@@ -1,4 +1,9 @@
 <?php
+if( file_exists('../../../../config/config.php') ) {
+	require_once '../../../../config/config.php';
+} else { // fall back at symbolic link to Perforce source location of server plug-in
+	require_once '../../../../Enterprise/config/config.php';
+}
 require_once dirname(__FILE__).'/../config.php';
 require_once dirname(__FILE__).'/AxaioMadeToPrint_AxaioMadeToPrint_EnterpriseWebApp.class.php';
 require_once BASEDIR.'/server/admin/global_inc.php'; // inputvar(), formvar()
@@ -12,7 +17,7 @@ require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 //    on = production/safe mode, showing only overrule issues and print channel issues
 //    off = debug/test mode, showing all issues
 if( !defined( 'AXAIO_MTP_ISSUE_FILTER' ) ) {
-    define( 'AXAIO_MTP_ISSUE_FILTER', 'off' ); 
+    define( 'AXAIO_MTP_ISSUE_FILTER', 'off' );
 }
 
 $ticket = checkSecure('publadmin');
@@ -102,7 +107,7 @@ if($save === true){
                  . "    '" . $dbDriver->toDBString($mtp_jobname) . "', "
                  . "    {$quietmode}, {$priority} "
                  . ");";
-            
+
             $retval = $dbDriver->query ($sql);
         }
         header('Location: '.INETROOT."/config/plugins/AxaioMadeToPrint/webapps/mtpsetup.php?Publication={$PublicationID}&Issue={$IssueID}");
@@ -115,7 +120,7 @@ if($delete) {
     $retval = $dbDriver->query ($sql);
     $PublicationID = $pub;
     $IssueID = $iss;
-    
+
     header('Location: '.INETROOT."/config/plugins/AxaioMadeToPrint/webapps/mtpsetup.php?Publication={$PublicationID}&Issue={$IssueID}");
 }
 
@@ -126,7 +131,7 @@ if($edit === true){
 
 /////////////////// PUB_INPUT ///////////////////
 if( $edit === true || $add === true ) { // disable pub combo when handling edit/add row of settings
-    $pub_Input = '<input type="hidden" name="Publication" value="'.$PublicationID.'"/>'; 
+    $pub_Input = '<input type="hidden" name="Publication" value="'.$PublicationID.'"/>';
     $pub_Input .= '<select name="Publication_disabled" style="width:100%" onChange="submit()" tabindex="2" disabled="disabled">';
 } else {
     $pub_Input = '<select name="Publication" style="width:100%" onChange="submit()" tabindex="2">';
@@ -145,7 +150,7 @@ $pub_Input .= '</select>';
 
 /////////////////// ISS_INPUT ///////////////////
 if( $edit === true || $add === true || $PublicationID == 0 ) { // disable issue combo when handling edit/add row of settings
-    $comboBoxIss = '<input type="hidden" name="Issue" value="'.$IssueID.'"/>'; 
+    $comboBoxIss = '<input type="hidden" name="Issue" value="'.$IssueID.'"/>';
     $comboBoxIss .= '<select name="Issue_disabled" style="width:100%" onChange="submit()" tabindex="3" disabled="disabled">';
 } else {
     $comboBoxIss = '<select name="Issue" style="width:100%" onChange="submit()" tabindex="3">';
@@ -166,7 +171,7 @@ if( $PublicationID ) {
         if( $row['type'] == 'print' || AXAIO_MTP_ISSUE_FILTER == 'off' || isset($badIssueIds[$iss->Id]) ) {
             $printIssues[] = $iss;
         }
-    }	
+    }
     if( count($printIssues) > 0 || AXAIO_MTP_ISSUE_FILTER == 'off') {
 
         // Mark publication issues ('Select All' entry) if there are MtP configurations (to ease admin users to look up)
@@ -186,7 +191,7 @@ if( $PublicationID ) {
             // We only support *one* level of MtP configitations per workflow.
             // So that is at publication level (= all its issues) OR at overruled issue level (= 1 issue).
             // That is why we skip publication issues and allow overruled issues here.
-            if( $iss->OverrulePublication || AXAIO_MTP_ISSUE_FILTER == 'off' || isset($badIssueIds[$iss->Id]) ) { 
+            if( $iss->OverrulePublication || AXAIO_MTP_ISSUE_FILTER == 'off' || isset($badIssueIds[$iss->Id]) ) {
 
                 // Mark overrule issues that have MtP configuration (to ease admin users to look up)
                 $sql = 'select count(*) as `CfgCount` from '.$mtptab.' where `publication_id`='.$PublicationID.' and `issue_id`='.$iss->Id;
@@ -245,7 +250,7 @@ if($PublicationID > 0){
             FROM {$mtptab} mtp
             INNER JOIN {$statustab} sta
             ON sta.`id`=mtp.`state_trigger_layout`
-            where mtp.`publication_id`={$PublicationID} and mtp.`issue_id`={$IssueID} 
+            where mtp.`publication_id`={$PublicationID} and mtp.`issue_id`={$IssueID}
             ORDER BY sta.`code`;
             ";
     $sth = $dbDriver->query ($sql);
@@ -268,7 +273,7 @@ if($PublicationID > 0){
                 where mtp.`publication_id`={$PublicationID} and mtp.`issue_id`=$IssueID and mtp.`state_trigger_layout`=$editlayout
                 ORDER BY sta.`code`;
                 ";
-        
+
         $sth = $dbDriver->query ($sql);
         $result = $dbDriver->fetch($sth);
         $row .= AxaioMadeToPrint_AxaioMadeToPrint_EnterpriseWebApp::buildRowOfCombos( $user, $PublicationID, $IssueID, $result, null );
