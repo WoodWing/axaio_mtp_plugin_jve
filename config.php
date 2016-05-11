@@ -1,19 +1,16 @@
 <?php
 /**
  * This is the configuration file for axaio MadeToPrint EnterprisePlugin
- * 
+ *
  * @copyright (c) 2015, axaio software GmbH
  * @author René Treuber <support@axaio.com>
  * @package AxaioMadeToPrint
  */
 
 /****************************************************************************
- * This is a sample config file which shows how this could look like. 
+ * This is a sample config file which shows how this could look like.
  * You need to set up your own values, of course.
  ***************************************************************************/
-
-// include the server config file, don't change!
-require_once dirname(__FILE__) . '/../../config.php';
 
 // ----------------------------------------------------------------------------
 // MadeToPrint settings for login

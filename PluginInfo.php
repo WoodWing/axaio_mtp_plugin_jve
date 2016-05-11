@@ -1,7 +1,7 @@
 <?php
 /**
- * Woodwing enterprise plugin for using axaio MadeToPrint. 
- * 
+ * Woodwing enterprise plugin for using axaio MadeToPrint.
+ *
  * @copyright (c) 2015, axaio software GmbH
  * @author René Treuber <support@axaio.com>
  * @package AxaioMadeToPrint
@@ -13,11 +13,11 @@ require_once BASEDIR.'/server/interfaces/plugins/EnterprisePlugin.class.php';
 class AxaioMadeToPrint_EnterprisePlugin extends EnterprisePlugin
 {
 	public function getPluginInfo()
-	{ 
+	{
 		require_once BASEDIR.'/server/interfaces/plugins/PluginInfoData.class.php';
-		$info = new PluginInfoData(); 
+		$info = new PluginInfoData();
 		$info->DisplayName = 'axaio MadeToPrint';
-		$info->Version     = '9.8 2016-02-09'; // don't use PRODUCTVERSION
+		$info->Version     = '9.9.0 Build 1063';
 		$info->Description = 'Automated output using axaio MadeToPrint';
 		$info->Copyright   = 'axaio software GmbH';
 		return $info;
@@ -26,9 +26,9 @@ class AxaioMadeToPrint_EnterprisePlugin extends EnterprisePlugin
 	{
 		return '9.2.1 Build 60';
 	}
-	
-	final public function getConnectorInterfaces() 
-	{ 
+
+	final public function getConnectorInterfaces()
+	{
 		return array(
 
 // adm services

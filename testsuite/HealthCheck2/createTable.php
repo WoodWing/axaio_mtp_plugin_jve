@@ -1,5 +1,9 @@
 <html><body><?php
-require_once dirname(__FILE__).'/../../../../config.php';
+if( file_exists('../../../../../config/config.php') ) {
+	require_once '../../../../../config/config.php';
+} else { // fall back at symbolic link to Perforce source location of server plug-in
+	require_once '../../../../../Enterprise/config/config.php';
+}
 require_once BASEDIR . '/server/utils/FolderUtils.class.php';
 require_once BASEDIR . '/server/utils/TestSuite.php';
 
@@ -17,7 +21,7 @@ $files = [ "mtptable_{$major}-{$minor}_" . DBTYPE . ".sql"
 $done = false;
 foreach($files as $cur_file) {
 
-    if(is_readable(dirname(__FILE__).'/'.$cur_file)) 
+    if(is_readable(dirname(__FILE__).'/'.$cur_file))
     {
             print '<font>Start creating '.$cur_file.'...</font><br><br>';
             $dbDriver = DBDriverFactory::gen();
@@ -27,7 +31,7 @@ foreach($files as $cur_file) {
 
             foreach($check_tables as $value)
             {
-                    $sql = "SHOW TABLES LIKE '$value'";	
+                    $sql = "SHOW TABLES LIKE '$value'";
                     $sth = $dbDriver->query($sql);
                     $return = $dbDriver->fetch($sth);
                     if($return)
@@ -37,12 +41,12 @@ foreach($files as $cur_file) {
                     }
             }
 
-            if( $tableCheck == false ) 
+            if( $tableCheck == false )
             {
                     $runSqlScript = runSqlScript( $dbDriver, $cur_file );
                     foreach($check_tables as $value)
                     {
-                            $sql = "SHOW TABLES LIKE '$value'";	
+                            $sql = "SHOW TABLES LIKE '$value'";
                             $sth = $dbDriver->query($sql);
                             $return = $dbDriver->fetch($sth);
                             if($return)
@@ -58,7 +62,7 @@ foreach($files as $cur_file) {
             }
         $done = true;
     }
- 
+
 }
 
 if(!$done) {
@@ -79,7 +83,7 @@ function runSqlScript( $dbDriver, $sqlScript )
 	$sqlTxt = file_get_contents( $sqlScript );
 	$sqlStatements = explode( ';', $sqlTxt );
 	array_pop( $sqlStatements ); // remove the last empty element ( after the ; )
-	
+
 	if( $sqlStatements ) foreach( $sqlStatements as $sqlStatement ) {
 		$sth = $dbDriver->query( $sqlStatement );
 		if( !$sth ) {
@@ -90,7 +94,7 @@ function runSqlScript( $dbDriver, $sqlScript )
 				LogHandler::Log( 'createTable.php', 'ERROR', print_r($message, true) );
 			}
 /*
-			$this->report->add( 'DbInstaller', 'FATAL', 'ERROR', 
+			$this->report->add( 'DbInstaller', 'FATAL', 'ERROR',
 								$message, 'SQL: '.$sqlStatement, '',
 								array( 'phase' => $this->phase ) );
 */
