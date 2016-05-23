@@ -1,0 +1,50 @@
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/datasource_32.png"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:DS_DATASOURCE--></span></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>&nbsp;<span class="subtitletext"><!--PAR:MODE_TITLE--></span></td>
+		</tr>
+	</table>
+
+	<!-- app body -->
+	<form action="dsquery.php" method="post">
+	<table class="formframe" width="60%"><tr><td>
+		<table class="formbody"><tr><td>
+			
+			<table width="100%"><tr><td valign="top">
+				<table>
+					<tr><td><!--RES:DS_QUERY_NAME-->: </td><td><!--VAR:NAME--><br/><font color="#ff0000"><i><!--PAR:ERROR--></i></font></td></tr>
+					<tr><td><!--RES:DS_QUERY_QUERY-->: </td><td><!--VAR:QUERY--><br/></td></tr>
+					<tr><td><!--RES:DS_QUERY_INTERFACE-->: </td><td><!--VAR:INTERFACE--></td></tr>
+					<tr><td><!--RES:DS_QUERY_COMMENT-->: </td><td><!--VAR:COMMENT--></td></tr>
+					<tr><td>&nbsp;</td><td></td></tr>
+					<tr><td><!--RES:DS_QUERY_RECORDID-->: </td><td><!--VAR:RECORDID--></td></tr>
+					<tr><td><!--RES:DS_QUERY_RECORDFAMILY-->: </td><td><!--VAR:RECORDFAMILY--></td></tr>
+					<tr><td></td><td></td></tr>
+				</table>
+			</td></tr></table>
+			<!--VAR:HIDDEN-->
+		</td></tr></table>
+	</td></tr><tr><td>
+		<table class="formbtnbar">
+			<tr>
+				<td>
+					<input type="submit" name="ok" value="<!--PAR:BUT_OK-->"/>
+					<!--PAR:BUT_CANCEL-->
+				</td>
+			</tr>
+		</table>
+	</td></tr></table>
+	</form>
+		
+	<br/>
+    <a href="datasources.php?dsSelect=<!--PAR:PRESELECTED_DATASOURCE-->&qSelect=<!--PAR:PRESELECTED_QUERY-->">
+    	<img src="../../config/images/back_32.gif" border="0" title="<!--RES:ACT_BACK-->" width="32" height="32"/>
+    </a>
+</td></tr></table>

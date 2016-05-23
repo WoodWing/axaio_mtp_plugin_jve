@@ -1,0 +1,151 @@
+<script language="JavaScript">
+
+	function SetAllCheckBoxes(FormName, FieldName, CheckValue)
+	{
+		if(!document.forms[FormName])
+			return;
+		var objCheckBoxes = document.forms[FormName].elements[FieldName];
+		if(!objCheckBoxes)
+			return;
+		var countCheckBoxes = objCheckBoxes.length;
+		if(!countCheckBoxes)
+			objCheckBoxes.checked = CheckValue;
+		else
+			// set the check value for all check boxes
+			for(var i = 0; i < countCheckBoxes; i++)
+				objCheckBoxes[i].checked = CheckValue;
+	}
+
+	function ImportSelected( sConfirmMessage )
+	{
+		var isChecked;
+		isChecked=false;
+		var pack="";
+		if( confirm( sConfirmMessage ) )
+		{
+			len = document.forms.SCE_PostForm.chkgrp.length;
+			if(len>1)
+			{
+				for (i=0;i<len;i++)
+				{
+					if (document.forms.SCE_PostForm.chkgrp[i].checked)
+					{
+						pack=pack+document.forms.SCE_PostForm.chkgrp[i].value;
+						isChecked=true;
+					}
+				}
+			}
+			else
+			{
+				if (document.SCE_PostForm.chkgrp.checked)
+				{
+					pack=pack+document.forms.SCE_PostForm.chkgrp.value;
+					isChecked=true;
+				}
+			}
+			if(!isChecked)
+			{
+				alert("<!--RES:ACT_TICK_CHECKBOXES-->");
+			}
+			else
+			{
+				var f = document.forms.SCE_PostForm;
+				f.TaggedImport.value = pack;
+				f.submit();
+			}
+		}
+	}
+
+</script>
+
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/groups.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:LDAP_IMPORT_GROUPS--></span></td>
+		</tr>
+	</table>
+
+	<!-- app body -->
+	<form name="SCE_PostForm" action="importgroups.php" method="post">
+	<table class="formframe"><tr><td>
+		<!-- query params -->
+		<table class="formbody">
+			<tr>
+				<td><!--RES:NETWORK_DOMAINS-->:</td>
+				<td colspan="2">
+					<select name="DomainsCombo" style="width: 250px;" onchange="submit()">
+						<!--LDAP_SERVERS-->
+					</select>
+				</td>
+				<td align="right"><nobr><!--RES:USR_USER_NAME-->:</nobr></td>
+				<td><input type="text" name="UserName" value="<!--USERNAME-->" size="21"/></td>
+			</tr>
+			<tr>
+				<td><nobr><!--RES:ACT_SEARCH-->:</nobr></td>
+				<td><input type="text" name="SearchTxt" value="<!--GROUP_SEARCH-->"/></td>
+				<td><input src="../../config/images/srch_32.gif" title="Search" height="32" type="image" width="32"/></td>
+				<td align="right"><nobr><!--RES:USR_PASSWORD-->:</nobr></td>
+				<td><input type="password" name="Password" value="<!--PASSWORD-->" size="21"></td>
+			</tr>
+		</table>
+	</td></tr></table>
+	<br/>
+
+	<table class="listframe" width="100%"><tr><td>
+		<table class="listpane">
+			<!-- list LDAP groups -->
+			<tr>
+				<th/> <!-- import tag column --> 
+				<th><!--RES:GRP_GROUP--></th>
+				<th><!--RES:GRP_FULL_DESCRIPTION--></th>
+			</tr>
+			<!--LDAP_GROUPS-->
+		</table>
+	</td></tr></table>
+				
+	<!-- show buttons -->
+	<table class="appbtnbar">
+		<tr>
+			<td width="5px">
+				<nobr>
+					<a href="javascript:ImportSelected( '<!--RES:GRP_SURE_IMPORT_SELECTION-->');" title="<!--RES:ACT_IMPORT_SELECTED_ROWS-->">
+						<img src="../../config/images/impt_16.gif" title="<!--RES:ACT_IMPORT_SELECTED_ROWS-->"border="0"/>
+						<!--RES:ACT_IMPORT_SELECTION-->
+					</a>
+					&nbsp;
+				</nobr>
+			</td>
+			<td width="5px">
+				<nobr>
+					<a href="javascript:SetAllCheckBoxes('SCE_PostForm','chkgrp',true)" title="<!--RES:ACT_SELECT_ALL_ROWS-->">
+						<img src="../../config/images/opts_16.gif" title="<!--RES:ACT_SELECT_ALL_ROWS-->" border="0"/>
+						<!--RES:ACT_SELECT_ALL-->
+					</a>
+					&nbsp;
+				</nobr>
+			</td>
+			<td width="5px">
+				<nobr>
+					<a href="javascript:SetAllCheckBoxes('SCE_PostForm','chkgrp',false)" title="<!--RES:ACT_UNSELECT_ALL_ROWS-->">
+						<img src="../../config/images/cancl_16.gif" title="<!--RES:ACT_UNSELECT_ALL_ROWS-->" border="0"/>
+						<!--RES:ACT_UNSELECT_ALL-->
+					</a>
+
+					&nbsp;
+				</nobr>
+			</td>
+			<td></td> <!-- trick: used fill button bar to far right -->
+		</tr>
+	</table>
+
+	<!-- hidden form params -->
+	<input type="hidden" name="TaggedImport" value=""/>
+	</form>
+
+	<p><b><font color="red"/><!--LDAP_ERROR--></font></b></p>
+
+</td></tr></table>

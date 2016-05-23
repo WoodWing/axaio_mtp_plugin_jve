@@ -1,0 +1,308 @@
+<script language="javascript">
+
+	function popUpThumb( URL )
+	{
+		day = new Date();
+		id = day.getTime();
+		eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=1,width=620,height=620,left = 150,top = 0');");
+	}
+	
+	function popUp( URL )
+	{
+		day = new Date();
+		id = day.getTime();
+		document.location.href = URL;
+	}
+		
+	function Question( href, string )
+	{
+		var bRetVal = false;
+		if( confirm( string ) )
+		{
+			location.href = href;
+			bRetVal = ( -1 == navigator.userAgent.toLowerCase().indexOf("safari") );
+		}
+		return bRetVal;
+	}
+	
+</script>
+
+<span class="title">WoodWing Enterprise - <!--RES:OBJ_DETAILS--></span>
+<table border="0" cellspacing="2" cellpadding="4" width="710" class="text">
+
+		<tr>
+			<td colspan="5"><b><!--RES:OBJ_GENERAL_INFORMATION-->:</b></td>
+		</tr>
+		<tr bgcolor="#cccccc">
+			<td width="25%"><b> <!--RES:OBJ_NAME--></b></td>
+			<td width="25%"><b> <!--RES:PUBLICATION--> </b></td>
+			<td width="25%"><b> <!--RES:SECTION--> </b></td>
+			<td width="25%" colspan="2"><b> <!--RES:STATE--> </b></td>
+		</tr>
+		<tr bgcolor="#DDDDDD">
+			<td><!--OBJNAME--></td>
+			<td><!--OBJPUB--></td>
+			<td><!--OBJSEC--></td>
+			<td colspan="2"><!--OBJSTA--></td>
+		</tr>
+		<tr bgcolor="#cccccc">
+			<td><b> <!--RES:OBJ_ID--> </b></td>
+			<td><b> <!--RES:OBJ_TYPE2--> </b></td>
+			<td><b> <!--RES:OBJ_FORMAT--> </b></td>
+			<td colspan="2"><b> <!--RES:USR_AUTHOR--> </b></td>
+		</tr>
+		<tr bgcolor="#DDDDDD">
+			<td><!--OBJID--></td>
+			<td><!--OBJTYPE--></td>
+			<td><!--OBJFORMAT--></td>
+			<td colspan="2"><!--OBJAUTHOR--></td>
+		</tr>
+
+		<!--SEC:OBJSLUGLINE>>>-->
+		<tr bgcolor="#cccccc">
+			<td colspan="5"><b> <!--RES:OBJ_SNIPPET--> </b></td>
+		</tr>
+		<tr>
+			<td bgcolor="#DDDDDD" colspan="5"><i><!--OBJSLUGLINE--></i></td>
+		</tr>
+		<!--<<<SEC:OBJSLUGLINE-->
+
+		<!--SEC:PLAINCONTENT>>>-->
+		<tr bgcolor="#cccccc">
+			<td colspan="5"><b> <!--RES:OBJ_PLAINCONTENT--> </b></td>
+		</tr>
+		<tr>
+			<td bgcolor="#DDDDDD" colspan="5"><i><!--PLAINCONTENT--></i></td>
+		</tr>
+		<!--<<<SEC:PLAINCONTENT-->
+
+		<!--SEC:DESCRIPTION>>>-->
+		<tr bgcolor="#cccccc">
+			<td colspan="5"><b> <!--RES:OBJ_DESCRIPTION--> </b></td>
+		</tr>
+		<tr>
+			<td bgcolor="#DDDDDD" colspan="5"><i><!--DESCRIPTION--></i></td>
+		</tr>
+		<!--<<<SEC:DESCRIPTION-->
+		
+		<!--SEC:OBJCOMMENT>>>-->
+		<tr bgcolor="#cccccc">
+			<td colspan="5"><b> <!--RES:OBJ_COMMENT--> </b></td>
+		</tr>
+		<tr>
+			<td bgcolor="#DDDDDD"colspan="5"><i><!--OBJCOMMENT--></i></td>
+		</tr>
+		<!--<<<SEC:OBJCOMMENT-->
+
+		<!--SEC:OBJKEYWORD>>>-->
+		<tr bgcolor="#cccccc">
+			<td colspan="5"><b> <!--RES:OBJ_KEYWORDS--> </b></td>
+		</tr>
+		<tr bgcolor="#DDDDDD">
+			<td colspan="5"><!--OBJKEYWORD--></td>
+		</tr>
+		<!--<<<SEC:OBJKEYWORD-->
+		
+		<!--SEC:OBJHIGHRESFILE>>>-->
+		<tr bgcolor="#cccccc">
+			<td colspan="5"><b><!--RES:OBJ_HIGHRESFILE--></b></td>
+		</tr>
+		<tr bgcolor="#DDDDDD">
+			<td colspan="5"><!--OBJHIGHRESFILE--></td>
+		</tr>
+		<!--<<<SEC:OBJHIGHRESFILE-->
+
+		<tr bgcolor="#cccccc">
+			<td><b> <!--RES:ACT_ROUTE_TO--> </b></td>
+			<td><b> <!--RES:OBJ_CREATOR--> </b></td>
+			<td><b> <!--RES:OBJ_CREATED--> </b></td>
+			<td colspan="2"><b> <!--RES:OBJ_COPYRIGHT--> </b></td>
+		</tr>
+		<tr bgcolor="#DDDDDD">
+			<td><!--OBJROUTE--></td>
+			<td><!--OBJCREATOR--></td>
+			<td><!--OBJCREATED--></td>
+			<td colspan="2"><!--OBJCOPYRIGHT--></td>
+		</tr>
+		<tr bgcolor="#cccccc">
+			<td><b> <!--RES:WFL_PRIORITY--> </b></td>
+			<td><b> <!--RES:OBJ_MODIFIER--> </b></td>
+			<td><b> <!--RES:OBJ_MODIFIED--> </b></td>
+			<td colspan="2"><b> <!--RES:OBJ_LOCKED_BY--> </b></td>
+		</tr>
+		<tr bgcolor="#DDDDDD">
+			<td><!--OBJPRI--></td>
+			<td><!--OBJMODIFIER--></td>
+			<td><!--OBJMODIFIED--></td>
+			<td><!--OBJLOCKED--></td>
+		</tr>
+</table>
+<br/>
+
+<!--SEC:TARGETS>>>-->
+<table border="0" cellspacing="2" cellpadding="4" width="710" class="text">
+	<tr>
+		<td colspan="4"><b><!--RES:OBJ_TARGETS-->:</b></td>
+	</tr>
+	<tr bgcolor="#cccccc">
+		<td><b><!--RES:PUBLICATION--></b></td>
+		<td><b><!--RES:CHANNEL--></b></td>
+		<td><b><!--RES:ISSUE--></b></td>
+		<td><b><!--RES:EDITIONS--></b></td>
+	</tr>
+	<!--TARGETS-->
+</table>
+<br/>
+<!--<<<SEC:TARGETS-->
+
+<!--SEC:RELTARGETS>>>-->
+<table border="0" cellspacing="2" cellpadding="4" width="710" class="text">
+	<tr>
+		<td colspan="6"><b><!--RES:OBJ_USEDIN-->:</b></td>
+	</tr>
+	<tr bgcolor="#cccccc">
+		<td width="5">&nbsp;</td> <!-- icon -->
+		<td><b><!--RES:OBJ_NAME--></b></td>
+		<td><b><!--RES:PUBLICATION--></b></td>
+		<td><b><!--RES:CHANNEL--></b></td>
+		<td><b><!--RES:ISSUE--></b></td>
+		<td><b><!--RES:EDITIONS--></b></td>
+	</tr>
+	<!--RELTARGETS-->
+</table>
+<br/>
+<!--<<<SEC:RELTARGETS-->
+
+<!--SEC:DEADLINES>>>-->
+<table border="0" cellspacing="2" cellpadding="4" width="710" class="text">
+	<tr>
+		<td colspan="4"><b><!--RES:DEADLINEINFO--></b></td>
+	</tr>
+	<tr bgcolor="#cccccc">
+		<td><b><!--RES:STATE--></b></td>
+		<td><b><!--RES:DEADLINE--></b></td>
+		<td><b><!--RES:DEADLINESOFT--></b></td>
+		<td><b><!--RES:CHANGED--></b></td>
+	</tr>
+	<!--DEADLINES-->
+</table>
+<br/>
+<!--<<<SEC:DEADLINES-->
+
+<!--SEC:SPECIFICS>>>-->
+<table border="0" cellspacing="2" cellpadding="4" width="710" class="text">
+	<tr>
+		<td colspan="6"><b><!--RES:OBJ_SPECIFIC_INFORMATION-->:</b></td>
+	</tr>
+	<tr bgcolor="#cccccc">
+		<td width="15%" align="center"><b><!--OBJ_SI_NAME_1--></b></td>
+		<td width="22%"><b><!--OBJ_SI_NAME_2--></b></td>
+		<td width="16%"><b><!--OBJ_SI_NAME_3--></b></td>
+		<td width="16%"><b><!--OBJ_SI_NAME_4--></b></td>
+		<td width="16%"><b><!--OBJ_SI_NAME_5--></b></td>
+		<td width="15%"><b><!--OBJ_SI_NAME_6--></b></td>
+	</tr>
+	<tr bgcolor="#DDDDDD" >
+		<td><!--OBJ_SI_VALUE_1--></td>
+		<td><!--OBJ_SI_VALUE_2--></td>
+		<td><!--OBJ_SI_VALUE_3--></td>
+		<td><!--OBJ_SI_VALUE_4--></td>
+		<td><!--OBJ_SI_VALUE_5--></td>
+		<td><!--OBJ_SI_VALUE_6--></td>
+	</tr>
+</table>
+<br/>
+<!--<<<SEC:SPECIFICS-->
+
+<!--SEC:OBJPARENTS>>>-->
+<table border="0" cellspacing="2" cellpadding="4" width="710" class="text">
+	<tr>
+		<td colspan="7"><b><!--RES:OBJ_PARENTS-->:</b></td>
+	</tr>
+	<tr bgcolor="#cccccc">
+		<td width="5">&nbsp;</td> <!-- icon -->
+		<td><b><!--RES:OBJ_NAME--></b></td>
+		<td><b><!--RES:OBJ_TYPE2--></b></td>
+		<td width="5">&nbsp;</td> <!-- status color -->
+		<td><b><!--RES:STATE--></b></td>
+		<td><b><!--RES:OBJ_ROUTE_TO--></b></td>
+		<td/> <!-- delete icon -->
+	</tr>
+	<!--OBJPARENTS-->
+</table>
+<br/>
+<!--<<<SEC:OBJPARENTS-->
+
+<!--SEC:OBJCHILDREN>>>-->
+<table border="0" cellspacing="2" cellpadding="4" width="710" class="text">
+	<tr>
+		<td colspan="7"><b><!--RES:OBJ_CHILDREN-->:</b></td>
+	</tr>
+	<tr bgcolor="#cccccc">
+		<td width="5">&nbsp;</td> <!-- icon -->
+		<td><b><!--RES:OBJ_NAME--></b></td>
+		<td><b><!--RES:OBJ_TYPE2--></b></td>
+		<td width="5">&nbsp;</td> <!-- status color -->
+		<td><b><!--RES:STATE--></b></td>
+		<td><b><!--RES:OBJ_ROUTE_TO--></b></td>
+		<td/> <!-- delete icon -->
+	</tr>
+	<!--OBJCHILDREN-->
+</table>
+<br/>
+<!--<<<SEC:OBJCHILDREN-->
+
+<!--SEC:OBJELEMENTS>>>-->
+<table border="0" cellspacing="2" cellpadding="4" width="710" class="text">
+	<tr>
+		<td colspan="7"><b><!--RES:OBJ_ELEMENTS-->:</b></td>
+	</tr>
+	<tr bgcolor="#cccccc">
+		<td><b><!--RES:OBJ_NAME--></b></td>
+		<td><b><!--RES:OBJ_LENGTHCHARS_ABR--></b></td>
+		<td><b><!--RES:OBJ_LENGTHWORDS_ABR--></b></td>
+		<td><b><!--RES:OBJ_LENGTHLINES_ABR--></b></td>
+		<td><b><!--RES:OBJ_LENGTHPARAS_ABR--></b></td>
+		<td><b><!--RES:OBJ_VERSION--></b></td>
+		<td><b><!--RES:OBJ_ID--></b></td>
+	</tr>	
+	<!--OBJELEMENTS-->
+</table>
+<br/>
+<!--<<<SEC:OBJELEMENTS-->
+
+<!--SEC:OBJPLACEMENTS>>>-->
+<table border="0" cellspacing="2" cellpadding="4" width="710" class="text">
+	<tr>
+		<td colspan="10"><b><!--RES:OBJ_RELATIONS-->:</b></td>
+	</tr>
+	<tr bgcolor="#cccccc">
+		<td colspan="4"><b><!--RELATION_TYPE--></b></td>    <!-- name,type,page,layer -->
+		<td colspan="4"><b><!--RES:OBJ_FRAME--></b></td>    <!-- left,top,widht,height -->
+		<td colspan="2"><b><!--RES:OBJ_MOVEMENT--></b></td> <!-- x,y -->
+		<td colspan="2"><b><!--RES:OBJ_SCALING--></b></td>  <!-- x,y -->
+	</tr>
+	<tr bgcolor="#cccccc">
+		<td><b><!--RES:OBJ_NAME--></b></td>
+		<td><b><!--RES:OBJ_TYPE2--></b></td>
+		<td><b><!--RES:OBJ_PAGE--></b></td>
+		<td><b><!--RES:OBJ_LAYER--></b></td>
+		
+		<td><b><!--RES:OBJ_LEFT--></b></td>
+		<td><b><!--RES:OBJ_TOP--></b></td>
+		<td><b><!--RES:OBJ_WIDTH--></b></td>
+		<td><b><!--RES:OBJ_HEIGHT--></b></td>
+		
+		<td><b><!--RES:POS_X--></b></td>
+		<td><b><!--RES:POS_Y--></b></td>
+		<td><b><!--RES:POS_X--></b></td>
+		<td><b><!--RES:POS_Y--></b></td>
+	</tr>
+	<!--OBJPLACEMENTS-->
+</table>
+<!--<<<SEC:OBJPLACEMENTS-->
+
+
+<br/>
+<!--LOG-->
+<!--PAR:MESSAGE-->

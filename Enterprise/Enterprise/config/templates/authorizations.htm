@@ -1,0 +1,69 @@
+<script language="javascript">
+function myconfirm(code)
+{
+	switch(code) {
+		case 'delauthor':
+			txt = "<!--RES:AUT_SURE_QMK-->";
+			break;
+	}
+	return confirm(txt);
+}
+</script>
+
+<table class="appframe"><tr class="text"><td>
+	
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/lock.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:ACT_AUTHORIZATION_MAINTENANCE--></span></td>
+		</tr>
+	</table>
+	
+	<!-- app body -->
+	<form action="authorizations.php" method="post">
+	<table class="formframe" width="50%"><tr><td>
+		<table class="infobody">
+			<tr>
+				<td class="infoname"><!--RES:PUBLICATION--></td>
+				<td class="infovalue"><!--VAR:PUBL--></td>
+			</tr>
+			<!--IF:STATE-->
+			<tr>
+				<td class="infoname"><!--RES:ISSUE--></td>
+				<td class="infovalue"><!--VAR:ISSUE--></td>
+			</tr>
+			<!--ENDIF-->
+			<tr>
+				<td class="infoname"><!--RES:MNU_GROUP--></td>
+				<td class="infovalue"><!--VAR:GROUP--></td>
+			</tr>
+		</table>
+	</td></tr></table>
+	<table class="listframe"><tr><td>
+		<table class="listpane">
+			<tr>
+				<th width="100"><!--RES:SECTION--></th>
+				<th width="100"><!--RES:STATE--></th>
+				<th width="100"><!--RES:ACT_PROFILE--></th>
+				<th width="100">&nbsp;</th>
+			</tr>
+			<!--ROWS-->
+		</table>
+	</td></tr><tr><td>
+		<table class="listbtnbar">
+			<tr>
+				<td>
+					<input type="submit" name="update" value="<!--RES:BUT_UPDATE-->"/>
+					<input type="submit" name="add" value="<!--RES:ACT_ADD_AUTHORIZATION-->"/>
+				</td>
+			</tr>
+		</table>
+	</td></tr></table>
+	</form>
+	<br/>
+    <a href="<!--BACK-->">
+    	<img src="../../config/images/back_32.gif" border="0" title="<!--RES:ACT_BACK-->" width="32" height="32"/>
+    </a>
+    
+</td></tr></table>

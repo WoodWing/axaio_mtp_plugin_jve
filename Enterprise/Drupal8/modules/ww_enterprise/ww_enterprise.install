@@ -1,0 +1,139 @@
+<?php
+
+include_once(drupal_get_path('module', 'ww_enterprise').'/ww_enterprise_field.inc');
+
+/**
+ * Implementation of hook_schema.
+ *
+ * Updates the Drupal database model with the ww_enterprise_preview table. This table is used to store node information
+ * for those nodes that are previewed from Enterprise Server. This hook is automatically called during the hook_install
+ * and hook_uninstall actions ( ww_enterprise_install and ww_enterprise_uninstall respectively). Therefore it only
+ * contains the tables that have to be removed during an uninstall operation as well. For other tables we use the
+ * hook_install and hook_uninstall separately.
+ *
+ * @return array An array containing the schema changes.
+ */
+function ww_enterprise_schema()
+{
+	$schema['ww_enterprise_preview'] = array(
+		'fields' => array(
+			'vid' => array(
+				'type' => 'int',
+				'unsigned' => TRUE,
+				'not null' => TRUE,
+				'default' => 0
+			),
+			'nid' => array(
+				'type' => 'int',
+				'unsigned' => TRUE,
+				'not null' => TRUE,
+				'default' => 0
+			),
+			'hash' => array(
+				'type' => 'varchar',
+				'length' => 200,
+				'not null' => TRUE,
+				'default' => ''
+			),
+			'date' => array(
+				'type' => 'int',
+				'not null' => TRUE,
+				'default' => 0
+			)
+		),
+		'indexes' => array('nid' => array('nid')),
+		'primairy key' => array('vid')
+	);
+	return $schema;
+}	
+
+/**
+ * Implementation of hook_install.
+ *
+ * Creates the ww_enterprise_field_map table, which is used to map Drupal fields to numeric id's. These id's are used
+ * by Enterprise Server as the external id for the field. This could not be the fields own id which is a string value.
+ * It is important to retain this information if the module is uninstalled and at a later time reinstalled to keep
+ * Enterprise Server and Drupal synchronized.
+ *
+ * Creates the ww_enterprise_vocabulary_map table which is used to store suggestion entities for Drupal vocabularies.
+ *
+ * The function checks whether or not the tables exist and will report on this information accordingly.
+ */
+function ww_enterprise_install()
+{
+	$name = 'ww_enterprise_field_map';
+	$table = array(
+		'fields' => array(
+			'field_id' => array(
+				'type' => 'serial',
+				'unsigned' => TRUE,
+				'not null' => TRUE,
+			    'description' => 'Value used by Enterprise to track the field.'
+			),
+			'machine_name' => array(
+				'type' => 'varchar',
+				'length' => 200,
+				'not null' => TRUE,
+				'default' => '',
+			    'description' => 'Value used by Enterprise to set a field on a node.'
+			),
+		),
+		'indexes' => array( 'machine_name' => array( 'machine_name' )  ),
+		'primary key' => array( 'field_id' )
+	);
+
+	if ( !db_table_exists( $name ) ) {
+		db_create_table( $name, $table );
+		drupal_set_message( 'Module `ww_enterprise`: Successfully created the `ww_enterprise_field_map` table.' );
+	} else {
+		drupal_set_message( 'Module `ww_enterprise`: Succesfully restored the `ww_enterprise_field_map` table.' );
+	}
+
+	// Create permanent storage for ww_term_entities used for suggestion services.
+	$name = 'ww_enterprise_vocabulary_map';
+	$table = array(
+		'fields' => array(
+			'vocabulary_uuid' => array(
+				'type' => 'varchar',
+				'length' => 128,
+				'not null' => TRUE,
+				'default' => '',
+				'description' => 'The vocabulary UUID.'
+			),
+			'ww_term_entity' => array(
+				'type' => 'varchar',
+				'length' => 200,
+				'not null' => TRUE,
+				'default' => '',
+				'description' => 'Value used by Enterprise to provide suggestions.'
+			),
+		),
+		'indexes' => array( 'ww_term_entity' => array( 'ww_term_entity' ) ),
+		'primary key' => array( 'vocabulary_uuid' )
+	);
+
+	if ( !db_table_exists( $name ) ) {
+		db_create_table( $name, $table );
+		drupal_set_message( 'Module `ww_enterprise`: Successfully created the `ww_enterprise_vocabulary_map` table.' );
+	} else {
+		drupal_set_message( 'Module `ww_enterprise`: Successfully restored the `ww_enterprise_vocabulary_map` table.' );
+	}
+}
+
+/**
+ * Implements the hook_uninstall() function.
+ *
+ * Removes the ww_enterprise_vocabulary_map table.
+ */
+function ww_enterprise_uninstall()
+{
+	db_drop_table( 'ww_enterprise_vocabulary_map' );
+
+	if ( db_table_exists( 'ww_enterprise_vocabulary_map' ) ) {
+		drupal_set_message( 'Module `ww_enterprise`: Could not remove the `ww_enterprise_vocabulary_map` table.' );
+	} else {
+		drupal_set_message( 'Module `ww_enterprise`: Successfully removed the `ww_enterprise_vocabulary_map` table.' );
+	}
+}
+
+?>

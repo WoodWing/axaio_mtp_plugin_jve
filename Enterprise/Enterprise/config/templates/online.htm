@@ -1,0 +1,67 @@
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/go_32.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:MNU_ONLINE--></span></td>
+		</tr>
+	</table>
+
+    <form action="../../server/admin/online.php" method="post">
+        <button style="margin-left: 10px" type="button" onclick="if(confirm('<!--RES:ASK_FORCE_LOGOFF-->'))forceLogOut()"><!--RES:FORCE_LOGOFF--></button>
+
+        <!-- app body -->
+        <table class="listframe"><tr><td>
+            <table class="listpane">
+                <tr>
+                    <th style="width:20px"></th>
+                    <th style="width:75px"><!--RES:USR_FULL_NAME--></th>
+                    <th style="width:75px"><!--RES:USR_CLIENT_IP--></th>
+                    <th style="width:125px"><!--RES:ACT_APPLICATION_NAME--></th>
+                    <th style="width:125px"><!--RES:ACT_APPLICATION_VERSION--></th>
+                    <th style="width:125px"><!--RES:ACT_LOGON_TIME--></th>
+                    <th style="width:125px"><!--RES:ACT_EXPIRY_TIME--></th>
+                    <th style="width:125px"><!--RES:IDLE_TIME--></th>
+                </tr>
+                <!--CONTENT-->
+            </table>
+        </td></tr></table>
+    </form>
+
+    <!--ERRORS-->
+
+</td></tr></table>
+
+<script language="javascript" src="../../server/utils/javascript/jquery.zend.jsonrpc.js"></script>
+<script language="javascript" type="text/javascript">
+
+    /**
+     * Delete a users ticket
+     */
+    function forceLogOut( )
+    {
+        var wflServerUrl = '../../index.php?protocol=JSON';
+
+        try {
+            // Create JSON proxy to Enterprise Server workflow interface
+            wflServices = jQuery.Zend.jsonrpc({url: wflServerUrl});
+        } catch( e ) {
+            alert( 'Could not connect to Enterprise Server.' );
+            return;
+        }
+
+        $('.logOutUsers:checked').each(function() {
+            try {
+                wflServices.LogOff({ Ticket: $(this).val() });
+            } catch( e ) {
+                if( !(e.indexOf("(S1043)") >= 0) ) { // Supress expired error
+                    alert(e);
+                }
+            }
+        });
+
+        location.reload();
+    }
+
+</script>

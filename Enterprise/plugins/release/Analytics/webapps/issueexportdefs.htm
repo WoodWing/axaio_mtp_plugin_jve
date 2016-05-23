@@ -1,0 +1,65 @@
+<form method="post">
+    <p class="subtitletext"><!--RES:ANA_CONNECTION--></p>
+    <table style="border-spacing:0">
+        <tbody>
+        <tr>
+            <td valign="top"><!--RES:ANA_ANALYTICS_URL--> *</td>
+            <td style='padding:0 0 0 10px'><!--VAR:ANALYTICS_URL--></td>
+        </tr>
+        <tr>
+            <td valign="top"><!--RES:ANA_ANALYTICS_KEY--> *</td>
+            <td style='padding:0 0 0 10px'><!--VAR:ANALYTICS_KEY--></td>
+        </tr>
+        <tr>
+            <td valign="top"><!--RES:ANA_ANALYTICS_SECRET--> *</td>
+            <td style='padding:0 0 0 10px'><!--VAR:ANALYTICS_SECRET--></td>
+        </tr>
+        <tr>
+            <td align="right"><i>* <!--RES:ACT_FIELD_IS_REQUIRED--></i></td>
+            <td style='padding:3px 0 0 10px'><!--VAR:REGISTERBTN--></td>
+        </tr>
+        </tbody>
+    </table>
+    <!--VAR:REGISTER_RESULT-->
+
+    <p class="subtitletext"><!--RES:WORDPRESS_SETTINGS--></p>
+    <table style="border-spacing:0">
+        <tbody>
+        <tr>
+            <td></td>
+            <td><!--VAR:SENDUSERNAMES--><!--VAR:ANA_SEND_USERNAMES_MSG--></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td style="padding:3px 0 0 0"><input type="submit" name="saveSettings" value="<!--RES:ACT_SAVE-->"></td>
+        </tr>
+        </tbody>
+    </table>
+    <!--VAR:SETTINGS_RESULT-->
+
+    <p class="subtitletext"><!--RES:ACT_EXPORT--></p>
+    <!--RES:ANA_EXPORT_ISSUES-->
+    <br/>
+    <table style="border-spacing:0">
+        <tr>
+            <td style='padding:3px 0 0 0'>
+                <!--VAR:EXPORTISSUES_DROPDOWN-->
+                <!--VAR:EXPORTISSUES_BTN-->
+            </td>
+        </tr>
+    </table>
+    <!--VAR:EXPORT_RESULT-->
+
+	<!-- TODO: Add translatable string here. For now it is hardcoded otherwise people will have to update the server core before they see the strings -->
+	<p class="subtitletext">Monitoring</p>
+	<table style="border-spacing:0">
+		<tr>
+			<td style='padding:3px 0 0 0'>
+				<!--VAR:TEST_MONITORING_BTN-->
+			</td>
+		</tr>
+	</table>
+
+    <!-- hidden web application identification required to round-trip form submits -->
+    <input type="hidden" name="webappid" value="ClientVersionValidatorConfig"><input type="hidden" name="plugintype" value="config"><input type="hidden" name="pluginname" value="ClientVersionValidator">
+</form>

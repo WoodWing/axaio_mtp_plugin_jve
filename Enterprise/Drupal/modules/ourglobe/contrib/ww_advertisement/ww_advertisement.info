@@ -1,0 +1,7 @@
+; $Id$
+name = WoodWing Advertisement
+description = Add advertisement to your site.
+core = 6.x
+package = OurGlobe
+dependencies[] = ourglobe
+dependencies[] = upload

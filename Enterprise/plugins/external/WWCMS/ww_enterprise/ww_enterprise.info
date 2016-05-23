@@ -1,0 +1,9 @@
+; $Id$
+name = WoodWing Enterprise
+description = Integrates WoodWing Enterprise as Content & Publishing platform with Drupal for the web publishing.
+core = 6.x
+version = "6.1.3 Build 141"
+;package = Services
+dependencies[] = image
+dependencies[] = image_attach
+dependencies[] = upload
