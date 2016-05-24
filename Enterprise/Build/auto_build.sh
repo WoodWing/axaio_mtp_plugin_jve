@@ -116,7 +116,7 @@ function zipFolder {
 #    -----------------------------------
 #    SERVER_VERSION: [10.0.0]
 #    SERVER_RELEASE_TYPE: [Pre-release 1]
-#    P4_BRANCH: [SmartConnection/Server.main]
+#    P4_BRANCH: [SmartConnection/Server.master]
 #    SERVER_VERSION_ZIP: [v10.0.0_Prerelease1_Build539.zip]
 #    -----------------------------------
 #    SERVER_VERSION: [9.5.0]
@@ -141,11 +141,11 @@ function determineZipPostfix {
 	then
 		SERVER_VERSION_ZIP="v${SERVER_VERSION}"
 	else
-		if test "${P4_BRANCH}" = "SmartConnection/Server.main"
+		if test "${P4_BRANCH}" = "SmartConnection/Server.master"
 		then
 			SERVER_VERSION_ZIP="v${serverVersion}"
 		else
-			if test "${P4_BRANCH}" = "SmartConnection/Server.main.work"
+			if test "${P4_BRANCH}" = "SmartConnection/Server.master.work"
 			then
 				SERVER_VERSION_ZIP="v${serverVersion}_Work"
 			else
