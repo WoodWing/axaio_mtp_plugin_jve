@@ -1,6 +1,0 @@
-{
-	"require": {
-    	"solarium/solarium": "3.2.0",
-		"graze/guzzle-jsonrpc": "0.2.3"
-	}
-}
