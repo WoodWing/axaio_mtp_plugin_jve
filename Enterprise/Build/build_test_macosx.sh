@@ -141,22 +141,19 @@ function step2_determineEnterpriseDir {
 		ENT_DIR=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\.archive\/Server\.v([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/Entv\1\2x_Release/g"`
 	else
 		echo "step2b: Detected non-archive branch."
-		# Map "SmartConnection/Server.v9.x.x.work2" onto "Entv9x.work2"
-		ENT_DIR=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.v([[:digit:]]+)\.x\.x(\.work)?(([[:digit:]]+))?/Entv\1x\2\3/g"`
-		if test "${ENT_DIR}" = "SmartConnection/Server.main"
+		if test "${P4_BRANCH}" = "SmartConnection/Server.master"
 		then
-			ENT_DIR="EntMain"
+			ENT_DIR="EntMaster"
 		else
-			if test "${ENT_DIR}" = "SmartConnection/Server.main.work"
+			isMasterWork=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.master(\.work)(([[:digit:]]+))?/\1/g"`
+			if test "${isMasterWork}" = ".work"
 			then
-				ENT_DIR="EntWork"
+				masterWorkNr=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.master\.work(([[:digit:]]+))?/\2/g"`
+				ENT_DIR="EntMasterWork${masterWorkNr}"
 			else
-				if [[ "${ENT_DIR}" == SmartConnection/* ]] ;
-				then
-					echo "Could not interpret the P4_BRANCH value: ${P4_BRANCH}"
-					ENT_DIR=""
-					exit 1
-				fi	
+				echo "Could not interpret the P4_BRANCH value: ${P4_BRANCH}"
+				ENT_DIR=""
+				exit 1
 			fi
 		fi
 	fi
