@@ -1,0 +1,370 @@
+<?xml version="1.0"?>
+<!-- Confidential, Copyright WoodWing Software BV, all rights reserved -->
+<!-- Enterprise Application Web Service: AppSession -->
+<wsdl:definitions 
+		targetNamespace="urn://www.woodwing.com/sce/AppService/AppSession" 
+		xmlns:tns="urn://www.woodwing.com/sce/AppService/AppSession" 
+		xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+		xmlns:content="http://schemas.xmlsoap.org/ws/2002/04/content-type/"
+		xmlns:dime="http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/"
+		xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/">
+
+	<wsdl:types xmlns="http://schemas.xmlsoap.org/wsdl/">
+		<xsd:schema targetNamespace="urn://www.woodwing.com/sce/AppService/AppSession">
+
+			<xsd:simpleType name="RenditionType">
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="16x16"/>
+					<xsd:enumeration value="24x24"/>
+					<xsd:enumeration value="32x32"/>
+					<xsd:enumeration value="48x48"/>
+					<xsd:enumeration value="native"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+			<xsd:complexType name="ArrayOfRenditionType">
+				<xsd:complexContent>
+					<xsd:restriction base="soap-enc:Array">
+						<xsd:attribute ref="soap-enc:arrayType" wsdl:arrayType="tns:RenditionType[]"/>
+					</xsd:restriction>
+				</xsd:complexContent>
+			</xsd:complexType>
+
+			<xsd:complexType name="AttachmentContent">
+				<xsd:simpleContent>
+					<xsd:restriction base="soap-enc:base64Binary">
+						<xsd:annotation>
+							<xsd:appinfo>
+								<content:mediaType value="application/octet-stream"/>
+							</xsd:appinfo>
+						</xsd:annotation>
+					</xsd:restriction>
+				</xsd:simpleContent>
+			</xsd:complexType>
+			<xsd:complexType name="Attachment">
+				<xsd:all>
+					<xsd:element name="Rendition" type="tns:RenditionType"/>
+					<xsd:element name="Type" type="xsd:string"/>
+					<xsd:element name="Content" type="tns:AttachmentContent"/>
+					<xsd:element name="FilePath" type="xsd:string" nillable="true"/> <!-- v8.0, file path at File Transfer server (internal) -->
+					<xsd:element name="FileUrl" type="xsd:string" nillable="true"/> <!-- v8.0, file URL at File Transfer server (external) -->
+				</xsd:all>
+			</xsd:complexType>
+			<xsd:complexType name="ArrayOfAttachment">
+				<xsd:complexContent>
+					<xsd:restriction base="soap-enc:Array">
+						<xsd:attribute ref="soap-enc:arrayType" wsdl:arrayType="tns:Attachment[]"/>
+					</xsd:restriction>
+				</xsd:complexContent>
+			</xsd:complexType>
+			
+			<xsd:complexType name="ObjectIcon">
+				<xsd:all>
+					<xsd:element name="ObjectType" type="xsd:string"/>
+					<xsd:element name="Format" type="xsd:string" nillable="true"/>
+					<xsd:element name="Attachments" type="tns:ArrayOfAttachment"/>
+				</xsd:all>
+			</xsd:complexType>
+			<xsd:complexType name="ArrayOfObjectIcon">
+				<xsd:complexContent>
+					<xsd:restriction base="soap-enc:Array">
+						<xsd:attribute ref="soap-enc:arrayType" wsdl:arrayType="tns:ObjectIcon[]"/>
+					</xsd:restriction>
+				</xsd:complexContent>
+			</xsd:complexType>
+
+			<xsd:complexType name="PubChannelIcon">
+				<xsd:all>
+					<xsd:element name="Id" type="xsd:string"/>
+					<xsd:element name="Attachments" type="tns:ArrayOfAttachment"/>
+				</xsd:all>
+			</xsd:complexType>
+			<xsd:complexType name="ArrayOfPubChannelIcon">
+				<xsd:complexContent>
+					<xsd:restriction base="soap-enc:Array">
+						<xsd:attribute ref="soap-enc:arrayType" wsdl:arrayType="tns:PubChannelIcon[]"/>
+					</xsd:restriction>
+				</xsd:complexContent>
+			</xsd:complexType>
+
+			<xsd:complexType name="Coordinates">
+				<xsd:all>
+					<xsd:element name="Left"    type="xsd:string"/>
+					<xsd:element name="Top"     type="xsd:string"/>
+					<xsd:element name="Width"   type="xsd:string"/>
+					<xsd:element name="Height"  type="xsd:string"/>
+				</xsd:all>
+			</xsd:complexType>
+
+			<xsd:element name="LogOnRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="User"             type="xsd:string"/>
+						<xsd:element name="Password"         type="xsd:string"/>	
+						<xsd:element name="Ticket"           type="xsd:string" nillable="true"/>  <!-- To allow silent logon, based on ticket of previous sections. Usage depends on client config. -->
+						<xsd:element name="Server"           type="xsd:string" nillable="true" /> <!-- Server to logon to as returned from GetServers or empty if not supported -->
+						<xsd:element name="ClientName"       type="xsd:string"/>                  <!-- Client machine name -->
+						<xsd:element name="Domain"           type="xsd:string" nillable="true" /> <!-- OS domain -->
+						<xsd:element name="ClientAppName"    type="xsd:string"/>                  <!-- Client Application: InDesign, InCopy, PhotoShop, Web -->
+						<xsd:element name="ClientAppVersion" type="xsd:string" nillable="true" />
+						<xsd:element name="ClientAppSerial"  type="xsd:string" nillable="true" />
+						<xsd:element name="ClientAppProductKey" type="xsd:string" nillable="true"/>
+						<xsd:element name="RequestTicket"   type="xsd:boolean" nillable="true"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:complexType name="Term">
+				<xsd:simpleContent>
+					<xsd:extension base="xsd:string">
+						<xsd:attribute name="key" type="xsd:string"/>
+					</xsd:extension>
+				</xsd:simpleContent>
+			</xsd:complexType>
+			
+			<xsd:element name="LogOnResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"   type="xsd:string"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			
+			<xsd:complexType name="ArrayOfString">
+				<xsd:sequence>
+					<xsd:element name="String" minOccurs="0" maxOccurs="unbounded" type="xsd:string"/>
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			<xsd:complexType name="Setting">
+				<xsd:all>
+					<xsd:element name="Setting"				type="xsd:string"/>
+					<xsd:element name="Value"				type="xsd:string"/>
+				</xsd:all>
+			</xsd:complexType>
+			<xsd:complexType name="ArrayOfSetting">
+				<xsd:sequence>
+					<xsd:element name="Setting" minOccurs="0" maxOccurs="unbounded" type="tns:Setting"/>
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="LogOffRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"  type="xsd:string"/>
+						<xsd:element name="SaveSettings"	type="xsd:boolean"	nillable="true"/>
+						<xsd:element name="Settings"	type="tns:ArrayOfSetting"	nillable="true"/>
+						<xsd:element name="ReadMessageIDs"	type="tns:ArrayOfString"	nillable="true"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="GetObjectIconsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket" type="xsd:string"/>
+						<xsd:element name="IconMetrics" type="tns:ArrayOfRenditionType"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="GetObjectIconsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Icons" type="tns:ArrayOfObjectIcon"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+						
+			<xsd:element name="GetPubChannelIconsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket" type="xsd:string"/>
+						<xsd:element name="IconMetrics" type="tns:ArrayOfRenditionType"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="GetPubChannelIconsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Icons" type="tns:ArrayOfPubChannelIcon"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="InstantiateWidgetRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket" 				type="xsd:string"/>
+						<xsd:element name="DossierId"			type="xsd:string"/>
+						<xsd:element name="WidgetId"			type="xsd:string"/>
+						<xsd:element name="LayoutId"			type="xsd:string"/>
+						<xsd:element name="EditionId" 		type="xsd:string"/>
+						<xsd:element name="Artboard" 			type="tns:Coordinates"/>
+						<xsd:element name="Location" 			type="tns:Coordinates"/>
+						<xsd:element name="Manifest" 			type="xsd:string"/>
+						<xsd:element name="PageSequence"	type="xsd:string"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="InstantiateWidgetResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Attachment" type="tns:Attachment"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="SendDiagnosticsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket" 		type="xsd:string"/>
+						<xsd:element name="Category" 	type="xsd:string"/>
+						<xsd:element name="Synopsis"	type="xsd:string"/>
+						<xsd:element name="Description"	type="xsd:string"/>
+						<xsd:element name="Files" 		type="tns:ArrayOfAttachment"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="SendDiagnosticsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Status" 	type="xsd:string"/>
+						<xsd:element name="Detail" 	type="xsd:string"	minOccurs="0" maxOccurs="1"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:schema>
+	</wsdl:types>
+	
+	<wsdl:message name="LogOnRequest">
+		<wsdl:part name="parameters" element="tns:LogOnRequest"/>
+	</wsdl:message>
+	<wsdl:message name="LogOnResponse">
+		<wsdl:part name="parameters" element="tns:LogOnResponse"/>
+	</wsdl:message>
+	
+	<wsdl:message name="LogOffRequest">
+		<wsdl:part name="parameters" element="tns:LogOffRequest"/>
+	</wsdl:message>
+	<wsdl:message name="LogOffResponse"/>
+
+	<wsdl:message name="GetObjectIconsRequest">
+		<wsdl:part name="parameters" element="tns:GetObjectIconsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="GetObjectIconsResponse">
+		<wsdl:part name="parameters" element="tns:GetObjectIconsResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="GetPubChannelIconsRequest">
+		<wsdl:part name="parameters" element="tns:GetPubChannelIconsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="GetPubChannelIconsResponse">
+		<wsdl:part name="parameters" element="tns:GetPubChannelIconsResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="InstantiateWidgetRequest">
+		<wsdl:part name="parameters" element="tns:InstantiateWidgetRequest"/>
+	</wsdl:message>
+	<wsdl:message name="InstantiateWidgetResponse">
+		<wsdl:part name="parameters" element="tns:InstantiateWidgetResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="SendDiagnosticsRequest">
+		<wsdl:part name="parameters" element="tns:SendDiagnosticsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="SendDiagnosticsResponse">
+		<wsdl:part name="parameters" element="tns:SendDiagnosticsResponse"/>
+	</wsdl:message>
+
+	<wsdl:portType name="SmartConnectionPort">
+		<wsdl:operation name="LogOn">
+			<wsdl:input message="tns:LogOnRequest"/>
+			<wsdl:output message="tns:LogOnResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="LogOff">
+			<wsdl:input message="tns:LogOffRequest"/>
+			<wsdl:output message="tns:LogOffResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="GetObjectIcons">
+			<wsdl:input message="tns:GetObjectIconsRequest"/>
+			<wsdl:output message="tns:GetObjectIconsResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="GetPubChannelIcons">
+			<wsdl:input message="tns:GetPubChannelIconsRequest"/>
+			<wsdl:output message="tns:GetPubChannelIconsResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="InstantiateWidget">
+			<wsdl:input message="tns:InstantiateWidgetRequest"/>
+			<wsdl:output message="tns:InstantiateWidgetResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="SendDiagnostics">
+			<wsdl:input message="tns:SendDiagnosticsRequest"/>
+			<wsdl:output message="tns:SendDiagnosticsResponse"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	
+	<wsdl:binding name="SmartConnectionBinding" type="tns:SmartConnectionPort">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="LogOn">
+			<soap:operation soapAction="urn://www.woodwing.com/sce/AppService/AppSession#LogOn"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="LogOff">
+			<soap:operation soapAction="urn://www.woodwing.com/sce/AppService/AppSession#LogOff"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetObjectIcons">
+			<soap:operation soapAction="urn://www.woodwing.com/sce/AppService/AppSession#GetObjectIcons"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="false"/>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetPubChannelIcons">
+			<soap:operation soapAction="urn://www.woodwing.com/sce/AppService/AppSession#GetPubChannelIcons"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="false"/>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="InstantiateWidget">
+			<soap:operation soapAction="urn://www.woodwing.com/sce/AppService/AppSession#InstantiateWidget"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="false"/>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="SendDiagnostics">
+			<soap:operation soapAction="urn://www.woodwing.com/sce/AppService/AppSession#SendDiagnostics"/>
+			<wsdl:input>
+				<dime:message layout="http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout" wsdl:required="false"/>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="SmartConnectionService">
+		<wsdl:documentation>Enterprise Application Web Service</wsdl:documentation>
+		<wsdl:port name="SmartConnectionPortName" binding="tns:SmartConnectionBinding">
+			<soap:address location="http://127.0.0.1/scenterprise/appservices.php"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,34 @@
+<?php
+
+
+function ww_advertisement_enable() {
+  if ($vocabulary = taxonomy_vocabulary_load(variable_get('advertisement_vocabulary', 0))) {
+    // Existing install. Add back advertisement node type, if the advertisements
+    // vocabulary still exists. Keep all other node types intact there.
+    $vocabulary = (array) $vocabulary;
+    $vocabulary['nodes']['ww_advertisement'] = 1;
+    taxonomy_save_vocabulary($vocabulary);
+  }
+  else {
+    // Create the forum vocabulary if it does not exist. Assign the vocabulary
+    // a low weight so it will appear first in forum topic create and edit
+    // forms.
+    $vocabulary = array(
+      'name' => t('Advertisement Group'),
+      'description' => t('Select the group that the ad in belongs.'),
+      'tags' => 1,
+      'multiple' => 0,
+      'required' => 1,
+      'hierarchy' => 1,
+      'relations' => 1,
+      'module' => 'taxonomy',
+      'weight' => 0,
+      'nodes' => array('ww_advertisement' => 1),
+    );
+    taxonomy_save_vocabulary($vocabulary);
+
+    variable_set('advertisement_vocabulary', $vocabulary['vid']);
+  }
+}
+
+?>

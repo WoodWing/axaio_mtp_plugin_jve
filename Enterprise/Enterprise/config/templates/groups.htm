@@ -1,0 +1,73 @@
+<script language="javascript" type="text/javascript">
+    function page_init() 
+    {
+    	// Show/Hide the "Import Group" button
+    	var f = document.forms.ImportForm;
+    	var impDiv = document.getElementById("ImportDiv");
+    	impDiv.style.visibility = (f.ShowImport.value == "true") ? "visible" : "hidden";
+    }
+</script>
+
+<body onload="JavaScript:page_init();"> 
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/groups.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:ACT_OVERVIEW_GROUPS--></span></td>
+		</tr>
+	</table>
+	
+	<!-- app body -->
+	<table class="listpane">
+		<tr>
+			<th width="200"><!--RES:GRP_GROUP--></th>
+			<th width="200"><!--RES:OBJ_DESCRIPTION--></th>
+			<th><!--RES:USR_ADMIN--></th>
+			<th><!--RES:WFL_ROUTING--></th>
+			<th width="50"><!--RES:USR_USERS--></th>
+		</tr>
+		<!--ROWS-->
+	</table>
+	<table class="appbtnbar">
+		<tr>
+			<td width="5px">
+				<nobr>
+					<a href="hpgroups.php">
+						<img src="../../config/images/add_16.gif" title="<!--RES:BUT_NEW_GROUP-->"/>
+						<!--RES:BUT_NEW_GROUP-->
+					</a>
+					&nbsp;
+				</nobr>
+			</td>
+			<td width="5px">
+				<nobr>
+					<a href="duplicate_group.php">
+						<img src="../../config/images/copy_16.gif" title="<!--RES:BUT_COPY_GROUP-->"/>
+						<!--RES:BUT_COPY_GROUP-->
+					</a>
+					&nbsp;
+				</nobr>
+			</td>
+			<td width="5px">
+				<nobr>
+				<form name="ImportForm" action="importgroups.php">
+					<div id="ImportDiv" style="visibility: hidden;">
+						<a href="javascript:document.forms.ImportForm.submit();">
+							<img src="../../config/images/group_16.gif" title="<!--RES:BUT_IMPORT_GROUP-->"/>
+							<!--RES:BUT_IMPORT_GROUP-->
+						</a>
+					</div>
+					<input name="ShowImport" type="hidden" value="<!--SHOW_IMPORT_BTN-->"/> <!-- "true" or "false" -->
+				</form>
+				</nobr>
+			</td>
+			<td></td> <!-- trick: used fill button bar to far right -->
+		</tr>
+	</table>
+
+</td></tr></table>
+
+</body>

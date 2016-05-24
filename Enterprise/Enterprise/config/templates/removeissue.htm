@@ -1,0 +1,206 @@
+<script language="JavaScript">
+
+function showObjects()
+{
+	document.remove.show.value = true;
+	document.remove.submit();
+}
+
+function message(message)
+{
+	alert(message);
+}
+
+function popUp(URL)
+{
+	document.location.href = URL;
+}
+
+function submitForm()
+{
+	document.removePage.submit();
+}
+
+function onChangeObjActionCombo( ID )
+{
+	objAction = eval("document.remove.objAction" + ID);
+	newIssue = eval("document.remove.newIssue" + ID);
+
+	if ( objAction.value == "move" ) {
+		newIssue.disabled = false;
+	} else {
+		newIssue.disabled = true;
+		newIssue.selectedIndex = 0;
+	}
+}
+
+/**
+ * Called when the master action combo box selection was changed.
+ * This combo box is shown at bottom of page and allows admin user to select
+ * an action which then is automatically applied to all action combos listed
+ * for each of object rows. This function takes care of that.
+ * Note that *not* all actions are shown at object rows; it depends what 
+ * action is allowed for that object. When the action is not listed (not found)
+ * that action is not allowed, and so this function selects the "None" action.
+ * This is done to avoid confusing situations which easily results in accidentally
+ * removed objects, which is pretty dangerous. When the "Move" action is selected,
+ * it enables the new-issues master combo box to allow user picking one issue to
+ * move objects to. This implies all new-issue combo boxes listed at the object rows
+ * get enabled too. When the "Default" action is selected, this function pre-selects
+ * first action at the combos listed for the object rows. This is assumed to be the default.
+ *
+ * @param object thisCombo The master action combo object (HTML 'select' element)
+ */
+function onChangeMasterObjActionCombo( thisCombo ) 
+{
+	// Disable master new-issues combo for "move" action, else enable
+	onChangeObjActionCombo( 'Master' );
+	// Walk through all listed objects/rows
+	var maxCount = document.remove.amount.value;
+	for( var i = 0; i < maxCount; i++ ) { 
+		objActionCombo = eval("document.remove.objAction" + i);
+		if( objActionCombo.value != thisCombo.value ) {
+			if( thisCombo.value == "default" ) {
+				objActionCombo.selectedIndex = 0;
+				onChangeObjActionCombo( i );
+				// Cascade all object new-issue combos
+				onChangeMasterNewIssueCombo( document.remove.newIssueMaster );
+			} else {
+				// Walk through all object row actions to see if one matches
+				var found = false;
+				for( var j = 0; j < objActionCombo.options.length; j++ ) {
+					if( objActionCombo.options[j].value == thisCombo.value ) {
+						// Found, so we select the matching action at object row
+						objActionCombo.selectedIndex = j;
+						onChangeObjActionCombo( i );
+						found = true;
+						break;
+					}
+				}
+				// We take "None" action (last entry!) when selected master action 
+				// was not listed at object row
+				if( !found ) {
+					objActionCombo.selectedIndex = objActionCombo.options.length - 1;
+					onChangeObjActionCombo( i );
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Called when the master new-issue combo box selection was changed.
+ * This combo box is shown at bottom of page and allows admin user to select
+ * an issue which then is automatically applied to all issue combos listed
+ * for each of object rows. This function takes care of that.
+ * See {@link: onChangeMasterObjActionCombo} function for more details.
+ *
+ * @param object thisCombo The master new-issue combo object (HTML 'select' element)
+ */
+function onChangeMasterNewIssueCombo( thisCombo )
+{
+	// Walk through all listed objects/rows
+	var maxCount = document.remove.amount.value;
+	for( var i = 0; i < maxCount; i++ ) { 
+		newIssueCombo = eval("document.remove.newIssue" + i);
+		newIssueCombo.selectedIndex = 0;
+		if( thisCombo.disabled ) {
+			newIssueCombo.disabled = true;
+		} else {
+			if( !newIssueCombo.disabled && newIssueCombo.value != thisCombo.value ) {
+				for( j = 0; j < newIssueCombo.options.length; j++ ) {
+					if( newIssueCombo.options[j].value == thisCombo.value ) {
+						newIssueCombo.selectedIndex = j;
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
+function directDelete( message, issuePublished )
+{
+	var issue = document.remove.Issue.options[document.remove.Issue.selectedIndex].text;
+	var publication = document.remove.Publication.options[document.remove.Publication.selectedIndex].text;
+	var msg = message;
+	if( issuePublished == false ) {
+		msg = msg + publication + " - " + issue;
+	}
+	var sure = confirm(msg);
+	if (sure == true) {
+		document.remove.directdel.value = true;
+		document.remove.submit();
+	}
+	// BZ # 5937 Fix for Where Empty page after cancelling deleting Issue objects
+	//	else
+	//	{
+	//		return false;
+	//	}
+}
+
+function areYouSure( message )
+{
+	var ready = true;
+	var maxCount = document.remove.amount.value;
+	for( var i = 0; i < maxCount; i++ ) {
+		objAction = eval("document.remove.objAction" + i);
+		if( objAction.value == "move" ) {
+			newIssueCombo = eval("document.remove.newIssue" + i);
+			newIssueValue = eval("document.remove.newIssue" + i + ".options[" + newIssueCombo.selectedIndex + "].text");
+			if (newIssueValue.length < 1) {
+				ready = false;
+				break;
+			}
+		}
+	}
+
+	if (ready == true) {
+		var issue = document.remove.Issue.options[document.remove.Issue.selectedIndex].text;
+		var publication = document.remove.Publication.options[document.remove.Publication.selectedIndex].text;
+		var msg = message + " " + publication + " - " + issue;
+		var sure = confirm(msg);
+		if (sure == true) {
+			document.remove.del.value = true;
+			document.remove.submit();
+		}
+
+	} else {
+		alert("<!--RES:ACT_SELECT_ISSUE_FOR_UNSELECTED_OBJECTS-->");
+		return;
+	}
+}
+
+</script>
+
+<!-- app header -->
+<table class="apptitlebar">
+	<tr>
+		<td><img class="apptitleicon" src="../../config/images/removebyissue.gif"/></td>
+		<td>&nbsp;<span class="apptitletext"><!--RES:ACT_PURGE_ISSUE--></span></td>
+	</tr>
+</table>
+
+<!-- app body -->
+<form name="remove" action="removeissue.php" method="post">
+	<table border="0" cellspacing="2" cellpadding="3" width="640" class="text">
+		<tr bgcolor="#cccccc">
+			<td> <!--RES:PUBLICATION--> </td>
+			<td> <!--RES:ISSUE--> </td>
+			<td> <!--RES:OBJ_TYPE--> </td>
+		</tr>
+		<tr>
+			<td valign="top">
+				<!--COMBOPUB-->
+			</td>
+			<td valign="top">
+				<!--COMBOISS-->
+			</td>
+			<td valign="top">
+				<!--COMBOOBJTYPE-->
+			</td>
+		</tr>
+	</table>
+	<br/>
+	<table border="0"><!--CONTENT--></table>
+</form>

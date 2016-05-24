@@ -1,0 +1,293 @@
+<script language="javascript">
+
+	var lastSelectedDataSource = '';
+	var lastSelectedQuery = '';
+
+	function showQueries( ds )
+	{
+		// color the previously selected datasource back to normal
+		if( lastSelectedDataSource && lastSelectedDataSource != 0 )
+		{
+			var previousRow = document.getElementById("datasource#"+lastSelectedDataSource);
+			previousRow.bgColor = "#FFFFFF";
+		}
+		
+		// save clicked datasource id
+		lastSelectedDataSource = ds.id.substring( ds.id.lastIndexOf("#")+1 );
+		// color the row of the clicked datasource id
+		var datasourceRow = document.getElementById( ds.id );
+		datasourceRow.bgColor = "#FF9342";
+		
+		var datasourceQueries = document.getElementById( ds.id + "_queries");
+		var queriesAnchor = document.getElementById("query_details_anchor");
+		var queryList = datasourceQueries.getElementsByTagName("div").item(0);
+		
+		queriesAnchor.innerHTML = queryList.innerHTML;
+		
+		// empty the previous selected query
+		lastSelectedQuery = 0;
+		
+		// show datasource buttons
+		var dsButtons = document.getElementById("dsButtons");
+		dsButtons.style.visibility = "visible";
+	}
+	
+	function selectQuery( query )
+	{		
+		if( query.id.substring( query.id.lastIndexOf("#")+1 ) != 0 )
+		{
+			// color the previously selected query back to normal
+			if( lastSelectedQuery && lastSelectedQuery != 0 )
+			{
+				// BZ#741, Safari specific fix
+				var queryList = document.getElementById("query_details_anchor").getElementsByTagName("tr");
+				for(var i=0; i < queryList.length; i++)
+				{
+					if( queryList.item(i).id == "query#"+lastSelectedQuery )
+					{
+						// color the row of the clicked query id
+						queryList.item(i).style.background = "#FFFFFF";
+					}
+				}
+			}
+			
+			// save clicked query id
+			lastSelectedQuery = query.id.substring( query.id.lastIndexOf("#")+1 );
+			
+			// BZ#741, Safari specific fix
+			var queryList = document.getElementById("query_details_anchor").getElementsByTagName("tr");
+			for(var i=0; i < queryList.length; i++)
+			{
+				if( queryList.item(i).id == query.id )
+				{
+					// color the row of the clicked query id
+					queryList.item(i).style.background = "#FF9342";
+				}
+			}
+			
+			// show query buttons (BZ#741, Safari specific fix)
+			var tds = document.getElementById("query_details_anchor").getElementsByTagName("td");
+			var qButtons = tds.item( tds.length - 1 );
+			qButtons.style.visibility = "visible";
+		}
+	}
+	
+	function copyDataSource()
+	{
+		if( lastSelectedDataSource && lastSelectedDataSource != 0 )
+		{
+			window.location = 'dscopy.php?datasource='+lastSelectedDataSource;
+		}else{
+			window.location = 'dscopy.php';
+		}
+	}
+	
+	function copyQuery()
+	{
+		if( lastSelectedQuery && lastSelectedQuery != 0 && lastSelectedDataSource && lastSelectedDataSource != 0 )
+		{
+			window.location = 'dsquerycopy.php?query='+lastSelectedQuery+'&datasource='+lastSelectedDataSource;
+		}
+	}
+	
+	function showQueryDetails()
+	{
+		if( lastSelectedQuery && lastSelectedQuery != 0 )
+		{
+			window.location = 'dsquery.php?mode=details&datasource='+lastSelectedDataSource+'&query='+lastSelectedQuery;
+		}
+	}
+	
+	function showQueryFields()
+	{
+		if( lastSelectedQuery && lastSelectedQuery != 0 )
+		{
+			window.location = 'dsfields.php?datasource='+lastSelectedDataSource+'&query='+lastSelectedQuery;
+		}
+	}
+	
+	function showDataSourceDetails()
+	{
+		if( lastSelectedDataSource && lastSelectedDataSource != 0 )
+		{
+			window.location = 'datasource.php?mode=details&datasource='+lastSelectedDataSource;
+		}
+	}
+	
+	function showDataSourceSettings()
+	{
+		if( lastSelectedDataSource && lastSelectedDataSource != 0 )
+		{
+			window.location = 'dssettings.php?datasource='+lastSelectedDataSource;
+		}
+	}
+	
+	function showDataSourcePublications()
+	{
+		if( lastSelectedDataSource && lastSelectedDataSource != 0 )
+		{
+			window.location = 'dspublications.php?datasource='+lastSelectedDataSource;
+		}
+	}
+	
+	function preSelectDataSource( dsid )
+	{
+		if( dsid )
+		{
+			// save datasource id
+			lastSelectedDataSource = dsid
+			// color the row of the clicked datasource id
+			var datasourceRow = document.getElementById( dsid );
+			datasourceRow.bgColor = "#FF9342";
+			
+			var datasourceQueries = document.getElementById( dsid + "_queries");
+			var queriesAnchor = document.getElementById("query_details_anchor");
+			var queryList = datasourceQueries.getElementsByTagName("div").item(0);
+			
+			queriesAnchor.innerHTML = queryList.innerHTML;
+		}
+	}
+</script>
+<table class="appframe"><tr class="text"><td>
+
+<!-- app header -->
+<table class="apptitlebar">
+	<tr>
+		<td><img class="apptitleicon" src="../../config/images/datasource_32.png"/></td>
+		<td>&nbsp;<span class="apptitletext"><!--RES:DS_DATASOURCE--></span></td>
+	</tr>
+</table>
+
+<!-- visual area; datasource browser -->
+<form action="datasources.php" enctype="multipart/form-data" name="DataSourceForm" method="post">
+	<table>
+		<tr>
+			<td valign="top">	
+				<table class="listpane" width="250">
+					<tr>
+						<th><!--RES:DS_DATASOURCE_NAME--></th>
+						<th><!--RES:DS_DATASOURCE_TYPE--></th>
+						<th><!--RES:DS_DATASOURCE_BI--></th>
+					</tr>
+					<!--PAR:DATASOURCES_LIST>-->
+					<tr id="datasource#<!--PAR:DATASOURCE_ID-->" bgcolor="#FFFFFF" onclick="showQueries(this);">
+						<td><strong><!--PAR:DATASOURCE_NAME--></strong></td>
+						<td><i><!--PAR:DATASOURCE_TYPE--></i></td>
+						<td align="center"><input type="checkbox" disabled <!--PAR:DATASOURCE_BIDIRECTIONAL-->></td>
+					</tr>
+					<!--<PAR:DATASOURCES_LIST-->
+					<tr><td colspan="3"></td></tr>	
+					<tr>
+						<td colspan="3" class="appbtnbar">
+							<!-- button bar -->
+							<table>
+								<tr>
+									<td>
+									<a href="datasource.php?mode=new">
+										<img src="../../config/images/add_16.gif" title="<!--RES:DS_NEW_DESC-->"/>
+										<!--RES:DS_DATASOURCE_NEW-->
+									</a>
+									</td><td id="dsButtons" style="visibility:hidden;">
+									&nbsp;
+									<a href="javascript:void(0);" OnClick="javascript:copyDataSource();">
+										<img src="../../config/images/copy_16.gif" title="<!--RES:DS_COPY_DESC-->"/>
+										<!--RES:DS_COPY-->
+									</a>
+									&nbsp;
+									<a href="javascript:void(0);" OnClick="javascript:showDataSourceDetails();">
+										<img src="../../config/images/srch_16.gif" title="<!--RES:DS_EDIT_DESC-->"/>
+										<!--RES:DS_DATASOURCE_EDIT-->
+									</a>
+									&nbsp;
+									<a href="javascript:void(0);" OnClick="javascript:showDataSourceSettings();">
+										<img src="../../config/images/prefs_16.gif" title="<!--RES:DS_SETTINGS_DESC-->"/>
+										<!--RES:DS_DATASOURCE_SETTINGS-->
+									</a>
+									&nbsp;
+									<a href="javascript:void(0);" OnClick="javascript:showDataSourcePublications();">
+										<img src="../../config/images/hist_16.gif" title="<!--RES:DS_PUBLICATIONS_DESC-->"/>
+										<!--RES:DS_DATASOURCE_PUBLICATIONS-->
+									</a>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+			<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td valign="top"> 
+				<div id="query_details_anchor"></div>
+				<div id="overal_details_anchor"></div>
+			</td>
+		</tr>
+	</table>
+	<!-- hidden form params -->
+	<input type="hidden" id="LastSelectedQueryId"   name="LastSelectedQueryId"   value="<!--FRM:LastSelectedQueryId-->"/>
+	<input type="hidden" id="LastSelectedDataSourceId" name="LastSelectedDataSourceId" value="<!--FRM:LastSelectedDataSourceId-->"/>
+</form>
+
+<!-- hidden area; data records -->
+
+<!--PAR:DATASOURCE_QUERIES>-->
+<div id="datasource#<!--PAR:DATASOURCE_ID-->_queries" 
+		style="visibility:hidden; position:absolute; ">
+	<div id="datasource#<!--PAR:DATASOURCE_ID-->_querylist"> <!-- this child is taken to copy into visual area -->
+		<table class="listpane" width="250">
+			<tr>
+				<th><!--RES:DS_QUERY_NAME--></th>
+			</tr>
+			<!--PAR:QUERY_LIST#<!--PAR:DATASOURCE_ID-->>-->
+			<tr id="query#<!--PAR:QUERY_ID-->" style="background:#FFFFFF;" onclick="selectQuery(this);">
+				<td><strong><!--PAR:QUERY_NAME--></strong></td>
+			</tr>
+			<!--<PAR:QUERY_LIST#<!--PAR:DATASOURCE_ID-->-->
+			<tr><td></td></tr>
+			<tr>
+				<td colspan="3" class="appbtnbar">
+					<table>
+						<tr>
+							<td>
+							<!-- button bar -->
+							<a href="dsquery.php?mode=new&datasource=<!--PAR:DATASOURCE_ID-->">
+								<img src="../../config/images/add_16.gif" title="<!--RES:DS_QUERY_NEW_DESC-->"/>
+								<!--RES:DS_QUERY_NEW-->
+							</a>
+							</td><td id="qButtons" style="visibility:hidden;">
+							&nbsp;
+							<a href="javascript:void(0);" OnClick="javascript:showQueryDetails();">
+								<img src="../../config/images/srch_16.gif" title="<!--RES:DS_QUERY_EDIT_DESC-->"/>
+								<!--RES:DS_QUERY_EDIT-->
+							</a>
+							&nbsp;
+							<a href="javascript:void(0);" OnClick="javascript:showQueryFields();">
+								<img src="../../config/images/fields_16.gif" title="<!--RES:DS_QUERY_FIELDS_DESC-->"/>
+								<!--RES:DS_QUERY_FIELDS-->
+							</a>
+							&nbsp;
+							<a href="javascript:void(0);" OnClick="javascript:copyQuery();">
+								<img src="../../config/images/copy_16.gif" title="<!--RES:DS_QUERY_COPY_DESC-->"/>
+								<!--RES:DS_COPY-->
+							</a>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
+<!--<PAR:DATASOURCE_QUERIES-->
+
+</td></tr></table>
+
+<script language="javascript">
+	if( <!--PAR:PRESELECTED_DATASOURCE--> > 0 )
+	{
+		var ds = document.getElementById("datasource#"+<!--PAR:PRESELECTED_DATASOURCE-->);
+		var query = document.getElementById("query#"+<!--PAR:PRESELECTED_QUERY-->);
+		
+		showQueries(ds);
+		selectQuery(query);
+	}
+</script>

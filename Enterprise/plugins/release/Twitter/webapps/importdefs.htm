@@ -1,0 +1,42 @@
+<form method="post">
+	<p><!--CONTENT--></p>
+    <p><!--ERROR--></p>
+	<input type="submit" name="import" value="Import"/>
+	<p>Import the Twitter Publish Form Templates.</p>
+
+    <table class="appframe">
+        <tr class="text">
+            <td style="<!--PAR:DISPLAY_ERRORMSG-->">
+                <p class="subtitletext">Twitter Issues</p>
+                <table class="formbody" width="100%">
+                    <tr>
+                        <th width="150">Brand</th>
+                        <th width="150">Publication Channel</th>
+                        <th width="150">Issue</th>
+                        <th width="150">Registered</th>
+                        <th width="150">Twitter Account</th>
+                        <th></th>
+                    </tr>
+                    <!--SEC:ISSUE_ROWS>-->
+                    <tr>
+                        <td><!--PAR:BRANDNAME--></a></td>
+                        <td><!--PAR:PUBCHANNELNAME--></td>
+                        <td><a href="<!--PAR:ISSUEURL-->" target="_blank"><!--PAR:ISSUENAME--></a></td>
+                        <td><!--PAR:REGISTERED--></td>
+                        <td><!--PAR:TWITTERACCOUNT--></td>
+                        <td><!--PAR:BUTTON--></td>
+                    </tr>
+                    <!--SEC:<ISSUE_ROWS-->
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <p class="subtitletext">Settings</p>
+    <!--RESPONSIVECHECK--> Enable URL validation by Enterprise Server (requires an Internet connection)
+    <br><br>
+    <input type="submit" name="Save" value="Save"/>
+
+	<!-- hidden web application identification required to round-trip form submits -->
+	<!--VAR:WEBAPPINDEX_HIDDENPARAMS-->
+</form>

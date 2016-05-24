@@ -1,0 +1,65 @@
+<script language="javascript">
+function myconfirm(code)
+{
+	switch(code) {
+		case 'deluser':
+			txt = "<!--RES:ACT_SURE_UNSUBSCRIBE_FROM_GROUP_QMK-->";
+			break;
+	}
+	return confirm(txt);
+}
+</script>
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/groups.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:ACT_GROUP_MAINTENANCE--></span></td>
+		</tr>
+	</table>
+
+	<!-- app body -->
+	<form action="hpgroups.php" method="post">
+	<table class="formframe" width="50%"><tr><td>
+		<table class="formbody">
+			<tr>
+				<td><!--RES:OBJ_NAME--></td>
+				<td><!--VAR:NAME--> <font color="#ff0000"><i><!--ERROR--></i></font></td>
+			</tr>
+			<tr>
+				<td><!--RES:OBJ_DESCRIPTION--></td>
+				<td><!--VAR:DESCR--></td>
+			</tr>
+			<tr>
+				<td><!--RES:USR_ADMIN--></td>
+				<td><!--VAR:ADMIN--></td>
+			</tr>
+			<tr>
+				<td><!--RES:WFL_ROUTING--></td>
+				<td><!--VAR:ROUTING--></td>
+			</tr>
+		</table>
+	</td></tr><tr><td>
+		<table class="formbtnbar">
+			<tr>
+				<td>
+					<input type="submit" name="update" value="<!--RES:BUT_UPDATE-->"/>
+					<input type="submit" name="delete" value="<!--RES:BUT_DELETE-->" onClick="return confirm('<!--RES:ACT_SURE_DELETE_GROUP_QMK-->')"/>
+				</td>
+			</tr>
+		</table>
+		<!--VAR:HIDDEN-->
+	</td></tr></table>
+	</form>
+	<br/>
+	
+	<!--DETAILS-->
+	<br/>
+
+	<a href="groups.php">
+		<img src="../../config/images/back_32.gif" border="0" title="<!--RES:ACT_BACK-->" width="32" height="32"/>
+	</a>
+    
+</td></tr></table>

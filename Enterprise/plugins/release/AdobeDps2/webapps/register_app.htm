@@ -1,0 +1,67 @@
+<form method="post">
+	<table class="appframe">
+		<tr class="text">
+			<td>
+				<p class="subtitletext"><!--RES:ACT_REGISTER--></p>
+				<table class="formbody">
+					<tr>
+						<td>
+							API Key*
+						</td>
+						<td>
+							<input name="consumerkey" 
+								value="<!--VAR:CONSUMER_KEY-->" style="width:400px;" autofocus/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Secret*
+						</td>
+						<td>
+							<input name="consumersecret" 
+								value="<!--VAR:CONSUMER_SECRET-->" style="width:400px;"/>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Device Token*
+						</td>
+						<td>
+							<textarea name="devicetoken" 
+								style="height:150px;width:400px;"><!--VAR:DEVICE_TOKEN--></textarea>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Device Id*
+						</td>
+						<td>
+							<input name="deviceid" 
+								value="<!--VAR:DEVICE_ID-->" style="width:400px;"/>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<i>* <!--RES:OBJ_MANDATORY--></i>
+						</td>
+					</tr>
+				</table>
+				<table class="formbtnbar">
+					<tr>
+						<td align="left">
+							<!--VAR:MESSAGES-->
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							<input type="submit" name="submit_cancel" value="<!--RES:ACT_CANCEL-->"/>
+							<input type="submit" name="submit_register" value="<!--RES:ACT_REGISTER-->"/>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	<!--VAR:REGISTERAPP_HIDDENPARAMS-->
+	<!--VAR:WEBAPPINDEX_HIDDENPARAMS-->
+</form>

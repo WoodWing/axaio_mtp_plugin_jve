@@ -1,0 +1,49 @@
+<script language="JavaScript">
+
+function showData()
+{
+	document.remove.show.value = true;
+	document.remove.submit();
+}
+
+function cleanup()
+{
+    var sure = confirm('<!--RES:ACT_CLEAN_UNUSED_PROP-->');
+    if( sure == true ) {
+        document.remove.clean.value = true;
+        document.remove.submit();
+    }
+}
+</script>
+
+<!-- app header -->
+<table class="apptitlebar">
+	<tr>
+		<td><img class="apptitleicon" src="../../config/images/removeprops.png"/></td>
+		<td>&nbsp;<span class="apptitletext"><!--RES:ACT_OVERVIEW_UNUSED_PROP--></span></td>
+	</tr>
+</table>
+
+<!-- app body -->
+<form name="remove" action="removeunusedproperties.php?serverplugin=<!--SERVERPLUGINNAME-->" method="post">
+	<table class="listframe">
+		<tr>
+			<td class="subtitletext"><!--SERVERPLUGIN--><!--ERROR--></td>
+		</tr>
+	</table>
+    <br/>
+    <table>
+        <tr>
+            <td>
+            <font color="red">
+                <!--VAR:WARNINGMESSAGE-->
+            </font>
+            </td>
+        </tr>
+    </table>
+    <table border="0">
+        <tr valign="top">
+            <td><!--CONTENT--></td>
+        </tr>
+    </table>
+</form>

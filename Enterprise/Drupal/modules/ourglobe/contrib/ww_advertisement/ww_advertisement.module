@@ -1,0 +1,142 @@
+<?php
+
+/**
+ * Return a node to display in the block.
+ *
+ * @param Integer $tid
+ * @return Object
+ */
+function ww_advertisement_load_node_by_term($tid) {
+  $result = db_query(db_rewrite_sql('SELECT t.nid, t.vid FROM {term_node} t WHERE t.tid = %d', 't', 'tid'), $tid);
+  $node = db_fetch_array($result);
+  
+  //TODO selection system for ads
+  
+  return node_load(array('nid' => $node['nid']), $node['vid']); 
+}
+
+/**
+* Implementation of hook_block().
+*/
+function ww_advertisement_block($op = 'list', $delta = 0, $edit = array()) {
+  $delta;
+  $edit;
+	
+  // The $op parameter determines what piece of information is being requested.
+  switch ($op) {
+    case 'list':
+      //Get all avertisement groups
+      $groups = (Array) taxonomy_get_tree(variable_get('advertisement_vocabulary', 0));
+      
+      //Display all advertisement groups as a block
+      foreach ($groups as $group) {
+        $blocks[ $group->tid ][ 'info' ] = t( $group -> name );
+      }
+    
+      return $blocks;
+      
+    case 'configure':
+      //Disable title
+      $form = array();
+      $form['title'] = array();
+      
+      return $form;
+      
+    case 'view': default:
+      // If $op is "view", then we need to generate the block for display
+      // purposes. The $delta parameter tells us which block is being requested.
+      $node = ww_advertisement_load_node_by_term($delta);
+      
+      //TODO selection system for ad image
+      if(is_array($node->files)) {
+        $banner = current($node->files);
+      }
+    
+      //Build the block content
+      $block['content'] = ($node->body) ? '<a href="'.$node->body .'">' . '<img src="'.base_path().$banner->filepath.'" alt="WoodWing Advertisement" />' . '</a>' : '<img src="'.base_path().$banner->filepath.'" alt="WoodWing Advertisement" />';
+    	
+      return $block;
+  }
+  
+  return false;
+}
+
+/**
+* Implementation of hook_node_info().
+*/
+function ww_advertisement_node_info() {
+  return array(
+    'ww_advertisement' => array(
+      'name' => t('WW Advertisement'),
+      'module' => 'ww_advertisement',
+      'description' => "Create a advertisement",
+    )
+  );
+}
+
+/**
+* Implementation of hook_perm().
+*/
+function ww_advertisement_perm() {
+  return array('create ww_advertisement', 'edit own ww_advertisement');
+}
+
+/**
+* Implementation of hook_access().
+*/
+function ww_advertisement_access($op, $node) {
+  global $user;
+
+  if ($op == 'create') {
+    // Only users with permission to do so may create this node type.
+    return user_access('create ww_advertisement');
+  }
+
+  // Users who create a node may edit or delete it later, assuming they have the
+  // necessary permissions.
+  if ($op == 'update' || $op == 'delete') {
+    if (user_access('edit own ww_advertisement') && ($user->uid == $node->uid)) {
+      return TRUE;
+    }
+  }
+  
+  return false;
+}
+
+/**
+* Implementation of hook_form().
+*/
+function ww_advertisement_form($node) {
+  // We need to define form elements for the node's title and body.
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => check_plain('Name'),
+    '#required' => TRUE,
+    '#default_value' => $node->title,
+    '#weight' => -5
+  );
+  
+  $form['body'] = array(
+    '#type' => 'textfield',
+    '#title' => check_plain('URL'),
+    '#default_value' => $node->body,
+    '#required' => FALSE,
+  	'#weight' => -4
+  );
+  
+  return $form;
+}
+
+/**
+* Implementation of hook_help().
+*/
+function ww_advertisement_help($section) {
+  switch ($section) {
+    case 'admin/help#ww_advertisement':
+      return t('ADMIN-HELP-TEXT');
+      break;
+  }
+  
+  return false;
+}
+?>
