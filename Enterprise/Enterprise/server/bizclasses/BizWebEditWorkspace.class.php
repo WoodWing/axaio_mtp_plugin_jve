@@ -250,7 +250,7 @@ class BizWebEditWorkspace
 		$bizSemaphore->setLifeTime( 300 ); // 5 minutes lifetime for IDS preview process
 		$semaphoreId = $bizSemaphore->createSemaphore( $semaphoreName );
 
-		if( $semaphoreId ) {
+		if( !$semaphoreId ) {
 			$details = 'Failed to create preview, because there is another preview generation is still busy in progress.';
 			throw new BizException( 'ERR_ERROR', 'Server', $details );
 		}
