@@ -396,8 +396,9 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	 * @param DOMNode $icPara ParagraphStyleRange node
 	 * @param DOMNode $icOneChar CharacterStyleRange node
 	 * @param boolean $skipCharacterStyleRange Skip creation of CharacterStyle <span> element
+	 * @param boolean $includeStyles True to create <strong> or <em> style element
 	 */
-	protected function convertParagraphStyleRange( DOMNode $icPara, $icOneChar = null, $skipCharacterStyleRange = false )
+	protected function convertParagraphStyleRange( DOMNode $icPara, $icOneChar = null, $skipCharacterStyleRange = false, $includeStyles = true )
 	{
 		$styleName = $icPara->getAttribute('AppliedParagraphStyle');
 		$styleName = str_replace( 'ParagraphStyle/', 'para_', $styleName );
@@ -562,7 +563,7 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 		// Continue parsing char style...
 		if( $icOneChar ) {
 			if( !$skipCharacterStyleRange ) {
-				$this->convertCharacterStyleRange( $icOneChar, false );
+				$this->convertCharacterStyleRange( $icOneChar, false, $includeStyles );
 				$this->prevCharNode = $icOneChar;  // Set the previous CharacterStyleRange node
 			}
 		} else {
@@ -629,7 +630,7 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	 * Converts a WCML styled text selection to XHTML. See convert() for more details.
 	 * InCopy path: ../Document/Story/ParagraphStyleRange/CharacterStyleRange
 	 */
-	protected function convertCharacterStyleRange( DOMNode $icChar, $includeContent = true )
+	protected function convertCharacterStyleRange( DOMNode $icChar, $includeContent = true, $includeStyles = true )
 	{
 		// Check the FontStyle, if there is bold or italic there, we may have to change the tag.
 		$hasBoldFont = false;
@@ -668,17 +669,19 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 
 		$this->xCursor = $xChar; // insertion point
 
-		// Prior to adding the content, make sure the strong / em tags are included if present.
-		if ( $hasBoldFont ) {
-			$xChar = $this->xDoc->createElement( 'strong' );
-			$this->xCursor->appendChild ( $xChar );
-			$this->xCursor = $xChar;
-		}
+		if( $includeStyles ) {
+			// Prior to adding the content, make sure the strong / em tags are included if present.
+			if ( $hasBoldFont ) {
+				$xChar = $this->xDoc->createElement( 'strong' );
+				$this->xCursor->appendChild ( $xChar );
+				$this->xCursor = $xChar;
+			}
 
-		if ( $hasObliqueFont || $hasItalicFont ) {
-			$xChar = $this->xDoc->createElement( 'em' );
-			$this->xCursor->appendChild ( $xChar );
-			$this->xCursor = $xChar;
+			if ( $hasObliqueFont || $hasItalicFont ) {
+				$xChar = $this->xDoc->createElement( 'em' );
+				$this->xCursor->appendChild ( $xChar );
+				$this->xCursor = $xChar;
+			}
 		}
 
 		if( $includeContent ) {
@@ -921,7 +924,9 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 						//    When next node is not a <Br/> node, continue converting CharacterStyleRange, to ensure that character style with FontStyle will
 						//    carried over to the next <Content> element.
 						$nextNode = ($key < $icNodes->length ) ? $icNodes->item($key + 1) : null;
-						if( ($nextNode && $nextNode->nodeName == 'Br') || $key == $icNodes->length -1 ) {
+						if( ($nextNode && $nextNode->nodeName == 'Br') ) {
+							$this->convertParagraphStyleRange( $icPara, $icChar, false, false );
+						} elseif( $key == $icNodes->length -1 && !$this->icChangeParentNode ) {
 							$this->convertParagraphStyleRange( $icPara, $icChar, true );
 						} else {
 							$this->convertParagraphStyleRange( $icPara, $icChar );
@@ -1159,7 +1164,7 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	}
 
 	/**
-	 * Returns a boolean whether or not the preceding sibling is a Change node.
+	 * Returns a boolean whether or not the preceding sibling is a Change node with ChangeType != DeletedText.
 	 * 
 	 * @param DOMNode $icNode ParagraphStyleRange node
 	 * @return boolean
@@ -1170,7 +1175,7 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 		
 		if( $precedingNodes->length > 0 ) {
 			$precedingNode = $precedingNodes->item(0);
-			if( $precedingNode->nodeName == 'Change' ) {
+			if( $precedingNode->nodeName == 'Change' && $precedingNode->getAttribute( 'ChangeType' ) != 'DeletedText' ) {
 				return true;
 			}
 		}

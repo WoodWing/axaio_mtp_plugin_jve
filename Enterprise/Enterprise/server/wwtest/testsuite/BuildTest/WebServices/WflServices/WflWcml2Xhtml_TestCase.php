@@ -65,10 +65,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 				$orgContent = '<div class="story story_body" id="30DE1381-8A7A-41E6-8F6C-5D80D8D9BAF8"><p class="para '
 					.'para_$ID/NormalParagraphStyle"><span class="char char_$ID/[No_character_style]">A test article '
 					.'with</span></p><p class="para para_$ID/NormalParagraphStyle"><span class="char char_$ID/[No_char'
-					.'acter_style]"></span></p><p class="para para_$ID/NormalParagraphStyle"><span class="char char_$ID/[No_'
+					.'acter_style]"/></p><p class="para para_$ID/NormalParagraphStyle"><span class="char char_$ID/[No_'
 					.'character_style]"><img id="ent_' . $this->image->MetaData->BasicMetaData->ID . '" '
-					.'src="ww_enterprise" width="319" height="291"></img></span></p><p class="para para_$ID/NormalParagraph'
-					.'Style"><span class="char char_$ID/[No_character_style]"></span></p><p class="para para_$ID/Normal'.
+					.'src="ww_enterprise" width="319" height="291"/></span></p><p class="para para_$ID/NormalParagraph'
+					.'Style"><span class="char char_$ID/[No_character_style]"/></p><p class="para para_$ID/Normal'.
 					'ParagraphStyle"><span class="char char_$ID/[No_character_style]">An inline image</span></p></div>';
 				if ($el->Content != $orgContent) {
 					$this->setResult( 'ERROR',  'Extracted content does not match the expected content.', 'Test failed.');
