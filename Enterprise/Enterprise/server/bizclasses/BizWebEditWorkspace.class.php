@@ -58,17 +58,25 @@ class BizWebEditWorkspace
 	}
 
 	/**
-	 * Delets an article at the workspace.
+	 * Deletes an article at the workspace.
 	 *
 	 * @param string $workspaceId
 	 */
 	public function deleteArticleWorkspace( $workspaceId )
 	{
-		$this->validateWorkspaceId( $workspaceId );
-		
-		$this->openWorkspaceAtDb( $workspaceId );
-		$this->deleteArticlesAtFileSystem();
-		$this->closeWorkspaceAtDb( $workspaceId ); // close the workspace
+		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+		$bizSemaphore = new BizSemaphore();
+		$semaphoreName = 'Wew_'.$workspaceId;
+		$bizSemaphore->setAttempts( array_fill( 0, 480, 250 ) ); // 480 attampts x 250ms wait = 120s max total wait
+		$semaphoreId = $bizSemaphore->createSemaphore( $semaphoreName );
+
+		if( $semaphoreId ) {
+			$this->validateWorkspaceId( $workspaceId );
+			$this->openWorkspaceAtDb( $workspaceId );
+			$this->deleteArticlesAtFileSystem();
+			$this->closeWorkspaceAtDb( $workspaceId ); // close the workspace
+			BizSemaphore::releaseSemaphore( $semaphoreId );
+		}
 	}
 
 	/**
@@ -214,6 +222,58 @@ class BizWebEditWorkspace
 	}
 
 	/**
+	 * Wrapper for Preview/Compose/PDF article content at workspace
+	 *
+	 * @since 10.0
+	 * @param string $workspaceId
+	 * @param ArticleAtWorkspace[] $articles List of articles to preview. Properties per article:
+	 * - ID: NULL when article not created yet.
+	 * - Format
+	 * - Elements: Array of text components (Element objects) to update article at workspace.
+	 * - Content: Article contents containing all text components.
+	 * @param string $action 'Compose','Preview' or 'PDF'
+	 * @param integer $layoutId
+	 * @param integer $editionId
+	 * @param string|null $previewType Preview for a 'page' or 'spread'. Pass null when $action is not 'Preview'.
+	 * @param array() $requestInfo [9.7] Pass in 'InDesignArticles' to resolve InDesignArticles and populate Placements with their frames.
+	 * @throws BizException
+	 * @throws $e
+	 * @return array 'Elements', 'Placements' and 'Pages'
+	 */
+	public function previewArticlesAtWorkspace( $workspaceId, array $articles, 
+									$action, $layoutId, $editionId, $previewType,
+									array $requestInfo = array() )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+		$bizSemaphore = new BizSemaphore();
+		$semaphoreName = 'Wew_'.$workspaceId;
+		$bizSemaphore->setLifeTime( 300 ); // 5 minutes lifetime for IDS preview process
+		$semaphoreId = $bizSemaphore->createSemaphore( $semaphoreName );
+
+		if( $semaphoreId ) {
+			$details = 'Failed to create preview, because there is another preview generation is still busy in progress.';
+			throw new BizException( 'ERR_ERROR', 'Server', $details );
+		}
+
+		$e = null;
+		$retVal = array();
+		try {
+			$retVal = self::doPreviewArticlesAtWorkspace( $workspaceId, $articles, $action, $layoutId, $editionId, $previewType, $requestInfo );
+		} catch( BizException $e ) {
+			// Do nothing here
+		}
+
+		if( $semaphoreId ) {
+			BizSemaphore::releaseSemaphore( $semaphoreId );
+		}
+		if( $e ) {
+			throw $e;
+		}
+
+		return $retVal;
+	}
+
+	/**
 	 * Preview/Compose/PDF article content at workspace
 	 *
 	 * @since 9.4
@@ -231,12 +291,12 @@ class BizWebEditWorkspace
 	 * @throws BizException
 	 * @return array 'Elements', 'Placements' and 'Pages'
 	 */
-	public function previewArticlesAtWorkspace( $workspaceId, array $articles, 
-									$action, $layoutId, $editionId, $previewType,
-									array $requestInfo = array() )
+	public function doPreviewArticlesAtWorkspace( $workspaceId, array $articles,
+	                                            $action, $layoutId, $editionId, $previewType,
+	                                            array $requestInfo = array() )
 	{
 		require_once BASEDIR.'/server/utils/UtfString.class.php';
-		
+
 		// Validate client input parameters
 		$this->validateWorkspaceId( $workspaceId );
 		foreach( $articles as $article ) {
@@ -251,10 +311,10 @@ class BizWebEditWorkspace
 		if( $layoutId ) { // having no layout is possible for articles with geometrical info
 			$this->validateEditionId( $layoutId, $editionId );
 		}
-		
+
 		$ticket = BizSession::getTicket();
 		$this->openWorkspaceAtDb( $workspaceId );
-		
+
 		// Read the layout version of previous preview operation (if there was any).
 		// For the first previous operation, we get this layout info from the database instead.
 		$layoutProps = null; $requestParams = null;
@@ -269,11 +329,11 @@ class BizWebEditWorkspace
 				$layoutVersion = DBObject::getObjectVersion( $layoutId );
 			}
 		}
-		
+
 		// When the user selects different layout to preview, the layout id differs.
 		// In that case, the delta WCML file should be removed to tell SC to read whole article.
 		$sameLayoutId = $layoutProps && $layoutProps->ID == intval($layoutId);
-		
+
 		$guidsOfChangedStories = array();
 		foreach( $articles as $articleAtWs ) {
 			$fsContent = ''; $updatedVersion = false;
@@ -312,24 +372,24 @@ class BizWebEditWorkspace
 		// When the user fills in different preview request parameters, such as another
 		// edition, the compose data and previews must be regenerated for ALL stories and pages.
 		// When request differs, simply reset the $guidsOfChangedStories, to trigger all this.
-		$sameRequest = 
+		$sameRequest =
 			$requestParams && // first time preview this is null
 			$requestParams->EditionId == intval($editionId) &&
 			$requestParams->PreviewType == $previewType &&
 			$requestParams->ExportType == $parExpType &&
-			$sameLayoutId; 
+			$sameLayoutId;
 		// L> Note: The layout Version can only be checked after opening layout, in IDPreview.js
 		if( !$sameRequest ) {
 			$guidsOfChangedStories = array();
 		}
-		
-		// from Web Editor perspective...	
+
+		// from Web Editor perspective...
 		$composeUpdateXmlFile = $this->workspace->WebEditor.'compose_update.xml';
 		$pdfFile = $this->getPdfPath( $workspaceId, $layoutId, $editionId, true ); // True for WebEditor perspective
 
 		// Clean up generated files from previous actions. When file does not exists,
 		// it is created with zero bytes. When exists, it is cleared (zero bytes).
-		// Since PHP creates the file, it has read/write access, as required. By 
+		// Since PHP creates the file, it has read/write access, as required. By
 		// giving full read/write access, also IDS has write access as required.
 		file_put_contents( $composeUpdateXmlFile, '' );
 		$oldUmask = umask(0); // Needed for mkdir, see http://www.php.net/umask
@@ -342,8 +402,8 @@ class BizWebEditWorkspace
 
 		// from InDesign Server perspective...
 		$composeUpdateXmlFileIDS = $this->workspace->InDesignServer.'compose_update.xml';
-		
-		// Determine the internal document version, since that tells us which IDS version 
+
+		// Determine the internal document version, since that tells us which IDS version
 		// to pick to run the job. When the article is placed on a layout, the preparation
 		// steps to generate preview may differ per IDS version. For example, for CS6 we do
 		// less performance optimization steps than for CC2014. For that reason, the job must
@@ -357,7 +417,7 @@ class BizWebEditWorkspace
 			require_once BASEDIR.'/server/bizclasses/BizFileStoreXmpFileInfo.class.php';
 			$domVersion = BizFileStoreXmpFileInfo::getInDesignDocumentVersion( $layoutId );
 		}
-		// When article is not placed, or when layout version could not be resolved, 
+		// When article is not placed, or when layout version could not be resolved,
 		// fall back to article document version.
 		if( !$domVersion ) {
 			$domVersion = $this->workspace->DOMVersion;
@@ -375,35 +435,35 @@ class BizWebEditWorkspace
 				', IDS compose file='.$composeUpdateXmlFileIDS.
 				', IDS output file='.$outFileIDS.
 				', DOM version='.$domVersion.
-				', previewType='.$previewType.')' 
+				', previewType='.$previewType.')'
 			);
 		}
-		
+
 		// Create edition subfolder at workspace to store edition specific preview/pdf files
 		if( $editionId ) {
 			$this->createWorkspaceDir( dirname($pdfFile) );
 		}
-		
+
 		// Compose list of article ids.
 		$articleIdsFormats = array();
 		foreach( $articles as $article ) {
 			$articleIdsFormats[$article->ID] = $article->Format;
 		}
-		
+
 		// Ask IDS to generate the previews / PDFs.
-		self::generateOutputPages( $ticket, $parExpType, $layoutId, 
-						$this->workspace->WebEditor, $this->workspace->InDesignServer, null, null, 
-						$editionId, $composeUpdateXmlFileIDS, $outFileIDS, null, 
-						$domVersion, null, $previewType, $articleIdsFormats, 
-						$layoutVersion, $guidsOfChangedStories, $requestInfo );
-		
+		self::generateOutputPages( $ticket, $parExpType, $layoutId,
+			$this->workspace->WebEditor, $this->workspace->InDesignServer, null, null,
+			$editionId, $composeUpdateXmlFileIDS, $outFileIDS, null,
+			$domVersion, null, $previewType, $articleIdsFormats,
+			$layoutVersion, $guidsOfChangedStories, $requestInfo );
+
 		// For robustness, when the update XML file is empty, we simply delete it.
 		// That avoids (in the succeeding code below) that the base XML gets emptied as well.
 		if( !filesize( $composeUpdateXmlFile ) ) {
 			unlink( $composeUpdateXmlFile );
 			clearstatcache(); // reflect unlink() disk operation back into PHP
 		}
-		
+
 		// Make sure there is always a base XML file. Only the first time preview there is
 		// no base, and so we rename the update XML to the base XML.
 		$composeBaseXmlFile = $this->workspace->WebEditor.'compose_base.xml';
@@ -411,7 +471,7 @@ class BizWebEditWorkspace
 			rename( $composeUpdateXmlFile, $composeBaseXmlFile );
 			clearstatcache(); // reflect rename() disk operation back into PHP
 		}
-		
+
 		// Read base XML.
 		if( !file_exists($composeBaseXmlFile) ) { // should never happen...
 			throw new BizException( 'IDS_ERROR', 'Server', 'Could not find compose data file "'.$composeBaseXmlFile.'".' );
@@ -425,17 +485,17 @@ class BizWebEditWorkspace
 
 		// Read the update XML and merge into the base XML.
 		if( file_exists($composeUpdateXmlFile) ) {
-		
+
 			// Merge update XML into base XML.
 			$this->mergeComposeData( $composeBaseXmlDom, $composeUpdateXmlFile );
-			
+
 			// Save the base XML (to be picked up by succeeding preview operations).
 			$composeBaseXmlDom->save( $composeBaseXmlFile );
 		}
-		
+
 		// Build response data
-		return $this->parseComposeData( $composeBaseXmlDom, $ticket, $action, 
-						$layoutId, $editionId, $requestInfo, $articles );
+		return $this->parseComposeData( $composeBaseXmlDom, $ticket, $action,
+			$layoutId, $editionId, $requestInfo, $articles );
 	}
 
 	/**
