@@ -7,22 +7,14 @@ require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
 require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 
-define( 'HTML_EOL', "\r\n" );
-
 checkSecure('publadmin');
 
 // domains
 $typesdomain = getObjectTypeMap();
 asort($typesdomain);
 
-//create 1 deadlinerelativefields for single input
+// Create 1 deadlinerelativefields for single input
 $deadlinerelativefield = new HtmlDiffTimeField(null, 'deadlinerelativefield');
-
-//create 100 deadlinerelative-fields for multiple input
-$deadlinerelativefields = array();
-for( $i=0; $i<100; $i++ ) {
-	$deadlinerelativefields[$i] = new HtmlDiffTimeField(null, 'deadlinerelativefield_' . $i);
-}
 
 // determine incoming mode
 $publ  = isset($_REQUEST['publ'])  ? intval($_REQUEST['publ'])  : 0; // zero should never happen
@@ -64,6 +56,8 @@ if( $records ) {
 		// build list of (sorted) status objects from HTTP request
 		$statusList = array();
 		for( $i=0; $i < $records; $i++ ) {
+			// Create deadlinerelative-fields for multiple input
+			$deadlinerelativefields[$i] = new HtmlDiffTimeField( null, 'deadlinerelativefield_' . $i );
 			$statusTmp = StatusAdminApp::httpRequestToStatusObj( $publ, $issue, $type,  
 									$_REQUEST, $deadlinerelativefields[$i]->requestValue(), $i );
 			$statusList[ $statusTmp->SortOrder.'_'.$i ] = $statusTmp;
@@ -168,6 +162,8 @@ switch( $mode ) {
 			if( $records > 0 ) { 
 				$rows = array();
 				for( $i=0; $i < $records; $i++ ) {
+					// Create deadlinerelative-fields for multiple input
+					$deadlinerelativefields[$i] = new HtmlDiffTimeField( null, 'deadlinerelativefield_' . $i );
 					$rows[] = StatusAdminApp::httpRequestToStatusObj( $publ, $issue, $type, 
 													$_REQUEST, $deadlinerelativefields[$i]->requestValue(), $i );
 				}
@@ -180,6 +176,8 @@ switch( $mode ) {
 			$clr = $color[$flip];
 			$flip = 1- $flip;
 			$thisdomain = array();
+			// Create deadlinerelative-fields for multiple input
+			$deadlinerelativefields[$i] = new HtmlDiffTimeField( null, 'deadlinerelativefield_' . $i );
 			if ($statedomain) foreach (array_keys($statedomain) as $state) {
 				if( $state != $row->Id ) {
 					$thisdomain[$state] = $statedomain[$state];
@@ -199,8 +197,8 @@ switch( $mode ) {
 				$mode = 'error';
 			}
 
-			$deltxt = '<a href="states.php?publ='.$publ.'&issue='.$issue.'&type='.urlencode($type).'&delete=1&id='.$row->Id.'" onclick="return myconfirm(\'delstate\', ' . $cnt . ', ' . $authCount . ')">'.HTML_EOL
-					.'<img src="../../config/images/remov_16.gif" border="0" width="16" height="16" title="'.BizResources::localize('ACT_DEL').'"/></a>'.HTML_EOL;
+			$deltxt = '<a href="states.php?publ='.$publ.'&issue='.$issue.'&type='.urlencode($type).'&delete=1&id='.$row->Id.'" onclick="return myconfirm(\'delstate\', ' . $cnt . ', ' . $authCount . ')">'
+					.'<img src="../../config/images/remov_16.gif" border="0" width="16" height="16" title="'.BizResources::localize('ACT_DEL').'"/></a>';
 			$tcolor = $row->Color;
 			$disableSkipIdsa = true;
 			if ( $useSkipIdsa ) {
@@ -209,36 +207,36 @@ switch( $mode ) {
 			}
 			$deadlinerelativefields[$i]->setValue( DateTimeFunctions::validRelativeTime( $row->DeadlineRelative ) );
 			$detailtxt .=
-					'<tr'.$clr.'>'.HTML_EOL
-					.'<td>'.inputvar('code'.$i, $row->SortOrder, 'small').'</td>'.HTML_EOL
-					.'<td>'.inputvar('state'.$i, $row->Name, 'shortname').'</td>'.HTML_EOL
-					.'<td>'.inputvar('produce'.$i, trim($row->Produce), 'checkbox').'</td>'.HTML_EOL
-					.'<td>'.inputvar('createpermanentversion'.$i, trim($row->CreatePermanentVersion), 'checkbox').'</td>'.HTML_EOL
-					.'<td>'.inputvar('removeintermediateversions'.$i, trim($row->RemoveIntermediateVersions), 'checkbox').'</td>'.HTML_EOL
-					//.'<td>'.inputvar('automaticallysendtonext'.$i, trim($row->AutomaticallySendToNext), 'checkbox').'</td>'.HTML_EOL
-					.'<td>'.inputvar('readyforpublishing'.$i, trim($row->ReadyForPublishing), 'checkbox').'</td>'.HTML_EOL;
+					'<tr'.$clr.'>'
+					.'<td>'.inputvar('code'.$i, $row->SortOrder, 'small').'</td>'
+					.'<td>'.inputvar('state'.$i, $row->Name, 'shortname').'</td>'
+					.'<td>'.inputvar('produce'.$i, trim($row->Produce), 'checkbox').'</td>'
+					.'<td>'.inputvar('createpermanentversion'.$i, trim($row->CreatePermanentVersion), 'checkbox').'</td>'
+					.'<td>'.inputvar('removeintermediateversions'.$i, trim($row->RemoveIntermediateVersions), 'checkbox').'</td>'
+					//.'<td>'.inputvar('automaticallysendtonext'.$i, trim($row->AutomaticallySendToNext), 'checkbox').'</td>'
+					.'<td>'.inputvar('readyforpublishing'.$i, trim($row->ReadyForPublishing), 'checkbox').'</td>';
 					if ( $useSkipIdsa ) {
-						$detailtxt .= '<td>'.inputvar( 'skipidsa'.$i, trim( $row->SkipIdsa ), 'checkbox', null, true, null, $disableSkipIdsa ).'</td>'.HTML_EOL;
+						$detailtxt .= '<td>'.inputvar( 'skipidsa'.$i, trim( $row->SkipIdsa ), 'checkbox', null, true, null, $disableSkipIdsa ).'</td>';
 					}
-					$detailtxt .='<td>'.inputvar('nextstate'.$i, $row->NextStatusId, 'combo', $thisdomain, false).'</td>'.HTML_EOL
-					.'<td>'.inputvar('phase'.$i, $row->Phase, 'combo', $phasedomain, false).'</td>'.HTML_EOL
-					//.'<td id="colorpicker'.$i.'" bgcolor="'.$tcolor.'"><input type="hidden" name="color'.$i.'" value="'.$tcolor.'"/>&nbsp;&nbsp;</td>'.HTML_EOL
-					//."<td><a href='#' onclick=\"cp2.select(document.forms[0].color$i, document.getElementById('colorpicker$i'), 'pick$i');return false;\" name='pick$i' id='pick$i'>".BizResources::localize('PICK').'</a></td>'.HTML_EOL
-					.'<td align="center">'.HTML_EOL
-						."<a href='#' onclick=\"cp2.select(document.forms[0].color$i, document.getElementById('colorpicker$i'), 'pick$i');return false;\" name='pick$i' id='pick$i'>".HTML_EOL
-							.inputvar("color$i",$tcolor,'hidden').'<table border="1" style="border-collapse: collapse" bordercolor="#606060" height="'.$boxSize.'" width="'.$boxSize.'"><tr><td id="colorpicker'.$i.'" bgcolor="'.$tcolor.'"></td></tr></table></td>'.HTML_EOL
-						.'</a></td>'.HTML_EOL;
+					$detailtxt .='<td>'.inputvar('nextstate'.$i, $row->NextStatusId, 'combo', $thisdomain, false).'</td>'
+					.'<td>'.inputvar('phase'.$i, $row->Phase, 'combo', $phasedomain, false).'</td>'
+					//.'<td id="colorpicker'.$i.'" bgcolor="'.$tcolor.'"><input type="hidden" name="color'.$i.'" value="'.$tcolor.'"/>&nbsp;&nbsp;</td>'
+					//."<td><a href='#' onclick=\"cp2.select(document.forms[0].color$i, document.getElementById('colorpicker$i'), 'pick$i');return false;\" name='pick$i' id='pick$i'>".BizResources::localize('PICK').'</a></td>'
+					.'<td align="center">'
+						."<a href='#' onclick=\"cp2.select(document.forms[0].color$i, document.getElementById('colorpicker$i'), 'pick$i');return false;\" name='pick$i' id='pick$i'>"
+							.inputvar("color$i",$tcolor,'hidden').'<table border="1" style="border-collapse: collapse" bordercolor="#606060" height="'.$boxSize.'" width="'.$boxSize.'"><tr><td id="colorpicker'.$i.'" bgcolor="'.$tcolor.'"></td></tr></table></td>'
+						.'</a></td>';
 
 			        // Only show the deadline fields if the brand has the calculation of deadlines set to enabled.
 					if ( $useDeadlines ) {
-						$detailtxt .= '<td>'.$deadlinerelativefields[$i]->drawBody().'</td>'.HTML_EOL;
+						$detailtxt .= '<td>'.$deadlinerelativefields[$i]->drawBody().'</td>';
 					}
-					$detailtxt .= '<td>'.$deltxt.'</td>'.HTML_EOL
-				.'</tr>'.HTML_EOL.HTML_EOL;
-			$detailtxt .= inputvar("id$i",$row->Id,'hidden').HTML_EOL;
+					$detailtxt .= '<td>'.$deltxt.'</td>'
+				.'</tr>';
+			$detailtxt .= inputvar("id$i",$row->Id,'hidden');
 			$i++;
 		}
-		$detailtxt .= inputvar('recs',$i,'hidden').HTML_EOL;
+		$detailtxt .= inputvar('recs',$i,'hidden');
 		break;
 	case 'add':
 		$row = array("code"=>'', "state" => '', "produce" => '', 'nextstate' => '', "phase" => $phasedomain['Production'], 'color' => '#a0a0a0',
@@ -266,32 +264,32 @@ switch( $mode ) {
 			$disableSkipIdsa = !IdsAutomationUtils::isLayoutObjectType( $type );
 		}
 		$detailtxt .=
-			'<tr>'.HTML_EOL
-				.'<td>'.inputvar('code', $row['code'], 'small').'</td>'.HTML_EOL
-				.'<td>'.inputvar('state', $row['state'], 'shortname').'</td>'.HTML_EOL
-				.'<td>'.inputvar('produce',trim($row['produce']), 'checkbox').'</td>'.HTML_EOL
-				.'<td>'.inputvar('createpermanentversion',trim($row['createpermanentversion']), 'checkbox').'</td>'.HTML_EOL
-				.'<td>'.inputvar('removeintermediateversions',trim($row['removeintermediateversions']), 'checkbox').'</td>'.HTML_EOL
-				//.'<td>'.inputvar('automaticallysendtonext',trim($row['automaticallysendtonext']), 'checkbox').'</td>'.HTML_EOL
-				.'<td>'.inputvar('readyforpublishing',trim($row['readyforpublishing']), 'checkbox').'</td>'.HTML_EOL;
+			'<tr>'
+				.'<td>'.inputvar('code', $row['code'], 'small').'</td>'
+				.'<td>'.inputvar('state', $row['state'], 'shortname').'</td>'
+				.'<td>'.inputvar('produce',trim($row['produce']), 'checkbox').'</td>'
+				.'<td>'.inputvar('createpermanentversion',trim($row['createpermanentversion']), 'checkbox').'</td>'
+				.'<td>'.inputvar('removeintermediateversions',trim($row['removeintermediateversions']), 'checkbox').'</td>'
+				//.'<td>'.inputvar('automaticallysendtonext',trim($row['automaticallysendtonext']), 'checkbox').'</td>'
+				.'<td>'.inputvar('readyforpublishing',trim($row['readyforpublishing']), 'checkbox').'</td>';
 				if ( $useSkipIdsa ) {
-					$detailtxt .= '<td>'.inputvar( 'skipidsa', trim( $row['skipidsa'] ), 'checkbox', null, true, null, $disableSkipIdsa ).'</td>'.HTML_EOL;
+					$detailtxt .= '<td>'.inputvar( 'skipidsa', trim( $row['skipidsa'] ), 'checkbox', null, true, null, $disableSkipIdsa ).'</td>';
 				}
-				$detailtxt .= '<td>'.inputvar('nextstate', $row['nextstate'], 'combo', $statedomain).'</td>'.HTML_EOL
-				.'<td>'.inputvar('phase', $row['phase'], 'combo', $phasedomain, false).'</td>'.HTML_EOL
-				//.'<td id="colorpicker" bgcolor="'.$tcolor.'"><input type="hidden" name="color" value="'.$tcolor.'"/>&nbsp;&nbsp;</td>'.HTML_EOL
-				//."<td><a href='#' onclick=\"cp2.select(document.forms[0].color, document.getElementById('colorpicker'), 'pick');return false;\" name='pick' id='pick'>".BizResources::localize('PICK').'</a></td>'.HTML_EOL
-				.'<td align="center">'.HTML_EOL
-					."<a href='#' onclick=\"cp2.select(document.forms[0].color, document.getElementById('colorpicker'), 'pick');return false;\" name='pick' id='pick'>".HTML_EOL
-						.'<input type="hidden" name="color" value="'.$tcolor.'"/><table border="1" style="border-collapse: collapse" bordercolor="#606060" height="'.$boxSize.'" width="'.$boxSize.'"><tr><td id="colorpicker" bgcolor="'.$tcolor.'"></td></tr></table></td>'.HTML_EOL
-					.'</a></td>'.HTML_EOL;
+				$detailtxt .= '<td>'.inputvar('nextstate', $row['nextstate'], 'combo', $statedomain).'</td>'
+				.'<td>'.inputvar('phase', $row['phase'], 'combo', $phasedomain, false).'</td>'
+				//.'<td id="colorpicker" bgcolor="'.$tcolor.'"><input type="hidden" name="color" value="'.$tcolor.'"/>&nbsp;&nbsp;</td>'
+				//."<td><a href='#' onclick=\"cp2.select(document.forms[0].color, document.getElementById('colorpicker'), 'pick');return false;\" name='pick' id='pick'>".BizResources::localize('PICK').'</a></td>'
+				.'<td align="center">'
+					."<a href='#' onclick=\"cp2.select(document.forms[0].color, document.getElementById('colorpicker'), 'pick');return false;\" name='pick' id='pick'>"
+						.'<input type="hidden" name="color" value="'.$tcolor.'"/><table border="1" style="border-collapse: collapse" bordercolor="#606060" height="'.$boxSize.'" width="'.$boxSize.'"><tr><td id="colorpicker" bgcolor="'.$tcolor.'"></td></tr></table></td>'
+					.'</a></td>';
 				// Only show the deadline inputs if the calculation of deadlines is enabled for the brand.
 		        if ( $useDeadlines ) {
-					$detailtxt .= '<td>'.$deadlinerelativefield->drawBody().'</td>'.HTML_EOL;
+					$detailtxt .= '<td>'.$deadlinerelativefield->drawBody().'</td>';
 				}
-				$detailtxt .= '<td></td>'.HTML_EOL
-			.'</tr>'.HTML_EOL.HTML_EOL;
-		$detailtxt .= inputvar('insert','1','hidden').HTML_EOL;
+				$detailtxt .= '<td></td>'
+			.'</tr>';
+		$detailtxt .= inputvar('insert','1','hidden');
 
 		// show other states as info
 		require_once BASEDIR.'/server/dbclasses/DBStates.class.php';
@@ -303,22 +301,22 @@ switch( $mode ) {
 			$flip = 1- $flip;
 			$tcolor = $row['color'];
 			$detailtxt .=
-				'<tr'.$clr.'>'.HTML_EOL
-					.'<td>'.$row['code'].'</td>'.HTML_EOL
-					.'<td>'.formvar($row['state']).'</td>'.HTML_EOL
-					.'<td>'.(trim($row['produce'])?CHECKIMAGE:'').'</td>'.HTML_EOL
-					.'<td>'.(trim($row['createpermanentversion'])?CHECKIMAGE:'').'</td>'.HTML_EOL
-					.'<td>'.(trim($row['removeintermediateversions'])?CHECKIMAGE:'').'</td>'.HTML_EOL
-					//.'<td>'.(trim($row['automaticallysendtonext'])?CHECKIMAGE:'').'</td>'.HTML_EOL
-					.'<td>'.(trim($row['readyforpublishing'])?CHECKIMAGE:'').'</td>'.HTML_EOL
-					.'<td>'.(trim($row['skipidsa'])?CHECKIMAGE:'').'</td>'.HTML_EOL
-					.'<td>'.(trim($row['nextstate'])?$statedomain[$row['nextstate']]:'').'</td>'.HTML_EOL
-					.'<td>'.(trim($row['phase'])?$phasedomain[$row['phase']]:'').'</td>'.HTML_EOL
-					//.'<td bgcolor="'.$tcolor.'">&nbsp;&nbsp;</td>'.HTML_EOL
-					.'<td align="center"><table border="1" style="border-collapse: collapse" bordercolor="#606060" height="'.$boxSize.'" width="'.$boxSize.'"><tr><td id="colorpicker" bgcolor="'.$tcolor.'"></td></tr></table></td>'.HTML_EOL
-					.'<td></td>'.HTML_EOL
-					.'<td>'.DateTimeFunctions::relativeDate( $row['deadlinerelative'] ).'</td>'.HTML_EOL
-				.'</tr>'.HTML_EOL.HTML_EOL;
+				'<tr'.$clr.'>'
+					.'<td>'.$row['code'].'</td>'
+					.'<td>'.formvar($row['state']).'</td>'
+					.'<td>'.(trim($row['produce'])?CHECKIMAGE:'').'</td>'
+					.'<td>'.(trim($row['createpermanentversion'])?CHECKIMAGE:'').'</td>'
+					.'<td>'.(trim($row['removeintermediateversions'])?CHECKIMAGE:'').'</td>'
+					//.'<td>'.(trim($row['automaticallysendtonext'])?CHECKIMAGE:'').'</td>'
+					.'<td>'.(trim($row['readyforpublishing'])?CHECKIMAGE:'').'</td>'
+					.'<td>'.(trim($row['skipidsa'])?CHECKIMAGE:'').'</td>'
+					.'<td>'.(trim($row['nextstate'])?$statedomain[$row['nextstate']]:'').'</td>'
+					.'<td>'.(trim($row['phase'])?$phasedomain[$row['phase']]:'').'</td>'
+					//.'<td bgcolor="'.$tcolor.'">&nbsp;&nbsp;</td>'
+					.'<td align="center"><table border="1" style="border-collapse: collapse" bordercolor="#606060" height="'.$boxSize.'" width="'.$boxSize.'"><tr><td id="colorpicker" bgcolor="'.$tcolor.'"></td></tr></table></td>'
+					.'<td></td>'
+					.'<td>'.DateTimeFunctions::relativeDate( $row['deadlinerelative'] ).'</td>'
+				.'</tr>';
 		}
 		break;
 }
