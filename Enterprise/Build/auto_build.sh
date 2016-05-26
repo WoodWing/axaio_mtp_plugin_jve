@@ -119,10 +119,10 @@ function zipFolder {
 #    P4_BRANCH: [SmartConnection/Server.master]
 #    SERVER_VERSION_ZIP: [v10.0.0_Prerelease1_Build539.zip]
 #    -----------------------------------
-#    SERVER_VERSION: [9.5.0]
-#    SERVER_RELEASE_TYPE: [Daily]
-#    P4_BRANCH: [SmartConnection/Server.v9.x.x.work2]
-#    SERVER_VERSION_ZIP: [v9.5_Work2_Daily_Build539.zip]
+#    SERVER_VERSION: [10.0.0]
+#    SERVER_RELEASE_TYPE: [Pre-release 1]
+#    P4_BRANCH: [SmartConnection/Server.master.work2]
+#    SERVER_VERSION_ZIP: [v10.0_Work2_Daily_Build539.zip]
 #    -----------------------------------
 #    SERVER_VERSION: [9.4.1]
 #    SERVER_RELEASE_TYPE: [Release]
@@ -149,25 +149,13 @@ function determineZipPostfix {
 			then
 				SERVER_VERSION_ZIP="v${serverVersion}_Work"
 			else
-				workPostfix=`echo "${P4_BRANCH}" | sed -r "s/SmartConnection\/Server\.v[[:digit:]]+\.x\.x(\.work)?(([[:digit:]]+))?/\1\2/g"`
-				if test "${workPostfix}" = ""
-				then
-					SERVER_VERSION_ZIP="v${serverVersion}"
+				workDigit=`echo "${P4_BRANCH}" | sed -r "s/SmartConnection\/Server\.master\.work([[:digit:]]+)/\1/g"`
+				if [ -n "${workDigit}" ]; then
+					SERVER_VERSION_ZIP="v${serverVersion}_Work${workDigit}"
 				else
-					if test "${workPostfix}" = ".work"
-					then
-						SERVER_VERSION_ZIP="v${serverVersion}_Work"
-					else
-						if [[ "${workPostfix}" = .work* ]]
-						then
-							workDigit=`echo "${workPostfix}" | sed -r "s/\.work([[:digit:]]+)/\1/g"`
-							SERVER_VERSION_ZIP="v${serverVersion}_Work${workDigit}"
-						else
-							SERVER_VERSION_ZIP=""
-							echo "Error detected: [${workPostfix}]"
-							exit 1
-						fi
-					fi
+					SERVER_VERSION_ZIP=""
+					echo "Could not derive server version from branch: [${P4_BRANCH}]"
+					exit 1
 				fi
 			fi
 		fi
