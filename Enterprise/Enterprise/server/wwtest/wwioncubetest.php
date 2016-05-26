@@ -1612,7 +1612,7 @@ function unix_package_name()
 function loader_download_instructions()
 {
     // >>> WoodWing: because our download archive contains all loaders, adjust installation instructions accordingly:
-	$downloadPage = 'https://community.woodwing.net/products/ioncube-loader-5014/';
+	$downloadPage = 'http://downloads.woodwing.net/ioncube-loaders/enterprise-server/ioncube-loader-5014.zip';
 	echo 
 		'<li><a target="_blank" href="'.$downloadPage.'">Download</a> the ionCube Loader '.REQUIRED_LOADER_VERSION.' archive '.
 			'and extract it locally. '.
