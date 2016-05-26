@@ -23,7 +23,8 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 	{
 		// Check DBTYPE option
 		$help = 'The DBTYPE option in configserver.php should be "mysql", "mssql" or "oracle".';
-		if( !defined('DBTYPE') || empty(trim(DBTYPE)) ) {
+		$definedDbType = defined('DBTYPE') ? trim(DBTYPE) : null;
+		if( is_null($definedDbType) || empty($definedDbType) ) {
 			$this->setResult( 'FATAL', 'The DBTYPE option is not defined or not filled in.', $help );
 			return;
 		}
@@ -35,16 +36,19 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 		
 		// Check the DBSERVER, DBSELECT, DBUSER, DBPASS options.
 		$help = 'The DBSERVER option should be configured at configserver.php.';
-		if( !defined('DBSERVER') || empty(trim(DBSERVER)) ) {
+		$definedDbServer = defined('DBSERVER') ? trim(DBSERVER) : null;
+		if( is_null($definedDbServer) || empty($definedDbServer) ) {
 			$this->setResult( 'FATAL', 'The DBSERVER option is not defined or not filled in.', $help );
 			return;
 		}
 		$help = 'The DBSELECT, DBUSER and DBPASS options should be configured at config.php.';
-		if( !defined('DBSELECT') || empty(trim(DBSELECT)) ) {
+		$definedDbSelect = defined('DBSELECT') ? trim(DBSELECT) : null;
+		if( is_null($definedDbSelect) || empty($definedDbSelect) ) {
 			$this->setResult( 'FATAL', 'The DBSELECT option is not defined or not filled in.', $help );
 			return;
 		}
-		if( !defined('DBUSER') || empty(trim(DBUSER)) ) {
+		$definedDbUser = defined('DBUSER') ? trim(DBUSER) : null;
+		if( is_null($definedDbUser) || empty($definedDbUser) ) {
 			$this->setResult( 'FATAL', 'The DBUSER option is not defined or not filled in.', $help );
 			return;
 		}
