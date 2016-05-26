@@ -62,6 +62,7 @@ class WW_SOAP_WflServer extends WW_SOAP_Server
 		$options['classmap']['LayoutObject'] = 'LayoutObject';
 		$options['classmap']['Message'] = 'Message';
 		$options['classmap']['MessageList'] = 'MessageList';
+		$options['classmap']['MessageQueueConnection'] = 'MessageQueueConnection';
 		$options['classmap']['MetaData'] = 'MetaData';
 		$options['classmap']['MetaDataValue'] = 'MetaDataValue';
 		$options['classmap']['NamedQueryType'] = 'NamedQueryType';

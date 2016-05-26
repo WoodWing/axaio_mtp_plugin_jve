@@ -1052,19 +1052,19 @@
 
 			<complexType name="PublicationInfo">
 				<all>
-					<element name="Id" 						type="xsd:string"/>
-					<element name="Name" 					type="xsd:string"/>
-					<element name="Issues" 					type="tns:ArrayOfIssueInfo"			nillable="true"/> <!-- DEPRECATED. Contains Channel Issues (ID of Issue, name of Channel + Issue) -->
-					<element name="States" 					type="tns:ArrayOfState"				nillable="true"/>
-					<element name="ObjectTypeProperties"	type="tns:ArrayOfObjectTypeProperty" nillable="true"/>
-					<element name="ActionProperties" 		type="tns:ArrayOfActionProperty"	nillable="true"/>
-					<element name="Editions" 				type="tns:ArrayOfEdition" 			nillable="true"/> <!-- v4.2, DEPRECATED, possibly removed after v6.0 -->
-					<element name="FeatureAccessList" 		type="tns:ArrayOfFeatureAccess" 	nillable="true"/> <!-- v4.2 -->
-					<element name="CurrentIssue" 			type="xsd:string" 					nillable="true"/> <!-- v4.2: Configured current issue of the default channel. -->
-					<element name="PubChannels"				type="tns:ArrayOfPubChannelInfo"	nillable="true"/> <!-- v6.0 -->
-					<element name="Categories"				type="tns:ArrayOfCategoryInfo"		nillable="true"/> <!-- v6.0: Formerly called Sections. -->
-					<element name="Dictionaries"			type="tns:ArrayOfDictionary"		nillable="true" minOccurs="0" maxOccurs="1"/> <!-- v7.4: Configured brand-specific dictionaries used for spelling -->
-					<element name="ReversedRead"            type="xsd:boolean"/> <!-- v7.6: reversed reading order of pages -->
+					<element name="Id"                      type="xsd:string"/>
+					<element name="Name"                    type="xsd:string"/>
+					<element name="Issues"                  type="tns:ArrayOfIssueInfo"          nillable="true"/> <!-- DEPRECATED. Contains Channel Issues (ID of Issue, name of Channel + Issue) -->
+					<element name="States"                  type="tns:ArrayOfState"              nillable="true"/>
+					<element name="ObjectTypeProperties"    type="tns:ArrayOfObjectTypeProperty" nillable="true"/>
+					<element name="ActionProperties"        type="tns:ArrayOfActionProperty"     nillable="true"/>
+					<element name="Editions"                type="tns:ArrayOfEdition"            nillable="true"/> <!-- v4.2, DEPRECATED, possibly removed after v6.0 -->
+					<element name="FeatureAccessList"       type="tns:ArrayOfFeatureAccess"      nillable="true"/> <!-- v4.2 -->
+					<element name="CurrentIssue"            type="xsd:string"                    nillable="true"/> <!-- v4.2: Configured current issue of the default channel. -->
+					<element name="PubChannels"             type="tns:ArrayOfPubChannelInfo"     nillable="true"/> <!-- v6.0 -->
+					<element name="Categories"              type="tns:ArrayOfCategoryInfo"       nillable="true"/> <!-- v6.0: Formerly called Sections. -->
+					<element name="Dictionaries"            type="tns:ArrayOfDictionary"         nillable="true" minOccurs="0" maxOccurs="1"/> <!-- v7.4: Configured brand-specific dictionaries used for spelling -->
+					<element name="ReversedRead"            type="xsd:boolean"/>                                                               <!-- v7.6: reversed reading order of pages -->
 				</all>
 			</complexType>
 			<complexType name="ArrayOfPublicationInfo">
@@ -1781,7 +1781,31 @@
 					</restriction>
 				</complexContent>
 			</complexType>
-		
+			
+			<!-- 
+				v10.0: Message Queue integrations used for push notifications.
+				When there are multiple protocols supported, there are multiple connections 
+				defined, so clients should search for a known Instance and Protocol combination.
+				When the Password is set to nil, the same user password used to logon to 
+				Enterprise Server should also be used to logon to the message queue server.
+			-->
+			<complexType name="MessageQueueConnection">
+				<all>
+					<element name="Instance"          type="xsd:string"/> <!-- Integrated message queue server. Supported value is "RabbitMQ". -->
+					<element name="Protocol"          type="xsd:string"/> <!-- Communication protocol used over TCP. Supported value is "AMQP". -->
+					<element name="Url"               type="xsd:string"/> <!-- Network connection URL to the message queue server. -->
+					<element name="User"              type="xsd:string"/> <!-- User name to logon to the message queue server. -->
+					<element name="Password"          type="xsd:string" nillable="true"/> <!-- User password to logon to the message queue server. -->
+					<element name="VirtualHost"       type="xsd:string" nillable="true"/> <!-- Area within the message queue server, used by this Enterprise installation. -->
+				</all>
+			</complexType>
+			<complexType name="ArrayOfMessageQueueConnection">
+				<complexContent>
+					<restriction base="soap-enc:Array">
+						<attribute ref="soap-enc:arrayType" wsdl:arrayType="tns:MessageQueueConnection[]"/>
+					</restriction>
+				</complexContent>
+			</complexType>
 
 			<!--
 				Return list of all servers. This message is optional in the sense it won't be called
@@ -1823,7 +1847,7 @@
 						Supported values: 
 							Publications, NamedQueries, ServerInfo, Settings, 
 							Users, UserGroups, Membership, ObjectTypeProperties, ActionProperties, 
-							Terms, FeatureProfiles, Dictionaries, MessageList, CurrentUser
+							Terms, FeatureProfiles, Dictionaries, MessageList, CurrentUser, MessageQueueConnections (v10.0)
 						And, when 'Publications' is NOT specified:
 							Publications->ObjectTypeProperties, Publications->ActionProperties, 
 							Publications->FeatureAccessList, Publications->CurrentIssue,
@@ -1859,6 +1883,10 @@
 							nillable="true" minOccurs="0" maxOccurs="1"/>	<!-- v8.0: Messages pending for this user. -->
 					<element name="CurrentUser"          type="tns:User"
 							nillable="true" minOccurs="0" maxOccurs="1"/>	<!-- v8.0: The user logged in. -->
+					<element name="MessageQueueConnections" type="tns:ArrayOfMessageQueueConnection"
+							nillable="true" minOccurs="0" maxOccurs="1"/>	<!-- v10.0: Clients may connect to one of these message queue definitions to receive push notifications. -->
+					<element name="MessageQueue"         type="xsd:string"
+							nillable="true" minOccurs="0" maxOccurs="1"/>   <!-- v10.0: Clients may subscribe to this message queue to receive push notifications through RabbitMQ integration. -->
 				</sequence>
 			  </complexType>
 			</element>

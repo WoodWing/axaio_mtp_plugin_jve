@@ -46,6 +46,10 @@ public class LogOnResponse  implements java.io.Serializable {
 
     private com.woodwing.enterprise.interfaces.services.wfl.User currentUser;
 
+    private com.woodwing.enterprise.interfaces.services.wfl.MessageQueueConnection[] messageQueueConnections;
+
+    private java.lang.String messageQueue;
+
     public LogOnResponse() {
     }
 
@@ -68,7 +72,9 @@ public class LogOnResponse  implements java.io.Serializable {
            java.lang.String trackChangesColor,
            com.woodwing.enterprise.interfaces.services.wfl.Dictionary[] dictionaries,
            com.woodwing.enterprise.interfaces.services.wfl.MessageList messageList,
-           com.woodwing.enterprise.interfaces.services.wfl.User currentUser) {
+           com.woodwing.enterprise.interfaces.services.wfl.User currentUser,
+           com.woodwing.enterprise.interfaces.services.wfl.MessageQueueConnection[] messageQueueConnections,
+           java.lang.String messageQueue) {
            this.ticket = ticket;
            this.publications = publications;
            this.namedQueries = namedQueries;
@@ -88,6 +94,8 @@ public class LogOnResponse  implements java.io.Serializable {
            this.dictionaries = dictionaries;
            this.messageList = messageList;
            this.currentUser = currentUser;
+           this.messageQueueConnections = messageQueueConnections;
+           this.messageQueue = messageQueue;
     }
 
 
@@ -470,6 +478,46 @@ public class LogOnResponse  implements java.io.Serializable {
         this.currentUser = currentUser;
     }
 
+
+    /**
+     * Gets the messageQueueConnections value for this LogOnResponse.
+     * 
+     * @return messageQueueConnections
+     */
+    public com.woodwing.enterprise.interfaces.services.wfl.MessageQueueConnection[] getMessageQueueConnections() {
+        return messageQueueConnections;
+    }
+
+
+    /**
+     * Sets the messageQueueConnections value for this LogOnResponse.
+     * 
+     * @param messageQueueConnections
+     */
+    public void setMessageQueueConnections(com.woodwing.enterprise.interfaces.services.wfl.MessageQueueConnection[] messageQueueConnections) {
+        this.messageQueueConnections = messageQueueConnections;
+    }
+
+
+    /**
+     * Gets the messageQueue value for this LogOnResponse.
+     * 
+     * @return messageQueue
+     */
+    public java.lang.String getMessageQueue() {
+        return messageQueue;
+    }
+
+
+    /**
+     * Sets the messageQueue value for this LogOnResponse.
+     * 
+     * @param messageQueue
+     */
+    public void setMessageQueue(java.lang.String messageQueue) {
+        this.messageQueue = messageQueue;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof LogOnResponse)) return false;
@@ -538,7 +586,13 @@ public class LogOnResponse  implements java.io.Serializable {
               this.messageList.equals(other.getMessageList()))) &&
             ((this.currentUser==null && other.getCurrentUser()==null) || 
              (this.currentUser!=null &&
-              this.currentUser.equals(other.getCurrentUser())));
+              this.currentUser.equals(other.getCurrentUser()))) &&
+            ((this.messageQueueConnections==null && other.getMessageQueueConnections()==null) || 
+             (this.messageQueueConnections!=null &&
+              java.util.Arrays.equals(this.messageQueueConnections, other.getMessageQueueConnections()))) &&
+            ((this.messageQueue==null && other.getMessageQueue()==null) || 
+             (this.messageQueue!=null &&
+              this.messageQueue.equals(other.getMessageQueue())));
         __equalsCalc = null;
         return _equals;
     }
@@ -719,6 +773,20 @@ public class LogOnResponse  implements java.io.Serializable {
         if (getCurrentUser() != null) {
             _hashCode += getCurrentUser().hashCode();
         }
+        if (getMessageQueueConnections() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getMessageQueueConnections());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getMessageQueueConnections(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
+        }
+        if (getMessageQueue() != null) {
+            _hashCode += getMessageQueue().hashCode();
+        }
         __hashCodeCalc = false;
         return _hashCode;
     }
@@ -859,6 +927,21 @@ public class LogOnResponse  implements java.io.Serializable {
         elemField.setFieldName("currentUser");
         elemField.setXmlName(new javax.xml.namespace.QName("", "CurrentUser"));
         elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnection", "User"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("messageQueueConnections");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "MessageQueueConnections"));
+        elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnection", "MessageQueueConnection"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        elemField.setItemQName(new javax.xml.namespace.QName("", "MessageQueueConnection"));
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("messageQueue");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "MessageQueue"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setMinOccurs(0);
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);

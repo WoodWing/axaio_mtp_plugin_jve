@@ -305,8 +305,9 @@ class BizSession
 	 * @param string $appversion
 	 * @param string $appserial
 	 * @param string $appproductcode
-	 * @param string[]|null $requestInfo [9.7] See LogOn service in SCEnterprise.wsdl for supported options. NULL to resolve all.
-	 * @param string $masterTicket [9.7] In case the same application does logon twice (e.g. IDS for DPS) this refers to the ticket of the first logon.
+	 * @param string[]|null $requestInfo [9.7.0] See LogOn service in SCEnterprise.wsdl for supported options. NULL to resolve all.
+	 * @param string $masterTicket [9.7.0] In case the same application does logon twice (e.g. IDS for DPS) this refers to the ticket of the first logon.
+	 * @param string $password [10.0.0] User typed password
 	 * @return WflLogOnResponse
 	 * @throws BizException
 	 */
@@ -314,13 +315,14 @@ class BizSession
 		/** @noinspection PhpUnusedParameterInspection */ $ticket,
 		$server, $clientname,
 		/** @noinspection PhpUnusedParameterInspection */ $domain,
-		$appname, $appversion, $appserial, $appproductcode, $requestInfo, $masterTicket )
+		$appname, $appversion, $appserial, $appproductcode, $requestInfo, $masterTicket, $password )
 	{
 		if( is_null($requestInfo) ) { // null means all
 			$requestInfo = array(
 				'Publications', 'NamedQueries', 'ServerInfo', 'Settings', 
 				'Users', 'UserGroups', 'Membership', 'ObjectTypeProperties', 'ActionProperties', 
 				'Terms', 'FeatureProfiles', 'Dictionaries', 'MessageList', 'CurrentUser' );
+				// MessageQueueConnection is not listed here since only 9.9+ clients may want this feature.
 		}
 
 		global $sLanguage_code;
@@ -335,7 +337,12 @@ class BizSession
 										$errorMessage, $masterTicket );
 		
 		// Purge the session workspaces for the purged tickets
-		self::purgeSessionWorkspaces( DBTicket::getPurgedTickets() );
+		$purgedTickets = DBTicket::getPurgedTickets();
+		self::purgeSessionWorkspaces( $purgedTickets );
+
+		// Remove orphan queues in RabbitMQ.
+		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
+		BizMessageQueue::removeOrphanQueuesByTickets( $purgedTickets );
 		
 		if ( !$ticketid )  {
 			throw new BizException( $userLimit ? 'WARN_USER_LIMIT' : 'ERR_LICENSE', 'Client', $errorMessage );
@@ -349,12 +356,7 @@ class BizSession
 		if( !isset(self::$userName) ) { 
 			self::$userName = $shortUser;
 		}
-		
-		// fire event
-		$fullname = self::getUserInfo('fullname');
 		$userid = self::getUserInfo('id');
-		require_once BASEDIR.'/server/smartevent.php';
-		new smartevent_logon( $ticketid, $shortUser, $fullname, $server );
 
 		// Return LogOnResponse to client application
 		require_once BASEDIR.'/server/interfaces/services/wfl/WflLogOnResponse.class.php';
@@ -425,6 +427,16 @@ class BizSession
 			$ret->TrackChangesColor    = $user->TrackChangesColor; // obsoleted but still here to support 7.6 clients.
 			$ret->CurrentUser          = $user;
 		}
+		if( in_array( 'MessageQueueConnections', $requestInfo ) ) {
+			require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
+			BizMessageQueue::setupMessageQueueConnectionsForLogOn( $ret, $password );
+		}
+
+		// fire event
+		$fullname = self::getUserInfo('fullname');
+		require_once BASEDIR.'/server/smartevent.php';
+		new smartevent_logon( $ticketid, $shortUser, $fullname, $server );
+
 		return $ret;
 	}
 	
@@ -548,7 +560,11 @@ class BizSession
 		}
 		
 		// Purge the session workspace
-		self::purgeSessionWorkspaces(array($ticket));
+		self::purgeSessionWorkspaces( array( $ticket ) );
+
+		// Remove the ticket based queue in RabbitMQ.
+		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
+		BizMessageQueue::removeOrphanQueuesByTickets( array( $ticket ) );
 
 		// settings
 		if( $savesettings ) {
@@ -1275,11 +1291,13 @@ class BizSession
 	 */
 	public static function getEnterpriseSystemId()
 	{
-		require_once BASEDIR . '/server/dbclasses/DBConfig.class.php';
-		require_once BASEDIR . '/server/utils/NumberUtils.class.php';
-		$enterpriseSystemId = DBConfig::getValue( 'enterprise_system_id' );
-		$enterpriseSystemId = !empty($enterpriseSystemId) && NumberUtils::validateGUID($enterpriseSystemId) ? $enterpriseSystemId : null;
-
+		static $enterpriseSystemId = false;
+		if( $enterpriseSystemId === false ) {
+			require_once BASEDIR . '/server/dbclasses/DBConfig.class.php';
+			require_once BASEDIR . '/server/utils/NumberUtils.class.php';
+			$enterpriseSystemId = DBConfig::getValue( 'enterprise_system_id' );
+			$enterpriseSystemId = !empty( $enterpriseSystemId ) && NumberUtils::validateGUID( $enterpriseSystemId ) ? $enterpriseSystemId : null;
+		}
 		return $enterpriseSystemId;
 	}
 }

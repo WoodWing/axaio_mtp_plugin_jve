@@ -923,6 +923,9 @@ class LogHandler
 				$transData = preg_replace('/\"Password\":\"(.*)\"/i', "\"Password\":\"***\"", $transData, 1 );
 			}
 		}
+		if( $methodName == 'RabbitMQ_createOrUpdateUser' && $protocol == 'REST' ) {
+			$transData = preg_replace('/\"password\":\"(.*)\"/i', "\"password\":\"***\"", $transData, 1 );
+		}
 
 		return $transData;
 	}

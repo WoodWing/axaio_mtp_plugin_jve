@@ -1,6 +1,7 @@
 {
 	"require": {
     	"solarium/solarium": "3.2.0",
-		"graze/guzzle-jsonrpc": "0.2.3"
+		"graze/guzzle-jsonrpc": "0.2.3",
+		"php-amqplib/php-amqplib": "2.6.2"
 	}
 }

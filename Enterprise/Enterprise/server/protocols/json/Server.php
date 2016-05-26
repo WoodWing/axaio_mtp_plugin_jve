@@ -31,6 +31,11 @@ class WW_JSON_Server extends Zend_Json_Server
 			header('Content-Type: application/json');
 			echo $smd;
 			return;
+		} elseif ('OPTIONS' == $_SERVER['REQUEST_METHOD']) {
+			// The Access-Control-Allow-Methods response header is already set
+			// in the addCrossOriginHeaders() call above. So nothing left to do here
+			// other that returning a HTTP 200.
+			return;
 		}
 
 		//ob_start(); // Catch any unexpected output to make sure it does not mixed through JSON output!

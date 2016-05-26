@@ -553,7 +553,7 @@ class DBMessage extends DBBase
 	{
 		// Avoid endless recursion. More than 25 replies on replies is very unlikely to happen.
 		if( $recursion > 25 ) {
-			LogHandler( 'DBMessage', 'ERROR', 'Exceeding maximum message reply depth of 25. '.
+			LogHandler::Log( 'DBMessage', 'ERROR', 'Exceeding maximum message reply depth of 25. '.
 						'Message ('.$message->MessageID.') and all its replies are ignored.' );
 			return;
 		}

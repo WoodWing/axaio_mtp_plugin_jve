@@ -84,6 +84,7 @@
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflArticleAtWorkspace', 'ArticleAtWorkspace' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflParam', 'Param' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflObjectOperation', 'ObjectOperation' );
+	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflMessageQueueConnection', 'MessageQueueConnection' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflEditionPages', 'EditionPages' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflPageObject', 'PageObject' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflPlacementInfo', 'PlacementInfo' );

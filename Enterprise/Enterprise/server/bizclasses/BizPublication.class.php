@@ -444,7 +444,6 @@ class BizPublication
 		}
 	
 		$result->ReversedRead = $issue['readingorderrev'] === 'on' ? true : false; // Added since v7.6.0
-		
 		return $result;
 	}
 

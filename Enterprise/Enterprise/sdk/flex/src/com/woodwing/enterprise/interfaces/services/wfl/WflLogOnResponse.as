@@ -35,6 +35,8 @@ package com.woodwing.enterprise.interfaces.services.wfl
 		private var _Dictionaries:Array;
 		private var _MessageList:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflMessageList;
 		private var _CurrentUser:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflUser;
+		private var _MessageQueueConnections:Array;
+		private var _MessageQueue:String;
 
 		public function WflLogOnResponse() {
 		}
@@ -170,6 +172,20 @@ package com.woodwing.enterprise.interfaces.services.wfl
 		}
 		public function set CurrentUser(CurrentUser:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflUser):void {
 			this._CurrentUser = CurrentUser;
+		}
+
+		public function get MessageQueueConnections():Array {
+			return this._MessageQueueConnections;
+		}
+		public function set MessageQueueConnections(MessageQueueConnections:Array):void {
+			this._MessageQueueConnections = MessageQueueConnections;
+		}
+
+		public function get MessageQueue():String {
+			return this._MessageQueue;
+		}
+		public function set MessageQueue(MessageQueue:String):void {
+			this._MessageQueue = MessageQueue;
 		}
 
 	}

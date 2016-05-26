@@ -609,7 +609,7 @@ class DBBase
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Set(Reset) the $tableName auto increment value to $autoIncrementValue.
 	 * @param string $tableName DB table name with 'smart_' prefix.

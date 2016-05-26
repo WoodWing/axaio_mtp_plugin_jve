@@ -11,11 +11,17 @@
 
 class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 {
+	/** @var TestCase $testCase */
 	private $testCase = null;
+	/** @var string[] $vars  */
 	private $vars = null;
+	/** @var string $ticket  */
 	private $ticket = null;
+	/** @var WW_Utils_TestSuite $utils */
 	private $utils = null;
+	/** @var callable $requestComposer  */
 	private $requestComposer = null;
+	/** @var string $namePrefix  */
 	private $namePrefix = null;
 	
 	/**
@@ -23,9 +29,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 *
 	 * @param TestCase $testCase
 	 * @param string $namePrefix Prefix to use for autofill names when creating entities.
+	 * @param string|null $protocol [v10.0.0] The used protocol for service calls. (Options: SOAP.) If null a regular service call is made.
 	 * @return bool Whether or not all session variables are complete.
 	 */
-	public function initTest( TestCase $testCase, $namePrefix = 'BT ' )
+	public function initTest( TestCase $testCase, $namePrefix = 'BT ', $protocol = null )
 	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		$valid = false;
@@ -33,7 +40,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$this->testCase = $testCase;
 		$this->expectedError = null;
 		$this->namePrefix = $namePrefix;
-		
+		$this->protocol = $protocol;
+
 		$tip = 'Please enable the "WflLogon" entry and try again.';
 		do {		
 			// Check LogOn ticket.
@@ -65,7 +73,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 
 		return $valid;
 	}
-	
+
 	/**
 	 * Defines the error message or server error (S-code) for the next function call
 	 * that executes a service request. This settings get automatically cleared after
@@ -111,7 +119,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		}
 		
 		// Call the web service.
-		$response = $this->utils->callService( $this->testCase, $request, $stepInfo, $expectedError, null, true );
+		$response = $this->utils->callService( $this->testCase, $request, $stepInfo, $expectedError, $this->protocol, true );
 
 		return $response;
 	}
@@ -407,10 +415,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$request = new WflCreateObjectsRequest();
 		$request->Ticket = $this->ticket;
 		$request->Lock = $lock;
-		$request->Messages = array();
-		$request->ReadMessageIDs = false;
+		$request->Messages = null;
 		$request->Objects = array( $object );
-		
+
 		$expectedError = $this->expectedError;
 		$response = $this->callService( $request, $stepInfo );
 
@@ -562,6 +569,52 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$articleObj->Targets = $targets ? $targets : null;
 
 		return $this->createObject( $articleObj, $stepInfo );
+	}
+
+	/**
+	 * Creates a dossier.
+	 *
+	 * @param string $stepInfo Extra logging info.
+	 * @param string|null $dossierName Name of template. Null to autofill name.
+	 * @param Relation[]|null $relations Add relations to dossier. Null for none.
+	 * @param Target[]|null $targets Assign dossier to targets. Null for none.
+	 * @return Object|null Dossier template object when success is expected. Null when error is expected.
+	 * @throws BizException on unexpected system response
+	 */
+	public function createDossierObject( $stepInfo, $dossierName=null, $relations=null, $targets=null )
+	{
+		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
+		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
+		$user = BizSession::checkTicket( $this->ticket );
+
+		$publication = $this->getPublication();
+
+		$basicMD = new BasicMetaData();
+		$basicMD->ID = null;
+		$basicMD->DocumentID = null;
+		$basicMD->Name = !is_null($dossierName) ? $dossierName : $this->composeName();
+		$basicMD->Type = 'Dossier';
+		$basicMD->Publication = $publication;
+		$basicMD->Category = BizObjectComposer::getFirstCategory( $user, $publication->Id );
+		$basicMD->ContentSource = null;
+
+		$state = BizObjectComposer::getFirstState( $user, $publication->Id, null, null, 'Dossier' );
+		$workflowMD = new WorkflowMetaData();
+		$workflowMD->State = $state;
+
+		// MetaData
+		$metaData = $this->buildEmptyMetaData();
+		$metaData->BasicMetaData = $basicMD; // Overwrite the BasicMetaData.
+		$metaData->ContentMetaData->Slugline = 'A test slugline';
+		$metaData->WorkflowMetaData = $workflowMD;
+
+		// Create the dossier template object.
+		$dossierObj = new Object();
+		$dossierObj->MetaData = $metaData;
+		$dossierObj->Relations = $relations ? $relations : null;
+		$dossierObj->Targets = $targets ? $targets : null;
+
+		return $this->createObject( $dossierObj, $stepInfo );
 	}
 
 	/**
@@ -717,6 +770,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	/**
 	 * Creates a Publication to let successor test cases work on it.
 	 *
+	 * @param string $stepInfo Extra logging info.
+	 * @param string|null $publicationName Name of the publication, if NULL one will be generated.
 	 * @return AdmPublication|null Brand when success is expected. Null when error is expected.
 	 * @throws BizException on unexpected system response
 	 */
@@ -991,10 +1046,11 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 * @param integer $publicationId
 	 * @param integer $pubChannelId
 	 * @param string $issueName Name of issue. Null to use autofill name.
+	 * @param boolean $isOverrule When true, this issue is created as overrule issue.
 	 * @return AdmIssue|null Issue when success is expected. Null when error is expected.
 	 * @throws BizException on unexpected system response
 	 */
-	public function createIssue( $stepInfo, $publicationId, $pubChannelId, $issueName=null )
+	public function createIssue( $stepInfo, $publicationId, $pubChannelId, $issueName=null, $isOverrule=false )
 	{
 		$issue = new AdmIssue();
 		$issue->Name                 = !is_null($issueName) ? $issueName : $this->composeName();
@@ -1002,7 +1058,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$issue->SortOrder            = 2;
 		$issue->EmailNotify          = false;
 		$issue->ReversedRead         = false;
-		$issue->OverrulePublication  = false;
+		$issue->OverrulePublication  = $isOverrule;
 		$issue->Deadline             = date('Y-m-d\TH:i:s', mktime( 0, 0, 0, date('m'), date('d')+1, date('Y')));
 		$issue->PublicationDate      = date('Y-m-d\TH:i:s', mktime( 0, 0, 0, date('m'), date('d'), date('Y')));
 		$issue->ExpectedPages        = 32;

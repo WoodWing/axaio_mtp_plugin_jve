@@ -308,4 +308,35 @@ class BizAccess
 
 		return $layoutIdsAuth;
 	}
+
+	/**
+	 * Checks if a user has any authorizations for the given brand and/or issue.
+	 *
+	 * When validating only a brand, set $issueId to 0.
+	 * When validating only an issue, set $brandId to 0.
+	 * When validating an overrule issue, set both of them.
+	 *
+	 * @param int $userId The id of a user.
+	 * @param int $brandId The brand id to verify for.
+	 * @param int $issueId The issue id to verify for.
+	 * @throws BizException when any of the supplied parameters are invalid.
+	 * @return bool TRUE when authorizations are found for the brand and issue.
+	 */
+	static public function isUserAuthorizedForBrandAndIssue( $userId, $brandId, $issueId )
+	{
+		if( !is_int($userId) ) {
+			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'User id is mandatory.' );
+		}
+
+		if( !is_int($brandId) ) {
+			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Brand id is mandatory.' );
+		}
+
+		if( !is_int($issueId) ) {
+			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Issue id is mandatory.' );
+		}
+
+		require_once BASEDIR.'/server/dbclasses/DBAccess.class.php';
+		return DBAccess::hasUserAuthorizations( $userId, $brandId, $issueId );
+	}
 }

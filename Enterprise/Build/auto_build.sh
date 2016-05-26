@@ -292,7 +292,7 @@ function step2_updateResourceFiles {
 	else
 		echo "step2e2: Perforce is out-of-sync with TMS. Downloading resources..."
 		wget "http://tms.woodwing.net/product/getexport/user/woodwing/pass/QjQjI2VyVmxAQDE=/versionid/117" -O ./tms_resources/adobedps2.zip
-		# L> update the versionid param when migrating to new AdobeDps2 major version: 99=9.0, 117-10.0
+		# L> update the versionid param when migrating to new AdobeDps2 major version: 99=9.0, 117=10.0
 
 		echo "step2e3: At Perforce depot, open resource files for editing."
 		p4 edit ./Enterprise/plugins/release/AdobeDps2/resources/...

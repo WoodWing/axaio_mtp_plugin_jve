@@ -63,7 +63,20 @@ class WW_SOAP_Client extends SoapClient
 				$options['location'] .= '?protocol='. $options['protocol'];
 				
 			}
-		}	
+		}
+		
+		// Clients can pass an expected error (S-code) on the URL of the entry point.
+		// When that error is thrown, is should be logged as INFO (not as ERROR).
+		// This is for testing purposes only, in case the server log must stay free of errors.
+		if( isset( $options['expectedError'] ) ) {
+			$urlInfo = parse_url( $options['location'] );
+			if( isset( $urlInfo['query'] ) ) {
+				$options['location'] .= '&expectedError='.$options['expectedError'];
+			} else {
+				$options['location'] .= '?expectedError='.$options['expectedError'];
+			}
+		}
+		
 		$this->invertedClassMap = array_flip( $options['classmap'] );
 
 		$options['stream_context'] = $this->setStreamContext( $options['location']);

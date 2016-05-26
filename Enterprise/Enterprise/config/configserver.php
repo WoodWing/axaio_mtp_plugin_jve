@@ -1203,6 +1203,30 @@ define( 'GHOST_SCRIPT_APP_PATH', '' );
 //)));
 
 // -------------------------------------------------------------------------------------------------
+// Push notifications via RabbitMQ integration
+// -------------------------------------------------------------------------------------------------
+
+// MESSAGE_QUEUE_CONNECTIONS:
+//    The message queue connections defined here are used by Enterprise Server and its clients.
+//    The functionality is based on a RabbitMQ integration using the AMQP protocol. It works for WAN (remote users)
+//    and is the successor of the broadcast/multicast integration (which worked for LAN only).
+//
+//    To enable this feature, do the following:
+//    1. Uncomment the required MessageQueueConnection definitions below by removing the leading slashes (//).
+//    2. For those definitions, replace 'localhost' with the hostname (or IP) of the system on which RabbitMQ is installed.
+//
+define( 'MESSAGE_QUEUE_CONNECTIONS', serialize(array(
+// - - - - Insecure connection over TCP: - - - -
+//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqp://localhost:5672', 'woodwing', 'ww' ),
+//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'http://localhost:15672', 'woodwing', 'ww' ),
+//	new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'ws://localhost:15674/ws', 'woodwing', 'ww' ),
+// - - - - Secure connection over SSL: - - - -
+//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqps://localhost:5671', 'woodwing', 'ww' ),
+//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'https://localhost:15671', 'woodwing', 'ww' ),
+//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'wss://localhost:15673/ws', 'woodwing', 'ww' ),
+)));
+
+// -------------------------------------------------------------------------------------------------
 // Debugging - Low-level logging of SQL, SOAP details etc.
 // -------------------------------------------------------------------------------------------------
 
@@ -1269,6 +1293,20 @@ define ('LOG_INTERNAL_SERVICES', false);
 //    By default, this log feature is disabled. It can be temporary enabled to troubleshoot DPS traffic.
 //    
 define ('LOG_DPS_SERVICES', false);
+
+// LOG_RABBITMQ_SERVICES:
+//    Used for logging RabbitMQ Web services in the service log folder. When enabled, RabbitMQ requests 
+//    that are fired by Enterprise Server to RabbitMQ Server as well as the corresponding responses are logged.
+//    Enterprise Server integrates with RabbitMQ via two protocols:
+//    1. REST for administration tasks (such as creating queues, users and permissions).
+//    2. AMQP to push messages (events) into the queues.
+//    The services (requests and responses) are logged in the server log folder (OUTPUTDIRECTORY) and have a
+//    RabbitMQ_ prefix and a .txt file extension.
+//   
+//    This log feature is disabled by default and can be temporarily enabled for troubleshooting RabbitMQ traffic.
+//    Note that clients read messages from RabbitMQ directly, but that traffic is not logged here.
+//   
+define ('LOG_RABBITMQ_SERVICES', false);
 
 // LOGFILE_FORMAT:
 //    The log file always contains UTF-8 characters, but aside to that, there are two formats

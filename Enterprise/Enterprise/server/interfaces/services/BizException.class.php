@@ -57,7 +57,7 @@ class BizException extends Exception
 	 * @param string 	$messageKey   Error message key (for automatic localization)
 	 * @param string 	$type         Error type: 'Client' or 'Server'
 	 * @param string 	$detail       Error detail of code specifying the error
-	 * @param string 	$message      Localized message (optional). When given, if overrules automatic localization of $messageKey param.
+	 * @param string 	$message      Localized message (optional). When given, it overrules automatic localization of $messageKey param.
 	 * @param array  	$params       List of parameters to fill in resource string during localization.
 	 * @param string    $severity     Severity / log level, such as 'ERROR', 'WARN', etc. See LogHandler for accepted values.
 	 * @param boolean	$rollback	  Rollback database transaction. 

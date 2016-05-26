@@ -1662,6 +1662,15 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
             cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", "ArrayOfMessageQueueConnection");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.wfl.MessageQueueConnection[].class;
+            cachedSerClasses.add(cls);
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", "MessageQueueConnection");
+            qName2 = new javax.xml.namespace.QName("", "MessageQueueConnection");
+            cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
+            cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
+
             qName = new javax.xml.namespace.QName("urn:SmartConnection", "ArrayOfMetaDataValue");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.wfl.MetaDataValue[].class;
@@ -2229,13 +2238,6 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
-            qName = new javax.xml.namespace.QName("urn:SmartConnection", "Facet");
-            cachedSerQNames.add(qName);
-            cls = com.woodwing.enterprise.interfaces.services.wfl.Facet.class;
-            cachedSerClasses.add(cls);
-            cachedSerFactories.add(beansf);
-            cachedDeserFactories.add(beandf);
-
     }
     private void addBindings2() {
             java.lang.Class cls;
@@ -2251,6 +2253,13 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             java.lang.Class simpledf = org.apache.axis.encoding.ser.SimpleDeserializerFactory.class;
             java.lang.Class simplelistsf = org.apache.axis.encoding.ser.SimpleListSerializerFactory.class;
             java.lang.Class simplelistdf = org.apache.axis.encoding.ser.SimpleListDeserializerFactory.class;
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", "Facet");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.wfl.Facet.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnection", "FacetItem");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.wfl.FacetItem.class;
@@ -2345,6 +2354,13 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             qName = new javax.xml.namespace.QName("urn:SmartConnection", "MessageList");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.wfl.MessageList.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", "MessageQueueConnection");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.wfl.MessageQueueConnection.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);

@@ -2878,6 +2878,39 @@ class ObjectOperation
 		}
 	}
 }
+class MessageQueueConnection
+{
+	public $Instance;
+	public $Protocol;
+	public $Url;
+	public $User;
+	public $Password;
+	public $VirtualHost;
+
+	/**
+	 * @param string               $Instance             
+	 * @param string               $Protocol             
+	 * @param string               $Url                  
+	 * @param string               $User                 
+	 * @param string               $Password             Nullable.
+	 * @param string               $VirtualHost          Nullable.
+	 */
+	public function __construct( $Instance=null, $Protocol=null, $Url=null, $User=null, $Password=null, $VirtualHost=null)
+	{
+		$this->Instance             = $Instance;
+		$this->Protocol             = $Protocol;
+		$this->Url                  = $Url;
+		$this->User                 = $User;
+		$this->Password             = $Password;
+		$this->VirtualHost          = $VirtualHost;
+	}
+
+	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflMessageQueueConnection'; } // AMF object type mapping
+
+	public function sanitizeProperties4Php()
+	{
+	}
+}
 class EditionPages
 {
 	public $Edition;

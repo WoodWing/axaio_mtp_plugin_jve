@@ -29,6 +29,8 @@ class WflLogOnResponse
 	public $Dictionaries;
 	public $MessageList;
 	public $CurrentUser;
+	public $MessageQueueConnections;
+	public $MessageQueue;
 
 	/**
 	 * @param string               $Ticket                    
@@ -50,8 +52,10 @@ class WflLogOnResponse
 	 * @param Dictionary[]         $Dictionaries              Nullable.
 	 * @param MessageList          $MessageList               Nullable.
 	 * @param User                 $CurrentUser               Nullable.
+	 * @param MessageQueueConnection[] $MessageQueueConnections   Nullable.
+	 * @param string               $MessageQueue              Nullable.
 	 */
-	public function __construct( $Ticket=null, $Publications=null, $NamedQueries=null, $FeatureSet=null, $LimitationSet=null, $ServerInfo=null, $Settings=null, $Users=null, $UserGroups=null, $Membership=null, $ObjectTypeProperties=null, $ActionProperties=null, $Terms=null, $FeatureProfiles=null, $Messages=null, $TrackChangesColor=null, $Dictionaries=null, $MessageList=null, $CurrentUser=null )
+	public function __construct( $Ticket=null, $Publications=null, $NamedQueries=null, $FeatureSet=null, $LimitationSet=null, $ServerInfo=null, $Settings=null, $Users=null, $UserGroups=null, $Membership=null, $ObjectTypeProperties=null, $ActionProperties=null, $Terms=null, $FeatureProfiles=null, $Messages=null, $TrackChangesColor=null, $Dictionaries=null, $MessageList=null, $CurrentUser=null, $MessageQueueConnections=null, $MessageQueue=null )
 	{
 		$this->Ticket               = $Ticket;
 		$this->Publications         = $Publications;
@@ -72,6 +76,8 @@ class WflLogOnResponse
 		$this->Dictionaries         = $Dictionaries;
 		$this->MessageList          = $MessageList;
 		$this->CurrentUser          = $CurrentUser;
+		$this->MessageQueueConnections = $MessageQueueConnections;
+		$this->MessageQueue         = $MessageQueue;
 	}
 
 	public function validate()
@@ -299,6 +305,26 @@ class WflLogOnResponse
 			if( !is_null( $datObj->CurrentUser ) ) {
 				$validator->checkType( $datObj->CurrentUser, 'User' );
 				WflUserValidator::validate( $validator, $datObj->CurrentUser );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'MessageQueueConnections' ) ) {
+			$validator->enterPath( 'MessageQueueConnections' );
+			if( !is_null( $datObj->MessageQueueConnections ) ) {
+				$validator->checkType( $datObj->MessageQueueConnections, 'array' );
+				if( !empty($datObj->MessageQueueConnections) ) foreach( $datObj->MessageQueueConnections as $listItem ) {
+					$validator->enterPath( 'MessageQueueConnection' );
+					$validator->checkType( $listItem, 'MessageQueueConnection' );
+					WflMessageQueueConnectionValidator::validate( $validator, $listItem );
+					$validator->leavePath();
+				}
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'MessageQueue' ) ) {
+			$validator->enterPath( 'MessageQueue' );
+			if( !is_null( $datObj->MessageQueue ) ) {
+				$validator->checkType( $datObj->MessageQueue, 'string' );
 			}
 			$validator->leavePath();
 		}

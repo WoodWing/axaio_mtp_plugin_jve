@@ -209,17 +209,21 @@ class BizMessage
 						continue; // SKIP deletion of this message
 					}
 				} else {
-					// Cascase delete the whole thread first (before deleting thread holder).
+					// Cascade delete the whole thread first (before deleting thread holder).
 					// For example, deletion of a sticky note, implies deletion of all its replies.
 					$dependentMessageIds = DBMessage::getMsgIdsForThreadMessageId( $messageId );
+					$objectIds = DBMessage::getObjectIdsForMsgIds( $dependentMessageIds );
 					if( $dependentMessageIds ) foreach( $dependentMessageIds as $dependentMessageId ) {
 						if( DBMessage::deleteMessage( $dependentMessageId ) ) {
-							new smartevent_deletemessage( $ticket, $dependentMessageId );
+							$objectId = isset($objectIds[$dependentMessageId]) ? $objectIds[$dependentMessageId] : null; // not set for a user message
+							new smartevent_deletemessage( $ticket, $dependentMessageId, $objectId );
 						}
 					}
 				}
+				$objectIds = DBMessage::getObjectIdsForMsgIds( array($messageId) );
 				if( DBMessage::deleteMessage( $messageId ) ) {
-					new smartevent_deletemessage( $ticket, $messageId );
+					$objectId = isset($objectIds[$messageId]) ? $objectIds[$messageId] : null; // not set for a user message
+					new smartevent_deletemessage( $ticket, $messageId, $objectId );
 				}
 			}
 		}

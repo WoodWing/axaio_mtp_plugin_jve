@@ -237,7 +237,8 @@ class WflLogOnService extends EnterpriseService
 			$req->ClientAppSerial,
 			$req->ClientAppProductKey,
 			$req->RequestInfo,
-			$masterTicket );
+			$masterTicket,
+			$req->Password );
 
 		$lic->addToUserMessages( $shortuser, $licenseStatus1, $errorMessage1, $resp->MessageList->Messages );
 		$lic->addToUserMessages( $shortuser, $licenseStatus2, $errorMessage2, $resp->MessageList->Messages );

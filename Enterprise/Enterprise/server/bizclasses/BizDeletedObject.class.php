@@ -650,7 +650,7 @@ class BizDeletedObject
 	 * @param boolean $permanent Object is deleted permanently (true) or moved to the Trash Can (false).
 	 * @param array $objectRow DB Object row. 
 	 * @param array $areas Object remains in the Workflow area or Trash Can area.
-	 * @return Object (before it was deleted). 
+	 * @return Object (before it was deleted) with MetaData and Targets.
 	 * @throws BizException
 	 */
 	private static function doDeleteObject( $objId, $permanent, $objectRow, array $areas = null )
@@ -667,7 +667,7 @@ class BizDeletedObject
 		//since v8.0, Delete Object will return the Object deleted in smartevent.
 		//Search from the respective area (Workflow or Area) which is introduced in v8.0 TrashCan Feature
 		$user = BizSession::getShortUserName();
-		$object = BizObject::getObject( $objId, $user, false, 'none', null, null, true, $areas, null, false );
+		$object = BizObject::getObject( $objId, $user, false, 'none', array('MetaData','Targets'), null, true, $areas, null, false );
 
 		LogHandler::Log( 'DeletedObjects', 'DEBUG', "doDeleteObject: $objId start" );
 

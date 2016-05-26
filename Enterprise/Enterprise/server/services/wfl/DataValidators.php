@@ -4034,6 +4034,59 @@ class WflObjectOperationValidator
 	}
 }
 
+class WflMessageQueueConnectionValidator
+{
+	static public function validate( $validator, $datObj )
+	{
+		if( $validator->checkExist( $datObj, 'Instance' ) ) {
+			$validator->enterPath( 'Instance' );
+			$validator->checkNull( $datObj->Instance );
+			if( !is_null( $datObj->Instance ) ) {
+				$validator->checkType( $datObj->Instance, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Protocol' ) ) {
+			$validator->enterPath( 'Protocol' );
+			$validator->checkNull( $datObj->Protocol );
+			if( !is_null( $datObj->Protocol ) ) {
+				$validator->checkType( $datObj->Protocol, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Url' ) ) {
+			$validator->enterPath( 'Url' );
+			$validator->checkNull( $datObj->Url );
+			if( !is_null( $datObj->Url ) ) {
+				$validator->checkType( $datObj->Url, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'User' ) ) {
+			$validator->enterPath( 'User' );
+			$validator->checkNull( $datObj->User );
+			if( !is_null( $datObj->User ) ) {
+				$validator->checkType( $datObj->User, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Password' ) ) {
+			$validator->enterPath( 'Password' );
+			if( !is_null( $datObj->Password ) ) {
+				$validator->checkType( $datObj->Password, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'VirtualHost' ) ) {
+			$validator->enterPath( 'VirtualHost' );
+			if( !is_null( $datObj->VirtualHost ) ) {
+				$validator->checkType( $datObj->VirtualHost, 'string' );
+			}
+			$validator->leavePath();
+		}
+	}
+}
+
 class WflGetStatesResponseValidator
 {
 	static public function validate( $validator, $datObj )

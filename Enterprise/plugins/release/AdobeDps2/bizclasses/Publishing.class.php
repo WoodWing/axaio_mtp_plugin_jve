@@ -18,6 +18,8 @@ class AdobeDps2_UploadStatus_SmartEvent extends smartevent
 	public function __construct( $layoutId, $uploadStatus )
 	{
 		parent::__construct( EVENT_SETOBJECTPROPERTIES, BizSession::getTicket() );
+		$this->composeExchangeNameForObjectId( $layoutId );
+
 		$this->addfield( 'ID', $layoutId );
 		$this->addfield( 'UserId', BizSession::getUserInfo('fullname') );
 		$this->addfield( 'C_DPS2_UPLOADSTATUS', $uploadStatus );

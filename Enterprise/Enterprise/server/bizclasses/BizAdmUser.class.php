@@ -81,7 +81,7 @@ class BizAdmUser
      * @param string $grpId User group id to return user that are member of one group. Null to return all users.
      * @param array $usrIds User ids to return specific users only. Null to return all users (or all users that are member of the group).
      * @param boolean $adminOnly Pass TRUE for admin users, or FALSE for non-admin users, or NULL for all users.
-     * @return array of AdmUser objects
+     * @return AdmUser[] array of AdmUser objects
      * @throws BizException on failure
      */
 	public static function listUsersObj( $usr, $subReq, $grpId, $usrIds, $adminOnly = null )
@@ -176,8 +176,8 @@ class BizAdmUser
 			throw new BizException( 'ERR_SELFDEACTIVATE', 'Client', DBUser::getUserDbIdByShortName( $usr ) ); // S-code!!!
 		}
 
-		$modifyusers = DBUser::modifyUsersObj( $users );
-		foreach( $modifyusers as $modifyUser ) {
+		$modifiedUsers = DBUser::modifyUsersObj( $users );
+		foreach( $modifiedUsers as $modifyUser ) {
 			if( !is_null($modifyUser->TrackChangesColor) ) {
 				$modifyUser->TrackChangesColor = substr($modifyUser->TrackChangesColor,1); // skip # prefix
 			}
@@ -186,13 +186,35 @@ class BizAdmUser
 			throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
 		}
 		// For each user, resolve all user groups, but only when requested and we actually have users.
-		if( $modifyusers && $subReq && in_array( 'GetUserGroups', $subReq ) ) {
-			foreach( $modifyusers as $user ) {
+		if( $modifiedUsers && $subReq && in_array( 'GetUserGroups', $subReq ) ) {
+			foreach( $modifiedUsers as $user ) {
 				//Returns all user groups, including admin groups
 				$user->UserGroups = DBUser::listUserGroupsObj( $user->Id );
 			}
 		}
-		return $modifyusers;
+
+		// When a RabbitMQ configuration is configured, we need to delete users in RabbitMQ when users in Enterprise are deleted.
+		// This is a security precaution to make sure that only active Enterprise users can listen to RabbitMQ.
+		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
+		if( BizMessageQueue::isInstalled() ) {
+			$connection = BizMessageQueue::getConnection('RabbitMQ', 'REST' );
+
+			require_once BASEDIR.'/server/utils/rabbitmq/restapi/Client.class.php';
+			$restClient = new WW_Utils_RabbitMQ_RestAPI_Client( $connection );
+
+			// If the resource is not found, we need to make the request fail silently.
+			$map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO', 'S1144' => 'INFO' ) );
+			try {
+				/** @var AdmUser $user */
+				foreach( $modifiedUsers as $user ) {
+					if( $user->Deactivated ) {
+						$rmqUserName = BizMessageQueue::composeSessionUserName( $user->Id );
+						$restClient->deleteUser( $rmqUserName );
+					}
+				}
+			} catch( BizException $e ) {}
+		}
+		return $modifiedUsers;
 	}
 
 	/**
@@ -201,7 +223,6 @@ class BizAdmUser
 	 * @param string $usr Acting admin user used to check service access rights
 	 * @param array $userIds Array of user id
 	 * @throws BizException Throws BizException on failure
-	 * @return unknown
 	 */
 	public static function deleteUsersObj( $usr, $userIds )
 	{
@@ -223,6 +244,25 @@ class BizAdmUser
 		// Delete users from DB.
 		foreach( $userIds as $userId ) {
 			DBUser::deleteUser( $userId );
+		}
+
+		// When a RabbitMQ configuration is configured, we need to delete users in RabbitMQ upon deletion of this user in Enterprise.
+		// This is a security precaution to make sure that only active Enterprise users can listen to RabbitMQ.
+		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
+		if( BizMessageQueue::isInstalled() ) {
+			$connection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST' );
+
+			require_once BASEDIR.'/server/utils/rabbitmq/restapi/Client.class.php';
+			$restClient = new WW_Utils_RabbitMQ_RestAPI_Client( $connection );
+
+			// If the resource is not found, we need to make the request fail silently.
+			$map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO', 'S1144' => 'INFO' ) );
+			try {
+				foreach( $userIds as $userId ) {
+					$rmqUserName = BizMessageQueue::composeSessionUserName( $userId );
+					$restClient->deleteUser( $rmqUserName );
+				}
+			} catch( BizException $e ) {}
 		}
 	}
 	

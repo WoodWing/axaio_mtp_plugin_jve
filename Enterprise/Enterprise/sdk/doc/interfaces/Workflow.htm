@@ -506,7 +506,7 @@
 						Supported values: 
 							Publications, NamedQueries, ServerInfo, Settings, 
 							Users, UserGroups, Membership, ObjectTypeProperties, ActionProperties, 
-							Terms, FeatureProfiles, Dictionaries, MessageList, CurrentUser
+							Terms, FeatureProfiles, Dictionaries, MessageList, CurrentUser, MessageQueueConnections (v10.0)
 						And, when 'Publications' is NOT specified:
 							Publications->ObjectTypeProperties, Publications->ActionProperties, 
 							Publications->FeatureAccessList, Publications->CurrentIssue,
@@ -533,6 +533,8 @@
 <tr><td class="bpc">Dictionaries</td><td class="btc">array of <a href="#Dictionary">Dictionary</a>*</td><td class="bcc"> v7.4: Configured system-wide dictionaries used for spelling </td></tr>
 <tr><td class="bpc">MessageList</td><td class="btc"><a href="#MessageList">MessageList</a>*</td><td class="bcc"> v8.0: Messages pending for this user. </td></tr>
 <tr><td class="bpc">CurrentUser</td><td class="btc"><a href="#User">User</a>*</td><td class="bcc"> v8.0: The user logged in. </td></tr>
+<tr><td class="bpc">MessageQueueConnections</td><td class="btc">array of <a href="#MessageQueueConnection">MessageQueueConnection</a>*</td><td class="bcc"> v10.0: Clients may connect to one of these message queue definitions to receive push notifications. </td></tr>
+<tr><td class="bpc">MessageQueue</td><td class="btc">string*</td><td class="bcc"> v10.0: Clients may subscribe to this message queue to receive push notifications through RabbitMQ integration. </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>MultiSetObjectProperties</h3><p> 
 				Since v9.2. Update properties for multiple objects at once.
@@ -1048,6 +1050,20 @@
 <tr><td class="bpc">Messages</td><td class="btc">array of <a href="#Message">Message</a>*</td><td class="bcc"></td></tr>
 <tr><td class="bpc">ReadMessageIDs</td><td class="btc">array of string*</td><td class="bcc"> read by any user </td></tr>
 <tr><td class="bpc">DeleteMessageIDs</td><td class="btc">array of string*</td><td class="bcc"> write only </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section" id="MessageQueueConnection"><h3>MessageQueueConnection</h3><p> 
+				v10.0: Message Queue integrations used for push notifications.
+				When there are multiple protocols supported, there are multiple connections 
+				defined, so clients should search for a known Instance and Protocol combination.
+				When the Password is set to nil, the same user password used to logon to 
+				Enterprise Server should also be used to logon to the message queue server.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Instance</td><td class="btc">string</td><td class="bcc"> Integrated message queue server. Supported value is "RabbitMQ". </td></tr>
+<tr><td class="bpc">Protocol</td><td class="btc">string</td><td class="bcc"> Communication protocol used over TCP. Supported value is "AMQP". </td></tr>
+<tr><td class="bpc">Url</td><td class="btc">string</td><td class="bcc"> Network connection URL to the message queue server. </td></tr>
+<tr><td class="bpc">User</td><td class="btc">string</td><td class="bcc"> User name to logon to the message queue server. </td></tr>
+<tr><td class="bpc">Password</td><td class="btc">string*</td><td class="bcc"> User password to logon to the message queue server. </td></tr>
+<tr><td class="bpc">VirtualHost</td><td class="btc">string*</td><td class="bcc"> Area within the message queue server, used by this Enterprise installation. </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section" id="MetaData"><h3>MetaData</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">BasicMetaData</td><td class="btc"><a href="#BasicMetaData">BasicMetaData</a>*</td><td class="bcc"> nillable since v4.2 </td></tr>

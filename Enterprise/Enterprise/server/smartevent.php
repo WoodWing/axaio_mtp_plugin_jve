@@ -58,11 +58,24 @@ define ('EVENTTYPE_USER',                              3);
 
 class smartevent
 {
+	/** @var int $action Event action id. Value of one of the EVENT_ definitions listed above. */
 	private $action;
+	/** @var int $type Event type. Not used. Value of one of the EVENTTYPE_ definitions listed above. */
 	private $type;
+	/** @var string[] $flds Key-value map containing the fields for a message.  */
 	private $flds = array();
+	/** @var string[] $potentialLargeFields Key-value map containing the fields for a message that can be potentially large.  */
 	private $potentialLargeFields = array();
+	/** @var string $exchangeName Message exchange whereto the message must be published. */
+	private $exchangeName = null;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param int $action
+	 * @param string|null $ticket
+	 * @param int $type
+	 */
 	public function __construct( $action, $ticket = null, $type = EVENTTYPE_SYSTEM )
 	{
 		$this->action = $action;
@@ -77,6 +90,13 @@ class smartevent
 		if( $ticket && function_exists('hash') && in_array( $algo, hash_algos() ) ) {
 			$hashed = substr( hash( $algo, $ticket ), 0, 12 );
 			$this->addfield( 'Ticket', $hashed );
+		}
+
+		// Since 10.0.0 a message queue integration was added wherefore exchange names must be composed by the sub classes.
+		// However, the re-logon event was not implemented in this module, but probably in use by customizations.
+		// To make those work, the exchange name is composed at this point, in the parental class.
+		if( $action == EVENT_RELOGON ) {
+			$this->composeExchangeNameForSystem();
 		}
 	}
 
@@ -276,6 +296,17 @@ class smartevent
 			}
 			$m->destroy();
 		}
+
+		// Publish the event to the message queue.
+		if( $this->exchangeName ) {
+			$headerFields = array( 'EventVersion' => EVENTVERSION, 'EventId' => $this->action );
+			$messageFields = array_merge(
+				$this->flds,
+				$this->potentialLargeFields
+			);
+			require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
+			BizMessageQueue::publishMessage( $this->exchangeName, $headerFields, $messageFields );
+		}
 	}
 
 	/**
@@ -335,8 +366,9 @@ class smartevent
 		// Cut up the ids and data into correctly sized chunks.
 		$labels = array_keys( $this->potentialLargeFields );
 		$idLabel = reset( $labels ); // Get the label for the Id's field.
-		$ids = array_shift($this->potentialLargeFields); // First item always contains the ids.
-		$dataChunks = array_shift($this->potentialLargeFields); // Second item always contains the data.
+		$ids = reset( $this->potentialLargeFields ); // First item always contains the ids.
+		$dataChunks = next( $this->potentialLargeFields ); // Second item always contains the data.
+		reset( $this->potentialLargeFields ); // Set internal pointer back to start.
 
 		// Split ids and data into evenly spaced chunks.
 		$ids = $this->packIdsIntoChunks( $maxMessageSize, $idLabel, $ids );
@@ -656,6 +688,198 @@ class smartevent
 
 		return $fieldPacked;
 	}
+
+	/**
+	 * Determines the exchange name for system/session related messages (used to publish the message).
+	 *
+	 * The system needs to know in which exchange the message should be published. There is a message exchange at system level,
+	 * per brand and per overrule issue. By calling this function, assumed is that the message should be published in
+	 * the system exchange. Typically used for logon/logoff events.
+	 */
+	protected function composeExchangeNameForSystem()
+	{
+		// When the message queue integration is disabled, there is no need to resolved the exchange name.
+		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
+		$this->exchangeName = null;
+		if( !BizMessageQueue::isInstalled() ) {
+			return;
+		}
+
+		// Determine the message exchange name.
+		$this->exchangeName = BizMessageQueue::composeExchangeNameForSystem();
+		LogHandler::Log( 'smartevent', 'INFO',	'Determined system exchange name '.$this->exchangeName );
+	}
+
+	/**
+	 * Takes an object id to resolve brand/overrule issue and determines the exchange name (used to publish the message).
+	 *
+	 * The system needs to know to which exchange the message should be published. There is a message exchange at system level,
+	 * per brand and per overrule issue. By calling this function, assumed is that the message should be published in
+	 * either the brand or overrule issue exchange.
+	 *
+	 * In case of failure, the function bails out silently. No error is logged nor exception is thrown since system can
+	 * operate properly in production without messages. Only a warning is given when bad param is provided since that is
+	 * considered a programmatic error.
+	 *
+	 * @param integer $objectId
+	 */
+	protected function composeExchangeNameForObjectId( $objectId )
+	{
+		// When message queue integration is disabled, there is no need to resolved the exchange name.
+		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
+		$this->exchangeName = null;
+		if( !BizMessageQueue::isInstalled() ) {
+			return;
+		}
+
+		// Warn and bail out when bad object id is provided.
+		if( !$objectId ) {
+			LogHandler::Log( 'smartevent', 'WARN', 'No object specfified. Message can not be published.' );
+			return;
+		}
+
+		// For alien objects, events are not published to message exchanges. This is because the brand / overrule issue
+		// can not be resolved and so the exchange name can not be determined. It is rather harmless not to publish messages
+		// because an alien object should become a shadow object first before it can be adjusted.
+		require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
+		if( BizContentSource::isAlienObject( $objectId ) ) {
+			LogHander::Log( 'smartevent', 'INFO', 'No event sent for alien object '.$objectId );
+			return;
+		}
+
+		// Determine the message exchange name.
+		require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
+		$objectIdsIssueIds = DBIssue::getOverruleIssueIdsFromObjectIds( array( $objectId ) );
+		if( array_key_exists( $objectId, $objectIdsIssueIds ) ) {
+			$this->exchangeName = BizMessageQueue::composeExchangeNameForOverruleIssue( $objectIdsIssueIds[$objectId] );
+			LogHandler::Log( 'smartevent', 'INFO',
+				'Resolved exchange name '.$this->exchangeName.' from overrule issue '.$objectIdsIssueIds[$objectId].' for object id '.$objectId );
+		} else {
+			require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
+			$pubId = DBObject::getObjectPublicationId( $objectId );
+			if( !$pubId ) {
+				$pubId = DBObject::getObjectPublicationId( $objectId, 'Trash' );
+			}
+			if( $pubId ) {
+				$this->exchangeName = BizMessageQueue::composeExchangeNameForPublication( $pubId );
+				LogHandler::Log( 'smartevent', 'INFO',
+					'Resolved exchange name '.$this->exchangeName.' from publication '.$pubId.' for object id '.$objectId );
+			} else {
+				LogHandler::Log( 'smartevent', 'WARN',
+					'Could not resolve publication id from object id '.$objectId.'. '.
+					'Event message will not be published.' );
+			}
+		}
+	}
+
+	/**
+	 * Same as composeExchangeNameForObjectId, but now fully relying on a given Object, without the help of DB.
+	 *
+	 * This is especially useful to fire events after an object is deleted from DB (but $object still in memory).
+	 *
+	 * @param Object $object The workflow object. Should have at least its MetaData and Targets members resolved.
+	 */
+	protected function composeExchangeNameForObject( $object )
+	{
+		// When message queue integration is disabled, there is no need to resolved the exchange name.
+		require_once BASEDIR . '/server/bizclasses/BizMessageQueue.class.php';
+		$this->exchangeName = null;
+		if( !BizMessageQueue::isInstalled() ) {
+			return;
+		}
+
+		// Warn and bail out when bad object id is provided.
+		$objectId = $object->MetaData->BasicMetaData->ID;
+		if( !$objectId ) {
+			LogHandler::Log( 'smartevent', 'WARN', 'No object specfified. Message can not be published.' );
+			return;
+		}
+
+		// For alien objects, events are not published into message exchanges. This is because the brand / overrule issue
+		// can not be resolved and so the exchange name can not be determined. It is rather harmless not to publish messages
+		// because an alien object should become a shadow object first before it can be adjusted.
+		require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
+		if( BizContentSource::isAlienObject( $objectId ) ) {
+			LogHander::Log( 'smartevent', 'INFO', 'No event sent for alien object ' . $objectId );
+			return;
+		}
+
+		$inOverruleIssue = count($object->Targets) == 1 && $object->Targets[0]->Issue->OverrulePublication;
+		if( $inOverruleIssue ) {
+			$issueId = $object->Targets[0]->Issue->Id;
+			if( $issueId ) {
+				$this->exchangeName = BizMessageQueue::composeExchangeNameForOverruleIssue( $issueId );
+				LogHandler::Log( 'smartevent', 'INFO',
+					'Resolved exchange name '.$this->exchangeName.' from overrule issue '.$issueId.' for object id '.$objectId );
+			} else {
+				LogHandler::Log( 'smartevent', 'WARN', 'No overrule issue id specified. Message can not be published.' );
+			}
+		} else {
+			$pubId = $object->MetaData->BasicMetaData->Publication->Id;
+			if( $pubId ) {
+				$this->exchangeName = BizMessageQueue::composeExchangeNameForPublication( $pubId );
+				LogHandler::Log( 'smartevent', 'INFO',
+					'Resolved exchange name '.$this->exchangeName.' from publication '.$pubId.' for object id '.$objectId );
+			} else {
+				LogHandler::Log( 'smartevent', 'WARN', 'No publication id specified. Message can not be published.' );
+			}
+		}
+	}
+
+	/**
+	 * Takes an issue id to resolve brand/overrule issue and determines the exchange name (used to publish the message).
+	 *
+	 * The system needs to know to which exchange the message should be published. There is a message exchange at system level,
+	 * per brand and per overrule issue. By calling this function, assumed is that the message should be published in
+	 * either the brand or overrule issue exchange.
+	 *
+	 * In case of failure, the function bails out silently. No error is logged nor exception is thrown since system can
+	 * operate properly in production without messages. Only a warning is given when bad param is provided since that is
+	 * considered a programmatic error.
+	 *
+	 * @param integer $issueId
+	 */
+	protected function composeExchangeNameForIssue( $issueId )
+	{
+		// When the message queue integration is disabled, there is no need to resolve the exchange name.
+		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
+		$this->exchangeName = null;
+		if( !BizMessageQueue::isInstalled() ) {
+			return;
+		}
+
+		// Warn and bail out when bad issue id is provided.
+		if( !$issueId ) {
+			LogHandler::Log( 'smartevent', 'WARN', 'No issue specfified. Message can not be published.' );
+			return;
+		}
+
+		// Determine the message exchange name.
+		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+		if( DBIssue::isOverruleIssue( $issueId ) ) {
+			$this->exchangeName = BizMessageQueue::composeExchangeNameForOverruleIssue( $issueId );
+			LogHandler::Log( 'smartevent', 'INFO',
+				'Resolved exchange name '.$this->exchangeName.' from overrule issue id '.$issueId );
+		} else {
+			$channelId = DBIssue::getChannelId( $issueId );
+			if( $channelId ) {
+				$pubId = DBChannel::getPublicationId( $channelId );
+				if( $pubId ) {
+					$this->exchangeName = BizMessageQueue::composeExchangeNameForPublication( $pubId );
+					LogHandler::Log( 'smartevent', 'INFO',
+						'Resolved exchange name '.$this->exchangeName.' from publication id '.$pubId );
+				} else {
+					LogHandler::Log( 'smartevent', 'WARN',
+						'Could not resolve publication id from issue id '.$issueId.'. '.
+						'Event message will not be published to exchange.' );
+				}
+			} else {
+				LogHandler::Log( 'smartevent', 'WARN',
+					'Could not resolve publication id from channel id '.$channelId.'. '.
+					'Event message will not be published to exchange.' );
+			}
+		}
+	}
 }
 ///////////////////////////////////////////////////////////////////
 // every event as a class
@@ -664,11 +888,12 @@ class smartevent_logon extends smartevent
 {
 	public function __construct( $ticket, $username, $fullname, $servername )
 	{
-		parent::__construct(EVENT_LOGON, $ticket);
+		parent::__construct( EVENT_LOGON, $ticket );
+		$this->composeExchangeNameForSystem();
 
-		$this->addfield('UserID', $username);
-		$this->addfield('FullName', $fullname);
-		$this->addfield('Server', $servername);
+		$this->addfield( 'UserID', $username );
+		$this->addfield( 'FullName', $fullname );
+		$this->addfield( 'Server', $servername );
 
 		$this->fire();
 	}
@@ -678,9 +903,10 @@ class smartevent_logoff extends smartevent
 {
 	public function __construct( $ticket, $username )
 	{
-		parent::__construct(EVENT_LOGOFF,$ticket);
+		parent::__construct( EVENT_LOGOFF, $ticket );
+		$this->composeExchangeNameForSystem();
 
-		$this->addfield('UserID', $username);
+		$this->addfield( 'UserID', $username );
 
 		$this->fire();
 	}
@@ -695,10 +921,11 @@ class smartevent_createobjectEx extends smartevent
 	 */
 	public function __construct( $ticket, $longusername, $object )
 	{
-		parent::__construct(EVENT_CREATEOBJECT, $ticket);
+		parent::__construct( EVENT_CREATEOBJECT, $ticket );
+		$this->composeExchangeNameForObjectId( $object->MetaData->BasicMetaData->ID );
 
-		$this->addfield('UserId', $longusername);
-		$this->addObjectFields($object);
+		$this->addfield( 'UserId', $longusername );
+		$this->addObjectFields( $object );
 
 		$this->fire();
 	}
@@ -714,13 +941,17 @@ class smartevent_deleteobject extends smartevent
 	 */
 	public function __construct( $ticket, $object, $userId, $permanent  )
 	{
-		parent::__construct(EVENT_DELETEOBJECT, $ticket);
+		parent::__construct( EVENT_DELETEOBJECT, $ticket );
+		if( $permanent ) {
+			$this->composeExchangeNameForObject( $object );
+		} else {
+			$this->composeExchangeNameForObjectId( $object->MetaData->BasicMetaData->ID );
+		}
 
-		$this->addObjectFields($object,false/*addModifier*/, true/*$addDeletor*/);
-		$this->addfield('UserId',$userId);
-
+		$this->addObjectFields( $object, false/*addModifier*/, true/*$addDeletor*/ );
+		$this->addfield( 'UserId', $userId );
 		$permanentMessage = $permanent ? 'true' : 'false';
-		$this->addfield('Permanent',$permanentMessage);
+		$this->addfield( 'Permanent', $permanentMessage );
 
 		$this->fire();
 	}
@@ -735,11 +966,11 @@ class smartevent_restoreobject extends smartevent
 	 */
 	public function __construct( $ticket, $object, $userId )
 	{
-		parent::__construct(EVENT_RESTOREOBJECT, $ticket);
+		parent::__construct( EVENT_RESTOREOBJECT, $ticket );
+		$this->composeExchangeNameForObjectId( $object->MetaData->BasicMetaData->ID );
 
-
-		$this->addObjectFields($object,true/*addModifier*/, true/*$addDeletor*/);
-		$this->addfield('UserId',$userId);
+		$this->addObjectFields( $object, true/*addModifier*/, true/*$addDeletor*/ );
+		$this->addfield( 'UserId', $userId );
 
 		$this->fire();
 	}
@@ -755,11 +986,12 @@ class smartevent_saveobjectEx extends smartevent
 	 */
 	public function __construct( $ticket, $longusername, $object, $oldRouteTo )
 	{
-		parent::__construct(EVENT_SAVEOBJECT, $ticket);
+		parent::__construct( EVENT_SAVEOBJECT, $ticket );
+		$this->composeExchangeNameForObjectId( $object->MetaData->BasicMetaData->ID );
 
-		$this->addfield('UserId', $longusername);
-		$this->addObjectFields($object);
-		$this->addfield('OldRouteTo', $oldRouteTo);
+		$this->addfield( 'UserId', $longusername );
+		$this->addObjectFields( $object );
+		$this->addfield( 'OldRouteTo', $oldRouteTo );
 
 		$this->fire();
 	}
@@ -775,11 +1007,12 @@ class smartevent_setobjectpropertiesEx extends smartevent
 	 */
 	public function __construct( $ticket, $longusername, $object, $oldRouteTo )
 	{
-		parent::__construct(EVENT_SETOBJECTPROPERTIES, $ticket);
+		parent::__construct( EVENT_SETOBJECTPROPERTIES, $ticket );
+		$this->composeExchangeNameForObjectId( $object->MetaData->BasicMetaData->ID );
 
-		$this->addfield('UserId', $longusername);
-		$this->addObjectFields($object);
-		$this->addfield('OldRouteTo', $oldRouteTo);
+		$this->addfield( 'UserId', $longusername );
+		$this->addObjectFields( $object );
+		$this->addfield( 'OldRouteTo', $oldRouteTo );
 
 		$this->fire();
 	}
@@ -789,10 +1022,11 @@ class smartevent_lockobject extends smartevent
 {
 	public function __construct( $ticket, $id, $user )
 	{
-		parent::__construct(EVENT_LOCKOBJECT, $ticket);
+		parent::__construct( EVENT_LOCKOBJECT, $ticket );
+		$this->composeExchangeNameForObjectId( $id );
 
-		$this->addfield('ID', $id);
-		$this->addfield('LockedBy', $user);
+		$this->addfield( 'ID', $id );
+		$this->addfield( 'LockedBy', $user );
 
 		$this->fire();
 	}
@@ -802,12 +1036,13 @@ class smartevent_unlockobject extends smartevent
 {
 	public function __construct( $ticket, $id, $user, $bKeepLockForOffline, $routeto = null )
 	{
-		parent::__construct(EVENT_UNLOCKOBJECT, $ticket);
+		parent::__construct( EVENT_UNLOCKOBJECT, $ticket );
+		$this->composeExchangeNameForObjectId( $id );
 
-		$this->addfield('ID', $id);
-		$this->addfield('LockedBy', $user); // user will only be set when object is locked for offline
-		$this->addfield('LockForOffline', $bKeepLockForOffline ? "true" : "false" );
-		$this->addfield('RouteTo', $routeto);
+		$this->addfield( 'ID', $id );
+		$this->addfield( 'LockedBy', $user ); // user will only be set when object is locked for offline
+		$this->addfield( 'LockForOffline', $bKeepLockForOffline ? "true" : "false" );
+		$this->addfield( 'RouteTo', $routeto );
 
 		$this->fire();
 	}
@@ -817,12 +1052,13 @@ class smartevent_createobjectrelation extends smartevent
 {
 	public function __construct( $ticket, $child, $reltype, $parent, $name )
 	{
-		parent::__construct(EVENT_CREATEOBJECTRELATION, $ticket);
+		parent::__construct( EVENT_CREATEOBJECTRELATION, $ticket );
+		$this->composeExchangeNameForObjectId( $parent );
 
-		$this->addfield('Child', $child);
-		$this->addfield('Type', $reltype);
-		$this->addfield('Parent', $parent);
-		$this->addfield('PlacedOn', $name);
+		$this->addfield( 'Child', $child );
+		$this->addfield( 'Type', $reltype );
+		$this->addfield( 'Parent', $parent );
+		$this->addfield( 'PlacedOn', $name );
 
 		$this->fire();
 	}
@@ -832,12 +1068,13 @@ class smartevent_updateobjectrelation extends smartevent
 {
 	public function __construct( $ticket, $child, $reltype, $parent, $name )
 	{
-		parent::__construct(EVENT_UPDATEOBJECTRELATION, $ticket);
+		parent::__construct( EVENT_UPDATEOBJECTRELATION, $ticket );
+		$this->composeExchangeNameForObjectId( $parent );
 
-		$this->addfield('Child', $child);
-		$this->addfield('Type', $reltype);
-		$this->addfield('Parent', $parent);
-		$this->addfield('PlacedOn', $name);
+		$this->addfield( 'Child', $child );
+		$this->addfield( 'Type', $reltype );
+		$this->addfield( 'Parent', $parent );
+		$this->addfield( 'PlacedOn', $name );
 
 		$this->fire();
 	}
@@ -847,12 +1084,13 @@ class smartevent_deleteobjectrelation extends smartevent
 {
 	public function __construct( $ticket, $child, $reltype, $parent, $name )
 	{
-		parent::__construct(EVENT_DELETEOBJECTRELATION, $ticket);
+		parent::__construct( EVENT_DELETEOBJECTRELATION, $ticket );
+		$this->composeExchangeNameForObjectId( $parent );
 
-		$this->addfield('Child', $child);
-		$this->addfield('Type', $reltype);
-		$this->addfield('Parent', $parent);
-		$this->addfield('PlacedOn', $name);
+		$this->addfield( 'Child', $child );
+		$this->addfield( 'Type', $reltype );
+		$this->addfield( 'Parent', $parent );
+		$this->addfield( 'PlacedOn', $name );
 
 		$this->fire();
 	}
@@ -862,11 +1100,12 @@ class smartevent_deadlinechanged extends smartevent
 {
 	public function __construct( $ticket, $id, $deadlinehard, $deadlinesoft )
 	{
-		parent::__construct(EVENT_DEADLINECHANGED, $ticket);
+		parent::__construct( EVENT_DEADLINECHANGED, $ticket );
+		$this->composeExchangeNameForObjectId( $id );
 
-		$this->addfield('ID', $id);
-		$this->addfield('DeadlineHard', $deadlinehard);
-		$this->addfield('DeadlineSoft', $deadlinesoft);
+		$this->addfield( 'ID', $id );
+		$this->addfield( 'DeadlineHard', $deadlinehard );
+		$this->addfield( 'DeadlineSoft', $deadlinesoft );
 
 		$this->fire();
 	}
@@ -877,6 +1116,11 @@ class smartevent_sendmessage extends smartevent
 	public function __construct( $ticket, $message )
 	{
 		parent::__construct( EVENT_SENDMESSAGE, $ticket );
+		if( $message->ObjectID ) {
+			$this->composeExchangeNameForObjectId( $message->ObjectID );
+		} else {
+			$this->composeExchangeNameForSystem();
+		}
 
 		$this->addfield( 'UserID',       $message->UserID );
 		$this->addfield( 'ObjectID',     $message->ObjectID );
@@ -912,17 +1156,29 @@ class smartevent_sendmessage extends smartevent
 			$this->addfield( 'Color',    $message->StickyInfo->Color );
 			$this->addfield( 'PageSequence', $message->StickyInfo->PageSequence );
 		}
+
 		$this->fire();
 	}
 }
 
 class smartevent_deletemessage extends smartevent
 {
-	public function __construct( $ticket, $messid )
+	/**
+	 * Constructor.
+	 *
+	 * @param string $ticket
+	 * @param int $messageId
+	 * @param null|string $objectId [10.0.0] Only set for object messages, not for user messages.
+	 */
+	public function __construct( $ticket, $messageId, $objectId=null )
 	{
-		parent::__construct(EVENT_DELETEMESSAGE, $ticket);
+		parent::__construct( EVENT_DELETEMESSAGE, $ticket );
 
-		$this->addfield('MessageID', $messid);
+		if( $objectId ) { // object message?
+			$this->composeExchangeNameForObjectId( $objectId );
+		} // else it is a user message for which the system event exchange should be used
+
+		$this->addfield( 'MessageID', $messageId );
 
 		$this->fire();
 	}
@@ -932,17 +1188,18 @@ class smartevent_restoreversion extends smartevent
 {
 	/**
 	 * @param string $ticket ticket of the logged in user
-	 * @param string $longusername full username of the logged in user
+	 * @param string $fullUserName full username of the logged in user
 	 * @param object $object all data is passed via $object
 	 * @param string $oldRouteTo The RouteTo property of the object before it got updated
 	 */
-	public function __construct( $ticket, $longusername, $object, $oldRouteTo )
+	public function __construct( $ticket, $fullUserName, $object, $oldRouteTo )
 	{
-		parent::__construct(EVENT_RESTOREVERSION, $ticket);
+		parent::__construct( EVENT_RESTOREVERSION, $ticket );
+		$this->composeExchangeNameForObjectId( $object->MetaData->BasicMetaData->ID );
 
-		$this->addfield('UserId', $longusername);
-		$this->addObjectFields($object);
-		$this->addfield('OldRouteTo', $oldRouteTo);
+		$this->addfield( 'UserId', $fullUserName );
+		$this->addObjectFields( $object );
+		$this->addfield( 'OldRouteTo', $oldRouteTo );
 
 		$this->fire();
 	}
@@ -952,17 +1209,18 @@ class smartevent_createobjecttarget extends smartevent
 {
 	/**
 	 * @param string $ticket ticket of the logged in user
-	 * @param string $longusername full username of the logged in user
+	 * @param string $fullUserName full username of the logged in user
 	 * @param int $objectId Enterprise object id
 	 * @param Target $target
 	 */
-	public function __construct( $ticket, $longusername, $objectId, $target )
+	public function __construct( $ticket, $fullUserName, $objectId, $target )
 	{
-		parent::__construct(EVENT_CREATEOBJECTTARGET, $ticket);
+		parent::__construct( EVENT_CREATEOBJECTTARGET, $ticket );
+		$this->composeExchangeNameForObjectId( $objectId );
 
-		$this->addfield('UserId', $longusername);
-		$this->addfield('ID', $objectId);
-		$this->addTargetFields($target);
+		$this->addfield( 'UserId', $fullUserName );
+		$this->addfield( 'ID', $objectId );
+		$this->addTargetFields( $target );
 
 		$this->fire();
 	}
@@ -972,17 +1230,18 @@ class smartevent_deleteobjecttarget extends smartevent
 {
 	/**
 	 * @param string $ticket ticket of the logged in user
-	 * @param string $longusername full username of the logged in user
+	 * @param string $fullUserName full username of the logged in user
 	 * @param int $objectId Enterprise object id
 	 * @param Target $target
 	 */
-	public function __construct( $ticket, $longusername, $objectId, $target )
+	public function __construct( $ticket, $fullUserName, $objectId, $target )
 	{
-		parent::__construct(EVENT_DELETEOBJECTTARGET, $ticket);
+		parent::__construct( EVENT_DELETEOBJECTTARGET, $ticket );
+		$this->composeExchangeNameForObjectId( $objectId );
 
-		$this->addfield('UserId', $longusername);
-		$this->addfield('ID', $objectId);
-		$this->addTargetFields($target);
+		$this->addfield( 'UserId', $fullUserName );
+		$this->addfield( 'ID', $objectId );
+		$this->addTargetFields( $target );
 
 		$this->fire();
 	}
@@ -992,17 +1251,18 @@ class smartevent_updateobjecttarget extends smartevent
 {
 	/**
 	 * @param string $ticket ticket of the logged in user
-	 * @param string $longusername full username of the logged in user
+	 * @param string $fullUserName full username of the logged in user
 	 * @param int $objectId Enterprise object id
 	 * @param Target $target
 	 */
-	public function __construct( $ticket, $longusername, $objectId, $target )
+	public function __construct( $ticket, $fullUserName, $objectId, $target )
 	{
-		parent::__construct(EVENT_UPDATEOBJECTTARGET, $ticket);
+		parent::__construct( EVENT_UPDATEOBJECTTARGET, $ticket );
+		$this->composeExchangeNameForObjectId( $objectId );
 
-		$this->addfield('UserId', $longusername);
-		$this->addfield('ID', $objectId);
-		$this->addTargetFields($target);
+		$this->addfield( 'UserId', $fullUserName );
+		$this->addfield( 'ID', $objectId );
+		$this->addTargetFields( $target );
 
 		$this->fire();
 	}
@@ -1011,7 +1271,7 @@ class smartevent_updateobjecttarget extends smartevent
 class smartevent_issuereorder extends smartevent
 {
 	/**
-	 * N-cast message on dossier reordering (within an issue) at production.
+	 * Event on dossier reordering (within an issue) at production.
 	 *
 	 * @param string $ticket ticket of the logged in user
 	 * @param string $pubChannelType
@@ -1022,6 +1282,7 @@ class smartevent_issuereorder extends smartevent
 	public function __construct( $ticket, $pubChannelType, $issueId, $dossierIds )
 	{
 		parent::__construct( EVENT_ISSUE_DOSSIER_REORDER_AT_PRODUCTION, $ticket );
+		$this->composeExchangeNameForObjectId( reset( $dossierIds ) );
 
 		$this->addfield( 'PubChannelType', $pubChannelType );
 		$this->addfield( 'IssueId', $issueId );
@@ -1036,7 +1297,7 @@ class smartevent_issuereorder extends smartevent
 class smartevent_issuereorderpublished extends smartevent
 {
 	/**
-	 * N-cast message on dossier reordering (within an issue) at publish system.
+	 * Event on dossier reordering (within an issue) at publish system.
 	 *
 	 * @param string $ticket ticket of the logged in user
 	 * @param string $pubChannelType
@@ -1047,6 +1308,7 @@ class smartevent_issuereorderpublished extends smartevent
 	public function __construct( $ticket, $pubChannelType, $publishedIssue, $dossierIds )
 	{
 		parent::__construct( EVENT_ISSUE_DOSSIER_REORDER_PUBLISHED, $ticket );
+		$this->composeExchangeNameForObjectId( reset( $dossierIds ) );
 
 		$this->addfield( 'PubChannelType', $pubChannelType );
 		$this->addfield( 'PubChannelId', $publishedIssue->Target->PubChannelID );
@@ -1071,6 +1333,7 @@ class smartevent_publishdossier extends smartevent
 	public function __construct( $ticket, $publishedDossier, $pubChannelType )
 	{
 		parent::__construct( EVENT_PUBLISH_DOSSIER, $ticket );
+		$this->composeExchangeNameForObjectId( $publishedDossier->DossierID );
 
 		$publishTarget = $publishedDossier->Target;
 		$this->addfield( 'DossierId', $publishedDossier->DossierID );
@@ -1079,9 +1342,10 @@ class smartevent_publishdossier extends smartevent
 		$this->addfield( 'IssueId', $publishTarget->IssueID );
 		$this->addfield( 'EditionId', $publishTarget->EditionID );
 		$this->addfield( 'PublishedDate', $publishedDossier->PublishedDate );
-		if( isset( $publishedDossier->Fields )) foreach( $publishedDossier->Fields as $field ){
+		if( isset( $publishedDossier->Fields ) ) foreach( $publishedDossier->Fields as $field ) {
 			$this->addfield( $field->Key, $field->Values[0] );
 		}
+
 		$this->fire();
 	}
 }
@@ -1097,6 +1361,7 @@ class smartevent_updatedossier extends smartevent
 	public function __construct( $ticket, $publishedDossier, $pubChannelType )
 	{
 		parent::__construct( EVENT_UPDATE_DOSSIER, $ticket );
+		$this->composeExchangeNameForObjectId( $publishedDossier->DossierID );
 
 		$publishTarget = $publishedDossier->Target;
 		$this->addfield( 'DossierId', $publishedDossier->DossierID );
@@ -1105,7 +1370,7 @@ class smartevent_updatedossier extends smartevent
 		$this->addfield( 'IssueId', $publishTarget->IssueID );
 		$this->addfield( 'EditionId', $publishTarget->EditionID );
 		$this->addfield( 'PublishedDate', $publishedDossier->PublishedDate );
-		if( isset( $publishedDossier->Fields )) foreach( $publishedDossier->Fields as $field ){
+		if( isset( $publishedDossier->Fields ) ) foreach( $publishedDossier->Fields as $field ) {
 			$this->addfield( $field->Key, $field->Values[0] );
 		}
 
@@ -1124,6 +1389,7 @@ class smartevent_unpublishdossier extends smartevent
 	public function __construct( $ticket, $publishedDossier, $pubChannelType )
 	{
 		parent::__construct( EVENT_UNPUBLISH_DOSSIER, $ticket );
+		$this->composeExchangeNameForObjectId( $publishedDossier->DossierID );
 
 		$publishTarget = $publishedDossier->Target;
 		$this->addfield( 'DossierId', $publishedDossier->DossierID );
@@ -1131,7 +1397,7 @@ class smartevent_unpublishdossier extends smartevent
 		$this->addfield( 'PubChannelId', $publishTarget->PubChannelID );
 		$this->addfield( 'IssueId', $publishTarget->IssueID );
 		$this->addfield( 'EditionId', $publishTarget->EditionID );
-		if( isset( $publishedDossier->Fields )) foreach( $publishedDossier->Fields as $field ){
+		if( isset( $publishedDossier->Fields ) ) foreach( $publishedDossier->Fields as $field ) {
 			$this->addfield( $field->Key, $field->Values[0] );
 		}
 
@@ -1150,14 +1416,15 @@ class smartevent_setpublishinfofordossier extends smartevent
 	public function __construct( $ticket, $publishedDossier, $pubChannelType )
 	{
 		parent::__construct( EVENT_SET_PUBLISH_INFO_FOR_DOSSIER, $ticket );
+		$this->composeExchangeNameForObjectId( $publishedDossier->DossierID );
 
 		$this->addfield( 'DossierId', $publishedDossier->DossierID );
 		$this->addfield( 'PubChannelType', $pubChannelType );
 		$this->addfield( 'PubChannelId', $publishedDossier->Target->PubChannelID );
 		$this->addfield( 'IssueId', $publishedDossier->Target->IssueID );
 		$this->addfield( 'EditionId', $publishedDossier->Target->EditionID );
-		$this->addfield( 'PublishedDate',  $publishedDossier->PublishedDate );
-		if( isset( $publishedDossier->Fields )) foreach( $publishedDossier->Fields as $field ){
+		$this->addfield( 'PublishedDate', $publishedDossier->PublishedDate );
+		if( isset( $publishedDossier->Fields ) ) foreach( $publishedDossier->Fields as $field ) {
 			$this->addfield( $field->Key, $field->Values[0] );
 		}
 
@@ -1176,6 +1443,7 @@ class smartevent_publishissue extends smartevent
 	public function __construct( $ticket, $publishedIssue, $pubChannelType  )
 	{
 		parent::__construct( EVENT_PUBLISH_ISSUE, $ticket );
+		$this->composeExchangeNameForIssue( $publishedIssue->Target->IssueID );
 
 		$this->addfield( 'PubChannelType', $pubChannelType );
 		$this->addfield( 'PubChannelId', $publishedIssue->Target->PubChannelID );
@@ -1183,7 +1451,7 @@ class smartevent_publishissue extends smartevent
 		$this->addfield( 'EditionId', $publishedIssue->Target->EditionID );
 		$this->addfield( 'Version', $publishedIssue->Version );
 		$this->addfield( 'PublishedDate', $publishedIssue->PublishedDate );
-		if( isset( $publishedIssue->Fields )) foreach( $publishedIssue->Fields as $field ){
+		if( isset( $publishedIssue->Fields ) ) foreach( $publishedIssue->Fields as $field ) {
 			$this->addfield( $field->Key, $field->Values[0] );
 		}
 
@@ -1202,6 +1470,7 @@ class smartevent_updateissue extends smartevent
 	public function __construct( $ticket, $publishedIssue, $pubChannelType  )
 	{
 		parent::__construct( EVENT_UPDATE_ISSUE, $ticket );
+		$this->composeExchangeNameForIssue( $publishedIssue->Target->IssueID );
 
 		$this->addfield( 'PubChannelType', $pubChannelType );
 		$this->addfield( 'PubChannelId', $publishedIssue->Target->PubChannelID );
@@ -1209,7 +1478,7 @@ class smartevent_updateissue extends smartevent
 		$this->addfield( 'EditionId', $publishedIssue->Target->EditionID );
 		$this->addfield( 'Version', $publishedIssue->Version );
 		$this->addfield( 'PublishedDate', $publishedIssue->PublishedDate );
-		if( isset( $publishedIssue->Fields )) foreach( $publishedIssue->Fields as $field ){
+		if( isset( $publishedIssue->Fields ) ) foreach( $publishedIssue->Fields as $field ) {
 			$this->addfield( $field->Key, $field->Values[0] );
 		}
 
@@ -1228,13 +1497,14 @@ class smartevent_unpublishissue extends smartevent
 	public function __construct( $ticket, $publishedIssue, $pubChannelType  )
 	{
 		parent::__construct( EVENT_UNPUBLISH_ISSUE, $ticket );
+		$this->composeExchangeNameForIssue( $publishedIssue->Target->IssueID );
 
 		$this->addfield( 'PubChannelType', $pubChannelType );
 		$this->addfield( 'PubChannelId', $publishedIssue->Target->PubChannelID );
 		$this->addfield( 'IssueId', $publishedIssue->Target->IssueID );
 		$this->addfield( 'EditionId', $publishedIssue->Target->EditionID );
 		$this->addfield( 'Version', $publishedIssue->Version );
-		if( isset( $publishedIssue->Fields )) foreach( $publishedIssue->Fields as $field ){
+		if( isset( $publishedIssue->Fields ) ) foreach( $publishedIssue->Fields as $field ) {
 			$this->addfield( $field->Key, $field->Values[0] );
 		}
 
@@ -1253,6 +1523,7 @@ class smartevent_setpublishinfoforissue extends smartevent
 	public function __construct( $ticket, $publishedIssue, $pubChannelType )
 	{
 		parent::__construct( EVENT_SET_PUBLISH_INFO_FOR_ISSUE, $ticket );
+		$this->composeExchangeNameForIssue( $publishedIssue->Target->IssueID );
 
 		$this->addfield( 'PubChannelType', $pubChannelType );
 		$this->addfield( 'PubChannelId', $publishedIssue->Target->PubChannelID );
@@ -1260,7 +1531,7 @@ class smartevent_setpublishinfoforissue extends smartevent
 		$this->addfield( 'EditionId', $publishedIssue->Target->EditionID );
 		$this->addfield( 'Version', $publishedIssue->Version );
 		$this->addfield( 'PublishedDate', $publishedIssue->PublishedDate );
-		if( isset( $publishedIssue->Fields )) foreach( $publishedIssue->Fields as $field ){
+		if( isset( $publishedIssue->Fields ) ) foreach( $publishedIssue->Fields as $field ) {
 			$this->addfield( $field->Key, $field->Values[0] );
 		}
 
@@ -1278,6 +1549,7 @@ class smartevent_createobjectlabels extends smartevent
 	public function __construct( $objectId, array $labels )
 	{
 		parent::__construct( EVENT_CREATE_OBJECT_LABELS, BizSession::getTicket() );
+		$this->composeExchangeNameForObjectId( $objectId );
 
 		$this->addfield( 'ObjectId', $objectId );
 		$this->addObjectLabels( $labels );
@@ -1296,6 +1568,7 @@ class smartevent_updateobjectlabels extends smartevent
 	public function __construct( $objectId, array $labels )
 	{
 		parent::__construct( EVENT_UPDATE_OBJECT_LABELS, BizSession::getTicket() );
+		$this->composeExchangeNameForObjectId( $objectId );
 
 		$this->addfield( 'ObjectId', $objectId );
 		$this->addObjectLabels( $labels );
@@ -1314,6 +1587,7 @@ class smartevent_deleteobjectlabels extends smartevent
 	public function __construct( $objectId, array $labels )
 	{
 		parent::__construct( EVENT_DELETE_OBJECT_LABELS, BizSession::getTicket() );
+		$this->composeExchangeNameForObjectId( $objectId );
 
 		$this->addfield( 'ObjectId', $objectId );
 		$this->addObjectLabels( $labels );
@@ -1333,6 +1607,7 @@ class smartevent_addobjectlabels extends smartevent
 	public function __construct( $parentId, array $childIds, array $labels )
 	{
 		parent::__construct( EVENT_ADD_OBJECT_LABELS, BizSession::getTicket() );
+		$this->composeExchangeNameForObjectId( $parentId );
 
 		$this->addfield( 'ParentId', $parentId );
 		$this->addfield( 'ChildIds', $childIds, true );
@@ -1353,6 +1628,7 @@ class smartevent_removeobjectlabels extends smartevent
 	public function __construct( $parentId, array $childIds, array $labels )
 	{
 		parent::__construct( EVENT_REMOVE_OBJECT_LABELS, BizSession::getTicket() );
+		$this->composeExchangeNameForObjectId( $parentId );
 
 		$this->addfield( 'ParentId', $parentId );
 		$this->addfield( 'ChildIds', $childIds, true );
@@ -1372,11 +1648,14 @@ class smartevent_setPropertiesForMultipleObjects extends smartevent
 	 * @param int[] $ids Ids of the objects for which the properties were set.
 	 * @param array $properties An array of key / value pairs containing the updated properties.
 	 */
-	public function __construct( array $ids, array $properties ) 
+	public function __construct( array $ids, array $properties )
 	{
 		parent::__construct( EVENT_SET_PROPERTIES_FOR_MULTIPLE_OBJECTS, BizSession::getTicket() );
+		$this->composeExchangeNameForObjectId( reset( $ids ) );
+
 		$this->addfield( 'ObjectIds', $ids, true );
 		$this->addfield( 'properties', $properties, true );
+
 		$this->fire( 'CartessianEvenly' );
 	}
 }
@@ -1385,10 +1664,11 @@ class smartevent_debug extends smartevent
 {
 	public function __construct( $message )
 	{
-		parent::__construct(EVENT_DEBUG);
+		parent::__construct( EVENT_DEBUG );
+		$this->composeExchangeNameForSystem();
 
-		$this->addfield('Time', date("H:i:s") );
-		$this->addfield('Message', $message);
+		$this->addfield( 'Time', date( "H:i:s" ) );
+		$this->addfield( 'Message', $message );
 
 		$this->fire();
 	}

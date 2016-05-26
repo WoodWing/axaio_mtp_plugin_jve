@@ -122,6 +122,13 @@ class authorizationmodule
 	private function coreCheckRight( $check, $publ, $overruleIssueId, $sect, $type, $state )
 	{
 		$hasAccess = false;
+		//EN-86861: User's were not able to perform any actions on objects in a Personal status when they
+		//have authorization rules set on specific object statuses.
+		//Since users own these objects, only them (and admin users) will be able to perform actions on them.
+		//So at any time a right's check needs to be done for a Personal state, this will come from a permitted user.
+		if( $state === -1 ) {
+			$hasAccess = true;
+		}
 		// loop each authorization-record
 		if( $this->rights ) foreach( $this->rights as $right ) {
 			// check if record matches

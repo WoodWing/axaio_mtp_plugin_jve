@@ -72,6 +72,7 @@
 	{
 		var serverUrl = "../../server/wwtest/testsuite.php";
 		//serverUrl += "?start_debug=1"; // Zend Debugger (do not combine with server side debugging!)
+		//serverUrl += "?XDEBUG_SESSION_START=PHPSTORM"; // PhpStorm debugger
 		WWAjax.doHttpRequest( serverUrl, "callbackTestInit", "text/xml", true, 
 									"command=InitTest&testSuite="+testSuite, true ); // asynchronous call (synchronous fails under Apache+WinXP?)
 	}
