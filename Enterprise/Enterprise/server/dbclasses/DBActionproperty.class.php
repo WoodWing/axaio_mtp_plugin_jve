@@ -101,8 +101,8 @@ class DBActionproperty extends DBBase
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbap = $dbDriver->tablename(self::TABLENAME);
-		$dbpr = $dbDriver->tablename('properties');		
-		$params = array($publ, $objType, $action);
+		$dbpr = $dbDriver->tablename('properties');
+		$params = array();
 
 		$nullObjType1 = '';
 		$nullObjType2 = '';
@@ -123,7 +123,11 @@ class DBActionproperty extends DBBase
 				"AND ( ap.`type` = pr2.`objtype` ".$nullObjType2 . "OR pr2.`name` LIKE 'C_%' ) ) ".
 				"WHERE ap.`publication` = ? AND ap.`type` = ? AND ap.`action` = ? ".
 				"ORDER BY ap.`orderid`, ap.`id`";
-		
+
+		$params[] = $publ;
+		$params[] = $objType;
+		$params[] = $action;
+
 		$sth = $dbDriver->query($sql, $params);
         
         return self::fetchResults($sth);	
