@@ -399,7 +399,10 @@ function step5_ionCubeEncodePhpFiles {
 	${ionCubeEncode} ./Enterprise/plugins/release/Elvis/Elvis_WflLogOn.class.php -o ./Enterprise_release/plugins/release/Elvis/Elvis_WflLogOn.class.php
 	${ionCubeEncode} ./Enterprise/plugins/release/Elvis/Elvis_ContentSource.class.php -o ./Enterprise_release/plugins/release/Elvis/Elvis_ContentSource.class.php
 
-	echo "step5d: Validate some of the ionCube Encoded files."
+	echo "step5d: Flushing buffers to ensure ionCube Encoded files are reflected to disk."
+	sync
+	
+	echo "step5e: Validate some of the ionCube Encoded files."
 	icFiles="./Enterprise_release/Enterprise/server/dbclasses/DBBase.class.php ./Enterprise_release/Enterprise/server/apps/webapplicense.inc.php ./Enterprise_release/Enterprise/server/utils/license/license.class.php"
 	for icFile in ${icFiles}; do
 		checkSum=`grep 'ionCube Loader' ${icFile}`
