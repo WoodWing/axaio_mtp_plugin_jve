@@ -46,16 +46,17 @@ class CopyrightValidationDemo_NameValidation extends NameValidation_EnterpriseCo
 		$user = $user;
 		$targets = $targets;
 
-		$id = $meta->BasicMetaData->ID;
+		if ( isset( $meta->RightsMetaData->Copyright ) ) {
+			$id = $meta->BasicMetaData->ID;
+			if( $meta->RightsMetaData->Copyright == 'Spam Software (c)' ) {
+				// Don't allow setting Copyright to Spam software
+				throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
+					'It is not allowed to set the Copyright property to "Spam Software (c)"' . PHP_EOL . 'id=' . $id );
+			}
 
-		if( $meta->RightsMetaData->Copyright == 'Spam Software (c)' ) {
-			// Don't allow setting Copyright to Spam software
-			throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
-				'It is not allowed to set the Copyright property to "Spam Software (c)"' . PHP_EOL . 'id=' . $id );
+			// Overwrite copyright metadata
+			$meta->RightsMetaData->Copyright = 'Ham Software (c)';
 		}
-
-		// Overwrite copyright metadata
-		$meta->RightsMetaData->Copyright = 'Ham Software (c)';
 	}
 
 	/**
