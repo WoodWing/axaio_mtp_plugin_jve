@@ -58,7 +58,9 @@ class BizWebEditWorkspace
 	}
 
 	/**
-	 * Deletes an article at the workspace.
+	 * Deletes an article at the workspace. Before the workspace can be deleted a semaphore must be set. If this fails
+	 * the workspace is still in use by another process (e.g. InDesign Server is creating a preview). After a short wait
+	 * a new attempt will be done. The maximum number of attempts is 480 and the wait time after each attempt is 250 ms.
 	 *
 	 * @param string $workspaceId
 	 */
@@ -67,14 +69,14 @@ class BizWebEditWorkspace
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 		$bizSemaphore = new BizSemaphore();
 		$semaphoreName = 'Wew_'.$workspaceId;
-		$bizSemaphore->setAttempts( array_fill( 0, 480, 250 ) ); // 480 attampts x 250ms wait = 120s max total wait
+		$bizSemaphore->setAttempts( array_fill( 0, 480, 250 ) );
 		$semaphoreId = $bizSemaphore->createSemaphore( $semaphoreName );
 
 		if( $semaphoreId ) {
 			$this->validateWorkspaceId( $workspaceId );
 			$this->openWorkspaceAtDb( $workspaceId );
 			$this->deleteArticlesAtFileSystem();
-			$this->closeWorkspaceAtDb( $workspaceId ); // close the workspace
+			$this->closeWorkspaceAtDb( $workspaceId );
 			BizSemaphore::releaseSemaphore( $semaphoreId );
 		}
 	}
@@ -222,7 +224,8 @@ class BizWebEditWorkspace
 	}
 
 	/**
-	 * Wrapper for Preview/Compose/PDF article content at workspace
+	 * Wrapper for Preview/Compose/PDF article content at workspace. The process is safeguared by setting a semaphore.
+	 * The lifetime of the semaphore is 300 seconds.
 	 *
 	 * @since 10.0
 	 * @param string $workspaceId
@@ -247,11 +250,11 @@ class BizWebEditWorkspace
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 		$bizSemaphore = new BizSemaphore();
 		$semaphoreName = 'Wew_'.$workspaceId;
-		$bizSemaphore->setLifeTime( 300 ); // 5 minutes lifetime for IDS preview process
+		$bizSemaphore->setLifeTime( 300 );
 		$semaphoreId = $bizSemaphore->createSemaphore( $semaphoreName );
 
 		if( !$semaphoreId ) {
-			$details = 'Failed to create preview, because there is another preview generation is still busy in progress.';
+			$details = 'Failed to create preview, because there is another preview generation still in progress.';
 			throw new BizException( 'ERR_ERROR', 'Server', $details );
 		}
 
