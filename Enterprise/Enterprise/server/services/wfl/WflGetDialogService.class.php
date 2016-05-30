@@ -167,7 +167,7 @@ class WflGetDialogService extends EnterpriseService
 		$resp2->oldClient = true; // Indicator it is from old client
 		// EN-84968 - Allow GetDialog2 connector to manipulate the GetStateResponse value for GetDialog
 		$resp2->GetStatesResponse = $retVal['GetStatesResponse'];
-		$resp2->GetStatesResponse = $retVal['Dossiers'];
+		$resp2->Dossiers = $retVal['Dossiers'];
 
 		return $resp2;
 	}
