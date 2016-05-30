@@ -364,7 +364,7 @@ class DBUser extends DBBase
 			$dba = $dbdriver->tablename('authorizations');
 			if( !$issue ) $issue = 0;
 			// beware: admin rights do NOT count
-			$sql = "SELECT DISTINCT(g.`id`), g.*, a.`issue` FROM $db g, $dba a ";
+			$sql = "SELECT DISTINCT g.*, a.`issue` FROM $db g, $dba a ";
 			$sql .= "WHERE g.`id` = a.`grpid` AND a.`publication` = ? AND a.`issue` = ? $where ORDER BY g.`name`";
 			$params[] = $publ;
 			$params[] = $issue;
