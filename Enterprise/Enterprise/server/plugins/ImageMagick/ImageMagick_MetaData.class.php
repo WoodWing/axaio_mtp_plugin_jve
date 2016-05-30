@@ -83,8 +83,13 @@ class ImageMagick_MetaData extends MetaData_EnterpriseConnector
 		$objectType = MimeTypeHandler::filename2ObjType( $format, '' );
 		$ext = MimeTypeHandler::mimeType2FileExt( $format, $objectType );
 		// Add the extension to the file to circumvent an ImageMagick bug. See BZ#28047.
-		require_once dirname(__FILE__) . '/ImageMagick.class.php';
-		$inputFilename = ImageMagick::addExtension( $attachment->FilePath, $ext );
+		require_once dirname( __FILE__ ).'/ImageMagick.class.php';
+		$extPos = strripos( $attachment->FilePath, $ext );
+		if( $extPos !== false && $extPos + strlen( $ext ) == strlen( $attachment->FilePath ) ) {
+			$inputFilename = $attachment->FilePath;
+		} else {
+			$inputFilename = ImageMagick::addExtension( $attachment->FilePath, $ext ); // does rename!
+		}
 
 		$identifyMetaData = array();
 		ImageMagick::getBasicMetaData( $inputFilename, $identifyMetaData );
@@ -93,7 +98,9 @@ class ImageMagick_MetaData extends MetaData_EnterpriseConnector
 		$iptcMetaData = array();
 		ImageMagick::getIPTCMetaData( $inputFilename, $iptcMetaData );
 
-		rename( $inputFilename, $attachment->FilePath );
+		if( strcasecmp( $inputFilename, $attachment->FilePath ) !== 0 ) {
+			rename( $inputFilename, $attachment->FilePath );
+		}
 		$metaData = array_merge( $iptcMetaData, $xmpMetaData, $identifyMetaData );
 
 		return $metaData;

@@ -104,7 +104,7 @@ class WW_TestSuite_HealthCheck2_ImageMagick_TestCase extends TestCase
 		// Setup a PDF test file to check ImageMagick invoking GhostScript to do image conversion together.
 		$testFile = new stdClass();
 		$testFile->FilePath = dirname(__FILE__).'/pdf_test.pdf';
-		$testFile->Format = 'image/jpeg';
+		$testFile->Format = 'application/pdf';
 		$testFile->Width = 504;
 		$testFile->Height = 360;
 		$testFile->Size = 128;
