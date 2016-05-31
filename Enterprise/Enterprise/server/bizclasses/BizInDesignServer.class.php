@@ -346,7 +346,9 @@ class BizInDesignServer
 	}
 
 	/**
-	 * Checks if InDesign Server handles requests.
+	 * Checks if InDesign Server handles requests. The socket time out is set to 5 seconds. If there is no response
+	 * within this time the InDesign Server is regarded as 'busy'. The connection error is logged but will not be
+	 * regarded as an error but rather as information.
 	 *
 	 * @since 9.7.0 Moved from BizInDesignServerJob class.
 	 * @param InDesignServer $server
@@ -355,7 +357,10 @@ class BizInDesignServer
 	public static function isHandlingJobs( $server )
 	{
 		require_once BASEDIR.'/server/protocols/soap/IdsSoapClient.php';
-		
+
+		$socketTimeOut = 5; // seconds
+		$defaultSocketTimeout = ini_get( 'default_socket_timeout' );
+		ini_set( 'default_socket_timeout', $socketTimeOut );
 		$options = array( 'location' => $server->ServerURL, 'connection_timeout' => 5 ); // time out 5 seconds
 		$soapclient = new WW_SOAP_IdsSoapClient( null, $options );
 		$scriptParams = array('scriptLanguage' => 'javascript');
@@ -374,23 +379,27 @@ class BizInDesignServer
 		$soapParams = array('runScriptParameters' => $scriptParams );
 		$isBusy = true;
 		try {
+			$severityMap =  array( 'S1144' => 'INFO' );
+			$severityMapHandle = new BizExceptionSeverityMap( $severityMap );
 			$jobResult = $soapclient->RunScript( $soapParams );
 			$jobResult = (array)$jobResult; // let's act like it was before (v6.1 or earlier)
 			if( $jobResult['errorNumber'] == 0 ) {
-				if ( $jobResult['scriptResult'] == 'BUSY' ) {
+				if( $jobResult['scriptResult'] == 'BUSY' ) {
 					LogHandler::Log( 'idserver', 'INFO', 'InDesign Server ['.$server->ServerURL.'] is still busy' );
 				} else {
 					LogHandler::Log( 'idserver', 'INFO', 'InDesign Server ['.$server->ServerURL.'] is not busy' );
 					$isBusy = false;
 				}
 			} else {
-				LogHandler::Log('idserver', 'INFO', 'Assume InDesign Server ['.$server->ServerURL.'] is still busy [ error code: '.$jobResult['errorNumber'].']' );
+				LogHandler::Log( 'idserver', 'INFO', 'Assume InDesign Server ['.$server->ServerURL.'] is still busy [ error code: '.$jobResult['errorNumber'].']' );
 			}
 		} catch( SoapFault $e ) {
 			LogHandler::Log('idserver', 'ERROR', 'Script failed on InDesign Server ['.$server->ServerURL.']: '.$e->getMessage() );
 		} catch( Exception $e ) {
 			LogHandler::Log('idserver', 'INFO', 'Assume InDesign Server ['.$server->ServerURL.'] is still busy [exception: '.$e.']' );
 		}
+		
+		ini_set( 'default_socket_timeout', $defaultSocketTimeout );
 		// L> On fatal errors, we assume that IDS is busy (since we could not talk successfully).
 
 		return $isBusy;

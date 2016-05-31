@@ -42,7 +42,6 @@ class WW_SOAP_IdsSoapClient extends SoapClient
 	 */
 	function __doRequest( $request, $location, $action, $version, $one_way = 0 ) 
 	{
-		$one_way = $one_way; // keep analyzer happy
 		if( empty($action) ) {
 			$logAction = 'RunScript'; // Fix: somehow action is not set.. seems to be a PHP bug?
 		} else {
@@ -50,6 +49,13 @@ class WW_SOAP_IdsSoapClient extends SoapClient
 		}
 		LogHandler::logService( $logAction, $request, true, 'SOAP' );
 		$response = parent::__doRequest( $request, $location, $action, $version );
+
+		// Avoid 'fetching HTTP Headers' error on method time-out, we throw the fault our self.
+		if ( is_null( $response )) {
+			$error = BizResources::localize( 'ERR_CONNECT', true, array( $location ) );
+			LogHandler::logService( $logAction, $error, null, 'SOAP' );
+			throw new BizException( '', 'SERVER', '', $error );
+		}
 		LogHandler::logService( $logAction, $response, false, 'SOAP' );
 		return $response;
 	}

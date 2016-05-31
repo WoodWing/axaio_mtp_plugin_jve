@@ -925,12 +925,12 @@ class BizInDesignServerJobs
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServer.class.php';
 
-		// Fetch the jobs that are queued more than 5 minutes ago and still have an IDS instance
+		// Fetch the jobs that are started more than 5 minutes ago and still have an IDS instance
 		// assigned. Those are running suspiciously long and so we want to examine those.
 		LogHandler::Log( 'idserver', 'INFO', 'Repairing detached IDS servers and jobs...' );
-		$queuedBefore = defined('IDS_AUTOMATION_REPAIRLOCK') ? IDS_AUTOMATION_REPAIRLOCK : 5; // hidden opt, default 5 minutes
-		$queuedBefore = date( 'Y-m-d\TH:i:s', time() - ($queuedBefore*60) ); // older than 5 minutes (default)
-		$jobs = DBInDesignServerJob::getLockedJobsQueuedBefore( $queuedBefore );
+		$startedBefore = defined('IDS_AUTOMATION_REPAIRLOCK') ? IDS_AUTOMATION_REPAIRLOCK : 5; // hidden opt, default 5 minutes
+		$startedBefore = date( 'Y-m-d\TH:i:s', time() - ($startedBefore*60) ); // older than 5 minutes (default)
+		$jobs = DBInDesignServerJob::getLockedJobsStartedBefore( $startedBefore );
 		if( $jobs ) foreach( $jobs as $job ) {
 			LogHandler::Log( 'idserver', 'INFO', 'Checking job that is locked for long '.$job->JobId );
 		
@@ -949,13 +949,13 @@ class BizInDesignServerJobs
 						LogHandler::Log( 'idserver', 'INFO', 
 							'Checking if the locked IDS instance is still handling jobs.' );
 						if( BizInDesignServer::isHandlingJobs( $server ) ) {
-							LogHandler::Log( 'idserver', 'INFO', 
+							LogHandler::Log( 'idserver', 'INFO',
 								'Job is running for long, but the assigned IDS instance is '.
 								'still processing the job, so no action needed.' );
 							$server = null;
 							$job = null;
 						} else {
-							LogHandler::Log( 'idserver', 'INFO', 
+							LogHandler::Log( 'idserver', 'INFO',
 								'IDS is no longer busy, so we need to unlock.' );
 						}
 					} else {

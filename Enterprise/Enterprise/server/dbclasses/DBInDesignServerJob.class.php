@@ -1148,24 +1148,24 @@ class DBInDesignServerJob extends DBBase
 	}
 	
     /**
-     * Returns jobs that are still busy (locked) and queued before a given time.
+     * Returns jobs that are still busy (locked) and started before a given time.
      *
 	 * @since 9.8.0
-     * @param string $queuedBefore
+     * @param string $startedBefore
      * @return InDesignServerJob[]
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
      */
-	static public function getLockedJobsQueuedBefore( $queuedBefore )
+	static public function getLockedJobsStartedBefore( $startedBefore )
 	{
 		// Bail out when invalid parameters provided. (Paranoid check.)
-		$queuedBefore = trim( strval( $queuedBefore ) );
-		if( !$queuedBefore ) {
+		$startedBefore = trim( strval( $startedBefore ) );
+		if( !$startedBefore ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Invalid params provided for '.__METHOD__.'().' );
 		}
 		
 		// Retrieve the jobs from DB.
-		$where = '`locktoken` != ? AND `queuetime` < ?';
-		$params = array( '', $queuedBefore );
+		$where = '`locktoken` != ? AND `starttime` < ?';
+		$params = array( '', $startedBefore );
 		$select = array( 
 			'jobid', 'assignedserverid', 'objid', 'locktoken', 'attempts',
 			'queuetime', 'starttime', 'readytime', 'jobstatus' ); 
