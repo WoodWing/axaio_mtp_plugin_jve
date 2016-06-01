@@ -533,11 +533,7 @@ class BizWorkflow
 									$defaultDossier=null, $parentId=null, $templateId=null, $areas=null,
 									$multipleObjects=false )
 	{
-		if( isset($metaData['ID']->PropertyValues[0]->Value) ) {
-			$objId = $metaData['ID']->PropertyValues[0]->Value;
-		} else {
-			$objId = 0;
-		}
+		$objId = self::getPropertyFromMetaData( 'ID', $metaData, 0 );
 		if( isset($metaData['IDs']->PropertyValues[0]->Value) ) {
 			$objIds = array();
 			$propValues = $metaData['IDs']->PropertyValues;
@@ -547,37 +543,12 @@ class BizWorkflow
 		} else {
 			$objIds = array();
 		}
-		if( isset($metaData['Publication']->PropertyValues[0]->Value) ) {
-			$pub = $metaData['Publication']->PropertyValues[0]->Value;
-		} else {
-			$pub = 0;
-		}
-		if( isset($metaData['Issue']->PropertyValues[0]->Value) ) {
-			$iss = $metaData['Issue']->PropertyValues[0]->Value;
-		} else {
-			$iss = 0;
-		}
-		if( isset($metaData['Category']->PropertyValues[0]->Value) ) {
-			$catId = $metaData['Category']->PropertyValues[0]->Value;
-		} else {
-			$catId = 0;
-		}
-		if( isset($metaData['State']->PropertyValues[0]->Value) ) {
-			$statusId = $metaData['State']->PropertyValues[0]->Value;
-		} else {
-			$statusId = 0;
-		}
-		if( isset($metaData['Type']->PropertyValues[0]->Value) ) {
-			$objType = $metaData['Type']->PropertyValues[0]->Value;
-		} else {
-			$objType = 0;
-		}
-		// since v9.2
-		if( isset($metaData['RouteTo']->PropertyValues[0]->Value) ) {
-			$routeTo = $metaData['RouteTo']->PropertyValues[0]->Value;
-		} else {
-			$routeTo = null; // Not sent in by client.
-		}
+		$pub = self::getPropertyFromMetaData( 'Publication', $metaData, 0 );
+		$iss = self::getPropertyFromMetaData( 'Issue', $metaData, 0 );
+		$catId = self::getPropertyFromMetaData( 'Category', $metaData, 0 );
+		$statusId = self::getPropertyFromMetaData( 'State', $metaData, 0 );
+		$objType = self::getPropertyFromMetaData( 'Type', $metaData, 0 );
+		$routeTo = self::getPropertyFromMetaData( 'RouteTo', $metaData, null );
 
 		$retVal = self::getDefaultPublishDialog(); // collect response data
 
@@ -600,27 +571,15 @@ class BizWorkflow
 		self::getDialogBasicParamsValidation( $metaData, $multipleObjects, $action, $targetsFromReq, $defaultDossier,
 																	$parentId, $templateId, $areas, $objId, $objIds );
 
-		// Tricky assumptions; When $objId is given it is must be for a non-Create dialog.
-		// But, when $pub is given too, assumed is that the dialog is about to get re-drawn! Else initial draw!
-		// In other cases, it must be a Create dialog for which we can not tell if we are
-		// in initial- or redraw mode! This is because clients can pass the active* brand on object creations.
-		// * That is the brand user is working in, like currently selected in Search results.
-		$redrawNonCreate = ($objId && $pub) ||
-				// Note that in multisetprops mode the $objId is not set and so we determine a redraw as follows:
-				($multipleObjects && count( $metaData ) > 3 ) ;
-									// L> getDialogBasicParamsValidation checks for presence of IDs, Type and Publication
-
-		// Get the object, the parent object (typically a Layout or Dossier) and the template object.
-		// (If $multipleObjects == true, none of the three objects below will be retrieved.)
-		$obj = self::getObjectOrAlien( $user, $objId, $areas );
-		$parentObj = self::getObjectOrAlien( $user, $parentId, $areas );
-		$templateObj = self::getObjectOrAlien( $user, $templateId, $areas );
-
-		// Check whether there is brand change on dialog. (BZ#31415)
-		$redrawOnPub = false;
-		if( $obj && $pub && isset($obj->MetaData->BasicMetaData->Publication->Id) && $obj->MetaData->BasicMetaData->Publication->Id != $pub ) {
-			$redrawOnPub = true;
+		if ( !$multipleObjects ) {
+			$obj = self::getObjectOrAlien( $user, $objId, $areas );
+			$parentObj = self::getObjectOrAlien( $user, $parentId, $areas );
+			$templateObj = self::getObjectOrAlien( $user, $templateId, $areas );
 		}
+
+		$redrawOnPub = self::publicationIsChanged( $obj, $pub );
+		$redrawNonCreate = self::isRedrawNoCreateActionOnSingleObject( $objId, $pub, $multipleObjects, $metaData ) ||
+								 self::isRedrawNoCreateActionOnMultipleObjects( $multipleObjects, $metaData );
 
 		// Repair CS hack: CS requests for 'NotSupported' type when it does not know the object type. (Tested with CSv8.0.1)
 		if( $objType == 'NotSupported' && $obj && isset($obj->MetaData->BasicMetaData->Type)) {
@@ -825,6 +784,8 @@ class BizWorkflow
 				$statusId = $mixedStatusIds ? 0 : $uniqueStatusId[0];
 			}
 
+			$oriStateId = $statusId;
+
 			// RouteTo
 			if( is_null( $routeTo )) { // Only get the RouteTo from database when user did not select RouteTo.
 				// Can only get RouteTo when all the objects share the same RouteTo user/group, otherwise it is mixed values.
@@ -842,6 +803,7 @@ class BizWorkflow
 			$rights = self::determineAccessRightsForMultipleObjects( $user, $pub, $issAccess, $catId, $objType, $statusId, $objIds );
 		} else { // when handling with one object's properties.
 			// StatusId
+			$oriStateId = isset($obj->MetaData->WorkflowMetaData->State->Id) ? $obj->MetaData->WorkflowMetaData->State->Id : 0;
 			$statusId = $states ? self::fixAndResolveStatusId( $obj, $statusId, $states->States ) : 0;
 
 			// RouteTo
@@ -863,12 +825,11 @@ class BizWorkflow
 			$changeStatusRights = ($rights['hasRights']['Change_Status']) ? true : false;
 			$changeStatusForwardRights = ($rights['hasRights']['Change_Status_Forward']) ? true : false;
 			if( !$changeStatusRights && $changeStatusForwardRights ) {
-				$oriStateId = isset($obj->MetaData->WorkflowMetaData->State->Id) ? $obj->MetaData->WorkflowMetaData->State->Id : 0; // Original state id from DB
-				$nextStateId = DBWorkflow::nextState($oriStateId);
+				$nextStateId = DBWorkflow::nextState( $oriStateId );
 				foreach( $states->States as $key => $state ) {
 					// Remove state when it is not current and next state.
 					if( $state->Id != $nextStateId && $state->Id != $statusId && $state->Id != $oriStateId ) {
-						unset($states->States[$key]);
+						unset( $states->States[ $key ] );
 					}
 				}
 			}
@@ -1043,6 +1004,68 @@ class BizWorkflow
 		}
 
 		return $retVal;
+	}
+
+	/**
+	 * Retrieves a property value from a metadata structure. If no value is set the property value is initialized.
+	 *
+	 * @param string $property
+	 * @param $metaData Array of MetaDataValue object.
+	 * @param $initValue Initialize value
+	 * @return mixed
+	 */
+	private function getPropertyFromMetaData( $property, $metaData, $initValue )
+	{
+		$value = $initValue;
+		if( isset( $metaData[ $property ]->PropertyValues[0]->Value ) ) {
+			$value = $metaData[ $property ]->PropertyValues[0]->Value;
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Check whether there is brand change on dialog. See also BZ#31415.
+	 *
+	 * @param Object $object
+	 * @param int $publication
+	 * @return bool
+	 */
+	private function publicationIsChanged( $object, $pubId )
+	{
+		return ( $object &&
+					$pubId &&
+					isset($object->MetaData->BasicMetaData->Publication->Id) &&
+					$object->MetaData->BasicMetaData->Publication->Id != $pubId );
+	}
+
+	/**
+	 * Tricky assumptions; When $objId is given it is must be for a non-Create dialog.
+	 * But, when $pubId is given too, assumed is that the dialog is about to get re-drawn! Else initial draw!
+	 * In other cases, it must be a Create dialog for which we can not tell if we are
+	 * in initial- or redraw mode! This is because clients can pass the active* brand on object creations.
+	 * That is the brand user is working in, like currently selected in Search results.
+	 *
+	 * @param int $objId Object id in case only a single object is involved.
+	 * @param int $pubId Publication Id passed in.
+	 * @return bool
+	 */
+	private function isRedrawNoCreateActionOnSingleObject( $objId, $pubId )
+	{
+		return ($objId && $pubId );
+	}
+
+
+	/**
+	 * Educated guess to see if the dialog is created for a redraw action while no new objects are created.
+	 *
+	 * @param bool $multiobjects Dialog is created for multiple objects
+	 * @param MetaData[] $metadata.
+	 * @return bool
+	 */
+	private function isRedrawNoCreateActionOnMultipleObjects( $multiobjects, $metadata )
+	{
+		return ( $multiobjects && count( $metadata ) > 3 );
 	}
 
 	/**
