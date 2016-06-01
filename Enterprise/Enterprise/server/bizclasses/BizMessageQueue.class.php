@@ -160,7 +160,8 @@ class BizMessageQueue
 	 */
 	public static function isInstalled()
 	{
-		return !empty( self::unserializeConnections() );
+		$connections = self::unserializeConnections();
+		return !empty( $connections );
 	}
 	
 	/**
