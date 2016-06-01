@@ -533,11 +533,7 @@ class BizWorkflow
 									$defaultDossier=null, $parentId=null, $templateId=null, $areas=null,
 									$multipleObjects=false )
 	{
-		if( isset($metaData['ID']->PropertyValues[0]->Value) ) {
-			$objId = $metaData['ID']->PropertyValues[0]->Value;
-		} else {
-			$objId = 0;
-		}
+		$objId = self::getPropertyFromMetaData( 'ID', $metaData, 0 );
 		if( isset($metaData['IDs']->PropertyValues[0]->Value) ) {
 			$objIds = array();
 			$propValues = $metaData['IDs']->PropertyValues;
@@ -547,37 +543,12 @@ class BizWorkflow
 		} else {
 			$objIds = array();
 		}
-		if( isset($metaData['Publication']->PropertyValues[0]->Value) ) {
-			$pub = $metaData['Publication']->PropertyValues[0]->Value;
-		} else {
-			$pub = 0;
-		}
-		if( isset($metaData['Issue']->PropertyValues[0]->Value) ) {
-			$iss = $metaData['Issue']->PropertyValues[0]->Value;
-		} else {
-			$iss = 0;
-		}
-		if( isset($metaData['Category']->PropertyValues[0]->Value) ) {
-			$catId = $metaData['Category']->PropertyValues[0]->Value;
-		} else {
-			$catId = 0;
-		}
-		if( isset($metaData['State']->PropertyValues[0]->Value) ) {
-			$statusId = $metaData['State']->PropertyValues[0]->Value;
-		} else {
-			$statusId = 0;
-		}
-		if( isset($metaData['Type']->PropertyValues[0]->Value) ) {
-			$objType = $metaData['Type']->PropertyValues[0]->Value;
-		} else {
-			$objType = 0;
-		}
-		// since v9.2
-		if( isset($metaData['RouteTo']->PropertyValues[0]->Value) ) {
-			$routeTo = $metaData['RouteTo']->PropertyValues[0]->Value;
-		} else {
-			$routeTo = null; // Not sent in by client.
-		}
+		$pub = self::getPropertyFromMetaData( 'Publication', $metaData, 0 );
+		$iss = self::getPropertyFromMetaData( 'Issue', $metaData, 0 );
+		$catId = self::getPropertyFromMetaData( 'Category', $metaData, 0 );
+		$statusId = self::getPropertyFromMetaData( 'State', $metaData, 0 );
+		$objType = self::getPropertyFromMetaData( 'Type', $metaData, 0 );
+		$routeTo = self::getPropertyFromMetaData( 'RouteTo', $metaData, null );
 
 		$retVal = self::getDefaultPublishDialog(); // collect response data
 
@@ -824,6 +795,7 @@ class BizWorkflow
 			if( !$statusId ) { // Only get the statusId from database when user did not select status.
 				$statusId = $mixedStatusIds ? 0 : $uniqueStatusId[0];
 			}
+			$oriStateId = $statusId;
 
 			// RouteTo
 			if( is_null( $routeTo )) { // Only get the RouteTo from database when user did not select RouteTo.
@@ -842,6 +814,7 @@ class BizWorkflow
 			$rights = self::determineAccessRightsForMultipleObjects( $user, $pub, $issAccess, $catId, $objType, $statusId, $objIds );
 		} else { // when handling with one object's properties.
 			// StatusId
+			$oriStateId = isset($obj->MetaData->WorkflowMetaData->State->Id) ? $obj->MetaData->WorkflowMetaData->State->Id : 0;
 			$statusId = $states ? self::fixAndResolveStatusId( $obj, $statusId, $states->States ) : 0;
 
 			// RouteTo
@@ -863,7 +836,6 @@ class BizWorkflow
 			$changeStatusRights = ($rights['hasRights']['Change_Status']) ? true : false;
 			$changeStatusForwardRights = ($rights['hasRights']['Change_Status_Forward']) ? true : false;
 			if( !$changeStatusRights && $changeStatusForwardRights ) {
-				$oriStateId = isset($obj->MetaData->WorkflowMetaData->State->Id) ? $obj->MetaData->WorkflowMetaData->State->Id : 0; // Original state id from DB
 				$nextStateId = DBWorkflow::nextState($oriStateId);
 				foreach( $states->States as $key => $state ) {
 					// Remove state when it is not current and next state.
@@ -1043,6 +1015,24 @@ class BizWorkflow
 		}
 
 		return $retVal;
+	}
+
+	/**
+	 * Retrieves a property value from a metadata structure. If no value is set the property value is initialized.
+	 *
+	 * @param string $property
+	 * @param $metaData Array of MetaDataValue object.
+	 * @param $initValue Initialize value
+	 * @return mixed
+	 */
+	private function getPropertyFromMetaData( $property, $metaData, $initValue )
+	{
+		$value = $initValue;
+		if( isset( $metaData[ $property ]->PropertyValues[0]->Value ) ) {
+			$value = $metaData[ $property ]->PropertyValues[0]->Value;
+		}
+
+		return $value;
 	}
 
 	/**
