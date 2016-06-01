@@ -19,10 +19,25 @@ if( $isadmin && $ispubladmin ) {
 	$tpl = str_replace( '<!--PAR:SHOW_FOR_SYS_ADMIN_ONLY-->', 'display:none; ', $tpl );
 }
 
+$webApps = array();
+
+// RabbitMQ is not a plugin, but it also needs an app icon (that refers to its admin pages).
+require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
+if( BizMessageQueue::isInstalled() ) {
+	$connection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST' );
+	if( $connection ) {
+		$webApps[] = array(
+			'url' => $connection->Url,
+			'icon' => '../../config/images/rabbitmq.png',
+			'title' => 'RabbitMQ',
+			'target' => '_blank'
+		);
+	}
+}
+
 // Collect admin web apps (icons) provided by server plug-in.
 require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 $connRetVals = array();
-$webApps = array();
 BizServerPlugin::runDefaultConnectors( 'WebApps', null, 'getWebApps', array(), $connRetVals, false );
 require_once BASEDIR.'/server/utils/htmlclasses/TemplateSection.php';
 $webAppDefs = array();
@@ -32,10 +47,20 @@ foreach( $connRetVals as $connName => $connRetVal ) {
 		$pluginObj = BizServerPlugin::getPluginForConnector( $connName );
 		$pluginType = $pluginObj->IsSystem ? 'server' : 'config';
 		if( $pluginObj->IsActive || $webAppDef->ShowWhenUnplugged ) {
-			$webApps[] = array( 
-				'webAppDef' => $webAppDef,
-				'pluginName' => $pluginName,
-				'pluginType' => $pluginType
+
+			$params = 'webappid=' . $webAppDef->WebAppId . '&plugintype=' . $pluginType . '&pluginname=' . $pluginName;
+			$webAppUrl = '../../server/admin/webappindex.php?' . $params;
+			if( strpos( $webAppDef->IconUrl, 'data:' ) === 0 ) {
+				$iconUrl = $webAppDef->IconUrl;
+			} else {
+				$iconUrl = '../../' . $pluginType . '/plugins/' . $pluginName . '/' . $webAppDef->IconUrl;
+			}
+
+			$webApps[] = array(
+				'url' => $webAppUrl,
+				'icon' => $iconUrl,
+				'title' => $webAppDef->IconCaption,
+				'target' => '_self'
 			);
 		}
 	}
@@ -57,23 +82,13 @@ if( $webApps ) {
 	$rowTxt = ''; // web apps on a table row
 	foreach( $webApps as $index => $webApp ) {
 		
-		// Determine web app icon attributes.
-		$webAppDef = $webApp['webAppDef'];
-		$pluginName = $webApp['pluginName'];
-		$pluginType = $webApp['pluginType'];
-		$params = 'webappid='.$webAppDef->WebAppId.'&plugintype='.$pluginType.'&pluginname='.$pluginName;
-		$webAppUrl = '../../server/admin/webappindex.php?'.$params;
-		if( strpos( $webAppDef->IconUrl, 'data:' ) === 0 ) {
-			$iconUrl = $webAppDef->IconUrl;
-		} else {
-			$iconUrl = '../../'.$pluginType.'/plugins/'.$pluginName.'/'.$webAppDef->IconUrl;
-		}
-		
 		// Fill in the web app icon attributes.
 		$appTxt = $appSectionTpl;
-		$appTxt = str_replace( '<!--PAR:WEBAPP_WEBAPPURL-->', $webAppUrl, $appTxt );
-		$appTxt = str_replace( '<!--PAR:WEBAPP_ICONURL-->', $iconUrl, $appTxt );
-		$appTxt = str_replace( '<!--PAR:WEBAPP_ICONCAPTION-->', $webAppDef->IconCaption, $appTxt );
+		$appTxt = str_replace( '<!--PAR:WEBAPP_WEBAPPURL-->', $webApp['url'], $appTxt );
+		$appTxt = str_replace( '<!--PAR:WEBAPP_ICONURL-->', $webApp['icon'], $appTxt );
+		$appTxt = str_replace( '<!--PAR:WEBAPP_ICONCAPTION-->', $webApp['title'], $appTxt );
+		$appTxt = str_replace( '<!--PAR:WEBAPP_URLTARGET-->', $webApp['target'], $appTxt );
+
 		
 		// Add web app icon to table row.
 		$rowTxt .= $appTxt;
