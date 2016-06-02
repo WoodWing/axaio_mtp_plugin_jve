@@ -17,7 +17,7 @@ class HunspellShellSpelling_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Hunspell Spelling';
-		$info->Version     = '10.0.0 Build 1194';
+		$info->Version     = '10.0.0 Build 1';
 		$info->Description = 'Spelling and suggestion integration via command shell.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;

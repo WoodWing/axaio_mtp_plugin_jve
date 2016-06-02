@@ -18,7 +18,7 @@ class Facebook_EnterprisePlugin extends EnterprisePlugin
 	{
 		$info = new PluginInfoData();
 		$info->DisplayName = 'Facebook - Publish Forms';
-		$info->Version = '10.0.0 Build 1194';
+		$info->Version = '10.0.0 Build 1';
 		$info->Description = 'Publishing service for Facebook';
 		$info->Copyright = COPYRIGHT_WOODWING;
 		return $info;

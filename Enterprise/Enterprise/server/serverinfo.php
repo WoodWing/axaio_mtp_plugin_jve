@@ -5,8 +5,8 @@ define ('SERVERNAME',		    'Enterprise');
 define ('SERVERDEVELOPER',	    'WoodWing');			// DO NOT CHANGE!
 define ('SERVERIMPLEMENTATION',	'SmartConnection');		// DO NOT CHANGE!
 define ('SERVERTECHNOLOGY',	    'PHP');					// DO NOT CHANGE!
-define ('SERVERVERSION',	    '10.0.0 Build 1194');
-define ('SERVERVERSION_EXTRAINFO',	'Prerelease');					// To be used for labels such as Prerelease and Daily
+define ('SERVERVERSION',	    '10.0.0 Build 1');
+define ('SERVERVERSION_EXTRAINFO',	'');					// To be used for labels such as Prerelease and Daily
 
 // For internal use, to validate configurations:
 define ('SCENT_DBVERSION',	    '10.0' );

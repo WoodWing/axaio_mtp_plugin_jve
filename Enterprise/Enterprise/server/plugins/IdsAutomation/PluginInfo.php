@@ -21,7 +21,7 @@ class IdsAutomation_EnterprisePlugin extends EnterprisePlugin
 	{
 		$info = new PluginInfoData();
 		$info->DisplayName = 'InDesign Server Automation';
-		$info->Version     = '10.0.0 Build 1194'; // don't use PRODUCTVERSION
+		$info->Version     = '10.0.0 Build 1'; // don't use PRODUCTVERSION
 		$info->Description = 'Creates a preview, PDF or EPS from layout (or Layout Module) pages '.
 			'using Adobe InDesign Server. This happens in the background after saving a layout or '.
 			'a placed article, image or spreadsheet or after changing a layout status. ';
