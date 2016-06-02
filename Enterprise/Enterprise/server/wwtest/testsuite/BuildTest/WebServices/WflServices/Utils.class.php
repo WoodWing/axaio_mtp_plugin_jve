@@ -23,13 +23,13 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	private $requestComposer = null;
 	/** @var string $namePrefix  */
 	private $namePrefix = null;
-	
+
 	/**
 	 * Initializes the utils to let it work for a TestCase.
 	 *
 	 * @param TestCase $testCase
 	 * @param string $namePrefix Prefix to use for autofill names when creating entities.
-	 * @param string|null $protocol [v10.0.0] The used protocol for service calls. (Options: SOAP.) If null a regular service call is made.
+	 * @param string|null $protocol [v10.0.0] The used protocol for service calls. (Options: SOAP or JSON.) If null a regular service call is made.
 	 * @return bool Whether or not all session variables are complete.
 	 */
 	public function initTest( TestCase $testCase, $namePrefix = 'BT ', $protocol = null )
@@ -40,7 +40,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$this->testCase = $testCase;
 		$this->expectedError = null;
 		$this->namePrefix = $namePrefix;
-		$this->protocol = $protocol;
 
 		$tip = 'Please enable the "WflLogon" entry and try again.';
 		do {		
@@ -70,6 +69,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( $protocol );
 
 		return $valid;
 	}
@@ -119,7 +119,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		}
 		
 		// Call the web service.
-		$response = $this->utils->callService( $this->testCase, $request, $stepInfo, $expectedError, $this->protocol, true );
+		$response = $this->utils->callService( $this->testCase, $request, $stepInfo, $expectedError, true );
 
 		return $response;
 	}

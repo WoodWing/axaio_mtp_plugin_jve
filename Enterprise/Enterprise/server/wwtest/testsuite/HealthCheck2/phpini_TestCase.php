@@ -23,32 +23,23 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 
 	final public function runTest()
 	{
-    	$help = 'Your php.ini file is located at: <br>&nbsp;&nbsp;&nbsp;"'.$this->getPhpIni().'"<br/>';
-    	$help .= 'If your changes to the ini file are not reflected, try restarting the web service.';
+		$help = 'Your php.ini file is located at: <br>&nbsp;&nbsp;&nbsp;"'.$this->getPhpIni().'"<br/>';
+		$help .= 'If your changes to the ini file are not reflected, try restarting the web service.';
 
 		// Note: Database PHP extensions are checked in WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase.
 
-        // Get installed PHP version
-        require_once BASEDIR.'/server/utils/NumberUtils.class.php';
-        $this->phpVersion = NumberUtils::getPhpVersionNumber();
+		// Get installed PHP version
+		require_once BASEDIR.'/server/utils/NumberUtils.class.php';
+		$this->phpVersion = NumberUtils::getPhpVersionNumber();
 
-		// Check mandatory PHP extensions
-		$this->checkMandatoryPhpExtensions( $help );
+		// Check PHP extensions
+		$this->checkPhpExtensions();
 
 		// Check mandatory PHP settings
 		$this->checkMandatoryPhpSettings( $help );
 
-		// Check OpenSSL extension
-		$this->checkOpensslExtension( $help );
-
-		// Check CURL extension
-		$this->checkCurlExtension( $help );
-
 		// Check PHP session directory
 		$this->checkPhpSessionDirectory( $help );
-
-		// Check XSL Extension
-		$this->checkXslExtension( $help );
 
 		// Check system temp directory
 		$this->checkSystemTempDirectory();
@@ -90,14 +81,14 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 	 * @return string
 	 */
    private function getPhpIni()
-    {
-        ob_start();
-        phpinfo(INFO_GENERAL);
-        $phpinfo = ob_get_contents();
-        ob_end_clean();
-		$found = array();
-        return preg_match('/\(php.ini\).*<\/td><td[^>]*>([^<]+)/',$phpinfo,$found) ? $found[1] : '';
-    }
+   {
+	   ob_start();
+	   phpinfo( INFO_GENERAL );
+	   $phpinfo = ob_get_contents();
+	   ob_end_clean();
+	   $found = array();
+	   return preg_match( '/\(php.ini\).*<\/td><td[^>]*>([^<]+)/', $phpinfo, $found ) ? trim( $found[1] ) : '';
+   }
 
     /**
      * Session error handler
@@ -120,18 +111,60 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 
 	/**
 	 * Check if mandatory extension libraries is loaded in PHP
-	 *
-	 * @param string $help Help message
 	 */
-	private function checkMandatoryPhpExtensions( $help )
+	private function checkPhpExtensions()
 	{
-		// Note that zlib is needed since Enterprise 9.5 to support Deflate compression
-		// during file uploads/downloads through Transfer Server.
-		$exts = array( 'gd', 'exif', 'sockets', 'mbstring', 'soap', 'iconv', 'curl', 'zlib' );
+		// Mandatory PHP extensions for which an ERROR should raise.
+		$exts = array(
+			'gd' => 'http://php.net/manual/en/image.installation.php',
+			'exif' => 'http://php.net/manual/en/exif.installation.php',
+			'sockets' => 'http://php.net/manual/en/sockets.installation.php',
+			'mbstring' => 'http://php.net/manual/en/mbstring.installation.php',
+			'soap' => 'http://php.net/manual/en/soap.installation.php',
+			'iconv' => 'http://php.net/manual/en/iconv.installation.php',
+			'curl' => 'http://php.net/manual/en/curl.installation.php',
+			'zlib' => 'http://php.net/manual/en/zlib.installation.php',
+				// L> Note that zlib is needed since Enterprise 9.5 to support Deflate compression
+				//    during file uploads/downloads through Transfer Server.
+			'xsl' => 'http://php.net/manual/en/xsl.installation.php'
+		);
 
-		foreach( $exts as $ext ) {
+		// Optional PHP extentions for which a WARNing should raise instead.
+		$optExtWarnings = array(
+			'xsl' => 'This will break HTML5 exports from ContentStation'
+		);
+
+		if( defined('ENCRYPTION_PRIVATEKEY_PATH') ) {
+			LogHandler::Log('wwtest', 'INFO', 'Using password encryption which requires PHP "openssl" library.');
+			$exts['openssl'] = 'http://php.net/manual/en/openssl.installation.php';
+		}
+
+		if( isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on' ) {
+			LogHandler::Log('wwtest', 'INFO', 'Using HTTPS which requires PHP "curl" library.');
+			$exts['curl'] = 'http://php.net/manual/en/curl.installation.php';
+		}
+
+		// Note that since Enterprise 10.0 RabbitMQ AMQP requires the bcmatch library.
+		// For example used in: php-amqplib/PhpAmqpLib/Wire/AMQPWriter.php.
+		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
+		if( BizMessageQueue::isInstalled()) {
+			LogHandler::Log('wwtest', 'INFO', 'Using RabbitMQ which requires PHP "bcmath" library.');
+			$exts['bcmath'] = 'http://php.net/manual/en/bc.installation.php';
+		}
+
+		foreach( $exts as $ext => $phpManual ) {
 			if( !extension_loaded($ext) ) {
-				$this->setResult( 'ERROR',  "PHP library \"<b>$ext</b>\" not loaded, check php.ini.", $help );
+				$extPath = ini_get('extension_dir');
+				$help = 'Please see <a href="'.$phpManual.'" target="_blank">PHP manual</a> for instructions.<br/>'.
+					'Note that the PHP extension path is "'.$extPath.'".<br/>'.
+					'PHP compilation options can be found in <a href="phpinfo.php" target="_blank">PHP info</a>.<br/>'.
+					'Your php.ini file is located at "'.$this->getPhpIni().'".';
+				$msg = 'The PHP library "<b>'.$ext.'</b>" is not loaded.';
+				if( isset($optExtWarnings[$ext]) ) {
+					$this->setResult( 'WARN', $msg.'<br/>'.$optExtWarnings[$ext], $help );
+				} else {
+					$this->setResult( 'ERROR', $msg, $help );
+				}
 			}
 		}
 		LogHandler::Log('wwtest', 'INFO', 'PHP libraries checked.');
@@ -207,39 +240,6 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 	}
 
 	/**
-	 * Check if OpenSSL library is loaded (only when used)
-	 *
-	 * @param string $help Help message
-	 */
-	private function checkOpensslExtension( $help )
-	{
-		if( defined('ENCRYPTION_PRIVATEKEY_PATH') ) {
-			LogHandler::Log('wwtest', 'INFO', 'Using password encryption.');
-			if( !extension_loaded('openssl') ) {
-				$this->setResult( 'ERROR', "PHP library \"<b>openssl</b>\" not loaded, check php.ini.<br>"
-					."For Windows: Make sure libeay32.dll and ssleay32.dll modules are installed in the System32 folder.", $help );
-			}
-			LogHandler::Log('wwtest', 'INFO', 'OpenSSL extension checked.');
-		}
-	}
-
-	/**
-	 * Check if CURL library is loaded when running HTTPS
-	 *
-	 * @param string $help Help message
-	 */
-	private function checkCurlExtension( $help )
-	{
-		if( isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on' ) {
-			LogHandler::Log('wwtest', 'INFO', 'Using HTTPS.');
-			if( !extension_loaded('curl') ) {
-				$this->setResult( 'ERROR', "PHP library \"<b>curl</b>\" not loaded, check php.ini.", $help );
-			}
-			LogHandler::Log('wwtest', 'INFO', 'CURL extension checked.');
-		}
-	}
-
-	/**
 	 * Check if PHP session directory exists and is writable
 	 *
 	 * @param string $help Help message
@@ -265,31 +265,6 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 				'<br />Error details: ' . $error, $help );
 		}
 		LogHandler::Log('wwtest', 'INFO', 'PHP session directory checked.');
-	}
-
-	/**
-	 * Check if the XSL library is loaded, if not give a warning.
-	 *
-	 * @param string $help Help message
-	 */
-	private function checkXslExtension( $help )
-	{
-		if( extension_loaded('xsl') ) {
-			// XSLT processing changed between version 3.8.x and 5.4.0, by default writing to files from XSLT is disabled.
-			// this will break exporting Magazines to HTML5. (BZ#28595)
-			if( (version_compare($this->phpVersion, '5.3.9') >= 0) && (version_compare($this->phpVersion, '5.4', '<')) ) {
-				$xslPrefs = get_cfg_var("xsl.security_prefs");
-				// If the value is disabled (null) or set to 44 it means that write operations are not allowed, this will
-				// break XSLT transformations during HTML5 exports.
-				if( is_null($xslPrefs) || $xslPrefs == '44' || $xslPrefs == '' ) {
-					$this->setResult( 'WARN', 'The XSL security preferences setting is set to default or disabled. This will break HTML5 exports from ' .
-						'ContentStation, check your php.ini and make sure that <b>"xsl.security_prefs"</b> is present and is set to 0. If the section is missing please add it.', $help);
-				}
-			}
-		} else {
-			$this->setResult( 'WARN', "PHP library \"<b>xsl</b>\" not loaded, this will break HTML5 exports from ContentStation. Check php.ini.", $help );
-		}
-		LogHandler::Log('wwtest', 'INFO', 'XSL extension checked.');
 	}
 
 	/**

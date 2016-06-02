@@ -79,7 +79,7 @@ p4 revert -a "${ENT_DIR}/server/vendor/..."
 p4 revert -a "${ENT_DIR}/server/buildtools/composer/..."
 
 # Perforce: add newly created files (if any) to vendor folder:
-find "${ENT_DIR}/server/vendor" -type f \( ! -iname ".*" \) -print | p4 -x - add
+find "${ENT_DIR}/server/vendor" -type f -not -path '*/\.*' -print | p4 -x - add
 # L> "p4 add" command does not allow us to add files recursively (unline the GUI client)
 # L> note that the "find <folder> -type f -print" command lists all files recursively
 # L> note that the "\( ! -iname ".*" \)" expression excludes the hidden files (starting with dot)

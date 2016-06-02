@@ -14,6 +14,21 @@ class WW_Utils_TestSuite
 	const VALIDATE_PATH_NO_SPACE    = 5; // no space at end of path
 	const VALIDATE_PATH_ALL         = 255;
 
+	/** @var string $protocol  */
+	private $protocol = null;
+
+	/**
+	 * Initializes this test utils class.
+	 *
+	 * @since 10.0.0
+	 * @param string|null $protocol The used protocol for service calls. (Options: SOAP or JSON.) If null a regular service call is made.
+	 * @return bool Whether or not all session variables are complete.
+	 */
+	public function initTest( $protocol = null )
+	{
+		$this->protocol = $protocol;
+	}
+
 	/**
 	 * Determines the full file path of the php.ini file as used by current PHP session.
 	 * Typically useful to locate the correct ini file in case settings needs to change.
@@ -253,8 +268,8 @@ class WW_Utils_TestSuite
 	/**
 	 * Return real path value with replacement of forward slash
 	 *
-	 * @param string $dir
-	 * @return string $realPath
+	 * @param string $filePath
+	 * @return string Real path
 	 */
 	public function realPathFwdSlash( $filePath )
 	{
@@ -278,18 +293,15 @@ class WW_Utils_TestSuite
 	 * @param object $request
 	 * @param string $stepInfo Logical test description.
 	 * @param string|null $expectedErrorCodeOrMsgKey The expected error message key or error code. Null when no error is expected.
-	 * @param string|null $protocol The used protocol for the service call. (Options: SOAP.) If null a regular service call is made.
 	 * @param bool $throwException TRUE to throw BizException and setError(), FALSE to setError() only, on unexpected failures
 	 * @return mixed A corresponding response object when service was successful or NULL on error.
 	 */
 	public function callService( TestCase $testCase, $request, $stepInfo, $expectedErrorCodeOrMsgKey = null, 
-		$protocol = null, $throwException = false )
+		$throwException = false )
 	{
 		$baseName = get_class( $request );
 		$baseName = substr( $baseName, 0, strlen($baseName) - strlen('Request') );
-		$serviceName = $baseName.'Service';
 		$responseName = $baseName.'Response';
-		$service = new $serviceName();
 
 		// When there is a sCode from $expectedErrorCodeOrMsgKey, add it to the severity map
 		// to suppress errors appearing at server logging.
@@ -303,20 +315,23 @@ class WW_Utils_TestSuite
 			$expectedError = $expectedSCode ? $expectedSCode : $expectedErrorCodeOrMsgKey;
 			if( $expectedError ) {
 				$map = new BizExceptionSeverityMap( array( $expectedError => 'INFO' ) );
-				$map = $map; // keep analyzer happy
 			}
 		}
 				
 		LogHandler::Log( 'TestSuite', 'DEBUG', '<b>Test: '.$stepInfo.'</b>' );
 		$response = null;
 		try {
-			$service->suppressRecording();
-			if( !$protocol ) {
+			if( !$this->protocol ) {
+				$serviceName = $baseName.'Service';
+				$service = new $serviceName();
+				$service->suppressRecording();
 				$response = $service->execute( $request );
-			} elseif( $protocol == 'SOAP' ) {
-				$response = $this->executeSoap( $request, $serviceName, $expectedSCode );
+			} elseif( $this->protocol == 'SOAP' ) {
+				$response = $this->executeSoap( $request, $expectedSCode );
+			} elseif( $this->protocol == 'JSON' ) {
+				$response = $this->executeJson( $request, $expectedSCode );
 			} else {
-				$message = 'Invalid protocol used for service call: "'.$protocol.'"';
+				$message = 'Invalid protocol used for service call: "'.$this->protocol.'"';
 				if( $throwException ) {
 					$testCase->throwError( $message );
 				} else {
@@ -384,17 +399,16 @@ class WW_Utils_TestSuite
 	 * Executes any service through a soap client.
 	 *
 	 * @param object $request Request object to execute.
-	 * @param string $serviceName Name of the service to be executed.
 	 * @param string|null $expectedSCode Expected server error (S-code). Use null to indicate no error is expected.
 	 * @return object Response object.
 	 * @throws BizException when the web service failed.
 	 */
-	private function executeSoap( $request, $serviceName, $expectedSCode )
+	private function executeSoap( $request, $expectedSCode )
 	{
-		$servicePrefix = substr( $serviceName, 0, 3 );
-		if( !ctype_alpha( $servicePrefix ) ) {
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Server', 'Invalid service name was supplied.' );
-		}
+		$requestClass = get_class( $request ); // e.g. returns 'WflDeleteObjectsRequest'
+		$servicePrefix = substr( $requestClass, 0, 3 );
+		$function = substr( $requestClass, 3, strlen($requestClass) - 3 - strlen('Request') );
+
 		require_once BASEDIR.'/server/protocols/soap/'.$servicePrefix.'Client.php';
 		$clientClass = 'WW_SOAP_'.$servicePrefix.'Client';
 		$options = array(
@@ -404,11 +418,40 @@ class WW_Utils_TestSuite
 		if( $expectedSCode ) {
 			$options['expectedError'] = $expectedSCode;
 		}
-		$soapClients[$servicePrefix] = new $clientClass( $options );
-		$function = substr( $serviceName, 3, strlen($serviceName)-10 ); //remove wfl|adm + service is 10 characters
-		try{
+		try {
+			$soapClients[$servicePrefix] = new $clientClass( $options );
 			$response = $soapClients[$servicePrefix]->$function( $request );
 		} catch( SoapFault $e ) {
+			throw new BizException( '', 'Server', '', $e->getMessage() );
+		}
+		return $response;
+	}
+
+	/**
+	 * Executes any service through a JSON client.
+	 *
+	 * @since 10.0.0
+	 * @param object $request Request object to execute.
+	 * @param string|null $expectedSCode Expected server error (S-code). Use null to indicate no error is expected.
+	 * @return object Response object.
+	 * @throws BizException when the web service failed.
+	 */
+	private function executeJson( $request, $expectedSCode )
+	{
+		$requestClass = get_class( $request ); // e.g. returns 'WflDeleteObjectsRequest'
+		$servicePrefix = substr( $requestClass, 0, 3 );
+		$function = substr( $requestClass, 3, strlen($requestClass) - 3 - strlen('Request') );
+
+		require_once BASEDIR.'/server/protocols/json/'.$servicePrefix.'Client.php';
+		$clientClass = 'WW_JSON_'.$servicePrefix.'Client';
+		$options = array();
+		if( $expectedSCode ) {
+			$options['expectedError'] = $expectedSCode;
+		}
+		try {
+			$soapClients[$servicePrefix] = new $clientClass( '', $options );
+			$response = $soapClients[$servicePrefix]->$function( $request );
+		} catch( Exception $e ) {
 			throw new BizException( '', 'Server', '', $e->getMessage() );
 		}
 		return $response;
@@ -419,18 +462,10 @@ class WW_Utils_TestSuite
 	 *
 	 * @since 9.0.0
 	 * @param TestCase $testCase The test module calling this function.
-	 * @return AdmLogOnResponse|null Response on succes. NULL on error.
+	 * @return AdmLogOnResponse|null Response on success. NULL on error.
 	 */
 	public function admLogOn( TestCase $testCase )
 	{
-		// Use TESTSUITE defined test user (for wwtest)
-		$suiteOpts = defined('TESTSUITE') ? unserialize( TESTSUITE ) : array();
-		if( !$suiteOpts ){
-			$this->setResult( 'ERROR', 'Could not find the test user: ',
-				'Please check the TESTSUITE setting in configserver.php.' );
-			return null;
-		}
-
 		// Determine client app name
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
 		$clientIP = WW_Utils_UrlUtils::getClientIP();
@@ -441,10 +476,11 @@ class WW_Utils_TestSuite
 		// <<<
 		
 		// Build the LogOn request.
+		require_once BASEDIR.'/server/utils/TestSuiteOptions.php';
 		require_once BASEDIR.'/server/services/adm/AdmLogOnService.class.php';
 		$request = new AdmLogOnRequest();
-		$request->AdminUser     = $suiteOpts['User'];
-		$request->Password      = $suiteOpts['Password'];
+		$request->AdminUser     = WW_Utils_TestSuiteOptions::getUser();
+		$request->Password      = WW_Utils_TestSuiteOptions::getPassword();
 		$request->Server        = 'Enterprise Server';
 		$request->ClientName    = $clientName;
 		$request->Domain        = '';
@@ -486,18 +522,10 @@ class WW_Utils_TestSuite
 	 *
 	 * @since 9.0.0
 	 * @param TestCase $testCase The test module calling this function.
-	 * @return WflLogOnResponse|null Response on succes. NULL on error.
+	 * @return WflLogOnResponse|null Response on success. NULL on error.
 	 */	 
 	public function wflLogOn( TestCase $testCase )
 	{	
-		// Use TESTSUITE defined test user (for wwtest)
-		$suiteOpts = defined('TESTSUITE') ? unserialize( TESTSUITE ) : array();
-		if( !$suiteOpts ){
-			$this->setResult( 'ERROR', 'Could not find the test user: ',
-				'Please check the TESTSUITE setting in configserver.php.' );
-			return null;
-		}
-
 		// Determine client app name
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
 		$clientIP = WW_Utils_UrlUtils::getClientIP();
@@ -509,9 +537,10 @@ class WW_Utils_TestSuite
 		
 		// Build the LogOn request.
 		require_once BASEDIR.'/server/services/wfl/WflLogOnService.class.php';
+		require_once BASEDIR.'/server/utils/TestSuiteOptions.php';
 		$request = new WflLogOnRequest();
-		$request->User = $suiteOpts['User'];
-		$request->Password = $suiteOpts['Password'];
+		$request->User = WW_Utils_TestSuiteOptions::getUser();
+		$request->Password = WW_Utils_TestSuiteOptions::getPassword();
 		$request->Ticket = '';
 		$request->Server = 'Enterprise Server';
 		$request->ClientName = $clientName;
@@ -593,6 +622,7 @@ class WW_Utils_TestSuite
 	 * @param int $publicationId
 	 * @param int $pubChannelId
 	 * @return AdmDeletePubChannelsResponse|null
+	 * @throws BizException
 	 */
 	public function removePubChannel( TestCase $testCase, $ticket, $publicationId, $pubChannelId )
 	{
@@ -951,7 +981,7 @@ class WW_Utils_TestSuite
 	/**
 	 * Deletes a given object from the database by calling the DeleteObjects service.
 	 *
-	 * @param $TestCase Test case being executed
+	 * @param TestCase $testCase Test case being executed
 	 * @param string $ticket Server ticket
 	 * @param int $objId The id of the object to be removed.
 	 * @param string $stepInfo Extra logging info.
@@ -961,7 +991,7 @@ class WW_Utils_TestSuite
 	 * @param array $areas The areas to test against.
 	 * @return bool Whether or not service response was according to given expectations ($expectedError).
 	 */
-	public function deleteObject( $TestCase, $ticket, $objId, $stepInfo, &$errorReport, $expectedError = null, $permanent=true, $areas=array('Workflow'))
+	public function deleteObject( TestCase $testCase, $ticket, $objId, $stepInfo, &$errorReport, $expectedError = null, $permanent=true, $areas=array('Workflow'))
 	{
 		require_once BASEDIR.'/server/services/wfl/WflDeleteObjectsService.class.php';
 		$request = new WflDeleteObjectsRequest();
@@ -970,7 +1000,7 @@ class WW_Utils_TestSuite
 		$request->Permanent = $permanent;
 		$request->Areas     = $areas;
 
-		$response = $this->callService( $TestCase, $request, $stepInfo, $expectedError );
+		$response = $this->callService( $testCase, $request, $stepInfo, $expectedError );
 		if( is_null( $response ) ) {
 			return false;
 		}
@@ -1053,7 +1083,7 @@ class WW_Utils_TestSuite
 	/**
 	 * Updates an object with given metadata by calling the MultiSetObjectProperties service.
 	 *
-	 * @param $testCase The test case executing the service. Errors are set on the test case object.
+	 * @param TestCase $testCase The test case executing the service. Errors are set on the test case object.
 	 * @param string $ticket A valid ticket for the test session.
 	 * @param Object[] $objects Objects properties to update. On success, they are updated with latest info from the DB.
 	 * @param string $stepInfo Extra logging info.
@@ -1064,7 +1094,7 @@ class WW_Utils_TestSuite
 	 * @return bool|null Whether or not the operation was succesful, null when the service failed.
 	 */
 	public function multiSetObjectProperties(
-		$testCase, $ticket, $objects, $stepInfo, array $expectedReports,
+		TestCase $testCase, $ticket, $objects, $stepInfo, array $expectedReports,
 		array $updateProps, array $changedPropPaths, array $exclVerObjIds = array() )
 	{
 		// Collect object ids.
@@ -1075,6 +1105,7 @@ class WW_Utils_TestSuite
 
 		// Suppress errors that are expected.
 		$serverityMap = array();
+		$expectedError = '';
 		foreach( $expectedReports as $expectedReport ) {
 			foreach( $expectedReport->Entries as $entry ) {
 				$expectedError = trim( $entry->ErrorCode,'()' ); // Remove () brackets.
@@ -1082,7 +1113,6 @@ class WW_Utils_TestSuite
 			}
 		}
 		$severityMapHandle = new BizExceptionSeverityMap( $serverityMap );
-		$severityMapHandle = $severityMapHandle; // Keep code analyzer happy.
 
 		// Call the SetObjectProperties service.
 		require_once BASEDIR . '/server/services/wfl/WflMultiSetObjectPropertiesService.class.php';

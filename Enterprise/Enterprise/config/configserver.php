@@ -1488,8 +1488,16 @@ if(!defined('sLanguage_code')){
 //DEFAULT_USER_COLOR: Including hash(#).
 define( 'DEFAULT_USER_COLOR', '#FF9900' ); // The default user color that is assigned during user creation.(Only take default when no color given)
 
-// PEAR and Zend framework requires the library folder to be in php path:
-ini_set('include_path', BASEDIR.'/server/PEAR'.PATH_SEPARATOR. BASEDIR.'/server/ZendFramework/library'.PATH_SEPARATOR.ini_get('include_path'));
+// Zend Framework 1 requires the library folder to be in php path:
+ini_set('include_path', BASEDIR.'/server/ZendFramework/library'.PATH_SEPARATOR.ini_get('include_path'));
+
+// Init autoloader for Zend Framework 2:
+define('ZF2_PATH', BASEDIR.'/server/vendor/zendframework/zendframework/library');
+require_once ZF2_PATH . '/Zend/Loader/StandardAutoloader.php';
+$loader = new Zend\Loader\StandardAutoloader(array(
+    'autoregister_zf' => true,
+));
+$loader->register();
 
 require_once BASEDIR.'/server/utils/LogHandler.class.php';
 LogHandler::init();

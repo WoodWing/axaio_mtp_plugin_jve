@@ -9,7 +9,7 @@
  * @since v6.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
- 
+
 require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_HealthCheck2_HttpServerEncoding_TestCase extends TestCase
@@ -26,16 +26,14 @@ class WW_TestSuite_HealthCheck2_HttpServerEncoding_TestCase extends TestCase
 		$testUrl = WW_Utils_UrlUtils::fileToUrl( $testFile, 'server' );
 
 		try {
-			require_once 'Zend/Uri.php';
-			$testUri = Zend_Uri::factory( $testUrl );
+			$testUri = Zend\Uri\UriFactory::factory( $testUrl );
 			$isHttps = $testUri && $testUri->getScheme() == 'https';
-		} catch( Zend_Uri_Exception $e ) {
+		} catch( Exception $e ) {
 			throw new BizException( null, 'Server', 'URL to download test file does not seem to be valid: '
 				.$e->getMessage(), 'Configuration error' );
 		}
 
-		require_once 'Zend/Http/Client.php';
-		$httpClient = new Zend_Http_Client( $testUrl );
+		$httpClient = new Zend\Http\Client( $testUrl );
 
 		if( $isHttps ) {
 			$localCert = BASEDIR.'/config/encryptkeys/cacert.pem'; // for HTTPS / SSL only
@@ -43,13 +41,13 @@ class WW_TestSuite_HealthCheck2_HttpServerEncoding_TestCase extends TestCase
 				throw new BizException( null, 'Server', null,
 					'The certificate file "'.$localCert.'" does not exists.' );
 			}
-			// Because the Zend_Http_Client class supports SSL, but does not validate certificates / hosts / peers (yet),
+			// Because the Zend\Http\Client class supports SSL, but does not validate certificates / hosts / peers (yet),
 			// and therefore its HTTPS connections are NOT safe! See http://www.zendframework.com/issues/browse/ZF-4838
-			// For this reason, the Zend_Http_Client_Adapter_Curl adapter is passed onto
-			// the Zend_Http_Client class, which enables us to set the secure options and certificate.
-			$httpClient->setConfig(
+			// For this reason, the Zend\Http\Client\Adapter\Curl adapter is passed onto
+			// the Zend\Http\Client class, which enables us to set the secure options and certificate.
+			$httpClient->setOptions(
 				array(
-					'adapter' => 'Zend_Http_Client_Adapter_Curl',
+					'adapter' => 'Zend\Http\Client\Adapter\Curl',
 					'curloptions' => $this->getCurlOptionsForSsl( $localCert )
 				)
 			);
@@ -58,14 +56,15 @@ class WW_TestSuite_HealthCheck2_HttpServerEncoding_TestCase extends TestCase
 		$contents = null;
 		try {
 			$httpClient->setUri( $testUrl );
-			$response = $httpClient->request( Zend_Http_Client::GET );
-			if( $response->isSuccessful() ) {
+			$httpClient->setMethod( Zend\Http\Request::METHOD_GET );
+			$response = $httpClient->send();
+			if( $response->isSuccess() ) {
 				$contents = $response->getBody();
 				LogHandler::Log( __CLASS__, 'INFO',  "Download remote test file successful." );
 			} else {
-				$details = $response->getHeadersAsString( true, '<br/>' );
+				$details = $response->getHeaders()->toString();
 			}
-		} catch( Zend_Http_Client_Exception $e ) {
+		} catch( Exception $e ) {
 			$details = $e->getMessage();
 		}
 		if( is_null($contents) ) {

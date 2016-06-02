@@ -11,7 +11,11 @@
 
 require 'Zend/Json/Server.php';
 
-class WW_JSON_Server extends Zend_Json_Server
+use Zend\Json\Server\Server,
+	Zend\Json\Server\Smd,
+	Zend\Json\Json;
+
+class WW_JSON_Server extends Server
 {
 	public function handle( $request = false )
 	{
@@ -19,19 +23,18 @@ class WW_JSON_Server extends Zend_Json_Server
 		require_once BASEDIR.'/server/utils/CrossOriginHeaderUtil.class.php';
 		WW_Utils_CrossOriginHeaderUtil::addCrossOriginHeaders();
 
-		$request = $request; // keep analyzer happy
-		if ('GET' == $_SERVER['REQUEST_METHOD']) {
-			// Indicate the URL endpoint, and the JSON-RPC version used:
-			$this->setEnvelope(Zend_Json_Server_Smd::ENV_JSONRPC_2);
-		
-			// Grab the SMD
+		$this->getRequest()->setVersion( Server::VERSION_2 );
+
+		if( 'GET' == $_SERVER['REQUEST_METHOD'] ) {
+			// Grab the web service definition and set the RPC version to use.
 			$smd = $this->getServiceMap();
-		
-			// Return the SMD to the client
+			$smd->setEnvelope( Smd::ENV_JSONRPC_2 );
+
+			// Return the web service definition to the client.
 			header('Content-Type: application/json');
 			echo $smd;
 			return;
-		} elseif ('OPTIONS' == $_SERVER['REQUEST_METHOD']) {
+		} elseif( 'OPTIONS' == $_SERVER['REQUEST_METHOD'] ) {
 			// The Access-Control-Allow-Methods response header is already set
 			// in the addCrossOriginHeaders() call above. So nothing left to do here
 			// other that returning a HTTP 200.
@@ -64,8 +67,7 @@ class WW_JSON_Server extends Zend_Json_Server
 		if( $req->isMethodError() ) {
 			LogHandler::Log( __CLASS__, 'ERROR', 'JSON method error occurred for: '.$req->getMethod() );
 		}
-		require_once 'Zend/Json.php';
-		LogHandler::logService( $req->getMethod(), Zend_Json::prettyPrint($req->__toString()), true, 'JSON' );
+		LogHandler::logService( $req->getMethod(), Json::prettyPrint($req->__toString()), true, 'JSON' );
 	}
 
 	/**
@@ -76,7 +78,6 @@ class WW_JSON_Server extends Zend_Json_Server
 		$req = $this->getRequest();
 		$resp = $this->getResponse();
 
-		require_once 'Zend/Json.php';
-		LogHandler::logService( $req->getMethod(), Zend_Json::prettyPrint($resp->__toString()), false, 'JSON' );
+		LogHandler::logService( $req->getMethod(), Json::prettyPrint($resp->__toString()), false, 'JSON' );
 	}
 }

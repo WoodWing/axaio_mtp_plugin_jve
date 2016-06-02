@@ -14,7 +14,7 @@
  * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
- 
+
 class WW_Utils_TransferClient
 {
 	private $httpClient = null;
@@ -22,8 +22,7 @@ class WW_Utils_TransferClient
 	
 	public function __construct( $ticket )
 	{
-		require_once 'Zend/Http/Client.php';
-		$this->httpClient = new Zend_Http_Client();
+		$this->httpClient = new Zend\Http\Client();
 		$this->ticket = $ticket;
 	}
 	
@@ -71,30 +70,29 @@ class WW_Utils_TransferClient
 				LogHandler::Log( __CLASS__, 'DEBUG',  'File upload, (compressed) bytes uploaded: '.strlen($content) );
 			}
 			if( $httpMethod == 'PUT' ) {
-				$this->httpClient->setRawData( $content );
-				$response = $this->httpClient->request( Zend_Http_Client::PUT );
+				$this->httpClient->setMethod( Zend\Http\Request::METHOD_PUT );
+				$this->httpClient->setRawBody( $content );
+				$response = $this->httpClient->send();
 			} elseif( $httpMethod == 'POST' ) {
+				$this->httpClient->setMethod( Zend\Http\Request::METHOD_POST );
 				$this->httpClient->setFileUpload( 'tmp_name', 'Filedata', $content );
-				$response = $this->httpClient->request( Zend_Http_Client::POST );
+				$response = $this->httpClient->send();
 			} else {
 				LogHandler::Log( __CLASS__, 'ERROR', 'Unsupported HTTP method: '.$httpMethod );
 				return false;
 			}
 
 			// After successful upload, enrich the Attachment.
-			if( $response->isSuccessful() ) {
+			if( $response->isSuccess() ) {
 				$attachment->FileUrl = $attachmentUrl;
 				$attachment->FilePath = null; 
 				$attachment->Content = null;
 				$result = true;
 				LogHandler::Log( __CLASS__, 'INFO',  "uploadFile successful: Upload over HTTP completed." );
 			} else {
-				//$respStatusCode = $response->getStatus();
-				//$respStatusText = $response->responseCodeAsText( $respStatusCode );
-				//LogHandler::Log( __CLASS__, 'ERROR',  "uploadFile failed: $respStatusText (HTTP code: $respStatusCode)" );
-				LogHandler::Log( __CLASS__, 'ERROR', 'uploadFile failed:<br/>'.$response->getHeadersAsString( true, '<br/>' ) );
+				LogHandler::Log( __CLASS__, 'ERROR', 'uploadFile failed:<br/>'.$response->getHeaders()->toString() );
 			}
-		} catch( Zend_Http_Client_Exception $e ) {
+		} catch( Exception $e ) {
 			LogHandler::Log( __CLASS__, 'ERROR', 'uploadFile failed: '.$e->getMessage() );
 		}
 		PerformanceProfiler::stopProfile( 'transfer client file upload', 3 );
@@ -127,11 +125,11 @@ class WW_Utils_TransferClient
 		try {
 			$this->httpClient->resetParameters(); // clear stuff of previously fired requests
 			$this->httpClient->setUri( $url );
-//			$this->httpClient->setParameterGet( 'XDEBUG_PROFILE', 1 ); // Uncomment this to trigger XDebug Profiler.
 			$this->httpClient->setStream( true );
-			$response = $this->httpClient->request( Zend_Http_Client::GET );	
+			$this->httpClient->setMethod( Zend\Http\Request::METHOD_GET );
+			$response = $this->httpClient->send();
         	$this->httpClient->setStream( false );
-			if( $response->isSuccessful() ) {
+			if( $response->isSuccess() ) {
 				$content = $response->getBody();
 				LogHandler::Log( __CLASS__, 'DEBUG',  'File download, (compressed) bytes downloaded: '.strlen($content) );
 				if( $compression == 'deflate' ) {
@@ -142,12 +140,9 @@ class WW_Utils_TransferClient
 				LogHandler::Log( __CLASS__, 'INFO',  "downloadFile successful: Download over HTTP completed." );
 				$result = true;
 			} else {
-				//$respStatusCode = $response->getStatus();
-				//$respStatusText = $response->responseCodeAsText( $respStatusCode );
-				//LogHandler::Log( __CLASS__, 'ERROR', "downloadFile failed: $respStatusText (HTTP code: $respStatusCode)" );
-				LogHandler::Log( __CLASS__, 'ERROR', 'downloadFile failed:<br/>'.$response->getHeadersAsString( true, '<br/>' ) );
+				LogHandler::Log( __CLASS__, 'ERROR', 'downloadFile failed:<br/>'.$response->getHeaders()->toString() );
 			}
-		} catch( Zend_Http_Client_Exception $e ) {
+		} catch( Exception $e ) {
 			LogHandler::Log( __CLASS__, 'ERROR', 'downloadFile failed: '.$e->getMessage() );
 		}
 		PerformanceProfiler::stopProfile( 'transfer client file download', 3 );
@@ -172,17 +167,15 @@ class WW_Utils_TransferClient
 		try {
 			$this->httpClient->resetParameters(); // clear stuff of previously fired requests
 			$this->httpClient->setUri( $cleanupUrl );
-			$response = $this->httpClient->request( Zend_Http_Client::DELETE );
-			if( $response->isSuccessful() ) {
+			$this->httpClient->setMethod( Zend\Http\Request::METHOD_DELETE );
+			$response = $this->httpClient->send();
+			if( $response->isSuccess() ) {
 				LogHandler::Log( __CLASS__, 'INFO',  "cleanupFile successful: Cleanup over HTTP completed." );
 				$result = true;
 			} else {
-				//$respStatusCode = $response->getStatus();
-				//$respStatusText = $response->responseCodeAsText( $respStatusCode );
-				//LogHandler::Log( __CLASS__, 'ERROR',  "cleanupFile failed: $respStatusText (HTTP code: $respStatusCode)" );
-				LogHandler::Log( __CLASS__, 'ERROR', 'cleanupFile failed:<br/>'.$response->getHeadersAsString( true, '<br/>' ) );
+				LogHandler::Log( __CLASS__, 'ERROR', 'cleanupFile failed:<br/>'.$response->getHeaders()->toString() );
 			}
-		} catch( Zend_Http_Client_Exception $e ) {
+		} catch( Exception $e ) {
 			LogHandler::Log( __CLASS__, 'ERROR', 'cleanFile failed: '.$e->getMessage() );
 		}
 		PerformanceProfiler::stopProfile( 'transfer client file cleanup', 3 );
@@ -232,17 +225,15 @@ class WW_Utils_TransferClient
 		LogHandler::Log( __CLASS__, 'INFO',  "getTechniques: Started handshake \"$url\" over HTTP." );
 		try {
 			$this->httpClient->setUri( $url );
-			$response = $this->httpClient->request( Zend_Http_Client::GET );
-			if( $response->isSuccessful() ) {
+			$this->httpClient->setMethod( Zend\Http\Request::METHOD_GET );
+			$response = $this->httpClient->send();
+			if( $response->isSuccess() ) {
 				$xmlStream = $response->getBody();
 				LogHandler::Log( __CLASS__, 'INFO',  "getTechniques successful: Handshake over HTTP completed." );
 			} else {
-				//$respStatusCode = $response->getStatus();
-				//$respStatusText = $response->responseCodeAsText( $respStatusCode );
-				//LogHandler::Log( __CLASS__, 'ERROR',  "getTechniques failed: $respStatusText (HTTP code: $respStatusCode)" );
-				LogHandler::Log( __CLASS__, 'ERROR', 'getTechniques failed:<br/>'.$response->getHeadersAsString( true, '<br/>' ) );
+				LogHandler::Log( __CLASS__, 'ERROR', 'getTechniques failed:<br/>'.$response->getHeaders()->toString() );
 			}
-		} catch( Zend_Http_Client_Exception $e ) {
+		} catch( Exception $e ) {
 			LogHandler::Log( __CLASS__, 'ERROR', 'getTechniques failed: '.$e->getMessage() );
 		}
 		PerformanceProfiler::stopProfile( 'transfer client handshake', 3 );

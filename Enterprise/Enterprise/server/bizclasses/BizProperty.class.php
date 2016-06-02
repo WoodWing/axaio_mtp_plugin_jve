@@ -1751,8 +1751,8 @@ class BizProperty
 	  * this function needed to update one with the other structure. See also {@link updateMetaDataFlatWithTree}.
 	  * Only present props are used to update the tree structure.
 	  *
-	  * @param $treeMD MetaData to be updated
-	  * @param $flatMD array of ExtraMetaData input data
+	  * @param MetaData $treeMD MetaData to be updated
+	  * @param stdClass $flatMD array of ExtraMetaData input data
 	  */
 	public static function updateMetaDataTreeWithFlat( MetaData &$treeMD, $flatMD )
 	{

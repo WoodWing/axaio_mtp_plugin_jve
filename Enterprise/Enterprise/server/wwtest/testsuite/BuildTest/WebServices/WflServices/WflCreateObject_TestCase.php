@@ -18,9 +18,11 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflCreateObject_TestCase ex
 	private $vars = null;
 	private $objIDs = array(); // To remember the object Ids for deletion in the DeleteObjects_TestCase
 
-	// Session related stuff	
+	/** @var string $ticket  */
 	private $ticket = null;
-		
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
+
 	public function getDisplayName() { return 'Create Objects'; }
 	public function getTestGoals()   { return 'Checks if Objects can be created successfully'; }
 	public function getTestMethods() { return 'Call createObject service and see whether it returns newly created Object.'; }
@@ -35,6 +37,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflCreateObject_TestCase ex
 			$this->setResult( 'ERROR',  'Could not find ticket to test with.', 'Please enable the WflLogon test.' );
 			return;
 		}
+
+		require_once BASEDIR.'/server/utils/TestSuite.php';
+		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		$this->testCreateObject();
 		$this->testCreateObjectWithoutStatus();
@@ -111,21 +117,21 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflCreateObject_TestCase ex
 				return;
 			}
 	
-			/* Commented out; We do not use the SoapClient, and so we should not use the TransferClient either! (=> Use both or use none.)
 			require_once BASEDIR.'/server/utils/TransferClient.class.php';
-			$transferClient = new WW_Utils_TransferClient();
+			$transferClient = new WW_Utils_TransferClient( $this->ticket );
 			if( !$transferClient->uploadFile($attachment) ) {
 				$articleName = $articleObj->MetaData->BasicMetaData->Name;
 				$this->setResult( 'ERROR',  'Failed uploading native file for article "'.$articleName.'".', 'Check if all the Transfer Server settings are set in configserver.php.' );
 				return;
-			}*/
+			}
 		}
 	}
 
 	/**
-	 * Create object via CreateObejcts service call.
+	 * Create object via CreateObjects service call.
 	 *
-	 * @param array $articleObjs List of objects to be created via CreateObjects service call.
+	 * @param Object[] $articleObjs List of objects to be created via CreateObjects service call.
+	 * @return Object[] Created objects, returned by web service.
 	 */
 	private function callCreateObjectService( $articleObjs )
 	{
@@ -137,9 +143,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflCreateObject_TestCase ex
 		$request->Ticket	= $this->ticket;
 		$request->Lock		= false;
 		$request->Objects	= $articleObjs;
-		$objects = $service->execute( $request );
 
-		return $objects;
+		$response = $this->utils->callService( $this, $request, 'Create Objects' );
+
+		return $response->Objects;
 	}
 
 	/**
@@ -147,13 +154,13 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflCreateObject_TestCase ex
 	 * ['BuildTest_WebServices_WflServices']['objIds'] so that these objects
 	 * get deleted (and so tested implicitly) during DeteleObjects_TestCase.
 	 *
-	 * @param array List of Objects to retrieve its objectId for deletion.
+	 * @param Object[] of Objects to retrieve its objectId for deletion.
 	 */
 	private function collectObjIdsForDeletion( $objects )
 	{
 		// Collect object ids and temporary store it at the session.
 		// This data is picked up by successor TestCase modules within this WflServices TestSuite.
-		foreach ( $objects->Objects as $object ) {
+		foreach ( $objects as $object ) {
 			$this->objIDs[] = $object->MetaData->BasicMetaData->ID;
 		}
 		$this->vars['BuildTest_WebServices_WflServices']['objIds'] = $this->objIDs;

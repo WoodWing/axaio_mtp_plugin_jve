@@ -560,16 +560,15 @@ class BizContentSource
 	 */
 	private static function getContentSourceConnectorForContentSource( $contentSource )
 	{
-		
 		// Now find the corresponding content source:
 		// Results is cached, because for multi-object gets this is called multiple times and this turns to be expensive
-		require_once 'Zend/Registry.php';
-		if( Zend_Registry::isRegistered( 'ContentSource'.$contentSource ) ) {
-			$connector = Zend_Registry::get( 'ContentSource'.$contentSource );
+		static $registry = array();
+		if( array_key_exists( 'ContentSource'.$contentSource, $registry ) ) {
+			$connector = $registry['ContentSource'.$contentSource];
 		} else {
 			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 			$connector = BizServerPlugin::searchConnector( 'ContentSource', null, 'isContentSourceId', array($contentSource) );
-			Zend_Registry::set( 'ContentSource'.$contentSource, $connector );
+			$registry['ContentSource'.$contentSource] = $connector;
 		}
 		if( $connector ) {
 			return $connector;

@@ -1,33 +1,32 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	Services
- * @since 		v7.0
- * @copyright 	WoodWing Software bv. All Rights Reserved.
+ * @package    Enterprise
+ * @subpackage Services
+ * @since      v7.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 require_once BASEDIR . '/server/utils/LogHandler.class.php';
 require_once BASEDIR . '/server/protocols/soap/Server.php';
 
 class WW_SOAP_Client extends SoapClient
 {
-	/**
-	 * @var array */
+	/** @var array $attachments */
 	private $attachments = array();
-	private $invertedClassMap = null; // classmap with inverted keys/values
-	/**
-	 * Holds DIME response
-	 *
-	 * @var WW_DIME_Message
-	 */
+	/** @var array|null $invertedClassMap class map with inverted keys/values */
+	private $invertedClassMap = null;
+	/** @var WW_DIME_Message $dime Holds DIME response */
 	public $dime = null;
+	/** @var resource $dimeFH File handle for $this->dimeTmpFilePath  */
 	private $dimeFH = null;
+	/** @var string $dimeTmpFilePath Temporary file use to store the DIME attachments */
 	private $dimeTmpFilePath = '';
+	/** @var string $cookie */
 	private $cookie = '';
 	
 	/**
-	 * @see SoapClient::__construct()
+	 * {@inheritdoc}
 	 */
-	public function __construct($wsdl, $options = array())
+	public function __construct( $wsdl, $options = array() )
 	{
 		WW_SOAP_Server::initWsdlCache();
 		
@@ -38,43 +37,38 @@ class WW_SOAP_Client extends SoapClient
 		$options['typemap'][] = array( 'type_ns' => $options['uri'], 
 			'type_name' => 'Attachment' , 'from_xml' => array( $this, 'xmlAttachmentToObject'));
 
-		// for debugging: additional SOAP entry point params
-		if( LogHandler::debugMode() && defined('TESTSUITE') ) {
-			$testSuiteOpts = unserialize(TESTSUITE);
-			if( isset($testSuiteOpts['SoapUrlDebugParams']) && !empty($testSuiteOpts['SoapUrlDebugParams']) ) {
-				$options['location'] .= '?'.$testSuiteOpts['SoapUrlDebugParams'];
+		$urlInfo = parse_url( $options['location'] );
+		$hasQuery = isset( $urlInfo['query'] );
+
+		// for debugging: additional HTTP entry point params
+		if( LogHandler::debugMode() ) {
+			require_once BASEDIR.'/server/utils/TestSuiteOptions.php';
+			$params = WW_Utils_TestSuiteOptions::getHttpEntryPointDebugParams();
+			if( $params ) {
+				$separator = $hasQuery ? '&' : '?';
+				$options['location'] .= $separator.$params;
+				$hasQuery = true;
 			}
 		}
 		
 		if ( isset( $options['transfer'] )) { // Pass the transfer method
-			$urlInfo = parse_url($options['location']);
-			if ( isset($urlInfo['query'] )) {
-				$options['location'] .= '&transfer='. $options['transfer'];
-			} else {
-				$options['location'] .= '?transfer='. $options['transfer'];
-				
-			}
+			$separator = $hasQuery ? '&' : '?';
+			$options['location'] .= $separator.'transfer='. $options['transfer'];
+			$hasQuery = true;
 		}
 		if ( isset( $options['protocol'] )) { // Pass the protocol
-			$urlInfo = parse_url($options['location']);
-			if ( isset($urlInfo['query'] )) {
-				$options['location'] .= '&protocol='. $options['protocol'];
-			} else {
-				$options['location'] .= '?protocol='. $options['protocol'];
-				
-			}
+			$separator = $hasQuery ? '&' : '?';
+			$options['location'] .= $separator.'protocol='. $options['protocol'];
+			$hasQuery = true;
 		}
 		
 		// Clients can pass an expected error (S-code) on the URL of the entry point.
 		// When that error is thrown, is should be logged as INFO (not as ERROR).
 		// This is for testing purposes only, in case the server log must stay free of errors.
 		if( isset( $options['expectedError'] ) ) {
-			$urlInfo = parse_url( $options['location'] );
-			if( isset( $urlInfo['query'] ) ) {
-				$options['location'] .= '&expectedError='.$options['expectedError'];
-			} else {
-				$options['location'] .= '?expectedError='.$options['expectedError'];
-			}
+			$separator = $hasQuery ? '&' : '?';
+			$options['location'] .= $separator.'expectedError='. $options['expectedError'];
+			$hasQuery = true;
 		}
 		
 		$this->invertedClassMap = array_flip( $options['classmap'] );
@@ -135,14 +129,7 @@ class WW_SOAP_Client extends SoapClient
 
 
 	/**
-	 * @see SoapClient::__soapCall()
-	 *
-	 * @param string $function_name
-	 * @param array $arguments
-	 * @param array $options
-	 * @param mixed[optional] $input_headers
-	 * @param array $output_headers
-	 * @return mixed
+	 * {@inheritdoc}
 	 */
 	public function __call ($function_name, $arguments)
 	{
@@ -150,14 +137,7 @@ class WW_SOAP_Client extends SoapClient
 	}
 	
 	/**
-	 * @see SoapClient::__soapCall()
-	 *
-	 * @param string $function_name
-	 * @param array $arguments
-	 * @param array $options
-	 * @param mixed[optional] $input_headers
-	 * @param array $output_headers
-	 * @return mixed
+	 * {@inheritdoc}
 	 */
 	public function __soapCall ($function_name, $arguments, $options = null, $input_headers = null, &$output_headers = null)
 	{
@@ -185,9 +165,6 @@ class WW_SOAP_Client extends SoapClient
 
 	public function __doRequest($request, $location, $action, $version , $one_way = 0)
 	{
-		$version = $version;
-		$one_way = $one_way;
-		
 		$result = '';
 		$att = $this->getAttachments();
 		if (count($att) > 0){
@@ -495,7 +472,6 @@ class WW_SOAP_Client extends SoapClient
 		$xml = new SimpleXMLElement( $xmlStream );
 		$attachment = new Attachment();
 		foreach( get_object_vars( $attachment ) as $name => $value ) {
-			$value = $value; // keep analyzer happy
 			if (isset( $xml->$name )) {
 				if ($name == 'Content') {
 					// NOTE: $childNode->Content['id'] does not work when namespaces are involved!!

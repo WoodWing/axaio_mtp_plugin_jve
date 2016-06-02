@@ -30,8 +30,7 @@ class WW_JSON_PlnServices extends WW_JSON_Services
 			$resp = $service->execute( $req );
 			$resp = $this->restructureObjects( $resp );
 		} catch( BizException $e ) {
-			require_once 'Zend/Json/Server/Exception.php';
-			throw new Zend_Json_Server_Exception( $e->getMessage() );
+			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
 		}
 		return $resp;
 	}
@@ -48,8 +47,7 @@ class WW_JSON_PlnServices extends WW_JSON_Services
 			$resp = $service->execute( $req );
 			$resp = $this->restructureObjects( $resp );
 		} catch( BizException $e ) {
-			require_once 'Zend/Json/Server/Exception.php';
-			throw new Zend_Json_Server_Exception( $e->getMessage() );
+			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
 		}
 		return $resp;
 	}
@@ -66,8 +64,7 @@ class WW_JSON_PlnServices extends WW_JSON_Services
 			$resp = $service->execute( $req );
 			$resp = $this->restructureObjects( $resp );
 		} catch( BizException $e ) {
-			require_once 'Zend/Json/Server/Exception.php';
-			throw new Zend_Json_Server_Exception( $e->getMessage() );
+			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
 		}
 		return $resp;
 	}
@@ -84,8 +81,7 @@ class WW_JSON_PlnServices extends WW_JSON_Services
 			$resp = $service->execute( $req );
 			$resp = $this->restructureObjects( $resp );
 		} catch( BizException $e ) {
-			require_once 'Zend/Json/Server/Exception.php';
-			throw new Zend_Json_Server_Exception( $e->getMessage() );
+			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
 		}
 		return $resp;
 	}
@@ -102,8 +98,7 @@ class WW_JSON_PlnServices extends WW_JSON_Services
 			$resp = $service->execute( $req );
 			$resp = $this->restructureObjects( $resp );
 		} catch( BizException $e ) {
-			require_once 'Zend/Json/Server/Exception.php';
-			throw new Zend_Json_Server_Exception( $e->getMessage() );
+			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
 		}
 		return $resp;
 	}
@@ -132,8 +127,7 @@ class WW_JSON_PlnServices extends WW_JSON_Services
 			$resp = $service->execute( $req );
 			$resp = $this->restructureObjects( $resp );
 		} catch( BizException $e ) {
-			require_once 'Zend/Json/Server/Exception.php';
-			throw new Zend_Json_Server_Exception( $e->getMessage() );
+			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
 		}
 		return $resp;
 	}
@@ -162,8 +156,7 @@ class WW_JSON_PlnServices extends WW_JSON_Services
 			$resp = $service->execute( $req );
 			$resp = $this->restructureObjects( $resp );
 		} catch( BizException $e ) {
-			require_once 'Zend/Json/Server/Exception.php';
-			throw new Zend_Json_Server_Exception( $e->getMessage() );
+			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
 		}
 		return $resp;
 	}
@@ -180,8 +173,7 @@ class WW_JSON_PlnServices extends WW_JSON_Services
 			$resp = $service->execute( $req );
 			$resp = $this->restructureObjects( $resp );
 		} catch( BizException $e ) {
-			require_once 'Zend/Json/Server/Exception.php';
-			throw new Zend_Json_Server_Exception( $e->getMessage() );
+			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
 		}
 		return $resp;
 	}

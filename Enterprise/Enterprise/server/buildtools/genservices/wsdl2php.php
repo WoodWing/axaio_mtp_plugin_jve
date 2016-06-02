@@ -19,7 +19,7 @@ $actions = array(
 	'-all-', 
 	'Services classes', 
 	'Service classes',
-	'SOAP server+client classes',
+	'Server and client classes',
 	'Request and response classes', 
 	'Service interface classes', 
 	'Data classes',
@@ -126,8 +126,9 @@ if( $selAction && $selInterface ) {
 		case 'Service classes':
 			$funcs['Service classes'] = 'generateServiceClasses';
 			if( $selAction !== '-all-' ) break;
-		case 'SOAP server+client classes':
+		case 'Server and client classes':
 			$funcs['SOAP server+client classes'] = 'generateSoapServerClientClasses';
+			$funcs['JSON client classes'] = 'generateJsonClientClasses';
 			if( $selAction !== '-all-' ) break;
 		case 'Request and response classes':
 			$funcs['Request and response classes for PHP'] = 'generateRequestResponseClasses4Php';

@@ -1189,8 +1189,7 @@ abstract class ServicesClassGenerator
 					$outTxt .= "\t\t\tthrow new Zend_Amf_Server_Exception( \$e->getMessage() );\n";
 				break;
 				case 'json':
-					$outTxt .= "\t\t\trequire_once 'Zend/Json/Server/Exception.php';\n";
-					$outTxt .= "\t\t\tthrow new Zend_Json_Server_Exception( \$e->getMessage() );\n";
+					$outTxt .= "\t\t\tthrow new Zend\\Json\\Server\\Exception\\ErrorException( \$e->getMessage() );\n";
 				break;
 			}
 			$outTxt .= "\t\t}\n";
@@ -1726,6 +1725,43 @@ abstract class ServicesClassGenerator
 
 		// create client class file		
 		$classFile = BASEDIR.'/server/protocols/soap/'.$this->getServiceNameShort().'Client.php';
+		$fp = @fopen( $classFile, 'w+' );
+		if( !$fp || fwrite( $fp, $clntOutTxt ) === false ) {
+			$this->ErrorFiles[] = $classFile;
+		} else {
+			$this->SuccessFiles[] = $classFile;
+		}
+		if( $fp ) fclose( $fp );
+	}
+
+	public function generateJsonClientClasses()
+	{
+		$this->clearErrors();
+
+		$intfFull = $this->getServiceNameFull();
+		$intfShort = $this->getServiceNameShort();
+
+		$classFile = BASEDIR.'/server/buildtools/genservices/templates/JsonClient.template.php';
+		$clntOutTxt = file_get_contents( $classFile );
+		if( !$clntOutTxt ) {
+			$this->FatalErrors[] = 'Could not read from file '.$classFile;
+			return;
+		}
+
+		// Determine service location (SOAP entry point) at WSDL
+		$xpath = $this->XPath;
+		$entries = $xpath->query( '/wsdl:definitions/wsdl:service/wsdl:port/soap:address' );
+		$address = $entries->item(0);
+		$location = $address->getAttribute('location');
+
+		// replace /*...*/ markers for client
+		$clntOutTxt = str_replace( '/*INTFFULL*/', $intfFull, $clntOutTxt );
+		$clntOutTxt = str_replace( '/*INTFSHORT*/', $intfShort, $clntOutTxt );
+		$clntOutTxt = str_replace( '/*NAMESPACE*/', $this->getNameSpace(), $clntOutTxt );
+		$clntOutTxt = str_replace( '/*ENTRYPOINT*/', $this->getSoapEntryPoint(), $clntOutTxt );
+
+		// create client class file
+		$classFile = BASEDIR.'/server/protocols/json/'.$this->getServiceNameShort().'Client.php';
 		$fp = @fopen( $classFile, 'w+' );
 		if( !$fp || fwrite( $fp, $clntOutTxt ) === false ) {
 			$this->ErrorFiles[] = $classFile;

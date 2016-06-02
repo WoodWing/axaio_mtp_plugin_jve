@@ -40,6 +40,7 @@ $funcs = array();
 $funcs['Services class'] = 'generateServicesClasses';
 $funcs['Service classes'] = 'generateServiceClasses';
 $funcs['SOAP server+client classes'] = 'generateSoapServerClientClasses';
+$funcs['JSON client classes'] = 'generateJsonClientClasses';
 $funcs['Request and response classes for PHP'] = 'generateRequestResponseClasses4Php';
 $funcs['Request and response classes for Flex'] = 'generateRequestResponseClasses4Flex';
 $funcs['Interfaces classes'] = 'generateServiceInterfaces';

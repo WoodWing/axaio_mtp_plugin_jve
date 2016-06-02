@@ -244,7 +244,7 @@ class WW_DIME_Message
 	/**
 	 * Enter description here...
 	 *
-	 * @param unknown_type $number
+	 * @param integer $number
 	 * @return WW_DIME_Record
 	 */
 	public function getRecord ($number)

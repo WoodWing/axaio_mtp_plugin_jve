@@ -15,11 +15,15 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmIssues_TestCase extends 
 	public function getTestMethods() { return 'Call admin issue services with initial property values and modified property values.'; }
 	public function getPrio()        { return 130; }
 	public function isSelfCleaning() { return true; }
-    
+
+	/** @var integer $publicationId  */
 	private $publicationId = null;
+	/** @var integer $pubChannelId  */
 	private $pubChannelId = null;
+	/** @var string $ticket  */
 	private $ticket = null;
-	private $utils = null; // WW_Utils_TestSuite
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 
 	final public function runTest()
 	{
@@ -27,6 +31,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmIssues_TestCase extends 
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		// Retrieve the test data that has been determined by AdmInitData TestCase.
    		$vars = $this->getSessionVariables();

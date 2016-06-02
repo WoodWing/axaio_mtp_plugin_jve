@@ -6,6 +6,9 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
 
+use Zend\Mail;
+use Zend\Mime;
+
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
 class BizEmail
@@ -14,10 +17,10 @@ class BizEmail
 	 * Send Email notification if this has been configured
 	 *
 	 * @param string $mode				Name of the action triggering this, not used.
-	 * @param Object $object			Object for which to send notifiction
+	 * @param Object $object			Object for which to send notification
 	 * @param array	$types	            Rendition types for this object
-	 * @param string $previousRouteTo	Short username or group of routeto before the action.
-	 * 									if routeto has not changed we will not send email.
+	 * @param string $previousRouteTo	Short username or group of route-to before the action.
+	 * 									if route-to has not changed we will not send email.
 	 */
 	public static function sendNotification( /** @noinspection PhpUnusedParameterInspection */ $mode,
 												$object, $types, $previousRouteTo )
@@ -32,9 +35,9 @@ class BizEmail
 		
 		// generate list of emails to send, email subject and body
 		$emails = self::getEmailRecipients( $props['RouteTo'] );
-		$subj = self::generateEmailsSubject( $props );
+		$subject = self::generateEmailsSubject( $props );
 		$file=''; $fileFormat='';
-		$emailtxt = self::generateEmailBody( $object, $props, $types, $file, $fileFormat );
+		$emailTxt = self::generateEmailBody( $object, $props, $types, $file, $fileFormat );
 		
 		// Setup email transport
 		$transport = self::setupEmailTransport();
@@ -45,7 +48,7 @@ class BizEmail
 		$senderName	 = EMAIL_SENDER_NAME ? EMAIL_SENDER_NAME : BizSession::getUserInfo('fullname');
 
 		// Note: When the $senderEmail is empty we can NOT fall back to the user name (by filling in), 
-		// because that is not a valid email address, some (strict?) SMPT servers will complain: 
+		// because that is not a valid email address, some (strict?) SMTP servers will complain:
 		//     "Domain name required for sender address".
 		// Nevertheless, when the $senderEmail is empty, we just leave it that way and $mail->setFrom(...)
 		// will take care; the $senderName will appear in the "From" field of the arrived email.
@@ -53,24 +56,38 @@ class BizEmail
 		// Before v6.1, the EMAIL_SMTP_SENDER option was used to fill in the $senderEmail.
 		// But, by using the user email or leaving it empty works well, so the option is obsoleted.
 
-		foreach ($emails as $email) { // $email: array( email, fullname, language )
-			// Future enhancment: translate per email/user
-			try{
-				$mail = new Zend_Mail('utf-8');
-				$mail->addTo($email[0],$email[1]); // email, fullname
-				$mail->setFrom($senderEmail, $senderName );
-				$mail->setSubject($subj);
+		if( $emails ) foreach( $emails as $email ) { // $email: array( email, full name, language )
+			// Future enhancement: translate per email/user
+			try {
+				$message = new Mail\Message();
+				$message->setEncoding( 'utf-8' );
+				$message->addTo( $email[0], $email[1] ); // email, full name
+				$message->setFrom( $senderEmail, $senderName ); // email, full name
+				$message->setSubject( $subject );
+
+				$body = new Mime\Message();
+				$html = new Mime\Part();
+				$html->setContent( $emailTxt );
+				$html->setType( 'text/html' );
+				$body->addPart( $html );
+
 				if( !empty($file) ) {
-					$img 		= $mail->createAttachment(	$file, $fileFormat,
-															Zend_Mime::DISPOSITION_INLINE,
-															Zend_Mime::ENCODING_BASE64 );
-					$img->id 	= 'previewthumb';
-					$mail->setType(Zend_Mime::MULTIPART_RELATED);
+					$image = new Mime\Part();
+					$image->setContent( $file );
+					$image->setType( $fileFormat );
+					$image->setDisposition( Mime\Mime::DISPOSITION_INLINE );
+					$image->setEncoding( Mime\Mime::ENCODING_BASE64 );
+					$image->setId( 'previewthumb' );
+					$body->addPart( $image );
 				}
-				$mail->setBodyHtml($emailtxt);
-				$mail->send($transport);
-			} catch( Zend_Exception $e ) {
-				LogHandler::Log('email', 'ERROR', 'Error sending email to '.$email[0].', error:'.$e->getMessage() ); // $e->getMessage() is typically empty...
+
+				$message->setBody( $body );
+				if( !empty($file) ) {
+					$message->getHeaders()->get( 'content-type' )->setType( Mime\Mime::MULTIPART_RELATED );
+				}
+				$transport->send( $message );
+			} catch( Exception $e ) {
+				LogHandler::Log( __CLASS__, 'ERROR', 'Error sending email to '.$email[0].', error:'.$e->getMessage() ); // $e->getMessage() is typically empty...
 			}
 		}
 	}
@@ -121,24 +138,32 @@ class BizEmail
 
 		$emailTxt = self::generateEmailBodyForMultipleObjects( $routeObjects, $objProps, $senderName, $statuses, $categories, $newCategoryId, $newStateId, $fullName );
 		$params = array( count($routeObjects), $fullName, $senderName );
-		$emailSubject = BizResources::localize('MULTI_FILE_EMAIL_SUBJECT', true, $params);
+		$emailSubject = BizResources::localize( 'MULTI_FILE_EMAIL_SUBJECT', true, $params );
 
 		$emails = self::getEmailRecipients( $newRouteTo );
 
 		// Setup email transport
 		$transport = self::setupEmailTransport();
 
-		if( $emails ) foreach ( $emails as $email ) { // $email: array( email, fullname, language )
+		if( $emails ) foreach ( $emails as $email ) { // $email: array( email, full name, language )
 			// Future enhancement: translate per email
-			try{
-				$mail = new Zend_Mail( 'utf-8' );
-				$mail->addTo( $email[0], $email[1] ); // email, fullname
-				$mail->setFrom( $senderEmail, $senderName );
-				$mail->setSubject( $emailSubject );
-				$mail->setBodyHtml( $emailTxt );
-				$mail->send( $transport );
-			} catch( Zend_Exception $e ) {
-				LogHandler::Log('email', 'ERROR', 'Error sending email to ' . $email[0] . ', error:'.$e->getMessage() ); // $e->getMessage() is typically empty...
+			try {
+				$message = new Mail\Message();
+				$message->setEncoding( 'utf-8' );
+				$message->addTo( $email[0], $email[1] ); // email, full name
+				$message->setFrom( $senderEmail, $senderName ); // email, full name
+				$message->setSubject( $emailSubject );
+
+				$body = new Mime\Message();
+				$html = new Mime\Part( $emailTxt );
+				$html->setContent( $emailTxt );
+				$html->setType( 'text/html' );
+				$body->addPart( $html );
+
+				$message->setBody( $body );
+				$transport->send( $message );
+			} catch( Exception $e ) {
+				LogHandler::Log( __CLASS__, 'ERROR', 'Error sending email to ' . $email[0] . ', error:'.$e->getMessage() ); // $e->getMessage() is typically empty...
 			}
 		}
 	}
@@ -161,14 +186,14 @@ class BizEmail
 		
 		// Convert dates to display strings
 		$props['Created']	= DateTimeFunctions::iso2date($props['Created']);
-		$props['Modified']	= DateTimeFunctions::iso2date($props['Modified']);
+		$props['Modified'] = DateTimeFunctions::iso2date($props['Modified']);
 		if( isset($props['Deadline'])) {
-			$props['Deadline']		= DateTimeFunctions::iso2date($props['Deadline']);
+			$props['Deadline'] = DateTimeFunctions::iso2date($props['Deadline']);
 		}
 		
 		// Translate object type to correct language:
 		$objTypeMap = getObjectTypeMap();
-		$props['Type']		= $objTypeMap[$props['Type']];
+		$props['Type'] = $objTypeMap[$props['Type']];
 
 		$issues = array();
 		if( $object->Targets) foreach( $object->Targets as $target ) { // Get all the object target issue
@@ -259,47 +284,47 @@ class BizEmail
 	 * Gets list of all email recipients. In case of a group this is all the users of the group that have
 	 * group email enabled.
 	 *
-	 * @param string $routeto
+	 * @param string $routeTo
 	 * @return array Info list where list [0] email, [1] full name, [2] language
 	 */
-	private static function getEmailRecipients( $routeto )
+	private static function getEmailRecipients( $routeTo )
 	{
 		$emails = array();
-		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSettings.class.php';
-		$row = DBUser::getUser( $routeto );
-		if($row){
-			if (trim($row['email']) && !trim($row['disable']) && trim($row['emailusr'])){
-				if(array_key_exists('language', $row)){
-					$emails[] = array($row['email'], $row['fullname'], $row['language']);
-				}else{
-					if(BizSettings::isFeatureEnabled('CompanyLanguage')){
-						$emails[] = array($row['email'], $row['fullname'], BizSettings::getFeatureValue('CompanyLanguage'));
-					}else{
-						$emails[] = array($row['email'], $row['fullname'], 'enUS');
+		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
+		require_once BASEDIR . '/server/bizclasses/BizSettings.class.php';
+		$row = DBUser::getUser( $routeTo );
+		if( $row ) {
+			if( trim( $row['email'] ) && !trim( $row['disable'] ) && trim( $row['emailusr'] ) ) {
+				if( array_key_exists( 'language', $row ) ) {
+					$emails[] = array( $row['email'], $row['fullname'], $row['language'] );
+				} else {
+					if( BizSettings::isFeatureEnabled( 'CompanyLanguage' ) ) {
+						$emails[] = array( $row['email'], $row['fullname'], BizSettings::getFeatureValue( 'CompanyLanguage' ) );
+					} else {
+						$emails[] = array( $row['email'], $row['fullname'], 'enUS' );
 					}
 				}
 			}
-		}else{
-			$sth = DBUser::getGroupMembers( $routeto );
-			if ($sth){
+		} else {
+			$sth = DBUser::getGroupMembers( $routeTo );
+			if( $sth ) {
 				$dbDriver = DBDriverFactory::gen();
-				while (($row = $dbDriver->fetch($sth))){
-					if (trim($row['email']) && !trim($row['disable']) && trim($row['emailgrp'])){
-						if(array_key_exists('language', $row)){
-							$emails[] = array($row['email'], $row['fullname'], $row['language']);
-						}else{
-					if(BizSettings::isFeatureEnabled('CompanyLanguage')){
-								$emails[] = array($row['email'], $row['fullname'], BizSettings::getFeatureValue('CompanyLanguage'));
-							}else{
-								$emails[] = array($row['email'], $row['fullname'], 'enUS');
+				while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+					if( trim( $row['email'] ) && !trim( $row['disable'] ) && trim( $row['emailgrp'] ) ) {
+						if( array_key_exists( 'language', $row ) ) {
+							$emails[] = array( $row['email'], $row['fullname'], $row['language'] );
+						} else {
+							if( BizSettings::isFeatureEnabled( 'CompanyLanguage' ) ) {
+								$emails[] = array( $row['email'], $row['fullname'], BizSettings::getFeatureValue( 'CompanyLanguage' ) );
+							} else {
+								$emails[] = array( $row['email'], $row['fullname'], 'enUS' );
 							}
 						}
 					}
 				}
 			}
 		}
-		
+
 		return $emails;
 	}
 	
@@ -312,15 +337,16 @@ class BizEmail
 	private static function generateEmailsSubject( $props )
 	{
 		// Generate email subject
-		$subj = BizResources::localize('EMAIL_SUBJECT');
-		
+		$subject = BizResources::localize( 'EMAIL_SUBJECT' );
+
 		$vars = array();
-		preg_match_all("/%(.*?)%/", $subj, $vars, PREG_SET_ORDER);
-		foreach ($vars as $var) {
-			if (isset($props[$var[1]]))
-				$subj = str_replace("%".$var[1]."%", $props[$var[1]], $subj);
+		preg_match_all( "/%(.*?)%/", $subject, $vars, PREG_SET_ORDER );
+		foreach( $vars as $var ) {
+			if( isset( $props[$var[1]] ) ) {
+				$subject = str_replace( "%" . $var[1] . "%", $props[$var[1]], $subject );
+			}
 		}
-		return $subj;
+		return $subject;
 	}
 	
 	/**
@@ -342,15 +368,15 @@ class BizEmail
 		// First see if we have object type specific template. If not, use generic
 		// Not: $props['Type'] contains localized type, so is not usable.
 		if( file_exists( BASEDIR.'/config/templates/email_'.$object->MetaData->BasicMetaData->Type.'.htm' ) ){
-			$emailtxt = file_get_contents( BASEDIR.'/config/templates/email_'.$object->MetaData->BasicMetaData->Type.'.htm' );
+			$emailTxt = file_get_contents( BASEDIR.'/config/templates/email_'.$object->MetaData->BasicMetaData->Type.'.htm' );
 		} else {
-			$emailtxt = file_get_contents( BASEDIR.'/config/templates/email.htm' );
+			$emailTxt = file_get_contents( BASEDIR.'/config/templates/email.htm' );
 		}
 
-		$emailtxt = HtmlDocument::buildDocument( $emailtxt, false );
+		$emailTxt = HtmlDocument::buildDocument( $emailTxt, false );
 
 		$vars = array();
-		preg_match_all("/%(.*?)%/", $emailtxt, $vars, PREG_SET_ORDER);
+		preg_match_all("/%(.*?)%/", $emailTxt, $vars, PREG_SET_ORDER);
 		foreach ($vars as $var) {
 			if( empty($file) && ( $var[1]=='preview' || $var[1]=='thumb') ) {
 				$types = unserialize($types);
@@ -371,29 +397,29 @@ class BizEmail
 						$msgText .= ' &mdash; '. $messageList->Messages[$i]->Message . '<br/>';
 					}
 				}
-				$emailtxt = str_replace("%".$var[1]."%", $msgText, $emailtxt);
+				$emailTxt = str_replace("%".$var[1]."%", $msgText, $emailTxt);
 			} elseif (isset($props[$var[1]])) {
 				if( is_array($props[$var[1]]) ) {
-					$emailtxt = str_replace("%".$var[1]."%", implode(', ',$props[$var[1]]), $emailtxt);
+					$emailTxt = str_replace("%".$var[1]."%", implode(', ',$props[$var[1]]), $emailTxt);
 				} else {
-					$emailtxt = str_replace("%".$var[1]."%", $props[$var[1]], $emailtxt);
+					$emailTxt = str_replace("%".$var[1]."%", $props[$var[1]], $emailTxt);
 				}
 			} elseif( $var[1] == 'server_inetroot' ) {
 				// URL to login at Content Station Web (BZ#1787 / BZ#10515)
-				$emailtxt = str_replace('%server_inetroot%', SERVERURL_ROOT.INETROOT, $emailtxt);
+				$emailTxt = str_replace('%server_inetroot%', SERVERURL_ROOT.INETROOT, $emailTxt);
 			} else { // when property is not set, remove the %Prop% key from email:
-				$emailtxt = str_replace("%".$var[1]."%", '', $emailtxt);
+				$emailTxt = str_replace("%".$var[1]."%", '', $emailTxt);
 			}
 		}
 		if( !empty($file) ) {
-			$emailtxt = str_replace('%thumb%', '<br/><img src="cid:previewthumb" class="image"/>', $emailtxt);								
-			$emailtxt = str_replace('%preview%', '<br/><img src="cid:previewthumb" class="image"/>', $emailtxt);								
+			$emailTxt = str_replace('%thumb%', '<br/><img src="cid:previewthumb" class="image"/>', $emailTxt);
+			$emailTxt = str_replace('%preview%', '<br/><img src="cid:previewthumb" class="image"/>', $emailTxt);
 		} else {
-			$emailtxt = str_replace('%thumb%', '', $emailtxt);								
-			$emailtxt = str_replace('%preview%', '', $emailtxt);								
+			$emailTxt = str_replace('%thumb%', '', $emailTxt);
+			$emailTxt = str_replace('%preview%', '', $emailTxt);
 		}
 		
-		return $emailtxt;
+		return $emailTxt;
 	}
 
 	/**
@@ -410,8 +436,8 @@ class BizEmail
 	 * @param string $routeToFullName the full name of the routeTo, this can be a user or a group
 	 * @return string Email the html body for the email
 	 */
-
-	private static function generateEmailBodyForMultipleObjects( $invokedObjects, $objProps, $senderName, $statuses, $categories, $newCategoryId, $newStateId, $routeToFullName  )
+	private static function generateEmailBodyForMultipleObjects( $invokedObjects, $objProps,
+		$senderName, $statuses, $categories, $newCategoryId, $newStateId, $routeToFullName  )
 	{
 		$emailTxt = file_get_contents( BASEDIR . '/config/templates/emailMultipleObjects.htm' );
 		$emailTxt = HtmlDocument::buildDocument( $emailTxt, false );
@@ -492,7 +518,7 @@ class BizEmail
 	 *
 	 * @param integer $pubId The id of the publication.
 	 * @param string $routeTo
-	 * @param string	$previousRouteTo	RouteTo before the action, we onlt email if it has changed
+	 * @param string	$previousRouteTo	RouteTo before the action, we only email if it has changed
 	 * @return boolean whether we should email
 	 */
 	private static function somethingToEmail( $pubId, $routeTo, $previousRouteTo )
@@ -501,10 +527,10 @@ class BizEmail
 		if (!EMAIL_SMTP) return false;
 
 		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-		// Nothing to do if Pub or RouteTo not set or if routeto
+		// Nothing to do if Pub or RouteTo not set or if route-to
 		// is not changing
 		if (!$pubId || !$routeTo || $routeTo == BizUser::resolveFullUserName($previousRouteTo) ) {
-			LogHandler::Log('email', 'DEBUG', "No need to send email ($pubId, $routeTo, $previousRouteTo)" );
+			LogHandler::Log( __CLASS__, 'DEBUG', "No need to send email ($pubId, $routeTo, $previousRouteTo)" );
 			return false;
 		}
 
@@ -514,7 +540,7 @@ class BizEmail
 		$dbDriver = DBDriverFactory::gen();
 		$row = $dbDriver->fetch($sth);
 		if (!$row || !trim($row['email'])) {
-			return false; // Email turnd off for this publication.
+			return false; // Email turned off for this publication.
 		}
 
 		return true;
@@ -523,33 +549,35 @@ class BizEmail
 	/**
 	 * Setup Zend email transport using variables from config file
 	 *
-	 * @return Zend_Mail_Transport_Smtp|null
+	 * @return Zend\Mail\Transport\Smtp|null
 	 */
 	private static function setupEmailTransport()
 	{
-		//Create and set mail transport
-		require_once BASEDIR."/server/ZendFramework/library/Zend/Mail.php";
-		require_once BASEDIR."/server/ZendFramework/library/Zend/Mail/Transport/Smtp.php";
-		$smtp = EMAIL_SMTP_USER;
-		$config = array();
-		if( !empty($smtp) ) {
-			$config['auth'] 	= 'login';
-			$config['username']	= EMAIL_SMTP_USER;
-			$config['password']	= EMAIL_SMTP_PASS;
-		}
-		$emailPort = EMAIL_PORT;
-		if( !empty($emailPort) ) {
-			$config['port'] = EMAIL_PORT;
-		}
-		$emailSSL = EMAIL_SSL;
-		if( !empty($emailSSL) ) {
-			$config['ssl'] = EMAIL_SSL;
-		}
 		$transport = null;
-		try{
-			$transport = new Zend_Mail_Transport_Smtp(EMAIL_SMTP, $config);
+		try {
+			$options = new Mail\Transport\SmtpOptions();
+			$options->setHost( EMAIL_SMTP );
+			$emailPort = EMAIL_PORT;
+			if( !empty($emailPort) ) {
+				$options->setPort( EMAIL_PORT );
+			}
+			$config = array();
+			$smtp = EMAIL_SMTP_USER;
+			if( !empty($smtp) ) {
+				$options->setConnectionClass( 'login' );
+				$config['username'] = EMAIL_SMTP_USER;
+				$config['password'] = EMAIL_SMTP_PASS;
+			}
+			$emailSSL = EMAIL_SSL;
+			if( !empty($emailSSL) ) {
+				$config['ssl'] = EMAIL_SSL;
+			}
+			if( $config ) {
+				$options->setConnectionConfig( $config );
+			}
+			$transport = new Mail\Transport\Smtp( $options );
 		} catch( Exception $e ) {
-			LogHandler::Log('email', 'ERROR', 'Failed to setup SMTP transport: '.$e->getMessage() );
+			LogHandler::Log( __CLASS__, 'ERROR', 'Failed to setup SMTP transport: '.$e->getMessage() );
 		}
 		
 		return $transport;
@@ -558,38 +586,45 @@ class BizEmail
 	/**
 	 * Sends separate emails with attachments to passed list of email addresses.
 	 * @param array 	$emailTo List with email address to send the email to.
-	 * @param string 	$emailtxt text for email body.
-	 * @param string 	$subj subject of the email.
+	 * @param string 	$emailTxt text for email body.
+	 * @param string 	$subject subject of the email.
 	 * @param array 	$sender From address
 	 * @param array 	$attachments list of files to be added as attachment.
 	 * @return boolean	True in the case of success. Success means all emails are send.
 	 */
-	public static function sendMail( $emailTo, $emailtxt, $subj, $sender, $attachments )
+	public static function sendMail( $emailTo, $emailTxt, $subject, $sender, $attachments )
 	{
 		$transport = self::setupEmailTransport();
 		$result = true;
-		if ( $emailTo )foreach ($emailTo as $email) { // $email: array( email, fullname )
-			try{
-				$mail = new Zend_Mail('utf-8');
-				$mail->addTo($email['address'],$email['fullname']); // email, fullname
-				$mail->setFrom( $sender['address'], $sender['fullname'] );
-				$mail->setSubject($subj);
+		if( $emailTo ) foreach( $emailTo as $email ) { // $email: array( email, full name )
+			try {
+				$message = new Mail\Message();
+				$message->setEncoding( 'utf-8' );
+				$message->addTo( $email['address'], $email['fullname'] ); // email, full name
+				$message->setFrom( $sender['address'], $sender['fullname'] ); // email, full name
+				$message->setSubject( $subject );
 
-				if ( $attachments ) { 
-					$mail->setType(Zend_Mime::MULTIPART_MIXED);
-					foreach ( $attachments as $attachment ) {
-						$mail->createAttachment( $attachment['content'],
-												 $attachment['format'],
-												 Zend_Mime::DISPOSITION_ATTACHMENT,
-												 Zend_Mime::ENCODING_BASE64,
-												 $attachment['filename']);
-					}
-				} 
+				$body = new Mime\Message();
+				foreach( $attachments as $attachment ) {
+					$part = new Mime\Part();
+					$part->setContent( $attachment['content'] );
+					$part->setType( $attachment['format'] );
+					$part->setDisposition( Mime\Mime::DISPOSITION_ATTACHMENT );
+					$part->setEncoding( Mime\Mime::ENCODING_BASE64 );
+					$part->setFileName( $attachment['filename'] );
+					$body->addPart( $part );
+				}
+				$html = new Mime\Part();
+				$html->setContent( $emailTxt );
+				$html->setType( 'text/html' );
+				$body->addPart( $html );
 
-				$mail->setBodyText($emailtxt);
-				$mail->send($transport);
-			} catch( Zend_Exception $e ) {
-				LogHandler::Log('email', 'ERROR', 'Error sending email to '.$email['address'].', error:'.$e->getMessage() ); // $e->getMessage() is typically empty...
+				$message->setBody( $body );
+				$message->getHeaders()->get( 'content-type' )->setType( Mime\Mime::MULTIPART_MIXED );
+				$transport->send( $message );
+
+			} catch( Exception $e ) {
+				LogHandler::Log( __CLASS__, 'ERROR', 'Error sending email to ' . $email['address'] . ', error:' . $e->getMessage() ); // $e->getMessage() is typically empty...
 				$result = false;
 			}
 		} else {
@@ -597,7 +632,7 @@ class BizEmail
 		}
 
 		return $result;
-	}	
+	}
 	
 	/**
 	 * Generic Send Email function where SMTP configuration is checked / settled here.
@@ -617,7 +652,7 @@ class BizEmail
 	public static function sendEmail( $from, $fromFullName, $tos, $subject, $content )
 	{
 		if( !$from || is_null($tos) ){
-			LogHandler::Log('Email', 'ERROR', __METHOD__.':: No Sender or Recipients Email' );
+			LogHandler::Log( __CLASS__, 'ERROR', __METHOD__.':: No Sender or Recipients Email' );
 			return false;
 		}
 		// Setup email transport
@@ -625,16 +660,25 @@ class BizEmail
 		
 		if( $transport ){
 			foreach ($tos as $to => $toFullName ) { 
-				// Future enhancment: translate per email/user
+				// Future enhancement: translate per email/user
 				try{
-					$mail = new Zend_Mail('utf-8');
-					$mail->addTo($to,$toFullName); // email, fullname
-					$mail->setFrom($from, $fromFullName ); // email, fullname
-					$mail->setSubject($subject);
-					$mail->setBodyHtml($content);
-					$mail->send($transport);
-				} catch( Zend_Exception $e ) {
-					LogHandler::Log('email', 'ERROR', 'Error sending email to '. $to .', error:'.$e->getMessage() ); // $e->getMessage() is typically empty...
+					$message = new Mail\Message();
+					$message->setEncoding( 'utf-8' );
+					$message->addTo( $to, $toFullName ); // email, full name
+					$message->setFrom( $from, $fromFullName ); // email, full name
+					$message->setSubject( $subject );
+
+					$body = new Mime\Message();
+					$html = new Mime\Part();
+					$html->setContent( $content );
+					$html->setType( 'text/html' );
+					$body->addPart( $html );
+
+					$message->setBody( $body );
+					$transport->send( $message );
+
+				} catch( Exception $e ) {
+					LogHandler::Log( __CLASS__, 'ERROR', 'Error sending email to '. $to .', error:'.$e->getMessage() ); // $e->getMessage() is typically empty...
 				}
 			}
 			return true;

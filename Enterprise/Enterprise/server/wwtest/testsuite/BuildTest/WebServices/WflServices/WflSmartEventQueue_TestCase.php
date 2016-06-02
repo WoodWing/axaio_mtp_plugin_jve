@@ -170,8 +170,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSmartEventQueue_TestCase
 		$this->vars = $this->getSessionVariables();
 		$this->publication = $this->vars['BuildTest_WebServices_WflServices']['publication'];
 		$this->util = new WW_Utils_TestSuite();
+		$this->util->initTest( 'SOAP' );
 		$this->wflUtil = new WW_TestSuite_BuildTest_WebServices_WflServices_Utils();
-		$this->assertTrue( $this->wflUtil->initTest( $this, 'PMT', 'SOAP' ) );
+		$this->assertTrue( $this->wflUtil->initTest( $this, 'RMQ', 'SOAP' ) );
 
 		// Validate the MESSAGE_QUEUE_CONNECIONS property configured in configserver.php
 		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
@@ -286,7 +287,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSmartEventQueue_TestCase
 				require_once BASEDIR.'/server/services/wfl/WflLogOffService.class.php';
 				$request = new WflLogOffRequest();
 				$request->Ticket = $this->logonResponseA->Ticket;
-				$this->util->callService( $this, $request, 'Teardown: Log off User A', null, 'SOAP' );
+				$this->util->callService( $this, $request, 'Teardown: Log off User A' );
 				$this->logonResponseA = null;
 			} catch( BizException $e ) {} // Exception $e was already thrown and handled before.
 		}
@@ -303,7 +304,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSmartEventQueue_TestCase
 				require_once BASEDIR.'/server/services/wfl/WflLogOffService.class.php';
 				$request = new WflLogOffRequest();
 				$request->Ticket = $this->logonResponseB->Ticket;
-				$this->util->callService( $this, $request, 'Teardown: Log off User B', null, 'SOAP' );
+				$this->util->callService( $this, $request, 'Teardown: Log off User B' );
 				$this->logonResponseB = null;
 			} catch( BizException $e ) {} // Exception $e was already thrown and handled before.
 		}
@@ -417,7 +418,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSmartEventQueue_TestCase
 		$request->RequestInfo = array('Publications', 'MessageQueueConnections');
 
 		/** @var WflLogOnResponse $response */
-		return $this->util->callService( $this, $request, $stepInfo, null, 'SOAP', true );
+		return $this->util->callService( $this, $request, $stepInfo, null, true );
 	}
 
 	/**

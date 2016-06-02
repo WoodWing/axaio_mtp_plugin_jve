@@ -128,76 +128,55 @@ class BizResources
 		global $sLanguage_code;
 		static $resourceTable = array();
 
-		// only reload if user has changed the language
+		// Only reload if user has changed the language.
 		$reload = ($reload === true && $lastUserLang != $sLanguage_code );
-		if ($reload){
-			// delete memory cached resource table
-			$resourceTable = array();
+		if( $reload ) {
+			$resourceTable = array(); // Delete memory cached resource table.
 		}
-		if (count($resourceTable) == 0){
-			// get valid user language
+
+		// For the first call of this session, the resource table need to be populated and cached in memory.
+		if( count($resourceTable) == 0 ) {
+
+			// Get the user language and the file location of the XML resource file.
 			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
 			$sLanguage_code = BizUser::validUserLanguage( $sLanguage_code );
 			$lastUserLang = $sLanguage_code;
-			// check if table is in cache
 			$resFile = self::getFileName( $sLanguage_code );
-			$cache = self::getCache($resFile);
-			// save mtime in cache id because if we deliver a new language file, it's always older than the cache
-			// and the cache won't be updated. Zend_Cache should clean old cache files once a while.
-			$cacheId = 'BizResoures_' . filemtime($resFile) . '_' . $sLanguage_code;
-			if ($cache != null && $cache->test( $cacheId )) {
-				// get table from cache
-				LogHandler::Log(__CLASS__, 'DEBUG', 'Get resource table from cache for language ' . $sLanguage_code );
-				$resourceTable = unserialize($cache->load($cacheId));
+
+			// Read resource table from file cache. Skipped for first time use after installation only.
+			// Since 10.0.0 the file cache implementation based on Zend_Cache is replaced with the home brewed
+			// implementation below, which is 3x faster.
+			$esVersion = str_replace( array(' ', '.'), '_', SERVERVERSION );
+
+			//sys_get_temp_dir is unreliable in adding a trailing slash, so we need to check for this before using it.
+			$tmpDir = sys_get_temp_dir();
+			if( substr($tmpDir, -1) != DIRECTORY_SEPARATOR ) {
+				$tmpDir.DIRECTORY_SEPARATOR;
 			}
-			if (count( $resourceTable ) == 0){
-				LogHandler::Log(__CLASS__, 'DEBUG', 'Read resource table from file for language ' . $sLanguage_code );
+			$cacheFile = $tmpDir.'ww_ent_server_' . $esVersion . '_BizResources_' . filemtime($resFile) . '_' . $sLanguage_code;
+			if( file_exists( $cacheFile ) ) {
+				LogHandler::Log( __CLASS__, 'DEBUG', 'Reading resource table from file cache '.$cacheFile );
+				$resourceTable = unserialize( file_get_contents( $cacheFile ) );
+			}
+
+			// Read resource table from installed XML file. Happens for first time use after installation only.
+			if( count( $resourceTable ) == 0 ) {
+				LogHandler::Log( __CLASS__, 'DEBUG', 'Reading resource table from XML file ' . $resFile );
 				$resourceTable = self::readResourceTable( $resFile );
-				// resolve ui terms here and not in readResourceTable itself because of round tripping
-				// static $resourceTable is now filled so we won't be here again
-				self::resolveUITerms($resourceTable);
-				if ($cache != null){
-					LogHandler::Log(__CLASS__, 'DEBUG', 'Save resource table in cache for language ' . $sLanguage_code );
-					$cache->save(serialize($resourceTable), $cacheId);
-				}
+				// Resolve UI terms here and not in readResourceTable itself because of round tripping
+				// static $resourceTable is now filled so we won't be here again.
+				self::resolveUITerms( $resourceTable );
+			}
+
+			// Write resource table in file cache. Happens for first time use after installation only.
+			if( !file_exists( $cacheFile ) ) {
+				LogHandler::Log( __CLASS__, 'DEBUG', 'Writing resource table into file cache '.$cacheFile );
+				file_put_contents( $cacheFile, serialize( $resourceTable ) );
 			}
 		}
-		
+
+		// Return the memory cached resource table to caller.
 		return $resourceTable;
-	}
-	
-	/**
-	 * Builds cache object.
-	 *
-	 * @param string $resourcePath
-	 * @return Zend_Cache or null if error
-	 */
-	protected static function getCache($resourcePath)
-	{
-		require_once 'Zend/Cache.php';
-		require_once 'Zend/Cache/Frontend/File.php';
-		
-		// Zend_Cache_Frontend_File monitors $resourcePath: when $resourcePath changes
-		// the cache becomes invalid
-		$frontendName = 'File';
-		$frontendOptions = array(
-			'cache_id_prefix' => 'WW_Ent_',
-			'master_file' => $resourcePath);
-		//TODO get backend name and options from config?
-		$backendName = 'File';
-		$backendOptions = array('cache_dir' => TEMPDIRECTORY);
-		
-		try {
-			$cache = Zend_Cache::factory( $frontendName, $backendName, $frontendOptions, $backendOptions );
-		} catch (Exception $e){
-			$cache = null;
-			// Commented out the log below because it makes no sense to log the same warning
-			// over and over again when this is already covered by the Health Check.
-			//LogHandler::Log(__CLASS__, 'WARN', 'Could not create cache (' . $e->getMessage() . '). '
-			//	. 'This affects performance but it\'s normal if the temporary directory hasn\'t been created yet.');
-		}
-		
-		return $cache;
 	}
 	
 	/**

@@ -11,11 +11,13 @@ require_once BASEDIR.'/server/dbclasses/DBServerPlugin.class.php';
 
 class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetObjects_TestCase extends TestCase
 {
-
-	private $ticket;
+	/** @var string $ticket  */
+	private $ticket = null;
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
+	/** @var string $ticket  */
 	private $user;
-
-	// Objects for testing.
+	/** @var Object $wflArticle  */
 	private $wflArticle = null;
 		
 	public function getDisplayName() { return 'Get Objects'; }
@@ -27,20 +29,20 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetObjects_TestCase exte
 	{
 		// Getting session variables
 		// get ticket ( retrieved from wflLogon Test )
-   		$this->vars = $this->getSessionVariables();
-   		$this->ticket = @$this->vars['BuildTest_WebServices_WflServices']['ticket'];
+		$this->vars = $this->getSessionVariables();
+		$this->ticket = @$this->vars['BuildTest_WebServices_WflServices']['ticket'];
 		if( !$this->ticket ) {
-			$this->setResult( 'ERROR',  'Could not find ticket to test with.', 'Please enable the WflLogon test.' );
+			$this->setResult( 'ERROR', 'Could not find ticket to test with.', 'Please enable the WflLogon test.' );
 			return;
 		}
 		$suiteOpts = unserialize( TESTSUITE );
 		$this->user = $suiteOpts['User'];
 
-		require_once BASEDIR.'/server/utils/TestSuite.php';
+		require_once BASEDIR . '/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		$this->runGetObjectsTest();
-
 	}
 
 	/**
@@ -284,6 +286,13 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetObjects_TestCase exte
 		$fileAttach->EditionId = null;
 		$inputPath = dirname(__FILE__).'/testdata/rec#001_att#000_native.wcml';
 		$transferServer->copyToFileTransferServer( $inputPath, $fileAttach );
+
+		require_once BASEDIR.'/server/utils/TransferClient.class.php';
+		$transferClient = new WW_Utils_TransferClient( $this->ticket );
+		if( !$transferClient->uploadFile( $fileAttach ) ) {
+			$articleName = $metaData->BasicMetaData->Name;
+			$this->setResult( 'ERROR', 'Failed uploading native file for article "' . $articleName . '".', 'Check if all the Transfer Server settings are set in configserver.php.' );
+		}
 
 		// Target
 		$target = $this->vars['BuildTest_WebServices_WflServices']['printTarget'];

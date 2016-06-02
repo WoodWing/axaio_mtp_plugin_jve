@@ -10,13 +10,14 @@ class WW_Utils_UrlUtils
 {
 	/**
 	 * Converts PHP file location to URL. 
-	 * Works only in Enterprise application server contex.
+	 * Works only in Enterprise application server context.
 	 * Note that you should use this function, or else you might risk troubles with linked folders
 	 * or proxy servers or forwarded URLs or ...
 	 *
 	 * @param string $fileName
 	 * @param string $entChildDir The child folder of the Enterprise application server. Must be 'server' or 'config'.
 	 * @param bool  $local true return local URL; false return server URL, for server processes that connect to the server again, you need local else server
+	 * @return string URL
 	 */
 	static public function fileToUrl( $fileName, $entChildDir, $local = true )
 	{
@@ -47,17 +48,15 @@ class WW_Utils_UrlUtils
 	{
 		// Validate URL syntax.
 		try {
-			require_once 'Zend/Uri.php';
-			$testUri = Zend_Uri::factory( $testUrl );
+			$testUri = Zend\Uri\UriFactory::factory( $testUrl );
 			$isHttps = $testUri && $testUri->getScheme() == 'https';
-		} catch( Zend_Uri_Exception $e ) {
+		} catch( Exception $e ) {
 			LogHandler::Log( 'UrlUtils', 'ERROR', 
 				'URL to download test file does not seem to be valid: '.$e->getMessage() );
 			return false;
 		}
 
-		require_once 'Zend/Http/Client.php';
-		$httpClient = new Zend_Http_Client( $testUrl );
+		$httpClient = new Zend\Http\Client( $testUrl );
 
 		// When the cURL extension is loaded we set the curl
 		// options. Otherwise we can still try to connect with the
@@ -70,8 +69,8 @@ class WW_Utils_UrlUtils
 			}
 			$curlOpts[CURLOPT_TIMEOUT] = 5;
 
-			$httpClient->setConfig(	array(
-				'adapter' => 'Zend_Http_Client_Adapter_Curl',
+			$httpClient->setOptions(	array(
+				'adapter' => 'Zend\Http\Client\Adapter\Curl',
 				'curloptions' => $curlOpts ) );
 		}
 
@@ -79,17 +78,16 @@ class WW_Utils_UrlUtils
 		$retVal = false;
 		try {
 			$httpClient->setUri( $testUrl );
-			$response = $httpClient->request( $httpMethod );
-			if( $response->isSuccessful() ) {
-				//$contents = $response->getBody();
+			$httpClient->setMethod( $httpMethod );
+			$response = $httpClient->send();
+			if( $response->isSuccess() ) {
 				LogHandler::Log( 'UrlUtils', 'INFO',  'URL seems to be responsive: '.$testUrl );
 				$retVal = true;
 			} else {
-				$message = $response->getHeadersAsString( true, '<br/>' );
-				LogHandler::Log( 'UrlUtils', 'ERROR', 
-					'URL to test does not seems to be responsive: '.$message );
+				LogHandler::Log( 'UrlUtils', 'ERROR',
+					'URL to test does not seems to be responsive: '.$response->getHeaders()->toString() );
 			}
-		} catch( Zend_Http_Client_Exception $e ) {
+		} catch( Exception $e ) {
 			LogHandler::Log( 'UrlUtils', 'ERROR', 
 				'URL to test does not seems to be responsive: '.$e->getMessage() );
 		}
@@ -97,10 +95,10 @@ class WW_Utils_UrlUtils
 	}
 
 	/**
-	 * Retrieve a member of the $_SERVER superglobal
+	 * Retrieve a member of the $_SERVER super global
 	 *
 	 * @param string $key
-	 * @return string Returns null if key does not exist
+	 * @return string|null Returns null if key does not exist
 	 */
 	static private function getServerOpt( $key )
 	{
@@ -108,12 +106,12 @@ class WW_Utils_UrlUtils
 	}
 
 	/**
-	 * Get the remote client IP addres. When any localhost variation is found it simply returns '127.0.0.1'
+	 * Get the remote client IP address. When any localhost variation is found it simply returns '127.0.0.1'
 	 * to make life easier for caller.
 	 * Please no more use $_SERVER[ 'REMOTE_ADDR' ] to resolve the remotely calling client IP.
 	 * Reasons are that:
 	 * - it could be ::1 which represents the localhost (in IPv6 format) and sometimes can not be resolved.
-	 * - the client could be a forewarded, for which the address needs to be taken from HTTP_X_FORWARDED_FOR.
+	 * - the client could be a forwarded, for which the address needs to be taken from HTTP_X_FORWARDED_FOR.
 	 * - there could be localhost or 127.0.0.1 which are the same, but could lead to mismatches in string compares.
 	 *
 	 * @return string
@@ -141,8 +139,7 @@ class WW_Utils_UrlUtils
 	static public function validateUrl($url)
 	{
 		try {
-			require_once 'Zend/Uri.php';
-			Zend_Uri::factory( $url );
+			$testUri = Zend\Uri\UriFactory::factory( $url );
 		} catch( Exception $e ) {
 			throw new BizException( null, 'Server URL does not seem to be valid: '
 				. $e->getMessage(), 'Configuration error' );
@@ -159,19 +156,17 @@ class WW_Utils_UrlUtils
 	 * @param string $detail Optional error details to raise on the BizException, if left empty the default message is used.
 	 * @param string $errorLevel Optional error level to raise on the BizException, defaults to 'ERROR'.
 	 * @param array  $curlOptions An optional array of curl options to use for the http client.
-	 * @return Zend_Http_Client The instantiated httpClient.
+	 * @return Zend\Http\Client The instantiated httpClient.
 	 */
 	static public  function createHttpClient( $url, $message='', $detail='', $errorLevel='ERROR', $curlOptions=array())
 	{
 		try {
-			require_once 'Zend/Http/Client.php';
-
 			$curlConfig = array(
-				'adapter'   => 'Zend_Http_Client_Adapter_Curl',
+				'adapter'   => 'Zend\Http\Client\Adapter\Curl',
 				'curloptions' => $curlOptions ,
 			);
-			$httpClient = new Zend_Http_Client( $url, $curlConfig );
-		} catch( Exception $e ) { // Catches Zend_Validate_Exception, and Zend_Uri_Exception.
+			$httpClient = new Zend\Http\Client( $url, $curlConfig );
+		} catch( Exception $e ) {
 			$errorLevel = ('' == $errorLevel) ? 'ERROR' : $errorLevel;
 			$message = ('' == $message) ? 'Cannot complete the HTTP Request.' : $message;
 			$detail = ('' == $detail)
@@ -186,45 +181,41 @@ class WW_Utils_UrlUtils
 	/**
 	 * Calls a service on the provided HTTP_CLIENT.
 	 *
-	 * @throws BizException Throws an Exception if the Service call could not be completed succesfully.
+	 * @throws BizException Throws an Exception if the Service call could not be completed successfully.
 	 *
-	 * @param Zend_Http_Client The HTTP Client to call the service for.
-	 * @param string $serviceName The name of the Service to be called, defaults to NULL (meaning the URL will just be called).
-	 * @param $tring|null $result The response body of the call, passed by reference.
+	 * @param Zend\Http\Client The HTTP Client to call the service for.
+	 * @param string|null $result The response body of the call, passed by reference.
 	 * @param string|null $httpCode The HTTP Code returned by the call, passed by reference.
 	 * @param string $methodName The name of the method calling this function, used for logging, defaults to '';
 	 * @return null|DomDocument $response The call response as a DomDocument.
 	 */
-	static public function callService( $httpClient, &$result=null, &$httpCode=null, $methodName='')
+	static public function callService( Zend\Http\Client $httpClient, &$result=null, &$httpCode=null, $methodName='')
 	{
 		// Call the service.
 		try {
-			$response = $httpClient->request();
-		} catch( Exception $e ) { // Zend_Http_Client_Exception, Zend_Http_Client_Adapter_Exception, etc
+			$response = $httpClient->send();
+		} catch( Exception $e ) {
 			$response = null;
 		}
 		$e = isset($e) ? $e : null; // keep analyzer happy.
 
 		// Log request and response (OR ERROR)
 		if( $response ) {
-			LogHandler::logService( $methodName, $httpClient->getLastRequest(), true, null, 'txt', true );
-			if( $response->isError() ) {
-				LogHandler::logService( $methodName, $response->asString(), null, null, 'txt', true );
+			LogHandler::logService( $methodName, $httpClient->getLastRawRequest(), true, null, 'txt', true );
+			if( $response->isSuccess() ) {
+				LogHandler::logService( $methodName, $response->toString(), false, null, 'txt', true );
 			} else {
-				LogHandler::logService( $methodName, $response->asString(), false, null, 'txt', true );
+				LogHandler::logService( $methodName, $response->toString(), null, null, 'txt', true );
 			}
 		}
 
 		// Get HTTP response data.
 		if( $response ) {
-			$httpCode = $response->getStatus();
+			$httpCode = $response->getStatusCode();
 			$result = $response->getBody();
 		} else {
 			$httpCode = null;
 			$result = null;
 		}
-
-		$httpCode = $httpCode; // Keep the analyzer happy.
-		$result = $result; // Keep the analyzer happy.
 	}
 }

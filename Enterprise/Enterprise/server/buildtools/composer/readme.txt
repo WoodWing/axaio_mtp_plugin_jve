@@ -17,17 +17,16 @@ See download and documentation: https://getcomposer.org/
 
 How to add more packages using Composer?
 ----------------------------------------------------------------
-1. Perforce: "Check Out" these folders:
-	Enterprise/server/buildtools/composer
-	Enterprise/server/vendor
-2. Text editor: Add required packages to the Enterprise/server/buildtools/composer/composer.json file.
+1. Perforce: 
+	Make sure your default change list is empty.
+	"Check Out" this file: Enterprise/server/buildtools/composer/composer.json
+2. Text editor: Add required packages to the composer.json file.
 3. Terminal: 
 	cd Enterprise/server/buildtools/composer
 	sh composer.sh
 	L> Note that this regenerates composer files and downloads required packages.
-4. Perforce: "Revert Unchanged Files" for these folders:
-	Enterprise/server/buildtools/composer
-	Enterprise/server/vendor
-5. Perforce: "Mark for Add" the entire(!) following folder: Enterprise/server/vendor
+4. Perforce: "Mark for Add" the entire(!) following folder: Enterprise/server/vendor
 	L> Note that this automatically includes all new nested folders and files recursively.
-6. Perforce: Submit the composer and vendor folders.
+5. Perforce: 
+	Refresh your default change list.
+	Submit the composer.json and the files under the vendor folder.

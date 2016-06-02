@@ -68,12 +68,10 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function listQueues()
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// GET /api/queues/{vhost}
 		$path = $this->composeUrl( '/api/queues/'.$this->connection->VirtualHost );
 		$headers = array( 'Accept' => 'application/json' );
-		$request = $this->composeRequest( $path, null, Zend_Http_Client::GET, $headers );
+		$request = $this->composeRequest( $path, null, Zend\Http\Request::METHOD_GET, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -102,8 +100,6 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	public function createQueue( $queueName, $passive = false, $durable = true, $exclusive = false, $autoDelete = false,
 	                             $nowait = false, $arguments = array()  )
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// Validate given params.
 		$this->validateString( __FUNCTION__, 'queueName', $queueName );
 		$this->validateBoolean( __FUNCTION__, 'passive', $passive );
@@ -123,7 +119,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 		);
 		$path = $this->composeUrl( '/api/queues/'.$this->connection->VirtualHost.'/'.$queueName );
 		$headers = array( 'Content-Type' => 'application/json' );
-		$request = $this->composeRequest( $path, json_encode($requestProps), Zend_Http_Client::PUT, $headers );
+		$request = $this->composeRequest( $path, json_encode($requestProps), Zend\Http\Request::METHOD_PUT, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -138,14 +134,12 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function deleteQueue( $queueName )
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// Validate given params.
 		$this->validateString( __FUNCTION__, 'queueName', $queueName );
 
 		// DELETE /api/queues/{vhost}/{name}
 		$path = $this->composeUrl( '/api/queues/'.$this->connection->VirtualHost.'/'.$queueName );
-		$request = $this->composeRequest( $path, null, Zend_Http_Client::DELETE );
+		$request = $this->composeRequest( $path, null, Zend\Http\Request::METHOD_DELETE );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -163,12 +157,10 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function listExchanges()
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// GET /api/exchanges/{vhost}
 		$path = $this->composeUrl( '/api/exchanges/'.$this->connection->VirtualHost );
 		$headers = array( 'Accept' => 'application/json' );
-		$request = $this->composeRequest( $path, null, Zend_Http_Client::GET, $headers );
+		$request = $this->composeRequest( $path, null, Zend\Http\Request::METHOD_GET, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -198,8 +190,6 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	public function createExchange( $exchangeName, $exchangeType, $passive = false, $durable = false, $autoDelete = false,
 	                                $internal = false, $nowait = false, $arguments = array() )
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// Validate given params.
 		$this->validateString( __FUNCTION__, 'exchangeName', $exchangeName );
 		$this->validateString( __FUNCTION__, 'exchangeType', $exchangeType );
@@ -221,7 +211,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 		);
 		$path = $this->composeUrl( '/api/exchanges/'.$this->connection->VirtualHost.'/'.$exchangeName );
 		$headers = array( 'Content-Type' => 'application/json' );
-		$request = $this->composeRequest( $path, json_encode($requestProps), Zend_Http_Client::PUT, $headers );
+		$request = $this->composeRequest( $path, json_encode($requestProps), Zend\Http\Request::METHOD_PUT, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -236,14 +226,12 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function deleteExchange( $exchangeName )
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// Validate given params.
 		$this->validateString( __FUNCTION__, 'exchangeName', $exchangeName );
 
 		// DELETE /api/exchanges/{vhost}/{name}
 		$path = $this->composeUrl( '/api/exchanges/'.$this->connection->VirtualHost.'/'.$exchangeName );
-		$request = $this->composeRequest( $path, null, Zend_Http_Client::DELETE );
+		$request = $this->composeRequest( $path, null, Zend\Http\Request::METHOD_DELETE );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -265,8 +253,6 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function createBindingBetweenQueueAndExchange( $queueName, $exchangeName, $routingKey = '', $arguments = array() )
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// Validate given params.
 		$this->validateString( __FUNCTION__, 'queueName', $queueName );
 		$this->validateString( __FUNCTION__, 'exchangeName', $exchangeName );
@@ -278,7 +264,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 		);
 		$path = $this->composeUrl( '/api/bindings/'.$this->connection->VirtualHost.'/e/'.$exchangeName.'/q/'.$queueName );
 		$headers = array( 'Content-Type' => 'application/json', 'Accept' => 'application/json' );
-		$request = $this->composeRequest( $path, json_encode($requestProps), Zend_Http_Client::POST, $headers );
+		$request = $this->composeRequest( $path, json_encode($requestProps), Zend\Http\Request::METHOD_POST, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -303,15 +289,13 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function getUser( $userName )
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// Validate given params.
 		$this->validateString( __FUNCTION__, 'userName', $userName );
 		
 		// GET /api/users/{name}
 		$path = $this->composeUrl( '/api/users/'.$userName );
 		$headers = array( 'Accept' => 'application/json' );
-		$request = $this->composeRequest( $path, null, Zend_Http_Client::GET, $headers );
+		$request = $this->composeRequest( $path, null, Zend\Http\Request::METHOD_GET, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -331,8 +315,6 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function createOrUpdateUser( WW_Utils_RabbitMQ_RestAPI_User $user )
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// Validate given params.
 		$this->validateString( __FUNCTION__, 'user->Name', $user->Name );
 		$this->validateString( __FUNCTION__, 'user->Password', $user->Password );
@@ -341,7 +323,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 		// PUT /api/users/{name}
 		$path = $this->composeUrl( '/api/users/'.$user->Name );
 		$headers = array( 'Content-Type' => 'application/json' );
-		$request = $this->composeRequest( $path, json_encode( $user->getJson() ), Zend_Http_Client::PUT, $headers );
+		$request = $this->composeRequest( $path, json_encode( $user->getJson() ), Zend\Http\Request::METHOD_PUT, $headers );
 		
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -356,14 +338,12 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function deleteUser( $userName )
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// Validate given params.
 		$this->validateString( __FUNCTION__, 'userName', $userName );
 
 		// DELETE /api/users/{name}
 		$path = $this->composeUrl( '/api/users/'.$userName );
-		$request = $this->composeRequest( $path, null, Zend_Http_Client::DELETE );
+		$request = $this->composeRequest( $path, null, Zend\Http\Request::METHOD_DELETE );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -381,12 +361,10 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function listPermissions()
 	{
-		require_once 'Zend/Http/Client.php';
-		
 		// GET /api/vhosts/{name}/permissions
 		$path = $this->composeUrl( '/api/vhosts/'.$this->connection->VirtualHost.'/permissions' );
 		$headers = array( 'Accept' => 'application/json' );
-		$request = $this->composeRequest( $path, null, Zend_Http_Client::GET, $headers );
+		$request = $this->composeRequest( $path, null, Zend\Http\Request::METHOD_GET, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -411,12 +389,10 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function getUserPermissions( $userName )
 	{
-		require_once 'Zend/Http/Client.php';
-		
 		// GET api/users/{user}/permissions
 		$path = $this->composeUrl( '/api/users/'.$userName.'/permissions' );
 		$headers = array( 'Accept' => 'application/json' );
-		$request = $this->composeRequest( $path, null, Zend_Http_Client::GET, $headers );
+		$request = $this->composeRequest( $path, null, Zend\Http\Request::METHOD_GET, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -442,8 +418,6 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function setUserPermissions( $userName, WW_Utils_RabbitMQ_RestAPI_Permissions $permissions )
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// Validate given params.
 		$this->validateString( __FUNCTION__, 'permissions->Read', $permissions->Read );
 		$this->validateString( __FUNCTION__, 'permissions->Write', $permissions->Write );
@@ -453,7 +427,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 		$permissions->VirtualHost = $this->connection->VirtualHost;
 		$path = $this->composeUrl( '/api/permissions/'.$this->connection->VirtualHost.'/'.$userName );
 		$headers = array( 'Content-Type' => 'application/json' );
-		$request = $this->composeRequest( $path, json_encode( $permissions->getJson() ), Zend_Http_Client::PUT, $headers );
+		$request = $this->composeRequest( $path, json_encode( $permissions->getJson() ), Zend\Http\Request::METHOD_PUT, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -472,12 +446,10 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function hasVirtualHost()
 	{
-		require_once 'Zend/Http/Client.php';
-		
 		// GET /api/vhosts/{name}
 		$path = $this->composeUrl( '/api/vhosts/'.$this->connection->VirtualHost );
 		$headers = array( 'Accept' => 'application/json' );
-		$request = $this->composeRequest( $path, null, Zend_Http_Client::GET, $headers );
+		$request = $this->composeRequest( $path, null, Zend\Http\Request::METHOD_GET, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -502,15 +474,13 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function createVirtualHost( $tracing = true )
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// PUT /api/vhosts/{name}
 		$requestProps = array(
 			'tracing' => $tracing,
 		);
 		$path = $this->composeUrl( '/api/vhosts/'.$this->connection->VirtualHost );
 		$headers = array( 'Content-Type' => 'application/json' );
-		$request = $this->composeRequest( $path, json_encode( $requestProps ), Zend_Http_Client::PUT, $headers );
+		$request = $this->composeRequest( $path, json_encode( $requestProps ), Zend\Http\Request::METHOD_PUT, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -523,11 +493,9 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function deleteVirtualHost()
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// DELETE /api/vhosts/{name}
 		$path = $this->composeUrl( '/api/vhosts/'.$this->connection->VirtualHost );
-		$request = $this->composeRequest( $path, null, Zend_Http_Client::DELETE );
+		$request = $this->composeRequest( $path, null, Zend\Http\Request::METHOD_DELETE );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -549,12 +517,12 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	{
 		$httpClient = $this->createHttpClient( $this->connection->Url );
 		try {
-			$httpClient->request();
+			$httpClient->send();
 		} catch ( Exception $e ) {
 			/** @noinspection PhpSillyAssignmentInspection */
 			$e = $e; // To make analyzer happy.
 			$adapter = $httpClient->getAdapter();
-			if ( $adapter instanceof Zend_Http_Client_Adapter_Curl ) {
+			if ( $adapter instanceof Zend\Http\Client\Adapter\Curl ) {
 				$curl = $adapter->getHandle();
 				$curlErrNr = curl_errno( $curl );
 				$curlErrMsg = curl_error( $curl );
@@ -571,12 +539,10 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	public function testAliveness()
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// GET /api/aliveness-test/{vhost}
 		$path = $this->composeUrl( '/api/aliveness-test/'.$this->connection->VirtualHost );
 		$headers = array( 'Accept' => 'application/json' );
-		$request = $this->composeRequest( $path, null, Zend_Http_Client::GET, $headers );
+		$request = $this->composeRequest( $path, null, Zend\Http\Request::METHOD_GET, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -592,12 +558,10 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	private function getApiOverview()
 	{
-		require_once 'Zend/Http/Client.php';
-
 		// GET /api/overview
 		$path = $this->composeUrl( '/api/overview' );
 		$headers = array( 'Accept' => 'application/json' );
-		$request = $this->composeRequest( $path, null, Zend_Http_Client::GET, $headers );
+		$request = $this->composeRequest( $path, null, Zend\Http\Request::METHOD_GET, $headers );
 
 		// Call the REST service.
 		$httpClient = $this->composeClient( $request );
@@ -789,7 +753,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 * Constructs a HTTP client class in memory.
 	 *
 	 * @param string[] $request List of request params.
-	 * @return Zend_Http_Client|null Client, or NULL when mocked.
+	 * @return Zend\Http\Client|null Client, or NULL when mocked.
 	 */
 	protected function composeClient( $request )
 	{
@@ -797,7 +761,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 			LogHandler::Log( 'RabbitMQ', 'DEBUG', 'Composing HTTP client with request data: '.print_r($request,true) );
 		}
 		$httpClient = $this->createHttpClient( $request['url'], $request['curloptions'] );
-		$httpClient->setRawData( $request['body'] );
+		$httpClient->setRawBody( $request['body'] );
 		$httpClient->setMethod( $request['method'] );
 		$httpClient->setHeaders( $request['headers'] );
 
@@ -810,7 +774,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 *
 	 * @param string $path
 	 * @param array $curlOptions Optional. Extra parameters for the cURL adapter.
-	 * @return Zend_Http_Client
+	 * @return Zend\Http\Client
 	 * @throws BizException on connection errors.
 	 */
 	protected function createHttpClient( $path, $curlOptions = array() )
@@ -819,10 +783,9 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 			// Determine HTTP or HTTPS.
 			$isHttps = false;
 			try {
-				require_once 'Zend/Uri.php';
-				$testUri = Zend_Uri::factory( $path );
+				$testUri = Zend\Uri\UriFactory::factory( $path );
 				$isHttps = $testUri && $testUri->getScheme() == 'https';
-			} catch( Zend_Uri_Exception $e ) {
+			} catch( Exception $e ) {
 				throw new BizException( null, 'Server', 'URL to download test file does not seem to be valid: '
 					.$e->getMessage(), 'Configuration error' );
 			}
@@ -845,8 +808,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 				}
 			}
 
-			require_once 'Zend/Http/Client.php';
-			$httpClient = new Zend_Http_Client( $path );
+			$httpClient = new Zend\Http\Client( $path );
 
 			if( $isHttps ) {
 				$localCert = BASEDIR.'/config/encryptkeys/rabbitmq/cacert.pem'; // for HTTPS / SSL only
@@ -854,18 +816,14 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 					throw new BizException( null, 'Server', null,
 						'The certificate file "'.$localCert.'" does not exists.' );
 				}
-				// Because the Zend_Http_Client class supports SSL, but does not validate certificates / hosts / peers (yet),
-				// and therefore its HTTPS connections are NOT safe! See http://www.zendframework.com/issues/browse/ZF-4838
-				// For this reason, the Zend_Http_Client_Adapter_Curl adapter is passed onto
-				// the Zend_Http_Client class, which enables us to set the secure options and certificate.
-				$httpClient->setConfig(
+				$httpClient->setOptions(
 					array(
-						'adapter' => 'Zend_Http_Client_Adapter_Curl',
+						'adapter' => 'Zend\Http\Client\Adapter\Curl',
 						'curloptions' => $curlOptions + $this->getCurlOptionsForSsl( $localCert ) // prefer theirs ($curlOptions) over ours
 					)
 				);
 			}
-		} catch( Exception $e ) { // catches Zend_Validate_Exception, Zend_Uri_Exception, etc (EN-27253)
+		} catch( Exception $e ) {
 			$message = 'Could not connect to RabbitMQ.'; // for admin users only
 			$detail = 'Error: '.$e->getMessage();
 			throw new BizException( null, 'Server', $detail, $message );
@@ -893,7 +851,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 * Runs a service request at RabbitMQ (REST server) and returns the response.
 	 * Logs the request and response at Enterprise Server logging folder.
 	 * 
-	 * @param Zend_Http_Client $httpClient Client connected to RabbitMQ.
+	 * @param Zend\Http\Client $httpClient Client connected to RabbitMQ.
 	 * @param array $request Request data.
 	 * @param callable $cbFunction Callback function to handle the response. Should accept $request, $httpCode and $responseBody params.
 	 * @param string $serviceName Service to run at RabbitMQ. Used for logging only.
@@ -907,7 +865,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 
 		// Get HTTP response data.
 		if( $response ) {
-			$httpCode = $response->getStatus();
+			$httpCode = $response->getStatusCode();
 			$responseBody = $response->getBody();
 		} else {
 			$httpCode = null;
@@ -921,14 +879,14 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	/**
 	 * Retrieves the response from the HttpClient.
 	 *
-	 * @param Zend_Http_Client $httpClient Client connected to RabbitMQ.
+	 * @param Zend\Http\Client $httpClient Client connected to RabbitMQ.
 	 * @param string $serviceName Service to run at RabbitMQ. Used for logging only.
 	 * @param array $request Request data.
 	 *
-	 * @return null|Zend_Http_Response The response object from the HttpClient.
+	 * @return null|Zend\Http\Response The response object from the HttpClient.
 	 * @throws BizException When operation could not be executed properly.
 	 */
-	protected function callService( Zend_Http_Client $httpClient, $serviceName, array $request )
+	protected function callService( Zend\Http\Client $httpClient, $serviceName, array $request )
 	{
 		/** @noinspection PhpSillyAssignmentInspection */
 		$request = $request;
@@ -937,9 +895,9 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 		PerformanceProfiler::startProfile( 'Calling RabbitMQ', 1 );
 		$e = null;
 		try {
-			$rawResponse = $httpClient->request();
-		} catch( Exception $e ) { // BizException, Zend_Http_Client_Exception, Zend_Http_Client_Adapter_Exception, etc
-			$rawResponse = null;
+			$response = $httpClient->send();
+		} catch( Exception $e ) {
+			$response = null;
 		}
 		PerformanceProfiler::stopProfile( 'Calling RabbitMQ', 1 );
 
@@ -947,12 +905,12 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 		LogHandler::Log( 'RabbitMQ', 'DEBUG', 'Called RabbitMQ service '.$serviceName );
 		if( defined('LOG_RABBITMQ_SERVICES') && LOG_RABBITMQ_SERVICES ) {
 			$rabbitMqServiceName = 'RabbitMQ_'.$serviceName;
-			LogHandler::logService( $rabbitMqServiceName, $httpClient->getLastRequest(), true, 'REST', null, true );
-			if( $rawResponse ) {
-				if( $rawResponse->isError() ) {
-					LogHandler::logService( $rabbitMqServiceName, $rawResponse->asString(), null, 'REST', null, true );
+			LogHandler::logService( $rabbitMqServiceName, $httpClient->getLastRawRequest(), true, 'REST', null, true );
+			if( $response ) {
+				if( $response->isSuccess() ) {
+					LogHandler::logService( $rabbitMqServiceName, $response->toString(), false, 'REST', null, true );
 				} else {
-					LogHandler::logService( $rabbitMqServiceName, $rawResponse->asString(), false, 'REST', null, true );
+					LogHandler::logService( $rabbitMqServiceName, $response->toString(), null, 'REST', null, true );
 				}
 			}
 		}
@@ -962,7 +920,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 			$detail = 'Error: '.$e->getMessage();
 			throw new BizException( 'ERR_CONNECT', 'Server', $detail, null, ['RabbitMQ'] );
 		}
-		return $rawResponse;
+		return $response;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -322,7 +322,7 @@ class BizSession
 				'Publications', 'NamedQueries', 'ServerInfo', 'Settings', 
 				'Users', 'UserGroups', 'Membership', 'ObjectTypeProperties', 'ActionProperties', 
 				'Terms', 'FeatureProfiles', 'Dictionaries', 'MessageList', 'CurrentUser' );
-				// MessageQueueConnection is not listed here since only 9.9+ clients may want this feature.
+				// MessageQueueConnection is not listed here since only 10.0+ clients may want this feature.
 		}
 
 		global $sLanguage_code;

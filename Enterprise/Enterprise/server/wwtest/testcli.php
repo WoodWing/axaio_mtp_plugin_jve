@@ -7,6 +7,7 @@
  * 
  * php testcli.php <TestSuite>
  */
+
 require_once dirname(__FILE__) . '/../../config/config.php';
 
 $testsuitePath = '/server/wwtest/testsuite.php';
@@ -71,10 +72,9 @@ function getTests($testSuite)
 function pollTest(WW_Test $test)
 {
 	$startTime = microtime(true);
-	require_once 'Zend/Http/Client.php';
 	$options = array( 'timeout' => 3600 ); // Max 1 hour
-	$client = new Zend_Http_Client( TESTSUITE_URI . '?command=PollTest&classPath=' . $test->ClassPath .'&sessionId=' . $test->SessionId, $options );
-	$response = $client->request();
+	$client = new Zend\Http\Client( TESTSUITE_URI . '?command=PollTest&classPath=' . $test->ClassPath .'&sessionId=' . $test->SessionId, $options );
+	$response = $client->send();
 	$contents = $response->getBody();
 	$test->Time = microtime(true) - $startTime;
 	
