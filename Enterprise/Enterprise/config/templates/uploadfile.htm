@@ -1,0 +1,80 @@
+	<script language="javascript">
+
+		function reset()
+		{
+			document.file.reset();
+		}
+
+		function Delete(href)
+		{
+			var bRetVal = false;
+			if(confirm("<!--RES:ACT_SURE_DELETE_FILE-->"))
+			{
+				location.href = href;
+				bRetVal = ( -1 == navigator.userAgent.toLowerCase().indexOf("safari") );
+			}
+			return bRetVal;
+		}
+
+	</script>
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/up_32.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:ACT_UPLOAD_STEP_ONE_OF_TWO--></span></td>
+		</tr>
+	</table>
+	
+	<!-- app body -->
+	<form enctype="multipart/form-data" action="uploadfile.php" method="post" name="file">
+
+				<table border="0" cellspacing="0" cellpadding="10" width="610" class="text" bgcolor="#eeeeee">
+					<tr bgcolor="#cccccc">
+						<td><b><!--RES:ACT_SELECT_FILES--></b></td>
+					</tr>
+					<tr>
+						<td>
+							<!--%FILE_CHECK_1%--> <!--%FILE_VALUE_1%--><!--%FILE_CHECK_COMMENT%-->
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							<input type="image" src="../../config/images/up_32.gif" value="Upload" title="<!--RES:ACT_UPLOAD_SELECTED_FILE-->">
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							<img src="../../config/images/undo_32.gif" title="<!--RES:ACT_CLEAR_BROWSE_FIELD-->" onclick="reset()">
+						</td>
+					</tr>
+				</table>
+				<table border="0" cellspacing="0" cellpadding="10" width="610" class="text" bgcolor="#eeeeee">
+					<tr bgcolor="#cccccc">
+						<td colspan="3"><b><!--RES:ACT_UPLOADED_FILES--></b></td>
+					</tr>
+						<!--%RECORDSET%
+							<tr>
+								<td width="32"><img src="../../config/images/%GIFFILE%" title="<!--RES:OBJ_FILE-->"/></td>
+								<td width="32"><a href="#" onclick="Delete('%DEL_URL%');">
+								<img src="../../config/images/trash_16.gif" border="0" title="<!--RES:ACT_DELETE_UPLOADED_FILE-->"/></a></td>
+								<td>%UPLOADFILE%</td>
+							</tr>
+						%RECORDSET%-->
+					<tr>
+						<td colspan="3" align="right">
+							<!--%STEP2%-->
+						</td>
+					</tr>
+					</tr>
+				</table>
+				<table border="0" cellspacing="2" cellpadding="3" width="100%" class="text">
+					<tr>
+						<td><font size="1"><!--%UPLOADNOTE%--></font></td>
+					</tr>
+				</table>
+				<!-- posted variables -->
+				<!--%INPUTHIDDEN%-->
+				<input type="hidden" name="submit" value="SubmitFile"/>
+			</form>
+
+</td></tr></table>

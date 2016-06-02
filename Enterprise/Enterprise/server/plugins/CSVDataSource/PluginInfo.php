@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * @package 	Enterprise
+ * @subpackage 	ServerPlugins
+ * @since 		v6.0
+ * @copyright	WoodWing Software bv. All Rights Reserved.
+ */
+
+require_once BASEDIR.'/server/interfaces/plugins/EnterprisePlugin.class.php';
+require_once BASEDIR.'/server/interfaces/plugins/PluginInfoData.class.php';
+ 
+class CSVDataSource_EnterprisePlugin extends EnterprisePlugin
+{
+	public function getPluginInfo()
+	{ 
+		$info = new PluginInfoData(); 
+		$info->DisplayName = 'CSV Data Source';
+		$info->Version     = '10.0.0 Build 1194'; // don't use PRODUCTVERSION
+		$info->Description = 'CSV Data Source for Smart Catalog Enterprise';
+		$info->Copyright   = COPYRIGHT_WOODWING;
+		return $info;
+	}
+	
+	final public function getConnectorInterfaces() 
+	{ 
+		return array( 'DataSource_EnterpriseConnector' ); 
+	}
+
+	/**
+	 * For first time installation, disable this plug-in.
+	 * See EnterprisePlugin class for more details.
+	 *
+	 * @since 9.0.0
+	 * @return boolean
+	 */
+	public function isActivatedByDefault()
+	{
+		return false;
+	}
+}

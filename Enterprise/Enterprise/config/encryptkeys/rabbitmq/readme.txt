@@ -1,0 +1,1 @@
+Please use this folder to put your cacert.pem file to connect to RabbitMQ over SSL.

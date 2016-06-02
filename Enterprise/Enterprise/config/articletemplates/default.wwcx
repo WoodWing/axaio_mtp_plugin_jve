@@ -1,0 +1,922 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?><wwst_template version="1.0"><wwst_docinfo baselinegrid="36.000000;12.000000;0.750000;" bleedslug="0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000" bnd="0.000000;0.000000;612.000000;792.000000" cnt="1" colmarg="1;12.000000;0" docdeflang="English: USA" docpageinfo="1;1;2;0.000000;540.000000;12.000000;0;36.000000;36.000000;36.000000;36.000000;" facepg="2;" mg="36.000000;36.000000;36.000000;36.000000" spreadinfo="1;0;" zordertw="0"/><wwst_styles pi0="style=&quot;33&quot; type=&quot;snippet&quot; DOMVersion=&quot;5.0&quot; readerVersion=&quot;4.0&quot; featureSet=&quot;257&quot; product=&quot;5.0(458)&quot; " pi1="SnippetType=&quot;DocumentElement&quot;"><SnippetRoot>
+<colr Self="rc_ub" atcs="e_nasp" atvl="x_0" clbs="o_n" clmd="e_prss" clsp="e_CMYK" clvl="x_4_D_0_D_0_D_0_D_100" edbl="b_f" ovrd="e_eOvB" pnam="c_Black" pvis="b_t" rmbl="b_f" swID="l_1f01"/>
+<swch Self="rc_ue" edbl="b_f" pnam="c_None" pvis="b_t" rmbl="b_f" swID="l_1f01"/>
+<StSt Self="rc_di5a29" pnam="k_Solid" strT="rk_"/>
+<csty Self="rc_u68" pnam="k_[No character style]" smpt="b_f"/>
+<csty Self="rc_u136" basd="k_[No character style]" kbsc="x_2_s_0_s_0" pnam="c_Strong" ptfs="c_Bold" smpt="b_f"/>
+<csty Self="rc_u137" basd="k_[No character style]" kbsc="x_2_s_0_s_0" pnam="c_Citate" ptfs="c_Italic" smpt="b_f"/>
+<bnli Self="rc_u3d" bncd="b_f" bncs="b_f" pnam="k_[Default]"/>
+<psty DHnm="k_1, 2, 3, 4..." Jled="e_Jlab" OTPf="e_none" OTca="b_t" OTdl="b_f" OTfr="b_f" OThi="b_f" OTlc="b_t" OTmk="b_t" OTor="b_f" OTss="l_0" OTsw="b_f" OTti="b_f" OTzr="b_f" Ofst="e_Dflt" Self="rc_u67" Stvp="b_f" alea="D_120" alrs="x_0" alts="x_0" bala="e_BlOf" blfn="k_" blft="e_nada" bnar="b_t" bnba="e_left" bnbc="x_2_e_BCuo_l_2022" bnbr="x_3_e_enap_l_0_l_0" bnbs="o_u68" bncl="c_Text Color" bncp="b_t" bnle="l_1" bnlt="e_LTno" bnna="e_left" bnnc="o_u68" bnne="c_^#.^t" bnnl="o_u3d" bnns="k_1, 2, 3, 4..." bnsa="l_1" bnst="l_1" bnta="c_^t" bshf="U_0" capm="e_norm" crot="D_0" dcca="s_0" dcdm="l_0" dcli="s_0" filt="D_-1" flcl="o_ub" font="c_Times" gsde="D_100" gsma="D_100" gsmi="D_100" hkna="b_f" hycf="b_t" hylw="b_t" hypc="b_t" hyph="b_t" hypl="s_3" hypw="s_5" hyzo="U_36" igEA="b_f" inbl="U_0" inbr="U_0" infl="U_0" inlr="U_0" ital="b_f" jatc="s_0" jatr="b_f" jbki="b_t" jcal="e_Jact" jga1="b_f" jgal="e_none" jgfm="e_none" jggy="s_0" jgrt="b_f" jjid="s_0" jkal="e_Jknc" jkcc="k_" jkcm="D_100" jkfc="k_Text Color" jkfn="k_" jkfs="e_nada" jkfz="D_-1" jkht="e_none" jkin="e_nada" jkit="e_Jkif" jkof="e_atil" jkos="e_atil" jkp2="e_Jkar" jkpl="D_0" jkpt="D_100" jksc="k_Text Color" jkst="D_-1" jktn="D_-1" jktp="e_none" jkwt="D_-1" jmab="s_2" jmas="D_-1" jmbb="s_2" jmbs="D_-1" jmoj="e_nada" jpgd="b_f" jpro="b_t" jraa="b_t" jral="e_Jrjs" jras="b_f" jren="b_t" jrfl="k_Text Color" jrfn="k_" jrfs="D_-1" jrft="e_nada" jro1="b_f" jrof="e_atil" jros="e_atil" jrov="b_f" jrpt="D_100" jrpz="e_Jkar" jrsc="D_66" jrsk="k_Text Color" jrsp="e_Jr12" jrst="D_-1" jrtd="s_0" jrti="D_-1" jrtp="e_Jrpc" jrtr="b_f" jrts="b_t" jrva="e_Jro1" jrwd="D_100" jrwt="D_-1" jrxo="D_0" jryo="D_0" jset="e_Jchi" jsha="D_4500" jshp="D_0" jshr="b_f" jsht="b_t" jslh="b_f" jtax="D_0" jtay="D_0" jtcy="b_f" jwal="e_atil" jwar="b_f" jwas="D_50" jwli="s_2" jwls="D_0" kepl="b_f" kept="b_f" kfnl="s_2" klnl="s_2" kwnx="s_0" ligt="b_t" lint="D_-1" lncl="o_ue" lnwt="U_1" lsde="D_0" lsma="D_0" lsmi="D_0" miaf="s_2" mibe="s_2" nmfn="k_" nobk="b_f" ovpr="b_f" pair="U_0" pakm="k_Metrics" paln="e_left" pals="e_full" palt="b_f" paof="U_0" patp="o_di5a29" pbbp="e_nbrk" pbir="U_0" pbop="U_0" pbtp="o_di5a29" pgfa="D_0" pgfl="D_-1" pgsa="D_0" pgsl="D_-1" pgss="x_2_U_0_U_0" pgst="x_2_U_0_U_0" phzs="D_100" plng="k_English: USA" pnam="k_[No paragraph style]" posm="e_norm" prak="b_f" pral="U_0" prao="b_f" prar="b_f" pras="D_1" prat="D_-1" prb2="b_f" prbl="U_0" prbo="b_f" prbr="b_f" prbs="D_1" prbt="D_-1" pskw="D_0" ptce="c_HL Composer" ptfs="c_Regular" ptsz="U_12" pvts="D_100" ragc="o_ue" rago="b_f" ragt="D_-1" rawd="e_Klwd" rbg2="b_f" rbgc="o_ue" rbgo="b_f" rbgt="D_-1" rbwd="e_Klwd" rlac="k_Text Color" rlbc="k_Text Color" smpt="b_f" sovp="b_f" spaf="U_0" spbe="U_0" stco="k_Text Color" stgc="o_ue" stgo="b_f" stgt="D_-1" stos="U_-9999" strk="b_f" sttp="o_di5a29" sttt="D_-1" stwt="U_-9999" swor="s_5" szld="e_atil" trak="D_0" tsum="D_0" ulco="k_Text Color" ulgc="o_ue" ulgt="D_-1" ulop="b_f" ulos="U_-9999" ultp="o_di5a29" ultt="D_-1" ulwt="U_-9999" undr="b_f" upgo="b_f" wsde="D_100" wsma="D_133" wsmi="D_80"/>
+<psty Self="rc_u6b" basd="k_[No paragraph style]" font="c_Arial" kbsc="x_2_s_0_s_0" nxpa="o_u6b" pnam="k_NormalParagraphStyle" smpt="b_f"/>
+<psty Self="rc_u132" basd="o_u6b" kbsc="x_2_s_0_s_0" nxpa="o_u132" pnam="c_Head" ptfs="c_Bold" ptsz="U_18" smpt="b_f"/>
+<psty Self="rc_u134" basd="o_u6b" kbsc="x_2_s_0_s_0" nxpa="o_u134" pnam="c_Intro" ptfs="c_Italic" smpt="b_f"/>
+<psty Self="rc_u135" basd="o_u6b" kbsc="x_2_s_0_s_0" nxpa="o_u135" pnam="c_Body" smpt="b_f"/>
+<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta x:xmptk="Adobe XMP Core 4.0-c006 1.236519, Wed Jun 14 2006 08:31:24" xmlns:x="adobe:ns:meta/">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about="" xmlns:xap="http://ns.adobe.com/xap/1.0/" xmlns:xapGImg="http://ns.adobe.com/xap/1.0/g/img/">
+         <xap:CreateDate>2007-09-14T11:48:15Z</xap:CreateDate>
+         <xap:MetadataDate>2007-09-14T11:48:15Z</xap:MetadataDate>
+         <xap:CreatorTool>Adobe InDesign 5.0</xap:CreatorTool>
+         <xap:Thumbnails>
+            <rdf:Alt>
+               <rdf:li rdf:parseType="Resource">
+                  <xapGImg:format>JPEG</xapGImg:format>
+                  <xapGImg:width>512</xapGImg:width>
+                  <xapGImg:height>512</xapGImg:height>
+                  <xapGImg:image>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
+Pn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCK
+W8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q
+/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f
+5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZN
+jw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/
+APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A
+9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+xD/VNQ5/W
+eEPq/WvrHp+o3Hj9X+rU5+jWtd/s5Z4uOuGzXDXL+lfew4J3e13f2V3N2MN3c2VvcyX84eaJJGCr
+BQFlDGlYD44M04QyECA2P9L9a44ylAHiP2fqV/qVz/1cLj/gYP8AsnyHix/mD/ZfrZ+HL+cfs/U7
+6lc/9XC4/wCBg/7J8fFj/MH+y/Wvhy/nH7P1O+pXP/VwuP8AgYP+yfHxY/zB/sv1r4cv5x+z9Tvq
+Vz/1cLj/AIGD/snx8WP8wf7L9a+HL+cfs/U76lc/9XC4/wCBg/7J8fFj/MH+y/Wvhy/nH7P1O+pX
+P/VwuP8AgYP+yfHxY/zB/sv1r4cv5x+z9TvqVz/1cLj/AIGD/snx8WP8wf7L9a+HL+cfs/U76lc/
+9XC4/wCBg/7J8fFj/MH+y/Wvhy/nH7P1O+pXP/VwuP8AgYP+yfHxY/zB/sv1r4cv5x+z9TvqVz/1
+cLj/AIGD/snx8WP8wf7L9a+HL+cfs/U76lc/9XC4/wCBg/7J8fFj/MH+y/Wvhy/nH7P1O+pXP/Vw
+uP8AgYP+yfHxY/zB/sv1r4cv5x+z9SEspLy+9LldSRf6HbTN6axfE8vq8yecT/yDpluaMMV+kH1S
+G99K82vGZTrf+EHoi/qVz/1cLj/gYP8AsnyrxY/zB/sv1tnhy/nH7P1O+pXP/VwuP+Bg/wCyfHxY
+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
+rsVdirsVSj/pY/8Abw/7EMy/8l/mf79x/wCP/O/3qL0n/jlWX/MPF/xBcq1X99L3n72zB/dx9wRm
+UtjsVdirsVdirsVdirsVdirsVdirsVSjRP8Adf8A2z7L/mfmXrOv9eX6HH0/T+rH9Kb5iOQ7FXYq
+7FXYq7FXYq7FXYq7FXYq7FUo/wClj/28P+xDMv8AyX+Z/v3H/j/zv96i9J/45Vl/zDxf8QXKtV/f
+S95+9swf3cfcEZlLY7FXYq7FXYq7FXYq7FXYq7FXYq7FUo0T/df/AGz7L/mfmXrOv9eX6HH0/T+r
+H9Kb5iOQ7FXYq7FXYq7FXYq7FXYq7FXYq7FUo/6WP/bw/wCxDMv/ACX+Z/v3H/j/AM7/AHq/Trm5
+i0+1i+pTSenDGvNHgKtRQKqfX3BwZ8cZZJHiHM/zv1JxTkIAcJ5eX60R9duf+rfcf8FB/wBlGV+F
+H+eP9l+pn4kv5p+z9bvrtz/1b7j/AIKD/sox8KP88f7L9S+JL+afs/W767c/9W+4/wCCg/7KMfCj
+/PH+y/UviS/mn7P1u+u3P/VvuP8AgoP+yjHwo/zx/sv1L4kv5p+z9bvrtz/1b7j/AIKD/sox8KP8
+8f7L9S+JL+afs/W767c/9W+4/wCCg/7KMfCj/PH+y/UviS/mn7P1u+u3P/VvuP8AgoP+yjHwo/zx
+/sv1L4kv5p+z9bvrtz/1b7j/AIKD/sox8KP88f7L9S+JL+afs/W767c/9W+4/wCCg/7KMfCj/PH+
+y/UviS/mn7P1u+u3P/VvuP8AgoP+yjHwo/zx/sv1L4kv5p+z9bvrtz/1b7j/AIKD/sox8KP88f7L
+9S+JL+afs/W767c/9W+4/wCCg/7KMfCj/PH+y/UviS/mn7P1oHT2mtfR4wNc1sbRD6LxGhT1uvKV
+djy2I2OX5xGd7165c78vJqxXGtr9I5V5+aO+u3P/AFb7j/goP+yjKPCj/PH+y/U2+JL+afs/W767
+c/8AVvuP+Cg/7KMfCj/PH+y/UviS/mn7P1u+u3P/AFb7j/goP+yjHwo/zx/sv1L4kv5p+z9bvrtz
+/wBW+4/4KD/sox8KP88f7L9S+JL+afs/W767c/8AVvuP+Cg/7KMfCj/PH+y/UviS/mn7P1u+u3P/
+AFb7j/goP+yjHwo/zx/sv1L4kv5p+z9bvrtz/wBW+4/4KD/sox8KP88f7L9S+JL+afs/W767c/8A
+VvuP+Cg/7KMfCj/PH+y/UviS/mn7P1u+u3P/AFb7j/goP+yjHwo/zx/sv1L4kv5p+z9bvrtz/wBW
++4/4KD/sox8KP88f7L9S+JL+afs/W767c/8AVvuP+Cg/7KMfCj/PH+y/UviS/mn7P1u+u3P/AFb7
+j/goP+yjHwo/zx/sv1L4kv5p+z9aB5TfWPrHoNy+vc/Q5xepT6n6f+/eNe9OVab5fUeGr/g5719d
+9zVvxXX8XLb+b73/2Q==</xapGImg:image>
+               </rdf:li>
+            </rdf:Alt>
+         </xap:Thumbnails>
+      </rdf:Description>
+      <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <dc:format>application/x-indesign</dc:format>
+      </rdf:Description>
+      <rdf:Description rdf:about="" xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/">
+         <xapMM:InstanceID>9a78e168-636f-11dc-ba31-ac1fe918d054</xapMM:InstanceID>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>
+</SnippetRoot></wwst_styles><wwst_tags pi0="style=&quot;33&quot; type=&quot;snippet&quot; DOMVersion=&quot;5.0&quot; readerVersion=&quot;4.0&quot; featureSet=&quot;257&quot; product=&quot;5.0(458)&quot; " pi1="SnippetType=&quot;DocumentElement&quot;"><SnippetRoot>
+<tagX Self="rc_ua0" XTCr="e_iLbl" pnam="c_Root"/>
+<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta x:xmptk="Adobe XMP Core 4.0-c006 1.236519, Wed Jun 14 2006 08:31:24" xmlns:x="adobe:ns:meta/">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about="" xmlns:xap="http://ns.adobe.com/xap/1.0/" xmlns:xapGImg="http://ns.adobe.com/xap/1.0/g/img/">
+         <xap:CreateDate>2007-09-14T11:48:15Z</xap:CreateDate>
+         <xap:MetadataDate>2007-09-14T11:48:15Z</xap:MetadataDate>
+         <xap:CreatorTool>Adobe InDesign 5.0</xap:CreatorTool>
+         <xap:Thumbnails>
+            <rdf:Alt>
+               <rdf:li rdf:parseType="Resource">
+                  <xapGImg:format>JPEG</xapGImg:format>
+                  <xapGImg:width>512</xapGImg:width>
+                  <xapGImg:height>512</xapGImg:height>
+                  <xapGImg:image>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
+Pn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCK
+W8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q
+/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f
+5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZN
+jw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/
+APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A
+9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+xD/VNQ5/W
+eEPq/WvrHp+o3Hj9X+rU5+jWtd/s5Z4uOuGzXDXL+lfew4J3e13f2V3N2MN3c2VvcyX84eaJJGCr
+BQFlDGlYD44M04QyECA2P9L9a44ylAHiP2fqV/qVz/1cLj/gYP8AsnyHix/mD/ZfrZ+HL+cfs/U7
+6lc/9XC4/wCBg/7J8fFj/MH+y/Wvhy/nH7P1O+pXP/VwuP8AgYP+yfHxY/zB/sv1r4cv5x+z9Tvq
+Vz/1cLj/AIGD/snx8WP8wf7L9a+HL+cfs/U76lc/9XC4/wCBg/7J8fFj/MH+y/Wvhy/nH7P1O+pX
+P/VwuP8AgYP+yfHxY/zB/sv1r4cv5x+z9TvqVz/1cLj/AIGD/snx8WP8wf7L9a+HL+cfs/U76lc/
+9XC4/wCBg/7J8fFj/MH+y/Wvhy/nH7P1O+pXP/VwuP8AgYP+yfHxY/zB/sv1r4cv5x+z9TvqVz/1
+cLj/AIGD/snx8WP8wf7L9a+HL+cfs/U76lc/9XC4/wCBg/7J8fFj/MH+y/Wvhy/nH7P1O+pXP/Vw
+uP8AgYP+yfHxY/zB/sv1r4cv5x+z9SEspLy+9LldSRf6HbTN6axfE8vq8yecT/yDpluaMMV+kH1S
+G99K82vGZTrf+EHoi/qVz/1cLj/gYP8AsnyrxY/zB/sv1tnhy/nH7P1O+pXP/VwuP+Bg/wCyfHxY
+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
+rsVdirsVSj/pY/8Abw/7EMy/8l/mf79x/wCP/O/3qL0n/jlWX/MPF/xBcq1X99L3n72zB/dx9wRm
+UtjsVdirsVdirsVdirsVdirsVdirsVSjRP8Adf8A2z7L/mfmXrOv9eX6HH0/T+rH9Kb5iOQ7FXYq
+7FXYq7FXYq7FXYq7FXYq7FUo/wClj/28P+xDMv8AyX+Z/v3H/j/zv96i9J/45Vl/zDxf8QXKtV/f
+S95+9swf3cfcEZlLY7FXYq7FXYq7FXYq7FXYq7FXYq7FUo0T/df/AGz7L/mfmXrOv9eX6HH0/T+r
+H9Kb5iOQ7FXYq7FXYq7FXYq7FXYq7FXYq7FUo/6WP/bw/wCxDMv/ACX+Z/v3H/j/AM7/AHq/Trm5
+i0+1i+pTSenDGvNHgKtRQKqfX3BwZ8cZZJHiHM/zv1JxTkIAcJ5eX60R9duf+rfcf8FB/wBlGV+F
+H+eP9l+pn4kv5p+z9bvrtz/1b7j/AIKD/sox8KP88f7L9S+JL+afs/W767c/9W+4/wCCg/7KMfCj
+/PH+y/UviS/mn7P1u+u3P/VvuP8AgoP+yjHwo/zx/sv1L4kv5p+z9bvrtz/1b7j/AIKD/sox8KP8
+8f7L9S+JL+afs/W767c/9W+4/wCCg/7KMfCj/PH+y/UviS/mn7P1u+u3P/VvuP8AgoP+yjHwo/zx
+/sv1L4kv5p+z9bvrtz/1b7j/AIKD/sox8KP88f7L9S+JL+afs/W767c/9W+4/wCCg/7KMfCj/PH+
+y/UviS/mn7P1u+u3P/VvuP8AgoP+yjHwo/zx/sv1L4kv5p+z9bvrtz/1b7j/AIKD/sox8KP88f7L
+9S+JL+afs/W767c/9W+4/wCCg/7KMfCj/PH+y/UviS/mn7P1oHT2mtfR4wNc1sbRD6LxGhT1uvKV
+djy2I2OX5xGd7165c78vJqxXGtr9I5V5+aO+u3P/AFb7j/goP+yjKPCj/PH+y/U2+JL+afs/W767
+c/8AVvuP+Cg/7KMfCj/PH+y/UviS/mn7P1u+u3P/AFb7j/goP+yjHwo/zx/sv1L4kv5p+z9bvrtz
+/wBW+4/4KD/sox8KP88f7L9S+JL+afs/W767c/8AVvuP+Cg/7KMfCj/PH+y/UviS/mn7P1u+u3P/
+AFb7j/goP+yjHwo/zx/sv1L4kv5p+z9bvrtz/wBW+4/4KD/sox8KP88f7L9S+JL+afs/W767c/8A
+VvuP+Cg/7KMfCj/PH+y/UviS/mn7P1u+u3P/AFb7j/goP+yjHwo/zx/sv1L4kv5p+z9bvrtz/wBW
++4/4KD/sox8KP88f7L9S+JL+afs/W767c/8AVvuP+Cg/7KMfCj/PH+y/UviS/mn7P1u+u3P/AFb7
+j/goP+yjHwo/zx/sv1L4kv5p+z9aB5TfWPrHoNy+vc/Q5xepT6n6f+/eNe9OVab5fUeGr/g5719d
+9zVvxXX8XLb+b73/2Q==</xapGImg:image>
+               </rdf:li>
+            </rdf:Alt>
+         </xap:Thumbnails>
+      </rdf:Description>
+      <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <dc:format>application/x-indesign</dc:format>
+      </rdf:Description>
+      <rdf:Description rdf:about="" xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/">
+         <xapMM:InstanceID>9a78e169-636f-11dc-ba31-ac1fe918d054</xapMM:InstanceID>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>
+</SnippetRoot></wwst_tags><wwst_stories pi0="style=&quot;33&quot; type=&quot;snippet&quot; DOMVersion=&quot;5.0&quot; readerVersion=&quot;4.0&quot; featureSet=&quot;257&quot; product=&quot;5.0(458)&quot; " pi1="SnippetType=&quot;PageItem&quot;"><SnippetRoot>
+<colr Self="rc_ub" atcs="e_nasp" atvl="x_0" clbs="o_n" clmd="e_prss" clsp="e_CMYK" clvl="x_4_D_0_D_0_D_0_D_100" edbl="b_f" ovrd="e_eOvB" pnam="c_Black" pvis="b_t" rmbl="b_f" swID="l_1f01"/>
+<swch Self="rc_ue" edbl="b_f" pnam="c_None" pvis="b_t" rmbl="b_f" swID="l_1f01"/>
+<StSt Self="rc_di5a29" pnam="k_Solid" strT="rk_"/>
+<csty Self="rc_u68" pnam="k_[No character style]" smpt="b_f"/>
+<bnli Self="rc_u3d" bncd="b_f" bncs="b_f" pnam="k_[Default]"/>
+<psty DHnm="k_1, 2, 3, 4..." Jled="e_Jlab" OTPf="e_none" OTca="b_t" OTdl="b_f" OTfr="b_f" OThi="b_f" OTlc="b_t" OTmk="b_t" OTor="b_f" OTss="l_0" OTsw="b_f" OTti="b_f" OTzr="b_f" Ofst="e_Dflt" Self="rc_u67" Stvp="b_f" alea="D_120" alrs="x_0" alts="x_0" bala="e_BlOf" blfn="k_" blft="e_nada" bnar="b_t" bnba="e_left" bnbc="x_2_e_BCuo_l_2022" bnbr="x_3_e_enap_l_0_l_0" bnbs="o_u68" bncl="c_Text Color" bncp="b_t" bnle="l_1" bnlt="e_LTno" bnna="e_left" bnnc="o_u68" bnne="c_^#.^t" bnnl="o_u3d" bnns="k_1, 2, 3, 4..." bnsa="l_1" bnst="l_1" bnta="c_^t" bshf="U_0" capm="e_norm" crot="D_0" dcca="s_0" dcdm="l_0" dcli="s_0" filt="D_-1" flcl="o_ub" font="c_Times" gsde="D_100" gsma="D_100" gsmi="D_100" hkna="b_f" hycf="b_t" hylw="b_t" hypc="b_t" hyph="b_t" hypl="s_3" hypw="s_5" hyzo="U_36" igEA="b_f" inbl="U_0" inbr="U_0" infl="U_0" inlr="U_0" ital="b_f" jatc="s_0" jatr="b_f" jbki="b_t" jcal="e_Jact" jga1="b_f" jgal="e_none" jgfm="e_none" jggy="s_0" jgrt="b_f" jjid="s_0" jkal="e_Jknc" jkcc="k_" jkcm="D_100" jkfc="k_Text Color" jkfn="k_" jkfs="e_nada" jkfz="D_-1" jkht="e_none" jkin="e_nada" jkit="e_Jkif" jkof="e_atil" jkos="e_atil" jkp2="e_Jkar" jkpl="D_0" jkpt="D_100" jksc="k_Text Color" jkst="D_-1" jktn="D_-1" jktp="e_none" jkwt="D_-1" jmab="s_2" jmas="D_-1" jmbb="s_2" jmbs="D_-1" jmoj="e_nada" jpgd="b_f" jpro="b_t" jraa="b_t" jral="e_Jrjs" jras="b_f" jren="b_t" jrfl="k_Text Color" jrfn="k_" jrfs="D_-1" jrft="e_nada" jro1="b_f" jrof="e_atil" jros="e_atil" jrov="b_f" jrpt="D_100" jrpz="e_Jkar" jrsc="D_66" jrsk="k_Text Color" jrsp="e_Jr12" jrst="D_-1" jrtd="s_0" jrti="D_-1" jrtp="e_Jrpc" jrtr="b_f" jrts="b_t" jrva="e_Jro1" jrwd="D_100" jrwt="D_-1" jrxo="D_0" jryo="D_0" jset="e_Jchi" jsha="D_4500" jshp="D_0" jshr="b_f" jsht="b_t" jslh="b_f" jtax="D_0" jtay="D_0" jtcy="b_f" jwal="e_atil" jwar="b_f" jwas="D_50" jwli="s_2" jwls="D_0" kepl="b_f" kept="b_f" kfnl="s_2" klnl="s_2" kwnx="s_0" ligt="b_t" lint="D_-1" lncl="o_ue" lnwt="U_1" lsde="D_0" lsma="D_0" lsmi="D_0" miaf="s_2" mibe="s_2" nmfn="k_" nobk="b_f" ovpr="b_f" pair="U_0" pakm="k_Metrics" paln="e_left" pals="e_full" palt="b_f" paof="U_0" patp="o_di5a29" pbbp="e_nbrk" pbir="U_0" pbop="U_0" pbtp="o_di5a29" pgfa="D_0" pgfl="D_-1" pgsa="D_0" pgsl="D_-1" pgss="x_2_U_0_U_0" pgst="x_2_U_0_U_0" phzs="D_100" plng="k_English: USA" pnam="k_[No paragraph style]" posm="e_norm" prak="b_f" pral="U_0" prao="b_f" prar="b_f" pras="D_1" prat="D_-1" prb2="b_f" prbl="U_0" prbo="b_f" prbr="b_f" prbs="D_1" prbt="D_-1" pskw="D_0" ptce="c_HL Composer" ptfs="c_Regular" ptsz="U_12" pvts="D_100" ragc="o_ue" rago="b_f" ragt="D_-1" rawd="e_Klwd" rbg2="b_f" rbgc="o_ue" rbgo="b_f" rbgt="D_-1" rbwd="e_Klwd" rlac="k_Text Color" rlbc="k_Text Color" smpt="b_f" sovp="b_f" spaf="U_0" spbe="U_0" stco="k_Text Color" stgc="o_ue" stgo="b_f" stgt="D_-1" stos="U_-9999" strk="b_f" sttp="o_di5a29" sttt="D_-1" stwt="U_-9999" swor="s_5" szld="e_atil" trak="D_0" tsum="D_0" ulco="k_Text Color" ulgc="o_ue" ulgt="D_-1" ulop="b_f" ulos="U_-9999" ultp="o_di5a29" ultt="D_-1" ulwt="U_-9999" undr="b_f" upgo="b_f" wsde="D_100" wsma="D_133" wsmi="D_80"/>
+<psty Self="rc_u6b" basd="k_[No paragraph style]" font="c_Arial" kbsc="x_2_s_0_s_0" nxpa="o_u6b" pnam="k_NormalParagraphStyle" smpt="b_f"/>
+<psty Self="rc_u132" basd="o_u6b" kbsc="x_2_s_0_s_0" nxpa="o_u132" pnam="c_Head" ptfs="c_Bold" ptsz="U_18" smpt="b_f"/>
+<psty Self="rc_u134" basd="o_u6b" kbsc="x_2_s_0_s_0" nxpa="o_u134" pnam="c_Intro" ptfs="c_Italic" smpt="b_f"/>
+<ObSt Jang="o_n" Self="rc_u83" basd="k_[None]" dffg="o_u84" dfos="o_u82" dtos="o_u83" endc="e_bcap" endj="e_mjon" filt="D_-1" flcl="o_ue" gapC="o_ue" gapT="D_-1" kbsc="x_2_s_0_s_0" lint="D_-1" llen="e_none" lncl="o_ue" lnwt="U_0" mitr="D_4" nopr="b_f" obCc="b_t" obao="b_f" obbc="b_t" obcc="b_t" obdc="b_t" obfc="b_t" obff="b_f" oboc="b_f" obpc="b_f" obsc="b_t" obtc="b_t" obtf="b_t" obtw="b_f" osnp="b_f" pcOp="e_none" pcef="e_none" pcrd="D_12" pgfa="D_0" pgsa="D_0" pnam="k_[Normal Text Frame]" prst="o_u6b" rlen="e_none" strA="e_stAC" stty="o_di5a29" xpBi="b_f" xpBk="b_f" xpBm="e_norm" xpBo="D_100" xpSb="e_xpMb" xpSc="o_ub" xpSm="e_none" xpSn="D_0" xpSo="D_75" xpSr="U_5" xpSs="D_0" xpSx="U_7" xpSy="U_7" xpVc="e_xpCc" xpVm="e_none" xpVn="D_0" xpVw="U_9">
+	<TFPf Fboa="U_0" Fbof="e_MAso" Self="rc_u83TFPf1" VJal="e_top" VJmi="U_0" ccnt="l_1" clgt="U_12" clwd="U_144" inst="x_4_U_0_U_0_U_0_U_0" iwrp="b_f" ufcw="b_f"/>
+	<BfGo BFcl="e_iLbl" BFic="U_12" BFro="e_EToi" BFso="U_0" BFuc="b_f" Self="rc_u83BfGo1"/>
+	<cAOs AHrl="e_txtf" AOHa="e_left" AOVa="e_botm" AOVr="e_AVba" AOlp="b_f" AOpp="b_t" AOpt="e_AOPi" AOsr="b_f" AOwp="e_ANbr" AOxo="D_0" AOya="D_0" AOyo="D_0" Self="rc_u83cAOs1"/>
+	<ctxw Self="rc_u83ctxw1" ptwi="e_nada" ptwm="b_f" ptws="e_twbs" ptwv="b_f" txwt="e_none">
+		<ccos Self="rc_u83ctxw1ccos1" acpn="rx_0" iied="b_f" pcnm="k_" pcot="e_sacp" ptns="rx_0"/>
+	</ctxw>
+	<SyPf Self="rc_u83SyPf1" omAL="b_f" omBZ="U_12" sgON="e_Txft" sorn="e_Unkn"/>
+	<FFop Self="rc_u83FFop1" faln="e_ANtl" fcrb="U_0" fcrl="U_0" fcrr="U_0" fcrt="U_0" ffit="e_none"/>
+	<ospc Self="rc_u83ospc1" obbe="b_t" obdf="b_t" obds="b_t" obgf="b_t" obig="b_t" obis="b_t" obog="b_t" obsa="b_t" obtc="b_t" obvg="b_t"/>
+	<ossc Self="rc_u83ossc1" obbe="b_t" obdf="b_t" obds="b_t" obgf="b_t" obig="b_t" obis="b_t" obog="b_t" obsa="b_t" obtc="b_t" obvg="b_t"/>
+	<osfc Self="rc_u83osfc1" obbe="b_t" obdf="b_t" obds="b_t" obgf="b_t" obig="b_t" obis="b_t" obog="b_t" obsa="b_t" obtc="b_t" obvg="b_t"/>
+	<oscc Self="rc_u83oscc1" obbe="b_t" obdf="b_t" obds="b_t" obgf="b_t" obig="b_t" obis="b_t" obog="b_t" obsa="b_t" obtc="b_t" obvg="b_t"/>
+</ObSt>
+<ObSt Jang="o_n" Self="rc_u82" basd="k_[None]" dffg="o_u84" dfos="o_u82" dtos="o_u83" endc="e_bcap" endj="e_mjon" filt="D_-1" flcl="o_ue" gapC="o_ue" gapT="D_-1" kbsc="x_2_s_0_s_0" lint="D_-1" llen="e_none" lncl="o_ub" lnwt="U_1" mitr="D_4" nopr="b_f" obCc="b_t" obao="b_f" obbc="b_f" obcc="b_t" obdc="b_t" obfc="b_t" obff="b_f" oboc="b_f" obpc="b_f" obsc="b_t" obtc="b_t" obtf="b_f" obtw="b_f" osnp="b_f" pcOp="e_none" pcef="e_none" pcrd="D_12" pgfa="D_0" pgsa="D_0" pnam="k_[Normal Graphics Frame]" prst="o_u67" rlen="e_none" sovp="b_f" strA="e_stAC" stty="o_di5a29" xpBi="b_f" xpBk="b_f" xpBm="e_norm" xpBo="D_100" xpSb="e_xpMb" xpSc="o_ub" xpSm="e_none" xpSn="D_0" xpSo="D_75" xpSr="U_5" xpSs="D_0" xpSx="U_7" xpSy="U_7" xpVc="e_xpCc" xpVm="e_none" xpVn="D_0" xpVw="U_9">
+	<TFPf Fboa="U_0" Fbof="e_MAso" Self="rc_u82TFPf1" VJal="e_top" VJmi="U_0" ccnt="l_1" clgt="U_12" clwd="U_144" inst="x_4_U_0_U_0_U_0_U_0" iwrp="b_f" ufcw="b_f"/>
+	<BfGo BFcl="e_iLbl" BFic="U_12" BFro="e_EToi" BFso="U_0" BFuc="b_f" Self="rc_u82BfGo1"/>
+	<cAOs AHrl="e_txtf" AOHa="e_left" AOVa="e_botm" AOVr="e_AVba" AOlp="b_f" AOpp="b_t" AOpt="e_AOPi" AOsr="b_f" AOwp="e_ANbr" AOxo="D_0" AOya="D_0" AOyo="D_0" Self="rc_u82cAOs1"/>
+	<ctxw Self="rc_u82ctxw1" ptwi="e_nada" ptwm="b_f" ptws="e_twbs" ptwv="b_f" txwt="e_none">
+		<ccos Self="rc_u82ctxw1ccos1" acpn="rx_0" iied="b_f" pcnm="k_" pcot="e_sacp" ptns="rx_0"/>
+	</ctxw>
+	<SyPf Self="rc_u82SyPf1" omAL="b_f" omBZ="U_12" sgON="e_Unkn" sorn="e_Unkn"/>
+	<FFop Self="rc_u82FFop1" faln="e_ANtl" fcrb="U_0" fcrl="U_0" fcrr="U_0" fcrt="U_0" ffit="e_none"/>
+	<ospc Self="rc_u82ospc1" obbe="b_t" obdf="b_t" obds="b_t" obgf="b_t" obig="b_t" obis="b_t" obog="b_t" obsa="b_t" obtc="b_t" obvg="b_t"/>
+	<ossc Self="rc_u82ossc1" obbe="b_t" obdf="b_t" obds="b_t" obgf="b_t" obig="b_t" obis="b_t" obog="b_t" obsa="b_t" obtc="b_t" obvg="b_t"/>
+	<osfc Self="rc_u82osfc1" obbe="b_t" obdf="b_t" obds="b_t" obgf="b_t" obig="b_t" obis="b_t" obog="b_t" obsa="b_t" obtc="b_t" obvg="b_t"/>
+	<oscc Self="rc_u82oscc1" obbe="b_t" obdf="b_t" obds="b_t" obgf="b_t" obig="b_t" obis="b_t" obog="b_t" obsa="b_t" obtc="b_t" obvg="b_t"/>
+</ObSt>
+<ObSt Jang="o_n" Self="rc_u84" basd="k_[None]" dffg="o_u84" dfos="o_u82" dtos="o_u83" endc="e_bcap" endj="e_mjon" filt="D_-1" flcl="o_ue" gapC="o_ue" gapT="D_-1" kbsc="x_2_s_0_s_0" lint="D_-1" llen="e_none" lncl="o_ue" lnwt="U_0" mitr="D_4" nopr="b_f" obCc="b_t" obao="b_f" obbc="b_t" obcc="b_t" obdc="b_t" obfc="b_t" obff="b_f" oboc="b_t" obpc="b_f" obsc="b_t" obtc="b_t" obtf="b_t" obtw="b_f" osnp="b_f" pcOp="e_none" pcef="e_none" pcrd="D_12" pgfa="D_0" pgsa="D_0" pnam="k_[Normal Grid]" prst="o_u6b" rlen="e_none" strA="e_stAC" stty="o_di5a29" xpBi="b_f" xpBk="b_f" xpBm="e_norm" xpBo="D_100" xpSb="e_xpMb" xpSc="o_ub" xpSm="e_none" xpSn="D_0" xpSo="D_75" xpSr="U_5" xpSs="D_0" xpSx="U_7" xpSy="U_7" xpVc="e_xpCc" xpVm="e_none" xpVn="D_0" xpVw="U_9">
+	<TFPf Fboa="U_0" Fbof="e_MAso" Self="rc_u84TFPf1" VJal="e_top" VJmi="U_0" ccnt="l_1" clgt="U_12" clwd="U_144" inst="x_4_U_0_U_0_U_0_U_0" iwrp="b_f" ufcw="b_f"/>
+	<BfGo BFcl="e_iLbl" BFic="U_12" BFro="e_EToi" BFso="U_0" BFuc="b_f" Self="rc_u84BfGo1"/>
+	<cAOs AHrl="e_txtf" AOHa="e_left" AOVa="e_botm" AOVr="e_AVba" AOlp="b_f" AOpp="b_t" AOpt="e_AOPi" AOsr="b_f" AOwp="e_ANbr" AOxo="D_0" AOya="D_0" AOyo="D_0" Self="rc_u84cAOs1"/>
+	<ctxw Self="rc_u84ctxw1" ptwi="e_nada" ptwm="b_f" ptws="e_twbs" ptwv="b_f" txwt="e_none">
+		<ccos Self="rc_u84ctxw1ccos1" acpn="rx_0" iied="b_f" pcnm="k_" pcot="e_sacp" ptns="rx_0"/>
+	</ctxw>
+	<SyPf Self="rc_u84SyPf1" omAL="b_f" omBZ="U_12" sgON="e_FGtp" sorn="e_Unkn"/>
+	<FFop Self="rc_u84FFop1" faln="e_ANtl" fcrb="U_0" fcrl="U_0" fcrr="U_0" fcrt="U_0" ffit="e_none"/>
+	<ospc Self="rc_u84ospc1" obbe="b_t" obdf="b_t" obds="b_t" obgf="b_t" obig="b_t" obis="b_t" obog="b_t" obsa="b_t" obtc="b_t" obvg="b_t"/>
+	<ossc Self="rc_u84ossc1" obbe="b_t" obdf="b_t" obds="b_t" obgf="b_t" obig="b_t" obis="b_t" obog="b_t" obsa="b_t" obtc="b_t" obvg="b_t"/>
+	<osfc Self="rc_u84osfc1" obbe="b_t" obdf="b_t" obds="b_t" obgf="b_t" obig="b_t" obis="b_t" obog="b_t" obsa="b_t" obtc="b_t" obvg="b_t"/>
+	<oscc Self="rc_u84oscc1" obbe="b_t" obdf="b_t" obds="b_t" obgf="b_t" obig="b_t" obis="b_t" obog="b_t" obsa="b_t" obtc="b_t" obvg="b_t"/>
+</ObSt>
+<xpDC Self="rc_dxpDC1">
+	<xpQa Self="rc_dxpDC1xpQa1">
+		<xpQe Self="rc_dxpDC1xpQa1xpQe1" xpBi="b_f" xpBk="b_f" xpBm="e_norm" xpBo="D_100"/>
+		<xpQf Self="rc_dxpDC1xpQa1xpQf1" dsiz="U_5" e0D5="D_0" sprd="D_0" xpBm="e_xpMb" xpBo="D_75" xpU7="b_f" xpUj="U_7" xpUk="U_7" xpUp="e_none" xpUr="b_t" xpUs="b_f" xpUt="o_n"/>
+		<xpQg Self="rc_dxpDC1xpQa1xpQg1" e0D5="D_0" wdwh="U_9" xpUp="e_none" xpUq="e_xpCc" xpUu="D_0"/>
+		<xpQh Self="rc_dxpDC1xpQa1xpQh1" dsiz="U_7" e0D5="D_0" e0D8="U_7" inAn="D_120" xpBm="e_xpMb" xpBo="D_75" xpUn="b_f" xpUs="b_f" xpUt="o_n" xpUu="D_0"/>
+		<xpQi Self="rc_dxpDC1xpQa1xpQi1" dsiz="U_7" e0D5="D_0" sprd="D_0" xpBm="e_xpMc" xpBo="D_75" xpUn="b_f" xpUo="e_xp0a" xpUt="o_n"/>
+		<xpQj Self="rc_dxpDC1xpQa1xpQj1" dsiz="U_7" e0D5="D_0" hlsc="e_xp1b" sprd="D_0" xpBm="e_xpMc" xpBo="D_75" xpUn="b_f" xpUo="e_xp0a" xpUt="o_n"/>
+		<xpQk Self="rc_dxpDC1xpQa1xpQk1" dsiz="U_7" e0E3="D_75" e0E4="o_n" inAn="D_120" xpSb="e_xpMb" xpSc="o_n" xpSo="D_75" xpUb="e_xp2b" xpUc="D_100" xpUd="e_Fstn" xpUe="U_0" xpUf="D_30" xpUh="e_xpMc" xpUn="b_f" xpUo="e_xp3a" xpUs="b_f"/>
+		<xpQl Self="rc_dxpDC1xpQa1xpQl1" dsiz="U_7" e0D8="U_7" inAn="D_120" xpBm="e_xpMb" xpBo="D_50" xpUn="b_f" xpUt="o_n" xpUv="b_f"/>
+		<xpQm Self="rc_dxpDC1xpQa1xpQm1" e0D5="D_0" inAn="D_0" xpU3="U_0" xpU4="U_0" xpU5="U_0" xpU6="U_0" xpUn="b_f" xpUu="D_0" xpUw="e_en5a"/>
+		<xpQn Self="rc_dxpDC1xpQa1xpQn1" grdt="e_axlg" inAn="D_0" leng="U_0" xpUn="b_f" xpUx="x_2_U_0_U_0" xpUy="D_0" xpUz="U_0"/>
+	</xpQa>
+	<xpQb Self="rc_dxpDC1xpQb1">
+		<xpQe Self="rc_dxpDC1xpQb1xpQe1" xpBi="b_f" xpBk="b_f" xpBm="e_norm" xpBo="D_100"/>
+		<xpQf Self="rc_dxpDC1xpQb1xpQf1" dsiz="U_5" e0D5="D_0" sprd="D_0" xpBm="e_xpMb" xpBo="D_75" xpU7="b_f" xpUj="U_7" xpUk="U_7" xpUp="e_none" xpUr="b_t" xpUs="b_f" xpUt="o_n"/>
+		<xpQg Self="rc_dxpDC1xpQb1xpQg1" e0D5="D_0" wdwh="U_9" xpUp="e_none" xpUq="e_xpCc" xpUu="D_0"/>
+		<xpQh Self="rc_dxpDC1xpQb1xpQh1" dsiz="U_7" e0D5="D_0" e0D8="U_7" inAn="D_120" xpBm="e_xpMb" xpBo="D_75" xpUn="b_f" xpUs="b_f" xpUt="o_n" xpUu="D_0"/>
+		<xpQi Self="rc_dxpDC1xpQb1xpQi1" dsiz="U_7" e0D5="D_0" sprd="D_0" xpBm="e_xpMc" xpBo="D_75" xpUn="b_f" xpUo="e_xp0a" xpUt="o_n"/>
+		<xpQj Self="rc_dxpDC1xpQb1xpQj1" dsiz="U_7" e0D5="D_0" hlsc="e_xp1b" sprd="D_0" xpBm="e_xpMc" xpBo="D_75" xpUn="b_f" xpUo="e_xp0a" xpUt="o_n"/>
+		<xpQk Self="rc_dxpDC1xpQb1xpQk1" dsiz="U_7" e0E3="D_75" e0E4="o_n" inAn="D_120" xpSb="e_xpMb" xpSc="o_n" xpSo="D_75" xpUb="e_xp2b" xpUc="D_100" xpUd="e_Fstn" xpUe="U_0" xpUf="D_30" xpUh="e_xpMc" xpUn="b_f" xpUo="e_xp3a" xpUs="b_f"/>
+		<xpQl Self="rc_dxpDC1xpQb1xpQl1" dsiz="U_7" e0D8="U_7" inAn="D_120" xpBm="e_xpMb" xpBo="D_50" xpUn="b_f" xpUt="o_n" xpUv="b_f"/>
+		<xpQm Self="rc_dxpDC1xpQb1xpQm1" e0D5="D_0" inAn="D_0" xpU3="U_0" xpU4="U_0" xpU5="U_0" xpU6="U_0" xpUn="b_f" xpUu="D_0" xpUw="e_en5a"/>
+		<xpQn Self="rc_dxpDC1xpQb1xpQn1" grdt="e_axlg" inAn="D_0" leng="U_0" xpUn="b_f" xpUx="x_2_U_0_U_0" xpUy="D_0" xpUz="U_0"/>
+	</xpQb>
+	<xpQc Self="rc_dxpDC1xpQc1">
+		<xpQe Self="rc_dxpDC1xpQc1xpQe1" xpBi="b_f" xpBk="b_f" xpBm="e_norm" xpBo="D_100"/>
+		<xpQf Self="rc_dxpDC1xpQc1xpQf1" dsiz="U_5" e0D5="D_0" sprd="D_0" xpBm="e_xpMb" xpBo="D_75" xpU7="b_f" xpUj="U_7" xpUk="U_7" xpUp="e_none" xpUr="b_t" xpUs="b_f" xpUt="o_n"/>
+		<xpQg Self="rc_dxpDC1xpQc1xpQg1" e0D5="D_0" wdwh="U_9" xpUp="e_none" xpUq="e_xpCc" xpUu="D_0"/>
+		<xpQh Self="rc_dxpDC1xpQc1xpQh1" dsiz="U_7" e0D5="D_0" e0D8="U_7" inAn="D_120" xpBm="e_xpMb" xpBo="D_75" xpUn="b_f" xpUs="b_f" xpUt="o_n" xpUu="D_0"/>
+		<xpQi Self="rc_dxpDC1xpQc1xpQi1" dsiz="U_7" e0D5="D_0" sprd="D_0" xpBm="e_xpMc" xpBo="D_75" xpUn="b_f" xpUo="e_xp0a" xpUt="o_n"/>
+		<xpQj Self="rc_dxpDC1xpQc1xpQj1" dsiz="U_7" e0D5="D_0" hlsc="e_xp1b" sprd="D_0" xpBm="e_xpMc" xpBo="D_75" xpUn="b_f" xpUo="e_xp0a" xpUt="o_n"/>
+		<xpQk Self="rc_dxpDC1xpQc1xpQk1" dsiz="U_7" e0E3="D_75" e0E4="o_n" inAn="D_120" xpSb="e_xpMb" xpSc="o_n" xpSo="D_75" xpUb="e_xp2b" xpUc="D_100" xpUd="e_Fstn" xpUe="U_0" xpUf="D_30" xpUh="e_xpMc" xpUn="b_f" xpUo="e_xp3a" xpUs="b_f"/>
+		<xpQl Self="rc_dxpDC1xpQc1xpQl1" dsiz="U_7" e0D8="U_7" inAn="D_120" xpBm="e_xpMb" xpBo="D_50" xpUn="b_f" xpUt="o_n" xpUv="b_f"/>
+		<xpQm Self="rc_dxpDC1xpQc1xpQm1" e0D5="D_0" inAn="D_0" xpU3="U_0" xpU4="U_0" xpU5="U_0" xpU6="U_0" xpUn="b_f" xpUu="D_0" xpUw="e_en5a"/>
+		<xpQn Self="rc_dxpDC1xpQc1xpQn1" grdt="e_axlg" inAn="D_0" leng="U_0" xpUn="b_f" xpUx="x_2_U_0_U_0" xpUy="D_0" xpUz="U_0"/>
+	</xpQc>
+	<xpQd Self="rc_dxpDC1xpQd1">
+		<xpQe Self="rc_dxpDC1xpQd1xpQe1" xpBi="b_f" xpBk="b_f" xpBm="e_norm" xpBo="D_100"/>
+		<xpQf Self="rc_dxpDC1xpQd1xpQf1" dsiz="U_5" e0D5="D_0" sprd="D_0" xpBm="e_xpMb" xpBo="D_75" xpU7="b_f" xpUj="U_7" xpUk="U_7" xpUp="e_none" xpUr="b_t" xpUs="b_f" xpUt="o_n"/>
+		<xpQg Self="rc_dxpDC1xpQd1xpQg1" e0D5="D_0" wdwh="U_9" xpUp="e_none" xpUq="e_xpCc" xpUu="D_0"/>
+		<xpQh Self="rc_dxpDC1xpQd1xpQh1" dsiz="U_7" e0D5="D_0" e0D8="U_7" inAn="D_120" xpBm="e_xpMb" xpBo="D_75" xpUn="b_f" xpUs="b_f" xpUt="o_n" xpUu="D_0"/>
+		<xpQi Self="rc_dxpDC1xpQd1xpQi1" dsiz="U_7" e0D5="D_0" sprd="D_0" xpBm="e_xpMc" xpBo="D_75" xpUn="b_f" xpUo="e_xp0a" xpUt="o_n"/>
+		<xpQj Self="rc_dxpDC1xpQd1xpQj1" dsiz="U_7" e0D5="D_0" hlsc="e_xp1b" sprd="D_0" xpBm="e_xpMc" xpBo="D_75" xpUn="b_f" xpUo="e_xp0a" xpUt="o_n"/>
+		<xpQk Self="rc_dxpDC1xpQd1xpQk1" dsiz="U_7" e0E3="D_75" e0E4="o_n" inAn="D_120" xpSb="e_xpMb" xpSc="o_n" xpSo="D_75" xpUb="e_xp2b" xpUc="D_100" xpUd="e_Fstn" xpUe="U_0" xpUf="D_30" xpUh="e_xpMc" xpUn="b_f" xpUo="e_xp3a" xpUs="b_f"/>
+		<xpQl Self="rc_dxpDC1xpQd1xpQl1" dsiz="U_7" e0D8="U_7" inAn="D_120" xpBm="e_xpMb" xpBo="D_50" xpUn="b_f" xpUt="o_n" xpUv="b_f"/>
+		<xpQm Self="rc_dxpDC1xpQd1xpQm1" e0D5="D_0" inAn="D_0" xpU3="U_0" xpU4="U_0" xpU5="U_0" xpU6="U_0" xpUn="b_f" xpUu="D_0" xpUw="e_en5a"/>
+		<xpQn Self="rc_dxpDC1xpQd1xpQn1" grdt="e_axlg" inAn="D_0" leng="U_0" xpUn="b_f" xpUx="x_2_U_0_U_0" xpUy="D_0" xpUz="U_0"/>
+	</xpQd>
+</xpDC>
+<layr Self="rc_uaa" exlr="b_t" iwrp="b_f" lcol="e_iLbl" lkgd="b_f" plck="b_f" pnam="c_Layer 1" prta="b_t" pvis="b_t" sogd="b_t" uilr="b_t"/>
+<txtf ElLa="c_head" IGeo="x_19_l_1_l_4_l_2_D_-120_D_-124.9090909090909_l_2_D_-120_D_-74.72727272727272_l_2_D_152.72727272727275_D_-74.72727272727272_l_2_D_152.72727272727275_D_-124.9090909090909_b_f_D_-120_D_-124.9090909090909_D_152.72727272727275_D_-74.72727272727272_D_1_D_0_D_0_D_1_D_156_D_-235.0909090909091" PRht="x_3_e_PRno_e_RRun_D_0" PRhz="x_3_e_PRno_e_RRun_D_0" PRvt="x_3_e_PRno_e_RRun_D_0" PRwd="x_3_e_PRno_e_RRun_D_0" SLbs="x_2_b_f_l_ffffffff" STof="ro_n" Self="rc_ud4" SnippetParent="c_root" aobs="o_u83" cntt="e_~sep~745f7465" ftxf="ro_ud4" gfha="D_0" gfhl="U_0" gsha="D_0" gshl="U_0" itxf="rl_0" ltxf="ro_ud4" ntxf="o_n" pLDs="e_Dflt" pgfa="D_0" pgfl="U_0" pgsa="D_0" pgsl="U_0" pgss="x_2_U_0_U_0" pgst="x_2_U_0_U_0" pilr="o_uaa" plck="b_f" ptxf="o_n" strp="ro_uc2">
+	<TFPf Self="rc_ud4TFPf1" clwd="U_272.72727272727275"/>
+	<ctxw Self="rc_ud4ctxw1" ptwi="e_nada" ptwm="b_f" ptws="e_twbs" ptwv="b_f" txwt="e_none">
+		<ccos Self="rc_ud4ctxw1ccos1" acpn="rx_0" ptns="rx_0"/>
+	</ctxw>
+</txtf>
+<txtf ElLa="c_intro" IGeo="x_19_l_1_l_4_l_2_D_-120_D_-124.9090909090909_l_2_D_-120_D_-26.72727272727272_l_2_D_152.72727272727275_D_-26.72727272727272_l_2_D_152.72727272727275_D_-124.9090909090909_b_f_D_-120_D_-124.9090909090909_D_152.72727272727275_D_-26.72727272727272_D_1_D_0_D_0_D_1_D_156_D_-177.0909090909091" PRht="x_3_e_PRno_e_RRun_D_0" PRhz="x_3_e_PRno_e_RRun_D_0" PRvt="x_3_e_PRno_e_RRun_D_0" PRwd="x_3_e_PRno_e_RRun_D_0" SLbs="x_2_b_f_l_ffffffff" STof="ro_n" Self="rc_ud9" SnippetParent="c_root" aobs="o_u83" cntt="e_~sep~745f7465" ftxf="ro_ud9" gfha="D_0" gfhl="U_0" gsha="D_0" gshl="U_0" itxf="rl_0" ltxf="ro_ud9" ntxf="o_n" pLDs="e_Dflt" pgfa="D_0" pgfl="U_0" pgsa="D_0" pgsl="U_0" pgss="x_2_U_0_U_0" pgst="x_2_U_0_U_0" pilr="o_uaa" plck="b_f" ptxf="o_n" strp="ro_udc">
+	<TFPf Self="rc_ud9TFPf1" clwd="U_272.72727272727275"/>
+	<ctxw Self="rc_ud9ctxw1" ptwi="e_nada" ptwm="b_f" ptws="e_twbs" ptwv="b_f" txwt="e_none">
+		<ccos Self="rc_ud9ctxw1ccos1" acpn="rx_0" ptns="rx_0"/>
+	</ctxw>
+</txtf>
+<txtf ElLa="c_body" IGeo="x_19_l_1_l_4_l_2_D_-67.63636363636365_D_-80.18181818181819_l_2_D_-67.63636363636365_D_80.18181818181819_l_2_D_66.54545454545453_D_80.18181818181819_l_2_D_66.54545454545453_D_-80.18181818181819_b_f_D_-67.63636363636365_D_-80.18181818181819_D_66.54545454545453_D_80.18181818181819_D_1_D_0_D_0_D_1_D_103.63636363636365_D_-116.09090909090912" PRht="x_3_e_PRno_e_RRun_D_0" PRhz="x_3_e_PRno_e_RRun_D_0" PRvt="x_3_e_PRno_e_RRun_D_0" PRwd="x_3_e_PRno_e_RRun_D_0" SLbs="x_2_b_f_l_ffffffff" STof="ro_n" Self="rc_u107" SnippetParent="c_root" aobs="o_u83" cntt="e_~sep~745f7465" ftxf="ro_u107" gfha="D_0" gfhl="U_0" gsha="D_0" gshl="U_0" itxf="rl_0" ltxf="ro_u10f" ntxf="o_u10f" pLDs="e_Dflt" pgfa="D_0" pgfl="U_0" pgsa="D_0" pgsl="U_0" pgss="x_2_U_0_U_0" pgst="x_2_U_0_U_0" pilr="o_uaa" plck="b_f" ptxf="o_n" strp="ro_uf5">
+	<TFPf Self="rc_u107TFPf1" clwd="U_134.1818181818182"/>
+	<ctxw Self="rc_u107ctxw1" ptwi="e_nada" ptwm="b_f" ptws="e_twbs" ptwv="b_f" txwt="e_none">
+		<ccos Self="rc_u107ctxw1ccos1" acpn="rx_0" ptns="rx_0"/>
+	</ctxw>
+</txtf>
+<txtf ElLa="c_body" IGeo="x_19_l_1_l_4_l_2_D_-66.54545454545458_D_-80.18181818181819_l_2_D_-66.54545454545458_D_80.18181818181819_l_2_D_67.63636363636363_D_80.18181818181819_l_2_D_67.63636363636363_D_-80.18181818181819_b_f_D_-66.54545454545458_D_-80.18181818181819_D_67.63636363636363_D_80.18181818181819_D_1_D_0_D_0_D_1_D_241.0909090909091_D_-116.09090909090912" PRht="x_3_e_PRno_e_RRun_D_0" PRhz="x_3_e_PRno_e_RRun_D_0" PRvt="x_3_e_PRno_e_RRun_D_0" PRwd="x_3_e_PRno_e_RRun_D_0" SLbs="x_2_b_f_l_ffffffff" STof="ro_n" Self="rc_u10f" SnippetParent="c_root" aobs="o_u83" cntt="e_~sep~745f7465" ftxf="ro_u107" gfha="D_0" gfhl="U_0" gsha="D_0" gshl="U_0" itxf="rl_1" ltxf="ro_u10f" ntxf="o_n" pLDs="e_Dflt" pgfa="D_0" pgfl="U_0" pgsa="D_0" pgsl="U_0" pgss="x_2_U_0_U_0" pgst="x_2_U_0_U_0" pilr="o_uaa" plck="b_f" ptxf="o_u107" strp="ro_uf5">
+	<TFPf Self="rc_u10fTFPf1" clwd="U_134.1818181818182"/>
+	<ctxw Self="rc_u10fctxw1" ptwi="e_nada" ptwm="b_f" ptws="e_twbs" ptwv="b_f" txwt="e_none">
+		<ccos Self="rc_u10fctxw1ccos1" acpn="rx_0" ptns="rx_0"/>
+	</ctxw>
+</txtf>
+<cflo ATOC="o_n" GUID="k_DC1B32A5-DE9B-46E1-A4DE-ACC4C3378AAC" Jang="o_n" OVRF="rb_f" Self="rc_uf5" TCAc="b_f" VeGU="c_BCD8E40E-9BF0-46D5-BD16-DA5E949E3722" pSMP="x_2_x_0_x_0" pTXT="x_0" pWRD="x_0" pXLS="x_0" sLbl="k_body" sTtl="k_body" stcs="ry_2_o_u107_o_u10f">
+	<SyPf Self="rc_uf5SyPf1" omAL="b_f" omBZ="U_12" sgON="e_Txft" sorn="e_horz"/>
+	<cMep Self="rc_uf5cMep1">
+		<pcnt><![CDATA[<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 4.0-c006 1.236519, Wed Jun 14 2006 08:31:24">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+            xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/">
+         <xapMM:InstanceID>664cee73-6301-11dc-ba31-ac1fe918d054</xapMM:InstanceID>
+         <xapMM:DocumentID>adobe:docid:incd:664cee74-6301-11dc-ba31-ac1fe918d054</xapMM:DocumentID>
+         <xapMM:RenditionClass>default</xapMM:RenditionClass>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xap="http://ns.adobe.com/xap/1.0/">
+         <xap:CreateDate>2007-09-14T11:25:24Z</xap:CreateDate>
+         <xap:CreatorTool>Adobe InCopy 5.0</xap:CreatorTool>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <dc:format>application/x-incopy</dc:format>
+         <dc:title>
+            <rdf:Alt>
+               <rdf:li xml:lang="x-default">body</rdf:li>
+            </rdf:Alt>
+         </dc:title>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>]]></pcnt>
+	</cMep>
+	<icEo Self="rc_uf5icEo1" inGP="b_t"/>
+	<cins crst="o_u68" prst="o_u6b">
+		<pcnt>c_<?aid Char="0" Self="rc_uf5cins0"?></pcnt>
+	</cins>
+</cflo>
+<cflo ATOC="o_n" GUID="k_93F799D8-08D5-4609-AFC0-3FA2146CA24F" Jang="o_n" OVRF="rb_f" Self="rc_udc" TCAc="b_f" VeGU="c_964381F4-DFD4-4CEE-96E9-27EBD1AE10A0" pSMP="x_2_x_0_x_0" pTXT="x_0" pWRD="x_0" pXLS="x_0" sLbl="k_intro" sTtl="k_intro" stcs="ry_1_o_ud9">
+	<SyPf Self="rc_udcSyPf1" omAL="b_f" omBZ="U_12" sgON="e_Txft" sorn="e_horz"/>
+	<cMep Self="rc_udccMep1">
+		<pcnt><![CDATA[<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 4.0-c006 1.236519, Wed Jun 14 2006 08:31:24">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+            xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/">
+         <xapMM:InstanceID>664cee71-6301-11dc-ba31-ac1fe918d054</xapMM:InstanceID>
+         <xapMM:DocumentID>adobe:docid:incd:664cee72-6301-11dc-ba31-ac1fe918d054</xapMM:DocumentID>
+         <xapMM:RenditionClass>default</xapMM:RenditionClass>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xap="http://ns.adobe.com/xap/1.0/">
+         <xap:CreateDate>2007-09-14T11:25:09Z</xap:CreateDate>
+         <xap:CreatorTool>Adobe InCopy 5.0</xap:CreatorTool>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <dc:format>application/x-incopy</dc:format>
+         <dc:title>
+            <rdf:Alt>
+               <rdf:li xml:lang="x-default">intro</rdf:li>
+            </rdf:Alt>
+         </dc:title>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>]]></pcnt>
+	</cMep>
+	<icEo Self="rc_udcicEo1" inGP="b_t"/>
+	<cins crst="o_u68" prst="o_u134">
+		<pcnt>c_<?aid Char="0" Self="rc_udccins0"?></pcnt>
+	</cins>
+</cflo>
+<cflo ATOC="o_n" GUID="k_31A3EC36-657A-40E8-9FBD-3DBB2CB3E896" Jang="o_n" OVRF="rb_f" Self="rc_uc2" TCAc="b_f" VeGU="c_089C2EDB-657B-4180-A6E7-58EDEE7E119E" pSMP="x_2_x_0_x_0" pTXT="x_0" pWRD="x_0" pXLS="x_0" sLbl="k_head" sTtl="k_head" stcs="ry_1_o_ud4">
+	<SyPf Self="rc_uc2SyPf1" omAL="b_f" omBZ="U_12" sgON="e_Txft" sorn="e_horz"/>
+	<cMep Self="rc_uc2cMep1">
+		<pcnt><![CDATA[<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 4.0-c006 1.236519, Wed Jun 14 2006 08:31:24">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+            xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/">
+         <xapMM:InstanceID>664cee6f-6301-11dc-ba31-ac1fe918d054</xapMM:InstanceID>
+         <xapMM:DocumentID>adobe:docid:incd:664cee70-6301-11dc-ba31-ac1fe918d054</xapMM:DocumentID>
+         <xapMM:RenditionClass>default</xapMM:RenditionClass>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xap="http://ns.adobe.com/xap/1.0/">
+         <xap:CreateDate>2007-09-14T10:00:32Z</xap:CreateDate>
+         <xap:CreatorTool>Adobe InCopy 5.0</xap:CreatorTool>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <dc:format>application/x-incopy</dc:format>
+         <dc:title>
+            <rdf:Alt>
+               <rdf:li xml:lang="x-default">head</rdf:li>
+            </rdf:Alt>
+         </dc:title>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>]]></pcnt>
+	</cMep>
+	<icEo Self="rc_uc2icEo1" inGP="b_t"/>
+	<cins crst="o_u68" prst="o_u132">
+		<pcnt>c_<?aid Char="0" Self="rc_uc2cins0"?></pcnt>
+	</cins>
+</cflo>
+<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta x:xmptk="Adobe XMP Core 4.0-c006 1.236519, Wed Jun 14 2006 08:31:24" xmlns:x="adobe:ns:meta/">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about="" xmlns:xap="http://ns.adobe.com/xap/1.0/" xmlns:xapGImg="http://ns.adobe.com/xap/1.0/g/img/">
+         <xap:CreateDate>2007-09-14T11:48:15Z</xap:CreateDate>
+         <xap:MetadataDate>2007-09-14T11:48:15Z</xap:MetadataDate>
+         <xap:CreatorTool>Adobe InDesign 5.0</xap:CreatorTool>
+         <xap:Thumbnails>
+            <rdf:Alt>
+               <rdf:li rdf:parseType="Resource">
+                  <xapGImg:format>JPEG</xapGImg:format>
+                  <xapGImg:width>512</xapGImg:width>
+                  <xapGImg:height>512</xapGImg:height>
+                  <xapGImg:image>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
+Pn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCK
+W8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q
+/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f
+5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZN
+jw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/
+APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A
+9JD/APZNjw4f5x+Q/wCKW8ncPn+x3qar/wAs1v8A9JD/APZNjw4f5x+Q/wCKW8ncPn+xD/VNQ5/W
+eEPq/WvrHp+o3Hj9X+rU5+jWtd/s5Z4uOuGzXDXL+lfew4J3e13f2V3N2MN3c2VvcyX84eaJJGCr
+BQFlDGlYD44M04QyECA2P9L9a44ylAHiP2fqV/qVz/1cLj/gYP8AsnyHix/mD/ZfrZ+HL+cfs/U7
+6lc/9XC4/wCBg/7J8fFj/MH+y/Wvhy/nH7P1O+pXP/VwuP8AgYP+yfHxY/zB/sv1r4cv5x+z9Tvq
+Vz/1cLj/AIGD/snx8WP8wf7L9a+HL+cfs/U76lc/9XC4/wCBg/7J8fFj/MH+y/Wvhy/nH7P1O+pX
+P/VwuP8AgYP+yfHxY/zB/sv1r4cv5x+z9TvqVz/1cLj/AIGD/snx8WP8wf7L9a+HL+cfs/U76lc/
+9XC4/wCBg/7J8fFj/MH+y/Wvhy/nH7P1O+pXP/VwuP8AgYP+yfHxY/zB/sv1r4cv5x+z9TvqVz/1
+cLj/AIGD/snx8WP8wf7L9a+HL+cfs/U76lc/9XC4/wCBg/7J8fFj/MH+y/Wvhy/nH7P1O+pXP/Vw
+uP8AgYP+yfHxY/zB/sv1r4cv5x+z9SEspLy+9LldSRf6HbTN6axfE8vq8yecT/yDpluaMMV+kH1S
+G99K82vGZTrf+EHoi/qVz/1cLj/gYP8AsnyrxY/zB/sv1tnhy/nH7P1O+pXP/VwuP+Bg/wCyfHxY
+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
+rsVdirsVSj/pY/8Abw/7EMy/8l/mf79x/wCP/O/3qL0n/jlWX/MPF/xBcq1X99L3n72zB/dx9wRm
+UtjsVdirsVdirsVdirsVdirsVdirsVSjRP8Adf8A2z7L/mfmXrOv9eX6HH0/T+rH9Kb5iOQ7FXYq
+7FXYq7FXYq7FXYq7FXYq7FUo/wClj/28P+xDMv8AyX+Z/v3H/j/zv96i9J/45Vl/zDxf8QXKtV/f
+S95+9swf3cfcEZlLY7FXYq7FXYq7FXYq7FXYq7FXYq7FUo0T/df/AGz7L/mfmXrOv9eX6HH0/T+r
+H9Kb5iOQ7FXYq7FXYq7FXYq7FXYq7FXYq7FUo/6WP/bw/wCxDMv/ACX+Z/v3H/j/AM7/AHq/Trm5
+i0+1i+pTSenDGvNHgKtRQKqfX3BwZ8cZZJHiHM/zv1JxTkIAcJ5eX60R9duf+rfcf8FB/wBlGV+F
+H+eP9l+pn4kv5p+z9bvrtz/1b7j/AIKD/sox8KP88f7L9S+JL+afs/W767c/9W+4/wCCg/7KMfCj
+/PH+y/UviS/mn7P1u+u3P/VvuP8AgoP+yjHwo/zx/sv1L4kv5p+z9bvrtz/1b7j/AIKD/sox8KP8
+8f7L9S+JL+afs/W767c/9W+4/wCCg/7KMfCj/PH+y/UviS/mn7P1u+u3P/VvuP8AgoP+yjHwo/zx
+/sv1L4kv5p+z9bvrtz/1b7j/AIKD/sox8KP88f7L9S+JL+afs/W767c/9W+4/wCCg/7KMfCj/PH+
+y/UviS/mn7P1u+u3P/VvuP8AgoP+yjHwo/zx/sv1L4kv5p+z9bvrtz/1b7j/AIKD/sox8KP88f7L
+9S+JL+afs/W767c/9W+4/wCCg/7KMfCj/PH+y/UviS/mn7P1oHT2mtfR4wNc1sbRD6LxGhT1uvKV
+djy2I2OX5xGd7165c78vJqxXGtr9I5V5+aO+u3P/AFb7j/goP+yjKPCj/PH+y/U2+JL+afs/W767
+c/8AVvuP+Cg/7KMfCj/PH+y/UviS/mn7P1u+u3P/AFb7j/goP+yjHwo/zx/sv1L4kv5p+z9bvrtz
+/wBW+4/4KD/sox8KP88f7L9S+JL+afs/W767c/8AVvuP+Cg/7KMfCj/PH+y/UviS/mn7P1u+u3P/
+AFb7j/goP+yjHwo/zx/sv1L4kv5p+z9bvrtz/wBW+4/4KD/sox8KP88f7L9S+JL+afs/W767c/8A
+VvuP+Cg/7KMfCj/PH+y/UviS/mn7P1u+u3P/AFb7j/goP+yjHwo/zx/sv1L4kv5p+z9bvrtz/wBW
++4/4KD/sox8KP88f7L9S+JL+afs/W767c/8AVvuP+Cg/7KMfCj/PH+y/UviS/mn7P1u+u3P/AFb7
+j/goP+yjHwo/zx/sv1L4kv5p+z9aB5TfWPrHoNy+vc/Q5xepT6n6f+/eNe9OVab5fUeGr/g5719d
+9zVvxXX8XLb+b73/2Q==</xapGImg:image>
+               </rdf:li>
+            </rdf:Alt>
+         </xap:Thumbnails>
+      </rdf:Description>
+      <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <dc:format>application/x-indesign</dc:format>
+      </rdf:Description>
+      <rdf:Description rdf:about="" xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/">
+         <xapMM:InstanceID>9a78e16a-636f-11dc-ba31-ac1fe918d054</xapMM:InstanceID>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>
+</SnippetRoot></wwst_stories><wwst_story_contents><wwst_story GUID="31A3EC36-657A-40E8-9FBD-3DBB2CB3E896" pi0="style=&quot;33&quot; type=&quot;snippet&quot; DOMVersion=&quot;5.0&quot; readerVersion=&quot;4.0&quot; featureSet=&quot;513&quot; product=&quot;5.0(458)&quot; " pi1="SnippetType=&quot;InCopyInterchange&quot;"><StoryInfo><SI_EL>head</SI_EL><SI_Words>0</SI_Words><SI_Chars>0</SI_Chars><SI_Paras>1</SI_Paras><SI_Lines>1</SI_Lines><SI_Snippet> </SI_Snippet><SI_Version/></StoryInfo><SnippetRoot>
+<cink Self="rc_u7" inAn="D_71.5651" inAs="c_k[NoAlias]" inCP="b_f" inFr="D_190" inIP="rb_t" inND="D_0.61" inPI="b_t" inPo="l_1" inSd="rD_0" inTp="e_norm" pnam="k_Process Cyan"/>
+<cink Self="rc_u8" inAn="D_18.4349" inAs="c_k[NoAlias]" inCP="b_f" inFr="D_190" inIP="rb_t" inND="D_0.76" inPI="b_t" inPo="l_2" inSd="rD_0" inTp="e_norm" pnam="k_Process Magenta"/>
+<cink Self="rc_u9" inAn="D_0" inAs="c_k[NoAlias]" inCP="b_f" inFr="D_200" inIP="rb_t" inND="D_0.16" inPI="b_t" inPo="l_3" inSd="rD_0" inTp="e_norm" pnam="k_Process Yellow"/>
+<cink Self="rc_ua" inAn="D_45" inAs="c_k[NoAlias]" inCP="b_f" inFr="D_212" inIP="rb_t" inND="D_1.7" inPI="b_t" inPo="l_4" inSd="rD_0" inTp="e_norm" pnam="k_Process Black"/>
+<cfnt Self="rc_u88" pnam="k_[No composite font]">
+	<cfen Self="rc_u89" bshf="D_0" font="c_Kozuka Mincho Pro" jcfa="b_t" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Kanji" ptfs="k_R" pvts="D_100"/>
+	<cfen Self="rc_u8b" bshf="D_0" font="c_Kozuka Mincho Pro" jcfa="b_t" jcfc="k_ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖゝゞァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺーヽヾ" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Kana" ptfs="k_R" pvts="D_100"/>
+	<cfen Self="rc_u8c" bshf="D_0" font="c_Kozuka Mincho Pro" jcfa="b_t" jcfc="k_—―‖‘’“”‥…′″∥、。〈〉《》「」『』【】〔〕〜・！（），．／：；？［］｛｝～" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Punctuation" ptfs="k_R" pvts="D_100"/>
+	<cfen Self="rc_u8d" bshf="D_0" font="c_Kozuka Mincho Pro" jcfa="b_t" jcfc="k_¢£§¨¬°±´¶×÷ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωЁАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяё‐†‡‰※℃Å←↑→↓⇒⇔∀∂∃∇∈∋−√∝∞∠∧∨∩∪∫∬∴∵∽≒≠≡≦≧≪≫⊂⊃⊆⊇⊥⌒■□▲△▼▽◆◇○◎●◯★☆♀♂♪♭♯〃〆〇〒〓゛゜＃＄％＆＊＋－０１２３４５６７８９＜＝＞＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ＼＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ｜￠￡￢￣￥" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Symbols" ptfs="k_R" pvts="D_100"/>
+	<cfen Self="rc_u8e" bshf="D_0" font="c_Times" jcfa="b_f" jcfc="k_ !&quot;#$%&amp;'()*+,-./:;&lt;=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^~sep~`abcdefghijklmnopqrstuvwxyz{|}~ ¡¤¥¦©ª«­®¯²³µ·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿıŒœŠšŸŽžƒˆˇ˘˙˚˛˜˝–‚„•‹›⁄€™∆∏∑≈≤≥◊ﬀﬁﬂﬃﬄﬅﬆ" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Alphabetic" ptfs="k_Regular" pvts="D_100"/>
+	<cfen Self="rc_u8f" bshf="D_0" font="c_Times" jcfa="b_f" jcfc="k_0123456789" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Numbers" ptfs="k_Regular" pvts="D_100"/>
+</cfnt>
+<csty Self="rc_u68" pnam="k_[No character style]" smpt="b_f"/>
+<psty Self="rc_u6b" basd="k_[No paragraph style]" font="c_Arial" kbsc="x_2_s_0_s_0" nxpa="o_u6b" pnam="k_NormalParagraphStyle" smpt="b_f"/>
+<psty Self="rc_u132" basd="o_u6b" kbsc="x_2_s_0_s_0" nxpa="o_u132" pnam="c_Head" ptfs="c_Bold" ptsz="U_18" smpt="b_f"/>
+<cflo GUID="k_31A3EC36-657A-40E8-9FBD-3DBB2CB3E896" InTc="e_nada" Jang="o_n" OVRF="rb_f" Self="rc_uc2" SnippetParent="c_root" TCAc="b_f" VeGU="c_089C2EDB-657B-4180-A6E7-58EDEE7E119E" pSMP="x_2_x_0_x_0" pTXT="x_0" pWRD="x_0" pXLS="x_0" sLbl="k_head" sTtl="k_head" stcs="ry_1_o_ud4">
+	<SyPf Self="rc_uc2SyPf1" omAL="b_f" omBZ="U_12" sgON="e_Txft" sorn="e_horz"/>
+	<cMep Self="rc_uc2cMep1">
+		<pcnt><![CDATA[<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 4.0-c006 1.236519, Wed Jun 14 2006 08:31:24">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+            xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/">
+         <xapMM:InstanceID>664cee6f-6301-11dc-ba31-ac1fe918d054</xapMM:InstanceID>
+         <xapMM:DocumentID>adobe:docid:incd:664cee70-6301-11dc-ba31-ac1fe918d054</xapMM:DocumentID>
+         <xapMM:RenditionClass>default</xapMM:RenditionClass>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xap="http://ns.adobe.com/xap/1.0/">
+         <xap:CreateDate>2007-09-14T10:00:32Z</xap:CreateDate>
+         <xap:CreatorTool>Adobe InCopy 5.0</xap:CreatorTool>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <dc:format>application/x-incopy</dc:format>
+         <dc:title>
+            <rdf:Alt>
+               <rdf:li xml:lang="x-default">head</rdf:li>
+            </rdf:Alt>
+         </dc:title>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>]]></pcnt>
+	</cMep>
+	<icEo Self="rc_uc2icEo1" inGP="b_t"/>
+	<cins crst="o_u68" prst="o_u132">
+		<pcnt>c_<?aid Char="0" Self="rc_uc2cins0"?></pcnt>
+	</cins>
+</cflo>
+</SnippetRoot></wwst_story><wwst_story GUID="93F799D8-08D5-4609-AFC0-3FA2146CA24F" pi0="style=&quot;33&quot; type=&quot;snippet&quot; DOMVersion=&quot;5.0&quot; readerVersion=&quot;4.0&quot; featureSet=&quot;513&quot; product=&quot;5.0(458)&quot; " pi1="SnippetType=&quot;InCopyInterchange&quot;"><StoryInfo><SI_EL>intro</SI_EL><SI_Words>0</SI_Words><SI_Chars>0</SI_Chars><SI_Paras>1</SI_Paras><SI_Lines>1</SI_Lines><SI_Snippet> </SI_Snippet><SI_Version/></StoryInfo><SnippetRoot>
+<cink Self="rc_u7" inAn="D_71.5651" inAs="c_k[NoAlias]" inCP="b_f" inFr="D_190" inIP="rb_t" inND="D_0.61" inPI="b_t" inPo="l_1" inSd="rD_0" inTp="e_norm" pnam="k_Process Cyan"/>
+<cink Self="rc_u8" inAn="D_18.4349" inAs="c_k[NoAlias]" inCP="b_f" inFr="D_190" inIP="rb_t" inND="D_0.76" inPI="b_t" inPo="l_2" inSd="rD_0" inTp="e_norm" pnam="k_Process Magenta"/>
+<cink Self="rc_u9" inAn="D_0" inAs="c_k[NoAlias]" inCP="b_f" inFr="D_200" inIP="rb_t" inND="D_0.16" inPI="b_t" inPo="l_3" inSd="rD_0" inTp="e_norm" pnam="k_Process Yellow"/>
+<cink Self="rc_ua" inAn="D_45" inAs="c_k[NoAlias]" inCP="b_f" inFr="D_212" inIP="rb_t" inND="D_1.7" inPI="b_t" inPo="l_4" inSd="rD_0" inTp="e_norm" pnam="k_Process Black"/>
+<cfnt Self="rc_u88" pnam="k_[No composite font]">
+	<cfen Self="rc_u89" bshf="D_0" font="c_Kozuka Mincho Pro" jcfa="b_t" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Kanji" ptfs="k_R" pvts="D_100"/>
+	<cfen Self="rc_u8b" bshf="D_0" font="c_Kozuka Mincho Pro" jcfa="b_t" jcfc="k_ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖゝゞァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺーヽヾ" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Kana" ptfs="k_R" pvts="D_100"/>
+	<cfen Self="rc_u8c" bshf="D_0" font="c_Kozuka Mincho Pro" jcfa="b_t" jcfc="k_—―‖‘’“”‥…′″∥、。〈〉《》「」『』【】〔〕〜・！（），．／：；？［］｛｝～" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Punctuation" ptfs="k_R" pvts="D_100"/>
+	<cfen Self="rc_u8d" bshf="D_0" font="c_Kozuka Mincho Pro" jcfa="b_t" jcfc="k_¢£§¨¬°±´¶×÷ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωЁАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяё‐†‡‰※℃Å←↑→↓⇒⇔∀∂∃∇∈∋−√∝∞∠∧∨∩∪∫∬∴∵∽≒≠≡≦≧≪≫⊂⊃⊆⊇⊥⌒■□▲△▼▽◆◇○◎●◯★☆♀♂♪♭♯〃〆〇〒〓゛゜＃＄％＆＊＋－０１２３４５６７８９＜＝＞＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ＼＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ｜￠￡￢￣￥" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Symbols" ptfs="k_R" pvts="D_100"/>
+	<cfen Self="rc_u8e" bshf="D_0" font="c_Times" jcfa="b_f" jcfc="k_ !&quot;#$%&amp;'()*+,-./:;&lt;=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^~sep~`abcdefghijklmnopqrstuvwxyz{|}~ ¡¤¥¦©ª«­®¯²³µ·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿıŒœŠšŸŽžƒˆˇ˘˙˚˛˜˝–‚„•‹›⁄€™∆∏∑≈≤≥◊ﬀﬁﬂﬃﬄﬅﬆ" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Alphabetic" ptfs="k_Regular" pvts="D_100"/>
+	<cfen Self="rc_u8f" bshf="D_0" font="c_Times" jcfa="b_f" jcfc="k_0123456789" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Numbers" ptfs="k_Regular" pvts="D_100"/>
+</cfnt>
+<csty Self="rc_u68" pnam="k_[No character style]" smpt="b_f"/>
+<psty Self="rc_u6b" basd="k_[No paragraph style]" font="c_Arial" kbsc="x_2_s_0_s_0" nxpa="o_u6b" pnam="k_NormalParagraphStyle" smpt="b_f"/>
+<psty Self="rc_u134" basd="o_u6b" kbsc="x_2_s_0_s_0" nxpa="o_u134" pnam="c_Intro" ptfs="c_Italic" smpt="b_f"/>
+<cflo GUID="k_93F799D8-08D5-4609-AFC0-3FA2146CA24F" InTc="e_nada" Jang="o_n" OVRF="rb_f" Self="rc_udc" SnippetParent="c_root" TCAc="b_f" VeGU="c_964381F4-DFD4-4CEE-96E9-27EBD1AE10A0" pSMP="x_2_x_0_x_0" pTXT="x_0" pWRD="x_0" pXLS="x_0" sLbl="k_intro" sTtl="k_intro" stcs="ry_1_o_ud9">
+	<SyPf Self="rc_udcSyPf1" omAL="b_f" omBZ="U_12" sgON="e_Txft" sorn="e_horz"/>
+	<cMep Self="rc_udccMep1">
+		<pcnt><![CDATA[<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 4.0-c006 1.236519, Wed Jun 14 2006 08:31:24">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+            xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/">
+         <xapMM:InstanceID>664cee71-6301-11dc-ba31-ac1fe918d054</xapMM:InstanceID>
+         <xapMM:DocumentID>adobe:docid:incd:664cee72-6301-11dc-ba31-ac1fe918d054</xapMM:DocumentID>
+         <xapMM:RenditionClass>default</xapMM:RenditionClass>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xap="http://ns.adobe.com/xap/1.0/">
+         <xap:CreateDate>2007-09-14T11:25:09Z</xap:CreateDate>
+         <xap:CreatorTool>Adobe InCopy 5.0</xap:CreatorTool>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <dc:format>application/x-incopy</dc:format>
+         <dc:title>
+            <rdf:Alt>
+               <rdf:li xml:lang="x-default">intro</rdf:li>
+            </rdf:Alt>
+         </dc:title>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>]]></pcnt>
+	</cMep>
+	<icEo Self="rc_udcicEo1" inGP="b_t"/>
+	<cins crst="o_u68" prst="o_u134">
+		<pcnt>c_<?aid Char="0" Self="rc_udccins0"?></pcnt>
+	</cins>
+</cflo>
+</SnippetRoot></wwst_story><wwst_story GUID="DC1B32A5-DE9B-46E1-A4DE-ACC4C3378AAC" pi0="style=&quot;33&quot; type=&quot;snippet&quot; DOMVersion=&quot;5.0&quot; readerVersion=&quot;4.0&quot; featureSet=&quot;513&quot; product=&quot;5.0(458)&quot; " pi1="SnippetType=&quot;InCopyInterchange&quot;"><StoryInfo><SI_EL>body</SI_EL><SI_Words>0</SI_Words><SI_Chars>0</SI_Chars><SI_Paras>1</SI_Paras><SI_Lines>1</SI_Lines><SI_Snippet> </SI_Snippet><SI_Version/></StoryInfo><SnippetRoot>
+<cink Self="rc_u7" inAn="D_71.5651" inAs="c_k[NoAlias]" inCP="b_f" inFr="D_190" inIP="rb_t" inND="D_0.61" inPI="b_t" inPo="l_1" inSd="rD_0" inTp="e_norm" pnam="k_Process Cyan"/>
+<cink Self="rc_u8" inAn="D_18.4349" inAs="c_k[NoAlias]" inCP="b_f" inFr="D_190" inIP="rb_t" inND="D_0.76" inPI="b_t" inPo="l_2" inSd="rD_0" inTp="e_norm" pnam="k_Process Magenta"/>
+<cink Self="rc_u9" inAn="D_0" inAs="c_k[NoAlias]" inCP="b_f" inFr="D_200" inIP="rb_t" inND="D_0.16" inPI="b_t" inPo="l_3" inSd="rD_0" inTp="e_norm" pnam="k_Process Yellow"/>
+<cink Self="rc_ua" inAn="D_45" inAs="c_k[NoAlias]" inCP="b_f" inFr="D_212" inIP="rb_t" inND="D_1.7" inPI="b_t" inPo="l_4" inSd="rD_0" inTp="e_norm" pnam="k_Process Black"/>
+<cfnt Self="rc_u88" pnam="k_[No composite font]">
+	<cfen Self="rc_u89" bshf="D_0" font="c_Kozuka Mincho Pro" jcfa="b_t" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Kanji" ptfs="k_R" pvts="D_100"/>
+	<cfen Self="rc_u8b" bshf="D_0" font="c_Kozuka Mincho Pro" jcfa="b_t" jcfc="k_ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖゝゞァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺーヽヾ" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Kana" ptfs="k_R" pvts="D_100"/>
+	<cfen Self="rc_u8c" bshf="D_0" font="c_Kozuka Mincho Pro" jcfa="b_t" jcfc="k_—―‖‘’“”‥…′″∥、。〈〉《》「」『』【】〔〕〜・！（），．／：；？［］｛｝～" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Punctuation" ptfs="k_R" pvts="D_100"/>
+	<cfen Self="rc_u8d" bshf="D_0" font="c_Kozuka Mincho Pro" jcfa="b_t" jcfc="k_¢£§¨¬°±´¶×÷ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωЁАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяё‐†‡‰※℃Å←↑→↓⇒⇔∀∂∃∇∈∋−√∝∞∠∧∨∩∪∫∬∴∵∽≒≠≡≦≧≪≫⊂⊃⊆⊇⊥⌒■□▲△▼▽◆◇○◎●◯★☆♀♂♪♭♯〃〆〇〒〓゛゜＃＄％＆＊＋－０１２３４５６７８９＜＝＞＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ＼＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ｜￠￡￢￣￥" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Symbols" ptfs="k_R" pvts="D_100"/>
+	<cfen Self="rc_u8e" bshf="D_0" font="c_Times" jcfa="b_f" jcfc="k_ !&quot;#$%&amp;'()*+,-./:;&lt;=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^~sep~`abcdefghijklmnopqrstuvwxyz{|}~ ¡¤¥¦©ª«­®¯²³µ·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿıŒœŠšŸŽžƒˆˇ˘˙˚˛˜˝–‚„•‹›⁄€™∆∏∑≈≤≥◊ﬀﬁﬂﬃﬄﬅﬆ" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Alphabetic" ptfs="k_Regular" pvts="D_100"/>
+	<cfen Self="rc_u8f" bshf="D_0" font="c_Times" jcfa="b_f" jcfc="k_0123456789" jcfs="D_100" phzs="D_100" plck="b_t" pnam="k_Numbers" ptfs="k_Regular" pvts="D_100"/>
+</cfnt>
+<csty Self="rc_u68" pnam="k_[No character style]" smpt="b_f"/>
+<psty Self="rc_u6b" basd="k_[No paragraph style]" font="c_Arial" kbsc="x_2_s_0_s_0" nxpa="o_u6b" pnam="k_NormalParagraphStyle" smpt="b_f"/>
+<cflo GUID="k_DC1B32A5-DE9B-46E1-A4DE-ACC4C3378AAC" InTc="e_nada" Jang="o_n" OVRF="rb_f" Self="rc_uf5" SnippetParent="c_root" TCAc="b_f" VeGU="c_BCD8E40E-9BF0-46D5-BD16-DA5E949E3722" pSMP="x_2_x_0_x_0" pTXT="x_0" pWRD="x_0" pXLS="x_0" sLbl="k_body" sTtl="k_body" stcs="ry_2_o_u107_o_u10f">
+	<SyPf Self="rc_uf5SyPf1" omAL="b_f" omBZ="U_12" sgON="e_Txft" sorn="e_horz"/>
+	<cMep Self="rc_uf5cMep1">
+		<pcnt><![CDATA[<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 4.0-c006 1.236519, Wed Jun 14 2006 08:31:24">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+            xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/">
+         <xapMM:InstanceID>664cee73-6301-11dc-ba31-ac1fe918d054</xapMM:InstanceID>
+         <xapMM:DocumentID>adobe:docid:incd:664cee74-6301-11dc-ba31-ac1fe918d054</xapMM:DocumentID>
+         <xapMM:RenditionClass>default</xapMM:RenditionClass>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xap="http://ns.adobe.com/xap/1.0/">
+         <xap:CreateDate>2007-09-14T11:25:24Z</xap:CreateDate>
+         <xap:CreatorTool>Adobe InCopy 5.0</xap:CreatorTool>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <dc:format>application/x-incopy</dc:format>
+         <dc:title>
+            <rdf:Alt>
+               <rdf:li xml:lang="x-default">body</rdf:li>
+            </rdf:Alt>
+         </dc:title>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>]]></pcnt>
+	</cMep>
+	<icEo Self="rc_uf5icEo1" inGP="b_t"/>
+	<cins crst="o_u68" prst="o_u6b">
+		<pcnt>c_<?aid Char="0" Self="rc_uf5cins0"?></pcnt>
+	</cins>
+</cflo>
+</SnippetRoot></wwst_story></wwst_story_contents></wwst_template>

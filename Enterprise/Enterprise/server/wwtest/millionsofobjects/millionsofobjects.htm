@@ -1,0 +1,336 @@
+<link rel="stylesheet" href="<!--INETROOT-->/config/jquery-ui/jquery-ui-1.8.16.custom.css" type="text/css" media="all" />
+<style type="text/css">	
+	.ui-progressbar-value { background-image: url("<!--INETROOT-->/config/images/progressBarFull.png"); }
+</style>
+
+<script language="javascript" type="text/javascript" src="../../utils/javascript/XPath.js" ></script>
+<script language="javascript" type="text/javascript" src="../../utils/javascript/WWAjax.js" ></script>
+
+<script language="javascript" type="text/javascript">
+<!--
+	// init globals
+	var gAutoTimer = null;
+	var gPageMode = '';
+	var gStepSize = 0;
+	var gLastObjCount = 0; // the last object count
+	var gMaxObjCount = 0;
+	var gCurrStepIndex = 0;
+	var gCurrStepName = '';
+	var gProcessStarted = 0; // Indicate user agree to start the process, so next time click of start button, confirmation message won't popup
+	var gSteps = new Array();
+	
+	/**
+	 * Requests server to run the step process
+	 */
+	function processStep()
+	{
+		if( gAutoTimer != null ) {
+			var serverUrl = "millionsofobjects.php";
+			//serverUrl += "?start_debug=1"; // Zend Debugger (do not combine with server side debugging!)
+ 			WWAjax.doHttpRequest( serverUrl, "callbackOnServerResponse", "text/xml", true, "command="+gPageMode+"&stepSize="+gStepSize+"&lastObjCount="+gLastObjCount+"&maxObjCount="+gMaxObjCount+"&stepName="+gCurrStepName, true );
+		}
+	}
+
+	/**
+	 * Requests server to return initial progress state.
+	 */
+	function initPage()
+	{
+		gPageMode = 'InitPage';
+		document.getElementById('stopBtn').disabled = true;
+		var serverUrl = "millionsofobjects.php";
+		//serverUrl += "?start_debug=1"; // Zend Debugger (do not combine with server side debugging!)
+		WWAjax.doHttpRequest( serverUrl, "callbackStepInit", "text/xml", true, "command=InitPage", true );
+	}
+
+	/**
+	 * Called back by WWAjax when server responds on initPage function call
+	 */
+	function callbackStepInit( xmlResult, httpStatus )
+	{
+		if( httpStatus == 200 ) { // ok?
+			// Handle errors after talking to server. Quit on error.
+			if( !xmlResult.documentElement ) {
+				alert( 'Fatal Error!\nHTTP Status: ' + httpStatus + '\nInvalid XML response:\n' + xmlResult );
+				return;
+			}
+			if( xmlResult.documentElement.nodeName == 'parsererror' ) {
+				alert( 'Invalid XML response:\n' + XPath.selectNodeExtended( "parsererror/text()", xmlResult ) );
+				return;
+			}
+			var fatalError = XPath.selectNodeExtended( "//FatalError/Description/text()", xmlResult );
+			if( fatalError ) {
+				alert(fatalError);
+				return;
+			}
+			
+			// Collect ALL Steps as received from server.
+			gStepsDoc = xmlResult;
+			var steps = XPath.selectNodes( "//Steps/Step", gStepsDoc );
+			if( steps.length == 0 ) alert( 'init failed' );
+
+			// Collect all the steps name into global array
+			allSteps = XPath.selectNodes( "MillionsofObjectsConfig/Steps/Step", xmlResult );
+			for( var j=0; j < allSteps.length; j++ ) {
+				var name = XPath.selectNodeExtended( "@name", allSteps[j] );
+				var stepsize = XPath.selectNodeExtended( "@stepsize", allSteps[j] );
+				gSteps.push({name: name, stepsize: stepsize});
+
+				// init progress bars
+				$(function() {
+					$("#ProgressBar_"+name).progressbar({ value: 0 });
+				});
+			}
+		} else {
+			alert( 'ERROR\nHttpstatus: ' + httpStatus + '\n' + xmlResult );
+		}
+	}
+
+	/**
+	 * Called back by WWAjax when server responds on startProcess / processStep function call.
+	 * This updates the progress bar with results returned from server.
+	 */
+	function callbackOnServerResponse( xmlResult, httpStatus )
+	{
+		// stop process when user did abort/reload page
+		if( httpStatus == 0 ) {
+			processingStopped();
+			return;
+		}
+
+		// show HTML page when redirected
+		if( httpStatus == 200 && !xmlResult.documentElement ) {
+			document.write( xmlResult );
+			return;
+		}
+		
+		// stop process on error and show message
+		if( !xmlResult.documentElement ) {
+			alert( 'Fatal Error!\nHTTP Status: ' + httpStatus + '\nInvalid XML response:\n' + xmlResult );
+			processingStopped(); // break out when communication fails (avoid many errors)
+			return;
+		}
+		if( httpStatus != 200 ) {
+			alert( 'Fatal Error!\nHTTP Status: ' + httpStatus + '\nXML response:\n' + xmlResult );
+			processingStopped(); // break out when communication fails (avoid many errors)
+			return;
+		}
+		
+		// parse error response from server and display at screen
+		testResultNodes = XPath.selectNodes( "//ProgressResponse/Error", xmlResult );
+		if( testResultNodes.length > 0 ) { 
+			var errMsg = XPath.selectNodeExtended( "Message/text()", testResultNodes[0] );
+			document.getElementById(gCurrStepName + '_errorReport').innerHTML += '<font color="#800080">' + errMsg + '<\/font><br\/>';
+		}
+
+		// parse progress response from server
+		idxResultNodes = XPath.selectNodes( "//ProgressResponse/ProgressBar", xmlResult );
+		if( idxResultNodes.length == 0 ) { // no results implies test crashed or something
+			alert( 'Fatal Error!' );
+			processingStopped();
+			return;
+		}
+		
+		// update the process bars
+		var max = XPath.selectNodeExtended( "Maximum/text()", idxResultNodes[0] );
+		gLastObjCount = XPath.selectNodeExtended( "Progress/text()", idxResultNodes[0] );
+		var step = XPath.selectNodeExtended( "Name/text()", idxResultNodes[0] );
+		var runCompleted = XPath.selectNodeExtended( "RunCompleted/text()", idxResultNodes[0] );
+		var progressPercentage = ( gLastObjCount / max) * 100;
+		$("#ProgressBar_" + step).progressbar( "option", "value", progressPercentage );
+		$("#ProgressLabel_" + step).text( progressPercentage.toFixed(0) + '%' );		
+		document.getElementById(step+'_created').innerHTML = gLastObjCount;
+
+		// when step process complete or error count reach 3 attempts, we stop, and proceed with next step process
+		if( runCompleted == 'true' || errMsg ) {
+			gCurrStepIndex += 1;
+			processingStopped();
+			startProcess();
+		} else {
+			// only start new timer when not stopped by user in the meantime
+			if( gAutoTimer != null ) {
+				gCurrStepName = step;
+				gAutoTimer = setTimeout( "processStep()", 1 );
+			} else {
+				processingStopped();
+			}
+		}
+	}
+	
+	/**
+	 * Shows/hides the spinning ball icon
+	 */
+	function spinningBall( show, spinningBallId )
+	{
+		var spinningBall = document.getElementById( spinningBallId ); 
+		if( show ) {
+			spinningBall.innerHTML = '<img src="../../../config/images/wwloader.gif">';
+		} else {
+			spinningBall.innerHTML = '';
+		}
+	}
+
+	function confirmMsg()
+	{
+		if( gProcessStarted ) {
+			startProcess();
+		}
+		else {
+			if( confirm( 'Are you sure you want to run the process?' ) ) {
+				gProcessStarted = 1;
+				startProcess();
+			}
+			else {
+				return;
+			}
+		}
+	}
+	/**
+	 * Start process those selected steps
+	 */
+	function startProcess()
+	{
+		gPageMode = 'processStep';
+		if( gAutoTimer == null ) {
+			if( gSteps.length > 0 && gSteps.length > gCurrStepIndex ) {
+				for( var i=gCurrStepIndex; i < gSteps.length; i++ ) {
+					var stepCheckBox = document.getElementById("checkbox_"+gSteps[i].name);
+					if( stepCheckBox && stepCheckBox.checked ) {
+						gCurrStepName = gSteps[i].name;
+						gLastObjCount = document.getElementById(gSteps[i].name+"_created").innerHTML;
+						gMaxObjCount = document.getElementById(gSteps[i].name+"_count").innerHTML;
+						gStepSize = gSteps[i].stepsize;
+						spinningBall( true, gCurrStepName + "_spinningBall" );
+						// toggle visual state of all buttons
+						grayButtons();
+						document.getElementById('stopBtn').disabled = false;
+						// init global timer to start processing
+						gAutoTimer = setTimeout( "processStep()", 1 );
+						break;
+					}
+				}
+			}
+			else {
+				gCurrStepIndex = 0;
+			}
+		}
+	}
+
+	/**
+	 * Called back from server when step process has actually stopped
+	 */
+	function processingStopped()
+	{
+		initButtons(); // toggle visual state of all buttons
+
+		// hide spinning ball
+		spinningBall( false, gCurrStepName + "_spinningBall" );
+
+		// klll global timer to stop processing
+		if( gAutoTimer != null ) {
+			clearTimeout( gAutoTimer ); // stop auto-save interval
+			gAutoTimer = null;
+		}
+	}
+	
+	/**
+	 * Aborts step process that was started with startProcess function
+	 */
+	function stopProcessing()
+	{
+		initButtons(); // toggle visual state of all buttons
+
+		// klll global timer to stop processing
+		if( gAutoTimer != null ) {
+			clearTimeout( gAutoTimer ); // stop auto-save interval
+			gAutoTimer = null;
+		}
+	}
+
+	/**
+	 * Sets initial enabled/disabled state for all buttons. Typically when ready.
+	 */
+	function initButtons()
+	{
+		document.getElementById('startBtn').disabled = false;
+		document.getElementById('stopBtn').disabled = true;
+	}
+
+	/**
+	 * Disables all buttons. Typically when busy / processing.
+	 */
+	function grayButtons()
+	{
+		document.getElementById('startBtn').disabled = true;
+		document.getElementById('stopBtn').disabled = true;
+	}
+
+	/**
+	 * Shows details info of the given step.
+	 */
+	function toggleInfo( stepId )
+	{
+		var stepInfo = document.getElementById("stepinfo_"+stepId); 
+		if( stepInfo.style.display == '' ) {
+			stepInfo.style.display = 'none';
+		} else {
+			stepInfo.style.display = '';
+		}
+	}
+-->
+</script>
+
+<table class="appframe"><tr class="text"><td>
+	<!-- TODO: localize this entire GUI -->
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td></td>
+			<td><span id="apptitle" class="apptitletext"><!--VAR:NAME--></span></td>
+		</tr>
+	</table>
+
+	<!-- disclaimer -->
+	<table class="listframe"><tr><td>
+		<table class="listpane">
+			<tr>
+				<td colspan="4">
+Test is a test tool that allows you to create millions of objects at the Enterprise system. 
+The goal is to load the system with plenty data after which the performance can be tested in
+several ways using other test tools, such as the speedtest.php. <br/><br/>
+It can take a very long time to complete (up to a couple of days) depending on your configuration 
+made at the config.xml file. Make sure that no users are working with the system nor any other 
+processes are running while using this tool.<br/><br/>
+<font color="red"><b>*** Please do NOT run this tool on a production system. ***</b></font><br/><br/>
+<b>Disclaimer:</b> Using this tool is on your own risk; WoodWing Software takes no responsibility for
+any problems caused by this tool whatsoever. Please note that recovery is not possible and generated data can not be undone.<br/>
+				</td>
+			</tr>
+		</table>
+	</td></tr></table>
+
+	<!-- debug warning -->
+	<table class="listframe"><tr><td>
+		<table class="listpane">
+			<tr>
+				<td colspan="4"><span><font color="red"><!--VAR:WARNING--></font></span></td>
+			</tr>
+		</table>
+	</td></tr></table>
+
+	<!-- steps body -->
+	<table class="listframe"><tr><td>
+		<table class="listpane">
+			<!--VAR:STEPS-->
+			<!--VAR:STARTSTOP-->
+		</table>
+	</td></tr></table>
+</td></tr></table>
+
+<script language="javascript" type="text/javascript">
+<!--
+	// late initializers
+	setTimeout( "initPage()", 50 );
+-->
+</script>

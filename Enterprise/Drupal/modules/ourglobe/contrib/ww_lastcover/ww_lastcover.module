@@ -1,0 +1,130 @@
+<?php
+
+/**
+ * Return a node to display in the block.
+ *
+ * @param Integer $tid
+ * @return Object
+ */
+function get_latest_cover () {
+  $result = db_query_range(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.type='ww_lastcover' AND n.status=1 ORDER BY changed DESC"), 0, 1);
+  $nid = db_fetch_object($result);
+	
+  return node_load(array('nid' => $nid->nid));
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function ww_lastcover_theme() {
+  return array(
+    'ww_lastcover_latest' => array(
+      'arguments' => array('node' => NULL, 'image' => NULL),
+      'template' => 'ww_lastcover_latest'
+    ) 
+  );
+}
+
+/**
+* Implementation of hook_block().
+*/
+function ww_lastcover_block($op = 'list', $delta = 0, $edit = array()) {
+  // The $op parameter determines what piece of information is being requested.
+  switch ($op) {
+    case 'list':
+      $blocks[0][ 'info' ] = t('LastCover');
+    
+      return $blocks;
+    case 'configure':
+    	return $form;
+      
+    case 'view': default:
+      //Get node and content
+      $node = get_latest_cover();
+      $cartoon = current($node -> files);
+      $image = base_path().$cartoon -> filepath;
+      
+      //Build content
+      $block['content'] = theme('ww_lastcover_latest', $node, $image);
+      
+      return $block;
+  }
+}
+
+/**
+* Implementation of hook_node_info().
+*/
+function ww_lastcover_node_info() {
+  return array(
+    'ww_lastcover' => array(
+      'name' => t('WW LastCover'),
+      'module' => 'ww_lastcover',
+      'description' => "Add a cover",
+    )
+  );
+}
+
+/**
+* Implementation of hook_perm().
+*/
+function ww_lastcover_perm() {
+  return array('create ww_lastcover', 'edit own ww_lastcover');
+}
+
+/**
+* Implementation of hook_access().
+*/
+function ww_lastcover_access($op, $node) {
+  global $user;
+
+  if ($op == 'create') {
+    // Only users with permission to do so may create this node type.
+    return user_access('create ww_lastcover');
+  }
+
+  // Users who create a node may edit or delete it later, assuming they have the
+  // necessary permissions.
+  if ($op == 'update' || $op == 'delete') {
+    if (user_access('edit own ww_lastcover') && ($user->uid == $node->uid)) {
+      return TRUE;
+    }
+  }
+}
+
+/**
+* Implementation of hook_form().
+*/
+function ww_lastcover_form(&$node) {
+  $type = node_get_types('type', $node);
+
+  // We need to define form elements for the node's title and body.
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => check_plain('Name'),
+    '#required' => TRUE,
+    '#default_value' => $node->title,
+    '#weight' => -5
+  );
+  
+  return $form;
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function ww_lastcover_menu ()
+{
+  
+}
+
+/**
+* Implementation of hook_help().
+*/
+function ww_lastcover_help($section) {
+  switch ($section) {
+    case 'admin/help#ww_lastcover':
+      return t('ADMIN-HELP-TEXT');
+      break;
+  }
+}
+?>

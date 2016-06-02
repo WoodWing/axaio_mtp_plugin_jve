@@ -1,0 +1,209 @@
+<?php
+
+/**
+ * Return a node to display in the block.
+ *
+ * @param Integer $tid
+ * @return Object
+ */
+function get_latest_cartoon () {
+  $result = db_query_range(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.type='ww_cartoon' AND n.status=1 ORDER BY changed DESC"), 0, 1);
+  $nid = db_fetch_object($result);
+	
+  return node_load(array('nid' => $nid->nid));
+}
+
+/**
+ * Get the next cartoon
+ *
+ * @param Integer $date
+ * @return Object
+ */
+function get_next_cartoon ($date) {
+  $result = db_query_range(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.type='ww_cartoon' AND n.status=1 AND n.changed > '".$date."' ORDER BY changed ASC"), 0, 1);
+  $nid = db_fetch_object($result);
+	
+  return node_load(array('nid' => $nid->nid));
+}
+
+/**
+ * Get the previous cartoon
+ *
+ * @param Integer $date
+ * @return Object
+ */
+function get_previous_cartoon ($date) {
+  $result = db_query_range(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.type='ww_cartoon' AND n.status=1 AND n.changed < '".$date."' ORDER BY changed DESC"), 0, 1);
+  $nid = db_fetch_object($result);
+	
+  return node_load(array('nid' => $nid->nid));
+}
+
+/**
+ * Callback to handle requests from ww_cartoon content.
+ * @return JSON data.
+ */
+function ww_cartoon_item () {
+  
+  if($_GET['date'] == "latest") {
+  	$node = get_latest_cartoon();
+  	$_GET['date'] = $node -> changed;
+  }	
+	
+  switch ($_GET['type']) {
+  	case 'next':
+      $node = get_next_cartoon($_GET['date']);
+      break;
+      
+    case 'previous':
+      $node = get_previous_cartoon($_GET['date']);
+      break;
+      
+    default;
+      $node = get_latest_cartoon();	
+  }
+  
+  if(is_numeric($node -> nid))
+  {
+    $cartoon = current($node -> files);
+    $image = base_path().$cartoon -> filepath;
+    
+    drupal_set_header("Content-Type: text/plain; charset: utf-8");
+    printf('{"cartoon" : {"date" : "%s", "image" : "%s"}}', $node->changed, $image);
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function ww_cartoon_theme() {
+  return array(
+    'ww_cartoon_latest' => array(
+      'arguments' => array('node' => NULL, 'image' => NULL),
+      'template' => 'ww_cartoon_latest'
+    ) 
+  );
+}
+
+/**
+* Implementation of hook_block().
+*/
+function ww_cartoon_block($op = 'list', $delta = 0, $edit = array()) {
+  $delta;
+  $edit;
+	
+  // The $op parameter determines what piece of information is being requested.
+  switch ($op) {
+    case 'list':
+      $blocks[0][ 'info' ] = t('WoodWing Cartoon');
+    
+      return $blocks;
+      
+    case 'view': default:
+      //Get node and content
+      $node = get_latest_cartoon();
+      $cartoon = current($node -> files);
+      $image = base_path().$cartoon -> filepath;
+      
+      //Load JavaScript for enableing browse functionality 
+      $module_path = drupal_get_path('module', 'ww_cartoon');
+      drupal_add_js($module_path .'/ww_cartoon.js');
+      
+      
+      $opts = array('absolute' => true);
+      $json_url = url('ww_cartoon.json', $opts);
+      drupal_add_js(array('ww_cartoon' => array("json_url" => $json_url)), 'setting');
+      
+      //Build content
+      $block['content'] = theme('ww_cartoon_latest', $node, $image);
+  }
+  
+  return $block;
+}
+
+/**
+* Implementation of hook_node_info().
+*/
+function ww_cartoon_node_info() {
+  return array(
+    'ww_cartoon' => array(
+      'name' => t('WW Cartoon'),
+      'module' => 'ww_cartoon',
+      'description' => "Create a advertisement",
+    )
+  );
+}
+
+/**
+* Implementation of hook_perm().
+*/
+function ww_cartoon_perm() {
+  return array('create ww_cartoon', 'edit own ww_cartoon');
+}
+
+/**
+* Implementation of hook_access().
+*/
+function ww_cartoon_access($op, $node) {
+  global $user;
+
+  if ($op == 'create') {
+    // Only users with permission to do so may create this node type.
+    return user_access('create ww_cartoon');
+  }
+
+  // Users who create a node may edit or delete it later, assuming they have the
+  // necessary permissions.
+  if ($op == 'update' || $op == 'delete') {
+    if (user_access('edit own ww_cartoon') && ($user->uid == $node->uid)) {
+      return TRUE;
+    }
+  }
+  
+  return false;
+}
+
+/**
+* Implementation of hook_form().
+*/
+function ww_cartoon_form($node) {
+  // We need to define form elements for the node's title and body.
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => check_plain('Name'),
+    '#required' => TRUE,
+    '#default_value' => $node->title,
+    '#weight' => -5
+  );
+  
+  return $form;
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function ww_cartoon_menu ()
+{
+  $items['ww_cartoon.json'] = array(
+    'title' => 'WW Cartoon AJAX Gateway',
+    'page callback' => 'ww_cartoon_item',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+	
+  return $items;
+}
+
+/**
+* Implementation of hook_help().
+*/
+function ww_cartoon_help($section) {
+  switch ($section) {
+    case 'admin/help#ww_cartoon':
+      return t('ADMIN-HELP-TEXT');
+      break;
+  }
+  
+  return false;
+}
+?>

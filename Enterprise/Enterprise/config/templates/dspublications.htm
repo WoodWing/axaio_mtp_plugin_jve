@@ -1,0 +1,70 @@
+<script language="javascript">
+	function removePublication( publicationid )
+	{
+		if( confirm("<!--RES:DS_PUB_DEL-->") )
+		{
+			// try to add parameters to the next page in a 'safe' way (i.e: not through the URL)
+			var hiddenFormElement = document.getElementById("publicationid#"+publicationid);
+			// fill the hidden element
+			hiddenFormElement.value = publicationid;
+			// submit the hidden form
+			var hiddenForm = document.getElementById("deleteform#"+publicationid);
+			hiddenForm.submit();
+		}
+	}
+</script>
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/datasource_32.png"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:DS_DATASOURCE--></span></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>&nbsp;<span class="subtitletext"><!--PAR:MODE_TITLE--></span></td>
+		</tr>
+	</table>
+
+	<!-- app body -->
+	<table width="70%">
+		<tr>
+			<td valign="top">	
+			<table class="listpane" width="250">
+				<tr>
+					<th><!--RES:DS_PUB_NAME--></th>
+					<th><!--RES:DS_PUB_DESC--></th>
+				</tr>
+				<!--PAR:PUBLICATION_LIST>-->
+				<form name="deleteform" id="deleteform#<!--PAR:PUBLICATION_ID-->" method="post" action="dspublications.php?mode=delete&datasource=<!--PAR:DATASOURCE_ID-->" width="20" height="20"><input type="hidden" id="publicationid#<!--PAR:PUBLICATION_ID-->" name="publication"></form>
+				<tr id="publication#<!--PAR:PUBLICATION_ID-->" bgcolor="#FFFFFF">
+					<td><strong><!--PAR:PUBLICATION_NAME--></strong></td>
+					<td><i><!--PAR:PUBLICATION_DESC--></i></td>
+					<td width="16"><img src="../../config/images/remov_16.gif" title="<!--RES:DS_PUB_DEL_DESC-->" onClick="javascript:removePublication( <!--PAR:PUBLICATION_ID--> );"></td>
+				</tr>
+				<!--<PAR:PUBLICATION_LIST-->
+				<tr><td colspan="3"></td></tr>	
+			</table>
+			</td>
+		</tr>
+	</table>
+		
+	<form action="dspublications.php" method="post">
+	<table class="formframe" width="70%"><tr><td>
+		<table class="formbody"><tr><td>
+			<table width="100%"><tr><td valign="top">
+				<tr><td><!--RES:DS_PUB_LIST-->: </td><td><!--VAR:PUBLICATIONS_LIST-->&nbsp;&nbsp;<input type="submit" name="ok" value="<!--RES:ACT_ADD-->"/></td></tr>
+			</td></tr></table>
+			<!--VAR:HIDDEN-->
+		</td></tr></table>
+	</td></tr><tr><td>
+	</td></tr></table>
+	</form>
+		
+	<br/>
+    <a href="datasources.php?dsSelect=<!--PAR:PRESELECTED_DATASOURCE-->">
+    	<img src="../../config/images/back_32.gif" border="0" title="<!--RES:ACT_BACK-->" width="32" height="32"/>
+    </a>
+</td></tr></table>

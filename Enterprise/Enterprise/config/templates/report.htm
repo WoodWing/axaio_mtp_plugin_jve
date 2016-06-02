@@ -1,0 +1,46 @@
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/stats_32.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:MNU_REPORTING--></span></td>
+		</tr>
+	</table>
+
+	<!-- app body -->
+	<form name="form" action="report.php" method="post">
+
+	<input type="hidden" name="path" value=""/>
+	<input type="hidden" name="inPub" value=""/>
+	<input type="hidden" name="inIssue" value=""/>
+	<input type="hidden" name="ticket" value="<!--TICKET-->"/>
+	<input type="hidden" name="use_template" value="<!--USE_TEMPLATE-->"/>
+
+	<table class="listframe"><tr><td>
+		<table class="listpane">
+			<tr>
+			  <th><!--RES:PUBLICATION--></th>
+			  <th><!--RES:ISSUE--></th>
+			  <th><!--RES:OBJ_REPORT--></th>
+			</tr>
+			<tr>
+				<td width="20%"><!--COMBOPUB--></td>
+				<td width="20%"><!--COMBOISS--></td>
+				<td width="20%"><!--COMBOREP--></td>
+			</tr>
+		</table>
+	<br/>
+	</td></tr></table>
+	</form>
+
+	<table width="100%">
+		<tr>
+			<!--GENERATELINKS-->
+		</tr>
+	</table>
+
+	<!--REPTABLE-->
+
+
+</td></tr></table>

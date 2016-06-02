@@ -1,0 +1,204 @@
+<?php
+
+// Converting module for Drupal 6 to 7: http://drupal.org/node/224333
+// Drupal API reference: http://api.drupal.org/api/drupal
+// Working with images: http://drupal.org/documentation/modules/image
+
+include_once(drupal_get_path('module', 'ww_enterprise').'/ww_enterprise_utils.inc');
+
+/**
+ * Implementation of hook_update_N
+ *
+ * This is the required update for ww_enterprise to run with Drupal core API 7.x when upgrading
+ * from Drupal core API 6.x.
+ *
+ * See numbering: http://api.drupal.org/api/drupal/modules%21system%21system.api.php/function/hook_update_N/7
+ */
+function ww_enterprise_update_7000( &$sandbox )
+{
+	$sandbox = $sandbox; // keep code analyzer happy
+	ww_enterprise_install();
+}
+
+/**
+ * Implementation of hook_schema
+ *
+ * This hook is executed automatically in Drupal 7 when installing/uninstalling the module.
+ * In Drupal 6 this method won't be executed, but is called explicitly from the
+ * ww_enterprise_install and ww_enterprise_uninstall.
+ */
+function ww_enterprise_schema()
+{
+	$schema['ww_enterprise_preview'] = array(
+		'fields' => array(
+			'vid' => array(
+				'type' => 'int',
+				'unsigned' => TRUE,
+				'not null' => TRUE,
+				'default' => 0
+			),
+			'nid' => array(
+				'type' => 'int',
+				'unsigned' => TRUE,
+				'not null' => TRUE,
+				'default' => 0
+			),
+			'hash' => array(
+				'type' => 'varchar',
+				'length' => 200,
+				'not null' => TRUE,
+				'default' => ''
+			),
+			'date' => array(
+				'type' => 'int',
+				'not null' => TRUE,
+				'default' => 0
+			)
+		),
+		'indexes' => array('nid' => array('nid')),
+		'primairy key' => array('vid')
+	);
+
+	// Add a table for Enterprise configuration settings to allow storing usable data in the Drupal 7 database.
+	$schema['ww_enterprise_configuration'] = array(
+		'fields' => array(
+			'setting' => array(
+				'type' => 'varchar',
+				'length' => 255,
+				'not null' => TRUE,
+				'default' => ''
+			),
+			'value' => array(
+				'type' => 'varchar',
+				'length' => 255,
+				'not null' => TRUE,
+				'default' => ''
+			),
+		),
+		'indexes' => array('setting' => array('setting')),
+		'primairy key' => array('setting')
+	);
+
+	return $schema;
+}	
+
+/**
+ * Implementation of hook_requirements
+ *
+ * @param string $phase
+ */
+function ww_enterprise_requirements( $phase )
+{
+	$phase = $phase; // keep code analyzer happy
+	return array();
+}
+
+/**
+ * Implements the hook_install() function.
+ *
+ * - Updates the vocabulary table by adding the ww_term_entity field.
+ */
+function ww_enterprise_install()
+{
+	$hasConfigurationTable = false;
+
+	// Add the Enterprise Term Entity field to the database if it does not exist.
+	if (!db_field_exists('taxonomy_vocabulary', 'ww_term_entity')) {
+		db_add_field('taxonomy_vocabulary', 'ww_term_entity', _ww_term_entity_definition());
+		drupal_set_message('Module `ww_enterprise`: Successfully updated the `taxonomy_vocabulary` table.' );
+	} else {
+		drupal_set_message('Module `ww_enterprise`: Table `taxonomy_vocabulary` was already up to date.' );
+	}
+
+	// Verify the Enterprise configuration table, and install the DrupalDatabaseInstanceId setting if needed.
+	if (!db_table_exists( 'ww_enterprise_configuration') ) {
+		drupal_set_message('Module `ww_enterprise`: Table `ww_enterprise_configuration does not exist.`', 'error' );
+	} else {
+		$hasConfigurationTable = true;
+		drupal_set_message('Module `ww_enterprise`: Table `ww_enterprise_configuration installed succesfully.`' );
+	}
+
+	if ( $hasConfigurationTable ) {
+		// Setup the configuration for the Drupal database instance id if needed.
+		try {
+			$hasDrupalInstanceId = ww_enterprise_utils_configuration_setting_exists( 'DrupalDatabaseInstanceId' );
+
+			if (!$hasDrupalInstanceId) {
+
+				// Check if the variable is set for the instance id in case we did an uninstall, it will also remove
+				// the configuration table because everything defined in the schema is automatically uninstalled. Therefore
+				// check if we have one in the variables and use that, otherwise generate one and set it as a variable
+				// and store it in the variables table.
+
+
+				$drupalDatabaseInstanceId = variable_get('DrupalDatabaseInstanceId', '');
+				if (empty( $drupalDatabaseInstanceId ) ) {
+					// Generate a GUID to uniquely identify this installation, and set it as a variable.
+					$drupalDatabaseInstanceId = ww_enterprise_utils_generate_guid();
+					variable_set('DrupalDatabaseInstanceId', $drupalDatabaseInstanceId);
+				}
+
+				// Store the Drupal database instance id in the configuration table.
+				ww_enterprise_utils_save_configuration_setting( 'DrupalDatabaseInstanceId', $drupalDatabaseInstanceId );
+			}
+		} catch ( Exception $e ) {
+			// Report the error on the screen for the end user.
+			drupal_set_message('Module `ww_enterprise` reported: ' . $e->getMessage(), 'error' );
+		}
+	}
+}
+
+/**
+ * Implements the hook_uninstall() function.
+ *
+ * - Updates the vocabulary table by removing the ww_term_entity field.
+ */
+function ww_enterprise_uninstall()
+{
+	// Remove The Enterprise Term Entity field from the database if it exists.
+	// Note that the preview and configuration tables are not removed, only the added rows for the existing tables
+	// are removed. if the configuration table were to be removed it would no longer allow us to uniquely id this
+	// Drupal 7 instance.
+
+	if (db_field_exists('taxonomy_vocabulary', 'ww_term_entity')) {
+		db_drop_field('taxonomy_vocabulary', 'ww_term_entity');
+		drupal_set_message('Module `ww_enterprise`: Successfully updated the `taxonomy_vocabulary` table.' );
+	} else {
+		drupal_set_message('Module `ww_enterprise`: Table `taxonomy_vocabulary` was already up to date.' );
+	}
+}
+
+/**
+ * Retrieves the field definition for the ww_term_entity field.
+ *
+ * @return array
+ */
+function _ww_term_entity_definition()
+{
+	return array(
+		'type' => 'varchar',
+		'length' => 200,
+		'not null' => TRUE,
+		'default' => '',
+		'description' => 'WoodWing Term Entity, used when providing Suggestions from the Publish Form.'
+	);
+}
+
+/**
+ * Implements the hook_schema_alter function.
+ *
+ * To make the Drupal internals work nicely with the ww_term_entity field this function adds the
+ * field to the schema.
+ *
+ * @param array $schema
+ */
+function ww_enterprise_schema_alter(&$schema)
+{
+	if (isset($schema['taxonomy_vocabulary'])) {
+		if (!isset($schema['taxonomy_vocabulary']['fields']['ww_term_entity'])) {
+			$schema['taxonomy_vocabulary']['fields']['ww_term_entity'] = _ww_term_entity_definition();
+		}
+	}
+}
+
+?>

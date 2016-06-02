@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Last edit date in TMS: 20-05-2016 08:37:54 GMT-->
+<LocalizationMap language="plPL">
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS">Status wysłania</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_FAILED">Nieudane (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_PENDING">W toku (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_UPLOADED">Wysłane (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_UPLOADING">Wysyłanie %1% (v%2)</Term>
+  <Term key="AdobeDps2.ASSET_NEEDS_ATTENTION">Nie powiodło się przesłanie układu, który miał być opublikowany w usłudze Adobe Distribution Service.</Term>
+  <Term key="AdobeDps2.AUTHENTICATION_SERVER_URL">Adres URL serwera uwierzytelnienia</Term>
+  <Term key="AdobeDps2.CONFIRM_UNREGISTER">Czy na pewno chcesz wyrejestrować?</Term>
+  <Term key="AdobeDps2.CONFIRM_UNSETPROJECT">Czy na pewno chcesz anulować przypisanie projektu?</Term>
+  <Term key="AdobeDps2.CREATE_COLLECTIONS">Utwórz kolekcje</Term>
+  <Term key="AdobeDps2.DEFAULT_ARTICLE_ACCESS">Domyślny dostęp do artykułu</Term>
+  <Term key="AdobeDps2.ERROR_AFFECTS_LAYOUT">Niestety wystąpił błąd. Dotyczy następującego układu:</Term>
+  <Term key="AdobeDps2.ERROR_CANT_CONNECT_TO_SERVER">Nie można połączyć się z usługą Adobe Distribution Service.</Term>
+  <Term key="AdobeDps2.ERROR_NO_CHANNELS">Nie znaleziono kanału publikacji typu „dps2”.</Term>
+  <Term key="AdobeDps2.ERROR_NO_CHANNELS_HELP">Upewnij się, że kanał publikacji typu „dps2” został skonfigurowany.</Term>
+  <Term key="AdobeDps2.ERROR_NO_EDIT_CONTENT_RIGHTS">Nie znaleziono praw dostępu „Dodawanie i edycja treści” do projektów Adobe DPS.</Term>
+  <Term key="AdobeDps2.ERROR_SERVER_ERROR">Wystąpił błąd usługi Adobe DPS Distribution Service.</Term>
+  <Term key="AdobeDps2.LETTER_BEGINNING">Szanowna Pani/Szanowny Panie,</Term>
+  <Term key="AdobeDps2.PROJECT">Projekt</Term>
+  <Term key="AdobeDps2.SELECT_PROJECT">Wybierz projekt</Term>
+  <Term key="AdobeDps2.SETPROJECT">Przypisz projekt</Term>
+  <Term key="AdobeDps2.SUCCESSFULLY_UNREGISTERED">Wyrejestrowano pomyślnie.</Term>
+  <Term key="AdobeDps2.UNSETPROJECT">Anuluj przypisanie projektu</Term>
+  <Term key="AdobeDps2.UPLOADING_AP_ARTICLES">%1 Status wysłania artykułu</Term>
+</LocalizationMap>

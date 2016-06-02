@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Last edit date in TMS: 20-05-2016 08:37:54 GMT-->
+<LocalizationMap language="frFR">
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS">État du chargement</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_FAILED">Échec (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_PENDING">En attente (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_UPLOADED">Chargé (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_UPLOADING">Chargement en %1% (v%2)</Term>
+  <Term key="AdobeDps2.ASSET_NEEDS_ATTENTION">Le chargement de la mise en page que vous avez essayé de publier sur Adobe Distribution Service a échoué.</Term>
+  <Term key="AdobeDps2.AUTHENTICATION_SERVER_URL">URL du serveur d'authentification</Term>
+  <Term key="AdobeDps2.CONFIRM_UNREGISTER">Voulez-vous vraiment vous déconnecter ?</Term>
+  <Term key="AdobeDps2.CONFIRM_UNSETPROJECT">Voulez-vous vraiment annuler l'affectation du projet ?</Term>
+  <Term key="AdobeDps2.CREATE_COLLECTIONS">Créer des collections</Term>
+  <Term key="AdobeDps2.DEFAULT_ARTICLE_ACCESS">Accès à l'article par défaut</Term>
+  <Term key="AdobeDps2.ERROR_AFFECTS_LAYOUT">Une erreur est malheureusement survenue. Elle correspond à la mise en page suivante :</Term>
+  <Term key="AdobeDps2.ERROR_CANT_CONNECT_TO_SERVER">Impossible de se connecter à Adobe Distribution Service.</Term>
+  <Term key="AdobeDps2.ERROR_NO_CHANNELS">Aucun canal de publication de type « dps2 » n'a pu être trouvé.</Term>
+  <Term key="AdobeDps2.ERROR_NO_CHANNELS_HELP">Assurez-vous qu'un canal de publication de type « dps2 » a été configuré.</Term>
+  <Term key="AdobeDps2.ERROR_NO_EDIT_CONTENT_RIGHTS">Aucun droit d'accès pour « Ajouter et modifier le contenu » n'a été trouvé pour les projets Adobe DPS.</Term>
+  <Term key="AdobeDps2.ERROR_SERVER_ERROR">Une erreur est survenue dans le programme Adobe DPS Distribution Service.</Term>
+  <Term key="AdobeDps2.LETTER_BEGINNING">Cher/chère</Term>
+  <Term key="AdobeDps2.PROJECT">Projet</Term>
+  <Term key="AdobeDps2.SELECT_PROJECT">Veuillez sélectionner un projet</Term>
+  <Term key="AdobeDps2.SETPROJECT">Affecter le projet</Term>
+  <Term key="AdobeDps2.SUCCESSFULLY_UNREGISTERED">Déconnexion réussie.</Term>
+  <Term key="AdobeDps2.UNSETPROJECT">Annuler l'affectation du projet</Term>
+  <Term key="AdobeDps2.UPLOADING_AP_ARTICLES">%1 état de chargement de l'article</Term>
+</LocalizationMap>
