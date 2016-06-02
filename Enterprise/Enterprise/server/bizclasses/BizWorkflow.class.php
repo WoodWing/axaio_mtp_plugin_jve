@@ -1021,8 +1021,8 @@ class BizWorkflow
 	 * Retrieves a property value from a metadata structure. If no value is set the property value is initialized.
 	 *
 	 * @param string $property
-	 * @param $metaData Array of MetaDataValue object.
-	 * @param $initValue Initialize value
+	 * @param MetaDataValue[] $metaData
+	 * @param mixed $initValue Initialize value
 	 * @return mixed
 	 */
 	static private function getPropertyFromMetaData( $property, $metaData, $initValue )
