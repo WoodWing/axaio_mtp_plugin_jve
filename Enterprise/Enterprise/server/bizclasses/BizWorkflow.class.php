@@ -1025,7 +1025,7 @@ class BizWorkflow
 	 * @param $initValue Initialize value
 	 * @return mixed
 	 */
-	private function getPropertyFromMetaData( $property, $metaData, $initValue )
+	static private function getPropertyFromMetaData( $property, $metaData, $initValue )
 	{
 		$value = $initValue;
 		if( isset( $metaData[ $property ]->PropertyValues[0]->Value ) ) {
