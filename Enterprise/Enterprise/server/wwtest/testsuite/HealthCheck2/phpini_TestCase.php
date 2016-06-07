@@ -116,17 +116,17 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 	{
 		// Mandatory PHP extensions for which an ERROR should raise.
 		$exts = array(
-			'gd' => 'http://php.net/manual/en/image.installation.php',
-			'exif' => 'http://php.net/manual/en/exif.installation.php',
-			'sockets' => 'http://php.net/manual/en/sockets.installation.php',
-			'mbstring' => 'http://php.net/manual/en/mbstring.installation.php',
-			'soap' => 'http://php.net/manual/en/soap.installation.php',
-			'iconv' => 'http://php.net/manual/en/iconv.installation.php',
-			'curl' => 'http://php.net/manual/en/curl.installation.php',
-			'zlib' => 'http://php.net/manual/en/zlib.installation.php',
+			'gd' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/image-installation',
+			'exif' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/exif-installation',
+			'sockets' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/sockets-installation',
+			'mbstring' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/mbstring-installation',
+			'soap' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/soap-installation',
+			'iconv' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/iconv-installation',
+			'curl' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/curl-installation',
+			'zlib' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/zlib-installation',
 				// L> Note that zlib is needed since Enterprise 9.5 to support Deflate compression
 				//    during file uploads/downloads through Transfer Server.
-			'xsl' => 'http://php.net/manual/en/xsl.installation.php'
+			'xsl' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/xsl-installation'
 		);
 
 		// Optional PHP extentions for which a WARNing should raise instead.
@@ -303,7 +303,7 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 			require_once BASEDIR . '/server/utils/ZendOpcache.php';
 			$isInstalled = WW_Utils_ZendOpcache::isOpcacheInstalled();
 			if( !$isInstalled ) {
-				$help = 'See <a href="https://helpcenter.woodwing.com/hc/en-us/articles/205501875" '.
+				$help = 'See <a href="https://redirect.woodwing.com/v1/?path=enterprise-server/'.ONLINEHELP_SERVER_MAJOR_VERSION.'/help/zend-opcache" '.
 					'target="_blank">Enterprise Help</a> for instructions.';
 				$this->setResult( 'WARN',  "Zend OPcache is not installed.", $help );
 			}
