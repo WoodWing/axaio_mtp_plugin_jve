@@ -137,13 +137,17 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	
 	/**
 	 * Replaces empty string in SQL by 'is (not) null' except for INSERT statements.
-	 * E.g:
+	 *
+	 * For example, the following SQL fragment:
+	 *    SELECT ... WHERE `name` = ''
+	 * is replaced with:
+	 *    SELECT ... WHERE `name` = is null
+	 *
+	 * Supported operators:
 	 * = '' => is null
 	 * != '' => is not null
 	 * <> '' => is not null
-	 * Only replaces last WHERE clause (reason unknown).
-	 * The method replaceEmptyStringNew() is not limited to the first where clause and also takes for example joins
-	 * into account. This method should be enabled at the start of new release project.
+	 * Note that this function has a limitation (for an unknown reason): It only replaces the last instance.
 	 *
 	 * @param string $sql
 	 * @return string
@@ -158,35 +162,6 @@ class oracledriver extends WW_DbDrivers_DriverBase
 			$phaseB = preg_replace( "/<>[ ]*(\\'\\')/is", " is not null ", $phaseA );
 			$arr[ $last ] = preg_replace( "/=[ ]*(\\'\\')/is", " is null ", $phaseB );
 			$sql = implode( "where", $arr );
-		}
-
-		return $sql;
-	}
-
-	/**
-	 * Improved version of replaceEmptyString:
-	 * - Is not limited to one 'where' clause.
-	 * - Takes also 'joins' into account
-	 * Tested with:
-	 * $sqlIn = "SELECT o.`id`, MIN(o.`modified`) AS `o_modified` from SMART_OBJECTS o INNER JOIN TEMP_AOV aov ON
-	 *          ( aov.`id` = '' ) WHERE ( ( (UPPER(o.`name`) LIKE UPPER('%where b = ''''%') ESCAPE '|' ) ) )
-	 *          AND o.`name` != '' OR o.`name` = '' OR o.`name` <> '' GROUP BY o.`id` ORDER BY `o_modified` DESC";
-	 * $sqlOut = "SELECT o.`id`, MIN(o.`modified`) AS `o_modified` from SMART_OBJECTS o INNER JOIN TEMP_AOV aov ON
-	 *          ( aov.`id` is null ) WHERE ( ( (UPPER(o.`name`) LIKE UPPER('%where b = ''''%') ESCAPE '|' ) ) )
-	 *          AND o.`name` is not null OR o.`name` is null OR o.`name` is not null GROUP BY o.`id`
-	 *          ORDER BY `o_modified` DESC
-	 * The '%where b = ''''%' is created by searching on "where b = ''" at the client application.
-	 * This method can be activated at the beginning of a new version development project.
-	 *
-	 * @param string $sql
-	 * @return string
-	 */
-	private function replaceEmptyStringNew( $sql )
-	{
-		if( strtolower( substr( trim( $sql ), 0, 6 ) ) != "insert" ) {
-			$sql = preg_replace( "/!=[ ]*(\\'\\')[^\\']/is", " is not null ", $sql );
-			$sql = preg_replace( "/<>[ ]*(\\'\\')[^\\']/is", " is not null ", $sql );
-			$sql = preg_replace( "/=[ ]*(\\'\\')[^\\']/is", " is null ", $sql );
 		}
 
 		return $sql;

@@ -38,7 +38,10 @@ define ('ADOBE_VERSIONS_ALL',		serialize( array( // used to detect documents ver
 	'CC' => '9.0',
 	'CC2014' => '10.0',
 	'CC2015' => '11.0',
-))); 
+)));
+
+// For online-help articles:
+define ('ONLINEHELP_SERVER_MAJOR_VERSION', '10');
 
 // For License:
 define ('PRODUCTMAJORVERSION', '10' );
