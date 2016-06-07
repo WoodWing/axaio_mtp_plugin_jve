@@ -21,18 +21,6 @@ function showUsage {
 	echo "${0} <personal-api-key> <enterprise-major-version> "
 }
 
-# Validate input parameters
-if [ ! -n "${1}" ]; then 
-	echo "Personal API key not specified. Please request SysOps for a personal API key and provide this parameter."
-	showUsage
-	exit 1;
-fi
-if [ ! -n "${2}" ]; then 
-	echo "Enterprise Server major version not specified. Please provide this parameter."
-	showUsage
-	exit 1;
-fi
-
 #
 # Creates or updates a redirection URL.
 #
@@ -91,18 +79,49 @@ function saveAndTestRedirection {
 	testRedirection ${1} ${2} ${3} 
 }
 
-# https://redirect.woodwing.com/v1/?path=enterprise-server/10/help/zend-opcache
-saveAndTestRedirection "${1}" "enterprise-server/${2}/help/zend-opcache" "https://helpcenter.woodwing.com/hc/en-us/articles/205501875" 
+#
+# Saves all known redirections for the PHP manual pages as referred from our Health Check pages.
+#
+# Example:
+#    Source URL: https://redirect.woodwing.com/v1/?path=enterprise-server/10/help/zend-opcache
+#    Target URL: https://helpcenter.woodwing.com/hc/en-us/articles/205501875
+#
+function saveAndTestPhpManualRedirections {
+	# https://redirect.woodwing.com/v1/?path=enterprise-server/10/help/zend-opcache
+	saveAndTestRedirection "${1}" "enterprise-server/${2}/help/zend-opcache" "https://helpcenter.woodwing.com/hc/en-us/articles/205501875" 
 
-# Note that this Analytics help page is removed already: https://helpcenter.woodwing.com/hc/en-us/articles/204805639
+	# Note that this Analytics help page is removed already: https://helpcenter.woodwing.com/hc/en-us/articles/204805639
+}
 
-# Redirection URLs for the PHP manual pages as referred from our Health Check pages.
-saveAndTestRedirection "${1}" "enterprise-server/php-manual/image-installation" "http://php.net/manual/en/image.installation.php"
-saveAndTestRedirection "${1}" "enterprise-server/php-manual/exif-installation" "http://php.net/manual/en/exif.installation.php"
-saveAndTestRedirection "${1}" "enterprise-server/php-manual/sockets-installation" "http://php.net/manual/en/sockets.installation.php"
-saveAndTestRedirection "${1}" "enterprise-server/php-manual/mbstring-installation" "http://php.net/manual/en/mbstring.installation.php"
-saveAndTestRedirection "${1}" "enterprise-server/php-manual/soap-installation" "http://php.net/manual/en/soap.installation.php"
-saveAndTestRedirection "${1}" "enterprise-server/php-manual/iconv-installation" "http://php.net/manual/en/iconv.installation.php"
-saveAndTestRedirection "${1}" "enterprise-server/php-manual/curl-installation" "http://php.net/manual/en/curl.installation.php"
-saveAndTestRedirection "${1}" "enterprise-server/php-manual/zlib-installation" "http://php.net/manual/en/zlib.installation.php"
+#
+# Saves all known redirections for the Help Center articles as referred from our Health Check pages.
+#
+# @param string $1 Personal API key
+#
+function saveAndTestHelpCenterRedirections {
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/image-installation" "http://php.net/manual/en/image.installation.php"
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/exif-installation" "http://php.net/manual/en/exif.installation.php"
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/sockets-installation" "http://php.net/manual/en/sockets.installation.php"
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/mbstring-installation" "http://php.net/manual/en/mbstring.installation.php"
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/soap-installation" "http://php.net/manual/en/soap.installation.php"
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/iconv-installation" "http://php.net/manual/en/iconv.installation.php"
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/curl-installation" "http://php.net/manual/en/curl.installation.php"
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/zlib-installation" "http://php.net/manual/en/zlib.installation.php"
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/xsl-installation" "http://php.net/manual/en/xsl.installation.php"
+}
 
+# Validate input parameters
+if [ ! -n "${1}" ]; then 
+	echo "Personal API key not specified. Please request SysOps for a personal API key and provide this parameter."
+	showUsage
+	exit 1;
+fi
+if [ ! -n "${2}" ]; then 
+	echo "Enterprise Server major version not specified. Please provide this parameter."
+	showUsage
+	exit 1;
+fi
+
+# Save and test all redirections as referred from our Health Check pages.
+saveAndTestPhpManualRedirections ${1}
+saveAndTestHelpCenterRedirections ${1}
