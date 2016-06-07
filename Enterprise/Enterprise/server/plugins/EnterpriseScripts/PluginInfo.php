@@ -16,7 +16,7 @@ class EnterpriseScripts_EnterprisePlugin extends EnterprisePlugin
 		require_once BASEDIR.'/server/interfaces/plugins/PluginInfoData.class.php';
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Enterprise Scripts';
-		$info->Version     = '10.0.0 Build 1'; // don't use PRODUCTVERSION.
+		$info->Version     = '10.0.0 Build 81'; // don't use PRODUCTVERSION.
 		$info->Description = 'Enterprise Scripts deployment server plug-in. Provides a URL to a downloadable package of client-side scripts to install.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;

@@ -5,7 +5,7 @@ define ('SERVERNAME',		    'Enterprise');
 define ('SERVERDEVELOPER',	    'WoodWing');			// DO NOT CHANGE!
 define ('SERVERIMPLEMENTATION',	'SmartConnection');		// DO NOT CHANGE!
 define ('SERVERTECHNOLOGY',	    'PHP');					// DO NOT CHANGE!
-define ('SERVERVERSION',	    '10.0.0 Build 1');
+define ('SERVERVERSION',	    '10.0.0 Build 81');
 define ('SERVERVERSION_EXTRAINFO',	'');					// To be used for labels such as Prerelease and Daily
 
 // For internal use, to validate configurations:

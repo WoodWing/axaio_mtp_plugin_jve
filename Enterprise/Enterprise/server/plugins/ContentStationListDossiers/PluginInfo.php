@@ -16,7 +16,7 @@ class ContentStationListDossiers_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Content Station List Dossiers';
-		$info->Version     = '10.0.0 Build 1'; // don't use PRODUCTVERSION
+		$info->Version     = '10.0.0 Build 81'; // don't use PRODUCTVERSION
 		$info->Description = 'This content source implements a hidden named query for content station.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
