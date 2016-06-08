@@ -526,11 +526,11 @@ define('MTP_POSTPROCESS_LOC', 	SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostP
 //       Broadcasting (default)
 //          (Server feature.) Enables event mechanism.
 //       ContentStationNumberOfItemsToPrefetch
-//          For Content Station 9.5 or higher
+//          For Content Station 9.5 up to 9.x
 //          Sets the maximum number of files and objects for which the preview and metadata information should be prefetched from the server.
 //          This makes sure that when a user selects a different file or object in a Document pane, the information is readily available.
 //       ContentStationNumberOfSimultaneousDownloads
-//          For Content Station 9.5 or higher
+//          For Content Station 9.5 up to 9.x
 //          Sets the maximum number of simultaneous downloads (such as thumbnails in the Publication Overview Application) that Content Station will handle.
 //       CompanyLanguage (default)
 //          (Server feature.) The company language is used as the default language. This means that 
@@ -634,27 +634,32 @@ define('MTP_POSTPROCESS_LOC', 	SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostP
 //						SS = 30
 //		UseTwelveHourFormat
 //			If set Contentstation will use the 12 hour format for the time input components
+//			For ContentStation up to 9.x
 //      CSPlainText
 //			If set ContentStation will use plain text for new articles
+//			For ContentStation up to 9.x
 //		ContentStationRTL
 //			Enables right-to-left support in ContentStation
+//			For ContentStation up to 9.x
 //		PublicationOverviewCombineRequests
 //			This will combine the requests for the thumbs and previews in the publication overview into one request. This can fix communication errors with IIS or proxy servers
 //			Note: A downside of this is that the user does not see any thumbs or previews before the complete request has finished.
+//			For ContentStation up to 9.x
 //		ClientFeedback
 //			This will enable the diagnosis functionality at client application side. The user can send feedback or a crash report is send when
 //			the client application encounters an unexpected error.
+//			For ContentStation up to 9.x
 //      ContentStationUseWWEAEditor
-//			For ContentStation 7.4 or higher
+//			For ContentStation 7.4 up to 9.x
 //			If set ContentStation uses the wwea editor instead of the multi channel editor
 //      ContentStationDisableEditorPreview
-//			For ContentStation 7.4 or higher, Content Station HTML
+//			For ContentStation 7.4 and higher
 //          If set the preview in the multi channel editor is disabled
-//      ContentStationReadWriteEditor
-//			For Content Station HTML
-//          Articles in Content Station HTML are always opened in readonly mode, unless this feature is set
+//      ContentStationReadOnlyEditor
+//			For Content Station 10 and higher
+//          Articles in Content Station 10 are always opened in read/write mode, unless this feature is set
 //		MaxPDFPreviewSize (default)
-//			For ContentStation 7.6.7 or higher
+//			For ContentStation 7.6.7 up to 9.x
 //			If set, Content Station will download the 'native' PDF as long as the filesize of the PDF does not exceed
 //			the maximum. The download refers to viewing the PDF in the 'Preview' pane. In case the PDF file exceeds the
 //			maximum, Content Station will ask for the preview of the PDF. The size is in Kb. So 1024 equals 1 Mb. Default value: 1024.
@@ -673,6 +678,7 @@ define('MTP_POSTPROCESS_LOC', 	SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostP
 //			The default value is 144.
 //		ContentStationHideGlobalNewArticle
 //			Hide the new article button in the home tab of Content Station
+//			For ContentStation up to 9.x
 //		UseElementLabelOrder
 //			(Client feature for Smart Connection v8.3 or higher). When an
 //			InDesign user creates a new article or article template, the order of the
@@ -687,6 +693,7 @@ define('MTP_POSTPROCESS_LOC', 	SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostP
 // 			By matching the PublicationOverviewMaxGridViewZoom setting to the maximum thumbnail preview size, zooming is restricted 
 // 			up to that size and page previews are prevented from being loaded.
 // 			The default setting of PublicationOverviewMaxGridViewZoom would therefore be '255'.
+//			For ContentStation up to 9.x
 //		RespectPlannedAdvertGeometry
 //			For Smart Connection.
 //			The RespectPlannedAdvertGeometry setting controls if geometry changes(location and dimension) of an Advert 
@@ -705,12 +712,12 @@ define('MTP_POSTPROCESS_LOC', 	SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostP
 //          InCopy files. The advantage is that always the latest information on the layout is displayed in the
 //          InCopy Layout View mode.
 //      MCEHideListButtons
-//          For Content Station 9.5.1 or higher
+//          For Content Station 9.5.1 up to 9.x
 //          When specific paragraph styles are set up for creating numbered lists and bulleted lists, it is important
 //          that the user uses those styles and not uses the buttons in the toolbar for creating such lists.
 //          Using this feature, the buttons for creating lists are hidden from the toolbar in the Multi Channel Editor.
 //      ContentStationInlineArticleCompare
-//          Enables the Inline Article Compare feature in Content Station 9.6 or higher.
+//          Enables the Inline Article Compare feature in Content Station 9.6 up to 9.x.
 //          When enabled, Track Changes are automatically disabled in Content Station.
 
 define ('SERVERFEATURES', serialize(array(	
