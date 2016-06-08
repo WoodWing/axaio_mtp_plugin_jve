@@ -348,7 +348,7 @@ class BizProperty
 	 * Returns the display name of a (custom) property.
 	 *
 	 * @param string $property
-	 * @return true id display name is found else false
+	 * @return true id displayname is found else false
 	 */
 	public static function getPropertyDisplayName($property)
 	{
@@ -493,7 +493,7 @@ class BizProperty
 		// TargetMetaData (DEPRECATED since v6.0)
 		// TargetMetaData has been removed completely from WSDL but cannot remove
 		// the four properties below ('IssueId', 'Issue', 'SectionId' and 'Section')
-		// even though they were previously derived from TargetMetaData.
+		// eventhough they were previously derived from TargetMetaData. 
 		// These four properties are used all over the shops, removing all entirely will risk the
 		// Enterprise not working. So just null the issue and issueId's $MetaProps[] 
 		// and for Section and SectionId's $MetaProps[], map them to Category and CategoryId.
@@ -1094,14 +1094,9 @@ class BizProperty
 	 * Asks the server plug-ins with a CustomObjectMetaData connector for custom object properties.
 	 * Those properties are validated and installed by expanding the DB model.
 	 *
-	 * Make sure that all validation is done in validateCustomProperties(). After the validation the installation of
-	 * custom properties should not error except for errors due to the database update.
-	 *
-	 * @param $pluginName string|null Server Plug-in (name) to run the CustomObjectMetaData connector for.
-	 * NULL to run all plugins with a CustomObjectMetaData connector.
+	 * @param $pluginName string|null Server Plug-in (name) to run the CustomObjectMetaData connector for. NULL to run all plugins with a CustomObjectMetaData connector.
 	 * @param array|null $pluginErrs Empty array to collect errors. NULL to let function throw BizException on errors.
-	 * @param bool $coreInstallation True to get the customProperties and install them now; False to let the import page
-	 * collect and install the properties.
+	 * @param bool $coreInstallation True to get the customProperties and install them now; False to let the import page collect and install the properties.
 	 * @throws BizException When one of the provided custom properties is not valid.
 	 */
 	static public function validateAndInstallCustomProperties( $pluginName = null, &$pluginErrs, $coreInstallation )
@@ -1126,15 +1121,12 @@ class BizProperty
 	 */
 	static private function validateCustomProperties( $connRetVals, &$pluginErrs )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizCustomField.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
 		$excludeFromModel = BizCustomField::getExcludedObjectFields();
 		$objTypes = getObjectTypeMap();
 		$propTypes = getPropertyTypeMap();
 
-		if ( $connRetVals ) foreach( $connRetVals as $connName => $brandProps ) {
-			$plugin = BizServerPlugin::getPluginForConnector( $connName );
+		foreach( $connRetVals as $connName => $brandProps ) {
 			try {
 				if( !is_array( $brandProps ) ) {
 					throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
@@ -1167,54 +1159,6 @@ class BizProperty
 						}
 						// Validate the array of PropertyInfo.
 						foreach( $propInfos as $propInfo ) {
-							if( $propInfo->TermEntity ) {
-								$autocompleteProvider = $propInfo->AutocompleteProvider;
-								if( $autocompleteProvider ) {
-									// When the plugin has a property with Term Entity defined, it is expected that the
-									// AutocompleteProvider plugin connector should be provided by the plugin.
-									if( $autocompleteProvider != $plugin->UniqueName ) {
-										throw new BizException( 'PLN_CLICKTOREPAIR', 'Client',
-											'The '.$connName.'->collectCustomProperties function has a Term Entity property defined, '.
-											'but the \'AutocompleteProvider\' specified for this property ("'.$propInfo->Name.
-											'") is incorrect. The Autocomplete provider expected is "'.$plugin->UniqueName.'", but "'.
-											$autocompleteProvider.'" is provided instead.' );
-									}
-								} else { // When not given, resolve it (expected the plugin to provide its own Autocomplete Provider.)
-									$autocompleteProvider = $plugin->UniqueName;
-								}
-								require_once BASEDIR.'/server/bizclasses/BizAutocompleteDispatcher.class.php';
-								$foundConnector = BizAutocompleteDispatcher::findAutocompleteProviderConnector( $autocompleteProvider );
-								if( !$foundConnector ) {
-									throw new BizException( 'PLN_CLICKTOREPAIR', 'Client',
-										'The ' . $connName.'->collectCustomProperties function has a Term Entity property ' .
-										'defined ("'.$propInfo->Name.'"), but this property cannot be installed. Either '.
-										'the AutocompleteProvider plugin connector is not found or the AutocompleteProvider ' .
-										'"'.$autocompleteProvider.'" cannot handle the Term Entity "'.$propInfo->TermEntity.'" ' .
-										'set on the property.' );
-								}
-							}
-							
-							$customPropertyInfos = DBProperty::getPropertyInfos( $plugin->UniqueName, $propInfo->Name );
-							if( count( $customPropertyInfos ) != 0 ) { // Update
-								if( $customPropertyInfos[0]->Type != $propInfo->Type ) { // Not allow to change the prop 'Type'
-									throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
-										'attempted to change the existing property "'.$propInfo->DisplayName.'" ("'.$propInfo->Name.'") of type '.
-										'"'.$customPropertyInfos[0]->Type.'" to type "'.$propInfo->Type.'". This is not allowed.' );
-								}
-							} else { // Create
-								$custProps = DBProperty::getPropertyByNameAndFields( $propInfo->Name, 'all', null );
-								if( $custProps ) { // Custom property do exists in DB, but in different Publication, check if the
-									// prop type is the same. $custProps[0]: Taking just first custProp is fine as it is
-									// assumed that when the custom prop shares the same prop name, they share the same prop type too.
-									if( $custProps[0]->Type != $propInfo->Type ) {
-										throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
-											'is about to introduce a property "'.$propInfo->Name.'" where the name already exists, this '.
-											'is allowed but it must have of type "'.$custProps[0]->Type.
-											'" instead of type "'.$propInfo->Type.'".' );
-									}
-								}
-							}
-
 							if( !is_object( $propInfo ) || get_class($propInfo) !== 'PropertyInfo' ) {
 								throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
 									'did not return an array of PropertyInfo objects at index ['.$brandId.']['.$objType.'].' );
@@ -1277,11 +1221,6 @@ class BizProperty
 	/**
 	 * Stores custom object property definitions at DB and extends the DB model.
 	 *
-	 * If the DBMS supports the update of multiple columns of a table all updates are done by one statement.
-	 * After that the properties are updated. This reduces the risk that the definition of the smart_(deleted)objects
-	 * table is out of sync with the definitions stored in smart_properties. The same is true for new columns that
-	 * are added.
-	 *
 	 * @param array $connRetVals Custom property definition, as returned by plugin connectors (key = connector name, value = array of PropertyInfo objects)
 	 * @param array|null $pluginErrs Empty array to collect errors. NULL to let function throw BizException on errors.
 	 * @throws BizException Throws BizException when there's problem with the installation.
@@ -1295,29 +1234,45 @@ class BizProperty
 
 		// Properties of type 'file' or 'articlecomponent' should not be inserted or updated in the model.
 		$excludeFromModel = BizCustomField::getExcludedObjectFields();
-		if( $connRetVals ) foreach( $connRetVals as $connName => $brandProps ) {
+		if ( $connRetVals ) foreach( $connRetVals as $connName => $brandProps ) {
 			$plugin = BizServerPlugin::getPluginForConnector( $connName );
 			try {
-				$dbFieldsToAdd = array();
-				$dbFieldsToUpdate = array();
-				$propertiesToUpdate = array();
-				$propertiesToAdd = array();
-				if( $brandProps ) foreach( $brandProps as $brandId => $objTypeProps ) {
-					if( $objTypeProps ) foreach( $objTypeProps as $objType => $propInfos ) {
-						if( $propInfos ) foreach( $propInfos as $propInfo ) {
+				$fieldsToAdd = array();
+				$fieldsToUpdate = array();
+				if ( $brandProps ) foreach( $brandProps as $brandId => $objTypeProps ) {
+					if ( $objTypeProps ) foreach( $objTypeProps as $objType => $propInfos ) {
+						if ( $propInfos) foreach( $propInfos as $propInfo ) {
 							// Debugging: Uncomment the lines below to cleanup the property from DB.
-							/* try { BizCustomField::deleteFieldAtModel( 'objects', $propInfo->Name ); } catch( BizException $e ) { $e = $e; }
+							/*try { BizCustomField::deleteFieldAtModel( 'objects', $propInfo->Name ); } catch( BizException $e ) { $e = $e; }
 							DBProperty::deletePropertyInfo( $brandId, $objType, $propInfo->Name );
-							continue; */
+							continue;*/
 
 							if( $propInfo->TermEntity ) { // When property has Term Entity defined.
 								$autocompleteProvider = $propInfo->AutocompleteProvider;
-								if( !$autocompleteProvider ) {
-									// When not given, resolve it (expected the plugin to provide its own Autocomplete Provider.)
+								if( $autocompleteProvider ) {
+									// When the plugin has a property with Term Entity defined, it is expected that the
+									// AutocompleteProvider plugin connector should be provided by the plugin.
+									if( $autocompleteProvider != $plugin->UniqueName ) {
+										throw new BizException( 'PLN_CLICKTOREPAIR', 'Client',
+											'The '. $connName.'->collectCustomProperties function has a Term Entity property defined, '.
+											'but the \'AutocompleteProvider\' specified for this property ("'.$propInfo->Name.
+											'") is incorrect. The Autocomplete provider expected is "'.$plugin->UniqueName.'", but "'.
+											$autocompleteProvider.'" is provided instead.' );
+									}
+								} else { // When not given, resolve it (expected the plugin to provide its own Autocomplete Provider.)
 									$autocompleteProvider = $plugin->UniqueName;
 									$propInfo->AutocompleteProvider = $autocompleteProvider; // To be stored in the DB later.
 								}
-								if( is_null( $propInfo->PublishSystemId ) ) {
+								$foundConnector = BizAutocompleteDispatcher::findAutocompleteProviderConnector( $autocompleteProvider );
+								if( !$foundConnector ) {
+									throw new BizException( 'PLN_CLICKTOREPAIR', 'Client',
+										'The ' . $connName.'->collectCustomProperties function has a Term Entity property ' .
+										'defined ("'.$propInfo->Name.'"), but this property cannot be installed. Either '.
+										'the AutocompleteProvider plugin connector is not found or the AutocompleteProvider ' .
+										'"'.$autocompleteProvider.'" cannot handle the Term Entity "'.$propInfo->TermEntity.'" ' .
+										'set on the property.' );
+								}
+								if( is_null( $propInfo->PublishSystemId )) {
 									// When the property has Term Entity defined, the PublishSystemId has to be set.
 									// When it is set, meaning there might be two same Term Entity being used by two different publishing system instance.
 									// When it is empty, it implies the publishing system that using this Term Entity has only one instance.
@@ -1328,120 +1283,97 @@ class BizProperty
 							}
 
 							$customPropertyInfos = DBProperty::getPropertyInfos( $plugin->UniqueName, $propInfo->Name );
-							if( count( $customPropertyInfos ) != 0 ) { // Update
-								$propInfo = self::enrichPropertyInfoWithInternalProps( $propInfo, $brandId, $objType, $plugin );
-
-								if( $propInfo->DefaultValue ) {
-									$propInfo->DefaultValue = self::convertDefault( $propInfo->Type, $propInfo->DefaultValue );
+							if( count( $customPropertyInfos ) != 0 ) { // should always contain one
+								if( $customPropertyInfos[0]->Type != $propInfo->Type ) { // Not allow to change the prop 'Type'
+									throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
+										'attempted to change the existing property "'.$propInfo->DisplayName.'" ("'.$propInfo->Name.'") of type '.
+										'"'.$customPropertyInfos[0]->Type.'" to type "'.$propInfo->Type.'". This is not allowed.' );
 								}
 
 								// Only update the model if the property type is not flagged to be excluded.
 								if( !in_array( $propInfo->Type, $excludeFromModel ) ) {
 									if( self::supportUpdateMultipleColumns() )
-										$dbFieldsToUpdate['objects'][ $propInfo->Name ] = array(
+										$fieldsToUpdate['objects'][ $propInfo->Name ] = array(
 											'Name' => $propInfo->Name,
 											'Type' => $propInfo->Type );
 									else {
 										BizCustomField::updateFieldAtModel( 'objects', $propInfo->Name, $propInfo->Type );
 									}
 								}
-								if( self::supportUpdateMultipleColumns() ) {
-									// Add the properties after the datamodel is successfully updated.
-									$propertiesToUpdate[] = array(
-										'Name' => $propInfo->Name,
-										'Info' => $propInfo,
-										'Serverplugin' => $plugin->UniqueName
-									);
-								} else {
-									if( !DBProperty::updatePropertyInfo( $propInfo->Name, $propInfo, array( 'serverplugin' => $plugin->UniqueName ) ) ) {
-										throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
-											'returned a property "'.$propInfo->Name.'" that could not be updated in DB. '.
-											'Please check the server logging.' );
-									}
+
+								$propInfo = self::enrichPropertyInfoWithInternalProps( $propInfo, $brandId, $objType, $plugin );
+
+								if ( $propInfo->DefaultValue ) {
+									$propInfo->DefaultValue = self::convertDefault( $propInfo->Type, $propInfo->DefaultValue );
 								}
-							} else { // Create
+
+								if( !DBProperty::updatePropertyInfo( $propInfo->Name, $propInfo, array( 'serverplugin' => $plugin->UniqueName ) ) ) {
+									throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
+										'returned a property "'.$propInfo->Name.'" that could not be updated in DB. '.
+										'Please check the server logging.' );
+								}
+							} else { // create
 								$custProps = DBProperty::getPropertyByNameAndFields( $propInfo->Name, 'all', null );
-								if( !$custProps ) {
-									// Custom property never exists in DB before, insert into smart_objects and smart_deleted tables.
-									// Expand both the tables with a column to store data for the custom property.
+								if( $custProps ) { // Cust prop do exists in DB, but in different Publication, check if the prop type is the same.
+									// $custProps[0]: Taking just first custProp is fine as it is assumed that
+									// when the custom prop shares the same prop name, they share the same prop type too.
+									if( $custProps[0]->Type != $propInfo->Type ) {
+										// Here error when a new prop name (where name already exists ) is
+										// going to have different prop type than the existing one.
+										throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
+											'is about to introduce a property "'.$propInfo->Name.'" where the name already exists, this '.
+											'is allowed but it must have of type "'.$custProps[0]->Type.
+											'" instead of type "'.$propInfo->Type.'".' );
+									}
+
+									// When the prop type of the new prop name (which already exists) are the same
+									// the new prop name can be installed, but it is not needed to be installed into smart_objects
+									// and smart_deletedobjects table as they already exists.
+								} else { // cust prop never exists in DB before, insert into smart_objects and smart_deleted tables.
+									// Expand the smart_objects and smart_delete tables with a column to store data for the custom property.
 									// Only do this if the field is not flagged for exclusion from the model.
-									if( !in_array( $propInfo->Type, $excludeFromModel ) ) {
-										if( !isset( $dbFieldsToAdd['objects'] ) ) {
-											$dbFieldsToAdd['objects'] = array();
+									if (!in_array($propInfo->Type, $excludeFromModel)) {
+										if ( !isset( $fieldsToAdd['objects'])) {
+											$fieldsToAdd['objects'] = array();
 										}
-										$dbFieldsToAdd['objects'][ $propInfo->Name ] = array(
+										$fieldsToAdd['objects'][$propInfo->Name] = array(
 											'Name' => $propInfo->Name,
 											'Type' => $propInfo->Type );
 									}
 								}
 
+								// Now register this new custom prop into smart_property table
+								// This is done regardless of if the custom prop name do exists already in DB (but in different publication)
+
 								$propInfo = self::enrichPropertyInfoWithInternalProps( $propInfo, $brandId, $objType, $plugin );
 
-								if( $propInfo->DefaultValue ) {
+								if ( $propInfo->DefaultValue ) {
 									$propInfo->DefaultValue = self::convertDefault( $propInfo->Type, $propInfo->DefaultValue );
 								}
 
-								$propertiesToAdd[] = $propInfo;
+								// Add a row of the custom property definition to the smart_properties table to remember the details.
+								if( !DBProperty::insertPropertyInfo( $propInfo ) ) {
+									throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
+										'returned a property "'.$propInfo->Name.'" that could not be inserted in DB. '.
+										'Please check the server logging.' );
+								}
 							}
 						}
 					}
-					if( $dbFieldsToAdd ) {
-						BizCustomField::insertMultipleFieldsAtModel( $dbFieldsToAdd );
-					}
-					if( $dbFieldsToUpdate ) {
-						BizCustomField::updateMultipleFieldsAtModel( $dbFieldsToUpdate );
-					}
-					self::updateProperties( $propertiesToUpdate, $connName );
-					self::addProperties( $propertiesToAdd, $connName);
+				}
+				if ( $fieldsToAdd ) {
+					BizCustomField::insertMultipleFieldsAtModel( $fieldsToAdd );
+				}
+				if ( $fieldsToUpdate ) {
+					BizCustomField::updateMultipleFieldsAtModel( $fieldsToUpdate );
 				}
 			} catch( BizException $e ) {
-				if( is_array( $pluginErrs ) ) { // the caller wants us to collect errors?
+				if( is_array($pluginErrs) ) { // the caller wants us to collect errors?
 					$pluginKey = BizServerPlugin::getPluginUniqueNameForConnector( $connName );
-					$pluginErrs[ $pluginKey ] = $e->getMessage()."\n".$e->getDetail();
+					$pluginErrs[$pluginKey] = $e->getMessage()."\n".$e->getDetail();
 				} else { // the caller does collect errors, so we (re)throw
 					throw $e;
 				}
-			}
-		}
-	}
-
-	/**
-	 * Updates property definitions (supplied by a connector).
-	 *
-	 * @param array $propertiesToUpdate
-	 * @param $connName
-	 * @throws BizException
-	 */
-	static private function updateProperties( array $propertiesToUpdate, $connName )
-	{
-		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
-		if( $propertiesToUpdate ) foreach( $propertiesToUpdate as $propertyToUpdate ) {
-			if( !DBProperty::updatePropertyInfo( $propertyToUpdate['Name'],
-				$propertyToUpdate['Info'],
-				array( 'serverplugin' => $propertyToUpdate['Serverplugin'] ) )
-			) {
-				throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
-					'returned a property "'.$propertyToUpdate['Name'].'" that could not be updated in DB. '.
-					'Please check the server logging.' );
-			}
-		}
-	}
-
-	/**
-	 * Adds property definitions (supplied by a connector).
-	 *
-	 * @param array $propertiesToAdd
-	 * @param $connName
-	 * @throws BizException
-	 */
-	static private function addProperties( array $propertiesToAdd, $connName )
-	{
-		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
-		if( $propertiesToAdd ) foreach( $propertiesToAdd as $propertyToAdd ) {
-			if( !DBProperty::insertPropertyInfo( $propertyToAdd ) ) {
-				throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
-					'returned a property "'.$propertyToAdd->Name.'" that could not be inserted in DB. '.
-					'Please check the server logging.' );
 			}
 		}
 	}
@@ -1611,7 +1543,7 @@ class BizProperty
 	/**
 	 * Array version of objRowToPropValues
 	 *
-	 * @param 	array of array 	$objRowArray 	Array of Object row arrays
+	 * @param 	array of array 	$objRowArray 	Aray of Object row arrays
 	 * @return array        	Array of Object properties array
 	 */
 	static public function objRowArrayToPropValues( $objRowArray )
@@ -1753,7 +1685,7 @@ class BizProperty
 										$value = $treeMD->'.$path.';
 									}');
 
-							// RouteTo property needs special treatment.
+							// RouteTo property needs special treatement.
 							if( $fmd->Property == 'RouteTo' && isset( $value )) {
 								$routeTo = $value;
 								$routeToPropValue = self::getRouteToPropertyValue( $routeTo );
@@ -1794,10 +1726,10 @@ class BizProperty
 			$userShort = $userRow['user'];
 			$entity = 'User';
 		} else {
-			// When the routeTo value isn't a user it can be a user group
+			// When the routeTo value isn't a user it can be a usergroup
 			$userGroup = DBUser::getUserGroup( $routeTo );
 			if ( $userGroup ) {
-				// For a user group the value and display are the same
+				// For a usergroup the value and display are the same
 				$userShort = $routeTo;
 				$entity = 'UserGroup';
 			}
@@ -1987,6 +1919,7 @@ class BizProperty
 	                                      $customOnly = false, $onlyAllObjType=false )
 	{
 		// Get custom properties.
+		$onlyAllObjType = ($objType == '') ? true : false; // When objType = "All", set onlyAllObjType is true
 		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
 		$custProps = DBProperty::getProperties( $publ, $objType, false, $publishSystem, $templateId, $filtered, $onlyAllObjType );
 		$stdProps = array();
@@ -2045,13 +1978,13 @@ class BizProperty
 	 * All custom properties started with c_ (lowercase c)
 	 * In v5.0 custom properties can start with C_ (uppercase C) as well.
 	 *
-	 * @param string $propertyName Name of the property to check
-	 * @return boolean: true if the $propertyName starts with c_ or C_, else false
+	 * @param string $propertyname Name of the property to check
+	 * @return boolean: true if the $propertyname starts with c_ or C_, else false
 	 */
-	public static function isCustomPropertyName( $propertyName)
+	public static function isCustomPropertyName($propertyname)
 	{
 		require_once BASEDIR . '/server/dbclasses/DBProperty.class.php';
-		return DBProperty::isCustomPropertyName($propertyName);
+		return DBProperty::isCustomPropertyName($propertyname);
 	}
 
 	/**
@@ -2073,8 +2006,8 @@ class BizProperty
 
 	/**
 	 * Get's the type of a standard property by property name.
-	 * By the way: this is not the field type in the db, but a 'propertytype' as defined by woodwing.
-	 * @param string $propName Name of the standard property (not a display name!)
+	 * By the way: this is not the fieldtype in the db, but a 'propertytype' as defined by woodwing.
+	 * @param string propertyname Name of the standard property (not a displayname!)
 	 * @return string: type of the property
 	 **/
 	public static function getStandardPropertyType($propName)
@@ -2218,7 +2151,7 @@ class BizProperty
 					break;
 				case 'UnreadMessageCount':
 					require_once BASEDIR.'/server/dbclasses/DBMessage.class.php';
-					$numberUnread = DBMessage::getUnReadMessageCountForObject($objId);
+					$numberUnread = DBMessage::getUnreadMessageCountForObject($objId);
 					if ( !is_null($numberUnread)) {
 						$mdv->PropertyValues = array( new PropertyValue( $numberUnread ) );
 					}
@@ -2290,7 +2223,7 @@ class BizProperty
 		}
 		if ( $unReadMessages ) {
 			require_once BASEDIR.'/server/dbclasses/DBMessage.class.php';
-			$unreadMessageCountAll = DBMessage::getUnReadMessageCountForObjects( $objIds );
+			$unreadMessageCountAll = DBMessage::getUnreadMessageCountForObjects( $objIds );
 			if ( $objIds ) foreach ( $objIds as $objId ) {
 				if ( array_key_exists( $objId, $unreadMessageCountAll ) ) {
 					$unreadMessageCount = intval( $unreadMessageCountAll[$objId]['total'] );
@@ -2382,7 +2315,7 @@ class BizProperty
 		if( !$theType || $theType == "" )
 			return "";
 
-		/* If the table name equals to objects, deletedobjects or is empty use an integer for the boolean.
+		/* If the tablename equals to objects, deletedobjects or is empty use an integer for the boolean.
 		 * Otherwise use a (var)char for the field.
 		 */
 
@@ -2475,7 +2408,7 @@ class BizProperty
 	}
 
 	/**
-	 * Adds a property. Before updating the data is validated.
+	 * Adds a propery. Before updating the data is validated.
 	 * Note: The methods expects all attributes of the property to be set.
 	 * @param array $values attribute/value pairs
 	 * @return int Id of created record.
@@ -2505,7 +2438,7 @@ class BizProperty
 	}
 
 	/**
-	 * Updates a property. Before updating the data is validated.
+	 * Updates a propery. Before updating the data is validated.
 	 * Note: The methods expects all attributes of the property to be set.
 	 * @param int Id of the property.
 	 * @param array $values attribute/value pairs.
@@ -2577,7 +2510,7 @@ class BizProperty
 		}
 
 		require_once BASEDIR . '/server/dbclasses/DBProperty.class.php';
-		$where = '`publication` = ? AND UPPER(`name`) = UPPER(?) ';
+		$where = '`publication` = ? AND UPPER(`name`) = ? ';
 		$params = array( $publication, $name );
 
 		$row = DBProperty::getRow( 'properties', $where, array('id'), $params );
