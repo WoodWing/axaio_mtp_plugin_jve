@@ -18,7 +18,7 @@ class ContentStationOverruleCompatibility_EnterprisePlugin extends EnterprisePlu
 	{
 		$info = new PluginInfoData();
 		$info->DisplayName = 'Content Station Overrule Compatibility';
-		$info->Version     = '10.0.0 Build 81'; // don't use PRODUCTVERSION
+		$info->Version     = '10.0.0 Build 82'; // don't use PRODUCTVERSION
 		$info->Description = 'Makes the overrule option compatible with Content Station';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
