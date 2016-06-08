@@ -26,8 +26,8 @@ class BizProperty
 	public static function getStaticPropIds()
 	{
 		return array('Name', 'Publication', 'PubChannels', 'Targets', 'Issues',
-						'Issue', // BZ#10219 'Issue' is still there for the sake of client applications (like ID/IC) that deal with 1 issue (which are not multi-channel aware)
-						'Editions', 'Category', 'State');
+			'Issue', // BZ#10219 'Issue' is still there for the sake of client applications (like ID/IC) that deal with 1 issue (which are not multi-channel aware)
+			'Editions', 'Category', 'State');
 	}
 
 	/**
@@ -38,11 +38,11 @@ class BizProperty
 	public static function getDynamicPropIds()
 	{
 		return array('ID', 'Type', 'Keywords', 'Slugline', 'Format', 'Columns', 'Width', 'Height', 'Dpi', 'LengthWords',
-					'LengthChars', 'LengthParas', 'LengthLines', 'PlainContent', 'FileSize', 'ColorSpace', 'Deadline',
-		             'Modifier', 'Creator', 'Comment', 'RouteTo', 'LockedBy', 'Deletor', 'Deleted', 'Version', 'PlacedOn',
-			         'PlacedOnPage', 'Flag', 'FlagMsg',	'PageRange', 'PlannedPageRange', 'ContentSource', 'Encoding',
-			         'Compression', 'KeyFrameEveryFrames', 'Channels', 'AspectRatio', 'Rating','ElementName', 'Dossier',
-			         'UnreadMessageCount');
+			'LengthChars', 'LengthParas', 'LengthLines', 'PlainContent', 'FileSize', 'ColorSpace', 'Deadline',
+			'Modifier', 'Creator', 'Comment', 'RouteTo', 'LockedBy', 'Deletor', 'Deleted', 'Version', 'PlacedOn',
+			'PlacedOnPage', 'Flag', 'FlagMsg',	'PageRange', 'PlannedPageRange', 'ContentSource', 'Encoding',
+			'Compression', 'KeyFrameEveryFrames', 'Channels', 'AspectRatio', 'Rating','ElementName', 'Dossier',
+			'UnreadMessageCount');
 	}
 
 	/**
@@ -53,7 +53,7 @@ class BizProperty
 	public static function getXmpPropIds()
 	{
 		return array('DocumentID', 'CopyrightMarked', 'Copyright', 'CopyrightURL', 'Credit', 'Source', 'Author',
-					'Description', 'DescriptionAuthor', 'Urgency', 'Modified', 'Created');
+			'Description', 'DescriptionAuthor', 'Urgency', 'Modified', 'Created');
 	}
 
 	/**
@@ -64,9 +64,9 @@ class BizProperty
 	public static function getSystemPropIds()
 	{
 		return array('ID', 'DocumentID', 'Type', 'Format', 'Columns', 'Width', 'Height', 'Dpi', 'LengthWords', 'LengthChars',
-		             'LengthParas', 'LengthLines', 'FileSize', 'ColorSpace', 'Modifier', 'Modified', 'Creator', 'Created', 'LockedBy', 'Deletor', 'Deleted',
-		             'Version', 'PlacedOn', 'Flag', 'FlagMsg', 'PageRange', 'PlannedPageRange', 'LockForOffline', 'DeadlineChanged', 'DeadlineSoft',
-		             'HighResFile', 'PlacedOnPage', 'StateColor', 'StatePhase', 'ElementName', 'PlainContent', /*'Slugline', BZ#31369 */ 'UnreadMessageCount');
+			'LengthParas', 'LengthLines', 'FileSize', 'ColorSpace', 'Modifier', 'Modified', 'Creator', 'Created', 'LockedBy', 'Deletor', 'Deleted',
+			'Version', 'PlacedOn', 'Flag', 'FlagMsg', 'PageRange', 'PlannedPageRange', 'LockForOffline', 'DeadlineChanged', 'DeadlineSoft',
+			'HighResFile', 'PlacedOnPage', 'StateColor', 'StatePhase', 'ElementName', 'PlainContent', /*'Slugline', BZ#31369 */ 'UnreadMessageCount');
 	}
 
 	/**
@@ -77,7 +77,7 @@ class BizProperty
 	public static function getWorkflowPropIds()
 	{
 		return array('Deadline','Urgency','Modifier','Modified','Creator','Created','Comment',
-		             'RouteTo','LockedBy', 'Deletor', 'Deleted','Version','DeadlineSoft','Rating');
+			'RouteTo','LockedBy', 'Deletor', 'Deleted','Version','DeadlineSoft','Rating');
 	}
 
 	/**
@@ -121,14 +121,14 @@ class BizProperty
 	public static function getStandardQueryPropIds( $areas = array('Workflow'))
 	{
 		$ret = array('ID','Type','Name','State','RouteTo','LockedBy','PlacedOn', 'PlacedOnPage',
-		             'FileSize', 'LengthWords','LengthChars','LengthLines','Comment','Slugline', 'PageRange', 'Flag', 'FlagMsg',
+			'FileSize', 'LengthWords','LengthChars','LengthLines','Comment','Slugline', 'PageRange', 'Flag', 'FlagMsg',
 			'Publication','Issues','Category', 'Editions');
 		if( in_array('Workflow',$areas) ) { // workflow
 			$ret = array_merge( $ret,  array( 'Modifier','Modified','PlannedPageRange','Deadline', 'DeadlineSoft', 'UnreadMessageCount'));
 		}
 		if( in_array('Trash',$areas) ) { // Trash Can
 			$ret = array_merge( $ret,  array( 'Deleted','Deletor'));
-	}
+		}
 		return $ret;
 	}
 
@@ -259,9 +259,9 @@ class BizProperty
 						}
 					} else {
 						$propUsage->Mandatory = true;
-					}	
+					}
 					$usages[$prop] = $propUsage;
-				}	
+				}
 			}
 		} else {
 			if ( $withStaticProps ) {
@@ -338,35 +338,35 @@ class BizProperty
 	 * @return array An array of PropertyInfo objects.
 	 */
 	public static function getFullPropertyInfos($pluginName = null, $propName = null, $objectType = null,
-											$publishSystem = null, $templateId = null, $getTermEntityPropOnly = false )
+	                                            $publishSystem = null, $templateId = null, $getTermEntityPropOnly = false )
 	{
 		require_once BASEDIR . '/server/dbclasses/DBProperty.class.php';
 		return DBProperty::getPropertyInfos($pluginName, $propName, $objectType, $publishSystem, $templateId, $getTermEntityPropOnly );
 	}
 
 	/**
-	 * Returns the display name of a (custom) property. 
+	 * Returns the display name of a (custom) property.
 	 *
 	 * @param string $property
-	 * @return true id displayname is found else false 
+	 * @return true id displayname is found else false
 	 */
 	public static function getPropertyDisplayName($property)
-	{	
-		$propInfos = self::getPropertyInfos();	
+	{
+		$propInfos = self::getPropertyInfos();
 		require_once BASEDIR . '/server/dbclasses/DBProperty.class.php';
 		$customProps = DBProperty::getProperties( 0, '', false );
-				
+
 		if( isset($customProps[$property])) {
 			$displayName = $customProps[$property]->DisplayName;
 		} elseif( isset($propInfos[$property])) {
 			$displayName = $propInfos[$property]->DisplayName;
 		} else { // typically happens for child row props like IDC, Snippet, etc
 			$displayName = $property;
-		}		
-		
+		}
+
 		return $displayName;
 	}
-	
+
 	/**
 	 * The complete list of MetaData paths, typically used for CreateObjects, SaveObjects and SetProperties services
 	 * @return array of string, See also workflow WSDL.
@@ -1102,10 +1102,10 @@ class BizProperty
 	static public function validateAndInstallCustomProperties( $pluginName = null, &$pluginErrs, $coreInstallation )
 	{
 		$connRetVals = self::collectCustomPropertiesFromConnectors( $pluginName, $coreInstallation );
-		
+
 		// Validate the provided properties.
 		self::validateCustomProperties( $connRetVals, $pluginErrs );
-		
+
 		// Install the provided properties by expanding the DB model.
 		self::installCustomProperties( $connRetVals, $pluginErrs );
 	}
@@ -1149,7 +1149,7 @@ class BizProperty
 						}
 					}
 					foreach( $objTypeProps as $objType => $propInfos ) {
-					
+
 						// Validate object type.
 						if( $objType !== 0 ) {
 							if( gettype( $objType ) != 'string' || !array_key_exists( $objType, $objTypes ) ) {
@@ -1189,7 +1189,7 @@ class BizProperty
 									'returned a property type that is not supported: "'.$propInfo->Type.'". ' .
 									'This is the case for property "'.$propInfo->Name.'".' );
 							}
-	
+
 							if (in_array($propInfo->Type, array('file', 'fileselector', 'articlecomponent', 'articlecomponentselector'))) {
 								if ( (!isset($propInfo->AdminUI) ) || ( isset($propInfo->AdminUI) && $propInfo->AdminUI == true ) ){
 									throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
@@ -1200,7 +1200,7 @@ class BizProperty
 							// The old way of hiding props was by using C_HIDDEN_ prefix, which we repair here before we store them in the DB.
 							// Default the value to true if it is not hidden or the original value was not set.
 							$propInfo->AdminUI = ( !self::isHiddenCustomProperty( $propInfo ) );
-	
+
 							//	if( isset( $allPropInfos[$propName] ) ) {
 							//	TODO: Check for duplicates??? (already inserted in DB)
 							// }
@@ -1217,10 +1217,10 @@ class BizProperty
 			}
 		}
 	}
-	
+
 	/**
 	 * Stores custom object property definitions at DB and extends the DB model.
-	 * 
+	 *
 	 * @param array $connRetVals Custom property definition, as returned by plugin connectors (key = connector name, value = array of PropertyInfo objects)
 	 * @param array|null $pluginErrs Empty array to collect errors. NULL to let function throw BizException on errors.
 	 * @throws BizException Throws BizException when there's problem with the installation.
@@ -1254,10 +1254,10 @@ class BizProperty
 									// AutocompleteProvider plugin connector should be provided by the plugin.
 									if( $autocompleteProvider != $plugin->UniqueName ) {
 										throw new BizException( 'PLN_CLICKTOREPAIR', 'Client',
-										'The '. $connName.'->collectCustomProperties function has a Term Entity property defined, '.
-										'but the \'AutocompleteProvider\' specified for this property ("'.$propInfo->Name.
-										'") is incorrect. The Autocomplete provider expected is "'.$plugin->UniqueName.'", but "'.
-										$autocompleteProvider.'" is provided instead.' );
+											'The '. $connName.'->collectCustomProperties function has a Term Entity property defined, '.
+											'but the \'AutocompleteProvider\' specified for this property ("'.$propInfo->Name.
+											'") is incorrect. The Autocomplete provider expected is "'.$plugin->UniqueName.'", but "'.
+											$autocompleteProvider.'" is provided instead.' );
 									}
 								} else { // When not given, resolve it (expected the plugin to provide its own Autocomplete Provider.)
 									$autocompleteProvider = $plugin->UniqueName;
@@ -1281,26 +1281,26 @@ class BizProperty
 									$propInfo->PublishSystemId = '';
 								}
 							}
-	
+
 							$customPropertyInfos = DBProperty::getPropertyInfos( $plugin->UniqueName, $propInfo->Name );
-							if( count( $customPropertyInfos ) != 0  ) { // should always contain one
+							if( count( $customPropertyInfos ) != 0 ) { // should always contain one
 								if( $customPropertyInfos[0]->Type != $propInfo->Type ) { // Not allow to change the prop 'Type'
 									throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
-									'attempted to change the existing property "'.$propInfo->Name.'" of type '.
-									'"'.$customPropertyInfos[0]->Type.'" to type "'.$propInfo->Type.'". This is not allowed.' );
+										'attempted to change the existing property "'.$propInfo->DisplayName.'" ("'.$propInfo->Name.'") of type '.
+										'"'.$customPropertyInfos[0]->Type.'" to type "'.$propInfo->Type.'". This is not allowed.' );
 								}
-	
+
 								// Only update the model if the property type is not flagged to be excluded.
-								if (!in_array($propInfo->Type, $excludeFromModel)) {
-									if ( self::supportUpdateMultipleColumns() )
-										$fieldsToUpdate['objects'][$propInfo->Name] = array(
-																						'Name' => $propInfo->Name,
-																						'Type' => $propInfo->Type );
+								if( !in_array( $propInfo->Type, $excludeFromModel ) ) {
+									if( self::supportUpdateMultipleColumns() )
+										$fieldsToUpdate['objects'][ $propInfo->Name ] = array(
+											'Name' => $propInfo->Name,
+											'Type' => $propInfo->Type );
 									else {
 										BizCustomField::updateFieldAtModel( 'objects', $propInfo->Name, $propInfo->Type );
 									}
 								}
-	
+
 								$propInfo = self::enrichPropertyInfoWithInternalProps( $propInfo, $brandId, $objType, $plugin );
 
 								if ( $propInfo->DefaultValue ) {
@@ -1309,8 +1309,8 @@ class BizProperty
 
 								if( !DBProperty::updatePropertyInfo( $propInfo->Name, $propInfo, array( 'serverplugin' => $plugin->UniqueName ) ) ) {
 									throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
-									'returned a property "'.$propInfo->Name.'" that could not be updated in DB. '.
-									'Please check the server logging.' );
+										'returned a property "'.$propInfo->Name.'" that could not be updated in DB. '.
+										'Please check the server logging.' );
 								}
 							} else { // create
 								$custProps = DBProperty::getPropertyByNameAndFields( $propInfo->Name, 'all', null );
@@ -1320,12 +1320,12 @@ class BizProperty
 									if( $custProps[0]->Type != $propInfo->Type ) {
 										// Here error when a new prop name (where name already exists ) is
 										// going to have different prop type than the existing one.
-											throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
+										throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
 											'is about to introduce a property "'.$propInfo->Name.'" where the name already exists, this '.
 											'is allowed but it must have of type "'.$custProps[0]->Type.
 											'" instead of type "'.$propInfo->Type.'".' );
 									}
-									
+
 									// When the prop type of the new prop name (which already exists) are the same
 									// the new prop name can be installed, but it is not needed to be installed into smart_objects
 									// and smart_deletedobjects table as they already exists.
@@ -1337,20 +1337,20 @@ class BizProperty
 											$fieldsToAdd['objects'] = array();
 										}
 										$fieldsToAdd['objects'][$propInfo->Name] = array(
-																					'Name' => $propInfo->Name,
-																					'Type' => $propInfo->Type );
+											'Name' => $propInfo->Name,
+											'Type' => $propInfo->Type );
 									}
-								}	
-	
+								}
+
 								// Now register this new custom prop into smart_property table
 								// This is done regardless of if the custom prop name do exists already in DB (but in different publication)
-								
+
 								$propInfo = self::enrichPropertyInfoWithInternalProps( $propInfo, $brandId, $objType, $plugin );
 
 								if ( $propInfo->DefaultValue ) {
 									$propInfo->DefaultValue = self::convertDefault( $propInfo->Type, $propInfo->DefaultValue );
 								}
-								
+
 								// Add a row of the custom property definition to the smart_properties table to remember the details.
 								if( !DBProperty::insertPropertyInfo( $propInfo ) ) {
 									throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
@@ -1434,7 +1434,7 @@ class BizProperty
 			$result = false;
 			foreach( $failedDeletedFields as $pluginName => $custProps ) {
 				LogHandler::Log( 'BizProperty', 'ERROR', __METHOD__ . ': Failed deleting the following custom properties: ' .
-							implode( ',', $custProps ) . '" introduced by plugin "'.$pluginName.'"');
+					implode( ',', $custProps ) . '" introduced by plugin "'.$pluginName.'"');
 			}
 		}
 		return $result;
@@ -1456,11 +1456,11 @@ class BizProperty
 		$connRetVals = array();
 		if( $pluginName ) {
 			BizServerPlugin::runDefaultConnector( $pluginName, 'CustomObjectMetaData', null, 'collectCustomProperties',
-										array( $coreInstallation ), $connRetVals );
+				array( $coreInstallation ), $connRetVals );
 		} else {
 			// Ask the server plug-ins with a CustomObjectMetaData connector for custom object properties.
 			BizServerPlugin::runDefaultConnectors( 'CustomObjectMetaData', null, 'collectCustomProperties',
-										array( $coreInstallation ), $connRetVals );
+				array( $coreInstallation ), $connRetVals );
 		}
 
 		return $connRetVals;
@@ -1468,9 +1468,9 @@ class BizProperty
 	/**
 	 * Enrich the property with some attribute. These attributes are not registered
 	 * in WSDL, and therefore they are used internally only.
-	 * 
+	 *
 	 * @param PropertyInfo $propInfo PropertyInfo to be enriched with some internal attributes.
-	 * @param int $brandId Publication 
+	 * @param int $brandId Publication
 	 * @param string $objType The object type for the property.
 	 * @param PluginInfoData $plugin
 	 * @return PropertyInfo The enriched PropertyInfo with internal attributes.
@@ -1483,7 +1483,7 @@ class BizProperty
 		$propInfo->Entity = 'Object';
 		$propInfo->PlugIn = $plugin->UniqueName;
 		$propInfo->DBUpdated = true;
-		
+
 		// Show the property in the admin pages, unless explicitly supressed by connector.
 		// Note that the AdminUI is an internal attribute, which is therefore not defined in WSDL.
 		if( !isset( $propInfo->AdminUI ) ) {
@@ -1498,7 +1498,7 @@ class BizProperty
 			$propInfo->TemplateId = 0;
 		}
 
-		return $propInfo;							
+		return $propInfo;
 	}
 
 	/**
@@ -1514,14 +1514,14 @@ class BizProperty
 	}
 
 	/**
-	  * Transforms an object row into an object property bag.
-	  * The object row has lower case keys and has values from smart_object table.
-	  * The returned object properties have mixed case keys and their values are taken from given the rows.
-	  * In other terms, it 'converts' the keys from lower case to mixed case and leaves the values as-is.
-	  *
-	  * @param array $objRow Object row
-	  * @return array        Object properties
-	  */
+	 * Transforms an object row into an object property bag.
+	 * The object row has lower case keys and has values from smart_object table.
+	 * The returned object properties have mixed case keys and their values are taken from given the rows.
+	 * In other terms, it 'converts' the keys from lower case to mixed case and leaves the values as-is.
+	 *
+	 * @param array $objRow Object row
+	 * @return array        Object properties
+	 */
 	static public function objRowToPropValues( $objRow )
 	{
 		$fields = self::getMetaDataObjFields(); // mixed-low
@@ -1541,11 +1541,11 @@ class BizProperty
 	}
 
 	/**
-	  * Array version of objRowToPropValues
-	  *
-	  * @param 	array of array 	$objRowArray 	Aray of Object row arrays
-	  * @return array        	Array of Object properties array
-	  */
+	 * Array version of objRowToPropValues
+	 *
+	 * @param 	array of array 	$objRowArray 	Aray of Object row arrays
+	 * @return array        	Array of Object properties array
+	 */
 	static public function objRowArrayToPropValues( $objRowArray )
 	{
 		$retArray = array();
@@ -1556,14 +1556,14 @@ class BizProperty
 	}
 
 	/**
-	  * Transforms an object prop array into an object row.
-	  * The object properties have mixed case keys
-	  * The returned object row has lower case keys (db columns) and has values from properties
-	  * In other terms, it 'converts' the keys from mixed case to lower case and leaves the values as-is.
-	  *
-	  * @param array $objProps Object props array
-	  * @return array        Object row
-	  */
+	 * Transforms an object prop array into an object row.
+	 * The object properties have mixed case keys
+	 * The returned object row has lower case keys (db columns) and has values from properties
+	 * In other terms, it 'converts' the keys from mixed case to lower case and leaves the values as-is.
+	 *
+	 * @param array $objProps Object props array
+	 * @return array        Object row
+	 */
 	static public function objPropToRowValues( $objProps )
 	{
 		$fields = self::getMetaDataObjFields(); // mixed-low
@@ -1581,16 +1581,16 @@ class BizProperty
 	}
 
 	/**
-	  * Updates a flattened metadata list tree with data from the metadata tree,
-	  * Both tree- and flat structures are defined in the workflow WSDL, resp. MetaData and ExtraMetaData.
-	  * Normally, only custom properties are sent through ExtraMetaData, however, the WebEditWorkflow
-	  * uses this structure for ALL properties, including the standard shipped ones. That makes
-	  * this function needed to update one with the other structure. See also {@link updateMetaDataTreeWithFlat}.
-	  * Only present props are used to update the tree structure.
-	  *
-	  * @param $flatMD array of ExtraMetaData to be updated
-	  * @param $treeMD MetaData input data
-	  */
+	 * Updates a flattened metadata list tree with data from the metadata tree,
+	 * Both tree- and flat structures are defined in the workflow WSDL, resp. MetaData and ExtraMetaData.
+	 * Normally, only custom properties are sent through ExtraMetaData, however, the WebEditWorkflow
+	 * uses this structure for ALL properties, including the standard shipped ones. That makes
+	 * this function needed to update one with the other structure. See also {@link updateMetaDataTreeWithFlat}.
+	 * Only present props are used to update the tree structure.
+	 *
+	 * @param $flatMD array of ExtraMetaData to be updated
+	 * @param $treeMD MetaData input data
+	 */
 	public static function updateMetaDataFlatWithTree( &$flatMD, MetaData $treeMD )
 	{
 		// Ignore the following built-in properties because they SHOULD be filled afterwards, see updateMetaDataFlatWithSpecialProperties
@@ -1639,7 +1639,7 @@ class BizProperty
 							$fmd->PropertyValues[] = new PropertyValue( $val );
 						}
 					}
-				break;
+					break;
 
 				default:
 					require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
@@ -1696,7 +1696,7 @@ class BizProperty
 
 						}
 					}
-				break;
+					break;
 			}
 			if( isset($value) ) { // handle normal (single value) props
 				$propValue = new PropertyValue();
@@ -1744,16 +1744,16 @@ class BizProperty
 	}
 
 	/**
-	  * Updates a metadata tree with data from flattened metadata list,
-	  * Both tree- and flat structures are defined in the workflow WSDL, resp. MetaData and ExtraMetaData.
-	  * Normally, only custom properties are sent through ExtraMetaData, however, the WebEditWorkflow
-	  * uses this structure for ALL properties, including the standard shipped ones. That makes
-	  * this function needed to update one with the other structure. See also {@link updateMetaDataFlatWithTree}.
-	  * Only present props are used to update the tree structure.
-	  *
-	  * @param MetaData $treeMD MetaData to be updated
-	  * @param stdClass $flatMD array of ExtraMetaData input data
-	  */
+	 * Updates a metadata tree with data from flattened metadata list,
+	 * Both tree- and flat structures are defined in the workflow WSDL, resp. MetaData and ExtraMetaData.
+	 * Normally, only custom properties are sent through ExtraMetaData, however, the WebEditWorkflow
+	 * uses this structure for ALL properties, including the standard shipped ones. That makes
+	 * this function needed to update one with the other structure. See also {@link updateMetaDataFlatWithTree}.
+	 * Only present props are used to update the tree structure.
+	 *
+	 * @param MetaData $treeMD MetaData to be updated
+	 * @param stdClass $flatMD array of ExtraMetaData input data
+	 */
 	public static function updateMetaDataTreeWithFlat( MetaData &$treeMD, $flatMD )
 	{
 		// Ignore the following built-in properties because they SHOULD be filled afterwards, see updateMetaDataFlatWithSpecialProperties
@@ -1820,12 +1820,12 @@ class BizProperty
 						$emdFound = false;
 						if( $extMD )
 							foreach( $extMD as $emd ) {
-							if( $emd->Property == $fmd->Property ) {
-								$emd->Values = $fmd->Values;
-								$emdFound = true;
-								break;
+								if( $emd->Property == $fmd->Property ) {
+									$emd->Values = $fmd->Values;
+									$emdFound = true;
+									break;
+								}
 							}
-						}
 						if( !$emdFound ) {
 							$extMD[] = new MetaDataValue( $fmd->Property, $fmd->Values );
 						}
@@ -1858,7 +1858,7 @@ class BizProperty
 							eval('$treeMD->'.$propPath.' = ('.$propType.')"'.$v.'";');
 						}
 					}
-				break;
+					break;
 			}
 		}
 	}
@@ -1916,7 +1916,7 @@ class BizProperty
 	 * @return array of PropertyInfo  PropertyInfo definitions as used in workflow WSDL.
 	 */
 	public static function getProperties( $publ, $objType, $publishSystem = null, $templateId = null, $filtered = true,
-		$customOnly = false, $onlyAllObjType=false )
+	                                      $customOnly = false, $onlyAllObjType=false )
 	{
 		// Get custom properties.
 		$onlyAllObjType = ($objType == '') ? true : false; // When objType = "All", set onlyAllObjType is true
@@ -2009,7 +2009,7 @@ class BizProperty
 	 * By the way: this is not the fieldtype in the db, but a 'propertytype' as defined by woodwing.
 	 * @param string propertyname Name of the standard property (not a displayname!)
 	 * @return string: type of the property
-	**/
+	 **/
 	public static function getStandardPropertyType($propName)
 	{
 		static $propsLow = null;
@@ -2236,7 +2236,7 @@ class BizProperty
 
 		return $specialData;
 	}
-	
+
 	/**
 	 * metaDataToBizPropArray
 	 *
@@ -2310,91 +2310,91 @@ class BizProperty
 	 * @param string $theTable optional database table name for the custom property
 	 * @return string the data(base) type of the custom property.
 	 */
-    public static function convertCustomPropertyTypeToDB($theType, $theTable = '')
-    {
-    	if( !$theType || $theType == "" )
-    		return "";
+	public static function convertCustomPropertyTypeToDB($theType, $theTable = '')
+	{
+		if( !$theType || $theType == "" )
+			return "";
 
-    	/* If the tablename equals to objects, deletedobjects or is empty use an integer for the boolean.
-    	 * Otherwise use a (var)char for the field.
-    	 */
+		/* If the tablename equals to objects, deletedobjects or is empty use an integer for the boolean.
+		 * Otherwise use a (var)char for the field.
+		 */
 
-    	switch (DBTYPE) {
-    		case 'oracle':
-    			$dbTypeMap = array(
-    				"string"			=> "varchar(255) default ''",
-    				"multistring"		=> "clob",
-    				"multiline"			=> "clob",
-    				"bool"				=> ($theTable == 'objects' || $theTable == 'deletedobjects' || $theTable == '') ? "integer default 0" : "varchar(2) default ''",
-    				"int"				=> "integer default 0",
-    				"double"			=> "float default 0.0",
-    				"date"				=> "varchar(20) default ''",
-    				"datetime"			=> "varchar(20) default ''",
-    				"list"				=> "varchar(255) default ''",
-    				"multilist"			=> "clob",
-    				"password"			=> "varchar(40) default ''",
-    				"language"			=> "varchar(4) default ''",
+		switch (DBTYPE) {
+			case 'oracle':
+				$dbTypeMap = array(
+					"string"			=> "varchar(255) default ''",
+					"multistring"		=> "clob",
+					"multiline"			=> "clob",
+					"bool"				=> ($theTable == 'objects' || $theTable == 'deletedobjects' || $theTable == '') ? "integer default 0" : "varchar(2) default ''",
+					"int"				=> "integer default 0",
+					"double"			=> "float default 0.0",
+					"date"				=> "varchar(20) default ''",
+					"datetime"			=> "varchar(20) default ''",
+					"list"				=> "varchar(255) default ''",
+					"multilist"			=> "clob",
+					"password"			=> "varchar(40) default ''",
+					"language"			=> "varchar(4) default ''",
 					"color"				=> "varchar(11) default ''",
 					"fileselector"		=> "varchar(255) default ''",
 					"file"		        => "varchar(255) default ''",
 					"articlecomponentselector" => "varchar(255) default ''",
 					"articlecomponent"	=> "varchar(255) default ''",
-    			);
-    			break;
-    		case 'mssql':
-    			$dbTypeMap = array(
-    				"string"			=> "varchar(255) default ''",
-    				"multistring"		=> "text",
-    				"multiline"			=> "text",
-    				"bool"				=> ($theTable == 'objects' || $theTable == 'deletedobjects' || $theTable == '') ? "integer default 0" : "char(2) default ''",
-    				"int"				=> "integer default 0",
-    				"double"			=> "real default 0.0",
-    				"date"				=> "varchar(20) default ''",
-    				"datetime"			=> "varchar(20) default ''",
-    				"list"				=> "varchar(255) default ''",
-    				"multilist"			=> "text",
-    				"password"			=> "varchar(40) default ''",
-    				"language"			=> "varchar(4) default ''",
+				);
+				break;
+			case 'mssql':
+				$dbTypeMap = array(
+					"string"			=> "varchar(255) default ''",
+					"multistring"		=> "text",
+					"multiline"			=> "text",
+					"bool"				=> ($theTable == 'objects' || $theTable == 'deletedobjects' || $theTable == '') ? "integer default 0" : "char(2) default ''",
+					"int"				=> "integer default 0",
+					"double"			=> "real default 0.0",
+					"date"				=> "varchar(20) default ''",
+					"datetime"			=> "varchar(20) default ''",
+					"list"				=> "varchar(255) default ''",
+					"multilist"			=> "text",
+					"password"			=> "varchar(40) default ''",
+					"language"			=> "varchar(4) default ''",
 					"color"				=> "varchar(11) default ''",
 					"fileselector"		=> "varchar(255) default ''",
 					"file"		        => "varchar(255) default ''",
 					"articlecomponentselector" => "varchar(255) default ''",
 					"articlecomponent"	=> "varchar(255) default ''",
-    			);
-    			break;
-    		default: // MySQL:
-    			$dbTypeMap = array(
+				);
+				break;
+			default: // MySQL:
+				$dbTypeMap = array(
 					"string"			=> "tinytext",
-    				"multistring"		=> "mediumblob", // all the 'blob' changed to 'mediumblob' BZ#21480
-    				"multiline"			=> "mediumblob",
-    				"bool"				=> ($theTable == 'objects' || $theTable == 'deletedobjects' || $theTable == '') ? "integer default 0" : "char(2) default ''",
-    				"int"				=> "integer default 0",
-    				"double"			=> "double default 0.0",
-    				"date"				=> "varchar(20) default ''",
-    				"datetime"			=> "varchar(20) default ''",
+					"multistring"		=> "mediumblob", // all the 'blob' changed to 'mediumblob' BZ#21480
+					"multiline"			=> "mediumblob",
+					"bool"				=> ($theTable == 'objects' || $theTable == 'deletedobjects' || $theTable == '') ? "integer default 0" : "char(2) default ''",
+					"int"				=> "integer default 0",
+					"double"			=> "double default 0.0",
+					"date"				=> "varchar(20) default ''",
+					"datetime"			=> "varchar(20) default ''",
 					"list"				=> "tinytext",
-    				"multilist"			=> "mediumblob",
-    				"password"			=> "varchar(40) default ''",
-    				"language"			=> "varchar(4) default ''",
+					"multilist"			=> "mediumblob",
+					"password"			=> "varchar(40) default ''",
+					"language"			=> "varchar(4) default ''",
 					"color"				=> "varchar(11) default ''",
 					"fileselector"		=> "tinytext",
 					"file"		        => "tinytext",
 					"articlecomponentselector" => "tinytext",
 					"articlecomponent" => "tinytext",
-    			);
-    			break;
-    	}
+				);
+				break;
+		}
 
-    	return $dbTypeMap[$theType];
-    }
-    
+		return $dbTypeMap[$theType];
+	}
+
 	/**
 	 * Finds out if a property is a hidden custom property.
 	 *
-	 * In the database, all properties with the 'adminui' field set to '' are flagged 
+	 * In the database, all properties with the 'adminui' field set to '' are flagged
 	 * as hidden properties. The ones set to 'on' should be shown in the admin pages.
-	 * Once read from DB, the PropertyInfo->AdminUI is respectively set to false or true. 
-	 * In case of a new property, the AdminUI might not be set, which means that the 
+	 * Once read from DB, the PropertyInfo->AdminUI is respectively set to false or true.
+	 * In case of a new property, the AdminUI might not be set, which means that the
 	 * property needs to be shown (default). The AdminUI attribute is not defined in
 	 * the WSDL and therefor not an initial member of the PropertyInfo class. This
 	 * attribute is added on-the-fly by the core server and is used internally only.
@@ -2408,7 +2408,7 @@ class BizProperty
 	}
 
 	/**
-	 * Adds a propery. Before updating the data is validated. 
+	 * Adds a propery. Before updating the data is validated.
 	 * Note: The methods expects all attributes of the property to be set.
 	 * @param array $values attribute/value pairs
 	 * @return int Id of created record.
@@ -2438,7 +2438,7 @@ class BizProperty
 	}
 
 	/**
-	 * Updates a propery. Before updating the data is validated. 
+	 * Updates a propery. Before updating the data is validated.
 	 * Note: The methods expects all attributes of the property to be set.
 	 * @param int Id of the property.
 	 * @param array $values attribute/value pairs.
@@ -2507,12 +2507,12 @@ class BizProperty
 		$nounderscorename = str_replace( '_', '', $name ); // Remove underscore(s) 
 		if( ctype_alnum( $nounderscorename ) == false || is_numeric( $name[0] ) ) {
 			throw new BizException( 'ERR_NAME_INVALID', 'Client', 'Name: ' . $messName );
-		} 
-		
+		}
+
 		require_once BASEDIR . '/server/dbclasses/DBProperty.class.php';
 		$where = '`publication` = ? AND UPPER(`name`) = ? ';
 		$params = array( $publication, $name );
-		
+
 		$row = DBProperty::getRow( 'properties', $where, array('id'), $params );
 		if( $row ) {
 			throw new BizException( 'ERR_SUBJECT_EXISTS', 'Client', '', null, array('{OBJ_PROPERTY}', $messName) );
