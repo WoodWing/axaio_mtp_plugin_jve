@@ -658,6 +658,10 @@ define('MTP_POSTPROCESS_LOC', 	SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostP
 //      ContentStationReadOnlyEditor
 //			For Content Station 10 and higher
 //          Articles in Content Station 10 are always opened in read/write mode, unless this feature is set
+//		ContentStationAcceptAllChanges
+//			For Content Station 10 and higher
+//			If set, Content Station 10 will accept all changes when opening an article, otherwise when opening an article
+//			with changes the editor will show an error
 //		MaxPDFPreviewSize (default)
 //			For ContentStation 7.6.7 up to 9.x
 //			If set, Content Station will download the 'native' PDF as long as the filesize of the PDF does not exceed
