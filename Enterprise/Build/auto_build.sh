@@ -186,7 +186,9 @@ function ionCubeFile {
 	for i in `seq 1 10`;
 	do
 		"${iONCUBE_ENCODER}" --project-file "${1}" "${sourceFile}" -o "${targetFile}"
+		set +e
 		checkSum=`grep 'ionCube Loader' ${targetFile}`
+		set -e
 		if [ -n "${checkSum}"  ]; then
 			ionCubeEncodedFiles=$((ionCubeEncodedFiles+1))
 			break
