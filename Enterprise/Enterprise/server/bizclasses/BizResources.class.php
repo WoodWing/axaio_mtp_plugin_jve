@@ -151,7 +151,7 @@ class BizResources
 			//sys_get_temp_dir is unreliable in adding a trailing slash, so we need to check for this before using it.
 			$tmpDir = sys_get_temp_dir();
 			if( substr($tmpDir, -1) != DIRECTORY_SEPARATOR ) {
-				$tmpDir.DIRECTORY_SEPARATOR;
+				$tmpDir .= DIRECTORY_SEPARATOR;
 			}
 			$cacheFile = $tmpDir.'ww_ent_server_' . $esVersion . '_BizResources_' . filemtime($resFile) . '_' . $sLanguage_code;
 			if( file_exists( $cacheFile ) ) {
