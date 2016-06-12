@@ -582,6 +582,10 @@ function step9_submitOrRevertLocalVersionInfoUpdates {
 # exit on unset variables
 set -u
 
+# init global variables
+ionCubeBadAttempts=0
+ionCubeEncodedFiles=0
+
 # Main build procedure
 set +x; echo "================ Step 0 ================"; set -x
 step0_validateEnvironment
