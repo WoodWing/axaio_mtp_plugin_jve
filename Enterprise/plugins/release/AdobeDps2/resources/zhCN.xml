@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 20-05-2016 08:37:54 GMT-->
 <LocalizationMap language="zhCN">
   <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS">上传状态</Term>
   <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_FAILED">失败 (v%1)</Term>
