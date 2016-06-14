@@ -1278,7 +1278,7 @@
   <Term key="LIC_ERR_NO_PRODUCTCODE">Foutmelding: geen productcode</Term>
   <Term key="LIC_ERR_OPENSSL">Configuratiefout:  de OpenSSL-module is niet geïnstalleerd of niet actief gemaakt voor PHP.</Term>
   <Term key="LIC_ERR_PREPARING_LICENSEINFO">Fout in het voorbereiden van de licentie informatie.</Term>
-  <Term key="LIC_ERR_PRIVATE_DECRYPT">Fout bij ontcijferen privé sleutel.</Term>
+  <Term key="LIC_ERR_PRIVATE_DECRYPT">Fout bij het ontcijferen van de privé sleutel.</Term>
   <Term key="LIC_ERR_PUBLIC_ENCRYPT">Fout bij coderen publieke sleutel.</Term>
   <Term key="LIC_ERR_READING_DATABASE">Fout bij lezen van database.</Term>
   <Term key="LIC_ERR_READING_FILESTORE">Fout bij lezen van filestore.</Term>
