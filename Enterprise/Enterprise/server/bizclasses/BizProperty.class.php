@@ -1178,7 +1178,9 @@ class BizProperty
 											'but the \'AutocompleteProvider\' specified for this property ("'.$propInfo->Name.
 											'") is incorrect. The Autocomplete provider expected is "'.$plugin->UniqueName.'", but "'.
 											$autocompleteProvider.'" is provided instead.' );
-									}
+								} else { // When not given, resolve it (expected the plugin to provide its own Autocomplete Provider.)
+									$autocompleteProvider = $plugin->UniqueName;
+								}
 								}
 								require_once BASEDIR.'/server/bizclasses/BizAutocompleteDispatcher.class.php';
 								$foundConnector = BizAutocompleteDispatcher::findAutocompleteProviderConnector( $autocompleteProvider );
