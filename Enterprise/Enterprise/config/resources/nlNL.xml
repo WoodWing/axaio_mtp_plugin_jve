@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 31-05-2016 07:08:39 GMT-->
+<!--Last edit date in TMS: 14-06-2016 12:21:16 GMT-->
 <LocalizationMap language="nlNL">
   <Term key="ISSUE">Uitgave</Term>
   <Term key="ISSUES">Uitgaven</Term>
@@ -1279,7 +1279,7 @@
   <Term key="LIC_ERR_NO_PRODUCTCODE">Foutmelding: geen productcode</Term>
   <Term key="LIC_ERR_OPENSSL">Configuratiefout:  de OpenSSL-module is niet geïnstalleerd of niet actief gemaakt voor PHP.</Term>
   <Term key="LIC_ERR_PREPARING_LICENSEINFO">Fout in het voorbereiden van de licentie informatie.</Term>
-  <Term key="LIC_ERR_PRIVATE_DECRYPT">Fout bij ontcijferen privé sleutel.</Term>
+  <Term key="LIC_ERR_PRIVATE_DECRYPT">Fout bij het ontcijferen van de privé sleutel.</Term>
   <Term key="LIC_ERR_PUBLIC_ENCRYPT">Fout bij coderen publieke sleutel.</Term>
   <Term key="LIC_ERR_READING_DATABASE">Fout bij lezen van database.</Term>
   <Term key="LIC_ERR_READING_FILESTORE">Fout bij lezen van filestore.</Term>
