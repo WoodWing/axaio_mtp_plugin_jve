@@ -634,8 +634,8 @@ cd "${WORKSPACE_SERVER}"
 set +x; echo "================ Step 1 ================"; set -x
 step1_cleanGetWorkspace
 set +x; echo "================ Step 2 ================"; set -x
-step2_updateResourceFilesForCoreServer
-step2_updateResourceFilesForAdobeAEM
+step2a_updateResourceFilesForCoreServer
+step2b_updateResourceFilesForAdobeAEM
 set +x; echo "================ Step 3 ================"; set -x
 step3_updateVersionInfo
 set +x; echo "================ Step 4 ================"; set -x
