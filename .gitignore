@@ -1,6 +1,8 @@
 .DS_Store
 WWActivate.xml
 
+Enterprise/Enterprise/config/config_local.php
+
 Enterprise/Enterprise/config/plugins
 
 Enterprise/.idea/checkstyle-idea.xml
@@ -16,3 +18,4 @@ Enterprise/.idea/inspectionProfiles/profiles_settings.xml
 Enterprise/.idea/inspectionProfiles/Project_Default.xml
 
 Enterprise/Enterprise/config/encryptkeys/rabbitmq/cacert.pem
+
