@@ -1,5 +1,4 @@
 .DS_Store
-Enterprise/Enterprise/config/config_local.php
 Enterprise/Enterprise/config/WWActivate.xml
 Enterprise/Enterprise/config/encryptkeys/rabbitmq/cacert.pem
 

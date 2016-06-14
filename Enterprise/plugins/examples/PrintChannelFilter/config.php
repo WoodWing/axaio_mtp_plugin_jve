@@ -15,11 +15,12 @@
    limitations under the License.
 ****************************************************************************/
 
-//
 //	Show MAXISSUES number of issues, including undefined issues (with no publication date) and current issues
-define ('PRINTCHANNELFILTER_MAXISSUES', 5);
+if( !defined('PRINTCHANNELFILTER_MAXISSUES') ) {
+   define( 'PRINTCHANNELFILTER_MAXISSUES', 5 );
+}
 
-//
 //  Show only issues in a date range from today() til today() plus _RANGE days.
-define ('PRINTCHANNELFILTER_RANGE', 85);
-
+if( !defined('PRINTCHANNELFILTER_RANGE') ) {
+   define( 'PRINTCHANNELFILTER_RANGE', 85 );
+}

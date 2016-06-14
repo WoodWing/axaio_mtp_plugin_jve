@@ -16,24 +16,40 @@
 ****************************************************************************/
 
 // URL of Fotoware server
-define ('FOTOWARE_URL',				'http://fotoweb.fotoware.com/fotoweb'); // without ending slash
+if( !defined('FOTOWARE_URL') ) {
+   define( 'FOTOWARE_URL', 'http://fotoweb.fotoware.com/fotoweb' ); // without ending slash
+}
 
 // Username and password, to download the hi-res image from Fotoware server (FOTOWARE_URL)
-define ('FOTOWARE_USERNAME',		'demo' );
-define ('FOTOWARE_PASSWORD',		'demo' );
+if( !defined('FOTOWARE_USERNAME') ) {
+   define( 'FOTOWARE_USERNAME', 'demo' );
+}
+if( !defined('FOTOWARE_PASSWORD') ) {
+   define( 'FOTOWARE_PASSWORD', 'demo' );
+}
 
 // In case you need to use a proxy to get to FIP please specify proxy server and port like http://myproxy:8080
-define ('FOTOWARE_PROXY',				'');
+if( !defined('FOTOWARE_PROXY') ) {
+   define( 'FOTOWARE_PROXY', '' );
+}
 
 // Enterprise Brand and Category to use when importing Fotoware images
-define ('FOTOWARE_SHADOW_BRAND',	'Our Globe' );
-define ('FOTOWARE_SHADOW_CATEGORY',	'Editorial' );
-//define ('FOTOWARE_SHADOW_BRAND',	'WW News' );
-//define ('FOTOWARE_SHADOW_CATEGORY',	'News' );
-
+if( !defined('FOTOWARE_SHADOW_BRAND') ) {
+   define( 'FOTOWARE_SHADOW_BRAND', 'Our Globe' );
+}
+if( !defined('FOTOWARE_SHADOW_CATEGORY') ) {
+   define( 'FOTOWARE_SHADOW_CATEGORY', 'Editorial' );
+}
+if( !defined('FOTOWARE_SHADOW_BRAND') ) {
+   //define ('FOTOWARE_SHADOW_BRAND',	'WW News' );
+}
+if( !defined('FOTOWARE_SHADOW_CATEGORY') ) {
+   //define ('FOTOWARE_SHADOW_CATEGORY',	'News' );
+}
 
 
 // ----- DO NOT MAKE CHANGES BELOW -----
 
-define ('FOTOWARE_FULLURL', FOTOWARE_URL . '/fwbin/fotoweb_isapi.dll/ArchiveAgent/'); 
-
+if( !defined('FOTOWARE_FULLURL') ) {
+   define( 'FOTOWARE_FULLURL', FOTOWARE_URL.'/fwbin/fotoweb_isapi.dll/ArchiveAgent/' );
+}

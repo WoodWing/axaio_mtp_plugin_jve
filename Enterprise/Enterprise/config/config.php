@@ -1,5 +1,4 @@
 <?php
-require_once "osconfig.php";
 
 // ----------------------------------------------------------------------------
 // Application Server details
@@ -13,14 +12,14 @@ require_once "osconfig.php";
 // from local point of view. Needed for internal server calls (especially WWtest).
 // ----------------------------------------------------------------------------
 
-if( OS == 'WIN' )
-	define ('BASEDIR',	'c:/Inetpub/wwwroot/Enterprise');  // DO NOT end with a separator, use forward slashes
-elseif(OS == 'UNIX') // Mac OSX & UNIX:
-	define ('BASEDIR',	'/Library/WebServer/Documents/Enterprise');  // DO NOT end with a separator, use forward slashes
-elseif(OS == 'LINUX') // Linux Red Hat Enterprise
-	define ('BASEDIR',	'/var/www/html/Enterprise');  // DO NOT end with a separator, use forward slashes
+define ('BASEDIR',	dirname( dirname( __FILE__ ) )); // DO NOT end with a separator, use forward slashes
 
-define ('INETROOT', '/Enterprise'); // DO NOT end with a separator, use forward slashes
+require_once( BASEDIR.'/config/osconfig.php' );
+require_once( BASEDIR.'/config/config_local.php' );
+
+if( !defined('INETROOT') ) {
+	define( 'INETROOT', '/Enterprise' ); // DO NOT end with a separator, use forward slashes
+}
 
 // The SERVERURL_ROOT setting is calculated at runtime (see bottom of this file).
 // You are allowed to overrule/hard-code this setting, but normally there is no need.
@@ -28,7 +27,9 @@ define ('INETROOT', '/Enterprise'); // DO NOT end with a separator, use forward 
 // from the start of the line. Do not use a slash at the end.
 // For example: 'https://www.mydomain.com:481'.
 //define ('SERVERURL_ROOT', 'http://localhost' );
-define ('LOCALURL_ROOT', 'http://127.0.0.1' ); 
+if( !defined('LOCALURL_ROOT') ) {
+	define( 'LOCALURL_ROOT', 'http://127.0.0.1' );
+}
 
 // ----------------------------------------------------------------------------
 // Database details
@@ -38,14 +39,20 @@ define ('LOCALURL_ROOT', 'http://127.0.0.1' );
 // Note: advanced Database settings can be found in the configserver.php file
 // ----------------------------------------------------------------------------
 
-define ('DBSELECT', 'Enterprise');   // Database name
-define ('DBUSER', 'root'); 	// Database user to be used by the Application Server. 
-							// Note: this is the single database user that is used by the application
-						   	// server to access the database. 
-						   	// This database user account needs SELECT, INSERT, UPDATE, and DELETE privileges.
-							// Additionally, the database user also requires ALTER TABLE privileges for creation and deletion of custom properties.
-							// Default is 'root'. For MSSQL Server you could use 'sa' as default.
-define ('DBPASS', ''); 		// Password for the database user identified by DBUSER.
+if( !defined('DBSELECT') ) {
+	define( 'DBSELECT', 'Enterprise' );   // Database name
+}
+if( !defined('DBUSER') ) {
+	define( 'DBUSER', 'root' );   // Database user to be used by the Application Server.
+											// Note: this is the single database user that is used by the application
+											// server to access the database.
+											// This database user account needs SELECT, INSERT, UPDATE, and DELETE privileges.
+											// Additionally, the database user also requires ALTER TABLE privileges for creation and deletion of custom properties.
+											// Default is 'root'. For MSSQL Server you could use 'sa' as default.
+}
+if( !defined('DBPASS') ) {
+	define( 'DBPASS', '' );       // Password for the database user identified by DBUSER.
+}
 
 // ----------------------------------------------------------------------------
 // File Server details
@@ -62,19 +69,32 @@ define ('DBPASS', ''); 		// Password for the database user identified by DBUSER.
 // EXPORTDIRECTORY         - Export folder; Location where all exported files are downloaded
 // ----------------------------------------------------------------------------
 
-if( OS == 'WIN' )
-	define ('ATTACHMENTDIRECTORY', 'c:/FileStore');
-else // Mac OSX & UNIX:
-	define ('ATTACHMENTDIRECTORY', '/FileStore');
+if( !defined('ATTACHMENTDIRECTORY') ) {
+	if( OS == 'WIN' )
+		define( 'ATTACHMENTDIRECTORY', 'c:/FileStore' );
+	else // Mac OSX & UNIX:
+		define( 'ATTACHMENTDIRECTORY', '/FileStore' );
+}
 
-define ('WOODWINGSYSTEMDIRECTORY', ATTACHMENTDIRECTORY     . '/_SYSTEM_'); // no ending '/'
-define ('TEMPDIRECTORY',           WOODWINGSYSTEMDIRECTORY . '/Temp');     // no ending '/'
-define ('SESSIONWORKSPACE',        WOODWINGSYSTEMDIRECTORY . '/SessionWorkspace');  // no ending '/'
-define ('EXPORTDIRECTORY',         WOODWINGSYSTEMDIRECTORY . '/Export/');  // including ending '/'
-define ('PERSISTENTDIRECTORY',     WOODWINGSYSTEMDIRECTORY . '/Persistent');  // no ending '/'
+if( !defined('WOODWINGSYSTEMDIRECTORY') ) {
+	define( 'WOODWINGSYSTEMDIRECTORY', ATTACHMENTDIRECTORY.'/_SYSTEM_' ); // no ending '/'
+}
+if( !defined('TEMPDIRECTORY') ) {
+	define( 'TEMPDIRECTORY', WOODWINGSYSTEMDIRECTORY.'/Temp' );     // no ending '/'
+}
+if( !defined('SESSIONWORKSPACE') ) {
+	define( 'SESSIONWORKSPACE', WOODWINGSYSTEMDIRECTORY.'/SessionWorkspace' );  // no ending '/'
+}
+if( !defined('EXPORTDIRECTORY') ) {
+	define( 'EXPORTDIRECTORY', WOODWINGSYSTEMDIRECTORY.'/Export/' );  // including ending '/'
+}
+if( !defined('PERSISTENTDIRECTORY') ) {
+	define( 'PERSISTENTDIRECTORY', WOODWINGSYSTEMDIRECTORY.'/Persistent' );  // no ending '/'
+}
 
-define( 'AUTOCOMPLETEDIRECTORY', WOODWINGSYSTEMDIRECTORY.'/TermsFiles' );
-
+if( !defined('AUTOCOMPLETEDIRECTORY') ) {
+	define( 'AUTOCOMPLETEDIRECTORY', WOODWINGSYSTEMDIRECTORY.'/TermsFiles' );
+}
 
 // ----------------------------------------------------------------------------
 // File name encoding
@@ -90,7 +110,9 @@ define( 'AUTOCOMPLETEDIRECTORY', WOODWINGSYSTEMDIRECTORY.'/TermsFiles' );
 // - 'ISO-8859-1'	Latin
 // ----------------------------------------------------------------------------
 
-// define ('FILENAME_ENCODING', 'cp1251'); // example of how to configure a Russian system
+// if( !defined('FILENAME_ENCODING') ) {
+//    define ('FILENAME_ENCODING', 'cp1251'); // example of how to configure a Russian system
+// }
 
 // The setlocale() function call below sets the internal locale of PHP itself which should be US English.
 // When it would not call this function, PHP takes over the locale setting from your OS or HTTP server.
@@ -126,35 +148,45 @@ if( setlocale( LC_ALL, array('en_US.UTF-8', 'en_US.UTF8', 'us')) === false ) { /
 // ===> DO NOT MAKE CHANGES BELOW
 
 if(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on') {
-	define ('SERVERURL_PROTOCOL', 'https://' );
-	if($_SERVER['SERVER_PORT']!='443') {
-		define ('SERVERURL_PORT', ':' . $_SERVER['SERVER_PORT'] );
-	} else {
-		define ('SERVERURL_PORT', '' );
+	if( !defined('SERVERURL_PROTOCOL') ) {
+		define ('SERVERURL_PROTOCOL', 'https://' );
+	}
+	if( !defined('SERVERURL_PORT') ) {
+		if( $_SERVER['SERVER_PORT'] != '443' ) {
+			define( 'SERVERURL_PORT', ':'.$_SERVER['SERVER_PORT'] );
+		} else {
+			define( 'SERVERURL_PORT', '' );
+		}
 	}
 } else {
-	define ('SERVERURL_PROTOCOL', 'http://' );
-	if(isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']!='80') {
-		define ('SERVERURL_PORT', ':' . $_SERVER['SERVER_PORT'] );
-	} else {
-		define ('SERVERURL_PORT', '' );
+	if( !defined('SERVERURL_PROTOCOL') ) {
+		define ('SERVERURL_PROTOCOL', 'http://' );
+	}
+	if( !defined('SERVERURL_PORT') ) {
+		if( isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']!='80' ) {
+			define ('SERVERURL_PORT', ':' . $_SERVER['SERVER_PORT'] );
+		} else {
+			define ('SERVERURL_PORT', '' );
+		}
 	}
 }
-if( !defined('SERVERURL_ROOT') ) { // allow overrule
-	if (isset($_SERVER['HTTP_HOST'])) {
+if( !defined('SERVERURL_ROOT') ) {
+	if( isset($_SERVER['HTTP_HOST']) ) {
 		define ('SERVERURL_ROOT', SERVERURL_PROTOCOL.$_SERVER['HTTP_HOST'] );
 	} else {
 		$serverName = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
 		define ('SERVERURL_ROOT', $serverName.SERVERURL_PORT );
 	}
 }
-if(isset($_SERVER['REQUEST_URI'])) {
-	define ('SERVERURL_SCRIPT', SERVERURL_ROOT.$_SERVER['REQUEST_URI'] );
-} else {
-	if(isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING']>' ') {
-		define ('SERVERURL_SCRIPT', SERVERURL_ROOT.$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'] );
+if( !defined('SERVERURL_SCRIPT') ) {
+	if(isset($_SERVER['REQUEST_URI'])) {
+		define ('SERVERURL_SCRIPT', SERVERURL_ROOT.$_SERVER['REQUEST_URI'] );
 	} else {
-		define ('SERVERURL_SCRIPT',SERVERURL_ROOT.$_SERVER['PHP_SELF'] );
+		if(isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING']>' ') {
+			define ('SERVERURL_SCRIPT', SERVERURL_ROOT.$_SERVER['PHP_SELF'].'?'.$_SERVER['QUERY_STRING'] );
+		} else {
+			define ('SERVERURL_SCRIPT',SERVERURL_ROOT.$_SERVER['PHP_SELF'] );
+		}
 	}
 }
 

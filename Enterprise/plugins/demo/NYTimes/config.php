@@ -16,20 +16,38 @@
 ****************************************************************************/
 
 // API Key for NY Times Article Search API
-define( 'NYT_API_ARTICLESEARCH_KEY', 	'' );
-define( 'NYT_API_NEWSWIRE_KEY', 		'' );
+if( !defined('NYT_API_ARTICLESEARCH_KEY') ) {
+   define( 'NYT_API_ARTICLESEARCH_KEY', '' );
+}
+if( !defined('NYT_API_NEWSWIRE_KEY') ) {
+   define( 'NYT_API_NEWSWIRE_KEY', '' );
+}
 
 // Define Brand, Category and status for objects imported into the system.
 // When any of these don't exist, the first available Brand/Category/Status will be used.
-define( 'NYT_BRAND', 			'WW News' );
-define( 'NYT_CATEGORY', 		'News' );
-define( 'NYT_STATUS', 			'Hyperlinks' );
+if( !defined('NYT_BRAND') ) {
+   define( 'NYT_BRAND', 'WW News' );
+}
+if( !defined('NYT_CATEGORY') ) {
+   define( 'NYT_CATEGORY', 'News' );
+}
+if( !defined('NYT_STATUS') ) {
+   define( 'NYT_STATUS', 'Hyperlinks' );
+}
 
 // Name of the Query to be shown in the User Interface:
-define( 'NYT_QUERY_ARTICLESEARCH_NAME', 	'NY Times Archive' );
-define( 'NYT_QUERY_NEWSWIRE_NAME', 			'NY Times Newswire' );
+if( !defined('NYT_QUERY_ARTICLESEARCH_NAME') ) {
+   define( 'NYT_QUERY_ARTICLESEARCH_NAME', 'NY Times Archive' );
+}
+if( !defined('NYT_QUERY_NEWSWIRE_NAME') ) {
+   define( 'NYT_QUERY_NEWSWIRE_NAME', 'NY Times Newswire' );
+}
 
 // Unique ID's for this Content Source. Make sure to change this if you create your own
 // Content Source based on this example plugin
-define('NYT_CONTENTSOURCEID', 		'NYTAS' );
-define('NYT_CONTENTSOURCEPREFIX', 	'_NYTAS_' );
+if( !defined('NYT_CONTENTSOURCEID') ) {
+   define( 'NYT_CONTENTSOURCEID', 'NYTAS' );
+}
+if( !defined('NYT_CONTENTSOURCEPREFIX') ) {
+   define( 'NYT_CONTENTSOURCEPREFIX', '_NYTAS_' );
+}

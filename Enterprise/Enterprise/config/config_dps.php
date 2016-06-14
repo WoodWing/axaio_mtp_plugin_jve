@@ -71,15 +71,17 @@
 //               'overwrite' each other which causes unexpected results. Those errors will not be detected
 //               by the Health Check.
 //    
-define('ADOBEDPS_ACCOUNTS', serialize( array (
-	0 => array(
-		0 => array (
-			'username'       => '', // Adobe DPS user email address
-			'password'       => '', // Adobe DPS user password
-			'serverurl'      => '', // Adobe DPS server URL
+if( !defined('ADOBEDPS_ACCOUNTS') ) {
+	define('ADOBEDPS_ACCOUNTS', serialize( array (
+		0 => array(
+			0 => array (
+				'username'       => '', // Adobe DPS user email address
+				'password'       => '', // Adobe DPS user password
+				'serverurl'      => '', // Adobe DPS server URL
+			),
 		),
-	),
-)));
+	)));
+}
 
 // ADOBEDPS_READER_VERSIONS:
 //    This is a list of Adobe Content Viewer versions and is shown when
@@ -87,27 +89,33 @@ define('ADOBEDPS_ACCOUNTS', serialize( array (
 //
 //    The values should be numeric values of available Content Viewers to
 //    which the issue can be exported.
-define('ADOBEDPS_READER_VERSIONS', serialize( array (
-	'20',
-	'21',
-	'22',
-	'23',
-	'24',
-	'25',
-	'26',
-	'27',
-)));
+if( !defined('ADOBEDPS_READER_VERSIONS') ) {
+	define('ADOBEDPS_READER_VERSIONS', serialize( array (
+		'20',
+		'21',
+		'22',
+		'23',
+		'24',
+		'25',
+		'26',
+		'27',
+	)));
+}
 
 // ADOBEDPS_EXPORTDIR:
 //    Root folder where Adobe DPS folio files are exported to.
 //    By default based on the export directory setting: EXPORTDIRECTORY.'AdobeDps/'
 //    
-define( 'ADOBEDPS_EXPORTDIR', EXPORTDIRECTORY.'AdobeDps/' );
+if( !defined('ADOBEDPS_EXPORTDIR') ) {
+	define( 'ADOBEDPS_EXPORTDIR', EXPORTDIRECTORY.'AdobeDps/' );
+}
 
 // ADOBEDPS_PERSISTENT_DATADIR
 // 	  Folder where persistent data like the HTML Resouce cache, is stored. This folder is used by the publish process
 //	  and should not be cleaned by hand.
-define( 'ADOBEDPS_PERSISTENTDIR', PERSISTENTDIRECTORY.'/AdobeDps' );
+if( !defined('ADOBEDPS_PERSISTENTDIR') ) {
+	define( 'ADOBEDPS_PERSISTENTDIR', PERSISTENTDIRECTORY.'/AdobeDps' );
+}
 
 // PARALLEL_PUBLISHING_MAX_CONNECTIONS:
 // 
@@ -119,7 +127,9 @@ define( 'ADOBEDPS_PERSISTENTDIR', PERSISTENTDIRECTORY.'/AdobeDps' );
 //    might overload the server machine or exceed the maximum available HTTP/socket connections. Too
 //    few connections leads to unnecessary wait time, especially for remote connections (long distance).
 //
-define( 'PARALLEL_PUBLISHING_MAX_CONNECTIONS', 5 );
+if( !defined('PARALLEL_PUBLISHING_MAX_CONNECTIONS') ) {
+	define( 'PARALLEL_PUBLISHING_MAX_CONNECTIONS', 5 );
+}
 
 // AllowDuplicateProductID:
 //
@@ -133,4 +143,6 @@ define( 'PARALLEL_PUBLISHING_MAX_CONNECTIONS', 5 );
 //	  Note that with this setting enabled it is possible to define the same product ID for the same device for separate
 //	  Publication Channels. This will lead to mixed up content on the device and in the library.
 //
-define( 'AllowDuplicateProductID', false );
+if( !defined('AllowDuplicateProductID') ) {
+	define( 'AllowDuplicateProductID', false );
+}

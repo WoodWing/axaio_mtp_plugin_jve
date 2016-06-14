@@ -7,7 +7,9 @@
  * This is typically localhost (if Elvis and Enterprise are running on the same machine),
  * or the internal ip address of the Elvis Server.
  */
-define('ELVIS_URL', 'http://localhost:8080');
+if( !defined('ELVIS_URL') ) {
+	define( 'ELVIS_URL', 'http://localhost:8080' );
+}
 
 /**
  * Elvis server URL for Enterprise client applications (without a trailing slash).
@@ -16,28 +18,40 @@ define('ELVIS_URL', 'http://localhost:8080');
  *
  * This is typically the domain (elvis.mycompany.com) or external ip address of the Elvis server.
  */
-define('ELVIS_CLIENT_URL', ELVIS_URL);
+if( !defined('ELVIS_CLIENT_URL') ) {
+	define( 'ELVIS_CLIENT_URL', ELVIS_URL );
+}
 
 /**
  * Elvis uses the credentials of the currently logged Content Station / Smart Connection 
  * user to connect to Elvis. This means that the WoodWing user also needs access to Elvis.
  */
 
-define('ELVIS_NAMEDQUERY', 'Elvis Search');
+if( !defined('ELVIS_NAMEDQUERY') ) {
+	define( 'ELVIS_NAMEDQUERY', 'Elvis Search' );
+}
 
 /**
  * Elvis SUPER_USER username and password, needed for creating PDF previews with InDesign Server.
  * This user is also used to give Enterprise users without Elvis credentials access to the Elvis server.
  */
-define('ELVIS_SUPER_USER', 'woodwing');
-define('ELVIS_SUPER_USER_PASS', 'ww');
+if( !defined('ELVIS_SUPER_USER') ) {
+	define( 'ELVIS_SUPER_USER', 'woodwing' );
+}
+if( !defined('ELVIS_SUPER_USER_PASS') ) {
+	define( 'ELVIS_SUPER_USER_PASS', 'ww' );
+}
 
 /**
  * Enterprise Admin username and password, needed for metadata synchronisation from Elvis 
  * to Enterprise. By default we user a user which is known in both systems with the same credentials.
  */
-define('ELVIS_ENT_ADMIN_USER', ELVIS_SUPER_USER);
-define('ELVIS_ENT_ADMIN_PASS', ELVIS_SUPER_USER_PASS);
+if( !defined('ELVIS_ENT_ADMIN_USER') ) {
+	define( 'ELVIS_ENT_ADMIN_USER', ELVIS_SUPER_USER );
+}
+if( !defined('ELVIS_ENT_ADMIN_PASS') ) {
+	define( 'ELVIS_ENT_ADMIN_PASS', ELVIS_SUPER_USER_PASS );
+}
 
 /**
  * List of "archived" statuses.
@@ -45,16 +59,20 @@ define('ELVIS_ENT_ADMIN_PASS', ELVIS_SUPER_USER_PASS);
  * These statuses should match the statuses from the Elvis archive plugin.
  * No updates are sent to Elvis when an object is in one of theses statuses.
  */
-define('ELVIS_ARCHIVED_STATUSES', serialize( array(
-	'Archived',
-) ) );
+if( !defined('ELVIS_ARCHIVED_STATUSES') ) {
+	define('ELVIS_ARCHIVED_STATUSES', serialize( array(
+		'Archived',
+	) ) );
+}
 
 /**
  * By default Elvis will create a shadow object in Enterprise that is linked to the asset in Elvis.
  * When set to true, a copy of the asset will be uploaded to Enterprise and is not linked to the 
  * original in Elvis.
  */
-define('ELVIS_CREATE_COPY', 'false');
+if( !defined('ELVIS_CREATE_COPY') ) {
+	define( 'ELVIS_CREATE_COPY', 'false' );
+}
 
 // Specify a Unique ID & prefix for this contentSource
 
@@ -136,7 +154,9 @@ $cfgFieldHandlers['C_StringTest'] = new ReadWriteFieldHandler("cf_StringTest", f
 
 //LogHandler::logPhpObject($cfgFieldHandlers);
 
-define('ELVIS_FIELD_HANDLERS', serialize($cfgFieldHandlers));
+if( !defined('ELVIS_FIELD_HANDLERS') ) {
+	define( 'ELVIS_FIELD_HANDLERS', serialize( $cfgFieldHandlers ) );
+}
 
 /**
  * Constants, should never be changed!
