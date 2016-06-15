@@ -1282,7 +1282,6 @@ class smartevent_issuereorder extends smartevent
 	public function __construct( $ticket, $pubChannelType, $issueId, $dossierIds )
 	{
 		parent::__construct( EVENT_ISSUE_DOSSIER_REORDER_AT_PRODUCTION, $ticket );
-		$this->composeExchangeNameForObjectId( reset( $dossierIds ) );
 
 		$this->addfield( 'PubChannelType', $pubChannelType );
 		$this->addfield( 'IssueId', $issueId );
@@ -1308,7 +1307,6 @@ class smartevent_issuereorderpublished extends smartevent
 	public function __construct( $ticket, $pubChannelType, $publishedIssue, $dossierIds )
 	{
 		parent::__construct( EVENT_ISSUE_DOSSIER_REORDER_PUBLISHED, $ticket );
-		$this->composeExchangeNameForObjectId( reset( $dossierIds ) );
 
 		$this->addfield( 'PubChannelType', $pubChannelType );
 		$this->addfield( 'PubChannelId', $publishedIssue->Target->PubChannelID );
