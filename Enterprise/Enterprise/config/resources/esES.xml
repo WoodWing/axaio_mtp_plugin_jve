@@ -811,7 +811,7 @@
   <Term key="ERR_CHECKIN">El nombre de archivo no coincide, ¿desea consignar de todas formas?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">Sólo se permite combinar artículos de texto sin formato</Term>
   <Term key="ERR_COMPOSE">Error al componer el artículo.(S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">Error al conectarse a %1. Por favor verifique su conexión e intente de nuevo. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">Error al conectarse al servidor. Compruebe su conexión y vuelva a intentarlo. (S1068)</Term>
   <Term key="ERR_COPY_FOLDER">Se ha producido un error durante la publicación. Póngase en contacto con el administrador del sistema.\n\nDetalles: No se ha encontrado la carpeta de caché de recursos HTML. Ejecute el test .Adobe Digital Publishing System (DPS)' en la página de comprobación del estado y siga las instrucciones.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">No se ha podido conectar con la base de datos (S1003)</Term>
@@ -869,7 +869,7 @@
   <Term key="ERR_GET_MESSAGES">Los mensajes no pudieron recuperarse.</Term>
   <Term key="ERR_GROUP_NAME_NOT_SPECIFIED">El nombre del grupo de origen no se ha especificado o el nombre del nuevo grupo está en blanco. (S1100)</Term>
   <Term key="ERR_IDS_OBJVERSION_MISMATCH">Las versiones no coinciden debido a una secuencia de procesamiento incorrecta al guardar el layout. El trabajo será reprogramado. (S1133)</Term>
-  <Term key="ERR_INCOMPAT_BROWSER">No se admite este explorador. Por favor consulte la guía del administrador para saber cuáles son los exploradores compatibles. (S1101)</Term>
+  <Term key="ERR_INCOMPAT_BROWSER">Este explorador no es compatible. Por favor consulte el Centro de Ayuda para saber cuáles son los exploradores compatibles. (S1101)</Term>
   <Term key="ERR_INCORRECT_FIELDS">Las entradas siguientes no son correctas:</Term>
   <Term key="ERR_INVALIDCATEGORY">{CATEGORY} no válida: '%1' (S1129)</Term>
   <Term key="ERR_INVALIDSTATE">{STATE} no válido: '%1' (S1017)</Term>
@@ -1457,7 +1457,7 @@ Después de cambiar la configuración, no olvide reiniciar el servicio Web o el 
   <Term key="MNU_USER_QUERY">Consultas de usuario</Term>
   <Term key="MNU_WEBSERVICESSDK">SDK de Servicios Web</Term>
   <Term key="MNU_WEB_EDITOR">Editor Web</Term>
-  <Term key="MSG_EMPTY_DELETED_OBJ">Por favor vacíe la Papelera (usando su instalación original de Enterprise Server) antes de proceder con la actualización. - Consulte la Guía del Administrador.</Term>
+  <Term key="MSG_EMPTY_DELETED_OBJ">Por favor vacíe la Papelera (usando su instalación original de Enterprise Server) antes de proceder con la actualización. - Consulte el Centro de Ayuda.</Term>
   <Term key="MSG_EMPTY_INDESIGNSERVERJOBS">Se encontraron tareas de InDesign Server en la fila de tareas de InDesign Server. Se eliminarán estas tareas.</Term>
   <Term key="MSG_EMPTY_SERVERJOBS">Se encontraron tareas de Enterprise Server en la fila de tareas de Enterprise Server. Se eliminarán estas tareas.</Term>
   <Term key="MSG_EMPTY_STORAGE">Existen archivos de flujo de trabajo almacenados en su base de datos, lo que se a tornado en una función obsoleta desde la versión 8.0. No hay una función para migrar esos archivos al File Store. Por lo tanto, necesita empezar con una base de datos limpia. Por otra parte, si está muy seguro de que el File Store se utiliza y que todos los registros de la tabla de la base de datos llamados ‘smart storage’ contienen archivos que pueden retirarse sin peligro, podría limpiar la tabla y proceder con la migración.</Term>
@@ -1972,7 +1972,7 @@ Después de cambiar la configuración, no olvide reiniciar el servicio Web o el 
   <Term key="STT_CREATEPERMANENT">Crear versión permanente</Term>
   <Term key="STT_READYTOBEPUBLISHED">Listo para publicarse</Term>
   <Term key="STT_REMOVEINTERMEDIATE">Quitar versiones intermedias</Term>
-  <Term key="STT_SKIPIDSA">Skip InDesign Server Automation</Term>
+  <Term key="STT_SKIPIDSA">Omitir automatización de InDesign Server</Term>
   <Term key="SUGGESTIONS_BUTTON_LABEL">Sugerencias</Term>
   <Term key="SUGGESTIONS_BUTTON_TOOLTIP">Actualizar todas las sugerencias</Term>
   <Term key="SUGGESTION_PROVIDER">Proveedor de sugerencias</Term>
@@ -1991,7 +1991,7 @@ Después de cambiar la configuración, no olvide reiniciar el servicio Web o el 
   <Term key="SVR_JOBPROGRESS">Avance</Term>
   <Term key="SVR_JOBPROGRESS_BUSY">Ocupado</Term>
   <Term key="SVR_JOBPROGRESS_DONE">Realizado</Term>
-  <Term key="SVR_JOBPROGRESS_HALT">Halted</Term>
+  <Term key="SVR_JOBPROGRESS_HALT">Detenido</Term>
   <Term key="SVR_JOBPROGRESS_TODO">Por hacer</Term>
   <Term key="SVR_JOBSTATUS">Estatus</Term>
   <Term key="SVR_JOBSTATUS_COMPLETED">Completado</Term>
@@ -2007,11 +2007,11 @@ Después de cambiar la configuración, no olvide reiniciar el servicio Web o el 
   <Term key="SVR_JOBSTATUS_GAVEUP">Desistido</Term>
   <Term key="SVR_JOBSTATUS_GAVEUP_INFO">Se intentó procesar el Trabajo la cantidad de veces configurada, pero falló en todas ellas.</Term>
   <Term key="SVR_JOBSTATUS_INCOMPATIBLE">Incompatible</Term>
-  <Term key="SVR_JOBSTATUS_INCOMPATIBLE_INFO">There is no InDesign Server configured that can process this job.</Term>
+  <Term key="SVR_JOBSTATUS_INCOMPATIBLE_INFO">No hay un InDesign Server configurado que pueda procesar este trabajo</Term>
   <Term key="SVR_JOBSTATUS_INITIALIZED">Inicializado</Term>
   <Term key="SVR_JOBSTATUS_INITIALIZED_INFO">Inicializado, listo para procesar.</Term>
-  <Term key="SVR_JOBSTATUS_LOCKED">Locked</Term>
-  <Term key="SVR_JOBSTATUS_LOCKED_INFO">The object is locked by another user, it will be processed at a later stage.</Term>
+  <Term key="SVR_JOBSTATUS_LOCKED">Bloqueado</Term>
+  <Term key="SVR_JOBSTATUS_LOCKED_INFO">El objeto está bloqueado por otro usuario; se procesará posteriormente</Term>
   <Term key="SVR_JOBSTATUS_NOT_COMPLETED">No completado</Term>
   <Term key="SVR_JOBSTATUS_OVERRUN">Excedido</Term>
   <Term key="SVR_JOBSTATUS_OVERRUN_INFO">El trabajo se puso en fila, pero un nuevo trabajo recurrente ya había iniciado.</Term>
@@ -2021,8 +2021,8 @@ Después de cambiar la configuración, no olvide reiniciar el servicio Web o el 
   <Term key="SVR_JOBSTATUS_PROCESSING_INFO">El trabajo fue tomado y se está porcesando en este momento.</Term>
   <Term key="SVR_JOBSTATUS_REPLANNED">Replaneado</Term>
   <Term key="SVR_JOBSTATUS_REPLANNED_INFO">El Trabajo falló y se intentará de nuevo.</Term>
-  <Term key="SVR_JOBSTATUS_UNAVAILABLE">Unavailable</Term>
-  <Term key="SVR_JOBSTATUS_UNAVAILABLE_INFO">No InDesign Server is available to process this job.</Term>
+  <Term key="SVR_JOBSTATUS_UNAVAILABLE">No disponible</Term>
+  <Term key="SVR_JOBSTATUS_UNAVAILABLE_INFO">No hay un InDesign Server disponible para procesar este trabajo</Term>
   <Term key="SVR_JOBSTATUS_WARNING">Advertencia</Term>
   <Term key="SVR_JOBSTATUS_WARNING_INFO">El Trabajo falló pero no se intentará de nuevo.</Term>
   <Term key="SVR_MAINTENANCE">Mantenimiento al Servidor Enterprise</Term>

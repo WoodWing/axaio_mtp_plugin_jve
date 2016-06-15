@@ -811,7 +811,7 @@
   <Term key="ERR_CHECKIN">De bestandsnamen komt niet overeen, wilt u toch inchecken?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">Het is alleen toegestaan om ongeformatteerde artikelen te combineren</Term>
   <Term key="ERR_COMPOSE">Fout tijdens het samenstellen van het artikel. (S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">Fout bij het verbinden naar %1. Controleer uw verbinding en probeer het opnieuw.  (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">Fout bij het verbinding maken met de server. Controleer uw verbinding en probeer opnieuw. (S1068)</Term>
   <Term key="ERR_COPY_FOLDER">Er is een fout opgetreden bij het publiceren, neem contact op met de systeembeheerder.\n\nDetails: de map HTML Resources was niet gevonden. Gebruik de test ‘Adobe Digital Publishing Systems (DPS)’ van de systeemdiagnose en volg de instructies.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">Kon geen verbinding maken met de database (S1003)</Term>
@@ -869,7 +869,7 @@
   <Term key="ERR_GET_MESSAGES">De berichten konden niet opgehaald worden.</Term>
   <Term key="ERR_GROUP_NAME_NOT_SPECIFIED">Groepsnaam is niet ingegeven of nieuwe groepsnaam is blanco. (S1100)</Term>
   <Term key="ERR_IDS_OBJVERSION_MISMATCH">Er is een verschil in versies aangetroffen die is veroorzaakt door een onjuiste volgorde tijdens het opslaan van de layout. De opdracht zal opnieuw gepland worden. (S1133)</Term>
-  <Term key="ERR_INCOMPAT_BROWSER">Deze browser wordt niet ondersteund. Zie Admin Guide voor welke browsers compatibel zijn. (S1101)</Term>
+  <Term key="ERR_INCOMPAT_BROWSER">Deze browser wordt niet ondersteund. Zie de Help Center voor een overzicht van de browsers die compatibel zijn. (S1101)</Term>
   <Term key="ERR_INCORRECT_FIELDS">De volgende invoeringen zijn niet correct:</Term>
   <Term key="ERR_INVALIDCATEGORY">Invalide {CATEGORY}: '%1' (S1129)</Term>
   <Term key="ERR_INVALIDSTATE">Ongeldige {STATE}: '%1' (S1017)</Term>
@@ -1456,7 +1456,7 @@
   <Term key="MNU_USER_QUERY">Gebruikerszoekopdrachten</Term>
   <Term key="MNU_WEBSERVICESSDK">Web Services SDK</Term>
   <Term key="MNU_WEB_EDITOR">Web Editor</Term>
-  <Term key="MSG_EMPTY_DELETED_OBJ">Leegt u a.u.b de Prullenbak (door gebruik te maken van uw oorspronkelijke Server installatie) voordat u doorgaat met de upgrade. - Refereer naar de Admin Guide.</Term>
+  <Term key="MSG_EMPTY_DELETED_OBJ">Leegt u a.u.b de Prullenbak (door gebruik te maken van uw oorspronkelijke Server installatie) voordat u doorgaat met de upgrade. - Refereer naar de Help Center.</Term>
   <Term key="MSG_EMPTY_INDESIGNSERVERJOBS">Er zijn InDesign Server opdrachten aangetroffen in de InDesign Server-opdracht wachtrij. Deze opdrachten zullen worden verwijderd.</Term>
   <Term key="MSG_EMPTY_SERVERJOBS">Er zijn Enterprise Server opdrachten aangetroffen in de Enterprise Server-opdracht wachtrij. Deze opdrachten zullen worden verwijdert.</Term>
   <Term key="MSG_EMPTY_STORAGE">Er bevinden zich workflow-bestanden in uw database, een feature die per ingang van versie 8.0 niet meer ondersteund wordt. Er bestaat geen mogelijkheid om deze bestanden naar de File Store te migreren; u dient te starten met een schone database. Mocht u er echter zeker van bent dat de File Store gebruikt wordt en dat alle bestanden die zich in de database tabel 'smart_storage' bevinden veilig verwijderd mogen worden, dan kunt u als alternatief deze tabel legen en doorgaan met de migratie.</Term>
@@ -1971,7 +1971,7 @@
   <Term key="STT_CREATEPERMANENT">Permanente versie creëren</Term>
   <Term key="STT_READYTOBEPUBLISHED">Klaar voor publicatie</Term>
   <Term key="STT_REMOVEINTERMEDIATE">Tussenversies verwijderen</Term>
-  <Term key="STT_SKIPIDSA">Skip InDesign Server Automation</Term>
+  <Term key="STT_SKIPIDSA">InDesign Server Automatisering overslaan</Term>
   <Term key="SUGGESTIONS_BUTTON_LABEL">Suggesties</Term>
   <Term key="SUGGESTIONS_BUTTON_TOOLTIP">Ververs alle suggesties</Term>
   <Term key="SUGGESTION_PROVIDER">Suggesties Aanbieder</Term>
