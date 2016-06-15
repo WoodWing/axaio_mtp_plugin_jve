@@ -21,7 +21,7 @@ class Drupal7_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Drupal 7 - Publish Forms';
-		$info->Version     = '10.0.0 Build 82'; // don't use PRODUCTVERSION.
+		$info->Version     = '10.0.0 Build 83'; // don't use PRODUCTVERSION.
 		$info->Description = 'Publishing service to Drupal 7 using Publish Forms';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
