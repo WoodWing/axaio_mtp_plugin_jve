@@ -310,12 +310,12 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_WflLogon_TestCase extends Te
 			'Twitter' => true, 
 			'Facebook' => true, 
 			'Drupal7' => true,
+			'Drupal8' => true,
 			'WordPress' => true,
 			'MultiChannelPublishingSample' => true,
 			'PublishingTest' => false, // Analytics test
 			'AdobeDps' =>  false,
 			'AdobeDps2' =>  false,
-			'Drupal' => false, // Drupal 6
 			'SMS' => false
 		);
 		foreach( $pubChannels as $pubChannel ) {
