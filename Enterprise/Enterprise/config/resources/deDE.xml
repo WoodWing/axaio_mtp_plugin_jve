@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 14-06-2016 12:21:16 GMT-->
+<!--Last edit date in TMS: 15-06-2016 14:07:22 GMT-->
 <LocalizationMap language="deDE">
   <Term key="ISSUE">Ausgabe</Term>
   <Term key="ISSUES">Ausgaben</Term>
@@ -870,7 +870,7 @@
   <Term key="ERR_GET_MESSAGES">Die Nachrichten konnten nicht abgerufen werden.</Term>
   <Term key="ERR_GROUP_NAME_NOT_SPECIFIED">Quell-Gruppenname nicht angegeben oder neuer Gruppenname ist leer. (S1100)</Term>
   <Term key="ERR_IDS_OBJVERSION_MISMATCH">Aufgrund einer falschen Verarbeitungssequenz beim Speichern des Layouts ist ein Versionskonflikt aufgetreten. Der Job wird erneut eingeplant. (S1133)</Term>
-  <Term key="ERR_INCOMPAT_BROWSER">Dieser Browser wird nicht unterstützt. Kompatible Browser sind im Administrationshandbuch aufgeführt. (S1101)</Term>
+  <Term key="ERR_INCOMPAT_BROWSER">Dieser Browser wird nicht unterstützt. Kompatible Browser sind im Hilfecenter aufgeführt. (S1101)</Term>
   <Term key="ERR_INCORRECT_FIELDS">Die folgenden Einträge sind falsch:</Term>
   <Term key="ERR_INVALIDCATEGORY">Ungültige {CATEGORY}: '%1' (S1129)</Term>
   <Term key="ERR_INVALIDSTATE">Ungültiger {STATE}: '%1' (S1017)</Term>
@@ -1458,7 +1458,7 @@ Nach dem Ändern der Einstellungen müssen Sie den Webdienst bzw. Datenbankdiens
   <Term key="MNU_USER_QUERY">Benutzerabfragen</Term>
   <Term key="MNU_WEBSERVICESSDK">Web-Services-SDK</Term>
   <Term key="MNU_WEB_EDITOR">Web-Editor</Term>
-  <Term key="MSG_EMPTY_DELETED_OBJ">Leeren Sie bitte (unter Verwendung Ihrer ursprünglichen Enterprise Server-Installation) den Papierkorb, bevor Sie mit dem Upgrade-Vorgang fortfahren. - Richten Sie sich nach den Informationen im Administrationshandbuch.</Term>
+  <Term key="MSG_EMPTY_DELETED_OBJ">Leeren Sie bitte (unter Verwendung Ihrer ursprünglichen Enterprise Server-Installation) den Papierkorb, bevor Sie mit dem Upgrade-Vorgang fortfahren. – Informationen finden Sie im Hilfecenter.</Term>
   <Term key="MSG_EMPTY_INDESIGNSERVERJOBS">In der InDesign-ServerJob-Warteschlange wurden InDesign-Server-Jobs gefunden. Diese Jobs werden gelöscht.</Term>
   <Term key="MSG_EMPTY_SERVERJOBS">In der Enterprise-Server-Job-Warteschlange wurden Enterprise-Server-Jobs gefunden. Diese Jobs werden gelöscht.</Term>
   <Term key="MSG_EMPTY_STORAGE">In Ihrer Datenbank sind Arbeitsablauf-Dateien gespeichert; seit Version 8.0 handelt es sich dabei um eine veraltete Funktion. Die Migration dieser Dateien auf den Dateispeicher wird nicht unterstützt. Sie müssen deshalb mit einer bereinigten Datenbank beginnen. Wenn Sie wirklich sicher sind, dass der Dateispeicher verwendet wird und dass alle Datensätze in der Datenbanktabelle 'smart_storage' problemlos entfernbare Dateien enthalten, können Sie die erwähnte Tabelle auch leeren und mit der Migration fortfahren.</Term>

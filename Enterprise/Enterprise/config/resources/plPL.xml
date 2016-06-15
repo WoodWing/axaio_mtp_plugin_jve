@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 14-06-2016 12:21:16 GMT-->
+<!--Last edit date in TMS: 15-06-2016 14:07:22 GMT-->
 <LocalizationMap language="plPL">
   <Term key="ISSUE">Wydanie</Term>
   <Term key="ISSUES">Wydania</Term>
@@ -870,7 +870,7 @@
   <Term key="ERR_GET_MESSAGES">Odzyskiwanie wiadomości nie powiodło się.</Term>
   <Term key="ERR_GROUP_NAME_NOT_SPECIFIED">Nazwa grupy źródłowej nie jest określona lub nazwa nowej grupy jest pusta. (S1100)</Term>
   <Term key="ERR_IDS_OBJVERSION_MISMATCH">Niezgodność wersji w związku z niepoprawną sekwencją przetwarzania w trakcie zapisu układu. Praca zostanie przesunięta. (S1133)</Term>
-  <Term key="ERR_INCOMPAT_BROWSER">Ta przeglądarka nie jest obsługiwana. Listę zgodnych przeglądarek można znaleźć w Podręczniku administratora. (S1101)</Term>
+  <Term key="ERR_INCOMPAT_BROWSER">Ta przeglądarka nie jest obsługiwana. Aby uzyskać listę obsługiwanych przeglądarek, odwiedź centrum pomocy. (S1101)</Term>
   <Term key="ERR_INCORRECT_FIELDS">Następujące wpisy nie mają autoryzacji:</Term>
   <Term key="ERR_INVALIDCATEGORY">Nieprawidłowa kategoria {CATEGORY}: '„%1” (S1129)</Term>
   <Term key="ERR_INVALIDSTATE">Nieprawidłowy status {STATE}: '„%1” (S1017)</Term>
@@ -1458,7 +1458,7 @@ Po zmianie ustawień należy pamiętać o ponownym uruchomieniu usługi WWW i/lu
   <Term key="MNU_USER_QUERY">Kwerendy użytkownika</Term>
   <Term key="MNU_WEBSERVICESSDK">Usługi sieciowe SDK</Term>
   <Term key="MNU_WEB_EDITOR">Edytor sieci Web</Term>
-  <Term key="MSG_EMPTY_DELETED_OBJ">Opróżnij kosz (korzystając z pierwszego zainstalowanego serwera Enterprise) przed przeprowadzeniem aktualizacji. - Zob. Podręcznik administratora.</Term>
+  <Term key="MSG_EMPTY_DELETED_OBJ">Przed przystąpieniem do aktualizacji opróżnij kosz (przy użyciu oryginalnej instalacji Enterprise Server). — Odwiedź centrum pomocy.</Term>
   <Term key="MSG_EMPTY_INDESIGNSERVERJOBS">Znaleziono prace w kolejce zadań serwera InDesign. Te prace zostaną usunięte.</Term>
   <Term key="MSG_EMPTY_SERVERJOBS">Znaleziono prace w kolejce zadań serwera Enterprise. Te prace zostaną usunięte.</Term>
   <Term key="MSG_EMPTY_STORAGE">W Twojej bazie danych znajdują się pliki przepływu pracy; ta funkcja stała się nieaktualna w wersji 8.0. Przenoszenie tych plików do pamięci plików nie jest obsługiwane. Dlatego musisz utworzyć pustą bazę danych. Jeśli masz pewność, że pamięć plików jest używana oraz że wszystkie zapisy w tabeli bazy danych noszące nazwę „smart_storage” zawierają pliki, które mogą zostać usunięte, możesz również oczyścić tabelę i przeprowadzić przenoszenie.</Term>
