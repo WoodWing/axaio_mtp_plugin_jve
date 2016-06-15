@@ -863,13 +863,18 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 		// Retrieve the raw response object.
 		$response = $this->callService( $httpClient, $serviceName, $request );
 
+		$httpCode = null;
+		$responseBody = null;
+
 		// Get HTTP response data.
 		if( $response ) {
 			$httpCode = $response->getStatusCode();
-			$responseBody = $response->getBody();
-		} else {
-			$httpCode = null;
-			$responseBody = null;
+
+			//EN-87488 RabbitMQ on CentOS sends responses with Content-Encoding set, but an empty body.
+			//Zend\Http\Response does not check for empty bodies, and just tries to decode it which goes wrong.
+			if( !empty( (string) $response->getContent() ) ) {
+				$responseBody = $response->getBody();
+			}
 		}
 
 		// Callback the response handler.

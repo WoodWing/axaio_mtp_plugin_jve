@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 20-05-2016 08:37:54 GMT-->
 <LocalizationMap language="fiFI">
   <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS">Latauksen tila</Term>
   <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_FAILED">Epäonnistui (v%1)</Term>

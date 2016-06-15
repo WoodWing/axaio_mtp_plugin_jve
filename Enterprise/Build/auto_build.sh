@@ -10,6 +10,10 @@
 # Some source code files are encoded with ionCube. The server, plugins and 3rd party modules are archived at last.
 #
 
+SOURCE_BASE="./Enterprise/"
+TARGET_BASE="./Enterprise_release/"
+iONCUBE_ENCODER="/usr/local/ioncube/9.0/ioncube_encoder54_9.0_64"
+
 #
 # Logs a given param name and value and exits with error when param value is empty.
 #
@@ -169,6 +173,105 @@ function determineZipPostfix {
 }
 
 #
+# ionCube Encode a given PHP file. 
+#
+# It reads from the ${SOURCE_BASE} folder and writes into the ${TARGET_BASE} folder.
+# 
+# @param string ${1} ionCube Encoder project options file
+# @param string ${2} Relative path of file to be ionCube encoded
+#
+function ionCubeFile {
+	sourceFile="${SOURCE_BASE}${2}"
+	targetFile="${TARGET_BASE}${2}"
+	for i in `seq 1 10`;
+	do
+		"${iONCUBE_ENCODER}" --project-file "${1}" "${sourceFile}" -o "${targetFile}"
+		set +e
+		checkSum=`grep 'ionCube Loader' ${targetFile}`
+		set -e
+		if [ -n "${checkSum}"  ]; then
+			ionCubeEncodedFiles=$((ionCubeEncodedFiles+1))
+			break
+		else
+			# Sometimes ionCube Encoder silently fails. It turns out that we need
+			# to wait a bit and try again. The exact reason of failure is unknown (EN-87512).
+			echo "WARNING: ${targetFile} is not ionCube Encoded! (will retry)";
+			ionCubeBadAttempts=$((ionCubeBadAttempts+1))
+			sleep 3s
+		fi
+	done
+	if [ ! -n "${checkSum}"  ]; then
+		echo "ERROR: ${targetFile} is not ionCube Encoded! (gave up)";
+		head ${targetFile}
+		exit 1
+	fi
+}
+
+#
+# ionCube Encode all PHP files in a given folder recursively.
+#
+# It reads from the ${SOURCE_BASE} folder and writes into the ${TARGET_BASE} folder.
+# 
+# @param string ${1} ionCube Encoder project options file
+# @param string ${2} Relative path of folder to be ionCube encoded recursively
+#
+function ionCubeFolder {
+	for icFile in $(find "${SOURCE_BASE}${2}" -name '*.php'); do
+		ionCubeFile "${1}" "${icFile#$SOURCE_BASE}"
+	done
+}
+
+#
+# ionCube encode some files and folders in Enterprise Server release folder.
+#
+function ionCubeEnterpriseFiles {
+	thisYear=`date +%Y`
+	encodeOptionFile="${SOURCE_BASE}encodeoptions.txt"
+	echo "--replace-target --add-comment \"(c) Copyright 2000-${thisYear} WoodWing Software, www.woodwing.com\" --obfuscate locals --obfuscation-key \"de bocht van de ronde tocht\" --optimize max --no-doc-comments --property \"magic='the windmill keeps on turning'\" --message-if-no-loader \"'No Ioncube loader installed. Please run the Health Check page (e.g. http://localhost/Enterprise/server/wwtest/testsuite.php).'\"" > "${encodeOptionFile}"
+	icFolders="\
+		Enterprise/server/admin/license/ \
+		Enterprise/server/dbclasses/ \
+		Enterprise/server/dbdrivers/ \
+		Enterprise/server/services/ \
+		Enterprise/server/appservices/ \
+		Enterprise/server/wwtest/ngrams/ \
+		Enterprise/server/plugins/AdobeDps/ \
+	"
+	for icFolder in ${icFolders}; do
+		ionCubeFolder "${encodeOptionFile}" "${icFolder}"
+	done
+
+	icFolder="${SOURCE_BASE}plugins/release/Analytics/"
+	for icFile in $(find ${icFolder} -name '*.php'); do
+		if [ ${icFile} == "${SOURCE_BASE}plugins/release/Analytics/monitor_config.php" ]; then 
+			echo "Skipped ${icFile}"
+		else
+			ionCubeFile "${encodeOptionFile}" "${icFile#$SOURCE_BASE}"
+		fi
+	done
+	
+	icFiles="\
+		Enterprise/server/apps/webapplicense.inc.php \
+		Enterprise/server/regserver.inc.php \
+		Enterprise/server/bizclasses/BizServerJob.class.php \
+		Enterprise/server/bizclasses/BizPublishing.class.php \
+		Enterprise/server/utils/DigitalPublishingSuiteClient.class.php \
+		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
+		plugins/release/Elvis/Elvis_WflLogOn.class.php \
+		plugins/release/Elvis/Elvis_ContentSource.class.php \
+	"
+	for icFile in ${icFiles}; do
+		ionCubeFile "${encodeOptionFile}" "${icFile}"
+	done
+
+	encodeOptionFile2="${SOURCE_BASE}encodeoptions2.txt"
+	cp "${encodeOptionFile}" "${encodeOptionFile2}"
+	echo "--include-if-property \"magic='the windmill keeps on turning'\"" >> "${encodeOptionFile2}"
+	icFolder="Enterprise/server/utils/license/"
+	ionCubeFolder "${encodeOptionFile2}" "${icFolder}"
+}
+
+#
 # Validates environment variables that are required by this script.
 #
 function step0_validateEnvironment {
@@ -223,8 +326,8 @@ function step1_cleanGetWorkspace {
 	p4 revert -c default ...
 
 	echo "step1d: Delete local build folders (forced, recursively)."
-	rm -rf ./Enterprise_release
-	mkdir ./Enterprise_release
+	rm -rf ${TARGET_BASE}
+	mkdir ${TARGET_BASE}
 	rm -rf ./tms_resources
 	mkdir ./tms_resources
 	rm -rf ./reports
@@ -235,66 +338,107 @@ function step1_cleanGetWorkspace {
 }
 
 #
-# When TMS has newer resource files, they are downloaded to update workspace and Perforce depot.
+# Downloads the latest Enterprise Server resource files from TMS and submits changes to the repository.
 #
-function step2_updateResourceFiles {
-	echo "step2a: Retrieve timestamp of last update from TMS for core Enterprise Server."
-	lastUpdate=`curl http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20server/version/10.0/`
-	if [ ! -n "${lastUpdate}"  ]; then
+# Note that for historical reasons the XML resource files downloaded from TMS contain a timestamp
+# at the second line, such as: <!--Last edit date in TMS: 31-05-2016 07:08:39 GMT-->
+# However, this leads to conflicts when merging code branches and so we take out those lines. 
+# Nevertheless, to avoid unnecessary daily submits without changes (that would blur the view) 
+# we keep track of the last modification timestamp of TMS in the a file named "_lastupdate.txt" 
+# (that resides in the resource folder) which allows us to compare timestamps and skip submits.
+#
+function step2a_updateResourceFilesForCoreServer {
+	echo "step2a1: Retrieve timestamp of last update from TMS for core Enterprise Server."
+	tmsLastUpdate=`curl http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20server/version/10.0/`
+	if [ ! -n "${tmsLastUpdate}"  ]; then
 		echo 'Could not retrieve last modification timestamp from TMS (for the core Enterprise Server project). Is TMS down?';
 		exit 1;
 	fi
-
-	echo "step2b: Retrieve timestamp of last update from local resource file for core Enterprise Server."
-	currentUpdate=`grep "Last edit date in TMS" ./Enterprise/Enterprise/config/resources/enUS.xml | sed -r "s/<\!--Last edit date in TMS: (.*)-->/\1/g"`
-	if [ "${lastUpdate}" == "${currentUpdate}" ]; then
-		echo "step2b1: Perforce and TMS are in sync. No update needed."
+	
+	echo "step2a2: Retrieve timestamp of last update from local resource file for core Enterprise Server."
+	resLastUpdate=`cat "${SOURCE_BASE}Enterprise/config/resources/_lastupdate.txt"`
+	if [ "${tmsLastUpdate}" == "${resLastUpdate}" ]; then
+		echo "step2a3: Repository and TMS are in sync. No update needed."
 	else
-		echo "step2b2: Perforce is out-of-sync with TMS. Downloading resources..."
+		echo "step2a3: Repository is out-of-sync with TMS. Downloading resources..."
 		wget "http://tms.woodwing.net/product/getexport/user/woodwing/pass/QjQjI2VyVmxAQDE=/versionid/116" -O ./tms_resources/core.zip
 		# L> update the versionid param when migrating to new Enterprise major version: 10=7.0, 22=8.0, 73=9.0, 116=10.0
 
-		echo "step2b3: At Perforce depot, open resource files for editing."
-		p4 edit ./Enterprise/Enterprise/config/resources/...
+		echo "step2a4: At repository, open resource files for editing."
+		p4 edit ${SOURCE_BASE}Enterprise/config/resources/...
 
-		echo "step2b4: Extract resource archive and overwrite local resources."
-		cd ./Enterprise/Enterprise/config/resources
+		echo "step2a5: Extract resource archive and overwrite local resources."
+		cd ${SOURCE_BASE}Enterprise/config/resources
 		7za e -y "${WORKSPACE_SERVER}/tms_resources/core.zip" "Server/config/resources"
 		cd -
 
-		echo "step2b5: Submit latest resource files to Perforce."
-		p4 submit -d "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${lastUpdate}) core resource files from TMS for server build ${BUILD_NUMBER}."
-	fi
+		echo "step2a6: Write timestamp of last update from TMS into the resource folder of Enterprise Server."
+		echo "${tmsLastUpdate}" > ${SOURCE_BASE}Enterprise/config/resources/_lastupdate.txt
+		
+		echo "step2a7: Remove the timestamp from the downloaded XML files."
+		for icFile in $(find "${SOURCE_BASE}Enterprise/config/resources/" -name '*.xml'); do
+			sed '/<!--Last edit date in TMS:.*-->/d' "${icFile}" > ./temp && mv ./temp "${icFile}"
+		done
+		
+		echo "step2a8: Revert unchanged resource files."
+		p4 revert -a ${SOURCE_BASE}Enterprise/config/resources/...
 
-	echo "step2d: Retrieve timestamp of last update from TMS for AdobeDps2 plugin."
-	lastUpdate=`curl http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20Server%20AdobeDps2/version/10.0/`
-	if [ ! -n "${lastUpdate}"  ]; then
+		echo "step2a9: Submit latest resource files to repository."
+		p4 submit -d "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) core resource files from TMS for server build ${BUILD_NUMBER}."
+	fi
+}
+
+#
+# Downloads the latest Adobe AEM resource files from TMS and submits changes to the repository.
+#
+# Note that for historical reasons the XML resource files downloaded from TMS contain a timestamp
+# at the second line, such as: <!--Last edit date in TMS: 31-05-2016 07:08:39 GMT-->
+# However, this leads to conflicts when merging code branches and so we take out those lines. 
+# Nevertheless, to avoid unnecessary daily submits without changes (that would blur the view) 
+# we keep track of the last modification timestamp of TMS in the a file named "_lastupdate.txt" 
+# (that resides in the resource folder) which allows us to compare timestamps and skip submits.
+#
+function step2b_updateResourceFilesForAdobeAEM {
+	echo "step2b1: Retrieve timestamp of last update from TMS for AdobeDps2 plugin."
+	tmsLastUpdate=`curl http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20Server%20AdobeDps2/version/10.0/`
+	if [ ! -n "${tmsLastUpdate}"  ]; then
 		echo 'Could not retrieve last modification timestamp from TMS (for the AdobeDps2 project). Is TMS down?';
 		exit 1;
 	fi
 
-	echo "step2e: Retrieve timestamp of last update from local resource file for AdobeDps2 plugin."
-	currentUpdate=`grep "Last edit date in TMS" ./Enterprise/plugins/release/AdobeDps2/resources/enUS.xml | sed -r "s/<\!--Last edit date in TMS: (.*)-->/\1/g"`
-	if [ "${lastUpdate}" == "${currentUpdate}" ]; then
-		echo "step2e1: Perforce and TMS are in sync. No update needed."
+	echo "step2b2: Retrieve timestamp of last update from local resource file for AdobeDps2 plugin."
+	resLastUpdate=`cat "${SOURCE_BASE}plugins/release/AdobeDps2/resources/_lastupdate.txt"`
+	if [ "${tmsLastUpdate}" == "${resLastUpdate}" ]; then
+		echo "step2b3: Repository and TMS are in sync. No update needed."
 	else
-		echo "step2e2: Perforce is out-of-sync with TMS. Downloading resources..."
+		echo "step2b3: Repository is out-of-sync with TMS. Downloading resources..."
 		wget "http://tms.woodwing.net/product/getexport/user/woodwing/pass/QjQjI2VyVmxAQDE=/versionid/117" -O ./tms_resources/adobedps2.zip
 		# L> update the versionid param when migrating to new AdobeDps2 major version: 99=9.0, 117=10.0
 
-		echo "step2e3: At Perforce depot, open resource files for editing."
-		p4 edit ./Enterprise/plugins/release/AdobeDps2/resources/...
+		echo "step2b4: At the repository, open resource files for editing."
+		p4 edit ${SOURCE_BASE}plugins/release/AdobeDps2/resources/...
 
-		echo "step2e4: Extract resource archive and overwrite local resources."
-		cd ./Enterprise/plugins/release/AdobeDps2/resources
+		echo "step2b5: Extract resource archive and overwrite local resources."
+		cd ${SOURCE_BASE}plugins/release/AdobeDps2/resources
 		7za e -y "${WORKSPACE_SERVER}/tms_resources/adobedps2.zip" "Server/config/resources"
 		cd -
 		
-		echo "step2e5: Prefix the resource keys with AdobeDps2."
+		echo "step2b6: Prefix the resource keys with AdobeDps2."
 		php "${WORKSPACE_SERVER}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE_SERVER}/Enterprise/plugins/release/AdobeDps2/resources" AdobeDps2
 
-		echo "step2e6: Submit latest resource files to Perforce."
-		p4 submit -d "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${lastUpdate}) AdobeDps2 resource files from TMS for server build ${BUILD_NUMBER}."
+		echo "step2a7: Write timestamp of last update from TMS into the resource folder of AdobeDps2 plugin."
+		echo "${tmsLastUpdate}" > ${SOURCE_BASE}plugins/release/AdobeDps2/resources/_lastupdate.txt
+		
+		echo "step2a8: Remove the timestamp from the downloaded XML files."
+		for icFile in $(find "${SOURCE_BASE}plugins/release/AdobeDps2/resources/" -name '*.xml'); do
+			sed '/<!--Last edit date in TMS:.*-->/d' "${icFile}" > ./temp && mv ./temp "${icFile}"
+		done
+		
+		echo "step2a9: Revert unchanged resource files."
+		p4 revert -a ${SOURCE_BASE}plugins/release/AdobeDps2/resources/...
+
+		echo "step2b10: Submit latest resource files to repository."
+		p4 submit -d "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) AdobeDps2 resource files from TMS for server build ${BUILD_NUMBER}."
 	fi
 }
 
@@ -303,34 +447,34 @@ function step2_updateResourceFiles {
 #
 function step3_updateVersionInfo {
 	echo "step3a: Update version info in server modules."
-	updateVersion ./Enterprise/Enterprise/server/serverinfo.php "^define\s*\(\s*'SERVERVERSION'\s*,\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
+	updateVersion ${SOURCE_BASE}Enterprise/server/serverinfo.php "^define\s*\(\s*'SERVERVERSION'\s*,\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
 	if [ "${SERVER_RELEASE_TYPE}" == "Release" ]; then
-		updatePhpDefine ./Enterprise/Enterprise/server/serverinfo.php "SERVERVERSION_EXTRAINFO" ""
+		updatePhpDefine ${SOURCE_BASE}Enterprise/server/serverinfo.php "SERVERVERSION_EXTRAINFO" ""
 	else
-		updatePhpDefine ./Enterprise/Enterprise/server/serverinfo.php "SERVERVERSION_EXTRAINFO" ${SERVER_RELEASE_TYPE}
+		updatePhpDefine ${SOURCE_BASE}Enterprise/server/serverinfo.php "SERVERVERSION_EXTRAINFO" ${SERVER_RELEASE_TYPE}
 	fi
 
 	echo "step3b: Update version info in server plugins."
-	updatePluginVersions ./Enterprise/Enterprise/config/plugins ${SERVER_VERSION} ${BUILD_NUMBER}
-	updatePluginVersions ./Enterprise/Enterprise/server/plugins ${SERVER_VERSION} ${BUILD_NUMBER}
-	updatePluginVersions ./Enterprise/plugins/release ${SERVER_VERSION} ${BUILD_NUMBER}
+	updatePluginVersions ${SOURCE_BASE}Enterprise/config/plugins ${SERVER_VERSION} ${BUILD_NUMBER}
+	updatePluginVersions ${SOURCE_BASE}Enterprise/server/plugins ${SERVER_VERSION} ${BUILD_NUMBER}
+	updatePluginVersions ${SOURCE_BASE}plugins/release ${SERVER_VERSION} ${BUILD_NUMBER}
 
 	echo "step3c: Update version info in Analytics, AdobeDps2 and Elvis plugins. They have their own buildnr, but use the major.minor of Enterprise."
 	twoDigitVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)(\.[0-9]+)?/\1/g"` # ignores patch nr
-	updatePluginVersions ./Enterprise/plugins/release/Analytics "${twoDigitVersion}" ${ANALYTICS_BUILDNR}
-	updatePluginVersions ./Enterprise/plugins/release/AdobeDps2 "${twoDigitVersion}" ${ADOBEDPS2_BUILDNR}
-	updatePluginVersions ./Enterprise/plugins/release/Elvis "${twoDigitVersion}" ${ELVIS_BUILDNR}
+	updatePluginVersions ${SOURCE_BASE}plugins/release/Analytics "${twoDigitVersion}" ${ANALYTICS_BUILDNR}
+	updatePluginVersions ${SOURCE_BASE}plugins/release/AdobeDps2 "${twoDigitVersion}" ${ADOBEDPS2_BUILDNR}
+	updatePluginVersions ${SOURCE_BASE}plugins/release/Elvis "${twoDigitVersion}" ${ELVIS_BUILDNR}
 
 	echo "step3d: Update version info of the ProxyForSC solution."
-	updateVersion ./Enterprise/ProxyForSC/proxyserver/serverinfo.php "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
-	updateVersion ./Enterprise/ProxyForSC/proxystub/serverinfo.php "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
-	updateVersion ./Enterprise/ProxyForSC/speedtest/serverinfo.php "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
+	updateVersion ${SOURCE_BASE}ProxyForSC/proxyserver/serverinfo.php "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
+	updateVersion ${SOURCE_BASE}ProxyForSC/proxystub/serverinfo.php "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
+	updateVersion ${SOURCE_BASE}ProxyForSC/speedtest/serverinfo.php "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
 
 	echo "step3e: Update version info in 3rd party modules."
-	updateVersion ./Enterprise/Drupal/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
-	updateVersion ./Enterprise/Drupal7/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
-	updateVersion ./Enterprise/Drupal8/modules/ww_enterprise/ww_enterprise.info.yml "^version\s*:\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
-	updateVersion ./Enterprise/WordPress/plugins/ww_enterprise/ww_enterprise.php "^\s*\*\s*Version:\s*" ${SERVER_VERSION} ${BUILD_NUMBER}
+	updateVersion ${SOURCE_BASE}Drupal/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
+	updateVersion ${SOURCE_BASE}Drupal7/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
+	updateVersion ${SOURCE_BASE}Drupal8/modules/ww_enterprise/ww_enterprise.info.yml "^version\s*:\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
+	updateVersion ${SOURCE_BASE}WordPress/plugins/ww_enterprise/ww_enterprise.php "^\s*\*\s*Version:\s*" ${SERVER_VERSION} ${BUILD_NUMBER}
 }
 
 #
@@ -359,58 +503,30 @@ function step4_validatePhpCode {
 # Makes a copy of core and plugins into the release folder and encodes some PHP files.
 #
 function step5_ionCubeEncodePhpFiles {
-	echo "step5a: Make local copy of Enterprise Server source (and plugins) to release folder."
-	cp -r ./Enterprise/Enterprise ./Enterprise_release/Enterprise
-	cp -r ./Enterprise/plugins ./Enterprise_release/plugins
+
+	echo 'step5a: Make local copy of Enterprise Server source (and plugins) to release folder.'
+	cp -r ${SOURCE_BASE}Enterprise ${TARGET_BASE}Enterprise
+	cp -r ${SOURCE_BASE}plugins ${TARGET_BASE}plugins
+	sync
 
 	echo "step5b: Remove some unwanted files and folder from the release folder that should NOT be released."
-	rm -f -r ./Enterprise_release/Enterprise/phpunit
-	rm -f -r ./Enterprise_release/Enterprise/server/buildtools
-	rm -f -r ./Enterprise_release/Enterprise/server/useful
-	rm -f -r ./Enterprise_release/Enterprise/server/vendor/solarium/solarium/examples
-	rm -f -r ./Enterprise_release/Enterprise/server/vendor/solarium/solarium/tests
-	rm -f -r ./Enterprise_release/Enterprise/server/wwtest/development
-	rm -f -r ./Enterprise_release/Enterprise/server/wwtest/testsuite/BuildTest/PhpCoding
-	rm -f -r ./Enterprise_release/Enterprise/server/wwtest/testsuite/BuildTest2
-
-	echo "step5c: ionCube encode some files and folders in Enterprise Server release folder."
-	sudo /usr/local/ioncube/9.0/ioncube_encoder54_9.0_64 --acquire-license
-	/usr/local/ioncube/9.0/ioncube_encoder54_9.0_64 -V
-	# /usr/local/ioncube/9.0/ioncube_encoder54_9.0_64 --help | more
-	thisYear=`date +%Y`
-	echo "--replace-target --add-comment \"(c) Copyright 2000-${thisYear} WoodWing Software, www.woodwing.com\" --obfuscate locals --obfuscation-key \"de bocht van de ronde tocht\" --optimize max --no-doc-comments --property \"magic='the windmill keeps on turning'\" --message-if-no-loader \"'No Ioncube loader installed. Please run the Health Check page (e.g. http://localhost/Enterprise/server/wwtest/testsuite.php).'\"" > ./Enterprise/encodeoptions.txt
-
-	ionCubeEncode="/usr/local/ioncube/9.0/ioncube_encoder54_9.0_64 --project-file ./Enterprise/encodeoptions.txt"
-	${ionCubeEncode} ./Enterprise/Enterprise/server/admin/license --into ./Enterprise_release/Enterprise/server/admin
-	${ionCubeEncode} --include-if-property "magic='the windmill keeps on turning'" ./Enterprise/Enterprise/server/utils/license --into ./Enterprise_release/Enterprise/server/utils
-	${ionCubeEncode} ./Enterprise/Enterprise/server/dbclasses --into ./Enterprise_release/Enterprise/server
-	${ionCubeEncode} ./Enterprise/Enterprise/server/dbdrivers --into ./Enterprise_release/Enterprise/server
-	${ionCubeEncode} ./Enterprise/Enterprise/server/services --into ./Enterprise_release/Enterprise/server
-	${ionCubeEncode} ./Enterprise/Enterprise/server/appservices --into ./Enterprise_release/Enterprise/server
-	${ionCubeEncode} ./Enterprise/Enterprise/server/wwtest/ngrams --into ./Enterprise_release/Enterprise/server/wwtest
-	${ionCubeEncode} ./Enterprise/Enterprise/server/plugins/AdobeDps --into ./Enterprise_release/Enterprise/server/plugins
-	${ionCubeEncode} ./Enterprise/Enterprise/server/apps/webapplicense.inc.php -o ./Enterprise_release/Enterprise/server/apps/webapplicense.inc.php
-	${ionCubeEncode} ./Enterprise/Enterprise/server/regserver.inc.php -o ./Enterprise_release/Enterprise/server/regserver.inc.php
-	${ionCubeEncode} ./Enterprise/Enterprise/server/bizclasses/BizServerJob.class.php -o ./Enterprise_release/Enterprise/server/bizclasses/BizServerJob.class.php
-	${ionCubeEncode} ./Enterprise/Enterprise/server/bizclasses/BizPublishing.class.php -o ./Enterprise_release/Enterprise/server/bizclasses/BizPublishing.class.php
-	${ionCubeEncode} ./Enterprise/Enterprise/server/utils/DigitalPublishingSuiteClient.class.php -o ./Enterprise_release/Enterprise/server/utils/DigitalPublishingSuiteClient.class.php
-	${ionCubeEncode} ./Enterprise/Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php -o ./Enterprise_release/Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php
-	${ionCubeEncode} ./Enterprise/plugins/release/Analytics --into ./Enterprise_release/plugins/release --exclude monitor_config.php
-	${ionCubeEncode} ./Enterprise/plugins/release/Elvis/Elvis_WflLogOn.class.php -o ./Enterprise_release/plugins/release/Elvis/Elvis_WflLogOn.class.php
-	${ionCubeEncode} ./Enterprise/plugins/release/Elvis/Elvis_ContentSource.class.php -o ./Enterprise_release/plugins/release/Elvis/Elvis_ContentSource.class.php
-
-	echo "step5d: Flushing buffers to ensure ionCube Encoded files are reflected to disk."
+	rm -f -r ${TARGET_BASE}Enterprise/phpunit
+	rm -f -r ${TARGET_BASE}Enterprise/server/buildtools
+	rm -f -r ${TARGET_BASE}Enterprise/server/useful
+	rm -f -r ${TARGET_BASE}Enterprise/server/vendor/solarium/solarium/examples
+	rm -f -r ${TARGET_BASE}Enterprise/server/vendor/solarium/solarium/tests
+	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/development
+	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/testsuite/BuildTest/PhpCoding
+	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/testsuite/BuildTest2
 	sync
-	
-	echo "step5e: Validate some of the ionCube Encoded files."
-	icFiles="./Enterprise_release/Enterprise/server/dbclasses/DBBase.class.php ./Enterprise_release/Enterprise/server/apps/webapplicense.inc.php ./Enterprise_release/Enterprise/server/utils/license/license.class.php"
-	for icFile in ${icFiles}; do
-		checkSum=`grep 'ionCube Loader' ${icFile}`
-		if [ ! -n "${checkSum}"  ]; then
-		   echo '${icFile} is not ionCube Encoded! Tip: Maybe needed to acquire license for ionCube Encoder?';
-		   exit 1
-		fi	
-	done
+
+	echo 'step5c: Acquire license for ionCube Encoded to make sure it is still valid.'
+	sudo "${iONCUBE_ENCODER}" --acquire-license
+	"${iONCUBE_ENCODER}" -V
+	# "${iONCUBE_ENCODER}" --help | more
+
+	echo 'step5d: ionCube encode some files and folders in Enterprise Server release folder.'
+	ionCubeEnterpriseFiles
 }
 
 #
@@ -507,6 +623,10 @@ function step9_submitOrRevertLocalVersionInfoUpdates {
 # exit on unset variables
 set -u
 
+# init global variables
+ionCubeBadAttempts=0
+ionCubeEncodedFiles=0
+
 # Main build procedure
 set +x; echo "================ Step 0 ================"; set -x
 step0_validateEnvironment
@@ -514,7 +634,8 @@ cd "${WORKSPACE_SERVER}"
 set +x; echo "================ Step 1 ================"; set -x
 step1_cleanGetWorkspace
 set +x; echo "================ Step 2 ================"; set -x
-step2_updateResourceFiles
+step2a_updateResourceFilesForCoreServer
+step2b_updateResourceFilesForAdobeAEM
 set +x; echo "================ Step 3 ================"; set -x
 step3_updateVersionInfo
 set +x; echo "================ Step 4 ================"; set -x
