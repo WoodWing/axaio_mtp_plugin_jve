@@ -936,7 +936,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Ins
 		$request->Objects[0]->MetaData->WorkflowMetaData->Deletor = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Deleted = null;
 		$request->Objects[0]->MetaData->ExtraMetaData = null;
-		$request->Objects[0]->Relations = null;
+		$request->Objects[0]->Relations = array();
 		$request->Objects[0]->Pages = null;
 		$request->Objects[0]->Files = null;
 		$request->Objects[0]->Messages = null;
