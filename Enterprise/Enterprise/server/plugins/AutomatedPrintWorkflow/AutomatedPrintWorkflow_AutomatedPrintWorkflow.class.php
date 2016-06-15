@@ -5,7 +5,7 @@
  * @since 		v9.8
  * @copyright	WoodWing Software bv. All Rights Reserved.
  */
- 
+
 require_once BASEDIR . '/server/interfaces/plugins/connectors/AutomatedPrintWorkflow_EnterpriseConnector.class.php';
 
 class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkflow_EnterpriseConnector
@@ -17,29 +17,29 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	{
 		$resolvedOperations = array( $operation ); // by default, don't resolve
 		if( $operation->Type == 'AutomatedPrintWorkflow' && $operation->Name == 'PlaceDossier' ) {
-			
+
 			$resolvedOperations = array(); // always resolve the 'PlaceDossier' operation
-			
+
 			require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
 			$parentTargets = DBTarget::getTargetsByObjectId( $objectId );
 			if( $parentTargets && count( $parentTargets ) == 1 ) {
 				$issueId = $parentTargets[0]->Issue->Id;
-			
+
 				$params = self::paramsToKeyValues( $operation->Params );
 				$editionId = intval($params['EditionId']);
 				$dossierId = intval($params['DossierId']);
 				$inDesignArticleId = $params['InDesignArticleId'];
-			
-				$resolvedOperations = $this->resolvePlaceDossierOperation( 
+
+				$resolvedOperations = $this->resolvePlaceDossierOperation(
 					$objectId, $issueId, $editionId, $dossierId, $inDesignArticleId );
 			}
 		}
 		return $resolvedOperations;
 	}
-	
+
 	/**
-	 * The Automated Print Workflow feature kicks in when SC calls GetObjects with ObjectOperations set 
-	 * for RequestInfo; For each PlaceDossier operation the following steps will be done 
+	 * The Automated Print Workflow feature kicks in when SC calls GetObjects with ObjectOperations set
+	 * for RequestInfo; For each PlaceDossier operation the following steps will be done
 	 * server side in this business connector of the AutomatedPrintWorkflow server plug-in:
 	 * 1. Resolve IdArt frames (placements) from given IdArt id (Placement->InDesignArticleIds[0]).
 	 * 2. Exclude duplicate IdArt frames; For those we can not decide which one to make a match.
@@ -50,7 +50,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 *    L> Note: Exclude Spreadsheets entirely. Those are never placed automatically.
 	 * 7. Exclude childs (ids) for which the user has no read access rights.
 	 *    L> Or when in Personal status and routed to other user.
-	 * 8. When child is an Article: 
+	 * 8. When child is an Article:
 	 * - Exclude Article when is placed already and the user has no Allow Multiple Article Placements access rights.
 	 *   L> TODO
 	 * - Resolve the frames of the found child ids.
@@ -70,12 +70,12 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	private function resolvePlaceDossierOperation(
 		$layoutId, $issueId, $editionId, $dossierId, $inDesignArticleId )
 	{
-		LogHandler::Log( 'AutoPrintWfl', 'INFO', 
+		LogHandler::Log( 'AutoPrintWfl', 'INFO',
 			"Collecting placement candidates for InDesignArticle (id=$inDesignArticleId) ".
 			"that is placed on layout (id=$layoutId). The candidates must have ".
 			"a relational target set to issue (id=$issueId) and edition (id=$editionId) ".
 			"and should be contained by dossier (id=$dossierId)." );
-		
+
 		$resolvedOperations = array();
 		do {
 			// Resolve IdArt frames (placements) from given IdArt id (Placement->InDesignArticleIds[0]).
@@ -84,17 +84,17 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 				self::reportNoMatchingElementsFound( $layoutId );
 				break;
 			}
-			
+
 			// Exclude duplicate IdArt frames; For those we can not decide which one to make a match.
 			if( !self::markDuplicatePlacements( $iaPlacements ) ) {
 				self::reportNoMatchingElementsFound( $layoutId );
 				break;
 			}
-			
+
 			// Compose collection with all possible frame types from the resolved IdArt frames.
 			$iaFrameLabels = array(); $iaFrameTypes = array();
 			self::determineUsedFrameTypesAndLabels( $iaPlacements, $iaFrameLabels, $iaFrameTypes );
-			
+
 			// Derive all possible child obj types from the composed frame types.
 			// Note: This excludes Spreadsheets entirely. Those are not placed automatically.
 			$childTypes = self::determineUsedChildObjectTypes( $iaFrameTypes );
@@ -106,8 +106,8 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			// Search dossier for Contained Article and Image childs (ids) having 
 			// layout's target as relational target.
 			// Resolve essential metadata properties of the child objects found.
-			$invokedObjects = self::getDossierChildrenMetaData( $issueId, 
-								$editionId, $dossierId, $childTypes );
+			$invokedObjects = self::getDossierChildrenMetaData( $issueId,
+				$editionId, $dossierId, $childTypes );
 			if( !$invokedObjects ) {
 				self::reportNoMatchingElementsFound( $layoutId );
 				break;
@@ -120,7 +120,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 				self::reportNoMatchingElementsFound( $layoutId );
 				break;
 			}
-			
+
 			// When more than one image found, we don't know which one to pick,
 			// so filter out all images when dossier contains multiple images.
 			$imageId = self::filterOutImagesWhenMultipleFound( $invokedObjects );
@@ -128,35 +128,35 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 				self::reportNoMatchingElementsFound( $layoutId );
 				break;
 			}
-			
+
 			// For child Articles, resolve the elements of the found child ids.
 			$articleElements = self::getArticleElements( $invokedObjects, $iaFrameLabels );
 
 			// There could be still images, but without article elements there is
 			// no article relation with the layout and so there is nothing to show
 			// in the CS preview. In that case, don't place anything and report error.
- 			if( !$articleElements ) {
+			if( !$articleElements ) {
 				self::reportNoMatchingElementsFound( $layoutId );
- 				break;
- 			}
+				break;
+			}
 
 			// Exclude frame when having duplicate element label; For those we can not 
 			// decide which one to make a match. Exclude frame when the same frame label 
 			// also exists in the same or other articles.
 			self::filterOutDuplicateArticeElements( $articleElements );
- 			if( !$articleElements ) {
+			if( !$articleElements ) {
 				self::reportNoMatchingElementsFound( $layoutId );
- 				break;
- 			}
-			
+				break;
+			}
+
 			// Error for objects that are already placed while the user has no multi-place
 			// access rights. Those are filtered out. When he/she has rights, just give a 
 			// warning instead (but don't filter). When not placed, no message and no filter.
 			self::filterForMultiplaceAccessRights( $layoutId, $issueId, $editionId, $invokedObjects, $articleElements );
- 			if( !$articleElements ) {
+			if( !$articleElements ) {
 				self::reportNoMatchingElementsFound( $layoutId );
- 				break;
- 			}
+				break;
+			}
 
 			// Match the element labels with the IdArt frame labels (Placement->Element).
 			// For EACH frame of the selected InDesignArticle, we have to tell the ID script
@@ -164,12 +164,12 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			// When child is an Image, only make match when IdArt has one graphic frame 
 			// and exactly one image was found in dossier.
 			$resolvedOperations = self::composeOperations( $iaPlacements, $articleElements, $imageId, $editionId );
-			
+
 		} while( false ); // do once only
-		
+
 		return $resolvedOperations;
 	}
-	
+
 	/**
 	 * Resolve IdArt frames (placements) from given IdArt id (Placement->InDesignArticleIds[0]).
 	 *
@@ -178,32 +178,32 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @return Placement[]
 	 */
 	private static function getInDesignArticlePlacements( $layoutId, $inDesignArticleId )
-	{	
+	{
 		require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
 		$iaPlacementIds = DBInDesignArticlePlacement::getPlacementIdsByInDesignArticleId( $layoutId, $inDesignArticleId );
 		if( LogHandler::debugMode() ) {
-			LogHandler::Log( 'AutoPrintWfl', 'DEBUG', 
+			LogHandler::Log( 'AutoPrintWfl', 'DEBUG',
 				'Found IdArt placement ids: '.implode(',',$iaPlacementIds) );
 		}
-		
+
 		if( $iaPlacementIds ) {
 			require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 			$iaPlacements = DBPlacements::getPlacementBasicsByIds( $iaPlacementIds, true );
 		} else {
 			$iaPlacements = array();
 		}
-		
+
 		if( $iaPlacements ) {
-			LogHandler::Log( 'AutoPrintWfl', 'DEBUG', 
+			LogHandler::Log( 'AutoPrintWfl', 'DEBUG',
 				count($iaPlacements)." placements found for InDesignArticle (id=$inDesignArticleId)." );
 		} else {
-			LogHandler::Log( 'AutoPrintWfl', 'INFO', 
+			LogHandler::Log( 'AutoPrintWfl', 'INFO',
 				"Bailed out: No placements found for InDesignArticle (id=$inDesignArticleId)." );
 		}
-		
+
 		return $iaPlacements;
 	}
-	
+
 	/**
 	 * Excludes duplicate IdArt frames; For those we can not decide which one to make a match.
 	 * All frames are marked with a boolean property named IsDuplicate, which is added on-the-fly.
@@ -231,9 +231,9 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			} // else: skip successors of linked text frames
 		}
 		if( LogHandler::debugMode() ) {
-			LogHandler::Log( 'AutoPrintWfl', 'DEBUG', 
+			LogHandler::Log( 'AutoPrintWfl', 'DEBUG',
 				'Found IdArt image frame types: '.print_r($iaFrameTypes,true) );
-			LogHandler::Log( 'AutoPrintWfl', 'DEBUG', 
+			LogHandler::Log( 'AutoPrintWfl', 'DEBUG',
 				'Found IdArt element labels: '.print_r($iaFrameLabels,true) );
 		}
 		$duplicateCount = 0;
@@ -252,12 +252,12 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 		}
 		$continue = count($iaPlacements) > $duplicateCount;
 		if( !$continue ) {
-			LogHandler::Log( 'AutoPrintWfl', 'INFO', 
+			LogHandler::Log( 'AutoPrintWfl', 'INFO',
 				"Bailed out: All placements found for InDesignArticle are duplicates." );
 		}
 		return $continue;
 	}
-	
+
 	/**
 	 * Composes a collection with all possible frame types and label from the resolved IdArt frames.
 	 *
@@ -279,13 +279,13 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 		$iaFrameTypes = array_keys( $iaFrameTypes );
 		$iaFrameLabels = array_keys( $iaFrameLabels );
 		if( LogHandler::debugMode() ) {
-			LogHandler::Log( 'AutoPrintWfl', 'DEBUG', 
+			LogHandler::Log( 'AutoPrintWfl', 'DEBUG',
 				'Unique IdArt frame types: '.implode(',',$iaFrameTypes) );
-			LogHandler::Log( 'AutoPrintWfl', 'DEBUG', 
+			LogHandler::Log( 'AutoPrintWfl', 'DEBUG',
 				'Unique IdArt element labels: '.implode(',',$iaFrameLabels) );
 		}
 	}
-	
+
 	/**
 	 * Derives all possible child object types from the composed IdArt frame types.
 	 * Note: This excludes Spreadsheets entirely. Those are not placed automatically.
@@ -294,12 +294,12 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @return string[] Child object types.
 	 */
 	private static function determineUsedChildObjectTypes( array $iaFrameTypes )
-	{	
+	{
 		// Note that empty ('') frame type means: User is not allowed place onto, so we skip those.
 		// And, 'unassigned' means: User can place text or graphic, but those
 		// are no candidates for automatic placing; Those undetermined frames 
 		// are intended for manual placements.
-			
+
 		$childTypes = array();
 		foreach( $iaFrameTypes as $iaFrameType ) {
 			if( $iaFrameType == 'graphic' ) {
@@ -315,21 +315,21 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 		}
 		$childTypes = array_keys( $childTypes );
 		if( LogHandler::debugMode() ) {
-			LogHandler::Log( 'AutoPrintWfl', 'DEBUG', 
+			LogHandler::Log( 'AutoPrintWfl', 'DEBUG',
 				'Matching child types found: '.implode(',',$childTypes) );
 		}
 		if( !$childTypes ) {
-			LogHandler::Log( 'AutoPrintWfl', 'INFO', 
+			LogHandler::Log( 'AutoPrintWfl', 'INFO',
 				'Bailed out: No matching child types found.' );
 		}
 		return $childTypes;
 	}
-	
+
 	/**
-	 * Search dossier for Contained Article and Image childs (ids) having 
+	 * Search dossier for Contained Article and Image childs (ids) having
 	 * layout's target as relational target.
 	 * Resolve essential metadata properties of the child objects found.
-	 *		
+	 *
 	 * @param integer $issueId
 	 * @param integer $editionId
 	 * @param integer $dossierId
@@ -339,8 +339,8 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	private static function getDossierChildrenMetaData( $issueId, $editionId, $dossierId, $childTypes )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
-		$childIds = DBTarget::getChildrenbyParentTarget( $dossierId, null, 
-						$issueId, $editionId, $childTypes, array('Contained') );
+		$childIds = DBTarget::getChildrenbyParentTarget( $dossierId, null,
+			$issueId, $editionId, $childTypes, array('Contained') );
 
 		if( $childIds ) {
 			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
@@ -349,17 +349,17 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			$invokedObjects = array();
 		}
 		if( !$invokedObjects ) {
-			LogHandler::Log( 'AutoPrintWfl', 'INFO', 
+			LogHandler::Log( 'AutoPrintWfl', 'INFO',
 				"Bailed out: No ".implode('/',$childTypes)." children found in dossier ($dossierId) ".
 				"having relational target set to issue ($issueId) and edition ($editionId)." );
 		}
 		return $invokedObjects;
 	}
-	
+
 	/**
 	 * Excludes child objects for which the user has no read access rights,
 	 * or when in Personal status and routed to other user.
-	 * 
+	 *
 	 * @param MetaData[] $invokedObjects [input/output] Children to check and filter out.
 	 * @param integer $issueId
 	 */
@@ -378,27 +378,21 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			$categoryId    = $invokedObject->BasicMetaData->Category->Id;
 			$objectType    = $invokedObject->BasicMetaData->Type;
 			$statusId      = $invokedObject->WorkflowMetaData->State->Id;
-			$globAuth->getrights( $user, $publicationId, $issueId, $categoryId, $objectType );
-			if( $statusId == -1 ) {
-				if( $invokedObject->WorkflowMetaData->RouteTo != $user ) {
-					unset( $invokedObjects[$invokedObjectId] );
-				}
-			} else {
-				if( !$globAuth->checkright( 'R', 
-						$publicationId, $issueId, $categoryId, 
-						$objectType, $statusId, $invokedObjectId, 
-						$invokedObject->BasicMetaData->ContentSource, 
-						$invokedObject->BasicMetaData->DocumentID ) ) {
-					unset( $invokedObjects[$invokedObjectId] );
-				}
+			$globAuth->getRights( $user, $publicationId, $issueId, $categoryId, $objectType );
+			if( !$globAuth->checkright( 'R',
+				$publicationId, $issueId, $categoryId,
+				$objectType, $statusId, $invokedObjectId,
+				$invokedObject->BasicMetaData->ContentSource,
+				$invokedObject->BasicMetaData->DocumentID, $invokedObject->WorkflowMetaData->RouteTo ) ) {
+				unset( $invokedObjects[$invokedObjectId] );
 			}
 		}
 		if( !$invokedObjects ) {
-			LogHandler::Log( 'AutoPrintWfl', 'INFO', 
+			LogHandler::Log( 'AutoPrintWfl', 'INFO',
 				"Bailed out: User has no read access for any of the objects found in dossier." );
 		}
 	}
-	
+
 	/**
 	 * When more than one image found, we don't know which one to pick.
 	 * This function filters out all images when dossier contains multiple images.
@@ -429,7 +423,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 		}
 		return $imageCount == 1 ? $imageIds[0] : null;
 	}
-	
+
 	/**
 	 * Resolves the text elements of the dossier's articles ($invokedObjects).
 	 *
@@ -452,15 +446,15 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			$elements = array();
 		}
 		if( !$elements ) {
-			LogHandler::Log( 'AutoPrintWfl', 'INFO', 
+			LogHandler::Log( 'AutoPrintWfl', 'INFO',
 				'Not placing articles; No article elements found in dossier.' );
 		}
 		return $elements;
 	}
-	
+
 	/**
-	 * Excludes frame when having duplicate element label; For those we can not 
-	 * decide which one to make a match. Exclude frame when the same element label 
+	 * Excludes frame when having duplicate element label; For those we can not
+	 * decide which one to make a match. Exclude frame when the same element label
 	 * also exists in the same or other articles.
 	 *
 	 * @param Element[] $articleElements [input/output] The elements to check and filter out.
@@ -479,16 +473,16 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			unset( $articleElements[$index] );
 		}
 		if( $duplicates && !$articleElements ) {
-			LogHandler::Log( 'AutoPrintWfl', 'INFO', 
+			LogHandler::Log( 'AutoPrintWfl', 'INFO',
 				'Not placing articles; No article elements left after filtering out the duplicate element labels.' );
 		}
 	}
-	
+
 	/**
 	 * Errors for objects that are already placed while the user has no multi-place
-	 * access rights. Those are filtered out. When he/she has rights, just give a 
+	 * access rights. Those are filtered out. When he/she has rights, just give a
 	 * warning instead (but don't filter). When not placed, no message and no filter.
-	 * 
+	 *
 	 * @param integer $layoutId
 	 * @param integer $issueId
 	 * @param integer $editionId
@@ -496,22 +490,22 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @param Element[] $articleElements [input/output] The elements to check and filter out.
 	 */
 	private static function filterForMultiplaceAccessRights( $layoutId, $issueId, $editionId,
-		array $invokedObjects, array &$articleElements )
+	                                                         array $invokedObjects, array &$articleElements )
 	{
 		// Determine which elements are placed already for the edition.
 		$articleElementIds = array_map( function( $element ) { return $element->ID; }, $articleElements );
 		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 		$placedObjectIdsElementIds = DBPlacements::getChildsIdsForPlacedElementIdsAndEdition( $articleElementIds, $editionId );
 		if( !$placedObjectIdsElementIds ) {
-			LogHandler::Log( 'AutoPrintWfl', 'INFO', 
+			LogHandler::Log( 'AutoPrintWfl', 'INFO',
 				'Multi-place check; None of the text components (elements) are placed already.' );
 			return;
 		}
 		foreach( $placedObjectIdsElementIds as $placedObjectId => $elementIds ) {
-			LogHandler::Log( 'AutoPrintWfl', 'INFO', 
+			LogHandler::Log( 'AutoPrintWfl', 'INFO',
 				'Multi-place check; For object '.$placedObjectId.' the following text components (elements) are placed already: '.implode(',',array_keys($elementIds)) );
 		}
-		
+
 		// Iterate through the elements that are already placed.
 		global $globAuth;
 		if( !isset($globAuth) ) {
@@ -525,20 +519,26 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			// Check if user has the multi-place access right.
 			$hasRights = false;
 			if( $elementIds ) {
-				$publicationId = $invokedObject->BasicMetaData->Publication->Id;
-				$categoryId    = $invokedObject->BasicMetaData->Category->Id;
-				$objectType    = $invokedObject->BasicMetaData->Type;
-				$statusId      = $invokedObject->WorkflowMetaData->State->Id;
-				$globAuth->getrights( $user, $publicationId, $issueId, $categoryId, $objectType );
-				$hasRights = $globAuth->checkright( 'M', 
-						$publicationId, $issueId, $categoryId, 
-						$objectType, $statusId, $placedObjectId, 
-						$invokedObject->BasicMetaData->ContentSource, 
-						$invokedObject->BasicMetaData->DocumentID );
+				$globAuth->getRights(
+					$user,
+					$invokedObject->BasicMetaData->Publication->Id,
+					$issueId,
+					$invokedObject->BasicMetaData->Category->Id,
+					$invokedObject->BasicMetaData->Type );
+				$hasRights = $globAuth->checkright( 'M',
+					$invokedObject->BasicMetaData->Publication->Id,
+					$issueId,
+					$invokedObject->BasicMetaData->Category->Id,
+					$invokedObject->BasicMetaData->Type,
+					$invokedObject->WorkflowMetaData->State->Id,
+					$placedObjectId,
+					$invokedObject->BasicMetaData->ContentSource,
+					$invokedObject->BasicMetaData->DocumentID,
+					$invokedObject->WorkflowMetaData->RouteTo );
 			}
 
 			foreach( array_keys($elementIds) as $elementId ) {
-				
+
 				// Lookup the element label.
 				$elementName = '';
 				foreach( $articleElements as $articleElement ) {
@@ -550,8 +550,8 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 				if( !$elementName ) { // should not happen, but let's fall back to the id
 					$elementName = $elementId;
 				}
-				
-				
+
+
 				// Compose report with warning or error for the multi-place. 
 				$report = BizErrorReport::startReport();
 				$report->Type = 'Object';
@@ -559,7 +559,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 				$report->Role = 'PlaceDossier';
 				$errorReportEntry = new ErrorReportEntry();
 				if( $hasRights ) {
-					$errorReportEntry->Message = BizResources::localize('APW_WARN_TEXTCOMP_ALREADY_PLACED', 
+					$errorReportEntry->Message = BizResources::localize('APW_WARN_TEXTCOMP_ALREADY_PLACED',
 						true, array( $elementName, $invokedObject->BasicMetaData->Name ) );
 					$errorReportEntry->MessageLevel = 'Warning';
 				} else {
@@ -570,7 +570,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 				}
 				$errorReportEntry->Details = '';
 				$errorReportEntry->Entities = array();
-			
+
 				$entity = new ErrorReportEntity();
 				$entity->Type = 'Object';
 				$entity->ID = $placedObjectId;
@@ -590,13 +590,13 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 						}
 					}
 				}
-			}				
+			}
 		}
 	}
-	
+
 	/**
 	 * Compose an error report about the fact that we could not make a match.
-	 * This is important to inform user since the action did not result into 
+	 * This is important to inform user since the action did not result into
 	 * any automated operation. So nothing happened.
 	 *
 	 * @param integer $layoutId
@@ -615,12 +615,12 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 		BizErrorReport::reportError( $errorReportEntry );
 		BizErrorReport::stopReport();
 	}
-	
+
 	/**
 	 * Match the frame labels with the IdArt frame labels (Placement->Element).
 	 * For EACH frame of the selected InDesignArticle, we have to tell the ID script
 	 * what to do; either place an element, or remove the existing placement.
-	 * When child is an Image, only make match when IdArt has one graphic frame 
+	 * When child is an Image, only make match when IdArt has one graphic frame
 	 * and exactly one image was found in dossier.
 	 *
 	 * When no match could be made at all, an EMPTY array is returned to leave the whole
@@ -642,7 +642,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 				if( $iaPlacement->FrameType == 'text' ) {
 					if( $articleElements ) foreach( $articleElements as $element ) {
 						if( $element->Name == $iaPlacement->Element ) {
-							$operations[] = self::composePlaceArticleElementOperation( $editionId, 
+							$operations[] = self::composePlaceArticleElementOperation( $editionId,
 								$element->ObjectId, $element->ID, $iaPlacement );
 							$found = true;
 							$anyFound = true;
@@ -664,7 +664,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 		}
 		return $anyFound ? $operations : array();
 	}
-	
+
 	/**
 	 * Composes a PlaceImage Object Operation.
 	 *
@@ -690,8 +690,8 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			'ScaleY'    => floatval( $iaPlacement->ScaleY )
 		));
 		return $operation;
- 	}
-	
+	}
+
 	/**
 	 * Composes a PlaceArticleElement Object Operation.
 	 *
@@ -716,7 +716,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 		));
 		return $operation;
 	}
-	
+
 	/**
 	 * Composes a ClearFrameContent Object Operation.
 	 *

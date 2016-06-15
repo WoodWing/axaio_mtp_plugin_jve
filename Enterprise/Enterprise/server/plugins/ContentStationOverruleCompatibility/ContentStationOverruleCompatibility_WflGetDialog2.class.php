@@ -243,7 +243,7 @@ class ContentStationOverruleCompatibility_WflGetDialog2 extends WflGetDialog2_En
 					require_once BASEDIR.'/server/authorizationmodule.php';
 					$globAuth = new authorizationmodule( );
 				}
-				$globAuth->getrights( BizSession::getShortUserName() );
+				$globAuth->getRights( BizSession::getShortUserName() );
 				require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
 				$issueRow = DBIssue::getIssue( $issueId );
 				$ourIssue = BizPublication::getIssueInfo( $globAuth->getCachedRights(), $issueRow );

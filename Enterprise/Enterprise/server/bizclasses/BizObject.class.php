@@ -127,7 +127,7 @@ class BizObject
 
 	/**
 	 * Adds a new object to Enterprise.
-	 * 
+	 *
 	 * @param Object $object New object with properties to be stored into the system.
 	 * @param string $user User doing the request.
 	 * @param bool $lock Object must be locked after it is created.
@@ -183,28 +183,28 @@ class BizObject
 			foreach( $object->Relations as $relation ) {
 				if( $relation->Parent == -1 && $relation->Type == 'Contained' ) {
 					self::nameValidation(
-							$user,
-							$object->MetaData,
-							null,
-							$object->MetaData->BasicMetaData->Name,
-							'Dossier',
-							$object->Targets,
-							null,
-							false );
+						$user,
+						$object->MetaData,
+						null,
+						$object->MetaData->BasicMetaData->Name,
+						'Dossier',
+						$object->Targets,
+						null,
+						false );
 				}
 			}
 		}
 
 		if ( $object->Targets ) { // Layouts/Dossiers have object targets and their names can be checked immediately.
 			self::nameValidation(
-					$user,
-					$object->MetaData,
-					null,
-					$object->MetaData->BasicMetaData->Name,
-					$object->MetaData->BasicMetaData->Type,
-					$object->Targets,
-					null,
-					false );
+				$user,
+				$object->MetaData,
+				null,
+				$object->MetaData->BasicMetaData->Name,
+				$object->MetaData->BasicMetaData->Type,
+				$object->Targets,
+				null,
+				false );
 		}
 
 		// Validate and fill in name and meta data
@@ -221,18 +221,16 @@ class BizObject
 		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 		$status = BizAdmStatus::getStatusWithId( $object->MetaData->WorkflowMetaData->State->Id );
 
-		if ( $status->Id != -1 ) { // Object is created in Personal State. See EN-86861.
-			// Check authorization
-			$rights = 'W'; // check 'Write' access (W)
-			if ( $arr['type'] == 'Dossier' || $arr['type'] == 'DossierTemplate' ) {
-				$rights .= 'd'; // check the 'Create Dossier' access (d) (BZ#17051)
-			} else if ( $arr['type'] == 'Task' ) {
-				$rights .= 't'; // check 'Create Task' access (t) (BZ#17119)
-			}
-			BizAccess::checkRightsForMetaDataAndTargets(
-				$user, $rights, BizAccess::THROW_ON_DENIED,
-				$object->MetaData, $object->Targets ); // BZ#17119
+		// Check authorization
+		$rights = 'W'; // check 'Write' access (W)
+		if( $arr['type'] == 'Dossier' || $arr['type'] == 'DossierTemplate' ) {
+			$rights .= 'd'; // check the 'Create Dossier' access (d) (BZ#17051)
+		} else if( $arr['type'] == 'Task' ) {
+			$rights .= 't'; // check 'Create Task' access (t) (BZ#17119)
 		}
+		BizAccess::checkRightsForMetaDataAndTargets(
+			$user, $rights, BizAccess::THROW_ON_DENIED,
+			$object->MetaData, $object->Targets ); // BZ#17119
 
 		// If possible (depends on DB) we get id for new object beforehand:
 		$dbDriver = DBDriverFactory::gen();
@@ -260,14 +258,14 @@ class BizObject
 			$arr['creator'] = $userRow['user']; // should always be the username
 		}
 
-        if( !$isShadowObject || !isset($object->MetaData->WorkflowMetaData->Created) ) {
-            $arr['created'] = $now;
-            $object->MetaData->WorkflowMetaData->Created = $now;
-        } else {
-            $created = date('Y-m-d\TH:i:s', strtotime($object->MetaData->WorkflowMetaData->Created));
-            $arr['created'] = $created;
-            $object->MetaData->WorkflowMetaData->Created = $created;
-        }
+		if( !$isShadowObject || !isset($object->MetaData->WorkflowMetaData->Created) ) {
+			$arr['created'] = $now;
+			$object->MetaData->WorkflowMetaData->Created = $now;
+		} else {
+			$created = date('Y-m-d\TH:i:s', strtotime($object->MetaData->WorkflowMetaData->Created));
+			$arr['created'] = $created;
+			$object->MetaData->WorkflowMetaData->Created = $created;
+		}
 
 		// If this is a shadow object and the modifier is already filled in use this value
 		if ( !$isShadowObject || !isset($object->MetaData->WorkflowMetaData->Modifier) ) {
@@ -301,9 +299,9 @@ class BizObject
 		}
 		$arr['version'] = $object->MetaData->WorkflowMetaData->Version;
 
-        if( isset($arr['id']) ) { // EN-18998 - Unset 'id' identity field, to avoid new object insertion failed
-        	unset($arr['id']);
-        }
+		if( isset($arr['id']) ) { // EN-18998 - Unset 'id' identity field, to avoid new object insertion failed
+			unset($arr['id']);
+		}
 
 		// Create object record in DB:
 		$sth = DBObject::createObject( $storename, $id, $arr['modifier'], $arr['created'], $arr, $arr['modified'] );
@@ -393,7 +391,7 @@ class BizObject
 				*/
 			}
 		}
-		
+
 		// Replace the InCopy text component GUIDs in the native file and in the Object's Elements.
 		if ( $replaceGuid == true && ( $arr['type'] == 'Article' || $arr['type'] = 'ArticleTemplate' )) {
 			self::replaceGuidOfArticle( $object );
@@ -466,7 +464,7 @@ class BizObject
 		if( is_null( $requestInfo ) ) {
 			$requestInfo = self::getDefaultRequestInfos();
 		}
-		$object = self::getObject( $object->MetaData->BasicMetaData->ID, $user, false, 
+		$object = self::getObject( $object->MetaData->BasicMetaData->ID, $user, false,
 			$rendition,	$requestInfo );
 
 		if( defined( 'HTMLLINKFILES' ) && HTMLLINKFILES == true ) {
@@ -504,7 +502,7 @@ class BizObject
 
 		return $object;
 	}
-	
+
 	/**
 	 * Creates a new object based on a given object template. Currently layouts are supported only.
 	 *
@@ -519,7 +517,7 @@ class BizObject
 	 * @throws BizException on fatal error.
 	 */
 	public static function instantiateTemplate($templateId, $user, /** @noinspection PhpLanguageLevelInspection */
-											   Object $object, $lock, $rendition, $requestInfo )
+	                                           Object $object, $lock, $rendition, $requestInfo )
 	{
 		// Retrieve the template object from DB.
 		static $templates = null;
@@ -528,7 +526,7 @@ class BizObject
 		} else {
 			$tplRequestInfo = array( 'MetaData', 'PagesInfo', 'Relations', 'Targets', 'InDesignArticles', 'Placements', 'ObjectOperations' ); // stuff to copy
 			$template = self::getObject( $templateId, $user, false, 'native', $tplRequestInfo ); // $lock=false
-			
+
 			// The above is to get the native, but getObjects does not return page previews/thumbs at once,
 			// so when caller is requesting for that, we have to grab the page renditions separately.
 			if( $rendition == 'preview' || $rendition == 'thumb' ) {
@@ -537,7 +535,7 @@ class BizObject
 			}
 			$templates[$templateId] = $template; // session cache
 		}
-		
+
 		// Validate the given parameters.
 		if( $template->MetaData->BasicMetaData->Type != 'LayoutTemplate' &&
 			$template->MetaData->BasicMetaData->Type != 'LayoutModuleTemplate' ) {
@@ -574,7 +572,7 @@ class BizObject
 				$placedRelations[] = $relation;
 			}
 		}
-		
+
 		// Inherit some from the template, and some from the given object.
 		$newObject = $template;
 		$newObject->MetaData->BasicMetaData->ID = null;
@@ -590,10 +588,10 @@ class BizObject
 		$newObject->MessageList  = $object->MessageList;
 		$newObject->ObjectLabels = $object->ObjectLabels;
 		$newObject->Operations   = $object->Operations;
-		
+
 		return self::createObject( $newObject, $user, $lock, null, false, $rendition, $requestInfo );
 	}
-	
+
 	/**
 	 * Provides the full set of the RequestInfo param, used for Create/Save/GetObjects services.
 	 *
@@ -628,9 +626,9 @@ class BizObject
 		// Next, check if we have an alien object (from content source, not in our database)
 		require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
 		if( BizContentSource::isAlienObject( $id ) ) {
-            // Check if all users in the metadata are known within the system. If not, create them and import remaining
+			// Check if all users in the metadata are known within the system. If not, create them and import remaining
 			// information when such a user logs in through LDAP when enabled.
-            self::getOrCreateResolvedUsers($id, $object->MetaData);
+			self::getOrCreateResolvedUsers($id, $object->MetaData);
 			// Check if we already have a shadow object for this alien. If so, change the id
 			// to the shadow id
 			$shadowID = BizContentSource::getShadowObjectID($id);
@@ -669,7 +667,7 @@ class BizObject
 		if( !$object->MetaData->BasicMetaData->Category || !$object->MetaData->BasicMetaData->Category->Id ) {
 			$object->MetaData->BasicMetaData->Category = new Category( $curSect );
 		}
-		
+
 		// Determine the current- and new targets and issue.
 		require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
 		$curTargets = DBTarget::getTargetsByObjectId( $id );
@@ -702,12 +700,12 @@ class BizObject
 		// First, authorization check against current values:
 		// - If status changes, we need to see if that is allowed.
 		// - When in personal status (-1), status change is always allowed.
-		if( $curState != $state && $curState != -1 ) {
-			$hasRightF = BizAccess::checkRightsForObjectRow( 
-							$user, 'F', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId );
-			$hasRightC = BizAccess::checkRightsForObjectRow( 
-							$user, 'C', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId );
-			if( $state == DBWorkflow::nextState( $curState ) ) {
+		if( $curState != $state ) {
+			$hasRightF = BizAccess::checkRightsForObjectRow(
+				$user, 'F', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId );
+			$hasRightC = BizAccess::checkRightsForObjectRow(
+				$user, 'C', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId );
+			if( ( $state != -1 && $curState != -1 ) && $state == DBWorkflow::nextState( $curState ) ) {
 				// Check rights: Change && Forward
 				if( !$hasRightF && !$hasRightC ) {
 					throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(F)" );
@@ -719,12 +717,9 @@ class BizObject
 
 		// Next, authorization check against new values:
 		// - Check if we have Write access to the new status.
-		// - When changing into personal status (-1) it's always Ok.
-		if( $state != -1 ) {
-			BizAccess::checkRightsForParams( $user, 'W', BizAccess::THROW_ON_DENIED, 
-				$newRow['publication'], $newIssueId, $newRow['section'], $newRow['type'], $state,
-				$currRow['id'], $currRow['contentsource'], $currRow['documentid'] );
-		}
+		BizAccess::checkRightsForParams( $user, 'W', BizAccess::THROW_ON_DENIED,
+			$newRow['publication'], $newIssueId, $newRow['section'], $newRow['type'], $state,
+			$currRow['id'], $currRow['contentsource'], $currRow['documentid'], $currRow['routeto'] );
 
 		// validate Publish Form and Dossier
 		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
@@ -967,7 +962,7 @@ class BizObject
 	 * @param array $areas
 	 * @param string $editionId Optional. Used to get edition/device specific file renditions.
 	 * @param boolean $callGetShadowObject Whether or not to call getShadowObject.
-     * @param array $supportedContentSources A list of the content sources that are understood by a client.
+	 * @param array $supportedContentSources A list of the content sources that are understood by a client.
 	 * @return Object
 	 * @throws BizException Throws BizException when error occurs during object retrieve.
 	 */
@@ -1141,17 +1136,17 @@ class BizObject
 			if( in_array('Relations', $requestInfo) ) {
 				require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 				// BZ#14481 only attach geo info when server feature "UseXMLGeometry" is on, object type is Article and rendition != none (BZ#8657)
-				$attachGeo = 
-					$objectProps['Type'] == 'Article' && 
-					BizSettings::isFeatureEnabled('UseXMLGeometry') && 
+				$attachGeo =
+					$objectProps['Type'] == 'Article' &&
+					BizSettings::isFeatureEnabled('UseXMLGeometry') &&
 					$rendition != 'none';
-				$relations = BizRelation::getObjectRelations( 
-					$id, 
-					$attachGeo, 
-					in_array( 'Targets', $requestInfo ), 
+				$relations = BizRelation::getObjectRelations(
+					$id,
+					$attachGeo,
+					in_array( 'Targets', $requestInfo ),
 					null, // use $id in both ways to resolve relations (as parent and child)
 					false, // get from workflow and trashcan
-					in_array( 'ObjectLabels', $requestInfo ), 
+					in_array( 'ObjectLabels', $requestInfo ),
 					null // get all relation types
 				);
 			} else {
@@ -1240,7 +1235,7 @@ class BizObject
 				try {
 					require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
 					BizContentSource::getShadowObject( trim($objectProps['ContentSource']),
-						trim($objectProps['DocumentID']), $object, $objectProps, $lock, 
+						trim($objectProps['DocumentID']), $object, $objectProps, $lock,
 						$rendition, $requestInfo, $supportedContentSources, $haveVersion );
 				} catch( BizException $e ) {
 					// Let's be robust here; When the Content Source connector has been unplugged, an exception is thrown.
@@ -1263,7 +1258,7 @@ class BizObject
 				$attachment = null;
 				// BZ#13297 don't get files for native and placement renditions when haveversion is same as object version
 				if ($rendition && $rendition != 'none'
-					&& ! ( ($rendition == 'native' || $rendition == 'placement') 
+					&& ! ( ($rendition == 'native' || $rendition == 'placement')
 						&& $haveVersion === $object->MetaData->WorkflowMetaData->Version ) ) {
 					require_once BASEDIR.'/server/bizclasses/BizStorage.php';
 					if( $editionId ) { // edition/device specific rendition
@@ -1344,7 +1339,7 @@ class BizObject
 		}
 
 		if ( $relations ) foreach ( $relations as $relation ) {
-			if ( $relation->Type == 'InstanceOf' ) {	
+			if ( $relation->Type == 'InstanceOf' ) {
 				$templateId = $relation->Parent;
 				$targets = BizTarget::getTargets('', $templateId);
 				if ( $targets ) foreach ( $targets as $target ) {
@@ -1560,7 +1555,7 @@ class BizObject
 		// Key props, if not set use the current values, needed for auth check etc.
 		if( !isset($meta->BasicMetaData->ID)){ $meta->BasicMetaData->ID = $id; }
 		if( !isset($meta->BasicMetaData->Name)){ $meta->BasicMetaData->Name = $currRow['name']; }
-		if( !isset($meta->BasicMetaData->Type)){ $meta->BasicMetaData->Type = $curType; } 
+		if( !isset($meta->BasicMetaData->Type)){ $meta->BasicMetaData->Type = $curType; }
 		if( !isset($meta->BasicMetaData->Publication)){	$meta->BasicMetaData->Publication = new Publication( $curPub ); }
 		if( !isset($meta->BasicMetaData->Category)){ $meta->BasicMetaData->Category = new Category( $curSection ); }
 		if( !$meta->WorkflowMetaData ){ $meta->WorkflowMetaData = new WorkflowMetaData(); }
@@ -1579,12 +1574,12 @@ class BizObject
 		$categoryId = $newRow['section'];
 
 		// If state changes, we need to check if we are allowed to move out of old status
-		if( $curState != $state && $state != -1 && $curState != -1 ) {
-			$hasRightF = BizAccess::checkRightsForObjectRow( 
-							$user, 'F', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId );
-			$hasRightC = BizAccess::checkRightsForObjectRow( 
-							$user, 'C', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId );
-			if( $state == DBWorkflow::nextState( $curState ) ) {
+		if( $curState != $state ) {
+			$hasRightF = BizAccess::checkRightsForObjectRow(
+				$user, 'F', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId );
+			$hasRightC = BizAccess::checkRightsForObjectRow(
+				$user, 'C', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId );
+			if( ( $curState != -1 && $state != -1 ) && $state == DBWorkflow::nextState( $curState ) ) {
 				// Check rights: Change && Forward
 				if( !$hasRightF && !$hasRightC ) {
 					throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(F)" );
@@ -1594,24 +1589,19 @@ class BizObject
 			}
 		}
 		// Next check if we are allowed to modify the object in its existing place (open for edit access)
-		// for personal status we can forget this
 		// When there is no E-access it may still be that we have W-access (BZ#5519). In that case don't fail.
-		if( $curState != -1 ) {
-			if( !BizAccess::checkRightsForObjectRow( 
-						$user, 'E', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId ) ) {
-				if( !BizAccess::checkRightsForObjectRow( 
-						$user, 'W', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId ) ) {
-					throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(E)" );
-				}
+		if( !BizAccess::checkRightsForObjectRow(
+			$user, 'E', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId ) ) {
+			if( !BizAccess::checkRightsForObjectRow(
+				$user, 'W', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId ) ) {
+				throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(E)" );
 			}
 		}
 
-		// Next, check if we have access to destination. For personal status (-1) we can forget this)
-		if( $state != -1 ) {
-			BizAccess::checkRightsForParams( $user, 'W', BizAccess::THROW_ON_DENIED,
-					$newRow['publication'], $newIssueId, $newRow['section'], $newRow['type'], $newRow['state'],
-					$currRow['id'], $currRow['contentsource'], $currRow['documentid'] );
-		}
+		// Next, check if we have access to destination.
+		BizAccess::checkRightsForParams( $user, 'W', BizAccess::THROW_ON_DENIED,
+			$newRow['publication'], $newIssueId, $newRow['section'], $newRow['type'], $newRow['state'],
+			$currRow['id'], $currRow['contentsource'], $currRow['documentid'], $currRow['routeto'] );
 
 		// Check if user is allowed to change the object's location (ChangePIS)
 		if($meta->BasicMetaData->Publication->Id != $curPub ||
@@ -2329,7 +2319,7 @@ class BizObject
 					$latestStateIdForDeadline = $newStateId ? $newStateId : $originalStateId;
 					$latestCatIdForDeadline = $newCategoryId ? $newCategoryId : $originalCategoryId;
 					$deadline = ( isset( $objectProperties['standard']['Deadline'] ) ) ?
-												$objectProperties['standard']['Deadline'] : null;
+						$objectProperties['standard']['Deadline'] : null;
 					self::handleDeadline( $id, $publicationId, $targets[$id], $objectType, $originalStateId,
 						$originalCategoryId, $latestStateIdForDeadline, $latestCatIdForDeadline, $deadline );
 
@@ -2451,8 +2441,8 @@ class BizObject
 	 * @return bool true on success, or false on failure.
 	 */
 	private static function checkAccessRightsOnStateAndCategory( &$invokedObjects, $objectId, $newStateId, $statuses,
-											$globAuth, $user, $newCategoryId, $categories,
-											$publicationId, $issueId, $objectType )
+	                                                             $globAuth, $user, $newCategoryId, $categories,
+	                                                             $publicationId, $issueId, $objectType )
 	{
 		$retVal = true;
 
@@ -2463,6 +2453,7 @@ class BizObject
 			$currentCategory = $invokedObjects[$objectId]->BasicMetaData->Category->Id;
 			$contentSouce = $invokedObjects[$objectId]->BasicMetaData->ContentSource;
 			$documentId = $invokedObjects[$objectId]->BasicMetaData->DocumentID;
+			$routeTo = $invokedObjects[$objectId]->WorkflowMetaData->RouteTo;
 
 			if ( !is_null( $newStateId ) ) {
 				// Double check that the new status is a valid status for this publication / overrule issue.
@@ -2482,33 +2473,35 @@ class BizObject
 
 				// On a detected state change, check if we may adjust the Object property. We ignore personal status.
 				// What to do if the new state has an automatic routing settings on the state?
-				if ( $newStateId != $currentState && $newStateId != -1 && $currentState != -1) {
+				if ( $newStateId != $currentState ) {
 					// Retrieve the latest rights for the object to check the rights for this object.
-					$globAuth->getrights( $user, $publicationId, $issueId, $currentCategory, $objectType );
-					$currentStateObject = $statuses[$currentState];
+					$globAuth->getRights( $user, $publicationId, $issueId, $currentCategory, $objectType );
 					$changeStatusForward = $globAuth->checkright( 'F', // 'Change_Status_Forward'
 						$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-						$objectId, $contentSouce, $documentId );
+						$objectId, $contentSouce, $documentId, $routeTo );
 					$changeStatus = $globAuth->checkright( 'C',  // 'Change_Status'
 						$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-						$objectId, $contentSouce, $documentId );
+						$objectId, $contentSouce, $documentId, $routeTo );
 
 					// If the next status is requested and we cannot move the status forward we need to report an
 					// error. Change Status allows any transition while change forward only allows moving forward to
-					// the next status.
-					if ( $newStateId == $currentStateObject->NextStatusId ) {
-						if ( !$changeStatusForward && !$changeStatus ) {
-							try {
-								throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
-									BizResources::localize( 'ERR_AUTHORIZATION' ) . PHP_EOL . 'id=' .$objectId
-									. ' (F)' );
-							} catch( BizException $e ) {
-								self::reportError( 'Authorization', $objectId, null, $e );
-							}
+					// the next status. This can be skipped if Personal state is involved.
+					if ( $newStateId != -1 && $currentState != -1  ) {
+						$currentStateObject = $statuses[$currentState];
+						if (  $newStateId == $currentStateObject->NextStatusId) {
+							if ( !$changeStatusForward && !$changeStatus ) {
+								try {
+									throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
+										BizResources::localize( 'ERR_AUTHORIZATION' ) . PHP_EOL . 'id=' . $objectId
+										. ' (F)' );
+								} catch ( BizException $e ) {
+									self::reportError( 'Authorization', $objectId, null, $e );
+								}
 
-							unset( $invokedObjects[$objectId] );
-							$retVal = false;
-							break;
+								unset($invokedObjects[$objectId]);
+								$retVal = false;
+								break;
+							}
 						}
 					} elseif ( !$changeStatus ) {
 						try {
@@ -2524,15 +2517,13 @@ class BizObject
 						break;
 					}
 
-					// Check if we are allowed to change the source Object, but only if it is not in personal
-					// status. We check Write access (W) and open/edit rights (E).
-					if( $currentState != -1
-						&& !$globAuth->checkright( 'E', 
-										$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-										$objectId, $contentSouce, $documentId )
+					// Check if we are allowed to change the source Object. We check Write access (W) and open/edit rights (E).
+					if( !$globAuth->checkright( 'E',
+							$publicationId, $issueId, $currentCategory, $objectType, $currentState,
+							$objectId, $contentSouce, $documentId, $routeTo  )
 						&& !$globAuth->checkright( 'W',
-										$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-										$objectId, $contentSouce, $documentId ) ) {
+							$publicationId, $issueId, $currentCategory, $objectType, $currentState,
+							$objectId, $contentSouce, $documentId, $routeTo ) ) {
 						try {
 							throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
 								BizResources::localize( 'ERR_AUTHORIZATION' ) . PHP_EOL . 'id=' .$objectId
@@ -2546,13 +2537,11 @@ class BizObject
 						break;
 					}
 
-					// Check if there is write access to the destination Object (W), again disregarding the
-					// personal state.
-					$globAuth->getrights($user, $publicationId, $issueId, $newCategoryId, $objectType);
-					if( $newStateId != -1
-						&& !$globAuth->checkright( 'W', 
-										$publicationId, $issueId, $newCategoryId, $objectType, $newStateId,
-										$objectId, $contentSouce, $documentId )
+					// Check if there is write access to the destination Object (W).
+					$globAuth->getRights($user, $publicationId, $issueId, $newCategoryId, $objectType);
+					if(  !$globAuth->checkright( 'W',
+						$publicationId, $issueId, $newCategoryId, $objectType, $newStateId,
+						$objectId, $contentSouce, $documentId, $routeTo )
 					){
 						try {
 							throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
@@ -2588,10 +2577,10 @@ class BizObject
 				// Check change Brand / Issue / Category.
 				if ( $newCategoryId != $currentCategory ) {
 					// Check if user is allowed to change the object's location (ChangePIS)
-					$globAuth->getrights($user, $publicationId, $issueId, $currentCategory, $objectType);
-					if (!$globAuth->checkright( 'P', 
-										$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-										$objectId, $contentSouce, $documentId ) ) {
+					$globAuth->getRights($user, $publicationId, $issueId, $currentCategory, $objectType);
+					if (!$globAuth->checkright( 'P',
+						$publicationId, $issueId, $currentCategory, $objectType, $currentState,
+						$objectId, $contentSouce, $documentId, $routeTo ) ) {
 						try {
 							throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
 								BizResources::localize( 'ERR_AUTHORIZATION' ) . PHP_EOL . 'id=' .$objectId
@@ -2878,18 +2867,16 @@ class BizObject
 
 		$objformat = $objRow['format'];
 
-		if ( $meta->WorkflowMetaData->State->Id != -1 ) { // Object is created in Personal State. See EN-86861.
-			// Check authorizations on destination
-			$rights = 'W'; // check 'Write' access (W)
-			if ( $arr['type'] == 'Dossier' || $arr['type'] == 'DossierTemplate' ) {
-				$rights .= 'd'; // check the 'Create Dossier' access (d) (BZ#17051)
-			} else if ( $arr['type'] == 'Task' ) {
-				$rights .= 't'; // check 'Create Task' access (t) (BZ#17119)
-			}
-			BizAccess::checkRightsForMetaDataAndTargets(
-				$user, $rights, BizAccess::THROW_ON_DENIED,
-				$meta, $targets ); // BZ#17119
+		// Check authorizations on destination
+		$rights = 'W'; // check 'Write' access (W)
+		if( $arr['type'] == 'Dossier' || $arr['type'] == 'DossierTemplate' ) {
+			$rights .= 'd'; // check the 'Create Dossier' access (d) (BZ#17051)
+		} else if( $arr['type'] == 'Task' ) {
+			$rights .= 't'; // check 'Create Task' access (t) (BZ#17119)
 		}
+		BizAccess::checkRightsForMetaDataAndTargets(
+			$user, $rights, BizAccess::THROW_ON_DENIED,
+			$meta, $targets ); // BZ#17119
 
 		// If possible (depends on DB) we get id for new object beforehand:
 		$dbDriver = DBDriverFactory::gen();
@@ -2948,7 +2935,7 @@ class BizObject
 		// Determine if it is normal brand or overruleIssue.
 		$overruleIssueId = 0;
 		if( count( $issueIdsDL ) == 1 ) { // When there are more than 1 issue targeted to an Object,
-										  // it's definitely not an overruleIssue, so don't need to check.
+			// it's definitely not an overruleIssue, so don't need to check.
 			require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
 			$overruleIssueId = DBIssue::isOverruleIssue( $issueIdsDL[0] ) ? $issueIdsDL[0] : 0;
 		}
@@ -3208,7 +3195,7 @@ class BizObject
 
 			BizRelation::createObjectRelations( $relations, $user, $id, false );
 		}
-		
+
 		// Copy also all relations to image-objects
 
 		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
@@ -3232,7 +3219,7 @@ class BizObject
 			// complete the copy (by saving alle elements for the destination object)
 			DBElement::saveElements($id, $elements );
 		}
-		
+
 		// Copy the InDesign Articles (and their placements) set for layout objects.
 		require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
 		$idArticles = DBInDesignArticle::getInDesignArticles( $srcid );
@@ -3244,7 +3231,7 @@ class BizObject
 		foreach( $placements as $placement ) {
 			DBPlacements::insertPlacement( $id, 0, 'Placed', $placement );
 		}
-		
+
 		// Delete the Object Operations set for layout objects.
 		// Those are about to get processed on a future version, while the user
 		// makes a copy of the current version. Therefore they should be removed.
@@ -3434,19 +3421,19 @@ class BizObject
 		$id 		= $meta->BasicMetaData->ID;
 		$type 		= $meta->BasicMetaData->Type;
 		$name		= $meta->BasicMetaData->Name;
-		
+
 		$meta->BasicMetaData->Name = self::nameValidation(
-										$user,
-										$meta,
-										$id,
-										$name,
-										$type,
-										$targets,
-										$relations,
-										$restore );
+			$user,
+			$meta,
+			$id,
+			$name,
+			$type,
+			$targets,
+			$relations,
+			$restore );
 		// Give the connectors the opportunity
 		$connRetVals = array(); // not used
-		BizServerPlugin::runDefaultConnectors( 
+		BizServerPlugin::runDefaultConnectors(
 			'NameValidation',
 			null,
 			'validateMetaDataAndTargets',
@@ -3491,7 +3478,7 @@ class BizObject
 	}
 
 	/**
-	 * Validates the name of an object. 
+	 * Validates the name of an object.
 	 * The name of a dossier, layout or layout module must be unique within the issues it is used.
 	 * If the user enters a name an exception is thrown if it is not unique. During restoring of an object from the
 	 * Trash Can the system can provide a unique name if the original name is use.
@@ -3499,7 +3486,7 @@ class BizObject
 	 * - If an object is added to a dossier/task check the names of other objects in the dossier of the same type. If
 	 * 	there is an object with same name make the name of the added object unique. Except when:
 	 *  	- The added object is already contained by another dossier/task.
-	 * 		- A plug-in has indicated that the autonaming must not be applied. 
+	 * 		- A plug-in has indicated that the autonaming must not be applied.
 	 * 		- Publishforms are named like the dossier they belong. Two publishforms within the same dossier have the
 	 * 			same name.
 	 * @staticvar array $uniqueIssueTypes Object types that must have unique names within their issues.
@@ -3595,7 +3582,7 @@ class BizObject
 		}
 
 		return $proposedName;
-	}	
+	}
 
 	/**
 	 * Validates changed object meta data.
@@ -3634,7 +3621,7 @@ class BizObject
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		return DBObject::objectNameExists( $issueIds, $name, $type, $id );
 	}
-	
+
 	/**
 	 * Locks objects in the DB. Throws S1021 when object was locked already.
 	 *
@@ -3673,11 +3660,11 @@ class BizObject
 		}
 
 		// Make fast lookup map for locked objects: keys = object ids, values = true.
-		if( $lockedObjectIds ) { 
+		if( $lockedObjectIds ) {
 			$trueValues = array_fill( 0, count($lockedObjectIds), true );
 			$lockedObjectIds = array_combine( $lockedObjectIds, $trueValues );
 		}
-		
+
 		// Error when object not found or when current version mismatches with caller's 'have version'.
 		foreach( $haveVersions as $haveVersion ) {
 			try {
@@ -3697,13 +3684,13 @@ class BizObject
 				self::reportError( 'Object', $haveVersion->ID, null, $e );
 			}
 		}
-		
+
 		// Resolve the full name of the acting user for whom we're creating the locks.
 		// For all invoked object ids, N-cast the new LockedBy value and notify event plugins.
 		if( $lockedObjectIds ) {
 			require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 			$lockedBy = DBUser::getFullName( $user );
-			
+
 			require_once BASEDIR.'/server/smartevent.php';
 			$eventProps = array( 'LockedBy' => $lockedBy );
 			new smartevent_setPropertiesForMultipleObjects( $lockedObjectIds, $eventProps );
@@ -3717,7 +3704,7 @@ class BizObject
 			$metaDataValues[0]->PropertyValues[0]->Value = $lockedBy;
 			BizEnterpriseEvent::createMultiObjectEvent( $lockedObjectIds, $metaDataValues );
 		}
-		
+
 		// Return the ids of those objects that we locked by us and for which the caller 
 		// has the latest version.
 		return array_keys( $lockedObjectIds );
@@ -3737,7 +3724,7 @@ class BizObject
 	}
 
 	private static function validateForSave($user, /** @noinspection PhpLanguageLevelInspection */
-											Object $object, $currRow )
+	                                        Object $object, $currRow )
 	{
 		// Enrich object MetaData with any embedded metadata from file
 		require_once BASEDIR.'/server/bizclasses/BizMetaDataPreview.class.php';
@@ -3875,7 +3862,7 @@ class BizObject
 	}
 
 	private static function saveExtended($id, /** @noinspection PhpLanguageLevelInspection */
-										 Object $object, $user, $create )
+	                                     Object $object, $user, $create )
 	{
 		// Save object's elements:
 		$objectelements = array();
@@ -3895,7 +3882,7 @@ class BizObject
 			require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
 			DBInDesignArticle::deleteInDesignArticles( $id );
 		}
-		
+
 		// Delete all InDesignArticle placements (v9.7)
 		// Needs to be done BEFORE saveObjectPlacedRelations() since that is ALSO creating
 		// InDesignArticle placements (the ones that are also relational placements).
@@ -3903,10 +3890,10 @@ class BizObject
 			require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 			DBPlacements::deletePlacements( $id, 0, 'Placed' );
 		}
-		
+
 		// Create / Update object relations
 		self::saveObjectPlacedRelations( $user, $id, $object->Relations, $create );
-		
+
 		// Save edition/device specific renditions (types)
 		require_once BASEDIR.'/server/dbclasses/DBObjectRenditions.class.php';
 		$version = $object->MetaData->WorkflowMetaData->Version;
@@ -3935,7 +3922,7 @@ class BizObject
 
 		// Note that the DB updates below are guarded by BizObject::createSemaphoreForSaveLayout()
 		// to avoid SaveObjects being executed in the same time as PreviewArticle(s)AtWorkspace (EN-86722).
-		
+
 		// Save the Indesign Articles for the layout object (v9.7).
 		if( !is_null($object->InDesignArticles) ) {
 			require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
@@ -3948,7 +3935,7 @@ class BizObject
 				DBPlacements::insertPlacement( $id, 0, 'Placed', $placement );
 			}
 		}
-		
+
 		// Save the Object Operations for the layout object (9.7).
 		// Typically used for instantiate template service, internally calling createObject().
 		require_once BASEDIR.'/server/bizclasses/BizObjectOperation.class.php';
@@ -3959,12 +3946,12 @@ class BizObject
 			BizObjectOperation::createOperations( $user, $id, $version, $object->Operations );
 		}
 	}
-	
+
 	/**
 	 * Stores the given object relations (of type Placed) in the DB.
 	 *
-	 * Assumed is that the give set of relations is complete; 
-	 * All relations are removed and created in the DB. 
+	 * Assumed is that the give set of relations is complete;
+	 * All relations are removed and created in the DB.
 	 *
 	 * @param string $user
 	 * @param integer $id
@@ -3993,7 +3980,7 @@ class BizObject
 				}
 			}
 		}
-		
+
 		// For Save (!create) we first delete all placed relations
 		// If the current relations is null do not delete placed relations (BZ #17159)
 		if( !$create && !is_null($relations) ) {
@@ -4289,45 +4276,45 @@ class BizObject
 		switch ($typename)
 		{
 			case 'Article':
-				{$result = 'Obj_Article.gif';
+			{$result = 'Obj_Article.gif';
 				break;}
 			case 'ArticleTemplate':
-				{$result = 'Obj_ArticleTemplate.gif';
+			{$result = 'Obj_ArticleTemplate.gif';
 				break;}
 			case 'Layout':
-				{$result = 'Obj_Layout.gif';
+			{$result = 'Obj_Layout.gif';
 				break;}
 			case 'LayoutTemplate':
-				{$result = 'Obj_LayoutTemplate.gif';
+			{$result = 'Obj_LayoutTemplate.gif';
 				break;}
 			case 'Video':
-				{$result = 'Obj_Video.gif';
+			{$result = 'Obj_Video.gif';
 				break;}
 			case 'Audio':
-				{$result = 'Obj_Audio.gif';
+			{$result = 'Obj_Audio.gif';
 				break;}
 			case 'Library':
-				{$result = 'Obj_Library.gif';
+			{$result = 'Obj_Library.gif';
 				break;}
 			case 'PublishForm':
 			case 'Dossier':
-				{$result = 'Obj_Dossier.gif';
+			{$result = 'Obj_Dossier.gif';
 				break;}
 			case 'PublishFormTemplate':
 			case 'DossierTemplate':
-				{$result = 'Obj_DossierTemplate.gif';
+			{$result = 'Obj_DossierTemplate.gif';
 				break;}
 			case 'Task':
-				{$result = 'Obj_Task.gif';
+			{$result = 'Obj_Task.gif';
 				break;}
 			case 'Hyperlink':
-				{$result = 'Obj_Hyperlink.gif';
+			{$result = 'Obj_Hyperlink.gif';
 				break;}
 			case 'LayoutModule':
-				{$result = 'Obj_LayoutModule.gif';
+			{$result = 'Obj_LayoutModule.gif';
 				break;}
 			case 'LayoutModuleTemplate':
-				{$result = 'Obj_LayoutModuleTemplate.gif';
+			{$result = 'Obj_LayoutModuleTemplate.gif';
 				break;}
 			case 'Spreadsheet':
 				$result = 'Obj_Spreadsheet.png';
@@ -4337,7 +4324,7 @@ class BizObject
 			case 'AdvertTemplate':
 			case 'Plan':
 			default:
-				{$result = 'Obj_Image.gif'; break;}
+			{$result = 'Obj_Image.gif'; break;}
 
 		}
 		return $icondir . $result;
@@ -4437,14 +4424,14 @@ class BizObject
 					case 'list':
 					case 'date':
 					case 'double':
-						{
+					{
 						if (array_key_exists($propName, $row) && trim($row[$propName]) == '') {
 							$row[$propName] = null;
 						}
 						break;
-						}
+					}
 					case 'bool':
-						{
+					{
 						if (array_key_exists($propName, $row)){
 							$trimVal = trim(strtolower($row[$propName]));
 							if ($trimVal == 'on' || // Indexed, Closed, Flag, LockForOffline (on/<empty>)
@@ -4458,7 +4445,7 @@ class BizObject
 							}
 						}
 						break;
-						}
+					}
 				}
 
 
@@ -4631,7 +4618,7 @@ class BizObject
 	 * @param string $user Short User Name
 	 * @param array $objectProps Route User(group)
 	 */
-	static private function checkAccesRights( $lock, $user, array $objectProps ) 
+	static private function checkAccesRights( $lock, $user, array $objectProps )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
@@ -5024,8 +5011,8 @@ class BizObject
 			if ( self::childRelationCanBeCopied( $srcRelation, $trgtParentState, $user, $dbDriver  ) ) {
 				require_once BASEDIR . '/server/dbclasses/DBObjectRelation.class.php';
 				$objRelId = DBObjectRelation::createObjectRelation(
-								$newCopiedParentId, $srcRelation['child'], $srcRelation['type'], $srcRelation['subid'],
-								$srcRelation['pagerange'], $srcRelation['rating'], $srcRelation['parenttype'] );
+					$newCopiedParentId, $srcRelation['child'], $srcRelation['type'], $srcRelation['subid'],
+					$srcRelation['pagerange'], $srcRelation['rating'], $srcRelation['parenttype'] );
 				if ( is_null( $objRelId ) ) { throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() ); }
 				if ( $trgtParentTargets ) {
 					BizTarget::createObjectRelationTargets( $user, $objRelId, $trgtParentTargets );
@@ -5037,7 +5024,7 @@ class BizObject
 				BizEnterpriseEvent::createObjectEvent( $srcRelation['child'], 'update' );
 			}
 			if ( self::needsDeepCopy( $srcRelation ) &&
-				 self::targetsCanBeCopied( $srcRelation, $trgtParentTargets, $user ) ) {
+				self::targetsCanBeCopied( $srcRelation, $trgtParentTargets, $user ) ) {
 				self::copyNewForm( $srcRelation['child'], $user, $meta, $newCopiedParentId, $dbDriver );
 			}
 			//copy the labels when needed
@@ -5058,7 +5045,7 @@ class BizObject
 	static private function needsDeepCopy( $relation)
 	{
 		return (($relation['parenttype'] == 'Dossier' || $relation['parenttype'] == 'DossierTemplate') &&
-				 $relation['subid'] == 'PublishForm' && $relation['type'] == 'Contained' );
+			$relation['subid'] == 'PublishForm' && $relation['type'] == 'Contained' );
 	}
 
 	/**
@@ -5174,7 +5161,7 @@ class BizObject
 		$childIssueId = $childTargets && count( $childTargets ) ? $childTargets[0]->Issue->Id : 0;
 		require_once BASEDIR . '/server/bizclasses/BizAccess.class.php';
 		$allowed = BizAccess::checkRightsForObjectRow(
-					$user, 'M', BizAccess::DONT_THROW_ON_DENIED, $childRow, $childIssueId );
+			$user, 'M', BizAccess::DONT_THROW_ON_DENIED, $childRow, $childIssueId );
 
 		return $allowed;
 	}
@@ -5750,9 +5737,9 @@ class BizObject
 
 	/**
 	 * Update object relational targets based on different relation target business rules
-	 * 
+	 *
 	 * For Parent=Dossier, Child=Layout, Type=Contained, when layout object target removed, same relation target get removed.
-	 * 
+	 *
 	 *
 	 * @param string $user Short user name
 	 * @param object $object
@@ -5916,72 +5903,72 @@ class BizObject
 		}
 	}
 
-    /**
-     * Collect all users from the MetaData $fields
-     *
-     * @param MetaData $meta
-     * @param array $fields
-     *
-     * @return array $users
-     * */
-    public static function getUserFieldsFromMetaData( MetaData $meta, $fields = array() )
-    {
-        $users = array();
+	/**
+	 * Collect all users from the MetaData $fields
+	 *
+	 * @param MetaData $meta
+	 * @param array $fields
+	 *
+	 * @return array $users
+	 * */
+	public static function getUserFieldsFromMetaData( MetaData $meta, $fields = array() )
+	{
+		$users = array();
 
-        foreach ($fields as $field) {
-            if (isset($meta->WorkflowMetaData->$field) && $meta->WorkflowMetaData->$field != '') {
-                $users[strtolower($field)] = $meta->WorkflowMetaData->$field;
-            }
-        }
+		foreach ($fields as $field) {
+			if (isset($meta->WorkflowMetaData->$field) && $meta->WorkflowMetaData->$field != '') {
+				$users[strtolower($field)] = $meta->WorkflowMetaData->$field;
+			}
+		}
 
-        return $users;
-    }
+		return $users;
+	}
 
-    /**
-     * Consolidate the users that appear multiple times in the array
-     *
-     * @param $users
-     * @return array
-     */
-    public static function getConsolidatedUsersToCheck($users)
-    {
-        $usersToCheck = array();
-        foreach ($users as $user) {
-            if (!in_array($user, $usersToCheck)) {
-                $usersToCheck[] = $user;
-            }
-        }
-        return $usersToCheck;
-    }
+	/**
+	 * Consolidate the users that appear multiple times in the array
+	 *
+	 * @param $users
+	 * @return array
+	 */
+	public static function getConsolidatedUsersToCheck($users)
+	{
+		$usersToCheck = array();
+		foreach ($users as $user) {
+			if (!in_array($user, $usersToCheck)) {
+				$usersToCheck[] = $user;
+			}
+		}
+		return $usersToCheck;
+	}
 
-    /**
-     * Funnel out all the usernames from the MetaData and create the users that are unknown.
-     * The content source could provide more user details before we create the user.
-     *
+	/**
+	 * Funnel out all the usernames from the MetaData and create the users that are unknown.
+	 * The content source could provide more user details before we create the user.
+	 *
 	 * @param string $alienId ID of the alien object. Needed to resolve the content source
-     * @param MetaData $metaData MetaData tree to find all the usernames.
-     * @return array
-     */
-    public static function getOrCreateResolvedUsers($alienId, $metaData)
-    {
-        // Catch the values of the following MetaData fields
-        $fields = array('Creator', 'Deletor', 'LockedBy', 'Modifier', 'RouteTo');
-        $result = array();
+	 * @param MetaData $metaData MetaData tree to find all the usernames.
+	 * @return array
+	 */
+	public static function getOrCreateResolvedUsers($alienId, $metaData)
+	{
+		// Catch the values of the following MetaData fields
+		$fields = array('Creator', 'Deletor', 'LockedBy', 'Modifier', 'RouteTo');
+		$result = array();
 
-        $usersFromMetaData = BizObject::getUserFieldsFromMetaData($metaData, $fields);
-        $usersToCheck = BizObject::getConsolidatedUsersToCheck($usersFromMetaData);
+		$usersFromMetaData = BizObject::getUserFieldsFromMetaData($metaData, $fields);
+		$usersToCheck = BizObject::getConsolidatedUsersToCheck($usersFromMetaData);
 
-        if (is_array($usersToCheck) && count($usersToCheck) > 0) {
-            foreach ($usersToCheck as $userToCheck) {
-                $user = self::getOrCreateResolvedUser( $alienId, $userToCheck );
+		if (is_array($usersToCheck) && count($usersToCheck) > 0) {
+			foreach ($usersToCheck as $userToCheck) {
+				$user = self::getOrCreateResolvedUser( $alienId, $userToCheck );
 				if ( $user ) {
 					$result[] = $user;
 				}
-		    }
-        }
+			}
+		}
 
-        return $result;
-    }
+		return $result;
+	}
 
 	/**
 	 * Funnel out all the usernames/fullnames from the MetaData and create the users that are unknown.
@@ -6010,35 +5997,35 @@ class BizObject
 		return null;
 	}
 
-    /**
-     * Request more user information from the content source
-     *
-     * @param string $alienId
-     * @param string $userToCheck
-     * @return AdmUser
-     */
-    private static function completeUserFromContentSource($alienId, $userToCheck)
-    {
+	/**
+	 * Request more user information from the content source
+	 *
+	 * @param string $alienId
+	 * @param string $userToCheck
+	 * @return AdmUser
+	 */
+	private static function completeUserFromContentSource($alienId, $userToCheck)
+	{
 		require_once BASEDIR . '/server/interfaces/services/adm/DataClasses.php';
 
-        $userObj = new AdmUser();
-        $userObj->Name = $userToCheck;
+		$userObj = new AdmUser();
+		$userObj->Name = $userToCheck;
 		$userObj->FullName = $userToCheck;
-        $userObj->ImportOnLogon = true;
-        $userObj = BizContentSource::completeUser($alienId, $userObj);
+		$userObj->ImportOnLogon = true;
+		$userObj = BizContentSource::completeUser($alienId, $userObj);
 
-        return $userObj;
-    }
+		return $userObj;
+	}
 
 	/**
 	 * Replaces the element GUIDs for all text components of a given InCopy article.
 	 *
-	 * This is typically needed when an InCopy article is uploaded by Content Station. 
-	 * Else, uploading the article twice would result in duplicate GUIDs for the different 
+	 * This is typically needed when an InCopy article is uploaded by Content Station.
+	 * Else, uploading the article twice would result in duplicate GUIDs for the different
 	 * elements, which would confuse Smart Connection, and therefore is not allowed.
 	 *
 	 * Aside to the native InCopy file itself, the GUIDs of the Object's Elements are also
-	 * replaced in memory so that they get stored correcly in the DB later and can be 
+	 * replaced in memory so that they get stored correcly in the DB later and can be
 	 * mapped correctly onto the InCopy file by Smart Connection (and Content Station).
 	 *
 	 * @param Object $object
@@ -6053,7 +6040,7 @@ class BizObject
 			'application/incopyicmt' => true );
 		if ( $object->Files ) foreach ( $object->Files as $attachment ) {
 			if ( $attachment->Rendition == 'native' && isset( $formats[ $attachment->Type ] )) {
-			
+
 				// Replace the GUIDs in the native InCopy file (that resides in the transfer server folder).
 				require_once BASEDIR . '/server/appservices/textconverters/InCopyTextUtils.php';
 				$domDoc = new DOMDocument();
@@ -6061,7 +6048,7 @@ class BizObject
 				$replaceGuids = array(); // Must be declared as it is passed by reference.
 				InCopyUtils::replaceGUIDs($domDoc, $replaceGuids, $attachment->Type );
 				$domDoc->save( $attachment->FilePath );
-				
+
 				// Replace the GUIDs in the Object's Elements as well.
 				if( $replaceGuids && isset($object->Elements) ) {
 					if( $object->Elements ) foreach( $object->Elements as $element ) {
@@ -6104,7 +6091,7 @@ class BizObject
 
 		return false;
 	}
-	
+
 	/**
 	 * Creates a semaphore for the SaveObjects operation of a layout.
 	 *
@@ -6118,12 +6105,12 @@ class BizObject
 		// from the transfer server folder to the filestore. Note that the (DIME) file upload 
 		// time should NOT be taken into account here since that is already completed
 		// at the time the services is executed.
-		$lifeTime = 120; 
+		$lifeTime = 120;
 
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 		$bizSemaphore = new BizSemaphore();
 		$semaphoreName = 'SaveLayout_'.$layoutId;
-		$bizSemaphore->setLifeTime( $lifeTime ); 
+		$bizSemaphore->setLifeTime( $lifeTime );
 		$bizSemaphore->setAttempts( array_fill( 0, 4 * $lifeTime, 250 ) ); // 4*120 attampts x 250ms wait = 120s max total wait
 		$semaphoreId = $bizSemaphore->createSemaphore( $semaphoreName );
 		$bizSemaphore->updateLifeTime( $semaphoreId, $lifeTime );

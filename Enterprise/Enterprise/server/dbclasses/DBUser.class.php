@@ -11,13 +11,13 @@ require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 class DBUser extends DBBase
 {
 	const TABLENAME = 'users';
-	
+
 	public static function findUser( $id, $user, $fullname )
 	{
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();	
+		$dbdriver = DBDriverFactory::gen();
 		$dbu = $dbdriver->tablename('users');
-		
+
 		// Check on name
 		$sql = "SELECT * FROM $dbu WHERE (`user` = '" . $dbdriver->toDBString($user) . "' OR `fullname` = '" . $dbdriver->toDBString($fullname) . "')";
 		if( $id ) { $sql .= " AND `id` != $id"; }
@@ -37,9 +37,9 @@ class DBUser extends DBBase
 	public static function getUserGroup( $group )
 	{
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();	
+		$dbdriver = DBDriverFactory::gen();
 		$dbg = $dbdriver->tablename('groups');
-		
+
 		$sql = "SELECT `id` FROM $dbg WHERE `name` = '" . $dbdriver->toDBString($group) . "'";
 		$sth = $dbdriver->query($sql);
 		if( !$sth ) {
@@ -52,25 +52,25 @@ class DBUser extends DBBase
 		}
 		return null; // not found
 	}
-	
-	public static function createUser( 
-		$user, $pass, $fullname = '', $email = '', $newlanguage = '', 
+
+	public static function createUser(
+		$user, $pass, $fullname = '', $email = '', $newlanguage = '',
 		$fixedpass = '', $disable = '',  $emailgrp = '', $emailusr = '',
-		$startdate = '', $enddate = '', $expiredays = 0, $trackchangescolor = DEFAULT_USER_COLOR, 
+		$startdate = '', $enddate = '', $expiredays = 0, $trackchangescolor = DEFAULT_USER_COLOR,
 		$organization = '', $location = '' )
 	{
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();	
+		$dbdriver = DBDriverFactory::gen();
 		$dbu = $dbdriver->tablename('users');
 
 		// create user in DB tables
 		$sql = 'INSERT INTO '.$dbu.' (`user`, `fullname`, `disable`, `startdate`, `enddate`, '.
-				'`expiredays`, `email`, `emailgrp`, `emailusr`, `fixedpass`, `language`, '.
-				'`trackchangescolor`, `organization`, `location` ) '.
-				"VALUES ('" . $dbdriver->toDBString($user) . "', '" . $dbdriver->toDBString($fullname) . "', ".
-				"'$disable', '$startdate', '$enddate', '$expiredays', '" . $dbdriver->toDBString($email) . "', ".
-				"'$emailgrp', '$emailusr', '$fixedpass', '$newlanguage', '$trackchangescolor', ".
-				"'" . $dbdriver->toDBString($organization) . "', '" . $dbdriver->toDBString($location) ."' ) ";
+			'`expiredays`, `email`, `emailgrp`, `emailusr`, `fixedpass`, `language`, '.
+			'`trackchangescolor`, `organization`, `location` ) '.
+			"VALUES ('" . $dbdriver->toDBString($user) . "', '" . $dbdriver->toDBString($fullname) . "', ".
+			"'$disable', '$startdate', '$enddate', '$expiredays', '" . $dbdriver->toDBString($email) . "', ".
+			"'$emailgrp', '$emailusr', '$fixedpass', '$newlanguage', '$trackchangescolor', ".
+			"'" . $dbdriver->toDBString($organization) . "', '" . $dbdriver->toDBString($location) ."' ) ";
 		$sql = $dbdriver->autoincrement($sql);
 		$sth = $dbdriver->query($sql);
 		if( !$sth ) {
@@ -88,16 +88,16 @@ class DBUser extends DBBase
 		return $newid;
 	}
 
-	public static function updateUser( 
-		$id, $user, $pass = '', $fullname = '', $email = '', $newlanguage = '', 
+	public static function updateUser(
+		$id, $user, $pass = '', $fullname = '', $email = '', $newlanguage = '',
 		$fixedpass = '', $disable = '',  $emailgrp = '', $emailusr = '',
 		$startdate = '', $enddate = '', $expiredays = 0, $trackchangescolor = '',
 		$organization = '', $location = '' )
 	{
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();	
+		$dbdriver = DBDriverFactory::gen();
 		$dbu = $dbdriver->tablename('users');
-		
+
 		// update user in DB tables
 		$sql = "UPDATE $dbu SET `user`='".$dbdriver->toDBString($user)."', `fullname`='".$dbdriver->toDBString($fullname)."', ";
 		$sql .= "`language`='$newlanguage', `disable`='$disable', `startdate` = '$startdate', `enddate` = '$enddate', ";
@@ -109,16 +109,16 @@ class DBUser extends DBBase
 		if( !$sth ) {
 			self::setError( $dbdriver->error() );
 		}
-		
+
 		// save password
-		if( $pass ) { 
+		if( $pass ) {
 			$pass = ww_crypt($pass, null, true ); // BZ#20845 - Always store the password with new SHA-512 hash type
 			if( !self::setPassword( $user, $pass, $expiredays ) ){
 				self::setError( $dbdriver->error() );
 			}
 		}
 	}
-	
+
 	public static function deleteUser( $id )
 	{
 		if( $id ) {
@@ -170,17 +170,17 @@ class DBUser extends DBBase
 	public static function getMemberships( $userId )
 	{
 		self::clearError();
-		
+
 		static $result = array();
 		static $holdUserId = 0;
-		
+
 		if ($userId == $holdUserId) {
 			return $result;
 		}
-		
-		$holdUserId = $userId;		
-		
-		$dbdriver = DBDriverFactory::gen();	
+
+		$holdUserId = $userId;
+
+		$dbdriver = DBDriverFactory::gen();
 		$dbg = $dbdriver->tablename('groups');
 		$dbx = $dbdriver->tablename('usrgrp');
 
@@ -198,12 +198,12 @@ class DBUser extends DBBase
 		while( ($row = $dbdriver->fetch($sth)) ) {
 			$rows[] = $row;
 		}
-		
+
 		$result = $rows;
-	
+
 		return $result;
 	}
-	
+
 	/**
 	 * Resets all user's memberships (group assignments). <br>
 	 * Removes all memberships, and then adds user to all given groups. <br>
@@ -215,13 +215,13 @@ class DBUser extends DBBase
 	public static function resetMemberships( $userId, $groupsToDelete, $groupsToAdd )
 	{
 		self::clearError();
-		
-		if( !$userId ) { 
+
+		if( !$userId ) {
 			self::setError( BizResources::localize( 'ERR_ARGUMENT' ) );
-			return; 
+			return;
 		}
 
-		$dbdriver = DBDriverFactory::gen();	
+		$dbdriver = DBDriverFactory::gen();
 		$dbx = $dbdriver->tablename('usrgrp');
 
 		// Remove given memberships
@@ -229,8 +229,8 @@ class DBUser extends DBBase
 			$or = '';
 			$sql = "DELETE FROM $dbx WHERE `usrid` = $userId AND (";
 			foreach( $groupsToDelete as $groupId ) {
-				 $sql .= " $or `grpid` = $groupId ";
-				 $or = 'OR';
+				$sql .= " $or `grpid` = $groupId ";
+				$or = 'OR';
 			}
 			$sql .= ')';
 
@@ -242,9 +242,9 @@ class DBUser extends DBBase
 		}
 
 		if( !is_null($groupsToAdd) && is_array($groupsToAdd) && sizeof($groupsToAdd)>0 ) {
-									
+
 			foreach( $groupsToAdd as $groupId ) {
-				$sql = "INSERT INTO $dbx (`usrid`,`grpid`) VALUES ($userId,$groupId)"; 
+				$sql = "INSERT INTO $dbx (`usrid`,`grpid`) VALUES ($userId,$groupId)";
 				$sql = $dbdriver->autoincrement($sql);
 
 				if( !$dbdriver->query($sql) ) {
@@ -255,12 +255,12 @@ class DBUser extends DBBase
 
 			return;
 		}
-	}	
+	}
 
 	/**
 	 * Returns users assigned to given publication and/or issue. <br>
 	 * * Note that null must be given when overrulepub is disabled for that issue !
-	 * 
+	 *
 	 * @param string $publ  publication id (null implies all users for all publications)
 	 * @param string $issue issue id (null* implies all users for given publication)
 	 * @param string $sortBy sorting column either by user or fullname, default sort by fullname column
@@ -270,10 +270,10 @@ class DBUser extends DBBase
 	public static function getUsers( $publ = null, $issue = null, $sortBy = 'fullname', $activeOnly = false )
 	{
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();	
+		$dbdriver = DBDriverFactory::gen();
 		$db = $dbdriver->tablename('users');
 		$params = array();
-		
+
 		if ($publ)
 		{
 			$dbx = $dbdriver->tablename('usrgrp');
@@ -297,8 +297,8 @@ class DBUser extends DBBase
 			$params[] = 'on';
 		}
 		$sql .= "ORDER BY " . self::toColname( 'u.'. $sortBy );
-		
-			
+
+
 		$sth = $dbdriver->query( $sql, $params );
 		if (!$sth) {
 			self::setError( $dbdriver->error() );
@@ -331,10 +331,10 @@ class DBUser extends DBBase
 		$authorization = $dbDriver->tablename('authorizations');
 
 		$sql =  'SELECT a.`publication`, a.`issue` '.
-				'FROM '.$authorization.' a '.
-				'INNER JOIN '.$usergrp.' usrgrp ON ( a.`grpid` = usrgrp.`grpid` ) '.
-				'INNER JOIN '.$users.' u ON ( u.`id` = usrgrp.`usrid` ) '.
-				'WHERE u.`id` = ? ';
+			'FROM '.$authorization.' a '.
+			'INNER JOIN '.$usergrp.' usrgrp ON ( a.`grpid` = usrgrp.`grpid` ) '.
+			'INNER JOIN '.$users.' u ON ( u.`id` = usrgrp.`usrid` ) '.
+			'WHERE u.`id` = ? ';
 
 		$params = array( $userId );
 		$sth = $dbDriver->query( $sql, $params );
@@ -342,7 +342,7 @@ class DBUser extends DBBase
 
 		return $ret;
 	}
-	
+
 
 	/**
 	 * Returns all user groups assigned to given publication (+issue). <br>
@@ -355,7 +355,7 @@ class DBUser extends DBBase
 	public static function getUserGroups( $publ = null, $issue = null, $onlyrouting = false )
 	{
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();	
+		$dbdriver = DBDriverFactory::gen();
 		$db = $dbdriver->tablename('groups');
 		$params = array();
 
@@ -371,7 +371,7 @@ class DBUser extends DBBase
 		} else {
 			$sql = "SELECT g.* FROM $db g WHERE 1=1 $where ORDER BY g.`name`";
 		}
-			
+
 		$sth = $dbdriver->query( $sql, $params );
 		if (!$sth) {
 			self::setError( $dbdriver->error() );
@@ -412,7 +412,7 @@ class DBUser extends DBBase
 		}
 		return self::updateRow('groups', $values, 'id = ?', array($id));
 	}
-	
+
 	/*
 	 * Create a new user group in the database. <br>
 	 *
@@ -435,7 +435,7 @@ class DBUser extends DBBase
 			'externalid' => strval($externalId),
 		));
 	}
-	
+
 	/*
 	 * Remove the given user group from the database. <br>
 	 *
@@ -443,7 +443,7 @@ class DBUser extends DBBase
 	 */
 	public static function deleteUserGroup( $id )
 	{
-		if( !$id ) { 
+		if( !$id ) {
 			self::setError( BizResources::localize( 'ERR_ARGUMENT' ) );
 		} else {
 			// first get user group name (needed later)
@@ -451,8 +451,8 @@ class DBUser extends DBBase
 			$params = array( $id );
 			$row = self::getRow( 'groups', $where, array( 'name' ), $params );
 
-		if( $row ) {
-			$userGroupName = $row['name'];
+			if( $row ) {
+				$userGroupName = $row['name'];
 
 				self::deleteRows( 'groups', '`id` = ?', $params );						// Delete groups
 				self::deleteRows( 'usrgrp', '`grpid` = ?', $params ); 					// cascading delete usrgrp
@@ -464,12 +464,12 @@ class DBUser extends DBBase
 		}
 
 	}
-		
+
 	public static function listPublAuthorizations($publid, $fieldnames = '*')
 	{
 		return self::listRows('authorizations', 'id', 'grpid', "`publication` = '$publid' ", $fieldnames);
 	}
-	
+
 	public static function listIssueAuthorizations($issueid, $fieldnames = '*', $nopubldefs = false)
 	{
 		$issue = DBIssue::getIssue($issueid);
@@ -482,12 +482,12 @@ class DBUser extends DBBase
 			return $nopubldefs ? null : self::listPublAuthorizations($issue['publication'], $fieldnames);
 		}
 	}
-	
+
 	/*public static function listPublAdmins($publid, $fieldnames = '*')
 	{
 		return self::listRows('publadmin', 'id', 'grpid', " `publication` = '$publid' ");
 	}*/
-	
+
 	/**
 	 * Lists all users (system wide), or all users that are member of a given user group.
 	 *
@@ -499,7 +499,7 @@ class DBUser extends DBBase
 	public static function listUsersObj( $grpId, $adminOnly = null, $isAdmin = null )
 	{
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();	
+		$dbdriver = DBDriverFactory::gen();
 		$dbu = $dbdriver->tablename('users');
 
 		// Build SQL to query the users
@@ -525,7 +525,7 @@ class DBUser extends DBBase
 			}
 		}
 		$sql .= "ORDER BY u.`fullname` ";
-		
+
 		// Run SQL to query the users
 		$sth = $dbdriver->query($sql, $params);
 		if( !$sth ) {
@@ -540,7 +540,7 @@ class DBUser extends DBBase
 		}
 		return $users;
 	}
-	
+
 	/**
 	 *  Gets exactly one user object with specific user id $usrId
 	 *  @param string $usrId Id of the user
@@ -549,7 +549,7 @@ class DBUser extends DBBase
 	 */
 	public static function getUserObj( $usrId, $isAdmin = null )
 	{
-	 	$usrId = intval($usrId); //Convert to integer
+		$usrId = intval($usrId); //Convert to integer
 		self::clearError();
 		$user = null;
 		$params = array();
@@ -566,7 +566,7 @@ class DBUser extends DBBase
 		}
 		return $user;
 	}
-	
+
 	/**
 	 * Lists all user groups (system wide) or all user groups a given user is member of.
 	 *
@@ -577,7 +577,7 @@ class DBUser extends DBBase
 	public static function listUserGroupsObj( $usrId, $adminOnly = null )
 	{
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();	
+		$dbdriver = DBDriverFactory::gen();
 		$dbg = $dbdriver->tablename('groups');
 		$dbx = $dbdriver->tablename('usrgrp');
 
@@ -597,7 +597,7 @@ class DBUser extends DBBase
 			}
 		}
 		$sql .= 'ORDER BY g.`name` ';
-		
+
 		// Run the SQL
 		$sth = $dbdriver->query( $sql, $params );
 		if( !$sth ) {
@@ -612,113 +612,113 @@ class DBUser extends DBBase
 		}
 		return $userGroups;
 	}
-	
+
 	/**
 	 *  Gets exactly one user object with specific user id $usrId
-	 *  @param string $grpId Id of the usergroup 
+	 *  @param string $grpId Id of the usergroup
 	 *  @return object of usergroup if succeeded, null if no record returned
 	 */
 	public static function getUserGroupObj( $grpId )
 	{
-    	$grpId = intval($grpId); //Convert to integer
-    	
+		$grpId = intval($grpId); //Convert to integer
+
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();	
+		$dbdriver = DBDriverFactory::gen();
 		$dbg = $dbdriver->tablename('groups');
 		$usergroup = null;
-		
+
 		$sql = "SELECT * FROM $dbg where `id` = ?";
 		$params = array($grpId);
 		$sth = $dbdriver->query($sql, $params);
-		
+
 		if (!$sth) {
 			self::setError( $dbdriver->error() );
 			return null;
 		}
-		
+
 		while( ($row = $dbdriver->fetch($sth)) ) {
 			$usergroup = self::rowToGroupObj($row);
 		}
-		
-        return $usergroup;
-    }
-    
-    /**
-     *  Create new user object
-     *  
-     *  @param AdmUser $user new user
-     *  @param bool $isAdmin System admin indicator
-     *  @return new created User object - throws BizException on failure
-     */
-     public static function createUserObj( $user, $isAdmin = null )
-    {	
-    	self::clearError();
-    	$dbdriver = DBDriverFactory::gen();
-    	$values = self::objToUserRow( $user );
-		
-    	self::insertRow('users', $values );
-    	if(self::hasError()){ // insertion ok
+
+		return $usergroup;
+	}
+
+	/**
+	 *  Create new user object
+	 *
+	 *  @param AdmUser $user new user
+	 *  @param bool $isAdmin System admin indicator
+	 *  @return new created User object - throws BizException on failure
+	 */
+	public static function createUserObj( $user, $isAdmin = null )
+	{
+		self::clearError();
+		$dbdriver = DBDriverFactory::gen();
+		$values = self::objToUserRow( $user );
+
+		self::insertRow('users', $values );
+		if(self::hasError()){ // insertion ok
 			return null;
-    	}
-    	$newid = $dbdriver->newid('users', true);
-    	if( is_null($newid) ){
+		}
+		$newid = $dbdriver->newid('users', true);
+		if( is_null($newid) ){
 			return null;
-    	}
-    	// save password
-    	if( $user->Password ) {
-    		$user->Password = ww_crypt( $user->Password, null, true ); // Encrypt the plain password
-    	} elseif( $user->EncryptedPassword ) {
-    		$user->Password = $user->EncryptedPassword; // Set the password as encrypted password
-    	}
-    	if( !self::setPassword( $user->Name, $user->Password, $user->PasswordExpired ) ) {
-    		self::setError( $dbdriver->error() );
-    		return null;
-    	}
-    	return DBUser::getUserObj($newid, $isAdmin);
-    }
-    
-    /**
-     *  Create new usergroup object
-     *  
-     *  @param $usergroup new usergroup
-     *  @return new created UserGroup object - throws BizException on failure
-     */
-     public static function createUserGroupObj( $usergroup )
-    {	
-    	self::clearError();
-    	$dbdriver = DBDriverFactory::gen();
-    	$newusergroup = null;
-    	
-    	$values = self::objToGroupRow( $usergroup );
-			
-    	self::insertRow('groups', $values );
-    	if(!self::hasError()){ // insertion ok
+		}
+		// save password
+		if( $user->Password ) {
+			$user->Password = ww_crypt( $user->Password, null, true ); // Encrypt the plain password
+		} elseif( $user->EncryptedPassword ) {
+			$user->Password = $user->EncryptedPassword; // Set the password as encrypted password
+		}
+		if( !self::setPassword( $user->Name, $user->Password, $user->PasswordExpired ) ) {
+			self::setError( $dbdriver->error() );
+			return null;
+		}
+		return DBUser::getUserObj($newid, $isAdmin);
+	}
+
+	/**
+	 *  Create new usergroup object
+	 *
+	 *  @param $usergroup new usergroup
+	 *  @return new created UserGroup object - throws BizException on failure
+	 */
+	public static function createUserGroupObj( $usergroup )
+	{
+		self::clearError();
+		$dbdriver = DBDriverFactory::gen();
+		$newusergroup = null;
+
+		$values = self::objToGroupRow( $usergroup );
+
+		self::insertRow('groups', $values );
+		if(!self::hasError()){ // insertion ok
 			$newid = $dbdriver->newid('groups', true);
 			if( !is_null($newid) ){
 				$newusergroup = DBUser::getUserGroupObj($newid);
-			}	
-    	}
-    	return $newusergroup;
-    }
-    
-     /**
-     *  Modify users object
-     *  
-     *  @param $users array of values to modify existing users
-     *  @return array of modified User objects - throws BizException on failure
-     */
-     public static function modifyUsersObj( $users )
-    {	
-    	$dbdriver = DBDriverFactory::gen();
-    	$modifyusers = array();
-    	
-    	foreach($users as $user) {
-    		// get old user for later
-    		$oldUser = self::getUserById($user->Id);
-    		$values = self::objToUserRow( $user );
-		
+			}
+		}
+		return $newusergroup;
+	}
+
+	/**
+	 *  Modify users object
+	 *
+	 *  @param $users array of values to modify existing users
+	 *  @return array of modified User objects - throws BizException on failure
+	 */
+	public static function modifyUsersObj( $users )
+	{
+		$dbdriver = DBDriverFactory::gen();
+		$modifyusers = array();
+
+		foreach($users as $user) {
+			// get old user for later
+			$oldUser = self::getUserById($user->Id);
+			$values = self::objToUserRow( $user );
+
 			$result = self::updateRow('users', $values, " `id` = '$user->Id'");
-			
+
 			if( $result === true){
 				if(!is_null($user->Password)){
 					// save password
@@ -738,23 +738,23 @@ class DBUser extends DBBase
 				}
 				$modifyuser = DBUser::getUserObj($user->Id);
 				$modifyusers[] = $modifyuser;
-			}	
-    	}
-    	return $modifyusers;
-    }
-    
-    /**
-     *  Modify usergroup object
-     *  
-     *  @param $groups array of values to modify existing user groups
-     *  @return array of modified UserGroup objects - throws BizException on failure
-     */
-    public static function modifyUserGroupsObj( $groups )
-    {
-    	$modifyusergroups = array();
-    	foreach( $groups as $usergroup ) {
-    		$oldUserGroup = DBUser::getUserGroupObj( $usergroup->Id );
-    		$values = self::objToGroupRow( $usergroup );
+			}
+		}
+		return $modifyusers;
+	}
+
+	/**
+	 *  Modify usergroup object
+	 *
+	 *  @param $groups array of values to modify existing user groups
+	 *  @return array of modified UserGroup objects - throws BizException on failure
+	 */
+	public static function modifyUserGroupsObj( $groups )
+	{
+		$modifyusergroups = array();
+		foreach( $groups as $usergroup ) {
+			$oldUserGroup = DBUser::getUserGroupObj( $usergroup->Id );
+			$values = self::objToGroupRow( $usergroup );
 
 			$result = self::updateRow( 'groups', $values, " `id` = '$usergroup->Id'" );
 
@@ -764,11 +764,11 @@ class DBUser extends DBBase
 				}
 				$modifyusergroup = DBUser::getUserGroupObj( $usergroup->Id );
 				$modifyusergroups[] = $modifyusergroup;
-			}	
-    	}
-    	return $modifyusergroups;
-    }
-    
+			}
+		}
+		return $modifyusergroups;
+	}
+
 	/*
      * Add Users to Group
      *
@@ -778,40 +778,40 @@ class DBUser extends DBBase
      * @param array $grpId group id that user will be added to
      *
      */
-    public static function addUsersToGroup( $usrId, $grpId )
-    {
-    	$usrId = intval($usrId); //Convert to integer
-    	$grpId = intval($grpId); //Convert ot integer
-    	
-    	$where = '`usrid` = ? AND `grpid` = ?';
-    	$params = array($usrId, $grpId);
+	public static function addUsersToGroup( $usrId, $grpId )
+	{
+		$usrId = intval($usrId); //Convert to integer
+		$grpId = intval($grpId); //Convert ot integer
+
+		$where = '`usrid` = ? AND `grpid` = ?';
+		$params = array($usrId, $grpId);
 		$usergrpvalue = array();
-		
+
 		$usergrpvalue['usrid'] = $usrId;
 		$usergrpvalue['grpid'] = $grpId;
-		
+
 		// Checking whether it is an existing usergrp 
 		$existingusergroup = self::getRow('usrgrp', $where, 'Id', $params );
 		if($existingusergroup){}
 		else {
 			self::insertRow('usrgrp', $usergrpvalue);
 		}
-    }
-    
-    /*
-     * Remove Users from Group
-     *
-     * Returns nothing
-     *
-     * @param array $usrId user id that remove from group
-     * @param array $grpId group id that user will be remove from
-     *
-     */
-    public static function removeUsersFromGroup( $usrId, $grpId )
-    {
-    	$where = 'usrid = ' . $usrId . ' AND grpid = ' . $grpId;
+	}
+
+	/*
+	 * Remove Users from Group
+	 *
+	 * Returns nothing
+	 *
+	 * @param array $usrId user id that remove from group
+	 * @param array $grpId group id that user will be remove from
+	 *
+	 */
+	public static function removeUsersFromGroup( $usrId, $grpId )
+	{
+		$where = 'usrid = ' . $usrId . ' AND grpid = ' . $grpId;
 		self::deleteRows('usrgrp', $where);
-    }
+	}
 
 	/*
      * Add Groups to User
@@ -822,58 +822,58 @@ class DBUser extends DBBase
      * @param array $usrId user id that group will be added to
      *
      */
-    public static function addGroupsToUser( $grpId, $usrId )
-    {
-    	$grpId = intval($grpId); //Convert to integer
-    	$usrId = intval($usrId); //Convert to integer
-    	 
-    	$where = '`usrid` = ? AND `grpid` = ? ';
-    	$params = array($usrId, $grpId);
+	public static function addGroupsToUser( $grpId, $usrId )
+	{
+		$grpId = intval($grpId); //Convert to integer
+		$usrId = intval($usrId); //Convert to integer
+
+		$where = '`usrid` = ? AND `grpid` = ? ';
+		$params = array($usrId, $grpId);
 		$usergrpvalue = array();
-		
+
 		$usergrpvalue['usrid'] = $usrId;
 		$usergrpvalue['grpid'] = $grpId;
-		
+
 		// Checking whether it is an existing usergrp 
 		$existingusergroup = self::getRow('usrgrp', $where, 'Id', $params);
 		if($existingusergroup){}
 		else {
 			self::insertRow('usrgrp', $usergrpvalue);
 		}
-    }
-    
-    /*
-     * Remove Groups from User
-     *
-     * Returns nothing
-     *
-     * @param array $grpId group id that remove from user
-     * @param array $usrId user id that group will be remove from
-     *
-     */
-    public static function removeGroupsFromUser( $grpId, $usrId )
-    {
-    	$where = 'usrid = ' . $usrId . ' AND grpid = ' . $grpId;
-		
-		self::deleteRows('usrgrp', $where);
-    }
+	}
 
-    
-    /**
-     *  Converts user object value to an array
-     *  It return an array with the mapping value for user object to row
-     *  @param  object $obj user object
-     *  @return array of user value
-     */
+	/*
+	 * Remove Groups from User
+	 *
+	 * Returns nothing
+	 *
+	 * @param array $grpId group id that remove from user
+	 * @param array $usrId user id that group will be remove from
+	 *
+	 */
+	public static function removeGroupsFromUser( $grpId, $usrId )
+	{
+		$where = 'usrid = ' . $usrId . ' AND grpid = ' . $grpId;
+
+		self::deleteRows('usrgrp', $where);
+	}
+
+
+	/**
+	 *  Converts user object value to an array
+	 *  It return an array with the mapping value for user object to row
+	 *  @param  object $obj user object
+	 *  @return array of user value
+	 */
 	static public function objToUserRow ( $obj )
-	{	
+	{
 		$fields = array();
-		
+
 		if(!is_null($obj->Name)){
 			$fields['user'] 			= $obj->Name;
 		}
 		if(!is_null($obj->FullName)){
-			$fields['fullname'] 		= $obj->FullName;	
+			$fields['fullname'] 		= $obj->FullName;
 		}
 		if(!is_null($obj->EmailAddress)){
 			$fields['email'] 	  		= $obj->EmailAddress;
@@ -916,13 +916,13 @@ class DBUser extends DBBase
 		if(property_exists($obj, 'ExternalId')){
 			$fields['externalid'] = $obj->ExternalId;
 		}
-        if(!is_null($obj->ImportOnLogon)){
-            $fields['importonlogon'] = ($obj->ImportOnLogon == true ? 'on' : '');
-        }
+		if(!is_null($obj->ImportOnLogon)){
+			$fields['importonlogon'] = ($obj->ImportOnLogon == true ? 'on' : '');
+		}
 
 		return $fields;
 	}
-	
+
 	/**
 	 * Determines the groups for which given user is NOT a member.
 	 *
@@ -932,14 +932,14 @@ class DBUser extends DBBase
 	static public function getNonMemberGroupsObj( $usrId )
 	{
 		$usrId = intval($usrId); // Convert to integer
-		
+
 		$dbh = DBDriverFactory::gen();
 		$dbg = $dbh->tablename('groups');
 		$dbx = $dbh->tablename('usrgrp');
-	
+
 		$sql = "SELECT g.* FROM $dbg g ".
-				"LEFT JOIN $dbx x ON (x.`grpid` = g.`id` AND x.`usrid` = ?) ".
-				"WHERE x.`id` IS NULL ORDER BY `name`";
+			"LEFT JOIN $dbx x ON (x.`grpid` = g.`id` AND x.`usrid` = ?) ".
+			"WHERE x.`id` IS NULL ORDER BY `name`";
 		$params = array($usrId);
 		$sth = $dbh->query($sql, $params);
 		$groups = array();
@@ -948,7 +948,7 @@ class DBUser extends DBBase
 		}
 		return $groups;
 	}
-	
+
 	/**
 	 * Determines the users that are NO members of a given group.
 	 *
@@ -962,8 +962,8 @@ class DBUser extends DBBase
 		$dbu = $dbh->tablename('users');
 		$dbx = $dbh->tablename('usrgrp');
 		$sql = "SELECT u.* FROM $dbu u ".
-				"LEFT JOIN $dbx x ON (x.`usrid` = u.`id` AND x.`grpid` = ?) ".
-				"WHERE x.`id` IS NULL ORDER BY `fullname`";
+			"LEFT JOIN $dbx x ON (x.`usrid` = u.`id` AND x.`grpid` = ?) ".
+			"WHERE x.`id` IS NULL ORDER BY `fullname`";
 		$params = array($grpId);
 		$sth = $dbh->query($sql, $params);
 		$users = array();
@@ -972,14 +972,14 @@ class DBUser extends DBBase
 		}
 		return $users;
 	}
-	
+
 	/**
-     *  Converts row value to user object
-     *  Ir return an object with the mapping value for row to object
-     *  @param array $row row contains key values
-     *  @param bool $isAdmin To determine if the user is a System admin
-     *  @return object of user
-     */
+	 *  Converts row value to user object
+	 *  Ir return an object with the mapping value for row to object
+	 *  @param array $row row contains key values
+	 *  @param bool $isAdmin To determine if the user is a System admin
+	 *  @return object of user
+	 */
 	static public function rowToUserObj ( $row, $isAdmin = null )
 	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
@@ -995,44 +995,44 @@ class DBUser extends DBBase
 		$user->PasswordExpired		= $row['expiredays'];
 		$user->ValidFrom			= $row['startdate'];
 		$user->ValidTill			= $row['enddate'];
-		$user->Language				= $row['language']; 
+		$user->Language				= $row['language'];
 		$user->TrackChangesColor	= $row['trackchangescolor'] && !empty($row['trackchangescolor']) ? $row['trackchangescolor'] : null;// When not set this needs to become null because of the wsdl Color definition
 		$user->Organization			= $row['organization'];
 		$user->Location				= $row['location'];
 		$user->EncryptedPassword	= $isAdmin ? $row['pass'] : null;
 		$user->ExternalId			= $row['externalid'];
-        $user->ImportOnLogon        = ($row['importonlogon'] == 'on' ? true : false);
+		$user->ImportOnLogon        = ($row['importonlogon'] == 'on' ? true : false);
 		return $user;
 	}
-	
+
 	/**
-     *  Converts object value to an array
-     *  It return an array with the mapping value for object to row
-     *  @param  object $obj publication object
-     *  @return array of publication value
-     */
+	 *  Converts object value to an array
+	 *  It return an array with the mapping value for object to row
+	 *  @param  object $obj publication object
+	 *  @return array of publication value
+	 */
 	static public function objToGroupRow ( $obj )
 	{
 		$fields = array();
-		if(!is_null($obj->Name)){
+		if( !is_null($obj->Name ) ) {
 			$fields['name'] 		= $obj->Name;
 		}
-		if(!is_null($obj->Description)){
-			$fields['descr'] 		= $obj->Description;	
+		if( !is_null($obj->Description ) ) {
+			$fields['descr'] 		= $obj->Description;
 		}
-		if(!is_null($obj->Admin)){
-			$fields['admin']		= ($obj->Admin == true ? 'on' : '');
+		if( !is_null($obj->Admin ) ) {
+			$fields['admin']		= ($obj->Admin == true ? 'on' : '' );
 		}
-		if(!is_null($obj->Routing)){
-			$fields['routing']		= ($obj->Routing == true ? 'on' : '');
+		if( !is_null($obj->Routing ) ) {
+			$fields['routing']		= ($obj->Routing == true ? 'on' : '' );
 		}
-		if(isset($obj->ExternalId) && !is_null($obj->ExternalId)){
+		if( isset($obj->ExternalId ) && !is_null( $obj->ExternalId ) ) {
 			$fields['externalid']	= $obj->ExternalId;
 		}
-				
+
 		return $fields;
 	}
-	
+
 	/**
 	 * Converts row value to group object
 	 * It returns an object with the mapping value for row to object
@@ -1041,7 +1041,7 @@ class DBUser extends DBBase
 	 * @return AdmUserGroup
 	 */
 	static public function rowToGroupObj ( $row )
-	{		
+	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		$group = new AdmUserGroup();
 		$group->Id		  	= $row['id'];
@@ -1051,10 +1051,10 @@ class DBUser extends DBBase
 		$group->Routing		= ($row['routing'] == 'on' ? true : false);
 		return $group;
 	}
-	
+
 	static public function getLanguage($username)
 	{
-		$dbdriver = DBDriverFactory::gen();	
+		$dbdriver = DBDriverFactory::gen();
 		$username = $dbdriver->toDBString($username);
 		$db = $dbdriver->tablename('users');
 
@@ -1098,7 +1098,7 @@ class DBUser extends DBBase
 		}
 		return $row;
 	}
-	
+
 	static public function setPassword( $user, $pass, $expiredays=null )
 	{
 		$dbDriver = DBDriverFactory::gen();
@@ -1135,7 +1135,7 @@ class DBUser extends DBBase
 	/**
 	 * Returns the user info. Either the short user name or the full name can be passed.
 	 * @param string $user The short or full name of the user to be retrieved
-	 * @return mixed array|null|false Array if info is found, false if not found, null if error. 
+	 * @return mixed array|null|false Array if info is found, false if not found, null if error.
 	 */
 	static public function getUser( $user )
 	{
@@ -1158,7 +1158,7 @@ class DBUser extends DBBase
 		}
 		return $row;
 	}
-	
+
 	/**
 	 * Gets user record for specied user id.
 	 *
@@ -1175,7 +1175,7 @@ class DBUser extends DBBase
 		}
 		return $row;
 	}
-	
+
 	static public function isAdminUser( $user )
 	{
 		$dbDriver = DBDriverFactory::gen();
@@ -1207,117 +1207,6 @@ class DBUser extends DBBase
 
 		return $sth;
 	}
-	
-	static public function getRightsCached( $user, $publ, $issue, $sect, $type, $state, $issessionuser = true )
-	{
-		$dbDriver = DBDriverFactory::gen();
-		static $cacheRights; // cache for Rights
-
-		// if not cached: cache all states
-		//LogHandler::Log('dbuser', 'DEBUG', 'getRightsCached started >>>'."user=[$user] pub=[$publ] iss=[$issue] sec=[$sect] type=[$type] state=[$state]" );
-
-		if ($issessionuser === false) {
-			if (!isset($cacheRights)) {
-				$cachedrights = null;
-			} else {
-				$cachedrights = $cacheRights;
-				unset($cacheRights);
-			}
-		}
-
-		if (!isset($cacheRights)) {
-			require_once BASEDIR.'/server/bizclasses/BizAccessFeatureProfiles.class.php';
-			//LogHandler::Log('dbuser', 'DEBUG', 'getRightsCached: Initialising >>>' );
-			$cacheRights = array();
-			$sth = self::getRights( $user, null, null, null, null, null );
-			if (!$sth) {
-				//LogHandler::Log('dbuser', 'smdb', 'DEBUG', 'getRightsCached: Abort; no rights <<<' );
-				if ($issessionuser === false) {
-					/** @noinspection PhpUndefinedVariableInspection */
-					// Can surpress this from the anazlyer because can be assumed that $cachedrights will be
-					// defined if it reaches here.
-					if ($cachedrights == null) {
-						unset($cacheRights);
-					} else {
-						$cacheRights = $cachedrights;
-					}
-				}
-				return false;		// DB error
-			}
-			$features = 
-				BizAccessFeatureProfiles::getFileAccessProfiles() +
-				BizAccessFeatureProfiles::getAnnotationsAccessProfiles() +
-				BizAccessFeatureProfiles::getWorkflowAccessProfiles();
-			$cacheRights = self::fetchResults($sth);
-			// build array of unique profiles
-			$uniqueProfiles = array();
-			foreach ($cacheRights as $cr){
-				if (! isset($uniqueProfiles[$cr['profile']])){
-					$uniqueProfiles[$cr['profile']] = '';
-				}
-			}
-			// do not query for profiles if there're no profiles
-			if (! empty($uniqueProfiles)){
-				// get all features for unique profiles
-				$dbpv = $dbDriver->tablename('profilefeatures');
-				$sql = 'SELECT `profile`, `feature` FROM ' . $dbpv 
-					. ' WHERE `profile` IN (' . implode(',', array_keys($uniqueProfiles)) . ')'
-					. ' AND `feature` < 100'; // [1..99]
-				$sth = $dbDriver->query($sql);	
-				$profFeatRows = self::fetchResults($sth);
-				foreach ($profFeatRows as $row){
-					$fid = $row['feature'];
-					$uniqueProfiles[$row['profile']] .= $features[$fid]->Flag;
-				}
-				// put concatted rights in cache entries
-				foreach ($cacheRights as &$cr){
-					$cr['rights'] = $uniqueProfiles[$cr['profile']];
-				}
-			}
-			//LogHandler::Log('dbuser', 'DEBUG', 'getRightsCached: Initialised <<<' );
-		} else {
-			//LogHandler::Log('dbuser', 'DEBUG', 'getRightsCached: Chache was initialised before.' );
-		}
-
-		// get from cache
-		$ret = array();
-		if (is_array($cacheRights)) {
-			foreach ($cacheRights as $row) {
-				$add = true;
-				if ($publ && $row['publication'] != $publ && $row['publication'] != 0){
-					$add = false;
-				}else if ($issue && $row['issue'] != $issue && $row['issue'] != 0){
-					$add = false;
-				}else if ($sect	&& $row['section'] != $sect && $row['section'] != 0){
-					$add = false;
-				}else if ($state && $row['state'] != $state && $row['state'] != 0){
-					$add = false;
-				}else if ($type	&& $row['type'] != $type && !empty($row['type'])){
-					$add = false;
-				}
-				if ($add === true) {
-					$ret[] = $row;
-					//LogHandler::Log( 'smdb', 'DEBUG', 'getRightsCached: Adding rights: ['.$row['rights'].']' );
-				}
-				// else {
-				//	LogHandler::Log( 'smdb', 'DEBUG', 'getRightsCached: Discarding rights: ['.$row['rights'].']' );
-				//}
-			}
-		}
-		//LogHandler::Log('dbuser', 'DEBUG', 'getRightsCached completed <<<' );
-		
-		if ($issessionuser === false) {
-			/** @noinspection PhpUndefinedVariableInspection */
-			// Can surpress this from the anazlyer because can be assumed that $cachedrights will be
-			// defined if it reaches here.
-			if ($cachedrights == null) {
-				unset($cacheRights);
-			} else {
-				$cacheRights = $cachedrights;
-			}
-		}
-		return $ret;
-	}
 
 	/**
 	 * Query the access rights for a certain user regarding accessing a brand.
@@ -1328,7 +1217,7 @@ class DBUser extends DBBase
 	 * @param integer $sect Optional: Category id
 	 * @param integer|string $type Optional: Object type
 	 * @param integer $state Optional: Status id
-	 * @return resource DB handle
+	 * @return array Authorization records of the user.
 	 */
 	static public function getRights( $user, $pubIds, $issue = 0, $sect = 0, $type = 0, $state = 0 )
 	{
@@ -1342,10 +1231,10 @@ class DBUser extends DBBase
 		$user = $dbDriver->toDBString($user);
 
 		$sql =  "SELECT DISTINCT a.*, s.`type`, p.`profile` as `profilename` ".
-				"FROM $db1 u, $db2 x, $db3 a ".
-				"LEFT JOIN $db4 s ON s.`id` = a.`state` ".
-				"INNER JOIN $db5 p ON p.`id` = a.`profile` ".
-				"WHERE u.`user` = '$user' AND u.`id` = x.`usrid` AND x.`grpid` = a.`grpid` ";
+			"FROM $db1 u, $db2 x, $db3 a ".
+			"LEFT JOIN $db4 s ON s.`id` = a.`state` ".
+			"INNER JOIN $db5 p ON p.`id` = a.`profile` ".
+			"WHERE u.`user` = '$user' AND u.`id` = x.`usrid` AND x.`grpid` = a.`grpid` ";
 		if( $pubIds ) {
 			if( is_array($pubIds) ) {
 				$sql .= " AND a.`publication` IN (".implode(',',$pubIds).") ";
@@ -1360,18 +1249,23 @@ class DBUser extends DBBase
 			$sql .=	" AND (a.`section` = $sect OR a.`section` = 0) ";
 		}
 		if( $type ) {
-			$sql .=	" AND (s.`type` = '$type' OR a.`state` = 0) ";
+			$sql .=	" AND (s.`type` = '$type' OR s.`type`  =  '' OR s.`type` IS NULL ) ";
 		}
 		if( $state ) {
 			$sql .=	" AND (a.`state` = $state OR a.`state` = 0) ";
 		}
 		$sth = $dbDriver->query($sql);
 
-		return $sth;
+		$result = array();
+		if ( $sth ) {
+			$result = self::fetchResults($sth);
+		}
+
+		return $result;
 	}
 
 	/**
-	 * This function returns the full name of the user. 
+	 * This function returns the full name of the user.
 	 *
 	 * @param String $usershortname
 	 * @return String Full name of the user
@@ -1380,17 +1274,17 @@ class DBUser extends DBBase
 	{
 		$dbDriver = DBDriverFactory::gen();
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();	
+		$dbdriver = DBDriverFactory::gen();
 		$dbu = $dbdriver->tablename('users');
 		$result = '';
-		
+
 		// Check on name
 		$sql = "SELECT `fullname` FROM $dbu WHERE `user` = '" . $dbDriver->toDBString($usershortname) . "'";
 		$sth = $dbdriver->query($sql);
 		if( !$sth ) {
 			self::setError($dbdriver->error());
 		}
-		
+
 		$row = $dbdriver->fetch($sth);
 		if($row) {
 			$result = $row['fullname']; // found on name
@@ -1400,7 +1294,27 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 * This function returns the short name of the user. That is used to uniquely refer to the 
+	 * Reads the full name of the user based on the short name. After it is read the full name is cached. This function
+	 * should only be used when no update of the 'users' table is expected.
+	 *
+	 * @param string $shortName The short name of the user.
+	 * @return string The full name of the user
+	 */
+	static public function getCachedUserFullName( $shortName )
+	{
+		static $holdShortName = '';
+		static $holdFullName = '';
+
+		if ( $holdShortName !== $shortName ) {
+			$holdFullName = self::getFullName( $shortName );
+			$holdShortName = $shortName;
+		}
+
+		return $holdFullName;
+	}
+
+	/**
+	 * This function returns the short name of the user. That is used to uniquely refer to the
 	 * user by the outside world, since db ids are not communicated through web services.
 	 *
 	 * @param integer $userDbId
@@ -1415,7 +1329,7 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 * This function returns the user db id, given the user short name, which is also unique. 
+	 * This function returns the user db id, given the user short name, which is also unique.
 	 * The user db id is used to identify the user record at database.
 	 *
 	 * @param string $userShort Short name of the user.
@@ -1428,7 +1342,7 @@ class DBUser extends DBBase
 		$row = self::getRow( self::TABLENAME, $where, array('id'), $params );
 		return isset($row['id']) ? $row['id'] : null;
 	}
-	
+
 	/**
 	 * Checks if an user belongs to the admin group of a certain brand.
 	 * @param $user
@@ -1437,13 +1351,13 @@ class DBUser extends DBBase
 	 */
 	static public function isPubAdmin($user, $pubid)
 	{
-		$dbDriver = DBDriverFactory::gen();	
+		$dbDriver = DBDriverFactory::gen();
 		$user = $dbDriver->toDBString($user);
 		$usertable = $dbDriver->tablename('users');
 		$grouptable = $dbDriver->tablename('usrgrp');
 		$publadmintable = $dbDriver->tablename('publadmin');
 		$params = array($user, $pubid);
-		
+
 		$sql  = "SELECT usr.`id` ";
 		$sql .= "FROM $usertable usr ";
 		$sql .= "INNER JOIN $grouptable usrgrp ON (usr.`id` = usrgrp.`usrid`) ";
@@ -1452,7 +1366,7 @@ class DBUser extends DBBase
 
 		$sth = $dbDriver->query($sql, $params);
 		$row = $dbDriver->fetch($sth);
-		
+
 		return $row == null ? false : true;
 	}
 
@@ -1464,25 +1378,25 @@ class DBUser extends DBBase
 	 */
 	static public function getListBrandsByPubAdmin($user)
 	{
-		$dbDriver = DBDriverFactory::gen();	
+		$dbDriver = DBDriverFactory::gen();
 		$user = $dbDriver->toDBString($user);
 		$usertable = $dbDriver->tablename('users');
 		$grouptable = $dbDriver->tablename('usrgrp');
 		$publadmintable = $dbDriver->tablename('publadmin');
-		
+
 		$sql  = "SELECT DISTINCT pad.`publication` ";
 		$sql .= "FROM $usertable usr ";
 		$sql .= "INNER JOIN $grouptable usrgrp ON (usr.`id` = usrgrp.`usrid`) ";
 		$sql .= "INNER JOIN $publadmintable pad ON (usrgrp.`grpid` = pad.`grpid`) ";
 		$sql .= "WHERE usr.`user` = ?";
-		$params = array($user); 
-		
-		$sth = $dbDriver->query($sql, $params);	
+		$params = array($user);
+
+		$sth = $dbDriver->query($sql, $params);
 		$rows = self::fetchResults($sth);
 
-		return $rows;		
-	}	
-	
+		return $rows;
+	}
+
 	/**
 	 * Returns array of AdmUser objects matching where clause
 	 *
@@ -1501,10 +1415,10 @@ class DBUser extends DBBase
 		foreach ($rows as $row){
 			$users[] = DBUser::rowToUserObj($row);
 		}
-		
+
 		return $users;
 	}
-	
+
 	/**
 	 * Returns array of AdmUserGroup objects matching where clause
 	 *
@@ -1523,10 +1437,10 @@ class DBUser extends DBBase
 		foreach ($rows as $row){
 			$groups[] = DBUser::rowToGroupObj($row);
 		}
-		
+
 		return $groups;
 	}
-	
+
 	/**
 	 * Update all username links in the database.
 	 *
@@ -1551,9 +1465,9 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 * Update object indexes when user fullname value changes. The full name is indexed by the search server. 
-	 * This needed to enable searching on full name, as this attribute is displayed in the UI. 
-	 * So the short name is stored into the database and the full name is indexed. 
+	 * Update object indexes when user fullname value changes. The full name is indexed by the search server.
+	 * This needed to enable searching on full name, as this attribute is displayed in the UI.
+	 * So the short name is stored into the database and the full name is indexed.
 	 *
 	 * @param string $userName
 	 */
@@ -1608,7 +1522,7 @@ class DBUser extends DBBase
 	 * Returns the Brand/Category/State combinations where the user has 'List in
 	 * Search Result'. The order by of the results is crucial.
 	 * Calling methods depend on this sorting.
-	 * 
+	 *
 	 * @param string $user short user name
 	 * @param integer $listRight checked profile feature (right), Listed in Search Results = 1,
 	 * Listed in Publication Overview = 11.
@@ -1616,13 +1530,13 @@ class DBUser extends DBBase
 	 */
 	public static function getListReadAccessBrandLevel($user, $listRight)
 	{
-		$dbDriver = DBDriverFactory::gen();	
+		$dbDriver = DBDriverFactory::gen();
 		$users = $dbDriver->tablename(self::TABLENAME);
 		$usergrouptable = $dbDriver->tablename('usrgrp');
-		$authorizationtable = $dbDriver->tablename('authorizations');		
-		$profilefeaturestable = $dbDriver->tablename('profilefeatures');	
-		$states = $dbDriver->tablename('states');	
-		
+		$authorizationtable = $dbDriver->tablename('authorizations');
+		$profilefeaturestable = $dbDriver->tablename('profilefeatures');
+		$states = $dbDriver->tablename('states');
+
 		$sql  = "SELECT  a.`publication`, a.`section`, a.`state` ";
 		$sql .= "FROM $users u ";
 		$sql .= "INNER JOIN $usergrouptable ug ON (ug.`usrid` = u.`id`) ";
@@ -1633,8 +1547,8 @@ class DBUser extends DBBase
 		$sql .= "GROUP BY a.`publication`, a.`section`, a.`state` ";
 		$sql .= "ORDER BY a.`publication` ASC, a.`section` ASC, a.`state` ASC";
 		$params = array($user, $listRight);
-		
-		$sth = $dbDriver->query($sql, $params);	
+
+		$sth = $dbDriver->query($sql, $params);
 		$rows = self::fetchResults($sth);
 
 		return $rows;
@@ -1645,21 +1559,21 @@ class DBUser extends DBBase
 	 * Search Result'. The order by of the results is crucial.
 	 * Calling methods depend on this sorting. Issue is used in case of 'overrule
 	 * brand' access rights.
-	 * 
+	 *
 	 * @param string $user short user name
 	 * @param integer $listRight checked profile feature (right), Listed in Search Results = 1,
 	 * Listed in Publication Overview = 11.
 	 * @return array with Issue/Category/State combinations
-	 */	
+	 */
 	public static function getListReadAccessIssueLevel($user, $listRight)
 	{
-		$dbDriver = DBDriverFactory::gen();	
+		$dbDriver = DBDriverFactory::gen();
 		$users = $dbDriver->tablename(self::TABLENAME);
 		$usergrouptable = $dbDriver->tablename('usrgrp');
-		$authorizationtable = $dbDriver->tablename('authorizations');		
-		$profilefeaturestable = $dbDriver->tablename('profilefeatures');	
-		$states = $dbDriver->tablename('states');	
-		
+		$authorizationtable = $dbDriver->tablename('authorizations');
+		$profilefeaturestable = $dbDriver->tablename('profilefeatures');
+		$states = $dbDriver->tablename('states');
+
 		$sql  = "SELECT  a.`issue`, a.`section`, a.`state` ";
 		$sql .= "FROM $users u ";
 		$sql .= "INNER JOIN $usergrouptable ug ON (ug.`usrid` = u.`id`) ";
@@ -1670,28 +1584,26 @@ class DBUser extends DBBase
 		$sql .= "GROUP BY a.`issue`, a.`section`, a.`state` ";
 		$sql .= "ORDER BY a.`issue` ASC, a.`section` ASC, a.`state` ASC";
 		$params = array($user, $listRight);
-		
-		$sth = $dbDriver->query($sql, $params);	
+
+		$sth = $dbDriver->query($sql, $params);
 		$rows = self::fetchResults($sth);
 
 		return $rows;
 	}
-	
+
 	/**
 	 * Get rights for given user groups.
-	 * @see self::getRightsCached
 	 *
 	 * @param array $userGroupIds
-	 * @return array same as getRightsCached
+	 * @return array Authorization records of the user group.
 	 */
 	public static function getRightsByUserGroups(array $userGroupIds)
 	{
 		$rights = array();
-		
+
 		if (! empty($userGroupIds)){
 			require_once BASEDIR.'/server/bizclasses/BizAccessFeatureProfiles.class.php';
-			
-			$features = 
+			$features =
 				BizAccessFeatureProfiles::getFileAccessProfiles() +
 				BizAccessFeatureProfiles::getAnnotationsAccessProfiles() +
 				BizAccessFeatureProfiles::getWorkflowAccessProfiles();
@@ -1699,12 +1611,12 @@ class DBUser extends DBBase
 			$authorizations = $dbDriver->tablename("authorizations");
 			$profilefeatures = $dbDriver->tablename("profilefeatures");
 			$states = $dbDriver->tablename("states");
-			
+
 			$sql = "SELECT a.`profile`, a.`publication`, a.`issue`, a.`section`, s.`type`, a.`state`, pf.`feature` "
-			    . "FROM $authorizations a "
-			    . "INNER JOIN $profilefeatures pf ON (a.`profile` = pf.`profile`) "
-			    . "LEFT JOIN $states s ON (a.`state` = s.`id`) "
-			    . "WHERE a.`grpid` IN (" . implode(',', $userGroupIds) . ") "
+				. "FROM $authorizations a "
+				. "INNER JOIN $profilefeatures pf ON (a.`profile` = pf.`profile`) "
+				. "LEFT JOIN $states s ON (a.`state` = s.`id`) "
+				. "WHERE a.`grpid` IN (" . implode(',', $userGroupIds) . ") "
 				. ' AND pf.`feature` < 100'; // [1..99]
 			$sth = $dbDriver->query($sql);
 			$rows = DBBase::fetchResults($sth);
@@ -1726,7 +1638,7 @@ class DBUser extends DBBase
 			// remove keys
 			$rights = array_values($rights);
 		}
-		
+
 		return $rights;
 	}
 
@@ -1756,8 +1668,8 @@ class DBUser extends DBBase
 		$userByGroups = $dbh->tablename('usrgrp');
 
 		$sql =  'SELECT COUNT(1) as `total`, usrgrp.`grpid` '.
-				'FROM '.$userByGroups.' usrgrp '.
-				'GROUP BY usrgrp.`grpid` ';
+			'FROM '.$userByGroups.' usrgrp '.
+			'GROUP BY usrgrp.`grpid` ';
 
 		$sth = $dbh->query( $sql );
 		$rows = self::fetchResults( $sth );

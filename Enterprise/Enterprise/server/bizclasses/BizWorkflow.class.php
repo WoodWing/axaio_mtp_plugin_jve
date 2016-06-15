@@ -92,23 +92,23 @@ class BizWorkflow
 	 * Returns statuses for the given Pub/Issue/Section/object type. Caller does not have to worry about overrule issues.
 	 *
 	 * About the Personal Status feature...
-	 * As you know, the Personal status is designed to keep the document for your eyes only. Since introduction of the 
-	 * Personal status feature, it was hidden for InDesign users creating articles (from a layout). The main reason to 
-	 * hide the Personal status from workflow dialogs in this specific situation is that Personal status is always the 
-	 * first entry in the list of statuses. As a result, articles would be too easily created in the Personal status, 
-	 * which is unwanted in most cases; Typically layouters would create an article from layout to send out to someone 
-	 * else (to write-to-fit). By default (accidentally overlooking the status combo), the article would be created at 
-	 * the layouter's Personal status and so unaccessible for the user to whom the article is sent to. Note that the 
-	 * server does not accept creating articles (or any objects) for someone else in his/her Personal status, and so 
-	 * choosing Personal status and Route To someone else, will silently Route To the user performing the action (in 
-	 * this case the layouter). However, since the introduction of Content Station, the status lists at the workflow 
+	 * As you know, the Personal status is designed to keep the document for your eyes only. Since introduction of the
+	 * Personal status feature, it was hidden for InDesign users creating articles (from a layout). The main reason to
+	 * hide the Personal status from workflow dialogs in this specific situation is that Personal status is always the
+	 * first entry in the list of statuses. As a result, articles would be too easily created in the Personal status,
+	 * which is unwanted in most cases; Typically layouters would create an article from layout to send out to someone
+	 * else (to write-to-fit). By default (accidentally overlooking the status combo), the article would be created at
+	 * the layouter's Personal status and so unaccessible for the user to whom the article is sent to. Note that the
+	 * server does not accept creating articles (or any objects) for someone else in his/her Personal status, and so
+	 * choosing Personal status and Route To someone else, will silently Route To the user performing the action (in
+	 * this case the layouter). However, since the introduction of Content Station, the status lists at the workflow
 	 * dialogs became very inconsistent with InDesign since men would *always* see the Personal status, no matter the
 	 * object type or application.
-	 * Since v6.1, to make both applications consistent at this point, and to avoid the initial problem (layouters 
+	 * Since v6.1, to make both applications consistent at this point, and to avoid the initial problem (layouters
 	 * accidentally creating articles in Personal status), we have changed the system's behavior a bit. The server *always*
-	 * return the Personal status to client applications to show in their workflow dialogs. The client applications 
-	 * are now responsible to avoid this problem; InDesign should pre-select the 2nd status in the list when the first 
-	 * one is the  personal status and the user is about to create a new article. 
+	 * return the Personal status to client applications to show in their workflow dialogs. The client applications
+	 * are now responsible to avoid this problem; InDesign should pre-select the 2nd status in the list when the first
+	 * one is the  personal status and the user is about to create a new article.
 	 * Since v6.5, the Personal status has been moved to the end of the status list! (See BZ#5458) This is to allow
 	 * configuring a 'default' status, which is the first one. Having the Personal always on top would block this feature.
 	 *
@@ -117,7 +117,7 @@ class BizWorkflow
 	 * @param string	$issue		issue id
 	 * @param string	$section		section id
 	 * @param string	$type		object type
-     * @param boolean $checkForOverruleIssue if you know that the issue you pass in is overrule, pass in false to save a DB call.
+	 * @param boolean $checkForOverruleIssue if you know that the issue you pass in is overrule, pass in false to save a DB call.
 	 * @param boolean $logon
 	 * @throws BizException
 	 * @return array of State
@@ -147,7 +147,7 @@ class BizWorkflow
 			$globAuth = new authorizationmodule( );
 		}
 		if ($user) {
-			$globAuth->getrights($user, $publication, $issue, $section);
+			$globAuth->getRights($user, $publication, $issue, $section);
 		}
 		foreach ($sts as $row){
 			// check for any right on this state
@@ -169,9 +169,9 @@ class BizWorkflow
 					if ($logon !== true) {
 						$route = self::doGetDefaultRouting( $publication, $issue, $section, $row['id'] );
 					}
-					if( empty($route) ) $route=null;
+					if( empty( $route ) ) { $route = null; }
 					$ret[] =new State( $row['id'], $row['state'], $row['type'], trim($row['produce']) != '',
-										$color, $route );
+						$color, $route );
 				}
 			}
 
@@ -199,12 +199,12 @@ class BizWorkflow
 				);
 				if( in_array( $type, $types ) && !in_array( $type, $exceptionTypes ) ) {
 					$ret[] = new State( '-1', BizResources::localize('PERSONAL_STATE'), $type, false,
-										substr(PERSONAL_STATE_COLOR, 1), $user);
+						substr(PERSONAL_STATE_COLOR, 1), $user);
 				}
 			} else {
 				foreach( $types as $objtype ){
 					$ret[]= new State( '-1', BizResources::localize('PERSONAL_STATE'), $objtype, false,
-										substr(PERSONAL_STATE_COLOR, 1), $user);
+						substr(PERSONAL_STATE_COLOR, 1), $user);
 				}
 			}
 		}
@@ -424,7 +424,7 @@ class BizWorkflow
 	 * @throws BizException
 	 */
 	private static function getDialogBasicParamsValidation( $metaData, $multipleObjects, $action, $targets,
-							$defaultDossier, $parentId, $templateId, $areas, $objId, $objIds )
+	                                                        $defaultDossier, $parentId, $templateId, $areas, $objId, $objIds )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR .'/server/dbclasses/DBIssue.class.php';
@@ -514,10 +514,10 @@ class BizWorkflow
 	 * @param string $user          User ID. Mandatory.
 	 * @param string $action        Workflow ActionType.
 	 * @param array  $metaData      Array of MetaDataValue object.
-	 * @param array  $targetsFromReq Array of Targets 
+	 * @param array  $targetsFromReq Array of Targets
 	 * @param boolean $reqDialog    Asks to populate Dialog element at response.
 	 * @param boolean $reqPub       Asks to populate Publications element at response.
-	 * @param boolean $reqMetaData  Asks to populate MetaData element at response. (Do not confuse with Dialog->MetaData.) 
+	 * @param boolean $reqMetaData  Asks to populate MetaData element at response. (Do not confuse with Dialog->MetaData.)
 	 * @param boolean $reqStates    Asks to populate GetStatesResponse element at response.
 	 * @param boolean $reqTargets   [v6.0] Indicates if client supports the Targets complex widget (that hold multiple issues/editions).
 	 * @param int $defaultDossier   [v7.0] Dossier ID.  Tells if client can draw the Dossier prop. Nil when not. (BZ#10526)
@@ -529,9 +529,9 @@ class BizWorkflow
 	 * @return array of Dialog      Dialog definition to show user. See BizDataClasses {@link: Dialog}
 	 */
 	public static function getDialog( $user, $action, $metaData, &$targetsFromReq,
-									$reqDialog, $reqPub, $reqMetaData, $reqStates, $reqTargets,
-									$defaultDossier=null, $parentId=null, $templateId=null, $areas=null,
-									$multipleObjects=false )
+	                                  $reqDialog, $reqPub, $reqMetaData, $reqStates, $reqTargets,
+	                                  $defaultDossier=null, $parentId=null, $templateId=null, $areas=null,
+	                                  $multipleObjects=false )
 	{
 		$objId = self::getPropertyFromMetaData( 'ID', $metaData, 0 );
 		if( isset($metaData['IDs']->PropertyValues[0]->Value) ) {
@@ -569,7 +569,7 @@ class BizWorkflow
 		}
 
 		self::getDialogBasicParamsValidation( $metaData, $multipleObjects, $action, $targetsFromReq, $defaultDossier,
-																	$parentId, $templateId, $areas, $objId, $objIds );
+			$parentId, $templateId, $areas, $objId, $objIds );
 
 		// Tricky assumptions; When $objId is given it is must be for a non-Create dialog.
 		// But, when $pub is given too, assumed is that the dialog is about to get re-drawn! Else initial draw!
@@ -577,9 +577,9 @@ class BizWorkflow
 		// in initial- or redraw mode! This is because clients can pass the active* brand on object creations.
 		// * That is the brand user is working in, like currently selected in Search results.
 		$redrawNonCreate = ($objId && $pub) ||
-				// Note that in multisetprops mode the $objId is not set and so we determine a redraw as follows:
-				($multipleObjects && count( $metaData ) > 3 ) ;
-									// L> getDialogBasicParamsValidation checks for presence of IDs, Type and Publication
+			// Note that in multisetprops mode the $objId is not set and so we determine a redraw as follows:
+			($multipleObjects && count( $metaData ) > 3 ) ;
+		// L> getDialogBasicParamsValidation checks for presence of IDs, Type and Publication
 
 		// Get the object, the parent object (typically a Layout or Dossier) and the template object.
 		// (If $multipleObjects == true, none of the three objects below will be retrieved.)
@@ -821,12 +821,18 @@ class BizWorkflow
 			$routeTo = ($obj && isset($obj->MetaData->WorkflowMetaData->RouteTo)) ? $obj->MetaData->WorkflowMetaData->RouteTo : '';
 			$contentSource = ($obj && isset($obj->MetaData->BasicMetaData->ContentSource)) ? $obj->MetaData->BasicMetaData->ContentSource : '';
 			$documentId = ($obj && isset($obj->MetaData->BasicMetaData->DocumentID)) ? $obj->MetaData->BasicMetaData->DocumentID : '';
-			$accessObjId = $action == 'CopyTo' ? 0 : $objId; // Don't use object id for access checking (e.g. needed to copy aliens; EN-85894)
+			$accessObjId = ( $action == 'CopyTo' || $action == 'Create' ) ? null : $objId ; // Don't use object id for access checking (e.g. needed to copy aliens; EN-85894)
+			$routeToForRights = $accessObjId ? $routeTo : $user;
+			// This is quite a hack. The routeTo user is determined later on based on for example the state. To
+			// determine the state the rights are needed. If a new object is created in personal state then the user has full
+			// access. Personal state means that the $statusId = -1 and the routeTo user of an object is the acting user.
+			// At this moment the $routeTo user is not set for new objects. In that case we pass the acting user as the
+			// routeTo user. If the state = -1 then the user will get full access.
 
 			// Access Rights.
-			$rights = self::determineAccessRightsForObject( $user, 
-								$pub, $iss, $catId, $objType, $statusId, 
-								$accessObjId, $contentSource, $documentId );
+			$rights = self::determineAccessRightsForObject( $user,
+				$pub, $iss, $catId, $objType, $statusId,
+				$accessObjId, $contentSource, $documentId, $routeToForRights );
 		}
 
 		// Check access right "Change Status" and "Change Status Forward"
@@ -889,7 +895,7 @@ class BizWorkflow
 		// But, disable Dossier property for non-Create dialogs, even when client does support it.
 		// The reason is that only the CreateObject service does support implicit Dossier creation !
 		if(  ($action != 'Create'  && // Only for Create dialogs we want the Dossier property (BZ#10526)
-			$action != 'CopyTo' ) ||  // Besides 'Create', 'CopyTo' needs Dossier property as well. (BZ #18311)
+				$action != 'CopyTo' ) ||  // Besides 'Create', 'CopyTo' needs Dossier property as well. (BZ #18311)
 			$objType == 'Dossier' || $objType == 'DossierTemplate'  ) { // Dossier in Dossier not supported! (BZ#16909)
 			unset($usages['Dossier']);
 		}
@@ -905,16 +911,16 @@ class BizWorkflow
 
 		// Build dialog
 		$pubs = BizPublication::getPublications( $user, 'flat' );
-		
+
 		self::addDisabledRouteTo( $routeTo, $states );
 
 		$props = self::fillValueListIntoProps( $user, $props, $pubs, $pub, $states, $prunedPubInfo );
 
 		if( $reqDialog == 'true' ) { // requested for dialog definition?
-     		$retVal['Dialog'] = self::buildDialog( $obj, $objType, $pub, $iss, $catId,
-										$statusId, $action, $routeTo, $parentObj,
-										$props, $usages, $rights, $isPlaced, $reqTargets == 'true', $metaData,
-										$redrawOnPub, $targets, $objectsProps, $multipleObjects );
+			$retVal['Dialog'] = self::buildDialog( $obj, $objType, $pub, $iss, $catId,
+				$statusId, $action, $routeTo, $parentObj,
+				$props, $usages, $rights, $isPlaced, $reqTargets == 'true', $metaData,
+				$redrawOnPub, $targets, $objectsProps, $multipleObjects );
 		}
 
 		if( $action != 'Query' && // The below makes no sense for 'Query' actions (BZ#16988)
@@ -1046,7 +1052,7 @@ class BizWorkflow
 	 */
 	protected static function enrichDialogWidgetsSuggestionProviders(
 		/** @noinspection PhpUnusedParameterInspection */ $objId,
-		$channelId, $dialog )
+		                                                  $channelId, $dialog )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizAutoSuggest.class.php';
 		$suggestionProvider = DBChannel::getSuggestionProviderByChannelId( $channelId );
@@ -1076,11 +1082,11 @@ class BizWorkflow
 	 * which is called list of propertyValues.
 	 * This functions will populate the propertyValues for several properties
 	 * like 'Publication', 'Category','State' and 'RouteTo'.
-	 * This is for the client to show the lists of properties with their 
+	 * This is for the client to show the lists of properties with their
 	 * values in Id<->Name pair.
-	 * 
+	 *
 	 * @param string $user user shortname.
-	 * @param array $props PropertyInfo objects. 
+	 * @param array $props PropertyInfo objects.
 	 * @param array $pubs List of Publication objects.
 	 * @param int $pubId DB Id of publication. Used to getSections()
 	 * @param WflGetStatesResponse $statusesResp. Statuses for $objType
@@ -1154,7 +1160,7 @@ class BizWorkflow
 	}
 
 	/**
-	 * For new objects that about to get created, this function inherits MetaData from 
+	 * For new objects that about to get created, this function inherits MetaData from
 	 * given template.
 	 * Nothing is done to existing objects or in context of other actions than Create.
 	 * If obj is null a new Object is created.
@@ -1197,21 +1203,21 @@ class BizWorkflow
 			}
 			$basMD->Type = $objType;
 			$wflMD = $obj->MetaData->WorkflowMetaData;
-            require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+			require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 			foreach( array_keys(get_class_vars('WorkflowMetaData')) as $prop ) {
-                $propType = BizProperty::getStandardPropertyType( $prop );
-                if( is_object($wflMD->$prop) || is_null($wflMD->$prop) || $propType == 'int' || $propType == 'datetime' ) {
-                    $wflMD->$prop = null; // Clear, set property to null to avoid service validation error
-                } else {
-                    $wflMD->$prop = ''; // Clear, set string type property to empty string
-                }
+				$propType = BizProperty::getStandardPropertyType( $prop );
+				if( is_object($wflMD->$prop) || is_null($wflMD->$prop) || $propType == 'int' || $propType == 'datetime' ) {
+					$wflMD->$prop = null; // Clear, set property to null to avoid service validation error
+				} else {
+					$wflMD->$prop = ''; // Clear, set string type property to empty string
+				}
 			}
 		}
 	}
 
 	/**
 	 * Checks and fixes the Brand/Issue/Category parameters.
-	 * Assumed is that the params are given (=> Create mode) or the object is given (=> Save mode), 
+	 * Assumed is that the params are given (=> Create mode) or the object is given (=> Save mode),
 	 * or both (=> Save with changed location).
 	 * Empty params are zerofied. No Brand means no Issue and no Category.
 	 * When zero/empty params, Brand/Issue/Category are derived from the object ($obj), parent or template.
@@ -1301,13 +1307,13 @@ class BizWorkflow
 		} else if( $iss ) { // [1]
 			// nothing to do
 		} else if( $obj && $action != 'Create'
-				// BZ#20589
-				// For 'CopyTo', assigning $iss from Target when $iss is empty might violate either of the following:
-				// - Current Issue not being selected
-				// - User's selection of Issue is not respected
-				&& $action != 'CopyTo' // [2]
-				// BZ#24178: (Only for CS) When user changes from overrule iss to normal pub within the same Brand, the obj iss (which is overrule iss) should not be respected anymore.
-				&& !self::$avoidOverrulePreSelection ) {
+			// BZ#20589
+			// For 'CopyTo', assigning $iss from Target when $iss is empty might violate either of the following:
+			// - Current Issue not being selected
+			// - User's selection of Issue is not respected
+			&& $action != 'CopyTo' // [2]
+			// BZ#24178: (Only for CS) When user changes from overrule iss to normal pub within the same Brand, the obj iss (which is overrule iss) should not be respected anymore.
+			&& !self::$avoidOverrulePreSelection ) {
 			require_once BASEDIR . '/server/bizclasses/BizTarget.class.php';
 			if( $obj->Targets ) {
 				// Prefer that object issue, which is default for the brand
@@ -1325,7 +1331,7 @@ class BizWorkflow
 							if( !$iss && count( $relation->Targets ) > 0 ) {
 								$iss = intval($relation->Targets[0]->Issue->Id);
 							}
-							// Ignore overrule issues of parents/relations, because they might not apply to the 
+							// Ignore overrule issues of parents/relations, because they might not apply to the
 							// child objects.
 							if( DBIssue::isOverruleIssue( $iss ) ) {
 								$iss = 0;
@@ -1378,7 +1384,7 @@ class BizWorkflow
 
 	/**
 	 * Validates the $statusId (must be numeric) and checks if it exists in the possible options user can
-	 * choose from ($states). If not, or $statusId is not given, it does a fallback; It takes the status of 
+	 * choose from ($states). If not, or $statusId is not given, it does a fallback; It takes the status of
 	 * the object, or, when object is a template used to create new object, it takes the first of $states.
 	 * When there is none, it clears the $statusId (set to zero). That means bad config.
 	 *
@@ -1441,10 +1447,10 @@ class BizWorkflow
 	 * @return Dialog
 	 */
 	protected static function buildDialog( $obj, $objType, $pub, $iss, $sec,
-											$statusId, $action, $routeTo, $parentObj,
-											array $props, array $usages, array $rights,
-											$isPlaced, $reqTargets, $flatMD, $redrawOnPub = false,
-											$objTargets, $objectsProps, $multipleObjects )
+	                                       $statusId, $action, $routeTo, $parentObj,
+	                                       array $props, array $usages, array $rights,
+	                                       $isPlaced, $reqTargets, $flatMD, $redrawOnPub = false,
+	                                       $objTargets, $objectsProps, $multipleObjects )
 	{
 		// Checks if there's 'MixedValues' for each property to be displayed on the dialog.
 		$mixedValueProps = array();
@@ -1460,8 +1466,8 @@ class BizWorkflow
 		// Make fields read-only for which user has no edit rights
 		$statusEditable = false;
 		self::handlePropertiesEditableField( $usages, $flatMD, $parentObj, $action, $obj, $objType, $objTargets, $rights,
-						            $statusId, $statusEditable, $reqTargets, $isPlaced, $redrawOnPub, $multipleObjects,
-									$readOnlyProperties );
+			$statusId, $statusEditable, $reqTargets, $isPlaced, $redrawOnPub, $multipleObjects,
+			$readOnlyProperties );
 
 		// Build flat list of all props shown in dialog, except for Dossier
 		$widgets = array();
@@ -1478,7 +1484,7 @@ class BizWorkflow
 
 		// Prepares Dialog->MetaData.
 		$flatMD = self::enrichAndRepairFlatMetaData( $flatMD, $usages, $props, $pub, $iss, $sec, $action, $obj, $objType,
-										$statusId, $routeTo, $multipleObjects, $objectsProps, $mixedValueProps );
+			$statusId, $routeTo, $multipleObjects, $objectsProps, $mixedValueProps );
 
 		// Build the dialog with tabs
 		$tabs = self::buildDialogTabs( $widgetGroup, $multipleObjects, $widgets, $action, $statusEditable );
@@ -1509,8 +1515,8 @@ class BizWorkflow
 	 * @param array $readOnlyProperties List of properties that need to be disabled.
 	 */
 	private static function handlePropertiesEditableField( &$usages, $flatMD, $parentObj, $action, $obj, $objType,
-									$objTargets, $rights, $statusId, &$statusEditable, $reqTargets, $isPlaced,
-									$redrawOnPub, $multipleObjects, $readOnlyProperties )
+	                                                       $objTargets, $rights, $statusId, &$statusEditable, $reqTargets, $isPlaced,
+	                                                       $redrawOnPub, $multipleObjects, $readOnlyProperties )
 	{
 		// Object Id: Typically needed when dealing with single-setproperties.
 		$objId = isset( $obj->MetaData->BasicMetaData->ID ) ? $obj->MetaData->BasicMetaData->ID : 0;
@@ -1742,7 +1748,7 @@ class BizWorkflow
 			// Edge case where it will hardly happen, but we still need to handle them to avoid mixed values in RouteTo
 			// which can't be resolved by setObjectProperties and MultiSetObjectProperties service.
 			$categoryStateRouteToMixed = isset( $mixedValueProps['Category'] ) && isset( $mixedValueProps['State'] ) &&
-										isset( $mixedValueProps['RouteTo'] );
+				isset( $mixedValueProps['RouteTo'] );
 			$categoryRouteToMixed = isset( $mixedValueProps['Category'] ) && isset( $mixedValueProps['RouteTo'] );
 			$stateRouteToMixed = isset( $mixedValueProps['State'] ) && isset( $mixedValueProps['RouteTo'] );
 
@@ -2114,7 +2120,7 @@ class BizWorkflow
 			$propNotification->Type = 'Info';
 			$bulletSymbol = chr( 0xE2 ) . chr( 0x80 ) . chr( 0xA2 );
 			$propNotification->Message = BizResources::localize( 'MULTI_SET_PROPERTIES_ACCESRIGHTS_WARNING' ) . "\n" .
-										$bulletSymbol. implode( "\n" . $bulletSymbol , $noRightsObjects );
+				$bulletSymbol. implode( "\n" . $bulletSymbol , $noRightsObjects );
 
 			$notifications[] = $propNotification;
 		}
@@ -2160,11 +2166,11 @@ class BizWorkflow
 
 	/**
 	 * For initially drawn dialogs, we do not (yet) pre-select the Route To, except for Create and CopyTo dialogs.
-	 * As soon at the user selects a different Status or Category, the GetDialog service is called 
+	 * As soon at the user selects a different Status or Category, the GetDialog service is called
 	 * again for a redraw, in which case the Route To should get pre-selected. The pre-selections
 	 * are implemented by returning the MetaDataValue for the Route To field through GetDialog response.
 	 * Note that the personal status is all-overruling, for which the Route To is -always- set to current user.
-	 * 
+	 *
 	 * @param bool $redrawNonCreate
 	 * @param string $routeTo Route To value of object, as stored at DB (not as selected by user!)
 	 * @param string $action Dialog action
@@ -2181,8 +2187,8 @@ class BizWorkflow
 			$newRouteTo = true; // Redraw dialog always triggers automatic routing!
 			LogHandler::Log( 'GetDialog', 'INFO', 'Decided to determine new Route To because non-Create dialog is about to get redrawn.' );
 		} else if( $action == 'Create'
-					|| $action == 'CopyTo' // BZ#16971
-					//|| $action == 'CheckIn' // BZ#19543
+			|| $action == 'CopyTo' // BZ#16971
+			//|| $action == 'CheckIn' // BZ#19543
 		) {
 			$newRouteTo = true; // Create/CopyTo dialogs always have Route To preselected; even when dialog is initially drawn
 			LogHandler::Log( 'GetDialog', 'INFO', 'Decided to determine new Route To because dialog type is Create, Copy To or Check In.' );
@@ -2248,11 +2254,12 @@ class BizWorkflow
 	 * @param int $objId Object id of which their access rights collected.
 	 * @param string $contentSource
 	 * @param string $documentId
+	 * @param string $routeTo
 	 * @return array List of access rights with the object ids assigned to the corresponding access.
 	 */
-	private static function determineAccessRightsForObject( 
-		$user, $pub, $iss, $cat, $objType, $statusId, 
-		$objId, $contentSource, $documentId )
+	private static function determineAccessRightsForObject(
+		$user, $pub, $iss, $cat, $objType, $statusId,
+		$objId, $contentSource, $documentId, $routeTo )
 	{
 		// Determine access rights
 		global $globAuth;
@@ -2262,10 +2269,10 @@ class BizWorkflow
 		}
 
 		$rights = self::initRights();
-		$globAuth->getrights( $user, $pub, $iss, $cat, $objType, $statusId );
-		$rights = self::collectAccessRights( $globAuth, 
-					$pub, $iss, $cat, $objType, $statusId, 
-					$objId, $contentSource, $documentId, $rights );
+		$globAuth->getRights( $user, $pub, $iss, $cat, $objType, $statusId );
+		$rights = self::collectAccessRights( $globAuth,
+			$pub, $iss, $cat, $objType, $statusId,
+			$objId, $contentSource, $documentId, $rights, $routeTo );
 		LogHandler::Log( 'GetDialog', 'INFO', 'Access rights: '.print_r($rights,true) );
 		return $rights;
 	}
@@ -2282,7 +2289,7 @@ class BizWorkflow
 	 * @param array $objIds List of object ids of which their access rights collected.
 	 * @return array List of access rights with the object ids assigned to the corresponding access.
 	 */
-	private static function determineAccessRightsForMultipleObjects( 
+	private static function determineAccessRightsForMultipleObjects(
 		$user, $pub, $iss, $cat, $objType, $statusId, $objIds )
 	{
 		// Determine access rights
@@ -2291,19 +2298,20 @@ class BizWorkflow
 			require_once BASEDIR.'/server/authorizationmodule.php';
 			$globAuth = new authorizationmodule( );
 		}
-		$globAuth->getrights( $user, $pub, $iss );
-		
+		$globAuth->getRights( $user, $pub, $iss );
+
 		$rights = self::initRights();
 		$metaDatas = DBObject::getMultipleObjectsProperties( $objIds );
-		
+
 		foreach( $metaDatas as $objId => $metaData ) {
 			$objCatId = $cat ? $cat : $metaData->BasicMetaData->Category->Id; // When $cat is given, meaning it is a re-draw.
 			$objStatusId = $statusId ? $statusId : $metaData->WorkflowMetaData->State->Id;
 			$contentSource = $metaData->BasicMetaData->ContentSource;
 			$documentId = $metaData->BasicMetaData->DocumentID;
-			$rights = self::collectAccessRights( $globAuth, 
-						$pub, $iss, $objCatId, $objType, $objStatusId, 
-						$objId, $contentSource, $documentId, $rights );
+			$routeTo = $metaData->WorkflowMetaData->RouteTo;
+			$rights = self::collectAccessRights( $globAuth,
+				$pub, $iss, $objCatId, $objType, $objStatusId,
+				$objId, $contentSource, $documentId, $rights, $routeTo );
 		}
 		return $rights;
 	}
@@ -2321,55 +2329,56 @@ class BizWorkflow
 	 * @param string $contentSource
 	 * @param string $documentId
 	 * @param array $rights List of access rights of which the object id will be assign in to the corresponding access.
+	 * @param string $routeTo User to which an object is routed or will be routed to.
 	 * @return array List of access rights with the object id assigned to the corresponding access.
 	 */
-	private static function collectAccessRights( 
-		$globAuth, $pub, $iss, $cat, $objType, $statusId, 
-		$objId, $contentSource, $documentId, $rights )
+	private static function collectAccessRights(
+		$globAuth, $pub, $iss, $cat, $objType, $statusId,
+		$objId, $contentSource, $documentId, $rights, $routeTo )
 	{
-		if( $globAuth->checkright( 'e', 
-							$pub, $iss, $cat, $objType, $statusId, 
-							$objId, $contentSource, $documentId ) ) {
+		if( $globAuth->checkright( 'e',
+			$pub, $iss, $cat, $objType, $statusId,
+			$objId, $contentSource, $documentId, $routeTo ) ) {
 			$rights['hasRights']['ChangeEdition'][] = $objId;
 		} else {
 			$rights['noRights']['ChangeEdition'][] = $objId;
 		}
 
-		if( $globAuth->checkright( 'C', 
-							$pub, $iss, $cat, $objType, $statusId, 
-							$objId, $contentSource, $documentId ) ) {
+		if( $globAuth->checkright( 'C',
+			$pub, $iss, $cat, $objType, $statusId,
+			$objId, $contentSource, $documentId, $routeTo ) ) {
 			$rights['hasRights']['Change_Status'][] = $objId;
 		} else {
 			$rights['noRights']['Change_Status'][] = $objId;
 		}
 
-		if( $globAuth->checkright( 'F', 
-							$pub, $iss, $cat, $objType, $statusId, 
-							$objId, $contentSource, $documentId ) ) {
+		if( $globAuth->checkright( 'F',
+			$pub, $iss, $cat, $objType, $statusId,
+			$objId, $contentSource, $documentId, $routeTo ) ) {
 			$rights['hasRights']['Change_Status_Forward'][] = $objId;
 		} else {
 			$rights['noRights']['Change_Status_Forward'][] = $objId;
 		}
 
-		if( $globAuth->checkright( 'd', 
-							$pub, $iss, $cat, $objType, $statusId, 
-							$objId, $contentSource, $documentId ) ) {
+		if( $globAuth->checkright( 'd',
+			$pub, $iss, $cat, $objType, $statusId,
+			$objId, $contentSource, $documentId, $routeTo ) ) {
 			$rights['hasRights']['CreateDossier'][] = $objId;
 		} else {
 			$rights['noRights']['CreateDossier'][] = $objId;
 		}
 
-		if( $globAuth->checkright( 'r', 
-							$pub, $iss, $cat, $objType, $statusId, 
-							$objId, $contentSource, $documentId ) ) {
+		if( $globAuth->checkright( 'r',
+			$pub, $iss, $cat, $objType, $statusId,
+			$objId, $contentSource, $documentId, $routeTo ) ) {
 			$rights['hasRights']['RestrictedProperties'][] = $objId;
 		} else {
 			$rights['noRights']['RestrictedProperties'][] = $objId;
 		}
 
-		if( $globAuth->checkright( 'P', 
-							$pub, $iss, $cat, $objType, $statusId, 
-							$objId, $contentSource, $documentId ) ) {
+		if( $globAuth->checkright( 'P',
+			$pub, $iss, $cat, $objType, $statusId,
+			$objId, $contentSource, $documentId, $routeTo ) ) {
 			$rights['hasRights']['ChangePIS'][] = $objId;
 		} else {
 			$rights['noRights']['ChangePIS'][] = $objId;
@@ -2534,15 +2543,15 @@ class BizWorkflow
 	protected static function hideTargetsAtDialog( $reqTargets, $isPlaced, $objTargets )
 	{
 		return !$reqTargets && // InDesign or InCopy which can not handle multiple targets at the dialog. Showing only 1 issue selection at the time.
-			($isPlaced ||      // Typically a placed article/image for which we don't know which parent to pick to derive the (single!) issue
-							   // and for which the server does not know the last selected edition for the placed article.
+		($isPlaced ||      // Typically a placed article/image for which we don't know which parent to pick to derive the (single!) issue
+			// and for which the server does not know the last selected edition for the placed article.
 			count($objTargets) != 1); // When object has multiple targets, server can not pick one (as done for v6.1).
-									  // This is because there can be multiple print channels (or PDF created for Web channel). Better show nothing.
+		// This is because there can be multiple print channels (or PDF created for Web channel). Better show nothing.
 	}
 
 	/**
-	 * Prune a given PublicationInfo tree; avoid returning a whole bunch of definitions that are not 
-	 * used to draw dialog. For example, -many- sections/editions would be returned for 
+	 * Prune a given PublicationInfo tree; avoid returning a whole bunch of definitions that are not
+	 * used to draw dialog. For example, -many- sections/editions would be returned for
 	 * all overrule issues if we won't prune those. But, we do not prune for the requested issue !
 	 * But, we never return states; To populate combo, clients should use GetStatesResponse!
 	 *
@@ -2573,7 +2582,7 @@ class BizWorkflow
 			}
 			$pubInfo->Categories = null;
 		}
-		
+
 		return $pubInfo;
 	}
 
@@ -2612,8 +2621,8 @@ class BizWorkflow
 			$queryParams[] = new QueryParam('Type', '=', 'Dossier');
 			// BZ#22871 - Shouldn't set the result limit, set maxEntries = '' to return all dossiers
 			$result = BizQuery::queryObjects('', $shortUserName, $queryParams, null, '', false, null, false,
-												array( new QueryOrder('Name',true) ), // sort on Name (BZ#16962)
-												null, array('ID', 'Name', 'Type'));
+				array( new QueryOrder('Name',true) ), // sort on Name (BZ#16962)
+				null, array('ID', 'Name', 'Type'));
 			if (is_array($result->Rows)){
 				foreach ($result->Rows as $row) {
 					if( $row[0] == $defaultDossier ){ // BZ#24829: version#9, scenario 2 & 4:
@@ -2652,7 +2661,7 @@ class BizWorkflow
 	 * channel when not configured). Of that channel, the current issue is taken (or
 	 * the first issue when not configured). When the given issue can not be found at
 	 * publication info, a default issue is determined. When the given category can
-	 * not be found at the publication or (resolved) issue, the default category is 
+	 * not be found at the publication or (resolved) issue, the default category is
 	 * determined by taking the first one.
 	 *
 	 * @param PublicationInfo $pubInfo
@@ -2709,10 +2718,10 @@ class BizWorkflow
 		$parentObjType = $parentObj ? $parentObj->MetaData->BasicMetaData->Type : '';
 		if( $channelId && // theoretically, the Brand could have no channels
 			( $iss ||  ( // issue can be resolved before, typically an overrule issue, which we need to resolve Category below! (BZ#16965)
-			($action == 'Create' && $parentObjType != 'Dossier') || $action == 'CopyTo' ||  // avoid adding current issue for Preview dialog, Save Version, etc etc (BZ#16482 / BZ#16971)
-			($action == 'Create' && ($objType == 'Layout' || $objType == 'PublishForm') && $parentObjType == 'Dossier' && !$parentObj->Targets ) || // Resolve the default issue when parent object is not target (BZ#30404)
-			($redrawNonCreate && !self::canBeIssuelessObject($objType) ) || /* A */
-			($objectId && !BizContentSource::isAlienObject( $objectId )&& self::canBeIssuelessObject($objType) && DBTarget::hasObjectTargetIssue( $objectId )) /* B */))) {
+					($action == 'Create' && $parentObjType != 'Dossier') || $action == 'CopyTo' ||  // avoid adding current issue for Preview dialog, Save Version, etc etc (BZ#16482 / BZ#16971)
+					($action == 'Create' && ($objType == 'Layout' || $objType == 'PublishForm') && $parentObjType == 'Dossier' && !$parentObj->Targets ) || // Resolve the default issue when parent object is not target (BZ#30404)
+					($redrawNonCreate && !self::canBeIssuelessObject($objType) ) || /* A */
+					($objectId && !BizContentSource::isAlienObject( $objectId )&& self::canBeIssuelessObject($objType) && DBTarget::hasObjectTargetIssue( $objectId )) /* B */))) {
 			// avoid empty issue combo when selecting another Brand (for Save Version, Check In, etc)
 			// Except if a dialog is redrawn and the object can be issueless:
 			// - If the object is issueless (no object-target) no default is returned and the issue combo-box will not be shown in ID/IC. BZ#18740. Marked with A.
@@ -2952,7 +2961,7 @@ class BizWorkflow
 	 * assigned.
 	 *
 	 * Throws BizException in case of not allowed number of targets
-	 * 
+	 *
 	 * @param MetaData $meta
 	 * @param array $targets
 	 * @throws BizException
@@ -3160,23 +3169,23 @@ class BizWorkflow
 											}
 										}
 									} else {
-									    // Check if we have standard object properties at hand, otherwise fetch them.
+										// Check if we have standard object properties at hand, otherwise fetch them.
 										if (is_null($standardProperties)) {
 											$standardProperties = BizProperty::getPropertyInfos();
 										}
 
 										// Go through our standard properties to find a match for the wiwiwUsage.
-									    if ( $standardProperties ) foreach ( $standardProperties as $standardPropertyInfoKey => $standardPropertyInfo ) {
-										    if ($oneWiwiwKey == $standardPropertyInfoKey) {
-											    $oneWiwiwWidget = self::getDialogWidget( $standardPropertyInfo, $oneWiwiwPropertyUsage );
-										    }
-									    }
-								    }
+										if ( $standardProperties ) foreach ( $standardProperties as $standardPropertyInfoKey => $standardPropertyInfo ) {
+											if ($oneWiwiwKey == $standardPropertyInfoKey) {
+												$oneWiwiwWidget = self::getDialogWidget( $standardPropertyInfo, $oneWiwiwPropertyUsage );
+											}
+										}
+									}
 									if ($oneWiwiwWidget) {
 										$widgetsInWidgetsInWidgets[$propertyInfo->Category][$parentPropId][] = $oneWiwiwWidget;
 									}
-							    }
-						    }
+								}
+							}
 						}
 
 						// Extract the MetaData.
@@ -3249,7 +3258,7 @@ class BizWorkflow
 
 		$default = self::getDefaultPublishDialog();
 		$default['Dialog'] = $dialog;
-		$default['Relations'] = $object->Relations;		
+		$default['Relations'] = $object->Relations;
 
 		// When there is a Dialog and the requestMetaData property is set to true,
 		// return all the metadata from the object.
@@ -3355,7 +3364,7 @@ class BizWorkflow
 
 		return $buttonBar;
 	}
-	
+
 	/**
 	 * Get a default dialog for publishing. This is send back when the get Dialog for Publishing
 	 * (publish, update and unpublish) isn't overruled.
@@ -3365,13 +3374,13 @@ class BizWorkflow
 	private static function getDefaultPublishDialog()
 	{
 		$ret = array();
-		
+
 		// GetDialogResponse attributes that are not in GetDialog2Response:
 		$ret['Publications'] = null;
 		$ret['PublicationInfo'] = null;
 		$ret['GetStatesResponse'] = null;
 		$ret['Dossiers'] = null;
-		
+
 		// GetDialog2Response attributes:
 		$ret['Dialog'] = null;
 		$ret['PubChannels'] = null;
@@ -3428,7 +3437,7 @@ class BizWorkflow
 	/**
 	 * Checks if an objecttype can issueless. This means that an object of this type
 	 * can have no object target. E.g an article can be created without assigning
-	 * it to an issue. 
+	 * it to an issue.
 	 * @param string $objectType Object type to be checked.
 	 * @return boolean Can be issueless (true/false)
 	 */
@@ -3508,7 +3517,7 @@ class BizWorkflow
 
 	/**
 	 * Adds a disabled routeTo user to the states.
-	 * 
+	 *
 	 * The states only contain active users. But if an object is routed to a deactivated user we add this user so
 	 * it will be available in the drop-down list.
 	 * @param string $routeTo short user name of the RouteTo user.

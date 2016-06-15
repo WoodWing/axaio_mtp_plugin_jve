@@ -457,7 +457,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPlacementTiles_TestCase 
 		if( !isset($globAuth) ) {
 			require_once BASEDIR.'/server/authorizationmodule.php';
 			$globAuth = new authorizationmodule( );
-			$globAuth->getrights( $this->suiteOpts['User'] ); // Cache the rights, otherwise the issues aren't returned
+			$globAuth->getRights( $this->suiteOpts['User'] ); // Cache the rights, otherwise the issues aren't returned
 		}
 
 		// Determine the issue object

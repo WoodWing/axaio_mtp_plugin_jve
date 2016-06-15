@@ -35,15 +35,15 @@ class BizPlnObject
 
 			// properties to set
 			$props = array (
-			"name"         => $layout->NewLayout->Name,
-			"pub_name"     => $layout->NewLayout->Publication,
-			"issue_name"   => $layout->NewLayout->Issue,
-			"section_name" => $layout->NewLayout->Section,
-			"state_name"   => $layout->NewLayout->Status,			// beware: status to state
-			"pages"        => $layout->NewLayout->Pages,
-			"type"         => 'Layout',
-			"editions"	   => $layout->NewLayout->Editions,
-			"deadline"	   => $layout->NewLayout->Deadline
+				"name"         => $layout->NewLayout->Name,
+				"pub_name"     => $layout->NewLayout->Publication,
+				"issue_name"   => $layout->NewLayout->Issue,
+				"section_name" => $layout->NewLayout->Section,
+				"state_name"   => $layout->NewLayout->Status,			// beware: status to state
+				"pages"        => $layout->NewLayout->Pages,
+				"type"         => 'Layout',
+				"editions"	   => $layout->NewLayout->Editions,
+				"deadline"	   => $layout->NewLayout->Deadline
 			);
 
 			//BZ#6599 Editionid's were not assigned to pages so the editions were not written correctly when copying the layout.
@@ -77,9 +77,9 @@ class BizPlnObject
 			self::copyResolvedPropsFromArray( $layout->NewLayout, $props );
 
 			$retlays[] = new PlnLayout( $layout->NewLayout->Id, $layout->NewLayout->Name,
-									$layout->NewLayout->Publication, $layout->NewLayout->Issue, $layout->NewLayout->Section, 
-									$layout->NewLayout->Status, null,
-									$layout->NewLayout->Editions, $layout->NewLayout->Deadline, $layout->NewLayout->Version );
+				$layout->NewLayout->Publication, $layout->NewLayout->Issue, $layout->NewLayout->Section,
+				$layout->NewLayout->Status, null,
+				$layout->NewLayout->Editions, $layout->NewLayout->Deadline, $layout->NewLayout->Version );
 		}
 		LogHandler::Log('PlanningServices', 'DEBUG', 'CreateLayouts completed <<<');
 		return $retlays;
@@ -95,12 +95,12 @@ class BizPlnObject
 		foreach ($layouts as &$layout) {
 			$layout->Id = trim($layout->Id);
 			$layout->Name = trim($layout->Name);
-			
+
 			if( !self::isValidId( $layout->Id ) && (!isset( $layout->Name ) || $layout->Name == '') )  {
 				throw new BizException( 'PLAN_DELETE_LAYOUT_FAILED', 'Client', '' );
 			}
 		}
-		
+
 		foreach ($layouts as $layout) {
 			// lookup in DB and enrich $layout object
 			$storename = '';
@@ -119,7 +119,7 @@ class BizPlnObject
 			BizPage::cleanPages( null, $layout->Id, 'Planning', $version );
 			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 			DBObject::updatePageRange( $layout->Id, '', 'Planning' );
-			
+
 
 			// tell layouter that his/her layout needs to be knuffel'ed since planner has infected layout
 			$sMsg = BizResources::localize( 'PLAN_MESS_LAYOUT_DELETED', true, array($layout->Name) );
@@ -141,7 +141,7 @@ class BizPlnObject
 		foreach ($layouts as &$layout) {
 			$layout->Id = trim($layout->Id);
 			$layout->Name = trim($layout->Name);
-			
+
 			if( !self::isValidId( $layout->Id ) && (!isset( $layout->Name ) || $layout->Name == '') )  {
 				throw new BizException( 'PLAN_MODIFY_LAYOUT_FAILED', 'Client', '' );
 			}
@@ -170,7 +170,7 @@ class BizPlnObject
 			$lay_props['deadline'] = $layout->Deadline;
 
 			self::modifyObject( $lay_props, $user );
-			
+
 			$layout->Version = $lay_props['version'];
 
 			// tell layouter that his/her layout needs to be knuffel'ed since planner has infected layout
@@ -210,8 +210,8 @@ class BizPlnObject
 			BizPage::savePages( null, $layout->Id, 'Planning', $layout->Pages, true, $oldVersion, $lay_props['version'] ); // replace planned pages
 
 			$retlays[] = new PlnLayout( $layout->Id, $layout->Name,
-									$layout->Publication, $layout->Issue, $layout->Section, $layout->Status, null,
-									$layout->Editions, $layout->Deadline, $layout->Version );
+				$layout->Publication, $layout->Issue, $layout->Section, $layout->Status, null,
+				$layout->Editions, $layout->Deadline, $layout->Version );
 
 		} // endfor layouts
 
@@ -230,7 +230,7 @@ class BizPlnObject
 		// validate required arguments to create adverts to avoid errors later on
 		foreach ($adverts as $advert) {
 			if( (!self::isValidId( $layoutid ) && (!isset( $layoutname ) || $layoutname == '')) ||
-					!self::advertHasId( $advert ) || !self::advertHasContent( $advert ) )  {
+				!self::advertHasId( $advert ) || !self::advertHasContent( $advert ) )  {
 				throw new BizException( 'PLAN_CREATE_ADVERT_FAILED', 'Client', '' );
 			}
 		}
@@ -245,33 +245,33 @@ class BizPlnObject
 
 			// properties to set
 			$props = array (
-			//'id'          => $advert->Id, // editorial system determines the object id
-			'documentid'  => $advert->AlienId, // advert id of advertisement system
-			'pub_name'    => $advert->Publication,
-			'issue_name'  => $advert->Issue,
-			'section_name'=> $advert->Section,
-			'state_name'  => $advert->Status, // we accept initial(!) status from plansystems (no changes)
-			'name'        => $advert->Name,
+				//'id'          => $advert->Id, // editorial system determines the object id
+				'documentid'  => $advert->AlienId, // advert id of advertisement system
+				'pub_name'    => $advert->Publication,
+				'issue_name'  => $advert->Issue,
+				'section_name'=> $advert->Section,
+				'state_name'  => $advert->Status, // we accept initial(!) status from plansystems (no changes)
+				'name'        => $advert->Name,
 
-			'comment'     => $advert->Comment,
-			'source'	     => $advert->Source,
-			'colorspace'  => $advert->ColorSpace,
-			'description' => $advert->Description,
+				'comment'     => $advert->Comment,
+				'source'	     => $advert->Source,
+				'colorspace'  => $advert->ColorSpace,
+				'description' => $advert->Description,
 
-			'plaincontent'=> $advert->PlainContent,
-			'highresfile' => $advert->HighResFile,
-			'pageorder'   => isset( $advert->PageOrder ) && $advert->PageOrder != '' ? $advert->PageOrder : $advert->Page->PageOrder,
+				'plaincontent'=> $advert->PlainContent,
+				'highresfile' => $advert->HighResFile,
+				'pageorder'   => isset( $advert->PageOrder ) && $advert->PageOrder != '' ? $advert->PageOrder : $advert->Page->PageOrder,
 
-			//'storename'   => $storename,
-			'format'      => self::getMimeType( $advert ),
-			'type'        => 'Advert',
-			'width'       => $advert->Placement->Width,
-			'depth'       => $advert->Placement->Height,
+				//'storename'   => $storename,
+				'format'      => self::getMimeType( $advert ),
+				'type'        => 'Advert',
+				'width'       => $advert->Placement->Width,
+				'depth'       => $advert->Placement->Height,
 
-			'editions'    => $advert->Editions,
-			'deadline'    => $advert->Deadline,
+				'editions'    => $advert->Editions,
+				'deadline'    => $advert->Deadline,
 
-			'pagesequence'   => isset( $advert->PageSequence ) && $advert->PageSequence != '' ? $advert->PageSequence : $advert->Page->PageSequence
+				'pagesequence'   => isset( $advert->PageSequence ) && $advert->PageSequence != '' ? $advert->PageSequence : $advert->Page->PageSequence
 			);
 
 			LogHandler::Log('PlanningServices', 'DEBUG', 'CreateAdverts 2');
@@ -281,7 +281,7 @@ class BizPlnObject
 			if( isset( $advert->File->FilePath) ) {
 				require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 				$transferServer = new BizTransferServer();
-				$content = $transferServer->getContent($advert->File);				
+				$content = $transferServer->getContent($advert->File);
 
 				// generate and collect thumb when jpeg preview is given
 				if( MimeTypeHandler::isJPEG( $advert->File->Type ) && $advert->File->Rendition == 'preview' ) {
@@ -346,7 +346,7 @@ class BizPlnObject
 				}
 			} else {
 				$placement = self::plnPlacementToWflPlacement($advert->Placement);
-			 	$placements[] = $placement;
+				$placements[] = $placement;
 			}
 			$rel = array( new Relation( $layoutid, $advert->Id, 'Planned', $placements ) );
 			unset( $advert->Placement->FilePath ); // preview no longer used
@@ -450,32 +450,32 @@ class BizPlnObject
 
 			// properties to set
 			$props = array (
-			'id'          => $advert->Id,
-			'pub_name'    => $advert->Publication,
-			'issue_name'  => $advert->Issue,
-			'section_name'=> $advert->Section,
-			//'state_name' => $advert->Status, // we don't accept status changes from plansystems
-			'name'        => $advert->Name,
+				'id'          => $advert->Id,
+				'pub_name'    => $advert->Publication,
+				'issue_name'  => $advert->Issue,
+				'section_name'=> $advert->Section,
+				//'state_name' => $advert->Status, // we don't accept status changes from plansystems
+				'name'        => $advert->Name,
 
-			'comment'     => $advert->Comment,
-			'source'	     => $advert->Source,
-			'colorspace'  => $advert->ColorSpace,
-			'description' => $advert->Description,
+				'comment'     => $advert->Comment,
+				'source'	     => $advert->Source,
+				'colorspace'  => $advert->ColorSpace,
+				'description' => $advert->Description,
 
-			'plaincontent' => $advert->PlainContent,
-			'highresfile'  => $advert->HighResFile,
-			'pageorder'   => isset( $advert->PageOrder ) && $advert->PageOrder != '' ? $advert->PageOrder : $advert->Page->PageOrder,
+				'plaincontent' => $advert->PlainContent,
+				'highresfile'  => $advert->HighResFile,
+				'pageorder'   => isset( $advert->PageOrder ) && $advert->PageOrder != '' ? $advert->PageOrder : $advert->Page->PageOrder,
 
-			'storename'   => $storename,
-			'format'      => self::getMimeType( $advert ),
-			'type'        => 'Advert',
-			'width'       => $advert->Placement->Width,
-			'depth'       => $advert->Placement->Height,
+				'storename'   => $storename,
+				'format'      => self::getMimeType( $advert ),
+				'type'        => 'Advert',
+				'width'       => $advert->Placement->Width,
+				'depth'       => $advert->Placement->Height,
 
-			"editions"	   => $advert->Editions,
-			"deadline"	   => $advert->Deadline,
+				"editions"	   => $advert->Editions,
+				"deadline"	   => $advert->Deadline,
 
-			'pagesequence'  => isset( $advert->PageSequence ) && $advert->PageSequence != '' ? $advert->PageSequence : $advert->Page->PageSequence,
+				'pagesequence'  => isset( $advert->PageSequence ) && $advert->PageSequence != '' ? $advert->PageSequence : $advert->Page->PageSequence,
 
 			);
 
@@ -590,10 +590,10 @@ class BizPlnObject
 
 			// return created advert to inform caller about new object id, truncated(?) name, and implicit(?) status change
 			$retads[] = new PlnAdvert( $advert->Id, $advert->AlienId,
-			$advert->Publication, $advert->Issue, $advert->Section, $advert->Status, $advert->Name, null /*adtype*/,
-			null /*comment*/, null /*source*/, null /*color*/, null /*descr*/, null /*content*/,
-			null /*file*/, null /*highres*/, null /*pageorder*/, null /*page*/, null /*placement*/,
-			null /*prefplace*/, null /*prio*/, null /*rate*/, $advert->Editions, $advert->Deadline, null, $advert->Version );
+				$advert->Publication, $advert->Issue, $advert->Section, $advert->Status, $advert->Name, null /*adtype*/,
+				null /*comment*/, null /*source*/, null /*color*/, null /*descr*/, null /*content*/,
+				null /*file*/, null /*highres*/, null /*pageorder*/, null /*page*/, null /*placement*/,
+				null /*prefplace*/, null /*prio*/, null /*rate*/, $advert->Editions, $advert->Deadline, null, $advert->Version );
 		}
 		LogHandler::Log('PlanningServices', 'DEBUG', 'ModifyAdverts completed <<<');
 		return $retads;
@@ -642,9 +642,9 @@ class BizPlnObject
 	static private function isValidId( $objectId )
 	{
 		$objectId = trim($objectId);
-		return !empty($objectId) && 
-				((string)($objectId) == (string)(int)($objectId)) && // natural?
-				$objectId > 0;
+		return !empty($objectId) &&
+		((string)($objectId) == (string)(int)($objectId)) && // natural?
+		$objectId > 0;
 	}
 
 	static private function advertHasId( $advert )
@@ -652,8 +652,8 @@ class BizPlnObject
 		return // id is unique but optional, so only validate other params when id is missing
 			self::isValidId( $advert->Id ) ||
 			( isset( $advert->Name ) && trim($advert->Name) != '' &&
-			isset( $advert->Publication ) && trim($advert->Publication) != '' &&
-			isset( $advert->Issue ) && trim($advert->Issue) != '' );
+				isset( $advert->Publication ) && trim($advert->Publication) != '' &&
+				isset( $advert->Issue ) && trim($advert->Issue) != '' );
 	}
 
 	static private function advertHasContent( $advert )
@@ -661,8 +661,8 @@ class BizPlnObject
 		return // highres or attachment or plain content
 			( isset( $advert->HighResFile ) && $advert->HighResFile != '' ) ||
 			(  ( isset( $advert->File->FilePath) && $advert->File->FilePath != '' ) &&
-			( isset( $advert->File->Rendition ) && $advert->File->Rendition != '' ) &&
-			( isset( $advert->File->Type ) && $advert->File->Type != '' )) ||
+				( isset( $advert->File->Rendition ) && $advert->File->Rendition != '' ) &&
+				( isset( $advert->File->Type ) && $advert->File->Type != '' )) ||
 			( isset( $advert->PlainContent ) && $advert->PlainContent != '' ) ||
 			( isset( $advert->Description ) && $advert->Description != '' );
 	}
@@ -762,20 +762,20 @@ class BizPlnObject
 		$target->Issue = new Issue();
 		if( isset($arr['issue']) && trim($arr['issue']) )
 			$target->Issue->Id   = $arr['issue'];
-			require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-			require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
-			$channelId = DBIssue::getChannelId($arr['issue']);
-			$channelName = DBChannel::getPubChannelObj($channelId)->Name;
-			$target->PubChannel = new PubChannel();
-			$target->PubChannel->Id = $channelId;
-			$target->PubChannel->Name = $channelName;
+		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
+		$channelId = DBIssue::getChannelId($arr['issue']);
+		$channelName = DBChannel::getPubChannelObj($channelId)->Name;
+		$target->PubChannel = new PubChannel();
+		$target->PubChannel->Id = $channelId;
+		$target->PubChannel->Name = $channelName;
 		if( isset($arr['issue_name']) && trim($arr['issue_name']) )
 			$target->Issue->Name = $arr['issue_name'];
 		if ( isset($arr['editions']) )
 			$target->Editions    = $arr['editions'];
 		return $target;
 	}
-		
+
 	static private function arrayToMetaStruc( $arr, &$meta )
 	{
 		if( !isset($meta->BasicMetaData) ) {
@@ -891,7 +891,7 @@ class BizPlnObject
 
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 		$object = BizObject::getObject( $arr['id'], $user, true, null, array('Targets') ); // lock, no rendition
-		
+
 		try {
 			self::arrayToMetaStruc( $arr, $object->MetaData ); // update meta data from DB with arrived
 			$targets = array( self::arrayToTarget( $arr ) );
@@ -968,7 +968,7 @@ class BizPlnObject
 				$issueId = $targets && count($targets) ? $targets[0]->Issue->Id : 0;
 			}
 			require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
-			BizAccess::checkRightsForObjectRow( 
+			BizAccess::checkRightsForObjectRow(
 				$user, 'RW', BizAccess::THROW_ON_DENIED, $row, $issueId );
 		}
 
@@ -984,14 +984,14 @@ class BizPlnObject
 		// TODO can we rewrite this by using BizObject::setObjectProperties see modifyadvert ?
 		self::saveIssuesAndEditions($user, $id, $arr, $row);
 	}
-	
+
 	/**
 	 * Save issues and editions by saving the targets
 	 * Some rules:
 	 * 1. If editions is set always change editions
 	 * 2. If publication (or overrule pub issue) has been changed, assume editions are changed (no channel info here) => nil will mean all editions
 	 * 3. If issue (not overrule pub) has been changed and editions are not set, don't set editions
-	 * 
+	 *
 	 * @param string $user short username
 	 * @param int $id object id
 	 * @param array $arr new object properties
@@ -1142,10 +1142,10 @@ class BizPlnObject
 		// when id is given, but 'named id' (Pub+Iss+Name+Type) is not, just fill in the current db values (Solves #3359)
 		if( array_key_exists( 'id', $arr ) && trim($arr['id']) != '' ) {
 			if( ( !array_key_exists( 'name', $arr ) || trim($arr['name']) == '' ) ||
-			( !array_key_exists( 'type', $arr ) || trim($arr['type']) == '' ) ||
-			( !array_key_exists( 'publication', $arr ) || trim($arr['publication']) == '' ) ||
-			//( !array_key_exists( 'issue', $arr ) || trim($arr['issue']) == '' ) ||
-			( !array_key_exists( 'section', $arr ) || trim($arr['section']) == '' ) ) {
+				( !array_key_exists( 'type', $arr ) || trim($arr['type']) == '' ) ||
+				( !array_key_exists( 'publication', $arr ) || trim($arr['publication']) == '' ) ||
+				//( !array_key_exists( 'issue', $arr ) || trim($arr['issue']) == '' ) ||
+				( !array_key_exists( 'section', $arr ) || trim($arr['section']) == '' ) ) {
 				$dbo  = $dbdriver->tablename('objects');
 				$sql = 'SELECT `name`, `type`, `publication`, `section` FROM '.$dbo.' WHERE `id` = '.$arr['id'];
 				$sth = $dbdriver->query($sql);
@@ -1184,9 +1184,9 @@ class BizPlnObject
 			} else {
 				require_once BASEDIR.'/server/dbclasses/DBSection.class.php';
 				$sth = DBSection::listSections( $arr['publication'], $arr['issue'] );
-				$globAuth->getrights( $user, $arr['publication'], $arr['issue'] );
+				$globAuth->getRights( $user, $arr['publication'], $arr['issue'] );
 				if( $sth ) while( ($row = $dbdriver->fetch($sth)) ) {
-					if( $globAuth->checkright( '', $arr['publication'], $arr['issue'], $row['id'] ) ) { // examine accessable sections only
+					if( $globAuth->checkright( '', $arr['publication'], $arr['issue'], $row['id'] ) ) { // examine access to sections only
 						if( $status_provided ) {
 							$arr['section'] = $row['id']; // section resolved !
 							$arr['section_name'] = $row['section'];
@@ -1209,7 +1209,7 @@ class BizPlnObject
 				require_once BASEDIR.'/server/bizclasses/BizWorkflow.class.php';
 				if( $section_found === true || $section_provided === true ) {
 					$states = BizWorkflow::getStates( BizSession::getShortUserName(), $arr['publication'], $arr['issue'], $arr['section'], $arr['type'] );
-					$globAuth->getrights( $user, $arr['publication'], $arr['issue'], $arr['section'], $arr['type'] );
+					$globAuth->getRights( $user, $arr['publication'], $arr['issue'], $arr['section'], $arr['type'] );
 					foreach( $states as $stat ) {
 						if( $globAuth->checkright( 'W', $arr['publication'], $arr['issue'], $arr['section'], $arr['type'], $stat->Id ) ) { // examine write access
 							$status_found = true;
@@ -1221,7 +1221,7 @@ class BizPlnObject
 				} else {
 					foreach( $section_candidates as $section_candidate ) {
 						$states = BizWorkflow::getStates( BizSession::getShortUserName(), $arr['publication'], $arr['issue'], $section_candidate['id'], $arr['type'] );
-						$globAuth->getrights( $user, $arr['publication'], $arr['issue'], $section_candidate['id'], $arr['type'] );
+						$globAuth->getRights( $user, $arr['publication'], $arr['issue'], $section_candidate['id'], $arr['type'] );
 						foreach( $states as $stat ) {
 							self::log_pissn( $arr, 'resolvepiss determine rights for status ['.$stat->Id.'] : ' );
 							if( $globAuth->checkright( 'W', $arr['publication'], $arr['issue'], $section_candidate['id'], $arr['type'], $stat->Id ) ) { // examine write access
@@ -1427,7 +1427,7 @@ class BizPlnObject
 		// fail on any unresolved edition
 		if ( $editions) foreach( $editions as $edition ) {
 			if( !isset( $edition->Id ) || empty( $edition->Id ) ||
-			!isset( $edition->Name ) || empty( $edition->Name ) ) {
+				!isset( $edition->Name ) || empty( $edition->Name ) ) {
 				return empty( $edition->Name ) ? 'Unknown' :  $edition->Name;
 			}
 		}
@@ -1445,7 +1445,7 @@ class BizPlnObject
 			$message->Message = $msgText;
 			$message->TimeStamp = date('Y-m-d\TH:i:s');
 			$message->MessageLevel = $msgLevel;
-			
+
 			$messageList = new MessageList();
 			$messageList->Messages = array( $message );
 			BizMessage::sendMessages( $messageList );
@@ -1454,7 +1454,7 @@ class BizPlnObject
 			// suppress errors
 		}
 	}
-	
+
 	/**
 	 * Converts a planning PlnPlacement object to a workflow Placement object.
 	 *
@@ -1472,9 +1472,9 @@ class BizPlnObject
 
 	/**
 	 * Converts a PlnPage object (planned page) to a Page object (workflow).
-	 * 
+	 *
 	 * @param PlnPage $plnPage
-	 * @return Page 
+	 * @return Page
 	 */
 	static private function plnPageToWflPage( PlnPage $plnPage )
 	{
@@ -1486,5 +1486,5 @@ class BizPlnObject
 		}
 
 		return $wflPage;
-	}	
+	}
 }
