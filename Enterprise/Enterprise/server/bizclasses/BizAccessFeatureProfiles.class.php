@@ -7,15 +7,15 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  *
  * IMPORTANT: Access/Workflow features have reserved range: [1...99].
- *    This range is used by DBUser::getRightsCached to filter out those rights efficiently.
+ *    This range is used by authorizationmodule::getRightsCached to filter out those rights efficiently.
  *    Only for THESE rights, the server can/will check access.
- *    Clients are free wether or not to check them too, which is for usabilty only.
+ *    Clients are free whether or not to check them too, which is for usability only.
  *    If not respected by clients, server will raise Access Denied error.
- *    Other rights, the server is concidered NOT able to check.
+ *    Other rights, the server is considered NOT able to check.
  *    These rights are checked client-side only (and so always accepted by server).
  *
  * MAINTENANCE: You are NOT allowed to change the right ids nor the names!!!
- *    This is because those ids are stored in databases and names are intepret by clients.
+ *    This is because those ids are stored in databases and names are interpreted by clients.
  *    Changing ids would results into mismatches for existing databases or confuse clients.
  *
  * @since 9.0.0 This module is introduced in replacement of the old BizAccessData.php module.
