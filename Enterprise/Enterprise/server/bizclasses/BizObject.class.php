@@ -3693,7 +3693,7 @@ class BizObject
 
 			require_once BASEDIR.'/server/smartevent.php';
 			$eventProps = array( 'LockedBy' => $lockedBy );
-			new smartevent_setPropertiesForMultipleObjects( $lockedObjectIds, $eventProps );
+			new smartevent_setPropertiesForMultipleObjects( array_keys( $lockedObjectIds ), $eventProps );
 
 			require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
 			$metaDataValues = array();
