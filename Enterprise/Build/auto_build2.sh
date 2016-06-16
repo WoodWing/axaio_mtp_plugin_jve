@@ -116,59 +116,65 @@ function zipFolder {
 
 #
 # Derives the postfix to use for naming artifact files. After call, SERVER_VERSION_ZIP is set.
-# It is derived from SERVER_VERSION, SERVER_RELEASE_TYPE and P4_BRANCH. Some examples:
+# It is derived from SERVER_VERSION, SERVER_RELEASE_TYPE and GIT_BRANCH. Some examples:
+#    -----------------------------------
+#    SERVER_VERSION: [10.1.0]
+#    SERVER_RELEASE_TYPE: [Daily]
+#    GIT_BRANCH: [master]
+#    SERVER_VERSION_ZIP: [v10.1_Master_Daily_Build123.zip]
+#    -----------------------------------
+#    SERVER_VERSION: [10.1.0]
+#    SERVER_RELEASE_TYPE: [Daily]
+#    GIT_BRANCH: [master/work2]
+#    SERVER_VERSION_ZIP: [v10.1_Master_Work2_Daily_Build123.zip]
 #    -----------------------------------
 #    SERVER_VERSION: [10.0.0]
-#    SERVER_RELEASE_TYPE: [Pre-release 1]
-#    P4_BRANCH: [SmartConnection/Server.master]
-#    SERVER_VERSION_ZIP: [v10.0.0_Prerelease1_Build539.zip]
+#    SERVER_RELEASE_TYPE: [Prerelease]
+#    GIT_BRANCH: [release/v10.0.x]
+#    SERVER_VERSION_ZIP: [v10.0.0_Prerelease_Build123.zip]
 #    -----------------------------------
-#    SERVER_VERSION: [10.0.0]
-#    SERVER_RELEASE_TYPE: [Pre-release 1]
-#    P4_BRANCH: [SmartConnection/Server.master.work2]
-#    SERVER_VERSION_ZIP: [v10.0_Work2_Daily_Build539.zip]
+#    SERVER_VERSION: [10.0.1]
+#    SERVER_RELEASE_TYPE: [Daily]
+#    GIT_BRANCH: [release/v10.0.x]
+#    SERVER_VERSION_ZIP: [v10.0.1_Daily_Build123.zip]
 #    -----------------------------------
-#    SERVER_VERSION: [9.4.1]
+#    SERVER_VERSION: [10.0.1]
 #    SERVER_RELEASE_TYPE: [Release]
-#    P4_BRANCH: [SmartConnection.archive/Server.v9.4.1]
-#    SERVER_VERSION_ZIP: [v9.4.1_Build539.zip]
+#    GIT_BRANCH: [release/v10.0.1]
+#    SERVER_VERSION_ZIP: [v10.0.1_Build123.zip]
 #    -----------------------------------
 #
 function determineZipPostfix {
-	if test "${SERVER_RELEASE_TYPE}" = "Daily"
-	then
-		serverVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)\.[0-9]+/\1/g"`
-	else
-		serverVersion="${SERVER_VERSION}"
+	# Start with the server version, but remote the patch digit for daily master builds.
+	SERVER_VERSION_ZIP="${SERVER_VERSION}"
+	if [[ "${SERVER_RELEASE_TYPE}" == "Daily" && 
+		( "${GIT_BRANCH}" == "master" || "${GIT_BRANCH}" == master/* ) ]]; then
+		SERVER_VERSION_ZIP=`echo "${SERVER_VERSION_ZIP}" | sed -r "s/([0-9]+\.[0-9]+)\.[0-9]+/\1/g"`
 	fi
-	if [[ "${P4_BRANCH}" == SmartConnection.archive/* ]] ;
-	then
-		SERVER_VERSION_ZIP="v${SERVER_VERSION}"
-	else
-		if test "${P4_BRANCH}" = "SmartConnection/Server.master"
-		then
-			SERVER_VERSION_ZIP="v${serverVersion}"
-		else
-			if test "${P4_BRANCH}" = "SmartConnection/Server.master.work"
-			then
-				SERVER_VERSION_ZIP="v${serverVersion}_Work"
-			else
-				workDigit=`echo "${P4_BRANCH}" | sed -r "s/SmartConnection\/Server\.master\.work([[:digit:]]+)/\1/g"`
-				if [ -n "${workDigit}" ]; then
-					SERVER_VERSION_ZIP="v${serverVersion}_Work${workDigit}"
-				else
-					SERVER_VERSION_ZIP=""
-					echo "Could not derive server version from branch: [${P4_BRANCH}]"
-					exit 1
-				fi
-			fi
+	
+	# Prefix with "v".
+	SERVER_VERSION_ZIP="v${SERVER_VERSION_ZIP}"
+	
+	# Add "_Master" for master branches.
+	if [[ "${GIT_BRANCH}" == "master" || "${GIT_BRANCH}" == master/* ]]; then
+		SERVER_VERSION_ZIP="${SERVER_VERSION_ZIP}_Master"
+	fi
+	
+	# Add "_Work", "_Work2" or "_Work3" for master work branches.
+	if [[ "${GIT_BRANCH}" == master/work* ]]; then
+		SERVER_VERSION_ZIP="${SERVER_VERSION_ZIP}_Work"
+		workDigit=`echo "${GIT_BRANCH}" | sed -r "s/master\/work([[:digit:]]+)/\1/g"`
+		if [ -n "${workDigit}" ]; then
+			SERVER_VERSION_ZIP="${SERVER_VERSION_ZIP}${workDigit}"
 		fi
 	fi
-	releaseType=`echo "${SERVER_RELEASE_TYPE}" | sed -r "s/[ -]//g"`
-	if test "${releaseType}" != "Release"
-	then
-		SERVER_VERSION_ZIP="${SERVER_VERSION_ZIP}_${releaseType}"
+	
+	# Add "_Daily" or "_Prelease" for non-release builds.
+	if [[ "${SERVER_RELEASE_TYPE}" != "Release" ]]; then
+		SERVER_VERSION_ZIP="${SERVER_VERSION_ZIP}_${SERVER_RELEASE_TYPE}"
 	fi
+	
+	# Add "_Build<nr>.zip" postfix.
 	SERVER_VERSION_ZIP="${SERVER_VERSION_ZIP}_Build${BUILD_NUMBER}.zip"
 }
 
@@ -290,11 +296,19 @@ function step0_validateEnvironment {
 	validateEnvironmentVariableNotEmpty BUILD_NUMBER "${BUILD_NUMBER}"
 	validateEnvironmentVariableNotEmpty PROXYFORSC_VERSION "${PROXYFORSC_VERSION}"
 	validateEnvironmentVariableNotEmpty PROXYFORSC_BUILDNR "${PROXYFORSC_BUILDNR}"
-	validateEnvironmentVariableNotEmpty P4CLIENT "${P4CLIENT}"
-	validateEnvironmentVariableNotEmpty P4_BRANCH "${P4_BRANCH}"
+	validateEnvironmentVariableNotEmpty GIT_BRANCH "${GIT_BRANCH}"
 	validateEnvironmentVariableNotEmpty SERVER_VERSION "${SERVER_VERSION}"
 	validateEnvironmentVariableNotEmpty SERVER_RELEASE_TYPE "${SERVER_RELEASE_TYPE}"
 	validateEnvironmentVariableNotEmpty WORKSPACE_SERVER "${WORKSPACE_SERVER}"
+
+	if [[ "${GIT_BRANCH}" != release/* && "${GIT_BRANCH}" != "master" && "${GIT_BRANCH}" != master/* ]]; then
+		echo "ERROR: Environment variable GIT_BRANCH has unsupported value: ${GIT_BRANCH}"
+		exit 1
+	fi
+	if [[ "${SERVER_RELEASE_TYPE}" != "Release" && "${SERVER_RELEASE_TYPE}" != "Daily" && "${SERVER_RELEASE_TYPE}" != "Prerelease" ]]; then
+		echo "ERROR: Environment variable SERVER_RELEASE_TYPE has unsupported value: ${SERVER_RELEASE_TYPE}"
+		exit 1
+	fi
 	
 	echo "step0b: Determining the postfix to use for artifacts (SERVER_VERSION_ZIP)..."
 	determineZipPostfix
