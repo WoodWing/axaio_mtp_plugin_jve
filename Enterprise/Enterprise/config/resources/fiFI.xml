@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 15-06-2016 14:07:22 GMT-->
+<!--Last edit date in TMS: 16-06-2016 13:05:50 GMT-->
 <LocalizationMap language="fiFI">
   <Term key="ISSUE">Julkaisu</Term>
   <Term key="ISSUES">Julkaisut</Term>
@@ -857,7 +857,6 @@
   <Term key="ERR_EXPORT_FAILURE">Vienti epäonnistui, kohdetta EXPORTDIRECTORY ei ole määritetty (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Vienti epäonnistui, tiedostoa ei löytynyt tai sitä ei voitu tallentaa kohteeseen (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">Lehden vientiä ei voitu aloittaa, ota yhteyttä järjestelmänvalvojaan. (S1097)</Term>
-  <Term key="ERR_FAILED">EPÄONNISTUI (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">Seuraavia tiedostomuotoja ei tueta</Term>
   <Term key="ERR_FIXEDPASS">Käyttäjät on korjannut salasanan (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Palvelinasetusongelma: kyselystä puuttuu muotoilusarake. Ota yhteyttä järjestelmänvalvojaan. (S1096)</Term>

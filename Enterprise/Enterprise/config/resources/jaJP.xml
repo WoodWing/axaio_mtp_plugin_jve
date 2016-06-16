@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 15-06-2016 14:07:22 GMT-->
+<!--Last edit date in TMS: 16-06-2016 13:05:50 GMT-->
 <LocalizationMap language="jaJP">
   <Term key="ISSUE">号</Term>
   <Term key="ISSUES">号</Term>
@@ -857,7 +857,6 @@
   <Term key="ERR_EXPORT_FAILURE">書き出しに失敗しました。EXPORTDIRECTORY が定義されていません(S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">書き出しに失敗しました。書き出し先のディレクトリ見つからないか、書き込みができません(S1014)</Term>
   <Term key="ERR_EXPORT_MAG">デジタルマガジンの書き出しは発生出来ません。システム管理者に連絡して下さい。(S1097)</Term>
-  <Term key="ERR_FAILED">失敗しました(S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">次のファイルはサポート対象外です。</Term>
   <Term key="ERR_FIXEDPASS">ユーザがパスワードを修正しました(S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">サーバー設定に問題があります: クエリの段フォーマットが欠落しています。システム管理者に連絡してください。(S1096)</Term>
