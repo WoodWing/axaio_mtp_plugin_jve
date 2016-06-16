@@ -74,7 +74,13 @@ function validateEnvironmentVariableNotEmpty {
 function step0_validateEnvironment {
 	set +x
 	echo "step0a: Validating required environment variables..."
+	validateEnvironmentVariableNotEmpty GIT_BRANCH "${GIT_BRANCH}"
 	validateEnvironmentVariableNotEmpty SERVER_VERSION "${SERVER_VERSION}"
+
+	if [[ "${GIT_BRANCH}" != "master" && "${GIT_BRANCH}" != master/* ]]; then
+		echo "ERROR: Environment variable GIT_BRANCH has unsupported value: ${GIT_BRANCH}"
+		exit 1
+	fi
 	
 	echo "step0b: Validating required tools..."
 	if [ ! -f "${SED_BIN}" ]; then
@@ -133,22 +139,14 @@ function step1_determineHttpPortAndPhpVersion {
 #
 function step2_determineEnterpriseDir {
 	echo "step2a: Deriving the Enterprise Server web directory (ENT_DIR) from the Perforce branch (GIT_BRANCH)."
-	isArchive=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/SmartConnection(\.archive)?\/.*/\1/g"`
-	if test "${isArchive}" = ".archive"
-	then
-		echo "step2b: Detected archive branch."
-		# Map "SmartConnection.archive/Server.v9.4.0" onto "Entv94x_Release"
-		ENT_DIR=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\.archive\/Server\.v([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/Entv\1\2x_Release/g"`
+	if [[ "${GIT_BRANCH}" == "master" ]]; then
+		ENT_DIR="EntMaster"
 	else
-		echo "step2b: Detected non-archive branch."
-		if test "${GIT_BRANCH}" = "SmartConnection/Server.master"
-		then
-			ENT_DIR="EntMaster"
+		if [[ "${GIT_BRANCH}" == "master/work" ]]; then
+			ENT_DIR="EntMasterWork"
 		else
-			isMasterWork=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.master(\.work)(([[:digit:]]+))?/\1/g"`
-			if test "${isMasterWork}" = ".work"
-			then
-				masterWorkNr=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.master\.work(([[:digit:]]+))?/\2/g"`
+			if [[ "${GIT_BRANCH}" == master/work* ]]; then
+				masterWorkNr=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/master\/work(([[:digit:]]+))?/\2/g"`
 				ENT_DIR="EntMasterWork${masterWorkNr}"
 			else
 				echo "Could not interpret the GIT_BRANCH value: ${GIT_BRANCH}"
@@ -159,11 +157,10 @@ function step2_determineEnterpriseDir {
 	fi
 
 	if [ ! -d "${DOCROOT}/${ENT_DIR}" ]; then
-		echo "step2c: Enterprise Server web directory does not exist: ${DOCROOT}/${ENT_DIR}"
+		echo "step2b: Enterprise Server web directory does not exist: ${DOCROOT}/${ENT_DIR}"
 		exit 1
-	else
-		echo "step2c: Determined ENT_DIR: [${ENT_DIR}]"
 	fi 
+	echo "step2b: Determined ENT_DIR: [${ENT_DIR}]"
 }
 
 #
