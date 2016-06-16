@@ -322,7 +322,6 @@ function step0_validateEnvironment {
 	validateEnvironmentVariableNotEmpty GIT_BRANCH "${GIT_BRANCH}"
 	validateEnvironmentVariableNotEmpty SERVER_VERSION "${SERVER_VERSION}"
 	validateEnvironmentVariableNotEmpty SERVER_RELEASE_TYPE "${SERVER_RELEASE_TYPE}"
-	validateEnvironmentVariableNotEmpty WORKSPACE_SERVER "${WORKSPACE_SERVER}"
 
 	if [[ "${GIT_BRANCH}" != release/* && "${GIT_BRANCH}" != "master" && "${GIT_BRANCH}" != master/* ]]; then
 		echo "ERROR: Environment variable GIT_BRANCH has unsupported value: ${GIT_BRANCH}"
@@ -384,7 +383,7 @@ function step2a_updateResourceFilesForCoreServer {
 
 		echo "step2a4: Extract resource archive and overwrite local resources."
 		cd ${SOURCE_BASE}Enterprise/config/resources
-		7za e -y "${WORKSPACE_SERVER}/tms_resources/core.zip" "Server/config/resources"
+		7za e -y "${WORKSPACE}/tms_resources/core.zip" "Server/config/resources"
 		cd -
 
 		echo "step2a5: Write timestamp of last update from TMS into the resource folder of Enterprise Server."
@@ -431,11 +430,11 @@ function step2b_updateResourceFilesForAdobeAEM {
 
 		echo "step2b4: Extract resource archive and overwrite local resources."
 		cd ${SOURCE_BASE}plugins/release/AdobeDps2/resources
-		7za e -y "${WORKSPACE_SERVER}/tms_resources/adobedps2.zip" "Server/config/resources"
+		7za e -y "${WORKSPACE}/tms_resources/adobedps2.zip" "Server/config/resources"
 		cd -
 		
 		echo "step2b5: Prefix the resource keys with AdobeDps2."
-		php "${WORKSPACE_SERVER}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE_SERVER}/Enterprise/plugins/release/AdobeDps2/resources" AdobeDps2
+		php "${WORKSPACE}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE}/Enterprise/plugins/release/AdobeDps2/resources" AdobeDps2
 
 		echo "step2b6: Write timestamp of last update from TMS into the resource folder of AdobeDps2 plugin."
 		echo "${tmsLastUpdate}" > ${SOURCE_BASE}plugins/release/AdobeDps2/resources/_lastupdate.txt
@@ -494,20 +493,20 @@ function step3_updateVersionInfo {
 #
 function step4_validatePhpCode {
 	echo "step4a: Run the PHP Coding Test (testsuite)."
-	cd "${WORKSPACE_SERVER}/Enterprise/Enterprise/server/wwtest/"
-	php testphpcodingcli.php "${WORKSPACE_SERVER}/reports"
+	cd "${WORKSPACE}/Enterprise/Enterprise/server/wwtest/"
+	php testphpcodingcli.php "${WORKSPACE}/reports"
 	cd -
 
 	echo "step4b: Run phpStorm's code inspection on the server folder."
 	# mkdir ./reports/phpstorm_strict
 	# inspect.sh params: <project file path> <inspection profile path> <output path> -d <directory to be inspected>
 	# see more info: http://www.jetbrains.com/phpstorm/webhelp/running-inspections-offline.html
-	sh /opt/phpstorm/bin/inspect.sh "${WORKSPACE_SERVER}/Enterprise" "${WORKSPACE_SERVER}/Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml" "${WORKSPACE_SERVER}/reports/phpstorm_strict" -d "${WORKSPACE_SERVER}/Enterprise/Enterprise"
+	sh /opt/phpstorm/bin/inspect.sh "${WORKSPACE}/Enterprise" "${WORKSPACE}/Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml" "${WORKSPACE}/reports/phpstorm_strict" -d "${WORKSPACE}/Enterprise/Enterprise"
 
-	cd "${WORKSPACE_SERVER}/Enterprise/Build/"
+	cd "${WORKSPACE}/Enterprise/Build/"
 	echo "step4c: Convert folder with XML files (output of phpStorm's code inspection) to one JUnit XML file to display in UI of Jenkins."
 	# phpstorm2junit params: <folder path with code inspector output> <output path for jUnit>
-	php phpstorm2junit.php "\"${WORKSPACE_SERVER}/reports/phpstorm_strict\"" "\"${WORKSPACE_SERVER}/reports/TEST-PhpStormCodeInspection.xml\""
+	php phpstorm2junit.php "\"${WORKSPACE}/reports/phpstorm_strict\"" "\"${WORKSPACE}/reports/TEST-PhpStormCodeInspection.xml\""
 	cd -
 }
 
@@ -546,19 +545,19 @@ function step5_ionCubeEncodePhpFiles {
 #
 function step6_zipEnterpriseServer {
 	echo "step6a: Zipping BuildTest ..."
-	zipFolder "${WORKSPACE_SERVER}/Enterprise_release/Enterprise/server/wwtest/testsuite" "BuildTest" "${WORKSPACE}/artifacts" "BuildTest1_${SERVER_VERSION_ZIP}"
+	zipFolder "${WORKSPACE}/Enterprise_release/Enterprise/server/wwtest/testsuite" "BuildTest" "${WORKSPACE}/artifacts" "BuildTest1_${SERVER_VERSION_ZIP}"
 
 	echo "step6b: Zipping large sample data..."
-	zipFolder "${WORKSPACE_SERVER}/Enterprise_release/Enterprise/server/wwtest/testdata" "largeSpeedTestData" "${WORKSPACE}/artifacts" "largeSpeedTestData_${SERVER_VERSION_ZIP}"
+	zipFolder "${WORKSPACE}/Enterprise_release/Enterprise/server/wwtest/testdata" "largeSpeedTestData" "${WORKSPACE}/artifacts" "largeSpeedTestData_${SERVER_VERSION_ZIP}"
 
 	echo "step6c: Excluding (removing) testsuite stuff that not needed for production..."
-	rm -rf "${WORKSPACE_SERVER}/Enterprise_release/Enterprise/server/wwtest/testsuite/BuildTest"
-	rm -rf "${WORKSPACE_SERVER}/Enterprise_release/Enterprise/server/wwtest/testsuite/BuildTest2"
-	rm -rf "${WORKSPACE_SERVER}/Enterprise_release/Enterprise/server/wwtest/testsuite/PhpCodingTest"
-	rm -rf "${WORKSPACE_SERVER}/Enterprise_release/Enterprise/server/wwtest/testdata/largeSpeedTestData"
+	rm -rf "${WORKSPACE}/Enterprise_release/Enterprise/server/wwtest/testsuite/BuildTest"
+	rm -rf "${WORKSPACE}/Enterprise_release/Enterprise/server/wwtest/testsuite/BuildTest2"
+	rm -rf "${WORKSPACE}/Enterprise_release/Enterprise/server/wwtest/testsuite/PhpCodingTest"
+	rm -rf "${WORKSPACE}/Enterprise_release/Enterprise/server/wwtest/testdata/largeSpeedTestData"
 
 	echo "step6d: Zipping Enterprise Server ..."
-	zipFolder "${WORKSPACE_SERVER}/Enterprise_release" "Enterprise" "${WORKSPACE}/artifacts" "EnterpriseServer_${SERVER_VERSION_ZIP}"
+	zipFolder "${WORKSPACE}/Enterprise_release" "Enterprise" "${WORKSPACE}/artifacts" "EnterpriseServer_${SERVER_VERSION_ZIP}"
 }
 
 #
@@ -566,47 +565,47 @@ function step6_zipEnterpriseServer {
 #
 function step7_zipExternalModules {
 	echo "step7a: Zipping 3rd party modules module ..."
-	zipFolder "${WORKSPACE_SERVER}/Enterprise/Drupal/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "DrupalEnterprise_${SERVER_VERSION_ZIP}"
-	zipFolder "${WORKSPACE_SERVER}/Enterprise/Drupal7/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "Drupal7Enterprise_${SERVER_VERSION_ZIP}"
-	zipFolder "${WORKSPACE_SERVER}/Enterprise/Drupal8/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "Drupal8_Drupal_Module_${SERVER_VERSION_ZIP}"
-	zipFolder "${WORKSPACE_SERVER}/Enterprise/WordPress/plugins" "ww_enterprise" "${WORKSPACE}/artifacts" "WordPress_Plugin_${SERVER_VERSION_ZIP}"
-	zipFolder "${WORKSPACE_SERVER}/Enterprise" "Solr" "${WORKSPACE}/artifacts" "SolrEnterprise_${SERVER_VERSION_ZIP}"
+	zipFolder "${WORKSPACE}/Enterprise/Drupal/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "DrupalEnterprise_${SERVER_VERSION_ZIP}"
+	zipFolder "${WORKSPACE}/Enterprise/Drupal7/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "Drupal7Enterprise_${SERVER_VERSION_ZIP}"
+	zipFolder "${WORKSPACE}/Enterprise/Drupal8/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "Drupal8_Drupal_Module_${SERVER_VERSION_ZIP}"
+	zipFolder "${WORKSPACE}/Enterprise/WordPress/plugins" "ww_enterprise" "${WORKSPACE}/artifacts" "WordPress_Plugin_${SERVER_VERSION_ZIP}"
+	zipFolder "${WORKSPACE}/Enterprise" "Solr" "${WORKSPACE}/artifacts" "SolrEnterprise_${SERVER_VERSION_ZIP}"
 
 	echo "step7b: Zipping release plug-ins ..."
 	twoDigitVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)(\.[0-9]+)?/\1/g"` # ignores patch nr
-	zipFolder "${WORKSPACE_SERVER}/Enterprise_release/plugins/release" "Analytics" "${WORKSPACE}/artifacts" "Enterprise_Analytics_Build_${ANALYTICS_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
-	zipFolder "${WORKSPACE_SERVER}/Enterprise_release/plugins/release" "AdobeDps2" "${WORKSPACE}/artifacts" "AdobeDPS_Build_${ADOBEDPS2_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
-	zipFolder "${WORKSPACE_SERVER}/Enterprise_release/plugins/release" "Elvis" "${WORKSPACE}/artifacts" "Elvis_Build_${ELVIS_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
+	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "Analytics" "${WORKSPACE}/artifacts" "Enterprise_Analytics_Build_${ANALYTICS_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
+	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "AdobeDps2" "${WORKSPACE}/artifacts" "AdobeDPS_Build_${ADOBEDPS2_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
+	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "Elvis" "${WORKSPACE}/artifacts" "Elvis_Build_${ELVIS_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
 	plugins="Facebook Twitter WordPress Drupal8"
 	for plugin in ${plugins}; do
 		# For Drupal 8 we want to modify the name to indicate this is the plugin (and not the module)
 		if [ "${plugin}" == "Drupal8" ]; then
-			zipFolder "${WORKSPACE_SERVER}/Enterprise_release/plugins/release" "${plugin}" "${WORKSPACE}/artifacts" "Drupal8_Enterprise_Plugin_${SERVER_VERSION_ZIP}"
+			zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "${plugin}" "${WORKSPACE}/artifacts" "Drupal8_Enterprise_Plugin_${SERVER_VERSION_ZIP}"
 		else
-			zipFolder "${WORKSPACE_SERVER}/Enterprise_release/plugins/release" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"	
+			zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"	
 		fi
 	done
 	
 	echo "step7c: Zipping demo plug-ins ..."
 	plugins="Celum Claro EZPublish FlickrPublish FlickrSearch Fotoware Guardian Imprezzeo NYTimes QRCode SMS Tripolis YouTubePublish AspellShellSpelling GoogleWebSpelling Tika"
 	for plugin in ${plugins}; do
-		zipFolder "${WORKSPACE_SERVER}/Enterprise_release/plugins/demo" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"
+		zipFolder "${WORKSPACE}/Enterprise_release/plugins/demo" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"
 	done
 
 	echo "step7d: Zipping examples plug-ins ..."
 	plugins="CopyrightValidationDemo SimpleFileSystem CustomObjectPropsDemo CustomAdminPropsDemo MultiChannelPublishingSample AddSubApplication StandaloneAutocompleteSample"
 	for plugin in ${plugins}; do
-		zipFolder "${WORKSPACE_SERVER}/Enterprise_release/plugins/examples" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"
+		zipFolder "${WORKSPACE}/Enterprise_release/plugins/examples" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"
 	done
 
 	echo "step7e: Zipping buildtest plug-ins ..."
 	plugins="AnalyticsTest PublishingTest AutoTargetingTest AutoNamingTest"
 	for plugin in ${plugins}; do
-		zipFolder "${WORKSPACE_SERVER}/Enterprise_release/plugins/buildtest" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"
+		zipFolder "${WORKSPACE}/Enterprise_release/plugins/buildtest" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"
 	done
 
 	echo "step7f: Copying the ionCube Loaders to the artifacts folder ..."
-	cp "${WORKSPACE_SERVER}/Enterprise/ionCube/loaders/v5.0.14_at_2015_07_29/ioncube_loaders_all_platforms.zip" "${WORKSPACE}/artifacts"
+	cp "${WORKSPACE}/Enterprise/ionCube/loaders/v5.0.14_at_2015_07_29/ioncube_loaders_all_platforms.zip" "${WORKSPACE}/artifacts"
 	chmod +w "${WORKSPACE}/artifacts/ioncube_loaders_all_platforms.zip"
 }
 
@@ -615,7 +614,7 @@ function step7_zipExternalModules {
 #
 function step8_zipProxyForSC {
 	echo "step8a: Zipping ProxyForSC ..."
-	zipFolder "${WORKSPACE_SERVER}/Enterprise" "ProxyForSC" "${WORKSPACE}/artifacts" "ProxyForSC_v${PROXYFORSC_VERSION}_Build${PROXYFORSC_BUILDNR}.zip"
+	zipFolder "${WORKSPACE}/Enterprise" "ProxyForSC" "${WORKSPACE}/artifacts" "ProxyForSC_v${PROXYFORSC_VERSION}_Build${PROXYFORSC_BUILDNR}.zip"
 }
 
 # exit on unset variables
@@ -628,7 +627,7 @@ ionCubeEncodedFiles=0
 # Main build procedure
 set +x; echo "================ Step 0 ================"; set -x
 step0_validateEnvironment
-cd "${WORKSPACE_SERVER}"
+cd "${WORKSPACE}"
 set +x; echo "================ Step 1 ================"; set -x
 step1_cleanGetWorkspace
 set +x; echo "================ Step 2 ================"; set -x
