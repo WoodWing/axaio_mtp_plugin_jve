@@ -856,7 +856,6 @@
   <Term key="ERR_EXPORT_FAILURE">Failed to export, EXPORTDIRECTORY not defined (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Failed to export, unable to find or save to (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">Exporting the magazine could not be started. Please contact the system administrator. (S1097)</Term>
-  <Term key="ERR_FAILED">FAILED (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">The following files are not supported</Term>
   <Term key="ERR_FIXEDPASS">User has fixed password (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Server configuration problem: format column missing in query. Please contact your system administrator. (S1096)</Term>

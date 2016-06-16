@@ -856,7 +856,6 @@
   <Term key="ERR_EXPORT_FAILURE">Echec de l'exportation, répertoire EXPORTDIRECTORY non défini (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Echec de l'exportation, impossible de détecter ou d'enregistrer vers (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">Impossible de démarrer l’exportation du magazine, contactez l’administrateur système. (S1097)</Term>
-  <Term key="ERR_FAILED">ECHEC (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">Les fichiers suivants ne sont pas pris en charge</Term>
   <Term key="ERR_FIXEDPASS">L'utilisateur a saisi un mot de passe (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problème de configuration du serveur : il manque la colonne de format dans la requête. Contactez l’administrateur système. (S1096)</Term>

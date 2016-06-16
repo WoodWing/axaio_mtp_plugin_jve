@@ -856,7 +856,6 @@
   <Term key="ERR_EXPORT_FAILURE">Esportazione non riuscita: la EXPORTDIRECTORY non è stata specificata (S1013).</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Esportazione non riuscita. Impossibile individuare o scrivere in (S1014).</Term>
   <Term key="ERR_EXPORT_MAG">Impossibile avviare l'esportazione della rivista. Rivolgersi all'amministratore di sistema. (S1097)</Term>
-  <Term key="ERR_FAILED">NON RIUSCITO (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">I seguenti file non sono supportati</Term>
   <Term key="ERR_FIXEDPASS">L'utente ha fissato una password (S1016).</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problema di configurazione del server: colonna del formato mancante nella query. Rivolgersi all'amministratore di sistema. (S1096)</Term>

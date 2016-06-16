@@ -856,7 +856,6 @@
   <Term key="ERR_EXPORT_FAILURE">Nelze exportovat, není definována složka EXPORTDIRECTORY (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Nelze exportovat, nelze najít nebo uložit do (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">Export časopisu nelze spustit, obraťte se na správce systému. (S1097)</Term>
-  <Term key="ERR_FAILED">CHYBA (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">Následující soubory nejsou podporované</Term>
   <Term key="ERR_FIXEDPASS">Uživatel má pevné heslo (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problém s konfigurací serveru: v dotazu chybí sloupec formátu. Obraťte se na správce systému. (S1096)</Term>

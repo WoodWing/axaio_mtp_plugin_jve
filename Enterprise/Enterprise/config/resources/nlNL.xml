@@ -856,7 +856,6 @@
   <Term key="ERR_EXPORT_FAILURE">Exporteren mislukt, EXPORTDIRECTORY niet gedefinieerd (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Exporteren mislukt, niet gevonden of opslaan niet mogelijk (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">De export kon niet gestart worden. Neem contact op met de systeembeheerder. (S1097)</Term>
-  <Term key="ERR_FAILED">MISLUKT (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">De volgende bestanden worden niet ondersteund</Term>
   <Term key="ERR_FIXEDPASS">Gebruiker heeft een vast wachtwoord (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Server configuratie probleem: bestand kolom niet aanwezig in de zoekopdracht. Neem contact op met uw systeembeheerder. (S1096)</Term>

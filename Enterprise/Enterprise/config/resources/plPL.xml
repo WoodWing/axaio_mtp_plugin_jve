@@ -856,7 +856,6 @@
   <Term key="ERR_EXPORT_FAILURE">Eksport nie powiódł się. Nie zdefiniowano katalogu eksportu (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Eksport nie powiódł się. Nie można odszukać lub zapisać do podanej lokalizacji (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">Rozpoczęcie eksportowania magazynu nie było możliwe, skontaktuj się z administratorem systemu. (S1097)</Term>
-  <Term key="ERR_FAILED">OPERACJA NIE POWIODŁA SIĘ (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">Następujące pliki nie są obsługiwane</Term>
   <Term key="ERR_FIXEDPASS">Użytkownik ma stałe hasła (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problem z konfiguracją serwera: w kwerendzie brak formatu kolumny. Skontaktuj się z administratorem ssytemu. (S1096)</Term>

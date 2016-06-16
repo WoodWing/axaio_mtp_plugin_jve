@@ -856,7 +856,6 @@
   <Term key="ERR_EXPORT_FAILURE">Fallo al exportar, EXPORTDIRECTORY no está definido (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Fallo al exportar, no se ha podido encontrar o guardar en (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">No fue posible iniciar la exportación de la revista; por favor contacte al administrador del sistema. (S1097)</Term>
-  <Term key="ERR_FAILED">FALLO (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">Los siguientes archivos no son compatibles</Term>
   <Term key="ERR_FIXEDPASS">El usuario tiene una contraseña fija (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problema de configuración del servidor: falta columna de formato en consulta. Por favor contacte al administrador del sistema. (S1096)</Term>

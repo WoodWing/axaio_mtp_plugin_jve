@@ -856,7 +856,6 @@
   <Term key="ERR_EXPORT_FAILURE">Ошибка экспорта, EXPORTDIRECTORY не определена (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Ошибка экспорта, невозможно найти или записать в (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">Не удалось начать операцию экспорта журнала. Обратитесь к администратору системы. (S1097)</Term>
-  <Term key="ERR_FAILED">НЕ ВЫПОЛНЕНО (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">Следующие файлы не поддерживаются</Term>
   <Term key="ERR_FIXEDPASS">Пользователь восстановил пароль (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Проблема конфигурации сервера: в запросе отсутствует колонка формата. Обратитесь к администратору системы. (S1096)</Term>
