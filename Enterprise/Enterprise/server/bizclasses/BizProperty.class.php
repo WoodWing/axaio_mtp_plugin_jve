@@ -1987,7 +1987,6 @@ class BizProperty
 	                                      $customOnly = false, $onlyAllObjType=false )
 	{
 		// Get custom properties.
-		$onlyAllObjType = ($objType == '') ? true : false; // When objType = "All", set onlyAllObjType is true
 		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
 		$custProps = DBProperty::getProperties( $publ, $objType, false, $publishSystem, $templateId, $filtered, $onlyAllObjType );
 		$stdProps = array();
