@@ -132,26 +132,26 @@ function step1_determineHttpPortAndPhpVersion {
 # Determines the Enterprise Server web directory. After calling ENT_DIR is set.
 #
 function step2_determineEnterpriseDir {
-	echo "step2a: Deriving the Enterprise Server web directory (ENT_DIR) from the Perforce branch (P4_BRANCH)."
-	isArchive=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection(\.archive)?\/.*/\1/g"`
+	echo "step2a: Deriving the Enterprise Server web directory (ENT_DIR) from the Perforce branch (GIT_BRANCH)."
+	isArchive=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/SmartConnection(\.archive)?\/.*/\1/g"`
 	if test "${isArchive}" = ".archive"
 	then
 		echo "step2b: Detected archive branch."
 		# Map "SmartConnection.archive/Server.v9.4.0" onto "Entv94x_Release"
-		ENT_DIR=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\.archive\/Server\.v([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/Entv\1\2x_Release/g"`
+		ENT_DIR=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\.archive\/Server\.v([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/Entv\1\2x_Release/g"`
 	else
 		echo "step2b: Detected non-archive branch."
-		if test "${P4_BRANCH}" = "SmartConnection/Server.master"
+		if test "${GIT_BRANCH}" = "SmartConnection/Server.master"
 		then
 			ENT_DIR="EntMaster"
 		else
-			isMasterWork=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.master(\.work)(([[:digit:]]+))?/\1/g"`
+			isMasterWork=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.master(\.work)(([[:digit:]]+))?/\1/g"`
 			if test "${isMasterWork}" = ".work"
 			then
-				masterWorkNr=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.master\.work(([[:digit:]]+))?/\2/g"`
+				masterWorkNr=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.master\.work(([[:digit:]]+))?/\2/g"`
 				ENT_DIR="EntMasterWork${masterWorkNr}"
 			else
-				echo "Could not interpret the P4_BRANCH value: ${P4_BRANCH}"
+				echo "Could not interpret the GIT_BRANCH value: ${GIT_BRANCH}"
 				ENT_DIR=""
 				exit 1
 			fi

@@ -4,9 +4,10 @@
 # @since        9.5
 # @copyright    WoodWing Software bv. All Rights Reserved.
 #
-# Build script for Enterprise Server 9.5 (or later). Designed to run on the Zetes build machine running CentOS7.
+# Build script for Enterprise Server 10.1 (or later). Designed to run on the Zetes build machine running CentOS7.
+# Initially, for 9.5 it was written for Perforce integration but since 10.1 it is redesigned for Git integration.
 #
-# It retrieves source code files from Perforce and updates version info in the core, plugins and 3rd party modules.
+# It retrieves source code files from Git and updates version info in the core, plugins and 3rd party modules.
 # Some source code files are encoded with ionCube. The server, plugins and 3rd party modules are archived at last.
 #
 
@@ -37,7 +38,6 @@ function validateEnvironmentVariableNotEmpty {
 # @param integer $4 New build number to replace the old one with.
 #
 function updateVersion {
-	p4 edit "${1}"
 	mv "${1}" "${1}.old"
 	sed -r "s/(${2})([0-9]+\.[0-9]+(\.[0-9]+)?)\s[Bb]uild\s([0-9]+)/\1${3} Build ${4}/g" "${1}.old" > "${1}"
 	rm -f "${1}.old"
@@ -50,6 +50,7 @@ function updateVersion {
 		exit 1
 	fi
 	set -e
+	git add "${1}"
 }
 
 #
@@ -83,7 +84,6 @@ function updatePluginVersions {
 # @param string $3 Value to be filled into the define.
 #
 function updatePhpDefine {
-	p4 edit "${1}"
 	mv "${1}" "${1}.old"
 	sed -r "s/(^define\s*\(\s*'${2}'\s*,\s*')([^']*)/\1${3}/g" "${1}.old" > "${1}"
 	rm -f "${1}.old"
@@ -96,6 +96,7 @@ function updatePhpDefine {
 		exit 1
 	fi
 	set -e
+	git add "${1}"
 }
 
 #
@@ -317,29 +318,10 @@ function step0_validateEnvironment {
 }
 
 #
-# Retrieves latest version from Perforce and cleans release- and artifact folders locally.
+# Cleans release-, resources-, reports- and artifacts folders locally.
 #
 function step1_cleanGetWorkspace {
-	# When a previous batch has checked out files, but the batch got badly interrupted, those files are still opened for edit.
-	# Even a forget get from Perforce does not retrieve those kind of files. Therefore we revert changes and get again.
-
-	echo "step1a: Checking for files in depot that are opened for editing:"
-	depotFiles=`p4 opened -C ${P4CLIENT} | sed -r 's/(.*)#(.*)/\1/g'`
-
-	echo "step1b: Retrieve files from depot that are opened for editing, but are missing in the current workspace: ${P4CLIENT}"
-	for depotFile in $depotFiles
-	do
-		workspaceFile=`php -r "print str_replace('//ww5/${P4_BRANCH}', '${WORKSPACE_SERVER}', '${depotFile}');"`
-		if [ ! -f "${workspaceFile}" ]; then
-			p4 revert ${depotFile}
-			p4 sync -f ${depotFile}
-		fi
-	done
-	
-	echo "step1c: Revert files that are opened for editing due to unfinished (aborted) previous build process:"
-	p4 revert -c default ...
-
-	echo "step1d: Delete local build folders (forced, recursively)."
+	echo "step1a: Delete local build folders (forced, recursively)."
 	rm -rf ${TARGET_BASE}
 	mkdir ${TARGET_BASE}
 	rm -rf ./tms_resources
@@ -378,27 +360,23 @@ function step2a_updateResourceFilesForCoreServer {
 		wget "http://tms.woodwing.net/product/getexport/user/woodwing/pass/QjQjI2VyVmxAQDE=/versionid/116" -O ./tms_resources/core.zip
 		# L> update the versionid param when migrating to new Enterprise major version: 10=7.0, 22=8.0, 73=9.0, 116=10.0
 
-		echo "step2a4: At repository, open resource files for editing."
-		p4 edit ${SOURCE_BASE}Enterprise/config/resources/...
-
-		echo "step2a5: Extract resource archive and overwrite local resources."
+		echo "step2a4: Extract resource archive and overwrite local resources."
 		cd ${SOURCE_BASE}Enterprise/config/resources
 		7za e -y "${WORKSPACE_SERVER}/tms_resources/core.zip" "Server/config/resources"
 		cd -
 
-		echo "step2a6: Write timestamp of last update from TMS into the resource folder of Enterprise Server."
+		echo "step2a5: Write timestamp of last update from TMS into the resource folder of Enterprise Server."
 		echo "${tmsLastUpdate}" > ${SOURCE_BASE}Enterprise/config/resources/_lastupdate.txt
 		
-		echo "step2a7: Remove the timestamp from the downloaded XML files."
+		echo "step2a6: Remove the timestamp from the downloaded XML files."
 		for icFile in $(find "${SOURCE_BASE}Enterprise/config/resources/" -name '*.xml'); do
 			sed '/<!--Last edit date in TMS:.*-->/d' "${icFile}" > ./temp && mv ./temp "${icFile}"
 		done
 		
-		echo "step2a8: Revert unchanged resource files."
-		p4 revert -a ${SOURCE_BASE}Enterprise/config/resources/...
-
-		echo "step2a9: Submit latest resource files to repository."
-		p4 submit -d "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) core resource files from TMS for server build ${BUILD_NUMBER}."
+		echo "step2a7: Commit changed resource files to repository."
+		git add ${SOURCE_BASE}Enterprise/config/resources/*.xml
+		git add --force ${SOURCE_BASE}Enterprise/config/resources/_lastupdate.txt
+		git commit -m "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) core resource files from TMS for server build ${BUILD_NUMBER}."
 	fi
 }
 
@@ -429,30 +407,26 @@ function step2b_updateResourceFilesForAdobeAEM {
 		wget "http://tms.woodwing.net/product/getexport/user/woodwing/pass/QjQjI2VyVmxAQDE=/versionid/117" -O ./tms_resources/adobedps2.zip
 		# L> update the versionid param when migrating to new AdobeDps2 major version: 99=9.0, 117=10.0
 
-		echo "step2b4: At the repository, open resource files for editing."
-		p4 edit ${SOURCE_BASE}plugins/release/AdobeDps2/resources/...
-
-		echo "step2b5: Extract resource archive and overwrite local resources."
+		echo "step2b4: Extract resource archive and overwrite local resources."
 		cd ${SOURCE_BASE}plugins/release/AdobeDps2/resources
 		7za e -y "${WORKSPACE_SERVER}/tms_resources/adobedps2.zip" "Server/config/resources"
 		cd -
 		
-		echo "step2b6: Prefix the resource keys with AdobeDps2."
+		echo "step2b5: Prefix the resource keys with AdobeDps2."
 		php "${WORKSPACE_SERVER}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE_SERVER}/Enterprise/plugins/release/AdobeDps2/resources" AdobeDps2
 
-		echo "step2a7: Write timestamp of last update from TMS into the resource folder of AdobeDps2 plugin."
+		echo "step2b6: Write timestamp of last update from TMS into the resource folder of AdobeDps2 plugin."
 		echo "${tmsLastUpdate}" > ${SOURCE_BASE}plugins/release/AdobeDps2/resources/_lastupdate.txt
 		
-		echo "step2a8: Remove the timestamp from the downloaded XML files."
+		echo "step2b7: Remove the timestamp from the downloaded XML files."
 		for icFile in $(find "${SOURCE_BASE}plugins/release/AdobeDps2/resources/" -name '*.xml'); do
 			sed '/<!--Last edit date in TMS:.*-->/d' "${icFile}" > ./temp && mv ./temp "${icFile}"
 		done
 		
-		echo "step2a9: Revert unchanged resource files."
-		p4 revert -a ${SOURCE_BASE}plugins/release/AdobeDps2/resources/...
-
-		echo "step2b10: Submit latest resource files to repository."
-		p4 submit -d "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) AdobeDps2 resource files from TMS for server build ${BUILD_NUMBER}."
+		echo "step2b8: Commit changed resource files to repository."
+		git add ${SOURCE_BASE}plugins/release/AdobeDps2/resources/*.xml
+		git add --force ${SOURCE_BASE}plugins/release/AdobeDps2/resources/_lastupdate.txt
+		git commit -m "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) AdobeDps2 resource files from TMS for server build ${BUILD_NUMBER}."
 	fi
 }
 
@@ -610,7 +584,6 @@ function step7_zipExternalModules {
 	echo "step7f: Copying the ionCube Loaders to the artifacts folder ..."
 	cp "${WORKSPACE_SERVER}/Enterprise/ionCube/loaders/v5.0.14_at_2015_07_29/ioncube_loaders_all_platforms.zip" "${WORKSPACE}/artifacts"
 	chmod +w "${WORKSPACE}/artifacts/ioncube_loaders_all_platforms.zip"
-	# Note that we COPY (not MOVE) since P4 won't get the ZIP file again once retrieved before. (With a MOVE, the next build would fail.)
 }
 
 #
@@ -619,19 +592,6 @@ function step7_zipExternalModules {
 function step8_zipProxyForSC {
 	echo "step8a: Zipping ProxyForSC ..."
 	zipFolder "${WORKSPACE_SERVER}/Enterprise" "ProxyForSC" "${WORKSPACE}/artifacts" "ProxyForSC_v${PROXYFORSC_VERSION}_Build${PROXYFORSC_BUILDNR}.zip"
-}
-
-#
-# For a Daily, local changes (version info updates) are reverted. For (pre)release builds, this info is submit to Perforce.
-#
-function step9_submitOrRevertLocalVersionInfoUpdates {
-	if [ "${SERVER_RELEASE_TYPE}" == "Daily" ]; then
-		echo "step8: Revert local version info updates because it is a Daily build."
-		p4 revert -c default ...
-	else
-		echo "step8: Submit local version info updates because it is NOT a Daily build."
-		p4 submit -d "[Ent Server ${SERVER_VERSION}] Jenkins: Updated version info for build ${BUILD_NUMBER}."
-	fi
 }
 
 # exit on unset variables
@@ -662,5 +622,3 @@ set +x; echo "================ Step 7 ================"; set -x
 step7_zipExternalModules
 set +x; echo "================ Step 8 ================"; set -x
 step8_zipProxyForSC
-set +x; echo "================ Step 9 ================"; set -x
-step9_submitOrRevertLocalVersionInfoUpdates
