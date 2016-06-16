@@ -36,7 +36,7 @@ function validateEnvironmentVariableNotEmpty {
 # @param string $2 New version number (x.y.z) to replace the old one with.
 # @param integer $3 New build number to replace the old one with.
 #
-function updateVersion2 {
+function replaceVersionFile {
 	echo "${2} Build ${3}" > "${1}"
 
 	# Error when the new version can not be found in the updated file.
@@ -47,8 +47,7 @@ function updateVersion2 {
 		exit 1
 	fi
 	set -e
-	git add "${1}"
-
+	git add --force "${1}"
 }
 
 #
@@ -92,7 +91,7 @@ function updatePluginVersions {
 	pluginPath=`pwd`
 	pluginFiles=`find "${pluginPath}" -name _productversion.txt`
 	for pluginFile in ${pluginFiles}; do
-		updateVersion2 "${pluginFile}" ${2} ${3}
+		replaceVersionFile "${pluginFile}" ${2} ${3}
 	done
 	cd -
 	IFS=${orgIFS}
@@ -292,12 +291,14 @@ function ionCubeEnterpriseFiles {
 	for icFile in ${icFiles}; do
 		ionCubeFile "${encodeOptionFile}" "${icFile}"
 	done
+	rm -f "${encodeOptionFile}"
 
 	encodeOptionFile2="${SOURCE_BASE}encodeoptions2.txt"
 	cp "${encodeOptionFile}" "${encodeOptionFile2}"
 	echo "--include-if-property \"magic='the windmill keeps on turning'\"" >> "${encodeOptionFile2}"
 	icFolder="Enterprise/server/utils/license/"
 	ionCubeFolder "${encodeOptionFile2}" "${icFolder}"
+	rm -f "${encodeOptionFile2}"
 }
 
 #
@@ -384,6 +385,7 @@ function step2a_updateResourceFilesForCoreServer {
 		echo "step2a4: Extract resource archive and overwrite local resources."
 		cd ${SOURCE_BASE}Enterprise/config/resources
 		7za e -y "${WORKSPACE}/tms_resources/core.zip" "Server/config/resources"
+		rm -f "${WORKSPACE}/tms_resources/core.zip"
 		cd -
 
 		echo "step2a5: Write timestamp of last update from TMS into the resource folder of Enterprise Server."
@@ -398,6 +400,9 @@ function step2a_updateResourceFilesForCoreServer {
 		git add ${SOURCE_BASE}Enterprise/config/resources/*.xml
 		git add --force ${SOURCE_BASE}Enterprise/config/resources/_lastupdate.txt
 		git commit -m "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) core resource files from TMS for server build ${BUILD_NUMBER}."
+
+		echo "step2a8: Push changed resource files to Git."
+		git push --set-upstream origin "${GIT_BRANCH}"
 	fi
 }
 
@@ -448,6 +453,9 @@ function step2b_updateResourceFilesForAdobeAEM {
 		git add ${SOURCE_BASE}plugins/release/AdobeDps2/resources/*.xml
 		git add --force ${SOURCE_BASE}plugins/release/AdobeDps2/resources/_lastupdate.txt
 		git commit -m "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) AdobeDps2 resource files from TMS for server build ${BUILD_NUMBER}."
+
+		echo "step2b9: Push changed resource files to Git."
+		git push --set-upstream origin "${GIT_BRANCH}"
 	fi
 }
 
@@ -455,15 +463,14 @@ function step2b_updateResourceFilesForAdobeAEM {
 # Updates version info embedded in PHP modules.
 #
 function step3_updateVersionInfo {
-	echo "step3a: Update version info in server modules."
-
-	#Update serverinfo.php
-	updateVersion2 ${SOURCE_BASE}Enterprise/server/_productversion.txt ${SERVER_VERSION} ${BUILD_NUMBER}
+	echo "step3a: Update version info in serverinfo.php."
+	replaceVersionFile ${SOURCE_BASE}Enterprise/server/_productversion.txt ${SERVER_VERSION} ${BUILD_NUMBER}
 	if [ "${SERVER_RELEASE_TYPE}" == "Release" ]; then
 		echo "" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 	else
 		echo "${SERVER_RELEASE_TYPE}" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 	fi
+	git add --force "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 
 	echo "step3b: Update version info in server plugins."
 	updatePluginVersions ${SOURCE_BASE}Enterprise/config/plugins ${SERVER_VERSION} ${BUILD_NUMBER}
@@ -477,15 +484,18 @@ function step3_updateVersionInfo {
 	updatePluginVersions ${SOURCE_BASE}plugins/release/Elvis "${twoDigitVersion}" ${ELVIS_BUILDNR}
 
 	echo "step3d: Update version info of the ProxyForSC solution."
-	updateVersion2 ${SOURCE_BASE}ProxyForSC/proxyserver/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
-	updateVersion2 ${SOURCE_BASE}ProxyForSC/proxystub/_productversion.txt "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
-	updateVersion2 ${SOURCE_BASE}ProxyForSC/speedtest/_productversion.txt "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
+	replaceVersionFile ${SOURCE_BASE}ProxyForSC/proxyserver/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
+	replaceVersionFile ${SOURCE_BASE}ProxyForSC/proxystub/_productversion.txt "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
+	replaceVersionFile ${SOURCE_BASE}ProxyForSC/speedtest/_productversion.txt "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
 
 	echo "step3e: Update version info in 3rd party modules."
 	updateVersion ${SOURCE_BASE}Drupal/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
 	updateVersion ${SOURCE_BASE}Drupal7/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
 	updateVersion ${SOURCE_BASE}Drupal8/modules/ww_enterprise/ww_enterprise.info.yml "^version\s*:\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
 	updateVersion ${SOURCE_BASE}WordPress/plugins/ww_enterprise/ww_enterprise.php "^\s*\*\s*Version:\s*" ${SERVER_VERSION} ${BUILD_NUMBER}
+	
+	echo "step3f: Push version info changes to Git."
+	git push --set-upstream origin "${GIT_BRANCH}"
 }
 
 #
