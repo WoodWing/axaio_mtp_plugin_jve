@@ -1,12 +1,12 @@
 <?php
 
 // ServerInfo
-define ('SERVERNAME',		    'Enterprise');
-define ('SERVERDEVELOPER',	    'WoodWing');			// DO NOT CHANGE!
-define ('SERVERIMPLEMENTATION',	'SmartConnection');		// DO NOT CHANGE!
-define ('SERVERTECHNOLOGY',	    'PHP');					// DO NOT CHANGE!
-define ('SERVERVERSION',	    '10.0.0 Build 1194');
-define ('SERVERVERSION_EXTRAINFO',	'Prerelease');					// To be used for labels such as Prerelease and Daily
+define ('SERVERNAME',		        'Enterprise');
+define ('SERVERDEVELOPER',	        'WoodWing');          // DO NOT CHANGE!
+define ('SERVERIMPLEMENTATION',    'SmartConnection');   // DO NOT CHANGE!
+define ('SERVERTECHNOLOGY',        'PHP');               // DO NOT CHANGE!
+define ('SERVERVERSION',	        file_exists('_productversion.txt') ? file_get_contents('_productversion.txt') : "");
+define ('SERVERVERSION_EXTRAINFO', file_exists('_productversionextra.txt') ? file_get_contents('_productversionextra.txt') : ""); // To be used for labels such as Prerelease and Daily
 
 // For internal use, to validate configurations:
 define ('SCENT_DBVERSION',	    '10.0' );

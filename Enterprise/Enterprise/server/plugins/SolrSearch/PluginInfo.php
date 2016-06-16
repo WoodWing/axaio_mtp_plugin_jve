@@ -23,7 +23,7 @@ class SolrSearch_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Solr Search';
-		$info->Version     = '10.0.0 Build 1194';
+		$info->Version     = file_exists('_productversion.txt') ? file_get_contents('_productversion.txt') : "";
 		$info->Description = 'Integrates Solr search engine.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;

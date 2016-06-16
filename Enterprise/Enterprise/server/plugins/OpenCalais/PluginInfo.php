@@ -17,7 +17,7 @@ class OpenCalais_EnterprisePlugin extends EnterprisePlugin
 		require_once BASEDIR.'/server/interfaces/plugins/PluginInfoData.class.php';
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'OpenCalais Suggestion Provider';
-		$info->Version     = '10.0.0 Build 1194'; // don't use PRODUCTVERSION
+		$info->Version     = file_exists('_productversion.txt') ? file_get_contents('_productversion.txt') : "";
 		$info->Description = 'Integrates the OpenCalais suggestion service.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;

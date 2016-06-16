@@ -33,6 +33,28 @@ function validateEnvironmentVariableNotEmpty {
 # Replaces a version in a given file. It searches for a given regular expression prefix followed by "<x.y.z> Build <nr>".
 #
 # @param string $1 Full local file path of PHP file to update version in.
+# @param string $2 New version number (x.y.z) to replace the old one with.
+# @param integer $3 New build number to replace the old one with.
+#
+function updateVersion2 {
+	echo "${2} Build ${3}" > "${1}"
+
+	# Error when the new version can not be found in the updated file.
+	set +e
+	testVersion=`grep "${2} Build ${3}" "${1}"`
+	if [ ! -n "${testVersion}" ]; then
+		echo "ERROR: Could not update version in ${1}"
+		exit 1
+	fi
+	set -e
+	git add "${1}"
+
+}
+
+#
+# Replaces a version in a given file. It searches for a given regular expression prefix followed by "<x.y.z> Build <nr>".
+#
+# @param string $1 Full local file path of PHP file to update version in.
 # @param string $2 Regular expression of some text just before the old version.
 # @param string $3 New version number (x.y.z) to replace the old one with.
 # @param integer $4 New build number to replace the old one with.
@@ -68,9 +90,9 @@ function updatePluginVersions {
 	IFS=$(echo -en "\n\b")
 	cd "${1}"
 	pluginPath=`pwd`
-	pluginFiles=`find "${pluginPath}" -name PluginInfo.php`
+	pluginFiles=`find "${pluginPath}" -name _productversion.txt`
 	for pluginFile in ${pluginFiles}; do
-		updateVersion "${pluginFile}" ".*->Version\s*=\s*'" ${2} ${3}
+		updateVersion2 "${pluginFile}" ${2} ${3}
 	done
 	cd -
 	IFS=${orgIFS}
@@ -435,11 +457,13 @@ function step2b_updateResourceFilesForAdobeAEM {
 #
 function step3_updateVersionInfo {
 	echo "step3a: Update version info in server modules."
-	updateVersion ${SOURCE_BASE}Enterprise/server/serverinfo.php "^define\s*\(\s*'SERVERVERSION'\s*,\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
+
+	#Update serverinfo.php
+	updateVersion2 ${SOURCE_BASE}Enterprise/server/_productversion.txt ${SERVER_VERSION} ${BUILD_NUMBER}
 	if [ "${SERVER_RELEASE_TYPE}" == "Release" ]; then
-		updatePhpDefine ${SOURCE_BASE}Enterprise/server/serverinfo.php "SERVERVERSION_EXTRAINFO" ""
+		echo "" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 	else
-		updatePhpDefine ${SOURCE_BASE}Enterprise/server/serverinfo.php "SERVERVERSION_EXTRAINFO" ${SERVER_RELEASE_TYPE}
+		echo "${SERVER_RELEASE_TYPE}" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 	fi
 
 	echo "step3b: Update version info in server plugins."
@@ -454,9 +478,9 @@ function step3_updateVersionInfo {
 	updatePluginVersions ${SOURCE_BASE}plugins/release/Elvis "${twoDigitVersion}" ${ELVIS_BUILDNR}
 
 	echo "step3d: Update version info of the ProxyForSC solution."
-	updateVersion ${SOURCE_BASE}ProxyForSC/proxyserver/serverinfo.php "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
-	updateVersion ${SOURCE_BASE}ProxyForSC/proxystub/serverinfo.php "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
-	updateVersion ${SOURCE_BASE}ProxyForSC/speedtest/serverinfo.php "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
+	updateVersion2 ${SOURCE_BASE}ProxyForSC/proxyserver/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
+	updateVersion2 ${SOURCE_BASE}ProxyForSC/proxystub/_productversion.txt "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
+	updateVersion2 ${SOURCE_BASE}ProxyForSC/speedtest/_productversion.txt "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
 
 	echo "step3e: Update version info in 3rd party modules."
 	updateVersion ${SOURCE_BASE}Drupal/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}

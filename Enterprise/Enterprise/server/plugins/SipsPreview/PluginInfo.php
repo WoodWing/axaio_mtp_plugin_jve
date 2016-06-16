@@ -18,7 +18,7 @@ class SipsPreview_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Sips Preview';
-		$info->Version     = '10.0.0 Build 1194'; // don't use PRODUCTVERSION
+		$info->Version     = file_exists('_productversion.txt') ? file_get_contents('_productversion.txt') : "";
 		$info->Description = 'Use Sips command for preview generation';
 
 		// Append Sips version information in description field

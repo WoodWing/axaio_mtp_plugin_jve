@@ -16,7 +16,7 @@ class InCopyHTMLConversion_EnterprisePlugin extends EnterprisePlugin
 	{
 		$info = new PluginInfoData();
 		$info->DisplayName = 'InCopy HTML Conversion';
-		$info->Version     = '10.0.0 Build 1194';
+		$info->Version     = file_exists('_productversion.txt') ? file_get_contents('_productversion.txt') : "";
 		$info->Description = 'Have InCopy and InDesign convert HTML articles to the InCopy format.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
