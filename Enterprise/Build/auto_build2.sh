@@ -485,8 +485,8 @@ function step3_updateVersionInfo {
 
 	echo "step3d: Update version info of the ProxyForSC solution."
 	replaceVersionFile ${SOURCE_BASE}ProxyForSC/proxyserver/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
-	replaceVersionFile ${SOURCE_BASE}ProxyForSC/proxystub/_productversion.txt "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
-	replaceVersionFile ${SOURCE_BASE}ProxyForSC/speedtest/_productversion.txt "^define\s*\(\s*'PRODUCT_VERSION'\s*,\s*[\"']" ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
+	replaceVersionFile ${SOURCE_BASE}ProxyForSC/proxystub/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
+	replaceVersionFile ${SOURCE_BASE}ProxyForSC/speedtest/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
 
 	echo "step3e: Update version info in 3rd party modules."
 	updateVersion ${SOURCE_BASE}Drupal/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
