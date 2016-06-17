@@ -3892,7 +3892,7 @@ class BizObject
 		}
 
 		// Create / Update object relations
-		self::saveObjectPlacedRelations( $user, $id, $object->Relations, $create );
+		self::saveObjectPlacedRelations( $user, $id, $object->Relations, $create, true );
 
 		// Save edition/device specific renditions (types)
 		require_once BASEDIR.'/server/dbclasses/DBObjectRenditions.class.php';
@@ -3956,9 +3956,10 @@ class BizObject
 	 * @param string $user
 	 * @param integer $id
 	 * @param Relation[]|null $relations
+	 * @param boolean $checkAccess Check if the user has the right to update the relation. See EN-87518.
 	 * @param bool $create TRUE when creating a new object, FALSE when saving existing object.
 	 */
-	public static function saveObjectPlacedRelations( $user, $id, $relations, $create )
+	public static function saveObjectPlacedRelations( $user, $id, $relations, $create, $checkAccess )
 	{
 		require_once BASEDIR."/server/bizclasses/BizRelation.class.php";
 
@@ -3996,7 +3997,7 @@ class BizObject
 			self::handleObjectRelations( $id, $newRelations, $relationsToBeUpdated );
 		}
 		if( $relationsToBeUpdated ) {
-			BizRelation::updateObjectRelations( $user, $relationsToBeUpdated, false /* See BZ#36045 */ );
+			BizRelation::updateObjectRelations( $user, $relationsToBeUpdated, false /* See BZ#36045 */, $checkAccess );
 		}
 		if( $newRelations ) {
 			// => Added $create param => BZ#15317 Broadcast event when implicitly creating
