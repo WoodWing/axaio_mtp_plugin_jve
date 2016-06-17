@@ -353,6 +353,9 @@ function step1_cleanGetWorkspace {
 	mkdir ./reports/phpstorm_strict
 	rm -rf "${WORKSPACE}/artifacts"
 	mkdir "${WORKSPACE}/artifacts"
+
+	echo "step1b: Checkout the ${GIT_BRANCH} branch in the workspace."
+	git checkout "${GIT_BRANCH}"
 }
 
 #
