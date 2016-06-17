@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--Last edit date in TMS: 17-06-2016 12:31:56 GMT-->
 <LocalizationMap language="esES">
   <Term key="ISSUE">Edición</Term>
   <Term key="ISSUES">Ediciones</Term>
@@ -256,7 +257,6 @@
   <Term key="ACT_OK">Aceptar</Term>
   <Term key="ACT_OPEN">Abrir</Term>
   <Term key="ACT_OPEN_EDIT">Abrir para editar</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">Abrir en una pestaña nueva</Term>
   <Term key="ACT_ORDER_BY">Ordenar por</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">El archivo %1 no existe</Term>
@@ -840,6 +840,10 @@
   <Term key="ERR_DOWNLOAD_VERSION">¿Confirma que desea descargar esta versión?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">No se puede establecer la versión de DPS Viewer en 25 o menos porque el nivel de acceso de las siguientes carpetas está establecido en Gratuito (S1123): %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">No se puede cambiar el nivel de acceso; se requiere la versión 26 o superior de DPS Viewer. (S1124)</Term>
+  <Term key="ERR_DRUPAL_IMAGE_REQUIRED">Se requiere una imagen. </Term>
+  <Term key="ERR_DRUPAL_NO_COMPONENTS_MAPPING">Cannot find components mapping in config file (S1063).</Term>
+  <Term key="ERR_DRUPAL_NO_SITE_INFORMATION">No se encontró información del sitio. No se pudo publicar a Drupal. Defina por lo menos un sitio en config_drupal.php (S1062). </Term>
+  <Term key="ERR_DRUPAL_REQUIRED_COMPONENTS_NOT_FOUND">No se encontraron los componentes requeridos (%1). (S1093)</Term>
   <Term key="ERR_DRUPAL_UPLOAD_FAILED">El archivo adjunto no pudo cargarse a Drupal (S1064). </Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Este nombre de usuario ya existe (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Este nombre ya existe en la base de datos (S1010)</Term>
