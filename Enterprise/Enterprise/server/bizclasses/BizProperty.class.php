@@ -2577,7 +2577,7 @@ class BizProperty
 		}
 
 		require_once BASEDIR . '/server/dbclasses/DBProperty.class.php';
-		$where = '`publication` = ? AND UPPER(`name`) = ? ';
+		$where = '`publication` = ? AND UPPER(`name`) = UPPER(?) ';
 		$params = array( $publication, $name );
 
 		$row = DBProperty::getRow( 'properties', $where, array('id'), $params );
