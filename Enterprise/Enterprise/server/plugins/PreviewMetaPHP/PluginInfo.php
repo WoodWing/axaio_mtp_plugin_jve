@@ -16,7 +16,7 @@ class PreviewMetaPHP_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'PHP Preview and Meta Data';
-		$info->Version     = '10.0.0 Build 83'; // don't use PRODUCTVERSION
+		$info->Version     = '10.0.0 Build 84'; // don't use PRODUCTVERSION
 		$info->Description = 'Using internal PHP libraries (such as GD) to generate previews and read metadata';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
