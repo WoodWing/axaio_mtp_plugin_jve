@@ -291,13 +291,14 @@ function ionCubeEnterpriseFiles {
 	for icFile in ${icFiles}; do
 		ionCubeFile "${encodeOptionFile}" "${icFile}"
 	done
-	rm -f "${encodeOptionFile}"
 
 	encodeOptionFile2="${SOURCE_BASE}encodeoptions2.txt"
 	cp "${encodeOptionFile}" "${encodeOptionFile2}"
 	echo "--include-if-property \"magic='the windmill keeps on turning'\"" >> "${encodeOptionFile2}"
 	icFolder="Enterprise/server/utils/license/"
 	ionCubeFolder "${encodeOptionFile2}" "${icFolder}"
+
+	rm -f "${encodeOptionFile}"
 	rm -f "${encodeOptionFile2}"
 }
 
