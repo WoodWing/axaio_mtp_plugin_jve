@@ -846,6 +846,7 @@ define ('CLIENTFEATURES', serialize(array(
 		'IDS_AUTOMATION' => array(
 			new Feature( 'CreatePagePreview' ),
 			new Feature( 'CreatePagePDFOnProduce', '[Press Quality]' ),
+			new Feature( 'PageSyncDefaultsToNo' ),
 		),
 	),
 )));
