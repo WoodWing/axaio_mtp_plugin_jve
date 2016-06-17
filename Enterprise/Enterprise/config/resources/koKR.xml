@@ -859,7 +859,6 @@
   <Term key="ERR_FILES_NOT_SUPPORTED">이 파일은 제공하지 않습니다.</Term>
   <Term key="ERR_FIXEDPASS">사용자가 패스워드를 수정했습니다(S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">서버 구성 문제 : 검색내에 컬럼형식이 잘못되어 있습니다. 관리자에게 문의하시기 바랍니다. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">%1 를(을) FTP Server %2 에 연결할수 없습니다.</Term>
   <Term key="ERR_FTP_CREATE_DIR">FTP Server 에 폴더 %1 을 생성할수 없습니다.</Term>
   <Term key="ERR_FTP_UPLOAD">FTP Server 에 %1 파일을 업로드 할수 없습니다.</Term>
   <Term key="ERR_GENERAL_ERROR">에러</Term>

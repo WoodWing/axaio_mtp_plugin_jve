@@ -859,7 +859,6 @@
   <Term key="ERR_FILES_NOT_SUPPORTED">De volgende bestanden worden niet ondersteund</Term>
   <Term key="ERR_FIXEDPASS">Gebruiker heeft een vast wachtwoord (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Server configuratie probleem: bestand kolom niet aanwezig in de zoekopdracht. Neem contact op met uw systeembeheerder. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">Niet in staat om %1 te verbinden met FTP Server %2.</Term>
   <Term key="ERR_FTP_CREATE_DIR">Niet in staat om folder %1 op de FTP Server aan te maken.</Term>
   <Term key="ERR_FTP_UPLOAD">Niet in staat om bestand %1 naar de FTP Server te uploaden.</Term>
   <Term key="ERR_GENERAL_ERROR">Fout</Term>

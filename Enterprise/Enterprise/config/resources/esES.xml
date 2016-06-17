@@ -859,7 +859,6 @@
   <Term key="ERR_FILES_NOT_SUPPORTED">Los siguientes archivos no son compatibles</Term>
   <Term key="ERR_FIXEDPASS">El usuario tiene una contraseña fija (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problema de configuración del servidor: falta columna de formato en consulta. Por favor contacte al administrador del sistema. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">Fallo al conectar %1 al Servidor FTP%2.</Term>
   <Term key="ERR_FTP_CREATE_DIR">Fallo al crear carpeta %1 en el Servidor FTP.</Term>
   <Term key="ERR_FTP_UPLOAD">Fallo al cargar archivo %1 al Servidor FTP.</Term>
   <Term key="ERR_GENERAL_ERROR">Error</Term>

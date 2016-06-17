@@ -859,7 +859,6 @@
   <Term key="ERR_FILES_NOT_SUPPORTED">次のファイルはサポート対象外です。</Term>
   <Term key="ERR_FIXEDPASS">ユーザがパスワードを修正しました(S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">サーバー設定に問題があります: クエリの段フォーマットが欠落しています。システム管理者に連絡してください。(S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">%1 をFTP サーバー %2 に接続することができませんでした。</Term>
   <Term key="ERR_FTP_CREATE_DIR">FTP サーバーでフォルダ %1 をつくる事ができませんでした。</Term>
   <Term key="ERR_FTP_UPLOAD">FTP サーバーにファイル %1 をアップロードする事ができませんでした。</Term>
   <Term key="ERR_GENERAL_ERROR">エラー</Term>

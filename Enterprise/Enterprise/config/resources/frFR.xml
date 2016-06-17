@@ -859,7 +859,6 @@
   <Term key="ERR_FILES_NOT_SUPPORTED">Les fichiers suivants ne sont pas pris en charge</Term>
   <Term key="ERR_FIXEDPASS">L'utilisateur a saisi un mot de passe (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problème de configuration du serveur : il manque la colonne de format dans la requête. Contactez l’administrateur système. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">Échec de la connexion %1 au serveur FTP %2.</Term>
   <Term key="ERR_FTP_CREATE_DIR">Impossible de créer le dossier %1 sur le serveur FTP.</Term>
   <Term key="ERR_FTP_UPLOAD">Impossible de télécharger le fichier %1 sur le serveur FTP.</Term>
   <Term key="ERR_GENERAL_ERROR">Erreur</Term>

@@ -859,7 +859,6 @@
   <Term key="ERR_FILES_NOT_SUPPORTED">I seguenti file non sono supportati</Term>
   <Term key="ERR_FIXEDPASS">L'utente ha fissato una password (S1016).</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problema di configurazione del server: colonna del formato mancante nella query. Rivolgersi all'amministratore di sistema. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">Impossibile connettere %1 al server FTP %2.</Term>
   <Term key="ERR_FTP_CREATE_DIR">Impossibile creare la cartella %1 sul server FTP.</Term>
   <Term key="ERR_FTP_UPLOAD">Impossibile caricare il file %1 sul server FTP.</Term>
   <Term key="ERR_GENERAL_ERROR">Errore</Term>
