@@ -1,0 +1,111 @@
+<?php
+/**
+ * Return a node to display in the block.
+ *
+ * @param Integer $tid
+ * @return Object
+ */
+function get_latest_story ($count = 1) {
+  $result = db_query_range($sql = db_rewrite_sql("SELECT n.nid FROM {node_counter} nc, {node} n WHERE nc.nid = n.nid AND n.type='ww_enterprise' AND n.status=1 ORDER BY daycount DESC"), 0, $count);
+  
+  while($nid = db_fetch_object($result)) {
+  	$nodes[] = node_load(array('nid' => $nid->nid));
+  }
+	
+  return (Array) $nodes;
+}
+
+/**
+* Implementation of hook_block().
+*/
+function ww_mostread_block($op = 'list', $delta = 0, $edit = array()) {
+  // The $op parameter determines what piece of information is being requested.
+  switch ($op) {
+    case 'list':
+      $blocks[0][ 'info' ] = t('Most Read');
+    
+      return $blocks;
+    case 'configure':
+    	return $form;
+      
+    case 'view': default:
+      //Get node and content
+      $nodes = get_latest_story(5);
+      
+      if(is_array($nodes))
+      	foreach ($nodes as $node)
+      		$options .= sprintf('<li><a href="%snode/%d">%s</a></li>', base_path(), $node-> nid, $node-> title);
+      
+      //Build content
+      $block['title'] = t('Most Read');
+      $block['content'] = sprintf("<ol>%s</ol>", $options);
+      
+      return $block;
+  }
+}
+
+
+/**
+* Implementation of hook_perm().
+*/
+function ww_mostread_perm() {
+  return array('create ww_mostread', 'edit own ww_mostread');
+}
+
+/**
+* Implementation of hook_access().
+*/
+function ww_mostread_access($op, $node) {
+  global $user;
+
+  if ($op == 'create') {
+    // Only users with permission to do so may create this node type.
+    return user_access('create ww_mostread');
+  }
+
+  // Users who create a node may edit or delete it later, assuming they have the
+  // necessary permissions.
+  if ($op == 'update' || $op == 'delete') {
+    if (user_access('edit own ww_mostread') && ($user->uid == $node->uid)) {
+      return TRUE;
+    }
+  }
+}
+
+/**
+* Implementation of hook_form().
+*/
+function ww_mostread_form(&$node) {
+  $type = node_get_types('type', $node);
+
+  // We need to define form elements for the node's title and body.
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => check_plain('Name'),
+    '#required' => TRUE,
+    '#default_value' => $node->title,
+    '#weight' => -5
+  );
+  
+  return $form;
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function ww_mostread_menu ()
+{
+  
+}
+
+/**
+* Implementation of hook_help().
+*/
+function ww_mostread_help($section) {
+  switch ($section) {
+    case 'admin/help#ww_mostread':
+      return t('ADMIN-HELP-TEXT');
+      break;
+  }
+}
+?>

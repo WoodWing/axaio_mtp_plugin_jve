@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+	<meta http-equiv="PRAGMA" content="NO-CACHE"/>
+	<meta http-equiv='Expires' content="-1"/>
+	<meta name="generator" content="WoodWing Enterprise" />
+	<title>WoodWing Enterprise</title>
+	<link href="../../config/templates/woodwingmain.css" rel="stylesheet" type="text/css" media="all" />
+	<link rel="icon" href="../../config/images/favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="../../config/images/favicon.ico" type="image/x-icon" />
+	<script language="JavaScript">
+		function Message(message){
+			alert(message+"\n"+"<!--RES:ACT_PLEASE_TRY_AGAIN-->")
+		}
+		function Required_UP(){
+			alert("<!--RES:ERR_USERNAME_PASSWORD_REQUIRED-->")
+		}
+		function Required_U(){
+			alert("<!--RES:ERR_USER_NAME_REQUIRED-->")
+		}
+		function Required_P(){
+			alert("<!--RES:ERR_PASSWORD_REQUIRED-->")
+		}
+	</script>
+	</head>
+
+<body bgcolor="black">
+	<form action="../../server/apps/login.php" method="post">
+	
+		<!-- header bar and dialog (background) -->
+		<div style="position:absolute; left:8px; top:8px;">
+			<img src="../../config/images/login_screen.png" title="" />
+		</div>
+
+		<!-- right fill header bar at right top -->
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr height="65"> <!-- head -->
+				<td width="100%" style="background-image: url(../../config/images/enterprise_fillright.png); background-repeat: repeat-x; background-position: 0% 0%;">
+					&nbsp;
+				</td>
+			</tr>
+		</table>
+
+		<!-- copyright at right bottom -->
+		<div style="position:absolute;top:315px;left:0px;width:170px;height:100px;-adbe-c:c">
+			<table width="100%" border="0" cellspacing="0" cellpadding="0" height="100%">
+				<tr>
+					<td align="center" valign="bottom">
+						<p class="menusmall"><!---->v<!--VERSIONINFO--></p>
+						<p class="menusmall">&copy; WoodWing Software</p>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<!-- dialog caption -->
+		<div style="position:absolute;top:55px;left:261px;width:480px;height:69px;-adbe-c:c">
+			<p class="logontitle"><br />
+				<!-- need to prevent IU from cutting tops --><b><!--RES:ACT_LOGIN--></b> | WoodWing Enterprise</p>
+		</div>
+		
+		<!-- form fields -->
+		<div style="position:absolute;top:175px;left:261px;width:330px;height:153px;-adbe-c:c">
+			<p class="logonlabel"><nobr><!--RES:USR_USER_NAME--></nobr><br />
+				<input type="text" name="usr" value="<!--USERNAME-->" style="width:250px" autocomplete="off"/></p>
+			<p class="logonlabel"><!--RES:USR_PASSWORD--><br />
+				<input type="password" name="psswd" style="width:250px" autocomplete="off"/></p>
+		</div>
+		<div style="position:absolute;top:285px;left:261px;width:330px;height:153px;-adbe-c:c">
+			<p class="logonlabel"><!--MESSAGE--></p>
+		</div>
+		<div style="position:absolute;top:360px;left:460px;width:63px;height:24px;">
+			<input type="submit" name="Login" value="<!--RES:ACT_LOGIN-->" />
+		</div>
+		<div style="position:absolute;top:326px;left:555px;width:12px;height:12px;">
+			<input type="hidden" name="login" value="login" />
+			<input type="hidden" name="redir" value="<!--PAR:REDIR-->" />
+		</div>
+</form></body>
+</html>

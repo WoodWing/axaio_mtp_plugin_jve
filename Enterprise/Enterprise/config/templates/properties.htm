@@ -1,0 +1,65 @@
+<script language="Javascript">
+	<!--ERR_INVALID_OPERATION-->
+	function SetCombos(sPubl,sObjType)
+	{
+		// Point to the form having Publication and ObjectType combos...
+		var f = document.forms.propfilter;
+
+		// Debug info...
+		//alert( f.publ.options[f.publ.selectedIndex].text );
+		//alert( f.objtype.options[f.objtype.selectedIndex].text );
+
+		// Select requested values in Publication and ObjectType combos...
+		for(i=0; i<f.publ.options.length; i++){
+			if(f.publ.options[i].value == sPubl){
+				f.publ.selectedIndex = i;
+			}
+		}
+		//f.publ.selectedIndex = sPubl;
+		f.objtype.value = sObjType;
+
+		// Reflect combo changes in properties.php...
+		f.submit();
+	}
+</script>
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/metadata.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:MNU_META_DATA--></span></td>
+		</tr>
+	</table>
+
+	<!-- app body -->
+	<form name="propfilter" action="properties.php" method="post">
+	<table class="listframe" width="100%"><tr><td>
+		<table class="listpane">
+			<tr>
+				<th width="100"><!--RES:PUBLICATION--></th>
+				<th width="100"><!--RES:OBJ_TYPE2--></th>
+				<th width="100"><!--RES:ACT_VIEW--></th>
+			</tr>
+			<tr>
+				<td valign="top"><!--COMBO:PUBL--></td>
+				<td valign="top"><!--COMBO:TYPE--></td>
+				<td valign="top"><!--COMBO:VIEW--></td>
+			</tr>
+		</table>
+		<br/>
+		<table class="listpane">
+			<tr>
+				<th><!--RES:PVW_CUSTOM--></th>
+			</tr>
+			<tr>
+				<td valign="top"><!--PUB_OBJTYPE_LIST--></td>
+			</tr>
+		</table>
+	</td></tr></table>
+
+	<!--DETAILS-->
+	</form>
+	
+</td></tr></table>

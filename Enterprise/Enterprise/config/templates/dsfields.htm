@@ -1,0 +1,87 @@
+<script type="text/javascript">
+	function removeField( fieldid )
+	{
+		if( confirm("<!--RES:DS_FIELD_DEL-->") )
+		{
+			// try to add parameters to the next page in a 'safe' way (i.e: not through the URL)
+			var hiddenFormElement = document.getElementById("fieldid#"+fieldid);
+			// fill the hidden element
+			hiddenFormElement.value = fieldid;
+			// submit the hidden form
+			var hiddenForm = document.getElementById("deleteform#"+fieldid);
+			hiddenForm.submit();
+		}
+	}
+	
+	function updateField( fieldid )
+	{
+		
+		// try to add parameters to the next page in a 'safe' way (i.e: not through the URL)
+		var hiddenFormElement = document.getElementById("updatefieldid#"+fieldid);
+		// fill the hidden element
+		hiddenFormElement.value = fieldid;
+		// submit the hidden form
+		var hiddenForm = document.getElementById("updateform#"+fieldid);
+		hiddenForm.submit();
+	}
+</script>
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/datasource_32.png"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:DS_DATASOURCE--></span></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>&nbsp;<span class="subtitletext"><!--PAR:MODE_TITLE--></span></td>
+		</tr>
+	</table>
+
+	<!-- app body -->
+	<table width="70%">
+		<tr>
+			<td valign="top">	
+			<table class="listpane" width="250">
+				<tr>
+					<th><!--RES:DS_FIELD_NAME--></th>
+					<th><!--RES:DS_FIELD_PRIO--></th>
+					<th><!--RES:DS_FIELD_READONLY--></th>
+				</tr>
+				<!--PAR:FIELD_LIST>-->
+				<form name="deleteform" id="deleteform#<!--PAR:FIELD_ID-->" method="post" action="dsfields.php?mode=delete&amp;datasource=<!--PAR:DATASOURCE_ID-->&amp;query=<!--PAR:QUERY_ID-->"><input type="hidden" id="fieldid#<!--PAR:FIELD_ID-->" name="field" /></form>
+				<form name="updateform" id="updateform#<!--PAR:FIELD_ID-->" method="post" action="dsfields.php?mode=update&amp;datasource=<!--PAR:DATASOURCE_ID-->&amp;query=<!--PAR:QUERY_ID-->"><input type="hidden" id="updatefieldid#<!--PAR:FIELD_ID-->" name="field" />
+				<tr id="field#<!--PAR:FIELD_ID-->" bgcolor="#FFFFFF">
+					<td><strong><!--PAR:FIELD_NAME--></strong><input type="hidden" value="<!--PAR:FIELD_NAME-->" name="fieldname" /></td>
+					<td><!--PAR:FIELD_PRIO--></td>
+					<td><!--PAR:FIELD_READONLY--></td>
+					<td width="16"><a href="javascript:void(0);"><img src="../../config/images/remov_16.gif" title="<!--RES:DS_FIELD_DEL_DESC-->" onclick="javascript:removeField( <!--PAR:FIELD_ID--> );" /></a>&nbsp;&nbsp;<a href="javascript:void(0);"><img src="../../config/images/edit_16.gif" title="<!--RES:BUT_UPDATE-->" onclick="javascript:updateField( <!--PAR:FIELD_ID--> );" /></a></td>
+				</tr>
+				</form>
+				<!--<PAR:FIELD_LIST-->
+				<tr><td colspan="3"></td></tr>
+				<form name="addform" method="post" action="dsfields.php">
+				<tr bgcolor="#FFFFFF">
+					<td><input type="text" name="name" /></td>
+					<td><input type="checkbox" name="priority" /></td>
+					<td><input type="checkbox" name="readonly" /></td>
+					<td><input type="submit" name="ok" value="<!--RES:ACT_ADD-->"/></td>
+				</tr>
+				<tr>
+					<td colspan="4"><font color="#ff0000"><i><!--PAR:ERROR--></i></font></td>
+				</tr>
+				<!--VAR:HIDDEN-->
+				</form>
+				<tr><td colspan="3"></td></tr>	
+			</table>
+			</td>
+		</tr>
+	</table>
+		
+	<br/>
+    <a href="datasources.php?dsSelect=<!--PAR:PRESELECTED_DATASOURCE-->&amp;qSelect=<!--PAR:PRESELECTED_QUERY-->">
+    	<img src="../../config/images/back_32.gif" border="0" title="<!--RES:ACT_BACK-->" width="32" height="32"/>
+    </a>
+</td></tr></table>

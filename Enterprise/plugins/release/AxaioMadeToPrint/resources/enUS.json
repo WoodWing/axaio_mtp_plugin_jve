@@ -1,0 +1,35 @@
+{
+	"{{MTP_MAINTENANCE}}": "MadeToPrint Maintenance",
+	"{{MTP_SETT}}": "MadeToPrint Setting",
+	"{{MTP_SETUP}}": "MadeToPrint",
+	"{{MNU_MTP}}": "MadeToPrint",
+
+	"{{BEFORE}}": "Before",
+	"{{AFTER}}": "After",
+	"{{ERROR}}": "On Error",
+
+	"{{OBJ_STATUS_LAYOUTS}}": "Status Layout",
+	"{{OBJ_STATUS_ARTICLES}}": "Status Articles",
+	"{{OBJ_STATUS_IMAGES}}": "Status Images",
+
+	"{{MTP_SETT}}": "MadeToPrint Setting",
+	"{{MTP_SETUP}}": "MadeToPrint",
+	"{{QUIET}}": "Quiet",
+
+	"{{WFL_PRIORITY}}": "Priority",
+	"{{ACT_DEL}}": "Delete",
+	"{{ACT_EDIT}}": "Edit",
+	"{{ACT_SAVE}}": "Save",
+	"{{ACT_CANCEL}}": "Cancel",
+	"{{ACT_ADD}}": "Add",
+
+	"{{LIC_CURRENT}}": "Current",
+	"{{ACT_SELECT_ALL}}": "Select All",
+	"{{ACT_SELECT_ALL_ROWS}}": "Select All Rows",
+
+	"{{ACT_QUIT_LOSING_CHANGES}}": "Are you sure you want to quit and lose changes?"
+}
+
+
+
+

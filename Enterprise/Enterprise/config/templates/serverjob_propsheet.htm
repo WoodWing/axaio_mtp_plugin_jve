@@ -1,0 +1,74 @@
+<script language="JavaScript">
+
+function doDelete()
+{
+	if( confirm('<!--RES:SVR_CONFIRM_DELETE_JOBINSTANCE-->') ) {
+		var f = document.forms.jobSheetForm;
+		f.action.value = "deleteSingle";
+		f.submit();
+		return true;
+	}
+	return false;
+}
+
+function doRestart()
+{
+	if( confirm('<!--RES:IDS_RESTARTJOB-->' + '?') ) {
+		var f = document.forms.jobSheetForm;
+		f.action.value = "restart";
+		f.submit();
+		return true;
+	}
+	return false;	
+}
+
+</script>
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app body -->
+	<form name="jobSheetForm" action="serverjobs.php" method="post">
+		<table class="formframe"><tr><td>
+			<table class="formbody">
+
+				<tr><td colspan="2"><font color="#ff0000"><i><!--PAR:ERROR--></i></font></td></tr>
+
+				<!--SEC:SERVERJOB_RECORD>-->
+				<tr><td width="150"><!--RES:SVR_SERVERJOB_TYPE--></td><td>
+					<input type="hidden" name="jobid" value="<!--PAR:ServerJob->JobId-->"/>
+					<!--PAR:ServerJob->JobType-->
+				</td></tr>
+				<tr><td><!--RES:SVR_SERVER_TYPE--></td><td>
+					<!--PAR:ServerJob->ServerType-->
+				</td></tr>
+				<tr><td><!--RES:IDS_QUEUED_SINCE--></td><td>
+					<!--PAR:ServerJob->QueueTime-->
+				</td></tr>
+				<tr><td><!--RES:IDS_STARTED_AT--></td><td>
+					<!--PAR:ServerJob->StartTime-->
+				</td></tr>
+				<tr><td><!--RES:IDS_FINISHED_AT--></td><td>
+					<!--PAR:ServerJob->ReadyTime-->
+				</td></tr>
+				<tr><td><!--RES:SVR_JOBSTATUS--></td><td>
+					<!--PAR:JOBSTATUS-->: <!--PAR:JOBSTATUSINFO-->
+				</td></tr>
+				<tr><td><!--RES:USR_USER_NAME--></td><td>
+					<!--PAR:ServerJob->ActingUser-->
+				</td></tr>
+				<!--SEC:<SERVERJOB_RECORD-->
+			</table>
+		</td></tr><tr><td>
+			<table class="formbtnbar">
+				<tr>
+					<td style='<!--VAR:SHOW_RESTART_BUTTON-->'>
+						<input type="submit" name="restart" value="Restart" onClick="return doRestart();" />
+					</td>
+					<td width="10%">
+						<input type="submit" name="delete" value="Delete" onClick="return doDelete();" />
+				</td></tr>
+						<input type="hidden" name="action" value=""/>
+			</table>
+		</td></tr></table>		
+	</form>
+</td></tr></table>

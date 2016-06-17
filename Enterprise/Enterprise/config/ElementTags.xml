@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes" ?>
+<!--WoodWing Software ElementTag v7.0 build 12 -->
+<tags>
+<elementtag name="intro" default="" xmltag="" parastyletag="" showDefault="true"/>
+<elementtag name="head" default="insmartlayout" xmltag="" parastyletag="" showDefault="true"/>
+<elementtag name="body" default="normal" xmltag="" parastyletag="" showDefault="true"/>
+<elementtag name="byline" default="" xmltag="" parastyletag="" showDefault="false"/>
+<elementtag name="caption" default="" xmltag="" parastyletag="" showDefault="false"/>
+<elementtag name="credit" default="" xmltag="" parastyletag="" showDefault="false"/>
+<elementtag name="crosshead" default="" xmltag="" parastyletag="" showDefault="false"/>
+<elementtag name="graphic" default="image" xmltag="" parastyletag="" showDefault="false"/>
+<elementtag name="highlight" default="" xmltag="" parastyletag="" showDefault="false"/>
+<elementtag name="subhead" default="" xmltag="" parastyletag="" showDefault="false"/>
+</tags>
