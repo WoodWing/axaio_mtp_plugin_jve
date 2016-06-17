@@ -811,7 +811,7 @@
   <Term key="ERR_CHECKIN">ファイル名が一致しません。このままチェックインしてもよろしいですか？</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">プレーンテキストのアーティクルのみ結合できます。</Term>
   <Term key="ERR_COMPOSE">エラー：アーティクルを構成できません。(S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">%1に接続できません。接続の確認と再度お試しください。(S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">サーバー接続エラーです。接続を確認して再試行してください。(S1068)</Term>
   <Term key="ERR_COPY_FOLDER">発行中にエラーが発生しました。システム管理者へ連絡してください。\n\n詳細：HTMLリソースのキャッシュフォルダが見つかりませんでした。 'Adobe Digital Publishing System (DPS)'ヘルスチェックページでテストを実行し、指示に従ってください。</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">データベースに接続できません(S1003)</Term>
@@ -859,7 +859,6 @@
   <Term key="ERR_FILES_NOT_SUPPORTED">次のファイルはサポート対象外です。</Term>
   <Term key="ERR_FIXEDPASS">ユーザがパスワードを修正しました(S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">サーバー設定に問題があります: クエリの段フォーマットが欠落しています。システム管理者に連絡してください。(S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">%1 をFTP サーバー %2 に接続することができませんでした。</Term>
   <Term key="ERR_FTP_CREATE_DIR">FTP サーバーでフォルダ %1 をつくる事ができませんでした。</Term>
   <Term key="ERR_FTP_UPLOAD">FTP サーバーにファイル %1 をアップロードする事ができませんでした。</Term>
   <Term key="ERR_GENERAL_ERROR">エラー</Term>
@@ -1971,7 +1970,7 @@
   <Term key="STT_CREATEPERMANENT">永続バージョンを作成</Term>
   <Term key="STT_READYTOBEPUBLISHED">発行の準備完了</Term>
   <Term key="STT_REMOVEINTERMEDIATE">中間バージョンを削除</Term>
-  <Term key="STT_SKIPIDSA">Skip InDesign Server Automation</Term>
+  <Term key="STT_SKIPIDSA">InDesign Server Automationをスキップ</Term>
   <Term key="SUGGESTIONS_BUTTON_LABEL">タグ候補</Term>
   <Term key="SUGGESTIONS_BUTTON_TOOLTIP">すべてのタグ候補を更新</Term>
   <Term key="SUGGESTION_PROVIDER">タグ候補システム</Term>

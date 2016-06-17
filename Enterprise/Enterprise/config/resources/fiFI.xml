@@ -859,7 +859,6 @@
   <Term key="ERR_FILES_NOT_SUPPORTED">Seuraavia tiedostomuotoja ei tueta</Term>
   <Term key="ERR_FIXEDPASS">Käyttäjät on korjannut salasanan (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Palvelinasetusongelma: kyselystä puuttuu muotoilusarake. Ota yhteyttä järjestelmänvalvojaan. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">Kohteen %1 yhdistäminen FTP-palvelimeen %2 epäonnistui.</Term>
   <Term key="ERR_FTP_CREATE_DIR">Kansion %1 luominen FTP-palvelimelle epäonnistui.</Term>
   <Term key="ERR_FTP_UPLOAD">Tiedoston %1 lataaminen FTP-palvelimelle epäonnistui.</Term>
   <Term key="ERR_GENERAL_ERROR">Virhe</Term>
