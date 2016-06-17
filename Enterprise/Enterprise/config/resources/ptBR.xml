@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 16-06-2016 13:05:50 GMT-->
+<!--Last edit date in TMS: 17-06-2016 12:31:56 GMT-->
 <LocalizationMap language="ptBR">
   <Term key="ISSUE">Edição</Term>
   <Term key="ISSUES">Edições</Term>
@@ -860,7 +860,6 @@
   <Term key="ERR_FILES_NOT_SUPPORTED">Os seguintes arquivos não são suportados:</Term>
   <Term key="ERR_FIXEDPASS">Usuário possui senha fixa (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problema de configuração do servidor: coluna de formato ausente na consulta. Entre em contato com o administrador do sistema. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">Falha em conectar %1 ao Servidor FTP %2.</Term>
   <Term key="ERR_FTP_CREATE_DIR">Falha na criação da pasta %1 no Servidor FTP.</Term>
   <Term key="ERR_FTP_UPLOAD">Falha no upload do arquivo %1 ao Servidor FTP.</Term>
   <Term key="ERR_GENERAL_ERROR">Erro</Term>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 16-06-2016 13:05:50 GMT-->
+<!--Last edit date in TMS: 17-06-2016 12:31:56 GMT-->
 <LocalizationMap language="enUS">
   <Term key="ISSUE">Issue</Term>
   <Term key="ISSUES">Issues</Term>
@@ -860,7 +860,6 @@
   <Term key="ERR_FILES_NOT_SUPPORTED">The following files are not supported</Term>
   <Term key="ERR_FIXEDPASS">User has fixed password (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Server configuration problem: format column missing in query. Please contact your system administrator. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">Failed to connect %1 to FTP Server %2.</Term>
   <Term key="ERR_FTP_CREATE_DIR">Failed to create folder %1 on the FTP Server.</Term>
   <Term key="ERR_FTP_UPLOAD">Failed to upload file %1 to the FTP Server.</Term>
   <Term key="ERR_GENERAL_ERROR">Error</Term>

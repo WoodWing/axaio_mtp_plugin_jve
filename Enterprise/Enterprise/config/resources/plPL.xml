@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 16-06-2016 13:05:50 GMT-->
+<!--Last edit date in TMS: 17-06-2016 12:31:56 GMT-->
 <LocalizationMap language="plPL">
   <Term key="ISSUE">Wydanie</Term>
   <Term key="ISSUES">Wydania</Term>
@@ -860,7 +860,6 @@
   <Term key="ERR_FILES_NOT_SUPPORTED">Następujące pliki nie są obsługiwane</Term>
   <Term key="ERR_FIXEDPASS">Użytkownik ma stałe hasła (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problem z konfiguracją serwera: w kwerendzie brak formatu kolumny. Skontaktuj się z administratorem ssytemu. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">Łączenie %1 z serwerem FTP %2 nie powiodło się.</Term>
   <Term key="ERR_FTP_CREATE_DIR">Utworzenie folderu %1 na serwerze FTP nie powiodło się.</Term>
   <Term key="ERR_FTP_UPLOAD">Przesłanie pliku %1 na serwer FTP nie powiodło się.</Term>
   <Term key="ERR_GENERAL_ERROR">Błąd</Term>

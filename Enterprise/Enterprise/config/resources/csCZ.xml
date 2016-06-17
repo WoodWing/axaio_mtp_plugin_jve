@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 16-06-2016 13:05:50 GMT-->
+<!--Last edit date in TMS: 17-06-2016 12:31:56 GMT-->
 <LocalizationMap language="csCZ">
   <Term key="ISSUE">Vydání</Term>
   <Term key="ISSUES">Vydání</Term>
@@ -860,7 +860,6 @@
   <Term key="ERR_FILES_NOT_SUPPORTED">Následující soubory nejsou podporované</Term>
   <Term key="ERR_FIXEDPASS">Uživatel má pevné heslo (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problém s konfigurací serveru: v dotazu chybí sloupec formátu. Obraťte se na správce systému. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">Nepodařilo se připojit %1 k FTP serveru %2.</Term>
   <Term key="ERR_FTP_CREATE_DIR">Vytvoření složky %1 na serveru FTP se nezdařilo.</Term>
   <Term key="ERR_FTP_UPLOAD">Uložení souboru %1 na server FTP se nezdařilo.</Term>
   <Term key="ERR_GENERAL_ERROR">Chyba</Term>
