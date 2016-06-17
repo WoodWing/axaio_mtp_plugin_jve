@@ -250,9 +250,18 @@ function ionCubeFolder {
 }
 
 #
-# ionCube encode some files and folders in Enterprise Server release folder.
+# ionCube encode specific files and folders in Enterprise Server release folder.
+#
+# Encoding is done for files that are related to the licensing of Enterprise to avoid
+# hackers working with our product without licenses. But also for some files that are
+# rather hard to develop which we do not want to give away for free and for files that 
+# integrate with a 3rd party API that should not be exposed to the outside world.
 #
 function ionCubeEnterpriseFiles {
+	# Disable debugger; Else this function gives tons of noise. It validates encodings by itself.
+	set +x
+	
+	echo "Encode specific Enterprise core folders."
 	thisYear=`date +%Y`
 	encodeOptionFile="${SOURCE_BASE}encodeoptions.txt"
 	echo "--replace-target --add-comment \"(c) Copyright 2000-${thisYear} WoodWing Software, www.woodwing.com\" --obfuscate locals --obfuscation-key \"de bocht van de ronde tocht\" --optimize max --no-doc-comments --property \"magic='the windmill keeps on turning'\" --message-if-no-loader \"'No Ioncube loader installed. Please run the Health Check page (e.g. http://localhost/Enterprise/server/wwtest/testsuite.php).'\"" > "${encodeOptionFile}"
@@ -268,7 +277,8 @@ function ionCubeEnterpriseFiles {
 	for icFolder in ${icFolders}; do
 		ionCubeFolder "${encodeOptionFile}" "${icFolder}"
 	done
-
+	
+	echo "Encode the Analytics plugin, except its config file."
 	icFolder="${SOURCE_BASE}plugins/release/Analytics/"
 	for icFile in $(find ${icFolder} -name '*.php'); do
 		if [ ${icFile} == "${SOURCE_BASE}plugins/release/Analytics/monitor_config.php" ]; then 
@@ -278,6 +288,7 @@ function ionCubeEnterpriseFiles {
 		fi
 	done
 	
+	echo "Encode specific Enterprise core files and Elvis plugin files."
 	icFiles="\
 		Enterprise/server/apps/webapplicense.inc.php \
 		Enterprise/server/regserver.inc.php \
@@ -291,13 +302,20 @@ function ionCubeEnterpriseFiles {
 	for icFile in ${icFiles}; do
 		ionCubeFile "${encodeOptionFile}" "${icFile}"
 	done
-
+	
+	echo "Encode the license folder of Enterprise core."
+	# Note that this step is separately done because it requires extra security options.
+	# These options block non-encoded PHP files from directly including one of our license files.
 	encodeOptionFile2="${SOURCE_BASE}encodeoptions2.txt"
 	cp "${encodeOptionFile}" "${encodeOptionFile2}"
 	echo "--include-if-property \"magic='the windmill keeps on turning'\"" >> "${encodeOptionFile2}"
 	icFolder="Enterprise/server/utils/license/"
 	ionCubeFolder "${encodeOptionFile2}" "${icFolder}"
+	
+	# Restore the debugger; Now the encoding is done.
+	set -x
 
+	# Remove the temporary encoding options files.
 	rm -f "${encodeOptionFile}"
 	rm -f "${encodeOptionFile2}"
 }
