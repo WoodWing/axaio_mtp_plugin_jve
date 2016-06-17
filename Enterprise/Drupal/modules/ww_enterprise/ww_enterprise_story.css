@@ -1,0 +1,36 @@
+div.writer
+{
+	border-top: 1px solid #a3cfe1;
+	border-bottom: 1px solid #a3cfe1;
+	color: #0078ab;
+	font-size: 10px;
+	line-height: 12px;
+	margin-bottom: 5px;
+}
+
+div.teaser {
+	color: #827e7e;
+}
+
+.attached-image-wrapper
+{
+	
+}
+
+.attached-image
+{
+	margin-bottom: -6px;
+	padding: 0px;
+}
+
+.attached-image-caption
+{
+	margin: 0px;
+	background: #429cc1 url(arrow.png) no-repeat 10px 6px;
+	
+	position: relative;	
+	width: 480px;
+	color: #FFFFFF;
+	padding-left: 25px;
+	
+}

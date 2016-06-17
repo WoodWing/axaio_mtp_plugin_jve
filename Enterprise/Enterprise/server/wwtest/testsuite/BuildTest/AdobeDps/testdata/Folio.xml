@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<folio lastUpdated="Fri Sep 30 11:30:37 GMT+0200 2011" date="pub date Oct 2011" orientation="always" bindingDirection="left" id="EKL1" version="1.9.0" path="/adc" subpath="/adc">
+  <metadata>
+    <path>/adc</path>
+    <subpath>/adc</subpath>
+    <description>description Oct 2011</description>
+    <magazineTitle>magazine title Oct 2011</magazineTitle>
+    <folioNumber>number Oct 2011</folioNumber>
+    <issueTitle>EKL1</issueTitle>
+  </metadata>
+  <targetDimensions>
+    <targetDimension wideDimension="1024" narrowDimension="768"/>
+  </targetDimensions>
+  <contentStacks>
+    <contentStack id="Wifi2" subfolio="Wifi_2011_9_14_11_2_49.folio"/>
+    <contentStack id="Enjoy2" subfolio="Enjoy_2011_9_14_12_43_14.folio"/>
+  </contentStacks>
+</folio>

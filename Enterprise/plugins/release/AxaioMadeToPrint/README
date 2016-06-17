@@ -1,0 +1,12 @@
+axaio MadeToPrint Woodwing-Plugin
+=================================
+
+Please place this folder into the folder
+ $woodwingserver/config/plugins/
+ 
+Then, rename config_sample.php into config.php and open it in any 
+plain text editor (e.g. TextWrangler, Notepad) and setup the values 
+as you need it. Save the file and open your Woodwing Administration 
+panel in the browser. Go to “Server Plug-Ins” and enable “axaio 
+MadeToPrint”. You will find the setup at “Integrations” -> “axaio 
+MadeToPrint”.

@@ -1,0 +1,380 @@
+/**
+ * Property.java
+ *
+ * This file was auto-generated from WSDL
+ * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
+ */
+
+package com.woodwing.enterprise.interfaces.services.dat;
+
+public class Property  implements java.io.Serializable {
+    private java.lang.String name;
+
+    private java.lang.String displayName;
+
+    private com.woodwing.enterprise.interfaces.services.dat.PropertyType type;
+
+    private java.lang.String defaultValue;
+
+    private java.lang.String[] valueList;
+
+    private java.lang.String minValue;
+
+    private java.lang.String maxValue;
+
+    private java.lang.Integer maxLength;
+
+    public Property() {
+    }
+
+    public Property(
+           java.lang.String name,
+           java.lang.String displayName,
+           com.woodwing.enterprise.interfaces.services.dat.PropertyType type,
+           java.lang.String defaultValue,
+           java.lang.String[] valueList,
+           java.lang.String minValue,
+           java.lang.String maxValue,
+           java.lang.Integer maxLength) {
+           this.name = name;
+           this.displayName = displayName;
+           this.type = type;
+           this.defaultValue = defaultValue;
+           this.valueList = valueList;
+           this.minValue = minValue;
+           this.maxValue = maxValue;
+           this.maxLength = maxLength;
+    }
+
+
+    /**
+     * Gets the name value for this Property.
+     * 
+     * @return name
+     */
+    public java.lang.String getName() {
+        return name;
+    }
+
+
+    /**
+     * Sets the name value for this Property.
+     * 
+     * @param name
+     */
+    public void setName(java.lang.String name) {
+        this.name = name;
+    }
+
+
+    /**
+     * Gets the displayName value for this Property.
+     * 
+     * @return displayName
+     */
+    public java.lang.String getDisplayName() {
+        return displayName;
+    }
+
+
+    /**
+     * Sets the displayName value for this Property.
+     * 
+     * @param displayName
+     */
+    public void setDisplayName(java.lang.String displayName) {
+        this.displayName = displayName;
+    }
+
+
+    /**
+     * Gets the type value for this Property.
+     * 
+     * @return type
+     */
+    public com.woodwing.enterprise.interfaces.services.dat.PropertyType getType() {
+        return type;
+    }
+
+
+    /**
+     * Sets the type value for this Property.
+     * 
+     * @param type
+     */
+    public void setType(com.woodwing.enterprise.interfaces.services.dat.PropertyType type) {
+        this.type = type;
+    }
+
+
+    /**
+     * Gets the defaultValue value for this Property.
+     * 
+     * @return defaultValue
+     */
+    public java.lang.String getDefaultValue() {
+        return defaultValue;
+    }
+
+
+    /**
+     * Sets the defaultValue value for this Property.
+     * 
+     * @param defaultValue
+     */
+    public void setDefaultValue(java.lang.String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+
+    /**
+     * Gets the valueList value for this Property.
+     * 
+     * @return valueList
+     */
+    public java.lang.String[] getValueList() {
+        return valueList;
+    }
+
+
+    /**
+     * Sets the valueList value for this Property.
+     * 
+     * @param valueList
+     */
+    public void setValueList(java.lang.String[] valueList) {
+        this.valueList = valueList;
+    }
+
+
+    /**
+     * Gets the minValue value for this Property.
+     * 
+     * @return minValue
+     */
+    public java.lang.String getMinValue() {
+        return minValue;
+    }
+
+
+    /**
+     * Sets the minValue value for this Property.
+     * 
+     * @param minValue
+     */
+    public void setMinValue(java.lang.String minValue) {
+        this.minValue = minValue;
+    }
+
+
+    /**
+     * Gets the maxValue value for this Property.
+     * 
+     * @return maxValue
+     */
+    public java.lang.String getMaxValue() {
+        return maxValue;
+    }
+
+
+    /**
+     * Sets the maxValue value for this Property.
+     * 
+     * @param maxValue
+     */
+    public void setMaxValue(java.lang.String maxValue) {
+        this.maxValue = maxValue;
+    }
+
+
+    /**
+     * Gets the maxLength value for this Property.
+     * 
+     * @return maxLength
+     */
+    public java.lang.Integer getMaxLength() {
+        return maxLength;
+    }
+
+
+    /**
+     * Sets the maxLength value for this Property.
+     * 
+     * @param maxLength
+     */
+    public void setMaxLength(java.lang.Integer maxLength) {
+        this.maxLength = maxLength;
+    }
+
+    private java.lang.Object __equalsCalc = null;
+    public synchronized boolean equals(java.lang.Object obj) {
+        if (!(obj instanceof Property)) return false;
+        Property other = (Property) obj;
+        if (obj == null) return false;
+        if (this == obj) return true;
+        if (__equalsCalc != null) {
+            return (__equalsCalc == obj);
+        }
+        __equalsCalc = obj;
+        boolean _equals;
+        _equals = true && 
+            ((this.name==null && other.getName()==null) || 
+             (this.name!=null &&
+              this.name.equals(other.getName()))) &&
+            ((this.displayName==null && other.getDisplayName()==null) || 
+             (this.displayName!=null &&
+              this.displayName.equals(other.getDisplayName()))) &&
+            ((this.type==null && other.getType()==null) || 
+             (this.type!=null &&
+              this.type.equals(other.getType()))) &&
+            ((this.defaultValue==null && other.getDefaultValue()==null) || 
+             (this.defaultValue!=null &&
+              this.defaultValue.equals(other.getDefaultValue()))) &&
+            ((this.valueList==null && other.getValueList()==null) || 
+             (this.valueList!=null &&
+              java.util.Arrays.equals(this.valueList, other.getValueList()))) &&
+            ((this.minValue==null && other.getMinValue()==null) || 
+             (this.minValue!=null &&
+              this.minValue.equals(other.getMinValue()))) &&
+            ((this.maxValue==null && other.getMaxValue()==null) || 
+             (this.maxValue!=null &&
+              this.maxValue.equals(other.getMaxValue()))) &&
+            ((this.maxLength==null && other.getMaxLength()==null) || 
+             (this.maxLength!=null &&
+              this.maxLength.equals(other.getMaxLength())));
+        __equalsCalc = null;
+        return _equals;
+    }
+
+    private boolean __hashCodeCalc = false;
+    public synchronized int hashCode() {
+        if (__hashCodeCalc) {
+            return 0;
+        }
+        __hashCodeCalc = true;
+        int _hashCode = 1;
+        if (getName() != null) {
+            _hashCode += getName().hashCode();
+        }
+        if (getDisplayName() != null) {
+            _hashCode += getDisplayName().hashCode();
+        }
+        if (getType() != null) {
+            _hashCode += getType().hashCode();
+        }
+        if (getDefaultValue() != null) {
+            _hashCode += getDefaultValue().hashCode();
+        }
+        if (getValueList() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getValueList());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getValueList(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
+        }
+        if (getMinValue() != null) {
+            _hashCode += getMinValue().hashCode();
+        }
+        if (getMaxValue() != null) {
+            _hashCode += getMaxValue().hashCode();
+        }
+        if (getMaxLength() != null) {
+            _hashCode += getMaxLength().hashCode();
+        }
+        __hashCodeCalc = false;
+        return _hashCode;
+    }
+
+    // Type metadata
+    private static org.apache.axis.description.TypeDesc typeDesc =
+        new org.apache.axis.description.TypeDesc(Property.class, true);
+
+    static {
+        typeDesc.setXmlType(new javax.xml.namespace.QName("urn:PlutusDatasource", "Property"));
+        org.apache.axis.description.ElementDesc elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("name");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "Name"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("displayName");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "DisplayName"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("type");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "Type"));
+        elemField.setXmlType(new javax.xml.namespace.QName("urn:PlutusDatasource", "PropertyType"));
+        elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("defaultValue");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "DefaultValue"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("valueList");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "ValueList"));
+        elemField.setXmlType(new javax.xml.namespace.QName("urn:PlutusDatasource", "String"));
+        elemField.setNillable(true);
+        elemField.setItemQName(new javax.xml.namespace.QName("", "String"));
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("minValue");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "MinValue"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("maxValue");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "MaxValue"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("maxLength");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "MaxLength"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+    }
+
+    /**
+     * Return type metadata object
+     */
+    public static org.apache.axis.description.TypeDesc getTypeDesc() {
+        return typeDesc;
+    }
+
+    /**
+     * Get Custom Serializer
+     */
+    public static org.apache.axis.encoding.Serializer getSerializer(
+           java.lang.String mechType, 
+           java.lang.Class _javaType,  
+           javax.xml.namespace.QName _xmlType) {
+        return 
+          new  org.apache.axis.encoding.ser.BeanSerializer(
+            _javaType, _xmlType, typeDesc);
+    }
+
+    /**
+     * Get Custom Deserializer
+     */
+    public static org.apache.axis.encoding.Deserializer getDeserializer(
+           java.lang.String mechType, 
+           java.lang.Class _javaType,  
+           javax.xml.namespace.QName _xmlType) {
+        return 
+          new  org.apache.axis.encoding.ser.BeanDeserializer(
+            _javaType, _xmlType, typeDesc);
+    }
+
+}

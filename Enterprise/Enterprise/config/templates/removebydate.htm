@@ -1,0 +1,178 @@
+<script type="text/javascript"><!--INC:DatePicker.js--></script>
+<script type="text/javascript">
+function setval()
+{
+	document.content.show.value = true;
+}
+
+function popwin(url,w,h)
+{
+	window.open (url,'_blank','top=0,left=0,screenX=0,screenY=0,toolbar=no,location=no,directories=no,status=no,scrollbars=no,resizable=no,copyhistory=no,width='+w+',height='+h);
+}
+
+function popUp(URL) {
+	day = new Date();
+	id = day.getTime();
+	//eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=750,height=700,left = 150,top = 0');");
+	document.location.href = URL;
+}
+
+function popUpThumb(URL){
+	day = new Date();
+	id = day.getTime();
+	eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=1,width=620,height=620,left = 150,top = 0');");
+}
+
+function directdelete(message)
+{
+		var category = document.content.Category.options[document.content.Category.selectedIndex].text;
+		var publication = document.content.Publication.options[document.content.Publication.selectedIndex].text;
+		var msg = message + " " + publication + " - " + category;
+		var sure = confirm(msg);
+		if (sure == true) {
+			document.content.directdel.value = true;
+			document.content.submit();
+		}
+		// BZ # 5937 Fix for Where Empty page after cancelling deleting objects by Date
+		//else
+		//{
+		//	return false;
+		//}
+}
+
+function AreYouSure(message, error)
+{
+	var date = eval("document.content.Date");
+	var category = eval("document.content.Category");
+	if ((category.options[category.selectedIndex].value != "") & (date.value != "")) {
+		var cnt = countChecked();
+		if (cnt > 0){
+			var msg = message;
+			var sure = confirm(msg);
+			if (sure == true) {
+				document.content.del.value = true;
+				document.content.submit();
+			}
+		} else {
+			alert("<!--RES:ACT_SELECT_ONE_OR_MORE-->");
+		}
+	} else {
+		alert(error);
+	}
+}
+
+function countChecked()
+{
+	var cnt = 0;
+	var elements = document.content.elements;
+	for(i = 0; i < elements.length; i++){
+		var el = elements.item(i);
+		if (el.type == "checkbox" 
+			&& el.name.indexOf("checkbox") == 0
+			&& el.checked == true){
+			cnt++;
+		}
+	}
+	return cnt;
+}
+
+function Message(message)
+{
+	alert(message);
+}
+
+function getElmById(aID)
+{
+  var element = null;
+
+  if (document.getElementById)
+    element = document.getElementById(aID)
+  else if (isNetscape4)
+    element = document.layers[aID]
+  else if (isIE4)
+    element = document.all[aID];
+
+  return element;
+}
+
+function hideShowElement( _id )
+{
+	var elem = getElmById(_id);
+	if( elem.style.display == '' )
+	{
+		elem.style.display = 'none';
+	}
+	else
+	{
+		elem.style.display = '';
+	}
+}
+</script>
+
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/removebydate.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:ACT_REMOVE_BY_DATE--></span></td>
+		</tr>
+	</table>
+
+	<!-- app body -->
+	<form name="content" action="removebydate.php" method="post">
+	<table class="listframe"><tr><td>
+		<table class="listpane">
+			<tr>
+				<th><!--RES:PUBLICATION--></th>
+				<th><!--RES:CATEGORY--></th>
+				<th><!--RES:WFL_DATE--> (dd-mm-yyyy)</th>
+				<th><!--RES:OBJ_ARTICLE--></th>
+				<th><!--RES:OBJ_IMAGE--></th>
+			</tr>
+			<tr>
+				<td width="28%"><!--COMBOPUB--></td>
+				<td width="28%"><!--COMBOCAT--></td>
+				<td width="28%"><!--DATE--></td>
+				<td width="8%" valign="top" align="center"><!--CHECKARTICLE--></td>
+				<td width="8%" valign="top" align="center"><!--CHECKIMAGE--></td>
+			</tr>
+			<tr id="RemoveByDateHelp" style="display: none">
+				<td colspan="5">
+					<div style="float: top; border: 1px; border-style: solid; background: orange; padding: 6px; font-weight: bold; color: white">
+						<!--RES:ACT_SELECT_UNUSED_IMAGES_AND_ARTICLES-->
+					</div>
+				</td>
+			</tr>
+		</table>
+	</td></tr></table>
+	<table class="appbtnbar">
+		<tr>
+			<td width="5" nowrap="nowrap">
+					<a href="javascript:document.content.submit();">
+						<img src="../../config/images/srch_16.gif" border="0" title="<!--RES:ACT_FIND-->"/>
+						<!--RES:ACT_FIND-->
+					</a>
+			</td>
+			<td width="5" nowrap="nowrap">
+					<a href="javascript:hideShowElement('RemoveByDateHelp');">
+						<img src="../../config/images/sinfo_16.gif" title="<!--RES:OBJ_INFO-->"/>
+						<!--RES:OBJ_INFO-->
+					</a>
+			</td>
+			<td></td> <!-- trick: used fill button bar to far right -->
+		</tr>
+	</table>
+
+	<br/>
+	<!--DELETEINFO-->
+
+	<table class="listframe"><tr><td>
+		<table class="listpane">
+			<!--CONTENT-->
+		</table>
+	</td></tr></table>
+	</form>
+
+</td></tr></table>

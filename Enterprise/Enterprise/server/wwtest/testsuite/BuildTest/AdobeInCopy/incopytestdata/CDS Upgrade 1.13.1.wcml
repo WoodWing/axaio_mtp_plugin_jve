@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<ea:Stories ea:DocumentPath="" ea:WWVersion="2.0" xmlns:aic="http://ns.adobe.com/AdobeInCopy/2.0" xmlns:ea="urn:SmartConnection_v3">
+  <ea:Story ea:GUID="901D7D3C-A13B-8B70-B64D-5469D0449295" pi0="style=&quot;50&quot; type=&quot;snippet&quot; readerVersion=&quot;6.0&quot; featureSet=&quot;513&quot; product=&quot;7.0(522)&quot; " pi1="SnippetType=&quot;InCopyInterchange&quot;">
+    <ea:StoryInfo>
+      <ea:SI_EL>body</ea:SI_EL>
+      <ea:SI_Words>26</ea:SI_Words>
+      <ea:SI_Chars>170</ea:SI_Chars>
+      <ea:SI_Paras>4</ea:SI_Paras>
+      <ea:SI_Lines>0</ea:SI_Lines>
+      <ea:SI_Snippet>The European environment will be upgraded at 10am (Amsterdam, CEST)
+Fixed BZ# 25552
+
+For any questons or support related to this upgrade, please contact support@woodwing.com</ea:SI_Snippet>
+      <ea:SI_Version>bb570f15-3466-afa9-4c0c-9db8105ae1a7</ea:SI_Version>
+    </ea:StoryInfo>
+    <Document DOMVersion="7.0" Self="d">
+      <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="false" ColorOverride="Specialblack" ColorRemovable="false" ColorValue="0 0 0 100" Model="Process" Name="Black" Self="Color/Black" Space="CMYK" SwatchCreatorID="7937" Visible="true"/>
+      <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="true" ColorOverride="Normal" ColorRemovable="true" ColorValue="0 0 100 0" Model="Process" Name="C=0 M=0 Y=100 K=0" Self="Color/C=0 M=0 Y=100 K=0" Space="CMYK" SwatchCreatorID="7937" Visible="true"/>
+      <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="true" ColorOverride="Normal" ColorRemovable="true" ColorValue="0 100 0 0" Model="Process" Name="C=0 M=100 Y=0 K=0" Self="Color/C=0 M=100 Y=0 K=0" Space="CMYK" SwatchCreatorID="7937" Visible="true"/>
+      <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="true" ColorOverride="Normal" ColorRemovable="true" ColorValue="100 0 0 0" Model="Process" Name="C=100 M=0 Y=0 K=0" Self="Color/C=100 M=0 Y=0 K=0" Space="CMYK" SwatchCreatorID="7937" Visible="true"/>
+      <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="true" ColorOverride="Normal" ColorRemovable="true" ColorValue="100 90 10 0" Model="Process" Name="C=100 M=90 Y=10 K=0" Self="Color/C=100 M=90 Y=10 K=0" Space="CMYK" SwatchCreatorID="7937" Visible="true"/>
+      <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="true" ColorOverride="Normal" ColorRemovable="true" ColorValue="15 100 100 0" Model="Process" Name="C=15 M=100 Y=100 K=0" Self="Color/C=15 M=100 Y=100 K=0" Space="CMYK" SwatchCreatorID="7937" Visible="true"/>
+      <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="true" ColorOverride="Normal" ColorRemovable="true" ColorValue="75 5 100 0" Model="Process" Name="C=75 M=5 Y=100 K=0" Self="Color/C=75 M=5 Y=100 K=0" Space="CMYK" SwatchCreatorID="7937" Visible="true"/>
+      <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="false" ColorOverride="Hiddenreserved" ColorRemovable="false" ColorValue="100 0 0 0" Model="Process" Name="Cyan" Self="Color/Cyan" Space="CMYK" SwatchCreatorID="7937" Visible="false"/>
+      <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="false" ColorOverride="Hiddenreserved" ColorRemovable="false" ColorValue="0 100 0 0" Model="Process" Name="Magenta" Self="Color/Magenta" Space="CMYK" SwatchCreatorID="7937" Visible="false"/>
+      <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="true" ColorOverride="Specialpaper" ColorRemovable="false" ColorValue="0 0 0 0" Model="Process" Name="Paper" Self="Color/Paper" Space="CMYK" SwatchCreatorID="7937" Visible="true"/>
+      <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="false" ColorOverride="Specialregistration" ColorRemovable="false" ColorValue="100 100 100 100" Model="Registration" Name="Registration" Self="Color/Registration" Space="CMYK" SwatchCreatorID="7937" Visible="true"/>
+      <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="false" ColorOverride="Hiddenreserved" ColorRemovable="false" ColorValue="0 0 100 0" Model="Process" Name="Yellow" Self="Color/Yellow" Space="CMYK" SwatchCreatorID="7937" Visible="false"/>
+      <Ink Angle="71.5651" ConvertToProcess="false" Frequency="94.8683" InkType="Normal" Name="$ID/Process Cyan" NeutralDensity="0.61" PrintInk="true" Self="Ink/$ID/Process Cyan" TrapOrder="1"/>
+      <Ink Angle="18.4349" ConvertToProcess="false" Frequency="94.8683" InkType="Normal" Name="$ID/Process Magenta" NeutralDensity="0.76" PrintInk="true" Self="Ink/$ID/Process Magenta" TrapOrder="2"/>
+      <Ink Angle="0" ConvertToProcess="false" Frequency="100" InkType="Normal" Name="$ID/Process Yellow" NeutralDensity="0.16" PrintInk="true" Self="Ink/$ID/Process Yellow" TrapOrder="3"/>
+      <Ink Angle="45" ConvertToProcess="false" Frequency="106.066" InkType="Normal" Name="$ID/Process Black" NeutralDensity="1.7" PrintInk="true" Self="Ink/$ID/Process Black" TrapOrder="4"/>
+      <Swatch ColorEditable="false" ColorRemovable="false" Name="None" Self="Swatch/None" SwatchCreatorID="7937" Visible="true"/>
+      <StrokeStyle Name="$ID/Solid" Self="StrokeStyle/$ID/Solid" StrokeStyleType="$ID/"/>
+      <FontFamily Name="Minion Pro" Self="di3e">
+        <Font FontFamily="Minion Pro" FontStyleName="Bold Cond" FontStyleNameNative="Bold Cond" FontType="OpenTypeCFF" FullName="Minion Pro Bold Cond" FullNameNative="Minion Pro Bold Cond" Name="Minion Pro Bold Cond" PlatformName="$ID/" PostScriptName="$ID/MinionPro-BoldCn" Self="di3eFontnMinion Pro Bold Cond" Status="Installed" Version="Version 2.068;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Minion Pro" FontStyleName="Bold Cond Italic" FontStyleNameNative="Bold Cond Italic" FontType="OpenTypeCFF" FullName="Minion Pro Bold Cond Italic" FullNameNative="Minion Pro Bold Cond Italic" Name="Minion Pro Bold Cond Italic" PlatformName="$ID/" PostScriptName="$ID/MinionPro-BoldCnIt" Self="di3eFontnMinion Pro Bold Cond Italic" Status="Installed" Version="Version 2.068;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Minion Pro" FontStyleName="Regular" FontStyleNameNative="Regular" FontType="OpenTypeCFF" FullName="Minion Pro" FullNameNative="Minion Pro" Name="Minion Pro Regular" PlatformName="$ID/" PostScriptName="$ID/MinionPro-Regular" Self="di3eFontnMinion Pro Regular" Status="Installed" Version="Version 2.068;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Minion Pro" FontStyleName="Italic" FontStyleNameNative="Italic" FontType="OpenTypeCFF" FullName="Minion Pro Italic" FullNameNative="Minion Pro Italic" Name="Minion Pro Italic" PlatformName="$ID/" PostScriptName="$ID/MinionPro-It" Self="di3eFontnMinion Pro Italic" Status="Installed" Version="Version 2.068;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Minion Pro" FontStyleName="Medium" FontStyleNameNative="Medium" FontType="OpenTypeCFF" FullName="Minion Pro Medium" FullNameNative="Minion Pro Medium" Name="Minion Pro Medium" PlatformName="$ID/" PostScriptName="$ID/MinionPro-Medium" Self="di3eFontnMinion Pro Medium" Status="Installed" Version="Version 2.068;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Minion Pro" FontStyleName="Medium Italic" FontStyleNameNative="Medium Italic" FontType="OpenTypeCFF" FullName="Minion Pro Medium Italic" FullNameNative="Minion Pro Medium Italic" Name="Minion Pro Medium Italic" PlatformName="$ID/" PostScriptName="$ID/MinionPro-MediumIt" Self="di3eFontnMinion Pro Medium Italic" Status="Installed" Version="Version 2.068;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Minion Pro" FontStyleName="Semibold" FontStyleNameNative="Semibold" FontType="OpenTypeCFF" FullName="Minion Pro Semibold" FullNameNative="Minion Pro Semibold" Name="Minion Pro Semibold" PlatformName="$ID/" PostScriptName="$ID/MinionPro-Semibold" Self="di3eFontnMinion Pro Semibold" Status="Installed" Version="Version 2.068;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Minion Pro" FontStyleName="Semibold Italic" FontStyleNameNative="Semibold Italic" FontType="OpenTypeCFF" FullName="Minion Pro Semibold Italic" FullNameNative="Minion Pro Semibold Italic" Name="Minion Pro Semibold Italic" PlatformName="$ID/" PostScriptName="$ID/MinionPro-SemiboldIt" Self="di3eFontnMinion Pro Semibold Italic" Status="Installed" Version="Version 2.068;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Minion Pro" FontStyleName="Bold" FontStyleNameNative="Bold" FontType="OpenTypeCFF" FullName="Minion Pro Bold" FullNameNative="Minion Pro Bold" Name="Minion Pro Bold" PlatformName="$ID/" PostScriptName="$ID/MinionPro-Bold" Self="di3eFontnMinion Pro Bold" Status="Installed" Version="Version 2.068;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Minion Pro" FontStyleName="Bold Italic" FontStyleNameNative="Bold Italic" FontType="OpenTypeCFF" FullName="Minion Pro Bold Italic" FullNameNative="Minion Pro Bold Italic" Name="Minion Pro Bold Italic" PlatformName="$ID/" PostScriptName="$ID/MinionPro-BoldIt" Self="di3eFontnMinion Pro Bold Italic" Status="Installed" Version="Version 2.068;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+      </FontFamily>
+      <FontFamily Name="Myriad Pro" Self="di7e">
+        <Font FontFamily="Myriad Pro" FontStyleName="Condensed" FontStyleNameNative="Condensed" FontType="OpenTypeCFF" FullName="Myriad Pro Condensed" FullNameNative="Myriad Pro Condensed" Name="Myriad Pro Condensed" PlatformName="$ID/" PostScriptName="$ID/MyriadPro-Cond" Self="di7eFontnMyriad Pro Condensed" Status="Installed" Version="Version 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Myriad Pro" FontStyleName="Condensed Italic" FontStyleNameNative="Condensed Italic" FontType="OpenTypeCFF" FullName="Myriad Pro Condensed Italic" FullNameNative="Myriad Pro Condensed Italic" Name="Myriad Pro Condensed Italic" PlatformName="$ID/" PostScriptName="$ID/MyriadPro-CondIt" Self="di7eFontnMyriad Pro Condensed Italic" Status="Installed" Version="Version 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Myriad Pro" FontStyleName="Bold Condensed" FontStyleNameNative="Bold Condensed" FontType="OpenTypeCFF" FullName="Myriad Pro Bold Condensed" FullNameNative="Myriad Pro Bold Condensed" Name="Myriad Pro Bold Condensed" PlatformName="$ID/" PostScriptName="$ID/MyriadPro-BoldCond" Self="di7eFontnMyriad Pro Bold Condensed" Status="Installed" Version="Version 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Myriad Pro" FontStyleName="Bold Condensed Italic" FontStyleNameNative="Bold Condensed Italic" FontType="OpenTypeCFF" FullName="Myriad Pro Bold Condensed Italic" FullNameNative="Myriad Pro Bold Condensed Italic" Name="Myriad Pro Bold Condensed Italic" PlatformName="$ID/" PostScriptName="$ID/MyriadPro-BoldCondIt" Self="di7eFontnMyriad Pro Bold Condensed Italic" Status="Installed" Version="Version 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Myriad Pro" FontStyleName="Regular" FontStyleNameNative="Regular" FontType="OpenTypeCFF" FullName="Myriad Pro" FullNameNative="Myriad Pro" Name="Myriad Pro Regular" PlatformName="$ID/" PostScriptName="$ID/MyriadPro-Regular" Self="di7eFontnMyriad Pro Regular" Status="Installed" Version="Version 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Myriad Pro" FontStyleName="Italic" FontStyleNameNative="Italic" FontType="OpenTypeCFF" FullName="Myriad Pro Italic" FullNameNative="Myriad Pro Italic" Name="Myriad Pro Italic" PlatformName="$ID/" PostScriptName="$ID/MyriadPro-It" Self="di7eFontnMyriad Pro Italic" Status="Installed" Version="Version 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Myriad Pro" FontStyleName="Semibold" FontStyleNameNative="Semibold" FontType="OpenTypeCFF" FullName="Myriad Pro Semibold" FullNameNative="Myriad Pro Semibold" Name="Myriad Pro Semibold" PlatformName="$ID/" PostScriptName="$ID/MyriadPro-Semibold" Self="di7eFontnMyriad Pro Semibold" Status="Installed" Version="Version 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Myriad Pro" FontStyleName="Semibold Italic" FontStyleNameNative="Semibold Italic" FontType="OpenTypeCFF" FullName="Myriad Pro Semibold Italic" FullNameNative="Myriad Pro Semibold Italic" Name="Myriad Pro Semibold Italic" PlatformName="$ID/" PostScriptName="$ID/MyriadPro-SemiboldIt" Self="di7eFontnMyriad Pro Semibold Italic" Status="Installed" Version="Version 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Myriad Pro" FontStyleName="Bold" FontStyleNameNative="Bold" FontType="OpenTypeCFF" FullName="Myriad Pro Bold" FullNameNative="Myriad Pro Bold" Name="Myriad Pro Bold" PlatformName="$ID/" PostScriptName="$ID/MyriadPro-Bold" Self="di7eFontnMyriad Pro Bold" Status="Installed" Version="Version 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+        <Font FontFamily="Myriad Pro" FontStyleName="Bold Italic" FontStyleNameNative="Bold Italic" FontType="OpenTypeCFF" FullName="Myriad Pro Bold Italic" FullNameNative="Myriad Pro Bold Italic" Name="Myriad Pro Bold Italic" PlatformName="$ID/" PostScriptName="$ID/MyriadPro-BoldIt" Self="di7eFontnMyriad Pro Bold Italic" Status="Installed" Version="Version 2.062;PS 2.000;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="0"/>
+      </FontFamily>
+      <FontFamily Name="Kozuka Mincho Pro" Self="di8b">
+        <Font FontFamily="Kozuka Mincho Pro" FontStyleName="EL" FontStyleNameNative="EL" FontType="OpenTypeCID" FullName="Kozuka Mincho Pro EL" FullNameNative="小塚明朝 Pro EL" Name="Kozuka Mincho Pro EL" PlatformName="$ID/" PostScriptName="$ID/KozMinPro-ExtraLight" Self="di8bFontnKozuka Mincho Pro EL" Status="Installed" Version="Version 4.005;PS 4.003;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="1"/>
+        <Font FontFamily="Kozuka Mincho Pro" FontStyleName="L" FontStyleNameNative="L" FontType="OpenTypeCID" FullName="Kozuka Mincho Pro L" FullNameNative="小塚明朝 Pro L" Name="Kozuka Mincho Pro L" PlatformName="$ID/" PostScriptName="$ID/KozMinPro-Light" Self="di8bFontnKozuka Mincho Pro L" Status="Installed" Version="Version 4.005;PS 4.003;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="1"/>
+        <Font FontFamily="Kozuka Mincho Pro" FontStyleName="R" FontStyleNameNative="R" FontType="OpenTypeCID" FullName="Kozuka Mincho Pro R" FullNameNative="小塚明朝 Pro R" Name="Kozuka Mincho Pro R" PlatformName="$ID/" PostScriptName="$ID/KozMinPro-Regular" Self="di8bFontnKozuka Mincho Pro R" Status="Installed" Version="Version 4.005;PS 4.003;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="1"/>
+        <Font FontFamily="Kozuka Mincho Pro" FontStyleName="M" FontStyleNameNative="M" FontType="OpenTypeCID" FullName="Kozuka Mincho Pro M" FullNameNative="小塚明朝 Pro M" Name="Kozuka Mincho Pro M" PlatformName="$ID/" PostScriptName="$ID/KozMinPro-Medium" Self="di8bFontnKozuka Mincho Pro M" Status="Installed" Version="Version 4.005;PS 4.003;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="1"/>
+        <Font FontFamily="Kozuka Mincho Pro" FontStyleName="B" FontStyleNameNative="B" FontType="OpenTypeCID" FullName="Kozuka Mincho Pro B" FullNameNative="小塚明朝 Pro B" Name="Kozuka Mincho Pro B" PlatformName="$ID/" PostScriptName="$ID/KozMinPro-Bold" Self="di8bFontnKozuka Mincho Pro B" Status="Installed" Version="Version 4.005;PS 4.003;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="1"/>
+        <Font FontFamily="Kozuka Mincho Pro" FontStyleName="H" FontStyleNameNative="H" FontType="OpenTypeCID" FullName="Kozuka Mincho Pro H" FullNameNative="小塚明朝 Pro H" Name="Kozuka Mincho Pro H" PlatformName="$ID/" PostScriptName="$ID/KozMinPro-Heavy" Self="di8bFontnKozuka Mincho Pro H" Status="Installed" Version="Version 4.005;PS 4.003;hotconv 1.0.57;makeotf.lib2.0.21895" WritingScript="1"/>
+      </FontFamily>
+      <FontFamily Name="Arial" Self="die3">
+        <Font FontFamily="Arial" FontStyleName="Regular" FontStyleNameNative="Regular" FontType="OpenTypeTT" FullName="Arial" FullNameNative="Arial" Name="Arial Regular" PlatformName="$ID/" PostScriptName="$ID/ArialMT" Self="die3FontnArial Regular" Status="Installed" Version="Version 3.05" WritingScript="0"/>
+        <Font FontFamily="Arial" FontStyleName="Italic" FontStyleNameNative="Italic" FontType="OpenTypeTT" FullName="Arial Italic" FullNameNative="Arial Italic" Name="Arial Italic" PlatformName="$ID/" PostScriptName="$ID/Arial-ItalicMT" Self="die3FontnArial Italic" Status="Installed" Version="Version 3.05" WritingScript="0"/>
+        <Font FontFamily="Arial" FontStyleName="Bold" FontStyleNameNative="Bold" FontType="OpenTypeTT" FullName="Arial Bold" FullNameNative="Arial Bold" Name="Arial Bold" PlatformName="$ID/" PostScriptName="$ID/Arial-BoldMT" Self="die3FontnArial Bold" Status="Installed" Version="Version 3.05" WritingScript="0"/>
+        <Font FontFamily="Arial" FontStyleName="Bold Italic" FontStyleNameNative="Bold Italic" FontType="OpenTypeTT" FullName="Arial Bold Italic" FullNameNative="Arial Bold Italic" Name="Arial Bold Italic" PlatformName="$ID/" PostScriptName="$ID/Arial-BoldItalicMT" Self="die3FontnArial Bold Italic" Status="Installed" Version="Version 3.05" WritingScript="0"/>
+      </FontFamily>
+      <CompositeFont Name="$ID/[No composite font]" Self="CompositeFont/$ID/[No composite font]">
+        <CompositeFontEntry BaselineShift="0" FontStyle="$ID/R" HorizontalScale="100" Locked="true" Name="$ID/Kanji" RelativeSize="100" ScaleOption="true" Self="u8a" VerticalScale="100">
+          <Properties>
+            <AppliedFont type="string">Kozuka Mincho Pro</AppliedFont>
+          </Properties>
+        </CompositeFontEntry>
+        <CompositeFontEntry BaselineShift="0" CustomCharacters="ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖゝゞァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺーヽヾ" FontStyle="$ID/R" HorizontalScale="100" Locked="true" Name="$ID/Kana" RelativeSize="100" ScaleOption="true" Self="u8c" VerticalScale="100">
+          <Properties>
+            <AppliedFont type="string">Kozuka Mincho Pro</AppliedFont>
+          </Properties>
+        </CompositeFontEntry>
+        <CompositeFontEntry BaselineShift="0" CustomCharacters="—―‖‘’“”‥…′″∥、。〈〉《》「」『』【】〔〕〜・！（），．／：；？［］｛｝～" FontStyle="$ID/R" HorizontalScale="100" Locked="true" Name="$ID/Punctuation" RelativeSize="100" ScaleOption="true" Self="u8d" VerticalScale="100">
+          <Properties>
+            <AppliedFont type="string">Kozuka Mincho Pro</AppliedFont>
+          </Properties>
+        </CompositeFontEntry>
+        <CompositeFontEntry BaselineShift="0" CustomCharacters="¢£§¨¬°±´¶×÷ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωЁАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяё‐†‡‰※℃Å←↑→↓⇒⇔∀∂∃∇∈∋−√∝∞∠∧∨∩∪∫∬∴∵∽≒≠≡≦≧≪≫⊂⊃⊆⊇⊥⌒■□▲△▼▽◆◇○◎●◯★☆♀♂♪♭♯〃〆〇〒〓゛゜＃＄％＆＊＋－０１２３４５６７８９＜＝＞＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ＼＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ｜￠￡￢￣￥" FontStyle="$ID/R" HorizontalScale="100" Locked="true" Name="$ID/Symbols" RelativeSize="100" ScaleOption="true" Self="u8e" VerticalScale="100">
+          <Properties>
+            <AppliedFont type="string">Kozuka Mincho Pro</AppliedFont>
+          </Properties>
+        </CompositeFontEntry>
+        <CompositeFontEntry BaselineShift="0" CustomCharacters=" !&quot;#$%&amp;'()*+,-./:;&lt;=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ¡¤¥¦©ª«­®¯²³µ·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿıŒœŠšŸŽžƒˆˇ˘˙˚˛˜˝–‚„•‹›⁄€™∆∏∑≈≤≥◊ﬀﬁﬂﬃﬄﬅﬆ" FontStyle="$ID/Regular" HorizontalScale="100" Locked="true" Name="$ID/Alphabetic" RelativeSize="100" ScaleOption="false" Self="u8f" VerticalScale="100">
+          <Properties>
+            <AppliedFont type="string">Minion Pro</AppliedFont>
+          </Properties>
+        </CompositeFontEntry>
+        <CompositeFontEntry BaselineShift="0" CustomCharacters="0123456789" FontStyle="$ID/Regular" HorizontalScale="100" Locked="true" Name="$ID/Numbers" RelativeSize="100" ScaleOption="false" Self="u90" VerticalScale="100">
+          <Properties>
+            <AppliedFont type="string">Minion Pro</AppliedFont>
+          </Properties>
+        </CompositeFontEntry>
+      </CompositeFont>
+      <RootCharacterStyleGroup Self="u6a">
+        <CharacterStyle Imported="false" Name="$ID/[No character style]" Self="CharacterStyle/$ID/[No character style]"/>
+      </RootCharacterStyleGroup>
+      <NumberingList ContinueNumbersAcrossDocuments="false" ContinueNumbersAcrossStories="false" Name="$ID/[Default]" Self="NumberingList/$ID/[Default]"/>
+      <RootParagraphStyleGroup Self="u69">
+        <ParagraphStyle AllowArbitraryHyphenation="false" AppliedLanguage="$ID/English: USA" AutoLeading="120" AutoTcy="0" AutoTcyIncludeRoman="false" BaselineShift="0" BulletsAlignment="LeftAlign" BulletsAndNumberingListType="NoList" BulletsTextAfter="^t" BunriKinshi="true" Capitalization="Normal" CharacterAlignment="AlignEmCenter" CharacterDirection="DefaultDirection" CharacterRotation="0" CjkGridTracking="false" Composer="HL Composer" DesiredGlyphScaling="100" DesiredLetterSpacing="0" DesiredWordSpacing="100" DiacriticPosition="OpentypePosition" DigitsType="DefaultDigits" DropCapCharacters="0" DropCapLines="0" DropcapDetail="1" EndJoin="MiterEndJoin" FillColor="Color/Black" FillTint="-1" FirstLineIndent="0" FontStyle="Regular" GlyphForm="None" GradientFillAngle="0" GradientFillLength="-1" GradientFillStart="0 0" GradientStrokeAngle="0" GradientStrokeLength="-1" GradientStrokeStart="0 0" GridAlignFirstLineOnly="false" GridAlignment="None" GridGyoudori="0" HorizontalScale="100" HyphenWeight="5" HyphenateAcrossColumns="true" HyphenateAfterFirst="2" HyphenateBeforeLast="2" HyphenateCapitalizedWords="true" HyphenateLadderLimit="3" HyphenateLastWord="true" HyphenateWordsLongerThan="5" Hyphenation="true" HyphenationZone="36" IgnoreEdgeAlignment="false" Imported="false" Jidori="0" Justification="LeftAlign" Kashidas="DefaultKashidas" KeepAllLinesTogether="false" KeepFirstLines="2" KeepLastLines="2" KeepLinesTogether="false" KeepRuleAboveInFrame="false" KeepWithNext="0" KeepWithPrevious="false" KentenAlignment="AlignKentenCenter" KentenCharacterSet="CharacterInput" KentenCustomCharacter="" KentenFontSize="-1" KentenKind="None" KentenOverprintFill="Auto" KentenOverprintStroke="Auto" KentenPlacement="0" KentenPosition="AboveRight" KentenStrokeTint="-1" KentenTint="-1" KentenWeight="-1" KentenXScale="100" KentenYScale="100" KerningMethod="$ID/Metrics" KeyboardDirection="DefaultDirection" KinsokuHangType="None" KinsokuType="KinsokuPushInFirst" LastLineIndent="0" LeadingAki="-1" LeadingModel="LeadingModelAkiBelow" LeftIndent="0" Ligatures="true" MaximumGlyphScaling="100" MaximumLetterSpacing="0" MaximumWordSpacing="133" MinimumGlyphScaling="100" MinimumLetterSpacing="0" MinimumWordSpacing="80" MiterLimit="4" Name="$ID/[No paragraph style]" NoBreak="false" NumberingAlignment="LeftAlign" NumberingApplyRestartPolicy="true" NumberingContinue="true" NumberingExpression="^#.^t" NumberingLevel="1" NumberingStartAt="1" OTFContextualAlternate="true" OTFDiscretionaryLigature="false" OTFFigureStyle="Default" OTFFraction="false" OTFHVKana="false" OTFHistorical="false" OTFJustificationAlternate="false" OTFLocale="true" OTFMark="true" OTFOrdinal="false" OTFOverlapSwash="false" OTFProportionalMetrics="false" OTFRomanItalics="false" OTFSlashedZero="false" OTFStretchedAlternate="false" OTFStylisticAlternate="false" OTFStylisticSets="0" OTFSwash="false" OTFTitling="false" OverprintFill="false" OverprintStroke="false" PageNumberType="AutoPageNumber" ParagraphBreakType="Anywhere" ParagraphDirection="LeftToRightDirection" ParagraphGyoudori="false" ParagraphJustification="DefaultJustification" PointSize="12" Position="Normal" PositionalForm="None" Rensuuji="true" RightIndent="0" RotateSingleByteCharacters="false" RubyAlignment="RubyJIS" RubyAutoAlign="true" RubyAutoScaling="false" RubyAutoTcyAutoScale="true" RubyAutoTcyDigits="0" RubyAutoTcyIncludeRoman="false" RubyFontSize="-1" RubyOpenTypePro="true" RubyOverhang="false" RubyOverprintFill="Auto" RubyOverprintStroke="Auto" RubyParentOverhangAmount="RubyOverhangOneRuby" RubyParentScalingPercent="66" RubyParentSpacing="RubyParent121Aki" RubyPosition="AboveRight" RubyStrokeTint="-1" RubyTint="-1" RubyType="PerCharacterRuby" RubyWeight="-1" RubyXOffset="0" RubyXScale="100" RubyYOffset="0" RubyYScale="100" RuleAbove="false" RuleAboveGapOverprint="false" RuleAboveGapTint="-1" RuleAboveLeftIndent="0" RuleAboveLineWeight="1" RuleAboveOffset="0" RuleAboveOverprint="false" RuleAboveRightIndent="0" RuleAboveTint="-1" RuleAboveWidth="ColumnWidth" RuleBelow="false" RuleBelowGapOverprint="false" RuleBelowGapTint="-1" RuleBelowLeftIndent="0" RuleBelowLineWeight="1" RuleBelowOffset="0" RuleBelowOverprint="false" RuleBelowRightIndent="0" RuleBelowTint="-1" RuleBelowWidth="ColumnWidth" ScaleAffectsLineHeight="false" Self="ParagraphStyle/$ID/[No paragraph style]" ShataiAdjustRotation="false" ShataiAdjustTsume="true" ShataiDegreeAngle="4500" ShataiMagnification="0" SingleWordJustification="FullyJustified" Skew="0" SpaceAfter="0" SpaceBefore="0" SpanColumnMinSpaceAfter="0" SpanColumnMinSpaceBefore="0" SpanColumnType="SingleColumn" SplitColumnInsideGutter="6" SplitColumnOutsideGutter="0" StartParagraph="Anywhere" StrikeThroughGapOverprint="false" StrikeThroughGapTint="-1" StrikeThroughOffset="-9999" StrikeThroughOverprint="false" StrikeThroughTint="-1" StrikeThroughWeight="-9999" StrikeThru="false" StrokeAlignment="OutsideAlignment" StrokeColor="Swatch/None" StrokeTint="-1" StrokeWeight="1" Tatechuyoko="false" TatechuyokoXOffset="0" TatechuyokoYOffset="0" Tracking="0" TrailingAki="-1" TreatIdeographicSpaceAsSpace="false" Tsume="0" Underline="false" UnderlineGapOverprint="false" UnderlineGapTint="-1" UnderlineOffset="-9999" UnderlineOverprint="false" UnderlineTint="-1" UnderlineWeight="-9999" VerticalScale="100" Warichu="false" WarichuAlignment="Auto" WarichuCharsAfterBreak="2" WarichuCharsBeforeBreak="2" WarichuLineSpacing="0" WarichuLines="2" WarichuSize="50" XOffsetDiacritic="0" YOffsetDiacritic="0">
+          <Properties>
+            <Leading type="enumeration">Auto</Leading>
+            <AppliedFont type="string">Minion Pro</AppliedFont>
+            <RuleAboveColor type="string">Text Color</RuleAboveColor>
+            <RuleBelowColor type="string">Text Color</RuleBelowColor>
+            <RuleAboveType type="object">StrokeStyle/$ID/Solid</RuleAboveType>
+            <RuleBelowType type="object">StrokeStyle/$ID/Solid</RuleBelowType>
+            <BalanceRaggedLines type="enumeration">NoBalancing</BalanceRaggedLines>
+            <RuleAboveGapColor type="object">Swatch/None</RuleAboveGapColor>
+            <RuleBelowGapColor type="object">Swatch/None</RuleBelowGapColor>
+            <UnderlineColor type="string">Text Color</UnderlineColor>
+            <UnderlineGapColor type="object">Swatch/None</UnderlineGapColor>
+            <UnderlineType type="object">StrokeStyle/$ID/Solid</UnderlineType>
+            <StrikeThroughColor type="string">Text Color</StrikeThroughColor>
+            <StrikeThroughGapColor type="object">Swatch/None</StrikeThroughGapColor>
+            <StrikeThroughType type="object">StrokeStyle/$ID/Solid</StrikeThroughType>
+            <SpanSplitColumnCount type="enumeration">All</SpanSplitColumnCount>
+            <Mojikumi type="enumeration">Nothing</Mojikumi>
+            <KinsokuSet type="enumeration">Nothing</KinsokuSet>
+            <RubyFont type="string">$ID/</RubyFont>
+            <RubyFontStyle type="enumeration">Nothing</RubyFontStyle>
+            <RubyFill type="string">Text Color</RubyFill>
+            <RubyStroke type="string">Text Color</RubyStroke>
+            <KentenFont type="string">$ID/</KentenFont>
+            <KentenFontStyle type="enumeration">Nothing</KentenFontStyle>
+            <KentenFillColor type="string">Text Color</KentenFillColor>
+            <KentenStrokeColor type="string">Text Color</KentenStrokeColor>
+            <BulletChar BulletCharacterType="UnicodeOnly" BulletCharacterValue="8226"/>
+            <NumberingFormat type="string">1, 2, 3, 4...</NumberingFormat>
+            <BulletsFont type="string">$ID/</BulletsFont>
+            <BulletsFontStyle type="enumeration">Nothing</BulletsFontStyle>
+            <AppliedNumberingList type="object">NumberingList/$ID/[Default]</AppliedNumberingList>
+            <NumberingRestartPolicies LowerLevel="0" RestartPolicy="AnyPreviousLevel" UpperLevel="0"/>
+            <BulletsCharacterStyle type="object">CharacterStyle/$ID/[No character style]</BulletsCharacterStyle>
+            <NumberingCharacterStyle type="object">CharacterStyle/$ID/[No character style]</NumberingCharacterStyle>
+          </Properties>
+        </ParagraphStyle>
+        <ParagraphStyle AppliedLanguage="$ID/English: UK" Imported="false" KeyboardShortcut="0 0" Name="$ID/NormalParagraphStyle" NextStyle="ParagraphStyle/$ID/NormalParagraphStyle" Self="ParagraphStyle/$ID/NormalParagraphStyle">
+          <Properties>
+            <BasedOn type="string">$ID/[No paragraph style]</BasedOn>
+            <PreviewColor type="enumeration">Nothing</PreviewColor>
+          </Properties>
+        </ParagraphStyle>
+        <ParagraphStyle AppliedLanguage="$ID/English: UK" FontStyle="Bold" Imported="false" KeyboardShortcut="0 0" Name="Test MKL" NextStyle="ParagraphStyle/Test MKL" Self="ParagraphStyle/Test MKL">
+          <Properties>
+            <BasedOn type="string">$ID/[No paragraph style]</BasedOn>
+            <PreviewColor type="enumeration">Nothing</PreviewColor>
+            <AppliedFont type="string">Arial</AppliedFont>
+          </Properties>
+        </ParagraphStyle>
+      </RootParagraphStyleGroup>
+      <RootCellStyleGroup Self="u6f">
+        <CellStyle AppliedParagraphStyle="ParagraphStyle/$ID/[No paragraph style]" Name="$ID/[None]" Self="CellStyle/$ID/[None]"/>
+      </RootCellStyleGroup>
+      <RootTableStyleGroup Self="u71">
+        <TableStyle BodyRegionCellStyle="CellStyle/$ID/[None]" BottomBorderStrokeColor="Color/Black" BottomBorderStrokeGapColor="Color/Paper" BottomBorderStrokeGapOverprint="false" BottomBorderStrokeGapTint="100" BottomBorderStrokeOverprint="false" BottomBorderStrokeTint="100" BottomBorderStrokeType="StrokeStyle/$ID/Solid" BottomBorderStrokeWeight="1" ColumnFillsPriority="false" EndColumnFillColor="Swatch/None" EndColumnFillCount="0" EndColumnFillOverprint="false" EndColumnFillTint="100" EndColumnLineStyle="StrokeStyle/$ID/Solid" EndColumnStrokeColor="Color/Black" EndColumnStrokeCount="0" EndColumnStrokeGapColor="Color/Paper" EndColumnStrokeGapOverprint="false" EndColumnStrokeGapTint="100" EndColumnStrokeOverprint="false" EndColumnStrokeTint="100" EndColumnStrokeWeight="0.25" EndRowFillColor="Swatch/None" EndRowFillCount="0" EndRowFillOverprint="false" EndRowFillTint="100" EndRowStrokeColor="Color/Black" EndRowStrokeCount="0" EndRowStrokeGapColor="Color/Paper" EndRowStrokeGapOverprint="false" EndRowStrokeGapTint="100" EndRowStrokeOverprint="false" EndRowStrokeTint="100" EndRowStrokeType="StrokeStyle/$ID/Solid" EndRowStrokeWeight="0.25" FooterRegionCellStyle="n" FooterRegionSameAsBodyRegion="true" HeaderRegionCellStyle="n" HeaderRegionSameAsBodyRegion="true" LeftBorderStrokeColor="Color/Black" LeftBorderStrokeGapColor="Color/Paper" LeftBorderStrokeGapOverprint="false" LeftBorderStrokeGapTint="100" LeftBorderStrokeOverprint="false" LeftBorderStrokeTint="100" LeftBorderStrokeType="StrokeStyle/$ID/Solid" LeftBorderStrokeWeight="1" LeftColumnRegionCellStyle="n" LeftColumnRegionSameAsBodyRegion="true" Name="$ID/[No table style]" RightBorderStrokeColor="Color/Black" RightBorderStrokeGapColor="Color/Paper" RightBorderStrokeGapOverprint="false" RightBorderStrokeGapTint="100" RightBorderStrokeOverprint="false" RightBorderStrokeTint="100" RightBorderStrokeType="StrokeStyle/$ID/Solid" RightBorderStrokeWeight="1" RightColumnRegionCellStyle="n" RightColumnRegionSameAsBodyRegion="true" Self="TableStyle/$ID/[No table style]" SkipFirstAlternatingFillColumns="0" SkipFirstAlternatingFillRows="0" SkipFirstAlternatingStrokeColumns="0" SkipFirstAlternatingStrokeRows="0" SkipLastAlternatingFillColumns="0" SkipLastAlternatingFillRows="0" SkipLastAlternatingStrokeColumns="0" SkipLastAlternatingStrokeRows="0" SpaceAfter="-4" SpaceBefore="4" StartColumnFillColor="Color/Black" StartColumnFillCount="0" StartColumnFillOverprint="false" StartColumnFillTint="20" StartColumnStrokeColor="Color/Black" StartColumnStrokeCount="0" StartColumnStrokeGapColor="Color/Paper" StartColumnStrokeGapOverprint="false" StartColumnStrokeGapTint="100" StartColumnStrokeOverprint="false" StartColumnStrokeTint="100" StartColumnStrokeType="StrokeStyle/$ID/Solid" StartColumnStrokeWeight="1" StartRowFillColor="Color/Black" StartRowFillCount="0" StartRowFillOverprint="false" StartRowFillTint="20" StartRowStrokeColor="Color/Black" StartRowStrokeCount="0" StartRowStrokeGapColor="Color/Paper" StartRowStrokeGapOverprint="false" StartRowStrokeGapTint="100" StartRowStrokeOverprint="false" StartRowStrokeTint="100" StartRowStrokeType="StrokeStyle/$ID/Solid" StartRowStrokeWeight="1" StrokeOrder="BestJoins" TopBorderStrokeColor="Color/Black" TopBorderStrokeGapColor="Color/Paper" TopBorderStrokeGapOverprint="false" TopBorderStrokeGapTint="100" TopBorderStrokeOverprint="false" TopBorderStrokeTint="100" TopBorderStrokeType="StrokeStyle/$ID/Solid" TopBorderStrokeWeight="1"/>
+        <TableStyle KeyboardShortcut="0 0" Name="$ID/[Basic Table]" Self="TableStyle/$ID/[Basic Table]">
+          <Properties>
+            <BasedOn type="string">$ID/[No table style]</BasedOn>
+          </Properties>
+        </TableStyle>
+      </RootTableStyleGroup>
+      <TinDocumentDataObject>
+        <Properties>
+          <GaijiRefMaps><![CDATA[/////wAAAAAAAAAA]]></GaijiRefMaps>
+        </Properties>
+      </TinDocumentDataObject>
+      <FootnoteOption ContinuingRuleGapOverprint="false" ContinuingRuleGapTint="100" ContinuingRuleLeftIndent="0" ContinuingRuleLineWeight="1" ContinuingRuleOffset="0" ContinuingRuleOn="true" ContinuingRuleOverprint="false" ContinuingRuleTint="100" ContinuingRuleWidth="288" EosPlacement="false" FootnoteFirstBaselineOffset="LeadingOffset" FootnoteMarkerStyle="CharacterStyle/$ID/[No character style]" FootnoteMinimumFirstBaselineOffset="0" FootnoteTextStyle="ParagraphStyle/$ID/[No paragraph style]" NoSplitting="false" Prefix="" RuleGapOverprint="false" RuleGapTint="100" RuleLeftIndent="0" RuleLineWeight="1" RuleOffset="0" RuleOn="true" RuleOverprint="false" RuleTint="100" RuleWidth="72" SeparatorText="&#x9;" SpaceBetween="0" Spacer="0" StartAt="1" Suffix="">
+        <Properties>
+          <FootnoteNumberingStyle type="enumeration">Arabic</FootnoteNumberingStyle>
+          <RestartNumbering type="enumeration">DontRestart</RestartNumbering>
+          <ShowPrefixSuffix type="enumeration">NoPrefixSuffix</ShowPrefixSuffix>
+          <MarkerPositioning type="enumeration">SuperscriptMarker</MarkerPositioning>
+          <RuleType type="object">StrokeStyle/$ID/Solid</RuleType>
+          <RuleColor type="object">Color/Black</RuleColor>
+          <RuleGapColor type="object">Swatch/None</RuleGapColor>
+          <ContinuingRuleType type="object">StrokeStyle/$ID/Solid</ContinuingRuleType>
+          <ContinuingRuleColor type="object">Color/Black</ContinuingRuleColor>
+          <ContinuingRuleGapColor type="object">Swatch/None</ContinuingRuleGapColor>
+        </Properties>
+      </FootnoteOption>
+      <ConditionalTextPreference ActiveConditionSet="n" ShowConditionIndicators="ShowIndicators"/>
+      <XMLTag Name="Root" Self="XMLTag/Root">
+        <Properties>
+          <TagColor type="enumeration">LightBlue</TagColor>
+        </Properties>
+      </XMLTag>
+      <CrossReferenceFormat AppliedCharacterStyle="n" Name="Full Paragraph &amp; Page Number" Self="u7f">
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="&quot;" IncludeDelimiter="false" Self="u7fBuildingBlock0"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="FullParagraphBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u7fBuildingBlock1"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="&quot; on page " IncludeDelimiter="false" Self="u7fBuildingBlock2"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="PageNumberBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u7fBuildingBlock3"/>
+      </CrossReferenceFormat>
+      <CrossReferenceFormat AppliedCharacterStyle="n" Name="Full Paragraph" Self="u80">
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="&quot;" IncludeDelimiter="false" Self="u80BuildingBlock0"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="FullParagraphBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u80BuildingBlock1"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="&quot;" IncludeDelimiter="false" Self="u80BuildingBlock2"/>
+      </CrossReferenceFormat>
+      <CrossReferenceFormat AppliedCharacterStyle="n" Name="Paragraph Text &amp; Page Number" Self="u81">
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="&quot;" IncludeDelimiter="false" Self="u81BuildingBlock0"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="ParagraphTextBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u81BuildingBlock1"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="&quot; on page " IncludeDelimiter="false" Self="u81BuildingBlock2"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="PageNumberBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u81BuildingBlock3"/>
+      </CrossReferenceFormat>
+      <CrossReferenceFormat AppliedCharacterStyle="n" Name="Paragraph Text" Self="u82">
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="&quot;" IncludeDelimiter="false" Self="u82BuildingBlock0"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="ParagraphTextBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u82BuildingBlock1"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="&quot;" IncludeDelimiter="false" Self="u82BuildingBlock2"/>
+      </CrossReferenceFormat>
+      <CrossReferenceFormat AppliedCharacterStyle="n" Name="Paragraph Number &amp; Page Number" Self="u83">
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="ParagraphNumberBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u83BuildingBlock0"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText=" on page " IncludeDelimiter="false" Self="u83BuildingBlock1"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="PageNumberBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u83BuildingBlock2"/>
+      </CrossReferenceFormat>
+      <CrossReferenceFormat AppliedCharacterStyle="n" Name="Paragraph Number" Self="u84">
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="ParagraphNumberBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u84BuildingBlock0"/>
+      </CrossReferenceFormat>
+      <CrossReferenceFormat AppliedCharacterStyle="n" Name="Text Anchor Name &amp; Page Number" Self="u85">
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="&quot;" IncludeDelimiter="false" Self="u85BuildingBlock0"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="BookmarkNameBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u85BuildingBlock1"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="&quot; on page " IncludeDelimiter="false" Self="u85BuildingBlock2"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="PageNumberBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u85BuildingBlock3"/>
+      </CrossReferenceFormat>
+      <CrossReferenceFormat AppliedCharacterStyle="n" Name="Text Anchor Name" Self="u86">
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="&quot;" IncludeDelimiter="false" Self="u86BuildingBlock0"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="BookmarkNameBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u86BuildingBlock1"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="&quot;" IncludeDelimiter="false" Self="u86BuildingBlock2"/>
+      </CrossReferenceFormat>
+      <CrossReferenceFormat AppliedCharacterStyle="n" Name="Page Number" Self="u87">
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="CustomStringBuildingBlock" CustomText="page " IncludeDelimiter="false" Self="u87BuildingBlock0"/>
+        <BuildingBlock AppliedCharacterStyle="n" AppliedDelimiter="$ID/" BlockType="PageNumberBuildingBlock" CustomText="$ID/" IncludeDelimiter="false" Self="u87BuildingBlock1"/>
+      </CrossReferenceFormat>
+      <DocumentUser UserName="Joris Conijn">
+        <Properties>
+          <UserColor type="enumeration">Gold</UserColor>
+        </Properties>
+      </DocumentUser>
+      <DocumentUser UserName="Gerard van den Akker">
+        <Properties>
+          <UserColor type="enumeration">Ochre</UserColor>
+        </Properties>
+      </DocumentUser>
+      <Story AppliedNamedGrid="n" Guid="901D7D3C-A13B-8B70-B64D-5469D0449295" Self="ucb" StoryTitle="$ID/body" TrackChanges="true" VersionGuid="e17c6526-5d53-93d7-7b5e-72fc85e19dd0">
+        <Properties>
+          <AppliedIndexInstance type="enumeration">Nothing</AppliedIndexInstance>
+        </Properties>
+        <StoryPreference FrameType="TextFrameType" OpticalMarginAlignment="false" OpticalMarginSize="12" StoryDirection="LeftToRightDirection" StoryOrientation="Horizontal"/>
+        <MetadataPacketPreference>
+          <Properties>
+            <Contents><![CDATA[<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.0-c060 61.134777, 2010/02/12-17:32:00        ">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+            xmlns:xmp="http://ns.adobe.com/xap/1.0/">
+         <xmp:CreateDate>2011-08-09T15:27:04</xmp:CreateDate>
+         <xmp:MetadataDate>2011-08-09T15:26:25+02:00</xmp:MetadataDate>
+         <xmp:ModifyDate>2011-08-09T15:27:06</xmp:ModifyDate>
+         <xmp:CreatorTool>Adobe InCopy 7.0</xmp:CreatorTool>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/"
+            xmlns:stEvt="http://ns.adobe.com/xap/1.0/sType/ResourceEvent#">
+         <xmpMM:InstanceID>xmp.iid:199F710E8BC2E0118905CCC1CAA39618</xmpMM:InstanceID>
+         <xmpMM:OriginalDocumentID>xmp.did:199F710E8BC2E0118905CCC1CAA39618</xmpMM:OriginalDocumentID>
+         <xmpMM:History>
+            <rdf:Seq>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>created</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:199F710E8BC2E0118905CCC1CAA39618</stEvt:instanceID>
+                  <stEvt:when>2011-08-09T15:26:25+02:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InCopy 7.0</stEvt:softwareAgent>
+               </rdf:li>
+            </rdf:Seq>
+         </xmpMM:History>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <dc:format>application/x-incopy</dc:format>
+         <dc:title>
+            <rdf:Alt>
+               <rdf:li xml:lang="x-default">default</rdf:li>
+            </rdf:Alt>
+         </dc:title>
+      </rdf:Description>
+      <rdf:Description rdf:about=""
+            xmlns:xmpRights="http://ns.adobe.com/xap/1.0/rights/">
+         <xmpRights:Marked>False</xmpRights:Marked>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>]]></Contents>
+          </Properties>
+        </MetadataPacketPreference>
+        <InCopyExportOption IncludeAllResources="false" IncludeGraphicProxies="true"/>
+        <StandaloneDocumentPreference CharacterAki="0" FacingPages="true" FrameType="TextFrameType" HorizontalScale="100" LineAki="6.909448818897637" PageHeight="841.8897705078125" PageWidth="595.2755737304688" StoryOrientation="Horizontal" TextAreaCharPerLine="52" TextAreaDepth="0" TextAreaDepthUnit="DepthColumnInches" TextAreaWidth="523.275590551" VerticalScale="100"/>
+        <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
+          <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+            <Change Date="2011-09-08T11:40:07" ChangeType="InsertedText" UserName="Gerard van den Akker" AppliedDocumentUser="null">
+              <Content>The European environment will be upgraded at 10am (Amsterdam, CEST)</Content>
+              <Br/>
+            </Change>
+          </CharacterStyleRange>
+        </ParagraphStyleRange>
+        <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle" BulletsAndNumberingListType="BulletList">
+          <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+            <Change Date="2011-09-20T14:44:23" ChangeType="InsertedText" UserName="Joris Conijn" AppliedDocumentUser="null">
+              <Content>Fixed BZ# 25552</Content>
+              <Br/>
+            </Change>
+          </CharacterStyleRange>
+        </ParagraphStyleRange>
+        <Change Date="2011-09-20T14:49:15" ChangeType="DeletedText" UserName="Joris Conijn" AppliedDocumentUser="null">
+          <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle" BulletsAndNumberingListType="BulletList">
+            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+              <Content>yThe minimal Application version that is needed to download an issue can now be set up per rendition. Previously, forcing users to upgrade their Apps was only possible for all platforms at the same time. </Content>
+              <Br/>
+            </CharacterStyleRange>
+          </ParagraphStyleRange>
+          <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
+            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+              <Br/>
+              <Content>- Improved Apple iOS 5 Newsstand support</Content>
+              <Br/>
+              <Content>The Push Notification mechanism has been updated to support the Newsstand feature in iOS 5.</Content>
+              <Br/>
+              <Br/>
+              <Br/>
+            </CharacterStyleRange>
+          </ParagraphStyleRange>
+          <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle" BulletsAndNumberingListType="BulletList">
+            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+              <Content>- </Content>
+              <Br/>
+              <Br/>
+            </CharacterStyleRange>
+          </ParagraphStyleRange>
+        </Change>
+        <Change Date="2011-09-08T11:40:08" ChangeType="InsertedText" UserName="Gerard van den Akker" AppliedDocumentUser="null">
+          <ParagraphStyleRange BulletsAndNumberingListType="BulletList" AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
+            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+              <Br/>
+            </CharacterStyleRange>
+          </ParagraphStyleRange>
+          <ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
+            <CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]">
+              <Content>For any questons or support related to this upgrade, please contact support@woodwing.com</Content>
+            </CharacterStyleRange>
+          </ParagraphStyleRange>
+        </Change>
+      </Story>
+    </Document>
+  </ea:Story>
+  <ea:wwsd_document ea:version="1.0">
+    <ea:wwsd_styles pi0="style=&quot;50&quot; type=&quot;snippet&quot; readerVersion=&quot;6.0&quot; featureSet=&quot;513&quot; product=&quot;7.0(522)&quot; " pi1="SnippetType=&quot;PageItem&quot;">
+      <Document DOMVersion="7.0" Self="d">
+        <Color AlternateColorValue="" AlternateSpace="NoAlternateColor" ColorEditable="false" ColorOverride="Specialblack" ColorRemovable="false" ColorValue="0 0 0 100" Model="Process" Name="Black" Self="Color/Black" Space="CMYK" SwatchCreatorID="7937" Visible="true"/>
+        <Swatch ColorEditable="false" ColorRemovable="false" Name="None" Self="Swatch/None" SwatchCreatorID="7937" Visible="true"/>
+        <StrokeStyle Name="$ID/Solid" Self="StrokeStyle/$ID/Solid" StrokeStyleType="$ID/"/>
+        <RootCharacterStyleGroup Self="u6a">
+          <CharacterStyle Imported="false" Name="$ID/[No character style]" Self="CharacterStyle/$ID/[No character style]"/>
+        </RootCharacterStyleGroup>
+        <NumberingList ContinueNumbersAcrossDocuments="false" ContinueNumbersAcrossStories="false" Name="$ID/[Default]" Self="NumberingList/$ID/[Default]"/>
+        <RootParagraphStyleGroup Self="u69">
+          <ParagraphStyle AllowArbitraryHyphenation="false" AppliedLanguage="$ID/English: USA" AutoLeading="120" AutoTcy="0" AutoTcyIncludeRoman="false" BaselineShift="0" BulletsAlignment="LeftAlign" BulletsAndNumberingListType="NoList" BulletsTextAfter="^t" BunriKinshi="true" Capitalization="Normal" CharacterAlignment="AlignEmCenter" CharacterDirection="DefaultDirection" CharacterRotation="0" CjkGridTracking="false" Composer="HL Composer" DesiredGlyphScaling="100" DesiredLetterSpacing="0" DesiredWordSpacing="100" DiacriticPosition="OpentypePosition" DigitsType="DefaultDigits" DropCapCharacters="0" DropCapLines="0" DropcapDetail="1" EndJoin="MiterEndJoin" FillColor="Color/Black" FillTint="-1" FirstLineIndent="0" FontStyle="Regular" GlyphForm="None" GradientFillAngle="0" GradientFillLength="-1" GradientFillStart="0 0" GradientStrokeAngle="0" GradientStrokeLength="-1" GradientStrokeStart="0 0" GridAlignFirstLineOnly="false" GridAlignment="None" GridGyoudori="0" HorizontalScale="100" HyphenWeight="5" HyphenateAcrossColumns="true" HyphenateAfterFirst="2" HyphenateBeforeLast="2" HyphenateCapitalizedWords="true" HyphenateLadderLimit="3" HyphenateLastWord="true" HyphenateWordsLongerThan="5" Hyphenation="true" HyphenationZone="36" IgnoreEdgeAlignment="false" Imported="false" Jidori="0" Justification="LeftAlign" Kashidas="DefaultKashidas" KeepAllLinesTogether="false" KeepFirstLines="2" KeepLastLines="2" KeepLinesTogether="false" KeepRuleAboveInFrame="false" KeepWithNext="0" KeepWithPrevious="false" KentenAlignment="AlignKentenCenter" KentenCharacterSet="CharacterInput" KentenCustomCharacter="" KentenFontSize="-1" KentenKind="None" KentenOverprintFill="Auto" KentenOverprintStroke="Auto" KentenPlacement="0" KentenPosition="AboveRight" KentenStrokeTint="-1" KentenTint="-1" KentenWeight="-1" KentenXScale="100" KentenYScale="100" KerningMethod="$ID/Metrics" KeyboardDirection="DefaultDirection" KinsokuHangType="None" KinsokuType="KinsokuPushInFirst" LastLineIndent="0" LeadingAki="-1" LeadingModel="LeadingModelAkiBelow" LeftIndent="0" Ligatures="true" MaximumGlyphScaling="100" MaximumLetterSpacing="0" MaximumWordSpacing="133" MinimumGlyphScaling="100" MinimumLetterSpacing="0" MinimumWordSpacing="80" MiterLimit="4" Name="$ID/[No paragraph style]" NoBreak="false" NumberingAlignment="LeftAlign" NumberingApplyRestartPolicy="true" NumberingContinue="true" NumberingExpression="^#.^t" NumberingLevel="1" NumberingStartAt="1" OTFContextualAlternate="true" OTFDiscretionaryLigature="false" OTFFigureStyle="Default" OTFFraction="false" OTFHVKana="false" OTFHistorical="false" OTFJustificationAlternate="false" OTFLocale="true" OTFMark="true" OTFOrdinal="false" OTFOverlapSwash="false" OTFProportionalMetrics="false" OTFRomanItalics="false" OTFSlashedZero="false" OTFStretchedAlternate="false" OTFStylisticAlternate="false" OTFStylisticSets="0" OTFSwash="false" OTFTitling="false" OverprintFill="false" OverprintStroke="false" PageNumberType="AutoPageNumber" ParagraphBreakType="Anywhere" ParagraphDirection="LeftToRightDirection" ParagraphGyoudori="false" ParagraphJustification="DefaultJustification" PointSize="12" Position="Normal" PositionalForm="None" Rensuuji="true" RightIndent="0" RotateSingleByteCharacters="false" RubyAlignment="RubyJIS" RubyAutoAlign="true" RubyAutoScaling="false" RubyAutoTcyAutoScale="true" RubyAutoTcyDigits="0" RubyAutoTcyIncludeRoman="false" RubyFontSize="-1" RubyOpenTypePro="true" RubyOverhang="false" RubyOverprintFill="Auto" RubyOverprintStroke="Auto" RubyParentOverhangAmount="RubyOverhangOneRuby" RubyParentScalingPercent="66" RubyParentSpacing="RubyParent121Aki" RubyPosition="AboveRight" RubyStrokeTint="-1" RubyTint="-1" RubyType="PerCharacterRuby" RubyWeight="-1" RubyXOffset="0" RubyXScale="100" RubyYOffset="0" RubyYScale="100" RuleAbove="false" RuleAboveGapOverprint="false" RuleAboveGapTint="-1" RuleAboveLeftIndent="0" RuleAboveLineWeight="1" RuleAboveOffset="0" RuleAboveOverprint="false" RuleAboveRightIndent="0" RuleAboveTint="-1" RuleAboveWidth="ColumnWidth" RuleBelow="false" RuleBelowGapOverprint="false" RuleBelowGapTint="-1" RuleBelowLeftIndent="0" RuleBelowLineWeight="1" RuleBelowOffset="0" RuleBelowOverprint="false" RuleBelowRightIndent="0" RuleBelowTint="-1" RuleBelowWidth="ColumnWidth" ScaleAffectsLineHeight="false" Self="ParagraphStyle/$ID/[No paragraph style]" ShataiAdjustRotation="false" ShataiAdjustTsume="true" ShataiDegreeAngle="4500" ShataiMagnification="0" SingleWordJustification="FullyJustified" Skew="0" SpaceAfter="0" SpaceBefore="0" SpanColumnMinSpaceAfter="0" SpanColumnMinSpaceBefore="0" SpanColumnType="SingleColumn" SplitColumnInsideGutter="6" SplitColumnOutsideGutter="0" StartParagraph="Anywhere" StrikeThroughGapOverprint="false" StrikeThroughGapTint="-1" StrikeThroughOffset="-9999" StrikeThroughOverprint="false" StrikeThroughTint="-1" StrikeThroughWeight="-9999" StrikeThru="false" StrokeAlignment="OutsideAlignment" StrokeColor="Swatch/None" StrokeTint="-1" StrokeWeight="1" Tatechuyoko="false" TatechuyokoXOffset="0" TatechuyokoYOffset="0" Tracking="0" TrailingAki="-1" TreatIdeographicSpaceAsSpace="false" Tsume="0" Underline="false" UnderlineGapOverprint="false" UnderlineGapTint="-1" UnderlineOffset="-9999" UnderlineOverprint="false" UnderlineTint="-1" UnderlineWeight="-9999" VerticalScale="100" Warichu="false" WarichuAlignment="Auto" WarichuCharsAfterBreak="2" WarichuCharsBeforeBreak="2" WarichuLineSpacing="0" WarichuLines="2" WarichuSize="50" XOffsetDiacritic="0" YOffsetDiacritic="0">
+            <Properties>
+              <Leading type="enumeration">Auto</Leading>
+              <AppliedFont type="string">Minion Pro</AppliedFont>
+              <RuleAboveColor type="string">Text Color</RuleAboveColor>
+              <RuleBelowColor type="string">Text Color</RuleBelowColor>
+              <RuleAboveType type="object">StrokeStyle/$ID/Solid</RuleAboveType>
+              <RuleBelowType type="object">StrokeStyle/$ID/Solid</RuleBelowType>
+              <BalanceRaggedLines type="enumeration">NoBalancing</BalanceRaggedLines>
+              <RuleAboveGapColor type="object">Swatch/None</RuleAboveGapColor>
+              <RuleBelowGapColor type="object">Swatch/None</RuleBelowGapColor>
+              <UnderlineColor type="string">Text Color</UnderlineColor>
+              <UnderlineGapColor type="object">Swatch/None</UnderlineGapColor>
+              <UnderlineType type="object">StrokeStyle/$ID/Solid</UnderlineType>
+              <StrikeThroughColor type="string">Text Color</StrikeThroughColor>
+              <StrikeThroughGapColor type="object">Swatch/None</StrikeThroughGapColor>
+              <StrikeThroughType type="object">StrokeStyle/$ID/Solid</StrikeThroughType>
+              <SpanSplitColumnCount type="enumeration">All</SpanSplitColumnCount>
+              <Mojikumi type="enumeration">Nothing</Mojikumi>
+              <KinsokuSet type="enumeration">Nothing</KinsokuSet>
+              <RubyFont type="string">$ID/</RubyFont>
+              <RubyFontStyle type="enumeration">Nothing</RubyFontStyle>
+              <RubyFill type="string">Text Color</RubyFill>
+              <RubyStroke type="string">Text Color</RubyStroke>
+              <KentenFont type="string">$ID/</KentenFont>
+              <KentenFontStyle type="enumeration">Nothing</KentenFontStyle>
+              <KentenFillColor type="string">Text Color</KentenFillColor>
+              <KentenStrokeColor type="string">Text Color</KentenStrokeColor>
+              <BulletChar BulletCharacterType="UnicodeOnly" BulletCharacterValue="8226"/>
+              <NumberingFormat type="string">1, 2, 3, 4...</NumberingFormat>
+              <BulletsFont type="string">$ID/</BulletsFont>
+              <BulletsFontStyle type="enumeration">Nothing</BulletsFontStyle>
+              <AppliedNumberingList type="object">NumberingList/$ID/[Default]</AppliedNumberingList>
+              <NumberingRestartPolicies LowerLevel="0" RestartPolicy="AnyPreviousLevel" UpperLevel="0"/>
+              <BulletsCharacterStyle type="object">CharacterStyle/$ID/[No character style]</BulletsCharacterStyle>
+              <NumberingCharacterStyle type="object">CharacterStyle/$ID/[No character style]</NumberingCharacterStyle>
+            </Properties>
+          </ParagraphStyle>
+          <ParagraphStyle AppliedLanguage="$ID/English: UK" Imported="false" KeyboardShortcut="0 0" Name="$ID/NormalParagraphStyle" NextStyle="ParagraphStyle/$ID/NormalParagraphStyle" Self="ParagraphStyle/$ID/NormalParagraphStyle">
+            <Properties>
+              <BasedOn type="string">$ID/[No paragraph style]</BasedOn>
+              <PreviewColor type="enumeration">Nothing</PreviewColor>
+            </Properties>
+          </ParagraphStyle>
+          <ParagraphStyle AppliedLanguage="$ID/English: UK" FontStyle="Bold" Imported="false" KeyboardShortcut="0 0" Name="Test MKL" NextStyle="ParagraphStyle/Test MKL" Self="ParagraphStyle/Test MKL">
+            <Properties>
+              <BasedOn type="string">$ID/[No paragraph style]</BasedOn>
+              <PreviewColor type="enumeration">Nothing</PreviewColor>
+              <AppliedFont type="string">Arial</AppliedFont>
+            </Properties>
+          </ParagraphStyle>
+        </RootParagraphStyleGroup>
+        <TinDocumentDataObject>
+          <Properties>
+            <GaijiRefMaps><![CDATA[/////wAAAAAAAAAA]]></GaijiRefMaps>
+          </Properties>
+        </TinDocumentDataObject>
+        <TransparencyDefaultContainerObject>
+          <TransparencySetting>
+            <BlendingSetting BlendMode="Normal" IsolateBlending="false" KnockoutGroup="false" Opacity="100"/>
+            <DropShadowSetting BlendMode="Multiply" EffectColor="n" HonorOtherEffects="false" KnockedOut="true" Mode="None" Noise="0" Opacity="75" Size="5" Spread="0" UseGlobalLight="false" XOffset="7" YOffset="7"/>
+            <FeatherSetting ChokeAmount="0" CornerType="Diffusion" Mode="None" Noise="0" Width="9"/>
+            <InnerShadowSetting Angle="120" Applied="false" BlendMode="Multiply" ChokeAmount="0" Distance="7" EffectColor="n" Noise="0" Opacity="75" Size="7" UseGlobalLight="false"/>
+            <OuterGlowSetting Applied="false" BlendMode="Screen" EffectColor="n" Noise="0" Opacity="75" Size="7" Spread="0" Technique="Softer"/>
+            <InnerGlowSetting Applied="false" BlendMode="Screen" EffectColor="n" Noise="0" Opacity="75" Size="7" Source="EdgeSourced" Spread="0" Technique="Softer"/>
+            <BevelAndEmbossSetting Altitude="30" Angle="120" Applied="false" Depth="100" Direction="Up" HighlightBlendMode="Screen" HighlightColor="n" HighlightOpacity="75" ShadowBlendMode="Multiply" ShadowColor="n" ShadowOpacity="75" Size="7" Soften="0" Style="InnerBevel" Technique="SmoothContour" UseGlobalLight="false"/>
+            <SatinSetting Angle="120" Applied="false" BlendMode="Multiply" Distance="7" EffectColor="n" InvertEffect="false" Opacity="50" Size="7"/>
+            <DirectionalFeatherSetting Angle="0" Applied="false" BottomWidth="0" ChokeAmount="0" FollowShapeMode="LeadingEdge" LeftWidth="0" Noise="0" RightWidth="0" TopWidth="0"/>
+            <GradientFeatherSetting Angle="0" Applied="false" GradientStart="0 0" HiliteAngle="0" HiliteLength="0" Length="0" Type="Linear"/>
+          </TransparencySetting>
+          <StrokeTransparencySetting>
+            <BlendingSetting BlendMode="Normal" IsolateBlending="false" KnockoutGroup="false" Opacity="100"/>
+            <DropShadowSetting BlendMode="Multiply" EffectColor="n" HonorOtherEffects="false" KnockedOut="true" Mode="None" Noise="0" Opacity="75" Size="5" Spread="0" UseGlobalLight="false" XOffset="7" YOffset="7"/>
+            <FeatherSetting ChokeAmount="0" CornerType="Diffusion" Mode="None" Noise="0" Width="9"/>
+            <InnerShadowSetting Angle="120" Applied="false" BlendMode="Multiply" ChokeAmount="0" Distance="7" EffectColor="n" Noise="0" Opacity="75" Size="7" UseGlobalLight="false"/>
+            <OuterGlowSetting Applied="false" BlendMode="Screen" EffectColor="n" Noise="0" Opacity="75" Size="7" Spread="0" Technique="Softer"/>
+            <InnerGlowSetting Applied="false" BlendMode="Screen" EffectColor="n" Noise="0" Opacity="75" Size="7" Source="EdgeSourced" Spread="0" Technique="Softer"/>
+            <BevelAndEmbossSetting Altitude="30" Angle="120" Applied="false" Depth="100" Direction="Up" HighlightBlendMode="Screen" HighlightColor="n" HighlightOpacity="75" ShadowBlendMode="Multiply" ShadowColor="n" ShadowOpacity="75" Size="7" Soften="0" Style="InnerBevel" Technique="SmoothContour" UseGlobalLight="false"/>
+            <SatinSetting Angle="120" Applied="false" BlendMode="Multiply" Distance="7" EffectColor="n" InvertEffect="false" Opacity="50" Size="7"/>
+            <DirectionalFeatherSetting Angle="0" Applied="false" BottomWidth="0" ChokeAmount="0" FollowShapeMode="LeadingEdge" LeftWidth="0" Noise="0" RightWidth="0" TopWidth="0"/>
+            <GradientFeatherSetting Angle="0" Applied="false" GradientStart="0 0" HiliteAngle="0" HiliteLength="0" Length="0" Type="Linear"/>
+          </StrokeTransparencySetting>
+          <FillTransparencySetting>
+            <BlendingSetting BlendMode="Normal" IsolateBlending="false" KnockoutGroup="false" Opacity="100"/>
+            <DropShadowSetting BlendMode="Multiply" EffectColor="n" HonorOtherEffects="false" KnockedOut="true" Mode="None" Noise="0" Opacity="75" Size="5" Spread="0" UseGlobalLight="false" XOffset="7" YOffset="7"/>
+            <FeatherSetting ChokeAmount="0" CornerType="Diffusion" Mode="None" Noise="0" Width="9"/>
+            <InnerShadowSetting Angle="120" Applied="false" BlendMode="Multiply" ChokeAmount="0" Distance="7" EffectColor="n" Noise="0" Opacity="75" Size="7" UseGlobalLight="false"/>
+            <OuterGlowSetting Applied="false" BlendMode="Screen" EffectColor="n" Noise="0" Opacity="75" Size="7" Spread="0" Technique="Softer"/>
+            <InnerGlowSetting Applied="false" BlendMode="Screen" EffectColor="n" Noise="0" Opacity="75" Size="7" Source="EdgeSourced" Spread="0" Technique="Softer"/>
+            <BevelAndEmbossSetting Altitude="30" Angle="120" Applied="false" Depth="100" Direction="Up" HighlightBlendMode="Screen" HighlightColor="n" HighlightOpacity="75" ShadowBlendMode="Multiply" ShadowColor="n" ShadowOpacity="75" Size="7" Soften="0" Style="InnerBevel" Technique="SmoothContour" UseGlobalLight="false"/>
+            <SatinSetting Angle="120" Applied="false" BlendMode="Multiply" Distance="7" EffectColor="n" InvertEffect="false" Opacity="50" Size="7"/>
+            <DirectionalFeatherSetting Angle="0" Applied="false" BottomWidth="0" ChokeAmount="0" FollowShapeMode="LeadingEdge" LeftWidth="0" Noise="0" RightWidth="0" TopWidth="0"/>
+            <GradientFeatherSetting Angle="0" Applied="false" GradientStart="0 0" HiliteAngle="0" HiliteLength="0" Length="0" Type="Linear"/>
+          </FillTransparencySetting>
+          <ContentTransparencySetting>
+            <BlendingSetting BlendMode="Normal" IsolateBlending="false" KnockoutGroup="false" Opacity="100"/>
+            <DropShadowSetting BlendMode="Multiply" EffectColor="n" HonorOtherEffects="false" KnockedOut="true" Mode="None" Noise="0" Opacity="75" Size="5" Spread="0" UseGlobalLight="false" XOffset="7" YOffset="7"/>
+            <FeatherSetting ChokeAmount="0" CornerType="Diffusion" Mode="None" Noise="0" Width="9"/>
+            <InnerShadowSetting Angle="120" Applied="false" BlendMode="Multiply" ChokeAmount="0" Distance="7" EffectColor="n" Noise="0" Opacity="75" Size="7" UseGlobalLight="false"/>
+            <OuterGlowSetting Applied="false" BlendMode="Screen" EffectColor="n" Noise="0" Opacity="75" Size="7" Spread="0" Technique="Softer"/>
+            <InnerGlowSetting Applied="false" BlendMode="Screen" EffectColor="n" Noise="0" Opacity="75" Size="7" Source="EdgeSourced" Spread="0" Technique="Softer"/>
+            <BevelAndEmbossSetting Altitude="30" Angle="120" Applied="false" Depth="100" Direction="Up" HighlightBlendMode="Screen" HighlightColor="n" HighlightOpacity="75" ShadowBlendMode="Multiply" ShadowColor="n" ShadowOpacity="75" Size="7" Soften="0" Style="InnerBevel" Technique="SmoothContour" UseGlobalLight="false"/>
+            <SatinSetting Angle="120" Applied="false" BlendMode="Multiply" Distance="7" EffectColor="n" InvertEffect="false" Opacity="50" Size="7"/>
+            <DirectionalFeatherSetting Angle="0" Applied="false" BottomWidth="0" ChokeAmount="0" FollowShapeMode="LeadingEdge" LeftWidth="0" Noise="0" RightWidth="0" TopWidth="0"/>
+            <GradientFeatherSetting Angle="0" Applied="false" GradientStart="0 0" HiliteAngle="0" HiliteLength="0" Length="0" Type="Linear"/>
+          </ContentTransparencySetting>
+        </TransparencyDefaultContainerObject>
+        <x:xmpmeta x:xmptk="Adobe XMP Core 5.0-c060 61.134777, 2010/02/12-17:32:00        " xmlns:x="adobe:ns:meta/">
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">
+              <dc:format>application/x-incopy</dc:format>
+            </rdf:Description>
+            <rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/">
+              <xmp:CreatorTool>Adobe InCopy 7.0</xmp:CreatorTool>
+              <xmp:CreateDate>2011-09-05T16:06:54+02:00</xmp:CreateDate>
+              <xmp:MetadataDate>2011-09-05T16:06:54+02:00</xmp:MetadataDate>
+              <xmp:ModifyDate>2011-09-05T16:06:54+02:00</xmp:ModifyDate>
+            </rdf:Description>
+            <rdf:Description rdf:about="" xmlns:stEvt="http://ns.adobe.com/xap/1.0/sType/ResourceEvent#" xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/">
+              <xmpMM:InstanceID>xmp.iid:F97F1174072068119109C8F46DC18EB3</xmpMM:InstanceID>
+              <xmpMM:DocumentID>xmp.did:F97F1174072068119109C8F46DC18EB3</xmpMM:DocumentID>
+              <xmpMM:OriginalDocumentID>xmp.did:F97F1174072068119109C8F46DC18EB3</xmpMM:OriginalDocumentID>
+              <xmpMM:History>
+                <rdf:Seq>
+                  <rdf:li rdf:parseType="Resource">
+                    <stEvt:action>created</stEvt:action>
+                    <stEvt:instanceID>xmp.iid:F97F1174072068119109C8F46DC18EB3</stEvt:instanceID>
+                    <stEvt:when>2011-09-05T16:06:54+02:00</stEvt:when>
+                    <stEvt:softwareAgent>Adobe InCopy 7.0</stEvt:softwareAgent>
+                  </rdf:li>
+                </rdf:Seq>
+              </xmpMM:History>
+            </rdf:Description>
+          </rdf:RDF>
+        </x:xmpmeta>
+      </Document>
+    </ea:wwsd_styles>
+  </ea:wwsd_document>
+</ea:Stories>
