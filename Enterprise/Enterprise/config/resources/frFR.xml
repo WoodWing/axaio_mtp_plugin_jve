@@ -856,7 +856,6 @@
   <Term key="ERR_EXPORT_FAILURE">Echec de l'exportation, répertoire EXPORTDIRECTORY non défini (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Echec de l'exportation, impossible de détecter ou d'enregistrer vers (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">Impossible de démarrer l’exportation du magazine, contactez l’administrateur système. (S1097)</Term>
-  <Term key="ERR_FAILED">ECHEC (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">Les fichiers suivants ne sont pas pris en charge</Term>
   <Term key="ERR_FIXEDPASS">L'utilisateur a saisi un mot de passe (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problème de configuration du serveur : il manque la colonne de format dans la requête. Contactez l’administrateur système. (S1096)</Term>
@@ -869,7 +868,7 @@
   <Term key="ERR_GET_MESSAGES">Les messages n’ont pas pu être récupérés.</Term>
   <Term key="ERR_GROUP_NAME_NOT_SPECIFIED">Le nom du groupe source n’est pas spécifié ou le nom du nouveau groupe n’a pas été renseigné. (S1100)</Term>
   <Term key="ERR_IDS_OBJVERSION_MISMATCH">La version ne correspond pas en raison d'une séquence de traitement incorrecte au moment de la sauvegarde de la mise en page. Le travail sera replanifié. (S1133)</Term>
-  <Term key="ERR_INCOMPAT_BROWSER">Ce navigateur n’est pas pris en charge. Consultez le guide d’administration pour savoir quels sont les navigateurs compatibles. (S1101)</Term>
+  <Term key="ERR_INCOMPAT_BROWSER">Ce navigateur n'est pas pris en charge. Consultez le centre d'aide pour savoir quels sont les navigateurs compatibles. (S1101)</Term>
   <Term key="ERR_INCORRECT_FIELDS">Les entrées suivantes sont incorrectes :</Term>
   <Term key="ERR_INVALIDCATEGORY">{CATEGORY} incorrect : « %1 » (S1129)</Term>
   <Term key="ERR_INVALIDSTATE">{STATE} incorrect : « %1 » (S1017)</Term>
@@ -1456,7 +1455,7 @@
   <Term key="MNU_USER_QUERY">Requêtes de l'utilisateur</Term>
   <Term key="MNU_WEBSERVICESSDK">Kit SDK de services Web</Term>
   <Term key="MNU_WEB_EDITOR">Editeur Web</Term>
-  <Term key="MSG_EMPTY_DELETED_OBJ">Veuillez vider la corbeille (à l’aide de l’installation originale d’Enterprise Server) avant de procéder à la mise à niveau. - Se reporter au guide d’administration.</Term>
+  <Term key="MSG_EMPTY_DELETED_OBJ">Veuillez vider la corbeille (à l'aide de l'installation originale d'Enterprise Server) avant de procéder à la mise à niveau. - Veuillez vous référer au centre d'aide.</Term>
   <Term key="MSG_EMPTY_INDESIGNSERVERJOBS">Des travaux d’InDesign Server ont été trouvés dans la file d’attente des travaux d’InDesign Server. Ces travaux seront supprimés.</Term>
   <Term key="MSG_EMPTY_SERVERJOBS">Des travaux d’Enterprise Server ont été trouvés dans la file d’attente des travaux d’Enterprise Server. Ces travaux seront supprimés.</Term>
   <Term key="MSG_EMPTY_STORAGE">Des fichiers de flux de travail sont stockés dans votre base de données, qui est devenue obsolète depuis la v8.0. La migration de ces fichiers vers le magasin de fichiers n’est pas prise en charge. Par conséquent, vous devez démarrer avec une base de données vierge. Autrement, si vous êtes sûr(e) d’utiliser le magasin de fichiers et que tous les dossiers figurant dans le tableau de la base de données intitulé « smart_storage » contiennent des fichiers pouvant être supprimés sans danger, vous pouvez effacer ce tableau et procéder à la migration.</Term>

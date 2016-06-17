@@ -811,7 +811,7 @@
   <Term key="ERR_CHECKIN">文件名称不匹配，是否继续保存?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">只有平文文章可以连接</Term>
   <Term key="ERR_COMPOSE">编辑文章错误. (S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">错误连接%1。请检查您的连接，然后再试一次。  (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">连接至服务器错误.请检查连接并重试(S1068)</Term>
   <Term key="ERR_COPY_FOLDER">发布时出现了一个错误. 请联系你的系统管理员.\n\n 原因: HTML Resources 缓存文件夹不存在. 请在健康检查页面上运行 'Adobe Digital Publishing System (DPS)' 测试并遵从它的指令.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">不能连接到数据库 (S1003)</Term>
@@ -856,7 +856,6 @@
   <Term key="ERR_EXPORT_FAILURE">输出失败, EXPORTDIRECTORY 没有定义 (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">输出失败，不能找到或保存到 (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">倒出杂志不能启动, 请联系系统管理员. (S1097)</Term>
-  <Term key="ERR_FAILED">失败 (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">下列文件不支持</Term>
   <Term key="ERR_FIXEDPASS">用户已修改密码 (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">服务器配置故障:查询中的列格式未定义.请联系系统管理员. (S1096)</Term>
@@ -1971,7 +1970,7 @@
   <Term key="STT_CREATEPERMANENT">创建永久版本</Term>
   <Term key="STT_READYTOBEPUBLISHED">发布就绪</Term>
   <Term key="STT_REMOVEINTERMEDIATE">删除过渡版本</Term>
-  <Term key="STT_SKIPIDSA">Skip InDesign Server Automation</Term>
+  <Term key="STT_SKIPIDSA">跳过InDesign服务器自动化</Term>
   <Term key="SUGGESTIONS_BUTTON_LABEL">提示系统</Term>
   <Term key="SUGGESTIONS_BUTTON_TOOLTIP">更新所有提示</Term>
   <Term key="SUGGESTION_PROVIDER">提示系统</Term>

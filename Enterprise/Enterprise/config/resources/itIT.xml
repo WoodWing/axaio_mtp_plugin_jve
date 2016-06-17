@@ -856,7 +856,6 @@
   <Term key="ERR_EXPORT_FAILURE">Esportazione non riuscita: la EXPORTDIRECTORY non è stata specificata (S1013).</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Esportazione non riuscita. Impossibile individuare o scrivere in (S1014).</Term>
   <Term key="ERR_EXPORT_MAG">Impossibile avviare l'esportazione della rivista. Rivolgersi all'amministratore di sistema. (S1097)</Term>
-  <Term key="ERR_FAILED">NON RIUSCITO (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">I seguenti file non sono supportati</Term>
   <Term key="ERR_FIXEDPASS">L'utente ha fissato una password (S1016).</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problema di configurazione del server: colonna del formato mancante nella query. Rivolgersi all'amministratore di sistema. (S1096)</Term>
@@ -869,7 +868,7 @@
   <Term key="ERR_GET_MESSAGES">Impossibile recuperare i messaggi.</Term>
   <Term key="ERR_GROUP_NAME_NOT_SPECIFIED">Il nome del gruppo di origine non è specificato o il nome del nuovo gruppo è vuoto. (S1100)</Term>
   <Term key="ERR_IDS_OBJVERSION_MISMATCH">La versione non corrisponde a causa di una sequenza di elaborazione non corretta durante il salvataggio del layout. Il processo verrà ripianificato. (S1133)</Term>
-  <Term key="ERR_INCOMPAT_BROWSER">Il browser non è supportato. Per ulteriori informazioni sui browser compatibili, consultare il Manuale dell'amministratore. (S1101)</Term>
+  <Term key="ERR_INCOMPAT_BROWSER">Il browser non è supportato. Per ulteriori informazioni sui browser compatibili, consultare l’Help Center. (S1101)</Term>
   <Term key="ERR_INCORRECT_FIELDS">I seguenti dati immessi non sono corretti:</Term>
   <Term key="ERR_INVALIDCATEGORY">{CATEGORY} non valida: '%1' (S1129)</Term>
   <Term key="ERR_INVALIDSTATE">{STATE} non valido: '%1' (S1017)</Term>
@@ -1457,7 +1456,7 @@ Dopo avere apportato le modifiche necessarie, riavviare il servizio Web e/o quel
   <Term key="MNU_USER_QUERY">Query utente</Term>
   <Term key="MNU_WEBSERVICESSDK">SDK servizi Web</Term>
   <Term key="MNU_WEB_EDITOR">Editor Web</Term>
-  <Term key="MSG_EMPTY_DELETED_OBJ">Svuotare il Cestino (utilizzando l'installazione Server Enterprise originale) prima di continuare l'aggiornamento. - Fare riferimento al Manuale dell'amministratore.</Term>
+  <Term key="MSG_EMPTY_DELETED_OBJ">Svuotare il Cestino (utilizzando l’installazione Server Enterprise originale) prima di procedere con l’aggiornamento. - Fare riferimento all’Help Center.</Term>
   <Term key="MSG_EMPTY_INDESIGNSERVERJOBS">Sono stati rilevati processi server InDesign nella Coda processi server InDesign. Questi processi verranno eliminati.</Term>
   <Term key="MSG_EMPTY_SERVERJOBS">Sono stati rilevati processi server Enterprise nella Coda processi server Enterprise. Questi processi verranno eliminati.</Term>
   <Term key="MSG_EMPTY_STORAGE">Nel database sono memorizzati file del flusso di lavoro che sono diventati una funzione obsoleta a partire dalla versione v8.0. Non è disponibile alcun supporto per eseguire la migrazione di tali file nell'archivio dei file. Quindi, è necessario iniziare con un database pulito. In alternativa, quando si è sicuri che l'archivio dei file è utilizzato e che tutti i record presenti nella tabella del database denominata 'smart_storage' contengono file che è possibile rimuovere senza rischi, è possibile eseguire la pulizia della tabella e procedere con la migrazione.</Term>

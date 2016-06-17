@@ -856,7 +856,6 @@
   <Term key="ERR_EXPORT_FAILURE">Eksport nie powiódł się. Nie zdefiniowano katalogu eksportu (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Eksport nie powiódł się. Nie można odszukać lub zapisać do podanej lokalizacji (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">Rozpoczęcie eksportowania magazynu nie było możliwe, skontaktuj się z administratorem systemu. (S1097)</Term>
-  <Term key="ERR_FAILED">OPERACJA NIE POWIODŁA SIĘ (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">Następujące pliki nie są obsługiwane</Term>
   <Term key="ERR_FIXEDPASS">Użytkownik ma stałe hasła (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problem z konfiguracją serwera: w kwerendzie brak formatu kolumny. Skontaktuj się z administratorem ssytemu. (S1096)</Term>
@@ -869,7 +868,7 @@
   <Term key="ERR_GET_MESSAGES">Odzyskiwanie wiadomości nie powiodło się.</Term>
   <Term key="ERR_GROUP_NAME_NOT_SPECIFIED">Nazwa grupy źródłowej nie jest określona lub nazwa nowej grupy jest pusta. (S1100)</Term>
   <Term key="ERR_IDS_OBJVERSION_MISMATCH">Niezgodność wersji w związku z niepoprawną sekwencją przetwarzania w trakcie zapisu układu. Praca zostanie przesunięta. (S1133)</Term>
-  <Term key="ERR_INCOMPAT_BROWSER">Ta przeglądarka nie jest obsługiwana. Listę zgodnych przeglądarek można znaleźć w Podręczniku administratora. (S1101)</Term>
+  <Term key="ERR_INCOMPAT_BROWSER">Ta przeglądarka nie jest obsługiwana. Aby uzyskać listę obsługiwanych przeglądarek, odwiedź centrum pomocy. (S1101)</Term>
   <Term key="ERR_INCORRECT_FIELDS">Następujące wpisy nie mają autoryzacji:</Term>
   <Term key="ERR_INVALIDCATEGORY">Nieprawidłowa kategoria {CATEGORY}: '„%1” (S1129)</Term>
   <Term key="ERR_INVALIDSTATE">Nieprawidłowy status {STATE}: '„%1” (S1017)</Term>
@@ -1457,7 +1456,7 @@ Po zmianie ustawień należy pamiętać o ponownym uruchomieniu usługi WWW i/lu
   <Term key="MNU_USER_QUERY">Kwerendy użytkownika</Term>
   <Term key="MNU_WEBSERVICESSDK">Usługi sieciowe SDK</Term>
   <Term key="MNU_WEB_EDITOR">Edytor sieci Web</Term>
-  <Term key="MSG_EMPTY_DELETED_OBJ">Opróżnij kosz (korzystając z pierwszego zainstalowanego serwera Enterprise) przed przeprowadzeniem aktualizacji. - Zob. Podręcznik administratora.</Term>
+  <Term key="MSG_EMPTY_DELETED_OBJ">Przed przystąpieniem do aktualizacji opróżnij kosz (przy użyciu oryginalnej instalacji Enterprise Server). — Odwiedź centrum pomocy.</Term>
   <Term key="MSG_EMPTY_INDESIGNSERVERJOBS">Znaleziono prace w kolejce zadań serwera InDesign. Te prace zostaną usunięte.</Term>
   <Term key="MSG_EMPTY_SERVERJOBS">Znaleziono prace w kolejce zadań serwera Enterprise. Te prace zostaną usunięte.</Term>
   <Term key="MSG_EMPTY_STORAGE">W Twojej bazie danych znajdują się pliki przepływu pracy; ta funkcja stała się nieaktualna w wersji 8.0. Przenoszenie tych plików do pamięci plików nie jest obsługiwane. Dlatego musisz utworzyć pustą bazę danych. Jeśli masz pewność, że pamięć plików jest używana oraz że wszystkie zapisy w tabeli bazy danych noszące nazwę „smart_storage” zawierają pliki, które mogą zostać usunięte, możesz również oczyścić tabelę i przeprowadzić przenoszenie.</Term>
