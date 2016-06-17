@@ -16,7 +16,7 @@ class AdobeDps_EnterprisePlugin extends EnterprisePlugin
 	{
 		$info = new PluginInfoData();
 		$info->DisplayName = 'Adobe DPS';
-		$info->Version = file_exists('_productversion.txt') ? file_get_contents('_productversion.txt') : "";
+		$info->Version = file_get_contents(__DIR__.'/_productversion.txt');
 		$info->Description = 'Integrates Adobe Digital Publishing Suite support.';
 		$info->Copyright = COPYRIGHT_WOODWING;
 		return $info;

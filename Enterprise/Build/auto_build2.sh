@@ -47,7 +47,9 @@ function replaceVersionFile {
 		exit 1
 	fi
 	set -e
-	git add --force "${1}"
+	if [ "${SERVER_RELEASE_TYPE}" != "Daily" ]; then
+		git add --force "${1}"
+	fi
 }
 
 #
@@ -506,7 +508,9 @@ function step3_updateVersionInfo {
 	else
 		echo "${SERVER_RELEASE_TYPE}" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 	fi
-	git add --force "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
+	if [ "${SERVER_RELEASE_TYPE}" != "Daily" ]; then
+		git add --force "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
+	fi
 
 	echo "step3b: Update version info in server plugins."
 	updatePluginVersions ${SOURCE_BASE}Enterprise/config/plugins ${SERVER_VERSION} ${BUILD_NUMBER}
@@ -530,8 +534,13 @@ function step3_updateVersionInfo {
 	updateVersion ${SOURCE_BASE}Drupal8/modules/ww_enterprise/ww_enterprise.info.yml "^version\s*:\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
 	updateVersion ${SOURCE_BASE}WordPress/plugins/ww_enterprise/ww_enterprise.php "^\s*\*\s*Version:\s*" ${SERVER_VERSION} ${BUILD_NUMBER}
 	
-	echo "step3f: Push version info changes to Git."
-	git push --set-upstream origin "${GIT_BRANCH}"
+	if [ "${SERVER_RELEASE_TYPE}" == "Daily" ]; then
+		echo "step3f: Skip pushing version info changes to Git since it is a Daily build."
+	else
+		echo "step3f: Push version info changes to Git."
+		git commit -m "[Ent Server ${SERVER_VERSION}] Jenkins: Updated product version info files with ${BUILD_NUMBER}."
+		git push --set-upstream origin "${GIT_BRANCH}"
+	fi
 }
 
 #

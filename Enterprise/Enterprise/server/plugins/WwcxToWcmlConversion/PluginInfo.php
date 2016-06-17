@@ -15,7 +15,7 @@ class WwcxToWcmlConversion_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Content Station CS4 Article Conversion';
-		$info->Version     = file_exists('_productversion.txt') ? file_get_contents('_productversion.txt') : "";
+		$info->Version     = file_get_contents(__DIR__.'/_productversion.txt');
 		$info->Description = 'Converts CS4 (WWCX) articles to CS5 (WCML) format with the '.
 			'help of InDesign Server CS5 or higher. This happens on-the-fly when an '.
 			'CS4 article gets opened for editing using the Content Station editor.';

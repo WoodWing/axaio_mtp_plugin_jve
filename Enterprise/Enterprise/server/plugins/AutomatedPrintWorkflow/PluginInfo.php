@@ -20,7 +20,7 @@ class AutomatedPrintWorkflow_EnterprisePlugin extends EnterprisePlugin
 		require_once BASEDIR.'/server/interfaces/plugins/PluginInfoData.class.php';
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Automated Print Workflow';
-		$info->Version     = file_exists('_productversion.txt') ? file_get_contents('_productversion.txt') : "";
+		$info->Version     = file_get_contents(__DIR__.'/_productversion.txt');
 		$info->Description = 'Provides information for SC to automatically place candidates on a layout.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
