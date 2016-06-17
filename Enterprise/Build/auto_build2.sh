@@ -355,8 +355,9 @@ function step1_cleanGetWorkspace {
 	rm -rf "${WORKSPACE}/artifacts"
 	mkdir "${WORKSPACE}/artifacts"
 
-	echo "step1b: Checkout the ${GIT_BRANCH} branch in the workspace."
+	echo "step1b: Checkout the ${GIT_BRANCH} branch in the workspace and get latest changes."
 	git checkout "${GIT_BRANCH}"
+	git pull
 }
 
 #
