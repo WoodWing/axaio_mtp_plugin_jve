@@ -91,7 +91,7 @@ function updatePluginVersions {
 	IFS=$(echo -en "\n\b")
 	cd "${1}"
 	pluginsBaseFolder=`pwd`
-	for pluginFolder in "${pluginsBaseFolder}"/*; do
+	for pluginFolder in $(find "${pluginsBaseFolder}" -maxdepth 1 -mindepth 1 -type d); do
 		replaceVersionFile "${pluginFolder}/_productversion.txt" ${2} ${3}
 	done
 	cd -
