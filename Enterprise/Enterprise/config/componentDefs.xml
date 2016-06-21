@@ -1,0 +1,65 @@
+<?xml version="1.0" standalone="yes" ?>
+<!--WoodWing Software ComponentDefs v7.0 build 1-->
+<brands>
+	<brand id="default">
+		<!-- list all default components. Configure order, shown by default, default paragraph styles 
+			and allowance of multiple instances here
+		-->	
+		<components>
+			<component name="head" default="true" parastyle=""/>
+			<component name="subhead" default="false" parastyle=""/>
+			<component name="intro" default="true" parastyle=""/>
+			<component name="byline" default="false" parastyle=""/>
+			<component name="body" default="true" parastyle=""/>
+			<component name="caption" default="false" parastyle=""/>
+			<component name="credit" default="false" parastyle=""/>
+			<component name="crosshead" default="false" parastyle="" allowmultipleinstances="true"/>
+			<component name="graphic" default="false" parastyle=""/>
+			<component name="highlight" default="false" parastyle=""/> 
+		</components>
+		<!-- List with available paragraph styles. Label is shown in editor -->
+		<paragraphstyles>
+			<style name="para_head_style" label="Head"/>
+			<style name="para_body_style" label="Body"/>
+		</paragraphstyles>
+		<!-- List with available character styles. Label is shown in editor -->
+		<characterstyles>
+			<style name="char_head_style" label="Head"/>
+			<style name="char_body_style" label="Body"/>
+		</characterstyles>
+		<!--List with available css stylesheets. The url can be absolute or relative-->
+		<stylesheets>
+			<stylesheet url="config/editor-styles/default.css" label="Default"/>
+		</stylesheets>
+		<!-- InCopy Template that should be used when placing or importing article -->
+		<template url="articletemplates/ihcdefault.wwcx"/>
+	</brand>
+	<!-- example of override default settings per Brand
+			by setting "usedefaults" to "true" or "false"
+			when not provided "usedefault" will be assumed "true"
+	-->
+	<!--
+	<brand id="1">
+		<components usedefaults="false">
+			<component name="body" default="true" parastyle="para_body_style"/>
+			<component name="byline" default="true" parastyle=""/>
+			<component name="caption" default="true" parastyle=""/>
+			<component name="credit" default="false" parastyle=""/>
+			<component name="crosshead" default="false" parastyle=""/>
+			<component name="graphic" default="false" parastyle=""/>
+			<component name="head" default="false" parastyle="para_head_style"/>
+			<component name="highlight" default="false" parastyle=""/>
+			<component name="intro" default="false" parastyle="para_intro_style"/>
+			<component name="subhead" default="false" parastyle=""/>
+		</components>
+		<paragraphstyles usedefaults="true"/>
+		<characterstyles usedefaults="true"/>
+		<stylesheets>
+			<stylesheet url="" label="Web Channel" channelId="1"/>
+			<stylesheet url="" label="Print Channel" channelId="2"/>
+		</stylesheets>
+	</brand>
+	-->
+</brands>
+
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LocalizationMap language="ptBR">
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS">Carregar estado</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_FAILED">Falhou (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_PENDING">Pendente (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_UPLOADED">Enviado (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_UPLOADING">Enviando %1% (v%2)</Term>
+  <Term key="AdobeDps2.ASSET_NEEDS_ATTENTION">O envio do layout que você tentou publicar no serviço de distribuição do Adobe falhou.</Term>
+  <Term key="AdobeDps2.AUTHENTICATION_SERVER_URL">URL do servidor de autenticação</Term>
+  <Term key="AdobeDps2.CONFIRM_UNREGISTER">Tem certeza de que deseja cancelar o registro?</Term>
+  <Term key="AdobeDps2.CONFIRM_UNSETPROJECT">Tem certeza de que deseja cancelar atribuição do projeto?</Term>
+  <Term key="AdobeDps2.CREATE_COLLECTIONS">Criar coleções</Term>
+  <Term key="AdobeDps2.DEFAULT_ARTICLE_ACCESS">Acessar artigo padrão</Term>
+  <Term key="AdobeDps2.ERROR_AFFECTS_LAYOUT">Infelizmente, ocorreu um erro. Ele afeta o seguinte layout:</Term>
+  <Term key="AdobeDps2.ERROR_CANT_CONNECT_TO_SERVER">Não foi possível conectar ao serviço de distribuição Adobe.</Term>
+  <Term key="AdobeDps2.ERROR_NO_CHANNELS">Nenhum canal de publicação do tipo “dps2” foi encontrado.</Term>
+  <Term key="AdobeDps2.ERROR_NO_CHANNELS_HELP">Certifique-se de que um canal de publicação do tipo “dps2” esteja configurado.</Term>
+  <Term key="AdobeDps2.ERROR_NO_EDIT_CONTENT_RIGHTS">Nenhum direito de acesso “Adicionar e editar conteúdo” encontrado para projetos Adobe DPS.</Term>
+  <Term key="AdobeDps2.ERROR_SERVER_ERROR">Erro no serviço de distribuição do Adobe DPS.</Term>
+  <Term key="AdobeDps2.LETTER_BEGINNING">Prezado(a)</Term>
+  <Term key="AdobeDps2.PROJECT">Projeto</Term>
+  <Term key="AdobeDps2.SELECT_PROJECT">Selecione um projeto</Term>
+  <Term key="AdobeDps2.SETPROJECT">Atribuir projeto</Term>
+  <Term key="AdobeDps2.SUCCESSFULLY_UNREGISTERED">Registro cancelado com sucesso.</Term>
+  <Term key="AdobeDps2.UNSETPROJECT">Cancelar atribuição do projeto</Term>
+  <Term key="AdobeDps2.UPLOADING_AP_ARTICLES">%1 estado do envio do artigo</Term>
+</LocalizationMap>

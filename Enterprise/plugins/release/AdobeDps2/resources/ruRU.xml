@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LocalizationMap language="ruRU">
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS">Статус загрузки</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_FAILED">Не выполнено (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_PENDING">Ожидает (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_UPLOADED">Загружено (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_UPLOADING">Загрузка %1% (v%2)</Term>
+  <Term key="AdobeDps2.ASSET_NEEDS_ATTENTION">Не удалось загрузить макет, который вы хотели опубликовать в службе Adobe Distribution.</Term>
+  <Term key="AdobeDps2.AUTHENTICATION_SERVER_URL">Ссылка на сервер идентификации</Term>
+  <Term key="AdobeDps2.CONFIRM_UNREGISTER">Хотите отменить регистрацию?</Term>
+  <Term key="AdobeDps2.CONFIRM_UNSETPROJECT">Хотите отменить назначение проекта?</Term>
+  <Term key="AdobeDps2.CREATE_COLLECTIONS">Создать коллекции</Term>
+  <Term key="AdobeDps2.DEFAULT_ARTICLE_ACCESS">Доступ к статьям по умолчанию</Term>
+  <Term key="AdobeDps2.ERROR_AFFECTS_LAYOUT">Произошла ошибка. Она повлияет на следующий макет:</Term>
+  <Term key="AdobeDps2.ERROR_CANT_CONNECT_TO_SERVER">Не удалось подключиться к службе Adobe Distribution.</Term>
+  <Term key="AdobeDps2.ERROR_NO_CHANNELS">Канал публикации типа 'dps2' не найден.</Term>
+  <Term key="AdobeDps2.ERROR_NO_CHANNELS_HELP">Убедитесь, что канал публикации типа 'dps2' настроен.</Term>
+  <Term key="AdobeDps2.ERROR_NO_EDIT_CONTENT_RIGHTS">Права доступа «Добавление и редактирование контента» для проектов Adobe DPS не найдены.</Term>
+  <Term key="AdobeDps2.ERROR_SERVER_ERROR">В службе Adobe DPS Distribution произошла ошибка.</Term>
+  <Term key="AdobeDps2.LETTER_BEGINNING">Уважаемый(-ая)</Term>
+  <Term key="AdobeDps2.PROJECT">Проект</Term>
+  <Term key="AdobeDps2.SELECT_PROJECT">Выберите проект</Term>
+  <Term key="AdobeDps2.SETPROJECT">Назначить проект</Term>
+  <Term key="AdobeDps2.SUCCESSFULLY_UNREGISTERED">Регистрация успешно отменена.</Term>
+  <Term key="AdobeDps2.UNSETPROJECT">Отменить назначение проекта</Term>
+  <Term key="AdobeDps2.UPLOADING_AP_ARTICLES">%1 статус загрузки статьи</Term>
+</LocalizationMap>

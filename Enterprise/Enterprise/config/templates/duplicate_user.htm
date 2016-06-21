@@ -1,0 +1,70 @@
+<script language="javascript">
+
+/**
+ * Does a very basic validate of input form and submits when ok.
+ */
+function validateAndSubmitForm()
+{
+	// Take form params
+	var dup = document.duplicate;
+	var userId = dup.Users.value;
+	
+	// Check for empty form params
+	if( userId <= 0 ) {
+		alert("<!--RES:ERR_SELECT_USER_FROM_LIST-->");
+	} else if( dup.newPass_1.value != dup.newPass_2.value ) {
+		alert("<!--RES:ERR_PASSWORDS_DONT_MATCH-->");
+	} else {
+		dup.newName.value = dup.newusrName.value;
+		dup.newFullName.value = dup.FullName.value;
+		dup.ID.value = userId;
+		dup.submit();
+	}
+}
+
+function getusrID( id )
+{
+	if(id==-1) {
+		alert("<!--RES:ERR_SELECT_USER_FROM_LIST-->");
+	}
+}
+
+</script>
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/users.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:ACT_DUPLICATE_USER--></span></td>
+		</tr>
+	</table>
+	
+	<!-- app body -->
+	<form name="duplicate" action="duplicate_user.php" method="post">
+	<table class="formframe"><tr><td>
+		<table class="formbody">
+			<tr>
+				<td><!--RES:USR_SOURCE_USER--></td>
+				<td><!--RES:USR_USER_NAME--></td>
+			</tr>
+			<!--PAR:USERS-->
+		</table>
+		<font color="red"><!--PAR:ERROR--></font>
+	</td></tr><tr><td>
+		<table class="formbtnbar">
+			<tr>
+				<td>
+					<input type="button" name="Copy" value="<!--RES:ACT_COPY_USER-->"
+						onClick="javascript:validateAndSubmitForm();"/>
+				</td>	
+			</tr>
+		</table>
+		<input type="hidden" name="newName" value=""/>
+		<input type="hidden" name="newFullName" value=""/>
+		<input type="hidden" name="ID" value=""/>
+	</td></tr></table>
+	</form>
+
+</td></tr></table>

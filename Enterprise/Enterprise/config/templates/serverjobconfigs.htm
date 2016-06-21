@@ -1,0 +1,63 @@
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/jobconfig_32.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:SVR_SERVERJOB_CONFIGS--></span></td>
+		</tr>
+	</table>
+
+	<!-- app body -->
+	<table class="listframe" width="100%"><tr><td>
+		<font color="#ff0000"><i><!--PAR:ERROR--></i></font>
+		<table class="listpane">
+			<tr>
+				<th width="1"/>
+				<th>&nbsp;</th>
+				<th width="150"><!--RES:OBJ_NAME--></th>
+				<th width="100"><!--RES:SVR_SERVER_TYPE--></th>				
+				<th><!--RES:ISS_ACTIVE--></th>
+			</tr>
+			<!--SEC:JOBCONFIG_RECORD>-->
+			<tr>
+				<td><!--PAR:MARK_CONFIG--></td>
+				<td style="<!--PAR:RECURRENCE_RECURRING-->"><img title="<!--RES:SVR_SERVER_SCHEDULED_JOB_SMALL_J-->" src="../../config/images/cal_16.gif"/></td>
+				<td style="<!--PAR:RECURRENCE_USERINITIATED-->"><img title="<!--RES:SVR_SERVER_USER_INITIATED_JOB_SMALL_J-->" src="../../config/images/user_16.gif"/></td>
+				<td><a href='serverjobconfigs.php?action=edit&id=<!--PAR:ServerJobConfig->Id-->'><!--PAR:ServerJobConfig->JobType--></a></td>
+				<td><!--PAR:ServerJobConfig->ServerType--></td>
+				<td><!--PAR:ServerJobConfig->Active--></td>
+			</tr>
+			<!--SEC:<JOBCONFIG_RECORD-->
+		</table>
+		<font color="#ff0000"><i><!--PAR:MSG_OLD_JOBCONFIGS--></i></font>
+		<font color="#00cc00"><i><!--PAR:MSG_NEW_JOBCONFIGS--></i></font>
+	</td></tr><tr><td>
+		<table><tr>
+				<td width=50><!--RES:LEGEND--></td>
+				<td width=16><img title="<!--RES:SVR_SERVER_SCHEDULED_JOB_BIG_J-->"  src="../../config/images/cal_16.gif"/></td>
+				<td width=90><!--RES:SVR_SERVER_SCHEDULED_JOB_BIG_J--></td>
+				<td width=16><img title="<!--RES:SVR_SERVER_USER_INITIATED_JOB_BIG_J-->"  src="../../config/images/user_16.gif"/></td>
+				<td width=90><!--RES:SVR_SERVER_USER_INITIATED_JOB_BIG_J--></td>
+		</tr></table>
+	</td></tr><tr><td>
+		<table class="appbtnbar">
+			<tr>
+				<td width="5px">
+					<nobr>
+					</nobr>
+				</td>
+				<td></td> <!-- trick: used fill button bar to far right -->
+			</tr>
+		</table>
+	</td></tr></table>
+
+	<!--SEC:MARK_OLDCONFIG>-->
+		<font color="#ff0000"><b>* </b></font>
+	<!--SEC:<MARK_OLDCONFIG-->
+	
+	<!--SEC:MARK_NEWCONFIG>-->
+		<font color="#00cc00"><b>* </b></font>
+	<!--SEC:<MARK_NEWCONFIG-->
+
+</td></tr></table>

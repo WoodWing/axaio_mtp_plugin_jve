@@ -1,0 +1,234 @@
+<script language="javascript">
+function ShowLimitedResults( newStartPos )
+{
+	var f = document.forms.log;
+	f.startPos.value = newStartPos;
+	f.submit();
+}
+function SetAllCheckBoxes(FormName, FieldName, CheckValue)
+{
+	if(!document.forms[FormName])
+		return;
+	var objCheckBoxes = document.forms[FormName].elements[FieldName];
+	if(!objCheckBoxes)
+		return;
+	var countCheckBoxes = objCheckBoxes.length;
+	if(!countCheckBoxes)
+	{
+		objCheckBoxes.checked = CheckValue;
+	}
+	else
+	{
+		// set the check value for all check boxes
+		for(var i = 0; i < countCheckBoxes; i++)
+			objCheckBoxes[i].checked = CheckValue;
+	}
+}
+function Delete(href,string)
+{
+	var bRetVal = false;
+	if( confirm( string ) )
+	{
+		location.href = href;
+		bRetVal = ( -1 == navigator.userAgent.toLowerCase().indexOf("safari") );
+	}
+	return bRetVal;
+}
+function deleteselected( user, logSearch, getvars, service, ip, date, del, id, string )
+{
+	var isChecked;
+	isChecked=false;
+	var cid="";
+	if( confirm( string ) )
+	{
+		len = document.log.chkobj.length;
+		if(len>1)
+		{
+			for (i=0;i<id;i++)
+			{
+				if (document.log.chkobj[i].checked)
+				{
+					//alert(document.test.chkobj[i].value);
+					cid=cid+document.log.chkobj[i].value+",";
+					//alert(cid);
+					isChecked=true;
+				}
+			}
+		}
+		else
+		{
+			if (document.test.chkobj.checked)
+				isChecked=true;
+		}
+		if(!isChecked)
+		{
+			alert("<!--RES:ACT_TICK_CHECKBOXES-->");
+		}
+		else
+		{
+			var f = document.forms.doit;
+			f.user.value 	= user;
+			f.logSearch.value = logSearch;
+			f.getvars.value = getvars;
+			f.service.value = service;
+			f.ip.value 		= ip;
+			f.date.value 	= date;
+			f.del.value 	= cid;
+			f.submit();
+		}
+	}
+}
+function popUp(URL)
+{
+	document.location.href = URL;
+}
+</script>
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/log.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:MNU_LOG--></span></td>
+		</tr>
+	</table>
+
+	<!-- app body -->
+	<form enctype="multipart/form-data" action="log.php" method="post" name="log">
+	<table class="listframe" width="100%"><tr><td>
+		<table class="listpane">
+			<tr bgcolor="#cccccc">
+				<td width="24%">
+					<!--RES:USR_USER-->:
+				</td>
+				<td width="254">
+					<!--RES:ACT_SERVICE-->:
+				</td>
+				<td width="24%">
+					<!--RES:USR_IP-->:
+				</td>
+				<td width="24%">
+					<!--RES:WFL_DATE-->:
+				</td>
+			</tr>
+			<tr>
+				<td width="24%">
+					<select name="user" style="width:150px">
+						<option value=""><!--RES:ACT_ALL--></option>
+						<!--USER-->
+					</select>
+				</td>
+				<td width="24%">
+					<select name="service" style="width:150px">
+						<option value=""><!--RES:ACT_ALL--></option>
+						<!--SERVICE-->
+					</select>
+				</td>
+				<td width="24%">
+					<select name="ip" style="width:150px">
+						<option value=""><!--RES:ACT_ALL--></option>
+						<!--IP-->
+					</select>
+				</td>
+				<td width="24%">
+					<input type="text" size="20" name="date" value="<!--DATE-->" >
+				</td>
+			</tr>
+			<tr>
+				<td></td><td></td><td></td><td><!--RES:OBJ_EXP-->: yyyy-mm-dd</td>
+			</tr>
+		</table>
+	</td></tr><tr><td>
+		<table class="formbtnbar">
+			<tr>
+				<td colspan="6" align="right">
+					<input type="image" src="../../config/images/srch_32.gif" value="Submit" title="<!--RES:ACT_SEARCH-->" width="32" height="32"/>
+					&nbsp;
+					<input type="hidden" name="logSearch" value="true">
+					&nbsp;
+					<a href="log.php">
+						<img src="../../config/images/undo_32.gif" border="0" title="<!--RES:BUT_RESET-->" width="32" height="32"/>
+					</a>
+				</td>
+			</tr>
+		</table>
+	</td></tr></table>
+
+	<!-- sub header -->
+	<table class="subtitlebar">
+		<tr>
+			<td><span class="subtitletext"><!--RES:ACT_RESULT--></span></td>
+		</tr>
+	</table>
+			
+	<!-- page property header -->
+	<table class="listframe" width="100%"><tr><td>
+		<table class="listpane">
+			<tr>
+				<th colspan="2" width="12%"><!--RES:USR_USER--></th>
+				<th width="12%"><!--RES:ACT_SERVICE--></th>
+				<th width="12%"><!--RES:USR_IP--> </th>
+				<th width="12%"><!--RES:WFL_DATE--></th>
+				<th width="12%"><!--RES:OBJ_NAME--></th>
+				<th width="12%"><!--RES:PUBLICATION--></th>
+				<th width="12%"><!--RES:ISSUE--></th>
+				<th width="12%"><!--RES:SECTION--></th>
+				<th width="12%"><!--RES:OBJ_VERSION--></th>
+				<th></th>
+			</tr>
+			<!--RESULT-->
+		</table>
+	</td></tr><tr><td>
+		<table class="appbtnbar">
+			<tr>
+				<td width="5px">
+					<nobr>
+						<!--DELETEALL-->
+						&nbsp;
+					</nobr>
+				</td>
+				<td width="5px">
+					<nobr>
+						<!--SELECTALL-->
+						&nbsp;
+					</nobr>
+				</td>
+				<td width="5px">
+					<nobr>
+						<!--UNSELECTALL-->
+						&nbsp;
+					</nobr>
+				</td>
+				<td></td> <!-- trick: used fill button bar to far right -->
+				</td>
+			</tr>
+		</table>
+	</td></tr><tr><td>
+		<table class="appbtnbar">
+			<tr>
+				<td width="5px">
+					<nobr>
+						<!--SEARCHCOUNT-->
+						<!--SEARCHBACK_NEXT-->
+						&nbsp;
+					</nobr>
+				</td>
+				<td></td> <!-- trick: used fill button bar to far right -->
+			</tr>
+		</table>
+	</td></tr></table>
+	
+	</form>
+
+	<form action="log.php" method="get" name="doit">
+		<input type="hidden" name="user">
+		<input type="hidden" name="service">
+		<input type="hidden" name="ip">
+		<input type="hidden" name="date">
+		<input type="hidden" name="logSearch">
+		<input type="hidden" name="getvars">
+		<input type="hidden" name="del">
+	</form>
+
+</td></tr></table>

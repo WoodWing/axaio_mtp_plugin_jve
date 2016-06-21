@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LocalizationMap language="fiFI">
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS">Latauksen tila</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_FAILED">Epäonnistui (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_PENDING">Odotetaan (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_UPLOADED">Ladattu (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_UPLOADING">Ladataan %1% (v%2)</Term>
+  <Term key="AdobeDps2.ASSET_NEEDS_ATTENTION">Asettelua, jonka yritit julkaista Adobe Distribution Service -palvelussa, ei ladattu.</Term>
+  <Term key="AdobeDps2.AUTHENTICATION_SERVER_URL">Tarkistuspalvelimen URL-osoite</Term>
+  <Term key="AdobeDps2.CONFIRM_UNREGISTER">Oletko varma, että haluat poistaa rekisteröinnin?</Term>
+  <Term key="AdobeDps2.CONFIRM_UNSETPROJECT">Oletko varma, että haluat poistaa projektin määrityksen?</Term>
+  <Term key="AdobeDps2.CREATE_COLLECTIONS">Luo kokoelmia</Term>
+  <Term key="AdobeDps2.DEFAULT_ARTICLE_ACCESS">Artikkelin oletuskäyttöoikeus</Term>
+  <Term key="AdobeDps2.ERROR_AFFECTS_LAYOUT">Tapahtui virhe. Se vaikuttaa seuraavaan asetteluun:</Term>
+  <Term key="AdobeDps2.ERROR_CANT_CONNECT_TO_SERVER">Yhteyden muodostus Adobe Distribution Service -palveluun epäonnistui.</Term>
+  <Term key="AdobeDps2.ERROR_NO_CHANNELS">Tyypin 'dps2' julkaisukanavaa ei löytynyt.</Term>
+  <Term key="AdobeDps2.ERROR_NO_CHANNELS_HELP">Varmista, että tyypin 'dps2' julkaisukanava on asennettu.</Term>
+  <Term key="AdobeDps2.ERROR_NO_EDIT_CONTENT_RIGHTS">Käyttöoikeutta sisällön lisäämiseen ja muokkaamiseen Adobe DPS -projekteissa ei löytynyt.</Term>
+  <Term key="AdobeDps2.ERROR_SERVER_ERROR">Adobe DPS Distribution Service -palvelussa tapahtui virhe.</Term>
+  <Term key="AdobeDps2.LETTER_BEGINNING">Hei</Term>
+  <Term key="AdobeDps2.PROJECT">Projekti</Term>
+  <Term key="AdobeDps2.SELECT_PROJECT">Valitse projekti</Term>
+  <Term key="AdobeDps2.SETPROJECT">Määritä projekti</Term>
+  <Term key="AdobeDps2.SUCCESSFULLY_UNREGISTERED">Rekisteröinnin poisto onnistui.</Term>
+  <Term key="AdobeDps2.UNSETPROJECT">Poista projektin määritys</Term>
+  <Term key="AdobeDps2.UPLOADING_AP_ARTICLES">%1 artikkelin lataustila</Term>
+</LocalizationMap>

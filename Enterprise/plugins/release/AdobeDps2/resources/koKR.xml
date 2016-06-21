@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LocalizationMap language="koKR">
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS">업로드 현황</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_FAILED">실패  (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_PENDING">대기중 (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_UPLOADED">업로드됨 (v%1)</Term>
+  <Term key="AdobeDps2.AP_ARTICLE_UPLOAD_STATUS_UPLOADING">%1% (v%2) 업로드중</Term>
+  <Term key="AdobeDps2.ASSET_NEEDS_ATTENTION">Adobe Distribution Service 에 배포를 하려고 한 레이아웃이 업로드에 실패했습니다.</Term>
+  <Term key="AdobeDps2.AUTHENTICATION_SERVER_URL">인증서버 주소</Term>
+  <Term key="AdobeDps2.CONFIRM_UNREGISTER">등록취소 하시겠습니까?</Term>
+  <Term key="AdobeDps2.CONFIRM_UNSETPROJECT">프로젝트 할당을 취소하시겠습니까?</Term>
+  <Term key="AdobeDps2.CREATE_COLLECTIONS">콜렉션 생성</Term>
+  <Term key="AdobeDps2.DEFAULT_ARTICLE_ACCESS">기본 아티클 연결</Term>
+  <Term key="AdobeDps2.ERROR_AFFECTS_LAYOUT">다음 레이아웃에 영향을 주는 에러가 발생했습니다:</Term>
+  <Term key="AdobeDps2.ERROR_CANT_CONNECT_TO_SERVER">Adobe Distribution Service에 연결할수 없습니다.</Term>
+  <Term key="AdobeDps2.ERROR_NO_CHANNELS">No Publication Channel of type 'dps2' was found.</Term>
+  <Term key="AdobeDps2.ERROR_NO_CHANNELS_HELP">배포채널의 타입 'dps2' 설정을 확인하십시오.</Term>
+  <Term key="AdobeDps2.ERROR_NO_EDIT_CONTENT_RIGHTS">Adobe DPS 프로젝트의  '컨텐츠 추가 및 편집'에 대한 접근권한이 없습니다.</Term>
+  <Term key="AdobeDps2.ERROR_SERVER_ERROR">Adobe DPS Distribution Service 에서 에러가 발생했습니다.</Term>
+  <Term key="AdobeDps2.LETTER_BEGINNING">귀하</Term>
+  <Term key="AdobeDps2.PROJECT">프로젝트</Term>
+  <Term key="AdobeDps2.SELECT_PROJECT">프로젝트를 선택하십시요.</Term>
+  <Term key="AdobeDps2.SETPROJECT">프로젝트 할당</Term>
+  <Term key="AdobeDps2.SUCCESSFULLY_UNREGISTERED">Successfully unregistered.</Term>
+  <Term key="AdobeDps2.UNSETPROJECT">프로젝트 할당 취소</Term>
+  <Term key="AdobeDps2.UPLOADING_AP_ARTICLES">%1 아티글 업로드 현황</Term>
+</LocalizationMap>

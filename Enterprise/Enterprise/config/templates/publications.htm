@@ -1,0 +1,59 @@
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/pub.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:PUBLICATIONS--></span></td>
+		</tr>
+	</table>
+
+	<!-- app body -->
+	<form action="publications.php" method="post" name="frmPubs">
+	<table><tr><td>
+		<table class="listframe"><tr><td>
+			<table class="listpane">
+				<tr>
+					<th width="200"><!--RES:PUBLICATION--></th>
+					<th width="50"><!--RES:ISSUES--></th>
+					<th><!--RES:LIS_ORDER--></th></th>
+				</tr>
+				<!--ROWS-->
+			</table>
+		</td></tr></table>
+	</td></tr><tr><td>	
+		<table class="appbtnbar">
+			<tr>
+				<td width="5px">
+					<nobr>
+						<a href="hppublications.php">
+							<img src="../../config/images/add_16.gif" title="<!--RES:ACT_NEW-->"/>
+							<!--RES:ACT_NEW-->
+						</a>
+						&nbsp;
+					</nobr>
+				</td>
+				<td width="5px">
+					<nobr>
+						<a href="duplicate_pub.php">
+							<img src="../../config/images/copy_16.gif" title="<!--RES:ACT_COPY-->"/>
+							<!--RES:ACT_COPY-->
+						</a>
+						&nbsp;
+					</nobr>
+				</td>
+				<td width="5px">
+					<nobr>
+						<a href="javascript:document.forms[0].submit();">
+							<img src="../../config/images/ref_16.gif" border="0" title="<!--RES:ACT_REORDER-->"/>
+							<!--RES:ACT_REORDER-->
+						</a>
+					</nobr>
+				</td>
+				<td></td> <!-- trick: used fill button bar to far right -->
+			</tr>
+		</table>
+	</td></tr></table>
+	</form>
+
+</td></tr></table>

@@ -1,0 +1,161 @@
+<?php
+set_time_limit(3600);
+
+include_once(drupal_get_path('module', 'ww_enterprise').'/ww_enterprise_field.inc');
+include_once(drupal_get_path('module', 'ww_enterprise').'/ww_enterprise_xmlrpc.inc');
+
+/**
+ * Implementation of hook_node_access.
+ *
+ * Used to determine access to a node during previews. A neutral response is returned if access decisions are not the
+ * concern of the ww_enterprise module. Enterprise is only interested in the operation `view`, and only for that operation
+ * grants or denies access when a preview is requested.
+ *
+ * The actual access check is done by using the ww_enterprise_preview table to see if for the specified node there is a
+ * generated preview.
+ *
+ * @param \Drupal\node\NodeInterface $node The node being accessed.
+ * @param string $op The action 'view', 'create', 'update', 'delete'.
+ * @param \Drupal\Core\Session\AccountInterface $account The account data. (required by interface).
+ *
+ * @return \Drupal\Core\Access\AccessResult The access result, to be handled by the Drupal core.
+ */
+function ww_enterprise_node_access( \Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account )
+{
+	// We are only interested in view actions.
+	if ( $op != 'view' || !\Drupal::hasRequest() ) {
+		return \Drupal\Core\Access\AccessResult::neutral();
+	}
+
+	// We are only interested if a preview was requested with a hash.
+	$hash = \Drupal::request()->query->filter( 'ww_enterprise_hash' );
+	if ( empty( $hash ) ) {
+		return \Drupal\Core\Access\AccessResult::neutral();
+	}
+
+	\Drupal::logger( 'ww_enterprise' )->debug( 'Called node preview access for Node Id: ' . $node->id() . '.' );
+	$hasPreviewAccess = false;
+
+	// Check the previews table for the presence of an access record.
+	$query = 'SELECT nid FROM {ww_enterprise_preview} p WHERE p.hash = :hash ORDER BY p.nid DESC';
+	$params = array( ':hash' => $hash );
+	$result = db_query_range( $query, 0, 1, $params, array() );
+	$resultSet = $result->fetchAssoc(); // Need to use fetchAssoc because we are not sure if the record actually exists.
+	if ( $resultSet ){
+		$storedNid = $resultSet['nid'];
+		if ( $storedNid == $node->id() ) {
+			$hasPreviewAccess = true;
+		}
+	}
+
+	if ( $hasPreviewAccess ) {
+		// Access to the preview is granted.
+		\Drupal::logger( 'ww_enterprise' )->debug( 'Preview access granted to Node Id: ' . $node->id() . '.' );
+		return \Drupal\Core\Access\AccessResult::allowed();
+	} else {
+		// User has no access, let other access routines handle the request.
+		\Drupal::logger( 'ww_enterprise' )->debug( 'Preview access denied to Node Id: ' . $node->id() . '.' );
+		return \Drupal\Core\Access\AccessResult::neutral();
+	}
+}
+
+/**
+ * Implementation of hook_ENTITY_TYPE_form_alter.
+ *
+ * Adds a ww_term_entity field to the Taxonomy form for Vocabularies to allow users to enter a term entity which
+ * is used to provide suggestions in Enterprise Server for the field.
+ *
+ * @param array $form The form being manipulated.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state The state of the manipulated form.
+ * @param string $form_id The ID of the form.
+ */
+function ww_enterprise_form_taxonomy_vocabulary_form_alter( &$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id )
+{
+	$vocabularyId = $form['vid']['#default_value'];
+
+	// If an existing vocabulary is loaded we want to set the ww_term_entity to the stored value.
+	$defaultValue = '';
+	if ( !is_null( $vocabularyId ) ) {
+		// Load the vocabulary to retrieve the uuid.
+		$vocabularies = \Drupal\taxonomy\Entity\Vocabulary::loadMultiple( array( $vocabularyId ) );
+		if ( $vocabularies ) {
+			/** @var $vocabulary \Drupal\taxonomy\Entity\Vocabulary */
+			$vocabulary = $vocabularies[$vocabularyId];
+			$guid = $vocabulary->uuid();
+			$suggestionEntity = getWoodWingSuggestionEntity( $guid );
+			$defaultValue = ( empty( $suggestionEntity ) ) ? '' : $suggestionEntity;
+		}
+	}
+
+	// Add the form element for the ww_term_entity field to the vocabulary form.
+	$form['ww_term_entity'] = array(
+		'#type' => 'textfield',
+		'#title' => t('WoodWing Enterprise Suggestion Entity'),
+		'#default_value' => $defaultValue,
+		'#size' => 60,
+		'#maxlength' => 200,
+		'#required' => false,
+	);
+}
+
+/**
+ * Implementation of the hook_ENTITY_TYPE_presave hook.
+ *
+ * Updates a WoodWing Suggestion Entity for the given vocabulary. This hook is also used when performing inserts on a
+ * vocabulary by storing an initial record for the ww_term_entity.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity The entity being saved.
+ */
+function ww_enterprise_taxonomy_vocabulary_presave( Drupal\Core\Entity\EntityInterface $entity )
+{
+	$guid = $entity->uuid();
+	$suggestionEntity = \Drupal::request()->request->get( 'ww_term_entity' );
+
+	// Prevent an SQL injection if no suggestion entity is given.
+	if (!$suggestionEntity) {
+		return;
+	}
+
+	// Check if a value already exists for the ww_term_entity, if not add one, used for insert as well as update.
+	$storedEntity = getWoodWingSuggestionEntity( $guid );
+	if ( is_null( $storedEntity ) ) {
+		$vocabularyMap = array( 'vocabulary_uuid', 'ww_term_entity' );
+		$values = array( 'vocabulary_uuid' => $guid, 'ww_term_entity' => $suggestionEntity );
+		db_insert( 'ww_enterprise_vocabulary_map' )
+			->fields( $vocabularyMap )
+			->values( $values )
+			->execute();
+
+		\Drupal::logger( 'ww_enterprise' )->debug( 'Inserted a WoodWing Suggestion Entity `' . $suggestionEntity
+			. '` for Entity UUID `' . $guid . '`' );
+	} else {
+		// Update the ww_term_entity value with the newly entered value.
+		db_update( 'ww_enterprise_vocabulary_map' )
+			->condition( 'vocabulary_uuid', $guid )
+			->fields( array( 'ww_term_entity' => $suggestionEntity ) )
+			->execute();
+		// Add logging of the update event.
+		\Drupal::logger( 'ww_enterprise' )->debug( 'Updated a WoodWing Suggestion Entity `' . $suggestionEntity
+			. '` for Entity UUID `' . $guid . '`' );
+	}
+}
+
+/**
+ * Implementation of the hook_ENITTY_TYPE_delete hook.
+ *
+ * Deletes a WoodWing Suggestion Entity for the given vocabulary.
+ *
+ * @param \Drupal\Core\Entity\EntityInterface $entity The entity being deleted.
+ */
+function ww_enterprise_taxonomy_vocabulary_delete( Drupal\Core\Entity\EntityInterface $entity )
+{
+	$guid = $entity->uuid();
+
+	// Remove the ww_term_entity for the passed in guid.
+	db_delete( 'ww_enterprise_vocabulary_map' )
+		->condition( 'vocabulary_uuid', $guid )
+		->execute();
+
+	// Add logging of the delete event.
+	\Drupal::logger( 'ww_enterprise' )->debug( 'Deleted a WoodWing Suggestion Entity for Entity UUID `' . $guid . '`' );
+}

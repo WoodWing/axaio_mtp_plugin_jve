@@ -1,0 +1,459 @@
+<?php
+
+set_time_limit(3600);
+
+include_once(drupal_get_path('module', 'ww_enterprise').'/ww_enterprise_utils.inc');
+include_once(drupal_get_path('module', 'ww_enterprise').'/ww_enterprise_xmlrpc.inc');
+
+/**
+ * Implementation of the Drupal 7 hook_menu() function.
+ *
+ * This function is called by the site manager to define a specific page to have a specific page callback function.
+ *
+ * This hook enables modules to register paths in the database. The registered paths define how the paths (URL requests)
+ * should be handled (by defining a callback function).
+ *
+ * This function is triggered for the first time when the Woodwing (WW) module is loaded in the 'Module' Drupal admin
+ * page, and again each time the cache is cleared.
+ *
+ * When changing this function the 'Module' Drupal admin page has to be reloaded (by disabling the WW module and
+ * enabling it again). This is because the registration of the paths are cached in the database.
+ *
+ * This function has two paths registered in the database:
+ *  L> ww_enterprise/preview/%node/% :
+ *      - Accessed during a page preview in ContentStation.
+ *      - Callback functions: ww_enterprise_title(), ww_enterprise_page_view(),
+ *        ww_enterprise_preview_access().
+ *      - The %node means calling the function node_load() with the node id.
+ *        thus %node in 'ww_enterprise/preview/8/49fa4ad037b2b0cc370c3f38afae7115'
+ *        will become node_load(8) and results in a node object.
+ *
+ *  L> ww_enterprise/upload :
+ *      - Accessed during file uploads from Enterprise to Drupal.
+ *      - Instead of using XMLRPC the file upload is handled here (XMLRPC is too costly).
+ *      - Callback functions: ww_enterprise_upload().
+ *
+ * @see ww_enterprise_upload
+ * @return array Key-Value list where Keys are the registered path while the values the callback functions and its arguments.
+ */
+function ww_enterprise_menu()
+{
+	// Handle Page preview in ContentStation.
+	// Sample URL for Drupal 7 preview in ContentStation: ww_enterprise/preview/8/49fa4ad037b2b0cc370c3f38afae7115
+	$items['ww_enterprise/preview/%node/%'] = array(
+		'title' => 'enterprise menu',
+		'title callback' => 'ww_enterprise_title' ,
+		// Passing in index 2 of the registered path ['ww_enterprise/preview/%node/%'] (separated by '/' ) thus passing
+		// in the node object to the ww_enterprise_title function.
+		'title arguments' => array(2) , // 0=ww_enterprise, 1=preview, 2=8(the node object), 3=49fa4ad037b2b0cc370c3f38afae7115 (hash)
+
+		'page callback' => 'ww_enterprise_page_view' ,
+		// Passing in index 2 of the registered path ['ww_enterprise/preview/%node/%'] (separated by '/' ) thus passing
+		// in the node object to the ww_enterprise_page_view function.
+		'page arguments' => array(2) , // 0=ww_enterprise, 1=preview, 2=8(the node object), 3=49fa4ad037b2b0cc370c3f38afae7115 (hash)
+
+		'access callback' => 'ww_enterprise_preview_access' ,
+		// Passing in index 2 and index 3 of the registered path ['ww_enterprise/preview/%node/%'] (separated by '/' )
+		// thus passing in 'preview'(hard coded), the node(index 2) and the hash(index 3) to the ww_enterprise_preview_access
+		// function.
+		'access arguments' => array( 2, 3 ) , // 0=ww_enterprise, 1=preview, 2=8(the node object), 3=49fa4ad037b2b0cc370c3f38afae7115 (hash)
+		'type' => MENU_CALLBACK
+	);
+
+	// Handle file uploads. Sample URL for file uploads to Drupal 7 from ContentStation: ww_enterprise/upload.
+	$items['ww_enterprise/upload'] = array(
+		'title' => 'enterprise menu',
+		'page callback' => 'ww_enterprise_upload',
+		'access callback' => 'ww_enterprise_page_access', // For requesting access permission.
+		'type' => MENU_CALLBACK
+	);
+
+	return $items;
+}
+
+/**
+ * Access callback function for the 'ww_enterprise/upload' hook.
+ *
+ * Called as 'access callback' for path [ww_enterprise/upload], (defined in ww_enterprise_menu() ) for file uploads
+ * to Drupal from ContentStation.
+ *
+ * Grants access if Drupal can access the URL (the upload file URL), in this case, it always returns true to ensure
+ * that file uploads from Enterprise to Drupal are always allowed.
+ *
+ * @return bool True, to allow uploads to Drupal.
+ */
+function ww_enterprise_page_access()
+{
+	//TODO check if requested from Enterprise server.
+	return TRUE;
+}
+
+/**
+ * Access callback function for the  'ww_enterprise/preview/%node/%' hook.
+ *
+ * Called as 'access callback' for path [ww_enterprise/preview/%node/%], (defined in ww_enterprise_menu() )
+ * for previews from within ContentStation.
+ *
+ * Checks if the ContentStation user can preview the page. When the hash given corresponds to the page node id
+ * (saved in the Drupal database, in the 'ww_enterprise_preview' table. )access to view the page is granted.
+ *
+ * @param Object $node The node of the page to be previewed.
+ * @param string $hash The hash of the page to be previewed.
+ * @return bool Whether access is granted or not.
+ */
+function ww_enterprise_preview_access( $node, $hash )
+{
+	$nid = $node->nid;
+	watchdog( 'content', "ww_enterprise_preview_access", array(), WATCHDOG_NOTICE );
+	watchdog( 'content', "Searching access for nid: $nid and hash: $hash", array(), WATCHDOG_NOTICE );
+
+	$sql = "SELECT * FROM {ww_enterprise_preview} WHERE nid = :nid AND hash = :hash";
+	$sth = ww_enterprise_utils_dbQuery( $sql, array( ':nid' => $nid, ':hash' => $hash ) );
+	while( ww_enterprise_utils_dbFetchObject( $sth ) ) {
+		watchdog('content', "Access granted for preview.", array(), WATCHDOG_NOTICE);
+		return TRUE;
+	}
+
+	watchdog('content', "Access denied for preview.", array(), WATCHDOG_NOTICE);
+	return FALSE;
+}
+
+/**
+ * Title callback function for the 'ww_enterprise/preview/%node/%' hook.
+ *
+ * Called as the 'title callback' for path [ww_enterprise/preview/%node/%], (defined in ww_enterprise_menu() ) ,
+ * (defined in ww_enterprise_menu() ) to get the title for previews in ContentStation.
+ *
+ * @param Object $node The page node.
+ * @return string The title of the published page to be previewed.
+ */
+function ww_enterprise_title( $node )
+{
+	//watchdog('DEBUG-title', '<pre>'. print_r($node, TRUE) .'</pre>'); // enable this when debugging.
+	return $node->title; // The Drupal article for 'title'.
+}
+
+/**
+ * Page callback function for the 'ww_enterprise/preview/%node/%' hook.
+ *
+ * Called as the 'page callback' [ww_enterprise/preview/%node/%], (defined in ww_enterprise_menu() )to get the page to
+ * be previewed.
+ *
+ * This function returns an array of nodes (in this case one node in the list) to be viewed. Node(s) returned in this
+ * fashion are ready for drupal_render().
+ *
+ * @param Object $node The page node to be viewed.
+ * @param bool $message True to show page revision being previewed in the page title. False(Default) to disable.
+ * @return array List of pages (in this case one page) to be viewed.
+ */
+function ww_enterprise_page_view( $node, $message = false )
+{
+	//TODO generate random key and check it here as identification.
+	$pages = null;
+	// Uncomment the code below if you want the ContentStation user to be logged-in to Drupal to view the page, otherwise
+	// the user can view the page without logging in.
+
+	// NOTE: If the user is logged-in here, there's a problem where we can't log out the user. So currently, this code
+	//       is commented out.
+
+	// If we want the ContentStation user to be logged-in to Drupal to view the page, Uncomment the code below, and also
+	// uncomment the codes further down marked with ***.
+	//global $user;
+	//$userBackup = $user; // backup user
+	try {
+		// *** Uncomment the code below to enable users to login as an Enterprise user to show unpublished images too.
+		//$account = user_load( $node->uid ); // Load the user to do the preview.
+		//$form_state['uid'] = $account->uid;
+		//user_login_submit( array(), $form_state ); // Submit handler.
+
+		drupal_set_title( $node->title ); // Sets the title of the page to be previewed.
+		$pages = node_show( $node, $message ); // Returns an array of page(s), suitable for use by drupal_render().
+
+	} catch( Exception $e ) {
+		watchdog( 'content', $e->getMessage(), array(), WATCHDOG_ERROR );
+	}
+
+	//$user = $userBackup; // Restore user (is this needed? user is being logged out which defeats the purpose to do a
+	// login above).
+	return $pages;
+}
+
+/**
+ * Page callback function for the 'ww_enterprise/upload' hook.
+ *
+ * Called as the 'page callback' [ww_enterprise/upload], (defined in ww_enterprise_menu() ) for file uploads.
+ *
+ * This function handles file uploads via a HTTP POST request (instead of XMLRPC between Drupal and Enterprise). This is
+ * faster than sending files through XMLRPC. Prints the data as XML so it can be parsed on Enterprise side.
+ *
+ * @param bool $enableTestMode Determines whether this function should be run in the test mode or not. Default: false
+ * @return string Response of file upload in XML string.
+ */
+function ww_enterprise_upload( $enableTestMode=false )
+{
+	$dom = new DOMDocument( '1.0', 'UTF-8' );
+	$uploadResponseEl = $dom->createElement( 'UploadResponse' );
+	try {
+		$uid = ww_enterprise_utils_oauth_verify_request( $enableTestMode );
+		$contentType = $_GET['content_type'];
+		$field_id = $_GET['field_id'];
+
+		$instances = field_info_instances( 'node', $contentType );
+		$validators = array('file_validate_extensions' => array());
+
+		// Find the field definition for the field we are uploading a file for.
+		foreach ($instances as $data ) {
+			// Match up the passed Id to the instance field id.
+			if ($data['field_id'] == $field_id) {
+			    // Add the validator. If the validator cannot be found, or is empty then allow any kind of file
+				// to be uploaded.
+				$extensions = (!empty($data['settings']['file_extensions']))
+					? array($data['settings']['file_extensions'])
+					: array();
+				$validators['file_validate_extensions'] = $extensions;
+			}
+		}
+		$file = file_save_upload( 'upload', $validators, ww_enterprise_utils_fileDirectoryPath() );
+
+		// Check if the file was uploaded correctly.
+		$errors = form_get_errors();
+		ww_enterprise_utils_logPhpObject($errors, 'errrors', 'errors');
+		if (is_array($errors) && isset($errors['upload'])) {
+			throw new Exception($errors['upload']); // throw an error.
+		}
+
+		// Update the File and resave.
+		$file->status = FILE_STATUS_PERMANENT; // The File should be permanent, otherwise it will be removed automatically.
+		$file->uid = $uid; // Set the user id to the User doing the Upload.
+		$file = file_save($file);
+
+		$fidEl = $dom->createElement('fid');
+		$fidEl->appendChild( $dom->createTextNode( $file->fid ) );
+		$uploadResponseEl->appendChild( $fidEl );
+	} catch( Exception $e ) {
+		watchdog( 'content', $e->getMessage(), array(), WATCHDOG_ERROR) ;
+		$errEl = $dom->createElement( 'error' );
+		$errEl->appendChild( $dom->createTextNode( $e->getMessage() ) );
+		$uploadResponseEl->appendChild( $errEl );
+	}
+	$dom->appendChild( $uploadResponseEl );
+	print $dom->saveXML();
+}
+
+// WW_TERM_ENTITY - Update of the schema / database to allow storing / retrieving the Term Entity.
+
+/**
+ * Updates the form with the ww_term_entity field.
+ *
+ * @param array $form
+ */
+function _get_term_entity_field( &$form )
+{
+	// Determine if we already have a term for this one.
+	$term_entity_default  = isset($form['#vocabulary']->ww_term_entity) ? $form['#vocabulary']->ww_term_entity : '';
+
+	$form['ww_term_entity']['#type'] = 'textfield';
+	$form['ww_term_entity']['#title'] = 'WoodWing Enterprise Suggestion Entity';
+	$form['ww_term_entity']['#default_value'] = $term_entity_default;
+	$form['ww_term_entity']['#maxlength'] = 200;
+	$form['ww_term_entity']['#required'] = false;
+	$form['#validate'][] = 'ww_enterprise_validate';
+	$form['#submit'][] = 'ww_enterprise_submit';
+}
+
+/**
+ * Hook for the validation of the ww_term_entity field.
+ *
+ * Place any extra needed directives on validating the field here.
+ */
+function ww_enterprise_validate()
+{
+	// Directives go here.
+}
+
+/**
+ * Hook for the submission of the ww_term_entity field.
+ *
+ * Place any extra needed directives on submitting the field here.
+ */
+function ww_enterprise_submit()
+{
+	// Directives go here.
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ *
+ * @param array $entity_info
+ */
+function ww_enterprise_entity_info_alter(&$entity_info)
+{
+	$entity_info['taxonomy_vocabulary']['bundles']['taxonomy_vocabulary'] = array(
+		'label' => t('Vocabulary'),
+		'admin' => array(
+			'path' => 'admin/structure/taxonomy',
+			'access arguments' => array('administer taxonomy'),
+		),
+	);
+	$entity_info['taxonomy_vocabulary']['view modes'] = array(
+		'full' => array(
+			'label' => t('Full content'),
+			'custom settings' => FALSE,
+		),
+	);
+	$entity_info['taxonomy_vocabulary']['fieldable'] = TRUE;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * @param array $form
+ * @param array $form_state
+ */
+function ww_enterprise_form_taxonomy_form_vocabulary_alter(&$form, &$form_state)
+{
+	if (!empty($form['#id']) && $form['#id'] == 'taxonomy_vocabulary_confirm_delete') {
+		return;
+	}
+
+	_get_term_entity_field( $form );
+
+	$vocabulary = $form_state['vocabulary'];
+	field_attach_form('taxonomy_vocabulary', $vocabulary, $form, $form_state);
+}
+
+/**
+ * Implements callback_ENTITY_TYPE_presave().
+ *
+ * @param Object $vocabulary The vocabulary object with all of its metadata.
+ */
+function ww_enterprise_taxonomy_vocabulary_presave($vocabulary)
+{
+	field_attach_presave('taxonomy_vocabulary', $vocabulary);
+}
+
+/**
+ * Implements callback_ENTITY_TYPE_insert().
+ *
+ * @param Object $vocabulary The vocabulary object with all of its metadata.
+ */
+function ww_enterprise_taxonomy_vocabulary_insert($vocabulary)
+{
+	field_attach_insert('taxonomy_vocabulary', $vocabulary);
+}
+
+/**
+ * Implements callback_ENTITY_TYPE_update().
+ *
+ * @param Object $vocabulary The vocabulary object with all of its metadata.
+ */
+function ww_enterprise_taxonomy_vocabulary_update($vocabulary)
+{
+	field_attach_update('taxonomy_vocabulary', $vocabulary);
+}
+
+/**
+ * Implements callback_ENTITY_TYPE_delete().
+ *
+ * @param Object $vocabulary The vocabulary object with all of its metadata.
+ */
+function ww_enterprise_taxonomy_vocabulary_delete($vocabulary)
+{
+	field_attach_delete('taxonomy_vocabulary', $vocabulary);
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ *
+ * @return array
+ */
+function ww_enterprise_field_extra_fields()
+{
+	$extra = array();
+	$extra['taxonomy_vocabulary']['taxonomy_vocabulary'] = array(
+		'form' => array(
+			'name' => array(
+				'label' => t('Name'),
+				'description' => t('Name of the vocabulary'),
+				'weight' => -5,
+			),
+			'description' => array(
+				'label' => t('Description'),
+				'description' => t('Description of the vocabulary'),
+				'weight' => 0,
+			),
+			'ww_term_entity' => array(
+				'label' => t('WoodWing Enterprise Suggestion Entity'),
+				'description' => t('Enterprise Term Entity'),
+				'weight' => 100,
+			),
+		),
+		'display' => array(
+			'name' => array(
+				'label' => t('Name'),
+				'description' => t('Name of the vocabulary'),
+				'weight' => -5,
+			),
+			'description' => array(
+				'label' => t('Description'),
+				'description' => t('Description of the vocabulary'),
+				'weight' => 0,
+			),
+			'ww_term_entity' => array(
+				'label' => t('WoodWing Enterprise Suggestion Entity'),
+				'description' => t('Enterprise Term Entity'),
+				'weight' => 100,
+			),
+		),
+	);
+	return $extra;
+}
+
+/**
+ * Implements hook_file_download().
+ *
+ * Control the access to inline images.
+ * Inline images stored in a private folder must be shown in case
+ * the user has view access on at least one of the nodes where the
+ * image is used.
+ */
+function ww_enterprise_file_download( $uri ) {
+	global $user;
+
+ 	// Get the file record based on the URI. If not in the database just return.
+  	$files = file_load_multiple(array(), array('uri' => $uri));
+  	if (count($files)) {
+    	foreach ($files as $item) {
+      		// Since some database servers sometimes use a case-insensitive comparison
+      		// by default, double check that the filename is an exact match.
+      		if ($item->uri === $uri) {
+      			$file = $item;
+        		break;
+      		}
+    	}
+  	}
+  	if (!isset($file)) {
+  	  	return array();
+  	}
+
+	$fileUsages = file_usage_list( $file );
+	foreach( $fileUsages as $fileUsage ) {
+		foreach($fileUsage as $objectType => $nodes ) {
+			if ( $objectType == 'inline_images' ) {
+				foreach ( $nodes as $nodeId => $usageCount ) {
+					if ( $usageCount > 0 ) {
+						$nodeObject = node_load( $nodeId );
+						if ( node_access( 'view', $nodeObject )) {
+							$info = image_get_info($uri);
+    						return array(
+								'Content-Type' => $info['mime_type'],
+								'Content-Length' => $info['file_size'] );
+						}
+					}
+				}
+			}
+		}
+	}
+		
+  	return array();
+}	
