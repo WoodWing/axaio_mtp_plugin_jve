@@ -21,7 +21,7 @@ class ImageMagick_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'ImageMagick Preview and Metadata';
-		$info->Version     = file_exists('_productversion.txt') ? file_get_contents('_productversion.txt') : "";
+		$info->Version     = file_get_contents(__DIR__.'/_productversion.txt');
 		$info->Description = 'Uses ImageMagick to support extra file formats for preview generation. ';
 
 		// Append ImageMagick & Ghostscript version numbers:

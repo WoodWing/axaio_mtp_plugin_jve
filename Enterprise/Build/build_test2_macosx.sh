@@ -141,19 +141,15 @@ function step2_determineEnterpriseDir {
 	echo "step2a: Deriving the Enterprise Server web directory (ENT_DIR) from the Perforce branch (GIT_BRANCH)."
 	if [[ "${GIT_BRANCH}" == "master" ]]; then
 		ENT_DIR="EntMaster"
+	elif [[ "${GIT_BRANCH}" == "master/work" ]]; then
+		ENT_DIR="EntMasterWork"
+	elif [[ "${GIT_BRANCH}" == master/work* ]]; then
+		masterWorkNr=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/master\/work(([[:digit:]]+))?/\2/g"`
+		ENT_DIR="EntMasterWork${masterWorkNr}"
 	else
-		if [[ "${GIT_BRANCH}" == "master/work" ]]; then
-			ENT_DIR="EntMasterWork"
-		else
-			if [[ "${GIT_BRANCH}" == master/work* ]]; then
-				masterWorkNr=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/master\/work(([[:digit:]]+))?/\2/g"`
-				ENT_DIR="EntMasterWork${masterWorkNr}"
-			else
-				echo "Could not interpret the GIT_BRANCH value: ${GIT_BRANCH}"
-				ENT_DIR=""
-				exit 1
-			fi
-		fi
+		echo "Could not interpret the GIT_BRANCH value: ${GIT_BRANCH}"
+		ENT_DIR=""
+		exit 1
 	fi
 
 	if [ ! -d "${DOCROOT}/${ENT_DIR}" ]; then

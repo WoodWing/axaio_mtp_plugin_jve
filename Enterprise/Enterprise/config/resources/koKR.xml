@@ -811,7 +811,7 @@
   <Term key="ERR_CHECKIN">파일명이 일치하지 않습니다.이대로 체크인 해도 좋습니까?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">단지 일반텍스트 아티클만 결합할 수 있습니다.</Term>
   <Term key="ERR_COMPOSE">아티클 생성 에러.(S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT"> %1 연결에 문제가 있습니다. 다시 연결해 주시기 바랍니다. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">서버연결이 실패하였습니다. 연결을 점검한 후 다시 서버연결을 시도해 주시기 바랍니다.(S1068)</Term>
   <Term key="ERR_COPY_FOLDER">출판하는 동안 오류가 발생했습니다. 시스템 관리자에게 문의하십시오.\n\n상세: HTML 리소스 캐시 폴더를 찾을수 없습니다. '어도비 디지털 퍼블리싱(DPS)'을 실행하고 상태 체크 페이지를 확인한후 지침을 따르시기 바랍니다.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">데이타베이스에 접속할 수 없습니다(S1003)</Term>
@@ -856,11 +856,9 @@
   <Term key="ERR_EXPORT_FAILURE">내보내기에 실패했습니다.EXPORTDIRECTORY 가 정의되어 있지 않습니다.(S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">내보내기에 실패했습니다.EXPORTDIRECTORY 가 발견되지 않아 저장할 수 없습니다.(S1014)</Term>
   <Term key="ERR_EXPORT_MAG">매거진 내보내기가 시작될 수 없습니다. 시스템 관리자에게 문의하세요 (S1097)</Term>
-  <Term key="ERR_FAILED">실패했습니다(S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">이 파일은 제공하지 않습니다.</Term>
   <Term key="ERR_FIXEDPASS">사용자가 패스워드를 수정했습니다(S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">서버 구성 문제 : 검색내에 컬럼형식이 잘못되어 있습니다. 관리자에게 문의하시기 바랍니다. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">%1 를(을) FTP Server %2 에 연결할수 없습니다.</Term>
   <Term key="ERR_FTP_CREATE_DIR">FTP Server 에 폴더 %1 을 생성할수 없습니다.</Term>
   <Term key="ERR_FTP_UPLOAD">FTP Server 에 %1 파일을 업로드 할수 없습니다.</Term>
   <Term key="ERR_GENERAL_ERROR">에러</Term>
@@ -1456,7 +1454,7 @@
   <Term key="MNU_USER_QUERY">사용자 쿼리</Term>
   <Term key="MNU_WEBSERVICESSDK">웹서비스 SDK</Term>
   <Term key="MNU_WEB_EDITOR">Web 에디터</Term>
-  <Term key="MSG_EMPTY_DELETED_OBJ">업그레이드 진행을 위해서 원본 Enterprise 서버의 휴지톨을 삭제하여 주십시요. - Admin Guide 참조</Term>
+  <Term key="MSG_EMPTY_DELETED_OBJ">업그레이드 진행을 위해서 원본 엔터프라이즈 서버의 휴지톨을 삭제하여 주십시요. - 관리자 가이드참조</Term>
   <Term key="MSG_EMPTY_INDESIGNSERVERJOBS">인디자인 서버 작업 대기열에 인디자인 작업이 발견되었습니다. 이 작업은 삭제될것입니다.</Term>
   <Term key="MSG_EMPTY_SERVERJOBS">엔터프라이즈 서버 작업 대기열에 엔터프라이즈 서버 작업이 발견되었습니다. 이 작업은 삭제될것입니다.</Term>
   <Term key="MSG_EMPTY_STORAGE">데이터 베이스에 저장된 workflow 파일은 v8.0 에 필요없는 기능입니다. 이 파일들은 File Store 에 마이그레이션 할수 없으므로, 데이터베이스를 삭제하신후 시작하십시요. 그렇지 않으면, File Store에 사용중인 모든 레코드와 'smart_storage' 테이블에 포함된 모든 데이터들이 삭제되어도 안전하다고 확신이 들었을때 테이블을 완전히 삭제하고 마이그레이션을 진행하십시요.</Term>
@@ -1971,7 +1969,7 @@
   <Term key="STT_CREATEPERMANENT">영구한 버전 생성</Term>
   <Term key="STT_READYTOBEPUBLISHED">게시할 준비완료</Term>
   <Term key="STT_REMOVEINTERMEDIATE">중간버젼 삭제</Term>
-  <Term key="STT_SKIPIDSA">Skip InDesign Server Automation</Term>
+  <Term key="STT_SKIPIDSA">인디자인 서버 자동화 건너뛰기</Term>
   <Term key="SUGGESTIONS_BUTTON_LABEL">제안</Term>
   <Term key="SUGGESTIONS_BUTTON_TOOLTIP">모든 제안을 새로고침</Term>
   <Term key="SUGGESTION_PROVIDER">제안 제공자</Term>

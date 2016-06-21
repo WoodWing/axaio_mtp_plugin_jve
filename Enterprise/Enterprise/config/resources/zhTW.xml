@@ -811,7 +811,7 @@
   <Term key="ERR_CHECKIN">文檔名稱不符，是否繼續登記存入?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">只有平文文章可以連接</Term>
   <Term key="ERR_COMPOSE">構成文章錯誤. (S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">錯誤連接 %1. 請檢查您的連線並再試一次. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">連接服務器錯誤.請檢查網絡連接並重試(S1068)</Term>
   <Term key="ERR_COPY_FOLDER">發佈時出現了一個錯誤. 請聯繫你的系統管理員.\n\n 原因: HTML Resources 緩存文件夾不存在. 請在健康檢查頁面上運行 'Adobe Digital Publishing System (DPS)' 測試並遵從它的指令.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">不能連接至資料庫 (S1003)</Term>
@@ -856,11 +856,9 @@
   <Term key="ERR_EXPORT_FAILURE">輸出失敗, EXPORTDIRECTORY 沒有定義 (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">輸出失敗，不能尋找或儲存 (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">倒出雜誌不能啟動, 請聯繫系統管理員. (S1097)</Term>
-  <Term key="ERR_FAILED">失敗 (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">下述文件不支持</Term>
   <Term key="ERR_FIXEDPASS">用戶已修正密碼 (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">服務器配置錯誤:查詢中format列缺失.請聯繫系統管理員. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">連接%1 FTP服務器%2失敗。</Term>
   <Term key="ERR_FTP_CREATE_DIR">在的FTP服務器上建立文件夾%1失敗。</Term>
   <Term key="ERR_FTP_UPLOAD">上傳文件%1到的FTP服務器上失敗。</Term>
   <Term key="ERR_GENERAL_ERROR">錯誤</Term>
@@ -1971,7 +1969,7 @@
   <Term key="STT_CREATEPERMANENT">產生永久版本</Term>
   <Term key="STT_READYTOBEPUBLISHED">發布就緒</Term>
   <Term key="STT_REMOVEINTERMEDIATE">移除過渡版本</Term>
-  <Term key="STT_SKIPIDSA">Skip InDesign Server Automation</Term>
+  <Term key="STT_SKIPIDSA">跳過inDesign伺服器自動化程序</Term>
   <Term key="SUGGESTIONS_BUTTON_LABEL">提示系統</Term>
   <Term key="SUGGESTIONS_BUTTON_TOOLTIP">更新所有提示</Term>
   <Term key="SUGGESTION_PROVIDER">建議提供者</Term>

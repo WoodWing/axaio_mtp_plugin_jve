@@ -856,11 +856,9 @@
   <Term key="ERR_EXPORT_FAILURE">Nelze exportovat, není definována složka EXPORTDIRECTORY (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Nelze exportovat, nelze najít nebo uložit do (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">Export časopisu nelze spustit, obraťte se na správce systému. (S1097)</Term>
-  <Term key="ERR_FAILED">CHYBA (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">Následující soubory nejsou podporované</Term>
   <Term key="ERR_FIXEDPASS">Uživatel má pevné heslo (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Problém s konfigurací serveru: v dotazu chybí sloupec formátu. Obraťte se na správce systému. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">Nepodařilo se připojit %1 k FTP serveru %2.</Term>
   <Term key="ERR_FTP_CREATE_DIR">Vytvoření složky %1 na serveru FTP se nezdařilo.</Term>
   <Term key="ERR_FTP_UPLOAD">Uložení souboru %1 na server FTP se nezdařilo.</Term>
   <Term key="ERR_GENERAL_ERROR">Chyba</Term>
@@ -869,7 +867,7 @@
   <Term key="ERR_GET_MESSAGES">Zprávy nebylo možné vyvolat.</Term>
   <Term key="ERR_GROUP_NAME_NOT_SPECIFIED">Buď není specifikováno zdrojové jméno skupiny nebo je nové jméno skupiny prázdné. (S1100)</Term>
   <Term key="ERR_IDS_OBJVERSION_MISMATCH">Neshoda verzí v důsledku nesprávného pořadí zpracování při ukládání rozvržení. Úloha bude přeplánována. (S1133)</Term>
-  <Term key="ERR_INCOMPAT_BROWSER">Tento prohlížeč není podporován. Informace o kompatibilních prohlížečích získáte v příručce správce. (S1101)</Term>
+  <Term key="ERR_INCOMPAT_BROWSER">Tento prohlížeč není podporován. Informace o kompatibilních prohlížečích naleznete v centru nápovědy. (S1101)</Term>
   <Term key="ERR_INCORRECT_FIELDS">Následující položky jsou nesprávné:</Term>
   <Term key="ERR_INVALIDCATEGORY">Neplatné {CATEGORY}: '%1' (S1129)</Term>
   <Term key="ERR_INVALIDSTATE">Neplatné {STATE}: '%1' (S1017)</Term>
@@ -1456,7 +1454,7 @@
   <Term key="MNU_USER_QUERY">Dotazy uživatele</Term>
   <Term key="MNU_WEBSERVICESSDK">SDK webových služeb</Term>
   <Term key="MNU_WEB_EDITOR">Editor webu</Term>
-  <Term key="MSG_EMPTY_DELETED_OBJ">Před pokračováním aktualizace vyprázdněte koš (použijte originální instalaci aplikace Enterprise Server). - Informace získáte v příručce správce.</Term>
+  <Term key="MSG_EMPTY_DELETED_OBJ">Než budete pokračovat v upgradu, vyprázdněte prosím koš (za použití původní instalace produktu Enterprise Server). – Další informace naleznete v centru nápovědy.</Term>
   <Term key="MSG_EMPTY_INDESIGNSERVERJOBS">Byly nalezeny úlohy aplikace InDesign Server ve frontě úloh InDesign Server Job Queue. Tyto úlohy budou odstraněny.</Term>
   <Term key="MSG_EMPTY_SERVERJOBS">Byly nalezeny úlohy aplikace Enterprise Server ve frontě Enterprise Server Job Queue. Tyto úlohy budou odstraněny.</Term>
   <Term key="MSG_EMPTY_STORAGE">Existují soubory pracovních postupů uložené v databázi, která je zastaralým prvkem od verze v8.0. Pro migraci těchto souborů do aplikace File Store neexistuje podpora. Proto je třeba začít s čistou databází. Případně, pokud jste si opravu jisti, že je se aplikace File Store používá a že všechny záznamy v databázové tabulce s názvem ‚smart_storage‘ obsahuje soubory, které lze bezpečně odstranit, můžete tuto tabulku vyčistit a pokračovat v migraci.</Term>

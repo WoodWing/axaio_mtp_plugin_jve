@@ -856,11 +856,9 @@
   <Term key="ERR_EXPORT_FAILURE">Vienti epäonnistui, kohdetta EXPORTDIRECTORY ei ole määritetty (S1013)</Term>
   <Term key="ERR_EXPORT_FOLDER_EXISTS">Vienti epäonnistui, tiedostoa ei löytynyt tai sitä ei voitu tallentaa kohteeseen (S1014)</Term>
   <Term key="ERR_EXPORT_MAG">Lehden vientiä ei voitu aloittaa, ota yhteyttä järjestelmänvalvojaan. (S1097)</Term>
-  <Term key="ERR_FAILED">EPÄONNISTUI (S1015)</Term>
   <Term key="ERR_FILES_NOT_SUPPORTED">Seuraavia tiedostomuotoja ei tueta</Term>
   <Term key="ERR_FIXEDPASS">Käyttäjät on korjannut salasanan (S1016)</Term>
   <Term key="ERR_FORMAT_COLUMN_NOT_FOUND">Palvelinasetusongelma: kyselystä puuttuu muotoilusarake. Ota yhteyttä järjestelmänvalvojaan. (S1096)</Term>
-  <Term key="ERR_FTP_CONNECTION">Kohteen %1 yhdistäminen FTP-palvelimeen %2 epäonnistui.</Term>
   <Term key="ERR_FTP_CREATE_DIR">Kansion %1 luominen FTP-palvelimelle epäonnistui.</Term>
   <Term key="ERR_FTP_UPLOAD">Tiedoston %1 lataaminen FTP-palvelimelle epäonnistui.</Term>
   <Term key="ERR_GENERAL_ERROR">Virhe</Term>
@@ -869,7 +867,7 @@
   <Term key="ERR_GET_MESSAGES">Viestejä ei voitu hakea.</Term>
   <Term key="ERR_GROUP_NAME_NOT_SPECIFIED">Joko lähteen ryhmännimeä ei ole määritelty tai uusi ryhmännimi on jätetty tyhjäksi (S1100)</Term>
   <Term key="ERR_IDS_OBJVERSION_MISMATCH">Version sopimattomuus johtuen virheellisestä prosessointisekvenssistä taittoa tallennettaessa. Työ aikataulutetaan uudelleen. (S1133)</Term>
-  <Term key="ERR_INCOMPAT_BROWSER">Tätä selainta ei tueta. Tarkista yhteensopivat selaimet järjestelmänvalvojan oppaasta. (S1101)</Term>
+  <Term key="ERR_INCOMPAT_BROWSER">Tätä selainta ei tueta. Tarkista yhteensopivat selaimet Ohjekeskuksesta. (S1101)</Term>
   <Term key="ERR_INCORRECT_FIELDS">Seuraavat merkinnät ovat virheellisiä:</Term>
   <Term key="ERR_INVALIDCATEGORY">Virheellinen {CATEGORY}: '%1' (S1129)</Term>
   <Term key="ERR_INVALIDSTATE">Virheellinen {STATE}: '%1' (S1017)</Term>
@@ -1456,7 +1454,7 @@
   <Term key="MNU_USER_QUERY">Käyttäjäkyselyt</Term>
   <Term key="MNU_WEBSERVICESSDK">Verkkopalveluiden kehitysympäristö</Term>
   <Term key="MNU_WEB_EDITOR">Verkkoeditori</Term>
-  <Term key="MSG_EMPTY_DELETED_OBJ">Tyhjennä roskakori (käyttämällä alkuperäistä Enterprise Serverin asennusta) ennen kuin jatkat päivitykseen. - Tarkista järjetelmänvalvojan oppaasta</Term>
+  <Term key="MSG_EMPTY_DELETED_OBJ">Tyhjennä roskakori (käyttämällä alkuperäistä Enterprise Serverin asennusta) ennen kuin jatkat päivitykseen. - Katso Ohjekeskusta.</Term>
   <Term key="MSG_EMPTY_INDESIGNSERVERJOBS">InDesign-palvelintöitä on löydetty InDesign-palvelintyöjonossa. Nämä työt poistetaan.</Term>
   <Term key="MSG_EMPTY_SERVERJOBS">Enterprise Server -palvelimen töitä on löydetty Enterprise Server -palvelimen työjonosta. Nämä työt poistetaan.</Term>
   <Term key="MSG_EMPTY_STORAGE">Tietokantaasi on tallennettu työnkulkutiedostoja, joista on tullut vanhentuneita versiosta 8.0 eteenpäin. Valittujen tiedostojen tiedostosäilöön siirtämiselle ei ole tukea. Kyseisten tiedostojen siirtäminen onnistuu ainoastaan tyhjään tietokantaan. Jos olet varma, että tietosäilö on käytössä ja että kaikki tietokantataulukossa olevat 'smart_storage'-rekisteritiedot sisältävät tarpeettomia tiedostoja, voit tyhjentää taulukon ja jatkaa tiedostojen siirtoon.</Term>
