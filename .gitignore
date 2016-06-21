@@ -6,7 +6,7 @@ Enterprise/Enterprise/config/WWActivate.xml
 Enterprise/Enterprise/config/encryptkeys/rabbitmq/cacert.pem
 
 # Locally overruled settings
-Enterprise/Enterprise/config/config_local.php
+Enterprise/Enterprise/config/config_overrule.php
 
 # Custom server plugins (except the instructions file)
 Enterprise/Enterprise/config/plugins

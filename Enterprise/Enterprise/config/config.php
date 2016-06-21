@@ -15,7 +15,7 @@
 define ('BASEDIR',	dirname( dirname( __FILE__ ) )); // DO NOT end with a separator, use forward slashes
 
 require_once( BASEDIR.'/config/osconfig.php' );
-require_once( BASEDIR.'/config/config_local.php' );
+require_once( BASEDIR.'/config/config_overrule.php' );
 
 if( !defined('INETROOT') ) {
 	define( 'INETROOT', '/Enterprise' ); // DO NOT end with a separator, use forward slashes
