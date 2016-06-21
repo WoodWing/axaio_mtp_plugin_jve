@@ -21,7 +21,25 @@ class WW_TestSuite_HealthCheck2_IdsAutomation_TestCase extends TestCase
 
 	final public function runTest()
 	{
-		// TODO: check config options
+		$this->validateClientFeatureOptions();
+	}
+
+	/**
+	 * Validate the CLIENTFEATURES setting option that required by Ids Automation
+	 *
+	 * @return bool True when feature found else false
+	 */
+	private function validateClientFeatureOptions()
+	{
+		require_once BASEDIR.'/server/plugins/IdsAutomation/IdsAutomationUtils.class.php';
+		$pageSyncDefaultsToNo = IdsAutomationUtils::isIdsClientFeatureValue( 'PageSyncDefaultsToNo' );
+		if( !$pageSyncDefaultsToNo ) {
+			$help = 'Please add the feature option to the CLIENTFEATURES settings in configserver.php.';
+			$this->setResult( 'ERROR',
+				'The CLIENTFEATURES->[\'InDesign Server\']->[\'IDS_AUTOMATION\']->{\'PageSyncDefaultsToNo\'} feature option is missing.',
+				$help
+				);
+		}
 	}
 }
 
