@@ -168,7 +168,7 @@ function zipFolder {
 #    -----------------------------------
 #
 function determineZipPostfix {
-	# Start with the server version, but remote the patch digit for daily master builds.
+	# Start with the server version, but remove the patch digit for daily master builds.
 	SERVER_VERSION_ZIP="${SERVER_VERSION}"
 	if [[ "${SERVER_RELEASE_TYPE}" == "Daily" && 
 		( "${GIT_BRANCH}" == "master" || "${GIT_BRANCH}" == master/* ) ]]; then
