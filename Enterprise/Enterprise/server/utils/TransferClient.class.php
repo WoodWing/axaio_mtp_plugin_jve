@@ -19,11 +19,17 @@ class WW_Utils_TransferClient
 {
 	private $httpClient = null;
 	private $ticket = '';
-	
+
+	/**
+	 * WW_Utils_TransferClient constructor.
+	 *
+	 * @param string $ticket
+	 */
 	public function __construct( $ticket )
 	{
-		$this->httpClient = new Zend\Http\Client();
 		$this->ticket = $ticket;
+		require_once BASEDIR.'/server/utils/UrlUtils.php';
+		$this->httpClient = WW_Utils_UrlUtils::createHttpClient('');
 	}
 	
 	/**
@@ -41,7 +47,7 @@ class WW_Utils_TransferClient
 		require_once BASEDIR . '/server/utils/NumberUtils.class.php';
 		PerformanceProfiler::startProfile( 'transfer client file upload', 3 );
 		$result = false;
-		$guid = NumberUtils::createGUID(); // create unique name for our file in transferserver
+		$guid = NumberUtils::createGUID(); // create unique name for our file in transfer server
 		$attachmentUrl = HTTP_FILE_TRANSFER_LOCAL_URL . '?fileguid='.urlencode($guid);
 		$attachmentUrl .= '&format=' . urlencode($attachment->Type); // not needed for upload, but this is to prepare for download
 		$uploadUrl = $attachmentUrl .'&ticket='.urlencode($this->ticket);
@@ -57,8 +63,8 @@ class WW_Utils_TransferClient
 		
 		LogHandler::Log( __CLASS__, 'INFO',  "uploadFile: Started upload \"$uploadUrl\" over HTTP." );
 		try {
-			$this->httpClient->resetParameters(); // clear stuff of previously fired requests
 			$this->httpClient->setUri( $uploadUrl );
+			$this->setCurlOptionsForSsl();
 			if (!empty($attachment->FilePath)) {
 				$content = file_get_contents( $attachment->FilePath );
 			} else {
@@ -102,7 +108,7 @@ class WW_Utils_TransferClient
 	/**
 	 * Downloads a file from the transfer server through HTTP.
 	 * The FileUrl property must be set. After downloading the downloaded file
-	 * is deleted from the transferserver if $cleanup is set to true.
+	 * is deleted from the transfer server if $cleanup is set to true.
 	 *
 	 * @param Attachment $attachment 
 	 * @param bool $cleanup Whether or not to remove the file from Transfer Folder after download.
@@ -123,8 +129,8 @@ class WW_Utils_TransferClient
 		}
 		LogHandler::Log( __CLASS__, 'INFO',  "downloadFile: Started download \"$url\" over HTTP." );
 		try {
-			$this->httpClient->resetParameters(); // clear stuff of previously fired requests
 			$this->httpClient->setUri( $url );
+			$this->setCurlOptionsForSsl();
 			$this->httpClient->setStream( true );
 			$this->httpClient->setMethod( Zend\Http\Request::METHOD_GET );
 			$response = $this->httpClient->send();
@@ -165,8 +171,8 @@ class WW_Utils_TransferClient
 		$cleanupUrl = $attachment->FileUrl.'&ticket='.urlencode($this->ticket);
 		LogHandler::Log( __CLASS__, 'INFO',  "cleanupFile: Started cleanup \"$cleanupUrl\" over HTTP." );
 		try {
-			$this->httpClient->resetParameters(); // clear stuff of previously fired requests
 			$this->httpClient->setUri( $cleanupUrl );
+			$this->setCurlOptionsForSsl();
 			$this->httpClient->setMethod( Zend\Http\Request::METHOD_DELETE );
 			$response = $this->httpClient->send();
 			if( $response->isSuccess() ) {
@@ -225,6 +231,7 @@ class WW_Utils_TransferClient
 		LogHandler::Log( __CLASS__, 'INFO',  "getTechniques: Started handshake \"$url\" over HTTP." );
 		try {
 			$this->httpClient->setUri( $url );
+			$this->setCurlOptionsForSsl();
 			$this->httpClient->setMethod( Zend\Http\Request::METHOD_GET );
 			$response = $this->httpClient->send();
 			if( $response->isSuccess() ) {
@@ -257,5 +264,60 @@ class WW_Utils_TransferClient
 			}
 		}
 		return $techDefs;
+	}
+
+	/**
+	 * Calls a service on the provided HTTP_CLIENT.
+	 *
+	 * @param string $url Endpoint of the service.
+	 * @param string|null $response The response body of the call, passed by reference.
+	 * @param string|null $httpCode The HTTP Code returned by the call, passed by reference.
+	 */
+	public function callService( $url, &$response, &$httpCode )
+	{
+		require_once BASEDIR.'/server/utils/UrlUtils.php';
+		$this->httpClient->setUri( $url );
+		$this->setCurlOptionsForSsl();
+		WW_Utils_UrlUtils::callService($this->httpClient, $response, $httpCode, 'wwtest' );
+	}
+
+	/**
+	 * If the Transfer Server is accessed over SSL extra options on the Curl adapter has to be set.
+	 *
+	 * @throws BizException
+	 */
+	public function setCurlOptionsForSsl()
+	{
+		if(  $this->httpClient->getUri() && $this->httpClient->getUri()->getScheme() == 'https' ) {
+			$certificate = $this->getCertificate();
+
+			if( !$certificate ) {
+				throw new BizException( null, 'Server', null,
+					'The certificate file, to access the Transfer Server over SSL, does exist.' );
+			}
+
+			$curlOptions = array(
+				CURLOPT_SSL_VERIFYHOST => 2,
+				CURLOPT_SSL_VERIFYPEER => 1,
+				CURLOPT_CAINFO => $certificate
+			);
+
+			$this->httpClient->setOptions( array( 'curloptions' => $curlOptions ) );
+		}
+	}
+	
+	private function getCertificate()
+	{
+		$certificateSpecific = BASEDIR.'/config/encryptkeys/transferserver/cacert.pem';
+		$certificateCommon = BASEDIR.'/config/encryptkeys/cacert.pem';
+		$certificate = '';
+
+		if( file_exists( $certificateSpecific ) ) {
+			$certificate = $certificateSpecific;
+		} elseif( file_exists( $certificateCommon ) ) {
+			$certificate = $certificateCommon;
+		}
+
+		return $certificate;
 	}
 }
