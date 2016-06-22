@@ -25,14 +25,22 @@
  */
 
 // Define name of NameQuery
-define ('FLICKRSEARCH_NAMEDQUERY', 'Flickr Search');
+if( !defined('FLICKRSEARCH_NAMEDQUERY') ) {
+   define( 'FLICKRSEARCH_NAMEDQUERY', 'Flickr Search' );
+}
 
 // Terms to use in UI for query:
-define ('FLICKRSEARCH_SEARCH_BY_TAG',	'By Tag'	);
-define ('FLICKRSEARCH_SEARCH_BY_USER',	'By User'	);
+if( !defined('FLICKRSEARCH_SEARCH_BY_TAG') ) {
+   define( 'FLICKRSEARCH_SEARCH_BY_TAG', 'By Tag' );
+}
+if( !defined('FLICKRSEARCH_SEARCH_BY_USER') ) {
+   define( 'FLICKRSEARCH_SEARCH_BY_USER', 'By User' );
+}
 
 // Define the number of items per page
-define ('FLICKRSEARCH_ITEMS_PER_PAGE', 50);
+if( !defined('FLICKRSEARCH_ITEMS_PER_PAGE') ) {
+   define( 'FLICKRSEARCH_ITEMS_PER_PAGE', 50 );
+}
 
 /*
 	In order to use the Flickr web services, we must have an API key.
@@ -42,7 +50,15 @@ define ('FLICKRSEARCH_ITEMS_PER_PAGE', 50);
 	Define the FLICKRSEARCH_API_SECRET, once obtained the API Secret.
 	
 */
-define ('FLICKRSEARCH_USR_ACC', 	'' ); // User Account Id
-define ('FLICKRSEARCH_API_KEY', 	'' ); // API Key
-define ('FLICKRSEARCH_API_SECRET',	'' ); // Secret
-define ('FLICKRSEARCH_TOKEN',		'' ); // Token
+if( !defined('FLICKRSEARCH_USR_ACC') ) {
+   define( 'FLICKRSEARCH_USR_ACC', '' ); // User Account Id
+}
+if( !defined('FLICKRSEARCH_API_KEY') ) {
+   define( 'FLICKRSEARCH_API_KEY', '' ); // API Key
+}
+if( !defined('FLICKRSEARCH_API_SECRET') ) {
+   define( 'FLICKRSEARCH_API_SECRET', '' ); // Secret
+}
+if( !defined('FLICKRSEARCH_TOKEN') ) {
+   define( 'FLICKRSEARCH_TOKEN', '' ); // Token
+}

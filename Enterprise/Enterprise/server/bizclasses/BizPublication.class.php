@@ -41,7 +41,7 @@ class BizPublication
 				require_once BASEDIR.'/server/authorizationmodule.php';
 				$globAuth = new authorizationmodule( );
 			}
-			$globAuth->getrights($user);
+			$globAuth->getRights($user);
 			$pubRow = DBPublication::getPublication( $pubId );
 			return array( self::getPublicationInfo( $globAuth->getCachedRights(), $user, $pubRow, $mode, $extraIssueIds ) );
 		}
@@ -68,7 +68,7 @@ class BizPublication
 			require_once BASEDIR.'/server/authorizationmodule.php';
 			$globAuth = new authorizationmodule( );
 		}
-		$globAuth->getrights( $userName );
+		$globAuth->getRights( $userName );
 
 		if( $mode == 'flat' ) {
 			$pubRows = DBPublication::listPublications(array('id','publication'));
@@ -198,9 +198,9 @@ class BizPublication
 			$globAuth = new authorizationmodule( );
 		}
 		if( $pubId ) { // one brand only
-			$globAuth->getrights( $userName, $pubId );
+			$globAuth->getRights( $userName, $pubId );
 		} else { // all brands
-			$globAuth->getrights( $userName );
+			$globAuth->getRights( $userName );
 		}
 		$rights = $globAuth->getCachedRights();
 		$userRights = array();
@@ -770,7 +770,7 @@ class BizPublication
 			require_once BASEDIR.'/server/authorizationmodule.php';
 			$globAuth = new authorizationmodule( );
 		}
-		$globAuth->getrights($user, $publication, $issue);
+		$globAuth->getRights($user, $publication, $issue);
 
 		// fetch into array
 		$ret = array();

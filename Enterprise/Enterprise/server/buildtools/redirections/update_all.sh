@@ -86,7 +86,7 @@ function saveAndTestRedirection {
 #    Source URL: https://redirect.woodwing.com/v1/?path=enterprise-server/10/help/zend-opcache
 #    Target URL: https://helpcenter.woodwing.com/hc/en-us/articles/205501875
 #
-function saveAndTestPhpManualRedirections {
+function saveAndTestHelpCenterRedirections {
 	# https://redirect.woodwing.com/v1/?path=enterprise-server/10/help/zend-opcache
 	saveAndTestRedirection "${1}" "enterprise-server/${2}/help/zend-opcache" "https://helpcenter.woodwing.com/hc/en-us/articles/205501875" 
 
@@ -98,7 +98,7 @@ function saveAndTestPhpManualRedirections {
 #
 # @param string $1 Personal API key
 #
-function saveAndTestHelpCenterRedirections {
+function saveAndTestPhpManualRedirections {
 	saveAndTestRedirection "${1}" "enterprise-server/php-manual/image-installation" "http://php.net/manual/en/image.installation.php"
 	saveAndTestRedirection "${1}" "enterprise-server/php-manual/exif-installation" "http://php.net/manual/en/exif.installation.php"
 	saveAndTestRedirection "${1}" "enterprise-server/php-manual/sockets-installation" "http://php.net/manual/en/sockets.installation.php"
@@ -123,5 +123,5 @@ if [ ! -n "${2}" ]; then
 fi
 
 # Save and test all redirections as referred from our Health Check pages.
-saveAndTestPhpManualRedirections ${1}
 saveAndTestHelpCenterRedirections ${1}
+saveAndTestPhpManualRedirections ${1}

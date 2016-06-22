@@ -15,8 +15,9 @@
 // -------------------------------------------------------
 // Workflow SOAP entry point (URL) to the archive server
 // -------------------------------------------------------
-define('SMARTARCHIVE_SERVERURL', 'http://127.0.0.1:8888/SCE702B70_2/index.php');
-
+if( !defined('SMARTARCHIVE_SERVERURL') ) {
+	define( 'SMARTARCHIVE_SERVERURL', 'http://127.0.0.1:8888/SCE702B70_2/index.php' );
+}
 
 // Define Brand, Category and status for objects from Archive Server
 /* 
@@ -26,29 +27,35 @@ define('SMARTARCHIVE_SERVERURL', 'http://127.0.0.1:8888/SCE702B70_2/index.php');
 *
 * Definition below should be the same as the one defined in Production Server of Enterprise.
 */
-define( 'SA_BRAND', 			'Smart Archive' );
-define( 'SA_CATEGORY', 		'Archived' );
-
+if( !defined('SA_BRAND') ) {
+	define( 'SA_BRAND', 'Smart Archive' );
+}
+if( !defined('SA_CATEGORY') ) {
+	define( 'SA_CATEGORY', 'Archived' );
+}
 
 // -------------------------------------------------------
 // Defined name query field query function
 // -------------------------------------------------------
-define('SMARTARCHIVE_FILTER_FIELDS', serialize( array( 
-			'Search' //Do not specify OBJECT TYPE HERE, define it below under SMARTARCHIVE_SEARCH_OBJECT_TYPES
-)));
+if( !defined('SMARTARCHIVE_FILTER_FIELDS') ) {
+	define('SMARTARCHIVE_FILTER_FIELDS', serialize( array(
+				'Search' //Do not specify OBJECT TYPE HERE, define it below under SMARTARCHIVE_SEARCH_OBJECT_TYPES
+	)));
+}
 											
 // -------------------------------------------------------
 // Object types listed at "Type" filter field of the archive search queries
 // Currently only supports 'Article' and 'Image'
 // -------------------------------------------------------
-define('SMARTARCHIVE_SEARCH_OBJECT_TYPES', serialize( array(	
-			'Article', 'Image'
-)));
-
+if( !defined('SMARTARCHIVE_SEARCH_OBJECT_TYPES') ) {
+	define('SMARTARCHIVE_SEARCH_OBJECT_TYPES', serialize( array(
+				'Article', 'Image'
+	)));
+}
 
 // -------------------------------------------------------
 // System internals
 // ===> DO NOT MAKE CHANGES TO THE FOLLOWING SECTION
 // -------------------------------------------------------
-define('SMARTARCHIVE_CONTENTSOURCEID', 'Archive');
-define('SMARTARCHIVE_CONTENTSOURCEPREFIX', '_Archive_');
+define( 'SMARTARCHIVE_CONTENTSOURCEID', 'Archive' );
+define( 'SMARTARCHIVE_CONTENTSOURCEPREFIX', '_Archive_' );

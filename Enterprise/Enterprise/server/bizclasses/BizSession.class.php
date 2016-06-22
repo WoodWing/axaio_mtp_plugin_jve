@@ -66,7 +66,7 @@ class BizSession
 	 *
 	 */
 	const SESSION_NAMESPACE = 'WW_Biz_Session';
-	
+
 	// These run mode options match with DefaultConnector:
 	const RUNMODE_SYNCHRON    = 'Synchron';
 	const RUNMODE_BACKGROUND  = 'Background';
@@ -76,21 +76,21 @@ class BizSession
 	 * @var bool
 	 */
 	static private $directCommit = false;
-	
+
 	/**
 	 * getShortUserName
-	 * 
+	 *
 	 * @return string	short user name
 	 */
 	public static function getShortUserName()
 	{
 		return self::$userName;
 	}
-	
+
 	/**
 	 * Returns the session workspace
 	 *
-	 * @return string 
+	 * @return string
 	 */
 	public static function getSessionWorkspace()
 	{
@@ -100,20 +100,20 @@ class BizSession
 			FolderUtils::mkFullDir($workspace);
 			return $workspace;
 		}
-		
+
 		return "";
 	}
-	
+
 	/**
-	 * Purges the session workspace folders for the given tickets. 
+	 * Purges the session workspace folders for the given tickets.
 	 *
-	 * @param array $purgedTickets 
+	 * @param array $purgedTickets
 	 * @return void
 	 */
 	public static function purgeSessionWorkspaces( $purgedTickets )
 	{
 		require_once BASEDIR.'/server/utils/FolderUtils.class.php';
-		
+
 		foreach( $purgedTickets as $purgedTicket ) {
 			$dir = SESSIONWORKSPACE . '/' . $purgedTicket . '/';
 			if ( file_exists($dir) ) {
@@ -158,7 +158,7 @@ class BizSession
 				return self::$userRow[$key];
 		}
 	}
-	
+
 	/**
 	 * Returns the User who is currently logged in.
 	 *
@@ -176,7 +176,7 @@ class BizSession
 			}
 			self::$userRow = $row;
 		}
-		
+
 		// Remove the # prefix from color.
 		$trackChangesColor = self::$userRow['trackchangescolor'];
 		if( strlen( $trackChangesColor ) > 0 ) {
@@ -185,7 +185,7 @@ class BizSession
 			self::$userRow['trackchangescolor'] = DEFAULT_USER_COLOR;
 			$trackChangesColor = substr( DEFAULT_USER_COLOR, 1 );
 		}
-		
+
 		// Build the User object from DB row.
 		$user = new User();
 		$user->UserID = self::$userRow['user'];
@@ -193,7 +193,7 @@ class BizSession
 		$user->TrackChangesColor = $trackChangesColor;
 		return $user;
 	}
-	
+
 	/**
 	 * Check the username and password
 	 * Generate an exception in case the user can not be validated
@@ -207,7 +207,7 @@ class BizSession
 	public static function validateUser( $user, $password )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
-		
+
 		// Decode the user typed password
 		// Although server has given public encryption key to client application, this does *not* imply
 		// client did (or supports) encryption. That means we might receive encrypted- or just plain text passwords here!
@@ -234,7 +234,7 @@ class BizSession
 		self::$userRow = DBUser::checkUser( $user ); // normalizes $user ! 
 		self::$userName = $user;
 		DBlog::logService( $user, 'LogOn' ); // log after normalization
-		
+
 		// if empty pass, create std password, to avoid differences in crypt
 		$pass = self::getUserInfo('pass');
 		if( $pass == '') {
@@ -265,7 +265,7 @@ class BizSession
 			$enddate = self::getUserInfo('enddate');
 			$expiredate = self::getUserInfo('expirepassdate');
 			$now = date('Y-m-d\TH:i:s');
-		    if ( !empty($startdate) && strncmp($startdate, $now, 19) > 0 ) { // $now < $startdate
+			if ( !empty($startdate) && strncmp($startdate, $now, 19) > 0 ) { // $now < $startdate
 				throw new BizException( 'ERR_USER_BEGINDATE', 'Client', '' );
 			}
 			if( !empty($enddate) ) {
@@ -278,7 +278,7 @@ class BizSession
 					throw new BizException( 'ERR_USER_ENDDATE', 'Client', '' );
 				}
 			}
-		    if ( !empty($expiredate) && strncmp($expiredate, $now, 19) < 0 ) { // $expiredate < $now
+			if ( !empty($expiredate) && strncmp($expiredate, $now, 19) < 0 ) { // $expiredate < $now
 				// Password expired, return specific SOAP fault:
 				throw new BizException( 'WARN_PASSWORD_EXPIRED', 'Client', 'SCEntError_PasswordExpired' ); //see apps/login.php
 			}
@@ -288,13 +288,13 @@ class BizSession
 		//In case the caller passed the fullname, the short user id will be returned now
 		return $user;
 	}
-	
+
 	/**
 	 * Logon the given user (short user id) to the given application.
 	 * Be sure to call 'validateUser' first!
 	 * Generate an exception in case the user can not logon
 	 * Returns a ticket
-	 * 
+	 *
 	 * @param string $orguser: either the fullname or the short user id (as entered by the end user)
 	 * @param string $shortUser: the short user id, returned by the validateUser call!
 	 * @param string $ticket
@@ -313,14 +313,14 @@ class BizSession
 	 */
 	public static function logOn( $orguser, $shortUser,
 		/** @noinspection PhpUnusedParameterInspection */ $ticket,
-		$server, $clientname,
+		                          $server, $clientname,
 		/** @noinspection PhpUnusedParameterInspection */ $domain,
 		$appname, $appversion, $appserial, $appproductcode, $requestInfo, $masterTicket, $password )
 	{
 		if( is_null($requestInfo) ) { // null means all
 			$requestInfo = array(
-				'Publications', 'NamedQueries', 'ServerInfo', 'Settings', 
-				'Users', 'UserGroups', 'Membership', 'ObjectTypeProperties', 'ActionProperties', 
+				'Publications', 'NamedQueries', 'ServerInfo', 'Settings',
+				'Users', 'UserGroups', 'Membership', 'ObjectTypeProperties', 'ActionProperties',
 				'Terms', 'FeatureProfiles', 'Dictionaries', 'MessageList', 'CurrentUser' );
 				// MessageQueueConnection is not listed here since only 10.0+ clients may want this feature.
 		}
@@ -332,10 +332,10 @@ class BizSession
 		// Make up new ticket		
 		$errorMessage = '';
 		$userLimit = false;
-		$ticketid = DBTicket::genTicket( $orguser, $shortUser, $server, $clientname, $appname, 
-										$appversion, $appserial, $appproductcode, $userLimit, 
-										$errorMessage, $masterTicket );
-		
+		$ticketid = DBTicket::genTicket( $orguser, $shortUser, $server, $clientname, $appname,
+			$appversion, $appserial, $appproductcode, $userLimit,
+			$errorMessage, $masterTicket );
+
 		// Purge the session workspaces for the purged tickets
 		$purgedTickets = DBTicket::getPurgedTickets();
 		self::purgeSessionWorkspaces( $purgedTickets );
@@ -351,9 +351,9 @@ class BizSession
 		// Start session here (since deeply nested functions after this point use BizSession::getTicket or session_id for $ticket)
 		self::startSession($ticketid);
 		self::setRunMode( self::RUNMODE_SYNCHRON );
-		
+
 		// Store username that is accessible via public getShortUserName:
-		if( !isset(self::$userName) ) { 
+		if( !isset(self::$userName) ) {
 			self::$userName = $shortUser;
 		}
 		$userid = self::getUserInfo('id');
@@ -363,7 +363,7 @@ class BizSession
 		$ret = new WflLogOnResponse();
 		$ret->Ticket = $ticketid;
 		$ret->FeatureSet    = array();
-		$ret->LimitationSet = array(); 
+		$ret->LimitationSet = array();
 
 		$pubRequestInfo = array_filter( $requestInfo, function( $requestProp ) { return substr( $requestProp, 0, 14 ) == 'Publications->'; } );
 		if( in_array( 'Publications', $requestInfo ) || $pubRequestInfo ) {
@@ -439,7 +439,7 @@ class BizSession
 
 		return $ret;
 	}
-	
+
 	/**
 	 *
 	 *
@@ -469,35 +469,35 @@ class BizSession
 		if( self::getUserInfo('language') != '') {
 			$compLangFeature->Value = self::getUserInfo('language'); // Let user overrule
 		}
-		
+
 		// Add the server feature FileUploadUrl (if proper define is set).
 		require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 		$transferServer = new BizTransferServer();
 		$transferServer->addFeatures($serverInfo);
-		
+
 		// Determine whether or not the user works from remote location.
 		require_once BASEDIR.'/server/utils/IpAddressRange.class.php';
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
 		$clientIP = WW_Utils_UrlUtils::getClientIP();
-		$isRemote = WW_Utils_IpAddressRange::isIpIncluded( $clientIP, 
+		$isRemote = WW_Utils_IpAddressRange::isIpIncluded( $clientIP,
 			unserialize( REMOTE_LOCATIONS_EXCLUDE ), unserialize( REMOTE_LOCATIONS_INCLUDE ) ) ? 'true' : 'false';
 		$serverInfo->FeatureSet[] = new Feature( 'IsRemoteUser', $isRemote );
 		$locationStr = $isRemote == 'true' ? 'remote' : 'local';
 		LogHandler::Log( 'BizSession', 'INFO', 'The client IP '.$clientIP.' is a '.$locationStr. ' address '.
 			'according to REMOTE_LOCATIONS_EXCLUDE and REMOTE_LOCATIONS_INCLUDE options. Therefore '.
 			'adding IsRemoteUser='.$isRemote.' option to ServerInfo->FeatureSet in LogOnResponse. ' );
-			
+
 		// Add the Labels feature to the FeatureSet.
 		self::addFeatureLabels( $serverInfo->FeatureSet );
-		
+
 		// Add the Client features (CLIENTFEATURES) to the FeatureSet.
 		self::addFeaturesForClient( $serverInfo->FeatureSet, $isRemote == 'true', $ticket );
 
 		// Add the AutomatedPrintWorkflow feature to the FeatureSet.
 		self::addFeatureForAutomatedPrintWorkflow( $serverInfo->FeatureSet );
 
-        // Add the ContentSourceFileLinks feature to the FeatureSet.
-        self::addFeatureForContentSourceFileLinks( $serverInfo->FeatureSet );
+		// Add the ContentSourceFileLinks feature to the FeatureSet.
+		self::addFeatureForContentSourceFileLinks( $serverInfo->FeatureSet );
 
 		// Add Output Devices to the FeatureSet.
 		require_once BASEDIR.'/server/bizclasses/BizAdmOutputDevice.class.php';
@@ -527,14 +527,14 @@ class BizSession
 	}
 
 	public static function logOff( $ticket, $savesettings=null, $settings=null, $messageList=null )
-	{	
+	{
 		// check ticket (and get user)
 		$user = self::checkTicket( $ticket, 'LogOff' );
-		
+
 		// Handle messages read/deleted by user.
 		if( $messageList ) {
 			if( !is_a( $messageList, 'MessageList' ) ) { // detect 7.x customizations that are not ported to 8.0 (used to be $messageIds)
-				throw new BizException( 'ERR_INVALID_OPERATION', 'Server', 
+				throw new BizException( 'ERR_INVALID_OPERATION', 'Server',
 					'Since 8.0, the BizSession::logOff() function no longer accepts an array of message ids. '.
 					'Make sure you pass in a MessageList data object at the 4th parameter. ' );
 			}
@@ -547,10 +547,10 @@ class BizSession
 		new smartevent_logoff( $ticket, $user );  // fire event now, while ticket is still valid
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
 		DBlog::logService( $user, 'LogOff' );
-		
+
 		//get the appname before deleting the ticket...
 		$appname = DBTicket::DBappticket($ticket);
-		
+
 		// delete ticket
 		$dbDriver = DBDriverFactory::gen();
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
@@ -558,7 +558,7 @@ class BizSession
 		if( !$sth ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
 		}
-		
+
 		// Purge the session workspace
 		self::purgeSessionWorkspaces( array( $ticket ) );
 
@@ -582,7 +582,7 @@ class BizSession
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns the language of the user who has just logged on. <br>
 	 * When language of user is not set, the configured CompanyLanguage is taken.
@@ -594,7 +594,7 @@ class BizSession
 	public static function getUserLanguage()
 	{
 		global $sLanguage_code;
-	
+
 		$sLanguage_code = self::getUserInfo('language');
 
 		// Check user language, if unknown, assign the default company language (or English when not configured)
@@ -613,15 +613,15 @@ class BizSession
 	 * @throws BizException When ticket not valid.
 	 */
 	public static function checkTicket( $ticket, $service='' )
-    {
-    	// All web applications validate their ticket before they start operating,
-    	// but most of them do not start a session. Here we do a lazy start to avoid
-    	// connectors being called through ticketExpirationReset() without valid session.
-    	if( !self::isStarted() ) {
-    		self::startSession( $ticket );
-    	}
-    	
-    	// Throw error when ticket is not (or no longer) valid.
+	{
+		// All web applications validate their ticket before they start operating,
+		// but most of them do not start a session. Here we do a lazy start to avoid
+		// connectors being called through ticketExpirationReset() without valid session.
+		if( !self::isStarted() ) {
+			self::startSession( $ticket );
+		}
+
+		// Throw error when ticket is not (or no longer) valid.
 		require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
 		self::$userName = DBTicket::checkTicket( $ticket, $service );
 		if( !self::$userName ) {
@@ -631,37 +631,37 @@ class BizSession
 		// Language was not correctly loaded when called from soap-client, so making sure 
 		// language is correctly loaded here.
 		self::loadUserLanguage(self::$userName);
-		
-	    if( $service && !self::isFeatherLightService( $service ) ) {
-		    // Ask connectors if they have a valid ticket for their integrated system as well.
-		    $connectorTicketsValid = true;
-		    require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
-		    $connRetVals = array();
-		    BizServerPlugin::runDefaultConnectors( 'Session', null,
-			    'ticketExpirationReset', array( $ticket, self::$userName ), $connRetVals );
-		    if( $connRetVals ) foreach( $connRetVals as $connName => $connRetVal ) {
-			    if( $connRetVal === false ) {
-				    LogHandler::Log( 'BizSession', 'INFO', 'Server Plug-in connector '.$connName.' indicates '.
-					    'through ticketExpirationReset() that the integrated system has no valid '.
-					    'ticket for the current user. Therefore the Enterprise ticket will be made '.
-					    'invalid as well to let the user (re)logon to obtain ticket for both systems.' );
-				    $connectorTicketsValid = false;
-				    break;
-			    }
-		    }
 
-		    // When integrated system has no ticket, make Enterprise ticket invalid as well.
-		    // That forces clients to (re)login and obtain a seat for both Enterprise and
-		    // the remote system again.
-		    if( !$connectorTicketsValid ) {
-			    DBTicket::DBendticket( $ticket );
-			    throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
-		    }
-        }
+		if( $service && !self::isFeatherLightService( $service ) ) {
+			// Ask connectors if they have a valid ticket for their integrated system as well.
+			$connectorTicketsValid = true;
+			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+			$connRetVals = array();
+			BizServerPlugin::runDefaultConnectors( 'Session', null,
+				'ticketExpirationReset', array( $ticket, self::$userName ), $connRetVals );
+			if( $connRetVals ) foreach( $connRetVals as $connName => $connRetVal ) {
+				if( $connRetVal === false ) {
+					LogHandler::Log( 'BizSession', 'INFO', 'Server Plug-in connector '.$connName.' indicates '.
+						'through ticketExpirationReset() that the integrated system has no valid '.
+						'ticket for the current user. Therefore the Enterprise ticket will be made '.
+						'invalid as well to let the user (re)logon to obtain ticket for both systems.' );
+					$connectorTicketsValid = false;
+					break;
+				}
+			}
+
+			// When integrated system has no ticket, make Enterprise ticket invalid as well.
+			// That forces clients to (re)login and obtain a seat for both Enterprise and
+			// the remote system again.
+			if( !$connectorTicketsValid ) {
+				DBTicket::DBendticket( $ticket );
+				throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
+			}
+		}
 
 		return self::$userName;
-    }
-	
+	}
+
 	/**
 	 * Loads the language of the user in to global $sLanguage_code.
 	 * Needed because when called from a soap-client this was not loaded correctly.
@@ -689,7 +689,7 @@ class BizSession
 	public static function startSession( $ticket )
 	{
 		if( ($ticket && session_id()=='') // null when called by logon
-				 || $ticket == session_id()) { // the next service is called within the same PHP session
+			|| $ticket == session_id()) { // the next service is called within the same PHP session
 			session_id($ticket);
 			//BZ#13361 Do not start session here, to prevent locking issues
 			self::$sessionStarted = true;
@@ -708,8 +708,8 @@ class BizSession
 	}
 
 	/**
-	* Ends a business session - clears our stuff. This will commit to DB (if supported by DB)
-	*/
+	 * Ends a business session - clears our stuff. This will commit to DB (if supported by DB)
+	 */
 	public static function endSession()
 	{
 		unset( self::$sessionCache[self::$sessionCounter] ); // Clearing the 'going-to-end' session information, should be cleared before the $sessionCounter is decreased!
@@ -722,20 +722,20 @@ class BizSession
 			session_id(''); //clear session id
 		}
 	}
-	
+
 	/**
-	* Starts a atomic transaction, commits via EndTransaction, rollback with CancelTransaction
-	* If DB does not support transactions, nothing will be done (up to the DB driver)
-	*/
+	 * Starts a atomic transaction, commits via EndTransaction, rollback with CancelTransaction
+	 * If DB does not support transactions, nothing will be done (up to the DB driver)
+	 */
 	public static function startTransaction()
 	{
 		$dbDriver = DBDriverFactory::gen();
-    	$dbDriver->beginTransaction();
+		$dbDriver->beginTransaction();
 	}
-        
+
 	/**
-	* Commit transaction (if supported by DB)
-	*/
+	 * Commit transaction (if supported by DB)
+	 */
 	public static function endTransaction()
 	{
 		$dbDriver = DBDriverFactory::gen();
@@ -743,8 +743,8 @@ class BizSession
 	}
 
 	/**
-	* Cancels transaction. This will rollback DB changes (if supported by DB)
-	*/
+	 * Cancels transaction. This will rollback DB changes (if supported by DB)
+	 */
 	public static function cancelTransaction()
 	{
 		$dbDriver = DBDriverFactory::gen();
@@ -777,10 +777,10 @@ class BizSession
 			if( !$curr_row ) {
 				throw new BizException( 'ERR_NOTFOUND', 'Client', $id );
 			}
-			
+
 			require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
 			DBlog::logService( $user, 'ChangeOnlineStatus', $id, $curr_row["publication"], '', $curr_row["section"],
-									$curr_row["state"], '', '', '', $curr_row['type'], $curr_row['routeto'], '', $curr_row['version']);
+				$curr_row["state"], '', '', '', $curr_row['type'], $curr_row['routeto'], '', $curr_row['version']);
 
 			// Determine the first best issue which the object is assigned to.
 			require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
@@ -788,16 +788,14 @@ class BizSession
 			$issueId = $targets && count($targets) ? $targets[0]->Issue->Id : 0;
 
 			// check "Keep Locked" access (=> 'K')
-			if( $curr_row['state'] != -1 ) { // ignore Personal Status
-				require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
-				if( !BizAccess::checkRightsForObjectRow( 
-									$user, 'K', BizAccess::DONT_THROW_ON_DENIED, 
-									$curr_row, $issueId ) 
-				) {
-					// collect access errors and continue
-					$bAccessError = true;
-					$arrAccessErrors[] = $curr_row['name'];
-				}
+			require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
+			if( !BizAccess::checkRightsForObjectRow(
+				$user, 'K', BizAccess::DONT_THROW_ON_DENIED,
+				$curr_row, $issueId )
+			) {
+				// collect access errors and continue
+				$bAccessError = true;
+				$arrAccessErrors[] = $curr_row['name'];
 			}
 
 			$bKeepLockForOffline = $onlinestatus == 'TakeOffline';
@@ -817,7 +815,7 @@ class BizSession
 		// error once if user is not allowed to take one or more objects offline
 		if( count( $arrAccessErrors ) > 0 ) {
 			$sErrorMessage = BizResources::localize("ERR_AUTHORIZATION")."\n";
-			foreach( $arrAccessErrors as $err  ) { 
+			foreach( $arrAccessErrors as $err  ) {
 				$sErrorMessage .= "\n- ".$err;
 			}
 			throw new BizException( null, 'Client', 'SCEntError_UserNotAllowed', $sErrorMessage );
@@ -840,9 +838,9 @@ class BizSession
 			}
 		}
 	}
-	
+
 	/**
-	 * Adds the "ExtensionMap" feature to the given feature set. "ExtensionMap" contains 
+	 * Adds the "ExtensionMap" feature to the given feature set. "ExtensionMap" contains
 	 * an XML tree like this:
 	 * <extensions>
 	 * 		<extension ext=".jpg" mime="image/jpeg" objtype="Image" default="true"/>
@@ -850,7 +848,7 @@ class BizSession
 	 * </extensions>
 	 * Note: extensions are unique, but mime types don't have to be. The default attribute
 	 * tells that this extension is the default for this mimetype.
-	 * 
+	 *
 	 * The values are read form EXTENSIONMAP defined in configserver.php
 	 *
 	 * @param Feature[] $features Feature set to add the "ExtensionMap" feature.
@@ -878,20 +876,20 @@ class BizSession
 				$ext->addAttribute('default', 'false' );
 			}
 		}
-		
+
 		$features[] = new Feature('ExtensionMap', $xmlTree->asXML());
 	}
 
 	/**
 	 * Adds the features configured for CLIENTFEATURES to a given set of features.
-	 * 
+	 *
 	 * Depending on the client name, client location and ticket(seal) it decides which
 	 * subcollection of features (configured in CLIENTFEATURES) to add.
 	 *
 	 * @since 9.7.0
 	 * @param Feature[] $features Feature set to add the client features.
 	 * @param boolean $isRemote
-	 * @param string $ticket The requested ticket 
+	 * @param string $ticket The requested ticket
 	 */
 	private static function addFeaturesForClient( array &$features, $isRemote, $ticket )
 	{
@@ -908,7 +906,7 @@ class BizSession
 			$features = array_merge( $features, $options[$clientName][$subEntry] );
 		}
 	}
-	
+
 	/**
 	 * Adds the ContentStationAutomatedPrintWorkflow feature when any of the plugins
 	 * has the AutomatedPrintWorkflow business connector interface implemented.
@@ -924,30 +922,30 @@ class BizSession
 		}
 	}
 
-    /**
-     * Adds the ContentSourceFileLinks feature when any of the content source plugins 
+	/**
+	 * Adds the ContentSourceFileLinks feature when any of the content source plugins
 	 * has enabled this feature.
-     *
+	 *
 	 * @since 9.7.0
-     * @param Feature[] $features Feature set to update.
-     */
-    private static function addFeatureForContentSourceFileLinks( array &$features )
-    {
-        require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
-        BizServerPlugin::runDefaultConnectors(
-            'ContentSource', null, 'isContentSourceFileLinksSupported', array(), $connRetVals );
+	 * @param Feature[] $features Feature set to update.
+	 */
+	private static function addFeatureForContentSourceFileLinks( array &$features )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+		BizServerPlugin::runDefaultConnectors(
+			'ContentSource', null, 'isContentSourceFileLinksSupported', array(), $connRetVals );
 
-        $contentSources = array();
-        foreach( $connRetVals as $conn => $val ) {
-            if( $val === true ) {
-                $contentSources[] = BizServerPlugin::getPluginUniqueNameForConnector( $conn );
-            }
-        }
-        if( count($contentSources) > 0 ) {
-            $features[] = new Feature( 'ContentSourceFileLinks', implode($contentSources, ',') );
-        }
-    }
-	
+		$contentSources = array();
+		foreach( $connRetVals as $conn => $val ) {
+			if( $val === true ) {
+				$contentSources[] = BizServerPlugin::getPluginUniqueNameForConnector( $conn );
+			}
+		}
+		if( count($contentSources) > 0 ) {
+			$features[] = new Feature( 'ContentSourceFileLinks', implode($contentSources, ',') );
+		}
+	}
+
 	/**
 	 * Set mulitple session variables.
 	 * This function open the session, sets variables, saves and closes the
@@ -976,7 +974,7 @@ class BizSession
 	 * Get mulitple session variables.
 	 * This function open the session, gets variables and closes the
 	 * session. This way an other process won't be locked.
-	 * 
+	 *
 	 * @return array key value pairs
 	 */
 	public static function getSessionVariables ()
@@ -991,10 +989,10 @@ class BizSession
 			}
 			session_write_close();
 		}
-		
+
 		return $variables;
 	}
-	
+
 	/**
 	 * Return wether or not a BizSession has been started
 	 *
@@ -1004,7 +1002,7 @@ class BizSession
 	{
 		return self::$sessionStarted;
 	}
-	
+
 	/**
 	 * Returns current session ticket if session has been started.
 	 *
@@ -1017,14 +1015,14 @@ class BizSession
 		}
 		return '';
 	}
-	
+
 	/**
 	 * Returns whether or not a given client application name is acting in the current session.
 	 *
 	 * The given name can be a fragment of the full name. For example, when passing in 'indesign'
 	 * for the $appName param, the function will return TRUE when the session app name is
 	 * 'InDesign', 'InDesign Server' or 'Digital Publishing Tools InDesign'.
-	 * 
+	 *
 	 * @param null $ticket Obsoleted since 9.4. Always pass NULL.
 	 * @param string $appName The (fragment of) the application name to check.
 	 * @return bool
@@ -1034,13 +1032,13 @@ class BizSession
 		$clientName = self::getClientName( $ticket );
 		return $clientName && (bool)stristr( $clientName, $appName );
 	}
-	
+
 	/**
 	 * Returns the client application name that using the current (or given) session / ticket.
-	 * 
+	 *
 	 * When this function is called, but there is no active session, NULL is returned.
-	 * 
-	 * When this function is called in in context of Server Jobs (running in background mode), 
+	 *
+	 * When this function is called in in context of Server Jobs (running in background mode),
 	 * EMPTY is returned. This is for recurring jobs but also for normal jobs even when
 	 * initiated in context of a web service with acting client. That client is NOT returned.
 	 *
@@ -1055,7 +1053,7 @@ class BizSession
 				'BizSession::getClientName() called with the $ticket param set. Please pass in null.' );
 			return null;
 		}
-		
+
 		$clientName = null;
 		$ticket = self::getTicket();
 		if( $ticket ) {
@@ -1079,7 +1077,7 @@ class BizSession
 	 * when there is no active session or when the client does not respect the Enterprise
 	 * version standard.
 	 *
-	 * When this function is called in in context of Server Jobs (running in background mode), 
+	 * When this function is called in in context of Server Jobs (running in background mode),
 	 * EMPTY is returned. This is for recurring jobs but also for normal jobs even when
 	 * initiated in context of a web service with acting client. That client is NOT returned.
 	 *
@@ -1100,7 +1098,7 @@ class BizSession
 				'BizSession::getClientVersion() called with the $clientVersion param set. Please pass in null.' );
 			return null;
 		}
-		
+
 		$retVal = null;
 		$ticket = self::getTicket();
 		if( $ticket ) {
@@ -1119,7 +1117,7 @@ class BizSession
 		}
 		return $retVal;
 	}
-	
+
 	/**
 	 * Converts a client application version into "x.y.z.b" notation.
 	 * The format passed by SC / CS clients is in "[v]x.y.z [DAILY] build b" notation whereby:
@@ -1165,7 +1163,7 @@ class BizSession
 		}
 		return $retVal;
 	}
-	
+
 	/**
 	 * Sets the Service Name. See getServiceName() for details.
 	 *
@@ -1178,7 +1176,7 @@ class BizSession
 		}
 
 	}
-	
+
 	/**
 	 * Returns the Service Name that is currently handled by the system.
 	 * For example: WflCreateObjects, WflCreateObjectRelations, AdmCreateUsers, etc.
@@ -1190,8 +1188,8 @@ class BizSession
 		return isset( self::$sessionCache[self::$sessionCounter]['servicename'] ) ?
 			self::$sessionCache[self::$sessionCounter]['servicename'] : '';
 	}
-	
-	
+
+
 	/**
 	 * Sets the current Run Mode of the server. See getRunMode() for details.
 	 *
@@ -1200,7 +1198,7 @@ class BizSession
 	 */
 	public static function setRunMode( $runMode )
 	{
-		if( $runMode == self::RUNMODE_SYNCHRON || 
+		if( $runMode == self::RUNMODE_SYNCHRON ||
 			$runMode == self::RUNMODE_BACKGROUND ) {
 			self::$runMode = $runMode;
 		}
@@ -1286,7 +1284,7 @@ class BizSession
 
 	/**
 	 * Get the Enterprise System ID from the config table.
-	 * 
+	 *
 	 * @return string|null $flagValue Enterprise System ID, null when it is not set.
 	 */
 	public static function getEnterpriseSystemId()

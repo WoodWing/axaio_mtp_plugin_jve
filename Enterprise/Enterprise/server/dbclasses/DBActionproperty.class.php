@@ -95,9 +95,10 @@ class DBActionproperty extends DBBase
 	 * @param integer $publ Publication on with action property is defined
 	 * @param string $objType Object type on which action property is defined
 	 * @param string $action Action on which action property is defined
+	 * @param boolean $onlyAllObjectType Only return "All" object type property.
 	 * @return array with results
 	 */
-	static public function listActionPropertyWithNames( $publ, $objType, $action )
+	static public function listActionPropertyWithNames( $publ, $objType, $action, $onlyAllObjectType )
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbap = $dbDriver->tablename(self::TABLENAME);
@@ -109,8 +110,15 @@ class DBActionproperty extends DBBase
 		// For oracle, the comparison between null values of 2 tables fields returns zero row,
 		// therefore we need to check if a particular field is a null value or not.
 		if( $objType == '' ) {
-			$nullObjType1 = 'OR pr.`objtype` is null ';
-			$nullObjType2 = 'OR pr2.`objtype` is null ';
+			$nullObjType1 = 'OR pr.`objtype` IS NULL ';
+			$nullObjType2 = 'OR pr2.`objtype` IS NULL ';
+		}
+
+		if( !$onlyAllObjectType ) {
+			$nullObjType1 .= 'OR ap.`type` = ? OR ap.`type` IS NULL ';
+			$params[] = '';
+			$nullObjType2 .= 'OR ap.`type` = ? OR ap.`type` IS NULL ';
+			$params[] = '';
 		}
 
 		$sql =  "SELECT ap.`id`, ap.`orderid`, ap.`property`, ap.`edit`,".
@@ -129,8 +137,8 @@ class DBActionproperty extends DBBase
 		$params[] = $action;
 
 		$sth = $dbDriver->query($sql, $params);
-        
-        return self::fetchResults($sth);	
+
+        return self::fetchResults($sth);
 	}
 	
 	/**

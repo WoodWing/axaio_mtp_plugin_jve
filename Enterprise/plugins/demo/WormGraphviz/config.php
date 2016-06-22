@@ -16,10 +16,16 @@
 ****************************************************************************/
 
 // Path to the Graphviz dot executable.
-define('GRAPHVIZ_APPLICATION_PATH', '/opt/local/bin/dot');
+if( !defined('GRAPHVIZ_APPLICATION_PATH') ) {
+   define( 'GRAPHVIZ_APPLICATION_PATH', '/opt/local/bin/dot' );
+}
 
 // Path to the ps2pdf dot executable. Needed when GRAPHVIZ_OUTPUT_FORMAT is set to 'pdf'.
-define('GRAPHVIZ_PS2PDF_APPLICATION_PATH', '/usr/local/bin/ps2pdf');
+if( !defined('GRAPHVIZ_PS2PDF_APPLICATION_PATH') ) {
+   define( 'GRAPHVIZ_PS2PDF_APPLICATION_PATH', '/usr/local/bin/ps2pdf' );
+}
 
 // File format type to compose Graphviz reports. Supported values are 'pdf' and 'svg'.
-define('GRAPHVIZ_OUTPUT_FORMAT', 'svg');
+if( !defined('GRAPHVIZ_OUTPUT_FORMAT') ) {
+   define( 'GRAPHVIZ_OUTPUT_FORMAT', 'svg' );
+}

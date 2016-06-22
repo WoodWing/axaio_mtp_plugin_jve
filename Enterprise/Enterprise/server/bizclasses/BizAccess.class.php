@@ -42,10 +42,10 @@ class BizAccess
 {
 	const THROW_ON_DENIED = true;
 	const DONT_THROW_ON_DENIED = false;
-	
+
 	/**
 	 * Checks if the current user has specified rights to an object, based on given object properties.
-	 * 
+	 *
 	 * @obsoleted since 9.4, please use {@link:checkRightsForObjectProps()} instead.
 	 * @param array $objProps Array of object properties (Biz props, mixed case)
 	 * @param string $rights String with rights to check, each character is a right that is needed
@@ -55,25 +55,26 @@ class BizAccess
 	static public function checkRights( $objProps, $rights )
 	{
 		Log::LogHandler( 'BizAccess', 'WARN', 'The checkRights() function is obsoleted. '.
-					'Please call the checkRightsForObjectProps() function instead.' );
-					
+			'Please call the checkRightsForObjectProps() function instead.' );
+
 		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$issueId = array_key_exists( 'IssueId', $objProps) ? $objProps['IssueId'] : 0; // See Note#001
 		return self::checkRightsForParams(
-						BizSession::getShortUserName(), $rights, self::THROW_ON_DENIED,
-						$objProps['PublicationId'], // brand id
-						$issueId,                   // issue id
-						$objProps['SectionId'],     // category id
-						$objProps['Type'],          // object type
-						$objProps['StateId'],       // status id
-						$objProps['ID'],            // object id
-						$objProps['ContentSource'],
-						$objProps['DocumentID'] );
+			BizSession::getShortUserName(), $rights, self::THROW_ON_DENIED,
+			$objProps['PublicationId'],
+			$issueId,
+			$objProps['SectionId'],
+			$objProps['Type'],
+			$objProps['StateId'],
+			$objProps['ID'],
+			$objProps['ContentSource'],
+			$objProps['DocumentID'],
+			$objProps['RouteTo'] );
 	}
-	
+
 	/**
 	 * Checks if the given user has specified rights to an object, based on given object properties.
-	 * 
+	 *
 	 * @since 9.4
 	 * @param string $user Short user name.
 	 * @param string $rights String with rights to check, each character is a right that is needed
@@ -85,45 +86,47 @@ class BizAccess
 	{
 		$issueId = array_key_exists( 'IssueId', $objProps) ? $objProps['IssueId'] : 0; // See Note#001
 		return self::checkRightsForParams(
-						$user, $rights, $throwException,
-						$objProps['PublicationId'], // brand id
-						$issueId,                   // issue id
-						$objProps['SectionId'],     // category id
-						$objProps['Type'],          // object type
-						$objProps['StateId'],       // status id
-						$objProps['ID'],            // object id
-						$objProps['ContentSource'],
-						$objProps['DocumentID'] );
+			$user, $rights, $throwException,
+			$objProps['PublicationId'],
+			$issueId,
+			$objProps['SectionId'],
+			$objProps['Type'],
+			$objProps['StateId'],
+			$objProps['ID'],
+			$objProps['ContentSource'],
+			$objProps['DocumentID'],
+			$objProps['RouteTo'] );
 	}
 
 	/**
 	 * Checks if the current user has specified rights to object, based on given object row.
-	 * 
+	 *
 	 * @since 9.4
 	 * @param string $user Short user name.
 	 * @param string $rights String with rights to check, each character is a right that is needed.
 	 * @param bool $throwException Whether or not to throw BizException when no access.
 	 * @param array $objRow	Row of smart_object table.
- 	 * @param integer $issueId ID of the overrule issue. Zero when object is targetted for none or normal issues.
+	 * @param integer $issueId ID of the overrule issue. Zero when object is targetted for none or normal issues.
 	 * @return bool Whether or not the user has the requested rights.
 	 */
 	static public function checkRightsForObjectRow( $user, $rights, $throwException, $objRow, $issueId )
 	{
-		return self::checkRightsForParams( 
-						$user, $rights, $throwException,
-						$objRow['publication'], // brand id
-						$issueId,               // issue id
-						$objRow['section'],     // category id
-						$objRow['type'],        // object type
-						$objRow['state'],       // status id
-						$objRow['id'],          // object id
-						$objRow['contentsource'],
-						$objRow['documentid'] );
+		return self::checkRightsForParams(
+			$user, $rights, $throwException,
+			$objRow['publication'],
+			$issueId,
+			$objRow['section'],
+			$objRow['type'],
+			$objRow['state'],
+			$objRow['id'],
+			$objRow['contentsource'],
+			$objRow['documentid'],
+			$objRow['routeto'] );
 	}
 
 	/**
 	 * Checks if the session user has specified rights to an object, based on given object metadata and targets.
-	 * 
+	 *
 	 * @obsoleted since 9.4, please use {@link:checkRightsForMetaDataAndTargets()} instead.
 	 * @param MetaData $meta Object metadata
 	 * @param Target[] $targets Object targets
@@ -134,25 +137,28 @@ class BizAccess
 	static public function checkRightsMetaDataTargets( MetaData $meta, array $targets, $rights )
 	{
 		Log::LogHandler( 'BizAccess', 'WARN', 'The checkRightsMetaDataTargets() function is obsoleted. '.
-					'Please call the checkRightsForMetaDataAndTargets() function instead.' );
+			'Please call the checkRightsForMetaDataAndTargets() function instead.' );
 
 		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$issueId = count($targets) > 0 ? $targets[0]->Issue->Id : 0; // See Note#001
-		return self::checkRightsForParams( 
-						BizSession::getShortUserName(), $rights, self::THROW_ON_DENIED,
-						$meta->BasicMetaData->Publication->Id,
-						$issueId,
-						$meta->BasicMetaData->Category->Id,
-						$meta->BasicMetaData->Type,
-						$meta->WorkflowMetaData->State->Id,
-						$meta->BasicMetaData->ID,
-						$meta->BasicMetaData->ContentSource, 
-						$meta->BasicMetaData->DocumentID );
+		return self::checkRightsForParams(
+			BizSession::getShortUserName(),
+			$rights,
+			self::THROW_ON_DENIED,
+			$meta->BasicMetaData->Publication->Id,
+			$issueId,
+			$meta->BasicMetaData->Category->Id,
+			$meta->BasicMetaData->Type,
+			$meta->WorkflowMetaData->State->Id,
+			$meta->BasicMetaData->ID,
+			$meta->BasicMetaData->ContentSource,
+			$meta->BasicMetaData->DocumentID,
+			$meta->WorkflowMetaData->RouteTo );
 	}
 
 	/**
 	 * Checks if the session user has specified rights to an object, based on given object metadata and targets.
-	 * 
+	 *
 	 * @since 9.4
 	 * @param string $user Short user name.
 	 * @param string $rights String with rights to check, each character is a right that is needed
@@ -162,22 +168,23 @@ class BizAccess
 	 * @throws BizException when session user has no rights
 	 * @return bool Whether or not the session user has the requested rights.
 	 */
-	static public function checkRightsForMetaDataAndTargets( 
+	static public function checkRightsForMetaDataAndTargets(
 		$user, $rights, $throwException, MetaData $meta, array $targets )
 	{
 		$issueId = count($targets) > 0 ? $targets[0]->Issue->Id : 0; // See Note#001
-		return self::checkRightsForParams( 
-						$user, $rights, $throwException,
-						$meta->BasicMetaData->Publication->Id,
-						$issueId,
-						$meta->BasicMetaData->Category->Id,
-						$meta->BasicMetaData->Type,
-						$meta->WorkflowMetaData->State->Id,
-						$meta->BasicMetaData->ID,
-						$meta->BasicMetaData->ContentSource, 
-						$meta->BasicMetaData->DocumentID );
+		return self::checkRightsForParams(
+			$user, $rights, $throwException,
+			$meta->BasicMetaData->Publication->Id,
+			$issueId,
+			$meta->BasicMetaData->Category->Id,
+			$meta->BasicMetaData->Type,
+			$meta->WorkflowMetaData->State->Id,
+			$meta->BasicMetaData->ID,
+			$meta->BasicMetaData->ContentSource,
+			$meta->BasicMetaData->DocumentID,
+			$meta->WorkflowMetaData->RouteTo );
 	}
-	
+
 	/**
 	 * Checks if the current user has rights to a specific context in a certain brand.
 	 *
@@ -193,22 +200,23 @@ class BizAccess
 	 * @throws BizException when $throwException and session user has no rights
 	 * @return bool Whether or not session user has rights.
 	 */
-	static public function checkRightsForBrandContext( $user, $rights, $throwException, 
-		$brandId, $issueId = null, $categoryId = null, $objectType = null, $statusId = null )
+	static public function checkRightsForBrandContext( $user, $rights, $throwException,
+	                                                   $brandId, $issueId = null, $categoryId = null, $objectType = null, $statusId = null )
 	{
 		$objectId = null;
 		$contentSource = null;
 		$documentId = null;
-		return self::checkRightsForParams( $user, $rights, $throwException, 
-						$brandId, $issueId, $categoryId, $objectType, $statusId,
-						$objectId, $contentSource, $documentId );
+		$routeTo = '';
+		return self::checkRightsForParams( $user, $rights, $throwException,
+			$brandId, $issueId, $categoryId, $objectType, $statusId,
+			$objectId, $contentSource, $documentId, $routeTo );
 	}
 
 	/**
-	 * Checks if the current user has specified rights to an object and/or a specific 
+	 * Checks if the current user has specified rights to an object and/or a specific
 	 * context in a certain brand. Should be used when an object is about to move to
 	 * another status, category, etc. Else other functions are more preferred, see Note#002.
-	 * 
+	 *
 	 * @param string $user Short user name.
 	 * @param string $rights String with rights to check, each character is a right that is needed
 	 * @param bool $throwException Whether or not to throw BizException when no access.
@@ -220,12 +228,13 @@ class BizAccess
 	 * @param integer $objectId Object ID (zero for Create operations)
 	 * @param string $contentSource
 	 * @param string $documentId
+	 * @param string $routeTo User to which an object is routed or will be routed to.
 	 * @throws BizException when $throwException and session user has no rights
 	 * @return bool Whether or not session user has rights.
 	 */
-	static public function checkRightsForParams( $user, $rights, $throwException, 
-		$brandId, $issueId, $categoryId, $objectType, $statusId,
-		$objectId, $contentSource, $documentId )
+	static public function checkRightsForParams( $user, $rights, $throwException,
+	                                             $brandId, $issueId, $categoryId, $objectType, $statusId,
+	                                             $objectId, $contentSource, $documentId, $routeTo )
 	{
 		// Check authorization
 		global $globAuth;
@@ -233,12 +242,12 @@ class BizAccess
 			require_once BASEDIR.'/server/authorizationmodule.php';
 			$globAuth = new authorizationmodule( );
 		}
-		$globAuth->getrights( $user, $brandId, $issueId, $categoryId, $objectType, $statusId );
+		$globAuth->getRights( $user, $brandId, $issueId, $categoryId, $objectType, $statusId );
 		for( $i=0; $i < strlen($rights); ++$i ) {
-			$hasAccess = $globAuth->checkright( $rights[$i], 
-							$brandId, $issueId, $categoryId, $objectType, $statusId,
-							$objectId, $contentSource, $documentId );
-			
+			$hasAccess = $globAuth->checkright( $rights[$i],
+				$brandId, $issueId, $categoryId, $objectType, $statusId,
+				$objectId, $contentSource, $documentId, $routeTo );
+
 			// When no access: Throw authorization error or return false.
 			if( !$hasAccess ) {
 				if( $throwException ) {
@@ -255,7 +264,7 @@ class BizAccess
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Checks if layouts can be listed in the Publication Overview for a given user.
 	 *
@@ -270,36 +279,33 @@ class BizAccess
 		if( !isset($globAuth) ) {
 			require_once BASEDIR.'/server/authorizationmodule.php';
 			$globAuth = new authorizationmodule( );
-		}		
-		$layoutIdsAuth = array();	
+		}
+		$layoutIdsAuth = array();
 		$holdCategoryId = -1;
 		$holdStateId = -2; // Not -1 as this is reserved for 'Personal State'.
 		$auth = false;
 		if ( $layoutInfos ) foreach ( $layoutInfos as $layoutId => $layoutInfo ) {
-			if ( intval( $layoutInfo->WorkflowMetaData->State->Id ) === -1 && $user === $layoutInfo->WorkflowMetaData->RouteTo  ) {
-				$auth = true;
-			} else {
-				$globAuth->getrights( 
-							$user,
-							$layoutInfo->BasicMetaData->Publication->Id,
-							$issueId,
-							$layoutInfo->BasicMetaData->Category->Id,
-							$layoutInfo->BasicMetaData->Type  );
-				if ( $layoutInfo->BasicMetaData->Category->Id <> $holdCategoryId ||
-					 $layoutInfo->WorkflowMetaData->State->Id <> $holdStateId ) {
-					$auth = ( $globAuth->checkright(
-							'L',
-							$layoutInfo->BasicMetaData->Publication->Id,
-							$issueId,
-							$layoutInfo->BasicMetaData->Category->Id,
-							$layoutInfo->BasicMetaData->Type,
-							$layoutInfo->WorkflowMetaData->State->Id,
-							$layoutInfo->BasicMetaData->ID,
-							$layoutInfo->BasicMetaData->ContentSource,
-							$layoutInfo->BasicMetaData->DocumentID ));
-					$holdCategoryId = $layoutInfo->BasicMetaData->Category->Id;
-					$holdStateId = $layoutInfo->WorkflowMetaData->State->Id;
-				}
+			$globAuth->getRights(
+				$user,
+				$layoutInfo->BasicMetaData->Publication->Id,
+				$issueId,
+				$layoutInfo->BasicMetaData->Category->Id,
+				$layoutInfo->BasicMetaData->Type  );
+			if ( $layoutInfo->BasicMetaData->Category->Id <> $holdCategoryId ||
+				$layoutInfo->WorkflowMetaData->State->Id <> $holdStateId ) {
+				$auth = ( $globAuth->checkright(
+					'L',
+					$layoutInfo->BasicMetaData->Publication->Id,
+					$issueId,
+					$layoutInfo->BasicMetaData->Category->Id,
+					$layoutInfo->BasicMetaData->Type,
+					$layoutInfo->WorkflowMetaData->State->Id,
+					$layoutInfo->BasicMetaData->ID,
+					$layoutInfo->BasicMetaData->ContentSource,
+					$layoutInfo->BasicMetaData->DocumentID,
+					$layoutInfo->WorkflowMetaData->RouteTo ));
+				$holdCategoryId = $layoutInfo->BasicMetaData->Category->Id;
+				$holdStateId = $layoutInfo->WorkflowMetaData->State->Id;
 			}
 			if ( $auth ) {
 				$layoutIdsAuth[] = $layoutId;

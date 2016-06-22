@@ -15,11 +15,32 @@
    limitations under the License.
 ****************************************************************************/
 
-define('TRIPOLIS_DIALOGSERVICE_URI', 'https://api.tripolis.com/soap/1.5/no-mtom/DialogueService?wsdl'); // URL to the Tripolis server including / (e.g. https://api.tripolis.com/soap/1.5/DialogueService?wsdl)
-define('TRIPOLIS_AUTHINFO_CLIENT', ''); // Tripolis Dialogue client name
-define('TRIPOLIS_AUTHINFO_USERNAME', ''); // Tripolis Dialogue username.
-define('TRIPOLIS_AUTHINFO_PASSWORD', ''); // Tripolis Dialogue password.
-define('TRIPOLIS_WORKSPACE', 'woodwingdemo'); // Tripolis workspace to create content in.
-define('TRIPOLIS_DATABASE', 'woodwingdemo'); // Tripolis contact database name.
-define('TRIPOLIS_DIRECTEMAIL_TYPE', 'detype1'); // Tripolis direct email type name.
+// URL to the Tripolis server including / (e.g. https://api.tripolis.com/soap/1.5/DialogueService?wsdl)
+if( !defined('TRIPOLIS_DIALOGSERVICE_URI') ) {
+   define( 'TRIPOLIS_DIALOGSERVICE_URI', 'https://api.tripolis.com/soap/1.5/no-mtom/DialogueService?wsdl' );
+}
 
+// Tripolis Dialogue client name
+if( !defined('TRIPOLIS_AUTHINFO_CLIENT') ) {
+   define( 'TRIPOLIS_AUTHINFO_CLIENT', '' );
+}
+// Tripolis Dialogue username.
+if( !defined('TRIPOLIS_AUTHINFO_USERNAME') ) {
+   define( 'TRIPOLIS_AUTHINFO_USERNAME', '' );
+}
+// Tripolis Dialogue password.
+if( !defined('TRIPOLIS_AUTHINFO_PASSWORD') ) {
+   define( 'TRIPOLIS_AUTHINFO_PASSWORD', '' );
+}
+// Tripolis workspace to create content in.
+if( !defined('TRIPOLIS_WORKSPACE') ) {
+   define( 'TRIPOLIS_WORKSPACE', 'woodwingdemo' );
+}
+// Tripolis contact database name.
+if( !defined('TRIPOLIS_DATABASE') ) {
+   define( 'TRIPOLIS_DATABASE', 'woodwingdemo' );
+}
+// Tripolis direct email type name.
+if( !defined('TRIPOLIS_DIRECTEMAIL_TYPE') ) {
+   define( 'TRIPOLIS_DIRECTEMAIL_TYPE', 'detype1' );
+}

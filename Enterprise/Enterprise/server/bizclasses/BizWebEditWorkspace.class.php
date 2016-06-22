@@ -1068,7 +1068,7 @@ class BizWebEditWorkspace
 						DBPlacements::deletePlacements( $layoutId, 0, 'Placed' );
 					}
 
-					BizObject::saveObjectPlacedRelations( $user, $layoutId, $ret['Relations'], false );
+					BizObject::saveObjectPlacedRelations( $user, $layoutId, $ret['Relations'], false, false );
 
 					// Save the Indesign Articles for the layout object (v9.7).
 					if( !is_null($ret['InDesignArticles']) ) {

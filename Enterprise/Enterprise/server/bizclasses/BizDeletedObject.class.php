@@ -667,7 +667,7 @@ class BizDeletedObject
 		//since v8.0, Delete Object will return the Object deleted in smartevent.
 		//Search from the respective area (Workflow or Area) which is introduced in v8.0 TrashCan Feature
 		$user = BizSession::getShortUserName();
-		$object = BizObject::getObject( $objId, $user, false, 'none', array('MetaData','Targets'), null, true, $areas, null, false );
+		$object = BizObject::getObject( $objId, $user, false, 'none', array( 'MetaData', 'Targets', 'Relations' ), null, true, $areas, null, false );
 
 		LogHandler::Log( 'DeletedObjects', 'DEBUG', "doDeleteObject: $objId start" );
 

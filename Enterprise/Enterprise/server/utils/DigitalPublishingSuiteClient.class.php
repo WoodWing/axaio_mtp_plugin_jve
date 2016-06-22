@@ -1165,13 +1165,13 @@ class WW_Utils_DigitalPublishingSuiteClient
 	 * @return string The kicker info
 	 * @since 9.7.0
 	 */
-	private function getKickerContent( $dossier )
+	static private function getKickerContent( $dossier )
 	{
-		$kicker = BizAdmProperty::getCustomPropVal( $dossier->MetaData->ExtraMetaData, 'C_KICKER');
-		if ( !is_null( $kicker ) && !empty( $kicker ) ) {
+		$kicker = BizAdmProperty::getCustomPropVal( $dossier->MetaData->ExtraMetaData, 'C_KICKER' );
+		if( !is_null( $kicker ) && !empty( $kicker ) ) {
 			return $kicker;
-		} elseif ( !empty( $dossier->MetaData->ContentMetaData->Slugline )) {
-			return( $dossier->MetaData->ContentMetaData->Slugline );
+		} elseif( !empty( $dossier->MetaData->ContentMetaData->Slugline ) ) {
+			return ( $dossier->MetaData->ContentMetaData->Slugline );
 		}
 
 		return '';

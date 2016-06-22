@@ -15,27 +15,45 @@
    limitations under the License.
 ****************************************************************************/
 
-define ('CLARO_WW_USERNAME', 	'woodwing');
-define ('CLARO_WW_USERPWD', 	'ww');
-define ('CLARO_POST_STATUS', 	'Image Finished');
-define ('CLARO_PRE_STATUS', 	'Image Editing');
-define ('CLARO_PRE_BW_STATUS', 	'BW Image Editing');
-define ('CLARO_PROCESS_STATUS', 'Image Processing');
+if( !defined('CLARO_WW_USERNAME') ) {
+	define( 'CLARO_WW_USERNAME', 'woodwing' );
+}
+if( !defined('CLARO_WW_USERPWD') ) {
+	define( 'CLARO_WW_USERPWD', 'ww' );
+}
+if( !defined('CLARO_POST_STATUS') ) {
+	define( 'CLARO_POST_STATUS', 'Image Finished' );
+}
+if( !defined('CLARO_PRE_STATUS') ) {
+	define( 'CLARO_PRE_STATUS', 'Image Editing' );
+}
+if( !defined('CLARO_PRE_BW_STATUS') ) {
+	define( 'CLARO_PRE_BW_STATUS', 'BW Image Editing' );
+}
+if( !defined('CLARO_PROCESS_STATUS') ) {
+	define( 'CLARO_PROCESS_STATUS', 'Image Processing' );
+}
 
-define ('CLARO_IMAGE_TYPE', serialize(array(".jpg",".jpeg", ".tif", ".tiff", ".psd")) );
+if( !defined('CLARO_IMAGE_TYPE') ) {
+	define( 'CLARO_IMAGE_TYPE', serialize( array( ".jpg", ".jpeg", ".tif", ".tiff", ".psd" ) ) );
+}
 
-define ('CLARO_CONFIG', serialize(array(
-		'WW News' => array (		// for each publicationname (case sensitve):
-					'MIME' =>'image/jpg',		// MIME to CLaro, 'image/jpg' or psd 'image/vnd.adobe.photoshop'
-					'EXT' => 'jpg',				// ext to Claro 'jpg' or 'psd'
-					'DOCROP' => true,
-					'DOROTATE' => true,
-					'EXPORT_PATH' => ATTACHMENTDIRECTORY . '/_CLARO_/input/',
-					'EXPORT_IMAGE_PATH' => ATTACHMENTDIRECTORY . '/_CLARO_/input/images/',
-				//	'SERVER_EXPORT_IMG_PATH' => '/CLARO/to/image/',	// delete this line if not needed
-					'IMPORT_PATH' => ATTACHMENTDIRECTORY . '/_CLARO_/output/'
-					)
-		)
-));
+if( !defined('CLARO_CONFIG') ) {
+	define ('CLARO_CONFIG', serialize(array(
+			'WW News' => array (		// for each publicationname (case sensitve):
+						'MIME' =>'image/jpg',		// MIME to CLaro, 'image/jpg' or psd 'image/vnd.adobe.photoshop'
+						'EXT' => 'jpg',				// ext to Claro 'jpg' or 'psd'
+						'DOCROP' => true,
+						'DOROTATE' => true,
+						'EXPORT_PATH' => ATTACHMENTDIRECTORY . '/_CLARO_/input/',
+						'EXPORT_IMAGE_PATH' => ATTACHMENTDIRECTORY . '/_CLARO_/input/images/',
+					//	'SERVER_EXPORT_IMG_PATH' => '/CLARO/to/image/',	// delete this line if not needed
+						'IMPORT_PATH' => ATTACHMENTDIRECTORY . '/_CLARO_/output/'
+						)
+			)
+	));
+}
 
-define ('CLARODEBUG', 			false);
+if( !defined('CLARODEBUG') ) {
+	define( 'CLARODEBUG', false );
+}

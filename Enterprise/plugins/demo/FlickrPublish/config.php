@@ -18,27 +18,43 @@
 /*
 	Flick account name
 */
-define ('FLICKRPUBLISH_ACCOUNT', 	'' );
+if( !defined('FLICKRPUBLISH_ACCOUNT') ) {
+   define( 'FLICKRPUBLISH_ACCOUNT', '' );
+}
 
 /*
 	Register for API Key and Secret at:
 	http://www.flickr.com/services/api/ under API Keys.
 	This can be used independent of the Flickr account, this is linked with the token:
 */
-define ('FLICKRPUBLISH_API_KEY', 	'' );
-define ('FLICKRPUBLISH_API_SECRET', '' );
+if( !defined('FLICKRPUBLISH_API_KEY') ) {
+   define( 'FLICKRPUBLISH_API_KEY', '' );
+}
+if( !defined('FLICKRPUBLISH_API_SECRET') ) {
+   define( 'FLICKRPUBLISH_API_SECRET', '' );
+}
 
 /*
 	Flickr Token that links to your account.
 	Logon, to Flickr and next open this plugin page:
 	http://YOUR_SERVER/YOUR_ENTERPRISE_FOLDER/config/plugins/flickrpublish/gettoken.php
 */
-define ('FLICKRPUBLISH_TOKEN',		'' );
+if( !defined('FLICKRPUBLISH_TOKEN') ) {
+   define( 'FLICKRPUBLISH_TOKEN', '' );
+}
 
 // Define whether the image publish to Flickr will be for Public, Friends, or Family.
-define ('FLICKRPUBLISH_PUBLIC',	true );
-define ('FLICKRPUBLISH_FRIEND', true );
-define ('FLICKRPUBLISH_FAMILY',	true );
+if( !defined('FLICKRPUBLISH_PUBLIC') ) {
+   define( 'FLICKRPUBLISH_PUBLIC', true );
+}
+if( !defined('FLICKRPUBLISH_FRIEND') ) {
+   define( 'FLICKRPUBLISH_FRIEND', true );
+}
+if( !defined('FLICKRPUBLISH_FAMILY') ) {
+   define( 'FLICKRPUBLISH_FAMILY', true );
+}
 
 // Define Flickr temp directory
-define ('FLICKR_DIRECTORY', ATTACHMENTDIRECTORY . '/_FLICKR_');
+if( !defined('FLICKR_DIRECTORY') ) {
+   define( 'FLICKR_DIRECTORY', ATTACHMENTDIRECTORY.'/_FLICKR_' );
+}

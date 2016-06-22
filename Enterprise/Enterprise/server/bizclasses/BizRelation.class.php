@@ -142,7 +142,7 @@ class BizRelation
 				//$relation->childRow = $childRow; // for usages at next loop (below)
 
 				require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
-				DBlog::logService( 
+				DBlog::logService(
 					$user,
 					'CreateObjectRelations',
 					$childId,
@@ -182,10 +182,10 @@ class BizRelation
 
 				if( $relation->Type == 'Contained'  ) {
 					if ( $childType == 'PublishForm' && $parentType == 'Dossier' ) {
-						self::validateFormContainedByDossier( 
+						self::validateFormContainedByDossier(
 							$childId,
 							null,// null =  Object Target is not interesting here.
-							array( $relation )); 
+							array( $relation ));
 						$dossierTargets = BizTarget::getTargets( $user, $parentId );
 						self::validateDossierContainsForms( $parentId,  $dossierTargets, array( $relation ));
 					} else {
@@ -206,7 +206,7 @@ class BizRelation
 							DBObject::updateRowValues($childId, array('name' => $name));
 							// No indexing by Solr needed as this is done after the relation is created.
 						}
-					}	
+					}
 				}
 
 				// Check user authorization. See Note#001!
@@ -236,14 +236,14 @@ class BizRelation
 					if ( $objRelId ) {
 						// Duplicate row error plus record found => multiple placements.
 						$multiplePlacement = true;
-					}	
+					}
 				}
 
 				$relationCreated = DBObjectRelation::getObjectRelationByRelId( $objRelId ); // Needed since v7.6.0
-				
+
 				// 'Related' relations should become bi-directional. Above, parent->child relation is already created,
 				// so here we create child->parent relation to make it bi-directional. (BZ#17023)
-				if( $relation->Type == 'Related' ) { 
+				if( $relation->Type == 'Related' ) {
 					DBObjectRelation::createObjectRelation( $childId, $parentId, $relation->Type, $childType, $pagerange, $relation->Rating, $parentType );
 				}
 
@@ -251,7 +251,7 @@ class BizRelation
 				// Get the created Relations from the database and return it on the relation that was created
 				$placements = DBPlacements::getPlacements( $parentId, $childId, $relation->Type );
 				$relationCreated->Placements =  $placements;
-				
+
 				self::automaticRelationTargetAssignments($user, $relation, $parentType, $childRow['type']);
 				// only create targets if they are defined
 				if (isset($relation->Targets) && is_array($relation->Targets) && ! empty($relation->Targets)){
@@ -285,7 +285,7 @@ class BizRelation
 						throw new BizException( 'ERR_ATTACHMENT', 'Server', $attachobj->getError() );
 					}
 				}
-				
+
 				self::addVersionInfoToCreatedRelation( $relationCreated, $parentId, $childId );
 				if ( isset( $objRelationTargets ) ) {
 					$relationCreated->Targets = $objRelationTargets;
@@ -312,7 +312,7 @@ class BizRelation
 				$childInfo->Type = $childRow['type'];
 				$childInfo->Format = $childRow['format'];
 				$relationCreated->ChildInfo = $childInfo;
-				
+
 				$parentInfo = new ObjectInfo;
 				$parentInfo->ID = $parentId;
 				$parentInfo->Name = $parentRow['name'];
@@ -361,7 +361,7 @@ class BizRelation
 	 * @param boolean $regenPage True if page must be regenerated else false.
 	 * @param mysqlidriver|oracledriver|mssqldriver $dbDriver
 	 * @param array $parentRow
-	 * @throws BizException 
+	 * @throws BizException
 	 */
 	private static function registerPlacements(  Relation $relation, $parentId, $childId, $regenPage, $dbDriver, $parentRow )
 	{
@@ -394,7 +394,7 @@ class BizRelation
 										$image_pg = imagecreatefromstring( $content );
 										$image_plc = imagecreatefromstring( $placement->Preview );
 										$factor = 792.0 / imagesy( $image_pg );
-										imagecopyresized( 
+										imagecopyresized(
 											$image_pg,
 											$image_plc,
 											$placement->Left / $factor,
@@ -435,11 +435,11 @@ class BizRelation
 	}
 
 	/**
-	 * Adds the major/minor version of the parent and child object to the relation (as returned within the response). 
+	 * Adds the major/minor version of the parent and child object to the relation (as returned within the response).
 	 * @param Relation $relationCreated Relation 9returned within response)
 	 * @param int $parentId  Id of the parent object.
 	 * @param int $childId  Id of the child object.
-	 */	
+	 */
 	private static function addVersionInfoToCreatedRelation( Relation $relationCreated, $parentId, $childId )
 	{
 		// Geting parent and child object version.
@@ -468,10 +468,10 @@ class BizRelation
 		if ( !$parentIds ) {
 			return $relations;
 		}
-		
+
 		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
-		
+
 		$rows = DBObjectRelation::getObjectRelations( $parentIds, 'childs', 'Placed', false );
 		$allPlacements = DBPlacements::getAllPlacements( $parentIds, 0, 'Placed', false );
 		foreach( $rows as $row ) {
@@ -532,7 +532,7 @@ class BizRelation
 	 *      L> All relations( with or without 'DeletedXXX' relation) returned.
 	 *      L> All placement (with or without 'DeletedPlaced' ) returned.
 	 *      L> Object properties are all retrieved from smart_objects and smart_deletedobjects table.
-		 *
+	 *
 	 *      When $getFromWorkflowAndTrash = false
 	 *      L> Only relations without 'DeletedXXX' are returned.
 	 *      L> Only placement without 'DeletedPlaced' are returned.
@@ -561,7 +561,7 @@ class BizRelation
 	 * @throws BizException
 	 */
 	public static function getObjectRelations(
-		$id, $attachGeo = true, $allTargets = false, $related = null, $getFromWorkflowAndTrash = false, 
+		$id, $attachGeo = true, $allTargets = false, $related = null, $getFromWorkflowAndTrash = false,
 		$objectLabels = false, $type = null )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizStorage.php';
@@ -606,8 +606,8 @@ class BizRelation
 
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
 		DBlog::logService( '', 'GetObjectRelations', $id,
-					$row['publication'], '', $row['section'], $row['state'], 
-					'', '', '', $row['type'], $row['routeto'], '', $row['version'] );
+			$row['publication'], '', $row['section'], $row['state'],
+			'', '', '', $row['type'], $row['routeto'], '', $row['version'] );
 
 		// Determine relation type, when related type not specify, then return both parent+child.
 		$related = is_null($related) ? 'both' : $related;
@@ -702,16 +702,16 @@ class BizRelation
 						$rel->Targets  = DBTarget::composeRelationTargetsOfTargetEditionRows( $targetEditionRows[ $objectRelationId ] );
 					} else {
 						$rel->Targets = array();
-					}	
+					}
 				}
 			} else { // we are parent
 				//$rel->Targets  = DBTarget::getTargetsbyObjectrelationId( $row['id'] );
 				$objectRelationId = intval( $row['id'] );
 				if ( isset($targetEditionRows[ $objectRelationId ])) {
-					$rel->Targets  = DBTarget::composeRelationTargetsOfTargetEditionRows( $targetEditionRows[ $objectRelationId ] );	
+					$rel->Targets  = DBTarget::composeRelationTargetsOfTargetEditionRows( $targetEditionRows[ $objectRelationId ] );
 				} else {
 					$rel->Targets = array();
-				}	
+				}
 			}
 
 			if( $rel->Type == 'Contained' && $objectLabels ) {
@@ -723,20 +723,20 @@ class BizRelation
 		}
 
 		/** BZ#18702 Getting all unplaced adverts and adding them as planned relations
-		 * to a layout has a huge performance drawback and is not used client-side. 
-		  // and for layout objects: also all unplaced adverts in same P/I/S
-		  if ($objectType == 'Layout'){
-		  require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
-		  $unplaced = DBObjectRelation::unplacedAdverts( $id, $pub, $issue, $section );
-		  if ($unplaced) foreach ($unplaced as $child) {
-		  $relations[] = new Relation( $id, $child, 'Planned');
-		  }
-		  }
+		 * to a layout has a huge performance drawback and is not used client-side.
+		// and for layout objects: also all unplaced adverts in same P/I/S
+		if ($objectType == 'Layout'){
+		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
+		$unplaced = DBObjectRelation::unplacedAdverts( $id, $pub, $issue, $section );
+		if ($unplaced) foreach ($unplaced as $child) {
+		$relations[] = new Relation( $id, $child, 'Planned');
+		}
+		}
 		 */
-		
+
 		return $relations;
 	}
-	
+
 	/**
 	 * This function checks if the combination parent type and child type is
 	 * allowed. This depends on the type of the relation.
@@ -765,7 +765,7 @@ class BizRelation
 					default:
 						break;
 				}
-				// No break here, needs to continue.
+			// No break here, needs to continue.
 			case 'Contained':
 				switch ($parentType) {
 					case 'Dossier':   // All is allowed inside dossier(template) except dossier(template)
@@ -962,7 +962,7 @@ class BizRelation
 		if ($relations){
 			// $serverJobs = array(); // v8.0: Uncomment when serverJob 'UpdateParentModifierAndModified' is supported again.
 			$objectsToIndex = array();
-			foreach ($relations as $relation) {				
+			foreach ($relations as $relation) {
 				$parentId = $relation->Parent;
 				$childId = $relation->Child;
 
@@ -1008,12 +1008,12 @@ class BizRelation
 				$parentType = $parentRow['type'];
 
 				require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
-				DBlog::logService( $user, "UpdateObjectRelations", $childId, 
-					$childRow['publication'] , '', $childRow['section'], $childRow['state'] , 
+				DBlog::logService( $user, "UpdateObjectRelations", $childId,
+					$childRow['publication'] , '', $childRow['section'], $childRow['state'] ,
 					$parentId, '', '', $childRow['type'], $childRow['routeto'], '', $childRow['version'] );
 				if( $relation->Type == 'Related' ) { // Related relations are bi-directional (BZ#17023)
-					DBlog::logService( $user, "UpdateObjectRelations", $parentId, 
-						$parentRow['publication'] , '', $parentRow['section'], $parentRow['state'] , 
+					DBlog::logService( $user, "UpdateObjectRelations", $parentId,
+						$parentRow['publication'] , '', $parentRow['section'], $parentRow['state'] ,
 						$childId, '', '', $parentRow['type'], $parentRow['routeto'], '', $parentRow['version'] );
 				}
 
@@ -1027,7 +1027,7 @@ class BizRelation
 				//  so they can be placed multiple items on separate parents. Multiple placements
 				// inside 1 parent means 1 relation with multiple placements.
 				//$childType = $parent;
-	
+
 				// Check user authorization. See Note#001!
 				if ( $checkAccess ) {
 					self::checkWriteAccessForObjRow( $user, $parentRow );
@@ -1142,7 +1142,7 @@ class BizRelation
 						$objRelationTargets = DBTarget::getTargetsbyObjectrelationId( $objRelId );
 					}
 				} // else, Related; nothing to do!
-	
+
 				/* v8.0: Uncomment when serverJob 'UpdateParentModifierAndModified' is supported again.
 				if( $relation->Type == 'Contained' ){
 					if( !isset($serverJobs[$parentId]) ){
@@ -1160,7 +1160,7 @@ class BizRelation
 						BizTarget::updateObjectRelationTargets( $user, $objRelId, $relation->Targets );
 					}
 				}
-	
+
 				// update geometry
 				if ( isset($relation->Geometry) ) {
 					$attachobj = StorageFactory::gen($childRow['storename'], $childId, "geo-$parentId", XMLTYPE, null, null, null, true);
@@ -1212,7 +1212,7 @@ class BizRelation
 			}
 			if ( $objectsToIndex ) {
 				BizSearch::indexObjectsByIds( $objectsToIndex );
-			}	
+			}
 		}
 		return $relationsUpdated;
 	}
@@ -1390,19 +1390,14 @@ class BizRelation
 	 */
 	private static function checkWriteAccessForObjRow( $user, $row )
 	{
-		if( $row['state'] != -1 ) { // // ignore Personal Status
-		
-			// Determine the first best issue which the object is assigned to.
-			require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
-			$targets = DBTarget::getTargetsByObjectId( $row['id'] );
-			$issueId = $targets && count($targets) ? $targets[0]->Issue->Id : 0;
-	
-			// Check user authorization
-			require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
-			BizAccess::checkRightsForObjectRow( 
-								$user, 'W', BizAccess::THROW_ON_DENIED, 
-								$row, $issueId );
-		}
+		// Determine the first best issue which the object is assigned to.
+		require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
+		$targets = DBTarget::getTargetsByObjectId( $row['id'] );
+		$issueId = $targets && count($targets) ? $targets[0]->Issue->Id : 0;
+
+		// Check user authorization
+		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
+		BizAccess::checkRightsForObjectRow( $user, 'W', BizAccess::THROW_ON_DENIED, $row, $issueId );
 	}
 
 	/**
@@ -1461,7 +1456,7 @@ class BizRelation
 				$retMessages[] = $msgObj;
 			}
 		}
-		
+
 		// Collect messages to be deleted.
 		$messageList = new MessageList();
 		$messageList->DeletedMessageIDs = $oldMessageIds;
@@ -1514,10 +1509,10 @@ class BizRelation
 								}
 								if( empty( $editionName ) ) {
 									$msg = BizResources::localize( 'WARN_ELEMENT_PLACED', true,
-									array( $elementNames, '"'.$childName.'"', '"'.$parentName.'"' ) );
+										array( $elementNames, '"'.$childName.'"', '"'.$parentName.'"' ) );
 								} else {
 									$msg = BizResources::localize( 'WARN_ELEMENT_PLACED_EDITION', true,
-									array( $elementNames, '"'.$childName.'"', '"'.$editionName.'"', '"'.$parentName.'"' ) );
+										array( $elementNames, '"'.$childName.'"', '"'.$editionName.'"', '"'.$parentName.'"' ) );
 								}
 								LogHandler::Log( 'BizRelation','INFO','Detected duplicate placement: '.$msg );
 
@@ -1658,7 +1653,7 @@ class BizRelation
 	 * - when a printable object is added to a layout, target it automatically to the same targets as the layout
 	 * - when a layout is added to a dossier that has the same issue assigned, the target must be added to the layout too
 	 * - when a video or audio object is added to a dossier, target it automatically to the DM targets of the dossier
-	 * 
+	 *
 	 * See "Improved Dossier Usability" spec
 	 *
 	 * @param string $user
@@ -1682,11 +1677,11 @@ class BizRelation
 		$extraTargets = array();
 		$params = array( $user, $relation, $parentType, $childType, &$extraTargets ); // Allow adjusting $extraTargets!
 		BizServerPlugin::runDefaultConnectors(
-									'NameValidation',
-									null,
-									'applyAutoTargetingRule',
-									$params,
-									$connRetVals );
+			'NameValidation',
+			null,
+			'applyAutoTargetingRule',
+			$params,
+			$connRetVals );
 		$applyAutoTargeting = true;
 		if ( $connRetVals ) foreach ( $connRetVals as $retVal ) {
 			if ( $retVal === false ) {
@@ -1743,16 +1738,16 @@ class BizRelation
 						if ( $childObjectTarget->Editions ) foreach( $childObjectTarget->Editions as $childEdition ) {
 							if ($parentObjectTarget->Editions) foreach( $parentObjectTarget->Editions as $parentEdition ) {
 								if ( $childEdition->Id == $parentEdition->Id ) {
-									$targetToAssign->Editions[] = $parentEdition; 
+									$targetToAssign->Editions[] = $parentEdition;
 									break; // Intersection => only set common editions BZ#31202.
 								}
 							}
 						}
-						if ( empty($targetToAssign->Editions ) ) { 
-						// If there is no overlap, all editions (if any) of the dossier are set on the relational target.
+						if ( empty($targetToAssign->Editions ) ) {
+							// If there is no overlap, all editions (if any) of the dossier are set on the relational target.
 							$targetToAssign->Editions = $parentObjectTarget->Editions;
 						}
-						
+
 						// add dossier target
 						BizTarget::addToTargetArray( $relation->Targets, $targetToAssign );
 						break;
@@ -1839,7 +1834,7 @@ class BizRelation
 	 * Returns the relations of an object (esp. layouts) which have been removed.
 	 * Only 'placed' relations are taken into account.
 	 * First the stored relations are retrieved and these are compared agains the new
-	 * relations (not yet stored). 
+	 * relations (not yet stored).
 	 *
 	 * @param integer $parent  Parent object of which the relations are checked
 	 * @param array $newRelations List of relation objects
@@ -1883,7 +1878,7 @@ class BizRelation
 		return $singleDossier;
 	}
 
-	
+
 	/**
 	 * Create placement tiles
 	 *
@@ -1914,7 +1909,7 @@ class BizRelation
 	 * the function retrieves the Form(s) that is/are contained by this dossier.
 	 * The Form(s) relation Target is/are then checked against the Dossier's Targets.
 	 * Refer to validateDossierAndFormIssues() for more rules.
-	 * 
+	 *
 	 * @param string|null $dossierId Dossier (ID) to validate, including its forms. Null when dossier is not yet created(about to create).
 	 * @param array $dossierTargets Targets the client/user is about to assign to the dossier.
 	 * @param array|null $dossierRelations ALL object relations of the dossier. NULL to let function resolve.
@@ -1930,7 +1925,7 @@ class BizRelation
 		if( is_null( $dossierRelations ) && $dossierId ) {
 			$dossierRelations = self::resolveContainedRelations( $dossierId, null );
 		}
-		
+
 		// Dossier without relations mean dossier contain no form, nothing to validate, bail out.
 		if( empty( $dossierRelations ) ) {
 			return;
@@ -1941,7 +1936,7 @@ class BizRelation
 		if( $dossierTargets ) foreach( $dossierTargets as $dossierTarget ) {
 			$dossierIssueIds[] = $dossierTarget->Issue->Id;
 		}
-		
+
 		// Collect the issue ids where the forms are assigned to.
 		// Only take into account the forms contained by the dossier.
 		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
@@ -1990,15 +1985,15 @@ class BizRelation
 			self::validateDossierAndFormIssues( $dossierId, $formId, $dossierIssueIds, array($formIssueId) );
 		}
 	}
-	
+
 	/**
 	 * Validate the Form and its Dossier the Form is contained in.
 	 * When form is targeted to an Issue(Object Target), it raises Error.
 	 * Based on the $formRelationsToBeSaved(resolved in this function when not given),
 	 * the function retrieves the Dossier the form is contained in.
 	 * The Form(s) relation Target is/are then checked against the Dossier's Targets.
-	 * Refer to validateDossierAndFormIssues() for more rules.	 
-	 * 
+	 * Refer to validateDossierAndFormIssues() for more rules.
+	 *
 	 * @param string|null $formId PublishForm (ID) to validate, including its dossier.When form is not yet created, pass in Null, but $formRelationsToBeSaved should be passed in.
 	 * @param array $formTargets Targets the client/user is about to assign to the form.
 	 * @param array|null $formRelationsToBeSaved ALL object relations of the form. NULL to let function resolve. When $formId is null, $formRelationsToBeSaved must be passed in.
@@ -2009,18 +2004,18 @@ class BizRelation
 		$childType = '';
 		if( is_null( $formId ) && is_null( $formRelationsToBeSaved ) ) {
 			throw new BizException( 'ERR_ERROR', 'Client', 'FormId and Form relations are found to be null.' .
-					'If the Form is not yet created, passed in a Null FormId with a valid Form Relations; '. 
-					'If the Form has already been created before, pass in the FormId' );
+				'If the Form is not yet created, passed in a Null FormId with a valid Form Relations; '.
+				'If the Form has already been created before, pass in the FormId' );
 		} else if( is_null( $formId ) && $formRelationsToBeSaved ) { // Exception! Happens only when Form is about to get created.
 			// No form id in the Relation->Child yet, assume childType is Form.
 			$childType = 'PublishForm';
 		}
-	
+
 		// Retrieve the forms's object relations when not provided by caller.
 		if( is_null( $formRelationsToBeSaved ) ) {
 			$formRelationsToBeSaved = self::resolveContainedRelations( null, $formId );
 		}
-		
+
 		// A form should have relations (at least one Contained and one InstanceOf).
 		if( empty( $formRelationsToBeSaved ) ) {
 			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
@@ -2077,7 +2072,7 @@ class BizRelation
 						$currentFormId = !is_null( $formRelationToBeSaved->Child ) ? $formRelationToBeSaved->Child : $formCounter;
 						$formCounter--;
 						if( array_key_exists( $formIssueId, $issueIdsOfAllForms ) &&
-								( $issueIdsOfAllForms[$formIssueId] != $formRelationToBeSaved->Child ))  {
+							( $issueIdsOfAllForms[$formIssueId] != $formRelationToBeSaved->Child ))  {
 							$formName = ( $currentFormId >  0 ) ?
 								'"'. DBObject::getObjectName( $currentFormId ) . '(id='.$currentFormId.')"' : '';
 							$otherFormId = $issueIdsOfAllForms[$formIssueId];
@@ -2241,7 +2236,7 @@ class BizRelation
 
 			throw new BizException( 'ERR_ARGUMENT', 'Client', $message );
 		}
-		
+
 		// Rule [B] ...
 		$formIssuesNotFoundInDossierIssues = array_diff( $formIssueIds, $dossierIssueIds );
 		if( $formIssuesNotFoundInDossierIssues ) {
@@ -2263,7 +2258,7 @@ class BizRelation
 				'which does not match a targeted issue of the Dossier '. $dossierName;
 			throw new BizException( 'ERR_ARGUMENT', 'Client',  $message );
 		}
-		
+
 	}
 
 	/**
@@ -2279,7 +2274,7 @@ class BizRelation
 		$isForm = ($parentType == 'PublishForm') || ($parentType == 'PublishFormTemplate');
 
 		return ($isDossier && $relationType == 'Contained') ||
-			($isForm && $relationType == 'Placed');
+		($isForm && $relationType == 'Placed');
 	}
 
 	/**

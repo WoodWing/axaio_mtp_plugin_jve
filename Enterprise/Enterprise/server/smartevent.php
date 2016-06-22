@@ -1276,13 +1276,13 @@ class smartevent_issuereorder extends smartevent
 	 * @param string $ticket ticket of the logged in user
 	 * @param string $pubChannelType
 	 * @param integer $issueId
-	 * @param string $dossierIds Comma separated list of dossiers as ordered within the issue.
+	 * @param string $dossierIds Comma separated list of dossiers, base64 encoded, as ordered within the issue.
 	 * @since v7.0.13 for Digital Magazine / Newsfeed
 	 */
 	public function __construct( $ticket, $pubChannelType, $issueId, $dossierIds )
 	{
 		parent::__construct( EVENT_ISSUE_DOSSIER_REORDER_AT_PRODUCTION, $ticket );
-		$this->composeExchangeNameForObjectId( reset( $dossierIds ) );
+		$this->composeExchangeNameForIssue( $issueId );
 
 		$this->addfield( 'PubChannelType', $pubChannelType );
 		$this->addfield( 'IssueId', $issueId );
@@ -1302,13 +1302,13 @@ class smartevent_issuereorderpublished extends smartevent
 	 * @param string $ticket ticket of the logged in user
 	 * @param string $pubChannelType
 	 * @param PubPublishedIssue $publishedIssue
-	 * @param string $dossierIds Comma separated list of dossiers as ordered within the issue.
+	 * @param string $dossierIds Comma separated list of dossiers, base64 encoded, as ordered within the issue.
 	 * @since v7.5.0
 	 */
 	public function __construct( $ticket, $pubChannelType, $publishedIssue, $dossierIds )
 	{
 		parent::__construct( EVENT_ISSUE_DOSSIER_REORDER_PUBLISHED, $ticket );
-		$this->composeExchangeNameForObjectId( reset( $dossierIds ) );
+		$this->composeExchangeNameForIssue( $publishedIssue->Target->IssueID );
 
 		$this->addfield( 'PubChannelType', $pubChannelType );
 		$this->addfield( 'PubChannelId', $publishedIssue->Target->PubChannelID );

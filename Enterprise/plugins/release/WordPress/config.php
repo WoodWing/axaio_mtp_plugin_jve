@@ -20,4 +20,6 @@ $sites[''] = array(
 	'password'   => ''
 );
 
-define('WORDPRESS_SITES',   serialize( $sites ));
+if( !defined('WORDPRESS_SITES') ) {
+	define( 'WORDPRESS_SITES', serialize( $sites ) );
+}

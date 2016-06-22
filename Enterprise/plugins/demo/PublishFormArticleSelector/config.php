@@ -29,8 +29,9 @@ $mapping_rules = array();
 //$mapping_rules[] = array ('channelId' => '11', 'labelRegEx' => '/body/i', 'componentName' => 'body');
 
 
-define('MAPPING_RULES',  serialize($mapping_rules));
-
+if( !defined('MAPPING_RULES') ) {
+   define( 'MAPPING_RULES', serialize( $mapping_rules ) );
+}
 
 //Using the article rules you can specify which article to use for the mapping
 //channelId: Id of the channel
@@ -53,4 +54,6 @@ $article_rules = array ();
 //$article_rules[] = array ('channelId' => '11', 'type' => 'copy', 'brandId' => '-1', 'articleName' => 'WebArticleTemplate', 'suffix' => '-Web');
 
 
-define('ARTICLE_RULES',  serialize($article_rules));
+if( !defined('ARTICLE_RULES') ) {
+   define( 'ARTICLE_RULES', serialize( $article_rules ) );
+}
