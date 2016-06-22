@@ -272,14 +272,13 @@ class WW_Utils_TransferClient
 	 * @param string $url Endpoint of the service.
 	 * @param string|null $response The response body of the call, passed by reference.
 	 * @param string|null $httpCode The HTTP Code returned by the call, passed by reference.
-	 * @param string $methodName The name of the method calling this function, used for logging, defaults to '';
 	 */
-	public function callService( $url, &$response, &$httpCode, $methodName )
+	public function callService( $url, &$response, &$httpCode )
 	{
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
 		$this->httpClient->setUri( $url );
 		$this->setCurlOptionsForSsl();
-		WW_Utils_UrlUtils::callService($this->httpClient, $response, $httpCode, $methodName );
+		WW_Utils_UrlUtils::callService($this->httpClient, $response, $httpCode, 'wwtest' );
 	}
 
 	/**
@@ -294,7 +293,7 @@ class WW_Utils_TransferClient
 
 			if( !$certificate ) {
 				throw new BizException( null, 'Server', null,
-					'The certificate file, to access the Transfer Server over SSL, does not exist.' );
+					'The certificate file, to access the Transfer Server over SSL, does exist.' );
 			}
 
 			$curlOptions = array(
