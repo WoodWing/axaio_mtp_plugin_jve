@@ -1,4 +1,22 @@
 <?php
+// Paranoid check defines that are essential to locate include files.
+if( !defined('DIRECTORY_SEPARATOR') || !defined('PATH_SEPARATOR') ) {
+	die( 'The PHP constants DIRECTORY_SEPARATOR or PATH_SEPARATOR are undefined.' );
+	// Note: The PATH_SEPARATOR was introduced with PHP 4.3.0-RC2.
+}
+
+// Determine which OS is running to use correct default path settings in config files.
+if( DIRECTORY_SEPARATOR == '/' && PATH_SEPARATOR == ':' ) {
+	$uname = php_uname();
+	$parts = preg_split('/[[:space:]]+/', trim($uname));
+	if($parts[0] == "Linux") {
+		define( 'OS', 'LINUX' );
+	} else {  // UNIX or Macintosh
+		define( 'OS', 'UNIX' );
+	}
+} else { // Windows: DIRECTORY_SEPARATOR = '\' and PATH_SEPARATOR = ';'
+	define( 'OS', 'WIN' );
+}
 
 // ----------------------------------------------------------------------------
 // Application Server details
@@ -14,7 +32,6 @@
 
 define ('BASEDIR',	dirname( dirname( __FILE__ ) )); // DO NOT end with a separator, use forward slashes
 
-require_once( BASEDIR.'/config/osconfig.php' );
 require_once( BASEDIR.'/config/config_overrule.php' );
 
 if( !defined('INETROOT') ) {
@@ -27,6 +44,7 @@ if( !defined('INETROOT') ) {
 // from the start of the line. Do not use a slash at the end.
 // For example: 'https://www.mydomain.com:481'.
 //define ('SERVERURL_ROOT', 'http://localhost' );
+
 if( !defined('LOCALURL_ROOT') ) {
 	define( 'LOCALURL_ROOT', 'http://127.0.0.1' );
 }

@@ -8,13 +8,11 @@
  * php testphpcodingcli.php <output directory>
  */
 
+require_once BASEDIR . '/config/config.php';
 /**
- * We need to overrule the default config.php. We run this on the latest source code from perforce
- * without the need of a fully configured Enterprise installation. Just define the BASEDIR and include
- * configserver.php so that the Zend Framework is included and the LogHandler is initialized.
+ * We need to overrule the default config.php.
  */
 define('BASEDIR', realpath(dirname(__FILE__) . '/../../'));
-require_once BASEDIR . '/config/osconfig.php';
 require_once BASEDIR . '/config/configserver.php';
 
 // Create a new session id
