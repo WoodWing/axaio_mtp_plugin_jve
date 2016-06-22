@@ -180,7 +180,7 @@ function step3_extractArtifacts() {
 # Copies Enterprise and the BuildTest to the web server for testing.
 #
 function step4_deployArtifactsToWebServer {
-	rsync -av  --exclude 'config/config_overrule.php' --delete "${WORKSPACE}/artifacts/Enterprise/" "${DOCROOT}/${ENT_DIR}/" 1>/dev/null
+	rsync -av --delete "${WORKSPACE}/artifacts/Enterprise/" "${DOCROOT}/${ENT_DIR}/" 1>/dev/null
 	rsync -av --delete "${WORKSPACE}/artifacts/BuildTest/" "${DOCROOT}/${ENT_DIR}/server/wwtest/testsuite/BuildTest/" 1>/dev/null
 	rsync -av --delete "${WORKSPACE}/artifacts/largeSpeedTestData/" "${DOCROOT}/${ENT_DIR}/server/wwtest/testsuite/largeSpeedTestData/" 1>/dev/null
 	rsync -av --delete "${WORKSPACE}/artifacts/Enterprise/config/configlang.php" "${DOCROOT}/${ENT_DIR}/config/configlang.php" 1>/dev/null
