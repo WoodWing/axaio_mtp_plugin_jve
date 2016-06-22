@@ -8,11 +8,11 @@
  * php testphpcodingcli.php <output directory>
  */
 
-require_once BASEDIR . '/config/config.php';
+define('BASEDIR', realpath(dirname(__FILE__) . '/../../'));
 /**
  * We need to overrule the default config.php.
  */
-define('BASEDIR', realpath(dirname(__FILE__) . '/../../'));
+require_once BASEDIR . '/config/config.php';
 require_once BASEDIR . '/config/configserver.php';
 
 // Create a new session id

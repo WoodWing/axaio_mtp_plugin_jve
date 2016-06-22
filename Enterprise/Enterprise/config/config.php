@@ -29,8 +29,9 @@ if( DIRECTORY_SEPARATOR == '/' && PATH_SEPARATOR == ':' ) {
 // LOCALURL_ROOT is the root HTTP location on which the application server runs 
 // from local point of view. Needed for internal server calls (especially WWtest).
 // ----------------------------------------------------------------------------
-
-define ('BASEDIR',	dirname( dirname( __FILE__ ) )); // DO NOT end with a separator, use forward slashes
+if( !defined('BASEDIR') ) {
+	define( 'BASEDIR', dirname( dirname( __FILE__ ) ) ); // DO NOT end with a separator, use forward slashes
+}
 
 require_once( BASEDIR.'/config/config_overrule.php' );
 
