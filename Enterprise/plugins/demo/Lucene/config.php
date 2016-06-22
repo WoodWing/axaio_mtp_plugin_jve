@@ -37,8 +37,9 @@
 
 	In any case you will need to call cron_optimize.php periodically.
 */
-define ('LUCENE_SYNCHRONOUS_INDEX', true ); // true for demo, false for 'production'
-
+if( !defined('LUCENE_SYNCHRONOUS_INDEX') ) {
+   define( 'LUCENE_SYNCHRONOUS_INDEX', true ); // true for demo, false for 'production'
+}
 
 /*
 	The work folder of the Lucene integration to store temporary files.
@@ -53,12 +54,18 @@ define ('LUCENE_SYNCHRONOUS_INDEX', true ); // true for demo, false for 'product
 	  not work on NFS and many other networked file systems". 
 	- Do not use networked file systems with Zend_Search_Lucene. 
 */
-define ('LUCENE_DIRECTORY', ATTACHMENTDIRECTORY . '/_LUCENE_'); // no ending '/'
+if( !defined('LUCENE_DIRECTORY') ) {
+   define( 'LUCENE_DIRECTORY', ATTACHMENTDIRECTORY.'/_LUCENE_' ); // no ending '/'
+}
 
 // Name of NameQuery as shown at end user.
-define ('LUCENE_NAMEDQUERY', 'Lucene Search');
+if( !defined('LUCENE_NAMEDQUERY') ) {
+   define( 'LUCENE_NAMEDQUERY', 'Lucene Search' );
+}
 
 // The number of Enterprise objects to index at Lucine. This is the maximum count of
 // objects treated for each cron_index.php call. You can temporary increase this number
 // for very large databases to limit the number of cron_index.php calls to do manually.
-define ('LUCENE_INDEX_MAXDOCS', 100);
+if( !defined('LUCENE_INDEX_MAXDOCS') ) {
+   define( 'LUCENE_INDEX_MAXDOCS', 100 );
+}

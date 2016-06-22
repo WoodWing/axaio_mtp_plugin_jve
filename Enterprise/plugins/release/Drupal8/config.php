@@ -37,4 +37,6 @@ $sites = array(
 	),
 );
 
-define('DRUPAL8_SITES', serialize( $sites ));
+if( !defined('DRUPAL8_SITES') ) {
+	define( 'DRUPAL8_SITES', serialize( $sites ) );
+}

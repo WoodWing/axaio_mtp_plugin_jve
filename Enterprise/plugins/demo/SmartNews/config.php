@@ -16,12 +16,26 @@
 ****************************************************************************/
 
 // Smart News configuration / credentials
-DEFINE("SMARTNEWS_PUBLISHINTERFACE", "http://localhost/smartnews/publish.php");
-DEFINE("SMARTNEWS_USERNAME", "woodwing");
-DEFINE("SMARTNEWS_PASSWORD", "ww");
+if( !defined('SMARTNEWS_PUBLISHINTERFACE') ) {
+   define( "SMARTNEWS_PUBLISHINTERFACE", "http://localhost/smartnews/publish.php" );
+}
+if( !defined('SMARTNEWS_USERNAME') ) {
+   define( "SMARTNEWS_USERNAME", "woodwing" );
+}
+if( !defined('SMARTNEWS_PASSWORD') ) {
+   define( "SMARTNEWS_PASSWORD", "ww" );
+}
 
 // Enterprise element configuration
-DEFINE("ARTICLE_HEADER", 	"header");	// the element name that is used for the title of the article
-DEFINE("ARTICLE_INTRO", 	"intro");	// the element name that is used for the intro of the article
-DEFINE("ARTICLE_BODY",		"body");	// the element name that is used for the body of the article
-
+// the element name that is used for the title of the article
+if( !defined('ARTICLE_HEADER') ) {
+   define( "ARTICLE_HEADER", "header" );
+}
+// the element name that is used for the intro of the article
+if( !defined('ARTICLE_INTRO') ) {
+   define( "ARTICLE_INTRO", "intro" );
+}
+// the element name that is used for the body of the article
+if( !defined('ARTICLE_BODY') ) {
+   define( "ARTICLE_BODY", "body" );
+}

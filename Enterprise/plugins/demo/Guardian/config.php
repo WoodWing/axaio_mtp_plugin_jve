@@ -18,21 +18,37 @@
 // API Key for Guardian API. Get one via http://guardian.mashery.com/
 // Approval process could take a few days.
 // For more info, see http://www.guardian.co.uk/open-platform
-define( 'GNL_API_KEY', 	'' );
+if( !defined('GNL_API_KEY') ) {
+   define( 'GNL_API_KEY', '' );
+}
 
 // Define the number of items per page
-define ('GNL_ITEMS_PER_PAGE', 25);
+if( !defined('GNL_ITEMS_PER_PAGE') ) {
+   define( 'GNL_ITEMS_PER_PAGE', 25 );
+}
 
 // Define Brand, Category and status for objects imported into the system.
 // When any of these don't exist, the first available Brand/Category/Status will be used.
-define( 'GNL_BRAND', 			'WW News' );
-define( 'GNL_CATEGORY', 		'News' );
-define( 'GNL_STATUS', 			'Draft text' );
+if( !defined('GNL_BRAND') ) {
+   define( 'GNL_BRAND', 'WW News' );
+}
+if( !defined('GNL_CATEGORY') ) {
+   define( 'GNL_CATEGORY', 'News' );
+}
+if( !defined('GNL_STATUS') ) {
+   define( 'GNL_STATUS', 'Draft text' );
+}
 
 // Name of the Query to be shown in the User Interface:
-define( 'GNL_QUERY_NAME', 			'Guardian' );
+if( !defined('GNL_QUERY_NAME') ) {
+   define( 'GNL_QUERY_NAME', 'Guardian' );
+}
 
 // Unique ID's for this Content Source. Make sure to change this if you create your own
 // Content Source based on this example plugin
-define('GNL_CONTENTSOURCEID', 		'GNL' );
-define('GNL_CONTENTSOURCEPREFIX', 	'_GNL_' );
+if( !defined('GNL_CONTENTSOURCEID') ) {
+   define( 'GNL_CONTENTSOURCEID', 'GNL' );
+}
+if( !defined('GNL_CONTENTSOURCEPREFIX') ) {
+   define('GNL_CONTENTSOURCEPREFIX', 	'_GNL_' );
+}

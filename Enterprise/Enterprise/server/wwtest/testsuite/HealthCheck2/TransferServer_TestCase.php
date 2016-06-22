@@ -103,9 +103,10 @@ class WW_TestSuite_HealthCheck2_TransferServer_TestCase extends TestCase
 		$testUrl = $testUrl . '?test=path';
 		$status = null;
 		$httpCode = null;
+		require_once BASEDIR.'/server/utils/TransferClient.class.php';
 		try {
-			$httpClient = WW_Utils_UrlUtils::createHttpClient($testUrl);
-			WW_Utils_UrlUtils::callService($httpClient, $status, $httpCode, 'wwtest');
+			$client = new WW_Utils_TransferClient( '' );
+			$client->callService($testUrl, $status, $httpCode );
 		} catch (Exception $e) {
 			LogHandler::Log( 'wwtest', 'ERROR', 'Could not connect to: ' . $testUrl . ' received error: ' . $e->getMessage());
 			$this->setResult( 'ERROR', 'Could not connect to: ' . $testUrl, 'Please contact your system administrator.' );
@@ -124,7 +125,6 @@ class WW_TestSuite_HealthCheck2_TransferServer_TestCase extends TestCase
 
 		// Check if handshake protocol works
 		$help = '';
-		require_once BASEDIR.'/server/utils/TransferClient.class.php';
 		$client = new WW_Utils_TransferClient( '' );
 		$techDefs = $client->getTechniques();
 		if( count($techDefs) == 0 ) {

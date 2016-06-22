@@ -25,26 +25,37 @@
  */
 
 // Define name of NameQuery
-define ('GETTYIMAGES_NAMEDQUERY', 'Getty Images');
-
+if( !defined('GETTYIMAGES_NAMEDQUERY') ) {
+   define( 'GETTYIMAGES_NAMEDQUERY', 'Getty Images' );
+}
 
 /**
  * These are the participant System ID and Password of the Getty Images API crendentials.
  * By default, it use WoodWing as the participant system. User need not need to configure the below section.
  */
-define ('GETTYIMAGES_SYS_ID', 		'3159' ); // System ID
-define ('GETTYIMAGES_SYS_PWD', 		'AL+BK5vEYRjhSjD7Ev4mFXfLAyFkVEwP7rdpUY9tZJQ=' ); // System Password
+if( !defined('GETTYIMAGES_SYS_ID') ) {
+   define( 'GETTYIMAGES_SYS_ID', '3159' ); // System ID
+}
+if( !defined('GETTYIMAGES_SYS_PWD') ) {
+   define( 'GETTYIMAGES_SYS_PWD', 'AL+BK5vEYRjhSjD7Ev4mFXfLAyFkVEwP7rdpUY9tZJQ=' ); // System Password
+}
 
 /**
  * In order to use the Getty Images Connect API services, you have to enter your Getty Images API credentials.
  *
  */
-define ('GETTYIMAGES_USER_NAME',	'' ); // User Name
-define ('GETTYIMAGES_USER_PWD',		'' ); // User Password
+if( !defined('GETTYIMAGES_USER_NAME') ) {
+   define( 'GETTYIMAGES_USER_NAME', '' ); // User Name
+}
+if( !defined('GETTYIMAGES_USER_PWD') ) {
+   define( 'GETTYIMAGES_USER_PWD', '' ); // User Password
+}
 
 /**
  * Define the refinement that will be excluded from the facets list
  */
-define ('EXCLUDE_REFINEMENTS' , serialize( array( 'Age',
-												  'Gender',
-												  ) ) );
+if( !defined('EXCLUDE_REFINEMENTS') ) {
+   define ('EXCLUDE_REFINEMENTS' , serialize( array( 'Age',
+                                         'Gender',
+   												  ) ) );
+}

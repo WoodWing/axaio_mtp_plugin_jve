@@ -4,7 +4,7 @@ require_once BASEDIR.'/server/interfaces/plugins/EnterprisePlugin.class.php';
 class AutoTargetingTest_EnterprisePlugin extends EnterprisePlugin
 {
 	public function getPluginInfo()
-	{
+	{ 
 		require_once BASEDIR.'/server/interfaces/plugins/PluginInfoData.class.php';
 		$info = new PluginInfoData();
 		$info->DisplayName = 'Auto Targeting Test';
@@ -13,9 +13,9 @@ class AutoTargetingTest_EnterprisePlugin extends EnterprisePlugin
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
 	}
-
+	
 	final public function getConnectorInterfaces()
-	{
+	{ 
 		return array( "NameValidation_EnterpriseConnector" );
 	}
 

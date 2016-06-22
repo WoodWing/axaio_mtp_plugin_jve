@@ -16,7 +16,7 @@ class DataSourceService_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'DataSource Record Structure';
-		$info->Version     = '10.0.0 Build 762'; // don't use PRODUCTVERSION
+		$info->Version     = file_get_contents(__DIR__.'/_productversion.txt');
 		$info->Description = 'DataSource Service to check record structure consistency.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;

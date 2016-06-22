@@ -17,6 +17,7 @@
 			<component name="graphic" default="false" parastyle=""/>
 			<component name="highlight" default="false" parastyle=""/> 
 		</components>
+        <!-- ** The following settings apply to the HTML Editor only ** -->
 		<!-- List with available paragraph styles. Label is shown in editor -->
 		<paragraphstyles>
 			<style name="para_head_style" label="Head"/>

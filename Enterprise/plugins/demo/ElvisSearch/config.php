@@ -24,10 +24,17 @@
  * Configuration file
  */
 
-define ('ELVIS_URL', 'http://elvis.dutchsoftware.com/elvis/webservice/elvis.wsdl'); // URL to WSDL
-define ('ELVIS_USERNAME', '');
-define ('ELVIS_PASSWORD', '');
+if( !defined('ELVIS_URL') ) {
+   define( 'ELVIS_URL', 'http://elvis.dutchsoftware.com/elvis/webservice/elvis.wsdl' ); // URL to WSDL
+}
+if( !defined('ELVIS_USERNAME') ) {
+   define( 'ELVIS_USERNAME', '' );
+}
+if( !defined('ELVIS_PASSWORD') ) {
+   define( 'ELVIS_PASSWORD', '' );
+}
 
 // Define name of NameQuery
-define ('ELVISSEARCH_NAMEDQUERY', 'Elvis Search');
-
+if( !defined('ELVISSEARCH_NAMEDQUERY') ) {
+   define( 'ELVISSEARCH_NAMEDQUERY', 'Elvis Search' );
+}

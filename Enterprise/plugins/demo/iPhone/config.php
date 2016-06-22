@@ -8,4 +8,7 @@
  * Configuration file
  */
 
-define ('MAXRESOLUTION', 720 );  // Note: iPhone display resolution is 480x320
+// Note: iPhone display resolution is 480x320
+if( !defined('MAXRESOLUTION') ) {
+	define( 'MAXRESOLUTION', 720 );
+}

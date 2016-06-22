@@ -26,4 +26,6 @@ $brandLimits = array(
 );
 
 // Message to show if logons exceeded, use $limit to show allowed logons and $userOrg to show your brand
-DEFINE( 'BRANDLOGON_LIMIT_MSG', 'Reached maximum number of logons ($limit) for your brand ($userOrg).' );
+if( !defined('BRANDLOGON_LIMIT_MSG') ) {
+   define( 'BRANDLOGON_LIMIT_MSG', 'Reached maximum number of logons ($limit) for your brand ($userOrg).' );
+}

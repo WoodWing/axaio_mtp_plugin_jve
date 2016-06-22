@@ -76,7 +76,13 @@ for($i = 0; $i < sizeof($myservers); $i++){
 	}
 }
 
-define("SERVERLIST", serialize($myservers));
-define('MultipleInbox_CONTENTSOURCEID', 'Inbox');
-define('MultipleInbox_CONTENTSOURCEPREFIX', '_Inbox_');
+if( !defined('SERVERLIST') ) {
+	define( "SERVERLIST", serialize( $myservers ) );
+}
+if( !defined('MultipleInbox_CONTENTSOURCEID') ) {
+	define( 'MultipleInbox_CONTENTSOURCEID', 'Inbox' );
+}
+if( !defined('MultipleInbox_CONTENTSOURCEPREFIX') ) {
+	define( 'MultipleInbox_CONTENTSOURCEPREFIX', '_Inbox_' );
+}
 ?>

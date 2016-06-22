@@ -24,7 +24,7 @@ class Twitter_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Twitter Publishing Connector';
-		$info->Version     = '10.0.0 Build 762';
+		$info->Version     = '10.0.0 Build 1194';
 		$info->Description = 'Publishing service to Twitter';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;

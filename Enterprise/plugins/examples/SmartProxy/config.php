@@ -16,7 +16,11 @@
 ****************************************************************************/
 
 
-define( 'REMOTE_SERVER_URL', 'http://127.0.0.1/Enterprise7/index.php' );
-define( 'CACHE_DIR', '/Temp/' );
+if( !defined('REMOTE_SERVER_URL') ) {
+   define( 'REMOTE_SERVER_URL', 'http://127.0.0.1/Enterprise7/index.php' );
+}
+if( !defined('CACHE_DIR') ) {
+   define( 'CACHE_DIR', '/Temp/' );
+}
 
 require_once( dirname(__FILE__).'/SmartProxy.class.php');
