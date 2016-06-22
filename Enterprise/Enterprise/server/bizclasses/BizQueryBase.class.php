@@ -301,7 +301,6 @@ class BizQueryBase
      * Builds a list of properties for the given columns.
      * This is used to resolve the display names to show in column headers
      * of query results.
-	 * For Query type dialog, only retrieving customized properties, for Brand="All", Object Type="All".
      *
      * @param array $rows List of column names.
      * @return array of Property objects.
@@ -316,7 +315,7 @@ class BizQueryBase
 
 		// Get custom props, which can also include customized standard properties
 		require_once BASEDIR . '/server/dbclasses/DBProperty.class.php';
-		$customProps = DBProperty::getProperties( 0, '', false, null, null, true, true );
+		$customProps = DBProperty::getProperties( 0, '', false );
 
 		// Build props with internal name and display names
 		$columns = array_keys(current($rows));

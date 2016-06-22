@@ -205,35 +205,36 @@ class WW_TestSuite_BuildTest_AdobeDps2_Setup_TestCase extends TestCase
 	 */
 	private function setupLayoutStatus( $name, $readyForPublishing, $nextStatusId=0 )
 	{
-		require_once BASEDIR .'/server/bizclasses/BizAdmStatus.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 
 		$newStatus = new stdClass();
-		$newStatus->Id                          = null;
-		$newStatus->PublicationId               = $this->testOptions['Brand']->Id;
-		$newStatus->Type                        = 'Layout';
-		$newStatus->Phase                       = 'Production';
-		$newStatus->Name                        = $name;
-		$newStatus->Produce                     = false;
-		$newStatus->Color                       = '#A0A0A0';
-		$newStatus->NextStatusId				= $nextStatusId;
-		$newStatus->SortOrder				    = '';
-		$newStatus->IssueId                     = 0; // It is not an overrule issue publication, so we leave this 0
-		$newStatus->SectionId                   = '';
-		$newStatus->DeadlineRelative            = '';
-		$newStatus->CreatePermanentVersion      = false;
-		$newStatus->RemoveIntermediateVersions  = false;
-		$newStatus->AutomaticallySendToNext     = false;
-		$newStatus->ReadyForPublishing          = $readyForPublishing;
+		$newStatus->Id = null;
+		$newStatus->PublicationId = $this->testOptions['Brand']->Id;
+		$newStatus->Type = 'Layout';
+		$newStatus->Phase = 'Production';
+		$newStatus->Name = $name;
+		$newStatus->Produce = false;
+		$newStatus->Color = '#A0A0A0';
+		$newStatus->NextStatusId = $nextStatusId;
+		$newStatus->SortOrder = '';
+		$newStatus->IssueId = 0; // It is not an overrule issue publication, so we leave this 0
+		$newStatus->SectionId = '';
+		$newStatus->DeadlineRelative = '';
+		$newStatus->CreatePermanentVersion = false;
+		$newStatus->RemoveIntermediateVersions = false;
+		$newStatus->AutomaticallySendToNext = false;
+		$newStatus->ReadyForPublishing = $readyForPublishing;
+		$newStatus->SkipIdsa = false;
 		$layoutStatus = BizAdmStatus::createStatus( $newStatus );
 
 		// Recompose to please the BuildTest.
-		require_once BASEDIR .'/server/interfaces/services/wfl/DataClasses.php';
+		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		$newState = new State();
-		$newState->Id      = $layoutStatus->Id;
-		$newState->Name    = $layoutStatus->Name;
-		$newState->Type    = $layoutStatus->Type;
+		$newState->Id = $layoutStatus->Id;
+		$newState->Name = $layoutStatus->Name;
+		$newState->Type = $layoutStatus->Type;
 		$newState->Produce = $layoutStatus->Produce;
-		$newState->Color   = $layoutStatus->Color;
+		$newState->Color = $layoutStatus->Color;
 		$newState->DefaultRouteTo = null;
 
 		return $newState;

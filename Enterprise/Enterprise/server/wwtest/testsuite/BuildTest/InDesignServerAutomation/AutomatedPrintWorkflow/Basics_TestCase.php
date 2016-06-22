@@ -535,6 +535,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 	
 	/**
 	 * Creates an Object Operation for the Layout to place the Dossier's objects.
+	 * As the article is already placed the error/warning with 'S1142' is expected and logged at INFO level.
 	 *
 	 * @throws BizException on failure
 	 */
@@ -544,6 +545,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 		require_once BASEDIR.'/server/services/wfl/WflCreateObjectOperationsService.class.php';
 		$request = $this->composePlaceDossierOnLayoutRequest();
 		$stepInfo = 'Creating the Object Operation for the layout (to place the dossier).';
+		$map = new BizExceptionSeverityMap( array( 'S1142' => 'INFO' ) );
 		$response = $this->globalUtils->callService( $this, $request, $stepInfo );
 		
 		// Retrieve the layout again and validate the response.

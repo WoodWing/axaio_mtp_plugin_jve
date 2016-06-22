@@ -58,6 +58,7 @@ class ActionPropertiesAdminApp
 	private $objType = null;
 	private $action = null;
 	private $onlyQuery = null;
+	private $onlyAllObjectType = null;
 	private $mode = null;
 	private $sAll = null;
 	private $sysProps = null;
@@ -513,8 +514,7 @@ class ActionPropertiesAdminApp
 		$cust = array();
 		$trans = array();
 		$publication = $limitPub ? $this->publ : 0;
-		$onlyAllObjectType = ($this->objType == '') ? true : false;
-		$propObjs = BizProperty::getProperties( $publication, $this->objType, null, null, false, false, $onlyAllObjectType );
+		$propObjs = BizProperty::getProperties( $publication, $this->objType, null, null, false, false, $this->onlyAllObjectType );
 
 		require_once BASEDIR.'/server/bizclasses/BizCustomField.class.php';
 		$excludedPropTypes = BizCustomField::getExcludedObjectFields();
@@ -584,7 +584,7 @@ class ActionPropertiesAdminApp
 		$detailTxt = '';
 		$multiObjAllowedActions = array( '', 'SetProperties', 'SendTo' ); // Action that supports multiple-objects
 		$showMultiObj = in_array( $this->action, $multiObjAllowedActions );
-		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action );
+		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->onlyAllObjectType );
 
 		switch( $this->mode ) {
 			case 'view':
@@ -611,6 +611,7 @@ class ActionPropertiesAdminApp
 	public function processRequestData()
 	{
 		$this->onlyQuery = false;
+		$this->onlyAllObjectType = true;
 		switch( $this->action )
 		{
 			case 'QueryOut':
@@ -618,6 +619,11 @@ class ActionPropertiesAdminApp
 			case 'QueryOutInCopy':
 			case 'QueryOutContentStation':
 			case 'QueryOutPlanning':
+				$this->onlyAllObjectType = false; // Set to false, to include also specific object type
+				$this->onlyQuery = true;
+				$this->publ = 0;
+				$this->objType = '';
+				break;
 			case 'Query':
 				$this->onlyQuery = true;
 				$this->publ = 0;
