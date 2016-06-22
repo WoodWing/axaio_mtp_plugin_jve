@@ -154,6 +154,9 @@ class WflGetDialogService extends EnterpriseService
 		// Note that the buildOutgoingDialog calls copyObjProps, which does -not- do a deep copy,
 		// and so all attributes are referred from v1 to v2, which allows server plug-ins to
 		// adjust the v2 response, if they need, which gets reflected into v1 response through references.
+		// As the 'Dossiers' attribute is an array it can not just be referenced. By letting $this->resp1->Dossiers and
+		// $resp2->Dossiers point to the same content changes made in the runAfter of the server plug-ins to the
+		// $resp2->Dossiers get reflected in $this->resp1->Dossiers.
 
 		require_once BASEDIR.'/server/interfaces/services/wfl/WflGetDialog2Response.class.php';
 		$resp2 = new WflGetDialog2Response();
@@ -168,6 +171,7 @@ class WflGetDialogService extends EnterpriseService
 		// EN-84968 - Allow GetDialog2 connector to manipulate the GetStateResponse value for GetDialog
 		$resp2->GetStatesResponse = $retVal['GetStatesResponse'];
 		$resp2->Dossiers = $retVal['Dossiers'];
+		$this->resp1->Dossiers = &$resp2->Dossiers;
 
 		return $resp2;
 	}

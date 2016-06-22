@@ -16,20 +16,32 @@
 ****************************************************************************/
 
 // Mollie SMS account information
-define('WWSMS_USERNAME', 	'' );
-define('WWSMS_PASSWORD',	'' );
+if( !defined('WWSMS_USERNAME') ) {
+   define( 'WWSMS_USERNAME', '' );
+}
+if( !defined('WWSMS_PASSWORD') ) {
+   define( 'WWSMS_PASSWORD', '' );
+}
 
 // Which gateway to use, 2 is 20% cheaper, but less reliable
-define('WWSMS_GATEWAY', 1);
+if( !defined('WWSMS_GATEWAY') ) {
+   define( 'WWSMS_GATEWAY', 1 );
+}
 
 // Phone numbers to send SMS. Phone numbers are space separated and have international format, for example: '+316...'
 // Note this is used as fallback if no phone numbers set in Issue Description
-define('WWSMS_RECIPIENTS',	'');
+if( !defined('WWSMS_RECIPIENTS') ) {
+   define( 'WWSMS_RECIPIENTS', '' );
+}
 
 // The name of sender. Do not define too long names, or else sending SMS might fail.
 // This can be overruled by filling in the issue's subject.
-define('WWSMS_SENDER',		'WoodWing' );
+if( !defined('WWSMS_SENDER') ) {
+   define( 'WWSMS_SENDER', 'WoodWing' );
+}
 
 // The footer to add to each message. Empty for none. 
 // Do not define too footers, or else there is nothing left for the message (which has max 160 characters).
-define('WWSMS_FOOTER',		'(sent from WoodWing Enterprise)' );
+if( !defined('WWSMS_FOOTER') ) {
+   define( 'WWSMS_FOOTER', '(sent from WoodWing Enterprise)' );
+}

@@ -338,66 +338,107 @@ function step1_cleanGetWorkspace {
 }
 
 #
-# When TMS has newer resource files, they are downloaded to update workspace and Perforce depot.
+# Downloads the latest Enterprise Server resource files from TMS and submits changes to the repository.
 #
-function step2_updateResourceFiles {
-	echo "step2a: Retrieve timestamp of last update from TMS for core Enterprise Server."
-	lastUpdate=`curl http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20server/version/10.0/`
-	if [ ! -n "${lastUpdate}"  ]; then
+# Note that for historical reasons the XML resource files downloaded from TMS contain a timestamp
+# at the second line, such as: <!--Last edit date in TMS: 31-05-2016 07:08:39 GMT-->
+# However, this leads to conflicts when merging code branches and so we take out those lines. 
+# Nevertheless, to avoid unnecessary daily submits without changes (that would blur the view) 
+# we keep track of the last modification timestamp of TMS in the a file named "_lastupdate.txt" 
+# (that resides in the resource folder) which allows us to compare timestamps and skip submits.
+#
+function step2a_updateResourceFilesForCoreServer {
+	echo "step2a1: Retrieve timestamp of last update from TMS for core Enterprise Server."
+	tmsLastUpdate=`curl http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20server/version/10.0/`
+	if [ ! -n "${tmsLastUpdate}"  ]; then
 		echo 'Could not retrieve last modification timestamp from TMS (for the core Enterprise Server project). Is TMS down?';
 		exit 1;
 	fi
-
-	echo "step2b: Retrieve timestamp of last update from local resource file for core Enterprise Server."
-	currentUpdate=`grep "Last edit date in TMS" ${SOURCE_BASE}Enterprise/config/resources/enUS.xml | sed -r "s/<\!--Last edit date in TMS: (.*)-->/\1/g"`
-	if [ "${lastUpdate}" == "${currentUpdate}" ]; then
-		echo "step2b1: Perforce and TMS are in sync. No update needed."
+	
+	echo "step2a2: Retrieve timestamp of last update from local resource file for core Enterprise Server."
+	resLastUpdate=`cat "${SOURCE_BASE}Enterprise/config/resources/_lastupdate.txt"`
+	if [ "${tmsLastUpdate}" == "${resLastUpdate}" ]; then
+		echo "step2a3: Repository and TMS are in sync. No update needed."
 	else
-		echo "step2b2: Perforce is out-of-sync with TMS. Downloading resources..."
+		echo "step2a3: Repository is out-of-sync with TMS. Downloading resources..."
 		wget "http://tms.woodwing.net/product/getexport/user/woodwing/pass/QjQjI2VyVmxAQDE=/versionid/116" -O ./tms_resources/core.zip
 		# L> update the versionid param when migrating to new Enterprise major version: 10=7.0, 22=8.0, 73=9.0, 116=10.0
 
-		echo "step2b3: At Perforce depot, open resource files for editing."
+		echo "step2a4: At repository, open resource files for editing."
 		p4 edit ${SOURCE_BASE}Enterprise/config/resources/...
 
-		echo "step2b4: Extract resource archive and overwrite local resources."
+		echo "step2a5: Extract resource archive and overwrite local resources."
 		cd ${SOURCE_BASE}Enterprise/config/resources
 		7za e -y "${WORKSPACE_SERVER}/tms_resources/core.zip" "Server/config/resources"
 		cd -
 
-		echo "step2b5: Submit latest resource files to Perforce."
-		p4 submit -d "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${lastUpdate}) core resource files from TMS for server build ${BUILD_NUMBER}."
-	fi
+		echo "step2a6: Write timestamp of last update from TMS into the resource folder of Enterprise Server."
+		echo "${tmsLastUpdate}" > ${SOURCE_BASE}Enterprise/config/resources/_lastupdate.txt
+		
+		echo "step2a7: Remove the timestamp from the downloaded XML files."
+		for icFile in $(find "${SOURCE_BASE}Enterprise/config/resources/" -name '*.xml'); do
+			sed '/<!--Last edit date in TMS:.*-->/d' "${icFile}" > ./temp && mv ./temp "${icFile}"
+		done
+		
+		echo "step2a8: Revert unchanged resource files."
+		p4 revert -a ${SOURCE_BASE}Enterprise/config/resources/...
 
-	echo "step2d: Retrieve timestamp of last update from TMS for AdobeDps2 plugin."
-	lastUpdate=`curl http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20Server%20AdobeDps2/version/10.0/`
-	if [ ! -n "${lastUpdate}"  ]; then
+		echo "step2a9: Submit latest resource files to repository."
+		p4 submit -d "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) core resource files from TMS for server build ${BUILD_NUMBER}."
+	fi
+}
+
+#
+# Downloads the latest Adobe AEM resource files from TMS and submits changes to the repository.
+#
+# Note that for historical reasons the XML resource files downloaded from TMS contain a timestamp
+# at the second line, such as: <!--Last edit date in TMS: 31-05-2016 07:08:39 GMT-->
+# However, this leads to conflicts when merging code branches and so we take out those lines. 
+# Nevertheless, to avoid unnecessary daily submits without changes (that would blur the view) 
+# we keep track of the last modification timestamp of TMS in the a file named "_lastupdate.txt" 
+# (that resides in the resource folder) which allows us to compare timestamps and skip submits.
+#
+function step2b_updateResourceFilesForAdobeAEM {
+	echo "step2b1: Retrieve timestamp of last update from TMS for AdobeDps2 plugin."
+	tmsLastUpdate=`curl http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20Server%20AdobeDps2/version/10.0/`
+	if [ ! -n "${tmsLastUpdate}"  ]; then
 		echo 'Could not retrieve last modification timestamp from TMS (for the AdobeDps2 project). Is TMS down?';
 		exit 1;
 	fi
 
-	echo "step2e: Retrieve timestamp of last update from local resource file for AdobeDps2 plugin."
-	currentUpdate=`grep "Last edit date in TMS" ${SOURCE_BASE}plugins/release/AdobeDps2/resources/enUS.xml | sed -r "s/<\!--Last edit date in TMS: (.*)-->/\1/g"`
-	if [ "${lastUpdate}" == "${currentUpdate}" ]; then
-		echo "step2e1: Perforce and TMS are in sync. No update needed."
+	echo "step2b2: Retrieve timestamp of last update from local resource file for AdobeDps2 plugin."
+	resLastUpdate=`cat "${SOURCE_BASE}plugins/release/AdobeDps2/resources/_lastupdate.txt"`
+	if [ "${tmsLastUpdate}" == "${resLastUpdate}" ]; then
+		echo "step2b3: Repository and TMS are in sync. No update needed."
 	else
-		echo "step2e2: Perforce is out-of-sync with TMS. Downloading resources..."
+		echo "step2b3: Repository is out-of-sync with TMS. Downloading resources..."
 		wget "http://tms.woodwing.net/product/getexport/user/woodwing/pass/QjQjI2VyVmxAQDE=/versionid/117" -O ./tms_resources/adobedps2.zip
 		# L> update the versionid param when migrating to new AdobeDps2 major version: 99=9.0, 117=10.0
 
-		echo "step2e3: At Perforce depot, open resource files for editing."
+		echo "step2b4: At the repository, open resource files for editing."
 		p4 edit ${SOURCE_BASE}plugins/release/AdobeDps2/resources/...
 
-		echo "step2e4: Extract resource archive and overwrite local resources."
+		echo "step2b5: Extract resource archive and overwrite local resources."
 		cd ${SOURCE_BASE}plugins/release/AdobeDps2/resources
 		7za e -y "${WORKSPACE_SERVER}/tms_resources/adobedps2.zip" "Server/config/resources"
 		cd -
 		
-		echo "step2e5: Prefix the resource keys with AdobeDps2."
+		echo "step2b6: Prefix the resource keys with AdobeDps2."
 		php "${WORKSPACE_SERVER}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE_SERVER}/Enterprise/plugins/release/AdobeDps2/resources" AdobeDps2
 
-		echo "step2e6: Submit latest resource files to Perforce."
-		p4 submit -d "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${lastUpdate}) AdobeDps2 resource files from TMS for server build ${BUILD_NUMBER}."
+		echo "step2a7: Write timestamp of last update from TMS into the resource folder of AdobeDps2 plugin."
+		echo "${tmsLastUpdate}" > ${SOURCE_BASE}plugins/release/AdobeDps2/resources/_lastupdate.txt
+		
+		echo "step2a8: Remove the timestamp from the downloaded XML files."
+		for icFile in $(find "${SOURCE_BASE}plugins/release/AdobeDps2/resources/" -name '*.xml'); do
+			sed '/<!--Last edit date in TMS:.*-->/d' "${icFile}" > ./temp && mv ./temp "${icFile}"
+		done
+		
+		echo "step2a9: Revert unchanged resource files."
+		p4 revert -a ${SOURCE_BASE}plugins/release/AdobeDps2/resources/...
+
+		echo "step2b10: Submit latest resource files to repository."
+		p4 submit -d "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) AdobeDps2 resource files from TMS for server build ${BUILD_NUMBER}."
 	fi
 }
 
@@ -593,7 +634,8 @@ cd "${WORKSPACE_SERVER}"
 set +x; echo "================ Step 1 ================"; set -x
 step1_cleanGetWorkspace
 set +x; echo "================ Step 2 ================"; set -x
-step2_updateResourceFiles
+step2a_updateResourceFilesForCoreServer
+step2b_updateResourceFilesForAdobeAEM
 set +x; echo "================ Step 3 ================"; set -x
 step3_updateVersionInfo
 set +x; echo "================ Step 4 ================"; set -x

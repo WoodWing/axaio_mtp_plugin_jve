@@ -16,23 +16,40 @@
 ****************************************************************************/
 
 // Base URL for Celum Imagine system:
-define( 'CELUM_URL', 	'http://woodwing.at.celumimagine.net/api/' ); // End with a slash /, includ ethe API sub-folder
+if( !defined('CELUM_URL') ) {
+   define( 'CELUM_URL', 'http://woodwing.at.celumimagine.net/api/' ); // End with a slash /, include the API sub-folder
+}
 
 // User account and password:
-define ('CELUM_USER', 		'sonnemans' );
-define ('CELUM_PASSWORD', 	'sonnemans' );
-
+if( !defined('CELUM_USER') ) {
+   define( 'CELUM_USER', '' );
+}
+if( !defined('CELUM_PASSWORD') ) {
+   define( 'CELUM_PASSWORD', '' );
+}
 
 // Define Brand, Category and status for objects imported into the system.
 // When any of these don't exist, the first available Brand/Category/Status will be used.
-define( 'CELUM_BRAND', 			'WW News' );
-define( 'CELUM_CATEGORY', 		'News' );
-define( 'CELUM_STATUS', 		'Draft text' );
+if( !defined('CELUM_BRAND') ) {
+   define( 'CELUM_BRAND', 'WW News' );
+}
+if( !defined('CELUM_CATEGORY') ) {
+   define( 'CELUM_CATEGORY', 'News' );
+}
+if( !defined('CELUM_STATUS') ) {
+   define( 'CELUM_STATUS', 'Draft text' );
+}
 
 // Name of the Query to be shown in the User Interface:
-define( 'CELUM_QUERY_NAME', 	'Celum' );
+if( !defined('CELUM_QUERY_NAME') ) {
+   define( 'CELUM_QUERY_NAME', 'Celum' );
+}
 
 // Unique ID's for this Content Source. Make sure to change this if you create your own
 // Content Source based on this example plugin
-define('CELUM_CONTENTSOURCEID', 	'CELUM' );
-define('CELUM_CONTENTSOURCEPREFIX', '_CELUM_' );
+if( !defined('CELUM_CONTENTSOURCEID') ) {
+   define( 'CELUM_CONTENTSOURCEID', 'CELUM' );
+}
+if( !defined('CELUM_CONTENTSOURCEPREFIX') ) {
+   define( 'CELUM_CONTENTSOURCEPREFIX', '_CELUM_' );
+}

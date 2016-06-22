@@ -16,14 +16,23 @@
 ****************************************************************************/
 
 // Define YouTube temp directory
-define ('YOUTUBE_DIRECTORY', ATTACHMENTDIRECTORY . '/_YOUTUBE_');
+if( !defined('YOUTUBE_DIRECTORY') ) {
+   define( 'YOUTUBE_DIRECTORY', ATTACHMENTDIRECTORY.'/_YOUTUBE_' );
+}
 
 // YouTube User Name(User email)
-define ('YOUTUBEPUBLISH_USERNAME',	'' );
+if( !defined('YOUTUBEPUBLISH_USERNAME') ) {
+   define( 'YOUTUBEPUBLISH_USERNAME', '' );
+}
 // YouTube User Password
-define ('YOUTUBEPUBLISH_USERPWD',	'' );
+if( !defined('YOUTUBEPUBLISH_USERPWD') ) {
+   define( 'YOUTUBEPUBLISH_USERPWD', '' );
+}
 // YouTube Client ID
-define ('YOUTUBEPUBLISH_CLIENT_ID',	'' );
+if( !defined('YOUTUBEPUBLISH_CLIENT_ID') ) {
+   define( 'YOUTUBEPUBLISH_CLIENT_ID', '' );
+}
 // YouTubeDeveloper Key
-define ('YOUTUBEPUBLISH_DEV_KEY', 	'' );
-
+if( !defined('YOUTUBEPUBLISH_DEV_KEY') ) {
+   define( 'YOUTUBEPUBLISH_DEV_KEY', '' );
+}

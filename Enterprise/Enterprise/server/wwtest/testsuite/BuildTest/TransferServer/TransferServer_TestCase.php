@@ -72,7 +72,7 @@ class WW_TestSuite_BuildTest_TransferServer_TransferServer_TestCase extends Test
 	private function logOn()
 	{
 		require_once BASEDIR . '/server/services/wfl/WflLogOnService.class.php';
-		$service = new WflLogonService();
+		$service = new WflLogOnService();
 		$req = new WflLogOnRequest( $this->suiteOpts['User'], $this->suiteOpts['Password'], '', '', '', '', 'Transfer Server', SERVERVERSION, '', '', false );
 		$resp = $service->execute( $req );
 		$this->ticket = $resp->Ticket;
@@ -84,7 +84,7 @@ class WW_TestSuite_BuildTest_TransferServer_TransferServer_TestCase extends Test
 	private function logOff()
 	{
 		require_once BASEDIR . '/server/services/wfl/WflLogOffService.class.php';
-		$service = new wflLogOffService();
+		$service = new WflLogOffService();
 		$req = new WflLogOffRequest( $this->ticket, true );
 		/* $resp = */ $service->execute( $req );
 	}
@@ -96,8 +96,7 @@ class WW_TestSuite_BuildTest_TransferServer_TransferServer_TestCase extends Test
 	{
 		require_once BASEDIR . '/server/utils/TransferClient.class.php';
 		// Be sure Transfer Server is not moved out Enterprise
-		$transferClient = new WW_Utils_TransferClient( $this->ticket );
-		
+
 		// Prepare normal JPEG upload (uncompressed, HTTP PUT)
 		$localPath = dirname( __FILE__ ) . '/testdata/thumb1.jpg';
 		$this->files['thumb']['attachment'] = new Attachment();
@@ -163,6 +162,7 @@ class WW_TestSuite_BuildTest_TransferServer_TransferServer_TestCase extends Test
 		*/
 		
 		foreach( $this->files as $key => $file ) {
+			$transferClient = new WW_Utils_TransferClient( $this->ticket );
 			if ( !$transferClient->uploadFile( $file['attachment'], $file['compression'], $file['httpmethod'] ) ) {
 				$this->setResult( 'ERROR', 'Failed uploading '.$key.' file '.$file['attachment']->FilePath, '' );
 			}
@@ -177,8 +177,8 @@ class WW_TestSuite_BuildTest_TransferServer_TransferServer_TestCase extends Test
 	{
 		require_once BASEDIR . '/server/utils/TransferClient.class.php';
 		// Be sure Transfer Server is not moved out Enterprise
-		$transferClient = new WW_Utils_TransferClient( $this->ticket );
 		foreach( $this->files as $key => $file ) {
+			$transferClient = new WW_Utils_TransferClient( $this->ticket );
 			$url = $file['attachment']->FileUrl;
 			$stripWcml = isset($file['stripwcml']) ? $file['stripwcml'] : '';
 			if ( !$transferClient->downloadFile( $file['attachment'], false, $file['compression'], $stripWcml ) ) {
@@ -201,8 +201,8 @@ class WW_TestSuite_BuildTest_TransferServer_TransferServer_TestCase extends Test
 	{
 		require_once BASEDIR . '/server/utils/TransferClient.class.php';
 		// Be sure Transfer Server is not moved out Enterprise
-		$transferClient = new WW_Utils_TransferClient( $this->ticket );
 		foreach( $this->files as $key => $file ) {
+			$transferClient = new WW_Utils_TransferClient( $this->ticket );
 			$url = $file['attachment']->FileUrl;
 			if ( !$transferClient->cleanupFile( $file['attachment'] ) ) {
 				$this->setResult( 'ERROR', 'Failed deleting '.$key.' file using URL: '.$url, '' );

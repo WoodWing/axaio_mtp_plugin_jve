@@ -64,7 +64,15 @@ $config = array();
 //$config[] = array('brand' => 'WW News', 'channel' => 'Web 2', 'site' => 'Drupal test');
 
 // Define the three arrays as serialized constants
-define('DRUPAL_SITES',   serialize( $sites ));
-define('DRUPAL_CONFIG',  serialize(( isset($config) && !empty($config) ) ? $config : array() ));
-define('DRUPAL_OPTIONS', serialize(( isset($options) && !empty($options) ) ? $options : array() ));
-define('DRUPAL_MAPPING', serialize(( isset($mapping) && !empty($mapping) ) ? $mapping : array() ));
+if( !defined('DRUPAL_SITES') ) {
+	define( 'DRUPAL_SITES', serialize( $sites ) );
+}
+if( !defined('DRUPAL_CONFIG') ) {
+	define( 'DRUPAL_CONFIG', serialize( ( isset( $config ) && !empty( $config ) ) ? $config : array() ) );
+}
+if( !defined('DRUPAL_OPTIONS') ) {
+	define( 'DRUPAL_OPTIONS', serialize( ( isset( $options ) && !empty( $options ) ) ? $options : array() ) );
+}
+if( !defined('DRUPAL_MAPPING') ) {
+	define( 'DRUPAL_MAPPING', serialize( ( isset( $mapping ) && !empty( $mapping ) ) ? $mapping : array() ) );
+}

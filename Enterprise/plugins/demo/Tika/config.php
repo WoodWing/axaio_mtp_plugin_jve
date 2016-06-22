@@ -32,14 +32,18 @@
 //    When there is a need to share one Tika Server, configure its URL instead:
 //       define ('TIKA_SERVER_URL', 'http://<Tika_IP>/TikaServer/' );
 //
-define ('TIKA_SERVER_URL', LOCALURL_ROOT.INETROOT.'/config/plugins/Tika/TikaServer/');
+if( !defined('TIKA_SERVER_URL') ) {
+	define( 'TIKA_SERVER_URL', LOCALURL_ROOT.INETROOT.'/config/plugins/Tika/TikaServer/' );
+}
 
 // TIKA_CONNECTION_TIMEOUT
 //    Tika Server HTTP connection timeout in seconds. 
 //    Increase the timeout to support large files (upload) or when server logging shows this error:
 //       "Unable to read response, or response is empty"
 //
-define ('TIKA_CONNECTION_TIMEOUT', 600);
+if( !defined('TIKA_CONNECTION_TIMEOUT') ) {
+	define( 'TIKA_CONNECTION_TIMEOUT', 600 );
+}
 
 // TIKA_FORMATS
 //    File formats (content types) to process by the Tika server (when uploaded or saved).
@@ -49,31 +53,33 @@ define ('TIKA_CONNECTION_TIMEOUT', 600);
 //	  Note: Tika supports more formats then listed below. Only those formats are listed that are also supported
 //	  by Enterprise. Make sure that formats added below are also enabled in the 'EXTENSIONMAP' in configserver.php.
 //
-define ('TIKA_FORMATS', serialize(array(
-		'application/pdf',
-		'application/msword',
-		'application/vnd.ms-excel',
-		'application/vnd.ms-powerpoint',
-		'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-		'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-		'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-		'application/x-apple-numbers',
-		'application/x-apple-pages',
-		'application/x-apple-keynote',
-		/*
-		'application/vnd.oasis.opendocument.text',
-		'xml',
-		'application/x-gzip',
-		'application/zip',
-		'text/richtext',
-		'audio/x-aiff',
-		'audio/basic',
-		'audio/midi',
-		'audio/mpeg',
-		'audio/x-wav',
-		'image/gif',
-		'image/jpeg',
-		'image/png',
-		'image/tiff',
-		*/
-)));
+if( !defined('TIKA_FORMATS') ) {
+	define ('TIKA_FORMATS', serialize(array(
+			'application/pdf',
+			'application/msword',
+			'application/vnd.ms-excel',
+			'application/vnd.ms-powerpoint',
+			'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+			'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+			'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+			'application/x-apple-numbers',
+			'application/x-apple-pages',
+			'application/x-apple-keynote',
+			/*
+			'application/vnd.oasis.opendocument.text',
+			'xml',
+			'application/x-gzip',
+			'application/zip',
+			'text/richtext',
+			'audio/x-aiff',
+			'audio/basic',
+			'audio/midi',
+			'audio/mpeg',
+			'audio/x-wav',
+			'image/gif',
+			'image/jpeg',
+			'image/png',
+			'image/tiff',
+			*/
+	)));
+}

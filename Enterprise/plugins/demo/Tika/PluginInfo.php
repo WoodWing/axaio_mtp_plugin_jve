@@ -16,7 +16,7 @@ class Tika_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Tika Text and Data Extraction';
-		$info->Version     = 'v9.0 20130207'; // don't use PRODUCTVERSION
+		$info->Version     = 'v9.5 20150105'; // don't use PRODUCTVERSION
 		$info->Description = 'Using Apache Tika to extract plain content and metadata to make objects searchable.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
@@ -35,6 +35,6 @@ class Tika_EnterprisePlugin extends EnterprisePlugin
 	 */	
 	public function requiredServerVersion()
 	{
-		return '9.0.0 Build 1';
+		return '9.5.0 Build 1';
 	}	
 }

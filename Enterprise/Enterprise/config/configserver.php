@@ -2,7 +2,9 @@
 // -------------------------------------------------------------------------------------------------
 // Required includes
 // -------------------------------------------------------------------------------------------------
-define( 'AS_CLASSNAME_PREFIX', 'com.woodwing.enterprise.interfaces.services' ); // used for AMF object type mapping
+if( !defined('AS_CLASSNAME_PREFIX') ) {
+	define( 'AS_CLASSNAME_PREFIX', 'com.woodwing.enterprise.interfaces.services' ); // used for AMF object type mapping
+}
 require_once BASEDIR.'/server/vendor/autoload.php'; // install auto loaders for 3rd party components
 require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 require_once BASEDIR.'/server/serverinfo.php';
@@ -18,8 +20,9 @@ require_once BASEDIR.'/server/serverinfo.php';
 //       'oracle'  Oracle.
 //    Value must be in lower case.
 //
-define ('DBTYPE', 'mysql');
-
+if( !defined('DBTYPE') ) {
+	define( 'DBTYPE', 'mysql' );
+}
 // DBSERVER:
 //    The database server address. By default the same machine as the
 //    application server of which this configserver.php file is part.
@@ -36,7 +39,9 @@ define ('DBTYPE', 'mysql');
 //       To connect to a local DB use '127.0.0.1', for MAMP/XAMP installations use 'localhost' instead.
 //       If a socket is used, add the path of the socket. For example: define( 'DBSERVER', '/opt/local/tmp/mysql.sock' );
 //
-define ('DBSERVER', '127.0.0.1' );
+if( !defined('DBSERVER') ) {
+	define( 'DBSERVER', '127.0.0.1' );
+}
 
 // DBMAXQUERY:
 //    Maximum number of records returned in query results. Default value is 50. By default, when
@@ -46,7 +51,9 @@ define ('DBSERVER', '127.0.0.1' );
 //    will be returned at the highest level. So, when using hierarchical view, the number of returned
 //    rows can be many times greater than specified in DBMAXQUERY. 
 //
-define ('DBMAXQUERY', 50);
+if( !defined('DBMAXQUERY') ) {
+	define( 'DBMAXQUERY', 50 );
+}
 
 // -------------------------------------------------------------------------------------------------
 // FileStore - advanced configuration
@@ -56,7 +63,9 @@ define ('DBMAXQUERY', 50);
 //    Maximum number of objects to be stored within one folder. Note one object can itself contain
 //    many files so the number of files per folder will be many times greater. Default value: 100.
 //
-define ('ATTACHMODULO', 100);
+if( !defined('ATTACHMODULO') ) {
+	define( 'ATTACHMODULO', 100 );
+}
 
 // -------------------------------------------------------------------------------------------------
 // File Transfer Server
@@ -70,7 +79,9 @@ define ('ATTACHMODULO', 100);
 //    The web server must accept the HTTP methods GET, PUT, POST and DELETE (at least for
 //    the configured URL) to make the Transfer Server fully functional.
 //
-define( 'HTTP_FILE_TRANSFER_REMOTE_URL', SERVERURL_ROOT.INETROOT.'/transferindex.php' );
+if( !defined('HTTP_FILE_TRANSFER_REMOTE_URL') ) {
+	define( 'HTTP_FILE_TRANSFER_REMOTE_URL', SERVERURL_ROOT.INETROOT.'/transferindex.php' );
+}
 
 // HTTP_FILE_TRANSFER_LOCAL_URL:
 //    Same logical web location as specified for the HTTP_FILE_TRANSFER_REMOTE_URL option.
@@ -81,7 +92,9 @@ define( 'HTTP_FILE_TRANSFER_REMOTE_URL', SERVERURL_ROOT.INETROOT.'/transferindex
 //    configured on a different web location than the Enterprise Server, the LOCALURL_ROOT.INETROOT
 //    value needs to be replaced with a specific URL pointing to the Transfer Server machine.
 //
-define( 'HTTP_FILE_TRANSFER_LOCAL_URL', LOCALURL_ROOT.INETROOT.'/transferindex.php' );
+if( !defined('HTTP_FILE_TRANSFER_LOCAL_URL') ) {
+	define( 'HTTP_FILE_TRANSFER_LOCAL_URL', LOCALURL_ROOT.INETROOT.'/transferindex.php' );
+}
 
 // FILE_TRANSFER_LOCAL_PATH:
 //    When files are uploaded or downloaded, the Transfer Server needs a folder to temporary
@@ -93,7 +106,9 @@ define( 'HTTP_FILE_TRANSFER_LOCAL_URL', LOCALURL_ROOT.INETROOT.'/transferindex.p
 //    Servers and the Transfer Server), the settings might differ.
 //    This option is only used by Transfer Server, but not by the Enterprise Servers.
 //
-define( 'FILE_TRANSFER_LOCAL_PATH', WOODWINGSYSTEMDIRECTORY.'/TransferServerCache' ); // DO NOT end with a separator, use forward slashes
+if( !defined('FILE_TRANSFER_LOCAL_PATH') ) {
+	define( 'FILE_TRANSFER_LOCAL_PATH', WOODWINGSYSTEMDIRECTORY.'/TransferServerCache' ); // DO NOT end with a separator, use forward slashes
+}
 
 // -------------------------------------------------------------------------------------------------
 // Functional logging
@@ -105,7 +120,9 @@ define( 'FILE_TRANSFER_LOCAL_PATH', WOODWINGSYSTEMDIRECTORY.'/TransferServerCach
 //       '1'   Logon and Logoff only.
 //       '2'   All SOAP calls (note that this creates a large number of rows in the smartlog table.) 
 //
-define ('LOGLEVEL',	'0');
+if( !defined('LOGLEVEL') ) {
+	define( 'LOGLEVEL', '0' );
+}
 
 // -------------------------------------------------------------------------------------------------
 // Object file format support
@@ -114,134 +131,138 @@ define ('LOGLEVEL',	'0');
 // XMLTYPE:
 //    System internal. Do never change. It is used by the Geometry feature.
 //
-define ('XMLTYPE',	'xml');
+if( !defined('XMLTYPE') ) {
+	define( 'XMLTYPE', 'xml' );
+}
 
 // EXTENSIONMAP:
 //    Mapping of file types (extensions, for example image.jpg) to their MIME type and object type 
 //    as stored in the Enterprise database.
 //
-define ('EXTENSIONMAP', serialize( array(
-	'.jpg' => array( 'image/jpeg', 'Image'),
-	'.jpeg' => array( 'image/jpeg', 'Image'),
-	'.gif' => array( 'image/gif', 'Image'),
-	'.tif' => array( 'image/tiff', 'Image'),
-	'.tiff' => array( 'image/tiff', 'Image'),
-	'.png' => array( 'image/png', 'Image'),
-	'.psd' => array( 'image/x-photoshop', 'Image'),
-	'.eps' => array( 'application/postscript', 'Image'),
-	'.ai' => array( 'application/illustrator', 'Image'),
-	'.pdf' => array( 'application/pdf', 'Image'),
-	'.wwcx' => array( 'application/incopy', 'Article'),
-	'.wwct' => array( 'application/incopyinx', 'ArticleTemplate'),
-	'.wcml' => array( 'application/incopyicml', 'Article'),
-	'.wcmt' => array( 'application/incopyicmt', 'ArticleTemplate'),
-	'.wwea' => array( 'text/wwea', 'Article'),
-	'.wweat' => array( 'text/wwea', 'ArticleTemplate'), // BZ# 19176: To ensure the article template has the correct icon.
-	'.incd' => array( 'application/incopy', 'Article'),
-	'.incx' => array( 'application/incopy', 'Article'),
-	'.indd' => array( 'application/indesign', 'Layout'),
-	'.indt' => array( 'application/indesign', 'LayoutTemplate'),
-	'.indl' => array( 'application/indesignlibrary', 'Library'), // BZ#10231: Changed indesign into indesignlibrary
-	'.htm' => array( 'text/html', 'Article'),
-	'.html' => array( 'text/html', 'Article'),
-	'.txt' => array( 'text/plain', 'Article'),
-	'.rtf' => array( 'text/richtext', 'Article'),
-	'.xml' => array( XMLTYPE, ""),
+if( !defined('EXTENSIONMAP') ) {
+	define ('EXTENSIONMAP', serialize( array(
+		'.jpg' => array( 'image/jpeg', 'Image'),
+		'.jpeg' => array( 'image/jpeg', 'Image'),
+		'.gif' => array( 'image/gif', 'Image'),
+		'.tif' => array( 'image/tiff', 'Image'),
+		'.tiff' => array( 'image/tiff', 'Image'),
+		'.png' => array( 'image/png', 'Image'),
+		'.psd' => array( 'image/x-photoshop', 'Image'),
+		'.eps' => array( 'application/postscript', 'Image'),
+		'.ai' => array( 'application/illustrator', 'Image'),
+		'.pdf' => array( 'application/pdf', 'Image'),
+		'.wwcx' => array( 'application/incopy', 'Article'),
+		'.wwct' => array( 'application/incopyinx', 'ArticleTemplate'),
+		'.wcml' => array( 'application/incopyicml', 'Article'),
+		'.wcmt' => array( 'application/incopyicmt', 'ArticleTemplate'),
+		'.wwea' => array( 'text/wwea', 'Article'),
+		'.wweat' => array( 'text/wwea', 'ArticleTemplate'), // BZ# 19176: To ensure the article template has the correct icon.
+		'.incd' => array( 'application/incopy', 'Article'),
+		'.incx' => array( 'application/incopy', 'Article'),
+		'.indd' => array( 'application/indesign', 'Layout'),
+		'.indt' => array( 'application/indesign', 'LayoutTemplate'),
+		'.indl' => array( 'application/indesignlibrary', 'Library'), // BZ#10231: Changed indesign into indesignlibrary
+		'.htm' => array( 'text/html', 'Article'),
+		'.html' => array( 'text/html', 'Article'),
+		'.txt' => array( 'text/plain', 'Article'),
+		'.rtf' => array( 'text/richtext', 'Article'),
+		'.xml' => array( XMLTYPE, ""),
 
-	// Audio / Video	
-	'.au' => array( 'audio/basic', 'Audio'),
-	'.snd' => array( 'audio/basic', 'Audio'),
-	'.mid' => array( 'audio/midi', 'Audio'),
-	'.midi' => array( 'audio/midi', 'Audio'),
-	'.kar' => array( 'audio/midi', 'Audio'),
-	'.mp3' => array( 'audio/mpeg', 'Audio'), // BZ#6564: moved on top of audio/mpeg sublist
-	'.mpga' => array( 'audio/mpeg', 'Audio'),
-	'.mp2' => array( 'audio/mpeg', 'Audio'),
-	'.aif' => array( 'audio/x-aiff', 'Audio'),
-	'.aiff' => array( 'audio/x-aiff', 'Audio'),
-	'.aifc' => array( 'audio/x-aiff', 'Audio'),
-	'.m3u' => array( 'audio/x-mpegurl', 'Audio'),
-	'.ram' => array( 'audio/x-pn-realaudio', 'Audio'),
-	'.rm' => array( 'audio/x-pn-realaudio', 'Audio'),
-	'.rpm' => array( 'audio/x-pn-realaudio-plugin', 'Audio'),
-	'.ra' => array( 'audio/x-realaudio', 'Audio'),
-	'.wav' => array( 'audio/x-wav', 'Audio'),
-	'.mpg' => array( 'video/mpeg', 'Video'),
-	'.mpeg' => array( 'video/mpeg', 'Video'),
-	'.mov' => array( 'video/quicktime', 'Video'),
-	'.avi' => array( 'video/x-msvideo', 'Video'),
-	'.asf' => array( 'video/x-ms-asf', 'Video'),
-	'.asx' => array( 'video/x-ms-asf', 'Video'),
-	'.wma' => array( 'video/x-ms-wma', 'Video'),
-	'.wmv' => array( 'video/x-ms-wmv', 'Video'),
-	'.wmx' => array( 'video/x-ms-wmx', 'Video'),
-	'.wmz' => array( 'video/x-ms-wmz', 'Video'),
-	'.wmd' => array( 'video/x-ms-wmd', 'Video'),
-	'.wm' => array( 'video/x-ms-wm', 'Video'),
-	'.flv' => array( 'video/x-flv', 'Video'),
-	'.swf' => array( 'application/x-shockwave-flash', 'Video'),
-	'.mp4' => array( 'video/mp4', 'Video'),
-	'.m4v' => array( 'video/x-m4v', 'Video'), // BZ#20713
+		// Audio / Video
+		'.au' => array( 'audio/basic', 'Audio'),
+		'.snd' => array( 'audio/basic', 'Audio'),
+		'.mid' => array( 'audio/midi', 'Audio'),
+		'.midi' => array( 'audio/midi', 'Audio'),
+		'.kar' => array( 'audio/midi', 'Audio'),
+		'.mp3' => array( 'audio/mpeg', 'Audio'), // BZ#6564: moved on top of audio/mpeg sublist
+		'.mpga' => array( 'audio/mpeg', 'Audio'),
+		'.mp2' => array( 'audio/mpeg', 'Audio'),
+		'.aif' => array( 'audio/x-aiff', 'Audio'),
+		'.aiff' => array( 'audio/x-aiff', 'Audio'),
+		'.aifc' => array( 'audio/x-aiff', 'Audio'),
+		'.m3u' => array( 'audio/x-mpegurl', 'Audio'),
+		'.ram' => array( 'audio/x-pn-realaudio', 'Audio'),
+		'.rm' => array( 'audio/x-pn-realaudio', 'Audio'),
+		'.rpm' => array( 'audio/x-pn-realaudio-plugin', 'Audio'),
+		'.ra' => array( 'audio/x-realaudio', 'Audio'),
+		'.wav' => array( 'audio/x-wav', 'Audio'),
+		'.mpg' => array( 'video/mpeg', 'Video'),
+		'.mpeg' => array( 'video/mpeg', 'Video'),
+		'.mov' => array( 'video/quicktime', 'Video'),
+		'.avi' => array( 'video/x-msvideo', 'Video'),
+		'.asf' => array( 'video/x-ms-asf', 'Video'),
+		'.asx' => array( 'video/x-ms-asf', 'Video'),
+		'.wma' => array( 'video/x-ms-wma', 'Video'),
+		'.wmv' => array( 'video/x-ms-wmv', 'Video'),
+		'.wmx' => array( 'video/x-ms-wmx', 'Video'),
+		'.wmz' => array( 'video/x-ms-wmz', 'Video'),
+		'.wmd' => array( 'video/x-ms-wmd', 'Video'),
+		'.wm' => array( 'video/x-ms-wm', 'Video'),
+		'.flv' => array( 'video/x-flv', 'Video'),
+		'.swf' => array( 'application/x-shockwave-flash', 'Video'),
+		'.mp4' => array( 'video/mp4', 'Video'),
+		'.m4v' => array( 'video/x-m4v', 'Video'), // BZ#20713
 
-	// MS Office 2003/2004				(some are commented out to avoid duplicate mime types + object types)
-	'.doc' => array( 'application/msword',            'Article'),  // Word document
-	'.dot' => array( 'application/msword',            'ArticleTemplate'), // Word template
-	'.xls' => array( 'application/vnd.ms-excel',      'Spreadsheet' ), // Excel sheet
-	//'.xlt' => array( 'application/vnd.ms-excel',      'ArticleTemplate' ), // Excel template
-	//'.xlw' => array( 'application/vnd.ms-excel',      'Article' ), // Excel workbook
-	//'.xla' => array( 'application/vnd.ms-excel',      'Other' ),   // Excel add-in
-	//'.xlc' => array( 'application/vnd.ms-excel',      'Article' ), // Excel chart
-	//'.xlm' => array( 'application/vnd.ms-excel',      'Article' ), // Excel macro
-	'.ppt' => array( 'application/vnd.ms-powerpoint', 'Presentation' ),   // PowerPoint presentation (BZ#10482)
-	//'.pps' => array( 'application/vnd.ms-powerpoint', 'Other' ),   // PowerPoint slideshow
-	//'.pot' => array( 'application/vnd.ms-powerpoint', 'Other' ),   // PowerPoint template
-	//'.ppz' => array( 'application/vnd.ms-powerpoint', 'Other' ),   // PowerPoint animation
-	//'.ppa' => array( 'application/vnd.ms-powerpoint', 'Other' ),   // PowerPoint add-in
+		// MS Office 2003/2004				(some are commented out to avoid duplicate mime types + object types)
+		'.doc' => array( 'application/msword',            'Article'),  // Word document
+		'.dot' => array( 'application/msword',            'ArticleTemplate'), // Word template
+		'.xls' => array( 'application/vnd.ms-excel',      'Spreadsheet' ), // Excel sheet
+		//'.xlt' => array( 'application/vnd.ms-excel',      'ArticleTemplate' ), // Excel template
+		//'.xlw' => array( 'application/vnd.ms-excel',      'Article' ), // Excel workbook
+		//'.xla' => array( 'application/vnd.ms-excel',      'Other' ),   // Excel add-in
+		//'.xlc' => array( 'application/vnd.ms-excel',      'Article' ), // Excel chart
+		//'.xlm' => array( 'application/vnd.ms-excel',      'Article' ), // Excel macro
+		'.ppt' => array( 'application/vnd.ms-powerpoint', 'Presentation' ),   // PowerPoint presentation (BZ#10482)
+		//'.pps' => array( 'application/vnd.ms-powerpoint', 'Other' ),   // PowerPoint slideshow
+		//'.pot' => array( 'application/vnd.ms-powerpoint', 'Other' ),   // PowerPoint template
+		//'.ppz' => array( 'application/vnd.ms-powerpoint', 'Other' ),   // PowerPoint animation
+		//'.ppa' => array( 'application/vnd.ms-powerpoint', 'Other' ),   // PowerPoint add-in
 
-	// MS Office 2007
-	'.docx' => array( 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'Article' ), // Word document
-	'.docm' => array( 'application/vnd.ms-word.document.macroEnabled.12',                        'Article' ), // " (macro-enabled)
-	'.dotx' => array( 'application/vnd.openxmlformats-officedocument.wordprocessingml.template', 'ArticleTemplate' ), // Word template
-	'.dotm' => array( 'application/vnd.ms-word.template.macroEnabled.12',                        'Article' ), // " (macro-enabled)
-	'.xlsx' => array( 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',       'Spreadsheet' ), // Excel workbook
-	'.xlsm' => array( 'application/vnd.ms-excel.sheet.macroEnabled.12',                          'Spreadsheet' ), // " (macro-enabled)
-	'.xltx' => array( 'application/vnd.openxmlformats-officedocument.spreadsheetml.template',    'Spreadsheet' ), // Excel template
-	'.xltm' => array( 'application/vnd.ms-excel.template.macroEnabled.12',                       'Spreadsheet' ), // " (macro-enabled)
-	'.xlsb' => array( 'application/vnd.ms-excel.sheet.binary.macroEnabled.12',                   'Spreadsheet' ), // Excel binary workbook (macro-enabled)
-	'.xlam' => array( 'application/vnd.ms-excel.addin.macroEnabled.12',                          'Other' ),   // Excel add-in
-	'.pptx' => array( 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'Presentation' ), // PowerPoint presentation
-	'.pptm' => array( 'application/vnd.ms-powerpoint.presentation.macroEnabled.12',              'Presentation' ),   // " (macro-enabled)
-	'.ppsx' => array( 'application/vnd.openxmlformats-officedocument.presentationml.slideshow',  'Presentation' ),   // PowerPoint slideshow
-	'.ppsm' => array( 'application/vnd.ms-powerpoint.slideshow.macroEnabled.12',                 'Presentation' ),   // " (macro-enabled)
-	'.potx' => array( 'application/vnd.openxmlformats-officedocument.presentationml.template',   'Other' ),   // PowerPoint presentation template
-	'.potm' => array( 'application/vnd.ms-powerpoint.template.macroEnabled.12',                  'Other' ),   // " (macro-enabled)
-	'.ppam' => array( 'application/vnd.ms-powerpoint.addin.macroEnabled.12',                     'Other' ),   // PowerPoint add-in
-	'.sldx' => array( 'application/vnd.openxmlformats-officedocument.presentationml.slide',      'Presentation' ),   // PowerPoint presentation
-	'.sldm' => array( 'application/vnd.ms-powerpoint.slide.macroEnabled.12',                     'Presentation' ),   // " (macro-enabled)
+		// MS Office 2007
+		'.docx' => array( 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'Article' ), // Word document
+		'.docm' => array( 'application/vnd.ms-word.document.macroEnabled.12',                        'Article' ), // " (macro-enabled)
+		'.dotx' => array( 'application/vnd.openxmlformats-officedocument.wordprocessingml.template', 'ArticleTemplate' ), // Word template
+		'.dotm' => array( 'application/vnd.ms-word.template.macroEnabled.12',                        'Article' ), // " (macro-enabled)
+		'.xlsx' => array( 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',       'Spreadsheet' ), // Excel workbook
+		'.xlsm' => array( 'application/vnd.ms-excel.sheet.macroEnabled.12',                          'Spreadsheet' ), // " (macro-enabled)
+		'.xltx' => array( 'application/vnd.openxmlformats-officedocument.spreadsheetml.template',    'Spreadsheet' ), // Excel template
+		'.xltm' => array( 'application/vnd.ms-excel.template.macroEnabled.12',                       'Spreadsheet' ), // " (macro-enabled)
+		'.xlsb' => array( 'application/vnd.ms-excel.sheet.binary.macroEnabled.12',                   'Spreadsheet' ), // Excel binary workbook (macro-enabled)
+		'.xlam' => array( 'application/vnd.ms-excel.addin.macroEnabled.12',                          'Other' ),   // Excel add-in
+		'.pptx' => array( 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'Presentation' ), // PowerPoint presentation
+		'.pptm' => array( 'application/vnd.ms-powerpoint.presentation.macroEnabled.12',              'Presentation' ),   // " (macro-enabled)
+		'.ppsx' => array( 'application/vnd.openxmlformats-officedocument.presentationml.slideshow',  'Presentation' ),   // PowerPoint slideshow
+		'.ppsm' => array( 'application/vnd.ms-powerpoint.slideshow.macroEnabled.12',                 'Presentation' ),   // " (macro-enabled)
+		'.potx' => array( 'application/vnd.openxmlformats-officedocument.presentationml.template',   'Other' ),   // PowerPoint presentation template
+		'.potm' => array( 'application/vnd.ms-powerpoint.template.macroEnabled.12',                  'Other' ),   // " (macro-enabled)
+		'.ppam' => array( 'application/vnd.ms-powerpoint.addin.macroEnabled.12',                     'Other' ),   // PowerPoint add-in
+		'.sldx' => array( 'application/vnd.openxmlformats-officedocument.presentationml.slide',      'Presentation' ),   // PowerPoint presentation
+		'.sldm' => array( 'application/vnd.ms-powerpoint.slide.macroEnabled.12',                     'Presentation' ),   // " (macro-enabled)
 
-	// Open Office
-	'.odt' => array( 'application/vnd.oasis.opendocument.text',                  'Article' ),
-	'.ott' => array( 'application/vnd.oasis.opendocument.text-template',         'ArticleTemplate' ),
-	'.oth' => array( 'application/vnd.oasis.opendocument.text-web',              'Article' ),
-	'.odm' => array( 'application/vnd.oasis.opendocument.text-master',           'ArticleTemplate' ),
-	'.ods' => array( 'application/vnd.oasis.opendocument.spreadsheet',           'Spreadsheet' ),
-	'.ots' => array( 'application/vnd.oasis.opendocument.spreadsheet-template',  'Spreadsheet' ),
-	'.odp' => array( 'application/vnd.oasis.opendocument.presentation',          'Presentation' ),
-	'.otp' => array( 'application/vnd.oasis.opendocument.presentation-template', 'Other' ),
+		// Open Office
+		'.odt' => array( 'application/vnd.oasis.opendocument.text',                  'Article' ),
+		'.ott' => array( 'application/vnd.oasis.opendocument.text-template',         'ArticleTemplate' ),
+		'.oth' => array( 'application/vnd.oasis.opendocument.text-web',              'Article' ),
+		'.odm' => array( 'application/vnd.oasis.opendocument.text-master',           'ArticleTemplate' ),
+		'.ods' => array( 'application/vnd.oasis.opendocument.spreadsheet',           'Spreadsheet' ),
+		'.ots' => array( 'application/vnd.oasis.opendocument.spreadsheet-template',  'Spreadsheet' ),
+		'.odp' => array( 'application/vnd.oasis.opendocument.presentation',          'Presentation' ),
+		'.otp' => array( 'application/vnd.oasis.opendocument.presentation-template', 'Other' ),
 
-	// iWork
-	'.numbers' => array( 'application/x-apple-numbers', 'Spreadsheet' ),
-	'.pages' => array( 'application/x-apple-pages', 'Article' ),
-	'.key' => array( 'application/x-apple-keynote', 'Presentation' ), 
+		// iWork
+		'.numbers' => array( 'application/x-apple-numbers', 'Spreadsheet' ),
+		'.pages' => array( 'application/x-apple-pages', 'Article' ),
+		'.key' => array( 'application/x-apple-keynote', 'Presentation' ),
 
-	// Compressed
-	'.zip' => array( 'application/zip', 'Archive'), 
-	'.gz'  => array( 'application/x-gzip', 'Archive' ),
-	'.dmg' => array( 'application/x-apple-diskimage', 'Other' ),
-	'.htmlwidget' => array( 'application/ww-htmlwidget', 'Other'),
-	'.ofip' => array( 'application/x-ofip+zip', 'Other'), // Obsoleted, files can still be downloaded from the system
-    '.folio' => array( 'application/vnd.adobe.folio+zip', 'Other'), // For DPS
-)));
+		// Compressed
+		'.zip' => array( 'application/zip', 'Archive'),
+		'.gz'  => array( 'application/x-gzip', 'Archive' ),
+		'.dmg' => array( 'application/x-apple-diskimage', 'Other' ),
+		'.htmlwidget' => array( 'application/ww-htmlwidget', 'Other'),
+		'.ofip' => array( 'application/x-ofip+zip', 'Other'), // Obsoleted, files can still be downloaded from the system
+	    '.folio' => array( 'application/vnd.adobe.folio+zip', 'Other'), // For DPS
+	)));
+}
 
 // Discontinued settings:
 //    MIMEMAP:
@@ -250,18 +271,34 @@ define ('EXTENSIONMAP', serialize( array(
 // -------------------------------------------------------------------------------------------------
 // Ticket expiration - Logon ticket expiration time in seconds
 // -------------------------------------------------------------------------------------------------
-define ('EXPIREDEFAULT',	24*3600);	// Generic logon expiration time. Default value: 24*3600.
-define ('EXPIREWEB',		3600);		// Logon expiration time for Web based clients. Default value: 3600.
+if( !defined('EXPIREDEFAULT') ) {
+	define( 'EXPIREDEFAULT', 24 * 3600 );   // Generic logon expiration time. Default value: 24*3600.
+}
+if( !defined('EXPIREWEB') ) {
+	define( 'EXPIREWEB', 3600 );      // Logon expiration time for Web based clients. Default value: 3600.
+}
 
 // -------------------------------------------------------------------------------------------------
 // Versioning - Maximum number of versions to store per object type
 // -------------------------------------------------------------------------------------------------
-define ('MAX_ARTICLE_VERSION',	10); // also used for ArticleTemplate
-define ('MAX_IMAGE_VERSION', 	5);
-define ('MAX_VIDEO_VERSION', 	5);
-define ('MAX_AUDIO_VERSION', 	5);
-define ('MAX_LAYOUT_VERSION', 	5); // also used for LayoutTemplate, LayoutModule and LayoutModuleTemplate
-define ('MAX_LIBRARY_VERSION', 	5);
+if( !defined('MAX_ARTICLE_VERSION') ) {
+	define( 'MAX_ARTICLE_VERSION', 10 ); // also used for ArticleTemplate
+}
+if( !defined('MAX_IMAGE_VERSION') ) {
+	define( 'MAX_IMAGE_VERSION', 5 );
+}
+if( !defined('MAX_VIDEO_VERSION') ) {
+	define( 'MAX_VIDEO_VERSION', 5 );
+}
+if( !defined('MAX_AUDIO_VERSION') ) {
+	define( 'MAX_AUDIO_VERSION', 5 );
+}
+if( !defined('MAX_LAYOUT_VERSION') ) {
+	define( 'MAX_LAYOUT_VERSION', 5 ); // also used for LayoutTemplate, LayoutModule and LayoutModuleTemplate
+}
+if( !defined('MAX_LIBRARY_VERSION') ) {
+	define( 'MAX_LIBRARY_VERSION', 5 );
+}
 
 // Discontinued settings:
 //    CREATEVERSION_ONSTATECHANGE:
@@ -278,24 +315,32 @@ define ('MAX_LIBRARY_VERSION', 	5);
 //    Time To Live options for multicast messages. Possible values are: Scopes: 0=Host, 1=Subnet, 
 //    32=Site, 64=Region, 128=Continent, 255=Unrestricted. Default value: 32.
 //
-define ('MULTICAST_TTL', 32);
+if( !defined('MULTICAST_TTL') ) {
+	define( 'MULTICAST_TTL', 32 );
+}
 
 // MULTICAST_IF:
 //    The network interface used to send out multicast messages. If your server machine has more 
 //    than one network card, make sure this setting points to the right interface. Default value: '127.0.0.1'.
 //
-define ('MULTICAST_IF', '127.0.0.1');
+if( !defined('MULTICAST_IF') ) {
+	define( 'MULTICAST_IF', '127.0.0.1' );
+}
 
 // MC_MEDIATOR_ADDRESS:
 //    Address on which Enterprise talks to the Multicast Mediator. Default value: '127.0.0.1'.
 //
-define ('MC_MEDIATOR_ADDRESS', '127.0.0.1');
+if( !defined('MC_MEDIATOR_ADDRESS') ) {
+	define( 'MC_MEDIATOR_ADDRESS', '127.0.0.1' );
+}
 
 // MC_MEDIATOR_PORT:
 //    A UDP port used for the IP address indicated by the MC_MEDIATOR_ADDRESS setting.
 //    Default value: 8094.
 //
-define ('MC_MEDIATOR_PORT', 8094);
+if( !defined('MC_MEDIATOR_PORT') ) {
+	define( 'MC_MEDIATOR_PORT', 8094 );
+}
 
 // -------------------------------------------------------------------------------------------------
 // E-mail notification
@@ -304,42 +349,56 @@ define ('MC_MEDIATOR_PORT', 8094);
 // EMAIL_SMTP:
 //    SMTP server to send e-mail. For example: 'smtp.mydomain.com'. Default value: ''.
 //
-define ('EMAIL_SMTP', '');
+if( !defined('EMAIL_SMTP') ) {
+	define( 'EMAIL_SMTP', '' );
+}
 
 // EMAIL_SMTP_USER:
 //    Log-in user name for your SMTP server. Leave empty when log-in is not required. Default value: ''.
 //
-define ('EMAIL_SMTP_USER', '');
+if( !defined('EMAIL_SMTP_USER') ) {
+	define( 'EMAIL_SMTP_USER', '' );
+}
 
 // EMAIL_SMTP_USER:
 //    Log-in user password for your SMTP server. Leave empty when log-in is not required. Default value: ''.
 //
-define ('EMAIL_SMTP_PASS', ''); 
+if( !defined('EMAIL_SMTP_PASS') ) {
+	define( 'EMAIL_SMTP_PASS', '' );
+}
 
 // EMAIL_PORT:
 //    SMTP server port. Allows overruling the SMTP server port. Default value: 25.
 //
-define ('EMAIL_PORT', 25);
+if( !defined('EMAIL_PORT') ) {
+	define( 'EMAIL_PORT', 25 );
+}
 
 // EMAIL_SSL:
 //    Whether or not to use a secure connection to the email server. Use 'ssl' or 'tls' SSL types  
 //    for secure connections. Leave empty '' for no security. Default value: ''.
 //
-define ('EMAIL_SSL', '');
+if( !defined('EMAIL_SSL') ) {
+	define( 'EMAIL_SSL', '' );
+}
 
 // EMAIL_SENDER_ADDRESS:
 //    E-mail address to use as the sender of the e-mail.
 //    When left empty, the e-mail address defined on the User Maintenance page of the user who sent the e-mail is used instead.
 //    Default value: ''.
 //
-define ('EMAIL_SENDER_ADDRESS', '');
+if( !defined('EMAIL_SENDER_ADDRESS') ) {
+	define( 'EMAIL_SENDER_ADDRESS', '' );
+}
 
 // EMAIL_SENDER_NAME:
 //    User name to use for the sender of the e-mail.
 //    When left empty, the name defined on the User Maintenance page of the user who sent the e-mail is used instead.
 //    Default value: ''.
 //
-define ('EMAIL_SENDER_NAME', '');
+if( !defined('EMAIL_SENDER_NAME') ) {
+	define( 'EMAIL_SENDER_NAME', '' );
+}
 
 // -------------------------------------------------------------------------------------------------
 // InDesign Server / Web Editor settings
@@ -349,7 +408,9 @@ define ('EMAIL_SENDER_NAME', '');
 //    The logical name of the application server to logon to (from an InDesign Server point of view).
 //    This should match the ServerInfo name in the WWSettings.xml file or the APPLICATION_SERVERS setting.
 //
-define ('INDESIGNSERV_APPSERVER', SERVERNAME );
+if( !defined('INDESIGNSERV_APPSERVER') ) {
+	define( 'INDESIGNSERV_APPSERVER', SERVERNAME );
+}
 
 // INDESIGNSERV_JOBQUEUES:
 //    For each job type a priority can be specified that overrules the default priority
@@ -379,10 +440,12 @@ define ('INDESIGNSERV_APPSERVER', SERVERNAME );
 //    to "3" (medium) add the following line (without the leading //):
 //       'WEB_EDITOR' => 3,
 //   
-define( 'INDESIGNSERV_JOBQUEUES', serialize(array(
-	// job type name => job priority number
-	// ...
-)));
+if( !defined('INDESIGNSERV_JOBQUEUES') ) {
+	define( 'INDESIGNSERV_JOBQUEUES', serialize(array(
+		// job type name => job priority number
+		// ...
+	)));
+}
 
 // WEBEDITDIR:
 //    Defines the location where the Enterprise Server will put files for use by InDesign Server 
@@ -397,12 +460,16 @@ define( 'INDESIGNSERV_JOBQUEUES', serialize(array(
 //       Linux:    'nobody'
 //       Windows:  'IUSR_<machine>'
 //
-define ('WEBEDITDIR', WOODWINGSYSTEMDIRECTORY.'/WebEdit/');
+if( !defined('WEBEDITDIR') ) {
+	define( 'WEBEDITDIR', WOODWINGSYSTEMDIRECTORY.'/WebEdit/' );
+}
 
 // WEBEDITDIRIDSERV:
 //    Path to (mounted) WEBEDITDIR location from InDesign Server perspective (including trailing /).
 //
-define ('WEBEDITDIRIDSERV', WOODWINGSYSTEMDIRECTORY.'/WebEdit/'); 
+if( !defined('WEBEDITDIRIDSERV') ) {
+	define( 'WEBEDITDIRIDSERV', WOODWINGSYSTEMDIRECTORY.'/WebEdit/' );
+}
 
 // CURL:
 //	InDesign Server background job needs to have CURL installed and defined.
@@ -437,82 +504,104 @@ define ('WEBEDITDIRIDSERV', WOODWINGSYSTEMDIRECTORY.'/WebEdit/');
 //    See http://localhost/Enterprise/server/wwtest/spelling/unicodeblocks.php to study the used Unicode block ranges.
 //    See http://localhost/Enterprise/server/wwtest/spelling/workbench.php to study how words are split-up.
 //
-define( 'WORDCHARS_LATIN',    'A-Za-z-\x{00C0}-\x{024F}\x{1E00}-\x{1EFF}\x{0250}-\x{02AF}' ); // American and European languages
+if( !defined('WORDCHARS_LATIN') ) {
+	define( 'WORDCHARS_LATIN', 'A-Za-z-\x{00C0}-\x{024F}\x{1E00}-\x{1EFF}\x{0250}-\x{02AF}' ); // American and European languages
 //                            L> Range [A-Za-z] includes alphabetic characters
 //                            L> Range [00C0-024F] partially includes "Latin-1 Supplement" and includes "Latin Extended A" and "Latin Extended B"
 //                            L> Range [1E00-1EFF] includes "Latin Extended Additional"
 //                            L> Range [0250-02AF] includes "IPA Extensions" (International Phonetic Alphabet)
-define( 'WORDCHARS_RUSSIAN',  WORDCHARS_LATIN.'\x{0400}-\x{0523}\x{2DE0}-\x{2DFF}\x{A640}-\x{A697}'); // Russian language
+}
+if( !defined('WORDCHARS_RUSSIAN') ) {
+	define( 'WORDCHARS_RUSSIAN', WORDCHARS_LATIN.'\x{0400}-\x{0523}\x{2DE0}-\x{2DFF}\x{A640}-\x{A697}' ); // Russian language
 //                            L> WORDCHARS_LATIN includes all ranges specified for Latin (see above).
 //                            L> Range [0400-0523] includes "Cyrillic" and "Cyrillic Supplement"
 //                            L> Range [2DE0-2DFF] includes "Cyrillic Extended-A"
 //                            L> Range [A640-A697] includes "Cyrillic Extended-B"
+}
 
 // ENTERPRISE_SPELLING:
 //    Defines 3rd party spelling dictionaries installed for Enterprise. This affects only articles in
 //    Adobe InCopy CS5 format (or newer), as opened in the Multi Channel editor. This editor is shipped 
 //    with Content Station 7.4 (or newer).
 //
-define('ENTERPRISE_SPELLING', serialize( array(
-	/* configuration template:
-	brand => array( // brand (database id for brand specific, zero for system-wide)
-		dictionary => array( // display name of dictionary to be shown to end-users (must be unique per brand)
-			'language'     => '', // Language code in [llCC] format (l = language code, C = county code). Used by custom Server Plug-ins to recognize a language and take action.
-			'wordchars'    => '', // Valid characters that are used in words. (See detailed comments above.) Other characters are assumed to be word separators.
-			'serverplugin' => '', // Internal name of the Server Plug-in that does the integration
-			'location'     => '', // Full file path to executable, or web url. Leave empty for PHP integrations.
-			'dictionaries' => array( '' ), // The names of dictionaries installed for the engine. Those are internal names, depending on the engine.
-			'suggestions'  => #,  // The maximum number of suggestions to show end-users for a misspelled word.
-			'doclanguage'  => '', // [Optional] Document's language code. Used to pre-select the dictionary for a certain article text fragment for spelling checking.
-		),
-	*/
-	0 => array( 
-		'American English' => array( // Hunspell shell
-			'language'     => 'enUS',
-			'wordchars'    => '/(['.WORDCHARS_LATIN.']+)/u',
-			'serverplugin' => 'HunspellShellSpelling',
-			'location'     => '/opt/local/bin/hunspell',
-			'dictionaries' => array( 'en_US' ),
-			'suggestions'  => 10,
-		),
-		/*'American English' => array( // Google web
-			'language'     => 'enUS',
-			'wordchars'    => '/(['.WORDCHARS_LATIN.']+)/u',
-			'serverplugin' => 'GoogleWebSpelling',
-			'location'     => 'https://www.google.com/tbproxy/spell',
-			'dictionaries' => array( 'en' ),
-			'suggestions'  => 10,
-		),*/
-		/*'American English' => array( // Aspell shell
-			'language'     => 'enUS',
-			'wordchars'    => '/(['.WORDCHARS_LATIN.']+)/u',
-			'serverplugin' => 'AspellShellSpelling',
-			'location'     => '/opt/local/bin/aspell',
-			'dictionaries' => array( 'en' ),
-			'suggestions'  => 10,
-		),*/
-		/*'American English' => array( // Enchant PHP
-			'language'     => 'enUS',
-			'wordchars'    => '/(['.WORDCHARS_LATIN.']+)/u',
-			'serverplugin' => 'EnchantPhpSpelling',
-			'location'     => '/opt/local/bin/enchant', // only used for version checking
-			'dictionaries' => array( 'en_US' ),
-			'suggestions'  => 10,
-		),*/
-	), // Make sure this is included when dictionary is defined.
-)));
+if( !defined('ENTERPRISE_SPELLING') ) {
+	define('ENTERPRISE_SPELLING', serialize( array(
+		/* configuration template:
+		brand => array( // brand (database id for brand specific, zero for system-wide)
+			dictionary => array( // display name of dictionary to be shown to end-users (must be unique per brand)
+				'language'     => '', // Language code in [llCC] format (l = language code, C = county code). Used by custom Server Plug-ins to recognize a language and take action.
+				'wordchars'    => '', // Valid characters that are used in words. (See detailed comments above.) Other characters are assumed to be word separators.
+				'serverplugin' => '', // Internal name of the Server Plug-in that does the integration
+				'location'     => '', // Full file path to executable, or web url. Leave empty for PHP integrations.
+				'dictionaries' => array( '' ), // The names of dictionaries installed for the engine. Those are internal names, depending on the engine.
+				'suggestions'  => #,  // The maximum number of suggestions to show end-users for a misspelled word.
+				'doclanguage'  => '', // [Optional] Document's language code. Used to pre-select the dictionary for a certain article text fragment for spelling checking.
+			),
+		*/
+		0 => array(
+			'American English' => array( // Hunspell shell
+				'language'     => 'enUS',
+				'wordchars'    => '/(['.WORDCHARS_LATIN.']+)/u',
+				'serverplugin' => 'HunspellShellSpelling',
+				'location'     => '/opt/local/bin/hunspell',
+				'dictionaries' => array( 'en_US' ),
+				'suggestions'  => 10,
+			),
+			/*'American English' => array( // Google web
+				'language'     => 'enUS',
+				'wordchars'    => '/(['.WORDCHARS_LATIN.']+)/u',
+				'serverplugin' => 'GoogleWebSpelling',
+				'location'     => 'https://www.google.com/tbproxy/spell',
+				'dictionaries' => array( 'en' ),
+				'suggestions'  => 10,
+			),*/
+			/*'American English' => array( // Aspell shell
+				'language'     => 'enUS',
+				'wordchars'    => '/(['.WORDCHARS_LATIN.']+)/u',
+				'serverplugin' => 'AspellShellSpelling',
+				'location'     => '/opt/local/bin/aspell',
+				'dictionaries' => array( 'en' ),
+				'suggestions'  => 10,
+			),*/
+			/*'American English' => array( // Enchant PHP
+				'language'     => 'enUS',
+				'wordchars'    => '/(['.WORDCHARS_LATIN.']+)/u',
+				'serverplugin' => 'EnchantPhpSpelling',
+				'location'     => '/opt/local/bin/enchant', // only used for version checking
+				'dictionaries' => array( 'en_US' ),
+				'suggestions'  => 10,
+			),*/
+		), // Make sure this is included when dictionary is defined.
+	)));
+}
 
 // -------------------------------------------------------------------------------------------------
 // MadeToPrint server settings
 // -------------------------------------------------------------------------------------------------
-define('MTP_SERVER_DEF_ID',		''); // server name used to log-in to the Enterprise Server (WWSettings.xml)
-define('MTP_USER', 				''); // the user name used to log-in in Enterprise
-define('MTP_PASSWORD', 			''); // the password used to log-in in Enterprise
-define('MTP_SERVER_FOLDER_IN', 	''); // MTP input folder from server perspective
-define('MTP_CALLAS_FOLDER_IN', 	''); // MTP input folder from MTP perspective
-define('MTP_CALLAS_FOLDER_OUT', ''); // MTP output folder result from MTP perspective (the location where the resulting xml is placed)
-define('MTP_JOB_NAME', 			''); // //Default My Targets pane job. Fail-safe setting. If not defined in the server, this setting is used.
-define('MTP_POSTPROCESS_LOC', 	SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostProcess.php'); //location of the post processing file
+if( !defined('MTP_SERVER_DEF_ID') ) {
+	define( 'MTP_SERVER_DEF_ID', '' ); // server name used to log-in to the Enterprise Server (WWSettings.xml)
+}
+if( !defined('MTP_USER') ) {
+	define( 'MTP_USER', '' ); // the user name used to log-in in Enterprise
+}
+if( !defined('MTP_PASSWORD') ) {
+	define( 'MTP_PASSWORD', '' ); // the password used to log-in in Enterprise
+}
+if( !defined('MTP_SERVER_FOLDER_IN') ) {
+	define( 'MTP_SERVER_FOLDER_IN', '' ); // MTP input folder from server perspective
+}
+if( !defined('MTP_CALLAS_FOLDER_IN') ) {
+	define( 'MTP_CALLAS_FOLDER_IN', '' ); // MTP input folder from MTP perspective
+}
+if( !defined('MTP_CALLAS_FOLDER_OUT') ) {
+	define( 'MTP_CALLAS_FOLDER_OUT', '' ); // MTP output folder result from MTP perspective (the location where the resulting xml is placed)
+}
+if( !defined('MTP_JOB_NAME') ) {
+	define( 'MTP_JOB_NAME', '' ); // //Default My Targets pane job. Fail-safe setting. If not defined in the server, this setting is used.
+}
+if( !defined('MTP_POSTPROCESS_LOC') ) {
+	define( 'MTP_POSTPROCESS_LOC', SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostProcess.php' ); //location of the post processing file
+}
 
 // -------------------------------------------------------------------------------------------------
 // Server Features
@@ -526,11 +615,11 @@ define('MTP_POSTPROCESS_LOC', 	SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostP
 //       Broadcasting (default)
 //          (Server feature.) Enables event mechanism.
 //       ContentStationNumberOfItemsToPrefetch
-//          For Content Station 9.5 or higher
+//          For Content Station 9.5 up to 9.x
 //          Sets the maximum number of files and objects for which the preview and metadata information should be prefetched from the server.
 //          This makes sure that when a user selects a different file or object in a Document pane, the information is readily available.
 //       ContentStationNumberOfSimultaneousDownloads
-//          For Content Station 9.5 or higher
+//          For Content Station 9.5 up to 9.x
 //          Sets the maximum number of simultaneous downloads (such as thumbnails in the Publication Overview Application) that Content Station will handle.
 //       CompanyLanguage (default)
 //          (Server feature.) The company language is used as the default language. This means that 
@@ -634,27 +723,36 @@ define('MTP_POSTPROCESS_LOC', 	SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostP
 //						SS = 30
 //		UseTwelveHourFormat
 //			If set Contentstation will use the 12 hour format for the time input components
+//			For ContentStation up to 9.x
 //      CSPlainText
 //			If set ContentStation will use plain text for new articles
+//			For ContentStation up to 9.x
 //		ContentStationRTL
 //			Enables right-to-left support in ContentStation
+//			For ContentStation up to 9.x
 //		PublicationOverviewCombineRequests
 //			This will combine the requests for the thumbs and previews in the publication overview into one request. This can fix communication errors with IIS or proxy servers
 //			Note: A downside of this is that the user does not see any thumbs or previews before the complete request has finished.
+//			For ContentStation up to 9.x
 //		ClientFeedback
 //			This will enable the diagnosis functionality at client application side. The user can send feedback or a crash report is send when
 //			the client application encounters an unexpected error.
+//			For ContentStation up to 9.x
 //      ContentStationUseWWEAEditor
-//			For ContentStation 7.4 or higher
+//			For ContentStation 7.4 up to 9.x
 //			If set ContentStation uses the wwea editor instead of the multi channel editor
 //      ContentStationDisableEditorPreview
-//			For ContentStation 7.4 or higher, Content Station HTML
+//			For ContentStation 7.4 and higher
 //          If set the preview in the multi channel editor is disabled
-//      ContentStationReadWriteEditor
-//			For Content Station HTML
-//          Articles in Content Station HTML are always opened in readonly mode, unless this feature is set
+//      ContentStationReadOnlyEditor
+//			For Content Station 10 and higher
+//          Articles in Content Station 10 are always opened in read/write mode, unless this feature is set
+//		ContentStationAcceptAllChanges
+//			For Content Station 10 and higher
+//			If set, Content Station 10 will accept all changes when opening an article, otherwise when opening an article
+//			with changes the editor will show an error
 //		MaxPDFPreviewSize (default)
-//			For ContentStation 7.6.7 or higher
+//			For ContentStation 7.6.7 up to 9.x
 //			If set, Content Station will download the 'native' PDF as long as the filesize of the PDF does not exceed
 //			the maximum. The download refers to viewing the PDF in the 'Preview' pane. In case the PDF file exceeds the
 //			maximum, Content Station will ask for the preview of the PDF. The size is in Kb. So 1024 equals 1 Mb. Default value: 1024.
@@ -673,6 +771,7 @@ define('MTP_POSTPROCESS_LOC', 	SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostP
 //			The default value is 144.
 //		ContentStationHideGlobalNewArticle
 //			Hide the new article button in the home tab of Content Station
+//			For ContentStation up to 9.x
 //		UseElementLabelOrder
 //			(Client feature for Smart Connection v8.3 or higher). When an
 //			InDesign user creates a new article or article template, the order of the
@@ -687,6 +786,7 @@ define('MTP_POSTPROCESS_LOC', 	SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostP
 // 			By matching the PublicationOverviewMaxGridViewZoom setting to the maximum thumbnail preview size, zooming is restricted 
 // 			up to that size and page previews are prevented from being loaded.
 // 			The default setting of PublicationOverviewMaxGridViewZoom would therefore be '255'.
+//			For ContentStation up to 9.x
 //		RespectPlannedAdvertGeometry
 //			For Smart Connection.
 //			The RespectPlannedAdvertGeometry setting controls if geometry changes(location and dimension) of an Advert 
@@ -705,22 +805,23 @@ define('MTP_POSTPROCESS_LOC', 	SERVERURL_ROOT.INETROOT.'/server/MadeToPrintPostP
 //          InCopy files. The advantage is that always the latest information on the layout is displayed in the
 //          InCopy Layout View mode.
 //      MCEHideListButtons
-//          For Content Station 9.5.1 or higher
+//          For Content Station 9.5.1 up to 9.x
 //          When specific paragraph styles are set up for creating numbered lists and bulleted lists, it is important
 //          that the user uses those styles and not uses the buttons in the toolbar for creating such lists.
 //          Using this feature, the buttons for creating lists are hidden from the toolbar in the Multi Channel Editor.
 //      ContentStationInlineArticleCompare
-//          Enables the Inline Article Compare feature in Content Station 9.6 or higher.
+//          Enables the Inline Article Compare feature in Content Station 9.6 up to 9.x.
 //          When enabled, Track Changes are automatically disabled in Content Station.
-
-define ('SERVERFEATURES', serialize(array(	
-	new Feature( 'Messaging' ),
-	new Feature( 'Broadcasting' ),
-	new Feature( 'EventPort' , 8093 ),
-	new Feature( 'CompanyLanguage' , 'enUS'),
-	new Feature( 'KeepCheckedOut' ),
-	new Feature( 'ContentStationInlineArticleCompare')
-)));
+if( !defined('SERVERFEATURES') ) {
+	define ('SERVERFEATURES', serialize(array(
+		new Feature( 'Messaging' ),
+		new Feature( 'Broadcasting' ),
+		new Feature( 'EventPort' , 8093 ),
+		new Feature( 'CompanyLanguage' , 'enUS'),
+		new Feature( 'KeepCheckedOut' ),
+		new Feature( 'ContentStationInlineArticleCompare')
+	)));
+}
 
 // Discontinued SERVERFEATURES options: 
 //    ServerCreateImagePreview:
@@ -818,26 +919,28 @@ define ('SERVERFEATURES', serialize(array(
 //      and PagePreviewQuality features, but let InDesign Server generate a high-quality preview by providing the 
 //      feature on both levels but with different values.
 //
-define ('CLIENTFEATURES', serialize(array(
-	'InDesign' => array(
-		'local' => array(
-			new Feature( 'CreatePagePreview' ),
-			new Feature( 'CreatePagePDFOnProduce', '[Press Quality]' ), // Consider removing this option when IDS Automation is installed.
+if( !defined('CLIENTFEATURES') ) {
+	define ('CLIENTFEATURES', serialize(array(
+		'InDesign' => array(
+			'local' => array(
+				new Feature( 'CreatePagePreview' ),
+				new Feature( 'CreatePagePDFOnProduce', '[Press Quality]' ), // Consider removing this option when IDS Automation is installed.
+			),
+			'remote' => array(
+				new Feature( 'CreatePagePreview' ),
+			),
 		),
-		'remote' => array(
-			new Feature( 'CreatePagePreview' ),
+		'InDesign Server' => array(
+			'default' => array(
+				new Feature( 'CreatePagePreview' ),
+			),
+			'IDS_AUTOMATION' => array(
+				new Feature( 'CreatePagePreview' ),
+				new Feature( 'CreatePagePDFOnProduce', '[Press Quality]' ),
+			),
 		),
-	),
-	'InDesign Server' => array(
-		'default' => array(
-			new Feature( 'CreatePagePreview' ),
-		),
-		'IDS_AUTOMATION' => array(
-			new Feature( 'CreatePagePreview' ),
-			new Feature( 'CreatePagePDFOnProduce', '[Press Quality]' ),
-		),
-	),
-)));
+	)));
+}
 
 // -------------------------------------------------------------------------------------------------
 // Date/Time display patterns
@@ -846,20 +949,26 @@ define ('CLIENTFEATURES', serialize(array(
 // LANGPATDATE:
 //    Controls date display in the Maintenance applications. Default value: 'd-m-y'.
 //
-define ('LANGPATDATE', 'd-m-y');
+if( !defined('LANGPATDATE') ) {
+	define( 'LANGPATDATE', 'd-m-y' );
+}
 
 // LANGPATAMPM:
 //    Controls time display in the Maintenance applications and date/time formatting for creating/using 
 //    custom metadata property of type "date" or "datetime". Possible values true (for am/pm time display) 
 //    or false. Default value: false.
 //
-define ('LANGPATAMPM', false);
+if( !defined('LANGPATAMPM') ) {
+	define( 'LANGPATAMPM', false );
+}
 
 // LANGPATTIMEDIFF:
 //    Controls time display in the Maintenance applications. Shows the time in relative format using 
 //    letters (TSMTag/Stunde/Minute for German, DUMDag/Uur/Minuut for Dutch, etc.). Default value: 'DHM'.
 //
-define ('LANGPATTIMEDIFF', 'DHM');
+if( !defined('LANGPATTIMEDIFF') ) {
+	define( 'LANGPATTIMEDIFF', 'DHM' );
+}
 
 // -------------------------------------------------------------------------------------------------
 // Update geometry
@@ -872,7 +981,9 @@ define ('LANGPATTIMEDIFF', 'DHM');
 //          UPDATE_GEOM_SAVE setting. (When UseXMLGeometry is enabled, UPDATE_GEOM_SAVE needs to be
 //          disabled and vice versa.) The Update will not be sent if UseXMLGeometry is enabled.
 //
-define('UPDATE_GEOM_SAVE', 'OFF'); 	
+if( !defined('UPDATE_GEOM_SAVE') ) {
+	define( 'UPDATE_GEOM_SAVE', 'OFF' );
+}
 
 // -------------------------------------------------------------------------------------------------
 // Personal status
@@ -889,12 +1000,16 @@ define('UPDATE_GEOM_SAVE', 'OFF');
 //      (If routed to a user group all users of that group will have access tot the file.
 //    - Any admin users (users that belong to a user group that has got the Admin option set).
 //
-define('PERSONAL_STATE', 'OFF');
+if( !defined('PERSONAL_STATE') ) {
+	define( 'PERSONAL_STATE', 'OFF' );
+}
 
 // PERSONAL_STATE_COLOR:
 //    Color of Personal status. Default value '#F6A124' (orange).
 //
-define('PERSONAL_STATE_COLOR', '#F6A124');
+if( !defined('PERSONAL_STATE_COLOR') ) {
+	define( 'PERSONAL_STATE_COLOR', '#F6A124' );
+}
 
 // -------------------------------------------------------------------------------------------------
 // Deadline settings
@@ -903,39 +1018,45 @@ define('PERSONAL_STATE_COLOR', '#F6A124');
 // DEADLINE_WARNTIME:
 //    Seconds before a deadline that counts as the warning period (soft deadline). Default value: 2*24*3600.
 //
-define ("DEADLINE_WARNTIME", 2*24*3600);
+if( !defined('DEADLINE_WARNTIME') ) {
+	define( 'DEADLINE_WARNTIME', 2 * 24 * 3600 );
+}
 
 // NONWORKDAYS:
 //    Defines the days of the week NOT being worked. Sunday=0, Monday=1, ..., Saturday=6. Default values: 0,6
 //
-define ('NONWORKDAYS', serialize(array(
-		0, 6
-)));
+if( !defined('NONWORKDAYS') ) {
+	define ('NONWORKDAYS', serialize(array(
+			0, 6
+	)));
+}
 
 // HOLIDAYS:
 //   Days specified as a non-working day. Possible setting: y-m-d or m-d. By including the year (y) 
 //   makes it specific to that year only. When leaving out the year (y), it means each year.
 //
-define ('HOLIDAYS', serialize(array(
-		'01-01',				// New Year
-		'04-30',				// Queen's Day (Dutch; Birthday of Queen-Mother Juliana)
-		'12-25', '12-26',		// Christmas
-		// 2012
-		'2012-04-06',			// Good Friday (Christian; Friday before Easter)
-		'2012-04-09',			// Easter Monday (Christian; Monday after Easter)
-		'2012-05-17',			// Ascension Day [Hemelvaart] (Dutch; Thursday, 40 days after Easter)
-		'2012-05-28',			// Pentecost Monday [Pinksteren] (Dutch; Monday after Pentecost)
-		// 2013
-		'2013-03-29',			// Good Friday (Christian; Friday before Easter)
-		'2013-04-01',			// Easter Monday (Christian; Monday after Easter)
-		'2013-05-09',			// Ascension Day [Hemelvaart] (Dutch; Thursday, 40 days after Easter)
-		'2013-05-20',			// Pentecost Monday [Pinksteren] (Dutch; Monday after Pentecost)
-		// 2014
-		'2014-04-18',			// Good Friday (Christian; Friday before Easter)
-		'2014-04-21',			// Easter Monday (Christian; Monday after Easter)
-		'2014-05-29',			// Ascension Day [Hemelvaart] (Dutch; Thursday, 40 days after Easter)
-		'2014-06-09',			// Pentecost Monday [Pinksteren] (Dutch; Monday after Pentecost)
-)));
+if( !defined('HOLIDAYS') ) {
+	define ('HOLIDAYS', serialize(array(
+			'01-01',				// New Year
+			'04-30',				// Queen's Day (Dutch; Birthday of Queen-Mother Juliana)
+			'12-25', '12-26',		// Christmas
+			// 2012
+			'2012-04-06',			// Good Friday (Christian; Friday before Easter)
+			'2012-04-09',			// Easter Monday (Christian; Monday after Easter)
+			'2012-05-17',			// Ascension Day [Hemelvaart] (Dutch; Thursday, 40 days after Easter)
+			'2012-05-28',			// Pentecost Monday [Pinksteren] (Dutch; Monday after Pentecost)
+			// 2013
+			'2013-03-29',			// Good Friday (Christian; Friday before Easter)
+			'2013-04-01',			// Easter Monday (Christian; Monday after Easter)
+			'2013-05-09',			// Ascension Day [Hemelvaart] (Dutch; Thursday, 40 days after Easter)
+			'2013-05-20',			// Pentecost Monday [Pinksteren] (Dutch; Monday after Pentecost)
+			// 2014
+			'2014-04-18',			// Good Friday (Christian; Friday before Easter)
+			'2014-04-21',			// Easter Monday (Christian; Monday after Easter)
+			'2014-05-29',			// Ascension Day [Hemelvaart] (Dutch; Thursday, 40 days after Easter)
+			'2014-06-09',			// Pentecost Monday [Pinksteren] (Dutch; Monday after Pentecost)
+	)));
+}
 
 // -------------------------------------------------------------------------------------------------
 // First day of the week
@@ -945,17 +1066,29 @@ define ('HOLIDAYS', serialize(array(
 // FIRST_DAY_OF_WEEK:
 //    First working day of the week, Sunday = 0, Monday = 1, ..., Saturday = 6. Default value: 1.
 //
-define('FIRST_DAY_OF_WEEK', 1);
+if( !defined('FIRST_DAY_OF_WEEK') ) {
+	define( 'FIRST_DAY_OF_WEEK', 1 );
+}
 
 // -------------------------------------------------------------------------------------------------
 // Password management configuration
 // -------------------------------------------------------------------------------------------------
-define ("PASSWORD_EXPIRE", 90);			// default for UI: days a password expires: 90 days, 0 = never
+if( !defined('PASSWORD_EXPIRE') ) {
+	define( 'PASSWORD_EXPIRE', 90 );         // default for UI: days a password expires: 90 days, 0 = never
+}
 
-define ('PASSWORD_MIN_CHAR', 1);		// Minimum number of characters that a password should have. (0 = no restriction)
-define ('PASSWORD_MIN_LOWER', 0);		// Minimum number of lower case characters that a password should have. (0 = no restriction)
-define ('PASSWORD_MIN_UPPER', 0);		// Minimum number of upper case characters that a password should have. (0 = no restriction)
-define ('PASSWORD_MIN_SPECIAL', 0);		// Minimum number of special characters that a password should have. (0 = no restriction)
+if( !defined('PASSWORD_MIN_CHAR') ) {
+	define( 'PASSWORD_MIN_CHAR', 1 );      // Minimum number of characters that a password should have. (0 = no restriction)
+}
+if( !defined('PASSWORD_MIN_LOWER') ) {
+	define( 'PASSWORD_MIN_LOWER', 0 );      // Minimum number of lower case characters that a password should have. (0 = no restriction)
+}
+if( !defined('PASSWORD_MIN_UPPER') ) {
+	define( 'PASSWORD_MIN_UPPER', 0 );      // Minimum number of upper case characters that a password should have. (0 = no restriction)
+}
+if( !defined('PASSWORD_MIN_SPECIAL') ) {
+	define( 'PASSWORD_MIN_SPECIAL', 0 );      // Minimum number of special characters that a password should have. (0 = no restriction)
+}
 
 // -------------------------------------------------------------------------------------------------
 // Path to private RSA encryption key and base64 encoded public key
@@ -974,7 +1107,9 @@ define ('PASSWORD_MIN_SPECIAL', 0);		// Minimum number of special characters tha
 //	passed to Solr but directly to the database. This can have a negative impact on performance.
 //	If Solr is not used  the states are always sorted on sorting order.
 //	Default value: false
-define('SORT_ON_STATE_ORDER', false );
+if( !defined('SORT_ON_STATE_ORDER') ) {
+	define( 'SORT_ON_STATE_ORDER', false );
+}
 
 // -------------------------------------------------------------------------------------------------
 // Web server entry points
@@ -984,7 +1119,9 @@ define('SORT_ON_STATE_ORDER', false );
 //    Server web root location (URL). This is the workflow SOAP entry point from external(!) point
 //    of view. Should NOT be used by SOAP clients written in PHP; use LOCALURL_ROOT base instead!
 //
-define ('SERVERURL', SERVERURL_ROOT.INETROOT.'/index.php');
+if( !defined('SERVERURL') ) {
+	define( 'SERVERURL', SERVERURL_ROOT.INETROOT.'/index.php' );
+}
 
 // APPLICATION_SERVERS:
 //    List of available application servers (returned through GetServersReponse SOAP call).
@@ -993,15 +1130,17 @@ define ('SERVERURL', SERVERURL_ROOT.INETROOT.'/index.php');
 //    To return NO application servers (and so let clients use wwsettings.xml), define empty APPLICATION_SERVERS as follows:
 //       define( 'APPLICATION_SERVERS', serialize( array() ) );
 //
-define( 'APPLICATION_SERVERS', serialize( array(
-   //  ServerInfo( Name, URL [, Developer] [, Implementation] [, Technology] [, Version] [, array of Feature] [, Cryptkey (file path)] )
-   new ServerInfo( SERVERNAME, SERVERURL, SERVERDEVELOPER, SERVERIMPLEMENTATION, SERVERTECHNOLOGY, SERVERVERSION, 
-   				   unserialize(SERVERFEATURES), defined('ENCRYPTION_PUBLICKEY_PATH') ? ENCRYPTION_PUBLICKEY_PATH : null ), // this server
-   new ServerInfo( 'WoodWing.net', 'http://demo.woodwing.net/Enterprise/index.php',
-   					SERVERDEVELOPER, SERVERIMPLEMENTATION, SERVERTECHNOLOGY,
-   					'', 	// version unknown - may not be null
-   					array() )// feature set unknown - may not be null
-)));
+if( !defined('APPLICATION_SERVERS') ) {
+	define( 'APPLICATION_SERVERS', serialize( array(
+	   //  ServerInfo( Name, URL [, Developer] [, Implementation] [, Technology] [, Version] [, array of Feature] [, Cryptkey (file path)] )
+	   new ServerInfo( SERVERNAME, SERVERURL, SERVERDEVELOPER, SERVERIMPLEMENTATION, SERVERTECHNOLOGY, SERVERVERSION,
+	                  unserialize(SERVERFEATURES), defined('ENCRYPTION_PUBLICKEY_PATH') ? ENCRYPTION_PUBLICKEY_PATH : null ), // this server
+	   new ServerInfo( 'WoodWing.net', 'http://demo.woodwing.net/Enterprise/index.php',
+	                  SERVERDEVELOPER, SERVERIMPLEMENTATION, SERVERTECHNOLOGY,
+	                  '', 	// version unknown - may not be null
+	                  array() )// feature set unknown - may not be null
+	)));
+}
 
 // NETWORK_DOMAINS:
 // Obsolete since version 8.0, domains are picked up from LDAP_SERVERS.
@@ -1030,12 +1169,14 @@ define( 'APPLICATION_SERVERS', serialize( array(
 //    support HTTPS / SSL. The proxy server should also support the HTTP CONNECT method since 
 //    Enterprise Server tries to shake hands with the proxy before it connects to the external server. 
 //    
-define( 'ENTERPRISE_PROXY', serialize( array(
-//	'proxy_host' => '',  // Required: IP or network name. (Do NOT specify a URL.)
-//	'proxy_port' => 0,   // Optional: Network port the proxy is listening for. Default 1080. (Do not use quotes.)
-//	'proxy_user' => '',  // Optional: User name as registered on the proxy server. 
-//	'proxy_pass' => '',  // Optional: User password as registered on the proxy server. 
-)));
+if( !defined('ENTERPRISE_PROXY') ) {
+	define( 'ENTERPRISE_PROXY', serialize( array(
+	//	'proxy_host' => '',  // Required: IP or network name. (Do NOT specify a URL.)
+	//	'proxy_port' => 0,   // Optional: Network port the proxy is listening for. Default 1080. (Do not use quotes.)
+	//	'proxy_user' => '',  // Optional: User name as registered on the proxy server.
+	//	'proxy_pass' => '',  // Optional: User password as registered on the proxy server.
+	)));
+}
 
 // -------------------------------------------------------------------------------------------------
 // CA Bundle
@@ -1048,7 +1189,9 @@ define( 'ENTERPRISE_PROXY', serialize( array(
 //    Currently this option is only used by the Adobe DPS Server integration. The Adobe DPS health check
 //    will check this file. When the file doesn't exist, it will be created.
 //
-define( 'ENTERPRISE_CA_BUNDLE', WOODWINGSYSTEMDIRECTORY . '/Certificates/ca-bundle.crt' );
+if( !defined('ENTERPRISE_CA_BUNDLE') ) {
+	define( 'ENTERPRISE_CA_BUNDLE', WOODWINGSYSTEMDIRECTORY.'/Certificates/ca-bundle.crt' );
+}
 
 /*
 // -------------------------------------------------------------------------------------------------
@@ -1099,10 +1242,12 @@ $ldap_options = array(
 );
 
 // The port number is mandatory in case an IP-address is used. It will be ignored when an URL is used.
-define( 'LDAP_SERVERS', serialize( array(
-   //  LDAPServer( LDAP server IP, port number, Primary DNS Suffix, Options: see above )
-   new LDAPServer( 'myldap_server', 389, 'myldap.mycompany.local', $ldap_options )
-)));
+if( !defined('LDAP_SERVERS') ) {
+	define( 'LDAP_SERVERS', serialize( array(
+	   //  LDAPServer( LDAP server IP, port number, Primary DNS Suffix, Options: see above )
+	   new LDAPServer( 'myldap_server', 389, 'myldap.mycompany.local', $ldap_options )
+	)));
+}
 */
 
 // -------------------------------------------------------------------------------------------------
@@ -1113,17 +1258,21 @@ define( 'LDAP_SERVERS', serialize( array(
 //    Enter the email addresses to send the diagnostics to. Normally an email is sent to WoodWing Support.
 //    Another address can be added to send the reports to e.g. the system administrator. 
 //	  Default value: 'address' => 'diagnostics@woodwing.com', fullname' => 'WoodWing Diagnostics' 
-define ('DIAGNOSTICS_EMAIL_TO', serialize( array( 
-	array( 'address' => 'diagnostics@woodwing.com', 'fullname' => 'WoodWing Diagnostics' ),
-//	array( 'address' => '<Your email address>', 'fullname' => '<Your name>' ),
+if( !defined('DIAGNOSTICS_EMAIL_TO') ) {
+	define ('DIAGNOSTICS_EMAIL_TO', serialize( array(
+		array( 'address' => 'diagnostics@woodwing.com', 'fullname' => 'WoodWing Diagnostics' ),
+	//	array( 'address' => '<Your email address>', 'fullname' => '<Your name>' ),
 	)));
+}
 
 // DIAGNOSTICS_EMAIL_FROM:
 //    Enter the 'from' email addresses used for the diagnostice reporting.
 //    Make sure that a valid email address is added so the email containing the diagnostic report is not blocked.
-define ('DIAGNOSTICS_EMAIL_FROM', serialize( 
-	array('address' => '', 'fullname' => '' )
+if( !defined('DIAGNOSTICS_EMAIL_FROM') ) {
+	define ('DIAGNOSTICS_EMAIL_FROM', serialize(
+		array('address' => '', 'fullname' => '' )
 	));
+}
 
 // -------------------------------------------------------------------------------------------------
 // ImageMagick settings
@@ -1137,7 +1286,9 @@ define ('DIAGNOSTICS_EMAIL_FROM', serialize(
 //    Windows:
 //       define( 'IMAGE_MAGICK_APP_PATH', 'C:/Program Files/ImageMagick-6.6.3-Q16' );
 //
-define( 'IMAGE_MAGICK_APP_PATH', '' );
+if( !defined('IMAGE_MAGICK_APP_PATH') ) {
+	define( 'IMAGE_MAGICK_APP_PATH', '' );
+}
 
 // IMAGE_MAGICK_OPTIONS:
 // Options passed to the ImageMagick application to influence the quality of previews and thumbnails.
@@ -1145,8 +1296,10 @@ define( 'IMAGE_MAGICK_APP_PATH', '' );
 // The size (-size) is set by Enterprise and must not be set here.
 // The default value is ' -colorspace sRGB -quality 100 -sharpen 5 -layers merge -depth 8 -strip -density 72x72 '
 //
-define( 'IMAGE_MAGICK_OPTIONS', '-colorspace sRGB -quality 92 -sharpen 5 -layers merge -depth 8 -strip -density 72x72' );
-	
+if( !defined('IMAGE_MAGICK_OPTIONS') ) {
+	define( 'IMAGE_MAGICK_OPTIONS', '-colorspace sRGB -quality 92 -sharpen 5 -layers merge -depth 8 -strip -density 72x72' );
+}
+
 // GHOST_SCRIPT_APP_PATH:
 //    Full path to the folder of the GhostScript application.
 //    Use forward slashes and do NOT end with a slash.
@@ -1157,7 +1310,9 @@ define( 'IMAGE_MAGICK_OPTIONS', '-colorspace sRGB -quality 92 -sharpen 5 -layers
 //       If you use a different executable than gswin32c.exe, add the executable to the path.
 //       Example for using a 64-bits version: 'C:/Program Files/gs/gs8.71/bin/gswin64c.exe'
 //
-define( 'GHOST_SCRIPT_APP_PATH', '' );
+if( !defined('GHOST_SCRIPT_APP_PATH') ) {
+	define( 'GHOST_SCRIPT_APP_PATH', '' );
+}
 
 // -------------------------------------------------------------------------------------------------
 // Cross-origin Header settings
@@ -1194,13 +1349,15 @@ define( 'GHOST_SCRIPT_APP_PATH', '' );
 //
 //    Disabled by default. The system will not add any headers.
 //
-//define( 'CROSS_ORIGIN_HEADERS', serialize(array(
-//    'http://example.com' => array(
-//        'Access-Control-Allow-Credentials' => 'true',
-//        'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS, DELETE, PUT, HEAD',
-//        'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept'
-//    ),
-//)));
+//if( !defined('CROSS_ORIGIN_HEADERS') ) {
+//    define( 'CROSS_ORIGIN_HEADERS', serialize(array(
+//        'http://example.com' => array(
+//            'Access-Control-Allow-Credentials' => 'true',
+//            'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS, DELETE, PUT, HEAD',
+//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept'
+//        ),
+//    )));
+//}
 
 // -------------------------------------------------------------------------------------------------
 // Push notifications via RabbitMQ integration
@@ -1215,16 +1372,18 @@ define( 'GHOST_SCRIPT_APP_PATH', '' );
 //    1. Uncomment the required MessageQueueConnection definitions below by removing the leading slashes (//).
 //    2. For those definitions, replace 'localhost' with the hostname (or IP) of the system on which RabbitMQ is installed.
 //
-define( 'MESSAGE_QUEUE_CONNECTIONS', serialize(array(
-// - - - - Insecure connection over TCP: - - - -
-//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqp://localhost:5672', 'woodwing', 'ww' ),
-//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'http://localhost:15672', 'woodwing', 'ww' ),
-//	new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'ws://localhost:15674/ws', 'woodwing', 'ww' ),
-// - - - - Secure connection over SSL: - - - -
-//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqps://localhost:5671', 'woodwing', 'ww' ),
-//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'https://localhost:15671', 'woodwing', 'ww' ),
-//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'wss://localhost:15673/ws', 'woodwing', 'ww' ),
-)));
+if( !defined('MESSAGE_QUEUE_CONNECTIONS') ) {
+	define( 'MESSAGE_QUEUE_CONNECTIONS', serialize(array(
+	// - - - - Insecure connection over TCP: - - - -
+	//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqp://localhost:5672', 'woodwing', 'ww' ),
+	//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'http://localhost:15672', 'woodwing', 'ww' ),
+	//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'ws://localhost:15674/ws', 'woodwing', 'ww' ),
+	// - - - - Secure connection over SSL: - - - -
+	//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqps://localhost:5671', 'woodwing', 'ww' ),
+	//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'https://localhost:15671', 'woodwing', 'ww' ),
+	//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'wss://localhost:15673/ws', 'woodwing', 'ww' ),
+	)));
+}
 
 // -------------------------------------------------------------------------------------------------
 // Debugging - Low-level logging of SQL, SOAP details etc.
@@ -1239,17 +1398,21 @@ define( 'MESSAGE_QUEUE_CONNECTIONS', serialize(array(
 //    For the keys, fill in the client IPs and for the values, fill in the  debug levels.
 //    There must be one item named 'default' which is used for all clients that are not explicitly configured.
 //
-define ('DEBUGLEVELS', serialize( array(
-	// CLIENT IP => DEBUGLEVEL
-	'default' => 'INFO', // 'default' entry is mandatory
-	'127.0.0.1' => 'DEBUG',
-)));
+if( !defined('DEBUGLEVELS') ) {
+	define ('DEBUGLEVELS', serialize( array(
+		// CLIENT IP => DEBUGLEVEL
+		'default' => 'INFO', // 'default' entry is mandatory
+		'127.0.0.1' => 'DEBUG',
+	)));
+}
 
 // OUTPUTDIRECTORY:
 //    The path to write log files to (including '/'), e.g. "c:/enterpriselog/output/". 
 //    Empty to disable. Default value: ''.
 //
-define ('OUTPUTDIRECTORY', '');
+if( !defined('OUTPUTDIRECTORY') ) {
+	define( 'OUTPUTDIRECTORY', '' );
+}
 
 // PROFILELEVEL:
 //    Used for profiling PHP code. Default value: 1. Requires DEBUGLEVELS to be set to 'INFO' or 'DEBUG'  
@@ -1261,13 +1424,17 @@ define ('OUTPUTDIRECTORY', '');
 //       4: Data Store  => SQL calls to DB, file store, etc
 //       5: PHP Script  => Potential expensive PHP operations, such as loops, regular expressions, etc
 //
-define ('PROFILELEVEL', 1);
+if( !defined('PROFILELEVEL') ) {
+	define( 'PROFILELEVEL', 1 );
+}
 
 // LOGSQL:
 //    Used for logging all SQL statements to the main log file. Requires DEBUGLEVELS to be set to 
 //    'INFO' or 'DEBUG' in order to work, else the value of LOGSQL is ignored. Default value: false.
 //
-define ('LOGSQL', false);
+if( !defined('LOGSQL') ) {
+	define( 'LOGSQL', false );
+}
 
 // LOG_INTERNAL_SERVICES:
 //    Used for logging internal Web services in the service log folder. The services are logged in the 
@@ -1283,7 +1450,9 @@ define ('LOGSQL', false);
 //    The option requires DEBUGLEVELS to be set to 'DEBUG' and OUTPUTDIRECTORY to be specified in order
 //    to work, else its value is ignored. Default value: false.
 //
-define ('LOG_INTERNAL_SERVICES', false);
+if( !defined('LOG_INTERNAL_SERVICES') ) {
+	define( 'LOG_INTERNAL_SERVICES', false );
+}
 
 // LOG_DPS_SERVICES:
 //    Used for logging DPS Web services in the service log folder. When enabled, DPS requests  
@@ -1292,7 +1461,9 @@ define ('LOG_INTERNAL_SERVICES', false);
 //    (in OUTPUTDIRECTORY/soap) and have an AdobeDPS_ prefix and a .txt file extension. 
 //    By default, this log feature is disabled. It can be temporary enabled to troubleshoot DPS traffic.
 //    
-define ('LOG_DPS_SERVICES', false);
+if( !defined('LOG_DPS_SERVICES') ) {
+	define( 'LOG_DPS_SERVICES', false );
+}
 
 // LOG_RABBITMQ_SERVICES:
 //    Used for logging RabbitMQ Web services in the service log folder. When enabled, RabbitMQ requests 
@@ -1306,14 +1477,18 @@ define ('LOG_DPS_SERVICES', false);
 //    This log feature is disabled by default and can be temporarily enabled for troubleshooting RabbitMQ traffic.
 //    Note that clients read messages from RabbitMQ directly, but that traffic is not logged here.
 //   
-define ('LOG_RABBITMQ_SERVICES', false);
+if( !defined('LOG_RABBITMQ_SERVICES') ) {
+	define( 'LOG_RABBITMQ_SERVICES', false );
+}
 
 // LOGFILE_FORMAT:
 //    The log file always contains UTF-8 characters, but aside to that, there are two formats
 //    supported: 'html' and 'plain'. The HTML format is better readable in web browser. The plain
 //    text format can be easier searched through using command line tools like grep.
 //
-define ('LOGFILE_FORMAT', 'html');
+if( !defined('LOGFILE_FORMAT') ) {
+	define( 'LOGFILE_FORMAT', 'html' );
+}
 
 // -------------------------------------------------------------------------------------------------
 // Web services validation
@@ -1326,8 +1501,9 @@ define ('LOGFILE_FORMAT', 'html');
 //    problems at an early stage. By default, the option is set to false (no validation performed) in order to
 //    avoid raising problems during production (or demos). For testers, developers, and integrators, this option 
 //    should be set to true (validation enabled).
-define( 'SERVICE_VALIDATION', false );
-
+if( !defined('SERVICE_VALIDATION') ) {
+	define( 'SERVICE_VALIDATION', false );
+}
 // SERVICE_VALIDATION_IGNORE_PATHS:
 //    Used to suppress specific validation errors reported as: "Invalid property (S1020)".
 //    You can add a reported data path to this option to suppress an error raised by the clients.
@@ -1339,20 +1515,24 @@ define( 'SERVICE_VALIDATION', false );
 //    Example of problem raised by a server: LogOnResponse->MessageList->ReadMessageIDs
 //    Note that errors are raised in DEBUG mode only (because validation is time consuming).
 //
-define( 'SERVICE_VALIDATION_IGNORE_PATHS', serialize( array(
-)));
+if( !defined('SERVICE_VALIDATION_IGNORE_PATHS') ) {
+	define( 'SERVICE_VALIDATION_IGNORE_PATHS', serialize( array(
+	)));
+}
 
 // -------------------------------------------------------------------------------------------------
 // Testing - Options used by TestSuite modules (at wwtest page)
 // -------------------------------------------------------------------------------------------------
-define( 'TESTSUITE', serialize( array(
-	'User'     => 'woodwing',   // User name => for automatic login during tests
-	'Password' => 'ww',         // User password => "    "
-	'Brand'    => 'WW News',    // Brand name => picked to create/retrieve test data
-	'Issue'    => '2nd Issue',  // Issue name => "      "
-	'SoapUrlDebugParams' => '', // Debug params posted by SoapClient at SOAP entry point URL (only applied 
-	                            // when DEBUGLEVELS is set to 'DEBUG'). Typically useful to trigger Zend/Komodo debuggers.
-)));
+if( !defined('TESTSUITE') ) {
+	define( 'TESTSUITE', serialize( array(
+		'User'     => 'woodwing',   // User name => for automatic login during tests
+		'Password' => 'ww',         // User password => "    "
+		'Brand'    => 'WW News',    // Brand name => picked to create/retrieve test data
+		'Issue'    => '2nd Issue',  // Issue name => "      "
+		'SoapUrlDebugParams' => '', // Debug params posted by SoapClient at SOAP entry point URL (only applied
+		                            // when DEBUGLEVELS is set to 'DEBUG'). Typically useful to trigger Zend/Komodo debuggers.
+	)));
+}
 
 // HTMLLINKFILES:
 //    Obsoleted since v9.2: still functional, but will be removed in v10.0 completely and default is false 
@@ -1370,7 +1550,9 @@ define( 'TESTSUITE', serialize( array(
 //    moment the option is changed. Obviously, link files for earlier created objects or versions
 //    are not present.
 //
-define( 'HTMLLINKFILES', false ); // Default is false.
+if( !defined('HTMLLINKFILES') ) {
+	define( 'HTMLLINKFILES', false ); // Default is false.
+}
 
 // -------------------------------------------------------------------------------------------------
 //  Enterprise Server Job Auto Cleanup
@@ -1383,14 +1565,18 @@ define( 'HTMLLINKFILES', false ); // Default is false.
 //    Deletes Enterprise Server Jobs of status 'Completed' and InDesign Server Jobs of status 'OK' and 'QUEUED'.
 //    Default value is 14 days, which means all completed jobs in the queue that are older than 14 days will be deleted.
 //    When set to zero (0), this feature is disabled.
-define( 'AUTOCLEAN_SERVERJOBS_COMPLETED', 14 );
+if( !defined('AUTOCLEAN_SERVERJOBS_COMPLETED') ) {
+	define( 'AUTOCLEAN_SERVERJOBS_COMPLETED', 14 );
+}
 
 // AUTOCLEAN_SERVERJOBS_UNFINISHED:
 //    Deletes Enterprise Server Jobs that have a status other than 'Completed' and InDesign Server Jobs of status 'ERROR'.
 //    Default value is 30 days, which means all jobs in the queue that were never picked up, failed or not completed for
 //    some reasons, and that are older than 30 days will be deleted.
 //    When set to zero (0), this feature is disabled.
-define( 'AUTOCLEAN_SERVERJOBS_UNFINISHED', 30 );
+if( !defined('AUTOCLEAN_SERVERJOBS_UNFINISHED') ) {
+	define( 'AUTOCLEAN_SERVERJOBS_UNFINISHED', 30 );
+}
 
 // -------------------------------------------------------------------------------------------------
 // Remote users
@@ -1427,8 +1613,10 @@ define( 'AUTOCLEAN_SERVERJOBS_UNFINISHED', 30 );
 //    - '2001:db8::-2001:db9::'   => matches with ['2001:db8:0:0:0:0:0:0'...'2001:db9:0:0:0:0:0:0']
 //    - '2001:db8::-2001:db8::ff' => matches with ['2001:db8:0:0:0:0:0:0'...'2001:db8:0:0:0:0:0:ff']
 //
-define( 'REMOTE_LOCATIONS_INCLUDE', serialize( array(
-)));
+if( !defined('REMOTE_LOCATIONS_INCLUDE') ) {
+	define( 'REMOTE_LOCATIONS_INCLUDE', serialize( array(
+	)));
+}
 
 // REMOTE_LOCATIONS_EXCLUDE:
 //    This option does the opposite of the include option (REMOTE_LOCATIONS_INCLUDE).
@@ -1454,8 +1642,10 @@ define( 'REMOTE_LOCATIONS_INCLUDE', serialize( array(
 //    For debugging, search for 'IsRemoteUser' in the server logging to check the decision of
 //    the server whether or not a certain Content Station logon is from a remote worker.
 //
-define( 'REMOTE_LOCATIONS_EXCLUDE', serialize( array(
-)));
+if( !defined('REMOTE_LOCATIONS_EXCLUDE') ) {
+	define( 'REMOTE_LOCATIONS_EXCLUDE', serialize( array(
+	)));
+}
 
 // -------------------------------------------------------------------------------------------------
 // Discontinued settings 
@@ -1479,20 +1669,26 @@ if( defined('OUTPUTDIRECTORY') && OUTPUTDIRECTORY != '' ) {
 	ini_set('error_log', OUTPUTDIRECTORY.'php.log'); // Log PHP Errors, Warnings and Noticed to file
 }
 
-define ('DBPREFIX', "smart_"); // Prefix used for all database table names. This must not be changed.
+if( !defined('DBPREFIX') ) {
+	define( 'DBPREFIX', 'smart_' ); // Prefix used for all database table names. This must not be changed.
+}
 
 if(!defined('sLanguage_code')){
 	$sLanguage_code = null;
 }
 
 //DEFAULT_USER_COLOR: Including hash(#).
-define( 'DEFAULT_USER_COLOR', '#FF9900' ); // The default user color that is assigned during user creation.(Only take default when no color given)
+if( !defined('DEFAULT_USER_COLOR') ) {
+	define( 'DEFAULT_USER_COLOR', '#FF9900' ); // The default user color that is assigned during user creation.(Only take default when no color given)
+}
 
 // Zend Framework 1 requires the library folder to be in php path:
 ini_set('include_path', BASEDIR.'/server/ZendFramework/library'.PATH_SEPARATOR.ini_get('include_path'));
 
 // Init autoloader for Zend Framework 2:
-define('ZF2_PATH', BASEDIR.'/server/vendor/zendframework/zendframework/library');
+if( !defined('ZF2_PATH') ) {
+	define( 'ZF2_PATH', BASEDIR.'/server/vendor/zendframework/zendframework/library' );
+}
 require_once ZF2_PATH . '/Zend/Loader/StandardAutoloader.php';
 $loader = new Zend\Loader\StandardAutoloader(array(
     'autoregister_zf' => true,

@@ -201,6 +201,7 @@ class IdsAutomationUtils
 	 * Please call initLayoutStatusChangeTriggerForIds() before calling this function.
 	 *
 	 * @param integer $objId The id of object to be checked.
+	 * @param integer $statusId The id of the layout status.
 	 * @return boolean
 	 */
 	public static function isContentChangeTriggerForIds( $objId, $statusId )
@@ -250,7 +251,7 @@ class IdsAutomationUtils
 	 * @param string $featureKey Name of feature to search for.
 	 * @return boolean
 	 */
-	private static function isIdsClientFeatureValue( $featureKey )
+	public static function isIdsClientFeatureValue( $featureKey )
 	{
 		static $options = null;
 		if( is_null($options) ) {
@@ -488,7 +489,6 @@ class IdsAutomationUtils
 	/**
 	 * Retrieve layouts object metadata from DB
 	 *
-	 * @param string $user Short username
 	 * @param array $layoutIds Array of layout ID
 	 * @return array $layoutObjects Array of layout object
 	 */

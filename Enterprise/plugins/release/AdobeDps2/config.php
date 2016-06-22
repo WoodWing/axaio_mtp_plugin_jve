@@ -11,22 +11,30 @@
 // DSP2_AUTHENTICATION_URL:
 //    End point of the authentication server.
 //
-define( 'DSP2_AUTHENTICATION_URL', 'https://ims-na1.adobelogin.com' );
+if( !defined('DSP2_AUTHENTICATION_URL') ) {
+	define( 'DSP2_AUTHENTICATION_URL', 'https://ims-na1.adobelogin.com' );
+}
 
 // DSP2_AUTHORIZATION_URL:
 //    End point of the authorization server.
 //
-define( 'DSP2_AUTHORIZATION_URL', 'https://authorization.publish.adobe.io' );
+if( !defined('DSP2_AUTHORIZATION_URL') ) {
+	define( 'DSP2_AUTHORIZATION_URL', 'https://authorization.publish.adobe.io' );
+}
 
 // DSP2_PRODUCER_URL:
 //    End point of the producer server.
 //
-define( 'DSP2_PRODUCER_URL', 'https://pecs.publish.adobe.io' );
+if( !defined('DSP2_PRODUCER_URL') ) {
+	define( 'DSP2_PRODUCER_URL', 'https://pecs.publish.adobe.io' );
+}
 
 // DSP2_INGESTION_URL:
 //    End point of the ingestion server.
 //
-define( 'DSP2_INGESTION_URL', 'https://ings.publish.adobe.io' );
+if( !defined('DSP2_INGESTION_URL') ) {
+	define( 'DSP2_INGESTION_URL', 'https://ings.publish.adobe.io' );
+}
 
 // -------------------------------------------------------------------------------------------------
 // System internals
