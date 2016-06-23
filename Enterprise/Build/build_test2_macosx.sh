@@ -77,7 +77,7 @@ function step0_validateEnvironment {
 	validateEnvironmentVariableNotEmpty GIT_BRANCH "${GIT_BRANCH}"
 	validateEnvironmentVariableNotEmpty SERVER_VERSION "${SERVER_VERSION}"
 
-	if [[ "${GIT_BRANCH}" != "master" && "${GIT_BRANCH}" != master/* ]]; then
+	if [[ "${GIT_BRANCH}" != "master" && "${GIT_BRANCH}" != work* ]]; then
 		echo "ERROR: Environment variable GIT_BRANCH has unsupported value: ${GIT_BRANCH}"
 		exit 1
 	fi
@@ -138,13 +138,11 @@ function step1_determineHttpPortAndPhpVersion {
 # Determines the Enterprise Server web directory. After calling ENT_DIR is set.
 #
 function step2_determineEnterpriseDir {
-	echo "step2a: Deriving the Enterprise Server web directory (ENT_DIR) from the Perforce branch (GIT_BRANCH)."
+	echo "step2a: Deriving the Enterprise Server web directory (ENT_DIR) from the Git branch (GIT_BRANCH)."
 	if [[ "${GIT_BRANCH}" == "master" ]]; then
 		ENT_DIR="EntMaster"
-	elif [[ "${GIT_BRANCH}" == "master/work" ]]; then
-		ENT_DIR="EntMasterWork"
-	elif [[ "${GIT_BRANCH}" == master/work* ]]; then
-		masterWorkNr=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/master\/work(([[:digit:]]+))?/\2/g"`
+	elif [[ "${GIT_BRANCH}" == work* ]]; then
+		masterWorkNr=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/work(([[:digit:]]+))?/\2/g"`
 		ENT_DIR="EntMasterWork${masterWorkNr}"
 	else
 		echo "Could not interpret the GIT_BRANCH value: ${GIT_BRANCH}"

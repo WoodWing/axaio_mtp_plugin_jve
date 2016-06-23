@@ -148,7 +148,7 @@ function zipFolder {
 #    -----------------------------------
 #    SERVER_VERSION: [10.1.0]
 #    SERVER_RELEASE_TYPE: [Daily]
-#    GIT_BRANCH: [master/work2]
+#    GIT_BRANCH: [work2]
 #    SERVER_VERSION_ZIP: [v10.1_Master_Work2_Daily_Build123.zip]
 #    -----------------------------------
 #    SERVER_VERSION: [10.0.0]
@@ -171,7 +171,7 @@ function determineZipPostfix {
 	# Start with the server version, but remove the patch digit for daily master builds.
 	SERVER_VERSION_ZIP="${SERVER_VERSION}"
 	if [[ "${SERVER_RELEASE_TYPE}" == "Daily" && 
-		( "${GIT_BRANCH}" == "master" || "${GIT_BRANCH}" == master/* ) ]]; then
+		( "${GIT_BRANCH}" == "master" || "${GIT_BRANCH}" == work* ) ]]; then
 		SERVER_VERSION_ZIP=`echo "${SERVER_VERSION_ZIP}" | sed -r "s/([0-9]+\.[0-9]+)\.[0-9]+/\1/g"`
 	fi
 	
@@ -179,14 +179,14 @@ function determineZipPostfix {
 	SERVER_VERSION_ZIP="v${SERVER_VERSION_ZIP}"
 	
 	# Add "_Master" for master branches.
-	if [[ "${GIT_BRANCH}" == "master" || "${GIT_BRANCH}" == master/* ]]; then
+	if [[ "${GIT_BRANCH}" == "master" || "${GIT_BRANCH}" == work* ]]; then
 		SERVER_VERSION_ZIP="${SERVER_VERSION_ZIP}_Master"
 	fi
 	
 	# Add "_Work", "_Work2" or "_Work3" for master work branches.
-	if [[ "${GIT_BRANCH}" == master/work* ]]; then
+	if [[ "${GIT_BRANCH}" == work* ]]; then
 		SERVER_VERSION_ZIP="${SERVER_VERSION_ZIP}_Work"
-		workDigit=`echo "${GIT_BRANCH}" | sed -r "s/master\/work([[:digit:]]+)/\1/g"`
+		workDigit=`echo "${GIT_BRANCH}" | sed -r "s/work([[:digit:]]+)/\1/g"`
 		if [ -n "${workDigit}" ]; then
 			SERVER_VERSION_ZIP="${SERVER_VERSION_ZIP}${workDigit}"
 		fi
@@ -344,7 +344,7 @@ function step0_validateEnvironment {
 	validateEnvironmentVariableNotEmpty SERVER_VERSION "${SERVER_VERSION}"
 	validateEnvironmentVariableNotEmpty SERVER_RELEASE_TYPE "${SERVER_RELEASE_TYPE}"
 
-	if [[ "${GIT_BRANCH}" != release/* && "${GIT_BRANCH}" != "master" && "${GIT_BRANCH}" != master/* ]]; then
+	if [[ "${GIT_BRANCH}" != release/* && "${GIT_BRANCH}" != "master" && "${GIT_BRANCH}" != work* ]]; then
 		echo "ERROR: Environment variable GIT_BRANCH has unsupported value: ${GIT_BRANCH}"
 		exit 1
 	fi
