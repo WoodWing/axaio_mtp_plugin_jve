@@ -106,7 +106,7 @@ class WW_TestSuite_HealthCheck2_TransferServer_TestCase extends TestCase
 		require_once BASEDIR.'/server/utils/TransferClient.class.php';
 		try {
 			$client = new WW_Utils_TransferClient( '' );
-			$client->callService($testUrl, $status, $httpCode );
+			$client->callService($testUrl, $status, $httpCode, 'wwtest' );
 		} catch (Exception $e) {
 			LogHandler::Log( 'wwtest', 'ERROR', 'Could not connect to: ' . $testUrl . ' received error: ' . $e->getMessage());
 			$this->setResult( 'ERROR', 'Could not connect to: ' . $testUrl, 'Please contact your system administrator.' );
