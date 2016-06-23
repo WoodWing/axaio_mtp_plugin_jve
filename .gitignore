@@ -21,6 +21,6 @@ _productversion.txt
 Enterprise/Enterprise/server/_productversionextra.txt
 
 # phpStorm project settings (except shared coding standards)
-Enterprise/.idea/*
+Enterprise/.idea/**
 !Enterprise/.idea/codeStyleSettings.xml
 !Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml
