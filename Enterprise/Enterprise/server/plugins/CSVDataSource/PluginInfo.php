@@ -16,7 +16,7 @@ class CSVDataSource_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'CSV Data Source';
-		$info->Version     = file_get_contents(__DIR__.'/_productversion.txt');
+		$info->Version     = getProductVersion(__DIR__);
 		$info->Description = 'CSV Data Source for Smart Catalog Enterprise';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;

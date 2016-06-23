@@ -16,7 +16,7 @@ class DataSourceWorkflowService_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'DataSource Workflow Service';
-		$info->Version     = file_get_contents(__DIR__.'/_productversion.txt');
+		$info->Version     = getProductVersion(__DIR__);
 		$info->Description = 'DataSource Workflow Service to intercept DeleteObjects';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;

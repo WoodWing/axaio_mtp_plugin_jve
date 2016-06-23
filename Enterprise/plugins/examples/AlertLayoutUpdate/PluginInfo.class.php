@@ -27,7 +27,7 @@ class AlertLayoutUpdate_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = basename(dirname(__FILE__));
-		$info->Version     = file_exists('_productversion.txt') ? file_get_contents('_productversion.txt') : "";
+		$info->Version     = getProductVersion(__DIR__);
 		$info->Description = basename(dirname(__FILE__));
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;

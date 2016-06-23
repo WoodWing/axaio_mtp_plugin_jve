@@ -25,7 +25,7 @@ class WordPress_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'WordPress Publishing Connector';
-		$info->Version     = '10.0.0 Build 1194'; // don't use PRODUCTVERSION
+		$info->Version     = getProductVersion(__DIR__);
 		$info->Description = 'Publishing service to WordPress';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;

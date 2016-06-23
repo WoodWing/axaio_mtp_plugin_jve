@@ -16,7 +16,7 @@ class ContentStationListDossiers_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Content Station List Dossiers';
-		$info->Version     = file_get_contents(__DIR__.'/_productversion.txt');
+		$info->Version     = getProductVersion(__DIR__);
 		$info->Description = 'This content source implements a hidden named query for content station.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;

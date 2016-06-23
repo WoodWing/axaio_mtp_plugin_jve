@@ -5,8 +5,8 @@ define ('SERVERNAME',		        'Enterprise');
 define ('SERVERDEVELOPER',	        'WoodWing');          // DO NOT CHANGE!
 define ('SERVERIMPLEMENTATION',    'SmartConnection');   // DO NOT CHANGE!
 define ('SERVERTECHNOLOGY',        'PHP');               // DO NOT CHANGE!
-define ('SERVERVERSION',	        file_get_contents(__DIR__.'/_productversion.txt'));
-define ('SERVERVERSION_EXTRAINFO', file_get_contents(__DIR__.'/_productversionextra.txt')); // To be used for labels such as Prerelease and Daily
+define ('SERVERVERSION',	        getProductVersion(__DIR__));
+define ('SERVERVERSION_EXTRAINFO', getServerVersionExtraInfo(__DIR__)); // To be used for labels such as Prerelease and Daily
 
 // For internal use, to validate configurations:
 define ('SCENT_DBVERSION',	    '10.0' );
@@ -51,3 +51,51 @@ define ('PRODUCTVERSION', 'v' . SERVERVERSION );
 
 $copyRightYears = ini_get('date.timezone') ? '1998-'.date('Y') : '1998'; // Avoid bad error at PHP output; The error handler is not set at this stage.
 define( 'COPYRIGHT_WOODWING', '(c) '.$copyRightYears.' WoodWing Software bv. All rights reserved.' );
+
+/**
+ * Resolves the product version file _productversion.txt read from a given product folder.
+ *
+ * This function is called by the server plugins and by the core server.
+ * The file is present for shipped versions. For development installations the file is missing.
+ * Developers could add define( 'DEFAULT_PRODUCT_VERSION', 'x.y.0 Build 0' ); to config_overrule.php
+ * (which is used as a fallback value when file does not exists) to have a representative version.
+ *
+ * @since 10.1.0
+ * @param string $folder
+ * @return string The plugin version.
+ */
+function getProductVersion( $folder )
+{
+	$file = $folder.'/_productversion.txt';
+	if( file_exists( $file ) ) {
+		$version = file_get_contents( $file );
+	} elseif( defined( 'DEFAULT_PRODUCT_VERSION' ) ) {
+		$version = DEFAULT_PRODUCT_VERSION;
+	} else {
+		exit( 'ERROR: Product version undefined. '.
+			'For release versions, please provide a _productversion.txt file in '.$folder.'. '.
+			'For development version, define DEFAULT_PRODUCT_VERSION in config_overrule.php' );
+	}
+	return $version;
+}
+
+/**
+ * Resolves extra server version info from the file _productversionextra.txt read from a given product folder.
+ *
+ * This function is called by the core server.
+ * The file is present for shipped versions. For development installations the file is missing.
+ * When missing 'Development' is returned.
+ *
+ * @since 10.1.0
+ * @param string $folder
+ * @return string The extra product version info.
+ */
+function getServerVersionExtraInfo( $folder )
+{
+	$info = 'Development';
+	$file = $folder.'/_productversionextra.txt';
+	if( file_exists( $file ) ) {
+		$info = file_get_contents( $file );
+	}
+	return $info;
+}

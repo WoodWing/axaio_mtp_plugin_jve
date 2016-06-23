@@ -18,7 +18,7 @@ class EnchantPhpSpelling_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Enchant Spelling';
-		$info->Version     = file_get_contents(__DIR__.'/_productversion.txt');
+		$info->Version     = getProductVersion(__DIR__);
 		$info->Description = 'Spelling and suggestion integration via PHP library.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
