@@ -561,7 +561,7 @@ function step3b_updateVersionInRepository {
 		echo "step3b1: Skip version labeling in Git since it is a Daily build."
 	else
 		echo "step3b1: Version labeling in Git."
-		git tag "${SERVER_VERSION} Build ${BUILD_NUMBER}"
+		git tag "${SERVER_VERSION}_Build_${BUILD_NUMBER}"
 		git push --tags
 	fi
 }
