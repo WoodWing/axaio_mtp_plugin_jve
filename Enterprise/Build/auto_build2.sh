@@ -30,9 +30,12 @@ function validateEnvironmentVariableNotEmpty {
 }
 
 #
-# Replaces a version in a given file. It searches for a given regular expression prefix followed by "<x.y.z> Build <nr>".
+# Overwrites the version label with a new given version for a given _productversion.txt file.
 #
-# @param string $1 Full local file path of PHP file to update version in.
+# After updating the version, the file is added to Git in await for the next commit and push.
+# Because the given _productversion.txt files are added to the .gitignore file this is done with force.
+#
+# @param string $1 Full local file path of the _productversion.txt file to update.
 # @param string $2 New version number (x.y.z) to replace the old one with.
 # @param integer $3 New build number to replace the old one with.
 #
@@ -53,7 +56,9 @@ function replaceVersionFile {
 }
 
 #
-# Replaces a version in a given file. It searches for a given regular expression prefix followed by "<x.y.z> Build <nr>".
+# Replaces a version in a given PHP file. It searches for a given regular expression prefix followed by "<x.y.z> Build <nr>".
+#
+# After updating the version, the file is added to Git in await for the next commit and push.
 #
 # @param string $1 Full local file path of PHP file to update version in.
 # @param string $2 Regular expression of some text just before the old version.
