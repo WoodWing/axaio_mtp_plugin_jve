@@ -505,8 +505,8 @@ function step2b_updateResourceFilesForAdobeAEM {
 #
 # Updates version info embedded in PHP modules.
 #
-function step3_updateVersionInfo {
-	echo "step3a: Update version info in serverinfo.php."
+function step3a_updateVersionInfo {
+	echo "step3a1: Update version info in serverinfo.php."
 	replaceVersionFile ${SOURCE_BASE}Enterprise/server/_productversion.txt ${SERVER_VERSION} ${BUILD_NUMBER}
 	if [ "${SERVER_RELEASE_TYPE}" == "Release" ]; then
 		echo "" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
@@ -517,34 +517,47 @@ function step3_updateVersionInfo {
 		git add --force "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 	fi
 
-	echo "step3b: Update version info in server plugins."
+	echo "step3a2: Update version info in server plugins."
 	updatePluginVersions ${SOURCE_BASE}Enterprise/config/plugins ${SERVER_VERSION} ${BUILD_NUMBER}
 	updatePluginVersions ${SOURCE_BASE}Enterprise/server/plugins ${SERVER_VERSION} ${BUILD_NUMBER}
 	updatePluginVersions ${SOURCE_BASE}plugins/release ${SERVER_VERSION} ${BUILD_NUMBER}
 
-	echo "step3c: Update version info in Analytics, AdobeDps2 and Elvis plugins. They have their own buildnr, but use the major.minor of Enterprise."
+	echo "step3a3: Update version info in Analytics, AdobeDps2 and Elvis plugins. They have their own buildnr, but use the major.minor of Enterprise."
 	twoDigitVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)(\.[0-9]+)?/\1/g"` # ignores patch nr
 	updatePluginVersions ${SOURCE_BASE}plugins/release/Analytics "${twoDigitVersion}" ${ANALYTICS_BUILDNR}
 	updatePluginVersions ${SOURCE_BASE}plugins/release/AdobeDps2 "${twoDigitVersion}" ${ADOBEDPS2_BUILDNR}
 	updatePluginVersions ${SOURCE_BASE}plugins/release/Elvis "${twoDigitVersion}" ${ELVIS_BUILDNR}
 
-	echo "step3d: Update version info of the ProxyForSC solution."
+	echo "step3a4: Update version info of the ProxyForSC solution."
 	replaceVersionFile ${SOURCE_BASE}ProxyForSC/proxyserver/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
 	replaceVersionFile ${SOURCE_BASE}ProxyForSC/proxystub/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
 	replaceVersionFile ${SOURCE_BASE}ProxyForSC/speedtest/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
 
-	echo "step3e: Update version info in 3rd party modules."
+	echo "step3a5: Update version info in 3rd party modules."
 	updateVersion ${SOURCE_BASE}Drupal/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
 	updateVersion ${SOURCE_BASE}Drupal7/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
 	updateVersion ${SOURCE_BASE}Drupal8/modules/ww_enterprise/ww_enterprise.info.yml "^version\s*:\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
 	updateVersion ${SOURCE_BASE}WordPress/plugins/ww_enterprise/ww_enterprise.php "^\s*\*\s*Version:\s*" ${SERVER_VERSION} ${BUILD_NUMBER}
 	
 	if [ "${SERVER_RELEASE_TYPE}" == "Daily" ]; then
-		echo "step3f: Skip pushing version info changes to Git since it is a Daily build."
+		echo "step3a6: Skip pushing version info changes to Git since it is a Daily build."
 	else
-		echo "step3f: Push version info changes to Git."
+		echo "step3a6: Push version info changes to Git."
 		git commit -m "[Ent Server ${SERVER_VERSION}] Jenkins: Updated product version info files with ${BUILD_NUMBER}."
 		git push --set-upstream origin "${GIT_BRANCH}"
+	fi
+}
+
+#
+# Adds a label to the repository. This step is skipped for Daily builds.
+#
+function step3b_updateVersionInRepository {
+	if [ "${SERVER_RELEASE_TYPE}" == "Daily" ]; then
+		echo "step3b1: Skip version labeling in Git since it is a Daily build."
+	else
+		echo "step3b1: Version labeling in Git."
+		git tag "${SERVER_VERSION} Build ${BUILD_NUMBER}"
+		git push --tags
 	fi
 }
 
@@ -702,7 +715,8 @@ set +x; echo "================ Step 2 ================"; set -x
 step2a_updateResourceFilesForCoreServer
 step2b_updateResourceFilesForAdobeAEM
 set +x; echo "================ Step 3 ================"; set -x
-step3_updateVersionInfo
+step3a_updateVersionInfo
+step3b_updateVersionInRepository
 set +x; echo "================ Step 4 ================"; set -x
 step4_validatePhpCode
 set +x; echo "================ Step 5 ================"; set -x
