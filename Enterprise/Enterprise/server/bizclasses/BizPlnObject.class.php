@@ -353,7 +353,7 @@ class BizPlnObject
 			unset( $advert->Placement->FileUrl ); // preview no longer used
 
 			require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
-			BizRelation::createObjectRelations( $rel, null, null, false, true );
+			BizRelation::createObjectRelations( $rel, $user, null, false, true );
 
 			LogHandler::Log('PlanningServices', 'DEBUG', 'CreateAdverts 5');
 
@@ -563,7 +563,7 @@ class BizPlnObject
 			unset( $advert->Placement->FileUrl ); // preview no longer used
 
 			require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
-			BizRelation::createObjectRelations( $rel, null, null, false, true );
+			BizRelation::createObjectRelations( $rel, $user, null, false, true );
 
 			LogHandler::Log('PlanningServices', 'DEBUG', 'ModifyAdverts 5: advert=['.$advert->Id.'] layout=['.$layoutid.']');
 
@@ -1235,7 +1235,7 @@ class BizPlnObject
 								break; // end while
 							}
 						}
-						if( $section_found === true && $status_found === true ) break; // end for
+						if( $section_found === true && $status_found === true ) { break; } // end for
 					}
 				}
 				if( ( $section_provided === false && $section_found === false ) || ( $status_provided === false && $status_found === false ) ) {
