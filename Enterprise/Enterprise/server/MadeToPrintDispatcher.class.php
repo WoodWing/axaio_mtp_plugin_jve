@@ -451,7 +451,8 @@ class MadeToPrintDispatcher
 	 */
 	public static function doPrint( $objectId, $ticket )
 	{
-		if ( self::calledByIDSAutomation( $ticket )) {
+		require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';
+		if ( BizInDesignServerJobs::calledByIDSAutomation( $ticket )) {
 			return;
 		}
 
@@ -474,20 +475,6 @@ class MadeToPrintDispatcher
 				}
 			}
 		}
-	}
-
-	/**
-	 * Checks if the caller is an InDesign Server Job process.
-	 * @param string $ticket The ticket.
-	 * @return bool Called by an InDesign Server Job, true, else false.
-	 */
-	static private function calledByIDSAutomation( $ticket )
-	{
-		require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';
-		
-		$idsJob = BizInDesignServerJobs::getJobIdForRunningJobByTicketAndJobType( $ticket, 'IDS_AUTOMATION' );
-
-		return (bool)$idsJob;
 	}
 
 	/*
