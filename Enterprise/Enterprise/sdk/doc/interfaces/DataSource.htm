@@ -1,0 +1,154 @@
+<html>
+<head>
+	<style>
+		body { font-family: helvetica, arial, sans-serif; font-size: 11pt; }
+		td { font-family: helvetica, arial, sans-serif; font-size: 11pt; vertical-align:top; }
+		div.section { margin: 1em; padding: 1em; border:2px solid #CCCCCC; background-color:#FFEECC; width: 800px; }
+		td.caption { vertical-align:middle; padding-left: 1em; padding-top: 1em; }
+		table.section { padding: 1em; background-color:#FFDD88; }
+		td.hpc { width:180px; font-style: italic; font-weight: bold; } /* head-property-column */ /* WW orange: #FFA500 */
+		td.htc { width:220px; font-style: italic; font-weight: bold; } /* head-type-column */
+		td.hcc { width:350px; font-style: italic; font-weight: bold; } /* head-comment-column */
+		td.bpc {} /* body-property-column */
+		td.btc {} /* body-type-column */
+		td.bcc {} /* body-comment-column */
+		td.fpc {} /* foot-property-column */
+		td.ftc { font-style: italic; font-size: 9pt; text-align: right; } /* foot-type-column */
+		td.fcc {} /* foot-comment-column */
+	</style>
+</head>
+<body><table><tr><td><img title="" src="woodwing95.gif"/></td><td class="caption"><h1>DataSource interface - Enterprise v10.0</h1></td></table>
+<br/><h2>Web Services</h2>
+<div class="section"><h3>GetDatasourceRequest</h3><p> GetDatasource returns datasource info (fields, queries, etc). </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">DatasourceID</td><td class="btc">string</td><td class="bcc"> Datasource id to get the queries for </td></tr>
+</table></div><div class="section"><h3>GetDatasourceResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Queries</td><td class="btc">array of <a href="#Query">Query</a></td><td class="bcc"></td></tr>
+<tr><td class="bpc">Bidirectional</td><td class="btc">string</td><td class="bcc"> Datasource bidirectional </td></tr>
+</table></div><div class="section"><h3>GetRecordsRequest</h3><p> GetRecords returns a list of records. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">ObjectID</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">QueryID</td><td class="btc">string</td><td class="bcc"> Query id to execute on the server </td></tr>
+<tr><td class="bpc">DatasourceID</td><td class="btc">string</td><td class="bcc"> Datasource id </td></tr>
+<tr><td class="bpc">Params</td><td class="btc">array of <a href="#QueryParam">QueryParam</a></td><td class="bcc"> Parameters for the query </td></tr>
+</table></div><div class="section"><h3>GetRecordsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Records</td><td class="btc">array of <a href="#Record">Record</a></td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>GetUpdatesRequest</h3><p> GetUpdates returns a list of records. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">UpdateID</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">ObjectID</td><td class="btc">string</td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>GetUpdatesResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Records</td><td class="btc">array of <a href="#Record">Record</a></td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>HasUpdatesRequest</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">DatasourceID</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">FamilyValue</td><td class="btc">string*</td><td class="bcc"></td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>HasUpdatesResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+</table></div><div class="section"><h3>OnSaveRequest</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">DatasourceID</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Placements</td><td class="btc">array of <a href="#Placement">Placement</a></td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>OnSaveResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+</table></div><div class="section"><h3>QueryDatasourcesRequest</h3><p> QueryDatasources returns a list of data sources linked to a publiction. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">PublicationID</td><td class="btc">string</td><td class="bcc"> Publication id to get the linked data sources for </td></tr>
+</table></div><div class="section"><h3>QueryDatasourcesResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Datasources</td><td class="btc">array of <a href="#DatasourceInfo">DatasourceInfo</a></td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>SetRecordsRequest</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">ObjectID</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">DatasourceID</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">QueryID</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Params</td><td class="btc">array of <a href="#QueryParam">QueryParam</a></td><td class="bcc"> Parameters from the query </td></tr>
+<tr><td class="bpc">Records</td><td class="btc">array of <a href="#Record">Record</a></td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>SetRecordsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+</table></div><br/><h2>Data Entities</h2>
+<div class="section" id="Attribute"><h3>Attribute</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Name</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Value</td><td class="btc">string</td><td class="bcc"></td></tr>
+</table></div><div class="section" id="DatasourceInfo"><h3>DatasourceInfo</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">ID</td><td class="btc">string</td><td class="bcc"> Datasource ID </td></tr>
+<tr><td class="bpc">Name</td><td class="btc">string</td><td class="bcc"> Datasource name </td></tr>
+</table></div><div class="section" id="List"><h3>List</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Name</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Value</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Attributes</td><td class="btc">array of <a href="#Attribute">Attribute</a></td><td class="bcc"></td></tr>
+</table></div><div class="section" id="PlacedQuery"><h3>PlacedQuery</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">QueryID</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">FamilyValues</td><td class="btc">array of string</td><td class="bcc"></td></tr>
+</table></div><div class="section" id="Placement"><h3>Placement</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">ObjectID</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">PlacedQueries</td><td class="btc">array of <a href="#PlacedQuery">PlacedQuery</a></td><td class="bcc"></td></tr>
+</table></div><div class="section" id="Property"><h3>Property</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Name</td><td class="btc">string</td><td class="bcc"> unlocalized name of property </td></tr>
+<tr><td class="bpc">DisplayName</td><td class="btc">string</td><td class="bcc"> localized name of property </td></tr>
+<tr><td class="bpc">Type</td><td class="btc"><a href="#PropertyType">PropertyType</a></td><td class="bcc"> implies kind of field control used in dialog </td></tr>
+<tr><td class="bpc">DefaultValue</td><td class="btc">string*</td><td class="bcc"> pre-filled value when empty </td></tr>
+<tr><td class="bpc">ValueList</td><td class="btc">array of string*</td><td class="bcc"> only used for lists (Type="list") </td></tr>
+<tr><td class="bpc">MinValue</td><td class="btc">string*</td><td class="bcc"> only used for numbers (Type="int") </td></tr>
+<tr><td class="bpc">MaxValue</td><td class="btc">string*</td><td class="bcc"> only used for numbers (Type="int") </td></tr>
+<tr><td class="bpc">MaxLength</td><td class="btc">integer*</td><td class="bcc"> only used for strings (Type="string/multiline") </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section" id="Query"><h3>Query</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">ID</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Name</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Params</td><td class="btc">array of <a href="#Property">Property</a></td><td class="bcc"></td></tr>
+<tr><td class="bpc">RecordFamily</td><td class="btc">string</td><td class="bcc"></td></tr>
+</table></div><div class="section" id="QueryParam"><h3>QueryParam</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Property</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Operation</td><td class="btc"><a href="#OperationType">OperationType</a></td><td class="bcc"></td></tr>
+<tr><td class="bpc">Value</td><td class="btc">string</td><td class="bcc"></td></tr>
+</table></div><div class="section" id="Record"><h3>Record</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">ID</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">UpdateType</td><td class="btc"><a href="#UpdateType">UpdateType</a></td><td class="bcc"></td></tr>
+<tr><td class="bpc">UpdateResponse</td><td class="btc"><a href="#ResponseType">ResponseType</a></td><td class="bcc"></td></tr>
+<tr><td class="bpc">Hidden</td><td class="btc">boolean</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Fields</td><td class="btc">array of <a href="#RecordField">RecordField</a></td><td class="bcc"></td></tr>
+</table></div><div class="section" id="RecordField"><h3>RecordField</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">UpdateType</td><td class="btc"><a href="#UpdateType">UpdateType</a></td><td class="bcc"></td></tr>
+<tr><td class="bpc">UpdateResponse</td><td class="btc"><a href="#ResponseType">ResponseType</a></td><td class="bcc"></td></tr>
+<tr><td class="bpc">ReadOnly</td><td class="btc">boolean</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Priority</td><td class="btc">boolean</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Name</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Attributes</td><td class="btc">array of <a href="#Attribute">Attribute</a></td><td class="bcc"></td></tr>
+</table></div><br/><h2>Enumeration Types</h2>
+<div class="section" id="OperationType"><h3>OperationType</h3><p></p><table class="section"><tr><td class="htc">choice of</td><td class="hcc">comment</td></tr>
+<tr><td class="btc">"<"</td><td class="bcc"></td></tr>
+<tr><td class="btc">">"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"<="</td><td class="bcc"></td></tr>
+<tr><td class="btc">">="</td><td class="bcc"> 4.2 - Greater Than or Equal </td></tr>
+<tr><td class="btc">"="</td><td class="bcc"></td></tr>
+<tr><td class="btc">"!="</td><td class="bcc"></td></tr>
+<tr><td class="btc">"contains"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"starts"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"ends"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"within"</td><td class="bcc"> 5.0 Time interval </td></tr>
+</table></div><div class="section" id="PropertyType"><h3>PropertyType</h3><p></p><table class="section"><tr><td class="htc">choice of</td><td class="hcc">comment</td></tr>
+<tr><td class="btc">"string"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"multistring"</td><td class="bcc"> Allows commas used for separated vaues such as "keywords" </td></tr>
+<tr><td class="btc">"multiline"</td><td class="bcc"> Allows line-endings used for multi-line text box such as "comments" </td></tr>
+<tr><td class="btc">"bool"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"int"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"double"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"date"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"datetime"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"list"</td><td class="bcc"> Allows single value selection from option list such as "publication </td></tr>
+<tr><td class="btc">"multilist"</td><td class="bcc"> Allows multiple value selection from option list </td></tr>
+<tr><td class="btc">"fileselector"</td><td class="bcc"> v8.2: Container widget that allows users to pick a file. Contains a "file" widget and optionally other widgets. </td></tr>
+<tr><td class="btc">"file"</td><td class="bcc"> v8.2: Widget that represents a selected file, such as a thumbnail. </td></tr>
+<tr><td class="btc">"articlecomponentselector"</td><td class="bcc"> v8.2: Container widget that allows users to pick a text component of an article. Contains an "articlecomponent" widget and optionally other widgets. </td></tr>
+<tr><td class="btc">"articlecomponent"</td><td class="bcc"> v8.2: Widget that represents a selected file, such as a thumbnail. </td></tr>
+</table></div><div class="section" id="ResponseType"><h3>ResponseType</h3><p></p><table class="section"><tr><td class="htc">choice of</td><td class="hcc">comment</td></tr>
+<tr><td class="btc">"none"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"accepted"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"rejected"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"ignored"</td><td class="bcc"></td></tr>
+</table></div><div class="section" id="UpdateType"><h3>UpdateType</h3><p></p><table class="section"><tr><td class="htc">choice of</td><td class="hcc">comment</td></tr>
+<tr><td class="btc">"none"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"new"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"deleted"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"changed"</td><td class="bcc"></td></tr>
+</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "PlutusDatasource.wsdl" file at 17 May 2016</p>
+<p style="font-size: 9pt;" align="right">Confidential, (c) 1998 WoodWing Software bv. All rights reserved.</p></div>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></body></html>

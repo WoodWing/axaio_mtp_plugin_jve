@@ -1,0 +1,220 @@
+<script language="JavaScript">
+
+/**
+* To display the 'jobsheet' of a specific job clicked by the user.
+* This jobsheet will show the details of One job instance.
+*
+*/
+$(document).ready( function() {
+
+	// When user clicks a server job (table row)
+	$(".jobcell").click( function(e) {
+		var jobId = $(this).parent().attr('id'); // get id from parental table row
+		$("#propsheet").load( "serverjobs.php?action=inspect&jobid="+jobId, function(response, status, xhr) {
+			if (status == "error") {
+				$("#propsheet").html('<font color="red"><i>' + xhr.status + " " + xhr.statusText + '</i></font>');
+			}
+		});
+	});
+});
+
+/**
+* Set all checkboxes to be checked given the checkBox object.
+*
+* @param string $fieldId. The checkbox element.
+*/
+function setAllCheckBoxes( fieldId )
+{
+	$("#"+fieldId+":not(:checked)").click();
+}
+
+/**
+* Set all checkboxes to be un-checked given the checkBox object.
+*
+* @param string $fieldId. The checkbox element.
+*/
+function unsetAllCheckBoxes( fieldId )
+{
+	$("#"+fieldId+":checked").click();
+}
+
+/**
+* Collect all checked checkboxes Id(jobId) and submit the
+* form to the server for an operation defined in $actionValue.
+* Raise alert message when there's NO checkboxes checked.
+*
+* @param string $fieldId. The checkbox element.
+* @param string $command. Message to show when no checkBoxes is checked.
+* @param string $confirmMsg. Message to show during confirmation of action.
+* @param string $actionValue. Value for 'action' attribute to be filled in.
+*/
+
+function runActionForSelectedItems( fieldId, command, confirmMsg, actionValue )
+{
+	var atLeastOneSelected=false;
+	var cid="";
+	$("#"+fieldId+":checked").each(function()
+	{
+		cid=cid+$(this).val()+",";
+		atLeastOneSelected = true
+	});
+	
+	if(!atLeastOneSelected){
+		alert(command);
+	}else if( confirm( confirmMsg ) ){
+		var f = document.forms.svrform;
+		f.deleteIds.value = cid;
+		f.action.value = actionValue;
+		f.submit();
+	}
+}
+
+/**
+ * Get the record index
+ * and submit to the server. Server will get this index and
+ * show the appropriate records starting from the newStartPos.
+ *
+ */
+function ShowLimitedResults( newStartPos )
+{
+	var f = document.forms.svrform;
+	f.startPos.value = newStartPos;
+	f.submit();
+}
+
+</script>
+
+<form id="svrform" style="margin-bottom:0; margin-top:0;">
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/jobqueue_32.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:SVR_SERVERJOB_QUEUE--></span></td>
+		</tr>
+	</table>
+
+	<!-- limit query -->
+	<table class="formbody" width="100%">
+		<tr><td>
+			<!--RES:SVR_SERVERJOB_TYPE-->:
+			<select name="jobConfigId" OnChange = "ShowLimitedResults(1);">
+				<!--SEC:SERVERJOB_TYPES>-->
+				<option value="<!--PAR:JOBID-->" <!--PAR:JOBTYPE_SELECTED-->><!--PAR:JOBTYPE--></option>
+				<!--SEC:<SERVERJOB_TYPES-->
+			</select>
+		</td><td align=left>
+			<!--RES:SVR_SERVERS-->:
+			<select name="serverId" OnChange = "ShowLimitedResults(1);">
+				<!--SEC:MACHINENAMES>-->
+				<option value="<!--PAR:SERVERID-->" <!--PAR:MACHINENAME_SELECTED-->><!--PAR:MACHINENAME--></option>
+				<!--SEC:<MACHINENAMES-->
+			</select>		
+		</td></tr>		
+		<tr><td>
+			<!--RES:STATE-->:
+			<select name="jobStatus" OnChange = "ShowLimitedResults(1);">
+				<!--SEC:SERVERJOB_STATUS>-->
+				<option value="<!--PAR:JOBSTATE-->" <!--PAR:JOBSTATUS_SELECTED-->><!--PAR:JOBSTATE_LOCAL--></option>
+				<!--SEC:<SERVERJOB_STATUS-->
+			</select>
+		</td><td align=left>
+			<!--RES:USR_USERS-->:
+			<select name="actingUserId" OnChange = "ShowLimitedResults(1);">
+				<!--SEC:ACTINGUSERS>-->
+				<option value="<!--PAR:ACTINGUSERID-->" <!--PAR:ACTINGUSER_SELECTED-->><!--PAR:ACTINGUSER_SHORTNAME--></option>
+				<!--SEC:<ACTINGUSERS-->			
+			</select>		
+		</td></tr>
+	</table>
+
+	<!-- app body -->
+	<table class="listframe" width="100%"><tr><td>
+		<font color="#ff0000"><i><!--PAR:ERROR--></i></font>
+		<table class="listpane">
+			<tr>
+				<th>&nbsp;</th>
+				<th>&nbsp;</th>				
+				<th><!--RES:SVR_SERVERJOB_TYPE--></th>
+				<th><!--RES:IDS_SERVER--></th>
+				<th><!--RES:USR_USERS--></th>
+				<th><!--RES:IDS_QUEUED_SINCE--></th>
+				<th><!--RES:IDS_STARTED_AT--></th>
+				<th><!--RES:IDS_FINISHED_AT--></th>
+				<th><!--RES:SVR_JOBSTATUS--></th>
+				<th><!--RES:SVR_JOBCONDITION--></th>
+				<th><!--RES:SVR_JOBPROGRESS--></th>
+			</tr>
+			<!--SEC:SERVERJOB_RECORD>-->
+			<tr style="<!--VAR:SHOW_RECORD-->"  id="<!--PAR:ServerJob->JobId-->" onmouseover="this.bgColor='#FF9342'" onmouseout="this.bgColor='#FFFFFF'">
+				<td><input type="checkbox" id="chkobj" name="chkobj" value='<!--PAR:ServerJob->JobId-->'/></td>
+				<td style="<!--PAR:RECURRENCE_RECURRING-->" class="jobcell"><img title="<!--RES:SVR_SERVER_SCHEDULED_JOB_SMALL_J-->" src="../../config/images/cal_16.gif"/></td>
+				<td style="<!--PAR:RECURRENCE_USERINITIATED-->" class="jobcell"><img title="<!--RES:SVR_SERVER_USER_INITIATED_JOB_SMALL_J-->" src="../../config/images/user_16.gif"/></td>
+				<td class="jobcell"><!--PAR:ServerJob->JobType--></td>
+				<td class="jobcell"><!--PAR:ASSIGNED_SERVER--></td>
+				<td class="jobcell"><!--PAR:ServerJob->ActingUser--></td>
+				<td class="jobcell"><!--PAR:ServerJob->QueueTime--></td>
+				<td class="jobcell"><!--PAR:ServerJob->StartTime--></td>
+				<td class="jobcell"><!--PAR:ServerJob->ReadyTime--></td>
+				<td class="jobcell"><!--PAR:JOBSTATUS--></td>
+				<td class="jobcell"><!--PAR:JOBCONDITION--></td>
+				<td class="jobcell"><!--PAR:JOBPROGRESS--></td>
+			</tr>
+			<tr style="<!--VAR:NO_RECORD-->"><td colspan=11 align=center>&nbsp;</td></tr>
+			<tr style="<!--VAR:NO_RECORD-->"><td colspan=11 align=center><!--RES:NO_MATCH_FOUND--></td></tr>
+			<tr style="<!--VAR:NO_RECORD-->"><td colspan=11 align=center>&nbsp;</td></tr>
+			<!--SEC:<SERVERJOB_RECORD-->
+			<!--SEC:SERVERJOB_LEGEND_AND_BUTTONS>-->
+			<tr style="<!--VAR:NO_LEGEND_AND_BUTTONS-->">
+				<td colspan=5>
+					<table><tr>
+						<td width=50><!--RES:LEGEND--></td>
+						<td><img title="<!--RES:SVR_SERVER_SCHEDULED_JOB_BIG_J-->"  src="../../config/images/cal_16.gif"/></td>
+						<td width=90><!--RES:SVR_SERVER_SCHEDULED_JOB_BIG_J--></td>
+						<td><img title="<!--RES:SVR_SERVER_USER_INITIATED_JOB_BIG_J-->"  src="../../config/images/user_16.gif"/></td>
+						<td width=90><!--RES:SVR_SERVER_USER_INITIATED_JOB_BIG_J--></td>		
+					</tr></table>
+				</td>	
+				<td colspan="6" align="right" >			
+					<a href="javascript:setAllCheckBoxes('chkobj')">
+						<img  src="../../config/images/opts_16.gif" border="0"><!--RES:ACT_SELECT_ALL-->
+					</a>&nbsp;
+					<a href="javascript:unsetAllCheckBoxes('chkobj')">
+						<img  src="../../config/images/cancl_16.gif" border="0"><!--RES:ACT_UNSELECT_ALL-->
+					</a>&nbsp;
+					<a href="javascript:runActionForSelectedItems('chkobj','<!--RES:ACT_TICK_CHECKBOXES-->','<!--RES:SVR_CONFIRM_DELETE_JOBINSTANCE-->', 'deleteMultiple' );">
+						<img  src="../../config/images/trash_16.gif" border="0"><!--RES:ACT_DELETE_SELECTED-->
+					</a>&nbsp;
+					<input type="hidden" name="deleteIds" value=""/>
+					<input type="hidden" name="action" value=""/>
+				</td>
+			</tr>
+			<!--SEC:<SERVERJOB_LEGEND_AND_BUTTONS-->
+		</table>
+		<div id="propsheet">
+			<!-- in here gets serverjob_propsheet.htm loaded (on user click at table rows below) -->
+		</div>
+	</td></tr><tr><td>
+		<table align=center>
+			<tr>
+			<!--SEC:PAGE_NAVIGATION>-->
+				<td width=100 align=center><!--PAR:PAGE_NAVIGATION_ITEMS--></td>
+			<!--SEC:<PAGE_NAVIGATION-->	
+			</tr>
+		</table>
+	</td></tr><tr><td>
+		<table class="appbtnbar">
+			<tr>
+				<td width="5px">
+					<nobr>
+					</nobr>
+				</td>
+				<td></td> <!-- trick: used fill button bar to far right -->
+			</tr>
+		</table>
+	</td></tr></table>
+
+</td></tr></table>
+</form>

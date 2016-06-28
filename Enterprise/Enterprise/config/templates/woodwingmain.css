@@ -1,0 +1,315 @@
+.menusmall { color: #999; font-size: 8pt; font-family: arial, sans-serif; font-weight: normal; line-height: 11pt; }
+.menusmallfooter { color: #999; font-size: 8pt; font-family: arial, sans-serif; font-weight: normal; line-height: 11pt; text-align: center; }
+a.menu:link { color: #999; font-size: 9pt; font-family: arial, sans-serif; font-weight: normal; line-height: 13pt; }
+a.menu:visited { color: #999; font-size: 9pt; font-family: arial, sans-serif; font-weight: normal; line-height: 13pt; }
+a.menu:hover { color: #f90; font-size: 9pt; font-family: arial, sans-serif; font-weight: normal; line-height: 13pt; }
+a.menutitle:link { color: white; font-size: 11pt; font-family: arial, sans-serif; font-weight: normal; line-height: 15pt; }
+a.menutitle:visited { color: white; font-size: 11pt; font-family: arial, sans-serif; font-weight: normal; line-height: 15pt; }
+a.menutitle:hover { color: #f90; font-size: 11pt; font-family: arial, sans-serif; font-weight: normal; line-height: 15pt;}
+.text,.adminbody { color: #333; font-size: 8pt; font-family: arial, sans-serif; line-height: 11pt; }
+.title {
+	FONT-WEIGHT: bold; FONT-SIZE: 11pt; LINE-HEIGHT: 15pt; COLOR: #909090; FONT-FAMILY: Arial, 'MS Sans Serif'
+}
+.logontitle { font-size: 18pt; font-family: helvetica, arial, sans-serif; line-height: 21pt;}
+.logonlabel { font-family: helvetica, arial, sans-serif; font-weight: bold; }
+a:link { color: #f60; text-decoration: none; }
+a:visited { color: #f60; text-decoration: none; }
+a:hover { color: #33c; }
+a:active { }
+th { color: gray; text-align: left; border-bottom-color: inherit; border-bottom-style: solid; border-bottom-width: thin; }
+body { color: #333; font-size: 11pt; font-family: helvetica, arial, sans-serif; line-height: 14pt; }
+orangeonblack { color: #f90; font-size: 11pt; font-family: helvetica, arial, sans-serif; line-height: 14pt; BACKGROUND-COLOR: #000; }
+p {  }
+td { }
+LI { list-style-type: none; list-style-image: none; list-style-position: inherit; display: inherit; white-space: inherit; }
+a#bullet img {height: 7px; width: 14px; background: url(../images/bullet_gray.gif) top left no-repeat;}
+a#bullet:hover img {background: url(../images/bullet_orange.gif) top left no-repeat;}
+img { border: 0px; }
+
+td.wov_deadline_late { background-color: red; }
+td.wov_deadline_close { background-color: yellow; }
+td.wov_deadline_ok { background-color: white; }
+
+.appframe { padding: 5px; }
+.menuicons { text-align: center; font-size: 9pt; }
+
+/* ------------------------------------------------------ */
+/* app forms                                              */
+/* ------------------------------------------------------ */
+.formframe { }
+.formbody { padding: 8px; width: 100%; background-color: #EEEEEE; white-space: nowrap; }
+.formbody th { white-space: nowrap; }
+.formbtnbar { text-align: right; width: 100%; height: 35px; }
+
+.infobody { padding: 8px; background-color: #FFFFFF; width: 100%; }
+.infoname { font-weight: bold; color: #909090;}
+.infovalue { }
+
+.listframe { }
+.listpane { padding: 8px; width: 100%; }
+.listpane th { white-space: nowrap; }
+.listbtnbar { text-align: right; width: 100%; padding-top: 10px; }
+
+.appbtnbar { margin-top: 10px; width: 100%; white-space: nowrap; }
+.appbtnbar img { position: relative; top: +5px; }
+
+/* ------------------------------------------------------ */
+/* app headings                                           */
+/* ------------------------------------------------------ */
+.apptitlebar { margin-top: 5px; margin-bottom: 10px; }
+.apptitletext { font-size: 14pt; line-height: 16pt; font-weight: bold; }
+.apptitleicon { top: -5px; }
+
+.subtitlebar { margin-top: 20px; margin-bottom: 10px; }
+.subtitletext { font-size: 11pt; line-height: 13pt; font-weight: bold;  }
+.subtitleicon { top: -3px; }
+
+/* ------------------------------------------------------ */
+/* date picker                                            */
+/* ------------------------------------------------------ */
+
+/* the div that holds the date picker calendar */
+.dpDiv {
+	}
+
+
+/* the table (within the div) that holds the date picker calendar */
+.dpTable {
+	font-family: Arial, sans-serif;
+	font-size: 12px;
+	text-align: center;
+	color: #505050;
+	background-color: #ece9d8;
+	border: 1px solid #AAAAAA;
+	}
+
+
+/* a table row that holds date numbers (either blank or 1-31) */
+.dpTR {
+	}
+
+
+/* the top table row that holds the month, year, and forward/backward buttons */
+.dpTitleTR {
+	}
+
+
+/* the second table row, that holds the names of days of the week (Mo, Tu, We, etc.) */
+.dpDayTR {
+	}
+
+
+/* the bottom table row, that has the "This Month" and "Close" buttons */
+.dpTodayButtonTR {
+	}
+
+
+/* a table cell that holds a date number (either blank or 1-31) */
+.dpTD {
+	border: 1px solid #ece9d8;
+	}
+
+
+/* a table cell that holds a highlighted day (usually either today's date or the current date field value) */
+.dpDayHighlightTD {
+	background-color: #CCCCCC;
+	border: 1px solid #AAAAAA;
+	}
+
+
+/* the date number table cell that the mouse pointer is currently over (you can use contrasting colors to make it apparent which cell is being hovered over) */
+.dpTDHover {
+	background-color: #aca998;
+	border: 1px solid #888888;
+	cursor: pointer;
+	color: red;
+	}
+
+
+/* the table cell that holds the name of the month and the year */
+.dpTitleTD {
+	}
+
+
+/* a table cell that holds one of the forward/backward buttons */
+.dpButtonTD {
+	}
+
+
+/* the table cell that holds the "This Month" or "Close" button at the bottom */
+.dpTodayButtonTD {
+	}
+
+
+/* a table cell that holds the names of days of the week (Mo, Tu, We, etc.) */
+.dpDayTD {
+	background-color: #CCCCCC;
+	border: 1px solid #AAAAAA;
+	color: white;
+	}
+
+
+/* additional style information for the text that indicates the month and year */
+.dpTitleText {
+	font-size: 12px;
+	color: gray;
+	font-weight: bold;
+	}
+
+
+/* additional style information for the cell that holds a highlighted day (usually either today's date or the current date field value) */ 
+.dpDayHighlight {
+	color: #4060ff;
+	font-weight: bold;
+	}
+
+
+/* the forward/backward buttons at the top */
+.dpButton {
+	font-family: Arial, sans-serif;
+	font-size: 10px;
+	color: gray;
+	background: #d8e8ff;
+	font-weight: bold;
+	padding: 0px;
+	}
+
+
+/* the "This Month" and "Close" buttons at the bottom */
+.dpTodayButton {
+	font-family: Arial, sans-serif;
+	font-size: 10px;
+	color: gray;
+	background: #d8e8ff;
+	font-weight: bold;
+	}
+
+/* ------------------------------------------------------ */
+/* dialog boxes                                           */
+/* ------------------------------------------------------ */
+.dlg_backlayer {
+	background-color: rgb(0, 0, 0);
+	opacity: 0.5; /* Safari, Opera */
+	-moz-opacity:0.50; /* FireFox */
+	filter: alpha(opacity=50); /* IE */
+	z-index: 5;
+	height: 100%;
+	width: 100%;
+	background-repeat:repeat;
+	position:absolute; /* was: fixed */
+	top: 0px;
+	left: 0px;
+}
+.dlg_outerframe table {
+	padding:0 0 0 0;
+	background:#fff;
+}
+
+.dlg_border {
+	background-color: rgb(0, 0, 0);
+	opacity: 0.5; /* Safari, Opera */
+	-moz-opacity:0.50; /* FireFox */
+	filter: alpha(opacity=50); /* IE */
+}
+
+/* ------------------------------------------------------ */
+/* Web Editor elements                                    */
+/* ------------------------------------------------------ */
+.elm_box_on    { background-color:#FFA500; } /* orange */
+.elm_box_off   { background-color:#808080; } /* gray */
+.elm_label_on  { color:#000000; font-size:10pt; font-weight: bold; } /* black */
+.elm_label_off { color:#808080; font-size:10pt; font-weight: bold; } /* gray */
+.elm_slug_on   { color:#800080; font-size:10pt; } /* purple */
+.elm_slug_off  { color:#0000FF; font-size:10pt; } /* blue */
+
+/* ------------------------------------------------------ */
+/* jQuery tabs                                            */
+/* ------------------------------------------------------ */
+
+/* navigation */
+#wwtabs {
+	background:#eee url(../../config/images/gradient/h300.png);
+	border-bottom:1px solid #CCCCCC;
+	height:80px;	
+	width:800px;
+}
+
+#wwtabs ul {	
+	width:800px;
+	margin:0 auto;	
+}
+
+#wwtabs li {	
+	border-right:1px solid #ddd;
+	float:left;
+	padding-left:1px;
+	width:80px;
+	list-style-type:none;
+	text-align:center;
+	margin-top:0px;
+}
+
+#wwtabs a {
+	color:#333333;
+	display:block;
+	padding:2px;
+	position:relative;
+	word-spacing:-2px;
+	font-size:11px;		
+	height:77px;
+	text-decoration:none;
+}	
+
+#wwtabs a.current {
+	background:url(../../config/images/gradient/down_large.jpg);	
+}
+
+#wwtabs a:hover {
+	background-color:#FFB500;
+	color:#FFFFFF;
+}
+
+#wwtabs a.current:hover {
+	color:#000000;
+}
+
+#wwtabs img {
+	margin:10px 2px 2px 20px;
+	display:block;
+}
+
+#wwtabs strong {
+	display:block;		
+	font-size:13px;
+}
+
+/* panes */
+#wwpanes {
+	background:#fff url(../../config/images/gradient/h500.png) repeat scroll 0 0;
+	border-color:#ccc;
+	border-style:solid;
+	border-width:1px 1px 0;
+	height:455px;
+	margin-bottom:-20px;
+	padding-bottom:20px;
+	
+	/* must be relative so the individual panes can be absolutely positioned */
+	position:relative;
+}
+
+/* crossfading effect needs absolute positioning from the elements */
+#wwpanes div {
+	display:none;		
+	position:absolute;
+	top:20px;
+	left:20px;
+	color:#444;	
+	width:650px; 
+}
+
+.overlay {
+	display:none;
+	width:500px;
+	padding:20px;
+	background-color:#ddd;
+}

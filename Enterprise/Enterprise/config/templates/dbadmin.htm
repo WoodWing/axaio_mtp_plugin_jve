@@ -1,0 +1,117 @@
+<link rel="stylesheet" href="<!--INETROOT-->/config/jquery-ui/jquery-ui-1.8.24.custom.css" type="text/css" media="all" />
+<script>
+	function showTables()
+	{
+		$( "#dialog-modal" ).dialog({
+			height: 600,
+			width: 600,
+			modal: true
+		});
+	}
+</script>
+
+<form action="dbadmin.php" enctype="multipart/form-data" name="DBAdminForm" method="post">
+
+<table class="text" width="700">
+	<tr>
+		<td>
+			<h1><!--RES:DBINSTALLER_DBINSTALLUPGRADE--></h1>
+		</td>
+	</tr>
+</table>
+
+<table class="text" width="350">
+	<tr>
+		<th colspan="2">  
+			<h3><!--RES:DBINSTALLER_CONFIGSETTINGS--></h3>
+		</th>
+	</tr>
+	<tr></tr>
+	<!--PAR:CONFIG_RECORDSET>-->
+	<tr>
+		<td width="200">
+			<strong><!--PAR:SETTING--></strong>
+		</td>
+		<td>
+			<!--PAR:VALUE-->
+		</td>
+	</tr>
+	<!--<PAR:CONFIG_RECORDSET>-->
+</table>
+
+<table class="text" width="350">
+	<tr>
+		<th colspan="2">  
+			<h3><!--RES:DBINSTALLER_DBMODELINFO--></h3>
+		</th>
+	</tr>
+	<tr></tr>
+	<!--PAR:VERSION_RECORDSET>-->
+	<tr>
+		<td width="200">
+			<strong><!--PAR:SETTING--></strong>
+		</td>
+		<td>
+			<!--PAR:VALUE-->
+		</td>
+	</tr>
+	<!--<PAR:VERSION_RECORDSET>-->
+</table>
+
+<!--SEC:SCRIPTS_TOBE_EXECUTED>-->
+<table class="text" width="350">
+	<tr>
+		<th colspan="2">  
+			<h3><!--RES:DBINSTALLER_EXECSCRIPTS--></h3>
+		</th>
+	</tr>
+	<!--PAR:FILES_RECORDSET>-->
+	<tr>
+		<td>
+			<strong><!--PAR:NUMBER--></strong>
+		</td>
+		<td>
+			<strong><!--PAR:FILEPATH--></strong>
+		</td>
+	</tr>
+	<!--<PAR:FILES_RECORDSET>-->
+</table>
+<!--SEC:<SCRIPTS_TOBE_EXECUTED-->
+
+<!--SEC:MESSAGES>-->
+<table class="text" width="350">
+	<tr>
+		<th>
+			<h3><!--RES:DBINSTALLER_MESSAGES--></h3>
+		</th>
+	</tr>
+	<tr>
+		<td>
+			<!--PAR:CONFMESSAGE-->
+		</td>
+	</tr>
+</table>
+<!--SEC:<MESSAGES-->
+
+<!--SEC:NEXTSTEP>-->
+<table class="text" width="350">
+	<tr>
+		<th>
+			<h3><!--RES:DBINSTALLER_NEXTSTEP--></h3>
+		</th>
+	</tr>
+	<tr>
+		<td>
+			<!--PAR:BUTTONBAR-->
+		</td>
+	</tr>
+</table>
+<!--SEC:<NEXTSTEP-->
+
+<div style="visibility:hidden; position:absolute;">
+	<div id="dialog-modal" title="<!--RES:DBINSTALLER_DBTABLES-->">
+		<!--PAR:TABLEOVERVIEW-->
+	</div>
+</div>
+
+</form>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+    xmlns="urn:EnterpriseArticle" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    targetNamespace="urn:EnterpriseArticle" 
+    elementFormDefault="qualified" 
+    attributeFormDefault="unqualified">
+    <!-- 
+        Schema describing the article format as used by Enterprise system
+        for articles 
+    -->
+    
+    <!--
+        Enumeration of payload types
+    -->
+    <xs:simpleType name="payloadEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="xhtml"/>
+            <xs:enumeration value="incx"/>
+            <xs:enumeration value="icml"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <!--
+        Opaque type that serves as container for the real content
+        
+        @attribute  type    indicates the type of content in the payload container.
+        @attribute  data    container for CDATA blob 
+    -->
+    <xs:complexType name="payloadType">
+        <xs:sequence>
+            <xs:element name="data" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+        <xs:attribute name="type" type="payloadEnum" use="required"/> 
+        <xs:anyAttribute processContents="lax"/>
+    </xs:complexType>
+    
+    <!--
+        Contains statistics of the component
+        
+        @element    name                the name of the component
+        @element    lengthInWords       the length of the component in words
+        @element    lengthInChars       the length of the component in characters
+        @element    lengthInParas       the length of the component in paragraphs
+        @element    lengthInLines       the length of the component in lines
+        @element    snippet             short introduction of the content
+    -->
+    <xs:complexType name="statisticsType">
+        <xs:sequence>
+            <xs:element minOccurs="1" maxOccurs="1" name="name" type="xs:string"/>
+            <xs:element minOccurs="1" maxOccurs="1" name="lengthInWords" type="xs:nonNegativeInteger"/>
+            <xs:element minOccurs="1" maxOccurs="1" name="lengthInChars" type="xs:nonNegativeInteger"/>
+            <xs:element minOccurs="1" maxOccurs="1" name="lengthInParas" type="xs:nonNegativeInteger"/>
+            <xs:element minOccurs="1" maxOccurs="1" name="lengthInLines" type="xs:nonNegativeInteger"/>
+            <xs:element minOccurs="1" maxOccurs="1" name="snippet" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!--
+        Component of the article
+        
+        @attribute  contentId       GUID uniquely identifying the component. Unique across the system
+        @attribute  contentVersion  GUID uniquely identifying the version of the component. When the component
+        is changed and saved, the contentVersion changes. This enables the system
+        to indicate which components have changed when saving a version of the article
+        
+        @element    statistics      optional statistical information of the component
+        @element    payload         the component content
+    -->
+    <xs:complexType name="componentType">
+        <xs:sequence>
+            <xs:element minOccurs="1" maxOccurs="1" name="statistics" type="statisticsType"/>
+            <xs:element minOccurs="1" maxOccurs="1" name="payload" type="payloadType"/>
+        </xs:sequence>
+        <xs:attribute name="contentId" type="xs:string" use="required"/> 
+        <xs:attribute name="contentVersion" type="xs:string" use="required"/> 
+    </xs:complexType>
+    
+    <!--
+        Template information describing the design of the article. Only used in Smart Connection.
+    -->
+    <xs:complexType name="templateType">
+        <xs:sequence>
+            <xs:any minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    
+    <!-- 
+        Root element
+        
+        @attribute  schemaVersion   version of this XML instance
+        
+        @element    component       array of article components, the order determines the display order
+        @element    template        template information
+    -->
+    <xs:element name="article">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="component" type="componentType" minOccurs="1" maxOccurs="unbounded"/>
+                <xs:element name="template" type="templateType" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="schemaVersion" type="xs:decimal" use="required" fixed="1.0"/>
+        </xs:complexType>
+    </xs:element>
+    
+</xs:schema>

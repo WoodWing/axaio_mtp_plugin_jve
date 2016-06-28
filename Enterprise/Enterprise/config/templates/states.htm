@@ -1,0 +1,126 @@
+<style>
+.ww_th_ver {
+	color: gray; text-align: center; 
+	border-right-color: gray; border-right-style: dotted; border-right-width: thin;
+}
+.ww_th_hor { 
+	color: gray; text-align: left; 
+	border-bottom-color: gray; border-bottom-style: dotted; border-bottom-width: thin; 
+}
+.ww_th_edg {
+	color: gray; text-align: center; 
+}
+</style>
+
+<script language="javascript" src="ColorPicker2.js"></script>
+
+<script language="javascript">
+	var cp = new ColorPicker('window'); // Popup window
+	var cp2 = new ColorPicker(); // DIV style
+	cp.writeDiv();
+</script>
+
+<script language="javascript">
+	function myconfirm(code, nr, authcount)
+	{
+		switch(code) {
+			case 'delstate':
+
+                txt = "";
+                if (authcount > 0) txt = txt + "<!--RES:ACT_SURE_DELETE_STATUS_AUTH-->\n\n";
+
+				if (nr) txt = txt + "<!--RES:OBJ_NUMBER_OF_OBJECTS_WITH_THIS_STATUS--> " + nr + "\n\n";
+
+                txt = txt + "<!--RES:ACT_SURE_DELETE_STATUS_QMK-->";
+
+				break;
+		}
+		return confirm(txt);
+	}
+	
+	function focusfirstfield()
+	{
+	    if (document.forms[0].code != null)
+	    {
+	        document.forms[0].code.focus();
+	    }
+	    else
+	    {
+	        document.forms[0].code0.focus();
+	    }
+	}
+</script>
+
+<body onload="javascript:focusfirstfield();">
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/states.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:ACT_WORKFLOW_MAINTENANCE--></span></td>
+		</tr>
+	</table>
+
+	<!-- app body -->
+
+	<form action="states.php" method="post">
+		<table width="50%"><tr><td>
+		<table class="infobody">
+			<tr>
+				<td class="infoname"><!--RES:PUBLICATION--></td>
+				<td class="infovalue"><!--VAR:PUBL--></td>
+			</tr>
+			<!--IF:STATE-->
+			<tr>
+				<td class="infoname"><!--RES:ISSUE--></td>
+				<td class="infovalue"><!--VAR:ISSUE--></td>
+			</tr>
+			<!--ENDIF-->
+			<tr>
+				<td class="infoname"><!--RES:OBJ_TYPE2--></td>
+				<td class="infovalue"><!--VAR:TYPE--></td>
+			</tr>
+		</table>
+		</td></tr></table>
+		<br/>
+		<span><font color="#ff0000"><!--ERROR--></font></span>
+		<table class="listframe"><tr><td>
+		<table class="listpane">
+			<thead>
+			<tr>
+				<th width="50"><!--RES:LIS_ORDER--></th>
+				<th width="100"><!--RES:STATE--></th>
+				<th width="16"><img src="../../config/images/state_output_16.gif" border="0" width="16" height="16" title="<!--RES:OBJ_PRODUCE-->"/></th>
+				<th width="16"><img src="../../config/images/save_16.gif" border="0" width="16" height="16" title="<!--RES:STT_CREATEPERMANENT-->"/></th>
+				<th width="16"><img src="../../config/images/trash_16.gif" border="0" width="16" height="16" title="<!--RES:STT_REMOVEINTERMEDIATE-->"/></th>
+				<th width="16"><img src="../../config/images/ready_publish_16.png" border="0" width="16" height="16" title="<!--RES:STT_READYTOBEPUBLISHED-->"/></th>
+				<!--IF:USESKIPIDSA-->
+					<th width="16"><img src="../../config/images/admin_16.gif" border="0" width="16" height="16" title="<!--RES:STT_SKIPIDSA-->"/></th>
+				<!--ENDIF:USESKIPIDSA-->
+				<th width="100"><!--RES:WFL_NEXT_STATUS--></th>
+                <th width="100"><!--RES:WORKFLOW_PHASE--></th>
+				<th width="100"><!--RES:OBJ_COLOR--></th>
+                <!--IF:USEDEADLINES-->
+                    <th width="100"><!--RES:DEADLINE--></th>
+                <!--ENDIF:USEDEADLINES-->
+				<th></th> <!-- delete link -->
+			</tr></thead>
+			<!--ROWS-->
+		</table>
+		</td></tr></table>
+		<table class="listbtnbar">
+			<tr>
+				<td>
+					<input type="submit" name="update" value="<!--RES:BUT_UPDATE-->"/>
+					<input type="submit" name="add" value="<!--RES:ACT_ADD_STATUS-->"/>
+				</td>
+			</tr>
+		</table>
+	</form>
+	</br/>
+	<a href="<!--BACK-->">
+		<img src="../../config/images/back_32.gif" border="0" title="<!--RES:ACT_BACK-->" width="32" height="32"/>
+	</a>
+</td></tr></table>
+</body>

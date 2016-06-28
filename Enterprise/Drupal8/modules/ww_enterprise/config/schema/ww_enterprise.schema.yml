@@ -1,0 +1,6 @@
+ww_enterprise.settings:
+  type: mapping
+  mapping:
+    default_filter_format:
+      type: string
+      label: Default filter format

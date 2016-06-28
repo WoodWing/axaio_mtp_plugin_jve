@@ -1,0 +1,5 @@
+drop synonym woodwing.SMART_OBJECTOPERATIONS_SEQ;
+create synonym woodwing.SMART_OBJECTOPERATIONS_SEQ for root.SMART_OBJECTOPERATIONS_SEQ;
+drop synonym woodwing.SMART_OBJECTOPERATIONS;
+create synonym woodwing.SMART_OBJECTOPERATIONS for root.SMART_OBJECTOPERATIONS;
+

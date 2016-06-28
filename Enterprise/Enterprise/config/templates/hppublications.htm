@@ -1,0 +1,119 @@
+<script language="javascript"><!--INC:DatePicker.js--></script>
+
+<script language="javascript">
+function myconfirm(code)
+{
+	switch(code) {
+		case 'delsection':
+			txt = "<!--RES:ACT_SURE_DELETE_SECTION-->";
+			break;
+		case 'delstate':
+			txt = "<!--RES:ACT_SURE_DELETE_STATES_IN_PUBLICATION-->";
+			break;
+		case 'delauthor':
+			txt = "<!--RES:ACT_SURE_DELETE_AUTHORIZATIONS_IN_PUBLICATION_OF_GROUP-->";
+			break;
+		case 'delpubladmin':
+			txt = "<!--RES:ACT_SURE_DELETE_AUTHORIZATIONS_OF_PUBLICATION_IN_GROUP-->";
+			break;
+		case 'delroute':
+			txt = "<!--RES:ACT_SURE_DELETE_ROUTINGS_OF_SECTION-->";
+			break;
+		case 'delchannel':
+			txt = "<!--RES:ACT_SURE_DELETE_CHANNEL-->";
+			break;
+		case 'delpublobjects':
+			txt = "<!--RES:ACT_SURE_DELETE_GROUPS_OF_DOSSIER_TEMPLATE-->";
+			break;
+	}
+	return confirm(txt);
+}
+
+function mydelete()
+{
+	if( confirm( "<!--RES:ACT_SURE_DELETE_PUBLICATION-->" ) ) {
+		document.frmpub.vdelete.value = 'Delete';
+		return true;
+	}
+	return false;
+}
+
+function myupdate()
+{
+	document.frmpub.vupdate.value = 'Update';
+	return true;
+}
+
+function check()
+{
+ 	if( document.frmpub.pname.value.length >= 1 ) {
+		if( document.frmpub.vupdate.value == '' ) {
+			document.frmpub.vupdate.value = 'Update';
+			return true;
+		} else {
+			document.frmpub.vupdate.value = 'Update';
+			return true;
+		}
+	} else {
+		alert("<!--RES:ACT_ENTER_PUBLICATION-->");
+		return false;
+	}
+}
+
+// When HTML page is entirely loaded...
+$( document ).ready(function() {
+    // Install trigger that automatically hides/shows the Time Setting icon
+    // when the user disables/enables the Automatic Deadline Calculation checkbox.
+    $('#Publication_CalculateDeadlines').click(function () {
+        $("#timeSettingRow").toggle(this.checked);
+    });
+    // When the checkbox is initially disabled, hide the Time Settings icon.
+    if(!$('#Publication_CalculateDeadlines').attr('checked')) {
+        $("#timeSettingRow").toggle(this.checked);
+    }
+});
+
+</script>
+
+<table class="appframe"><tr class="text"><td>
+
+	<!-- app header -->
+	<table class="apptitlebar">
+		<tr>
+			<td><img class="apptitleicon" src="../../config/images/pub.gif"/></td>
+			<td>&nbsp;<span class="apptitletext"><!--RES:ACT_PUB_MAINTENANCE--></span></td>
+		</tr>
+	</table>
+	
+	<!-- app body -->
+	<form action="hppublications.php" method="post" name="frmpub" onSubmit="return check();">
+	<table class="formframe"><tr><td>
+		<table class="formbody">
+			<!--VAR:PUBLICATION_PROPERTIES-->
+		</table>
+		<i>* <!--RES:OBJ_MANDATORY--></i>
+		<div style="position:absolute; left:550px; top:150px; visibility:hidden;">
+			<table class="formbody">
+				<!--VAR:PUBLICATION_HIDDEN_PROPERTIES-->
+			</table>
+		</div>
+	</td></tr><tr><td>
+		<table class="formbtnbar">
+			<tr>
+				<td align="right">
+					<!--VAR:BUTTON-->
+					<input type="hidden" name="vupdate" value="">
+					<input type="hidden" name="vdelete" value="">
+					<!--VAR:HIDDEN-->
+				</td>
+			</tr>
+		</table>
+	</td></tr></table>
+	<!--DETAILS-->
+	</form>
+	<br/>
+	<a href="publications.php">
+		<img src="../../config/images/back_32.gif" border="0" title="<!--RES:ACT_BACK-->" width="32" height="32"/>
+	</a>
+
+</td></tr></table>
