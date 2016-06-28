@@ -144,32 +144,38 @@ class IdsAutomation_WflSaveObjects  extends WflSaveObjects_EnterpriseConnector
 				
 				// Resolve the parent layout ids in case of a placement.
 				if( $isPlaced ) {
-					$layoutIds = IdsAutomationUtils::getLayoutIdsFromObjectID( $objId );
-					if( $layoutIds ) {
-						if( count( $layoutIds ) <= 50 ) {
-							$layoutIdsStr = implode( ', ', $layoutIds );
-							LogHandler::Log( 'IdsAutomation', 'INFO', 
-								"Object (id=$objId) is placed on layouts (ids=$layoutIdsStr) ".
-								"for which a IDS jobs will be created." );
-							$layoutMetadatas = IdsAutomationUtils::getLayoutsMetadataFromIds( $layoutIds );
-							foreach ( $layoutMetadatas as $layoutId => $layoutMetadata ) {
-								$statusId = $layoutMetadata->WorkflowMetaData->State->Id;
-								$status = IdsAutomationUtils::getStatusWithId( $statusId );
-								if ( IdsAutomationUtils::layoutStatusSkipsIdsa( $status )) {
-									LogHandler::Log( 'IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed." );
-									continue;
+					$placedObjectStatusId = $object->MetaData->WorkflowMetaData->State->Id;
+					$placedObjectStatus = IdsAutomationUtils::getStatusWithId( $placedObjectStatusId );
+					if( IdsAutomationUtils::statusSkipsIdsa( $placedObjectStatus ) ) {
+						LogHandler::Log( 'IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed." );
+					} else {
+						$layoutIds = IdsAutomationUtils::getLayoutIdsFromObjectID( $objId );
+						if( $layoutIds ) {
+							if( count( $layoutIds ) <= 50 ) {
+								$layoutIdsStr = implode( ', ', $layoutIds );
+								LogHandler::Log( 'IdsAutomation', 'INFO',
+									"Object (id=$objId) is placed on layouts (ids=$layoutIdsStr) ".
+									"for which a IDS jobs will be created." );
+								$layoutMetadatas = IdsAutomationUtils::getLayoutsMetadataFromIds( $layoutIds );
+								foreach ( $layoutMetadatas as $layoutId => $layoutMetadata ) {
+									$layoutStatusId = $layoutMetadata->WorkflowMetaData->State->Id;
+									$layoutStatus = IdsAutomationUtils::getStatusWithId( $layoutStatusId );
+									if ( IdsAutomationUtils::statusSkipsIdsa( $layoutStatus ) ) {
+										LogHandler::Log( 'IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed." );
+										continue;
+									}
+									IdsAutomationUtils::createIDSJob( $layoutId, $layoutId, $objType );
 								}
-								IdsAutomationUtils::createIDSJob( $layoutId, $layoutId, $objType );
+							} else {
+								LogHandler::Log( 'IdsAutomation', 'INFO',
+									"Given object ID [$objId] is placed on ".count( $layoutIds )." layouts. ".
+									"To avoid flooding the IDS job queue, skipped processing all those layouts." );
 							}
 						} else {
-							LogHandler::Log( 'IdsAutomation', 'INFO', 
-								"Given object ID [$objId] is placed on ".count( $layoutIds )." layouts. ".
-								"To avoid flooding the IDS job queue, skipped processing all those layouts." );
+							LogHandler::Log( 'IdsAutomation', 'INFO',
+								"Object (id=$objId) is NOT placed on any layout ".
+								"so there will NOT be an IDS job created for this." );
 						}
-					} else {
-						LogHandler::Log( 'IdsAutomation', 'INFO', 
-							"Object (id=$objId) is NOT placed on any layout ".
-							"so there will NOT be an IDS job created for this." );
 					}
 				}
 				
