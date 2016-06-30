@@ -642,7 +642,7 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 			throw new BizException( null, 'Server', $detail, 'Invalid Configuration' );
 		}
 		$dbVerMajMin = $major.'.'.$minor; // Note: $revision is excluded to compare major.minor only
-		$maxVersion = '5.6'; // supported: 5.6.x // since Enterprise 9.4.2, it supports Mysql 5.6 (EN-84456)
+		$maxVersion = '5.7'; // supported: 5.7.x // since Enterprise 10.0.0, it supports Mysql 5.7 (EN-85866)
 		if( version_compare( $dbVerMajMin, $maxVersion, '>' ) ) {
 			$help = 'Please downgrade your database and try again.';
 			$detail = 'Maximum supported MySQL version is v'.$maxVersion.'. Found installed version v'.$dbVersion.'.';
