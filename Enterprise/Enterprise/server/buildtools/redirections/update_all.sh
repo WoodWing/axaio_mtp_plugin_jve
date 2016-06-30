@@ -108,6 +108,8 @@ function saveAndTestHelpCenterRedirections {
 	saveAndTestRedirection "${1}" "enterprise-server/php-manual/curl-installation" "http://php.net/manual/en/curl.installation.php"
 	saveAndTestRedirection "${1}" "enterprise-server/php-manual/zlib-installation" "http://php.net/manual/en/zlib.installation.php"
 	saveAndTestRedirection "${1}" "enterprise-server/php-manual/xsl-installation" "http://php.net/manual/en/xsl.installation.php"
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/openssl-installation" "http://php.net/manual/en/openssl.installation.php"
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/bcmath-installation" "http://php.net/manual/en/bc.installation.php"
 }
 
 # Validate input parameters
