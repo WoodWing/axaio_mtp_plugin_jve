@@ -370,7 +370,7 @@ function step0_validateEnvironment {
 function step1_cleanGetWorkspace {
 
 	echo "step1a: Checkout the ${GIT_BRANCH} branch in the workspace."
-	git checkout "${GIT_BRANCH}"
+	git checkout --track "origin/${GIT_BRANCH}"
 
 	echo "step1b: Get latest changes from remote repository."
 	git pull
