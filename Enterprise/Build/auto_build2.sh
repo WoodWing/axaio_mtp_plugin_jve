@@ -529,9 +529,9 @@ function step3a_updateVersionInfo {
 	replaceVersionFile ${SOURCE_BASE}ProxyForSC/speedtest/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
 
 	echo "step3a5: Update version info in 3rd party modules."
-	updateVersion ${SOURCE_BASE}Drupal7/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
-	updateVersion ${SOURCE_BASE}Drupal8/modules/ww_enterprise/ww_enterprise.info.yml "^version\s*:\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
-	updateVersion ${SOURCE_BASE}WordPress/plugins/ww_enterprise/ww_enterprise.php "^\s*\*\s*Version:\s*" ${SERVER_VERSION} ${BUILD_NUMBER}
+	updateVersion ${SOURCE_BASE}Integrations/Drupal7/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
+	updateVersion ${SOURCE_BASE}Integrations/Drupal8/modules/ww_enterprise/ww_enterprise.info.yml "^version\s*:\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
+	updateVersion ${SOURCE_BASE}Integrations/WordPress/plugins/ww_enterprise/ww_enterprise.php "^\s*\*\s*Version:\s*" ${SERVER_VERSION} ${BUILD_NUMBER}
 	
 	if [ "${SERVER_RELEASE_TYPE}" == "Daily" ]; then
 		echo "step3a6: Skip pushing version info changes to Git since it is a Daily build."
