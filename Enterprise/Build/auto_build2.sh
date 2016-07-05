@@ -284,16 +284,6 @@ function ionCubeEnterpriseFiles {
 		ionCubeFolder "${encodeOptionFile}" "${icFolder}"
 	done
 	
-	echo "Encode the Analytics plugin, except its config file."
-	icFolder="${SOURCE_BASE}plugins/release/Analytics/"
-	for icFile in $(find ${icFolder} -name '*.php'); do
-		if [ ${icFile} == "${SOURCE_BASE}plugins/release/Analytics/monitor_config.php" ]; then 
-			echo "Skipped ${icFile}"
-		else
-			ionCubeFile "${encodeOptionFile}" "${icFile#$SOURCE_BASE}"
-		fi
-	done
-	
 	echo "Encode specific Enterprise core files and Elvis plugin files."
 	icFiles="\
 		Enterprise/server/apps/webapplicense.inc.php \
