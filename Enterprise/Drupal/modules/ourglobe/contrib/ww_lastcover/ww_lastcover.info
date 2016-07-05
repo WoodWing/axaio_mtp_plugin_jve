@@ -1,7 +1,0 @@
-; $Id$
-name = WoodWing LastCover
-description = Add covers to your site and display the last one
-core = 6.x
-package = OurGlobe
-dependencies[] = ourglobe
-dependencies[] = upload

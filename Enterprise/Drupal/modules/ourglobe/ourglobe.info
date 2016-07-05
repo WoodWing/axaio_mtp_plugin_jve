@@ -1,5 +1,0 @@
-; $Id$
-name = WoodWing OurGlobe Demo
-description = A demostration site how Enterprise comunicates with Drupal.
-core = 6.x
-package = OurGlobe
