@@ -11,7 +11,7 @@
 
 DOCROOT=/Library/WebServer/Documents
 DRUPAL_DIR=drupal7
-PLUGINS="Twitter Facebook Analytics CopyrightValidationDemo SimpleFileSystem CustomObjectPropsDemo CustomAdminPropsDemo MultiChannelPublishingSample AddSubApplication StandaloneAutocompleteSample AnalyticsTest PublishingTest AutoTargetingTest AutoNamingTest AdobeDPS"
+PLUGINS="Twitter Facebook CopyrightValidationDemo SimpleFileSystem CustomObjectPropsDemo CustomAdminPropsDemo MultiChannelPublishingSample AddSubApplication StandaloneAutocompleteSample PublishingTest AutoTargetingTest AutoNamingTest AdobeDPS"
 SED_BIN=/opt/local/bin/gsed
 
 #

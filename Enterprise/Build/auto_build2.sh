@@ -517,9 +517,8 @@ function step3a_updateVersionInfo {
 	updatePluginVersions ${SOURCE_BASE}Enterprise/server/plugins ${SERVER_VERSION} ${BUILD_NUMBER}
 	updatePluginVersions ${SOURCE_BASE}plugins/release ${SERVER_VERSION} ${BUILD_NUMBER}
 
-	echo "step3a3: Update version info in Analytics, AdobeDps2 and Elvis plugins. They have their own buildnr, but use the major.minor of Enterprise."
+	echo "step3a3: Update version info in AdobeDps2 and Elvis plugins. They have their own buildnr, but use the major.minor of Enterprise."
 	twoDigitVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)(\.[0-9]+)?/\1/g"` # ignores patch nr
-	updatePluginVersions ${SOURCE_BASE}plugins/release/Analytics "${twoDigitVersion}" ${ANALYTICS_BUILDNR}
 	updatePluginVersions ${SOURCE_BASE}plugins/release/AdobeDps2 "${twoDigitVersion}" ${ADOBEDPS2_BUILDNR}
 	updatePluginVersions ${SOURCE_BASE}plugins/release/Elvis "${twoDigitVersion}" ${ELVIS_BUILDNR}
 
@@ -639,7 +638,6 @@ function step7_zipExternalModules {
 
 	echo "step7b: Zipping release plug-ins ..."
 	twoDigitVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)(\.[0-9]+)?/\1/g"` # ignores patch nr
-	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "Analytics" "${WORKSPACE}/artifacts" "Enterprise_Analytics_Build_${ANALYTICS_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
 	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "AdobeDps2" "${WORKSPACE}/artifacts" "AdobeDPS_Build_${ADOBEDPS2_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
 	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "Elvis" "${WORKSPACE}/artifacts" "Elvis_Build_${ELVIS_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
 	plugins="Facebook Twitter WordPress Drupal8"
@@ -665,7 +663,7 @@ function step7_zipExternalModules {
 	done
 
 	echo "step7e: Zipping buildtest plug-ins ..."
-	plugins="AnalyticsTest PublishingTest AutoTargetingTest AutoNamingTest"
+	plugins="PublishingTest AutoTargetingTest AutoNamingTest"
 	for plugin in ${plugins}; do
 		zipFolder "${WORKSPACE}/Enterprise_release/plugins/buildtest" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"
 	done
