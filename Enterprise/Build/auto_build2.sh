@@ -539,7 +539,6 @@ function step3a_updateVersionInfo {
 	replaceVersionFile ${SOURCE_BASE}ProxyForSC/speedtest/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
 
 	echo "step3a5: Update version info in 3rd party modules."
-	updateVersion ${SOURCE_BASE}Drupal/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
 	updateVersion ${SOURCE_BASE}Drupal7/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
 	updateVersion ${SOURCE_BASE}Drupal8/modules/ww_enterprise/ww_enterprise.info.yml "^version\s*:\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
 	updateVersion ${SOURCE_BASE}WordPress/plugins/ww_enterprise/ww_enterprise.php "^\s*\*\s*Version:\s*" ${SERVER_VERSION} ${BUILD_NUMBER}
@@ -643,7 +642,6 @@ function step6_zipEnterpriseServer {
 #
 function step7_zipExternalModules {
 	echo "step7a: Zipping 3rd party modules module ..."
-	zipFolder "${WORKSPACE}/Enterprise/Drupal/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "DrupalEnterprise_${SERVER_VERSION_ZIP}"
 	zipFolder "${WORKSPACE}/Enterprise/Drupal7/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "Drupal7Enterprise_${SERVER_VERSION_ZIP}"
 	zipFolder "${WORKSPACE}/Enterprise/Drupal8/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "Drupal8_Drupal_Module_${SERVER_VERSION_ZIP}"
 	zipFolder "${WORKSPACE}/Enterprise/WordPress/plugins" "ww_enterprise" "${WORKSPACE}/artifacts" "WordPress_Plugin_${SERVER_VERSION_ZIP}"
