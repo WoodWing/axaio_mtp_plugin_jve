@@ -839,10 +839,6 @@
   <Term key="ERR_DOWNLOAD_VERSION">Voulez-vous vraiment télécharger cette version ?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">Impossible de passer à la version 25 ou antérieure de DPS Viewer, car le niveau d'accès des dossiers suivants est défini comme Gratuit (S1123) : %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">Impossible de changer le niveau d'accès ; vous avez besoin de la version 26 ou ultérieure de DPS Viewer. (S1124)</Term>
-  <Term key="ERR_DRUPAL_IMAGE_REQUIRED">Une image est requise</Term>
-  <Term key="ERR_DRUPAL_NO_COMPONENTS_MAPPING">Composants de mapping introuvable dans le fichier de configuration (S1063)</Term>
-  <Term key="ERR_DRUPAL_NO_SITE_INFORMATION">Pas de site d’information trouvé. Edition à Drupal impossible. Definissez au moins un site dans config_drupal.php (S1062). </Term>
-  <Term key="ERR_DRUPAL_REQUIRED_COMPONENTS_NOT_FOUND">Composants requis (%1) non trouvés. (S1093)</Term>
   <Term key="ERR_DRUPAL_UPLOAD_FAILED">N’a pas pu charger de pièce jointe a Drupal (S1064). </Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Le nom existe déjà comme utilisateur (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Le nom existe déjà dans la base de données (S1010)</Term>

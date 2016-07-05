@@ -839,10 +839,6 @@
   <Term key="ERR_DOWNLOAD_VERSION">Are you sure you want to download this version?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">Unable to set the DPS Viewer version to 25 or lower because the access level of the following Dossiers is set to Free (S1123):  %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">Unable to change the access level; this requires DPS Viewer version 26 or higher. (S1124)</Term>
-  <Term key="ERR_DRUPAL_IMAGE_REQUIRED">An image is required.</Term>
-  <Term key="ERR_DRUPAL_NO_COMPONENTS_MAPPING">Cannot find components mapping in config file (S1063).</Term>
-  <Term key="ERR_DRUPAL_NO_SITE_INFORMATION">No site information found. Could not publish to Drupal. Define at least one site in config_drupal.php (S1062).</Term>
-  <Term key="ERR_DRUPAL_REQUIRED_COMPONENTS_NOT_FOUND">Required components (%1) not found. (S1093)</Term>
   <Term key="ERR_DRUPAL_UPLOAD_FAILED">Could not upload attachment to Drupal (S1064).</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Name already exists as user (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Name already exists in database (S1010)</Term>
