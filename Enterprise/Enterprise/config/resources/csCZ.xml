@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 17-06-2016 12:31:56 GMT-->
+<!--Last edit date in TMS: 05-07-2016 14:34:04 GMT-->
 <LocalizationMap language="csCZ">
   <Term key="ISSUE">Vydání</Term>
   <Term key="ISSUES">Vydání</Term>
@@ -840,10 +840,6 @@
   <Term key="ERR_DOWNLOAD_VERSION">Opravdu chcete stáhnout tuto verzi?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">Není možné nastavit verzi DPS Viewer na 25 nebo nižší, protože úroveň přístupu následujících fasciklů je nastavena na Bezplatné (S1123). %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">Není možné změnit přístupovou úroveň; to vyžaduje verzi DPS Viewer 26 nebo vyšší. (S1124)</Term>
-  <Term key="ERR_DRUPAL_IMAGE_REQUIRED">Je vyžadován obraz. </Term>
-  <Term key="ERR_DRUPAL_NO_COMPONENTS_MAPPING">V konfiguračním souboru nelze najít mapování komponent (S1063). </Term>
-  <Term key="ERR_DRUPAL_NO_SITE_INFORMATION">Nebyly nalezeny žádné informace o webu. Nelze publikovat do systému Drupal. Definujte alespoň jeden web v souboru config_drupal.php (S1062). </Term>
-  <Term key="ERR_DRUPAL_REQUIRED_COMPONENTS_NOT_FOUND">Požadované komponenty (%1) nebyly nalezeny. (S1093)</Term>
   <Term key="ERR_DRUPAL_UPLOAD_FAILED">Nelze odeslat přílohu do systému Drupal (S1064). </Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Toto jméno již je použito pro jiného uživatele (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Název již v databázi existuje (S1010)</Term>
