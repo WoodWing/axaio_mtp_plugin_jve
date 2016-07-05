@@ -145,7 +145,7 @@ function step2_determineEnterpriseDir {
 		masterWorkNr=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/work(([[:digit:]]+))?/\2/g"`
 		ENT_DIR="EntMasterWork${masterWorkNr}"
 	elif [[ "${GIT_BRANCH}" == release/* ]]; then
-		releaseNr=`echo "${GIT_BRANCH}" | cut -d "/" -f2-`
+		releaseNr=`echo "${GIT_BRANCH}" | cut -d "/" -f2- | tr -d '.'`
 		ENT_DIR="EntRelease${releaseNr}"
 	else
 		echo "Could not interpret the GIT_BRANCH value: ${GIT_BRANCH}"
