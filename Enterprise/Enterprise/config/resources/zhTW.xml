@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 17-06-2016 12:31:56 GMT-->
+<!--Last edit date in TMS: 05-07-2016 14:34:04 GMT-->
 <LocalizationMap language="zhTW">
   <Term key="ISSUE">期號</Term>
   <Term key="ISSUES">期號</Term>
@@ -840,10 +840,6 @@
   <Term key="ERR_DOWNLOAD_VERSION">是否確認刪除此版本?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">不能設置DPS Viewer 版本到25 或更低，因為以下文件夾的訪問權限級別設置為免費(S1123): %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">不能變更訪問權限級別; 這需DPS Viewer 版本26 或更高. (S1124)</Term>
-  <Term key="ERR_DRUPAL_IMAGE_REQUIRED">一幅圖片被要求. </Term>
-  <Term key="ERR_DRUPAL_NO_COMPONENTS_MAPPING">不能發現元件計畫在配置檔中 (S1063). </Term>
-  <Term key="ERR_DRUPAL_NO_SITE_INFORMATION">沒有設置資訊被發現,不能發佈至 Drupal. 至少定義一個設置在 config_drupal.php (S1062). </Term>
-  <Term key="ERR_DRUPAL_REQUIRED_COMPONENTS_NOT_FOUND">需求組件 (%1) 未找到. (S1093)</Term>
   <Term key="ERR_DRUPAL_UPLOAD_FAILED">不能升級附件至 Drupal (S1064). </Term>
   <Term key="ERR_DUPLICATE_GRPUSR">已經使用為用戶名字 (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">已經使用為資料庫名字 (S1010)</Term>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 17-06-2016 12:31:56 GMT-->
+<!--Last edit date in TMS: 05-07-2016 14:34:04 GMT-->
 <LocalizationMap language="jaJP">
   <Term key="ISSUE">号</Term>
   <Term key="ISSUES">号</Term>
@@ -840,10 +840,6 @@
   <Term key="ERR_DOWNLOAD_VERSION">このバージョンをダウンロードしてもよろしいですか？</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">以下のドシエのアクセスレベルが自由に設定されているため、DPS Viewerをバージョン25またはそれ以下に設定できません。 (S1123):  %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">アクセスレベル: を変更できません。DPS Viewer のバージョン26またはそれ以降のバージョンが必要になります。 (S1124)</Term>
-  <Term key="ERR_DRUPAL_IMAGE_REQUIRED">イメージは必須です。</Term>
-  <Term key="ERR_DRUPAL_NO_COMPONENTS_MAPPING">設定ファイルにコンポーネントマッピングが見つかりません。 (S1063) </Term>
-  <Term key="ERR_DRUPAL_NO_SITE_INFORMATION">サイト情報が見つかりませんでした。Drupalに発行できませんでした。サイト情報をconfig_drupal.phpに追加して下さい。(S1062). </Term>
-  <Term key="ERR_DRUPAL_REQUIRED_COMPONENTS_NOT_FOUND">必須なコンポーネント「(%1)」が見つかりませんでした。(S1093)</Term>
   <Term key="ERR_DRUPAL_UPLOAD_FAILED">アタッチメントはDrupalにアップロードができません。 (S1064) </Term>
   <Term key="ERR_DUPLICATE_GRPUSR">この名前はユーザとしてすでに存在します(S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">この名前はすでにデータベースに存在します(S1010)</Term>
