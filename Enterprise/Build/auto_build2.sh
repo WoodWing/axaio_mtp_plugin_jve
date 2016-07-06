@@ -284,16 +284,6 @@ function ionCubeEnterpriseFiles {
 		ionCubeFolder "${encodeOptionFile}" "${icFolder}"
 	done
 	
-	echo "Encode the Analytics plugin, except its config file."
-	icFolder="${SOURCE_BASE}plugins/release/Analytics/"
-	for icFile in $(find ${icFolder} -name '*.php'); do
-		if [ ${icFile} == "${SOURCE_BASE}plugins/release/Analytics/monitor_config.php" ]; then 
-			echo "Skipped ${icFile}"
-		else
-			ionCubeFile "${encodeOptionFile}" "${icFile#$SOURCE_BASE}"
-		fi
-	done
-	
 	echo "Encode specific Enterprise core files and Elvis plugin files."
 	icFiles="\
 		Enterprise/server/apps/webapplicense.inc.php \
@@ -527,9 +517,8 @@ function step3a_updateVersionInfo {
 	updatePluginVersions ${SOURCE_BASE}Enterprise/server/plugins ${SERVER_VERSION} ${BUILD_NUMBER}
 	updatePluginVersions ${SOURCE_BASE}plugins/release ${SERVER_VERSION} ${BUILD_NUMBER}
 
-	echo "step3a3: Update version info in Analytics, AdobeDps2 and Elvis plugins. They have their own buildnr, but use the major.minor of Enterprise."
+	echo "step3a3: Update version info in AdobeDps2 and Elvis plugins. They have their own buildnr, but use the major.minor of Enterprise."
 	twoDigitVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)(\.[0-9]+)?/\1/g"` # ignores patch nr
-	updatePluginVersions ${SOURCE_BASE}plugins/release/Analytics "${twoDigitVersion}" ${ANALYTICS_BUILDNR}
 	updatePluginVersions ${SOURCE_BASE}plugins/release/AdobeDps2 "${twoDigitVersion}" ${ADOBEDPS2_BUILDNR}
 	updatePluginVersions ${SOURCE_BASE}plugins/release/Elvis "${twoDigitVersion}" ${ELVIS_BUILDNR}
 
@@ -539,10 +528,9 @@ function step3a_updateVersionInfo {
 	replaceVersionFile ${SOURCE_BASE}ProxyForSC/speedtest/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
 
 	echo "step3a5: Update version info in 3rd party modules."
-	updateVersion ${SOURCE_BASE}Drupal/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
-	updateVersion ${SOURCE_BASE}Drupal7/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
-	updateVersion ${SOURCE_BASE}Drupal8/modules/ww_enterprise/ww_enterprise.info.yml "^version\s*:\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
-	updateVersion ${SOURCE_BASE}WordPress/plugins/ww_enterprise/ww_enterprise.php "^\s*\*\s*Version:\s*" ${SERVER_VERSION} ${BUILD_NUMBER}
+	updateVersion ${SOURCE_BASE}Integrations/Drupal7/modules/ww_enterprise/ww_enterprise.info "^version\s*=\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
+	updateVersion ${SOURCE_BASE}Integrations/Drupal8/modules/ww_enterprise/ww_enterprise.info.yml "^version\s*:\s*[\"']" ${SERVER_VERSION} ${BUILD_NUMBER}
+	updateVersion ${SOURCE_BASE}Integrations/WordPress/plugins/ww_enterprise/ww_enterprise.php "^\s*\*\s*Version:\s*" ${SERVER_VERSION} ${BUILD_NUMBER}
 	
 	if [ "${SERVER_RELEASE_TYPE}" == "Daily" ]; then
 		echo "step3a6: Skip pushing version info changes to Git since it is a Daily build."
@@ -643,15 +631,13 @@ function step6_zipEnterpriseServer {
 #
 function step7_zipExternalModules {
 	echo "step7a: Zipping 3rd party modules module ..."
-	zipFolder "${WORKSPACE}/Enterprise/Drupal/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "DrupalEnterprise_${SERVER_VERSION_ZIP}"
-	zipFolder "${WORKSPACE}/Enterprise/Drupal7/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "Drupal7Enterprise_${SERVER_VERSION_ZIP}"
-	zipFolder "${WORKSPACE}/Enterprise/Drupal8/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "Drupal8_Drupal_Module_${SERVER_VERSION_ZIP}"
-	zipFolder "${WORKSPACE}/Enterprise/WordPress/plugins" "ww_enterprise" "${WORKSPACE}/artifacts" "WordPress_Plugin_${SERVER_VERSION_ZIP}"
-	zipFolder "${WORKSPACE}/Enterprise" "Solr" "${WORKSPACE}/artifacts" "SolrEnterprise_${SERVER_VERSION_ZIP}"
+	zipFolder "${WORKSPACE}/Enterprise/Integrations/Drupal7/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "Drupal7Enterprise_${SERVER_VERSION_ZIP}"
+	zipFolder "${WORKSPACE}/Enterprise/Integrations/Drupal8/modules" "ww_enterprise" "${WORKSPACE}/artifacts" "Drupal8_Drupal_Module_${SERVER_VERSION_ZIP}"
+	zipFolder "${WORKSPACE}/Enterprise/Integrations/WordPress/plugins" "ww_enterprise" "${WORKSPACE}/artifacts" "WordPress_Plugin_${SERVER_VERSION_ZIP}"
+	zipFolder "${WORKSPACE}/Enterprise/Integrations" "Solr" "${WORKSPACE}/artifacts" "SolrEnterprise_${SERVER_VERSION_ZIP}"
 
 	echo "step7b: Zipping release plug-ins ..."
 	twoDigitVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)(\.[0-9]+)?/\1/g"` # ignores patch nr
-	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "Analytics" "${WORKSPACE}/artifacts" "Enterprise_Analytics_Build_${ANALYTICS_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
 	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "AdobeDps2" "${WORKSPACE}/artifacts" "AdobeDPS_Build_${ADOBEDPS2_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
 	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "Elvis" "${WORKSPACE}/artifacts" "Elvis_Build_${ELVIS_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
 	plugins="Facebook Twitter WordPress Drupal8"
@@ -677,13 +663,13 @@ function step7_zipExternalModules {
 	done
 
 	echo "step7e: Zipping buildtest plug-ins ..."
-	plugins="AnalyticsTest PublishingTest AutoTargetingTest AutoNamingTest"
+	plugins="PublishingTest AutoTargetingTest AutoNamingTest"
 	for plugin in ${plugins}; do
 		zipFolder "${WORKSPACE}/Enterprise_release/plugins/buildtest" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"
 	done
 
 	echo "step7f: Copying the ionCube Loaders to the artifacts folder ..."
-	cp "${WORKSPACE}/Enterprise/ionCube/loaders/v5.0.14_at_2015_07_29/ioncube_loaders_all_platforms.zip" "${WORKSPACE}/artifacts"
+	cp "${WORKSPACE}/Enterprise/Libraries/ionCube/loaders/v5.0.14_at_2015_07_29/ioncube_loaders_all_platforms.zip" "${WORKSPACE}/artifacts"
 	chmod +w "${WORKSPACE}/artifacts/ioncube_loaders_all_platforms.zip"
 }
 

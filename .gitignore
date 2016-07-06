@@ -24,3 +24,5 @@ Enterprise/Enterprise/server/_productversionextra.txt
 Enterprise/.idea/**
 !Enterprise/.idea/codeStyleSettings.xml
 !Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml
+!Enterprise/.idea/modules.xml
+!Enterprise/.idea/Enterprise.iml

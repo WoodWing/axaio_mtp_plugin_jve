@@ -344,7 +344,6 @@ class FolderUtils
 			BASEDIR.'/server/dgrid', 
 			BASEDIR.'/server/javachart', 
 			BASEDIR.'/server/jquery', 
-			BASEDIR.'/server/plugins/Drupal/lib',
 			BASEDIR.'/server/vendor',
 			BASEDIR.'/server/ZendFramework'
 		);

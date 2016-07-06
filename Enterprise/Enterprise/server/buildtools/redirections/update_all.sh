@@ -86,9 +86,12 @@ function saveAndTestRedirection {
 #    Source URL: https://redirect.woodwing.com/v1/?path=enterprise-server/10/help/zend-opcache
 #    Target URL: https://helpcenter.woodwing.com/hc/en-us/articles/205501875
 #
+# @param string $1 Personal API key
+# @param string $1 Enterprise Server major version
+#
 function saveAndTestHelpCenterRedirections {
 	# https://redirect.woodwing.com/v1/?path=enterprise-server/10/help/zend-opcache
-	saveAndTestRedirection "${1}" "enterprise-server/${2}/help/zend-opcache" "https://helpcenter.woodwing.com/hc/en-us/articles/205501875" 
+	saveAndTestRedirection "${1}" "enterprise-server/${2}/help/zend-opcache" "https://helpcenter.woodwing.com/hc/en-us/articles/209990166" 
 
 	# Note that this Analytics help page is removed already: https://helpcenter.woodwing.com/hc/en-us/articles/204805639
 }
@@ -108,6 +111,8 @@ function saveAndTestPhpManualRedirections {
 	saveAndTestRedirection "${1}" "enterprise-server/php-manual/curl-installation" "http://php.net/manual/en/curl.installation.php"
 	saveAndTestRedirection "${1}" "enterprise-server/php-manual/zlib-installation" "http://php.net/manual/en/zlib.installation.php"
 	saveAndTestRedirection "${1}" "enterprise-server/php-manual/xsl-installation" "http://php.net/manual/en/xsl.installation.php"
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/openssl-installation" "http://php.net/manual/en/openssl.installation.php"
+	saveAndTestRedirection "${1}" "enterprise-server/php-manual/bcmath-installation" "http://php.net/manual/en/bc.installation.php"
 }
 
 # Validate input parameters
@@ -123,5 +128,5 @@ if [ ! -n "${2}" ]; then
 fi
 
 # Save and test all redirections as referred from our Health Check pages.
-saveAndTestHelpCenterRedirections ${1}
+saveAndTestHelpCenterRedirections ${1} ${2}
 saveAndTestPhpManualRedirections ${1}
