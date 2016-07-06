@@ -42,14 +42,6 @@ if [ ! -f "${bowerbin}" ]; then
 fi 
 echo "[OK] bower executable found at: ${bowerbin}"
 
-# Perforce: make sure dgrid folders in workspace is in sync with latest version:
-p4 sync "${ENT_DIR}/dgrid/...#head"
-p4 sync "${ENT_DIR}/Enterprise/server/dgrid/...#head"
-
-# Perforce: checkout the dgrid folders:
-p4 edit "${ENT_DIR}/dgrid/..."
-p4 edit "${ENT_DIR}/Enterprise/server/dgrid/..."
-
 # Install/update dgrid (which also installs dojo through its dependencies).
 bower install dgrid
 echo "[OK] Updated dgrid"
@@ -65,16 +57,16 @@ echo "[OK] Found dojo version: ${dojover}"
 # Install/update additional packages for dgrid.
 bower install dojox#${dojover}
 bower install dijit#${dojover}
-echo "[OK] Updated dgrid packages at: ${ENT_DIR}/dgrid"
+echo "[OK] Updated dgrid packages at: ${ENT_DIR}/Libraries/dgrid"
 
 # Copy dgrid library from the full version folder to the shipping folder.
 # Note that we need a few components from dojox only, and we don't need test folders.
-cp -R "${ENT_DIR}/dgrid" "${ENT_DIR}/Enterprise/server"
+cp -R "${ENT_DIR}/Libraries/dgrid" "${ENT_DIR}/Enterprise/server"
 rm -Rfd "${ENT_DIR}/Enterprise/server/dgrid/dojox"
 mkdir "${ENT_DIR}/Enterprise/server/dgrid/dojox"
-cp -R "${ENT_DIR}/dgrid/dojox/grid" "${ENT_DIR}/Enterprise/server/dgrid/dojox/grid"
-cp -R "${ENT_DIR}/dgrid/dojox/html" "${ENT_DIR}/Enterprise/server/dgrid/dojox/html"
-cp "${ENT_DIR}/dgrid/dojox/main.js" "${ENT_DIR}/Enterprise/server/dgrid/dojox"
+cp -R "${ENT_DIR}/Libraries/dgrid/dojox/grid" "${ENT_DIR}/Enterprise/server/dgrid/dojox/grid"
+cp -R "${ENT_DIR}/Libraries/dgrid/dojox/html" "${ENT_DIR}/Enterprise/server/dgrid/dojox/html"
+cp "${ENT_DIR}/Libraries/dgrid/dojox/main.js" "${ENT_DIR}/Enterprise/server/dgrid/dojox"
 rm -Rfd "${ENT_DIR}/Enterprise/server/dgrid/dojox/grid/tests"
 rm -Rfd "${ENT_DIR}/Enterprise/server/dgrid/dojox/html/tests"
 rm -Rfd "${ENT_DIR}/Enterprise/server/dgrid/dijit/tests"
@@ -84,14 +76,4 @@ rm -Rfd "${ENT_DIR}/Enterprise/server/dgrid/put-selector/test"
 rm -Rfd "${ENT_DIR}/Enterprise/server/dgrid/xstyle/test"
 echo "[OK] Copied dgrid packages to: ${ENT_DIR}/Enterprise/server/dgrid"
 
-# Perforce: revert unchanged files in vendor- and composer folders:
-p4 revert -a "${ENT_DIR}/dgrid/..."
-p4 revert -a "${ENT_DIR}/Enterprise/server/dgrid/..."
-
-# Perforce: add newly created files (if any) to dgrid folders:
-find "${ENT_DIR}/dgrid" -type f \( ! -iname ".*" \) -print | p4 -x - add
-find "${ENT_DIR}/Enterprise/server/dgrid" -type f \( ! -iname ".*" \) -print | p4 -x - add
-# L> "p4 add" command does not allow us to add files recursively (unline the GUI client)
-# L> note that the "find <folder> -type f -print" command lists all files recursively
-# L> note that the "\( ! -iname ".*" \)" expression excludes the hidden files (starting with dot)
-echo "[OK] Update completed. Please check-in pending files in your 'default' Changelist at Perforce."
+echo "[OK] Update completed. Please commit and push unstaged files in the Git repo."

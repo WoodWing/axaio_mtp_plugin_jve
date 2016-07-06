@@ -1,7 +1,0 @@
-; $Id$
-name = WoodWing Cartoon
-description = Add cartoons to your site
-core = 6.x
-package = OurGlobe
-dependencies[] = ourglobe
-dependencies[] = upload

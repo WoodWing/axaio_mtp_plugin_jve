@@ -68,7 +68,6 @@ class WW_Utils_PhpInfo
 		$info .= self::getConfigFile( BASEDIR.'/config/configserver.php', 'configserver.php' );
 		$info .= self::getConfigFile( BASEDIR.'/server/serverinfo.php', 'serverinfo.php' );
 		$info .= self::getConfigFile( BASEDIR.'/config/config_solr.php', 'config_solr.php' );
-		$info .= self::getConfigFile( BASEDIR.'/config/config_drupal.php', 'config_drupal.php' );
 		$info .= self::getChapterFooter();
 		
 		// Get Enterprise server database details
