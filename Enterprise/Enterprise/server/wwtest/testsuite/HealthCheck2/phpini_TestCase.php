@@ -136,12 +136,7 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 
 		if( defined('ENCRYPTION_PRIVATEKEY_PATH') ) {
 			LogHandler::Log('wwtest', 'INFO', 'Using password encryption which requires PHP "openssl" library.');
-			$exts['openssl'] = 'http://php.net/manual/en/openssl.installation.php';
-		}
-
-		if( isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on' ) {
-			LogHandler::Log('wwtest', 'INFO', 'Using HTTPS which requires PHP "curl" library.');
-			$exts['curl'] = 'http://php.net/manual/en/curl.installation.php';
+			$exts['openssl'] = 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/openssl-installation';
 		}
 
 		// Note that since Enterprise 10.0 RabbitMQ AMQP requires the bcmatch library.
@@ -149,7 +144,7 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
 		if( BizMessageQueue::isInstalled()) {
 			LogHandler::Log('wwtest', 'INFO', 'Using RabbitMQ which requires PHP "bcmath" library.');
-			$exts['bcmath'] = 'http://php.net/manual/en/bc.installation.php';
+			$exts['bcmath'] = 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/bcmath-installation';
 		}
 
 		foreach( $exts as $ext => $phpManual ) {

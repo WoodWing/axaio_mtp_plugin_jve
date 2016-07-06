@@ -169,6 +169,9 @@ class PhpStormXml2JunitXmlConverter
 					}
 				} else {
 					$numberOfErrorsToIgnore = $this->numberOfErrorsToIgnore[$configFolder];
+					if( !isset($this->errorCountExceedingFolders[$configFolder]) ) {
+						$this->errorCountExceedingFolders[$configFolder] = 0;
+					}
 					$this->errorCountExceedingFolders[$configFolder] += 1;
 				}
 

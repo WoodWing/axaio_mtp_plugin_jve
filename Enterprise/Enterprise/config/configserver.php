@@ -1152,8 +1152,7 @@ if( !defined('APPLICATION_SERVERS') ) {
 // ENTERPRISE_PROXY:
 //    The proxy is a secure gateway through which Enterprise Server can safely access external servers.
 //    By default, the proxy is disabled but it can optionally be configured.
-//    Although this is a generic setting, currently only the Adobe DPS Server integration and the
-//    Enterprise Analytics integration are using it.
+//    Although this is a generic setting, currently only the Adobe DPS Server integration is using it.
 //    
 //    When all the proxy options are commented out (by starting with // characters) the proxy is 
 //    disabled. To enable it, at least the proxy_host option must be uncommented (by removing the 

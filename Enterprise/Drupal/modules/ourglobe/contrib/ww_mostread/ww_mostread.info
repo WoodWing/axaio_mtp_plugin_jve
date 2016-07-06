@@ -1,6 +1,0 @@
-; $Id$
-name = WoodWing MostRead
-description = Add a list of most read stories on your site.
-core = 6.x
-package = OurGlobe
-dependencies[] = ourglobe
