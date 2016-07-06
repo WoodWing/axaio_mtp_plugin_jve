@@ -839,10 +839,6 @@
   <Term key="ERR_DOWNLOAD_VERSION">Weet u zeker dat u deze versie wilt downloaden?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">Niet mogelijk om de DPS Viewer versie in te stellen op versie 25 of lager omdat het toegangsniveau voor de volgende Dossiers ingesteld is op Gratis (S1123): %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">Niet mogelijk om het toegangsniveau te veranderen; hiervoor is de DPS Viewer versie 26 of hoger nodig. (S1124)</Term>
-  <Term key="ERR_DRUPAL_IMAGE_REQUIRED">Een afbeelding is vereist. </Term>
-  <Term key="ERR_DRUPAL_NO_COMPONENTS_MAPPING">Kan geen associatie met componenten vinden in config bestand (S1063).</Term>
-  <Term key="ERR_DRUPAL_NO_SITE_INFORMATION">Geen site informatie gevonden. Publiceren naar Drupal was niet mogelijk. Definieer op z'n minst één site in config_drupal.php (S1062).</Term>
-  <Term key="ERR_DRUPAL_REQUIRED_COMPONENTS_NOT_FOUND">De vereiste componenten (%1) zijn niet gevonden. (S1093)</Term>
   <Term key="ERR_DRUPAL_UPLOAD_FAILED">De bijlage kon niet geupload worden naar Drupal (S1064). </Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Naam bestaat al als gebruiker (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Naam bestaat al in de database (S1010)</Term>
