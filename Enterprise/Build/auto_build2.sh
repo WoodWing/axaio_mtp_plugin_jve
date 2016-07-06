@@ -329,7 +329,6 @@ function step0_validateEnvironment {
     	exit 1
 	fi
 	echo "step0a: Validating required environment variables..."
-	validateEnvironmentVariableNotEmpty ANALYTICS_BUILDNR "${ANALYTICS_BUILDNR}"
 	validateEnvironmentVariableNotEmpty ADOBEDPS2_BUILDNR "${ADOBEDPS2_BUILDNR}"
 	validateEnvironmentVariableNotEmpty ELVIS_BUILDNR "${ELVIS_BUILDNR}"
 	validateEnvironmentVariableNotEmpty BUILD_NUMBER "${BUILD_NUMBER}"
