@@ -839,10 +839,6 @@
   <Term key="ERR_DOWNLOAD_VERSION">Tem certeza de que deseja transferir esta versão?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">Não é possível configurar a versão do Viewer DPS em 25 ou menos porque o nível de acesso dos seguintes Dossiês está configurado como Grátis (S1123):  %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">Não é possível mudar o nível de acesso; isto exige uma versão do Viewer DPS 26 ou maior. (S1124)</Term>
-  <Term key="ERR_DRUPAL_IMAGE_REQUIRED">É necessário uma imagem.</Term>
-  <Term key="ERR_DRUPAL_NO_COMPONENTS_MAPPING">Não foi encontrado componentes no arquivo config (S1063).</Term>
-  <Term key="ERR_DRUPAL_NO_SITE_INFORMATION">Sem configurações de site. Não foi possível publicar para Drupal. Defina pelo menos um site no config_drupal.php (S1062).</Term>
-  <Term key="ERR_DRUPAL_REQUIRED_COMPONENTS_NOT_FOUND">Componentes necessários (%1) não foram encontrados. (S1093)</Term>
   <Term key="ERR_DRUPAL_UPLOAD_FAILED">Não foi possível fazer upload do arquivo anexo para Drupal (S1064).</Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Este nome já existe como usuário (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Este nome já existe no banco de dados (S1010)</Term>
