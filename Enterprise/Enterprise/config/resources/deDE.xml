@@ -839,10 +839,6 @@
   <Term key="ERR_DOWNLOAD_VERSION">Soll diese Version heruntergeladen werden?</Term>
   <Term key="ERR_DPS_INCOMPATIBLE_VIEWERVERSION">Die DPS Viewer-Version kann nicht auf 25 oder niedriger gesetzt werden, da die Zugangsebene der folgenden Dossiers auf 'Kostenlos' gesetzt ist (S1123): %1</Term>
   <Term key="ERR_DPS_UNSUPPORTED_ARTICLE_ACCESS">Die Zugangsebene kann nicht geändert werden. Dazu ist DPS Viewer Version 26 oder höher erforderlich. (S1124)</Term>
-  <Term key="ERR_DRUPAL_IMAGE_REQUIRED">Ein Bild ist erforderlich. </Term>
-  <Term key="ERR_DRUPAL_NO_COMPONENTS_MAPPING">Der Konfigurationsdatei (S1063) zugeordnete Elemente können nicht gefunden werden. </Term>
-  <Term key="ERR_DRUPAL_NO_SITE_INFORMATION">Keine Site-Informationen gefunden. Publikation über Drupal ist nicht möglich. Geben Sie mindestens eine Site in config_drupal.php (S1062) an. </Term>
-  <Term key="ERR_DRUPAL_REQUIRED_COMPONENTS_NOT_FOUND">Erforderliche Komponenten (%1) wurden nicht gefunden. (S1093)</Term>
   <Term key="ERR_DRUPAL_UPLOAD_FAILED">Anhang konnte nicht zu Drupal hochgeladen werden (S1064). </Term>
   <Term key="ERR_DUPLICATE_GRPUSR">Name ist bereits als Benutzer vorhanden (S1009)</Term>
   <Term key="ERR_DUPLICATE_NAME">Name ist bereits in Datenbank vorhanden (S1010)</Term>
