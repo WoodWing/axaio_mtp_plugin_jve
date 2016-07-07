@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 05-07-2016 14:34:04 GMT-->
+<!--Last edit date in TMS: 07-07-2016 10:27:53 GMT-->
 <LocalizationMap language="jaJP">
   <Term key="ISSUE">号</Term>
   <Term key="ISSUES">号</Term>
@@ -257,6 +257,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">開く</Term>
   <Term key="ACT_OPEN_EDIT">編集</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">新規タブで開く</Term>
   <Term key="ACT_ORDER_BY">並べ替え</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">%1ファイルは存在しません</Term>
