@@ -256,6 +256,7 @@
   <Term key="ACT_OK">Aceptar</Term>
   <Term key="ACT_OPEN">Abrir</Term>
   <Term key="ACT_OPEN_EDIT">Abrir para editar</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">Abrir en una pestaña nueva</Term>
   <Term key="ACT_ORDER_BY">Ordenar por</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">El archivo %1 no existe</Term>
