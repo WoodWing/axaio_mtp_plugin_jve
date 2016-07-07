@@ -256,6 +256,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">Open</Term>
   <Term key="ACT_OPEN_EDIT">Openen voor bewerken</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">In een nieuwe tab openen</Term>
   <Term key="ACT_ORDER_BY">Sorteer op</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">Betand %1 bestaat niet</Term>
