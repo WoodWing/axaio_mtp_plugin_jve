@@ -256,6 +256,7 @@
   <Term key="ACT_OK">선택</Term>
   <Term key="ACT_OPEN">열기</Term>
   <Term key="ACT_OPEN_EDIT">편집</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">신규 탭 열기</Term>
   <Term key="ACT_ORDER_BY">명령자</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">파일 %1는 존재하지 않습니다</Term>
