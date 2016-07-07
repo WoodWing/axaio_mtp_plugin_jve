@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 05-07-2016 14:34:04 GMT-->
+<!--Last edit date in TMS: 07-07-2016 10:27:53 GMT-->
 <LocalizationMap language="zhTW">
   <Term key="ISSUE">期號</Term>
   <Term key="ISSUES">期號</Term>
@@ -257,6 +257,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">開啓</Term>
   <Term key="ACT_OPEN_EDIT">開啟編輯</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">在新選項卡中打開</Term>
   <Term key="ACT_ORDER_BY">Order by</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">文件 %1 不存在</Term>
