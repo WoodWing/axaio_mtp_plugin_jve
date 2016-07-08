@@ -64,6 +64,7 @@ class BizAccessFeatureProfiles
 	const FILE_LISTPUBOVERVIEW         = 11;
 	const FILE_READ                    =  2;
 	const FILE_OPENEDIT                =  9;
+	const FILE_OPENEDIT_UNPLACED       = 14;
 	const FILE_WRITE                   =  3;
 	const FILE_DELETE                  =  4;
 	const FILE_PURGE                   = 10;
@@ -92,6 +93,8 @@ class BizAccessFeatureProfiles
 				'Read',                      'R', BizResources::localize('ACT_READ') ),
 			self::FILE_OPENEDIT              => new SysFeatureProfile( self::FILE_OPENEDIT,
 				'Open_Edit',                 'E', BizResources::localize('ACT_OPEN_EDIT') ),
+			self::FILE_OPENEDIT_UNPLACED     => new SysFeatureProfile( self::FILE_OPENEDIT_UNPLACED,
+				'Open_Edit_Unplaced',        '', BizResources::localize('ACT_OPEN_EDIT_UNPLACED') ),
 			self::FILE_WRITE                 => new SysFeatureProfile( self::FILE_WRITE,
 				'Write',                     'W', BizResources::localize('ACT_WRITE') ),
 			self::FILE_DELETE                => new SysFeatureProfile( self::FILE_DELETE,
