@@ -39,17 +39,14 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 			$this->setUserType( $req->User, $req->Password );
 		}
 
-		// Add the feature to the feature set of the logon response.
-		// When a client requests for 'ticket only' the feature set is -not- provided by
+		// Pass the ElvisServerUrl option in the feature set, as used by Content Station.
+		// When a client requests for 'ticket only' the feature set is -not- provided by 
 		// the core server, so we need to handle with care.
 		if( isset($resp->ServerInfo->FeatureSet) ) {
-			require_once dirname(__FILE__).'/config.php'; // Load the Elvis settings
-			// Pass the ElvisServerUrl option in the feature set, as used by Content Station.
+			// Add the feature to the feature set of the logon response.
+			require_once dirname(__FILE__).'/config.php'; // get ELVIS_CLIENT_URL
 			$feature = new Feature( 'ElvisServerUrl', ELVIS_CLIENT_URL );
 			array_push( $resp->ServerInfo->FeatureSet, $feature );
-
-			$imageRestoreLocation = new Feature( 'ImageRestoreLocation', IMAGE_RESTORE_LOCATION );
-			array_push( $resp->ServerInfo->FeatureSet, $imageRestoreLocation );
 		}
 	}
 

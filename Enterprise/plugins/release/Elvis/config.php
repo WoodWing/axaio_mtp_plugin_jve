@@ -74,16 +74,6 @@ if( !defined('ELVIS_CREATE_COPY') ) {
 	define( 'ELVIS_CREATE_COPY', 'false' );
 }
 
-/**
- * The location to which images are restored when restoring a layout from Elvis.
- * it supports the following options:
- *
- * Elvis_Copy: The image is copied in Elvis and is linked via an Enterprise shadow object.
- * Elvis_Original: The image is linked via an Enterprise shadow object.
- * Enterprise: The image is copied to Enterprise.
- */
-define( 'IMAGE_RESTORE_LOCATION', 'Elvis_Copy' );
-
 // Specify a Unique ID & prefix for this contentSource
 
 /**
