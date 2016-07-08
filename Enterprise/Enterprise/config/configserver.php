@@ -819,7 +819,6 @@ if( !defined('SERVERFEATURES') ) {
 		new Feature( 'EventPort' , 8093 ),
 		new Feature( 'CompanyLanguage' , 'enUS'),
 		new Feature( 'KeepCheckedOut' ),
-		new Feature( 'ContentStationInlineArticleCompare')
 	)));
 }
 
