@@ -730,7 +730,6 @@ define ('SERVERFEATURES', serialize(array(
 	new Feature( 'EventPort' , 8093 ),
 	new Feature( 'CompanyLanguage' , 'enUS'),
 	new Feature( 'KeepCheckedOut' ),
-	new Feature( 'ContentStationInlineArticleCompare')
 )));
 
 // Discontinued SERVERFEATURES options: 
