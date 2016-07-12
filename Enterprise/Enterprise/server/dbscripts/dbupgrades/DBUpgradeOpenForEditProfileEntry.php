@@ -41,7 +41,7 @@ class DBUpgradeOpenForEditProfileEntry extends DbUpgradeModule
 			$result = $dbDriver->query("SELECT DISTINCT p.`id` FROM {$dbp} p, {$dbpf} pf WHERE p.`id` = pf.`profile` AND pf.`feature` = {$openForEditCode}");
 
 			while( $row = $dbDriver->fetch($result) ) {
-				$dbDriver->query("INSERT INTO $dbpf (`profile`, `feature`, `value`) VALUES ('{$row['id']}', '{$openForEditUnplacedCode}', 'Yes');");
+				$dbDriver->query("INSERT INTO {$dbpf} (`profile`, `feature`, `value`) VALUES ('{$row['id']}', '{$openForEditUnplacedCode}', 'Yes');");
 			}
 			return true;
 		} catch( Exception $ex ) {

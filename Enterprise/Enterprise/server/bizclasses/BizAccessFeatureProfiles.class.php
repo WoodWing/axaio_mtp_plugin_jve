@@ -94,7 +94,7 @@ class BizAccessFeatureProfiles
 			self::FILE_OPENEDIT              => new SysFeatureProfile( self::FILE_OPENEDIT,
 				'Open_Edit',                 'E', BizResources::localize('ACT_OPEN_EDIT') ),
 			self::FILE_OPENEDIT_UNPLACED     => new SysFeatureProfile( self::FILE_OPENEDIT_UNPLACED,
-				'Open_Edit_Unplaced',        '', BizResources::localize('ACT_OPEN_EDIT_UNPLACED') ),
+				'Open_Edit_Unplaced',        'O', BizResources::localize('ACT_OPEN_EDIT_UNPLACED') ),
 			self::FILE_WRITE                 => new SysFeatureProfile( self::FILE_WRITE,
 				'Write',                     'W', BizResources::localize('ACT_WRITE') ),
 			self::FILE_DELETE                => new SysFeatureProfile( self::FILE_DELETE,
