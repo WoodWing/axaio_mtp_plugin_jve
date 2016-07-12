@@ -20,7 +20,7 @@ function getClientName()
 <!DOCTYPE html>
 <html>
 <head>
-	<script language="javascript" src="../../jquery/jquery-1.8.2.min.js"></script>
+	<script language="javascript" src="../../jquery/jquery-1.12.4.min.js"></script>
 	<script language="javascript" src="../../utils/javascript/stomp.js"></script>
 	<script language="javascript" src="../../utils/javascript/jquery.zend.jsonrpc.js"></script>
 	
