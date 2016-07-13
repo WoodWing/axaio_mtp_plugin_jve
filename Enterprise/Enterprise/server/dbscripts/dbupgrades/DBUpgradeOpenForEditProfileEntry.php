@@ -40,8 +40,12 @@ class DBUpgradeOpenForEditProfileEntry extends DbUpgradeModule
 			$openForEditUnplacedCode = BizAccessFeatureProfiles::FILE_OPENEDIT_UNPLACED;
 			$result = $dbDriver->query("SELECT DISTINCT p.`id` FROM {$dbp} p, {$dbpf} pf WHERE p.`id` = pf.`profile` AND pf.`feature` = {$openForEditCode}");
 
+			require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 			while( $row = $dbDriver->fetch($result) ) {
-				$dbDriver->query("INSERT INTO {$dbpf} (`profile`, `feature`, `value`) VALUES ('{$row['id']}', '{$openForEditUnplacedCode}', 'Yes');");
+				DBBase::insertRow( 'profilefeatures',
+					array('profile', $row['id'],
+							'feature', $openForEditUnplacedCode,
+							'value', 'Yes') );
 			}
 			return true;
 		} catch( Exception $ex ) {

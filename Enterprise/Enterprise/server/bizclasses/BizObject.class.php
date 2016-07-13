@@ -1589,14 +1589,14 @@ class BizObject
 			}
 		}
 
-		$hasOpenforEditUnplacedRight = BizAccess::checkRightsForObjectRow( $user, 'O', BizAccess::THROW_ON_DENIED, $currRow, $curIssueId );
 		// Next check if we are allowed to modify the object in its existing place (open for edit access)
 		// When there is no E-access it may still be that we have W-access (BZ#5519). In that case don't fail.
 		if( !BizAccess::checkRightsForObjectRow( $user, 'E', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId )
 			 && !BizAccess::checkRightsForObjectRow( $user, 'W', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId )
 				 // If open for edit is disabled, it could be that user can only edit unplaced files. So first check if user
 				 // has that right and if they do check if the object is actually placed.
-			 && (!$hasOpenforEditUnplacedRight || ($hasOpenforEditUnplacedRight && self::hasRelationOfType( $id, 'Placed', 'parents' ))) ) {
+			 && (!BizAccess::checkRightsForObjectRow( $user, 'O', BizAccess::THROW_ON_DENIED, $currRow, $curIssueId )
+					|| BizRelation::hasRelationOfType( $id, 'Placed', 'parents' )) ) {
 				throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(E)" );
 		}
 
@@ -2519,10 +2519,7 @@ class BizObject
 						break;
 					}
 
-					$hasOpenforEditUnplacedRight = $globAuth->checkRight( 'O',
-						$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-						$objectId, $contentSource, $documentId, $routeTo );
-
+					require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 					// Check if we are allowed to change the source Object. We check Write access (W) and open/edit rights (E) and open/edit rights for unplaced (O).
 					if( !$globAuth->checkright( 'E',
 							$publicationId, $issueId, $currentCategory, $objectType, $currentState,
@@ -2530,7 +2527,9 @@ class BizObject
 						&& !$globAuth->checkright( 'W',
 							$publicationId, $issueId, $currentCategory, $objectType, $currentState,
 							$objectId, $contentSource, $documentId, $routeTo )
-						&& ( !$hasOpenforEditUnplacedRight || ( $hasOpenforEditUnplacedRight && self::hasRelationOfType( $objectId, 'Placed', 'parents' ) ) ) ) {
+						&& ( !$globAuth->checkRight( 'O',
+								$publicationId, $issueId, $currentCategory, $objectType, $currentState,
+								$objectId, $contentSource, $documentId, $routeTo ) || BizRelation::hasRelationOfType( $objectId, 'Placed', 'parents' ) ) ) {
 								try {
 									throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
 										BizResources::localize( 'ERR_AUTHORIZATION' ).PHP_EOL."id={$objectId} (E)" );
@@ -6184,18 +6183,5 @@ class BizObject
 		} while ( $nameFound && $iterations < 1000 );
 
 		return $proposedName;
-	}
-
-	/**
-	 * Looks if the given object has a specific relation, filtered on relation type.
-	 *
-	 * @param integer $id The object id for which the relation is checked.
-	 * @param string $type The relation type e.g. Placed, InstanceOf.
-	 * @param string $related Filter on which kind of relations to look at. Possible values: 'parents', 'childs', or null for 'both'.
-	 * @return bool True if the object has the requested relation, false if it does not.
-	 */
-	static private function hasRelationOfType( $id, $type, $related ) {
-		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
-		return count(BizRelation::getObjectRelations( $id, false, false, $related, false, false, $type )) > 0;
 	}
 }

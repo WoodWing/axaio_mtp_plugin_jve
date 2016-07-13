@@ -2317,4 +2317,17 @@ class BizRelation
 		}
 		return $targets;
 	}
+
+	/**
+	 * Looks if the given object has a specific relation, filtered on relation type.
+	 *
+	 * @param integer $id The object id for which the relation is checked.
+	 * @param string $type The relation type e.g. Placed, InstanceOf.
+	 * @param string $related Filter on which kind of relations to look at. Possible values: 'parents', 'childs', or null for 'both'.
+	 * @return bool True if the object has the requested relation, false if it does not.
+	 */
+	public static function hasRelationOfType( $id, $type, $related )
+	{
+		return count(self::getObjectRelations( $id, false, false, $related, false, false, $type )) > 0;
+	}
 }
