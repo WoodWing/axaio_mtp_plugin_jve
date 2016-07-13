@@ -6,99 +6,33 @@ require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
 checkSecure('publadmin');
 
-// database stuff
-$dbh = DBDriverFactory::gen();
-$dbg = $dbh->tablename('groups');
-$dbs = $dbh->tablename('publsections');
-$dbst = $dbh->tablename('states');
-$dba = $dbh->tablename('authorizations');
-
 // determine incoming mode
 $publ    = isset($_REQUEST['publ'])   ? intval($_REQUEST['publ'])  : 0; // Publication id. Zero not allowed.
 $issue   = isset($_REQUEST['issue'])  ? intval($_REQUEST['issue']) : 0; // Issue id. Zero for all.
 $grp     = isset($_REQUEST['grp'])    ? intval($_REQUEST['grp'])   : 0; // User group id. Zero for all, in special mode in which user should pick one first.
-$records = isset($_REQUEST['recs'])   ? intval($_REQUEST['recs'])  : 0; // Number of records posted.
-$insert  = isset($_REQUEST['insert']) ? (bool)$_REQUEST['insert']  : false; // Whether or not in insertion mode.
-$command = isset($_REQUEST['command']) ? $_REQUEST['command'] : 'view';
-
-// Validate auth record ids. Those are passed in for Edit, Delete and Save commands.
-// To block SQL injection, cast all ids to integers. To block other attacks, remove negatives and duplicates.
-$ids = isset($_REQUEST['authids']) ? explode(',', $_REQUEST['authids'] ) : array();
-$ids = array_unique( array_map( 'intval', $ids ) );
-$ids = array_filter( $ids, function( $id ) { return $id > 0; } );
 
 // check publication rights
 checkPublAdmin($publ);
 
-//////////////////////////////////////////
 // print report
-//////////////////////////////////////////
-if (isset($_REQUEST['report']) && $_REQUEST['report']) {
-
+if( isset($_REQUEST['report']) && $_REQUEST['report'] ) {
 	$txt = composeAuthorizationsReport( $publ, $issue );
-	print HtmlDocument::buildDocument($txt, false);
+	print HtmlDocument::buildDocument( $txt, false );
 	exit;
 }
 
+$command = isset($_REQUEST['command']) ? $_REQUEST['command'] : 'view';
+$authIds = isset($_REQUEST['authids']) ? safeCastCsvToDbIds( $_REQUEST['authids'] ) : array();
+
 $profiles = getProfiles();
 $objTypeMap = getObjectTypeMap();
-
-//////////////////////////////////////////
-// normal operations
-//////////////////////////////////////////
-if (!$grp) {
-	$mode = 'select';
-} else if (isset($_REQUEST['update']) && $_REQUEST['update']) {
-	$mode = 'update';
-} else if (isset($_REQUEST['delete']) && $_REQUEST['delete']) {
-	$mode = 'delete';
-} else if (isset($_REQUEST['add']) && $_REQUEST['add']) {
-	$mode = 'add';
-} else {
-	$mode = 'view';
-}
-
-// handle request
-if ($records > 0) {
-	for ($i=0; $i < $records; $i++) {
-		$id      = isset($_REQUEST["id$i"])      ? intval($_REQUEST["id$i"])      : 0; // Record id
-		$section = isset($_REQUEST["section$i"]) ? intval($_REQUEST["section$i"]) : 0; // Category id
-		$state   = isset($_REQUEST["state$i"])   ? intval($_REQUEST["state$i"])   : 0; // Status id
-		$profile = isset($_REQUEST["profile$i"]) ? intval($_REQUEST["profile$i"]) : 0; // Profile id
-		//echo 'DEBUG: id=['. $id .'] section=['. $section .'] state=['. $state .'] profile=['. $profile .']</br>';
-		if ($profile > 0) {
-			$sql = "UPDATE $dba SET `publication`=$publ, `issue` = $issue, `grpid`=$grp, ".
-						"`section`=$section, `state`=$state, `profile`=$profile ".
-					"WHERE `id` = $id";
-			$sth = $dbh->query($sql);
-		}
-	}
-}
-if ($insert === true) {
-	$section = isset($_REQUEST['section']) ? intval($_REQUEST['section']) : 0; // Category id
-	$state   = isset($_REQUEST['state'])   ? intval($_REQUEST['state'])   : 0; // Status id
-	$profile = isset($_REQUEST['profile']) ? intval($_REQUEST['profile']) : 0; // Profile id
-	//echo 'DEBUG: section=['. $section .'] state=['. $state .'] profile=['. $profile .']</br>';
-	if ($profile > 0) {
-		// handle autoincrement for non-mysql
-		$sql = "INSERT INTO $dba (`publication`, `issue`, `grpid`, `section`, `state`, `profile`) ".
-				"VALUES ($publ, $issue, $grp, $section, $state, $profile)";
-		$sql = $dbh->autoincrement($sql);
-		$sth = $dbh->query($sql);
-		$id = $dbh->newid($dba, true);
-	}
-}
-
-// Perform delete operation on authorizations.
-if( $command == 'delete' && $ids ) {
-	$sql = "DELETE FROM $dba WHERE `id` IN ( ".implode( ',', $ids )." )";
-	$dbh->query( $sql );
-}
 
 // generate upper part (info or select fields)
 $txt = HtmlDocument::loadTemplate( 'authorizations2.htm' );
 
 // Show user group.
+$dbh = DBDriverFactory::gen();
+$dbg = $dbh->tablename('groups');
 if( $command == 'view' ) {
 	$sql = "select `id`, `name` from $dbg order by `name`";
 	$sth = $dbh->query($sql);
@@ -128,19 +62,12 @@ if( $issue > 0 ) {
 	$txt = preg_replace('/<!--IF:STATE-->.*<!--ENDIF-->/is', '', $txt);
 }
 
-// generate lower part
-$detailtxt = '';
-
 // Collect categories (of the brand/issue).
-$sql = "select `id`, `section` from $dbs where `publication` = $publ and `issue` = $issue order by `section`";
-$sth = $dbh->query($sql);
-$sectiondomain = array();
-$sAll = BizResources::localize("LIS_ALL");
-while (($row = $dbh->fetch($sth))) {
-	$sectiondomain[$row['id']] = $row['section'];
-}
+$sectiondomain = getCategoryIdNameByBrandIssue( $publ, $issue );
 
 // Collect statuses (of the brand/issue).
+$dbh = DBDriverFactory::gen();
+$dbst = $dbh->tablename('states');
 $sql = "SELECT `id`, `state`, `type`, `code` FROM $dbst ".
 		"WHERE `publication` = $publ and `issue` = $issue ".
 		"ORDER BY `type`, `code`, `id`";
@@ -152,13 +79,20 @@ while (($row = $dbh->fetch($sth))) {
 	$statusDomainTree[$row['type']][$row['id']] = $row['state'];
 }
 
-if( $ids && $command == 'edit' ) {
+// Handle the Delete operation.
+if( $authIds && $command == 'delete' ) {
+	deleteAuthorizationsByIds( $authIds );
+}
+
+// Handle the Edit operation.
+if( $authIds && $command == 'edit' ) {
 
 	// Compose JSON data structure of categories for jsTree widget.
 	$categoryTree = array();
 	$categoryTreeRefs = array();
 	foreach( $sectiondomain as $categoryId => $categoryName ) {
 		$categoryItem = new stdClass();
+		$categoryItem->id = 'cat_'.$categoryId;
 		$categoryItem->text = formvar($categoryName);
 		$categoryTree[] = $categoryItem;
 		$categoryTreeRefs[$categoryId] = $categoryItem;
@@ -170,10 +104,12 @@ if( $ids && $command == 'edit' ) {
 	$statusTreeGroupsRefs = array();
 	foreach( $statusDomainTree as $statusType => $statusPerType ) {
 		$statusGroup = new stdClass();
+		$statusGroup->id = 'stt_'.$statusType;
 		$statusGroup->text = formvar($objTypeMap[$statusType]);
 		$statusGroup->children = array();
 		foreach( $statusPerType as $statusId => $statusName ) {
 			$statusItem = new stdClass();
+			$statusItem->id = 'stt_'.$statusId;
 			$statusItem->text = formvar($statusName);
 			$statusGroup->children[] = $statusItem;
 			$statusTreeItemsRefs[$statusId] = $statusItem;
@@ -187,18 +123,15 @@ if( $ids && $command == 'edit' ) {
 	$profileTreeRefs = array();
 	foreach( $profiles as $profileId => $profileName ) {
 		$profileItem = new stdClass();
+		$profileItem->id = 'prf_'.$profileId;
 		$profileItem->text = formvar($profileName);
 		$profileTree[] = $profileItem;
 		$profileTreeRefs[$profileId] = $profileItem;
 	}
 
 	// Enable the statuses in the jsTree for the authorization the user wants to edit.
-	$sql =
-		"SELECT a.`id`, a.`section`, a.`state`, a.`profile` ".
-		"FROM $dba a ".
-		'WHERE a.`id` IN( '.implode( ',', $ids ).' ) ';
-	$sth = $dbh->query( $sql );
-	while (($row = $dbh->fetch($sth))) {
+	$rows = getAuthorizationRowsByIds( $authIds );
+	foreach( $rows as $row ) {
 		if( $row['section'] ) {
 			$categoryItem = $categoryTreeRefs[ $row['section'] ];
 			$categoryItem->state = new stdClass();
@@ -230,103 +163,96 @@ if( $ids && $command == 'edit' ) {
 	$txt = str_replace( '[/*VAR:PROFILES*/]', json_encode( $profileTree ), $txt );
 }
 
-switch( $command ) {
-	case 'view':
-	case 'edit':
-	case 'update':
-	case 'delete':
-		// Changed order by state to order by code
-		$sql = "SELECT a.`id`, a.`section`, a.`state`, a.`profile` ".
-				"FROM $dba a ".
-				"LEFT JOIN $dbs s on (a.`section` = s.`id`) ".
-				"LEFT JOIN $dbst st on (a.`state` = st.`id`) ".
-				"WHERE a.`publication` = $publ and a.`issue` = $issue and a.`grpid` = $grp ".
-				"ORDER BY s.`section`, st.`type`, st.`code`";
-		$sth = $dbh->query($sql);
+// Handle the Save operation.
+if( $authIds && $command == 'save' ) {
 
-		$authMap = array();
-		while (($row = $dbh->fetch($sth))) {
-			$authMap[] = array(
-				'categories' => $row['section'],
-				'statuses' => $row['state'],
-				'profiles' => $row['profile'],
-				'ids' => $row['id']
-			);
-		}
-		$authMap = combineAuthorizations( $authMap );
-		$detailtxt .= composeAuthorizationsHtmlTable( $authMap, $sectiondomain, $statedomain, $profiles, $command, $ids );
+	// Retrieve user selected Categories/Statuses/Profiles from the jsTree widgets.
+	$selectedCategoryIds = isset( $_REQUEST['selcategoryids'] ) ? safeCastCsvToDbIds( $_REQUEST['selcategoryids'], 'cat_' ) : array();
+	$selectedStatusIds = isset( $_REQUEST['selstatusids'] ) ? safeCastCsvToDbIds( $_REQUEST['selstatusids'], 'stt_' ) : array();
+	$selectedProfileIds = isset( $_REQUEST['selprofileids'] ) ? safeCastCsvToDbIds( $_REQUEST['selprofileids'], 'prf_' ) : array();
 
-		$i = 0;
-		$color = array (" bgcolor='#eeeeee'", '');
-		$flip = 0;
-		while (($row = $dbh->fetch($sth))) {
-			$clr = $color[$flip];
-			$flip = 1- $flip;
-			//$deltxt = "<a href='authorizations2.php?publ=$publ&issue=$issue&grp=$grp&delete=1&id=".$row["id"]."' onClick='return myconfirm(\"delauthor\")'>".BizResources::localize("ACT_DEL")."</a>";
-			$detailtxt .= "<tr$clr><td>".inputvar("section$i", $row['section'], 'combo', $sectiondomain, $sAll).'</td>';
-			$detailtxt .= '<td>'.inputvar("state$i", $row['state'], 'combo', $statedomain, $sAll).'</td>';
-			$detailtxt .= "<td>".inputvar("profile$i", $row["profile"], 'combo', $profiles)."</td>";
-			//$detailtxt .= "<td>$deltxt</td>";
-			$detailtxt .= '</tr>';
-			$detailtxt .= inputvar( "id$i", $row['id'], 'hidden' );
-			$i++;
-		}
-		$detailtxt .= inputvar( 'recs', $i, 'hidden' );
-		break;
-	case 'add':
-		// 1 row to enter new record
-		$detailtxt .= '<tr><td>'.inputvar('section', '', 'combo', $sectiondomain, $sAll).'</td>';
-		$detailtxt .= '<td>'.inputvar('state','', 'combo', $statedomain, $sAll).'</td>';
-		$detailtxt .= '<td>'.inputvar('profile', '', 'combo', $profiles);
-		$detailtxt .= '<td></td></tr>';
-		$detailtxt .= inputvar( 'insert', '1', 'hidden' );
+	// When all Categories or Statuses are selected, that is indicated in DB as zero (0).
+	if( count( $sectiondomain ) == count( $selectedCategoryIds ) ) {
+		$selectedCategoryIds = array( 0 );
+	}
+	if( count( $statedomain ) == count( $selectedStatusIds ) ) {
+		$selectedStatusIds = array( 0 );
+	}
 
-		// show other authorizations as info
-		// Changed order by state to order by code
-		$sql = "SELECT a.`id`, s.`section`, a.`state`, st.`type`, ".
-					"st.`state` as `statename`, a.`profile` FROM $dba a ".
-				"LEFT JOIN $dbs s on (a.`section` = s.`id`) ".
-				"LEFT JOIN $dbst st on (a.`state` = st.`id`) ".
-				"WHERE a.`publication` = $publ and a.`issue` = $issue and a.`grpid` = $grp ".
-				"ORDER BY s.`section`, st.`type`, st.`code`";
-		$sth = $dbh->query($sql);
-		$color = array (" bgcolor='#eeeeee'", '');
-		$flip = 0;
-		while (($row = $dbh->fetch($sth))) {
-			$clr = $color[$flip];
-			$flip = 1- $flip;
-			if ($row['section']) {
-				$detailtxt .= "<tr$clr><td>". formvar($row['section']) .'</td><td>';
-			} else {
-				$detailtxt .= "<tr$clr><td>". $sAll .'</td><td>';
+	// Compose cartesian product of the user selected ids.
+	$selectedAuths = array();
+	foreach( $selectedCategoryIds as $categoryId ) {
+		foreach( $selectedStatusIds as $statusId ) {
+			foreach( $selectedProfileIds as $profileId ) {
+				$selectedAuths[ $categoryId ][ $statusId ][ $profileId ] = true;
 			}
-			if ($row['state']) {
-				$detailtxt .= formvar($row['type']).'/'.formvar($row['statename']);
-			} else {	
-				$detailtxt .= $sAll;
-			}	
-			$detailtxt .= '</td>';
-			$detailtxt .= '<td>'.formvar($profiles[$row['profile']]).'</td>';
-			$detailtxt .= '<td></td></tr>';
 		}
-		break;
+	}
+
+	// Delete all authorizations that have changed in the user's selection.
+	$deleteAuthIds = array();
+	$rows = getAuthorizationRowsByIds( $authIds );
+	foreach( $rows as $row ) {
+		if( !isset( $selectedAuths[ $row['section'] ][ $row['state'] ][ $row['profile'] ] ) ) {
+			$deleteAuthIds[] = $row['id'];
+		}
+	}
+	if( $deleteAuthIds ) {
+		deleteAuthorizationsByIds( $deleteAuthIds );
+	}
+
+	// Create all user configured authorizations in DB that do not exist yet.
+	$dbAuths =array();
+	foreach( $rows as $row ) {
+		$dbAuths[ $row['section'] ][ $row['state'] ][ $row['profile'] ] = true;
+	}
+	foreach( $selectedCategoryIds as $categoryId ) {
+		foreach( $selectedStatusIds as $statusId ) {
+			foreach( $selectedProfileIds as $profileId ) {
+				if( !isset( $dbAuths[ $categoryId ][ $statusId ][ $profileId ] ) ) {
+					insertAuthorizationRow( $publ, $issue, $grp, $categoryId, $statusId, $profileId );
+				}
+			}
+		}
+	}
 }
 
+// Retrieve all authorizations from DB and compose.
+$rows = getAuthorizationRowsByBrandIssueUserGroup( $publ, $issue, $grp );
+
+// Combine authorizations DB records that can be shown in one HTML row.
+$authMap = array();
+foreach( $rows as $row ) {
+	$authMap[] = array(
+		'categories' => $row['section'],
+		'statuses' => $row['state'],
+		'profiles' => $row['profile'],
+		'ids' => $row['id']
+	);
+}
+$authMap = combineAuthorizations( $authMap );
+
+// Compose a HTML table to display the (combined) authorizations.
+$detailtxt = composeAuthorizationsHtmlTable( $authMap, $sectiondomain, $statedomain, $profiles, $command, $authIds );
+$txt = str_replace( '<!--ROWS-->', $detailtxt, $txt );
+
+// If not in edit mode, show the Add Authorization button.
 $button = '';
 if( $command != 'edit' ) {
 	$button = '<input type="button" value="<!--RES:ACT_ADD_AUTHORIZATION-->" onclick="javascript:addAuth();" />';
 }
-$txt = str_replace( '<!--VAR:ADD_AUTH_BTN-->', $button , $txt );
+$txt = str_replace( '<!--VAR:ADD_AUTH_BTN-->', $button, $txt );
 
-// generate total page
-$txt = str_replace("<!--ROWS-->", $detailtxt, $txt);
-if ($issue > 0) {
+// Show the Back button to let user navigate back to brand/issue page.
+if( $issue > 0 ) {
 	$back = "hppublissues.php?id=$issue";
 } else {
 	$back = "hppublications.php?id=$publ";
 }
-$txt = str_replace("<!--BACK-->", $back, $txt);
-print HtmlDocument::buildDocument($txt);
+$txt = str_replace( '<!--BACK-->', $back, $txt );
+
+// Compose the HTML admin page, including header (top) and menu (left).
+print HtmlDocument::buildDocument( $txt );
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -348,6 +274,142 @@ function getProfiles()
 		$arr[$row['id']] = $row['profile'];
 	}
 	return $arr;
+}
+
+/**
+ * Retrieves all configured categories from DB for a given brand (and overrule issue).
+ *
+ * @param int $brandId
+ * @param int $issueId Optional, overrule issue id.
+ * @return array List of category names, indexed by record id, sorted by name.
+ */
+function getCategoryIdNameByBrandIssue( $brandId, $issueId = 0 )
+{
+	$where = '`publication` = ? and `issue` = ?';
+	$params = array( $brandId, $issueId );
+	$orderBy = array( 'section' => true );
+	$rows = DBBase::listRows( 'publsections', 'id', 'section', $where, null, $params, $orderBy );
+	return array_map( function( $row ) { return $row['section']; }, $rows );
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+/**
+ * Retrieves configured authorizations from DB, given their record ids.
+ *
+ * @param integer[] $authIds Authorization record ids.
+ * @return array smart_authorization table records indexed by record ids.
+ * @throws BizException
+ */
+function getAuthorizationRowsByIds( $authIds )
+{
+	$dbh = DBDriverFactory::gen();
+	$dba = $dbh->tablename('authorizations');
+	$sql =
+		"SELECT a.`id`, a.`section`, a.`state`, a.`profile` ".
+		"FROM $dba a ".
+		'WHERE a.`id` IN( '.implode( ',', $authIds ).' ) ';
+	$sth = $dbh->query( $sql );
+
+	$rows = array();
+	while( ( $row = $dbh->fetch( $sth ) ) ) {
+		$rows[ $row['id'] ] = $row;
+	}
+	return $rows;
+}
+
+/**
+ * Retrieves configured authorization records from DB.
+ *
+ * @param integer $brandId
+ * @param integer$issueId
+ * @param integer $userGroupId
+ * @return array Authorization records sorted by Category, Object Type and Status (code) and indexed by record id.
+ * @throws BizException
+ */
+function getAuthorizationRowsByBrandIssueUserGroup( $brandId, $issueId, $userGroupId )
+{
+	$dbh = DBDriverFactory::gen();
+	$dbs = $dbh->tablename('publsections');
+	$dbst = $dbh->tablename('states');
+	$dba = $dbh->tablename('authorizations');
+
+	$sql = "SELECT a.`id`, a.`section`, a.`state`, a.`profile` ".
+		"FROM $dba a ".
+		"LEFT JOIN $dbs s on (a.`section` = s.`id`) ".
+		"LEFT JOIN $dbst st on (a.`state` = st.`id`) ".
+		"WHERE a.`publication` = ? and a.`issue` = ? and a.`grpid` = ? ".
+		"ORDER BY s.`section`, st.`type`, st.`code`";
+	$params = array( $brandId, $issueId, $userGroupId );
+	$sth = $dbh->query( $sql, $params );
+
+	$rows = array();
+	while( ( $row = $dbh->fetch( $sth ) ) ) {
+		$rows[ $row['id'] ] = $row;
+	}
+	return $rows;
+}
+
+/**
+ * Deletes configured authorizations from DB, given their record ids.
+ *
+ * @param integer[] $authIds Authorization record ids.
+ * @throws BizException
+ */
+function deleteAuthorizationsByIds( $authIds )
+{
+	$dbh = DBDriverFactory::gen();
+	$dba = $dbh->tablename('authorizations');
+	$sql = "DELETE FROM $dba WHERE `id` IN ( ".implode( ',', $authIds )." )";
+	$dbh->query( $sql );
+}
+
+/**
+ * Creates a new authorization configuration record in DB.
+ *
+ * @param integer $brandId
+ * @param integer $issueId
+ * @param integer $userGroupId
+ * @param integer $categoryId
+ * @param integer $statusId
+ * @param integer $profileId
+ * @return bool|integer Record id, or false when creation failed.
+ * @throws BizException
+ */
+function insertAuthorizationRow( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId )
+{
+	$dbh = DBDriverFactory::gen();
+	$dba = $dbh->tablename('authorizations');
+	$sql = "INSERT INTO $dba (`publication`, `issue`, `grpid`, `section`, `state`, `profile`) ".
+		"VALUES ( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId )";
+	$sql = $dbh->autoincrement( $sql );
+	$sth = $dbh->query( $sql );
+	return (bool)$dbh->newid( $dba, true );
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+/**
+ * Converts a Comma Separated Value in a list of DB record ids (positive integers).
+ *
+ * Bad values are filtered out. Blocks SQL injections.
+ *
+ * @param string $csv
+ * @param string $prefix Optionally, prefix used for each DB id.
+ * @return integer[]
+ */
+function safeCastCsvToDbIds( $csv, $prefix = '' )
+{
+	$ids = explode(',', $csv );
+	if( $prefix ) {
+		$ids = array_map( function( $id ) use ( $prefix ) {
+			$id = substr( $id, strlen($prefix) );
+			return $id ? $id : 0; // false becomes zero
+		} , $ids );
+	}
+	$ids = array_map( 'intval', $ids ); // cast all to integers
+	$ids = array_unique( $ids ); // remove duplicates
+	return array_filter( $ids, function( $id ) { return $id > 0; } ); // keep positives only
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -487,20 +549,20 @@ function combineFields( $lhs, $rhs )
  * @param array $statedomain Id-Name lookup  map of statuses.
  * @param array $profiles Id-Name lookup map of profiles.
  * @param string $command The operation requested by user.
- * @param array $ids The authorization ids involved with the operation.
+ * @param array $authIds The authorization ids involved with the operation.
  * @return string HTML fragment that shows the authorizations.
  */
-function composeAuthorizationsHtmlTable( $authMap, $sectiondomain, $statedomain, $profiles, $command, $ids )
+function composeAuthorizationsHtmlTable( $authMap, $sectiondomain, $statedomain, $profiles, $command, $authIds )
 {
-	$idsCsv = implode( ',', $ids );
+	$authIdsCsv = implode( ',', $authIds );
 	$html = '';
 	foreach( $authMap as $key => $auth ) {
 		$html .= '<tr class="separator"><td colspan="4"/></tr>';
 
-		if( $command == 'edit' && $idsCsv && $idsCsv == $auth['ids'] ) {
-			$html .= composeAuthorizationsHtmlRowEditable( $auth, $sectiondomain, $statedomain, $profiles, $command, $ids );
+		if( $command == 'edit' && $authIdsCsv && $authIdsCsv == $auth['ids'] ) {
+			$html .= composeAuthorizationsHtmlRowEditable( $auth, $sectiondomain, $statedomain, $profiles, $command, $authIds );
 		} else {
-			$html .= composeAuthorizationsHtmlRowReadonly( $auth, $sectiondomain, $statedomain, $profiles, $command, $ids );
+			$html .= composeAuthorizationsHtmlRowReadonly( $auth, $sectiondomain, $statedomain, $profiles, $command, $authIds );
 		}
 	}
 	return $html;
@@ -514,10 +576,10 @@ function composeAuthorizationsHtmlTable( $authMap, $sectiondomain, $statedomain,
  * @param array $statedomain Id-Name lookup  map of statuses.
  * @param array $profiles Id-Name lookup map of profiles.
  * @param string $command The operation requested by user.
- * @param array $ids The authorization ids involved with the operation.
+ * @param array $authIds The authorization ids involved with the operation.
  * @return string HTML table row.
  */
-function composeAuthorizationsHtmlRowReadonly( $auth, $sectiondomain, $statedomain, $profiles, $command, $ids )
+function composeAuthorizationsHtmlRowReadonly( $auth, $sectiondomain, $statedomain, $profiles, $command, $authIds )
 {
 	$all = BizResources::localize("LIS_ALL");
 	$html = '<tr class="readonly">';
@@ -581,10 +643,10 @@ function composeAuthorizationsHtmlRowReadonly( $auth, $sectiondomain, $statedoma
  * @param array $statedomain Id-Name lookup  map of statuses.
  * @param array $profiles Id-Name lookup map of profiles.
  * @param string $command The operation requested by user.
- * @param array $ids The authorization ids involved with the operation.
+ * @param array $authIds The authorization ids involved with the operation.
  * @return string One HTML table row with the record and one row with Select/Deselect All buttons.
  */
-function composeAuthorizationsHtmlRowEditable( $auth, $sectiondomain, $statedomain, $profiles, $command, $ids )
+function composeAuthorizationsHtmlRowEditable( $auth, $sectiondomain, $statedomain, $profiles, $command, $authIds )
 {
 	// Add placeholders for the jsTree widgets to show Categories, Statuses and Profiles
 	// and show the Cancel and Save buttons (at right side of jsTree).
@@ -598,7 +660,7 @@ function composeAuthorizationsHtmlRowEditable( $auth, $sectiondomain, $statedoma
 					'<a href="javascript:viewAuth();">'.
 				      BizResources::localize( 'ACT_CANCEL' ).
 					'</a>'.
-					'<button style="display: block;" href="javascript:saveAuth(\''.$auth['ids'].'\');">'.
+					'<button onclick="javascript:saveAuth(\''.$auth['ids'].'\');">'.
 					   BizResources::localize( 'ACT_SAVE' ).
 					'</button>'.
 				'</div>'.

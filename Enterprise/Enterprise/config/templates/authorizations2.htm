@@ -8,7 +8,7 @@
 	table.wwauth tr.separator td {
 		padding: .3em;
 	}
-	table.wwauth tr {
+	table.wwauth tr td {
 		color: gray;
 		font-size: 7pt;
 	}
@@ -136,6 +136,9 @@
 		var authForm = document.forms.authform;
 		authForm.authids.value = authIds;
 		authForm.command.value = 'save';
+		authForm.selcategoryids.value = $('#jstree_categories').jstree("get_selected").join(",");
+		authForm.selstatusids.value = $('#jstree_statuses').jstree("get_selected").join(",");
+		authForm.selprofileids.value = $('#jstree_profiles').jstree("get_selected").join(",");
 		authForm.submit();
 	}
 	function viewAuth()
@@ -250,6 +253,9 @@
 	</td></tr></table>
 		<input type="hidden" name="authids" id="authids"/>
 		<input type="hidden" name="command" id="command" value="view"/>
+		<input type="hidden" name="selcategoryids" id="selcategoryids"/>
+		<input type="hidden" name="selstatusids" id="selstatusids"/>
+		<input type="hidden" name="selprofileids" id="selprofileids"/>
 	</form>
 	<br/>
     <a href="<!--BACK-->">
