@@ -80,7 +80,7 @@ function ww_enterprise_schema()
 	);
 
 	return $schema;
-}	
+}
 
 /**
  * Implementation of hook_requirements
@@ -96,20 +96,14 @@ function ww_enterprise_requirements( $phase )
 /**
  * Implements the hook_install() function.
  *
- * - Updates the vocabulary table by adding the ww_term_entity field.
+ * - Updates the vocabulary table by adding the ww_term_entity field. Field ww_preview is added to the node table.
  */
 function ww_enterprise_install()
 {
 	$hasConfigurationTable = false;
 
-	// Add the Enterprise Term Entity field to the database if it does not exist.
-	if (!db_field_exists('taxonomy_vocabulary', 'ww_term_entity')) {
-		db_add_field('taxonomy_vocabulary', 'ww_term_entity', _ww_term_entity_definition());
-		drupal_set_message('Module `ww_enterprise`: Successfully updated the `taxonomy_vocabulary` table.' );
-	} else {
-		drupal_set_message('Module `ww_enterprise`: Table `taxonomy_vocabulary` was already up to date.' );
-	}
-
+	addFieldToTable( 'taxonomy_vocabulary', 'ww_term_entity', _ww_term_entity_definition() );
+	addFieldToTable( 'node', 'ww_preview', _ww_node_preview_definition() );
 	// Verify the Enterprise configuration table, and install the DrupalDatabaseInstanceId setting if needed.
 	if (!db_table_exists( 'ww_enterprise_configuration') ) {
 		drupal_set_message('Module `ww_enterprise`: Table `ww_enterprise_configuration does not exist.`', 'error' );
@@ -148,24 +142,39 @@ function ww_enterprise_install()
 	}
 }
 
+function addFieldToTable( $tableName, $fieldName, $fieldDefinition )
+{
+	if( !db_field_exists( $tableName, $fieldName ) ) {
+		db_add_field( $tableName, $fieldName, $fieldDefinition );
+		drupal_set_message( 'Module `ww_enterprise`: Successfully updated the `'.$tableName.'` table.' );
+	} else {
+		drupal_set_message( 'Module `ww_enterprise`: Table `'.$tableName.'` was already up to date.' );
+	}
+}
+
 /**
  * Implements the hook_uninstall() function.
  *
- * - Updates the vocabulary table by removing the ww_term_entity field.
+ * Changes made to the Drupal schema on behalf of the ww_enterprise module are reverted.
+ * Note that the preview and configuration tables are not removed, only the added rows for the existing tables
+ * are removed. if the configuration table were to be removed it would no longer allow us to uniquely id this
+ * Drupal instance.
  */
 function ww_enterprise_uninstall()
 {
-	// Remove The Enterprise Term Entity field from the database if it exists.
-	// Note that the preview and configuration tables are not removed, only the added rows for the existing tables
-	// are removed. if the configuration table were to be removed it would no longer allow us to uniquely id this
-	// Drupal 7 instance.
+	dropFieldOfTable( 'taxonomy_vocabulary', 'ww_term_entity' );
+	dropFieldOfTable( 'node', 'ww_preview' );
+}
 
-	if (db_field_exists('taxonomy_vocabulary', 'ww_term_entity')) {
-		db_drop_field('taxonomy_vocabulary', 'ww_term_entity');
-		drupal_set_message('Module `ww_enterprise`: Successfully updated the `taxonomy_vocabulary` table.' );
+function dropFieldOfTable( $tableName, $fieldName )
+{
+	if( db_field_exists( $tableName, $fieldName ) ) {
+		db_drop_field( $tableName, $fieldName );
+		drupal_set_message( 'Module `ww_enterprise`: Successfully updated the `'.$tableName.'` table.' );
 	} else {
-		drupal_set_message('Module `ww_enterprise`: Table `taxonomy_vocabulary` was already up to date.' );
+		drupal_set_message( 'Module `ww_enterprise`: Table `'.$tableName.'` was already up to date.' );
 	}
+
 }
 
 /**
@@ -185,20 +194,40 @@ function _ww_term_entity_definition()
 }
 
 /**
+ * Returns the field definition for the ww_preview field.
+ *
+ * @return array
+ */
+function _ww_node_preview_definition()
+{
+	return  array(
+		'type' => 'int',
+		'unsigned' => TRUE,
+		'not null' => TRUE,
+		'default' => '0',
+		'description' => 'WoodWing Preview, used to indicate that a node is used for displaying a preview.'
+	);
+}
+
+/**
  * Implements the hook_schema_alter function.
  *
- * To make the Drupal internals work nicely with the ww_term_entity field this function adds the
- * field to the schema.
+ * To make the Drupal internals work nicely with the WoodWing fields this function adds the
+ * fields to the schema. Next a field is added to node table to mark nodes created for previewing.
  *
  * @param array $schema
  */
-function ww_enterprise_schema_alter(&$schema)
+function ww_enterprise_schema_alter( &$schema )
 {
-	if (isset($schema['taxonomy_vocabulary'])) {
-		if (!isset($schema['taxonomy_vocabulary']['fields']['ww_term_entity'])) {
+	if( isset( $schema['taxonomy_vocabulary'] ) ) {
+		if( !isset( $schema['taxonomy_vocabulary']['fields']['ww_term_entity'] ) ) {
 			$schema['taxonomy_vocabulary']['fields']['ww_term_entity'] = _ww_term_entity_definition();
 		}
 	}
-}
 
-?>
+	if( isset( $schema['node'] ) ) {
+		if( !isset( $schema['node']['fields']['ww_preview'] ) ) {
+			$schema['node']['fields']['ww_preview'] = _ww_node_preview_definition();
+		}
+	}
+}

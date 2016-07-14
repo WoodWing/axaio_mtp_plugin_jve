@@ -205,7 +205,7 @@ function ww_enterprise_upload( $enableTestMode=false )
 		foreach ($instances as $data ) {
 			// Match up the passed Id to the instance field id.
 			if ($data['field_id'] == $field_id) {
-			    // Add the validator. If the validator cannot be found, or is empty then allow any kind of file
+				// Add the validator. If the validator cannot be found, or is empty then allow any kind of file
 				// to be uploaded.
 				$extensions = (!empty($data['settings']['file_extensions']))
 					? array($data['settings']['file_extensions'])
@@ -420,21 +420,21 @@ function ww_enterprise_field_extra_fields()
 function ww_enterprise_file_download( $uri ) {
 	global $user;
 
- 	// Get the file record based on the URI. If not in the database just return.
-  	$files = file_load_multiple(array(), array('uri' => $uri));
-  	if (count($files)) {
-    	foreach ($files as $item) {
-      		// Since some database servers sometimes use a case-insensitive comparison
-      		// by default, double check that the filename is an exact match.
-      		if ($item->uri === $uri) {
-      			$file = $item;
-        		break;
-      		}
-    	}
-  	}
-  	if (!isset($file)) {
-  	  	return array();
-  	}
+	// Get the file record based on the URI. If not in the database just return.
+	$files = file_load_multiple(array(), array('uri' => $uri));
+	if (count($files)) {
+		foreach ($files as $item) {
+			// Since some database servers sometimes use a case-insensitive comparison
+			// by default, double check that the filename is an exact match.
+			if ($item->uri === $uri) {
+				$file = $item;
+				break;
+			}
+		}
+	}
+	if (!isset($file)) {
+		return array();
+	}
 
 	$fileUsages = file_usage_list( $file );
 	foreach( $fileUsages as $fileUsage ) {
@@ -445,7 +445,7 @@ function ww_enterprise_file_download( $uri ) {
 						$nodeObject = node_load( $nodeId );
 						if ( node_access( 'view', $nodeObject )) {
 							$info = image_get_info($uri);
-    						return array(
+							return array(
 								'Content-Type' => $info['mime_type'],
 								'Content-Length' => $info['file_size'] );
 						}
@@ -454,6 +454,32 @@ function ww_enterprise_file_download( $uri ) {
 			}
 		}
 	}
-		
-  	return array();
-}	
+
+	return array();
+}
+
+/**
+ * Implements hook_scheduler_allow_publishing().
+ */
+function ww_enterprise_scheduler_allow_publishing( $node )
+{
+	if ( $node->ww_preview == 1 ) {
+		$node->publish_on = '';
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Implements hook_scheduler_allow_unpublishing().
+ */
+function ww_enterprise_scheduler_allow_unpublishing( $node )
+{
+	if ( $node->ww_preview == 1 ) {
+		$node->unpublish_on = '';
+		return false;
+	}
+
+	return true;
+}
