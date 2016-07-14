@@ -107,7 +107,7 @@ class DBProperty extends DBBase
 
 		$result = array();
 		if ( $rows ) {
-			$result = self::createPropertyInfos( $rows );
+			$result = self::createPropertyInfos( $rows, $objType );
 		}
 
 		$propertiesStored[$publ][$objType][$customOnly][$publishSystemIndex][$templateIdIndex]['result'] = $result;
@@ -126,9 +126,10 @@ class DBProperty extends DBBase
 	 * are hidden. These properties are commonly defined on All/Object Type (e.g. publication = 0, type = Layout) level.
 	 *
 	 * @param array $propertyRows Database property rows.
+	 * @param string $objType Object type
 	 * @return PropertyInfo[]
 	 */
-	static private function createPropertyInfos( array $propertyRows )
+	static private function createPropertyInfos( array $propertyRows, $objType )
 	{
 		$propertyInfos = array();
 		$holdPubl = $propertyRows[0]['publication'];
@@ -136,7 +137,7 @@ class DBProperty extends DBBase
 		$onlyAddedByPlugIn = true;
 		$levelChanged = false;
 		foreach( $propertyRows as $row ) {
-			if( self::isLevelChanged( $holdPubl, $holdType, $row ) ) {
+			if( self::isLevelChanged( $holdPubl, $holdType, $row, $objType ) ) {
 				$levelChanged = true;
 			}
 			if ( !$levelChanged ) {
@@ -156,16 +157,18 @@ class DBProperty extends DBBase
 
 	/**
 	 * Checks if the publication/object type is changed.
+	 * When request object type is "All", it should  treat in the same level
 	 *
 	 * @param integer $holdPubl
 	 * @param string $holdType
 	 * @param array $propertyRow
+	 * @param string $objType
 	 * @return bool Publication or object type has changed, true, else false.
 	 */
-	static private function isLevelChanged( $holdPubl, $holdType, $propertyRow  )
+	static private function isLevelChanged( $holdPubl, $holdType, $propertyRow, $objType  )
 	{
 		$result = false;
-		if( $holdPubl != $propertyRow['publication'] || $holdType != $propertyRow['objtype'] ) {
+		if( $holdPubl != $propertyRow['publication'] || (!empty($objType) && $holdType != $propertyRow['objtype'] ) ){
 			$result = true;
 		}
 
