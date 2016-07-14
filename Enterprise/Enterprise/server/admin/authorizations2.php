@@ -84,8 +84,8 @@ if( $authIds && $command == 'delete' ) {
 	deleteAuthorizationsByIds( $authIds );
 }
 
-// Handle the Edit operation.
-if( $authIds && $command == 'edit' ) {
+// Handle the Edit/Add operations.
+if( ($authIds && $command == 'edit') || $command == 'add' ) {
 
 	// Compose JSON data structure of categories for jsTree widget.
 	$categoryTree = array();
@@ -130,7 +130,11 @@ if( $authIds && $command == 'edit' ) {
 	}
 
 	// Enable the statuses in the jsTree for the authorization the user wants to edit.
-	$rows = getAuthorizationRowsByIds( $authIds );
+	if( $authIds && $command == 'edit' ) {
+		$rows = getAuthorizationRowsByIds( $authIds );
+	} else if( $command == 'add' ) {
+		$rows = array( 'section' => 0, 'state' => 0, 'profile' => 0 );
+	}
 	foreach( $rows as $row ) {
 		if( $row['section'] ) {
 			$categoryItem = $categoryTreeRefs[ $row['section'] ];
@@ -164,7 +168,7 @@ if( $authIds && $command == 'edit' ) {
 }
 
 // Handle the Save operation.
-if( $authIds && $command == 'save' ) {
+if( $command == 'save' ) {
 
 	// Retrieve user selected Categories/Statuses/Profiles from the jsTree widgets.
 	$selectedCategoryIds = isset( $_REQUEST['selcategoryids'] ) ? safeCastCsvToDbIds( $_REQUEST['selcategoryids'], 'cat_' ) : array();
@@ -191,7 +195,11 @@ if( $authIds && $command == 'save' ) {
 
 	// Delete all authorizations that have changed in the user's selection.
 	$deleteAuthIds = array();
-	$rows = getAuthorizationRowsByIds( $authIds );
+	if( $authIds ) {
+		$rows = getAuthorizationRowsByIds( $authIds );
+	} else { // Happens when handling a Save command after an Add/Copy command.
+		$rows = array();
+	}
 	foreach( $rows as $row ) {
 		if( !isset( $selectedAuths[ $row['section'] ][ $row['state'] ][ $row['profile'] ] ) ) {
 			$deleteAuthIds[] = $row['id'];
@@ -202,7 +210,7 @@ if( $authIds && $command == 'save' ) {
 	}
 
 	// Create all user configured authorizations in DB that do not exist yet.
-	$dbAuths =array();
+	$dbAuths = array();
 	foreach( $rows as $row ) {
 		$dbAuths[ $row['section'] ][ $row['state'] ][ $row['profile'] ] = true;
 	}
@@ -210,14 +218,17 @@ if( $authIds && $command == 'save' ) {
 		foreach( $selectedStatusIds as $statusId ) {
 			foreach( $selectedProfileIds as $profileId ) {
 				if( !isset( $dbAuths[ $categoryId ][ $statusId ][ $profileId ] ) ) {
-					insertAuthorizationRow( $publ, $issue, $grp, $categoryId, $statusId, $profileId );
+					if( !doesAuthorizationExists( $publ, $issue, $grp, $categoryId, $statusId, $profileId ) ) {
+						insertAuthorizationRow( $publ, $issue, $grp, $categoryId, $statusId, $profileId );
+						deleteMoreSpecificAuthorizations( $publ, $issue, $grp, $categoryId, $statusId, $profileId );
+					}
 				}
 			}
 		}
 	}
 }
 
-// Retrieve all authorizations from DB and compose.
+// Retrieve all authorizations from DB that are configured for the brand/issue/group.
 $rows = getAuthorizationRowsByBrandIssueUserGroup( $publ, $issue, $grp );
 
 // Combine authorizations DB records that can be shown in one HTML row.
@@ -238,7 +249,7 @@ $txt = str_replace( '<!--ROWS-->', $detailtxt, $txt );
 
 // If not in edit mode, show the Add Authorization button.
 $button = '';
-if( $command != 'edit' ) {
+if( $command != 'edit' && $command != 'add' ) {
 	$button = '<input type="button" value="<!--RES:ACT_ADD_AUTHORIZATION-->" onclick="javascript:addAuth();" />';
 }
 $txt = str_replace( '<!--VAR:ADD_AUTH_BTN-->', $button, $txt );
@@ -365,6 +376,54 @@ function deleteAuthorizationsByIds( $authIds )
 }
 
 /**
+ * Removes all authorization records from DB that are 'more specific' than the provided params.
+ *
+ * The left column shows some records in the DB with values: section,state
+ * The header row shows the parameters provided with values: $categoryId, $statusId
+ * Other record- and parameter values are assumed to be exact matching.
+ * The crosses show which of the records are 'more specific' than the parameters
+ * and therefore are removed by this function.
+ *
+ *       0,0  0,1  1,0  1,1  ...   <= $categoryId, $statusId
+ *  0,0
+ *  0,1   X
+ *  0,2   X
+ *  1,0   X
+ *  1,1   X    X    X
+ *  1,2   X         X
+ *  2,0   X
+ *  2,1   X    X
+ *  2,2   X
+ *
+ * @param $brandId
+ * @param $issueId
+ * @param $userGroupId
+ * @param $categoryId
+ * @param $statusId
+ * @param $profileId
+ */
+function deleteMoreSpecificAuthorizations( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId )
+{
+	if( $categoryId && $statusId ) {
+		return; // bail out; there is nothing more specific than specific itself
+	}
+	$where = '`publication` = ? AND `issue` = ? AND `grpid` = ? AND `profile` = ? ';
+	$params = array( $brandId, $issueId, $userGroupId, $profileId );
+	if( !$categoryId && !$statusId ) {
+		$where = "($where AND `section` = ? AND `state` <> ? ) ".
+					"OR ($where AND `section` <> ? AND `state` = ? )";
+		$params = array_merge( $params, array( 0, 0 ), $params, array( 0, 0 ) );
+	} elseif( !$categoryId ) {
+		$where .= 'AND `section` <> ? AND `state` = ? ';
+		$params = array_merge( $params, array( 0, $statusId ) );
+	} else { // implies: !$statusId
+		$where .= 'AND `section` = ? AND `state` <> ? ';
+		$params = array_merge( $params, array( $categoryId, 0 ) );
+	}
+	DBBase::deleteRows( 'authorizations', $where, $params );
+}
+
+/**
  * Creates a new authorization configuration record in DB.
  *
  * @param integer $brandId
@@ -385,6 +444,32 @@ function insertAuthorizationRow( $brandId, $issueId, $userGroupId, $categoryId, 
 	$sql = $dbh->autoincrement( $sql );
 	$sth = $dbh->query( $sql );
 	return (bool)$dbh->newid( $dba, true );
+}
+
+/**
+ * Checks whether or not the authorization already exists in DB.
+ *
+ * It returns true when there is a record found that exactly matches the provided params.
+ * However, a record in DB for which category id and/or status id set to zero also matches
+ * regardless of the provided $categoryId / $statusId search params because zero means 'all'.
+ *
+ * @param integer $brandId
+ * @param integer $issueId
+ * @param integer $userGroupId
+ * @param integer $categoryId
+ * @param integer $statusId
+ * @param integer $profileId
+ * @return bool Whether or not a matching record exists.
+ */
+function doesAuthorizationExists( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId )
+{
+	$where = '`publication` = ? AND `issue` = ? AND `grpid` = ? '.
+		'AND (`section` = ? OR `section` = ?) '. // match with param or with ALL (0)
+		'AND (`state` = ? OR `state` = ?) '.     // match with param or with ALL (0)
+		'AND `profile` = ?';
+	$params = array( $brandId, $issueId, $userGroupId, $categoryId, 0, $statusId, 0, $profileId );
+	$row = DBBase::getRow( 'authorizations', $where, 'id', $params );
+	return isset($row['id']) && $row['id'];
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -444,21 +529,31 @@ function safeCastCsvToDbIds( $csv, $prefix = '' )
 function combineAuthorizations( $authMap )
 {
 	do {
-		$orgCount = count($authMap);
+		$originalCount = count($authMap);
 
 		list( $category, $status, $profile ) = prepareMultiSort( $authMap );
 		array_multisort( $category, SORT_ASC, SORT_STRING, $status, SORT_ASC, SORT_STRING, $authMap );
 		$authMap = combineRows( $authMap, 'categories', 'statuses' );
+		list( $category, $status, $profile ) = prepareMultiSort( $authMap );
+		array_multisort( $status, SORT_ASC, SORT_STRING, $category, SORT_ASC, SORT_STRING, $authMap );
+		$authMap = combineRows( $authMap, 'statuses', 'categories' );
 
 		list( $category, $status, $profile ) = prepareMultiSort( $authMap );
-		array_multisort( $category, SORT_ASC, SORT_STRING, $status, SORT_ASC, SORT_STRING, $authMap );
+		array_multisort( $status, SORT_ASC, SORT_STRING, $profile, SORT_ASC, SORT_STRING, $authMap );
 		$authMap = combineRows( $authMap, 'statuses', 'profiles' );
+		list( $category, $status, $profile ) = prepareMultiSort( $authMap );
+		array_multisort( $profile, SORT_ASC, SORT_STRING, $status, SORT_ASC, SORT_STRING, $authMap );
+		$authMap = combineRows( $authMap, 'profiles', 'statuses' );
 
 		list( $category, $status, $profile ) = prepareMultiSort( $authMap );
-		array_multisort( $category, SORT_ASC, SORT_STRING, $status, SORT_ASC, SORT_STRING, $authMap );
+		array_multisort( $category, SORT_ASC, SORT_STRING, $profile, SORT_ASC, SORT_STRING, $authMap );
 		$authMap = combineRows( $authMap, 'categories', 'profiles' );
+		list( $category, $status, $profile ) = prepareMultiSort( $authMap );
+		array_multisort( $profile, SORT_ASC, SORT_STRING, $category, SORT_ASC, SORT_STRING, $authMap );
+		$authMap = combineRows( $authMap, 'profiles', 'categories' );
 
-	} while( $orgCount != count($authMap) );
+	} while( $originalCount != count($authMap) );
+
 	return $authMap;
 }
 
@@ -560,10 +655,13 @@ function composeAuthorizationsHtmlTable( $authMap, $sectiondomain, $statedomain,
 		$html .= '<tr class="separator"><td colspan="4"/></tr>';
 
 		if( $command == 'edit' && $authIdsCsv && $authIdsCsv == $auth['ids'] ) {
-			$html .= composeAuthorizationsHtmlRowEditable( $auth, $sectiondomain, $statedomain, $profiles, $command, $authIds );
+			$html .= composeAuthorizationsHtmlRowEditable( $auth['ids'] );
 		} else {
 			$html .= composeAuthorizationsHtmlRowReadonly( $auth, $sectiondomain, $statedomain, $profiles, $command, $authIds );
 		}
+	}
+	if( $command == 'add' ) {
+		$html .= composeAuthorizationsHtmlRowEditable( '' );
 	}
 	return $html;
 }
@@ -584,32 +682,44 @@ function composeAuthorizationsHtmlRowReadonly( $auth, $sectiondomain, $statedoma
 	$all = BizResources::localize("LIS_ALL");
 	$html = '<tr class="readonly">';
 
+	// Compose list of Categories in HTML.
 	$html .= '<td><div class="chkbox"><ul>';
-	foreach( explode( ',', $auth['categories'] ) as $categoryId ) {
-		$html .= '<li>';
-		$html .=    $categoryId ? formvar( $sectiondomain[ $categoryId ] ) : formvar( $all );
-		$html .= '</li>';
+	$authCategoryIds = array_flip( explode( ',', $auth['categories'] ) );
+	foreach( array_keys( $sectiondomain + array(0) ) as $categoryId ) { // respect DB order
+		if( array_key_exists( $categoryId, $authCategoryIds ) ) {
+			$html .= '<li>';
+			$html .= $categoryId ? formvar( $sectiondomain[ $categoryId ] ) : formvar( $all );
+			$html .= '</li>';
+		}
 	}
 	$html .= '</ul></div></td>';
 
+	// Compose list of Statuses in HTML.
 	$html .= '<td><div class="chkbox"><ul>';
-	foreach( explode( ',', $auth['statuses'] ) as $statusId ) {
-		$html .= '<li>';
-		$html .=    $statusId ? formvar( $statedomain[ $statusId ] ) : formvar( $all );
-		$html .= '</li>';
+	$authStatusIds = array_flip( explode( ',', $auth['statuses'] ) );
+	foreach( array_keys( $statedomain + array(0) ) as $statusId ) { // respect DB order
+		if( array_key_exists( $statusId, $authStatusIds ) ) {
+			$html .= '<li>';
+			$html .= $statusId ? formvar( $statedomain[ $statusId ] ) : formvar( $all );
+			$html .= '</li>';
+		}
 	}
 	$html .= '</ul></div></td>';
 
+	// Compose list of Profiles in HTML.
 	$html .= '<td><div class="chkbox"><ul>';
-	foreach( explode( ',', $auth['profiles'] ) as $profileId ) {
-		$html .= '<li>';
-		$html .=    formvar( $profiles[ $profileId ] );
-		$html .= '</li>';
+	$authProfileIds = array_flip( explode( ',', $auth['profiles'] ) );
+	foreach( array_keys( $profiles ) as $profileId ) { // respect DB order
+		if( array_key_exists( $profileId, $authProfileIds ) ) {
+			$html .= '<li>';
+			$html .= formvar( $profiles[ $profileId ] );
+			$html .= '</li>';
+		}
 	}
 	$html .= '</ul></div></td>';
 
-	// Show Edit, Copy and Delete buttons (only when not in Edit mode).
-	if( $command != 'edit' ) {
+	// Show Edit, Copy and Delete buttons (only when not in Edit/Add mode).
+	if( $command != 'edit' && $command != 'add' ) {
 		$html .=
 			'<td>'.
 				'<div class="btnbar"">'.
@@ -638,15 +748,10 @@ function composeAuthorizationsHtmlRowReadonly( $auth, $sectiondomain, $statedoma
 /**
  * Composes two HTML rows representing a given combined authorization record as editable.
  *
- * @param array $auth Combined authorization record.
- * @param array $sectiondomain Id-Name lookup map of categories.
- * @param array $statedomain Id-Name lookup  map of statuses.
- * @param array $profiles Id-Name lookup map of profiles.
- * @param string $command The operation requested by user.
- * @param array $authIds The authorization ids involved with the operation.
+ * @param string $nextAuthIdsCsv The authorization ids (in CSV notation) to involve for next operation.
  * @return string One HTML table row with the record and one row with Select/Deselect All buttons.
  */
-function composeAuthorizationsHtmlRowEditable( $auth, $sectiondomain, $statedomain, $profiles, $command, $authIds )
+function composeAuthorizationsHtmlRowEditable( $nextAuthIdsCsv )
 {
 	// Add placeholders for the jsTree widgets to show Categories, Statuses and Profiles
 	// and show the Cancel and Save buttons (at right side of jsTree).
@@ -660,7 +765,7 @@ function composeAuthorizationsHtmlRowEditable( $auth, $sectiondomain, $statedoma
 					'<a href="javascript:viewAuth();">'.
 				      BizResources::localize( 'ACT_CANCEL' ).
 					'</a>'.
-					'<button onclick="javascript:saveAuth(\''.$auth['ids'].'\');">'.
+					'<button onclick="javascript:saveAuth(\''.$nextAuthIdsCsv.'\');">'.
 					   BizResources::localize( 'ACT_SAVE' ).
 					'</button>'.
 				'</div>'.
