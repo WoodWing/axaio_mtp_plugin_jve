@@ -157,7 +157,8 @@ class DBProperty extends DBBase
 
 	/**
 	 * Checks if the publication/object type is changed.
-	 * When request object type is "All", it should  treat in the same level
+	 * When request object type is "All", means it include "All" and specific object type, it should treat in the same level
+	 * When "All" is passed, the $objType is empty
 	 *
 	 * @param integer $holdPubl
 	 * @param string $holdType
@@ -168,7 +169,7 @@ class DBProperty extends DBBase
 	static private function isLevelChanged( $holdPubl, $holdType, $propertyRow, $objType  )
 	{
 		$result = false;
-		if( $holdPubl != $propertyRow['publication'] || (!empty($objType) && $holdType != $propertyRow['objtype'] ) ){
+		if( $holdPubl != $propertyRow['publication'] || (!empty($objType) && $holdType != $propertyRow['objtype'] ) ) {
 			$result = true;
 		}
 
