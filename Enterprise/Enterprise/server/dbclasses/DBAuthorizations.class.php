@@ -81,5 +81,178 @@ class DBAuthorizations extends DBBase
 		}
 		
 		return self::deleteRows(self::TABLENAME, $where, $params);
-	}	
+	}
+
+	/**
+	 * Retrieves configured authorizations from DB, given their record ids.
+	 *
+	 * @since 10.1.0
+	 * @param integer[] $authIds Authorization record ids.
+	 * @return array smart_authorization table records indexed by record ids.
+	 * @throws BizException
+	 */
+	public static function getAuthorizationRowsByIds( $authIds )
+	{
+		$dbh = DBDriverFactory::gen();
+		$dba = $dbh->tablename('authorizations');
+		$sql =
+			"SELECT a.`id`, a.`section`, a.`state`, a.`profile` ".
+			"FROM $dba a ".
+			'WHERE a.`id` IN( '.implode( ',', $authIds ).' ) ';
+		$sth = $dbh->query( $sql );
+
+		$rows = array();
+		while( ( $row = $dbh->fetch( $sth ) ) ) {
+			$rows[ $row['id'] ] = $row;
+		}
+		return $rows;
+	}
+
+	/**
+	 * Retrieves configured authorization records from DB.
+	 *
+	 * @since 10.1.0
+	 * @param integer $brandId
+	 * @param integer$issueId
+	 * @param integer $userGroupId
+	 * @return array Authorization records sorted by Category, Object Type and Status (code) and indexed by record id.
+	 * @throws BizException
+	 */
+	public static function getAuthorizationRowsByBrandIssueUserGroup( $brandId, $issueId, $userGroupId )
+	{
+		$dbh = DBDriverFactory::gen();
+		$dbs = $dbh->tablename('publsections');
+		$dbst = $dbh->tablename('states');
+		$dba = $dbh->tablename('authorizations');
+
+		$sql = "SELECT a.`id`, a.`section`, a.`state`, a.`profile` ".
+			"FROM $dba a ".
+			"LEFT JOIN $dbs s on (a.`section` = s.`id`) ".
+			"LEFT JOIN $dbst st on (a.`state` = st.`id`) ".
+			"WHERE a.`publication` = ? and a.`issue` = ? and a.`grpid` = ? ".
+			"ORDER BY s.`section`, st.`type`, st.`code`";
+		$params = array( $brandId, $issueId, $userGroupId );
+		$sth = $dbh->query( $sql, $params );
+
+		$rows = array();
+		while( ( $row = $dbh->fetch( $sth ) ) ) {
+			$rows[ $row['id'] ] = $row;
+		}
+		return $rows;
+	}
+
+	/**
+	 * Deletes configured authorizations from DB, given their record ids.
+	 *
+	 * @since 10.1.0
+	 * @param integer[] $authIds Authorization record ids.
+	 * @throws BizException
+	 */
+	public static function deleteAuthorizationsByIds( $authIds )
+	{
+		$dbh = DBDriverFactory::gen();
+		$dba = $dbh->tablename('authorizations');
+		$sql = "DELETE FROM $dba WHERE `id` IN ( ".implode( ',', $authIds )." )";
+		$dbh->query( $sql );
+	}
+
+	/**
+	 * Removes all authorization records from DB that are 'more specific' than the provided params.
+	 *
+	 * The left column shows some records in the DB with values: section,state
+	 * The header row shows the parameters provided with values: $categoryId, $statusId
+	 * Other record- and parameter values are assumed to be exact matching.
+	 * The crosses show which of the records are 'more specific' than the parameters
+	 * and therefore are removed by this function.
+	 *
+	 *       0,0  0,1  1,0  1,1  ...   <= $categoryId, $statusId
+	 *  0,0
+	 *  0,1   X
+	 *  0,2   X
+	 *  1,0   X
+	 *  1,1   X    X    X
+	 *  1,2   X         X
+	 *  2,0   X
+	 *  2,1   X    X
+	 *  2,2   X
+	 *
+	 * @since 10.1.0
+	 * @param $brandId
+	 * @param $issueId
+	 * @param $userGroupId
+	 * @param $categoryId
+	 * @param $statusId
+	 * @param $profileId
+	 */
+	public static function deleteMoreSpecificAuthorizations( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId )
+	{
+		if( $categoryId && $statusId ) {
+			return; // bail out; there is nothing more specific than specific itself
+		}
+		$where = '`publication` = ? AND `issue` = ? AND `grpid` = ? AND `profile` = ? ';
+		$params = array( $brandId, $issueId, $userGroupId, $profileId );
+		if( !$categoryId && !$statusId ) {
+			$where = "($where AND `section` = ? AND `state` <> ? ) ".
+				"OR ($where AND `section` <> ? AND `state` = ? )";
+			$params = array_merge( $params, array( 0, 0 ), $params, array( 0, 0 ) );
+		} elseif( !$categoryId ) {
+			$where .= 'AND `section` <> ? AND `state` = ? ';
+			$params = array_merge( $params, array( 0, $statusId ) );
+		} else { // implies: !$statusId
+			$where .= 'AND `section` = ? AND `state` <> ? ';
+			$params = array_merge( $params, array( $categoryId, 0 ) );
+		}
+		DBBase::deleteRows( 'authorizations', $where, $params );
+	}
+
+	/**
+	 * Creates a new authorization configuration record in DB.
+	 *
+	 * @since 10.1.0
+	 * @param integer $brandId
+	 * @param integer $issueId
+	 * @param integer $userGroupId
+	 * @param integer $categoryId
+	 * @param integer $statusId
+	 * @param integer $profileId
+	 * @return bool|integer Record id, or false when creation failed.
+	 * @throws BizException
+	 */
+	public static function insertAuthorizationRow( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId )
+	{
+		$dbh = DBDriverFactory::gen();
+		$dba = $dbh->tablename('authorizations');
+		$sql = "INSERT INTO $dba (`publication`, `issue`, `grpid`, `section`, `state`, `profile`) ".
+			"VALUES ( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId )";
+		$sql = $dbh->autoincrement( $sql );
+		$sth = $dbh->query( $sql );
+		return (bool)$dbh->newid( $dba, true );
+	}
+
+	/**
+	 * Checks whether or not the authorization already exists in DB.
+	 *
+	 * It returns true when there is a record found that exactly matches the provided params.
+	 * However, a record in DB for which category id and/or status id set to zero also matches
+	 * regardless of the provided $categoryId / $statusId search params because zero means 'all'.
+	 *
+	 * @since 10.1.0
+	 * @param integer $brandId
+	 * @param integer $issueId
+	 * @param integer $userGroupId
+	 * @param integer $categoryId
+	 * @param integer $statusId
+	 * @param integer $profileId
+	 * @return bool Whether or not a matching record exists.
+	 */
+	public static function doesAuthorizationExists( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId )
+	{
+		$where = '`publication` = ? AND `issue` = ? AND `grpid` = ? '.
+			'AND (`section` = ? OR `section` = ?) '. // match with param or with ALL (0)
+			'AND (`state` = ? OR `state` = ?) '.     // match with param or with ALL (0)
+			'AND `profile` = ?';
+		$params = array( $brandId, $issueId, $userGroupId, $categoryId, 0, $statusId, 0, $profileId );
+		$row = DBBase::getRow( 'authorizations', $where, 'id', $params );
+		return isset($row['id']) && $row['id'];
+	}
 }
