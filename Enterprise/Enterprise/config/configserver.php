@@ -783,6 +783,21 @@ define ('SERVERFEATURES', serialize(array(
 //          (SC for InDesign feature.) Controls the resolution (DPI) of the Layout page previews, as shown in the
 //          Publication Overview application in Content Station or preview panes in Smart Connection or Content Station.
 //          This option is only affective when the CreatePagePreview or CreatePagePreviewOnProduce option is enabled too.
+//       PageSyncDefaultsToNo (default)
+//          (Smart Connection for InDesign feature.) When produced pages are out-of-sync with planned pages, Smart Connection
+//          shows a message asking the user if the produced pages should be synchronized with the planned pages.
+//          The user can choose between Yes and No. By default, the Yes button is enabled.
+//          Note that synchronizing the pages may result in content loss (pages that are removed my contain content).
+//          It is therefore safer to set the No button as the default button. Do this by enabling the PageSyncDefaultsToNo option.
+//          This is especially important for InDesign Server which always uses the default button.
+//
+//          Changing the behavior for InDesign Server
+//          For InDesign Server, the PageSyncDefaultsToNo option can be set either in the configserver.php file or
+//          in the WWSettings.xml file. Note that for the Indesign Server Automation feature, the PageSyncDefaultsToNo
+//          option is already enabled in the configserver.php file.
+//          Changing the behavior for InDesign
+//          For InDesign, the PageSyncDefaultsToNo option can only be enabled by setting the SCEnt:PageSyncDefaultsToNo
+//          option in the WWSettings.xml file. (InDesign ignores the option set in the configserver.php file.)
 //
 //    Define where the generation of layout previews, thumbnails, PDFs or DPS articles 
 //    should or may take place: in InDesign 'local', InDesign 'remote' or in InDesign Server.
