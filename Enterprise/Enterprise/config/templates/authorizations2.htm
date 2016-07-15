@@ -27,6 +27,15 @@
 	table.wwauth tr.editbtnbar {
 		border-bottom: 1px solid #C8C8C8;
 	}
+	/* Let FireFox reflect tr->td->div->height=100% */
+	@-moz-document url-prefix() {
+		table.wwauth tr {
+			height: 100%;
+		}
+		table.wwauth tr td {
+			height: 100%;
+		}
+	}
 	table.wwauth tr td,
 	table.wwauth tr th  {
 		padding-top: .5em;
