@@ -98,7 +98,7 @@ function getClientName()
 					alert(frame.body);
 				}
 			};
-			client.connect(connection.User, password, on_connect, on_error, vhost);
+			client.connect(connection.User, connection.Password, on_connect, on_error, vhost);
 		}
 
 		/**
