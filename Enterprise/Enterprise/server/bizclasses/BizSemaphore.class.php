@@ -332,4 +332,16 @@ class BizSemaphore
 	{
 		return self::$sessionSemaphoreId;
 	}
+
+	/**
+	 * Generates a consistent but unique key for a semaphore and returns it.
+	 *
+	 * @param string $entityId
+	 * @return string
+	 */
+	public static function getKey( $entityId )
+	{
+		$semaId = DBSemaphore::getSemaphoreId( $entityId );
+		return crypt( $semaId, $entityId );
+	}
 }

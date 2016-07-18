@@ -429,7 +429,7 @@ class BizSession
 		}
 		if( in_array( 'MessageQueueConnections', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
-			BizMessageQueue::setupMessageQueueConnectionsForLogOn( $ret, $password );
+			BizMessageQueue::setupMessageQueueConnectionsForLogOn( $ret, $userid, $password );
 		}
 
 		// fire event
