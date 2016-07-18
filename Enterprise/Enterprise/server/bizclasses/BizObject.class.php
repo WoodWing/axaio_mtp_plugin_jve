@@ -4623,6 +4623,7 @@ class BizObject
 	 * @param boolean $lock Object is locked
 	 * @param string $user Short User Name
 	 * @param array $objectProps Route User(group)
+	 * @throws BizException on authorization error.
 	 */
 	static private function checkAccessRights( $lock, $user, array $objectProps )
 	{
