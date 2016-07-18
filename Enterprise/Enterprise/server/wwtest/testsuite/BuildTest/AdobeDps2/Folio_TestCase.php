@@ -117,7 +117,7 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 		$this->bizServerJob = new BizServerJob();
 
 		require_once BASEDIR . '/server/wwtest/testsuite/BuildTest/AdobeDps2/Utils.class.php';
-		$this->apUtils = new AdobeDps2_Utils( $this );
+		$this->dpsUtils = new AdobeDps2_Utils( $this );
 
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		$vars = $this->getSessionVariables();
@@ -237,7 +237,7 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 	private function deletePendingJobs()
 	{
 		// Deletes all jobs from the queue.
-		$this->apUtils->emptyServerJobsQueue();
+		$this->dpsUtils->emptyServerJobsQueue();
 
 		// Check if the jobs are really deleted from the queue.
 		$jobs = $this->bizServerJob->listJobs();
@@ -286,7 +286,7 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 		$this->assertCount( 1, $dpsJobs );
 		
 		// Process our job synchronously and validate the job status.
-		$this->apUtils->runServerJobs( 5, 1 );
+		$this->dpsUtils->runServerJobs( 5, 1 );
 		$dpsJobs = $this->bizServerJob->listJobs( array( 'jobtype' => 'AdobeDps2' ) );
 		$dpsJob = reset($dpsJobs);
 		$this->assertEquals( ServerJobStatus::COMPLETED, $dpsJob->JobStatus->getStatus() );
@@ -362,7 +362,7 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 		$dpsJobs = $this->bizServerJob->listJobs( array( 'jobtype' => 'AdobeDps2' ) );
 		$this->assertCount( 1, $dpsJobs );
 
-		$this->apUtils->runServerJobs( 5, 1 );
+		$this->dpsUtils->runServerJobs( 5, 1 );
 		$dpsJobs = $this->bizServerJob->listJobs( array( 'jobtype' => 'AdobeDps2' ) );
 		$dpsJob = reset($dpsJobs);
 		$this->assertEquals( ServerJobStatus::COMPLETED, $dpsJob->JobStatus->getStatus() );
@@ -549,7 +549,7 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 		$dpsJobs = $this->bizServerJob->listJobs( array( 'jobtype' => 'AdobeDps2' ) );
 		$this->assertCount( 1, $dpsJobs );
 
-		$this->apUtils->runServerJobs( 5, 1 );
+		$this->dpsUtils->runServerJobs( 5, 1 );
 		$dpsJobs = $this->bizServerJob->listJobs( array( 'jobtype' => 'AdobeDps2' ) );
 		$dpsJob = reset($dpsJobs);
 		$this->assertEquals( ServerJobStatus::COMPLETED, $dpsJob->JobStatus->getStatus() );
