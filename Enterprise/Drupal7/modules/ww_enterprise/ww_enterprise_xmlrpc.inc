@@ -242,6 +242,7 @@ function ww_enterprise_xmlrpc_saveNode( $dossierProps, $formValues, $attachments
 
 		// If a Preview is requested, we need to force the status to be 0. (Not published)
 		$node->status = ($dossierProps['Preview']) ? 0 : $formValues[C_DIALOG_DRUPAL7_PUBLISH][0];
+		$node->ww_preview = ($dossierProps['Preview']) ? 1 : 0;
 
 		// Set properties.
 		$node->title = $formValues[C_DIALOG_DRUPAL7_TITLE][0];
