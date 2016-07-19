@@ -16,7 +16,7 @@ class DBDataSource_EnterprisePlugin extends EnterprisePlugin
 	{ 
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Database Data Source';
-		$info->Version     = '10.0.0 Build 84'; // don't use PRODUCTVERSION
+		$info->Version     = getProductVersion(__DIR__); // don't use PRODUCTVERSION
 		$info->Description = 'Database Data Source for Smart Catalog Enterprise';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
