@@ -606,7 +606,7 @@ class PublicationMaintenanceApp
 			$flip = 0;
 			while (($row = $dbh->fetch($sth) )) {
 				$clr = $color[$flip];
-				$detail .= "<tr$clr><td><a href='authorizations.php?publ=$id&grp="
+				$detail .= "<tr$clr><td><a href='authorizations2.php?publ=$id&grp="
 					.$row["id"]
 					."'>"
 					.formvar($row["name"])

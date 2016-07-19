@@ -38,7 +38,7 @@ require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 if( $command == 'view' ) {
 	$grptxt = '<select name="grp" onChange="this.form.submit()">';
 	foreach( DBUser::listUserGroupNames() as $userGroupId => $userGroupName ) {
-		$selected = $row['id'] == $grp ? ' selected="selected"' : '';
+		$selected = $userGroupId == $grp ? ' selected="selected"' : '';
 		$grptxt .= '<option value="'.$userGroupId.'"'.$selected.'>'.formvar($userGroupName).'</option>';
 	}
 	$grptxt .= '</select>';

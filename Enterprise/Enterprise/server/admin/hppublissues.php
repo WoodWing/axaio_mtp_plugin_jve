@@ -1000,7 +1000,7 @@ class IssueMaintenanceApp
 			$flip = 0;
 			while (($row = $dbh->fetch($sth) )) {
 				$clr = $color[$flip];
-				$detail .= "<tr$clr><td><a href='authorizations.php?publ=$publ&issue=$id&grp="
+				$detail .= "<tr$clr><td><a href='authorizations2.php?publ=$publ&issue=$id&grp="
 					.$row["id"]."'>".$row["name"]
 					."</a></td><td><a href='hppublissues.php?delauthor=1&id=$id&del="
 					.$row['id']
