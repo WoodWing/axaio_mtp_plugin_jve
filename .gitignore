@@ -22,3 +22,6 @@ Enterprise/.idea/**
 !Enterprise/.idea/codeStyleSettings.xml
 !Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml
 *.iml
+
+# contentstation folder (Content Station HTML)
+Enterprise/Enterprise/contentstation
