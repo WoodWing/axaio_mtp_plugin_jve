@@ -32,8 +32,13 @@ if( DIRECTORY_SEPARATOR == '/' && PATH_SEPARATOR == ':' ) {
 if( !defined('BASEDIR') ) {
 	define( 'BASEDIR', dirname( dirname( __FILE__ ) ) ); // DO NOT end with a separator, use forward slashes
 }
+if (!file_exists(BASEDIR.'/config/config_overrule.php')){
+	exit( '<h1>File not found: '.BASEDIR.'/config/config_overrule.php'.'<br/>Please check BASEDIR setting in config.php<br/></h1>');
+}
 
-require_once( BASEDIR.'/config/config_overrule.php' );
+// The workflow data classes may be needed by config_overrule.php.
+require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
+require_once BASEDIR.'/config/config_overrule.php';
 
 if( !defined('INETROOT') ) {
 	define( 'INETROOT', '/Enterprise' ); // DO NOT end with a separator, use forward slashes
@@ -209,7 +214,4 @@ if( !defined('SERVERURL_SCRIPT') ) {
 	}
 }
 
-if (!file_exists(BASEDIR.'/config/configserver.php')){
-	exit( '<h1>File not found: '.BASEDIR.'/config/configserver.php'.'<br/>Please check BASEDIR setting in config.php<br/></h1>');
-}
 require_once BASEDIR.'/config/configserver.php';
