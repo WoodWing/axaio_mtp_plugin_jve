@@ -6,7 +6,6 @@ if( !defined('AS_CLASSNAME_PREFIX') ) {
 	define( 'AS_CLASSNAME_PREFIX', 'com.woodwing.enterprise.interfaces.services' ); // used for AMF object type mapping
 }
 require_once BASEDIR.'/server/vendor/autoload.php'; // install auto loaders for 3rd party components
-require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 require_once BASEDIR.'/server/serverinfo.php';
 
 // -------------------------------------------------------------------------------------------------
@@ -819,7 +818,6 @@ if( !defined('SERVERFEATURES') ) {
 		new Feature( 'EventPort' , 8093 ),
 		new Feature( 'CompanyLanguage' , 'enUS'),
 		new Feature( 'KeepCheckedOut' ),
-		new Feature( 'ContentStationInlineArticleCompare')
 	)));
 }
 
