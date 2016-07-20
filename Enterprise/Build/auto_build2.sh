@@ -40,7 +40,7 @@ function validateEnvironmentVariableNotEmpty {
 # @param integer $3 New build number to replace the old one with.
 #
 function replaceVersionFile {
-	echo "${2} Build ${3}" > "${1}"
+	echo -n "${2} Build ${3}" > "${1}"
 
 	# Error when the new version can not be found in the updated file.
 	set +e
@@ -431,7 +431,7 @@ function step2a_updateResourceFilesForCoreServer {
 		cd -
 
 		echo "step2a5: Write timestamp of last update from TMS into the resource folder of Enterprise Server."
-		echo "${tmsLastUpdate}" > ${SOURCE_BASE}Enterprise/config/resources/_lastupdate.txt
+		echo -n "${tmsLastUpdate}" > ${SOURCE_BASE}Enterprise/config/resources/_lastupdate.txt
 
 		echo "step2a6: Remove the timestamp from the downloaded XML files."
 		for icFile in $(find "${SOURCE_BASE}Enterprise/config/resources/" -name '*.xml'); do
@@ -510,7 +510,7 @@ function step3a_updateVersionInfo {
 	if [ "${SERVER_RELEASE_TYPE}" == "Release" ]; then
 		echo "" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 	else
-		echo "${SERVER_RELEASE_TYPE}" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
+		echo -n "${SERVER_RELEASE_TYPE}" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 	fi
 	if [ "${SERVER_RELEASE_TYPE}" != "Daily" ]; then
 		git add --force "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
