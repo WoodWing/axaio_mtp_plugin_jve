@@ -134,9 +134,9 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 		}
 		// Error on properties left empty for the AMQP, REST API and STOMP over WebSocket connections.
 		/** @var MessageQueueConnection $connection */
-		foreach( array( $this->amqpConnection, $this->restConnection ) as $connection ) {
+		foreach( array( $this->amqpConnection, $this->restConnection, $this->stompwsConnection ) as $connection ) {
 			foreach( array_keys( get_class_vars( 'MessageQueueConnection' ) ) as $property ) {
-				if( !$connection->$property ) {
+				if( !isset($connection->$property) ) {
 					$this->setResult( 'ERROR',
 						'The ' . $property . ' property of the RabbitMQ ' . $connection->Protocol . ' configuration is not set. ',
 						self::PLEASE_CHECK_CONFIGSERVER.
@@ -161,7 +161,7 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 	private function composeMessageQueueConnectionInHtml( $protocol )
 	{
 		return '<code>new MessageQueueConnection( \'RabbitMQ\', \''.$protocol.'\', '.
-			'\'&lt;Url&gt;\', \'&lt;User&gt;\', \'&lt;Password&gt;\' ),</code>';
+			'\'&lt;Url&gt;\', \'&lt;Internal&gt;\', \'&lt;User&gt;\', \'&lt;Password&gt;\' ),</code>';
 	}
 
 	/**

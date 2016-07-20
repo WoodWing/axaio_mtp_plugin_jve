@@ -1243,13 +1243,13 @@ define( 'GHOST_SCRIPT_APP_PATH', '' );
 //
 define( 'MESSAGE_QUEUE_CONNECTIONS', serialize(array(
 // - - - - Insecure connection over TCP: - - - -
-//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqp://localhost:5672', 'woodwing', 'ww' ),
-//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'http://localhost:15672', 'woodwing', 'ww' ),
-//	new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'ws://localhost:15674/ws', 'woodwing', 'ww' ),
+//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqp://localhost:5672', false, 'woodwing', 'ww' ),
+//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'http://localhost:15672', false, 'woodwing', 'ww' ),
+//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'ws://localhost:15674/ws', false, 'woodwing', 'ww' ),
 // - - - - Secure connection over SSL: - - - -
-//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqps://localhost:5671', 'woodwing', 'ww' ),
-//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'https://localhost:15671', 'woodwing', 'ww' ),
-//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'wss://localhost:15673/ws', 'woodwing', 'ww' ),
+//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqps://localhost:5671', false, 'woodwing', 'ww' ),
+//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'https://localhost:15672', false, 'woodwing', 'ww' ),
+//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'wss://localhost:15673/ws', false, 'woodwing', 'ww' ),
 )));
 
 // -------------------------------------------------------------------------------------------------

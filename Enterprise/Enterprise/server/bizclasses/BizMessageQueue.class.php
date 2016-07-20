@@ -176,7 +176,7 @@ class BizMessageQueue
 		$foundConnection = null;
 		foreach( self::unserializeConnections() as $connection ) {
 			if( $connection->Instance == $instance && $connection->Protocol == $protocol ) {
-				self::resolveConnectionProperies( $connection );
+				self::resolveConnectionProperties( $connection );
 				$foundConnection = $connection;
 				break;
 			}
@@ -193,7 +193,7 @@ class BizMessageQueue
 	{
 		$connections = self::unserializeConnections();
 		foreach( $connections as &$connection ) {
-			self::resolveConnectionProperies( $connection );
+			self::resolveConnectionProperties( $connection );
 		}
 		return $connections;
 	}
@@ -204,7 +204,7 @@ class BizMessageQueue
 	 *
 	 * @param MessageQueueConnection $connection The connection to be updated (input/output).
 	 */
-	private static function resolveConnectionProperies( &$connection )
+	private static function resolveConnectionProperties( &$connection )
 	{
 		if( is_null($connection->User) ) {
 			$connection->User = self::composeSessionUserName();
