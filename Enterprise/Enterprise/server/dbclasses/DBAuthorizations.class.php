@@ -159,13 +159,17 @@ class DBAuthorizations extends DBBase
 	/**
 	 * Removes all authorization records from DB that are 'more specific' than the provided params.
 	 *
-	 * The left column shows some records in the DB with values: section,state
-	 * The header row shows the parameters provided with values: $categoryId, $statusId
-	 * Other record- and parameter values are assumed to be exact matching.
-	 * The crosses show which of the records are 'more specific' than the parameters
-	 * and therefore are removed by this function.
+	 * The matrix below shows which kind of records are removed:
+	 * - The left column shows some records in the DB with values: section, state
+	 * - The header row shows the parameters provided with values: $categoryId, $statusId
+	 * - Other record- and parameter values are assumed to be exact matching.
+	 * - The crosses (X) show which of the records are 'more specific' than the parameters
+	 *   and therefore are removed by this function.
 	 *
-	 *       0,0  0,1  1,0  1,1  ...   <= $categoryId, $statusId
+	 *     Records that exist in DB before calling the function with fields section, state
+	 *     /   Given function parameter values $categoryId, $statusId
+	 *    /   /
+	 *   /   0,0  0,1  1,0  1,1  ...
 	 *  0,0
 	 *  0,1   X
 	 *  0,2   X
@@ -175,6 +179,10 @@ class DBAuthorizations extends DBBase
 	 *  2,0   X
 	 *  2,1   X    X
 	 *  2,2   X
+	 *  ...   X
+	 *
+	 * An example: When calling this function with $categoryId = 0 and $statusId = 1,
+	 * it will remove the records with section != 0 and state == 1, so [1,1] [2,1] [3,1] etc.
 	 *
 	 * @since 10.1.0
 	 * @param $brandId
