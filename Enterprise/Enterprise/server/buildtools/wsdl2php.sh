@@ -6,25 +6,17 @@
 #
 # This bash shell script does the following:
 # 1. validate manual changes applied to any of the supported WSDL files against 3rd party SOAP parser (Java)
-# 2. sync to latest and check out PHP files at Perforce that can be re-generated due to WSDL changes
-# 3. re-generate PHP files (data classes, service classes, reponses, requests, etc) from WSDL file
-# 4. revert re-generated PHP files at Perforce that turn out not to be changed compared to last version
+# 2. create a clean workspace in Git by stashing all your current changes
+# 3. re-generate PHP and Java files (data classes, service classes, reponses, requests, etc) from WSDL file
+# 4. add all changed files to the staged area in Git
+# 5. restore your workspace by applying the previously made stash over it
 #
-# After running the script, the changed files can be found at the default Pending Changelist at Perforce.
-# Those changes needs to be reviewed (check for unexpected changes) and submit manually.
+# After running the script, the changed files can be found as Staged files in Sourcetree (or run `git diff --name-only --cached` on the command line.
+# Those changes needs to be reviewed (check for unexpected changes) and committed manually.
 #
-# This script uses the Perforce client command line utility (p4), for which some settings must set correctly.
-# Settings are P4CLIENT, P4USER and P4PORT which can be viewed by running the 'p4 set' command at the Terminal.
-# For WW HeadQuarter, the port needs to be set as follows:
-#    P4PORT=perforce.woodwing.net:1666
-# For WW APAC:
-#    P4PORT=172.20.22.27:1666
-# The Perforce Command-Line Client (P4) can be downloaded from here: http://www.perforce.com/downloads/complete_list
-# Overview of commands: http://www.perforce.com/perforce/doc.current/manuals/cmdref/index.html
-# Under Windows, you can change the settings like this:
-#    p4 set P4PORT=perforce.woodwing.net:1666
-# Under Mac OSX, edit the ~/.profile or ~/.bash_profile files to make settings like this:
-#    export P4PORT=perforce.woodwing.net:1666
+# This script uses the Git command line client, you should not have to change any settings, provided this project was
+# retrieved from the repository.
+# Overview of commands: https://git-scm.com/docs
 
 ENT_DIR=../..
 ENT_INTF=$1
@@ -90,21 +82,7 @@ echo "Working folder: ${ENT_DIR}"
 echo "Interface file: ${ENT_HTTP_WSDL}"
 
 echo ------------------------------------------------
-echo "[Step#2] Getting latest version of Enterprise Server from Perforce..."
-p4 sync "${ENT_DIR}/...#head"
-if [ $? -ne 0 ]; then
-	echo "Perforce sync command failed. Please check settings and try again."
-	echo "Used settings: P4CLIENT=${P4CLIENT}, P4USER=${P4USER}, P4PORT=${P4PORT}"
-	exit 1
-fi
-echo "Got latest."
-
-echo ------------------------------------------------
-echo "[Step#3] Checking out Java classes (to be re-generated) from WSDL..."
-p4 edit "${ENT_DIR}/sdk/java/src/com/woodwing/enterprise/interfaces/services/${ENT_INTF}/..."
-
-echo ------------------------------------------------
-echo "[Step#4] Generating Java classes from ${ENT_WSDL} file..."
+echo "[Step#2] Generating Java classes from ${ENT_WSDL} file..."
 OUT_FOLDER="${ENT_DIR}/sdk/java/src/com/woodwing/enterprise/interfaces/services/${ENT_INTF}"
 OUT_CLASS="com.woodwing.enterprise.interfaces.services.${ENT_INTF}"
 test -d "${OUT_FOLDER}" && rm -R "${OUT_FOLDER}"
@@ -123,31 +101,7 @@ sed -i "" -e "s/${ENT_HTTP_OLD_ENTRY}/${ENT_HTTP_NEW_ENTRY}/g" "${OUT_FOLDER}/${
 echo "WSDL file is valid."
 
 echo ------------------------------------------------
-echo "[Step#5] Checking out PHP classes (to be re-generated) from Perforce..."
-p4 edit "${ENT_DIR}/server/interfaces/services/${ENT_INTF}/..."
-p4 edit "${ENT_DIR}/server/services/${ENT_INTF}/..."
-p4 edit "${ENT_DIR}/server/protocols/soap/${ENT_INTF_CAMEL}Client.php"
-p4 edit "${ENT_DIR}/server/protocols/soap/${ENT_INTF_CAMEL}Server.php"
-p4 edit "${ENT_DIR}/server/protocols/soap/${ENT_INTF_CAMEL}Services.php"
-p4 edit "${ENT_DIR}/server/protocols/amf/${ENT_INTF_CAMEL}Services.php"
-p4 edit "${ENT_DIR}/server/protocols/amf/${ENT_INTF_CAMEL}DataTypeMap.php"
-p4 edit "${ENT_DIR}/server/protocols/amf/${ENT_INTF_CAMEL}RequestTypeMap.php"
-p4 edit "${ENT_DIR}/server/protocols/json/${ENT_INTF_CAMEL}Services.php"
-p4 edit "${ENT_DIR}/sdk/doc/interfaces/${ENT_WSDL_DOC}"
-p4 edit "${ENT_DIR}/sdk/flex/src/com/woodwing/enterprise/interfaces/services/${ENT_INTF}/..."
-p4 edit "${ENT_DIR}/sdk/flex/src/com/woodwing/enterprise/interfaces/services/WoodWingUtils.as"
-
-# The following is needed when PHP is run from HTTP... but that is not the case here.
-#echo "Perforce takes the current 'user' (you) to apply access rights. But, generating files requires write access for the www user."
-#echo "Therefore taking over write access rights from 'user' account to 'group' and 'other' accounts..."
-#chmod go=u "${ENT_DIR}/server/interfaces/services/${ENT_INTF}/"*
-#chmod go=u "${ENT_DIR}/server/services/${ENT_INTF}/"*
-# allow 'group' and 'other' to have write access in folders (to create/generate new files)
-#chmod go+w "${ENT_DIR}/server/interfaces/services/${ENT_INTF}/."
-#chmod go+w "${ENT_DIR}/server/services/${ENT_INTF}/."
-
-echo ------------------------------------------------
-echo "[Step#6] Generating PHP classes locally..."
+echo "[Step#3] Generating PHP classes locally..."
 php genservices/wsdl2phpcli.php "${ENT_INTF}"
 if [ $? -ne 0 ]; then
 	echo "The following command has failed: php genservices/wsdl2phpcli.php ${ENT_INTF}"
@@ -156,29 +110,13 @@ if [ $? -ne 0 ]; then
 fi
 
 echo ------------------------------------------------
-echo "[Step#7] Adding new PHP classes at Perforce..."
-p4 add -f "${ENT_DIR}/server/interfaces/services/${ENT_INTF}/"*.php
-p4 add -f "${ENT_DIR}/server/services/${ENT_INTF}/"*.php
-p4 add -f "${ENT_DIR}/sdk/flex/src/com/woodwing/enterprise/interfaces/services/${ENT_INTF}/"*.as
-p4 add -f "${ENT_DIR}/sdk/flex/src/com/woodwing/enterprise/interfaces/services/${ENT_INTF}/dataclasses/"*.as
-p4 add -f "${ENT_DIR}/sdk/java/src/com/woodwing/enterprise/interfaces/services/${ENT_INTF}/"*.java
+echo "[Step#4] Adding all changed files to the stage area..."
+git add ${ENT_DIR}/server/interfaces/services/${ENT_INTF}/*
+git add ${ENT_DIR}/sdk/*
+git add ${ENT_DIR}/server/protocols/*
+git add ${ENT_DIR}/server/services/${ENT_INTF}/*
 
-echo ------------------------------------------------
-echo "[Step#8] Reverting unchanged PHP classes at Perforce..."
-p4 revert -a "${ENT_DIR}/server/interfaces/services/${ENT_INTF}/..."
-p4 revert -a "${ENT_DIR}/server/services/${ENT_INTF}/..."
-p4 revert -a "${ENT_DIR}/server/protocols/soap/${ENT_INTF_CAMEL}Client.php"
-p4 revert -a "${ENT_DIR}/server/protocols/soap/${ENT_INTF_CAMEL}Server.php"
-p4 revert -a "${ENT_DIR}/server/protocols/soap/${ENT_INTF_CAMEL}Services.php"
-p4 revert -a "${ENT_DIR}/server/protocols/amf/${ENT_INTF_CAMEL}Services.php"
-p4 revert -a "${ENT_DIR}/server/protocols/json/${ENT_INTF_CAMEL}Services.php"
-p4 revert -a "${ENT_DIR}/server/protocols/amf/${ENT_INTF_CAMEL}DataTypeMap.php"
-p4 revert -a "${ENT_DIR}/server/protocols/amf/${ENT_INTF_CAMEL}RequestTypeMap.php"
-p4 revert -a "${ENT_DIR}/sdk/doc/interfaces/${ENT_WSDL_DOC}"
-p4 revert -a "${ENT_DIR}/sdk/flex/src/com/woodwing/enterprise/interfaces/services/${ENT_INTF}/..."
-p4 revert -a "${ENT_DIR}/sdk/flex/src/com/woodwing/enterprise/interfaces/services/WoodWingUtils.as"
-p4 revert -a "${ENT_DIR}/sdk/java/src/com/woodwing/enterprise/interfaces/services/${ENT_INTF}/..."
 
 echo ------------------------------------------------
 echo "All done!"
-echo "At Perforce, refresh your default Pending Changelist and review re-generated files before submit."
+echo "In SourceTree, review all staged files before committing."
