@@ -1,6 +1,4 @@
 <?php
-require_once BASEDIR.'/config/configserver.php';
-
 // constants
 define ('EVENTVERSION',					1);
 // EVENT_MAXSIZE is set to the size of the payload of a standard MTU 1500 ethernet frame.

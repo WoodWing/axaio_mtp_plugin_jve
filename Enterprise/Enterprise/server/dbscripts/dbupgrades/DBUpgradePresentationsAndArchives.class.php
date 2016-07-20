@@ -333,7 +333,6 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 	 */
 	static private function getMimeMap()
 	{
-		require_once BASEDIR . '/config/configserver.php';
 		$mimeMap = array(self::OBJECT_TYPE_PRESENTATION, self::OBJECT_TYPE_ARCHIVE);
 		$mimeMap[self::OBJECT_TYPE_ARCHIVE] = array();
 		$mimeMap[self::OBJECT_TYPE_ARCHIVE] = array();
