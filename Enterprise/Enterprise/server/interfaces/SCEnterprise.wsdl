@@ -1794,6 +1794,7 @@
 					<element name="Instance"          type="xsd:string"/> <!-- Integrated message queue server. Supported value is "RabbitMQ". -->
 					<element name="Protocol"          type="xsd:string"/> <!-- Communication protocol used over TCP. Supported value is "AMQP". -->
 					<element name="Url"               type="xsd:string"/> <!-- Network connection URL to the message queue server. -->
+					<element name="Internal"          type="xsd:boolean"/> <!-- If true, it means the connection is to an internal address. Otherwise it is an extern address. Default = false! -->
 					<element name="User"              type="xsd:string"/> <!-- User name to logon to the message queue server. -->
 					<element name="Password"          type="xsd:string" nillable="true"/> <!-- User password to logon to the message queue server. -->
 					<element name="VirtualHost"       type="xsd:string" nillable="true"/> <!-- Area within the message queue server, used by this Enterprise installation. -->

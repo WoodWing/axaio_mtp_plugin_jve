@@ -2883,6 +2883,7 @@ class MessageQueueConnection
 	public $Instance;
 	public $Protocol;
 	public $Url;
+	public $Internal;
 	public $User;
 	public $Password;
 	public $VirtualHost;
@@ -2891,15 +2892,17 @@ class MessageQueueConnection
 	 * @param string               $Instance             
 	 * @param string               $Protocol             
 	 * @param string               $Url                  
+	 * @param boolean              $Internal             
 	 * @param string               $User                 
 	 * @param string               $Password             Nullable.
 	 * @param string               $VirtualHost          Nullable.
 	 */
-	public function __construct( $Instance=null, $Protocol=null, $Url=null, $User=null, $Password=null, $VirtualHost=null)
+	public function __construct( $Instance=null, $Protocol=null, $Url=null, $Internal=null, $User=null, $Password=null, $VirtualHost=null)
 	{
 		$this->Instance             = $Instance;
 		$this->Protocol             = $Protocol;
 		$this->Url                  = $Url;
+		$this->Internal             = $Internal;
 		$this->User                 = $User;
 		$this->Password             = $Password;
 		$this->VirtualHost          = $VirtualHost;
@@ -2909,6 +2912,7 @@ class MessageQueueConnection
 
 	public function sanitizeProperties4Php()
 	{
+		if (!is_null($this->Internal)){ $this->Internal = ('true' == $this->Internal) ? true : false; }
 	}
 }
 class EditionPages

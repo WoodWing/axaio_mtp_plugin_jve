@@ -4062,6 +4062,14 @@ class WflMessageQueueConnectionValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'Internal' ) ) {
+			$validator->enterPath( 'Internal' );
+			$validator->checkNull( $datObj->Internal );
+			if( !is_null( $datObj->Internal ) ) {
+				$validator->checkType( $datObj->Internal, 'boolean' );
+			}
+			$validator->leavePath();
+		}
 		if( $validator->checkExist( $datObj, 'User' ) ) {
 			$validator->enterPath( 'User' );
 			$validator->checkNull( $datObj->User );
