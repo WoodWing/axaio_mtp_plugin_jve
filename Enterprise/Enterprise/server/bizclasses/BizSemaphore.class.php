@@ -341,6 +341,7 @@ class BizSemaphore
 	 */
 	public static function getKey( $entityId )
 	{
+		require_once BASEDIR.'/server/dbclasses/DBSemaphore.class.php';
 		$semaId = DBSemaphore::getSemaphoreId( $entityId );
 		return crypt( $semaId, $entityId );
 	}
