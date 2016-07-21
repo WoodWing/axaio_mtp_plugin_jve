@@ -14,7 +14,7 @@ public class MessageQueueConnection  implements java.io.Serializable {
 
     private java.lang.String url;
 
-    private boolean internal;
+    private boolean _public;
 
     private java.lang.String user;
 
@@ -29,14 +29,14 @@ public class MessageQueueConnection  implements java.io.Serializable {
            java.lang.String instance,
            java.lang.String protocol,
            java.lang.String url,
-           boolean internal,
+           boolean _public,
            java.lang.String user,
            java.lang.String password,
            java.lang.String virtualHost) {
            this.instance = instance;
            this.protocol = protocol;
            this.url = url;
-           this.internal = internal;
+           this._public = _public;
            this.user = user;
            this.password = password;
            this.virtualHost = virtualHost;
@@ -104,22 +104,22 @@ public class MessageQueueConnection  implements java.io.Serializable {
 
 
     /**
-     * Gets the internal value for this MessageQueueConnection.
+     * Gets the _public value for this MessageQueueConnection.
      * 
-     * @return internal
+     * @return _public
      */
-    public boolean isInternal() {
-        return internal;
+    public boolean is_public() {
+        return _public;
     }
 
 
     /**
-     * Sets the internal value for this MessageQueueConnection.
+     * Sets the _public value for this MessageQueueConnection.
      * 
-     * @param internal
+     * @param _public
      */
-    public void setInternal(boolean internal) {
-        this.internal = internal;
+    public void set_public(boolean _public) {
+        this._public = _public;
     }
 
 
@@ -203,7 +203,7 @@ public class MessageQueueConnection  implements java.io.Serializable {
             ((this.url==null && other.getUrl()==null) || 
              (this.url!=null &&
               this.url.equals(other.getUrl()))) &&
-            this.internal == other.isInternal() &&
+            this._public == other.is_public() &&
             ((this.user==null && other.getUser()==null) || 
              (this.user!=null &&
               this.user.equals(other.getUser()))) &&
@@ -233,7 +233,7 @@ public class MessageQueueConnection  implements java.io.Serializable {
         if (getUrl() != null) {
             _hashCode += getUrl().hashCode();
         }
-        _hashCode += (isInternal() ? Boolean.TRUE : Boolean.FALSE).hashCode();
+        _hashCode += (is_public() ? Boolean.TRUE : Boolean.FALSE).hashCode();
         if (getUser() != null) {
             _hashCode += getUser().hashCode();
         }
@@ -272,8 +272,8 @@ public class MessageQueueConnection  implements java.io.Serializable {
         elemField.setNillable(false);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("internal");
-        elemField.setXmlName(new javax.xml.namespace.QName("", "Internal"));
+        elemField.setFieldName("_public");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "Public"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
         elemField.setNillable(false);
         typeDesc.addFieldDesc(elemField);

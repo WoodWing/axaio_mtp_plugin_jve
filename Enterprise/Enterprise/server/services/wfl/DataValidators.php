@@ -4062,11 +4062,11 @@ class WflMessageQueueConnectionValidator
 			}
 			$validator->leavePath();
 		}
-		if( $validator->checkExist( $datObj, 'Internal' ) ) {
-			$validator->enterPath( 'Internal' );
-			$validator->checkNull( $datObj->Internal );
-			if( !is_null( $datObj->Internal ) ) {
-				$validator->checkType( $datObj->Internal, 'boolean' );
+		if( $validator->checkExist( $datObj, 'Public' ) ) {
+			$validator->enterPath( 'Public' );
+			$validator->checkNull( $datObj->Public );
+			if( !is_null( $datObj->Public ) ) {
+				$validator->checkType( $datObj->Public, 'boolean' );
 			}
 			$validator->leavePath();
 		}

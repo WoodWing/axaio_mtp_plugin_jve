@@ -15,7 +15,7 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		private var _Instance:String;
 		private var _Protocol:String;
 		private var _Url:String;
-		private var _Internal:String;
+		private var _Public:String;
 		private var _User:String;
 		private var _Password:String;
 		private var _VirtualHost:String;
@@ -45,16 +45,16 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		}
 
 
-		// _Internal should be handled like a Boolean, but since Boolean is not a nillable type
+		// _Public should be handled like a Boolean, but since Boolean is not a nillable type
 		// we handle it like a String to be able to send it nillable to the server. 
-		public function get Internal():String {
-			return this._Internal;
+		public function get Public():String {
+			return this._Public;
 		}
 
-		// _Internal should be handled like a Boolean, but since Boolean is not a nillable type
+		// _Public should be handled like a Boolean, but since Boolean is not a nillable type
 		// we handle it like a String to be able to send it nillable to the server. 
-		public function set Internal(Internal:String):void {
-			this._Internal = Internal;
+		public function set Public(Public:String):void {
+			this._Public = Public;
 		}
 
 		public function get User():String {
