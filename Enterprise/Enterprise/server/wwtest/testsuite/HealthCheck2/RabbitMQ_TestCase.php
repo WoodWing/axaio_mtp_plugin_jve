@@ -98,14 +98,14 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 		$rmqConnections = array();
 		foreach( $connections as $connection ) {
 			if( $connection->Instance == 'RabbitMQ' ) {
-				if( isset($rmqConnections[$connection->Protocol]) ) {
+				if( isset($rmqConnections[$connection->Protocol][$connection->Public]) ) {
 					$this->setResult( 'ERROR',
 						'The RabbitMQ ' . $connection->Protocol . ' configuration is defined more than once. ',
 						self::PLEASE_CHECK_CONFIGSERVER.
 						'Make sure the following entry is listed only once:<br/>'.$this->composeMessageQueueConnectionInHtml($connection->Protocol) );
 					return false;
 				}
-				$rmqConnections[$connection->Protocol] = true;
+				$rmqConnections[$connection->Protocol][$connection->Public] = true;
 			}
 		}
 		$this->restConnection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST' );
@@ -161,7 +161,7 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 	private function composeMessageQueueConnectionInHtml( $protocol )
 	{
 		return '<code>new MessageQueueConnection( \'RabbitMQ\', \''.$protocol.'\', '.
-			'\'&lt;Url&gt;\', \'&lt;Internal&gt;\', \'&lt;User&gt;\', \'&lt;Password&gt;\' ),</code>';
+			'\'&lt;Url&gt;\', \'&lt;Public&gt;\', \'&lt;User&gt;\', \'&lt;Password&gt;\' ),</code>';
 	}
 
 	/**
