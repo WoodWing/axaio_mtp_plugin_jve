@@ -108,7 +108,7 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 				$rmqConnections[$connection->Protocol][$connection->Public] = true;
 			}
 		}
-		$this->restConnection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST' );
+		$this->restConnection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST', false );
 		if( !$this->restConnection ) {
 			$this->setResult( 'NOTINSTALLED',
 				'The RabbitMQ REST configuration is missing. ',
@@ -116,7 +116,7 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 				'Make sure the following entry exists:<br/>'.$this->composeMessageQueueConnectionInHtml('REST') );
 			return false;
 		}
-		$this->amqpConnection = BizMessageQueue::getConnection( 'RabbitMQ', 'AMQP' );
+		$this->amqpConnection = BizMessageQueue::getConnection( 'RabbitMQ', 'AMQP', false );
 		if( !$this->amqpConnection ) {
 			$this->setResult( 'NOTINSTALLED',
 				'The RabbitMQ AMQP configuration is missing. ',

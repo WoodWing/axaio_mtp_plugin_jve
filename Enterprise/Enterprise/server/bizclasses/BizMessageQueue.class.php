@@ -399,7 +399,7 @@ class BizMessageQueue
 	public static function publishMessage( $exchangeName, array $headers, array $fields )
 	{
 		$client = null;
-		$connection = self::getConnection( 'RabbitMQ', 'AMQP' );
+		$connection = self::getConnection( 'RabbitMQ', 'AMQP', false );
 		if( $connection ) {
 			$map = new BizExceptionSeverityMap( ['S1144' => 'INFO'] );
 			try {
@@ -491,7 +491,7 @@ class BizMessageQueue
 			return null;
 		}
 		require_once BASEDIR . '/server/utils/rabbitmq/restapi/Client.class.php';
-		$restConnection = self::getConnection( 'RabbitMQ', 'REST' );
+		$restConnection = self::getConnection( 'RabbitMQ', 'REST', false );
 		if( !$restConnection ) {
 			return null;
 		}
