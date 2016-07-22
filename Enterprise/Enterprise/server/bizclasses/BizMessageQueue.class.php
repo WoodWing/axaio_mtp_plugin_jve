@@ -190,18 +190,21 @@ class BizMessageQueue
 
 		switch( count($foundConnections) ) {
 			case 0:
-				return null;
+				$result = null;
+				break;
 			case 1:
-				return $foundConnections[0];
+				$result = $foundConnections[0];
+				break;
 			default:
 				// Can't return the value directly as this will give the error: "Only variables should be passed by reference".
 				$array = array_filter($foundConnections,
-									function($e) use (&$public) {
-										return $e->Public == $public;
+									function( $connection ) use ( $public ) {
+										return $connection->Public == $public;
 									});
-				// Return the connection matching the $public flag.
-				return reset($array);
+				$result = empty($array) ? null : reset($array);
+				break;
 		}
+		return $result;
 	}
 
 	/**

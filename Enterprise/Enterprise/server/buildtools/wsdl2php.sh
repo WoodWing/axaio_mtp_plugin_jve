@@ -111,10 +111,10 @@ fi
 
 echo ------------------------------------------------
 echo "[Step#4] Adding all changed files to the stage area..."
-git add ${ENT_DIR}/server/interfaces/services/${ENT_INTF}/*
-git add ${ENT_DIR}/sdk/*
-git add ${ENT_DIR}/server/protocols/*
-git add ${ENT_DIR}/server/services/${ENT_INTF}/*
+git add "${ENT_DIR}/server/interfaces/services/${ENT_INTF}/"*
+git add "${ENT_DIR}/sdk/"*
+git add "${ENT_DIR}/server/protocols/"*
+git add "${ENT_DIR}/server/services/${ENT_INTF}/"*
 
 
 echo ------------------------------------------------
