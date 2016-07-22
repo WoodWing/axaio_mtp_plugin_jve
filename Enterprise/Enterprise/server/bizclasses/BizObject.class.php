@@ -4652,7 +4652,7 @@ class BizObject
 
 					// Check if the user has access to unplaced files only. If not, it means the user does not have any edit rights.
 					if( BizAccess::checkRightsForObjectProps( $user, 'O', BizAccess::THROW_ON_DENIED, $objectProps )
-						 && self::hasRelationOfType( $objectProps['ID'], 'Placed', 'parents' ) ) {
+						 && BizRelation::hasRelationOfType( $objectProps['ID'], 'Placed', 'parents' ) ) {
 						//If object to be accessed is placed, throw error since user has only access to unplaced objects.
 						throw new BizException( 'ERR_AUTHORIZATION', 'Client',
 							'User does not have sufficient rights to edit object ('.$objectProps['id'].').');
