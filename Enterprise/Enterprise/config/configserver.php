@@ -1237,6 +1237,10 @@ define( 'GHOST_SCRIPT_APP_PATH', '' );
 //    The functionality is based on a RabbitMQ integration using the AMQP protocol. It works for WAN (remote users)
 //    and is the successor of the broadcast/multicast integration (which worked for LAN only).
 //
+//    It is possible to define public and private connections for all RabbitMQ communication. Enterprise Server will serve
+//    public connections to clients asking for MessageQueueConnections, and it will use the private connections by default
+//    for its own communication.
+//
 //    To enable this feature, do the following:
 //    1. Uncomment the required MessageQueueConnection definitions below by removing the leading slashes (//).
 //    2. For those definitions, replace 'localhost' with the hostname (or IP) of the system on which RabbitMQ is installed.
