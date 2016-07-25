@@ -461,9 +461,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSmartEventQueue_TestCase
 			if( $connection->Instance == 'RabbitMQ' && $connection->Protocol == 'AMQP' ) {
 				$this->assertNull( $amqpClient,
 					'Detected more than one AMQP configuration for RabbitMQ in LogOnResponse, which is unexpected.' );
-				$this->assertNull( $connection->Password,
-					'LogOnResponse should not reveal passwords for RabbitMQ AMQP connections.' );
-				$connection->Password = 'ww';
+				$this->assertTrue( $connection->Public,
+					'LogOnResponse should not reveal private connections for RabbitMQ AMQP.' );
 				try {
 					require_once BASEDIR . '/server/utils/rabbitmq/amqp/Client.class.php';
 					$amqpClient = new WW_Utils_RabbitMQ_AMQP_Client( $connection );
