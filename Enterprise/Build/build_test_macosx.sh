@@ -11,7 +11,7 @@
 
 DOCROOT=/Library/WebServer/Documents
 DRUPAL_DIR=drupal7
-PLUGINS="Twitter Facebook Analytics CopyrightValidationDemo SimpleFileSystem CustomObjectPropsDemo CustomAdminPropsDemo MultiChannelPublishingSample AddSubApplication StandaloneAutocompleteSample AnalyticsTest PublishingTest AutoTargetingTest AutoNamingTest Adobe_AEM"
+PLUGINS="Twitter Facebook CopyrightValidationDemo SimpleFileSystem CustomObjectPropsDemo CustomAdminPropsDemo MultiChannelPublishingSample AddSubApplication StandaloneAutocompleteSample PublishingTest AutoTargetingTest AutoNamingTest Adobe_AEM"
 SED_BIN=/opt/local/bin/gsed
 
 #
@@ -59,8 +59,8 @@ function vercomp {
 # @param string $2 Parameter value
 #
 function validateEnvironmentVariableNotEmpty {
-	echo "${1}: [${2}]" 
-	if [ ! -n "${2}" ]; then 
+	echo "${1}: [${2}]"
+	if [ ! -n "${2}" ]; then
 		echo "ERROR: Environment variable ${1} has no value!"
 		echo "Tip: Check if the BUILD project in Jenkins has this variable defined and filled in."
 		echo "Tip: Also note that you should start the BUILD project in Jenkins (NOT the TEST project)."
@@ -74,8 +74,14 @@ function validateEnvironmentVariableNotEmpty {
 function step0_validateEnvironment {
 	set +x
 	echo "step0a: Validating required environment variables..."
+	validateEnvironmentVariableNotEmpty GIT_BRANCH "${GIT_BRANCH}"
 	validateEnvironmentVariableNotEmpty SERVER_VERSION "${SERVER_VERSION}"
-	
+
+	if [[ "${GIT_BRANCH}" != "master" && "${GIT_BRANCH}" != work* ]]; then
+		echo "ERROR: Environment variable GIT_BRANCH has unsupported value: ${GIT_BRANCH}"
+		exit 1
+	fi
+
 	echo "step0b: Validating required tools..."
 	if [ ! -f "${SED_BIN}" ]; then
 		echo "Could not find SED executable: ${SED_BIN}"
@@ -122,7 +128,7 @@ function step1_determineHttpPortAndPhpVersion {
 		echo "Could not find PHP executable: ${PHP_BIN}"
 		exit 1
 	fi
-	
+
 	echo "step1a: Resolving the PHP version..."
 	phpVersion=`${PHP_BIN} -r "echo phpversion();"`
 	echo "Using PHP version ${phpVersion}"
@@ -132,38 +138,23 @@ function step1_determineHttpPortAndPhpVersion {
 # Determines the Enterprise Server web directory. After calling ENT_DIR is set.
 #
 function step2_determineEnterpriseDir {
-	echo "step2a: Deriving the Enterprise Server web directory (ENT_DIR) from the Perforce branch (P4_BRANCH)."
-	isArchive=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection(\.archive)?\/.*/\1/g"`
-	if test "${isArchive}" = ".archive"
-	then
-		echo "step2b: Detected archive branch."
-		# Map "SmartConnection.archive/Server.v9.4.0" onto "Entv94x_Release"
-		ENT_DIR=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\.archive\/Server\.v([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/Entv\1\2x_Release/g"`
+	echo "step2a: Deriving the Enterprise Server web directory (ENT_DIR) from the Git branch (GIT_BRANCH)."
+	if [[ "${GIT_BRANCH}" == "master" ]]; then
+		ENT_DIR="EntMaster"
+	elif [[ "${GIT_BRANCH}" == work* ]]; then
+		masterWorkNr=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/work(([[:digit:]]+))?/\2/g"`
+		ENT_DIR="EntMasterWork${masterWorkNr}"
 	else
-		echo "step2b: Detected non-archive branch."
-		if test "${P4_BRANCH}" = "SmartConnection/Server.master"
-		then
-			ENT_DIR="EntMaster"
-		else
-			isMasterWork=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.master(\.work)(([[:digit:]]+))?/\1/g"`
-			if test "${isMasterWork}" = ".work"
-			then
-				masterWorkNr=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.master\.work(([[:digit:]]+))?/\2/g"`
-				ENT_DIR="EntMasterWork${masterWorkNr}"
-			else
-				echo "Could not interpret the P4_BRANCH value: ${P4_BRANCH}"
-				ENT_DIR=""
-				exit 1
-			fi
-		fi
+		echo "Could not interpret the GIT_BRANCH value: ${GIT_BRANCH}"
+		ENT_DIR=""
+		exit 1
 	fi
 
 	if [ ! -d "${DOCROOT}/${ENT_DIR}" ]; then
-		echo "step2c: Enterprise Server web directory does not exist: ${DOCROOT}/${ENT_DIR}"
+		echo "step2b: Enterprise Server web directory does not exist: ${DOCROOT}/${ENT_DIR}"
 		exit 1
-	else
-		echo "step2c: Determined ENT_DIR: [${ENT_DIR}]"
-	fi 
+	fi
+	echo "step2b: Determined ENT_DIR: [${ENT_DIR}]"
 }
 
 #
@@ -187,14 +178,14 @@ function step3_extractArtifacts() {
 # Copies Enterprise and the BuildTest to the web server for testing.
 #
 function step4_deployArtifactsToWebServer {
-	rsync -av  --exclude 'config/config*.php' --exclude 'config/plugins/*' --delete "${WORKSPACE}/artifacts/Enterprise/" "${DOCROOT}/${ENT_DIR}/" 1>/dev/null
+	rsync -av --exclude "config/config_overrule.php" --delete "${WORKSPACE}/artifacts/Enterprise/" "${DOCROOT}/${ENT_DIR}/" 1>/dev/null
 	rsync -av --delete "${WORKSPACE}/artifacts/BuildTest/" "${DOCROOT}/${ENT_DIR}/server/wwtest/testsuite/BuildTest/" 1>/dev/null
 	rsync -av --delete "${WORKSPACE}/artifacts/largeSpeedTestData/" "${DOCROOT}/${ENT_DIR}/server/wwtest/testsuite/largeSpeedTestData/" 1>/dev/null
 	rsync -av --delete "${WORKSPACE}/artifacts/Enterprise/config/configlang.php" "${DOCROOT}/${ENT_DIR}/config/configlang.php" 1>/dev/null
 	rsync -av --delete "${WORKSPACE}/artifacts/ww_enterprise/" "${DOCROOT}/${DRUPAL_DIR}/sites/all/modules/ww_enterprise/" 1>/dev/null
 	for plugin in ${PLUGINS}; do
-		# We need to map the AdobeDPS plugin name to its internal name in order to be able to find it in the workspace.
-		if [ ${plugin} == "AdobeDPS" ]; then
+		# We need to map the Adobe_AEM plugin name to its internal name in order to be able to find it in the workspace.
+		if [ ${plugin} == "Adobe_AEM" ]; then
 			plugin="AdobeDps2" 
 		fi
 		# if a config.php file exists in a config folder do not overwrite it for the demo plugins.
