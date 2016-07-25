@@ -1288,10 +1288,10 @@ if( !defined('IMAGE_MAGICK_APP_PATH') ) {
 }
 
 // IMAGE_MAGICK_OPTIONS:
-// Options passed to the ImageMagick application to influence the quality of previews and thumbnails.
-// For more informtion see: http://www.imagemagick.org/script/command-line-options.php
-// The size (-size) is set by Enterprise and must not be set here.
-// The default value is ' -colorspace sRGB -quality 100 -sharpen 5 -layers merge -depth 8 -strip -density 72x72 '
+//    Options passed to the ImageMagick application to influence the quality of previews and thumbnails.
+//    For more informtion see: http://www.imagemagick.org/script/command-line-options.php
+//    The size (-size) is set by Enterprise and must not be set here.
+//    The default value is ' -colorspace sRGB -quality 100 -sharpen 5 -layers merge -depth 8 -strip -density 72x72 '
 //
 if( !defined('IMAGE_MAGICK_OPTIONS') ) {
 	define( 'IMAGE_MAGICK_OPTIONS', '-colorspace sRGB -quality 92 -sharpen 5 -layers merge -depth 8 -strip -density 72x72' );

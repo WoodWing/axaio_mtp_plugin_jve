@@ -349,7 +349,7 @@ class ImageMagick
 	 * @param boolean $log Log errors or leave it up to the caller.
 	 * @return int 0 on success else error code on failure
 	*/
-	protected static function imageMagickCmd( $cmd, $cmdline, $log=true )
+	public static function imageMagickCmd( $cmd, $cmdline, $log=true )
 	{
 		self::setEnvironment();
 		LogHandler::Log('ImageMagick', 'INFO', 'Running ImageMagick command: '.$cmdline );
