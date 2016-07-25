@@ -144,7 +144,7 @@ class IdsAutomationUtils
 				LogHandler::Log( 'IdsAutomation', 'INFO', "The new status [$newStatusId] could not be found in DB. No action needed." );
 				break;
 			}
-			if ( self::layoutStatusSkipsIdsa( $newStatus )) {
+			if ( self::statusSkipsIdsa( $newStatus )) {
 				LogHandler::Log( 'IdsAutomation', 'INFO', "The new status has the skip InDesign Server Automation property set. No action needed." );
 				break;
 			}
@@ -210,7 +210,7 @@ class IdsAutomationUtils
 	public static function isContentChangeTriggerForIds( $objId, $statusId )
 	{
 		$status = self::getStatusWithId( $statusId );
-		if ( self::layoutStatusSkipsIdsa( $status )) {
+		if ( self::statusSkipsIdsa( $status )) {
 			LogHandler::Log( 'IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed." );
 			return false;
 		}
@@ -230,7 +230,7 @@ class IdsAutomationUtils
 							'is configured, but layout has no PDFs yet. Action needed.' );
 			$retVal = true;
 		} else {
-			LogHandler::Log( 'IdsAutomation', 'INFO', 'Content has changed but no but no action for IDS '.
+			LogHandler::Log( 'IdsAutomation', 'INFO', 'Content has changed but no action for IDS '.
 							'configured or layout has Output renditions already. No action needed.' );
 			$retVal = false;
 		}
@@ -508,7 +508,7 @@ class IdsAutomationUtils
 	 * @param Object $status Status object
 	 * @return boolean
 	 */
-	static public function layoutStatusSkipsIdsa( $status )
+	static public function statusSkipsIdsa( $status )
 	{
 		return $status->SkipIdsa;
 	}

@@ -167,21 +167,44 @@ class BizMessageQueue
 	/**
 	 * Picks a connection from the MESSAGE_QUEUE_CONNECTIONS option with matching instance and protocol.
 	 *
+	 * Behaviour:
+	 * In case that only a public connection is configured, it will always return the public connection.
+	 * In case that only a private connection is configured, it will always return the private connection.
+	 * In case that both a public and a private connection are configured, it will return the one that matches
+	 * the $public property.
+	 *
 	 * @param string $instance
 	 * @param string $protocol
+	 * @param boolean $public If true, it will return the public connection if this is configured. Default = true.
 	 * @return MessageQueueConnection|null The connection found in config. NULL when not found.
 	 */
-	public static function getConnection( $instance, $protocol )
+	public static function getConnection( $instance, $protocol, $public = true )
 	{
-		$foundConnection = null;
+		$foundConnections = array();
 		foreach( self::unserializeConnections() as $connection ) {
 			if( $connection->Instance == $instance && $connection->Protocol == $protocol ) {
-				self::resolveConnectionProperies( $connection );
-				$foundConnection = $connection;
-				break;
+				self::resolveConnectionProperties( $connection );
+				$foundConnections[] = $connection;
 			}
 		}
-		return $foundConnection;
+
+		switch( count($foundConnections) ) {
+			case 0:
+				$result = null;
+				break;
+			case 1:
+				$result = $foundConnections[0];
+				break;
+			default:
+				// Can't return the value directly as this will give the error: "Only variables should be passed by reference".
+				$array = array_filter($foundConnections,
+									function( $connection ) use ( $public ) {
+										return $connection->Public == $public;
+									});
+				$result = empty($array) ? null : reset($array);
+				break;
+		}
+		return $result;
 	}
 
 	/**
@@ -193,7 +216,7 @@ class BizMessageQueue
 	{
 		$connections = self::unserializeConnections();
 		foreach( $connections as &$connection ) {
-			self::resolveConnectionProperies( $connection );
+			self::resolveConnectionProperties( $connection );
 		}
 		return $connections;
 	}
@@ -204,7 +227,7 @@ class BizMessageQueue
 	 *
 	 * @param MessageQueueConnection $connection The connection to be updated (input/output).
 	 */
-	private static function resolveConnectionProperies( &$connection )
+	private static function resolveConnectionProperties( &$connection )
 	{
 		if( is_null($connection->User) ) {
 			$connection->User = self::composeSessionUserName();
@@ -265,12 +288,9 @@ class BizMessageQueue
 			//    the getConnections() function hereafter. For deep cloning we use serialize() + unserialize().
 
 		// Get the REST API connection in order to perform operations on RabbitMQ resources.
-		if( $connections ) foreach( $connections as $connection ) {
-			if( $connection->Instance == 'RabbitMQ' && $connection->Protocol == 'REST' ) {
-				$restApiConnection = $connection;
-				break;
-			}
-		}
+		// If it exists, use a private connection
+		$restApiConnection = self::getConnection( 'RabbitMQ', 'REST', false );
+
 		if( $restApiConnection && $password ) {
 			require_once BASEDIR . '/server/utils/rabbitmq/restapi/Client.class.php';
 			$restClient = new WW_Utils_RabbitMQ_RestAPI_Client( $restApiConnection );
@@ -354,8 +374,8 @@ class BizMessageQueue
 
 			// Add all connections to the LogOnResponse.
 			foreach( $connections as $connection ) {
-				// For security reasons don't reveal the admin REST API connection of RabbitMQ to the outside world.
-				if( $connection->Instance == 'RabbitMQ' &&
+				// For security reasons don't reveal the admin REST API connection or any non-public connections to the outside world.
+				if( $connection->Instance == 'RabbitMQ' && $connection->Public == true &&
 					( $connection->Protocol == 'AMQP' || $connection->Protocol == 'STOMPWS' ) ) {
 					$connection->User = self::composeSessionUserName();
 					$connection->Password = $rmqPassword;
@@ -382,7 +402,7 @@ class BizMessageQueue
 	public static function publishMessage( $exchangeName, array $headers, array $fields )
 	{
 		$client = null;
-		$connection = self::getConnection( 'RabbitMQ', 'AMQP' );
+		$connection = self::getConnection( 'RabbitMQ', 'AMQP', false );
 		if( $connection ) {
 			$map = new BizExceptionSeverityMap( ['S1144' => 'INFO'] );
 			try {
@@ -474,7 +494,7 @@ class BizMessageQueue
 			return null;
 		}
 		require_once BASEDIR . '/server/utils/rabbitmq/restapi/Client.class.php';
-		$restConnection = self::getConnection( 'RabbitMQ', 'REST' );
+		$restConnection = self::getConnection( 'RabbitMQ', 'REST', false );
 		if( !$restConnection ) {
 			return null;
 		}

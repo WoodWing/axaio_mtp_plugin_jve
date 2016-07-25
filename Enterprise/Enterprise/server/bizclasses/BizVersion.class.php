@@ -43,7 +43,7 @@ class BizVersion
 		if( array_key_exists( 'ID', $arr ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 			$arr = BizProperty::objPropToRowValues( $arr );
-			LogHandler::Log('bizversion','DEBUG','createVersion - converted biz props to db props');
+			LogHandler::Log(__CLASS__,'DEBUG','createVersion - converted biz props to db props');
 		}
 
 		require_once BASEDIR.'/server/bizclasses/BizStorage.php'; // StorageFactory
@@ -220,7 +220,7 @@ class BizVersion
 					// Note that file deletions typically fail for migrated DBs! Such as from v4/v5 to v6/v7.
 					// This is because version numbering has been changed since v6.1 from vX to vX.Y notation at DB model
 					// but NOT reflected at filestore by migration procedure. So this is something the core needs to deal with ... !
-					LogHandler::Log( 'BizVersion', 'ERROR', BizResources::localize('ERR_ATTACHMENT') . $attachobj->getError() );
+					LogHandler::Log( __CLASS__, 'ERROR', BizResources::localize('ERR_ATTACHMENT') . $attachobj->getError() );
 					//throw new BizException( 'ERR_ATTACHMENT', 'Server', $attachobj->getError() );
 					// <<<
 				}
@@ -244,10 +244,10 @@ class BizVersion
 			$connRetVals = array();
 			$connectors = BizServerPlugin::searchConnectors('Version', null);
 			if ($connectors) foreach ( $connectors as $connClass => $connector ){
-				LogHandler::Log('BizVersion', 'DEBUG', 'Connector '.$connClass.' executes method createVersion');
+				LogHandler::Log(__CLASS__, 'DEBUG', 'Connector '.$connClass.' executes method createVersion');
 				$connRetVals[$connClass] = call_user_func_array( array(&$connector, 'createVersion'), 
 																 array( $objectId, $sourceVersion, $nextVersion, $storename, $setObjPropMode ) );
-				LogHandler::Log('BizVersion', 'DEBUG', 'Connector completed.' );
+				LogHandler::Log(__CLASS__, 'DEBUG', 'Connector completed.' );
 			}
 		} catch( BizException $e ) {
 			throw $e;
@@ -268,7 +268,7 @@ class BizVersion
 			$connRetVals = array();
 			$connectors = BizServerPlugin::searchConnectors('Version', null);
 			if ($connectors) foreach ( $connectors as $connClass => $connector ){
-				LogHandler::Log('BizVersion', 'DEBUG', 'Connector '.$connClass.' executes method deleteVersion');
+				LogHandler::Log(__CLASS__, 'DEBUG', 'Connector '.$connClass.' executes method deleteVersion');
 				$connRetVals[$connClass] = call_user_func_array( array(&$connector, 'deleteVersion'), array( $objectId, $version, $storename ));
 				LogHandler::Log('BizVersion', 'DEBUG', 'Connector completed.' );
 			}
@@ -325,54 +325,77 @@ class BizVersion
 	 * @param boolean  $setObjPropMode Optional. Special case for SetObjectProperties context, conditionally creating versions. (See Note#001)
 	 * @throws BizException on failure
 	 */
-	public static function createVersionIfNeeded( $id, $currRow, &$newRow, &$wflMetadata, $createVer, $restoreVer=null, $setObjPropMode=false )
+	public static function createVersionIfNeeded( $id, $currRow, &$newRow, &$wflMetadata, $createVer, $restoreVer = null, $setObjPropMode = false )
 	{
 		$newConverted = false;
 		// If we get Biz props in we convert to DB props. In future input should be BizProps.
-		if( array_key_exists('ID',$currRow)) {
-			LogHandler::Log('bizversion','DEBUG','createVersionIfNeeded - converted cur biz props to db props');
+		if( array_key_exists( 'ID', $currRow ) ) {
+			LogHandler::Log( __CLASS__, 'DEBUG', 'createVersionIfNeeded - converted cur biz props to db props' );
 			require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 			$currRow = BizProperty::objPropToRowValues( $currRow );
 		}
-		if( array_key_exists( 'ID',$newRow)) {
-			LogHandler::Log('bizversion','DEBUG','createVersionIfNeeded - converted new biz props to db props');
+		if( array_key_exists( 'ID', $newRow ) ) {
+			LogHandler::Log( __CLASS__, 'DEBUG', 'createVersionIfNeeded - converted new biz props to db props' );
 			require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 			$newRow = BizProperty::objPropToRowValues( $newRow );
 			$newConverted = true;
 		}
 
-		$srcStatusId = $currRow['state'];
-		$tarStatusId = $newRow['state'];
-
 		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
-		$srcStatusCfg = BizAdmStatus::getStatusWithId( $srcStatusId ); // source status config
-		$tarStatusCfg = ($srcStatusId == $tarStatusId) ? $srcStatusCfg : BizAdmStatus::getStatusWithId( $tarStatusId ); // target status config
-
-		// Get version information (versions, countversion, newversion) of all tracked object versions
+		$srcStatus = BizAdmStatus::getStatusWithId( $currRow['state'] );
+		$tarStatus = ( $currRow['state'] == $newRow['state'] ) ? $srcStatus : BizAdmStatus::getStatusWithId( $newRow['state'] );
 		$versions = DBVersion::getVersions( $id );
 
-		if( $createVer || $restoreVer || $setObjPropMode ) {
-
-			// For Set Properties operations, when [A] the target status has CreatePermanentVersion option disabled or
-			// when [B] the current object version is a major version, we -avoid- creating new versions here !
-			if( $setObjPropMode && (!$tarStatusCfg->CreatePermanentVersion || $currRow['minorversion'] == 0) ) {
-				// nothing to do (See Note#001)
-			} else {
-				$newRow['version'] = self::createVersion( $id, $currRow, $tarStatusCfg, $versions, $restoreVer, $setObjPropMode );
-				DBVersion::splitMajorMinorVersion( $newRow['version'], $newRow ); // update newRow
-				if( $wflMetadata ) {
-					$wflMetadata->Version = $newRow['version'];
-				}
+		if( $createVer || $restoreVer ||
+			( $setObjPropMode && ( $tarStatus->CreatePermanentVersion && $currRow['minorversion'] !== 0 ) ) ) {
+			// For Set Properties operations, create a new version when [A] the target status has CreatePermanentVersion
+			// option set and the current object version is not a major version. See Note#001
+			$newRow['version'] = self::createVersion( $id, $currRow, $tarStatus, $versions, $restoreVer, $setObjPropMode );
+			DBVersion::splitMajorMinorVersion( $newRow['version'], $newRow );
+			if( $wflMetadata ) {
+				$wflMetadata->Version = $newRow['version'];
 			}
+			self::removeOldVersionWhenNewIsCreatedByIDSA( $currRow, $newRow );
 		}
 
-		// Remove intermediate versions (when reached status with RemoveIntermediateVersions set)
 		self::removeIntermediateVersions( array( $id ), $currRow['type'], array( $id => $currRow['storename'] ),
-			array( $tarStatusCfg ), array( $id => $versions ) );
+			array( $tarStatus ), array( $id => $versions ) );
 
-		// If we converted from objProps to rows, convert back:
 		if( $newConverted ) {
 			$newRow = BizProperty::objRowToPropValues( $newRow );
+		}
+	}
+
+	/**
+	 * Removes previous version in case InDesign Server Automation (IDSA) created a new version.
+	 *
+	 * A new version is created the moment an object is saved by the IDSA process. This is in most cases unwanted as it
+	 * results in a lot of versions. The moment a new version is created by the IDSA process the previous version is
+	 * deleted. We can not overwrite the previous version as in that case client applications are not triggered that a
+	 * new version is available. In the rare case that adjacent versions are required a hidden option is added:
+	 * REMOVE_INTERMEDIATE_VERSION_BY_IDSA'. If set to 'false' a new version is created without removing the previous one.
+	 * See: EN-87467.
+	 *
+	 * @param array $oldDBRow Original database properties of the object.
+	 * @param array $newDBRow New database properties of the object.
+	 * @throws BizException
+	 */
+	private static function removeOldVersionWhenNewIsCreatedByIDSA( array $oldDBRow, array $newDBRow )
+	{
+		if ( defined( 'REMOVE_INTERMEDIATE_VERSION_BY_IDSA' ) && REMOVE_INTERMEDIATE_VERSION_BY_IDSA == false ) {
+			return;
+		}
+
+		require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';
+		if( ( version_compare( $oldDBRow['version'], $newDBRow['version'] ) == -1 ) &&
+			BizInDesignServerJobs::calledByIDSAutomation( BizSession::getTicket() )
+		) {
+			$types = unserialize( $oldDBRow['types'] ) ;
+			self::deleteVersions( array( $oldDBRow['id'] => $oldDBRow['id'] ),
+				array( $oldDBRow['id'] => $oldDBRow['version'] ),
+				array( $oldDBRow['id'] => $oldDBRow['storename'] ),
+				array( $oldDBRow['id'] => $types )
+			);
 		}
 	}
 
@@ -501,7 +524,7 @@ class BizVersion
 		$objProps = DBObject::getObjectProps( $id, $areas );
 
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
-		DBlog::logServiceEx( $user, 'GetVersion', $objProps, null );
+		DBLog::logServiceEx( $user, 'GetVersion', $objProps, null );
 
 		// If we have a shadow, we allow content source to implement this call
 		if( trim($objProps['ContentSource'])) {
@@ -624,7 +647,7 @@ class BizVersion
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		$objProps = DBObject::getObjectProps( $id, $areas );
 
-		DBlog::logServiceEx( $user, 'ListVersions', $objProps, null );
+		DBLog::logServiceEx( $user, 'ListVersions', $objProps, null );
 
 		// If we have a shadow, we allow content source to implement this call
 		if( trim($objProps['ContentSource'])) {
@@ -704,14 +727,14 @@ class BizVersion
 		$objProps = BizProperty::objRowToPropValues( $objRow );
 
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
-		DBlog::logServiceEx( $user, 'RestoreVersion', $objProps, null );
+		DBLog::logServiceEx( $user, 'RestoreVersion', $objProps, null );
 
 		$restored = false;
 		// If we have a shadow, we allow content source to implement this call
 		if( trim($objProps['ContentSource'])) {
 			$restored = BizContentSource::restoreShadowObjectVersion( trim($objProps['ContentSource']), trim($objProps['DocumentID']), $id, $restoreVer );
 			//TODO what to do if content source didn't restore the object?
-			// for now, do the same as before (???): try to restore object ourself
+			// For now, do the same as before (???): try to restore object ourselves.
 		}
 
 		if (!$restored){

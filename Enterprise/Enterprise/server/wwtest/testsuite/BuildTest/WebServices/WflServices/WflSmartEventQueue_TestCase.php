@@ -182,7 +182,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSmartEventQueue_TestCase
 			$this->setResult( 'NOTINSTALLED', $message );
 			throw new BizException( null, 'Server', null, $message );
 		}
-		$connection = BizMessageQueue::getConnection( 'RabbitMQ', 'AMQP' );
+		$connection = BizMessageQueue::getConnection( 'RabbitMQ', 'AMQP', false );
 		$this->assertInstanceOf( 'MessageQueueConnection', $connection,
 			'Please check the MESSAGE_QUEUE_CONNECTIONS option in the configserver.php file. '.
 			'It should have a MessageQueueConnection( \'RabbitMQ\', \'AMQP\', ... ) configured.' );
@@ -263,7 +263,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSmartEventQueue_TestCase
 		// Enterprise Server does auto clean users for security reasons.
 		// (The Health Check can be used to remove orphan resources.)
 		require_once BASEDIR.'/server/utils/rabbitmq/restapi/Client.class.php';
-		$connection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST' );
+		$connection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST', false );
 		if( $connection ) {
 			$restClient = new WW_Utils_RabbitMQ_RestAPI_Client( $connection );
 			if( $this->logonResponseA || $this->logonResponseB ) {
@@ -461,9 +461,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSmartEventQueue_TestCase
 			if( $connection->Instance == 'RabbitMQ' && $connection->Protocol == 'AMQP' ) {
 				$this->assertNull( $amqpClient,
 					'Detected more than one AMQP configuration for RabbitMQ in LogOnResponse, which is unexpected.' );
-				$this->assertNull( $connection->Password,
-					'LogOnResponse should not reveal passwords for RabbitMQ AMQP connections.' );
-				$connection->Password = 'ww';
+				$this->assertTrue( $connection->Public,
+					'LogOnResponse should not reveal private connections for RabbitMQ AMQP.' );
 				try {
 					require_once BASEDIR . '/server/utils/rabbitmq/amqp/Client.class.php';
 					$amqpClient = new WW_Utils_RabbitMQ_AMQP_Client( $connection );

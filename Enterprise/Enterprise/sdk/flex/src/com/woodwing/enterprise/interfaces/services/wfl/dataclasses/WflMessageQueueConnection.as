@@ -15,6 +15,7 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		private var _Instance:String;
 		private var _Protocol:String;
 		private var _Url:String;
+		private var _Public:String;
 		private var _User:String;
 		private var _Password:String;
 		private var _VirtualHost:String;
@@ -41,6 +42,19 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		}
 		public function set Url(Url:String):void {
 			this._Url = Url;
+		}
+
+
+		// _Public should be handled like a Boolean, but since Boolean is not a nillable type
+		// we handle it like a String to be able to send it nillable to the server. 
+		public function get Public():String {
+			return this._Public;
+		}
+
+		// _Public should be handled like a Boolean, but since Boolean is not a nillable type
+		// we handle it like a String to be able to send it nillable to the server. 
+		public function set Public(Public:String):void {
+			this._Public = Public;
 		}
 
 		public function get User():String {

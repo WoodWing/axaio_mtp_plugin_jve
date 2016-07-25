@@ -177,7 +177,7 @@ class CopyWithChildren_WflCopyObject extends WflCopyObject_EnterpriseConnector
 			}
 
 // now confirm the new relations
-			$newrelation= BizRelation::createObjectRelations($newobjrelation, null, null, false, false);
+			$newrelation= BizRelation::createObjectRelations($newobjrelation, BizSession::getShortUserName(), null, false, false);
 // and reset the old relations
 			BizRelation::deleteObjectRelations( null, $oldobjrelation );
 

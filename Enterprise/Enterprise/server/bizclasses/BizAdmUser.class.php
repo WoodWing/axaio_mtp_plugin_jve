@@ -197,7 +197,7 @@ class BizAdmUser
 		// This is a security precaution to make sure that only active Enterprise users can listen to RabbitMQ.
 		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
 		if( BizMessageQueue::isInstalled() ) {
-			$connection = BizMessageQueue::getConnection('RabbitMQ', 'REST' );
+			$connection = BizMessageQueue::getConnection('RabbitMQ', 'REST', false );
 
 			require_once BASEDIR.'/server/utils/rabbitmq/restapi/Client.class.php';
 			$restClient = new WW_Utils_RabbitMQ_RestAPI_Client( $connection );
@@ -250,7 +250,7 @@ class BizAdmUser
 		// This is a security precaution to make sure that only active Enterprise users can listen to RabbitMQ.
 		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
 		if( BizMessageQueue::isInstalled() ) {
-			$connection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST' );
+			$connection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST', false );
 
 			require_once BASEDIR.'/server/utils/rabbitmq/restapi/Client.class.php';
 			$restClient = new WW_Utils_RabbitMQ_RestAPI_Client( $connection );
