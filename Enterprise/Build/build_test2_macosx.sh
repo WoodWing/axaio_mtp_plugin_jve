@@ -187,8 +187,8 @@ function step4_deployArtifactsToWebServer {
 	rsync -av --delete "${WORKSPACE}/artifacts/Enterprise/config/configlang.php" "${DOCROOT}/${ENT_DIR}/config/configlang.php" 1>/dev/null
 	rsync -av --delete "${WORKSPACE}/artifacts/ww_enterprise/" "${DOCROOT}/${DRUPAL_DIR}/sites/all/modules/ww_enterprise/" 1>/dev/null
 	for plugin in ${PLUGINS}; do
-		# We need to map the AdobeDPS plugin name to its internal name in order to be able to find it in the workspace.
-		if [ ${plugin} == "AdobeDPS" ]; then
+		# We need to map the Adobe_AEM plugin name to its internal name in order to be able to find it in the workspace.
+		if [ ${plugin} == "Adobe_AEM" ]; then
 			plugin="AdobeDps2" 
 		fi
 		# if a config.php file exists in a config folder do not overwrite it for the demo plugins.
