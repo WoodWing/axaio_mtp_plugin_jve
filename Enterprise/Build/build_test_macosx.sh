@@ -74,8 +74,14 @@ function validateEnvironmentVariableNotEmpty {
 function step0_validateEnvironment {
 	set +x
 	echo "step0a: Validating required environment variables..."
+	validateEnvironmentVariableNotEmpty GIT_BRANCH "${GIT_BRANCH}"
 	validateEnvironmentVariableNotEmpty SERVER_VERSION "${SERVER_VERSION}"
-	
+
+	if [[ "${GIT_BRANCH}" != "master" && "${GIT_BRANCH}" != work* && "${GIT_BRANCH}" != release/* ]]; then
+		echo "ERROR: Environment variable GIT_BRANCH has unsupported value: ${GIT_BRANCH}"
+		exit 1
+	fi
+
 	echo "step0b: Validating required tools..."
 	if [ ! -f "${SED_BIN}" ]; then
 		echo "Could not find SED executable: ${SED_BIN}"
@@ -122,7 +128,7 @@ function step1_determineHttpPortAndPhpVersion {
 		echo "Could not find PHP executable: ${PHP_BIN}"
 		exit 1
 	fi
-	
+
 	echo "step1a: Resolving the PHP version..."
 	phpVersion=`${PHP_BIN} -r "echo phpversion();"`
 	echo "Using PHP version ${phpVersion}"
@@ -132,38 +138,26 @@ function step1_determineHttpPortAndPhpVersion {
 # Determines the Enterprise Server web directory. After calling ENT_DIR is set.
 #
 function step2_determineEnterpriseDir {
-	echo "step2a: Deriving the Enterprise Server web directory (ENT_DIR) from the Perforce branch (P4_BRANCH)."
-	isArchive=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection(\.archive)?\/.*/\1/g"`
-	if test "${isArchive}" = ".archive"
-	then
-		echo "step2b: Detected archive branch."
-		# Map "SmartConnection.archive/Server.v9.4.0" onto "Entv94x_Release"
-		ENT_DIR=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\.archive\/Server\.v([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/Entv\1\2x_Release/g"`
+	echo "step2a: Deriving the Enterprise Server web directory (ENT_DIR) from the Git branch (GIT_BRANCH)."
+	if [[ "${GIT_BRANCH}" == "master" ]]; then
+		ENT_DIR="EntMaster"
+	elif [[ "${GIT_BRANCH}" == work* ]]; then
+		masterWorkNr=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/work(([[:digit:]]+))?/\2/g"`
+		ENT_DIR="EntMasterWork${masterWorkNr}"
+	elif [[ "${GIT_BRANCH}" == release/* ]]; then
+		releaseNr=`echo "${GIT_BRANCH}" | cut -d "/" -f2- | tr -d '.'`
+		ENT_DIR="EntRelease${releaseNr}"
 	else
-		echo "step2b: Detected non-archive branch."
-		if test "${P4_BRANCH}" = "SmartConnection/Server.master"
-		then
-			ENT_DIR="EntMaster"
-		else
-			isMasterWork=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.master(\.work)(([[:digit:]]+))?/\1/g"`
-			if test "${isMasterWork}" = ".work"
-			then
-				masterWorkNr=`echo "${P4_BRANCH}" | ${SED_BIN} -r "s/SmartConnection\/Server\.master\.work(([[:digit:]]+))?/\2/g"`
-				ENT_DIR="EntMasterWork${masterWorkNr}"
-			else
-				echo "Could not interpret the P4_BRANCH value: ${P4_BRANCH}"
-				ENT_DIR=""
-				exit 1
-			fi
-		fi
+		echo "Could not interpret the GIT_BRANCH value: ${GIT_BRANCH}"
+		ENT_DIR=""
+		exit 1
 	fi
 
 	if [ ! -d "${DOCROOT}/${ENT_DIR}" ]; then
-		echo "step2c: Enterprise Server web directory does not exist: ${DOCROOT}/${ENT_DIR}"
+		echo "step2b: Enterprise Server web directory does not exist: ${DOCROOT}/${ENT_DIR}"
 		exit 1
-	else
-		echo "step2c: Determined ENT_DIR: [${ENT_DIR}]"
-	fi 
+	fi
+	echo "step2b: Determined ENT_DIR: [${ENT_DIR}]"
 }
 
 #
@@ -193,8 +187,8 @@ function step4_deployArtifactsToWebServer {
 	rsync -av --delete "${WORKSPACE}/artifacts/Enterprise/config/configlang.php" "${DOCROOT}/${ENT_DIR}/config/configlang.php" 1>/dev/null
 	rsync -av --delete "${WORKSPACE}/artifacts/ww_enterprise/" "${DOCROOT}/${DRUPAL_DIR}/sites/all/modules/ww_enterprise/" 1>/dev/null
 	for plugin in ${PLUGINS}; do
-		# We need to map the AdobeDPS plugin name to its internal name in order to be able to find it in the workspace.
-		if [ ${plugin} == "AdobeDPS" ]; then
+		# We need to map the Adobe_AEM plugin name to its internal name in order to be able to find it in the workspace.
+		if [ ${plugin} == "Adobe_AEM" ]; then
 			plugin="AdobeDps2" 
 		fi
 		# if a config.php file exists in a config folder do not overwrite it for the demo plugins.
