@@ -144,9 +144,7 @@ class IdsAutomation_WflSaveObjects  extends WflSaveObjects_EnterpriseConnector
 				
 				// Resolve the parent layout ids in case of a placement.
 				if( $isPlaced ) {
-					$placedObjectStatusId = $object->MetaData->WorkflowMetaData->State->Id;
-					$placedObjectStatus = IdsAutomationUtils::getStatusWithId( $placedObjectStatusId );
-					if( IdsAutomationUtils::statusSkipsIdsa( $placedObjectStatus ) ) {
+					if( $this->statusHasSkipIdsa( $object->MetaData->WorkflowMetaData->State->Id ) ) {
 						LogHandler::Log( 'IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed." );
 					} else {
 						$layoutIds = IdsAutomationUtils::getLayoutIdsFromObjectID( $objId );
@@ -158,9 +156,7 @@ class IdsAutomation_WflSaveObjects  extends WflSaveObjects_EnterpriseConnector
 									"for which a IDS jobs will be created." );
 								$layoutMetadatas = IdsAutomationUtils::getLayoutsMetadataFromIds( $layoutIds );
 								foreach ( $layoutMetadatas as $layoutId => $layoutMetadata ) {
-									$layoutStatusId = $layoutMetadata->WorkflowMetaData->State->Id;
-									$layoutStatus = IdsAutomationUtils::getStatusWithId( $layoutStatusId );
-									if ( IdsAutomationUtils::statusSkipsIdsa( $layoutStatus ) ) {
+									if ( $this->statusHasSkipIdsa( $layoutMetadata->WorkflowMetaData->State->Id ) ) {
 										LogHandler::Log( 'IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed." );
 										continue;
 									}
@@ -205,6 +201,19 @@ class IdsAutomation_WflSaveObjects  extends WflSaveObjects_EnterpriseConnector
 		}
 		// Clear service context data.
 		$this->cleanupResources();
+	}
+
+	/**
+	 * Function to check whether or not if a status has the skip InDesign Server option enabled.
+	 *
+	 * @param integer $stateId Status Id
+	 * @return bool True when option is enabled
+	 */
+	private function statusHasSkipIdsa( $stateId )
+	{
+		require_once dirname(__FILE__).'/IdsAutomationUtils.class.php';
+		$status = IdsAutomationUtils::getStatusWithId( $stateId );
+		return IdsAutomationUtils::statusSkipsIdsa( $status );
 	}
 
 	final public function onError( WflSaveObjectsRequest $req, BizException $e )
