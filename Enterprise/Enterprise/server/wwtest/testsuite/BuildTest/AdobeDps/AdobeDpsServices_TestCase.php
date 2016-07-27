@@ -28,7 +28,8 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
     private $operationId		= null;
 
 	const FOLIO_FORMAT    = 'application/vnd.adobe.folio+zip';
-        
+	const IMAGE_FORMAT    = 'image/jpeg';
+
 	final public function runTest()
 	{
 		require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php';
@@ -97,7 +98,8 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 			$this->verifyDossierIdsOrder( $this->newDossierIdsOrder, $updatedDossierIdsOrder, 'UpdateDossierOrder' );
 			$this->dossierIds = $updatedDossierIdsOrder;
 			
-			// - - - - - - - -  PREVIEW - - - - - - - - 
+			// - - - - - - - -  PREVIEW - - - - - - - -
+
 			$previewDossierResp = $this->callPreviewDossiers();
 			$previewDossierVerified = $this->verifyOperationDossiersResp( $previewDossierResp, 'Preview' );
 			if( $previewDossierVerified ) {
@@ -192,9 +194,79 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 		$response = $service->execute( $req );
 
 		$dossierId = $response->Objects[0]->MetaData->BasicMetaData->ID;
-		LogHandler::Log( 'AdobeDps', 'DEBUG', 'Dossier Id Created:'.$this->objId );
+		LogHandler::Log( 'AdobeDps', 'DEBUG', 'Dossier Id Created:'.$dossierId );
 
 		$this->createImportedFolioObject( $dossierId );
+		$this->createTOCImage( $dossierId );
+	}
+
+		/**
+	 * Creates an imported folio object inside a parent dossier.
+	 * The folio will also get an relational target to the issue.
+	 *
+	 * @param integer $parentDossierId
+	 * @return void
+	 */
+	private function createTOCImage( $parentDossierId )
+	{
+		// Build MetaData
+		$basicMD                = new BasicMetaData();
+		$basicMD->Name          = 'DPS_TOC_'.date('Y-m-d_H-i-s');
+		$basicMD->Type          = 'Image';
+		$basicMD->Publication   = new Publication( $this->pubInfo->Id, $this->pubInfo->Name );
+		$category               = $this->pubInfo->Categories[0];
+		$basicMD->Category      = new Category( $category->Id, $category->Name );
+
+		$wflMD           = new WorkflowMetaData();
+		$wflMD->State    = $this->getStatus( 'Image' );
+
+		$contentMD           = new ContentMetaData();
+		$contentMD->Format   = self::IMAGE_FORMAT;
+		$contentMD->FileSize = filesize(dirname(__FILE__) . '/testdata/Cover.jpg');
+
+		$metaData 					= new MetaData();
+		$metaData->BasicMetaData    = $basicMD;
+		$metaData->RightsMetaData   = new RightsMetaData();
+		$metaData->SourceMetaData   = new SourceMetaData();
+		$metaData->ContentMetaData  = $contentMD;
+		$metaData->WorkflowMetaData = $wflMD;
+		$metaData->ExtraMetaData    = array();
+		$metaData->ExtraMetaData[0] = new ExtraMetaData( 'C_INTENT', array( 'toc' ) );
+
+		$target		= $this->createTarget();
+
+		// Create dossier object
+		$object = new Object();
+		$object->MetaData 	= $metaData;
+		$object->Targets	= array( $target );
+
+		$relation = new Relation();
+		$relation->Parent = $parentDossierId;
+		$relation->Type = "Contained";
+		$relation->Targets = array($target);
+		$object->Relations  = array( $relation );
+
+		$fileName = dirname(__FILE__).'/testdata/Cover.jpg';
+		$edition = reset($target->Editions);
+
+		$fileAttachment = new Attachment();
+		$fileAttachment->Rendition 	= "native";
+		$fileAttachment->Type      	= self::IMAGE_FORMAT;
+		$fileAttachment->Content 	= null;
+		$fileAttachment->FilePath 	= '';
+		$fileAttachment->FileUrl 	= null;
+		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+		$transferServer = new BizTransferServer();
+		$transferServer->copyToFileTransferServer( $fileName, $fileAttachment );
+		$object->Files = array( $fileAttachment );
+
+		require_once BASEDIR.'/server/services/wfl/WflCreateObjectsService.class.php';
+		$service 	  = new WflCreateObjectsService();
+		$req          = new WflCreateObjectsRequest();
+		$req->Ticket  = $this->ticket;
+		$req->Lock    = false;
+		$req->Objects = array( $object );
+		$service->execute( $req );
 	}
 
 	/**
@@ -242,7 +314,7 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 		$relation->Targets = array($target);
 		$object->Relations  = array( $relation );
 
-		$fileName = dirname(__FILE__).'/testdata/folio_1.folio';
+		$fileName = dirname(__FILE__).'/testdata/Enjoy_2011_9_14_12_43_14.folio';
 		$edition = reset($target->Editions);
 
 		$fileAttachment = new Attachment();
@@ -251,7 +323,6 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 		$fileAttachment->Content 	= null;
 		$fileAttachment->FilePath 	= '';
 		$fileAttachment->FileUrl 	= null;
-		$fileAttachment->EditionId 	= $edition->Id;
 		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 		$transferServer = new BizTransferServer();		
 		$transferServer->copyToFileTransferServer( $fileName, $fileAttachment );		
