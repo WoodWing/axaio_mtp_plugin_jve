@@ -4,6 +4,8 @@ ADD   `documentid` varchar(512) not null  default '',
 ADD   `initialheight` int(4) not null  default '0',
 ADD   `multipleobjects` char(2) not null  default '';
 ALTER TABLE `smart_actionproperties` CHANGE `orderid`   `orderid` int(11) not null  default '0';
+ALTER TABLE `smart_authorizations`
+ADD   `bundle` int(11) not null  default '0';
 ALTER TABLE `smart_objectrelations`
 ADD   `parenttype` varchar(20) not null  default '';
 ALTER TABLE `smart_placements`

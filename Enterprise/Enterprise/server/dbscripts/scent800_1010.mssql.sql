@@ -14,6 +14,8 @@ SET @sql = 'ALTER TABLE smart_actionproperties DROP CONSTRAINT ' + @constraintNa
 EXEC (@sql);
 ALTER TABLE smart_actionproperties ALTER COLUMN   [orderid] int not null ;
 ALTER TABLE [smart_actionproperties] ADD DEFAULT ('0') FOR [orderid];
+ALTER TABLE [smart_authorizations] ADD 
+  [bundle] int not null  default '0';
 ALTER TABLE [smart_objectrelations] ADD 
   [parenttype] varchar(20) not null  default '';
 ALTER TABLE [smart_placements] ADD 

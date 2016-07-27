@@ -162,6 +162,8 @@ class DBStruct
 									'alters' => array('v' => '340', 'name' => 'issue',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
 							array('v' => '610', 'name' => 'profile',	'type' => 'int(11)',		'default' => "'0'",
 									'alters' => array('v' => '420', 'name' => 'profile',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '1010', 'name' => 'bundle',	'type' => 'int(11)',		'default' => "'0'",
+								'comment' => 'Group id of rows that should be combined (bundled) in the admin UI.' ),
 						),
 						'indexes' => array(
 							array('v' => '420', 'name' => 'gipu_authorizations', 	'fields' => 'grpid, publication'),
@@ -3265,6 +3267,7 @@ class DBStruct
 			'smart_indesignserverjobs', // id field was removed since 9.7
 			'smart_indesignarticles',
 			'smart_idarticlesplacements',
+			'smart_authorizationgroups',
 		);
 	}
 
@@ -4805,7 +4808,7 @@ class OraGenerator extends StdSqlGenerator
 	 */
 	private function hasAutoIncrement( $tableInfo )
 	{
-		if ( $tableInfo['fields'] ) foreach ($tableInfo['fields'] as $field) {
+		if ( isset($tableInfo['fields']) ) foreach ($tableInfo['fields'] as $field) {
 			if ( isset( $field['autoincrement'] ) ) {
 				return true;
 			}

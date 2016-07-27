@@ -1,6 +1,8 @@
 ALTER TABLE `smart_actionproperties`
 ADD   `multipleobjects` char(2) not null  default '';
 ALTER TABLE `smart_actionproperties` CHANGE `orderid`   `orderid` int(11) not null  default '0';
+ALTER TABLE `smart_authorizations`
+ADD   `bundle` int(11) not null  default '0';
 ALTER TABLE `smart_placements`
 ADD   `frametype` varchar(20) not null  default '',
 ADD   `splineid` varchar(200) not null  default '';

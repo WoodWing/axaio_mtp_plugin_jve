@@ -1,3 +1,5 @@
+ALTER TABLE SMART_AUTHORIZATIONS ADD (
+  BUNDLE int default '0');
 ALTER TABLE SMART_PLACEMENTS ADD (
   FRAMETYPE varchar(20) default '',
   SPLINEID varchar(200) default '');

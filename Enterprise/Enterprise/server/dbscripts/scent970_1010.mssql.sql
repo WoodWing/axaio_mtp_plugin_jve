@@ -1,3 +1,5 @@
+ALTER TABLE [smart_authorizations] ADD 
+  [bundle] int not null  default '0';
 ALTER TABLE [smart_states] ADD 
   [skipidsa] char(2) not null  default '';
 CREATE  INDEX [lt_indesignserverjobs] on [smart_indesignserverjobs]([locktoken]) ;
