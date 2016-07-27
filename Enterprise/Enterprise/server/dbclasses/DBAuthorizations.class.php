@@ -96,7 +96,7 @@ class DBAuthorizations extends DBBase
 		$dbh = DBDriverFactory::gen();
 		$dba = $dbh->tablename('authorizations');
 		$sql =
-			"SELECT a.`id`, a.`section`, a.`state`, a.`profile` ".
+			"SELECT a.`id`, a.`section`, a.`state`, a.`profile`, a.`bundle` ".
 			"FROM $dba a ".
 			'WHERE a.`id` IN( '.implode( ',', $authIds ).' ) ';
 		$sth = $dbh->query( $sql );
@@ -125,7 +125,7 @@ class DBAuthorizations extends DBBase
 		$dbst = $dbh->tablename('states');
 		$dba = $dbh->tablename('authorizations');
 
-		$sql = "SELECT a.`id`, a.`section`, a.`state`, a.`profile` ".
+		$sql = "SELECT a.`id`, a.`section`, a.`state`, a.`profile`, a.`bundle` ".
 			"FROM $dba a ".
 			"LEFT JOIN $dbs s on (a.`section` = s.`id`) ".
 			"LEFT JOIN $dbst st on (a.`state` = st.`id`) ".
@@ -223,15 +223,16 @@ class DBAuthorizations extends DBBase
 	 * @param integer $categoryId
 	 * @param integer $statusId
 	 * @param integer $profileId
+	 * @param integer $bundleId
 	 * @return bool|integer Record id, or false when creation failed.
 	 * @throws BizException
 	 */
-	public static function insertAuthorizationRow( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId )
+	public static function insertAuthorizationRow( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId, $bundleId )
 	{
 		$dbh = DBDriverFactory::gen();
 		$dba = $dbh->tablename('authorizations');
-		$sql = "INSERT INTO $dba (`publication`, `issue`, `grpid`, `section`, `state`, `profile`) ".
-			"VALUES ( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId )";
+		$sql = "INSERT INTO $dba (`publication`, `issue`, `grpid`, `section`, `state`, `profile`, `bundle`) ".
+			"VALUES ( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId, $bundleId )";
 		$sql = $dbh->autoincrement( $sql );
 		$sth = $dbh->query( $sql );
 		return (bool)$dbh->newid( $dba, true );
@@ -244,6 +245,9 @@ class DBAuthorizations extends DBBase
 	 * However, a record in DB for which category id and/or status id set to zero also matches
 	 * regardless of the provided $categoryId / $statusId search params because zero means 'all'.
 	 *
+	 * IMPORTANT: When $bundleId is set zero, this function will check for other bundles as well.
+	 * When given, it will check existence for the given bundle only.
+	 *
 	 * @since 10.1.0
 	 * @param integer $brandId
 	 * @param integer $issueId
@@ -251,16 +255,56 @@ class DBAuthorizations extends DBBase
 	 * @param integer $categoryId
 	 * @param integer $statusId
 	 * @param integer $profileId
+	 * @param integer $bundleId
 	 * @return bool Whether or not a matching record exists.
 	 */
-	public static function doesAuthorizationExists( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId )
+	public static function doesAuthorizationExists( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId, $bundleId )
 	{
 		$where = '`publication` = ? AND `issue` = ? AND `grpid` = ? '.
 			'AND (`section` = ? OR `section` = ?) '. // match with param or with ALL (0)
 			'AND (`state` = ? OR `state` = ?) '.     // match with param or with ALL (0)
-			'AND `profile` = ?';
+			'AND `profile` = ? ';
 		$params = array( $brandId, $issueId, $userGroupId, $categoryId, 0, $statusId, 0, $profileId );
+		if( $bundleId ) {
+			$where .= 'AND `bundle` = ?';
+			$params[] = $bundleId;
+		}
 		$row = DBBase::getRow( 'authorizations', $where, 'id', $params );
 		return isset($row['id']) && $row['id'];
+	}
+
+	/**
+	 * Determines the maximum value of the 'bundle' field stored in DB.
+	 *
+	 * @since 10.1.0
+	 * @param integer $brandId
+	 * @param integer $issueId
+	 * @param integer $userGroupId
+	 * @return int The maximum value.
+	 * @throws BizException
+	 */
+	public static function getMaxBundleId( $brandId, $issueId, $userGroupId )
+	{
+		$dbh = DBDriverFactory::gen();
+		$dba = $dbh->tablename('authorizations');
+		$sql = "SELECT MAX(`bundle`) as `maxid` FROM $dba ".
+				'WHERE `publication` = ? AND `issue` = ? AND `grpid` = ?';
+		$params = array( $brandId, $issueId, $userGroupId );
+		$sth = $dbh->query( $sql, $params );
+		$row = $dbh->fetch( $sth );
+		return $row['maxid'];
+	}
+
+	/**
+	 * Updates the bundle id for a given list of authorization ids.
+	 *
+	 * @param integer $newBundleId
+	 * @param integer[] $authIds
+	 */
+	public static function updateBundleIds( $newBundleId, array $authIds )
+	{
+		$row = array( 'bundle' => $newBundleId );
+		$where = '`id` IN( '.implode( ',', $authIds ).') ';
+		self::updateRow( 'authorizations', $row, $where );
 	}
 }

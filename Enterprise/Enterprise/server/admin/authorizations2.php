@@ -132,9 +132,13 @@ $rows = DBAuthorizations::getAuthorizationRowsByBrandIssueUserGroup( $publ, $iss
 // Combine authorizations DB records that can be shown in one HTML row.
 $authMap = new Ww_Admin_Authorizations_Map();
 foreach( $rows as $row ) {
-	$authMap->add( $row['id'], $row['section'], $row['state'], $row['profile'] );
+	$authMap->add( $row['id'], $row['section'], $row['state'], $row['profile'], $row['bundle'] );
 }
-$authMap->combine();
+$authMap->combine( DBAuthorizations::getMaxBundleId( $publ, $issue, $grp ) );
+$newBundleIds = $authMap->getNewBundleIds();
+if( $newBundleIds ) foreach( $newBundleIds as $bundleId => $authIds ) {
+	DBAuthorizations::updateBundleIds( $bundleId, $authIds );
+}
 
 // Compose a HTML table to display the (combined) authorizations.
 $detailtxt = $authApp->composeAuthorizationsHtmlTable( $authMap, $sectiondomain, $statedomain, $profiles, $command, $authIds );
@@ -200,7 +204,20 @@ function getCategoryIdNameByBrandIssue( $brandId, $issueId = 0 )
 
 class Ww_Admin_Authorizations_Map
 {
-	/** @var array List of (combined) authorization configurations. */
+	/**
+	 * @var array List of authorization configurations to be smartly combined by algorithm.
+	 * Could be either the ones that were not bundled by the admin user before, or
+	 * existing ones requested by admin user to be automatically optimized.
+	 */
+	private $authCombis = array();
+
+	/**
+	 * @var array List of authorization configurations that were bundled before.
+	 * Those are bundled in the way the admin user wants.
+	 */
+	private $authBundles = array();
+
+	/** @var array $authMap The two arrays above merged. Used to iterate over all.  */
 	private $authMap = array();
 
 	/**
@@ -210,15 +227,33 @@ class Ww_Admin_Authorizations_Map
 	 * @param integer $categoryId
 	 * @param integer $statusId
 	 * @param integer $profileId
+	 * @param integer $bundleId
 	 */
-	public function add( $authId, $categoryId, $statusId, $profileId )
+	public function add( $authId, $categoryId, $statusId, $profileId, $bundleId )
 	{
-		$this->authMap[] = array(
-			'categories' => $categoryId,
-			'statuses' => $statusId,
-			'profiles' => $profileId,
-			'ids' => $authId
-		);
+		if( $bundleId ) {
+			if( !isset($this->authBundles[$bundleId]) ) {
+				$this->authBundles[$bundleId] = array(
+					'categories' => $categoryId,
+					'statuses' => $statusId,
+					'profiles' => $profileId,
+					'ids' => $authId
+				);
+			} else {
+				$bundle = &$this->authBundles[$bundleId]; // by reference, so authBundles gets updated below
+				$bundle['categories'] = $this->combineFields( $bundle['categories'], $categoryId );
+				$bundle['statuses'] = $this->combineFields( $bundle['statuses'], $statusId );
+				$bundle['profiles'] = $this->combineFields( $bundle['profiles'], $profileId );
+				$bundle['ids'] = $this->combineFields( $bundle['ids'], $authId );
+			}
+		} else {
+			$this->authCombis[] = array(
+				'categories' => $categoryId,
+				'statuses' => $statusId,
+				'profiles' => $profileId,
+				'ids' => $authId
+			);
+		}
 	}
 
 	/**
@@ -280,8 +315,10 @@ class Ww_Admin_Authorizations_Map
 	 * as the next record, those two get merged.
 	 *
 	 * Note that this algorithm is kept simple and does not strive for the most optimal combinations.
+	 *
+	 * @param integer $maxBundleId The highest bundle id that already exists in DB.
 	 */
-	public function combine()
+	public function combine( $maxBundleId )
 	{
 		// About the algorithm below...
 
@@ -302,31 +339,56 @@ class Ww_Admin_Authorizations_Map
 		// could combine, we continue combining.
 
 		do {
-			$originalCount = count( $this->authMap );
+			$originalCount = count( $this->authCombis );
 
-			list( $category, $status, $profile ) = $this->prepareMultiSort( $this->authMap );
-			array_multisort( $category, SORT_ASC, SORT_STRING, $status, SORT_ASC, SORT_STRING, $this->authMap );
-			$this->authMap = $this->combineRows( $this->authMap, 'categories', 'statuses' );
-			list( $category, $status, $profile ) = $this->prepareMultiSort( $this->authMap );
-			array_multisort( $status, SORT_ASC, SORT_STRING, $category, SORT_ASC, SORT_STRING, $this->authMap );
-			$this->authMap = $this->combineRows( $this->authMap, 'statuses', 'categories' );
+			list( $category, $status, $profile ) = $this->prepareMultiSort( $this->authCombis );
+			array_multisort( $category, SORT_ASC, SORT_STRING, $status, SORT_ASC, SORT_STRING, $this->authCombis );
+			$this->authCombis = $this->combineRows( $this->authCombis, 'categories', 'statuses' );
+			list( $category, $status, $profile ) = $this->prepareMultiSort( $this->authCombis );
+			array_multisort( $status, SORT_ASC, SORT_STRING, $category, SORT_ASC, SORT_STRING, $this->authCombis );
+			$this->authCombis = $this->combineRows( $this->authCombis, 'statuses', 'categories' );
 
-			list( $category, $status, $profile ) = $this->prepareMultiSort( $this->authMap );
-			array_multisort( $status, SORT_ASC, SORT_STRING, $profile, SORT_ASC, SORT_STRING, $this->authMap );
-			$this->authMap = $this->combineRows( $this->authMap, 'statuses', 'profiles' );
-			list( $category, $status, $profile ) = $this->prepareMultiSort( $this->authMap );
-			array_multisort( $profile, SORT_ASC, SORT_STRING, $status, SORT_ASC, SORT_STRING, $this->authMap );
-			$this->authMap = $this->combineRows( $this->authMap, 'profiles', 'statuses' );
+			list( $category, $status, $profile ) = $this->prepareMultiSort( $this->authCombis );
+			array_multisort( $status, SORT_ASC, SORT_STRING, $profile, SORT_ASC, SORT_STRING, $this->authCombis );
+			$this->authCombis = $this->combineRows( $this->authCombis, 'statuses', 'profiles' );
+			list( $category, $status, $profile ) = $this->prepareMultiSort( $this->authCombis );
+			array_multisort( $profile, SORT_ASC, SORT_STRING, $status, SORT_ASC, SORT_STRING, $this->authCombis );
+			$this->authCombis = $this->combineRows( $this->authCombis, 'profiles', 'statuses' );
 
-			list( $category, $status, $profile ) = $this->prepareMultiSort( $this->authMap );
-			array_multisort( $category, SORT_ASC, SORT_STRING, $profile, SORT_ASC, SORT_STRING, $this->authMap );
-			$this->authMap = $this->combineRows( $this->authMap, 'categories', 'profiles' );
-			list( $category, $status, $profile ) = $this->prepareMultiSort( $this->authMap );
-			array_multisort( $profile, SORT_ASC, SORT_STRING, $category, SORT_ASC, SORT_STRING, $this->authMap );
-			$this->authMap = $this->combineRows( $this->authMap, 'profiles', 'categories' );
+			list( $category, $status, $profile ) = $this->prepareMultiSort( $this->authCombis );
+			array_multisort( $category, SORT_ASC, SORT_STRING, $profile, SORT_ASC, SORT_STRING, $this->authCombis );
+			$this->authCombis = $this->combineRows( $this->authCombis, 'categories', 'profiles' );
+			list( $category, $status, $profile ) = $this->prepareMultiSort( $this->authCombis );
+			array_multisort( $profile, SORT_ASC, SORT_STRING, $category, SORT_ASC, SORT_STRING, $this->authCombis );
+			$this->authCombis = $this->combineRows( $this->authCombis, 'profiles', 'categories' );
 
-		} while( $originalCount != count( $this->authMap ) );
+		} while( $originalCount != count( $this->authCombis ) );
 
+		// Replace the ids of the authCombis array with [max+1...n] in preparation of a merge with authBundles.
+		if( $this->authCombis ) {
+			$bundleIds = range( $maxBundleId + 1, $maxBundleId + count( $this->authCombis ) );
+			$this->authCombis = array_combine( $bundleIds, $this->authCombis );
+		}
+
+		// Combine the results of the combine algorithm (authCombies) with the manually edit configs (authBundles)
+		// so that the caller can iterate of all entries after this.
+		$this->authMap = array_merge( $this->authBundles, $this->authCombis );
+	}
+
+	/**
+	 * Composes a list of new bundle ids that are allocated by the compose algorithm (in memory).
+	 *
+	 * @return array List of bundle ids (keys). Each entry contains a list of authorization ids.
+	 */
+	public function getNewBundleIds()
+	{
+		$retVal = array();
+		foreach( $this->authCombis as $bundleId => $authConfig ) {
+			foreach( explode( ',', $authConfig['ids'] ) as $authId ) {
+				$retVal[ $bundleId ][] = $authId;
+			}
+		}
+		return $retVal;
 	}
 
 	/**
@@ -516,16 +578,35 @@ class Ww_Admin_Authorizations_App
 	}
 
 	/**
-	 * @param integer[] $selectedCategoryIds
-	 * @param integer[] $selectedStatusIds
-	 * @param integer[] $selectedProfileIds
-	 * @param integer[] $authIds
+	 * Save one bundle of configured authorizations in DB.
+	 *
+	 * It deletes existing authorizations from DB that are no longer in the bundle.
+	 * When saving a new bundle, a new bundle id gets assigned to all authorizations.
+	 *
+	 * IMPORTANT: When caller has cleared the bundle id before calling this function
+	 * it won't add authorizations that can be found in other bundles and it will
+	 * delete authorizations that are 'more specific'. In other terms, it jumps into
+	 * intelligence mode whereby redundant authorizations are not stored or cleaned.
+	 *
+	 * A 'more specific' authorization has the category and/or status set, while
+	 * a 'more generic' authorization has one/both set to zero (all). So in that way
+	 * they could be 'matching', since a zero (all) supersedes a specific value.
+	 * For those cases, technically, the specific authorizations can be removed (optimized).
+	 * But that would be very confusing for the admin user; e.g. when adding a all-all
+	 * authorization would delete all other configurations made before, which would
+	 * be simply too dangerous and may lead to frustrations. So cleaning should be done
+	 * manually, or auto cleaning should be an explicit request (by clearing the bundle ids).
+	 *
+	 * @param integer[] $selectedCategoryIds New user selection of category ids to be saved.
+	 * @param integer[] $selectedStatusIds New user selection of status ids to be saved.
+	 * @param integer[] $selectedProfileIds New user selection of profile ids to be saved.
+	 * @param integer[] $authIds Authorizations that were opened for editing by user.
 	 * @param integer $brandId
 	 * @param integer $issueId
 	 * @param integer $userGroupId
 	 */
 	function saveAuthorizations( $selectedCategoryIds, $selectedStatusIds, $selectedProfileIds,
-	            $authIds, $brandId, $issueId, $userGroupId )
+	                             $authIds, $brandId, $issueId, $userGroupId )
 	{
 		// Compose cartesian product of the user selected ids.
 		$selectedAuths = array();
@@ -553,6 +634,14 @@ class Ww_Admin_Authorizations_App
 			DBAuthorizations::deleteAuthorizationsByIds( $deleteAuthIds );
 		}
 
+		// Determine the bundle id. When user creates new authorizations take a new bundle id.
+		if( $rows ) {
+			$firstRow = reset( $rows );
+			$bundleId = $firstRow['bundle'];
+		} else {
+			$bundleId = DBAuthorizations::getMaxBundleId( $brandId, $issueId, $userGroupId ) + 1;
+		}
+
 		// Create all user configured authorizations in DB that do not exist yet.
 		$dbAuths = array();
 		foreach( $rows as $row ) {
@@ -562,12 +651,25 @@ class Ww_Admin_Authorizations_App
 			foreach( $selectedStatusIds as $statusId ) {
 				foreach( $selectedProfileIds as $profileId ) {
 					if( !isset( $dbAuths[ $categoryId ][ $statusId ][ $profileId ] ) ) {
+
+						// For logic within this if-part, see function header for full explanation.
+						// The bundle id is zero when caller has requested for auto clean,
+						// or when the first time editing authorizations after DB migration from < 10.1.
+
+						// When bundle id is set, check for existence within the bundle only.
+						// When bundle is zero, check for existence within the whole brand/issue/group.
 						if( !DBAuthorizations::doesAuthorizationExists( $brandId, $issueId, $userGroupId,
-								$categoryId, $statusId, $profileId ) ) {
+							$categoryId, $statusId, $profileId, $bundleId ) ) {
+
+							// Only create new authorization when it does not exist (see check above).
 							DBAuthorizations::insertAuthorizationRow( $brandId, $issueId, $userGroupId,
-								$categoryId, $statusId, $profileId );
-							DBAuthorizations::deleteMoreSpecificAuthorizations( $brandId, $issueId, $userGroupId,
-								$categoryId, $statusId, $profileId );
+								$categoryId, $statusId, $profileId, $bundleId );
+
+							// Only delete 'more specific' authorizations in auto clean mode.
+							if( !$bundleId ) {
+								DBAuthorizations::deleteMoreSpecificAuthorizations( $brandId, $issueId, $userGroupId,
+									$categoryId, $statusId, $profileId );
+							}
 						}
 					}
 				}
