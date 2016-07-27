@@ -35,8 +35,7 @@ class IdsAutomationUtils
 		}
 		$processedLayoutIds[$layoutID] = true;
 
-		$pageSyncDefaultsToNo = self::isIdsClientFeatureValue( 'PageSyncDefaultsToNo' );
-		if( !$pageSyncDefaultsToNo ) {
+		if( !self::isIdsClientFeatureValue( 'PageSyncDefaultsToNo' ) ) {
 			// Bail out when the layout has got an update flag set.
 			$dbh = DBDriverFactory::gen();
 			$flagsTable = $dbh->tablename('objectflags');
