@@ -41,9 +41,7 @@ class PreviewMetaPHP_MetaData extends MetaData_EnterpriseConnector
 			case 'image/tiff':
 				$returnVal = 8;	// Allow some space to have other plug-ins do it better
 				break;
-			case 'application/postscript':
 			case 'application/illustrator':
-			case 'application/pdf':
 			case 'application/indesign':
 			case 'application/incopy':
 			case 'application/incopyinx':
@@ -51,6 +49,10 @@ class PreviewMetaPHP_MetaData extends MetaData_EnterpriseConnector
 			case 'application/incopyicmt':
 			case 'image/x-photoshop':
 				$returnVal = 7;	// Allow some space to have other plug-ins do it better
+				break;
+			case 'application/postscript':
+			case 'application/pdf':
+				$returnVal = 5;
 				break;
 			case 'image/png':		// We cannot read PNG & GIF, can contain XMP, but need to be decompressed first
 			case 'image/x-png':		// But we can read width/height, so it's a level 1 support :-)
