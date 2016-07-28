@@ -24,7 +24,7 @@ $webApps = array();
 // RabbitMQ is not a plugin, but it also needs an app icon (that refers to its admin pages).
 require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
 if( BizMessageQueue::isInstalled() ) {
-	$connection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST' );
+	$connection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST', false );
 	if( $connection ) {
 		$webApps[] = array(
 			'url' => $connection->Url,
