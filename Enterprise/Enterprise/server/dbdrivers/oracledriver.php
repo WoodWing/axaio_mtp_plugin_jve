@@ -513,11 +513,13 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	 * Checks if a given database table exists in the current table space.
 	 *
 	 * @param string $tableName
+	 * @param boolean $addPrefix Add the WoodWing prefix to the table name.
 	 * @return boolean Whether or not the table exists.
 	 */
-	public function tableExists( $tableName )
+	public function tableExists( $tableName, $addPrefix = true )
 	{
-		$sql = 'SELECT table_name FROM user_tables WHERE table_name=\''.strtoupper(DBPREFIX.$tableName).'\'';
+		$tableName = $addPrefix ? DBPREFIX.$tableName : $tableName;
+		$sql = 'SELECT table_name FROM user_tables WHERE table_name=\''.strtoupper($tableName).'\'';
 		$sth = $this->query( $sql );
 		$row = $this->fetch( $sth );	
 		return (bool)$row;
