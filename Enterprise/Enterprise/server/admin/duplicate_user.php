@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__FILE__).'/../../config/config.php';
+require_once '../../config/configserver.php';   //BZ# 5063
 require_once BASEDIR.'/server/admin/global_inc.php';
 require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';

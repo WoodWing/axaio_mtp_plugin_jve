@@ -2749,7 +2749,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Deadline = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Urgency = null;
-		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Modifier = null;
+		require_once BASEDIR.'/server/utils/TestSuiteOptions.php';
+		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Modifier = WW_Utils_TestSuiteOptions::getUser();
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Modified = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Creator = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Created = null;
@@ -2839,7 +2840,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Deadline = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Urgency = null;
-		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Modifier = null;
+		require_once BASEDIR.'/server/utils/TestSuiteOptions.php';
+		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Modifier = WW_Utils_TestSuiteOptions::getUser();
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Modified = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Creator = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Created = null;
@@ -2929,7 +2931,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Deadline = null;
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Urgency = null;
-		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Modifier = null;
+		require_once BASEDIR.'/server/utils/TestSuiteOptions.php';
+		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Modifier = WW_Utils_TestSuiteOptions::getUser();
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Modified = null;
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Creator = null;
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Created = null;
@@ -3283,7 +3286,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Deadline = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Urgency = null;
-		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Modifier = null;
+		require_once BASEDIR.'/server/utils/TestSuiteOptions.php';
+		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Modifier = WW_Utils_TestSuiteOptions::getUser();
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Modified = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Creator = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Created = null;
@@ -3373,7 +3377,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Deadline = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Urgency = null;
-		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Modifier = null;
+		require_once BASEDIR.'/server/utils/TestSuiteOptions.php';
+		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Modifier = WW_Utils_TestSuiteOptions::getUser();
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Modified = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Creator = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Created = null;
@@ -3463,7 +3468,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Deadline = null;
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Urgency = null;
-		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Modifier = null;
+		require_once BASEDIR.'/server/utils/TestSuiteOptions.php';
+		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Modifier = WW_Utils_TestSuiteOptions::getUser();
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Modified = null;
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Creator = null;
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Created = null;

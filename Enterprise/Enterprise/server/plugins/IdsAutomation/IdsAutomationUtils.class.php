@@ -11,8 +11,8 @@ class IdsAutomationUtils
 	/**
 	 * Pushes a new job into the IDS jobs queue. It will be picked up for processing later.
 	 *
-	 * Exception: When the layout is flagged (due to changes in a 3rd party planning system),
-	 * the job is NOT pushed into the queue at all.
+	 * Exception: When PageSyncDefaultsToNo option is not support and the layout is flagged (due to changes in a
+	 * 3rd party planning system), the job is NOT pushed into the queue at all.
 	 * If the layout is locked, because it is still checked out, the job will initially be set on HALT
 	 * by setting the status to the job to LOCKED. After the layout is unlocked the job will be replanned.
 	 *
@@ -35,19 +35,21 @@ class IdsAutomationUtils
 		}
 		$processedLayoutIds[$layoutID] = true;
 
-		// Bail out when the layout has got an update flag set.
-		$dbh = DBDriverFactory::gen();
-		$flagsTable = $dbh->tablename('objectflags');
-		$sql = 'SELECT COUNT(`objid`) AS `idcount` FROM ' . $flagsTable . ' ' .
-			'WHERE `objid` = ? ';
-		$params = array($layoutID);
-		$sth = $dbh->query($sql, $params);
-		$row = $dbh->fetch($sth);
-		$idCount = $row ? $row['idcount'] : 0;
-		if ($idCount > 0) { // layout is flagged
-			LogHandler::Log('IdsAutomation', 'INFO',
-				"Skipped IDS job creation: Layout [$layoutID] has an Update Flag set.");
-			return;
+		if( !self::isIdsClientFeatureValue( 'PageSyncDefaultsToNo' ) ) {
+			// Bail out when the layout has got an update flag set.
+			$dbh = DBDriverFactory::gen();
+			$flagsTable = $dbh->tablename('objectflags');
+			$sql = 'SELECT COUNT(`objid`) AS `idcount` FROM ' . $flagsTable . ' ' .
+				'WHERE `objid` = ? ';
+			$params = array($layoutID);
+			$sth = $dbh->query($sql, $params);
+			$row = $dbh->fetch($sth);
+			$idCount = $row ? $row['idcount'] : 0;
+			if ($idCount > 0) { // layout is flagged
+				LogHandler::Log('IdsAutomation', 'INFO',
+					"Skipped IDS job creation: Layout [$layoutID] has an Update Flag set.");
+				return;
+			}
 		}
 
 		// We want an IDS instance with matching version.
@@ -141,7 +143,7 @@ class IdsAutomationUtils
 				LogHandler::Log( 'IdsAutomation', 'INFO', "The new status [$newStatusId] could not be found in DB. No action needed." );
 				break;
 			}
-			if ( self::layoutStatusSkipsIdsa( $newStatus )) {
+			if ( self::statusSkipsIdsa( $newStatus )) {
 				LogHandler::Log( 'IdsAutomation', 'INFO', "The new status has the skip InDesign Server Automation property set. No action needed." );
 				break;
 			}
@@ -207,7 +209,7 @@ class IdsAutomationUtils
 	public static function isContentChangeTriggerForIds( $objId, $statusId )
 	{
 		$status = self::getStatusWithId( $statusId );
-		if ( self::layoutStatusSkipsIdsa( $status )) {
+		if ( self::statusSkipsIdsa( $status )) {
 			LogHandler::Log( 'IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed." );
 			return false;
 		}
@@ -227,7 +229,7 @@ class IdsAutomationUtils
 							'is configured, but layout has no PDFs yet. Action needed.' );
 			$retVal = true;
 		} else {
-			LogHandler::Log( 'IdsAutomation', 'INFO', 'Content has changed but no but no action for IDS '.
+			LogHandler::Log( 'IdsAutomation', 'INFO', 'Content has changed but no action for IDS '.
 							'configured or layout has Output renditions already. No action needed.' );
 			$retVal = false;
 		}
@@ -505,7 +507,7 @@ class IdsAutomationUtils
 	 * @param Object $status Status object
 	 * @return boolean
 	 */
-	static public function layoutStatusSkipsIdsa( $status )
+	static public function statusSkipsIdsa( $status )
 	{
 		return $status->SkipIdsa;
 	}

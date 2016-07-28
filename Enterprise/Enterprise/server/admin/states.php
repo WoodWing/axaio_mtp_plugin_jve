@@ -84,13 +84,11 @@ if( $insert ) {
 
 if( $mode == 'delete' ) {
 	try {
-
 		// Check to see if there are statuses that are still linked to Authorizations.
 		$id = intval($_REQUEST['id']);
 
 		require_once BASEDIR.'/server/bizclasses/BizCascadePub.class.php';
 		BizCascadePub::deleteStatus( $id ); // only for deletions, status id is provided
-
 	} catch( BizException $e ) {
 		$errors[] = $e->getMessage();
 		$mode = 'error';
@@ -203,7 +201,7 @@ switch( $mode ) {
 			$disableSkipIdsa = true;
 			if ( $useSkipIdsa ) {
 				require_once BASEDIR.'/server/plugins/IdsAutomation/IdsAutomationUtils.class.php';
-				$disableSkipIdsa = !IdsAutomationUtils::isLayoutObjectType( $type );
+				$disableSkipIdsa = !( IdsAutomationUtils::isLayoutObjectType( $type ) || IdsAutomationUtils::isPlaceableObjectType( $type ) );
 			}
 			$deadlinerelativefields[$i]->setValue( DateTimeFunctions::validRelativeTime( $row->DeadlineRelative ) );
 			$detailtxt .=
