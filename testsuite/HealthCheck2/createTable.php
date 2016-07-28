@@ -31,10 +31,7 @@ foreach($files as $cur_file) {
 
             foreach($check_tables as $value)
             {
-                    $sql = "SHOW TABLES LIKE '$value'";
-                    $sth = $dbDriver->query($sql);
-                    $return = $dbDriver->fetch($sth);
-                    if($return)
+                    if( $dbDriver->tableExists( $value, false ))
                     {
                             print '<font color="green">Table '.$value.' already created</font><br>';
                             $tableCheck = true;
@@ -46,10 +43,7 @@ foreach($files as $cur_file) {
                     $runSqlScript = runSqlScript( $dbDriver, $cur_file );
                     foreach($check_tables as $value)
                     {
-                            $sql = "SHOW TABLES LIKE '$value'";
-                            $sth = $dbDriver->query($sql);
-                            $return = $dbDriver->fetch($sth);
-                            if($return)
+                            if( $dbDriver->tableExists( $value, false ))
                             {
                                     print '<font color="green">Table '.$value.' successfully created</font><br>';
                             }
@@ -62,7 +56,6 @@ foreach($files as $cur_file) {
             }
         $done = true;
     }
-
 }
 
 if(!$done) {
