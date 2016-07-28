@@ -92,11 +92,12 @@ class DBVersion extends DBBase
 	
 	/**
 	 * Removes one or more version records from the smart_objectversions table.
+	 *
 	 * @param array $ids Object ids of which versions need to be deleted
-	 * @param array $versions Array of object version numbers, one for each id
+	 * @param mixed $versions Array of object version numbers, one for each id
 	 * @return boolean Whether or not the deletions were successful.
 	 */
-	static public function deleteVersions( $ids, $versions=null )
+	static public function deleteVersions( array $ids, $versions=null )
 	{
 		$where = '';
 		$params = array();
@@ -134,13 +135,13 @@ class DBVersion extends DBBase
 		$versionstable = $dbdriver->tablename(self::TABLENAME);
 		$sql  = "SELECT v.*, ";
 		$sql .= $dbdriver->concatFields(array("v.`majorversion`","'.'","v.`minorversion`")) . " as \"version\" ";
-		$sql .= "FROM $versionstable v where v.`objid`=$id";
+		$sql .= "FROM $versionstable v WHERE v.`objid`=$id";
 		if( $version ) { // need to get specific version?
 			$verArray = array();
 			self::splitMajorMinorVersion( $version, $verArray );
-			$sql .=' and v.`majorversion` = '.$verArray['majorversion'].' and v.`minorversion` = '.$verArray['minorversion'];
+			$sql .=' AND v.`majorversion` = '.$verArray['majorversion'].' AND v.`minorversion` = '.$verArray['minorversion'];
 		}
-		$sql .= " order by v.`majorversion`, v.`minorversion` ";
+		$sql .= " ORDER BY v.`majorversion`, v.`minorversion` ";
 		$sth = $dbdriver->query($sql);
 
 		if( !$sth ) {

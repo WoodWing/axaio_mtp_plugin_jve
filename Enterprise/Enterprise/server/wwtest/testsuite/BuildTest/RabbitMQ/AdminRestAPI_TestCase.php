@@ -67,7 +67,7 @@ class WW_TestSuite_BuildTest_RabbitMQ_AdminRestAPI_TestCase extends TestCase
 		require_once BASEDIR.'/server/utils/rabbitmq/restapi/Client.class.php';
 
 		// Pick and validate connection configuration.
-		$this->connection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST' );
+		$this->connection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST', false );
 		$this->assertInstanceOf( 'MessageQueueConnection', $this->connection,
 			'Please check the MESSAGE_QUEUE_CONNECTIONS option in the configserver.php file. '.
 			'It should have a MessageQueueConnection( \'RabbitMQ\', \'REST\', ... ) configured.' );

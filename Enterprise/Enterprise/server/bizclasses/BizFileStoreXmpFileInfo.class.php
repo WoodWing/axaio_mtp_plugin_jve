@@ -12,6 +12,9 @@ class BizFileStoreXmpFileInfo
 {
 	/**
 	 * Reads the embedded XMP data from the file of a layout in the FileStore.
+	 * A layout can contain several XMP data blocks. Each block can refer to a different version. The highest version is
+	 * returned. A layout modified by certain InDesign client can only be displayed by an InDesign Server if the version
+	 * of InDesign Server is at least equal to the InDesign client version.
 	 *
 	 * Note that the document version should not be confused with the object version.
 	 *
@@ -23,49 +26,60 @@ class BizFileStoreXmpFileInfo
 		$layoutVersion = null;
 		LogHandler::Log( __CLASS__, 'DEBUG', 'Trying to resolve the layout document version '.
 			'from embedded XMP data in layout file (in FileStore) for layout id: '.$layoutId );
-		
+
 		// Resolve the layout object version and storename from DB.
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		$objProps = DBObject::getObjectsPropsForRelations( array($layoutId) );
-		if( isset($objProps[$layoutId]) ) { // smart_objects record found in DB?
-			$objectVersion = $objProps[$layoutId]['Version'];
-			$storeName = $objProps[$layoutId]['StoreName'];
-			
+		$objProps = DBObject::getObjectsPropsForRelations( array( $layoutId ) );
+		if( isset( $objProps[ $layoutId ] ) ) { // smart_objects record found in DB?
+			$objectVersion = $objProps[ $layoutId ]['Version'];
+			$storeName = $objProps[ $layoutId ]['StoreName'];
+
 			// Determine the filepath of the native layout file in the filestore.
 			require_once BASEDIR.'/server/bizclasses/BizStorage.php';
 			$fileStorage = new FileStorage( $storeName, $layoutId, 'native', 'application/indesign', $objectVersion );
 			if( file_exists( $fileStorage->getFileName() ) ) {
-				LogHandler::Log( __CLASS__, 'DEBUG', 'Found layout file in the FileStore: ' . $fileStorage->getFileName() );
-				
+				LogHandler::Log( __CLASS__, 'DEBUG', 'Found layout file in the FileStore: '.$fileStorage->getFileName() );
 				// Read the embedded XMP data from the layout file and iterate through the XMP blocks.
 				$xmpBlocks = self::readXmpFromFile( $fileStorage->getFileName() );
+				$parsedVersions = array();
 				if( $xmpBlocks ) foreach( $xmpBlocks as $xmpBlock ) {
-					
 					// Retreive the CreatorTool property value from XMP data block.
 					$creatorTool = self::getCreatorToolFromXmp( $xmpBlock );
 					if( $creatorTool ) {
-					
 						// Parse the CreatorTool, may contain the internal document version of the layout.
 						if( strpos( $creatorTool, 'InDesign' ) !== false ) {
-							$parsedVersion = self::getInDesignVersionFromXmpCreatorTool( $creatorTool );
-							if( $parsedVersion ) {
-								$layoutVersion = $parsedVersion;
-								break;
-							}
+							$parsedVersions[] = self::getInDesignVersionFromXmpCreatorTool( $creatorTool );
 						}
 					}
 				}
+				$layoutVersion = self::getHighestVersion( $parsedVersions );
 				if( !$layoutVersion ) {
 					LogHandler::Log( __CLASS__, 'ERROR', 'None of the XMP blocks have the document version.' );
 				}
 			} else {
 				LogHandler::Log( __CLASS__, 'ERROR', 'Could not read XMP data. '.
-					'Layout file does not exist in the FileStore: ' . $fileStorage->getFileName() );
+					'Layout file does not exist in the FileStore: '.$fileStorage->getFileName() );
 			}
 		} else {
 			LogHandler::Log( __CLASS__, 'ERROR', 'Layout could not be found in DB.' );
 		}
 		return $layoutVersion;
+	}
+
+	static private function getHighestVersion( array $versions )
+	{
+		$highestVersion = '';
+		if( $versions ) {
+			$highestVersion = array_shift( $versions );
+			require_once BASEDIR.'/server/utils/VersionUtils.class.php';
+			if( $versions ) foreach( $versions as $version ) {
+				if( VersionUtils::versionCompare( $highestVersion, $version ) == -1 ) {
+					$highestVersion = $version;
+				}
+			}
+		}
+
+		return $highestVersion;
 	}
 	
 	/**

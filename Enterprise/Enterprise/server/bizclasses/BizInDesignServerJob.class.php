@@ -1021,4 +1021,18 @@ class BizInDesignServerJobs
 			DBInDesignServer::unlockServer( $server->Id, $server->LockToken );
 		}
 	}
+
+	/**
+	 * Checks if the caller is an InDesign Server Job process.
+	 * @param string $ticket The ticket.
+	 * @return bool Called by an InDesign Server Job, true, else false.
+	 */
+	static public function calledByIDSAutomation( $ticket )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';
+
+		$idsJob = self::getJobIdForRunningJobByTicketAndJobType( $ticket, 'IDS_AUTOMATION' );
+
+		return (bool)$idsJob;
+	}
 }

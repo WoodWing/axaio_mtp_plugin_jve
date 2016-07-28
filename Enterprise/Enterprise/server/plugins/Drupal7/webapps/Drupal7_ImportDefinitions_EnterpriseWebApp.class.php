@@ -79,7 +79,8 @@ class Drupal7_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 				$this->importPublishFormDialogs();
 				$htmlBody = $this->printImportResults( $importStatus, $htmlBody );
 			} catch ( BizException $e ) {
-				$importStatus = '<font color=red>Import failed:' . $e->getMessage() . '</font>';
+				$importStatus = '<p style="color:red">Import failed: ' . $e->getMessage() .'<br /> Detail: '.
+					( $e->getDetail() ? $e->getDetail() : 'No details' ) .'</p>';
 			}
 		} else if( $importBtnPressed && ( !$importContentTypes && !$importTaxonomies )){
             $importStatus = '<font color=red>Import failed: None of the checkboxes are checked </font>';

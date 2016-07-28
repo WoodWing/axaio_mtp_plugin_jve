@@ -167,21 +167,44 @@ class BizMessageQueue
 	/**
 	 * Picks a connection from the MESSAGE_QUEUE_CONNECTIONS option with matching instance and protocol.
 	 *
+	 * Behaviour:
+	 * In case that only a public connection is configured, it will always return the public connection.
+	 * In case that only a private connection is configured, it will always return the private connection.
+	 * In case that both a public and a private connection are configured, it will return the one that matches
+	 * the $public property.
+	 *
 	 * @param string $instance
 	 * @param string $protocol
+	 * @param boolean $public If true, it will return the public connection if this is configured. Default = true.
 	 * @return MessageQueueConnection|null The connection found in config. NULL when not found.
 	 */
-	public static function getConnection( $instance, $protocol )
+	public static function getConnection( $instance, $protocol, $public = true )
 	{
-		$foundConnection = null;
+		$foundConnections = array();
 		foreach( self::unserializeConnections() as $connection ) {
 			if( $connection->Instance == $instance && $connection->Protocol == $protocol ) {
-				self::resolveConnectionProperies( $connection );
-				$foundConnection = $connection;
-				break;
+				self::resolveConnectionProperties( $connection );
+				$foundConnections[] = $connection;
 			}
 		}
-		return $foundConnection;
+
+		switch( count($foundConnections) ) {
+			case 0:
+				$result = null;
+				break;
+			case 1:
+				$result = $foundConnections[0];
+				break;
+			default:
+				// Can't return the value directly as this will give the error: "Only variables should be passed by reference".
+				$array = array_filter($foundConnections,
+									function( $connection ) use ( $public ) {
+										return $connection->Public == $public;
+									});
+				$result = empty($array) ? null : reset($array);
+				break;
+		}
+		return $result;
 	}
 
 	/**
@@ -193,7 +216,7 @@ class BizMessageQueue
 	{
 		$connections = self::unserializeConnections();
 		foreach( $connections as &$connection ) {
-			self::resolveConnectionProperies( $connection );
+			self::resolveConnectionProperties( $connection );
 		}
 		return $connections;
 	}
@@ -204,7 +227,7 @@ class BizMessageQueue
 	 *
 	 * @param MessageQueueConnection $connection The connection to be updated (input/output).
 	 */
-	private static function resolveConnectionProperies( &$connection )
+	private static function resolveConnectionProperties( &$connection )
 	{
 		if( is_null($connection->User) ) {
 			$connection->User = self::composeSessionUserName();
@@ -246,13 +269,14 @@ class BizMessageQueue
 	 *
 	 * To make sure the user can log on to RabbitMQ, it creates or updates the user credentials in RabbitMQ.
 	 *
-	 * For each brand and overrrule issue, a exchange is created (when not exists) in RabbitMQ and the user
+	 * For each brand and overrule issue, a exchange is created (when not exists) in RabbitMQ and the user
 	 * is given access to those.
 	 *
 	 * @param WflLogOnResponse $response
-	 * @param string $password
+	 * @param integer $userId
+	 * @param string $password User's Enterprise password.
 	 */
-	public static function setupMessageQueueConnectionsForLogOn( WflLogOnResponse $response, $password )
+	public static function setupMessageQueueConnectionsForLogOn( WflLogOnResponse $response, $userId, $password )
 	{
 		// Resolve the connections configured for MESSAGE_QUEUE_CONNECTIONS in configserver.php.
 		// Hide the administration REST API of RabbitMQ from clients, because of security reasons.
@@ -262,19 +286,11 @@ class BizMessageQueue
 			// L> Since $connections refers to our cached data and the code below changes properties
 			//    in the collection, we make a deep clone to avoid side effects of other classes calling
 			//    the getConnections() function hereafter. For deep cloning we use serialize() + unserialize().
-		if( $connections ) foreach( $connections as $connection ) {
-			$hideConnection = $connection->Instance == 'RabbitMQ' && $connection->Protocol == 'REST';
-			if( $hideConnection ) { // for security reasons don't reveal the admin REST API connection of RabbitMQ
-				$restApiConnection = $connection;
-			} else {
-				if( $connection->Instance == 'RabbitMQ' && 
-					( $connection->Protocol == 'AMQP' || $connection->Protocol == 'STOMPWS' ) ) {
-					$connection->User = self::composeSessionUserName();
-					$connection->Password = null;
-				}
-				$response->MessageQueueConnections[] = $connection;
-			}
-		}
+
+		// Get the REST API connection in order to perform operations on RabbitMQ resources.
+		// If it exists, use a private connection
+		$restApiConnection = self::getConnection( 'RabbitMQ', 'REST', false );
+
 		if( $restApiConnection && $password ) {
 			require_once BASEDIR . '/server/utils/rabbitmq/restapi/Client.class.php';
 			$restClient = new WW_Utils_RabbitMQ_RestAPI_Client( $restApiConnection );
@@ -289,13 +305,6 @@ class BizMessageQueue
 					$restClient->setUserPermissions( $restApiConnection->User, $adminPerms );
 				}
 			}
-			
-			// Create or update user in RabbitMQ to make sure client can log on with same password.
-			$restUser = new WW_Utils_RabbitMQ_RestAPI_User();
-			$restUser->Name = self::composeSessionUserName();
-			$restUser->Password = $password;
-			$restUser->Tags = array(); // normal end-user has no tags (no privileges)
-			$restClient->createOrUpdateUser( $restUser );
 
 			// Create queue dedicated for the client for which the messages arrive.
 			$response->MessageQueue = self::composeMessageQueueName( $response->Ticket );
@@ -345,6 +354,16 @@ class BizMessageQueue
 				}
 			}
 
+			$semaKey = self::getSemaphoreKey( $userId );
+			$rmqPassword = self::encryptPassword( $userId, $semaKey );
+
+			// Create or update user in RabbitMQ to make sure client can log on with same password.
+			$restUser = new WW_Utils_RabbitMQ_RestAPI_User();
+			$restUser->Name = self::composeSessionUserName();
+			$restUser->Password = $rmqPassword;
+			$restUser->Tags = array(); // normal end-user has no tags (no privileges)
+			$restClient->createOrUpdateUser( $restUser );
+
 			// Give user read access to the brand- and overrule issue exchanges in RabbitMQ.
 			$userRights = self::composePermissionRegExpression( $response->MessageQueue );
 			$restPerms = new WW_Utils_RabbitMQ_RestAPI_Permissions();
@@ -352,6 +371,17 @@ class BizMessageQueue
 			//$restPerms->Write = $userRights; // queues are used for reading only
 			$restPerms->Configure = $userRights; // our RabbitMQ monitor uses STOMPWS which seems to (re)define queues, which requires config rights
 			$restClient->setUserPermissions( $restUser->Name, $restPerms );
+
+			// Add all connections to the LogOnResponse.
+			foreach( $connections as $connection ) {
+				// For security reasons don't reveal the admin REST API connection or any non-public connections to the outside world.
+				if( $connection->Instance == 'RabbitMQ' && $connection->Public == true &&
+					( $connection->Protocol == 'AMQP' || $connection->Protocol == 'STOMPWS' ) ) {
+					$connection->User = self::composeSessionUserName();
+					$connection->Password = $rmqPassword;
+					$response->MessageQueueConnections[] = $connection;
+				}
+			}
 		} else {
 			// Happens when on re-logon or RabbitMQ connection failure or when no REST client configured.
 			// In the last two cases we do not want the client to connect to RabbitMQ as well.
@@ -372,7 +402,7 @@ class BizMessageQueue
 	public static function publishMessage( $exchangeName, array $headers, array $fields )
 	{
 		$client = null;
-		$connection = self::getConnection( 'RabbitMQ', 'AMQP' );
+		$connection = self::getConnection( 'RabbitMQ', 'AMQP', false );
 		if( $connection ) {
 			$map = new BizExceptionSeverityMap( ['S1144' => 'INFO'] );
 			try {
@@ -464,7 +494,7 @@ class BizMessageQueue
 			return null;
 		}
 		require_once BASEDIR . '/server/utils/rabbitmq/restapi/Client.class.php';
-		$restConnection = self::getConnection( 'RabbitMQ', 'REST' );
+		$restConnection = self::getConnection( 'RabbitMQ', 'REST', false );
 		if( !$restConnection ) {
 			return null;
 		}
@@ -474,5 +504,43 @@ class BizMessageQueue
 			return null;
 		}
 		return $restClient;
+	}
+
+	/**
+	 * RabbitMQ maintains its own semaphores for password encryption.
+	 * First we blindly create a semaphore which will fail silently if it already exists, then the key is requested and returned.
+	 *
+	 * @param integer $userId
+	 * @return string The semaphore key.
+	 */
+	private static function getSemaphoreKey( $userId )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+		$entityId = "rabbitmq_ticket_{$userId}";
+		$semaphore = new BizSemaphore();
+		$semaphore->setAttempts( array(1, 2, 5) );
+		$semaphore->setLifeTime( 60*60*8 ); //8 hours
+
+		// Do not log any errors as we only want to ensure that a semaphore exists.
+		$semaphore->createSemaphore( $entityId, false );
+
+		//Refresh the semaphore in case it already existed.
+		BizSemaphore::refreshSemaphoreByEntityId($entityId);
+
+		return BizSemaphore::getKey($entityId);
+	}
+
+	/**
+	 * Returns a hashed password, taking the userid and semaphore key as base and the Enterprise system id as salt.
+	 *
+	 * @param integer $userId
+	 * @param string $semaKey
+	 * @return string|null Returns the hashed password, or NULL on failure.
+	 */
+	private static function encryptPassword( $userId, $semaKey )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+		$hashedPwd = ww_crypt( $userId.$semaKey, BizSession::getEnterpriseSystemId(), true );
+		return ($hashedPwd) ? $hashedPwd : null;
 	}
 }

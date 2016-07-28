@@ -98,17 +98,17 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 		$rmqConnections = array();
 		foreach( $connections as $connection ) {
 			if( $connection->Instance == 'RabbitMQ' ) {
-				if( isset($rmqConnections[$connection->Protocol]) ) {
+				if( isset($rmqConnections[$connection->Protocol][$connection->Public]) ) {
 					$this->setResult( 'ERROR',
 						'The RabbitMQ ' . $connection->Protocol . ' configuration is defined more than once. ',
 						self::PLEASE_CHECK_CONFIGSERVER.
 						'Make sure the following entry is listed only once:<br/>'.$this->composeMessageQueueConnectionInHtml($connection->Protocol) );
 					return false;
 				}
-				$rmqConnections[$connection->Protocol] = true;
+				$rmqConnections[$connection->Protocol][$connection->Public] = true;
 			}
 		}
-		$this->restConnection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST' );
+		$this->restConnection = BizMessageQueue::getConnection( 'RabbitMQ', 'REST', false );
 		if( !$this->restConnection ) {
 			$this->setResult( 'NOTINSTALLED',
 				'The RabbitMQ REST configuration is missing. ',
@@ -116,7 +116,7 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 				'Make sure the following entry exists:<br/>'.$this->composeMessageQueueConnectionInHtml('REST') );
 			return false;
 		}
-		$this->amqpConnection = BizMessageQueue::getConnection( 'RabbitMQ', 'AMQP' );
+		$this->amqpConnection = BizMessageQueue::getConnection( 'RabbitMQ', 'AMQP', false );
 		if( !$this->amqpConnection ) {
 			$this->setResult( 'NOTINSTALLED',
 				'The RabbitMQ AMQP configuration is missing. ',
@@ -134,9 +134,9 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 		}
 		// Error on properties left empty for the AMQP, REST API and STOMP over WebSocket connections.
 		/** @var MessageQueueConnection $connection */
-		foreach( array( $this->amqpConnection, $this->restConnection ) as $connection ) {
+		foreach( array( $this->amqpConnection, $this->restConnection, $this->stompwsConnection ) as $connection ) {
 			foreach( array_keys( get_class_vars( 'MessageQueueConnection' ) ) as $property ) {
-				if( !$connection->$property ) {
+				if( !isset($connection->$property) ) {
 					$this->setResult( 'ERROR',
 						'The ' . $property . ' property of the RabbitMQ ' . $connection->Protocol . ' configuration is not set. ',
 						self::PLEASE_CHECK_CONFIGSERVER.
@@ -161,7 +161,7 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 	private function composeMessageQueueConnectionInHtml( $protocol )
 	{
 		return '<code>new MessageQueueConnection( \'RabbitMQ\', \''.$protocol.'\', '.
-			'\'&lt;Url&gt;\', \'&lt;User&gt;\', \'&lt;Password&gt;\' ),</code>';
+			'\'&lt;Url&gt;\', \'&lt;Public&gt;\', \'&lt;User&gt;\', \'&lt;Password&gt;\' ),</code>';
 	}
 
 	/**

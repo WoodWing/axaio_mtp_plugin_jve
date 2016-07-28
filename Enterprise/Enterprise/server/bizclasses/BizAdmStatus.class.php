@@ -37,7 +37,7 @@ class BizAdmStatus
 	{
 		$result = true;
 		require_once BASEDIR.'/server/plugins/IdsAutomation/IdsAutomationUtils.class.php';
-		if ( $status->SkipIdsa && !IdsAutomationUtils::isLayoutObjectType( $status->Type ) ) {
+		if( $status->SkipIdsa && !( IdsAutomationUtils::isLayoutObjectType( $status->Type ) || IdsAutomationUtils::isPlaceableObjectType( $status->Type ) ) ) {
 			throw new BizException( 'ERR_INVALID_PROPERTY', 'Client', null, null );
 		}
 	}

@@ -76,7 +76,7 @@ function getProductVersion( $folder )
 			'For release versions, please provide a _productversion.txt file in '.$folder.'. '.
 			'For development version, define DEFAULT_PRODUCT_VERSION in config_overrule.php' );
 	}
-	return $version;
+	return trim($version);
 }
 
 /**
@@ -97,5 +97,5 @@ function getServerVersionExtraInfo( $folder )
 	if( file_exists( $file ) ) {
 		$info = file_get_contents( $file );
 	}
-	return $info;
+	return trim($info);
 }

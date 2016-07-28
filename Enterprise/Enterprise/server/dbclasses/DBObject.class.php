@@ -443,59 +443,60 @@ class DBObject extends DBBase
 		$secTbl = $dbDriver->tablename( 'publsections' );
 		$sttTbl = $dbDriver->tablename( 'states' );
 		$lckTbl = $dbDriver->tablename( 'objectlocks' );
-		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' )).' as "version"';
-	
-		$sql =  'SELECT o.`id`, o.`documentid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
-				'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, '.
-				'pub.`publication` as "pubname", sec.`section` as "secname", stt.`state` as "sttname", '.
-				'stt.`type` as "stttype", stt.`color` as "sttcolor", o.`routeto`, lck.`usr` as "lockedby", '.$verFld.' '.
-				"FROM $objTbl o ".
-				"INNER JOIN $pubTbl pub ON (o.`publication` = pub.`id` ) ".
-				"LEFT JOIN $secTbl sec ON (o.`section` = sec.`id` ) ".
-				"LEFT JOIN $sttTbl stt ON (o.`state` = stt.`id` ) ". // LEFT JOIN because of Personal status = -1
-				"LEFT JOIN $lckTbl lck ON (o.`id` = lck.`object` ) ".
-				'WHERE o.`id` IN ( '.implode( ',', $objectIds ).' ) ';
+		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' ) ).' as "version"';
+
+		$sql = 'SELECT o.`id`, o.`documentid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
+			'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, o.`modifier`, '.
+			'pub.`publication` as "pubname", sec.`section` as "secname", stt.`state` as "sttname", '.
+			'stt.`type` as "stttype", stt.`color` as "sttcolor", o.`routeto`, lck.`usr` as "lockedby", '.$verFld.' '.
+			"FROM $objTbl o ".
+			"INNER JOIN $pubTbl pub ON (o.`publication` = pub.`id` ) ".
+			"LEFT JOIN $secTbl sec ON (o.`section` = sec.`id` ) ".
+			"LEFT JOIN $sttTbl stt ON (o.`state` = stt.`id` ) ". // LEFT JOIN because of Personal status = -1
+			"LEFT JOIN $lckTbl lck ON (o.`id` = lck.`object` ) ".
+			'WHERE o.`id` IN ( '.implode( ',', $objectIds ).' ) ';
 		$params = array();
 		$sth = $dbDriver->query( $sql, $params );
 		$rows = self::fetchResults( $sth, 'id', false, $dbDriver );
-		
+
 		$mds = array();
 		if( $rows ) foreach( $rows as $row ) {
-		
+
 			$md = new MetaData();
-			$md->BasicMetaData    = new BasicMetaData();
-			$md->RightsMetaData   = new RightsMetaData();
-			$md->SourceMetaData   = new SourceMetaData();
-			$md->ContentMetaData  = new ContentMetaData();
+			$md->BasicMetaData = new BasicMetaData();
+			$md->RightsMetaData = new RightsMetaData();
+			$md->SourceMetaData = new SourceMetaData();
+			$md->ContentMetaData = new ContentMetaData();
 			$md->WorkflowMetaData = new WorkflowMetaData();
 
-			$md->BasicMetaData->StoreName         = $row['storename']; // internal prop (not in WSDL)
-			$md->BasicMetaData->ID                = $row['id'];
-			$md->BasicMetaData->DocumentID        = $row['documentid'];
-			$md->BasicMetaData->Name              = $row['name'];
-			$md->BasicMetaData->Type              = $row['type'];
+			$md->BasicMetaData->StoreName = $row['storename']; // internal prop (not in WSDL)
+			$md->BasicMetaData->ID = $row['id'];
+			$md->BasicMetaData->DocumentID = $row['documentid'];
+			$md->BasicMetaData->Name = $row['name'];
+			$md->BasicMetaData->Type = $row['type'];
 			$md->BasicMetaData->Publication = new Publication();
-			$md->BasicMetaData->Publication->Id   = $row['publication'];
+			$md->BasicMetaData->Publication->Id = $row['publication'];
 			$md->BasicMetaData->Publication->Name = $row['pubname'];
 			$md->BasicMetaData->Category = new Category();
-			$md->BasicMetaData->Category->Id      = $row['section'];
-			$md->BasicMetaData->Category->Name    = $row['secname'];
-			$md->BasicMetaData->ContentSource     = $row['contentsource'];
-			$md->ContentMetaData->Format          = $row['format'];
+			$md->BasicMetaData->Category->Id = $row['section'];
+			$md->BasicMetaData->Category->Name = $row['secname'];
+			$md->BasicMetaData->ContentSource = $row['contentsource'];
+			$md->ContentMetaData->Format = $row['format'];
 			$md->WorkflowMetaData->State = new State();
-			$md->WorkflowMetaData->State->Id      = $row['state'];
-			$md->WorkflowMetaData->State->Name    = $row['state'] == -1 ? BizResources::localize('PERSONAL_STATE') : $row['sttname'];
-			$md->WorkflowMetaData->State->Type    = $row['state'] == -1 ? $row['type'] : $row['stttype'];
-			if ( $row['state'] == -1 ) { // Personal State
+			$md->WorkflowMetaData->State->Id = $row['state'];
+			$md->WorkflowMetaData->State->Name = $row['state'] == -1 ? BizResources::localize( 'PERSONAL_STATE' ) : $row['sttname'];
+			$md->WorkflowMetaData->State->Type = $row['state'] == -1 ? $row['type'] : $row['stttype'];
+			if( $row['state'] == -1 ) { // Personal State
 				$md->WorkflowMetaData->State->Color = substr( PERSONAL_STATE_COLOR, 1 );
 			} else {
-				$md->WorkflowMetaData->State->Color   = substr( $row['sttcolor'], 1 ); // remove # prefix
+				$md->WorkflowMetaData->State->Color = substr( $row['sttcolor'], 1 ); // remove # prefix
 			}
-			$md->WorkflowMetaData->RouteTo        = $row['routeto'];
-			$md->WorkflowMetaData->LockedBy       = $row['lockedby'];
-			$md->WorkflowMetaData->Version        = $row['version'];
-			$md->WorkflowMetaData->Modified		  = $row['modified'];
-			$mds[$row['id']] = $md;
+			$md->WorkflowMetaData->RouteTo = $row['routeto'];
+			$md->WorkflowMetaData->LockedBy = $row['lockedby'];
+			$md->WorkflowMetaData->Version = $row['version'];
+			$md->WorkflowMetaData->Modified = $row['modified'];
+			$md->WorkflowMetaData->Modifier = $row['modifier'];
+			$mds[ $row['id'] ] = $md;
 		}
 		return $mds;
 	}
