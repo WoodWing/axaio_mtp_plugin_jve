@@ -79,11 +79,11 @@ if( $authIds && $command == 'delete' ) {
 }
 
 // Handle the Edit/Add operations.
-if( ($authIds && $command == 'edit') || $command == 'add' ) {
+if( ($authIds && $command == 'edit') || $command == 'add' || $command == 'copy' ) {
 
 	// Get the authorization from DB the user wants to edit.
 	$authRows = array();
-	if( $authIds && $command == 'edit' ) {
+	if( $authIds && ( $command == 'edit' || $command == 'copy' ) ) {
 		$authRows = DBAuthorizations::getAuthorizationRowsByIds( $authIds );
 	} else if( $command == 'add' ) {
 		$authRows = array( 'section' => 0, 'state' => 0, 'profile' => 0 );
@@ -140,13 +140,20 @@ if( $newBundleIds ) foreach( $newBundleIds as $bundleId => $authIds ) {
 	DBAuthorizations::updateBundleIds( $bundleId, $authIds );
 }
 
+// In case that we copy the row, we want to add the complete bundle to the map, uncombined.
+if( $command == 'copy' ) {
+	if( isset($authRows) && !empty($authRows) ) foreach( $authRows as $authRow ) {
+		$authMap->add( 0, $authRow['section'], $authRow['state'], $authRow['profile'], 0);
+	}
+}
+
 // Compose a HTML table to display the (combined) authorizations.
 $detailtxt = $authApp->composeAuthorizationsHtmlTable( $authMap, $sectiondomain, $statedomain, $profiles, $command, $authIds );
 $txt = str_replace( '<!--ROWS-->', $detailtxt, $txt );
 
 // If not in edit mode, show the Add Authorization button.
 $button = '';
-if( $command != 'edit' && $command != 'add' ) {
+if( $command != 'edit' && $command != 'add' && $command != 'copy' ) {
 	$button = '<input type="button" value="<!--RES:ACT_ADD_AUTHORIZATION-->" onclick="javascript:addAuth();" />';
 }
 $txt = str_replace( '<!--VAR:ADD_AUTH_BTN-->', $button, $txt );
@@ -731,7 +738,7 @@ class Ww_Admin_Authorizations_App
 				$html .= $this->composeAuthorizationsHtmlRowReadonly( $authMap, $sectiondomain, $statedomain, $profiles, $command, $authIds );
 			}
 		}
-		if( $command == 'add' ) {
+		if( $command == 'add' || $command == 'copy' ) {
 			$html .= $this->composeAuthorizationsHtmlRowEditable( '' );
 		}
 		return $html;
@@ -789,8 +796,8 @@ class Ww_Admin_Authorizations_App
 		}
 		$html .= '</ul></div></td>';
 
-		// Show Edit, Copy and Delete buttons (only when not in Edit/Add mode).
-		if( $command != 'edit' && $command != 'add' ) {
+		// Show Edit, Copy and Delete buttons (only when not in Edit/Add/Copy mode).
+		if( $command != 'edit' && $command != 'add' && $command != 'copy' ) {
 			$authMapIdsCsv = implode( ',', $authMap->getCurrentAuthIds() );
 			$html .=
 				'<td>'.
