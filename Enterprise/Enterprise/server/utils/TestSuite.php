@@ -1442,7 +1442,7 @@ class WW_Utils_TestSuite
 	 *
 	 * @param Object $object
 	 */
-	public function sortObjectDataForCompare( Object $object )
+	public function sortObjectDataForCompare( /** @noinspection PhpLanguageLevelInspection */ Object $object )
 	{
 		if( $object->Placements ) {
 			$this->sortPlacementsForCompare( $object->Placements );
