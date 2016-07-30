@@ -94,6 +94,7 @@ class WW_Utils_IpAddressRange
 					$inRange = self::isIpv6InRange( $ip, $range );
 				}
 				break;
+			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::IPV4_V6_DUAL:
 				$ip = self::convertIpv6v4DualToIpv4( $ip );
 				// NO break!

@@ -1,12 +1,13 @@
 <?php
 /**
- * @package     SCEnterprise
+ * Class derived from HmtlAnyField that represents a field for entering a valid date.
+ *
+ * @package     Enterprise
  * @subpackage  HtmlClasses
  * @since       v4.2
  * @copyright   WoodWing Software bv. All Rights Reserved.
  *
- * Class derived from HmtlAnyField that represents a field for entering a valid date.
-**/
+ */
 
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlAnyField.class.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
@@ -17,35 +18,36 @@ class HtmlDateField extends HtmlAnyField
 {
 	public $CalenderIcon;
 
-	/**
+	/*
 	 *  $Year, $Month and $Day of the date. These are set when setValue is executed.
-	**/
+	 */
 	protected $Year;
 	protected $Month;
 	protected $Day;
 
-
 	/**
 	 *	Constructor
-	 *	@param $owner object derived from HtmlBase or null
+	 *
+	 * @param HtmlBase|null $owner either null or an object derived from HtmlBase
 	 *	@param $name string may not contain special chars
 	 *	@param $required boolean = false 
 	 *	@param $readonly boolean = false
 	 *	@param $hidden boolean = false
-	**/
-	function __construct($owner, $name, $required=false, $readonly=false, $hidden=false)
+	 */
+	public function __construct($owner, $name, $required=false, $readonly=false, $hidden=false)
 	{
 		parent::__construct($owner, $name, $required, $readonly, $hidden);
 		$this->CalenderIcon = self::$IconDir . 'cal_16.gif';
 	}
 	
 	/**
-	 *  setValue
-	 *  @param $isodatetime string iso-formatted string, for example: 01-01-2006T09:30:45
-	 *  sets $Value to this value if indeed iso-formatted and valid.
-	 *  $Year, $Month and $Day are also set for ease of use.
-	 *  @return Returns true if the value was succesfully set, otherwise false.
-	**/
+	 * Sets a date time value.
+	 *
+	 * @param string $isodatetime ISO-formatted string, for example: 01-01-2006T09:30:45
+	 * sets $Value to this value if indeed iso-formatted and valid.
+	 * $Year, $Month and $Day are also set for ease of use.
+	 * @return boolean Returns true if the value was successfully set, otherwise false.
+	 */
 	public function setValue($isodatetime)
 	{
 		$temp = DateTimeFunctions::iso2dateArray( $isodatetime );
@@ -59,10 +61,9 @@ class HtmlDateField extends HtmlAnyField
 		return false;
 	}
 
-
 	/**
-	 *  @return returns the raw input-value as a string. Returns null if not posted.
-	**/	
+	 * @return string|null Returns the raw input-value as a string. Returns null if not posted.
+	 */
 	public function requestInput()
 	{
 		$result = @$_REQUEST[$this->Name];
@@ -71,9 +72,8 @@ class HtmlDateField extends HtmlAnyField
 
 	
 	/**
-	 *  @return returns the converted raw input-value as an isodatetime.
-	 *  Returns null if not posted.
-	**/
+	 * @return string|null Returns the converted raw input-value as an isodatetime. Returns null if not posted.
+	 */
 	public function requestValue()
 	{
 		$result = self::requestInput();
@@ -85,8 +85,8 @@ class HtmlDateField extends HtmlAnyField
 	}
 
 	/**
-	 *  @return string Html that includes the javascript-file for picking a date.
-	**/
+	 * @return string Html that includes the javascript-file for picking a date.
+	 */
 	public function drawHeader()
 	{
 		$jsInc = file_get_contents( BASEDIR.'/server/utils/javascript/DatePicker.js' );
@@ -97,10 +97,9 @@ class HtmlDateField extends HtmlAnyField
 		return $result;
 	}
 
-
 	/**
 	 *  @return string Html that draws the input-field and datepicker-button.
-	**/
+	 */
 	public function drawBody()
 	{
 		/**
@@ -152,4 +151,3 @@ class HtmlDateField extends HtmlAnyField
 		return $result;	
 	}
 }
-?>

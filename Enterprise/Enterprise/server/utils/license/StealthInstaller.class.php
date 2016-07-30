@@ -67,6 +67,8 @@ class WW_Utils_License_StealthInstaller
 	public function installProductLicenses( $install = true )
 	{
 		$retVal = false;
+		$wasProducts = array();
+		$xmlProducts = array();
 		$this->init();
 		if( !$this->error ) {
 			$xmlProducts = $this->parseWwActivateXml();
@@ -245,6 +247,8 @@ class WW_Utils_License_StealthInstaller
 	/**
 	 * Step 10: Register product license at activation server.
 	 * On error, the $this->error class member will be set.
+	 *
+	 * @param boolean $install
 	 */
 	private function registerLicense( $install )
 	{
@@ -266,6 +270,8 @@ class WW_Utils_License_StealthInstaller
 	/**
 	 * Step 11: Save product license locally and at activation server.
 	 * On error, the $this->error class member will be set.
+	 *
+	 * @param boolean $install
 	 */
 	private function setLicense( $install )
 	{

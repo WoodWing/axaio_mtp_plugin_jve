@@ -1,12 +1,13 @@
 <?php
 /**
+ * Co-worker class for WW_Utils_DigitalPublishingSuiteClient to monitor the upload for one file.
+ *
+ * Introduced to support the parallel upload feature for Adobe DPS.
+ *
  * @package Enterprise
  * @subpackage Utils
  * @since v7.6.7
  * @copyright WoodWing Software bv. All Rights Reserved.
- *
- * Co-worker class for WW_Utils_DigitalPublishingSuiteClient to monitor the upload for one file.
- * Introduced to support the parallel upload feature for Adobe DPS.
  */
 
 class WW_Utils_UploadProgressPerFile
@@ -42,15 +43,9 @@ class WW_Utils_UploadProgressPerFile
 	 * @param integer $downloaded
 	 * @param integer $uploadSize
 	 * @param integer $uploaded
-	 * @param resource $curl cURL handle
-	 * @return null
 	 */
 	public function curlProgressCallback( $downloadSize, $downloaded, $uploadSize, $uploaded )
 	{
-		// keep analyzer happy
-		$downloadSize = $downloadSize;
-		$downloaded = $downloaded;
-
 		if( $uploaded > 0 ) {
 			// When the caller does not set the file size, we use the raw http body size
 			// as given by PHP. However, that is less accurate, since it is bigger than

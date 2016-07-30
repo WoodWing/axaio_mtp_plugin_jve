@@ -355,6 +355,7 @@ class FolderUtils
 	 *
 	 * @param string $version Version of the package to build.
 	 * @param string $type The logical package name: 'EnterpriseServer_Core', 'EnterpriseServer_Libraries' or 'PHP_Internal'
+	 * @return string Path of XML file.
 	 */
 	static function getReflectionPath( $version, $type )
 	{

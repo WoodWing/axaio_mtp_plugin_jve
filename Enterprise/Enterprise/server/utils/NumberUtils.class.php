@@ -2,10 +2,10 @@
 /**
  * Generic number related functions
  * 
- * @package 	Enterprise
- * @subpackage 	Utils
- * @since 		v4.2
- * @copyright 	WoodWing Software bv. All Rights Reserved.
+ * @package Enterprise
+ * @subpackage Utils
+ * @since v4.2
+ * @copyright WoodWing Software bv. All Rights Reserved.
  */
 
 class NumberUtils
@@ -14,6 +14,7 @@ class NumberUtils
 	 * Returns a raw number as a byte display string, e.g. 3 KB, 10 MB etc,
 	 *
 	 * @param integer $size
+	 * @param integer $precision
 	 * @return string
 	 */
 	public static function getByteString( $size, $precision=0 ) 
@@ -102,9 +103,9 @@ class NumberUtils
 		$hundreds = ($num - $tens - $ones) % 1000; 
 		$thou = ($num - $hundreds - $tens - $ones) % 10000; 
 		
-		$tens = $tens / 10; 
-		$hundreds = $hundreds / 100; 
-		$thou = $thou / 1000; 
+		$tens = intval( $tens / 10 );
+		$hundreds = intval( $hundreds / 100 );
+		$thou = intval( $thou / 1000 );
 		
 		$rnum = '';
 		if ($thou) { $rnum .= $r_thou[$thou]; } 

@@ -1,17 +1,17 @@
 <?php
-	/**
- * @package     SCEnterprise
- * @subpackage  HtmlClasses
- * @since       v4.2
- * @copyright   WoodWing Software bv. All Rights Reserved.
- *
+/**
  * Class derived from HmtlAnyField that represents a field for entering a
  * timedifference. At this moment only in days/hours/minutes. May need
  * expansion later.
  *
  * @todo Implement fields for other time-units.
  * @todo Implement flags for selecting the fields for time-units.
-**/
+ *
+ * @package     Enterprise
+ * @subpackage  HtmlClasses
+ * @since       v4.2
+ * @copyright   WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlAnyField.class.php';
 require_once BASEDIR.'/server/admin/global_inc.php'; // formvar, inputvar
@@ -24,10 +24,10 @@ class HtmlDiffTimeField extends HtmlAnyField
 	public $HoursLabel;
 	public $MinutesLabel;
 
-	/**
+	/*
 	 *  Which combos to show.
 	 *  @todo Not all combos implemented yet.
-	**/
+	 */
 
 	public $ShowYears;
 	public $ShowMonths;
@@ -37,9 +37,9 @@ class HtmlDiffTimeField extends HtmlAnyField
 	public $ShowMinutes;
 	public $AsTextField;
 
-	/**
+	/*
 	 *  $DiffDays, $DiffHours and $DiffMinutes of the timedifference.
-	**/
+	 */
 	protected $DiffDays;
 	protected $DiffHours;
 	protected $DiffMinutes;
@@ -47,12 +47,14 @@ class HtmlDiffTimeField extends HtmlAnyField
 
 	/**
 	 *	Constructor
-	 *	@param $owner object derived from HtmlBase or null
-	 *	@param $name string may not contain special chars
-	 *	@param $required boolean = false 
-	 *	@param $readonly boolean = false
-	 *	@param $hidden boolean = false
-	**/
+	 *
+	 * @param HtmlBase|null $owner either null or an object derived from HtmlBase
+	 *	@param string $name may not contain special chars
+	 *	@param boolean $required
+	 *	@param boolean $readonly
+	 *	@param boolean $hidden
+	 *	@param boolean $stayreadonly
+	 */
 	function __construct($owner, $name, $required=false, $readonly=false, $hidden=false, $stayreadonly=false)
 	{
 		HtmlAnyField::__construct($owner, $name, $required, $readonly, $hidden, $stayreadonly);
@@ -80,11 +82,11 @@ class HtmlDiffTimeField extends HtmlAnyField
 	}
 
 	/**
-	 *  setValue
-	 *  @param $totaldiffinseconds int 
-	 *  sets $Value to this value.
-	 *  $DiffDays, $DiffHours and $DiffMinutes are also set for ease of use.
-	**/
+	 * Sets $Value, $DiffDays, $DiffHours and $DiffMinutes.
+	 *
+	 * @param integer $totaldiffinseconds Sets $Value to this value.
+	 * @return boolean Returns true if the value was successfully set, otherwise false.
+	 */
 	public function setValue($totaldiffinseconds)
 	{
 		$this->Value = $totaldiffinseconds;
@@ -95,6 +97,7 @@ class HtmlDiffTimeField extends HtmlAnyField
 		$this->DiffHours = (int) ($secondsleft / (60*60));
 		$secondsleft = (int) ($secondsleft - ($this->DiffHours * (60*60)));
 		$this->DiffMinutes = (int) ($secondsleft / (60));
+		return true;
 	}
 
 	/**
@@ -280,4 +283,3 @@ class HtmlDiffTimeField extends HtmlAnyField
 		return $result;
 	}
 }
-?>

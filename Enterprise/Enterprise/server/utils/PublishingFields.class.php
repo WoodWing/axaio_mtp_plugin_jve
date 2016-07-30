@@ -1,14 +1,13 @@
 <?php
 /**
- * WW_Utils_PublishingFields class
+ * Utility class dealing with collections of PubField data classes.
+ *
+ * It does mathematical operations to collection, without implementing biz logic.
  *
  * @package Enterprise
  * @subpackage ServerPlugins
  * @since v7.5
  * @copyright WoodWing Software bv. All Rights Reserved.
- *
- * Utility class dealing with collections of PubField data classes.
- * It does mathematical operations to collection, without implementing biz logics.
  */
 
 class WW_Utils_PublishingFields
