@@ -172,8 +172,8 @@ class WW_Utils_FileStreamSearch
 	public function searchNextDataBlock( $startString, $stopString )
 	{
 		$found = false;
+		$recordData = false;
 		if( $this->fileHandle ) {
-			$recordData = false;
 			if( $this->doSearchNextData( $startString, $recordData ) ) {
 				$recordData = '';
 				if( $this->doSearchNextData( $stopString, $recordData ) ) {

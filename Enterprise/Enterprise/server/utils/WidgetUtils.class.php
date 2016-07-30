@@ -8,11 +8,11 @@
 
 class WW_Utils_WidgetUtils
 {
-	public $report	= null;
-	public $schema 	= null;
-	public $tempFolder 	= null;
-	public $exportFolder= null;
-	public $widgetPluginFolder= null;
+	public $report = null;
+	public $schema = null;
+	public $tempFolder = null;
+	public $exportFolder = null;
+	public $widgetPluginFolder = null;
 
 	/**
 	 * Retrieves a widget from storage (FILE or DB) and writes it to the magazine export folder.
@@ -23,11 +23,13 @@ class WW_Utils_WidgetUtils
 	 * @param DOMNode $widgetPlacement
 	 * @param array $frameDimensions The dimensions of the frame containing the widget.
 	 * @return string The file path (relative to the export folder) of the exported file.
+	 * @throws BizException
 	 */
 	public function downloadWidgetFile( $dossier, $object, $manifest, $widgetPlacement, $frameDimensions )
 	{
 		try {
 			$filePath = '';
+			$fileExt = '';
 			$dossierId = $dossier->MetaData->BasicMetaData->ID;
 			$objectId = $object->MetaData->BasicMetaData->ID;
 			$objectType = $object->MetaData->BasicMetaData->Type;
@@ -217,8 +219,9 @@ class WW_Utils_WidgetUtils
 	/**
 	 * Flattens the manifest by removing propertyGroups
 	 * 
-	 * @param object $object
+	 * @param Object $object
 	 * @param DOMDocument $domDoc by reference
+	 * @throws BizException
 	 */
 	public function flattenWidgetManifest( $object, DOMDocument &$domDoc )
 	{
@@ -246,7 +249,8 @@ class WW_Utils_WidgetUtils
 
 	/**
 	 * Parses the manifest.xml to add the files in the fileProperties and fileListProperties to the widget folder.
-	 * 
+	 *
+	 * @param Object $object
 	 * @param DOMDocument $domDoc
 	 * @param String $widgetFilePath String with the path to the widget folder
 	 * @param array $frameDimensions The dimensions of the frame containing the widget.
@@ -348,12 +352,14 @@ class WW_Utils_WidgetUtils
 	 * @param boolean $scale If widget images must be scaled to the frame dimensions.
 	 * @param array $frameDimensions The dimensions of the frame containing the widget.
 	 * @param boolean $extract
+	 * @throws BizException
 	 */
 	public function downloadWidgetAsset( $widgetObject, $widgetFilePath, $assetObjectId, $propId, &$outFiles, $extract = true, $scale = false, $frameDimensions = array() )
 	{
 		try {
 			$filePath = '';
-			
+			$fileExt = '';
+
 			require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 			$request = new WflGetObjectsRequest( BizSession::getTicket(), array( $assetObjectId ), false, 'native', array() );
 			$service = new WflGetObjectsService();
@@ -517,9 +523,11 @@ class WW_Utils_WidgetUtils
 	 * @param DOMNode $node
 	 * @param integer $level
 	 * @return string The JSON representation of the XML document
+	 * @throws BizException
 	 */
 	public function xmlToJson( $object, DOMNode $node, $level = 0 )
 	{
+		$r = null;
 		try {
 			if( $node->childNodes ) {
 				$r = array();
@@ -629,7 +637,6 @@ class WW_Utils_WidgetUtils
 				}
 			}
 			if( $level == 0 ) {
-				//file_put_contents( OUTPUTDIRECTORY.'r.txt', print_r( $r, true ) );
 				return json_encode( $r );
 			} else {
 				return $r;
@@ -642,6 +649,6 @@ class WW_Utils_WidgetUtils
 			}
 		}
 
-		return ''; // Make analyzer happy
+		return '';
 	}
 }

@@ -1,9 +1,9 @@
 <?php
 /**
- * Utility class to build HTML documenta based on HTML master templates. <br/>
- * This is especially used by web/admin applications. <br/>
+ * Utility class to build HTML documenta based on HTML master templates.
+ * This is especially used by web/admin applications.
  *
- * @package SCEnterprise
+ * @package Enterprise
  * @subpackage Utils
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
@@ -86,7 +86,6 @@ class HtmlDocument
 						$wr[$row["feature"]] = $row;
 					}
 				} catch( BizException $e ) { // ignore errors; could be no DB installed!
-					$e = $e; // keep analyzer happy
 				}
 			}
 				
@@ -345,8 +344,7 @@ class HtmlDocument
 				$user = BizSession::getUserInfo( 'fullname' );
 			}
 		} catch( BizException $e ) { // ignore errors; could be no DB installed!
-			$e = $e; // keep analyzer happy
-		} 
+		}
 		$txt = str_replace("<!--USER-->",formvar($user) ,$txt);
 
 		$versionInfo = trim( SERVERVERSION . ' ' . SERVERVERSION_EXTRAINFO );
@@ -354,4 +352,3 @@ class HtmlDocument
 		return $txt;
 	}
 }
-?>

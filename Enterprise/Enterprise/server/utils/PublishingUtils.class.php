@@ -154,7 +154,6 @@ class WW_Utils_PublishingUtils
 		// Status
 		$statuses = BizAdmStatus::getStatuses( $publicationObj->Id, 0, $formObjType );
 		$templateState = null;
-		$templateState = $templateState; // TODO: This is needed for Zend Code Analyzer. Please remove when possible...
 		foreach( $statuses as $status ) {
 			if( $status->Type == $formObjType ) {
 				$templateState = new State();

@@ -152,6 +152,8 @@ class FileHandler
      * Let's loop max 16 times under 256MB file size. Larger files will take significant
 	 * up/download time for which looping won't be the bottleneck (the network throughput will be).
 	 *
+	 * @param integer $fileSize
+	 * @return integer Buffer size
 	 */
 	public static function getBufferSize( $fileSize )
 	{
@@ -218,4 +220,3 @@ class FileHandler
 	   return ''; // no/unknown BOM
 	}
 }
-?>

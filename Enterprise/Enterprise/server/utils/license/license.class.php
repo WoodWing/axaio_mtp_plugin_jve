@@ -143,6 +143,8 @@ class License
 	/**
 	 * Add a zero in case the number is less than 10
 	 *
+	 * @param string $str
+	 * @return string
 	 */
 	private function make2( $str )
 	{
@@ -297,6 +299,7 @@ class License
 				$dbstamp = '';
 				//$fstampRoot = '';
 				$fstampSys = '';
+				$dbstampunix = '';
 				
 				//To keep de sql driver classes 'open'/'uncrypted', 
 				//AND to avoid the driver classes to LOG our secret statements, 
@@ -885,7 +888,7 @@ class License
 		if ( !$sema )
 			return false;
 			
-		$curval = $this->lo_getFieldFS( $field, $val );
+		$curval = $this->lo_getFieldFS( $field );
 		if ( !$this->lo_setFieldFS( $field, $val ))
 		{
 			$this->lo_releaseSema( $sema );
@@ -909,7 +912,6 @@ class License
 	 *
 	 * @param string field
 	 * @return boolean success
-	 *
 	 */
 	public function removeLicenseField( $field ) 
 	{
@@ -979,6 +981,7 @@ class License
 	 * so "unpack" it first.
 	 * The caller has to decrypt the string if necessary
  	 *
+	 * @param integer $productcode
 	 * @return string
 	 */
 	public function getLicense( $productcode ) {
@@ -1001,6 +1004,7 @@ class License
 	 * so "unpack" it first.
 	 * The caller has to decrypt the string if necessary
  	 *
+	 * @param string $productcode
 	 * @return string
 	 */
 	public function getSerial( $productcode ) {
@@ -1022,6 +1026,7 @@ class License
 	 * The product name is part of the value(string) that is saved in the filestore and database,
 	 * so "unpack" it first.
  	 *
+	 * @param string $productcode
 	 * @return string
 	 */
 	public function getName( $productcode ) {
@@ -1163,13 +1168,13 @@ class License
 		
 		if ( $bRemoveAll )
 		{
-			if ( !$this->removeLicenseField( "key1", '' ))
+			if ( !$this->removeLicenseField( "key1" ))
 				return false;
-			if ( !$this->removeLicenseField( "key2", '' ))
+			if ( !$this->removeLicenseField( "key2" ))
 				return false;
-			if ( !$this->removeLicenseField( "key3", '' ))
+			if ( !$this->removeLicenseField( "key3" ))
 				return false;
-			if ( !$this->removeLicenseField( "local", '' ))
+			if ( !$this->removeLicenseField( "local" ))
 				return false;
 
 			$productcodesArr = $this->getProductcodes();
@@ -1179,7 +1184,7 @@ class License
 					return false;
 			}
 	
-			if ( !$this->removeLicenseField( "productcodes", '' ))
+			if ( !$this->removeLicenseField( "productcodes" ))
 				return false;
 		}
 		return true;
@@ -1337,12 +1342,10 @@ class License
 	 * Return 0 if the user is not logged on yet; the user may not log on.
 	 * Return false on error
 	 * 
-	 * $productcode - fill in if it's allowed to logon as 1 user with multiple apps on 1 product code (like Content Station & WebEditor)
-	 * 
-	 * @param string user that logs on
-	 * @param string application to logon on to
+	 * @param string $logonUser user that logs on
+	 * @param string $logonApp application to logon on to
+	 * @param string $productcode fill in if it's allowed to logon as 1 user with multiple apps on 1 product code (like Content Station & WebEditor)
 	 * @return integer (0 or 1) or false
-	 
 	 */
 	private function userCanStillLogOn( $logonUser, $logonApp, $productcode=null )
 	{
@@ -1405,8 +1408,10 @@ class License
 	 *	If a user is about to log on to certain application, 
 	 *	and an old ticket for that user and application is still present in the tickets table,
 	 *  that ticket will be deleted, and thus doesn't count.
-	 * 
-	 * @param string product code
+	 *
+	 * @param string $appproductcode
+	 * @param string $logonUser
+	 * @param string $logonApp
 	 * @return int number of users/connections
 	 */
 	private function getNumConnections( $appproductcode='', $logonUser='', $logonApp='' )
@@ -1577,8 +1582,9 @@ class License
 	 * If the creation date of a NEWER object is before the creation date at the error moment, the client has set the time to the past...
 	 * Note to allow a difference for about 2 hours for summertime. However, a "summertime gap" may only occur once a year...
 	 * 
-	 * @param string starttime The creation date of the last smart object at the moment of an error situation (e.g. license expired)
-	 * @param int startobjid start checking objects with an id higher than this
+	 * @param int $starttime The creation date of the last smart object at the moment of an error situation (e.g. license expired)
+	 * @param int $startobjid start checking objects with an id higher than this
+	 * @param int $thistime
 	 * @return boolean success (no problem)
 	 */
 	private function checkCreationDates( $starttime, $startobjid, $thistime )
@@ -2753,6 +2759,7 @@ class License
 	 * 
 	 * @param string productcode
 	 * @param boolean success
+	 * @return boolean
 	 */
 	public function setTicket( $productcode )
 	{	
@@ -2781,9 +2788,10 @@ class License
 	/**
 	 * Instead of using the current value of key1, or the value from the database,
 	 * use the key1 value as stored in the license informatiuon
-	 * 
-	 * @param string productcode
-	 * @param string errorMessage
+	 *
+	 * @param string $key
+	 * @param string $productcode
+	 * @param string $errorMessage
 	 * @return string key code
 	 */
 	private function getKeyFromLicense( $key, $productcode, &$errorMessage )
@@ -2811,6 +2819,7 @@ class License
 	 * @param string errorMessage
 	 * @param boolean install
 	 * @param boolean addReclaim
+	 * @param string $productcode
 	 * @return string code
 	 */
 	public function getInstallationCode( &$errorMessage, $install=true, $addReclaim=false, $productcode='' )
@@ -3084,6 +3093,7 @@ class License
 	 * Return true if the given status is an error status, and the 'remove' button should be shown
 	 * 
 	 * @param int license status
+	 * @param string $errorMessage
 	 * @return boolean 
 	 */
 	private function isRemovableStatus( $licenseStatus, $errorMessage )
@@ -3103,7 +3113,7 @@ class License
 	 * @param string $userId Short user name (id)
 	 * @param string $licenseStatus The current license status
 	 * @param string $errorMessage Localized error message. Empty when no error.
-	 * @param string $collectedMessages  List of Message objects to show user
+	 * @param string[] $collectedMessages  List of Message objects to show user
 	 */
 	public function addToUserMessages( $userId, $licenseStatus, $errorMessage, &$collectedMessages )
 	{
@@ -3962,7 +3972,8 @@ class License
 	 * Return the current time according to the database server
 	 * To avoid "license time errors", don't use the PHP function time(), but use this method.
 	 * If one would use the PHP time() function, the local time of the AS is used, which may be (slightly) different from the DB server
-	 * @return time in seconds since 1-1-1970 or false on error
+	 *
+	 * @return integer time in seconds since 1-1-1970 or false on error
 	 */
 	public function time()
 	{
@@ -4070,8 +4081,9 @@ class License
 	 * Determine the system time difference between the database server and this AS.
 	 * If the difference is more than a certain limit, the difference in minutes is returned.
 	 * Otherwise, 0 is returned
-	 * @parameter DSTime optional
-	 * @return difference in minutes (0 if OK)
+	 *
+	 * @param string $DStime optional
+	 * @return integer difference in minutes (0 if OK)
 	 */
 	private function ASDSTimeDiff( $DStime = '' )
 	{
@@ -4103,15 +4115,13 @@ class License
 	
 	/**
 	 * Try to contact the SmartReg server using a direct POST (not using the browser)
-	 * @parameter $productcode (can be handy in the future to send extra info to SmartReg)
-	 * @parameter $errorMessage contains error message afterwards
+	 *
+	 * @param string $productcode (can be handy in the future to send extra info to SmartReg)
+	 * @param string $errorMessage contains error message afterwards
 	 * @return success
 	 */
 	public function SmartRegContact( $productcode, &$errorMessage )
 	{
-		//Make analyzer happy; $productcode can be used in the future by SmartReg to see what products are being tested
-		$productcode = $productcode;
-
 		$url = PINGURL;
 
 		$parameters = Array();
@@ -4138,10 +4148,11 @@ class License
 	 * Try to renew the license automatically
 	 * Not using the browser, but by connection to the server and posting HTTP data.
 	 * Remember the date and time of the last trial: only try it once a day...
-	 * @parameter $productcode
-	 * @parameter $force. If true, ignore the 'once a day' check, and always do it
-	 * @parameter $errorMessage, returns the errorMessage associated with the new licenseStatus
-	 * @parameter $licenseStatus, returns the new licenseStatus
+	 *
+	 * @param string $productcode
+	 * @param boolean $force. If true, ignore the 'once a day' check, and always do it
+	 * @param string $errorMessage, returns the errorMessage associated with the new licenseStatus
+	 * @param integer $licenseStatus, returns the new licenseStatus
 	 * @return success
 	 */
 	public function tryAutoRenew( $productcode, $force, &$licenseStatus, &$errorMessage )
@@ -4254,8 +4265,9 @@ class License
 	
 	/**
 	 * Create the parameters for the HTTP renew post
-	 * @parameter $productcode
-	 * @return false, or Array of parameters
+	 *
+	 * @param string $productcode
+	 * @return string[]|boolean false, or Array of parameters
 	 */
 	private function getRenewParameters( $productcode )
 	{
@@ -4283,7 +4295,7 @@ class License
 		$par[ 'concurrentseats' ] = 'renew';
 		$par[ 'productcode' ] = $productcode;
 		
-		$productname = $this->getName( $productcode, $errorMessage );
+		$productname = $this->getName( $productcode );
 		if ( $productname === false ) {
 			LogHandler::Log('license', 'ERROR', "Auto license renew: error in productname of $productcode." );
 			return false;
@@ -4312,9 +4324,10 @@ class License
 
 	/**
 	 * Post the HTTP renew post
-	 * @parameter $parameters
-	 * @parameter $errorMessage, contains errorMessage on error.
-	 * @return response or false on error
+	 *
+	 * @param string[] $parameters
+	 * @param string $errorMessage, contains errorMessage on error.
+	 * @return string|boolean response or false on error
 	 */
 	private function postRenew( $parameters, &$errorMessage ) 
 	{
@@ -4340,8 +4353,9 @@ class License
 		
 	/**
 	 * Install the license returned by the HTTP renew post
-	 * @parameter $response
-	 * @return false, or an array with parameters (status, error, message)
+	 *
+	 * @param string $response
+	 * @return string[]|boolean false, or an array with parameters (status, error, message)
 	 */
 	private function installLicenseFromResponse( $response )
 	{
@@ -4431,8 +4445,9 @@ class License
 	
 	/**
 	 * Post the given parameters to the SmartReg server to confirm the renew
-	 * @parameter $par post parameters
-	 * @return reponse returned by the SmartReg server
+	 *
+	 * @param array $par post parameters
+	 * @return string|boolean response returned by the SmartReg server
 	 */
 	private function postConfirmRenew( $par )
 	{
@@ -4451,7 +4466,8 @@ class License
 	
 	/**
 	 * Return the array of fields that represent the contact info
-	 * @return Array of parameters
+	 *
+	 * @return string[]
 	 */
 	public function getContactFields()
 	{
@@ -4470,7 +4486,8 @@ class License
 	
 	/**
 	 * Read the contact info from the database and return them in an array
-	 * @return Array of parameters
+	 *
+	 * @return string[] List of parameters
 	 */
 	public function getContactParameters()
 	{
@@ -4488,7 +4505,8 @@ class License
 
 	/**
 	 * Save the given array with contact info parameters into the database
-	 * @parameter array with contact info settings
+	 *
+	 * @param string[] $arr List of contact info settings
 	 */
 	public function setContactParameters( $arr )
 	{
@@ -4503,7 +4521,8 @@ class License
 
 	/**
 	 * Return the array of fields that represent the proxy server info
-	 * @return Array of parameters
+	 *
+	 * @return string[]
 	 */
 	public function getProxyFields()
 	{
@@ -4516,6 +4535,7 @@ class License
 
 	/**
 	 * Return an array with the proxy settings that are stored in the config table of the database
+	 *
 	 * @return array with proxy settings
 	 */
 	public function getProxyParameters()
@@ -4535,7 +4555,8 @@ class License
 	
 	/**
 	 * Save the given array with proxy parameters into the database
-	 * @parameter array with proxy settings
+	 *
+	 * @param string[] array with proxy settings
 	 */
 	public function setProxyParameters( $arr )
 	{
@@ -4567,6 +4588,7 @@ class License
 	
 	/**
 	 * Determines the name of the server from server/environment super globals.
+	 *
 	 * @return string Name of server (or IP when name not resolved). Returns empty string on failure.
 	 */
 	public function getServerNameOrAddr()
@@ -4586,5 +4608,4 @@ class License
 		}
 		return $name;
 	}
-
 }

@@ -34,7 +34,8 @@
 	<folder path=".../Enterprise/server/protocols/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/services/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/useful/" maxerr="1000000"/>
-	<folder path=".../Enterprise/server/utils/" maxerr="1000000"/>
+	<folder path=".../Enterprise/server/utils/javascript/" maxerr="1000000"/>
+	<folder path=".../Enterprise/server/utils/" maxerr="0"/>
 	<folder path=".../Enterprise/server/vendor/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/wwtest/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/ZendFramework/" maxerr="1000000"/>

@@ -85,7 +85,7 @@ class WW_Utils_Autocomplete
 	 * will happen and FALSE will be returned.
 	 *
 	 * @param string $termsFile Full path to the remote Terms file to import.
-	 * @throw BizException Throws an Exception when the import was not successful.
+	 * @throws BizException Throws an Exception when the import was not successful.
 	 * @return bool Whether or not the import was successful.
 	 */
 	public function importTermsFile( $termsFile )
@@ -196,6 +196,7 @@ class WW_Utils_Autocomplete
 	 *
 	 * IMPORTANT: This operation cannot be undone.
 	 *
+	 * @throws BizException
 	 * @return bool Whether or not the Terms file was deleted successfully.
 	 */
 	public function deleteTermsFile()
@@ -339,8 +340,8 @@ class WW_Utils_Autocomplete
 	 */
 	public function searchTerms( $searchPhrase, &$hits, $ignoreValues=array(), $firstEntry, $maxResults )
 	{
-		$firstEntry = $firstEntry; // To make analyzer happy.
 		$searchResult = null;
+		$searchPhraseLen = 0;
 		$eol = chr(0x0A);
 		$hits = 0;
 		$numberOfIgnoreValues = count( $ignoreValues );

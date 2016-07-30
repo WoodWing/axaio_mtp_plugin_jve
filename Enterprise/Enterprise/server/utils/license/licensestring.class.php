@@ -1,10 +1,8 @@
 <?php
 /**
- * SCE License String class.<br>
+ * Handles string conversions of Enterprise license strings.
  *
- * Handles string conversions of license strings.<br>
- *
- * @package SCEnterprise
+ * @package Enterprise
  * @subpackage License
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
@@ -16,39 +14,25 @@
 
 class LicenseString
 {
-	/**
-	 * @var string
-	 */
+	/** @var string $mWWLError */
 	private $mWWLError;
 
 	/**
-	 * @var date time
+	 * @var integer $mWWTimeOffset date time
 	 * Convert a unix timestamp into a string.
 	 * To avoid that people recognize the number (and shorten the data that needs to be transferred), 
 	 * count the number of seconds since 2000-1-1
 	 */
 	private $mWWTimeOffset;
 	
-	/**
-	 * @var transTab
-	 * A translation table to obfuscate a string in a simple way using strtr().
-	 */
-
+	/** @var string $mWWLTranstab A translation table to obfuscate a string in a simple way using strtr(). */
 	private $mWWLTranstab = "1owu4pr5sig2k8h9mf3nq7vx6jatey0zblcd-A,BCDEFGH:I\\J/KLMNOPQRSTUVWXYZ";
 	
-	/**
-	 * @var mOpenSSLLevel
-	 * The level of security (openSSL key)
-	 */
-
+	/** @var integer mOpenSSLLevel The level of security (openSSL key) */
 	private $mOpenSSLLevel = 1024;
 	
-	/**
-	 * @var mLicenseFields
-	 * The fields that are encrypted in the license string
-	 */
-
-	private $mLicenseFields = Array( 
+	/** @var string[] $mLicenseFields The fields that are encrypted in the license string */
+	private $mLicenseFields = Array(
 					//For license validation checks:
 					'serialchecksum',  	//a checksum of the associated serial number
 					'productcode', 		//the SmartReg productcode
@@ -74,23 +58,14 @@ class LicenseString
 
 					);
 	
-	/**
-	 * @var string
-	 * Glue for the two installation codes when reclaiming a license
-	 */
+	/** @var string $mReclaimSeparator Glue for the two installation codes when reclaiming a license */
+	private $mReclaimSeparator = '#RECLAIM#';
 
-	private $mReclaimSeparator = '#RECLAIM#'; 
-
-
-	/**
-	 * @var string
-	 * Separator string to separate the license information (product name, serial and license) of a certain product
-	 */
+	/** @var string $mProductInfoSeparator Separator for the license information (product name, serial and license) of a certain product */
 	private $mProductInfoSeparator = '||';
 
 	/**
 	 * Construct the License String.
-	 *
 	 */
 	public function __construct()
 	{
@@ -104,6 +79,7 @@ class LicenseString
 	 * The 'woodwing time' starts in 2000, instead of in 1970.
 	 * Return a hexadecimal value.
 	 *
+	 * @param integer $unixtime
 	 * @return string converted timestamp
 	 */
 	public function unix2WWTimeStr( $unixtime )
@@ -118,6 +94,7 @@ class LicenseString
 	 * The 'woodwing time' starts in 2000, instead of in 1970.
 	 * Return a hexadecimal value.
 	 *
+	 * @param string $str
 	 * @return int unix timestamp
 	 */
 	public function WWTimeStr2Unix( $str )
@@ -242,7 +219,7 @@ class LicenseString
 	/**
 	 * Get the public key for openSSL string conversions
 	 *
-	 * @return handle the public key
+	 * @return resource the public key
 	 */
 	private function getPubKey()
 	{
@@ -252,7 +229,7 @@ class LicenseString
 			return false;
 		}
 	
-		$publicKeyFile = BASEDIR . "/server/utils/license/pubkey_" . $this->mOpenSSLLevel . ".pem";
+		$publicKeyFile = BASEDIR . "/server/utils/license/pubkey_{$this->mOpenSSLLevel}.pem";
 		if( !file_exists( $publicKeyFile ) )
 		{
 			$this->mWWLError = BizResources::localize("LIC_ERR_UNABLE_TO_FIND_PUBLIC_KEY") . ' ' . $publicKeyFile;
@@ -499,7 +476,7 @@ class LicenseString
 		if ( $minpos === FALSE )
 			return $key;
 			
-		$len1 = substr( $key, 0, $minpos );
+		$len1 = intval( substr( $key, 0, $minpos ) );
 		$rest = substr( $key, $minpos+1 );
 		$len2 = strlen( $rest );
 		//Including the dot of a normal sentence?
@@ -578,7 +555,7 @@ class LicenseString
 	 * Unpacks license information about a certain productcode into 3 strings
 	 * The unpacked string is stored as a 'value' of the productcode in both FS and DB
 	 *
-	 * @param string $packed string
+	 * @param string $str string
 	 * @param string $productname
 	 * @param string $serial
 	 * @param string $license
@@ -596,5 +573,3 @@ class LicenseString
 	
 
 }
-
-?>

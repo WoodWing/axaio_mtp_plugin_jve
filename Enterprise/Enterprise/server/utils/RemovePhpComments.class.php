@@ -1,15 +1,14 @@
 <?php
-
 /*
  * Copies all files of the Enterprise server and removes all comments for PHP files. <br/>
  * This util can be used for performance optimization purposes, security and shipping. <br/>
  * Logging is echoed to HTML output (browser screen).
  *
- * @package SCEnterprise
+ * @package Enterprise
  * @subpackage Utils
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
-*/
+ */
 
 require_once BASEDIR.'/server/utils/FolderInterface.intf.php';
 require_once BASEDIR.'/server/utils/FolderUtils.class.php';
@@ -131,4 +130,3 @@ class RemovePhpComments implements FolderIterInterface
 	}
 	
 }
-?>

@@ -1733,7 +1733,7 @@ class SpeedTester
 				$transferClient = new WW_Utils_TransferClient( $this->ticket );
 			} else { // TRANSFERFOLDERHSCP
 				require_once BASEDIR.'/server/utils/ShellTransferClient.class.php';
-				$transferClient = new WW_Utils_ShellTransferClient( 'hscp' );
+				$transferClient = new WW_Utils_ShellTransferClient( $this->ticket, 'hscp' );
 			}
 			// Just download and clean up.
 			$result = $transferClient->downloadFile( $attachment );
@@ -1779,7 +1779,7 @@ class SpeedTester
 				$transferClient = new WW_Utils_TransferClient( $this->ticket );
 			} else { // TRANSFERFOLDERHSCP
 				require_once BASEDIR.'/server/utils/ShellTransferClient.class.php';
-				$transferClient = new WW_Utils_ShellTransferClient( 'hscp' );
+				$transferClient = new WW_Utils_ShellTransferClient( $this->ticket, 'hscp' );
 			}
 			if( !$transferClient->uploadFile( $attachment ) ) {
 				$this->speedTestReport->reportErrorAndExit( 'Failed uploading file "'.$attachment->FilePath.'".' );
