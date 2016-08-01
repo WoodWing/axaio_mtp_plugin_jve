@@ -246,7 +246,7 @@ class WW_Utils_FileXMPDataToProperties extends  WW_Utils_FileMetaDataToPropertie
 	/**
 	 * Return the basic metadata of a preview embedded in an image.
 	 *
-	 * @param $xmpData Extracted XMP metadata.
+	 * @param SimpleXMLElement $xmpData Extracted XMP metadata.
 	 * @return array  Array with key/value pairs of preview properties and their values.
 	 */
 	public function readPreviewMetaDataFromXMP( $xmpData )
@@ -268,6 +268,7 @@ class WW_Utils_FileXMPDataToProperties extends  WW_Utils_FileMetaDataToPropertie
 	 * @param string $metakey	Meta data key.
 	 * @param string $type		Type of the field: string, list or eval (like 30000/100)
 	 * @param SimpleXMLElement	$simpleXML	The XMP-XML element to read from.
+	 * @param string $xpath
 	 * @param string $attrNS    Namespace of the xmp element.
 	 * @param string $attrName  The XMP attribute name.
 	 */

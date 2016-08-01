@@ -144,9 +144,11 @@ class LogHandler
 
 	/**
 	 * Tells if the (configured) log level is supported.
+	 *
 	 * Typically called by Health Check (wwtest) to determine if the DEBUGLEVELS option is correctly
 	 * configured at the configserver.php file.
 	 *
+	 * @param integer $level
 	 * @return boolean TRUE when supported, or FALSE if not.
 	 */
 	public static function isValidLogLevel( $level )
@@ -155,9 +157,10 @@ class LogHandler
 	}
 
 	/**
-	 * Class destructor, called by PHP when the LogHandler ends life time. This function moves 
-	 * all log collected messages from the tmp log file to the 'real' server log file. The tmp
-	 * file is removed afterwards.
+	 * Class destructor, called by PHP when the LogHandler ends life time.
+	 *
+	 * This function moves all log collected messages from the tmp log file to the 'real' server log file.
+	 * The tmp file is removed afterwards.
 	 *
 	 * @since 7.5.0
 	 */
@@ -175,6 +178,7 @@ class LogHandler
 
 	/**
 	 * Tells if for the calling client DEBUG mode is configured at DEBUGLEVELS option in configserver.php.
+	 *
 	 * It also checks if OUTPUTDIRECTORY is configured, or else no logging will be done at all.
 	 * 
 	 * @return boolean Wether or not DEBUG logging is done.
@@ -334,13 +338,15 @@ class LogHandler
 	/**
 	 * Opens log file. Creates new one when not exists and inserts a table header for HTML logging.
 	 *
+	 * @param string $logFile
+	 * @param integer $fileMode The type of access required to the file.
 	 * @return resource Log file handle or false in case of error.
 	 */
-	private static function openFile( $logFile, $opentype )
+	private static function openFile( $logFile, $fileMode )
 	{
 		// Open or create the log file
 		$exists = file_exists( $logFile );
-		$handle = fopen( $logFile, $opentype );
+		$handle = fopen( $logFile, $fileMode );
 		if( !is_resource($handle) ) {
 			return false; // error
 		}
@@ -627,7 +633,7 @@ class LogHandler
 			$logFolder = self::getLogFolder();
 			if( !empty($logFolder) ) {
 				$fileExt = (LOGFILE_FORMAT == 'plain') ? '.txt' : '.htm';
-				$handle = self::openFile( $logFolder.'ent_log_errors'.$fileExt, 'a+', false );
+				$handle = self::openFile( $logFolder.'ent_log_errors'.$fileExt, 'a+' );
 				if( $handle ) {
 					$errMsg = $header.self::getLogLine( $level, $area, $message, $time, $logFile );
 					fwrite( $handle, $errMsg );
@@ -716,8 +722,6 @@ class LogHandler
 	 */
 	public static function phpErrorHandler( $errno, $errmsg, $file, $line, $debug )
 	{
-		$debug = $debug; // keep analyzer happy
-
 		// When the error handler catches the error, the @ puts silently error_reporting level to 0,
 		// so you can detect errors comming from 'arobased' instructions.
 		if( error_reporting() == 0 ) {
@@ -872,6 +876,7 @@ class LogHandler
 	 * It goes down the stack until it hits the Service layer (typically for web services).
 	 * For web applications, it possibly won't find that layer and so it shows the full stack.
 	 *
+	 * @param array $trace
 	 * @param integer $hideToplevels Number of rows on top of stack to hide. E.g. pass 2 to hide getDebugBackTrace() function call and yourself.
 	 * @return string The stack with \n separations.
 	 */

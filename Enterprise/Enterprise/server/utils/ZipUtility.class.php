@@ -1,12 +1,12 @@
 <?php
 /**
+ * Includes two wrapper classes; one for the built-in ZipArchive class and one for the zip/unzip
+ * command line tools. Also includes a factory class to create the one of those wrapper classes.
+ *
  * @package Enterprise
  * @subpackage Utils
  * @since v7.5
  * @copyright WoodWing Software bv. All Rights Reserved.
- *
- * Includes two wrapper classes; one for the built-in ZipArchive class and one for the zip/unzip 
- * command line tools. Also includes a factory class to create the one of those wrapper classes.
  */
  
 /**
@@ -126,7 +126,8 @@ abstract class WW_Utils_ZipUtility
 	 * Returns a string with the filepath to the newly created file.
 	 *
 	 * @param string $fileContent
-	 * @return string 
+	 * @return string
+	 * @throws BizException
 	 */
 	protected function writeTempFile( $fileContent )
 	{
@@ -164,7 +165,7 @@ class WW_Utils_ZipUtility_ZipArchive extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::openZipArchive()
+	 * {@inheritdoc}
 	 */
 	final public function openZipArchive( $archivePath )
 	{
@@ -180,7 +181,7 @@ class WW_Utils_ZipUtility_ZipArchive extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::openZipArchiveWithString()
+	 * {@inheritdoc}
 	 */
 	final public function openZipArchiveWithString( $fileContent )
 	{
@@ -190,7 +191,7 @@ class WW_Utils_ZipUtility_ZipArchive extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::createZipArchive()
+	 * {@inheritdoc}
 	 */
 	final public function createZipArchive( $archivePath = null )
 	{
@@ -243,7 +244,7 @@ class WW_Utils_ZipUtility_ZipArchive extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::getFile()
+	 * {@inheritdoc}
 	 */
 	final public function getFile( $filename ) 
 	{
@@ -251,7 +252,7 @@ class WW_Utils_ZipUtility_ZipArchive extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::getFiles()
+	 * {@inheritdoc}
 	 */
 	final public function getFiles( $filenames )
 	{
@@ -265,7 +266,7 @@ class WW_Utils_ZipUtility_ZipArchive extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::addFile()
+	 * {@inheritdoc}
 	 */
 	final public function addFile( $fileName, $ownName = null )
 	{
@@ -285,8 +286,8 @@ class WW_Utils_ZipUtility_ZipArchive extends WW_Utils_ZipUtility
 	}
 	 
 	/**
+	 * {@inheritdoc}
 	 * IMPORTANT: Be careful with ending slashes at $directory.
-	 * @see WW_Utils_ZipUtility::addDirectoryToArchive()
 	 */
 	final public function addDirectoryToArchive( $directory )
 	{
@@ -374,7 +375,7 @@ class WW_Utils_ZipUtility_ZipArchive extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::extractArchive()
+	 * {@inheritdoc}
 	 */
 	final public function extractArchive( $destination, $entries = null )
 	{
@@ -396,9 +397,9 @@ class WW_Utils_ZipUtility_ZipArchive extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::closeArchive()
+	 * {@inheritdoc}
 	 */
-	final public function closeArchive( )
+	final public function closeArchive()
 	{
 		LogHandler::Log( 'ZipUtility', 'DEBUG', 'Closing archive file.' );
 		if( $this->zipArchive->close() ) {
@@ -475,7 +476,7 @@ class WW_Utils_ZipUtility_CommandLine extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::openZipArchive()
+	 * {@inheritdoc}
 	 */
 	final public function openZipArchive( $archivePath )
 	{
@@ -484,7 +485,7 @@ class WW_Utils_ZipUtility_CommandLine extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::openZipArchiveWithString()
+	 * {@inheritdoc}
 	 */
 	final public function openZipArchiveWithString( $fileContent )
 	{
@@ -494,7 +495,7 @@ class WW_Utils_ZipUtility_CommandLine extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::createZipArchive()
+	 * {@inheritdoc}
 	 */
 	final public function createZipArchive( $archivePath = null )
 	{
@@ -524,7 +525,7 @@ class WW_Utils_ZipUtility_CommandLine extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::getFile()
+	 * {@inheritdoc}
 	 */
 	final public function getFile( $filename ) 
 	{
@@ -547,7 +548,7 @@ class WW_Utils_ZipUtility_CommandLine extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::getFiles()
+	 * {@inheritdoc}
 	 */
 	final public function getFiles( $filenames )
 	{
@@ -561,7 +562,7 @@ class WW_Utils_ZipUtility_CommandLine extends WW_Utils_ZipUtility
 	}
 
 	/**
-	 * @see WW_Utils_ZipUtility::addFile()
+	 * {@inheritdoc}
 	 */
 	final public function addFile( $fileName, $ownName = null )
 	{
@@ -581,8 +582,8 @@ class WW_Utils_ZipUtility_CommandLine extends WW_Utils_ZipUtility
 	}
 	
 	/**
+	 * {@inheritdoc}
 	 * IMPORTANT: Be careful with ending slashes at $directory.
-	 * @see WW_Utils_ZipUtility::addDirectoryToArchive()
 	 */
 	final public function addDirectoryToArchive( $directory )
 	{
@@ -608,7 +609,7 @@ class WW_Utils_ZipUtility_CommandLine extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::extractArchive()
+	 * {@inheritdoc}
 	 */
 	final public function extractArchive( $destination, $entries = null )
 	{
@@ -639,9 +640,9 @@ class WW_Utils_ZipUtility_CommandLine extends WW_Utils_ZipUtility
 	}
 	
 	/**
-	 * @see WW_Utils_ZipUtility::closeArchive()
+	 * {@inheritdoc}
 	 */
-	final public function closeArchive( )
+	final public function closeArchive()
 	{
 		LogHandler::Log( 'ZipUtility', 'DEBUG', 'Closing archive file "'. $this->archivePath .'".' );
 		// We don't have to do anything. 

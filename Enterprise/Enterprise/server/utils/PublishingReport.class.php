@@ -1,15 +1,12 @@
 <?php
 
 /**
- * Publishing Report class
+ * Helper class tracking errors and building an error report while exporting digital magazine (issue).
  *
  * @package Enterprise
  * @subpackage ServerPlugins
  * @since v7.5
  * @copyright WoodWing Software bv. All Rights Reserved.
- *
- * Helper class tracking errors and building an error report while exporting digital magazine (issue).
- *
  */
 class WW_Utils_PublishingReport
 {
@@ -42,7 +39,7 @@ class WW_Utils_PublishingReport
 		return $log->getLogMessage() . ' ' . $log->getLogReason();
 	}
 
-	/**
+	/*
 	 * Set contextual objects to automatically add to logging details when calling the log() function.
 	 */
 	public function setCurrentDossier( $dossier ) { $this->dossier = $dossier; }

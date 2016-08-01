@@ -1,32 +1,31 @@
 <?php
-
 /**
- * @package 	Enterprise
- * @subpackage 	Utils
- * @since 		v6.5
- * @copyright 	WoodWing Software bv. All Rights Reserved.
- * 
  * XHTML classes used to manage flexible (X)HTML pages.
  * It allow you to add input elements to forms dynamically.
  * As a whole, typicaly an useful utility to build admin screen.
  * Each class wraps and manages XML DOM objects to preserve well-formedness.
- * 
-	Example usage:
-		$doc = new Utils_XHtmlDocument();
-		$form = $doc->addForm( 'myform', 'myform' );
-		$field1 = $form->addField( 'string', 'field1', 'field1' );
-		$field1->setValues( array('hello') );
-		$field2 = $form->addField( 'multiline', 'field2', 'field2' );
-		$field2->setValues( array('world') );
-		$field2->setWidth( 200 );
-		$field3 = $form->addField( 'bool', 'field3', 'field3' );
-		$field3->setValues( array(true) );
-		$field4 = $form->addField( 'list', 'field4', 'field4' );
-		$field4->setOptions( array( '1' => 'rood', '2' => 'oranje', '3' => 'groen' ) );
-		$field4->setValues( array('2') );
-		//echo "<pre>".htmlentities( $field4->toString() )."</pre>";
-		echo $form->toString();
-*/
+ *
+ * Example usage:
+ * $doc = new Utils_XHtmlDocument();
+ * $form = $doc->addForm( 'myform', 'myform' );
+ * $field1 = $form->addField( 'string', 'field1', 'field1' );
+ * $field1->setValues( array('hello') );
+ * $field2 = $form->addField( 'multiline', 'field2', 'field2' );
+ * $field2->setValues( array('world') );
+ * $field2->setWidth( 200 );
+ * $field3 = $form->addField( 'bool', 'field3', 'field3' );
+ * $field3->setValues( array(true) );
+ * $field4 = $form->addField( 'list', 'field4', 'field4' );
+ * $field4->setOptions( array( '1' => 'rood', '2' => 'oranje', '3' => 'groen' ) );
+ * $field4->setValues( array('2') );
+ * //echo "<pre>".htmlentities( $field4->toString() )."</pre>";
+ * echo $form->toString();
+ *
+ * @package Enterprise
+ * @subpackage Utils
+ * @since v6.5
+ * @copyright WoodWing Software bv. All Rights Reserved.
+ */
 
 /**
  * XHTML document. Manages XHTML forms.
@@ -181,7 +180,7 @@ abstract class Utils_XHtmlField extends Utils_XHtmlElement
 	}
 	
 	abstract function setValues( array $values );
-	public function setMaxLength( $max ) { $max=$max; } // typically for strings
+	public function setMaxLength( $max ) {} // typically for strings
 }
 
 /**
@@ -197,7 +196,6 @@ class Utils_XHtmlSeparatorField extends Utils_XHtmlField
 	
 	function setValues( array $values )
 	{
-		$values = $values; // keep code analyzer happy
 	}
 }
 
@@ -237,7 +235,7 @@ class Utils_XHtmlPasswordField extends Utils_XHtmlStringField
 {
 	public function __construct( Utils_XHtmlDocument $doc, $id, $name )
 	{
-		Utils_XHtmlField::__construct( $doc, 'input', $id, $name );
+		parent::__construct( $doc, $id, $name );
 		$this->DOM->setAttribute( 'type', 'password' );
 		$this->DOM->setAttribute( 'autocomplete', 'off' );
 	}
@@ -363,7 +361,7 @@ class Utils_XHtmlComboboxField extends Utils_XHtmlField
 	/**
 	 * Creates and returns a select option and set the values. 
 	 *
-	 * @param DOMElement $domDoc The parent element to create a element
+	 * @param DOMDocument $domDoc The parent element to create a element
 	 * @param mixed $optionId The value for the option
 	 * @param mixed $optionVal The text to display
 	 * @param array $values Entries to set a option selected
@@ -408,7 +406,7 @@ class Utils_XHtmlDatetimeField extends Utils_XHtmlField
 	
 	public function __construct( Utils_XHtmlDocument $doc, $id, $name )
 	{
-		$id = $id; $doc = $doc; // keep analyzer happy
+		parent::__construct( $doc, 'input', $id, $name );
 		require_once BASEDIR.'/server/utils/htmlclasses/HtmlDateTimeField.class.php';
 		$this->Field = new HtmlDateTimeField( null, $name, false, true, false );
 	}
@@ -435,7 +433,6 @@ class Utils_XHtmlDatetimeField extends Utils_XHtmlField
 
 	public function setWidth( $width ) // overrule parent -> temp hack!
 	{
-		$width = $width; // ignore
 	}
 }
 
@@ -447,7 +444,7 @@ class Utils_XHtmlDateField extends Utils_XHtmlDatetimeField
 {
 	public function __construct( Utils_XHtmlDocument $doc, $id, $name )
 	{
-		$id = $id; $doc = $doc; // keep analyzer happy
+		parent::__construct( $doc, $id, $name );
 		require_once BASEDIR.'/server/utils/htmlclasses/HtmlDateField.class.php';
 		$this->Field = new HtmlDateField( null, $name, false, true, false );
 	}

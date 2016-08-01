@@ -69,7 +69,6 @@ class WW_Utils_XmlRpcClient
 		try {
 			$retVal = $this->rpcClient->call( $action, $params );
 		} catch( Exception $e ) {
-			$e = $e; // Keep analyzer happy.
 			$retVal = null; // Keep analyzer happy.
 		}
 		PerformanceProfiler::stopProfile( $area . '- '.$action, 3 );

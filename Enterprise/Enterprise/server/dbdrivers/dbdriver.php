@@ -277,6 +277,15 @@ abstract class WW_DbDrivers_DriverBase
 	 */
 	abstract function composeDropTempTableStatement( $tableName );
 
+	/**
+	 * Checks if a table exists in the database.
+	 *
+	 * @param string $tableName Name of the table
+	 * @param boolean $addPrefix Add the WoodWing table prefix to the table name.
+	 * @return boolean
+	 */
+	abstract function tableExists( $tableName, $addPrefix );
+
 }
 
 class DBDriverFactory

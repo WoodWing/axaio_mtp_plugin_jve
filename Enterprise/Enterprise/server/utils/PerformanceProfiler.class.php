@@ -1,10 +1,10 @@
 <?php
 /**
- * Performance Profiler utility class.<br>
+ * Performance Profiler utility class.
  *
- * Usefull tool for profiling purposes.<br>
+ * Useful tool for all kind of profiling purposes, such as 3rd party integrations, SQL and PHP execution.
  * 
- * @package SCEnterprise
+ * @package Enterprise
  * @subpackage Utils
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
@@ -66,6 +66,7 @@ class PerformanceProfiler
 	 * Returns a Byte count as Mega Byte count
 	 *
 	 * @param integer $size
+	 * @param integer $precision
 	 * @return string
 	 */
 	public static function getMBString( $size, $precision=0 ) 
@@ -302,7 +303,6 @@ class PerformanceProfiler
 	 */
 	public static function startProfile( $context, $level, $initiator=false )
 	{
-		$initiator = $initiator; // keep analyzer happy
 		if( self::$enabled && self::$profileLevel >= $level ) {
 			
 			// All profiles currently running take a hit of this startProfile and the subsequent 
@@ -408,5 +408,3 @@ if( !isset($profiler) ) {
 	$profiler = new PerformanceProfiler();
 	// -> $profiler singleton runs out of scope when PHP process dies in which case we stop profiling (see destructor)
 }
-
-?>

@@ -124,7 +124,7 @@ class WW_Utils_HttpClientMultiCurl
 	public function setFileUpload( $filename, $formname, $data = null, $ctype = null )
 	{
 		if( !$data && ($data = @file_get_contents($filename)) === false ) {
-			throw new BizException( "Unable to read file '{$filename}' for upload" );
+			throw new BizException( null, 'Server', null, "Unable to read file '{$filename}' for upload" );
 		}
 		$this->files[] = array(
 			'formname' => $formname,
@@ -339,6 +339,7 @@ class WW_Utils_HttpClientMultiCurl
 	 *
 	 * @param string $response Raw HTTP response.
 	 * @param integer $connId Connection index of the network request pool.
+	 * @throws BizException
 	 */
 	private function handleResponse( $response, $connId )
 	{
@@ -473,7 +474,6 @@ class WW_Utils_HttpClientMultiCurl
 								try {
 									$this->handleResponse( $response, $connId );
 								} catch( BizException $e ) {
-									$e = $e;
 								}
 
 								curl_multi_remove_handle($this->curlMultiHandler, $curl);

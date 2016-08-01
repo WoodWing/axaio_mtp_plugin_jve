@@ -59,6 +59,7 @@ class WW_Utils_HtmlClasses_TemplateSection
 	 *
 	 * @param string $section
 	 * @param object $object
+	 * @param boolean $editMode
 	 * @return string HTML section with replaced fields
 	 */
 	public function fillInRecordFields( $section, $object, $editMode=false )
@@ -66,6 +67,7 @@ class WW_Utils_HtmlClasses_TemplateSection
 		require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
 		$class = get_class( $object );
 		foreach( array_keys(get_object_vars($object)) as $prop ) {
+			$var = '';
 			if( property_exists( get_class($object), $prop ) ) {
 				if( is_bool($object->$prop) ) { // do not call gettype (see php man)
 					if( $editMode ) {
@@ -79,15 +81,7 @@ class WW_Utils_HtmlClasses_TemplateSection
 						$var = formvar($object->$prop);
 					}
 				}
-			} /*elseif( method_exists( $object, $prop ) ) {
-				$var = ''; // TODO?
-			} elseif( is_object($object->$prop) ) {
-				$var = ''; // TODO?
-			} elseif( is_array($object->$prop) ) {
-				$var = ''; // TODO?
-			} */ else {
-				$var = ''; // ERROR
-			} 
+			}
 			$dateTimeVar =  DateTimeFunctions::iso2date($var);
 			$var = $dateTimeVar ? $dateTimeVar : $var;
 			$section = str_replace( '<!--PAR:'.$class.'->'.$prop.'-->', $var, $section );

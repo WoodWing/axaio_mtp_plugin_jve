@@ -332,7 +332,7 @@ class BizAdmProperty
 	/**
 	 * Determines the value(s) of a custom property.
 	 *
-	 * @param AdmExtraMetaData[] $extraMetaData List of custom props to search in.
+	 * @param ExtraMetaData[]||AdmExtraMetaData[] $extraMetaData List of custom props to search in.
 	 * @param string $propName Name of custom property to lookup.
 	 * @param bool $multiVal Whether or not to return multi value (array).
 	 * @return mixed The value(s) of the property. NULL when property was not found.
