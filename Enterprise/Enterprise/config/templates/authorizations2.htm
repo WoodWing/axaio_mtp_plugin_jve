@@ -183,6 +183,8 @@
 			"checkbox" : {
 				"keep_selected_style" : false
 			},
+		}).on('changed.jstree', function() {
+			$(this).checkJsTrees();
 		});
 		$('#jstree_statuses').jstree({
 			'plugins':["checkbox"],
@@ -197,6 +199,8 @@
 			"checkbox" : {
 				"keep_selected_style" : false
 			},
+		}).on('changed.jstree', function() {
+			$(this).checkJsTrees();
 		});
 		$('#jstree_profiles').jstree({
 			'plugins':["checkbox"],
@@ -211,7 +215,22 @@
 			"checkbox" : {
 				"keep_selected_style" : false
 			},
+		}).on('changed.jstree', function() {
+			$(this).checkJsTrees();
 		});
+
+		/**
+		 * Disable the save button if no checkbox is selected in the status, category and profile trees.
+		 */
+		(function( $ ) {
+			$.fn.checkJsTrees = function() {
+				if( $("#jstree_statuses, #jstree_categories, #jstree_profiles").find(".jstree-clicked").length == 0 ) {
+					$("#savebtn").prop("disabled", true);
+				} else {
+					$("#savebtn").prop("disabled", false);
+				}
+			};
+		})( jQuery );
 	});
 </script>
 

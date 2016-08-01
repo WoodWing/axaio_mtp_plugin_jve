@@ -844,7 +844,7 @@ class Ww_Admin_Authorizations_App
 			'<a href="javascript:viewAuth();">'.
 			BizResources::localize( 'ACT_CANCEL' ).
 			'</a>'.
-			'<button onclick="javascript:saveAuth(\''.$nextAuthIdsCsv.'\');">'.
+			'<button id="savebtn" onclick="javascript:saveAuth(\''.$nextAuthIdsCsv.'\');">'.
 			BizResources::localize( 'ACT_SAVE' ).
 			'</button>'.
 			'</div>'.
