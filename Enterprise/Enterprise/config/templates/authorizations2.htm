@@ -224,11 +224,11 @@
 		 */
 		(function( $ ) {
 			$.fn.checkJsTrees = function() {
-				if( $("#jstree_statuses, #jstree_categories, #jstree_profiles").find(".jstree-clicked").length == 0 ) {
-					$("#savebtn").prop("disabled", true);
-				} else {
-					$("#savebtn").prop("disabled", false);
-				}
+				var $disableSave =
+					$("#jstree_statuses").find(".jstree-clicked").length == 0 ||
+					$("#jstree_categories").find(".jstree-clicked").length == 0 ||
+					$("#jstree_profiles").find(".jstree-clicked").length == 0;
+				$("#savebtn").prop("disabled", $disableSave);
 			};
 		})( jQuery );
 	});
