@@ -120,28 +120,29 @@ class DBEdition extends DBBase
 		}
 		return $ret;
 	}
-	
+
 	/**
-     * Retrieves editions from smart_editions table that are owned by given publication.
-     * Editions of issues with Overrule Publication are excluded! Use DBIssue::listIssueEditions for that.
-     *
-     * @param $pubId Id of the publication. Pass zero (0) to get all publication's editions.
+	 * Retrieves editions from smart_editions table that are owned by given publication.
+	 * Editions of issues with Overrule Publication are excluded! Use DBIssue::listIssueEditions for that.
+	 *
+	 * @param $pubId Id of the publication. Pass zero (0) to get all publication's editions.
 	 * @return array of edition rows.
-    **/    
-    
-    public static function listPublEditions( $pubId )
-    {
-        $dbdriver = DBDriverFactory::gen();
-        $editionstable = $dbdriver->tablename( self::TABLENAME );
-        $publicationstable = $dbdriver->tablename( 'publications' );
-        
-        $sql  = "SELECT edi.* ";
-        $sql .= "FROM $editionstable edi, $publicationstable pub ";
-        $sql .= "WHERE edi.`channelid` = pub.`defaultchannelid` AND pub.`id` = $pubId AND edi.`issueid` = 0 ";
-        
-        $sth = $dbdriver->query($sql);
-        return self::fetchResults($sth, 'id');
-    }
+	 **/
+
+	public static function listPublEditions( $pubId )
+	{
+		$dbdriver = DBDriverFactory::gen();
+		$editionstable = $dbdriver->tablename( self::TABLENAME );
+		$publicationstable = $dbdriver->tablename( 'publications' );
+
+		$sql = "SELECT edi.* ";
+		$sql .= "FROM $editionstable edi, $publicationstable pub ";
+		$sql .= "WHERE edi.`channelid` = pub.`defaultchannelid` AND pub.`id` = ? AND edi.`issueid` = 0 ";
+		$params = array( $pubId );
+
+		$sth = $dbdriver->query( $sql, $params );
+		return self::fetchResults( $sth, 'id' );
+	}
 	
 	/**
 	 * Lists all editions from smart_editions that are owned by the given channel.

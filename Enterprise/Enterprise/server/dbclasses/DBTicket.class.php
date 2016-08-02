@@ -46,9 +46,8 @@ class DBTicket extends DBBase
 	public static function makeTicketHashPart( $clientip='', $user='', $clientname='', $appname='', $appserial='', $appproductcode='' )
 	{
 		//"bla" = extra confusion for third parties who try to regenerate our hash...
-	//	$str = $clientip . $user . $clientname . $appname . $appproductcode . $appserial . "bla"; 
-		$clientip = $clientip;
-		$str = $user . $clientname . $appname . $appserial . $appproductcode . "bla"; 
+		//	$str = $clientip . $user . $clientname . $appname . $appproductcode . $appserial . "bla";
+		$str = $user . $clientname . $appname . $appserial . $appproductcode . "bla";
 		return substr( md5( $str ), 0, 8 );
 	}
 
@@ -495,8 +494,6 @@ class DBTicket extends DBBase
 	 */
 	public static function checkTicket( $ticket, $service = '' )
 	{
-		$service = $service; // keep analyzer happy
-		
 		// Special treatment for background/async server job processing, for which no seat must be taken.
 		if( self::$ServerJob && self::$ServerJob->TicketSeal == $ticket ) {
 			return self::$ServerJob->ActingUser;

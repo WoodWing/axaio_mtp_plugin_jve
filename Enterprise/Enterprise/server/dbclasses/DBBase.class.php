@@ -556,31 +556,29 @@ class DBBase
 	 * @return array of rows.
 	 */
 	public static function listPagedRows( $tableName, $keyCol, $where, $values = array(), $orderBy, $limit, $params )
-    {
+	{
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
 
-	    $params = $params;
+		// Preconstruct the order by.
+		$orderBySQL = ( !is_null( $orderBy ) ) ? self::addOrderByClause( '', $orderBy ) : '';
 
-	    // Preconstruct the order by.
-	    $orderBySQL = (!is_null( $orderBy )) ? self::addOrderByClause( '', $orderBy ) : '';
+		// Retrieve the fully composed query for the paged resultset.
+		$sql = $dbDriver->composePagedQuerySql( $tableName, $keyCol, $where, $orderBySQL, $limit, $values );
 
-	    // Retrieve the fully composed query for the paged resultset.
-	    $sql = $dbDriver->composePagedQuerySql( $tableName, $keyCol, $where, $orderBySQL, $limit, $values );
-
-	    // In case a driver does not support an updated query we have to run a normal listRows
-	    // to fetch the results, as is the case with the Oracle driver for example.
-		if (false === $sql) {
-			$rows =  self::listRows($tableName, $keyCol, '', $where, '*', $values, $orderBy, $limit);
-		}else {
+		// In case a driver does not support an updated query we have to run a normal listRows
+		// to fetch the results, as is the case with the Oracle driver for example.
+		if( false === $sql ) {
+			$rows = self::listRows( $tableName, $keyCol, '', $where, '*', $values, $orderBy, $limit );
+		} else {
 			// Run the query, fetch the results and return the rows.
 			$sth = $dbDriver->query( $sql, $values );
 			if( is_null( $sth ) ) {
 				$err = trim( $dbDriver->error() );
-				self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
+				self::setError( empty( $err ) ? BizResources::localize( 'ERR_DATABASE' ) : $err );
 				$rows = null;
 			} else {
-				$rows =  self::fetchResults( $sth, $keyCol, true );
+				$rows = self::fetchResults( $sth, $keyCol, true );
 			}
 		}
 		return $rows;

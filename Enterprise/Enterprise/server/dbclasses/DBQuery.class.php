@@ -1013,9 +1013,6 @@ class DBQuery extends DBBase
 													   $withclosed = false, $hierarchical = false, $objectsWhere = '',
 													   $accessRight = 1/* View */)
 	{
-		// $hierarchical is not used now but may be in the future
-		$hierarchical = $hierarchical;
-		
 		$brandAdmin = false; // Has user brand admin rights
 		$tempav = self::createAuthorizationsView($shortusername, $accessRight, $brandAdmin);
 		$dbdriver = DBDriverFactory::gen();

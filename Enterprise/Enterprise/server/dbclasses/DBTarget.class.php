@@ -350,7 +350,6 @@ class DBTarget extends DBBase
 					DBTargetEdition::addTargetEdition( $targetId, $editionId );
 				}
 			} catch ( BizException $e ) {
-				$e = $e; // To make analyzer happy.
 				$updateResult = false;
 			}
 		}
