@@ -15,29 +15,6 @@ class DBTargetEdition extends DBBase {
 	const DBINT_CLASS = 'WW_DBIntegrity_TargetEdition';
 	
 /**************************** Insert ******************************************/
-	/**
-	 * Inserts records with the new values for passed columns.  
-	 * @param $newValues column/value pairs of the columns to be inserted.
-	 * @param $autoIncrement Apply auto increment for primary key (true/false).
-	 * @return new id or else false.
-	 */
-	public static function insert(array $newValues, $autoIncrement)
-	{
-		self::clearError();
-		
-        $dbDriver = DBDriverFactory::gen();
-        $table = $dbDriver->tablename(self::TABLENAME);
-
-		$intDB = new WW_DBIntegrity_Tablename();
-        $intDB->beforeInsert($newValues);
-        
-		$newId = self::insertRow($table, $newValues, $autoIncrement);
-
-        $intDB->afterInsert($newId, $newValues);
-
-        return 1;
-	}		
-	
    /**
      * Adds one record to the smart_targeteditions table, with the values supplied in the params.
      * When the record does already exists, it does NOT error, but uses that record.

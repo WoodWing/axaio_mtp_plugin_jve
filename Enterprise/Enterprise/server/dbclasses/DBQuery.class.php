@@ -1069,7 +1069,7 @@ class DBQuery extends DBBase
 		$shortusernameDBStr = $dbdriver->toDBString($shortusername);
 		$objectstable = $deletedobjects ? $dbdriver->tablename('deletedobjects') : $dbdriver->tablename('objects');
 		
-		$isadmin = DBuser::isAdminUser($shortusername);
+		$isadmin = DBUser::isAdminUser($shortusername);
 		
 		// BZ#11479 insert directly into temp_aov
 		$sql  = "INSERT INTO $tempaov ";

@@ -1376,7 +1376,7 @@ class DBObject extends DBBase
 		if( $customProp ) {
 			$type = BizProperty::getCustomPropertyType( $property );
 		} else {
-			$types = BizProperty::getMetaDataSqlFieldTypes( $property );
+			$types = BizProperty::getMetaDataSqlFieldTypes();
 			$type = $types[$property];			
 		}
 		return $type;

@@ -223,7 +223,7 @@ class DBTarget extends DBBase
      * @return the id of the added entry in the publishhistory table
 	 *
 	 */
-    static public function updatePublishInfoDossier($objectid, $channelid, $issueid, $externalid, $action, $publisheddate, $version, $user)
+    static public function updatePublishInfoDossier($objectid, $channelid, $issueid, $externalid, $action, $publisheddate, $version, $user )
 	{
     	$tablename = self::TABLENAME;
 
@@ -245,10 +245,24 @@ class DBTarget extends DBBase
 		
     	self::updateRow($tablename, $values, $where);
 		
-   		require_once BASEDIR . '/server/dbclasses/DBPublishHistory.class.php';
-		
-   		//update publishhistory
-   		return DBPublishHistory::addPublishHistory($objectid, $channelid, $issueid, $action, $user);
+   	require_once BASEDIR . '/server/dbclasses/DBPublishHistory.class.php';
+
+		$publishedDossier = new PubPublishedDossier();
+		$publishedDossier->DossierID = $objectid;
+		$publishedDossier->Target = new Target();
+		$publishedDossier->Target->Issue = new Issue();
+		$publishedDossier->Target->Issue->Id = $issueid;
+		$publishedDossier->Target->PubChannel->Id = new PubChannel();
+		$publishedDossier->Target->PubChannel->Id = $channelid;
+		$publishedDossier->Target->PublishedDate = $publisheddate;
+		$publishedDossier->PublishedDate = $publisheddate;
+		$publishedDossier->ExternalId = $externalid;
+		$publishedDossier->FieldsVersion = $version;
+		$publishedDossier->History[0]->Action = $action;
+		$publishedDossier->History[0]->PublishedBy = $user;
+
+   	//update publishhistory
+   	return DBPublishHistory::addPublishHistory( $publishedDossier );
 	}
 
 	/**
