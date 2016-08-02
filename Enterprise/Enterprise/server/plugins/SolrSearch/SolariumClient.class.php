@@ -247,6 +247,7 @@ class SolariumClient
 	 */
 	public function createSelect( $options = null )
 	{
+		$query = null;
 		try {
 			$query = $this->client->createSelect( $options );
 

@@ -360,7 +360,7 @@ class DBIssue extends DBBase
 	
 	/**
 	 *  Lists ALL issues that overrule their publication in a array
-	 *  @return key-value array, key being the issueId and value the publication id of that overrule issue
+	 *  @return array (key-value), key being the issueId and value the publication id of that overrule issue
 	 */
 	static public function listAllOverruleIssuesWithPub()
 	{

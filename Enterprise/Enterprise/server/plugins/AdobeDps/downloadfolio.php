@@ -142,11 +142,11 @@ try {
 }
 
 // Cleanup used file handlers.
-if( $fdFolio ) {
+if( isset($fdFolio) ) {
 	fflush( $fdFolio );
 	fclose( $fdFolio );
 }
-if( $fdOutput ) {
+if( isset( $fdOutput ) ) {
 	fflush( $fdOutput );
 	fclose( $fdOutput );
 }

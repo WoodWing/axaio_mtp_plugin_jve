@@ -12,7 +12,7 @@ require_once BASEDIR.'/server/bizclasses/BizSpelling.class.php';
 	<title>Enterprise Spelling - Encoding Convertor</title>
 	<meta http-equiv="Content-Type" content="text/plain; charset=UTF-8" />
 	<style type="text/css">
-		table { border: 1px; border-spacing: 0px; empty-cells: show; }
+		table { border: 1px; border-spacing: 0; empty-cells: show; }
 	</style>
 </head>
 <body style="font-family: Arial;">
@@ -52,6 +52,7 @@ if( !$generate ){
 		$dictionariesPath = $connector->getInstalledDictionariesAndPath( $pluginObj->UniqueName );
 		
 		// Retrieves full path of the CONFIGURED Hunspell dictionaries
+		$affixFileNames = array();
 		foreach( $configs as $publicationId => $pubConfig ){
 			foreach( $pubConfig as $language => $langConfig ) {
 				foreach( $langConfig['dictionaries'] as $configuredDictionary ){
@@ -68,7 +69,7 @@ if( !$generate ){
 		$notUtf8Encoded = array();
 		// Now, do the dictionary encoding check.
 		$notReadableAffixFile = array();					
-		foreach( $affixFileNames as $affixFileName ){
+		if( $affixFileNames ) foreach( $affixFileNames as $affixFileName ){
 			$affixFileName = $affixFileName . '.aff';
 			if( is_readable( $affixFileName ) ){
 				$affixFile = file_get_contents( $affixFileName );

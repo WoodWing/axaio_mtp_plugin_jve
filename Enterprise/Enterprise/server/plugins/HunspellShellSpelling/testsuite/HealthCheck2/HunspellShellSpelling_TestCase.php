@@ -52,7 +52,8 @@ class WW_TestSuite_HealthCheck2_HunspellShellSpelling_TestCase extends TestCase
 			$connector = $bizSpelling->getInstalledSpellingConnector( null, $language, $pluginName );
 			$dictionariesPath = $connector->getInstalledDictionariesAndPath( $pluginName );
 			
-			// Retrieves full path of the CONFIGURED Hunspell dictionaries 
+			// Retrieves full path of the CONFIGURED Hunspell dictionaries
+			$affixFileNames = array();
 			foreach( $configs as $pubConfig ){
 				foreach( $pubConfig as $language => $langConfig ) {
 					foreach( $langConfig['dictionaries'] as $configuredDictionary ){
@@ -69,7 +70,7 @@ class WW_TestSuite_HealthCheck2_HunspellShellSpelling_TestCase extends TestCase
 			$notUtf8Encoded = array();	
 			// Now, do the encoding check.
 			$notReadableAffixFile = array();					
-			foreach( $affixFileNames as $affixFileName ){
+			if( $affixFileNames ) foreach( $affixFileNames as $affixFileName ){
 				$affixFileName = $affixFileName . '.aff';
 				if( is_readable( $affixFileName ) ){
 					$affixFile = file_get_contents( $affixFileName );
