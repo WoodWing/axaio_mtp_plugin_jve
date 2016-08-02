@@ -220,7 +220,8 @@
 		});
 
 		/**
-		 * Disable the save button if no checkbox is selected in the status, category and profile trees.
+		 * Disable the Save button if the status-, category- or profile tree
+		 * has nothing selected. This is to avoid faulty save operations.
 		 */
 		(function( $ ) {
 			$.fn.checkJsTrees = function() {
@@ -231,6 +232,28 @@
 				$("#savebtn").prop("disabled", $disableSave);
 			};
 		})( jQuery );
+		
+		/**
+		 * Close the status types (tree nodes) that have all statuses selected
+		 * or that have no statuses selected. So leave only parent nodes open that
+		 * have a mixture of child nodes selected. This is to optimize the view.
+		 */
+		$('#jstree_statuses').bind('ready.jstree', function(event, data) {
+			var statusTree = $(this).jstree(true);
+			var statusTypes = statusTree.get_children_dom( $(this) );
+			statusTypes.each( function( index, statusType ) {
+				var statusNodes = statusTree.get_children_dom( statusType );
+				var countSelectedChilds = 0;
+				statusNodes.each( function( index, statusNode ) {
+					if( statusTree.is_selected( statusNode ) ) {
+						countSelectedChilds += 1;
+					}
+				});
+				if( countSelectedChilds == statusNodes.length || countSelectedChilds == 0 ) {
+					statusTree.close_node( statusType );
+				}
+			});
+    	});
 	});
 </script>
 
