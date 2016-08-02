@@ -270,26 +270,30 @@ class DBVersion extends DBBase
 	}
 
 	/**
-     * Checks if major and minor version are valid.
-     * @param array $verArr Key-value pairs majorversion and minorversion to get updated.
-     * @param string $fieldPrefix Optional. Prefix for "majorversion" and "minorversion" field names. Default none.
-     */
-	static private function validMajorMinorVersion( $verArr, $fieldPrefix='' )
+	 * Checks if major and minor version are valid.
+	 *
+	 * @param array $verArr Key-value pairs majorversion and minorversion to get updated.
+	 * @param string $fieldPrefix Optional. Prefix for "majorversion" and "minorversion" field names. Default none.
+	 * @return boolean If valid true else false.
+	 */
+	static private function validMajorMinorVersion( $verArr, $fieldPrefix = '' )
 	{
-		return isset($verArr[$fieldPrefix.'majorversion']) && isset($verArr[$fieldPrefix.'minorversion'])
-			&& is_numeric($verArr[$fieldPrefix.'majorversion']) && is_numeric($verArr[$fieldPrefix.'minorversion'])
-			&& $verArr[$fieldPrefix.'majorversion'] != -1 && $verArr[$fieldPrefix.'minorversion'] != -1;
+		return isset( $verArr[ $fieldPrefix.'majorversion' ] ) && isset( $verArr[ $fieldPrefix.'minorversion' ] )
+		&& is_numeric( $verArr[ $fieldPrefix.'majorversion' ] ) && is_numeric( $verArr[ $fieldPrefix.'minorversion' ] )
+		&& $verArr[ $fieldPrefix.'majorversion' ] != -1 && $verArr[ $fieldPrefix.'minorversion' ] != -1;
 	}
 
 	/**
-     * Checks if major and minor version are valid.
-     * @param array $verArr Key-value pairs majorversion and minorversion to get valiated.
-     */
+	 * Checks if major and minor version are valid.
+	 *
+	 * @param array $objProps Object properties containing key-value pairs of major version and minor version.
+	 * @return boolean True if valid else false.
+	 */
 	static private function validMajorMinorVersionBiz( $objProps )
 	{
-		return isset($objProps['MajorVersion']) && isset($objProps['MinorVersion'])
-			&& is_numeric($objProps['MajorVersion']) && is_numeric($objProps['MinorVersion'])
-			&& $objProps['MajorVersion'] != -1 && $objProps['MinorVersion'] != -1;
+		return isset( $objProps['MajorVersion'] ) && isset( $objProps['MinorVersion'] )
+		&& is_numeric( $objProps['MajorVersion'] ) && is_numeric( $objProps['MinorVersion'] )
+		&& $objProps['MajorVersion'] != -1 && $objProps['MinorVersion'] != -1;
 	}
 
 	/**

@@ -734,6 +734,8 @@ class DBObject extends DBBase
 	 * @param array $arr List object properties to be updated.
 	 * @param string $modified Datetime when properties are updated.
 	 * @param string $storename Internal file storage name. Should be used for single object updates only.
+	 * @return resource DB handle that can be used to fetch results.
+	 * @throws BizException.
 	 */
 	static public function updateObject( $objectIds, $modifier, $arr, $modified, $storename = '' )
 	{
@@ -1273,6 +1275,7 @@ class DBObject extends DBBase
 	 * @param resource $dbDriver connection to the database
 	 * @param string $comma separator
 	 * @param array $blobs placeholder of blobs to be inserted/updated
+	 * @return string SQL-statement.
 	 */
 	static public function handleObjectUpdateInsert( $operation, $dbField, $propertyName, $value, $dbDriver, $comma, &$blobs )
 	{
@@ -1369,6 +1372,7 @@ class DBObject extends DBBase
 	 *
 	 * @param string $property The name of the property to be checked for the property type.
 	 * @param boolean $customProp True if it is a custom property, False for standard/builtin property.
+	 * @return string The PropertyType or an empty string if the PropertyType could not be determined.
 	 */
 	static protected function getPropertyType( $property, $customProp )
 	{
