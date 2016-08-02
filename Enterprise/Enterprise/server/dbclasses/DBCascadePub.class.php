@@ -406,6 +406,7 @@ class DBCascadePub extends DBBase
 		$propValues = array();
 		if( isset($copyIssueObj->ExtraMetaData) ) {
 			require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php'; // TODO: DB calling Biz = against architecture!
+			/** @noinspection PhpDeprecationInspection */
 			BizAdmProperty::enrichDBRowWithCustomMetaData( 'Issue', $copyIssueObj->ExtraMetaData, $propValues );
 		}
 		foreach( $srcChannelDataRows as $srcChannelDataRow ) {
