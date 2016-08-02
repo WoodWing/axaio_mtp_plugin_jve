@@ -630,7 +630,7 @@ class WW_TestSuite_HealthCheck2_AdobeDps_TestCase extends TestCase
 			$dpsService->signIn( $dpsAccSettings['username'], $dpsAccSettings['password'] );
 		} catch( BizException $e ) {
 			$e = $e; // Keep the Code Analyzer happy.
-			switch( $dpsService->getHttpCode() ) {
+			if( isset($dpsService) ) switch( $dpsService->getHttpCode() ) {
 				case 401 : // Authentication problem reported by Adobe DPS.
 					$this->setResult( 'ERROR', 'Adobe DPS credentials for channel '.$channelName .
 						' (id='.$channelId.') with edition '. $editionName.' (id='.$editionId.') are invalid.', $generalHelp );
@@ -704,15 +704,14 @@ class WW_TestSuite_HealthCheck2_AdobeDps_TestCase extends TestCase
 		////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		// Generic help(Tip) message for zip utility.
+		$zipHelp = '';
 		if( OS == 'WIN' ) {
 			$zipHelp = 'Please download and install the \'Info-ZIP\' Zip package. Links to use: '. PHP_EOL .
 						'<a href="ftp://ftp.info-zip.org/pub/infozip/win32/zip300xn.zip">Windows 32-bit version</a>, '.
 						'<a href="ftp://ftp.info-zip.org/pub/infozip/win32/zip300xn-x64.zip">Windows 64-bit version</a>. '.
 						'In case the package is already installed, please ensure that the ZIP directory '.
 						'is set in the environment called \'Path\'.';
-		}
-		
-		if( OS == 'UNIX' || OS == 'LINUX' ) {
+		} elseif( OS == 'UNIX' || OS == 'LINUX' ) {
 			$zipHelp = 'Please download and install the \'Info-ZIP\' Zip package from ' .
 						'<a href="http://www.info-zip.org/Zip.html">info-zip.org</a>.';
 			
@@ -761,14 +760,13 @@ class WW_TestSuite_HealthCheck2_AdobeDps_TestCase extends TestCase
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		// Generic help(Tip) message for unzip utility.
+		$unzipHelp = '';
 		if( OS == 'WIN' ) {
 			$unzipHelp = ' Please download and install the \'Info-ZIP\' Unzip package from ' .
 							'<a href="ftp://ftp.info-zip.org/pub/infozip/win32/unz600xn.exe">info-zip.org</a>.' .
 							' In case the package is already installed, please ensure that the Unzip directory is set '.
 							'in the environment called \'Path\'.';
-		}
-		
-		if( OS == 'UNIX' || OS == 'LINUX' ) {
+		} elseif( OS == 'UNIX' || OS == 'LINUX' ) {
 			$unzipHelp = 'Please download and install the \'Info-ZIP\' Unzip package from '.
 							'<a href="http://www.info-zip.org/UnZip.html">info-zip.org</a>.';
 		}

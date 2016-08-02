@@ -564,17 +564,22 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 
 		} catch( Exception $e ) { // any kind of Zend exception !!
 			$e = $e; // keep code analyzer happy
+			$client = null;
+			$fileId = 0;
 		}
 
 		// Log request and response (or fault) as plain text
 		if( $debugMode ) { // check here since saveXML() calls below are expensive
-			LogHandler::logService( $action, $client->getLastRequest(), true, 'http_upload', 'txt' );
-			$lastResponse = $client->getLastResponse();
-			if( $lastResponse ) {
-				if( $lastResponse->isError() ) {
-					LogHandler::logService( $action, (string)$lastResponse, null, 'http_upload', 'txt' );
-				} else {
-					LogHandler::logService( $action, (string)$lastResponse, false, 'http_upload', 'txt' );
+			if( isset($client ) ) {
+				LogHandler::logService( $action, $client->getLastRequest(), true, 'http_upload', 'txt' );
+				$lastResponse = $client->getLastResponse();
+
+				if( $lastResponse ) {
+					if( $lastResponse->isError() ) {
+						LogHandler::logService( $action, (string)$lastResponse, null, 'http_upload', 'txt' );
+					} else {
+						LogHandler::logService( $action, (string)$lastResponse, false, 'http_upload', 'txt' );
+					}
 				}
 			} else { // HTTP error
 				$message = isset($e) ? $e->getMessage() : 'unknown error';

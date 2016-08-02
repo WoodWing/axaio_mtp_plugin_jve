@@ -1161,7 +1161,7 @@ class DrupalField {
 					$propertyInfos[] = $propertyInfoSummary;
 				} else {
 					$name = $this->generateCustomPropertyName(self::ENTERPRISE_PROPERTY_TYPE_ARTICLECOMPONENT, '_SUM');
-					if ( $flattened ) {
+					if ( $flattened && isset($propertyInfoFile) ) {
 						$propertyInfoSummaryFile = unserialize(serialize($propertyInfoFile));
 						$propertyInfoSummaryFile->Name = $name;
 						$propertyInfoSummaryFile->DisplayName = 'Summary ('.$propertyInfoSummaryFile->DisplayName.')';

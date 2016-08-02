@@ -151,7 +151,7 @@ class AdobeDpsAdminUtils
 	/**
 	 * Validates the values of the properties.
 	 * @param AdmIssue $reqIssue The new/modified issue with its properties.
-	 * @param $pubChannelId The id of the publication channel of the issue.
+	 * @param int $pubChannelId The id of the publication channel of the issue.
 	 */
 	public function validateProperties(  AdmIssue $reqIssue, $pubChannelId )
 	{

@@ -205,13 +205,11 @@ class WW_Plugins_Drupal7_Utils
 	private static function extractContent( $object, $fieldName )
 	{
 		$extractContent = true;
-		$noEmptyTags = true;
 
 		// For layouts, get the object as is.
 		if ( isset( $object->MetaData->BasicMetaData->Type ) &&
 			$object->MetaData->BasicMetaData->Type == 'Layout') {
 			$extractContent = false;
-			$noEmptyTags = false;
 		}
 
 		// For Articles only get the content if we are dealing with a non-fileselector.
@@ -224,11 +222,10 @@ class WW_Plugins_Drupal7_Utils
 			$propertyInfo = $propertyInfos[0];
 			if ($propertyInfo->Type == 'fileselector') {
 				$extractContent = false;
-				$noEmptyTags = false;
 			}
 		}
 
-		return BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $object, $extractContent, $noEmptyTags );
+		return BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $object, $extractContent );
 	}
 
 	/**

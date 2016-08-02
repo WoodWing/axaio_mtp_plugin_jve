@@ -1515,6 +1515,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 			FolderUtils::mkFullDir( $folioFolder );
 		} else {
 			$folioFolder = null;
+			$exportFolder = '';
+			$contentFilePath = '';
 		}
 		
 		// When found, write the folio file to the export folder.
@@ -1644,7 +1646,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 		}
 
 		// Build an info structure of the folio, with folio parser / builder, export folder and Object.
-		if( $folioParser ) {
+		if( isset($folioParser) ) {
 			$this->objectFolioInfos[$dossierId][$objectId]['parser'] = $folioParser;
 		} else {
 			$this->objectFolioInfos[$dossierId][$objectId]['parser'] = null;
@@ -1996,9 +1998,10 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 			$horLayoutInfo = null;
 			$verLayoutInfo = null;
 			$dossierInfo = null;
-            $importedFolioInfo = null;
+			$importedFolioInfo = null;
 			$altLayoutFolioInfo = null;
 			$altLayoutBoth = false;
+			$object = null;
 
 			foreach( $this->objectFolioInfos[$dossierId] as $objectId => $folioInfo ) {			
 				// Do validations
@@ -2060,7 +2063,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 			$impParser = $importedFolioInfo && $importedFolioInfo['parser']; // are we reading an imported folio?
 			$hasTextViews = isset($this->textViews[$dossierId]); // are there vertical text views?
 
-            if( $dosParser && ($horParser || $verParser) && !$impParser ) {
+			if( $dosParser && ($horParser || $verParser) && !$impParser ) {
 				// Folio found at layout and dossier. Ignoring dossier, taking layout.
 				$message = 'Layout folio and Dossier folio have been found.';
 				$message .= 'Only one folio type is needed; only layout folio is used, Dossier folio is ignored.';
@@ -2070,15 +2073,15 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 				$dossierInfo = null;
 			}
 
-            if ( ($dosParser || ($horParser || $verParser)) && $impParser ) {
-                $message= BizResources::localize( 'DPS_REPORT_LAYOUT_AND_IMPORTED_FOLIO_FOUND' );
-                $reason	= BizResources::localize( 'DPS_REPORT_LAYOUT_AND_IMPORTED_FOLIO_FOUND_REASON' );
-                /* $log = */$this->report->log( __METHOD__, 'Error', $message, $reason );
-                // Set the impParser boolean to false. The imported folio won't be used so we don't need to validate it either
-                $impParser = false;
-                $objectId = $importedFolioInfo['object']->MetaData->BasicMetaData->ID;
-                unset( $this->objectFolioInfos[$dossierId][$objectId] );
-            }
+			if ( ($dosParser || ($horParser || $verParser)) && $impParser ) {
+				$message= BizResources::localize( 'DPS_REPORT_LAYOUT_AND_IMPORTED_FOLIO_FOUND' );
+				$reason	= BizResources::localize( 'DPS_REPORT_LAYOUT_AND_IMPORTED_FOLIO_FOUND_REASON' );
+				/* $log = */$this->report->log( __METHOD__, 'Error', $message, $reason );
+				// Set the impParser boolean to false. The imported folio won't be used so we don't need to validate it either
+				$impParser = false;
+				$objectId = $importedFolioInfo['object']->MetaData->BasicMetaData->ID;
+				unset( $this->objectFolioInfos[$dossierId][$objectId] );
+			}
 
 			// Check if we have Vertical Text Views for the dossier.
 			if( !$dosParser && !$horLayoutInfo && (!$verLayoutInfo && !$hasTextViews)  && !$impParser && !$altLayoutBoth) { // No dossier folio nor the dossier contain layouts or an imported folio or text views.
@@ -2101,10 +2104,10 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 				$this->validateAlternateLayouts($object, $orientationList, $dossierId );
 			}
 
-            // When there is an imported folio, check the orientation settings
-            if ( $impParser ) {
-               $this->validateImportedFolio( $object, $importedFolioInfo, $orientationList );
-            }
+			// When there is an imported folio, check the orientation settings
+			if ( $impParser ) {
+				$this->validateImportedFolio( $object, $importedFolioInfo, $orientationList );
+			}
 
 			// Avoid layouts to occur twice* in issue folio (* at layout and dossier).
 			// We can recognize this situation when reading layouts and building dossier.
@@ -2127,9 +2130,9 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 				}
 			}
 
-            // Get the dossier order and determine if this is the first dossier.
-            $dossierOrder = $this->getCurrentDossierOrder($publishTarget);
-            $firstDossier =  $dossier->MetaData->BasicMetaData->ID == $dossierOrder[0];
+			// Get the dossier order and determine if this is the first dossier.
+			$dossierOrder = $this->getCurrentDossierOrder($publishTarget);
+			$firstDossier =  $dossier->MetaData->BasicMetaData->ID == $dossierOrder[0];
 
 			$tocInfos = $this->determineLayoutsForTocPreview($horParser, $verParser, $verLayoutInfo, $horLayoutInfo, $dossier, $altLayoutBoth );
 
@@ -2422,6 +2425,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 		// we need to get the issue orientation and compare that to the orientation of the object.
 		$objectId = $object->MetaData->BasicMetaData->ID;
 		$toReport = false;
+		$message = '';
 
 		// Chekc if the alternate layouts are present.
 		if ($this->pageOrientation === 'always'){
@@ -2491,6 +2495,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
                 break;
             case 'always':
                 $toReport = false;
+					 $message = '';
 
                 if( !$horLayoutInfo && !$verLayoutInfo && !$verticalTextView){
                     $message = BizResources::localize( 'DPS_REPORT_LAYOUT_NOT_HAVING_HOR_NOR_VER' );
@@ -2557,6 +2562,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
                 break;
             case 'always':
                 $toReport = false;
+					 $message = '';
 
                 if( empty($importedOrientation) ){
                     $message = BizResources::localize( 'DPS_REPORT_IMPORTED_FOLIO_FILE_NOT_HAVING_HOR_NOR_VER' );
@@ -4105,6 +4111,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 		}
 			
 		if( $coverImages ) foreach( $coverImages as $orientation => $coverImage ) {
+			$message = '';
+			$reason = '';
 			if( $coverImage ) {
 				if( $orientation == 'portrait' ) {
 					$equal = 
@@ -4168,6 +4176,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 					if ( $portraitCover ) {
 						$coverImages['portrait'] = $portraitCover;
 					} else {
+						$reason = '';
+						$message = '';
 						if( $imageUsage == 'issueCover' ) {
 							$message = BizResources::localize( 'DPS_REPORT_VER_COVER_NOT_CREATED' );
 							$reason = BizResources::localize( 'DPS_REPORT_VER_COVER_NOT_CREATED_REASON' );
@@ -4187,6 +4197,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 					if ( $landscapeCover ) {
 						$coverImages['landscape'] = $landscapeCover;
 					} else {
+						$reason = '';
+						$message = '';
 						if( $imageUsage == 'issueCover' ) {
 							$message = BizResources::localize( 'DPS_REPORT_HOR_COVER_NOT_CREATED' );
 							$reason = BizResources::localize( 'DPS_REPORT_HOR_COVER_NOT_CREATED_REASON' );
@@ -4339,6 +4351,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 					$height = $object->MetaData->ContentMetaData->Height;
 					$orientation = $this->getOrientationByDimension( $width, $height );
 					if( !$orientation ) {
+						$message = '';
 						if( $imageUsage == 'issueCover' ) {
 							$message = BizResources::localize( 'DPS_REPORT_WRONG_COVER_IMG_DIMENSION' );
 						} else if( $imageUsage == 'sectionCover' ) {
@@ -4406,6 +4419,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	private function addCoverLayoutsByOrientation($object, $orientation, $coverImages, $imageUsage ) {
 		// Check the orientation param.
 		if( !$orientation ) {
+			$message = '';
 			if( $imageUsage == 'issueCover' ) {
 				$message = BizResources::localize( 'DPS_REPORT_WRONG_COVER_LAY_DIMENSION' );					
 			} else if( $imageUsage == 'sectionCover' ) {
@@ -4480,6 +4494,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 				if( $this->checkMimeTypeCoverImage( $attachment->Type ) ) {
 					$contentFilePath = $attachment->FilePath;
 				} else {
+					$message = '';
 					if( $imageUsage == 'issueCover' ) {
 						$message = BizResources::localize( 'DPS_REPORT_WRONG_COVER_IMG_MIMETYPE' );
 					} else if( $imageUsage == 'sectionCover' )	{
@@ -5481,7 +5496,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 			$transferServer = new BizTransferServer();
 
 			// Bail out when could not write content to export folder.
-			if( $transferServer->copyFromFileTransferServer( $exportFile, $attachment ) === false ) {
+			if( isset($attachment) && $transferServer->copyFromFileTransferServer( $exportFile, $attachment ) === false ) {
 				$message = BizResources::localize( 'DPS_REPORT_COULD_NOT_EXTRACT_FILE' );
 				$message .= ' '.BizResources::localize( 'ERR_PLEASE_CONTACT_YOUR_ADMIN' );
 				$detail = BizResources::localize( 'ERR_NO_WRITE_TO_DIR', true, array( $exportFile ) );

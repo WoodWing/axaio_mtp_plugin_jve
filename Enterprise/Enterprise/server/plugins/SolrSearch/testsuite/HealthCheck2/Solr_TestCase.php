@@ -564,19 +564,18 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	{
 		if (defined('SOLR_GENERAL_FACETS')) {
 			$facetFields = unserialize(SOLR_GENERAL_FACETS);
+
+			foreach($facetFields as $facetField) {
+				if (!array_key_exists($facetField, $schemaInfo)) {
+					$this->setResult( 'ERROR', 'Facet field ' . "'$facetField'" . ' not in &lt;fields&gt; section of schema.xml.' , 'Check &lt;fields&gt; tag in schema.xml.');
+				}
+				elseif ($schemaInfo[$facetField]['indexed'] !== 'true') {
+					$this->setResult( 'ERROR', "Facet field $facetField is not indexed." , "Add 'indexed = \"true\"' on field $facetField in schema.xml.");
+				}
+			}
 		}
 		else {
 			$this->setResult( 'WARN', 'Facets not used' , "Check SOLR_GENERAL_FACETS in config_solr.php.");
-		}
-
-		foreach($facetFields as $facetField)
-		{
-			if (!array_key_exists($facetField, $schemaInfo)) {
-				$this->setResult( 'ERROR', 'Facet field ' . "'$facetField'" . ' not in &lt;fields&gt; section of schema.xml.' , 'Check &lt;fields&gt; tag in schema.xml.');
-			}
-			elseif ($schemaInfo[$facetField]['indexed'] !== 'true') {
-				$this->setResult( 'ERROR', "Facet field $facetField is not indexed." , "Add 'indexed = \"true\"' on field $facetField in schema.xml.");
-			}
 		}
 	}
 

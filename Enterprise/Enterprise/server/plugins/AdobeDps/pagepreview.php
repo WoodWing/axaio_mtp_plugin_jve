@@ -170,7 +170,7 @@ try {
 	}
 
 	// Return the binary content to caller.
-	if( strlen($fileContent) > 1 ) { 
+	if( isset($fileContent) && strlen($fileContent) > 1 ) {
 		header( 'Content-length: ' . strlen( $fileContent ) );
 		header( 'Content-type: ' . $fileFormat );
 		fwrite( $fdOutput, $fileContent );
@@ -196,7 +196,7 @@ if( $fdOutput ) {
 }
 
 // Stop the session.
-if( $ticket ) {
+if( isset($ticket) ) {
 	BizSession::endSession();
 }
 
