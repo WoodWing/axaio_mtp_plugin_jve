@@ -364,4 +364,3 @@ class DBWorkflow extends DBBase
 	}
 
 }
-?>

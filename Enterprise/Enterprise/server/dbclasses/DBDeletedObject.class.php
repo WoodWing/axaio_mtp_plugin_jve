@@ -456,4 +456,3 @@ class DBDeletedObject extends DBBase
 		return false; // failed
 	}
 }
-?>

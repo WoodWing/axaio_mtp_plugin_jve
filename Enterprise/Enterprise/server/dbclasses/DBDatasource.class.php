@@ -1069,4 +1069,3 @@ class DBDatasource extends DBBase
 		return $result;		
 	}
 }
-?>

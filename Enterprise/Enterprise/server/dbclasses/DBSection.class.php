@@ -351,4 +351,3 @@ class DBSection extends DBBase
 		return $section;
 	}
 }
-?>

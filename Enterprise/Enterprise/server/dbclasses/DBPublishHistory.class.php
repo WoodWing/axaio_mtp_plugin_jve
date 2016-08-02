@@ -527,5 +527,3 @@ class DBPublishHistory extends DBBase
 // 		return $row ? self::rowToObj( $row ) : null;
 // 	}
 }
-
-?>

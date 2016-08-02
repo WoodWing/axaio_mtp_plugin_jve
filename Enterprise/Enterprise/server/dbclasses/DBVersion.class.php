@@ -344,5 +344,3 @@ class DBVersion extends DBBase
 		return $rows;
 	}
 }
-
-?>

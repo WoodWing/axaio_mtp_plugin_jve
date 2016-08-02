@@ -90,4 +90,3 @@ class DBIssueSection extends DBBase
 		return '';
 	}
 }
-?>
