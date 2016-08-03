@@ -242,15 +242,17 @@
 			var statusTree = $(this).jstree(true);
 			var statusTypes = statusTree.get_children_dom( $(this) );
 			statusTypes.each( function( index, statusType ) {
-				var statusNodes = statusTree.get_children_dom( statusType );
-				var countSelectedChilds = 0;
-				statusNodes.each( function( index, statusNode ) {
-					if( statusTree.is_selected( statusNode ) ) {
-						countSelectedChilds += 1;
+				if( statusTree.is_open(statusType) && !statusTree.is_leaf(statusType) ) {
+					var statusNodes = statusTree.get_children_dom( statusType );
+					var countSelectedChilds = 0;
+					statusNodes.each( function( index, statusNode ) {
+						if( statusTree.is_selected( statusNode ) ) {
+							countSelectedChilds += 1;
+						}
+					});
+					if( countSelectedChilds == statusNodes.length || countSelectedChilds == 0 ) {
+						statusTree.close_node( statusType );
 					}
-				});
-				if( countSelectedChilds == statusNodes.length || countSelectedChilds == 0 ) {
-					statusTree.close_node( statusType );
 				}
 			});
     	});
