@@ -654,9 +654,9 @@ class DBCascadePub extends DBBase
 	 * Performs cascade deletion of a given list of issues.
 	 * It removes all deadline definitions made for the issue and the issue itself.
 	 *
-	 * @param array $issueIds List of issue ids to delete.
+	 * @param array $editionIds List of edition ids to delete.
 	 */
-	static public function deleteEditions( $editionIds )
+	static public function deleteEditions( array $editionIds )
 	{
 		$editionIds = array_diff( $editionIds, array( 0 ) ); // paranoid filter; remove zeros
 		if( count($editionIds) > 0 ) {
@@ -757,9 +757,9 @@ class DBCascadePub extends DBBase
 	 * Performs cascade deletion of a given list of sections.
 	 * It removes all deadline/routing definitions made for the section and the section itself.
 	 *
-	 * @param array $statusIds List of status ids to delete.
+	 * @param array $sectionIds List of section ids to delete.
 	 */
-    public static function deleteSections( $sectionIds )
+    public static function deleteSections( array $sectionIds )
     {
 		$sectionIds = array_diff( $sectionIds, array( 0 ) ); // paranoid filter; remove zeros
 		if( count($sectionIds) > 0 ) {

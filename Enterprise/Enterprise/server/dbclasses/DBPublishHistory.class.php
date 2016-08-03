@@ -145,7 +145,7 @@ class DBPublishHistory extends DBBase
 	 * Method returns complete history of publish actions of a dossier
 	 * for a certain target.
 	 *
-	 * @param int $objectid object id of the published dossier
+	 * @param int $dossierid object id of the published dossier
 	 * @param int $channelid the publish channel
 	 * @param int $issueid the issue of the publish channel
 	 * @param boolean $lastRow indicator whether to get the last row history
@@ -247,7 +247,7 @@ class DBPublishHistory extends DBBase
 	 * is either publishDossier or updateDossier. Next to that we expect that the externalid
 	 * is filled when the update/publish action was successful.
 	 *
-	 * @param int $objectid object id of the published dossier
+	 * @param int $dossierid object id of the published dossier
 	 * @param int $channelid the publish channel
 	 * @param int $issueid the issue of the publish channel
 	 * @return array of rows. Each row is a histoy record, null if error
@@ -421,7 +421,7 @@ class DBPublishHistory extends DBBase
 
 	/**
 	 * Returns the latest publish history information of an object (plublished dossier). 
-	 * @param integer $objectRel Object id (dossier). 
+	 * @param integer $objectId Object id (dossier).
 	 * @param integer $channelId Publication channel
 	 * @param integer $issueId Published issue
 	 * @param integer $editionId A specific published edition (device in case of Adobe DBS channel). 

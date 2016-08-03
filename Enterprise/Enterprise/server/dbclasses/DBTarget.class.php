@@ -502,59 +502,58 @@ class DBTarget extends DBBase
 			DBTarget::removeTargetsOfContainedObjects($objectId, $channelId, $issueId);
 		}
 	}
-    
-	/**
-     * This method removes all targets belonging to an objectrelation. E.g. a dossier
-     * ($parent) contains an image ($child) and the image is removed from the dossier.
-     * Before the objectrelation is removed the targets for the objectrelation must
-     * be removed. 
-	 *
-     * @param integer $parent objectid of parent
-     * @param integer $child objectid of child
-     * @return true if no errors else null
-	 */
-    public static function removeTargetObjectRelation($parent, $child)
-    {
-    	// Get object's editions from DB		
-        $where = "parent = ? AND child = ?";
-        $params = array( $parent, $child );
-        $relations = self::listRows( 'objectrelations', 'id', null, $where, false, $params );
 
-        if (empty($relations)) { 
-        	return true;
+	/**
+	 * This method removes all targets belonging to an objectrelation. E.g. a dossier
+	 * ($parent) contains an image ($child) and the image is removed from the dossier.
+	 * Before the objectrelation is removed the targets for the objectrelation must
+	 * be removed.
+	 *
+	 * @param integer $parent objectid of parent
+	 * @param integer $child objectid of child
+	 * @return true if no errors else null
+	 */
+	public static function removeTargetObjectRelation( $parent, $child )
+	{
+		// Get object's editions from DB
+		$where = "parent = ? AND child = ?";
+		$params = array( $parent, $child );
+		$relations = self::listRows( 'objectrelations', 'id', null, $where, false, $params );
+
+		if( empty( $relations ) ) {
+			return true;
 		}
 
-        $rowIds = array_keys($relations);
-        $whereParams = array('objectrelationid' => $rowIds);
-        return self::delete($whereParams);
-    }
-        
-    /**
-     * This method removes the targets and target editions of children related
-     * to the passed parent ($objectId). To delete only targets for a certain channel,
-     * issue or edition combination extra filter options can be passed. This method is
-     * typically called when tagets are removed from a 'dossier'. Targets of contained 
-     * objects are identified by the objectrelation id's.
-     *
-     * @param integer $objectId object id of the parent (dossier). 
-     * @param integer $channelId channel id to filter on (null or 0 means no filter) 
-     * @param integer $issueId issue id to filter on (null or 0 means no filter)
-     * @param unknown_type $edition id to filter on (null or 0 means no filter)
-     */
-	static private function removeTargetsOfContainedObjects($objectId, $channelId, $issueId)
+		$rowIds = array_keys( $relations );
+		$whereParams = array( 'objectrelationid' => $rowIds );
+		return self::delete( $whereParams );
+	}
+
+	/**
+	 * This method removes the targets and target editions of children related
+	 * to the passed parent ($objectId). To delete only targets for a certain channel,
+	 * issue or edition combination extra filter options can be passed. This method is
+	 * typically called when tagets are removed from a 'dossier'. Targets of contained
+	 * objects are identified by the objectrelation id's.
+	 *
+	 * @param integer $objectId object id of the parent (dossier).
+	 * @param integer $channelId channel id to filter on (null or 0 means no filter)
+	 * @param integer $issueId issue id to filter on (null or 0 means no filter)
+	 */
+	static private function removeTargetsOfContainedObjects( $objectId, $channelId, $issueId )
 	{
-		require_once BASEDIR . '/server/dbclasses/DBObjectRelation.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
 		// Get objectrelations id's
-		$objectrelations = DBObjectRelation::getObjectRelations($objectId, 'childs', 'Contained', true);
-		if (is_array($objectrelations) && ! empty($objectrelations)) {
-			$objectrelationids = array_keys($objectrelations);
+		$objectrelations = DBObjectRelation::getObjectRelations( $objectId, 'childs', 'Contained', true );
+		if( is_array( $objectrelations ) && !empty( $objectrelations ) ) {
+			$objectrelationids = array_keys( $objectrelations );
 			// Get target id's of the objectrelations
-			$targetids = self::getTargetIdsByObjectRelationIds($objectrelationids, $channelId, $issueId);
-			if (is_array($targetids) && !empty($targetids)) {
+			$targetids = self::getTargetIdsByObjectRelationIds( $objectrelationids, $channelId, $issueId );
+			if( is_array( $targetids ) && !empty( $targetids ) ) {
 				// BZ#30217. Use the array keys here (which are the ids)
-	 	       	$whereParams = array('id' => array_keys($targetids));
-        		self::delete($whereParams);
-        }
+				$whereParams = array( 'id' => array_keys( $targetids ) );
+				self::delete( $whereParams );
+			}
 		}
 	}
 	

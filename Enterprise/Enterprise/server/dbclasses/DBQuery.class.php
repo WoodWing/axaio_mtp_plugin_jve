@@ -760,23 +760,24 @@ class DBQuery extends DBBase
 			$results[$row['child']][] = array('id' => $row['parent'], 'name' => $row['name']);
 		}
 		return $results;
-	}	 
+	}
 
 	/**
-		 * Queries the smart_elements table to return all elements which have objid's in the given view $objectviewname.
-		 * @param $objectviewname name of the view for which to get the elements for, this view must
-		 * at least contain an id-field with the objectid.
-		 * @return array of rows, containing elements.
-	 */        
-	static public function getElementsByView($viewid)
+	 * Queries the smart_elements table to return all elements which have objid's in the given view $objectviewname.
+	 *
+	 * @param string $viewid name of the view for which to get the elements for, this view must
+	 * at least contain an id-field with the objectid.
+	 * @return array of rows, containing elements.
+	 */
+	static public function getElementsByView( $viewid )
 	{
-			$dbdriver = DBDriverFactory::gen();
-		$tempids = self::getTempIds($viewid);
-		$elementstable = $dbdriver->tablename('elements');
-		$placementstable = $dbdriver->tablename('placements');
-		$editionstable = $dbdriver->tablename('editions');
+		$dbdriver = DBDriverFactory::gen();
+		$tempids = self::getTempIds( $viewid );
+		$elementstable = $dbdriver->tablename( 'elements' );
+		$placementstable = $dbdriver->tablename( 'placements' );
+		$editionstable = $dbdriver->tablename( 'editions' );
 
-		$sql  = 'SELECT ';
+		$sql = 'SELECT ';
 		$sql .= 'e.`guid` as "IDC", ';
 		$sql .= 'e.`id` as "Id", ';
 		$sql .= 'e.`name` as "Name", ';
@@ -790,48 +791,47 @@ class DBQuery extends DBBase
 		$sql .= "FROM $elementstable e ";
 		$sql .= "INNER JOIN $tempids ov ON (ov.`id` = e.`objid`) ";
 		$sql .= 'ORDER BY e.`id` ASC ';
-		$sth = $dbdriver->query($sql);
+		$sth = $dbdriver->query( $sql );
 
 		$rows = array();
-		while (($row = $dbdriver->fetch($sth))) {
+		while( ( $row = $dbdriver->fetch( $sth ) ) ) {
 			$id = $row['Id'];
-			unset($row['Id']);
-			$rows[$id] = $row;
+			unset( $row['Id'] );
+			$rows[ $id ] = $row;
 			// BZ#14493 Page is necessary for the "Placed" icon next to an element
 			// in the query panel
-			$rows[$id]['Page'] = '';
+			$rows[ $id ]['Page'] = '';
 			// default value for Editions
-			$rows[$id]['Editions'] = '';
+			$rows[ $id ]['Editions'] = '';
 		}
-		
+
 		// select all element ids with a placement
 		// this is a lot faster then a "LEFT JOIN smart_placements" in the previous SQL
 		$sql = 'SELECT DISTINCT e.`id` as "Id"'
-			. ' FROM smart_elements e'
-			. ' INNER JOIN ' . $tempids . ' ov ON (ov.`id` = e.`objid`)'
-			. ' INNER JOIN smart_placements pl ON (pl.`elementid` = e.`guid`)'
-			. " WHERE e.`guid` != '' ";
-		$sth = $dbdriver->query($sql);
-		while (($plRow = $dbdriver->fetch($sth))) {
+			.' FROM smart_elements e'
+			.' INNER JOIN '.$tempids.' ov ON (ov.`id` = e.`objid`)'
+			.' INNER JOIN smart_placements pl ON (pl.`elementid` = e.`guid`)'
+			." WHERE e.`guid` != '' ";
+		$sth = $dbdriver->query( $sql );
+		while( ( $plRow = $dbdriver->fetch( $sth ) ) ) {
 			// the value of Page isn't used, it only has to indicate if an element has been placed
-			$rows[$plRow['Id']]['Page'] = 1;
+			$rows[ $plRow['Id'] ]['Page'] = 1;
 		}
 
-		$sql  = "SELECT e.`id`, pl.`edition`, edi.`name` ";
+		$sql = "SELECT e.`id`, pl.`edition`, edi.`name` ";
 		$sql .= "FROM $placementstable pl ";
 		$sql .= "INNER JOIN $elementstable e ON (pl.`elementid` = e.`guid`) ";
 		$sql .= "INNER JOIN $editionstable edi ON (pl.`edition` = edi.`id`) ";
-		$sql .= "INNER JOIN $tempids ov ON (e.`objid` = ov.`id`) ";		
+		$sql .= "INNER JOIN $tempids ov ON (e.`objid` = ov.`id`) ";
 		$sql .= "WHERE e.`guid` != '' ";
-		$sth = $dbdriver->query($sql);
+		$sth = $dbdriver->query( $sql );
 
-		while (($editionrow = $dbdriver->fetch($sth))) {
+		while( ( $editionrow = $dbdriver->fetch( $sth ) ) ) {
 			$id = $editionrow['id'];
-			if ( $rows[$id]['Editions'] == '' ) {
-				$rows[$id]['Editions'] = $editionrow['name'];
-			}
-			else {
-				$rows[$id]['Editions'] .= ", " . $editionrow['name'];
+			if( $rows[ $id ]['Editions'] == '' ) {
+				$rows[ $id ]['Editions'] = $editionrow['name'];
+			} else {
+				$rows[ $id ]['Editions'] .= ", ".$editionrow['name'];
 			}
 		}
 		return $rows;

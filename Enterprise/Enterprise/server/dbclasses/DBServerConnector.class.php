@@ -151,25 +151,25 @@ class DBServerConnector extends DBBase
 		}
 		return null; // failed
 	}
-	
+
 	/**
-	  * Delete plugin's connectors from DB that do not exist at given list.
-	  *
-	  * For each given connector, its Id or ClassName should be valid
-	  * and its PluginId must match the given $pluginId.
-	  *
-	  * @param array $conns      List of connector class names that should NOT be touched at DB
-	  */
+	 * Delete plugin's connectors from DB that do not exist at given list.
+	 *
+	 * For each given connector, its Id or ClassName should be valid
+	 * and its PluginId must match the given $pluginId.
+	 *
+	 * @param string[] $connClasses List of connector class names that should NOT be touched at DB
+	 */
 	static public function deleteConnectorsOnClassNames( $connClasses )
 	{
 		self::clearError();
 		$where = '';
 		foreach( $connClasses as $connClass ) {
-			if( $where ) $where.= ' AND ';
+			if( $where ) $where .= ' AND ';
 			if( $connClass ) {
 				$where .= "NOT ( `classname` = '$connClass' ) ";
 			} else {
-				self::setError( BizResources::localize('ERR_ARGUMENT') );
+				self::setError( BizResources::localize( 'ERR_ARGUMENT' ) );
 				$where = '';
 				break;
 			}

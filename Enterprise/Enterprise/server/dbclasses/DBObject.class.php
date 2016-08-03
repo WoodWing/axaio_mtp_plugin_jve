@@ -932,11 +932,11 @@ class DBObject extends DBBase
 	 * Reads the placed on object names and placed on pages per passed object id.
 	 * Same as getPlacedOnRows() but then of multible objects.
 	 * 
-	 * @param integer[] $objId
+	 * @param integer[] $objIds
 	 * @return array (key is object id) with arrays with key "name" for the placed on object name
 	 * and key "pagerange" for the placed on page.
 	 */
-	static public function getPlacedOnRowsByObjIds( $objIds )
+	static public function getPlacedOnRowsByObjIds( array $objIds )
 	{
 		$dbDriver = DBDriverFactory::gen();
 
@@ -1110,7 +1110,7 @@ class DBObject extends DBBase
 	 * Marks objects as non-indexed.
 	 *
 	 * @param array $objectIds: ids of objects. Null for all objects at once.
-	 * @param boolean $deletedObjects True for using smart_deletedobjects table. False for using smart_objects instead.
+	 * @param string[] $areas Either 'Workflow' or 'Trash'.
 	 * @return void
 	 */
 	static public function setNonIndex( $objectIds, $areas = array('Workflow'))
@@ -1188,7 +1188,7 @@ class DBObject extends DBBase
 	/**
 	 * Counts the objects at smart_objects table that needs to be indexed (or needs to be un-indexed).
 	 *
-	 * @param boolean $index Whether to count objects to index or to un-index
+	 * @param boolean $toIndex Whether to count objects to index or to un-index
 	 * @return integer Object count.
 	 */
 	static public function countObjectsToIndex( $toIndex )
@@ -1271,7 +1271,7 @@ class DBObject extends DBBase
 	 * 
 	 * @param string $operation Fragment is used for update or insert operation
 	 * @param string $dbField name of the field as sent to the dbdriver
-	 * @param string $property Name name of the field as know in the Biz-layer
+	 * @param string $propertyName name of the field as know in the Biz-layer
 	 * @param string/integer/double $value value to be inserted/updated
 	 * @param resource $dbDriver connection to the database
 	 * @param string $comma separator
@@ -1330,7 +1330,7 @@ class DBObject extends DBBase
 	 * as 'blob' in their $SqlTProps[] (see BizProperty). Custom properties are either
 	 * marked as 'blob' (mysql), 'text' (mssql) or 'clob' (oracle).
 	 * 
-	 * @param string $property to be checked.
+	 * @param string $bizProperty Property to be checked.
 	 * @return true if property is stored as 'blob' else false.
 	 */
 	// TODO Move to BizProperty or dbdriver.

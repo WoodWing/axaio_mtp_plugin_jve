@@ -42,7 +42,6 @@ class DBBase
 	 * The table has "temp_" prefix.
 	 *
 	 * @param $viewid string three-letter id of the temporary table
-	 * @param boolean $resetCache Obsoleted!!! was not used anyway...
 	 * @return string created table name, typcially temp_abc
 	 */
 	static public function getTempIds($viewid)
@@ -114,7 +113,6 @@ class DBBase
 	/**
 	 * Tells if a DB error was raised.
 	 *
-	 * @param string $error
 	 */
 	static public function hasError()
 	{
@@ -548,10 +546,7 @@ class DBBase
 	 *
 	 * @param string $tableName Table name without the 'smart_' prefix.
 	 * @param string $keyCol The primary key column to search on.
-	 * @param int $startRow The starting row.
 	 * @param int $limit The number of records to retrieve.
-	 * @param string $sortOrder 'ASC' or 'DESC', if left empty defaults to 'ASC';
-	 * @param string $sortField The field to do sorting on.
 	 * @param array $params The params to use in the query.
 	 * @return array of rows.
 	 */
@@ -724,7 +719,6 @@ class DBBase
 	 * When NULL, no action is taken.
 	 *
 	 * @param string $versionProp Version property in major.minor notation
-	 * @param array $verArr Returns split values at keys "majorversion" and "minorversion".
 	 * @param string $fieldPrefix Prefix for "majorversion" and "minorversion" field names.
 	 */
     static protected function splitMajorMinorVer( $versionProp, &$row, $fieldPrefix )

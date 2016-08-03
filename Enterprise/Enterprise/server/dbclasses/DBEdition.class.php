@@ -148,7 +148,7 @@ class DBEdition extends DBBase
 	 * Lists all editions from smart_editions that are owned by the given channel.
 	 * The channel->issue->editions are NOT included!
 	 *
-	 * @param string $issueId
+	 * @param int $channelId
 	 * @return array of edition rows.
 	 */
 	public static function listChannelEditions( $channelId )
@@ -180,7 +180,7 @@ class DBEdition extends DBBase
 	 * Lists all editions from smart_editions that are owned by the given channel.
 	 * The channel->issue->editions are NOT included!
 	 *
-	 * @param string $issueId
+	 * @param int $channelId
 	 * @return array of edition objects if succeeded. Null if no record returned.
 	 */
 	static public function listChannelEditionsObj( $channelId )

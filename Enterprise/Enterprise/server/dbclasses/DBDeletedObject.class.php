@@ -275,7 +275,7 @@ class DBDeletedObject extends DBBase
 	/**
 	 * Counts the deletedobjects at smart_deletedobjects table that needs to be indexed (or needs to be un-indexed).
 	 *
-	 * @param boolean $index Whether to count deletedobjects to index or to un-index
+	 * @param boolean $toIndex Whether to count deletedobjects to index or to un-index
 	 * @return integer DeletedObject count.
 	 */
 	static public function countDeletedObjectsToIndex( $toIndex )

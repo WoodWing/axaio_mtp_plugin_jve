@@ -68,7 +68,7 @@ class DBSection extends DBBase
      *  - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with all values.
      *  - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with the values in $fieldnames.
      *
-	 * @param int $issueid Id of the issue, if $issueid = 0, null is returned;
+	 * @param int $issueId Id of the issue, if $issueid = 0, null is returned;
 	 * @param mixed $fieldnames See function description
 	 * @param bool $nopubldefs
 	 * @return array|null

@@ -206,8 +206,6 @@ class DBChanneldata extends DBBase
 	 *
 	 * @param integer $issueId
 	 * @param integer $sectionId
-	 * @param string $name Property name
-	 * @param string $value Property value
 	 * @return boolean Whether or not successful.
 	 */
 	public static function deleteSectionMappingsForIssue( $issueId, $sectionId )

@@ -24,7 +24,7 @@ class DBUserSetting
 	 *   have empty appname field). Typically used when no settings were found for given application.
 	 *   Pass an empty ('') string for $appName  to retrieve those from DB.
 	 *
-	 * @param string $shortUser User id (short name).
+	 * @param string $user User id (short name).
 	 * @param string $appName   Application name. Filled = app settings. Null = all settings. Empty = migrated settings.
 	 * @return array List of Setting objects
 	 * @throws BizException
