@@ -16,14 +16,16 @@ class DBTarget extends DBBase
 	const DBINT_CLASS = 'WW_DBIntegrity_Target';
 
 	/**************************** Insert ******************************************/
-    /**
-	 * Inserts records with the new values for passed columns.  
-	 * @param $newValues column/value pairs of the columns to be inserted.
+
+	/**
+	 * Inserts records with the new values for passed columns.
+	 *
+	 * @param array $newValues column/value pairs of the columns to be inserted.
 	 * @return new id or else false.
-     */
-	public static function insert(array $newValues, $autoIncrement)
-    {
-		return parent::doInsert(self::TABLENAME, self::DBINT_CLASS, $newValues, $autoIncrement);
+	 */
+	public static function insert( array $newValues, $autoIncrement )
+	{
+		return parent::doInsert( self::TABLENAME, self::DBINT_CLASS, $newValues, $autoIncrement );
 	}
 
     /**
@@ -199,8 +201,8 @@ class DBTarget extends DBBase
 	/**************************** Update ******************************************/
 	/**
 	 * Updates records with the new values for passed columns.  
-	 * @param $whereParams column/array of value pairs for where clause
-	 * @param $newValues column/value pairs of the columns to be updated.
+	 * @param array $whereParams column/array of value pairs for where clause
+	 * @param array $newValues column/value pairs of the columns to be updated.
 	 * @return number of records updated or null in case of error.
 	 */
 	public static function update(array $whereParams, array $newValues)

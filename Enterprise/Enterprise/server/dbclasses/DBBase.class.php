@@ -372,7 +372,7 @@ class DBBase
 	 *
 	 * @param string $tablename
 	 * @param string $where
-	 * @param array $fieldnames. Either an array containing the fieldnames to get or anything else in which case all fields are returned.
+	 * @param mixed $fieldnames. Either an array containing the fieldnames to get or '*' in which case all fields are returned.
 	 * @param array $params, containing parameters to be substituted for the placeholders
 	 *        of the where clause. 
 	 * @param array $orderBy List of fields to order (in case of many results, whereby the first/last row is wanted).
@@ -783,7 +783,7 @@ class DBBase
     
 	/**
 	 * Deletes records .....  
-	 * @param $whereParams column/array of value pairs for where clause
+	 * @param array $whereParams column/array of value pairs for where clause
 	 * @return number of records updated or null in case of error.
 	 */	
 	protected static function doDelete(array $whereParams, $table, $keyColumn, $dbIntClass)
@@ -817,8 +817,8 @@ class DBBase
 
 	/**
 	 * Updates records with the new values for passed columns.  
-	 * @param $whereParams column/array of value pairs for where clause
-	 * @param $newValues column/value pairs of the columns to be updated.
+	 * @param array $whereParams column/array of value pairs for where clause
+	 * @param array $newValues column/value pairs of the columns to be updated.
 	 * @return number of records updated or null in case of error.
 	 */
 	protected static function doUpdate(array $whereParams, $table, $keyColumn, $dbIntClass, array $newValues)

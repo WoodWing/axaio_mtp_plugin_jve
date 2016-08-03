@@ -70,8 +70,8 @@ class DBTargetEdition extends DBBase {
 /*************************** Update ******************************************/
 	/**
 	 * Updates records with the new values for passed columns.  
-	 * @param $whereParams column/array of value pairs for where clause
-	 * @param $newValues column/value pairs of the columns to be updated.
+	 * @param array $whereParams column/array of value pairs for where clause
+	 * @param array $newValues column/value pairs of the columns to be updated.
 	 * @return number of records updated or null in case of error.
 	 */
 	public static function update(array $whereParams, array $newValues)

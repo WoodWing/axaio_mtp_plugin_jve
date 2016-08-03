@@ -84,39 +84,41 @@ class DBSection extends DBBase
             return $nopubldefs ? null : self::listPublSectionDefs($issue['publication']);   
         }
     }
-    
-    /**
-     *  Lists all sections for the issue
-     *  What is exactly returned depends on the value of $fieldnames:
-     *  - Either null or false -> returns an array of rows indexed by the value in $keycol, each containing the name ($namecol) of the row.
-     *  - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with all values.
-     *  - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with the values in $fieldnames.
-     *  @param  $issueid Id of the issue, if $issueid = 0 null is returned;
-     *  @param  $fieldnames see functiondescription
-     *  @return  null in case of error, otherwise see functiondescription
-    **/
 
-    public static function listIssueSections($issueid, $fieldnames = '*')
-    {
-        return self::listRows('issuesection','id','section',"`issue` = '$issueid' ", $fieldnames);
-    }
+	/**
+	 *  Lists all sections for the issue
+	 *  What is exactly returned depends on the value of $fieldnames:
+	 *  - Either null or false -> returns an array of rows indexed by the value in $keycol, each containing the name ($namecol) of the row.
+	 *  - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with all values.
+	 *  - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with the values in $fieldnames.
+	 *
+	 * @param  int $issueid Id of the issue, if $issueid = 0 null is returned;
+	 * @param  mixed $fieldnames see function description
+	 * @return  null in case of error, otherwise see functiondescription
+	 */
 
-    /**
-     *  Gets exactly one section from issue $issueid, defined by $sectiondefid
-     *  What is exactly returned depends on the value of $fieldnames:
-     *  - Either null or false -> returns an array with the following two keys: 'id' and 'issue'.
-     *  - Either '*' or true -> returns an array with all fieldname-value-pairs of the issue.
-     *  - An array with fieldnames -> returns an array with the fieldname-value-pairs in $fieldnames.
-     *  @param  $issueid Id of the issue
-     *  @param  $sectiondefid Id of the sectiondefinition by which section is defined.
-     *  @param  $fieldnames see functiondescription
-     *  @return  null in case of error, else see function description
-    **/
+	public static function listIssueSections( $issueid, $fieldnames = '*' )
+	{
+		return self::listRows( 'issuesection', 'id', 'section', "`issue` = '$issueid' ", $fieldnames );
+	}
 
-    public static function getIssueSection($issueid, $sectiondefid, $fieldnames = '*')
-    {
-        return self::getRow('issuesection'," ( `issue` = '$issueid' AND `section` = '$sectiondefid' ) ", $fieldnames);
-    }
+	/**
+	 *  Gets exactly one section from issue $issueid, defined by $sectiondefid
+	 *  What is exactly returned depends on the value of $fieldnames:
+	 *  - Either null or false -> returns an array with the following two keys: 'id' and 'issue'.
+	 *  - Either '*' or true -> returns an array with all fieldname-value-pairs of the issue.
+	 *  - An array with fieldnames -> returns an array with the fieldname-value-pairs in $fieldnames.
+	 *
+	 * @param  int $issueid Id of the issue
+	 * @param  int $sectiondefid Id of the sectiondefinition by which section is defined.
+	 * @param  mixed $fieldnames see function description.
+	 * @return  null in case of error, else see function description
+	 */
+
+	public static function getIssueSection( $issueid, $sectiondefid, $fieldnames = '*' )
+	{
+		return self::getRow( 'issuesection', " ( `issue` = '$issueid' AND `section` = '$sectiondefid' ) ", $fieldnames );
+	}
 
 
     /**

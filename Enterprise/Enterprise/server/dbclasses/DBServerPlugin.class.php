@@ -12,13 +12,13 @@ require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 class DBServerPlugin extends DBBase
 {
 	const TABLENAME = 'serverplugins';
-	
+
 	/**
-	 *  Checks if the server plugin object exists at DB
+	 * Checks if the server plugin object exists at DB
 	 *
-	 *  @param string $plugin Plugin object (PluginInfoData) to be checked at DB
-	 *  @return int plugin id or 0 if plugin not found
-	**/
+	 * @param PluginInfoData $plugin Plugin object (PluginInfoData) to be checked at DB
+	 * @return int plugin id or 0 if plugin not found
+	 */
 	static public function getPluginId( PluginInfoData $plugin )
 	{
 		self::clearError();
@@ -32,29 +32,29 @@ class DBServerPlugin extends DBBase
 		}
 		return $row ? $row['id'] : 0;
 	}
-	
+
 	/**
 	 *  Retrieves one server plugin object from DB
 	 *
-	 *  @param object $plugin Plugin object (PluginInfoData) to be retrieved from DB
-	 *  @return object of PluginInfoData if succeeded, null if no record returned
-	**/
+	 * @param PluginInfoData $plugin Plugin object (PluginInfoData) to be retrieved from DB
+	 * @return object of PluginInfoData if succeeded, null if no record returned
+	 */
 	static public function getPlugin( PluginInfoData $plugin )
 	{
 		self::clearError();
 		if( $plugin->Id ) {
 			$row = self::getRow( self::TABLENAME, "`id` = '$plugin->Id' " );
 			if( !$row ) {
-				self::setError( BizResources::localize('ERR_NOTFOUND') );
+				self::setError( BizResources::localize( 'ERR_NOTFOUND' ) );
 			}
 		} else if( $plugin->UniqueName ) {
 			$row = self::getRow( self::TABLENAME, "`uniquename` = '$plugin->UniqueName' " );
 			if( !$row ) {
-				self::setError( BizResources::localize('ERR_NOTFOUND') );
+				self::setError( BizResources::localize( 'ERR_NOTFOUND' ) );
 			}
 		} else {
 			$row = null;
-			self::setError( BizResources::localize('ERR_ARGUMENT') );
+			self::setError( BizResources::localize( 'ERR_ARGUMENT' ) );
 		}
 		if( $row ) {
 			return self::rowToObj( $row );
@@ -111,41 +111,41 @@ class DBServerPlugin extends DBBase
 		}
 		
 		return $rows;
-	}	
-	
+	}
+
 	/**
-	 *  Create new plugin object
-	 *  
-	 *  @param object $plugin Plugin info data object (PluginInfoData) that need to be created
-	 *  @return object The created plugin objects (from DB), or null on failure
-	**/
+	 * Create new plugin object
+	 *
+	 * @param PluginInfoData $plugin Plugin info data object (PluginInfoData) that need to be created
+	 * @return object The created plugin objects (from DB), or null on failure
+	 */
 	static public function createPlugin( PluginInfoData $plugin )
-	{	
+	{
 		self::clearError();
 		$row = self::objToRow( $plugin );
 		self::insertRow( self::TABLENAME, $row );
 		$dbDriver = DBDriverFactory::gen();
 		$newid = $dbDriver->newid( self::TABLENAME, true );
-		if( is_null($newid) ) {
-			self::setError( BizResources::localize('ERR_DATABASE') );
+		if( is_null( $newid ) ) {
+			self::setError( BizResources::localize( 'ERR_DATABASE' ) );
 		} else {
 			$plugin->Id = $newid;
 			return self::getPlugin( $plugin );
 		}
 		return null; // failed
 	}
-	
-	 /**
-	 *  Modify plugin object
-	 *  
-	 *  @param object $plugin Plugin info data object (PluginInfoData) that need to be modified
-	 *  @return object The modified plugin object (from DB), or null on failure
-	**/
+
+	/**
+	 * Modify plugin object
+	 *
+	 * @param PluginInfoData $plugin Plugin info data object (PluginInfoData) that need to be modified
+	 * @return object The modified plugin object (from DB), or null on failure
+	 */
 	static public function updatePlugin( PluginInfoData $plugin )
-	{	
+	{
 		self::clearError();
 		$row = self::objToRow( $plugin );
-		unset($row['id']);
+		unset( $row['id'] );
 		if( self::updateRow( self::TABLENAME, $row, " `id` = '$plugin->Id'" ) ) { // does set error
 			return self::getPlugin( $plugin );
 		}
@@ -191,26 +191,26 @@ class DBServerPlugin extends DBBase
 		}
 		return $deletedObjs;
 	}
-	
+
 	/**
-	 *  Converts a plugin info data object into a DB plugin record (array).
+	 * Converts a plugin info data object into a DB plugin record (array).
 	 *
-	 *  @param object $plugin PluginInfoData
-	 *  @return array DB plugin row
-	**/
+	 * @param PluginInfoData $plugin PluginInfoData
+	 * @return array DB plugin row
+	 */
 	static public function objToRow( PluginInfoData $plugin )
-	{	
+	{
 		$row = array();
-		if(!is_null($plugin->Id))			$row['id'] 			= $plugin->Id ? $plugin->Id : 0;	
-		if(!is_null($plugin->UniqueName))	$row['uniquename'] 	= $plugin->UniqueName;
-		if(!is_null($plugin->DisplayName))	$row['displayname'] = $plugin->DisplayName;	
-		if(!is_null($plugin->Version))		$row['version'] 	= (string)$plugin->Version; // make it string to support === and !== compares
-		if(!is_null($plugin->Description))	$row['description'] = $plugin->Description;
-		if(!is_null($plugin->Copyright))	$row['copyright'] 	= $plugin->Copyright;
-		if(!is_null($plugin->IsActive))		$row['active'] 		= $plugin->IsActive == true ? 'on' : '';	
-		if(!is_null($plugin->IsSystem))		$row['system'] 		= $plugin->IsSystem == true ? 'on' : '';	
-		if(!is_null($plugin->IsInstalled))	$row['installed']	= $plugin->IsInstalled == true ? 'on' : '';	
-		if(!is_null($plugin->Modified))		$row['modified'] 	= $plugin->Modified;
+		if( !is_null( $plugin->Id ) ) $row['id'] = $plugin->Id ? $plugin->Id : 0;
+		if( !is_null( $plugin->UniqueName ) ) $row['uniquename'] = $plugin->UniqueName;
+		if( !is_null( $plugin->DisplayName ) ) $row['displayname'] = $plugin->DisplayName;
+		if( !is_null( $plugin->Version ) ) $row['version'] = (string)$plugin->Version; // make it string to support === and !== compares
+		if( !is_null( $plugin->Description ) ) $row['description'] = $plugin->Description;
+		if( !is_null( $plugin->Copyright ) ) $row['copyright'] = $plugin->Copyright;
+		if( !is_null( $plugin->IsActive ) ) $row['active'] = $plugin->IsActive == true ? 'on' : '';
+		if( !is_null( $plugin->IsSystem ) ) $row['system'] = $plugin->IsSystem == true ? 'on' : '';
+		if( !is_null( $plugin->IsInstalled ) ) $row['installed'] = $plugin->IsInstalled == true ? 'on' : '';
+		if( !is_null( $plugin->Modified ) ) $row['modified'] = $plugin->Modified;
 		return $row;
 	}
 	

@@ -182,7 +182,7 @@ class DBObjectLock extends DBBase
 	 * If more rows are found returns the first row found.
 	 *
 	 * @param string $where Indicates the condition or conditions that rows must satisfy to be selected.
-	 * @param array $fieldnames. Either an array containing the fieldnames to get or anything else in which case all fields are returned.
+	 * @param mixed $fieldnames. Either an array containing the fieldnames to get or '*' in which case all fields are returned.
 	 * @param array $params, containing parameters to be substituted for the placeholders
 	 *        of the where clause. 
 	 * @param array $orderBy List of fields to order (in case of many results, whereby the first/last row is wanted).

@@ -12,32 +12,33 @@ require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 class DBServerConnector extends DBBase
 {
 	const TABLENAME = 'serverconnectors';
-	
+
 	/**
-	 *  Checks if the server connector object exists at DB and returns its id
+	 * Checks if the server connector object exists at DB and returns its id
 	 *
-	 *  @param string $conn Connector object (ConnectorInfoData) to be checked at DB.
-	 *  @return string Connector id. Zero when not found.
-	**/
+	 * @param ConnectorInfoData $conn Connector object (ConnectorInfoData) to be checked at DB.
+	 * @return string Connector id. Zero when not found.
+	 */
 	static public function getConnectorId( ConnectorInfoData $conn )
 	{
 		$fields = array( '`id`' );
 		/*if( $conn->Id ) {
 			$row = self::getRow( 'serverconnectors', "`id` = '$conn->Id' ", $fields );
-		} else*/ if( $conn->ClassName ) {
+		} else*/
+		if( $conn->ClassName ) {
 			$row = self::getRow( self::TABLENAME, "`classname` = '$conn->ClassName' ", $fields );
 		} else {
 			$row = null;
 		}
 		return $row ? $row['id'] : 0;
 	}
-	
+
 	/**
 	 *  Retrieves one server connector object from DB
 	 *
-	 *  @param string $conn Connector object (ConnectorInfoData) to be retrieved from DB
-	 *  @return ConnectorInfoData|null ConnectorInfoData if succeeded, null if no record returned
-	**/
+	 * @param ConnectorInfoData $conn Connector object (ConnectorInfoData) to be retrieved from DB
+	 * @return ConnectorInfoData|null ConnectorInfoData if succeeded, null if no record returned
+	 */
 	static public function getConnector( ConnectorInfoData $conn )
 	{
 		self::clearError();
@@ -46,14 +47,15 @@ class DBServerConnector extends DBBase
 			if( !$row ) {
 				self::setError( BizResources::localize('ERR_NOTFOUND') );
 			}
-		} else */ if( $conn->ClassName ) {
+		} else */
+		if( $conn->ClassName ) {
 			$row = self::getRow( self::TABLENAME, "`classname` = '$conn->ClassName' ", '*' );
 			if( !$row ) {
-				self::setError( BizResources::localize('ERR_NOTFOUND') );
+				self::setError( BizResources::localize( 'ERR_NOTFOUND' ) );
 			}
 		} else {
 			$row = null;
-			self::setError( BizResources::localize('ERR_ARGUMENT') );
+			self::setError( BizResources::localize( 'ERR_ARGUMENT' ) );
 		}
 		if( $row ) {
 			return self::rowToObj( $row );
@@ -115,37 +117,37 @@ class DBServerConnector extends DBBase
 
 	/**
 	 *  Create new connector object
-	 *  
-	 *  @param object $conn Connector info data object (ConnectorInfoData) that need to be created
-	 *  @return object The created connector objects (from DB), or null on failure
-	**/
+	 *
+	 * @param ConnectorInfoData $conn Connector info data object (ConnectorInfoData) that need to be created
+	 * @return object The created connector objects (from DB), or null on failure
+	 */
 	static public function createConnector( ConnectorInfoData $conn )
-	{	
+	{
 		self::clearError();
 		$row = self::objToRow( $conn );
 		self::insertRow( self::TABLENAME, $row );
 		$dbDriver = DBDriverFactory::gen();
 		$newid = $dbDriver->newid( self::TABLENAME, true );
-		if( is_null($newid) ) {
-			self::setError( BizResources::localize('ERR_DATABASE') );
+		if( is_null( $newid ) ) {
+			self::setError( BizResources::localize( 'ERR_DATABASE' ) );
 		} else {
 			$conn->Id = $newid;
 			return self::getConnector( $conn );
 		}
 		return null; // failed
 	}
-	
-	 /**
+
+	/**
 	 *  Modify connector object
-	 *  
-	 *  @param object $conn Connector info data object (ConnectorInfoData) that need to be modified
-	 *  @return object The modified connector object (from DB), or null on failure
-	**/
+	 *
+	 * @param ConnectorInfoData $conn Connector info data object (ConnectorInfoData) that need to be modified
+	 * @return object The modified connector object (from DB), or null on failure
+	 */
 	static public function updateConnector( ConnectorInfoData $conn )
-	{	
+	{
 		self::clearError();
 		$row = self::objToRow( $conn );
-		unset($row['id']);
+		unset( $row['id'] );
 		if( self::updateRow( self::TABLENAME, $row, "`classname` = '$conn->ClassName'" ) ) { // does set error
 			return self::getConnector( $conn );
 		}
@@ -192,25 +194,25 @@ class DBServerConnector extends DBBase
 		$where = "`pluginid` = '$pluginId' ";
 		self::deleteRows( self::TABLENAME, $where );
 	}
-	
+
 	/**
-	 *  Converts a connector info data object into a DB connector record (array).
+	 * Converts a connector info data object into a DB connector record (array).
 	 *
-	 *  @param object $conn ConnectorInfoData
-	 *  @return array DB connector row
-	**/
+	 * @param ConnectorInfoData $conn ConnectorInfoData object.
+	 * @return array DB connector row
+	 */
 	static public function objToRow( ConnectorInfoData $conn )
-	{	
+	{
 		$row = array();
-		if(!is_null($conn->Id))			$row['id'] 			= $conn->Id ? $conn->Id : 0;	
-		if(!is_null($conn->PluginId))	$row['pluginid'] 	= $conn->PluginId ? $conn->PluginId : 0;	
-		if(!is_null($conn->ClassName))	$row['classname']	= $conn->ClassName;	
-		if(!is_null($conn->Interface))	$row['interface']	= $conn->Interface;	
-		if(!is_null($conn->Type))		$row['type'] 		= trim($conn->Type);
-		if(!is_null($conn->Prio))		$row['prio'] 		= $conn->Prio ? $conn->Prio : 500;
-		if(!is_null($conn->RunMode))	$row['runmode'] 	= $conn->RunMode;
-		if(!is_null($conn->ClassFile))	$row['classfile']	= $conn->ClassFile;	
-		if(!is_null($conn->Modified))	$row['modified']	= $conn->Modified;
+		if( !is_null( $conn->Id ) ) $row['id'] = $conn->Id ? $conn->Id : 0;
+		if( !is_null( $conn->PluginId ) ) $row['pluginid'] = $conn->PluginId ? $conn->PluginId : 0;
+		if( !is_null( $conn->ClassName ) ) $row['classname'] = $conn->ClassName;
+		if( !is_null( $conn->Interface ) ) $row['interface'] = $conn->Interface;
+		if( !is_null( $conn->Type ) ) $row['type'] = trim( $conn->Type );
+		if( !is_null( $conn->Prio ) ) $row['prio'] = $conn->Prio ? $conn->Prio : 500;
+		if( !is_null( $conn->RunMode ) ) $row['runmode'] = $conn->RunMode;
+		if( !is_null( $conn->ClassFile ) ) $row['classfile'] = $conn->ClassFile;
+		if( !is_null( $conn->Modified ) ) $row['modified'] = $conn->Modified;
 		return $row;
 	}
 	
