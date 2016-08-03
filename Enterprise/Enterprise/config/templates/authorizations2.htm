@@ -238,7 +238,7 @@
 		 * or that have no statuses selected. So leave only parent nodes open that
 		 * have a mixture of child nodes selected. This is to optimize the view.
 		 */
-		$('#jstree_statuses').bind('ready.jstree', function(event, data) {
+		$('#jstree_statuses').on('ready.jstree', function() {
 			var statusTree = $(this).jstree(true);
 			var statusTypes = statusTree.get_children_dom( $(this) );
 			statusTypes.each( function( index, statusType ) {
