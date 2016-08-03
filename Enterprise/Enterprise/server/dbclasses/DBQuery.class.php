@@ -1234,6 +1234,7 @@ class DBQuery extends DBBase
 	 * @param string $shortusernameDBStr
 	 * @param bool $isadmin
 	 * @return string
+	 * @throws BizException
 	 */
 	private static function getAOVParentSelect($parentIds, $overruleissues, $issues, $objectstable, $tempav, $sectionStateSQL, $shortusernameDBStr, $isadmin)
 	{

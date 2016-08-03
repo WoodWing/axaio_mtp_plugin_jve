@@ -128,6 +128,7 @@ class DBVersion extends DBBase
 	 * @param string $id Object id
 	 * @param integer $version Object version number
 	 * @return array of key-value pairs
+	 * @throws BizException
 	 */
 	static public function getVersions( $id, $version=null )
 	{

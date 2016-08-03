@@ -460,6 +460,7 @@ class DBTarget extends DBBase
      * @param int $objectId, required id of an object
      * @param int $channelId, optional, if not empty only targets for this channel will be removed.
      * @param int $issueId, optional, if not empty only targets for this issue will be removed.
+     * @throws BizException
     **/
     public static function removeSomeTargetsByObject( $objectId, $channelId = null, $issueId = null )
     {

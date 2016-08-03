@@ -396,6 +396,7 @@ class DBObject extends DBBase
 	 * @param int $id Object DB id.
 	 * @param array $areas 'Workflow' or 'Trash'. Where the object resides.
 	 * @return array of DB properties of the object.
+	 * @throws BizException
 	 */
 	static public function getObjectRows( $id, array $areas=null )
 	{

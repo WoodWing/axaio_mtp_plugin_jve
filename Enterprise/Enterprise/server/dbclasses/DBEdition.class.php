@@ -313,6 +313,7 @@ class DBEdition extends DBBase
 	 * @param int $issueId Issue owns the edition
 	 * @param array $editions array of edition objects that need to be modified
 	 * @return array of modified Edition objects - throws BizException on failure
+	 * @throws BizException
 	 */
 	public static function modifyChannelEditionsObj( $channelId, $issueId, $editions )
 	{	

@@ -230,70 +230,72 @@ class DBSection extends DBBase
         if (!$row) return null;
         return self::rowToObj($row);
     }
-    
-    /**
-     *  Create new section object
-     *  
-     *  @param string $pubId publication that new section belongs to
-     *  @param string $issueId Issue that new section belongs to
-     *  @param array  $sections array of new sections that will created
-     *  @return array of new created section objects - throws BizException on failure
-    **/
-     public static function createSectionsObj( $pubId, $issueId, $sections )
-    {	
-    	$dbdriver = DBDriverFactory::gen();
-    	$newsections = array();
-    	
-    	foreach( $sections as $section ) {
-    		$values = self::objToRow($pubId, $issueId, $section);
-    		
-    		// check duplicates
-			$row = self::getRow(self::TABLENAME, "`section` = '" . $dbdriver->toDBString($values['section']) . "' and `publication` = '$values[publication]' and `issue` = '$values[issue]' ");
-			if($row) {
-				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
+
+	/**
+	 *  Create new section object
+	 *
+	 * @param string $pubId publication that new section belongs to
+	 * @param string $issueId Issue that new section belongs to
+	 * @param array $sections array of new sections that will created
+	 * @return array of new created section objects - throws BizException on failure
+	 * @throws BizException
+	 **/
+	public static function createSectionsObj( $pubId, $issueId, $sections )
+	{
+		$dbdriver = DBDriverFactory::gen();
+		$newsections = array();
+
+		foreach( $sections as $section ) {
+			$values = self::objToRow( $pubId, $issueId, $section );
+
+			// check duplicates
+			$row = self::getRow( self::TABLENAME, "`section` = '".$dbdriver->toDBString( $values['section'] )."' and `publication` = '$values[publication]' and `issue` = '$values[issue]' " );
+			if( $row ) {
+				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null );
 			}
-			
-			self::insertRow(self::TABLENAME, $values );
-			$newid = $dbdriver->newid(self::TABLENAME, true);
-			if( !is_null($newid) ){
+
+			self::insertRow( self::TABLENAME, $values );
+			$newid = $dbdriver->newid( self::TABLENAME, true );
+			if( !is_null( $newid ) ) {
 				$newsection = DBSection::getSectionObj( $newid );
 				$newsections[] = $newsection;
-			}	
-    	}
-		return $newsections;
-    }
-    
-     /**
-     *  Modify Section object
-     *  
-     *  @param string $pubId Publication that Section belongs to
-     *  @param string $issueId Issue that Section belongs to
-     *  @param array  $sections array of sections that need to be modified
-     *  @return array of modified Section objects - throws BizException on failure
-    **/
-     public static function modifySectionsObj( $pubId, $issueId, $sections )
-    {	
-    	$dbdriver = DBDriverFactory::gen();
-    	$modifysections = array();
-    	
-    	foreach($sections as $section) {
-    		$values = self::objToRow( $pubId, $issueId, $section );
-
-    		// check duplicates
-			$row = self::getRow(self::TABLENAME, "`section` = '" . $dbdriver->toDBString($section->Name) . "' and `issue` = '$values[issue]' and `publication` = '$values[publication]' and `id` != '$section->Id'");
-			if($row) {
-				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
 			}
-		
-			$result = self::updateRow(self::TABLENAME, $values, " `id` = '$section->Id'");
-			
-			if( $result === true){
+		}
+		return $newsections;
+	}
+
+	/**
+	 *  Modify Section object
+	 *
+	 * @param string $pubId Publication that Section belongs to
+	 * @param string $issueId Issue that Section belongs to
+	 * @param array $sections array of sections that need to be modified
+	 * @return array of modified Section objects - throws BizException on failure
+	 * @throws BizException
+	 **/
+	public static function modifySectionsObj( $pubId, $issueId, $sections )
+	{
+		$dbdriver = DBDriverFactory::gen();
+		$modifysections = array();
+
+		foreach( $sections as $section ) {
+			$values = self::objToRow( $pubId, $issueId, $section );
+
+			// check duplicates
+			$row = self::getRow( self::TABLENAME, "`section` = '".$dbdriver->toDBString( $section->Name )."' and `issue` = '$values[issue]' and `publication` = '$values[publication]' and `id` != '$section->Id'" );
+			if( $row ) {
+				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null );
+			}
+
+			$result = self::updateRow( self::TABLENAME, $values, " `id` = '$section->Id'" );
+
+			if( $result === true ) {
 				$modifysection = self::getSectionObj( $section->Id );
 				$modifysections[] = $modifysection;
-			}	
-    	}
-    	return $modifysections;
-    }
+			}
+		}
+		return $modifysections;
+	}
 	
     /**
      *  Converts object value to an array

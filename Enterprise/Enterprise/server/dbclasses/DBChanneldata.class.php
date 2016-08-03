@@ -317,6 +317,7 @@ class DBChanneldata extends DBBase
 	 * @param integer $id Admin data object ID
 	 * @return array List of AdmExtraMetaData (the retrieved custom props).
 	 * @param array $typeMap Lookup table with custom property names as keys and types as values.
+	 * @throws BizException
 	 */
 	public static function getCustomProperties( $entity, $id, $typeMap )
 	{
@@ -392,6 +393,7 @@ class DBChanneldata extends DBBase
 	 * @param integer $id Admin data object ID
 	 * @param AdmExtraMetaData $extraMetaData Custom admin property to store.
 	 * @return boolean Whether or not successful.
+	 * @throws BizException
 	 */
 	private static function insertCustomProperty( $entity, $id, AdmExtraMetaData $extraMetaData, $type )
 	{
@@ -431,6 +433,7 @@ class DBChanneldata extends DBBase
 	 * @param integer $id Admin data object ID
 	 * @param AdmExtraMetaData $extraMetaData Custom admin property to store.
 	 * @return boolean Whether or not successful.
+	 * @throws BizException
 	 */
 	private static function updateCustomProperty( $entity, $id, AdmExtraMetaData $extraMetaData, $type )
 	{
@@ -471,6 +474,7 @@ class DBChanneldata extends DBBase
 	 * @param integer $id Admin data object ID
 	 * @param string $name Custom admin property name.
 	 * @return boolean Whether or not exists.
+	 * @throws BizException
 	 */
 	private static function doesCustomPropertyExist( $entity, $id, $name )
 	{

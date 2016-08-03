@@ -27,6 +27,7 @@ class DBUserSetting
 	 * @param string $shortUser User id (short name).
 	 * @param string $appName   Application name. Filled = app settings. Null = all settings. Empty = migrated settings.
 	 * @return array List of Setting objects
+	 * @throws BizException
 	 */
 	static public function getSettings( $user, $appName = null )
 	{
