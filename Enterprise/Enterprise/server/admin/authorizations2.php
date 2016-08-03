@@ -35,16 +35,16 @@ $txt = HtmlDocument::loadTemplate( 'authorizations2.htm' );
 
 // Show user group.
 require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
-if( $command == 'view' ) {
+if( ($authIds && $command == 'edit') || $command == 'add' || $command == 'copy' ) {
+	$userGroupName = DBUser::getUserGroupName( $grp );
+	$grptxt = formvar($userGroupName).inputvar( 'grp', $grp, 'hidden' );
+} else {
 	$grptxt = '<select name="grp" onChange="this.form.submit()">';
 	foreach( DBUser::listUserGroupNames() as $userGroupId => $userGroupName ) {
 		$selected = $userGroupId == $grp ? ' selected="selected"' : '';
 		$grptxt .= '<option value="'.$userGroupId.'"'.$selected.'>'.formvar($userGroupName).'</option>';
 	}
 	$grptxt .= '</select>';
-} else {
-	$userGroupName = DBUser::getUserGroupName( $grp );
-	$grptxt = formvar($userGroupName).inputvar( 'grp', $grp, 'hidden' );
 }
 $txt = str_replace('<!--VAR:GROUP-->', $grptxt, $txt);
 
