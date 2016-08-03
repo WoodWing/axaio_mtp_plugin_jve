@@ -33,6 +33,7 @@ class DBCascadePub extends DBBase
 	 * @param string $tableName  Name of table without prefix or quotes
 	 * @param array  $sourceRow    Row to be copied. Keys are column names, values are field data.
 	 * @param array  $overruleFields Some fields to be filled in during copy
+	 * @param boolean $autoincrement
 	 * @return string The id of the created row (the copy), or null if copy failed.
 	 */
 	static private function copyRow( $tableName, $sourceRow, $overruleFields, $autoincrement = true )
@@ -111,10 +112,11 @@ class DBCascadePub extends DBBase
 	 * It copies all definions that are made for the issue.
 	 * This includes editions, sections, deadlines, authorizations, workflow and routing.
 	 *
-	 * @param string  $copyChanId     Id of destination channel to copy issues into. Duplicate Issue passes zero to copy within same channel.
-	 * @param array   $srcIssueRow    Source issue row to be copied.
-	 * @param string  $copyIssueObj   New issue to be copy.
-	 * @param string  $namePrefix     Debug feature; name prefix to apply to all copied items inside issue. Just to ease recognizion.
+	 * @param int $srcPubId The Id of the Brand (Publication) that contains the issue.
+	 * @param string $copyChanId Id of destination channel to copy issues into. Duplicate Issue passes zero to copy within same channel.
+	 * @param array $srcIssueRow Source issue row to be copied.
+	 * @param string $copyIssueObj New issue to be copy.
+	 * @param string $namePrefix Debug feature; name prefix to apply to all copied items inside issue. Just to ease recognizion.
 	 * @return string Id of the copied issue
 	 */
 	static public function copyIssue( $srcPubId, $copyChanId, $srcIssueRow, $copyIssueObj, $namePrefix )
@@ -133,6 +135,14 @@ class DBCascadePub extends DBBase
 
 	/**
 	 * Same as above, but this one is used internally because it does not start a new copy session.
+	 *
+	 * @param int $srcPubId The Id of the Brand (Publication) that contains the source issue.
+	 * @param int $copyPubId The Id of the Brand (Publication) that will contain the new issue.
+	 * @param string $copyChanId Id of destination channel to copy issues into. Duplicate Issue passes zero to copy within same channel.
+	 * @param array $srcIssueRow Source issue row to be copied.
+	 * @param string $copyIssueObj New issue to be copy.
+	 * @see DBCascadePub::copyIssue.
+	 * @return int The Id of the new issue.
 	 */
 	static public function doCopyIssue( $srcPubId, $copyPubId, $copyChanId, $srcIssueRow, $copyIssueObj )
 	{

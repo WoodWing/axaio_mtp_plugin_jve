@@ -99,7 +99,8 @@ class DBChanneldata extends DBBase
 	 * @since 7.5.0
 	 *
 	 * @param integer $issueId
-	 * @param string $name Property value
+	 * @param string $name Property name.
+	 * @param mixed $value Value of the property.
 	 * @return boolean Whether or not successful.
 	 */
 	public static function setCustomPropertyValueForIssue( $issueId, $name, $value )
@@ -390,6 +391,7 @@ class DBChanneldata extends DBBase
 	 * @param string $entity 'Publication', 'PubChannel' or 'Issue'
 	 * @param integer $id Admin data object ID
 	 * @param AdmExtraMetaData $extraMetaData Custom admin property to store.
+	 * @param string $type Custom property type.
 	 * @return boolean Whether or not successful.
 	 * @throws BizException
 	 */
@@ -431,6 +433,7 @@ class DBChanneldata extends DBBase
 	 * @param integer $id Admin data object ID
 	 * @param AdmExtraMetaData $extraMetaData Custom admin property to store.
 	 * @return boolean Whether or not successful.
+	 * @param string $type Custom property type.
 	 * @throws BizException
 	 */
 	private static function updateCustomProperty( $entity, $id, AdmExtraMetaData $extraMetaData, $type )

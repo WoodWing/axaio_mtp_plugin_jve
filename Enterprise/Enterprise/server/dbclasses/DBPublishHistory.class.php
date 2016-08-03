@@ -148,6 +148,7 @@ class DBPublishHistory extends DBBase
 	 * @param int $dossierid object id of the published dossier
 	 * @param int $channelid the publish channel
 	 * @param int $issueid the issue of the publish channel
+	 * @param int $editionid the edition of the publish channel
 	 * @param boolean $lastRow indicator whether to get the last row history
 	 * @return array of rows. Each row is a histoy record, null if error
 	 */

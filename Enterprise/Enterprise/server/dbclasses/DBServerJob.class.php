@@ -162,7 +162,7 @@ class DBServerJob extends DBBase
 
 		$limit = array('min' => $startRecord, 'max' => $maxRecord );
 
-		$rows = self::listPagedRows( self::TABLENAME, 'jobid', $where, $values, $orderBy, $limit, $params );
+		$rows = self::listPagedRows( self::TABLENAME, 'jobid', $where, $values, $orderBy, $limit );
 
 		$jobs = array();
 		if( $rows ) foreach( $rows as $row ) {
@@ -508,7 +508,10 @@ class DBServerJob extends DBBase
 	// ------------------------------------------------------------------------
 
 	/**
-	 * See entBuddy() function header at /server/services/Background.php for details.
+	 * @see ServerJobProcessor::bizBuddyCB().
+	 * @param string $input The magical question
+	 * @param object $caller The calling instance
+	 * @return string The magical answer
 	 */
 	final public function dbBuddy( $input, $caller )
 	{ // L> Anti-hack: Function is made FINAL to block any subclass abusing this function!

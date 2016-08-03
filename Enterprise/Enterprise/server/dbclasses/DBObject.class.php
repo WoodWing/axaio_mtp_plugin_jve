@@ -30,6 +30,7 @@ class DBObject extends DBBase
 	 * So it is assumed that there will not be more than 99999 objects starting with the same proposed name in any issue.
 	 *
 	 * @param array of int $issueidsarray: id's of the issues the object is targeted for.
+	 * @param string $objtype The type of the object.
 	 * @param string $proposedobjectname: proposed name of the new object.
 	 * @return either string new objectname or null if no name found.
 	 */
@@ -88,7 +89,7 @@ class DBObject extends DBBase
 	 * @param integer $parent Id of the container (dossier/task)
 	 * @param string $proposedName Name to be checked
 	 * @param string $childType Object type for which the name must be unique
-	 * $param integer $id Id of the object, null in case an object is created.
+	 * @param integer $id Id of the object, null in case an object is created.
 	 * @return string unique name
 	 */
 	static public function getUniqueNameForChildren( $parent, $proposedName, $childType, $id )
@@ -1740,6 +1741,7 @@ class DBObject extends DBBase
 	 * Returns null if there is no matching Object found.
 	 * @param string $area The Area in which to search, `Workflow` or `Trash`.
 	 * @param string $documentId The DocumentId for which to search the ObjectId.
+	 * @param string $objectType The type of the object.
 	 * @return null|int The Object ID or null if not found.
 	 */
 	static public function getObjectIdByDocumentId( $area, $documentId, $objectType )

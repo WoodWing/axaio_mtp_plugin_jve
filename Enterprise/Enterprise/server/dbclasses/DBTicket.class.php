@@ -42,6 +42,14 @@ class DBTicket extends DBBase
 	 * the same part.
 	 * However, it is sometimes difficult for a client application (InDesign/InCopy) to determine its own IP-address, so we don't check on clientip...
 	 * Probably using the 'clientname' will be different on the different machines...
+	 *
+	 * @param string $clientip
+	 * @param string $user
+	 * @param string $clientname
+	 * @param string $appname
+	 * @param string $appserial
+	 * @param string $appproductcode
+	 * @return string The hash
 	 */
 	public static function makeTicketHashPart( $clientip='', $user='', $clientname='', $appname='', $appserial='', $appproductcode='' )
 	{
@@ -106,6 +114,7 @@ class DBTicket extends DBBase
 	 *
 	 * @param string $orguser: either the 'usr' or the 'fullname' from the smart_users table (as entered by the end user)
 	 * @param string $shortuser: the 'usr' from the smart_users table
+	 * @param string $server Server to logon to as returned from GetServers (or empty if not supported)
 	 * @param string $clientname
 	 * @param string $appname
 	 * @param string $appversion
@@ -617,7 +626,11 @@ class DBTicket extends DBBase
 	// ------------------------------------------------------------------------
 
 	/**
-	 * See entBuddy() function header at /server/services/Background.php for details.
+	 * @see ServerJobProcessor::bizBuddyCB().
+	 * @param string $input The magical question
+	 * @param object $caller The calling instance
+	 * @param ServerJob $job
+	 * @return string The magical answer
 	 */
 	final static public function dbBuddy( $input, $caller, $job )
 	{ // L> Anti-hack: Function is made FINAL to block any subclass abusing this function!

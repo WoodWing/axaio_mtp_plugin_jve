@@ -21,6 +21,7 @@ class DBTarget extends DBBase
 	 * Inserts records with the new values for passed columns.
 	 *
 	 * @param array $newValues column/value pairs of the columns to be inserted.
+	 * @param boolean $autoIncrement
 	 * @return new id or else false.
 	 */
 	public static function insert( array $newValues, $autoIncrement )
@@ -396,8 +397,8 @@ class DBTarget extends DBBase
      * @param int $channelid Channel id (of the target)
      * @param int $issueid Issue id (of the target)
      * @param string $externalid id of the published object in external system
-     * $param string $publisheddate date at which object must get/is published
-     * $param string $version version of object in format x.x
+     * @param string $publisheddate date at which object must get/is published
+     * @param string $version version of object in format x.x
      * 
      */    
     static public function updatePublishInfoObjectRelation($relationid, $channelid, $issueid, $externalid, $publisheddate, $version)

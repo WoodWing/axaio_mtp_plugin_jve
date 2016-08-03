@@ -35,6 +35,8 @@ class DBVersion extends DBBase
 	
 	/**
 	 * Tells if a given field is defined at the smart_objectversions table.
+	 *
+	 * @param string $field
 	 * @return boolean
 	 */
 	static public function isVersionField( $field )
@@ -259,6 +261,7 @@ class DBVersion extends DBBase
 	 * Formats major.minor version out of object properties (so NOT DB props)
 	 *
 	 * @param array $objProps Object array containing "MajorVersion" and "MinorVersion" key-values
+	 * @param string $fieldPrefix Like 'server' in 'servermajorversion'.
 	 * @return string
 	*/
 	static public function getVersionNumber( $objProps, $fieldPrefix='' )

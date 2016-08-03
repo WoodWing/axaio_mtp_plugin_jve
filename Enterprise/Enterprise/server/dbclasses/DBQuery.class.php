@@ -851,12 +851,14 @@ class DBQuery extends DBBase
 	/**
 	 * Creates a temporary table named 'temp_av' with all authorizations given to $shortusername with View-rights
 	 * (via normal workflow statuses and via publication admin rights).
+	 *
 	 * @param string $shortusername short name of the user to get the authorizations for
-     * @param int $accessRight  Database id of the access right for the objects, 1 = View, 2 = Read,
+	 * @param int $accessRight Database id of the access right for the objects, 1 = View, 2 = Read,
 	 * List in Publication Overview = 11, 0 = Skip
+	 * @param bool $brandAdmin True if the user is administrator of the brand.
 	 * @return string temporary table name
 	 */
-	static public function createAuthorizationsView($shortusername, $accessRight, &$brandAdmin)
+	static public function createAuthorizationsView( $shortusername, $accessRight, &$brandAdmin )
 	{
 		if (isset(self::$TempIdsTables['av']) && !empty(self::$TempIdsTables['av'])) {
 			return self::getTempIds('av'); //Already created See BZ#17870    

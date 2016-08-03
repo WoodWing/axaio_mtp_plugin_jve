@@ -144,6 +144,7 @@ class DBObjectLock extends DBBase
 	 * Call this function instead of {@link: unlockObject()} when dealing with multiple objects.
 	 *
 	 * @param int[] $objectIds List of object ids where the lock will be released.
+	 * @param string $user (short) User name.
 	 */
 	public static function unlockObjects( array $objectIds, $user )
 	{
