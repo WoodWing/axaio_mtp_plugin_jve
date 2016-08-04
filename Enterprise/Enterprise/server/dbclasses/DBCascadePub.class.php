@@ -115,7 +115,7 @@ class DBCascadePub extends DBBase
 	 * @param int $srcPubId The Id of the Brand (Publication) that contains the issue.
 	 * @param string $copyChanId Id of destination channel to copy issues into. Duplicate Issue passes zero to copy within same channel.
 	 * @param array $srcIssueRow Source issue row to be copied.
-	 * @param string $copyIssueObj New issue to be copy.
+	 * @param AdmIssue $copyIssueObj New issue to be copy.
 	 * @param string $namePrefix Debug feature; name prefix to apply to all copied items inside issue. Just to ease recognizion.
 	 * @return string Id of the copied issue
 	 */
@@ -140,7 +140,7 @@ class DBCascadePub extends DBBase
 	 * @param int $copyPubId The Id of the Brand (Publication) that will contain the new issue.
 	 * @param string $copyChanId Id of destination channel to copy issues into. Duplicate Issue passes zero to copy within same channel.
 	 * @param array $srcIssueRow Source issue row to be copied.
-	 * @param string $copyIssueObj New issue to be copy.
+	 * @param AdmIssue $copyIssueObj New issue to be copy.
 	 * @see DBCascadePub::copyIssue.
 	 * @return int The Id of the new issue.
 	 */
@@ -403,7 +403,7 @@ class DBCascadePub extends DBBase
 	 * as these fields are blobs.
 	 *
 	 * @param string $srcIssueId  Id of source issue to copy extra metadata from.
-	 * @param Object $copyIssueObj The copied object.
+	 * @param AdmIssue $copyIssueObj The copied object.
 	 * @return void
 	 */
 	static private function copyExtraMetaDataForIssue( $srcIssueId, $copyIssueObj )

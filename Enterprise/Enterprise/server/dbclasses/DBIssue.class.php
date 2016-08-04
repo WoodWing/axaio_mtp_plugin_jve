@@ -466,7 +466,7 @@ class DBIssue extends DBBase
 
 		$sth = $dbdriver->query($sql);
 		$rows = self::fetchResults($sth);
-		if (count($rows > 0)) {
+		if (count($rows) > 0) {
 			foreach ($rows as $row) {
 				$result[] = $row['id'];
 			}

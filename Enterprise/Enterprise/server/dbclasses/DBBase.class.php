@@ -156,7 +156,7 @@ class DBBase
 
 	/**
 	 * Add a 'limit by' clause to the sql statement.
-	 * @param DBDriverFactory $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @param string $sql
 	 * @param array $limit Contains two key/value pairs. $limit['min'] is the offset,
 	 * $limit['max'] the maximum number of rows to return.
@@ -549,10 +549,10 @@ class DBBase
 	 * @param string $where SQL-where clause.
 	 * @param array $params The params to use in the query.
 	 * @param array|null $orderBy Fields to sort on.
-	 * @param int $limit The number of records to retrieve.
+	 * @param array $limit The number of records to retrieve.
 	 * @return array of rows.
 	 */
-	public static function listPagedRows( $tableName, $keyCol, $where, $params = array(), $orderBy, $limit )
+	public static function listPagedRows( $tableName, $keyCol, $where, $params = array(), $orderBy = null, $limit )
 	{
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();

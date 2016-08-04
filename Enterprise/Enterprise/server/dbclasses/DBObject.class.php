@@ -1274,7 +1274,7 @@ class DBObject extends DBBase
 	 * @param string $dbField name of the field as sent to the dbdriver
 	 * @param string $propertyName name of the field as know in the Biz-layer
 	 * @param string/integer/double $value value to be inserted/updated
-	 * @param resource $dbDriver connection to the database
+	 * @param WW_DbDrivers_DriverBase $dbDriver connection to the database
 	 * @param string $comma separator
 	 * @param array $blobs placeholder of blobs to be inserted/updated
 	 * @return string SQL-statement.
