@@ -787,7 +787,7 @@ define ('SERVERFEATURES', serialize(array(
 //          (Smart Connection for InDesign feature.) When produced pages are out-of-sync with planned pages, Smart Connection
 //          shows a message asking the user if the produced pages should be synchronized with the planned pages.
 //          The user can choose between Yes and No. By default, the Yes button is enabled.
-//          Note that synchronizing the pages may result in content loss (pages that are removed my contain content).
+//          Note that synchronizing the pages may result in content loss (pages that are removed may contain content).
 //          It is therefore safer to set the No button as the default button. Do this by enabling the PageSyncDefaultsToNo option.
 //          This is especially important for InDesign Server which always uses the default button.
 //
