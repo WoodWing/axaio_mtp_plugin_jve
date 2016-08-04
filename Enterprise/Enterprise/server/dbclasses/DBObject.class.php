@@ -129,6 +129,7 @@ class DBObject extends DBBase
 	 */
 	static public function makeNameUnique( $existingNames, $startOfName )
 	{
+		$result = '';
 		//Use the proposedname if it does not exist yet.
 		if (!array_key_exists($startOfName, $existingNames)) {
 			$result = $startOfName;
@@ -1290,6 +1291,7 @@ class DBObject extends DBBase
 		} else {
 			$formattedDbValue = $value;
 		}
+		$descript = '';
 		if ( self::isBlob( $propertyName ) ) {
 			$blobs[] = $formattedDbValue;
 			$descript = '#BLOB#';

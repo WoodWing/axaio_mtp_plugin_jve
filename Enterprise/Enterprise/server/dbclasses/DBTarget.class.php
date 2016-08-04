@@ -638,68 +638,69 @@ class DBTarget extends DBBase
 	 * @param string $chanType Channel type, like 'print', 'web', etc. Pass null for all channels.
 	 * @return Target[].
 	 */
-    static public function getTargetsByObjectId( $objectId, $chanType = null )
-    {
-    	require_once BASEDIR.'/server/dbclasses/DBTargetEdition.class.php';
+	static public function getTargetsByObjectId( $objectId, $chanType = null )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBTargetEdition.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBPublishHistory.class.php';
 
-        $targets = array();
-        $rows = DBTargetEdition::listTargetEditionRowsByObjectId( $objectId, $chanType );
-        $firstIter = true;
-        $curchannelid = 0;
-        $curissueid = 0;
-        
-        foreach ($rows as $row) {
- 			$publishInfo = DBPublishHistory::resolvePubHistoryForObj($objectId, $row['channelid'], $row['issueid'], $row['editionid']);
+		$targets = array();
+		$rows = DBTargetEdition::listTargetEditionRowsByObjectId( $objectId, $chanType );
+		$firstIter = true;
+		$curchannelid = 0;
+		$curissueid = 0;
+
+		foreach( $rows as $row ) {
+			$publishInfo = DBPublishHistory::resolvePubHistoryForObj( $objectId, $row['channelid'], $row['issueid'], $row['editionid'] );
 			$publishedVersion = null; // No major/minor version for published dossiers.
 			$publishedDate = null;
-			if ( $publishInfo ) {
-                $publishedDate = $publishInfo->PublishedDate;
-				if( empty($publishedDate) ) { $publishedDate = null; } // Empty strings are not allowed in the wsdl.
+			if( $publishInfo ) {
+				$publishedDate = $publishInfo->PublishedDate;
+				if( empty( $publishedDate ) ) {
+					$publishedDate = null;
+				} // Empty strings are not allowed in the wsdl.
 			}
-            if( $firstIter ) {
-                $firstIter = false;
-                $curchannelid = $row['channelid'];
-                $curissueid = $row['issueid'];
-                $newchannel = new PubChannel($curchannelid, $row['channelname']);
-                $newissue = new Issue($curissueid, $row['issuename'], (boolean)trim($row['overrulepub'])); // BZ#17036 - MSSQL return overrulepub as single space
-                $neweditions = array();
-                if ($row['editionid'] != 0) {
-                    $neweditions[] = new Edition($row['editionid'], $row['editionname']);                
-                }
-                $newtarget = new Target($newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion);
-                $targets[] = $newtarget;
-            }
-            else if ($row['channelid'] != $curchannelid) {
-                $curchannelid = $row['channelid'];
-                $curissueid = $row['issueid'];
-                $newchannel = new PubChannel($curchannelid, $row['channelname']);
-                $newissue = new Issue($curissueid, $row['issuename'], (boolean)trim($row['overrulepub'])); // BZ#17036
-                $neweditions = array();
-                if ($row['editionid'] != 0) {
-                    $neweditions[] = new Edition($row['editionid'], $row['editionname']);                
-                }
-                $newtarget = new Target($newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion);
-                $targets[] = $newtarget;
-            }
-            else if ($row['issueid'] != $curissueid) {
-                $curissueid = $row['issueid'];
-                $newchannel = new PubChannel($curchannelid, $row['channelname']);
-                $newissue = new Issue($curissueid, $row['issuename'], (boolean)trim($row['overrulepub'])); // BZ#17036
-                $neweditions = array();
-                if ($row['editionid'] != 0) {
-                    $neweditions[] = new Edition($row['editionid'], $row['editionname']);                
-                }
-                $newtarget = new Target($newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion);
-                $targets[] = $newtarget;
-            }
-            else {
-                $newedition = new Edition($row['editionid'], $row['editionname']);
-                $newtarget->Editions[] = $newedition;
-            }
-        }    
-        return $targets;
-    }
+			if( $firstIter ) {
+				$firstIter = false;
+				$curchannelid = $row['channelid'];
+				$curissueid = $row['issueid'];
+				$newchannel = new PubChannel( $curchannelid, $row['channelname'] );
+				$newissue = new Issue( $curissueid, $row['issuename'], (boolean)trim( $row['overrulepub'] ) ); // BZ#17036 - MSSQL return overrulepub as single space
+				$neweditions = array();
+				if( $row['editionid'] != 0 ) {
+					$neweditions[] = new Edition( $row['editionid'], $row['editionname'] );
+				}
+				$newtarget = new Target( $newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion );
+				$targets[] = $newtarget;
+			} else if( $row['channelid'] != $curchannelid ) {
+				$curchannelid = $row['channelid'];
+				$curissueid = $row['issueid'];
+				$newchannel = new PubChannel( $curchannelid, $row['channelname'] );
+				$newissue = new Issue( $curissueid, $row['issuename'], (boolean)trim( $row['overrulepub'] ) ); // BZ#17036
+				$neweditions = array();
+				if( $row['editionid'] != 0 ) {
+					$neweditions[] = new Edition( $row['editionid'], $row['editionname'] );
+				}
+				$newtarget = new Target( $newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion );
+				$targets[] = $newtarget;
+			} else if( $row['issueid'] != $curissueid ) {
+				$curissueid = $row['issueid'];
+				$newchannel = new PubChannel( $curchannelid, $row['channelname'] );
+				$newissue = new Issue( $curissueid, $row['issuename'], (boolean)trim( $row['overrulepub'] ) ); // BZ#17036
+				$neweditions = array();
+				if( $row['editionid'] != 0 ) {
+					$neweditions[] = new Edition( $row['editionid'], $row['editionname'] );
+				}
+				$newtarget = new Target( $newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion );
+				$targets[] = $newtarget;
+			} else {
+				$newedition = new Edition( $row['editionid'], $row['editionname'] );
+				if ( isset( $newtarget )) {
+					$newtarget->Editions[] = $newedition;
+				}
+			}
+		}
+		return $targets;
+	}
     
     /**
      * Returns the external id of a published dossier
@@ -797,23 +798,23 @@ class DBTarget extends DBBase
 			$targets = array();
 		}
 		return $targets;
-	}	
+	}
 
 	/**
 	 * Based on the target(edition) rows stored in the database Target objects are composed.
 	 * The input of the method can be the rows as returned by DBTargetEdition::listTargetEditionRowsByObjectrelationId().
-	 *  
+	 *
 	 * @param array $targetEditionRows The target(edition) rows belonging to an objectrelation.
 	 * @return array|Target object
 	 */
 	static public function composeRelationTargetsOfTargetEditionRows( $targetEditionRows )
 	{
-        $targets = array();
-        $curobjectid = 0;
-        $curchannelid = 0;
-        $curissueid = 0;
+		$targets = array();
+		$curobjectid = 0;
+		$curchannelid = 0;
+		$curissueid = 0;
 
-		if ( $targetEditionRows ) foreach ($targetEditionRows as $row ) {
+		if( $targetEditionRows ) foreach( $targetEditionRows as $row ) {
 			/*$publishInfo = DBPublishHistory::resolvePubHistoryForObjRelation($objectrelationId, $row['channelid'], $row['issueid'], $row['editionid']);
 			$publishedVersion = null;
 			$publishedDate = null;
@@ -826,56 +827,57 @@ class DBTarget extends DBBase
 			$publishedDate = $row['publisheddate'];
 			$publishedVersion = '';
 			self::joinMajorMinorVer( $publishedVersion, $row, 'published' );
-			if( $publishedVersion == '0.0' ) { $publishedVersion = null; }
+			if( $publishedVersion == '0.0' ) {
+				$publishedVersion = null;
+			}
 
-			$overrulePub = trim($row['overrulepub']);
-			$overrulePub = empty($overrulePub) ? false : true;
-			if ($row['objectrelationid'] != $curobjectid) {
+			$overrulePub = trim( $row['overrulepub'] );
+			$overrulePub = empty( $overrulePub ) ? false : true;
+			if( $row['objectrelationid'] != $curobjectid ) {
 				$curobjectid = $row['objectrelationid'];
 				$curchannelid = $row['channelid'];
 				$curissueid = $row['issueid'];
-				$newchannel = new PubChannel($curchannelid, $row['channelname']);
-				$newissue = new Issue($curissueid, $row['issuename'], $overrulePub);
+				$newchannel = new PubChannel( $curchannelid, $row['channelname'] );
+				$newissue = new Issue( $curissueid, $row['issuename'], $overrulePub );
 				$neweditions = array();
-				if ($row['editionid'] != 0) {
-					$neweditions[] = new Edition($row['editionid'], $row['editionname']);                
+				if( $row['editionid'] != 0 ) {
+					$neweditions[] = new Edition( $row['editionid'], $row['editionname'] );
 				}
-				$newTarget = new Target($newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion);
+				$newTarget = new Target( $newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion );
 				$newTarget->ExternalId = $row['externalid']; // Not exposed to WSDL
 				$targets[] = $newTarget;
-			}
-			else if ($row['channelid'] != $curchannelid) {
+			} else if( $row['channelid'] != $curchannelid ) {
 				$curchannelid = $row['channelid'];
 				$curissueid = $row['issueid'];
-				$newchannel = new PubChannel($curchannelid, $row['channelname']);
-				$newissue = new Issue($curissueid, $row['issuename'], $overrulePub);
+				$newchannel = new PubChannel( $curchannelid, $row['channelname'] );
+				$newissue = new Issue( $curissueid, $row['issuename'], $overrulePub );
 				$neweditions = array();
-				if ($row['editionid'] != 0) {
-					$neweditions[] = new Edition($row['editionid'], $row['editionname']);                
+				if( $row['editionid'] != 0 ) {
+					$neweditions[] = new Edition( $row['editionid'], $row['editionname'] );
 				}
-				$newTarget = new Target($newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion);
+				$newTarget = new Target( $newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion );
 				$newTarget->ExternalId = $row['externalid']; // Not exposed to WSDL
 				$targets[] = $newTarget;
-			}
-			else if ($row['issueid'] != $curissueid) {
+			} else if( $row['issueid'] != $curissueid ) {
 				$curissueid = $row['issueid'];
-				$newchannel = new PubChannel($curchannelid, $row['channelname']);
-				$newissue = new Issue($curissueid, $row['issuename'], $overrulePub);
+				$newchannel = new PubChannel( $curchannelid, $row['channelname'] );
+				$newissue = new Issue( $curissueid, $row['issuename'], $overrulePub );
 				$neweditions = array();
-				if ($row['editionid'] != 0) {
-					$neweditions[] = new Edition($row['editionid'], $row['editionname']);                
+				if( $row['editionid'] != 0 ) {
+					$neweditions[] = new Edition( $row['editionid'], $row['editionname'] );
 				}
-				$newTarget = new Target($newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion);
+				$newTarget = new Target( $newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion );
 				$newTarget->ExternalId = $row['externalid']; // Not exposed to WSDL
 				$targets[] = $newTarget;
+			} else {
+				$newedition = new Edition( $row['editionid'], $row['editionname'] );
+				if( isset( $newTarget ) ) {
+					$newTarget->Editions[] = $newedition;
+				}
 			}
-			else {
-				$newedition = new Edition($row['editionid'], $row['editionname']);
-				$newTarget->Editions[] = $newedition;
-			}
-        }
-        return $targets;
-    }
+		}
+		return $targets;
+	}
 
     /**
      * Returns the targets of objects stored in a temporary table. The  

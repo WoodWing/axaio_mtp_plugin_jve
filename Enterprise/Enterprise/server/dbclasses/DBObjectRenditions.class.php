@@ -181,8 +181,8 @@ class DBObjectRenditions extends DBBase
 	 */
 	static public function getEditionIds( $objectId, $rendition, $version )
 	{
+		$verArr = array();
 		if( $version ) {
-			$verArr = array();
 			require_once BASEDIR.'/server/dbclasses/DBVersion.class.php';
 			if( !DBVersion::splitMajorMinorVersion( $version, $verArr ) ) {
 				return false;

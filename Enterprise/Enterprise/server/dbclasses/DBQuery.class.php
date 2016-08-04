@@ -99,6 +99,7 @@ class DBQuery extends DBBase
 	static public function getTopCount($sqlarray, $checkAccess)
 	{		
 		$dbdriver = DBDriverFactory::gen();
+		$tempaov = '';
 		if($checkAccess) {
 			$tempaov = self::getTempIds('aov');
 		}
@@ -199,6 +200,7 @@ class DBQuery extends DBBase
 		$totalcount = self::getTopCount($sqlarray, $checkAccess);
 
 		$dbdriver = DBDriverFactory::gen();
+		$tempaov = '';
 		if($checkAccess) {
 			$tempaov = self::getTempIds('aov');
 		}

@@ -193,6 +193,7 @@ class DBObjectLabels extends DBBase
 	 */
 	public static function getObjectIdsForLabels( array $labels )
 	{
+		$labelIds = array();
 		foreach( $labels as $label ) {
 			$labelIds[] = intval($label->Id);
 		}

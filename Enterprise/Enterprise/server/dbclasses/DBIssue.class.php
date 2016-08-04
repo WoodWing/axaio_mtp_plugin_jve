@@ -450,9 +450,11 @@ class DBIssue extends DBBase
 		$channelstable = $dbdriver->tablename('channels');
 		$result = array();
 
+		$whereinpublications = '';
 		if (!empty($publications)) {
 			$whereinpublications = implode(',', $publications);
 		}
+		$whereinissues = '';
 		if (!empty($issues)) {
 			$whereinissues = implode(',', $issues);
 		}
