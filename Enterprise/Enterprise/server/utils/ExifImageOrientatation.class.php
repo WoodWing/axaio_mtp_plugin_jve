@@ -317,6 +317,7 @@ class ExifImageOrientatation
 	 * Does flip the given image horizontally, vertically or both.
 	 *
 	 * @param resource $imageRes The image resource handler
+	 * @param integer $mode 1 = horizontal, 2 = vertical, 3 = both
 	 * @return resource of the flipped image
 	 */
 	private function flipImage( $imageRes, $mode )

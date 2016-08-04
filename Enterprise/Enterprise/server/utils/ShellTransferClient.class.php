@@ -1,6 +1,7 @@
 <?php
 /**
  * Client proxy class to talk to the Transfer Server through shell commands such as HSCP.
+ *
  * This is a client helper class that deals with file uploads/downloads.
  * Normally, there is no reason to travel through HTTP since the PHP client is already
  * running inside Enterprise Server, and so this class should NOT be used!
@@ -20,8 +21,9 @@ class WW_Utils_ShellTransferClient extends WW_Utils_TransferClient
 {
 	private $transfer = null;
 	
-	public function __construct( $transfer )
+	public function __construct( $ticket, $transfer )
 	{
+		parent::__construct( $ticket );
 		$this->transfer = $transfer;
 	}
 
@@ -57,8 +59,6 @@ class WW_Utils_ShellTransferClient extends WW_Utils_TransferClient
 	 */
 	public function uploadFile( Attachment $attachment, $compression = '', $httpMethod = 'PUT' )
 	{
-		$compression = $compression; $httpMethod=$httpMethod; // keep code analyzer happy
-		
 		// When content given, create temp file.
 		$tmpFile = false;
 		if( is_null($attachment->FilePath) && !is_null($attachment->Content) ) {
@@ -120,13 +120,10 @@ class WW_Utils_ShellTransferClient extends WW_Utils_TransferClient
 	 * @param Attachment $attachment
 	 * @param bool $cleanup Whether or not to remove the file from Transfer Folder after download.
 	 * @param string $compression This compression feature is not supported by this subclass.
-	 * @param string $stripWcml This optimization feature is not supported by this subclass.
 	 * @return bool Tells if download was successful. If true, the $attachment->Content is set.
 	 */	
 	public function downloadFile( Attachment $attachment, $cleanup = true, $compression = '' )
 	{
-		$compression = $compression; // keep code analyzer happy
-
 		// Read template command file (custom config)
 		$fileExt = OS == 'WIN' ? '.bat' : '.sh';
 		$cmdFile = BASEDIR.'/config/shellscripts/filetransfer/'

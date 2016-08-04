@@ -44,6 +44,7 @@ class WW_Utils_DigitalPublishingSuiteClient
 	/**
 	 * Returns a reference to the HTTP client, instantiating it if necessary
 	 *
+	 * @param string $path
 	 * @return Zend_Http_Client
 	 * @throws BizException on connection errors.
 	 */
@@ -107,11 +108,9 @@ class WW_Utils_DigitalPublishingSuiteClient
 	public function connectionCheck( &$curlErrNr = null )
 	{
 		$httpClient = $this->createHttpClient( '' );
-		$curlErrNr = $curlErrNr; // To make analyzer happy.
 		try {
 			$httpClient->request();
 		} catch ( Exception $e ) {
-			$e = $e; // To make analyzer happy.
 			$adapter = $httpClient->getAdapter();
 			if ( $adapter instanceof Zend_Http_Client_Adapter_Curl ) {
 				$curl = $adapter->getHandle();
@@ -154,6 +153,8 @@ class WW_Utils_DigitalPublishingSuiteClient
 	 *
 	 * @param string $emailAddress
 	 * @param string $pwd
+	 * @throws BizException
+	 * @throws Exception
 	 */
 	public function signIn( $emailAddress, $pwd )
 	{
@@ -472,6 +473,7 @@ class WW_Utils_DigitalPublishingSuiteClient
 	 *
 	 * @param string $issueId  Identifier of the issue.
 	 * @return bool
+	 * @throws BizException
 	 */
 	public function deleteIssue( $issueId )
 	{
@@ -481,8 +483,8 @@ class WW_Utils_DigitalPublishingSuiteClient
 
 		$httpClient = $this->createHttpClient( '/ddp/issueServer/issues/'.$issueId.'?'.http_build_query($data) );
 		$httpClient->setMethod( Zend_Http_Client::DELETE );
+		$statusCode = null;
 		try {
-			$statusCode = null;
 			$this->callService( $httpClient, 'deleteIssue', $statusCode );
 		} catch ( BizException $e ) {
 			// When there is a status code and the status code is UNKNOWN_ERROR
@@ -654,6 +656,7 @@ class WW_Utils_DigitalPublishingSuiteClient
 	 * - 'Protected': Article is only available for readers who have paid for it. (Formerly set to true)
 	 * - 'Free': Article is available for all readers. (Formerly not supported)
 	 *
+	 * @param string $articleId
 	 * @param string $issueId      Identifier of the issue.
 	 * @param string $issueId      Identifier of the article.
 	 * @param string $filePath     Full path to the article manifest file (XML format).
@@ -688,6 +691,7 @@ class WW_Utils_DigitalPublishingSuiteClient
 	 * @param string $issueId   Identifier of the issue.
 	 * @param string $articleId Identifier of the article.
 	 * @return bool
+	 * @throws BizException
 	 */
 	public function deleteArticle( $issueId, $articleId )
 	{
@@ -698,8 +702,8 @@ class WW_Utils_DigitalPublishingSuiteClient
 		$httpClient = $this->createHttpClient( '/ddp/issueServer/issues/'.$issueId.'/articles/'.$articleId.'?'.http_build_query($data) );
 		$httpClient->setMethod( Zend_Http_Client::DELETE );
 
+		$statusCode = null;
 		try {
-			$statusCode = null;
 			$this->callService( $httpClient, 'deleteArticle', $statusCode );
 		} catch ( BizException $e ) {
 			// When there is a status code and the status code is UNKNOWN_ERROR
@@ -744,6 +748,7 @@ class WW_Utils_DigitalPublishingSuiteClient
 	 * @param string $issueId        Identifier of the issue.
 	 * @param string $issueVersion   Version of the issue.
 	 * @return string Filepath to the downloaded file
+	 * @throws BizException
 	 */
 	public function downloadIssueBundle( $issueId, $issueVersion )
 	{
@@ -827,7 +832,6 @@ class WW_Utils_DigitalPublishingSuiteClient
 		$retVal = false; // assume failure.
 		$resultStatus = null;
 		$xpath = null;
-		$xpath = $xpath; // make analyzer happy.
 
 		try {
 			$httpClient = $this->createHttpClient( '/ddp/issueServer/notification' );
@@ -835,7 +839,6 @@ class WW_Utils_DigitalPublishingSuiteClient
 			$httpClient->setParameterPost( $data );
 			$xpath = $this->callService( $httpClient, 'pushNotificationRequest', $resultStatus, $this->httpCode );
 		} catch( BizException $e ) {
-			$e = $e; // make analyzer happy.
 		}
 
 		if ($xpath) { // if there is a xpath the notification is sent.
@@ -878,7 +881,7 @@ class WW_Utils_DigitalPublishingSuiteClient
 	 */
 	private function callService( $httpClient, $serviceName, &$resultStatus = null, &$httpCode = null, $retry = 0 )
 	{
-		if( $this->inParallelMode( $httpClient ) ) {
+		if( $this->inParallelMode() ) {
 			$connId = $httpClient->getCurrentConnectionId();
 			PerformanceProfiler::startProfile( 'Calling Adobe DPS #'.$connId, 1 );
 			$poolData = array( 'serviceName' => $serviceName );
@@ -1108,9 +1111,6 @@ class WW_Utils_DigitalPublishingSuiteClient
 	public static function getIssueProps( $issue, $deviceId )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
-
-		// Make the analyzer happy.. Not needed anymore.
-		$deviceId = $deviceId;
 
 		$issueProps = array();
 		// Leave out the device id in the id of the folio. Otherwise the iPad 1/2 and iPad 3 issues, that are the same will appear twice on an iPad 3

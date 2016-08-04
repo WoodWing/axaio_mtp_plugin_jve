@@ -142,38 +142,41 @@ class ImageUtils
 	}
 
 	/**
-	 * This function checks if an image exceeds the passed dimensions. This can be used to determine if an image must
-	 * be rescaled. Exceeds means that both the width and height of the image are larger than the passed values.
-	 * The image can be passed either in memory or as the filepath to the image. 
-	 * @param int 	$widthRh	Width to compare.
-	 * @param type $heightRh	Height to comapre.
-	 * @param type $path		Path to the image file.
-	 * @param type $image		Image as string (memory).
-	 * @return boolean 			Image is larger than passed dimension (true/false).
+	 * This function checks if an image exceeds the passed dimensions.
+	 *
+	 * This can be used to determine if an image must be rescaled. Exceeds means that both the width and height
+	 * of the image are larger than the passed values. The image can be passed either in memory or as the file path
+	 * to the image.
+	 *
+	 * @param integer $widthRh Width to compare.
+	 * @param integer $heightRh Height to compare.
+	 * @param string $path Path to the image file.
+	 * @param string $image Image as string (memory).
+	 * @return boolean Image is larger than passed dimension (true/false).
 	 */
-	public static function imageExceedsDimensions( $widthRh, $heightRh, $path, $image)
+	public static function imageExceedsDimensions( $widthRh, $heightRh, $path, $image )
 	{
 		$widthLh = 0.0;
 		$heightLh = 0.0;
 		$exceeds = false;
 
-		require_once BASEDIR.'/server/utils/MemoryTracker.class.php';
-		if( $image ) { // In memory...
-			MemoryTracker::Log( 'Calculate dimensions ImageCreateFromString:' );
-			$imageResc = imagecreatefromstring( $image );
-		}
-		MemoryTracker::Log( 'Calculate dimensions image loaded' );		
-
 		if( $path ) { // path...
 			$size = getimagesize( $path );
 			$widthLh = $size[0];
 			$heightLh = $size[1];
-		} else { // memory...
+		}
+
+		if( $image ) { // memory...
+			require_once BASEDIR.'/server/utils/MemoryTracker.class.php';
+			MemoryTracker::Log( 'Calculate dimensions ImageCreateFromString:' );
+			$imageResc = imagecreatefromstring( $image );
+			MemoryTracker::Log( 'Calculate dimensions image loaded' );
+
 			$widthLh = imagesx( $imageResc );
 			$heightLh = imagesy( $imageResc );
-		}		
+		}
 
-		if ( $widthLh > $widthRh  &&  $heightLh > $heightRh ) {
+		if( $widthLh > $widthRh && $heightLh > $heightRh ) {
 			$exceeds = true;
 		}
 
@@ -184,7 +187,8 @@ class ImageUtils
 	 * This method creates from a supplied image a toc image. The toc image
 	 * has the dimensions 70 x 70. Depending on the passed image (portrait
 	 * or landscape) the image will get transparent strokes on the left and right
-	 * (portrait) or at the top and bottom (landscape). 
+	 * (portrait) or at the top and bottom (landscape).
+	 *
 	 * @param string 	$inputPath Path to input image.
 	 * @param string 	$tocPatch Path to the location to write the toc image.
 	 * @return boolean 	$result Toc images is written to the passed location.	

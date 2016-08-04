@@ -506,6 +506,7 @@ class WW_Utils_TestSuite
 	 *
 	 * @since 9.0.0
 	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket
 	 */
 	public function admLogOff( TestCase $testCase, $ticket )
 	{
@@ -567,6 +568,7 @@ class WW_Utils_TestSuite
 	 *
 	 * @since 9.0.0
 	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket
 	 */
 	public function wflLogOff( TestCase $testCase, $ticket )
 	{
@@ -657,6 +659,7 @@ class WW_Utils_TestSuite
 	 * @param int $pubChannelId
 	 * @param AdmIssue $issue
 	 * @return AdmCreateIssuesResponse|null
+	 * @throws BizException
 	 */
 	public function createNewIssue( TestCase $testCase, $ticket, $pubId, $pubChannelId, $issue )
 	{
@@ -1031,7 +1034,8 @@ class WW_Utils_TestSuite
 	 * @param array $changedPropPaths List of changed metadata properties, expected to be different.
 	 * @return bool true on success
 	 */
-	public function setObjectProperties( $TestCase, $ticket, Object $object, $stepInfo, $expectedError, array $changedPropPaths )
+	public function setObjectProperties( $TestCase, $ticket, /** @noinspection PhpLanguageLevelInspection */
+	                                     Object $object, $stepInfo, $expectedError, array $changedPropPaths )
 	{
 		// Call the SetObjectProperties service.
 		require_once BASEDIR . '/server/services/wfl/WflSetObjectPropertiesService.class.php';
@@ -1342,9 +1346,11 @@ class WW_Utils_TestSuite
 	 * @param TestCase $testCase The test module calling this function.
 	 * @param string $ticket
 	 * @return AdmCreateUsersResponse|null
+	 * @throws BizException
 	 */
 	public function createNewUser( TestCase $testCase, $ticket )
 	{
+		$newUser = null;
 		try {
 			require_once BASEDIR.'/server/services/adm/AdmCreateUsersService.class.php';
 
@@ -1377,9 +1383,9 @@ class WW_Utils_TestSuite
 	 * @since 9.0.0
 	 * @param TestCase $testCase The test module calling this function.
 	 * @param string $ticket
-	 * @param in $publicationId
-	 * @param int $issueId
+	 * @param integer $userId
 	 * @return AdmDeleteIssuesResponse|null
+	 * @throws BizException
 	 */
 	public function removeUser( TestCase $testCase, $ticket, $userId )
 	{
@@ -1436,7 +1442,7 @@ class WW_Utils_TestSuite
 	 *
 	 * @param Object $object
 	 */
-	public function sortObjectDataForCompare( Object $object )
+	public function sortObjectDataForCompare( /** @noinspection PhpLanguageLevelInspection */ Object $object )
 	{
 		if( $object->Placements ) {
 			$this->sortPlacementsForCompare( $object->Placements );

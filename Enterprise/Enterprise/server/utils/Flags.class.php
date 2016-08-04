@@ -1,206 +1,213 @@
 <?php
     
 /**
- * @package     SCEnterprise
+ * Flags module
+ *
+ * Accepts an array of flag names and keeps track which flags are selected.
+ * The selection can be stored in an integer, each bit of the integer representing a selected/deselected flag.
+ * This is handy when for example you need to store a selection in a cookie.
+ * For this reason (maximum size of an integer) only 32 flags can be used in one instance of Flags.
+ * If you need more flags than 32, create a new instance of Flags and manage that separately.
+
+ * @package     Enterprise
  * @subpackage  Utils
  * @since       v5.0
  * @copyright   WoodWing Software bv. All Rights Reserved.
- * @version     v1.0
-**/
-    
-/**
- * module Flags
- * Accepts an array of flagnames and keeps track which flags are selected.
- * The selection can be stored in an integer, each bit of the integer representing a selected/unselected flag.
- * This is handy when for example you need to store a selection to a cookie.
- * For this reason (maximum size of an integer) only 32 flags can be used in one instance of Flags.
- * If you need more flags than 32, create a new instance of flags and manage that separately. 
-**/
+ */
     
 class Flags
 {
-	private $Names;
-	private $Bits;
-       
-	/**
- 	 *	Constructs an instance of the Flags-class.
- 	 *  As changing the order of names or adding names would render the value of possibly set bits useless
- 	 *  the constructor is the only place where the flagnames can be instantiated. No altering is possible afterwards.
- 	 *  In this version (1.0) Flags may not consist of more than 32 names.
- 	 *  1. Initializes the array of flagnames
- 	 *  2. Sets the initially selected flags to 0.
-	**/
+	/** @var string[] Names of all registered flags. */
+	private $names;
 
-	public function __construct(array $flagnames)   
-	{
-		assert(count($flagnames) <= 32);
-		$bitvalue = 0x01;
-		$this->Names = array();
-		foreach ($flagnames as $flagname) {
-			$this->Names[$flagname] = $bitvalue;
-			$bitvalue *= 0x02;
-        }
-		$this->Bits = 0x00;
-	}
-       
+	/** @var int Bit-set of all registered flags. */
+	private $bits;
+
 	/**
-	 *	@return array of ALL flagnames (selected or not).
-	**/
-	 
+	 * Constructs an instance of the Flags class.
+	 *
+	 * As changing the order of names or adding names would render the value of possibly set bits useless
+	 * the constructor is the only place where the flag names can be instantiated. No altering is possible afterwards.
+	 * In this version (1.0) Flags may not consist of more than 32 names.
+	 * 1. Initializes the array of flag names
+	 * 2. Sets the initially selected flags to 0.
+	 *
+	 * @param string[] $flagNames
+	 */
+	public function __construct( array $flagNames )
+	{
+		assert( count( $flagNames ) <= 32 );
+		$bitvalue = 0x01;
+		$this->names = array();
+		foreach( $flagNames as $flagName ) {
+			$this->names[ $flagName ] = $bitvalue;
+			$bitvalue *= 0x02;
+		}
+		$this->bits = 0x00;
+	}
+
+	/**
+	 * Returns all registered flag names (raised and lowered).
+	 *
+	 * @return string[] flag names
+	 */
 	public function listAllNames()
 	{
-		return array_keys($this->Names);
+		return array_keys( $this->names );
 	}
 
 	/**
-     *	Clears all bits, effectively unselecting all flags.
-	**/
-
+	 * Lowers all flags.
+	 */
 	public function clear()
 	{
-		$this->Bits = 0x00;
+		$this->bits = 0x00;
 	}
-       
-	/**
-	 *	@return selected flags as an int (32 bits).
-	**/
 
+	/**
+	 * Returns the raised flags as a bit-set (32 bits).
+	 * 
+	 * @return integer bits
+	 */
 	public function getBits()
 	{
-		return $this->Bits;   
+		return $this->bits;
 	}
-               
-	/**
-	 *	@return selected flags as an array of flagnames.
-	**/
 
+	/**
+	 * Returns the raised flags as an array of flag names.
+	 * 
+	 * @return string[] flag names
+	 */
 	public function getFlags()
 	{
-		return self::bits2flags($this->Bits);
+		return self::bits2flags( $this->bits );
 	}
 
 	/**
-	 *	Adds (selects) the flags in the array $flagnames.
-	 *  If flags where allready selected they stay selected.
-	 *	@param $flagnames to select as an array of names.
-	**/
-
-	public function addFlags($flagnames)
+	 * Raises flags by a given list of flag names.
+	 *
+	 * If flags where already selected they stay selected.
+	 *
+	 * @param string[] $flagNames to select as an array of names.
+	 */
+	public function addFlags( $flagNames )
 	{
-		$this->Bits |= self::flags2bits($flagnames);
-	}
-       
-	/**
-	 *	Removes (unselects) the flags in the array $flagnames.
-	 *  If flags where allready not selected they stay unselected.
-	 *	@param $flagnames to remove as an array of flagnames.
-	**/
-
-	public function removeFlags($flagnames)
-	{
-    	$this->Bits = $this->Bits &~ self::flags2bits($flagnames);
-	}
-       
-	/**
-	 *	Adds (selects) the bits of the int $bits.
-	 *  If flags where allready selected they stay selected.
-	 *	@param $bits to select as an integer.
-	**/
-
-	public function addBits($bits)
-	{
-		$this->Bits |= $bits;
-	}
-       
-	/**
-	 *	Removes (unselects) the bits of the int $bits.
-	 *  If flags where allready not selected they stay unselected.
-	 *	@param $bits to remove as an integer.
-	**/
-
-	public function removeBits($bits)
-	{
-		$this->Bits = $this->Bits &~ $bits;
-	}
-       
-	/**
-	 *	Checks if the flag $flagname is selected or not.
-	 *  @param $flagname name of the flag to check.
-	 *	@return boolean true if flag is selected, false if not.
-	**/
-		
-	public function hasFlag($flagname)
-	{
-		return $this->Bits & $this->Names[$flagname];    
-	}
-    
-	/**
-	 *	Checks if the flag corresponding to bit is selected or not.
-	 *  @param $bit bit to check.
-	 *	@return boolean true if flag is selected, false if not.
-	**/    
-       
-	public function hasBit($bit)
-	{
-		return $this->Bits & $bit;
+		$this->bits |= self::flags2bits( $flagNames );
 	}
 
 	/**
-	 *	Selects/unselects the flag $flagname, depending on $value.
-	 *  @param $flagname name of the flag to set.
-	 *  @param $value either select/unselect.
-	**/    
-       
-	public function setFlag($flagname, $value)
+	 * Lowers flags by a given list of flag names.
+	 *
+	 * If flags where already not selected they stay unselected.
+	 *
+	 * @param string[] $flagNames to remove as an array of flag names.
+	 */
+	public function removeFlags( $flagNames )
 	{
-		if ($value) {
-			self::addFlags(array($flagname));      
+		$this->bits = $this->bits & ~self::flags2bits( $flagNames );
+	}
+
+	/**
+	 * Raises flags by a given list of bits.
+	 *
+	 * If flags where selected they stay selected.
+	 *
+	 * @param $bits to select as an integer.
+	 */
+	public function addBits( $bits )
+	{
+		$this->bits |= $bits;
+	}
+
+	/**
+	 * Takes flags down by a given list of bits.
+	 *
+	 * If bits where not selected they stay unselected.
+	 *
+	 * @param $bits to remove as an integer.
+	 */
+	public function removeBits( $bits )
+	{
+		$this->bits = $this->bits & ~$bits;
+	}
+
+	/**
+	 * Checks if a given flag is raised or not.
+	 *
+	 * @param string $flagName name of the flag to check.
+	 * @return boolean true if flag is selected, false if not.
+	 */
+	public function hasFlag( $flagName )
+	{
+		return $this->bits & $this->names[ $flagName ];
+	}
+
+	/**
+	 * Checks whether or not a flag is raised by a given bit.
+	 *
+	 * @param $bit bit to check.
+	 * @return boolean true if flag is selected, false if not.
+	 */
+	public function hasBit( $bit )
+	{
+		return $this->bits & $bit;
+	}
+
+	/**
+	 * Raises or lowers a flag by a given name and value.
+	 *
+	 * @param string $flagName name of the flag to set.
+	 * @param boolean $value either select/deselect.
+	 */
+	public function setFlag( $flagName, $value )
+	{
+		if( $value ) {
+			self::addFlags( array( $flagName ) );
+		} else {
+			self::removeFlags( array( $flagName ) );
 		}
-		else {
-			self::removeFlags(array($flagname));   
-		}
 	}
-       
-	/**
-	 *	@param $bits Sets the complete selection to $bits
-	**/
 
-	public function setBits($bits)
+	/**
+	 * Raises or lowers all registered flag by a given bit-set.
+	 *
+	 * @param integer $bits
+	 */
+	public function setBits( $bits )
 	{
-		$this->Bits = $bits;   
+		$this->bits = $bits;
 	}
 
 	/**
-	 *	Converts the bitset to a flagset with the same flags being selected as the bits given.
-	 *	@param $bits 
-	 *	@result $array of flagnames
-	**/
-
-	public function bits2flags($bits)
+	 * Converts the bit-set to a flag-set with the same flags being selected as the bits given.
+	 *
+	 * @param integer $bits
+	 * @return string[] flag names
+	 */
+	public function bits2flags( $bits )
 	{
 		$result = array();
-		foreach ($this->Names as $flagname => $bitvalue) {
-			if ($bits & $bitvalue) {
-        		$result[] = $flagname;
-        	}
-        }
+		foreach( $this->names as $flagName => $bitvalue ) {
+			if( $bits & $bitvalue ) {
+				$result[] = $flagName;
+			}
+		}
 		return $result;
 	}
-       
-	/**
-	 *	Converts the flagset to a bitset with the same bits being set as the flags given.
-	 *	@param $flagnames
-	 *	@result $bits
-	**/
 
-	public function flags2bits($flagnames)
+	/**
+	 * Converts the flag-set to a bit-set with the same bits being set as the flags given.
+	 *
+	 * @param string[] $flagNames
+	 * @return integer $bits
+	 */
+	public function flags2bits( $flagNames )
 	{
 		$result = 0x00;
-		foreach ($flagnames as $flagname) {
-			$result |= $this->Names[$flagname];
+		foreach( $flagNames as $flagName ) {
+			$result |= $this->names[ $flagName ];
 		}
 		return $result;
 	}
 }
-   
-?>

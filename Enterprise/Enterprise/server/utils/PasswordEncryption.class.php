@@ -1,10 +1,10 @@
 <?php
 /**
- * Utility class for Password Encryption.<br>
+ * Utility class for Password Encryption.
  *
- * It takes a public key for encryption and a private key for decryption.<br>
+ * It takes a public key for encryption and a private key for decryption.
  *
- * @package SCEnterprise
+ * @package Enterprise
  * @subpackage Utils
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.
@@ -156,4 +156,3 @@ class PasswordEncryption
 	 */
 	public function GetLastError() { return $this->mLastError; }
 }
-?>

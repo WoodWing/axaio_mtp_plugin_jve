@@ -3,7 +3,7 @@
 /**
  * Helper functions for multi byte Unicode strings.
  *
- * @package SCEnterprise
+ * @package Enterprise
  * @subpackage Utils
  * @since v4.2
  * @copyright WoodWing Software bv. All Rights Reserved.

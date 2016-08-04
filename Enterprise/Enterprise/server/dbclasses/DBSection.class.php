@@ -47,11 +47,11 @@ class DBSection extends DBBase
      *  - Either null or false -> returns an array of rows indexed by the value in $keycol, each containing the name ($namecol) of the row.
      *  - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with all values.
      *  - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with the values in $fieldnames.
-     *  @param  $publid Id of the publication, if $publid = 0 null is returned;
-     *  @param  $fieldnames see functiondescription
-     *  @return  null in case of error, otherwise see functiondescription
-    **/
-
+     *
+     * @param integer $publid Id of the publication, if $publid = 0 null is returned;
+     * @param string|string[] $fieldnames see function description
+     * @return array|null NULL in case of error, otherwise see function description
+     */
     public static function listPublSectionDefs($publid, $fieldnames = '*')
     {
         if (empty($publid))
