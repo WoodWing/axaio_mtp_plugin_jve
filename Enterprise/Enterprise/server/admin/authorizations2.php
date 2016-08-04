@@ -590,19 +590,7 @@ class Ww_Admin_Authorizations_App
 	 * It deletes existing authorizations from DB that are no longer in the bundle.
 	 * When saving a new bundle, a new bundle id gets assigned to all authorizations.
 	 *
-	 * IMPORTANT: When caller has cleared the bundle id before calling this function
-	 * it won't add authorizations that can be found in other bundles and it will
-	 * delete authorizations that are 'more specific'. In other terms, it jumps into
-	 * intelligence mode whereby redundant authorizations are not stored or cleaned.
-	 *
-	 * A 'more specific' authorization has the category and/or status set, while
-	 * a 'more generic' authorization has one/both set to zero (all). So in that way
-	 * they could be 'matching', since a zero (all) supersedes a specific value.
-	 * For those cases, technically, the specific authorizations can be removed (optimized).
-	 * But that would be very confusing for the admin user; e.g. when adding a all-all
-	 * authorization would delete all other configurations made before, which would
-	 * be simply too dangerous and may lead to frustrations. So cleaning should be done
-	 * manually, or auto cleaning should be an explicit request (by clearing the bundle ids).
+	 * There is no need to update existing authorizations so it only creates new ones.
 	 *
 	 * @param integer[] $selectedCategoryIds New user selection of category ids to be saved.
 	 * @param integer[] $selectedStatusIds New user selection of status ids to be saved.
@@ -645,6 +633,11 @@ class Ww_Admin_Authorizations_App
 		if( $rows ) {
 			$firstRow = reset( $rows );
 			$bundleId = $firstRow['bundle'];
+
+			// When records were never touched by ES 10.1+ yet, we provide new bundle id.
+			if( $bundleId == 0 ) {
+				$bundleId = DBAuthorizations::getMaxBundleId( $brandId, $issueId, $userGroupId ) + 1;
+			}
 		} else {
 			$bundleId = DBAuthorizations::getMaxBundleId( $brandId, $issueId, $userGroupId ) + 1;
 		}
@@ -659,24 +652,13 @@ class Ww_Admin_Authorizations_App
 				foreach( $selectedProfileIds as $profileId ) {
 					if( !isset( $dbAuths[ $categoryId ][ $statusId ][ $profileId ] ) ) {
 
-						// For logic within this if-part, see function header for full explanation.
-						// The bundle id is zero when caller has requested for auto clean,
-						// or when the first time editing authorizations after DB migration from < 10.1.
-
-						// When bundle id is set, check for existence within the bundle only.
-						// When bundle is zero, check for existence within the whole brand/issue/group.
+						// Check for existence within the brand/issue/group/bundle.
 						if( !DBAuthorizations::doesAuthorizationExists( $brandId, $issueId, $userGroupId,
 							$categoryId, $statusId, $profileId, $bundleId ) ) {
 
 							// Only create new authorization when it does not exist (see check above).
 							DBAuthorizations::insertAuthorizationRow( $brandId, $issueId, $userGroupId,
 								$categoryId, $statusId, $profileId, $bundleId );
-
-							// Only delete 'more specific' authorizations in auto clean mode.
-							if( !$bundleId ) {
-								DBAuthorizations::deleteMoreSpecificAuthorizations( $brandId, $issueId, $userGroupId,
-									$categoryId, $statusId, $profileId );
-							}
 						}
 					}
 				}

@@ -157,63 +157,6 @@ class DBAuthorizations extends DBBase
 	}
 
 	/**
-	 * Removes all authorization records from DB that are 'more specific' than the provided params.
-	 *
-	 * The matrix below shows which kind of records are removed:
-	 * - The left column shows some records in the DB with values: section, state
-	 * - The header row shows the parameters provided with values: $categoryId, $statusId
-	 * - Other record- and parameter values are assumed to be exact matching.
-	 * - The crosses (X) show which of the records are 'more specific' than the parameters
-	 *   and therefore are removed by this function.
-	 *
-	 *     Records that exist in DB before calling the function with fields section, state
-	 *     /   Given function parameter values $categoryId, $statusId
-	 *    /   /
-	 *   /   0,0  0,1  1,0  1,1  ...
-	 *  0,0
-	 *  0,1   X
-	 *  0,2   X
-	 *  1,0   X
-	 *  1,1   X    X    X
-	 *  1,2   X         X
-	 *  2,0   X
-	 *  2,1   X    X
-	 *  2,2   X
-	 *  ...   X
-	 *
-	 * An example: When calling this function with $categoryId = 0 and $statusId = 1,
-	 * it will remove the records with section != 0 and state == 1, so [1,1] [2,1] [3,1] etc.
-	 *
-	 * @since 10.1.0
-	 * @param $brandId
-	 * @param $issueId
-	 * @param $userGroupId
-	 * @param $categoryId
-	 * @param $statusId
-	 * @param $profileId
-	 */
-	public static function deleteMoreSpecificAuthorizations( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId )
-	{
-		if( $categoryId && $statusId ) {
-			return; // bail out; there is nothing more specific than specific itself
-		}
-		$where = '`publication` = ? AND `issue` = ? AND `grpid` = ? AND `profile` = ? ';
-		$params = array( $brandId, $issueId, $userGroupId, $profileId );
-		if( !$categoryId && !$statusId ) {
-			$where = "($where AND `section` = ? AND `state` <> ? ) ".
-				"OR ($where AND `section` <> ? AND `state` = ? )";
-			$params = array_merge( $params, array( 0, 0 ), $params, array( 0, 0 ) );
-		} elseif( !$categoryId ) {
-			$where .= 'AND `section` <> ? AND `state` = ? ';
-			$params = array_merge( $params, array( 0, $statusId ) );
-		} else { // implies: !$statusId
-			$where .= 'AND `section` = ? AND `state` <> ? ';
-			$params = array_merge( $params, array( $categoryId, 0 ) );
-		}
-		DBBase::deleteRows( 'authorizations', $where, $params );
-	}
-
-	/**
 	 * Creates a new authorization configuration record in DB.
 	 *
 	 * @since 10.1.0
@@ -245,9 +188,6 @@ class DBAuthorizations extends DBBase
 	 * However, a record in DB for which category id and/or status id set to zero also matches
 	 * regardless of the provided $categoryId / $statusId search params because zero means 'all'.
 	 *
-	 * IMPORTANT: When $bundleId is set zero, this function will check for other bundles as well.
-	 * When given, it will check existence for the given bundle only.
-	 *
 	 * @since 10.1.0
 	 * @param integer $brandId
 	 * @param integer $issueId
@@ -263,12 +203,8 @@ class DBAuthorizations extends DBBase
 		$where = '`publication` = ? AND `issue` = ? AND `grpid` = ? '.
 			'AND (`section` = ? OR `section` = ?) '. // match with param or with ALL (0)
 			'AND (`state` = ? OR `state` = ?) '.     // match with param or with ALL (0)
-			'AND `profile` = ? ';
-		$params = array( $brandId, $issueId, $userGroupId, $categoryId, 0, $statusId, 0, $profileId );
-		if( $bundleId ) {
-			$where .= 'AND `bundle` = ?';
-			$params[] = $bundleId;
-		}
+			'AND `profile` = ? AND `bundle` = ? ';
+		$params = array( $brandId, $issueId, $userGroupId, $categoryId, 0, $statusId, 0, $profileId, $bundleId );
 		$row = DBBase::getRow( 'authorizations', $where, 'id', $params );
 		return isset($row['id']) && $row['id'];
 	}
