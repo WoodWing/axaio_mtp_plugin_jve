@@ -1454,7 +1454,7 @@ class DBTarget extends DBBase
 	 * object-target.
 	 *
 	 * @param int $objectId
-	 * @return issue ID
+	 * @return int|boolean issue ID or false when not found.
 	 */
 	public static function getObjectTargetIssueID( $objectId )
 	{

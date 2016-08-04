@@ -37,7 +37,7 @@ class DBIssueSection extends DBBase
 	 * @param array $issueids Collection of issue ids
 	 * @param integer $sectionid Specified category
 	 * @param integer $stateid Specified status
-	 * @return deadline if found else empty string
+	 * @return string deadline if found else empty string
 	 */
 	static public function getDeadlineForIssueCategoryStatus( $issueids, $sectionid, $stateid )
 	{
@@ -67,7 +67,7 @@ class DBIssueSection extends DBBase
 	 * The other rows are not fetched as we only need the earliest one.
 	 * @param array $issueids Collection of issue ids
 	 * @param integer $sectionid Specified category
-	 * @return deadline if found else empty string
+	 * @return string deadline if found else empty string
 	 */
 	static public function getDeadlineForIssueCategory( $issueids, $sectionid )
 	{

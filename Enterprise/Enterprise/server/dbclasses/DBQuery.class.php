@@ -33,7 +33,7 @@ class DBQuery extends DBBase
          * Registers a view with the purpose of dropping it when finished.
          * @param string $viewname Name of the view to register.
          * When empty no view is added, but it is still valid to get the array of views.
-         * @return the array of registered views.
+         * @return array of registered views.
 	 */
 	static private function registerView($viewname = '')
 	{
@@ -247,7 +247,7 @@ class DBQuery extends DBBase
 	 * rights is already done.
 	 *
 	 * @param array $rows contains the object ids
-	 * @return identifier
+	 * @return string identifier
 	 */
 	static public function createTopviewWithRowIDs($rows)
 	{
@@ -327,7 +327,7 @@ class DBQuery extends DBBase
 	 * @param array $childRows contains all children related to the parents (topview)
 	 * @param boolean $checkAccess indicates if the access rights of the child
 	 * objects have to be checked.
-	 * @return Identifier of the temporary table.
+	 * @return string Identifier of the temporary table.
 	 */
 	static public function createAllChildrenView($childRows, $checkAccess = true)
 	{
@@ -417,7 +417,7 @@ class DBQuery extends DBBase
 	 * checked for the objects on the top level.
 	 * @param string $allchildrenview Table containing all children id's
 	 * @param string $limitchildrenview Table containing children with a limit number of placements. 
-	 * @return Identifier of the temporary table.	 
+	 * @return string Identifier of the temporary table.
 	 */		
 	static public function createMultiPlacedChildrenView( $allchildrenview, $limitchildrenview)
 	{
@@ -598,7 +598,7 @@ class DBQuery extends DBBase
 	 * Returns the object ids already in the authorization view. 
 	 * @param array with the object ids as key.
 	 * 
-	 * @returns rows with object ids already in the authorization view.
+	 * @returns array rows with object ids already in the authorization view.
 	 */
 	static public function getObjectsFromAuthorizationView($objectIds)
 	{

@@ -177,7 +177,7 @@ class DBObjectRenditions extends DBBase
 	 * @param integer $objectId Id of the object.
 	 * @param string $rendition e.g. 'output'.
 	 * @param string $version Version <major>.<minor>
-	 * @return array with editions IDs. 
+	 * @return array|boolean array with editions IDs or false on error.
 	 */
 	static public function getEditionIds( $objectId, $rendition, $version )
 	{

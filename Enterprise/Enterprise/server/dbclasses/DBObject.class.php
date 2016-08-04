@@ -32,7 +32,7 @@ class DBObject extends DBBase
 	 * @param array of int $issueidsarray: id's of the issues the object is targeted for.
 	 * @param string $objtype The type of the object.
 	 * @param string $proposedobjectname: proposed name of the new object.
-	 * @return either string new objectname or null if no name found.
+	 * @return string Either new objectname or null if no name found.
 	 */
 	static public function getUniqueObjectName($issueidsarray, $objtype, $proposedobjectname)
 	{

@@ -362,7 +362,7 @@ class DBIssue extends DBBase
 	
 	/**
 	 *  Lists ALL issues that overrule their publication in a array
-	 *  @return key-value array, key being the issueId and value the publication id of that overrule issue
+	 *  @return array, key being the issueId and value the publication id of that overrule issue
 	 */
 	static public function listAllOverruleIssuesWithPub()
 	{
@@ -512,7 +512,7 @@ class DBIssue extends DBBase
 	 * is in active or inactive status.
 	 *
 	 * @param int $issuedId Database of the issue ID.
-	 * @return  booelan True when active, False otherwise. 
+	 * @return  boolean True when active, False otherwise.
 	 */
 	static public function isIssueActive( $issuedId )
 	{

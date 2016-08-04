@@ -221,7 +221,7 @@ class DBTicket extends DBBase
 	 * @param string $usageLimitReached: in case false is returned, 'userLimit' is true in case the max number of concurrent users has been reached.
 	 * @param string $errorMessage: in case false is returned, the errorMessage is set.
 	 * @param string $masterTicket [9.7] In case the same application does logon twice (e.g. IDS for DPS) this refers to the ticket of the first logon.
-	 * @return succes 
+	 * @return boolean True on success else false.
 	 * 	- userLimit: in case false is returned, 'userLimit' is true in case the max number of concurrent users has been reached.
 	 *  - errorMessage: in case false is returned, the errorMessage is set.
 	 */
