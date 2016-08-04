@@ -23,7 +23,7 @@
 	<folder path=".../Enterprise/server/buildtools/genservices/templates/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/buildtools/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/dataclasses/" maxerr="0"/>
-	<folder path=".../Enterprise/server/dbclasses/" maxerr="1000000"/>
+	<folder path=".../Enterprise/server/dbclasses/" maxerr="0"/>
 	<folder path=".../Enterprise/server/dbdrivers/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/dbintclasses/" maxerr="0"/>
 	<folder path=".../Enterprise/server/dbscripts/" maxerr="1000000"/>
