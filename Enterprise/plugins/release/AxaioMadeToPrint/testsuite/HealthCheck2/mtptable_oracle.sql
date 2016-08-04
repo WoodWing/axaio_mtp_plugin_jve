@@ -1,3 +1,5 @@
+-- noinspection SqlDialectInspectionForFile
+-- noinspection SqlNoDataSourceInspectionForFile
 
 CREATE SEQUENCE AXAIO_MTP_TRIGGER_SEQ START WITH 100;
 
