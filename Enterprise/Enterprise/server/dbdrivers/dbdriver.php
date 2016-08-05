@@ -284,7 +284,7 @@ abstract class WW_DbDrivers_DriverBase
 	 * @param boolean $addPrefix Add the WoodWing table prefix to the table name.
 	 * @return boolean
 	 */
-	abstract function tableExists( $tableName, $addPrefix );
+	abstract function tableExists( $tableName, $addPrefix = true );
 
 }
 
