@@ -701,7 +701,7 @@ class BizWorkflow
 		// At this point, the $iss belongs to the $pub, since it is resolved at fixAndResolveIssueSectionFromPubInfo (above).
 		// This is needed to determine the 'initial' Issue in case user is changing Brand (or Overrule Issue)
 		// or when he/she is about to Create (or Copy) an object.
-		if( self::objectIsCreated( $action) || // BZ#16971
+		if( $action == 'Create' || $action == 'CopyTo' || // BZ#16971
 			!$workflowMatchesPubParam ) { // BZ#16937, BZ#16713
 			require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 
@@ -821,7 +821,7 @@ class BizWorkflow
 			$routeTo = ($obj && isset($obj->MetaData->WorkflowMetaData->RouteTo)) ? $obj->MetaData->WorkflowMetaData->RouteTo : '';
 			$contentSource = ($obj && isset($obj->MetaData->BasicMetaData->ContentSource)) ? $obj->MetaData->BasicMetaData->ContentSource : '';
 			$documentId = ($obj && isset($obj->MetaData->BasicMetaData->DocumentID)) ? $obj->MetaData->BasicMetaData->DocumentID : '';
-            $accessObjId = ( self::objectIsCreated( $action ) ) ? null : $objId ; // Don't use object id for access checking (e.g. needed to copy aliens; EN-85894)
+			$accessObjId = ( $action == 'CopyTo' || $action == 'Create' ) ? null : $objId ; // Don't use object id for access checking (e.g. needed to copy aliens; EN-85894)
 			$routeToForRights = $accessObjId ? $routeTo : $user;
 			// This is quite a hack. The routeTo user is determined later on based on for example the state. To
 			// determine the state the rights are needed. If a new object is created in personal state then the user has full
@@ -838,7 +838,7 @@ class BizWorkflow
 		// Check access right "Change Status" and "Change Status Forward"
 		// When access right, "Change Status" disabled and "Change Status Forward" enabled,
 		// remove state other than current state and next state.
-        if( $statusId && !self::objectIsCreated( $action ) ) { // Only filter status for existing object, new object will include all statuses.
+		if( $statusId && $action != 'Create' && $action != 'CopyTo' ) { // Only filter status for existing object, new object will include all statuses.
 			$changeStatusRights = ($rights['hasRights']['Change_Status']) ? true : false;
 			$changeStatusForwardRights = ($rights['hasRights']['Change_Status_Forward']) ? true : false;
 			if( !$changeStatusRights && $changeStatusForwardRights ) {
@@ -894,10 +894,9 @@ class BizWorkflow
 		// Add Dossier property list to dialog and fill it with dossiers (to let user pick one).
 		// But, disable Dossier property for non-Create dialogs, even when client does support it.
 		// The reason is that only the CreateObject service does support implicit Dossier creation !
-        // Only for Create dialogs we want the Dossier property (BZ#10526)
-        // Besides 'Create', 'CopyTo' needs Dossier property as well. (BZ #18311)
-		if( !self::objectIsCreated( $action ) ||
-            $objType == 'Dossier' || $objType == 'DossierTemplate'  ) { // Dossier in Dossier not supported! (BZ#16909)
+		if(  ($action != 'Create'  && // Only for Create dialogs we want the Dossier property (BZ#10526)
+				$action != 'CopyTo' ) ||  // Besides 'Create', 'CopyTo' needs Dossier property as well. (BZ #18311)
+			$objType == 'Dossier' || $objType == 'DossierTemplate'  ) { // Dossier in Dossier not supported! (BZ#16909)
 			unset($usages['Dossier']);
 		}
 		if( !is_null($defaultDossier) && isset($usages['Dossier']) ) {
@@ -1478,10 +1477,7 @@ class BizWorkflow
 				$widgetGroup[] = $props[$key]->Category;
 				$widgets[$props[$key]->Category] = array();
 			}
-            $props[$key]->Notifications = null;
-            if ( !self::objectIsCreated( $action ) ) {
-                $props[$key]->Notifications = self::getNotificationsForMultiSetProperties( $key, $rights, $objectsProps, $readOnlyProperties ); // v9.2
-            }
+			$props[$key]->Notifications = self::getNotificationsForMultiSetProperties( $key, $rights, $objectsProps, $readOnlyProperties ); // v9.2
 			$props[$key]->MixedValues = isset( $mixedValueProps[$key] ) ? $mixedValueProps[$key] : false; // v9.2
 			$widgets[$props[$key]->Category][] = new DialogWidget( $props[$key], $usage );
 		}
@@ -1570,7 +1566,7 @@ class BizWorkflow
 							$usage->Editable = false;
 							LogHandler::Log( 'GetDialog', 'INFO', 'Set the '.$usage->Name.' property to read-only because dialog type is SendTo.' );
 						}
-                        else if( !self::objectIsCreated( $action ) ) {  // Avoid GUI deadlocks at Create dialogs (BZ#16504 / BZ#16971)
+						else if( $action != 'Create' && $action != 'CopyTo' ) {  // Avoid GUI deadlocks at Create dialogs (BZ#16504 / BZ#16971)
 							$usage->Editable = in_array( $objId, $rights['hasRights']['ChangeEdition'] );
 							if( !$usage->Editable ) {
 								LogHandler::Log( 'GetDialog', 'INFO', 'Set the '.$usage->Name.' property to read-only because user has no Change Edition rights.' );
@@ -1582,7 +1578,7 @@ class BizWorkflow
 					break;
 				case 'State':
 					if( $usage->Editable ) {
-                        if( !self::objectIsCreated( $action ) ) {  // Avoid GUI deadlocks at Create dialogs (BZ#16504 / BZ#16971)
+						if( $action != 'Create' && $action != 'CopyTo' ) {  // Avoid GUI deadlocks at Create dialogs (BZ#16504 / BZ#16971)
 							if( array_key_exists( 'State', $readOnlyProperties) ) { // Only applicable for multiple objects.
 								$usage->Editable = false;
 							} else { // Check access rights
@@ -1617,7 +1613,7 @@ class BizWorkflow
 					if( $usage->Editable ) {
 
 						if( ($objType == 'PublishForm' || $objType == 'PublishFormTemplate' || $disableDossierProperty ) &&
-                            ( !self::objectIsCreated( $action ) ) ) {
+							($action != 'Create' && $action != 'CopyTo') ) {
 							$usage->Editable = false;
 							LogHandler::Log( 'GetDialog', 'INFO', 'Set the '.$usage->Name.' property to read-only ' .
 								'because dialog type is '.$action.' and object type is '.$objType );
@@ -1636,7 +1632,7 @@ class BizWorkflow
 							// Happens for single target dialogs only, such as ID/IC. (BZ#17069, BZ#14916, BZ#16686)
 							$usage->Editable = false;
 							LogHandler::Log( 'GetDialog', 'INFO', 'Set the '.$usage->Name.' property to read-only because targets are hidden from dialog.' );
-                        } else if( !self::objectIsCreated( $action ) ) {  // Avoid GUI deadlocks at Create dialogs (BZ#16504 / BZ#16971)
+						} else if( $action != 'Create' && $action != 'CopyTo' ) {  // Avoid GUI deadlocks at Create dialogs (BZ#16504 / BZ#16971)
 							if( $redrawOnPub ) {
 								$usage->Editable = true; // BZ#31415 - Set field to editable, to avoid GUI deadlocks
 							} else {
@@ -1655,7 +1651,7 @@ class BizWorkflow
 						if( $isCommonPlacement ) {
 							$usage->Editable = false; // Always disable (BZ#15357)
 							LogHandler::Log( 'GetDialog', 'INFO', 'Set the '.$usage->Name.' property to read-only because user is about to create Article or Image onto a Layout.' );
-                        } else if( !self::objectIsCreated( $action ) ) {  // Avoid GUI deadlocks at Create dialogs (BZ#16504 / BZ#16971)
+						} else if( $action != 'Create' && $action != 'CopyTo' ) {  // Avoid GUI deadlocks at Create dialogs (BZ#16504 / BZ#16971)
 							if( $redrawOnPub ) {
 								$usage->Editable = true; // BZ#31415 - Set field to editable, to avoid GUI deadlocks
 							} else {
@@ -2043,7 +2039,7 @@ class BizWorkflow
 					}
 				} else {
 					// BZ#13312, BZ#16689: DefaultFocus feature
-                    $tab->DefaultFocus = ( self::objectIsCreated( $action ) || !$statusEditable) ? 'Name' : 'State';
+					$tab->DefaultFocus = ($action == 'Create' || $action == 'CopyTo' || !$statusEditable) ? 'Name' : 'State';
 				}
 
 			} else {
@@ -2062,7 +2058,6 @@ class BizWorkflow
 	 * When a user attempts to change a property value of an object but he/she has no access rights
 	 * to do so for a particular object, this function will collect the error and return in PropertyNotification.
 	 * The objects names of which user has no rights to will be returned.
-     * In case of a 'Create' or 'Copy' action the object id is unknown.
 	 *
 	 * $readOnlyProperties contains a list of read only properties and each of the property is enclosed with a notification
 	 * that tells why the property is disabled. Refer to {@link:autoRoutingInMultipleObjects()} for more info.
@@ -2191,7 +2186,10 @@ class BizWorkflow
 		} else if( $redrawNonCreate ) {
 			$newRouteTo = true; // Redraw dialog always triggers automatic routing!
 			LogHandler::Log( 'GetDialog', 'INFO', 'Decided to determine new Route To because non-Create dialog is about to get redrawn.' );
-		} else if( self::objectIsCreated( $action ) ) { // BZ#16971
+		} else if( $action == 'Create'
+			|| $action == 'CopyTo' // BZ#16971
+			//|| $action == 'CheckIn' // BZ#19543
+		) {
 			$newRouteTo = true; // Create/CopyTo dialogs always have Route To preselected; even when dialog is initially drawn
 			LogHandler::Log( 'GetDialog', 'INFO', 'Decided to determine new Route To because dialog type is Create, Copy To or Check In.' );
 		} else {
@@ -2246,7 +2244,6 @@ class BizWorkflow
 
 	/**
 	 * Determines user access rights that are relevant for drawing workflow dialogs.
-     * In case of an object is created or an existing object is copied the object id is unknown (null).
 	 *
 	 * @param string $user
 	 * @param int $pub Publication Id
@@ -2254,7 +2251,7 @@ class BizWorkflow
 	 * @param int|null $cat Category id
 	 * @param string $objType Object type
 	 * @param int $statusId Status id
-	 * @param mixed $objId Object id of which their access rights collected, null in case of a 'Create' or 'Copy' action.
+	 * @param int $objId Object id of which their access rights collected.
 	 * @param string $contentSource
 	 * @param string $documentId
 	 * @param string $routeTo
@@ -2321,7 +2318,6 @@ class BizWorkflow
 
 	/**
 	 * The access right is collected and being sorted into hasRights and noRights for the given object.
-     * In case of an object is created or an existing object is copied the object id is unknown (null).
 	 *
 	 * @param authorizationmodule $globAuth
 	 * @param int $pub Publication Id to filter/determine the access right.
@@ -2329,7 +2325,7 @@ class BizWorkflow
 	 * @param int $cat Category id to filter/determine the access right.
 	 * @param string $objType Object type to filter/determine the access right.
 	 * @param int $statusId Status id to filter/determine the access right.
-     * @param mixed $objId Object id of which their access rights collected, null in case of a 'Create' or 'Copy' action.
+	 * @param int $objId The object type where the access right will be collected.
 	 * @param string $contentSource
 	 * @param string $documentId
 	 * @param array $rights List of access rights of which the object id will be assign in to the corresponding access.
@@ -3536,22 +3532,16 @@ class BizWorkflow
 				$user = new User();
 				$user->UserID = $userRow['id'];
 				$user->FullName = $userRow['fullname'];
-				$trackChangesColor = $userRow['trackchangescolor'];
-				if ( strlen( $trackChangesColor ) > 0 ) {
-					$trackChangesColor = substr( $trackChangesColor, 1 );
+				$trackchangescolor = $userRow['trackchangescolor'];
+				if ( strlen( $trackchangescolor ) > 0 ) {
+					$trackchangescolor = substr( $trackchangescolor, 1 );
 				} else {
-					$trackChangesColor = substr( DEFAULT_USER_COLOR, 1 );
+					$trackchangescolor = substr( DEFAULT_USER_COLOR, 1 );
 				}
-				$user->TrackChangesColor = $trackChangesColor;
+				$user->TrackChangesColor = $trackchangescolor;
 				$states->RouteToUsers[] = $user;
 			}
 		}
 	}
-
-	private static function objectIsCreated( $action )
-    {
-        $createActions = array( 'Create', 'CopyTo' );
-        return in_array( $action, $createActions) ?  true : false;
-    }
 
 }
