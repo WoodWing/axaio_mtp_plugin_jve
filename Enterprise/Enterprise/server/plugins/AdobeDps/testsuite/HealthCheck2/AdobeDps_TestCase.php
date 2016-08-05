@@ -629,8 +629,11 @@ class WW_TestSuite_HealthCheck2_AdobeDps_TestCase extends TestCase
 			$dpsService = new WW_Utils_DigitalPublishingSuiteClient( $dpsAccSettings['serverurl'], $dpsAccSettings['username'] );
 			$dpsService->signIn( $dpsAccSettings['username'], $dpsAccSettings['password'] );
 		} catch( BizException $e ) {
-			$e = $e; // Keep the Code Analyzer happy.
-			if( isset($dpsService) ) switch( $dpsService->getHttpCode() ) {
+			if( !isset($dpsService) ) {
+				$this->setResult( 'ERROR', 'The DPS client could not be initialized.', 'Please check your account settings.' );
+				return false;
+			}
+			switch( $dpsService->getHttpCode() ) {
 				case 401 : // Authentication problem reported by Adobe DPS.
 					$this->setResult( 'ERROR', 'Adobe DPS credentials for channel '.$channelName .
 						' (id='.$channelId.') with edition '. $editionName.' (id='.$editionId.') are invalid.', $generalHelp );
