@@ -32,7 +32,7 @@ CREATE TABLE `smart_authorizations` (
 ) DEFAULT CHARSET=utf8;
 CREATE  INDEX `gipu_authorizations` on `smart_authorizations`(`grpid`, `publication`) ;
 CREATE  INDEX `gipr_authorizations` on `smart_authorizations`(`grpid`, `profile`) ;
-INSERT INTO `smart_authorizations` (`id`, `grpid`, `publication`, `section`, `state`, `rights`, `issue`, `profile`, `bundle`) VALUES (1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1);
+INSERT INTO `smart_authorizations` (`id`, `grpid`, `publication`, `section`, `state`, `rights`, `issue`, `profile`, `bundle`) VALUES (1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1, 0);
 
 CREATE TABLE `smart_config` (
   `id` int(11) not null  auto_increment,

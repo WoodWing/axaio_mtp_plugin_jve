@@ -33,7 +33,7 @@ CREATE TABLE [smart_authorizations] (
 CREATE  INDEX [gipu_authorizations] on [smart_authorizations]([grpid], [publication]) ;
 CREATE  INDEX [gipr_authorizations] on [smart_authorizations]([grpid], [profile]) ;
 SET IDENTITY_INSERT [smart_authorizations] ON
-INSERT INTO [smart_authorizations] ([id], [grpid], [publication], [section], [state], [rights], [issue], [profile], [bundle]) VALUES (1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1);
+INSERT INTO [smart_authorizations] ([id], [grpid], [publication], [section], [state], [rights], [issue], [profile], [bundle]) VALUES (1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1, 0);
 SET IDENTITY_INSERT [smart_authorizations] OFF
 
 CREATE TABLE [smart_config] (

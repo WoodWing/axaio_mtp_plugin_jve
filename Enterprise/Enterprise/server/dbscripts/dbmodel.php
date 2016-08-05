@@ -170,7 +170,7 @@ class DBStruct
 							array('v' => '420', 'name' => 'gipr_authorizations', 	'fields' => 'grpid, profile'),
 						),
 						'inserts' => array(
-							"1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1",
+							"1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1, 0",
 						),
 						'lookups' => array(
 							array('v' => '420', 'field' => 'grpid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
@@ -3267,7 +3267,6 @@ class DBStruct
 			'smart_indesignserverjobs', // id field was removed since 9.7
 			'smart_indesignarticles',
 			'smart_idarticlesplacements',
-			'smart_authorizationgroups',
 		);
 	}
 
