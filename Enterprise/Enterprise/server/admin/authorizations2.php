@@ -711,7 +711,7 @@ class Ww_Admin_Authorizations_App
 		$authIdsCsv = implode( ',', $authIds );
 		$html = '';
 		for( $authMap->reset(); $authMap->current(); $authMap->next() ) {
-			$html .= '<tr class="separator"><td colspan="4"/></tr>';
+			$html .= '<tr class="separator"><td colspan="4"></td></tr>';
 
 			$authMapIdsCsv = implode( ',', $authMap->getCurrentAuthIds() );
 			if( $command == 'edit' && $authIdsCsv && $authIdsCsv == $authMapIdsCsv ) {
@@ -743,47 +743,53 @@ class Ww_Admin_Authorizations_App
 		$html = '<tr class="readonly">';
 
 		// Compose list of Categories in HTML.
-		$html .= '<td><div class="chkbox"><ul>';
+		$html .= '<td><div class="chkbox unexpanded"><ul>';
 		$authCategoryIds = array_flip( $authMap->getCurrentCategoryIds() );
+		$nrSectionRows = 0;
 		foreach( array_keys( $sectiondomain + array( 0 ) ) as $categoryId ) { // respect DB order
 			if( array_key_exists( $categoryId, $authCategoryIds ) ) {
 				$html .= '<li>';
 				$html .= $categoryId ? formvar( $sectiondomain[ $categoryId ] ) : formvar( $all );
 				$html .= '</li>';
+				$nrSectionRows++;
 			}
 		}
-		$html .= '</ul></div></td>';
+		$html .= '</ul>'.$this->composeMoreLessLabels( $nrSectionRows ).'</div></td>';
 
 		// Compose list of Statuses in HTML.
-		$html .= '<td><div class="chkbox"><ul>';
+		$html .= '<td><div class="chkbox unexpanded"><ul>';
 		$authStatusIds = array_flip( $authMap->getCurrentStatusIds() );
+		$nrStateRows = 0;
 		foreach( array_keys( $statedomain + array( 0 ) ) as $statusId ) { // respect DB order
 			if( array_key_exists( $statusId, $authStatusIds ) ) {
 				$html .= '<li>';
 				$html .= $statusId ? formvar( $statedomain[ $statusId ] ) : formvar( $all );
 				$html .= '</li>';
+				$nrStateRows++;
 			}
 		}
-		$html .= '</ul></div></td>';
+		$html .= '</ul>'.$this->composeMoreLessLabels( $nrStateRows ).'</div></td>';
 
 		// Compose list of Profiles in HTML.
-		$html .= '<td><div class="chkbox"><ul>';
+		$html .= '<td><div class="chkbox unexpanded"><ul>';
 		$authProfileIds = array_flip( $authMap->getCurrentProfileIds() );
+		$nrProfileRows = 0;
 		foreach( array_keys( $profiles ) as $profileId ) { // respect DB order
 			if( array_key_exists( $profileId, $authProfileIds ) ) {
 				$html .= '<li>';
 				$html .= formvar( $profiles[ $profileId ] );
 				$html .= '</li>';
+				$nrProfileRows++;
 			}
 		}
-		$html .= '</ul></div></td>';
+		$html .= '</ul>'.$this->composeMoreLessLabels( $nrProfileRows ).'</div></td>';
 
 		// Show Edit, Copy and Delete buttons (only when not in Edit/Add/Copy mode).
 		if( $command != 'edit' && $command != 'add' && $command != 'copy' ) {
 			$authMapIdsCsv = implode( ',', $authMap->getCurrentAuthIds() );
 			$html .=
 				'<td>'.
-				'<div class="btnbar"">'.
+				'<div class="btnbar">'.
 				'<a class="ui-button ui-button-text-icons" href="javascript:editAuth(\''.$authMapIdsCsv.'\');">'.
 				'<span class="ui-button-icon ui-icon ui-icon-pencil"></span>'.
 				'<span class="ui-button-text">'.BizResources::localize( 'ACT_EDIT' ).'</span>'.
@@ -807,6 +813,24 @@ class Ww_Admin_Authorizations_App
 	}
 
 	/**
+	 * Composes HTML for the 'More' and 'Less' labels to expand and contract lists.
+	 * By design, the labels will only show for lists that contain five or more items.
+	 *
+	 * @param $nrRecords Number of list items to keep into account
+	 * @return string Two HTML link elements containing spans with text.
+	 */
+	function composeMoreLessLabels( $nrRecords )
+	{
+		$result = '';
+		if( $nrRecords >= 5 ) {
+			$result =
+				'<a href="#" class="morebtn ui-button"><span class="ui-button-text">'.BizResources::localize('ACT_MORE').'</span></a>'.
+				'<a href="#" class="lessbtn ui-button"><span class="ui-button-text">'.BizResources::localize('ACT_LESS').'</span></a>';
+		}
+		return $result;
+	}
+
+	/**
 	 * Composes two HTML rows representing a given combined authorization record as editable.
 	 *
 	 * @param string $nextAuthIdsCsv The authorization ids (in CSV notation) to involve for next operation.
@@ -818,9 +842,9 @@ class Ww_Admin_Authorizations_App
 		// and show the Cancel and Save buttons (at right side of jsTree).
 		$html =
 			'<tr class="editable">'.
-			'<td><div id="jstree_categories" class="chkbox"></div></td>'.
-			'<td><div id="jstree_statuses" class="chkbox"></div></td>'.
-			'<td><div id="jstree_profiles" class="chkbox"></div></td>'.
+			'<td><div id="jstree_categories" class="chkbox expanded"></div></td>'.
+			'<td><div id="jstree_statuses" class="chkbox expanded"></div></td>'.
+			'<td><div id="jstree_profiles" class="chkbox expanded"></div></td>'.
 			'<td>'.
 			'<div class="btnbar"">'.
 			'<a href="javascript:viewAuth();">'.

@@ -11,6 +11,7 @@
 	table.wwauth tr td {
 		color: gray;
 		font-size: 7pt;
+		vertical-align: top;
 	}
 	table.wwauth tr.readonly {
 		border: 1px solid #C8C8C8;
@@ -34,6 +35,9 @@
 		}
 		table.wwauth tr td {
 			height: 100%;
+		}
+		table.wwauth tr td div.expanded {
+			height: 96%;
 		}
 	}
 	table.wwauth tr td,
@@ -70,17 +74,29 @@
 		overflow: auto;
 		padding-left: 1em;
 	}
-	table.wwauth div.chkbox {
+	table.wwauth tr div.chkbox {
 		border: 1px solid #C8C8C8;
-		height: 100%;
-		overflow: auto;
 		background-color: #FCFCFC;
 		white-space: nowrap;
+		padding: .6em;
+	}
+	table.wwauth tr.readonly div.chkbox {
+		position: relative;
+	}
+	table.wwauth tr div.expanded {
+		height: 100%;
+		overflow: auto;
+	}
+	table.wwauth tr div.unexpanded {
+		height: 5.5em;
+		overflow: hidden;
+	}
+	table.wwauth tr ul {
+		margin: 0;
 	}
 	table.wwauth tr.readonly ul {
-		margin: .6em;
 		padding: 0;
-		list-style:none;
+		list-style: none;
 	}
 	table.wwauth div.separator {
 		content: '';
@@ -90,6 +106,16 @@
 		height: 12px;
 		width: 1px;
 		vertical-align: top;
+	}
+	table.wwauth a.morebtn,
+	table.wwauth a.lessbtn {
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		font-size: 6pt;
+	}
+	table.wwauth a.lessbtn {
+		display: none;
 	}
 
 	/* jsTree overrides defining WW colors and smaller checkboxes  */
@@ -256,6 +282,54 @@
 				}
 			});
     	});
+
+		/**
+		 * Upon clicking the more button, the following things will happen on the page:
+		 * 1. The table row will expand to full height.
+		 * 2. All 'more' buttons will be replaced with 'less' buttons.
+		 */
+		$(".morebtn").click(function(element) {
+			var tableRow = $(this).parents("tr").first();
+			var chkBoxElems = tableRow.find(".chkbox");
+			chkBoxElems.addClass("expanded").removeClass("unexpanded");
+
+			tableRow.find(".morebtn").css("display", "none");
+			tableRow.find(".lessbtn").css("display", "inline-block");
+
+			// Creating divs with a height of 100% inside table cells is apparently not possible in IE.
+			// So we find the max height of all divs and set the others to the max height.
+			if(navigator.userAgent.indexOf("MSIE") > -1 || navigator.userAgent.indexOf("Trident") > -1 || navigator.userAgent.indexOf("Edge") > -1) {
+				var maxHeight = 0;
+				$(chkBoxElems).each(function(){
+					var thisH = $(this).height();
+					if (thisH > maxHeight) maxHeight = thisH;
+				});
+				$(chkBoxElems).height(maxHeight);
+			}
+
+			element.preventDefault(); // Ensures that the page does not skip to the top.
+		});
+
+		/**
+		 * Upon clicking the 'less' button, the following things will happen on the page:
+		 * 1. The table row will expand to a default, hardcoded height to show four items in a row.
+		 * 2. All 'less' buttons will be replaced with 'more' buttons.
+		 */
+		$(".lessbtn").click(function(element) {
+			var tableRow = $(this).parents("tr").first();
+			var chkBoxElems = tableRow.find(".chkbox");
+			chkBoxElems.addClass("unexpanded").removeClass("expanded");
+
+			tableRow.find(".lessbtn").css("display", "none");
+			tableRow.find(".morebtn").css("display", "inline-block");
+
+			// This undoes the height settings done for IE in the morebtn click event handler.
+			if(navigator.userAgent.indexOf("MSIE") > -1 || navigator.userAgent.indexOf("Trident") > -1) {
+				$(chkBoxElems).css("height", "");
+			}
+
+			element.preventDefault(); // Ensures that the page does not skip to the top.
+		});
 	});
 </script>
 
