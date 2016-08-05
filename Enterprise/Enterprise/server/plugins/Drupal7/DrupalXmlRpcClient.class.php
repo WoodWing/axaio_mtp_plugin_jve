@@ -537,6 +537,8 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 			LogHandler::Log( 'Drupal', 'DEBUG', 'File does not exists at Drupal yet or '.
 				'Enterprise has a newer version, so sending the file to Drupal.' );
 		}
+		$client = null;
+		$fileId = 0;
 		try {
 			// Now it's time to upload the file to Drupal ...
 			require_once 'Zend/Http/Client.php';
@@ -563,9 +565,6 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 			LogHandler::Log( 'Drupal', 'DEBUG', 'File sent to drupal. File Id: ' . $fileId );
 
 		} catch( Exception $e ) { // any kind of Zend exception !!
-			$e = $e; // keep code analyzer happy
-			$client = null;
-			$fileId = 0;
 		}
 
 		// Log request and response (or fault) as plain text
