@@ -225,6 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Take Offline</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Leave empty for direct update</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Leave empty if owner is same as user</Term>
+  <Term key="ACT_LESS">Less</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">Listed in Publication Overview</Term>
   <Term key="ACT_LOGIN">Log In</Term>
   <Term key="ACT_LOGOFF">Log Off</Term>

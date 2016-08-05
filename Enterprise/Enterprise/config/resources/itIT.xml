@@ -225,6 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Disattiva</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Lascia vuoto per aggiornamento diretto</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Lascia vuoto se proprietario ed utente coincidono</Term>
+  <Term key="ACT_LESS">Less</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">Incluso nella panoramica delle pubblicazioni</Term>
   <Term key="ACT_LOGIN">Accedi</Term>
   <Term key="ACT_LOGOFF">Disconnetti</Term>
