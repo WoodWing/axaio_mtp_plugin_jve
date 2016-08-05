@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 07-07-2016 10:27:53 GMT-->
 <LocalizationMap language="nlNL">
   <Term key="ISSUE">Uitgave</Term>
   <Term key="ISSUES">Uitgaven</Term>
@@ -226,6 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Offline nemen</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Blanco laten voor directe wijziging</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Blanco laten als de eigenaar ook de gebruiker is</Term>
+  <Term key="ACT_LESS">Less</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">Opgenomen in Publicatieoverzicht</Term>
   <Term key="ACT_LOGIN">Inloggen</Term>
   <Term key="ACT_LOGOFF">Afmelden</Term>

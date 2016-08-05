@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 07-07-2016 10:27:53 GMT-->
 <LocalizationMap language="zhTW">
   <Term key="ISSUE">期號</Term>
   <Term key="ISSUES">期號</Term>
@@ -226,6 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">採取離線</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">留下空白以直接更新</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">如擁有者與使用者相同，則留下空白</Term>
+  <Term key="ACT_LESS">Less</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">列出在出版物預覽中</Term>
   <Term key="ACT_LOGIN">登入</Term>
   <Term key="ACT_LOGOFF">登出</Term>

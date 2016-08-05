@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 07-07-2016 10:27:53 GMT-->
 <LocalizationMap language="esES">
   <Term key="ISSUE">Edición</Term>
   <Term key="ISSUES">Ediciones</Term>
@@ -226,6 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Fuera de línea</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Dejar vacío para actualizar directamente</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Dejar vacío si el propietario es también el usuario</Term>
+  <Term key="ACT_LESS">Less</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">En la lista de Publicación en Vivo</Term>
   <Term key="ACT_LOGIN">Iniciar sesión</Term>
   <Term key="ACT_LOGOFF">Desconectar</Term>
