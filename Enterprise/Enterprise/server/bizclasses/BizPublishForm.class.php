@@ -517,12 +517,26 @@ class BizPublishForm
 				}
 			}
 
+			require_once BASEDIR.'/server/bizclasses/BizImageConverter.class.php';
+			$bizImageConverter = new BizImageConverter();
 			$inlineImages = array();
 			if( $xFrame->InlineImageIds ) {
 				$user = BizSession::getShortUserName();
-				foreach( $xFrame->InlineImageIds as $imgId ) {
-					$imgObj = BizObject::getObject( $imgId, $user, false/*lock*/, 'native'/*rendition*/ );
-					$inlineImages[$imgObj->MetaData->BasicMetaData->ID] = $imgObj->Files[0]; // Get the attachment only.
+				foreach( $xFrame->InlineImageIds as $key => $imgId ) {
+					$imgInfo = $xFrame->InlineImageInfos[$key];
+					$placement = new Placement();
+					$placement->Width = $imgInfo['Width'];
+					$placement->Height = $imgInfo['Height'];
+					$placement->ContentDx = $imgInfo['ContentDx'];
+					$placement->ContentDy = $imgInfo['ContentDy'];
+					$placement->ScaleX = $imgInfo['ScaleX'];
+					$placement->ScaleY = $imgInfo['ScaleY'];
+					if( $bizImageConverter->loadNativeFileForInputImage( $imgId ) &&
+						$bizImageConverter->cropAndScaleImageByPlacement( $placement ) ) {
+						$inlineImages[ $imgId ] = $bizImageConverter->getOutputImageAttachment();
+					} else { // fallback at native rendition
+						$inlineImages[ $imgId ] = $bizImageConverter->getInputImageAttachment();
+					}
 				}
 			}
 			$element = new stdClass();
