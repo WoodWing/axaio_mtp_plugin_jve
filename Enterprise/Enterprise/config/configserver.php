@@ -1389,20 +1389,6 @@ if( !defined('GHOST_SCRIPT_APP_PATH') ) {
 //    1. Uncomment the required MessageQueueConnection definitions below by removing the leading slashes (//).
 //    2. For those definitions, replace 'localhost' with the hostname (or IP) of the system on which RabbitMQ is installed.
 //
-<<<<<<< HEAD
-if( !defined('MESSAGE_QUEUE_CONNECTIONS') ) {
-	define( 'MESSAGE_QUEUE_CONNECTIONS', serialize(array(
-	// - - - - Insecure connection over TCP: - - - -
-	//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqp://localhost:5672', true, 'woodwing', 'ww' ),
-	//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'http://localhost:15672', true, 'woodwing', 'ww' ),
-	//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'ws://localhost:15674/ws', true, 'woodwing', 'ww' ),
-	// - - - - Secure connection over SSL: - - - -
-	//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqps://localhost:5671', true, 'woodwing', 'ww' ),
-	//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'https://localhost:15671', true, 'woodwing', 'ww' ),
-	//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'wss://localhost:15673/ws', true, 'woodwing', 'ww' ),
-	)));
-}
-=======
 define( 'MESSAGE_QUEUE_CONNECTIONS', serialize(array(
 // - - - - Unsecure connection over TCP: - - - -
 //  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqp://localhost:5672', true, 'woodwing', 'ww' ),
@@ -1413,7 +1399,6 @@ define( 'MESSAGE_QUEUE_CONNECTIONS', serialize(array(
 //  new MessageQueueConnection( 'RabbitMQ', 'REST', 'https://localhost:15671', true, 'woodwing', 'ww' ),
 //  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'wss://localhost:15673/ws', true, 'woodwing', 'ww' ),
 )));
->>>>>>> 44be780a162ac53ffd8205a45136f191e2691f82
 
 // -------------------------------------------------------------------------------------------------
 // Debugging - Low-level logging of SQL, SOAP details etc.
