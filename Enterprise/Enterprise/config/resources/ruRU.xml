@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--Last edit date in TMS: 07-07-2016 10:27:53 GMT-->
 <LocalizationMap language="ruRU">
   <Term key="ISSUE">Выпуск</Term>
   <Term key="ISSUES">Выпуски</Term>
@@ -226,6 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Перевести в Автономный режим</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Оставить пустым для прямого обновления</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Оставить пустым, если Владелец и Пользователь - одно лицо.</Term>
+  <Term key="ACT_LESS">Less</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">Перечислено в обзоре публикаций</Term>
   <Term key="ACT_LOGIN">Войти</Term>
   <Term key="ACT_LOGOFF">Выйти</Term>
