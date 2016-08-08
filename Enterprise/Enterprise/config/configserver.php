@@ -1246,7 +1246,7 @@ define( 'GHOST_SCRIPT_APP_PATH', '' );
 //    2. For those definitions, replace 'localhost' with the hostname (or IP) of the system on which RabbitMQ is installed.
 //
 define( 'MESSAGE_QUEUE_CONNECTIONS', serialize(array(
-// - - - - Insecure connection over TCP: - - - -
+// - - - - Unsecure connection over TCP: - - - -
 //  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqp://localhost:5672', true, 'woodwing', 'ww' ),
 //  new MessageQueueConnection( 'RabbitMQ', 'REST', 'http://localhost:15672', true, 'woodwing', 'ww' ),
 //  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'ws://localhost:15674/ws', true, 'woodwing', 'ww' ),
