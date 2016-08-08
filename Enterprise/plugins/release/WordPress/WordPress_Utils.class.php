@@ -38,13 +38,12 @@ class WordPress_Utils
 		$sites = $connectionInfo['sites'];
 		$this->clearTermEntitiesAndTerms();
 
-		foreach( $sites as $siteName => $site ){
+		foreach( $sites as $siteName => $site ) {
 			$clientWordPress->setConnectionPassword( $site['password'] );
 			$clientWordPress->setConnectionUserName( $site['username'] );
 			$clientWordPress->setConnectionUrl( $site['url'] . '/xmlrpc.php' );
 
 			$tags = $clientWordPress->getTags();
-
 			$preparedWordPressTags = array();
 			foreach( $tags as $wordpressTag ){
 				$preparedWordPressTags[] = $wordpressTag['name'];
@@ -83,32 +82,29 @@ class WordPress_Utils
 	public function getConnectionInfo( $publishTarget = null )
 	{
 		$sites = unserialize( WORDPRESS_SITES );
-
-		if( !$sites ){
+		if( !$sites ) {
 			$detail = BizResources::localize( 'WORDPRESS_ERROR_NO_SITES_TIP' );
 			throw new BizException( 'WORDPRESS_ERROR_NO_SITES', 'Server', $detail );
 		}
 
-		if( !$publishTarget ){
+		if( !$publishTarget ) {
 			return array( 'sites' => $sites ); // when we have nothing to filter just return all the sites. Used for HealthCheck and for importing customObjectMetadata
 		}
 
 		require_once BASEDIR . '/server/bizclasses/BizAdmProperty.class.php';
 		require_once BASEDIR . '/server/utils/PublishingUtils.class.php';
-
 		$channelObj = WW_Utils_PublishingUtils::getAdmChannelById( $publishTarget->PubChannelID );
 		$siteKey = BizAdmProperty::getCustomPropVal( $channelObj->ExtraMetaData, 'C_WP_CHANNEL_SITE' );
 
-		if( $siteKey && isset( $sites[$siteKey] )){
+		if( $siteKey && isset( $sites[$siteKey] ) ) {
 			$site = $sites[$siteKey];
-		}else{
+		} else {
 			LogHandler::Log( 'SERVER', 'ERROR', 'Channel "' . $channelObj->Name . '" does not have a site configured or the site does not exist' );
 		}
 
-		if( !isset($site['url']) || !isset($site['username']) || !isset($site['password']) ){ // check if none of these credentials is empty
+		if( !isset($site['url']) || !isset($site['username']) || !isset($site['password']) ) { // check if none of these credentials is empty
 			throw new BizException( 'WORDPRESS_ERROR_SITE_CREDENTIALS', 'Server', 'Incorrect credentials', null, array( $siteKey ) );
 		}
-
 		$url = $site['url'];
 
 		// More connection info can be added if needed
@@ -136,7 +132,7 @@ class WordPress_Utils
 	{
 		try {
 			require_once 'Zend/Uri.php';
-			require_once BASEDIR . '/server/utils/UrlUtils.php';
+			require_once BASEDIR.'/server/utils/UrlUtils.php';
 			$check = Zend_Uri::check( $url );
 			$responsive = WW_Utils_UrlUtils::isResponsiveUrl( $url );
 		} catch( Exception $e ) {
@@ -144,9 +140,9 @@ class WordPress_Utils
 			throw new BizException( 'WORDPRESS_ERROR_INVALID_URL', 'Server', 'WordPress Url error' , null, array( $url ));
 		}
 
-		if( !$check ){
+		if( !$check ) {
 			throw new BizException( 'WORDPRESS_ERROR_INVALID_URL', 'Server', 'WordPress Url error' , null, array( $url ) );
-		}else if( !$responsive ){
+		} else if( !$responsive ) {
 			throw new BizException( 'WORDPRESS_ERROR_NOT_RESPONDING', 'Server', 'WordPress Url error', null, array( $url ));
 		}
 	}
@@ -175,22 +171,23 @@ class WordPress_Utils
 			$clientWordPress->setConnectionPassword( $site['password'] );
 			$clientWordPress->setConnectionUrl( $site['url'] . '/xmlrpc.php' );
 
-			try{
-                $retVal[$normalizedSiteKey]['categories'] = $this->prepareCategories( $clientWordPress->getCategories() );
+			try {
+				$retVal[$normalizedSiteKey]['categories'] = $this->prepareCategories( $clientWordPress->getCategories() );
 			} catch ( BizException $e ){
 				throw new BizException( 'WORDPRESS_ERROR_IMPORT_CATEGORIES', 'SERVER', 'Import Failed - Get categories' );
 			}
 
-			try{
-                $formats = $clientWordPress->getFormats();
+			try {
+				$formats = $clientWordPress->getFormats();
 				$retVal[$normalizedSiteKey]['formats'] = $formats;
-                $flippedFormats = array_flip( $formats );
-                $this->saveFormats( $flippedFormats, $siteKey );
+				$flippedFormats = array_flip( $formats );
+				$this->saveFormats( $flippedFormats, $siteKey );
 			} catch ( BizException $e ){
 				$e = $e;
 				throw new BizException( 'WORDPRESS_ERROR_IMPORT_FORMATS', 'SERVER', 'Import Failed - Get Formats' );
 			}
 		}
+
 		return $retVal;
 	}
 
@@ -205,7 +202,7 @@ class WordPress_Utils
     {
         $preparedCategories = array();
 
-        foreach( $categories as $category ){
+        foreach( $categories as $category ) {
             if( !$category['parentId'] ){
                 $this->findChildCategories( $category, $categories, 0, $preparedCategories );
             }
@@ -226,21 +223,17 @@ class WordPress_Utils
     public function findChildCategories( $search, $allCategories, $level, &$foundTree )
     {
         $categoryName = null;
-
-        if( $level > 0 ){
-            for( $i = 0; $i < $level; $i++ ){
+        if( $level > 0 ) {
+            for( $i = 0; $i < $level; $i++ ) {
                 $categoryName .= '-';
             }
-
             $categoryName .= ' ';
         }
-
         $categoryName .= $search['categoryName'];
-
         $foundTree[] = $categoryName;
 
-        foreach( $allCategories as $category ){
-            if( $search['categoryId'] == $category['parentId'] ){
+        foreach( $allCategories as $category ) {
+            if( $search['categoryId'] == $category['parentId'] ) {
                 $this->findChildCategories( $category, $allCategories, $level + 1, $foundTree );
             }
         }
@@ -272,23 +265,21 @@ class WordPress_Utils
 	 */
 	public function updateTagsWidget()
 	{
-		require_once BASEDIR . '/server/dbclasses/DBProperty.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTermEntity.class.php';
 
 		$termEntities = DBAdmAutocompleteTermEntity::getTermEntityByProvider( self::WORDPRESS_PLUGIN_NAME );
-
-		if( $termEntities ) foreach( $termEntities as $termEntity ){
+		if( $termEntities ) foreach( $termEntities as $termEntity ) {
 			$tagsWidgetName = 'C_' . strtoupper($termEntity->Name);
 			$tagsPropertyInfos = DBProperty::getPropertyInfos( self::WORDPRESS_PLUGIN_NAME, $tagsWidgetName );
 
-			if( $tagsPropertyInfos ){
+			if( $tagsPropertyInfos ) {
 				$tagsPropertyInfo = reset( $tagsPropertyInfos );
-
 				$tagsPropertyInfo->TermEntity = $termEntity->Name;
 				$tagsPropertyInfo->AutocompleteProvider = $termEntity->AutocompleteProvider;
 				$tagsPropertyInfo->PublishSystemId = 0;
 
-				DBProperty::updatePropertyInfo( $tagsWidgetName, $tagsPropertyInfo, array( 'serverplugin' => self::WORDPRESS_PLUGIN_NAME ));
+				DBProperty::updatePropertyInfo( $tagsWidgetName, $tagsPropertyInfo, array( 'serverplugin' => self::WORDPRESS_PLUGIN_NAME ) );
 			}
 		}
 	}
@@ -347,19 +338,18 @@ class WordPress_Utils
 	 */
 	public function importAllUsers()
 	{
+		require_once 'Zend/Json.php';
 		$connectionInfo = $this->getConnectionInfo();
 		$sites = $connectionInfo['sites'];
 
-		if( $sites ) foreach( $sites as $siteName => $site ){
-			$users = $this->getAllUsersFromWordpress( 250, $site ,'import' );  // the first param defines how much users you want to get every request. the second param which fields you want to get
+		if( $sites ) foreach( $sites as $siteName => $site ) {
 			$preparedUsers = array();
-
-			foreach($users as $user){
+			$users = $this->getAllUsersFromWordpress( 250, $site ,'import' );  // the first param defines how much users you want to get every request. the second param which fields you want to get
+			foreach( $users as $user ) {
 				$preparedUsers[strtolower($user['username'])] = $user['user_id'];
 			}
-
 			$this->releaseSavedUsers( $siteName );
-			require_once 'Zend/Json.php';
+
 			file_put_contents( $this->getSavedUsersFilePath( $siteName ), Zend_Json::encode( $preparedUsers ));
 		}
 	}
@@ -404,7 +394,7 @@ class WordPress_Utils
 	public function releaseSavedUsers( $siteName )
 	{
 		$tokenFile = $this->getSavedUsersFilePath( $siteName );
-		if ( file_exists( $tokenFile )){
+		if ( file_exists( $tokenFile ) ) {
 			unlink($tokenFile);
 		}
 	}
@@ -476,7 +466,7 @@ class WordPress_Utils
     public function releaseSavedFormats( $siteName )
     {
         $tokenFile = $this->getSavedFormatsFilePath( $siteName );
-        if ( file_exists( $tokenFile )){
+        if ( file_exists( $tokenFile ) ) {
             unlink($tokenFile);
         }
     }
@@ -527,12 +517,10 @@ class WordPress_Utils
 		$connectionInfo = $this->getConnectionInfo();
 		if ( $connectionInfo ) foreach( array_keys( $connectionInfo['sites'] ) as $siteKey ) {
 			$cleanSiteKey = $this->normalizeSiteName( $siteKey );
-
 			if( strlen( $cleanSiteKey ) - substr_count( $cleanSiteKey, '-' ) > 10 ) {
 				$detail = BizResources::localize( 'WORDPRESS_ERROR_SITE_NAME_LENGTH_TIP' );
 				throw new BizException( 'WORDPRESS_ERROR_SITE_NAME_LENGTH_MESSAGE', 'ERROR', $detail, null, array( $siteKey, $cleanSiteKey ) );
 			}
 		}
-
 	}
 }

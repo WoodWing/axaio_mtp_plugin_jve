@@ -33,7 +33,7 @@ class WordPress_EnterprisePlugin extends EnterprisePlugin
 	
 	final public function getConnectorInterfaces() 
 	{ 
-		return array( 	'CustomObjectMetaData_EnterpriseConnector',
+		return array( 'CustomObjectMetaData_EnterpriseConnector',
 						'PubPublishing_EnterpriseConnector',
 						'WebApps_EnterpriseConnector',
 						'AdminProperties_EnterpriseConnector',
@@ -41,7 +41,7 @@ class WordPress_EnterprisePlugin extends EnterprisePlugin
 		);
 	}
 
-	//doesn't matter which build it is, at the time of writing the build number doesn't get checked.
+	// doesn't matter which build it is, at the time of writing the build number doesn't get checked.
 	public function requiredServerVersion()
 	{
 		return '9.3.0 Build 0';
