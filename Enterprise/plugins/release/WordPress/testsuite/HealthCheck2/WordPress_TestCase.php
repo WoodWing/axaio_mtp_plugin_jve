@@ -62,7 +62,7 @@ class WW_TestSuite_HealthCheck2_WordPress_TestCase extends TestCase
 	 */
 	final public function runTest()
 	{
-		require_once BASEDIR . '/server/bizclasses/BizServerPlugin.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 
 		// When plug-in is not installed or disabled, skip test and refer to the
 		// Server Plug-ins page to install/enable.
@@ -80,12 +80,12 @@ class WW_TestSuite_HealthCheck2_WordPress_TestCase extends TestCase
 		LogHandler::Log('wwtest', 'INFO', 'Checked server plugin WordPress installation.');
 
 		// Check WordPress API dependencies.
-		if ( !$this->checkWordPressDependencies() ) {
+		if( !$this->checkWordPressDependencies() ) {
 			return;
 		}
 
 		// Check the WordPress module.
-		if ( !$this->checkWordPressSetUp() ) {
+		if( !$this->checkWordPressSetUp() ) {
 			return;
 		}
 		LogHandler::Log('wwtest', 'INFO', 'Validated the WordPress plugin.');
@@ -104,21 +104,19 @@ class WW_TestSuite_HealthCheck2_WordPress_TestCase extends TestCase
 		$json = '<b>json</b>';
 		$missing = '';
 
-		if (!$hasCurlExtension && !$hasJsonExtension){
+		if(!$hasCurlExtension && !$hasJsonExtension) {
 			$missing = $curl . '\', \'' . $json;
-		}
-		elseif (!$hasCurlExtension){
+		} elseif (!$hasCurlExtension) {
 			$missing = $curl;
-		}
-		elseif (!$hasJsonExtension){
+		} elseif (!$hasJsonExtension) {
 			$missing = $json;
 		}
 
-		if ( $missing ){
+		if( $missing ) {
 			$reasonParams = array( $missing );
 			$help = BizResources::localize( 'WORDPRESS_ERROR_MISSING_EXTENSION_TIP', true, $reasonParams );
 			$message = BizResources::localize( 'WORDPRESS_ERROR_MISSING_EXTENSION_MESSAGE' );
-			$this->setResult('ERROR', $message, $help);
+			$this->setResult( 'ERROR', $message, $help );
 			return false;
 		}
 		return true;
@@ -138,32 +136,28 @@ class WW_TestSuite_HealthCheck2_WordPress_TestCase extends TestCase
 	 */
 	private function checkWordPressSetUp()
 	{
-		require_once dirname(__FILE__) . '/../../WordPressXmlRpcClient.class.php';
-		require_once dirname(__FILE__) . '/../../WordPress_Utils.class.php';
-		require_once BASEDIR . '/server/utils/VersionUtils.class.php';
-		require_once BASEDIR . '/server/dbclasses/DBChannel.class.php';
-		require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizServerPlugin.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizAdmProperty.class.php';
-		require_once BASEDIR . '/server/utils/PublishingUtils.class.php';
+		require_once dirname(__FILE__).'/../../WordPressXmlRpcClient.class.php';
+		require_once dirname(__FILE__).'/../../WordPress_Utils.class.php';
+		require_once BASEDIR.'/server/utils/VersionUtils.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
+		require_once BASEDIR.'/server/utils/PublishingUtils.class.php';
 
 		$pubChannels = DBChannel::getChannelsByPublishSystem( WordPress_Utils::WORDPRESS_PLUGIN_NAME );
-
-		if( !$pubChannels ){
+		if( !$pubChannels ) {
 			$help = BizResources::localize( 'WORDPRESS_ERROR_NO_CHANNELS_TIP' );
 			$message = BizResources::localize( 'WORDPRESS_ERROR_NO_CHANNELS_MESSAGE' );
 			$this->setResult('ERROR', $message, $help);
 			return false;
 		}
 
-		$ClientWordPress = new WordPressXmlRpcClient();
 		$wordpressUtils = new WordPress_Utils();
-		$pluginInfo = BizServerPlugin::getInstalledPluginInfo( WordPress_Utils::WORDPRESS_PLUGIN_NAME );
-
-		try{
+		try {
 			$allConnections = $wordpressUtils->getConnectionInfo(); // Will also check if there are any sites configured
-		} catch( BizException $e ){
-			$e = $e;
+		} catch( BizException $e ) {
+			//$e = $e;
 			$help = BizResources::localize( 'WORDPRESS_ERROR_NO_SITES_TIP' );
 			$message = BizResources::localize( 'WORDPRESS_ERROR_NO_SITES' );
 			$this->setResult('ERROR', $message, $help);
@@ -171,35 +165,33 @@ class WW_TestSuite_HealthCheck2_WordPress_TestCase extends TestCase
 		}
 
 		$sites = $allConnections['sites'];
-		foreach( $pubChannels as $pubChannel ){
+		foreach( $pubChannels as $pubChannel ) {
 			$issuesForChannel = DBIssue::listChannelIssues( $pubChannel->Id );
 			$admPubChannel = WW_Utils_PublishingUtils::getAdmChannelById( $pubChannel->Id );
 			$channelSiteKey = BizAdmProperty::getCustomPropVal( $admPubChannel->ExtraMetaData, 'C_WP_CHANNEL_SITE' );
-
 			$reasonParams = array( $pubChannel->Name, $channelSiteKey );
 
-			if( !$issuesForChannel ){
+			if( !$issuesForChannel ) {
 				$help = BizResources::localize( 'WORDPRESS_ERROR_NO_ISSUES_TIP', true, $reasonParams );
 				$message = BizResources::localize( 'WORDPRESS_ERROR_NO_ISSUES_MESSAGE', true, $reasonParams );
 				$this->setResult('ERROR', $message, $help);
 				continue; // skip the other tests because these are not needed
 			}
-
-			if( !$channelSiteKey ){
+			if( !$channelSiteKey ) {
 				$help = BizResources::localize( 'WORDPRESS_ERROR_SITE_MISSING_TIP', true, $reasonParams );
 				$message = BizResources::localize( 'WORDPRESS_ERROR_INCORRECT_CONFIG_MESSAGE' );
 				$this->setResult('ERROR', $message, $help);
 				continue; // skip the other tests because these are not needed
 			}
-
-			if( isset( $sites[$channelSiteKey] ) ){
+			if( isset( $sites[$channelSiteKey] ) ) {
 				$siteConnectionInfo = $sites[$channelSiteKey];
-				if(!isset($siteConnectionInfo['url']) || !isset($siteConnectionInfo['username']) || !isset($siteConnectionInfo['password'])){
-					$help = BizResources::localize( 'WORDPRESS_ERROR_SITE_CREDENTIALS', true, array( $channelSiteKey ));
+				if( !isset($siteConnectionInfo['url']) || !isset($siteConnectionInfo['username']) ||
+					!isset($siteConnectionInfo['password']) ) {
+					$help = BizResources::localize( 'WORDPRESS_ERROR_SITE_CREDENTIALS', true, array( $channelSiteKey ) );
 					$message = BizResources::localize( 'WORDPRESS_ERROR_INCORRECT_CONFIG_MESSAGE' );
 					$this->setResult('ERROR', $message, $help);
 				}
-			}else{
+			} else {
 				$help = BizResources::localize( 'WORDPRESS_ERROR_SITE_NOT_EXISTING_TIP', true, $reasonParams );
 				$message = BizResources::localize( 'WORDPRESS_ERROR_INCORRECT_CONFIG_MESSAGE' );
 				$this->setResult('ERROR', $message, $help);
@@ -207,66 +199,63 @@ class WW_TestSuite_HealthCheck2_WordPress_TestCase extends TestCase
 		}
 
 		$normalizedSites = array();
-
-		foreach( $sites as $siteKey => $site ){
+		foreach( $sites as $siteKey => $site ) {
 			$siteError = false;
 
-			try{
+			try {
 				$wordpressUtils->checkUrlSyntax( $site['url'] );
-			} catch( BizException $e ){
+			} catch( BizException $e ) {
 				$this->setResult( 'ERROR', $e->getDetail(), $e->getMessage() );
 				$siteError = true;
 			}
-
 			$cleanSiteKey = $wordpressUtils->normalizeSiteName( $siteKey );
-
-			if( strlen( $cleanSiteKey ) > 10 ){
+			if( strlen( $cleanSiteKey ) > 10 ) {
 				$tip = BizResources::localize( 'WORDPRESS_ERROR_SITE_NAME_LENGTH_TIP' );
 				$message = BizResources::localize( 'WORDPRESS_ERROR_SITE_NAME_LENGTH_MESSAGE', true, array( $siteKey ) );
 				$this->setResult( 'ERROR', $message, $tip );
 				$siteError = true;
 			}
-
-			if( isset( $normalizedSites[$cleanSiteKey] )){
+			if( isset( $normalizedSites[$cleanSiteKey] ) ) {
 				$tip = BizResources::localize( 'WORDPRESS_ERROR_SITE_NAME_DUPLICATE_TIP' );
 				$message = BizResources::localize( 'WORDPRESS_ERROR_SITE_NAME_DUPLICATE_MESSAGE' );
 				$this->setResult( 'ERROR', $message, $tip );
 				$siteError = true;
-			}else{
+			} else {
 				$normalizedSites[$cleanSiteKey] = $siteKey;
 			}
 
-			if( $siteError ){ // check if there is already a error else go to the next site
+			if( $siteError ) { // check if there is already a error else go to the next site
 				continue;
 			}
 
-			try{
+			$ClientWordPress = new WordPressXmlRpcClient();
+			$pluginInfo = BizServerPlugin::getInstalledPluginInfo( WordPress_Utils::WORDPRESS_PLUGIN_NAME );
+			try {
 				$ClientWordPress->setConnectionUrl( $site['url'] . '/xmlrpc.php' );
 				$ClientWordPress->setConnectionPassword( $site['password'] );
 				$ClientWordPress->setConnectionUserName( $site['username'] );
 				$retVal = $ClientWordPress->pluginTest( $pluginInfo->Version );
-			} catch( BizException $e ){
+			} catch( BizException $e ) {
 				$reasonParams = array( $siteKey );
-				if( strpos($e->getDetail(), 'method woodwing.PluginTest does not exist' )){
+				if( strpos($e->getDetail(), 'method woodwing.PluginTest does not exist' ) ) {
 					$tip = BizResources::localize( 'WORDPRESS_ERROR_MISSING_WORDPRESS_PLUGIN_TIP' );
 					$message = BizResources::localize( 'WORDPRESS_ERROR_MISSING_WORDPRESS_PLUGIN_MESSAGE', true, $reasonParams );
-				} else if( strpos($e->getDetail(), 'username or password') ){
+				} else if( strpos($e->getDetail(), 'username or password') ) {
 					$tip = BizResources::localize( 'WORDPRESS_ERROR_SITE_INCORRECT_SITE_CONFIG_TIP' );
 					$message = BizResources::localize( 'WORDPRESS_ERROR_SITE_INCORRECT_SITE_CONFIG_MESSAGE', true, $reasonParams );
-				}else if( strpos( $e->getDetail(), 'permission' ) && strpos( $e->getDetail(), '(403)') ){
+				} else if( strpos( $e->getDetail(), 'permission' ) && strpos( $e->getDetail(), '(403)') ) {
 					$tip = BizResources::localize( 'WORDPRESS_ERROR_SITE_INCORRECT_USER_ROLE_TIP', true, $reasonParams ) ;
 					$message = BizResources::localize( 'WORDPRESS_ERROR_INCORRECT_ROLE' );
-				} else{
+				} else {
 					$tip = $e->getDetail() . ' For site: ' . $siteKey;
 					$message = $e->getMessage();
 				}
 				$this->setResult( 'ERROR', $message, $tip );
 			}
 
-			if( !$retVal['successful'] ){
+			if( isset($retVal['successful']) && !$retVal['successful'] ) {
 				$errors = $retVal['errors'];
-
-				if( isset($errors['correctVersion']) ){
+				if( isset($errors['correctVersion']) ) {
 					$reasonParams = array( $errors['pluginVersion'], $errors['requiredVersion'], $siteKey );
 					$help = BizResources::localize( 'WORDPRESS_ERROR_INCORRECT_PLUGIN_VERSION_TIP', true, $reasonParams );
 					$message = BizResources::localize( 'WORDPRESS_ERROR_INCORRECT_PLUGIN_VERSION_MESSAGE', true, $reasonParams );
@@ -274,9 +263,9 @@ class WW_TestSuite_HealthCheck2_WordPress_TestCase extends TestCase
 				}
 			}
 
-			if( $retVal ){
+			if( $retVal ) {
 				$minimumWordPressVersion = '3.7';
-				if( VersionUtils::versionCompare( $retVal['wordpressVersion'], $minimumWordPressVersion, '<' ) ){
+				if( VersionUtils::versionCompare( $retVal['wordpressVersion'], $minimumWordPressVersion, '<' ) ) {
 					$reasonParams = array( $retVal['wordpressVersion'], $minimumWordPressVersion, $siteKey );
 					$help = BizResources::localize( 'WORDPRESS_ERROR_INCORRECT_SITE_VERSION_TIP', true, $reasonParams );
 					$message = BizResources::localize( 'WORDPRESS_ERROR_INCORRECT_SITE_VERSION_MESSAGE', true, $reasonParams );
@@ -284,6 +273,6 @@ class WW_TestSuite_HealthCheck2_WordPress_TestCase extends TestCase
 				}
 			}
 		}
-	return true;
+		return true;
 	}
 }

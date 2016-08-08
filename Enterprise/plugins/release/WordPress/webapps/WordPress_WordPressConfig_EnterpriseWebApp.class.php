@@ -32,9 +32,9 @@ class WordPress_WordPressConfig_EnterpriseWebApp extends EnterpriseWebApp
 	 */
 	public function getHtmlBody()
 	{
-		require_once BASEDIR . '/server/bizclasses/BizAdmPublication.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-		require_once BASEDIR . '/server/utils/htmlclasses/HtmlDocument.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizAdmPublication.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+		require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
 		$this->pubChannelInfos = BizAdmPublication::getPubChannelInfosForPublishSystem( 'WordPress' );
 		$wordpressUtils = new WordPress_Utils();
@@ -42,24 +42,24 @@ class WordPress_WordPressConfig_EnterpriseWebApp extends EnterpriseWebApp
 		$saveMessage = '';
 
 		// Intercept user input.
-		if( isset( $_REQUEST['submitImport'] )){
+		if( isset( $_REQUEST['submitImport'] ) ) {
 			$canContinue = true;
 			try {
 				$wordpressUtils->checkAllSiteKeyLengths();
 			} catch( BizException $e ) {
-				$importMessage = '<font color=red>Import failed: ' . $e->getMessage() . '</font>';
+				$importMessage = '<p style="color:red">Import failed: ' . $e->getMessage() . '</p>';
 				$canContinue = false;
 			}
-			if( $canContinue ) { //import should only continue if sitekey length is valid
-				if( $_REQUEST['import'] == 'importAll' ){
+			if( $canContinue ) { // import should only continue if sitekey length is valid
+				if( $_REQUEST['import'] == 'importAll' ) {
 					$importMessage = $this->importAll();
-				} else if( $_REQUEST['import'] == 'importUsers' ){
+				} else if( $_REQUEST['import'] == 'importUsers' ) {
 					$importMessage = $this->importUsersOnly();
-				} else if( $_REQUEST['import'] == 'importTags' ){
+				} else if( $_REQUEST['import'] == 'importTags' ) {
 					$importMessage = $this->importTagsOnly();
 				}
 			}
-		} else if( isset($_REQUEST['saveSettings']) ){
+		} else if( isset($_REQUEST['saveSettings']) ) {
 			$saveMessage = $this->saveSettings();
 		}
 
@@ -83,14 +83,15 @@ class WordPress_WordPressConfig_EnterpriseWebApp extends EnterpriseWebApp
 	 *
 	 * @return string
 	 */
-	private function saveSettings(){
+	private function saveSettings()
+	{
 		$wordpressUtils = new WordPress_Utils();
 		try {
 			$suggestionEntity = $_REQUEST['suggestionEntity'];
 			$wordpressUtils->storeEnterpriseSuggestionEntity( $suggestionEntity );
 			$saveMessage = BizResources::localize( 'WORDPRESS_SAVE_COMPLETED' );
 		} catch ( BizException $e ) {
-			$saveMessage = '<font color=red>Save failed: ' . $e->getMessage() . '</font>'; // WORDPRESS_SAVE_COMPLETED
+			$saveMessage = '<p style="color:red">Save failed: ' . $e->getMessage() . '</p>'; // WORDPRESS_SAVE_COMPLETED
 		}
 		return $saveMessage;
 	}
@@ -102,7 +103,8 @@ class WordPress_WordPressConfig_EnterpriseWebApp extends EnterpriseWebApp
 	 *
 	 * @return string
 	 */
-	private function importAll(){
+	private function importAll()
+	{
 		$wordpressUtils = new WordPress_Utils();
 		try {
 			// Raise the max execution time to ensure that the plugin has enough time to get and save all the data.
@@ -114,7 +116,7 @@ class WordPress_WordPressConfig_EnterpriseWebApp extends EnterpriseWebApp
 			$wordpressUtils->importAllUsers();
 			$importMessage = BizResources::localize( 'WORDPRESS_IMPORT_COMPLETED' );
 		} catch ( BizException $e ) {
-			$importMessage = '<font color=red>Import failed: ' . $e->getMessage() . '</font>';
+			$importMessage = '<p style="color:red">Import failed: ' . $e->getMessage() . '</p>';
 		}
 		return $importMessage;
 	}
@@ -126,7 +128,8 @@ class WordPress_WordPressConfig_EnterpriseWebApp extends EnterpriseWebApp
 	 *
 	 * @return string
 	 */
-	private function importTagsOnly(){
+	private function importTagsOnly()
+	{
 		$wordpressUtils = new WordPress_Utils();
 		try {
 			// Raise the max execution time to ensure that the plugin has enough time to get and save all the data.
@@ -135,7 +138,7 @@ class WordPress_WordPressConfig_EnterpriseWebApp extends EnterpriseWebApp
 			$wordpressUtils->updateTagsWidget();
 			$importMessage = BizResources::localize( 'WORDPRESS_IMPORT_COMPLETED' );
 		} catch ( BizException $e ) {
-			$importMessage = '<font color=red>Import failed: ' . $e->getMessage() . '</font>';
+			$importMessage = '<p style="color:red">Import failed: ' . $e->getMessage() . '</p>';
 		}
 		return $importMessage;
 	}
@@ -147,7 +150,8 @@ class WordPress_WordPressConfig_EnterpriseWebApp extends EnterpriseWebApp
 	 *
 	 * @return string
 	 */
-	private function importUsersOnly(){
+	private function importUsersOnly()
+	{
 		$wordpressUtils = new WordPress_Utils();
 		try {
 			// Raise the max execution time to ensure that the plugin has enough time to get and save all the data.
@@ -155,7 +159,7 @@ class WordPress_WordPressConfig_EnterpriseWebApp extends EnterpriseWebApp
 			$wordpressUtils->importAllUsers();
 			$importMessage = BizResources::localize( 'WORDPRESS_IMPORT_COMPLETED' );
 		} catch ( BizException $e ) {
-			$importMessage = '<font color=red>Import failed: ' . $e->getMessage() . '</font>';
+			$importMessage = '<p style="color:red">Import failed: ' . $e->getMessage() . '</p>';
 		}
 		return $importMessage;
 	}
@@ -206,7 +210,7 @@ class WordPress_WordPressConfig_EnterpriseWebApp extends EnterpriseWebApp
 	 * the built-in "PublishFormTemplates" Named Query.
 	 *
 	 * @param $pubChannelId
-	 * @return wflResponse
+	 * @return WflNamedQueryResponse
 	 */
 	private function queryTemplatesFromDb( $pubChannelId )
 	{

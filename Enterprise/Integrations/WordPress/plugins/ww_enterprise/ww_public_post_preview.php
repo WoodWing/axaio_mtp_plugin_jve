@@ -277,17 +277,16 @@ class WW_Public_Post_Preview {
 	}
 
 	/**
-	 * Get all of the expired
+	 * Get all expired preview from database ww_previews table
 	 *
-	 * This function gets all the expired previews from the database.
-	 * At the time of writing all previews of 1 hour and older will be removed
+	 * Return expired preview that expired in 1 hour(3600 seconds) and more from the preview creation date time
 	 *
 	 * @return array
 	 */
 	public static function woodwing_GetAllExpiredPreviews()
 	{
 		global $wpdb;
-		$results = $wpdb->get_results( $wpdb->prepare('SELECT * FROM '. self::woodwing_GetPreviewTableName() . ' WHERE `time_created` <= (NOW()-60*60)'));
+		$results = $wpdb->get_results( $wpdb->prepare('SELECT * FROM '. self::woodwing_GetPreviewTableName() . ' WHERE `time_created` <= (NOW()-%d)', 3600) );
 
 		return $results;
 	}

@@ -31,6 +31,7 @@ class WordPress_AdminProperties extends AdminProperties_EnterpriseConnector
 		$widgets = array();
 		switch( $entity ) {
 			case 'Publication':
+			case 'Issue':
 				break;
 			case 'PubChannel':
 				// Draw a separator.
@@ -41,26 +42,22 @@ class WordPress_AdminProperties extends AdminProperties_EnterpriseConnector
 						new PropertyUsage( 'C_WP_CHANNEL_SEPARATOR', true, false, false, false ) );
 				}
 
-				require_once dirname(__FILE__) . '/config.php';
+				require_once dirname(__FILE__).'/config.php';
 				$wordPressSites = unserialize( WORDPRESS_SITES );
 				$siteKeys = array_keys( $wordPressSites );
 				$preparedSiteKeys = array();
-
 				foreach( $siteKeys as $siteKey ){
 					$preparedSiteKeys[strval($siteKey)] = $siteKey;
 				}
-
 				if( !$preparedSiteKeys ){
 					$preparedSiteKeys[] = BizResources::localize( 'WORDPRESS_NO_SITES_CONFIGURED' );
 				}
 
-				$dropDownName = BizResources::localize( 'WORDPRESS_WEB_SITE_LABEL' );
-
 				if( $mode == 'draw_dialog' ) {
-					$channel = $context->getPubChannel();
-					require_once BASEDIR . '/server/bizclasses/BizAdmProperty.class.php';
-					require_once BASEDIR . '/server/utils/PublishingUtils.class.php';
+					require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
+					require_once BASEDIR.'/server/utils/PublishingUtils.class.php';
 
+					$channel = $context->getPubChannel();
 					$channelObj = WW_Utils_PublishingUtils::getAdmChannelById( $channel->Id );
 					$siteKey = BizAdmProperty::getCustomPropVal( $channelObj->ExtraMetaData, 'C_WP_CHANNEL_SITE' );
 					if ( !$siteKey && $siteKeys ) {
@@ -70,12 +67,11 @@ class WordPress_AdminProperties extends AdminProperties_EnterpriseConnector
 				}
 
 				// Draw the URL field.
+				$dropDownName = BizResources::localize( 'WORDPRESS_WEB_SITE_LABEL' );
 				$widgets['C_WP_CHANNEL_SITE'] = new DialogWidget(
 					new PropertyInfo( 'C_WP_CHANNEL_SITE', $dropDownName, null, 'list', null, $preparedSiteKeys ),
 					new PropertyUsage( 'C_WP_CHANNEL_SITE', true, true, true ));
 
-				break;
-			case 'Issue':
 				break;
 		}
 		return $widgets;
@@ -92,34 +88,32 @@ class WordPress_AdminProperties extends AdminProperties_EnterpriseConnector
 	 * - PublishSystem of the PubChannel should match our plugin's
 	 * - Entity should match 'PubChannel' as we only want the data for the channel.
 	 *
-	 * @param $context The context to check.
-	 * @param $entity The entity to check.
-	 * @param $action The action to check
+	 * @param AdminProperties_Context $context The context to check.
+	 * @param string $entity Admin object type: Publication, PubChannel, Issue, Edition, Section
+	 * @param string $action The action to check
 	 * @return bool Whether or not the context/entity match the requirements.
 	 */
-	private function isCorrectPublishSystem($context, $entity, $action)
+	private function isCorrectPublishSystem( $context, $entity, $action )
 	{
 		$match = false;
 		$isSystemChanged = false;
-
-		if( $entity == 'PubChannel'  && $action != 'Create') {
-			if ($action == 'Update') {
+		if( $entity == 'PubChannel'  && $action != 'Create' ) {
+			if( $action == 'Update' ) {
 				// Determine the PubChannelId.
 				$contextPubChannelObj = $context->getPubChannel();
 				$pubChannelId = $contextPubChannelObj->Id;
 
 				// Retrieve the previous channel.
 				require_once BASEDIR . '/server/utils/PublishingUtils.class.php';
-				$publicationChannel = WW_Utils_PublishingUtils::getAdmChannelById($pubChannelId);
-
-				if ($publicationChannel->Type != 'web' || $publicationChannel->PublishSystem != 'WordPress') {
+				$publicationChannel = WW_Utils_PublishingUtils::getAdmChannelById( $pubChannelId );
+				if( $publicationChannel->Type != 'web' || $publicationChannel->PublishSystem != 'WordPress' ) {
 					$isSystemChanged = true;
 				}
 			}
 			$pubChannel = $context->getPubChannel();
 			$publishSystem = $pubChannel->PublishSystem;
 			$chanType = $pubChannel->Type;
-			if($chanType == 'web' && $publishSystem == 'WordPress' && !$isSystemChanged) {
+			if( $chanType == 'web' && $publishSystem == 'WordPress' && !$isSystemChanged ) {
 				$match = true;
 			}
 		}
@@ -129,6 +123,9 @@ class WordPress_AdminProperties extends AdminProperties_EnterpriseConnector
 	/**
 	 * Collect all possible custom properties for the given entity to extend the DB model.
 	 * See AdminProperties_EnterpriseConnector interface for details.
+	 *
+	 * @param string $entity Admin object type: Publication, PubChannel, Issue, Edition, Section
+	 * @return array Array of DialogWidget
 	 */
 	final public function collectDialogWidgets( $entity )
 	{
@@ -138,29 +135,31 @@ class WordPress_AdminProperties extends AdminProperties_EnterpriseConnector
 	/**
 	 * Collect custom properties for the given context to travel along with the entity instance.
 	 * See AdminProperties_EnterpriseConnector interface for details.
+	 *
+	 * @param AdminProperties_Context $context
+	 * @param string $entity
+	 * @param string $action
+	 * @return array True to return array of DialogWidget, else empty array
 	 */
 	public function collectDialogWidgetsForContext( AdminProperties_Context $context, $entity, $action )
 	{
-		$action = $action; // keep analyzer happy
-
 		return ($this->isCorrectPublishSystem($context, $entity, $action))
-			? $this->doCollectDialogWidgets( $context, $entity, 'extend_entity')
-			: array();
+			? $this->doCollectDialogWidgets( $context, $entity, 'extend_entity') : array();
 	}
 
 	/**
 	 * Add (or adjust) given dialog widgets ($showWidgets) to show admin user for given entity+action.
 	 * See AdminProperties_EnterpriseConnector interface for details.
+	 *
+	 * @param AdminProperties_Context $context
+	 * @param string $entity
+	 * @param string $action
+	 * @param array $allWidgets
+	 * @param $showWidgets
+	 * @return array of Dialogwidgets
 	 */
 	final public function buildDialogWidgets( AdminProperties_Context $context, $entity, $action, $allWidgets, &$showWidgets )
 	{
-		$action = $action; $allWidgets = $allWidgets; // keep code analyzer happy
-
-		// This way you can grab contextual data:
-		//$pubObj = $context->getPublication();
-		//$channelObj = $context->getPubChannel();
-		//$issueObj = $context->getIssue();
-
 		// Add our custom props depending on the given admin entity.
 		// Let's simply add our custom props at the end of all properties.
 		if ($this->isCorrectPublishSystem($context, $entity, $action)) {
