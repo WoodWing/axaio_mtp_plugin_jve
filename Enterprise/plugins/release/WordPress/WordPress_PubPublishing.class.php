@@ -31,16 +31,14 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $dossier         [writable]
 	 * @param array $objectsInDossier [writable] Array of Object.
 	 * @param PubPublishTarget $publishTarget
-	 * 
 	 * @return array of PubField containing information from publishing system
-	 *
 	 * @throws BizException
 	 */
 	public function publishDossier( &$dossier, &$objectsInDossier, $publishTarget ) 
 	{
 		$pubFields = array();
 
-		foreach ( $objectsInDossier as $objectInDossier ) {
+		if( $objectsInDossier ) foreach ( $objectsInDossier as $objectInDossier ) {
 			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
 				// Prepare post content.
 				$postContents = $this->preparePost( $objectInDossier, $objectsInDossier, $dossier, $publishTarget, 'publish' );
@@ -413,7 +411,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	{
 		$pubFields = array();
 
-		foreach ( $objectsInDossier as $objectInDossier ) {
+		if( $objectsInDossier ) foreach ( $objectsInDossier as $objectInDossier ) {
 			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
 				// Prepare post content.
 				$postContents = $this->preparePost( $objectInDossier, $objectsInDossier, $dossier, $publishTarget, 'update' );
@@ -683,7 +681,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	{
 		$pubFields = array();
 
-		foreach ( $objectsInDossier as $objectInDossier ) {
+		if( $objectsInDossier ) foreach ( $objectsInDossier as $objectInDossier ) {
 			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
 				// Prepare post content.
 				$postContents = $this->preparePost( $objectInDossier, $objectsInDossier, $dossier, $publishTarget, 'preview' );
@@ -1226,7 +1224,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * @param $objectsInDossier
 	 * @param $objectType
-	 * @return null
+	 * @return Object|null Return object if found else return null
 	 */
 	private function getFirstObjectWithType( $objectsInDossier, $objectType )
 	{
