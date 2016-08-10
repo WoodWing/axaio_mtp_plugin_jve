@@ -38,7 +38,7 @@ class WordPress_Utils
 		$sites = $connectionInfo['sites'];
 		$this->clearTermEntitiesAndTerms();
 
-		foreach( $sites as $siteName => $site ) {
+		if( $sites ) foreach( $sites as $siteName => $site ) {
 			$clientWordPress->setConnectionPassword( $site['password'] );
 			$clientWordPress->setConnectionUserName( $site['username'] );
 			$clientWordPress->setConnectionUrl( $site['url'] . '/xmlrpc.php' );

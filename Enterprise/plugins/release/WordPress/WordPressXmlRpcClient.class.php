@@ -424,7 +424,7 @@ class WordPressXmlRpcClient
 	}
 
 	/**
-	 * Update NextGen image, update a image from WordPress is now done by deleting a image and re-uploading it.
+	 * Update NextGen image, updating an image from WordPress is done by deleting an image and uploading it again.
 	 *
 	 * This function is used to update an image source.
 	 * This function uses the XML-RPC API.

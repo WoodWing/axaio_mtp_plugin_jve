@@ -157,7 +157,6 @@ class WW_TestSuite_HealthCheck2_WordPress_TestCase extends TestCase
 		try {
 			$allConnections = $wordpressUtils->getConnectionInfo(); // Will also check if there are any sites configured
 		} catch( BizException $e ) {
-			//$e = $e;
 			$help = BizResources::localize( 'WORDPRESS_ERROR_NO_SITES_TIP' );
 			$message = BizResources::localize( 'WORDPRESS_ERROR_NO_SITES' );
 			$this->setResult('ERROR', $message, $help);
@@ -228,13 +227,13 @@ class WW_TestSuite_HealthCheck2_WordPress_TestCase extends TestCase
 				continue;
 			}
 
-			$ClientWordPress = new WordPressXmlRpcClient();
+			$clientWordPress = new WordPressXmlRpcClient();
 			$pluginInfo = BizServerPlugin::getInstalledPluginInfo( WordPress_Utils::WORDPRESS_PLUGIN_NAME );
 			try {
-				$ClientWordPress->setConnectionUrl( $site['url'] . '/xmlrpc.php' );
-				$ClientWordPress->setConnectionPassword( $site['password'] );
-				$ClientWordPress->setConnectionUserName( $site['username'] );
-				$retVal = $ClientWordPress->pluginTest( $pluginInfo->Version );
+				$clientWordPress->setConnectionUrl( $site['url'] . '/xmlrpc.php' );
+				$clientWordPress->setConnectionPassword( $site['password'] );
+				$clientWordPress->setConnectionUserName( $site['username'] );
+				$retVal = $clientWordPress->pluginTest( $pluginInfo->Version );
 			} catch( BizException $e ) {
 				$reasonParams = array( $siteKey );
 				if( strpos($e->getDetail(), 'method woodwing.PluginTest does not exist' ) ) {

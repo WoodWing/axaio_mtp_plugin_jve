@@ -277,9 +277,9 @@ class WW_Public_Post_Preview {
 	}
 
 	/**
-	 * Get all expired preview from database ww_previews table
+	 * Get all expired previews from the ww_previews table.
 	 *
-	 * Return expired preview that expired in 1 hour(3600 seconds) and more from the preview creation date time
+	 * Return expired previews. Expired means that the preview is more that 1 hour old.
 	 *
 	 * @return array
 	 */
