@@ -637,14 +637,14 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 		$major = 0; $minor = 0; $revision = 0; $other = '';
 		sscanf( $dbVersion, '%d.%d.%d%s', $major, $minor, $revision, $other );
 		$dbVersion = $major.'.'.$minor.'.'.$revision;
-		$minVersion = '5.0.3';
+		$minVersion = SCENT_MYSQLDB_MINVERSION;
 		if( version_compare( $dbVersion, $minVersion, '<' ) ) {
 			$help = 'Please upgrade your database and try again.';
 			$detail = 'Minimum required version of MySQL is v'.$minVersion.'. Found installed version v'.$dbVersion.'.';
 			throw new BizException( null, 'Server', $detail, 'Invalid Configuration' );
 		}
 		$dbVerMajMin = $major.'.'.$minor; // Note: $revision is excluded to compare major.minor only
-		$maxVersion = '5.7'; // supported: 5.7.x // since Enterprise 10.0.0, it supports Mysql 5.7 (EN-85866)
+		$maxVersion = SCENT_MYSQLDB_MAXVERSION; // supported: 5.7.x // since Enterprise 10.0.0, it supports Mysql 5.7 (EN-85866)
 		if( version_compare( $dbVerMajMin, $maxVersion, '>' ) ) {
 			$help = 'Please downgrade your database and try again.';
 			$detail = 'Maximum supported MySQL version is v'.$maxVersion.'. Found installed version v'.$dbVersion.'.';
