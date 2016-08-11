@@ -24,6 +24,10 @@ if( OS == 'LINUX' ) { // PHP 5.4.16+ supported on LINUX platform only
 }
 define ('SCENT_PHPVERSIONS',	serialize($supportedPhpVersions) );
 
+// Minimum and maximum supported version for MySQL
+define ('SCENT_MYSQLDB_MINVERSION', '5.6');
+define ('SCENT_MYSQLDB_MAXVERSION', '5.7');
+
 define ('ADOBE_VERSIONS',		serialize( array( // used to detect if installed IDS is supported by Enterprise
 	// Major/minor version, oldest version first, latest as last one.
 	'CS6' => '8.0',
