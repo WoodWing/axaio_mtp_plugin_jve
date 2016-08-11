@@ -4,13 +4,6 @@
  * @subpackage ServerPlugins
  * @since      v10.1
  * @copyright  WoodWing Software bv. All Rights Reserved.
- *
- * @todo:
- * - handle configuration for output file format (now jpeg hard coded)
- * - the ContentDx/ContentDy seems not to be telly among the PHP modules
- * - the MetaData->ContentMetaData->Dpi (300) returned for native image may not be correct?
- * - clean the transfer server folder and temp folder after image processing
- * - error handling and error logging
  */
 
 class BizImageConverter
@@ -73,7 +66,7 @@ class BizImageConverter
 
 				$attachment = new Attachment();
 				$attachment->Type = 'image/jpeg';
-				$attachment->Rendition = 'preview';
+				$attachment->Rendition = 'output';
 				$attachment->FilePath = $outputFilePath;
 				$this->outputImageAttachment = $attachment;
 			}
@@ -106,9 +99,11 @@ class BizImageConverter
 		BizServerPlugin::runConnector( $connector, 'setInputDimension', array(
 			$this->inputImageProps['Width'], $this->inputImageProps['Height'], $this->inputImageProps['Dpi'] ) );
 		if( $placement->ContentDx || $placement->ContentDy ) {
-			BizServerPlugin::runConnector( $connector, 'crop', array(
-				-$placement->ContentDx, -$placement->ContentDy,
-				$placement->Width, $placement->Height, 'points' ) );
+			$left = $placement->ScaleX ? -$placement->ContentDx / $placement->ScaleX : -$placement->ContentDx;
+			$top = $placement->ScaleY ? -$placement->ContentDy / $placement->ScaleY : -$placement->ContentDy;
+			$width = $placement->ScaleX ? $placement->Width / $placement->ScaleX : $placement->Width;
+			$height = $placement->ScaleY ? $placement->Height / $placement->ScaleY : $placement->Height;
+			BizServerPlugin::runConnector( $connector, 'crop', array( $left, $top, $width, $height, 'points' ) );
 		}
 		if( $placement->ScaleX || $placement->ScaleY ) {
 			BizServerPlugin::runConnector( $connector, 'scale', array( $placement->ScaleX, $placement->ScaleY ) );
