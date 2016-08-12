@@ -761,7 +761,7 @@ class BizPublishing
 	 * Perform publishing operation for a given dossier.
 	 *
 	 * @param PubPublishedDossier $inPubDossier
-	 * @param boolean $operation Preview, Publish, Update or UnPublish
+	 * @param string $operation Preview, Publish, Update or UnPublish
 	 * @return PubPublishedDossier
 	 */
 	private function doProcessDossier( $inPubDossier, $operation )
@@ -841,6 +841,31 @@ class BizPublishing
 								unset($children[$childId]);
 							}
 						}
+					}
+				}
+			}
+
+			//
+			if( BizSettings::isFeatureEnabled('ContentStationCropOnPublishForm') ) {
+				require_once BASEDIR.'/server/bizclasses/BizImageConverter.class.php';
+				$bizImageConverter = new BizImageConverter();
+				foreach( $children as $child ) {
+					if( $child->MetaData->BasicMetaData->Type == 'PublishForm' ) {
+						foreach( $child->Relations as $relation ) {
+							if( $relation->Type == 'Placed' && $relation->ChildInfo->Type == 'Image' &&
+								 $bizImageConverter->loadNativeFileForInputImage( $relation->ChildInfo->ID )) {
+
+								foreach( $relation->Placements as $placement ) {
+									if( $bizImageConverter->cropAndScaleImageByPlacement( $placement ) ) {
+										// This is a ghost property which is not described in the WSDL. The publish connectors should
+										// use this image to publish with if the property is set.
+										$placement->ImageCropAttachment = $bizImageConverter->getOutputImageAttachment();
+									}
+								}
+							}
+						}
+						// We only need to use the PublishForm properties. Once we have it we can stop looping.
+						break;
 					}
 				}
 			}

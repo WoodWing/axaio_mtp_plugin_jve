@@ -47,28 +47,18 @@ class BizImageConverter
 	{
 		$this->inputImageAttachment = null;
 		$this->inputImageProps = array();
-		$this->outputImageAttachment = null;
+		$this->inputImageObject = null;
 		try {
 			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 			$user = BizSession::getShortUserName();
-			$imageObject = BizObject::getObject( $imageId, $user, false/*lock*/,
+			$this->inputImageObject = BizObject::getObject( $imageId, $user, false/*lock*/,
 				'native'/*rendition*/, array( 'MetaData' ) );
 
-			$outputFilePath = $this->createOutputFile(
-				$imageObject->MetaData->ContentMetaData->Format,
-				$imageObject->MetaData->BasicMetaData->Type ); // could be Image or Advert
-
-			if( $imageObject && $imageObject->Files[0] && $outputFilePath ) {
-				$this->inputImageAttachment = $imageObject->Files[0];
-				$this->inputImageProps['Dpi'] = $imageObject->MetaData->ContentMetaData->Dpi;
-				$this->inputImageProps['Width'] = $imageObject->MetaData->ContentMetaData->Width;
-				$this->inputImageProps['Height'] = $imageObject->MetaData->ContentMetaData->Height;
-
-				$attachment = new Attachment();
-				$attachment->Type = 'image/jpeg';
-				$attachment->Rendition = 'output';
-				$attachment->FilePath = $outputFilePath;
-				$this->outputImageAttachment = $attachment;
+			if( $this->inputImageObject && $this->inputImageObject->Files[0] ) {
+				$this->inputImageAttachment = $this->inputImageObject->Files[0];
+				$this->inputImageProps['Dpi'] = $this->inputImageObject->MetaData->ContentMetaData->Dpi;
+				$this->inputImageProps['Width'] = $this->inputImageObject->MetaData->ContentMetaData->Width;
+				$this->inputImageProps['Height'] = $this->inputImageObject->MetaData->ContentMetaData->Height;
 			}
 		} catch( BizException $e ) {
 		}
@@ -83,13 +73,23 @@ class BizImageConverter
 	 */
 	public function cropAndScaleImageByPlacement( Placement $placement )
 	{
-		if( !$this->inputImageAttachment || !$this->outputImageAttachment ) {
+		if( !$this->inputImageAttachment ) {
 			return false;
 		}
 		$connector = $this->getBestConnector( $this->inputImageAttachment->Type );
 		if( !$connector ) {
 			return false;
 		}
+
+		$outputFilePath = $this->createOutputFile(
+			$this->inputImageObject->MetaData->ContentMetaData->Format,
+			$this->inputImageObject->MetaData->BasicMetaData->Type ); // could be Image or Advert
+
+		$attachment = new Attachment();
+		$attachment->Type = 'image/jpeg';
+		$attachment->Rendition = 'output';
+		$attachment->FilePath = $outputFilePath;
+		$this->outputImageAttachment = $attachment;
 
 		BizServerPlugin::runConnector( $connector, 'resetOperations', array() );
 		BizServerPlugin::runConnector( $connector, 'setInputFilePath', array(
