@@ -521,7 +521,6 @@ class BizPublishForm
 			$bizImageConverter = new BizImageConverter();
 			$inlineImages = array();
 			if( $xFrame->InlineImageIds ) {
-				$user = BizSession::getShortUserName();
 				foreach( $xFrame->InlineImageIds as $key => $imgId ) {
 					$imgInfo = $xFrame->InlineImageInfos[$key];
 					$placement = new Placement();
