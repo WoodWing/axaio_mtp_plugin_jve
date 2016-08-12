@@ -99,7 +99,7 @@ class DBTargetEdition extends DBBase {
      * @param int $channelId, optional, if not empty only rows for this channel will be removed.
      * @param int $issueId, optional, if not empty only rows for this issue will be removed.
      * @param int $editionId, optional, if not empty only rows for this edition will be removed.
-    **/
+     */
     public static function removeSomeTargetEditionsByObject( $objectId, $channelId = null, $issueId = null, $editionId = null )
     {
 		self::clearError();
@@ -311,6 +311,7 @@ class DBTargetEdition extends DBBase {
 	 * Returns the database Ids of the targeteditions table. Ids are returned of relational targets between a parent
 	 * object and its children. Filtering can be done by passing e.g. a specific issue id. If null is passed no
 	 * filtering is done.
+	 *
 	 * @param int    			$parentId Id of the parent object.
 	 * @param string|null 		$type Relation type, null for all relations
 	 * @param int|null 		$channelId Channel id or null  	

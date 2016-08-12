@@ -597,9 +597,9 @@ class DBQuery extends DBBase
 	}
 
 	/**
-	 * Returns the object ids already in the authorization view. 
+	 * Returns the object ids already in the authorization view.
+	 *
 	 * @param array with the object ids as key.
-	 * 
 	 * @returns array rows with object ids already in the authorization view.
 	 */
 	static public function getObjectsFromAuthorizationView($objectIds)

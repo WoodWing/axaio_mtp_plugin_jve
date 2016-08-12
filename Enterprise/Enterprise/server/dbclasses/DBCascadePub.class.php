@@ -113,7 +113,7 @@ class DBCascadePub extends DBBase
 	 * This includes editions, sections, deadlines, authorizations, workflow and routing.
 	 *
 	 * @param int $srcPubId The Id of the Brand (Publication) that contains the issue.
-	 * @param string $copyChanId Id of destination channel to copy issues into. Duplicate Issue passes zero to copy within same channel.
+	 * @param int $copyChanId Id of destination channel to copy issues into. Duplicate Issue passes zero to copy within same channel.
 	 * @param array $srcIssueRow Source issue row to be copied.
 	 * @param AdmIssue $copyIssueObj New issue to be copy.
 	 * @param string $namePrefix Debug feature; name prefix to apply to all copied items inside issue. Just to ease recognizion.
@@ -138,7 +138,7 @@ class DBCascadePub extends DBBase
 	 *
 	 * @param int $srcPubId The Id of the Brand (Publication) that contains the source issue.
 	 * @param int $copyPubId The Id of the Brand (Publication) that will contain the new issue.
-	 * @param string $copyChanId Id of destination channel to copy issues into. Duplicate Issue passes zero to copy within same channel.
+	 * @param int $copyChanId Id of destination channel to copy issues into. Duplicate Issue passes zero to copy within same channel.
 	 * @param array $srcIssueRow Source issue row to be copied.
 	 * @param AdmIssue $copyIssueObj New issue to be copy.
 	 * @see DBCascadePub::copyIssue.
@@ -402,7 +402,7 @@ class DBCascadePub extends DBBase
 	 * Copies all extra metadata for a given issue. Values are added by an update statement
 	 * as these fields are blobs.
 	 *
-	 * @param string $srcIssueId  Id of source issue to copy extra metadata from.
+	 * @param int $srcIssueId  Id of source issue to copy extra metadata from.
 	 * @param AdmIssue $copyIssueObj The copied object.
 	 * @return void
 	 */

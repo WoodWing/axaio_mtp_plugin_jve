@@ -251,7 +251,7 @@ class DBPublishHistory extends DBBase
 	 * @param int $dossierid object id of the published dossier
 	 * @param int $channelid the publish channel
 	 * @param int $issueid the issue of the publish channel
-	 * @return boolean|null True if the dossier is published, flase if not. Null on error.
+	 * @return boolean|null True if the dossier is published, false if not. Null on error.
 	 */
 	public static function isDossierWithinIssuePublished( $dossierid, $channelid, $issueid )
 	{

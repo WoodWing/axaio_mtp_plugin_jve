@@ -96,7 +96,6 @@ class DBSection extends DBBase
 	 * @param  mixed $fieldnames see function description
 	 * @return  null in case of error, otherwise see functiondescription
 	 */
-
 	public static function listIssueSections( $issueid, $fieldnames = '*' )
 	{
 		return self::listRows( 'issuesection', 'id', 'section', "`issue` = '$issueid' ", $fieldnames );
@@ -114,12 +113,10 @@ class DBSection extends DBBase
 	 * @param  mixed $fieldnames see function description.
 	 * @return  null in case of error, else see function description
 	 */
-
 	public static function getIssueSection( $issueid, $sectiondefid, $fieldnames = '*' )
 	{
 		return self::getRow( 'issuesection', " ( `issue` = '$issueid' AND `section` = '$sectiondefid' ) ", $fieldnames );
 	}
-
 
     /**
      *  updates a Section (record in the issuesections-table) with the values supplied in $values
@@ -128,13 +125,11 @@ class DBSection extends DBBase
      *         The array does NOT need to contain all values, only values that are to be updated.
      *  @return true if succeeded, false if an error occured.
      **/
-    
     public static function updateIssueSection($issuesectionid, $values)
     {
         return self::updateRow('issuesection', $values, "`id` = '$issuesectionid' ");
     }
 
-    
     /**
      * Inserts a Section for issue $issueId, defined by $sectionDefId
      *
@@ -225,7 +220,7 @@ class DBSection extends DBBase
      *  Gets exactly one section object with id $sectionId from DB
      *  @param  $sectionId Id of the section to get the values from
      *  @return object of section if succeeded, null if no record returned
-    **/
+	  */
 	static public function getSectionObj( $sectionId )
     {
     	$row   = self::getRow(self::TABLENAME, "`id` = '$sectionId' ", '*');
@@ -236,12 +231,12 @@ class DBSection extends DBBase
 	/**
 	 *  Create new section object
 	 *
-	 * @param string $pubId publication that new section belongs to
-	 * @param string $issueId Issue that new section belongs to
+	 * @param int $pubId publication that new section belongs to
+	 * @param int $issueId Issue that new section belongs to
 	 * @param array $sections array of new sections that will created
 	 * @return array of new created section objects - throws BizException on failure
 	 * @throws BizException
-	 **/
+	 */
 	public static function createSectionsObj( $pubId, $issueId, $sections )
 	{
 		$dbdriver = DBDriverFactory::gen();
@@ -269,12 +264,12 @@ class DBSection extends DBBase
 	/**
 	 *  Modify Section object
 	 *
-	 * @param string $pubId Publication that Section belongs to
-	 * @param string $issueId Issue that Section belongs to
+	 * @param int $pubId Publication that Section belongs to
+	 * @param int $issueId Issue that Section belongs to
 	 * @param array $sections array of sections that need to be modified
 	 * @return array of modified Section objects - throws BizException on failure
 	 * @throws BizException
-	 **/
+	 */
 	public static function modifySectionsObj( $pubId, $issueId, $sections )
 	{
 		$dbdriver = DBDriverFactory::gen();
@@ -301,11 +296,11 @@ class DBSection extends DBBase
 	
     /**
      *  Converts object value to an array
-     *  @param  string $pubId publication id
-     *  @param  string $issueId issue id
+     *  @param  int $pubId publication id
+     *  @param  int $issueId issue id
      *  @param  object $obj section object
      *  @return array of section value
-    **/
+     */
 	static public function objToRow ( $pubId, $issueId, $obj )
 	{
 		$fields = array();
@@ -340,7 +335,7 @@ class DBSection extends DBBase
      *  It return an object with the mapping value for row to object
      *  @param  $row row contains key values
      *  @return object of section
-    **/
+     */
 	static public function rowToObj ( $row )
 	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';

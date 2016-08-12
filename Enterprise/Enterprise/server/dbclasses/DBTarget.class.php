@@ -224,8 +224,7 @@ class DBTarget extends DBBase
      * @param string $version date at which object must get/is published
      * @param string $user short name of 'publisher'
      * @return the id of the added entry in the publishhistory table
-	 *
-	 */
+	  */
     static public function updatePublishInfoDossier($objectid, $channelid, $issueid, $externalid, $action, $publisheddate, $version, $user )
 	{
     	$tablename = self::TABLENAME;
@@ -440,8 +439,7 @@ class DBTarget extends DBBase
      * 
      * @param int $objectId, required id of an object
      * @return false in case of error else true
-    **/
-
+     */
     public static function removeAllTargetsByObject( $objectId )
     {
 		self::clearError();
@@ -464,7 +462,7 @@ class DBTarget extends DBBase
      * @param int $channelId, optional, if not empty only targets for this channel will be removed.
      * @param int $issueId, optional, if not empty only targets for this issue will be removed.
      * @throws BizException
-    **/
+     */
     public static function removeSomeTargetsByObject( $objectId, $channelId = null, $issueId = null )
     {
 		self::clearError();

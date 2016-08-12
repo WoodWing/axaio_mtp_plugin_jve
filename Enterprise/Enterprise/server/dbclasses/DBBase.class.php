@@ -156,6 +156,7 @@ class DBBase
 
 	/**
 	 * Add a 'limit by' clause to the sql statement.
+	 *
 	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @param string $sql
 	 * @param array $limit Contains two key/value pairs. $limit['min'] is the offset,
