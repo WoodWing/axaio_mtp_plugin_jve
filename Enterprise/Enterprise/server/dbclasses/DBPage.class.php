@@ -55,6 +55,7 @@ class DBPage extends DBBase
 	 * @param null|int $pageid
 	 * @param null|int $edition (about how to use see the explanation in the class header).
 	 * @param bool $unique
+	 * @param bool $resolveEditionName If true the edition name is also returned.
 	 * @return Resource
 	 */
 	public static function getPages( $objid, $instance, $pageid=null, $edition = null, $unique = false, $resolveEditionName = false )
@@ -237,15 +238,18 @@ class DBPage extends DBBase
 	}
 
 	/**
-	 *	Lists all pages of a specific issue (and possibly edition), either in normal order or reverse order.
-	 *	@param $issueid integer: id of the issue to get the rows for
-	 *	@param $editionid integer: About how to use see the explanation in the class header.
-	 *	@param $instance string: either empty, production or ???planning???
+	 * Lists all pages of a specific issue (and possibly edition), either in normal order or reverse order.
 	 *
-	 *	@return array of rows describing individual pages.
-	**/
-	
-	public static function listIssuePages($issueid, $editionid = 0, $pageordered = false, $sectionid=0, $layoutid=0, $instance = 'Production')
+	 * @param int $issueid integer: id of the issue to get the rows for
+	 * @param int $editionid integer: About how to use see the explanation in the class header.
+	 * @param bool $pageordered If true sort on 'pageorder' else on 'code' (sorting order).
+	 * @param int $sectionid The section (category) Id. 0 means do not filter.
+	 * @param int $layoutid The object Id of the layout to filer on. 0 means do not filter.
+	 * @param string $instance string: either empty, production or ???planning???
+	 *
+	 * @return array of rows describing individual pages.
+	 */
+	public static function listIssuePages( $issueid, $editionid = 0, $pageordered = false, $sectionid = 0, $layoutid = 0, $instance = 'Production' )
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$pagTable = $dbDriver->tablename(self::TABLENAME);

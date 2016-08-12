@@ -42,7 +42,6 @@ class DBBase
 	 * The table has "temp_" prefix.
 	 *
 	 * @param $viewid string three-letter id of the temporary table
-	 * @param boolean $resetCache Obsoleted!!! was not used anyway...
 	 * @return string created table name, typcially temp_abc
 	 */
 	static public function getTempIds($viewid)
@@ -114,7 +113,6 @@ class DBBase
 	/**
 	 * Tells if a DB error was raised.
 	 *
-	 * @param string $error
 	 */
 	static public function hasError()
 	{
@@ -158,7 +156,8 @@ class DBBase
 
 	/**
 	 * Add a 'limit by' clause to the sql statement.
-	 * @param DBDriverFactory $dbDriver
+	 *
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @param string $sql
 	 * @param array $limit Contains two key/value pairs. $limit['min'] is the offset,
 	 * $limit['max'] the maximum number of rows to return.
@@ -219,9 +218,9 @@ class DBBase
 	}	
 	
 	/**
-	 * Updates a row in table $tablename with $values where $where. If a field is of the type blob
+	 * Updates a row in table $tablename with $params where $where. If a field is of the type blob
 	 * the value must be passed by using the $blob parameter. The value of the blob field 
-	 * in $values must be set to the keyword #BLOB#, $values[<fieldname>] = '#BLOB#'.
+	 * in $params must be set to the keyword #BLOB#, $params[<fieldname>] = '#BLOB#'.
 	 *
 	 * @param string $tablename
 	 * @param array $values
@@ -249,7 +248,7 @@ class DBBase
 		$sql .= "UPDATE $tablename SET ";
 		$comma = '';
 
-		// Go through the values, create the SQL part and add the field to the params for the update.
+		// Go through the params, create the SQL part and add the field to the params for the update.
 		foreach ($values as $fieldname => $value)	
 		{
 			// If the field is a BLOB value, then we should add it directly to the Query results
@@ -279,9 +278,9 @@ class DBBase
 	}
 
 	/**
-	 * Inserts a row in table $tablename with $values. If a field is of the type blob
+	 * Inserts a row in table $tablename with $params. If a field is of the type blob
 	 * the value must be passed by using the $blob parameter. The value of the blob field 
-	 * in $values must be set to the keyword #BLOB#, $values[<fieldname>] = '#BLOB#'. 
+	 * in $params must be set to the keyword #BLOB#, $params[<fieldname>] = '#BLOB#'.
 	 *
 	 * @param string $tablename
 	 * @param array $values
@@ -339,8 +338,8 @@ class DBBase
 	 * Calling this function instead of {@link: insertRow()} multiple times when dealing with multiple rows insertion,
 	 * as this function does all the insertion in one go, and therefore it'll be much faster.
 	 *
-	 * $values structure looks like this:
-	 * $values = array(
+	 * $params structure looks like this:
+	 * $params = array(
 	 *              array( 1,2,3,4 ),
 	 *              array( 5,6,7,8 ),
 	 *              array( 9,10,11,12 )
@@ -348,7 +347,7 @@ class DBBase
 	 *
 	 * @param string $tableName Table name without the 'smart_' prefix.
 	 * @param string[] $columns List of DB field names.
-	 * @param array[] $values List of array list which contains the database values. Refer to function header.
+	 * @param array[] $values List of array list which contains the database params. Refer to function header.
 	 * @param bool $autoincrement Whether the table to be inserted has autoincrement db field.
 	 * @param bool $writeLog In case of license related queries, this option can be used to not write in the log file.
 	 * @param bool $logExistsErr Suppress 'already exists' errors.
@@ -374,14 +373,14 @@ class DBBase
 	 *
 	 * @param string $tablename
 	 * @param string $where
-	 * @param array $fieldnames. Either an array containing the fieldnames to get or anything else in which case all fields are returned.
+	 * @param mixed $fieldnames. Either an array containing the fieldnames to get or '*' in which case all fields are returned.
 	 * @param array $params, containing parameters to be substituted for the placeholders
 	 *        of the where clause. 
 	 * @param array $orderBy List of fields to order (in case of many results, whereby the first/last row is wanted).
 	 *        Keys: DB fields. Values: TRUE for ASC or FALSE for DESC. NULL for no ordering.
 	 * @param string|array $blob Chunck of data to store at DB. It will be converted to a DB string here.
 	 *                           One blob can be passed or multiple. If muliple are passed $blob is an array.
-	 * @return array with values or null if no row found.
+	 * @return array with params or null if no row found.
 	 */
 	static public function getRow( $tablename, $where, $fieldnames = '*', $params = array(), $orderBy = null, $blob=null )
 	{
@@ -433,9 +432,9 @@ class DBBase
 	 * List all rows from $tablename where $where.
 	 * What is exactly returned depends on the value of $fieldnames:
 	 * - Either null or false -> returns an array of rows indexed by the value in $keycol, each containing the name ($namecol) of the row.
-	 * - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with values.
-	 * - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with values in $fieldnames.
-	 * - An array with field names at values and table var names at keys -> for example: array( 'm' => array( '*' ), 'u' => array( 'id', 'user' ) )
+	 * - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with params.
+	 * - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with params in $fieldnames.
+	 * - An array with field names at params and table var names at keys -> for example: array( 'm' => array( '*' ), 'u' => array( 'id', 'user' ) )
 	 * @param string|array $tableNames One table name. Can also be a list of table names: array( 'u' => 'users', 'm' => 'messages' )
 	 * @param string $keycol  Used as keys at the result array. Leave empty to use [0...N-1] array keys. 
 	 * @param string $namecol
@@ -443,13 +442,13 @@ class DBBase
 	 * @param mixed  $fieldnames, see function description
 	 * @param array  $params ,containing parameters to be substituted for the placeholders
 	 *        of the where clause.
-	 * @param array $orderBy List of fields to order (in case of many results, whereby the first/last row is wanted).
+	 * @param array|null $orderBy List of fields to order (in case of many results, whereby the first/last row is wanted).
 	 *        Keys: DB fields. Values: TRUE for ASC or FALSE for DESC. NULL for no ordering.
-	 * @param array $limit Keys: 'min' specifies the offset of the first row to return,
+	 * @param array|null $limit Keys: 'min' specifies the offset of the first row to return,
 	 * 		  'max' specifies the maximum number of rows to return. E.g. ('min' => 5, 'max' => 10) means
 	 * 		  retrieve rows 6-15. The offset of the initial row is 0 (not 1).
-	 * $param array $groupBy List of fields on which the result set is grouped.
-	 * $param string $having Indicates the condition or conditions that the grouped by rows must satisfy to be selected.
+	 * @param array|null $groupBy List of fields on which the result set is grouped.
+	 * @param string|null $having Indicates the condition or conditions that the grouped by rows must satisfy to be selected.
 	 * @return array of rows (see function description) or null on failure (use getError() for details)
 	 */
 	static public function listRows(
@@ -548,39 +547,36 @@ class DBBase
 	 *
 	 * @param string $tableName Table name without the 'smart_' prefix.
 	 * @param string $keyCol The primary key column to search on.
-	 * @param int $startRow The starting row.
-	 * @param int $limit The number of records to retrieve.
-	 * @param string $sortOrder 'ASC' or 'DESC', if left empty defaults to 'ASC';
-	 * @param string $sortField The field to do sorting on.
+	 * @param string $where SQL-where clause.
 	 * @param array $params The params to use in the query.
+	 * @param array|null $orderBy Fields to sort on.
+	 * @param array $limit The number of records to retrieve.
 	 * @return array of rows.
 	 */
-	public static function listPagedRows( $tableName, $keyCol, $where, $values = array(), $orderBy, $limit, $params )
-    {
+	public static function listPagedRows( $tableName, $keyCol, $where, $params = array(), $orderBy = null, $limit )
+	{
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
 
-	    $params = $params;
+		// Preconstruct the order by.
+		$orderBySQL = ( !is_null( $orderBy ) ) ? self::addOrderByClause( '', $orderBy ) : '';
 
-	    // Preconstruct the order by.
-	    $orderBySQL = (!is_null( $orderBy )) ? self::addOrderByClause( '', $orderBy ) : '';
+		// Retrieve the fully composed query for the paged resultset.
+		$sql = $dbDriver->composePagedQuerySql( $tableName, $keyCol, $where, $orderBySQL, $limit, $params );
 
-	    // Retrieve the fully composed query for the paged resultset.
-	    $sql = $dbDriver->composePagedQuerySql( $tableName, $keyCol, $where, $orderBySQL, $limit, $values );
-
-	    // In case a driver does not support an updated query we have to run a normal listRows
-	    // to fetch the results, as is the case with the Oracle driver for example.
-		if (false === $sql) {
-			$rows =  self::listRows($tableName, $keyCol, '', $where, '*', $values, $orderBy, $limit);
-		}else {
+		// In case a driver does not support an updated query we have to run a normal listRows
+		// to fetch the results, as is the case with the Oracle driver for example.
+		if( false === $sql ) {
+			$rows = self::listRows( $tableName, $keyCol, '', $where, '*', $params, $orderBy, $limit );
+		} else {
 			// Run the query, fetch the results and return the rows.
-			$sth = $dbDriver->query( $sql, $values );
+			$sth = $dbDriver->query( $sql, $params );
 			if( is_null( $sth ) ) {
 				$err = trim( $dbDriver->error() );
-				self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
+				self::setError( empty( $err ) ? BizResources::localize( 'ERR_DATABASE' ) : $err );
 				$rows = null;
 			} else {
-				$rows =  self::fetchResults( $sth, $keyCol, true );
+				$rows = self::fetchResults( $sth, $keyCol, true );
 			}
 		}
 		return $rows;
@@ -657,10 +653,10 @@ class DBBase
 	}
 	
 	/**
-	 * Based on an array of column/values pairs a where clause is generated with
-	 * the proper number of ?-s. The values are returned as substitutes which
-	 * can later on be used to replace the ?-s. The column/values must be passed
-	 * as an array with the columns as keys and the values as an array.
+	 * Based on an array of column/params pairs a where clause is generated with
+	 * the proper number of ?-s. The params are returned as substitutes which
+	 * can later on be used to replace the ?-s. The column/params must be passed
+	 * as an array with the columns as keys and the params as an array.
 	 * E.g.
 	 * [column1]	[1]
 	 * 				[2]
@@ -726,7 +722,7 @@ class DBBase
 	 * When NULL, no action is taken.
 	 *
 	 * @param string $versionProp Version property in major.minor notation
-	 * @param array $verArr Returns split values at keys "majorversion" and "minorversion".
+	 * @param array $row Array with key/vlue pairs containing the major and minor version.
 	 * @param string $fieldPrefix Prefix for "majorversion" and "minorversion" field names.
 	 */
     static protected function splitMajorMinorVer( $versionProp, &$row, $fieldPrefix )
@@ -750,7 +746,7 @@ class DBBase
 	 * When NULL, no action is taken.
 	 *
 	 * @param string $versionProp Returns joined version property in major.minor notation
-	 * @param array $row DB row containing "majorversion" and "minorversion" key-values
+	 * @param array $row DB row containing "majorversion" and "minorversion" key-params
 	 * @param string $fieldPrefix Prefix for "majorversion" and "minorversion" field names.
 	 */
     static protected function joinMajorMinorVer( &$versionProp, $row, $fieldPrefix )
@@ -767,7 +763,7 @@ class DBBase
     }
 	
 	/**
-	 * Inserts records with the new values for passed columns.
+	 * Inserts records with the new params for passed columns.
 	 * @param string $table table name
 	 * @param string $dbIntClass DB Integrity class name
 	 * @param array $newValues column/value pairs of the columns to be inserted.
@@ -790,8 +786,12 @@ class DBBase
 	}	    
     
 	/**
-	 * Deletes records .....  
-	 * @param $whereParams column/array of value pairs for where clause
+	 * Deletes records .....
+	 *
+	 * @param array $whereParams column/array of value pairs for where clause
+	 * @param string $table Table from which records are deleted.
+	 * @param string $keyColumn  Used as keys at the result array. Leave empty to use [0...N-1] array keys.
+	 * @param string $dbIntClass Class name to instantiate the integrity object from.
 	 * @return number of records updated or null in case of error.
 	 */	
 	protected static function doDelete(array $whereParams, $table, $keyColumn, $dbIntClass)
@@ -824,9 +824,12 @@ class DBBase
 	}
 
 	/**
-	 * Updates records with the new values for passed columns.  
-	 * @param $whereParams column/array of value pairs for where clause
-	 * @param $newValues column/value pairs of the columns to be updated.
+	 * Updates records with the new params for passed columns.
+	 * @param array $whereParams column/array of value pairs for where clause
+	 * @param string $table Table from which records are deleted.
+	 * @param string $keyColumn  Used as keys at the result array. Leave empty to use [0...N-1] array keys.
+	 * @param string $dbIntClass Class name to instantiate the integrity object from.
+	 * @param array $newValues column/value pairs of the columns to be updated.
 	 * @return number of records updated or null in case of error.
 	 */
 	protected static function doUpdate(array $whereParams, $table, $keyColumn, $dbIntClass, array $newValues)
@@ -850,7 +853,7 @@ class DBBase
 		$intDB->setUpdateValues($newValues);
 		$intDB->beforeUpdate();
         
-		//Just past the key values of the records to be updated
+		//Just past the key params of the records to be updated
 		$whereParams = array($keyColumn => $rowIds);
 		$where = self::makeWhereForSubstitutes($whereParams, $params);
 		self::updateRow($table, $newValues, $where, $params);
@@ -877,15 +880,15 @@ class DBBase
 	}
 
 	/**
-	 * This method converts an array with integer values to a where clause.
+	 * This method converts an array with integer params to a where clause.
 	 * If the array contains one element the '=' operator is used else the 'in'
 	 * operator will be used. If the number of passed array elements exceeds 1000
 	 * then more than one IN-clause is generated.This is because of Oracle limitations.
 	 * This is a very exceptional case.
 	 *
 	 * @param string $fieldname database column name
- 	 * @param array (integer) $arrayValues values to filter on
- 	 * @param bool $not to negate the values
+ 	 * @param array (integer) $arrayValues params to filter on
+ 	 * @param bool $not to negate the params
 	 * @return string which can be added to where clause
 	 */
 	static public function addIntArrayToWhereClause( $fieldname, $arrayValues, $not )

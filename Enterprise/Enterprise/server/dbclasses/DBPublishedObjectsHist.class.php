@@ -125,4 +125,3 @@ class DBPublishedObjectsHist extends DBBase
 		return $result;
 	}
 }
-?>

@@ -992,6 +992,8 @@ class DBDatasource extends DBBase
 		self::clearError();
 		
 		$fieldnames = array('id', 'objectid');
+		$where = '';
+		$params = array();
 		if( $updateid ) {
 			$updateid = intval($updateid);
 			$where = '`updateid` = ?';
@@ -1054,7 +1056,8 @@ class DBDatasource extends DBBase
 		
 		$updateid = intval($updateid);
 		$objectid = intval($objectid);
-		
+		$where = '';
+		$params = array();
 		if( $updateid ) {
 			$where = '`updateid` = ? AND `objectid` = ?';
 			$params = array($updateid);
@@ -1069,4 +1072,3 @@ class DBDatasource extends DBBase
 		return $result;		
 	}
 }
-?>

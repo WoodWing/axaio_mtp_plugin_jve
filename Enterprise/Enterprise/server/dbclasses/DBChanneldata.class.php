@@ -99,7 +99,8 @@ class DBChanneldata extends DBBase
 	 * @since 7.5.0
 	 *
 	 * @param integer $issueId
-	 * @param string $name Property value
+	 * @param string $name Property name.
+	 * @param mixed $value Value of the property.
 	 * @return boolean Whether or not successful.
 	 */
 	public static function setCustomPropertyValueForIssue( $issueId, $name, $value )
@@ -206,8 +207,6 @@ class DBChanneldata extends DBBase
 	 *
 	 * @param integer $issueId
 	 * @param integer $sectionId
-	 * @param string $name Property name
-	 * @param string $value Property value
 	 * @return boolean Whether or not successful.
 	 */
 	public static function deleteSectionMappingsForIssue( $issueId, $sectionId )
@@ -317,6 +316,7 @@ class DBChanneldata extends DBBase
 	 * @param integer $id Admin data object ID
 	 * @return array List of AdmExtraMetaData (the retrieved custom props).
 	 * @param array $typeMap Lookup table with custom property names as keys and types as values.
+	 * @throws BizException
 	 */
 	public static function getCustomProperties( $entity, $id, $typeMap )
 	{
@@ -391,7 +391,9 @@ class DBChanneldata extends DBBase
 	 * @param string $entity 'Publication', 'PubChannel' or 'Issue'
 	 * @param integer $id Admin data object ID
 	 * @param AdmExtraMetaData $extraMetaData Custom admin property to store.
+	 * @param string $type Custom property type.
 	 * @return boolean Whether or not successful.
+	 * @throws BizException
 	 */
 	private static function insertCustomProperty( $entity, $id, AdmExtraMetaData $extraMetaData, $type )
 	{
@@ -431,6 +433,8 @@ class DBChanneldata extends DBBase
 	 * @param integer $id Admin data object ID
 	 * @param AdmExtraMetaData $extraMetaData Custom admin property to store.
 	 * @return boolean Whether or not successful.
+	 * @param string $type Custom property type.
+	 * @throws BizException
 	 */
 	private static function updateCustomProperty( $entity, $id, AdmExtraMetaData $extraMetaData, $type )
 	{
@@ -471,6 +475,7 @@ class DBChanneldata extends DBBase
 	 * @param integer $id Admin data object ID
 	 * @param string $name Custom admin property name.
 	 * @return boolean Whether or not exists.
+	 * @throws BizException
 	 */
 	private static function doesCustomPropertyExist( $entity, $id, $name )
 	{

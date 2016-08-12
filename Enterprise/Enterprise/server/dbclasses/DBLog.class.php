@@ -113,6 +113,7 @@ class DBLog extends DBBase
 	 *
 	 * @param string $service Name of the web service being called/handled.
 	 * @param Object $object The related object
+	 * @param array|null $extraInfo
 	 */
 	static public function logServiceForObject( $service, $object, $extraInfo = null )
 	{
@@ -145,6 +146,7 @@ class DBLog extends DBBase
 	 * @param array $sections Array of sections for each id
 	 * @param array $states Array with states for each id
 	 * @param array $versions Array with versions for each id
+	 * @param array $routeTos Array with RouteTo information.
 	 */
 	static public function logMultiService( $user = null, $service = '', $ids = array(), $type = '',
 									   $publ = '', $sections = array(), $states = array(), $versions = array(), $routeTos = array() )

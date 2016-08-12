@@ -113,7 +113,8 @@ class DBIssue extends DBBase
 	/**
 	 * Returns if the specified issue has the overrule option set
 	 *
-	 * @param boolean Wether or not the issue overrules the brand
+	 * @param int $issueId
+	 * @return boolean True if issue is an overule brand issue, else false.
 	 */
 	static public function isOverruleIssue( $issueId )
 	{
@@ -137,6 +138,7 @@ class DBIssue extends DBBase
 	 * @param $pubId integer Id of brand that owns the channel
 	 * @param $channelType string Type of channel that owns the issue (e.g. 'print', 'web', etc)
 	 * @param $issueName string Name of issue to search for
+	 * @return mixed Issue Id or null when not found.
 	 */
     static public function findIssueId( $pubId, $channelType, $issueName )
     {
@@ -360,7 +362,7 @@ class DBIssue extends DBBase
 	
 	/**
 	 *  Lists ALL issues that overrule their publication in a array
-	 *  @return array (key-value), key being the issueId and value the publication id of that overrule issue
+	 *  @return array, key being the issueId and value the publication id of that overrule issue
 	 */
 	static public function listAllOverruleIssuesWithPub()
 	{
@@ -448,9 +450,11 @@ class DBIssue extends DBBase
 		$channelstable = $dbdriver->tablename('channels');
 		$result = array();
 
+		$whereinpublications = '';
 		if (!empty($publications)) {
 			$whereinpublications = implode(',', $publications);
 		}
+		$whereinissues = '';
 		if (!empty($issues)) {
 			$whereinissues = implode(',', $issues);
 		}
@@ -464,7 +468,7 @@ class DBIssue extends DBBase
 
 		$sth = $dbdriver->query($sql);
 		$rows = self::fetchResults($sth);
-		if (count($rows > 0)) {
+		if (count($rows) > 0) {
 			foreach ($rows as $row) {
 				$result[] = $row['id'];
 			}
@@ -510,7 +514,7 @@ class DBIssue extends DBBase
 	 * is in active or inactive status.
 	 *
 	 * @param int $issuedId Database of the issue ID.
-	 * @return  booelan True when active, False otherwise. 
+	 * @return  boolean True when active, False otherwise.
 	 */
 	static public function isIssueActive( $issuedId )
 	{

@@ -18,7 +18,7 @@ class DBPlacementTiles extends DBBase
 	 * Create placement tile
 	 *
 	 * @param integer $placementId Placement Id
-	 * @param object $placementTiles Array of workflow placementtile objects
+	 * @param PlacementTile $placementTiles Array of workflow placementtile objects
 	 * @return integer|boolean New inserted row DB Id when record is successfully inserted; False otherwise.
 	 */
 	static public function createPlacementTile( $placementId, $placementTiles )

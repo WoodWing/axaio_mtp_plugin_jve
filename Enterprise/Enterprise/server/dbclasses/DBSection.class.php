@@ -68,7 +68,7 @@ class DBSection extends DBBase
      *  - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with all values.
      *  - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with the values in $fieldnames.
      *
-	 * @param int $issueid Id of the issue, if $issueid = 0, null is returned;
+	 * @param int $issueId Id of the issue, if $issueid = 0, null is returned;
 	 * @param mixed $fieldnames See function description
 	 * @param bool $nopubldefs
 	 * @return array|null
@@ -84,40 +84,39 @@ class DBSection extends DBBase
             return $nopubldefs ? null : self::listPublSectionDefs($issue['publication']);   
         }
     }
-    
-    /**
-     *  Lists all sections for the issue
-     *  What is exactly returned depends on the value of $fieldnames:
-     *  - Either null or false -> returns an array of rows indexed by the value in $keycol, each containing the name ($namecol) of the row.
-     *  - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with all values.
-     *  - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with the values in $fieldnames.
-     *  @param  $issueid Id of the issue, if $issueid = 0 null is returned;
-     *  @param  $fieldnames see functiondescription
-     *  @return  null in case of error, otherwise see functiondescription
-    **/
 
-    public static function listIssueSections($issueid, $fieldnames = '*')
-    {
-        return self::listRows('issuesection','id','section',"`issue` = '$issueid' ", $fieldnames);
-    }
+	/**
+	 *  Lists all sections for the issue
+	 *  What is exactly returned depends on the value of $fieldnames:
+	 *  - Either null or false -> returns an array of rows indexed by the value in $keycol, each containing the name ($namecol) of the row.
+	 *  - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with all values.
+	 *  - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with the values in $fieldnames.
+	 *
+	 * @param  int $issueid Id of the issue, if $issueid = 0 null is returned;
+	 * @param  mixed $fieldnames see function description
+	 * @return  null in case of error, otherwise see functiondescription
+	 */
+	public static function listIssueSections( $issueid, $fieldnames = '*' )
+	{
+		return self::listRows( 'issuesection', 'id', 'section', "`issue` = '$issueid' ", $fieldnames );
+	}
 
-    /**
-     *  Gets exactly one section from issue $issueid, defined by $sectiondefid
-     *  What is exactly returned depends on the value of $fieldnames:
-     *  - Either null or false -> returns an array with the following two keys: 'id' and 'issue'.
-     *  - Either '*' or true -> returns an array with all fieldname-value-pairs of the issue.
-     *  - An array with fieldnames -> returns an array with the fieldname-value-pairs in $fieldnames.
-     *  @param  $issueid Id of the issue
-     *  @param  $sectiondefid Id of the sectiondefinition by which section is defined.
-     *  @param  $fieldnames see functiondescription
-     *  @return  null in case of error, else see function description
-    **/
-
-    public static function getIssueSection($issueid, $sectiondefid, $fieldnames = '*')
-    {
-        return self::getRow('issuesection'," ( `issue` = '$issueid' AND `section` = '$sectiondefid' ) ", $fieldnames);
-    }
-
+	/**
+	 *  Gets exactly one section from issue $issueid, defined by $sectiondefid
+	 *  What is exactly returned depends on the value of $fieldnames:
+	 *  - Either null or false -> returns an array with the following two keys: 'id' and 'issue'.
+	 *  - Either '*' or true -> returns an array with all fieldname-value-pairs of the issue.
+	 *  - An array with fieldnames -> returns an array with the fieldname-value-pairs in $fieldnames.
+	 *
+	 * @param  int $issueid Id of the issue
+	 * @param  int $sectiondefid Id of the sectiondefinition by which section is defined.
+	 * @param  mixed $fieldnames see function description.
+	 * @return  null in case of error, else see function description
+	 */
+	public static function getIssueSection( $issueid, $sectiondefid, $fieldnames = '*' )
+	{
+		return self::getRow( 'issuesection', " ( `issue` = '$issueid' AND `section` = '$sectiondefid' ) ", $fieldnames );
+	}
 
     /**
      *  updates a Section (record in the issuesections-table) with the values supplied in $values
@@ -126,13 +125,11 @@ class DBSection extends DBBase
      *         The array does NOT need to contain all values, only values that are to be updated.
      *  @return true if succeeded, false if an error occured.
      **/
-    
     public static function updateIssueSection($issuesectionid, $values)
     {
         return self::updateRow('issuesection', $values, "`id` = '$issuesectionid' ");
     }
 
-    
     /**
      * Inserts a Section for issue $issueId, defined by $sectionDefId
      *
@@ -223,85 +220,87 @@ class DBSection extends DBBase
      *  Gets exactly one section object with id $sectionId from DB
      *  @param  $sectionId Id of the section to get the values from
      *  @return object of section if succeeded, null if no record returned
-    **/
+	  */
 	static public function getSectionObj( $sectionId )
     {
     	$row   = self::getRow(self::TABLENAME, "`id` = '$sectionId' ", '*');
         if (!$row) return null;
         return self::rowToObj($row);
     }
-    
-    /**
-     *  Create new section object
-     *  
-     *  @param string $pubId publication that new section belongs to
-     *  @param string $issueId Issue that new section belongs to
-     *  @param array  $sections array of new sections that will created
-     *  @return array of new created section objects - throws BizException on failure
-    **/
-     public static function createSectionsObj( $pubId, $issueId, $sections )
-    {	
-    	$dbdriver = DBDriverFactory::gen();
-    	$newsections = array();
-    	
-    	foreach( $sections as $section ) {
-    		$values = self::objToRow($pubId, $issueId, $section);
-    		
-    		// check duplicates
-			$row = self::getRow(self::TABLENAME, "`section` = '" . $dbdriver->toDBString($values['section']) . "' and `publication` = '$values[publication]' and `issue` = '$values[issue]' ");
-			if($row) {
-				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
+
+	/**
+	 *  Create new section object
+	 *
+	 * @param int $pubId publication that new section belongs to
+	 * @param int $issueId Issue that new section belongs to
+	 * @param array $sections array of new sections that will created
+	 * @return array of new created section objects - throws BizException on failure
+	 * @throws BizException
+	 */
+	public static function createSectionsObj( $pubId, $issueId, $sections )
+	{
+		$dbdriver = DBDriverFactory::gen();
+		$newsections = array();
+
+		foreach( $sections as $section ) {
+			$values = self::objToRow( $pubId, $issueId, $section );
+
+			// check duplicates
+			$row = self::getRow( self::TABLENAME, "`section` = '".$dbdriver->toDBString( $values['section'] )."' and `publication` = '$values[publication]' and `issue` = '$values[issue]' " );
+			if( $row ) {
+				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null );
 			}
-			
-			self::insertRow(self::TABLENAME, $values );
-			$newid = $dbdriver->newid(self::TABLENAME, true);
-			if( !is_null($newid) ){
+
+			self::insertRow( self::TABLENAME, $values );
+			$newid = $dbdriver->newid( self::TABLENAME, true );
+			if( !is_null( $newid ) ) {
 				$newsection = DBSection::getSectionObj( $newid );
 				$newsections[] = $newsection;
-			}	
-    	}
-		return $newsections;
-    }
-    
-     /**
-     *  Modify Section object
-     *  
-     *  @param string $pubId Publication that Section belongs to
-     *  @param string $issueId Issue that Section belongs to
-     *  @param array  $sections array of sections that need to be modified
-     *  @return array of modified Section objects - throws BizException on failure
-    **/
-     public static function modifySectionsObj( $pubId, $issueId, $sections )
-    {	
-    	$dbdriver = DBDriverFactory::gen();
-    	$modifysections = array();
-    	
-    	foreach($sections as $section) {
-    		$values = self::objToRow( $pubId, $issueId, $section );
-
-    		// check duplicates
-			$row = self::getRow(self::TABLENAME, "`section` = '" . $dbdriver->toDBString($section->Name) . "' and `issue` = '$values[issue]' and `publication` = '$values[publication]' and `id` != '$section->Id'");
-			if($row) {
-				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
 			}
-		
-			$result = self::updateRow(self::TABLENAME, $values, " `id` = '$section->Id'");
-			
-			if( $result === true){
+		}
+		return $newsections;
+	}
+
+	/**
+	 *  Modify Section object
+	 *
+	 * @param int $pubId Publication that Section belongs to
+	 * @param int $issueId Issue that Section belongs to
+	 * @param array $sections array of sections that need to be modified
+	 * @return array of modified Section objects - throws BizException on failure
+	 * @throws BizException
+	 */
+	public static function modifySectionsObj( $pubId, $issueId, $sections )
+	{
+		$dbdriver = DBDriverFactory::gen();
+		$modifysections = array();
+
+		foreach( $sections as $section ) {
+			$values = self::objToRow( $pubId, $issueId, $section );
+
+			// check duplicates
+			$row = self::getRow( self::TABLENAME, "`section` = '".$dbdriver->toDBString( $section->Name )."' and `issue` = '$values[issue]' and `publication` = '$values[publication]' and `id` != '$section->Id'" );
+			if( $row ) {
+				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null );
+			}
+
+			$result = self::updateRow( self::TABLENAME, $values, " `id` = '$section->Id'" );
+
+			if( $result === true ) {
 				$modifysection = self::getSectionObj( $section->Id );
 				$modifysections[] = $modifysection;
-			}	
-    	}
-    	return $modifysections;
-    }
+			}
+		}
+		return $modifysections;
+	}
 	
     /**
      *  Converts object value to an array
-     *  @param  string $pubId publication id
-     *  @param  string $issueId issue id
+     *  @param  int $pubId publication id
+     *  @param  int $issueId issue id
      *  @param  object $obj section object
      *  @return array of section value
-    **/
+     */
 	static public function objToRow ( $pubId, $issueId, $obj )
 	{
 		$fields = array();
@@ -336,7 +335,7 @@ class DBSection extends DBBase
      *  It return an object with the mapping value for row to object
      *  @param  $row row contains key values
      *  @return object of section
-    **/
+     */
 	static public function rowToObj ( $row )
 	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
@@ -351,4 +350,3 @@ class DBSection extends DBBase
 		return $section;
 	}
 }
-?>
