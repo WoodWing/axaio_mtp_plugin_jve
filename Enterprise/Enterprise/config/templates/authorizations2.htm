@@ -330,6 +330,14 @@
 
 			element.preventDefault(); // Ensures that the page does not skip to the top.
 		});
+
+		/**
+		 * The Select All and Deselect All buttons are hyperlinks <a> with a href="#".
+		 * But that causes the page to scroll to top when clicked. This function avoids that.
+		 */
+		$( "a.preventdefault" ).click(function( event ) {
+			event.preventDefault();
+		});
 	});
 </script>
 

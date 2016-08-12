@@ -863,19 +863,19 @@ class Ww_Admin_Authorizations_App
 		$html .=
 			'<tr class="editbtnbar">'.
 			'<td><div class="btnbar"">'.
-			'<a href="#" onclick="javascript:$(\'#jstree_categories\').jstree(\'check_all\');">'.$select.'</a>'.
+			'<a href="#" class="preventdefault" onclick="javascript:$(\'#jstree_categories\').jstree(\'check_all\');">'.$select.'</a>'.
 			'<div class="separator"></div>'.
-			'<a href="#" onclick="javascript:$(\'#jstree_categories\').jstree(\'uncheck_all\');">'.$deselect.'</a>'.
+			'<a href="#" class="preventdefault" onclick="javascript:$(\'#jstree_categories\').jstree(\'uncheck_all\');">'.$deselect.'</a>'.
 			'</div></td>'.
 			'<td><div class="btnbar"">'.
-			'<a href="#" onclick="javascript:$(\'#jstree_statuses\').jstree(\'check_all\');">'.$select.'</a>'.
+			'<a href="#" class="preventdefault" onclick="javascript:$(\'#jstree_statuses\').jstree(\'check_all\');">'.$select.'</a>'.
 			'<div class="separator"></div>'.
-			'<a href="#" onclick="javascript:$(\'#jstree_statuses\').jstree(\'uncheck_all\');">'.$deselect.'</a>'.
+			'<a href="#" class="preventdefault" onclick="javascript:$(\'#jstree_statuses\').jstree(\'uncheck_all\');">'.$deselect.'</a>'.
 			'</div></td>'.
 			'<td><div class="btnbar"">'.
-			'<a href="#" onclick="javascript:$(\'#jstree_profiles\').jstree(\'check_all\');">'.$select.'</a>'.
+			'<a href="#" class="preventdefault" onclick="javascript:$(\'#jstree_profiles\').jstree(\'check_all\');">'.$select.'</a>'.
 			'<div class="separator"></div>'.
-			'<a href="#" onclick="javascript:$(\'#jstree_profiles\').jstree(\'uncheck_all\');">'.$deselect.'</a>'.
+			'<a href="#" class="preventdefault" onclick="javascript:$(\'#jstree_profiles\').jstree(\'uncheck_all\');">'.$deselect.'</a>'.
 			'</div></td>'.
 			'<td></td>'.
 			'</tr>';
