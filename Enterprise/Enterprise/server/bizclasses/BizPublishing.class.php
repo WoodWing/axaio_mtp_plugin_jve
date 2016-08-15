@@ -845,30 +845,8 @@ class BizPublishing
 				}
 			}
 
-			//
-			if( BizSettings::isFeatureEnabled('ContentStationCropOnPublishForm') ) {
-				require_once BASEDIR.'/server/bizclasses/BizImageConverter.class.php';
-				$bizImageConverter = new BizImageConverter();
-				foreach( $children as $child ) {
-					if( $child->MetaData->BasicMetaData->Type == 'PublishForm' ) {
-						foreach( $child->Relations as $relation ) {
-							if( $relation->Type == 'Placed' && $relation->ChildInfo->Type == 'Image' &&
-								 $bizImageConverter->loadNativeFileForInputImage( $relation->ChildInfo->ID )) {
-
-								foreach( $relation->Placements as $placement ) {
-									if( $bizImageConverter->cropAndScaleImageByPlacement( $placement ) ) {
-										// This is a ghost property which is not described in the WSDL. The publish connectors should
-										// use this image to publish with if the property is set.
-										$placement->ImageCropAttachment = $bizImageConverter->getOutputImageAttachment();
-									}
-								}
-							}
-						}
-						// We only need to use the PublishForm properties. Once we have it we can stop looping.
-						break;
-					}
-				}
-			}
+			// Only do the image conversion after the children are thinned out so we have less to exclude.
+			$this->handleImageConversion( $children );
 
 			// Save the callback data already. It can be that the connector returns data immediately.
 			$cache = array( $publishedDossier, $operation, $action, $publishFields, $dossier, $children, $exceptionRaised );
@@ -2041,5 +2019,36 @@ class BizPublishing
 			$documentIds[] = $documentId;
 		}
 		return true;
+	}
+
+	/**
+	 * Searches for images placed on publish forms and then lets the ImageConverter decide for each placement if the
+	 * image needs to be converted. Converted images are added to the placement as shadow property 'ImageCropAttachment'.
+	 *
+	 * For example: PublishForm Object -> Relations[0] -> Placements[0] -> ImageCropAttachment (type: Attachment)
+	 *
+	 * @param Object[] $objects
+	 */
+	private function handleImageConversion( array $objects )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizImageConverter.class.php';
+		$bizImageConverter = new BizImageConverter();
+		foreach( $objects as $object ) {
+			if( $object->MetaData->BasicMetaData->Type == 'PublishForm' ) {
+				foreach( $object->Relations as $relation ) {
+					if( $relation->Type == 'Placed' && $relation->ChildInfo->Type == 'Image' &&
+						$bizImageConverter->loadNativeFileForInputImage( $relation->ChildInfo->ID )) {
+
+						foreach( $relation->Placements as $placement ) {
+							if( $bizImageConverter->cropAndScaleImageByPlacement( $placement ) ) {
+								// This is a ghost property which is not described in the WSDL. The publish connectors should
+								// use this image to publish with if the property is set.
+								$placement->ImageCropAttachment = $bizImageConverter->getOutputImageAttachment();
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }
