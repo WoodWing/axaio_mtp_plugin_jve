@@ -98,7 +98,9 @@ class BizImageConverter
 			$this->outputImageAttachment->FilePath ) );
 		BizServerPlugin::runConnector( $connector, 'setInputDimension', array(
 			$this->inputImageProps['Width'], $this->inputImageProps['Height'], $this->inputImageProps['Dpi'] ) );
-		if( $placement->ContentDx || $placement->ContentDy ) {
+		if( $placement->ContentDx || $placement->ContentDy ||
+			 $this->inputImageProps['Width'] != $placement->Width ||
+			 $this->inputImageProps['Height'] != $placement->Height ) {
 			$left = $placement->ScaleX ? -$placement->ContentDx / $placement->ScaleX : -$placement->ContentDx;
 			$top = $placement->ScaleY ? -$placement->ContentDy / $placement->ScaleY : -$placement->ContentDy;
 			$width = $placement->ScaleX ? $placement->Width / $placement->ScaleX : $placement->Width;
