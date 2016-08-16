@@ -192,6 +192,7 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 		$fields = null;
 		$pattern = null;
 		$values = null;
+		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
 
 		$templateId = BizPublishForm::getTemplateId( $publishForm );
 		if (!is_null($templateId)) {
@@ -226,7 +227,6 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 
 			// Handle attachments to be uploaded to Drupal.
 			//Todo: stream attachments instead of loading them in memory.
-			$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
 
 			foreach ($values as $field => $value) {
 				// Handle normal file attachments, for example for a file selector or layout.
@@ -353,7 +353,7 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * Places the Drupal ID (fid) in the object's ExternalId field.
 	 *
 	 * @param array $objectsInDossier All child in the dossier / placed on Form to be updated with ExternalId(DrupalId).
-	 * @param array $attachmentUploaded Key-Value pair list where Key is the Enteprise DB Id and Value is DrupalId.
+	 * @param array $attachmentUploaded Key-Value pair list where Key is the Enterprise DB Id and Value is DrupalId.
 	 */
 	private function updateExternalId( $objectsInDossier, $attachmentUploaded )
 	{

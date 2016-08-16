@@ -161,6 +161,9 @@ class Drupal7_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 		require_once dirname(__FILE__) . '/../Utils.class.php';
 		$channelInfos = array();
 
+		$severity = '';
+		$siteUrl = '';
+		$channelUrl = '';
 		foreach( array_values( $errorMessages ) as $errorMessage ) {
 			if( $errorMessage ) {
 				foreach( $errorMessage as $eachErrorMsg ) {

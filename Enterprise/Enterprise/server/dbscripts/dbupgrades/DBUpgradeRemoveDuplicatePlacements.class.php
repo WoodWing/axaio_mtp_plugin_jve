@@ -123,7 +123,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 	/**
 	 * Add a copy of the placements table and add an extra index.
 	 *
-	 * @param mssqldriver|oracledriver|mysqlidriver $dbDriver.
+	 * @param WW_DbDrivers_DriverBase $dbDriver.
 	 * @return bool success (true/false).
 	 */
 	private function prepareDatabase( $dbDriver )
@@ -147,7 +147,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 	/**
 	 * Delete the duplicate placements and the corresponding tiles.
 	 *
-	 * @param mssqldriver|oracledriver|mysqlidriver $dbDriver.
+	 * @param WW_DbDrivers_DriverBase $dbDriver.
 	 * @return bool success (true/false).
 	 */
 	private function deleteData( $dbDriver )
@@ -171,7 +171,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 	/**
 	 * Delete the copy of the placements table and drop the index.
 	 *
-	 * @param mssqldriver|oracledriver|mysqlidriver $dbDriver.
+	 * @param WW_DbDrivers_DriverBase $dbDriver.
 	 * @return bool success (true/false).
 	 */
 	private function correctDatabase( $dbDriver )
@@ -195,7 +195,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 	 *
 	 * @param string $tableName Name of the table to add the index.
 	 * @param string $indexName Name of the index.
-	 * @param mssqldriver|oracledriver|mysqlidriver $dbDriver.
+	 * @param WW_DbDrivers_DriverBase $dbDriver.
 	 * @return bool success (true/false).
 	 * @throws BizException
 	 */
@@ -227,7 +227,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 	 *
 	 * @param string $fromTable Table to be copied.
 	 * @param string $toTable Name of the new table (does not exist in the database yet).
-	 * @param mssqldriver|oracledriver|mysqlidriver $dbDriver.
+	 * @param WW_DbDrivers_DriverBase $dbDriver.
 	 * @return bool success (true/false).
 	 * @throws BizException
 	 */
@@ -274,7 +274,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 	 *
 	 * @param string $deleteTable Table to be updated.
 	 * @param string $selectTable Table used to find the duplicates.
-	 * @param mssqldriver|oracledriver|mysqlidriver $dbDriver.
+	 * @param WW_DbDrivers_DriverBase $dbDriver.
 	 * @return bool success (true/false).
 	 * @throws BizException
 	 */
@@ -335,7 +335,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 	 *
 	 * @param string $deleteTable Table to be updated (placementtiles).
 	 * @param string $selectTable Table used to find the redundant tiles (placements).
-	 * @param mssqldriver|oracledriver|mysqlidriver $dbDriver.
+	 * @param WW_DbDrivers_DriverBase $dbDriver.
 	 * @return bool success (true/false).
 	 * @throws BizException
 	 */
@@ -380,7 +380,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 	 * Drops a table (copy of the placements).
 	 *
 	 * @param string $droppedTable Name of the table to be dropped (placements2).
-	 * @param mssqldriver|oracledriver|mysqlidriver $dbDriver.
+	 * @param WW_DbDrivers_DriverBase $dbDriver.
 	 * @return bool success (true/false).
 	 * @throws BizException
 	 */
@@ -404,7 +404,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 
 	/**
 	 * @param string $tableName Table of which the index is dropped.
-	 * @param mssqldriver|oracledriver|mysqlidriver $dbDriver.
+	 * @param WW_DbDrivers_DriverBase $dbDriver.
 	 * @return bool success (true/false).
 	 * @throws BizException
 	 */

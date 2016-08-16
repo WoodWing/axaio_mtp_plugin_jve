@@ -225,6 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Offline schalten</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Fuer direktes Update freilassen</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Freilassen, wenn Eigentuemer identisch mit Benutzer</Term>
+  <Term key="ACT_LESS">Less</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">In Publikationsübersicht aufgeführt</Term>
   <Term key="ACT_LOGIN">Anmelden</Term>
   <Term key="ACT_LOGOFF">Abmelden</Term>

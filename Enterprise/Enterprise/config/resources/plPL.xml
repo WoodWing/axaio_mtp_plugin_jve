@@ -225,6 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Ustaw offline</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Pozostaw puste w celu aktualizacji bezpośredniej</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Pozostaw puste, jeżeli właścicielem jest użytkownik</Term>
+  <Term key="ACT_LESS">Less</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">Wymieniono w Przeglądzie publikacji</Term>
   <Term key="ACT_LOGIN">Zaloguj</Term>
   <Term key="ACT_LOGOFF">Wyloguj</Term>

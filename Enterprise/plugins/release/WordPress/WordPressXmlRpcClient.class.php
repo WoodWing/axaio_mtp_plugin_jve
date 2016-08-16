@@ -50,16 +50,16 @@ class WordPressXmlRpcClient
 		try {
 			$retVal = $xmlRpcClient->callRpcService( $action, $params );
 		} catch( BizException $e ) {
-			if( strpos( $e->getDetail(), 'permission' ) && strpos( $e->getDetail(), '(403)' )){ // given when the user has no the correct rights
+			if( strpos( $e->getDetail(), 'permission' ) && strpos( $e->getDetail(), '(403)' ) ) { // given when the user has no the correct rights
 				$errMsg = $e->getDetail();
 				$messageKey = 'WORDPRESS_ERROR_INCORRECT_ROLE';
-			} else if( strpos($e->getDetail(), '(403)') ){ // given if authentication failed with the current settings
+			} else if( strpos($e->getDetail(), '(403)') ) { // given if authentication failed with the current settings
 				$errMsg = $e->getDetail();
 				$messageKey = 'WORDPRESS_ERROR_INCORRECT_CONFIG';
-			} else if( $action == 'ngg.newGallery' || $action == 'ngg.uploadImage' ){ // given when the plug-in is not enabled or if uploading fails
+			} else if( $action == 'ngg.newGallery' || $action == 'ngg.uploadImage' ) { // given when the plug-in is not enabled or if uploading fails
 				$errMsg = $e->getDetail();
 				$messageKey = 'WORDPRESS_ERROR_UPLOAD_IMAGES';
-			} else{ // given for all other scenario's
+			} else { // given for all other scenario's
 				$errMsg = $e->getDetail();
 				$messageKey = 'WORDPRESS_ERROR_XMLRPC';
 			}
@@ -148,87 +148,80 @@ class WordPressXmlRpcClient
 			'mt_keywords' => $postContent['tags']
 		);
 
-		if( isset( $postContent['publishDate'] ) && $postContent['publishDate']!= '' ){
+		if( isset( $postContent['publishDate'] ) && $postContent['publishDate']!= '' ) {
 			$dateAndTimeGmt = gmdate( 'Y-m-d H:i:s', strtotime( $postContent['publishDate'] ));
 			$content['date_created_gmt'] = new DateTime( $dateAndTimeGmt );
 		}
 
-		if( isset( $postContent['categories'] )){
+		if( isset( $postContent['categories'] ) ) {
 			$content['categories'] = $postContent['categories'];
-		}else{
+		} else {
 			$content['categories'] = array( 'Uncategorized' );
 		}
 
-		if( isset( $postContent['excerpt'] ) && $postContent['excerpt'] != '' ){
+		if( isset( $postContent['excerpt'] ) && $postContent['excerpt'] != '' ) {
 			$content['mt_excerpt'] = $postContent['excerpt'];
 		}
 
-		if( isset($postContent['slug']) && $postContent['slug'] != '' ){
+		if( isset($postContent['slug']) && $postContent['slug'] != '' ) {
 			$content['wp_slug'] = $postContent['slug'];
 		}
 
-        if( $preview ){
-            if( isset( $content['wp_slug'] )){
-                $content['wp_slug'] = 'preview-'. $content['wp_slug'];
-            } else{
-                $content['wp_slug'] = 'preview-'. $content['title'];
-            }
-        }
+		if( $preview ) {
+			if( isset( $content['wp_slug'] ) ) {
+				$content['wp_slug'] = 'preview-'.$content['wp_slug'];
+			} else {
+				$content['wp_slug'] = 'preview-'.$content['title'];
+			}
+		}
 
-		if( isset($postContent['authorId']) && $postContent['authorId'] != '' ){
+		if( isset($postContent['authorId']) && $postContent['authorId'] != '' ) {
 			$content['wp_author_id'] = $postContent['authorId'];
 		}
 
-		if( isset( $postContent['inlineImages'] ) ){
+		if( isset( $postContent['inlineImages'] ) ) {
 			$inlineImagesCustomField = array(
 				'value' => json_encode($postContent['inlineImages']['inline-ids'] ),
 				'key' => 'Enterprise-inline-images'
 			);
-
-			if( isset( $postContent['inlineImages']['customFieldId'] )){
+			if( isset( $postContent['inlineImages']['customFieldId'] ) ) {
 				$inlineImagesCustomField['id'] = $postContent['inlineImages']['customFieldId'];
 			}
-
 			$content['custom_fields'][] = $inlineImagesCustomField;
 		}
 
-		if( isset( $postContent['gallProps'] ) ){
+		if( isset( $postContent['gallProps'] ) ) {
 			$galleriesCustomField = array(
 				'value' => Zend_Json::encode( $postContent['gallProps']['galleries'] ),
 				'key' => 'Enterprise-nextgen-galleries'
 			);
-
-			if( isset( $postContent['gallProps']['customFieldId'] )){
+			if( isset( $postContent['gallProps']['customFieldId'] ) ) {
 				$galleriesCustomField['id'] = $postContent['gallProps']['customFieldId'];
 			}
-
 			$content['custom_fields'][] = $galleriesCustomField;
 		}
 
-        if( isset( $postContent['featuredImage'] ) ){
-            $content['wp_post_thumbnail'] = $postContent['featuredImage']['featured-image'];
-
-            $featuredImagesCustomField = array(
+		if( isset( $postContent['featuredImage'] ) ) {
+			$content['wp_post_thumbnail'] = $postContent['featuredImage']['featured-image'];
+			$featuredImagesCustomField = array(
                 'value' => json_encode($postContent['featuredImage']['featured-image'] ),
                 'key' => 'Enterprise-featured-images'
-            );
+			);
+			if( isset( $postContent['featuredImage']['customFieldId'] ) ) {
+				$featuredImagesCustomField['id'] = $postContent['featuredImage']['customFieldId'];
+			}
+			$content['custom_fields'][] = $featuredImagesCustomField;
+		}
 
-            if( isset( $postContent['featuredImage']['customFieldId'] )){
-                $featuredImagesCustomField['id'] = $postContent['featuredImage']['customFieldId'];
-            }
-
-            $content['custom_fields'][] = $featuredImagesCustomField;
-        }
-
-		if( !$preview ){
-			if( !$externalId ){
+		if( !$preview ) {
+			if( !$externalId ) {
 				$params = array( 0, $userName, $password, $content, true );
 				return $this->rpcService( $url, 'metaWeblog.newPost', $params );
-			} else{
+			} else {
 				$params = array( $externalId, $userName, $password, $content, true );
 				return $this->rpcService( $url, 'metaWeblog.editPost', $params );
 			}
-		}else{
+		} else {
 			$content['post_status'] = 'draft';
 			$params = array( 0, $userName, $password, $content, true );
 			return $this->rpcService( $url, 'woodwing.GetPreviewUrl', $params );
@@ -246,7 +239,6 @@ class WordPressXmlRpcClient
 	function deleteOldPublishedPreviews()
 	{
 		$params = array( $this->userName, $this->password );
-
 		return $this->rpcService( $this->url, 'woodwing.DeleteOldPreviews', $params );
 	}
 
@@ -262,9 +254,7 @@ class WordPressXmlRpcClient
 	 */
 	function getPost( $externalId )
 	{
-		//get a blog post from WordPress
 		$params = array( $externalId, $this->userName, $this->password );
-
 		return $this->rpcService( $this->url, 'metaWeblog.getPost', $params );
 	}
 
@@ -280,9 +270,7 @@ class WordPressXmlRpcClient
 	 */
 	function deletePostAndContent( $externalId )
 	{
-		//Delete a blog post from WordPress
 		$params = array( $this->userName, $this->password, $externalId );
-
 		return $this->rpcService( $this->url, 'woodwing.DeletePostAndContent', $params );
 	}
 
@@ -297,7 +285,6 @@ class WordPressXmlRpcClient
 	function checkNextGenEnabled()
 	{
 		$params = array( $this->userName, $this->password );
-
 		return $this->rpcService( $this->url, 'woodwing.CheckNextGenEnabled', $params );
 	}
 
@@ -316,7 +303,7 @@ class WordPressXmlRpcClient
 	function updateMediaLibraryImageMetaData( $externalId, $name, $description, $alternativeText )
 	{
 		$caption = ''; // We do not support caption yet.
-		$params = array( $this->userName, $this->password, $externalId, $name, $description, $alternativeText, $caption);
+		$params = array( $this->userName, $this->password, $externalId, $name, $description, $alternativeText, $caption );
 		return $this->rpcService( $this->url, 'woodwing.UpdateImageMetaData', $params );
 	}
 
@@ -331,7 +318,7 @@ class WordPressXmlRpcClient
 	 */
 	function deleteInlineAndFeaturedImages( $externalId )
 	{
-		$params = array( $this->userName, $this->password, $externalId);
+		$params = array( $this->userName, $this->password, $externalId );
 		return $this->rpcService( $this->url, 'woodwing.DeleteInlineAndFeaturedImages', $params );
 	}
 
@@ -352,7 +339,6 @@ class WordPressXmlRpcClient
 	function uploadMediaLibraryImage( $imageName, $filePath, $extension)
 	{
 		$imageFile = file_get_contents( $filePath );
-
 		$data = array(
 			'name'  => $imageName,
 			'type'  => $extension,
@@ -362,8 +348,7 @@ class WordPressXmlRpcClient
 
 		$rpc = new IXR_Client( $this->url );
 		$status = $rpc->query( 'metaWeblog.newMediaObject', 0, $this->userName,	$this->password, $data );
-
-		if (!$status) {
+		if( !$status ) {
 			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', '' );
 		}
 
@@ -422,7 +407,6 @@ class WordPressXmlRpcClient
 	function uploadImage( $imageName, $filePath, $extension, $galleryId )
 	{
 		$imageFile = file_get_contents( $filePath );
-
 		$data = array(
 			'name'  => $imageName,
 			'type'  => $extension,
@@ -432,8 +416,7 @@ class WordPressXmlRpcClient
 
 		$rpc = new IXR_Client( $this->url );
 		$status = $rpc->query( 'ngg.uploadImage', 0, $this->userName,	$this->password, $data );
-
-		if (!$status) {
+		if( !$status ) {
 			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', 'Publishing the image failed. Please contact your system administrator' );
 		}
 
@@ -441,7 +424,7 @@ class WordPressXmlRpcClient
 	}
 
 	/**
-	 * Update NextGen image.
+	 * Update NextGen image, updating an image from WordPress is done by deleting an image and uploading it again.
 	 *
 	 * This function is used to update an image source.
 	 * This function uses the XML-RPC API.
@@ -456,7 +439,6 @@ class WordPressXmlRpcClient
 	 */
 	function updateImage( $imageName, $filePath, $extension, $galleryId, $externalId )
 	{
-		//Update a image from WordPress is now done by deleting a image and re-uploading it.
 		$this->deleteImage( $externalId );
 		$result = $this->uploadImage( $imageName, $filePath, $extension, $galleryId );
 
@@ -495,11 +477,10 @@ class WordPressXmlRpcClient
 	function getGalleryIdByName( $galleryName )
 	{
 		$params = array( 0, $this->userName, $this->password );
-
 		$galleries = $this->rpcService( $this->url, 'ngg.getGalleries', $params );
 
 		$galleryId = null;
-		foreach($galleries as $gallery){
+		if( $galleries ) foreach( $galleries as $gallery ) {
 			if($galleryName == $gallery['title']){
 				$galleryId = $gallery['gid'];
 				break;
@@ -535,7 +516,7 @@ class WordPressXmlRpcClient
 	 */
 	function getCategories()
 	{
-		$params = array(0, $this->userName, $this->password );
+		$params = array( 0, $this->userName, $this->password );
 		return $this->rpcService( $this->url, 'wp.getCategories',$params );
 	}
 
@@ -549,7 +530,7 @@ class WordPressXmlRpcClient
 	 */
 	function getFormats()
 	{
-		$params = array(0, $this->userName, $this->password, array( 'show-supported' => false ) );
+		$params = array( 0, $this->userName, $this->password, array( 'show-supported' => false ) );
 		return $this->rpcService( $this->url, 'wp.getPostFormats',$params );
 	}
 
@@ -586,14 +567,12 @@ class WordPressXmlRpcClient
 			'number' => $number,
 		);
 
-		if( $fields == 'import' ){
+		if( $fields == 'import' ) {
 			$fields = array( 'user_id', 'username' );
 		}
-
-		if($offset){
+		if( $offset ) {
 			$filter['offset'] = $offset;
 		}
-
 		$params = array( 0, $this->userName, $this->password, $filter, $fields );
 
 		return $this->rpcService( $this->url, 'wp.getUsers', $params );

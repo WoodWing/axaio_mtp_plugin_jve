@@ -251,7 +251,7 @@ class BizServerJob
 	 *
 	 * @param array $params. A set of (DB field name => DB value)
 	 * @param array $orderBy List of fields to order (in case of many results, whereby the first/last row is wanted).
-	 *                       Keys: DB fields. Values: TRUE for ASC or FALSE for DESC. NULL for no ordering.
+	 * Keys: DB fields. Values: TRUE for ASC or FALSE for DESC. NULL for no ordering.
 	 * @param int $startRecord The offset for the first record(job) to be returned, starting from zero. Eg. 6 indicates returning 5th record/job. When this is specified, $maxRecord has to be specified.
 	 * @param int $maxRecord The maximum record to be returned starting from offset $startRecord.
 	 * @return ServerJob[]
