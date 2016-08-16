@@ -625,7 +625,7 @@ class DBBase
 	 * @param resource $sth       Result returned from the call to dbdriver->query($sql).
 	 * @param string $keycol      Name of the col to use as a key, if empty the array of rows is returned non-associative
 	 * @param bool $keyslowercase Whether fieldnames should automatically be in lowercase (preferable, but not yet default)
-	 * @param mysqlidriver|mssqldriver|oracledriver $dbDriver  Optional.
+	 * @param WW_DbDrivers_DriverBase $dbDriver  Optional.
 	 * @return array of rows
 	 */
 	static public function fetchResults( $sth, $keycol = null, $keyslowercase = false, $dbDriver = null )

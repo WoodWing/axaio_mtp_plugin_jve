@@ -19,7 +19,7 @@ class WW_Utils_PhpInfo
 	 * the given $info param.
 	 *
 	 * @param string $info HTML formatted message in case of error.
-	 * @return mysqlidriver|mssqldriver|oracledriver|null DB driver on success, else null.
+	 * @return WW_DbDrivers_DriverBase|null DB driver on success, else null.
 	 */
 	private static function connectToDb( &$info )
 	{

@@ -295,11 +295,12 @@ class DBSection extends DBBase
 	}
 	
     /**
-     *  Converts object value to an array
-     *  @param  int $pubId publication id
-     *  @param  int $issueId issue id
-     *  @param  object $obj section object
-     *  @return array of section value
+     * Converts an AdmSection data object to a smart_sections DB row.
+     *
+     * @param int $pubId publication id
+     * @param int $issueId issue id
+     * @param AdmSection $obj The AdmSection data object.
+     * @return array The smart_sections DB row.
      */
 	static public function objToRow ( $pubId, $issueId, $obj )
 	{
@@ -331,11 +332,11 @@ class DBSection extends DBBase
 	}
 	
 	/**
-     *  Converts row value to an object
-     *  It return an object with the mapping value for row to object
-     *  @param  $row row contains key values
-     *  @return object of section
-     */
+    * Converts a smart_sections DB row to an AdmSection data object.
+	 *
+    * @param array $row The smart_sections DB row.
+    * @return AdmSection The AdmSection data object.
+    */
 	static public function rowToObj ( $row )
 	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
