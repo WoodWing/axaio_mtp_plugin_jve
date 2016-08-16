@@ -65,8 +65,11 @@ class WW_Utils_PhpInfo
 		$info .= self::getChapterHeader( 'Enterprise Server v'.$versionInfo, 'Configuration files' );
 		$info .= self::getConfigFile( BASEDIR.'/config/config.php', 'config.php' );
 		$info .= self::getConfigFile( BASEDIR.'/config/configserver.php', 'configserver.php' );
-		$info .= self::getConfigFile( BASEDIR.'/server/serverinfo.php', 'serverinfo.php' );
+		$info .= self::getConfigFile( BASEDIR.'/config/config_overrule.php', 'config_overrule.php' );
+		$info .= self::getConfigFile( BASEDIR.'/config/config_dps.php', 'config_dps.php' );
+		$info .= self::getConfigFile( BASEDIR.'/config/config_sips.php', 'config_sips.php' );
 		$info .= self::getConfigFile( BASEDIR.'/config/config_solr.php', 'config_solr.php' );
+		$info .= self::getConfigFile( BASEDIR.'/server/serverinfo.php', 'serverinfo.php' );
 		$info .= self::getChapterFooter();
 		
 		// Get Enterprise server database details
@@ -80,7 +83,12 @@ class WW_Utils_PhpInfo
 		$info .= self::getChapterHeader( 'Enterprise Server', 'Server Plug-ins' );
 		$info .= self::getServerPlugins();
 		$info .= self::getChapterFooter();
-		
+
+		// Get Enterprise server plug-ins
+		$info .= self::getChapterHeader( 'Enterprise Server', 'Runt-time PHP info' );
+		$info .= self::getRuntimePhpInfo();
+		$info .= self::getChapterFooter();
+
 		$info .= self::getPhpInfo();
 		
 		$info .= self::getPageFooter();
@@ -273,6 +281,19 @@ class WW_Utils_PhpInfo
 				$info .= self::getSectionFooter();
 			}
 		}
+		return $info;
+	}
+
+	/**
+	 * Returns some PHP information that is requested runtime.
+	 *
+	 * @return string HTML fragment with requested info.
+	 */
+	public static function getRuntimePhpInfo()
+	{
+		$info = '';
+		$info .= self::getSetting( 'PHP executable (PHP_BINDIR)', PHP_BINDIR );
+		$info .= self::getSetting( 'System temp folder (sys_get_temp_dir())', sys_get_temp_dir() );
 		return $info;
 	}
 
