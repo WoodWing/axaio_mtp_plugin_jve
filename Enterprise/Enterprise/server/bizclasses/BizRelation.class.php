@@ -359,7 +359,7 @@ class BizRelation
 	 * @param integer $parentId Id of the parent object.
 	 * @param integer $childId Id of the child object.
 	 * @param boolean $regenPage True if page must be regenerated else false.
-	 * @param mysqlidriver|oracledriver|mssqldriver $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @param array $parentRow
 	 * @throws BizException
 	 */

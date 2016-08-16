@@ -15,9 +15,9 @@
    limitations under the License.
 ****************************************************************************/
 
-require_once BASEDIR . '/server/interfaces/plugins/connectors/PubPublishing_EnterpriseConnector.class.php';
-require_once dirname(__FILE__) . '/WordPressXmlRpcClient.class.php';
-require_once dirname(__FILE__) . '/WordPress_Utils.class.php';
+require_once BASEDIR.'/server/interfaces/plugins/connectors/PubPublishing_EnterpriseConnector.class.php';
+require_once dirname(__FILE__).'/WordPressXmlRpcClient.class.php';
+require_once dirname(__FILE__).'/WordPress_Utils.class.php';
 
 class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 {
@@ -31,16 +31,31 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $dossier         [writable]
 	 * @param array $objectsInDossier [writable] Array of Object.
 	 * @param PubPublishTarget $publishTarget
-	 * 
 	 * @return array of PubField containing information from publishing system
-	 *
 	 * @throws BizException
 	 */
 	public function publishDossier( &$dossier, &$objectsInDossier, $publishTarget ) 
 	{
-		$pubField = $this->preparePost($objectsInDossier, $dossier, $publishTarget, 'publish');
-		$pubFields[] = $pubField;
+		$pubFields = array();
 
+		if( $objectsInDossier ) foreach ( $objectsInDossier as $objectInDossier ) {
+			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
+				// Prepare post content.
+				$postContents = $this->preparePost( $objectInDossier, $objectsInDossier, $dossier, $publishTarget, 'publish' );
+
+				try {
+					$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+					$postId = $objXMLRPClientWordPress->uploadPost( $postContents );
+					if( $postId ) {
+						$dossier->ExternalId = $postId;
+						$url = $this->getPostUrl( $postId, $publishTarget );
+						$pubFields[] = new PubField( 'URL', 'string', array( $url ) );
+					}
+				} catch( BizException $e ) {
+					$this->reThrowDetailedError( $objectInDossier, $e, 'PublishDossier' );
+				}
+			}
+		}
 		return $pubFields;
 	}
 
@@ -50,361 +65,224 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * This function is used to update or publish a post from WordPress.
 	 * With the action parameter 'publish' or 'update' can be given to determine which action should be done.
 	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
+	 * @param Object $publishForm PublishForm object
+	 * @param array $objectsInDossier Array of Objects
+	 * @param Object $dossier
 	 * @param PubPublishTarget $publishTarget
 	 * @param $action
-	 * @return PubField
+	 *
+	 * @return array $postContent
 	 * @throws BizException
 	 */
-	function preparePost(&$objectsInDossier, &$dossier, $publishTarget, $action)
+	private function preparePost( $publishForm, $objectsInDossier, $dossier, $publishTarget, $action )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
-
-		$publishForm = null;
-		$article = null;
-		$messageText = null;
-		$pubField = null;
-
-		foreach($objectsInDossier as $objectDossier){
-			if($objectDossier->MetaData->BasicMetaData->Type == 'Article'){
-				$article = $objectDossier;
-				break;
-			}
-		}
-
-		foreach ($objectsInDossier as $objectInDossier) {
-			if ($objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm') {
-				$publishForm = $objectInDossier;
-				break;
-			}
-		}
+		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
+		$postContent = array();
+		$article = $this->getFirstObjectWithType( $objectsInDossier, 'Article' );
 
 		$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
-
-		try{
+		try {
 			$objXMLRPClientWordPress->deleteOldPublishedPreviews(); // delete all old previews
-		} catch( Exception $e ){ // we want to continue when we could not remove the previews
+		} catch( BizException $e ) { // we want to continue when we could not remove the previews
 			LogHandler::Log( 'SERVER', 'WARN', 'Could not remove old published reviews', $e );
 		}
 
 		$wordpressUtils = new WordPress_Utils();
 		$siteName = $wordpressUtils->getSiteName( $publishTarget );
+		$publishFormDocId = BizPublishForm::getDocumentId( $publishForm );
+		if( $publishFormDocId == $this->getDocumentIdPrefix().$siteName ) {
+			$messageText = null;
+			$attachments = null;
+			$inlineImagesCustomField = null;
+			$featuredImagesCustomField = null;
+			$galleriesCustomField = null;
+			$galleryId = null;
 
-		if (!is_null($publishForm)) {
-			switch ( BizPublishForm::getDocumentId($publishForm) ) {
-				//WordPress post
-				case $this->getDocumentIdPrefix() . $siteName :
-					$images = null;
-					$size = null;
-					$count = 0;
-					$attachments = null;
-					$inlineImagesCustomField = null;
-                    $featuredImagesCustomField = null;
-					$galleriesCustomField = null;
-					$galleryId = null;
-					$title = null;
+			$publishFormOBJS = BizPublishForm::getFormFields( $publishForm );
 
-					$publishFormOBJS = BizPublishForm::getFormFields($publishForm);
-					$articleFields = BizPublishForm::extractFormFieldDataFromFieldValue ( 'C_WORDPRESS_PF_MESSAGE_SEL', $article, true );
+			// Get the title
+			$title = isset( $publishFormOBJS['C_WORDPRESS_POST_TITLE'] ) ? $publishFormOBJS['C_WORDPRESS_POST_TITLE'][0] : null;
+			if( !$title ) {
+				throw new BizException( 'WORDPRESS_ERROR_NO_TITLE', 'Server', 'A title is needed but there is no title found.' );
+			}
 
-					if ($articleFields && isset($articleFields[0]) && isset($articleFields[0]['elements']) && isset($articleFields[0]['elements'][0])){
-						$messageText = $articleFields[0]['elements'][0]->Content;
-					}
+			$articleFields = BizPublishForm::extractFormFieldDataFromFieldValue( 'C_WORDPRESS_PF_MESSAGE_SEL', $article, true );
+			if( $articleFields && isset( $articleFields[0] ) ) {
+				$messageText = ( isset( $articleFields[0]['elements'] ) && isset( $articleFields[0]['elements'][0] ) ) ?
+										$articleFields[0]['elements'][0]->Content : null;
+				$attachments = isset( $articleFields[0]['attachments'] ) ? $articleFields[0]['attachments'] : null;
+			}
+			$this->validateInlineImageFormat( $attachments );
 
-					// This is used for the Inline images so is not used right now
-					if ($articleFields && isset($articleFields[0]) && isset($articleFields[0]['attachments'])) {
-						$attachments = $articleFields[0]['attachments'];
-					}
+			if( strtolower( $action ) == 'update' ) { // deleting images from WordPress is only needed when updating
+				$customFieldIds = $objXMLRPClientWordPress->deleteInlineAndFeaturedImages( $dossier->ExternalId );
+				$inlineImagesCustomField = isset( $customFieldIds['inline-custom-field'] ) ? $customFieldIds['inline-custom-field'] : null;
+				$featuredImagesCustomField = isset( $customFieldIds['featured-custom-field'] ) ? $customFieldIds['featured-custom-field'] : null;
+				$gallery = $this->getGalleryByWidgetName( $publishTarget, $dossier->ExternalId, 'C_WORDPRESS_MULTI_IMAGES' );
 
-					$unsupportedInlineImages = array();
-					$supportedImageFormats = $this->getSupportedImageFormats();
+				if( isset( $gallery['customFieldId'] ) ) {
+					$galleriesCustomField = $gallery['customFieldId'];
+				}
+				if( isset( $gallery['galleryId'] ) ) {
+					$galleryId = $gallery['galleryId'];
+				}
+				if( $galleryId ) {
+					$pubChannelId = $publishTarget->PubChannelID;
+					$dossiersPublished = DBPublishHistory::getPublishHistoryDossier( $dossier->MetaData->BasicMetaData->ID, $pubChannelId, $publishTarget->IssueID, null, true );
+					$dossierPublished = reset( $dossiersPublished ); // Get the first dossier.
+					$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist( $dossierPublished['id'] );
 
-					if( $attachments ){
-						$inlineImages = array_keys($attachments);
-
-						foreach($inlineImages as $imageId){
-							require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
-							$extension = $attachments[$imageId]->Type;
-
-							if( !in_array( $extension, $supportedImageFormats )){
-								$inlineImageName = DBObject::getObjectName( $imageId );
-								$extension = explode('/', $extension);
-								$extension = '.' . $extension[1];
-								$unsupportedInlineImages[] = $inlineImageName . $extension;
-							}
-						}
-					}
-
-					if( $unsupportedInlineImages ){
-						$inlineImageCount = count( $unsupportedInlineImages );
-						$unsupported = null;
-						$count = 0;
-
-						foreach( $unsupportedInlineImages as $unsupportedInlineImage ){
-							$unsupported .= $unsupportedInlineImage;
-							$count += 1;
-
-							if( $inlineImageCount < $count ){
-								$unsupported .= ', ';
-							}
-						}
-
-						$reasonParams = array( $unsupported );
-						throw new BizException( 'WORDPRESS_ERROR_UNSUPPORTED_IMAGE', 'Server', 'Unsupported Image', null, $reasonParams);
-					}
-
-					//Get the title
-					if( isset($publishFormOBJS['C_WORDPRESS_POST_TITLE']) ){
-						$title = $publishFormOBJS['C_WORDPRESS_POST_TITLE'][0];
-					}
-
-					if ( !$title) {
-						throw new BizException( 'WORDPRESS_ERROR_NO_TITLE', 'Server', 'A title is needed but there is no title found.');
-					}
-
-					if( strtolower($action) == 'update' ){ // deleting images from WordPress is only needed when updating
-						$customFieldIds = $objXMLRPClientWordPress->deleteInlineAndFeaturedImages( $dossier->ExternalId );
-                        $inlineImagesCustomField = ( isset($customFieldIds['inline-custom-field']) ? $customFieldIds['inline-custom-field'] : null );
-                        $featuredImagesCustomField = ( isset($customFieldIds['featured-custom-field']) ? $customFieldIds['featured-custom-field'] : null );
-						$gallery = $this->getGalleryByWidgetName( $publishTarget, $dossier->ExternalId, 'C_WORDPRESS_MULTI_IMAGES' );
-
-						if( isset($gallery['customFieldId']) ){
-							$galleriesCustomField = $gallery['customFieldId'];
-						}
-
-						if( isset($gallery['galleryId']) ){
-							$galleryId = $gallery['galleryId'];
-						}
-
-						if( $galleryId ){
-							$pubChannelId = $publishTarget->PubChannelID;
-							$dossiersPublished = DBPublishHistory::getPublishHistoryDossier($dossier->MetaData->BasicMetaData->ID, $pubChannelId, $publishTarget->IssueID, null, true);
-							$dossierPublished = reset( $dossiersPublished ); // Get the first dossier.
-							$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist($dossierPublished['id']);
-
-							foreach ($publishedObjects as $relation) {
-								if ($relation['type'] == 'Image') {
-									$deleted = true;
-									foreach($objectsInDossier as $object){
-										if($object->MetaData->BasicMetaData->Type == 'Image'){
-											if($object->MetaData->BasicMetaData->ID == $relation['objectid']){
-												$deleted = false;
-												break;
-											}
-										}
-									}
-
-									$externalId = null;
-									if($deleted){
-										$externalId = DBPublishedObjectsHist::getObjectExternalId( $dossier->MetaData->BasicMetaData->ID, $relation['objectid'], $pubChannelId, $publishTarget->IssueID, null, $dossierPublished['id'] );
-									}
-
-									if( $externalId ){
-										$objXMLRPClientWordPress->deleteImage( $externalId );
-									}
-								}
-							}
-						}
-					}
-
-					$uploadImagesResult = null;
-					if( strtolower( $action ) == 'preview' ){ // if preview we don't want to save anything or use the existing gallery because that will corrupt the dossier
-						$uploadImagesResult = $this->uploadImages( $objectsInDossier,  $publishTarget, null, $dossier->MetaData->BasicMetaData->Name, $attachments, isset($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']), true);
-					} else if( $galleryId ){ // use already existing gallery
-						$uploadImagesResult = $this->uploadImages( $objectsInDossier,  $publishTarget, $galleryId, null, $attachments, isset($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']));
-					} else{ // create a new gallery
-						$uploadImagesResult = $this->uploadImages( $objectsInDossier,  $publishTarget, null, $dossier->MetaData->BasicMetaData->Name, $attachments, isset($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']));
-					}
-
-					if( isset( $uploadImagesResult['attachments'] )){
-						$attachments = $uploadImagesResult['attachments'];
-						$pattern = '/<img[^>]*id=\"ent_([^\"]*)[^>]*src=\"([^\"]*)[^>]*>/i';
-						$patternResult = array();
-						preg_match_all( $pattern, $messageText, $patternResult );
-
-						foreach( $attachments as $attachment ){
-							for( $i=0; $i<count($patternResult[0]); $i++ ) {
-								if( $patternResult[1][$i] == $attachment['ent_id'] ) {
-									$imageUrl = str_replace( $patternResult[2][$i], $attachment['url'], $patternResult[0][$i] );
-									$messageText = str_replace( $patternResult[0][$i], $imageUrl, $messageText );
-								}
-							}
-						}
-					}
-
-					if(isset($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'])){
-						$size = count($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']);
-					}
-
-					if( $size > 1 ){
-						foreach($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] as $image){
-							foreach($objectsInDossier as $dossierObject){
-								if($dossierObject->MetaData->BasicMetaData->Type == 'Image'){
-									if($dossierObject->MetaData->BasicMetaData->ID == $image->MetaData->BasicMetaData->ID){
-										$images .= $dossierObject->ExternalId;
-										$count += 1;
-
-										if($count != $size){
-											$images .=  ',';
-										}
-
+					foreach( $publishedObjects as $relation ) {
+						if( $relation['type'] == 'Image' ) {
+							$deleted = true;
+							foreach( $objectsInDossier as $object ) {
+								if( $object->MetaData->BasicMetaData->Type == 'Image' ) {
+									if( $object->MetaData->BasicMetaData->ID == $relation['objectid'] ) {
+										$deleted = false;
 										break;
 									}
 								}
 							}
-						}
-					} else if($size == 1){
-						foreach($objectsInDossier as $dossierObject){
-							if($dossierObject->MetaData->BasicMetaData->Type == 'Image'){
-								if($dossierObject->MetaData->BasicMetaData->ID == $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']->MetaData->BasicMetaData->ID){
-									$images .= $dossierObject->ExternalId;
+
+							if( $deleted ) {
+								$externalId = null;
+								$externalId = DBPublishedObjectsHist::getObjectExternalId( $dossier->MetaData->BasicMetaData->ID, $relation['objectid'], $pubChannelId, $publishTarget->IssueID, null, $dossierPublished['id'] );
+								if( $externalId ) {
+									$objXMLRPClientWordPress->deleteImage( $externalId );
 								}
 							}
 						}
 					}
+				}
+			}
 
-					if($images && $size == 1){
-						$messageText .= '[ngg_images gallery_ids="' . $galleryId . '" image_ids="'  . $images . '" display_type="photocrati-nextgen_basic_singlepic"]';
-					}
+			// This is needed because the getFormFields does not return a array when it has only 1 object
+			// in that case it will return a object instead of a array. We need a array so here we force it into an array.
+			if( isset($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']) ) {
+				if( !is_array($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']) ) {
+					$publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] = array( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] );
+				}
+			}
 
-					if($images && $size > 1){
-						$messageText .= '[ngg_images gallery_ids="' . $galleryId . '" image_ids="'  . $images . '" display_type="photocrati-nextgen_basic_slideshow"]';
-					}
+			$uploadImagesResult = null;
+			if( strtolower( $action ) == 'preview' ) { // if preview we don't want to save anything or use the existing gallery because that will corrupt the dossier
+				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget, null, $dossier->MetaData->BasicMetaData->Name,
+					$attachments, isset( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] ), true );
+			} else if( $galleryId ) { // use already existing gallery
+				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget, $galleryId, null, $attachments,
+					isset( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] ) );
+			} else { // create a new gallery
+				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget, null, $dossier->MetaData->BasicMetaData->Name,
+					$attachments, isset( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] ) );
+			}
 
-					$postContent = null;
-					$postContent['title'] = $title;
-					$postContent['body'] = $messageText; // Always exists because there should be at least 1 image or some text
-					$postContent['authorId'] = $this->getWordPressUserIdForCurrentUser( $siteName );
+			if( isset( $uploadImagesResult['attachments'] ) ) {
+				$attachments = $uploadImagesResult['attachments'];
+				$pattern = '/<img[^>]*id=\"ent_([^\"]*)[^>]*src=\"([^\"]*)[^>]*>/i';
+				$patternResult = array();
+				preg_match_all( $pattern, $messageText, $patternResult );
 
-					if( isset( $uploadImagesResult['galleryId'] )){
-						$postContent['gallProps']['galleries']['C_WORDPRESS_MULTI_IMAGES'] = $uploadImagesResult['galleryId'];
-						$postContent['gallProps']['customFieldId'] = $galleriesCustomField;
-					}
-
-					if( isset( $publishFormOBJS['C_WORDPRESS_CAT_' . strtoupper($siteName)] )){
-                        $categories = $publishFormOBJS['C_WORDPRESS_CAT_' . strtoupper($siteName)];
-                        $convertedCategories = array();
-
-                        foreach( $categories as $category ){ // delete the hierarchical prefixes.
-                            $convertedCategory = preg_replace('/^-+\ /', '', $category);
-                            $convertedCategories[] = $convertedCategory;
-                        }
-
-                        $postContent['categories'] = $convertedCategories;
-                    }
-
-					if( isset( $uploadImagesResult['inline-ids-for-saving'] ) ){
-						$postContent['inlineImages']['inline-ids'] = $uploadImagesResult['inline-ids-for-saving'];
-						if( $inlineImagesCustomField ){
-							$postContent['inlineImages']['customFieldId'] = $inlineImagesCustomField;
+				foreach( $attachments as $attachment ) {
+					for( $i = 0; $i < count( $patternResult[0] ); $i++ ) {
+						if( $patternResult[1][ $i ] == $attachment['ent_id'] ) {
+							$imageUrl = str_replace( $patternResult[2][ $i ], $attachment['url'], $patternResult[0][ $i ] );
+							$messageText = str_replace( $patternResult[0][ $i ], $imageUrl, $messageText );
 						}
 					}
+				}
+			}
 
-                    if( isset( $uploadImagesResult['featured-image'] ) ){
-                        $postContent['featuredImage']['featured-image'] = $uploadImagesResult['featured-image'];
-                        if( $featuredImagesCustomField ){
-                            $postContent['featuredImage']['customFieldId'] = $featuredImagesCustomField;
-                        }
-                    }
-
-					if( isset( $publishFormOBJS['C_WORDPRESS_FORMAT_' . strtoupper($siteName)] )){
-						$format = $publishFormOBJS['C_WORDPRESS_FORMAT_' . strtoupper($siteName)][0];
-                        $savedFormats = $wordpressUtils->getSavedFormats( $siteName );
-                        $savedFormat = $format;
-
-                        if( isset( $savedFormats[$format] ) ){
-                            $savedFormat = $savedFormats[$format];
-                        }
-
-                        $postContent['format'] = $savedFormat;
-					}
-
-					if( isset( $publishFormOBJS['C_WORDPRESS_VISIBILITY'] )){
-						$postContent['visibility'] = $publishFormOBJS['C_WORDPRESS_VISIBILITY'][0];
-					}
-
-					if( isset( $publishFormOBJS['C_WORDPRESS_STICKY'] )){
-						$postContent['sticky'] = $publishFormOBJS['C_WORDPRESS_STICKY'][0];
-					}
-
-					if( isset( $publishFormOBJS['C_WORDPRESS_ALLOW_COMMENTS'] )){
-						$postContent['allowComments'] = $publishFormOBJS['C_WORDPRESS_ALLOW_COMMENTS'][0];
-					}
-
-					if( isset( $publishFormOBJS['C_WORDPRESS_PUBLISH_DATE'] )){
-						$postContent['publishDate'] = $publishFormOBJS['C_WORDPRESS_PUBLISH_DATE'][0];
-					}
-
-					if( isset( $publishFormOBJS['C_WORDPRESS_EXCERPT'] )){
-						$postContent['excerpt'] = $publishFormOBJS['C_WORDPRESS_EXCERPT'][0];
-					}
-
-					if( isset( $publishFormOBJS['C_WORDPRESS_SLUG'] )){
-						$postContent['slug'] = $publishFormOBJS['C_WORDPRESS_SLUG'][0];
-					}
-
-					if( isset( $publishFormOBJS['C_WORDPRESS_TAGS_' . strtoupper($siteName)] )){
-						$tags = $publishFormOBJS['C_WORDPRESS_TAGS_' . strtoupper($siteName)];
-						$preparedTags = null;
-						$count = 0;
-
-						foreach( $tags as $tag ){
-							$count++;
-							$preparedTags .= $tag;
-							if( $count < count($tags) ){
-								$preparedTags .= ', ';
+			$images = array();
+			if( isset( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] ) ) {
+				foreach( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] as $image ) {
+					foreach( $objectsInDossier as $dossierObject ) {
+						if( $dossierObject->MetaData->BasicMetaData->Type == 'Image' ) {
+							if( $dossierObject->MetaData->BasicMetaData->ID == $image->MetaData->BasicMetaData->ID ) {
+								$images[] = $dossierObject->ExternalId;
+								break;
 							}
 						}
-
-						$postContent['tags'] = $preparedTags;
 					}
-
-					$result = null;
-					$standardUrl = null;
-
-					switch( strtolower( $action )){
-						case 'publish':
-							try{
-								$postId = $objXMLRPClientWordPress->uploadPost( $postContent );
-								$dossier->ExternalId = $postId;
-							} catch ( Exception $e ) {
-								$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
-							}
-							break;
-
-						case 'update':
-							try{
-								$objXMLRPClientWordPress->uploadPost( $postContent, $dossier->ExternalId );
-							} catch ( Exception $e ) {
-								$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
-							}
-							break;
-
-						case 'preview':
-							try{
-								$result = $objXMLRPClientWordPress->uploadPost( $postContent, null, true );
-							} catch ( Exception $e ) {
-								throw new BizException( 'WORDPRESS_ERROR_PREVIEW', 'SERVER', 'ERROR', null, array( $publishForm->MetaData->BasicMetaData->Name ));
-							}
-							break;
+				}
+				if( $images ) {
+					$size = count($images);
+					if( $size > 1 ) {
+						$messageText .= '[ngg_images gallery_ids="'.$galleryId.'" image_ids="'.implode(',', $images).'" display_type="photocrati-nextgen_basic_slideshow"]';
+					} else if( $size == 1 ) {
+						$messageText .= '[ngg_images gallery_ids="'.$galleryId.'" image_ids="'.implode(',', $images).'" display_type="photocrati-nextgen_basic_singlepic"]';
 					}
+				}
+			}
 
-					if( strtolower( $action ) == 'preview' ){
-						if( $result ) {
-							$standardUrl = $result;
-						}
-					}else{
-						$standardUrl = $this->getPostUrl( $dossier->ExternalId, $publishTarget );
-					}
+			$postContent['title'] = $title;
+			$postContent['body'] = $messageText; // Always exists because there should be at least 1 image or some text
+			$postContent['authorId'] = $this->getWordPressUserIdForCurrentUser( $siteName );
+			if( isset( $uploadImagesResult['galleryId'] ) ) {
+				$postContent['gallProps']['galleries']['C_WORDPRESS_MULTI_IMAGES'] = $uploadImagesResult['galleryId'];
+				$postContent['gallProps']['customFieldId'] = $galleriesCustomField;
+			}
 
-					if( $standardUrl ){
-						$pubField = new PubField( 'URL', 'string', array( $standardUrl ));
-					}
-					break;
+			if( isset( $publishFormOBJS[ 'C_WORDPRESS_CAT_'.strtoupper( $siteName ) ] ) ) {
+				$categories = $publishFormOBJS[ 'C_WORDPRESS_CAT_'.strtoupper( $siteName ) ];
+				$convertedCategories = array();
+				foreach( $categories as $category ) { // delete the hierarchical prefixes.
+					$convertedCategory = preg_replace( '/^-+\ /', '', $category );
+					$convertedCategories[] = $convertedCategory;
+				}
+				$postContent['categories'] = $convertedCategories;
+			}
+
+			if( isset( $uploadImagesResult['inline-ids-for-saving'] ) ) {
+				$postContent['inlineImages']['inline-ids'] = $uploadImagesResult['inline-ids-for-saving'];
+				if( $inlineImagesCustomField ) {
+					$postContent['inlineImages']['customFieldId'] = $inlineImagesCustomField;
+				}
+			}
+
+			if( isset( $uploadImagesResult['featured-image'] ) ) {
+				$postContent['featuredImage']['featured-image'] = $uploadImagesResult['featured-image'];
+				if( $featuredImagesCustomField ) {
+					$postContent['featuredImage']['customFieldId'] = $featuredImagesCustomField;
+				}
+			}
+
+			if( isset( $publishFormOBJS[ 'C_WORDPRESS_FORMAT_'.strtoupper( $siteName ) ] ) ) {
+				$format = $publishFormOBJS[ 'C_WORDPRESS_FORMAT_'.strtoupper( $siteName ) ][0];
+				$savedFormats = $wordpressUtils->getSavedFormats( $siteName );
+				$savedFormat = $format;
+
+				if( isset( $savedFormats[ $format ] ) ) {
+					$savedFormat = $savedFormats[ $format ];
+				}
+				$postContent['format'] = $savedFormat;
+			}
+
+			if( isset( $publishFormOBJS['C_WORDPRESS_VISIBILITY'] ) ) {
+				$postContent['visibility'] = $publishFormOBJS['C_WORDPRESS_VISIBILITY'][0];
+			}
+			if( isset( $publishFormOBJS['C_WORDPRESS_STICKY'] ) ) {
+				$postContent['sticky'] = $publishFormOBJS['C_WORDPRESS_STICKY'][0];
+			}
+			if( isset( $publishFormOBJS['C_WORDPRESS_ALLOW_COMMENTS'] ) ) {
+				$postContent['allowComments'] = $publishFormOBJS['C_WORDPRESS_ALLOW_COMMENTS'][0];
+			}
+			if( isset( $publishFormOBJS['C_WORDPRESS_PUBLISH_DATE'] ) ) {
+				$postContent['publishDate'] = $publishFormOBJS['C_WORDPRESS_PUBLISH_DATE'][0];
+			}
+			if( isset( $publishFormOBJS['C_WORDPRESS_EXCERPT'] ) ) {
+				$postContent['excerpt'] = $publishFormOBJS['C_WORDPRESS_EXCERPT'][0];
+			}
+			if( isset( $publishFormOBJS['C_WORDPRESS_SLUG'] ) ) {
+				$postContent['slug'] = $publishFormOBJS['C_WORDPRESS_SLUG'][0];
+			}
+			if( isset( $publishFormOBJS['C_WORDPRESS_TAGS_'.strtoupper( $siteName )] ) ) {
+				$tags = is_array($publishFormOBJS['C_WORDPRESS_TAGS_'.strtoupper( $siteName )]) ?
+					$publishFormOBJS['C_WORDPRESS_TAGS_'.strtoupper( $siteName )] :
+					array( $publishFormOBJS['C_WORDPRESS_TAGS_'.strtoupper( $siteName )] );
+				$postContent['tags'] = implode( ', ', $tags );
 			}
 		}
-		return $pubField;
+		return $postContent;
 	}
 
 	/**
@@ -416,13 +294,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	private function getSupportedImageFormats()
 	{
-		$retVal = array();
-
-		$retVal[] = 'image/jpg';
-		$retVal[] = 'image/jpeg';
-		$retVal[] = 'image/png';
-		$retVal[] = 'image/gif';
-
+		$retVal = array( 'image/jpg', 'image/jpeg', 'image/png', 'image/gif' );
 		return $retVal;
 	}
 
@@ -433,7 +305,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @param int $externalId
 	 * @param string $widgetName
-	 * @return int
+	 * @return array
 	 */
 	private function getGalleryByWidgetName( $publishTarget, $externalId, $widgetName )
 	{
@@ -441,27 +313,26 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		static $galleryField;
 		$clientWordPress = new WordPressXmlRpcClient( $publishTarget );
 
-		if( !$galleryField ){
+		if( !$galleryField ) {
 			$galleryField = $clientWordPress->getGalleriesFromCustomField( $externalId );
 		}
 
-		if( $galleryField ){
+		if( $galleryField ) {
 			$galleries = $galleryField['galleries'];
 			$customFieldId = $galleryField['customFieldId'];
 			$galleryId = null;
-
-			if( is_array( $galleries ) ){
+			if( is_array( $galleries ) ) {
 				$galleries = reset( $galleries );
 				$galleries = Zend_Json::decode( $galleries );
 
 				// Get the gallery id if the gallery already exists.
 				$galleryId = null;
-				if( isset( $galleries[$widgetName] )){
+				if( isset( $galleries[$widgetName] ) ) {
 					$galleryId = $galleries[$widgetName];
 				}
 			}
 			return array( 'galleryId' => $galleryId, 'customFieldId' => $customFieldId );
-		}else{
+		} else {
 			return null;
 		}
 	}
@@ -484,9 +355,9 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		$currentUser = BizSession::getUser();
 
 		if( $wordpressUsers ) {
-			if( isset( $wordpressUsers[strtolower( $currentUser->UserID )])) {
+			if( isset( $wordpressUsers[strtolower( $currentUser->UserID )] ) ) {
 				$savedUserId = $wordpressUsers[strtolower( $currentUser->UserID )];
-			}else if( isset ($wordpressUsers[strtolower( $currentUser->FullName )])) {
+			} else if( isset( $wordpressUsers[strtolower( $currentUser->FullName )] ) ) {
 				$savedUserId = $wordpressUsers[strtolower( $currentUser->FullName )];
 			}
 		}
@@ -505,20 +376,21 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param string $action Whether the error is from Publishing or Unpublishing. Possible values: 'PublishDossier', 'UnpublishDossier'
 	 * @throws BizException
 	 */
-	public function reThrowDetailedError($publishForm, $e, $action )
+	public function reThrowDetailedError( $publishForm, $e, $action )
 	{
 		$errorCode = ($e->getCode()) ? ' (code: ' . $e->getCode() . ')' : '';
 		$actionMessage = $action == 'PublishDossier' ? 'Posting' : 'Unpublishing';
 
 		$reasonParams = array( $publishForm->MetaData->BasicMetaData->Name );
-		if($action == 'PublishDossier' || $action == 'Posting'){
+		if( $action == 'PublishDossier' || $action == 'Posting' ) {
 			$msg = BizResources::localize( 'WORDPRESS_ERROR_PUBLISH', true, $reasonParams );
-		} else{ $msg = BizResources::localize( 'WORDPRESS_ERROR_UNPUBLISH', true, $reasonParams );}
-
+		} else {
+			$msg = BizResources::localize( 'WORDPRESS_ERROR_UNPUBLISH', true, $reasonParams );
+		}
 		$detail = $actionMessage . $publishForm->MetaData->BasicMetaData->Name . ' with id: ' . $publishForm->MetaData->BasicMetaData->ID
 			. ' produced an error: ' . $e->getMessage() . $errorCode;
 
-		throw new BizException(null, 'Server', $detail, $msg);
+		throw new BizException( null, 'Server', $detail, $msg );
 	}
 
 	/**
@@ -537,8 +409,24 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		$pubField = $this->preparePost($objectsInDossier, $dossier, $publishTarget, 'update');
-		return array($pubField);
+		$pubFields = array();
+
+		if( $objectsInDossier ) foreach ( $objectsInDossier as $objectInDossier ) {
+			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
+				// Prepare post content.
+				$postContents = $this->preparePost( $objectInDossier, $objectsInDossier, $dossier, $publishTarget, 'update' );
+
+				try {
+					$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+					$objXMLRPClientWordPress->uploadPost( $postContents, $dossier->ExternalId );
+					$url = $this->getPostUrl( $dossier->ExternalId, $publishTarget );
+					$pubFields[] = new PubField( 'URL', 'string', array( $url ) );
+				} catch( BizException $e ) {
+					$this->reThrowDetailedError( $objectInDossier, $e, 'PublishDossier' );
+				}
+			}
+		}
+		return $pubFields;
 	}
 
 	/**
@@ -553,20 +441,18 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget ) 
 	{
-		$objectsInDossier = $objectsInDossier; //Keep analyzer happy
 		$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
 
-		try{
-			$objXMLRPClientWordPress->deleteOldPublishedPreviews(); // delete all old previews
-		} catch( Exception $e ){ // we want to continue when we could not remove the previews
-			LogHandler::Log( 'SERVER', 'WARN', 'Could not remove old published reviews', $e );
-		}
-
 		try {
-			$objXMLRPClientWordPress->deletePostAndContent( $dossier->ExternalId );
-			$dossier->ExternalId = '';
-		} catch (Exception $e) {
-			$this->reThrowDetailedError($dossier, $e, 'UnpublishDossier' );
+			$objXMLRPClientWordPress->deleteOldPublishedPreviews(); // delete all old previews
+			try {
+				$objXMLRPClientWordPress->deletePostAndContent( $dossier->ExternalId );
+				$dossier->ExternalId = '';
+			} catch( BizException $e) {
+				$this->reThrowDetailedError( $dossier, $e, 'UnpublishDossier' );
+			}
+		} catch( BizException $e ) { // we want to continue when we could not remove the previews
+			LogHandler::Log( 'SERVER', 'WARN', 'Could not remove old published reviews', $e );
 		}
 		return array();
 	}
@@ -594,17 +480,15 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget The target.
 	 * @return array List of PubField with its values.
 	 */
-	public function requestPublishFields($dossier, $objectsInDossier, $publishTarget)
+	public function requestPublishFields( $dossier, $objectsInDossier, $publishTarget )
 	{
-		$objectsInDossier = $objectsInDossier; //Keep analyzer happy
 		$url = null;
-
-		if( $dossier->ExternalId ){
-            $url = $this->getPostUrl( $dossier->ExternalId, $publishTarget );
+		if( $dossier->ExternalId ) {
+			$url = $this->getPostUrl( $dossier->ExternalId, $publishTarget );
 		}
-
 		$pubField = new PubField('URL', 'string', array($url));
-		return array($pubField);
+
+		return array( $pubField );
 	}
 
 	/**
@@ -613,6 +497,8 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * This function is used to upload images, it processes the images and checks if they need to be uploaded or only updated.
 	 * It calls the upload image or update image for every image that is in the dossier.
 	 *
+	 * @param Object $publishForm PublishForm object
+	 * @param array $publishFormOBJS Array of PublishForm field values
 	 * @param $objectsInDossier
 	 * @param PubPublishTarget $publishTarget
 	 * @param $galleryId
@@ -625,137 +511,108 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * @throws BizException
 	 */
-	function uploadImages( &$objectsInDossier, $publishTarget, $galleryId = null, $galleryName = null, $attachments = null, $images = false, $preview = false )
+	function uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget, $galleryId = null, $galleryName = null, $attachments = null, $images = false, $preview = false )
 	{
 		$postId = null;
-		$publishForm = null;
 		$result = null;
 		$clientWordPress = new WordPressXmlRpcClient( $publishTarget );
 
-		foreach ($objectsInDossier as $objectInDossier) {
-			if ($objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm') {
-				$publishForm = $objectInDossier;
-				break;
+		if( $images ) {
+			// Check if we have a galleryName or an galleryId when there are images to upload,
+			// this exception is given when the function is called with the wrong parameters
+			if( !$galleryName && !$galleryId ) {
+				throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', 'Please contact your system administrator');
 			}
-		}
 
-		$publishFormOBJS = BizPublishForm::getFormFields($publishForm);
-
-		// Check if we have a galleryName or an galleryId when there are images to upload,
-		// this exception is given when the function is called with the wrong parameters
-		if( $images && !$galleryName && !$galleryId ){
-			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', 'Please contact your system administrator');
-		}
-
-		if( $images ){
-			//If no GalleryId then create a new Gallery.
-			if( !$galleryId ){
+			// If no GalleryId then create a new Gallery.
+			if( !$galleryId ) {
 				$galleryId = $clientWordPress->createGallery( $galleryName );
 			}
 
-			// This is needed because the getFormFields does not return a array when it has only 1 object
-			// in that case it will return a object instead of a array. We need a array so here we force it into an array.
-			if( isset($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']) ){
-				if( !is_array($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']) ){
-					$replaceObj[] = $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'];
-					$publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] = $replaceObj;
-				}
-			}
-
-			if( $galleryId ){
-				foreach($objectsInDossier as $object){
-					foreach( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] as $publishedImage ){
-						if( $publishedImage->MetaData->BasicMetaData->ID == $object->MetaData->BasicMetaData->ID ){
-							if($object->MetaData->BasicMetaData->Type == 'Image'){
-								$imageDescription = null;
-								$externalId = null;
-
-								foreach ($object->MetaData->ExtraMetaData as $extraData) {
-									if( $extraData->Property == 'C_WORDPRESS_IMAGE_DESCRIPTION' ){
-										$imageDescription = $extraData->Values[0];
-										break;
-									}
+			require_once BASEDIR.'/server/utils/VersionUtils.class.php';
+			foreach( $objectsInDossier as $object ) {
+				foreach( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] as $publishedImage ) {
+					if( $publishedImage->MetaData->BasicMetaData->ID == $object->MetaData->BasicMetaData->ID ) {
+						if( $object->MetaData->BasicMetaData->Type == 'Image' ) {
+							$imageDescription = null;
+							$externalId = null;
+							foreach( $object->MetaData->ExtraMetaData as $extraData ) {
+								if( $extraData->Property == 'C_WORDPRESS_IMAGE_DESCRIPTION' ) {
+									$imageDescription = $extraData->Values[0];
+									break;
 								}
+							}
 
-								$uploadNeeded = false;
-								if( !$preview ){ // Don't get the externalId when previewing because we want to upload a new set of images.
-									// This part gets the externalId if exists and compares the version of the published version and the workflow version.
-									foreach($object->Relations as $relation){
-										if($relation->Type == 'Placed' && $relation->Parent == $publishForm->MetaData->BasicMetaData->ID){
-											if( isset($relation->Targets) ){
-												foreach($relation->Targets as $target){
-													if( $target->Issue->Id == $publishTarget->IssueID ){
-														require_once BASEDIR.'/server/utils/VersionUtils.class.php';
-														$externalId = $relation->Targets[0]->ExternalId;
-
-														if( $externalId ){ // if there is no externalId the version does not have to compared
-															if( VersionUtils::versionCompare( $target->PublishedVersion, $object->MetaData->WorkflowMetaData->Version, '<' )) {
-																$uploadNeeded = true; // Modification has been done since published, so re-upload is needed.
-															}
+							$uploadNeeded = false;
+							if( !$preview ) { // Don't get the externalId when previewing because we want to upload a new set of images.
+								// This part gets the externalId if exists and compares the version of the published version and the workflow version.
+								foreach( $object->Relations as $relation ) {
+									if( $relation->Type == 'Placed' && $relation->Parent == $publishForm->MetaData->BasicMetaData->ID ) {
+										if( isset($relation->Targets) ) {
+											foreach( $relation->Targets as $target ) {
+												if( $target->Issue->Id == $publishTarget->IssueID ) {
+													$externalId = $relation->Targets[0]->ExternalId;
+													if( $externalId ) { // if there is no externalId the version does not have to compared
+														if( VersionUtils::versionCompare( $target->PublishedVersion, $object->MetaData->WorkflowMetaData->Version, '<' ) ) {
+															$uploadNeeded = true; // Modification has been done since published, so re-upload is needed.
 														}
-														break 2; // Stop this foreach and the relation foreach.
 													}
+													break 2; // Stop this foreach and the relation foreach.
 												}
 											}
 										}
 									}
 								}
-
-								if( !$externalId || ( $externalId && $uploadNeeded ) ){ // check if any change is made else do nothing
-									$mediaId = $object->MetaData->BasicMetaData->ID;
-									$filePath = $this->saveLocal($mediaId);
-									$extension = $object->Relations[0]->ChildInfo->Format;
-									$imageName = $object->MetaData->BasicMetaData->Name . '.' . pathinfo($filePath, PATHINFO_EXTENSION);
-
-									// If there is a externalId the image needs to be updated else it's a new image.
-									if( $externalId ){
-										try{
-											$response = $clientWordPress->updateImage( $imageName, $filePath, $extension, $galleryId, $externalId );
-										}catch( BizException $e ){
-											throw new BizException( 'WORDPRESS_ERROR_UPDATE_IMAGE', 'SERVER', $e->getDetail());
-										}
-									} else{
-										try{
-											$response = $clientWordPress->uploadImage( $imageName, $filePath, $extension, $galleryId );
-										}catch( BizException $e ){
-											throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail());
-										}
-									}
-
-									$postId = $response['pid'];
-									$object->ExternalId = $postId;
-								}
-
-								if( $object->ExternalId ){
-									$clientWordPress->updateImageMetaData( $object->ExternalId, $object->MetaData->BasicMetaData->Name, $imageDescription );
-								}
-
-								break;
 							}
+
+							if( !$externalId || ( $externalId && $uploadNeeded ) ) { // check if any change is made else do nothing
+								$mediaId = $object->MetaData->BasicMetaData->ID;
+								$filePath = $this->saveLocal($mediaId);
+								$extension = $object->Relations[0]->ChildInfo->Format;
+								$imageName = $object->MetaData->BasicMetaData->Name . '.' . pathinfo($filePath, PATHINFO_EXTENSION);
+
+								// If there is a externalId the image needs to be updated else it's a new image.
+								if( $externalId ) {
+									try {
+										$response = $clientWordPress->updateImage( $imageName, $filePath, $extension, $galleryId, $externalId );
+									} catch( BizException $e ) {
+										throw new BizException( 'WORDPRESS_ERROR_UPDATE_IMAGE', 'SERVER', $e->getDetail() );
+									}
+								} else {
+									try {
+										$response = $clientWordPress->uploadImage( $imageName, $filePath, $extension, $galleryId );
+									} catch( BizException $e ) {
+										throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail());
+									}
+								}
+								$postId = $response['pid'];
+								$object->ExternalId = $postId;
+							}
+							if( $object->ExternalId ) {
+								$clientWordPress->updateImageMetaData( $object->ExternalId, $object->MetaData->BasicMetaData->Name, $imageDescription );
+							}
+							break;
 						}
 					}
 				}
-				$result['galleryId'] = $galleryId;
 			}
+			$result['galleryId'] = $galleryId;
 		}
 
-		if( $attachments ){
+		if( $attachments ) {
 			$inlineImages = array_keys($attachments);
-
-			foreach($inlineImages as $imageId){
-				require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
-				$extension = $attachments[$imageId]->Type;
-				$extension = explode('/', $extension);
-				$extension = '.' . $extension[1];
-				$inlineImageName = null;
+			require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
+			foreach( $inlineImages as $imageId ) {
+				$format = $attachments[$imageId]->Type;
+				$extension = MimeTypeHandler::mimeType2FileExt($format);
 				$inlineImageName = DBObject::getObjectName( $imageId );
 
-				if( !$inlineImageName ){ // objectName not found in Workflow area
+				if( !$inlineImageName ) { // objectName not found in Workflow area
 					$inlineImageName = DBDeletedObject::getObjectName( $imageId ); // so find in Trash area
 				}
-				try{
-					$retVal = $clientWordPress->uploadMediaLibraryImage( $inlineImageName . $extension, $attachments[$imageId]->FilePath, $attachments[$imageId]->Type );
-				}catch( BizException $e ){
+				try {
+					$retVal = $clientWordPress->uploadMediaLibraryImage( $inlineImageName.$extension, $attachments[$imageId]->FilePath, $attachments[$imageId]->Type );
+				} catch( BizException $e ) {
 					throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail());
 				}
 
@@ -765,31 +622,31 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 			}
 		}
 
-        if( isset($publishFormOBJS['C_WORDPRESS_FEATURED_IMAGE']) ){
-            $featuredImage = $publishFormOBJS['C_WORDPRESS_FEATURED_IMAGE'];
+		if( isset($publishFormOBJS['C_WORDPRESS_FEATURED_IMAGE']) ) {
+			$featuredImage = $publishFormOBJS['C_WORDPRESS_FEATURED_IMAGE'];
 
-            try{
-                $mediaId = $featuredImage->MetaData->BasicMetaData->ID;
-                $filePath = $this->saveLocal($mediaId);
-                $extension = pathinfo($filePath, PATHINFO_EXTENSION);
-                $imageName = $featuredImage->MetaData->BasicMetaData->Name . '.' . $extension ;
+			try {
+				$mediaId = $featuredImage->MetaData->BasicMetaData->ID;
+				$filePath = $this->saveLocal($mediaId);
+				$extension = pathinfo($filePath, PATHINFO_EXTENSION);
+				$imageName = $featuredImage->MetaData->BasicMetaData->Name . '.' . $extension ;
 
-                $retVal = $clientWordPress->uploadMediaLibraryImage( $imageName, $filePath, $featuredImage->MetaData->ContentMetaData->Format );
+				$retVal = $clientWordPress->uploadMediaLibraryImage( $imageName, $filePath, $featuredImage->MetaData->ContentMetaData->Format );
 				if( $retVal['id'] ) {
-					foreach( $featuredImage->MetaData->ExtraMetaData as $extraData) {
-						if( $extraData->Property == 'C_WORDPRESS_IMAGE_DESCRIPTION' ){
+					$imageDescription = null;
+					foreach( $featuredImage->MetaData->ExtraMetaData as $extraData ) {
+						if( $extraData->Property == 'C_WORDPRESS_IMAGE_DESCRIPTION' ) {
 							$imageDescription = $extraData->Values[0];
 							break;
 						}
 					}
 					$clientWordPress->updateMediaLibraryImageMetaData( $retVal['id'], $featuredImage->MetaData->BasicMetaData->Name, $imageDescription, '' );
 				}
-            }catch( BizException $e ){
-                throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail());
-            }
-
-            $result['featured-image'] = $retVal['id'];
-        }
+			} catch( BizException $e ) {
+				throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail() );
+			}
+			$result['featured-image'] = $retVal['id'];
+		}
 
 		return $result;
 	}
@@ -806,9 +663,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getDossierURL( $dossier, $objectsInDossier, $publishTarget )
 	{
-		$objectsInDossier = $objectsInDossier; //Keep analyzer happy
-		$publishTarget = $publishTarget;
-		$dossier = $dossier;
 	}
 
 	/**
@@ -819,13 +673,31 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $dossier         [writable]
 	 * @param array $objectsInDossier [writable] Array of Object.
 	 * @param PubPublishTarget $publishTarget
-	 * 
+	 *
+	 * @throws BizException
 	 * @return array of Fields containing information from Publishing system
 	 */
 	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		$pubField = $this->preparePost( $objectsInDossier, $dossier, $publishTarget, 'preview' );
-		return array( $pubField );
+		$pubFields = array();
+
+		if( $objectsInDossier ) foreach ( $objectsInDossier as $objectInDossier ) {
+			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
+				// Prepare post content.
+				$postContents = $this->preparePost( $objectInDossier, $objectsInDossier, $dossier, $publishTarget, 'preview' );
+
+				try {
+					$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+					$result = $objXMLRPClientWordPress->uploadPost( $postContents, null, true );
+					if( $result ) {
+						$pubFields[] = new PubField( 'URL', 'string', array( $result ) );
+					}
+				} catch( BizException $e ) {
+					throw new BizException( 'WORDPRESS_ERROR_PREVIEW', 'SERVER', 'ERROR', null, array( $objectInDossier->MetaData->BasicMetaData->Name ) );
+				}
+			}
+		}
+		return $pubFields;
 	}
 
 	/**
@@ -846,20 +718,19 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param integer $pubChannelId Publication Channel Id.
 	 * @return array|Null Array of templates|The default connector returns null which indicates it doesn't support publishing forms.
 	 */
-	public function getPublishFormTemplates($pubChannelId)
+	public function getPublishFormTemplates( $pubChannelId )
 	{
+		require_once BASEDIR.'/server/utils/PublishingUtils.class.php';
 		// Create the templates.
 		$templatesObj = array();
 		$documentIdPrefix = $this->getDocumentIdPrefix();
-		require_once BASEDIR . '/server/utils/PublishingUtils.class.php';
 
 		$wordpressUtils = new WordPress_Utils();
 		$publishTarget = new PubPublishTarget( $pubChannelId );
 		$siteName = $wordpressUtils->getSiteName( $publishTarget );
 
 		$templatesObj[] = WW_Utils_PublishingUtils::getPublishFormTemplateObj(
-			$pubChannelId, 'WordPress post', 'Publish a text article to WordPress', $documentIdPrefix . $siteName
-		);
+			$pubChannelId, 'WordPress post', 'Publish a text article to WordPress', $documentIdPrefix.$siteName );
 
 		return $templatesObj;
 	}
@@ -884,27 +755,25 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getDialogForSetPublishPropertiesAction( $publishFormTemplate ) 
 	{
-		require_once BASEDIR . '/server/utils/PublishingUtils.class.php';
-		require_once dirname(__FILE__). '/WordPress_CustomObjectMetaData.class.php';
+		require_once BASEDIR.'/server/utils/PublishingUtils.class.php';
+		require_once dirname(__FILE__).'/WordPress_CustomObjectMetaData.class.php';
 
 		$dialog = WW_Utils_PublishingUtils::getDefaultPublishingDialog($publishFormTemplate->MetaData->BasicMetaData->Name);
-		$documentIdPrefix = $this->getDocumentIdPrefix();
-
-		$customObjectMetaData = new WordPress_CustomObjectMetaData();
 		$wordpressUtils = new WordPress_Utils();
 		$target = reset($publishFormTemplate->Targets);
 		$publishTarget = new PubPublishTarget( $target->PubChannel->Id );
 		$siteName = $wordpressUtils->getSiteName( $publishTarget );
 		$clientWordPress = new WordPressXmlRpcClient( $publishTarget );
+		$documentIdPrefix = $this->getDocumentIdPrefix();
+		$customObjectMetaData = new WordPress_CustomObjectMetaData();
 
 		// Create / Add widgets.
-		switch ($publishFormTemplate->MetaData->BasicMetaData->DocumentID) {
-			case $documentIdPrefix . $siteName : //WordPress post
-
+		switch( $publishFormTemplate->MetaData->BasicMetaData->DocumentID ) {
+			case $documentIdPrefix . $siteName : // WordPress post
 				//  **Post Tab**
 				$tabPost = WW_Utils_PublishingUtils::getPublishingTab( 'Publish Settings' );
 
-				//Title widget
+				// Title widget
 				$urlWidget = new DialogWidget();
 				$urlWidget->PropertyInfo = $customObjectMetaData->getProperty('C_WORDPRESS_POST_TITLE');
 				$urlWidgetUsage = new PropertyUsage();
@@ -914,10 +783,9 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				$urlWidgetUsage->Restricted = false;
 				$urlWidgetUsage->RefreshOnChange = false;
 				$urlWidget->PropertyUsage = $urlWidgetUsage;
-
 				$tabPost->Widgets[] = $urlWidget;
 
-				//Date widget
+				// Date widget
 				$publishDateWidget = new DialogWidget();
 				$publishDateWidget->PropertyInfo = $customObjectMetaData->getProperty('C_WORDPRESS_PUBLISH_DATE');
 				$publishDateWidgetUsage = new PropertyUsage();
@@ -927,10 +795,9 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				$publishDateWidgetUsage->Restricted = false;
 				$publishDateWidgetUsage->RefreshOnChange = false;
 				$publishDateWidget->PropertyUsage = $publishDateWidgetUsage;
-
 				$tabPost->Widgets[] = $publishDateWidget;
 
-				//Visibility widget
+				// Visibility widget
 				$visibilityWidget = new DialogWidget();
 				$visibilityWidget->PropertyInfo = $customObjectMetaData->getProperty('C_WORDPRESS_VISIBILITY');
 				$visibilityWidgetUsage = new PropertyUsage();
@@ -940,11 +807,11 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				$visibilityWidgetUsage->Restricted = false;
 				$visibilityWidgetUsage->RefreshOnChange = false;
 				$visibilityWidget->PropertyUsage = $visibilityWidgetUsage;
-
 				$tabPost->Widgets[] = $visibilityWidget;
+
 				$dialog->Tabs[] = $tabPost;
 
-				//Message widget
+				// Message widget
 				$articleWidget = new DialogWidget();
 				$articleWidget->PropertyInfo = $customObjectMetaData->getProperty('C_WORDPRESS_PF_MESSAGE');
 				$articleWidgetUsage = new PropertyUsage();
@@ -969,39 +836,39 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 
 				$tabPost->Widgets[] = $widget;
 
-                $tabFeaturedImage = WW_Utils_PublishingUtils::getPublishingTab( 'Featured image' );
+				$tabFeaturedImage = WW_Utils_PublishingUtils::getPublishingTab( 'Featured image' );
 
-                //Media widget
-                $imageFileWidget = new DialogWidget();
-                $imageFileWidget->PropertyInfo = $customObjectMetaData->getProperty('C_WORDPRESS_FEATURED_IMAGE_FILE');
-                $imageFileWidget->PropertyInfo->Widgets = $this->getFileWidgets();
-                $imageFileWidgetUsage = new PropertyUsage();
-                $imageFileWidgetUsage->Name = $imageFileWidget->PropertyInfo->Name;
-                $imageFileWidgetUsage->Editable = true;
-                $imageFileWidgetUsage->Mandatory = false;
-                $imageFileWidgetUsage->Restricted = false;
-                $imageFileWidgetUsage->RefreshOnChange = false;
-                $imageFileWidget->PropertyUsage = $imageFileWidgetUsage;
+				// Media widget
+				$imageFileWidget = new DialogWidget();
+				$imageFileWidget->PropertyInfo = $customObjectMetaData->getProperty('C_WORDPRESS_FEATURED_IMAGE_FILE');
+				$imageFileWidget->PropertyInfo->Widgets = $this->getFileWidgets();
+				$imageFileWidgetUsage = new PropertyUsage();
+				$imageFileWidgetUsage->Name = $imageFileWidget->PropertyInfo->Name;
+				$imageFileWidgetUsage->Editable = true;
+				$imageFileWidgetUsage->Mandatory = false;
+				$imageFileWidgetUsage->Restricted = false;
+				$imageFileWidgetUsage->RefreshOnChange = false;
+				$imageFileWidget->PropertyUsage = $imageFileWidgetUsage;
 
-                $imageWidget = new DialogWidget();
-                $imageWidget->PropertyInfo = $customObjectMetaData->getProperty('C_WORDPRESS_FEATURED_IMAGE');
-                $imageWidget->PropertyInfo->Widgets = array($imageFileWidget);
-                $imageWidgetUsage = new PropertyUsage();
-                $imageWidgetUsage->Name = $imageWidget->PropertyInfo->Name;
-                $imageWidgetUsage->Editable = true;
-                $imageWidgetUsage->Mandatory = false;
-                $imageWidgetUsage->Restricted = false;
-                $imageWidgetUsage->RefreshOnChange = false;
-                $imageWidget->PropertyUsage = $imageWidgetUsage;
+				$imageWidget = new DialogWidget();
+				$imageWidget->PropertyInfo = $customObjectMetaData->getProperty('C_WORDPRESS_FEATURED_IMAGE');
+				$imageWidget->PropertyInfo->Widgets = array($imageFileWidget);
+				$imageWidgetUsage = new PropertyUsage();
+				$imageWidgetUsage->Name = $imageWidget->PropertyInfo->Name;
+				$imageWidgetUsage->Editable = true;
+				$imageWidgetUsage->Mandatory = false;
+				$imageWidgetUsage->Restricted = false;
+				$imageWidgetUsage->RefreshOnChange = false;
+				$imageWidget->PropertyUsage = $imageWidgetUsage;
+				$tabFeaturedImage->Widgets[] = $imageWidget;
 
-                $tabFeaturedImage->Widgets[] = $imageWidget;
-                $dialog->Tabs[] = $tabFeaturedImage;
+				$dialog->Tabs[] = $tabFeaturedImage;
 
-				if( $clientWordPress->checkNextGenEnabled() ){ // check if the NextGen plug-in is installed else don't show the gallery tab
+				if( $clientWordPress->checkNextGenEnabled() ) { // check if the NextGen plug-in is installed else don't show the gallery tab
 					// **Gallery tab**
 					$tabGallery = WW_Utils_PublishingUtils::getPublishingTab( 'Gallery' );
 
-					//Media widget
+					// Media widget
 					$imagesFileWidget = new DialogWidget();
 					$imagesFileWidget->PropertyInfo = $customObjectMetaData->getProperty('C_WORDPRESS_MULTI_IMAGES_FILE');
 					$imagesFileWidget->PropertyInfo->Widgets = $this->getFileWidgets();
@@ -1023,7 +890,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 					$imagesWidgetUsage->Restricted = false;
 					$imagesWidgetUsage->RefreshOnChange = false;
 					$imagesWidget->PropertyUsage = $imagesWidgetUsage;
-
 					$tabGallery->Widgets[] = $imagesWidget;
 
 					$dialog->Tabs[] = $tabGallery;
@@ -1042,7 +908,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				$categoriesWidgetUsage->Restricted = false;
 				$categoriesWidgetUsage->RefreshOnChange = false;
 				$categoriesWidget->PropertyUsage = $categoriesWidgetUsage;
-
 				$tabTagging->Widgets[] = $categoriesWidget;
 
 				// Tags widget
@@ -1055,7 +920,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				$tagsWidgetUsage->Restricted = false;
 				$tagsWidgetUsage->RefreshOnChange = false;
 				$tagsWidget->PropertyUsage = $tagsWidgetUsage;
-
 				$tabTagging->Widgets[] = $tagsWidget;
 
 				$dialog->Tabs[] = $tabTagging;
@@ -1063,7 +927,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				// **Other tab**
 				$tabOther = WW_Utils_PublishingUtils::getPublishingTab( 'General Settings' );
 
-				//Slug widget
+				// Slug widget
 				$slugWidget = new DialogWidget();
 				$slugWidget->PropertyInfo = $customObjectMetaData->getProperty('C_WORDPRESS_SLUG');
 				$slugWidgetUsage = new PropertyUsage();
@@ -1073,7 +937,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				$slugWidgetUsage->Restricted = false;
 				$slugWidgetUsage->RefreshOnChange = false;
 				$slugWidget->PropertyUsage = $slugWidgetUsage;
-
 				$tabOther->Widgets[] = $slugWidget;
 
 				// Format widget
@@ -1086,10 +949,9 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				$formatWidgetUsage->Restricted = false;
 				$formatWidgetUsage->RefreshOnChange = false;
 				$formatWidget->PropertyUsage = $formatWidgetUsage;
-
 				$tabOther->Widgets[] = $formatWidget;
 
-				//Allow comments widget
+				// Allow comments widget
 				$allowCommentsWidget = new DialogWidget();
 				$allowCommentsWidget->PropertyInfo = $customObjectMetaData->getProperty ( 'C_WORDPRESS_ALLOW_COMMENTS' );
 				$allowCommentsWidgetUsage = new PropertyUsage();
@@ -1099,10 +961,9 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				$allowCommentsWidgetUsage->Restricted = false;
 				$allowCommentsWidgetUsage->RefreshOnChange = false;
 				$allowCommentsWidget->PropertyUsage = $allowCommentsWidgetUsage;
-
 				$tabOther->Widgets[] = $allowCommentsWidget;
 
-				//Sticky widget
+				// Sticky widget
 				$stickyWidget = new DialogWidget();
 				$stickyWidget->PropertyInfo = $customObjectMetaData->getProperty ( 'C_WORDPRESS_STICKY' );
 				$stickyWidgetUsage = new PropertyUsage();
@@ -1112,10 +973,9 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				$stickyWidgetUsage->Restricted = false;
 				$stickyWidgetUsage->RefreshOnChange = false;
 				$stickyWidget->PropertyUsage = $stickyWidgetUsage;
-
 				$tabOther->Widgets[] = $stickyWidget;
 
-				//Sticky widget
+				// Excerpt widget
 				$excerptWidget = new DialogWidget();
 				$excerptWidget->PropertyInfo = $customObjectMetaData->getProperty ( 'C_WORDPRESS_EXCERPT' );
 				$excerptWidgetUsage = new PropertyUsage();
@@ -1125,7 +985,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				$excerptWidgetUsage->Restricted = false;
 				$excerptWidgetUsage->RefreshOnChange = false;
 				$excerptWidget->PropertyUsage = $excerptWidgetUsage;
-
 				$tabOther->Widgets[] = $excerptWidget;
 
 				$dialog->Tabs[] = $tabOther;
@@ -1136,18 +995,19 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 
 	/**
 	 * Get file info widgets
+	 *
 	 * These widgets are used to show the info of a picture in content station.
 	 *
 	 * @return array
 	 */
 	private function getFileWidgets()
 	{
-		require_once dirname(__FILE__). '/WordPress_CustomObjectMetaData.class.php';
+		require_once dirname(__FILE__).'/WordPress_CustomObjectMetaData.class.php';
 		$customObjectMetaData = new WordPress_CustomObjectMetaData();
 		$standardProperties = BizProperty::getPropertyInfos();
 		$fileWidgets = array();
 
-		//Description
+		// Description
 		$fileWidget = new DialogWidget();
 		$fileWidget->PropertyInfo = $customObjectMetaData->getPropertyFromOthers( 'C_WORDPRESS_IMAGE_DESCRIPTION' );
 		$fileWidget->PropertyUsage = new PropertyUsage();
@@ -1214,25 +1074,24 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	/**
 	 * Composes a Dialog->MetaData list from dialog widgets and custom properties.
 	 *
-	 * @param $extraMetaDatas List of ExtraMetaData elements
-	 * @param $widgets List of DialogWidget elements
+	 * @param $extraMetaDatas array of ExtraMetaData elements
+	 * @param $widgets array of DialogWidget elements
 	 * @return array List of MetaDataValue elements
 	 */
-	public function extractMetaDataFromWidgets($extraMetaDatas, $widgets)
+	public function extractMetaDataFromWidgets( $extraMetaDatas, $widgets )
 	{
 		$metaDataValues = array();
-		if ($widgets) {
-			foreach ($widgets as $widget) {
-				if ($extraMetaDatas)
-					foreach ($extraMetaDatas as $extraMetaData) {
-						if ($widget->PropertyInfo->Name == $extraMetaData->Property) {
-							$metaDataValue = new MetaDataValue();
-							$metaDataValue->Property = $extraMetaData->Property;
-							$metaDataValue->Values = $extraMetaData->Values; // array of string
-							$metaDataValues[] = $metaDataValue;
-							break; // found
-						}
+		if( $widgets ) {
+			foreach( $widgets as $widget ) {
+				if( $extraMetaDatas ) foreach( $extraMetaDatas as $extraMetaData ) {
+					if( $widget->PropertyInfo->Name == $extraMetaData->Property ) {
+						$metaDataValue = new MetaDataValue();
+						$metaDataValue->Property = $extraMetaData->Property;
+						$metaDataValue->Values = $extraMetaData->Values; // array of string
+						$metaDataValues[] = $metaDataValue;
+						break; // found
 					}
+				}
 			}
 		}
 		return $metaDataValues;
@@ -1271,55 +1130,48 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function saveLocal( $id )
 	{
-		require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
+		// Check and create the directory as needed.
+		if( !is_dir(TEMPDIRECTORY) ) {
+			require_once BASEDIR . '/server/utils/FolderUtils.class.php';
+			FolderUtils::mkFullDir(TEMPDIRECTORY);
+			// Check if the directory was created.
+			if( !is_dir(TEMPDIRECTORY) ) {
+				$msg = 'The directory: "' . TEMPDIRECTORY . '" does not exist, or could not be created.';
+				$detail = 'The directory "' . TEMPDIRECTORY . '" could not be created. Either create it manually and '
+					. 'ensure the web server can write to it, or check that the webserver has rights to write to the sub-'
+					. 'directories in the path.';
 
-		$object = $this->getObject($id);
+				throw new BizException(null, 'Server', $detail, $msg);
+			}
+		}
+
+		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
+		$object = $this->getObject( $id );
 		$type = $object->MetaData->BasicMetaData->Type;
-
 		// We need to get a unique name for the object, in case there are multiple objects with the same name.
 		$name = $id . $type;
-
 		// Get the format, and the proper extension for the format.
 		$format = $object->MetaData->ContentMetaData->Format;
-		$extension = MimeTypeHandler::mimeType2FileExt($format);
+		$extension = MimeTypeHandler::mimeType2FileExt( $format );
+		$exportName = TEMPDIRECTORY . '/' . $name . $extension;
 
 		// Retrieve file data.
 		$filePath = null;
-		if (isset($object->Files[0]->FilePath)) {
+		if( isset($object->Files[0]->FilePath) ) {
 			$filePath = $object->Files[0]->FilePath;
 		}
-
-		$exportName = TEMPDIRECTORY . '/' . $name . $extension;
-
-		// Check and create the directory as needed.
-		if (!is_dir(TEMPDIRECTORY)) {
-			require_once BASEDIR . '/server/utils/FolderUtils.class.php';
-			FolderUtils::mkFullDir(TEMPDIRECTORY);
-		}
-
-		// Check if the directory was created.
-		if (!is_dir(TEMPDIRECTORY)) {
-			$msg = 'The directory: "' . TEMPDIRECTORY . '" does not exist, or could not be created.';
-			$detail = 'The directory "' . TEMPDIRECTORY . '" could not be created. Either create it manually and '
-				. 'ensure the web server can write to it, or check that the webserver has rights to write to the sub-'
-				. 'directories in the path.';
-
-			throw new BizException(null, 'Server', $detail, $msg);
-		}
-
 		$content = file_get_contents($filePath);
 
-		if (is_null($content)) {
+		if( is_null($content) ) {
 			$msg = 'Could not retrieve file contents';
 			$detail = (is_string($filePath)) ? $filePath : 'Attachment (' . $id . ')';
 			$detail .= ' did not yield proper content.';
 			throw new BizException(null, 'Server', $detail, $msg);
 		}
-
 		file_put_contents( $exportName, $content );
 
 		// Check if the file was created.
-		if (!file_exists($exportName)) {
+		if( !file_exists($exportName) ) {
 			$detail = 'File: ' . $exportName . ' for ' . $type . ', object (ID: ' . $id . ') Does not seem to be a valid file.';
 			$msg = 'Unable to save ' . $type . ' data locally.';
 			throw new BizException(null, 'Server', $detail, $msg);
@@ -1343,12 +1195,11 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * @see /Enterprise/server/bizclasses/BizObject.class.php
 	 */
-	private function getObject($id, $lock = false, $rendition = 'native', $requestInfo = array())
+	private function getObject( $id, $lock = false, $rendition = 'native', $requestInfo = array() )
 	{
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 		$service = new WflGetObjectsService();
-
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$request = new WflGetObjectsRequest();
 		$request->Ticket = BizSession::getTicket();
 		$request->IDs = array( $id );
@@ -1362,9 +1213,55 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		/* @var WflGetObjectsResponse $resp */
 		$resp = $service->execute($request);
 
-		if ( $resp->Objects ) {
+		if( $resp->Objects ) {
 			return $resp->Objects[0];
 		}
 		return null;
+	}
+
+	/**
+	 * Get the first object in a dossier which match with object type
+	 *
+	 * @param $objectsInDossier
+	 * @param $objectType
+	 * @return Object|null Return object if found else return null
+	 */
+	private function getFirstObjectWithType( $objectsInDossier, $objectType )
+	{
+		$objectFound = null;
+		foreach( $objectsInDossier as $objectDossier ) {
+			if( $objectDossier->MetaData->BasicMetaData->Type == $objectType ) {
+				$objectFound = $objectDossier;
+				break;
+			}
+		}
+		return $objectFound;
+	}
+
+	/**
+	 * Check and validate if the inline image format is wordpress supported image format or not
+	 *
+	 * @param array $attachments array of attachments
+	 * @throws BizException When unsupported image found, throw bizexception
+	 */
+	private function validateInlineImageFormat( $attachments )
+	{
+		$unsupportedInlineImages = array();
+		$supportedImageFormats = $this->getSupportedImageFormats();
+		if( $attachments ) {
+			$inlineImages = array_keys($attachments);
+			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+			require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
+			foreach( $inlineImages as $imageId ) {
+				$format = $attachments[$imageId]->Type;
+				if( !in_array( $format, $supportedImageFormats ) ) {
+					$inlineImageName = DBObject::getObjectName( $imageId );
+					$unsupportedInlineImages[] = $inlineImageName.MimeTypeHandler::mimeType2FileExt($format);
+				}
+			}
+		}
+		if( $unsupportedInlineImages ) {
+			throw new BizException( 'WORDPRESS_ERROR_UNSUPPORTED_IMAGE', 'Server', 'Unsupported Image', null, array( implode(', ', $unsupportedInlineImages) ) );
+		}
 	}
 }

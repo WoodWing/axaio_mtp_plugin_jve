@@ -165,7 +165,7 @@ class DBUser extends DBBase
 	 * Returns false when failed.
 	 *
 	 * @param string $userId
-	 * @return array of UserGroup
+	 * @return array|boolean Array of UserGroups or false on error.
 	 */
 	public static function getMemberships( $userId )
 	{

@@ -105,10 +105,10 @@ class DBServerJobConfig extends DBBase
 	}
 
 	/**
-	 *  Converts a ServerJobConfig object to a DB row.
+	 * Converts a ServerJobConfig data object to a smart_serverjobconfigs DB row.
 	 *
-	 *  @param object $obj
-	 *  @return array DB row
+	 * @param ServerJobConfig $obj The ServerJobConfig data object.
+	 * @return array The smart_serverjobconfigs DB row.
 	 */
 	static public function objToRow( $obj )
 	{
@@ -133,10 +133,10 @@ class DBServerJobConfig extends DBBase
 	}
 
 	/**
-	 *  Converts a DB row to a ServerJobConfig object.
+	 *  Converts a smart_serverjobconfigs DB row to a ServerJobConfig data object.
 	 * 
-	 *  @param  $row row contains key values
-	 *  @return object of issue
+	 *  @param array $row The smart_serverjobconfigs DB row.
+	 *  @return ServerJobConfig The ServerJobConfig data object.
 	 */
 	static public function rowToObj( $row )
 	{

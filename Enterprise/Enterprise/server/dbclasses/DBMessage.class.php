@@ -73,7 +73,7 @@ class DBMessage extends DBBase
 	 * Creates or updates a given Message in the database.
 	 *
 	 * @param Message $message
-	 * @return Message id
+	 * @return boolean|string Message Id on success or false on failure.
 	 */
 	static public function saveMessage( Message $message ) 
 	{

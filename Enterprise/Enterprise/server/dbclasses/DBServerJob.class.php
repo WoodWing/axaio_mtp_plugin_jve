@@ -139,14 +139,14 @@ class DBServerJob extends DBBase
 	 * Retrieves server job(s) from the job queue (at DB) that meets the criteria in $params.
 	 *
 	 * @param array $params A set of (DB field name => DB value)
-	 * @param array $orderBy List of fields to order (in case of many results, whereby the first/last row is wanted).
-	 *                       Keys: DB fields. Values: TRUE for ASC or FALSE for DESC.
+	 * @param array $orderBy Array of fields to order (in case of many results, whereby the first/last row is wanted).
+	 * Keys: DB fields. Values: TRUE for ASC or FALSE for DESC.
 	 * @param int $startRecord The offset for the first record(job) to be returned, starting from zero.
-	Eg. 6 indicates returning 5th record/job.
+	 * Eg. 6 indicates returning 5th record/job.
 	 * @param int $maxRecord The maximum record to be returned starting from offset $startRecord.
 	 * @return ServerJob[] The fetched jobs.
 	 */
-	public function listPagedJobs( array $params = array(), $orderBy, $startRecord, $maxRecord )
+	public function listPagedJobs( array $params = array(), array $orderBy, $startRecord, $maxRecord )
 	{
 		self::clearError();
 		$values = array();
@@ -162,7 +162,7 @@ class DBServerJob extends DBBase
 
 		$limit = array('min' => $startRecord, 'max' => $maxRecord );
 
-		$rows = self::listPagedRows( self::TABLENAME, 'jobid', $where, $values, $orderBy, $limit, $params );
+		$rows = self::listPagedRows( self::TABLENAME, 'jobid', $where, $values, $orderBy, $limit );
 
 		$jobs = array();
 		if( $rows ) foreach( $rows as $row ) {
@@ -508,7 +508,10 @@ class DBServerJob extends DBBase
 	// ------------------------------------------------------------------------
 
 	/**
-	 * See entBuddy() function header at /server/services/Background.php for details.
+	 * @see ServerJobProcessor::bizBuddyCB().
+	 * @param string $input The magical question
+	 * @param object $caller The calling instance
+	 * @return string The magical answer
 	 */
 	final public function dbBuddy( $input, $caller )
 	{ // L> Anti-hack: Function is made FINAL to block any subclass abusing this function!

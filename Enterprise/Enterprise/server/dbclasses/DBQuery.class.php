@@ -33,7 +33,7 @@ class DBQuery extends DBBase
          * Registers a view with the purpose of dropping it when finished.
          * @param string $viewname Name of the view to register.
          * When empty no view is added, but it is still valid to get the array of views.
-         * @return the array of registered views.
+         * @return array of registered views.
 	 */
 	static private function registerView($viewname = '')
 	{
@@ -99,6 +99,7 @@ class DBQuery extends DBBase
 	static public function getTopCount($sqlarray, $checkAccess)
 	{		
 		$dbdriver = DBDriverFactory::gen();
+		$tempaov = '';
 		if($checkAccess) {
 			$tempaov = self::getTempIds('aov');
 		}
@@ -199,6 +200,7 @@ class DBQuery extends DBBase
 		$totalcount = self::getTopCount($sqlarray, $checkAccess);
 
 		$dbdriver = DBDriverFactory::gen();
+		$tempaov = '';
 		if($checkAccess) {
 			$tempaov = self::getTempIds('aov');
 		}
@@ -247,7 +249,7 @@ class DBQuery extends DBBase
 	 * rights is already done.
 	 *
 	 * @param array $rows contains the object ids
-	 * @return identifier
+	 * @return string identifier
 	 */
 	static public function createTopviewWithRowIDs($rows)
 	{
@@ -327,7 +329,7 @@ class DBQuery extends DBBase
 	 * @param array $childRows contains all children related to the parents (topview)
 	 * @param boolean $checkAccess indicates if the access rights of the child
 	 * objects have to be checked.
-	 * @return Identifier of the temporary table.
+	 * @return string Identifier of the temporary table.
 	 */
 	static public function createAllChildrenView($childRows, $checkAccess = true)
 	{
@@ -417,7 +419,7 @@ class DBQuery extends DBBase
 	 * checked for the objects on the top level.
 	 * @param string $allchildrenview Table containing all children id's
 	 * @param string $limitchildrenview Table containing children with a limit number of placements. 
-	 * @return Identifier of the temporary table.	 
+	 * @return string Identifier of the temporary table.
 	 */		
 	static public function createMultiPlacedChildrenView( $allchildrenview, $limitchildrenview)
 	{
@@ -595,10 +597,10 @@ class DBQuery extends DBBase
 	}
 
 	/**
-	 * Returns the object ids already in the authorization view. 
+	 * Returns the object ids already in the authorization view.
+	 *
 	 * @param array with the object ids as key.
-	 * 
-	 * @returns rows with object ids already in the authorization view.
+	 * @returns array rows with object ids already in the authorization view.
 	 */
 	static public function getObjectsFromAuthorizationView($objectIds)
 	{
@@ -760,23 +762,24 @@ class DBQuery extends DBBase
 			$results[$row['child']][] = array('id' => $row['parent'], 'name' => $row['name']);
 		}
 		return $results;
-	}	 
+	}
 
 	/**
-		 * Queries the smart_elements table to return all elements which have objid's in the given view $objectviewname.
-		 * @param $objectviewname name of the view for which to get the elements for, this view must
-		 * at least contain an id-field with the objectid.
-		 * @return array of rows, containing elements.
-	 */        
-	static public function getElementsByView($viewid)
+	 * Queries the smart_elements table to return all elements which have objid's in the given view $objectviewname.
+	 *
+	 * @param string $viewid name of the view for which to get the elements for, this view must
+	 * at least contain an id-field with the objectid.
+	 * @return array of rows, containing elements.
+	 */
+	static public function getElementsByView( $viewid )
 	{
-			$dbdriver = DBDriverFactory::gen();
-		$tempids = self::getTempIds($viewid);
-		$elementstable = $dbdriver->tablename('elements');
-		$placementstable = $dbdriver->tablename('placements');
-		$editionstable = $dbdriver->tablename('editions');
+		$dbdriver = DBDriverFactory::gen();
+		$tempids = self::getTempIds( $viewid );
+		$elementstable = $dbdriver->tablename( 'elements' );
+		$placementstable = $dbdriver->tablename( 'placements' );
+		$editionstable = $dbdriver->tablename( 'editions' );
 
-		$sql  = 'SELECT ';
+		$sql = 'SELECT ';
 		$sql .= 'e.`guid` as "IDC", ';
 		$sql .= 'e.`id` as "Id", ';
 		$sql .= 'e.`name` as "Name", ';
@@ -790,48 +793,47 @@ class DBQuery extends DBBase
 		$sql .= "FROM $elementstable e ";
 		$sql .= "INNER JOIN $tempids ov ON (ov.`id` = e.`objid`) ";
 		$sql .= 'ORDER BY e.`id` ASC ';
-		$sth = $dbdriver->query($sql);
+		$sth = $dbdriver->query( $sql );
 
 		$rows = array();
-		while (($row = $dbdriver->fetch($sth))) {
+		while( ( $row = $dbdriver->fetch( $sth ) ) ) {
 			$id = $row['Id'];
-			unset($row['Id']);
-			$rows[$id] = $row;
+			unset( $row['Id'] );
+			$rows[ $id ] = $row;
 			// BZ#14493 Page is necessary for the "Placed" icon next to an element
 			// in the query panel
-			$rows[$id]['Page'] = '';
+			$rows[ $id ]['Page'] = '';
 			// default value for Editions
-			$rows[$id]['Editions'] = '';
+			$rows[ $id ]['Editions'] = '';
 		}
-		
+
 		// select all element ids with a placement
 		// this is a lot faster then a "LEFT JOIN smart_placements" in the previous SQL
 		$sql = 'SELECT DISTINCT e.`id` as "Id"'
-			. ' FROM smart_elements e'
-			. ' INNER JOIN ' . $tempids . ' ov ON (ov.`id` = e.`objid`)'
-			. ' INNER JOIN smart_placements pl ON (pl.`elementid` = e.`guid`)'
-			. " WHERE e.`guid` != '' ";
-		$sth = $dbdriver->query($sql);
-		while (($plRow = $dbdriver->fetch($sth))) {
+			.' FROM smart_elements e'
+			.' INNER JOIN '.$tempids.' ov ON (ov.`id` = e.`objid`)'
+			.' INNER JOIN smart_placements pl ON (pl.`elementid` = e.`guid`)'
+			." WHERE e.`guid` != '' ";
+		$sth = $dbdriver->query( $sql );
+		while( ( $plRow = $dbdriver->fetch( $sth ) ) ) {
 			// the value of Page isn't used, it only has to indicate if an element has been placed
-			$rows[$plRow['Id']]['Page'] = 1;
+			$rows[ $plRow['Id'] ]['Page'] = 1;
 		}
 
-		$sql  = "SELECT e.`id`, pl.`edition`, edi.`name` ";
+		$sql = "SELECT e.`id`, pl.`edition`, edi.`name` ";
 		$sql .= "FROM $placementstable pl ";
 		$sql .= "INNER JOIN $elementstable e ON (pl.`elementid` = e.`guid`) ";
 		$sql .= "INNER JOIN $editionstable edi ON (pl.`edition` = edi.`id`) ";
-		$sql .= "INNER JOIN $tempids ov ON (e.`objid` = ov.`id`) ";		
+		$sql .= "INNER JOIN $tempids ov ON (e.`objid` = ov.`id`) ";
 		$sql .= "WHERE e.`guid` != '' ";
-		$sth = $dbdriver->query($sql);
+		$sth = $dbdriver->query( $sql );
 
-		while (($editionrow = $dbdriver->fetch($sth))) {
+		while( ( $editionrow = $dbdriver->fetch( $sth ) ) ) {
 			$id = $editionrow['id'];
-			if ( $rows[$id]['Editions'] == '' ) {
-				$rows[$id]['Editions'] = $editionrow['name'];
-			}
-			else {
-				$rows[$id]['Editions'] .= ", " . $editionrow['name'];
+			if( $rows[ $id ]['Editions'] == '' ) {
+				$rows[ $id ]['Editions'] = $editionrow['name'];
+			} else {
+				$rows[ $id ]['Editions'] .= ", ".$editionrow['name'];
 			}
 		}
 		return $rows;
@@ -851,12 +853,14 @@ class DBQuery extends DBBase
 	/**
 	 * Creates a temporary table named 'temp_av' with all authorizations given to $shortusername with View-rights
 	 * (via normal workflow statuses and via publication admin rights).
+	 *
 	 * @param string $shortusername short name of the user to get the authorizations for
-     * @param int $accessRight  Database id of the access right for the objects, 1 = View, 2 = Read,
+	 * @param int $accessRight Database id of the access right for the objects, 1 = View, 2 = Read,
 	 * List in Publication Overview = 11, 0 = Skip
+	 * @param bool $brandAdmin True if the user is administrator of the brand.
 	 * @return string temporary table name
 	 */
-	static public function createAuthorizationsView($shortusername, $accessRight, &$brandAdmin)
+	static public function createAuthorizationsView( $shortusername, $accessRight, &$brandAdmin )
 	{
 		if (isset(self::$TempIdsTables['av']) && !empty(self::$TempIdsTables['av'])) {
 			return self::getTempIds('av'); //Already created See BZ#17870    
@@ -1013,9 +1017,6 @@ class DBQuery extends DBBase
 													   $withclosed = false, $hierarchical = false, $objectsWhere = '',
 													   $accessRight = 1/* View */)
 	{
-		// $hierarchical is not used now but may be in the future
-		$hierarchical = $hierarchical;
-		
 		$brandAdmin = false; // Has user brand admin rights
 		$tempav = self::createAuthorizationsView($shortusername, $accessRight, $brandAdmin);
 		$dbdriver = DBDriverFactory::gen();
@@ -1069,7 +1070,7 @@ class DBQuery extends DBBase
 		$shortusernameDBStr = $dbdriver->toDBString($shortusername);
 		$objectstable = $deletedobjects ? $dbdriver->tablename('deletedobjects') : $dbdriver->tablename('objects');
 		
-		$isadmin = DBuser::isAdminUser($shortusername);
+		$isadmin = DBUser::isAdminUser($shortusername);
 		
 		// BZ#11479 insert directly into temp_aov
 		$sql  = "INSERT INTO $tempaov ";
@@ -1237,6 +1238,7 @@ class DBQuery extends DBBase
 	 * @param string $shortusernameDBStr
 	 * @param bool $isadmin
 	 * @return string
+	 * @throws BizException
 	 */
 	private static function getAOVParentSelect($parentIds, $overruleissues, $issues, $objectstable, $tempav, $sectionStateSQL, $shortusernameDBStr, $isadmin)
 	{

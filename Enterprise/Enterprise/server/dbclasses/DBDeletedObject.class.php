@@ -275,7 +275,7 @@ class DBDeletedObject extends DBBase
 	/**
 	 * Counts the deletedobjects at smart_deletedobjects table that needs to be indexed (or needs to be un-indexed).
 	 *
-	 * @param boolean $index Whether to count deletedobjects to index or to un-index
+	 * @param boolean $toIndex Whether to count deletedobjects to index or to un-index
 	 * @return integer DeletedObject count.
 	 */
 	static public function countDeletedObjectsToIndex( $toIndex )
@@ -364,11 +364,13 @@ class DBDeletedObject extends DBBase
 	}
 
 	/**
-	 * Execute a query on smart_deletedobjects table to retrieve the deletedobject's ID which has the deleted date /equal/greater/greater equal/lesser/lesser equal/ than the $date specified.
+	 * Execute a query on smart_deletedobjects table to retrieve the deletedobject's ID which has the
+	 * deleted date /equal/greater/greater equal/lesser/lesser equal/ than the $date specified.
 	 *
 	 * @param string $operator Can be either of these '=', '>', '<', '>=', '<='
-	 * @param datetime $date Date for the comparison of the 'Deleted' field in smart_deletedobjects table (e.g $date =  '2010-09-23T00:00:00')
-	 * @return deletedObjectIds
+	 * @param datetime $date Date for the comparison of the 'Deleted' field in smart_deletedobjects table
+	 * (e.g $date =  '2010-09-23T00:00:00')
+	 * @return array|null Array with (deleted) object Ids or null on error.
 	 */
 	static public function getObjIdsToBeDeletedByDate( $operator, $date )
 	{
@@ -456,4 +458,3 @@ class DBDeletedObject extends DBBase
 		return false; // failed
 	}
 }
-?>

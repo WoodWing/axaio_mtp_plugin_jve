@@ -43,19 +43,14 @@ class AdmPropertyUsage extends PropertyUsage
 	                             $Mandatory=null, $Action=null, $ObjectType=null, $Restricted=null, $RefreshOnChange=null,
 	                             $ParentFieldId=null, $DocumentId=null, $InitialHeight=null)
 	{
+		parent::__construct( $Name, $Editable, $Mandatory, $Restricted, $RefreshOnChange, $InitialHeight );
 		$this->Id                   = $Id;
 		$this->PublicationId        = $PublicationId;
 		$this->SortOrder            = $SortOrder;
-		$this->Name                 = $Name;
-		$this->Editable             = $Editable;
-		$this->Mandatory            = $Mandatory;
 		$this->Action               = $Action;
 		$this->ObjectType           = $ObjectType;
-		$this->Restricted           = $Restricted;
-		$this->RefreshOnChange      = $RefreshOnChange;
 		$this->ParentFieldId        = $ParentFieldId;
 		$this->DocumentId           = $DocumentId;
-		$this->InitialHeight        = $InitialHeight;
 	}
 }
 

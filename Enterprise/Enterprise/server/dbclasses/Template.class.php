@@ -19,7 +19,7 @@ class DBTableName extends DBBase
 
 	/**
 	 * Inserts records with the new values for passed columns.  
-	 * @param $newValues column/value pairs of the columns to be inserted.
+	 * @param array $newValues column/value pairs of the columns to be inserted.
 	 * @param $autoIncrement Apply auto increment for primary key (true/false).
 	 * @return new id or else false.
 	 */
@@ -31,8 +31,8 @@ class DBTableName extends DBBase
 	/**************************** Update ******************************************/
 	/**
 	 * Updates records with the new values for passed columns.  
-	 * @param $whereParams column/array of value pairs for where clause
-	 * @param $newValues column/value pairs of the columns to be updated.
+	 * @param array $whereParams column/array of value pairs for where clause
+	 * @param array $newValues column/value pairs of the columns to be updated.
 	 * @return number of records updated or null in case of error.
 	 */
 	public static function update(array $whereParams, array $newValues)

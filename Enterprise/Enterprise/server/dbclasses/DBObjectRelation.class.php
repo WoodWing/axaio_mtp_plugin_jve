@@ -445,7 +445,7 @@ class DBObjectRelation extends DBBase
 	 * @param integer $publication id
 	 * @param integer $issue id
 	 * @param $section section id
-	 * @return array with ids of unplaced adverts
+	 * @return array|boolean Array with ids of unplaced adverts, false in case of an error.
 	 */
 	static public function unplacedAdverts( $lay_id, $publication, $issue, $section )
 	{

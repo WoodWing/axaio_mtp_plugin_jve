@@ -179,6 +179,7 @@ class DBPubPublishedIssues extends DBBase
 	 * Takes out the blob values from given $row and marks them with #BLOB#.
 	 * This step is needed before calling insertRow() or updateRow().
 	 *
+	 * @param array $row Database row.
 	 * @return array Blob values present at $row. If none, an empty array is returned.
 	 */
 	static private function markBlobsAtRowAndGetBlobValues( &$row )

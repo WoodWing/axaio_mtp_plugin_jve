@@ -5010,7 +5010,7 @@ class BizObject
 	 * - Child object that cannot be referenced (like PublishForm),
 	 * for those object, a new one is created (deep copy) instead of referenced.
 	 *
-	 * @param mysqlidriver|mssqldriver|oracledriver  $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @param array $srcRelations All child relations of the source parent.
 	 * @param int $trgtParentState State of the copied object (target).
 	 * @param string $user User performing the copy action.
@@ -5112,7 +5112,7 @@ class BizObject
 	 * @param array $relation DB-row of the source object-relation.
 	 * @param int $parentState Stat of the copy (target).
 	 * @param string $user User performing the copy action.
-	 * @param mysqlidriver|mssqldriver|oracledriver  $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @return bool reference is allowed (true) else false.
 	 * @throws BizException
 	 */
@@ -5162,7 +5162,7 @@ class BizObject
 	 *
 	 * @param $articleId Object Id of the article.
 	 * @param string $user User performing the copy action.
-	 * @param mysqlidriver|mssqldriver|oracledriver  $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @return bool User has right then true, else false.
 	 * @throws BizException
 	 */
@@ -5216,7 +5216,7 @@ class BizObject
 	 * @param int $newCopiedParent
 	 * @param int  $newCopiedChild
 	 * @param string $newCopiedChildType
-	 * @param mysqlidriver|mssqldriver|oracledriver $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @param array $objTargetsAdded
 	 * @param array $objTargetsRemoved
 	 * @param string $user
@@ -5303,7 +5303,7 @@ class BizObject
 	 * @param string $user
 	 * @param MetaData $meta
 	 * @param int $newCopiedDosserId
-	 * @param mysqlidriver|mssqldriver|oracledriver $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @throws BizException
 	 */
 	private static function copyNewForm( $srcChildId, $user, $meta, $newCopiedDosserId, $dbDriver )

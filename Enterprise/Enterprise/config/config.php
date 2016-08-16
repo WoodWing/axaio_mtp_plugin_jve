@@ -30,7 +30,12 @@ if( DIRECTORY_SEPARATOR == '/' && PATH_SEPARATOR == ':' ) {
 // from local point of view. Needed for internal server calls (especially WWtest).
 // ----------------------------------------------------------------------------
 if( !defined('BASEDIR') ) {
-	define( 'BASEDIR', dirname( dirname( __FILE__ ) ) ); // DO NOT end with a separator, use forward slashes
+	$dirName = dirname( dirname( __FILE__ ) );
+	if( OS == 'WIN' ) {
+		$dirName = str_replace( '\\', '/', $dirName );
+	}
+	define( 'BASEDIR', $dirName ); // DO NOT end with a separator, use forward slashes
+	unset( $dirName );
 }
 if (!file_exists(BASEDIR.'/config/config_overrule.php')){
 	exit( '<h1>File not found: '.BASEDIR.'/config/config_overrule.php'.'<br/>Please check BASEDIR setting in config.php<br/></h1>');
