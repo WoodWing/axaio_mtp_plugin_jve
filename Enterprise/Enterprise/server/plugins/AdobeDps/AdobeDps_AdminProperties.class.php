@@ -121,7 +121,6 @@ class AdobeDps_AdminProperties extends AdminProperties_EnterpriseConnector
 	 */
 	public function collectDialogWidgetsForContext( AdminProperties_Context $context, $entity, $action )
 	{
-		$action = $action; // keep analyzer happy
 		$widgets = array();
 		if( $entity == 'Issue' ) {
 			$chanType = $context->getPubChannel()->Type;
@@ -141,8 +140,6 @@ class AdobeDps_AdminProperties extends AdminProperties_EnterpriseConnector
 	 */
 	final public function buildDialogWidgets( AdminProperties_Context $context, $entity, $action, $allWidgets, &$showWidgets )
 	{
-		$action = $action; $allWidgets = $allWidgets; // To make analyzer happy.
-		
 		if( $entity == 'Issue' ) {
 			$chanType = $context->getPubChannel()->Type;
 			if( $chanType == 'dps' ) {

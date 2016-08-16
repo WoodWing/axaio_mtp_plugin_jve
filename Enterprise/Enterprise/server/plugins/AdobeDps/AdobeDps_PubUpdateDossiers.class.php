@@ -58,13 +58,7 @@ class AdobeDps_PubUpdateDossiers extends PubUpdateDossiers_EnterpriseConnector
 		}
 	}
 
-	final public function runAfter( PubUpdateDossiersRequest $req, PubUpdateDossiersResponse &$resp )
-	{
-		$req = $req; $resp = $resp; // Keep analyzer happy
-	}
+	final public function runAfter( PubUpdateDossiersRequest $req, PubUpdateDossiersResponse &$resp ) {}
 
-	final public function runOverruled( PubUpdateDossiersRequest $req )
-	{
-		$req = $req; // Keep analyzer happy
-	}
+	final public function runOverruled( PubUpdateDossiersRequest $req ) {}
 }

@@ -13,16 +13,10 @@ class AdobeDps_WflDeleteObjectTargets extends WflDeleteObjectTargets_EnterpriseC
 	final public function getPrio()      { return self::PRIO_DEFAULT; }
 	final public function getRunMode()   { return self::RUNMODE_AFTER; }
 
-	final public function runBefore( WflDeleteObjectTargetsRequest &$req )
-	{
-		// not called
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore( WflDeleteObjectTargetsRequest &$req ) {}
 
 	final public function runAfter( WflDeleteObjectTargetsRequest $req, WflDeleteObjectTargetsResponse &$resp )
 	{
-		$resp = $resp; // keep analyzer happy
-
 		require_once dirname(__FILE__).'/Utils/AdobeDpsAdminUtils.class.php';
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 		$request = new WflGetObjectsRequest( $req->Ticket, $req->IDs, false, 'none', array('MetaData') );
@@ -47,9 +41,5 @@ class AdobeDps_WflDeleteObjectTargets extends WflDeleteObjectTargets_EnterpriseC
 		}
 	}
 
-	final public function runOverruled( WflDeleteObjectTargetsRequest $req )
-	{
-		// not called
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflDeleteObjectTargetsRequest $req ) {}
 }

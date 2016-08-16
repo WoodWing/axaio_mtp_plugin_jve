@@ -384,7 +384,6 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 	public static function getField( $key, $type, $value )
 	{
 		$result = null;
-		$result = $result; // Keep analyzer happy
 		if( !is_null( $value ) ) {
 			switch( $type ) {
 				case 'int':

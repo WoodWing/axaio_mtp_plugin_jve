@@ -44,7 +44,6 @@ class AddArticleAccessProp
 			try {
 				BizCustomField::insertFieldAtModel( 'objects', 'C_ARTICLE_ACCESS', 'list' );
 			} catch ( BizException $e ) {
-				$e = $e; // To make analzyer happy.
 				$result = false;
 				break;
 			}
@@ -61,7 +60,6 @@ class AddArticleAccessProp
 			try {
 				BizCustomField::deleteFieldAtModel( 'objects', 'C_PROTECT' );
 			} catch( BizException $e ) {
-				$e = $e; // To make analzyer happy.
 				$result = false;
 				break;
 			}

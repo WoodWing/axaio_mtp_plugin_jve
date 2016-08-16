@@ -91,12 +91,6 @@ class ContentStationListDossiers_ContentSource extends ContentSource_EnterpriseC
 	 */
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{
-		// keep analyzer happy
-		$query = $query;
-		$firstEntry = $firstEntry;
-		$maxEntries = $maxEntries;
-		$order = $order;
-		
 		LogHandler::Log('ContentStationListDossiers', 'DEBUG', 'ContentStationListDossiers::queryObjects called' );
         
 		$shortusername = BizSession::getShortUserName();
@@ -167,11 +161,6 @@ class ContentStationListDossiers_ContentSource extends ContentSource_EnterpriseC
 	 */
 	final public function getAlienObject( $alienID, $rendition, $lock )
 	{
-		// keep analyzer happy
-		$alienID = $alienID;
-		$rendition = $rendition;
-		$lock = $lock;
-		
 		// not supported
 		throw new BizException( 'ERR_INVALID_OPERATION', 'Server', "ContentSource doesn't implement getAlienObject" );
 	}
@@ -188,10 +177,6 @@ class ContentStationListDossiers_ContentSource extends ContentSource_EnterpriseC
 	 */
 	final public function createShadowObject( $alienID, $destObject )
 	{
-		// keep analyzer happy
-		$alienID = $alienID;
-		$destObject = $destObject;
-		
 		// not supported
 		throw new BizException( 'ERR_INVALID_OPERATION', 'Server', "ContentSource doesn't implement createShadowObject" );
 	}

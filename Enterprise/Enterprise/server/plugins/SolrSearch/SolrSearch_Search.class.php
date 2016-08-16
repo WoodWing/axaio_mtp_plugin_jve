@@ -50,8 +50,6 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 	 */
 	public function unIndexObjects( $objectIds, $deletedObject )
 	{
-		$deletedObject = $deletedObject; // keep analyzer happy
-		
 		require_once BASEDIR .'/server/plugins/SolrSearch/SolrSearchEngine.class.php';
 		$searchEngine = new SolrSearchEngine();
 		$searchEngine->unindexObjects( $objectIds );
@@ -115,9 +113,6 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 				$retVal += 6;  // Good and fast
 				break;
 			default:
-				// Make analyzer happy:
-				$firstEntry=$firstEntry; $maxEntries=$maxEntries; $queryMode=$queryMode; $hierarchical=$hierarchical;
-				$queryOrder=$queryOrder; $minimalProps=$minimalProps; $requestProps=$requestProps;
 				break;
 		}
 		

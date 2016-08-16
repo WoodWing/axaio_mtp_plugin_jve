@@ -236,23 +236,13 @@ class HunspellShellSpelling_Spelling extends Spelling_EnterpriseConnector
 	*/
 	public function iterFile( $filePath, $level )
 	{		
-		$level = $level; // make analyzer happy		
 		$this->installedDictionaries[] = $filePath;
 	}
 
 	// These three functions are called by parent class, but have no meaning here.
-	public function skipFile( $filePath, $level )
-	{
-		$filePath = $filePath; $level = $level; // make analyzer happy
-	}
-	public function iterFolder( $folderPath, $level )
-	{
-		$folderPath = $folderPath; $level = $level; // make analyzer happy
-	}
-	public function skipFolder( $folderPath, $level )
-	{
-		$folderPath = $folderPath; $level = $level; // make analyzer happy
-	}
+	public function skipFile( $filePath, $level ) {}
+	public function iterFolder( $folderPath, $level ) {}
+	public function skipFolder( $folderPath, $level ) {}
 	
 	/**
 	* Retrieves requested environment variable and validate the values.

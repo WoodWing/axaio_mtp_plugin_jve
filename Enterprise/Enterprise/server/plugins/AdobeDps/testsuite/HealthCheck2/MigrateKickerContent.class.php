@@ -121,8 +121,6 @@ class MigrateKickerContent
 			}
 			return true;
 		} catch ( BizException $e ) {
-			/** @noinspection PhpUnusedLocalVariableInspection */
-			$e = $e; // To make analyser happy.
 			return false;
 		}
 	}
@@ -199,8 +197,6 @@ class MigrateKickerContent
 				DBBase::updateRow( 'objects', $values, $where );
 			}
 		} catch ( BizException $e ) {
-			/** @noinspection PhpUnusedLocalVariableInspection */
-			$e = $e; // To make analyser happy.
 			return false;
 		}
 

@@ -79,13 +79,7 @@ class AdobeDps_AdmModifyIssues extends AdmModifyIssues_EnterpriseConnector
 		}
 	}
 
-	final public function runAfter( AdmModifyIssuesRequest $req, AdmModifyIssuesResponse &$resp )
-	{
-		$req = $req; $resp = $resp; // To make analyzer happy.
-	}
+	final public function runAfter( AdmModifyIssuesRequest $req, AdmModifyIssuesResponse &$resp ) {}
 	
-	final public function runOverruled( AdmModifyIssuesRequest $req ) 
-	{
-		$req = $req; // To make analyzer happy.
-	}
+	final public function runOverruled( AdmModifyIssuesRequest $req ) {}
 }

@@ -140,8 +140,6 @@ class Drupal7_AdminProperties extends AdminProperties_EnterpriseConnector
 	 */
 	public function collectDialogWidgetsForContext( AdminProperties_Context $context, $entity, $action )
 	{
-		$action = $action; // keep analyzer happy
-
 		return ($this->isCorrectPublishSystem($context, $entity, $action))
 			? $this->doCollectDialogWidgets( $entity, 'extend_entity')
 			: array();
@@ -153,8 +151,6 @@ class Drupal7_AdminProperties extends AdminProperties_EnterpriseConnector
 	 */
 	final public function buildDialogWidgets( AdminProperties_Context $context, $entity, $action, $allWidgets, &$showWidgets )
 	{
-		$action = $action; $allWidgets = $allWidgets; // keep code analyzer happy
-
 		// This way you can grab contextual data:
 		//$pubObj = $context->getPublication();
 		//$channelObj = $context->getPubChannel();

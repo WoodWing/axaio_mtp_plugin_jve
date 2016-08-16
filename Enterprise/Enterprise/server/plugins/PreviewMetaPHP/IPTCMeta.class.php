@@ -20,8 +20,6 @@ class IPTCMeta
 	 */
 	public static function readIPTC( $format, $data, array &$metaData )
 	{
-		$format = $format;
-		
 		// Read the IPTC from file.
 		$iptc = false;
 		$bimPos = strpos( $data, '8BIM' );

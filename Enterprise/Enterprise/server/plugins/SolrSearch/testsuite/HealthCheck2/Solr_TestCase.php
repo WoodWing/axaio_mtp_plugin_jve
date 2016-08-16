@@ -322,7 +322,6 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 				return false;
 			}
 		} catch( Exception $e ) {
-			$e = $e; // Keep analyzer happy...
 			return false;
 		}
 		return true;
@@ -756,7 +755,6 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 			$versionNumber = (false != $versionNumber) ? $versionNumber[0] : $default;
 		} catch( Exception $e ) {
 			// Continue, return default
-			$e = $e; // Keep analyzer happy
 		}
 
 		// Found nothing? Try get the Solr 3 version number instead
@@ -778,7 +776,6 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 				}
 			} catch( Exception $e ) {
 				// Continue, return default
-				$e = $e; // Keep analyzer happy
 			}
 		}
 

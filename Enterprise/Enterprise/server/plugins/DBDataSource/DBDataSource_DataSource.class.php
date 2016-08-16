@@ -113,8 +113,6 @@ class DBDataSource_DataSource extends DataSource_EnterpriseConnector
 	
 	final public function getRecords( $query, $recordid, $queryparameters )
 	{
-		$queryparameters = $queryparameters; // made code analyzer happy
-		
 		// check the settings of this data source
 		$this->checkSettings();
 		
@@ -167,8 +165,6 @@ class DBDataSource_DataSource extends DataSource_EnterpriseConnector
 	 */
 	final public function setRecords( $records, $recordid, $queryparameters )
 	{
-		$queryparameters = $queryparameters;
-		
 		// check the settings of this data source
 		$this->checkSettings();
 		
@@ -220,7 +216,6 @@ class DBDataSource_DataSource extends DataSource_EnterpriseConnector
 	 */
 	final public function getUpdates( $familyvalue )
 	{
-		$familyvalue = $familyvalue; // made code analyzer happy
 		// not implemented in a standard CSV data source
 	}
 	

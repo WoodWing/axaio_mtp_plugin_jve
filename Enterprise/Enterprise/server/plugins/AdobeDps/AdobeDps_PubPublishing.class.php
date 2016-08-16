@@ -278,7 +278,6 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function afterOperation( $publishTarget, $operation )
 	{
-		$publishTarget = $publishTarget; $operation = $operation; // To make analyzer happy
 		if( $this->semaphoreId ) {
 			require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 			BizSemaphore::releaseSemaphore( $this->semaphoreId );
@@ -759,7 +758,6 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getDossierURL( $dossier, $objectsInDossier, $publishTarget )
 	{
-		$objectsInDossier = $objectsInDossier; // keep analyzer happy
 		$operationId = $this->getOperationId();
 		$operation = $this->getOperation();
 
@@ -3125,10 +3123,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @since 7.6.7
 	 *
 	 */
-	public function processedSectionCover( $connId )
-	{
-		$connId = $connId; // Make analyzer happy
-	}
+	public function processedSectionCover( $connId ) {}
 	
 	/**
 	 * Delete the article folio in Adobe Dps
@@ -3519,8 +3514,6 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	private function getAttachmentContentObject( $object, $rendition = 'native', &$attachmentType = '' )
 	{
-		$attachmentType = $attachmentType; // make analyzer happy
-
 		// Grab native attachment from retrieved image.
 		$contentFilePath = null;
 		if( isset($object->Files) && count($object->Files) > 0 ) {

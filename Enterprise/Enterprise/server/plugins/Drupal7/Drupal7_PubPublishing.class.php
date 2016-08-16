@@ -112,8 +112,6 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
 	{
-		$objectsInDossier = $objectsInDossier; // Keep analyzer happy.
-
 		// Unpublish the node.
 		require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
 		$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
@@ -420,7 +418,6 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function requestPublishFields( $dossier, $objectsInDossier, $publishTarget )
 	{
-		$objectsInDossier = $objectsInDossier; // keep analyzer happy.
 		$result = array();
 		$map = array(
 			'Views'    => 'int',
@@ -459,7 +456,6 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getDossierURL( $dossier, $objectsInDossier, $publishTarget )
 	{
-		$objectsInDossier = $objectsInDossier; // keep analyzer happy
 		require_once dirname(__FILE__).'/DrupalXmlRpcClient.class.php';
 		$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
 		$url = $drupalXmlRpcClient->getUrl($dossier);
@@ -484,9 +480,6 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function validateDossierForPublishing( $type, $dossierId, $issueId )
 	{
-		$type = $type; // Keep analyzer happy.
-		$dossierId = $dossierId; // Keep analyzer happy.
-		$issueId = $issueId; // Keep analyzer happy.
 		// If Content Station 7.1.x is used you can use this to validate the input before publishing or updaing
 		return array('errors' => array(), 'warnings' => array(), 'infos' => array());
 	}

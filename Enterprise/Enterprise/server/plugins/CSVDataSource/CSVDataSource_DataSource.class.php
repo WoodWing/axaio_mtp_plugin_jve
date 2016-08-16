@@ -153,8 +153,6 @@ class CSVDataSource_DataSource extends DataSource_EnterpriseConnector
 	
 	final public function getRecords( $query, $recordid, $queryparameters )
 	{
-		$query = $query; $recordid = $recordid; $queryparameters = $queryparameters; // keep analyzer happy
-		
 		// check the settings of this data source
 		$this->checkSettings();
 		// read the file
@@ -241,9 +239,6 @@ class CSVDataSource_DataSource extends DataSource_EnterpriseConnector
 	 */
 	final public function setRecords( $records, $recordid, $queryparameters )
 	{
-		$records = $records; // made code analyzer happy
-		$recordid = $recordid; // make code analyzer happy
-		$queryparameters = $queryparameters;
 		// not implemented in a standard CSV data source
 	}
 	
@@ -261,7 +256,6 @@ class CSVDataSource_DataSource extends DataSource_EnterpriseConnector
 	 */
 	final public function getUpdates( $familyvalue )
 	{
-		$familyvalue = $familyvalue; // made code analyzer happy
 		// not implemented in a standard CSV data source
 	}
 	

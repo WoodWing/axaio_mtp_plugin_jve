@@ -102,9 +102,5 @@ class AdobeDps_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseC
 		}
 	}
 
-	final public function runOverruled( WflSetObjectPropertiesRequest $req )
-	{
-		// not called
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflSetObjectPropertiesRequest $req ) {}
 }

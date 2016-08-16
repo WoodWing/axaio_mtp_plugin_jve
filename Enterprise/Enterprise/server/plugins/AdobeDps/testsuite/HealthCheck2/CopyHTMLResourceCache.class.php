@@ -135,7 +135,6 @@ class CopyHTMLResourceCache
 	 */
 	public function iterFolder( $folderPath, $level )
 	{
-		$level = $level; // make analyzer happy
 		$baseName = basename($folderPath);
 		if ( $baseName == 'HTMLResources_cache' ) {
 			$this->foldersToCopy[] = $folderPath;
@@ -144,19 +143,7 @@ class CopyHTMLResourceCache
 	}
 	
 	// These three functions are called by parent class, but have no meaning here.
-	public function skipFile( $filePath, $level )
-	{
-		$filePath = $filePath; $level = $level; // make analyzer happy
-	}
-
-	public function skipFolder( $folderPath, $level )
-	{
-		$folderPath = $folderPath; $level = $level; // make analyzer happy
-	}		
-	
-	public function iterFile( $filePath, $level )
-	{
-		$filePath = $filePath; $level = $level; // make analyzer happy
-	}
-
+	public function skipFile( $filePath, $level ) {}
+	public function skipFolder( $folderPath, $level ) {}
+	public function iterFile( $filePath, $level ) {}
 }

@@ -13,15 +13,10 @@ class WwcxToWcmlConversion_WflGetObjects extends WflGetObjects_EnterpriseConnect
 	final public function getPrio()      { return self::PRIO_DEFAULT; }
 	final public function getRunMode()   { return self::RUNMODE_AFTER; }
 
-	final public function runBefore( WflGetObjectsRequest &$req )
-	{
-		// not called
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore( WflGetObjectsRequest &$req ) {}
 
 	final public function runAfter( WflGetObjectsRequest $req, WflGetObjectsResponse &$resp )
 	{
-		$resp = $resp; // keep analyzer happy
 		if( $req->Rendition == 'native' ) {
 			require_once BASEDIR . '/server/dbclasses/DBTicket.class.php';
 			$app = DBTicket::DBappticket( $req->Ticket );
@@ -48,11 +43,7 @@ class WwcxToWcmlConversion_WflGetObjects extends WflGetObjects_EnterpriseConnect
 		}
 	}
 
-	final public function runOverruled( WflGetObjectsRequest $req )
-	{
-		// not called
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflGetObjectsRequest $req ) {}
 
 	/**
 	 * Converts the article object file from WWCX to WCML.
