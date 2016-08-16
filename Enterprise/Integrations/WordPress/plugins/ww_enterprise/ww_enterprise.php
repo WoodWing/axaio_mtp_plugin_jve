@@ -188,6 +188,7 @@ function woodwing_DeleteOldPreviews( $args )
 	global $wpdb;
 	$username = $args[0];
 	$password = $args[1];
+	$postPreview = new WW_Public_Post_Preview();
 
 	$user = wp_authenticate($username, $password);
 
@@ -201,7 +202,7 @@ function woodwing_DeleteOldPreviews( $args )
 		return new IXR_Error( 403, 'User does not have the correct permission' );
 	}
 
-	$expiredPreviews = WW_Public_Post_Preview::woodwing_GetAllExpiredPreviews();
+	$expiredPreviews = $postPreview->woodwing_GetAllExpiredPreviews();
 
 	if( $expiredPreviews ){
 		foreach ( $expiredPreviews as $preview ){
@@ -217,7 +218,7 @@ function woodwing_DeleteOldPreviews( $args )
 				}
 			}
 			wp_delete_post( $preview->post_id );
-			$wpdb->delete( WW_Public_Post_Preview::woodwing_GetPreviewTableName(), array( 'preview_id' => $preview->preview_id ), array('%d'));
+			$wpdb->delete( $postPreview->woodwing_GetPreviewTableName(), array( 'preview_id' => $preview->preview_id ), array('%d'));
 		}
 	}
 	return true;

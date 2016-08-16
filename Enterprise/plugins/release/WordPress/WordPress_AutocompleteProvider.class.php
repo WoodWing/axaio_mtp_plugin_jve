@@ -26,12 +26,12 @@ class WordPress_AutocompleteProvider extends AutocompleteProvider_EnterpriseConn
 	 */
 	public function getSupportedEntities()
 	{
-		require_once BASEDIR . '/server/bizclasses/BizAdmAutocomplete.class.php';
-		require_once dirname(__FILE__) . '/WordPress_Utils.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizAdmAutocomplete.class.php';
+		require_once dirname(__FILE__).'/WordPress_Utils.class.php';
 		$provider = WordPress_Utils::WORDPRESS_PLUGIN_NAME;
 		$termEntitiesObj = BizAdmAutocomplete::getAutocompleteTermEntities( $provider );
 		static $cachedSupportedEntities;
-		if( !isset( $cachedSupportedEntities[$provider] )) {
+		if( !isset( $cachedSupportedEntities[$provider] ) ) {
 			$supportedEntities = array();
 			if( $termEntitiesObj ) foreach( $termEntitiesObj as $termEntityObj ) {
 				$supportedEntities[] = $termEntityObj->Name;

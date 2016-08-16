@@ -42,13 +42,20 @@ class DBTicket extends DBBase
 	 * the same part.
 	 * However, it is sometimes difficult for a client application (InDesign/InCopy) to determine its own IP-address, so we don't check on clientip...
 	 * Probably using the 'clientname' will be different on the different machines...
+	 *
+	 * @param string $clientip
+	 * @param string $user
+	 * @param string $clientname
+	 * @param string $appname
+	 * @param string $appserial
+	 * @param string $appproductcode
+	 * @return string The hash
 	 */
 	public static function makeTicketHashPart( $clientip='', $user='', $clientname='', $appname='', $appserial='', $appproductcode='' )
 	{
 		//"bla" = extra confusion for third parties who try to regenerate our hash...
-	//	$str = $clientip . $user . $clientname . $appname . $appproductcode . $appserial . "bla"; 
-		$clientip = $clientip;
-		$str = $user . $clientname . $appname . $appserial . $appproductcode . "bla"; 
+		//	$str = $clientip . $user . $clientname . $appname . $appproductcode . $appserial . "bla";
+		$str = $user . $clientname . $appname . $appserial . $appproductcode . "bla";
 		return substr( md5( $str ), 0, 8 );
 	}
 
@@ -107,6 +114,7 @@ class DBTicket extends DBBase
 	 *
 	 * @param string $orguser: either the 'usr' or the 'fullname' from the smart_users table (as entered by the end user)
 	 * @param string $shortuser: the 'usr' from the smart_users table
+	 * @param string $server Server to logon to as returned from GetServers (or empty if not supported)
 	 * @param string $clientname
 	 * @param string $appname
 	 * @param string $appversion
@@ -213,7 +221,7 @@ class DBTicket extends DBBase
 	 * @param string $usageLimitReached: in case false is returned, 'userLimit' is true in case the max number of concurrent users has been reached.
 	 * @param string $errorMessage: in case false is returned, the errorMessage is set.
 	 * @param string $masterTicket [9.7] In case the same application does logon twice (e.g. IDS for DPS) this refers to the ticket of the first logon.
-	 * @return succes 
+	 * @return boolean True on success else false.
 	 * 	- userLimit: in case false is returned, 'userLimit' is true in case the max number of concurrent users has been reached.
 	 *  - errorMessage: in case false is returned, the errorMessage is set.
 	 */
@@ -495,8 +503,6 @@ class DBTicket extends DBBase
 	 */
 	public static function checkTicket( $ticket, $service = '' )
 	{
-		$service = $service; // keep analyzer happy
-		
 		// Special treatment for background/async server job processing, for which no seat must be taken.
 		if( self::$ServerJob && self::$ServerJob->TicketSeal == $ticket ) {
 			return self::$ServerJob->ActingUser;
@@ -620,7 +626,11 @@ class DBTicket extends DBBase
 	// ------------------------------------------------------------------------
 
 	/**
-	 * See entBuddy() function header at /server/services/Background.php for details.
+	 * @see ServerJobProcessor::bizBuddyCB().
+	 * @param string $input The magical question
+	 * @param object $caller The calling instance
+	 * @param ServerJob $job
+	 * @return string The magical answer
 	 */
 	final static public function dbBuddy( $input, $caller, $job )
 	{ // L> Anti-hack: Function is made FINAL to block any subclass abusing this function!

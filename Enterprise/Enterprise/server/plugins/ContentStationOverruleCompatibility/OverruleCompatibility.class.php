@@ -47,7 +47,7 @@ class OverruleCompatibility
 	 * Returns Enterprise publication out of fake overrule publication id
 	 *
 	 * @param string $pubId
-	 * @returns publicationid
+	 * @returns string Publication id
 	 */
 	static public function getPublication( $pubId )
 	{
@@ -59,7 +59,7 @@ class OverruleCompatibility
 	 * Returns Enterprise (overrule) issue out of fake overrule publication id
 	 *
 	 * @param string $pubId
-	 * @returns issueid
+	 * @returns string (Overrule) Issue id
 	 */
 	static public function getIssue( $pubId )
 	{
@@ -206,8 +206,8 @@ class OverruleCompatibility
 	 * The param $overruleIssues is the one returned by convertObjectBefore
 	 * Note: the caller does not have to worry if client app is Content Station
 	 *
-	 * @param string	$ticket
-	 * @param string	$objects		in/out objects to be manipulated, see comment above
+	 * @param string	   $ticket
+	 * @param Object[]	$objects		in/out objects to be manipulated, see comment above
 	 * @param array		$overruleIssues as filled in by convertObjectBefore
 	 */
 	static public function convertObjectsAfter( $ticket, &$objects, $overruleIssues )

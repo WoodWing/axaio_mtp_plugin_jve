@@ -207,12 +207,10 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 	 * This is needed because otherwise the properties will connect to WordPress every time you do the getProperty().
 	 *
 	 * @param $props
-	 *
 	 * @return array
 	 *
 	 * @throws BizException
 	 */
-
 	private function getPropertyFromWordPress( $props )
 	{
 		require_once dirname(__FILE__) . '/WordPress_PubPublishing.class.php';
@@ -223,7 +221,7 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 		if( $sites ) foreach( $sites as $normalizedSiteName => $categoriesAndFormats ){
 			// ** Categories widget **
 
-			//Categories widget
+			// Categories widget
 			$categoriesPropertyInfo = new PropertyInfo();
 			$categoriesPropertyInfo->Name = 'C_WORDPRESS_CAT_' . strtoupper($normalizedSiteName);
 			$categoriesPropertyInfo->DisplayName = 'Categories';
@@ -235,7 +233,7 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 			$props[] = $categoriesPropertyInfo;
 
 			// ** Format widget **
-			//Format widget
+			// Format widget
 			$formatPropertyInfo = new PropertyInfo();
 			$formatPropertyInfo->Name = 'C_WORDPRESS_FORMAT_' . strtoupper($normalizedSiteName);
 			$formatPropertyInfo->DisplayName = 'Format';
@@ -261,10 +259,9 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 			$tagsPropertyInfo->AdminUI = false;
 			$tagsPropertyInfo->PublishSystem = WordPress_Utils::WORDPRESS_PLUGIN_NAME;
 
-			if( $suggestionEntity ){
+			if( $suggestionEntity ) {
 				$tagsPropertyInfo->SuggestionEntity = $suggestionEntity;
 			}
-
 			$props[] = $tagsPropertyInfo;
 		}
 		return $props;
@@ -305,11 +302,9 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 	private function getMediaPropertyValues()
 	{
 		$properties = array();
-
-		//Image
+		// Image
 		$properties[] = new PropertyValue('image/png', '.png', 'Format');
 		$properties[] = new PropertyValue('image/jpeg', '.jpg', 'Format');
-
 		return $properties;
 	}
 
@@ -322,7 +317,6 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 	public function collectCustomProperties( $coreInstallation )
 	{
 		$props = array();
-
 		// Because we provide an admin page that imports custom object properties definition,
 		// we bail out when the core server is gathering and installing all custom properties
 		// during generic installation procedure such as running the Server Plug-ins page.
@@ -345,11 +339,9 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 	public function getCachedProps()
 	{
 		static $cachedProps;
-
-		if( !$cachedProps ){
-			$cachedProps = self::getPropertyFromWordPress(self::getPublishFormPropertyDefinition());
+		if( !$cachedProps ) {
+			$cachedProps = self::getPropertyFromWordPress( self::getPublishFormPropertyDefinition() );
 		}
-
 		return $cachedProps;
 	}
 
@@ -362,12 +354,12 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 	public function getPropertyFromOthers( $name )
 	{
 		$props = $this->getOtherPropertyDefinitions();
-
 		foreach( $props as $prop ) {
 			if( $prop->Name == $name ) {
 				return $prop;
 			}
 		}
+
 		LogHandler::Log( 'WordPress_Publisher', 'ERROR', ' property ' . $name . ' not found' );
 		return null;
 	}
@@ -381,12 +373,12 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 	public function getProperty( $name )
 	{
 		$props = $this->getCachedProps();
-
 		foreach( $props as $prop ) {
 			if( $prop->Name == $name ) {
 				return $prop;
 			}
 		}
+
 		LogHandler::Log( 'WordPress_Publisher', 'ERROR', ' property ' . $name . ' not found' );
 		return null;
 	}

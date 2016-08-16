@@ -1284,6 +1284,7 @@ class SolrSearchEngine extends BizQuery
 	private function buildNumericFacets($facetsInfo)
 	{
 		$holdName = null;
+		$currentName = null;
 		$resultFacetItems = array();
 
 		foreach( $facetsInfo as $facetName => $facetHits ) {

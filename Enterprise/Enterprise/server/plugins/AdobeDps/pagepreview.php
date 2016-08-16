@@ -36,14 +36,14 @@ $fdOutput = null;
 $httpErrorCode = 500;
 $httpErrorText = 'Internal Server Error';
 
-try {
-	// Get params from HTTP.
-	$ticket = isset($_GET['ticket']) ? $_GET['ticket'] : null; // allow overrule (URL param)
-	$editionId = isset($_GET['editionId']) ? intval($_GET['editionId']) : null;
-	$layoutId = isset($_GET['layoutId']) ? intval($_GET['layoutId']) : null;
-	$pageSequence = isset($_GET['page']) ? intval($_GET['page']) : 0; // page sequence within a layout.
-	$width = isset($_GET['width']) ? intval($_GET['width']) : 0;
+// Get params from HTTP.
+$ticket = isset($_GET['ticket']) ? $_GET['ticket'] : null; // allow overrule (URL param)
+$editionId = isset($_GET['editionId']) ? intval($_GET['editionId']) : null;
+$layoutId = isset($_GET['layoutId']) ? intval($_GET['layoutId']) : null;
+$pageSequence = isset($_GET['page']) ? intval($_GET['page']) : 0; // page sequence within a layout.
+$width = isset($_GET['width']) ? intval($_GET['width']) : 0;
 
+try {
 	// Validate HTTP params.
 	if( !$ticket || !$editionId || !$layoutId || !$pageSequence || !$width ) {
 		$httpErrorCode = 400;
@@ -170,7 +170,7 @@ try {
 	}
 
 	// Return the binary content to caller.
-	if( strlen($fileContent) > 1 ) { 
+	if( isset($fileContent) && strlen($fileContent) > 1 ) {
 		header( 'Content-length: ' . strlen( $fileContent ) );
 		header( 'Content-type: ' . $fileFormat );
 		fwrite( $fdOutput, $fileContent );

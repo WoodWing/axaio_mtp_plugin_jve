@@ -20,21 +20,21 @@ class DBWorkflow extends DBBase
         return self::updateRow(self::TABLENAME, $values, "`id` = '$statedefid' ");
     }
 
-    /**
-     *  Lists all sectionstatedefinitions defined for the section-definition
-     *  What is exactly returned depends on the value of $fieldnames:
-     *  - Either null or false -> returns an array of rows indexed by the value in $keycol, each containing the name ($namecol) of the row.
-     *  - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with all values.
-     *  - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with the values in $fieldnames.
-     *  @param  $sectiondefid Id of the section-definition, if $sectiondefid = 0 null is returned;
-     *  @param  $fieldnames see functiondescription
-     *  @return  null in case of error, otherwise see functiondescription
-    **/
-
-    public static function listSectionStateDefs($sectiondefid, $fieldnames = '*')
-    {
-        return self::listRows('sectionstate', 'id', 'state', "`section` = '$sectiondefid' ", $fieldnames);
-    }
+	/**
+	 * Lists all sectionstatedefinitions defined for the section-definition
+	 * What is exactly returned depends on the value of $fieldnames:
+	 * - Either null or false -> returns an array of rows indexed by the value in $keycol, each containing the name ($namecol) of the row.
+	 * - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with all values.
+	 * - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with the values in $fieldnames.
+	 *
+	 * @param  int $sectiondefid Id of the section-definition, if $sectiondefid = 0 null is returned;
+	 * @param  mixed $fieldnames see function description
+	 * @return  null in case of error, otherwise see functiondescription
+	 **/
+	public static function listSectionStateDefs( $sectiondefid, $fieldnames = '*' )
+	{
+		return self::listRows( 'sectionstate', 'id', 'state', "`section` = '$sectiondefid' ", $fieldnames );
+	}
         
     public static function listPublWorkflowDefs( $publid )
     {
@@ -364,4 +364,3 @@ class DBWorkflow extends DBBase
 	}
 
 }
-?>

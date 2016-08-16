@@ -101,44 +101,45 @@ class ContentStationListDossiers_ContentSource extends ContentSource_EnterpriseC
         
 		$shortusername = BizSession::getShortUserName();
 		
-        $dbdriver = DBDriverFactory::gen();
-        if( $query == self::LIST_DOSSIERS_QUERY_NAME ) {
-        	//create a view containing all object-id's for which $user is authorized and has view access for
-        	DBQuery::createAuthorizedObjectsView($shortusername,  false, null, false, false);
+		$dbdriver = DBDriverFactory::gen();
+		$sql = '';
+		if( $query == self::LIST_DOSSIERS_QUERY_NAME ) {
+			//create a view containing all object-id's for which $user is authorized and has view access for
+			DBQuery::createAuthorizedObjectsView($shortusername,  false, null, false, false);
 
-        	$tempaov = DBQuery::getTempIds('aov');
-        	
+			$tempaov = DBQuery::getTempIds('aov');
+
 			$sql = 'SELECT DISTINCT o.`id` as `ID`, o.`type` as `Type`, o.`name` as `Name`, o.`format` as `Format`, o.`publication` as `PublicationId`, o.`issue` as `IssueId` '
 				. 'FROM smart_objects o '
 				. 'INNER JOIN ' . $tempaov . ' aov ON (aov.`id` = o.`id`) '
 				. 'INNER JOIN `smart_objectrelations` orel ON (orel.`parent` = o.`id`) '
 				. 'WHERE o.`type` = \'Dossier\' '
 				. 'AND orel.`child` = ' . intval($params[0]->Value) . ' ';
-        }
-        elseif ( $query == self::LIST_DOSSIER_TEMPLATE_QUERY_NAME ) {
-        	//create a view containing all object-id's for which $user is authorized
-        	DBQuery::createAuthorizedObjectsView($shortusername,  false, null, false, false, '', 0 /* Skip access right */);
+		}
+		elseif ( $query == self::LIST_DOSSIER_TEMPLATE_QUERY_NAME ) {
+			//create a view containing all object-id's for which $user is authorized
+			DBQuery::createAuthorizedObjectsView($shortusername,  false, null, false, false, '', 0 /* Skip access right */);
 
-        	$tempaov = DBQuery::getTempIds('aov');  
-        	
-        	$sql = "SELECT DISTINCT o.`id` as `ID`, o.`type` as `Type`, o.`name` as `Name`, o.`format` as `Format`, o.`publication` as `PublicationId`, o.`issue` as `IssueId` "
+			$tempaov = DBQuery::getTempIds('aov');
+
+			$sql = "SELECT DISTINCT o.`id` as `ID`, o.`type` as `Type`, o.`name` as `Name`, o.`format` as `Format`, o.`publication` as `PublicationId`, o.`issue` as `IssueId` "
 				. "FROM smart_users u, smart_usrgrp ug, smart_objects o "
 				. "INNER JOIN " . $tempaov . " aov ON (aov.`id` = o.`id`) "
 				. "INNER JOIN `smart_publobjects` pobj ON (pobj.`objectid` = o.`id`) "
 				. "WHERE o.`type` = 'DossierTemplate' "
 				. "AND u.`user` = '" . $shortusername . "' AND u.`id` = ug.`usrid` AND (ug.`grpid` = pobj.`grpid` OR pobj.`grpid` = 0)";
-        }
-        
+		}
+
 		$sth  = $dbdriver->query($sql);
 		$dbRows = DBBase::fetchResults($sth);
         
 		//Drop the created views (essential to not get a lot of views in the database!)
-        DBQuery::dropRegisteredViews();
-		
-        // Create array with column definitions
+		DBQuery::dropRegisteredViews();
+
+		// Create array with column definitions
 		$cols = $this->getColumns();
 
-		// Transform db rows to names query reponse rows
+		// Transform db rows to names query response rows
 		$rows = array();
 		foreach($dbRows as $dbRow)
 		{

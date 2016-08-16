@@ -284,13 +284,13 @@ abstract class WW_DbDrivers_DriverBase
 	 * @param boolean $addPrefix Add the WoodWing table prefix to the table name.
 	 * @return boolean
 	 */
-	abstract function tableExists( $tableName, $addPrefix );
+	abstract function tableExists( $tableName, $addPrefix = true );
 
 }
 
 class DBDriverFactory
 {
-	/*
+	/**
 	 * Database driver factory.
 	 * Creates one of the following database driver objects: mysqldriver, mssqldriver or oracledriver.
 	 * Always use this factory to access a database; Never create a specific driver yourself.
@@ -301,7 +301,7 @@ class DBDriverFactory
 	 * @param $dbPass   string  Database user password used for for DB connection. Default value: DBPASS config option.
 	 * @param $dbSelect string  Database name to connect with. Default value: DBSELECT config option.
 	 * @param $throwException bool Whether or not to throw BizException on connection error.
-	 * @return object           Database driver object.
+	 * @return  WW_DbDrivers_DriverBase Database driver object.
 	 * @throws BizException On DB configuration error or DB connection error (since v8.0).
 	 */
 	static public function gen( $dbType = DBTYPE, $dbServer = DBSERVER, 

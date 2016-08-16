@@ -382,10 +382,9 @@ class DBDatasource extends DBBase
 	
 	/**
 	 * Delete Datasource
-	 * @todo Check return results
 	 *
 	 * @param int $datasourceid Datasource ID
-	 * @return undefined|null null in case of an error
+	 * @return boolean
 	 */
 	public static function deleteDatasource( $datasourceid )
 	{
@@ -397,21 +396,20 @@ class DBDatasource extends DBBase
 		$result = self::deleteRows(self::TABLENAME, $where, $params);
 		
 		if($result == null) { //error
-			return null;
+			return false;
 		}
 		
-		/** Because we have no transaction handling we just try to delete related
-		records and do not stop if an action fails.
-		*/
-		
+		// Because we have no transaction handling we just try to delete related
+		// records and do not stop if an action fails.
+
 		// also delete all settings
-		$result = self::deleteSettings( $datasourceid );
+		self::deleteSettings( $datasourceid );
 		// also delete all publications
-		$result = self::deletePublications( $datasourceid );
+		self::deletePublications( $datasourceid );
 		// also delete all queries
-		$result = self::deleteQueries( $datasourceid );
-		
-		return $result;
+		self::deleteQueries( $datasourceid );
+
+		return true;
 	}
 	
 	/**
@@ -992,6 +990,8 @@ class DBDatasource extends DBBase
 		self::clearError();
 		
 		$fieldnames = array('id', 'objectid');
+		$where = '';
+		$params = array();
 		if( $updateid ) {
 			$updateid = intval($updateid);
 			$where = '`updateid` = ?';
@@ -1054,7 +1054,8 @@ class DBDatasource extends DBBase
 		
 		$updateid = intval($updateid);
 		$objectid = intval($objectid);
-		
+		$where = '';
+		$params = array();
 		if( $updateid ) {
 			$where = '`updateid` = ? AND `objectid` = ?';
 			$params = array($updateid);
@@ -1069,4 +1070,3 @@ class DBDatasource extends DBBase
 		return $result;		
 	}
 }
-?>
