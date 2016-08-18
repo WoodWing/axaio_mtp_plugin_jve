@@ -627,6 +627,26 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	{
 		return false;
 	}
+
+	/**
+	 * Returns a list of the supported output image file formats (in their MIME format).
+	 * @since 10.1
+	 * @return array
+	 */
+	public function getFileFormatsForOutputImage()
+	{
+		return array( 'image/jpeg' );
+	}
+
+	/**
+	 * Returns the DPI for the output image based on the image metadata.
+	 * @since 10.1
+	 * @return integer
+	 */
+	public function getDpiForOutputImage()
+	{
+		return 72;
+	}
 	
 	// ===================================================================================
 

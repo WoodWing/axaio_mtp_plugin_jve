@@ -13,33 +13,48 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 	/** @var array $cmdParams List of parameters to put on command line when calling ImageMagick. */
 	private $cmdParams = array();
 
+	/** {@inheritdoc} */
+	private $supportedOutputFormats = array(
+		'image/jpeg',
+		'image/pjpeg',
+		'image/jpg',
+		'image/gif',
+		'image/png',
+		'image/x-png',
+	);
+
 	/**
 	 * {@inheritDoc}
 	 */
-	final public function canHandleFormat( $format )
+	final public function canHandleFormat( $inputFormat, $outputFormat )
 	{
-		switch( $format ) {
-			case 'image/jpeg':
-			case 'image/pjpeg':
-			case 'image/jpg':
-			case 'image/gif':
-			case 'image/png':
-			case 'image/x-png':
-				return 8;
-				break;
-			case 'image/tiff':
-			case 'image/x-photoshop':
-			case 'application/postscript':
-			case 'application/illustrator':
-			case 'application/pdf':
-			case 'application/photoshop':
-			case 'application/eps':
-				return 9;
-				break;
-			default:
-				return 0;
-				break;
+		$score = 0;
+		if( in_array( $outputFormat, $this->supportedOutputFormats ) ) {
+			switch( $inputFormat ) {
+				case 'image/jpeg':
+				case 'image/pjpeg':
+				case 'image/jpg':
+				case 'image/gif':
+				case 'image/png':
+				case 'image/x-png':
+					$score = 8;
+					break;
+				case 'image/tiff':
+				case 'image/x-photoshop':
+				case 'application/postscript':
+				case 'application/illustrator':
+				case 'application/pdf':
+				case 'application/photoshop':
+				case 'application/eps':
+					$score = 9;
+					break;
+				default:
+					$score = 0;
+					break;
+			}
 		}
+
+		return $score;
 	}
 
 	/**

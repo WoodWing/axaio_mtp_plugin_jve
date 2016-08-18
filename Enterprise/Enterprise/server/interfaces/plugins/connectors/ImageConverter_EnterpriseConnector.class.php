@@ -37,6 +37,9 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 	/** @var float $pt2pxFactor Calculated factor used to convert points to pixels.  */
 	private $pt2pxFactor;
 
+	/** @var array $supportedOutputFormats List of supported output image file formats (in MIME format). */
+	private $supportedOutputFormats;
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - -
 	/** @var integer $cropLeft Left most point in pixels of cropping frame on x-axis of input image.  */
 	protected $cropLeft;
@@ -326,8 +329,9 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 	/**
 	 * canHandleFormat
 	 *
-	 * @param string 	$format		mime format
-	 * @return int		Return if and how well the format is supported.
+	 * @param string 	$inputFormat		mime format
+	 * @param string 	$outputFormat		mime format
+	 * @return int		Return if and how well the formats are supported.
 	 * 				 	 0 - Not supported
 	 * 					 1 - Could give it a try
 	 * 					 2 - Reasonable
@@ -340,7 +344,7 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 	 * 					10 - perfect and lightening fast
 	 * 					11 - over the top to overrule it all
 	 */
-	abstract public function canHandleFormat( $format );
+	abstract public function canHandleFormat( $inputFormat, $outputFormat );
 
 	// ===================================================================================
 
