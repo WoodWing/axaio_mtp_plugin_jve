@@ -846,7 +846,7 @@ class BizPublishing
 			}
 
 			// Only do the image conversion after the children are thinned out so we have less to exclude.
-			$this->handleImageConversion( $children );
+			$this->handleImageConversion( $publishedDossier->Target->PubChannelID, $children );
 
 			// Save the callback data already. It can be that the connector returns data immediately.
 			$cache = array( $publishedDossier, $operation, $action, $publishFields, $dossier, $children, $exceptionRaised );
@@ -2030,7 +2030,7 @@ class BizPublishing
 	 * @since 10.1.0
 	 * @param Object[] $objects
 	 */
-	private function handleImageConversion( array $objects )
+	private function handleImageConversion( $channelId, array $objects )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizImageConverter.class.php';
 		$bizImageConverter = new BizImageConverter();
@@ -2040,7 +2040,7 @@ class BizPublishing
 					if( $relation->Type == 'Placed' && $relation->ChildInfo->Type == 'Image' &&
 						$bizImageConverter->loadNativeFileForInputImage( $relation->ChildInfo->ID )) {
 						foreach( $relation->Placements as $placement ) {
-							if( $bizImageConverter->cropAndScaleImageByPlacement( $placement ) ) {
+							if( $bizImageConverter->cropAndScaleImageByPlacement( $channelId, $placement ) ) {
 								// This is a ghost property which is not described in the WSDL. The publish connectors should
 								// use this image to publish with if the property is set.
 								$placement->ImageCropAttachment = $bizImageConverter->getOutputImageAttachment();
