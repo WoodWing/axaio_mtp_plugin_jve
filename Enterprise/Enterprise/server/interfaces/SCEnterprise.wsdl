@@ -306,8 +306,8 @@
 					<element name="Slugline" 		type="xsd:string"			nillable="true"/>	<!-- Contents snippet -->
 					<element name="Format" 			type="xsd:string"			nillable="true"/>	<!-- nillable since v4.2 - Mime filetype  -->
 					<element name="Columns" 		type="xsd:int"				nillable="true"/>
-					<element name="Width" 			type="xsd:double"			nillable="true"/>	<!-- Width in points for Images -->	
-					<element name="Height" 			type="xsd:double"			nillable="true"/>	<!-- Height in points for Images -->
+					<element name="Width" 			type="xsd:double"			nillable="true"/>	<!-- Width in pixels for Images -->	
+					<element name="Height" 			type="xsd:double"			nillable="true"/>	<!-- Height in pixels for Images -->
 					<element name="Dpi" 			type="xsd:unsignedInt"		nillable="true"/>	<!-- Dots per inch for images -->
 					<element name="LengthWords"		type="xsd:unsignedInt"		nillable="true"/>	<!-- Articles only -->
 					<element name="LengthChars"		type="xsd:unsignedInt"		nillable="true"/>	<!-- Articles only -->
