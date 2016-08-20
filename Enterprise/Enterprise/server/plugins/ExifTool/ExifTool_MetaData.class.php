@@ -96,6 +96,7 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 		$outputExifTool = self::callExifTool( $arguments.' '.escapeshellarg( $inputFileName ), 'extract metadata', $returnStatus );
 
 		$toolMetaData = array();
+		$this->toolMetaData = array();
 		eval( '$toolMetaData = '.$outputExifTool );
 		if( isset( $toolMetaData[0] ) && is_array( $toolMetaData[0] ) ) {
 			$this->toolMetaData = $toolMetaData[0];
@@ -112,6 +113,18 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 			LogHandler::Log( 'ExifTool', 'DEBUG', 'Extracted metadata for Enterprise: '.print_r( $this->entMetaData, true ) );
 		}
 		return $this->entMetaData;
+	}
+
+	/**
+	 * Retrieve all properties that could be extracted from a file after calling readMetaData().
+	 *
+	 * The returned properties are raw; they are NOT mapped onto Enterprise metadata property names.
+	 *
+	 * @return array|null Two-dimensional list of properties.
+	 */
+	public function getRawMetaData()
+	{
+		return $this->toolMetaData;
 	}
 
 	/**
