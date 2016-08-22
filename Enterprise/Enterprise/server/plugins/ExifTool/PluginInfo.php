@@ -17,7 +17,7 @@ class ExifTool_EnterprisePlugin extends EnterprisePlugin
 	public function getPluginInfo()
 	{
 		$info = new PluginInfoData();
-		$info->DisplayName = 'ExifTool MetaData';
+		$info->DisplayName = 'ExifTool Metadata';
 		$info->Version     = getProductVersion(__DIR__);
 		$info->Description = 'Integrates the ExifTool to extract embedded metadata properties '.
 			'from saved or uploaded files. This info is used to enrich object properties. ';

@@ -112,9 +112,10 @@ class WW_TestSuite_HealthCheck2_ServerPlugins_TestCase extends TestCase
 			if( !BizServerPlugin::isPluginActivated( $mandadoryPlugin ) ) {
 				$pluginName = isset($plugins[$mandadoryPlugin]) ? $plugins[$mandadoryPlugin]->DisplayName : $mandadoryPlugin;
 				$this->setResult( 'ERROR',
-					'The server plug-in "'.$pluginName.'" is mandatory but is currently not activated. '.$reason.
-					' Please activate that server plug-in before you take Enterprise Server in production. ',
-					'Please run <a href="../../server/admin/serverplugins.php'.'">Server Plug-ins</a> to fix the problem.' );
+					'The "'.$pluginName.'" Server plug-in is currently not activated. Activating it is mandatory; '.
+					'it is required for image cropping and image publishing features that need reliable dimension '.
+					'and resolution information from uploaded images.',
+					'Please run <a href="../../server/admin/serverplugins.php'.'">Server Plug-ins</a> and activate the plug-in.' );
 			}
 		}
 
