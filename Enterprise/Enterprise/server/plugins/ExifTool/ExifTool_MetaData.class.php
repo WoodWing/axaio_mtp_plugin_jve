@@ -26,6 +26,22 @@ require_once BASEDIR . '/server/interfaces/plugins/connectors/MetaData_Enterpris
 class ExifTool_MetaData extends MetaData_EnterpriseConnector
 {
 	/**
+	 * @var array $toolMetaData List of extracted metadata properties read by ExifTool.
+	 * Properties are grouped with keys: File, XMP, EXIF, IPTC, Photoshop, Computed, etc
+	 * The names and values are taken as-is from ExifTool, without any conversion whatsoever.
+	 * See top of this PHP module for references to the supported metadata standards.
+	 */
+	private $toolMetaData = array();
+
+	/**
+	 * @var array $entMetaData List of Enterprise properties the read properties $toolMetaData
+	 * could be mapped onto. So the names and the values are converted from the ExifTool world
+	 * to the Enterprise world. Properties that could not be mapped are not present. Only mapped
+	 * properties are returned to the core server so it can enrich the object being saved with those.
+	 */
+	private $entMetaData = array();
+
+	/**
 	 * {@inheritdoc}
 	 */
 	final public function canHandleFormat( $format )
@@ -390,7 +406,7 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 	 *                    NULL to skip mapping onto $this->entMetaData but just use the return value only.
 	 * @param string|null $property2 Target: The 2nd Enterprise metadata property name to be mapped onto.
 	 *                    NULL to skip mapping onto $this->entMetaData but just use the return value only.
-	 * @param callable $cbCastValue
+	 * @param callable $cbCastValue The function called to convert the property value from ExifTool to Enterprise format.
 	 * @return array Two Enterprise properties indexed with 0 and 1. Values could be NULL when not found
 	 *               in $this->toolMetaData or when value could not be converted to Enterprise format.
 	 */
