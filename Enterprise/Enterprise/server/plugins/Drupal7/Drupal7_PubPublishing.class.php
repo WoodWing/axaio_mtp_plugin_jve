@@ -266,6 +266,11 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 						$fileId = null;
 						$childId = $attachmentAndMetaData['metadata']->BasicMetaData->ID;
 						$uploadNeeded = $this->doesUploadChildNeeded( $publishForm, $objectsInDossier[$childId], $publishTarget );
+						$croppedImage = $this->getCroppedImage( $publishForm, $childId, $templateId, $field );
+						if( $croppedImage ) {
+							$attachmentAndMetaData[0] = $croppedImage;
+							$uploadNeeded = true; // crops are not versioned, so always needs upload
+						}
 
 						if( $uploadNeeded ) {
 							// Upload the attachment to Drupal.
@@ -362,6 +367,44 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 				$objectsInDossier[$enterpriseId]->ExternalId = $drupalId;
 			}
 		}
+	}
+
+	/**
+	 * Retrieves an image crop made on a given Publish Form.
+	 *
+	 * The end user may have cropped the image placed on the Publish Form.
+	 * When a crop is found, the caller should prefer the cropped image (over the native image).
+	 *
+	 * The cropped image is dynamically set by the core server during the publish operation at Placement->ImageCropAttachment.
+	 * Note that this property is not defined in the WSDL. When the property is missing, there is no crop.
+	 *
+	 * @since 10.1.0
+	 * @param Object $publishForm The form object being published.
+	 * @param string $childId Id of placed image object to get the attachment for.
+	 * @param integer $templateId The publish form template object id used to create the publish form.
+	 * @param integer $field The field index of the publish form the child object could be placed on.
+	 * @return Attachment|null The cropped image. NULL when no crop found.
+	 */
+	private function getCroppedImage( $publishForm, $childId, $templateId, $field )
+	{
+		$cropppedImage = null;
+		$fieldPrefix = 'C_DPF_' . $templateId . '_' . $field . '_';
+		foreach( $publishForm->Relations as $relation ) {
+			if( $relation->Type == 'Placed' &&
+				$relation->Child == $childId &&
+				$relation->Parent == $publishForm->MetaData->BasicMetaData->ID
+			) {
+				foreach( $relation->Placements as $placement ) {
+					if( $placement->FormWidgetId &&
+						strpos( $placement->FormWidgetId, $fieldPrefix ) === 0 &&
+						isset( $placement->ImageCropAttachment )
+					) {
+						$cropppedImage = $placement->ImageCropAttachment;
+					}
+				}
+			}
+		}
+		return $cropppedImage;
 	}
 
 	/**
