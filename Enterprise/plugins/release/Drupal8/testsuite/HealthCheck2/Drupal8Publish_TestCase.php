@@ -85,47 +85,60 @@ class WW_TestSuite_HealthCheck2_Drupal8Publish_TestCase extends TestCase
 	 */
 	private function validateSitesOption( $publicationId, $pubChannel )
 	{
-		$channelUrl = SERVERURL_ROOT.INETROOT.'/server/admin/editChannel.php?publid='.$publicationId.'&channelid='.$pubChannel->Id;
-		$help = 'Click <a href="'.$channelUrl.'" target="_blank">here</a> to resolve the problem.';
-
 		$selectedSite = WW_Utils_PublishingUtils::getAdmPropertyValue( $pubChannel, WW_Plugins_Drupal8_Utils::CHANNEL_SITE_URL );
 
-		if( empty($selectedSite) ) {
+		$channelUrl = SERVERURL_ROOT.INETROOT.'/server/admin/editChannel.php?publid='.$publicationId.'&channelid='.$pubChannel->Id;
+		$help = "For Publication Channel '{$pubChannel->Name}' the 'Web Site' option is set to '$selectedSite'. ".
+			"This option should match with one of the web site labels configured for the DRUPAL8_SITES option in the Drupal8/config.php file. ".
+			'Click <a href="'.$channelUrl.'" target="_blank">here</a> to open the Publication Channel Maintenance page.';
+
+		// Check if the admin user has set the Web Site option.
+		if( empty( $selectedSite ) ) {
 			$this->setResult( 'ERROR',
-				'The \'Site URL\' option is not set for Publication Channel \''.$pubChannel->Name.'\'.', $help );
-		} else {
-			// Resolve the Uri.
-			$configuration = WW_Plugins_Drupal8_Utils::resolveConfigurationSettings( $selectedSite );
-			$url = $configuration['url'];
+				"The 'Web Site' option is not set for Publication Channel '{$pubChannel->Name}'.", $help );
+			return;
+		}
 
-			// For Drupal we use the Zend Http Client, so we use its URI factory to validate.
-			try {
-				require_once 'Zend/Uri.php';
-				$uri = Zend_Uri::factory( $url );
-			} catch( Exception $e ) {
-				$e = $e;
-				$uri = null;
-			}
+		// Resolve the Drupal configuration for the Publication Channel.
+		$configuration = WW_Plugins_Drupal8_Utils::resolveConfigurationSettings( $selectedSite );
+		if( !$configuration ) {
+			$this->setResult( 'ERROR',
+				"The selected 'Web Site' option '$selectedSite' could not be found in the DRUPAL8_SITES option.", $help );
+			return;
+		}
+		$url = $configuration['url'];
 
-			// Check if the site could be reached.
-			if( !$uri ) {
-				$this->setResult( 'ERROR',
-					'The \'Web Site URL\' option is not set for Publication Channel \''.$pubChannel->Name.'\'.', $help );
-			} else if( substr( $uri, -1 ) != '/' ) { // Shouldn't happen but just to be safe. When you save the url in the channel admin page, it should automatically add / at the end of url.
-				$this->setResult( 'ERROR',
-					'The \'Web Site URL\' option for Publication Channel \''.$pubChannel->Name.'\' should end with a slash (/).', $help );
-			}
+		// Check if the URL is not empty.
+		if( !$url ) {
+			$this->setResult( 'ERROR',
+				"The option DRUPAL8_SITES => '$selectedSite' => 'url' may not be empty.", $help );
+		}
 
-			// Check that the username and password are not empty for the selected Drupal user.
-			if ( empty ( $configuration['username'] ) ) {
-				$this->setResult( 'ERROR',
-					'The \'Username\' option for Publication Channel \''.$pubChannel->Name.'\' may not be empty.', $help );
-			}
+		// Check if the configured URL ends with a slash.
+		if( substr( $url, -1 ) != '/' ) {
+			$this->setResult( 'ERROR',
+				"The option DRUPAL8_SITES => '$selectedSite' => 'url' should end with a slash (/).", $help );
+			return;
+		}
 
-			if ( empty ( $configuration['password'] ) ) {
-				$this->setResult( 'ERROR',
-					'The \'Pasword\' option for Publication Channel \''.$pubChannel->Name.'\' may not be empty.', $help );
-			}
+		// For Drupal we use the Zend Http Client, so we use its URI factory to validate.
+		try {
+			require_once 'Zend/Uri.php';
+			$uri = Zend_Uri::factory( $url );
+		} catch( Exception $e ) {
+			$this->setResult( 'ERROR',
+				"The option DRUPAL8_SITES => '$selectedSite' => 'url' is set to '$url' which is not valid: ".$e->getMessage(), $help );
+			return;
+		}
+
+		// Check that the username and password are not empty for the selected Drupal user.
+		if( empty ( $configuration['username'] ) ) {
+			$this->setResult( 'ERROR',
+				"The option DRUPAL8_SITES => '$selectedSite' => 'username' may not be empty.", $help );
+		}
+		if( empty ( $configuration['password'] ) ) {
+			$this->setResult( 'ERROR',
+				"The option DRUPAL8_SITES => '$selectedSite' => 'password' may not be empty.", $help );
 		}
 	}
 
@@ -142,7 +155,7 @@ class WW_TestSuite_HealthCheck2_Drupal8Publish_TestCase extends TestCase
 		require_once dirname(__FILE__) . '/../../DrupalXmlRpcClient.class.php';
 
 		$channelUrl = SERVERURL_ROOT.INETROOT.'/server/admin/editChannel.php?publid='.$publicationId.'&channelid='.$pubChannel->Id;
-		$help = 'Check the settings in the config.php file.';
+		$help = 'Check the settings in the Drupal8/config.php file.';
 
 		try {
 			$errorMessage = '';
@@ -150,7 +163,7 @@ class WW_TestSuite_HealthCheck2_Drupal8Publish_TestCase extends TestCase
 			// Test the configuration.
 			$result = DrupalXmlRpcClient::testConfig( $pubChannel );
 
-			$header = 'Drupal Errors for Publication Channel "'.$pubChannel->Name.'":<br />'.PHP_EOL;
+			$header = 'Drupal errors for Publication Channel "'.$pubChannel->Name.'":<br />'.PHP_EOL;
 			// don't show output from the above request on test page
 			ob_clean();
 			if (count($result['Errors'])){

@@ -67,10 +67,10 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 			$isHttps = $uri && $uri->getScheme() == 'https';
 		} catch( Zend_Http_Client_Exception $e ) {
 			throw new BizException( null, 'Server', null, $e->getMessage().
-				'. Check your "url" option at the DRUPAL_SITES setting of the drupal_config.php file.' );
+				'. Check your "url" option at the DRUPAL_SITES setting of the Drupal8/config.php file.' );
 		} catch( Zend_Uri_Exception $e ) {
 			throw new BizException( null, 'Server', null, $e->getMessage().
-				'. Check your "url" option at the DRUPAL_SITES setting of the drupal_config.php file.' );
+				'. Check your "url" option at the DRUPAL_SITES setting of the Drupal8/config.php file.' );
 		}
 
 		require_once 'Zend/Http/Client.php';
