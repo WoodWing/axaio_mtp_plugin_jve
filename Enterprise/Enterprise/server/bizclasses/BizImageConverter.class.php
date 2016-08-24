@@ -88,9 +88,10 @@ class BizImageConverter
 	 * Invokes the best image converter connector and requests for crop and scale operaions.
 	 *
 	 * @param Placement $placement Definition of the image crop frame, scale and dimensions.
+	 * @param integer $channelId The ID of the Publication Channel.
 	 * @return bool Whether or not the operation was successful.
 	 */
-	public function cropAndScaleImageByPlacement( $channelId, Placement $placement )
+	public function cropAndScaleImageByPlacement( Placement $placement, $channelId )
 	{
 		if( !$this->inputImageAttachment ) {
 			return false;
@@ -146,10 +147,20 @@ class BizImageConverter
 		return BizServerPlugin::runConnector( $connector, 'convertImage', array() );
 	}
 
-	private function getSupportedOutputFormats( $channelId)
+	/**
+	 * Requests the Publishing connector for a list of all output formats that are supported by the publication channel.
+	 *
+	 * @param integer $channelId The ID of the Publication channel.
+	 * @return array|null A list of MIME output formats supported by the current publication channel.
+	 */
+	private function getSupportedOutputFormats( $channelId )
 	{
 		$outputFileFormats = BizServerPlugin::runChannelConnector( $channelId, 'getFileFormatsForOutputImage', array() );
-		return $outputFileFormats;
+		if( is_array($outputFileFormats) ) {
+			return $outputFileFormats;
+		} else {
+			return null;
+		}
 	}
 
 	/**

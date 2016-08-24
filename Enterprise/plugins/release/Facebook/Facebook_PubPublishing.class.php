@@ -50,11 +50,22 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
 		if( !$publishForm ) {
 			return array();
+
+		$pageId = $facebookPublisher->pageId;
+
+		$publishForm = null;
+		$messageText = null;
+
+		//Get the Publish Form
+		foreach ($objectsInDossier as $objectInDossier) {
+			if ($objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm') {
+				$publishForm = $objectInDossier;
+				break;
+			}
 		}
 
 		// Take the objects that are placed on the publish form.
 		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
-
 		// Process the publish Form
 		$e = null;
 		try {
@@ -64,14 +75,14 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 				case $this->getDocumentIdPrefix().'0' :
 					// Extract the message
 					$messageText = null;
-					$element = BizPublishForm::extractFormFieldDataFromFieldValue( 'C_FACEBOOK_PF_MESSAGE_SEL', $publishFormObjects['C_FACEBOOK_PF_MESSAGE_SEL'] );
+					$element = BizPublishForm::extractFormFieldDataFromFieldValue( 'C_FACEBOOK_PF_MESSAGE_SEL', $publishFormObjects['C_FACEBOOK_PF_MESSAGE_SEL'], $publishTarget->PubChannelID );
 					if( isset( $element[0]['elements'][0] ) ) {
 						$messageText = str_get_html( $element[0]['elements'][0]->Content )->plaintext;
 					}
 
 					// Get the URL
 					$url = null;
-					$urlValue = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_PF_HYPERLINK_URL', false );
+					$urlValue = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_PF_HYPERLINK_URL', $publishTarget->PubChannelID, false );
 					if( $urlValue && $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'] && $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'][0] ) {
 						$url = $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'][0];
 					}
@@ -216,8 +227,8 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	{
 		$pubChannelId = $publishTarget->PubChannelID;
 		$facebookPublisher = new FacebookPublisher( $pubChannelId );
-		$albumNameField = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_ALBUM_NAME', false );
-		$albumDescriptionField = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_ALBUM', false );
+		$albumNameField = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_ALBUM_NAME', false, $pubChannelId );
+		$albumDescriptionField = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_ALBUM', false, $pubChannelId );
 		$albumName = $albumNameField['C_FACEBOOK_ALBUM_NAME'][0];
 		$albumDescription = $albumDescriptionField['C_FACEBOOK_ALBUM'][0];
 		$albumId = $dossier->ExternalId ? $dossier->ExternalId : null;

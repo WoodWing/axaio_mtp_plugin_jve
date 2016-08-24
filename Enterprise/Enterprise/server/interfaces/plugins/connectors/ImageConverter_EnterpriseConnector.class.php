@@ -331,8 +331,8 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 	/**
 	 * canHandleFormat
 	 *
-	 * @param string 	$inputFormat		mime format
-	 * @param string 	$outputFormat		mime format
+	 * @param string 	$inputFormat   mime format
+	 * @param string 	$outputFormat  mime format
 	 * @return int		Return if and how well the formats are supported.
 	 * 				 	 0 - Not supported
 	 * 					 1 - Could give it a try
