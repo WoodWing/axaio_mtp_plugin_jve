@@ -38,34 +38,27 @@ class WW_Plugins_Drupal8_Utils
 	 *
 	 * @param string $siteIndex The name of the configured Drupal 8 instance configuration.
 	 *
-	 * @return array An array containing the configuration settings.
+	 * @return array|null An array containing the configuration settings. NULL when not found.
 	 */
 	static public function resolveConfigurationSettings( $siteIndex )
 	{
-		$response = array(
-			'url' => '',
-			'username' => '',
-			'password' => '',
-		    'authentication' => '',
-		);
+		// Include the configuration file containing all our Drupal instance configurations.
+		require_once dirname(__FILE__) . '/config.php';
+		$sites = unserialize( DRUPAL8_SITES );
 
-		if ($siteIndex != BizResources::localize( 'LIS_NONE')) {
-			// Include the configuration file containing all our Drupal instance configurations.
-			require_once dirname(__FILE__) . '/config.php';
-			$sites = unserialize( DRUPAL8_SITES );
+		$preparedSites = array();
+		foreach( $sites as $siteKey => $values ){
+			$preparedSites[strval($siteKey)] = $values;
+		}
 
-			$preparedSites = array();
-			foreach( $sites as $siteKey => $values ){
-				$preparedSites[strval($siteKey)] = $values;
-			}
-
-			if ( array_key_exists( $siteIndex, $preparedSites ) ){
-				$siteInfo = $preparedSites[strval($siteIndex)];
-				$response['url'] = $siteInfo['url'];
-				$response['username'] = $siteInfo['username'];
-				$response['password'] = $siteInfo['password'];
-				$response['authentication'] = 'Basic ' . base64_encode( $response['username'] . ':' . $response['password']);
-			}
+		$response = null;
+		if ( array_key_exists( $siteIndex, $preparedSites ) ){
+			$siteInfo = $preparedSites[strval($siteIndex)];
+			$response = array();
+			$response['url'] = $siteInfo['url'];
+			$response['username'] = $siteInfo['username'];
+			$response['password'] = $siteInfo['password'];
+			$response['authentication'] = 'Basic ' . base64_encode( $response['username'] . ':' . $response['password']);
 		}
 		return $response;
 	}

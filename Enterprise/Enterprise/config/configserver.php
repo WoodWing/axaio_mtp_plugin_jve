@@ -1328,6 +1328,26 @@ if( !defined('GHOST_SCRIPT_APP_PATH') ) {
 }
 
 // -------------------------------------------------------------------------------------------------
+// ExifTool settings
+// -------------------------------------------------------------------------------------------------
+
+// EXIFTOOL_APP_PATH:
+//    Full path to the folder of the ExifTool application.
+//    Use forward slashes and do NOT end with a slash.
+//    Windows:
+//       define( 'EXIFTOOL_APP_PATH', 'C:/Program Files/ExifTool' );
+//    Linux/Mac:
+//       define( 'EXIFTOOL_APP_PATH', '/usr/local/bin' );
+//
+if( !defined('EXIFTOOL_APP_PATH') ) {
+	if( OS == 'WIN' ) {
+		define( 'EXIFTOOL_APP_PATH', 'C:/Program Files/ExifTool' );
+	} else {
+		define( 'EXIFTOOL_APP_PATH', '/usr/local/bin' );
+	}
+}
+
+// -------------------------------------------------------------------------------------------------
 // Cross-origin Header settings
 // -------------------------------------------------------------------------------------------------
 

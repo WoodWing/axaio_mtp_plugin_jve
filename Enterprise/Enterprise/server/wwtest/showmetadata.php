@@ -71,11 +71,11 @@ if( !isset($_REQUEST['ID']) || empty($_REQUEST['ID']) ||
 	$ticket = checkSecure();
 	global $globUser;  // set by checkSecure()
 
-	$viewMode = ($_REQUEST['view']) ? $_REQUEST['view'] : 'all';
+	$viewMode = isset($_REQUEST['view']) ? $_REQUEST['view'] : 'all';
 
 	// get object file (requested rendition) from database
 	try {
-		$rendition = ($_REQUEST['rendition']) ? $_REQUEST['rendition'] : 'native';
+		$rendition = isset($_REQUEST['rendition']) ? $_REQUEST['rendition'] : 'native';
 		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$object = BizObject::getObject( $_REQUEST['ID'], $globUser, false, $rendition, null );
@@ -143,7 +143,7 @@ if( !isset($_REQUEST['ID']) || empty($_REQUEST['ID']) ||
 
 	// determine the view modes to walk through
 	print '<table border="1">' . "\n";
-	$viewModes = ($viewMode == 'all') ? array('props','xmp','xmpthumb','exif','exifthumb','iptc'/*,'irb','irbthumb'*/) : array($viewMode);
+	$viewModes = ($viewMode == 'all') ? array('props','exiftool','getimagesize','xmp','xmpthumb','exif','exifthumb','iptc'/*,'irb','irbthumb'*/) : array($viewMode);
 	foreach( $viewModes as $viewMode ) {
 		$itemId++;
 		$errMsg = '';
@@ -154,6 +154,26 @@ if( !isset($_REQUEST['ID']) || empty($_REQUEST['ID']) ||
 				$dataOut .= '<pre>';
 				$dataOut .= print_r( $object->MetaData, true );
 				$dataOut .= '</pre>';
+				break;
+			case 'exiftool':
+				require_once  BASEDIR.'/server/plugins/ExifTool/ExifTool_MetaData.class.php';
+				$exifToolConnector = new ExifTool_MetaData();
+				$dataOut .= 'Properties mapped to Enterprise MetaData:<pre>';
+				$dataOut .= print_r( $exifToolConnector->readMetaData( $object->Files[0], null ), true );
+				$dataOut .= '</pre>';
+				$dataOut .= 'Properties extracted from file:<pre>';
+				$dataOut .= print_r( $exifToolConnector->getRawMetaData(), true );
+				$dataOut .= '</pre>';
+				break;
+			case 'getimagesize':
+				$imageInfo = getimagesize( $tmpFileName );
+				if( $imageInfo ) {
+					$dataOut .= '<pre>';
+					$dataOut .= print_r( $imageInfo, true );
+					$dataOut .= '</pre>';
+				} else {
+					$errMsg = 'getimagesize() returned nothing for image file.';
+				}
 				break;
 			case 'xmp':
 				require_once BASEDIR . '/server/utils/XMPParser.class.php';	

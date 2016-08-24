@@ -187,7 +187,9 @@ class Drupal8_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 							// Compose the Site URL.
 							$selectedSite = WW_Utils_PublishingUtils::getAdmPropertyValue($channel, WW_Plugins_Drupal8_Utils::CHANNEL_SITE_URL);
 							$configuration = WW_Plugins_Drupal8_Utils::resolveConfigurationSettings( $selectedSite );
-							$siteUrl = $configuration['url'];
+							if( $configuration ) {
+								$siteUrl = $configuration['url'];
+							}
 
 							// Store the data for reuse.
 							$channelInfos[$eachErrorMsg['pubchannelid']] = array();

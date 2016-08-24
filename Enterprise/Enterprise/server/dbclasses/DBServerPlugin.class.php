@@ -65,7 +65,7 @@ class DBServerPlugin extends DBBase
 	/**
 	  * Get plugin objects
 	  *
-	  * @return array of PluginInfoData
+	  * @return PluginInfoData[]
 	  */
 	static public function getPlugins()
 	{
@@ -218,7 +218,7 @@ class DBServerPlugin extends DBBase
 	 *  Converts a DB plugin record (array) into a plugin info data object.
 	 *
 	 *  @param array $row DB plugin row
-	 *  @return object PluginInfoData
+	 *  @return PluginInfoData
 	**/
 	static public function rowToObj( $row )
 	{
