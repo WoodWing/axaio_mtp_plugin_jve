@@ -28,157 +28,157 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		return self::PRIO_DEFAULT;
 	}
 
-    /**
+	/**
 	 * Publish dossier to Facebook
 	 *
 	 * Here the images and/or text ar posted to Facebook, there i looked at which Publish Form is
 	 * used in content station and after that processed an uploaded to Facebook.
 	 *
-     * @param Object $dossier [writable] The Dossier to be published. ExternalId to be filled in by this function.
-     * @param array $objectsInDossier [writable] The objects in the Dossier to be published.
-     * @param PublishTarget $publishTarget The target for publishing to.
-     * @return array A list with PubField|Empty array when no PublishForm found in the Dossier.
-     * @throws BizException
-     */
-    public function publishDossier(&$dossier, &$objectsInDossier, $publishTarget)
+	 * @param Object $dossier [writable] The Dossier to be published. ExternalId to be filled in by this function.
+	 * @param array $objectsInDossier [writable] The objects in the Dossier to be published.
+	 * @param PublishTarget $publishTarget The target for publishing to.
+	 * @return array A list with PubField|Empty array when no PublishForm found in the Dossier.
+	 * @throws BizException
+	 */
+	public function publishDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		require_once dirname(__FILE__) . '/simple_html_dom.php'; // Html to text converter
-		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
+		require_once dirname( __FILE__ ).'/simple_html_dom.php'; // Html to text converter
+		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
 		$publishTarget = $publishTarget; // Keep Analyzer happy.
 
-        $pubChannelId = $publishTarget->PubChannelID;
-		$facebookPublisher = new FacebookPublisher($pubChannelId);
+		$pubChannelId = $publishTarget->PubChannelID;
+		$facebookPublisher = new FacebookPublisher( $pubChannelId );
 
-        $pageId = $facebookPublisher->pageId;
+		$pageId = $facebookPublisher->pageId;
 
 		$publishForm = null;
 		$messageText = null;
 
 		//Get the Publish Form
-		foreach ($objectsInDossier as $objectInDossier) {
-			if ($objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm') {
+		foreach( $objectsInDossier as $objectInDossier ) {
+			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
 				$publishForm = $objectInDossier;
 				break;
 			}
 		}
 
 		// Process the publish Form
-		if (!is_null($publishForm)) {
+		if( !is_null( $publishForm ) ) {
 
 			//Extract the message
 			//Publish to Facebook
-			switch ( BizPublishForm::getDocumentId($publishForm) ) {
+			switch( BizPublishForm::getDocumentId( $publishForm ) ) {
 				//Facebook post
-				case $this->getDocumentIdPrefix() . '0' :
-                    $fields = BizPublishForm::getFormFields( $publishForm );
-                    $element = BizPublishForm::extractFormFieldDataFromFieldValue('C_FACEBOOK_PF_MESSAGE_SEL', $fields['C_FACEBOOK_PF_MESSAGE_SEL']);
-                    if ($element && isset($element[0]) && isset($element[0]['elements']) && isset($element[0]['elements'][0])) {
-                        $messageText = str_get_html($element[0]['elements'][0]->Content)->plaintext;
-                    }
+				case $this->getDocumentIdPrefix().'0' :
+					$fields = BizPublishForm::getFormFields( $publishForm );
+					$element = BizPublishForm::extractFormFieldDataFromFieldValue( 'C_FACEBOOK_PF_MESSAGE_SEL', $fields['C_FACEBOOK_PF_MESSAGE_SEL'] );
+					if( $element && isset( $element[0] ) && isset( $element[0]['elements'] ) && isset( $element[0]['elements'][0] ) ) {
+						$messageText = str_get_html( $element[0]['elements'][0]->Content )->plaintext;
+					}
 
 					//Get the URL
 					$url = null;
-					$urlValue = BizPublishForm::extractFormFieldDataByName($publishForm, 'C_FACEBOOK_PF_HYPERLINK_URL', false);
-					if ($urlValue && $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'] && $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'][0]) {
+					$urlValue = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_PF_HYPERLINK_URL', false );
+					if( $urlValue && $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'] && $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'][0] ) {
 						$url = $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'][0];
 					}
 
 					//Check if we have a message or hyperlink
-					if (!trim($messageText) && !$url) {
-						throw new BizException('FACEBOOK_ERROR_ADD_MESSAGE', 'Server', '');
+					if( !trim( $messageText ) && !$url ) {
+						throw new BizException( 'FACEBOOK_ERROR_ADD_MESSAGE', 'Server', '' );
 					}
 
 					// Needed for Facebook when you just want to post a URL
-					if(!$messageText){
+					if( !$messageText ) {
 						$messageText = ' ';
 					}
 
 					try {
-						$postId = $facebookPublisher->postMessageToPageFeed($pageId, $messageText, $url);
-                        $dossier->ExternalId = $postId;
-					} catch (Exception $e) {
-						if(strpos($e->getMessage(), '#100') || strpos($e->getMessage(), '#1500')){ // Facebook errors when they think the url is not proper formatted.
-							throw new BizException( 'FACEBOOK_ERROR_INVALID_URL', 'Server', 'Hyperlink error');
+						$postId = $facebookPublisher->postMessageToPageFeed( $pageId, $messageText, $url );
+						$dossier->ExternalId = $postId;
+					} catch( Exception $e ) {
+						if( strpos( $e->getMessage(), '#100' ) || strpos( $e->getMessage(), '#1500' ) ) { // Facebook errors when they think the url is not proper formatted.
+							throw new BizException( 'FACEBOOK_ERROR_INVALID_URL', 'Server', 'Hyperlink error' );
 						}
-						$this->reThrowDetailedError($publishForm, $e, 'PublishDossier' );
+						$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
 					}
 					break;
 
 				//Facebook photo
-				case $this->getDocumentIdPrefix() . '1' :
+				case $this->getDocumentIdPrefix().'1' :
 					$objectType = null;
 
 					//Get the id and type of the placed image
-					$mediaId = $this->getPlacedObjectId($publishForm, 'C_FACEBOOK_PF_MEDIA_SEL');
+					$mediaId = $this->getPlacedObjectId( $publishForm, 'C_FACEBOOK_PF_MEDIA_SEL' );
 
-					if (!is_null($mediaId)) {
-						$objectType = BizObject::getObjectType($mediaId, 'Workflow');
+					if( !is_null( $mediaId ) ) {
+						$objectType = BizObject::getObjectType( $mediaId, 'Workflow' );
 					}
 
-					if ($objectType != 'Image') {
-						throw new BizException('FACEBOOK_ERROR_ADD_IMAGE', 'Server', '');
+					if( $objectType != 'Image' ) {
+						throw new BizException( 'FACEBOOK_ERROR_ADD_IMAGE', 'Server', '' );
 					}
 
 					//Save the image to a file
-					$filePath = $this->saveLocal($mediaId);
+					$filePath = $this->saveLocal( $mediaId );
 
 					// Post the Image.
 					try {
-						if ($objectType == 'Image') {
-                            $imageDescription = null;
-                            foreach ($objectsInDossier as $objectInDossier) {
-                                if ($objectInDossier->MetaData->BasicMetaData->Type == 'Image') {
-                                    $imageObj = $objectInDossier;
+						if( $objectType == 'Image' ) {
+							$imageDescription = null;
+							foreach( $objectsInDossier as $objectInDossier ) {
+								if( $objectInDossier->MetaData->BasicMetaData->Type == 'Image' ) {
+									$imageObj = $objectInDossier;
 
-									if (is_array($imageObj->MetaData->ExtraMetaData)){
-										foreach ($imageObj->MetaData->ExtraMetaData as $extraData) {
-											if($extraData->Property == 'C_FACEBOOK_IMAGE_DESCRIPTION'){
+									if( is_array( $imageObj->MetaData->ExtraMetaData ) ) {
+										foreach( $imageObj->MetaData->ExtraMetaData as $extraData ) {
+											if( $extraData->Property == 'C_FACEBOOK_IMAGE_DESCRIPTION' ) {
 												$imageDescription = $extraData->Values[0];
 											}
 										}
 									}
 
-									$result = $facebookPublisher->uploadPictureToPage($pageId, $filePath, $imageDescription);
+									$result = $facebookPublisher->uploadPictureToPage( $pageId, $filePath, $imageDescription );
 									$postId = $result['id'];
 									$dossier->ExternalId = $postId;
-                                }
+								}
 							}
 						}
-					} catch (Exception $e) {
-						unlink($filePath);
-						$this->reThrowDetailedError($publishForm, $e, 'PublishDossier' );
+					} catch( Exception $e ) {
+						unlink( $filePath );
+						$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
 					}
 					//Remove the temp image
-					unlink($filePath);
+					unlink( $filePath );
 					break;
 
-                case $this->getDocumentIdPrefix() . '2' :
+				case $this->getDocumentIdPrefix().'2' :
 					$imageCheck = false;
-					$publishFormOBJS = BizPublishForm::getFormFields($publishForm);
+					$publishFormOBJS = BizPublishForm::getFormFields( $publishForm );
 
 					// This is needed because the getFormField returns an object when there is only 1 object else it returns an array
-					if(isset($publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'])){
-						if(count($publishFormOBJS['C_FACEBOOK_MULTI_IMAGES']) > 1){
-							foreach ( $publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'] as $image){
+					if( isset( $publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'] ) ) {
+						if( count( $publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'] ) > 1 ) {
+							foreach( $publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'] as $image ) {
 								$this->uploadImageToAlbum( $objectsInDossier, $publishForm, $dossier, $publishTarget, $image, $pageId );
-								if(!$imageCheck){
+								if( !$imageCheck ) {
 									$imageCheck = true;
 								}
 							}
-						}else if(count($publishFormOBJS['C_FACEBOOK_MULTI_IMAGES']) == 1){
-							$this->uploadImageToAlbum( $objectsInDossier, $publishForm, $dossier ,$publishTarget, $publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'], $pageId );
+						} else if( count( $publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'] ) == 1 ) {
+							$this->uploadImageToAlbum( $objectsInDossier, $publishForm, $dossier, $publishTarget, $publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'], $pageId );
 							$imageCheck = true;
 						}
 					}
 
-					if(!$imageCheck){
-						throw new BizException('FACEBOOK_ERROR_ADD_IMAGE', 'Server', '');
+					if( !$imageCheck ) {
+						throw new BizException( 'FACEBOOK_ERROR_ADD_IMAGE', 'Server', '' );
 					}
 			}
 		}
-		return $this->requestPublishFields($dossier, $objectsInDossier ,$publishTarget);
+		return $this->requestPublishFields( $dossier, $objectsInDossier, $publishTarget );
 	}
 
 	/**
@@ -196,49 +196,49 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	public function uploadImageToAlbum( &$objectsInDossier, &$publishForm, &$dossier, $publishTarget, $image, $pageId )
 	{
 		$pubChannelId = $publishTarget->PubChannelID;
-		$facebookPublisher = new FacebookPublisher($pubChannelId);
-		$albumNameField = BizPublishForm::extractFormFieldDataByName($publishForm, 'C_FACEBOOK_ALBUM_NAME', false);
-		$albumDescriptionField = BizPublishForm::extractFormFieldDataByName($publishForm, 'C_FACEBOOK_ALBUM', false);
+		$facebookPublisher = new FacebookPublisher( $pubChannelId );
+		$albumNameField = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_ALBUM_NAME', false );
+		$albumDescriptionField = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_ALBUM', false );
 		$albumName = $albumNameField['C_FACEBOOK_ALBUM_NAME'][0];
 		$albumDescription = $albumDescriptionField['C_FACEBOOK_ALBUM'][0];
 		$albumId = null;
 
-		foreach ($objectsInDossier as $imageObj) {
-			if ($imageObj->MetaData->BasicMetaData->Type == 'Image') {
-				if($imageObj->MetaData->BasicMetaData->ID == $image->MetaData->BasicMetaData->ID){
+		foreach( $objectsInDossier as $imageObj ) {
+			if( $imageObj->MetaData->BasicMetaData->Type == 'Image' ) {
+				if( $imageObj->MetaData->BasicMetaData->ID == $image->MetaData->BasicMetaData->ID ) {
 					$imageDescription = '';
 
-					if (is_array($imageObj->MetaData->ExtraMetaData)){
-						foreach ($imageObj->MetaData->ExtraMetaData as $extraData) {
-							if($extraData->Property == 'C_FACEBOOK_IMAGE_DESCRIPTION'){
+					if( is_array( $imageObj->MetaData->ExtraMetaData ) ) {
+						foreach( $imageObj->MetaData->ExtraMetaData as $extraData ) {
+							if( $extraData->Property == 'C_FACEBOOK_IMAGE_DESCRIPTION' ) {
 								$imageDescription = $extraData->Values[0];
 							}
 						}
 					}
 
-					if( $dossier->ExternalId ){
+					if( $dossier->ExternalId ) {
 						$albumId = $dossier->ExternalId;
 					}
 
 					//Save the image to a file
-					$filePath = $this->saveLocal($imageObj->MetaData->BasicMetaData->ID);
+					$filePath = $this->saveLocal( $imageObj->MetaData->BasicMetaData->ID );
 
 					// Post the slideshow.
 					try {
-						$result = $facebookPublisher->uploadPictureToPage($pageId, $filePath, $imageDescription, $albumName, $albumDescription, $albumId);
+						$result = $facebookPublisher->uploadPictureToPage( $pageId, $filePath, $imageDescription, $albumName, $albumDescription, $albumId );
 						$postId = $result['id'];
 						$imageObj->ExternalId = $postId;
 
-						if(isset($result['albumId'])){
+						if( isset( $result['albumId'] ) ) {
 							$dossier->ExternalId = $result['albumId'];
 						}
 
-					} catch (Exception $e) {
-						unlink($filePath);
-						$this->reThrowDetailedError($publishForm, $e, 'PublishDossier' );
+					} catch( Exception $e ) {
+						unlink( $filePath );
+						$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
 					}
 					//Remove the temp image
-					unlink($filePath);
+					unlink( $filePath );
 				}
 			}
 		}
@@ -255,20 +255,22 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param string $action Whether the error is from Publishing or Unpublishing. Possible values: 'PublishDossier', 'UnpublishDossier'
 	 * @throws BizException
 	 */
-    public function reThrowDetailedError($publishForm, $e, $action )
+	public function reThrowDetailedError( $publishForm, $e, $action )
 	{
-		$reasonParams = array($publishForm->MetaData->BasicMetaData->Name);
-		$errorCode = ($e->getCode()) ? ' (code: ' . $e->getCode() . ')' : '';
+		$reasonParams = array( $publishForm->MetaData->BasicMetaData->Name );
+		$errorCode = ( $e->getCode() ) ? ' (code: '.$e->getCode().')' : '';
 		$actionMessage = $action == 'PublishDossier' ? 'Posting' : 'Unpublishing';
 
-		if($actionMessage == 'PublishDossier' || $actionMessage == 'Posting'){
+		if( $actionMessage == 'PublishDossier' || $actionMessage == 'Posting' ) {
 			$msg = BizResources::localize( 'FACEBOOK_ERROR_PUBLISH', true, $reasonParams );
-		} else{ $msg = BizResources::localize( 'FACEBOOK_ERROR_UNPUBLISH', true, $reasonParams );}
+		} else {
+			$msg = BizResources::localize( 'FACEBOOK_ERROR_UNPUBLISH', true, $reasonParams );
+		}
 
-		$detail = $actionMessage . $publishForm->MetaData->BasicMetaData->Name . ' with id: ' . $publishForm->MetaData->BasicMetaData->ID
-			. ' produced an error: ' . $e->getMessage() . $errorCode;
+		$detail = $actionMessage.$publishForm->MetaData->BasicMetaData->Name.' with id: '.$publishForm->MetaData->BasicMetaData->ID
+			.' produced an error: '.$e->getMessage().$errorCode;
 
-		throw new BizException(null, 'Server', $detail, $msg);
+		throw new BizException( null, 'Server', $detail, $msg );
 	}
 
 	/**
@@ -281,13 +283,13 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	public function getPlacedObjectId( $publishForm, $fieldName )
 	{
 		$placedObjId = null;
-		if (is_array($publishForm->Relations)){
-			foreach ($publishForm->Relations as $relation) {
-				if ($relation->Type == 'Placed') {
-					if (is_array($relation->Placements)) {
-						foreach ($relation->Placements as $placement) {
+		if( is_array( $publishForm->Relations ) ) {
+			foreach( $publishForm->Relations as $relation ) {
+				if( $relation->Type == 'Placed' ) {
+					if( is_array( $relation->Placements ) ) {
+						foreach( $relation->Placements as $placement ) {
 							$property = $placement->FormWidgetId;
-							if ($property == $fieldName) {
+							if( $property == $fieldName ) {
 								$placedObjId = $relation->Child;
 								break; // Found
 							}
@@ -307,10 +309,10 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $dossier [writable] The Dossier to be updated on Facebook.
 	 * @param array $objectsInDossier [writable] The objects in the Dossier to be updated on Facebook.
 	 * @param PublishTarget $publishTarget
-     * @return void
+	 * @return void
 	 * @throws BizException
 	 */
-    public function updateDossier(&$dossier, &$objectsInDossier, $publishTarget)
+	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
 		// Keep analyzer happy.
 		$dossier = $dossier;
@@ -324,7 +326,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 
 		$msg = 'Updating a Dossier on Facebook is not possible.';
 		$detail = 'Updating is not possible due to restrictions in the Facebook Graph API.';
-		throw new BizException(null, 'Server', $detail, $msg);
+		throw new BizException( null, 'Server', $detail, $msg );
 	}
 
 	/**
@@ -338,55 +340,55 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param publishTarget $publishTarget The target.
 	 * @return array Empty array.
 	 */
-    public function unpublishDossier($dossier, $objectsInDossier, $publishTarget)
+	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
 	{
-		require_once BASEDIR . '/server/dbclasses/DBPublishedObjectsHist.class.php';
-		require_once BASEDIR . '/server/dbclasses/DBPublishHistory.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBPublishedObjectsHist.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBPublishHistory.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 
 		// Keep analyzer happy.
 		$objectsInDossier = $objectsInDossier; // Keep analyzer happy
 
-        $pubChannelId = $publishTarget->PubChannelID;
-        $facebookPublisher = new FacebookPublisher($pubChannelId);
-        $pageId = $facebookPublisher->pageId;
+		$pubChannelId = $publishTarget->PubChannelID;
+		$facebookPublisher = new FacebookPublisher( $pubChannelId );
+		$pageId = $facebookPublisher->pageId;
 		$publishForm = null;
 
 		//Get the Publish Form
-		foreach ($objectsInDossier as $objectInDossier) {
-			if ($objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm') {
+		foreach( $objectsInDossier as $objectInDossier ) {
+			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
 				$publishForm = $objectInDossier;
 				break;
 			}
 		}
 
-		switch ( BizPublishForm::getDocumentId($publishForm) ) {
+		switch( BizPublishForm::getDocumentId( $publishForm ) ) {
 			//Facebook post or Facebook single image
-			case $this->getDocumentIdPrefix() . '0' :
-			case $this->getDocumentIdPrefix() . '1' :
-				if( $dossier->ExternalId != 'publishedFacebook' ){ // needed for older publish forms with the externalId on the object instead of on the dossier, then the code of case '2' is needed
+			case $this->getDocumentIdPrefix().'0' :
+			case $this->getDocumentIdPrefix().'1' :
+				if( $dossier->ExternalId != 'publishedFacebook' ) { // needed for older publish forms with the externalId on the object instead of on the dossier, then the code of case '2' is needed
 					try {
-						$facebookPublisher->deleteMessageFromFeed($pageId, $dossier->ExternalId);
-					} catch (Exception $e) {
-						$this->reThrowDetailedError($publishForm, $e, 'UnpublishDossier' );
+						$facebookPublisher->deleteMessageFromFeed( $pageId, $dossier->ExternalId );
+					} catch( Exception $e ) {
+						$this->reThrowDetailedError( $publishForm, $e, 'UnpublishDossier' );
 					}
 					$dossier->ExternalId = '';
 					break;
 				}
 
 			//Facebook image gallery
-			case $this->getDocumentIdPrefix() . '2' :
-				$dossiersPublished = DBPublishHistory::getPublishHistoryDossier($dossier->MetaData->BasicMetaData->ID, $pubChannelId, $publishTarget->IssueID, null, true);
+			case $this->getDocumentIdPrefix().'2' :
+				$dossiersPublished = DBPublishHistory::getPublishHistoryDossier( $dossier->MetaData->BasicMetaData->ID, $pubChannelId, $publishTarget->IssueID, null, true );
 				$dossierPublished = reset( $dossiersPublished ); // Get the first dossier.
-				$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist($dossierPublished['id']);
-				foreach ($publishedObjects as $relation) {
-					if ($relation['type'] == 'Image') {
-						$externalId = DBPublishedObjectsHist::getObjectExternalId($dossier->MetaData->BasicMetaData->ID, $relation['objectid'], $pubChannelId, $publishTarget->IssueID, null, $dossierPublished['id']);
-						if(!empty($externalId)){
+				$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist( $dossierPublished['id'] );
+				foreach( $publishedObjects as $relation ) {
+					if( $relation['type'] == 'Image' ) {
+						$externalId = DBPublishedObjectsHist::getObjectExternalId( $dossier->MetaData->BasicMetaData->ID, $relation['objectid'], $pubChannelId, $publishTarget->IssueID, null, $dossierPublished['id'] );
+						if( !empty( $externalId ) ) {
 							try {
-								$facebookPublisher->deleteMessageFromFeed($pageId, $externalId);
-							} catch (Exception $e) {
-								$this->reThrowDetailedError($publishForm, $e, 'UnpublishDossier' );
+								$facebookPublisher->deleteMessageFromFeed( $pageId, $externalId );
+							} catch( Exception $e ) {
+								$this->reThrowDetailedError( $publishForm, $e, 'UnpublishDossier' );
 							}
 						}
 					}
@@ -419,10 +421,10 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $dossier [writable] The Dossier to be previewed.
 	 * @param array $objectsInDossier [writable] The objects in the Dossier to be previewed.
 	 * @param publishTarget $publishTarget The target.
-     * @return void
+	 * @return void
 	 * @throws BizException
 	 */
-	public function previewDossier(&$dossier, &$objectsInDossier, $publishTarget)
+	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
 		// Keep analyzer happy.
 		$dossier = $dossier;
@@ -432,7 +434,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		// Previewing content is not possible for the Facebook plug-in.
 		$msg = 'Previewing a Dossier is not possible on Facebook.';
 		$detail = 'Facebook does not support previewing of Dossiers.';
-		throw new BizException(null, 'Server', $detail, $msg);
+		throw new BizException( null, 'Server', $detail, $msg );
 	}
 
 	/**
@@ -444,45 +446,45 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param publishTarget $publishTarget The target.
 	 * @return array List of PubField with its values.
 	 */
-	public function requestPublishFields($dossier, $objectsInDossier, $publishTarget)
+	public function requestPublishFields( $dossier, $objectsInDossier, $publishTarget )
 	{
-		require_once BASEDIR . '/server/dbclasses/DBPublishHistory.class.php';
-        require_once BASEDIR . '/server/bizclasses/BizAdmProperty.class.php';
-        require_once BASEDIR . '/server/utils/PublishingUtils.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBPublishHistory.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
+		require_once BASEDIR.'/server/utils/PublishingUtils.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 
 		$publishTarget = $publishTarget; //keep analyzer happy
 		$url = null;
 		$pubField = array();
 
-		foreach ($objectsInDossier as $objectInDossier) {
-			if ($objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm') {
+		foreach( $objectsInDossier as $objectInDossier ) {
+			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
 				$publishForm = $objectInDossier;
 				break;
 			}
 		}
 
-		switch ( BizPublishForm::getDocumentId($publishForm) ) {
+		switch( BizPublishForm::getDocumentId( $publishForm ) ) {
 			//Facebook post or Facebook single image
-			case $this->getDocumentIdPrefix() . '0':
-				if( $dossier->ExternalId ){
+			case $this->getDocumentIdPrefix().'0':
+				if( $dossier->ExternalId ) {
 					$pieces = explode( '_', $dossier->ExternalId );
 					$part1 = $pieces[0];
 					$part2 = $pieces[1];
-					$url = 'http://www.facebook.com/' . $part1 . '/posts/' . $part2;
+					$url = 'http://www.facebook.com/'.$part1.'/posts/'.$part2;
 				}
 				break;
 
-			case $this->getDocumentIdPrefix() . '1':
-				if( $dossier->ExternalId != 'publishedFacebook' ){
-					if($dossier->ExternalId){
-						$url = 'https://www.facebook.com/photo.php?fbid=' . $dossier->ExternalId;
+			case $this->getDocumentIdPrefix().'1':
+				if( $dossier->ExternalId != 'publishedFacebook' ) {
+					if( $dossier->ExternalId ) {
+						$url = 'https://www.facebook.com/photo.php?fbid='.$dossier->ExternalId;
 					}
-				}else{
-					foreach($objectsInDossier as $objectInDossier){
-						if ($objectInDossier->MetaData->BasicMetaData->Type == 'Image') {
-							if( $objectInDossier->ExternalId ){
-								$url = 'https://www.facebook.com/photo.php?fbid=' . $objectInDossier->ExternalId;
+				} else {
+					foreach( $objectsInDossier as $objectInDossier ) {
+						if( $objectInDossier->MetaData->BasicMetaData->Type == 'Image' ) {
+							if( $objectInDossier->ExternalId ) {
+								$url = 'https://www.facebook.com/photo.php?fbid='.$objectInDossier->ExternalId;
 								break;
 							}
 						}
@@ -490,17 +492,17 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 				}
 				break;
 
-			case $this->getDocumentIdPrefix() . '2':
-				if( $dossier->ExternalId ){
-					if( $dossier->ExternalId != 'publishedFacebook' ){
-						$url = 'https://www.facebook.com/media/set/?set=a.' . $dossier->ExternalId;
-					}else{
-						$url = 'https://www.facebook.com/media/set/?set=a.' . $publishForm->ExternalId;
+			case $this->getDocumentIdPrefix().'2':
+				if( $dossier->ExternalId ) {
+					if( $dossier->ExternalId != 'publishedFacebook' ) {
+						$url = 'https://www.facebook.com/media/set/?set=a.'.$dossier->ExternalId;
+					} else {
+						$url = 'https://www.facebook.com/media/set/?set=a.'.$publishForm->ExternalId;
 					}
 				}
 				break;
 		}
-		$pubField[] = new PubField('URL', 'string', array($url));
+		$pubField[] = new PubField( 'URL', 'string', array( $url ) );
 		return $pubField;
 	}
 
@@ -513,17 +515,17 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * @return string The Dossier URL.
 	 */
-	public function getDossierURL($dossier, $objectsInDossier, $publishTarget)
+	public function getDossierURL( $dossier, $objectsInDossier, $publishTarget )
 	{
 		// Keep analyzer happy.
 		$publishTarget = $publishTarget;
 		$objectsInDossier = $objectsInDossier;
 		$dossier = $dossier;
 
-        $pubChannelId = $publishTarget->PubChannelID;
-        $facebookPublisher = new FacebookPublisher($pubChannelId);
+		$pubChannelId = $publishTarget->PubChannelID;
+		$facebookPublisher = new FacebookPublisher( $pubChannelId );
 
-        $facebookPage = 'http://www.facebook.com/pages/-/' . $facebookPublisher->pageId . '?sk=app_'.$facebookPublisher->appId;
+		$facebookPage = 'http://www.facebook.com/pages/-/'.$facebookPublisher->pageId.'?sk=app_'.$facebookPublisher->appId;
 
 		// Show the page where is being published to
 		return $facebookPage;
@@ -540,71 +542,71 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function saveLocal( $id )
 	{
-		require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
+		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
 
-		$object = $this->getObject($id);
+		$object = $this->getObject( $id );
 		$type = $object->MetaData->BasicMetaData->Type;
 
 		// We need to get a unique name for the object, in case there are multiple objects with the same name.
-		$name = $id . $type;
+		$name = $id.$type;
 
 		// Get the format, and the proper extension for the format.
 		$format = $object->MetaData->ContentMetaData->Format;
-		$extension = MimeTypeHandler::mimeType2FileExt($format);
+		$extension = MimeTypeHandler::mimeType2FileExt( $format );
 
 		// Retrieve file data.
 		$filePath = null;
-		if (isset($object->Files[0]->FilePath)) {
+		if( isset( $object->Files[0]->FilePath ) ) {
 			$filePath = $object->Files[0]->FilePath;
 		}
 
-		$exportName = TEMPDIRECTORY . '/' . $name . $extension;
+		$exportName = TEMPDIRECTORY.'/'.$name.$extension;
 
 		// Check and create the FACEBOOK_DIRECTORY as needed.
-		if (!is_dir(TEMPDIRECTORY)) {
-			require_once BASEDIR . '/server/utils/FolderUtils.class.php';
-			FolderUtils::mkFullDir(TEMPDIRECTORY);
+		if( !is_dir( TEMPDIRECTORY ) ) {
+			require_once BASEDIR.'/server/utils/FolderUtils.class.php';
+			FolderUtils::mkFullDir( TEMPDIRECTORY );
 		}
 
 		// Check if the directory was created.
-		if (!is_dir(TEMPDIRECTORY)) {
-			$msg = 'The Facebook directory: "' . TEMPDIRECTORY . '" does not exist, or could not be created.';
-			$detail = 'The directory "' . TEMPDIRECTORY . '" could not be created. Either create it manually and '
-					. 'ensure the web server can write to it, or check that the webserver has rights to write to the sub-'
-					. 'directories in the path.';
+		if( !is_dir( TEMPDIRECTORY ) ) {
+			$msg = 'The Facebook directory: "'.TEMPDIRECTORY.'" does not exist, or could not be created.';
+			$detail = 'The directory "'.TEMPDIRECTORY.'" could not be created. Either create it manually and '
+				.'ensure the web server can write to it, or check that the webserver has rights to write to the sub-'
+				.'directories in the path.';
 
-			throw new BizException(null, 'Server', $detail, $msg);
+			throw new BizException( null, 'Server', $detail, $msg );
 		}
 
-		if (is_string($filePath)) {
-			$content = file_get_contents($filePath);
+		if( is_string( $filePath ) ) {
+			$content = file_get_contents( $filePath );
 		} else {
 			$content = $object->Files[0]->Content->options['attachment']['body'];
 		}
 
-		if (is_null($content)) {
+		if( is_null( $content ) ) {
 			$msg = 'Could not retrieve file contents';
-			$detail = (is_string($filePath)) ? $filePath : 'Attachment (' . $id . ')';
+			$detail = ( is_string( $filePath ) ) ? $filePath : 'Attachment ('.$id.')';
 			$detail .= ' did not yield proper content.';
-			throw new BizException(null, 'Server', $detail, $msg);
+			throw new BizException( null, 'Server', $detail, $msg );
 		}
 
-		$fp = fopen($exportName, 'w+');
+		$fp = fopen( $exportName, 'w+' );
 
-		if (!$fp) {
+		if( !$fp ) {
 			$msg = 'Saving local file failed.';
-			$detail = 'Cannot store file: ' . $exportName;
-			throw new BizException(null, 'Server', $detail, $msg);
+			$detail = 'Cannot store file: '.$exportName;
+			throw new BizException( null, 'Server', $detail, $msg );
 		}
 
-		fputs($fp, $content);
-		fclose($fp);
+		fputs( $fp, $content );
+		fclose( $fp );
 
 		// Check if the file was created.
-		if (!file_exists($exportName)) {
-			$detail = 'File: ' . $exportName . ' for ' . $type . ', object (ID: ' . $id . ') Does not seem to be a valid file.';
-			$msg = 'Unable to save ' . $type . ' data locally.';
-			throw new BizException(null, 'Server', $detail, $msg);
+		if( !file_exists( $exportName ) ) {
+			$detail = 'File: '.$exportName.' for '.$type.', object (ID: '.$id.') Does not seem to be a valid file.';
+			$msg = 'Unable to save '.$type.' data locally.';
+			throw new BizException( null, 'Server', $detail, $msg );
 		}
 
 		return $exportName;
@@ -613,7 +615,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	/**
 	 * We provide our own icons to show in UI for our Facebook channels.
 	 * Icons are provided in our plug-ins folder as read by the core server:
-	 *	plugins/Facebook/pubchannelicons
+	 *   plugins/Facebook/pubchannelicons
 	 *
 	 * @since 8.2
 	 * @return boolean
@@ -637,18 +639,18 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @return null|Object $object The retrieved object.
 	 * @see /Enterprise/Enterprise/server/bizclasses/BizObject.class.php
 	 */
-	private function getObject($id, $userName = null, $lock = false, $rendition = 'native', $requestInfo = array())
+	private function getObject( $id, $userName = null, $lock = false, $rendition = 'native', $requestInfo = array() )
 	{
-		require_once BASEDIR . '/server/services/wfl/WflGetObjectsService.class.php';
+		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 
 		// Attempt to get the username from the session.
-		if (is_null($userName)) {
+		if( is_null( $userName ) ) {
 			$userName = BizSession::getShortUserName();
 		}
 
 		// Retrieve the object and return it if present.
-		$object = BizObject::getObject($id, $userName, $lock, $rendition, $requestInfo);
-		return ($object instanceof Object) ? $object : null;
+		$object = BizObject::getObject( $id, $userName, $lock, $rendition, $requestInfo );
+		return ( $object instanceof Object ) ? $object : null;
 	}
 
 	/**
@@ -666,32 +668,32 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	private function getDocumentIdPrefix()
 	{
-		return self::DOCUMENT_PREFIX . '_' . self::SITE_ID . '_';
+		return self::DOCUMENT_PREFIX.'_'.self::SITE_ID.'_';
 	}
 
 	/**
 	 * Refer to PubPublishing_EnterpriseConnector::getPublishFormTemplates() header.
 	 */
-	public function getPublishFormTemplates($pubChannelId)
+	public function getPublishFormTemplates( $pubChannelId )
 	{
 		// Create the templates.
 		$templatesObj = array();
 		$documentIdPrefix = $this->getDocumentIdPrefix();
-		require_once BASEDIR . '/server/utils/PublishingUtils.class.php';
+		require_once BASEDIR.'/server/utils/PublishingUtils.class.php';
 
 
 		// Facebook message
 		$templatesObj[] = WW_Utils_PublishingUtils::getPublishFormTemplateObj(
-			$pubChannelId, 'Facebook post', 'Create a Facebook post with an optional hyperlink', $documentIdPrefix . '0'
+			$pubChannelId, 'Facebook post', 'Create a Facebook post with an optional hyperlink', $documentIdPrefix.'0'
 		);
 
 		$templatesObj[] = WW_Utils_PublishingUtils::getPublishFormTemplateObj(
-			$pubChannelId, 'Facebook photo', 'Publish a photo with a description to Facebook', $documentIdPrefix . '1'
+			$pubChannelId, 'Facebook photo', 'Publish a photo with a description to Facebook', $documentIdPrefix.'1'
 		);
 
-        $templatesObj[] = WW_Utils_PublishingUtils::getPublishFormTemplateObj(
-        	$pubChannelId, 'Facebook photo album', 'Publish a photo album to Facebook', $documentIdPrefix . '2'
-        );
+		$templatesObj[] = WW_Utils_PublishingUtils::getPublishFormTemplateObj(
+			$pubChannelId, 'Facebook photo album', 'Publish a photo album to Facebook', $documentIdPrefix.'2'
+		);
 
 		return $templatesObj;
 	}
@@ -705,207 +707,207 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getDialogForSetPublishPropertiesAction( $publishFormTemplate )
 	{
-		require_once BASEDIR . '/server/utils/PublishingUtils.class.php';
+		require_once BASEDIR.'/server/utils/PublishingUtils.class.php';
 
-		$dialog = WW_Utils_PublishingUtils::getDefaultPublishingDialog($publishFormTemplate->MetaData->BasicMetaData->Name);
+		$dialog = WW_Utils_PublishingUtils::getDefaultPublishingDialog( $publishFormTemplate->MetaData->BasicMetaData->Name );
 		$tab = $dialog->Tabs[0];
 		$documentIdPrefix = $this->getDocumentIdPrefix();
 		$customObjectMetaData = new Facebook_CustomObjectMetaData();
 
 		// Create / Add widgets.
-		switch ($publishFormTemplate->MetaData->BasicMetaData->DocumentID) {
-			case $documentIdPrefix . '0' : //Facebook post
+		switch( $publishFormTemplate->MetaData->BasicMetaData->DocumentID ) {
+			case $documentIdPrefix.'0' : //Facebook post
 				// Article Component Selector.
 				$articleWidget = new DialogWidget();
-				$articleWidget->PropertyInfo = $customObjectMetaData->getProperty('C_FACEBOOK_PF_MESSAGE');
-				$articleWidget->PropertyUsage = new PropertyUsage($articleWidget->PropertyInfo->Name, true, false, false, false);
+				$articleWidget->PropertyInfo = $customObjectMetaData->getProperty( 'C_FACEBOOK_PF_MESSAGE' );
+				$articleWidget->PropertyUsage = new PropertyUsage( $articleWidget->PropertyInfo->Name, true, false, false, false );
 				$widget = new DialogWidget();
-				$widget->PropertyInfo = $customObjectMetaData->getProperty('C_FACEBOOK_PF_MESSAGE_SEL');
-				$widget->PropertyInfo->Widgets = array($articleWidget);
-				$widget->PropertyUsage = new PropertyUsage($widget->PropertyInfo->Name, true, false, false, false, 150);
+				$widget->PropertyInfo = $customObjectMetaData->getProperty( 'C_FACEBOOK_PF_MESSAGE_SEL' );
+				$widget->PropertyInfo->Widgets = array( $articleWidget );
+				$widget->PropertyUsage = new PropertyUsage( $widget->PropertyInfo->Name, true, false, false, false, 150 );
 				$tab->Widgets[] = $widget;
 
 				//Hyperlink widget
 				$urlWidget = new DialogWidget();
-				$urlWidget->PropertyInfo = $customObjectMetaData->getProperty('C_FACEBOOK_PF_HYPERLINK_URL');
-				$urlWidget->PropertyUsage = new PropertyUsage($urlWidget->PropertyInfo->Name, true, false, false, false);
+				$urlWidget->PropertyInfo = $customObjectMetaData->getProperty( 'C_FACEBOOK_PF_HYPERLINK_URL' );
+				$urlWidget->PropertyUsage = new PropertyUsage( $urlWidget->PropertyInfo->Name, true, false, false, false );
 				$tab->Widgets[] = $urlWidget;
 				break;
 
-			case $documentIdPrefix . '1' : //Facebook photo
+			case $documentIdPrefix.'1' : //Facebook photo
 				//Media widget
 				$fileWidget = new DialogWidget();
-				$fileWidget->PropertyInfo = $customObjectMetaData->getProperty('C_FACEBOOK_PF_MEDIA');
-                $fileWidget->PropertyInfo->Type = 'file';
-                $fileWidget->PropertyInfo->Name = 'C_FACEBOOK_PF_MEDIA';
-                $fileWidget->PropertyInfo->Category = null;
-                $fileWidget->PropertyInfo->DefaultValue = null;
-                $fileWidget->PropertyInfo->MaxLength = 2000000;
-                $fileWidget->PropertyInfo->Widgets = $this->getFileWidgets();
-				$fileWidget->PropertyUsage = new PropertyUsage($fileWidget->PropertyInfo->Name, false, false, false, false);
+				$fileWidget->PropertyInfo = $customObjectMetaData->getProperty( 'C_FACEBOOK_PF_MEDIA' );
+				$fileWidget->PropertyInfo->Type = 'file';
+				$fileWidget->PropertyInfo->Name = 'C_FACEBOOK_PF_MEDIA';
+				$fileWidget->PropertyInfo->Category = null;
+				$fileWidget->PropertyInfo->DefaultValue = null;
+				$fileWidget->PropertyInfo->MaxLength = 2000000;
+				$fileWidget->PropertyInfo->Widgets = $this->getFileWidgets();
+				$fileWidget->PropertyUsage = new PropertyUsage( $fileWidget->PropertyInfo->Name, false, false, false, false );
 
-                $widget = new DialogWidget();
-				$widget->PropertyInfo = $customObjectMetaData->getProperty('C_FACEBOOK_PF_MEDIA_SEL');
-                $widget->PropertyInfo->Type = 'fileselector';
-                $widget->PropertyInfo->Name = 'C_FACEBOOK_PF_MEDIA_SEL';
-                $widget->PropertyInfo->Category = null;
-                $widget->PropertyInfo->DefaultValue = null;
-                $widget->PropertyInfo->Widgets = array($fileWidget);
-				$widget->PropertyUsage = new PropertyUsage($widget->PropertyInfo->Name, true, true, false, false);
+				$widget = new DialogWidget();
+				$widget->PropertyInfo = $customObjectMetaData->getProperty( 'C_FACEBOOK_PF_MEDIA_SEL' );
+				$widget->PropertyInfo->Type = 'fileselector';
+				$widget->PropertyInfo->Name = 'C_FACEBOOK_PF_MEDIA_SEL';
+				$widget->PropertyInfo->Category = null;
+				$widget->PropertyInfo->DefaultValue = null;
+				$widget->PropertyInfo->Widgets = array( $fileWidget );
+				$widget->PropertyUsage = new PropertyUsage( $widget->PropertyInfo->Name, true, true, false, false );
 				$tab->Widgets[] = $widget;
 				break;
 
-            case $documentIdPrefix . '2' : //Facebook slide show to album
-                $descriptionWidget = new DialogWidget();
-                $descriptionWidget->PropertyInfo = $customObjectMetaData->getProperty('C_FACEBOOK_ALBUM_NAME');
-                $descriptionWidget->PropertyInfo->Type = 'string';
-                $descriptionWidget->PropertyInfo->Name = 'C_FACEBOOK_ALBUM_NAME';
-                $descriptionWidget->PropertyInfo->Category = null;
-                $descriptionWidget->PropertyInfo->DefaultValue = null;
-                $descriptionWidget->PropertyUsage = new PropertyUsage();
-                $descriptionWidget->PropertyUsage->Name                 = $descriptionWidget->PropertyInfo->Name;
-                $descriptionWidget->PropertyUsage->Editable             = true;
-                $descriptionWidget->PropertyUsage->Mandatory            = true;
-                $descriptionWidget->PropertyUsage->Restricted           = false;
-                $descriptionWidget->PropertyUsage->RefreshOnChange      = false;
-                $descriptionWidget->PropertyUsage->InitialHeight        = 0;
-                $tab->Widgets[] = $descriptionWidget;
+			case $documentIdPrefix.'2' : //Facebook slide show to album
+				$descriptionWidget = new DialogWidget();
+				$descriptionWidget->PropertyInfo = $customObjectMetaData->getProperty( 'C_FACEBOOK_ALBUM_NAME' );
+				$descriptionWidget->PropertyInfo->Type = 'string';
+				$descriptionWidget->PropertyInfo->Name = 'C_FACEBOOK_ALBUM_NAME';
+				$descriptionWidget->PropertyInfo->Category = null;
+				$descriptionWidget->PropertyInfo->DefaultValue = null;
+				$descriptionWidget->PropertyUsage = new PropertyUsage();
+				$descriptionWidget->PropertyUsage->Name = $descriptionWidget->PropertyInfo->Name;
+				$descriptionWidget->PropertyUsage->Editable = true;
+				$descriptionWidget->PropertyUsage->Mandatory = true;
+				$descriptionWidget->PropertyUsage->Restricted = false;
+				$descriptionWidget->PropertyUsage->RefreshOnChange = false;
+				$descriptionWidget->PropertyUsage->InitialHeight = 0;
+				$tab->Widgets[] = $descriptionWidget;
 
-                $nameWidget = new DialogWidget();
-                $nameWidget->PropertyInfo = $customObjectMetaData->getProperty('C_FACEBOOK_ALBUM');
-                $nameWidget->PropertyInfo->Type = 'multiline';
-                $nameWidget->PropertyInfo->Name = 'C_FACEBOOK_ALBUM';
-                $nameWidget->PropertyInfo->Category = null;
-                $nameWidget->PropertyInfo->DefaultValue = null;
-                $nameWidget->PropertyUsage = new PropertyUsage();
-                $nameWidget->PropertyUsage->Name                 = $nameWidget->PropertyInfo->Name;
-                $nameWidget->PropertyUsage->Editable             = true;
-                $nameWidget->PropertyUsage->Mandatory            = false;
-                $nameWidget->PropertyUsage->Restricted           = false;
-                $nameWidget->PropertyUsage->RefreshOnChange      = false;
-                $nameWidget->PropertyUsage->InitialHeight        = 0;
-                $tab->Widgets[] = $nameWidget;
+				$nameWidget = new DialogWidget();
+				$nameWidget->PropertyInfo = $customObjectMetaData->getProperty( 'C_FACEBOOK_ALBUM' );
+				$nameWidget->PropertyInfo->Type = 'multiline';
+				$nameWidget->PropertyInfo->Name = 'C_FACEBOOK_ALBUM';
+				$nameWidget->PropertyInfo->Category = null;
+				$nameWidget->PropertyInfo->DefaultValue = null;
+				$nameWidget->PropertyUsage = new PropertyUsage();
+				$nameWidget->PropertyUsage->Name = $nameWidget->PropertyInfo->Name;
+				$nameWidget->PropertyUsage->Editable = true;
+				$nameWidget->PropertyUsage->Mandatory = false;
+				$nameWidget->PropertyUsage->Restricted = false;
+				$nameWidget->PropertyUsage->RefreshOnChange = false;
+				$nameWidget->PropertyUsage->InitialHeight = 0;
+				$tab->Widgets[] = $nameWidget;
 
-                //Media widget
-                $fileImagePropertyInfoPropValue1 = new PropertyValue('image/png', '.png', 'Format');
-                $fileImagePropertyInfoPropValue2 = new PropertyValue('image/jpeg', '.jpg', 'Format');
+				//Media widget
+				$fileImagePropertyInfoPropValue1 = new PropertyValue( 'image/png', '.png', 'Format' );
+				$fileImagePropertyInfoPropValue2 = new PropertyValue( 'image/jpeg', '.jpg', 'Format' );
 
-                $fileWidget = new DialogWidget();
-                $fileWidget->PropertyInfo = new PropertyInfo('C_FACEBOOK_MULTI_IMAGES_FILE');
-                $fileWidget->PropertyInfo->Name = 'C_FACEBOOK_MULTI_IMAGES_FILE';
-                $fileWidget->PropertyInfo->DisplayName = 'Selected Image';
-                $fileWidget->PropertyInfo->Category = null; // Make sure the Category is always empty, we should let Client resolve it.
-                $fileWidget->PropertyInfo->Type = 'file';
-                $fileWidget->PropertyInfo->DefaultValue = null;
-                $fileWidget->PropertyInfo->MaxLength = 2000000; // (2MB max upload)
-                $fileWidget->PropertyInfo->PropertyValues = array( $fileImagePropertyInfoPropValue1, $fileImagePropertyInfoPropValue2 );
-                $fileWidget->PropertyInfo->MinResolution = '200x200'; // (w x h)
-                $fileWidget->PropertyInfo->MaxResolution = '640x480'; // (w x h)
-                $fileWidget->PropertyInfo->Widgets = $this->getFileWidgets();
-                $fileWidget->PropertyUsage = new PropertyUsage();
-                $fileWidget->PropertyUsage->Name                 = $fileWidget->PropertyInfo->Name;
-                $fileWidget->PropertyUsage->Editable             = false;
-                $fileWidget->PropertyUsage->Mandatory            = false;
-                $fileWidget->PropertyUsage->Restricted           = false;
-                $fileWidget->PropertyUsage->RefreshOnChange      = false;
-                $fileWidget->PropertyUsage->InitialHeight        = 0;
+				$fileWidget = new DialogWidget();
+				$fileWidget->PropertyInfo = new PropertyInfo( 'C_FACEBOOK_MULTI_IMAGES_FILE' );
+				$fileWidget->PropertyInfo->Name = 'C_FACEBOOK_MULTI_IMAGES_FILE';
+				$fileWidget->PropertyInfo->DisplayName = 'Selected Image';
+				$fileWidget->PropertyInfo->Category = null; // Make sure the Category is always empty, we should let Client resolve it.
+				$fileWidget->PropertyInfo->Type = 'file';
+				$fileWidget->PropertyInfo->DefaultValue = null;
+				$fileWidget->PropertyInfo->MaxLength = 2000000; // (2MB max upload)
+				$fileWidget->PropertyInfo->PropertyValues = array( $fileImagePropertyInfoPropValue1, $fileImagePropertyInfoPropValue2 );
+				$fileWidget->PropertyInfo->MinResolution = '200x200'; // (w x h)
+				$fileWidget->PropertyInfo->MaxResolution = '640x480'; // (w x h)
+				$fileWidget->PropertyInfo->Widgets = $this->getFileWidgets();
+				$fileWidget->PropertyUsage = new PropertyUsage();
+				$fileWidget->PropertyUsage->Name = $fileWidget->PropertyInfo->Name;
+				$fileWidget->PropertyUsage->Editable = false;
+				$fileWidget->PropertyUsage->Mandatory = false;
+				$fileWidget->PropertyUsage->Restricted = false;
+				$fileWidget->PropertyUsage->RefreshOnChange = false;
+				$fileWidget->PropertyUsage->InitialHeight = 0;
 
-                $widget = new DialogWidget();
-                $widget->PropertyInfo = new PropertyInfo('C_FACEBOOK_MULTI_IMAGES');
-                $widget->PropertyInfo->Name = 'C_FACEBOOK_MULTI_IMAGES';
-                $widget->PropertyInfo->DisplayName = 'Images';
-                $widget->PropertyInfo->Category = null;
-                $widget->PropertyInfo->Type = 'fileselector';
-                $widget->PropertyInfo->MinValue = 0; // Empty allowed.
-                $widget->PropertyInfo->MaxValue = null; // Many images allowed.
-                $widget->PropertyInfo->ValueList = null;
-                $widget->PropertyInfo->Widgets = array($fileWidget);
-                $widget->PropertyInfo->PropertyValues = null;
-                $widget->PropertyUsage = new PropertyUsage();
-                $widget->PropertyUsage->Name                 = $widget->PropertyInfo->Name;
-                $widget->PropertyUsage->Editable             = true;
-                $widget->PropertyUsage->Mandatory            = true;
-                $widget->PropertyUsage->Restricted           = false;
-                $widget->PropertyUsage->RefreshOnChange      = false;
-                $widget->PropertyUsage->InitialHeight        = 0;
-                $tab->Widgets[] = $widget;
-                break;
+				$widget = new DialogWidget();
+				$widget->PropertyInfo = new PropertyInfo( 'C_FACEBOOK_MULTI_IMAGES' );
+				$widget->PropertyInfo->Name = 'C_FACEBOOK_MULTI_IMAGES';
+				$widget->PropertyInfo->DisplayName = 'Images';
+				$widget->PropertyInfo->Category = null;
+				$widget->PropertyInfo->Type = 'fileselector';
+				$widget->PropertyInfo->MinValue = 0; // Empty allowed.
+				$widget->PropertyInfo->MaxValue = null; // Many images allowed.
+				$widget->PropertyInfo->ValueList = null;
+				$widget->PropertyInfo->Widgets = array( $fileWidget );
+				$widget->PropertyInfo->PropertyValues = null;
+				$widget->PropertyUsage = new PropertyUsage();
+				$widget->PropertyUsage->Name = $widget->PropertyInfo->Name;
+				$widget->PropertyUsage->Editable = true;
+				$widget->PropertyUsage->Mandatory = true;
+				$widget->PropertyUsage->Restricted = false;
+				$widget->PropertyUsage->RefreshOnChange = false;
+				$widget->PropertyUsage->InitialHeight = 0;
+				$tab->Widgets[] = $widget;
+				break;
 		}
 		$extraMetaData = null;
-		$dialog->MetaData = $this->extractMetaDataFromWidgets($extraMetaData, $tab->Widgets);
+		$dialog->MetaData = $this->extractMetaDataFromWidgets( $extraMetaData, $tab->Widgets );
 
 		return $dialog;
 	}
 
-    /**
+	/**
 	 * Get file info widgets
 	 * These widgets are used to show the info of a picture in content station.
 	 *
-     * @return array
-     */
+	 * @return array
+	 */
 
-    private function getFileWidgets()
-    {
-        $standardProperties = BizProperty::getPropertyInfos();
-        $fileWidgets = array();
-        //Description
-        $fileWidget = new DialogWidget();
-        $fileWidget->PropertyInfo = new PropertyInfo();
-        $fileWidget->PropertyInfo->Name = 'C_FACEBOOK_IMAGE_DESCRIPTION';
-        $fileWidget->PropertyInfo->DisplayName = 'Description';
-        $fileWidget->PropertyInfo->Category = null; // Make sure the Category is always empty, we should let Client resolve it.
-        $fileWidget->PropertyInfo->Type = 'multiline';
-        $fileWidget->PropertyInfo->DefaultValue = null;
-        $fileWidget->PropertyInfo->MaxLength = null;
-        $fileWidget->PropertyInfo->PropertyValues = null;
-        $fileWidget->PropertyInfo->Widgets = null;
-        $fileWidget->PropertyUsage = new PropertyUsage();
-        $fileWidget->PropertyUsage->Name = $fileWidget->PropertyInfo->Name;
-        $fileWidget->PropertyUsage->Editable = true;
-        $fileWidget->PropertyUsage->Mandatory = false;
-        $fileWidget->PropertyUsage->Restricted = false;
-        $fileWidget->PropertyUsage->RefreshOnChange = false;
-        $fileWidget->PropertyUsage->InitialHeight = 0;
-        $fileWidgets[] = $fileWidget;
+	private function getFileWidgets()
+	{
+		$standardProperties = BizProperty::getPropertyInfos();
+		$fileWidgets = array();
+		//Description
+		$fileWidget = new DialogWidget();
+		$fileWidget->PropertyInfo = new PropertyInfo();
+		$fileWidget->PropertyInfo->Name = 'C_FACEBOOK_IMAGE_DESCRIPTION';
+		$fileWidget->PropertyInfo->DisplayName = 'Description';
+		$fileWidget->PropertyInfo->Category = null; // Make sure the Category is always empty, we should let Client resolve it.
+		$fileWidget->PropertyInfo->Type = 'multiline';
+		$fileWidget->PropertyInfo->DefaultValue = null;
+		$fileWidget->PropertyInfo->MaxLength = null;
+		$fileWidget->PropertyInfo->PropertyValues = null;
+		$fileWidget->PropertyInfo->Widgets = null;
+		$fileWidget->PropertyUsage = new PropertyUsage();
+		$fileWidget->PropertyUsage->Name = $fileWidget->PropertyInfo->Name;
+		$fileWidget->PropertyUsage->Editable = true;
+		$fileWidget->PropertyUsage->Mandatory = false;
+		$fileWidget->PropertyUsage->Restricted = false;
+		$fileWidget->PropertyUsage->RefreshOnChange = false;
+		$fileWidget->PropertyUsage->InitialHeight = 0;
+		$fileWidgets[] = $fileWidget;
 
-        // Image height
-        $fileWidget = new DialogWidget();
-        $fileWidget->PropertyInfo = $standardProperties['Height'];
-        $fileWidget->PropertyUsage = new PropertyUsage();
-        $fileWidget->PropertyUsage->Name = $fileWidget->PropertyInfo->Name;
-        $fileWidget->PropertyUsage->Editable = false;
-        $fileWidget->PropertyUsage->Mandatory = true;
-        $fileWidget->PropertyUsage->Restricted = false;
-        $fileWidget->PropertyUsage->RefreshOnChange = false;
-        $fileWidget->PropertyUsage->InitialHeight = 0;
-        $fileWidgets[] = $fileWidget;
+		// Image height
+		$fileWidget = new DialogWidget();
+		$fileWidget->PropertyInfo = $standardProperties['Height'];
+		$fileWidget->PropertyUsage = new PropertyUsage();
+		$fileWidget->PropertyUsage->Name = $fileWidget->PropertyInfo->Name;
+		$fileWidget->PropertyUsage->Editable = false;
+		$fileWidget->PropertyUsage->Mandatory = true;
+		$fileWidget->PropertyUsage->Restricted = false;
+		$fileWidget->PropertyUsage->RefreshOnChange = false;
+		$fileWidget->PropertyUsage->InitialHeight = 0;
+		$fileWidgets[] = $fileWidget;
 
-        // Image width
-        $fileWidget = new DialogWidget();
-        $fileWidget->PropertyInfo = $standardProperties['Width'];
+		// Image width
+		$fileWidget = new DialogWidget();
+		$fileWidget->PropertyInfo = $standardProperties['Width'];
 
-        $fileWidget->PropertyUsage = new PropertyUsage();
-        $fileWidget->PropertyUsage->Name = $fileWidget->PropertyInfo->Name;
-        $fileWidget->PropertyUsage->Editable = false;
-        $fileWidget->PropertyUsage->Mandatory = true;
-        $fileWidget->PropertyUsage->Restricted = false;
-        $fileWidget->PropertyUsage->RefreshOnChange = false;
-        $fileWidget->PropertyUsage->InitialHeight = 0;
-        $fileWidgets[] = $fileWidget;
+		$fileWidget->PropertyUsage = new PropertyUsage();
+		$fileWidget->PropertyUsage->Name = $fileWidget->PropertyInfo->Name;
+		$fileWidget->PropertyUsage->Editable = false;
+		$fileWidget->PropertyUsage->Mandatory = true;
+		$fileWidget->PropertyUsage->Restricted = false;
+		$fileWidget->PropertyUsage->RefreshOnChange = false;
+		$fileWidget->PropertyUsage->InitialHeight = 0;
+		$fileWidgets[] = $fileWidget;
 
-        // Image format
-        $fileWidget = new DialogWidget();
-        $fileWidget->PropertyInfo = $standardProperties['Format'];
-        $fileWidget->PropertyUsage = new PropertyUsage();
-        $fileWidget->PropertyUsage->Name = $fileWidget->PropertyInfo->Name;
-        $fileWidget->PropertyUsage->Editable = false;
-        $fileWidget->PropertyUsage->Mandatory = true;
-        $fileWidget->PropertyUsage->Restricted = false;
-        $fileWidget->PropertyUsage->RefreshOnChange = false;
-        $fileWidget->PropertyUsage->InitialHeight = 0;
-        $fileWidgets[] = $fileWidget;
+		// Image format
+		$fileWidget = new DialogWidget();
+		$fileWidget->PropertyInfo = $standardProperties['Format'];
+		$fileWidget->PropertyUsage = new PropertyUsage();
+		$fileWidget->PropertyUsage->Name = $fileWidget->PropertyInfo->Name;
+		$fileWidget->PropertyUsage->Editable = false;
+		$fileWidget->PropertyUsage->Mandatory = true;
+		$fileWidget->PropertyUsage->Restricted = false;
+		$fileWidget->PropertyUsage->RefreshOnChange = false;
+		$fileWidget->PropertyUsage->InitialHeight = 0;
+		$fileWidgets[] = $fileWidget;
 
-        // Image name
+		// Image name
 		$fileWidget = new DialogWidget();
 		$fileWidget->PropertyInfo = $standardProperties['Name'];
 		$fileWidget->PropertyUsage = new PropertyUsage();
@@ -917,8 +919,8 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		$fileWidget->PropertyUsage->InitialHeight = 0;
 		$fileWidgets[] = $fileWidget;
 
-        return $fileWidgets; // Widgets in widgets (in widgets)
-    }
+		return $fileWidgets; // Widgets in widgets (in widgets)
+	}
 
 	/**
 	 * Composes a Dialog->MetaData list from dialog widgets and custom properties.
@@ -927,14 +929,14 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param $widgets List of DialogWidget elements
 	 * @return array List of MetaDataValue elements
 	 */
-    public function extractMetaDataFromWidgets($extraMetaDatas, $widgets)
+	public function extractMetaDataFromWidgets( $extraMetaDatas, $widgets )
 	{
 		$metaDataValues = array();
-		if ($widgets) {
-			foreach ($widgets as $widget) {
-				if ($extraMetaDatas)
-					foreach ($extraMetaDatas as $extraMetaData) {
-						if ($widget->PropertyInfo->Name == $extraMetaData->Property) {
+		if( $widgets ) {
+			foreach( $widgets as $widget ) {
+				if( $extraMetaDatas )
+					foreach( $extraMetaDatas as $extraMetaData ) {
+						if( $widget->PropertyInfo->Name == $extraMetaData->Property ) {
 							$metaDataValue = new MetaDataValue();
 							$metaDataValue->Property = $extraMetaData->Property;
 							$metaDataValue->Values = $extraMetaData->Values; // Array of string
@@ -964,14 +966,14 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $publishForm
 	 * @return array
 	 */
-	public function getButtonBarForSetPublishPropertiesAction($defaultButtonBar, $publishFormTemplate, $publishForm)
+	public function getButtonBarForSetPublishPropertiesAction( $defaultButtonBar, $publishFormTemplate, $publishForm )
 	{
 		$publishFormTemplate = $publishFormTemplate; // keep analyzer happy
 		$publishForm = $publishForm; // keep analyzer happy
 		//Remove the update and preview button
-		foreach ($defaultButtonBar as $index => $button) {
-			if (in_array($button->PropertyInfo->Name, array('Update', 'Preview'))) {
-				unset($defaultButtonBar[$index]);
+		foreach( $defaultButtonBar as $index => $button ) {
+			if( in_array( $button->PropertyInfo->Name, array( 'Update', 'Preview' ) ) ) {
+				unset( $defaultButtonBar[ $index ] );
 			}
 		}
 
@@ -987,7 +989,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	public function getPublishDossierFieldsForDB()
 	{
 		// Ensure that the URL is stored in the PublishHistory.
-		return array('URL');
+		return array( 'URL' );
 	}
-
 }

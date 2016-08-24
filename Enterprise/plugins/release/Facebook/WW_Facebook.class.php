@@ -17,9 +17,9 @@ class WW_Facebook extends Facebook
 	 * @return bool|mixed
 	 */
 	public function getUserAccessTokenForSaving()
-    {
-        return parent::getUserAccessToken();
-    }
+	{
+		return parent::getUserAccessToken();
+	}
 
 	/**
 	 * Get access token from Facebook redirect code.
@@ -30,8 +30,8 @@ class WW_Facebook extends Facebook
 	 * @param null $redirect_uri
 	 * @return mixed
 	 */
-	public function getAccessTokenFromFbCode($code, $redirect_uri = null)
-    {
-        return $this->getAccessTokenFromCode($code, $redirect_uri);
-    }
+	public function getAccessTokenFromFbCode( $code, $redirect_uri = null )
+	{
+		return $this->getAccessTokenFromCode( $code, $redirect_uri );
+	}
 }

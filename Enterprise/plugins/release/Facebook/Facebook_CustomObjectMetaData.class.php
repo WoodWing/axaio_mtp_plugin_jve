@@ -15,7 +15,7 @@ class Facebook_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConne
 	/** Constant for the Plugin type. */
 	const Facebook_CustomObjectMetaData = 'Facebook';
 
-    /**
+	/**
 	 * Returns list of PropertyInfo for the Publish Forms.
 	 *
 	 * @return array contains widgets
@@ -34,7 +34,7 @@ class Facebook_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConne
 		$articleComponent1->MaxLength = null; // (2MB max upload)
 		$articleComponent1->MinResolution = null; // (w x h)
 		$articleComponent1->MaxResolution = null; // (w x h)
-		$articleComponent1->PropertyValues = array(new PropertyValue('appl./incopyicml', '.wcml', 'Format'));
+		$articleComponent1->PropertyValues = array( new PropertyValue( 'appl./incopyicml', '.wcml', 'Format' ) );
 		$articleComponent1->Widgets = null;
 		$articleComponent1->AdminUI = false;
 		$articleComponent1->PublishSystem = Facebook_CustomObjectMetaData::Facebook_CustomObjectMetaData;
@@ -51,7 +51,7 @@ class Facebook_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConne
 		$articleComponentSelector1->AdminUI = false;
 		$articleComponentSelector1->PublishSystem = Facebook_CustomObjectMetaData::Facebook_CustomObjectMetaData;
 		$articleComponentSelector1->PropertyValues = array();
-		$articleComponentSelector1->Widgets = array($articleComponent1);
+		$articleComponentSelector1->Widgets = array( $articleComponent1 );
 		$props[] = $articleComponentSelector1;
 
 		// Media Component Selector.
@@ -77,44 +77,44 @@ class Facebook_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConne
 		$mediaComponentSelector1->Type = 'fileselector';
 		$mediaComponentSelector1->MinValue = 1; // One component.
 		$mediaComponentSelector1->MaxValue = 1; // One component.
-        $mediaComponentSelector1->DefaultValue = null;
+		$mediaComponentSelector1->DefaultValue = null;
 		$mediaComponentSelector1->AdminUI = false;
-        $mediaComponentSelector1->MinResolution = null; // (w x h)
-        $mediaComponentSelector1->MaxResolution = null; // (w x h)
+		$mediaComponentSelector1->MinResolution = null; // (w x h)
+		$mediaComponentSelector1->MaxResolution = null; // (w x h)
 		$mediaComponentSelector1->PublishSystem = Facebook_CustomObjectMetaData::Facebook_CustomObjectMetaData;
 		$mediaComponentSelector1->PropertyValues = array();
-		$mediaComponentSelector1->Widgets = array($mediaComponent1);
+		$mediaComponentSelector1->Widgets = array( $mediaComponent1 );
 		$props[] = $mediaComponentSelector1;
 
-        $albumDescriptionComponent = new PropertyInfo();
-        $albumDescriptionComponent->Name = 'C_FACEBOOK_ALBUM_NAME';
-        $albumDescriptionComponent->DisplayName = 'Album Name';
-        $albumDescriptionComponent->Category = null; // Make sure the Category is always empty, we should let Client resolve it.
-        $albumDescriptionComponent->Type = 'string';
-        $albumDescriptionComponent->DefaultValue = null;
-        $albumDescriptionComponent->MaxLength = null; // (2MB max upload)
-        $albumDescriptionComponent->MinResolution = null; // (w x h)
-        $albumDescriptionComponent->MaxResolution = null; // (w x h)
-        $albumDescriptionComponent->PropertyValues = array(new PropertyValue('appl./incopyicml', '.wcml', 'Format'));
-        $albumDescriptionComponent->Widgets = null;
-        $albumDescriptionComponent->AdminUI = false;
-        $albumDescriptionComponent->PublishSystem = Facebook_CustomObjectMetaData::Facebook_CustomObjectMetaData;
-        $props[] = $albumDescriptionComponent;
+		$albumDescriptionComponent = new PropertyInfo();
+		$albumDescriptionComponent->Name = 'C_FACEBOOK_ALBUM_NAME';
+		$albumDescriptionComponent->DisplayName = 'Album Name';
+		$albumDescriptionComponent->Category = null; // Make sure the Category is always empty, we should let Client resolve it.
+		$albumDescriptionComponent->Type = 'string';
+		$albumDescriptionComponent->DefaultValue = null;
+		$albumDescriptionComponent->MaxLength = null; // (2MB max upload)
+		$albumDescriptionComponent->MinResolution = null; // (w x h)
+		$albumDescriptionComponent->MaxResolution = null; // (w x h)
+		$albumDescriptionComponent->PropertyValues = array( new PropertyValue( 'appl./incopyicml', '.wcml', 'Format' ) );
+		$albumDescriptionComponent->Widgets = null;
+		$albumDescriptionComponent->AdminUI = false;
+		$albumDescriptionComponent->PublishSystem = Facebook_CustomObjectMetaData::Facebook_CustomObjectMetaData;
+		$props[] = $albumDescriptionComponent;
 
-        $albumNameComponent1 = new PropertyInfo();
-        $albumNameComponent1->Name = 'C_FACEBOOK_ALBUM';
-        $albumNameComponent1->DisplayName = 'Album Description';
-        $albumNameComponent1->Category = null; // Make sure the Category is always empty, we should let Client resolve it.
-        $albumNameComponent1->Type = 'multiline';
-        $albumNameComponent1->DefaultValue = null;
-        $albumNameComponent1->MaxLength = null; // (2MB max upload)
-        $albumNameComponent1->MinResolution = null; // (w x h)
-        $albumNameComponent1->MaxResolution = null; // (w x h)
-        $albumNameComponent1->PropertyValues = array(new PropertyValue('appl./incopyicml', '.wcml', 'Format'));
-        $albumNameComponent1->Widgets = null;
-        $albumNameComponent1->AdminUI = false;
-        $albumNameComponent1->PublishSystem = Facebook_CustomObjectMetaData::Facebook_CustomObjectMetaData;
-        $props[] = $albumNameComponent1;
+		$albumNameComponent1 = new PropertyInfo();
+		$albumNameComponent1->Name = 'C_FACEBOOK_ALBUM';
+		$albumNameComponent1->DisplayName = 'Album Description';
+		$albumNameComponent1->Category = null; // Make sure the Category is always empty, we should let Client resolve it.
+		$albumNameComponent1->Type = 'multiline';
+		$albumNameComponent1->DefaultValue = null;
+		$albumNameComponent1->MaxLength = null; // (2MB max upload)
+		$albumNameComponent1->MinResolution = null; // (w x h)
+		$albumNameComponent1->MaxResolution = null; // (w x h)
+		$albumNameComponent1->PropertyValues = array( new PropertyValue( 'appl./incopyicml', '.wcml', 'Format' ) );
+		$albumNameComponent1->Widgets = null;
+		$albumNameComponent1->AdminUI = false;
+		$albumNameComponent1->PublishSystem = Facebook_CustomObjectMetaData::Facebook_CustomObjectMetaData;
+		$props[] = $albumNameComponent1;
 
 		$hyperlinkComponent1 = new PropertyInfo();
 		$hyperlinkComponent1->Name = 'C_FACEBOOK_PF_HYPERLINK_URL';
@@ -168,7 +168,8 @@ class Facebook_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConne
 		return $props;
 	}
 
-	private function getOtherPropertyDefinitions(){
+	private function getOtherPropertyDefinitions()
+	{
 		// The following properties are applicable for ANY ObjectType.
 
 		// FileSelector: C_FACEBOOK_IMAGE_DESCRIPTION
@@ -200,8 +201,8 @@ class Facebook_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConne
 		$properties = array();
 
 		//Image
-		$properties[] = new PropertyValue('image/png', '.png', 'Format');
-		$properties[] = new PropertyValue('image/jpeg', '.jpg', 'Format');
+		$properties[] = new PropertyValue( 'image/png', '.png', 'Format' );
+		$properties[] = new PropertyValue( 'image/jpeg', '.jpg', 'Format' );
 
 		return $properties;
 	}
@@ -209,7 +210,7 @@ class Facebook_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConne
 	/**
 	 * See CustomObjectMetaData_EnterpriseConnector::collectCustomProperties function header.
 	 */
-	final public function collectCustomProperties($coreInstallation)
+	final public function collectCustomProperties( $coreInstallation )
 	{
 		$coreInstallation = $coreInstallation; // keep analyzer happy
 
@@ -225,17 +226,17 @@ class Facebook_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConne
 	 * @param string $name The property to search.
 	 * @return null|PropertyInfo
 	 */
-	public function getProperty($name)
+	public function getProperty( $name )
 	{
 		$prop = null;
-		$props = array_merge(self::getPublishFormPropertyDefinition(), self::getOtherPropertyDefinitions());
+		$props = array_merge( self::getPublishFormPropertyDefinition(), self::getOtherPropertyDefinitions() );
 
-		foreach ($props as $prop) {
-			if ($prop->Name == $name) {
+		foreach( $props as $prop ) {
+			if( $prop->Name == $name ) {
 				return $prop;
 			}
 		}
-		LogHandler::Log('FacebookPublisher', 'ERROR', ' property ' . $name . ' not found');
+		LogHandler::Log( 'FacebookPublisher', 'ERROR', ' property '.$name.' not found' );
 		return null;
 	}
 }
