@@ -204,6 +204,9 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 	/**
 	 * Queries the Enterprise DB for PublishTemplate objects. For that it uses
 	 * the built-in "PublishFormTemplates" Named Query.
+	 *
+	 * @param integer $pubChannelId
+	 * @return WflNamedQueryResponse
 	 */
 	private function queryTemplatesFromDb( $pubChannelId )
 	{

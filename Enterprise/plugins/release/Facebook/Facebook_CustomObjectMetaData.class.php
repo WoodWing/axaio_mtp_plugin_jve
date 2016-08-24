@@ -208,12 +208,10 @@ class Facebook_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConne
 	}
 
 	/**
-	 * See CustomObjectMetaData_EnterpriseConnector::collectCustomProperties function header.
+	 * {@inheritdoc}
 	 */
 	final public function collectCustomProperties( $coreInstallation )
 	{
-		$coreInstallation = $coreInstallation; // keep analyzer happy
-
 		$props = array();
 		$props[0]['PublishForm'] = self::getPublishFormPropertyDefinition();
 		$props[0][0] = self::getOtherPropertyDefinitions();

@@ -46,8 +46,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
-		$publishTarget = $publishTarget; // Keep Analyzer happy.
-
 		$pubChannelId = $publishTarget->PubChannelID;
 		$facebookPublisher = new FacebookPublisher( $pubChannelId );
 
@@ -251,7 +249,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * this detailed error is re-thrown.
 	 *
 	 * @param Object $publishForm
-	 * @param BizException $e
+	 * @param Exception $e
 	 * @param string $action Whether the error is from Publishing or Unpublishing. Possible values: 'PublishDossier', 'UnpublishDossier'
 	 * @throws BizException
 	 */
@@ -314,11 +312,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		// Keep analyzer happy.
-		$dossier = $dossier;
-		$objectsInDossier = $objectsInDossier;
-		$publishTarget = $publishTarget;
-
 		// Updating content on Facebook is not possible, the API does not support updating posts or images. They
 		// also do not support a full set of DELETE calls, therefore deleting the old content and uploading it again is
 		// not a possibility from within the plug-in. Deleting content mannually is an option, but is outside of the scope
@@ -346,9 +339,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		require_once BASEDIR.'/server/dbclasses/DBPublishHistory.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 
-		// Keep analyzer happy.
-		$objectsInDossier = $objectsInDossier; // Keep analyzer happy
-
 		$pubChannelId = $publishTarget->PubChannelID;
 		$facebookPublisher = new FacebookPublisher( $pubChannelId );
 		$pageId = $facebookPublisher->pageId;
@@ -365,6 +355,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		switch( BizPublishForm::getDocumentId( $publishForm ) ) {
 			//Facebook post or Facebook single image
 			case $this->getDocumentIdPrefix().'0' :
+			/** @noinspection PhpMissingBreakStatementInspection */
 			case $this->getDocumentIdPrefix().'1' :
 				if( $dossier->ExternalId != 'publishedFacebook' ) { // needed for older publish forms with the externalId on the object instead of on the dossier, then the code of case '2' is needed
 					try {
@@ -414,23 +405,12 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Previews the Dossier.
+	 * {@inheritdoc}
 	 *
 	 * Note: Not possible for Facebook content.
-	 *
-	 * @param Object $dossier [writable] The Dossier to be previewed.
-	 * @param array $objectsInDossier [writable] The objects in the Dossier to be previewed.
-	 * @param publishTarget $publishTarget The target.
-	 * @return void
-	 * @throws BizException
 	 */
 	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		// Keep analyzer happy.
-		$dossier = $dossier;
-		$objectsInDossier = $objectsInDossier;
-		$publishTarget = $publishTarget;
-
 		// Previewing content is not possible for the Facebook plug-in.
 		$msg = 'Previewing a Dossier is not possible on Facebook.';
 		$detail = 'Facebook does not support previewing of Dossiers.';
@@ -453,8 +433,8 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		require_once BASEDIR.'/server/utils/PublishingUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 
-		$publishTarget = $publishTarget; //keep analyzer happy
 		$url = null;
+		$publishForm = null;
 		$pubField = array();
 
 		foreach( $objectsInDossier as $objectInDossier ) {
@@ -517,11 +497,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getDossierURL( $dossier, $objectsInDossier, $publishTarget )
 	{
-		// Keep analyzer happy.
-		$publishTarget = $publishTarget;
-		$objectsInDossier = $objectsInDossier;
-		$dossier = $dossier;
-
 		$pubChannelId = $publishTarget->PubChannelID;
 		$facebookPublisher = new FacebookPublisher( $pubChannelId );
 
@@ -672,7 +647,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Refer to PubPublishing_EnterpriseConnector::getPublishFormTemplates() header.
+	 * {@inheritdoc}
 	 */
 	public function getPublishFormTemplates( $pubChannelId )
 	{
@@ -925,9 +900,9 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	/**
 	 * Composes a Dialog->MetaData list from dialog widgets and custom properties.
 	 *
-	 * @param $extraMetaDatas List of ExtraMetaData elements
-	 * @param $widgets List of DialogWidget elements
-	 * @return array List of MetaDataValue elements
+	 * @param ExtraMetaData[] $extraMetaDatas
+	 * @param DialogWidget[] $widgets
+	 * @return MetaDataValue[]
 	 */
 	public function extractMetaDataFromWidgets( $extraMetaDatas, $widgets )
 	{
@@ -968,8 +943,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getButtonBarForSetPublishPropertiesAction( $defaultButtonBar, $publishFormTemplate, $publishForm )
 	{
-		$publishFormTemplate = $publishFormTemplate; // keep analyzer happy
-		$publishForm = $publishForm; // keep analyzer happy
 		//Remove the update and preview button
 		foreach( $defaultButtonBar as $index => $button ) {
 			if( in_array( $button->PropertyInfo->Name, array( 'Update', 'Preview' ) ) ) {

@@ -71,9 +71,9 @@ class Facebook_AdminProperties extends AdminProperties_EnterpriseConnector
 	 * - PublishSystem of the PubChannel should match our plugin's
 	 * - Entity should match 'PubChannel' as we only want the data for the channel.
 	 *
-	 * @param $context The context to check.
-	 * @param $entity The entity to check.
-	 * @param $action The action to check
+	 * @param AdminProperties_Context $context The context to check.
+	 * @param string $entity The entity to check.
+	 * @param string $action The action to check
 	 * @return bool Whether or not the context/entity match the requirements.
 	 */
 	private function isCorrectPublishSystem( $context, $entity, $action )
@@ -104,6 +104,9 @@ class Facebook_AdminProperties extends AdminProperties_EnterpriseConnector
 	/**
 	 * Collect all possible custom properties for the given entity to extend the DB model.
 	 * See AdminProperties_EnterpriseConnector interface for details.
+	 *
+	 * @param string $entity
+	 * @return DialogWidget[]
 	 */
 	final public function collectDialogWidgets( $entity )
 	{
@@ -113,11 +116,14 @@ class Facebook_AdminProperties extends AdminProperties_EnterpriseConnector
 	/**
 	 * Collect custom properties for the given context to travel along with the entity instance.
 	 * See AdminProperties_EnterpriseConnector interface for details.
+	 *
+	 * @param AdminProperties_Context $context
+	 * @param string $entity
+	 * @param string $action
+	 * @return DialogWidget[]
 	 */
 	public function collectDialogWidgetsForContext( AdminProperties_Context $context, $entity, $action )
 	{
-		$action = $action; // keep analyzer happy
-
 		return ( $this->isCorrectPublishSystem( $context, $entity, $action ) )
 			? $this->doCollectDialogWidgets( $entity, 'extend_entity' )
 			: array();
@@ -126,12 +132,15 @@ class Facebook_AdminProperties extends AdminProperties_EnterpriseConnector
 	/**
 	 * Add (or adjust) given dialog widgets ($showWidgets) to show admin user for given entity+action.
 	 * See AdminProperties_EnterpriseConnector interface for details.
+	 *
+	 * @param AdminProperties_Context $context
+	 * @param string $entity
+	 * @param string $action
+	 * @param DialogWidget[] $allWidgets
+	 * @param DialogWidget[] $showWidgets
 	 */
 	final public function buildDialogWidgets( AdminProperties_Context $context, $entity, $action, $allWidgets, &$showWidgets )
 	{
-		$action = $action;
-		$allWidgets = $allWidgets; // keep code analyzer happy
-
 		// This way you can grab contextual data:
 		//$pubObj = $context->getPublication();
 		//$channelObj = $context->getPubChannel();
