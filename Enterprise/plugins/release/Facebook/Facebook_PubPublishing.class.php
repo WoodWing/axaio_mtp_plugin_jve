@@ -28,19 +28,19 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		return self::PRIO_DEFAULT;
 	}
 
-    /**
+	/**
 	 * Publish dossier to Facebook
 	 *
 	 * Here the images and/or text ar posted to Facebook, there i looked at which Publish Form is
 	 * used in content station and after that processed an uploaded to Facebook.
 	 *
-     * @param Object $dossier [writable] The Dossier to be published. ExternalId to be filled in by this function.
-     * @param array $objectsInDossier [writable] The objects in the Dossier to be published.
-     * @param PublishTarget $publishTarget The target for publishing to.
-     * @return array A list with PubField|Empty array when no PublishForm found in the Dossier.
-     * @throws BizException
-     */
-    public function publishDossier(&$dossier, &$objectsInDossier, $publishTarget)
+	 * @param Object $dossier [writable] The Dossier to be published. ExternalId to be filled in by this function.
+	 * @param array $objectsInDossier [writable] The objects in the Dossier to be published.
+	 * @param PubPublishTarget $publishTarget The target for publishing to.
+	 * @return array A list with PubField|Empty array when no PublishForm found in the Dossier.
+	 * @throws BizException
+	 */
+	public function publishDossier(&$dossier, &$objectsInDossier, $publishTarget)
 	{
 		require_once dirname(__FILE__) . '/simple_html_dom.php'; // Html to text converter
 		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
@@ -48,10 +48,10 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 
 		$publishTarget = $publishTarget; // Keep Analyzer happy.
 
-        $pubChannelId = $publishTarget->PubChannelID;
+		$pubChannelId = $publishTarget->PubChannelID;
 		$facebookPublisher = new FacebookPublisher($pubChannelId);
 
-        $pageId = $facebookPublisher->pageId;
+		$pageId = $facebookPublisher->pageId;
 
 		$publishForm = null;
 		$messageText = null;
@@ -73,14 +73,14 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 				//Facebook post
 				case $this->getDocumentIdPrefix() . '0' :
                     $fields = BizPublishForm::getFormFields( $publishForm );
-                    $element = BizPublishForm::extractFormFieldDataFromFieldValue('C_FACEBOOK_PF_MESSAGE_SEL', $fields['C_FACEBOOK_PF_MESSAGE_SEL']);
+                    $element = BizPublishForm::extractFormFieldDataFromFieldValue('C_FACEBOOK_PF_MESSAGE_SEL', $fields['C_FACEBOOK_PF_MESSAGE_SEL'], $publishTarget->PubChannelID);
                     if ($element && isset($element[0]) && isset($element[0]['elements']) && isset($element[0]['elements'][0])) {
                         $messageText = str_get_html($element[0]['elements'][0]->Content)->plaintext;
                     }
 
 					//Get the URL
 					$url = null;
-					$urlValue = BizPublishForm::extractFormFieldDataByName($publishForm, 'C_FACEBOOK_PF_HYPERLINK_URL', false);
+					$urlValue = BizPublishForm::extractFormFieldDataByName($publishForm, 'C_FACEBOOK_PF_HYPERLINK_URL', $publishTarget->PubChannelID, false );
 					if ($urlValue && $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'] && $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'][0]) {
 						$url = $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'][0];
 					}
@@ -188,7 +188,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * @param objectsInDossier
 	 * @param $publishForm
-	 * @param $publishTarget
+	 * @param PubPublishTarget $publishTarget
 	 * @param $dossier
 	 * @param object $image
 	 * @param int $pageId
@@ -197,8 +197,8 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	{
 		$pubChannelId = $publishTarget->PubChannelID;
 		$facebookPublisher = new FacebookPublisher($pubChannelId);
-		$albumNameField = BizPublishForm::extractFormFieldDataByName($publishForm, 'C_FACEBOOK_ALBUM_NAME', false);
-		$albumDescriptionField = BizPublishForm::extractFormFieldDataByName($publishForm, 'C_FACEBOOK_ALBUM', false);
+		$albumNameField = BizPublishForm::extractFormFieldDataByName($publishForm, 'C_FACEBOOK_ALBUM_NAME', false, $pubChannelId);
+		$albumDescriptionField = BizPublishForm::extractFormFieldDataByName($publishForm, 'C_FACEBOOK_ALBUM', false, $pubChannelId);
 		$albumName = $albumNameField['C_FACEBOOK_ALBUM_NAME'][0];
 		$albumDescription = $albumDescriptionField['C_FACEBOOK_ALBUM'][0];
 		$albumId = null;
@@ -441,7 +441,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * @param Object $dossier The Dossier to request field values from.
 	 * @param array $objectsInDossier The objects in the Dossier.
-	 * @param publishTarget $publishTarget The target.
+	 * @param PubPublishTarget $publishTarget The target.
 	 * @return array List of PubField with its values.
 	 */
 	public function requestPublishFields($dossier, $objectsInDossier, $publishTarget)
