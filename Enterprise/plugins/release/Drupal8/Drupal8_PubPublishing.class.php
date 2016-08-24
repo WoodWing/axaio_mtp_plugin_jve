@@ -38,8 +38,8 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 				// Prepare content.
 				$values = $this->prepareNodeValues( $objectInDossier, $objectsInDossier, $publishTarget );
 				// Publish the node.
-				require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
-				$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
+				require_once dirname(__FILE__) . '/XmlRpcClient.class.php';
+				$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient($publishTarget);
 				$result = $drupalXmlRpcClient->saveNode($dossier, $values, array());
 
 				// Handle errors.
@@ -83,8 +83,8 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 				// Prepare content.
 				$values = $this->prepareNodeValues( $objectInDossier, $objectsInDossier, $publishTarget );
 				// Publish the node.
-				require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
-				$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
+				require_once dirname(__FILE__) . '/XmlRpcClient.class.php';
+				$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient($publishTarget);
 				$result = $drupalXmlRpcClient->updateNode($dossier, $values, array());
 				// Handle errors.
 				if (isset($result['errors'])) {
@@ -115,8 +115,8 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
 	{
 		// Unpublish the node.
-		require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
-		$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
+		require_once dirname(__FILE__) . '/XmlRpcClient.class.php';
+		$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient($publishTarget);
 		$result = $drupalXmlRpcClient->removeNode( $dossier );
 
 		// Handle errors.
@@ -155,8 +155,8 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 				// Prepare content.
 				$values = $this->prepareNodeValues( $objectInDossier, $objectsInDossier, $publishTarget );
 				// Publish the node.
-				require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
-				$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
+				require_once dirname(__FILE__) . '/XmlRpcClient.class.php';
+				$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient($publishTarget);
 				$result = $drupalXmlRpcClient->previewNode($dossier, $values, array());
 
 				// Handle errors.
@@ -187,9 +187,9 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 	{
 		require_once dirname(__FILE__).'/Utils.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
-		require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
+		require_once dirname(__FILE__) . '/XmlRpcClient.class.php';
 		require_once dirname(__FILE__).'/DrupalField.class.php';
-		$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
+		$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient($publishTarget);
 
 		$fields = null;
 		$pattern = null;
@@ -477,8 +477,8 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 		);
 
 		// Get the info from Drupal.
-		require_once dirname(__FILE__).'/DrupalXmlRpcClient.class.php';
-		$drupalXmlRpcClient = new DrupalXmlRpcClient( $publishTarget );
+		require_once dirname(__FILE__).'/XmlRpcClient.class.php';
+		$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient( $publishTarget );
 		$response = $drupalXmlRpcClient->nodeGetInfo( $dossier );
 		if( $response ) foreach( $response as $fieldKey => $fieldVal ) {
 			if( $fieldVal == 'N/A' ) {
@@ -487,7 +487,7 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 			} else {
 				$type = isset( $map[$fieldKey] ) ? $map[$fieldKey] : 'string';
 			}
-			$result[] = DrupalXmlRpcClient::getField( $fieldKey, $type, $fieldVal );
+			$result[] = WW_Plugins_Drupal8_XmlRpcClient::getField( $fieldKey, $type, $fieldVal );
 		}
 		return $result;
 	}
@@ -504,8 +504,8 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getDossierURL( $dossier, $objectsInDossier, $publishTarget )
 	{
-		require_once dirname(__FILE__).'/DrupalXmlRpcClient.class.php';
-		$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
+		require_once dirname(__FILE__).'/XmlRpcClient.class.php';
+		$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient($publishTarget);
 		$url = $drupalXmlRpcClient->getUrl($dossier);
 		return $url;
 	}
@@ -575,12 +575,12 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 	public function getPublishFormTemplates( $pubChannelId )
 	{
 		require_once dirname(__FILE__).'/Utils.class.php'; // WW_Plugins_Drupal8_Utils.
-		require_once dirname(__FILE__).'/DrupalXmlRpcClient.class.php';
+		require_once dirname(__FILE__).'/XmlRpcClient.class.php';
 		require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php'; // PubPublishTarget.
 		require_once BASEDIR.'/server/utils/PublishingUtils.class.php';
 
 		$publishTarget = new PubPublishTarget( $pubChannelId );
-		$drupalXmlRpcClient = new DrupalXmlRpcClient( $publishTarget );
+		$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient( $publishTarget );
 
 		$templatesObj = array();
 		$contentTypes = $drupalXmlRpcClient->getContentTypes();
@@ -751,13 +751,13 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getFields( $pubChannelId, $contentType )
 	{
-		require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
+		require_once dirname(__FILE__) . '/XmlRpcClient.class.php';
 		require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php'; // PubPublishTarget
 
 		// Set the actual publish target object so we know which site to contact.
 		$publishTarget = new PubPublishTarget( $pubChannelId );
 		// Get the fields.
-		$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
+		$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient($publishTarget);
 		$fields = $drupalXmlRpcClient->getFields( $contentType );
 		return $fields;
 	}

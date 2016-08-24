@@ -9,7 +9,7 @@
  */
 require_once BASEDIR . '/server/utils/EnterpriseXmlRpcClient.class.php';
 
-class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
+class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 {
 	/**
 	 * @var null|string

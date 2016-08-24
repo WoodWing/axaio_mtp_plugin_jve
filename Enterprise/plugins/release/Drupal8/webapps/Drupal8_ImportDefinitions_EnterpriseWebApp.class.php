@@ -318,7 +318,7 @@ class Drupal8_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 	private function importTermEntitiesAndTerms()
 	{
 		require_once dirname(__FILE__).'/../Utils.class.php';
-		require_once dirname(__FILE__).'/../DrupalXmlRpcClient.class.php';
+		require_once dirname(__FILE__).'/../XmlRpcClient.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizAdmPublication.class.php';
 		require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php';
@@ -333,7 +333,7 @@ class Drupal8_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 
 				// Of course we should foreach instead to get all the channels.
 				$publishTarget = new PubPublishTarget( $pubChannelInfo->Id );
-				$drupalXmlRpcClient = new DrupalXmlRpcClient( $publishTarget );
+				$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient( $publishTarget );
 
 				// Fetching the Vocabulary names (Term Entities) from Drupal8.
 				$drupalVocabNames = $drupalXmlRpcClient->getVocabularyNames();
@@ -403,7 +403,7 @@ class Drupal8_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 	public function repairPublishFormTemplates( $pubChannelId )
 	{
 		require_once dirname(__FILE__).'/../Utils.class.php'; // WW_Plugins_Drupal8_Utils.
-		require_once dirname(__FILE__).'/../DrupalXmlRpcClient.class.php';
+		require_once dirname(__FILE__).'/../XmlRpcClient.class.php';
 		require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php'; // PubPublishTarget.
 		require_once BASEDIR.'/server/utils/PublishingUtils.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
@@ -425,7 +425,7 @@ class Drupal8_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 			$success = true;
 		} else {
 			$publishTarget = new PubPublishTarget( $pubChannelId );
-			$drupalXmlRpcClient = new DrupalXmlRpcClient( $publishTarget );
+			$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient( $publishTarget );
 
 			$contentTypes = $drupalXmlRpcClient->getContentTypes();
 
