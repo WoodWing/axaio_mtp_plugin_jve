@@ -23,9 +23,9 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * Publishes a dossier with contained objects (articles. images, etc.) to an external publishing system.
 	 * The plugin is supposed to publish the dossier and it's articles and fill in some fields for reference.
 	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PublishTarget $publishTarget
+	 * @param Object $dossier            [writable]
+	 * @param Object[] $objectsInDossier [writable]
+	 * @param PubPublishTarget $publishTarget
 	 * 
 	 * @return array of PubField containing information from publishing system
 	 */	
@@ -52,11 +52,11 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * In case the user aborts the operation, publishAbort() is called to let connector cleanup.
 	 *
 	 * @since 7.5
-	 * @param PublishTarget $publishTarget
+	 * @param PubPublishTarget $publishTarget
 	 */
-	public function publishBefore( $publishTarget ) { $publishTarget = $publishTarget; }
-	public function publishAfter( $publishTarget )  { $publishTarget = $publishTarget; }
-	public function publishAbort( $publishTarget )  { $publishTarget = $publishTarget; }
+	public function publishBefore( $publishTarget ) {}
+	public function publishAfter( $publishTarget )  {}
+	public function publishAbort( $publishTarget )  {}
 
 	/**
 	 * Updates/republishes a published dossier with contained objects (articles. images, etc.) to an 
@@ -64,9 +64,9 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * publishing system. The plugin is supposed to update/republish the dossier and it's articles 
 	 * and fill in some fields for reference.
 	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PublishTarget $publishTarget
+	 * @param Object $dossier            [writable]
+	 * @param Object[] $objectsInDossier [writable]
+	 * @param PubPublishTarget $publishTarget
 	 *
 	 * @return array of PubField containing information from publishing system
 	 */	
@@ -94,19 +94,19 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * In case the user aborts the operation, updateAbort() is called to let connector cleanup.
 	 *
 	 * @since 7.5
-	 * @param PublishTarget $publishTarget
+	 * @param PubPublishTarget $publishTarget
 	 */
-	public function updateBefore( $publishTarget ) { $publishTarget = $publishTarget; }
-	public function updateAfter( $publishTarget )  { $publishTarget = $publishTarget; }
-	public function updateAbort( $publishTarget )  { $publishTarget = $publishTarget; }
+	public function updateBefore( $publishTarget ) {}
+	public function updateAfter( $publishTarget )  {}
+	public function updateAbort( $publishTarget )  {}
 	
 	/**
 	 * Removes/unpublishes a published dossier from an external publishing system
 	 * using the $dossier->ExternalId to identify the dosier to the publishing system.
 	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PublishTarget $publishTarget
+	 * @param Object $dossier            [writable]
+	 * @param Object[] $objectsInDossier [writable]
+	 * @param PubPublishTarget $publishTarget
 	 *
 	 * @return array of PubField containing information from publishing system
 	 */	
@@ -128,19 +128,19 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * In case the user aborts the operation, unpublishAbort() is called to let connector cleanup.
 	 *
 	 * @since 7.5
-	 * @param PublishTarget $publishTarget
+	 * @param PubPublishTarget $publishTarget
 	 */
-	public function unpublishBefore( $publishTarget ) { $publishTarget = $publishTarget; }
-	public function unpublishAfter( $publishTarget )  { $publishTarget = $publishTarget; }
-	public function unpublishAbort( $publishTarget )  { $publishTarget = $publishTarget; }
+	public function unpublishBefore( $publishTarget ) {}
+	public function unpublishAfter( $publishTarget )  {}
+	public function unpublishAbort( $publishTarget )  {}
 
 	/**
 	 * Requests fieldvalues from an external publishing system
 	 * using the $dossier->ExternalId to identify the dosier to the publishing system.
 	 *
 	 * @param Object $dossier
-	 * @param array $objectsInDossier Array of Object.
-	 * @param PublishTarget $publishTarget
+	 * @param Object[] $objectsInDossier
+	 * @param PubPublishTarget $publishTarget
 	 * 
 	 * @return array of PubField containing information from publishing system
 	 */	
@@ -158,8 +158,8 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * using the $dossier->ExternalId to identify the dosier to the publishing system.
 	 *
 	 * @param Object $dossier
-	 * @param array $objectsInDossier Array of Object.
-	 * @param PublishTarget $publishTarget
+	 * @param Object[] $objectsInDossier
+	 * @param PubPublishTarget $publishTarget
 	 * 
 	 * @return string URL to published item
 	 */	
@@ -170,9 +170,9 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * system. The plugin is supposed to send the dossier and it's articles to the publishing system 
 	 * and fill in the URL field for reference.
 	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PublishTarget $publishTarget
+	 * @param Object $dossier            [writable]
+	 * @param Object[] $objectsInDossier [writable]
+	 * @param PubPublishTarget $publishTarget
 	 * 
 	 * @return array of Fields containing information from Publishing system
 	 */	
@@ -187,11 +187,11 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * In case the user aborts the operation, abortPreview() is called to let connector cleanup.
 	 *
 	 * @since 7.5
-	 * @param PublishTarget $publishTarget
+	 * @param PubPublishTarget $publishTarget
 	 */
-	public function previewBefore( $publishTarget ) { $publishTarget = $publishTarget; }
-	public function previewAfter( $publishTarget )  { $publishTarget = $publishTarget; }
-	public function previewAbort( $publishTarget )  { $publishTarget = $publishTarget; }
+	public function previewBefore( $publishTarget ) {}
+	public function previewAfter( $publishTarget )  {}
+	public function previewAbort( $publishTarget )  {}
 
 	// - - - - - - - - - - - - - - - - - - PUBLISH ISSUE - - - - - - - - - - - - - - - - - - - -
 
@@ -201,12 +201,11 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * Affective for publishDossiers(), updateDossiers(), unpublishDossiers() and previewDossiers().
 	 *
 	 * @since 7.5
-	 * @param PublishTarget $publishTarget
+	 * @param PubPublishTarget $publishTarget
 	 * @return PubPublishedIssue|null When NULL returned, the core skips the DB update.
 	 */
 	public function getPublishInfoForIssue( $publishTarget )
 	{
-		$publishTarget = $publishTarget; // keep analyzer happy
 		return null;
 	}
 
@@ -224,7 +223,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function setPublishInfoForIssue( $admIssue, $orgIssue, $newIssue )
 	{
-		$admIssue = $admIssue; $orgIssue = $orgIssue; $newIssue = $newIssue; // keep analyzer happy
 		return null;
 	}
 
@@ -257,11 +255,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function validateDossierForPublishing( $type, $dossierId, $issueId )
 	{
-		// keep analyzer happy
-		$type = $type;
-		$dossierId = $dossierId;
-		$issueId = $issueId;
-		
 		return array('errors' => array(), 'warnings' => array(), 'infos' => array());
 	}
 	
@@ -277,7 +270,13 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	{
 		return '';
 	}
-	
+
+	/**
+	 * Get the correct rendition for a to publish object.
+	 *
+	 * @param Object $object
+	 * @return string The file rendition type.
+	 */
 	protected function askRenditionType( $object )
 	{
 		$rendition = null;
@@ -295,7 +294,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	/**
 	 * Retrieves the file contents from the Object.
 	 *
-	 * @param $object The object to get the File Contents from.
+	 * @param Object $object The object to get the File Contents from.
 	 * @param string $rendition The rendition.
 	 * @return null|string The retrieved file or null if not found.
 	 */
@@ -359,7 +358,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function getDossierOrder( $publishTarget ) 
 	{
-		$publishTarget = $publishTarget; // keep code analyzer happy
 		return null;
 	}
 
@@ -370,11 +368,12 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 *
 	 * @since 7.5
 	 * @param PubPublishTarget $publishTarget Identification of the magazine.
+	 * @param array $newOrder
+	 * @param array $originalOrder
 	 * @return boolean FALSE for default/core behavior, or TRUE for custom/plugin behavior.
 	 */
 	public function updateDossierOrder( $publishTarget, $newOrder, $originalOrder ) 
 	{
-		$publishTarget = $publishTarget; $newOrder = $newOrder; $originalOrder = $originalOrder; // keep code analyzer happy
 		return null;
 	}
 
@@ -503,8 +502,8 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @param string $operation Publish, Update, UnPublish or Preview
 	 */
-	public function beforeOperation( $publishTarget, $operation ) { $operation = $operation; $publishTarget = $publishTarget; }
-	public function afterOperation ( $publishTarget, $operation ) { $operation = $operation; $publishTarget = $publishTarget; }
+	public function beforeOperation( $publishTarget, $operation ) {}
+	public function afterOperation ( $publishTarget, $operation ) {}
 
 	// - - - - - - - - - - - - - - - - - - PARALLEL UPLOAD - - - - - - - - - - - - - - - - - - - -
 
@@ -517,11 +516,10 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 *
 	 * @since 7.6.7
 	 * @param string $phase The phase of the publishing that will determine if it supports parallel upload.
-	 * $return bool TRUE when the connector can handle parallel publishing. FALSE when only handle one publishing at a time.
+	 * @return bool TRUE when the connector can handle parallel publishing. FALSE when only handle one publishing at a time.
 	 */
 	public function canHandleParallelUpload( $phase )
 	{
-		$phase = $phase; // To make analyzer happy.
 		return false;
 	}
 	
@@ -543,8 +541,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function publishDossiersParallel( $processNextDossierCB, $processedDossierCB )
 	{
-		$processNextDossierCB = $processNextDossierCB; // To make analyer happy.
-		$processedDossierCB = $processedDossierCB; // To make analyer happy.
 	}
 
 	/**
@@ -567,7 +563,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function getPublishFormTemplates( $pubChannelId )
 	{
-		$pubChannelId = $pubChannelId; // Make analyzer happy.
 		return null;
 	}
 
@@ -581,7 +576,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function getDialogForSetPublishPropertiesAction( $publishFormTemplate )
 	{
-		$publishFormTemplate = $publishFormTemplate; // Make analyzer happy.
 		return null;
 	}
 
@@ -604,9 +598,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function getButtonBarForSetPublishPropertiesAction( $defaultButtonBar, $publishFormTemplate, $publishForm )
 	{
-		$publishFormTemplate = $publishFormTemplate; // keep analyzer happy
-		$publishForm = $publishForm; // keep analyzer happy
-
 		return $defaultButtonBar;
 	}
 

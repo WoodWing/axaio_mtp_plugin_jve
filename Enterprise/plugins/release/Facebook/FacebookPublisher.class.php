@@ -260,7 +260,6 @@ class FacebookPublisher
 		try {
 			$user = $this->facebook->api( '/me', 'GET' );
 		} catch( FacebookApiException $e ) {
-			$e = $e;
 			$user = null;
 		}
 		return $user;
@@ -342,8 +341,8 @@ class FacebookPublisher
 	 * Note: If it is desirable to create an album that already exists then, set the $duplicateIfExists param to true.
 	 * otherwise no Album is created, but the id of an existing album is returned.
 	 *
-	 * @param $pageId The page id for which to create the new Album.
-	 * @param $name The name of the album to be created.
+	 * @param string $pageId The page id for which to create the new Album.
+	 * @param string $name The name of the album to be created.
 	 * @param string $description The description of the album.
 	 * @param bool $duplicateIfExists Whether to create a new Album if there already is an album with the same name.
 	 * @return null|string The ID of the created album, or found album.
@@ -390,11 +389,11 @@ class FacebookPublisher
 	 * @param string $description The optional description for a picture
 	 * @param string $album_name The optional name for the album
 	 * @param string $album_description The optional description for the album.
-	 * @param string $albumId when we already have the albumId this can be used to upload.
-	 * @return mixed
+	 * @param string $albumId when we already have the albumId this can be used to upload. This id is updated when album got created.
+	 * @return string Facebook id of the created picture.
 	 * @throws Exception Throws an Exception if the creation / upload process fails.
 	 */
-	public function uploadPictureToPage( $pageId, $file, $description = '', $album_name = '', $album_description = '', $albumId = null )
+	public function uploadPictureToPage( $pageId, $file, $description = '', $album_name = '', $album_description = '', &$albumId = null )
 	{
 		$this->facebook->setFileUploadSupport( true );
 		if( empty( $pageId ) ) {
@@ -409,25 +408,16 @@ class FacebookPublisher
 		$connectString = '/'.$pageId.'/photos';
 
 		if( !empty( $album_name ) ) {
-			if( !$albumId || $albumId == '' ) {
+			if( !$albumId ) {
 				$albumId = $this->createAlbum( $pageId, $album_name, $album_description );
 			}
 			$connectString = $albumId.'/photos';
 		}
 		// Upload the picture.
-		try {
-			$object = $this->facebook->api( $connectString, 'POST', array(
-					'image' => $file,
-					'message' => $description,
-				)
-			);
-		} catch( FacebookApiException $e ) {
-			$e = $e;
-		}
-
-		$object['albumId'] = $albumId;
-
-		return $object;
+		$object = $this->facebook->api( $connectString, 'POST', array(
+						'image' => $file,
+						'message' => $description ));
+		return $object['id'];
 	}
 
 	/**

@@ -57,30 +57,36 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 	 */
 	public function convertImage()
 	{
+		$retVal = false;
 		if( $this->applyCrop || $this->applyScale || $this->applyRotate || $this->applyMirror || $this->applyResize ) {
 			$inputImage = self::load( $this->inputFilePath );
-			$outputImage = imagecreatetruecolor( $this->outputWidth, $this->outputHeight );
-			if( $this->applyCrop || $this->applyScale || $this->applyResize ) {
-				imagecopyresampled(
-					$outputImage, $inputImage,
-					0, 0, $this->cropLeft, $this->cropTop,
-					$this->outputWidth, $this->outputHeight, $this->cropWidth, $this->cropHeight );
-			}
-			if( $this->applyMirror ) {
-				if( $this->mirrorHorizontal && $this->mirrorVertical ) {
-					$mode = IMG_FLIP_BOTH;
-				} else {
-					$mode = $this->mirrorHorizontal ? IMG_FLIP_HORIZONTAL : IMG_FLIP_VERTICAL;
+			if( $inputImage ) {
+				$outputImage = imagecreatetruecolor( intval($this->outputWidth), intval($this->outputHeight) );
+				if( $outputImage ) {
+					if( $this->applyCrop || $this->applyScale || $this->applyResize ) {
+						imagecopyresampled(
+							$outputImage, $inputImage,
+							0, 0, $this->cropLeft, $this->cropTop,
+							$this->outputWidth, $this->outputHeight, $this->cropWidth, $this->cropHeight );
+					}
+					if( $this->applyMirror ) {
+						if( $this->mirrorHorizontal && $this->mirrorVertical ) {
+							$mode = IMG_FLIP_BOTH;
+						} else {
+							$mode = $this->mirrorHorizontal ? IMG_FLIP_HORIZONTAL : IMG_FLIP_VERTICAL;
+						}
+						imageflip( $outputImage, $mode ); // requires custom implementation for < PHP 5.5
+					}
+					if( $this->applyRotate ) {
+						$outputImage = imagerotate( $outputImage, $this->rotateDegrees, 0 );
+					}
+					$retVal = self::save( $outputImage, $this->outputFilePath );
+					imagedestroy( $outputImage );
 				}
-				imageflip( $outputImage, $mode ); // requires custom implementation for < PHP 5.5
+				imagedestroy( $inputImage );
 			}
-			if( $this->applyRotate ) {
-				$outputImage = imagerotate( $outputImage, $this->rotateDegrees, 0 );
-			}
-			self::save( $outputImage, $this->outputFilePath );
-			imagedestroy( $outputImage );
-			imagedestroy( $inputImage );
 		}
+		return $retVal;
 	}
 
 	/**
@@ -113,20 +119,23 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 	 * @param resource $image Handle of the image.
 	 * @param string $fileName Full file path to write the image into.
 	 * @param integer $imageType
+	 * @return bool Whether or not successfully saved.
 	 */
 	static private function save( $image, $fileName, $imageType = IMAGETYPE_JPEG )
 	{
-		switcH( $imageType ) {
+		$retVal = false;
+		switch( $imageType ) {
 			case IMAGETYPE_JPEG:
-				imagejpeg( $image, $fileName, 75 ); // 75 = default compression
+				$retVal = imagejpeg( $image, $fileName, 75 ); // 75 = default compression
 				break;
 			case IMAGETYPE_GIF:
-				imagegif( $image, $fileName );
+				$retVal = imagegif( $image, $fileName );
 				break;
 			case IMAGETYPE_PNG:
-				imagepng( $image, $fileName );
+				$retVal = imagepng( $image, $fileName );
 				break;
 		}
+		return $retVal;
 	}
 }
 

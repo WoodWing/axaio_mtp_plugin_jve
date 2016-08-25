@@ -34,11 +34,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * Here the images and/or text ar posted to Facebook, there i looked at which Publish Form is
 	 * used in content station and after that processed an uploaded to Facebook.
 	 *
-	 * @param Object $dossier [writable] The Dossier to be published. ExternalId to be filled in by this function.
-	 * @param array $objectsInDossier [writable] The objects in the Dossier to be published.
-	 * @param PublishTarget $publishTarget The target for publishing to.
-	 * @return array A list with PubField|Empty array when no PublishForm found in the Dossier.
-	 * @throws BizException
+	 * {@inheritdoc}
 	 */
 	public function publishDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
@@ -54,7 +50,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		$publishForm = null;
 		$messageText = null;
 
-		//Get the Publish Form
+		// Get the Publish Form
 		foreach( $objectsInDossier as $objectInDossier ) {
 			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
 				$publishForm = $objectInDossier;
@@ -64,26 +60,25 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 
 		// Process the publish Form
 		if( !is_null( $publishForm ) ) {
-
-			//Extract the message
-			//Publish to Facebook
 			switch( BizPublishForm::getDocumentId( $publishForm ) ) {
-				//Facebook post
+
+				// Facebook post
 				case $this->getDocumentIdPrefix().'0' :
+					// Extract the message
 					$fields = BizPublishForm::getFormFields( $publishForm );
 					$element = BizPublishForm::extractFormFieldDataFromFieldValue( 'C_FACEBOOK_PF_MESSAGE_SEL', $fields['C_FACEBOOK_PF_MESSAGE_SEL'] );
 					if( $element && isset( $element[0] ) && isset( $element[0]['elements'] ) && isset( $element[0]['elements'][0] ) ) {
 						$messageText = str_get_html( $element[0]['elements'][0]->Content )->plaintext;
 					}
 
-					//Get the URL
+					// Get the URL
 					$url = null;
 					$urlValue = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_PF_HYPERLINK_URL', false );
 					if( $urlValue && $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'] && $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'][0] ) {
 						$url = $urlValue['C_FACEBOOK_PF_HYPERLINK_URL'][0];
 					}
 
-					//Check if we have a message or hyperlink
+					// Check if we have a message or hyperlink
 					if( !trim( $messageText ) && !$url ) {
 						throw new BizException( 'FACEBOOK_ERROR_ADD_MESSAGE', 'Server', '' );
 					}
@@ -93,6 +88,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 						$messageText = ' ';
 					}
 
+					// Publish to Facebook
 					try {
 						$postId = $facebookPublisher->postMessageToPageFeed( $pageId, $messageText, $url );
 						$dossier->ExternalId = $postId;
@@ -104,73 +100,57 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 					}
 					break;
 
-				//Facebook photo
+				// Facebook photo
 				case $this->getDocumentIdPrefix().'1' :
-					$objectType = null;
-
-					//Get the id and type of the placed image
-					$mediaId = $this->getPlacedObjectId( $publishForm, 'C_FACEBOOK_PF_MEDIA_SEL' );
-
-					if( !is_null( $mediaId ) ) {
-						$objectType = BizObject::getObjectType( $mediaId, 'Workflow' );
-					}
-
-					if( $objectType != 'Image' ) {
-						throw new BizException( 'FACEBOOK_ERROR_ADD_IMAGE', 'Server', '' );
-					}
-
-					//Save the image to a file
-					$filePath = $this->saveLocal( $mediaId );
-
-					// Post the Image.
-					try {
-						if( $objectType == 'Image' ) {
-							$imageDescription = null;
-							foreach( $objectsInDossier as $objectInDossier ) {
-								if( $objectInDossier->MetaData->BasicMetaData->Type == 'Image' ) {
-									$imageObj = $objectInDossier;
-
-									if( is_array( $imageObj->MetaData->ExtraMetaData ) ) {
-										foreach( $imageObj->MetaData->ExtraMetaData as $extraData ) {
-											if( $extraData->Property == 'C_FACEBOOK_IMAGE_DESCRIPTION' ) {
-												$imageDescription = $extraData->Values[0];
-											}
-										}
-									}
-
-									$result = $facebookPublisher->uploadPictureToPage( $pageId, $filePath, $imageDescription );
-									$postId = $result['id'];
-									$dossier->ExternalId = $postId;
+					$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
+					if( isset( $publishFormObjects['C_FACEBOOK_PF_MEDIA_SEL'] ) ) {
+						$imageObjects = $publishFormObjects['C_FACEBOOK_PF_MEDIA_SEL'];
+						if( is_object( $imageObjects ) ) {
+							// The getFormField returns an object when there is only 1 object else it returns an array.
+							$imageObjects = array( $imageObjects );
+						}
+						if( $imageObjects ) foreach( $imageObjects as $imageObject ) {
+							$imageId = $imageObject->MetaData->BasicMetaData->ID;
+							$imageAttachment = $this->getCroppedImage( $publishForm, $imageId, 'C_FACEBOOK_PF_MEDIA_SEL' );
+							if( !$imageAttachment ) {
+								$imageAttachment = $imageObject->Files[0]; // fallback to native image
+							}
+							if( $imageAttachment ) {
+								$imagePath = $imageAttachment->FilePath;
+								$imageDescription = $imageDescription = $this->getImageDescription( $imageObject );
+								try {
+									$dossier->ExternalId = $facebookPublisher->uploadPictureToPage( $pageId, $imagePath, $imageDescription );
+								} catch( Exception $e ) {
+									$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
 								}
 							}
 						}
-					} catch( Exception $e ) {
-						unlink( $filePath );
-						$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
 					}
-					//Remove the temp image
-					unlink( $filePath );
 					break;
 
+				// Facebook photo album
 				case $this->getDocumentIdPrefix().'2' :
 					$imageCheck = false;
-					$publishFormOBJS = BizPublishForm::getFormFields( $publishForm );
-
-					// This is needed because the getFormField returns an object when there is only 1 object else it returns an array
-					if( isset( $publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'] ) ) {
-						if( count( $publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'] ) > 1 ) {
-							foreach( $publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'] as $image ) {
-								$this->uploadImageToAlbum( $objectsInDossier, $publishForm, $dossier, $publishTarget, $image, $pageId );
-								if( !$imageCheck ) {
-									$imageCheck = true;
-								}
+					$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
+					if( isset( $publishFormObjects['C_FACEBOOK_MULTI_IMAGES'] ) ) {
+						$imageObjects = $publishFormObjects['C_FACEBOOK_MULTI_IMAGES'];
+						if( is_object( $imageObjects ) ) {
+							// The getFormField returns an object when there is only 1 object else it returns an array.
+							$imageObjects = array( $imageObjects );
+						}
+						if( $imageObjects ) foreach( $imageObjects as $imageObject ) {
+							$imageId = $imageObject->MetaData->BasicMetaData->ID;
+							$imageAttachment = $this->getCroppedImage( $publishForm, $imageId, 'C_FACEBOOK_MULTI_IMAGES' );
+							if( !$imageAttachment ) {
+								$imageAttachment = $imageObject->Files[0]; // fallback to native image
 							}
-						} else if( count( $publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'] ) == 1 ) {
-							$this->uploadImageToAlbum( $objectsInDossier, $publishForm, $dossier, $publishTarget, $publishFormOBJS['C_FACEBOOK_MULTI_IMAGES'], $pageId );
-							$imageCheck = true;
+							if( $imageAttachment ) {
+								$imagePath = $imageAttachment->FilePath;
+								$this->uploadImageToAlbum( $publishForm, $dossier, $publishTarget, $imageObject, $imagePath, $pageId );
+								$imageCheck = true;
+							}
 						}
 					}
-
 					if( !$imageCheck ) {
 						throw new BizException( 'FACEBOOK_ERROR_ADD_IMAGE', 'Server', '' );
 					}
@@ -180,18 +160,52 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
+	 * Retrieves an image crop made on a given Publish Form.
+	 *
+	 * The end user may have cropped the image placed on the Publish Form.
+	 * When a crop is found, the caller should prefer the cropped image (over the native image).
+	 *
+	 * The cropped image is dynamically set by the core server during the publish operation at Placement->ImageCropAttachment.
+	 * Note that this property is not defined in the WSDL. When the property is missing, there is no crop.
+	 *
+	 * @since 10.1.0
+	 * @param Object $publishForm The form object being published.
+	 * @param string $childId Id of placed image object to get the attachment for.
+	 * @param integer $formWidgetId The field of the publish form the child object could be placed on.
+	 * @return Attachment|null The cropped image. NULL when no crop found.
+	 */
+	private function getCroppedImage( $publishForm, $childId, $formWidgetId )
+	{
+		$cropppedImage = null;
+		foreach( $publishForm->Relations as $relation ) {
+			if( $relation->Type == 'Placed' &&
+				$relation->Child == $childId &&
+				$relation->Parent == $publishForm->MetaData->BasicMetaData->ID
+			) {
+				foreach( $relation->Placements as $placement ) {
+					if( $placement->FormWidgetId &&
+						$placement->FormWidgetId == $formWidgetId &&
+						isset( $placement->ImageCropAttachment )
+					) {
+						$cropppedImage = $placement->ImageCropAttachment;
+					}
+				}
+			}
+		}
+		return $cropppedImage;
+	}
+
+	/**
 	 * Upload to Facebook album
 	 *
-	 * This function is needed because of the getFromFields function that returns a array of multiple objects or returns just 1 object.
-	 *
-	 * @param objectsInDossier
-	 * @param $publishForm
-	 * @param $publishTarget
-	 * @param $dossier
-	 * @param object $image
+	 * @param Object $publishForm
+	 * @param Object $dossier
+	 * @param PubPublishTarget $publishTarget
+	 * @param Object $imageObject
+	 * @param string $imagePath
 	 * @param int $pageId
 	 */
-	public function uploadImageToAlbum( &$objectsInDossier, &$publishForm, &$dossier, $publishTarget, $image, $pageId )
+	private function uploadImageToAlbum( $publishForm, $dossier, $publishTarget, $imageObject, $imagePath, $pageId )
 	{
 		$pubChannelId = $publishTarget->PubChannelID;
 		$facebookPublisher = new FacebookPublisher( $pubChannelId );
@@ -199,48 +213,40 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		$albumDescriptionField = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_ALBUM', false );
 		$albumName = $albumNameField['C_FACEBOOK_ALBUM_NAME'][0];
 		$albumDescription = $albumDescriptionField['C_FACEBOOK_ALBUM'][0];
-		$albumId = null;
+		$albumId = $dossier->ExternalId ? $dossier->ExternalId : null;
+		$imageDescription = $this->getImageDescription( $imageObject );
 
-		foreach( $objectsInDossier as $imageObj ) {
-			if( $imageObj->MetaData->BasicMetaData->Type == 'Image' ) {
-				if( $imageObj->MetaData->BasicMetaData->ID == $image->MetaData->BasicMetaData->ID ) {
-					$imageDescription = '';
+		// Post the slideshow.
+		try {
+			$imageObject->ExternalId = $facebookPublisher->uploadPictureToPage( $pageId, $imagePath, $imageDescription,
+				$albumName, $albumDescription, $albumId );
+			if( $albumId ) {
+				$dossier->ExternalId = $albumId;
+			}
+		} catch( Exception $e ) {
+			$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
+		}
+	}
 
-					if( is_array( $imageObj->MetaData->ExtraMetaData ) ) {
-						foreach( $imageObj->MetaData->ExtraMetaData as $extraData ) {
-							if( $extraData->Property == 'C_FACEBOOK_IMAGE_DESCRIPTION' ) {
-								$imageDescription = $extraData->Values[0];
-							}
-						}
-					}
-
-					if( $dossier->ExternalId ) {
-						$albumId = $dossier->ExternalId;
-					}
-
-					//Save the image to a file
-					$filePath = $this->saveLocal( $imageObj->MetaData->BasicMetaData->ID );
-
-					// Post the slideshow.
-					try {
-						$result = $facebookPublisher->uploadPictureToPage( $pageId, $filePath, $imageDescription, $albumName, $albumDescription, $albumId );
-						$postId = $result['id'];
-						$imageObj->ExternalId = $postId;
-
-						if( isset( $result['albumId'] ) ) {
-							$dossier->ExternalId = $result['albumId'];
-						}
-
-					} catch( Exception $e ) {
-						unlink( $filePath );
-						$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
-					}
-					//Remove the temp image
-					unlink( $filePath );
+	/**
+	 * Looks up the image description in the custom metadata property C_FACEBOOK_IMAGE_DESCRIPTION.
+	 *
+	 * @param Object $imageObject
+	 * @return string
+	 */
+	private function getImageDescription( $imageObject )
+	{
+		$imageDescription = '';
+		if( $imageObject->MetaData->ExtraMetaData ) {
+			foreach( $imageObject->MetaData->ExtraMetaData as $extraData ) {
+				if( $extraData->Property == 'C_FACEBOOK_IMAGE_DESCRIPTION' ) {
+					$imageDescription = $extraData->Values[0];
 				}
 			}
 		}
+		return $imageDescription;
 	}
+
 
 	/**
 	 * Re-throw error resulted from Publishing/Unpublishing the PublishForm to Facebook.
@@ -257,46 +263,20 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	{
 		$reasonParams = array( $publishForm->MetaData->BasicMetaData->Name );
 		$errorCode = ( $e->getCode() ) ? ' (code: '.$e->getCode().')' : '';
-		$actionMessage = $action == 'PublishDossier' ? 'Posting' : 'Unpublishing';
 
-		if( $actionMessage == 'PublishDossier' || $actionMessage == 'Posting' ) {
+		if( $action == 'PublishDossier' ) {
 			$msg = BizResources::localize( 'FACEBOOK_ERROR_PUBLISH', true, $reasonParams );
+			$actionMessage = 'Publishing';
 		} else {
 			$msg = BizResources::localize( 'FACEBOOK_ERROR_UNPUBLISH', true, $reasonParams );
+			$actionMessage = 'Unpublishing';
 		}
 
-		$detail = $actionMessage.$publishForm->MetaData->BasicMetaData->Name.' with id: '.$publishForm->MetaData->BasicMetaData->ID
-			.' produced an error: '.$e->getMessage().$errorCode;
+		$detail = $actionMessage.' '.$publishForm->MetaData->BasicMetaData->Name.
+			' with id '.$publishForm->MetaData->BasicMetaData->ID.
+			' produced an error: '.$e->getMessage().$errorCode;
 
 		throw new BizException( null, 'Server', $detail, $msg );
-	}
-
-	/**
-	 * Returns the object id of the object placed in the specified field.
-	 *
-	 * @param Object $publishForm Publish form object
-	 * @param string $fieldName Name of the fileselector field
-	 * @return null|int The Id of the placed object on $fieldName; Null when not found.
-	 */
-	public function getPlacedObjectId( $publishForm, $fieldName )
-	{
-		$placedObjId = null;
-		if( is_array( $publishForm->Relations ) ) {
-			foreach( $publishForm->Relations as $relation ) {
-				if( $relation->Type == 'Placed' ) {
-					if( is_array( $relation->Placements ) ) {
-						foreach( $relation->Placements as $placement ) {
-							$property = $placement->FormWidgetId;
-							if( $property == $fieldName ) {
-								$placedObjId = $relation->Child;
-								break; // Found
-							}
-						}
-					}
-				}
-			}
-		}
-		return $placedObjId;
 	}
 
 	/**
@@ -422,8 +402,8 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * using the $dossier->ExternalId to identify the Dossier to the publishing system.
 	 *
 	 * @param Object $dossier The Dossier to request field values from.
-	 * @param array $objectsInDossier The objects in the Dossier.
-	 * @param publishTarget $publishTarget The target.
+	 * @param Object[] $objectsInDossier The objects in the Dossier.
+	 * @param PubPublishTarget $publishTarget The target.
 	 * @return array List of PubField with its values.
 	 */
 	public function requestPublishFields( $dossier, $objectsInDossier, $publishTarget )
@@ -507,87 +487,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Retrieves an object from the ObjectsService and stores a local copy to be uploaded.
-	 *
-	 * File structure from the object can differ.
-	 *
-	 * @param int $id The id for the object to be stored.
-	 * @return string $exportName The name of the exported object.
-	 * @throws BizException Throws an exception if something goes wrong.
-	 */
-	public function saveLocal( $id )
-	{
-		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
-
-		$object = $this->getObject( $id );
-		$type = $object->MetaData->BasicMetaData->Type;
-
-		// We need to get a unique name for the object, in case there are multiple objects with the same name.
-		$name = $id.$type;
-
-		// Get the format, and the proper extension for the format.
-		$format = $object->MetaData->ContentMetaData->Format;
-		$extension = MimeTypeHandler::mimeType2FileExt( $format );
-
-		// Retrieve file data.
-		$filePath = null;
-		if( isset( $object->Files[0]->FilePath ) ) {
-			$filePath = $object->Files[0]->FilePath;
-		}
-
-		$exportName = TEMPDIRECTORY.'/'.$name.$extension;
-
-		// Check and create the FACEBOOK_DIRECTORY as needed.
-		if( !is_dir( TEMPDIRECTORY ) ) {
-			require_once BASEDIR.'/server/utils/FolderUtils.class.php';
-			FolderUtils::mkFullDir( TEMPDIRECTORY );
-		}
-
-		// Check if the directory was created.
-		if( !is_dir( TEMPDIRECTORY ) ) {
-			$msg = 'The Facebook directory: "'.TEMPDIRECTORY.'" does not exist, or could not be created.';
-			$detail = 'The directory "'.TEMPDIRECTORY.'" could not be created. Either create it manually and '
-				.'ensure the web server can write to it, or check that the webserver has rights to write to the sub-'
-				.'directories in the path.';
-
-			throw new BizException( null, 'Server', $detail, $msg );
-		}
-
-		if( is_string( $filePath ) ) {
-			$content = file_get_contents( $filePath );
-		} else {
-			$content = $object->Files[0]->Content->options['attachment']['body'];
-		}
-
-		if( is_null( $content ) ) {
-			$msg = 'Could not retrieve file contents';
-			$detail = ( is_string( $filePath ) ) ? $filePath : 'Attachment ('.$id.')';
-			$detail .= ' did not yield proper content.';
-			throw new BizException( null, 'Server', $detail, $msg );
-		}
-
-		$fp = fopen( $exportName, 'w+' );
-
-		if( !$fp ) {
-			$msg = 'Saving local file failed.';
-			$detail = 'Cannot store file: '.$exportName;
-			throw new BizException( null, 'Server', $detail, $msg );
-		}
-
-		fputs( $fp, $content );
-		fclose( $fp );
-
-		// Check if the file was created.
-		if( !file_exists( $exportName ) ) {
-			$detail = 'File: '.$exportName.' for '.$type.', object (ID: '.$id.') Does not seem to be a valid file.';
-			$msg = 'Unable to save '.$type.' data locally.';
-			throw new BizException( null, 'Server', $detail, $msg );
-		}
-
-		return $exportName;
-	}
-
-	/**
 	 * We provide our own icons to show in UI for our Facebook channels.
 	 * Icons are provided in our plug-ins folder as read by the core server:
 	 *   plugins/Facebook/pubchannelicons
@@ -598,34 +497,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	public function hasPubChannelIcons()
 	{
 		return true;
-	}
-
-	/**
-	 * Uses the GetObjectsService to return a business object by its id.
-	 *
-	 * Retrieves the business object by id, uses the WflGetObjectsService to retrieve
-	 * the object.
-	 *
-	 * @param string $id The id of the object to be retrieved.
-	 * @param null $userName The username to use when retrieving the object.
-	 * @param bool $lock Whether to lock the object or not.
-	 * @param string $rendition Rendition option.
-	 * @param array $requestInfo Request specific information by changing the array.
-	 * @return null|Object $object The retrieved object.
-	 * @see /Enterprise/Enterprise/server/bizclasses/BizObject.class.php
-	 */
-	private function getObject( $id, $userName = null, $lock = false, $rendition = 'native', $requestInfo = array() )
-	{
-		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
-
-		// Attempt to get the username from the session.
-		if( is_null( $userName ) ) {
-			$userName = BizSession::getShortUserName();
-		}
-
-		// Retrieve the object and return it if present.
-		$object = BizObject::getObject( $id, $userName, $lock, $rendition, $requestInfo );
-		return ( $object instanceof Object ) ? $object : null;
 	}
 
 	/**

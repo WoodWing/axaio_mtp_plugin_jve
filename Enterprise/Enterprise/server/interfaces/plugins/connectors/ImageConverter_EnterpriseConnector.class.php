@@ -320,6 +320,8 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 
 	/**
 	 * Executes all image conversion operations (as defined before) at once.
+	 *
+	 * @return bool Whether or not conversion was successful.
 	 */
 	abstract public function convertImage();
 
