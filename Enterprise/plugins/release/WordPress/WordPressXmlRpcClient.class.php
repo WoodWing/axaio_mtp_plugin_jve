@@ -349,7 +349,7 @@ class WordPressXmlRpcClient
 		$rpc = new IXR_Client( $this->url );
 		$status = $rpc->query( 'metaWeblog.newMediaObject', 0, $this->userName,	$this->password, $data );
 		if( !$status ) {
-			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', '' );
+			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $rpc->getErrorMessage() );
 		}
 
 		return $rpc->getResponse();
@@ -417,7 +417,7 @@ class WordPressXmlRpcClient
 		$rpc = new IXR_Client( $this->url );
 		$status = $rpc->query( 'ngg.uploadImage', 0, $this->userName,	$this->password, $data );
 		if( !$status ) {
-			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', 'Publishing the image failed. Please contact your system administrator' );
+			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $rpc->getErrorMessage() );
 		}
 
 		return $rpc->getResponse();

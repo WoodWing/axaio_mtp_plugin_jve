@@ -662,6 +662,10 @@ class IXR_Client
         $request .= $xml;
 
         // Now send the request
+        $debugMode = LogHandler::debugMode();
+        if( $debugMode ) {
+            LogHandler::logService( $method, $xml, true, 'xmlrpc', 'xml' );
+        }
         if ($this->debug) {
             echo '<pre class="ixr_request">'.htmlspecialchars($request)."\n</pre>\n\n";
         }
@@ -710,16 +714,25 @@ class IXR_Client
         if (!$this->message->parse()) {
             // XML error
             $this->error = new IXR_Error(-32700, 'parse error. not well formed');
+            if( $debugMode ) {
+                LogHandler::logService( $method, $contents, null, 'xmlrpc', 'xml' );
+            }
             return false;
         }
 
         // Is the message a fault?
         if ($this->message->messageType == 'fault') {
             $this->error = new IXR_Error($this->message->faultCode, $this->message->faultString);
+            if( $debugMode ) {
+                LogHandler::logService( $method, $contents, null, 'xmlrpc', 'xml' );
+            }
             return false;
         }
 
         // Message must be OK
+        if( $debugMode ) {
+            LogHandler::logService( $method, $contents, true, 'xmlrpc', 'xml' );
+        }
         return true;
     }
 
