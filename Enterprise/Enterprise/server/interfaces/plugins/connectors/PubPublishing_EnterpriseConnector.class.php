@@ -26,8 +26,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * @param Object $dossier            [writable]
 	 * @param Object[] $objectsInDossier [writable]
 	 * @param PubPublishTarget $publishTarget
-	 * 
-	 * @return array of PubField containing information from publishing system
+	 * @return PubField[] containing information from publishing system
 	 */	
 	abstract public function publishDossier( &$dossier, &$objectsInDossier, $publishTarget );
 		
@@ -67,8 +66,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * @param Object $dossier            [writable]
 	 * @param Object[] $objectsInDossier [writable]
 	 * @param PubPublishTarget $publishTarget
-	 *
-	 * @return array of PubField containing information from publishing system
+	 * @return PubField[] containing information from publishing system
 	 */	
 	abstract public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget );
 	/*	Example algorithm
@@ -107,8 +105,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * @param Object $dossier            [writable]
 	 * @param Object[] $objectsInDossier [writable]
 	 * @param PubPublishTarget $publishTarget
-	 *
-	 * @return array of PubField containing information from publishing system
+	 * @return PubField[] containing information from publishing system
 	 */	
 	abstract public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget );
 	/*	Example algorithm
