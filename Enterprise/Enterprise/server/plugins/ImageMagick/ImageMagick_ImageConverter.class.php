@@ -62,6 +62,7 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 	 */
 	public function convertImage()
 	{
+		$retVal = false;
 		if( $this->applyCrop || $this->applyScale || $this->applyRotate || $this->applyMirror || $this->applyResize ) {
 
 			$this->addCommonParams();
@@ -96,8 +97,9 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 				escapeshellarg( $this->outputFilePath )
 			));
 			require_once BASEDIR . '/server/plugins/ImageMagick/ImageMagick.class.php';
-			ImageMagick::imageMagickCmd( $cmdName, $cmdLine );
+			$retVal = ImageMagick::imageMagickCmd( $cmdName, $cmdLine ) == 0;
 		}
+		return $retVal;
 	}
 
 	/**

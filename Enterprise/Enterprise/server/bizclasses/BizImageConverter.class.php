@@ -110,20 +110,22 @@ class BizImageConverter
 			$this->outputImageAttachment->FilePath ) );
 		BizServerPlugin::runConnector( $connector, 'setInputDimension', array(
 			$this->inputImageProps['Width'], $this->inputImageProps['Height'], $this->inputImageProps['Dpi'] ) );
-		if( $placement->ContentDx || $placement->ContentDy ||
-			 $this->inputImageProps['Width'] != $placement->Width ||
-			 $this->inputImageProps['Height'] != $placement->Height ) {
-			$left = $placement->ScaleX ? -$placement->ContentDx / $placement->ScaleX : -$placement->ContentDx;
-			$top = $placement->ScaleY ? -$placement->ContentDy / $placement->ScaleY : -$placement->ContentDy;
-			$width = $placement->ScaleX ? $placement->Width / $placement->ScaleX : $placement->Width;
-			$height = $placement->ScaleY ? $placement->Height / $placement->ScaleY : $placement->Height;
-			BizServerPlugin::runConnector( $connector, 'crop', array( $left, $top, $width, $height, 'points' ) );
+		if( $placement->Width && $placement->Height ) {
+			if( $placement->ContentDx || $placement->ContentDy ||
+				$this->inputImageProps['Width'] != $placement->Width ||
+				$this->inputImageProps['Height'] != $placement->Height
+			) {
+				$left = $placement->ScaleX ? -$placement->ContentDx / $placement->ScaleX : -$placement->ContentDx;
+				$top = $placement->ScaleY ? -$placement->ContentDy / $placement->ScaleY : -$placement->ContentDy;
+				$width = $placement->ScaleX ? $placement->Width / $placement->ScaleX : $placement->Width;
+				$height = $placement->ScaleY ? $placement->Height / $placement->ScaleY : $placement->Height;
+				BizServerPlugin::runConnector( $connector, 'crop', array( $left, $top, $width, $height, 'points' ) );
+			}
 		}
 		if( $placement->ScaleX || $placement->ScaleY ) {
 			BizServerPlugin::runConnector( $connector, 'scale', array( $placement->ScaleX, $placement->ScaleY ) );
 		}
-		BizServerPlugin::runConnector( $connector, 'convertImage', array() );
-		return true;
+		return BizServerPlugin::runConnector( $connector, 'convertImage', array() );
 	}
 
 	/**
@@ -185,7 +187,8 @@ class BizImageConverter
 	{
 		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
 		$fileExt = MimeTypeHandler::mimeType2FileExt( $format, $objectType );
-		$fileNameOut = sys_get_temp_dir().'/imgcnv_'.NumberUtils::createGUID().$fileExt;
+		$systemTempDir = rtrim( sys_get_temp_dir(), '/\\' );
+		$fileNameOut = $systemTempDir.'/imgcnv_'.NumberUtils::createGUID().$fileExt;
 		// Note that tempnam() does not give file extensions.
 		$fileResOut = fopen( $fileNameOut, 'wb' );
 		if( !$fileResOut ) {

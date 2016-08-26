@@ -11,7 +11,10 @@ require_once BASEDIR . '/server/interfaces/plugins/connectors/AdminProperties_En
 
 class Facebook_AdminProperties extends AdminProperties_EnterpriseConnector
 {
-	final public function getPrio()      { return self::PRIO_DEFAULT; }
+	final public function getPrio()
+	{
+		return self::PRIO_DEFAULT;
+	}
 
 	/**
 	 * Build a list of custom admin properties to show at the admin Maintenance pages.
@@ -39,17 +42,17 @@ class Facebook_AdminProperties extends AdminProperties_EnterpriseConnector
 				// Draw the Channel ID Field.
 				$widgets['C_FPF_CHANNEL_APPLICATION_ID'] = new DialogWidget(
 					new PropertyInfo( 'C_FPF_CHANNEL_APPLICATION_ID', 'Application ID', null, 'string', '' ),
-					new PropertyUsage( 'C_FPF_CHANNEL_APPLICATION_ID', true, true, false ));
+					new PropertyUsage( 'C_FPF_CHANNEL_APPLICATION_ID', true, true, false ) );
 
 				// Draw the Channel Secret Field.
 				$widgets['C_FPF_CHANNEL_APP_SECRET'] = new DialogWidget(
 					new PropertyInfo( 'C_FPF_CHANNEL_APP_SECRET', 'Application Secret', null, 'string', '' ),
-					new PropertyUsage( 'C_FPF_CHANNEL_APP_SECRET', true, true, false ));
+					new PropertyUsage( 'C_FPF_CHANNEL_APP_SECRET', true, true, false ) );
 
 				// Draw the Channel Page ID.
 				$widgets['C_FPF_CHANNEL_PAGE_ID'] = new DialogWidget(
 					new PropertyInfo( 'C_FPF_CHANNEL_PAGE_ID', 'Page ID', null, 'string', '' ),
-					new PropertyUsage( 'C_FPF_CHANNEL_PAGE_ID', true, true, false ));
+					new PropertyUsage( 'C_FPF_CHANNEL_PAGE_ID', true, true, false ) );
 				break;
 			case 'Issue':
 				break;
@@ -68,39 +71,42 @@ class Facebook_AdminProperties extends AdminProperties_EnterpriseConnector
 	 * - PublishSystem of the PubChannel should match our plugin's
 	 * - Entity should match 'PubChannel' as we only want the data for the channel.
 	 *
-	 * @param $context The context to check.
-	 * @param $entity The entity to check.
-     * @param $action The action to check
+	 * @param AdminProperties_Context $context The context to check.
+	 * @param string $entity The entity to check.
+	 * @param string $action The action to check
 	 * @return bool Whether or not the context/entity match the requirements.
 	 */
-    private function isCorrectPublishSystem($context, $entity, $action)
+	private function isCorrectPublishSystem( $context, $entity, $action )
 	{
-        $match = false;
-        $isSystemChanged = false;
+		$match = false;
+		$isSystemChanged = false;
 
-            if( $entity == 'PubChannel'  && $action != 'Create') {
+		if( $entity == 'PubChannel' && $action != 'Create' ) {
 
-                if ($action == 'Update') {
-                $pubChannel = $context->getPubChannel();
-                $publishSystem = $pubChannel->PublishSystem;
-                $chanType = $pubChannel->Type;
-                if($chanType != 'web' || $publishSystem != 'Facebook' ) {
-                    $isSystemChanged = true;
-                }
-            }
-                $pubChannel = $context->getPubChannel();
-                $publishSystem = $pubChannel->PublishSystem;
-                $chanType = $pubChannel->Type;
-                if($chanType == 'web' && $publishSystem == 'Facebook' && !$isSystemChanged) {
-                    $match = true;
-                }
-        }
+			if( $action == 'Update' ) {
+				$pubChannel = $context->getPubChannel();
+				$publishSystem = $pubChannel->PublishSystem;
+				$chanType = $pubChannel->Type;
+				if( $chanType != 'web' || $publishSystem != 'Facebook' ) {
+					$isSystemChanged = true;
+				}
+			}
+			$pubChannel = $context->getPubChannel();
+			$publishSystem = $pubChannel->PublishSystem;
+			$chanType = $pubChannel->Type;
+			if( $chanType == 'web' && $publishSystem == 'Facebook' && !$isSystemChanged ) {
+				$match = true;
+			}
+		}
 		return $match;
 	}
 
 	/**
 	 * Collect all possible custom properties for the given entity to extend the DB model.
 	 * See AdminProperties_EnterpriseConnector interface for details.
+	 *
+	 * @param string $entity
+	 * @return DialogWidget[]
 	 */
 	final public function collectDialogWidgets( $entity )
 	{
@@ -110,24 +116,31 @@ class Facebook_AdminProperties extends AdminProperties_EnterpriseConnector
 	/**
 	 * Collect custom properties for the given context to travel along with the entity instance.
 	 * See AdminProperties_EnterpriseConnector interface for details.
+	 *
+	 * @param AdminProperties_Context $context
+	 * @param string $entity
+	 * @param string $action
+	 * @return DialogWidget[]
 	 */
 	public function collectDialogWidgetsForContext( AdminProperties_Context $context, $entity, $action )
 	{
-		$action = $action; // keep analyzer happy
-
-		return ($this->isCorrectPublishSystem($context, $entity, $action))
-			? $this->doCollectDialogWidgets( $entity, 'extend_entity')
+		return ( $this->isCorrectPublishSystem( $context, $entity, $action ) )
+			? $this->doCollectDialogWidgets( $entity, 'extend_entity' )
 			: array();
 	}
 
 	/**
 	 * Add (or adjust) given dialog widgets ($showWidgets) to show admin user for given entity+action.
 	 * See AdminProperties_EnterpriseConnector interface for details.
+	 *
+	 * @param AdminProperties_Context $context
+	 * @param string $entity
+	 * @param string $action
+	 * @param DialogWidget[] $allWidgets
+	 * @param DialogWidget[] $showWidgets
 	 */
 	final public function buildDialogWidgets( AdminProperties_Context $context, $entity, $action, $allWidgets, &$showWidgets )
 	{
-		$action = $action; $allWidgets = $allWidgets; // keep code analyzer happy
-
 		// This way you can grab contextual data:
 		//$pubObj = $context->getPublication();
 		//$channelObj = $context->getPubChannel();
@@ -135,7 +148,7 @@ class Facebook_AdminProperties extends AdminProperties_EnterpriseConnector
 
 		// Add our custom props depending on the given admin entity.
 		// Let's simply add our custom props at the end of all properties.
-		if ($this->isCorrectPublishSystem($context, $entity, $action)) {
+		if( $this->isCorrectPublishSystem( $context, $entity, $action ) ) {
 			$showWidgets += $this->doCollectDialogWidgets( $entity, 'draw_dialog' );
 		}
 	}

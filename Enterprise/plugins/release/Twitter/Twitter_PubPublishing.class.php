@@ -406,29 +406,83 @@ class Twitter_PubPublishing extends PubPublishing_EnterpriseConnector
         return $text;
     }
 
-    private function getMediaToSend($objectsInDossier) {
-        require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
-        $images = array();
-        foreach ($objectsInDossier as $child) {
-            if ($child->MetaData->BasicMetaData->Type == 'PublishForm') {
-	            $publishFormOBJS = BizPublishForm::getFormFields($child);
-	            break;
-            }
-        }
-
-	    // This is needed because the getFormField returns an object when there is only 1 object else it returns an array
-	    if(isset($publishFormOBJS['C_TPF_MEDIA_SELECTOR'])){
-		    if(count($publishFormOBJS['C_TPF_MEDIA_SELECTOR']) > 1){
-			    foreach ( $publishFormOBJS['C_TPF_MEDIA_SELECTOR'] as $image){
-				    $images[] = $image->Files[0]->FilePath;
-			    }
-		    }else if(count($publishFormOBJS['C_TPF_MEDIA_SELECTOR']) == 1){
-			    $images[] = $publishFormOBJS['C_TPF_MEDIA_SELECTOR']->Files[0]->FilePath;
+	/**
+	 * Resolves the images to be published from the publish form of the given dossier.
+	 *
+	 * @param Object[] $objectsInDossier
+	 * @return string[] File paths of images to publish.
+	 * @throws BizException
+	 */
+    private function getMediaToSend( $objectsInDossier )
+    {
+	    require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
+	    $imagePaths = array();
+	    $publishForm = null;
+	    $publishFormFields = null;
+	    foreach( $objectsInDossier as $child ) {
+		    if( $child->MetaData->BasicMetaData->Type == 'PublishForm' ) {
+			    $publishForm = $child;
+			    $publishFormObjects = BizPublishForm::getFormFields( $publishForm );
+			    break;
 		    }
 	    }
 
-        return $images;
+	    if( $publishForm && isset( $publishFormObjects['C_TPF_MEDIA_SELECTOR'] ) ) {
+		    $imageObjects = $publishFormObjects['C_TPF_MEDIA_SELECTOR'];
+		    if( is_object( $imageObjects ) ) {
+			    // The getFormField returns an object when there is only 1 object else it returns an array.
+			    $imageObjects = array( $imageObjects );
+		    }
+		    if( $imageObjects ) foreach( $imageObjects as $imageObject ) {
+			    $imageId = $imageObject->MetaData->BasicMetaData->ID;
+			    $imageAttachment = $this->getCroppedImage( $publishForm, $imageId, 'C_TPF_MEDIA_SELECTOR' );
+			    if( !$imageAttachment ) {
+				    $imageAttachment = $imageObject->Files[0]; // fallback to native image
+			    }
+			    if( $imageAttachment ) {
+				    $imagePaths[] = $imageAttachment->FilePath;
+			    }
+		    }
+	    }
+
+	    return $imagePaths;
     }
+
+	/**
+	 * Retrieves an image crop made on a given Publish Form.
+	 *
+	 * The end user may have cropped the image placed on the Publish Form.
+	 * When a crop is found, the caller should prefer the cropped image (over the native image).
+	 *
+	 * The cropped image is dynamically set by the core server during the publish operation at Placement->ImageCropAttachment.
+	 * Note that this property is not defined in the WSDL. When the property is missing, there is no crop.
+	 *
+	 * @since 10.1.0
+	 * @param Object $publishForm The form object being published.
+	 * @param string $childId Id of placed image object to get the attachment for.
+	 * @param integer $formWidgetId The field of the publish form the child object could be placed on.
+	 * @return Attachment|null The cropped image. NULL when no crop found.
+	 */
+	private function getCroppedImage( $publishForm, $childId, $formWidgetId )
+	{
+		$cropppedImage = null;
+		foreach( $publishForm->Relations as $relation ) {
+			if( $relation->Type == 'Placed' &&
+				$relation->Child == $childId &&
+				$relation->Parent == $publishForm->MetaData->BasicMetaData->ID
+			) {
+				foreach( $relation->Placements as $placement ) {
+					if( $placement->FormWidgetId &&
+						$placement->FormWidgetId == $formWidgetId &&
+						isset( $placement->ImageCropAttachment )
+					) {
+						$cropppedImage = $placement->ImageCropAttachment;
+					}
+				}
+			}
+		}
+		return $cropppedImage;
+	}
 
 	/**
 	 * Get file info widgets

@@ -121,9 +121,9 @@ class Drupal8_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConnec
 	private function getFieldsFromDrupal($pubChannelInfo, $contentType=null)
 	{
 		require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php'; // PubPublishTarget
-		require_once dirname(__FILE__).'/DrupalXmlRpcClient.class.php';
+		require_once dirname(__FILE__).'/XmlRpcClient.class.php';
 		$publishTarget = new PubPublishTarget( $pubChannelInfo->Id );
-		$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
+		$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient($publishTarget);
 		return $drupalXmlRpcClient->getFields( $contentType );
 	}
 

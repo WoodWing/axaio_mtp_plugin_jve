@@ -152,7 +152,7 @@ class WW_TestSuite_HealthCheck2_Drupal8Publish_TestCase extends TestCase
 	 */
 	private function validateDrupalConnection( $publicationId, $pubChannel )
 	{	
-		require_once dirname(__FILE__) . '/../../DrupalXmlRpcClient.class.php';
+		require_once dirname(__FILE__) . '/../../XmlRpcClient.class.php';
 
 		$channelUrl = SERVERURL_ROOT.INETROOT.'/server/admin/editChannel.php?publid='.$publicationId.'&channelid='.$pubChannel->Id;
 		$help = 'Check the settings in the Drupal8/config.php file.';
@@ -161,7 +161,7 @@ class WW_TestSuite_HealthCheck2_Drupal8Publish_TestCase extends TestCase
 			$errorMessage = '';
 			
 			// Test the configuration.
-			$result = DrupalXmlRpcClient::testConfig( $pubChannel );
+			$result = WW_Plugins_Drupal8_XmlRpcClient::testConfig( $pubChannel );
 
 			$header = 'Drupal errors for Publication Channel "'.$pubChannel->Name.'":<br />'.PHP_EOL;
 			// don't show output from the above request on test page
