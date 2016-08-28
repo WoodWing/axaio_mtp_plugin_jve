@@ -33,25 +33,34 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function publishDossier( &$dossier, &$objectsInDossier, $publishTarget ) 
 	{
+		// Bail out if there is no publish form in the dossier (should never happen).
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
+		}
+
+		// Prepare post content.
 		$pubFields = array();
+		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
 
-		if( $objectsInDossier ) foreach ( $objectsInDossier as $objectInDossier ) {
-			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
-				// Prepare post content.
-				$postContents = $this->preparePost( $objectInDossier, $objectsInDossier, $dossier, $publishTarget, 'publish' );
-
-				try {
-					$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
-					$postId = $objXMLRPClientWordPress->uploadPost( $postContents );
-					if( $postId ) {
-						$dossier->ExternalId = $postId;
-						$url = $this->getPostUrl( $postId, $publishTarget );
-						$pubFields[] = new PubField( 'URL', 'string', array( $url ) );
-					}
-				} catch( BizException $e ) {
-					$this->reThrowDetailedError( $objectInDossier, $e, 'PublishDossier' );
-				}
+		$e = null;
+		try {
+			$postContents = $this->preparePost( $publishForm, $publishFormObjects, $dossier, $objectsInDossier, $publishTarget, 'publish' );
+			$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+			$postId = $objXMLRPClientWordPress->uploadPost( $postContents );
+			if( $postId ) {
+				$dossier->ExternalId = $postId;
+				$url = $this->getPostUrl( $postId, $publishTarget );
+				$pubFields[] = new PubField( 'URL', 'string', array( $url ) );
 			}
+		} catch( BizException $e ) {
+		}
+
+		// Remove temp files from transfer server folder as prepared by getFormFields().
+		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
+
+		if( $e ) {
+			$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
 		}
 		return $pubFields;
 	}
@@ -63,15 +72,15 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * With the action parameter 'publish' or 'update' can be given to determine which action should be done.
 	 *
 	 * @param Object $publishForm PublishForm object
-	 * @param array $objectsInDossier Array of Objects
+	 * @param Object[] $publishFormOBJS Objects placed on the Publish Form
 	 * @param Object $dossier
+	 * @param Object[] $objectsInDossier Objects contained by dossier
 	 * @param PubPublishTarget $publishTarget
 	 * @param $action
-	 *
 	 * @return array $postContent
 	 * @throws BizException
 	 */
-	private function preparePost( $publishForm, $objectsInDossier, $dossier, $publishTarget, $action )
+	private function preparePost( $publishForm, $publishFormOBJS, $dossier, $objectsInDossier, $publishTarget, $action )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 		$postContent = array();
@@ -94,8 +103,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 			$featuredImagesCustomField = null;
 			$galleriesCustomField = null;
 			$galleryId = null;
-
-			$publishFormOBJS = BizPublishForm::getFormFields( $publishForm );
 
 			// Get the title
 			$title = isset( $publishFormOBJS['C_WORDPRESS_POST_TITLE'] ) ? $publishFormOBJS['C_WORDPRESS_POST_TITLE'][0] : null;
@@ -171,6 +178,20 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 			} else { // create a new gallery
 				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget, null, $dossier->MetaData->BasicMetaData->Name,
 					$attachments, isset( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] ) );
+			}
+
+			// Cleanup the temporary created images files.
+			if( $attachments ) {
+				require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+				$transferServer = new BizTransferServer();
+				foreach( $attachments as $attachment ) {
+					$composedFilePath = $transferServer->composeTransferPath( basename( $attachment->FilePath ) );
+					if( $composedFilePath == $attachment->FilePath ) { // native files are stored in the transfer folder.
+						$transferServer->deleteFile( $attachment->FilePath );
+					} else { // cropped images are stored in the system temp folder.
+						unlink( $attachment->FilePath );
+					}
+				}
 			}
 
 			if( isset( $uploadImagesResult['attachments'] ) ) {
@@ -406,22 +427,31 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
+		// Bail out if there is no publish form in the dossier (should never happen).
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
+		}
+
+		// Prepare post content.
 		$pubFields = array();
+		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
 
-		if( $objectsInDossier ) foreach ( $objectsInDossier as $objectInDossier ) {
-			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
-				// Prepare post content.
-				$postContents = $this->preparePost( $objectInDossier, $objectsInDossier, $dossier, $publishTarget, 'update' );
+		$e = null;
+		try {
+			$postContents = $this->preparePost( $publishForm, $publishFormObjects, $dossier, $objectsInDossier, $publishTarget, 'update' );
+			$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+			$objXMLRPClientWordPress->uploadPost( $postContents, $dossier->ExternalId );
+			$url = $this->getPostUrl( $dossier->ExternalId, $publishTarget );
+			$pubFields[] = new PubField( 'URL', 'string', array( $url ) );
+		} catch( BizException $e ) {
+		}
 
-				try {
-					$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
-					$objXMLRPClientWordPress->uploadPost( $postContents, $dossier->ExternalId );
-					$url = $this->getPostUrl( $dossier->ExternalId, $publishTarget );
-					$pubFields[] = new PubField( 'URL', 'string', array( $url ) );
-				} catch( BizException $e ) {
-					$this->reThrowDetailedError( $objectInDossier, $e, 'PublishDossier' );
-				}
-			}
+		// Remove temp files from transfer server folder as prepared by getFormFields().
+		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
+
+		if( $e ) {
+			$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
 		}
 		return $pubFields;
 	}
@@ -741,24 +771,34 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		$pubFields = array();
-
-		if( $objectsInDossier ) foreach ( $objectsInDossier as $objectInDossier ) {
-			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
-				// Prepare post content.
-				$postContents = $this->preparePost( $objectInDossier, $objectsInDossier, $dossier, $publishTarget, 'preview' );
-
-				try {
-					$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
-					$result = $objXMLRPClientWordPress->uploadPost( $postContents, null, true );
-					if( $result ) {
-						$pubFields[] = new PubField( 'URL', 'string', array( $result ) );
-					}
-				} catch( BizException $e ) {
-					throw new BizException( 'WORDPRESS_ERROR_PREVIEW', 'SERVER', 'ERROR', null, array( $objectInDossier->MetaData->BasicMetaData->Name ) );
-				}
-			}
+		// Bail out if there is no publish form in the dossier (should never happen).
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
 		}
+
+		// Prepare post content.
+		$pubFields = array();
+		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
+
+		$e = null;
+		try {
+			$postContents = $this->preparePost( $publishForm, $publishFormObjects, $dossier, $objectsInDossier, $publishTarget, 'preview' );
+			$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+			$result = $objXMLRPClientWordPress->uploadPost( $postContents, null, true );
+			if( $result ) {
+				$pubFields[] = new PubField( 'URL', 'string', array( $result ) );
+			}
+		} catch( BizException $e ) {
+		}
+
+		// Remove temp files from transfer server folder as prepared by getFormFields().
+		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
+
+		if( $e ) {
+			throw new BizException( 'WORDPRESS_ERROR_PREVIEW', 'SERVER', 'ERROR', null, array( $publishForm->MetaData->BasicMetaData->Name ) );
+		}
+
 		return $pubFields;
 	}
 

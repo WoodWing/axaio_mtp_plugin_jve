@@ -91,6 +91,27 @@ class BizPublishForm
 	}
 
 	/**
+	 * Removes all files from the transfer server that were prepared by the getFormFields() function.
+	 *
+	 * @param array $fieldProperties The returned data from getFormFields()
+	 */
+	static public function cleanupFilesReturnedByGetFormFields( $fieldProperties )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+		$transferServer = new BizTransferServer();
+		if( $fieldProperties ) foreach( $fieldProperties as $formWidgetId => $objects ) {
+			if( is_object( $objects ) ) {
+				$objects = array( $objects );
+			}
+			if( $objects ) foreach( $objects as $object ) {
+				if( is_object( $object ) && $object->Files ) foreach( $object->Files as $attachment ) {
+					$transferServer->deleteFile( $attachment->FilePath );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Returns the requested field by name from the PublishForm.
 	 *
 	 * First checks the Objects MetaData to find the field, if found it is returned to the user. If the field could not
@@ -330,9 +351,7 @@ class BizPublishForm
 	static private function extractPlainTextElements( $articleObject )
 	{
 		$elements = array();
-		$attachments = self::getAttachments($articleObject);
-		$attachment = $attachments[0];
-		$content = self::getAttachmentContents( $attachment );
+		$content = self::getArticleContents( $articleObject );
 
 		$element = new stdClass();
 		$element->Label = 'body';
@@ -366,9 +385,7 @@ class BizPublishForm
 	static private function extractHtmlElements( $articleObject )
 	{
 		$elements = array();
-		$attachments = self::getAttachments($articleObject);
-		$attachment = $attachments[0];
-		$content = self::getAttachmentContents( $attachment );
+		$content = self::getArticleContents( $articleObject );
 
 		$element = new stdClass();
 		$element->Label = 'body';
@@ -416,9 +433,7 @@ class BizPublishForm
 	static private function extractWweaElements( $articleObject )
 	{
 		$elements = array();
-		$attachments = self::getAttachments($articleObject);
-		$attachment = $attachments[0];
-		$content = self::getAttachmentContents( $attachment );
+		$content = self::getArticleContents( $articleObject );
 
 		$eaDoc = new DOMDocument();
 		$eaDoc->loadXML($content);
@@ -481,9 +496,7 @@ class BizPublishForm
 	static private function extractWcmlArticleElements( $articleObject )
 	{
 		$elements = array();
-		$attachments = self::getAttachments($articleObject);
-		$attachment = $attachments[0];
-		$content = self::getAttachmentContents( $attachment );
+		$content = self::getArticleContents( $articleObject );
 		$format = $articleObject->MetaData->ContentMetaData->Format;
 
 		// Convert article into XHTML frames (tinyMCE compatible).
@@ -533,6 +546,7 @@ class BizPublishForm
 					if( $bizImageConverter->loadNativeFileForInputImage( $imgId ) &&
 						$bizImageConverter->cropAndScaleImageByPlacement( $placement ) ) {
 						$inlineImages[ $imgId ] = $bizImageConverter->getOutputImageAttachment();
+						$bizImageConverter->cleanupNativeFileForInputImage();
 					} else { // fallback at native rendition
 						$inlineImages[ $imgId ] = $bizImageConverter->getInputImageAttachment();
 					}
@@ -587,16 +601,27 @@ class BizPublishForm
 	}
 
 	/**
-	 * Retrieves the file contents for an Attachment.
+	 * Retrieves the file contents for a given article.
 	 *
-	 * @param Attachment $attachment The attachment for which to get the contents.
+	 * @param Object $articleObject The article for which to get the contents.
 	 * @return string
 	 */
-	static private function getAttachmentContents( $attachment )
+	static private function getArticleContents( $articleObject )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 		$transferServer = new BizTransferServer();
-		return $transferServer->getContent($attachment);
+
+		$attachments = self::getAttachments( $articleObject );
+		$content = $transferServer->getContent( $attachments[0] );
+
+		// Cleanup the temp images from the transfer folder.
+		if( $attachments ) {
+			$transferServer = new BizTransferServer();
+			foreach( $attachments as $attachment ) {
+				$transferServer->deleteFile( $attachment->FilePath );
+			}
+		}
+		return $content;
 	}
 
 	/**
@@ -753,5 +778,24 @@ class BizPublishForm
 		}
 
 		return $found;
+	}
+
+	/**
+	 * Returns a Publish Form in a list of objects (typically all objects contained by a dossier).
+	 *
+	 * @since 10.1.0
+	 * @param Object[]|null $objects List to searrh through
+	 * @return Object|null The Publish Form object. NULL when not found.
+	 */
+	static public function findPublishFormInObjects( $objects )
+	{
+		$publishForm = null;
+		if( $objects ) foreach( $objects as $object ) {
+			if( $object->MetaData->BasicMetaData->Type == 'PublishForm' ) {
+				$publishForm = $object;
+				break;
+			}
+		}
+		return $publishForm;
 	}
 }

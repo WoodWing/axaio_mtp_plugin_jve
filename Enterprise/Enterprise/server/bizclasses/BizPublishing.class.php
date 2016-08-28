@@ -2027,6 +2027,7 @@ class BizPublishing
 	 *
 	 * For example: PublishForm Object -> Relations[0] -> Placements[0] -> ImageCropAttachment (type: Attachment)
 	 *
+	 * @since 10.1.0
 	 * @param Object[] $objects
 	 */
 	private function handleImageConversion( array $objects )
@@ -2038,7 +2039,6 @@ class BizPublishing
 				foreach( $object->Relations as $relation ) {
 					if( $relation->Type == 'Placed' && $relation->ChildInfo->Type == 'Image' &&
 						$bizImageConverter->loadNativeFileForInputImage( $relation->ChildInfo->ID )) {
-
 						foreach( $relation->Placements as $placement ) {
 							if( $bizImageConverter->cropAndScaleImageByPlacement( $placement ) ) {
 								// This is a ghost property which is not described in the WSDL. The publish connectors should
@@ -2046,6 +2046,7 @@ class BizPublishing
 								$placement->ImageCropAttachment = $bizImageConverter->getOutputImageAttachment();
 							}
 						}
+						$bizImageConverter->cleanupNativeFileForInputImage();
 					}
 				}
 			}

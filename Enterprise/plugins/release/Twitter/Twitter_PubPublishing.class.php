@@ -48,71 +48,83 @@ class Twitter_PubPublishing extends PubPublishing_EnterpriseConnector
     /**
      * Publishes a Dossier to Twitter.
      *
-     * @param writable Object $dossier The Dossier to be Published.
-     * @param writable array of Object $objectsInDossier The objects in the Dossier to be published.
-     * @param PubPublishTarget $publishTarget The publishing target.
-     *
-     * @return PubField[] Array of PubField(s) containing information from Twitter.
-     * */
-    public function publishDossier(&$dossier, &$objectsInDossier, $publishTarget) {
-        LogHandler::Log('Twitter', 'INFO', 'Publishing a Dossier to Twitter.');
+     * {@inheritdoc}
+     */
+    public function publishDossier( &$dossier, &$objectsInDossier, $publishTarget )
+    {
+	    require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
+	    LogHandler::Log( 'Twitter', 'INFO', 'Publishing a Dossier to Twitter.' );
 
-        // Retrieve the text to be sent to Twitter.
-        $text = $this->getTextToSend($objectsInDossier);
+	    // Bail out if there is no publish form in the dossier (should never happen).
+	    $publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+	    if( !$publishForm ) {
+		    return array();
+	    }
 
-        $twitConn = new EnterpriseTwitterConnector();
-        $twitter = $twitConn->getTwitter($publishTarget->IssueID);
+	    // Take the objects that are placed on the publish form.
+	    $publishFormObjects = BizPublishForm::getFormFields( $publishForm );
 
-        // Post the text to Twitter.
-        try {
-	        $mediaFiles = $this->getMediaToSend($objectsInDossier);
-	        $mediaIds = array();
+	    // Retrieve the text and files to be sent to Twitter.
+	    $text = $this->getTextToSend( $objectsInDossier );
+	    $mediaFiles = $this->getMediaFilesToSend( $publishForm, $publishFormObjects );
 
-	        if ($mediaFiles) {
-		        foreach( $mediaFiles as $mediaFile){
-			        $mediaIds[] = $twitter->statusesUploadMedia( $mediaFile );
-		        }
+	    // Post the text and upload the media files to Twitter.
+	    $twitConn = new EnterpriseTwitterConnector();
+	    $e = null;
+	    $response = null;
+	    try {
+		    $twitter = $twitConn->getTwitter( $publishTarget->IssueID );
+		    $mediaIds = array();
+		    if( $mediaFiles ) {
+			    foreach( $mediaFiles as $mediaFile ) {
+				    $mediaIds[] = $twitter->statusesUploadMedia( $mediaFile );
+			    }
+			    $mediaIdsString = implode( ',', $mediaIds );
+		    }
+		    $response = $twitter->statusesUpdate( $text, null, $mediaIdsString );
+	    } catch( Exception $e ) {
+	    }
 
-		        $mediaIdsString = implode( ',', $mediaIds);
-            }
+	    // Remove temp files from transfer server folder as prepared by getFormFields().
+	    BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
 
-            $response = $twitter->statusesUpdate($text, null, $mediaIdsString);
+	    // Re-throw Twitter error caught before.
+	    if( $e ) {
+		    $msg = 'Error sending message to Twitter';
+		    $detail = 'Error Details: '.$e->getMessage();
+		    throw new BizException( null, 'Server', $detail, $msg );
+	    }
 
-        } catch (Exception $e) {
-            $msg = 'Error sending message to Twitter';
-            $detail = 'Error Details: ' . $e->getMessage();
-            throw new BizException(null, 'Server', $detail, $msg);
-        }
-        if ($response->isSuccess()) {
-            LogHandler::Log('Twitter', 'INFO', 'Message posted successfully.');
+	    if( $response->isSuccess() ) {
+		    LogHandler::Log( 'Twitter', 'INFO', 'Message posted successfully.' );
 
-            // Set the Dossier's external id, to be stored in the response.
-            $dossier->ExternalId = (string) $response->id_str;
-        } else {
-			if($response->error){ // this is needed because Twitter is not always giving the same errors
-				$errorCode = '0';
-				$errorMessage = $response->error;
-			} else{
-				$error = reset($response->getErrors());
-				$errorCode = $error->code;
-				$errorMessage = $error->message;
-			}
+		    // Set the Dossier's external id, to be stored in the response.
+		    $dossier->ExternalId = (string)$response->id_str;
+	    } else {
+		    if( $response->error ) { // this is needed because Twitter is not always giving the same errors
+			    $errorCode = '0';
+			    $errorMessage = $response->error;
+		    } else {
+			    $error = reset( $response->getErrors() );
+			    $errorCode = $error->code;
+			    $errorMessage = $error->message;
+		    }
 
-            $detail = 'Received error: ' . $errorCode;
-            $msg = "Error sending message to Twitter:\n" . $errorMessage;
-            throw new BizException(null, 'Server', $detail, $msg);
-        }
+		    $detail = 'Received error: '.$errorCode;
+		    $msg = "Error sending message to Twitter:\n".$errorMessage;
+		    throw new BizException( null, 'Server', $detail, $msg );
+	    }
 
-        // Return a new PubField containing the URL for the Twitter message.
-        $url = 'http://twitter.com/' . $twitConn->getUserName($publishTarget->IssueID) . '/status/'
-                . $dossier->ExternalId;
+	    // Return a new PubField containing the URL for the Twitter message.
+	    $url = 'http://twitter.com/'.$twitConn->getUserName( $publishTarget->IssueID ).'/status/'
+		    .$dossier->ExternalId;
 
-        $pubFields = array();
-        $pubFields[] = self::getNewPubField('URL', 'string', array($url));
-        $pubFields[] = self::getNewPubField('Id', 'string', array($dossier->ExternalId));
-        $pubFields[] = self::getNewPubField('Text', 'string', array($text));
+	    $pubFields = array();
+	    $pubFields[] = self::getNewPubField( 'URL', 'string', array( $url ) );
+	    $pubFields[] = self::getNewPubField( 'Id', 'string', array( $dossier->ExternalId ) );
+	    $pubFields[] = self::getNewPubField( 'Text', 'string', array( $text ) );
 
-        return $pubFields;
+	    return $pubFields;
     }
 
     /**
@@ -409,24 +421,14 @@ class Twitter_PubPublishing extends PubPublishing_EnterpriseConnector
 	/**
 	 * Resolves the images to be published from the publish form of the given dossier.
 	 *
-	 * @param Object[] $objectsInDossier
+	 * @param Object $publishForm
+	 * @param Object[] $publishFormObjects
 	 * @return string[] File paths of images to publish.
 	 * @throws BizException
 	 */
-    private function getMediaToSend( $objectsInDossier )
+    private function getMediaFilesToSend( $publishForm, $publishFormObjects )
     {
-	    require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 	    $imagePaths = array();
-	    $publishForm = null;
-	    $publishFormFields = null;
-	    foreach( $objectsInDossier as $child ) {
-		    if( $child->MetaData->BasicMetaData->Type == 'PublishForm' ) {
-			    $publishForm = $child;
-			    $publishFormObjects = BizPublishForm::getFormFields( $publishForm );
-			    break;
-		    }
-	    }
-
 	    if( $publishForm && isset( $publishFormObjects['C_TPF_MEDIA_SELECTOR'] ) ) {
 		    $imageObjects = $publishFormObjects['C_TPF_MEDIA_SELECTOR'];
 		    if( is_object( $imageObjects ) ) {
@@ -444,7 +446,6 @@ class Twitter_PubPublishing extends PubPublishing_EnterpriseConnector
 			    }
 		    }
 	    }
-
 	    return $imagePaths;
     }
 
