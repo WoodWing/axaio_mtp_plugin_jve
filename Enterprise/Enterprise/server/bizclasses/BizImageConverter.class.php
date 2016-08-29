@@ -17,6 +17,9 @@ class BizImageConverter
 	/** @var Attachment $outputImageAttachment */
 	private $outputImageAttachment;
 
+	/** @var Object $inputImageObject */
+	private $inputImageObject;
+
 	/**
 	 * Returns the image that was used as input for image conversion.
 	 *
@@ -63,6 +66,22 @@ class BizImageConverter
 		} catch( BizException $e ) {
 		}
 		return (bool)$this->inputImageAttachment;
+	}
+
+	/**
+	 * Removes the native image file from the transfer folder that was prepared by loadNativeFileForInputImage().
+	 *
+	 * Should be called after calling loadNativeFileForInputImage() and cropAndScaleImageByPlacement().
+	 */
+	public function cleanupNativeFileForInputImage()
+	{
+		if( $this->inputImageObject && $this->inputImageObject->Files ) {
+			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+			$transferServer = new BizTransferServer();
+			foreach( $this->inputImageObject->Files as $attachment ) {
+				$transferServer->deleteFile( $attachment->FilePath );
+			}
+		}
 	}
 
 	/**

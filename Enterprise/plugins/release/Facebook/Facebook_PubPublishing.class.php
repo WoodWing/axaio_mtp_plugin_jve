@@ -44,32 +44,30 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 
 		$pubChannelId = $publishTarget->PubChannelID;
 		$facebookPublisher = new FacebookPublisher( $pubChannelId );
-
 		$pubChannelId = $publishTarget->PubChannelID;
 
 		$pageId = $facebookPublisher->pageId;
 
-		$publishForm = null;
-		$messageText = null;
-
-		// Get the Publish Form
-		foreach( $objectsInDossier as $objectInDossier ) {
-			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
-				$publishForm = $objectInDossier;
-				break;
-			}
+		// Bail out if there is no publish form in the dossier (should never happen).
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
 		}
 
+		// Take the objects that are placed on the publish form.
+		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
+
 		// Process the publish Form
-		if( !is_null( $publishForm ) ) {
+		$e = null;
+		try {
 			switch( BizPublishForm::getDocumentId( $publishForm ) ) {
 
 				// Facebook post
 				case $this->getDocumentIdPrefix().'0' :
 					// Extract the message
-					$fields = BizPublishForm::getFormFields( $publishForm );
-					$element = BizPublishForm::extractFormFieldDataFromFieldValue( 'C_FACEBOOK_PF_MESSAGE_SEL', $fields['C_FACEBOOK_PF_MESSAGE_SEL'], $publishTarget->PubChannelID) );
-					if( $element && isset( $element[0] ) && isset( $element[0]['elements'] ) && isset( $element[0]['elements'][0] ) ) {
+					$messageText = null;
+					$element = BizPublishForm::extractFormFieldDataFromFieldValue( 'C_FACEBOOK_PF_MESSAGE_SEL', $publishFormObjects['C_FACEBOOK_PF_MESSAGE_SEL'], $publishTarget->PubChannelID );
+					if( isset( $element[0]['elements'][0] ) ) {
 						$messageText = str_get_html( $element[0]['elements'][0]->Content )->plaintext;
 					}
 
@@ -104,7 +102,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 
 				// Facebook photo
 				case $this->getDocumentIdPrefix().'1' :
-					$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
 					if( isset( $publishFormObjects['C_FACEBOOK_PF_MEDIA_SEL'] ) ) {
 						$imageObjects = $publishFormObjects['C_FACEBOOK_PF_MEDIA_SEL'];
 						if( is_object( $imageObjects ) ) {
@@ -133,7 +130,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 				// Facebook photo album
 				case $this->getDocumentIdPrefix().'2' :
 					$imageCheck = false;
-					$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
 					if( isset( $publishFormObjects['C_FACEBOOK_MULTI_IMAGES'] ) ) {
 						$imageObjects = $publishFormObjects['C_FACEBOOK_MULTI_IMAGES'];
 						if( is_object( $imageObjects ) ) {
@@ -156,8 +152,19 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 					if( !$imageCheck ) {
 						throw new BizException( 'FACEBOOK_ERROR_ADD_IMAGE', 'Server', '' );
 					}
+					break;
 			}
+		} catch( BizException $e ) {
 		}
+
+		// Remove temp files from transfer server folder as prepared by getFormFields().
+		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
+
+		// Re-throw publish error caught before.
+		if( $e ) {
+			throw $e;
+		}
+
 		return $this->requestPublishFields( $dossier, $objectsInDossier, $publishTarget );
 	}
 
@@ -324,14 +331,11 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		$pubChannelId = $publishTarget->PubChannelID;
 		$facebookPublisher = new FacebookPublisher( $pubChannelId );
 		$pageId = $facebookPublisher->pageId;
-		$publishForm = null;
 
-		//Get the Publish Form
-		foreach( $objectsInDossier as $objectInDossier ) {
-			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
-				$publishForm = $objectInDossier;
-				break;
-			}
+		// Bail out if there is no publish form in the dossier (should never happen).
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
 		}
 
 		switch( BizPublishForm::getDocumentId( $publishForm ) ) {
@@ -416,14 +420,12 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 
 		$url = null;
-		$publishForm = null;
 		$pubField = array();
 
-		foreach( $objectsInDossier as $objectInDossier ) {
-			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
-				$publishForm = $objectInDossier;
-				break;
-			}
+		// Bail out if there is no publish form in the dossier (should never happen).
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
 		}
 
 		switch( BizPublishForm::getDocumentId( $publishForm ) ) {

@@ -198,7 +198,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 			$publishTarget = new PubPublishTarget();
 			$publishTarget->PubChannelID = $pubChannel->Id;
 
-			$rpcClient = new DrupalXmlRpcClient( $publishTarget );
+			$rpcClient = new WW_Plugins_Drupal8_XmlRpcClient( $publishTarget );
 			$valueArray = $rpcClient->callRpcService( 'enterprise.testConfig',
 				array()
 			);

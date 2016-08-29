@@ -20,39 +20,59 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * Publishes a dossier with contained objects (articles. images, etc.) to Drupal.
 	 * The plugin is supposed to publish the dossier and it's articles and fill in some fields for reference.
 	 *
-	 * @throws BizException Throws a BizException if the node cannot be published.
-	 * @param Object $dossier
-	 * @param Object[] $objectsInDossier
-	 * @param PubPublishTarget $publishTarget
-	 * @return array of PubFields containing information from Drupal
+	 * {@inheritdoc}
 	 */
 	public function publishDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		$pubFields = array();
-
 		require_once dirname(__FILE__).'/Utils.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
 
-		foreach ( $objectsInDossier as $objectInDossier ) {
-			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
-				// Prepare content.
-				$values = $this->prepareNodeValues( $objectInDossier, $objectsInDossier, $publishTarget );
-				// Publish the node.
-				require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
-				$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
-				$result = $drupalXmlRpcClient->saveNode($dossier, $values, array());
+		// Bail out if there is no publish form in the dossier (should never happen).
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
+		}
+		$templateId = BizPublishForm::getTemplateId( $publishForm );
+		if( !$templateId ) {
+			return array();
+		}
 
-				// Handle errors.
-				if (isset($result['errors'])) {
-					LogHandler::Log(__CLASS__ . '::' . __FUNCTION__ , 'ERROR', $result['errors']);
-					throw new BizException( null, 'Server', null, $result['errors'] );
-				}
+		$pubFields = array();
+		/** @var BizException $e */
+		$e = null;
+		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
+		$propertyPattern = '/^C_DPF_'.$templateId.'_[A-Z0-9_]{0,}$/';
+		$publishFormObjects = WW_Plugins_Drupal7_Utils::getFormFields( $publishForm, $propertyPattern );
 
-				if (is_array($result) && isset($result['nid']) && isset($result['url'])) {
-					$dossier->ExternalId = $result['nid'];
-					$pubFields[] = new PubField('URL','string', array($result['url']));
-				}
+		try {
+			// Prepare content.
+			$values = $this->prepareNodeValues( $publishForm, $objectsInDossier, $publishTarget,
+				$publishFormObjects, $templateId, $propertyPattern );
+
+			// Publish the node.
+			require_once dirname( __FILE__ ).'/DrupalXmlRpcClient.class.php';
+			$drupalXmlRpcClient = new DrupalXmlRpcClient( $publishTarget );
+			$result = $drupalXmlRpcClient->saveNode( $dossier, $values, array() );
+
+			// Handle errors.
+			if( isset( $result['errors'] ) ) {
+				LogHandler::Log( __CLASS__.'::'.__FUNCTION__, 'ERROR', $result['errors'] );
+				throw new BizException( null, 'Server', null, $result['errors'] );
 			}
+
+			if( is_array( $result ) && isset( $result['nid'] ) && isset( $result['url'] ) ) {
+				$dossier->ExternalId = $result['nid'];
+				$pubFields[] = new PubField( 'URL', 'string', array( $result['url'] ) );
+			}
+		} catch( BizException $e ) {
+		}
+
+		// Remove temp files from transfer server folder as prepared by getFormFields().
+		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
+
+		// Re-throw publish error caught before.
+		if( $e ) {
+			throw $e;
 		}
 		return $pubFields;
 	}
@@ -64,38 +84,58 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * $dossier->ExternalId to identify the dosier to Drupal. The plugin is supposed to update/republish the dossier
 	 * and it's articles and fill in some fields for reference.
 	 *
-	 * @param Object $dossier
-	 * @param Object[] $objectsInDossier
-	 * @param PubPublishTarget $publishTarget
-	 * @return PubField[] Array containing information from Drupal.
+	 * {@inheritdoc}
 	 */
 	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		$values = array(); // Keep analyzer happy.
-		$pubFields = array();
-
 		require_once dirname(__FILE__).'/Utils.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
 
-		foreach ( $objectsInDossier as $objectInDossier ) {
-			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
-				// Prepare content.
-				$values = $this->prepareNodeValues( $objectInDossier, $objectsInDossier, $publishTarget );
-				// Publish the node.
-				require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
-				$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
-				$result = $drupalXmlRpcClient->updateNode($dossier, $values, array());
-				// Handle errors.
-				if (isset($result['errors'])) {
-					LogHandler::Log(__CLASS__ . '::' . __FUNCTION__ , 'ERROR', $result['errors']);
-					throw new BizException( null, 'Server', null, $result['errors'] );
-				}
+		// Bail out if there is no publish form in the dossier (should never happen).
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
+		}
+		$templateId = BizPublishForm::getTemplateId( $publishForm );
+		if( !$templateId ) {
+			return array();
+		}
 
-				if (is_array($result) && isset($result['nid']) && isset($result['url'])) {
-					$dossier->ExternalId = $result['nid'];
-					$pubFields[] = new PubField('URL','string', array($result['url']));
-				}
+		$pubFields = array();
+		/** @var BizException $e */
+		$e = null;
+		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
+		$propertyPattern = '/^C_DPF_'.$templateId.'_[A-Z0-9_]{0,}$/';
+		$publishFormObjects = WW_Plugins_Drupal7_Utils::getFormFields( $publishForm, $propertyPattern );
+
+		try {
+			// Prepare content.
+			$values = $this->prepareNodeValues( $publishForm, $objectsInDossier, $publishTarget,
+				$publishFormObjects, $templateId, $propertyPattern );
+
+			// Publish the node.
+			require_once dirname( __FILE__ ).'/DrupalXmlRpcClient.class.php';
+			$drupalXmlRpcClient = new DrupalXmlRpcClient( $publishTarget );
+			$result = $drupalXmlRpcClient->updateNode( $dossier, $values, array() );
+			// Handle errors.
+			if( isset( $result['errors'] ) ) {
+				LogHandler::Log( __CLASS__.'::'.__FUNCTION__, 'ERROR', $result['errors'] );
+				throw new BizException( null, 'Server', null, $result['errors'] );
 			}
+
+			if( is_array( $result ) && isset( $result['nid'] ) && isset( $result['url'] ) ) {
+				$dossier->ExternalId = $result['nid'];
+				$pubFields[] = new PubField( 'URL', 'string', array( $result['url'] ) );
+			}
+		} catch( BizException $e ) {
+		}
+
+		// Remove temp files from transfer server folder as prepared by getFormFields().
+		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
+
+		// Re-throw publish error caught before.
+		if( $e ) {
+			throw $e;
 		}
 		return $pubFields;
 	}
@@ -105,14 +145,10 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * The $dossier->ExternalId is used to identify the dosier in Drupal.
 	 *
-	 * @param Object $dossier
-	 * @param Object[] $objectsInDossier
-	 * @param PubPublishTarget $publishTarget
-	 * @return array of PubFields containing information from Drupal
+	 * {@inheritdoc}
 	 */
 	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
 	{
-		$objectsInDossier = $objectsInDossier; // Keep analyzer happy.
 
 		// Unpublish the node.
 		require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
@@ -136,39 +172,59 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * The plugin is supposed to send the dossier and it's articles to the publishing system and fill in the URL field
 	 * for reference.
 	 *
-	 * @param Object $dossier
-	 * @param Object[] $objectsInDossier
-	 * @param PubPublishTarget $publishTarget
-	 * @return PubField[] containing information from Publishing system.
+	 * {@inheritdoc}
 	 */
 	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		$values = array(); // Keep analyzer happy.
-		$pubFields = array();
-
 		require_once dirname(__FILE__).'/Utils.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
 
-		foreach ( $objectsInDossier as $objectInDossier ) {
-			if( $objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm' ) {
-				// Prepare content.
-				$values = $this->prepareNodeValues( $objectInDossier, $objectsInDossier, $publishTarget );
-				// Publish the node.
-				require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
-				$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
-				$result = $drupalXmlRpcClient->previewNode($dossier, $values, array());
+		// Bail out if there is no publish form in the dossier (should never happen).
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
+		}
+		$templateId = BizPublishForm::getTemplateId( $publishForm );
+		if( !$templateId ) {
+			return array();
+		}
 
-				// Handle errors.
-				if (isset($result['errors'])) {
-					LogHandler::Log(__CLASS__ . '::' . __FUNCTION__ , 'ERROR', $result['errors']);
-					throw new BizException( null, 'Server', null, $result['errors'] );
-				}
+		$pubFields = array();
+		/** @var BizException $e */
+		$e = null;
+		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
+		$propertyPattern = '/^C_DPF_'.$templateId.'_[A-Z0-9_]{0,}$/';
+		$publishFormObjects = WW_Plugins_Drupal7_Utils::getFormFields( $publishForm, $propertyPattern );
 
-				if (is_array($result) && isset($result['nid']) && isset($result['url'])) {
-					$dossier->ExternalId = $result['nid'];
-					$pubFields[] = new PubField('URL','string', array($result['url']));
-				}
+		try {
+			// Prepare content.
+			$values = $this->prepareNodeValues( $publishForm, $objectsInDossier, $publishTarget,
+				$publishFormObjects, $templateId, $propertyPattern );
+
+			// Publish the node.
+			require_once dirname( __FILE__ ).'/DrupalXmlRpcClient.class.php';
+			$drupalXmlRpcClient = new DrupalXmlRpcClient( $publishTarget );
+			$result = $drupalXmlRpcClient->previewNode( $dossier, $values, array() );
+
+			// Handle errors.
+			if( isset( $result['errors'] ) ) {
+				LogHandler::Log( __CLASS__.'::'.__FUNCTION__, 'ERROR', $result['errors'] );
+				throw new BizException( null, 'Server', null, $result['errors'] );
 			}
+
+			if( is_array( $result ) && isset( $result['nid'] ) && isset( $result['url'] ) ) {
+				$dossier->ExternalId = $result['nid'];
+				$pubFields[] = new PubField( 'URL', 'string', array( $result['url'] ) );
+			}
+		} catch( BizException $e ) {
+		}
+
+		// Remove temp files from transfer server folder as prepared by getFormFields().
+		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
+
+		// Re-throw publish error caught before.
+		if( $e ) {
+			throw $e;
 		}
 		return $pubFields;
 	}
@@ -179,9 +235,13 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $publishForm The PublishForm to be published/updated/previewed.
 	 * @param Object[] $objectsInDossier
 	 * @param PubPublishTarget $publishTarget The PublishForm Target
+	 * @param Object[] $publishFormObjects Objects placed on the Publish Form.
+	 * @param string $templateId ID of the Publish Form Template.
+	 * @param string $propertyPattern Logical pattern of property names to invoke on the Publish Form.
 	 * @throws BizException Throws an Exception if the validation fails.
+	 * @return array
 	 */
-	private function prepareNodeValues( $publishForm, $objectsInDossier, $publishTarget )
+	private function prepareNodeValues( $publishForm, $objectsInDossier, $publishTarget, $publishFormObjects, $templateId, $propertyPattern )
 	{
 		require_once dirname(__FILE__).'/Utils.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
@@ -189,163 +249,154 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 		require_once dirname(__FILE__).'/DrupalField.class.php';
 		$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
 
-		$fields = null;
-		$pattern = null;
 		$values = null;
 		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
 
-		$templateId = BizPublishForm::getTemplateId( $publishForm );
-		if (!is_null($templateId)) {
-			$pattern_prefix = '/^C_DPF_' . $templateId;
-			$pattern = $pattern_prefix . '_[A-Z0-9_]{0,}$/';
-			$fields = WW_Plugins_Drupal7_Utils::getFormFields( $publishForm, $pattern );
+		// Validate mandatory fields.
+		if( BizPublishForm::validateFormFields( $publishFormObjects, $publishForm, $propertyPattern ) ) {
+			$wiwiwUsages = array();
+			$propertyUsages = BizPublishForm::getPropertyUsagesForForm( $publishForm, $propertyPattern, false, false, $wiwiwUsages );
+			$values = WW_Plugins_Drupal7_Utils::prepareFormFields( $propertyUsages, $wiwiwUsages, $publishFormObjects );
+		} else {
+			$message = 'The Dossier could not be published.';
+			LogHandler::Log(__CLASS__ . '::' . __FUNCTION__ , 'ERROR', $message);
+			throw new BizException( null, 'Server', null, $message );
+		}
 
-			// Validate mandatory fields.
-			if (BizPublishForm::validateFormFields($fields, $publishForm, $pattern )) {
-				$wiwiwUsages = array();
-				$propertyUsages = BizPublishForm::getPropertyUsagesForForm( $publishForm, $pattern, false, false, $wiwiwUsages );
-				$values = WW_Plugins_Drupal7_Utils::prepareFormFields( $propertyUsages, $wiwiwUsages, $fields );
-			} else {
-				$message = 'The Dossier could not be published.';
-				LogHandler::Log(__CLASS__ . '::' . __FUNCTION__ , 'ERROR', $message);
-				throw new BizException( null, 'Server', null, $message );
+		// Array entry structure:
+		//
+		// ArticleComponent:
+		//   $values[$field][elements] = 'elementTextContent';
+		//   $values[$field][attachments] = array( 'EnterpriseObjectId' => 'DrupalFileId' );
+		//
+		// FileSelector: The returned value for the FileSelector can be a single file, or can be an array of files.
+		//   $values[$field][] = array( 'fid' => 1, 'description' => 'desc', 'display' => '0'. // File
+		// or
+		//   $values[$field][] = array( 'fid' => 1, 'alt' => 'alt text', 'title' => 'An image'. // Image
+		//
+		// Other input fields.
+		//  Values are taken as is, they already contain the right structure to be handled by Drupal.
+
+		// Handle attachments to be uploaded to Drupal.
+		//Todo: stream attachments instead of loading them in memory.
+
+		foreach ($values as $field => $value) {
+			// Handle normal file attachments, for example for a file selector or layout.
+			$contentType = $values[WW_Plugins_Drupal7_Utils::DRUPAL7_CONTENT_TYPE][0];
+
+			//Handle file attachments(such as InlineImages) on ArticleComponents.
+			if (is_array($value) && is_array($value[0]) && isset($value[0]['elements'])) {
+				// Get the element contents.
+				$value[0]['elements'] = $value[0]['elements'][0]->Content;
+
+				// Upload the inline images and make sure they are mapped to Enterprise object IDs.
+				$fileIds = array();
+				if (isset($value[0]['attachments'])) foreach ($value[0]['attachments'] as $key => $attachment ) {
+					$fileId = $drupalXmlRpcClient->uploadAttachment( $attachment, $key, $field,	$contentType);
+					$fileIds[$key] =  $fileId;
+				}
+				// Set the fileIds (EnterpriseObjectId => DrupalFileId) as attachments on the value.
+				$value[0]['attachments'] = $fileIds;
+
+				// Overwrite the value in the data to be sent to Drupal.
+				$values[$field] = $value;
+
+			// Handle File Selectors.
+			} elseif ( is_array( $value ) && is_array( $value[0]) && !isset($value[0]['elements'])
+				|| is_array($value) && is_object($value[0]) ) {
+
+				// Detect if we are handling a multi-file upload or a single file upload.
+				// If we are handling a single upload, restructure the file as needed.
+				if ( (is_array( $value ) && is_array( $value[0]) && !isset($value[0]['elements'])) == false ) {
+					$newValue = array($value);
+					$value = $newValue;
+					$values[$field] = $value;
+				}
+
+				// Now loop through our field values to upload the files.
+				if ($value) foreach ( $value as $key => $attachmentAndMetaData ) {
+					$fileId = null;
+					$childId = $attachmentAndMetaData['metadata']->BasicMetaData->ID;
+					$uploadNeeded = $this->doesUploadChildNeeded( $publishForm, $objectsInDossier[$childId], $publishTarget );
+					$croppedImage = $this->getCroppedImage( $publishForm, $childId, $templateId, $field );
+					if( $croppedImage ) {
+						$attachmentAndMetaData[0] = $croppedImage;
+						$uploadNeeded = true; // crops are not versioned, so always needs upload
+					}
+
+					if( $uploadNeeded ) {
+						// Upload the attachment to Drupal.
+						$fileId = $drupalXmlRpcClient->uploadAttachment(
+							$attachmentAndMetaData[0],
+							$attachmentAndMetaData['metadata']->BasicMetaData->Name,
+							$field,
+							$contentType
+						);
+					} else { // No changes since uploaded, so used back the existing ExternalId.
+						$fileId = $objectsInDossier[$childId]->ExternalId;
+					}
+
+					// Set the additional MetaData values needed by Drupal.
+					$newMetaData = array();
+					$newMetaData['fid'] = $fileId;
+					$filePatternPrefix = '/^C_DPF_F_' . $templateId . '_' . $field . '_';
+					$filePatternPostfix = '_[A-Z0-9_]{0,}$/';
+					foreach ($attachmentAndMetaData['metadata']->ExtraMetaData as $extra) {
+						// If the type is image, we need to add fields that are normally only for other Files because
+						// we do not know what the purpose of the Image is. The Image can be used as part of a Drupal
+						// file selector of a drupal image selector, if it is used as a File then Description / Display
+						// are needed, in other cases Title and Alt are needed. Therefore in case of an Image set
+						// both the sets. So set the File properties for any files being uploaded.
+
+						// Check the File's Display setting.
+						$filePattern = $filePatternPrefix . 'DIS' . $filePatternPostfix;
+						if (preg_match($filePattern, $extra->Property)) {
+							$newMetaData['display']  = $extra->Values[0];
+						}
+
+						// Check the File's Description setting.
+						$filePattern = $filePatternPrefix . 'DES' . $filePatternPostfix;
+						if (preg_match($filePattern, $extra->Property)) {
+							$newMetaData['description']  = $extra->Values[0];
+						}
+
+						// Set fields only needed for Images.
+						if ($attachmentAndMetaData['metadata']->BasicMetaData->Type == 'Image') {
+							// Check the Image's Alternate Text setting.
+							if ($extra->Property === DrupalField::DRUPAL_IMG_ALT_TEXT) {
+								$newMetaData['alt']  = $extra->Values[0];
+							}
+
+							// Check the Image's Title setting.
+							if ($extra->Property === DrupalField::DRUPAL_IMG_TITLE) {
+								$newMetaData['title']  = $extra->Values[0];
+							}
+						}
+					}
+
+					// Set our MetaData values to be sent to Drupal.
+					$values[$field][$key] = $newMetaData;
+
+					// For Child ExternalId.
+					$attachmentUploaded[$childId] = $fileId;
+
+				}
+			}
+			// Remove Metadata from the values if present.
+			if (isset($values[$field]['metadata'])) {
+				unset($values[$field]['metadata']);
 			}
 
-			// Array entry structure:
-			//
-			// ArticleComponent:
-			//   $values[$field][elements] = 'elementTextContent';
-			//   $values[$field][attachments] = array( 'EnterpriseObjectId' => 'DrupalFileId' );
-			//
-			// FileSelector: The returned value for the FileSelector can be a single file, or can be an array of files.
-			//   $values[$field][] = array( 'fid' => 1, 'description' => 'desc', 'display' => '0'. // File
-			// or
-			//   $values[$field][] = array( 'fid' => 1, 'alt' => 'alt text', 'title' => 'An image'. // Image
-			//
-			// Other input fields.
-			//  Values are taken as is, they already contain the right structure to be handled by Drupal.
-
-			// Handle attachments to be uploaded to Drupal.
-			//Todo: stream attachments instead of loading them in memory.
-
-			foreach ($values as $field => $value) {
-				// Handle normal file attachments, for example for a file selector or layout.
-				$contentType = $values[WW_Plugins_Drupal7_Utils::DRUPAL7_CONTENT_TYPE][0];
-
-				//Handle file attachments(such as InlineImages) on ArticleComponents.
-				if (is_array($value) && is_array($value[0]) && isset($value[0]['elements'])) {
-					// Get the element contents.
-					$value[0]['elements'] = $value[0]['elements'][0]->Content;
-
-					// Upload the inline images and make sure they are mapped to Enterprise object IDs.
-					$fileIds = array();
-					if (isset($value[0]['attachments'])) foreach ($value[0]['attachments'] as $key => $attachment ) {
-						$fileId = $drupalXmlRpcClient->uploadAttachment( $attachment, $key, $field,	$contentType);
-						$fileIds[$key] =  $fileId;
-					}
-					// Set the fileIds (EnterpriseObjectId => DrupalFileId) as attachments on the value.
-					$value[0]['attachments'] = $fileIds;
-
-					// Overwrite the value in the data to be sent to Drupal.
-					$values[$field] = $value;
-
-				// Handle File Selectors.
-				} elseif ( is_array( $value ) && is_array( $value[0]) && !isset($value[0]['elements'])
-					|| is_array($value) && is_object($value[0]) ) {
-
-					// Detect if we are handling a multi-file upload or a single file upload.
-					// If we are handling a single upload, restructure the file as needed.
-					if ( (is_array( $value ) && is_array( $value[0]) && !isset($value[0]['elements'])) == false ) {
-						$newValue = array($value);
-						$value = $newValue;
-						$values[$field] = $value;
-					}
-
-					// Now loop through our field values to upload the files.
-					if ($value) foreach ( $value as $key => $attachmentAndMetaData ) {
-						$fileId = null;
-						$childId = $attachmentAndMetaData['metadata']->BasicMetaData->ID;
-						$uploadNeeded = $this->doesUploadChildNeeded( $publishForm, $objectsInDossier[$childId], $publishTarget );
-						$croppedImage = $this->getCroppedImage( $publishForm, $childId, $templateId, $field );
-						if( $croppedImage ) {
-							$attachmentAndMetaData[0] = $croppedImage;
-							$uploadNeeded = true; // crops are not versioned, so always needs upload
-						}
-
-						if( $uploadNeeded ) {
-							// Upload the attachment to Drupal.
-							$fileId = $drupalXmlRpcClient->uploadAttachment(
-								$attachmentAndMetaData[0],
-								$attachmentAndMetaData['metadata']->BasicMetaData->Name,
-								$field,
-								$contentType
-							);
-						} else { // No changes since uploaded, so used back the existing ExternalId.
-							$fileId = $objectsInDossier[$childId]->ExternalId;
-						}
-
-						// Set the additional MetaData values needed by Drupal.
-						$newMetaData = array();
-						$newMetaData['fid'] = $fileId;
-						$filePatternPrefix = '/^C_DPF_F_' . $templateId . '_' . $field . '_';
-						$filePatternPostfix = '_[A-Z0-9_]{0,}$/';
-						foreach ($attachmentAndMetaData['metadata']->ExtraMetaData as $extra) {
-							// If the type is image, we need to add fields that are normally only for other Files because
-							// we do not know what the purpose of the Image is. The Image can be used as part of a Drupal
-							// file selector of a drupal image selector, if it is used as a File then Description / Display
-							// are needed, in other cases Title and Alt are needed. Therefore in case of an Image set
-							// both the sets. So set the File properties for any files being uploaded.
-
-							// Check the File's Display setting.
-							$filePattern = $filePatternPrefix . 'DIS' . $filePatternPostfix;
-							if (preg_match($filePattern, $extra->Property)) {
-								$newMetaData['display']  = $extra->Values[0];
-							}
-
-							// Check the File's Description setting.
-							$filePattern = $filePatternPrefix . 'DES' . $filePatternPostfix;
-							if (preg_match($filePattern, $extra->Property)) {
-								$newMetaData['description']  = $extra->Values[0];
-							}
-
-							// Set fields only needed for Images.
-							if ($attachmentAndMetaData['metadata']->BasicMetaData->Type == 'Image') {
-								// Check the Image's Alternate Text setting.
-								if ($extra->Property === DrupalField::DRUPAL_IMG_ALT_TEXT) {
-									$newMetaData['alt']  = $extra->Values[0];
-								}
-
-								// Check the Image's Title setting.
-								if ($extra->Property === DrupalField::DRUPAL_IMG_TITLE) {
-									$newMetaData['title']  = $extra->Values[0];
-								}
-							}
-						}
-
-						// Set our MetaData values to be sent to Drupal.
-						$values[$field][$key] = $newMetaData;
-
-						// For Child ExternalId.
-						$attachmentUploaded[$childId] = $fileId;
-
-					}
-				}
-				// Remove Metadata from the values if present.
-				if (isset($values[$field]['metadata'])) {
-					unset($values[$field]['metadata']);
+			// Use array_key_exists here.. The value can be null!!!
+			if ( array_key_exists( $field.'_SUM', $values ) ) {
+				$summary = $values[$field.'_SUM'];
+				if (isset($summary['metadata'])) {
+					unset($summary['metadata']);
 				}
 
-				// Use array_key_exists here.. The value can be null!!!
-				if ( array_key_exists( $field.'_SUM', $values ) ) {
-					$summary = $values[$field.'_SUM'];
-					if (isset($summary['metadata'])) {
-						unset($summary['metadata']);
-					}
-
-					// Save this value as value-summary, it will be handled as such on the Drupal side
-					$values[$field] = array( 'value' => $values[$field], 'summary' => $summary );
-					unset($values[$field.'_SUM']);
-				}
+				// Save this value as value-summary, it will be handled as such on the Drupal side
+				$values[$field] = array( 'value' => $values[$field], 'summary' => $summary );
+				unset($values[$field.'_SUM']);
 			}
 		}
 		$this->updateExternalId( $objectsInDossier, $attachmentUploaded );

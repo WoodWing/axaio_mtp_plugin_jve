@@ -232,8 +232,8 @@ class WW_Plugins_Drupal7_Utils
 	 * Retrieves the form fields from the PublishForm.
 	 *
 	 * @static
-	 * @param object $publishForm The PublishForm from which to get the form fields.
-	 * @param $pattern Optional pattern which Property names should match for to be included in the result.
+	 * @param Object $publishForm The PublishForm from which to get the form fields.
+	 * @param string $pattern Optional pattern which Property names should match for to be included in the result.
 	 * @return array An array of key / value pairs with values for the form fields.
 	 */
 	public static function getFormFields( $publishForm, $pattern )
