@@ -120,9 +120,10 @@ class WW_Plugins_Drupal8_Utils
 	 * @param array $propertyUsages The PropertyUsages to use.
 	 * @param array $wiwiwUsages A three dimensional list of PropertyUsages. Keys are used as follows: $wiwiwUsages[mainProp][wiwProp][wiwiwProp]
 	 * @param array $fields List of PublishForm fields.
+	 * @param integer $channelId The ID of the Publication Channel.
 	 * @return array An array of values indexed to Drupal Field ids.
 	 */
-	static public function prepareFormFields( $propertyUsages, $wiwiwUsages, $fields )
+	static public function prepareFormFields( $propertyUsages, $wiwiwUsages, $fields, $channelId )
 	{
 		$indexes = array();
 
@@ -139,7 +140,7 @@ class WW_Plugins_Drupal8_Utils
 			if ( isset($parts[4]) && $parts[4] == 'SUM' ) {
 				$drupalFieldId .= '_SUM';
 			}
-			$indexes = self::getFormFieldValue( $drupalFieldId, $fields, $fieldName, $indexes );
+			$indexes = self::getFormFieldValue( $drupalFieldId, $fields, $fieldName, $indexes, $channelId );
 		}
 		if( $wiwiwUsages ) foreach( $wiwiwUsages as /*$mainPropName => */$wiwUsages ) {
 			foreach( $wiwUsages as /*$wiwPropName => */$wiwiwUsageArray ) {
@@ -151,7 +152,7 @@ class WW_Plugins_Drupal8_Utils
 					if ( $parts[4] == 'SUM' ) {
 						$drupalFieldId .= '_SUM';
 					}
-					$indexes = self::getFormFieldValue( $drupalFieldId, $fields, $fieldName, $indexes );
+					$indexes = self::getFormFieldValue( $drupalFieldId, $fields, $fieldName, $indexes, $channelId );
 				}
 			}
 		}
@@ -166,32 +167,33 @@ class WW_Plugins_Drupal8_Utils
 	 * @param string $drupalFieldId
 	 * @param array $fields List of PublishForm fields.
 	 * @param string $fieldName The name of the property/field.
-	 * @param array $indexes Refer to header above.
-	 * @param array List of key-value pair that contains the FieldName and its value.
+	 * @param array $indexes List of key-value pair that contains the FieldName and its value.
+	 * @param integer $channelId The ID of the publication channel.
+	 * @return The $indexes property
 	 */
-	private static function getFormFieldValue( $drupalFieldId, $fields, $fieldName, $indexes )
+	private static function getFormFieldValue( $drupalFieldId, $fields, $fieldName, $indexes, $channelId )
 	{
 		if ($drupalFieldId == 'PROMOTE') {
 			$indexes[self::C_DIALOG_DRUPAL8_PROMOTE] = (isset($fields[$fieldName]))
-				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName] )
+				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName], $channelId )
 				: null;
 		} elseif ($drupalFieldId == 'STICKY') {
 			$indexes[self::C_DIALOG_DRUPAL8_STICKY] = (isset($fields[$fieldName]))
-				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName] )
+				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName], $channelId )
 				: null;
 		} elseif ($drupalFieldId == 'COMMENTS') {
 			$indexes[self::C_DIALOG_DRUPAL8_COMMENTS] = (isset($fields[$fieldName]))
-				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName] )
+				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName], $channelId )
 				: null;
 		}elseif ($drupalFieldId == 'TITLE') {
 			$indexes[self::C_DIALOG_DRUPAL8_TITLE] = (isset($fields[$fieldName]))
-				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName] )
+				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName], $channelId )
 				: null;
 		}elseif ($drupalFieldId == 'PUBLISH') {
 			require_once dirname(__FILE__) . '/DrupalField.class.php';
 			// Retrieve whether we should publish the node or not, and set an int on the field.
 			$value = (isset($fields[$fieldName]))
-				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName] )
+				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName], $channelId )
 				: DrupalField::DRUPAL_VALUE_PUBLISH_PUBLIC;
 			$indexes[self::C_DIALOG_DRUPAL8_PUBLISH] = (DrupalField::DRUPAL_VALUE_PUBLISH_PRIVATE == $value[0] )
 				? array(0)
@@ -205,13 +207,13 @@ class WW_Plugins_Drupal8_Utils
 					$content = array();
 					foreach ($fields[$fieldName] as $object) {
 						if (is_object( $object ) ) {
-							$content[] = self::extractContent( $object, $fieldName );
+							$content[] = self::extractContent( $object, $fieldName, $channelId );
 						} else {
-							$content = self::extractContent( $fields[$fieldName], $fieldName );
+							$content = self::extractContent( $fields[$fieldName], $fieldName, $channelId );
 						}
 					}
 				} else {
-					$content = self::extractContent( $fields[$fieldName], $fieldName );
+					$content = self::extractContent( $fields[$fieldName], $fieldName, $channelId );
 				}
 				$indexes[$drupalFieldId] = $content;
 			}
@@ -226,9 +228,10 @@ class WW_Plugins_Drupal8_Utils
 	 * @static
 	 * @param Object $object
 	 * @param string $fieldName
+	 * @param integer $channelId The ID of the publication channel.
 	 * @return array|null
 	 */
-	private static function extractContent( $object, $fieldName ) {
+	private static function extractContent( $object, $fieldName, $channelId ) {
 		$extractContent = true;
 
 		// For layouts, get the object as is.
@@ -250,7 +253,7 @@ class WW_Plugins_Drupal8_Utils
 			}
 		}
 
-		return BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $object, $extractContent );
+		return BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $object, $channelId, $extractContent );
 	}
 
 	/**

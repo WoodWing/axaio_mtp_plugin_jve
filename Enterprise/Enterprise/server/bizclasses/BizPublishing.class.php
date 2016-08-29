@@ -814,7 +814,7 @@ class BizPublishing
 
 			// If we support publishForms, the specs state that we should only pass the PublishForm along to the
 			// connector, and not all the collected children, therefore remove children that are of different types.
-			$supportsPublishForms = BizServerPlugin::runChannelConnector( $publishedDossier->Target->PubChannelID,	'doesSupportPublishForms', array(), false );
+			$supportsPublishForms = BizServerPlugin::runChannelConnector( $publishedDossier->Target->PubChannelID, 'doesSupportPublishForms', array(), false );
 			$publishForm = null;
 			$formId = null;
 			if ( $supportsPublishForms ) {
@@ -846,7 +846,7 @@ class BizPublishing
 			}
 
 			// Only do the image conversion after the children are thinned out so we have less to exclude.
-			$this->handleImageConversion( $children );
+			$this->handleImageConversion( $children, $publishedDossier->Target->PubChannelID );
 
 			// Save the callback data already. It can be that the connector returns data immediately.
 			$cache = array( $publishedDossier, $operation, $action, $publishFields, $dossier, $children, $exceptionRaised );
@@ -2029,8 +2029,9 @@ class BizPublishing
 	 *
 	 * @since 10.1.0
 	 * @param Object[] $objects
+	 * @param integer $channelId The ID of the Publication Channel.
 	 */
-	private function handleImageConversion( array $objects )
+	private function handleImageConversion( array $objects, $channelId )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizImageConverter.class.php';
 		$bizImageConverter = new BizImageConverter();
@@ -2040,7 +2041,7 @@ class BizPublishing
 					if( $relation->Type == 'Placed' && $relation->ChildInfo->Type == 'Image' &&
 						$bizImageConverter->loadNativeFileForInputImage( $relation->ChildInfo->ID )) {
 						foreach( $relation->Placements as $placement ) {
-							if( $bizImageConverter->cropAndScaleImageByPlacement( $placement ) ) {
+							if( $bizImageConverter->cropAndScaleImageByPlacement( $placement, $channelId ) ) {
 								// This is a ghost property which is not described in the WSDL. The publish connectors should
 								// use this image to publish with if the property is set.
 								$placement->ImageCropAttachment = $bizImageConverter->getOutputImageAttachment();

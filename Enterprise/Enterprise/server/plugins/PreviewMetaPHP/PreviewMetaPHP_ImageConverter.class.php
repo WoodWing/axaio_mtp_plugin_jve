@@ -10,39 +10,51 @@ require_once BASEDIR . '/server/interfaces/plugins/connectors/ImageConverter_Ent
 
 class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 {
+	/** {@inheritdoc} */
+	private $supportedOutputFormats = array(
+		'image/jpeg',
+		'image/pjpeg',
+		'image/jpg',
+		'image/gif',
+		'image/png',
+		'image/x-png',
+	);
+
 	/**
 	 * {@inheritDoc}
 	 */
-	final public function canHandleFormat( $format )
+	final public function canHandleFormat( $inputFormat, $outputFormat )
 	{
 		// Just to be sure we ask GD what formats are supported:
 		$gdInfo = gd_info( );
 		$useGD = false;
 
-		switch( $format ) {
-			case 'image/jpeg':
-			case 'image/pjpeg':
-			case 'image/jpg':
-				if( array_key_exists('JPG Support', $gdInfo ) ) { // PHP 5.2 and lower
-					if( $gdInfo['JPG Support'] ) {
+		if( in_array( $outputFormat, $this->supportedOutputFormats ) ) {
+			switch( $inputFormat ) {
+				case 'image/jpeg':
+				case 'image/pjpeg':
+				case 'image/jpg':
+					if( array_key_exists('JPG Support', $gdInfo ) ) { // PHP 5.2 and lower
+						if( $gdInfo['JPG Support'] ) {
+							$useGD = true;
+						}
+					}
+					else if( $gdInfo['JPEG Support'] ) { // PHP 5.3 and higher
 						$useGD = true;
 					}
-				}
-				else if( $gdInfo['JPEG Support'] ) { // PHP 5.3 and higher
-					$useGD = true;
-				}
-				break;
-			case 'image/gif':
-				if( $gdInfo['GIF Read Support'] ) {
-					$useGD = true;
-				}
-				break;
-			case 'image/png':
-			case 'image/x-png':
-				if( $gdInfo['PNG Support'] ) {
-					$useGD = true;
-				}
-				break;
+					break;
+				case 'image/gif':
+					if( $gdInfo['GIF Read Support'] ) {
+						$useGD = true;
+					}
+					break;
+				case 'image/png':
+				case 'image/x-png':
+					if( $gdInfo['PNG Support'] ) {
+						$useGD = true;
+					}
+					break;
+			}
 		}
 
 		if ( $useGD ) {

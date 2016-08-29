@@ -88,14 +88,26 @@ class BizImageConverter
 	 * Invokes the best image converter connector and requests for crop and scale operaions.
 	 *
 	 * @param Placement $placement Definition of the image crop frame, scale and dimensions.
+	 * @param integer $channelId The ID of the Publication Channel.
 	 * @return bool Whether or not the operation was successful.
 	 */
-	public function cropAndScaleImageByPlacement( Placement $placement )
+	public function cropAndScaleImageByPlacement( Placement $placement, $channelId )
 	{
 		if( !$this->inputImageAttachment ) {
 			return false;
 		}
-		$connector = $this->getBestConnector( $this->inputImageAttachment->Type );
+
+		$supportedOutputFormats = $this->getSupportedOutputFormats( $channelId );
+
+		$connector = null;
+		foreach( $supportedOutputFormats as $outputFormat ) {
+			$connector = $this->getBestConnector( $this->inputImageAttachment->Type, $outputFormat );
+
+			// Stop looking the moment we found a connector for the wanted output format.
+			if( $connector != null ) {
+				break;
+			}
+		}
 		if( !$connector ) {
 			return false;
 		}
@@ -136,19 +148,36 @@ class BizImageConverter
 	}
 
 	/**
+	 * Requests the Publishing connector for a list of all output formats that are supported by the publication channel.
+	 *
+	 * @param integer $channelId The ID of the Publication channel.
+	 * @return array|null A list of MIME output formats supported by the current publication channel.
+	 */
+	private function getSupportedOutputFormats( $channelId )
+	{
+		$outputFileFormats = BizServerPlugin::runChannelConnector( $channelId, 'getFileFormatsForOutputImage', array() );
+		if( is_array($outputFileFormats) ) {
+			return $outputFileFormats;
+		} else {
+			return null;
+		}
+	}
+
+	/**
 	 * Iterates through all image converter connectors to find the best one.
 	 *
-	 * @param string $imageFormat
+	 * @param string $inputImageFormat
+	 * @param string $outputImageFormat
 	 * @return ImageConverter_EnterpriseConnector|null
 	 */
-	private function getBestConnector( $imageFormat )
+	private function getBestConnector( $inputImageFormat, $outputImageFormat )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		$connectors = BizServerPlugin::searchConnectors( 'ImageConverter', null );
 		$highestQuality = 0;
 		$bestConnector = null;
 		foreach( $connectors as $connector ) {
-			$quality = BizServerPlugin::runConnector( $connector, 'canHandleFormat', array( $imageFormat ) );
+			$quality = BizServerPlugin::runConnector( $connector, 'canHandleFormat', array( $inputImageFormat, $outputImageFormat ) );
 			if( $quality > $highestQuality ) {
 				$highestQuality = $quality;
 				$bestConnector = $connector;
@@ -160,7 +189,7 @@ class BizImageConverter
 				get_class( $bestConnector ).'" with quality "'.$highestQuality.'".' );
 		} else {
 			LogHandler::Log( 'BizImageConverter', 'INFO', 'Could not find an ImageConverter connector '.
-				'for image format "'.$imageFormat.'".' );
+				'for image input format "'.$inputImageFormat.'" and output format "'.$outputImageFormat.'".' );
 			// Note that when no connector found, there is no need for a warning; Biz logic should take care.
 		}
 		return $bestConnector;

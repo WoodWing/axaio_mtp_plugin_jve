@@ -111,7 +111,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				throw new BizException( 'WORDPRESS_ERROR_NO_TITLE', 'Server', 'A title is needed but there is no title found.' );
 			}
 
-			$articleFields = BizPublishForm::extractFormFieldDataFromFieldValue( 'C_WORDPRESS_PF_MESSAGE_SEL', $article, true );
+			$articleFields = BizPublishForm::extractFormFieldDataFromFieldValue( 'C_WORDPRESS_PF_MESSAGE_SEL', $article, $publishTarget->PubChannelID, true );
 			if( $articleFields && isset( $articleFields[0] ) ) {
 				$messageText = ( isset( $articleFields[0]['elements'] ) && isset( $articleFields[0]['elements'][0] ) ) ?
 										$articleFields[0]['elements'][0]->Content : null;

@@ -51,7 +51,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 
 		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
 		try {
-			$elements = BizPublishForm::extractArticleObjectElements( $this->article );
+			$elements = BizPublishForm::extractArticleObjectElements( $this->article, $this->publicationChannel->Id );
 		} catch (BizException $e) {
 			$this->setResult( 'ERROR',  'Extraction failed: ' . $e->getMessage(), 'Test failed.' );
 			$this->teardown();

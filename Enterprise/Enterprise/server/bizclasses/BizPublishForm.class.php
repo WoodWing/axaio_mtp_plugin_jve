@@ -174,7 +174,7 @@ class BizPublishForm
 	 * @param bool $extractContent In some cases it can be preferable to not get an objects content, but instead get the objects attachment.
 	 * @return array|null An array with the resolved data.
 	 */
-	static public function extractFormFieldDataByName ( $publishForm, $fieldName, $extractContent )
+	static public function extractFormFieldDataByName ( $publishForm, $fieldName, $extractContent, $channelId )
 	{
 		try {
 			$field = self::getFormFieldByName( $publishForm, $fieldName );
@@ -190,7 +190,7 @@ class BizPublishForm
 			switch( $values->MetaData->BasicMetaData->Type ) {
 				case 'Article' :
 					if ($extractContent) {
-						$values = self::extractArticleObjectElements( $values );
+						$values = self::extractArticleObjectElements( $values, $channelId );
 					} else {
 						$values = self::getAttachments( $values );
 					}
@@ -220,10 +220,11 @@ class BizPublishForm
 	 *
 	 * @param string $fieldName The FieldName for which to retrieve the data.
 	 * @param string|Object $fieldValues The raw field values to be resolved.
+	 * @param integer $channelId The ID of the publication channel.
 	 * @param bool $extractContent True to extract the data out of the object, false to only extract the object attachment.
 	 * @return array|null An array with the resolved data.
 	 */
-	static public function extractFormFieldDataFromFieldValue ( $fieldName, $fieldValues, $extractContent=true )
+	static public function extractFormFieldDataFromFieldValue ( $fieldName, $fieldValues, $channelId, $extractContent=true )
 	{
 		$values = $fieldValues;
 		if (is_object($values)) {
@@ -244,7 +245,7 @@ class BizPublishForm
 
 					if (!is_null($elementId) && $extractContent) {
 						// Get the elements.
-						$values = self::extractArticleObjectElements( $values );
+						$values = self::extractArticleObjectElements( $values, $channelId );
 
 						// If we have more than one element, find the correct one.
 						if (is_array($values) && count($values) > 1) {
@@ -317,7 +318,7 @@ class BizPublishForm
 	 * @param Object $articleObject The object for which to get the Elements.
 	 * @return Element[] An array of elements.
 	 */
-	static public function extractArticleObjectElements( $articleObject )
+	static public function extractArticleObjectElements( $articleObject, $channelId )
 	{
 		require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
 
@@ -326,7 +327,7 @@ class BizPublishForm
 			case 'application/incopy':
 			case 'application/incopyinx':
 			case 'application/incopyicml':
-				$elements = self::extractWcmlArticleElements( $articleObject );
+				$elements = self::extractWcmlArticleElements( $articleObject, $channelId );
 				break;
 			case 'text/html':
 				$elements = self::extractHtmlElements($articleObject);
@@ -488,12 +489,13 @@ class BizPublishForm
 
 	/**
 	 * Extracts wcml article elements from an article object.
-     *
-     * @static
-     * @param object $articleObject The Article Object to retrieve the elements from.
-     * @return Element[] An array of Element objects.
-     */
-	static private function extractWcmlArticleElements( $articleObject )
+    *
+    * @static
+    * @param object $articleObject The Article Object to retrieve the elements from.
+	 * @param
+    * @return Element[] An array of Element objects.
+    */
+	static private function extractWcmlArticleElements( $articleObject, $channelId )
 	{
 		$elements = array();
 		$content = self::getArticleContents( $articleObject );
@@ -544,7 +546,7 @@ class BizPublishForm
 					$placement->ScaleX = $imgInfo['ScaleX'];
 					$placement->ScaleY = $imgInfo['ScaleY'];
 					if( $bizImageConverter->loadNativeFileForInputImage( $imgId ) &&
-						$bizImageConverter->cropAndScaleImageByPlacement( $placement ) ) {
+						$bizImageConverter->cropAndScaleImageByPlacement( $placement, $channelId ) ) {
 						$inlineImages[ $imgId ] = $bizImageConverter->getOutputImageAttachment();
 						$bizImageConverter->cleanupNativeFileForInputImage();
 					} else { // fallback at native rendition

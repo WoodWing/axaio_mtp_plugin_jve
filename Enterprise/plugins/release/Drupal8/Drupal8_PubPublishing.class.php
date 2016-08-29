@@ -260,7 +260,7 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 		if( BizPublishForm::validateFormFields( $publishFormObjects, $publishForm, $propertyPattern ) ) {
 			$wiwiwUsages = array();
 			$propertyUsages = BizPublishForm::getPropertyUsagesForForm( $publishForm, $propertyPattern, false, false, $wiwiwUsages );
-			$values = WW_Plugins_Drupal8_Utils::prepareFormFields( $propertyUsages, $wiwiwUsages, $publishFormObjects );
+			$values = WW_Plugins_Drupal8_Utils::prepareFormFields( $propertyUsages, $wiwiwUsages, $publishFormObjects, $publishTarget->PubChannelID );
 		} else {
 			$message = 'The Dossier could not be published.';
 			LogHandler::Log(__CLASS__ . '::' . __FUNCTION__ , 'ERROR', $message);
