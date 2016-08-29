@@ -4655,7 +4655,7 @@ class BizObject
 						 && BizRelation::hasRelationOfType( $objectProps['ID'], 'Placed', 'parents' ) ) {
 						//If object to be accessed is placed, throw error since user has only access to unplaced objects.
 						throw new BizException( 'ERR_AUTHORIZATION', 'Client',
-							'User does not have sufficient rights to edit object ('.$objectProps['id'].').');
+							'User does not have sufficient rights to edit object ('.$objectProps['ID'].').');
 					}
 				}
 			}
