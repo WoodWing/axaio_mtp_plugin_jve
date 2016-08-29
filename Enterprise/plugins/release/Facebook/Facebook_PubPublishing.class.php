@@ -44,6 +44,8 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 
 		$pubChannelId = $publishTarget->PubChannelID;
 		$facebookPublisher = new FacebookPublisher( $pubChannelId );
+		$pubChannelId = $publishTarget->PubChannelID;
+
 		$pageId = $facebookPublisher->pageId;
 
 		// Bail out if there is no publish form in the dossier (should never happen).
