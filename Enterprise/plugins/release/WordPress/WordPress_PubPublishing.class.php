@@ -305,8 +305,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Get supported Image Formats
-	 *
 	 * This function returns the supported WordPress Image Formats.
 	 *
 	 * @return array
@@ -363,7 +361,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * only if the username or full name of the logged in Enterprise user matches the WordPress username.
 	 *
 	 * @param string $siteName
-	 *
 	 * @return int $savedUserId
 	 */
 	public function getWordPressUserIdForCurrentUser( $siteName )
@@ -421,9 +418,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $dossier         [writable]
 	 * @param array $objectsInDossier [writable] Array of Object.
 	 * @param PubPublishTarget $publishTarget
-	 *
 	 * @return array|void of PubField containing information from publishing system
-	 *
 	 * @throws BizException
 	 */
 	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
@@ -535,12 +530,10 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Attachment[]|null $attachments
 	 * @param bool $images
 	 * @param bool $preview
-	 *
 	 * @return array
-	 *
 	 * @throws BizException
 	 */
-	function uploadImages( $publishForm, $publishFormObjects, $objectsInDossier, $publishTarget, $galleryId = null, $galleryName = null, $attachments = null, $images = false, $preview = false )
+	public function uploadImages( $publishForm, $publishFormObjects, $objectsInDossier, $publishTarget, $galleryId = null, $galleryName = null, $attachments = null, $images = false, $preview = false )
 	{
 		$postId = null;
 		$result = null;
@@ -571,17 +564,14 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 							case 'C_WORDPRESS_MULTI_IMAGES':
 								foreach( $publishFormObjects['C_WORDPRESS_MULTI_IMAGES'] as $imageObj ) {
 									if( $imageObj->MetaData->BasicMetaData->ID == $relation->Child ) {
-
 										$this->handleGalleryImage( $clientWordPress, $publishForm, $publishTarget, $imageObj, $galleryId, $preview, $imageCropAttachment );
-
 										break; // You can only have one match on image id, so stop looking when we find it.
 									}
 								}
 
 								break;
 							case 'C_WORDPRESS_FEATURED_IMAGE':
-								$wpFeaturedImageId = $this->handleFeaturedImage( $clientWordPress, $publishForm, $publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'] );
-
+								$wpFeaturedImageId = $this->handleFeaturedImage( $clientWordPress, $publishForm, $publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'], $imageCropAttachment );
 								$result['featured-image'] = $wpFeaturedImageId;
 								break;
 
@@ -620,21 +610,23 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * @param WordPressXmlRpcClient $clientWordPress
-	 * @param Object $publishForm
-	 * @param Object $featuredImage
-	 * @throws BizException
+	 * Handles the processing and uploading of a featured image.
+	 *
+	 * @param WordPressXmlRpcClient $clientWordPress The client used to communicate with WordPress.
+	 * @param Object $publishForm PublishForm object.
+	 * @param Object $featuredImage Original image object to be uploaded. Contains all metadata.
+	 * @param Attachment|null $imageCropAttachment The converted image, if any conversion has been done for it. If not this property is null.
+	 * @throws BizException when communicating with WordPress returns an error.
 	 */
-	private function handleFeaturedImage( $clientWordPress, $publishForm, $featuredImage )
+	private function handleFeaturedImage( $clientWordPress, $publishForm, $featuredImage, $imageCropAttachment )
 	{
 		$imageCropAttachment = $this->getCroppedImageAttachment( $publishForm, $featuredImage->MetaData->BasicMetaData->ID );
 
 		try {
-			$mediaId = $featuredImage->MetaData->BasicMetaData->ID;
 			if( $imageCropAttachment ) {
 				$filePath = $imageCropAttachment->FilePath;
 			} else {
-				$filePath = $this->saveLocal( $mediaId );
+				$filePath = $this->saveLocal( $featuredImage->MetaData->BasicMetaData->ID );
 			}
 			$extension = pathinfo($filePath, PATHINFO_EXTENSION);
 			$imageName = $featuredImage->MetaData->BasicMetaData->Name . '.' . $extension ;
@@ -656,6 +648,18 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		return $retVal['id'];
 	}
 
+	/**
+	 * Uploads or updates an image to/in a specific gallery.
+	 *
+	 * @param WordPressXmlRpcClient $clientWordPress The client used to communicate with WordPress.
+	 * @param Object $publishForm PublishForm object.
+	 * @param PubPublishTarget $publishTarget
+	 * @param Object $imageObj Original image object to be uploaded. Contains all relevant metadata.
+	 * @param integer $galleryId The gallery to which we need to upload images.
+	 * @param boolean $preview TRUE if the current action is Preview, FALSE if it is not.
+	 * @param Attachment|null $imageCropAttachment The converted image, if any conversion has been done for it. If not this property is null.
+	 * @throws BizException when communicating with WordPress returns an error.
+	 */
 	private function handleGalleryImage( $clientWordPress, $publishForm, $publishTarget, $imageObj, $galleryId, $preview, $imageCropAttachment )
 	{
 		$imageDescription = null;
