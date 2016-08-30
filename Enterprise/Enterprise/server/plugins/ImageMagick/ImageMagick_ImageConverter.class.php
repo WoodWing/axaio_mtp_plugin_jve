@@ -13,16 +13,6 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 	/** @var array $cmdParams List of parameters to put on command line when calling ImageMagick. */
 	private $cmdParams = array();
 
-	/** {@inheritdoc} */
-	private $supportedOutputFormats = array(
-		'image/jpeg',
-		'image/pjpeg',
-		'image/jpg',
-		'image/gif',
-		'image/png',
-		'image/x-png',
-	);
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -100,6 +90,21 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 			$retVal = ImageMagick::imageMagickCmd( $cmdName, $cmdLine ) == 0;
 		}
 		return $retVal;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getSupportedOutputFormats()
+	{
+		return array(
+			'image/jpeg',
+			'image/pjpeg',
+			'image/jpg',
+			'image/gif',
+			'image/png',
+			'image/x-png',
+		);
 	}
 
 	/**

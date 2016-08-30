@@ -10,16 +10,6 @@ require_once BASEDIR . '/server/interfaces/plugins/connectors/ImageConverter_Ent
 
 class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 {
-	/** {@inheritdoc} */
-	private $supportedOutputFormats = array(
-		'image/jpeg',
-		'image/pjpeg',
-		'image/jpg',
-		'image/gif',
-		'image/png',
-		'image/x-png',
-	);
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -99,6 +89,21 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 			}
 		}
 		return $retVal;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getSupportedOutputFormats()
+	{
+		return array(
+			'image/jpeg',
+			'image/pjpeg',
+			'image/jpg',
+			'image/gif',
+			'image/png',
+			'image/x-png',
+		);
 	}
 
 	/**
