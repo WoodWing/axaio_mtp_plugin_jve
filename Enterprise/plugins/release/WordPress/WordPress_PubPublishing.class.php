@@ -753,6 +753,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
 		// Bail out if there is no publish form in the dossier (should never happen).
+		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
 		if( !$publishForm ) {
 			return array();

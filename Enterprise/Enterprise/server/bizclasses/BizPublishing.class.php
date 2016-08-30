@@ -846,7 +846,9 @@ class BizPublishing
 			}
 
 			// Only do the image conversion after the children are thinned out so we have less to exclude.
-			$this->handleImageConversion( $children, $publishedDossier->Target->PubChannelID );
+			if( $operation == 'Preview' || $operation == 'Publish' || $operation == 'Update' ) {
+				$this->handleImageConversion( $children, $publishedDossier->Target->PubChannelID );
+			}
 
 			// Save the callback data already. It can be that the connector returns data immediately.
 			$cache = array( $publishedDossier, $operation, $action, $publishFields, $dossier, $children, $exceptionRaised );
