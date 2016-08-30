@@ -42,32 +42,18 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
-		$pubChannelId = $publishTarget->PubChannelID;
-		$facebookPublisher = new FacebookPublisher( $pubChannelId );
-		$pubChannelId = $publishTarget->PubChannelID;
-
+		$facebookPublisher = new FacebookPublisher( $publishTarget->PubChannelID );
 		$pageId = $facebookPublisher->pageId;
 
 		// Bail out if there is no publish form in the dossier (should never happen).
 		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
 		if( !$publishForm ) {
 			return array();
-
-		$pageId = $facebookPublisher->pageId;
-
-		$publishForm = null;
-		$messageText = null;
-
-		//Get the Publish Form
-		foreach ($objectsInDossier as $objectInDossier) {
-			if ($objectInDossier->MetaData->BasicMetaData->Type == 'PublishForm') {
-				$publishForm = $objectInDossier;
-				break;
-			}
 		}
 
 		// Take the objects that are placed on the publish form.
 		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
+
 		// Process the publish Form
 		$e = null;
 		try {
