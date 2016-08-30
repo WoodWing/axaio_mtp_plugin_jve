@@ -4,8 +4,11 @@ ADD   `documentid` varchar(512) not null  default '',
 ADD   `initialheight` int(4) not null  default '0',
 ADD   `multipleobjects` char(2) not null  default '';
 ALTER TABLE `smart_actionproperties` CHANGE `orderid`   `orderid` int(11) not null  default '0';
+ALTER TABLE `smart_deletedobjects` CHANGE `dpi`   `dpi` double not null  default '0';
 ALTER TABLE `smart_objectrelations`
 ADD   `parenttype` varchar(20) not null  default '';
+ALTER TABLE `smart_objects` CHANGE `dpi`   `dpi` double not null  default '0';
+ALTER TABLE `smart_objectversions` CHANGE `dpi`   `dpi` double not null  default '0';
 ALTER TABLE `smart_placements`
 ADD   `formwidgetid` varchar(200) not null  default '',
 ADD   `frametype` varchar(20) not null  default '',

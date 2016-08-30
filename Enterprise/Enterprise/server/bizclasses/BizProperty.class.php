@@ -636,10 +636,10 @@ class BizProperty
 		self::$JoinProps['Height']  	 = null;
 		self::$JFldProps['Height']  	 = null;
 
-		self::$InfoProps['Dpi']          = new PropertyInfo( 'Dpi',         BizResources::localize( 'OBJ_DPI' ),        null,'int' );
+		self::$InfoProps['Dpi']          = new PropertyInfo( 'Dpi',         BizResources::localize( 'OBJ_DPI' ),        null,'double' );
 		self::$MetaProps['Dpi']          = 'ContentMetaData->Dpi';
 		self::$ObjFProps['Dpi']          = 'dpi';
-		self::$SqlTProps['Dpi']          = 'int';
+		self::$SqlTProps['Dpi']          = 'double';
 		self::$JoinProps['Dpi']  	 	 = null;
 		self::$JFldProps['Dpi']  	 	 = null;
 

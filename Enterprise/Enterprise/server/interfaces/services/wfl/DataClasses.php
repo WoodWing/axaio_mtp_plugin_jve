@@ -152,7 +152,7 @@ class ContentMetaData
 	 * @param int                  $Columns              Nullable.
 	 * @param float                $Width                Nullable.
 	 * @param float                $Height               Nullable.
-	 * @param integer              $Dpi                  Nullable.
+	 * @param float                $Dpi                  Nullable.
 	 * @param integer              $LengthWords          Nullable.
 	 * @param integer              $LengthChars          Nullable.
 	 * @param integer              $LengthParas          Nullable.

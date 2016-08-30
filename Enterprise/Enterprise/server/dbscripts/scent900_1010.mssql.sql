@@ -11,6 +11,24 @@ SET @sql = 'ALTER TABLE smart_actionproperties DROP CONSTRAINT ' + @constraintNa
 EXEC (@sql);
 ALTER TABLE smart_actionproperties ALTER COLUMN   [orderid] int not null ;
 ALTER TABLE [smart_actionproperties] ADD DEFAULT ('0') FOR [orderid];
+DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
+EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_deletedobjects', @columnName = 'dpi', @constraintName = @constraintName OUTPUT
+SET @sql = 'ALTER TABLE smart_deletedobjects DROP CONSTRAINT ' + @constraintName
+EXEC (@sql);
+ALTER TABLE smart_deletedobjects ALTER COLUMN   [dpi] real not null ;
+ALTER TABLE [smart_deletedobjects] ADD DEFAULT ('0') FOR [dpi];
+DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
+EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_objects', @columnName = 'dpi', @constraintName = @constraintName OUTPUT
+SET @sql = 'ALTER TABLE smart_objects DROP CONSTRAINT ' + @constraintName
+EXEC (@sql);
+ALTER TABLE smart_objects ALTER COLUMN   [dpi] real not null ;
+ALTER TABLE [smart_objects] ADD DEFAULT ('0') FOR [dpi];
+DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
+EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_objectversions', @columnName = 'dpi', @constraintName = @constraintName OUTPUT
+SET @sql = 'ALTER TABLE smart_objectversions DROP CONSTRAINT ' + @constraintName
+EXEC (@sql);
+ALTER TABLE smart_objectversions ALTER COLUMN   [dpi] real not null ;
+ALTER TABLE [smart_objectversions] ADD DEFAULT ('0') FOR [dpi];
 ALTER TABLE [smart_placements] ADD 
   [frametype] varchar(20) not null  default '',
   [splineid] varchar(200) not null  default '';

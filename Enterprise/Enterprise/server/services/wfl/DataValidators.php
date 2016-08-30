@@ -351,7 +351,7 @@ class WflContentMetaDataValidator
 		if( $validator->checkExist( $datObj, 'Dpi' ) ) {
 			$validator->enterPath( 'Dpi' );
 			if( !is_null( $datObj->Dpi ) ) {
-				$validator->checkType( $datObj->Dpi, 'unsignedInt' );
+				$validator->checkType( $datObj->Dpi, 'float' );
 			}
 			$validator->leavePath();
 		}
