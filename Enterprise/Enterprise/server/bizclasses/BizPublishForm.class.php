@@ -172,6 +172,7 @@ class BizPublishForm
 	 * @param object $publishForm The PublishForm to retrieve data from.
 	 * @param string $fieldName The FieldName for which to retrieve the data.
 	 * @param bool $extractContent In some cases it can be preferable to not get an objects content, but instead get the objects attachment.
+	 * @param integer $channelId Id of the publication channel to publish in.
 	 * @return array|null An array with the resolved data.
 	 */
 	static public function extractFormFieldDataByName ( $publishForm, $fieldName, $extractContent, $channelId )
@@ -316,6 +317,7 @@ class BizPublishForm
 	 * Extracts article elements from an article object.
 	 *
 	 * @param Object $articleObject The object for which to get the Elements.
+	 * @param integer $channelId Id of the publication channel to publish in.
 	 * @return Element[] An array of elements.
 	 */
 	static public function extractArticleObjectElements( $articleObject, $channelId )
