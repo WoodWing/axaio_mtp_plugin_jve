@@ -24,7 +24,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * The plugin is supposed to publish the dossier and it's articles and fill in some fields for reference.
 	 *
 	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
+	 * @param Object[] $objectsInDossier [writable] Array of Object.
 	 * @param PubPublishTarget $publishTarget
 	 * @return PubField[] containing information from publishing system
 	 */	

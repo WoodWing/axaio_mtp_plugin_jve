@@ -620,8 +620,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	private function handleFeaturedImage( $clientWordPress, $publishForm, $featuredImage, $imageCropAttachment )
 	{
-		$imageCropAttachment = $this->getCroppedImageAttachment( $publishForm, $featuredImage->MetaData->BasicMetaData->ID );
-
 		try {
 			if( $imageCropAttachment ) {
 				$filePath = $imageCropAttachment->FilePath;
@@ -724,29 +722,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 			$clientWordPress->updateImageMetaData( $imageObj->ExternalId, $imageObj->MetaData->BasicMetaData->Name, $imageDescription );
 		}
 
-	}
-
-	/**
-	 * @param $publishForm
-	 * @param $objectId
-	 * @return Attachment|null
-	 */
-	private function getCroppedImageAttachment( $publishForm, $objectId )
-	{
-		$imageAttachment = null;
-		foreach( $publishForm->Relations as $relation ) {
-			/** @var Relation $relation */
-			if( $relation->Type == 'Placed' && $relation->Child == $objectId ) {
-				foreach( $relation->Placements as $placement ) {
-					if( isset( $placement->ImageCropAttachment ) ) {
-						$imageAttachment = $placement->ImageCropAttachment;
-						break 2; // For minor performance increase.
-					}
-				}
-				break; // For minor performance increase.
-			}
-		}
-		return $imageAttachment;
 	}
 
 	/**
