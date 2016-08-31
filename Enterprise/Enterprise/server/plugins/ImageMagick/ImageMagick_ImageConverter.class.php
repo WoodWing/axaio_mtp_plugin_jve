@@ -19,7 +19,7 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 	final public function canHandleFormat( $inputFormat, $outputFormat )
 	{
 		$score = 0;
-		if( in_array( $outputFormat, $this->supportedOutputFormats ) ) {
+		if( in_array( $outputFormat, $this->getSupportedOutputFormats() ) ) {
 			switch( $inputFormat ) {
 				case 'image/jpeg':
 				case 'image/pjpeg':

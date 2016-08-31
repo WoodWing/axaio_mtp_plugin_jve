@@ -19,7 +19,7 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 		$gdInfo = gd_info( );
 		$useGD = false;
 
-		if( in_array( $outputFormat, $this->supportedOutputFormats ) ) {
+		if( in_array( $outputFormat, $this->getSupportedOutputFormats() ) ) {
 			switch( $inputFormat ) {
 				case 'image/jpeg':
 				case 'image/pjpeg':
