@@ -34,6 +34,8 @@ public class PubChannel  implements java.io.Serializable {
 
     private com.woodwing.enterprise.interfaces.services.adm.IdName[] editions;
 
+    private java.lang.Boolean supportsCropping;
+
     public PubChannel() {
     }
 
@@ -50,7 +52,8 @@ public class PubChannel  implements java.io.Serializable {
            java.lang.Boolean directPublish,
            java.lang.Boolean supportsForms,
            com.woodwing.enterprise.interfaces.services.adm.IdName[] issues,
-           com.woodwing.enterprise.interfaces.services.adm.IdName[] editions) {
+           com.woodwing.enterprise.interfaces.services.adm.IdName[] editions,
+           java.lang.Boolean supportsCropping) {
            this.id = id;
            this.name = name;
            this.type = type;
@@ -64,6 +67,7 @@ public class PubChannel  implements java.io.Serializable {
            this.supportsForms = supportsForms;
            this.issues = issues;
            this.editions = editions;
+           this.supportsCropping = supportsCropping;
     }
 
 
@@ -326,6 +330,26 @@ public class PubChannel  implements java.io.Serializable {
         this.editions = editions;
     }
 
+
+    /**
+     * Gets the supportsCropping value for this PubChannel.
+     * 
+     * @return supportsCropping
+     */
+    public java.lang.Boolean getSupportsCropping() {
+        return supportsCropping;
+    }
+
+
+    /**
+     * Sets the supportsCropping value for this PubChannel.
+     * 
+     * @param supportsCropping
+     */
+    public void setSupportsCropping(java.lang.Boolean supportsCropping) {
+        this.supportsCropping = supportsCropping;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof PubChannel)) return false;
@@ -376,7 +400,10 @@ public class PubChannel  implements java.io.Serializable {
               java.util.Arrays.equals(this.issues, other.getIssues()))) &&
             ((this.editions==null && other.getEditions()==null) || 
              (this.editions!=null &&
-              java.util.Arrays.equals(this.editions, other.getEditions())));
+              java.util.Arrays.equals(this.editions, other.getEditions()))) &&
+            ((this.supportsCropping==null && other.getSupportsCropping()==null) || 
+             (this.supportsCropping!=null &&
+              this.supportsCropping.equals(other.getSupportsCropping())));
         __equalsCalc = null;
         return _equals;
     }
@@ -450,6 +477,9 @@ public class PubChannel  implements java.io.Serializable {
                     _hashCode += obj.hashCode();
                 }
             }
+        }
+        if (getSupportsCropping() != null) {
+            _hashCode += getSupportsCropping().hashCode();
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -548,6 +578,13 @@ public class PubChannel  implements java.io.Serializable {
         elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "IdName"));
         elemField.setNillable(true);
         elemField.setItemQName(new javax.xml.namespace.QName("", "IdName"));
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("supportsCropping");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "SupportsCropping"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
     }
 

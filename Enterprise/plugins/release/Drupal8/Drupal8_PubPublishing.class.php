@@ -606,13 +606,19 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Refer to PubPublishing_EnterpriseConnector::doesSupportPublishForms() header.
-	 *
-	 * @see PubPublishing_EnterpriseConnector::doesSupportPublishForms().
+	 * {@inheritdoc}
 	 */
 	public function doesSupportPublishForms()
 	{
 		return true; // Supports Publish Forms feature.
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function doesSupportCropping()
+	{
+		return true;
 	}
 
 	/**

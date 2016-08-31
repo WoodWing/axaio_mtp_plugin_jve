@@ -330,6 +330,7 @@ class AdmPubChannel
 	public $SupportsForms;
 	public $Issues;
 	public $Editions;
+	public $SupportsCropping;
 
 	/**
 	 * @param integer              $Id                   Nullable.
@@ -345,8 +346,9 @@ class AdmPubChannel
 	 * @param boolean              $SupportsForms        Nullable.
 	 * @param AdmIdName[]          $Issues               Nullable.
 	 * @param AdmIdName[]          $Editions             Nullable.
+	 * @param boolean              $SupportsCropping     Nullable.
 	 */
-	public function __construct( $Id=null, $Name=null, $Type=null, $Description=null, $PublishSystem=null, $PublishSystemId=null, $CurrentIssueId=null, $SuggestionProvider=null, $ExtraMetaData=null, $DirectPublish=null, $SupportsForms=null, $Issues=null, $Editions=null)
+	public function __construct( $Id=null, $Name=null, $Type=null, $Description=null, $PublishSystem=null, $PublishSystemId=null, $CurrentIssueId=null, $SuggestionProvider=null, $ExtraMetaData=null, $DirectPublish=null, $SupportsForms=null, $Issues=null, $Editions=null, $SupportsCropping=null)
 	{
 		$this->Id                   = $Id;
 		$this->Name                 = $Name;
@@ -361,6 +363,7 @@ class AdmPubChannel
 		$this->SupportsForms        = $SupportsForms;
 		$this->Issues               = $Issues;
 		$this->Editions             = $Editions;
+		$this->SupportsCropping     = $SupportsCropping;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.adm.dataclasses.AdmPubChannel'; } // AMF object type mapping
@@ -371,6 +374,7 @@ class AdmPubChannel
 		if (is_nan($this->CurrentIssueId)){ $this->CurrentIssueId = null; }
 		if (!is_null($this->DirectPublish)){ $this->DirectPublish = ('true' == $this->DirectPublish) ? true : false; }
 		if (!is_null($this->SupportsForms)){ $this->SupportsForms = ('true' == $this->SupportsForms) ? true : false; }
+		if (!is_null($this->SupportsCropping)){ $this->SupportsCropping = ('true' == $this->SupportsCropping) ? true : false; }
 		if (0 < count($this->ExtraMetaData)){
 			if (is_object($this->ExtraMetaData[0])){
 				foreach ($this->ExtraMetaData as $complexField){

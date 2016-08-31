@@ -501,11 +501,19 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Refer to PubPublishing_EnterpriseConnector::doesSupportPublishForms() header.
+	 * {@inheritdoc}
 	 */
 	public function doesSupportPublishForms()
 	{
-		return true; // Supports Publish Forms feature.
+		return true;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function doesSupportCropping()
+	{
+		return true;
 	}
 
 	/**

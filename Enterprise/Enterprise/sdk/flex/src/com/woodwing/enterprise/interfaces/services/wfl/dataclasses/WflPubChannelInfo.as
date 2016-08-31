@@ -20,6 +20,7 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		private var _Type:String;
 		private var _DirectPublish:String;
 		private var _SupportsForms:String;
+		private var _SupportsCropping:String;
 
 		public function WflPubChannelInfo() {
 		}
@@ -90,6 +91,19 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		// we handle it like a String to be able to send it nillable to the server. 
 		public function set SupportsForms(SupportsForms:String):void {
 			this._SupportsForms = SupportsForms;
+		}
+
+
+		// _SupportsCropping should be handled like a Boolean, but since Boolean is not a nillable type
+		// we handle it like a String to be able to send it nillable to the server. 
+		public function get SupportsCropping():String {
+			return this._SupportsCropping;
+		}
+
+		// _SupportsCropping should be handled like a Boolean, but since Boolean is not a nillable type
+		// we handle it like a String to be able to send it nillable to the server. 
+		public function set SupportsCropping(SupportsCropping:String):void {
+			this._SupportsCropping = SupportsCropping;
 		}
 
 	}

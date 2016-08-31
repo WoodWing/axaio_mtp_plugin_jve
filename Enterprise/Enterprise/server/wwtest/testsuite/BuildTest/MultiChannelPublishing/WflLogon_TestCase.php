@@ -318,6 +318,18 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_WflLogon_TestCase extends Te
 			'AdobeDps2' =>  false,
 			'SMS' => false
 		);
+		$supportCropping = array(
+			'Twitter' => true,
+			'Facebook' => true,
+			'Drupal7' => true,
+			'Drupal8' => true,
+			'WordPress' => true,
+			'MultiChannelPublishingSample' => false,
+			'PublishingTest' => false, // Analytics test
+			'AdobeDps' =>  false,
+			'AdobeDps2' =>  false,
+			'SMS' => false
+		);
 		foreach( $pubChannels as $pubChannel ) {
 			$publishSystem = DBChannel::getPublishSystemByChannelId( $pubChannel->Id );
 			if( $publishSystem ) {
@@ -347,6 +359,17 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_WflLogon_TestCase extends Te
 					}
 					$this->setResult( 'ERROR', 'The ['. $pubChannel->Name.'] channel ' . $errMsg, 
 											'Please check the ['. $pubChannel->Name.'] plugin.' );
+					$isValid = false;
+					continue; // avoid more errors on same channel, but continue validating other channels
+				}
+				if( $supportCropping[$publishSystem] != $pubChannel->SupportsCropping ) {
+					if( $supportCropping[$publishSystem] ) {
+						$errMsg =  'should have SupportsCropping set to "true" but currently is set to "false", which is incorrect.';
+					} else {
+						$errMsg =  'should have SupportsCropping set to "false" but currently is set to "true", which is incorrect.';
+					}
+					$this->setResult( 'ERROR', 'The ['. $pubChannel->Name.'] channel ' . $errMsg,
+						'Please check the ['. $pubChannel->Name.'] plugin.' );
 					$isValid = false;
 					continue; // avoid more errors on same channel, but continue validating other channels
 				}

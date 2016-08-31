@@ -785,12 +785,17 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * The function tells whether the plugin ( Channel specific ) supports Publish Form feature.
-	 *
-	 * @since 9.0
-	 * @return boolean True when the channel plugin supports PublishForm feature; False(Default) otherwise.
+	 * {@inheritdoc}
 	 */
 	public function doesSupportPublishForms() 
+	{
+		return true;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function doesSupportCropping()
 	{
 		return true;
 	}

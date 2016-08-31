@@ -592,6 +592,13 @@ class AdmPubChannelValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'SupportsCropping' ) ) {
+			$validator->enterPath( 'SupportsCropping' );
+			if( !is_null( $datObj->SupportsCropping ) ) {
+				$validator->checkType( $datObj->SupportsCropping, 'boolean' );
+			}
+			$validator->leavePath();
+		}
 	}
 }
 

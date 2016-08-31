@@ -628,6 +628,17 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	}
 
 	/**
+	 * The function tells whether the plugin ( Channel specific ) supports the image cropping feature.
+	 *
+	 * @since 10.1
+	 * @return boolean TRUE when the channel plugin supports the feature; FALSE (default) otherwise.
+	 */
+	public function doesSupportCropping()
+	{
+		return false;
+	}
+
+	/**
 	 * Returns the DPI for the output image based on the image metadata.
 	 *
 	 * @since 10.1

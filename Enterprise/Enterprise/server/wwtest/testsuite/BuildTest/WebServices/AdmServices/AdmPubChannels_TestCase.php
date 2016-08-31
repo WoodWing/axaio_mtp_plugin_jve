@@ -107,6 +107,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmPubChannels_TestCase ext
 				$this->pubChannel->Id            = $responseChan->Id;
 				$this->pubChannel->DirectPublish = $responseChan->DirectPublish;
 				$this->pubChannel->SupportsForms = $responseChan->SupportsForms;
+				$this->pubChannel->SupportsCropping = $responseChan->SupportsCropping;
 			}
 			$this->validateAdmPubChannel( $responseChan, 'CreatePubChannels' );
 			$this->pubChannel = $responseChan;
@@ -165,6 +166,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmPubChannels_TestCase ext
 			if( $responseChan ) {
 				$this->pubChannel->DirectPublish = $responseChan->DirectPublish;
 				$this->pubChannel->SupportsForms = $responseChan->SupportsForms;
+				$this->pubChannel->SupportsCropping = $responseChan->SupportsCropping;
 			}
 			$this->validateAdmPubChannel( $responseChan, 'ModifyPubChannels' );
 			$this->pubChannel = $responseChan;

@@ -1120,6 +1120,8 @@
 					<element name="DirectPublish"	type="xsd:boolean"			nillable="true"/>
 					<element name="SupportsForms"	type="xsd:boolean"			nillable="true" 
 								minOccurs="0" maxOccurs="1"/> <!-- v9.0: Tells whether the channel supports publish form feature -->
+					<element name="SupportsCropping"	type="xsd:boolean"		nillable="true"
+							 minOccurs="0" maxOccurs="1"/> <!-- v10.1: Tells whether the channel supports image cropping feature -->
 				</all>
 			</complexType>
 			

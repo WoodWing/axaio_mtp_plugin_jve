@@ -1330,6 +1330,7 @@ class WW_Utils_TestSuite
 			if( $responseChan ) {
 				$pubChannel->DirectPublish = $responseChan->DirectPublish;
 				$pubChannel->SupportsForms = $responseChan->SupportsForms;
+				$pubChannel->SupportsCropping = $responseChan->SupportsCropping;
 			}
 			$this->validateAdmPubChannel( $testCase, $pubChannel, $responseChan, 'ModifyPubChannels' );
 			$pubChannel = $responseChan;

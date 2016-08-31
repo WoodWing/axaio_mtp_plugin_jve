@@ -389,6 +389,7 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 		$request->PubChannels[0]->SupportsForms = null;
 		$request->PubChannels[0]->Issues = null;
 		$request->PubChannels[0]->Editions = null;
+		$request->PubChannels[0]->SupportsCropping = null;
 		return $request;
 	}
 
@@ -422,6 +423,7 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 		$request->PubChannels[0]->SupportsForms = null;
 		$request->PubChannels[0]->Issues = null;
 		$request->PubChannels[0]->Editions = null;
+		$request->PubChannels[0]->SupportsCropping = null;
 		return $request;
 	}
 
