@@ -35,14 +35,6 @@ class MultiChannelPublishingSample_PubPublishing extends PubPublishing_Enterpris
 	}
 
 	/**
-	 * {@inheritdoc}
-	 */
-	public function doesSupportCropping()
-	{
-		return true;
-	}
-
-	/**
 	 * Refer to PubPublishing_EnterpriseConnector::getPublishFormTemplates() header.
 	 */
 	public function getPublishFormTemplates( $pubChannelId )
