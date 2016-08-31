@@ -66,7 +66,6 @@ class AxaioMadeToPrintDispatcher
 			LogHandler::Log( 'mtp', 'ERROR', 'postProcess: Could not find layout. Id='.$layoutId );
 			return;
 		}
-		$comment = $res['comment'];
 
 
 		// Add MtP job notification to the layout's comment
@@ -77,9 +76,6 @@ class AxaioMadeToPrintDispatcher
 		} else {
 			$editionTxt = '';
 		}
-		$comment = '[MTP'.(isset($servername)?' '.$servername.' ':' ').date('Y-m-d H:i:s', time()). '] '.$editionTxt.$message."\n".$comment;
-
-        self::customize('postProcess_filterComment', $comment, $layoutId, $layStatusId, $layEditionId, $success);
 
 		// Get MtP configuration record for the layout trigger status
 		$mtpConfig = self::getMtpConfig( $layStatusId );
@@ -123,6 +119,15 @@ class AxaioMadeToPrintDispatcher
 			}
 		}
 
+        $comment = '[MTP' . (isset($servername) ? ' ' . $servername . ' ' : ' ') . date('Y-m-d H:i:s', time()) . '] ' . $editionTxt . $message . "\n" . $res['comment'];
+        $commentinfo = array( 'servername' => $servername
+                            , 'editionTxt' => $editionTxt
+                            , 'message'    => $message
+                            , 'comment'    => $res['comment']
+                            , 'success'    => $success
+                            );
+        self::customize('postProcess_filterComment', $comment, $layoutId, $layStatusId, $layEditionId, $success, $mtpConfig, $commentinfo);
+
 		// Update layout status and comment
 		if($refstatelayout != 0 && $success == 1){
 			$newRouteTo = BizWorkflow::doGetDefaultRouting( $mtpConfig['publication_id'], $mtpConfig['issue_id'], null, $refstatelayout );
@@ -157,9 +162,10 @@ class AxaioMadeToPrintDispatcher
 
 		LogHandler::Log('mtp', 'DEBUG', 'postProcess: layout status='.$refstatelayout.' success='.$success);
 
-        if($refstatelayout != 0 && $success == 1){
-            require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-            self::doPrint($layoutId, BizSession::getTicket() );
+        if (is_array($updatedObjects)) {
+            foreach ($updatedObjects as $obj) {
+                self::retriggerObject($obj);
+            }
         }
 	}
 
@@ -641,7 +647,7 @@ class AxaioMadeToPrintDispatcher
 		}
 
 		$objType = self::getObjectType( $objectId );
-		if( $objType == 'Layout' ) {
+        if (substr($objType,0,6) == 'Layout') { //also support LayoutTemplates
 			$layoutIds = array( $objectId );
 		} elseif( $objType == 'Article' || $objType == 'Image' ) {
 			$layoutIds = self::getParentLayouts( $objectId );
@@ -733,6 +739,83 @@ class AxaioMadeToPrintDispatcher
 		return true;
 	}
 
+    /*
+     * retriggers the document to set next status in panel and forces Woodwing
+     * to check if another trigger was hit.
+     * 
+     * code based on submit from A&F
+     */
+    private static function retriggerObject($obj)
+    {
+        require_once(BASEDIR . '/server/secure.php');
+        require_once(BASEDIR . "/server/services/wfl/WflLogOnService.class.php");
+        require_once(BASEDIR . "/server/services/wfl/WflLogOffService.class.php");
+        require_once(BASEDIR . "/server/services/wfl/WflGetObjectsService.class.php");
+        require_once(BASEDIR .
+                "/server/services/wfl/WflSetObjectPropertiesService.class.php");
+        
+        $user   = AXAIO_MTP_USER;
+        $password = AXAIO_MTP_PASSWORD;
+        $result = false;
+        $ticket = null;
+        try {
+            do {
+                LogHandler::Log('mtp', 'INFO', 'Re-Trigger object: ' . $obj);
+                // log on
+                $service = new WflLogOnService();
+                $req = new WflLogOnRequest($user, $password, null, "retriggerObject", null, "retriggerObject", "8.0.0", null, null, true);
+                $resp = $service->execute($req);
+                if (!$resp) {
+                    LogHandler::Log('mtp', 'ERROR', 'LogOn failed: Request failed.');
+                    break;
+                }
+                $ticket = $resp->Ticket;
+                if (!$ticket) {
+                    LogHandler::Log('mtp', 'ERROR', 'LogOn failed: No ticket returned.');
+                    break;
+                }
+                // get object
+                /* 	$service = new WflGetObjectsService();
+                  $req = new WflGetObjectsRequest($ticket, array($id), false, 'none');
+                  $resp = $service->execute($req);
+                  if (!$resp) {
+                  self::log('ERROR', 'GetObject failed: Request failed.');
+                  break;
+                  }
+                  $obj = $resp->Objects[0];
+                 */ if (!$obj) {
+                    LogHandler::Log('mtp', 'ERROR', 'GetObject failed: No object returned.');
+                    break;
+                }
+                // avoid WoodWing S1019 error
+                $obj->MetaData->TargetMetaData = null;
+                // set object properties
+                $service = new WflSetObjectPropertiesService();
+                $req = new WflSetObjectPropertiesRequest($ticket, $obj->MetaData->BasicMetaData->ID, $obj->MetaData, null);
+                $resp = $service->execute($req);
+                if (!$resp) {
+                    LogHandler::Log('mtp', 'ERROR', 'SetObjectProperties failed.');
+                    break;
+                }
+                LogHandler::Log('mtp', 'DEBUG', 'DONE');
+                $result = true;
+            } while (false);
+        } catch (Exception $ex) {
+            LogHandler::Log('mtp', 'ERROR', 'An unexpected exception occured: ' . $ex);
+        }
+        try {
+            if ($ticket) {
+                // log off
+                $service = new WflLogOffService();
+                $req = new WflLogOffRequest($ticket);
+                $service->execute($req);
+            }
+        } catch (Exception $ex) {
+            
+        }
+        return $result;
+    }
+    
 	/**
 	 * Returns the object status (from smart_objects table).
 	 *

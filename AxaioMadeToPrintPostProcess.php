@@ -38,4 +38,13 @@ if($message){
 	$message = addslashes(html_entity_decode($message));
 }
 
+LogHandler::Log('mtp', 'DEBUG', 'postProcess: calling postProcess with: ' . 
+								'  $layoutId ' . $layoutId .
+								', $layStatusId ' . $layStatusId .
+								', $layEditionId ' . $layEditionId .
+								', $success ' . $success .
+								', $servername ' . $servername .
+								', $message ' . $message
+				);
+
 AxaioMadeToPrintDispatcher::postProcess( $layoutId, $layStatusId, $layEditionId, $success, $message, $servername);

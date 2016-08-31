@@ -46,7 +46,12 @@ function getMTPUserName()
 		return $users[$host];
   	}
 
-	return $users[0];
+    if( isset( $users[0] ) ) 
+    {
+		return $users[0];
+	}
+
+    return "";
 }
 
 print getMTPUserName();
