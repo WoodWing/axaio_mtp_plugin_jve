@@ -171,14 +171,14 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 
 			$uploadImagesResult = null;
 			if( strtolower( $action ) == 'preview' ) { // if preview we don't want to save anything or use the existing gallery because that will corrupt the dossier
-				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget, null, $dossier->MetaData->BasicMetaData->Name,
-					$attachments, isset( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] ), true );
+				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget,
+					null, $dossier->MetaData->BasicMetaData->Name, $attachments, true );
 			} else if( $galleryId ) { // use already existing gallery
-				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget, $galleryId, null, $attachments,
-					isset( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] ) );
+				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget,
+					$galleryId, null, $attachments );
 			} else { // create a new gallery
-				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget, null, $dossier->MetaData->BasicMetaData->Name,
-					$attachments, isset( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] ) );
+				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget,
+					null, $dossier->MetaData->BasicMetaData->Name, $attachments );
 			}
 
 			// Cleanup the temporary created images files.
@@ -528,28 +528,18 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param integer|null $galleryId
 	 * @param string|null $galleryName
 	 * @param Attachment[]|null $attachments
-	 * @param bool $images
 	 * @param bool $preview
 	 * @return array
 	 * @throws BizException
 	 */
-	public function uploadImages( $publishForm, $publishFormObjects, $objectsInDossier, $publishTarget, $galleryId = null, $galleryName = null, $attachments = null, $images = false, $preview = false )
+	public function uploadImages( $publishForm, $publishFormObjects, $objectsInDossier, $publishTarget,
+	                              $galleryId, $galleryName, $attachments, $preview = false )
 	{
 		$postId = null;
 		$result = null;
 		$clientWordPress = new WordPressXmlRpcClient( $publishTarget );
 
-		if( $images ) {
-			// Check if we have a galleryName or an galleryId when there are images to upload,
-			// this exception is given when the function is called with the wrong parameters
-			if( !$galleryName && !$galleryId ) {
-				throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', 'Please contact your system administrator');
-			}
-
-			// If no GalleryId then create a new Gallery.
-			if( !$galleryId ) {
-				$galleryId = $clientWordPress->createGallery( $galleryName );
-			}
+		if( isset($publishFormObjects['C_WORDPRESS_MULTI_IMAGES']) || isset($publishFormObjects['C_WORDPRESS_FEATURED_IMAGE']) ) {
 
 			foreach( $publishForm->Relations as $relation ) {
 				if( $relation->Type == 'Placed' && $relation->ChildInfo->Type == 'Image' ) {
@@ -562,17 +552,30 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 
 						switch( $placement->FormWidgetId ) {
 							case 'C_WORDPRESS_MULTI_IMAGES':
+
+								// Check if we have a galleryName or an galleryId when there are images to upload,
+								// this exception is given when the function is called with the wrong parameters
+								if( !$galleryName && !$galleryId ) {
+									throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', 'Please contact your system administrator');
+								}
+
+								// If no GalleryId then create a new Gallery.
+								if( !$galleryId ) {
+									$galleryId = $clientWordPress->createGallery( $galleryName );
+								}
+
 								foreach( $publishFormObjects['C_WORDPRESS_MULTI_IMAGES'] as $imageObj ) {
 									if( $imageObj->MetaData->BasicMetaData->ID == $relation->Child ) {
-										$this->handleGalleryImage( $clientWordPress, $publishForm, $publishTarget, $imageObj, $galleryId, $preview, $imageCropAttachment );
+										$this->handleGalleryImage( $clientWordPress, $publishForm, $publishTarget, $imageObj,
+											$galleryId, $preview, $imageCropAttachment );
 										break; // You can only have one match on image id, so stop looking when we find it.
 									}
 								}
 
 								break;
 							case 'C_WORDPRESS_FEATURED_IMAGE':
-								$wpFeaturedImageId = $this->handleFeaturedImage( $clientWordPress, $publishForm, $publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'], $imageCropAttachment );
-								$result['featured-image'] = $wpFeaturedImageId;
+								$result['featured-image'] = $this->handleFeaturedImage( $clientWordPress, $publishForm,
+									$publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'], $imageCropAttachment );
 								break;
 
 						}
@@ -595,7 +598,8 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 					$inlineImageName = DBDeletedObject::getObjectName( $imageId ); // so find in Trash area
 				}
 				try {
-					$retVal = $clientWordPress->uploadMediaLibraryImage( $inlineImageName.$extension, $attachments[$imageId]->FilePath, $attachments[$imageId]->Type );
+					$retVal = $clientWordPress->uploadMediaLibraryImage( $inlineImageName.$extension,
+						$attachments[$imageId]->FilePath, $attachments[$imageId]->Type );
 				} catch( BizException $e ) {
 					throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail());
 				}
