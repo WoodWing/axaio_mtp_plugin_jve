@@ -686,6 +686,11 @@ class BizObject
 		$newRow = self::validateForSave( $user, $object, $currRow );
 		$state = $newRow['state'];
 
+		// Unset those field's value that mustn't change during save operation
+		if( isset($newRow['created']) ) {
+			unset($newRow['created']);
+		}
+
 		// Does the user has a lock for this file?
 		$lockedby = DBObjectLock::checkLock( $id );
 		if( !$lockedby ){
