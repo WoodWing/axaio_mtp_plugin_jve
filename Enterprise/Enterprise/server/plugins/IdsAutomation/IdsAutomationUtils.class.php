@@ -23,6 +23,7 @@ class IdsAutomationUtils
 	 * @param integer $objectId The object ID of the object causing the trigger to create the job.
 	 * @param string $objectType The object Type of the object causing the trigger to create the job.
 	 * @param bool $unique TRUE when layout should be unique in the queue. If found, the job is NOT created.
+	 * @return bool
 	 */
 	public static function createIDSJob( $layoutID, $objectId, $objectType, $unique = true )
 	{
@@ -31,7 +32,7 @@ class IdsAutomationUtils
 		if (isset($processedLayoutIds[$layoutID])) {
 			LogHandler::Log('IdsAutomation', 'INFO',
 				"Skipped IDS job creation: Just created an IDS job before for layout [$layoutID].");
-			return;
+			return false;
 		}
 		$processedLayoutIds[$layoutID] = true;
 
@@ -48,7 +49,7 @@ class IdsAutomationUtils
 			if ($idCount > 0) { // layout is flagged
 				LogHandler::Log('IdsAutomation', 'INFO',
 					"Skipped IDS job creation: Layout [$layoutID] has an Update Flag set.");
-				return;
+				return false;
 			}
 		}
 
@@ -91,6 +92,7 @@ class IdsAutomationUtils
 		if ($jobId) {
 			LogHandler::Log('IdsAutomation', 'INFO', "Layout [$layoutID] submitted as IDS jobID [" . $jobId . ']');
 		}
+		return true;
 	}
 
 	/**
@@ -131,8 +133,7 @@ class IdsAutomationUtils
 							LogHandler::Log('IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed.");
 							continue;
 						}
-						self::createIDSJob($layoutId, $layoutId, $objType);
-						$retVal = true;
+						$retVal = self::createIDSJob($layoutId, $layoutId, $objType);
 					}
 				} else {
 					LogHandler::Log('IdsAutomation', 'INFO',
@@ -178,8 +179,7 @@ class IdsAutomationUtils
 
 		// Create an IDS job for layout.
 		LogHandler::Log('IdsAutomation', 'INFO', "Creating IDS job for $objType (id=$objId).");
-		IdsAutomationUtils::createIDSJob($objId, $objId, $objType);
-		return true;
+		return self::createIDSJob($objId, $objId, $objType);
 	}
 
 	/**
