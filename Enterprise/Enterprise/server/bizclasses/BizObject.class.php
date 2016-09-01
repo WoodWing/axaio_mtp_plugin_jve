@@ -686,11 +686,6 @@ class BizObject
 		$newRow = self::validateForSave( $user, $object, $currRow );
 		$state = $newRow['state'];
 
-		// Unset those field's value that mustn't change during save operation
-		if( isset($newRow['created']) ) {
-			unset($newRow['created']);
-		}
-
 		// Does the user has a lock for this file?
 		$lockedby = DBObjectLock::checkLock( $id );
 		if( !$lockedby ){
@@ -4170,7 +4165,7 @@ class BizObject
 		$arr = array();
 		$systemDeterminedFields = array( 'id', 'created', 'creator', 'modified', 'modifier', 'lockedby', 'majorversion', 'minorversion' );
 		if ( $isShadowObject ) {
-			$systemDeterminedFields = array( 'id', 'majorversion', 'minorversion' );
+			$systemDeterminedFields = array( 'id', 'created', 'majorversion', 'minorversion' );
 		}
 		foreach( $objFields as $propName => $objField ) {
 			$propPath = $propPaths[$propName];
