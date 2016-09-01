@@ -18,7 +18,7 @@ class IdsAutomationServerJobFacade
 	 * when needed. The object type and status id aren't mandatory, if known they can be passed
 	 * to this function to optimize the call.
 	 *
-	 * @param integer $objId
+	 * @param string $objId
 	 * @param string|null $objType
 	 * @param integer|null $stateId
 	 * @return boolean|null Returns true if a job was created, otherwise false. Null is returned when the plugin isn't activated
@@ -50,7 +50,7 @@ class IdsAutomationServerJobFacade
 	 *
 	 * This call is used by the Content Station 10 plugin.
 	 *
-	 * @param integer $objId
+	 * @param string $objId
 	 * @param string|null $objType
 	 * @param integer|null $stateId
 	 * @return boolean|null Returns true if a job was created, otherwise false. Null is returned when the plugin isn't activated

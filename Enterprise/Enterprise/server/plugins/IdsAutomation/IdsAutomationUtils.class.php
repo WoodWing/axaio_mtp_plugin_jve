@@ -98,7 +98,7 @@ class IdsAutomationUtils
 	/**
 	 * Creates InDesign Server jobs for the layouts of the given placeable object.
 	 *
-	 * @param integer $objId
+	 * @param string $objId
 	 * @param integer $stateId
 	 * @param string $objType
 	 * @return boolean
@@ -153,7 +153,7 @@ class IdsAutomationUtils
 	/**
 	 * Creates InDesign Server jobs for the given layouts.
 	 *
-	 * @param integer $objId
+	 * @param string $objId
 	 * @param integer $stateId
 	 * @param string $objType
 	 * @return boolean
@@ -503,7 +503,7 @@ class IdsAutomationUtils
 	/**
 	 * Returns the object type for the given object id.
 	 *
-	 * @param integer $objId
+	 * @param string $objId
 	 * @return string
 	 */
 	public static function getObjectType( $objId )
@@ -515,7 +515,7 @@ class IdsAutomationUtils
 	/**
 	 * Returns the object status id for the given object id.
 	 *
-	 * @param integer $objId
+	 * @param string $objId
 	 * @return integer
 	 */
 	public static function getStatusId( $objId )
