@@ -94,6 +94,105 @@ class IdsAutomationUtils
 	}
 
 	/**
+	 * Creates InDesign Server jobs for the layouts of the given placeable object.
+	 *
+	 * @param integer $objId
+	 * @param integer $stateId
+	 * @param string $objType
+	 * @return boolean
+	 */
+	public static function createIdsAutomationJobsForPlacedObject( $objId, $stateId, $objType ) {
+		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
+		if( BizContentSource::isAlienObject( $objId ) ) {
+			// Skip when this is an alien object
+			return false;
+		}
+		if ( !self::isPlaceableObjectType( $objType ) ) {
+			// Stop when this isn't a placeable object
+			return false;
+		}
+
+		if (self::statusHasSkipIdsa($stateId)) {
+			LogHandler::Log('IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed.");
+		} else {
+			$layoutIds = self::getLayoutIdsFromObjectID($objId);
+			if ($layoutIds) {
+				if (count($layoutIds) <= 50) {
+					$layoutIdsStr = implode(', ', $layoutIds);
+					LogHandler::Log('IdsAutomation', 'INFO',
+						"Object (id=$objId) is placed on layouts (ids=$layoutIdsStr) " .
+						"for which a IDS jobs will be created.");
+					$layoutMetadatas = self::getLayoutsMetadataFromIds($layoutIds);
+					$jobCreated = false;
+					foreach ($layoutMetadatas as $layoutId => $layoutMetadata) {
+						if (self::statusHasSkipIdsa($layoutMetadata->WorkflowMetaData->State->Id)) {
+							LogHandler::Log('IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed.");
+							continue;
+						}
+						self::createIDSJob($layoutId, $layoutId, $objType);
+						$jobCreated = true;
+					}
+					return $jobCreated;
+				} else {
+					LogHandler::Log('IdsAutomation', 'INFO',
+						"Given object ID [$objId] is placed on " . count($layoutIds) . " layouts. " .
+						"To avoid flooding the IDS job queue, skipped processing all those layouts.");
+				}
+			} else {
+				LogHandler::Log('IdsAutomation', 'INFO',
+					"Object (id=$objId) is NOT placed on any layout " .
+					"so there will NOT be an IDS job created for this.");
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Creates InDesign Server jobs for the given layouts.
+	 *
+	 * @param integer $objId
+	 * @param integer $stateId
+	 * @param string $objType
+	 * @return boolean
+	 */
+	public static function createIdsAutomationJobsForLayout( $objId, $stateId, $objType ) {
+		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
+		if( BizContentSource::isAlienObject( $objId ) ) {
+			// Skip when this is an alien object
+			return false;
+		}
+		if ( !self::isLayoutObjectType($objType) ) {
+			return false;
+		}
+
+		// Skip when ID client has already provided all the renditions needed for the
+		// workflow setup since then no work needs to be offloaded to IDS.
+		IdsAutomationUtils::initLayoutStatusChangeTriggerForIds(array($objId));
+		if (!IdsAutomationUtils::isContentChangeTriggerForIds($objId, $stateId)) {
+			// log already done by isContentChangeTriggerForIds()
+			return false; // skip
+		}
+
+		// Create an IDS job for layout.
+		LogHandler::Log('IdsAutomation', 'INFO', "Creating IDS job for $objType (id=$objId).");
+		IdsAutomationUtils::createIDSJob($objId, $objId, $objType);
+		return true;
+	}
+
+	/**
+	 * Function to check whether or not if a status has the skip InDesign Server option enabled.
+	 *
+	 * @param integer $stateId Status Id
+	 * @return bool True when option is enabled
+	 */
+	private static function statusHasSkipIdsa( $stateId )
+	{
+		$status = self::getStatusWithId( $stateId );
+		return self::statusSkipsIdsa( $status );
+	}
+
+	/**
 	 * Whether or not a given Layout (or -Module) status change matches the configured one,
 	 * and so the layout should be processed by IDS.
 	 * Please call initLayoutStatusChangeTriggerForIds() before calling this function.
@@ -398,11 +497,39 @@ class IdsAutomationUtils
 		LogHandler::Log( 'IdsAutomation', 'DEBUG', "Found layout ids: " . implode(',', $layoutids) );	
 		return $layoutids;
 	}
-	
+
+	/**
+	 * Returns the object type for the given object id.
+	 *
+	 * @param integer $objId
+	 * @return string
+	 */
 	public static function getObjectType( $objId )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		return DBObject::getObjectType( $objId );
+	}
+
+	/**
+	 * Returns the object status id for the given object id.
+	 *
+	 * @param integer $objId
+	 * @return integer
+	 */
+	public static function getStatusId( $objId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		return DBObject::getObjectStatusId( $objId );
+	}
+
+	/**
+	 * Helper function that returns true if the IdsAutomation plugin is activated.
+	 *
+	 * @return boolean
+	 */
+	public static function isPluginActivated() {
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+		return BizServerPlugin::isPluginActivated( 'IdsAutomation' );
 	}
 	
 	// - - - - - - - - - - - Wrappers with memory cache - - - - - - - - - - - - - - - - - -
