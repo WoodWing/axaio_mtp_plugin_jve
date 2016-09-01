@@ -101,7 +101,8 @@ class IdsAutomationUtils
 	 * @param string $objType
 	 * @return boolean
 	 */
-	public static function createIdsAutomationJobsForPlacedObject( $objId, $stateId, $objType ) {
+	public static function createIdsAutomationJobsForPlacedObject( $objId, $stateId, $objType )
+	{
 		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 		if( BizContentSource::isAlienObject( $objId ) ) {
 			// Skip when this is an alien object
@@ -111,6 +112,8 @@ class IdsAutomationUtils
 			// Stop when this isn't a placeable object
 			return false;
 		}
+
+		$retVal = false;
 
 		if (self::statusHasSkipIdsa($stateId)) {
 			LogHandler::Log('IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed.");
@@ -123,16 +126,14 @@ class IdsAutomationUtils
 						"Object (id=$objId) is placed on layouts (ids=$layoutIdsStr) " .
 						"for which a IDS jobs will be created.");
 					$layoutMetadatas = self::getLayoutsMetadataFromIds($layoutIds);
-					$jobCreated = false;
 					foreach ($layoutMetadatas as $layoutId => $layoutMetadata) {
 						if (self::statusHasSkipIdsa($layoutMetadata->WorkflowMetaData->State->Id)) {
 							LogHandler::Log('IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed.");
 							continue;
 						}
 						self::createIDSJob($layoutId, $layoutId, $objType);
-						$jobCreated = true;
+						$retVal = true;
 					}
-					return $jobCreated;
 				} else {
 					LogHandler::Log('IdsAutomation', 'INFO',
 						"Given object ID [$objId] is placed on " . count($layoutIds) . " layouts. " .
@@ -145,7 +146,7 @@ class IdsAutomationUtils
 			}
 		}
 
-		return false;
+		return $retVal;
 	}
 
 	/**
@@ -156,7 +157,8 @@ class IdsAutomationUtils
 	 * @param string $objType
 	 * @return boolean
 	 */
-	public static function createIdsAutomationJobsForLayout( $objId, $stateId, $objType ) {
+	public static function createIdsAutomationJobsForLayout( $objId, $stateId, $objType )
+	{
 		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 		if( BizContentSource::isAlienObject( $objId ) ) {
 			// Skip when this is an alien object
