@@ -492,9 +492,9 @@ class BizEmail
 			$rowText .= '<td valign="top">' . $object->BasicMetaData->Publication->Name . '</td>';
 			$rowText .= '<td valign="top">' . $objectCategory . '</td>';
 			$rowText .= '<td valign="top">' . $objectStatus . '</td>';
-            $rowText .= '<td valign="top">' . self::resolveModifierFromObject( $object ). '</td>';
-            $rowText .= '<td valign="top">' . $object->WorkflowMetaData->Modified . '</td>';
-            $rowText .= '<td valign="top">' . $object->WorkflowMetaData->Comment . '</td>';
+         $rowText .= '<td valign="top">' . self::resolveModifierFromObject( $object ). '</td>';
+         $rowText .= '<td valign="top">' . $object->WorkflowMetaData->Modified . '</td>';
+         $rowText .= '<td valign="top">' . $object->WorkflowMetaData->Comment . '</td>';
 
 			if( ($count % 2) == 0 ){ // this is used for the row styling
 				$objectRowsText .= '<tr class="even">' . $rowText . '</tr>';
@@ -520,7 +520,7 @@ class BizEmail
     {
         require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
         $modifier = '';
-        if( isset( $object->WorkflowMetaData->Modifier ) ) {
+        if( !empty( $object->WorkflowMetaData->Modifier ) ) {
             $modifier = BizUser::resolveFullUserName( $object->WorkflowMetaData->Modifier );
         }
 
