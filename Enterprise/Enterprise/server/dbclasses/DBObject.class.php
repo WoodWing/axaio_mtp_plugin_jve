@@ -446,7 +446,7 @@ class DBObject extends DBBase
 		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' ) ).' as "version"';
 
 		$sql = 'SELECT o.`id`, o.`documentid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
-			'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, o.`modifier`, o.`comment`, '.
+			'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, o.`modifier`, '.
 			'pub.`publication` as "pubname", sec.`section` as "secname", stt.`state` as "sttname", '.
 			'stt.`type` as "stttype", stt.`color` as "sttcolor", o.`routeto`, lck.`usr` as "lockedby", '.$verFld.' '.
 			"FROM $objTbl o ".
@@ -496,7 +496,6 @@ class DBObject extends DBBase
 			$md->WorkflowMetaData->Version = $row['version'];
 			$md->WorkflowMetaData->Modified = $row['modified'];
 			$md->WorkflowMetaData->Modifier = $row['modifier'];
-			$md->WorkflowMetaData->Comment = $row['comment'];
 			$mds[ $row['id'] ] = $md;
 		}
 		return $mds;
