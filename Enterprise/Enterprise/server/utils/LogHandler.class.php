@@ -803,14 +803,19 @@ class LogHandler
 	 * @param string $protocol     Service protocol (e.g. 'soap') used in log file postfix, and to determine file extension.
 	 * @param string $fileExt      File extension to use for logging. Supersedes $protocol.
 	 * @param bool $forceLog       Whether or not to suppress the DEBUGLEVELS setting.
+	 * @param callable|null $customObfuscatePassword A PHP callable to a custom function to obfuscate passwords for logging purposes.
 	 */
-	public static function logService( $methodName, $transData, $isRequest, $protocol, $fileExt=null, $forceLog=false )
+	public static function logService( $methodName, $transData, $isRequest, $protocol, $fileExt=null, $forceLog=false, $customObfuscatePassword=null )
 	{
 		if( ($forceLog || self::$debugLevel == 'DEBUG') &&
 			!self::suppressLoggingForService( $methodName ) ) {
 
 			if( $isRequest ) { // Futher check on if LogOn request, Password value will change to ***
-				$transData = self::replacePasswordWithAsterisk( $methodName, $transData, $protocol );
+				if( !$customObfuscatePassword ) {
+					$transData = self::replacePasswordWithAsterisk( $methodName, $transData, $protocol );
+				} elseif( is_callable($customObfuscatePassword) ) {
+					$transData = call_user_func( $customObfuscatePassword, $methodName, $transData );
+				}
 			}
 
 			// Build file path for log file

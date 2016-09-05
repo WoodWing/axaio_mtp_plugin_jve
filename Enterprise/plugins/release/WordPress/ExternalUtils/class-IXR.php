@@ -664,7 +664,7 @@ class IXR_Client
         // Now send the request
         $debugMode = LogHandler::debugMode();
         if( $debugMode ) {
-            LogHandler::logService( $method, $xml, true, 'xmlrpc', 'xml' );
+            LogHandler::logService( $method, $xml, true, 'xmlrpc', 'xml', false, array('WordPress_Utils', 'obfuscatePasswordInRequest') );
         }
         if ($this->debug) {
             echo '<pre class="ixr_request">'.htmlspecialchars($request)."\n</pre>\n\n";
@@ -731,7 +731,7 @@ class IXR_Client
 
         // Message must be OK
         if( $debugMode ) {
-            LogHandler::logService( $method, $contents, true, 'xmlrpc', 'xml' );
+            LogHandler::logService( $method, $contents, false, 'xmlrpc', 'xml' );
         }
         return true;
     }

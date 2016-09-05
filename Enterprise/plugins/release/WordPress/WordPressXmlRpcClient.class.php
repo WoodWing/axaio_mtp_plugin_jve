@@ -48,7 +48,7 @@ class WordPressXmlRpcClient
 		$xmlRpcClient = new WW_Utils_XmlRpcClient($url);
 		$xmlRpcClient->setXmlRpcClient($url, $zendHttpClient);
 		try {
-			$retVal = $xmlRpcClient->callRpcService( $action, $params );
+			$retVal = $xmlRpcClient->callRpcService( $action, $params, array( 'WordPress_Utils', 'obfuscatePasswordInRequest' ) );
 		} catch( BizException $e ) {
 			if( strpos( $e->getDetail(), 'permission' ) && strpos( $e->getDetail(), '(403)' ) ) { // given when the user has no the correct rights
 				$errMsg = $e->getDetail();
@@ -218,7 +218,8 @@ class WordPressXmlRpcClient
 				$params = array( 0, $userName, $password, $content, true );
 				return $this->rpcService( $url, 'metaWeblog.newPost', $params );
 			} else {
-				$params = array( $externalId, $userName, $password, $content, true );
+				// WordPress API uses integers for the external id. Need to make sure this type is set correctly.
+				$params = array( (int) $externalId, $userName, $password, $content, true );
 				return $this->rpcService( $url, 'metaWeblog.editPost', $params );
 			}
 		} else {
@@ -248,13 +249,14 @@ class WordPressXmlRpcClient
 	 * This function gets a post from WordPress
 	 * This function uses the XML-RPC API.
 	 *
-	 * @param $externalId
+	 * @param int $externalId
 	 *
 	 * @return mixed
 	 */
 	function getPost( $externalId )
 	{
-		$params = array( $externalId, $this->userName, $this->password );
+		// WordPress API uses integers for the external id. Need to make sure this type is set correctly.
+		$params = array( (int) $externalId, $this->userName, $this->password );
 		return $this->rpcService( $this->url, 'metaWeblog.getPost', $params );
 	}
 
@@ -264,7 +266,7 @@ class WordPressXmlRpcClient
 	 * This function deletes a post from WordPress with all the content.(Inline images and galleries)
 	 * This function uses the XML-RPC API.
 	 *
-	 * @param $externalId
+	 * @param int $externalId
 	 *
 	 * @return mixed
 	 */

@@ -523,4 +523,29 @@ class WordPress_Utils
 			}
 		}
 	}
+
+	/**
+	 * Obfuscates the passwords in the logging for all WordPress requests by replacing the password with '***'.
+	 *
+	 * This function and its parameters are based on LogHandler::replacePasswordWithAsterisk.
+	 *
+	 * @param string $methodName Request method name.
+	 * @param string $transData Raw request data in XML format.
+	 * @return string The complete request with replaced password.
+	 */
+	public static function obfuscatePasswordInRequest( $methodName, $transData )
+	{
+		$doc = new DOMDocument();
+		$doc->loadXML( $transData );
+		$xpath = new DOMXPath($doc);
+		$params = $xpath->query('//methodCall/params/param/value/*');
+		// WordPress uses different APIs, each of which has a different order of communicating properties.
+		if( substr( $methodName, 0, 9 ) == 'woodwing.' && $methodName !== 'woodwing.GetPreviewUrl' ) {
+			$item = $params->item(1);
+		} else {
+			$item = $params->item(2);
+		}
+		$item->nodeValue = '***';
+		return $doc->saveXML();
+	}
 }

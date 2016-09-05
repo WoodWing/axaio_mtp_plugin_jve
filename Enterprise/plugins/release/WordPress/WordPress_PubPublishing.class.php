@@ -484,7 +484,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
     /**
      * Get the Url for a certain post.
      *
-     * @param $externalId int The id of the post, used to get the Url.
+     * @param int $externalId The id of the post, used to get the Url.
      * @param $publishTarget PubPublishTarget
      * @return string
      */
