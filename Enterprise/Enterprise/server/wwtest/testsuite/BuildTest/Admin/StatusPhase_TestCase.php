@@ -268,8 +268,6 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 	private function wflCreateObjectWithDefaultStatusPhase()
 	{
 		$resultOK = false;
-		$resultOK = $resultOK; // Keep ZCA happy
-
 		$microTime = explode( ' ', microtime() );
 		$milliSec = sprintf( '%03d', round($microTime[0]*1000) );
 		$postfix = date( 'ymd His', $microTime[1] ).' '.$milliSec;
@@ -506,7 +504,7 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$response->Objects[0]->MetaData->ContentMetaData->Columns = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->Width = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->Height = '0';
-		$response->Objects[0]->MetaData->ContentMetaData->Dpi = '0';
+		$response->Objects[0]->MetaData->ContentMetaData->Dpi = 0;
 		$response->Objects[0]->MetaData->ContentMetaData->LengthWords = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->LengthChars = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->LengthParas = '3';
@@ -625,7 +623,6 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 	private function wflGetObjects()
 	{
 		$resultOK = false;
-		$resultOK = $resultOK; // Keep ZCA happy
 
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
@@ -714,7 +711,7 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$response->Objects[0]->MetaData->ContentMetaData->Columns = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->Width = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->Height = '0';
-		$response->Objects[0]->MetaData->ContentMetaData->Dpi = '0';
+		$response->Objects[0]->MetaData->ContentMetaData->Dpi = 0;
 		$response->Objects[0]->MetaData->ContentMetaData->LengthWords = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->LengthChars = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->LengthParas = '3';
@@ -1083,7 +1080,7 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$response->Objects[0]->MetaData->ContentMetaData->Columns = '3';
 		$response->Objects[0]->MetaData->ContentMetaData->Width = '523.275591';
 		$response->Objects[0]->MetaData->ContentMetaData->Height = '769.889764';
-		$response->Objects[0]->MetaData->ContentMetaData->Dpi = '72';
+		$response->Objects[0]->MetaData->ContentMetaData->Dpi = 0;
 		$response->Objects[0]->MetaData->ContentMetaData->LengthWords = '1';
 		$response->Objects[0]->MetaData->ContentMetaData->LengthChars = '5';
 		$response->Objects[0]->MetaData->ContentMetaData->LengthParas = '3';
