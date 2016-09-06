@@ -2754,7 +2754,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Modified = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Creator = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Created = null;
-		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Comment = null;
+		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Comment = '';
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State = new State();
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->Id = $this->statuses['Layout']->Id;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->Name = $this->statuses['Layout']->Name;
@@ -2845,7 +2845,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Modified = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Creator = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Created = null;
-		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Comment = null;
+		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Comment = '';
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State = new State();
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->Id = $this->statuses['Layout']->Id;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->Name = $this->statuses['Layout']->Name;
@@ -2936,7 +2936,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Modified = null;
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Creator = null;
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Created = null;
-		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Comment = null;
+		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Comment = '';
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->State = new State();
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->State->Id = $this->statuses['Layout']->Id;
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->State->Name = $this->statuses['Layout']->Name;
@@ -3291,7 +3291,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Modified = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Creator = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Created = null;
-		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Comment = null;
+		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Comment = '';
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State = new State();
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->Id = $this->statuses['Layout']->Id;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->Name = $this->statuses['Layout']->Name;
@@ -3382,7 +3382,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Modified = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Creator = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Created = null;
-		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Comment = null;
+		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Comment = '';
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State = new State();
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->Id = $this->statuses['Layout']->Id;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->Name = $this->statuses['Layout']->Name;
@@ -3473,7 +3473,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Modified = null;
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Creator = null;
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Created = null;
-		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Comment = null;
+		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->Comment = '';
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->State = new State();
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->State->Id = $this->statuses['Layout']->Id;
 		$response->ObjectPageInfos[2]->MetaData->WorkflowMetaData->State->Name = $this->statuses['Layout']->Name;
