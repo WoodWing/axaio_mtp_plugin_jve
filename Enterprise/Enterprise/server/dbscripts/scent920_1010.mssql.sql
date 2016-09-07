@@ -64,6 +64,19 @@ ALTER TABLE [smart_tickets] ADD
 CREATE  INDEX [mtid_tickets] on [smart_tickets]([masterticketid]) ;
 ALTER TABLE [smart_users] ADD 
   [importonlogon] char(2) not null  default '';
+
+CREATE TABLE [smart_publishedplcmtshist] (
+  [id] int not null  IDENTITY(1,1),
+  [objectid] int not null  default '0',
+  [publishid] int not null  default '0',
+  [majorversion] int not null  default '0',
+  [minorversion] int not null  default '0',
+  [externalid] varchar(200) not null  default '',
+  [placementhash] varchar(64) not null ,
+  PRIMARY KEY ([id])
+);
+CREATE  INDEX [obpu_publplchist] on [smart_publishedplcmtshist]([objectid], [publishid]) ;
+CREATE  INDEX [puob_publplchist] on [smart_publishedplcmtshist]([publishid], [objectid]) ;
 ALTER TABLE [smart_indesignservers] ADD 
   [prio1] char(2) not null  default 'on',
   [prio2] char(2) not null  default 'on',

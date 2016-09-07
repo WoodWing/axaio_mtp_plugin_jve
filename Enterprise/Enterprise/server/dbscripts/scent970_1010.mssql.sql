@@ -23,6 +23,19 @@ ALTER TABLE smart_objectversions ALTER COLUMN   [dpi] real not null ;
 ALTER TABLE [smart_objectversions] ADD DEFAULT ('0') FOR [dpi];
 ALTER TABLE [smart_states] ADD 
   [skipidsa] char(2) not null  default '';
+
+CREATE TABLE [smart_publishedplcmtshist] (
+  [id] int not null  IDENTITY(1,1),
+  [objectid] int not null  default '0',
+  [publishid] int not null  default '0',
+  [majorversion] int not null  default '0',
+  [minorversion] int not null  default '0',
+  [externalid] varchar(200) not null  default '',
+  [placementhash] varchar(64) not null ,
+  PRIMARY KEY ([id])
+);
+CREATE  INDEX [obpu_publplchist] on [smart_publishedplcmtshist]([objectid], [publishid]) ;
+CREATE  INDEX [puob_publplchist] on [smart_publishedplcmtshist]([publishid], [objectid]) ;
 CREATE  INDEX [lt_indesignserverjobs] on [smart_indesignserverjobs]([locktoken]) ;
 DROP PROCEDURE [dbo].[SCE_GetConstraintName];
 UPDATE [smart_config] set [value] = '10.1' where [name] = 'version';

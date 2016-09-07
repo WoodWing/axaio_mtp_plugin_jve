@@ -2461,6 +2461,41 @@ class DBStruct
 						),
 				),
 
+				array ('v' => '1010', 'name' => 'smart_publishedplcmtshist',
+						'comment' => 'History of object relational placements that are published to a content management system (CMS). '.
+							'For example an image placed on a Publish Form for which a crop is made during the publish operation.',
+						'fields' => array(
+						  	array('v' => '1010', 'name' => 'id',			'type' => 'int(11)',		 'autoincrement' => true),
+							array('v' => '1010', 'name' => 'objectid', 		'type' => 'int(11)', 		'default' => "'0'",
+								'comment' => 'The id of the Enterprise object of which the native file is used for publishing.'),
+							array('v' => '1010', 'name' => 'publishid', 	'type' => 'int(11)', 		'default' => "'0'",
+								'comment' => 'Foreign key that refers to the publish operation of the dossier / publish form.'),
+						  	array('v' => '1010', 'name' => 'majorversion',	'type' => 'mediumint(9)',	'default' => "'0'",
+						  		'comment' => 'Major object version of the object. Coexists with the minorversion field.' ),
+						  	array('v' => '1010', 'name' => 'minorversion',	'type' => 'mediumint(9)',	'default' => "'0'",
+						  		'comment' => 'Minor object version of the object. Coexists with the majorversion field.' ),
+							array('v' => '1010', 'name' => 'externalid',	'type' => 'varchar(200)', 	'default' => "''",
+								'comment' => 'Id retrieved from the CMS that refers to the published file.' ),
+							array('v' => '1010', 'name' => 'placementhash',	'type' => 'varchar(64)', 'default' => "",
+								'comment' => 'SHA256 hash of placement information which can be used for versioning and identification. '.
+									'This information is used to determine whether or not the placement has changed since the previous publish operation. '.
+									'When there is no matching record in this table found, the placement was changed or never published before. '.
+									'In both cases it needs to be re-published to reflect changes at the CMS. E.g. in case of image cropping '.
+									'the crop geometry, scale, form widget id, output mime type and DPI are hashed. The object id and version are excluded. ' ),
+						),
+						'indexes' => array(
+							array('v' => '1010', 'name' => 'obpu_publplchist', 'fields' => 'objectid, publishid'),
+							array('v' => '1010', 'name' => 'puob_publplchist', 'fields' => 'publishid, objectid'),
+						),
+						'inserts' => array(
+						),
+						'lookups' => array(
+							array('v' => '1010', 'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '1010', 'field' => 'publishid', 'reftable' => 'smart_publishhistory', 'reffield' => 'id'),
+							array('v' => '1010', 'field' => 'majorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
+							array('v' => '1010', 'field' => 'minorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
+						),
+				),
 
 				array ('v' => '599', 'name' => 'smart_targeteditions',
 						'comment' => 'Keeps a relation between channel/issue and editions.',

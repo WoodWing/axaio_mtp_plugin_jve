@@ -1045,6 +1045,19 @@ CREATE TABLE `smart_publishedobjectshist` (
 CREATE  INDEX `obpu_publobjhist` on `smart_publishedobjectshist`(`objectid`, `publishid`) ;
 CREATE  INDEX `puob_publobjhist` on `smart_publishedobjectshist`(`publishid`, `objectid`) ;
 
+CREATE TABLE `smart_publishedplcmtshist` (
+  `id` int(11) not null  auto_increment,
+  `objectid` int(11) not null  default '0',
+  `publishid` int(11) not null  default '0',
+  `majorversion` mediumint(9) not null  default '0',
+  `minorversion` mediumint(9) not null  default '0',
+  `externalid` varchar(200) not null  default '',
+  `placementhash` varchar(64) not null ,
+  PRIMARY KEY (`id`)
+) DEFAULT CHARSET=utf8;
+CREATE  INDEX `obpu_publplchist` on `smart_publishedplcmtshist`(`objectid`, `publishid`) ;
+CREATE  INDEX `puob_publplchist` on `smart_publishedplcmtshist`(`publishid`, `objectid`) ;
+
 CREATE TABLE `smart_targeteditions` (
   `id` int(11) not null  auto_increment,
   `targetid` int(11) not null  default '0',

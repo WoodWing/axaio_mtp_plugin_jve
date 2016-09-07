@@ -21,5 +21,18 @@ SET @sql = 'ALTER TABLE smart_objectversions DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
 ALTER TABLE smart_objectversions ALTER COLUMN   [dpi] real not null ;
 ALTER TABLE [smart_objectversions] ADD DEFAULT ('0') FOR [dpi];
+
+CREATE TABLE [smart_publishedplcmtshist] (
+  [id] int not null  IDENTITY(1,1),
+  [objectid] int not null  default '0',
+  [publishid] int not null  default '0',
+  [majorversion] int not null  default '0',
+  [minorversion] int not null  default '0',
+  [externalid] varchar(200) not null  default '',
+  [placementhash] varchar(64) not null ,
+  PRIMARY KEY ([id])
+);
+CREATE  INDEX [obpu_publplchist] on [smart_publishedplcmtshist]([objectid], [publishid]) ;
+CREATE  INDEX [puob_publplchist] on [smart_publishedplcmtshist]([publishid], [objectid]) ;
 DROP PROCEDURE [dbo].[SCE_GetConstraintName];
 UPDATE [smart_config] set [value] = '10.1' where [name] = 'version';

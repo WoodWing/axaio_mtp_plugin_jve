@@ -86,6 +86,21 @@ ALTER TABLE SMART_PUBLISHEDOBJECTSHIST ADD (
   OBJECTNAME varchar(255) default '',
   OBJECTTYPE varchar(40) default '',
   OBJECTFORMAT varchar(128) default '');
+
+CREATE TABLE SMART_PUBLISHEDPLCMTSHIST (
+  ID int ,
+  OBJECTID int default '0',
+  PUBLISHID int default '0',
+  MAJORVERSION int default '0',
+  MINORVERSION int default '0',
+  EXTERNALID varchar(200) default '',
+  PLACEMENTHASH varchar(64),
+  PRIMARY KEY (ID)
+);
+
+CREATE SEQUENCE SMART_PUBLISHEDPLCMTSHIST_SEQ START WITH 100;
+CREATE  INDEX OBPU_PUBLPLCHIST on SMART_PUBLISHEDPLCMTSHIST(OBJECTID, PUBLISHID) ;
+CREATE  INDEX PUOB_PUBLPLCHIST on SMART_PUBLISHEDPLCMTSHIST(PUBLISHID, OBJECTID) ;
 ALTER TABLE SMART_INDESIGNSERVERS ADD (
   PRIO1  varchar(2) default 'on',
   PRIO2  varchar(2) default 'on',
@@ -192,6 +207,8 @@ grant select,insert,update,delete on SMART_OBJECTOPERATIONS to woodwing;
 grant select on SMART_TERMENTITIES_SEQ to woodwing;
 grant select,insert,update,delete on SMART_TERMENTITIES to woodwing;
 grant select,insert,update,delete on SMART_TERMS to woodwing;
+grant select on SMART_PUBLISHEDPLCMTSHIST_SEQ to woodwing;
+grant select,insert,update,delete on SMART_PUBLISHEDPLCMTSHIST to woodwing;
 grant select,insert,update,delete on SMART_SERVERJOBTYPESONHOLD to woodwing;
 grant select on SMART_OBJECTLABELS_SEQ to woodwing;
 grant select,insert,update,delete on SMART_OBJECTLABELS to woodwing;

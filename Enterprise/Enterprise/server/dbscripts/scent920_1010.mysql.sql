@@ -39,6 +39,19 @@ ADD   `masterticketid` varchar(40) not null  default '';
 CREATE  INDEX `mtid_tickets` on `smart_tickets`(`masterticketid`) ;
 ALTER TABLE `smart_users`
 ADD   `importonlogon` char(2) not null  default '';
+
+CREATE TABLE `smart_publishedplcmtshist` (
+  `id` int(11) not null  auto_increment,
+  `objectid` int(11) not null  default '0',
+  `publishid` int(11) not null  default '0',
+  `majorversion` mediumint(9) not null  default '0',
+  `minorversion` mediumint(9) not null  default '0',
+  `externalid` varchar(200) not null  default '',
+  `placementhash` varchar(64) not null ,
+  PRIMARY KEY (`id`)
+) DEFAULT CHARSET=utf8;
+CREATE  INDEX `obpu_publplchist` on `smart_publishedplcmtshist`(`objectid`, `publishid`) ;
+CREATE  INDEX `puob_publplchist` on `smart_publishedplcmtshist`(`publishid`, `objectid`) ;
 ALTER TABLE `smart_indesignservers`
 ADD   `prio1` char(2) not null  default 'on',
 ADD   `prio2` char(2) not null  default 'on',
