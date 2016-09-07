@@ -40,7 +40,6 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 		$pubFields = array();
 		/** @var BizException $e */
 		$e = null;
-		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
 		$propertyPattern = '/^C_DPF_'.$templateId.'_[A-Z0-9_]{0,}$/';
 		$publishFormObjects = WW_Plugins_Drupal7_Utils::getFormFields( $publishForm, $propertyPattern );
 
@@ -104,7 +103,6 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 		$pubFields = array();
 		/** @var BizException $e */
 		$e = null;
-		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
 		$propertyPattern = '/^C_DPF_'.$templateId.'_[A-Z0-9_]{0,}$/';
 		$publishFormObjects = WW_Plugins_Drupal7_Utils::getFormFields( $publishForm, $propertyPattern );
 
@@ -117,6 +115,7 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 			require_once dirname( __FILE__ ).'/DrupalXmlRpcClient.class.php';
 			$drupalXmlRpcClient = new DrupalXmlRpcClient( $publishTarget );
 			$result = $drupalXmlRpcClient->updateNode( $dossier, $values, array() );
+
 			// Handle errors.
 			if( isset( $result['errors'] ) ) {
 				LogHandler::Log( __CLASS__.'::'.__FUNCTION__, 'ERROR', $result['errors'] );
@@ -143,13 +142,12 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	/**
 	 * Unpublishes and removes a published dossier from Drupal.
 	 *
-	 * The $dossier->ExternalId is used to identify the dosier in Drupal.
+	 * The $dossier->ExternalId is used to identify the dossier in Drupal.
 	 *
 	 * {@inheritdoc}
 	 */
 	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
 	{
-
 		// Unpublish the node.
 		require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
 		$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
@@ -192,7 +190,6 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 		$pubFields = array();
 		/** @var BizException $e */
 		$e = null;
-		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
 		$propertyPattern = '/^C_DPF_'.$templateId.'_[A-Z0-9_]{0,}$/';
 		$publishFormObjects = WW_Plugins_Drupal7_Utils::getFormFields( $publishForm, $propertyPattern );
 
@@ -233,8 +230,8 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * Prepares node data to be sent to Drupal.
 	 *
 	 * @param Object $publishForm The PublishForm to be published/updated/previewed.
-	 * @param Object[] $objectsInDossier
-	 * @param PubPublishTarget $publishTarget The PublishForm Target
+	 * @param Object[] $objectsInDossier Objects contained by the dossier.
+	 * @param PubPublishTarget $publishTarget The Target of the Publish Form.
 	 * @param Object[] $publishFormObjects Objects placed on the Publish Form.
 	 * @param string $templateId ID of the Publish Form Template.
 	 * @param string $propertyPattern Logical pattern of property names to invoke on the Publish Form.
@@ -243,14 +240,13 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	private function prepareNodeValues( $publishForm, $objectsInDossier, $publishTarget, $publishFormObjects, $templateId, $propertyPattern )
 	{
-		require_once dirname(__FILE__).'/Utils.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
-		require_once dirname(__FILE__) . '/DrupalXmlRpcClient.class.php';
-		require_once dirname(__FILE__).'/DrupalField.class.php';
-		$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
+		require_once dirname( __FILE__ ).'/Utils.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
+		require_once dirname( __FILE__ ).'/DrupalXmlRpcClient.class.php';
+		require_once dirname( __FILE__ ).'/DrupalField.class.php';
+		$drupalXmlRpcClient = new DrupalXmlRpcClient( $publishTarget );
 
 		$values = null;
-		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
 
 		// Validate mandatory fields.
 		if( BizPublishForm::validateFormFields( $publishFormObjects, $publishForm, $propertyPattern ) ) {
@@ -259,7 +255,7 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 			$values = WW_Plugins_Drupal7_Utils::prepareFormFields( $propertyUsages, $wiwiwUsages, $publishFormObjects, $publishTarget->PubChannelID );
 		} else {
 			$message = 'The Dossier could not be published.';
-			LogHandler::Log(__CLASS__ . '::' . __FUNCTION__ , 'ERROR', $message);
+			LogHandler::Log( __CLASS__.'::'.__FUNCTION__, 'ERROR', $message );
 			throw new BizException( null, 'Server', null, $message );
 		}
 
@@ -280,68 +276,80 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 		// Handle attachments to be uploaded to Drupal.
 		//Todo: stream attachments instead of loading them in memory.
 
-		foreach ($values as $field => $value) {
+		foreach( $values as $field => $value ) {
 			// Handle normal file attachments, for example for a file selector or layout.
-			$contentType = $values[WW_Plugins_Drupal7_Utils::DRUPAL7_CONTENT_TYPE][0];
+			$contentType = $values[ WW_Plugins_Drupal7_Utils::DRUPAL7_CONTENT_TYPE ][0];
 
 			//Handle file attachments(such as InlineImages) on ArticleComponents.
-			if (is_array($value) && is_array($value[0]) && isset($value[0]['elements'])) {
+			if( is_array( $value ) && is_array( $value[0] ) && isset( $value[0]['elements'] ) ) {
 				// Get the element contents.
 				$value[0]['elements'] = $value[0]['elements'][0]->Content;
 
 				// Upload the inline images and make sure they are mapped to Enterprise object IDs.
 				$fileIds = array();
-				if (isset($value[0]['attachments'])) foreach ($value[0]['attachments'] as $key => $attachment ) {
-					$fileId = $drupalXmlRpcClient->uploadAttachment( $attachment, $key, $field,	$contentType);
-					$fileIds[$key] =  $fileId;
+				if( isset( $value[0]['attachments'] ) ) foreach( $value[0]['attachments'] as $key => $attachment ) {
+					$fileId = $drupalXmlRpcClient->uploadAttachment( $attachment, $key, $field, $contentType );
+					$fileIds[ $key ] = $fileId;
 				}
 				// Set the fileIds (EnterpriseObjectId => DrupalFileId) as attachments on the value.
 				$value[0]['attachments'] = $fileIds;
 
 				// Overwrite the value in the data to be sent to Drupal.
-				$values[$field] = $value;
+				$values[ $field ] = $value;
 
-			// Handle File Selectors.
-			} elseif ( is_array( $value ) && is_array( $value[0]) && !isset($value[0]['elements'])
-				|| is_array($value) && is_object($value[0]) ) {
+				// Handle File Selectors.
+			} elseif( is_array( $value ) && is_array( $value[0] ) && !isset( $value[0]['elements'] )
+				|| is_array( $value ) && is_object( $value[0] )
+			) {
 
 				// Detect if we are handling a multi-file upload or a single file upload.
 				// If we are handling a single upload, restructure the file as needed.
-				if ( (is_array( $value ) && is_array( $value[0]) && !isset($value[0]['elements'])) == false ) {
-					$newValue = array($value);
+				if( ( is_array( $value ) && is_array( $value[0] ) && !isset( $value[0]['elements'] ) ) == false ) {
+					$newValue = array( $value );
 					$value = $newValue;
-					$values[$field] = $value;
+					$values[ $field ] = $value;
 				}
 
 				// Now loop through our field values to upload the files.
-				if ($value) foreach ( $value as $key => $attachmentAndMetaData ) {
+				if( $value ) foreach( $value as $key => $attachmentAndMetaData ) {
 					$fileId = null;
 					$childId = $attachmentAndMetaData['metadata']->BasicMetaData->ID;
-					$uploadNeeded = $this->doesUploadChildNeeded( $publishForm, $objectsInDossier[$childId], $publishTarget );
-					$croppedImage = $this->getCroppedImage( $publishForm, $childId, $templateId, $field );
-					if( $croppedImage ) {
-						$attachmentAndMetaData[0] = $croppedImage;
-						$uploadNeeded = true; // crops are not versioned, so always needs upload
-					}
-
-					if( $uploadNeeded ) {
-						// Upload the attachment to Drupal.
-						$fileId = $drupalXmlRpcClient->uploadAttachment(
-							$attachmentAndMetaData[0],
-							$attachmentAndMetaData['metadata']->BasicMetaData->Name,
-							$field,
-							$contentType
-						);
-					} else { // No changes since uploaded, so used back the existing ExternalId.
-						$fileId = $objectsInDossier[$childId]->ExternalId;
+					$convertedPlacement = $this->getConvertedPlacement( $publishForm, $childId, $templateId, $field, $key );
+					if( $convertedPlacement ) {
+						$uploadNeeded = $this->isConvertedImageUploadNeeded( $convertedPlacement );
+						if( $uploadNeeded ) {
+							$attachmentAndMetaData[0] = $convertedPlacement->ConvertedImageToPublish->Attachment;
+							$fileId = $drupalXmlRpcClient->uploadAttachment(
+								$attachmentAndMetaData[0],
+								$attachmentAndMetaData['metadata']->BasicMetaData->Name,
+								$field,
+								$contentType
+							);
+							$convertedPlacement->ConvertedImageToPublish->ExternalId = $fileId;
+						} else {
+							$fileId = $convertedPlacement->ConvertedImageToPublish->ExternalId;
+						}
+					} else { // Handle normal file uploads
+						$uploadNeeded = $this->isUploadChildNeeded( $publishForm, $objectsInDossier[ $childId ], $publishTarget );
+						if( $uploadNeeded ) {
+							$fileId = $drupalXmlRpcClient->uploadAttachment(
+								$attachmentAndMetaData[0],
+								$attachmentAndMetaData['metadata']->BasicMetaData->Name,
+								$field,
+								$contentType
+							);
+							$objectsInDossier[ $childId ]->ExternalId = $fileId;
+						} else { // No changes since uploaded, so used back the existing ExternalId.
+							$fileId = $objectsInDossier[ $childId ]->ExternalId;
+						}
 					}
 
 					// Set the additional MetaData values needed by Drupal.
 					$newMetaData = array();
 					$newMetaData['fid'] = $fileId;
-					$filePatternPrefix = '/^C_DPF_F_' . $templateId . '_' . $field . '_';
+					$filePatternPrefix = '/^C_DPF_F_'.$templateId.'_'.$field.'_';
 					$filePatternPostfix = '_[A-Z0-9_]{0,}$/';
-					foreach ($attachmentAndMetaData['metadata']->ExtraMetaData as $extra) {
+					foreach( $attachmentAndMetaData['metadata']->ExtraMetaData as $extra ) {
 						// If the type is image, we need to add fields that are normally only for other Files because
 						// we do not know what the purpose of the Image is. The Image can be used as part of a Drupal
 						// file selector of a drupal image selector, if it is used as a File then Description / Display
@@ -349,84 +357,62 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 						// both the sets. So set the File properties for any files being uploaded.
 
 						// Check the File's Display setting.
-						$filePattern = $filePatternPrefix . 'DIS' . $filePatternPostfix;
-						if (preg_match($filePattern, $extra->Property)) {
-							$newMetaData['display']  = $extra->Values[0];
+						$filePattern = $filePatternPrefix.'DIS'.$filePatternPostfix;
+						if( preg_match( $filePattern, $extra->Property ) ) {
+							$newMetaData['display'] = $extra->Values[0];
 						}
 
 						// Check the File's Description setting.
-						$filePattern = $filePatternPrefix . 'DES' . $filePatternPostfix;
-						if (preg_match($filePattern, $extra->Property)) {
-							$newMetaData['description']  = $extra->Values[0];
+						$filePattern = $filePatternPrefix.'DES'.$filePatternPostfix;
+						if( preg_match( $filePattern, $extra->Property ) ) {
+							$newMetaData['description'] = $extra->Values[0];
 						}
 
 						// Set fields only needed for Images.
-						if ($attachmentAndMetaData['metadata']->BasicMetaData->Type == 'Image') {
+						if( $attachmentAndMetaData['metadata']->BasicMetaData->Type == 'Image' ) {
 							// Check the Image's Alternate Text setting.
-							if ($extra->Property === DrupalField::DRUPAL_IMG_ALT_TEXT) {
-								$newMetaData['alt']  = $extra->Values[0];
+							if( $extra->Property === DrupalField::DRUPAL_IMG_ALT_TEXT ) {
+								$newMetaData['alt'] = $extra->Values[0];
 							}
 
 							// Check the Image's Title setting.
-							if ($extra->Property === DrupalField::DRUPAL_IMG_TITLE) {
-								$newMetaData['title']  = $extra->Values[0];
+							if( $extra->Property === DrupalField::DRUPAL_IMG_TITLE ) {
+								$newMetaData['title'] = $extra->Values[0];
 							}
 						}
 					}
 
 					// Set our MetaData values to be sent to Drupal.
-					$values[$field][$key] = $newMetaData;
-
-					// For Child ExternalId.
-					$attachmentUploaded[$childId] = $fileId;
-
+					$values[ $field ][ $key ] = $newMetaData;
 				}
 			}
 			// Remove Metadata from the values if present.
-			if (isset($values[$field]['metadata'])) {
-				unset($values[$field]['metadata']);
+			if( isset( $values[ $field ]['metadata'] ) ) {
+				unset( $values[ $field ]['metadata'] );
 			}
 
 			// Use array_key_exists here.. The value can be null!!!
-			if ( array_key_exists( $field.'_SUM', $values ) ) {
-				$summary = $values[$field.'_SUM'];
-				if (isset($summary['metadata'])) {
-					unset($summary['metadata']);
+			if( array_key_exists( $field.'_SUM', $values ) ) {
+				$summary = $values[ $field.'_SUM' ];
+				if( isset( $summary['metadata'] ) ) {
+					unset( $summary['metadata'] );
 				}
 
 				// Save this value as value-summary, it will be handled as such on the Drupal side
-				$values[$field] = array( 'value' => $values[$field], 'summary' => $summary );
-				unset($values[$field.'_SUM']);
+				$values[ $field ] = array( 'value' => $values[ $field ], 'summary' => $summary );
+				unset( $values[ $field.'_SUM' ] );
 			}
 		}
-		$this->updateExternalId( $objectsInDossier, $attachmentUploaded );
 		return $values;
 	}
 
 	/**
-	 * Update the external ID for an object published to Drupal.
-	 *
-	 * Places the Drupal ID (fid) in the object's ExternalId field.
-	 *
-	 * @param array $objectsInDossier All child in the dossier / placed on Form to be updated with ExternalId(DrupalId).
-	 * @param array $attachmentUploaded Key-Value pair list where Key is the Enterprise DB Id and Value is DrupalId.
-	 */
-	private function updateExternalId( $objectsInDossier, $attachmentUploaded )
-	{
-		if( $attachmentUploaded ) foreach( $attachmentUploaded as $enterpriseId => $drupalId ) {
-			if( isset( $objectsInDossier[$enterpriseId]->ExternalId ) ) {
-				$objectsInDossier[$enterpriseId]->ExternalId = $drupalId;
-			}
-		}
-	}
-
-	/**
-	 * Retrieves an image crop made on a given Publish Form.
+	 * Retrieves a placement of an image crop made on a given Publish Form.
 	 *
 	 * The end user may have cropped the image placed on the Publish Form.
 	 * When a crop is found, the caller should prefer the cropped image (over the native image).
 	 *
-	 * The cropped image is dynamically set by the core server during the publish operation at Placement->ImageCropAttachment.
+	 * The cropped image is dynamically set by the core server during the publish operation at Placement->ConvertedImageToPublish->Attachment.
 	 * Note that this property is not defined in the WSDL. When the property is missing, there is no crop.
 	 *
 	 * @since 10.1.0
@@ -434,11 +420,12 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param string $childId Id of placed image object to get the attachment for.
 	 * @param integer $templateId The publish form template object id used to create the publish form.
 	 * @param integer $field The field index of the publish form the child object could be placed on.
-	 * @return Attachment|null The cropped image. NULL when no crop found.
+	 * @param integer $frameOrder
+	 * @return Placement|null The cropped image. NULL when no crop found.
 	 */
-	private function getCroppedImage( $publishForm, $childId, $templateId, $field )
+	private function getConvertedPlacement( $publishForm, $childId, $templateId, $field, $frameOrder )
 	{
-		$cropppedImage = null;
+		$convertedPlacement = null;
 		$fieldPrefix = 'C_DPF_' . $templateId . '_' . $field . '_';
 		foreach( $publishForm->Relations as $relation ) {
 			if( $relation->Type == 'Placed' &&
@@ -446,16 +433,29 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 				$relation->Parent == $publishForm->MetaData->BasicMetaData->ID
 			) {
 				foreach( $relation->Placements as $placement ) {
-					if( $placement->FormWidgetId &&
-						strpos( $placement->FormWidgetId, $fieldPrefix ) === 0 &&
-						isset( $placement->ImageCropAttachment )
+					if( $placement->FrameOrder == $frameOrder &&
+						isset( $placement->ConvertedImageToPublish ) &&
+						$placement->FormWidgetId && strpos( $placement->FormWidgetId, $fieldPrefix ) === 0
 					) {
-						$cropppedImage = $placement->ImageCropAttachment;
+						$convertedPlacement = $placement;
 					}
 				}
 			}
 		}
-		return $cropppedImage;
+		return $convertedPlacement;
+	}
+
+	/**
+	 * Determines whether or not a cropped image should be uploaded to Drupal again.
+	 *
+	 * @since 10.1.0
+	 * @param Placement $convertedPlacement
+	 * @return bool
+	 */
+	private function isConvertedImageUploadNeeded( Placement $convertedPlacement )
+	{
+		return !$convertedPlacement->ConvertedImageToPublish->ExternalId &&
+			$convertedPlacement->ConvertedImageToPublish->Attachment;
 	}
 
 	/**
@@ -471,7 +471,7 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @return bool True when child object upload is needed; False otherwise.
 	 */
-	private function doesUploadChildNeeded( $publishForm, $childObj, $publishTarget )
+	private function isUploadChildNeeded( $publishForm, $childObj, $publishTarget )
 	{
 		$publishedChildVersion = null;
 		$publishedChildPublishDate = null;
@@ -479,7 +479,8 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 		if( $formRelations ) foreach( $formRelations as $relation ) {
 			if( $relation->Parent == $publishForm->MetaData->BasicMetaData->ID &&
 				$relation->Child == $childObj->MetaData->BasicMetaData->ID &&
-				$relation->Type == 'Placed' ) {
+				$relation->Type == 'Placed'
+			) {
 				if( $relation->Targets ) foreach( $relation->Targets as $target ) {
 					$isSameIssue = ( $target->Issue->Id == $publishTarget->IssueID );
 					if( $isSameIssue ) {
@@ -493,9 +494,9 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 		$uploadNeeded = false;
 		if( is_null( $publishedChildVersion ) || !$publishedChildPublishDate ) {
 			$uploadNeeded = true; // Has never been uploaded or is unpublished before (PublishDate set empty).
-		}else {
+		} else {
 			require_once BASEDIR.'/server/utils/VersionUtils.class.php';
-			if( VersionUtils::versionCompare( $publishedChildVersion,$childObj->MetaData->WorkflowMetaData->Version, '<' )) {
+			if( VersionUtils::versionCompare( $publishedChildVersion, $childObj->MetaData->WorkflowMetaData->Version, '<' ) ) {
 				$uploadNeeded = true; // Modification has been done since published, so re-upload is needed.
 			}
 		}

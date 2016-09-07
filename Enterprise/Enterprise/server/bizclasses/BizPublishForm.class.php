@@ -785,10 +785,28 @@ class BizPublishForm
 	}
 
 	/**
+	 * Retrieve all the objects(children) that are placed on the PublishForm.
+	 *
+	 * @since 10.1 Moved from BizPublishing class to here.
+	 * @param int $publishFormId
+	 * @return array List of object Ids that are placed on the PublishForm.
+	 */
+	static public function getObjectsPlacedOnPublishForm( $publishFormId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
+		$objIdsPlacedOnForm = array();
+		$rows = DBObjectRelation::getObjectRelations( $publishFormId, 'childs', 'Placed' );
+		if( $rows ) foreach( array_values( $rows ) as $row ) {
+			$objIdsPlacedOnForm[] = $row['child'];
+		}
+		return $objIdsPlacedOnForm;
+	}
+
+	/**
 	 * Returns a Publish Form in a list of objects (typically all objects contained by a dossier).
 	 *
 	 * @since 10.1.0
-	 * @param Object[]|null $objects List to searrh through
+	 * @param Object[]|null $objects List to search through
 	 * @return Object|null The Publish Form object. NULL when not found.
 	 */
 	static public function findPublishFormInObjects( $objects )

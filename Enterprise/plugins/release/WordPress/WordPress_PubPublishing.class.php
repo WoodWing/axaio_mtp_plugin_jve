@@ -545,9 +545,9 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				if( $relation->Type == 'Placed' && $relation->ChildInfo->Type == 'Image' ) {
 					foreach( $relation->Placements as $placement ) {
 
-						$imageCropAttachment = null;
-						if( isset( $placement->ImageCropAttachment ) ) {
-							$imageCropAttachment = $placement->ImageCropAttachment;
+						$convertedPlacement = null;
+						if( isset( $placement->ConvertedImageToPublish ) ) {
+							$convertedPlacement = $placement;
 						}
 
 						switch( $placement->FormWidgetId ) {
@@ -567,7 +567,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 								foreach( $publishFormObjects['C_WORDPRESS_MULTI_IMAGES'] as $imageObj ) {
 									if( $imageObj->MetaData->BasicMetaData->ID == $relation->Child ) {
 										$this->handleGalleryImage( $clientWordPress, $publishForm, $publishTarget, $imageObj,
-											$galleryId, $preview, $imageCropAttachment );
+											$galleryId, $preview, $convertedPlacement );
 										break; // You can only have one match on image id, so stop looking when we find it.
 									}
 								}
@@ -575,7 +575,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 								break;
 							case 'C_WORDPRESS_FEATURED_IMAGE':
 								$result['featured-image'] = $this->handleFeaturedImage( $clientWordPress, $publishForm,
-									$publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'], $imageCropAttachment );
+									$publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'], $convertedPlacement );
 								break;
 
 						}
@@ -619,14 +619,14 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param WordPressXmlRpcClient $clientWordPress The client used to communicate with WordPress.
 	 * @param Object $publishForm PublishForm object.
 	 * @param Object $featuredImage Original image object to be uploaded. Contains all metadata.
-	 * @param Attachment|null $imageCropAttachment The converted image, if any conversion has been done for it. If not this property is null.
+	 * @param Placement|null $convertedPlacement The converted image, if any conversion has been done for it. If not this property is null.
 	 * @throws BizException when communicating with WordPress returns an error.
 	 */
-	private function handleFeaturedImage( $clientWordPress, $publishForm, $featuredImage, $imageCropAttachment )
+	private function handleFeaturedImage( $clientWordPress, $publishForm, $featuredImage, $convertedPlacement )
 	{
 		try {
-			if( $imageCropAttachment ) {
-				$filePath = $imageCropAttachment->FilePath;
+			if( $convertedPlacement ) {
+				$filePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
 			} else {
 				$filePath = $this->saveLocal( $featuredImage->MetaData->BasicMetaData->ID );
 			}
@@ -659,10 +659,10 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $imageObj Original image object to be uploaded. Contains all relevant metadata.
 	 * @param integer $galleryId The gallery to which we need to upload images.
 	 * @param boolean $preview TRUE if the current action is Preview, FALSE if it is not.
-	 * @param Attachment|null $imageCropAttachment The converted image, if any conversion has been done for it. If not this property is null.
+	 * @param Placement|null $convertedPlacement The converted image, if any conversion has been done for it. If not this property is null.
 	 * @throws BizException when communicating with WordPress returns an error.
 	 */
-	private function handleGalleryImage( $clientWordPress, $publishForm, $publishTarget, $imageObj, $galleryId, $preview, $imageCropAttachment )
+	private function handleGalleryImage( $clientWordPress, $publishForm, $publishTarget, $imageObj, $galleryId, $preview, $convertedPlacement )
 	{
 		$imageDescription = null;
 		$externalId = null;
@@ -673,59 +673,114 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 			}
 		}
 
-		$uploadNeeded = false;
-		if( !$preview ) { // Don't get the externalId when previewing because we want to upload a new set of images.
-			// This part gets the externalId if exists and compares the version of the published version and the workflow version.
-			foreach( $imageObj->Relations as $relation ) {
-				if( $relation->Type == 'Placed' && $relation->Parent == $publishForm->MetaData->BasicMetaData->ID ) {
-					if( isset($relation->Targets) ) {
-						foreach( $relation->Targets as $target ) {
-							if( $target->Issue->Id == $publishTarget->IssueID ) {
-								$externalId = $target->ExternalId;
-								if( $externalId ) { // if there is no externalId the version does not have to compared
-									if( VersionUtils::versionCompare( $target->PublishedVersion, $imageObj->MetaData->WorkflowMetaData->Version, '<' ) ) {
-										$uploadNeeded = true; // Modification has been done since published, so re-upload is needed.
-									}
-								}
-								break 2; // Stop this foreach and the relation foreach.
-							}
-						}
+		if( $preview ) { // Don't get the externalId when previewing because we want to upload a new set of images.
+			$uploadNeeded = true;
+		} else {
+			if( $convertedPlacement ) {
+				$uploadNeeded = $this->isConvertedImageUploadNeeded( $convertedPlacement );
+				$externalId = $convertedPlacement->ConvertedImageToPublish->ExternalId;
+			} else {
+				$uploadNeeded = $this->isUploadChildNeeded( $publishForm, $imageObj, $publishTarget, $externalId );
+			}
+		}
+
+		if( $uploadNeeded ) {
+			$filePath = null;
+			$extension = $imageObj->Relations[0]->ChildInfo->Format;
+			if( $convertedPlacement ) {
+				if( $convertedPlacement->ConvertedImageToPublish->Attachment ) {
+					$filePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
+				}
+			} else {
+				$filePath = $this->saveLocal( $imageObj->MetaData->BasicMetaData->ID );
+			}
+
+			if( $filePath ) {
+				$imageName = $imageObj->MetaData->BasicMetaData->Name.'.'.pathinfo( $filePath, PATHINFO_EXTENSION );
+				if( $externalId ) { // update existing?
+					try {
+						$response = $clientWordPress->updateImage( $imageName, $filePath, $extension, $galleryId, $externalId );
+					} catch( BizException $e ) {
+						throw new BizException( 'WORDPRESS_ERROR_UPDATE_IMAGE', 'SERVER', $e->getDetail() );
+					}
+				} else { // upload new?
+					try {
+						$response = $clientWordPress->uploadImage( $imageName, $filePath, $extension, $galleryId );
+					} catch( BizException $e ) {
+						throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail() );
+					}
+				}
+				if( $convertedPlacement ) {
+					$convertedPlacement->ConvertedImageToPublish->ExternalId = $response['pid']; // posted file id
+				} else {
+					$imageObj->ExternalId = $response['pid']; // posted file id
+				}
+			}
+		}
+		if( isset($imageObj->ExternalId) ) {
+			$clientWordPress->updateImageMetaData( $imageObj->ExternalId, $imageObj->MetaData->BasicMetaData->Name, $imageDescription );
+		}
+
+	}
+
+	/**
+	 * Checks if the child object has been changed since it was last published.
+	 *
+	 * Checks if the child object has been changed since the last time it was published.
+	 * If the published version of the object is older (older version number) then the
+	 * object needs to be re-uploaded to Drupal. When the child has never been uploaded
+	 * (publishing for the first time) the object needs to be uploaded as well.
+	 *
+	 * @param Object $publishForm
+	 * @param Object $childObj
+	 * @param PubPublishTarget $publishTarget
+	 * @param string $externalId
+	 * @return bool True when child object upload is needed; False otherwise.
+	 */
+	private function isUploadChildNeeded( $publishForm, $childObj, $publishTarget, &$externalId )
+	{
+		$publishedChildVersion = null;
+		$publishedChildPublishDate = null;
+		$formRelations = $publishForm->Relations;
+		if( $formRelations ) foreach( $formRelations as $relation ) {
+			if( $relation->Parent == $publishForm->MetaData->BasicMetaData->ID &&
+				$relation->Child == $childObj->MetaData->BasicMetaData->ID &&
+				$relation->Type == 'Placed'
+			) {
+				if( $relation->Targets ) foreach( $relation->Targets as $target ) {
+					$isSameIssue = ( $target->Issue->Id == $publishTarget->IssueID );
+					if( $isSameIssue ) {
+						$publishedChildVersion = $target->PublishedVersion;
+						$publishedChildPublishDate = $target->PublishedDate;
+						$externalId = $target->ExternalId;
+						break 2;
 					}
 				}
 			}
 		}
-
-		if( $imageCropAttachment || !$externalId || ( $externalId && $uploadNeeded ) ) { // check if any change is made else do nothing
-			$mediaId = $imageObj->MetaData->BasicMetaData->ID;
-			$extension = $imageObj->Relations[0]->ChildInfo->Format;
-			if( $imageCropAttachment ) {
-				$filePath = $imageCropAttachment->FilePath;
-			} else {
-				$filePath = $this->saveLocal( $mediaId );
+		$uploadNeeded = false;
+		if( !$publishedChildVersion || !$publishedChildPublishDate || !$externalId ) {
+			$uploadNeeded = true; // Has never been uploaded or is unpublished before (PublishDate set empty).
+		} elseif( $publishedChildVersion ) {
+			require_once BASEDIR.'/server/utils/VersionUtils.class.php';
+			if( VersionUtils::versionCompare( $publishedChildVersion, $childObj->MetaData->WorkflowMetaData->Version, '<' ) ) {
+				$uploadNeeded = true; // Modification has been done since published, so re-upload is needed.
 			}
-			$imageName = $imageObj->MetaData->BasicMetaData->Name . '.' . pathinfo($filePath, PATHINFO_EXTENSION);
-
-			// If there is a externalId the image needs to be updated else it's a new image.
-			if( $externalId && !$imageCropAttachment ) {
-				try {
-					$response = $clientWordPress->updateImage( $imageName, $filePath, $extension, $galleryId, $externalId );
-				} catch( BizException $e ) {
-					throw new BizException( 'WORDPRESS_ERROR_UPDATE_IMAGE', 'SERVER', $e->getDetail() );
-				}
-			} else {
-				try {
-					$response = $clientWordPress->uploadImage( $imageName, $filePath, $extension, $galleryId );
-				} catch( BizException $e ) {
-					throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail());
-				}
-			}
-			$postId = $response['pid'];
-			$imageObj->ExternalId = $postId;
 		}
-		if( $imageObj->ExternalId ) {
-			$clientWordPress->updateImageMetaData( $imageObj->ExternalId, $imageObj->MetaData->BasicMetaData->Name, $imageDescription );
-		}
+		return $uploadNeeded;
+	}
 
+	/**
+	 * Determines whether or not a cropped image should be uploaded to Drupal again.
+	 *
+	 * @since 10.1.0
+	 * @param Placement $convertedPlacement
+	 * @return bool
+	 */
+	private function isConvertedImageUploadNeeded( Placement $convertedPlacement )
+	{
+		return !$convertedPlacement->ConvertedImageToPublish->ExternalId &&
+			$convertedPlacement->ConvertedImageToPublish->Attachment;
 	}
 
 	/**

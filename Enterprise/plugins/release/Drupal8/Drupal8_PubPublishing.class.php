@@ -41,7 +41,6 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 		$pubFields = array();
 		/** @var BizException $e */
 		$e = null;
-		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
 		$propertyPattern = '/^C_DPF_'.$templateId.'_[A-Z0-9_]{0,}$/';
 		$publishFormObjects = WW_Plugins_Drupal8_Utils::getFormFields( $publishForm, $propertyPattern );
 
@@ -106,7 +105,6 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 		$pubFields = array();
 		/** @var BizException $e */
 		$e = null;
-		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
 		$propertyPattern = '/^C_DPF_'.$templateId.'_[A-Z0-9_]{0,}$/';
 		$publishFormObjects = WW_Plugins_Drupal8_Utils::getFormFields( $publishForm, $propertyPattern );
 
@@ -195,7 +193,6 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 		$pubFields = array();
 		/** @var BizException $e */
 		$e = null;
-		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
 		$propertyPattern = '/^C_DPF_'.$templateId.'_[A-Z0-9_]{0,}$/';
 		$publishFormObjects = WW_Plugins_Drupal8_Utils::getFormFields( $publishForm, $propertyPattern );
 
@@ -254,7 +251,6 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 		$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient($publishTarget);
 
 		$values = null;
-		$attachmentUploaded = array(); // To store EnterpriseId => DrupalId if there's any file uploaded.
 
 		// Validate mandatory fields.
 		if( BizPublishForm::validateFormFields( $publishFormObjects, $publishForm, $propertyPattern ) ) {
@@ -323,23 +319,34 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 				if( $value ) foreach( $value as $key => $attachmentAndMetaData ) {
 					$fileId = null;
 					$childId = $attachmentAndMetaData['metadata']->BasicMetaData->ID;
-					$uploadNeeded = $this->doesUploadChildNeeded( $publishForm, $objectsInDossier[ $childId ], $publishTarget );
-					$croppedImage = $this->getCroppedImage( $publishForm, $childId, $templateId, $field );
-					if( $croppedImage ) {
-						$attachmentAndMetaData[0] = $croppedImage;
-						$uploadNeeded = true; // crops are not versioned, so always needs upload
-					}
-
-					if( $uploadNeeded ) {
-						// Upload the attachment to Drupal.
-						$fileId = $drupalXmlRpcClient->uploadAttachment(
-							$attachmentAndMetaData[0],
-							$attachmentAndMetaData['metadata']->BasicMetaData->Name,
-							$field,
-							$contentType
-						);
-					} else { // No changes since uploaded, so used back the existing ExternalId.
-						$fileId = $objectsInDossier[ $childId ]->ExternalId;
+					$convertedPlacement = $this->getConvertedPlacement( $publishForm, $childId, $templateId, $field, $key );
+					if( $convertedPlacement ) {
+						$uploadNeeded = $this->isConvertedImageUploadNeeded( $convertedPlacement );
+						if( $uploadNeeded ) {
+							$attachmentAndMetaData[0] = $convertedPlacement->ConvertedImageToPublish->Attachment;
+							$fileId = $drupalXmlRpcClient->uploadAttachment(
+								$attachmentAndMetaData[0],
+								$attachmentAndMetaData['metadata']->BasicMetaData->Name,
+								$field,
+								$contentType
+							);
+							$convertedPlacement->ConvertedImageToPublish->ExternalId = $fileId;
+						} else {
+							$fileId = $convertedPlacement->ConvertedImageToPublish->ExternalId;
+						}
+					} else { // Handle normal file uploads
+						$uploadNeeded = $this->isUploadChildNeeded( $publishForm, $objectsInDossier[ $childId ], $publishTarget );
+						if( $uploadNeeded ) {
+							$fileId = $drupalXmlRpcClient->uploadAttachment(
+								$attachmentAndMetaData[0],
+								$attachmentAndMetaData['metadata']->BasicMetaData->Name,
+								$field,
+								$contentType
+							);
+							$objectsInDossier[ $childId ]->ExternalId = $fileId;
+						} else { // No changes since uploaded, so used back the existing ExternalId.
+							$fileId = $objectsInDossier[ $childId ]->ExternalId;
+						}
 					}
 
 					// Set the additional MetaData values needed by Drupal.
@@ -382,10 +389,6 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 
 					// Set our MetaData values to be sent to Drupal.
 					$values[ $field ][ $key ] = $newMetaData;
-
-					// For Child ExternalId.
-					$attachmentUploaded[ $childId ] = $fileId;
-
 				}
 			}
 			// Remove Metadata from the values if present.
@@ -405,34 +408,16 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 				unset( $values[ $field.'_SUM' ] );
 			}
 		}
-		$this->updateExternalId( $objectsInDossier, $attachmentUploaded );
 		return $values;
 	}
 
 	/**
-	 * Update the external ID for an object published to Drupal.
-	 *
-	 * Places the Drupal ID (fid) in the object's ExternalId field.
-	 *
-	 * @param array $objectsInDossier All child in the dossier / placed on Form to be updated with ExternalId(DrupalId).
-	 * @param array $attachmentUploaded Key-Value pair list where Key is the Enteprise DB Id and Value is DrupalId.
-	 */
-	private function updateExternalId( $objectsInDossier, $attachmentUploaded )
-	{
-		if( $attachmentUploaded ) foreach( $attachmentUploaded as $enterpriseId => $drupalId ) {
-			if( isset( $objectsInDossier[$enterpriseId]->ExternalId ) ) {
-				$objectsInDossier[$enterpriseId]->ExternalId = $drupalId;
-			}
-		}
-	}
-
-	/**
-	 * Retrieves an image crop made on a given Publish Form.
+	 * Retrieves a placement of an image crop made on a given Publish Form.
 	 *
 	 * The end user may have cropped the image placed on the Publish Form.
 	 * When a crop is found, the caller should prefer the cropped image (over the native image).
 	 *
-	 * The cropped image is dynamically set by the core server during the publish operation at Placement->ImageCropAttachment.
+	 * The cropped image is dynamically set by the core server during the publish operation at Placement->ConvertedImageToPublish->Attachment.
 	 * Note that this property is not defined in the WSDL. When the property is missing, there is no crop.
 	 *
 	 * @since 10.1.0
@@ -440,11 +425,12 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param string $childId Id of placed image object to get the attachment for.
 	 * @param integer $templateId The publish form template object id used to create the publish form.
 	 * @param integer $field The field index of the publish form the child object could be placed on.
-	 * @return Attachment|null The cropped image. NULL when no crop found.
+	 * @param integer $frameOrder
+	 * @return Placement|null The cropped image. NULL when no crop found.
 	 */
-	private function getCroppedImage( $publishForm, $childId, $templateId, $field )
+	private function getConvertedPlacement( $publishForm, $childId, $templateId, $field, $frameOrder )
 	{
-		$cropppedImage = null;
+		$convertedPlacement = null;
 		$fieldPrefix = 'C_DPF_' . $templateId . '_' . $field . '_';
 		foreach( $publishForm->Relations as $relation ) {
 			if( $relation->Type == 'Placed' &&
@@ -452,16 +438,29 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 				$relation->Parent == $publishForm->MetaData->BasicMetaData->ID
 			) {
 				foreach( $relation->Placements as $placement ) {
-					if( $placement->FormWidgetId &&
-						strpos( $placement->FormWidgetId, $fieldPrefix ) === 0 &&
-						isset( $placement->ImageCropAttachment )
+					if( $placement->FrameOrder == $frameOrder &&
+						isset( $placement->ConvertedImageToPublish ) &&
+						$placement->FormWidgetId && strpos( $placement->FormWidgetId, $fieldPrefix ) === 0
 					) {
-						$cropppedImage = $placement->ImageCropAttachment;
+						$convertedPlacement = $placement;
 					}
 				}
 			}
 		}
-		return $cropppedImage;
+		return $convertedPlacement;
+	}
+
+	/**
+	 * Determines whether or not a cropped image should be uploaded to Drupal again.
+	 *
+	 * @since 10.1.0
+	 * @param Placement $convertedPlacement
+	 * @return bool
+	 */
+	private function isConvertedImageUploadNeeded( Placement $convertedPlacement )
+	{
+		return !$convertedPlacement->ConvertedImageToPublish->ExternalId &&
+			$convertedPlacement->ConvertedImageToPublish->Attachment;
 	}
 
 	/**
@@ -477,7 +476,7 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @return bool True when child object upload is needed; False otherwise.
 	 */
-	private function doesUploadChildNeeded( $publishForm, $childObj, $publishTarget )
+	private function isUploadChildNeeded( $publishForm, $childObj, $publishTarget )
 	{
 		$publishedChildVersion = null;
 		$publishedChildPublishDate = null;
@@ -485,7 +484,8 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 		if( $formRelations ) foreach( $formRelations as $relation ) {
 			if( $relation->Parent == $publishForm->MetaData->BasicMetaData->ID &&
 				$relation->Child == $childObj->MetaData->BasicMetaData->ID &&
-				$relation->Type == 'Placed' ) {
+				$relation->Type == 'Placed'
+			) {
 				if( $relation->Targets ) foreach( $relation->Targets as $target ) {
 					$isSameIssue = ( $target->Issue->Id == $publishTarget->IssueID );
 					if( $isSameIssue ) {
@@ -499,9 +499,9 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 		$uploadNeeded = false;
 		if( is_null( $publishedChildVersion ) || !$publishedChildPublishDate ) {
 			$uploadNeeded = true; // Has never been uploaded or is unpublished before (PublishDate set empty).
-		}else {
+		} else {
 			require_once BASEDIR.'/server/utils/VersionUtils.class.php';
-			if( VersionUtils::versionCompare( $publishedChildVersion,$childObj->MetaData->WorkflowMetaData->Version, '<' )) {
+			if( VersionUtils::versionCompare( $publishedChildVersion, $childObj->MetaData->WorkflowMetaData->Version, '<' ) ) {
 				$uploadNeeded = true; // Modification has been done since published, so re-upload is needed.
 			}
 		}

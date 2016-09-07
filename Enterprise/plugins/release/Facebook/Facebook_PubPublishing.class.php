@@ -171,7 +171,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * The end user may have cropped the image placed on the Publish Form.
 	 * When a crop is found, the caller should prefer the cropped image (over the native image).
 	 *
-	 * The cropped image is dynamically set by the core server during the publish operation at Placement->ImageCropAttachment.
+	 * The cropped image is dynamically set by the core server during the publish operation at Placement->ConvertedImageToPublish->Attachment.
 	 * Note that this property is not defined in the WSDL. When the property is missing, there is no crop.
 	 *
 	 * @since 10.1.0
@@ -191,9 +191,9 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 				foreach( $relation->Placements as $placement ) {
 					if( $placement->FormWidgetId &&
 						$placement->FormWidgetId == $formWidgetId &&
-						isset( $placement->ImageCropAttachment )
+						isset( $placement->ConvertedImageToPublish )
 					) {
-						$cropppedImage = $placement->ImageCropAttachment;
+						$cropppedImage = $placement->ConvertedImageToPublish->Attachment;
 					}
 				}
 			}
