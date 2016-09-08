@@ -2072,11 +2072,18 @@ class BizPublishing
 		if( $publishForm->Relations ) foreach( $publishForm->Relations as $relation ) {
 			if( $relation->Type == 'Placed' && $relation->ChildInfo->Type == 'Image' ) {
 				if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
-					$conversionNeeded = ( $placement->Width && $placement->Height ) || ( $placement->ScaleX || $placement->ScaleY );
-					if( $conversionNeeded ) {
+					$objectId = $relation->ChildInfo->ID;
+					if( isset( $bizImageConverters[ $objectId ] ) ) {
+						$bizImageConverter = $bizImageConverters[ $objectId ];
+					} else {
+						$bizImageConverter = new BizImageConverter();
+						$bizImageConverter->loadNativeFileForInputImage( $objectId );
+						$bizImageConverters[ $objectId ] = $bizImageConverter;
+					}
+					if( $bizImageConverter->doesImageNeedConversion( $objectId, $placement ) ) {
 						$this->convertImage( $operation, $publishTarget,
-							$relation->ChildInfo->ID, $relation->ChildVersion,
-							$placement, $foundPubPlacementIds, $bizImageConverters, $pubPlacementsIndex );
+							$objectId, $relation->ChildVersion,
+							$placement, $foundPubPlacementIds, $bizImageConverter, $pubPlacementsIndex );
 					}
 				}
 			}
@@ -2108,11 +2115,11 @@ class BizPublishing
 	 * @param Placement $placement Specifies the conversion (crop/scale) needed to place the image on the publish form.
 	 * @param integer[] $foundPubPlacementIds Record ids of the smart_publishedplcmtshist table for which image conversion
 	 *                                        did not change since the last publish operation.
-	 * @param BizImageConverter[] $bizImageConverters Cache of converters populated by this function.
+	 * @param BizImageConverter $bizImageConverter Cache of converters populated by this function.
 	 * @param PubPublishedPlacement[] $pubPlacementsIndex
 	 */
 	private function convertImage( $operation, PubPublishTarget $publishTarget, $objectId, $objectVersion, Placement $placement,
-	                               &$foundPubPlacementIds, &$bizImageConverters, &$pubPlacementsIndex )
+	                               &$foundPubPlacementIds, &$bizImageConverter, &$pubPlacementsIndex )
 	{
 		// ConvertedImageToPublish is an internal property which is not described in the WSDL.
 		// The publish connectors should use this image to publish with if the property is set.
@@ -2125,13 +2132,6 @@ class BizPublishing
 		// For the UnPublish operation the ConvertedImageToPublish->Attachment remains null.
 		$attachmentNeeded = ( $operation == 'Preview' || $operation == 'Publish' || $operation == 'Update' );
 		if( $attachmentNeeded ) {
-			if( isset( $bizImageConverters[ $objectId ] ) ) {
-				$bizImageConverter = $bizImageConverters[ $objectId ];
-			} else {
-				$bizImageConverter = new BizImageConverter();
-				$bizImageConverter->loadNativeFileForInputImage( $objectId );
-				$bizImageConverters[ $objectId ] = $bizImageConverter;
-			}
 			if( $bizImageConverter->cropAndScaleImageByPlacement( $placement, $publishTarget->PubChannelID ) ) {
 				$placement->ConvertedImageToPublish->Attachment = $bizImageConverter->getOutputImageAttachment();
 			}

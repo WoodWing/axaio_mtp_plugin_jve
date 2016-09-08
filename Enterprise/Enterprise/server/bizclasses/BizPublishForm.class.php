@@ -539,7 +539,7 @@ class BizPublishForm
 			$inlineImages = array();
 			if( $xFrame->InlineImageIds ) {
 				foreach( $xFrame->InlineImageIds as $key => $imgId ) {
-					$imgInfo = $xFrame->InlineImageInfos[$key];
+					$imgInfo = $xFrame->InlineImageInfos[ $key ];
 					$placement = new Placement();
 					$placement->Width = $imgInfo['Width'];
 					$placement->Height = $imgInfo['Height'];
@@ -547,12 +547,15 @@ class BizPublishForm
 					$placement->ContentDy = $imgInfo['ContentDy'];
 					$placement->ScaleX = $imgInfo['ScaleX'];
 					$placement->ScaleY = $imgInfo['ScaleY'];
-					if( $bizImageConverter->loadNativeFileForInputImage( $imgId ) &&
-						$bizImageConverter->cropAndScaleImageByPlacement( $placement, $channelId ) ) {
-						$inlineImages[ $imgId ] = $bizImageConverter->getOutputImageAttachment();
-						$bizImageConverter->cleanupNativeFileForInputImage();
-					} else { // fallback at native rendition
-						$inlineImages[ $imgId ] = $bizImageConverter->getInputImageAttachment();
+					if( $bizImageConverter->loadNativeFileForInputImage( $imgId ) ) {
+						if( $bizImageConverter->doesImageNeedConversion( $imgId, $placement ) ) {
+							if( $bizImageConverter->cropAndScaleImageByPlacement( $placement, $channelId ) ) {
+								$inlineImages[ $imgId ] = $bizImageConverter->getOutputImageAttachment();
+							}
+							$bizImageConverter->cleanupNativeFileForInputImage();
+						} else { // fallback at native rendition
+							$inlineImages[ $imgId ] = $bizImageConverter->getInputImageAttachment();
+						}
 					}
 				}
 			}

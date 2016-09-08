@@ -12,13 +12,10 @@ class BizImageConverter
 	private $inputImageAttachment;
 
 	/** @var array $inputImageProps */
-	private $inputImageProps = array();
+	private $inputImageProps;
 
 	/** @var Attachment $outputImageAttachment */
 	private $outputImageAttachment;
-
-	/** @var Object $inputImageObject */
-	private $inputImageObject;
 
 	/**
 	 * Returns the image that was used as input for image conversion.
@@ -41,6 +38,77 @@ class BizImageConverter
 	}
 
 	/**
+	 * Initialisation. Retrieves essential image object properties from DB.
+	 *
+	 * @param integer $imageId
+	 * @return bool Whether or not the properties could be retrieved.
+	 */
+	private function loadPropertiesForInputImage( $imageId )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+		$user = BizSession::getShortUserName();
+		$reqProps = array(
+			'ID', 'Type', 'Dpi', 'Height', 'Width', 'Format', // required by this class
+			'Version', 'Types', 'StoreName' ); // required by BizStorage::getFile
+		$propsPerObject = BizObject::getMultipleObjectsPropertiesByObjectIds( $user, array( $imageId ), $reqProps );
+		$this->inputImageProps = count( $propsPerObject ) > 0 ? reset( $propsPerObject ) : null;
+		$this->inputImageAttachment = null;
+		return (bool)$this->inputImageProps;
+	}
+
+	/**
+	 * Tells whether or not the image needs to be converted, based on a given placement.
+	 *
+	 * @param integer $imageId
+	 * @param Placement $placement
+	 * @return bool
+	 */
+	public function doesImageNeedConversion( $imageId, $placement )
+	{
+		if( !$this->inputImageProps ) {
+			if( !$this->loadPropertiesForInputImage( $imageId ) ) {
+				return false;
+			}
+		}
+		return $this->doesImageNeedCrop( $imageId, $placement ) ||
+			$this->doesImageNeedScale( $placement );
+	}
+
+	/**
+	 * Tells whether or not the image needs to be cropped, based on a given placement.
+	 *
+	 * @param integer $imageId
+	 * @param Placement $placement
+	 * @return bool
+	 */
+	private function doesImageNeedCrop( $imageId, $placement )
+	{
+		$retVal = false;
+		if( $placement->Width && $placement->Height ) {
+			if( !$this->inputImageProps ) {
+				$this->loadPropertiesForInputImage( $imageId );
+			}
+			if( $placement->ContentDx || $placement->ContentDy ||
+				$this->inputImageProps['Width'] != $placement->Width ||
+				$this->inputImageProps['Height'] != $placement->Height ) {
+				$retVal = true;
+			}
+		}
+		return $retVal;
+	}
+
+	/**
+	 * Tells whether or not the image needs to be scaled, based on a given placement.
+	 *
+	 * @param Placement $placement
+	 * @return bool
+	 */
+	private function doesImageNeedScale( $placement )
+	{
+		return $placement->ScaleX != 1 || $placement->ScaleY != 1;
+	}
+
+	/**
 	 * Retrieves a native image file from the file-store along with some metadata.
 	 *
 	 * @param integer $imageId
@@ -48,21 +116,14 @@ class BizImageConverter
 	 */
 	public function loadNativeFileForInputImage( $imageId )
 	{
-		$this->inputImageAttachment = null;
-		$this->inputImageProps = array();
-		$this->inputImageObject = null;
-		try {
-			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-			$user = BizSession::getShortUserName();
-			$this->inputImageObject = BizObject::getObject( $imageId, $user, false/*lock*/,
-				'native'/*rendition*/, array( 'MetaData' ) );
-
-			if( $this->inputImageObject && $this->inputImageObject->Files[0] ) {
-				$this->inputImageAttachment = $this->inputImageObject->Files[0];
-				$this->inputImageProps['Dpi'] = $this->inputImageObject->MetaData->ContentMetaData->Dpi;
-				$this->inputImageProps['Width'] = $this->inputImageObject->MetaData->ContentMetaData->Width;
-				$this->inputImageProps['Height'] = $this->inputImageObject->MetaData->ContentMetaData->Height;
+		if( !$this->inputImageProps ) {
+			if( !$this->loadPropertiesForInputImage( $imageId ) ) {
+				return false;
 			}
+		}
+		try {
+			require_once BASEDIR.'/server/bizclasses/BizStorage.php';
+			$this->inputImageAttachment = BizStorage::getFile( $this->inputImageProps, 'native', $this->inputImageProps['Version'] );
 		} catch( BizException $e ) {
 		}
 		return (bool)$this->inputImageAttachment;
@@ -75,12 +136,10 @@ class BizImageConverter
 	 */
 	public function cleanupNativeFileForInputImage()
 	{
-		if( $this->inputImageObject && $this->inputImageObject->Files ) {
+		if( $this->inputImageAttachment ) {
 			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 			$transferServer = new BizTransferServer();
-			foreach( $this->inputImageObject->Files as $attachment ) {
-				$transferServer->deleteFile( $attachment->FilePath );
-			}
+			$transferServer->deleteFile( $this->inputImageAttachment->FilePath );
 		}
 	}
 
@@ -113,8 +172,8 @@ class BizImageConverter
 		}
 
 		$outputFilePath = $this->createOutputFile(
-			$this->inputImageObject->MetaData->ContentMetaData->Format,
-			$this->inputImageObject->MetaData->BasicMetaData->Type ); // could be Image or Advert
+			$this->inputImageProps['Format'],
+			$this->inputImageProps['Type'] ); // could be Image or Advert
 
 		$attachment = new Attachment();
 		$attachment->Type = 'image/jpeg';
@@ -129,19 +188,14 @@ class BizImageConverter
 			$this->outputImageAttachment->FilePath ) );
 		BizServerPlugin::runConnector( $connector, 'setInputDimension', array(
 			$this->inputImageProps['Width'], $this->inputImageProps['Height'], $this->inputImageProps['Dpi'] ) );
-		if( $placement->Width && $placement->Height ) {
-			if( $placement->ContentDx || $placement->ContentDy ||
-				$this->inputImageProps['Width'] != $placement->Width ||
-				$this->inputImageProps['Height'] != $placement->Height
-			) {
-				$left = $placement->ScaleX ? -$placement->ContentDx / $placement->ScaleX : -$placement->ContentDx;
-				$top = $placement->ScaleY ? -$placement->ContentDy / $placement->ScaleY : -$placement->ContentDy;
-				$width = $placement->ScaleX ? $placement->Width / $placement->ScaleX : $placement->Width;
-				$height = $placement->ScaleY ? $placement->Height / $placement->ScaleY : $placement->Height;
-				BizServerPlugin::runConnector( $connector, 'crop', array( $left, $top, $width, $height, 'points' ) );
-			}
+		if( $this->doesImageNeedCrop( $this->inputImageProps['ID'], $placement ) ) {
+			$left = $placement->ScaleX ? -$placement->ContentDx / $placement->ScaleX : -$placement->ContentDx;
+			$top = $placement->ScaleY ? -$placement->ContentDy / $placement->ScaleY : -$placement->ContentDy;
+			$width = $placement->ScaleX ? $placement->Width / $placement->ScaleX : $placement->Width;
+			$height = $placement->ScaleY ? $placement->Height / $placement->ScaleY : $placement->Height;
+			BizServerPlugin::runConnector( $connector, 'crop', array( $left, $top, $width, $height, 'points' ) );
 		}
-		if( $placement->ScaleX || $placement->ScaleY ) {
+		if( $this->doesImageNeedScale( $placement ) ) {
 			BizServerPlugin::runConnector( $connector, 'scale', array( $placement->ScaleX, $placement->ScaleY ) );
 		}
 		return BizServerPlugin::runConnector( $connector, 'convertImage', array() );
