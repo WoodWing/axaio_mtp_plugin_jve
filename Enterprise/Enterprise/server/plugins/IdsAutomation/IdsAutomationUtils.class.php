@@ -107,11 +107,9 @@ class IdsAutomationUtils
 	{
 		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 		if( BizContentSource::isAlienObject( $objId ) ) {
-			// Skip when this is an alien object
 			return false;
 		}
 		if ( !self::isPlaceableObjectType( $objType ) ) {
-			// Stop when this isn't a placeable object
 			return false;
 		}
 
@@ -162,7 +160,6 @@ class IdsAutomationUtils
 	{
 		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 		if( BizContentSource::isAlienObject( $objId ) ) {
-			// Skip when this is an alien object
 			return false;
 		}
 		if ( !self::isLayoutObjectType($objType) ) {
@@ -177,7 +174,6 @@ class IdsAutomationUtils
 			return false; // skip
 		}
 
-		// Create an IDS job for layout.
 		LogHandler::Log('IdsAutomation', 'INFO', "Creating IDS job for $objType (id=$objId).");
 		return self::createIDSJob($objId, $objId, $objType);
 	}
