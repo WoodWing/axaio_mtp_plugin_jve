@@ -11,22 +11,42 @@ require_once BASEDIR.'/server/dbclasses/DBServerPlugin.class.php';
 
 class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase extends TestCase
 {
-	private $vars = null;
+	/** @var string $ticket  */
 	private $ticket = null;
+
+	/** @var PublicationInfo $publication  */
 	private $publication = null;
-	private $issue = null;
+
+	/** @var Target $target  */
 	private $target = null;
-	private $editions = null;
+
+	/** @var PubChannelInfo $publicationChannel  */
 	private $publicationChannel = null;
+
+	/** @var CategoryInfo $category  */
+	private $category = null;
+
+	/** @var BizTransferServer $transferServer  */
 	private $transferServer = null;
+
+	/** @var WW_TestSuite_BuildTest_WebServices_WflServices_Utils $wflServicesUtils */
+	private $wflServicesUtils = null;
 
 	const TRANSFERIMAGE = '/testdata/WflWcml2Xhtml_Image.png';
 	const TRANSFERARTICLE = '/testdata/WflWcml2Xhtml_Article.wcml';
 	const ELEMENTID = '30DE1381-8A7A-41E6-8F6C-5D80D8D9BAF8';
 
+	/** @var Object $dossier */
 	private $dossier = null;
+
+	/** @var Object $image */
 	private $image = null;
+
+	/** @var Object $article */
 	private $article = null;
+
+	/** @var State[] $statuses */
+	private $statuses = array();
 
 	public function getDisplayName() { return 'WCML To XHTML conversion.'; }
 	public function getTestGoals()   { return 'Checks if the Article can be converted to XHTML and that the image '
@@ -52,6 +72,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
 		try {
 			$elements = BizPublishForm::extractArticleObjectElements( $this->article, $this->publicationChannel->Id );
+			// Note:
 		} catch (BizException $e) {
 			$this->setResult( 'ERROR',  'Extraction failed: ' . $e->getMessage(), 'Test failed.' );
 			$this->teardown();
@@ -89,11 +110,14 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 	 */
 	private function setup()
 	{
+		require_once BASEDIR.'/server/wwtest/testsuite/BuildTest/WebServices/WflServices/Utils.class.php';
+		$this->wflServicesUtils = new WW_TestSuite_BuildTest_WebServices_WflServices_Utils();
+		if( !$this->wflServicesUtils->initTest( $this ) ) {
+			return false;
+		}
+
 		// Get all the session related variables.;
 		$this->readSessionVariables();
-
-		// Determine target and editions.
-		$this->determineTargetAndEditions();
 
 		// Get the transferServer
 		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
@@ -127,79 +151,18 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 
 	/**
 	 * Reads out the session variables and sets them for the test.
-	 *
-	 * @return bool Whether or not reading out the variables was successful.
 	 */
 	private function readSessionVariables()
 	{
-		// Get Session variables.
-		$this->vars = $this->getSessionVariables();
-
-		// Get the ticket.
-		$this->ticket = @$this->vars['BuildTest_WebServices_WflServices']['ticket'];
-		if( !$this->ticket ) {
-			$this->setResult( 'ERROR',  'Could not find ticket to test with.', 'Please enable the WflLogon test.' );
-			return false;
-		}
-
-		// Get the publication.
-		$this->publication = @$this->vars['BuildTest_WebServices_WflServices']['publication'];
-		if( !$this->publication ) {
-			$this->setResult( 'ERROR',  'Could not find publication to test with.', 'Please enable the WflLogon test.' );
-			return false;
-		}
-
-		// Get the issue.
-		$this->issue = @$this->vars['BuildTest_WebServices_WflServices']['issue'];
-		if( !$this->publication ) {
-			$this->setResult( 'ERROR',  'Could not find an issue to test with.', 'Please enable the WflLogon test.' );
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Determines the Target and Editions for this test case.
-	 */
-	private function determineTargetAndEditions()
-	{
-		$pubChannel = new PubChannel();
-		$issue = new Issue();
-		$editions = null;
-
-		foreach( $this->publication->PubChannels as $pubChannelInfo ) {
-			if( $pubChannelInfo->Name == 'Print' ) {
-
-				$pubChannel->Id = $pubChannelInfo->Id;
-				$pubChannel->Name = $pubChannelInfo->Name;
-
-				foreach( $pubChannelInfo->Issues as $issInfo ) {
-					if( $issInfo->Name == $this->issue )	{
-						$issue->Id   = $issInfo->Id;
-						$issue->Name = $issInfo->Name;
-						$issue->OverrulePublication = $issInfo->OverrulePublication;
-						break;
-					}
-				}
-
-				$editions = $pubChannelInfo->Editions;
-				break;
-			}
-		}
-
-		// Set the issue.
-		$this->issue = $issue;
-
-		// Set the editions.
-		$this->editions = $editions;
-
-		// Generate a target.
-		$target = new Target();
-		$target->PubChannel = $pubChannel;
-		$target->Issue      = $issue;
-		$target->Editions   = $editions;
-		$this->target = $target;
-		$this->publicationChannel = $target->PubChannel;
+		$vars = $this->getSessionVariables();
+		$this->ticket              = $vars['BuildTest_WebServices_WflServices']['ticket'];
+		$this->publication         = $vars['BuildTest_WebServices_WflServices']['publication'];
+		$this->publicationChannel  = $vars['BuildTest_WebServices_WflServices']['printPubChannel'];
+		$this->target              = $vars['BuildTest_WebServices_WflServices']['printTarget'];
+		$this->category            = $vars['BuildTest_WebServices_WflServices']['category'];
+		$this->statuses['Image']   = $vars['BuildTest_WebServices_WflServices']['imageStatus'];
+		$this->statuses['Article'] = $vars['BuildTest_WebServices_WflServices']['articleStatus'];
+		$this->statuses['Dossier'] = $vars['BuildTest_WebServices_WflServices']['dossierStatus'];
 	}
 
 	/**
@@ -228,20 +191,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 	 */
 	private function createImage()
 	{
-		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizWorkflow.class.php';
 
 		// Get the current User.
 		$user = BizSession::checkTicket( $this->ticket );
-
-		// Determine the Publication.
-		$publication = $this->getPublication();
-
-		// Determine the State.
-		$state = BizObjectComposer::getFirstState($user, $this->publication->Id, null, null, 'Image');
-
-		// Determine the Category.
-		$category = BizObjectComposer::getFirstCategory($user, $publication->Id);
 
 		// Determine parent relation (with the Dossier.)
 		$relations = array();
@@ -278,8 +231,12 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 		$image->MetaData->BasicMetaData->DocumentID = null;
 		$image->MetaData->BasicMetaData->Name = 'Screen Shot 2012-12-13 at 12.48.12 PM';
 		$image->MetaData->BasicMetaData->Type = 'Image';
-		$image->MetaData->BasicMetaData->Publication = $publication;
-		$image->MetaData->BasicMetaData->Category = $category;
+		$image->MetaData->BasicMetaData->Publication = new Publication();
+		$image->MetaData->BasicMetaData->Publication->Id = $this->publication->Id;
+		$image->MetaData->BasicMetaData->Publication->Name = $this->publication->Name;
+		$image->MetaData->BasicMetaData->Category = new Category();
+		$image->MetaData->BasicMetaData->Category->Id = $this->category->Id;
+		$image->MetaData->BasicMetaData->Category->Name = $this->category->Name;
 		$image->MetaData->BasicMetaData->ContentSource = null;
 		$image->MetaData->RightsMetaData = new RightsMetaData();
 		$image->MetaData->RightsMetaData->CopyrightMarked = false;
@@ -320,7 +277,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 		$image->MetaData->WorkflowMetaData->Creator = null;
 		$image->MetaData->WorkflowMetaData->Created = null;
 		$image->MetaData->WorkflowMetaData->Comment = null;
-		$image->MetaData->WorkflowMetaData->State = $state;
+		$image->MetaData->WorkflowMetaData->State = $this->statuses['Image'];
 		$image->MetaData->WorkflowMetaData->RouteTo = null;
 		$image->MetaData->WorkflowMetaData->LockedBy = null;
 		$image->MetaData->WorkflowMetaData->Version = null;
@@ -353,15 +310,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 		// Get the current User.
 		$user = BizSession::checkTicket( $this->ticket );
 
-		// Determine the Publication.
-		$publication = $this->getPublication();
-
-		// Determine the State.
-		$state = BizObjectComposer::getFirstState( $user, $this->publication->Id, null, null, 'Image' );
-
-		// Determine the Category.
-		$category = BizObjectComposer::getFirstCategory( $user, $publication->Id );
-
 		// Update the link object id with the image object id.
 		$find = '{objectid}';
 		$replaceWith = $this->image->MetaData->BasicMetaData->ID;
@@ -389,8 +337,12 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 		$article->MetaData->BasicMetaData->DocumentID = null;
 		$article->MetaData->BasicMetaData->Name = 'buildtest_inline_img';
 		$article->MetaData->BasicMetaData->Type = 'Article';
-		$article->MetaData->BasicMetaData->Publication = $publication;
-		$article->MetaData->BasicMetaData->Category = $category;
+		$article->MetaData->BasicMetaData->Publication = new Publication();
+		$article->MetaData->BasicMetaData->Publication->Id = $this->publication->Id;
+		$article->MetaData->BasicMetaData->Publication->Name = $this->publication->Name;
+		$article->MetaData->BasicMetaData->Category = new Category();
+		$article->MetaData->BasicMetaData->Category->Id = $this->category->Id;
+		$article->MetaData->BasicMetaData->Category->Name = $this->category->Name;
 		$article->MetaData->BasicMetaData->ContentSource = null;
 		$article->MetaData->RightsMetaData = new RightsMetaData();
 		$article->MetaData->RightsMetaData->CopyrightMarked = null;
@@ -439,7 +391,7 @@ An inline image';
 		$article->MetaData->WorkflowMetaData->Creator = null;
 		$article->MetaData->WorkflowMetaData->Created = '2013-03-19T12:09:54';
 		$article->MetaData->WorkflowMetaData->Comment = '';
-		$article->MetaData->WorkflowMetaData->State = $state;
+		$article->MetaData->WorkflowMetaData->State = $this->statuses['Article'];
 		$article->MetaData->WorkflowMetaData->RouteTo = null;
 		$article->MetaData->WorkflowMetaData->LockedBy = null;
 		$article->MetaData->WorkflowMetaData->Version = null;
@@ -490,19 +442,6 @@ An inline image';
 	}
 
 	/**
-	 * Determines the Publication to use for this testcase.
-	 *
-	 * @return Publication The Publication to use for this testcase.
-	 */
-	private function getPublication()
-	{
-		$publication = new Publication();
-		$publication->Id = $this->publication->Id;
-		$publication->Name = $this->publication->Name;
-		return $publication;
-	}
-
-	/**
 	 * Creates an Object in DB.
 	 *
 	 * @param Object $object
@@ -530,7 +469,6 @@ An inline image';
 	 */
 	private function createDossier()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizObjectComposer.class.php';
 		$user = BizSession::checkTicket( $this->ticket );
 
 		// Compose new Dossier in memory.
@@ -539,14 +477,18 @@ An inline image';
 		$dossier->MetaData->BasicMetaData = new BasicMetaData();
 		$dossier->MetaData->BasicMetaData->Name = 'WflArticleInlineImageTest';
 		$dossier->MetaData->BasicMetaData->Type = 'Dossier';
-		$dossier->MetaData->BasicMetaData->Publication = $this->getPublication(); // convert PublicationInfo to Publication
-		$dossier->MetaData->BasicMetaData->Category = BizObjectComposer::getFirstCategory( $user, $this->publication->Id );
+		$dossier->MetaData->BasicMetaData->Publication = new Publication();
+		$dossier->MetaData->BasicMetaData->Publication->Id = $this->publication->Id;
+		$dossier->MetaData->BasicMetaData->Publication->Name = $this->publication->Name;
+		$dossier->MetaData->BasicMetaData->Category = new Category();
+		$dossier->MetaData->BasicMetaData->Category->Id = $this->category->Id;
+		$dossier->MetaData->BasicMetaData->Category->Name = $this->category->Name;
 		$dossier->MetaData->RightsMetaData = new RightsMetaData();
 		$dossier->MetaData->SourceMetaData = new SourceMetaData();
 		$dossier->MetaData->ContentMetaData = new ContentMetaData();
 		$dossier->MetaData->ContentMetaData->Description = 'Temporary dossier for testing inline image conversion.';
 		$dossier->MetaData->WorkflowMetaData = new WorkflowMetaData();
-		$dossier->MetaData->WorkflowMetaData->State = BizObjectComposer::getFirstState( $user, $this->publication->Id, null, null, 'Dossier' );
+		$dossier->MetaData->WorkflowMetaData->State = $this->statuses['Dossier'];
 		$dossier->MetaData->ExtraMetaData = array();
 		$dossier->Targets = array( $this->target );
 

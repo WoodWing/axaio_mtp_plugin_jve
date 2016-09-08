@@ -41,7 +41,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$this->expectedError = null;
 		$this->namePrefix = $namePrefix;
 
-		$tip = 'Please enable the "WflLogon" entry and try again.';
+		$tip = 'Please enable the "Setup test data" entry (WflLogon_TestCase.php) and try again. '.
+			'Please also check the TESTSUITE setting in the configserver.php file.';
 		do {		
 			// Check LogOn ticket.
 			$this->ticket = @$this->vars['BuildTest_WebServices_WflServices']['ticket'];
@@ -53,11 +54,13 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 			// Check presence of test data.
 			if( !isset($this->vars['BuildTest_WebServices_WflServices']['publication'] ) ||
 				!isset($this->vars['BuildTest_WebServices_WflServices']['category'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['issue'] ) ||
+				!isset($this->vars['BuildTest_WebServices_WflServices']['printPubChannel'] ) ||
+				!isset($this->vars['BuildTest_WebServices_WflServices']['printIssue'] ) ||
 				!isset($this->vars['BuildTest_WebServices_WflServices']['printTarget'] ) ||
 				!isset($this->vars['BuildTest_WebServices_WflServices']['imageStatus'] ) ||
 				!isset($this->vars['BuildTest_WebServices_WflServices']['articleStatus'] ) ||
 				!isset($this->vars['BuildTest_WebServices_WflServices']['dossierStatus'] ) ||
+				!isset($this->vars['BuildTest_WebServices_WflServices']['layoutStatus'] ) ||
 				!isset($this->vars['BuildTest_WebServices_WflServices']['articleTemplateStatus'] )
 			) {
 				$testCase->setResult( 'ERROR',  'Could not find data to test with.', $tip );

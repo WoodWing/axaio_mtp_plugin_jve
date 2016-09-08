@@ -25,12 +25,17 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 		$suiteOpts = unserialize( TESTSUITE );
 		$ticket = null;
 		$userGroup = null;
+
 		$testPub = null;
+		$printPubChannel = null;
+		$printIssue = null;
+		$printTarget = null;
 		$testCategory = null;
 		
 		$imageStatus = null;
 		$articleStatus = null;
 		$dossierStatus = null;
+		$layoutStatus = null;
 		$articleTemplateStatus = null;
 		
 		if( !is_null($response) ) {
@@ -39,18 +44,16 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 			// Store first user group from user
 			$userGroup = !empty( $response->UserGroups ) ? $response->UserGroups[0] : null;
 
-			// Determine the brand to work with
-			if( count($response->Publications) > 0 ) {
-				foreach( $response->Publications as $pub ) {
-					if( $pub->Name == $suiteOpts['Brand'] ) {
-						$testPub = $pub;
-						break;
+			$testPub = $this->lookupPublicationInfo( $response, $suiteOpts['Brand'] );
+			if( $testPub ) {
+				$printPubChannel = $this->lookupPubChannelInfo( $testPub, 'Print' );
+				if( $printPubChannel ) {
+					$printIssue = $this->lookupIssueInfo( $printPubChannel, $suiteOpts['Issue'] );
+					if( $printIssue ) {
+						$printTarget = $this->composeTarget( $printPubChannel, $printIssue );
 					}
 				}
-			}
-			
-			if( $testPub ) {
-				
+
 				// Simply pick the first Category of the Brand
 				$testCategory = count( $testPub->Categories ) > 0  ? $testPub->Categories[0] : null;
 				if( !$testCategory ) {
@@ -58,18 +61,12 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 						'Please check the Brand setup and configure one.' );
 				}
 
-				// Lookup the first Print channel and lookup the configured issue/editions inside.
-				$printTarget = $this->buildPrintTargetFromBrandSetup( $testPub, $suiteOpts['Issue'] );
-				
 				// Pick a status for Images, Articles and Dossiers.
 				$imageStatus   = $this->pickObjectTypeStatus( $testPub, 'Image' );
 				$articleStatus = $this->pickObjectTypeStatus( $testPub, 'Article' );
 				$dossierStatus = $this->pickObjectTypeStatus( $testPub, 'Dossier' );
+				$layoutStatus = $this->pickObjectTypeStatus( $testPub, 'Layout' );
 				$articleTemplateStatus = $this->pickObjectTypeStatus( $testPub, 'ArticleTemplate' );
-		
-			} else {
-				$this->setResult( 'ERROR', 'Could not find the test Brand: '.$suiteOpts['Brand'], 
-					'Please check the TESTSUITE setting in configserver.php.' );
 			}
 		}
 
@@ -81,12 +78,14 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 		
 		$vars['BuildTest_WebServices_WflServices']['publication'] = $testPub;
 		$vars['BuildTest_WebServices_WflServices']['category'] = $testCategory;
-		$vars['BuildTest_WebServices_WflServices']['issue'] = $suiteOpts['Issue'];
+		$vars['BuildTest_WebServices_WflServices']['printPubChannel'] = $printPubChannel;
+		$vars['BuildTest_WebServices_WflServices']['printIssue'] = $printIssue;
 		$vars['BuildTest_WebServices_WflServices']['printTarget'] = $printTarget;
 		
 		$vars['BuildTest_WebServices_WflServices']['imageStatus'] = $imageStatus;
 		$vars['BuildTest_WebServices_WflServices']['articleStatus'] = $articleStatus;
 		$vars['BuildTest_WebServices_WflServices']['dossierStatus'] = $dossierStatus;
+		$vars['BuildTest_WebServices_WflServices']['layoutStatus'] = $layoutStatus;
 		$vars['BuildTest_WebServices_WflServices']['articleTemplateStatus'] = $articleTemplateStatus;
 		$this->setSessionVariables( $vars );
 	}
@@ -120,50 +119,77 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 	}
 
 	/**
-	 * Takes the first Print channel from the given brand setup (PublicationInfo)
-	 * and looks up the given issue name. When found, it composes and returns a 
-	 * print target.
+	 * Lookup a brand by name that is returned in the LogOn response.
 	 *
-	 * @param PublicationInfo $testPub
-	 * @param string $issueName
-	 * @return Target
+	 * @param WflLogOnResponse $response
+	 * @param string $brandName
+	 * @return PublicationInfo|null
 	 */
-	private function buildPrintTargetFromBrandSetup( PublicationInfo $testPub, $issueName )
+	private function lookupPublicationInfo( WflLogOnResponse $response, $brandName )
 	{
-		$printTarget = null;
-		$testChannel = null;
-		$testIssue = null;
-
-		// Lookup the first Print channel and lookup the configured issue/editions inside.
-		foreach( $testPub->PubChannels as $pubChannelInfo ) {
-			if( $pubChannelInfo->Name == 'Print' ) {
-				foreach( $pubChannelInfo->Issues as $issInfo ) {
-					if( $issInfo->Name == $issueName )	{
-						$testIssue = $issInfo;
-						break;
-					}
-				}
-				$testChannel = $pubChannelInfo;
+		$foundInfo = null;
+		if( $response->Publications ) foreach( $response->Publications as $publicationInfo ) {
+			if( $publicationInfo->Name == $brandName ) {
+				$foundInfo = $publicationInfo;
 				break;
 			}
 		}
-		if( !$testChannel ) {
-			$this->setResult( 'ERROR', 'Brand "'.$testPub->Name.'" has no '.
-				'Print channel to work with.', 
+		if( !$foundInfo ) {
+			$this->setResult( 'ERROR', 'Could not find the test Brand "'.$brandName.'".',
+				'Please check the TESTSUITE setting in configserver.php.' );
+		}
+		return $foundInfo;
+	}
+
+	/**
+	 * Lookup a PubChannelInfo by name that is configured for a given brand.
+	 *
+	 * @param PublicationInfo $publicationInfo
+	 * @param string $pubChannelName
+	 * @return PubChannelInfo|null
+	 */
+	private function lookupPubChannelInfo( PublicationInfo $publicationInfo, $pubChannelName )
+	{
+		$foundInfo = null;
+		if( $publicationInfo->PubChannels ) foreach( $publicationInfo->PubChannels as $pubChannelInfo ) {
+			if( $pubChannelInfo->Name == $pubChannelName ) {
+				$foundInfo = $pubChannelInfo;
+				break;
+			}
+		}
+		if( !$foundInfo ) {
+			$this->setResult( 'ERROR', 'Brand "'.$publicationInfo->Name.'" has no '.
+				'Publication Channel named "'.$pubChannelName.'" to work with.',
 				'Please check the Brand setup and configure one.' );
 		}
-		if( !$testIssue ) {
-			$this->setResult( 'ERROR', 'Brand "'.$testPub->Name.'" has no '.
-				'Issue "'.$issueName.'" for the first Print channel to work with.', 
+		return $foundInfo;
+	}
+
+	/**
+	 * Lookup a IssueInfo by name that is configured for a given channel.
+	 *
+	 * @param PubChannelInfo $pubChannelInfo
+	 * @param string $issueName
+	 * @return IssueInfo|null
+	 */
+	private function lookupIssueInfo( PubChannelInfo $pubChannelInfo, $issueName )
+	{
+		$foundInfo = null;
+		if( $pubChannelInfo->Issues ) foreach( $pubChannelInfo->Issues as $issueInfo ) {
+			if( $issueInfo->Name == $issueName )	{
+				$foundInfo = $issueInfo;
+				break;
+			}
+		}
+		if( !$foundInfo ) {
+			$this->setResult( 'ERROR', 'Publication Channel "'.$pubChannelInfo->Name.'" has no '.
+				'Issue "'.$issueName.'" for the first Print channel to work with.',
 				'Please check the Brand setup and configure one, '.
 				'or check the TESTSUITE setting in configserver.php.' );
 		}
-		if( $testChannel && $testIssue ) {
-			$printTarget = $this->composeTarget( $testChannel, $testIssue );
-		}
-		return $printTarget;
+		return $foundInfo;
 	}
-	
+
 	/**
 	 * Builds a Target from given channel, issue and editions.
 	 *

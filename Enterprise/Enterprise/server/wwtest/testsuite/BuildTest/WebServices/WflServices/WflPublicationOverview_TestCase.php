@@ -68,12 +68,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$this->suiteOpts = unserialize( TESTSUITE );
 
 		// Retrieve the Ticket that has been determined by WflLogOn TestCase.
-   		$vars = $this->getSessionVariables();
-   		$this->ticket = @$vars['BuildTest_WebServices_WflServices']['ticket'];
-		if( !$this->ticket ) {
-			$this->setResult( 'ERROR',  'Could not find ticket to test with.', 'Please enable the WflLogon test.' );
-			return;
-		}
+      $vars = $this->getSessionVariables();
+		$this->ticket = @$vars['BuildTest_WebServices_WflServices']['ticket'];
+		// Note that BuildTest_WebServices_WflServices option are validated by WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 
 		if( !$this->resolveBrandSetup() ) {
 			return;
@@ -113,7 +110,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 			$this->testService022();  // WflGetPages
 		}
 		catch( BizException $e ) {
-			$e = $e; // keep analyzer happy
 		}
 		
 		// Remove all the test data objects and the test issue.
@@ -3592,74 +3588,23 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 	 */
 	private function resolveBrandSetup()
 	{
-   		$vars = $this->getSessionVariables();
-   		
-   		// Check if the TESTSUITE['Brand'] could be found in the brand setup.
-		$this->pubObj = @$vars['BuildTest_WebServices_WflServices']['publication'];
-		if( !$this->pubObj ) {
-			$this->setResult( 'ERROR', 'Could not find the test Brand named "'.$this->suiteOpts['Brand'].'". '. 
-								'Please check the TESTSUITE setting in the configserver.php file.' );
-			return false;
-		}
-		
-		// Lookup the pub channel in the brand setup under which the TESTSUITE['Issue'] is setup.
-		$otherIssueName = @$vars['BuildTest_WebServices_WflServices']['issue'];
-		if( $this->pubObj->PubChannels ) foreach( $this->pubObj->PubChannels as $pubChannelInfo ) {
-			if( $pubChannelInfo->Type == 'print' ) {
-				if( $pubChannelInfo->Issues ) foreach( $pubChannelInfo->Issues as $issueInfo ) {
-					if( $issueInfo->Name == $otherIssueName ) {
-						$this->pubChannelObj = $pubChannelInfo;
-						$this->editions = $pubChannelInfo->Editions;
-						break;
-					}
-				}
-			}
-		}
-		
-		// Error when the channel could not be found, or when it has less than two editions.
-		$pleaseCheck = 'Please check the configuration under the test Brand named "'.$this->pubObj->Name.'". '.
-						'Also check the TESTSUITE option in the configserver.php file. '.
-						'The TESTSUITE options should correspond with your actual brand setup. ';
-		if( !$this->pubChannelObj ) {
-			$this->setResult( 'ERROR', 'Could not find TESTSUITE Issue "'.$otherIssueName.'". '.$pleaseCheck );
-			return false;
-		}
-		if( !$this->editions || count($this->editions) < 2 ) {
-			$this->setResult( 'ERROR', 'Could find TESTSUITE Issue named "'.$otherIssueName.'", '.
-								'but its publication channel should have at least two editions configured. '.$pleaseCheck );
-			return false;
-		}
-		
-		// Lookup status configurations for Article/Layout/Image objects in the brand setup.
-		if( $this->pubObj->States ) foreach( $this->pubObj->States as $status ) {
-			if( $status->Id != -1 ) { // prefer non-personal status
-				switch( $status->Type ) {
-					case 'Article':
-					case 'Layout':
-					case 'Image':
-						$this->statuses[$status->Type] = $status;
-						break;
-				}
-			}
-		}
-		
-		// Error when any of the status configurations could not be found.
-		foreach( array( 'Article', 'Layout', 'Image' ) as $objType ) {
-			if( !isset($this->statuses[$objType]) ) {
-				$this->setResult( 'ERROR', 'No statuses configured for '.$objType.' objects. '.$pleaseCheck );
-				return false;
-			}
-		}
-		
-		// 
-		$this->category = count( $this->pubObj->Categories ) > 0  ? $this->pubObj->Categories[0] : null;
-		if( !$this->category ) {
-			$this->setResult( 'ERROR', 'Could find the test Brand named "'.$this->suiteOpts['Brand'].'", '. 
-								'but there are no categories configured for that brand. '.$pleaseCheck );
-			return false;
-		}
+		$vars = $this->getSessionVariables();
 
-		return true;
+		$this->pubObj              = @$vars['BuildTest_WebServices_WflServices']['publication'];
+		$this->pubChannelObj       = @$vars['BuildTest_WebServices_WflServices']['printPubChannel'];
+		$this->category            = @$vars['BuildTest_WebServices_WflServices']['category'];
+		$this->statuses['Image']   = @$vars['BuildTest_WebServices_WflServices']['imageStatus'];
+		$this->statuses['Article'] = @$vars['BuildTest_WebServices_WflServices']['articleStatus'];
+		$this->statuses['Layout']  = @$vars['BuildTest_WebServices_WflServices']['layoutStatus'];
+		// Note that the options listed above are validated by WW_TestSuite_BuildTest_WebServices_WflServices_Utils.
+
+		$retVal = true;
+		$this->editions = $this->pubChannelObj->Editions;
+		if( !$this->editions || count( $this->editions ) < 2 ) {
+			$this->setResult( 'ERROR', 'Publication Channel "'.$this->pubChannelObj->Name.'" should have at least two editions configured.' );
+			$retVal = false;
+		}
+		return $retVal;
 	}
 
 	/**
