@@ -30,9 +30,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 * @param TestCase $testCase
 	 * @param string $namePrefix Prefix to use for autofill names when creating entities.
 	 * @param string|null $protocol [v10.0.0] The used protocol for service calls. (Options: SOAP or JSON.) If null a regular service call is made.
+	 * @param bool $validateSessionVars Set TRUE to skip validation e.g. for logon / init test cases.
 	 * @return bool Whether or not all session variables are complete.
 	 */
-	public function initTest( TestCase $testCase, $namePrefix = 'BT ', $protocol = null )
+	public function initTest( TestCase $testCase, $namePrefix = 'BT ', $protocol = null, $validateSessionVars = true )
 	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		$valid = false;
@@ -40,35 +41,43 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$this->testCase = $testCase;
 		$this->expectedError = null;
 		$this->namePrefix = $namePrefix;
+		$this->ticket = @$this->vars['BuildTest_WebServices_WflServices']['ticket'];
 
-		$tip = 'Please enable the "Setup test data" entry (WflLogon_TestCase.php) and try again. '.
-			'Please also check the TESTSUITE setting in the configserver.php file.';
-		do {		
-			// Check LogOn ticket.
-			$this->ticket = @$this->vars['BuildTest_WebServices_WflServices']['ticket'];
-			if( !$this->ticket ) {
-				$testCase->setResult( 'ERROR',  'Could not find ticket to test with.', $tip );
-				break;
-			}
-			
-			// Check presence of test data.
-			if( !isset($this->vars['BuildTest_WebServices_WflServices']['publication'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['category'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['printPubChannel'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['printIssue'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['printTarget'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['imageStatus'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['articleStatus'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['dossierStatus'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['layoutStatus'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['articleTemplateStatus'] )
-			) {
-				$testCase->setResult( 'ERROR',  'Could not find data to test with.', $tip );
-				break;
-			}
-			
+		if( $validateSessionVars ) {
+			$tip = 'Please enable the "Setup test data" entry (WflLogon_TestCase.php) and try again. '.
+				'Please also check the TESTSUITE setting in the configserver.php file.';
+			do {
+				// Check LogOn ticket.
+				if( !$this->ticket ) {
+					$testCase->setResult( 'ERROR', 'Could not find ticket to test with.', $tip );
+					break;
+				}
+
+				// Check presence of test data.
+				if( !isset( $this->vars['BuildTest_WebServices_WflServices']['publication'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['category'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['printPubChannel'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['printIssue'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['printTarget'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['webPubChannel'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['webIssue'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['webTarget'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['activatedMcpPlugin'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['imageStatus'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['articleStatus'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['dossierStatus'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['layoutStatus'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['articleTemplateStatus'] )
+				) {
+					$testCase->setResult( 'ERROR', 'Could not find data to test with.', $tip );
+					break;
+				}
+
+				$valid = true;
+			} while( false );
+		} else {
 			$valid = true;
-		} while( false );
+		}
 
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();

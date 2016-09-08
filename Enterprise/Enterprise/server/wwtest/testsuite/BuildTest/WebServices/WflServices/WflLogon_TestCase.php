@@ -10,6 +10,9 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends TestCase
 {
+	/** @var WW_TestSuite_BuildTest_WebServices_WflServices_Utils $wflServicesUtils */
+	private $wflServicesUtils = null;
+
 	public function getDisplayName() { return 'Setup test data'; }
 	public function getTestGoals()   { return 'Checks if the user (as configured at TESTSUITE option) can logon to Enterprise. It tries to resolve entities from the brand setup (as configured at TESTSUITE option). '; }
 	public function getTestMethods() { return 'Does logon through workflow services at application server. The service response is used to lookup the Brand, Channel, Issue, Category and some object statuses. '; }
@@ -27,11 +30,12 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 		$userGroup = null;
 
 		$testPub = null;
+		$testCategory = null;
+
 		$printPubChannel = null;
 		$printIssue = null;
 		$printTarget = null;
-		$testCategory = null;
-		
+
 		$imageStatus = null;
 		$articleStatus = null;
 		$dossierStatus = null;
@@ -50,7 +54,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 				if( $printPubChannel ) {
 					$printIssue = $this->lookupIssueInfo( $printPubChannel, $suiteOpts['Issue'] );
 					if( $printIssue ) {
-						$printTarget = $this->composeTarget( $printPubChannel, $printIssue );
+						$printTarget = $this->composeTargetByLogOnInfo( $printPubChannel, $printIssue );
 					}
 				}
 
@@ -75,18 +79,44 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 		$vars = array();
 		$vars['BuildTest_WebServices_WflServices']['ticket'] = $ticket;
 		$vars['BuildTest_WebServices_WflServices']['userGroup'] = $userGroup;
-		
+
 		$vars['BuildTest_WebServices_WflServices']['publication'] = $testPub;
 		$vars['BuildTest_WebServices_WflServices']['category'] = $testCategory;
+
 		$vars['BuildTest_WebServices_WflServices']['printPubChannel'] = $printPubChannel;
 		$vars['BuildTest_WebServices_WflServices']['printIssue'] = $printIssue;
 		$vars['BuildTest_WebServices_WflServices']['printTarget'] = $printTarget;
-		
+
 		$vars['BuildTest_WebServices_WflServices']['imageStatus'] = $imageStatus;
 		$vars['BuildTest_WebServices_WflServices']['articleStatus'] = $articleStatus;
 		$vars['BuildTest_WebServices_WflServices']['dossierStatus'] = $dossierStatus;
 		$vars['BuildTest_WebServices_WflServices']['layoutStatus'] = $layoutStatus;
 		$vars['BuildTest_WebServices_WflServices']['articleTemplateStatus'] = $articleTemplateStatus;
+		$this->setSessionVariables( $vars );
+
+		// Create a web channel and issue, and compose a target from those.
+		$activatedMcpPlugin = null;
+		$webPubChannel = null;
+		$webIssue = null;
+		$webTarget = null;
+		$activatedMcpPlugin = $utils->activatePluginByName( $this, 'MultiChannelPublishingSample' );
+		if( !is_null( $activatedMcpPlugin ) ) {
+			require_once BASEDIR.'/server/wwtest/testsuite/BuildTest/WebServices/WflServices/Utils.class.php';
+			$this->wflServicesUtils = new WW_TestSuite_BuildTest_WebServices_WflServices_Utils();
+			if( $this->wflServicesUtils->initTest( $this, 'BT', null, false ) ) {
+				$webPubChannel = $this->createAdmPubChannel( $testPub->Id );
+				if( $webPubChannel ) {
+					$webIssue = $this->createAdmIssue( $testPub->Id, $webPubChannel->Id );
+					if( $webIssue ) {
+						$webTarget = $this->composeTargetByAdminInfo( $webPubChannel, $webIssue );
+					}
+				}
+			}
+		}
+		$vars['BuildTest_WebServices_WflServices']['activatedMcpPlugin'] = $activatedMcpPlugin;
+		$vars['BuildTest_WebServices_WflServices']['webPubChannel'] = $webPubChannel;
+		$vars['BuildTest_WebServices_WflServices']['webIssue'] = $webIssue;
+		$vars['BuildTest_WebServices_WflServices']['webTarget'] = $webTarget;
 		$this->setSessionVariables( $vars );
 	}
 	
@@ -197,7 +227,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 	 * @param IssueInfo $issueInfo
 	 * @return Target $target
 	 */
-	private function composeTarget( PubChannelInfo $chanInfo, IssueInfo $issueInfo )
+	private function composeTargetByLogOnInfo( PubChannelInfo $chanInfo, IssueInfo $issueInfo )
 	{
 		$pubChannel = new PubChannel();
 		$pubChannel->Id = $chanInfo->Id;
@@ -214,5 +244,65 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflLogon_TestCase extends T
 		$target->Editions   = $chanInfo->Editions;
 		
 		return $target;		
+	}
+
+	/**
+	 * Creates publication channel for testing.
+	 *
+	 * @throws BizException on failure
+	 * @param int $publicationId
+	 * @return AdmPubChannel
+	 */
+	private function createAdmPubChannel( $publicationId )
+	{
+		$this->wflServicesUtils->setRequestComposer(
+			function( AdmCreatePubChannelsRequest $req ) {
+				$pubChannel = reset( $req->PubChannels );
+				$pubChannel->Type = 'web';
+				$pubChannel->PublishSystem = 'MultiChannelPublishingSample';
+			}
+		);
+		$stepInfo = 'Creating channel for WflServices tests.';
+		return $this->wflServicesUtils->createPubChannel( $stepInfo, $publicationId );
+	}
+
+	/**
+	 * Creates publication channel for testing.
+	 *
+	 * @throws BizException on failure
+	 * @param int $publicationId
+	 * @param int $pubChannelId
+	 * @return AdmIssue
+	 */
+	private function createAdmIssue( $publicationId, $pubChannelId )
+	{
+		$stepInfo = 'Creating channel for WflServices tests.';
+		return $this->wflServicesUtils->createIssue( $stepInfo, $publicationId, $pubChannelId );
+	}
+
+	/**
+	 * Builds a Target from given channel and issue.
+	 *
+	 * @param AdmPubChannel $admPubChannel
+	 * @param AdmIssue $admIssue
+	 * @return Target $target
+	 */
+	private function composeTargetByAdminInfo( AdmPubChannel $admPubChannel, AdmIssue $admIssue )
+	{
+		$pubChannel = new PubChannel();
+		$pubChannel->Id = $admPubChannel->Id;
+		$pubChannel->Name = $admPubChannel->Name;
+
+		$issue = new Issue();
+		$issue->Id   = $admIssue->Id;
+		$issue->Name = $admIssue->Name;
+		$issue->OverrulePublication = $admIssue->OverrulePublication;
+
+		$target = new Target();
+		$target->PubChannel = $pubChannel;
+		$target->Issue      = $issue;
+		$target->Editions   = null;
+
+		return $target;
 	}
 }

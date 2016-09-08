@@ -20,17 +20,11 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 	/** @var Target $target  */
 	private $target = null;
 
-	/** @var PubChannelInfo $publicationChannel  */
-	private $publicationChannel = null;
-
 	/** @var CategoryInfo $category  */
 	private $category = null;
 
 	/** @var BizTransferServer $transferServer  */
 	private $transferServer = null;
-
-	/** @var WW_TestSuite_BuildTest_WebServices_WflServices_Utils $wflServicesUtils */
-	private $wflServicesUtils = null;
 
 	const TRANSFERIMAGE = '/testdata/WflWcml2Xhtml_Image.png';
 	const TRANSFERARTICLE = '/testdata/WflWcml2Xhtml_Article.wcml';
@@ -71,7 +65,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 
 		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
 		try {
-			$elements = BizPublishForm::extractArticleObjectElements( $this->article, $this->publicationChannel->Id );
+			$elements = BizPublishForm::extractArticleObjectElements( $this->article, $this->target->PubChannel->Id );
 			// Note:
 		} catch (BizException $e) {
 			$this->setResult( 'ERROR',  'Extraction failed: ' . $e->getMessage(), 'Test failed.' );
@@ -88,7 +82,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 					.'with</span></p><p class="para para_$ID/NormalParagraphStyle"><span class="char char_$ID/[No_char'
 					.'acter_style]"/></p><p class="para para_$ID/NormalParagraphStyle"><span class="char char_$ID/[No_'
 					.'character_style]"><img id="ent_' . $this->image->MetaData->BasicMetaData->ID . '" '
-					.'src="ww_enterprise" width="319" height="291"/></span></p><p class="para para_$ID/NormalParagraph'
+					.'src="ww_enterprise" width="319.125" height="291.9512195122"/></span></p><p class="para para_$ID/NormalParagraph'
 					.'Style"><span class="char char_$ID/[No_character_style]"/></p><p class="para para_$ID/Normal'.
 					'ParagraphStyle"><span class="char char_$ID/[No_character_style]">An inline image</span></p></div>';
 				if ($el->Content != $orgContent) {
@@ -110,9 +104,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 	 */
 	private function setup()
 	{
+		// Validate session variables.
 		require_once BASEDIR.'/server/wwtest/testsuite/BuildTest/WebServices/WflServices/Utils.class.php';
-		$this->wflServicesUtils = new WW_TestSuite_BuildTest_WebServices_WflServices_Utils();
-		if( !$this->wflServicesUtils->initTest( $this ) ) {
+		$wflServicesUtils = new WW_TestSuite_BuildTest_WebServices_WflServices_Utils();
+		if( !$wflServicesUtils->initTest( $this ) ) {
 			return false;
 		}
 
@@ -157,8 +152,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 		$vars = $this->getSessionVariables();
 		$this->ticket              = $vars['BuildTest_WebServices_WflServices']['ticket'];
 		$this->publication         = $vars['BuildTest_WebServices_WflServices']['publication'];
-		$this->publicationChannel  = $vars['BuildTest_WebServices_WflServices']['printPubChannel'];
-		$this->target              = $vars['BuildTest_WebServices_WflServices']['printTarget'];
+		$this->target              = $vars['BuildTest_WebServices_WflServices']['webTarget'];
 		$this->category            = $vars['BuildTest_WebServices_WflServices']['category'];
 		$this->statuses['Image']   = $vars['BuildTest_WebServices_WflServices']['imageStatus'];
 		$this->statuses['Article'] = $vars['BuildTest_WebServices_WflServices']['articleStatus'];
