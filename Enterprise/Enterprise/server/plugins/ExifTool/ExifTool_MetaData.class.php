@@ -280,11 +280,13 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 		// L> Note that ExifTool returns ExifImageWidth/ExifImageHeight which are specified as PixelXDimension/PixelYDimension.
 		list( $psImageHeight, $psImageWidth ) = $this->mapFieldPairValues( 'Photoshop', 'ImageHeight', 'ImageWidth',
 			'Height', 'Width', array( $this, 'castToFloatWhenPositive' ) );
+		list( $pngImageHeight, $pngImageWidth ) = $this->mapFieldPairValues( 'PNG', 'ImageHeight', 'ImageWidth',
+			'Height', 'Width', array( $this, 'castToFloatWhenPositive' ) );
 
 		if( LogHandler::debugMode() ) {
 			LogHandler::Log( 'ExifTool', 'DEBUG', "Extracted image (height={$this->entMetaData['Height']}, width={$this->entMetaData['Width']}) from tags: ".
 				"File($fileHeight, $fileWidth) XMP($xmpImageHeight, $xmpImageWidth) ".
-				"EXIF($exifImageHeight, $exifImageWidth) Photoshop($psImageHeight, $psImageWidth)" );
+				"EXIF($exifImageHeight, $exifImageWidth) PNG($pngImageHeight, $pngImageWidth) Photoshop($psImageHeight, $psImageWidth)" );
 		}
 
 		// To determine the DPI, we need the width and height, so bail out when not found.
