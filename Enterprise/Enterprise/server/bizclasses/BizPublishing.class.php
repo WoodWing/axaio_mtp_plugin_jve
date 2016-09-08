@@ -2073,17 +2073,19 @@ class BizPublishing
 			if( $relation->Type == 'Placed' && $relation->ChildInfo->Type == 'Image' ) {
 				if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
 					$objectId = $relation->ChildInfo->ID;
-					if( isset( $bizImageConverters[ $objectId ] ) ) {
-						$bizImageConverter = $bizImageConverters[ $objectId ];
-					} else {
+					if( !isset( $bizImageConverters[ $objectId ] ) ) {
 						$bizImageConverter = new BizImageConverter();
-						$bizImageConverter->loadNativeFileForInputImage( $objectId );
-						$bizImageConverters[ $objectId ] = $bizImageConverter;
+						if( $bizImageConverter->doesImageNeedConversion( $objectId, $placement ) ) {
+							if( $bizImageConverter->loadNativeFileForInputImage( $objectId ) ) {
+								$bizImageConverters[ $objectId ] = $bizImageConverter;
+							}
+						}
+						$bizImageConverter = null;
 					}
-					if( $bizImageConverter->doesImageNeedConversion( $objectId, $placement ) ) {
+					if( isset( $bizImageConverters[ $objectId ] ) ) {
 						$this->convertImage( $operation, $publishTarget,
 							$objectId, $relation->ChildVersion,
-							$placement, $foundPubPlacementIds, $bizImageConverter, $pubPlacementsIndex );
+							$placement, $foundPubPlacementIds, $bizImageConverters[ $objectId ], $pubPlacementsIndex );
 					}
 				}
 			}

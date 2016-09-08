@@ -105,7 +105,8 @@ class BizImageConverter
 	 */
 	private function doesImageNeedScale( $placement )
 	{
-		return $placement->ScaleX != 1 || $placement->ScaleY != 1;
+		return $placement->ScaleX && $placement->ScaleY &&  // Avoid zero scale, which would lead into endlessly large images.
+			( $placement->ScaleX != 1 || $placement->ScaleY != 1 ); // A scaling of 1 is 100%, which means no scaling is needed.
 	}
 
 	/**
@@ -152,19 +153,29 @@ class BizImageConverter
 	 */
 	public function cropAndScaleImageByPlacement( Placement $placement, $channelId )
 	{
-		if( !$this->inputImageAttachment ) {
+		if( !$this->inputImageAttachment || !$this->inputImageProps ) {
 			return false;
 		}
 
-		$supportedOutputFormats = $this->getSupportedOutputFormats( $channelId );
+		// Collect all operations that need to be done on the image based on the placement data.
+		$conversionOperations = array();
+		if( $this->doesImageNeedCrop( $this->inputImageProps['ID'], $placement ) ) {
+			$conversionOperations[] = 'crop';
+		}
+		if( $this->doesImageNeedScale( $placement ) ) {
+			$conversionOperations[] = 'scale';
+		}
+		if( !$conversionOperations ) {
+			return false;
+		}
 
+		// Lookup a connector that supports the most preferred output mime type (file format).
+		$supportedOutputFormats = $this->getSupportedOutputFormats( $channelId );
 		$connector = null;
 		foreach( $supportedOutputFormats as $outputFormat ) {
 			$connector = $this->getBestConnector( $this->inputImageAttachment->Type, $outputFormat );
-
-			// Stop looking the moment we found a connector for the wanted output format.
 			if( $connector != null ) {
-				break;
+				break; // Stop looking the moment we found a connector for the wanted output format.
 			}
 		}
 		if( !$connector ) {
@@ -188,15 +199,22 @@ class BizImageConverter
 			$this->outputImageAttachment->FilePath ) );
 		BizServerPlugin::runConnector( $connector, 'setInputDimension', array(
 			$this->inputImageProps['Width'], $this->inputImageProps['Height'], $this->inputImageProps['Dpi'] ) );
-		if( $this->doesImageNeedCrop( $this->inputImageProps['ID'], $placement ) ) {
-			$left = $placement->ScaleX ? -$placement->ContentDx / $placement->ScaleX : -$placement->ContentDx;
-			$top = $placement->ScaleY ? -$placement->ContentDy / $placement->ScaleY : -$placement->ContentDy;
-			$width = $placement->ScaleX ? $placement->Width / $placement->ScaleX : $placement->Width;
-			$height = $placement->ScaleY ? $placement->Height / $placement->ScaleY : $placement->Height;
-			BizServerPlugin::runConnector( $connector, 'crop', array( $left, $top, $width, $height, 'points' ) );
-		}
-		if( $this->doesImageNeedScale( $placement ) ) {
-			BizServerPlugin::runConnector( $connector, 'scale', array( $placement->ScaleX, $placement->ScaleY ) );
+
+		foreach( $conversionOperations as $operation ) {
+			switch( $operation ) {
+				case 'crop':
+					$left = $placement->ScaleX ? -$placement->ContentDx / $placement->ScaleX : -$placement->ContentDx;
+					$top = $placement->ScaleY ? -$placement->ContentDy / $placement->ScaleY : -$placement->ContentDy;
+					$width = $placement->ScaleX ? $placement->Width / $placement->ScaleX : $placement->Width;
+					$height = $placement->ScaleY ? $placement->Height / $placement->ScaleY : $placement->Height;
+					BizServerPlugin::runConnector( $connector, 'crop', array( $left, $top, $width, $height, 'points' ) );
+					break;
+				case 'scale':
+					BizServerPlugin::runConnector( $connector, 'scale', array( $placement->ScaleX, $placement->ScaleY ) );
+					break;
+				default:
+					break;
+			}
 		}
 		return BizServerPlugin::runConnector( $connector, 'convertImage', array() );
 	}
