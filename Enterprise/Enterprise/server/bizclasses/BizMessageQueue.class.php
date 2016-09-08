@@ -133,7 +133,7 @@ class BizMessageQueue
 	 * @param string $queueName
 	 * @return string|null Ticket
 	 */
-	public static function deriveTicketFromMesageQueueName( $queueName )
+	public static function deriveTicketFromMessageQueueName($queueName )
 	{
 		$ticket = null;
 		$prefix = 'ticket.';
@@ -292,96 +292,103 @@ class BizMessageQueue
 		$restApiConnection = self::getConnection( 'RabbitMQ', 'REST', false );
 
 		if( $restApiConnection && $password ) {
-			require_once BASEDIR . '/server/utils/rabbitmq/restapi/Client.class.php';
-			$restClient = new WW_Utils_RabbitMQ_RestAPI_Client( $restApiConnection );
+            /** @noinspection PhpUnusedLocalVariableInspection */
+            $map = new BizExceptionSeverityMap( ['S1144' => 'INFO'] );
+		    try {
+                require_once BASEDIR . '/server/utils/rabbitmq/restapi/Client.class.php';
+                $restClient = new WW_Utils_RabbitMQ_RestAPI_Client($restApiConnection);
 
-			// Create a vhost in RabbitMQ to separate this Enterprise installation from others.
-			// Note that this only works when we have access to the root vhost "/".
-			if( !$restClient->hasVirtualHost() ) {
-				if( $restClient->createVirtualHost() ) {
-					// Let's try to give ourselves admin access to the new vhost.
-					$adminPerms = new WW_Utils_RabbitMQ_RestAPI_Permissions();
-					$adminPerms->setFullAccess();
-					$restClient->setUserPermissions( $restApiConnection->User, $adminPerms );
-				}
-			}
+                // Create a vhost in RabbitMQ to separate this Enterprise installation from others.
+                // Note that this only works when we have access to the root vhost "/".
+                if (!$restClient->hasVirtualHost()) {
+                    if ($restClient->createVirtualHost()) {
+                        // Let's try to give ourselves admin access to the new vhost.
+                        $adminPerms = new WW_Utils_RabbitMQ_RestAPI_Permissions();
+                        $adminPerms->setFullAccess();
+                        $restClient->setUserPermissions($restApiConnection->User, $adminPerms);
+                    }
+                }
 
-			// Create queue dedicated for the client for which the messages arrive.
-			$response->MessageQueue = self::composeMessageQueueName( $response->Ticket );
-			$restClient->createQueue( $response->MessageQueue );
+                // Create queue dedicated for the client for which the messages arrive.
+                $response->MessageQueue = self::composeMessageQueueName($response->Ticket);
+                $restClient->createQueue($response->MessageQueue);
 
-			// Create exchange for system events.
-			$systemExchange = self::composeExchangeNameForSystem();
-			$restClient->createExchange( $systemExchange, self::getExchangeType() );
-			$restClient->createBindingBetweenQueueAndExchange( $response->MessageQueue, $systemExchange );
+                // Create exchange for system events.
+                $systemExchange = self::composeExchangeNameForSystem();
+                $restClient->createExchange($systemExchange, self::getExchangeType());
+                $restClient->createBindingBetweenQueueAndExchange($response->MessageQueue, $systemExchange);
 
-			// For each brand and overrule issue create an exchange in RabbitMQ.
-			$restExchanges = $restClient->listExchanges();
-			if( $response->Publications ) foreach( $response->Publications as $pubInfo ) {
-				$brandHasRegularIssues = false;
-				if( $pubInfo->PubChannels ) foreach( $pubInfo->PubChannels as $channelInfo ) {
-					if( $channelInfo->Issues ) foreach( $channelInfo->Issues as $issueInfo ) {
-						if( $issueInfo->OverrulePublication ) {
-							$issueExchange = self::composeExchangeNameForOverruleIssue( $issueInfo->Id );
-							if( !array_key_exists( $issueExchange, $restExchanges ) ) {
-								$restClient->createExchange( $issueExchange, self::getExchangeType() );
-								$restClient->createBindingBetweenQueueAndExchange( $response->MessageQueue, $issueExchange );
-							}
-						} else {
-							// We need to track if a brand has regular issues, because in the situation that it DOESN'T
-							// and all issues are overrule issues, we have to check if a user is authorized for the
-							// brand of the issues.
-							$brandHasRegularIssues = true;
-						}
-					}
-				}
+                // For each brand and overrule issue create an exchange in RabbitMQ.
+                $restExchanges = $restClient->listExchanges();
+                if ($response->Publications) foreach ($response->Publications as $pubInfo) {
+                    $brandHasRegularIssues = false;
+                    if ($pubInfo->PubChannels) foreach ($pubInfo->PubChannels as $channelInfo) {
+                        if ($channelInfo->Issues) foreach ($channelInfo->Issues as $issueInfo) {
+                            if ($issueInfo->OverrulePublication) {
+                                $issueExchange = self::composeExchangeNameForOverruleIssue($issueInfo->Id);
+                                if (!array_key_exists($issueExchange, $restExchanges)) {
+                                    $restClient->createExchange($issueExchange, self::getExchangeType());
+                                    $restClient->createBindingBetweenQueueAndExchange($response->MessageQueue, $issueExchange);
+                                }
+                            } else {
+                                // We need to track if a brand has regular issues, because in the situation that it DOESN'T
+                                // and all issues are overrule issues, we have to check if a user is authorized for the
+                                // brand of the issues.
+                                $brandHasRegularIssues = true;
+                            }
+                        }
+                    }
 
-				// Check whether the user has access to the brand. In the case of overrule issues, the brand of the
-				// overrule issue is added to the logon response regardless of whether the user is authorized to it.
-				// For this case it needs to be verified if the user actually is authorized.
-				$authorized = true;
-				// The amount of access rights checks should be limited as it could be expensive and overrule issues
-				// are an exceptional case in and of itself.
-				if( !$brandHasRegularIssues ) {
-					require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
-					$authorized = BizAccess::isUserAuthorizedForBrandAndIssue( (integer)BizSession::getUserInfo('id'), $pubInfo->Id, 0 );
-				}
+                    // Check whether the user has access to the brand. In the case of overrule issues, the brand of the
+                    // overrule issue is added to the logon response regardless of whether the user is authorized to it.
+                    // For this case it needs to be verified if the user actually is authorized.
+                    $authorized = true;
+                    // The amount of access rights checks should be limited as it could be expensive and overrule issues
+                    // are an exceptional case in and of itself.
+                    if (!$brandHasRegularIssues) {
+                        require_once BASEDIR . '/server/bizclasses/BizAccess.class.php';
+                        $authorized = BizAccess::isUserAuthorizedForBrandAndIssue((integer)BizSession::getUserInfo('id'), $pubInfo->Id, 0);
+                    }
 
-				$pubExchange = self::composeExchangeNameForPublication( $pubInfo->Id );
-				if( $authorized && !array_key_exists( $pubExchange, $restExchanges ) ) {
-					$restClient->createExchange( $pubExchange, self::getExchangeType() );
-					$restClient->createBindingBetweenQueueAndExchange( $response->MessageQueue, $pubExchange );
-				}
-			}
+                    $pubExchange = self::composeExchangeNameForPublication($pubInfo->Id);
+                    if ($authorized && !array_key_exists($pubExchange, $restExchanges)) {
+                        $restClient->createExchange($pubExchange, self::getExchangeType());
+                        $restClient->createBindingBetweenQueueAndExchange($response->MessageQueue, $pubExchange);
+                    }
+                }
 
-			$semaKey = self::getSemaphoreKey( $userId );
-			$rmqPassword = self::encryptPassword( $userId, $semaKey );
+                $semaKey = self::getSemaphoreKey($userId);
+                $rmqPassword = self::encryptPassword($userId, $semaKey);
 
-			// Create or update user in RabbitMQ to make sure client can log on with same password.
-			$restUser = new WW_Utils_RabbitMQ_RestAPI_User();
-			$restUser->Name = self::composeSessionUserName();
-			$restUser->Password = $rmqPassword;
-			$restUser->Tags = array(); // normal end-user has no tags (no privileges)
-			$restClient->createOrUpdateUser( $restUser );
+                // Create or update user in RabbitMQ to make sure client can log on with same password.
+                $restUser = new WW_Utils_RabbitMQ_RestAPI_User();
+                $restUser->Name = self::composeSessionUserName();
+                $restUser->Password = $rmqPassword;
+                $restUser->Tags = array(); // normal end-user has no tags (no privileges)
+                $restClient->createOrUpdateUser($restUser);
 
-			// Give user read access to the brand- and overrule issue exchanges in RabbitMQ.
-			$userRights = self::composePermissionRegExpression( $response->MessageQueue );
-			$restPerms = new WW_Utils_RabbitMQ_RestAPI_Permissions();
-			$restPerms->Read = $userRights;
-			//$restPerms->Write = $userRights; // queues are used for reading only
-			$restPerms->Configure = $userRights; // our RabbitMQ monitor uses STOMPWS which seems to (re)define queues, which requires config rights
-			$restClient->setUserPermissions( $restUser->Name, $restPerms );
+                // Give user read access to the brand- and overrule issue exchanges in RabbitMQ.
+                $userRights = self::composePermissionRegExpression($response->MessageQueue);
+                $restPerms = new WW_Utils_RabbitMQ_RestAPI_Permissions();
+                $restPerms->Read = $userRights;
+                //$restPerms->Write = $userRights; // queues are used for reading only
+                $restPerms->Configure = $userRights; // our RabbitMQ monitor uses STOMPWS which seems to (re)define queues, which requires config rights
+                $restClient->setUserPermissions($restUser->Name, $restPerms);
 
-			// Add all connections to the LogOnResponse.
-			foreach( $connections as $connection ) {
-				// For security reasons don't reveal the admin REST API connection or any non-public connections to the outside world.
-				if( $connection->Instance == 'RabbitMQ' && $connection->Public == true &&
-					( $connection->Protocol == 'AMQP' || $connection->Protocol == 'STOMPWS' ) ) {
-					$connection->User = self::composeSessionUserName();
-					$connection->Password = $rmqPassword;
-					$response->MessageQueueConnections[] = $connection;
-				}
-			}
+                // Add all connections to the LogOnResponse.
+                foreach ($connections as $connection) {
+                    // For security reasons don't reveal the admin REST API connection or any non-public connections to the outside world.
+                    if ($connection->Instance == 'RabbitMQ' && $connection->Public == true &&
+                        ($connection->Protocol == 'AMQP' || $connection->Protocol == 'STOMPWS')
+                    ) {
+                        $connection->User = self::composeSessionUserName();
+                        $connection->Password = $rmqPassword;
+                        $response->MessageQueueConnections[] = $connection;
+                    }
+                }
+            } catch ( BizException $e ) {
+                $response->MessageQueueConnections = null;
+            }
 		} else {
 			// Happens when on re-logon or RabbitMQ connection failure or when no REST client configured.
 			// In the last two cases we do not want the client to connect to RabbitMQ as well.
@@ -404,7 +411,8 @@ class BizMessageQueue
 		$client = null;
 		$connection = self::getConnection( 'RabbitMQ', 'AMQP', false );
 		if( $connection ) {
-			$map = new BizExceptionSeverityMap( ['S1144' => 'INFO'] );
+            /** @noinspection PhpUnusedLocalVariableInspection */
+            $map = new BizExceptionSeverityMap( ['S1144' => 'INFO'] );
 			try {
 				require_once BASEDIR . '/server/utils/rabbitmq/amqp/Client.class.php';
 				$client = new WW_Utils_RabbitMQ_AMQP_Client( $connection );
@@ -419,7 +427,8 @@ class BizMessageQueue
 				'No configuration found in MESSAGE_QUEUE_CONNECTIONS for RabbitMQ over AMQP.' );
 		}
 		if( $client ) {
-			$map = new BizExceptionSeverityMap( ['S1144' => 'INFO'] );
+            /** @noinspection PhpUnusedLocalVariableInspection */
+            $map = new BizExceptionSeverityMap( ['S1144' => 'INFO'] );
 			try {
 				$client->logOff();
 			} catch( BizException $e ) {}
@@ -440,7 +449,8 @@ class BizMessageQueue
 		if( !$restClient ) {
 			return;
 		}
-		$map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO', 'S1144' => 'INFO' ) );
+        /** @noinspection PhpUnusedLocalVariableInspection */
+        $map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO', 'S1144' => 'INFO' ) );
 			// L> Not all clients support RabbitMQ so HTTP 404 / "Record not (S1029)" found may happen.
 		foreach( $expiredTickets as $ticket ) {
 			$queueName = self::composeMessageQueueName( $ticket );
@@ -466,7 +476,7 @@ class BizMessageQueue
 		$expiredTickets = array();
 		require_once BASEDIR . '/server/dbclasses/DBTicket.class.php';
 		foreach( $queues as $queue ) {
-			$ticket = self::deriveTicketFromMesageQueueName( $queue );
+			$ticket = self::deriveTicketFromMessageQueueName( $queue );
 			if( $ticket ) {
 				$clientName = DBTicket::DBappticket( $ticket );
 				if( $clientName === false ) {
