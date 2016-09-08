@@ -156,6 +156,13 @@ class PlnPageValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'PageNumber' ) ) {
+			$validator->enterPath( 'PageNumber' );
+			if( !is_null( $datObj->PageNumber ) ) {
+				$validator->checkType( $datObj->PageNumber, 'string' );
+			}
+			$validator->leavePath();
+		}
 	}
 }
 
