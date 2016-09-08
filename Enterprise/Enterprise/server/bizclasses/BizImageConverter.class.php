@@ -97,54 +97,77 @@ class BizImageConverter
 			return false;
 		}
 
-		$supportedOutputFormats = $this->getSupportedOutputFormats( $channelId );
-
-		$connector = null;
-		foreach( $supportedOutputFormats as $outputFormat ) {
-			$connector = $this->getBestConnector( $this->inputImageAttachment->Type, $outputFormat );
-
-			// Stop looking the moment we found a connector for the wanted output format.
-			if( $connector != null ) {
-				break;
-			}
-		}
-		if( !$connector ) {
-			return false;
-		}
-
-		$outputFilePath = $this->createOutputFile(
-			$this->inputImageObject->MetaData->ContentMetaData->Format,
-			$this->inputImageObject->MetaData->BasicMetaData->Type ); // could be Image or Advert
-
-		$attachment = new Attachment();
-		$attachment->Type = 'image/jpeg';
-		$attachment->Rendition = 'output';
-		$attachment->FilePath = $outputFilePath;
-		$this->outputImageAttachment = $attachment;
-
-		BizServerPlugin::runConnector( $connector, 'resetOperations', array() );
-		BizServerPlugin::runConnector( $connector, 'setInputFilePath', array(
-			$this->inputImageAttachment->FilePath ) );
-		BizServerPlugin::runConnector( $connector, 'setOutputFilePath', array(
-			$this->outputImageAttachment->FilePath ) );
-		BizServerPlugin::runConnector( $connector, 'setInputDimension', array(
-			$this->inputImageProps['Width'], $this->inputImageProps['Height'], $this->inputImageProps['Dpi'] ) );
-		if( $placement->Width && $placement->Height ) {
-			if( $placement->ContentDx || $placement->ContentDy ||
+		// Collect all operations that need to be done on the image based on the placement data.
+		$conversionOperations = array();
+		if( $placement->Width && $placement->Height &&
+				( $placement->ContentDx || $placement->ContentDy ||
 				$this->inputImageProps['Width'] != $placement->Width ||
-				$this->inputImageProps['Height'] != $placement->Height
-			) {
-				$left = $placement->ScaleX ? -$placement->ContentDx / $placement->ScaleX : -$placement->ContentDx;
-				$top = $placement->ScaleY ? -$placement->ContentDy / $placement->ScaleY : -$placement->ContentDy;
-				$width = $placement->ScaleX ? $placement->Width / $placement->ScaleX : $placement->Width;
-				$height = $placement->ScaleY ? $placement->Height / $placement->ScaleY : $placement->Height;
-				BizServerPlugin::runConnector( $connector, 'crop', array( $left, $top, $width, $height, 'points' ) );
+				$this->inputImageProps['Height'] != $placement->Height ) ) {
+			$conversionOperations[] = 'crop';
+		}
+
+		// A scaling of 1 is 100%, which means no scaling is needed.
+		if( ($placement->ScaleX && $placement->ScaleX < 1) ||
+			 ($placement->ScaleY && $placement->ScaleX < 1) ) {
+			$conversionOperations[] = 'scale';
+		}
+
+		$conversionResult = false;
+		if( $conversionOperations ) {
+
+			$supportedOutputFormats = $this->getSupportedOutputFormats( $channelId );
+
+			$connector = null;
+			foreach( $supportedOutputFormats as $outputFormat ) {
+				$connector = $this->getBestConnector( $this->inputImageAttachment->Type, $outputFormat );
+
+				// Stop looking the moment we found a connector for the wanted output format.
+				if( $connector != null ) {
+					break;
+				}
 			}
+			if( !$connector ) {
+				return false;
+			}
+
+			$outputFilePath = $this->createOutputFile(
+				$this->inputImageObject->MetaData->ContentMetaData->Format,
+				$this->inputImageObject->MetaData->BasicMetaData->Type ); // could be Image or Advert
+
+			$attachment = new Attachment();
+			$attachment->Type = 'image/jpeg';
+			$attachment->Rendition = 'output';
+			$attachment->FilePath = $outputFilePath;
+			$this->outputImageAttachment = $attachment;
+
+			BizServerPlugin::runConnector( $connector, 'resetOperations', array() );
+			BizServerPlugin::runConnector( $connector, 'setInputFilePath', array(
+				$this->inputImageAttachment->FilePath ) );
+			BizServerPlugin::runConnector( $connector, 'setOutputFilePath', array(
+				$this->outputImageAttachment->FilePath ) );
+			BizServerPlugin::runConnector( $connector, 'setInputDimension', array(
+				$this->inputImageProps['Width'], $this->inputImageProps['Height'], $this->inputImageProps['Dpi'] ) );
+
+			foreach( $conversionOperations as $operation ) {
+				switch( $operation ) {
+					case 'crop':
+						$left = $placement->ScaleX ? -$placement->ContentDx / $placement->ScaleX : -$placement->ContentDx;
+						$top = $placement->ScaleY ? -$placement->ContentDy / $placement->ScaleY : -$placement->ContentDy;
+						$width = $placement->ScaleX ? $placement->Width / $placement->ScaleX : $placement->Width;
+						$height = $placement->ScaleY ? $placement->Height / $placement->ScaleY : $placement->Height;
+						BizServerPlugin::runConnector( $connector, 'crop', array( $left, $top, $width, $height, 'points' ) );
+						break;
+					case 'scale':
+						BizServerPlugin::runConnector( $connector, 'scale', array( $placement->ScaleX, $placement->ScaleY ) );
+						break;
+					default:
+						break;
+				}
+			}
+			$conversionResult = BizServerPlugin::runConnector( $connector, 'convertImage', array() );
 		}
-		if( $placement->ScaleX || $placement->ScaleY ) {
-			BizServerPlugin::runConnector( $connector, 'scale', array( $placement->ScaleX, $placement->ScaleY ) );
-		}
-		return BizServerPlugin::runConnector( $connector, 'convertImage', array() );
+
+		return $conversionResult;
 	}
 
 	/**
