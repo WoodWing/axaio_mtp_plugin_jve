@@ -66,10 +66,25 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 				$outputImage = imagecreatetruecolor( intval($this->outputWidth), intval($this->outputHeight) );
 				if( $outputImage ) {
 					if( $this->applyCrop || $this->applyScale || $this->applyResize ) {
+						// The crop window can be sticking out on any side of the input window. The imagecopyresampled() call
+						// would then make those parts black in the output image (crop), which is unwanted. ImageMagick will
+						// simply cut off all edges that are sticking out, and so the output image (crop) becomes smaller.
+						// Here we mimic that behaviour by recalculating the crop window to let imagecopyresampled() implicitly
+						// cut off the edges that are sticking out. (EN-87902)
+						$shiftRight = $this->cropLeft < 0 ? -$this->cropLeft : 0;
+						$shiftDown = $this->cropTop < 0 ? -$this->cropTop : 0;
+						$cropLeft = $this->cropLeft + $shiftRight;
+						$cropTop = $this->cropTop + $shiftDown;
+						$cropWidth = $this->cropWidth + $shiftRight;
+						$cropHeight = $this->cropHeight + $shiftDown;
+						$cropWidth = min( $cropWidth, $this->inputWidth -$cropLeft );
+						$cropHeight = min( $cropHeight, $this->inputHeight - $cropTop );
+						$outputWidth = min( $this->outputWidth, $cropWidth );
+						$outputHeight = min( $this->outputHeight, $cropHeight );
 						imagecopyresampled(
-							$outputImage, $inputImage,
-							0, 0, $this->cropLeft, $this->cropTop,
-							$this->outputWidth, $this->outputHeight, $this->cropWidth, $this->cropHeight );
+							$outputImage, $inputImage, // dst, src
+							0, 0, $cropLeft, $cropTop, // (dst_x, dst_y), (src_x, src_y),
+							$outputWidth, $outputHeight, $cropWidth, $cropHeight ); // (dst_w, dst_h), (src_w, src_h)
 					}
 					if( $this->applyMirror ) {
 						if( $this->mirrorHorizontal && $this->mirrorVertical ) {
