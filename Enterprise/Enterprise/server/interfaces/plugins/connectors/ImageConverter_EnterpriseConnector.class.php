@@ -31,8 +31,11 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 	/** @var integer $inputHeight Height in pixels of the input image. */
 	protected $inputHeight;
 
-	/** @var integer $inputDpi Pixel density (DPI) of the input image.  */
+	/** @var float $inputDpi Pixel density (DPI) of the input image.  */
 	protected $inputDpi;
+
+	/** @var float $outputDpi Pixel density (DPI) of the output image.  */
+	protected $outputDpi;
 
 	/** @var float $pt2pxFactor Calculated factor used to convert points to pixels.  */
 	private $pt2pxFactor;
@@ -116,15 +119,27 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 	 *
 	 * @param integer $width Number of horizontal pixels.
 	 * @param integer $height Number of vertical pixels.
-	 * @param integer $dpi Number of pixels per inch.
+	 * @param float $dpi Number of pixels per inch.
 	 */
 	public function setInputDimension( $width, $height, $dpi )
 	{
 		$this->inputWidth = $width;
 		$this->inputHeight = $height;
 		$this->inputDpi = $dpi;
+		$this->recalcOutputDpi();
 		$this->pt2pxFactor = $dpi / 72; // assumption: 72 points per inch
 		$this->resetOperations();
+	}
+
+	/**
+	 * Defines the DPI of the output image.
+	 *
+	 * @param float $dpi Number of pixels per inch.
+	 */
+	public function setOutputDpi( $dpi )
+	{
+		$this->outputDpi = $dpi;
+		$this->recalcOutputDpi();
 	}
 
 	/**
@@ -316,7 +331,21 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 		}
 	}
 
-	// Candidate functions: resize, mirror, rotate
+	/**
+	 * Adjusts the outputDpi based on inputDpi avoiding getting more pixels out than available.
+	 *
+	 * Should be called whenever inputDpi or outputDpi is changed.
+	 */
+	private function recalcOutputDpi()
+	{
+		if( $this->inputDpi && $this->outputDpi ) {
+			$this->outputDpi = min( $this->outputDpi, $this->inputDpi );
+		} elseif( $this->inputDpi ) {
+			$this->outputDpi = $this->inputDpi;
+		} else {
+			$this->outputDpi = null;
+		}
+	}
 
 	/**
 	 * Executes all image conversion operations (as defined before) at once.

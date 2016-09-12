@@ -619,7 +619,14 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	/**
 	 * Returns a list of the supported output image file formats (in their MIME format).
 	 *
-	 * @since 10.1
+	 * When one of the formats matches with any of the supported formats of the installed image converters,
+	 * that format is picked for image conversion. (Note that image converters implement the
+	 * ImageConverter_EnterpriseConnector interface.)
+	 *
+	 * Note that images may only be converted when doesSupportCropping() returns true and when detected
+	 * is that the image is scaled or cropped on the publish form.
+	 *
+	 * @since 10.1.0
 	 * @return array
 	 */
 	public function getFileFormatsForOutputImage()
@@ -628,9 +635,12 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	}
 
 	/**
-	 * The function tells whether the plugin ( Channel specific ) supports the image cropping feature.
+	 * Tells whether the plugin supports the image cropping feature for this publication channel.
 	 *
-	 * @since 10.1
+	 * When supported, clients will enable this feature in the UI to let the user scale and crop
+	 * the images that are placed on publish forms (that are targeted to this publication channel).
+	 *
+	 * @since 10.1.0
 	 * @return boolean TRUE when the channel plugin supports the feature; FALSE (default) otherwise.
 	 */
 	public function doesSupportCropping()
@@ -639,9 +649,18 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	}
 
 	/**
-	 * Returns the DPI for the output image based on the image metadata.
+	 * Returns the DPI to apply to the images published for this channel (when conversion is needed).
 	 *
-	 * @since 10.1
+	 * When images needs conversion (crop, scale, etc) the created output image will have this DPI.
+	 * Note that the "PHP Preview and Metadata" server plugin does not support this feature, but the
+	 * "ImageMagick Preview and Metadata" plugin does.
+	 *
+	 * When the connector does not overrule/implement this function, a default of 72 DPI is taken.
+	 * Note that images may only be converted when doesSupportCropping() returns true and when detected
+	 * is that the image is scaled or cropped on the publish form. Image conversion is NOT triggered
+	 * when the original image has different DPI than this function returns.
+	 *
+	 * @since 10.1.0
 	 * @return double
 	 */
 	public function getDpiForOutputImage()

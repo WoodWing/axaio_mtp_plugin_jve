@@ -153,6 +153,7 @@ class BizImageConverter
 	 */
 	public function cropAndScaleImageByPlacement( Placement $placement, $channelId )
 	{
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		if( !$this->inputImageAttachment || !$this->inputImageProps ) {
 			return false;
 		}
@@ -199,6 +200,8 @@ class BizImageConverter
 			$this->outputImageAttachment->FilePath ) );
 		BizServerPlugin::runConnector( $connector, 'setInputDimension', array(
 			$this->inputImageProps['Width'], $this->inputImageProps['Height'], $this->inputImageProps['Dpi'] ) );
+		BizServerPlugin::runConnector( $connector, 'setOutputDpi', array(
+			$this->getDpiForOutputImage( $channelId ) ) );
 
 		foreach( $conversionOperations as $operation ) {
 			switch( $operation ) {
@@ -227,12 +230,21 @@ class BizImageConverter
 	 */
 	private function getSupportedOutputFormats( $channelId )
 	{
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		$outputFileFormats = BizServerPlugin::runChannelConnector( $channelId, 'getFileFormatsForOutputImage', array() );
-		if( is_array($outputFileFormats) ) {
-			return $outputFileFormats;
-		} else {
-			return null;
-		}
+		return is_array($outputFileFormats) ? $outputFileFormats : null;
+	}
+
+	/**
+	 * Requests the Publishing connector for the DPI to be used for image conversions for a given publication channel.
+	 *
+	 * @param integer $channelId The ID of the Publication channel.
+	 * @return double|null The DPI when connector found, else NULL.
+	 */
+	private function getDpiForOutputImage( $channelId )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+		return BizServerPlugin::runChannelConnector( $channelId, 'getDpiForOutputImage', array() );
 	}
 
 	/**

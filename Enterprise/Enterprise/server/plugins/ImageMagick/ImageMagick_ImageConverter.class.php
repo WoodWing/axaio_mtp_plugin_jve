@@ -141,7 +141,8 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 		$this->addCmdParam( 'layers', 'merge' );
 		$this->addCmdParam( 'depth', '8' );
 		$this->addCmdParam( 'strip' );
-		$this->addCmdParam( 'density', '72x72' );
+		$this->addCmdParam( 'units', 'PixelsPerInch' ); // used conjunction with 'density' param
+		$this->addCmdParam( 'density', $this->outputDpi );
 	}
 
 	/**
