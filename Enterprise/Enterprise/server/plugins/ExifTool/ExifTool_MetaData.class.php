@@ -16,7 +16,12 @@
  * - http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/IPTC.html
  * - http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/Photoshop.html
  *
- * For most properties, it uses the following fallback path: File => XMP => EXIF => IPTC => Photoshop
+ * For most properties, it uses the following fallback path: File => EXIF => IPTC => Photoshop => XMP
+ *
+ * The reason to put XMP at the end of the fallback is that:
+ * - when Adobe ID/PS does update XMP, it updates EXIF/IPTC too
+ * - when 3rd party image tool (e.g. Claro) does not support XMP, it updates EXIF/IPTC only
+ * So EXIF/IPTC is more 'reliable' than XMP.
  *
  * Mapping to Enterprise properties: https://helpcenter.woodwing.com/hc/en-us/articles/209991626
  */
@@ -200,21 +205,21 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 	{
 		$this->determineDimensionAndResolutionProperties();
 
-		$this->mapFieldValue( 'XMP', 'Author', 'Author', array( $this, 'castToUtf8String' ) );
-		$this->mapFieldValue( 'EXIF', 'OwnerName', 'Author', array( $this, 'castToUtf8String' ) ); // v10.1
+		$this->mapFieldValue( 'EXIF', 'Artist', 'Author', array( $this, 'castToUtf8String' ) );
 		$this->mapFieldValue( 'IPTC', 'By-line', 'Author', array( $this, 'castToUtf8String' ) );
+		$this->mapFieldValue( 'XMP', 'Creator', 'Author', array( $this, 'castToUtf8String' ) );
 
 		// v10.1: The format of the two date fields below differ from xsd:datetime and are not converted properly.
 		//        The core server overwrites the creation time stamp anyway, so let's skip them here.
-		//$this->mapFieldValue( 'XMP', 'CreateDate', 'Created', array( $this, 'castToUtf8String' ) );
 		//$this->mapFieldValue( 'IPTC', 'DateCreated', 'Created', array( $this, 'castToUtf8String' ) );
+		//$this->mapFieldValue( 'XMP', 'CreateDate', 'Created', array( $this, 'castToUtf8String' ) );
 
-		$this->mapFieldValue( 'XMP', 'Credit', 'Credit', array( $this, 'castToUtf8String' ) );
 		$this->mapFieldValue( 'IPTC', 'Credit', 'Credit', array( $this, 'castToUtf8String' ) );
+		$this->mapFieldValue( 'XMP', 'Credit', 'Credit', array( $this, 'castToUtf8String' ) );
 
-		$this->mapFieldValue( 'XMP', 'ColorMode', 'ColorSpace', array( $this, 'castColorModeToColorSpace' ) );
 		$this->mapFieldValue( 'EXIF', 'ColorSpace', 'ColorSpace', array( $this, 'castToColorSpace' ) );
 												// L> v10.1: improved (used to be: IsColor == 1 ? 'RGB' : 'CMYK')
+		$this->mapFieldValue( 'XMP', 'ColorMode', 'ColorSpace', array( $this, 'castColorModeToColorSpace' ) );
 
 		$this->mapFieldValue( 'XMP', 'Instructions', 'Comment', array( $this, 'castToUtf8String' ) );
 
@@ -222,20 +227,20 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 		//$this->mapFieldValue( 'EXIF', 'UserComment', 'Comment', array( $this, 'castToUtf8String' ) );
 		$this->mapFieldValue( 'IPTC', 'SpecialInstructions', 'Comment', array( $this, 'castToUtf8String' ) );
 
-		$this->mapFieldValue( 'XMP', 'DocumentID', 'DocumentID', array( $this, 'castToUtf8String' ) );
 		$this->mapFieldValue( 'IPTC', 'UniqueObjectName', 'DocumentID', array( $this, 'castToUtf8String' ) );
+		$this->mapFieldValue( 'XMP', 'DocumentID', 'DocumentID', array( $this, 'castToUtf8String' ) );
 
-		$this->mapFieldValue( 'XMP', 'Description', 'Description', array( $this, 'castToUtf8String' ) );
 		$this->mapFieldValue( 'EXIF', 'Description', 'Description', array( $this, 'castToUtf8String' ) );
 		$this->mapFieldValue( 'IPTC', 'Caption-Abstract', 'Description', array( $this, 'castToUtf8String' ) );
+		$this->mapFieldValue( 'XMP', 'Description', 'Description', array( $this, 'castToUtf8String' ) );
 
-		$this->mapFieldValue( 'XMP', 'CaptionWriter', 'DescriptionAuthor', array( $this, 'castToUtf8String' ) );
 		$this->mapFieldValue( 'IPTC', 'Writer-Editor', 'DescriptionAuthor', array( $this, 'castToUtf8String' ) );
+		$this->mapFieldValue( 'XMP', 'CaptionWriter', 'DescriptionAuthor', array( $this, 'castToUtf8String' ) );
 
-		$this->mapFieldValue( 'XMP', 'Copyright', 'Copyright', array( $this, 'castToUtf8String' ) );
-		$this->mapFieldValue( 'XMP', 'Rights', 'Copyright', array( $this, 'castToUtf8String' ) );
 		$this->mapFieldValue( 'EXIF', 'Copyright', 'Copyright', array( $this, 'castToUtf8String' ) );
 		$this->mapFieldValue( 'IPTC', 'CopyrightNotice', 'Copyright', array( $this, 'castToUtf8String' ) );
+		$this->mapFieldValue( 'XMP', 'Copyright', 'Copyright', array( $this, 'castToUtf8String' ) );
+		$this->mapFieldValue( 'XMP', 'Rights', 'Copyright', array( $this, 'castToUtf8String' ) );
 
 		$this->mapFieldValue( 'XMP', 'WebStatement', 'CopyrightURL', array( $this, 'castToUtf8String' ) );
 
@@ -246,21 +251,21 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 		$this->mapFieldValue( 'File', 'MIMEType', 'Format', array( $this, 'castToFileFormatWhenKnown' ) );
 		$this->mapFieldValue( 'XMP', 'Format', 'Format', array( $this, 'castToFileFormatWhenKnown' ) );
 
+		$this->mapFieldValue( 'IPTC', 'Keywords', 'Keywords', array( $this, 'castToListOfUtf8String' ) );
 		$this->mapFieldValue( 'XMP', 'Keywords', 'Keywords', array( $this, 'castToListOfUtf8String' ) );
 		$this->mapFieldValue( 'XMP', 'Keyword', 'Keywords', array( $this, 'castToListOfUtf8String' ) ); // v10.1
 		$this->mapFieldValue( 'XMP', 'Subject', 'Keywords', array( $this, 'castToListOfUtf8String' ) ); // v10.1
-		$this->mapFieldValue( 'IPTC', 'Keywords', 'Keywords', array( $this, 'castToListOfUtf8String' ) );
 
 		// Make sure that Rating is an integer (BZ#35029).
 		// XMP->Rating supports [0-5] and -1 for rejected. Enterprise supports unsignedInt only (see WSDL).
 		// Since v10.1 the -1 value won't be accepted (becomes null).
 		$this->mapFieldValue( 'XMP', 'Rating', 'Rating', array( $this, 'castToIntegerWhenZeroOrPositive' ) );
 
-		$this->mapFieldValue( 'XMP', 'Headline', 'Slugline', array( $this, 'castToUtf8String' ) );
 		$this->mapFieldValue( 'IPTC', 'Headline', 'Slugline', array( $this, 'castToUtf8String' ) );
+		$this->mapFieldValue( 'XMP', 'Headline', 'Slugline', array( $this, 'castToUtf8String' ) );
 
-		$this->mapFieldValue( 'XMP', 'Source', 'Source', array( $this, 'castToUtf8String' ) );
 		$this->mapFieldValue( 'IPTC', 'Source', 'Source', array( $this, 'castToUtf8String' ) );
+		$this->mapFieldValue( 'XMP', 'Source', 'Source', array( $this, 'castToUtf8String' ) );
 
 		$this->mapFieldValue( 'IPTC', 'Urgency', 'Urgency', array( $this, 'castToUtf8String' ) ); // number [0-9] to string
 	}
@@ -273,14 +278,14 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 		// Determine width and height. Preference: File => XMP => EXIF => Photoshop
 		list( $fileHeight, $fileWidth ) = $this->mapFieldPairValues( 'File', 'ImageHeight', 'ImageWidth',
 			'Height', 'Width', array( $this, 'castToFloatWhenPositive' ) );
-		list( $xmpImageHeight, $xmpImageWidth ) = $this->mapFieldPairValues( 'XMP', 'ImageHeight', 'ImageWidth',
-			'Height', 'Width', array( $this, 'castToFloatWhenPositive' ) );
 		list( $exifImageHeight, $exifImageWidth ) = $this->mapFieldPairValues( 'EXIF', 'ExifImageHeight', 'ExifImageWidth',
 			'Height', 'Width', array( $this, 'castToFloatWhenPositive' ) );
 		// L> Note that ExifTool returns ExifImageWidth/ExifImageHeight which are specified as PixelXDimension/PixelYDimension.
 		list( $psImageHeight, $psImageWidth ) = $this->mapFieldPairValues( 'Photoshop', 'ImageHeight', 'ImageWidth',
 			'Height', 'Width', array( $this, 'castToFloatWhenPositive' ) );
 		list( $pngImageHeight, $pngImageWidth ) = $this->mapFieldPairValues( 'PNG', 'ImageHeight', 'ImageWidth',
+			'Height', 'Width', array( $this, 'castToFloatWhenPositive' ) );
+		list( $xmpImageHeight, $xmpImageWidth ) = $this->mapFieldPairValues( 'XMP', 'ImageHeight', 'ImageWidth',
 			'Height', 'Width', array( $this, 'castToFloatWhenPositive' ) );
 
 		if( LogHandler::debugMode() ) {
@@ -301,22 +306,6 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 		// find out which information is most reliable. For that we take the width and height. So in the example, when the
 		// ExifImageHeight and ExifImageWidth are not matching with the width and height resolved from the image format ('File' tag)
 		// then we assume EXIF is -not- updated and so we also do -not- use its XResolution to determine the DPI value.
-
-		// XMP
-		if( !isset($this->entMetaData[ 'Dpi' ]) ) {
-			if( $xmpImageHeight == $this->entMetaData['Height'] && $xmpImageWidth == $this->entMetaData['Width'] ) { // XMP reliable?
-				$xmpXResolution = $this->mapFieldValue( 'XMP', 'XResolution', null, array( $this, 'castToFloatWhenPositive' ) );
-				if( $xmpXResolution ) {
-					// XMP: Unit of XResolution/YResolution: '1' = no-unit, '2' = inches, '3' = centimeters.
-					$xmpResolutionUnit = $this->mapFieldValue( 'XMP', 'ResolutionUnit', null, array( $this, 'castToIntegerWhenPositive' ) );
-					$xmpXResolution = $this->convertResolutionToInches( $xmpXResolution, $xmpResolutionUnit );
-					if( $xmpXResolution ) {
-						$this->entMetaData['Dpi'] = $xmpXResolution;
-						LogHandler::Log( 'ExifTool', 'DEBUG', 'Derived DPI from XMP: '.$this->entMetaData['Dpi'] );
-					}
-				}
-			}
-		}
 
 		// EXIF
 		if( !isset($this->entMetaData[ 'Dpi' ]) ) {
@@ -345,6 +334,22 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 					if( $psXResolution ) {
 						$this->entMetaData['Dpi'] = $psXResolution;
 						LogHandler::Log( 'ExifTool', 'DEBUG', 'Derived DPI from Photoshop: '.$this->entMetaData['Dpi'] );
+					}
+				}
+			}
+		}
+
+		// XMP
+		if( !isset($this->entMetaData[ 'Dpi' ]) ) {
+			if( $xmpImageHeight == $this->entMetaData['Height'] && $xmpImageWidth == $this->entMetaData['Width'] ) { // XMP reliable?
+				$xmpXResolution = $this->mapFieldValue( 'XMP', 'XResolution', null, array( $this, 'castToFloatWhenPositive' ) );
+				if( $xmpXResolution ) {
+					// XMP: Unit of XResolution/YResolution: '1' = no-unit, '2' = inches, '3' = centimeters.
+					$xmpResolutionUnit = $this->mapFieldValue( 'XMP', 'ResolutionUnit', null, array( $this, 'castToIntegerWhenPositive' ) );
+					$xmpXResolution = $this->convertResolutionToInches( $xmpXResolution, $xmpResolutionUnit );
+					if( $xmpXResolution ) {
+						$this->entMetaData['Dpi'] = $xmpXResolution;
+						LogHandler::Log( 'ExifTool', 'DEBUG', 'Derived DPI from XMP: '.$this->entMetaData['Dpi'] );
 					}
 				}
 			}
