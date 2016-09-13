@@ -157,6 +157,8 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		// Remove temp files from transfer server folder as prepared by getFormFields().
 		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
 
+		BizPublishForm::cleanupPlacedFilesCreatedByConversion( $publishForm );
+
 		// Re-throw publish error caught before.
 		if( $e ) {
 			throw $e;

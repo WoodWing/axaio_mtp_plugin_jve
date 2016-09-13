@@ -195,6 +195,9 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				}
 			}
 
+			//Remove any images that are temporarily saved during image conversion.
+			BizPublishForm::cleanupPlacedFilesCreatedByConversion( $publishForm );
+
 			if( isset( $uploadImagesResult['attachments'] ) ) {
 				$attachments = $uploadImagesResult['attachments'];
 				$pattern = '/<img[^>]*id=\"ent_([^\"]*)[^>]*src=\"([^\"]*)[^>]*>/i';
@@ -620,6 +623,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $publishForm PublishForm object.
 	 * @param Object $featuredImage Original image object to be uploaded. Contains all metadata.
 	 * @param Placement|null $convertedPlacement The converted image, if any conversion has been done for it. If not this property is null.
+	 * @return External id of the uploaded image.
 	 * @throws BizException when communicating with WordPress returns an error.
 	 */
 	private function handleFeaturedImage( $clientWordPress, $publishForm, $featuredImage, $convertedPlacement )

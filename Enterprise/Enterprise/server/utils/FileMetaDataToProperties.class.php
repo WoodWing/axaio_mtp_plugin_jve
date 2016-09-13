@@ -3,12 +3,16 @@
  * @package 	Enterprise
  * @subpackage 	utils
  * @since 		v9.7
+ * @deprecated v10.1.0 This file is deprecated and should be removed with v11.
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  *
  * Includes two wrapper classes; one for the convert XMP metadata class and one for the convert IPTC metadata class.
  * Also includes a factory class to create the one of those wrapper classes.
  */
 
+/**
+ * @deprecated v10.1.0 This class is deprecated and should be removed with v11.
+ */
 class WW_Utils_FileMetaDataToProperties_Factory
 {
 	/**
@@ -30,6 +34,9 @@ class WW_Utils_FileMetaDataToProperties_Factory
 	}
 }
 
+/**
+ * @deprecated v10.1.0 This class is deprecated and should be removed with v11.
+ */
 abstract class WW_Utils_FileMetaDataToProperties
 {
 
@@ -42,6 +49,9 @@ abstract class WW_Utils_FileMetaDataToProperties
 	abstract public function convert( $imageMetaData, &$metaData );
 }
 
+/**
+ * @deprecated v10.1.0 This class is deprecated and should be removed with v11.
+ */
 class WW_Utils_FileIPTCDataToProperties extends  WW_Utils_FileMetaDataToProperties
 {
 	/**
@@ -101,7 +111,9 @@ class WW_Utils_FileIPTCDataToProperties extends  WW_Utils_FileMetaDataToProperti
 	}
 }
 
-
+/**
+ * @deprecated v10.1.0 This class is deprecated and should be removed with v11.
+ */
 class WW_Utils_FileXMPDataToProperties extends  WW_Utils_FileMetaDataToProperties
 {
 	/**
