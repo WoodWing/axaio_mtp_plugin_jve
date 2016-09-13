@@ -112,6 +112,23 @@ class BizPublishForm
 	}
 
 	/**
+	 * Removes all files from the tempfolder that were converted by the image converter and placed on the publish form.
+	 *
+	 * @param Object $publishForm The publishform containing all images.
+	 */
+	static public function cleanupPlacedFilesCreatedByConversion( $publishForm )
+	{
+		if( $publishForm->Relations ) foreach( $publishForm->Relations as $relation ) {
+			foreach( $relation->Placements as $placement ) {
+				//ImageCropAttachment == ConvertedImageToPublish->Attachment
+				if( isset($placement->ConvertedImageToPublish) && file_exists( $placement->ConvertedImageToPublish->Attachment->FilePath ) ) {
+					unlink( $placement->ConvertedImageToPublish->Attachment->FilePath );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Returns the requested field by name from the PublishForm.
 	 *
 	 * First checks the Objects MetaData to find the field, if found it is returned to the user. If the field could not

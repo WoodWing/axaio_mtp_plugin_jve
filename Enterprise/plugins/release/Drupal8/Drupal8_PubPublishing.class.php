@@ -280,6 +280,8 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 		// Handle attachments to be uploaded to Drupal.
 		//Todo: stream attachments instead of loading them in memory.
 
+		// Contains filepaths to temporary files which will be overwritten during the for loop. They are needed so they can be removed from tmp.
+		$tempFilePaths = array();
 		foreach ($values as $field => $value) {
 			// Handle normal file attachments, for example for a file selector or layout.
 			$contentType = $values[ WW_Plugins_Drupal8_Utils::DRUPAL8_CONTENT_TYPE ][0];
@@ -295,6 +297,7 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 				if( isset( $value[0]['attachments'] ) ) foreach( $value[0]['attachments'] as $key => $attachment ) {
 					$fileId = $drupalXmlRpcClient->uploadAttachment( $attachment, $key, $field, $contentType );
 					$fileIds[ $key ] = $fileId;
+					$tempFilePaths[] = $attachment->FilePath;
 				}
 				// Set the fileIds (EnterpriseObjectId => DrupalFileId) as attachments on the value.
 				$value[0]['attachments'] = $fileIds;
@@ -408,6 +411,13 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 				unset( $values[ $field.'_SUM' ] );
 			}
 		}
+
+		BizPublishForm::cleanupPlacedFilesCreatedByConversion( $publishForm );
+
+		if( $tempFilePaths ) foreach( $tempFilePaths as $tempFilePath ) {
+			unlink( $tempFilePath );
+		}
+
 		return $values;
 	}
 

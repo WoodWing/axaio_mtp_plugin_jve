@@ -75,6 +75,7 @@ class Twitter_PubPublishing extends PubPublishing_EnterpriseConnector
 	    try {
 		    $twitter = $twitConn->getTwitter( $publishTarget->IssueID );
 		    $mediaIds = array();
+		    $mediaIdsString = '';
 		    if( $mediaFiles ) {
 			    foreach( $mediaFiles as $mediaFile ) {
 				    $mediaIds[] = $twitter->statusesUploadMedia( $mediaFile );
@@ -87,6 +88,9 @@ class Twitter_PubPublishing extends PubPublishing_EnterpriseConnector
 
 	    // Remove temp files from transfer server folder as prepared by getFormFields().
 	    BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
+
+	    //Remove any converted images that are saved in the
+	    BizPublishForm::cleanupPlacedFilesCreatedByConversion( $publishForm );
 
 	    // Re-throw Twitter error caught before.
 	    if( $e ) {
