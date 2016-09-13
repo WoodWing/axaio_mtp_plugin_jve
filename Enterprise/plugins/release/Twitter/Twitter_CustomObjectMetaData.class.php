@@ -113,7 +113,7 @@ class Twitter_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConnec
 
 	/**
 	 * Returns one of the properties or null if not found
-	 * @param type $name The property to search for
+	 * @param string $name The property to search for
 	 * @return null
 	 */
 	public function getProperty($name)
