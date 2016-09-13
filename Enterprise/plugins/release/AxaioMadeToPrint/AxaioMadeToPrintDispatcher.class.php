@@ -4,9 +4,9 @@
  * checking trigger and output files to MadeToPrint.
  *
  * The Methods can be customized by hooks in the AxaioMadeToPrintCustomize
- * class, which are called from within here. If you need additional hooking 
+ * class, which are called from within here. If you need additional hooking
  * points, please report to <support@axaio.com>.
- * 
+ *
  * @copyright (c) 2015, axaio software GmbH
  * @author René Treuber <support@axaio.com>
  * @package AxaioMadeToPrint
@@ -20,7 +20,7 @@ class AxaioMadeToPrintDispatcher
 	private function __construct() {}
 	private function __destruct() {}
 	private function __copy() {}
-	
+
 	private static function domAddElement($dom, $parentNode, $name, $value)
 	{
 		$node = $dom->createElement($name);
@@ -52,11 +52,11 @@ class AxaioMadeToPrintDispatcher
 		$dbDriver->query($sql);
 		*/
 
-		// Quit when MtP job has failed		
+		// Quit when MtP job has failed
 		if( $success != 1 ) {
 			LogHandler::Log( 'mtp', 'ERROR', 'postProcess: MtP failed with message: '.$message );
 		}
-		
+
 		// Get current object comment
 		$dbobjects = $dbDriver->tablename("objects");
 		$sql = 'select `comment` from '.$dbobjects.' where `id`='.$layoutId;
@@ -66,9 +66,8 @@ class AxaioMadeToPrintDispatcher
 			LogHandler::Log( 'mtp', 'ERROR', 'postProcess: Could not find layout. Id='.$layoutId );
 			return;
 		}
-		$comment = $res['comment'];
 
-        
+
 		// Add MtP job notification to the layout's comment
 		if( $layEditionId > 0 ) {
 			require_once BASEDIR . '/server/dbclasses/DBEdition.class.php';
@@ -77,10 +76,7 @@ class AxaioMadeToPrintDispatcher
 		} else {
 			$editionTxt = '';
 		}
-		$comment = '[MTP'.(isset($servername)?' '.$servername.' ':' ').date('Y-m-d H:i:s', time()). '] '.$editionTxt.$message."\n".$comment;
 
-        self::customize('postProcess_filterComment', $comment, $layoutId, $layStatusId, $layEditionId, $success); 
-   
 		// Get MtP configuration record for the layout trigger status
 		$mtpConfig = self::getMtpConfig( $layStatusId );
 		if( !$mtpConfig ) {
@@ -93,7 +89,7 @@ class AxaioMadeToPrintDispatcher
 		$errstatelayout  = $mtpConfig['state_error_layout'];
 		$doUpdateComment = (!$mtpConfig['quiet'])?true:false;
 
-		require_once BASEDIR . '/server/bizclasses/BizObject.class.php'; 
+		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 		$updatedObjects = array();
 		// Update article/image status
 		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
@@ -102,17 +98,17 @@ class AxaioMadeToPrintDispatcher
 			$childIds = self::getPlacedChilds( $layoutId );
 			foreach( $childIds as $childId ) {
 				$objType = self::getObjectType( $childId );
-				
-				$refstate = 0;				
+
+				$refstate = 0;
 				if( $objType == 'Image' ) {
-					$refstate = $refstateimage;				
+					$refstate = $refstateimage;
 				} elseif( $objType == 'Article') {
 					$refstate = $refstatearticle;
 				}
-				
-				if( $refstate != 0 ){					
+
+				if( $refstate != 0 ){
 					$newRouteTo = BizWorkflow::doGetDefaultRouting( $mtpConfig['publication_id'], $mtpConfig['issue_id'], null, $refstate );
-					if( $newRouteTo ){ 
+					if( $newRouteTo ){
 						// BZ##4729: Adding routeTo into update as well.
 						DBBase::updateRow( 'objects', array( 'routeto' => $newRouteTo, 'state' => $refstate ), "`id` = $childId");
 					}else {
@@ -122,45 +118,55 @@ class AxaioMadeToPrintDispatcher
 				}
 			}
 		}
-		
+
+		$comment = '[MTP' . (isset($servername) ? ' ' . $servername . ' ' : ' ') . date('Y-m-d H:i:s', time()) . '] ' . $editionTxt . $message . "\n" . $res['comment'];
+		$commentinfo = array( 'servername' => $servername
+		, 'editionTxt' => $editionTxt
+		, 'message'    => $message
+		, 'comment'    => $res['comment']
+		, 'success'    => $success
+		);
+		self::customize('postProcess_filterComment', $comment, $layoutId, $layStatusId, $layEditionId, $success, $mtpConfig, $commentinfo);
+
 		// Update layout status and comment
-		if($refstatelayout != 0 && $success == 1){			
+		if($refstatelayout != 0 && $success == 1){
 			$newRouteTo = BizWorkflow::doGetDefaultRouting( $mtpConfig['publication_id'], $mtpConfig['issue_id'], null, $refstatelayout );
 			if( $newRouteTo ){
-                if($doUpdateComment) {
-                    DBBase::updateRow( 'objects', array( 'state' => $refstatelayout, 'routeto' => $newRouteTo, 'comment' => $comment ), "`id` = $layoutId");
-                } else {
-                    DBBase::updateRow( 'objects', array( 'state' => $refstatelayout, 'routeto' => $newRouteTo ), "`id` = $layoutId");
-                }
+				if($doUpdateComment) {
+					DBBase::updateRow( 'objects', array( 'state' => $refstatelayout, 'routeto' => $newRouteTo, 'comment' => $comment ), "`id` = $layoutId");
+				} else {
+					DBBase::updateRow( 'objects', array( 'state' => $refstatelayout, 'routeto' => $newRouteTo ), "`id` = $layoutId");
+				}
 			}else{
-                if($doUpdateComment) {
-    				DBBase::updateRow( 'objects', array( 'state' => $refstatelayout, 'comment' => $comment ), "`id` = $layoutId");                
-                } else {
-                    DBBase::updateRow( 'objects', array( 'state' => $refstatelayout ), "`id` = $layoutId");
-                }
+				if($doUpdateComment) {
+					DBBase::updateRow( 'objects', array( 'state' => $refstatelayout, 'comment' => $comment ), "`id` = $layoutId");
+				} else {
+					DBBase::updateRow( 'objects', array( 'state' => $refstatelayout ), "`id` = $layoutId");
+				}
 			}
 		}else{
-            if($doUpdateComment) {
-                DBBase::updateRow( 'objects', array( 'comment' => $comment ), "`id` = $layoutId");
-            }
+			if($doUpdateComment) {
+				DBBase::updateRow( 'objects', array( 'comment' => $comment ), "`id` = $layoutId");
+			}
 		}
-        if($success != 1 && $errstatelayout != 0) {
-            DBBase::updateRow( 'objects', array( 'state' => $errstatelayout), "`id` = $layoutId");
-        }
-		
+		if($success != 1 && $errstatelayout != 0) {
+			DBBase::updateRow( 'objects', array( 'state' => $errstatelayout), "`id` = $layoutId");
+		}
+
 		// Add to search index:
 		$updatedObjects[] = BizObject::getObject($layoutId, AXAIO_MTP_USER, false, 'none', array('Targets','MetaData', 'Relations'), null, false);
 		require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
 		BizSearch::indexObjects( $updatedObjects );
-		
-		self::customize('postProcess_updatedObjects', $layoutId, $updatedObjects); 
-		
+
+		self::customize('postProcess_updatedObjects', $layoutId, $updatedObjects);
+
 		LogHandler::Log('mtp', 'DEBUG', 'postProcess: layout status='.$refstatelayout.' success='.$success);
 
-        if($refstatelayout != 0 && $success == 1){
-            require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-            self::doPrint($layoutId, BizSession::getTicket() );
-        }
+		if (is_array($updatedObjects)) {
+			foreach ($updatedObjects as $obj) {
+				self::retriggerObject($obj);
+			}
+		}
 	}
 
 	/**
@@ -179,8 +185,8 @@ class AxaioMadeToPrintDispatcher
 		require_once BASEDIR . '/server/dbclasses/DBTicket.class.php';
 		$user = DBTicket::checkTicket( $ticket );
 
-        self::customize('queueLayoutObject_begin', $layEditions, $layoutId, $layStatusId, $user);
-        
+		self::customize('queueLayoutObject_begin', $layEditions, $layoutId, $layStatusId, $user);
+
 		/* At MtP you can see process, handled jobs, job status, etc etc  No more reason to do this at SCE
 		// Create job record at smart_mtpsentobjects table
 		if( !self::saveLayoutIntoQueue( $layoutId, $layPubId, $layIssueId, $layStatusId ) ) {
@@ -190,27 +196,27 @@ class AxaioMadeToPrintDispatcher
 		// Retrieve object props from smart_objects table
 		require_once BASEDIR . '/server/bizclasses/BizQuery.class.php';
 		$fullrow = BizQuery::queryObjectRow($layoutId );
-        // Determine the MtP job name
-        $mtpConfig = self::getMtpConfig($layStatusId);
-        if (!$mtpConfig) {
-            LogHandler::Log('mtp', 'ERROR', 'queueLayoutObject: Could not find MtP configuration for layout status ' . $layStatusId);
-            return;
-        }
+		// Determine the MtP job name
+		$mtpConfig = self::getMtpConfig($layStatusId);
+		if (!$mtpConfig) {
+			LogHandler::Log('mtp', 'ERROR', 'queueLayoutObject: Could not find MtP configuration for layout status ' . $layStatusId);
+			return;
+		}
 
-        if (isset($mtpConfig['prio'])) {
-            $fullrow['prio'] = $mtpConfig['prio'];
-        }
+		if (isset($mtpConfig['prio'])) {
+			$fullrow['prio'] = $mtpConfig['prio'];
+		}
 
 		// We risk getting no issue when no current is set at channel; so we overrule here
 		require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
 		$fullrow['Issue'] = DBIssue::getIssueName( $layIssueId );
 		$axIssue = DBIssue::getIssue( $layIssueId );
-        //add layouts issue information to metadata, incl. IssueId, IssueName, IssueDescription, etc.
-        foreach ($axIssue as $issueKey => $issueValue) {
-            $issueKey = 'Issue'.ucfirst($issueKey);
-            $fullrow[$issueKey] = $issueValue; 
-        }
-        
+		//add layouts issue information to metadata, incl. IssueId, IssueName, IssueDescription, etc.
+		foreach ($axIssue as $issueKey => $issueValue) {
+			$issueKey = 'Issue'.ucfirst($issueKey);
+			$fullrow[$issueKey] = $issueValue;
+		}
+
 		// Optional feature: Collect special custom MTP fields too (for outputting later on)
 		// Those fields have C_MTP_ prefixes at smart_objects table.
 		$mtparr = array();
@@ -219,33 +225,33 @@ class AxaioMadeToPrintDispatcher
 				$mtparr[substr($propName, 6, strlen($propName)-6)] = $propValue;
 			}
 		}
-		
-		$jobname = (trim($mtpConfig['mtp_jobname']) == '') ? trim(AXAIO_MTP_JOB_NAME) : trim($mtpConfig['mtp_jobname']);
-        
 
-        self::customize('queueLayoutObject_filterEditions', $layEditions, $layoutId, $layStatusId, $user);
-        
-        if( is_array($layEditions) && !empty($layEditions)) {
-            foreach( $layEditions as $layEdition ) {
+		$jobname = (trim($mtpConfig['mtp_jobname']) == '') ? trim(AXAIO_MTP_JOB_NAME) : trim($mtpConfig['mtp_jobname']);
+
+
+		self::customize('queueLayoutObject_filterEditions', $layEditions, $layoutId, $layStatusId, $user);
+
+		if( is_array($layEditions) && !empty($layEditions)) {
+			foreach( $layEditions as $layEdition ) {
 				self::outputProcessingFiles( $layoutId, $layStatusId, $layEdition, $jobname, $fullrow, $mtparr, $layPubId );
 			}
-        } else { // no edition, so output layout once with default edition
+		} else { // no edition, so output layout once with default edition
 			self::outputProcessingFiles( $layoutId, $layStatusId, $layEditions, $jobname, $fullrow, $mtparr, $layPubId );
 		}
 	}
 
-    public static function mtpTokenize( $string, $metadata)
-    {
-        $mtpTokenBegin = ( defined("AXAIO_MTP_TOKEN_BEGIN")) ? AXAIO_MTP_TOKEN_BEGIN : '«';
-        $mtpTokenEnd   = ( defined("AXAIO_MTP_TOKEN_END"))   ? AXAIO_MTP_TOKEN_END   : '»';
+	public static function mtpTokenize( $string, $metadata)
+	{
+		$mtpTokenBegin = ( defined("AXAIO_MTP_TOKEN_BEGIN")) ? AXAIO_MTP_TOKEN_BEGIN : '«';
+		$mtpTokenEnd   = ( defined("AXAIO_MTP_TOKEN_END"))   ? AXAIO_MTP_TOKEN_END   : '»';
 
-        foreach($metadata as $mkey => $mval) {
-            $string = str_ireplace( $mtpTokenBegin.$mkey.$mtpTokenEnd, $mval, $string );
-        }
+		foreach($metadata as $mkey => $mval) {
+			$string = str_ireplace( $mtpTokenBegin.$mkey.$mtpTokenEnd, $mval, $string );
+		}
 
-        return $string;
-    }
-    
+		return $string;
+	}
+
 	/**
 	 * Creates processing scripts for MtP to output given layout for certain edition.
 	 *
@@ -259,35 +265,35 @@ class AxaioMadeToPrintDispatcher
 	 */
 	private static function outputProcessingFiles( $layoutId, $layStatusId, $layEdition, $jobname, $fullrow, $mtparr, $publId = null )
 	{
-        $break = false;
-        self::customize('outputProcessingFiles_begin', $layoutId, $layStatusId, $fullrow, $layEdition, $publId, $break);
-        if($break) {return;}
-        
+		$break = false;
+		self::customize('outputProcessingFiles_begin', $layoutId, $layStatusId, $fullrow, $layEdition, $publId, $break);
+		if($break) {return;}
+
 		// Calculate page range for printing
 		require_once BASEDIR . '/server/dbclasses/DBPage.class.php';
 		$sth = DBPage::getPages( $layoutId, 'Production', null, $layEdition ? $layEdition->Id : null, true );
 		$firstPage = 1000000;
 		$lastPage = 0;
 		$dbDriver = DBDriverFactory::gen();
-        
+
 		while( ($pageRow = $dbDriver->fetch($sth)) ) {
 			if ($firstPage > $pageRow['pageorder']) {
-                $firstPage = $pageRow['pageorder'];
-            }
-            if ($lastPage < $pageRow['pageorder']) {
-                $lastPage = $pageRow['pageorder'];
-            }
-        }
+				$firstPage = $pageRow['pageorder'];
+			}
+			if ($lastPage < $pageRow['pageorder']) {
+				$lastPage = $pageRow['pageorder'];
+			}
+		}
 		if ($firstPage == 1000000) {
-            $firstPage = 1;
-        }
-        if ($lastPage == 0) {
-            $lastPage = 1;
-        }
+			$firstPage = 1;
+		}
+		if ($lastPage == 0) {
+			$lastPage = 1;
+		}
 
 		$layEditionId = $layEdition ? $layEdition->Id : 0;
 
-        // Add custom MtP meta data props to the job
+		// Add custom MtP meta data props to the job
 		foreach($mtparr as $field => $value){
 			// Convert SCE custom prop name convention to MtP, e.g.
 			//    PAGE_RANGE to page-range
@@ -309,31 +315,31 @@ class AxaioMadeToPrintDispatcher
 			$fullrow['EditionId'] = 0;
 			$fullrow['Edition'] = '';
 		}
-        
+
 		// Concat object id + status id + edition id => to make up unique file name
 		// Note: we should not use names here since (accented) unicode chars have problems on cross OS mounted disks
-        $name = $layoutId.'_'.$layStatusId.'_'.$layEditionId;
-        self::customize('outputProcessingFiles_filterName', $name, $fullrow);
-        
-        $mtpPaths = array   ( 'axaio_prejs_in'      => self::mtpTokenize( AXAIO_MTP_AXAIO_FOLDER_IN.$name.'_pre.js', $fullrow)
-                            , 'axaio_postjs_in'     => self::mtpTokenize( AXAIO_MTP_AXAIO_FOLDER_IN.$name.'_post.js', $fullrow)
-                            , 'axaio_xml_out'       => self::mtpTokenize( AXAIO_MTP_AXAIO_FOLDER_OUT.$name.'.xml', $fullrow)
-                            , 'server_xml_in'       => self::mtpTokenize( AXAIO_MTP_SERVER_FOLDER_IN.$name.'.xml', $fullrow)
-                            , 'server_prejs_in'     => self::mtpTokenize( AXAIO_MTP_SERVER_FOLDER_IN.$name.'_pre.js', $fullrow)
-                            , 'server_postjs_in'    => self::mtpTokenize( AXAIO_MTP_SERVER_FOLDER_IN.$name.'_post.js', $fullrow)
-                            );
-        
-        self::customize('outputProcessingFiles_filterMtpPaths', $mtpPaths);
-        
-        $jobname = self::mtpTokenize( $jobname, $fullrow);
-        
-        /*
-        // if user wants to have seperate IN-folders for each publication he can define AXAIO_MTP_INFOLDER_PER_PUBLICATION
-		if( defined( "AXAIO_MTP_INFOLDER_PER_PUBLICATION") && AXAIO_MTP_INFOLDER_PER_PUBLICATION == true) {
-			$name = $publId.'/'.$layoutId.'_'.$layStatusId.'_'.$layEditionId;
-		} else {
-			$name = $layoutId.'_'.$layStatusId.'_'.$layEditionId;
-		}*/
+		$name = $layoutId.'_'.$layStatusId.'_'.$layEditionId;
+		self::customize('outputProcessingFiles_filterName', $name, $fullrow);
+
+		$mtpPaths = array   ( 'axaio_prejs_in'      => self::mtpTokenize( AXAIO_MTP_AXAIO_FOLDER_IN.$name.'_pre.js', $fullrow)
+		, 'axaio_postjs_in'     => self::mtpTokenize( AXAIO_MTP_AXAIO_FOLDER_IN.$name.'_post.js', $fullrow)
+		, 'axaio_xml_out'       => self::mtpTokenize( AXAIO_MTP_AXAIO_FOLDER_OUT.$name.'.xml', $fullrow)
+		, 'server_xml_in'       => self::mtpTokenize( AXAIO_MTP_SERVER_FOLDER_IN.$name.'.xml', $fullrow)
+		, 'server_prejs_in'     => self::mtpTokenize( AXAIO_MTP_SERVER_FOLDER_IN.$name.'_pre.js', $fullrow)
+		, 'server_postjs_in'    => self::mtpTokenize( AXAIO_MTP_SERVER_FOLDER_IN.$name.'_post.js', $fullrow)
+		);
+
+		self::customize('outputProcessingFiles_filterMtpPaths', $mtpPaths);
+
+		$jobname = self::mtpTokenize( $jobname, $fullrow);
+
+		/*
+		// if user wants to have seperate IN-folders for each publication he can define AXAIO_MTP_INFOLDER_PER_PUBLICATION
+	 if( defined( "AXAIO_MTP_INFOLDER_PER_PUBLICATION") && AXAIO_MTP_INFOLDER_PER_PUBLICATION == true) {
+		 $name = $publId.'/'.$layoutId.'_'.$layStatusId.'_'.$layEditionId;
+	 } else {
+		 $name = $layoutId.'_'.$layStatusId.'_'.$layEditionId;
+	 }*/
 
 		// Build processing files and write them to folder (AXAIO_MTP_AXAIO_FOLDER_IN)
 		$dom = new DOMDocument('1.0', 'UTF-8');
@@ -348,35 +354,35 @@ class AxaioMadeToPrintDispatcher
 		if(array_key_exists('PAGE_RANGE', $mtparr) === false){
 			self::domAddElement($dom, $rootNode, 'allpages', '1');
 
-            // If start page is NOT a custom prop, let's take the actual start page
-            // Note: Since v6.0 this is renamed from "start-page" to "START_PAGE" to meet name validation
-            if (array_key_exists('START_PAGE', $mtparr) === false) {
-                self::domAddElement($dom, $rootNode, 'start-page', $firstPage);
-            } else if ($mtparr['START_PAGE'] < $firstPage) {
-                    $mtparr['START_PAGE'] = $firstPage; // repair out-of-scope values
-            }
-        } else {
-            // page range always overrules the start page, so remove to avoid errors at MtP
-            unset($mtparr['START_PAGE']);
-            // repair out-of-scope values
-            if ($mtparr['PAGE_RANGE'] > $lastPage) {
-                $mtparr['PAGE_RANGE'] = $lastPage;
-            }
-            // Note: the custom value is outputted below!
-        }
+			// If start page is NOT a custom prop, let's take the actual start page
+			// Note: Since v6.0 this is renamed from "start-page" to "START_PAGE" to meet name validation
+			if (array_key_exists('START_PAGE', $mtparr) === false) {
+				self::domAddElement($dom, $rootNode, 'start-page', $firstPage);
+			} else if ($mtparr['START_PAGE'] < $firstPage) {
+				$mtparr['START_PAGE'] = $firstPage; // repair out-of-scope values
+			}
+		} else {
+			// page range always overrules the start page, so remove to avoid errors at MtP
+			unset($mtparr['START_PAGE']);
+			// repair out-of-scope values
+			if ($mtparr['PAGE_RANGE'] > $lastPage) {
+				$mtparr['PAGE_RANGE'] = $lastPage;
+			}
+			// Note: the custom value is outputted below!
+		}
 
-        self::customize('outputProcessingFiles_filterFullrow', $fullrow);
-        
+		self::customize('outputProcessingFiles_filterFullrow', $fullrow);
+
 		$extendedNode = $rootNode->appendChild(new DOMElement('extended'));
-        foreach($fullrow as $mdfield => $mdvalue) {
-            $xmetadataEl = $dom->createElement('xmetadata');
-            $xmetadataEl->setAttribute('name', $mdfield);
-            $xmetadataEl->setAttribute('value', $mdvalue);
-            $extendedNode->appendChild($xmetadataEl);
-        }
-        
+		foreach($fullrow as $mdfield => $mdvalue) {
+			$xmetadataEl = $dom->createElement('xmetadata');
+			$xmetadataEl->setAttribute('name', $mdfield);
+			$xmetadataEl->setAttribute('value', $mdvalue);
+			$extendedNode->appendChild($xmetadataEl);
+		}
+
 		$mtpjob = $dom->saveXML();
-		
+
 		// the pre process script content
 		$preprocessjs = '
 			function handleMTP_WW_Result( success , msg )
@@ -391,22 +397,22 @@ class AxaioMadeToPrintDispatcher
 
 				try {
                     app.performSimpleRequest( "'.AXAIO_MTP_POSTPROCESS_LOC.'?id='.$layoutId
-																.'&state='.$layStatusId
-																.'&edition='.$layEditionId
-																.'&servername="+encodeURIComponent(servername)+"'
-																.'&success="+success+"'
-																.'&message="+encodeURIComponent(msg));
+			.'&state='.$layStatusId
+			.'&edition='.$layEditionId
+			.'&servername="+encodeURIComponent(servername)+"'
+			.'&success="+success+"'
+			.'&message="+encodeURIComponent(msg));
 				}catch(err){
 			        msg = msg = err.message;
                     success = 99;
 			    }
-                
+
                 if( success != 1) {
 					msg = "Error: " + msg;
 				}
 				return msg;
 			}
-			
+
             function ww_login( user, pass, server, maxTries)
             {
                 var msg = "", tryCounter = 0;
@@ -421,7 +427,7 @@ class AxaioMadeToPrintDispatcher
                             msg = ""; //overwrite error messages from earlier tries
                             break; //leave "while" as login already successful
                         }
-                    } catch( err ) { 
+                    } catch( err ) {
                         msg = err.message; //set error message
                     }
                     //login was not successful, because we would have "break"ed out
@@ -448,47 +454,47 @@ class AxaioMadeToPrintDispatcher
 				try {
 					app.entSession.logout();
 				} catch(err) { } // fail silently;
-			
+
 				// remove pending results from earlier output
 				try {
-					var report = File("'.addslashes($mtpPaths['axaio_xml_out']).'"); 
+					var report = File("'.addslashes($mtpPaths['axaio_xml_out']).'");
 					if( report.exists && !report.remove()) { // remove pending results (errors) from previous jobs if still exists
 						throw new Error( "Cannot delete old xml result file. Please check folder permissions for '.addslashes($mtpPaths['axaio_xml_out']).'!");
 					}
 				} catch( err ) {
 					return handleMTP_WW_Result( 7 , err);
 				}
-							
+
 				// log in user
 				try {
 					';
-					//when using multiply clients the JS has to retrieve the Username, otherwise take the default
-					if( defined( "AXAIO_MTP_ENABLE_MULTI_USERS") && AXAIO_MTP_ENABLE_MULTI_USERS == true) {
-						$preprocessjs .= 'var username = app.performSimpleRequest("'.AXAIO_MTP_PREPROCESS_LOC.'");';
-					} else {
-						$preprocessjs .= 'var username = "'.addslashes(AXAIO_MTP_USER).'";';
-					}
+		//when using multiply clients the JS has to retrieve the Username, otherwise take the default
+		if( defined( "AXAIO_MTP_ENABLE_MULTI_USERS") && AXAIO_MTP_ENABLE_MULTI_USERS == true) {
+			$preprocessjs .= 'var username = app.performSimpleRequest("'.AXAIO_MTP_PREPROCESS_LOC.'");';
+		} else {
+			$preprocessjs .= 'var username = "'.addslashes(AXAIO_MTP_USER).'";';
+		}
 
 		$preprocessjs .= '
 					ww_login( username, "'.addslashes(AXAIO_MTP_PASSWORD).'", "'.addslashes(AXAIO_MTP_SERVER_DEF_ID).'", 11 );
-				} catch( err ) { 
+				} catch( err ) {
 					return handleMTP_WW_Result( 4 , "Cannot logon MTP user ["+err+"]");
 				}
 
 				//initialize working document pointer
-				var myWWDoc = null; 
-				
+				var myWWDoc = null;
+
 				// open layout
 				try {
 					myWWDoc = app.openObject("'.$layoutId.'", false);
 				} catch( err ) {
 					return handleMTP_WW_Result( 5 , "Cannot open layout '.$layoutId.' ["+err+"]");
 				}';
-				
+
 		// Pre-select the requested edition before MtP starts processing
 		if( $layEditionId > 0 ) {
 			$preprocessjs .= '
-				
+
 				// activate edition
 				try {
 					myWWDoc.activeEdition = "' .addslashes($layEdition->Name). '";
@@ -517,22 +523,22 @@ class AxaioMadeToPrintDispatcher
 
 				try {
                     app.performSimpleRequest( "'.AXAIO_MTP_POSTPROCESS_LOC.'?id='.$layoutId
-																.'&state='.$layStatusId
-																.'&edition='.$layEditionId
-																.'&servername="+encodeURIComponent(servername)+"'
-																.'&success="+success+"'
-																.'&message="+encodeURIComponent(msg));
+			.'&state='.$layStatusId
+			.'&edition='.$layEditionId
+			.'&servername="+encodeURIComponent(servername)+"'
+			.'&success="+success+"'
+			.'&message="+encodeURIComponent(msg));
 				}catch(err){
 			        msg = msg = err.message;
                     success = 99;
 			    }
-                
+
                 if( success != 1) {
 					msg = "Error: " + msg;
 				}
 				return msg;
 			}
-			
+
 			function postprocessjs()
 			{
 				// turn off user interaction
@@ -542,23 +548,23 @@ class AxaioMadeToPrintDispatcher
 
 				// read MTP report file
 				try {
-					var report = File("'.addslashes($mtpPaths['axaio_xml_out']).'"); 
-					report.open("r"); 
-					content = report.read(); 
+					var report = File("'.addslashes($mtpPaths['axaio_xml_out']).'");
+					report.open("r");
+					content = report.read();
                     report.close();
 					if( content.length == 0 ) {
 						throw new Error( "Cannot read MTP status report file" );
-					} 
+					}
 				} catch( err ) {
 					return handleMTP_WW_Result( 3 , err );
-				} 
+				}
 
 				// handle result
 				try {
-					if( content.indexOf("<type>ok") > 0) { 
+					if( content.indexOf("<type>ok") > 0) {
 						handleMTP_WW_Result( 1 , "ok" )
 						report.remove(); // we only clean on success! or else there is no way to find back fatal errors!
-					} else { 
+					} else {
 						i = content.indexOf("<status>")+8;
 						j = content.indexOf("</status>")
 						msg = content.substring(i,j);
@@ -571,8 +577,8 @@ class AxaioMadeToPrintDispatcher
 				} catch( err ) {
 					handleMTP_WW_Result( 8 , "error when handle the result xml ["+err+"]");
 				}
-				
-				// close all open documents. 
+
+				// close all open documents.
 				// MTP can not start with documents open, so here we safely close *all* documents;
 				// They must be all ours and this is just to make sure documents don\'t get stacked in fatal situations,
 				// for example documents still left open from previous sessions that ended unexpectedly.
@@ -583,26 +589,26 @@ class AxaioMadeToPrintDispatcher
 						runs++;
 					}
 				} catch (err)  { } // fail silently;
-				
+
 				// try to logout
 				try {
 					app.entSession.logout();
 				} catch(err) { } // fail silently;
 			}
-								
+
 			// run the script now!
 			postprocessjs();';
-		
-        self::customize('outputProcessingFiles_beforeWrite', $preprocessjs, $postprocessjs, $mtpjob, $mtpPaths, $fullrow);
 
-        // output MTP files
-        self::writeFile( $mtpPaths['server_prejs_in'], $preprocessjs);
-        self::writeFile( $mtpPaths['server_postjs_in'], $postprocessjs);
+		self::customize('outputProcessingFiles_beforeWrite', $preprocessjs, $postprocessjs, $mtpjob, $mtpPaths, $fullrow);
+
+		// output MTP files
+		self::writeFile( $mtpPaths['server_prejs_in'], $preprocessjs);
+		self::writeFile( $mtpPaths['server_postjs_in'], $postprocessjs);
 		self::writeFile( $mtpPaths['server_xml_in'], $mtpjob);
 
-        self::customize('outputProcessingFiles_afterWrite', $preprocessjs, $postprocessjs, $mtpjob, $mtpPaths, $fullrow);
-        
-        self::customize('outputProcessingFiles_end', $layoutId, $fullrow);
+		self::customize('outputProcessingFiles_afterWrite', $preprocessjs, $postprocessjs, $mtpjob, $mtpPaths, $fullrow);
+
+		self::customize('outputProcessingFiles_end', $layoutId, $fullrow);
 	}
 
 	public static function clearSentObject( $objectId, $newPubId, $newStatusId, $oldStatusId )
@@ -611,20 +617,20 @@ class AxaioMadeToPrintDispatcher
 		// EKL: There is no much we can do here?
 	}
 
-    public static function writeFile( $filename, $content )
-    {
-        $fp = fopen( $filename, "w+" );
+	public static function writeFile( $filename, $content )
+	{
+		$fp = fopen( $filename, "w+" );
 		if( $fp ) {
-			#Add utf-8 byte order mark 
-    	    fwrite( $fp, pack("CCC",0xEF,0xBB,0xBF)); 
+			#Add utf-8 byte order mark
+			fwrite( $fp, pack("CCC",0xEF,0xBB,0xBF));
 			fwrite( $fp, $content );
 			fclose( $fp );
 			LogHandler::Log( 'mtp', 'INFO', 'Wrote into: '.$filename );
 		} else {
 			LogHandler::Log( 'mtp', 'ERROR', 'No write access for: '.$filename );
 		}
-    }
-    
+	}
+
 	/**
 	 * Pushes layouts into the MadeToPrint queue when configured trigger statuses are reached.
 	 * When a layouts pushed into the queue, it will get processed by MadeToPrint later on.
@@ -641,7 +647,7 @@ class AxaioMadeToPrintDispatcher
 		}
 
 		$objType = self::getObjectType( $objectId );
-		if( $objType == 'Layout' ) {
+		if (substr($objType,0,6) == 'Layout') { //also support LayoutTemplates
 			$layoutIds = array( $objectId );
 		} elseif( $objType == 'Article' || $objType == 'Image' ) {
 			$layoutIds = self::getParentLayouts( $objectId );
@@ -653,7 +659,7 @@ class AxaioMadeToPrintDispatcher
 			$layPubId = $layIssueId = $layStatusId = 0;
 			$layEditions = array();
 			if( self::getLayoutDetails( $layoutId, $layPubId, $layIssueId, $layStatusId, $layEditions ) ) {
-                self::logLayoutStatus($layoutId, $layStatusId);
+				self::logLayoutStatus($layoutId, $layStatusId);
 				if( self::checkTriggerStatuses( $layoutId, $layStatusId ) ) {
 					self::queueLayoutObject( $ticket, $layoutId, $layPubId, $layIssueId, $layStatusId, $layEditions );
 				}
@@ -676,8 +682,8 @@ class AxaioMadeToPrintDispatcher
 	}
 
 	/**
-	 * Checks if the layout and its children all match the configured 'trigger' 
-     * statuses and the layout can go into the queue.
+	 * Checks if the layout and its children all match the configured 'trigger'
+	 * statuses and the layout can go into the queue.
 	 *
 	 * @param int $layoutId     Id of the layout
 	 * @param int $layStatusId  Status id of the layout
@@ -689,9 +695,9 @@ class AxaioMadeToPrintDispatcher
 		if( !$mtpConfig ) {
 			return false;
 		}
-        
-        self::customize('checkTriggerStatuses_begin', $layoutId, $layStatusId, $mtpConfig);
-        
+
+		self::customize('checkTriggerStatuses_begin', $layoutId, $layStatusId, $mtpConfig);
+
 		$childIds = self::getPlacedChilds( $layoutId );
 		foreach( $childIds as $childId ){
 			$objType = self::getObjectType( $childId );
@@ -711,26 +717,103 @@ class AxaioMadeToPrintDispatcher
 				}
 			}
 		}
-        
-        if( defined( "AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY") && AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY == true) {
-            $dbDriver = DBDriverFactory::gen();
-            $sql =" SELECT		option_value as `stateID`
+
+		if( defined( "AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY") && AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY == true) {
+			$dbDriver = DBDriverFactory::gen();
+			$sql =" SELECT		option_value as `stateID`
                     FROM		axaio_mtp_process_options
                     WHERE		option_name = 'stateOfLayout_{$layoutId}'
                     ORDER BY	id DESC
                     LIMIT		2";
-            $sth = $dbDriver->query($sql);
-            $stateIds = array();
-            while(($res = $dbDriver->fetch($sth))){
-                array_push($stateIds, $res['stateID']);
-            }
-            
-            if( isset($stateIds[0]) && isset($stateIds[1]) && $stateIds[0]===$stateIds[1]) {
-                LogHandler::Log('mtp', 'DEBUG', 'Skipping layout '.$layoutId.' because the status was not changed' );
-                return false;
-            }
-        }
-		return true; 
+			$sth = $dbDriver->query($sql);
+			$stateIds = array();
+			while(($res = $dbDriver->fetch($sth))){
+				array_push($stateIds, $res['stateID']);
+			}
+
+			if( isset($stateIds[0]) && isset($stateIds[1]) && $stateIds[0]===$stateIds[1]) {
+				LogHandler::Log('mtp', 'DEBUG', 'Skipping layout '.$layoutId.' because the status was not changed' );
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/*
+	 * retriggers the document to set next status in panel and forces Woodwing
+	 * to check if another trigger was hit.
+	 *
+	 * code based on submit from A&F
+	 */
+	private static function retriggerObject($obj)
+	{
+		require_once(BASEDIR . '/server/secure.php');
+		require_once(BASEDIR . "/server/services/wfl/WflLogOnService.class.php");
+		require_once(BASEDIR . "/server/services/wfl/WflLogOffService.class.php");
+		require_once(BASEDIR . "/server/services/wfl/WflGetObjectsService.class.php");
+		require_once(BASEDIR .
+			"/server/services/wfl/WflSetObjectPropertiesService.class.php");
+
+		$user   = AXAIO_MTP_USER;
+		$password = AXAIO_MTP_PASSWORD;
+		$result = false;
+		$ticket = null;
+		try {
+			do {
+				LogHandler::Log('mtp', 'INFO', 'Re-Trigger object: ' . $obj);
+				// log on
+				$service = new WflLogOnService();
+				$req = new WflLogOnRequest($user, $password, null, "retriggerObject", null, "retriggerObject", "8.0.0", null, null, true);
+				$resp = $service->execute($req);
+				if (!$resp) {
+					LogHandler::Log('mtp', 'ERROR', 'LogOn failed: Request failed.');
+					break;
+				}
+				$ticket = $resp->Ticket;
+				if (!$ticket) {
+					LogHandler::Log('mtp', 'ERROR', 'LogOn failed: No ticket returned.');
+					break;
+				}
+				// get object
+				/* 	$service = new WflGetObjectsService();
+				  $req = new WflGetObjectsRequest($ticket, array($id), false, 'none');
+				  $resp = $service->execute($req);
+				  if (!$resp) {
+				  self::log('ERROR', 'GetObject failed: Request failed.');
+				  break;
+				  }
+				  $obj = $resp->Objects[0];
+				 */ if (!$obj) {
+					LogHandler::Log('mtp', 'ERROR', 'GetObject failed: No object returned.');
+					break;
+				}
+				// avoid WoodWing S1019 error
+				$obj->MetaData->TargetMetaData = null;
+				// set object properties
+				$service = new WflSetObjectPropertiesService();
+				$req = new WflSetObjectPropertiesRequest($ticket, $obj->MetaData->BasicMetaData->ID, $obj->MetaData, null);
+				$resp = $service->execute($req);
+				if (!$resp) {
+					LogHandler::Log('mtp', 'ERROR', 'SetObjectProperties failed.');
+					break;
+				}
+				LogHandler::Log('mtp', 'DEBUG', 'DONE');
+				$result = true;
+			} while (false);
+		} catch (Exception $ex) {
+			LogHandler::Log('mtp', 'ERROR', 'An unexpected exception occured: ' . $ex);
+		}
+		try {
+			if ($ticket) {
+				// log off
+				$service = new WflLogOffService();
+				$req = new WflLogOffRequest($ticket);
+				$service->execute($req);
+			}
+		} catch (Exception $ex) {
+
+		}
+		return $result;
 	}
 
 	/**
@@ -738,7 +821,7 @@ class AxaioMadeToPrintDispatcher
 	 *
 	 * @param int $objectId
 	 * @retun int The status id
-	 */ 
+	 */
 	private static function getObjectStatus( $objectId )
 	{
 		$dbDriver = DBDriverFactory::gen();
@@ -754,7 +837,7 @@ class AxaioMadeToPrintDispatcher
 	 *
 	 * @param int $objectId
 	 * @retun string The object type
-	 */ 
+	 */
 	private static function getObjectType( $objectId )
 	{
 		$dbDriver = DBDriverFactory::gen();
@@ -770,7 +853,7 @@ class AxaioMadeToPrintDispatcher
 	 *
 	 * @param int $layoutId
 	 * @retun array List of placed object ids
-	 */ 
+	 */
 	private static function getPlacedChilds( $layoutId )
 	{
 		$dbDriver = DBDriverFactory::gen();
@@ -789,7 +872,7 @@ class AxaioMadeToPrintDispatcher
 	 *
 	 * @param int $objectId
 	 * @retun array List of layout ids
-	 */ 
+	 */
 	private static function getParentLayouts( $objectId )
 	{
 		$dbDriver = DBDriverFactory::gen();
@@ -811,48 +894,48 @@ class AxaioMadeToPrintDispatcher
 	 */
 	private static function getMtpConfig( $layStatusId )
 	{
-        self::customize('getMtpConfig_begin', $layStatusId);
-        
+		self::customize('getMtpConfig_begin', $layStatusId);
+
 		$dbDriver = DBDriverFactory::gen();
 		$dbmtp = 'axaio_mtp_trigger';
 		$sql = 'select * from '.$dbmtp.' where `state_trigger_layout`='.$layStatusId;
 		$sth = $dbDriver->query($sql);
 		$row = $dbDriver->fetch($sth);
 		if (!$row) {
-            return null;
-        }
+			return null;
+		}
 
-        // TODO: Move this to admin page (setup) -> validation/repair
-        if (trim($row['state_trigger_article']) == '') {
-            $row['state_trigger_article'] = 0;
-        }
-        if (trim($row['state_trigger_image']) == '') {
-            $row['state_trigger_image'] = 0;
-        }
+		// TODO: Move this to admin page (setup) -> validation/repair
+		if (trim($row['state_trigger_article']) == '') {
+			$row['state_trigger_article'] = 0;
+		}
+		if (trim($row['state_trigger_image']) == '') {
+			$row['state_trigger_image'] = 0;
+		}
 
-        if (trim($row['state_after_layout']) == '') {
-            $row['state_after_layout'] = 0;
-        }
-        if (trim($row['state_after_article']) == '') {
-            $row['state_after_article'] = 0;
-        }
-        if (trim($row['state_after_image']) == '') {
-            $row['state_after_image'] = 0;
-        }
+		if (trim($row['state_after_layout']) == '') {
+			$row['state_after_layout'] = 0;
+		}
+		if (trim($row['state_after_article']) == '') {
+			$row['state_after_article'] = 0;
+		}
+		if (trim($row['state_after_image']) == '') {
+			$row['state_after_image'] = 0;
+		}
 
-        if (trim($row['state_error_layout']) == '') {
-            $row['state_error_layout'] = 0;
-        }
+		if (trim($row['state_error_layout']) == '') {
+			$row['state_error_layout'] = 0;
+		}
 
-        if (trim($row['quiet']) == '') {
-            $row['quiet'] = 0;
-        }
-        if (trim($row['prio']) == '') {
-            $row['prio'] = 2;
-        }
+		if (trim($row['quiet']) == '') {
+			$row['quiet'] = 0;
+		}
+		if (trim($row['prio']) == '') {
+			$row['prio'] = 2;
+		}
 
-        self::customize('getMtpConfig_end', $layStatusId, $row);
-        
+		self::customize('getMtpConfig_end', $layStatusId, $row);
+
 		return $row;
 	}
 
@@ -882,7 +965,7 @@ class AxaioMadeToPrintDispatcher
 		}
 		$layIssueId = $targets[0]->Issue->Id;
 		$layEditions = $targets[0]->Editions;
-			
+
 		// Get layout's publication and status
 		$dbDriver = DBDriverFactory::gen();
 		$dbobjects = $dbDriver->tablename("objects");
@@ -893,15 +976,15 @@ class AxaioMadeToPrintDispatcher
 			LogHandler::Log('mtp', 'ERROR', 'Layout not found. Id='.$layoutId );
 			return false;
 		}
-        $dbflags = $dbDriver->tablename("objectflags");
-        $sql2 = 'select `objid` from '.$dbflags.' where `objid`='.$layoutId;
-        $sth2 = $dbDriver->query($sql2);
-        $res2 = $dbDriver->fetch($sth2);
-        if( $res2 )
-        {
-            LogHandler::Log('mtp', 'ERROR', 'Layout '.$layoutId.' has a Flag.' );
-            return false;
-        }
+		$dbflags = $dbDriver->tablename("objectflags");
+		$sql2 = 'select `objid` from '.$dbflags.' where `objid`='.$layoutId;
+		$sth2 = $dbDriver->query($sql2);
+		$res2 = $dbDriver->fetch($sth2);
+		if( $res2 )
+		{
+			LogHandler::Log('mtp', 'ERROR', 'Layout '.$layoutId.' has a Flag.' );
+			return false;
+		}
 		$layPubId = $res['publication'];
 		if( !$layPubId ) {
 			LogHandler::Log('mtp', 'ERROR', 'Layout '.$layoutId.' has unknown publication.' );
@@ -912,31 +995,31 @@ class AxaioMadeToPrintDispatcher
 			LogHandler::Log('mtp', 'ERROR', 'Layout '.$layoutId.' has unknown status.' );
 			return false;
 		}
-        return true;
+		return true;
 	}
 
-    /**
-     * logs the current layout status id into the database
-     * Used to determine if the layout status id was changed
-     * 
-     * @param int  $layoutId     Layout id
-     * @param int  $layStatusId  Status id of layout
-     */
-    private static function logLayoutStatus($layoutId, $layStatusId)
-    {
-        if( defined( "AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY") && AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY == true) {
-            $dbDriver = DBDriverFactory::gen();
-            $sql = "INSERT INTO axaio_mtp_process_options (`option_name`,`option_value`) VALUES ('stateOfLayout_{$layoutId}', '{$layStatusId}');";
-            $dbDriver->query($sql);
-        }
-    }
-    
-    private static function customize( $name, &$arg1=null, &$arg2=null, &$arg3=null, &$arg4=null, &$arg5=null, &$arg6=null, &$arg7=null )
-    {
-        $filename = dirname(__FILE__).'/AxaioMadeToPrintCustomize.class.php';
-        if(file_exists($filename)) {
-            require_once $filename;
-            AxaioMadeToPrintCustomize::Customize($name, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6, $arg7); // run hook
-        }        
-    }
+	/**
+	 * logs the current layout status id into the database
+	 * Used to determine if the layout status id was changed
+	 *
+	 * @param int  $layoutId     Layout id
+	 * @param int  $layStatusId  Status id of layout
+	 */
+	private static function logLayoutStatus($layoutId, $layStatusId)
+	{
+		if( defined( "AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY") && AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY == true) {
+			$dbDriver = DBDriverFactory::gen();
+			$sql = "INSERT INTO axaio_mtp_process_options (`option_name`,`option_value`) VALUES ('stateOfLayout_{$layoutId}', '{$layStatusId}');";
+			$dbDriver->query($sql);
+		}
+	}
+
+	private static function customize( $name, &$arg1=null, &$arg2=null, &$arg3=null, &$arg4=null, &$arg5=null, &$arg6=null, &$arg7=null )
+	{
+		$filename = dirname(__FILE__).'/AxaioMadeToPrintCustomize.class.php';
+		if(file_exists($filename)) {
+			require_once $filename;
+			AxaioMadeToPrintCustomize::Customize($name, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6, $arg7); // run hook
+		}
+	}
 }

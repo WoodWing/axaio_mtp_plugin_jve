@@ -2,7 +2,7 @@
 /**
  * returns the username for logging in with MadeToPrint.
  * Enables the use of MadeToPrint with different servers
- * 
+ *
  * @package SCEnterprise
  * @subpackage MadeToPrint
  * @since v6.x
@@ -20,11 +20,11 @@ function getFilledUserArray()
 	if( defined("AXAIO_MTP_MULTI_USERS"))
 	{
 		foreach( unserialize( AXAIO_MTP_MULTI_USERS) as $cur_ref => $cur_user)
-		{	
+		{
 			$users[ $cur_ref ] = $cur_user;
 		}
 	}
-	
+
 	return $users;
 }
 
@@ -33,20 +33,25 @@ function getMTPUserName()
 	$users = getFilledUserArray();
 
 
-    $addr = $_SERVER['REMOTE_ADDR'];
+	$addr = $_SERVER['REMOTE_ADDR'];
 	$host = gethostbyaddr( $addr );
-	
+
 	if( isset( $users[$addr] ) )
 	{
 		return $users[$addr];
-  	}
-  	
-  	if( isset( $users[$host] ) )
+	}
+
+	if( isset( $users[$host] ) )
 	{
 		return $users[$host];
-  	}
+	}
 
-	return $users[0];
+	if( isset( $users[0] ) )
+	{
+		return $users[0];
+	}
+
+	return "";
 }
 
 print getMTPUserName();
