@@ -210,7 +210,7 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 		$this->mapFieldValue( 'XMP', 'Creator', 'Author', array( $this, 'castToUtf8String' ) );
 
 		// v10.1: The format of the two date fields below differ from xsd:datetime and are not converted properly.
-		//        The core server overwrites the creation time stamp anyway, so let's skip them here.
+		//        The core server overwrites the creation time stamp anyway, so let's skip them here. (EN-87917)
 		//$this->mapFieldValue( 'IPTC', 'DateCreated', 'Created', array( $this, 'castToUtf8String' ) );
 		//$this->mapFieldValue( 'XMP', 'CreateDate', 'Created', array( $this, 'castToUtf8String' ) );
 
