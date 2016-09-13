@@ -23,8 +23,8 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * Publishes a dossier with contained objects (articles. images, etc.) to an external publishing system.
 	 * The plugin is supposed to publish the dossier and it's articles and fill in some fields for reference.
 	 *
-	 * @param Object $dossier         [writable]
-	 * @param Object[] $objectsInDossier [writable] Array of Object.
+	 * @param Object $dossier            [writable]
+	 * @param Object[] $objectsInDossier [writable]
 	 * @param PubPublishTarget $publishTarget
 	 * @return PubField[] containing information from publishing system
 	 */	
@@ -32,13 +32,13 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 		
 	/*	Example algorithm
 		1. Publish the dossier and it's objects to the publishing system.
-			a. Read $objectindossier->Files->Attachment[0]->Content to read the contents of the file
+			a. Read $objectsInDossier->Files->Attachment[0]->Content to read the contents of the file
 			b. Optional: convert the files to a format recognized by the publishing system
 			c. Publish the files
 			d. throw a BizException if the publishing fails.
 		2. Fill in $dossier->ExternalId with a string uniquely identifying the dossier in the 
 		   publishing system;
-		3. Optional: For each $object in $objectsindossier: fill in $objectindossier->ExternalId 
+		3. Optional: For each $object in $objectsInDossier: fill in $object->ExternalId
 		   with an unique id identifying the object.
 		4. Return array of Field's about the dossier in the publishing system, for example:
 			numviews, rating, numraters, numcomments, url
@@ -70,16 +70,16 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */	
 	abstract public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget );
 	/*	Example algorithm
-		1. Update/repblish the dossier and it's objects to the publishing system, identifying the 
+		1. Update/republish the dossier and it's objects to the publishing system, identifying the
 		   data to be updated with $dossier->ExternalId.
-			a. Read $objectindossier->Files->Attachment[0]->Content to read the contents of the file
+			a. Read $objectsInDossier->Files->Attachment[0]->Content to read the contents of the file
 			b. Optional: convert the files to a format recognized by the publishing system
 			c. Publish the files
 			d. throw a BizException if the updating/republishing fails.
-		2. Optional: For each $object in $objectsindossier: use $objectindossier->ExternalId.
+		2. Optional: For each $object in $objectsInDossier: use $object->ExternalId.
 		3. If changed: Fill in $dossier->ExternalId with a string uniquely identifying the dossier 
 		   in the publishing system, this is only needed if this id has changed;
-		4. Optional: For each $object in $objectsindossier: fill in $objectindossier->ExternalId with 
+		4. Optional: For each $object in $objectsInDossier: fill in $object->ExternalId with
 		   an unique id identifying the object, this is only needed if these id's have changed.
 		5. Return array of Fields with data about the dossier in the publishing system, for example:
 			numviews, rating, numraters, numcomments, url
@@ -113,7 +113,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 		   be updated with $dossier->ExternalId.
 			a. Unpublish the dossier
 			b. throw a BizException if the updating/republishing fails.
-		2. Optional: For each $object in $objectsindossier: use $objectindossier->ExternalId.
+		2. Optional: For each $object in $objectsInDossier: use $object->ExternalId.
 		3. Return array of Fields with data about the dossier in the publishing system, for example:
 			numviews, rating, numraters, numcomments, url
 	*/
@@ -132,8 +132,8 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	public function unpublishAbort( $publishTarget )  {}
 
 	/**
-	 * Requests fieldvalues from an external publishing system
-	 * using the $dossier->ExternalId to identify the dosier to the publishing system.
+	 * Requests field values from an external publishing system
+	 * using the $dossier->ExternalId to identify the dossier to the publishing system.
 	 *
 	 * @param Object $dossier
 	 * @param Object[] $objectsInDossier
@@ -144,15 +144,15 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	abstract public function requestPublishFields( $dossier, $objectsInDossier, $publishTarget );
 	/*	Example algorithm
 		1. Query fields from the publishing system, identifying the data with $dossier->ExternalId.
-			a. query fieldvalues by looping through the fieldnames.
+			a. query field values by looping through the field names.
 			b. throw a BizException if the request fails.
-		2. Optional: For each $object in $objectsindossier: use $objectindossier->ExternalId.
+		2. Optional: For each $object in $objectsInDossier: use $object->ExternalId.
 		3. Return array of Fields.
 	*/
 
 	/**
 	 * Requests dossier URL from an external publishing system
-	 * using the $dossier->ExternalId to identify the dosier to the publishing system.
+	 * using the $dossier->ExternalId to identify the dossier to the publishing system.
 	 *
 	 * @param Object $dossier
 	 * @param Object[] $objectsInDossier
@@ -209,7 +209,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	/**
 	 * Allows connector to act on changes to published issue properties. To get full control
 	 * of the issue being changed, the original published issue ($orgIssue) is provided.
-	 * The passed $newIssue contains only thonse properties that actually are different from $orgIssue.
+	 * The passed $newIssue contains only those properties that actually are different from $orgIssue.
 	 * The connector may adjust $newIssue Fields property when needed. The core server merges both and updates the DB after.
 	 *
 	 * @since 7.5
@@ -333,8 +333,8 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	public function getPublishDossierFieldsForWebServices() { return null; }
 	
 	/**
-	 * Allows connector to filter out fields that needs to be Ncasted (broadcasted/multicasted).
-	 * By default, no fields are Ncasted. The function should simply return the key names of the
+	 * Allows connector to filter out fields that needs to be N-casted (broadcasted/multicasted).
+	 * By default, no fields are N-casted. The function should simply return the key names of the
 	 * fields. The core checks if those keys are available and includes those in the Ncasting.
 	 *
 	 * @return array|null List of PubField keys. NULL to include all fields.
@@ -442,7 +442,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	}
 	
 	/**
-	 * Can be called by connectors to find out the actualy operation phase when its previewDossier(), 
+	 * Can be called by connectors to find out the actual operation phase when its previewDossier(),
 	 * publishDossier(), updateDossier() or unpublishDossier() functions are called. See above for more details.
 	 *
 	 * @since 7.5
@@ -468,7 +468,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	}
 	
 	/**
-	 * Can be called by connectors to find out the actualy operation id when its previewDossier(), 
+	 * Can be called by connectors to find out the actual operation id when its previewDossier(),
 	 * publishDossier(), updateDossier() or unpublishDossier() functions are called. See above for more details.
 	 *
 	 * @since 7.5
@@ -480,7 +480,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	}
 
 	/**
-	 * Can be called by connectors to find out the actualy operation name when its previewDossier(), 
+	 * Can be called by connectors to find out the actual operation name when its previewDossier(),
 	 * publishDossier(), updateDossier() or unpublishDossier() functions are called. See above for more details.
 	 *
 	 * @since 7.5
