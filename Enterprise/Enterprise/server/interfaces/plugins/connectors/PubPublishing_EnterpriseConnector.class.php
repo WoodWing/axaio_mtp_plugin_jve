@@ -631,7 +631,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function getFileFormatsForOutputImage()
 	{
-		return array( 'image/jpeg' );
+		return array( 'image/png' );
 	}
 
 	/**

@@ -173,6 +173,7 @@ class BizImageConverter
 		// Lookup a connector that supports the most preferred output mime type (file format).
 		$supportedOutputFormats = $this->getSupportedOutputFormats( $channelId );
 		$connector = null;
+		$outputFormat = null;
 		foreach( $supportedOutputFormats as $outputFormat ) {
 			$connector = $this->getBestConnector( $this->inputImageAttachment->Type, $outputFormat );
 			if( $connector != null ) {
@@ -183,14 +184,10 @@ class BizImageConverter
 			return false;
 		}
 
-		$outputFilePath = $this->createOutputFile(
-			$this->inputImageProps['Format'],
-			$this->inputImageProps['Type'] ); // could be Image or Advert
-
 		$attachment = new Attachment();
-		$attachment->Type = 'image/jpeg';
+		$attachment->Type = $outputFormat;
 		$attachment->Rendition = 'output';
-		$attachment->FilePath = $outputFilePath;
+		$attachment->FilePath = $this->createOutputFile( $outputFormat, 'Image' );
 		$this->outputImageAttachment = $attachment;
 
 		BizServerPlugin::runConnector( $connector, 'resetOperations', array() );
