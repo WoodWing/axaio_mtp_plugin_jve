@@ -189,7 +189,9 @@ class BizPlnObject
 				$page->Files = null; // avoid conflicts
 				// Treat property that do not occur in planning WSDL
 				$page->Instance = 'Planning';
-				$page->PageNumber = "$page->PageOrder";
+				if ( isset( $page->Number ) && !empty( $page->Number ) ) {
+					$page->PageNumber = strval( $page->PageOrder );
+				}
 
 				// resolve edition ids (or names)
 				if( $page->Edition && ($page->Edition->Id || $page->Edition->Name)) {
@@ -743,7 +745,9 @@ class BizPlnObject
 			$wflPage->Files = null; // Avoid conflicts.
 			// Set defaults for properties that do not occur in planning WSDL.
 			$wflPage->Instance = 'Planning';
-			$wflPage->PageNumber = "$page->PageOrder";
+			if ( isset( $page->PageNumber ) && !empty( $page->PageNumber ) ) {
+				$wflPage->PageNumber = strval( $page->PageOrder );
+			}
 			// Create planned page in DB
 			BizPage::insertPage( null, $resp->MetaData->BasicMetaData->ID, $wflPage, $resp->MetaData->WorkflowMetaData->Version );
 		}

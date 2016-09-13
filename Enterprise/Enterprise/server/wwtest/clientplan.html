@@ -9,14 +9,14 @@
 <li>When Issue and/or Section are given, but do not exist, they are created automatically.</li>
 <li>Layouts are NOT removed after DeleteLayouts operation. Instead, they are marked with a flag and message informing user that layout is removed from plan. Adverts ARE removed after DeleteAdverts.</li>
 <li>When the advert/layout is locked and the ModifyLayouts/ModifyAdverts operations fails. Assumed is that the plan system re-schedules the update operation.</li>
-<li>Planned relations (between layouts and adverts) are created/removed by the plan system. Placed relations are maintained by InDesign.</i>
+<li>Planned relations (between layouts and adverts) are created/removed by the plan system. Placed relations are maintained by InDesign.</li>
 <li>When a planned layout-advert relation is deleted, and there is no placed relation for that advert, the advert gets deleted implicitly.</li>
 <li>For all layout operations, a flag is set and message is sent to the layout. For adverts operations the same is done, but then to the layout on which the advert is placed.</li> 
 </ul>
 Note: Using the clientplan.php tool, adverts are randomly positioned and re-shaped on random pages of the layout. This means each update to the adverts becomes always visible.
 
 
-<hr><b>Parameters:</b><br><ul>
+<hr><b>Parameters:</b><br /><ul>
 <li>The <b>show</b> parameter shows the SOAP requests and responses in different ways. 
 <ul>
 	<li>The <i>wire</i> option shows SOAP envelopes and DIME attachments. </li>
@@ -27,14 +27,13 @@ For example, <a href="http://localhost/Enterprise/server/wwtest/clientplan?show=
 </li><li>The <b>namebased</b> parameter uses names instead of ids to refer to layout and advert objects for all SOAP requests. Layouts are assumed to be in the same publication and issue as the adverts when using names. 
 It is recommended to use ids since objects can be renamed in the editorial system that can cause your requests to fail when using names. This parameter has no effect on publication/issue values, which are always name based.
 </li><li>The <b>ip_port</b> parameter is obsoleted. You can change port at HTTP server.
-
-</li><br><li>The <b>act_create</b> parameter performs CreateLayouts and/or CreateAdverts. Supported values are <i>layout</i>, <i>advert</i>, <i>none</i> and <i>all</i>. Default value is <i>all</i>.
+</li><br /><li>The <b>act_create</b> parameter performs CreateLayouts and/or CreateAdverts. Supported values are <i>layout</i>, <i>advert</i>, <i>none</i> and <i>all</i>. Default value is <i>all</i>.
 </li><li>The <b>act_modify</b> parameter performs ModifyLayouts and/or ModifyAdverts. Supported values are <i>layout</i>, <i>advert</i>, <i>none</i> and <i>all</i>. Default value is <i>all</i>.
 </li><li>The <b>act_delete</b> parameter performs DeleteLayouts and/or DeleteAdverts. Supported values are <i>layout</i>, <i>advert</i>, <i>none</i> and <i>all</i>. Default value is <i>all</i>.
 </li><li>The <b>no_modify</b> parameter is obsoleted. Use act_modify instead. 
 </li><li>The <b>delete</b> parameter is obsoleted. Use act_delete instead.
 
-</li><br><li>The <b>layout_id</b> parameter points to an existing layout. If you know the object id, you can avoid creating new layouts by specifying this parameter. All modifications are then done to the existing layout. 
+</li><br /><li>The <b>layout_id</b> parameter points to an existing layout. If you know the object id, you can avoid creating new layouts by specifying this parameter. All modifications are then done to the existing layout.
 </li><li>The <b>advert_id</b> parameter points to an existing advert. If you know the object id, you can avoid creating new advert by specifying this parameter. All modifications are then done to the existing advert. 
 </li><li>The <b>publication</b> and <b>issue </b> parameters define the location where to create/modify layouts/adverts. Default are resp. 'WW News' and '2nd Issue'.
 </li><li>The <b>lay_name</b> and <b>adv_name </b> parameters specify name of layout or advert. Default is random name.
@@ -44,14 +43,16 @@ It is recommended to use ids since objects can be renamed in the editorial syste
 </li><li>The <b>lay_editions</b> and <b>adv_editions</b> parameters specify editions for layout or advert. Values are seperated with semi-colons, for example: <i>lay_editions=North;East</i>. Default is empty to let Enterprise choose all editions defined for publication or issue.
 </li><li>The <b>lay_deadline</b> and <b>adv_deadline </b> parameters specify deadline for layout or advert. Format is: YYYY-MM-DDTHH:MM:SS, for example: <i>lay_deadline=2006-12-31T24:00:00</i>. Default is empty, which means no deadline to meet.
 </li>
-<br> <li><font color="red"><b>Since v5.0: </b></font>The <b>pag[pos]_height</b> and <b>pag[pos]_width</b> parameters specify dimensions for the page indicated with [pos]. For example: <i>pag2_height=650</i> and <i>pagenrs=33,34,35,36</i> will set page 34(!) to 650 points high. The "pagenrs" parameter is required and the page [pos] must reside in that scope. When no [pos] given, all pages get the same height or width. For example: <i>pag_width=200</i>.
-</li><li><font color="red"><b>Since v5.0: </b></font>The <b>pag[pos]_master</b> parameter specifies the master page (of layout template) to use for page indicated with [pos]. For example: <i>pag3_master=Cover</i> and <i>pagenrs=12,13,14,15</i> will use master page named 'Cover' for page number 14. When not specified or not exists, the default master is taken from template. The "pagenrs" or "pagenrs_<i>edition</i>" parameter is required and the page [pos] must reside in that scope. When no [pos] given, all pages get the same master. For example: <i>pag_master=Appendix</i>.
-</li><li><font color="red"><b>Since v5.0: </b></font>The <b>pagenrs</b> and/or <b>pagenrs_<i>edition</i></b> parameters define the page numbers [1..N] for the layout. Default is random page number with random page count. For example: <i>pagenrs=3,4,5,6</i> <br/>
+<br> <li>The <b>pag[pos]_height</b> and <b>pag[pos]_width</b> parameters specify dimensions for the page indicated with [pos]. For example: <i>pag2_height=650</i> and <i>pagenrs=33,34,35,36</i> will set page 34(!) to 650 points high. The "pagenrs" parameter is required and the page [pos] must reside in that scope. When no [pos] given, all pages get the same height or width. For example: <i>pag_width=200</i>.
+</li><li>The <b>pag[pos]_master</b> parameter specifies the master page (of layout template) to use for page indicated with [pos]. For example: <i>pag3_master=Cover</i> and <i>pagenrs=12,13,14,15</i> will use master page named 'Cover' for page number 14. When not specified or not exists, the default master is taken from template. The "pagenrs" or "pagenrs_<i>edition</i>" parameter is required and the page [pos] must reside in that scope. When no [pos] given, all pages get the same master. For example: <i>pag_master=Appendix</i>.
+</li><li>The <b>pagenrs</b> and/or <b>pagenrs_<i>edition</i></b> parameters define the page numbers [1..N] for the layout. Default is random page number with random page count. For example: <i>pagenrs=3,4,5,6</i> <br/>
 Page numbering can differ per edition. In that case, the same layout pages are used, but numbers differ. For example: <i>pagenrs_North=10,11,12,13</i>. 
 In that case, the first page has number 3 for all editions, except for 'North' edition for which the page number is 10.
 Make sure you specify the same amount of pages for each edition. Also the general amount of pages specified with <i>pagenrs</i> parameters should match all edition specific pages specified with <i>pagenrs_North</i> parameter. Note that the referred <i>edition</i> must be one of the editions specified with <i>lay_editions</i> parameter.
+</li><li>The <b>num_style</b> allows you to specify an alternative page number style. Supported values are <i>roman</i> and <i>alpha</i>. The default value is <i>arabic</i>. In case of <i>roman</i> page order 1 will become page number <i>I</i>. In case of <i>alpha</i> page order 2 will become page number <i>B</i>.
+</li><li>The <b>num_prefix</b> allows you to specify a page number prefix. The maximum length is 8 characters. If set to <i>pre</i> page order 1 will be set to page number <i>pre 1</i>.
 
-</li><br><li>The <b>content</b> parameter tells what kind of content is used. Possible values are <i>highresfile, output, preview, plaincontent</i> or <i>description</i>. 
+</li><br /><li>The <b>content</b> parameter tells what kind of content is used. Possible values are <i>highresfile, output, preview, plaincontent</i> or <i>description</i>.
 <ul>
 <li>The <i>highresfile</i> option sends file path only. Make sure that the plugins have access to it. Use the "ad_filename" parameter to specify a filename to use.</li>
 <li>The <i>output</i> option sends the highres file as a DIME attachment in the SOAP message. Uses the output1page1.pdf on create and output1page2.pdf on modify.</li>
@@ -63,16 +64,16 @@ When parameter is not given, the default value <i>preview</i> is used.
 </ul>
 </li><li>The <b>ad_filename</b> parameter defines the filename that will be used when setting the content parameter to <i>highresfile</i>. Make sure that you have a subfolder <b>wwtest</b> in your high-resolution folder to store the file defined by this parameter. When omitted uses output1page1.pdf on create and output1page2.pdf on modify.
 
-</li><br><li>The <b>left, top, width</b> and <b>height </b> parameters define position/size of the created/modified adverts. Default is random position/size.
+</li><br /><li>The <b>left, top, width</b> and <b>height </b> parameters define position/size of the created/modified adverts. Default is random position/size.
 </li><li>The <b>pagenr</b> parameter define the target page [1..N] on the layout to place/move advert. Default is random page position. This is page position within the layout, not the page number.
 </li>
 
-<br> <li><font color="red"><b>Since v5.0: </b></font>The <b>ad_layer</b> parameter specifies the InDesign layer name for advert.
+<br /> <li>The <b>ad_layer</b> parameter specifies the InDesign layer name for advert.
 </li>
-<li><font color="red"><b>Since v5.0: </b></font>The <b>ad_dx</b> parameter moves the advert graphic relatively to frame (not to page) from left to right in points (pt). Use negative values for moves towards the left. Default is random value.</li>
-<li><font color="red"><b>Since v5.0: </b></font>The <b>ad_dy</b> parameter moves the advert graphic relatively to frame (not to page) from top to bottom in points (pt). Use negative values for moves towards the top. Default is random value.</li>
-<li><font color="red"><b>Since v5.0: </b></font>The <b>ad_scalex</b> parameter specifies the factor to scale the advert graphic horizontally in its frame. Value 0.15 means 15.2%. 1.0 for 100%. Default is random value.</li>
-<li><font color="red"><b>Since v5.0: </b></font>The <b>ad_scaley</b> parameter does the same as "ad_scalex" but then vertically.
+<li>The <b>ad_dx</b> parameter moves the advert graphic relatively to frame (not to page) from left to right in points (pt). Use negative values for moves towards the left. Default is random value.</li>
+<li>The <b>ad_dy</b> parameter moves the advert graphic relatively to frame (not to page) from top to bottom in points (pt). Use negative values for moves towards the top. Default is random value.</li>
+<li>The <b>ad_scalex</b> parameter specifies the factor to scale the advert graphic horizontally in its frame. Value 0.15 means 15.2%. 1.0 for 100%. Default is random value.</li>
+<li>The <b>ad_scaley</b> parameter does the same as "ad_scalex" but then vertically.
 </ul>
 
 
