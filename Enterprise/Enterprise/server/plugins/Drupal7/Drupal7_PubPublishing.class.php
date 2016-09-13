@@ -459,9 +459,10 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Checks if the child object has been changed since it was last published.
+	 * Checks if the child object file needs to be uploaded to Drupal.
 	 *
-	 * Checks if the child object has been changed since the last time it was published.
+	 * If the child has no ExternalId yet, we have no reference, so it needs uploading.
+	 * Else it checks if the child object has been changed since the last time it was published.
 	 * If the published version of the object is older (older version number) then the
 	 * object needs to be re-uploaded to Drupal. When the child has never been uploaded
 	 * (publishing for the first time) the object needs to be uploaded as well.
@@ -475,18 +476,20 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	{
 		$publishedChildVersion = null;
 		$publishedChildPublishDate = null;
-		$formRelations = $publishForm->Relations;
-		if( $formRelations ) foreach( $formRelations as $relation ) {
-			if( $relation->Parent == $publishForm->MetaData->BasicMetaData->ID &&
-				$relation->Child == $childObj->MetaData->BasicMetaData->ID &&
-				$relation->Type == 'Placed'
-			) {
-				if( $relation->Targets ) foreach( $relation->Targets as $target ) {
-					$isSameIssue = ( $target->Issue->Id == $publishTarget->IssueID );
-					if( $isSameIssue ) {
-						$publishedChildVersion = $target->PublishedVersion;
-						$publishedChildPublishDate = $target->PublishedDate;
-						break 2;
+		if( $childObj->ExternalId ) {
+			$formRelations = $publishForm->Relations;
+			if( $formRelations ) foreach( $formRelations as $relation ) {
+				if( $relation->Parent == $publishForm->MetaData->BasicMetaData->ID &&
+					$relation->Child == $childObj->MetaData->BasicMetaData->ID &&
+					$relation->Type == 'Placed'
+				) {
+					if( $relation->Targets ) foreach( $relation->Targets as $target ) {
+						$isSameIssue = ( $target->Issue->Id == $publishTarget->IssueID );
+						if( $isSameIssue ) {
+							$publishedChildVersion = $target->PublishedVersion;
+							$publishedChildPublishDate = $target->PublishedDate;
+							break 2;
+						}
 					}
 				}
 			}
