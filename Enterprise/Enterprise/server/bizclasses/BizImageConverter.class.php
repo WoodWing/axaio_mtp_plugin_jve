@@ -167,6 +167,7 @@ class BizImageConverter
 			$conversionOperations[] = 'scale';
 		}
 		if( !$conversionOperations ) {
+			LogHandler::Log( 'ImageConverter', 'ERROR', 'No crop or scale operations defined for image. Image not converted.' );
 			return false;
 		}
 
@@ -213,6 +214,7 @@ class BizImageConverter
 					BizServerPlugin::runConnector( $connector, 'scale', array( $placement->ScaleX, $placement->ScaleY ) );
 					break;
 				default:
+					LogHandler::Log( 'ImageConverter', 'ERROR', 'No unknown operation requested to convert image: '.$operation );
 					break;
 			}
 		}

@@ -65,6 +65,7 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 			if( $inputImage ) {
 				$outputImage = imagecreatetruecolor( intval($this->outputWidth), intval($this->outputHeight) );
 				if( $outputImage ) {
+					$resampledFailed = false;
 					if( $this->applyCrop || $this->applyScale || $this->applyResize ) {
 						// The crop window can be sticking out on any side of the input window. The imagecopyresampled() call
 						// would then make those parts black in the output image (crop), which is unwanted. ImageMagick will
@@ -81,10 +82,13 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 						$cropHeight = min( $cropHeight, $this->inputHeight - $cropTop );
 						$outputWidth = min( $this->outputWidth, $cropWidth );
 						$outputHeight = min( $this->outputHeight, $cropHeight );
-						imagecopyresampled(
+						$resampledFailed = !imagecopyresampled(
 							$outputImage, $inputImage, // dst, src
 							0, 0, $cropLeft, $cropTop, // (dst_x, dst_y), (src_x, src_y),
 							$outputWidth, $outputHeight, $cropWidth, $cropHeight ); // (dst_w, dst_h), (src_w, src_h)
+						if( $resampledFailed ) {
+							LogHandler::Log( 'ImageConverter', 'ERROR', 'Could not resample image for file "'.$this->inputFilePath.'". ' );
+						}
 					}
 					if( $this->applyMirror ) {
 						if( $this->mirrorHorizontal && $this->mirrorVertical ) {
@@ -96,12 +100,21 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 					}
 					if( $this->applyRotate ) {
 						$outputImage = imagerotate( $outputImage, $this->rotateDegrees, 0 );
+						if( !$outputImage ) {
+							LogHandler::Log( 'ImageConverter', 'ERROR', 'Could not rotate image for file "'.$this->inputFilePath.'". ' );
+						}
 					}
-					$retVal = self::save( $outputImage, $this->outputFilePath );
+					if( !$resampledFailed && $outputImage ) {
+						$retVal = self::save( $outputImage, $this->outputFilePath );
+					}
 					imagedestroy( $outputImage );
+				} else {
+					LogHandler::Log( 'ImageConverter', 'ERROR', 'Could not create image for file "'.$this->inputFilePath.'". ' );
 				}
 				imagedestroy( $inputImage );
 			}
+		} else {
+			LogHandler::Log( 'ImageConverter', 'INFO', 'No operation defined to convert the image. No action taken.' );
 		}
 		return $retVal;
 	}
@@ -141,6 +154,13 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 			case IMAGETYPE_PNG:
 				$image = imagecreatefrompng( $fileName );
 				break;
+			default:
+				LogHandler::Log( 'ImageConverter', 'ERROR', 'Could not load image from file "'.$fileName.'". '.
+					'Unsupported image file type: '.$imageInfo[2] );
+				break;
+		}
+		if( !$image ) {
+			LogHandler::Log( 'ImageConverter', 'ERROR', 'Could not load image from file "'.$fileName.'".' );
 		}
 		return $image;
 	}
@@ -166,6 +186,13 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 			case IMAGETYPE_PNG:
 				$retVal = imagepng( $image, $fileName );
 				break;
+			default:
+				LogHandler::Log( 'ImageConverter', 'ERROR', 'Could not save image to file "'.$fileName.'". '.
+					'Unsupported image file type: '.$imageType );
+				break;
+		}
+		if( !$retVal ) {
+			LogHandler::Log( 'ImageConverter', 'ERROR', 'Could not save image to file "'.$fileName.'".' );
 		}
 		return $retVal;
 	}

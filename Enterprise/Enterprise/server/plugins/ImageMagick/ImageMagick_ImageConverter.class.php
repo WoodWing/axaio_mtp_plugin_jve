@@ -88,6 +88,8 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 			));
 			require_once BASEDIR . '/server/plugins/ImageMagick/ImageMagick.class.php';
 			$retVal = ImageMagick::imageMagickCmd( $cmdName, $cmdLine ) == 0;
+		} else {
+			LogHandler::Log( 'ImageConverter', 'INFO', 'No operation defined to convert the image. No action taken.' );
 		}
 		return $retVal;
 	}
