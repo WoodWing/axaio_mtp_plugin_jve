@@ -1305,12 +1305,35 @@ if( !defined('IMAGE_MAGICK_APP_PATH') ) {
 
 // IMAGE_MAGICK_OPTIONS:
 //    Options passed to the ImageMagick application to influence the quality of previews and thumbnails.
-//    For more informtion see: http://www.imagemagick.org/script/command-line-options.php
+//    For more information see: http://www.imagemagick.org/script/command-line-options.php
 //    The size (-size) is set by Enterprise and must not be set here.
-//    The default value is ' -colorspace sRGB -quality 100 -sharpen 5 -layers merge -depth 8 -strip -density 72x72 '
+//    The default value is ' -colorspace sRGB -quality 92 -sharpen 5 -layers merge -depth 8 -strip -density 72x72 '
 //
 if( !defined('IMAGE_MAGICK_OPTIONS') ) {
 	define( 'IMAGE_MAGICK_OPTIONS', '-colorspace sRGB -quality 92 -sharpen 5 -layers merge -depth 8 -strip -density 72x72' );
+}
+
+// IMAGE_MAGICK_PUBLISH_OPTIONS:
+//    Options passed to the ImageMagick application to influence the quality of image conversions when published to
+//    web channels. Conversion takes place when images are cropped or scaled on a Publish Form and published to
+//    Drupal, Wordpress, Twitter or Facebook.
+//    The following options are set by Enterprise and must not be set here:
+//       -verbose, -units, -density, -resize, -crop, -rotate, -flip, -flop
+//    The default setting as shipped with Enterprise is defined as follows:
+//       '-colorspace %colorspace% -quality %quality% -sharpen %sharpen% -layers %layers% -depth %depth% -strip'
+//    Before using the default setting, the options are automatically filled in by Enterprise as follows:
+//       -colorspace sRGB -quality 92 -sharpen 5 -layers merge -depth 8 -strip
+//    To change one of these options, please replace the placeholder with a fixed value, for example:
+//       replace: -quality %quality%
+//       with:    -quality 100
+//    In this example the %quality% placeholder will no longer be replaced by Enterprise. And so, instead of using
+//    the default quality value 92, it is using the configured quality value 100.
+//    ImageMagick options that are not mentioned can be added to the setting.
+//    And, any of the listed default options can be removed as well.
+//    For more information about ImageMagick options see: http://www.imagemagick.org/script/command-line-options.php
+//
+if( !defined('IMAGE_MAGICK_PUBLISH_OPTIONS') ) {
+	define( 'IMAGE_MAGICK_PUBLISH_OPTIONS', '-colorspace %colorspace% -quality %quality% -sharpen %sharpen% -layers %layers% -depth %depth% -strip' );
 }
 
 // GHOST_SCRIPT_APP_PATH:

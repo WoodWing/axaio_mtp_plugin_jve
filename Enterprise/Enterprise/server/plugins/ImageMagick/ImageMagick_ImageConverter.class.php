@@ -13,6 +13,9 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 	/** @var array $cmdParams List of parameters to put on command line when calling ImageMagick. */
 	private $cmdParams = array();
 
+	/** @var string $configCmdLineParams  */
+	private $configCmdLineParams = '';
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -83,6 +86,7 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 			$cmdLine = implode( ' ', array(
 				$cmdName,
 				escapeshellarg( $this->inputFilePath.'[0]' ), // [0] = first layer only
+				$this->configCmdLineParams,
 				$this->serializeParams(),
 				escapeshellarg( $this->outputFilePath )
 			));
@@ -116,6 +120,7 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 	{
 		parent::resetOperations();
 		$this->cmdParams = array();
+		$this->configCmdLineParams = IMAGE_MAGICK_PUBLISH_OPTIONS;
 	}
 
 	/**
@@ -123,10 +128,15 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 	 *
 	 * @param string $name Parameter to appear as -param on the command line
 	 * @param string|null $value The value to put after parameter name on command line. NULL to skip.
+	 * @param bool $config
 	 */
-	private function addCmdParam( $name, $value=null )
+	private function addCmdParam( $name, $value=null, $config=false )
 	{
-		$this->cmdParams[$name] = $value;
+		if( $config ) {
+			$this->configCmdLineParams = str_replace( '%'.$name.'%', $value, $this->configCmdLineParams );
+		} else {
+			$this->cmdParams[ $name ] = $value;
+		}
 	}
 
 	/**
@@ -137,14 +147,16 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 		if( LogHandler::debugMode() ) {
 			$this->addCmdParam( 'verbose' );
 		}
-		$this->addCmdParam( 'colorspace', 'sRGB' );
-		$this->addCmdParam( 'quality', '92' );
-		$this->addCmdParam( 'sharpen', '5' );
-		$this->addCmdParam( 'layers', 'merge' );
-		$this->addCmdParam( 'depth', '8' );
-		$this->addCmdParam( 'strip' );
 		$this->addCmdParam( 'units', 'PixelsPerInch' ); // used conjunction with 'density' param
 		$this->addCmdParam( 'density', $this->outputDpi );
+
+		// Fill in the template option IMAGE_MAGICK_PUBLISH_OPTIONS with default values.
+		$this->addCmdParam( 'colorspace', 'sRGB', true );
+		$this->addCmdParam( 'quality', '92', true );
+		$this->addCmdParam( 'sharpen', '5', true );
+		$this->addCmdParam( 'layers', 'merge', true );
+		$this->addCmdParam( 'depth', '8', true );
+		$this->addCmdParam( 'strip', null, true );
 	}
 
 	/**
