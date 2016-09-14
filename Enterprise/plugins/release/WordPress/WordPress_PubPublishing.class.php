@@ -179,6 +179,9 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 			} else { // create a new gallery
 				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget,
 					null, $dossier->MetaData->BasicMetaData->Name, $attachments );
+				if( isset( $uploadImagesResult['galleryId'] ) ) {
+					$galleryId = $uploadImagesResult['galleryId'];
+				}
 			}
 
 			// Cleanup the temporary created images files.

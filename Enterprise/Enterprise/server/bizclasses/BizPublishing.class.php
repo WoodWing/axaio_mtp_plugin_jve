@@ -2083,9 +2083,16 @@ class BizPublishing
 						$bizImageConverter = null;
 					}
 					if( isset( $bizImageConverters[ $objectId ] ) ) {
-						$this->convertImage( $operation, $publishTarget,
-							$objectId, $relation->ChildVersion,
-							$placement, $foundPubPlacementIds, $bizImageConverters[ $objectId ], $pubPlacementsIndex );
+						// The fact that an image converter exists in cache does not indicate whether the image needs conversion;
+						// It could be that the one image is placed twice of which the first is cropped and the second is not.
+						// So we need to call doesImageNeedConversion() here again to check the specific placement of the image.
+						$bizImageConverter = $bizImageConverters[ $objectId ];
+						if( $bizImageConverter->doesImageNeedConversion( $objectId, $placement ) ) {
+							$this->convertImage( $operation, $publishTarget,
+								$objectId, $relation->ChildVersion,
+								$placement, $foundPubPlacementIds, $bizImageConverter, $pubPlacementsIndex );
+						}
+						$bizImageConverter = null;
 					}
 				}
 			}
