@@ -293,6 +293,10 @@ class AxaioMadeToPrintDispatcher
 
 		$layEditionId = $layEdition ? $layEdition->Id : 0;
 
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        $dom->formatOutput = true;
+        $rootNode = $dom->appendChild(new DOMElement('mtp-data'));
+        
         // Add custom MtP meta data props to the job
 		foreach($mtparr as $field => $value){
 			// Convert SCE custom prop name convention to MtP, e.g.
@@ -342,9 +346,6 @@ class AxaioMadeToPrintDispatcher
 		}*/
 
 		// Build processing files and write them to folder (AXAIO_MTP_AXAIO_FOLDER_IN)
-		$dom = new DOMDocument('1.0', 'UTF-8');
-		$dom->formatOutput = true;
-		$rootNode = $dom->appendChild(new DOMElement('mtp-data'));
 		self::domAddElement($dom, $rootNode, 'preprocess-javascript', $mtpPaths['axaio_prejs_in']);
 		self::domAddElement($dom, $rootNode, 'postprocess-javascript', $mtpPaths['axaio_postjs_in']);
 		self::domAddElement($dom, $rootNode, 'print-set', $jobname);
