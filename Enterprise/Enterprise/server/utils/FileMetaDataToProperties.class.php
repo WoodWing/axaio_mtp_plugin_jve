@@ -25,8 +25,10 @@ class WW_Utils_FileMetaDataToProperties_Factory
 	static public function createConverter( $source )
 	{
 		if ( $source == 'iptc' ) {
+			/** @noinspection PhpDeprecationInspection */
 			return new WW_Utils_FileIPTCDataToProperties();
 		} elseif ( $source == 'xmp' ) {
+			/** @noinspection PhpDeprecationInspection */
 			return new WW_Utils_FileXMPDataToProperties();
 		}
 
@@ -52,6 +54,8 @@ abstract class WW_Utils_FileMetaDataToProperties
 /**
  * @deprecated v10.1.0 This class is deprecated and should be removed with v11.
  */
+
+/** @noinspection PhpDeprecationInspection */
 class WW_Utils_FileIPTCDataToProperties extends  WW_Utils_FileMetaDataToProperties
 {
 	/**
@@ -75,8 +79,8 @@ class WW_Utils_FileIPTCDataToProperties extends  WW_Utils_FileMetaDataToProperti
 		if( !array_key_exists('Copyright', $metaData ) && array_key_exists("2#116",$iptcData) ) {
 			$metaData['Copyright'] = UtfString::smart_utf8_encode($iptcData["2#116"][0]);
 		}
-		// v10.1: The format of the two date fields below differ from xsd:datetime and are not converted properly.
-		//        The core server overwrites the creation time stamp anyway, so let's skip them here. (EN-87917)
+		// v10.1.0: The format of the two date fields below differ from xsd:datetime and are not converted properly.
+		//          The core server overwrites the creation time stamp anyway, so let's skip them here. (EN-87917)
 		//if( !array_key_exists('Created', $metaData ) && array_key_exists("2#055",$iptcData) ) {
 		//	$metaData['Created'] = UtfString::smart_utf8_encode($iptcData["2#055"][0]);
 		//}
@@ -116,6 +120,8 @@ class WW_Utils_FileIPTCDataToProperties extends  WW_Utils_FileMetaDataToProperti
 /**
  * @deprecated v10.1.0 This class is deprecated and should be removed with v11.
  */
+
+/** @noinspection PhpDeprecationInspection */
 class WW_Utils_FileXMPDataToProperties extends  WW_Utils_FileMetaDataToProperties
 {
 	/**
@@ -152,8 +158,8 @@ class WW_Utils_FileXMPDataToProperties extends  WW_Utils_FileMetaDataToPropertie
 			if( isset($metaData['Rating'] ) ) {
 				$metaData['Rating'] = intval( $metaData['Rating'] ); // BZ#35029 Make sure that Rating is an integer.
 			}
-			// v10.1: The format of the two date fields below differ from xsd:datetime and are not converted properly.
-			//        The core server overwrites the creation time stamp anyway, so let's skip them here. (EN-87917)
+			// v10.1.0: The format of the two date fields below differ from xsd:datetime and are not converted properly.
+			//          The core server overwrites the creation time stamp anyway, so let's skip them here. (EN-87917)
 			//$this->getXMPValue( $metaData, 'Created', 'string', $xmpData, '//xap:CreateDate' );
 			//if( !isset($metaData['Created'] ) ) { // Try to find alternative way.
 			//	$this->getXMPValue( $metaData, 'Created','attrstring', $xmpData, '//rdf:Description', 'http://ns.adobe.com/xap/1.0/', 'CreateDate' );
