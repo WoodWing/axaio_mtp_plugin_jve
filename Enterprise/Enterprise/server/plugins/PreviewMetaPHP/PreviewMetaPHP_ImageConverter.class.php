@@ -170,25 +170,29 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 	 *
 	 * @param resource $image Handle of the image.
 	 * @param string $fileName Full file path to write the image into.
-	 * @param integer $imageType
 	 * @return bool Whether or not successfully saved.
 	 */
-	static private function save( $image, $fileName, $imageType = IMAGETYPE_JPEG )
+	static private function save( $image, $fileName )
 	{
+		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
+		$format = MimeTypeHandler::filePath2MimeType( $fileName );
 		$retVal = false;
-		switch( $imageType ) {
-			case IMAGETYPE_JPEG:
+		switch( $format ) {
+			case 'image/jpeg':
+			case 'image/pjpeg':
+			case 'image/jpg':
 				$retVal = imagejpeg( $image, $fileName, 75 ); // 75 = default compression
 				break;
-			case IMAGETYPE_GIF:
+			case 'image/gif':
 				$retVal = imagegif( $image, $fileName );
 				break;
-			case IMAGETYPE_PNG:
+			case 'image/png':
+			case 'image/x-png':
 				$retVal = imagepng( $image, $fileName );
 				break;
 			default:
 				LogHandler::Log( 'ImageConverter', 'ERROR', 'Could not save image to file "'.$fileName.'". '.
-					'Unsupported image file type: '.$imageType );
+					'Unsupported image file type: '.$format );
 				break;
 		}
 		if( !$retVal ) {
