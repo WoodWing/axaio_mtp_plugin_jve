@@ -449,7 +449,8 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 				$unit += 1;
 			}
 			switch( $unit ) {
-				case 1: // none
+				case 1: // none (e.g. for JFIF this is used to specific the pixel aspect ratio)
+					$resolution = null; // do not use to fall back at default (EN-87972)
 					break;
 				case 2: // inches
 					break;
