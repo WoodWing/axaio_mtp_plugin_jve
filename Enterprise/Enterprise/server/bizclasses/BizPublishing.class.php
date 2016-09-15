@@ -2141,7 +2141,7 @@ class BizPublishing
 		// For the UnPublish operation the ConvertedImageToPublish->Attachment remains null.
 		$attachmentNeeded = ( $operation == 'Preview' || $operation == 'Publish' || $operation == 'Update' );
 		if( $attachmentNeeded ) {
-			if( $bizImageConverter->cropAndScaleImageByPlacement( $placement, $publishTarget->PubChannelID ) ) {
+			if( $bizImageConverter->convertImageByPlacement( $placement, $publishTarget->PubChannelID ) ) {
 				$placement->ConvertedImageToPublish->Attachment = $bizImageConverter->getOutputImageAttachment();
 			}
 		}

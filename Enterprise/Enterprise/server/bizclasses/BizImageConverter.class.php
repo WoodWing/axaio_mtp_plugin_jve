@@ -4,6 +4,40 @@
  * @subpackage ServerPlugins
  * @since      v10.1
  * @copyright  WoodWing Software bv. All Rights Reserved.
+ *
+ * Handles image conversions, such as cropping and scaling images placed on a publish form.
+ *
+ * Example use cases of this class:
+ *
+ * 1) In case you want to avoid retrieving the native image file when no conversion is needed:
+ *
+ *   require_once BASEDIR.'/server/bizclasses/BizImageConverter.class.php';
+ *   $bizImageConverter = new BizImageConverter();
+ *   $imageAttachment = null;
+ *   if( $bizImageConverter->doesImageNeedConversion( $imageId, $imagePlacement ) ) {
+ *      if( $bizImageConverter->loadNativeFileForInputImage( $imageId ) ) {
+ *         if( $bizImageConverter->convertImageByPlacement( $imagePlacement, $pubChannelId ) ) {
+ *            $imageAttachment = $bizImageConverter->getOutputImageAttachment();
+ *         }
+ *         $bizImageConverter->cleanupNativeFileForInputImage();
+ *      }
+ *   }
+ *
+ * 2) In case you want to use the native image file regardless whether or not the image needs conversion:
+ *
+ *   require_once BASEDIR.'/server/bizclasses/BizImageConverter.class.php';
+ *   $bizImageConverter = new BizImageConverter();
+ *   $imageAttachment = null;
+ *   if( $bizImageConverter->loadNativeFileForInputImage( $imageId ) ) {
+ *      if( $bizImageConverter->doesImageNeedConversion( $imageId, $imagePlacement ) ) {
+ *         if( $bizImageConverter->convertImageByPlacement( $imagePlacement, $pubChannelId ) ) {
+ *            $imageAttachment = $bizImageConverter->getOutputImageAttachment();
+ *         }
+ *         $bizImageConverter->cleanupNativeFileForInputImage();
+ *      } else { // fallback at native rendition
+ *         $imageAttachment = $bizImageConverter->getInputImageAttachment();
+ *      }
+ *   }
  */
 
 class BizImageConverter
@@ -133,7 +167,7 @@ class BizImageConverter
 	/**
 	 * Removes the native image file from the transfer folder that was prepared by loadNativeFileForInputImage().
 	 *
-	 * Should be called after calling loadNativeFileForInputImage() and cropAndScaleImageByPlacement().
+	 * Should be called after calling loadNativeFileForInputImage() and convertImageByPlacement().
 	 */
 	public function cleanupNativeFileForInputImage()
 	{
@@ -150,8 +184,9 @@ class BizImageConverter
 	 * @param Placement $placement Definition of the image crop frame, scale and dimensions.
 	 * @param integer $channelId The ID of the Publication Channel.
 	 * @return bool Whether or not the operation was successful.
+	 * @throws BizException When not called correctly. See module header for usage.
 	 */
-	public function cropAndScaleImageByPlacement( Placement $placement, $channelId )
+	public function convertImageByPlacement( Placement $placement, $channelId )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		if( !$this->inputImageAttachment || !$this->inputImageProps ) {
@@ -167,8 +202,8 @@ class BizImageConverter
 			$conversionOperations[] = 'scale';
 		}
 		if( !$conversionOperations ) {
-			LogHandler::Log( 'ImageConverter', 'ERROR', 'No crop or scale operations defined for image. Image not converted.' );
-			return false;
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'No crop or scale operations defined for image. '.
+				'Please do not call this function when doesImageNeedConversion() returns false.' );
 		}
 
 		// Lookup a connector that supports the most preferred output mime type (file format).
@@ -214,7 +249,7 @@ class BizImageConverter
 					BizServerPlugin::runConnector( $connector, 'scale', array( $placement->ScaleX, $placement->ScaleY ) );
 					break;
 				default:
-					LogHandler::Log( 'ImageConverter', 'ERROR', 'No unknown operation requested to convert image: '.$operation );
+					throw new BizException( 'ERR_ARGUMENT', 'Client', 'Unknown operation requested to convert image: '.$operation );
 					break;
 			}
 		}

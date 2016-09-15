@@ -566,7 +566,7 @@ class BizPublishForm
 					$placement->ScaleY = $imgInfo['ScaleY'];
 					if( $bizImageConverter->loadNativeFileForInputImage( $imgId ) ) {
 						if( $bizImageConverter->doesImageNeedConversion( $imgId, $placement ) ) {
-							if( $bizImageConverter->cropAndScaleImageByPlacement( $placement, $channelId ) ) {
+							if( $bizImageConverter->convertImageByPlacement( $placement, $channelId ) ) {
 								$inlineImages[ $imgId ] = $bizImageConverter->getOutputImageAttachment();
 							}
 							$bizImageConverter->cleanupNativeFileForInputImage();
