@@ -1322,10 +1322,10 @@ if( !defined('IMAGE_MAGICK_OPTIONS') ) {
 //       -verbose, -units, -density, -resize, -crop, -rotate, -flip, -flop
 //
 //    The default setting as shipped with Enterprise is defined as follows:
-//       '-colorspace %colorspace% -quality %quality% -sharpen %sharpen% -layers %layers% -depth %depth% -strip'
+//       '-colorspace %colorspace% -quality %quality% -sharpen %sharpen% -depth %depth% -strip -background %background% -layers %layers%'
 //
 //    Before using the default setting, the options are automatically filled in by Enterprise as follows:
-//       -colorspace sRGB -quality 92 -sharpen 5 -layers merge -depth 8 -strip
+//       -colorspace sRGB -quality 92 -sharpen 5 -depth 8 -strip -background none -layers merge
 //
 //    To change one of these options, replace the placeholder with a fixed value.
 //    Example:
@@ -1340,7 +1340,7 @@ if( !defined('IMAGE_MAGICK_OPTIONS') ) {
 //    - For more information about ImageMagick options see: http://www.imagemagick.org/script/command-line-options.php
 //
 if( !defined('IMAGE_MAGICK_PUBLISH_OPTIONS') ) {
-	define( 'IMAGE_MAGICK_PUBLISH_OPTIONS', '-colorspace %colorspace% -quality %quality% -sharpen %sharpen% -depth %depth% -strip -background none -layers %layers%' );
+	define( 'IMAGE_MAGICK_PUBLISH_OPTIONS', '-colorspace %colorspace% -quality %quality% -sharpen %sharpen% -depth %depth% -strip -background %background% -layers %layers%' );
 }
 
 // GHOST_SCRIPT_APP_PATH:

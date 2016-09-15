@@ -154,9 +154,10 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 		$this->addCmdParam( 'colorspace', 'sRGB', true );
 		$this->addCmdParam( 'quality', '92', true );
 		$this->addCmdParam( 'sharpen', '5', true );
-		$this->addCmdParam( 'layers', 'merge', true );
 		$this->addCmdParam( 'depth', '8', true );
 		$this->addCmdParam( 'strip', null, true );
+		$this->addCmdParam( 'background', 'none', true );
+		$this->addCmdParam( 'layers', 'merge', true );
 	}
 
 	/**
