@@ -63,25 +63,13 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 		if( $this->applyCrop || $this->applyScale || $this->applyRotate || $this->applyMirror || $this->applyResize ) {
 			$inputImage = self::load( $this->inputFilePath );
 			if( $inputImage ) {
-				$outputImage = imagecreatetruecolor( intval($this->outputWidth), intval($this->outputHeight) );
+				list( $cropLeft, $cropTop, $cropWidth, $cropHeight ) = $this->removeVoidFromCrop();
+				$outputWidth = min( $this->outputWidth, $cropWidth );
+				$outputHeight = min( $this->outputHeight, $cropHeight );
+				$outputImage = imagecreatetruecolor( intval($outputWidth), intval($outputHeight) );
 				if( $outputImage ) {
 					$resampledFailed = false;
 					if( $this->applyCrop || $this->applyScale || $this->applyResize ) {
-						// The crop window can be sticking out on any side of the input window. The imagecopyresampled() call
-						// would then make those parts black in the output image (crop), which is unwanted. ImageMagick will
-						// simply cut off all edges that are sticking out, and so the output image (crop) becomes smaller.
-						// Here we mimic that behaviour by recalculating the crop window to let imagecopyresampled() implicitly
-						// cut off the edges that are sticking out. (EN-87902)
-						$shiftRight = $this->cropLeft < 0 ? -$this->cropLeft : 0;
-						$shiftDown = $this->cropTop < 0 ? -$this->cropTop : 0;
-						$cropLeft = $this->cropLeft + $shiftRight;
-						$cropTop = $this->cropTop + $shiftDown;
-						$cropWidth = $this->cropWidth + $shiftRight;
-						$cropHeight = $this->cropHeight + $shiftDown;
-						$cropWidth = min( $cropWidth, $this->inputWidth -$cropLeft );
-						$cropHeight = min( $cropHeight, $this->inputHeight - $cropTop );
-						$outputWidth = min( $this->outputWidth, $cropWidth );
-						$outputHeight = min( $this->outputHeight, $cropHeight );
 						$resampledFailed = !imagecopyresampled(
 							$outputImage, $inputImage, // dst, src
 							0, 0, $cropLeft, $cropTop, // (dst_x, dst_y), (src_x, src_y),
@@ -132,6 +120,44 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 			'image/png',
 			'image/x-png',
 		);
+	}
+
+	/**
+	 * Slim down the crop window when it sticks out over the input image.
+	 *
+	 * The crop window can be sticking out on any side of the input window. The imagecopyresampled() call
+	 * would then make those parts black in the output image (crop), which is unwanted. ImageMagick will
+	 * simply cut off all edges that are sticking out, and so the output image (crop) becomes smaller.
+	 * Here we mimic that behaviour by recalculating the crop window to let imagecopyresampled() implicitly
+	 * cut off the edges that are sticking out. (EN-87902)
+	 *
+	 * @return integer[] cropLeft, cropTop, cropWidth, cropHeight
+	 */
+	private function removeVoidFromCrop()
+	{
+		if( $this->cropLeft < 0 ) { // remove void at left side?
+			$cropLeft = 0;
+			$cropWidth = $this->cropWidth + $this->cropLeft;
+		} else {
+			$cropLeft = $this->cropLeft;
+			$cropWidth = $this->cropWidth;
+		}
+		if( $cropLeft + $cropWidth > $this->inputWidth ) { // remove void at right side?
+			$cropWidth = $this->inputWidth - $cropLeft;
+		}
+
+		if( $this->cropTop < 0 ) { // remove void at top side?
+			$cropTop = 0;
+			$cropHeight = $this->cropHeight + $this->cropTop;
+		} else {
+			$cropTop = $this->cropTop;
+			$cropHeight = $this->cropHeight;
+		}
+		if( $cropTop + $cropHeight > $this->inputHeight ) { // remove void at bottom side?
+			$cropHeight = $this->inputHeight - $cropTop;
+		}
+
+		return array( $cropLeft, $cropTop, $cropWidth, $cropHeight );
 	}
 
 	/**
