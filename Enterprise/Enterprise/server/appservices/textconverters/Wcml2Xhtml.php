@@ -1059,7 +1059,7 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 		$placementInfo = $this->calculateImagePlacementInfo( $imageAttributes );
 
 		// Convert the image to HTML.
-		$this->createHtmlImage( $imageId, $placementInfo );
+		$this->createHtmlImage( $imageId, $placementInfo, $imageAttributes['PpiX'], $imageAttributes['PpiY'] );
 
 		// Collect the inline images per frame.
 		// Not unique collection, duplicates are saved as it is.
@@ -1327,8 +1327,10 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	 *
 	 * @param string $imageId
 	 * @param string[] $placementInfo
+	 * @param integer $ppiX
+	 * @param integer $ppiY
 	 */
-	private function createHtmlImage( $imageId, array $placementInfo )
+	private function createHtmlImage( $imageId, array $placementInfo, $ppiX, $ppiY )
 	{
 		// Create the HTML image element.
 		$xImgLink = $this->xDoc->createElement( 'img' );
@@ -1343,8 +1345,8 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 
 		// Set the dimension of the image retrieved from the rectangle element.
 		if( isset( $placementInfo['Width'] ) && isset( $placementInfo['Height'] ) ) {
-			$xImgLink->setAttribute( 'width', $placementInfo['Width'] );
-			$xImgLink->setAttribute( 'height', $placementInfo['Height'] );
+			$xImgLink->setAttribute( 'width', $placementInfo['Width'] * ( $ppiX / 72 ) );
+			$xImgLink->setAttribute( 'height', $placementInfo['Height'] * ( $ppiY / 72 ) );
 		}
 		$this->xCursor->appendChild( $xImgLink );
 	}
