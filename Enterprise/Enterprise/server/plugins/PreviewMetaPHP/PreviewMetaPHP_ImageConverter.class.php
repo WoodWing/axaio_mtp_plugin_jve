@@ -68,6 +68,8 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 				$outputHeight = min( $this->outputHeight, $cropHeight );
 				$outputImage = imagecreatetruecolor( intval($outputWidth), intval($outputHeight) );
 				if( $outputImage ) {
+					imagealphablending( $outputImage, false ); // preserve transparency (EN-87990)
+					imagesavealpha( $outputImage, true );
 					$resampledFailed = false;
 					if( $this->applyCrop || $this->applyScale || $this->applyResize ) {
 						$resampledFailed = !imagecopyresampled(

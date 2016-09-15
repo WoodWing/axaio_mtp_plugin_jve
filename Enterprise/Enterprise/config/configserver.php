@@ -1333,7 +1333,7 @@ if( !defined('IMAGE_MAGICK_OPTIONS') ) {
 //    For more information about ImageMagick options see: http://www.imagemagick.org/script/command-line-options.php
 //
 if( !defined('IMAGE_MAGICK_PUBLISH_OPTIONS') ) {
-	define( 'IMAGE_MAGICK_PUBLISH_OPTIONS', '-colorspace %colorspace% -quality %quality% -sharpen %sharpen% -layers %layers% -depth %depth% -strip' );
+	define( 'IMAGE_MAGICK_PUBLISH_OPTIONS', '-colorspace %colorspace% -quality %quality% -sharpen %sharpen% -depth %depth% -strip -background none -layers %layers%' );
 }
 
 // GHOST_SCRIPT_APP_PATH:
