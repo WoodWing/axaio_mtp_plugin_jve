@@ -810,7 +810,8 @@ class BizObject
 
 			require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
 			if( BizPublication::isCalculateDeadlinesEnabled( $newRow['publication'], $overruleIssueId ) ) {
-				$deadlinehard = DBObject::objectSetDeadline( $id, $issueIdsDL, $newRow['section'], $newRow['state'] );
+				$deadlines = DBObject::objectSetDeadline( $id, $issueIdsDL, $newRow['section'], $newRow['state'] );
+                $deadlinehard = $deadlines['Deadline'];
 				if ( $oldDeadline !== $deadlinehard ) {
 					if ( BizDeadlines::canPassDeadlineToChild( $newRow['type'] ) ) {
 						// Recalculate the deadlines of children without own object-target issue.
