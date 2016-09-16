@@ -1098,7 +1098,9 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 		$info['ScaleX'] = $attr['ScaleX'];
 		$info['ScaleY'] = $attr['ScaleY'];
 
-		LogHandler::Log( 'textconverter', 'DEBUG', 'Inline image placement info: '.print_r($info,true) );
+		if( LogHandler::debugMode() ) { // avoid expensive print_r() in production
+			LogHandler::Log( 'textconverter', 'DEBUG', 'Inline image placement info: '.print_r( $info, true ) );
+		}
 
 		return $info;
 	}
