@@ -89,8 +89,7 @@ class Drupal7_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConnec
 							$pubChannelInfo->Id, $contentType );
 
 					if ( $drupalField->hasError() ) {
-						$errors = array_merge( $errors, $drupalField->getErrors() );
-						$this->errors = array_merge( $this->errors, $errors );
+						$this->errors = array_merge( $this->errors, $drupalField->getErrors() );
 					} else { // Just warnings or no errors
 						if( $propertyInfos ) foreach ($propertyInfos as $propertyInfo) {
 							$props[0]['PublishForm'][] = $propertyInfo;

@@ -1,14 +1,14 @@
 <?php
 /**
- * @package     SCEnterprise
+ * Class derived from HmtlAnyField that represents a field for entering a valid date AND time.
+ *
+ * @todo Implement languages for the date-time picker: 'close', 'this month', 'days of the week', 'months'
+ *
+ * @package     Enterprise
  * @subpackage  HtmlClasses
  * @since       v4.2
  * @copyright   WoodWing Software bv. All Rights Reserved.
- *
- * Class derived from HmtlAnyField that represents a field for entering a
- * valid date AND time.
- * @todo Implement languages for the date-time picker: 'close', 'this month', 'days of the week', 'months'
-**/
+ */
 
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlAnyField.class.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
@@ -20,10 +20,10 @@ class HtmlDateTimeField extends HtmlAnyField
 	public $MinutesGranule;
 	public $CalenderIcon;        
 
-	/**
+	/*
 	 *  $Year, $Month and $Day of the date, and $Hour, $Minute and $Second of the time.
 	 *  These are set when setValue is executed.
-	**/
+	 */
 	protected $Year;
 	protected $Month;
 	protected $Day;
@@ -33,31 +33,31 @@ class HtmlDateTimeField extends HtmlAnyField
 
 	/**
 	 *	Constructor
-	 *	@param $owner object derived from HtmlBase or null
+	 *
+	 * @param HtmlBase|null $owner either null or an object derived from HtmlBase
 	 *	@param $name string may not contain special chars
 	 *	@param $required boolean = false 
 	 *	@param $readonly boolean = false
 	 *	@param $hidden boolean = false
-	**/
-	function __construct($owner, $name, $required=false, $readonly=false, $hidden=false)
+	 */
+	public function __construct($owner, $name, $required=false, $readonly=false, $hidden=false)
 	{			
 		HtmlAnyField::__construct($owner, $name, $required, $readonly, $hidden);
 		$this->MinutesGranule = 5;
 
-		/**
-		 *  @todo Replace this icon with 'cal.gif' instead of cal_16.gif as this is the same icon as for issue and the calender looks better.
-		**/
+		// todo Replace this icon with 'cal.gif' instead of cal_16.gif as this is the same icon as for issue and the calender looks better.
 		$this->CalenderIcon = self::$IconDir . 'cal_16.gif';
 	}
 	
 
 	/**
-	 *  setValue
-	 *  @param $isodatetime string iso-formatted string, for example: 01-01-2006T09:30:45
-	 *  sets $Value to this value if indeed iso-formatted and valid.
-	 *  $Year, $Month, $Day, $Hour, $Minute and $Second are also set for ease of use.
-	 *  @return Returns true if the value was succesfully set, otherwise false.
-	**/
+	 * Sets a date time value.
+	 *
+	 * @param $isodatetime string iso-formatted string, for example: 01-01-2006T09:30:45
+	 * sets $Value to this value if indeed iso-formatted and valid.
+	 * $Year, $Month, $Day, $Hour, $Minute and $Second are also set for ease of use.
+	 * @return boolean Returns true if the value was successfully set, otherwise false.
+	 */
 	public function setValue($isodatetime)
 	{
 		if( is_array($isodatetime) ) {
@@ -271,4 +271,3 @@ class HtmlDateTimeField extends HtmlAnyField
 			'</div>';
 	}
 }
-?>

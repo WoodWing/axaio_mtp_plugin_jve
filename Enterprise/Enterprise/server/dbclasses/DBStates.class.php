@@ -104,4 +104,27 @@ class DBStates extends DBBase
 		$rows = self::fetchResults( $sth );
 		return $rows;
 	}
+
+	/**
+	 * Retrieves all group names that are configured for a given brand (or overrule issue).
+	 *
+	 * @since 10.1.0
+	 * @param integer $brandId
+	 * @param integer $issueId Overrule issue id. Pass zero to return user groups of brand level.
+	 * @return array List of status names, indexed by object type and record id, sorted by type, code and id.
+	 */
+	public static function getStatusNamesForBrandIssue( $brandId, $issueId )
+	{
+		$select = array( 'id', 'state', 'type', 'code' );
+		$where = '`publication` = ? and `issue` = ?';
+		$params = array( $brandId, $issueId );
+		$orderBy = array( 'type' => true, 'code' => true, 'id' => true );
+		$rows = self::listRows( self::TABLENAME, 'id', 'name', $where, $select, $params, $orderBy );
+
+		$ret = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$ret[$row['type']][$row['id']] = $row['state'];
+		}
+		return $ret;
+	}
 }

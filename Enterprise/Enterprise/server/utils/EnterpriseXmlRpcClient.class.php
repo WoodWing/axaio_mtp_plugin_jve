@@ -53,9 +53,10 @@ class WW_Utils_XmlRpcClient
 	 *
 	 * @param string $action
 	 * @param mixed $params
-	 * @return mixed - If answer is recieved the object will be returned otherwise null is returned.
+	 * @param callable|null $obfuscatePasswordForLogs A PHP callable to a custom function to obfuscate passwords for logging purposes. Default value is null.
+	 * @return mixed - If answer is received the object will be returned, otherwise null is returned.
 	 */
-	public function callRpcService( $action, $params )
+	public function callRpcService( $action, $params, $obfuscatePasswordForLogs = null )
 	{
 		// Leave a trail in the server log before calling Drupal
 		$debugMode = LogHandler::debugMode();
@@ -69,14 +70,13 @@ class WW_Utils_XmlRpcClient
 		try {
 			$retVal = $this->rpcClient->call( $action, $params );
 		} catch( Exception $e ) {
-			$e = $e; // Keep analyzer happy.
 			$retVal = null; // Keep analyzer happy.
 		}
 		PerformanceProfiler::stopProfile( $area . '- '.$action, 3 );
 
 		// Log request and response (or fault) as XML
 		if( $debugMode ) { // check here since saveXML() calls below are expensive
-			LogHandler::logService( $action, $this->rpcClient->getLastRequest()->saveXML(), true, 'xmlrpc', 'xml' );
+			LogHandler::logService( $action, $this->rpcClient->getLastRequest()->saveXML(), true, 'xmlrpc', 'xml', false, $obfuscatePasswordForLogs );
 			$lastResponse = $this->rpcClient->getLastResponse();
 			if( $lastResponse ) {
 				if( $lastResponse->isFault() ) {

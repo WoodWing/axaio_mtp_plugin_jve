@@ -19,12 +19,11 @@ class WW_Utils_PhpInfo
 	 * the given $info param.
 	 *
 	 * @param string $info HTML formatted message in case of error.
-	 * @return mysqlidriver|mssqldriver|oracledriver|null DB driver on success, else null.
+	 * @return WW_DbDrivers_DriverBase|null DB driver on success, else null.
 	 */
 	private static function connectToDb( &$info )
 	{
 		$map = new BizExceptionSeverityMap( array( 'S1003' => 'INFO' ) );
-		$map = $map; // keep analyzer happy
 		try {
 			$dbDriver = DBDriverFactory::gen();
 		} catch( BizException $e ) {
@@ -66,8 +65,11 @@ class WW_Utils_PhpInfo
 		$info .= self::getChapterHeader( 'Enterprise Server v'.$versionInfo, 'Configuration files' );
 		$info .= self::getConfigFile( BASEDIR.'/config/config.php', 'config.php' );
 		$info .= self::getConfigFile( BASEDIR.'/config/configserver.php', 'configserver.php' );
-		$info .= self::getConfigFile( BASEDIR.'/server/serverinfo.php', 'serverinfo.php' );
+		$info .= self::getConfigFile( BASEDIR.'/config/config_overrule.php', 'config_overrule.php' );
+		$info .= self::getConfigFile( BASEDIR.'/config/config_dps.php', 'config_dps.php' );
+		$info .= self::getConfigFile( BASEDIR.'/config/config_sips.php', 'config_sips.php' );
 		$info .= self::getConfigFile( BASEDIR.'/config/config_solr.php', 'config_solr.php' );
+		$info .= self::getConfigFile( BASEDIR.'/server/serverinfo.php', 'serverinfo.php' );
 		$info .= self::getChapterFooter();
 		
 		// Get Enterprise server database details
@@ -81,7 +83,12 @@ class WW_Utils_PhpInfo
 		$info .= self::getChapterHeader( 'Enterprise Server', 'Server Plug-ins' );
 		$info .= self::getServerPlugins();
 		$info .= self::getChapterFooter();
-		
+
+		// Get Enterprise server plug-ins
+		$info .= self::getChapterHeader( 'Enterprise Server', 'Runt-time PHP info' );
+		$info .= self::getRuntimePhpInfo();
+		$info .= self::getChapterFooter();
+
 		$info .= self::getPhpInfo();
 		
 		$info .= self::getPageFooter();
@@ -107,6 +114,9 @@ class WW_Utils_PhpInfo
 	/**
 	 * Returns all names and values of the defines made in a config files (by parsing it manually).
 	 * It also includes the file and asks PHP for actual values of those defines.
+	 *
+	 * @param string $filePath
+	 * @param string $displayName
 	 * @return string HTML fragment with requested info.
 	 */
 	public static function getConfigFile( $filePath, $displayName )
@@ -274,11 +284,25 @@ class WW_Utils_PhpInfo
 		return $info;
 	}
 
+	/**
+	 * Returns some PHP information that is requested runtime.
+	 *
+	 * @return string HTML fragment with requested info.
+	 */
+	public static function getRuntimePhpInfo()
+	{
+		$info = '';
+		$info .= self::getSetting( 'PHP executable (PHP_BINDIR)', PHP_BINDIR );
+		$info .= self::getSetting( 'System temp folder (sys_get_temp_dir())', sys_get_temp_dir() );
+		return $info;
+	}
+
 	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 	// Display helper functions...
 
 	public static function getPageHeader()
 	{
+		/** @noinspection CssRedundantUnit */
 		return '<html><head><style type="text/css"><!--
 			body {background-color: #ffffff; color: #000000;}
 			body, td, th, h1, h2 {font-family: sans-serif;}

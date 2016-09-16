@@ -70,6 +70,7 @@ class WW_Utils_ResolveBrandSetup
 	 * Resolves the Edition, PubChannelInfo and Publication given the edition id.	 
 	 *
 	 * @param integer $editionId DB edition id.
+	 * @throws BizException
 	 */
 	public function resolveEditionPubChannelBrand( $editionId )
 	{

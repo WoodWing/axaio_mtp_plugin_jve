@@ -94,9 +94,10 @@ class WW_Plugins_Drupal7_Utils
 	 * @param array $propertyUsages The PropertyUsages to use.
 	 * @param array $wiwiwUsages A three dimensional list of PropertyUsages. Keys are used as follows: $wiwiwUsages[mainProp][wiwProp][wiwiwProp]
 	 * @param array $fields List of PublishForm fields.
+	 * @param integer $pubChannelId
 	 * @return array An array of values indexed to Drupal Field ids.
 	 */
-	static public function prepareFormFields( $propertyUsages, $wiwiwUsages, $fields )
+	static public function prepareFormFields( $propertyUsages, $wiwiwUsages, $fields, $pubChannelId )
 	{
 		$indexes = array();
 
@@ -113,7 +114,7 @@ class WW_Plugins_Drupal7_Utils
 			if ( isset($parts[4]) && $parts[4] == 'SUM' ) {
 				$drupalFieldId .= '_SUM';
 			}
-			$indexes = self::getFormFieldValue( $drupalFieldId, $fields, $fieldName, $indexes );
+			$indexes = self::getFormFieldValue( $drupalFieldId, $fields, $fieldName, $indexes, $pubChannelId );
 		}
 		if( $wiwiwUsages ) foreach( $wiwiwUsages as /*$mainPropName => */$wiwUsages ) {
 			foreach( $wiwUsages as /*$wiwPropName => */$wiwiwUsageArray ) {
@@ -125,7 +126,7 @@ class WW_Plugins_Drupal7_Utils
 					if ( $parts[4] == 'SUM' ) {
 						$drupalFieldId .= '_SUM';
 					}
-					$indexes = self::getFormFieldValue( $drupalFieldId, $fields, $fieldName, $indexes );
+					$indexes = self::getFormFieldValue( $drupalFieldId, $fields, $fieldName, $indexes, $pubChannelId );
 				}
 			}
 		}
@@ -141,31 +142,33 @@ class WW_Plugins_Drupal7_Utils
 	 * @param array $fields List of PublishForm fields.
 	 * @param string $fieldName The name of the property/field.
 	 * @param array $indexes Refer to header above.
+	 * @param integer $pubChannelId
 	 * @param array List of key-value pair that contains the FieldName and its value.
+	 * @return array The values.
 	 */
-	private static function getFormFieldValue( $drupalFieldId, $fields, $fieldName, $indexes )
+	private static function getFormFieldValue( $drupalFieldId, $fields, $fieldName, $indexes, $pubChannelId )
 	{
 		if ($drupalFieldId == 'PROMOTE') {
 			$indexes[self::C_DIALOG_DRUPAL7_PROMOTE] = (isset($fields[$fieldName]))
-				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName] )
+				? BizPublishForm::extractFormFieldDataFromFieldValue( $fieldName, $fields[$fieldName], $pubChannelId )
 				: null;
 		} elseif ($drupalFieldId == 'STICKY') {
 			$indexes[self::C_DIALOG_DRUPAL7_STICKY] = (isset($fields[$fieldName]))
-				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName] )
+				? BizPublishForm::extractFormFieldDataFromFieldValue( $fieldName, $fields[$fieldName], $pubChannelId )
 				: null;
 		} elseif ($drupalFieldId == 'COMMENTS') {
 			$indexes[self::C_DIALOG_DRUPAL7_COMMENTS] = (isset($fields[$fieldName]))
-				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName] )
+				? BizPublishForm::extractFormFieldDataFromFieldValue( $fieldName, $fields[$fieldName], $pubChannelId )
 				: null;
 		}elseif ($drupalFieldId == 'TITLE') {
 			$indexes[self::C_DIALOG_DRUPAL7_TITLE] = (isset($fields[$fieldName]))
-				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName] )
+				? BizPublishForm::extractFormFieldDataFromFieldValue( $fieldName, $fields[$fieldName], $pubChannelId )
 				: null;
 		}elseif ($drupalFieldId == 'PUBLISH') {
 			require_once dirname(__FILE__) . '/DrupalField.class.php';
 			// Retrieve whether we should publish the node or not, and set an int on the field.
 			$value = (isset($fields[$fieldName]))
-				? BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $fields[$fieldName] )
+				? BizPublishForm::extractFormFieldDataFromFieldValue( $fieldName, $fields[$fieldName], $pubChannelId )
 				: DrupalField::DRUPAL_VALUE_PUBLISH_PUBLIC;
 			$indexes[self::C_DIALOG_DRUPAL7_PUBLISH] = (DrupalField::DRUPAL_VALUE_PUBLISH_PRIVATE == $value[0] )
 				? array(0)
@@ -179,13 +182,13 @@ class WW_Plugins_Drupal7_Utils
 					$content = array();
 					foreach ($fields[$fieldName] as $object) {
 						if (is_object( $object ) ) {
-							$content[] = self::extractContent( $object, $fieldName );
+							$content[] = self::extractContent( $object, $fieldName, $pubChannelId );
 						} else {
-							$content = self::extractContent( $fields[$fieldName], $fieldName );
+							$content = self::extractContent( $fields[$fieldName], $fieldName, $pubChannelId );
 						}
 					}
 				} else {
-					$content = self::extractContent( $fields[$fieldName], $fieldName );
+					$content = self::extractContent( $fields[$fieldName], $fieldName, $pubChannelId );
 				}
 				$indexes[$drupalFieldId] = $content;
 			}
@@ -200,18 +203,17 @@ class WW_Plugins_Drupal7_Utils
 	 * @static
 	 * @param Object $object
 	 * @param string $fieldName
+	 * @param integer $pubChannelId
 	 * @return array|null
 	 */
-	private static function extractContent( $object, $fieldName )
+	private static function extractContent( $object, $fieldName, $pubChannelId )
 	{
 		$extractContent = true;
-		$noEmptyTags = true;
 
 		// For layouts, get the object as is.
 		if ( isset( $object->MetaData->BasicMetaData->Type ) &&
 			$object->MetaData->BasicMetaData->Type == 'Layout') {
 			$extractContent = false;
-			$noEmptyTags = false;
 		}
 
 		// For Articles only get the content if we are dealing with a non-fileselector.
@@ -224,19 +226,18 @@ class WW_Plugins_Drupal7_Utils
 			$propertyInfo = $propertyInfos[0];
 			if ($propertyInfo->Type == 'fileselector') {
 				$extractContent = false;
-				$noEmptyTags = false;
 			}
 		}
 
-		return BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $object, $extractContent, $noEmptyTags );
+		return BizPublishForm::extractFormFieldDataFromFieldValue ( $fieldName, $object, $pubChannelId, $extractContent );
 	}
 
 	/**
 	 * Retrieves the form fields from the PublishForm.
 	 *
 	 * @static
-	 * @param object $publishForm The PublishForm from which to get the form fields.
-	 * @param $pattern Optional pattern which Property names should match for to be included in the result.
+	 * @param Object $publishForm The PublishForm from which to get the form fields.
+	 * @param string $pattern Optional pattern which Property names should match for to be included in the result.
 	 * @return array An array of key / value pairs with values for the form fields.
 	 */
 	public static function getFormFields( $publishForm, $pattern )

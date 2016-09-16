@@ -108,8 +108,11 @@ abstract class WW_DbDrivers_DriverBase
 		
 		// Error when placeholders and parameters mismatch.
 		if( substr_count( $sql, '?' ) !== count($params) ) {
-			throw new BizException( 'ERR_ARGUMENT', 'Server',
-				'The number of parameters does not match the number of placeholders.' );
+			$detail = 'The number of parameters does not match the number of placeholders.';
+			if( LogHandler::debugMode() ) { // reveal more details in debug mode
+				$detail .= " => SQL: [$sql] PARAMS: [".implode( ',', $params )."]";
+			}
+			throw new BizException( 'ERR_ARGUMENT', 'Server', $detail );
 		}
 		
 		// Iterate through the provided parameters and substitute one by one.
@@ -277,11 +280,20 @@ abstract class WW_DbDrivers_DriverBase
 	 */
 	abstract function composeDropTempTableStatement( $tableName );
 
+	/**
+	 * Checks if a table exists in the database.
+	 *
+	 * @param string $tableName Name of the table
+	 * @param boolean $addPrefix Add the WoodWing table prefix to the table name.
+	 * @return boolean
+	 */
+	abstract function tableExists( $tableName, $addPrefix = true );
+
 }
 
 class DBDriverFactory
 {
-	/*
+	/**
 	 * Database driver factory.
 	 * Creates one of the following database driver objects: mysqldriver, mssqldriver or oracledriver.
 	 * Always use this factory to access a database; Never create a specific driver yourself.
@@ -292,7 +304,7 @@ class DBDriverFactory
 	 * @param $dbPass   string  Database user password used for for DB connection. Default value: DBPASS config option.
 	 * @param $dbSelect string  Database name to connect with. Default value: DBSELECT config option.
 	 * @param $throwException bool Whether or not to throw BizException on connection error.
-	 * @return object           Database driver object.
+	 * @return  WW_DbDrivers_DriverBase Database driver object.
 	 * @throws BizException On DB configuration error or DB connection error (since v8.0).
 	 */
 	static public function gen( $dbType = DBTYPE, $dbServer = DBSERVER, 

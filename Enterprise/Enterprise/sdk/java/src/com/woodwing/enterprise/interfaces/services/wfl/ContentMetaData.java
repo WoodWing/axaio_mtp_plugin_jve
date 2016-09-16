@@ -24,7 +24,7 @@ public class ContentMetaData  implements java.io.Serializable {
 
     private java.lang.Double height;
 
-    private org.apache.axis.types.UnsignedInt dpi;
+    private java.lang.Double dpi;
 
     private org.apache.axis.types.UnsignedInt lengthWords;
 
@@ -64,7 +64,7 @@ public class ContentMetaData  implements java.io.Serializable {
            java.lang.Integer columns,
            java.lang.Double width,
            java.lang.Double height,
-           org.apache.axis.types.UnsignedInt dpi,
+           java.lang.Double dpi,
            org.apache.axis.types.UnsignedInt lengthWords,
            org.apache.axis.types.UnsignedInt lengthChars,
            org.apache.axis.types.UnsignedInt lengthParas,
@@ -268,7 +268,7 @@ public class ContentMetaData  implements java.io.Serializable {
      * 
      * @return dpi
      */
-    public org.apache.axis.types.UnsignedInt getDpi() {
+    public java.lang.Double getDpi() {
         return dpi;
     }
 
@@ -278,7 +278,7 @@ public class ContentMetaData  implements java.io.Serializable {
      * 
      * @param dpi
      */
-    public void setDpi(org.apache.axis.types.UnsignedInt dpi) {
+    public void setDpi(java.lang.Double dpi) {
         this.dpi = dpi;
     }
 
@@ -767,7 +767,7 @@ public class ContentMetaData  implements java.io.Serializable {
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("dpi");
         elemField.setXmlName(new javax.xml.namespace.QName("", "Dpi"));
-        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "unsignedInt"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "double"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();

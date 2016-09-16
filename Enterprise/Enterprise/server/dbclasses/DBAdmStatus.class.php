@@ -254,5 +254,3 @@ class DBAdmStatus extends DBBase
 		return $obj;
 	}
 }
-
-?>

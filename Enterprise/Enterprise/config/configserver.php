@@ -872,6 +872,21 @@ if( !defined('SERVERFEATURES') ) {
 //          (SC for InDesign feature.) Controls the resolution (DPI) of the Layout page previews, as shown in the
 //          Publication Overview application in Content Station or preview panes in Smart Connection or Content Station.
 //          This option is only affective when the CreatePagePreview or CreatePagePreviewOnProduce option is enabled too.
+//       PageSyncDefaultsToNo (default)
+//          (Smart Connection for InDesign feature.) When produced pages are out-of-sync with planned pages, Smart Connection
+//          shows a message asking the user if the produced pages should be synchronized with the planned pages.
+//          The user can choose between Yes and No. By default, the Yes button is enabled.
+//          Note that synchronizing the pages may result in content loss (pages that are removed may contain content).
+//          It is therefore safer to set the No button as the default button. Do this by enabling the PageSyncDefaultsToNo option.
+//          This is especially important for InDesign Server which always uses the default button.
+//
+//          Changing the behavior for InDesign Server
+//          For InDesign Server, the PageSyncDefaultsToNo option can be set either in the configserver.php file or
+//          in the WWSettings.xml file. Note that for the Indesign Server Automation feature, the PageSyncDefaultsToNo
+//          option is already enabled in the configserver.php file.
+//          Changing the behavior for InDesign
+//          For InDesign, the PageSyncDefaultsToNo option can only be enabled by setting the SCEnt:PageSyncDefaultsToNo
+//          option in the WWSettings.xml file. (InDesign ignores the option set in the configserver.php file.)
 //
 //    Define where the generation of layout previews, thumbnails, PDFs or DPS articles 
 //    should or may take place: in InDesign 'local', InDesign 'remote' or in InDesign Server.
@@ -935,6 +950,7 @@ if( !defined('CLIENTFEATURES') ) {
 			'IDS_AUTOMATION' => array(
 				new Feature( 'CreatePagePreview' ),
 				new Feature( 'CreatePagePDFOnProduce', '[Press Quality]' ),
+				new Feature( 'PageSyncDefaultsToNo' ),
 			),
 		),
 	)));
@@ -1288,13 +1304,43 @@ if( !defined('IMAGE_MAGICK_APP_PATH') ) {
 }
 
 // IMAGE_MAGICK_OPTIONS:
-// Options passed to the ImageMagick application to influence the quality of previews and thumbnails.
-// For more informtion see: http://www.imagemagick.org/script/command-line-options.php
-// The size (-size) is set by Enterprise and must not be set here.
-// The default value is ' -colorspace sRGB -quality 100 -sharpen 5 -layers merge -depth 8 -strip -density 72x72 '
+//    Options passed to the ImageMagick application to influence the quality of previews and thumbnails.
+//    For more information see: http://www.imagemagick.org/script/command-line-options.php
+//    The size (-size) is set by Enterprise and must not be set here.
+//    The default value is ' -colorspace sRGB -quality 92 -sharpen 5 -layers merge -depth 8 -strip -density 72x72 '
 //
 if( !defined('IMAGE_MAGICK_OPTIONS') ) {
 	define( 'IMAGE_MAGICK_OPTIONS', '-colorspace sRGB -quality 92 -sharpen 5 -layers merge -depth 8 -strip -density 72x72' );
+}
+
+// IMAGE_MAGICK_PUBLISH_OPTIONS:
+//    Options passed to the ImageMagick application to influence the quality of image conversions when published to
+//    Publication Channels of type 'Web'. Conversion takes place when images are cropped or scaled on a Publish Form and
+//    published to Drupal, Wordpress, Twitter or Facebook.
+//
+//    The following options are set by Enterprise and must not be set here:
+//       -verbose, -units, -density, -resize, -crop, -rotate, -flip, -flop
+//
+//    The default setting as shipped with Enterprise is defined as follows:
+//       '-colorspace %colorspace% -quality %quality% -sharpen %sharpen% -depth %depth% -strip -background %background% -layers %layers%'
+//
+//    Before using the default setting, the options are automatically filled in by Enterprise as follows:
+//       -colorspace sRGB -quality 92 -sharpen 5 -depth 8 -strip -background none -layers merge
+//
+//    To change one of these options, replace the placeholder with a fixed value.
+//    Example:
+//       replace: -quality %quality%
+//       with:    -quality 100
+//    In this example the %quality% placeholder will no longer be replaced by Enterprise. Instead of using
+//    the default quality value 92, it is using the configured quality value 100.
+//
+//    Notes:
+//    - Other ImageMagick options that are not mentioned here can also be added to the setting.
+//    - Any of the listed default options can be removed.
+//    - For more information about ImageMagick options see: http://www.imagemagick.org/script/command-line-options.php
+//
+if( !defined('IMAGE_MAGICK_PUBLISH_OPTIONS') ) {
+	define( 'IMAGE_MAGICK_PUBLISH_OPTIONS', '-colorspace %colorspace% -quality %quality% -sharpen %sharpen% -depth %depth% -strip -background %background% -layers %layers%' );
 }
 
 // GHOST_SCRIPT_APP_PATH:
@@ -1309,6 +1355,26 @@ if( !defined('IMAGE_MAGICK_OPTIONS') ) {
 //
 if( !defined('GHOST_SCRIPT_APP_PATH') ) {
 	define( 'GHOST_SCRIPT_APP_PATH', '' );
+}
+
+// -------------------------------------------------------------------------------------------------
+// ExifTool settings
+// -------------------------------------------------------------------------------------------------
+
+// EXIFTOOL_APP_PATH:
+//    Full path to the folder of the ExifTool application.
+//    Use forward slashes and do NOT end with a slash.
+//    Windows:
+//       define( 'EXIFTOOL_APP_PATH', 'C:/Program Files/ExifTool' );
+//    Linux/Mac:
+//       define( 'EXIFTOOL_APP_PATH', '/usr/local/bin' );
+//
+if( !defined('EXIFTOOL_APP_PATH') ) {
+	if( OS == 'WIN' ) {
+		define( 'EXIFTOOL_APP_PATH', 'C:/Program Files/ExifTool' );
+	} else {
+		define( 'EXIFTOOL_APP_PATH', '/usr/local/bin' );
+	}
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1375,7 +1441,7 @@ if( !defined('GHOST_SCRIPT_APP_PATH') ) {
 //
 if( !defined('MESSAGE_QUEUE_CONNECTIONS') ) {
 	define( 'MESSAGE_QUEUE_CONNECTIONS', serialize(array(
-	// - - - - Insecure connection over TCP: - - - -
+	// - - - - Unsecure connection over TCP: - - - -
 	//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqp://localhost:5672', true, 'woodwing', 'ww' ),
 	//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'http://localhost:15672', true, 'woodwing', 'ww' ),
 	//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'ws://localhost:15674/ws', true, 'woodwing', 'ww' ),

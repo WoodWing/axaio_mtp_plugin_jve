@@ -18,7 +18,7 @@ class Facebook_EnterprisePlugin extends EnterprisePlugin
 	{
 		$info = new PluginInfoData();
 		$info->DisplayName = 'Facebook - Publish Forms';
-		$info->Version     = getProductVersion(__DIR__);
+		$info->Version = getProductVersion( __DIR__ );
 		$info->Description = 'Publishing service for Facebook';
 		$info->Copyright = COPYRIGHT_WOODWING;
 		return $info;
@@ -26,10 +26,12 @@ class Facebook_EnterprisePlugin extends EnterprisePlugin
 
 	final public function getConnectorInterfaces()
 	{
-		return array( 	'CustomObjectMetaData_EnterpriseConnector',
-						'PubPublishing_EnterpriseConnector',
-						'WebApps_EnterpriseConnector',
-						'AdminProperties_EnterpriseConnector');
+		return array(
+			'CustomObjectMetaData_EnterpriseConnector',
+			'PubPublishing_EnterpriseConnector',
+			'WebApps_EnterpriseConnector',
+			'AdminProperties_EnterpriseConnector'
+		);
 	}
 
 	/**

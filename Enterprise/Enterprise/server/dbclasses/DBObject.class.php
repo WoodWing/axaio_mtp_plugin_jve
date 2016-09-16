@@ -30,8 +30,9 @@ class DBObject extends DBBase
 	 * So it is assumed that there will not be more than 99999 objects starting with the same proposed name in any issue.
 	 *
 	 * @param array of int $issueidsarray: id's of the issues the object is targeted for.
+	 * @param string $objtype The type of the object.
 	 * @param string $proposedobjectname: proposed name of the new object.
-	 * @return either string new objectname or null if no name found.
+	 * @return string Either new objectname or null if no name found.
 	 */
 	static public function getUniqueObjectName($issueidsarray, $objtype, $proposedobjectname)
 	{
@@ -88,7 +89,7 @@ class DBObject extends DBBase
 	 * @param integer $parent Id of the container (dossier/task)
 	 * @param string $proposedName Name to be checked
 	 * @param string $childType Object type for which the name must be unique
-	 * $param integer $id Id of the object, null in case an object is created.
+	 * @param integer $id Id of the object, null in case an object is created.
 	 * @return string unique name
 	 */
 	static public function getUniqueNameForChildren( $parent, $proposedName, $childType, $id )
@@ -128,6 +129,7 @@ class DBObject extends DBBase
 	 */
 	static public function makeNameUnique( $existingNames, $startOfName )
 	{
+		$result = '';
 		//Use the proposedname if it does not exist yet.
 		if (!array_key_exists($startOfName, $existingNames)) {
 			$result = $startOfName;
@@ -396,6 +398,7 @@ class DBObject extends DBBase
 	 * @param int $id Object DB id.
 	 * @param array $areas 'Workflow' or 'Trash'. Where the object resides.
 	 * @return array of DB properties of the object.
+	 * @throws BizException
 	 */
 	static public function getObjectRows( $id, array $areas=null )
 	{
@@ -446,7 +449,7 @@ class DBObject extends DBBase
 		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' ) ).' as "version"';
 
 		$sql = 'SELECT o.`id`, o.`documentid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
-			'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, o.`modifier`, '.
+			'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, o.`modifier`, o.`comment`, '.
 			'pub.`publication` as "pubname", sec.`section` as "secname", stt.`state` as "sttname", '.
 			'stt.`type` as "stttype", stt.`color` as "sttcolor", o.`routeto`, lck.`usr` as "lockedby", '.$verFld.' '.
 			"FROM $objTbl o ".
@@ -496,6 +499,7 @@ class DBObject extends DBBase
 			$md->WorkflowMetaData->Version = $row['version'];
 			$md->WorkflowMetaData->Modified = $row['modified'];
 			$md->WorkflowMetaData->Modifier = $row['modifier'];
+			$md->WorkflowMetaData->Comment = $row['comment'];
 			$mds[ $row['id'] ] = $md;
 		}
 		return $mds;
@@ -734,6 +738,8 @@ class DBObject extends DBBase
 	 * @param array $arr List object properties to be updated.
 	 * @param string $modified Datetime when properties are updated.
 	 * @param string $storename Internal file storage name. Should be used for single object updates only.
+	 * @return resource DB handle that can be used to fetch results.
+	 * @throws BizException.
 	 */
 	static public function updateObject( $objectIds, $modifier, $arr, $modified, $storename = '' )
 	{
@@ -929,11 +935,11 @@ class DBObject extends DBBase
 	 * Reads the placed on object names and placed on pages per passed object id.
 	 * Same as getPlacedOnRows() but then of multible objects.
 	 * 
-	 * @param integer[] $objId
+	 * @param integer[] $objIds
 	 * @return array (key is object id) with arrays with key "name" for the placed on object name
 	 * and key "pagerange" for the placed on page.
 	 */
-	static public function getPlacedOnRowsByObjIds( $objIds )
+	static public function getPlacedOnRowsByObjIds( array $objIds )
 	{
 		$dbDriver = DBDriverFactory::gen();
 
@@ -1107,7 +1113,7 @@ class DBObject extends DBBase
 	 * Marks objects as non-indexed.
 	 *
 	 * @param array $objectIds: ids of objects. Null for all objects at once.
-	 * @param boolean $deletedObjects True for using smart_deletedobjects table. False for using smart_objects instead.
+	 * @param string[] $areas Either 'Workflow' or 'Trash'.
 	 * @return void
 	 */
 	static public function setNonIndex( $objectIds, $areas = array('Workflow'))
@@ -1185,7 +1191,7 @@ class DBObject extends DBBase
 	/**
 	 * Counts the objects at smart_objects table that needs to be indexed (or needs to be un-indexed).
 	 *
-	 * @param boolean $index Whether to count objects to index or to un-index
+	 * @param boolean $toIndex Whether to count objects to index or to un-index
 	 * @return integer Object count.
 	 */
 	static public function countObjectsToIndex( $toIndex )
@@ -1268,11 +1274,12 @@ class DBObject extends DBBase
 	 * 
 	 * @param string $operation Fragment is used for update or insert operation
 	 * @param string $dbField name of the field as sent to the dbdriver
-	 * @param string $property Name name of the field as know in the Biz-layer
+	 * @param string $propertyName name of the field as know in the Biz-layer
 	 * @param string/integer/double $value value to be inserted/updated
-	 * @param resource $dbDriver connection to the database
+	 * @param WW_DbDrivers_DriverBase $dbDriver connection to the database
 	 * @param string $comma separator
 	 * @param array $blobs placeholder of blobs to be inserted/updated
+	 * @return string SQL-statement.
 	 */
 	static public function handleObjectUpdateInsert( $operation, $dbField, $propertyName, $value, $dbDriver, $comma, &$blobs )
 	{
@@ -1285,6 +1292,7 @@ class DBObject extends DBBase
 		} else {
 			$formattedDbValue = $value;
 		}
+		$descript = '';
 		if ( self::isBlob( $propertyName ) ) {
 			$blobs[] = $formattedDbValue;
 			$descript = '#BLOB#';
@@ -1326,7 +1334,7 @@ class DBObject extends DBBase
 	 * as 'blob' in their $SqlTProps[] (see BizProperty). Custom properties are either
 	 * marked as 'blob' (mysql), 'text' (mssql) or 'clob' (oracle).
 	 * 
-	 * @param string $property to be checked.
+	 * @param string $bizProperty Property to be checked.
 	 * @return true if property is stored as 'blob' else false.
 	 */
 	// TODO Move to BizProperty or dbdriver.
@@ -1369,6 +1377,7 @@ class DBObject extends DBBase
 	 *
 	 * @param string $property The name of the property to be checked for the property type.
 	 * @param boolean $customProp True if it is a custom property, False for standard/builtin property.
+	 * @return string The PropertyType or an empty string if the PropertyType could not be determined.
 	 */
 	static protected function getPropertyType( $property, $customProp )
 	{
@@ -1376,7 +1385,7 @@ class DBObject extends DBBase
 		if( $customProp ) {
 			$type = BizProperty::getCustomPropertyType( $property );
 		} else {
-			$types = BizProperty::getMetaDataSqlFieldTypes( $property );
+			$types = BizProperty::getMetaDataSqlFieldTypes();
 			$type = $types[$property];			
 		}
 		return $type;
@@ -1735,6 +1744,7 @@ class DBObject extends DBBase
 	 * Returns null if there is no matching Object found.
 	 * @param string $area The Area in which to search, `Workflow` or `Trash`.
 	 * @param string $documentId The DocumentId for which to search the ObjectId.
+	 * @param string $objectType The type of the object.
 	 * @return null|int The Object ID or null if not found.
 	 */
 	static public function getObjectIdByDocumentId( $area, $documentId, $objectType )

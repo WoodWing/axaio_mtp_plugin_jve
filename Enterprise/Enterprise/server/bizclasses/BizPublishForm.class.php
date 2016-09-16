@@ -91,6 +91,43 @@ class BizPublishForm
 	}
 
 	/**
+	 * Removes all files from the transfer server that were prepared by the getFormFields() function.
+	 *
+	 * @param array $fieldProperties The returned data from getFormFields()
+	 */
+	static public function cleanupFilesReturnedByGetFormFields( $fieldProperties )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+		$transferServer = new BizTransferServer();
+		if( $fieldProperties ) foreach( $fieldProperties as $formWidgetId => $objects ) {
+			if( is_object( $objects ) ) {
+				$objects = array( $objects );
+			}
+			if( $objects ) foreach( $objects as $object ) {
+				if( is_object( $object ) && $object->Files ) foreach( $object->Files as $attachment ) {
+					$transferServer->deleteFile( $attachment->FilePath );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Removes all files from the tempfolder that were converted by the image converter and placed on the publish form.
+	 *
+	 * @param Object $publishForm The publishform containing all images.
+	 */
+	static public function cleanupPlacedFilesCreatedByConversion( $publishForm )
+	{
+		if( $publishForm->Relations ) foreach( $publishForm->Relations as $relation ) {
+			if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
+				if( isset($placement->ConvertedImageToPublish->Attachment->FilePath ) ) {
+					unlink( $placement->ConvertedImageToPublish->Attachment->FilePath );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Returns the requested field by name from the PublishForm.
 	 *
 	 * First checks the Objects MetaData to find the field, if found it is returned to the user. If the field could not
@@ -151,9 +188,10 @@ class BizPublishForm
 	 * @param object $publishForm The PublishForm to retrieve data from.
 	 * @param string $fieldName The FieldName for which to retrieve the data.
 	 * @param bool $extractContent In some cases it can be preferable to not get an objects content, but instead get the objects attachment.
+	 * @param integer $channelId Id of the publication channel to publish in.
 	 * @return array|null An array with the resolved data.
 	 */
-	static public function extractFormFieldDataByName ( $publishForm, $fieldName, $extractContent )
+	static public function extractFormFieldDataByName ( $publishForm, $fieldName, $extractContent, $channelId )
 	{
 		try {
 			$field = self::getFormFieldByName( $publishForm, $fieldName );
@@ -169,7 +207,7 @@ class BizPublishForm
 			switch( $values->MetaData->BasicMetaData->Type ) {
 				case 'Article' :
 					if ($extractContent) {
-						$values = self::extractArticleObjectElements( $values );
+						$values = self::extractArticleObjectElements( $values, $channelId );
 					} else {
 						$values = self::getAttachments( $values );
 					}
@@ -199,10 +237,11 @@ class BizPublishForm
 	 *
 	 * @param string $fieldName The FieldName for which to retrieve the data.
 	 * @param string|Object $fieldValues The raw field values to be resolved.
+	 * @param integer $channelId The ID of the publication channel.
 	 * @param bool $extractContent True to extract the data out of the object, false to only extract the object attachment.
 	 * @return array|null An array with the resolved data.
 	 */
-	static public function extractFormFieldDataFromFieldValue ( $fieldName, $fieldValues, $extractContent=true )
+	static public function extractFormFieldDataFromFieldValue ( $fieldName, $fieldValues, $channelId, $extractContent=true )
 	{
 		$values = $fieldValues;
 		if (is_object($values)) {
@@ -223,7 +262,7 @@ class BizPublishForm
 
 					if (!is_null($elementId) && $extractContent) {
 						// Get the elements.
-						$values = self::extractArticleObjectElements( $values );
+						$values = self::extractArticleObjectElements( $values, $channelId );
 
 						// If we have more than one element, find the correct one.
 						if (is_array($values) && count($values) > 1) {
@@ -294,9 +333,10 @@ class BizPublishForm
 	 * Extracts article elements from an article object.
 	 *
 	 * @param Object $articleObject The object for which to get the Elements.
+	 * @param integer $channelId Id of the publication channel to publish in.
 	 * @return Element[] An array of elements.
 	 */
-	static public function extractArticleObjectElements( $articleObject )
+	static public function extractArticleObjectElements( $articleObject, $channelId )
 	{
 		require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
 
@@ -305,7 +345,7 @@ class BizPublishForm
 			case 'application/incopy':
 			case 'application/incopyinx':
 			case 'application/incopyicml':
-				$elements = self::extractWcmlArticleElements( $articleObject );
+				$elements = self::extractWcmlArticleElements( $articleObject, $channelId );
 				break;
 			case 'text/html':
 				$elements = self::extractHtmlElements($articleObject);
@@ -330,9 +370,7 @@ class BizPublishForm
 	static private function extractPlainTextElements( $articleObject )
 	{
 		$elements = array();
-		$attachments = self::getAttachments($articleObject);
-		$attachment = $attachments[0];
-		$content = self::getAttachmentContents( $attachment );
+		$content = self::getArticleContents( $articleObject );
 
 		$element = new stdClass();
 		$element->Label = 'body';
@@ -366,9 +404,7 @@ class BizPublishForm
 	static private function extractHtmlElements( $articleObject )
 	{
 		$elements = array();
-		$attachments = self::getAttachments($articleObject);
-		$attachment = $attachments[0];
-		$content = self::getAttachmentContents( $attachment );
+		$content = self::getArticleContents( $articleObject );
 
 		$element = new stdClass();
 		$element->Label = 'body';
@@ -416,9 +452,7 @@ class BizPublishForm
 	static private function extractWweaElements( $articleObject )
 	{
 		$elements = array();
-		$attachments = self::getAttachments($articleObject);
-		$attachment = $attachments[0];
-		$content = self::getAttachmentContents( $attachment );
+		$content = self::getArticleContents( $articleObject );
 
 		$eaDoc = new DOMDocument();
 		$eaDoc->loadXML($content);
@@ -473,17 +507,16 @@ class BizPublishForm
 
 	/**
 	 * Extracts wcml article elements from an article object.
-     *
-     * @static
-     * @param object $articleObject The Article Object to retrieve the elements from.
-     * @return Element[] An array of Element objects.
-     */
-	static private function extractWcmlArticleElements( $articleObject )
+    *
+    * @static
+    * @param object $articleObject The Article Object to retrieve the elements from.
+	 * @param
+    * @return Element[] An array of Element objects.
+    */
+	static private function extractWcmlArticleElements( $articleObject, $channelId )
 	{
 		$elements = array();
-		$attachments = self::getAttachments($articleObject);
-		$attachment = $attachments[0];
-		$content = self::getAttachmentContents( $attachment );
+		$content = self::getArticleContents( $articleObject );
 		$format = $articleObject->MetaData->ContentMetaData->Format;
 
 		// Convert article into XHTML frames (tinyMCE compatible).
@@ -517,12 +550,29 @@ class BizPublishForm
 				}
 			}
 
+			require_once BASEDIR.'/server/bizclasses/BizImageConverter.class.php';
 			$inlineImages = array();
 			if( $xFrame->InlineImageIds ) {
-				$user = BizSession::getShortUserName();
-				foreach( $xFrame->InlineImageIds as $imgId ) {
-					$imgObj = BizObject::getObject( $imgId, $user, false/*lock*/, 'native'/*rendition*/ );
-					$inlineImages[$imgObj->MetaData->BasicMetaData->ID] = $imgObj->Files[0]; // Get the attachment only.
+				foreach( $xFrame->InlineImageIds as $key => $imgId ) {
+					$imgInfo = $xFrame->InlineImageInfos[ $key ];
+					$placement = new Placement();
+					$placement->Width = $imgInfo['Width'];
+					$placement->Height = $imgInfo['Height'];
+					$placement->ContentDx = $imgInfo['ContentDx'];
+					$placement->ContentDy = $imgInfo['ContentDy'];
+					$placement->ScaleX = $imgInfo['ScaleX'];
+					$placement->ScaleY = $imgInfo['ScaleY'];
+					$bizImageConverter = new BizImageConverter();
+					if( $bizImageConverter->loadNativeFileForInputImage( $imgId ) ) {
+						if( $bizImageConverter->doesImageNeedConversion( $imgId, $placement ) ) {
+							if( $bizImageConverter->convertImageByPlacement( $placement, $channelId ) ) {
+								$inlineImages[ $imgId ] = $bizImageConverter->getOutputImageAttachment();
+							}
+							$bizImageConverter->cleanupNativeFileForInputImage();
+						} else { // fallback at native rendition
+							$inlineImages[ $imgId ] = $bizImageConverter->getInputImageAttachment();
+						}
+					}
 				}
 			}
 			$element = new stdClass();
@@ -574,16 +624,27 @@ class BizPublishForm
 	}
 
 	/**
-	 * Retrieves the file contents for an Attachment.
+	 * Retrieves the file contents for a given article.
 	 *
-	 * @param Attachment $attachment The attachment for which to get the contents.
+	 * @param Object $articleObject The article for which to get the contents.
 	 * @return string
 	 */
-	static private function getAttachmentContents( $attachment )
+	static private function getArticleContents( $articleObject )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 		$transferServer = new BizTransferServer();
-		return $transferServer->getContent($attachment);
+
+		$attachments = self::getAttachments( $articleObject );
+		$content = $transferServer->getContent( $attachments[0] );
+
+		// Cleanup the temp images from the transfer folder.
+		if( $attachments ) {
+			$transferServer = new BizTransferServer();
+			foreach( $attachments as $attachment ) {
+				$transferServer->deleteFile( $attachment->FilePath );
+			}
+		}
+		return $content;
 	}
 
 	/**
@@ -740,5 +801,42 @@ class BizPublishForm
 		}
 
 		return $found;
+	}
+
+	/**
+	 * Retrieve all the objects(children) that are placed on the PublishForm.
+	 *
+	 * @since 10.1 Moved from BizPublishing class to here.
+	 * @param int $publishFormId
+	 * @return array List of object Ids that are placed on the PublishForm.
+	 */
+	static public function getObjectsPlacedOnPublishForm( $publishFormId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
+		$objIdsPlacedOnForm = array();
+		$rows = DBObjectRelation::getObjectRelations( $publishFormId, 'childs', 'Placed' );
+		if( $rows ) foreach( array_values( $rows ) as $row ) {
+			$objIdsPlacedOnForm[] = $row['child'];
+		}
+		return $objIdsPlacedOnForm;
+	}
+
+	/**
+	 * Returns a Publish Form in a list of objects (typically all objects contained by a dossier).
+	 *
+	 * @since 10.1.0
+	 * @param Object[]|null $objects List to search through
+	 * @return Object|null The Publish Form object. NULL when not found.
+	 */
+	static public function findPublishFormInObjects( $objects )
+	{
+		$publishForm = null;
+		if( $objects ) foreach( $objects as $object ) {
+			if( $object->MetaData->BasicMetaData->Type == 'PublishForm' ) {
+				$publishForm = $object;
+				break;
+			}
+		}
+		return $publishForm;
 	}
 }

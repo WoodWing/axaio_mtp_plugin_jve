@@ -1094,7 +1094,7 @@ class BizAdmPublication
 	
 	/**
 	 * Some standard properties are calculated run-time (not read from DB).
-	 * This function determines the DirectPublish and SupportsForms properties.
+	 * This function determines the DirectPublish, SupportsForms and SupportsCropping properties.
 	 *
 	 * @param array List of AdmPubChannel (input/output)
 	 */
@@ -1107,7 +1107,7 @@ class BizAdmPublication
 
 	/**
 	 * Some standard properties are calculated run-time (not read from DB).
-	 * This function determines the DirectPublish and SupportsForms properties.
+	 * This function determines the DirectPublish, SupportsForms and SupportsCropping properties.
 	 *
 	 * @param array AdmPubChannel (input/output)
 	 */
@@ -1115,10 +1115,16 @@ class BizAdmPublication
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		$pubChannel->DirectPublish = !empty($pubChannel->PublishSystem) ? true : false;
+
 		$supportsForms = BizServerPlugin::runChannelConnector( $pubChannel->Id, 
-						'doesSupportPublishForms', array(), false/*supress Error*/ );
-		// $supportsForms is null, most likely there was an error thrown but we supress it.
+			'doesSupportPublishForms', array(), false/*suppress Error*/ );
+		// $supportsForms is null, most likely there was an error thrown but we suppress it.
 		$pubChannel->SupportsForms = is_null( $supportsForms ) ? false : $supportsForms;
+
+		$supportsCropping = BizServerPlugin::runChannelConnector( $pubChannel->Id,
+			'doesSupportCropping', array(), false/*suppress Error*/ );
+		// $supportsCropping is null, most likely there was an error thrown but we suppress it.
+		$pubChannel->SupportsCropping = is_null( $supportsCropping ) ? false : $supportsCropping;
 	}
 
 	/**

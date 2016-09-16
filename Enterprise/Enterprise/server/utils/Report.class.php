@@ -1,15 +1,15 @@
 <?php
-
 /**
- * Utils build a report, e.g. collecting operation results of biz logics.
+ * Utils build a report, e.g. collecting operation results of biz logic.
+ *
  * It builds a list of report items in memory whereby severities can be tracked
  * and optionally all reported information can be logged.
  * MVC tip: This could help separating biz logics (Model/Control) from UI (View).
  *
- * @package 	Enterprise
- * @subpackage 	utils
- * @since 		v9.0.0
- * @copyright 	WoodWing Software bv. All Rights Reserved.
+ * @package Enterprise
+ * @subpackage utils
+ * @since v9.0.0
+ * @copyright WoodWing Software bv. All Rights Reserved.
  */
  
 class WW_Utils_ReportItem

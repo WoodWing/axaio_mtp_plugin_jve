@@ -69,7 +69,7 @@ class BizAdmStatus
 	/**
 	 * Creates a new status object at DB.
 	 *
-	 * @param Object $status The admin status object
+	 * @param AdmStatus $status The admin status object
 	 * @throws BizException Throws BizException when invalid status is given, see {@link:validateStatus()}
 	 * @return Object
 	 */

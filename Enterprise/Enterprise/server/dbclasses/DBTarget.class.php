@@ -16,14 +16,17 @@ class DBTarget extends DBBase
 	const DBINT_CLASS = 'WW_DBIntegrity_Target';
 
 	/**************************** Insert ******************************************/
-    /**
-	 * Inserts records with the new values for passed columns.  
-	 * @param $newValues column/value pairs of the columns to be inserted.
+
+	/**
+	 * Inserts records with the new values for passed columns.
+	 *
+	 * @param array $newValues column/value pairs of the columns to be inserted.
+	 * @param boolean $autoIncrement
 	 * @return new id or else false.
-     */
-	public static function insert(array $newValues, $autoIncrement)
-    {
-		return parent::doInsert(self::TABLENAME, self::DBINT_CLASS, $newValues, $autoIncrement);
+	 */
+	public static function insert( array $newValues, $autoIncrement )
+	{
+		return parent::doInsert( self::TABLENAME, self::DBINT_CLASS, $newValues, $autoIncrement );
 	}
 
     /**
@@ -199,8 +202,8 @@ class DBTarget extends DBBase
 	/**************************** Update ******************************************/
 	/**
 	 * Updates records with the new values for passed columns.  
-	 * @param $whereParams column/array of value pairs for where clause
-	 * @param $newValues column/value pairs of the columns to be updated.
+	 * @param array $whereParams column/array of value pairs for where clause
+	 * @param array $newValues column/value pairs of the columns to be updated.
 	 * @return number of records updated or null in case of error.
 	 */
 	public static function update(array $whereParams, array $newValues)
@@ -221,9 +224,8 @@ class DBTarget extends DBBase
      * @param string $version date at which object must get/is published
      * @param string $user short name of 'publisher'
      * @return the id of the added entry in the publishhistory table
-	 *
-	 */
-    static public function updatePublishInfoDossier($objectid, $channelid, $issueid, $externalid, $action, $publisheddate, $version, $user)
+	  */
+    static public function updatePublishInfoDossier($objectid, $channelid, $issueid, $externalid, $action, $publisheddate, $version, $user )
 	{
     	$tablename = self::TABLENAME;
 
@@ -245,10 +247,24 @@ class DBTarget extends DBBase
 		
     	self::updateRow($tablename, $values, $where);
 		
-   		require_once BASEDIR . '/server/dbclasses/DBPublishHistory.class.php';
-		
-   		//update publishhistory
-   		return DBPublishHistory::addPublishHistory($objectid, $channelid, $issueid, $action, $user);
+   	require_once BASEDIR . '/server/dbclasses/DBPublishHistory.class.php';
+
+		$publishedDossier = new PubPublishedDossier();
+		$publishedDossier->DossierID = $objectid;
+		$publishedDossier->Target = new Target();
+		$publishedDossier->Target->Issue = new Issue();
+		$publishedDossier->Target->Issue->Id = $issueid;
+		$publishedDossier->Target->PubChannel->Id = new PubChannel();
+		$publishedDossier->Target->PubChannel->Id = $channelid;
+		$publishedDossier->Target->PublishedDate = $publisheddate;
+		$publishedDossier->PublishedDate = $publisheddate;
+		$publishedDossier->ExternalId = $externalid;
+		$publishedDossier->FieldsVersion = $version;
+		$publishedDossier->History[0]->Action = $action;
+		$publishedDossier->History[0]->PublishedBy = $user;
+
+   	//update publishhistory
+   	return DBPublishHistory::addPublishHistory( $publishedDossier );
 	}
 
 	/**
@@ -336,7 +352,6 @@ class DBTarget extends DBBase
 					DBTargetEdition::addTargetEdition( $targetId, $editionId );
 				}
 			} catch ( BizException $e ) {
-				$e = $e; // To make analyzer happy.
 				$updateResult = false;
 			}
 		}
@@ -381,8 +396,8 @@ class DBTarget extends DBBase
      * @param int $channelid Channel id (of the target)
      * @param int $issueid Issue id (of the target)
      * @param string $externalid id of the published object in external system
-     * $param string $publisheddate date at which object must get/is published
-     * $param string $version version of object in format x.x
+     * @param string $publisheddate date at which object must get/is published
+     * @param string $version version of object in format x.x
      * 
      */    
     static public function updatePublishInfoObjectRelation($relationid, $channelid, $issueid, $externalid, $publisheddate, $version)
@@ -424,8 +439,7 @@ class DBTarget extends DBBase
      * 
      * @param int $objectId, required id of an object
      * @return false in case of error else true
-    **/
-
+     */
     public static function removeAllTargetsByObject( $objectId )
     {
 		self::clearError();
@@ -447,7 +461,8 @@ class DBTarget extends DBBase
      * @param int $objectId, required id of an object
      * @param int $channelId, optional, if not empty only targets for this channel will be removed.
      * @param int $issueId, optional, if not empty only targets for this issue will be removed.
-    **/
+     * @throws BizException
+     */
     public static function removeSomeTargetsByObject( $objectId, $channelId = null, $issueId = null )
     {
 		self::clearError();
@@ -488,59 +503,58 @@ class DBTarget extends DBBase
 			DBTarget::removeTargetsOfContainedObjects($objectId, $channelId, $issueId);
 		}
 	}
-    
-	/**
-     * This method removes all targets belonging to an objectrelation. E.g. a dossier
-     * ($parent) contains an image ($child) and the image is removed from the dossier.
-     * Before the objectrelation is removed the targets for the objectrelation must
-     * be removed. 
-	 *
-     * @param integer $parent objectid of parent
-     * @param integer $child objectid of child
-     * @return true if no errors else null
-	 */
-    public static function removeTargetObjectRelation($parent, $child)
-    {
-    	// Get object's editions from DB		
-        $where = "parent = ? AND child = ?";
-        $params = array( $parent, $child );
-        $relations = self::listRows( 'objectrelations', 'id', null, $where, false, $params );
 
-        if (empty($relations)) { 
-        	return true;
+	/**
+	 * This method removes all targets belonging to an objectrelation. E.g. a dossier
+	 * ($parent) contains an image ($child) and the image is removed from the dossier.
+	 * Before the objectrelation is removed the targets for the objectrelation must
+	 * be removed.
+	 *
+	 * @param integer $parent objectid of parent
+	 * @param integer $child objectid of child
+	 * @return true if no errors else null
+	 */
+	public static function removeTargetObjectRelation( $parent, $child )
+	{
+		// Get object's editions from DB
+		$where = "parent = ? AND child = ?";
+		$params = array( $parent, $child );
+		$relations = self::listRows( 'objectrelations', 'id', null, $where, false, $params );
+
+		if( empty( $relations ) ) {
+			return true;
 		}
 
-        $rowIds = array_keys($relations);
-        $whereParams = array('objectrelationid' => $rowIds);
-        return self::delete($whereParams);
-    }
-        
-    /**
-     * This method removes the targets and target editions of children related
-     * to the passed parent ($objectId). To delete only targets for a certain channel,
-     * issue or edition combination extra filter options can be passed. This method is
-     * typically called when tagets are removed from a 'dossier'. Targets of contained 
-     * objects are identified by the objectrelation id's.
-     *
-     * @param integer $objectId object id of the parent (dossier). 
-     * @param integer $channelId channel id to filter on (null or 0 means no filter) 
-     * @param integer $issueId issue id to filter on (null or 0 means no filter)
-     * @param unknown_type $edition id to filter on (null or 0 means no filter)
-     */
-	static private function removeTargetsOfContainedObjects($objectId, $channelId, $issueId)
+		$rowIds = array_keys( $relations );
+		$whereParams = array( 'objectrelationid' => $rowIds );
+		return self::delete( $whereParams );
+	}
+
+	/**
+	 * This method removes the targets and target editions of children related
+	 * to the passed parent ($objectId). To delete only targets for a certain channel,
+	 * issue or edition combination extra filter options can be passed. This method is
+	 * typically called when tagets are removed from a 'dossier'. Targets of contained
+	 * objects are identified by the objectrelation id's.
+	 *
+	 * @param integer $objectId object id of the parent (dossier).
+	 * @param integer $channelId channel id to filter on (null or 0 means no filter)
+	 * @param integer $issueId issue id to filter on (null or 0 means no filter)
+	 */
+	static private function removeTargetsOfContainedObjects( $objectId, $channelId, $issueId )
 	{
-		require_once BASEDIR . '/server/dbclasses/DBObjectRelation.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
 		// Get objectrelations id's
-		$objectrelations = DBObjectRelation::getObjectRelations($objectId, 'childs', 'Contained', true);
-		if (is_array($objectrelations) && ! empty($objectrelations)) {
-			$objectrelationids = array_keys($objectrelations);
+		$objectrelations = DBObjectRelation::getObjectRelations( $objectId, 'childs', 'Contained', true );
+		if( is_array( $objectrelations ) && !empty( $objectrelations ) ) {
+			$objectrelationids = array_keys( $objectrelations );
 			// Get target id's of the objectrelations
-			$targetids = self::getTargetIdsByObjectRelationIds($objectrelationids, $channelId, $issueId);
-			if (is_array($targetids) && !empty($targetids)) {
+			$targetids = self::getTargetIdsByObjectRelationIds( $objectrelationids, $channelId, $issueId );
+			if( is_array( $targetids ) && !empty( $targetids ) ) {
 				// BZ#30217. Use the array keys here (which are the ids)
-	 	       	$whereParams = array('id' => array_keys($targetids));
-        		self::delete($whereParams);
-        }
+				$whereParams = array( 'id' => array_keys( $targetids ) );
+				self::delete( $whereParams );
+			}
 		}
 	}
 	
@@ -622,68 +636,69 @@ class DBTarget extends DBBase
 	 * @param string $chanType Channel type, like 'print', 'web', etc. Pass null for all channels.
 	 * @return Target[].
 	 */
-    static public function getTargetsByObjectId( $objectId, $chanType = null )
-    {
-    	require_once BASEDIR.'/server/dbclasses/DBTargetEdition.class.php';
+	static public function getTargetsByObjectId( $objectId, $chanType = null )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBTargetEdition.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBPublishHistory.class.php';
 
-        $targets = array();
-        $rows = DBTargetEdition::listTargetEditionRowsByObjectId( $objectId, $chanType );
-        $firstIter = true;
-        $curchannelid = 0;
-        $curissueid = 0;
-        
-        foreach ($rows as $row) {
- 			$publishInfo = DBPublishHistory::resolvePubHistoryForObj($objectId, $row['channelid'], $row['issueid'], $row['editionid']);
+		$targets = array();
+		$rows = DBTargetEdition::listTargetEditionRowsByObjectId( $objectId, $chanType );
+		$firstIter = true;
+		$curchannelid = 0;
+		$curissueid = 0;
+
+		foreach( $rows as $row ) {
+			$publishInfo = DBPublishHistory::resolvePubHistoryForObj( $objectId, $row['channelid'], $row['issueid'], $row['editionid'] );
 			$publishedVersion = null; // No major/minor version for published dossiers.
 			$publishedDate = null;
-			if ( $publishInfo ) {
-                $publishedDate = $publishInfo->PublishedDate;
-				if( empty($publishedDate) ) { $publishedDate = null; } // Empty strings are not allowed in the wsdl.
+			if( $publishInfo ) {
+				$publishedDate = $publishInfo->PublishedDate;
+				if( empty( $publishedDate ) ) {
+					$publishedDate = null;
+				} // Empty strings are not allowed in the wsdl.
 			}
-            if( $firstIter ) {
-                $firstIter = false;
-                $curchannelid = $row['channelid'];
-                $curissueid = $row['issueid'];
-                $newchannel = new PubChannel($curchannelid, $row['channelname']);
-                $newissue = new Issue($curissueid, $row['issuename'], (boolean)trim($row['overrulepub'])); // BZ#17036 - MSSQL return overrulepub as single space
-                $neweditions = array();
-                if ($row['editionid'] != 0) {
-                    $neweditions[] = new Edition($row['editionid'], $row['editionname']);                
-                }
-                $newtarget = new Target($newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion);
-                $targets[] = $newtarget;
-            }
-            else if ($row['channelid'] != $curchannelid) {
-                $curchannelid = $row['channelid'];
-                $curissueid = $row['issueid'];
-                $newchannel = new PubChannel($curchannelid, $row['channelname']);
-                $newissue = new Issue($curissueid, $row['issuename'], (boolean)trim($row['overrulepub'])); // BZ#17036
-                $neweditions = array();
-                if ($row['editionid'] != 0) {
-                    $neweditions[] = new Edition($row['editionid'], $row['editionname']);                
-                }
-                $newtarget = new Target($newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion);
-                $targets[] = $newtarget;
-            }
-            else if ($row['issueid'] != $curissueid) {
-                $curissueid = $row['issueid'];
-                $newchannel = new PubChannel($curchannelid, $row['channelname']);
-                $newissue = new Issue($curissueid, $row['issuename'], (boolean)trim($row['overrulepub'])); // BZ#17036
-                $neweditions = array();
-                if ($row['editionid'] != 0) {
-                    $neweditions[] = new Edition($row['editionid'], $row['editionname']);                
-                }
-                $newtarget = new Target($newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion);
-                $targets[] = $newtarget;
-            }
-            else {
-                $newedition = new Edition($row['editionid'], $row['editionname']);
-                $newtarget->Editions[] = $newedition;
-            }
-        }    
-        return $targets;
-    }
+			if( $firstIter ) {
+				$firstIter = false;
+				$curchannelid = $row['channelid'];
+				$curissueid = $row['issueid'];
+				$newchannel = new PubChannel( $curchannelid, $row['channelname'] );
+				$newissue = new Issue( $curissueid, $row['issuename'], (boolean)trim( $row['overrulepub'] ) ); // BZ#17036 - MSSQL return overrulepub as single space
+				$neweditions = array();
+				if( $row['editionid'] != 0 ) {
+					$neweditions[] = new Edition( $row['editionid'], $row['editionname'] );
+				}
+				$newtarget = new Target( $newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion );
+				$targets[] = $newtarget;
+			} else if( $row['channelid'] != $curchannelid ) {
+				$curchannelid = $row['channelid'];
+				$curissueid = $row['issueid'];
+				$newchannel = new PubChannel( $curchannelid, $row['channelname'] );
+				$newissue = new Issue( $curissueid, $row['issuename'], (boolean)trim( $row['overrulepub'] ) ); // BZ#17036
+				$neweditions = array();
+				if( $row['editionid'] != 0 ) {
+					$neweditions[] = new Edition( $row['editionid'], $row['editionname'] );
+				}
+				$newtarget = new Target( $newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion );
+				$targets[] = $newtarget;
+			} else if( $row['issueid'] != $curissueid ) {
+				$curissueid = $row['issueid'];
+				$newchannel = new PubChannel( $curchannelid, $row['channelname'] );
+				$newissue = new Issue( $curissueid, $row['issuename'], (boolean)trim( $row['overrulepub'] ) ); // BZ#17036
+				$neweditions = array();
+				if( $row['editionid'] != 0 ) {
+					$neweditions[] = new Edition( $row['editionid'], $row['editionname'] );
+				}
+				$newtarget = new Target( $newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion );
+				$targets[] = $newtarget;
+			} else {
+				$newedition = new Edition( $row['editionid'], $row['editionname'] );
+				if ( isset( $newtarget )) {
+					$newtarget->Editions[] = $newedition;
+				}
+			}
+		}
+		return $targets;
+	}
     
     /**
      * Returns the external id of a published dossier
@@ -781,23 +796,23 @@ class DBTarget extends DBBase
 			$targets = array();
 		}
 		return $targets;
-	}	
+	}
 
 	/**
 	 * Based on the target(edition) rows stored in the database Target objects are composed.
 	 * The input of the method can be the rows as returned by DBTargetEdition::listTargetEditionRowsByObjectrelationId().
-	 *  
+	 *
 	 * @param array $targetEditionRows The target(edition) rows belonging to an objectrelation.
 	 * @return array|Target object
 	 */
 	static public function composeRelationTargetsOfTargetEditionRows( $targetEditionRows )
 	{
-        $targets = array();
-        $curobjectid = 0;
-        $curchannelid = 0;
-        $curissueid = 0;
+		$targets = array();
+		$curobjectid = 0;
+		$curchannelid = 0;
+		$curissueid = 0;
 
-		if ( $targetEditionRows ) foreach ($targetEditionRows as $row ) {
+		if( $targetEditionRows ) foreach( $targetEditionRows as $row ) {
 			/*$publishInfo = DBPublishHistory::resolvePubHistoryForObjRelation($objectrelationId, $row['channelid'], $row['issueid'], $row['editionid']);
 			$publishedVersion = null;
 			$publishedDate = null;
@@ -810,56 +825,57 @@ class DBTarget extends DBBase
 			$publishedDate = $row['publisheddate'];
 			$publishedVersion = '';
 			self::joinMajorMinorVer( $publishedVersion, $row, 'published' );
-			if( $publishedVersion == '0.0' ) { $publishedVersion = null; }
+			if( $publishedVersion == '0.0' ) {
+				$publishedVersion = null;
+			}
 
-			$overrulePub = trim($row['overrulepub']);
-			$overrulePub = empty($overrulePub) ? false : true;
-			if ($row['objectrelationid'] != $curobjectid) {
+			$overrulePub = trim( $row['overrulepub'] );
+			$overrulePub = empty( $overrulePub ) ? false : true;
+			if( $row['objectrelationid'] != $curobjectid ) {
 				$curobjectid = $row['objectrelationid'];
 				$curchannelid = $row['channelid'];
 				$curissueid = $row['issueid'];
-				$newchannel = new PubChannel($curchannelid, $row['channelname']);
-				$newissue = new Issue($curissueid, $row['issuename'], $overrulePub);
+				$newchannel = new PubChannel( $curchannelid, $row['channelname'] );
+				$newissue = new Issue( $curissueid, $row['issuename'], $overrulePub );
 				$neweditions = array();
-				if ($row['editionid'] != 0) {
-					$neweditions[] = new Edition($row['editionid'], $row['editionname']);                
+				if( $row['editionid'] != 0 ) {
+					$neweditions[] = new Edition( $row['editionid'], $row['editionname'] );
 				}
-				$newTarget = new Target($newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion);
+				$newTarget = new Target( $newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion );
 				$newTarget->ExternalId = $row['externalid']; // Not exposed to WSDL
 				$targets[] = $newTarget;
-			}
-			else if ($row['channelid'] != $curchannelid) {
+			} else if( $row['channelid'] != $curchannelid ) {
 				$curchannelid = $row['channelid'];
 				$curissueid = $row['issueid'];
-				$newchannel = new PubChannel($curchannelid, $row['channelname']);
-				$newissue = new Issue($curissueid, $row['issuename'], $overrulePub);
+				$newchannel = new PubChannel( $curchannelid, $row['channelname'] );
+				$newissue = new Issue( $curissueid, $row['issuename'], $overrulePub );
 				$neweditions = array();
-				if ($row['editionid'] != 0) {
-					$neweditions[] = new Edition($row['editionid'], $row['editionname']);                
+				if( $row['editionid'] != 0 ) {
+					$neweditions[] = new Edition( $row['editionid'], $row['editionname'] );
 				}
-				$newTarget = new Target($newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion);
+				$newTarget = new Target( $newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion );
 				$newTarget->ExternalId = $row['externalid']; // Not exposed to WSDL
 				$targets[] = $newTarget;
-			}
-			else if ($row['issueid'] != $curissueid) {
+			} else if( $row['issueid'] != $curissueid ) {
 				$curissueid = $row['issueid'];
-				$newchannel = new PubChannel($curchannelid, $row['channelname']);
-				$newissue = new Issue($curissueid, $row['issuename'], $overrulePub);
+				$newchannel = new PubChannel( $curchannelid, $row['channelname'] );
+				$newissue = new Issue( $curissueid, $row['issuename'], $overrulePub );
 				$neweditions = array();
-				if ($row['editionid'] != 0) {
-					$neweditions[] = new Edition($row['editionid'], $row['editionname']);                
+				if( $row['editionid'] != 0 ) {
+					$neweditions[] = new Edition( $row['editionid'], $row['editionname'] );
 				}
-				$newTarget = new Target($newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion);
+				$newTarget = new Target( $newchannel, $newissue, $neweditions, $publishedDate, $publishedVersion );
 				$newTarget->ExternalId = $row['externalid']; // Not exposed to WSDL
 				$targets[] = $newTarget;
+			} else {
+				$newedition = new Edition( $row['editionid'], $row['editionname'] );
+				if( isset( $newTarget ) ) {
+					$newTarget->Editions[] = $newedition;
+				}
 			}
-			else {
-				$newedition = new Edition($row['editionid'], $row['editionname']);
-				$newTarget->Editions[] = $newedition;
-			}
-        }
-        return $targets;
-    }
+		}
+		return $targets;
+	}
 
     /**
      * Returns the targets of objects stored in a temporary table. The  
@@ -1438,7 +1454,7 @@ class DBTarget extends DBBase
 	 * object-target.
 	 *
 	 * @param int $objectId
-	 * @return issue ID
+	 * @return int|boolean issue ID or false when not found.
 	 */
 	public static function getObjectTargetIssueID( $objectId )
 	{

@@ -15,29 +15,6 @@ class DBTargetEdition extends DBBase {
 	const DBINT_CLASS = 'WW_DBIntegrity_TargetEdition';
 	
 /**************************** Insert ******************************************/
-	/**
-	 * Inserts records with the new values for passed columns.  
-	 * @param $newValues column/value pairs of the columns to be inserted.
-	 * @param $autoIncrement Apply auto increment for primary key (true/false).
-	 * @return new id or else false.
-	 */
-	public static function insert(array $newValues, $autoIncrement)
-	{
-		self::clearError();
-		
-        $dbDriver = DBDriverFactory::gen();
-        $table = $dbDriver->tablename(self::TABLENAME);
-
-		$intDB = new WW_DBIntegrity_Tablename();
-        $intDB->beforeInsert($newValues);
-        
-		$newId = self::insertRow($table, $newValues, $autoIncrement);
-
-        $intDB->afterInsert($newId, $newValues);
-
-        return 1;
-	}		
-	
    /**
      * Adds one record to the smart_targeteditions table, with the values supplied in the params.
      * When the record does already exists, it does NOT error, but uses that record.
@@ -93,8 +70,8 @@ class DBTargetEdition extends DBBase {
 /*************************** Update ******************************************/
 	/**
 	 * Updates records with the new values for passed columns.  
-	 * @param $whereParams column/array of value pairs for where clause
-	 * @param $newValues column/value pairs of the columns to be updated.
+	 * @param array $whereParams column/array of value pairs for where clause
+	 * @param array $newValues column/value pairs of the columns to be updated.
 	 * @return number of records updated or null in case of error.
 	 */
 	public static function update(array $whereParams, array $newValues)
@@ -122,7 +99,7 @@ class DBTargetEdition extends DBBase {
      * @param int $channelId, optional, if not empty only rows for this channel will be removed.
      * @param int $issueId, optional, if not empty only rows for this issue will be removed.
      * @param int $editionId, optional, if not empty only rows for this edition will be removed.
-    **/
+     */
     public static function removeSomeTargetEditionsByObject( $objectId, $channelId = null, $issueId = null, $editionId = null )
     {
 		self::clearError();
@@ -334,6 +311,7 @@ class DBTargetEdition extends DBBase {
 	 * Returns the database Ids of the targeteditions table. Ids are returned of relational targets between a parent
 	 * object and its children. Filtering can be done by passing e.g. a specific issue id. If null is passed no
 	 * filtering is done.
+	 *
 	 * @param int    			$parentId Id of the parent object.
 	 * @param string|null 		$type Relation type, null for all relations
 	 * @param int|null 		$channelId Channel id or null  	

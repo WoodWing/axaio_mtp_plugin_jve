@@ -152,7 +152,7 @@ class ContentMetaData
 	 * @param int                  $Columns              Nullable.
 	 * @param float                $Width                Nullable.
 	 * @param float                $Height               Nullable.
-	 * @param integer              $Dpi                  Nullable.
+	 * @param float                $Dpi                  Nullable.
 	 * @param integer              $LengthWords          Nullable.
 	 * @param integer              $LengthChars          Nullable.
 	 * @param integer              $LengthParas          Nullable.
@@ -1845,6 +1845,7 @@ class PubChannelInfo
 	public $Type;
 	public $DirectPublish;
 	public $SupportsForms;
+	public $SupportsCropping;
 
 	/**
 	 * @param string               $Id                   
@@ -1855,8 +1856,9 @@ class PubChannelInfo
 	 * @param string               $Type                 Nullable.
 	 * @param boolean              $DirectPublish        Nullable.
 	 * @param boolean              $SupportsForms        Nullable.
+	 * @param boolean              $SupportsCropping     Nullable.
 	 */
-	public function __construct( $Id=null, $Name=null, $Issues=null, $Editions=null, $CurrentIssue=null, $Type=null, $DirectPublish=null, $SupportsForms=null)
+	public function __construct( $Id=null, $Name=null, $Issues=null, $Editions=null, $CurrentIssue=null, $Type=null, $DirectPublish=null, $SupportsForms=null, $SupportsCropping=null)
 	{
 		$this->Id                   = $Id;
 		$this->Name                 = $Name;
@@ -1866,6 +1868,7 @@ class PubChannelInfo
 		$this->Type                 = $Type;
 		$this->DirectPublish        = $DirectPublish;
 		$this->SupportsForms        = $SupportsForms;
+		$this->SupportsCropping     = $SupportsCropping;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflPubChannelInfo'; } // AMF object type mapping
@@ -1874,6 +1877,7 @@ class PubChannelInfo
 	{
 		if (!is_null($this->DirectPublish)){ $this->DirectPublish = ('true' == $this->DirectPublish) ? true : false; }
 		if (!is_null($this->SupportsForms)){ $this->SupportsForms = ('true' == $this->SupportsForms) ? true : false; }
+		if (!is_null($this->SupportsCropping)){ $this->SupportsCropping = ('true' == $this->SupportsCropping) ? true : false; }
 		if (0 < count($this->Issues)){
 			if (is_object($this->Issues[0])){
 				foreach ($this->Issues as $complexField){

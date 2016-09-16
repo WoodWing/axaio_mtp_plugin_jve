@@ -537,6 +537,8 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 			LogHandler::Log( 'Drupal', 'DEBUG', 'File does not exists at Drupal yet or '.
 				'Enterprise has a newer version, so sending the file to Drupal.' );
 		}
+		$client = null;
+		$fileId = 0;
 		try {
 			// Now it's time to upload the file to Drupal ...
 			require_once 'Zend/Http/Client.php';
@@ -563,18 +565,20 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 			LogHandler::Log( 'Drupal', 'DEBUG', 'File sent to drupal. File Id: ' . $fileId );
 
 		} catch( Exception $e ) { // any kind of Zend exception !!
-			$e = $e; // keep code analyzer happy
 		}
 
 		// Log request and response (or fault) as plain text
 		if( $debugMode ) { // check here since saveXML() calls below are expensive
-			LogHandler::logService( $action, $client->getLastRequest(), true, 'http_upload', 'txt' );
-			$lastResponse = $client->getLastResponse();
-			if( $lastResponse ) {
-				if( $lastResponse->isError() ) {
-					LogHandler::logService( $action, (string)$lastResponse, null, 'http_upload', 'txt' );
-				} else {
-					LogHandler::logService( $action, (string)$lastResponse, false, 'http_upload', 'txt' );
+			if( isset($client ) ) {
+				LogHandler::logService( $action, $client->getLastRequest(), true, 'http_upload', 'txt' );
+				$lastResponse = $client->getLastResponse();
+
+				if( $lastResponse ) {
+					if( $lastResponse->isError() ) {
+						LogHandler::logService( $action, (string)$lastResponse, null, 'http_upload', 'txt' );
+					} else {
+						LogHandler::logService( $action, (string)$lastResponse, false, 'http_upload', 'txt' );
+					}
 				}
 			} else { // HTTP error
 				$message = isset($e) ? $e->getMessage() : 'unknown error';
@@ -670,18 +674,12 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 	}
 
 	/**
-	 * Sends a message to a XML-RPC server using the Zend_XmlRpc classes.
-	 *
-	 * @throws BizException Throws a BizException in case of errors.
-	 *
-	 * @param string $action
-	 * @param mixed $params
-	 * @return mixed - If answer is recieved the object will be returned otherwise null is returned.
+	 * {@inheritdoc}
 	 */
-	public function callRpcService( $action, $params )
+	public function callRpcService( $action, $params, $obfuscatePasswordForLogs = null )
 	{
 		try {
-			$retVal = parent::callRpcService( $action, $params );
+			$retVal = parent::callRpcService( $action, $params, $obfuscatePasswordForLogs );
 		} catch( BizException $e ) {
 			$httpClient = $this->rpcClient->getHttpClient();
 			$lastResponse = $httpClient->getLastResponse();

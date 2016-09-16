@@ -606,9 +606,15 @@ class BizMetaDataPreview extends BizServerJobHandler
 		if( !empty($object->MetaData->RightsMetaData->Copyright ) ){
 			$object->MetaData->RightsMetaData->CopyrightMarked= true;
 		}
-		// If Dpi not set, fill in proper default depending on image size
-		if( empty($object->MetaData->ContentMetaData->Dpi) && !empty($object->MetaData->ContentMetaData->Width)) {
-			$object->MetaData->ContentMetaData->Dpi = $object->MetaData->ContentMetaData->Width < 1024 ? 72 : 300;
+
+		// If Dpi not set fallback at 72 DPI default. With ExifTool in place this should never happen for images.
+		// Since 10.1 a DPI value is needed to enable image cropping feature on publish forms in CS. We have removed
+		// the default of 300 DPI for images wider than 1024 pixels, which gives unpredictable behaviour. (EN-87911)
+		if( $object->MetaData->ContentMetaData && !$object->MetaData->ContentMetaData->Dpi ) {
+			$objType = $object->MetaData->BasicMetaData->Type;
+			if( $objType == 'Image' || $objType == 'Advert' ) {
+				$object->MetaData->ContentMetaData->Dpi = 72;
+			}
 		}
 	}
 }

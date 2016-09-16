@@ -691,6 +691,7 @@
 					<xsd:element name="SupportsForms"     type="xsd:boolean"        nillable="true" minOccurs="0" maxOccurs="1"/>  <!-- v9.0: Tells whether the channel supports publish form feature. -->
 					<xsd:element name="Issues"            type="tns:ArrayOfIdName"  nillable="true"/>  <!-- issues (references) defined for pubchannel -->
 					<xsd:element name="Editions"          type="tns:ArrayOfIdName"  nillable="true"/>  <!-- editions (references) defined for pubchannel -->
+					<xsd:element name="SupportsCropping"  type="xsd:boolean"        nillable="true" minOccurs="0" maxOccurs="1"/>  <!-- v10.1: Tells whether the channel supports image cropping feature. -->
 				</xsd:all>
 			</xsd:complexType>
 			<xsd:complexType name="ArrayOfPubChannel">

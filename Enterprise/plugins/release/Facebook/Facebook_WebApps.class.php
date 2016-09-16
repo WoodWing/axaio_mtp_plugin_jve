@@ -27,5 +27,4 @@ class Facebook_WebApps extends WebApps_EnterpriseConnector
 
 		return $apps;
 	}
-
 }

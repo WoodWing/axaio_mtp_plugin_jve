@@ -24,6 +24,8 @@ public class PubChannelInfo  implements java.io.Serializable {
 
     private java.lang.Boolean supportsForms;
 
+    private java.lang.Boolean supportsCropping;
+
     public PubChannelInfo() {
     }
 
@@ -35,7 +37,8 @@ public class PubChannelInfo  implements java.io.Serializable {
            java.lang.String currentIssue,
            com.woodwing.enterprise.interfaces.services.wfl.PubChannelType type,
            java.lang.Boolean directPublish,
-           java.lang.Boolean supportsForms) {
+           java.lang.Boolean supportsForms,
+           java.lang.Boolean supportsCropping) {
            this.id = id;
            this.name = name;
            this.issues = issues;
@@ -44,6 +47,7 @@ public class PubChannelInfo  implements java.io.Serializable {
            this.type = type;
            this.directPublish = directPublish;
            this.supportsForms = supportsForms;
+           this.supportsCropping = supportsCropping;
     }
 
 
@@ -206,6 +210,26 @@ public class PubChannelInfo  implements java.io.Serializable {
         this.supportsForms = supportsForms;
     }
 
+
+    /**
+     * Gets the supportsCropping value for this PubChannelInfo.
+     * 
+     * @return supportsCropping
+     */
+    public java.lang.Boolean getSupportsCropping() {
+        return supportsCropping;
+    }
+
+
+    /**
+     * Sets the supportsCropping value for this PubChannelInfo.
+     * 
+     * @param supportsCropping
+     */
+    public void setSupportsCropping(java.lang.Boolean supportsCropping) {
+        this.supportsCropping = supportsCropping;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof PubChannelInfo)) return false;
@@ -241,7 +265,10 @@ public class PubChannelInfo  implements java.io.Serializable {
               this.directPublish.equals(other.getDirectPublish()))) &&
             ((this.supportsForms==null && other.getSupportsForms()==null) || 
              (this.supportsForms!=null &&
-              this.supportsForms.equals(other.getSupportsForms())));
+              this.supportsForms.equals(other.getSupportsForms()))) &&
+            ((this.supportsCropping==null && other.getSupportsCropping()==null) || 
+             (this.supportsCropping!=null &&
+              this.supportsCropping.equals(other.getSupportsCropping())));
         __equalsCalc = null;
         return _equals;
     }
@@ -292,6 +319,9 @@ public class PubChannelInfo  implements java.io.Serializable {
         }
         if (getSupportsForms() != null) {
             _hashCode += getSupportsForms().hashCode();
+        }
+        if (getSupportsCropping() != null) {
+            _hashCode += getSupportsCropping().hashCode();
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -350,6 +380,13 @@ public class PubChannelInfo  implements java.io.Serializable {
         elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("supportsForms");
         elemField.setXmlName(new javax.xml.namespace.QName("", "SupportsForms"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("supportsCropping");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "SupportsCropping"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "boolean"));
         elemField.setMinOccurs(0);
         elemField.setNillable(true);

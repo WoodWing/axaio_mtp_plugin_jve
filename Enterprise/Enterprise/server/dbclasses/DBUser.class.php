@@ -165,7 +165,7 @@ class DBUser extends DBBase
 	 * Returns false when failed.
 	 *
 	 * @param string $userId
-	 * @return array of UserGroup
+	 * @return array|boolean Array of UserGroups or false on error.
 	 */
 	public static function getMemberships( $userId )
 	{
@@ -384,6 +384,36 @@ class DBUser extends DBBase
 			$ret[] = $row;
 		}
 		return $ret;
+	}
+
+	/**
+	 * Retrieve the name of a given user group.
+	 *
+	 * @since 10.1.0
+	 * @param integer $userGroupId
+	 * @return string|bool User group name (or false when not found).
+	 */
+	public static function getUserGroupName( $userGroupId )
+	{
+		$select = array( 'name' );
+		$where = '`id` = ?';
+		$params = array( $userGroupId );
+		$row = self::getRow( 'groups', $where, $select, $params );
+		return isset($row['name']) ? $row['name'] : false;
+	}
+
+	/**
+	 * Retrieve the names of all configured user groups (system wide).
+	 *
+	 * @since 10.1.0
+	 * @return array List of user group names indexed by record ids sorted by name.
+	 */
+	public static function listUserGroupNames()
+	{
+		$select = array( 'id', 'name' );    // SELECT `id`, `name`
+		$orderBy = array( 'name' => true ); // ORDER BY 'name' ASC
+		$rows = self::listRows( 'groups', 'id', 'name', '', $select, array(), $orderBy );
+		return array_map( function ( $row ) { return $row['name']; }, $rows );
 	}
 
 	/*

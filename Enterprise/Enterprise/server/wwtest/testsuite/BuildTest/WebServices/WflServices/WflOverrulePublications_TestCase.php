@@ -71,47 +71,20 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflOverrulePublications_Tes
 		$this->ticket        = @$this->vars['BuildTest_WebServices_WflServices']['ticket'];
 		$this->userGroup     = @$this->vars['BuildTest_WebServices_WflServices']['userGroup'];
 		$this->publication   = @$this->vars['BuildTest_WebServices_WflServices']['publication'];
+		$this->pubChannel    = @$this->vars['BuildTest_WebServices_WflServices']['printPubChannel'];
+		$this->issueInfo     = @$this->vars['BuildTest_WebServices_WflServices']['printIssue'];
 		$this->category      = @$this->vars['BuildTest_WebServices_WflServices']['category'];
 		$this->articleStatus = @$this->vars['BuildTest_WebServices_WflServices']['articleStatus'];
 		$this->dossierStatus = @$this->vars['BuildTest_WebServices_WflServices']['dossierStatus'];
 		$this->printTarget   = @$this->vars['BuildTest_WebServices_WflServices']['printTarget'];
 
-		if( !$this->ticket || !$this->publication || !$this->category ||
-			!$this->dossierStatus || !$this->printTarget ) {
-			$this->setResult( 'ERROR', 'Could not find data to test with.', 'Please enable the WflLogon test.' );
-			return;
-		}
-
-		$this->articleStatus->Produce = null;
-
-		// Get the PubChannel and IssueInfo.
-		$issueName = $this->vars['BuildTest_WebServices_WflServices']['issue'];
-		if( empty( $issueName ) ) {
-			$message = 'Issue name should be set in configserver.';
-			$help = 'Please check the settings in configserver.php.';
-			$this->setResult( 'ERROR',  $message, $help );
-			return;
-		}
-
-		foreach( $this->publication->PubChannels as $pubChan ) {
-			foreach( $pubChan->Issues as $issue ) {
-				if( $issue->Name == $issueName ) {
-					$this->pubChannel = $pubChan;
-					$this->issueInfo = $issue;
-					break;
-				}
-			}
-		}
-		if( is_null( $this->pubChannel ) || is_null( $this->issueInfo ) ) {
-			$this->setResult( 'ERROR',  'Could not find publication channel or issue info.', 'Please enable the WflLogon test and ensure a valid issue is defined in TESTSUITE.' );
-			return;
-		}
-
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
 		require_once BASEDIR.'/server/wwtest/testsuite/BuildTest/WebServices/WflServices/Utils.class.php';
 		$this->wflServicesUtils = new WW_TestSuite_BuildTest_WebServices_WflServices_Utils();
-		$this->wflServicesUtils->initTest( $this );
+		$this->wflServicesUtils->initTest( $this ); // also validates the BuildTest_WebServices_WflServices options above
+
+		$this->articleStatus->Produce = null;
 
 		do {
 			if( !$this->setupTestData() ) {

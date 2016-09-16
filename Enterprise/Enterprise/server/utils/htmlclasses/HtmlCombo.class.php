@@ -44,6 +44,9 @@ class HtmlCombo extends HtmlAnyField
         return '';
     }
 
+    /**
+     * @return string
+     */
     public function requestInput()
     {
     	$optionid = @$_REQUEST[$this->Name];
@@ -83,5 +86,3 @@ class HtmlCombo extends HtmlAnyField
         return $result;
     }
 }
-
-?>

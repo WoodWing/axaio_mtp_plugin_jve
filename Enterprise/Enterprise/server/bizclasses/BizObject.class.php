@@ -810,7 +810,8 @@ class BizObject
 
 			require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
 			if( BizPublication::isCalculateDeadlinesEnabled( $newRow['publication'], $overruleIssueId ) ) {
-				$deadlinehard = DBObject::objectSetDeadline( $id, $issueIdsDL, $newRow['section'], $newRow['state'] );
+				$deadlines = DBObject::objectSetDeadline( $id, $issueIdsDL, $newRow['section'], $newRow['state'] );
+                $deadlinehard = $deadlines['Deadline'];
 				if ( $oldDeadline !== $deadlinehard ) {
 					if ( BizDeadlines::canPassDeadlineToChild( $newRow['type'] ) ) {
 						// Recalculate the deadlines of children without own object-target issue.
@@ -1094,7 +1095,7 @@ class BizObject
 			}
 
 			if ($checkRights) {
-				self::checkAccesRights( $lock, $user, $objectProps );
+				self::checkAccessRights( $lock, $user, $objectProps );
 			}
 
 			if (!empty($objectProps['RouteToUser'])) {
@@ -1588,17 +1589,19 @@ class BizObject
 				throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(C)" );
 			}
 		}
+
 		// Next check if we are allowed to modify the object in its existing place (open for edit access)
 		// When there is no E-access it may still be that we have W-access (BZ#5519). In that case don't fail.
-		if( !BizAccess::checkRightsForObjectRow(
-			$user, 'E', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId ) ) {
-			if( !BizAccess::checkRightsForObjectRow(
-				$user, 'W', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId ) ) {
+		if( !BizAccess::checkRightsForObjectRow( $user, 'E', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId )
+			 && !BizAccess::checkRightsForObjectRow( $user, 'W', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId )
+				 // If open for edit is disabled, it could be that user can only edit unplaced files. So first check if user
+				 // has that right and if they do check if the object is actually placed.
+			 && (!BizAccess::checkRightsForObjectRow( $user, 'O', BizAccess::THROW_ON_DENIED, $currRow, $curIssueId )
+					|| BizRelation::hasRelationOfType( $id, 'Placed', 'parents' )) ) {
 				throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(E)" );
-			}
 		}
 
-		// Next, check if we have access to destination.
+			// Next, check if we have access to destination.
 		BizAccess::checkRightsForParams( $user, 'W', BizAccess::THROW_ON_DENIED,
 			$newRow['publication'], $newIssueId, $newRow['section'], $newRow['type'], $newRow['state'],
 			$currRow['id'], $currRow['contentsource'], $currRow['documentid'], $currRow['routeto'] );
@@ -2451,7 +2454,7 @@ class BizObject
 			// needed.
 			$currentState = $invokedObjects[$objectId]->WorkflowMetaData->State->Id;
 			$currentCategory = $invokedObjects[$objectId]->BasicMetaData->Category->Id;
-			$contentSouce = $invokedObjects[$objectId]->BasicMetaData->ContentSource;
+			$contentSource = $invokedObjects[$objectId]->BasicMetaData->ContentSource;
 			$documentId = $invokedObjects[$objectId]->BasicMetaData->DocumentID;
 			$routeTo = $invokedObjects[$objectId]->WorkflowMetaData->RouteTo;
 
@@ -2478,10 +2481,10 @@ class BizObject
 					$globAuth->getRights( $user, $publicationId, $issueId, $currentCategory, $objectType );
 					$changeStatusForward = $globAuth->checkright( 'F', // 'Change_Status_Forward'
 						$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-						$objectId, $contentSouce, $documentId, $routeTo );
+						$objectId, $contentSource, $documentId, $routeTo );
 					$changeStatus = $globAuth->checkright( 'C',  // 'Change_Status'
 						$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-						$objectId, $contentSouce, $documentId, $routeTo );
+						$objectId, $contentSource, $documentId, $routeTo );
 
 					// If the next status is requested and we cannot move the status forward we need to report an
 					// error. Change Status allows any transition while change forward only allows moving forward to
@@ -2517,41 +2520,44 @@ class BizObject
 						break;
 					}
 
-					// Check if we are allowed to change the source Object. We check Write access (W) and open/edit rights (E).
+					require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
+					// Check if we are allowed to change the source Object. We check Write access (W) and open/edit rights (E) and open/edit rights for unplaced (O).
 					if( !$globAuth->checkright( 'E',
 							$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-							$objectId, $contentSouce, $documentId, $routeTo  )
+							$objectId, $contentSource, $documentId, $routeTo )
 						&& !$globAuth->checkright( 'W',
 							$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-							$objectId, $contentSouce, $documentId, $routeTo ) ) {
-						try {
-							throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
-								BizResources::localize( 'ERR_AUTHORIZATION' ) . PHP_EOL . 'id=' .$objectId
-								. ' (E)' );
-						} catch( BizException $e ) {
-							self::reportError( 'Authorization', $objectId, null, $e );
-						}
+							$objectId, $contentSource, $documentId, $routeTo )
+						&& ( !$globAuth->checkRight( 'O',
+								$publicationId, $issueId, $currentCategory, $objectType, $currentState,
+								$objectId, $contentSource, $documentId, $routeTo ) || BizRelation::hasRelationOfType( $objectId, 'Placed', 'parents' ) ) ) {
+								try {
+									throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
+										BizResources::localize( 'ERR_AUTHORIZATION' ).PHP_EOL."id={$objectId} (E)" );
+								} catch( BizException $e ) {
+									self::reportError( 'Authorization', $objectId, null, $e );
+								}
 
-						unset( $invokedObjects[$objectId] );
-						$retVal = false;
-						break;
+								unset( $invokedObjects[ $objectId ] );
+								$retVal = false;
+								break;
 					}
 
 					// Check if there is write access to the destination Object (W).
-					$globAuth->getRights($user, $publicationId, $issueId, $newCategoryId, $objectType);
-					if(  !$globAuth->checkright( 'W',
+					$globAuth->getRights( $user, $publicationId, $issueId, $newCategoryId, $objectType );
+					if( !$globAuth->checkright( 'W',
 						$publicationId, $issueId, $newCategoryId, $objectType, $newStateId,
-						$objectId, $contentSouce, $documentId, $routeTo )
-					){
+						$objectId, $contentSource, $documentId, $routeTo )
+					) {
 						try {
 							throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
-								BizResources::localize( 'ERR_AUTHORIZATION' ) . PHP_EOL . 'id=' .$objectId
-								. ' (W)' );
+								BizResources::localize( 'ERR_AUTHORIZATION' ).PHP_EOL.'id='.$objectId
+								.' (W)' );
 						} catch( BizException $e ) {
 							self::reportError( 'Authorization', $objectId, null, $e );
 						}
 
-						unset( $invokedObjects[$objectId] );
+						unset( $invokedObjects[ $objectId ] );
 						$retVal = false;
 						break;
 					}
@@ -2580,7 +2586,7 @@ class BizObject
 					$globAuth->getRights($user, $publicationId, $issueId, $currentCategory, $objectType);
 					if (!$globAuth->checkright( 'P',
 						$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-						$objectId, $contentSouce, $documentId, $routeTo ) ) {
+						$objectId, $contentSource, $documentId, $routeTo ) ) {
 						try {
 							throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
 								BizResources::localize( 'ERR_AUTHORIZATION' ) . PHP_EOL . 'id=' .$objectId
@@ -4165,7 +4171,7 @@ class BizObject
 		$arr = array();
 		$systemDeterminedFields = array( 'id', 'created', 'creator', 'modified', 'modifier', 'lockedby', 'majorversion', 'minorversion' );
 		if ( $isShadowObject ) {
-			$systemDeterminedFields = array( 'id', 'majorversion', 'minorversion' );
+			$systemDeterminedFields = array( 'id', 'created', 'majorversion', 'minorversion' );
 		}
 		foreach( $objFields as $propName => $objField ) {
 			$propPath = $propPaths[$propName];
@@ -4272,8 +4278,8 @@ class BizObject
 	// needs to move to apps folder:
 	public static function getTypeIcon($typename)
 	{
-		$icondir = '../../config/images/';
 
+		$icondir = '../../config/images/';
 		switch ($typename)
 		{
 			case 'Article':
@@ -4618,8 +4624,9 @@ class BizObject
 	 * @param boolean $lock Object is locked
 	 * @param string $user Short User Name
 	 * @param array $objectProps Route User(group)
+	 * @throws BizException on authorization error.
 	 */
-	static private function checkAccesRights( $lock, $user, array $objectProps )
+	static private function checkAccessRights( $lock, $user, array $objectProps )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
@@ -4638,10 +4645,20 @@ class BizObject
 		}
 		//BZ#6468 user needs 'E'-access to lock
 		if ($lock === true) {
+			// Do not check authorization in case of 'Personal' state and user is 'route to
+			// user' or in the 'route to group'.
 			if (! (($objectProps['StateId'] == - 1) && ($routeto == $user || $routetouser))) {
-				// Do not check authorization in case of 'Personal' state and user is 'route to
-				// user' or in the 'route to group'.
-				BizAccess::checkRightsForObjectProps( $user, 'E', BizAccess::THROW_ON_DENIED, $objectProps );
+				//If user has not 'Open for Edit' rights, they could still have 'Open for Edit (Unplaced)' rights.
+				if( !BizAccess::checkRightsForObjectProps( $user, 'E', BizAccess::DONT_THROW_ON_DENIED, $objectProps ) ) {
+
+					// Check if the user has access to unplaced files only. If not, it means the user does not have any edit rights.
+					if( BizAccess::checkRightsForObjectProps( $user, 'O', BizAccess::THROW_ON_DENIED, $objectProps )
+						 && BizRelation::hasRelationOfType( $objectProps['ID'], 'Placed', 'parents' ) ) {
+						//If object to be accessed is placed, throw error since user has only access to unplaced objects.
+						throw new BizException( 'ERR_AUTHORIZATION', 'Client',
+							'User does not have sufficient rights to edit object ('.$objectProps['ID'].').');
+					}
+				}
 			}
 		} else if ($routeto == $user || $routetouser) {
 			;
@@ -4994,7 +5011,7 @@ class BizObject
 	 * - Child object that cannot be referenced (like PublishForm),
 	 * for those object, a new one is created (deep copy) instead of referenced.
 	 *
-	 * @param mysqlidriver|mssqldriver|oracledriver  $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @param array $srcRelations All child relations of the source parent.
 	 * @param int $trgtParentState State of the copied object (target).
 	 * @param string $user User performing the copy action.
@@ -5096,7 +5113,7 @@ class BizObject
 	 * @param array $relation DB-row of the source object-relation.
 	 * @param int $parentState Stat of the copy (target).
 	 * @param string $user User performing the copy action.
-	 * @param mysqlidriver|mssqldriver|oracledriver  $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @return bool reference is allowed (true) else false.
 	 * @throws BizException
 	 */
@@ -5146,7 +5163,7 @@ class BizObject
 	 *
 	 * @param $articleId Object Id of the article.
 	 * @param string $user User performing the copy action.
-	 * @param mysqlidriver|mssqldriver|oracledriver  $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @return bool User has right then true, else false.
 	 * @throws BizException
 	 */
@@ -5200,7 +5217,7 @@ class BizObject
 	 * @param int $newCopiedParent
 	 * @param int  $newCopiedChild
 	 * @param string $newCopiedChildType
-	 * @param mysqlidriver|mssqldriver|oracledriver $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @param array $objTargetsAdded
 	 * @param array $objTargetsRemoved
 	 * @param string $user
@@ -5287,7 +5304,7 @@ class BizObject
 	 * @param string $user
 	 * @param MetaData $meta
 	 * @param int $newCopiedDosserId
-	 * @param mysqlidriver|mssqldriver|oracledriver $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @throws BizException
 	 */
 	private static function copyNewForm( $srcChildId, $user, $meta, $newCopiedDosserId, $dbDriver )
@@ -6121,7 +6138,7 @@ class BizObject
 	/**
 	 * Get an unique object, when restoring an object or when applyautonaming is true.
 	 *
-	 * Different logic or algorithm will be apply differently for both actions, restoring object or applyautonaing is true.
+	 * Different logic or algorithm will be apply differently for both actions, restoring object or applyautonaming is true.
 	 * When restoring an object, if the object name already exists in DB, autonaming numbering will be append at the end of object name,
 	 * For example:
 	 * Original name                Unique name

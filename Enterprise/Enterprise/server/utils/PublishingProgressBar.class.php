@@ -1,14 +1,13 @@
 <?php
 /**
- * WW_Utils_PublishingProgressBar class
+ * Utility class tracking progress of preview/publish operations for a magazine (issue).
+ *
+ * It supports multiple phases per operation, each having its own progress bar.
  *
  * @package Enterprise
  * @subpackage ServerPlugins
  * @since v7.5
  * @copyright WoodWing Software bv. All Rights Reserved.
- *
- * Utility class tracking progress of preview/publish operations for a magazine (issue).
- * It supports multiple phases per operation, each having its own progress bar.
  */
  
 class WW_Utils_PublishingProgressBar

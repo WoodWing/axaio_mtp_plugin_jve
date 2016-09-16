@@ -23,23 +23,22 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * Publishes a dossier with contained objects (articles. images, etc.) to an external publishing system.
 	 * The plugin is supposed to publish the dossier and it's articles and fill in some fields for reference.
 	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PublishTarget $publishTarget
-	 * 
-	 * @return array of PubField containing information from publishing system
+	 * @param Object $dossier            [writable]
+	 * @param Object[] $objectsInDossier [writable]
+	 * @param PubPublishTarget $publishTarget
+	 * @return PubField[] containing information from publishing system
 	 */	
 	abstract public function publishDossier( &$dossier, &$objectsInDossier, $publishTarget );
 		
 	/*	Example algorithm
 		1. Publish the dossier and it's objects to the publishing system.
-			a. Read $objectindossier->Files->Attachment[0]->Content to read the contents of the file
+			a. Read $objectsInDossier->Files->Attachment[0]->Content to read the contents of the file
 			b. Optional: convert the files to a format recognized by the publishing system
 			c. Publish the files
 			d. throw a BizException if the publishing fails.
 		2. Fill in $dossier->ExternalId with a string uniquely identifying the dossier in the 
 		   publishing system;
-		3. Optional: For each $object in $objectsindossier: fill in $objectindossier->ExternalId 
+		3. Optional: For each $object in $objectsInDossier: fill in $object->ExternalId
 		   with an unique id identifying the object.
 		4. Return array of Field's about the dossier in the publishing system, for example:
 			numviews, rating, numraters, numcomments, url
@@ -52,11 +51,11 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * In case the user aborts the operation, publishAbort() is called to let connector cleanup.
 	 *
 	 * @since 7.5
-	 * @param PublishTarget $publishTarget
+	 * @param PubPublishTarget $publishTarget
 	 */
-	public function publishBefore( $publishTarget ) { $publishTarget = $publishTarget; }
-	public function publishAfter( $publishTarget )  { $publishTarget = $publishTarget; }
-	public function publishAbort( $publishTarget )  { $publishTarget = $publishTarget; }
+	public function publishBefore( $publishTarget ) {}
+	public function publishAfter( $publishTarget )  {}
+	public function publishAbort( $publishTarget )  {}
 
 	/**
 	 * Updates/republishes a published dossier with contained objects (articles. images, etc.) to an 
@@ -64,24 +63,23 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * publishing system. The plugin is supposed to update/republish the dossier and it's articles 
 	 * and fill in some fields for reference.
 	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PublishTarget $publishTarget
-	 *
-	 * @return array of PubField containing information from publishing system
+	 * @param Object $dossier            [writable]
+	 * @param Object[] $objectsInDossier [writable]
+	 * @param PubPublishTarget $publishTarget
+	 * @return PubField[] containing information from publishing system
 	 */	
 	abstract public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget );
 	/*	Example algorithm
-		1. Update/repblish the dossier and it's objects to the publishing system, identifying the 
+		1. Update/republish the dossier and it's objects to the publishing system, identifying the
 		   data to be updated with $dossier->ExternalId.
-			a. Read $objectindossier->Files->Attachment[0]->Content to read the contents of the file
+			a. Read $objectsInDossier->Files->Attachment[0]->Content to read the contents of the file
 			b. Optional: convert the files to a format recognized by the publishing system
 			c. Publish the files
 			d. throw a BizException if the updating/republishing fails.
-		2. Optional: For each $object in $objectsindossier: use $objectindossier->ExternalId.
+		2. Optional: For each $object in $objectsInDossier: use $object->ExternalId.
 		3. If changed: Fill in $dossier->ExternalId with a string uniquely identifying the dossier 
 		   in the publishing system, this is only needed if this id has changed;
-		4. Optional: For each $object in $objectsindossier: fill in $objectindossier->ExternalId with 
+		4. Optional: For each $object in $objectsInDossier: fill in $object->ExternalId with
 		   an unique id identifying the object, this is only needed if these id's have changed.
 		5. Return array of Fields with data about the dossier in the publishing system, for example:
 			numviews, rating, numraters, numcomments, url
@@ -94,21 +92,20 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * In case the user aborts the operation, updateAbort() is called to let connector cleanup.
 	 *
 	 * @since 7.5
-	 * @param PublishTarget $publishTarget
+	 * @param PubPublishTarget $publishTarget
 	 */
-	public function updateBefore( $publishTarget ) { $publishTarget = $publishTarget; }
-	public function updateAfter( $publishTarget )  { $publishTarget = $publishTarget; }
-	public function updateAbort( $publishTarget )  { $publishTarget = $publishTarget; }
+	public function updateBefore( $publishTarget ) {}
+	public function updateAfter( $publishTarget )  {}
+	public function updateAbort( $publishTarget )  {}
 	
 	/**
 	 * Removes/unpublishes a published dossier from an external publishing system
 	 * using the $dossier->ExternalId to identify the dosier to the publishing system.
 	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PublishTarget $publishTarget
-	 *
-	 * @return array of PubField containing information from publishing system
+	 * @param Object $dossier            [writable]
+	 * @param Object[] $objectsInDossier [writable]
+	 * @param PubPublishTarget $publishTarget
+	 * @return PubField[] containing information from publishing system
 	 */	
 	abstract public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget );
 	/*	Example algorithm
@@ -116,7 +113,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 		   be updated with $dossier->ExternalId.
 			a. Unpublish the dossier
 			b. throw a BizException if the updating/republishing fails.
-		2. Optional: For each $object in $objectsindossier: use $objectindossier->ExternalId.
+		2. Optional: For each $object in $objectsInDossier: use $object->ExternalId.
 		3. Return array of Fields with data about the dossier in the publishing system, for example:
 			numviews, rating, numraters, numcomments, url
 	*/
@@ -128,38 +125,38 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * In case the user aborts the operation, unpublishAbort() is called to let connector cleanup.
 	 *
 	 * @since 7.5
-	 * @param PublishTarget $publishTarget
+	 * @param PubPublishTarget $publishTarget
 	 */
-	public function unpublishBefore( $publishTarget ) { $publishTarget = $publishTarget; }
-	public function unpublishAfter( $publishTarget )  { $publishTarget = $publishTarget; }
-	public function unpublishAbort( $publishTarget )  { $publishTarget = $publishTarget; }
+	public function unpublishBefore( $publishTarget ) {}
+	public function unpublishAfter( $publishTarget )  {}
+	public function unpublishAbort( $publishTarget )  {}
 
 	/**
-	 * Requests fieldvalues from an external publishing system
-	 * using the $dossier->ExternalId to identify the dosier to the publishing system.
+	 * Requests field values from an external publishing system
+	 * using the $dossier->ExternalId to identify the dossier to the publishing system.
 	 *
 	 * @param Object $dossier
-	 * @param array $objectsInDossier Array of Object.
-	 * @param PublishTarget $publishTarget
+	 * @param Object[] $objectsInDossier
+	 * @param PubPublishTarget $publishTarget
 	 * 
 	 * @return array of PubField containing information from publishing system
 	 */	
 	abstract public function requestPublishFields( $dossier, $objectsInDossier, $publishTarget );
 	/*	Example algorithm
 		1. Query fields from the publishing system, identifying the data with $dossier->ExternalId.
-			a. query fieldvalues by looping through the fieldnames.
+			a. query field values by looping through the field names.
 			b. throw a BizException if the request fails.
-		2. Optional: For each $object in $objectsindossier: use $objectindossier->ExternalId.
+		2. Optional: For each $object in $objectsInDossier: use $object->ExternalId.
 		3. Return array of Fields.
 	*/
 
 	/**
 	 * Requests dossier URL from an external publishing system
-	 * using the $dossier->ExternalId to identify the dosier to the publishing system.
+	 * using the $dossier->ExternalId to identify the dossier to the publishing system.
 	 *
 	 * @param Object $dossier
-	 * @param array $objectsInDossier Array of Object.
-	 * @param PublishTarget $publishTarget
+	 * @param Object[] $objectsInDossier
+	 * @param PubPublishTarget $publishTarget
 	 * 
 	 * @return string URL to published item
 	 */	
@@ -170,9 +167,9 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * system. The plugin is supposed to send the dossier and it's articles to the publishing system 
 	 * and fill in the URL field for reference.
 	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PublishTarget $publishTarget
+	 * @param Object $dossier            [writable]
+	 * @param Object[] $objectsInDossier [writable]
+	 * @param PubPublishTarget $publishTarget
 	 * 
 	 * @return array of Fields containing information from Publishing system
 	 */	
@@ -187,11 +184,11 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * In case the user aborts the operation, abortPreview() is called to let connector cleanup.
 	 *
 	 * @since 7.5
-	 * @param PublishTarget $publishTarget
+	 * @param PubPublishTarget $publishTarget
 	 */
-	public function previewBefore( $publishTarget ) { $publishTarget = $publishTarget; }
-	public function previewAfter( $publishTarget )  { $publishTarget = $publishTarget; }
-	public function previewAbort( $publishTarget )  { $publishTarget = $publishTarget; }
+	public function previewBefore( $publishTarget ) {}
+	public function previewAfter( $publishTarget )  {}
+	public function previewAbort( $publishTarget )  {}
 
 	// - - - - - - - - - - - - - - - - - - PUBLISH ISSUE - - - - - - - - - - - - - - - - - - - -
 
@@ -201,19 +198,18 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * Affective for publishDossiers(), updateDossiers(), unpublishDossiers() and previewDossiers().
 	 *
 	 * @since 7.5
-	 * @param PublishTarget $publishTarget
+	 * @param PubPublishTarget $publishTarget
 	 * @return PubPublishedIssue|null When NULL returned, the core skips the DB update.
 	 */
 	public function getPublishInfoForIssue( $publishTarget )
 	{
-		$publishTarget = $publishTarget; // keep analyzer happy
 		return null;
 	}
 
 	/**
 	 * Allows connector to act on changes to published issue properties. To get full control
 	 * of the issue being changed, the original published issue ($orgIssue) is provided.
-	 * The passed $newIssue contains only thonse properties that actually are different from $orgIssue.
+	 * The passed $newIssue contains only those properties that actually are different from $orgIssue.
 	 * The connector may adjust $newIssue Fields property when needed. The core server merges both and updates the DB after.
 	 *
 	 * @since 7.5
@@ -224,7 +220,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function setPublishInfoForIssue( $admIssue, $orgIssue, $newIssue )
 	{
-		$admIssue = $admIssue; $orgIssue = $orgIssue; $newIssue = $newIssue; // keep analyzer happy
 		return null;
 	}
 
@@ -257,11 +252,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function validateDossierForPublishing( $type, $dossierId, $issueId )
 	{
-		// keep analyzer happy
-		$type = $type;
-		$dossierId = $dossierId;
-		$issueId = $issueId;
-		
 		return array('errors' => array(), 'warnings' => array(), 'infos' => array());
 	}
 	
@@ -277,7 +267,13 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	{
 		return '';
 	}
-	
+
+	/**
+	 * Get the correct rendition for a to publish object.
+	 *
+	 * @param Object $object
+	 * @return string The file rendition type.
+	 */
 	protected function askRenditionType( $object )
 	{
 		$rendition = null;
@@ -295,7 +291,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	/**
 	 * Retrieves the file contents from the Object.
 	 *
-	 * @param $object The object to get the File Contents from.
+	 * @param Object $object The object to get the File Contents from.
 	 * @param string $rendition The rendition.
 	 * @return null|string The retrieved file or null if not found.
 	 */
@@ -337,8 +333,8 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	public function getPublishDossierFieldsForWebServices() { return null; }
 	
 	/**
-	 * Allows connector to filter out fields that needs to be Ncasted (broadcasted/multicasted).
-	 * By default, no fields are Ncasted. The function should simply return the key names of the
+	 * Allows connector to filter out fields that needs to be N-casted (broadcasted/multicasted).
+	 * By default, no fields are N-casted. The function should simply return the key names of the
 	 * fields. The core checks if those keys are available and includes those in the Ncasting.
 	 *
 	 * @return array|null List of PubField keys. NULL to include all fields.
@@ -359,7 +355,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function getDossierOrder( $publishTarget ) 
 	{
-		$publishTarget = $publishTarget; // keep code analyzer happy
 		return null;
 	}
 
@@ -370,11 +365,12 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 *
 	 * @since 7.5
 	 * @param PubPublishTarget $publishTarget Identification of the magazine.
+	 * @param array $newOrder
+	 * @param array $originalOrder
 	 * @return boolean FALSE for default/core behavior, or TRUE for custom/plugin behavior.
 	 */
 	public function updateDossierOrder( $publishTarget, $newOrder, $originalOrder ) 
 	{
-		$publishTarget = $publishTarget; $newOrder = $newOrder; $originalOrder = $originalOrder; // keep code analyzer happy
 		return null;
 	}
 
@@ -446,7 +442,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	}
 	
 	/**
-	 * Can be called by connectors to find out the actualy operation phase when its previewDossier(), 
+	 * Can be called by connectors to find out the actual operation phase when its previewDossier(),
 	 * publishDossier(), updateDossier() or unpublishDossier() functions are called. See above for more details.
 	 *
 	 * @since 7.5
@@ -472,7 +468,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	}
 	
 	/**
-	 * Can be called by connectors to find out the actualy operation id when its previewDossier(), 
+	 * Can be called by connectors to find out the actual operation id when its previewDossier(),
 	 * publishDossier(), updateDossier() or unpublishDossier() functions are called. See above for more details.
 	 *
 	 * @since 7.5
@@ -484,7 +480,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	}
 
 	/**
-	 * Can be called by connectors to find out the actualy operation name when its previewDossier(), 
+	 * Can be called by connectors to find out the actual operation name when its previewDossier(),
 	 * publishDossier(), updateDossier() or unpublishDossier() functions are called. See above for more details.
 	 *
 	 * @since 7.5
@@ -503,8 +499,8 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @param string $operation Publish, Update, UnPublish or Preview
 	 */
-	public function beforeOperation( $publishTarget, $operation ) { $operation = $operation; $publishTarget = $publishTarget; }
-	public function afterOperation ( $publishTarget, $operation ) { $operation = $operation; $publishTarget = $publishTarget; }
+	public function beforeOperation( $publishTarget, $operation ) {}
+	public function afterOperation ( $publishTarget, $operation ) {}
 
 	// - - - - - - - - - - - - - - - - - - PARALLEL UPLOAD - - - - - - - - - - - - - - - - - - - -
 
@@ -517,11 +513,10 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 *
 	 * @since 7.6.7
 	 * @param string $phase The phase of the publishing that will determine if it supports parallel upload.
-	 * $return bool TRUE when the connector can handle parallel publishing. FALSE when only handle one publishing at a time.
+	 * @return bool TRUE when the connector can handle parallel publishing. FALSE when only handle one publishing at a time.
 	 */
 	public function canHandleParallelUpload( $phase )
 	{
-		$phase = $phase; // To make analyzer happy.
 		return false;
 	}
 	
@@ -543,8 +538,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function publishDossiersParallel( $processNextDossierCB, $processedDossierCB )
 	{
-		$processNextDossierCB = $processNextDossierCB; // To make analyer happy.
-		$processedDossierCB = $processedDossierCB; // To make analyer happy.
 	}
 
 	/**
@@ -567,7 +560,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function getPublishFormTemplates( $pubChannelId )
 	{
-		$pubChannelId = $pubChannelId; // Make analyzer happy.
 		return null;
 	}
 
@@ -581,7 +573,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function getDialogForSetPublishPropertiesAction( $publishFormTemplate )
 	{
-		$publishFormTemplate = $publishFormTemplate; // Make analyzer happy.
 		return null;
 	}
 
@@ -604,9 +595,6 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	 */
 	public function getButtonBarForSetPublishPropertiesAction( $defaultButtonBar, $publishFormTemplate, $publishForm )
 	{
-		$publishFormTemplate = $publishFormTemplate; // keep analyzer happy
-		$publishForm = $publishForm; // keep analyzer happy
-
 		return $defaultButtonBar;
 	}
 
@@ -626,6 +614,58 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 	public function hasPubChannelIcons()
 	{
 		return false;
+	}
+
+	/**
+	 * Returns a list of the supported output image file formats (in their MIME format).
+	 *
+	 * When one of the formats matches with any of the supported formats of the installed image converters,
+	 * that format is picked for image conversion. (Note that image converters implement the
+	 * ImageConverter_EnterpriseConnector interface.)
+	 *
+	 * Note that images may only be converted when doesSupportCropping() returns true and when detected
+	 * is that the image is scaled or cropped on the publish form.
+	 *
+	 * @since 10.1.0
+	 * @return array
+	 */
+	public function getFileFormatsForOutputImage()
+	{
+		return array( 'image/png' );
+	}
+
+	/**
+	 * Tells whether the plugin supports the image cropping feature for this publication channel.
+	 *
+	 * When supported, clients will enable this feature in the UI to let the user scale and crop
+	 * the images that are placed on publish forms (that are targeted to this publication channel).
+	 *
+	 * @since 10.1.0
+	 * @return boolean TRUE when the channel plugin supports the feature; FALSE (default) otherwise.
+	 */
+	public function doesSupportCropping()
+	{
+		return false;
+	}
+
+	/**
+	 * Returns the DPI to apply to the images published for this channel (when conversion is needed).
+	 *
+	 * When images needs conversion (crop, scale, etc) the created output image will have this DPI.
+	 * Note that the "PHP Preview and Metadata" server plugin does not support this feature, but the
+	 * "ImageMagick Preview and Metadata" plugin does.
+	 *
+	 * When the connector does not overrule/implement this function, a default of 72 DPI is taken.
+	 * Note that images may only be converted when doesSupportCropping() returns true and when detected
+	 * is that the image is scaled or cropped on the publish form. Image conversion is NOT triggered
+	 * when the original image has different DPI than this function returns.
+	 *
+	 * @since 10.1.0
+	 * @return double
+	 */
+	public function getDpiForOutputImage()
+	{
+		return 72.0;
 	}
 	
 	// ===================================================================================

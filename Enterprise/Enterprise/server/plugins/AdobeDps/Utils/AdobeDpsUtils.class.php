@@ -344,37 +344,39 @@ class AdobeDpsUtils
 				$previewWidth	= $previewNode->getAttribute( 'width' );
 				$previewHeight	= $previewNode->getAttribute( 'height' );
 				$previewPath = $subFolioId ? ($subFolioId.'/'.$previewPath) : $previewPath;
-			}
-			// Get the preview file from the folio file
-			$previewContent = $zipUtility->getFile( $previewPath );
 
-			// Create preview attachement object. This is need to store the page in the db.
-			$files = array();
-			$preview = new Attachment( 'preview', 'image/jpeg' );
-			require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
-			$transferServer = new BizTransferServer();
-			$transferServer->writeContentToFileTransferServer( $previewContent, $preview );
-			$files[] = $preview;
+				// Get the preview file from the folio file
+				$previewContent = $zipUtility->getFile( $previewPath );
 
-			// Create a new page object to store in the db.
-			$pageObj = new Page();
-			$pageObj->Width                = $previewWidth;
-			$pageObj->Height               = $previewHeight;
-			$pageObj->PageNumber           = ( ($landscape) ? $hPageNumber : $vPageNumber ) . "_" . ( ($landscape) ? 'h' : 'v');
-			$pageObj->PageOrder            = ( ($landscape) ? $hPageNumber : $vPageNumber );
-			$pageObj->Files                = $files;
-			$pageObj->Master               = "Master";
-			$pageObj->Instance             = 'Production';
-			$pageObj->PageSequence         = ( ($landscape) ? $hPageNumber : $vPageNumber );
 
-			// Save the page to the db.
-			BizPage::insertPage( $storeName, $objectId, $pageObj, '' );
+				// Create preview attachment object. This is need to store the page in the db.
+				$files = array();
+				$preview = new Attachment( 'preview', 'image/jpeg' );
+				require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
+				$transferServer = new BizTransferServer();
+				$transferServer->writeContentToFileTransferServer( $previewContent, $preview );
+				$files[] = $preview;
 
-			// Increase the correct page number.
-			if ( $landscape ) {
-				$hPageNumber++;
-			} else {
-				$vPageNumber++;
+				// Create a new page object to store in the db.
+				$pageObj = new Page();
+				$pageObj->Width                = $previewWidth;
+				$pageObj->Height               = $previewHeight;
+				$pageObj->PageNumber           = ( ($landscape) ? $hPageNumber : $vPageNumber ) . "_" . ( ($landscape) ? 'h' : 'v');
+				$pageObj->PageOrder            = ( ($landscape) ? $hPageNumber : $vPageNumber );
+				$pageObj->Files                = $files;
+				$pageObj->Master               = "Master";
+				$pageObj->Instance             = 'Production';
+				$pageObj->PageSequence         = ( ($landscape) ? $hPageNumber : $vPageNumber );
+
+				// Save the page to the db.
+				BizPage::insertPage( $storeName, $objectId, $pageObj, '' );
+
+				// Increase the correct page number.
+				if ( $landscape ) {
+					$hPageNumber++;
+				} else {
+					$vPageNumber++;
+				}
 			}
 		}
 	}

@@ -351,7 +351,7 @@ class WflContentMetaDataValidator
 		if( $validator->checkExist( $datObj, 'Dpi' ) ) {
 			$validator->enterPath( 'Dpi' );
 			if( !is_null( $datObj->Dpi ) ) {
-				$validator->checkType( $datObj->Dpi, 'unsignedInt' );
+				$validator->checkType( $datObj->Dpi, 'float' );
 			}
 			$validator->leavePath();
 		}
@@ -2820,6 +2820,13 @@ class WflPubChannelInfoValidator
 			$validator->enterPath( 'SupportsForms' );
 			if( !is_null( $datObj->SupportsForms ) ) {
 				$validator->checkType( $datObj->SupportsForms, 'boolean' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'SupportsCropping' ) ) {
+			$validator->enterPath( 'SupportsCropping' );
+			if( !is_null( $datObj->SupportsCropping ) ) {
+				$validator->checkType( $datObj->SupportsCropping, 'boolean' );
 			}
 			$validator->leavePath();
 		}

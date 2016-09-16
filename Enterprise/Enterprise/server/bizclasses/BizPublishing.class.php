@@ -326,7 +326,7 @@ class BizPublishing
 		if( !is_null( $publishFields ) ) { // Fields returned by the connector (only happens for parallel upload mode)
 			// update the publishFields before calling doProcessDossierHandleResponse() below.
 			$doProcessDossierCache = $this->callbackCache->loadData( 'doProcessDossier', $dossierId );
-			list( $publishedDossier, $operation, $action, $publishFieldsInCache, $dossier, $children, $exceptionRaised ) = $doProcessDossierCache;
+			list( $publishedDossier, $operation, $action, $publishFieldsInCache, $dossier, $children, $publishForm, $exceptionRaised ) = $doProcessDossierCache;
 	
 			if( is_null( $publishFieldsInCache ) ) { // should be null!!
 				$publishFieldsInCache = $publishFields;
@@ -334,7 +334,7 @@ class BizPublishing
 
 			// Here save the latest PublishFields that came from the connector (only happens for parallel upload)
 			// So that doProcessDossierHandleResponse() has the latest information.
-			$doProcessDossierCache = array( $publishedDossier, $operation, $action, $publishFieldsInCache, $dossier, $children, $exceptionRaised );
+			$doProcessDossierCache = array( $publishedDossier, $operation, $action, $publishFieldsInCache, $dossier, $children, $publishForm, $exceptionRaised );
 			// 'doProcessDossier' => The cache-name to store a particular dossier(dossier Id)'s data to process the dossier.
 			$this->callbackCache->saveData( 'doProcessDossier', $dossierId, $doProcessDossierCache );		
 		}
@@ -761,7 +761,7 @@ class BizPublishing
 	 * Perform publishing operation for a given dossier.
 	 *
 	 * @param PubPublishedDossier $inPubDossier
-	 * @param boolean $operation Preview, Publish, Update or UnPublish
+	 * @param string $operation Preview, Publish, Update or UnPublish
 	 * @return PubPublishedDossier
 	 */
 	private function doProcessDossier( $inPubDossier, $operation )
@@ -809,21 +809,17 @@ class BizPublishing
 
 		// Call the connector: publishDossier(), updateDossier() or unpublishDossier()
 		$action = self::operationToConnectorFuncNameForPublish( $operation );
+		$publishForm = null;
+		$formId = null;
 
 		try {
 
 			// If we support publishForms, the specs state that we should only pass the PublishForm along to the
 			// connector, and not all the collected children, therefore remove children that are of different types.
-			$supportsPublishForms = BizServerPlugin::runChannelConnector( $publishedDossier->Target->PubChannelID,	'doesSupportPublishForms', array(), false );
-			$publishForm = null;
-			$formId = null;
+			$supportsPublishForms = BizServerPlugin::runChannelConnector( $publishedDossier->Target->PubChannelID, 'doesSupportPublishForms', array(), false );
 			if ( $supportsPublishForms ) {
-				foreach ($children as $childObject) {
-					if ($childObject->MetaData->BasicMetaData->Type == 'PublishForm') {
-						$publishForm = $childObject;
-						break;
-					}
-				}
+				require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
+				$publishForm = BizPublishForm::findPublishFormInObjects( $children );
 				// Forget the children of the dossier that are not placed on the Form.
 				if ( $publishForm ) {
 					$formId = $publishForm->MetaData->BasicMetaData->ID;
@@ -845,8 +841,14 @@ class BizPublishing
 				}
 			}
 
+			// Only do the image conversion after the children are thinned out so we have less to exclude.
+			$orphanExternalIds = array();
+			if( BizServerPlugin::runChannelConnector( $publishedDossier->Target->PubChannelID, 'doesSupportCropping', array(), false ) ) {
+				$this->handleImageConversion( $operation, $publishedDossier, $publishForm, $orphanExternalIds );
+			}
+
 			// Save the callback data already. It can be that the connector returns data immediately.
-			$cache = array( $publishedDossier, $operation, $action, $publishFields, $dossier, $children, $exceptionRaised );
+			$cache = array( $publishedDossier, $operation, $action, $publishFields, $dossier, $children, $publishForm, $exceptionRaised );
 			$this->callbackCache->saveData( 'doProcessDossier', $publishedDossier->DossierID, $cache );
 
 			$publishFields = BizServerPlugin::runChannelConnector( $publishedDossier->Target->PubChannelID, $action,
@@ -870,7 +872,7 @@ class BizPublishing
 		// The connector could support parallel uploads. In that case we will have no data returned here.
 		// Therefore cache all data of this function so that when the response comes back from the network
 		// we can grab that data from the cache and continue at doProcessDossierHandleResponse.
-		$cache = array( $publishedDossier, $operation, $action, $publishFields, $dossier, $children, $exceptionRaised );
+		$cache = array( $publishedDossier, $operation, $action, $publishFields, $dossier, $children, $publishForm, $exceptionRaised );
 		$this->callbackCache->saveData( 'doProcessDossier', $publishedDossier->DossierID, $cache );
 	}
 	
@@ -892,7 +894,7 @@ class BizPublishing
 		try {
 			// Read request data from cache.
 			$cache = $this->callbackCache->loadData( 'doProcessDossier', $dossierId );
-			list( $publishedDossier, $operation, $action, $publishFields, $dossier, $children, $exceptionRaised ) = $cache;
+			list( $publishedDossier, $operation, $action, $publishFields, $dossier, $children, $publishForm, $exceptionRaised ) = $cache;
 			
 			// Handle error raised during processing the request.
 			if( $exceptionRaised ) {
@@ -964,8 +966,7 @@ class BizPublishing
 						$versionObject = null;
 						require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 						foreach( $child->Relations as $relation ) {
-							$parentObjType = DBObject::getObjectType( $relation->Parent );
-							if( BizRelation::canRelationHaveTargets( $parentObjType, $relation->Type ) ) {
+							if( BizRelation::canRelationHaveTargets( $relation->ParentInfo->Type, $relation->Type ) ) {
 								if( $operation == 'Publish' || $operation == 'Update' ) {
 									$versionObject = $publishedObject->Version;
 								} else if( $operation == 'UnPublish' ) {
@@ -999,11 +1000,14 @@ class BizPublishing
 				$publishedDossier->History = array( $history );
 	
 				// Save changed published dossier at DB.
-				self::storePublishedDossier( $publishedDossier );
+				self::storePublishedDossier( $publishedDossier, $publishForm, $operation );
 	
 				// N-cast publish message to the clients
 				self::ncastPublishedDossier( $operation, $publishedDossier );
 			}
+
+			//Remove any images that are temporarily saved during image conversion.
+			BizPublishForm::cleanupPlacedFilesCreatedByConversion( $publishForm );
 		} catch( BizException $e ) {
 			// if an exception is thrown, catch it and set $publishedDossier->PublishMessage
 			self::doProcessDossierHandleException( $e, $publishedDossier );
@@ -1108,20 +1112,21 @@ class BizPublishing
 	 * Store a published dossier and its contained published objects into the DB.
 	 *
 	 * @param PubPublishedDossier $publishedDossier
+	 * @param Object|null $publishForm
+	 * @param string $operation
 	 */
-	static private function storePublishedDossier( PubPublishedDossier $publishedDossier )
+	static private function storePublishedDossier( PubPublishedDossier $publishedDossier, $publishForm, $operation )
 	{
 		// Creating extra PublishedDossier properties on the fly to be inserted into DB.
 		$serverVer = explode( '.', SERVERVERSION );
    		$publishedDossier->FieldsVersion = $serverVer[0] .'.'. $serverVer[1];
 		
 		// Store published dossier into DB.
-
 		require_once BASEDIR . '/server/dbclasses/DBPubPublishedIssues.class.php';
 		require_once BASEDIR . '/server/utils/PublishingFields.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizServerPlugin.class.php';
 		$dBFieldKeys = BizServerPlugin::runChannelConnector( $publishedDossier->Target->PubChannelID, 
-		'getPublishDossierFieldsForDB', array() );
+			'getPublishDossierFieldsForDB', array() );
 		$publishedDossierDB = unserialize(serialize($publishedDossier)); // Deep copy
 		$publishedDossierDB->Fields = WW_Utils_PublishingFields::filterFields( $dBFieldKeys, $publishedDossierDB->Fields );
 		$publishId = DBPublishHistory::addPublishHistory( $publishedDossierDB );															
@@ -1138,6 +1143,30 @@ class BizPublishing
 				$format = isset( $publishObject->Format ) ? $publishObject->Format : '';
 				$externalId = isset( $publishObject->ExternalId ) ? $publishObject->ExternalId : '';
 				DBPublishedObjectsHist::addPublishedObjectsHistory( $publishId, $childId, $version, $externalId, $name, $type, $format );
+			}
+		}
+
+		// Since 10.1: Store published publish form placements into DB (such as cropped images).
+		if( $publishForm ) {
+			require_once BASEDIR . '/server/dbclasses/DBPubPublishedPlacementsHist.class.php';
+			if( $publishForm->Relations ) foreach( $publishForm->Relations as $relation ) {
+				if( $relation->Type == 'Placed' && $relation->Parent == $publishForm->MetaData->BasicMetaData->ID ) {
+					foreach( $relation->Placements as $placement ) {
+						if( isset( $placement->ConvertedImageToPublish ) ) {
+							$pubPlacement = new PubPublishedPlacement();
+							$pubPlacement->ObjectId = $relation->Child;
+							$pubPlacement->ObjectVersion = $relation->ChildVersion;
+							$pubPlacement->PlacementHash = $placement->ConvertedImageToPublish->PlacementHash;
+							$pubPlacement->PublishId = $publishId;
+							if( $operation == 'Publish' || $operation == 'Update' ) {
+								$pubPlacement->ExternalId = $placement->ConvertedImageToPublish->ExternalId;
+							} else if( $operation == 'UnPublish' ) {
+								$pubPlacement->ExternalId = '';
+							}
+							DBPubPublishedPlacementsHistory::addPublishedPlacementHistory( $pubPlacement );
+						}
+					}
+				}
 			}
 		}
 	}
@@ -1189,6 +1218,7 @@ class BizPublishing
 			$dossier = BizObject::getObject( $dossierId, $user, false, null, null );
 			$dossier->ExternalId = self::getDossierExternalId( $dossierId, $publishTarget );
 			$childids = self::listContained( $dossierId, $publishTarget );
+			/** @var Object[] $children */
 			$children = array();
 			if( $childids ) foreach( $childids as $childid ) {
 				$children[$childid] = BizObject::getObject( $childid, $user, false, 'none', null );
@@ -1199,15 +1229,15 @@ class BizPublishing
 																		'doesSupportPublishForms', array(), false );
 			$childrenIdsPlacedOnForm = array();
 			if( $supportsPublishForms ) { // Retrieve all the child placed on the Form.
-				if( $children ) foreach( $children  as $childId => $child ) { // Should have only one child which is the Form.
-					if( $child->MetaData->BasicMetaData->Type == 'PublishForm' ) {
-						$childrenIds = self::getObjectsPlacedOnPublishForm( $childId );
-						$childrenIdsPlacedOnForm = array_merge( $childrenIds, $childrenIdsPlacedOnForm );
-					}
+				require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
+				$publishForm = BizPublishForm::findPublishFormInObjects( $children );
+				if( $publishForm ) {
+					$childrenIds = BizPublishForm::getObjectsPlacedOnPublishForm( $publishForm->MetaData->BasicMetaData->ID );
+					$childrenIdsPlacedOnForm = array_merge( $childrenIds, $childrenIdsPlacedOnForm );
 				}
 			}
 			if( $childrenIdsPlacedOnForm ) foreach( $childrenIdsPlacedOnForm as $childrenIdPlacedOnForm ) {
-				$children[$childrenIdPlacedOnForm] = BizObject::GetObject( $childrenIdPlacedOnForm, $user, false, 'none', null );
+				$children[$childrenIdPlacedOnForm] = BizObject::getObject( $childrenIdPlacedOnForm, $user, false, 'none', null );
 				// $childrenIdPlacedOnForm are also children in the Dossier($dossierId).
 				$children[$childrenIdPlacedOnForm]->ExternalId = self::getChildExternalId( $dossierId, $childrenIdPlacedOnForm, $publishTarget );
 			}
@@ -1231,23 +1261,6 @@ class BizPublishing
 				$publishTarget->PubChannelID,
 				$publishTarget->IssueID,
 				$publishTarget->EditionID);
-	}
-
-	/**
-	 * Retrieve all the objects(children) that are placed on the PublishForm.
-	 *
-	 * @param int $publishFormId
-	 * @return array List of object Ids that are placed on the PublishForm.
-	 */
-	static protected function getObjectsPlacedOnPublishForm( $publishFormId )
-	{
-		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
-		$objIdsPlacedOnForm = array();
-		$rows = DBObjectRelation::getObjectRelations( $publishFormId, 'childs', 'Placed' );
-		if( $rows ) foreach( array_values( $rows ) as $row ) {
-			$objIdsPlacedOnForm[] = $row['child'];
-		}
-		return $objIdsPlacedOnForm;
 	}
 
 	/**
@@ -2016,5 +2029,159 @@ class BizPublishing
 			$documentIds[] = $documentId;
 		}
 		return true;
+	}
+
+	/**
+	 * Searches for images placed on publish forms and then lets the ImageConverter decide for each placement if the
+	 * image needs to be converted. Converted images are added to the placement as shadow property 'ConvertedImageToPublish->Attachment'.
+	 *
+	 * For example: PublishForm Object -> Relations[0] -> Placements[0] -> ConvertedImageToPublish -> Attachment (type: Attachment)
+	 *
+	 * @since 10.1.0
+	 * @param string $operation 'Preview', 'Publish', 'Update' or 'UnPublish'
+	 * @param PubPublishedDossier $publishedDossier
+	 * @param Object $publishForm
+	 * @param integer[] $orphanExternalIds
+	 */
+	private function handleImageConversion( $operation, $publishedDossier, $publishForm, &$orphanExternalIds )
+	{
+		/** @var PubPublishedPlacement[] $pubPlacementsIndex */
+		$pubPlacementsIndex = array();
+		/** @var PubPublishedPlacement[] $pubPlacementsList */
+		$pubPlacementsList = array();
+
+		// Get all published placements that belong to latest publish operation of the dossier.
+		// For performance reasons, retrieve the whole list at once (to avoid one SQL statement per placement).
+		require_once BASEDIR.'/server/dbclasses/DBPublishHistory.class.php';
+		$publishTarget = $publishedDossier->Target;
+		$pubDossiers = DBPublishHistory::getPublishHistoryDossier( $publishedDossier->DossierID,
+			$publishTarget->PubChannelID, intval( $publishTarget->IssueID ), intval( $publishTarget->EditionID ), true );
+		if( $pubDossiers ) {
+			$pubDossier = reset( $pubDossiers );
+			require_once BASEDIR.'/server/dbclasses/DBPubPublishedPlacementsHist.class.php';
+			$pubPlacementsList = DBPubPublishedPlacementsHistory::listPublishedPlacements( $pubDossier['id'] );
+			if( $pubPlacementsList ) foreach( $pubPlacementsList as $pubPlacement ) {
+				$pubPlacementsIndex[ $pubPlacement->ObjectId ][ $pubPlacement->ObjectVersion ][ $pubPlacement->PlacementHash ] = $pubPlacement;
+			}
+		}
+
+		// Cache the image converters to avoid retrieving the same native image file multiple times.
+		// This could happen when one image cropped multiple times on the publish form.
+		require_once BASEDIR.'/server/bizclasses/BizImageConverter.class.php';
+		$bizImageConverters = array();
+
+		// Convert the images placed on the publish form. Skip those that to not require conversion.
+		$foundPubPlacementIds = array();
+		if( $publishForm->Relations ) foreach( $publishForm->Relations as $relation ) {
+			if( $relation->Type == 'Placed' && $relation->ChildInfo->Type == 'Image' ) {
+				if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
+					$objectId = $relation->ChildInfo->ID;
+					if( !isset( $bizImageConverters[ $objectId ] ) ) {
+						$bizImageConverter = new BizImageConverter();
+						if( $bizImageConverter->doesImageNeedConversion( $objectId, $placement ) ) {
+							if( $bizImageConverter->loadNativeFileForInputImage( $objectId ) ) {
+								$bizImageConverters[ $objectId ] = $bizImageConverter;
+							}
+						}
+						$bizImageConverter = null;
+					}
+					if( isset( $bizImageConverters[ $objectId ] ) ) {
+						// The fact that an image converter exists in cache does not indicate whether the image needs conversion;
+						// It could be that the one image is placed twice of which the first is cropped and the second is not.
+						// So we need to call doesImageNeedConversion() here again to check the specific placement of the image.
+						$bizImageConverter = $bizImageConverters[ $objectId ];
+						if( $bizImageConverter->doesImageNeedConversion( $objectId, $placement ) ) {
+							$this->convertImage( $operation, $publishTarget,
+								$objectId, $relation->ChildVersion,
+								$placement, $foundPubPlacementIds, $bizImageConverter, $pubPlacementsIndex );
+						}
+						$bizImageConverter = null;
+					}
+				}
+			}
+		}
+		// Remove temporary files used for image conversions.
+		foreach( $bizImageConverters as $bizImageConverter ) {
+			$bizImageConverter->cleanupNativeFileForInputImage();
+		}
+		// Make inventory of converted images that were published before but now got changed or removed.
+		$orphanExernalIds = array();
+		foreach( $pubPlacementsList as $pubPlacement ) {
+			if( !array_key_exists( $pubPlacement->Id, $foundPubPlacementIds ) ) {
+				if( $pubPlacement->ExternalId ) {
+					$orphanExernalIds[] = $pubPlacement->ExternalId;
+				}
+			}
+		}
+	}
+
+	/**
+	 * For publish operations it converts (crops, scales) the image placed on the publish form needs.
+	 *
+	 * It adds a ConvertedImageToPublish property to the given placement that contains all the details.
+	 *
+	 * @param string $operation 'Preview', 'Publish', 'Update' or 'UnPublish'
+	 * @param PubPublishTarget $publishTarget Publishing to this channel/issue/edition.
+	 * @param integer $objectId Image object id.
+	 * @param string $objectVersion Image object version.
+	 * @param Placement $placement Specifies the conversion (crop/scale) needed to place the image on the publish form.
+	 * @param integer[] $foundPubPlacementIds Record ids of the smart_publishedplcmtshist table for which image conversion
+	 *                                        did not change since the last publish operation.
+	 * @param BizImageConverter $bizImageConverter Cache of converters populated by this function.
+	 * @param PubPublishedPlacement[] $pubPlacementsIndex
+	 */
+	private function convertImage( $operation, PubPublishTarget $publishTarget, $objectId, $objectVersion, Placement $placement,
+	                               &$foundPubPlacementIds, &$bizImageConverter, &$pubPlacementsIndex )
+	{
+		// ConvertedImageToPublish is an internal property which is not described in the WSDL.
+		// The publish connectors should use this image to publish with if the property is set.
+		$placement->ConvertedImageToPublish = new stdClass();
+		$placement->ConvertedImageToPublish->Attachment = null;
+		$placement->ConvertedImageToPublish->PlacementHash = null;
+		$placement->ConvertedImageToPublish->ExternalId = null;
+
+		// Only for publish/preview operations there is a need for image conversion.
+		// For the UnPublish operation the ConvertedImageToPublish->Attachment remains null.
+		$attachmentNeeded = ( $operation == 'Preview' || $operation == 'Publish' || $operation == 'Update' );
+		if( $attachmentNeeded ) {
+			if( $bizImageConverter->convertImageByPlacement( $placement, $publishTarget->PubChannelID ) ) {
+				$placement->ConvertedImageToPublish->Attachment = $bizImageConverter->getOutputImageAttachment();
+			}
+		}
+
+		// Placements can not be identified by DB id because they are re-created by core for each save operation.
+		// Instead, a hash is used based on image scale/crop dimensions used for the image conversion.
+		// The hash is actually both an id as a version; When the hash exists in DB (publish history) for a certain
+		// image object id and version, it implies that the image did not change since last publish operation.
+		$placementHash = self::composeHashForPlacement( $placement );
+		$placement->ConvertedImageToPublish->PlacementHash = $placementHash;
+
+		// When the image conversion is unchanged since the previous publish operation, we set ExternalId.
+		// This is an indicator for publish connectors to preserve the relation (to remain untouched).
+		if( isset( $pubPlacementsIndex[ $objectId ][ $objectVersion ][ $placementHash ] ) ) {
+			/** @var PubPublishedPlacement $pubPlacement */
+			$pubPlacement = $pubPlacementsIndex[ $objectId ][ $objectVersion ][ $placementHash ];
+			$placement->ConvertedImageToPublish->ExternalId = $pubPlacement->ExternalId;
+			$foundPubPlacementIds[ $pubPlacement->Id ] = true;
+		} else {
+			$placement->ConvertedImageToPublish->ExternalId = '';
+		}
+	}
+
+	/**
+	 * Composes a hash for a given placement that can be used to uniquely identify an image crop.
+	 *
+	 * @since 10.1.0
+	 * @param Placement $placement
+	 * @return string The hash (64 bytes)
+	 */
+	public static function composeHashForPlacement( Placement $placement )
+	{
+		$placementParams = array(
+			$placement->ScaleX, $placement->ScaleY,
+			$placement->Left, $placement->Top,
+			$placement->ContentDx, $placement->ContentDy
+		);
+		return hash( 'sha256', implode( '|', $placementParams ) );
 	}
 }

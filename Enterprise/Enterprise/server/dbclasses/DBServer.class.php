@@ -237,7 +237,6 @@ class DBServer extends DBBase
 	 * Replaces the job type supports registered for a given server at the DB.
 	 *
 	 * @param Server $server
-	 * @param array $jobTypes Complete new list of job supports for $server.
 	 */
 	private function updateServerJobSupports( Server $server )
 	{

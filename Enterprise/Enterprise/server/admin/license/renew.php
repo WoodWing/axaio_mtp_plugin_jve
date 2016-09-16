@@ -254,8 +254,9 @@
 	$renewStartStr = str_replace( '\'', '\\\'', $renewStartStr );
 
 	print "<form method='POST' action='#' name='reload'>\n";
-	foreach( $_POST as $k => $v )
-		print "<input type='hidden' name='$k' value=" . htmlspecialchars( stripslashes( $v )) . ">\n";
+	foreach( $_POST as $k => $v ) {
+		print "<input type='hidden' name='$k' value='" . htmlspecialchars( stripslashes( $v ) ) . "'>\n";
+	}
 	print "</form>";
 	
 ?>

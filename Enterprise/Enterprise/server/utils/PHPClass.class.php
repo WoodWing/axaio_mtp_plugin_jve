@@ -16,6 +16,7 @@ class WW_Utils_PHPClass
 	 * @param object $oldObject     Object instance to cast.
 	 * @param string $newClassname  Class to cast object to.
 	 * @return object The casted object instance.
+	 * @throws BizException
 	 */
 	static public function typeCast( $oldObject, $newClassname ) 
 	{
@@ -103,7 +104,6 @@ class WW_Utils_PHPClass
 			// Checks whether method is explicitly defined in this class
 			$retVal = $reflectionMethod->getDeclaringClass()->getName() == $reflectionClass->getName();
 		} catch( Exception $e ) {
-			$e = $e; // To make code analyzer happy.
 			$retVal = false;
 		}
 		return $retVal;

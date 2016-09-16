@@ -349,7 +349,7 @@ class ImageMagick
 	 * @param boolean $log Log errors or leave it up to the caller.
 	 * @return int 0 on success else error code on failure
 	*/
-	protected static function imageMagickCmd( $cmd, $cmdline, $log=true )
+	public static function imageMagickCmd( $cmd, $cmdline, $log=true )
 	{
 		self::setEnvironment();
 		LogHandler::Log('ImageMagick', 'INFO', 'Running ImageMagick command: '.$cmdline );
@@ -389,6 +389,7 @@ class ImageMagick
 	 *
 	 * @param string $fileName Full path to the file.
 	 * @param array $metaData Array with key/value pairs of Enterprise properties and their values.
+	 * @deprecated v10.1.0 This function is deprecated and should be removed with v11.
 	 * @return bool Success when metadata is extracted else false.
 	 */
 	public static function getBasicMetaData( $fileName, &$metaData  )
@@ -451,6 +452,7 @@ class ImageMagick
 	 *
 	 * @param string $fileName Full path to the file.
 	 * @param array $metaData Array with key/value pairs of Enterprise properties and their values.
+	 * @deprecated v10.1.0 This function is deprecated and should be removed with v11.
 	 * @return bool Success when metadata is extracted else false.
 	 */
 	static public function getXMPMetaData( $fileName, &$metaData )
@@ -501,6 +503,7 @@ class ImageMagick
 	 *
 	 * @param string $fileName Full path to the file.
 	 * @param array $metaData Array with key/value pairs of Enterprise properties and their values.
+	 * @deprecated v10.1.0 This function is deprecated and should be removed with v11.
 	 * @return bool Success when metadata is extracted else false.
 	 */
 	static function getIPTCMetaData( $fileName, &$metaData )
@@ -560,6 +563,7 @@ class ImageMagick
 	/**
 	 * Creates a file to store the image metadata extracted by ImageMagick.
 	 *
+	 * @deprecated v10.1.0 This function is deprecated and should be removed with v11.
 	 * @return bool|string false if no file is created else the filename.
 	 */
 	static private function createOutputFile()
@@ -579,6 +583,7 @@ class ImageMagick
 	 * Reads the content of the file and after that removes the file.
 	 *
 	 * @param string $outputFilename The full path to the file.
+	 * @deprecated v10.1.0 This function is deprecated and should be removed with v11.
 	 * @return bool|string False in case the reading fails else the content of the file.
 	 */
 	static private function readAndCloseOutPutFile( $outputFilename )

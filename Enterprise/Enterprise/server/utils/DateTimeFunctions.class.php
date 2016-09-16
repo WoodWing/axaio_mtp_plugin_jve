@@ -233,18 +233,21 @@ class DateTimeFunctions
 	}
 
 	/**
-	 *	function addzeros formats a string to a string padded with zeros, for example with time
-	 *	a '9' is converted to '09', 19 stays 19
-	 *	@param $str inputstring
-	 *	@param $sz length to pad the numbers: default = 2; 
-	**/
-	static public function addzeros( $str, $sz = 2 )
+	 * This functions returns the input string padded on the left with zeros.
+	 *
+	 *	Examples:
+	 * - when $inputString = '9' and $padLength = 2 it returns '09'
+	 * - when $inputString = '19' and $padLength = 2 it returns '19'
+	 * - when $inputString = '2016' and $padLength = 2 it returns '2016'
+	 *
+	 *	@param string $inputString
+	 *	@param integer $padLength If this value is negative, less than, or equal to the length of the
+	 * input string, no padding takes place, and input string will be returned. Default padding is 2.
+	 * @return string
+	 */
+	static public function addzeros( $inputString, $padLength = 2 )
 	{
-		$len = strlen($str);
-		if ($len < $sz) {
-			$str = substr("0000000000", 0,$sz-$len).$str;
-		}
-		return $str;
+		return str_pad( $inputString, $padLength, '0', STR_PAD_LEFT );
 	}
 
 	/**
@@ -270,12 +273,12 @@ class DateTimeFunctions
 	
 	/**
 	 * Converts a date-inputstring (formatted as LANGPATDATE) to an $iso-formatted datetime-string
-	 * @param $dt string date-time formatted string as a LANGPATDATE (for example D-M-Y or Y-M-D etc...)
+	 *
+	 * @param string $dt date-time formatted string as a LANGPATDATE (for example D-M-Y or Y-M-D etc...)
 	 * typically used for handling input from an string-edit-field. Also takes account of times entered
 	 * with AM/PM. So 09:00 PM converts to 21:00.
-	 * @param $incltime boolean if the time-part of the inputstring should be written to the iso-time
-	 * @return string iso-formatted time string
-	 * returns false if the inputstring was not valid
+	 * @param boolean $incltime Whether or not the time-part of the input string should be written to the iso-time
+	 * @return string|bool iso-formatted time string, or false if the input string was not valid
 	**/
 	static public function validDate($dt, $incltime = true)
 	{
@@ -304,6 +307,7 @@ class DateTimeFunctions
 		if ( preg_match("/^$pat(.*)$/", $dt, $r) == 0) {
 			return false;
 		}
+		$h = 0; $i = 0; $s = 0;
 		if ($incltime) {
 			if ($r[4]) {
 				$rr = array();

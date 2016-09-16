@@ -321,10 +321,16 @@ class BizPublication
 		$pubChannelInfo->DirectPublish = $directpublish;
 		
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
-		$supportsForms = BizServerPlugin::runChannelConnector( $channel['id'], 'doesSupportPublishForms', array(), false/*supress Error*/ );
-		// $supportsForms is null, most likely there was an error thrown but we supress it.
+		$supportsForms = BizServerPlugin::runChannelConnector( $channel['id'],
+			'doesSupportPublishForms', array(), false/*suppress Error*/ );
+		// $supportsForms is null, most likely there was an error thrown but we suppress it.
 		$pubChannelInfo->SupportsForms = is_null( $supportsForms ) ? false : $supportsForms;
-		
+
+		$supportsCropping = BizServerPlugin::runChannelConnector( $channel['id'],
+			'doesSupportCropping', array(), false/*suppress Error*/ );
+		// $supportsCropping is null, most likely there was an error thrown but we suppress it.
+		$pubChannelInfo->SupportsCropping = is_null( $supportsCropping ) ? false : $supportsCropping;
+
 		return $pubChannelInfo;
 	}	
 

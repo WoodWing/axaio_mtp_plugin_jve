@@ -3,15 +3,15 @@
 class UtfConverter
 {
 	/**
-	 *  Converts a plain-text-file to UTF-16BE with BOM.
-	 *  The infile must have a BOM, otherwise no conversion.
-	 *  This is the required format to be able to be read correctly by InCopy/InDesign
+	 * Converts a plain-text-file to UTF-16BE with BOM.
+	 * The infile must have a BOM, otherwise no conversion.
+	 * This is the required format to be able to be read correctly by InCopy/InDesign
 	 *
-	 *  @param $infile  string Filename of the plain-text-file to be converted
-	 *  @param $outfile string Filename of the destination-file
-	 *  @param $overwriteifexists boolean If the destination-file exists, overwrite it
-	 *  @return boolean true if conversion succeeded, false if some error
-	**/  
+	 * @param $infile  string Filename of the plain-text-file to be converted
+	 * @param $outfile string Filename of the destination-file
+	 * @param $overwriteifexists boolean If the destination-file exists, overwrite it
+	 * @return boolean true if conversion succeeded, false if some error
+	 */
 	static public function convert2UTFAdobe( $infile, $outfile, $overwriteifexists = false )
 	{
 		// Validate parameters
@@ -46,4 +46,3 @@ class UtfConverter
 		return $retVal;
 	}
 }
-?>

@@ -9,7 +9,7 @@ define ('SERVERVERSION',	        getProductVersion(__DIR__));
 define ('SERVERVERSION_EXTRAINFO', getServerVersionExtraInfo(__DIR__)); // To be used for labels such as Prerelease and Daily
 
 // For internal use, to validate configurations:
-define ('SCENT_DBVERSION',	    '10.0' );
+define ('SCENT_DBVERSION',	    '10.1' );
 
 $supportedPhpVersions = array(
     // format   >>> meaning
@@ -23,6 +23,10 @@ if( OS == 'LINUX' ) { // PHP 5.4.16+ supported on LINUX platform only
    $supportedPhpVersions[] = '5.4.16+';
 }
 define ('SCENT_PHPVERSIONS',	serialize($supportedPhpVersions) );
+
+// Minimum and maximum supported version for MySQL
+define ('SCENT_MYSQLDB_MINVERSION', '5.6');
+define ('SCENT_MYSQLDB_MAXVERSION', '5.7');
 
 define ('ADOBE_VERSIONS',		serialize( array( // used to detect if installed IDS is supported by Enterprise
 	// Major/minor version, oldest version first, latest as last one.

@@ -38,8 +38,10 @@ class ImageMagick_EnterprisePlugin extends EnterprisePlugin
 	final public function getConnectorInterfaces() 
 	{ 
 		return array(
-				'Preview_EnterpriseConnector',
-				'MetaData_EnterpriseConnector' );
+			'Preview_EnterpriseConnector',
+			'MetaData_EnterpriseConnector',
+			'ImageConverter_EnterpriseConnector'
+		);
 	}
 
 	/**

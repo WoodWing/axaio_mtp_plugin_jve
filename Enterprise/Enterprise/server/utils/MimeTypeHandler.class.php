@@ -139,4 +139,3 @@ class MimeTypeHandler
 		return ($MimeType == "image/pjpeg" || $MimeType == "image/jpeg" || $MimeType == "image/jpg") ? true : false;
 	}
 }
-?>

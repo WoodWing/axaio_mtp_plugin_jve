@@ -22,12 +22,12 @@ require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 $httpErrorCode = 500;
 $httpErrorText = 'Internal Server Error';
 
+// Init vars so they can be safely checked in case of BizException.
+$fdOutput = null;
+$fdFolio = null;
+$message = null;
+
 try {
-	// Init vars so they can be safely checked in case of BizException.
-	$fdOutput = null;
-	$fdFolio = null;
-	$message = null;
-	
 	// Get params from HTTP and validate them.
 	$ticket = isset($_GET['ticket']) ? $_GET['ticket'] : '';
 	$channelId = isset($_GET['channelId']) ? intval($_GET['channelId']) : 0;

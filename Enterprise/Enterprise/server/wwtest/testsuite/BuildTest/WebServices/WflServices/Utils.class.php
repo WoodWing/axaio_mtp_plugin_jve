@@ -30,9 +30,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 * @param TestCase $testCase
 	 * @param string $namePrefix Prefix to use for autofill names when creating entities.
 	 * @param string|null $protocol [v10.0.0] The used protocol for service calls. (Options: SOAP or JSON.) If null a regular service call is made.
+	 * @param bool $validateSessionVars Set TRUE to skip validation e.g. for logon / init test cases.
 	 * @return bool Whether or not all session variables are complete.
 	 */
-	public function initTest( TestCase $testCase, $namePrefix = 'BT ', $protocol = null )
+	public function initTest( TestCase $testCase, $namePrefix = 'BT ', $protocol = null, $validateSessionVars = true )
 	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		$valid = false;
@@ -40,32 +41,43 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$this->testCase = $testCase;
 		$this->expectedError = null;
 		$this->namePrefix = $namePrefix;
+		$this->ticket = @$this->vars['BuildTest_WebServices_WflServices']['ticket'];
 
-		$tip = 'Please enable the "WflLogon" entry and try again.';
-		do {		
-			// Check LogOn ticket.
-			$this->ticket = @$this->vars['BuildTest_WebServices_WflServices']['ticket'];
-			if( !$this->ticket ) {
-				$testCase->setResult( 'ERROR',  'Could not find ticket to test with.', $tip );
-				break;
-			}
-			
-			// Check presence of test data.
-			if( !isset($this->vars['BuildTest_WebServices_WflServices']['publication'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['category'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['issue'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['printTarget'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['imageStatus'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['articleStatus'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['dossierStatus'] ) ||
-				!isset($this->vars['BuildTest_WebServices_WflServices']['articleTemplateStatus'] )
-			) {
-				$testCase->setResult( 'ERROR',  'Could not find data to test with.', $tip );
-				break;
-			}
-			
+		if( $validateSessionVars ) {
+			$tip = 'Please enable the "Setup test data" entry (WflLogon_TestCase.php) and try again. '.
+				'Please also check the TESTSUITE setting in the configserver.php file.';
+			do {
+				// Check LogOn ticket.
+				if( !$this->ticket ) {
+					$testCase->setResult( 'ERROR', 'Could not find ticket to test with.', $tip );
+					break;
+				}
+
+				// Check presence of test data.
+				if( !isset( $this->vars['BuildTest_WebServices_WflServices']['publication'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['category'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['printPubChannel'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['printIssue'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['printTarget'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['webPubChannel'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['webIssue'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['webTarget'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['activatedMcpPlugin'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['imageStatus'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['articleStatus'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['dossierStatus'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['layoutStatus'] ) ||
+					!isset( $this->vars['BuildTest_WebServices_WflServices']['articleTemplateStatus'] )
+				) {
+					$testCase->setResult( 'ERROR', 'Could not find data to test with.', $tip );
+					break;
+				}
+
+				$valid = true;
+			} while( false );
+		} else {
 			$valid = true;
-		} while( false );
+		}
 
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
@@ -232,7 +244,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 *
 	 * @param string|null $statusName Name of the status. Null to use autofill name.
 	 * @param string $objectType The object type for the status to be created.
-	 * @param int $pubId Publication id of which the status will be bound to.
+	 * @param int $publicationId Publication id of which the status will be bound to.
+	 * @param int $nextStatusId
 	 * @param int $issueId Overrule Issue id of which the status will be bound to.
 	 * @return AdmStatus Object on success
 	 * @throws BizException on failure
@@ -242,28 +255,29 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$this->testCase->assertNull( $this->expectedError ); // not supported by this function
 
 		// TODO: call web service layer (instead of calling biz layer)
+		$statusCreated = null;
+
+		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
+		$status = new AdmStatus(null, $statusName, $objectType, false, null, 'WoodWing Software');
+		$status->Id = 0;
+		$status->PublicationId	= $publicationId;
+		$status->Type = $objectType;
+		$status->Phase = 'Production';
+		$status->Name = $statusName;
+		$status->Produce = false;
+		$status->Color = '#FFFF99';
+		$status->NextStatusId = $nextStatusId;
+		$status->SortOrder = 0;
+		$status->IssueId = $issueId;
+		$status->SectionId = 0;
+		$status->DeadlineStatusId = 0;
+		$status->DeadlineRelative = 0;
+		$status->CreatePermanentVersion = false;
+		$status->RemoveIntermediateVersions = false;
+		$status->AutomaticallySendToNext = false;
+		$status->ReadyForPublishing = false;
+		$status->SkipIdsa = false;
 		try {
-			require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
-			$status = new AdmStatus(null, $statusName, $objectType, false, null, 'WoodWing Software');
-			$status->Id = 0;
-			$status->PublicationId	= $publicationId;
-			$status->Type = $objectType;
-			$status->Phase = 'Production';
-			$status->Name = $statusName;
-			$status->Produce = false;
-			$status->Color = '#FFFF99';
-			$status->NextStatusId = $nextStatusId;
-			$status->SortOrder = 0;
-			$status->IssueId = $issueId;
-			$status->SectionId = 0;
-			$status->DeadlineStatusId = 0;
-			$status->DeadlineRelative = 0;
-			$status->CreatePermanentVersion = false;
-			$status->RemoveIntermediateVersions = false;
-			$status->AutomaticallySendToNext = false;
-			$status->ReadyForPublishing = false;
-			$status->SkipIdsa = false;
-		
 			$statusCreated = BizAdmStatus::createStatus( $status );
 
 		} catch( BizException $e ) {
@@ -874,7 +888,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	
 	/**
 	 * Removes a routing profile.
-	 * 
+	 *
+	 * @param integer $routingId
 	 * @throws BizException on failure
 	 */
 	public function deleteRoutingProfile( $routingId ) 
@@ -901,6 +916,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 * @param integer $sectionId
 	 * @param integer $stateId
 	 * @param integer $profileId
+	 * @param string $rights
 	 * @return integer Authorization record id.
 	 * @throws BizException on unexpected system response
 	 */
@@ -934,7 +950,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 * @param integer $groupId
 	 * @param integer $sectionId
 	 * @param integer $stateId
-	 * @param integer $profileId
 	 */
 	public function removeAuthorization( $publId, $issueId, $groupId, $sectionId = 0, $stateId = 0 )
 	{
@@ -954,6 +969,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 *
 	 * @param string $stepInfo Extra logging info
 	 * @param string $groupName Name of the user group. Null to autofill name.
+	 * @return AdmUserGroup|null
 	 * @throws BizException on unexpected system response
 	 */
 	public function createUserGroup( $stepInfo, $groupName=null ) {
@@ -984,7 +1000,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	/**
 	 * Deletes a user group given the group id.
 	 *
-	 * @param string $stepInfo Extra logging info.
 	 * @param int $groupId Group id of the group to be deleted.
 	 * @throws BizException on failure
 	 */
@@ -1165,7 +1180,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 * Errors when that service returns a PubChannel (as shown in the BuildTest).
 	 *
 	 * @param string $stepInfo Extra logging info.
-	 * @param string $pubChannelName
+	 * @param integer $pubChannelId
 	 * @param integer $publicationId
 	 * @throws BizException on failure
 	 */

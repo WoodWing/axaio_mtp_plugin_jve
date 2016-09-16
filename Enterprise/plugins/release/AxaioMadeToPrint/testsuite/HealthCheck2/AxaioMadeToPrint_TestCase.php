@@ -98,17 +98,11 @@ class WW_TestSuite_HealthCheck2_AxaioMadeToPrint_TestCase extends TestCase
 
 		$check_tables = array('axaio_mtp_trigger', 'axaio_mtp_sentobjects');
 		$not_found_tables =array();
-		foreach($check_tables as $value)
-		{
-			$sql = "SHOW TABLES LIKE '$value'";	
-			$sth = $dbDriver->query($sql);
-			$return = $dbDriver->fetch($sth);
-			if( $return == false ) 
-			{
-				$not_found_tables[] = $value;
-			}
-			
-		}
+        foreach ($check_tables as $value) {
+            if (!$dbDriver->tableExists($value, false)) {
+                $not_found_tables[] = $value;
+            }
+        }
 		if(!empty($not_found_tables))
 		{
 			$tables = (count($not_found_tables) == 1) ? 'Table' : 'Tables';

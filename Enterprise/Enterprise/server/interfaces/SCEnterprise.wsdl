@@ -306,9 +306,9 @@
 					<element name="Slugline" 		type="xsd:string"			nillable="true"/>	<!-- Contents snippet -->
 					<element name="Format" 			type="xsd:string"			nillable="true"/>	<!-- nillable since v4.2 - Mime filetype  -->
 					<element name="Columns" 		type="xsd:int"				nillable="true"/>
-					<element name="Width" 			type="xsd:double"			nillable="true"/>	<!-- Width in points for Images -->	
-					<element name="Height" 			type="xsd:double"			nillable="true"/>	<!-- Height in points for Images -->
-					<element name="Dpi" 			type="xsd:unsignedInt"		nillable="true"/>	<!-- Dots per inch for images -->
+					<element name="Width" 			type="xsd:double"			nillable="true"/>	<!-- Width in pixels for Images -->	
+					<element name="Height" 			type="xsd:double"			nillable="true"/>	<!-- Height in pixels for Images -->
+					<element name="Dpi" 			type="xsd:double"			nillable="true"/>	<!-- Dots per inch for images. Since 10.1 changed from unsignedInt to double. -->
 					<element name="LengthWords"		type="xsd:unsignedInt"		nillable="true"/>	<!-- Articles only -->
 					<element name="LengthChars"		type="xsd:unsignedInt"		nillable="true"/>	<!-- Articles only -->
 					<element name="LengthParas"		type="xsd:unsignedInt"		nillable="true"/>	<!-- Articles only -->
@@ -1120,6 +1120,8 @@
 					<element name="DirectPublish"	type="xsd:boolean"			nillable="true"/>
 					<element name="SupportsForms"	type="xsd:boolean"			nillable="true" 
 								minOccurs="0" maxOccurs="1"/> <!-- v9.0: Tells whether the channel supports publish form feature -->
+					<element name="SupportsCropping"	type="xsd:boolean"		nillable="true"
+							 minOccurs="0" maxOccurs="1"/> <!-- v10.1: Tells whether the channel supports image cropping feature -->
 				</all>
 			</complexType>
 			

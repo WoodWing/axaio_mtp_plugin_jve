@@ -1,13 +1,13 @@
 <?php
 /**
- * Utility class to display defines made in PHP config files. <br>
+ * Utility class to display defines made in PHP config files.
  *
- * It parses PHP files and takes out all defines. <br>
- * The defines can be retrieved in arrays.  See {@link ParseDefines()}. <br>
+ * It parses PHP files and takes out all defines.
+ * The defines can be retrieved in arrays.  See {@link ParseDefines()}.
  *
  * It also determines the actual values of the defines. <br> 
- * So make sure you have included the PHP files before using this parser. <br>
- * Values can be retrieved in array of arrays. See {@link ParseDefineValues()}. <br>
+ * So make sure you have included the PHP files before using this parser.
+ * Values can be retrieved in array of arrays. See {@link ParseDefineValues()}.
  * 
  * @package Enterprise
  * @subpackage Utils
