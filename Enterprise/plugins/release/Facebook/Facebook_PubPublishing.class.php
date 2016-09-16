@@ -29,11 +29,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Publish dossier to Facebook
-	 *
-	 * Here the images and/or text ar posted to Facebook, there i looked at which Publish Form is
-	 * used in content station and after that processed an uploaded to Facebook.
-	 *
 	 * {@inheritdoc}
 	 */
 	public function publishDossier( &$dossier, &$objectsInDossier, $publishTarget )
@@ -157,8 +152,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		// Remove temp files from transfer server folder as prepared by getFormFields().
 		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
 
-		BizPublishForm::cleanupPlacedFilesCreatedByConversion( $publishForm );
-
 		// Re-throw publish error caught before.
 		if( $e ) {
 			throw $e;
@@ -224,7 +217,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		$albumId = $dossier->ExternalId ? $dossier->ExternalId : null;
 		$imageDescription = $this->getImageDescription( $imageObject );
 
-		// Post the slideshow.
+		// Post the album.
 		try {
 			$imageObject->ExternalId = $facebookPublisher->uploadPictureToPage( $pageId, $imagePath, $imageDescription,
 				$albumName, $albumDescription, $albumId );
@@ -288,15 +281,9 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Updates/republishes a published Dossier.
-	 *
 	 * Note: Updating a Dossier on Facebook is NOT possible at the moment of this writing.
 	 *
-	 * @param Object $dossier [writable] The Dossier to be updated on Facebook.
-	 * @param array $objectsInDossier [writable] The objects in the Dossier to be updated on Facebook.
-	 * @param PublishTarget $publishTarget
-	 * @return void
-	 * @throws BizException
+	 * {@inheritdoc}
 	 */
 	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
@@ -311,15 +298,10 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Removes/unPublishes a published Dossier.
-	 *
 	 * Note: UnPublishing a Dossier with an album does not delete the album itself, it only deletes the pictures
 	 * in the dossier from Facebook. Facebook API does not support deleting albums.
 	 *
-	 * @param Object $dossier The Dossier to be unpublished.
-	 * @param array $objectsInDossier $objectsInDossier The objects in the Dossier to be unpublished on Facebook.
-	 * @param publishTarget $publishTarget The target.
-	 * @return array Empty array.
+	 * {@inheritdoc}
 	 */
 	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
 	{
@@ -352,14 +334,14 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 					break;
 				}
 
-			//Facebook image gallery
+			//Facebook photo album
 			case $this->getDocumentIdPrefix().'2' :
 				$dossiersPublished = DBPublishHistory::getPublishHistoryDossier( $dossier->MetaData->BasicMetaData->ID, $pubChannelId, $publishTarget->IssueID, null, true );
 				$dossierPublished = reset( $dossiersPublished ); // Get the first dossier.
 				$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist( $dossierPublished['id'] );
-				foreach( $publishedObjects as $relation ) {
-					if( $relation['type'] == 'Image' ) {
-						$externalId = DBPublishedObjectsHist::getObjectExternalId( $dossier->MetaData->BasicMetaData->ID, $relation['objectid'], $pubChannelId, $publishTarget->IssueID, null, $dossierPublished['id'] );
+				foreach( $publishedObjects as $publishedObject ) {
+					if( $publishedObject['type'] == 'Image' ) {
+						$externalId = DBPublishedObjectsHist::getObjectExternalId( $dossier->MetaData->BasicMetaData->ID, $publishedObject['objectid'], $pubChannelId, $publishTarget->IssueID, null, $dossierPublished['id'] );
 						if( !empty( $externalId ) ) {
 							try {
 								$facebookPublisher->deleteMessageFromFeed( $pageId, $externalId );
@@ -390,9 +372,9 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * {@inheritdoc}
-	 *
 	 * Note: Not possible for Facebook content.
+	 *
+	 * {@inheritdoc}
 	 */
 	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
@@ -403,13 +385,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Requests field values from an external publishing system
-	 * using the $dossier->ExternalId to identify the Dossier to the publishing system.
-	 *
-	 * @param Object $dossier The Dossier to request field values from.
-	 * @param Object[] $objectsInDossier The objects in the Dossier.
-	 * @param PubPublishTarget $publishTarget The target.
-	 * @return array List of PubField with its values.
+	 * {@inheritdoc}
 	 */
 	public function requestPublishFields( $dossier, $objectsInDossier, $publishTarget )
 	{
@@ -470,13 +446,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Requests Dossier URL from an external publishing system.
-	 *
-	 * @param Object $dossier The Dossier.
-	 * @param array $objectsInDossier The objects in the Dossier.
-	 * @param publishTarget $publishTarget The target.
-	 *
-	 * @return string The Dossier URL.
+	 * {@inheritdoc}
 	 */
 	public function getDossierURL( $dossier, $objectsInDossier, $publishTarget )
 	{

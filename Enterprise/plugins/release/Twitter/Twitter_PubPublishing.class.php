@@ -69,9 +69,6 @@ class Twitter_PubPublishing extends PubPublishing_EnterpriseConnector
 		// Remove temp files from transfer server folder as prepared by getFormFields().
 		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
 
-		//Remove any converted images that are saved in the
-		BizPublishForm::cleanupPlacedFilesCreatedByConversion( $publishForm );
-
 		// Re-throw Twitter error caught before.
 		if( $e ) {
 			$msg = 'Error sending message to Twitter';

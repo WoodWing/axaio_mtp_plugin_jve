@@ -119,9 +119,8 @@ class BizPublishForm
 	static public function cleanupPlacedFilesCreatedByConversion( $publishForm )
 	{
 		if( $publishForm->Relations ) foreach( $publishForm->Relations as $relation ) {
-			foreach( $relation->Placements as $placement ) {
-				//ImageCropAttachment == ConvertedImageToPublish->Attachment
-				if( isset($placement->ConvertedImageToPublish) && file_exists( $placement->ConvertedImageToPublish->Attachment->FilePath ) ) {
+			if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
+				if( isset($placement->ConvertedImageToPublish->Attachment->FilePath ) ) {
 					unlink( $placement->ConvertedImageToPublish->Attachment->FilePath );
 				}
 			}
