@@ -412,10 +412,17 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 			}
 		}
 
-		BizPublishForm::cleanupPlacedFilesCreatedByConversion( $publishForm );
-
-		if( $tempFilePaths ) foreach( $tempFilePaths as $tempFilePath ) {
-			unlink( $tempFilePath );
+		if( $tempFilePaths ) {
+			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+			$transferServer = new BizTransferServer();
+			foreach( $tempFilePaths as $tempFilePath ) {
+				$composedFilePath = $transferServer->composeTransferPath( basename( $tempFilePath ) );
+				if( $composedFilePath == $tempFilePath ) { // native files are stored in the transfer folder.
+					$transferServer->deleteFile( $tempFilePath );
+				} else { // cropped images are stored in the system temp folder.
+					unlink( $tempFilePath );
+				}
+			}
 		}
 
 		return $values;
