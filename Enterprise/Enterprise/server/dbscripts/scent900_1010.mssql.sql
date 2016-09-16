@@ -11,6 +11,8 @@ SET @sql = 'ALTER TABLE smart_actionproperties DROP CONSTRAINT ' + @constraintNa
 EXEC (@sql);
 ALTER TABLE smart_actionproperties ALTER COLUMN   [orderid] int not null ;
 ALTER TABLE [smart_actionproperties] ADD DEFAULT ('0') FOR [orderid];
+ALTER TABLE [smart_authorizations] ADD 
+  [bundle] int not null  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_deletedobjects', @columnName = 'dpi', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_deletedobjects DROP CONSTRAINT ' + @constraintName

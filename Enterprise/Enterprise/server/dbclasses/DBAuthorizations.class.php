@@ -81,5 +81,166 @@ class DBAuthorizations extends DBBase
 		}
 		
 		return self::deleteRows(self::TABLENAME, $where, $params);
-	}	
+	}
+
+	/**
+	 * Retrieves configured authorizations from DB, given their record ids.
+	 *
+	 * @since 10.1.0
+	 * @param integer[] $authIds Authorization record ids.
+	 * @return array smart_authorization table records indexed by record ids.
+	 * @throws BizException
+	 */
+	public static function getAuthorizationRowsByIds( $authIds )
+	{
+		$dbh = DBDriverFactory::gen();
+		$dba = $dbh->tablename('authorizations');
+		$sql =
+			"SELECT a.`id`, a.`section`, a.`state`, a.`profile`, a.`bundle` ".
+			"FROM $dba a ".
+			'WHERE a.`id` IN( '.implode( ',', $authIds ).' ) ';
+		$sth = $dbh->query( $sql );
+
+		$rows = array();
+		while( ( $row = $dbh->fetch( $sth ) ) ) {
+			$rows[ $row['id'] ] = $row;
+		}
+		return $rows;
+	}
+
+	/**
+	 * Retrieves configured authorization records from DB.
+	 *
+	 * @since 10.1.0
+	 * @param integer $brandId
+	 * @param integer$issueId
+	 * @param integer $userGroupId
+	 * @return array Authorization records sorted by Category, Object Type and Status (code) and indexed by record id.
+	 * @throws BizException
+	 */
+	public static function getAuthorizationRowsByBrandIssueUserGroup( $brandId, $issueId, $userGroupId )
+	{
+		$dbh = DBDriverFactory::gen();
+		$dbs = $dbh->tablename('publsections');
+		$dbst = $dbh->tablename('states');
+		$dba = $dbh->tablename('authorizations');
+
+		$sql = "SELECT a.`id`, a.`section`, a.`state`, a.`profile`, a.`bundle` ".
+			"FROM $dba a ".
+			"LEFT JOIN $dbs s on (a.`section` = s.`id`) ".
+			"LEFT JOIN $dbst st on (a.`state` = st.`id`) ".
+			"WHERE a.`publication` = ? and a.`issue` = ? and a.`grpid` = ? ".
+			"ORDER BY s.`section`, st.`type`, st.`code`";
+		$params = array( $brandId, $issueId, $userGroupId );
+		$sth = $dbh->query( $sql, $params );
+
+		$rows = array();
+		while( ( $row = $dbh->fetch( $sth ) ) ) {
+			$rows[ $row['id'] ] = $row;
+		}
+		return $rows;
+	}
+
+	/**
+	 * Deletes configured authorizations from DB, given their record ids.
+	 *
+	 * @since 10.1.0
+	 * @param integer[] $authIds Authorization record ids.
+	 * @throws BizException
+	 */
+	public static function deleteAuthorizationsByIds( $authIds )
+	{
+		$dbh = DBDriverFactory::gen();
+		$dba = $dbh->tablename('authorizations');
+		$sql = "DELETE FROM $dba WHERE `id` IN ( ".implode( ',', $authIds )." )";
+		$dbh->query( $sql );
+	}
+
+	/**
+	 * Creates a new authorization configuration record in DB.
+	 *
+	 * @since 10.1.0
+	 * @param integer $brandId
+	 * @param integer $issueId
+	 * @param integer $userGroupId
+	 * @param integer $categoryId
+	 * @param integer $statusId
+	 * @param integer $profileId
+	 * @param integer $bundleId
+	 * @return bool|integer Record id, or false when creation failed.
+	 * @throws BizException
+	 */
+	public static function insertAuthorizationRow( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId, $bundleId )
+	{
+		$dbh = DBDriverFactory::gen();
+		$dba = $dbh->tablename('authorizations');
+		$sql = "INSERT INTO $dba (`publication`, `issue`, `grpid`, `section`, `state`, `profile`, `bundle`) ".
+			"VALUES ( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId, $bundleId )";
+		$sql = $dbh->autoincrement( $sql );
+		$sth = $dbh->query( $sql );
+		return (bool)$dbh->newid( $dba, true );
+	}
+
+	/**
+	 * Checks whether or not the authorization already exists in DB.
+	 *
+	 * It returns true when there is a record found that exactly matches the provided params.
+	 * However, a record in DB for which category id and/or status id set to zero also matches
+	 * regardless of the provided $categoryId / $statusId search params because zero means 'all'.
+	 *
+	 * @since 10.1.0
+	 * @param integer $brandId
+	 * @param integer $issueId
+	 * @param integer $userGroupId
+	 * @param integer $categoryId
+	 * @param integer $statusId
+	 * @param integer $profileId
+	 * @param integer $bundleId
+	 * @return bool Whether or not a matching record exists.
+	 */
+	public static function doesAuthorizationExists( $brandId, $issueId, $userGroupId, $categoryId, $statusId, $profileId, $bundleId )
+	{
+		$where = '`publication` = ? AND `issue` = ? AND `grpid` = ? '.
+			'AND (`section` = ? OR `section` = ?) '. // match with param or with ALL (0)
+			'AND (`state` = ? OR `state` = ?) '.     // match with param or with ALL (0)
+			'AND `profile` = ? AND `bundle` = ? ';
+		$params = array( $brandId, $issueId, $userGroupId, $categoryId, 0, $statusId, 0, $profileId, $bundleId );
+		$row = DBBase::getRow( 'authorizations', $where, 'id', $params );
+		return isset($row['id']) && $row['id'];
+	}
+
+	/**
+	 * Determines the maximum value of the 'bundle' field stored in DB.
+	 *
+	 * @since 10.1.0
+	 * @param integer $brandId
+	 * @param integer $issueId
+	 * @param integer $userGroupId
+	 * @return int The maximum value.
+	 * @throws BizException
+	 */
+	public static function getMaxBundleId( $brandId, $issueId, $userGroupId )
+	{
+		$dbh = DBDriverFactory::gen();
+		$dba = $dbh->tablename('authorizations');
+		$sql = "SELECT MAX(`bundle`) as `maxid` FROM $dba ".
+				'WHERE `publication` = ? AND `issue` = ? AND `grpid` = ?';
+		$params = array( $brandId, $issueId, $userGroupId );
+		$sth = $dbh->query( $sql, $params );
+		$row = $dbh->fetch( $sth );
+		return $row['maxid'];
+	}
+
+	/**
+	 * Updates the bundle id for a given list of authorization ids.
+	 *
+	 * @param integer $newBundleId
+	 * @param integer[] $authIds
+	 */
+	public static function updateBundleIds( $newBundleId, array $authIds )
+	{
+		$row = array( 'bundle' => $newBundleId );
+		$where = '`id` IN( '.implode( ',', $authIds ).') ';
+		self::updateRow( 'authorizations', $row, $where );
+	}
 }

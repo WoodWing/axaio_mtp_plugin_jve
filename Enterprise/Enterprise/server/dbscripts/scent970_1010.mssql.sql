@@ -1,3 +1,5 @@
+ALTER TABLE [smart_authorizations] ADD 
+  [bundle] int not null  default '0';
 CREATE PROCEDURE [dbo].[SCE_GetConstraintName] ( @tablename sysname, @columnName sysname, @constraintName sysname OUTPUT ) AS
 SELECT @constraintName = o1.name FROM sysobjects o1
 INNER JOIN sysobjects o2 ON o1.parent_obj = o2.id

@@ -8,7 +8,7 @@ a.menutitle:visited { color: white; font-size: 11pt; font-family: arial, sans-se
 a.menutitle:hover { color: #f90; font-size: 11pt; font-family: arial, sans-serif; font-weight: normal; line-height: 15pt;}
 .text,.adminbody { color: #333; font-size: 8pt; font-family: arial, sans-serif; line-height: 11pt; }
 .title {
-	FONT-WEIGHT: bold; FONT-SIZE: 11pt; LINE-HEIGHT: 15pt; COLOR: #909090; FONT-FAMILY: Arial, 'MS Sans Serif'
+	font-weight: bold; font-size: 11pt; line-height: 15pt; color: #909090; font-family: arial, sans-serif;
 }
 .logontitle { font-size: 18pt; font-family: helvetica, arial, sans-serif; line-height: 21pt;}
 .logonlabel { font-family: helvetica, arial, sans-serif; font-weight: bold; }
@@ -18,17 +18,13 @@ a:hover { color: #33c; }
 a:active { }
 th { color: gray; text-align: left; border-bottom-color: inherit; border-bottom-style: solid; border-bottom-width: thin; }
 body { color: #333; font-size: 11pt; font-family: helvetica, arial, sans-serif; line-height: 14pt; }
-orangeonblack { color: #f90; font-size: 11pt; font-family: helvetica, arial, sans-serif; line-height: 14pt; BACKGROUND-COLOR: #000; }
+orangeonblack { color: #f90; font-size: 11pt; font-family: helvetica, arial, sans-serif; line-height: 14pt; background-color: #000; }
 p {  }
 td { }
-LI { list-style-type: none; list-style-image: none; list-style-position: inherit; display: inherit; white-space: inherit; }
+li { list-style-type: none; list-style-image: none; list-style-position: inherit; display: inherit; white-space: inherit; }
 a#bullet img {height: 7px; width: 14px; background: url(../images/bullet_gray.gif) top left no-repeat;}
 a#bullet:hover img {background: url(../images/bullet_orange.gif) top left no-repeat;}
 img { border: 0px; }
-
-td.wov_deadline_late { background-color: red; }
-td.wov_deadline_close { background-color: yellow; }
-td.wov_deadline_ok { background-color: white; }
 
 .appframe { padding: 5px; }
 .menuicons { text-align: center; font-size: 9pt; }
@@ -210,101 +206,6 @@ td.wov_deadline_ok { background-color: white; }
 	opacity: 0.5; /* Safari, Opera */
 	-moz-opacity:0.50; /* FireFox */
 	filter: alpha(opacity=50); /* IE */
-}
-
-/* ------------------------------------------------------ */
-/* Web Editor elements                                    */
-/* ------------------------------------------------------ */
-.elm_box_on    { background-color:#FFA500; } /* orange */
-.elm_box_off   { background-color:#808080; } /* gray */
-.elm_label_on  { color:#000000; font-size:10pt; font-weight: bold; } /* black */
-.elm_label_off { color:#808080; font-size:10pt; font-weight: bold; } /* gray */
-.elm_slug_on   { color:#800080; font-size:10pt; } /* purple */
-.elm_slug_off  { color:#0000FF; font-size:10pt; } /* blue */
-
-/* ------------------------------------------------------ */
-/* jQuery tabs                                            */
-/* ------------------------------------------------------ */
-
-/* navigation */
-#wwtabs {
-	background:#eee url(../../config/images/gradient/h300.png);
-	border-bottom:1px solid #CCCCCC;
-	height:80px;	
-	width:800px;
-}
-
-#wwtabs ul {	
-	width:800px;
-	margin:0 auto;	
-}
-
-#wwtabs li {	
-	border-right:1px solid #ddd;
-	float:left;
-	padding-left:1px;
-	width:80px;
-	list-style-type:none;
-	text-align:center;
-	margin-top:0px;
-}
-
-#wwtabs a {
-	color:#333333;
-	display:block;
-	padding:2px;
-	position:relative;
-	word-spacing:-2px;
-	font-size:11px;		
-	height:77px;
-	text-decoration:none;
-}	
-
-#wwtabs a.current {
-	background:url(../../config/images/gradient/down_large.jpg);	
-}
-
-#wwtabs a:hover {
-	background-color:#FFB500;
-	color:#FFFFFF;
-}
-
-#wwtabs a.current:hover {
-	color:#000000;
-}
-
-#wwtabs img {
-	margin:10px 2px 2px 20px;
-	display:block;
-}
-
-#wwtabs strong {
-	display:block;		
-	font-size:13px;
-}
-
-/* panes */
-#wwpanes {
-	background:#fff url(../../config/images/gradient/h500.png) repeat scroll 0 0;
-	border-color:#ccc;
-	border-style:solid;
-	border-width:1px 1px 0;
-	height:455px;
-	margin-bottom:-20px;
-	padding-bottom:20px;
-	
-	/* must be relative so the individual panes can be absolutely positioned */
-	position:relative;
-}
-
-/* crossfading effect needs absolute positioning from the elements */
-#wwpanes div {
-	display:none;		
-	position:absolute;
-	top:20px;
-	left:20px;
-	color:#444;	
-	width:650px; 
 }
 
 .overlay {

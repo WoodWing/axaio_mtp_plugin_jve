@@ -162,13 +162,15 @@ class DBStruct
 									'alters' => array('v' => '340', 'name' => 'issue',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
 							array('v' => '610', 'name' => 'profile',	'type' => 'int(11)',		'default' => "'0'",
 									'alters' => array('v' => '420', 'name' => 'profile',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '1010', 'name' => 'bundle',	'type' => 'int(11)',		'default' => "'0'",
+								'comment' => 'Group id of rows that should be combined (bundled) in the admin UI.' ),
 						),
 						'indexes' => array(
 							array('v' => '420', 'name' => 'gipu_authorizations', 	'fields' => 'grpid, publication'),
 							array('v' => '420', 'name' => 'gipr_authorizations', 	'fields' => 'grpid, profile'),
 						),
 						'inserts' => array(
-							"1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1",
+							"1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1, 0",
 						),
 						'lookups' => array(
 							array('v' => '420', 'field' => 'grpid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
@@ -4843,7 +4845,7 @@ class OraGenerator extends StdSqlGenerator
 	 */
 	private function hasAutoIncrement( $tableInfo )
 	{
-		if ( $tableInfo['fields'] ) foreach ($tableInfo['fields'] as $field) {
+		if ( isset($tableInfo['fields']) ) foreach ($tableInfo['fields'] as $field) {
 			if ( isset( $field['autoincrement'] ) ) {
 				return true;
 			}

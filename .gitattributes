@@ -1,4 +1,5 @@
 # Declare SQL files that will always have CRLF line endings.
 Enterprise/Enterprise/server/dbscripts/*.sql text eol=crlf
+
 # Git should not try to diff folio files.
 *.folio binary
