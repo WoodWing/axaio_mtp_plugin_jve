@@ -21,6 +21,7 @@ class PlnPage
 	public $Edition;
 	public $Master;
 	public $PageSequence;
+	public $PageNumber;
 
 	/**
 	 * @param integer              $PageOrder            
@@ -30,8 +31,9 @@ class PlnPage
 	 * @param Edition              $Edition              Nullable.
 	 * @param string               $Master               Nullable.
 	 * @param integer              $PageSequence         Nullable.
+	 * @param string               $PageNumber           Nullable.
 	 */
-	public function __construct( $PageOrder=null, $Width=null, $Height=null, $Files=null, $Edition=null, $Master=null, $PageSequence=null)
+	public function __construct( $PageOrder=null, $Width=null, $Height=null, $Files=null, $Edition=null, $Master=null, $PageSequence=null, $PageNumber=null)
 	{
 		$this->PageOrder            = $PageOrder;
 		$this->Width                = $Width;
@@ -40,6 +42,7 @@ class PlnPage
 		$this->Edition              = $Edition;
 		$this->Master               = $Master;
 		$this->PageSequence         = $PageSequence;
+		$this->PageNumber           = $PageNumber;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.pln.dataclasses.PlnPage'; } // AMF object type mapping

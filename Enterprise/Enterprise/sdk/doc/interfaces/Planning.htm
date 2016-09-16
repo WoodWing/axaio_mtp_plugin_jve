@@ -17,7 +17,7 @@
 		td.fcc {} /* foot-comment-column */
 	</style>
 </head>
-<body><table><tr><td><img title="" src="woodwing95.gif"/></td><td class="caption"><h1>Planning interface - Enterprise v10.0</h1></td></table>
+<body><table><tr><td><img title="" src="woodwing95.gif"/></td><td class="caption"><h1>Planning interface - Enterprise v10.1</h1></td></table>
 <br/><h2>Web Services</h2>
 <div class="section"><h3>CreateAdverts</h3><p> Element level planning, not we use the term layout which contain 1 or more pages </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
@@ -136,6 +136,7 @@
 <tr><td class="bpc">Edition</td><td class="btc"><a href="#Edition">Edition</a>*</td><td class="bcc"> v5.0 Edition to produce page. Nil when same for all editions, or no editions available at pub/iss. </td></tr>
 <tr><td class="bpc">Master</td><td class="btc">string*</td><td class="bcc"> v5.0 Name of master page in template used to create page. When empty, first master page is taken. </td></tr>
 <tr><td class="bpc">PageSequence</td><td class="btc">unsigned integer*</td><td class="bcc"> Relative location within the layout, starts at 1 </td></tr>
+<tr><td class="bpc">PageNumber</td><td class="btc">string*</td><td class="bcc">v10.0.2 Needed to support different numberings styles. </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section" id="Placement"><h3>Placement</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Left</td><td class="btc">double / float</td><td class="bcc"> Position in points (pt) on page </td></tr>
@@ -159,6 +160,6 @@
 <tr><td class="btc">"none"</td><td class="bcc"> Request for object info only; without attachment </td></tr>
 <tr><td class="btc">"preview"</td><td class="bcc"> low res preview image (jpeg) sent as DIME attachment </td></tr>
 <tr><td class="btc">"output"</td><td class="bcc"> high res output file (PDF, EPS, etc) sent as DIME attachment (used for production) </td></tr>
-</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SmartEditorialPlan.wsdl" file at 17 May 2016</p>
+</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SmartEditorialPlan.wsdl" file at 8 Sep 2016</p>
 <p style="font-size: 9pt;" align="right">Confidential, (c) 1998 WoodWing Software bv. All rights reserved.</p></div>
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></body></html>

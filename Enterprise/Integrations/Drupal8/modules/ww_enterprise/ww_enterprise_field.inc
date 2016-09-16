@@ -963,7 +963,7 @@ function getEnterprisePropertyInfoType( $widgetType, $fieldInfoType, $cardinalit
 		case 'options_buttons' :
 		case 'options_select' :
 			$propertyInfoType = 'list';
-			if ( in_array( $fieldInfoType, array( 'list_float', 'list_integer', 'list_string', 'entity_reference' ) )
+			if ( in_array( $fieldInfoType, array( 'list_float', 'list_integer', 'list_string', 'entity_reference', 'taxonomy_term_reference' ) )
 				&& $cardinality != 1
 			) {
 				$propertyInfoType = 'multilist';
