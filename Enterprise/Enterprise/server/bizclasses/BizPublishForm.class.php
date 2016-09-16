@@ -552,7 +552,6 @@ class BizPublishForm
 			}
 
 			require_once BASEDIR.'/server/bizclasses/BizImageConverter.class.php';
-			$bizImageConverter = new BizImageConverter();
 			$inlineImages = array();
 			if( $xFrame->InlineImageIds ) {
 				foreach( $xFrame->InlineImageIds as $key => $imgId ) {
@@ -564,6 +563,7 @@ class BizPublishForm
 					$placement->ContentDy = $imgInfo['ContentDy'];
 					$placement->ScaleX = $imgInfo['ScaleX'];
 					$placement->ScaleY = $imgInfo['ScaleY'];
+					$bizImageConverter = new BizImageConverter();
 					if( $bizImageConverter->loadNativeFileForInputImage( $imgId ) ) {
 						if( $bizImageConverter->doesImageNeedConversion( $imgId, $placement ) ) {
 							if( $bizImageConverter->convertImageByPlacement( $placement, $channelId ) ) {
