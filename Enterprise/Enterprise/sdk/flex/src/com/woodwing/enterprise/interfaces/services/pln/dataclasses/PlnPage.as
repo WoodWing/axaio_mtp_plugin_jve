@@ -21,6 +21,7 @@ package com.woodwing.enterprise.interfaces.services.pln.dataclasses
 		private var _Edition:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflEdition;
 		private var _Master:String;
 		private var _PageSequence:Number;
+		private var _PageNumber:String;
 
 		public function PlnPage() {
 		}
@@ -72,6 +73,13 @@ package com.woodwing.enterprise.interfaces.services.pln.dataclasses
 		}
 		public function set PageSequence(PageSequence:Number):void {
 			this._PageSequence = PageSequence;
+		}
+
+		public function get PageNumber():String {
+			return this._PageNumber;
+		}
+		public function set PageNumber(PageNumber:String):void {
+			this._PageNumber = PageNumber;
 		}
 
 	}

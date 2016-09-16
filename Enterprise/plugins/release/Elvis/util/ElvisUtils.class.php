@@ -96,6 +96,7 @@ class ElvisUtils {
 	 * @param string $rendition - to be extracted
 	 * @param bool $returnFileUrls When true, only file links to the content source are returned, otherwise the complete file cpmtemt/
 	 * @return Attachment - if could be restored or null
+	 * @throws BizException
 	 */
 	public static function getAttachment($hit, $rendition, $returnFileUrls)
 	{
@@ -109,7 +110,9 @@ class ElvisUtils {
 				require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 				$transferServer = new BizTransferServer();
 				$attachment = new Attachment($rendition, $type);
-				$transferServer->copyToFileTransferServer($url, $attachment);
+				if ( !$transferServer->copyToFileTransferServer($url, $attachment) ) {
+					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
+				}
 				$file = $attachment;
 			} else {
 				$file = new Attachment($rendition, $type, null, null, null, null, $url);

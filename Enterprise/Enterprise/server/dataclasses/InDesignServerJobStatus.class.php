@@ -40,7 +40,7 @@ class InDesignServerJobStatus
 //  const DISABLED  = 0x4460; // (=17419) job was created, but at execution time, no IDS server enabled to handle
 	const LOCKED    = 0x2870; // (=10352) // object currently locked by other user, will retry job later
 	const UNAVAILABLE = 0x2880; // (=10368) no matching IDS instances found for job, will retry later
-	const INCOMPATIBLE = 0x2890; // (=10382) no existing IDS instance found that is compatible with the job version, will retry later (new dispatcher)
+	const INCOMPATIBLE = 0x2890; // (=10384) no existing IDS instance found that is compatible with the job version, will retry later (new dispatcher)
 
 	// * Note that the first two hex digits bit-masked values from Job Condition and Job Progress (COND and PRGD)
 	//   and the last two hex digits are reserved for the specific / detailed status itself.

@@ -23,6 +23,7 @@ class IdsAutomationUtils
 	 * @param integer $objectId The object ID of the object causing the trigger to create the job.
 	 * @param string $objectType The object Type of the object causing the trigger to create the job.
 	 * @param bool $unique TRUE when layout should be unique in the queue. If found, the job is NOT created.
+	 * @return bool
 	 */
 	public static function createIDSJob( $layoutID, $objectId, $objectType, $unique = true )
 	{
@@ -31,7 +32,7 @@ class IdsAutomationUtils
 		if (isset($processedLayoutIds[$layoutID])) {
 			LogHandler::Log('IdsAutomation', 'INFO',
 				"Skipped IDS job creation: Just created an IDS job before for layout [$layoutID].");
-			return;
+			return false;
 		}
 		$processedLayoutIds[$layoutID] = true;
 
@@ -48,7 +49,7 @@ class IdsAutomationUtils
 			if ($idCount > 0) { // layout is flagged
 				LogHandler::Log('IdsAutomation', 'INFO',
 					"Skipped IDS job creation: Layout [$layoutID] has an Update Flag set.");
-				return;
+				return false;
 			}
 		}
 
@@ -91,6 +92,102 @@ class IdsAutomationUtils
 		if ($jobId) {
 			LogHandler::Log('IdsAutomation', 'INFO', "Layout [$layoutID] submitted as IDS jobID [" . $jobId . ']');
 		}
+		return true;
+	}
+
+	/**
+	 * Creates InDesign Server jobs for the layouts of the given placeable object.
+	 *
+	 * @param string $objId
+	 * @param integer $stateId
+	 * @param string $objType
+	 * @return boolean
+	 */
+	public static function createIdsAutomationJobsForPlacedObject( $objId, $stateId, $objType )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
+		if( BizContentSource::isAlienObject( $objId ) ) {
+			return false;
+		}
+		if ( !self::isPlaceableObjectType( $objType ) ) {
+			return false;
+		}
+
+		$retVal = false;
+
+		if (self::statusHasSkipIdsa($stateId)) {
+			LogHandler::Log('IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed.");
+		} else {
+			$layoutIds = self::getLayoutIdsFromObjectID($objId);
+			if ($layoutIds) {
+				if (count($layoutIds) <= 50) {
+					$layoutIdsStr = implode(', ', $layoutIds);
+					LogHandler::Log('IdsAutomation', 'INFO',
+						"Object (id=$objId) is placed on layouts (ids=$layoutIdsStr) " .
+						"for which a IDS jobs will be created.");
+					$layoutMetadatas = self::getLayoutsMetadataFromIds($layoutIds);
+					foreach ($layoutMetadatas as $layoutId => $layoutMetadata) {
+						if (self::statusHasSkipIdsa($layoutMetadata->WorkflowMetaData->State->Id)) {
+							LogHandler::Log('IdsAutomation', 'INFO', "The status has the skip InDesign Server Automation property set. No action needed.");
+							continue;
+						}
+						$retVal = self::createIDSJob($layoutId, $layoutId, $objType);
+					}
+				} else {
+					LogHandler::Log('IdsAutomation', 'INFO',
+						"Given object ID [$objId] is placed on " . count($layoutIds) . " layouts. " .
+						"To avoid flooding the IDS job queue, skipped processing all those layouts.");
+				}
+			} else {
+				LogHandler::Log('IdsAutomation', 'INFO',
+					"Object (id=$objId) is NOT placed on any layout " .
+					"so there will NOT be an IDS job created for this.");
+			}
+		}
+
+		return $retVal;
+	}
+
+	/**
+	 * Creates InDesign Server jobs for the given layouts.
+	 *
+	 * @param string $objId
+	 * @param integer $stateId
+	 * @param string $objType
+	 * @return boolean
+	 */
+	public static function createIdsAutomationJobsForLayout( $objId, $stateId, $objType )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
+		if( BizContentSource::isAlienObject( $objId ) ) {
+			return false;
+		}
+		if ( !self::isLayoutObjectType($objType) ) {
+			return false;
+		}
+
+		// Skip when ID client has already provided all the renditions needed for the
+		// workflow setup since then no work needs to be offloaded to IDS.
+		IdsAutomationUtils::initLayoutStatusChangeTriggerForIds(array($objId));
+		if (!IdsAutomationUtils::isContentChangeTriggerForIds($objId, $stateId)) {
+			// log already done by isContentChangeTriggerForIds()
+			return false; // skip
+		}
+
+		LogHandler::Log('IdsAutomation', 'INFO', "Creating IDS job for $objType (id=$objId).");
+		return self::createIDSJob($objId, $objId, $objType);
+	}
+
+	/**
+	 * Function to check whether or not if a status has the skip InDesign Server option enabled.
+	 *
+	 * @param integer $stateId Status Id
+	 * @return bool True when option is enabled
+	 */
+	private static function statusHasSkipIdsa( $stateId )
+	{
+		$status = self::getStatusWithId( $stateId );
+		return self::statusSkipsIdsa( $status );
 	}
 
 	/**
@@ -398,11 +495,39 @@ class IdsAutomationUtils
 		LogHandler::Log( 'IdsAutomation', 'DEBUG', "Found layout ids: " . implode(',', $layoutids) );	
 		return $layoutids;
 	}
-	
+
+	/**
+	 * Returns the object type for the given object id.
+	 *
+	 * @param string $objId
+	 * @return string
+	 */
 	public static function getObjectType( $objId )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		return DBObject::getObjectType( $objId );
+	}
+
+	/**
+	 * Returns the object status id for the given object id.
+	 *
+	 * @param string $objId
+	 * @return integer
+	 */
+	public static function getStatusId( $objId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		return DBObject::getObjectStatusId( $objId );
+	}
+
+	/**
+	 * Helper function that returns true if the IdsAutomation plugin is activated.
+	 *
+	 * @return boolean
+	 */
+	public static function isPluginActivated() {
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+		return BizServerPlugin::isPluginActivated( 'IdsAutomation' );
 	}
 	
 	// - - - - - - - - - - - Wrappers with memory cache - - - - - - - - - - - - - - - - - -
