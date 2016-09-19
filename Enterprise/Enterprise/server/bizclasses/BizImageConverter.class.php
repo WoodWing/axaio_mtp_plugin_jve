@@ -156,9 +156,18 @@ class BizImageConverter
 				return false;
 			}
 		}
+		$this->inputImageAttachment = null;
 		try {
-			require_once BASEDIR.'/server/bizclasses/BizStorage.php';
-			$this->inputImageAttachment = BizStorage::getFile( $this->inputImageProps, 'native', $this->inputImageProps['Version'] );
+			// Note that we can not call BizStorage::getFile() to retrieve the native file from filestore because
+			// the image could be a shadow object (e.g. managed by Elvis). Instead we call BizObject::getObject().
+			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+			$object = BizObject::getObject( $imageId, BizSession::getShortUserName(), false, 'native', array('NoMetaData') );
+			if( $object->Files ) foreach( $object->Files as $attachment ) {
+				if( $attachment->Rendition == 'native' ) {
+					$this->inputImageAttachment = $attachment;
+					break;
+				}
+			}
 		} catch( BizException $e ) {
 		}
 		return (bool)$this->inputImageAttachment;
