@@ -139,6 +139,10 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 								$this->uploadImageToAlbum( $publishForm, $dossier, $publishTarget, $imageObject, $imagePath, $pageId );
 								$imageCheck = true;
 							}
+
+							if( array_key_exists( $imageObject->MetaData->BasicMetaData->ID, $objectsInDossier ) ) {
+								$objectsInDossier[$imageObject->MetaData->BasicMetaData->ID]->ExternalId = $imageObject->ExternalId;
+							}
 						}
 					}
 					if( !$imageCheck ) {
