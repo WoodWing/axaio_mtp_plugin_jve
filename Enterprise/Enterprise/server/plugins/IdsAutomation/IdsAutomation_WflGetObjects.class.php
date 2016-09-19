@@ -45,7 +45,7 @@ class IdsAutomation_WflGetObjects extends WflGetObjects_EnterpriseConnector
 
 		// Bail out when no object ids requested.
 		if( !$objIds ) {
-			LogHandler::Log( 'IdsAutomation', 'WARN', 'No IDs nor HaveVersions specified in WflGetObjectsRequest. No action needed.' );
+			LogHandler::Log( 'IdsAutomation', 'INFO', 'No IDs nor HaveVersions specified in WflGetObjectsRequest. No action needed.' );
 			return;
 		}
 		
