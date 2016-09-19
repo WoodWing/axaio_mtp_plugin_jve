@@ -20,7 +20,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	private $metadataHandler;
 
 	/**
-	 * @return MetdataHandler
+	 * @return MetadataHandler
 	 */
 	private function getMetadataHandler()
 	{
@@ -205,12 +205,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * Default implementation does nothing, leaving it all up to Enterprise
 	 *
 	 * @param string	$alienId 	Alien object id
-	 * @param string	$object 	Shadow object from Enterprise
+	 * @param Object	$object 	Shadow object from Enterprise
 	 * @param array		$objprops 	Array of all properties, both the public (also in Object) as well as internals
 	 * @param boolean	$lock		Whether object should be locked
 	 * @param string	$rendition	Rendition to get
-	 *
-	 * @return Object
 	 */
 	public function getShadowObject($alienId, &$object, $objprops, $lock, $rendition)
 	{
@@ -235,12 +233,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * If Files is null, Enterprise will fill in the files
 	 * 
 	 * @param string $alienId
-	 * @param string $object
+	 * @param Object $object
 	 * @param array $objprops
 	 * @param bool $lock
 	 * @param string $rendition
 	 * @param string $haveVersion
-	 * @return Object
 	 */
 	public function getShadowObject2( $alienId, &$object, $objprops, $lock, $rendition, $haveVersion )
 	{
@@ -844,7 +841,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	/**
 	 * Helper to make array filled with default Enterprise metadata 
 	 * fields required for Elvis.
-	 * @param array $metadata Enterprise metadata object 
+	 * @param MetaData $metadata Enterprise metadata object
 	 * @return array $elvisMetaData Map containing Enterprise metadata properties which are always synchronized to Elvis  
 	 */
 	private function fillElvisEnterpriseMetadata($metadata)
