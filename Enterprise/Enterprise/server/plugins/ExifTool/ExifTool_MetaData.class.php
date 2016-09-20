@@ -268,6 +268,8 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 		$this->mapFieldValue( 'XMP', 'Source', 'Source', array( $this, 'castToUtf8String' ) );
 
 		$this->mapFieldValue( 'IPTC', 'Urgency', 'Urgency', array( $this, 'castToUtf8String' ) ); // number [0-9] to string
+
+		$this->mapFieldValue( 'EXIF', 'Orientation', 'Orientation', array( $this, 'castToIntegerWhenPositive' ) );
 	}
 
 	/**
