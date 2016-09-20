@@ -102,6 +102,7 @@ CREATE TABLE `smart_deletedobjects` (
   `rating` tinyint(4) not null  default 0,
   `indexed` char(2) not null  default '',
   `closed` char(2) not null  default '',
+  `orientation` tinyint(4) not null  default '0',
   `routetouserid` int(11) not null  default '0',
   `routetogroupid` int(11) not null  default '0',
   PRIMARY KEY (`id`)
@@ -245,6 +246,7 @@ CREATE TABLE `smart_objects` (
   `closed` char(2) not null  default '',
   `routetouserid` int(11) not null  default '0',
   `routetogroupid` int(11) not null  default '0',
+  `orientation` tinyint(4) not null  default '0',
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8;
 CREATE  INDEX `nm_objects` on `smart_objects`(`name`) ;
@@ -278,6 +280,7 @@ CREATE TABLE `smart_objectversions` (
   `plaincontent` blob not null ,
   `filesize` int(15) not null  default '0',
   `colorspace` varchar(20) not null  default '',
+  `orientation` tinyint(4) not null  default '0',
   `state` int(11) not null  default '0',
   `majorversion` mediumint(9) not null  default '0',
   PRIMARY KEY (`id`)

@@ -106,6 +106,7 @@ CREATE TABLE [smart_deletedobjects] (
   [rating] tinyint not null  default 0,
   [indexed] char(2) not null  default '',
   [closed] char(2) not null  default '',
+  [orientation] tinyint not null  default '0',
   [routetouserid] int not null  default '0',
   [routetogroupid] int not null  default '0',
   PRIMARY KEY ([id])
@@ -279,6 +280,7 @@ CREATE TABLE [smart_objects] (
   [closed] char(2) not null  default '',
   [routetouserid] int not null  default '0',
   [routetogroupid] int not null  default '0',
+  [orientation] tinyint not null  default '0',
   PRIMARY KEY ([id])
 );
 CREATE  INDEX [nm_objects] on [smart_objects]([name]) ;
@@ -312,6 +314,7 @@ CREATE TABLE [smart_objectversions] (
   [plaincontent] text not null  default '',
   [filesize] int not null  default '0',
   [colorspace] varchar(20) not null  default '',
+  [orientation] tinyint not null  default '0',
   [state] int not null  default '0',
   [majorversion] int not null  default '0',
   PRIMARY KEY ([id])
