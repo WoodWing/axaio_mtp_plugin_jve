@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @package 	SCEnterprise
- * @subpackage 	BizClasses
- * @since 		v5.0
- * @copyright 	WoodWing Software bv. All Rights Reserved.
+ * @package    Enterprise
+ * @subpackage BizClasses
+ * @since      v5.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 class BizProperty
 {
@@ -64,7 +64,7 @@ class BizProperty
 	public static function getSystemPropIds()
 	{
 		return array('ID', 'DocumentID', 'Type', 'Format', 'Columns', 'Width', 'Height', 'Dpi', 'LengthWords', 'LengthChars',
-			'LengthParas', 'LengthLines', 'FileSize', 'ColorSpace', 'Modifier', 'Modified', 'Creator', 'Created', 'LockedBy', 'Deletor', 'Deleted',
+			'LengthParas', 'LengthLines', 'FileSize', 'ColorSpace', 'Orientation', 'Modifier', 'Modified', 'Creator', 'Created', 'LockedBy', 'Deletor', 'Deleted',
 			'Version', 'PlacedOn', 'Flag', 'FlagMsg', 'PageRange', 'PlannedPageRange', 'LockForOffline', 'DeadlineChanged', 'DeadlineSoft',
 			'HighResFile', 'PlacedOnPage', 'StateColor', 'StatePhase', 'ElementName', 'PlainContent', /*'Slugline', BZ#31369 */ 'UnreadMessageCount');
 	}
@@ -733,6 +733,13 @@ class BizProperty
 		self::$SqlTProps['AspectRatio']  = 'string';
 		self::$JoinProps['AspectRatio']  = null;
 		self::$JFldProps['AspectRatio']	 = null;
+
+		self::$InfoProps['Orientation']  = new PropertyInfo( 'Orientation', 'Orientation', null, 'int' ); // not localized, not shown in UI
+		self::$MetaProps['Orientation']  = 'ContentMetaData->Orientation'; // since v10.1
+		self::$ObjFProps['Orientation']  = 'orientation';
+		self::$SqlTProps['Orientation']  = 'int';
+		self::$JoinProps['Orientation']  = null;
+		self::$JFldProps['Orientation']	 = null;
 
 		// Obsoleted property names: Snippet(=>>Slugline), Depth(=>>Height), WordCount(=>>LengthChars),
 		//   CharCount(=>>LengthChars), LineCount(=>>LengthLines), Content(=>>PlainContent), Size(=>>FileSize)

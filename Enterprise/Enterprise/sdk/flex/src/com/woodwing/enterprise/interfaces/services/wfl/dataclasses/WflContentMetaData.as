@@ -34,6 +34,7 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		private var _KeyFrameEveryFrames:Number;
 		private var _Channels:String;
 		private var _AspectRatio:String;
+		private var _Orientation:Number;
 
 		public function WflContentMetaData() {
 		}
@@ -190,6 +191,13 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		}
 		public function set AspectRatio(AspectRatio:String):void {
 			this._AspectRatio = AspectRatio;
+		}
+
+		public function get Orientation():Number {
+			return this._Orientation;
+		}
+		public function set Orientation(Orientation:Number):void {
+			this._Orientation = Orientation;
 		}
 
 	}
