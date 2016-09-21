@@ -1201,7 +1201,7 @@ class BizProperty
 								}
 							}
 							
-							$customPropertyInfos = DBProperty::getPropertyInfos( $plugin->UniqueName, $propInfo->Name );
+							$customPropertyInfos = DBProperty::getPropertyInfosByBrand( $plugin->UniqueName, $propInfo->Name, $brandId );
 							if( count( $customPropertyInfos ) != 0 ) { // Update
 								if( $customPropertyInfos[0]->Type != $propInfo->Type ) { // Not allow to change the prop 'Type'
 									throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
@@ -1305,11 +1305,11 @@ class BizProperty
 		if( $connRetVals ) foreach( $connRetVals as $connName => $brandProps ) {
 			$plugin = BizServerPlugin::getPluginForConnector( $connName );
 			try {
-				$dbFieldsToAdd = array();
-				$dbFieldsToUpdate = array();
-				$propertiesToUpdate = array();
-				$propertiesToAdd = array();
 				if( $brandProps ) foreach( $brandProps as $brandId => $objTypeProps ) {
+					$dbFieldsToAdd = array();
+					$dbFieldsToUpdate = array();
+					$propertiesToUpdate = array();
+					$propertiesToAdd = array();
 					if( $objTypeProps ) foreach( $objTypeProps as $objType => $propInfos ) {
 						if( $propInfos ) foreach( $propInfos as $propInfo ) {
 							// Debugging: Uncomment the lines below to cleanup the property from DB.
@@ -1334,7 +1334,7 @@ class BizProperty
 								}
 							}
 
-							$customPropertyInfos = DBProperty::getPropertyInfos( $plugin->UniqueName, $propInfo->Name );
+							$customPropertyInfos = DBProperty::getPropertyInfosByBrand( $plugin->UniqueName, $propInfo->Name, $brandId );
 							if( count( $customPropertyInfos ) != 0 ) { // Update
 								$propInfo = self::enrichPropertyInfoWithInternalProps( $propInfo, $brandId, $objType, $plugin );
 
@@ -1460,6 +1460,8 @@ class BizProperty
 	 * It removes all the custom properties introduced by the plugin $pluginName;
 	 * when pluginName is not specified, it removes all custom properties that
 	 * are introduced by the CustomObjectMetaData connector.
+	 * If a custom property is defined for several different Brands the datamodel is updated the moment the last
+	 * custom property is removed.
 	 *
 	 * @since 9.0.0
 	 * @param $pluginName string|null Server Plug-in (name) to run the CustomObjectMetaData connector for.
@@ -1484,16 +1486,18 @@ class BizProperty
 				foreach( $objTypeProps as $objType => $propInfos ) {
 					foreach( $propInfos as $propInfo ) {
 						$continueDelete = true;
-						try {
-							if (!in_array($propInfo->Type, $excludeFromModel)) {
-								BizCustomField::deleteFieldAtModel( 'objects', $propInfo->Name );
+						if ( self::lastDefinedCustomPropertyForPlugin( $pluginName, $propInfo->Name ) ) {
+							try {
+								if( !in_array( $propInfo->Type, $excludeFromModel ) ) {
+									BizCustomField::deleteFieldAtModel( 'objects', $propInfo->Name );
+								}
+							} catch( BizException $e ) {
+								if( !isset( $failedDeletedFields[ $plugin->UniqueName ] ) ) {
+									$failedDeletedFields[ $plugin->UniqueName ] = array();
+								}
+								$failedDeletedFields[ $plugin->UniqueName ][] = $propInfo->Name;
+								$continueDelete = false;
 							}
-						} catch( BizException $e ) {
-							if( !isset( $failedDeletedFields[$plugin->UniqueName] )) {
-								$failedDeletedFields[$plugin->UniqueName] = array();
-							}
-							$failedDeletedFields[$plugin->UniqueName][] = $propInfo->Name;
-							$continueDelete = false;
 						}
 
 						if( $continueDelete ) { // only remove fields from smart_properties and smart_actionproperties table when the above is successful.
@@ -1513,6 +1517,13 @@ class BizProperty
 			}
 		}
 		return $result;
+	}
+
+	static private function lastDefinedCustomPropertyForPlugin( $pluginName, $propertyName )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
+		$timesDefined = count( DBProperty::getPropertyInfos( $pluginName, $propertyName ) );
+		return ( $timesDefined == 1 ? true : false );
 	}
 
 	/**
