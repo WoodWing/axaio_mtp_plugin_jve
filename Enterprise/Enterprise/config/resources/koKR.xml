@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">파일명이 일치하지 않습니다.이대로 체크인 해도 좋습니까?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">단지 일반텍스트 아티클만 결합할 수 있습니다.</Term>
   <Term key="ERR_COMPOSE">아티클 생성 에러.(S1067)</Term>
-  <Term key="ERR_CONNECT"> %1 연결에 문제가 있습니다. 다시 연결해 주시기 바랍니다. (S1144)</Term>
+  <Term key="ERR_CONNECT">%1 연결에 문제가 있습니다. 다시 연결해 주시기 바랍니다. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">서버연결이 실패하였습니다. 연결을 점검한 후 다시 서버연결을 시도해 주시기 바랍니다.(S1068)</Term>
   <Term key="ERR_COPY_FOLDER">출판하는 동안 오류가 발생했습니다. 시스템 관리자에게 문의하십시오.\n\n상세: HTML 리소스 캐시 폴더를 찾을수 없습니다. '어도비 디지털 퍼블리싱(DPS)'을 실행하고 상태 체크 페이지를 확인한후 지침을 따르시기 바랍니다.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">데이타베이스에 접속할 수 없습니다(S1003)</Term>
