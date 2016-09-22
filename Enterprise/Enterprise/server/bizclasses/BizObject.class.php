@@ -3479,8 +3479,34 @@ class BizObject
 			$meta->ContentMetaData->HighResFile = $highresfile;
 		}
 
+		// Make sure that the Orientation is in range [1...8] or null.
+		self::validateAndRepairOrientation( $meta );
+
 		// Validate overruled publications
 		self::validateOverruledPublications( $user, $meta, $targets );
+	}
+
+	/**
+	 * Make sure that the Orientation is in range [1...8] or null.
+	 *
+	 * When not in range, null is assigned to tell callers (e.g. GetObjects) there is no Orientation set
+	 * for the object, or to tell the database (e.g. SaveObjects) that the orientation should not be stored.
+	 *
+	 * Note that when there is no Orientation, there is a zero (0) stored in the database. Unlike other properties,
+	 * this should be converted to null when read from DB to tell clients there is no Orientation set for the object.
+	 * Also note that only for images (and adverts?) the Orientation property makes sense.
+	 *
+	 * @param MetaData $meta
+	 */
+	private static function validateAndRepairOrientation( MetaData $meta )
+	{
+		if( isset( $meta->ContentMetaData->Orientation ) ) {
+			if( !ctype_digit( $meta->ContentMetaData->Orientation ) ||
+				$meta->ContentMetaData->Orientation < 1 ||
+				$meta->ContentMetaData->Orientation > 8 ) {
+				$meta->ContentMetaData->Orientation = null; // repair
+			}
+		}
 	}
 
 	/**
@@ -4492,6 +4518,9 @@ class BizObject
 				$meta->ContentMetaData->Description = '';
 			}
 			$meta->ExtraMetaData = $extramd;
+
+			// Make sure that the Orientation is in range [1...8] or null.
+			self::validateAndRepairOrientation( $meta );
 		}
 		return $meta;
 	}

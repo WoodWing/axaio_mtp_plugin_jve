@@ -367,7 +367,7 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$request->Objects[0]->MetaData->ContentMetaData->KeyFrameEveryFrames = 0;
 		$request->Objects[0]->MetaData->ContentMetaData->Channels = $this->vars['BuildTest_Admin']['Channels'][0]->Name;
 		$request->Objects[0]->MetaData->ContentMetaData->AspectRatio = null;
-		$request->Objects[0]->MetaData->ContentMetaData->Orientation = 0;
+		$request->Objects[0]->MetaData->ContentMetaData->Orientation = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$request->Objects[0]->MetaData->WorkflowMetaData->Deadline = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Urgency = null;
@@ -519,7 +519,7 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$response->Objects[0]->MetaData->ContentMetaData->KeyFrameEveryFrames = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->Channels = $this->vars['BuildTest_Admin']['Channels'][0]->Name;
 		$response->Objects[0]->MetaData->ContentMetaData->AspectRatio = '';
-		$response->Objects[0]->MetaData->ContentMetaData->Orientation = '0';
+		$response->Objects[0]->MetaData->ContentMetaData->Orientation = null;
 		$response->Objects[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$response->Objects[0]->MetaData->WorkflowMetaData->Deadline = null;
 		$response->Objects[0]->MetaData->WorkflowMetaData->Urgency = '';
@@ -727,7 +727,7 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$response->Objects[0]->MetaData->ContentMetaData->KeyFrameEveryFrames = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->Channels = $this->vars['BuildTest_Admin']['Channels'][0]->Name;
 		$response->Objects[0]->MetaData->ContentMetaData->AspectRatio = '';
-		$response->Objects[0]->MetaData->ContentMetaData->Orientation = '0';
+		$response->Objects[0]->MetaData->ContentMetaData->Orientation = null;
 		$response->Objects[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$response->Objects[0]->MetaData->WorkflowMetaData->Deadline = null;
 		$response->Objects[0]->MetaData->WorkflowMetaData->Urgency = '';
@@ -963,7 +963,7 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$request->Objects[0]->MetaData->ContentMetaData->KeyFrameEveryFrames = null;
 		$request->Objects[0]->MetaData->ContentMetaData->Channels = $this->vars['BuildTest_Admin']['Channels'][0]->Name;
 		$request->Objects[0]->MetaData->ContentMetaData->AspectRatio = null;
-		$request->Objects[0]->MetaData->ContentMetaData->Orientation = 0;
+		$request->Objects[0]->MetaData->ContentMetaData->Orientation = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$request->Objects[0]->MetaData->WorkflowMetaData->Deadline = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Urgency = null;
@@ -1098,7 +1098,7 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 		$response->Objects[0]->MetaData->ContentMetaData->KeyFrameEveryFrames = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->Channels = $this->vars['BuildTest_Admin']['Channels'][0]->Name;
 		$response->Objects[0]->MetaData->ContentMetaData->AspectRatio = '';
-		$response->Objects[0]->MetaData->ContentMetaData->Orientation = '0';
+		$response->Objects[0]->MetaData->ContentMetaData->Orientation = null;
 		$response->Objects[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$response->Objects[0]->MetaData->WorkflowMetaData->Deadline = null;
 		$response->Objects[0]->MetaData->WorkflowMetaData->Urgency = '';
