@@ -19,21 +19,17 @@ class Elvis_WflLogOff extends WflLogOff_EnterpriseConnector
 	// No called.
 	final public function runBefore( WflLogOffRequest &$req )
 	{
-		$req = $req; // keep code analyzer happy
 	}
 
 	final public function runAfter( WflLogOffRequest $req, WflLogOffResponse &$resp )
 	{
-		$req = $req; $resp = $resp; // keep code analyzer happy
-		
 		// Logout from Elvis.
-		require_once dirname(__FILE__) . '/logic/ElvisRESTClient.php';
+		require_once dirname(__FILE__).'/logic/ElvisRESTClient.php';
 		ElvisRESTClient::logout();
 	}
 	
 	// No called.
 	final public function runOverruled( WflLogOffRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
 	}
 }
