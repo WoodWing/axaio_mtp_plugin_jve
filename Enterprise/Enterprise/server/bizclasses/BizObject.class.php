@@ -3501,7 +3501,7 @@ class BizObject
 	private static function validateAndRepairOrientation( MetaData $meta )
 	{
 		if( isset( $meta->ContentMetaData->Orientation ) ) {
-			if( !ctype_digit( $meta->ContentMetaData->Orientation ) ||
+			if( !ctype_digit( strval( $meta->ContentMetaData->Orientation ) ) ||
 				$meta->ContentMetaData->Orientation < 1 ||
 				$meta->ContentMetaData->Orientation > 8 ) {
 				$meta->ContentMetaData->Orientation = null; // repair
