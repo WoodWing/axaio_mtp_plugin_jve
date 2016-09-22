@@ -23,7 +23,6 @@ class VersionHandler
 		$versions = array();
 		foreach ($hits as $hit) {
 			$vi = $this->fillVersionInfo($hit, $rendition);
-			// TODO setup version state
 			array_unshift($versions, $vi);
 		}
 		return $versions;
@@ -72,10 +71,9 @@ class VersionHandler
 	 * @param $rendition
 	 * @return VersionInfo
 	 */
-	private function fillVersionInfo($hit, $rendition)
+	private function fillVersionInfo( $hit, $rendition )
 	{
-		require_once dirname(__FILE__) . '/MetadataHandler.class.php';
-
+		require_once dirname(__FILE__).'/MetadataHandler.class.php';
 		$metadataHandler = new MetadataHandler();
 		$object = new Object();
 		$metadataHandler->read($object, $hit->metadata);
@@ -86,10 +84,8 @@ class VersionHandler
 		$vi->Created = $object->MetaData->WorkflowMetaData->Modified;
 		$vi->Comment = $object->MetaData->WorkflowMetaData->Comment;
 		$vi->Object = $object->MetaData->BasicMetaData->Name;
-		$vi->File = ElvisUtils::getAttachment($hit, $rendition);
+		$vi->File = ElvisUtils::getAttachment( $hit, $rendition, false );
 
-		// set dummy state // TODO find proper state
-		$vi->State = new State( 0, '-', "Others", false, 'AAAAAA' );
 		return $vi;
 	}
 

@@ -621,15 +621,18 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *
 	 * @return array of VersionInfo or null if Enterprise should handle this
 	 */
-	public function listShadowObjectVersions($alienId, $shadowId, $rendition)
+	public function listShadowObjectVersions( $alienId, $shadowId, $rendition )
 	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::listShadowObjectVersions called for alienId:' . $alienId . '; shadowId:' . $shadowId . '; rendition:' . $rendition );
 
-		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::listShadowObjectVersions called for alienId:' . $alienId . '; shadowId:' . $shadowId . '; rendition:' . $rendition);
-
-		require_once dirname(__FILE__) . '/model/VersionHandler.class.php';
-
+		require_once dirname(__FILE__).'/model/VersionHandler.class.php';
 		$versionHandler = new VersionHandler();
-		return $versionHandler->listVersions($alienId, $rendition);
+		$elvisAssetVersions = $versionHandler->listVersions( $alienId, $rendition );
+
+		require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
+		$elvisAssetVersions = ElvisObjectUtils::setVersionStatusFromEnterprise( $shadowId, $elvisAssetVersions );
+
+		return $elvisAssetVersions;
 	}
 
 	/**
