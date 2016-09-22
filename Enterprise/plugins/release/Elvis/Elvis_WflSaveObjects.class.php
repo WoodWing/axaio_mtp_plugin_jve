@@ -45,10 +45,10 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 	 */
 	final public function runBefore( WflSaveObjectsRequest &$req )
 	{
-		require_once dirname(__FILE__) . '/util/ElvisUtils.class.php';
-		require_once dirname(__FILE__) . '/util/ElvisObjectUtils.class.php';
-		require_once dirname(__FILE__) . '/util/ElvisObjectRelationUtils.class.php';
-		require_once BASEDIR  . '/server/bizclasses/BizObject.class.php';
+		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
+		require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
+		require_once dirname(__FILE__).'/util/ElvisObjectRelationUtils.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 
 		// Just remember whether or not the user is unlocking or keeps the lock after save.
 		ElvisUtils::setUnlock( $req->Unlock );
@@ -83,10 +83,8 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 	 */
 	final public function runAfter( WflSaveObjectsRequest $req, WflSaveObjectsResponse &$resp )
 	{
-		require_once dirname(__FILE__) . '/util/ElvisPlacementUtils.class.php';
-		require_once dirname(__FILE__) . '/logic/ElvisUpdateManager.class.php';
-
-		$req = $req; $resp = $resp; // keep analyzer happy
+		require_once dirname(__FILE__).'/util/ElvisPlacementUtils.class.php';
+		require_once dirname(__FILE__).'/logic/ElvisUpdateManager.class.php';
 
 		// Walk through all placements of the old and new layout objects and collect changed shadow object ids of placements
 		$layoutIds = array_keys( $this->oldShadowRelations ) + array_keys( $this->newShadowRelations );
@@ -156,6 +154,5 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 	 */
 	public function runOverruled( WflSaveObjectsRequest $req )
 	{
-		$req = $req; // keep analyzer happy
 	}
 }

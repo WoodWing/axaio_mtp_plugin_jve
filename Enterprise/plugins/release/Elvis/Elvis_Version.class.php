@@ -20,14 +20,18 @@ class Elvis_Version extends Version_EnterpriseConnector
 	 */
 	public function useContentSourceVersion()
 	{
-		require_once dirname(__FILE__) . '/Elvis_ContentSource.class.php';
+		require_once dirname(__FILE__).'/Elvis_ContentSource.class.php';
 		$contentSource = new Elvis_ContentSource();
 		$contentSourceId = $contentSource->getContentSourceId();
+
 		return array( $contentSourceId => true );
 	}
 
 	// Generic connector methods that can be overruled by a Version implementation:
-	public function getPrio()      { return self::PRIO_DEFAULT; }
+	public function getPrio()
+	{
+		return self::PRIO_DEFAULT;
+	}
 	
 	/**
 	 * Overrides createVersion in Version_EnterpriseConnector for backwards compatibility
@@ -41,8 +45,6 @@ class Elvis_Version extends Version_EnterpriseConnector
 	 */
 	public function createVersion( $objectId, $sourceVersion, $nextVersion, $storename, $setObjPropMode )
 	{
-		$objectId = $objectId; $sourceVersion = $sourceVersion; $nextVersion = $nextVersion; $storename = $storename;
-		$setObjPropMode = $setObjPropMode;
 	}
 
 	/**
@@ -55,7 +57,6 @@ class Elvis_Version extends Version_EnterpriseConnector
 	 */
 	public function deleteVersion( $objectId, $version, $storeName )
 	{
-		$objectId = $objectId; $version = $version; $storeName = $storeName;
 	}
 	
 	// Generic connector methods that cannot be overruled by a content source implementation:

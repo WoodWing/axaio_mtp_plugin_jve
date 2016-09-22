@@ -20,13 +20,12 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 
 	final public function runBefore( WflSetObjectPropertiesRequest &$req )
 	{
-		require_once dirname(__FILE__) . '/config.php';
-		require_once BASEDIR  . '/server/bizclasses/BizObject.class.php';
-		require_once dirname(__FILE__) . '/util/ElvisObjectUtils.class.php';
-		require_once dirname(__FILE__) . '/util/ElvisUtils.class.php';
-		$req = $req; // keep code analyzer happy
-				
-		if (!is_null($req->MetaData->BasicMetaData->ID) && ElvisUtils::isElvisId($req->MetaData->BasicMetaData->ID)) {
+		require_once dirname(__FILE__).'/config.php';
+		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
+		require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+
+		if( !is_null($req->MetaData->BasicMetaData->ID) && ElvisUtils::isElvisId($req->MetaData->BasicMetaData->ID) ) {
 			// Hack: WflSetObjectPropertiesService incorrectly sets MetaData->BasicMetaData->ID to $req->ID 
 			// even if it's a shadow object. This is wrong for shadow objects and leads to all kind of issues in the Enterprise core.
 			$req->MetaData->BasicMetaData->ID = null;
@@ -72,10 +71,9 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 
 	final public function runAfter( WflSetObjectPropertiesRequest $req, WflSetObjectPropertiesResponse &$resp )
 	{
-		require_once dirname(__FILE__) . '/config.php';
-		require_once dirname(__FILE__) . '/util/ElvisObjectRelationUtils.class.php';
-		require_once dirname(__FILE__) . '/logic/ElvisUpdateManager.class.php';
-		$req = $req; $resp = $resp; // keep code analyzer happy
+		require_once dirname(__FILE__).'/config.php';
+		require_once dirname(__FILE__).'/logic/ElvisUpdateManager.class.php';
+		require_once dirname(__FILE__).'/util/ElvisObjectRelationUtils.class.php';
 
 		$updatedObjects = array();
 		$updatedShadowRelations = array();
@@ -101,6 +99,5 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 	// Not called.
 	final public function runOverruled( WflSetObjectPropertiesRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
 	} 
 }

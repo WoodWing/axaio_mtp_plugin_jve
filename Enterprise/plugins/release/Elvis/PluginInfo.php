@@ -61,7 +61,7 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 
 	public function runInstallation()
 	{
-		$configFile = dirname(__FILE__) . '/config.php';
+		$configFile = dirname(__FILE__).'/config.php';
 
 		require_once $configFile;
 
@@ -91,5 +91,4 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 	{
 		return '8.3.3 Build 1';
 	}
-	
 }

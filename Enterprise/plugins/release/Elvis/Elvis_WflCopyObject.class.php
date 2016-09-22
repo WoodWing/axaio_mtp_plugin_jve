@@ -18,16 +18,14 @@ class Elvis_WflCopyObject extends WflCopyObject_EnterpriseConnector
 
 	final public function runBefore( WflCopyObjectRequest &$req )
 	{
-		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; // keep code analyzer happy
+		require_once dirname(__FILE__).'/config.php';
 	}
 
 	final public function runAfter( WflCopyObjectRequest $req, WflCopyObjectResponse &$resp )
 	{
-		require_once dirname(__FILE__) . '/config.php';
-		require_once dirname(__FILE__) . '/util/ElvisObjectRelationUtils.class.php';
-		require_once dirname(__FILE__) . '/logic/ElvisUpdateManager.class.php';
-		$req = $req; $resp = $resp; // keep code analyzer happy
+		require_once dirname(__FILE__).'/config.php';
+		require_once dirname(__FILE__).'/util/ElvisObjectRelationUtils.class.php';
+		require_once dirname(__FILE__).'/logic/ElvisUpdateManager.class.php';
 
 		$copiedObject = new Object();
 		$copiedObject->MetaData = $resp->MetaData;
@@ -35,7 +33,6 @@ class Elvis_WflCopyObject extends WflCopyObject_EnterpriseConnector
 		$copiedObject->Targets = $resp->Targets;
 
 		$respObjects = array( $copiedObject );
-
 		// Get object shadow relations from the response objects
 		$newShadowRelations = ElvisObjectRelationUtils::getShadowRelationsFromObjects( $respObjects );
 
@@ -48,6 +45,5 @@ class Elvis_WflCopyObject extends WflCopyObject_EnterpriseConnector
 	// Not called.
 	final public function runOverruled( WflCopyObjectRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
 	} 
 }

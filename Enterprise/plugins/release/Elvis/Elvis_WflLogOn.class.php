@@ -19,7 +19,6 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 	// Not called.
 	final public function runBefore( WflLogOnRequest &$req )
 	{
-		$req = $req; // keep code analyzer happy
 	}
 
 	final public function runAfter( WflLogOnRequest $req, WflLogOnResponse &$resp ) 
@@ -97,6 +96,5 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 	// Not called.
 	final public function runOverruled( WflLogOnRequest $req ) 
 	{
-		$req = $req; // keep code analyzer happy
 	}
 }
