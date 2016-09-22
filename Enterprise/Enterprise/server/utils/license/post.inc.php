@@ -56,24 +56,23 @@
 		$reqbody = makeReqBodyFormFields( $dataArr, $boundary );
 		$reqbody .= "--$boundary--\r\n";
 
-		if ( !$proxy_host )
+		if( !$proxy_host ) {
 			$proxy_host = $host;
-		if ( !$proxy_port )
+		}
+		if( !$proxy_port ) {
 			$proxy_port = $port;
+		}
 
 		$contentlength = strlen($reqbody); 
-		$reqheader =  "POST $url HTTP/1.1\r\n". 
-					"Host: $proxy_host\r\n";
-		if ( $proxy_user )
-			$reqheader .= "Proxy-Authorization: Basic " . base64_encode ("$proxy_user:$proxy_pass") . "\r\n";
-
+		$reqheader = "POST $url HTTP/1.1\r\n".
+						"Host: $host\r\n";
+		if ( $proxy_user ) {
+			$reqheader .= "Proxy-Authorization: Basic ".base64_encode( "$proxy_user:$proxy_pass" )."\r\n";
+		}
 		$reqheader .= "User-Agent: Woodwing SCEServer\r\n".
 					"Content-Type: multipart/form-data; boundary=$boundary\r\n".
 					"Content-Length: $contentlength\r\n\r\n". 
 					$reqbody; 
-
-//print "<br>reqheader:";
-//print htmlspecialchars( $reqheader );
 
 		$connectTimeout = WWREGCONNECTTIMEOUT;
 		$errstr = '';
@@ -103,8 +102,7 @@
 	   	} while ( !$stop && !preg_match('/\\r\\n\\r\\n$/',$header));
 
 		//In case of a proxy server, "100 Continue" may be answered
-        if ( strpos($header, " 100 Continue") !== FALSE ) 
-        {
+      if ( strpos($header, " 100 Continue") !== FALSE ) {
         	//Reset header and continue reading
 			$header = '';
 			$stop = false;
@@ -118,16 +116,15 @@
 		   	} while (!$stop && !preg_match('/\\r\\n\\r\\n$/',$header));
 		}
 
-        $headerError = ( strpos($header, " 200 OK") === FALSE );
-        if ( $headerError )
-        {
-        	if ( !$header )
-        		$header = '(no (header) result returned from server)';
-        	$headerlines = explode( "\n", $header );
-        	$result = 'error: ' . $headerlines[0]; //has HTTP error code in it.
-    	}
-    	else
-    	{
+		$headerError = ( strpos($header, " 200 OK") === FALSE );
+		if( $headerError ) {
+			if( !$header ) {
+				$header = '(no (header) result returned from server)';
+			}
+			$headerlines = explode( "\n", $header );
+			$result = 'error: '.$headerlines[0]; //has HTTP error code in it.
+		}
+    	else {
 			$result = '';
 			// check for chunked encoding
 			if (preg_match('/Transfer\\-Encoding:\\s+chunked\\r\\n/i',$header))
@@ -135,15 +132,13 @@
 				do {
 					$byte = "";
 					$chunk_size="";
-					do 
-					{
+					do {
 						$chunk_size.=$byte;
 						$byte=fread($socket,1);
 					} while ($byte!="\r");      // till we match the CR
 					$byte=fread($socket,1); // also drop off the LF
 					$chunk_size=hexdec($chunk_size); // convert to real number
-					if ( $chunk_size )
-					{
+					if ( $chunk_size ) {
 						$toRead = $chunk_size;
 						do {
 							$tmp = fread($socket,$toRead);
@@ -157,12 +152,10 @@
 					$byte=fread($socket,1); // also drop off the LF
 				} while ($chunk_size);         // till we reach the 0 length chunk (end marker)
 			}
-			else 
-			{
+			else {
 				// check for specified content length
 				$matches = array();
-				if (preg_match('/Content\\-Length:\\s+([0-9]*)\\r\\n/i',$header,$matches)) 
-				{
+				if (preg_match('/Content\\-Length:\\s+([0-9]*)\\r\\n/i',$header,$matches)) {
 					$toRead = $matches[1];
 					do {
 						$tmp = fread($socket,$toRead);
@@ -170,11 +163,9 @@
 						$result.= $tmp;
 					} while ( $toRead > 0  );
 				} 
-				else 
-				{
+				else {
 					// not a nice way to do it (may also result in extra CRLF which trails the real content???)
-					while (!feof($socket)) 
-					{
+					while (!feof($socket)) {
 						$tmp = fread($socket, 4096);
 						$result .= $tmp;
 					}
@@ -184,9 +175,7 @@
 		// close connection
 		fclose($socket);
 
-//		$result = $header . $result;
-		
-		return $result; 
+		return $result;
 	}
 
 ?>
