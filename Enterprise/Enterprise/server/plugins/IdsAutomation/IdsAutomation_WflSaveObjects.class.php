@@ -143,7 +143,7 @@ class IdsAutomation_WflSaveObjects  extends WflSaveObjects_EnterpriseConnector
 					"and is ".($isPlaced?'':'NOT')." a supported placed object. " );
 				
 				// Resolve the parent layout ids in case of a placement.
-				IdsAutomationUtils::createIdsAutomationJobsForPlacedObject($objId, $objType, $object->MetaData->WorkflowMetaData->State->Id);
+				IdsAutomationUtils::createIdsAutomationJobsForPlacedObject($objId, $object->MetaData->WorkflowMetaData->State->Id, $objType);
 				
 				// Create IDS job for each layout, unless our IDS job is saving.
 				if( $isLayout ) {

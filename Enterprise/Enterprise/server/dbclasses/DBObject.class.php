@@ -252,29 +252,31 @@ class DBObject extends DBBase
 		return $sth;
 	}
 
-	/**
-	 * Returns the database row of an object, either from the Workflow or from the Trash.
-	 *
-	 * @param int|string $objectId Id of the object.
-	 * @param boolean $workflow Found in the Workflow.
-	 * @return array database row when found else empty.
-	 */
-	static public function getObjectRow( $objectId, &$workflow )
-	{
-		$result = array();
-		$sth = self::getObject( intval( $objectId ), array('Workflow') );
-		if ( $sth ) {
-			$workflow = true;
-		} else {
-			$sth = self::getObject( intval( $objectId ), array('Trash') );
-			$workflow = false;
-		}
+    /**
+     * Returns the database row of an object, either from the Workflow or from the Trash.
+     * First the Workflow area is checked and if nothing is found the Trash Can is checked.
+     *
+     * @param int|string $objectId Id of the object.
+     * @param boolean $workflow Found in the Workflow.
+     * @return array database row when found else empty.
+     */
+    static public function getObjectRow( $objectId, &$workflow )
+    {
+        $areas = array ( 'Workflow', 'Trash' );
+        $result = array();
+        foreach ( $areas as $area ) {
+            $sth = self::getObject( intval( $objectId ), array( $area ) );
+            if( $sth ) {
+                $result = self::fetchResults( $sth );
+            }
+            if ( $result ) {
+                $workflow = ( $area == 'Workflow' ) ? true : false ;
+                break;
+            }
+        }
 
-		if ( $sth ) {
-			$result = self::fetchResults( $sth );
-		}
-		return $result ? $result[0] : $result; // database row or empty array;
-	}
+        return $result ? $result[0] : $result; // database row or empty array;
+    }
 
 	/**
 	 * Returns the current version of an object. The format is <majorversion>.<minorversion>

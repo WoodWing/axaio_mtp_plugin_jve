@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">The file names do not match, do you still want to check in?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">Only plain-text articles are allowed to be combined</Term>
   <Term key="ERR_COMPOSE">Error composing article. (S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">Error connecting to the service named %1. Please check your connection and try again. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">Error connecting to server. Please check your connection and try again. (S1068)</Term>
   <Term key="ERR_COPY_FOLDER">An error occurred during publishing. Please contact your system administrator.nnDetails: The HTML Resources cache folder was not found. Please run the 'Adobe Digital Publishing System (DPS)' test on the Health Check page and follow the instructions.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">Couldn't connect to database (S1003)</Term>

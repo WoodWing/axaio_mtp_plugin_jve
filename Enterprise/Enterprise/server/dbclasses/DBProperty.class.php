@@ -500,6 +500,32 @@ class DBProperty extends DBBase
 			$where .= "AND pr.`termentityid` > 0 ";
 		}
 
+		return self::getPropertyInfoObjects( $where, $params );
+	}
+
+	public static function getPropertyInfosByBrand( $pluginName, $propName, $brandId )
+	{
+		$where = "pr.`entity` = ? ";
+		$params = array( 'Object' );
+		if( !is_null($pluginName) ) {
+			$where .= "AND pr.`serverplugin` = ? ";
+			$params[] = $pluginName;
+		}
+		if( !is_null($propName) ) {
+			$where .= "AND pr.`name` = ? ";
+			$params[] = $propName;
+		}
+		if( !empty( $brandId ) ) {
+			$where .= "AND ( pr.`publication` = ? OR pr.`publication` = ? ) ";
+			$params[] = $brandId;
+			$params[] = 0;
+		}
+
+		return self::getPropertyInfoObjects( $where, $params );
+	}
+
+	private static function getPropertyInfoObjects( $where, $params )
+	{
 		$dbDriver = DBDriverFactory::gen();
 		$tablename = $dbDriver->tablename( self::TABLENAME );
 		$dbTermEntities = $dbDriver->tablename( 'termentities' );
@@ -515,6 +541,7 @@ class DBProperty extends DBBase
 		foreach( $rows as $row ) {
 			$objs[] = self::rowToObj( $row );
 		}
+
 		return $objs;
 	}
 	
