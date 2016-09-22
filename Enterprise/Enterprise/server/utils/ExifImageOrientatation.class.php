@@ -279,32 +279,32 @@ class ExifImageOrientatation
 		switch( $orientation ) {
 			case 1: // nothing
 				break;
-			case 2: // horizontal flip
+			case 2: // mirror horizontal
 				$tmpImage = $this->flipImage( $imageRes, 1 );
 				break;
-			case 3: // 180 rotate left
+			case 3: // rotate 180 CCW
 				$tmpImage = imagerotate( $imageRes, 180, 0 );
 				break;
-			case 4: // vertical flip
+			case 4: // flip vertical
 				$tmpImage = $this->flipImage( $imageRes, 2 );
 				break;
-			case 5: // vertical flip + 90 rotate right
+			case 5: // first flip vertical, then rotate 270 CCW
 				$tmpImage = $this->flipImage( $imageRes, 2 );
 				if( $tmpImage ) {
 					$tmpImage = imagerotate( $tmpImage, 270, 0 );
 				}
 				break;
-			case 6: // 90 rotate right
+			case 6: // rotate 270 CCW
 				$tmpImage = imagerotate( $imageRes, 270, 0 );
 				break;
-			case 7: // horizontal flip + 90 rotate right
+			case 7: // first mirror horizontal, then rotate 270 CCW
 				$tmpImage = $this->flipImage( $imageRes, 1 );
 				if( $tmpImage ) {
 					$tmpImage = imagerotate( $tmpImage, 270, 0 );
 				}
 				break;
-			case 8:    // 90 rotate left
-				$tmpImage = imagerotate( $imageRes, 90,0 );
+			case 8: // rotate 90 CCW
+				$tmpImage = imagerotate( $imageRes, 90, 0 );
 				break;
 		}
 		if( $tmpImage ) {

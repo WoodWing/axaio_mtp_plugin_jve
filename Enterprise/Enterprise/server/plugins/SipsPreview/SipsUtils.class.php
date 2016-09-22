@@ -235,20 +235,20 @@ class SipsUtils
 			case 2: // Mirror horizontal
 				$cmdParams = ' -f horizontal ';
 				break;
-			case 3: // Rotate 180
+			case 3: // Rotate 180 CW
 				$cmdParams = ' -r 180 ';
 				break;
-			case 4: // Mirror vertical
+			case 4: // Flip vertical
 				$cmdParams = ' -f vertical ';
 				break;
-			case 5: // Mirror horizontal and rotate 270 CW
-				$cmdParams = ' -f horizontal -r 270 ';
+			case 5: // First rotate 270 CW, then flip vertical
+				$cmdParams = ' -r 270 -f vertical ';
 				break;
 			case 6: // Rotate 90 CW
 				$cmdParams = ' -r 90 ';
 				break;
-			case 7: // Mirror horizontal and rotate 90 CW
-				$cmdParams = ' -f horizontal -r 90 ';
+			case 7: // First rotate 270 CW, then mirror horizontal
+				$cmdParams = ' -r 270 -f horizontal ';
 				break;
 			case 8: // Rotate 270 CW
 				$cmdParams = ' -r 270 ';
