@@ -17,7 +17,7 @@ class AdobeDps2_EnterprisePlugin extends EnterprisePlugin
 		require_once BASEDIR.'/server/interfaces/plugins/PluginInfoData.class.php';
 		$info = new PluginInfoData(); 
 		$info->DisplayName = DPS2_PLUGIN_DISPLAYNAME;
-		$info->Version     = '10.0 Build 5209'; // don't use PRODUCTVERSION
+		$info->Version     = getProductVersion(__DIR__); // don't use PRODUCTVERSION
 		$info->Description = 'Integrates with '.DPS2_PLUGIN_DISPLAYNAME.'.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
