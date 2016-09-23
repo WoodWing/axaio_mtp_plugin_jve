@@ -235,9 +235,7 @@ class ElvisObjectUtils
 					if( $enterpriseObjectVersion && version_compare( $enterpriseObjectVersion,  $elvisAssetVersion, '<' ) ) {
 						$values = array();
 						DBVersion::splitMajorMinorVersion( $elvisAssetVersion, $values );
-						$where = '`id` = ? ';
-						$params = array( $id );
-						$success = DBObject::updateRow( 'objects', $values, $where, $params );
+						$success = DBObject::updateRowValues( $id, $values );
 						if( !$success ) {
 							LogHandler::Log(__CLASS__ . '::' . __FUNCTION__, 'INFO', 'Object: ' . $id .
 										' could not be updated with the latest version from Elvis Content Source.');
@@ -249,16 +247,16 @@ class ElvisObjectUtils
 	}
 
 	/**
-	 * Set the VersionInfo's state from the best matching version status from Enterprise.
-	 * When there is a gap of versions exist between Enterprise and Elvis.
-	 * For example:
-	 * In Elvis, asset versions created are 0.1, 0.2, 0.3, 0.4, 0.5.
-	 * In Enterprise, shadow object versions created are 0.1, 0.2, 0.5.
+	 * Set the VersionInfo's state to the best matching version status from Enterprise.
 	 *
-	 * In this case, when version 0.3, 0.4 are not exist in Enterprise, set the version status
-	 * to be the last previous version, which is 0.2.
-	 * In Enterprise, the shadow object's status doesn't change between version 0.2 and 0.5,
-	 * therefore it is logic to replace 0.3, 0.4 version status with last previous version.
+	 * This is needed when there is a gap between versions stored in Enterprise and Elvis.
+	 * For example:
+	 * In Elvis, the asset versions are 0.1, 0.2, 0.3, 0.4, 0.5.
+	 * In Enterprise the shadow object versions are 0.1, 0.2, 0.5.
+	 * In this case, the versions 0.3 and 0.4 do not exist in Enterprise. The version status
+	 * will be set to the last previous version status as stored in Enterprise, which is the status of version 0.2.
+	 * In Enterprise, the shadow object's status hasn't changed between version 0.2 and 0.5,
+	 * therefore the logic is to replace the 0.3 and 0.4 version status with the last previous version.
 	 *
 	 * @param int $shadowId Enterprise shadow object id
 	 * @param array $elvisAssetVersions List of shadow object version retrieve from Elvis
@@ -274,7 +272,7 @@ class ElvisObjectUtils
 		$states = BizVersion::getVersionStatuses( $objProps, null );
 		$enterpriseObjectVersions = DBVersion::getVersions( $shadowId );
 
-		// Add current object version with limited fields that sufficient to perform comparison
+		// Add current object version with limited number of fields but sufficient to perform comparison.
 		$currentObjectVersion = array(
 										'objid' => $shadowId,
 										'version' => BizVersion::getCurrentVersionNumber( $objProps ),
@@ -292,8 +290,10 @@ class ElvisObjectUtils
 					$previousVersionInEnterprise = null;
 					break;
 				} elseif( version_compare( $enterpriseObjectVersion['version'], $elvisAssetVersion->Version, '<' ) ) {
-					if( $previousVersionInEnterprise && version_compare( $previousVersionInEnterprise['version'], $enterpriseObjectVersion['version'], '<' ) ) {
-						$previousVersionInEnterprise = $enterpriseObjectVersion;
+					if( $previousVersionInEnterprise ) {
+						if( version_compare( $previousVersionInEnterprise['version'], $enterpriseObjectVersion['version'], '<' ) ) {
+							$previousVersionInEnterprise = $enterpriseObjectVersion;
+						}
 					} else {
 						$previousVersionInEnterprise = $enterpriseObjectVersion;
 					}
