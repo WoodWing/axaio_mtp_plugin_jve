@@ -18,7 +18,7 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 	{
 		$info = new PluginInfoData();
 		$info->DisplayName = 'Elvis';
-		$info->Version    = '10.0 Build 6075'; // don't use PRODUCTVERSION
+		$info->Version    = getProductVersion(__DIR__); // don't use PRODUCTVERSION
 		$info->Description = 'Elvis Content Source';
 		$info->Copyright = COPYRIGHT_WOODWING;
 		return $info;

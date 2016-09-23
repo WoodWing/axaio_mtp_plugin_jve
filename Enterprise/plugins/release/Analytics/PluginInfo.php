@@ -15,7 +15,7 @@ class Analytics_EnterprisePlugin extends EnterprisePlugin
 		require_once BASEDIR.'/server/interfaces/plugins/PluginInfoData.class.php';
 		$info = new PluginInfoData(); 
 		$info->DisplayName = 'Enterprise Analytics';
-		$info->Version     = '10.0 Build 4258'; // don't use PRODUCTVERSION
+		$info->Version     = getProductVersion(__DIR__); // don't use PRODUCTVERSION
 		$info->Description = 'Integrates with Enterprise Analytics Cloud.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
