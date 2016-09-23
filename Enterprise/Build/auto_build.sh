@@ -523,9 +523,9 @@ function step3a_updateVersionInfo {
 
 	echo "step3a3: Update version info in Analytics, AdobeDps2 and Elvis plugins. They have their own buildnr, but use the major.minor of Enterprise."
 	twoDigitVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)(\.[0-9]+)?/\1/g"` # ignores patch nr
-	updatePluginVersions ${SOURCE_BASE}plugins/release/Analytics "${twoDigitVersion}" ${ANALYTICS_BUILDNR}
-	updatePluginVersions ${SOURCE_BASE}plugins/release/AdobeDps2 "${twoDigitVersion}" ${ADOBEDPS2_BUILDNR}
-	updatePluginVersions ${SOURCE_BASE}plugins/release/Elvis "${twoDigitVersion}" ${ELVIS_BUILDNR}
+	replaceVersionFile ${SOURCE_BASE}plugins/release/Analytics/_productversion.txt "${twoDigitVersion}" ${ANALYTICS_BUILDNR}
+	replaceVersionFile ${SOURCE_BASE}plugins/release/AdobeDps2/_productversion.txt "${twoDigitVersion}" ${ADOBEDPS2_BUILDNR}
+	replaceVersionFile ${SOURCE_BASE}plugins/release/Elvis/_productversion.txt "${twoDigitVersion}" ${ELVIS_BUILDNR}
 
 	echo "step3a4: Update version info of the ProxyForSC solution."
 	replaceVersionFile ${SOURCE_BASE}ProxyForSC/proxyserver/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
