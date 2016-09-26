@@ -3,8 +3,11 @@
 // Example: Run for a maximum of 3 minutes with a wait time towards Elvis of 30 seconds
 // 		Cron settings (run every 3 minutes): */3 * * * *
 //		URL: http://localhost:8888/Enterprise/config/plugins/Elvis/sync.php?maxexectime=180&maxtimeoutperrun=30
-
-require_once dirname(__FILE__) . '/../../config.php';
+if( file_exists('/../../config.php') ) {
+	require_once '/../../config.php';
+} else { // fall back at symbolic link to Perforce source location of server plug-in
+	require_once '../../../Enterprise/config/config.php';
+}
 require_once BASEDIR.'/server/secure.php';
 require_once dirname(__FILE__) . '/ElvisSync.class.php';
 

@@ -117,7 +117,9 @@ class ElvisSync {
 		}
 		$domain = '';
 		$appname = 'Elvis';
-		$appversion	= 'v.' . Elvis_EnterprisePlugin::getPluginVersion();
+		$plugin = new Elvis_EnterprisePlugin();
+		$pluginInfo = $plugin->getPluginInfo();
+		$appversion = 'v.'. $pluginInfo->Version;
 		$appserial	= '';
 		$appproductcode = '';
 		
