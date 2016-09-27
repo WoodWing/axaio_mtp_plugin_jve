@@ -89,8 +89,8 @@ class ImageUtils
 		}
 
 		// >>> Get the Orientation Tag from native image file (BZ#18975)
-		require_once BASEDIR.'/server/utils/ExifImageOrientatation.class.php';
-		$orientHelper = new ExifImageOrientatation();
+		require_once BASEDIR.'/server/utils/ExifImageOrientation.class.php';
+		$orientHelper = new ExifImageOrientation();
 		if( $uploaddir ) { // path...
 			$orientation = $orientHelper->readExifOrientationFromFile( $file );
 		} else {

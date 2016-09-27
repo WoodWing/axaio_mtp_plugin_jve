@@ -27,7 +27,7 @@
  *  88          88  888888  888888
  * 
  */
-class ExifImageOrientatation
+class ExifImageOrientation
 {
 	private $content = null;
 	

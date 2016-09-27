@@ -1198,8 +1198,8 @@ class BizPublishing
 	 *
 	 * @param integer $dossierId
 	 * @param PubPublishTarget $publishTarget
-	 * @param object $dossier
-	 * @param array $children
+	 * @param Object $dossier
+	 * @param Object[] $children
 	 */
 	static protected function fetchDossier( $dossierId, $publishTarget, &$dossier, &$children )
 	{
@@ -1217,12 +1217,12 @@ class BizPublishing
 			require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 			$dossier = BizObject::getObject( $dossierId, $user, false, null, null );
 			$dossier->ExternalId = self::getDossierExternalId( $dossierId, $publishTarget );
-			$childids = self::listContained( $dossierId, $publishTarget );
+			$childIds = self::listContained( $dossierId, $publishTarget );
 			/** @var Object[] $children */
 			$children = array();
-			if( $childids ) foreach( $childids as $childid ) {
-				$children[$childid] = BizObject::getObject( $childid, $user, false, 'none', null );
-				$children[$childid]->ExternalId = self::getChildExternalId( $dossierId, $childid, $publishTarget );
+			if( $childIds ) foreach( $childIds as $childId ) {
+				$children[$childId] = BizObject::getObject( $childId, $user, false, 'none', null );
+				$children[$childId]->ExternalId = self::getChildExternalId( $dossierId, $childId, $publishTarget );
 			}
 
 			$supportsPublishForms = BizServerPlugin::runChannelConnector( $publishTarget->PubChannelID,
@@ -1281,14 +1281,14 @@ class BizPublishing
 	 * Get the ExternalId of the child of a published dossier
 	 *
 	 * @param integer $dossierId
-	 * @param integer $childid
+	 * @param integer $childId
 	 * @param PubPublishTarget $publishTarget
 	 * @return string ExternalId
 	 */
-	static protected function getChildExternalId( $dossierId, $childid, $publishTarget )
+	static protected function getChildExternalId( $dossierId, $childId, $publishTarget )
 	{
 		require_once BASEDIR . '/server/dbclasses/DBPublishedObjectsHist.class.php';
-		return DBPublishedObjectsHist::getObjectExternalId( $dossierId, $childid, 
+		return DBPublishedObjectsHist::getObjectExternalId( $dossierId, $childId,
 					$publishTarget->PubChannelID, $publishTarget->IssueID, $publishTarget->EditionID );
 	}
 
