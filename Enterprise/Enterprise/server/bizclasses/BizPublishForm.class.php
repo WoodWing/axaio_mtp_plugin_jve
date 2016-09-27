@@ -41,6 +41,7 @@ class BizPublishForm
 			}
 		}
 
+		$objects = array();
 		// Retrieve all complex fields (FileSelector / ArticleComponentSelector). This can be done by resolving all
 		// the 'Placed' relations. Placements aren't pattern checked.
 		$filesByFormWidgetId = array();
@@ -51,8 +52,11 @@ class BizPublishForm
 					$fileObjectId = $relation->Child;
 					$user = BizSession::getShortUserName();
 					try {
-						$file = BizObject::getObject($fileObjectId, $user, false, $rendition, $requestInfo, null, true
-							, array('Workflow'));
+						// Cache the getObject calls for performance.
+						if( !array_key_exists($fileObjectId, $objects ) ) {
+							$objects[$fileObjectId] = BizObject::getObject( $fileObjectId, $user, false, $rendition, $requestInfo, null, true, array('Workflow') );
+						}
+						$file = clone $objects[$fileObjectId];
 
 						if (!array_key_exists( $property, $filesByFormWidgetId )) {
 							$filesByFormWidgetId[$property] = array();
@@ -71,6 +75,7 @@ class BizPublishForm
 				}
 			}
 		}
+		unset( $objects );
 
 		// We always have at least one file per formWidgetId. Restructure the fields so we can still work with Article-
 		// ComponentSelectors and single FileSelectors. Multiple files become an array, single files a single object.
