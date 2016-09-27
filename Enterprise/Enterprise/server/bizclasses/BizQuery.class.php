@@ -543,7 +543,7 @@ class BizQuery extends BizQueryBase
         $sqlarray['joins4where'] = "/*JOINS4WHERE*/ " . self::buildJoins4Where();
         return $sqlarray;
     }
-	
+
 	static protected function getPropNames($mode, $minimalProps, $requestProps, $areas)
 	{
 		// If $requestProps set, this is the complete list of properties, so if no empty return this
@@ -563,7 +563,7 @@ class BizQuery extends BizQueryBase
 		$reqprops['IssueId'] 	 = 'Issue';
 		$reqprops['State']	 	 = 'StateId';
 		$reqprops['StateId'] 	 = 'State';
-		
+
 		$propnames = self::getQueryProperties($mode, $areas);
 
 		$reqpropnames = array();
@@ -622,10 +622,11 @@ class BizQuery extends BizQueryBase
 					BizQueryBase::requireJoin('rtg');
 					break;
 				}
+	         case 'Dimensions':
 				case 'HasChildren':
 				case 'PlacedOn':
 				case 'PlacedOnPage':
-					// HasChildren, PlacedOn and PlacedOnPage will be resolved later
+					// Dimensions, HasChildren, PlacedOn and PlacedOnPage will be resolved later
 					break;
 
 				default:

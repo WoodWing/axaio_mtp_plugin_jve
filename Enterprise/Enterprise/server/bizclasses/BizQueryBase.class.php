@@ -1056,6 +1056,10 @@ class BizQueryBase
 			self::resolveHasChildren($resultRows, $deleted);
 		}
 
+		if( in_array( 'Dimensions', $requestedpropnames ) ) {
+			self::determineDimensions( $resultRows, $areas );
+		}
+
 		if ( in_array( 'UnreadMessageCount', $requestedpropnames )) {
 			require_once BASEDIR.'/server/dbclasses/DBMessage.class.php';
 			$unreadMessageRows = DBMessage::getUnReadMessageCountForView( $limitPlacedView );
@@ -1065,6 +1069,40 @@ class BizQueryBase
 		$resultRows = self::addMissingRequestedProperties($requestedpropnames, $resultRows);
 
 		return $resultRows;
+	}
+
+	/**
+	 * Populate the Dimensions column in the search results.
+	 *
+	 * The Dimensions property is resolved through Width, Height and Orientation properties.
+	 *
+	 * IMPORTANT: Please keep this function in-sync with BizObjects::determineDimensions() !
+	 *
+	 * @since 10.1.0
+	 * @param array $resultRows the database objects that will be enriched.
+	 * @param array $areas 'Workflow' or 'Trash'
+	 */
+	private static function determineDimensions( &$resultRows, $areas )
+	{
+		$objectIds = array_keys( $resultRows );
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		$objRows = DBObject::getColumnsValuesForObjectIds( $objectIds, $areas, array( 'id', 'width', 'depth', 'orientation' ) );
+		foreach( $resultRows as $objectId => &$resultRow ) {
+			$objRow = isset( $objRows[$objectId] ) ? $objRows[$objectId] : null;
+			if( isset( $objRow['width'] ) && $objRow['width'] > 0 &&
+				isset( $objRow['depth'] ) && $objRow['depth'] > 0 ) {
+				if( isset( $objRow['orientation'] ) && $objRow['orientation'] >= 5 ) {
+					$lhs = $objRow['depth'];
+					$rhs = $objRow['width'];
+				} else {
+					$lhs = $objRow['width'];
+					$rhs = $objRow['depth'];
+				}
+				$resultRow['Dimensions'] = "$lhs x $rhs";
+			} else {
+				$resultRow['Dimensions'] = '';
+			}
+		}
 	}
 
 	/**

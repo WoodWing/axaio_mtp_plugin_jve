@@ -54,6 +54,8 @@ public class ContentMetaData  implements java.io.Serializable {
 
     private org.apache.axis.types.UnsignedInt orientation;
 
+    private java.lang.String dimensions;
+
     public ContentMetaData() {
     }
 
@@ -80,7 +82,8 @@ public class ContentMetaData  implements java.io.Serializable {
            org.apache.axis.types.UnsignedInt keyFrameEveryFrames,
            java.lang.String channels,
            java.lang.String aspectRatio,
-           org.apache.axis.types.UnsignedInt orientation) {
+           org.apache.axis.types.UnsignedInt orientation,
+           java.lang.String dimensions) {
            this.description = description;
            this.descriptionAuthor = descriptionAuthor;
            this.keywords = keywords;
@@ -104,6 +107,7 @@ public class ContentMetaData  implements java.io.Serializable {
            this.channels = channels;
            this.aspectRatio = aspectRatio;
            this.orientation = orientation;
+           this.dimensions = dimensions;
     }
 
 
@@ -566,6 +570,26 @@ public class ContentMetaData  implements java.io.Serializable {
         this.orientation = orientation;
     }
 
+
+    /**
+     * Gets the dimensions value for this ContentMetaData.
+     * 
+     * @return dimensions
+     */
+    public java.lang.String getDimensions() {
+        return dimensions;
+    }
+
+
+    /**
+     * Sets the dimensions value for this ContentMetaData.
+     * 
+     * @param dimensions
+     */
+    public void setDimensions(java.lang.String dimensions) {
+        this.dimensions = dimensions;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof ContentMetaData)) return false;
@@ -646,7 +670,10 @@ public class ContentMetaData  implements java.io.Serializable {
               this.aspectRatio.equals(other.getAspectRatio()))) &&
             ((this.orientation==null && other.getOrientation()==null) || 
              (this.orientation!=null &&
-              this.orientation.equals(other.getOrientation())));
+              this.orientation.equals(other.getOrientation()))) &&
+            ((this.dimensions==null && other.getDimensions()==null) || 
+             (this.dimensions!=null &&
+              this.dimensions.equals(other.getDimensions())));
         __equalsCalc = null;
         return _equals;
     }
@@ -734,6 +761,9 @@ public class ContentMetaData  implements java.io.Serializable {
         }
         if (getOrientation() != null) {
             _hashCode += getOrientation().hashCode();
+        }
+        if (getDimensions() != null) {
+            _hashCode += getDimensions().hashCode();
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -882,6 +912,13 @@ public class ContentMetaData  implements java.io.Serializable {
         elemField.setFieldName("orientation");
         elemField.setXmlName(new javax.xml.namespace.QName("", "Orientation"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "unsignedInt"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("dimensions");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "Dimensions"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setMinOccurs(0);
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);

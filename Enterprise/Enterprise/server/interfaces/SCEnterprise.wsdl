@@ -323,6 +323,7 @@
 					<element name="Channels"        type="xsd:string"           nillable="true"/>   <!-- Audio/Video only -->
 					<element name="AspectRatio"     type="xsd:string"           nillable="true"/>   <!-- Video only -->
 					<element name="Orientation"     type="xsd:unsignedInt"      nillable="true" minOccurs="0" maxOccurs="1"/> <!-- v10.1: Image orientation value, as specified in Exif IFD0. Default value is 1 = Horizontal (normal). Can only be set through uploads of image files having embedded Exif metadata, so not directly through web services. Nil when not resolved. -->
+					<element name="Dimensions"      type="xsd:string"           nillable="true" minOccurs="0" maxOccurs="1"/> <!-- v10.1: Measurements of an image in "Width x Height" format. When the image Orientation is set to 90 degrees rotation, the Width and Height values are switched. This field is for UI purposes and is derived from Width, Height and Orientation. -->
 				</all>
 			</complexType>
 			<complexType name="WorkflowMetaData">

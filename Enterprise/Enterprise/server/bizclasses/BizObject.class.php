@@ -3482,6 +3482,9 @@ class BizObject
 		// Make sure that the Orientation is in range [1...8] or null.
 		self::validateAndRepairOrientation( $meta );
 
+		// Derive the Dimensions property value from Width, Height and Orientation.
+		self::determineDimensions( $meta );
+
 		// Validate overruled publications
 		self::validateOverruledPublications( $user, $meta, $targets );
 	}
@@ -3496,6 +3499,7 @@ class BizObject
 	 * this should be converted to null when read from DB to tell clients there is no Orientation set for the object.
 	 * Also note that only for images (and adverts?) the Orientation property makes sense.
 	 *
+	 * @since 10.1.0
 	 * @param MetaData $meta
 	 */
 	private static function validateAndRepairOrientation( MetaData $meta )
@@ -3506,6 +3510,33 @@ class BizObject
 				$meta->ContentMetaData->Orientation > 8 ) {
 				$meta->ContentMetaData->Orientation = null; // repair
 			}
+		}
+	}
+
+	/**
+	 * Determines the Dimensions property value, which is not(!) stored in DB, readonly, and for UI purposes only.
+	 *
+	 * When Width and Height are set, the Dimensions will get value "Width x Height" unless the Orientation tells that
+	 * the image should be rotated 90 degrees, it will get value "Height x Width". When Width and Height are not set
+	 * the Dimensions will remain undetermined (unset).
+	 *
+	 * IMPORTANT: Please keep this function in-sync with BizQueryBase::determineDimensions() !
+	 *
+	 * @since 10.1.0
+	 * @param MetaData $meta
+	 */
+	private static function determineDimensions( MetaData $meta )
+	{
+		if( isset( $meta->ContentMetaData->Width ) && $meta->ContentMetaData->Width > 0 &&
+			isset( $meta->ContentMetaData->Height ) && $meta->ContentMetaData->Height > 0 ) {
+			if( isset( $meta->ContentMetaData->Orientation ) && $meta->ContentMetaData->Orientation >= 5 ) { // 90 degrees rotated?
+				$lhs = $meta->ContentMetaData->Height;
+				$rhs = $meta->ContentMetaData->Width;
+			} else {
+				$lhs = $meta->ContentMetaData->Width;
+				$rhs = $meta->ContentMetaData->Height;
+			}
+			$meta->ContentMetaData->Dimensions = "$lhs x $rhs";
 		}
 	}
 
@@ -4521,6 +4552,9 @@ class BizObject
 
 			// Make sure that the Orientation is in range [1...8] or null.
 			self::validateAndRepairOrientation( $meta );
+
+			// Derive the Dimensions property value from Width, Height and Orientation.
+			self::determineDimensions( $meta );
 		}
 		return $meta;
 	}

@@ -37,8 +37,8 @@ class BizProperty
 	 */
 	public static function getDynamicPropIds()
 	{
-		return array('ID', 'Type', 'Keywords', 'Slugline', 'Format', 'Columns', 'Width', 'Height', 'Dpi', 'LengthWords',
-			'LengthChars', 'LengthParas', 'LengthLines', 'PlainContent', 'FileSize', 'ColorSpace', 'Deadline',
+		return array('ID', 'Type', 'Keywords', 'Slugline', 'Format', 'Columns', 'Width', 'Height', 'Dimensions', 'Dpi',
+			'LengthWords', 'LengthChars', 'LengthParas', 'LengthLines', 'PlainContent', 'FileSize', 'ColorSpace', 'Deadline',
 			'Modifier', 'Creator', 'Comment', 'RouteTo', 'LockedBy', 'Deletor', 'Deleted', 'Version', 'PlacedOn',
 			'PlacedOnPage', 'Flag', 'FlagMsg',	'PageRange', 'PlannedPageRange', 'ContentSource', 'Encoding',
 			'Compression', 'KeyFrameEveryFrames', 'Channels', 'AspectRatio', 'Rating','ElementName', 'Dossier',
@@ -63,10 +63,12 @@ class BizProperty
 	 */
 	public static function getSystemPropIds()
 	{
-		return array('ID', 'DocumentID', 'Type', 'Format', 'Columns', 'Width', 'Height', 'Dpi', 'LengthWords', 'LengthChars',
-			'LengthParas', 'LengthLines', 'FileSize', 'ColorSpace', 'Orientation', 'Modifier', 'Modified', 'Creator', 'Created', 'LockedBy', 'Deletor', 'Deleted',
-			'Version', 'PlacedOn', 'Flag', 'FlagMsg', 'PageRange', 'PlannedPageRange', 'LockForOffline', 'DeadlineChanged', 'DeadlineSoft',
-			'HighResFile', 'PlacedOnPage', 'StateColor', 'StatePhase', 'ElementName', 'PlainContent', /*'Slugline', BZ#31369 */ 'UnreadMessageCount');
+		return array('ID', 'DocumentID', 'Type', 'Format', 'Columns', 'Width', 'Height', 'Dimensions', 'Dpi',
+			'LengthWords', 'LengthChars', 'LengthParas', 'LengthLines', 'FileSize', 'ColorSpace', 'Orientation',
+			'Modifier', 'Modified', 'Creator', 'Created', 'LockedBy', 'Deletor', 'Deleted', 'Version', 'PlacedOn',
+			'Flag', 'FlagMsg', 'PageRange', 'PlannedPageRange', 'LockForOffline', 'DeadlineChanged', 'DeadlineSoft',
+			'HighResFile', 'PlacedOnPage', 'StateColor', 'StatePhase', 'ElementName', 'PlainContent', /*'Slugline', BZ#31369 */
+			'UnreadMessageCount');
 	}
 
 	/**
@@ -739,7 +741,14 @@ class BizProperty
 		self::$ObjFProps['Orientation']  = 'orientation';
 		self::$SqlTProps['Orientation']  = 'int';
 		self::$JoinProps['Orientation']  = null;
-		self::$JFldProps['Orientation']	 = null;
+		self::$JFldProps['Orientation']  = null;
+
+		self::$InfoProps['Dimensions']  = new PropertyInfo( 'Dimensions', BizResources::localize( 'OBJ_DIMENSIONS' ),null,'string' );
+		self::$MetaProps['Dimensions']  = 'ContentMetaData->Dimensions';
+		self::$ObjFProps['Dimensions']  = null;
+		self::$SqlTProps['Dimensions']  = null;
+		self::$JoinProps['Dimensions']  = null;
+		self::$JFldProps['Dimensions']  = null;
 
 		// Obsoleted property names: Snippet(=>>Slugline), Depth(=>>Height), WordCount(=>>LengthChars),
 		//   CharCount(=>>LengthChars), LineCount(=>>LengthLines), Content(=>>PlainContent), Size(=>>FileSize)

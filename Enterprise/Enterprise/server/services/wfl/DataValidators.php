@@ -453,6 +453,13 @@ class WflContentMetaDataValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'Dimensions' ) ) {
+			$validator->enterPath( 'Dimensions' );
+			if( !is_null( $datObj->Dimensions ) ) {
+				$validator->checkType( $datObj->Dimensions, 'string' );
+			}
+			$validator->leavePath();
+		}
 	}
 }
 
