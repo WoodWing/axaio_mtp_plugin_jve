@@ -161,7 +161,7 @@ class BizImageConverter
 			// Note that we can not call BizStorage::getFile() to retrieve the native file from filestore because
 			// the image could be a shadow object (e.g. managed by Elvis). Instead we call BizObject::getObject().
 			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-			$object = BizObject::getObject( $imageId, BizSession::getShortUserName(), false, 'native', array('') );
+			$object = BizObject::getObject( $imageId, BizSession::getShortUserName(), false, 'native', array('MetaData') );
 			if( $object->Files ) foreach( $object->Files as $attachment ) {
 				if( $attachment->Rendition == 'native' ) {
 					$this->inputImageAttachment = $attachment;
