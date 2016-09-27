@@ -241,14 +241,14 @@ class SipsUtils
 			case 4: // Flip vertical
 				$cmdParams = ' -f vertical ';
 				break;
-			case 5: // First rotate 270 CW, then flip vertical
-				$cmdParams = ' -r 270 -f vertical ';
+			case 5: // First flip vertical, then rotate 90 CW
+				$cmdParams = ' -r 90 -f vertical '; // these two operations are executed in opposite order!
 				break;
 			case 6: // Rotate 90 CW
 				$cmdParams = ' -r 90 ';
 				break;
-			case 7: // First rotate 270 CW, then mirror horizontal
-				$cmdParams = ' -r 270 -f horizontal ';
+			case 7: // First mirror horizontal, then rotate 90 CW
+				$cmdParams = ' -r 90 -f horizontal '; // these two operations are executed in opposite order!
 				break;
 			case 8: // Rotate 270 CW
 				$cmdParams = ' -r 270 ';
