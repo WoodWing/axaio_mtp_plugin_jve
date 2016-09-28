@@ -58,15 +58,16 @@ class DBPublishedObjectsHist extends DBBase
 	{
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
-		$objHistTable = $dbDriver->tablename(self::TABLENAME);
-		$objVersTable = $dbDriver->tablename("objectversions");
+		$objHistTable = $dbDriver->tablename( self::TABLENAME );
+		$objVersTable = $dbDriver->tablename( 'objectversions' );
 
 		$sql = "SELECT poh.`objectid`, poh.`majorversion`, poh.`minorversion`, poh.`objectname` AS name, poh.`objecttype` AS type, poh.`objectformat` as format "
-				."FROM (SELECT * FROM {$objHistTable} WHERE publishid = {$publishId}) poh "
+				."FROM (SELECT * FROM {$objHistTable} WHERE publishid = ?) poh "
 				."LEFT JOIN {$objVersTable} ov "
 				."ON (ov.`objid` = poh.`objectid` AND ov.`majorversion` = poh.`majorversion` AND ov.`minorversion` = poh.`minorversion`) ";
+		$params = array( $publishId );
 
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query( $sql, $params );
 		if (is_null($sth)) {
 			$err = trim( $dbDriver->error() );
 			self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
@@ -88,36 +89,42 @@ class DBPublishedObjectsHist extends DBBase
 	 * @param int $issueId Issue id (of the target)
 	 * @param int $editionId optional edition id
 	 * @param int $publishId optional publish id
-	 * @return string externalid (can be empty) or null if error
+	 * @return string External id (can be empty) or null if error
 	 */
 	public static function getObjectExternalId( $dossierId, $childId, $channelId, $issueId, $editionId = null, $publishId = null )
 	{
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
 		$objHistTable = $dbDriver->tablename( self::TABLENAME );
-		$publishHistTable = $dbDriver->tablename( "publishhistory" );
+		$publishHistTable = $dbDriver->tablename( 'publishhistory' );
 		$result = '';
 
 		$sql = "SELECT objhist.`externalid`, publishhist.`actiondate` "
 				."FROM {$objHistTable} objhist "
 				."INNER JOIN {$publishHistTable} publishhist ON (publishhist.`id` = objhist.`publishid`) "
-				."WHERE publishhist.`objectid` = {$dossierId} "
-				."AND publishhist.`channelid` = {$channelId} ";
+				."WHERE publishhist.`objectid` = ? "
+				."AND publishhist.`channelid` = ? ";
+		$params = array( $dossierId, $channelId );
+
 		if( !empty($issueId) ) {
-			$sql .= " AND publishhist.`issueid` = {$issueId} ";
+			$sql .= " AND publishhist.`issueid` = ? ";
+			$params[] = $issueId;
 		}
 		if( $editionId ) {
-			$sql .= " AND publishhist.`editionid` = {$editionId} ";
+			$sql .= " AND publishhist.`editionid` = ? ";
+			$params[] = $editionId;
 		}
 		if ( $publishId ) {
-			$sql .= " AND objhist.`publishid` = {$publishId} ";
+			$sql .= " AND objhist.`publishid` = ? ";
+			$params[] = $publishId;
 		}
-		$sql .= "AND objhist.`objectid` = {$childId} "
+		$sql .= "AND objhist.`objectid` = ? "
 				 ."ORDER BY publishhist.`actiondate` DESC ";
+		$params[] = $childId;
 
-		$sql = $dbDriver->limitquery($sql, 0, 1);
+		$sql = $dbDriver->limitquery( $sql, 0, 1 );
 
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query( $sql, $params );
 
 		if( is_null($sth) ) {
 			$err = trim( $dbDriver->error() );

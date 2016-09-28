@@ -1267,7 +1267,7 @@ class DBObject extends DBBase
 		$rows = DBBase::listRows(self::TABLENAME, 'id', $property, $where, array($dbColumn));		
 		return $rows;
 	}
-	
+
 	/**
 	 * Generates a part of a sql-statement that can be used to update/insert object
 	 * information in the database. Typically used if an object is added/updated.
@@ -1721,6 +1721,30 @@ class DBObject extends DBBase
 			}
 		}
 
+		return $results;
+	}
+
+	/**
+	 * Retrieves values of column names from smart_objects and/or smart_deletedobjects table.
+	 *
+	 * @param integer[] $objectIds The object ids for retrieve values for.
+	 * @param string[] $areas Where to search in: 'Workflow' (smart_objects) and/or 'Trash' (smart_deletedobjects).
+	 * @param string[] $columnNames The names of the columns to retrieve values for.
+	 * @return array
+	 */
+	static public function getColumnsValuesForObjectIds( $objectIds, $areas, $columnNames )
+	{
+		$results = array();
+		if( $objectIds && $areas && $columnNames ) {
+			foreach( $areas as $area ) {
+				$tableName = ( $area == 'Workflow' ) ? self::TABLENAME : 'deletedobjects';
+				$where = '`id` IN ('.implode( ',', $objectIds ).')';
+				$objRows = self::listRows( $tableName, 'id', '', $where, $columnNames );
+				if( $objRows ) foreach( $objRows as $objectId => $objRow ) {
+					$results[ $objectId ] = $objRow;
+				}
+			}
+		}
 		return $results;
 	}
 

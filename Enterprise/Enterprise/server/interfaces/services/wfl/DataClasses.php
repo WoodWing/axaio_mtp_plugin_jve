@@ -143,6 +143,7 @@ class ContentMetaData
 	public $Channels;
 	public $AspectRatio;
 	public $Orientation;
+	public $Dimensions;
 
 	/**
 	 * @param string               $Description          Nullable.
@@ -168,8 +169,9 @@ class ContentMetaData
 	 * @param string               $Channels             Nullable.
 	 * @param string               $AspectRatio          Nullable.
 	 * @param integer              $Orientation          Nullable.
+	 * @param string               $Dimensions           Nullable.
 	 */
-	public function __construct( $Description=null, $DescriptionAuthor=null, $Keywords=null, $Slugline=null, $Format=null, $Columns=null, $Width=null, $Height=null, $Dpi=null, $LengthWords=null, $LengthChars=null, $LengthParas=null, $LengthLines=null, $PlainContent=null, $FileSize=null, $ColorSpace=null, $HighResFile=null, $Encoding=null, $Compression=null, $KeyFrameEveryFrames=null, $Channels=null, $AspectRatio=null, $Orientation=null)
+	public function __construct( $Description=null, $DescriptionAuthor=null, $Keywords=null, $Slugline=null, $Format=null, $Columns=null, $Width=null, $Height=null, $Dpi=null, $LengthWords=null, $LengthChars=null, $LengthParas=null, $LengthLines=null, $PlainContent=null, $FileSize=null, $ColorSpace=null, $HighResFile=null, $Encoding=null, $Compression=null, $KeyFrameEveryFrames=null, $Channels=null, $AspectRatio=null, $Orientation=null, $Dimensions=null)
 	{
 		$this->Description          = $Description;
 		$this->DescriptionAuthor    = $DescriptionAuthor;
@@ -194,6 +196,7 @@ class ContentMetaData
 		$this->Channels             = $Channels;
 		$this->AspectRatio          = $AspectRatio;
 		$this->Orientation          = $Orientation;
+		$this->Dimensions           = $Dimensions;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflContentMetaData'; } // AMF object type mapping
