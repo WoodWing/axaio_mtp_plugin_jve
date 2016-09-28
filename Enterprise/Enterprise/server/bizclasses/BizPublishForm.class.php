@@ -25,52 +25,57 @@ class BizPublishForm
 	 * @return array An array containing all the found fields is returned with the field name as the key.
 	 * @throws BizException An exception is thrown in case placed objects cannot be retrieved.
 	 */
-	static public function getFormFields( $publishForm, $pattern=null )
+	static public function getFormFields( $publishForm, $pattern = null )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 
 		$fieldProperties = array();
 		$requestInfo = array('Pages', 'Targets', 'Relations', 'Elements');
-		$rendition='native';
+		$rendition = 'native';
 
 		// Retrieve all simple fields (retrievable by the MetaData values.)
 		foreach ( $publishForm->MetaData->ExtraMetaData as $extraMetaData ) {
-			if (is_null($pattern) || (preg_match($pattern, $extraMetaData->Property))){
+			if( is_null($pattern) || (preg_match($pattern, $extraMetaData->Property)) ) {
 				$fieldProperties[$extraMetaData->Property] = $extraMetaData->Values;
 			}
 		}
 
+		$objects = array();
 		// Retrieve all complex fields (FileSelector / ArticleComponentSelector). This can be done by resolving all
 		// the 'Placed' relations. Placements aren't pattern checked.
 		$filesByFormWidgetId = array();
-		if (is_array($publishForm->Relations)) foreach ($publishForm->Relations as $relation ) {
-			if ($relation->Type == 'Placed') {
-				if (is_array($relation->Placements)) foreach ($relation->Placements as $placement) {
+		if( is_array($publishForm->Relations) ) foreach( $publishForm->Relations as $relation ) {
+			if( $relation->Type == 'Placed' ) {
+				if( is_array($relation->Placements) ) foreach( $relation->Placements as $placement ) {
 					$property = $placement->FormWidgetId;
 					$fileObjectId = $relation->Child;
 					$user = BizSession::getShortUserName();
 					try {
-						$file = BizObject::getObject($fileObjectId, $user, false, $rendition, $requestInfo, null, true
-							, array('Workflow'));
+						// Cache the getObject calls for performance.
+						if( !array_key_exists($fileObjectId, $objects ) ) {
+							$objects[$fileObjectId] = BizObject::getObject( $fileObjectId, $user, false, $rendition, $requestInfo, null, true, array('Workflow') );
+						}
+						$file = clone $objects[$fileObjectId];
 
-						if (!array_key_exists( $property, $filesByFormWidgetId )) {
+						if( !array_key_exists( $property, $filesByFormWidgetId ) ) {
 							$filesByFormWidgetId[$property] = array();
 						}
 						// Add the files by frameOrder to ensure correct sorting.
-						if (!isset($filesByFormWidgetId[$property][$placement->FrameOrder])) {
+						if( !isset($filesByFormWidgetId[$property][$placement->FrameOrder]) ) {
 							$filesByFormWidgetId[$property][$placement->FrameOrder] = array();
 						}
 
 						$filesByFormWidgetId[$property][$placement->FrameOrder][] = $file;
 					} catch (BizException $e ) {
 						LogHandler::Log(__CLASS__ . '::' . __FUNCTION__, 'ERROR'
-							, 'Failed to retrieve placed objects for Object ID \'' . $fileObjectId . '\'.');
+							, "Failed to retrieve placed objects for Object ID '{$fileObjectId}'.");
 						throw $e;
 					}
 				}
 			}
 		}
+		unset( $objects );
 
 		// We always have at least one file per formWidgetId. Restructure the fields so we can still work with Article-
 		// ComponentSelectors and single FileSelectors. Multiple files become an array, single files a single object.
