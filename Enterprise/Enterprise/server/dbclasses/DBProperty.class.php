@@ -576,6 +576,12 @@ class DBProperty extends DBBase
 		$where = ' `name` = ? ';
 		$params[] = $propName;
 
+		if( isset( $propInfo->PublicationId ) ) {
+			$whereConditions['publication'] = $propInfo->PublicationId;
+		} else {
+			$whereConditions['publication'] = 0;
+		}
+
 		if( $whereConditions ) {
 			foreach( $whereConditions as $field => $value ) {
 				$where .= 'AND `' . $field . '` = ? ';
