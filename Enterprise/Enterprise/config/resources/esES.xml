@@ -225,7 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Fuera de línea</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Dejar vacío para actualizar directamente</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Dejar vacío si el propietario es también el usuario</Term>
-  <Term key="ACT_LESS">Less</Term>
+  <Term key="ACT_LESS">Menos</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">En la lista de Publicación en Vivo</Term>
   <Term key="ACT_LOGIN">Iniciar sesión</Term>
   <Term key="ACT_LOGOFF">Desconectar</Term>
@@ -257,7 +257,7 @@
   <Term key="ACT_OK">Aceptar</Term>
   <Term key="ACT_OPEN">Abrir</Term>
   <Term key="ACT_OPEN_EDIT">Abrir para editar</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Abrir para editar (No colocado)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">Abrir en una pestaña nueva</Term>
   <Term key="ACT_ORDER_BY">Ordenar por</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">El archivo %1 no existe</Term>
@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">El nombre de archivo no coincide, ¿desea consignar de todas formas?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">Sólo se permite combinar artículos de texto sin formato</Term>
   <Term key="ERR_COMPOSE">Error al componer el artículo.(S1067)</Term>
-  <Term key="ERR_CONNECT">Error al conectarse a %1. Por favor verifique su conexión e intente de nuevo. (S1144)</Term>
+  <Term key="ERR_CONNECT">Hubo un error al conectarse al servicio %1. Por favor revise su conexión e intente nuevamente. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">Error al conectarse al servidor. Compruebe su conexión y vuelva a intentarlo. (S1068)</Term>
   <Term key="ERR_COPY_FOLDER">Se ha producido un error durante la publicación. Póngase en contacto con el administrador del sistema.\n\nDetalles: No se ha encontrado la carpeta de caché de recursos HTML. Ejecute el test .Adobe Digital Publishing System (DPS)' en la página de comprobación del estado y siga las instrucciones.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">No se ha podido conectar con la base de datos (S1003)</Term>
