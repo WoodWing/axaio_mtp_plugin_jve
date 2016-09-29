@@ -110,8 +110,7 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 	 */
 	private function readMetaDataFromFile( $inputFileName )
 	{
-		$arguments = '-q -s -ee -n -g -php -charset UTF8';
-		// L> Note that without -ee option we got no JFIF info.
+		$arguments = '-q -s -n -g -php -charset UTF8';
 		// L> We do NOT add -b to avoid thumbnail extraction, which is not used and expensive.
 		$returnStatus = 0;
 		$outputExifTool = self::callExifTool( $arguments.' '.escapeshellarg( $inputFileName ), 'extract metadata', $returnStatus );
