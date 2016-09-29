@@ -2171,16 +2171,21 @@ class BizPublishing
 	/**
 	 * Composes a hash for a given placement that can be used to uniquely identify an image crop.
 	 *
+	 * The following properties are included:
+	 * Crop geometry, scale, size and form widget id
+	 *
 	 * @since 10.1.0
 	 * @param Placement $placement
-	 * @return string The hash (64 bytes)
+	 * @return string The placement hash (length of 64 bytes)
 	 */
 	public static function composeHashForPlacement( Placement $placement )
 	{
 		$placementParams = array(
-			$placement->ScaleX, $placement->ScaleY,
 			$placement->Left, $placement->Top,
-			$placement->ContentDx, $placement->ContentDy
+			$placement->ContentDx, $placement->ContentDy,
+			$placement->ScaleX, $placement->ScaleY,
+			$placement->Width, $placement->Height,
+			$placement->FormWidgetId
 		);
 		return hash( 'sha256', implode( '|', $placementParams ) );
 	}

@@ -29,10 +29,10 @@ class PubPublishedPlacement
 	
 	/** 
 	 * @var string $PlacementHash 
-	 * This information is used to determine whether or not the placement has changed since the previous publish operation. '.
+	 * This information is used to determine whether or not the placement has changed since the previous publish operation.
 	 * When there is no matching record in this table found, the placement was changed or never published before.
 	 * In both cases it needs to be re-published to reflect changes at the CMS. E.g. in case of image cropping
-	 * the crop geometry, scale, form widget id, output mime type and DPI are hashed. The object id and version are excluded.
+	 * the crop geometry, scale, size and form widget id are hashed. The object id and version are excluded.
 	 */
 	public $PlacementHash;
 }
