@@ -56,7 +56,6 @@ class BizPublishForm
 						if( !array_key_exists($fileObjectId, $objects ) ) {
 							$objects[$fileObjectId] = BizObject::getObject( $fileObjectId, $user, false, $rendition, $requestInfo, null, true, array('Workflow') );
 						}
-						$file = clone $objects[$fileObjectId];
 
 						if( !array_key_exists( $property, $filesByFormWidgetId ) ) {
 							$filesByFormWidgetId[$property] = array();
@@ -66,7 +65,7 @@ class BizPublishForm
 							$filesByFormWidgetId[$property][$placement->FrameOrder] = array();
 						}
 
-						$filesByFormWidgetId[$property][$placement->FrameOrder][] = $file;
+						$filesByFormWidgetId[$property][$placement->FrameOrder][] = $objects[$fileObjectId];
 					} catch (BizException $e ) {
 						LogHandler::Log(__CLASS__ . '::' . __FUNCTION__, 'ERROR'
 							, "Failed to retrieve placed objects for Object ID '{$fileObjectId}'.");

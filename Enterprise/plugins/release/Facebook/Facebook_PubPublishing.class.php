@@ -128,9 +128,9 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 							// The getFormField returns an object when there is only 1 object else it returns an array.
 							$imageObjects = array( $imageObjects );
 						}
-						if( $imageObjects ) foreach( $imageObjects as $key => $imageObject ) {
+						if( $imageObjects ) foreach( $imageObjects as $frameOrder => $imageObject ) {
 							$imageId = $imageObject->MetaData->BasicMetaData->ID;
-							$convertedPlacement = $this->getConvertedPlacement( $publishForm, $imageId, 'C_FACEBOOK_MULTI_IMAGES', $key );
+							$convertedPlacement = $this->getConvertedPlacement( $publishForm, $imageId, 'C_FACEBOOK_MULTI_IMAGES', $frameOrder );
 
 							if( $convertedPlacement ) {
 								$imagePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
@@ -153,8 +153,8 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 								$imageCheck = true;
 								if( $convertedPlacement ) {
 									$convertedPlacement->ConvertedImageToPublish->ExternalId = $externalId;
-								} elseif( array_key_exists( $imageObject->MetaData->BasicMetaData->ID, $objectsInDossier ) ) {
-									$objectsInDossier[$imageObject->MetaData->BasicMetaData->ID]->ExternalId = $externalId;
+								} elseif( array_key_exists( $imageId, $objectsInDossier ) ) {
+									$objectsInDossier[$imageId]->ExternalId = $externalId;
 								}
 							}
 						}
@@ -202,7 +202,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 				$relation->Child == $childId &&
 				$relation->Parent == $publishForm->MetaData->BasicMetaData->ID
 			) {
-				/** @var $placement Placement */
 				foreach( $relation->Placements as $placement ) {
 					if( $placement->FormWidgetId &&
 						$placement->FormWidgetId == $formWidgetId &&
