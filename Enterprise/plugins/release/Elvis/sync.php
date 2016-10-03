@@ -4,8 +4,8 @@
 // 		Cron settings (run every 3 minutes): */3 * * * *
 //		URL: http://localhost:8888/Enterprise/config/plugins/Elvis/sync.php?maxexectime=180&maxtimeoutperrun=30
 if( file_exists(dirname(__FILE__).'/../../config.php') ) {
-	require_once '/../../config.php';
-} else { // fall back at symbolic link to Perforce source location of server plug-in
+	require_once '../../config.php';
+} else { // fall back at symbolic link to VCS source location of server plug-in
 	require_once '../../../Enterprise/config/config.php';
 }
 require_once BASEDIR.'/server/secure.php';
