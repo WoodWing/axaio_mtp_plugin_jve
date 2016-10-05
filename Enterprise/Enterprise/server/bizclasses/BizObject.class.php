@@ -3789,6 +3789,9 @@ class BizObject
 	private static function validateForSave($user, /** @noinspection PhpLanguageLevelInspection */
 	                                        Object $object, $currRow )
 	{
+		// Block callers from overruling the Orientation; This is extracted from the native file by the ExifTool integration.
+		$object->MetaData->ContentMetaData->Orientation = null;
+
 		// Enrich object MetaData with any embedded metadata from file
 		require_once BASEDIR.'/server/bizclasses/BizMetaDataPreview.class.php';
 		$bizMetaPreview = new BizMetaDataPreview();
