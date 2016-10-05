@@ -41,69 +41,6 @@ class BizInDesignServerJobs
 		// Cleanup old InDesign Server Jobs that are not finished.
 		$purgeDate = BizAutoPurge::getDateForPurging( AUTOCLEAN_SERVERJOBS_UNFINISHED );
 		DBInDesignServerJob::removeUnfinishedJobs( $purgeDate );
-		
-// 		LogHandler::Log('idserver', 'INFO', 'Start checking if jobs needs to be queued again or will be set to to TIMEOUT.' );
-// 		$activeJobs = DBInDesignServerJob::getActiveJobs( $checkdate );
-// 		$timeOutDBStr = BizResources::localize('IDS_TIMEOUT');
-// 		$maxTimeOutBGInSecs = 600; // Background jobs may run for 600 seconds
-// 		$minStartTimeBG = DateTimeFunctions::calcTime( $date, -$maxTimeOutBGInSecs ); // To filter long running background jobs.
-// 		if ( $activeJobs ) foreach ( $activeJobs as $activeJob ) {
-// 			$update = false;
-// 			$values = array();
-// 			if (( $activeJob['foreground'] != 1 ) &&
-// 				( $activeJob['starttime'] < $minStartTimeBG )) { // Background running longer than $maxTimeOutBGInSecs seconds
-// 				$requeue = false;
-// 				$timeout = false;
-// 				LogHandler::Log( 'idserver', 'INFO', 'Background job['.$activeJob['jobid'].'] started before '. $maxTimeOutBGInSecs/60 .' minutes.' );
-// 				$serverUrl = self::createURL( $activeJob['hostname'] ) . ':' . $activeJob['portnumber'];
-// 				LogHandler::Log( 'idserver', 'INFO', 'Background job['.$activeJob['jobid'].'] is handled by InDesign Server ['.$serverUrl.'].' );
-// 				if ( !self::isResponsive( $serverUrl ) ) {
-// 					LogHandler::Log( 'idserver', 'INFO', 'InDesign Server ['.$serverUrl.'] is no longer responsive.' );
-// 					if ( $activeJob['errorcode'] != -1 ) { // -1 means InDesign Server was not available.
-// 						$requeue = true;
-// 					} else {
-// 						$timeout = true; // InDesign Server wasn't available the first time and still isn't.
-// 					}
-// 				} else { // Responsive
-// 					LogHandler::Log( 'idserver', 'INFO', 'InDesign Server ['.$serverUrl.']is responsive.' );
-// 					// Check if very small dummy job, on SAME server, is ready within 5 seconds, if so, server no longer busy...
-// 					if ( self::isHandlingJobs( $serverUrl ) ) {
-// 						LogHandler::Log( 'idserver', 'INFO', 'Indesign Server ['.$serverUrl.']is responsive and busy. So it could be busy with our current job.' );
-// 					} else {
-// 						if ( $activeJob['errormessage'] != 'REQUEUED' ) {
-// 							LogHandler::Log( 'idserver', 'INFO', 'InDesign Server is not busy. Add background job['.$activeJob['jobid'].'] to the queue again.' );
-// 							$requeue = true;
-// 						} else {
-// 							$timeout = true;
-// 							LogHandler::Log( 'idserver', 'INFO', 'InDesign Server is not busy. But Background job['.$activeJob['jobid'].'] will not be added to queue again as it was already re-queued.' );
-// 						}
-// 					}
-// 				}
-// 				if ( $requeue ) {
-// 					LogHandler::Log( 'idserver', 'INFO', 'Add background job ['.$activeJob['jobid'].'] to the queue again.' );
-// 					$values = array('starttime' => '', 'assignedserverid' => 0, 'errormessage' => 'REQUEUED'); 
-// 					$update = true;
-// 				}
-// 				if ( $timeout ) {
-// 					LogHandler::Log( 'idserver', 'INFO', 'Job ['.$activeJob['jobid'].'] was already re-queued before. Job is set to TIMEOUT.' );
-// 					$values = array('readytime' => $date, 'errorcode' => 'IDS_TIMEOUT', 'errormessage' => $timeOutDBStr); 
-// 					$update = true;
-// 				}
-// 			} else { // Foreground
-// 				LogHandler::Log( 'idserver', 'INFO', 'Foreground job ['.$activeJob['jobid'].'] is running/queued for more than '. $timeOutInSecs/60 .' minutes. Job is set to TIMEOUT.' );
-// 				$values = array('readytime' => $date, 'errorcode' => 'IDS_TIMEOUT', 'errormessage' => $timeOutDBStr); 
-// 				$update = true;
-// 			}
-// 			if ( $update ) {
-// 				$where = "`readytime` = '' AND `jobid` = ? ";
-// 				$params = array( $activeJob['jobid'] );
-// 				$result = DBInDesignServerJob::update($values, $where, $params);
-// 				if( DBInDesignServerJob::hasError() || $result === false ) {
-// 					throw new BizException( 'ERR_DATABASE', 'Server', DBInDesignServerJob::getError() );
-// 				}
-// 			}
-// 		}
-// 		LogHandler::Log('idserver', 'INFO', 'Finished checking if jobs needs to be queued again or will be set to to TIMEOUT.' );
 
 		// End all foreground jobs never started and queued more than 3 minutes ago.
  		$nowDate = date( 'Y-m-d\TH:i:s', time() );
@@ -606,7 +543,7 @@ class BizInDesignServerJobs
 			
 			// Keep the IDS jobs queue healthy.
 			self::cleanupJobs();
-		
+
 			// Increment the number of attempts.
 			if( is_null($job->Attempts) ) {
 				$job->Attempts = 0;
@@ -719,11 +656,11 @@ class BizInDesignServerJobs
 		// Create a token that can be used for record locking.
 		require_once BASEDIR.'/server/utils/NumberUtils.class.php';
 		$lockToken = NumberUtils::createGUID();
-		
 		// Push job into queue and execute it synchronously.
 		$jobId = self::createJob( $job );
 
 		if( $jobId ) {
+			self::repairDetachedServersAndJobs();
 			// Find IDS instance that can handle the job; IDS that is active, has matching
 			// version and can handle the job prio.
 			try {
@@ -919,8 +856,8 @@ class BizInDesignServerJobs
      *
 	 * @since 9.8.0
      */
-    public static function repairDetachedServersAndJobs()
-    { 
+	public static function repairDetachedServersAndJobs()
+	{
 		require_once BASEDIR.'/server/bizclasses/BizInDesignServer.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServer.class.php';
@@ -928,92 +865,97 @@ class BizInDesignServerJobs
 		// Fetch the jobs that are started more than 5 minutes ago and still have an IDS instance
 		// assigned. Those are running suspiciously long and so we want to examine those.
 		LogHandler::Log( 'idserver', 'INFO', 'Repairing detached IDS servers and jobs...' );
-		$startedBefore = defined('IDS_AUTOMATION_REPAIRLOCK') ? IDS_AUTOMATION_REPAIRLOCK : 5; // hidden opt, default 5 minutes
-		$startedBefore = date( 'Y-m-d\TH:i:s', time() - ($startedBefore*60) ); // older than 5 minutes (default)
+		$startedBefore = defined( 'IDS_AUTOMATION_REPAIRLOCK' ) ? IDS_AUTOMATION_REPAIRLOCK : 5; // hidden opt, default 5 minutes
+		$startedBefore = date( 'Y-m-d\TH:i:s', time() - ( $startedBefore * 60 ) ); // older than 5 minutes (default)
 		$jobs = DBInDesignServerJob::getLockedJobsStartedBefore( $startedBefore );
-		if( $jobs ) foreach( $jobs as $job ) {
-			LogHandler::Log( 'idserver', 'INFO', 'Checking job that is locked for long '.$job->JobId );
-		
-			// Lookup the assigned IDS instance for the locked job.
-			$server = null;
-			if( $job->AssignedServerId ) {
-				$server = BizInDesignServer::getInDesignServer( $job->AssignedServerId );
-			}
-			if( $server ) {
-				LogHandler::Log( 'idserver', 'INFO', 
-					'Checking IDS instance '.$job->AssignedServerId.' that is assigned to the job.' );
-				if( $job->LockToken == $server->LockToken ) {
-					LogHandler::Log( 'idserver', 'INFO', 
-						'Pinging the suspiciously locked IDS instance.' );
-					if( BizInDesignServer::isResponsive( $server ) ) {
-						LogHandler::Log( 'idserver', 'INFO', 
-							'Checking if the locked IDS instance is still handling jobs.' );
-						if( BizInDesignServer::isHandlingJobs( $server ) ) {
+		$maxExecutionTime = time() + 10;
+		$numberOfLockedJobs = count( $jobs );
+		do {
+			if( $jobs ) foreach( $jobs as $job ) {
+				LogHandler::Log( 'idserver', 'INFO', 'Checking job that is locked for long '.$job->JobId );
+
+				// Lookup the assigned IDS instance for the locked job.
+				$server = null;
+				if( $job->AssignedServerId ) {
+					$server = BizInDesignServer::getInDesignServer( $job->AssignedServerId );
+				}
+				if( $server ) {
+					LogHandler::Log( 'idserver', 'INFO',
+						'Checking IDS instance '.$job->AssignedServerId.' that is assigned to the job.' );
+					if( $job->LockToken == $server->LockToken ) {
+						LogHandler::Log( 'idserver', 'INFO',
+							'Pinging the suspiciously locked IDS instance.' );
+						if( BizInDesignServer::isResponsive( $server ) ) {
 							LogHandler::Log( 'idserver', 'INFO',
-								'Job is running for long, but the assigned IDS instance is '.
-								'still processing the job, so no action needed.' );
+								'Checking if the locked IDS instance is still handling jobs.' );
+							if( BizInDesignServer::isHandlingJobs( $server ) ) {
+								LogHandler::Log( 'idserver', 'INFO',
+									'Job is running for long, but the assigned IDS instance is '.
+									'still processing the job, so no action needed.' );
+								$server = null;
+								$job = null;
+							} else {
+								LogHandler::Log( 'idserver', 'INFO',
+									'IDS is no longer busy, so we need to unlock.' );
+							}
+						} else {
+							// The IDS instance went down (crashed, recovering, restarting, etc) or network problem.
+							// Let's wait until that is solved before jumping into conclusions, so no action needed.
+							LogHandler::Log( 'idserver', 'INFO',
+								'IDS could not be accessed, so we wait for it to come up again.' );
 							$server = null;
 							$job = null;
-						} else {
-							LogHandler::Log( 'idserver', 'INFO',
-								'IDS is no longer busy, so we need to unlock.' );
 						}
 					} else {
-						// The IDS instance went down (crashed, recovering, restarting, etc) or network problem. 
-						// Let's wait until that is solved before jumping into conclusions, so no action needed.
-						LogHandler::Log( 'idserver', 'INFO', 
-							'IDS could not be accessed, so we wait for it to come up again.' );
+						LogHandler::Log( 'idserver', 'INFO',
+							'IDS instance seems to be processing another job, '.
+							'so we forget about the IDS server but we unassign the job.' );
 						$server = null;
-						$job = null;
 					}
 				} else {
-					LogHandler::Log( 'idserver', 'INFO', 
-						'IDS instance seems to be processing another job, '.
-						'so we forget about the IDS server but we unassign the job.' );
-					$server = null;
-				}
-			} else {
-				LogHandler::Log( 'idserver', 'INFO', 
-					'IDS instance that was processing this job can no longer be found '.
-					'in the DB, so we unassign the job.' );
-			}
-			
-			if( $server ) {
-				LogHandler::Log( 'idserver', 'INFO', 'Unlocking the detached IDS instance.' );
-				DBInDesignServer::unlockServer( $server->Id, $server->LockToken );
-			}
-			
-			if( $job ) {
-				if( $job->AssignedServerId ) {
-					if( $server ) {
-						LogHandler::Log( 'idserver', 'INFO', 'Unassigning the detached IDS job.' );
-					} else {
-						LogHandler::Log( 'idserver', 'INFO', 'Unassigning the orphan IDS job.' );
-					}
-					DBInDesignServerJob::unassignServerFromJob( $job->JobId, $job->AssignedServerId, $job->LockToken );
-				} else { 
-					// This solves EN-86775 where the AssignedServerId is set to zero and the LockToken is set.
-					// It seems to happen on several machines, but scenario is unknown and it should not happen.
-					LogHandler::Log( 'idserver', 'INFO', 'Unlocking the orphan IDS job.' );
-					DBInDesignServerJob::unlockUnassignedJob( $job->JobId, $job->LockToken );
+					LogHandler::Log( 'idserver', 'INFO',
+						'IDS instance that was processing this job can no longer be found '.
+						'in the DB, so we unassign the job.' );
 				}
 
-				if( $job->Foreground ) {
-					// For foreground jobs the user already received an error. Since he/she
-					// will manually retry there is no need to restart job automatically.
-					LogHandler::Log( 'idserver', 'INFO', 'No need to restart foreground job.' );
-				} else {
-					if( $job->ReadyTime ) {
-						LogHandler::Log( 'idserver', 'INFO', 'No need to restart completed job.' );
-					} else {
-						LogHandler::Log( 'idserver', 'INFO', 'Restarting the job.' );
-						DBInDesignServerJob::restartJob( $job->JobId );
-					}
-					
+				if( $server ) {
+					LogHandler::Log( 'idserver', 'INFO', 'Unlocking the detached IDS instance.' );
+					DBInDesignServer::unlockServer( $server->Id, $server->LockToken );
 				}
+
+				if( $job ) {
+					if( $job->AssignedServerId ) {
+						if( $server ) {
+							LogHandler::Log( 'idserver', 'INFO', 'Unassigning the detached IDS job.' );
+						} else {
+							LogHandler::Log( 'idserver', 'INFO', 'Unassigning the orphan IDS job.' );
+						}
+						DBInDesignServerJob::unassignServerFromJob( $job->JobId, $job->AssignedServerId, $job->LockToken );
+					} else {
+						// This solves EN-86775 where the AssignedServerId is set to zero and the LockToken is set.
+						// It seems to happen on several machines, but scenario is unknown and it should not happen.
+						LogHandler::Log( 'idserver', 'INFO', 'Unlocking the orphan IDS job.' );
+						DBInDesignServerJob::unlockUnassignedJob( $job->JobId, $job->LockToken );
+					}
+
+					if( $job->Foreground ) {
+						// For foreground jobs the user already received an error. Since he/she
+						// will manually retry there is no need to restart job automatically.
+						LogHandler::Log( 'idserver', 'INFO', 'No need to restart foreground job.' );
+					} else {
+						if( $job->ReadyTime ) {
+							LogHandler::Log( 'idserver', 'INFO', 'No need to restart completed job.' );
+						} else {
+							LogHandler::Log( 'idserver', 'INFO', 'Restarting the job.' );
+							DBInDesignServerJob::restartJob( $job->JobId );
+						}
+
+					}
+				}
+				$numberOfLockedJobs--;
 			}
-		}
-		
+		} while( ( time() < $maxExecutionTime ) && ( $numberOfLockedJobs > 0 ) );
+
 		// Unlock the IDS instances that are locked but for which no corresponding
 		// lock token could be found in the IDS job queue.
 		$servers = DBInDesignServer::getServersWithOrphanLock();
