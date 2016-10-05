@@ -67,10 +67,10 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 			$isHttps = $uri && $uri->getScheme() == 'https';
 		} catch( Zend_Http_Client_Exception $e ) {
 			throw new BizException( null, 'Server', null, $e->getMessage().
-				'. Check your "url" option at the DRUPAL_SITES setting of the Drupal8/config.php file.' );
+				'. Check your "url" option at the DRUPAL8_SITES setting of the Drupal8/config.php file.' );
 		} catch( Zend_Uri_Exception $e ) {
 			throw new BizException( null, 'Server', null, $e->getMessage().
-				'. Check your "url" option at the DRUPAL_SITES setting of the Drupal8/config.php file.' );
+				'. Check your "url" option at the DRUPAL8_SITES setting of the Drupal8/config.php file.' );
 		}
 
 		require_once 'Zend/Http/Client.php';
@@ -82,7 +82,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 		if( $localCert ) {
 			if( !file_exists($localCert) ) {
 				throw new BizException( null, 'Server', null,
-					'The file "'.$localCert.'" specified at "local_cert" option does not exists.' );
+					'The file "'.$localCert.'" specified at the "Certificate" option on the Publication Channel Maintenance page does not exists.' );
 			}
 			if( $isHttps ) {
 				$httpClient->setConfig(
@@ -95,7 +95,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 		} else {
 			if( $isHttps ) {
 				throw new BizException( null, 'Server', null,
-					'Using HTTPS, but no "local_cert" option defined at DRUPAL_SITES setting.' );
+					'Using HTTPS, but the "Certificate" option on the Publication Channel Maintenance page is not filled in.' );
 			}
 		}
 
