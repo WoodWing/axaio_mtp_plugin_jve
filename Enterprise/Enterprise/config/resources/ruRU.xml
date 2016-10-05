@@ -225,7 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Перевести в Автономный режим</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Оставить пустым для прямого обновления</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Оставить пустым, если Владелец и Пользователь - одно лицо.</Term>
-  <Term key="ACT_LESS">Less</Term>
+  <Term key="ACT_LESS">Меньше</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">Перечислено в обзоре публикаций</Term>
   <Term key="ACT_LOGIN">Войти</Term>
   <Term key="ACT_LOGOFF">Выйти</Term>
@@ -257,7 +257,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">Открыть</Term>
   <Term key="ACT_OPEN_EDIT">Открыть для изменения</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Открыть для редактирования (не размещено)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">Открыть в Новой Вкладке</Term>
   <Term key="ACT_ORDER_BY">Порядок сортировки</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">Файл %1 не существует</Term>
@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">Имена файлов не совпадают, вы по-прежнему хотите зарегистрировать?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">Разрешается объединять только простые текстовые статьи</Term>
   <Term key="ERR_COMPOSE">Ошибка составления статьи. (S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">Ошибка при подключении к сервису с именем %1. Пожалуйста, проверьте ваше подключение и попробуйте снова. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">Ошибка подключения к серверу. Проверьте соединение и повторите попытку. (S1068)</Term>
   <Term key="ERR_COPY_FOLDER">Во время публикации произошла ошибка. Обратитесь к системному администратору.\n\nСведения: Папка кэша ресурсов HTML не найдена. Запустите проверку Adobe Digital Publishing System (DPS) на странице проверки работоспособности и следуйте инструкциям.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">Ошибка соединения с базой данных (S1003)</Term>
