@@ -33,7 +33,7 @@ class InDesignServerJobStatus
 	
 	// Job Status* (from handling, to be set by core server job handler)
 	const PLANNED   = 0x1110; // (=04368) job is created, but not picked up yet
-	const PROGRESS  = 0x1220; // (=04615) job is picked up and being executed
+	const PROGRESS  = 0x1220; // (=04640) job is picked up and being executed
 	const FLOODED   = 0x4430; // (=17416) no server available to execute job within defined time interval
 //  const OVERRUN   = 0x4440; // (=17417) job was queued, but new recurring job has already started
 //  const GAVEUP    = 0x4450; // (=17418) job was started, but has ran longer than expected. Maybe the PHP process (that picked up the job) has crashed.
