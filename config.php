@@ -62,6 +62,12 @@ define('AXAIO_MTP_AXAIO_FOLDER_IN',     '/WW_Hotfolder/IN/'); // MTP input folde
 define('AXAIO_MTP_AXAIO_FOLDER_OUT',	'/WW_Hotfolder/OUT/'); // MTP output folder from MadeToPrint perspective (as set up in the MadeToPrint auto job)
 
 // ----------------------------------------------------------------------------
+// Whether to create trigger files only when the layout status changed on checkin
+// ----------------------------------------------------------------------------
+
+define('AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY', false);
+
+// ----------------------------------------------------------------------------
 // MadeToPrint job name default setting. Real value is set up in admin panel
 // ----------------------------------------------------------------------------
 
