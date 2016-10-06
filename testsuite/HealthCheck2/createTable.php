@@ -26,7 +26,7 @@ foreach($files as $cur_file) {
             print '<font>Start creating '.$cur_file.'...</font><br><br>';
             $dbDriver = DBDriverFactory::gen();
 
-            $check_tables = array('axaio_mtp_trigger', 'axaio_mtp_sentobjects');
+            $check_tables = array('axaio_mtp_trigger', 'axaio_mtp_sentobjects', 'axaio_mtp_process_options'); 
             $tableCheck = false;
 
             foreach($check_tables as $value)
