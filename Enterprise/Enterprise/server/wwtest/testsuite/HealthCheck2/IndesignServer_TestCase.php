@@ -106,7 +106,7 @@ class WW_TestSuite_HealthCheck2_InDesignServer_TestCase extends TestCase
 		require_once BASEDIR.'/server/bizclasses/BizInDesignServer.class.php';
    		$idsObjs = BizInDesignServer::listInDesignServers();
 		foreach( $idsObjs as $idsObj ) {
-			$msgPrefix = '<h3><font style="color: white; background-color:gray;">&nbsp;InDesign Server:&nbsp;</font>&nbsp;'.$idsObj->Name.'</h3>';
+			$msgPrefix = '<h3><span style="color:white; background-color:gray;">&nbsp;InDesign Server:&nbsp;></span>&nbsp;'.$idsObj->Name.'</h3>';
     		if( $idsObj->Active ) {
 				$this->checkInDesignServer( $idsObj, $msgPrefix );
 			} else {
@@ -350,6 +350,7 @@ class WW_TestSuite_HealthCheck2_InDesignServer_TestCase extends TestCase
 
 		$previewOption = $responseData[2];
 		if ( $previewOption == 'ImagePreviewOptionNotSet' ) {
+			$help = 'Please check if the \'-previews\' option is added to the start command or start parameters. ';
 			$errmsg = 'InDesign Server is started without the \'-previews\' option. This could result in missing image previews.';
 			$this->setResult( 'ERROR', $errmsg, $help );
 		}
