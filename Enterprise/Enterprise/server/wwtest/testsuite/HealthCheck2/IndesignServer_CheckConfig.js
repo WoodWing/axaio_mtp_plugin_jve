@@ -54,7 +54,7 @@ try {
 	throw( e );
 }
 
-// Return the ticket/URL to Enterprise Server to validate the origin. The imagePreviewOption is needed to check make sure
+// Return the ticket/URL to Enterprise Server to validate the origin. The imagePreviewOption is needed to make sure
 // that the -previews flag will be set.
 var response = ticket + " " + srvrURL + " " + imagePreviewOption;
 response;
