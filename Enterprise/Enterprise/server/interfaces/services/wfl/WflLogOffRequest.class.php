@@ -110,6 +110,9 @@ class WflLogOffRequest
 				}
 			}
 		}
+		if( is_object( $this->MessageList ) ) {
+			$this->MessageList->sanitizeProperties4Php();
+		}
 	}
 
 	public function mightHaveContent() { return false; }

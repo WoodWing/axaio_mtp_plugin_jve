@@ -653,8 +653,9 @@ abstract class ServicesClassGenerator
 				."require_once BASEDIR.'/server/protocols/soap/SOAP_Attachment.class.php';"."\n\n";
 		foreach( $dataClasses as $dataName => $dataStruct ) {
 			$numberFields = array();
-			$complexFields = array();
 			$booleanFields = array();
+			$complexFields = array();
+			$arrayFields = array();
 
 			// Data class members
 			$dataClassName = $this->getDataClassPrefix().$dataName;
@@ -695,7 +696,9 @@ abstract class ServicesClassGenerator
 
 				$outTxt .= "\t * @param ".str_pad($prefixedPropType,20)." \$".str_pad($propStruct['name'],20)." $showNullable\n";   //FVFV
 
-				if ( $propStruct['isarray'] ) {
+				if( $propStruct['isarray'] ) {
+					$arrayFields[] = $propStruct['name'];
+				} elseif( !$isEnum && isset($dataClasses[$propType]) ) {
 					$complexFields[] = $propStruct['name'];
 				}
 
@@ -749,16 +752,19 @@ abstract class ServicesClassGenerator
 				}
 			}
 			// clean array structures of objects.
-			if (0 < count($complexFields)){
-				foreach ($complexFields as $complexField){
-					$outTxt .= "\t\tif (0 < count(\$this->$complexField)){\n";
-					$outTxt .= "\t\t\tif (is_object(\$this->$complexField" . "[0])){\n";
-					$outTxt .= "\t\t\t\tforeach (\$this->$complexField as \$complexField){\n";
-					$outTxt .= "\t\t\t\t\t\$complexField->sanitizeProperties4Php();\n";
-					$outTxt .= "\t\t\t\t}\n";
-					$outTxt .= "\t\t\t}\n";
-					$outTxt .= "\t\t}\n";
-				}
+			if( $arrayFields ) foreach( $arrayFields as $complexField ) {
+				$outTxt .= "\t\tif (0 < count(\$this->$complexField)){\n";
+				$outTxt .= "\t\t\tif (is_object(\$this->$complexField" ."[0])){\n";
+				$outTxt .= "\t\t\t\tforeach (\$this->$complexField as \$complexField){\n";
+				$outTxt .= "\t\t\t\t\t\$complexField->sanitizeProperties4Php();\n";
+				$outTxt .= "\t\t\t\t}\n";
+				$outTxt .= "\t\t\t}\n";
+				$outTxt .= "\t\t}\n";
+			}
+			if( $complexFields ) foreach( $complexFields as $complexField ) {
+				$outTxt .= "\t\tif( is_object( \$this->$complexField ) ) {\n";
+				$outTxt .= "\t\t\t\$this->{$complexField}->sanitizeProperties4Php();\n";
+				$outTxt .= "\t\t}\n";
 			}
 			$outTxt .= "\t}\n";
 			$outTxt .= "}\n";
@@ -1274,8 +1280,9 @@ abstract class ServicesClassGenerator
 		foreach( $services as $serviceName => $messageStruct ) {
 			$isRequest = $messageStruct['isRequest'];
 			$numberFields = array();
-			$complexFields = array();
 			$booleanFields = array();
+			$complexFields = array();
+			$arrayFields = array();
 
 			// File header
 			$outTxt = "<?php\n\n/**\n"
@@ -1318,6 +1325,8 @@ abstract class ServicesClassGenerator
 					$outTxt .= "\t * @param ".str_pad($prefixedPropType,20).' '.'$'.str_pad($propName, 25)." $showNullable\n";
 
 					if( $propStruct['isarray'] ) {
+						$arrayFields[] = $propStruct['name'];
+					} elseif( !$isEnum && isset($dataClasses[$propType]) ) {
 						$complexFields[] = $propStruct['name'];
 					}
 
@@ -1387,16 +1396,19 @@ abstract class ServicesClassGenerator
 					}
 				}
 				// clean array structures of objects.
-				if (0 < count($complexFields)){
-					foreach ($complexFields as $complexField){
-						$outTxt .= "\t\tif (0 < count(\$this->$complexField)){\n";
-						$outTxt .= "\t\t\tif (is_object(\$this->$complexField" ."[0])){\n";
-						$outTxt .= "\t\t\t\tforeach (\$this->$complexField as \$complexField){\n";
-						$outTxt .= "\t\t\t\t\t\$complexField->sanitizeProperties4Php();\n";
-						$outTxt .= "\t\t\t\t}\n";
-						$outTxt .= "\t\t\t}\n";
-						$outTxt .= "\t\t}\n";
-					}
+				if( $arrayFields ) foreach( $arrayFields as $complexField ) {
+					$outTxt .= "\t\tif (0 < count(\$this->$complexField)){\n";
+					$outTxt .= "\t\t\tif (is_object(\$this->$complexField" ."[0])){\n";
+					$outTxt .= "\t\t\t\tforeach (\$this->$complexField as \$complexField){\n";
+					$outTxt .= "\t\t\t\t\t\$complexField->sanitizeProperties4Php();\n";
+					$outTxt .= "\t\t\t\t}\n";
+					$outTxt .= "\t\t\t}\n";
+					$outTxt .= "\t\t}\n";
+				}
+				if( $complexFields ) foreach( $complexFields as $complexField ) {
+					$outTxt .= "\t\tif( is_object( \$this->$complexField ) ) {\n";
+					$outTxt .= "\t\t\t\$this->{$complexField}->sanitizeProperties4Php();\n";
+					$outTxt .= "\t\t}\n";
 				}
 				$outTxt .= "\t}\n";
 			}

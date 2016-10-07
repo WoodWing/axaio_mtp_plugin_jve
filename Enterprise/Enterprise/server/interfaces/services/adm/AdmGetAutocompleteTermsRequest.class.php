@@ -89,6 +89,9 @@ class AdmGetAutocompleteTermsRequest
 	{
 		if (is_nan($this->FirstEntry)){ $this->FirstEntry = null; }
 		if (is_nan($this->MaxEntries)){ $this->MaxEntries = null; }
+		if( is_object( $this->TermEntity ) ) {
+			$this->TermEntity->sanitizeProperties4Php();
+		}
 	}
 
 	public function mightHaveContent() { return false; }
