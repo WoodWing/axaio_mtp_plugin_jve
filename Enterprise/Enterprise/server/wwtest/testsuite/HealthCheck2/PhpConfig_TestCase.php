@@ -19,7 +19,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
     public function getPrio()        { return 2; }
 	
 	const PACKAGE_HELP = 'Check the original Enterprise Server installation package.';
-	
+
 	/** @var WW_Utils_TestSuite */
 	private $utils;
 	
@@ -77,7 +77,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 			return;
 		}
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
-		if( !WW_Utils_UrlUtils::isResponsiveUrl( LOCALURL_ROOT.INETROOT.'/index.php' ) ) {
+		if( !WW_Utils_UrlUtils::isResponsiveUrl( LOCALURL_ROOT.INETROOT.'/index.php?test=ping' ) ) {
 			$this->setResult( 'ERROR', 'It seems to be impossible to connect to "'.LOCALURL_ROOT.'". '.
 				'Please check your LOCALURL_ROOT setting and make sure the server can access that URL.', $help );
 			return;

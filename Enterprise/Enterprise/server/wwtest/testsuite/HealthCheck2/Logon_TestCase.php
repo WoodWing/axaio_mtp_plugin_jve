@@ -22,7 +22,7 @@ class WW_TestSuite_HealthCheck2_Logon_TestCase extends TestCase
 	final public function runTest()
 	{
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
-		if( !WW_Utils_UrlUtils::isResponsiveUrl( LOCALURL_ROOT.INETROOT.'/index.php' ) ) {
+		if( !WW_Utils_UrlUtils::isResponsiveUrl( LOCALURL_ROOT.INETROOT.'/index.php?test=ping' ) ) {
 			$this->setResult( 'ERROR', 'It seems to be impossible to connect to "'.LOCALURL_ROOT.'". ',
 				'Please check your LOCALURL_ROOT setting at the config.php file. Make sure the server can access that URL.' );
 			return;
