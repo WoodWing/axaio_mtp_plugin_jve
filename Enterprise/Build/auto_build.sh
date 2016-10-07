@@ -50,9 +50,6 @@ function replaceVersionFile {
 		exit 1
 	fi
 	set -e
-	if [ "${SERVER_RELEASE_TYPE}" != "Daily" ]; then
-		git add --force "${1}"
-	fi
 }
 
 #
@@ -506,9 +503,6 @@ function step3a_updateVersionInfo {
 		echo "" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 	else
 		echo -n "${SERVER_RELEASE_TYPE}" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
-	fi
-	if [ "${SERVER_RELEASE_TYPE}" != "Daily" ]; then
-		git add --force "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 	fi
 
 	echo "step3a2: Update version info in server plugins."
