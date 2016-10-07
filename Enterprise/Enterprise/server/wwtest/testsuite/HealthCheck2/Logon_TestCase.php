@@ -17,7 +17,7 @@ class WW_TestSuite_HealthCheck2_Logon_TestCase extends TestCase
 	public function getDisplayName() { return 'LogOn / LogOff'; }
 	public function getTestGoals()   { return 'Checks if user can logon to the application server. '; }
 	public function getTestMethods() { return 'Uses a SOAP client to logon and logoff through workflow services at application server.'; }
-    public function getPrio()        { return 8; }
+	public function getPrio()        { return 8; }
 	
 	final public function runTest()
 	{

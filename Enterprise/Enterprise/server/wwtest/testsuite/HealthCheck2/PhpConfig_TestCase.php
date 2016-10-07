@@ -16,15 +16,15 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 	public function getDisplayName() { return 'PHP Configuration'; }
 	public function getTestGoals()   { return 'Checks if settings in config.php and configserver.php files are correct and all 3rd-party libraries are installed. '; }
 	public function getTestMethods() { return 'Checks if file paths options have proper slashes and exist on disk, etc, etc.'; }
-    public function getPrio()        { return 2; }
-	
+	public function getPrio()        { return 2; }
+
 	const PACKAGE_HELP = 'Check the original Enterprise Server installation package.';
 
 	/** @var WW_Utils_TestSuite */
 	private $utils;
 	
 	final public function runTest()
-    {
+   {
     	// BZ#23964
     	// OUTPUTDIRECTORY should be checked before the full HealthCheck, this is because when there's any 
     	// error in the HealthCheck test, the error will not be able to be written in the log folder;
@@ -44,8 +44,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 
     	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		// CONFIG.PHP OPTIONS
-    	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
+    	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		$help = 'Check your config.php file.';
 		$serverscriptpath = $_SERVER['SCRIPT_FILENAME'];
 		$serverscriptpath = str_replace('\\', '/', $serverscriptpath);
@@ -54,7 +53,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 				'The BASEDIR config is the location on your hard drive where your Enterprise Server is located.', $help );
 			return;
 		}
-		LogHandler::Log('wwtest', 'INFO', 'BASEDIR checked: '.BASEDIR);
+		LogHandler::Log( 'wwtest', 'INFO', 'BASEDIR checked: '.BASEDIR );
 
 		$serverscriptname = $_SERVER['SCRIPT_NAME'];
 		$serverscriptname = str_replace(' ', '%20', $serverscriptname);
@@ -65,7 +64,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 				'It must start with a slash, but should NOT end with a slash.', $help );
 			return;
 		}
-		LogHandler::Log('wwtest', 'INFO', 'INETROOT checked: '.INETROOT);
+		LogHandler::Log( 'wwtest', 'INFO', 'INETROOT checked: '.INETROOT );
 
 		if( !defined('LOCALURL_ROOT')) {
 			$this->setResult( 'ERROR', 'The LOCALURL_ROOT is not defined.', $help );
@@ -82,7 +81,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 				'Please check your LOCALURL_ROOT setting and make sure the server can access that URL.', $help );
 			return;
 		}		
-		LogHandler::Log('wwtest', 'INFO', 'LOCALURL_ROOT checked: '.LOCALURL_ROOT);
+		LogHandler::Log( 'wwtest', 'INFO', 'LOCALURL_ROOT checked: '.LOCALURL_ROOT );
 		
     	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		// LIBRARIES
@@ -94,19 +93,17 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 				BASEDIR."/server/javachart", self::PACKAGE_HELP );
 			return;
 		}		
-		LogHandler::Log('wwtest', 'INFO', 'JavaChart library checked');
-		
-		
+		LogHandler::Log( 'wwtest', 'INFO', 'JavaChart library checked' );
+
     	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 		// CONFIGSERVER.PHP OPTIONS
-    	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
+    	// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 		$this->testHtmlLinkFiles();
 		$this->testEnterpriseProxy();
 		$this->testObsoleteOptions();
 		$this->testExtensionMap();
-	    $this->testRemoteLocations();
-	    $this->testClientServerFeatures();
+		$this->testRemoteLocations();
+		$this->testClientServerFeatures();
 	}
 	
 	/**
@@ -156,7 +153,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 				$this->setResult( 'WARN', BizResources::localize('HTML_LINK_FILES_OBSOLETE') );
 			}
 		}
-		LogHandler::Log('wwtest', 'INFO', 'HTMLLINKFILES option checked');
+		LogHandler::Log( 'wwtest', 'INFO', 'HTMLLINKFILES option checked' );
 	}
 	
 	/**
@@ -201,7 +198,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 				}
 			}			
 		}
-		LogHandler::Log('wwtest', 'INFO', 'ENTERPRISE_PROXY option checked');
+		LogHandler::Log( 'wwtest', 'INFO', 'ENTERPRISE_PROXY option checked' );
 	}
 	
 	/**
@@ -225,7 +222,6 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 			array( 'name' => 'DEBUGLEVEL',	'help' => 'This option is superseded by DEBUGLEVELS.' ),
 			array( 'name' => 'NETWORK_DOMAINS',	'help' => 'This option is no longer used.' ),
 			array( 'name' => 'ATTACHSTORAGE',	'help' => 'This option is no longer used, as there is only one type of storage supported which is FILE' ),
-
 		);
 		foreach( $obsoletedDefines as $opt ) {
 			if( defined( $opt['name'] ) ) {
@@ -243,7 +239,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 				$this->setResult( 'WARN', 'The server feature '.$opt['name'].' is obsoleted. '.$opt['help'].'', $help );
 			}
 		}
-		LogHandler::Log('wwtest', 'INFO', 'Obsoleted options checked');
+		LogHandler::Log( 'wwtest', 'INFO', 'Obsoleted options checked' );
 	}
 	
 	/**
@@ -275,8 +271,8 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 			'.ots' => array( 'application/vnd.oasis.opendocument.spreadsheet-template',  'Spreadsheet' ),
 			'.numbers' => array( 'application/x-apple-numbers', 'Spreadsheet' ),
 		 );
-	    // Checks if the MimeTypes have been mapped to the correct Object Type in 'EXTENSIONMAP' option.
-	    $definedExtMap = MimeTypeHandler::getExtensionMap();
+		// Checks if the MimeTypes have been mapped to the correct Object Type in 'EXTENSIONMAP' option.
+		$definedExtMap = MimeTypeHandler::getExtensionMap();
 		foreach( $newObjectTypes as $expectedFileExtension => $mimeAndObjType ) {
 			$definedExtension = MimeTypeHandler::mimeType2FileExt( $mimeAndObjType[0], $mimeAndObjType[1] );
 			if( $definedExtension != $expectedFileExtension ) {
@@ -292,7 +288,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 				return;
 			}
 		}
-	    LogHandler::Log('wwtest', 'INFO', 'EXTENSIONMAP option with the new ObjectType checked.');
+	    LogHandler::Log( 'wwtest', 'INFO', 'EXTENSIONMAP option with the new ObjectType checked.' );
     }
     
 	/**
@@ -318,13 +314,13 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 				}
 			}
 		}
-		LogHandler::Log('wwtest', 'INFO', 'Checked REMOTE_LOCATIONS_INCLUDE and REMOTE_LOCATIONS_EXCLUDE options.');
+		LogHandler::Log( 'wwtest', 'INFO', 'Checked REMOTE_LOCATIONS_INCLUDE and REMOTE_LOCATIONS_EXCLUDE options.' );
 	}
 	
 	/**
 	 * Checks for the CLIENTFEATURES value.
 	 */
-    private function testClientServerFeatures()
+	private function testClientServerFeatures()
 	{
 		// Check the structure of the CLIENTFEATURES option.
 		if( $this->utils->validateDefines( $this, array('CLIENTFEATURES'), 
@@ -378,7 +374,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 				}
 			}
 		}
-		LogHandler::Log('wwtest', 'INFO', 'The structure of the CLIENTFEATURES option has been checked.');
+		LogHandler::Log( 'wwtest', 'INFO', 'The structure of the CLIENTFEATURES option has been checked.' );
 		
 		// Check if all CLIENTFEATURES options are moved away from SERVERFEATURES.
 		$help = 'Check your configserver.php file for the SERVERFEATURES and CLIENTFEATURES settings.';
@@ -393,6 +389,6 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 				$this->setResult( 'ERROR', 'The feature '.$movedFeature.' should be moved from the SERVERFEATURES setting to the CLIENTFEATURES setting.', $help );
 			}
 		}
-		LogHandler::Log('wwtest', 'INFO', 'The SERVERFEATURES has been checked for options that should be moved to CLIENTFEATURES.');
+		LogHandler::Log( 'wwtest', 'INFO', 'The SERVERFEATURES has been checked for options that should be moved to CLIENTFEATURES.' );
 	}
 }
