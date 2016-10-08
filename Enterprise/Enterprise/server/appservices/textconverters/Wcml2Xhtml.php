@@ -1049,12 +1049,18 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 			return;
 		}
 
+		// Determine the image Orientation flag.
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		$imageProps = DBObject::getColumnsValuesForObjectIds( array( $imageId ), array( 'Workflow' ), array( 'id', 'orientation' ) );
+		$orientation = $imageProps[$imageId]['orientation'];
+		$orientation = $orientation ? $orientation : 1;
+
 		// Determine the WCML attributes for the inline image.
-		$imageAttributes = $this->getImageAttributes( $icRectangle );
+		$imageAttributes = $this->getImageAttributes( $icRectangle, $orientation );
 		if( !$imageAttributes ) {
 			return;
 		}
-		
+
 		// Calculate the inline image placement info from its attributes.
 		$placementInfo = $this->calculateImagePlacementInfo( $imageAttributes );
 
@@ -1083,16 +1089,21 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	{
 		$info = array();
 
-		$info['Width'] = $attr['Right'] - $attr['Left'] - $attr['CropRight'] - $attr['CropLeft'];
+		$left = $attr['Left'];
+		$right = $attr['Right'];
+		$top = $attr['Top'];
+		$bottom = $attr['Bottom'];
+
+		$info['Width'] = $right - $left - $attr['CropRight'] - $attr['CropLeft'];
 		$info['Width'] *= $attr['ScaleX'];
 
-		$info['Height'] = $attr['Bottom'] - $attr['Top'] - $attr['CropBottom'] - $attr['CropTop'];
+		$info['Height'] = $bottom - $top - $attr['CropBottom'] - $attr['CropTop'];
 		$info['Height'] *= $attr['ScaleY'];
 
-		$info['ContentDx'] = $attr['Left'] - $attr['CropLeft'];
+		$info['ContentDx'] = $left - $attr['CropLeft'];
 		$info['ContentDx'] *= $attr['ScaleX'];
 
-		$info['ContentDy'] = $attr['Top'] - $attr['CropTop'];
+		$info['ContentDy'] = $top - $attr['CropTop'];
 		$info['ContentDy'] *= $attr['ScaleY'];
 
 		$info['ScaleX'] = $attr['ScaleX'];
@@ -1133,16 +1144,17 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	 * Retrieve attributes of a given WCML inline image.
 	 *
 	 * @param DOMNode $icRectangle
+	 * @param int $orientation How to rotate/mirror the image; EXIF/IFD0 standard with values 1...8
 	 * @return array List of properties with indexes Left, Top, Right, Bottom, ScaleX, ScaleY,
 	 * PpiX, PpiY, CropLeft, CropTop, CropRight, CropBottom
 	 */
-	private function getImageAttributes( DOMNode $icRectangle )
+	private function getImageAttributes( DOMNode $icRectangle, $orientation )
 	{
 		$attributes = array();
 		$icImages = $this->icXPath->query( 'Image', $icRectangle );
 		$icImage = $icImages && $icImages->length > 0 ? $icImages->item( 0 ) : null;
 		if( $icImage ) {
-			$boundaries = $this->getImageBoundaries( $icImage );
+			$boundaries = $this->getImageBoundaries( $icImage, $orientation );
 			if( $boundaries ) {
 				$scale = $this->getImageScale( $icImage );
 				$density = $this->getImageDensity( $icImage );
@@ -1157,18 +1169,26 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	 * Retrieves boundary info of a given WCML inline image.
 	 *
 	 * @param DOMNode $icImage
+	 * @param int $orientation How to rotate/mirror the image; EXIF/IFD0 standard with values 1...8
 	 * @return array List of properties with indexes Left, Top, Right and Bottom
 	 */
-	private function getImageBoundaries( DOMNode $icImage )
+	private function getImageBoundaries( DOMNode $icImage, $orientation )
 	{
 		$bound = array();
 		$icBounds = $this->icXPath->query( 'Properties/GraphicBounds', $icImage );
 		$icBound = $icBounds && $icBounds->length > 0 ? $icBounds->item( 0 ) : null;
 		if( $icBound ) {
-			$bound['Left'] = $icBound->getAttribute( 'Left' );
-			$bound['Top'] = $icBound->getAttribute( 'Top' );
-			$bound['Right'] = $icBound->getAttribute( 'Right' );
-			$bound['Bottom'] = $icBound->getAttribute( 'Bottom' );
+			if( $orientation < 5 ) {
+				$bound['Left'] = $icBound->getAttribute( 'Left' );
+				$bound['Top'] = $icBound->getAttribute( 'Top' );
+				$bound['Right'] = $icBound->getAttribute( 'Right' );
+				$bound['Bottom'] = $icBound->getAttribute( 'Bottom' );
+			} else { // rotate 90 degrees CW or CCW
+				$bound['Left'] = $icBound->getAttribute( 'Top' );
+				$bound['Top'] = $icBound->getAttribute( 'Left' );
+				$bound['Right'] = $icBound->getAttribute( 'Bottom' );
+				$bound['Bottom'] = $icBound->getAttribute( 'Right' );
+			}
 		}
 		return $bound;
 	}
