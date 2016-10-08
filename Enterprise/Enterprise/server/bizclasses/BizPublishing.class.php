@@ -2068,6 +2068,7 @@ class BizPublishing
 		// Cache the image converters to avoid retrieving the same native image file multiple times.
 		// This could happen when one image cropped multiple times on the publish form.
 		require_once BASEDIR.'/server/bizclasses/BizImageConverter.class.php';
+		/** @var BizImageConverter[] $bizImageConverters */
 		$bizImageConverters = array();
 
 		// Convert the images placed on the publish form. Skip those that to not require conversion.
