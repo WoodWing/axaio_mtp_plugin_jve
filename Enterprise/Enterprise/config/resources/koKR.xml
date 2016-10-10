@@ -225,7 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">오프라인 제공</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">직접 갱신을 위하여 공백인 채로 나둠</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">소유자가 사용자가 같은 경우는 공백인 채로 나둠</Term>
-  <Term key="ACT_LESS">Less</Term>
+  <Term key="ACT_LESS">적게</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">퍼블리케이션 보기 일람</Term>
   <Term key="ACT_LOGIN">로그인</Term>
   <Term key="ACT_LOGOFF">로그 오프</Term>
@@ -257,7 +257,7 @@
   <Term key="ACT_OK">선택</Term>
   <Term key="ACT_OPEN">열기</Term>
   <Term key="ACT_OPEN_EDIT">편집</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">편집을 위해 열기 (  배치안됨)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">신규 탭 열기</Term>
   <Term key="ACT_ORDER_BY">명령자</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">파일 %1는 존재하지 않습니다</Term>
