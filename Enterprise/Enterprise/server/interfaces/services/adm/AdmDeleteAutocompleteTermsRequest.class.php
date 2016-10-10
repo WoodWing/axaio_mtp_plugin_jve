@@ -78,6 +78,9 @@ class AdmDeleteAutocompleteTermsRequest
 				}
 			}
 		}
+		if( is_object( $this->TermEntity ) ) {
+			$this->TermEntity->sanitizeProperties4Php();
+		}
 	}
 
 	public function mightHaveContent() { return false; }

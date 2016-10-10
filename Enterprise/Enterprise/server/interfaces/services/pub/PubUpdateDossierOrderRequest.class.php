@@ -101,6 +101,9 @@ class PubUpdateDossierOrderRequest
 				}
 			}
 		}
+		if( is_object( $this->Target ) ) {
+			$this->Target->sanitizeProperties4Php();
+		}
 	}
 
 	public function mightHaveContent() { return false; }

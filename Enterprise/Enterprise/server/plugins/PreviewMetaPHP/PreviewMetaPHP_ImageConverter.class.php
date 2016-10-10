@@ -60,18 +60,27 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 	public function convertImage()
 	{
 		$retVal = false;
-		if( $this->applyCrop || $this->applyScale || $this->applyRotate || $this->applyMirror || $this->applyResize ) {
+		if( $this->applyCrop || $this->applyScale || $this->applyRotate || $this->applyMirror || $this->applyResize || $this->inputOrientation > 1 ) {
 			$inputImage = self::load( $this->inputFilePath );
 			if( $inputImage ) {
 				list( $cropLeft, $cropTop, $cropWidth, $cropHeight ) = $this->removeVoidFromCrop();
 				$outputWidth = min( $this->outputWidth, $cropWidth );
 				$outputHeight = min( $this->outputHeight, $cropHeight );
-				$outputImage = imagecreatetruecolor( intval($outputWidth), intval($outputHeight) );
+				$outputImage = imagecreatetruecolor( intval( $outputWidth ), intval( $outputHeight ) );
 				if( $outputImage ) {
 					imagealphablending( $outputImage, false ); // preserve transparency (EN-87990)
 					imagesavealpha( $outputImage, true );
+
+					// Assumed is that the crop dimensions are defined in 'human readable' manner. Therefore we first
+					// 'straighten' the image according to the way (orientation) the camera was held *before* applying crop.
+					if( $this->inputOrientation > 1 ) {
+						require_once BASEDIR.'/server/utils/ExifImageOrientation.class.php';
+						$orientHelper = new ExifImageOrientation();
+						$orientHelper->applyOrientation( $inputImage, $this->inputOrientation );
+					}
+
 					$resampledFailed = false;
-					if( $this->applyCrop || $this->applyScale || $this->applyResize ) {
+					if( $this->applyCrop || $this->applyScale || $this->applyResize || $this->inputOrientation > 1 ) {
 						$resampledFailed = !imagecopyresampled(
 							$outputImage, $inputImage, // dst, src
 							0, 0, $cropLeft, $cropTop, // (dst_x, dst_y), (src_x, src_y),
@@ -89,8 +98,11 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 						imageflip( $outputImage, $mode ); // requires custom implementation for < PHP 5.5
 					}
 					if( $this->applyRotate ) {
-						$outputImage = imagerotate( $outputImage, $this->rotateDegrees, 0 );
-						if( !$outputImage ) {
+						$rotatedImage = imagerotate( $outputImage, $this->rotateDegrees, 0 );
+						if( $rotatedImage ) {
+							imagedestroy( $outputImage );
+							$outputImage = $rotatedImage;
+						} else {
 							LogHandler::Log( 'ImageConverter', 'ERROR', 'Could not rotate image for file "'.$this->inputFilePath.'". ' );
 						}
 					}
@@ -137,6 +149,13 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 	 */
 	private function removeVoidFromCrop()
 	{
+		if( $this->inputOrientation < 5 ) {
+			$inputWidth = $this->inputWidth;
+			$inputHeight = $this->inputHeight;
+		} else { // rotate 90 degrees CW or CCW
+			$inputWidth = $this->inputHeight;
+			$inputHeight = $this->inputWidth;
+		}
 		if( $this->cropLeft < 0 ) { // remove void at left side?
 			$cropLeft = 0;
 			$cropWidth = $this->cropWidth + $this->cropLeft;
@@ -144,8 +163,8 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 			$cropLeft = $this->cropLeft;
 			$cropWidth = $this->cropWidth;
 		}
-		if( $cropLeft + $cropWidth > $this->inputWidth ) { // remove void at right side?
-			$cropWidth = $this->inputWidth - $cropLeft;
+		if( $cropLeft + $cropWidth > $inputWidth ) { // remove void at right side?
+			$cropWidth = $inputWidth - $cropLeft;
 		}
 
 		if( $this->cropTop < 0 ) { // remove void at top side?
@@ -155,8 +174,8 @@ class PreviewMetaPHP_ImageConverter extends ImageConverter_EnterpriseConnector
 			$cropTop = $this->cropTop;
 			$cropHeight = $this->cropHeight;
 		}
-		if( $cropTop + $cropHeight > $this->inputHeight ) { // remove void at bottom side?
-			$cropHeight = $this->inputHeight - $cropTop;
+		if( $cropTop + $cropHeight > $inputHeight ) { // remove void at bottom side?
+			$cropHeight = $inputHeight - $cropTop;
 		}
 
 		return array( $cropLeft, $cropTop, $cropWidth, $cropHeight );

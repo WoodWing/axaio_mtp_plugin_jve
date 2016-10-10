@@ -188,6 +188,9 @@ class WflGetPagesRequest
 				}
 			}
 		}
+		if( is_object( $this->Edition ) ) {
+			$this->Edition->sanitizeProperties4Php();
+		}
 	}
 
 	public function mightHaveContent() { return false; }

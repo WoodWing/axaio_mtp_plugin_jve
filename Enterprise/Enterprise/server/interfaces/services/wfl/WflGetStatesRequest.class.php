@@ -97,6 +97,15 @@ class WflGetStatesRequest
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->Publication ) ) {
+			$this->Publication->sanitizeProperties4Php();
+		}
+		if( is_object( $this->Issue ) ) {
+			$this->Issue->sanitizeProperties4Php();
+		}
+		if( is_object( $this->Section ) ) {
+			$this->Section->sanitizeProperties4Php();
+		}
 	}
 
 	public function mightHaveContent() { return false; }

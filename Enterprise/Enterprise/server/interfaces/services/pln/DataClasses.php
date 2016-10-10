@@ -140,6 +140,9 @@ class PlnLayoutFromTemplate
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->NewLayout ) ) {
+			$this->NewLayout->sanitizeProperties4Php();
+		}
 	}
 }
 class PlnPlacement
@@ -297,6 +300,12 @@ class PlnAdvert
 					$complexField->sanitizeProperties4Php();
 				}
 			}
+		}
+		if( is_object( $this->Page ) ) {
+			$this->Page->sanitizeProperties4Php();
+		}
+		if( is_object( $this->Placement ) ) {
+			$this->Placement->sanitizeProperties4Php();
 		}
 	}
 }
