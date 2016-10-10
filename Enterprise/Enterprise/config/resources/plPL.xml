@@ -257,7 +257,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">Otwórz</Term>
   <Term key="ACT_OPEN_EDIT">Otwórz do edycji</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Otwórz w celu edytowania (niewstawiony)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Otwórz do edycji (niewstawiony)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">Otwórz w nowej karcie</Term>
   <Term key="ACT_ORDER_BY">Porządkuj według</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">Plik %1 nie istnieje</Term>
