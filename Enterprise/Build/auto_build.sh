@@ -32,9 +32,6 @@ function validateEnvironmentVariableNotEmpty {
 #
 # Overwrites the version label with a new given version for a given _productversion.txt file.
 #
-# After updating the version, the file is added to Git in await for the next commit and push.
-# Because the given _productversion.txt files are added to the .gitignore file this is done with force.
-#
 # @param string $1 Full local file path of the _productversion.txt file to update.
 # @param string $2 New version number (x.y.z) to replace the old one with.
 # @param integer $3 New build number to replace the old one with.
@@ -50,9 +47,6 @@ function replaceVersionFile {
 		exit 1
 	fi
 	set -e
-	if [ "${SERVER_RELEASE_TYPE}" != "Daily" ]; then
-		git add --force "${1}"
-	fi
 }
 
 #
@@ -511,9 +505,6 @@ function step3a_updateVersionInfo {
 		echo "" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 	else
 		echo -n "${SERVER_RELEASE_TYPE}" > "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
-	fi
-	if [ "${SERVER_RELEASE_TYPE}" != "Daily" ]; then
-		git add --force "${SOURCE_BASE}Enterprise/server/_productversionextra.txt"
 	fi
 
 	echo "step3a2: Update version info in server plugins."
