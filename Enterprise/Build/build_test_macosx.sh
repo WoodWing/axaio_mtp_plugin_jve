@@ -77,7 +77,7 @@ function step0_validateEnvironment {
 	validateEnvironmentVariableNotEmpty GIT_BRANCH "${GIT_BRANCH}"
 	validateEnvironmentVariableNotEmpty SERVER_VERSION "${SERVER_VERSION}"
 
-	if [[ "${GIT_BRANCH}" != "master" && "${GIT_BRANCH}" != work* ]]; then
+	if [[ "${GIT_BRANCH}" != "master" && "${GIT_BRANCH}" != work* && "${GIT_BRANCH}" != release/*  ]]; then
 		echo "ERROR: Environment variable GIT_BRANCH has unsupported value: ${GIT_BRANCH}"
 		exit 1
 	fi
