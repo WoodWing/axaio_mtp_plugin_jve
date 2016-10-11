@@ -209,6 +209,7 @@ class PlnAdvert
 	public $AlienId;
 	public $Publication;
 	public $Issue;
+	public $PubChannel;
 	public $Section;
 	public $Status;
 	public $Name;
@@ -236,6 +237,7 @@ class PlnAdvert
 	 * @param string               $AlienId              Nullable.
 	 * @param string               $Publication          Nullable.
 	 * @param string               $Issue                Nullable.
+	 * @param string               $PubChannel           Nullable.
 	 * @param string               $Section              Nullable.
 	 * @param string               $Status               Nullable.
 	 * @param string               $Name                 Nullable.
@@ -258,12 +260,13 @@ class PlnAdvert
 	 * @param integer              $PageSequence         Nullable.
 	 * @param string               $Version              Nullable.
 	 */
-	public function __construct( $Id=null, $AlienId=null, $Publication=null, $Issue=null, $Section=null, $Status=null, $Name=null, $AdType=null, $Comment=null, $Source=null, $ColorSpace=null, $Description=null, $PlainContent=null, $File=null, $HighResFile=null, $PageOrder=null, $Page=null, $Placement=null, $PreferredPlacement=null, $PublishPrio=null, $Rate=null, $Editions=null, $Deadline=null, $PageSequence=null, $Version=null)
+	public function __construct( $Id=null, $AlienId=null, $Publication=null, $Issue=null, $PubChannel=null, $Section=null, $Status=null, $Name=null, $AdType=null, $Comment=null, $Source=null, $ColorSpace=null, $Description=null, $PlainContent=null, $File=null, $HighResFile=null, $PageOrder=null, $Page=null, $Placement=null, $PreferredPlacement=null, $PublishPrio=null, $Rate=null, $Editions=null, $Deadline=null, $PageSequence=null, $Version=null)
 	{
 		$this->Id                   = $Id;
 		$this->AlienId              = $AlienId;
 		$this->Publication          = $Publication;
 		$this->Issue                = $Issue;
+		$this->PubChannel           = $PubChannel;
 		$this->Section              = $Section;
 		$this->Status               = $Status;
 		$this->Name                 = $Name;
