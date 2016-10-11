@@ -187,6 +187,7 @@
 					<element name="AlienId" nillable="true" type="xsd:string"/> <!-- Advert id of advert system -->
 					<element name="Publication" nillable="true" type="xsd:string"/>  
 					<element name="Issue" nillable="true" type="xsd:string"/>
+					<element name="PubChannel"  type="xsd:string"  nillable="true"	minOccurs="0" maxOccurs="1"/> <!-- Publication Channel, added in v9.8.1 QP, EN-88057 -->
 					<element name="Section" nillable="true" type="xsd:string"/>
 					<element name="Status" nillable="true" type="xsd:string"/>  
 					<element name="Name" nillable="true" type="xsd:string"/>           <!-- Name, doesn't have to be unique -->
