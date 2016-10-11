@@ -198,6 +198,13 @@ class PlnLayoutValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'PubChannel' ) ) {
+			$validator->enterPath( 'PubChannel' );
+			if( !is_null( $datObj->PubChannel ) ) {
+				$validator->checkType( $datObj->PubChannel, 'string' );
+			}
+			$validator->leavePath();
+		}
 		if( $validator->checkExist( $datObj, 'Section' ) ) {
 			$validator->enterPath( 'Section' );
 			if( !is_null( $datObj->Section ) ) {

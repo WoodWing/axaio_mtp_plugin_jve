@@ -131,7 +131,7 @@
 					<element name="Name"        type="xsd:string"         nillable="true"/>
 					<element name="Publication" type="xsd:string"         nillable="true"/>
 					<element name="Issue"       type="xsd:string"         nillable="true"/>
-					<element name="PubChannel"  type="xsd:string"         nillable="true"	minOccurs="0" maxOccurs="1"/> <!-- Added in 9.8.1 QP, EN-88057 -->
+					<element name="PubChannel"  type="xsd:string"         nillable="true"	minOccurs="0" maxOccurs="1"/> <!-- Publication Channel, added in v9.8.1 QP, EN-88057 -->
 					<element name="Section"     type="xsd:string"         nillable="true"/>
 					<element name="Status"      type="xsd:string"         nillable="true"/>
 					<element name="Pages"       type="tns:ArrayOfPage"    nillable="true"/> <!-- List of planned pages which needs to be complete since it overwrites all previous pages!! -->

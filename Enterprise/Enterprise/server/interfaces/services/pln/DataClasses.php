@@ -68,6 +68,7 @@ class PlnLayout
 	public $Name;
 	public $Publication;
 	public $Issue;
+	public $PubChannel;
 	public $Section;
 	public $Status;
 	public $Pages;
@@ -80,6 +81,7 @@ class PlnLayout
 	 * @param string               $Name                 Nullable.
 	 * @param string               $Publication          Nullable.
 	 * @param string               $Issue                Nullable.
+	 * @param string               $PubChannel           Nullable.
 	 * @param string               $Section              Nullable.
 	 * @param string               $Status               Nullable.
 	 * @param PlnPage[]            $Pages                Nullable.
@@ -87,12 +89,13 @@ class PlnLayout
 	 * @param string               $Deadline             Nullable.
 	 * @param string               $Version              Nullable.
 	 */
-	public function __construct( $Id=null, $Name=null, $Publication=null, $Issue=null, $Section=null, $Status=null, $Pages=null, $Editions=null, $Deadline=null, $Version=null)
+	public function __construct( $Id=null, $Name=null, $Publication=null, $Issue=null, $PubChannel=null, $Section=null, $Status=null, $Pages=null, $Editions=null, $Deadline=null, $Version=null)
 	{
 		$this->Id                   = $Id;
 		$this->Name                 = $Name;
 		$this->Publication          = $Publication;
 		$this->Issue                = $Issue;
+		$this->PubChannel           = $PubChannel;
 		$this->Section              = $Section;
 		$this->Status               = $Status;
 		$this->Pages                = $Pages;
