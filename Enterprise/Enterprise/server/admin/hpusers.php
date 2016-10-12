@@ -208,34 +208,34 @@ $txt = HtmlDocument::loadTemplate( 'hpusers.htm');
 // error handling
 $err = '';
 foreach ($errors as $error) {
-	$err .= $error.'<br/>';
+	$err .= formvar($error).'<br/>';
 }
-$txt = str_replace('<!--ERROR-->', formvar( $err ), $txt);
+$txt = str_replace('<!--ERROR-->', $err, $txt);
 $err = '';
 foreach ($errors2 as $error) {
-	$err .= $error.'<br/>';
+	$err .= formvar($error).'<br/>';
 }
-$txt = str_replace('<!--ERROR2-->', formvar( $err ), $txt);
+$txt = str_replace('<!--ERROR2-->', $err, $txt);
 $err = '';
 foreach ($errors3 as $error) {
-	$err .= $error.'<br/>';
+	$err .= formvar($error).'<br/>';
 }
-$txt = str_replace('<!--ERROR3-->', formvar( $err ), $txt);
+$txt = str_replace('<!--ERROR3-->', $err, $txt);
 $err = '';
 foreach ($errors4 as $error) {
-	$err .= $error.'<br/>';
+	$err .= formvar($error).'<br/>';
 }
-$txt = str_replace('<!--ERROR4-->', formvar( $err ), $txt);
+$txt = str_replace('<!--ERROR4-->', $err, $txt);
 $err = '';
 foreach ($errors5 as $error) {
-	$err .= $error.'<br/>';
+	$err .= formvar($error).'<br/>';
 }
-$txt = str_replace('<!--ERROR5-->', formvar( $err ), $txt);
+$txt = str_replace('<!--ERROR5-->', $err, $txt);
 $err = '';
 foreach ($errors6 as $error) {
-	$err .= $error.'<br/>';
+	$err .= formvar($error).'<br/>';
 }
-$txt = str_replace('<!--ERROR6-->', formvar( $err ), $txt);
+$txt = str_replace('<!--ERROR6-->', $err, $txt);
 
 // fields
 $txt = str_replace('<!--VAR:USER-->', '<input maxlength="40" name="user" value="'.formvar($row['user']).'"/>', $txt );
