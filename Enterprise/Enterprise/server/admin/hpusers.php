@@ -1,93 +1,67 @@
-<?php	 
+<?php
 require_once dirname(__FILE__).'/../../config/config.php';
 require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/admin/global_inc.php';
 require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 require_once BASEDIR.'/server/bizclasses/BizWorkflow.class.php';
-require_once BASEDIR.'/server/bizclasses/BizAdmUser.class.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
 require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
+require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 $ticket = checkSecure('admin');
-
-require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
 $sessionUser = DBTicket::checkTicket( $ticket );
 
 // get param's
 $id          = isset($_REQUEST['id'])       ? intval($_REQUEST['id']) : 0;
 $user        = isset($_REQUEST['user'])     ? $_REQUEST['user'] : '';
-$fullname    = isset($_REQUEST['fullname']) ? $_REQUEST['fullname'] : '';
+$fullName    = isset($_REQUEST['fullname']) ? $_REQUEST['fullname'] : '';
 $disable     = isset($_REQUEST['disable'])  && $_REQUEST['disable'] ? 'on'  : '';
 $email       = isset($_REQUEST['email'])    ? $_REQUEST['email'] : '';
-$emailusr    = isset($_REQUEST['emailusr']) && $_REQUEST['emailusr']  ? 'on' : '';
-$emailgrp    = isset($_REQUEST['emailgrp']) && $_REQUEST['emailgrp']  ? 'on' : '';
-$fixedpass   = isset($_REQUEST['fixedpass'])&& $_REQUEST['fixedpass'] ? 'on' : '';
+$emailUsr    = isset($_REQUEST['emailusr']) && $_REQUEST['emailusr']  ? 'on' : '';
+$emailGrp    = isset($_REQUEST['emailgrp']) && $_REQUEST['emailgrp']  ? 'on' : '';
+$fixedPass   = isset($_REQUEST['fixedpass'])&& $_REQUEST['fixedpass'] ? 'on' : '';
 $pass		 = isset($_REQUEST['password']) ? $_REQUEST['password'] : '';
 // do not set password if $pass is empty string
-if (empty($pass)){
+if( empty($pass) ) {
 	// pass null/nil to the admin service, this prevents setting the password
 	$pass = null;
 }
 $organization= isset($_REQUEST['organization']) ? $_REQUEST['organization'] : '';
 $location	 = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
 
-$inpstartdate = isset($_REQUEST['startdate'])      ? $_REQUEST['startdate'] : '';
-$startyear	 = isset($_REQUEST['startdate_years']) ? intval($_REQUEST['startdate_years']) : 0;
-$startmonth  = isset($_REQUEST['startdate_months'])? intval($_REQUEST['startdate_months']) : 0;
-$startday	 = isset($_REQUEST['startdate_days'])  ? intval($_REQUEST['startdate_days']): 0;
+$inpStartDate = isset($_REQUEST['startdate'])      ? $_REQUEST['startdate'] : '';
+$startYear	 = isset($_REQUEST['startdate_years']) ? intval($_REQUEST['startdate_years']) : 0;
+$startMonth  = isset($_REQUEST['startdate_months'])? intval($_REQUEST['startdate_months']) : 0;
+$startDay	 = isset($_REQUEST['startdate_days'])  ? intval($_REQUEST['startdate_days']): 0;
 
-$inpenddate  = isset($_REQUEST['enddate'])         ? $_REQUEST['enddate'] : '';
-$endyear	 = isset($_REQUEST['enddate_years'])   ? intval($_REQUEST['enddate_years']) : 0;
-$endmonth  	 = isset($_REQUEST['enddate_months'])  ? intval($_REQUEST['enddate_months']) : 0;
-$endday	 	 = isset($_REQUEST['enddate_days'])    ? intval($_REQUEST['enddate_days']) : 0;
+$inpEndDate  = isset($_REQUEST['enddate'])         ? $_REQUEST['enddate'] : '';
+$endYear	 = isset($_REQUEST['enddate_years'])   ? intval($_REQUEST['enddate_years']) : 0;
+$endMonth  	 = isset($_REQUEST['enddate_months'])  ? intval($_REQUEST['enddate_months']) : 0;
+$endDay	 	 = isset($_REQUEST['enddate_days'])    ? intval($_REQUEST['enddate_days']) : 0;
 
-$expiredays  = isset($_REQUEST['expiredays'])      ? intval($_REQUEST['expiredays']) : 0;
-$newlanguage = isset($_REQUEST['newlanguage'])     ? $_REQUEST['newlanguage'] : '';
-$usercolor   = isset($_REQUEST['color1'])          ? $_REQUEST['color1'] : '';
+$expireDays  = isset($_REQUEST['expiredays'])      ? intval($_REQUEST['expiredays']) : 0;
+$newLanguage = isset($_REQUEST['newlanguage'])     ? $_REQUEST['newlanguage'] : '';
+$userColor   = isset($_REQUEST['color1'])          ? $_REQUEST['color1'] : '';
 $groupId     = isset($_REQUEST['grpid'])           ? intval($_REQUEST['grpid']) : 0;
 
-// determine incoming mode
-if (isset($_REQUEST['update']) && $_REQUEST['update']) {
-	$mode = ($id > 0) ? 'update' : 'insert';
-} else if (isset($_REQUEST['delete']) && $_REQUEST['delete']) {
-	$mode = 'delete';
-} else if (isset($_REQUEST['deldet']) && $_REQUEST['deldet']) {
-	$mode = 'deldet';
-} else {
-	$mode = ($id > 0) ? 'edit' : 'new';
-}
+// Create new user maintenance app
+$app = new UserMaintenanceApp();
 
-$errors = $errors2 = $errors3 = $errors4 = $errors5 = $errors6 = array();
+// Determine incoming mode for app
+$mode = $app->getMode( $id );
 
-if ($startyear && $startmonth && $startday) {
-	$startdate = DateTimeFunctions::validDate($startday . '-' . $startmonth . '-' . $startyear, false);	
-} else {
-	$startdate = DateTimeFunctions::validDate($inpstartdate, false);
-}
-if ($endyear && $endmonth && $endday) {
-	$enddate = DateTimeFunctions::validDate($endday . '-' . $endmonth . '-' . $endyear, false);	
-} else {
-	$enddate = DateTimeFunctions::validDate($inpenddate, false);
-}
+$errors = array( 'ERROR' => array(),
+					'ERROR2' => array(),
+					'ERROR3' => array(),
+					'ERROR4' => array(),
+					'ERROR5' => array(),
+					'ERROR6' => array()
+					);
 
-if (!$startdate && $inpstartdate) {
-	$mode = 'error';
-	$sErrorMessage = BizResources::localize("INVALID_DATE");
-	$errors5[] = $sErrorMessage;
-}
-if (!$enddate && $inpenddate) {
-	$mode = 'error';
-	$sErrorMessage = BizResources::localize("INVALID_DATE");
-	$errors6[] = $sErrorMessage;
-}
-if ( DateTimeFunctions::diffIsoTimes( $startdate, $enddate ) > 0)
-{
-	$mode = 'error';
-	$sErrorMessage = BizResources::localize("INVALID_DATE");
-	$errors6[] = $sErrorMessage;
-}
-
+$startDate = $app->getStartDate( $inpStartDate, $startYear, $startMonth, $startDay );
+$endDate = $app->getEndDate( $inpEndDate, $endYear, $endMonth, $endDay );
+$mode = $app->validateStartEndDate( $inpStartDate, $startDate, $inpEndDate, $endDate, $mode, $errors );
 
 BizSession::startSession( $ticket );
 
@@ -95,12 +69,11 @@ BizSession::startSession( $ticket );
 try {
 	switch( $mode ) {
 		case 'insert':
-			require_once BASEDIR . '/server/services/adm/AdmCreateUsersService.class.php';
-			require_once BASEDIR . '/server/interfaces/services/adm/AdmCreateUsersRequest.class.php';
-			$userObjs = array( new AdmUser( null, $user, $fullname, $disable == 'on', $pass,
-			 					    $fixedpass == 'on', $email, $emailusr == 'on', $emailgrp == 'on',
-			 					    $expiredays, $startdate, $enddate, $newlanguage,
-			 					    substr($usercolor,1), $organization, $location, null));
+			require_once BASEDIR.'/server/services/adm/AdmCreateUsersService.class.php';
+			$userObjs = array( new AdmUser( null, $user, $fullName, $disable == 'on', $pass,
+			 					    $fixedPass == 'on', $email, $emailUsr == 'on', $emailGrp == 'on',
+			 					    $expireDays, $startDate, $endDate, $newLanguage,
+			 					    substr($userColor,1), $organization, $location, null));
 			$service = new AdmCreateUsersService();
 			$request = new AdmCreateUsersRequest();
 			$request->Ticket = $ticket;
@@ -110,12 +83,11 @@ try {
 			$id = $response->Users[0]->Id; //We only get one user back
 			break;
 		case 'update':
-			require_once BASEDIR . '/server/services/adm/AdmModifyUsersService.class.php';
-			require_once BASEDIR . '/server/interfaces/services/adm/AdmModifyUsersRequest.class.php';
-			$userObjs = array( new AdmUser($id, $user, $fullname, $disable == 'on', $pass,
-			 					    $fixedpass == 'on', $email, $emailusr == 'on', $emailgrp == 'on',
-			 					    $expiredays, $startdate, $enddate, $newlanguage,
-			 					    substr($usercolor,1), $organization, $location, null));
+			require_once BASEDIR.'/server/services/adm/AdmModifyUsersService.class.php';
+			$userObjs = array( new AdmUser($id, $user, $fullName, $disable == 'on', $pass,
+			 					    $fixedPass == 'on', $email, $emailUsr == 'on', $emailGrp == 'on',
+			 					    $expireDays, $startDate, $endDate, $newLanguage,
+			 					    substr($userColor,1), $organization, $location, null));
 			$service = new AdmModifyUsersService();
 			$request = new AdmModifyUsersRequest();
 			$request->Ticket = $ticket;
@@ -125,15 +97,15 @@ try {
 
 			global $globUser;
 			if( $user == $globUser ) {
-				setLogCookie( 'language', $newlanguage );
+				setLogCookie( 'language', $newLanguage );
 				// update global language to reflect change immediately
 				global $sLanguage_code;
-				$sLanguage_code = $newlanguage;
+				$sLanguage_code = $newLanguage;
 			}
 			//ENDOF#2575
 			break;
 		case 'delete':
-			require_once BASEDIR . '/server/services/adm/AdmDeleteUsersService.class.php';
+			require_once BASEDIR.'/server/services/adm/AdmDeleteUsersService.class.php';
 			$service = new AdmDeleteUsersService();
 			$request = new AdmDeleteUsersRequest();
 			$request->Ticket = $ticket;
@@ -141,8 +113,7 @@ try {
 			$response = $service->execute($request);
 			break;
 		case 'deldet':
-			require_once BASEDIR . '/server/services/adm/AdmRemoveGroupsFromUserService.class.php';
-			require_once BASEDIR . '/server/interfaces/services/adm/AdmRemoveGroupsFromUserRequest.class.php';
+			require_once BASEDIR.'/server/services/adm/AdmRemoveGroupsFromUserService.class.php';
 			$userGroups = array($groupId);
 			$service = new AdmRemoveGroupsFromUserService();
 			$request = new AdmRemoveGroupsFromUserRequest();
@@ -156,11 +127,11 @@ try {
 } catch( BizException $e ) {
 	switch( $e->getMessageKey() ) {
 		case 'ERR_DUPLICATE_NAME':
-			$errors2[] = $e->getMessage();
+			$errors['ERROR2'][] = $e->getMessage();
 			$mode = 'error';
 			break;
 		case 'ERR_INVALID_EMAIL':
-			$errors3[] = $e->getMessage();
+			$errors['ERROR3'][] = $e->getMessage();
 			$mode = 'error';
 			break;
 		case 'ERR_NOT_EMPTYPASS':
@@ -168,11 +139,11 @@ try {
 		case 'PASS_LOWER':
 		case 'PASS_UPPER':
 		case 'PASS_SPECIAL':
-			$errors4[] = $e->getMessage();
+			$errors['ERROR4'][] = $e->getMessage();
 			$mode = 'error';
 			break;
 		default:
-			$errors[] = $e->getMessage();
+			$errors['ERROR'][] = $e->getMessage();
 			$mode = 'error';
 			break;
 	}
@@ -181,127 +152,263 @@ try {
 BizSession::endSession();
 
 // delete: back to overview
-if ($mode == 'delete') {
+if( $mode == 'delete' ) {
 	header("Location:users.php");
 	exit();
 }
 
+$txt = HtmlDocument::loadTemplate('hpusers.htm');
+
 // generate upper part (edit fields)
-if ($mode == 'error') {
-	$row = array ('user' => $user, 'fullname' => $fullname, 'disable' => $disable, 
-				'email' => $email, 'emailgrp' => $emailgrp, 'emailusr' => $emailusr, 
-				'fixedpass' => $fixedpass, 'startdate' => $inpstartdate, 'enddate' => $inpenddate, 
-				'expiredays' => $expiredays, 'language' => $newlanguage, 'trackchangescolor' => $usercolor,
+if( $mode == 'error' ) {
+	$row = array ('user' => $user, 'fullname' => $fullName, 'disable' => $disable,
+				'email' => $email, 'emailgrp' => $emailGrp, 'emailusr' => $emailUsr,
+				'fixedpass' => $fixedPass, 'startdate' => $inpStartDate, 'enddate' => $inpEndDate,
+				'expiredays' => $expireDays, 'language' => $newLanguage, 'trackchangescolor' => $userColor,
 				'organization' => $organization, 'location' => $location );
-} elseif ($mode != "new") {
+} elseif( $mode != "new" ) {
 	$row = DBUser::getUserById($id); 
 	$row['startdate'] = DateTimeFunctions::iso2date( $row['startdate'] );
 	$row['enddate'] = DateTimeFunctions::iso2date( $row['enddate'] );
 } else {
 	$row = array ('user' => '', 'fullname' => '', 'disable' => '', 'email' => '', 'emailgrp' => 'on', 
 				'emailusr' => 'on', 'fixedpass' => '', 'startdate' => '', 'enddate' => '', 
-				'expiredays' => PASSWORD_EXPIRE, 'language' => $newlanguage, 'trackchangescolor' => DEFAULT_USER_COLOR,
+				'expiredays' => PASSWORD_EXPIRE, 'language' => $newLanguage, 'trackchangescolor' => DEFAULT_USER_COLOR,
 				'organization' => '', 'location' => '' );
 }
-$txt = HtmlDocument::loadTemplate( 'hpusers.htm');
 
-// error handling
-$err = '';
-foreach ($errors as $error) {
-	$err .= formvar($error).'<br/>';
-}
-$txt = str_replace('<!--ERROR-->', $err, $txt);
-$err = '';
-foreach ($errors2 as $error) {
-	$err .= formvar($error).'<br/>';
-}
-$txt = str_replace('<!--ERROR2-->', $err, $txt);
-$err = '';
-foreach ($errors3 as $error) {
-	$err .= formvar($error).'<br/>';
-}
-$txt = str_replace('<!--ERROR3-->', $err, $txt);
-$err = '';
-foreach ($errors4 as $error) {
-	$err .= formvar($error).'<br/>';
-}
-$txt = str_replace('<!--ERROR4-->', $err, $txt);
-$err = '';
-foreach ($errors5 as $error) {
-	$err .= formvar($error).'<br/>';
-}
-$txt = str_replace('<!--ERROR5-->', $err, $txt);
-$err = '';
-foreach ($errors6 as $error) {
-	$err .= formvar($error).'<br/>';
-}
-$txt = str_replace('<!--ERROR6-->', $err, $txt);
+// Error handling
+$txt = $app->replaceErrorMessages( $txt, $errors );
 
-// fields
-$txt = str_replace('<!--VAR:USER-->', '<input maxlength="40" name="user" value="'.formvar($row['user']).'"/>', $txt );
-$txt = str_replace('<!--VAR:FULLNAME-->', '<input name="fullname" maxlength="255" value="'.formvar($row['fullname']).'"/>', $txt );
-$txt = str_replace('<!--VAR:DISABLE-->', '<input type="checkbox" name="disable" '.(trim($row['disable'])?'checked="checked"':'').'/>', $txt );
-$txt = str_replace('<!--VAR:PASSWORD-->', '<input name="password" maxlength="40" type="password"/>', $txt );
-$txt = str_replace('<!--VAR:FIXEDPASS-->', inputvar('fixedpass', $row['fixedpass'], 'checkbox'), $txt );
+// Build the upper part of user form
+$txt = $app->buildUserForm( $id, $row, $txt );
 
-$txt = str_replace('<!--VAR:ORGANIZATION-->', '<input name="organization" maxlength="255" value="'.formvar($row['organization']).'"/>', $txt );
-$txt = str_replace('<!--VAR:LOCATION-->', '<input name="location" maxlength="255" value="'.formvar($row['location']).'"/>', $txt );
+// Build lower part user groups table
+$txt = $app->buildUserGroupsTable( $id, $mode, $sessionUser, $txt );
 
-$startdatefield = inputvar('startdate', $row['startdate'], 'date', null, true);
-$txt = str_replace('<!--VAR:STARTDATE-->', $startdatefield , $txt );
-
-$enddatefield = inputvar('enddate', $row['enddate'], 'date', null, true);
-$txt = str_replace('<!--VAR:ENDDATE-->', $enddatefield , $txt );
-	
-$txt = str_replace('<!--VAR:EXPIREDAYS-->', inputvar('expiredays', $row['expiredays']), $txt );
-$txt = str_replace('<!--VAR:EMAIL-->', '<input name="email" maxlength="100" value="'.formvar($row['email']).'"/>', $txt );
-$txt = str_replace('<!--VAR:EMAILGRP-->', inputvar('emailgrp', $row['emailgrp'], 'checkbox'), $txt );
-$txt = str_replace('<!--VAR:EMAILUSR-->', inputvar('emailusr', $row['emailusr'], 'checkbox'), $txt );
-$txt = str_replace('<!--VAR:HIDDEN-->', inputvar('id', $id, 'hidden'), $txt );
-
-//BZ#2575
-require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-$userlanguagecode = BizUser::validUserLanguage( $row['language'] );
-$languagecodes = BizResources::getLanguageCodes();
-$languagecombodef = '<select name="newlanguage">';
-foreach ($languagecodes as $curcode) {
-	$selected = ($curcode === $userlanguagecode) ? 'selected="selected"' : '';
-	$languagename = BizResources::localize('LAN_NAME_'.$curcode);
-	$languagecombodef .= '<option '.$selected.' value="'.$curcode.'">'.formvar($languagename).'</option>';
-}
-$languagecombodef .= '</select>';
-$txt = str_replace('<!--VAR:LANGUAGE-->', $languagecombodef, $txt );	
-//ENDOF#2575
-
-$usercolor = $row['trackchangescolor'];
-if (empty($usercolor)) $usercolor = DEFAULT_USER_COLOR; // should not happen in v8.
-$txt = str_replace('<!--VAR:TRACKCHANGESCOLOR-->',formvar($usercolor), $txt);
-
-// generate lower part (details)
-$detailtxt = '';
-if ($mode != "new" && $mode != "error") {
-	$detail = '';
-	if ($id > 0) {
-		$groups = BizAdmUser::listUserGroupsObj( $sessionUser, null, $id, null );
-		$color = array (" bgcolor='#eeeeee'", '');
-		$flip = 0;
-		foreach( $groups as $group ) {
-			$clr = $color[$flip];
-			$detail .=
-				'<tr'.$clr.'><td><a href="hpgroups.php?id='.intval($group->Id).'">'.formvar($group->Name).'</a></td>'.
-				'<td>'.formvar($group->Description).'</td><td><a href="hpusers.php?deldet=1&id='.$id.'&grpid='.intval($group->Id).'" '.
-				' onclick="return myconfirm(\'delgroup\')">'.BizResources::localize('ACT_DELETE').'</a></td></tr>';
-			$flip = 1- $flip;
-		}
-	}
-	$detailtxt = str_replace("<!--ROWS-->", $detail, HtmlDocument::loadTemplate( 'hpusersdet.htm' ) );
-	$detailtxt = str_replace("<!--ID-->", $id, $detailtxt);
-}
-
-// generate total page
-$txt = str_replace('<!--DETAILS-->', $detailtxt, $txt);
-
-//set focus to the first field
+// Set focus to the first field
 $txt .= '<script language="javascript">document.forms[0].user.focus();</script>';
 
 print HtmlDocument::buildDocument($txt);
+
+/**
+ * Helper class for the admin application: User Maintenance App
+ */
+class UserMaintenanceApp
+{
+	/**
+	 * Build the user form fields at the upper part of the user maintenance page
+	 * @param $id
+	 * @param $row
+	 * @param $txt
+	 * @return mixed
+	 */
+	public function buildUserForm( $id, $row, $txt )
+	{
+		// fields
+		$txt = str_replace('<!--VAR:USER-->', '<input maxlength="40" name="user" value="'.formvar($row['user']).'"/>', $txt );
+		$txt = str_replace('<!--VAR:FULLNAME-->', '<input name="fullname" maxlength="255" value="'.formvar($row['fullname']).'"/>', $txt );
+		$txt = str_replace('<!--VAR:DISABLE-->', '<input type="checkbox" name="disable" '.(trim($row['disable'])?'checked="checked"':'').'/>', $txt );
+		$txt = str_replace('<!--VAR:PASSWORD-->', '<input name="password" maxlength="40" type="password"/>', $txt );
+		$txt = str_replace('<!--VAR:FIXEDPASS-->', inputvar('fixedpass', $row['fixedpass'], 'checkbox'), $txt );
+
+		$txt = str_replace('<!--VAR:ORGANIZATION-->', '<input name="organization" maxlength="255" value="'.formvar($row['organization']).'"/>', $txt );
+		$txt = str_replace('<!--VAR:LOCATION-->', '<input name="location" maxlength="255" value="'.formvar($row['location']).'"/>', $txt );
+
+		$startDateField = inputvar('startdate', $row['startdate'], 'date', null, true);
+		$txt = str_replace('<!--VAR:STARTDATE-->', $startDateField , $txt );
+
+		$endDateField = inputvar('enddate', $row['enddate'], 'date', null, true);
+		$txt = str_replace('<!--VAR:ENDDATE-->', $endDateField , $txt );
+
+		$txt = str_replace('<!--VAR:EXPIREDAYS-->', inputvar('expiredays', $row['expiredays']), $txt );
+		$txt = str_replace('<!--VAR:EMAIL-->', '<input name="email" maxlength="100" value="'.formvar($row['email']).'"/>', $txt );
+		$txt = str_replace('<!--VAR:EMAILGRP-->', inputvar('emailgrp', $row['emailgrp'], 'checkbox'), $txt );
+		$txt = str_replace('<!--VAR:EMAILUSR-->', inputvar('emailusr', $row['emailusr'], 'checkbox'), $txt );
+		$txt = str_replace('<!--VAR:HIDDEN-->', inputvar('id', $id, 'hidden'), $txt );
+
+		//BZ#2575
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+		$userLanguageCode = BizUser::validUserLanguage( $row['language'] );
+		$languageCodes = BizResources::getLanguageCodes();
+		$languageComboDef = '<select name="newlanguage">';
+		foreach( $languageCodes as $languageCode ) {
+			$selected = ($languageCode === $userLanguageCode) ? 'selected="selected"' : '';
+			$languageName = BizResources::localize('LAN_NAME_'.$languageCode);
+			$languageComboDef .= '<option '.$selected.' value="'.$languageCode.'">'.formvar($languageName).'</option>';
+		}
+		$languageComboDef .= '</select>';
+		$txt = str_replace('<!--VAR:LANGUAGE-->', $languageComboDef, $txt );
+		//ENDOF#2575
+
+		$userColor = $row['trackchangescolor'];
+		if( empty($userColor) ) {
+			$userColor = DEFAULT_USER_COLOR; // should not happen in v8.
+		}
+		$txt = str_replace('<!--VAR:TRACKCHANGESCOLOR-->',formvar($userColor), $txt);
+
+		return $txt;
+	}
+
+	/**
+	 * Build the user groups table for the user at the lower part of the maintenance page
+	 *
+	 * @param $id
+	 * @param $mode
+	 * @param $sessionUser
+	 * @param $txt
+	 * @return mixed
+	 */
+	public function buildUserGroupsTable( $id, $mode, $sessionUser, $txt )
+	{
+		$detailTxt = '';
+		if( $mode != "new" && $mode != "error" ) {
+			$detail = '';
+			if( $id > 0 ) {
+				require_once BASEDIR.'/server/bizclasses/BizAdmUser.class.php';
+				$groups = BizAdmUser::listUserGroupsObj( $sessionUser, null, $id, null );
+				$color = array (" bgcolor='#eeeeee'", '');
+				$flip = 0;
+				foreach( $groups as $group ) {
+					$clr = $color[$flip];
+					$detail .=
+						'<tr'.$clr.'><td><a href="hpgroups.php?id='.intval($group->Id).'">'.formvar($group->Name).'</a></td>'.
+						'<td>'.formvar($group->Description).'</td><td><a href="hpusers.php?deldet=1&id='.$id.'&grpid='.intval($group->Id).'" '.
+						' onclick="return myconfirm(\'delgroup\')">'.BizResources::localize('ACT_DELETE').'</a></td></tr>';
+					$flip = 1- $flip;
+				}
+			}
+			$detailTxt = str_replace("<!--ROWS-->", $detail, HtmlDocument::loadTemplate( 'hpusersdet.htm' ) );
+			$detailTxt = str_replace("<!--ID-->", $id, $detailTxt);
+		}
+		$txt = str_replace('<!--DETAILS-->', $detailTxt, $txt);
+
+		return $txt;
+	}
+
+	/**
+	 * Replace with error messages
+	 *
+	 * @param $txt
+	 * @param $errorFields
+	 * @return mixed
+	 */
+	public function replaceErrorMessages( $txt, $errorFields )
+	{
+		foreach( $errorFields as $field => $errors ) {
+			$err = $this->concatErrorMessage( $errors );
+			$txt = str_replace('<!--'.$field.'-->', $err, $txt);
+		}
+
+		return $txt;
+	}
+
+	/**
+	 * Concatenate error message into string
+	 *
+	 * @param $errors
+	 * @return string
+	 */
+	private function concatErrorMessage( $errors )
+	{
+		$errorMsg = '';
+		foreach( $errors as $error ) {
+			$errorMsg .= formvar($error).'<br/>';
+		}
+
+		return $errorMsg;
+	}
+
+	/**
+	 * Get the mode of the user maintenance pages
+	 *
+	 * @param $id
+	 * @return string
+	 */
+	public function getMode( $id )
+	{
+		if( isset($_REQUEST['update']) && $_REQUEST['update'] ) {
+			$mode = ($id > 0) ? 'update' : 'insert';
+		} else if( isset($_REQUEST['delete']) && $_REQUEST['delete'] ) {
+			$mode = 'delete';
+		} else if(isset($_REQUEST['deldet']) && $_REQUEST['deldet'] ) {
+			$mode = 'deldet';
+		} else {
+			$mode = ($id > 0) ? 'edit' : 'new';
+		}
+
+		return $mode;
+	}
+
+	/**
+	 * Get Start Date
+	 *
+	 * @param $inpStartDate
+	 * @param $startYear
+	 * @param $startMonth
+	 * @param $startDay
+	 * @return string
+	 */
+	public function getStartDate( $inpStartDate, $startYear, $startMonth, $startDay )
+	{
+		if( $startYear && $startMonth && $startDay ) {
+			$startDate = DateTimeFunctions::validDate( $startDay . '-' . $startMonth . '-' . $startYear, false );
+		} else {
+			$startDate = DateTimeFunctions::validDate( $inpStartDate, false );
+		}
+
+		return $startDate;
+	}
+
+	/**
+	 * Get the end date
+	 *
+	 * @param $inpEndDate
+	 * @param $endYear
+	 * @param $endMonth
+	 * @param $endDay
+	 * @return string
+	 */
+	public function getEndDate( $inpEndDate, $endYear, $endMonth, $endDay )
+	{
+		if( $endYear && $endMonth && $endDay ) {
+			$endDate = DateTimeFunctions::validDate( $endDay . '-' . $endMonth . '-' . $endYear, false );
+		} else {
+			$endDate = DateTimeFunctions::validDate( $inpEndDate, false );
+		}
+
+		return $endDate;
+	}
+
+	/**
+	 * Validate the start and end date
+	 *
+	 * @param $inpStartDate
+	 * @param $startDate
+	 * @param $inpEndDate
+	 * @param $endDate
+	 * @param $mode
+	 * @param $errors
+	 * @return string
+	 */
+	public function validateStartEndDate( $inpStartDate, $startDate, $inpEndDate, $endDate, $mode, &$errors )
+	{
+		if( !$startDate && $inpStartDate ) {
+			$mode = 'error';
+			$sErrorMessage = BizResources::localize("INVALID_DATE");
+			$errors['ERROR5'][] = $sErrorMessage;
+		}
+		if( !$endDate && $inpEndDate ) {
+			$mode = 'error';
+			$sErrorMessage = BizResources::localize("INVALID_DATE");
+			$errors['ERROR6'][] = $sErrorMessage;
+			return $mode;
+		}
+		if( DateTimeFunctions::diffIsoTimes( $startDate, $endDate ) > 0 ) {
+			$mode = 'error';
+			$sErrorMessage = BizResources::localize("INVALID_DATE");
+			$errors['ERROR6'][] = $sErrorMessage;
+		}
+		return $mode;
+	}
+}
