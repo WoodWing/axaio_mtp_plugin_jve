@@ -1275,7 +1275,7 @@ function mapNodeValues(NodeInterface $node, $formValues, $previewMode )
 											$autocreate_bundle = reset($target_bundles);
 										}
 										// Otherwise use the target bundle stored in selection handler settings.
-										elseif (!$autocreate_bundle = $field_definition->getSetting('handler_settings')['auto_create_bundle']) {
+										elseif ( !($autocreate_bundle = $field_definition->getSetting('handler_settings')['auto_create_bundle']) ) {
 											// If no bundle has been set as auto create target means that there is
 											// an inconsistency in entity reference field settings.
 											trigger_error(
