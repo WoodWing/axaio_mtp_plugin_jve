@@ -23,17 +23,17 @@ foreach($files as $cur_file) {
 
     if(is_readable(dirname(__FILE__).'/'.$cur_file))
     {
-            print '<font>Start creating '.$cur_file.'...</font><br><br>';
+            print '<font>Running '.$cur_file.'...</font><br><br>';
             $dbDriver = DBDriverFactory::gen();
 
-            $check_tables = array('axaio_mtp_trigger', 'axaio_mtp_sentobjects', 'axaio_mtp_process_options'); 
+            $check_tables = array('axaio_mtp_trigger', 'axaio_mtp_sentobjects', 'axaio_mtp_process_options'); // names without prefix 
             $tableCheck = false;
 
             foreach($check_tables as $value)
             {
-                    if( $dbDriver->tableExists( $value, false ))
+                    if( $dbDriver->tableExists( $value ))
                     {
-                            print '<font color="green">Table '.$value.' already created</font><br>';
+                            print '<font color="green">Table <em>'.DBPREFIX.$value.'</em> already created</font><br>';
                             $tableCheck = true;
                     }
             }
@@ -43,13 +43,27 @@ foreach($files as $cur_file) {
                     $runSqlScript = runSqlScript( $dbDriver, $cur_file );
                     foreach($check_tables as $value)
                     {
-                            if( $dbDriver->tableExists( $value, false ))
+                            if( $dbDriver->tableExists( $value ))
                             {
-                                    print '<font color="green">Table '.$value.' successfully created</font><br>';
+                                    print '<font color="green">Table <em>'.DBPREFIX.$value.'</em> successfully created</font><br>';
+                                    
+                                    if(DBTYPE == "mysql") {
+                                        //try to copy values from old table (without prefix) to new one
+                                        $sql = 'INSERT INTO '.DBPREFIX.$value.'
+                                                SELECT *
+                                                FROM '.$value.';';
+                                        $res = $dbDriver->query($sql);
+                                        if($res) {
+                                            print '<font color="green" style="padding-left:1em"> - Found values in existing table <em>'.$value.'</em>, moved them to new table</font><br>';
+                                        }
+
+                                        $sql = 'DROP TABLE '.$value.';'; //DROP OLD TABLE
+                                        $res = $dbDriver->query($sql);
+                                    }
                             }
                             else
                             {
-                                    print '<font color="red">Couldn\'t create Table '.$value.'</font><br>';
+                                    print '<font color="red">Couldn\'t create Table <em>'.DBPREFIX.$value.'</em></font><br>';
                             }
                     }
 
@@ -74,6 +88,8 @@ if(!$done) {
 function runSqlScript( $dbDriver, $sqlScript )
 {
 	$sqlTxt = file_get_contents( $sqlScript );
+        $sqlTxt = str_replace('{DBPREFIX}', DBPREFIX, $sqlTxt);
+        
 	$sqlStatements = explode( ';', $sqlTxt );
 	array_pop( $sqlStatements ); // remove the last empty element ( after the ; )
 

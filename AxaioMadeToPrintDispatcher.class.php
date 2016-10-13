@@ -721,8 +721,9 @@ class AxaioMadeToPrintDispatcher
 
         if( defined( "AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY") && AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY == true) {
             $dbDriver = DBDriverFactory::gen();
+            $table = DBPREFIX."axaio_mtp_process_options";
             $sql =" SELECT		option_value as `stateID`
-                    FROM		axaio_mtp_process_options
+                    FROM		{$table}
                     WHERE		option_name = 'stateOfLayout_{$layoutId}'
                     ORDER BY	id DESC
                     LIMIT		2";
@@ -898,7 +899,7 @@ class AxaioMadeToPrintDispatcher
         self::customize('getMtpConfig_begin', $layStatusId);
 
 		$dbDriver = DBDriverFactory::gen();
-		$dbmtp = 'axaio_mtp_trigger';
+		$dbmtp = DBPREFIX.'axaio_mtp_trigger';
 		$sql = 'select * from '.$dbmtp.' where `state_trigger_layout`='.$layStatusId;
 		$sth = $dbDriver->query($sql);
 		$row = $dbDriver->fetch($sth);
@@ -1010,7 +1011,7 @@ class AxaioMadeToPrintDispatcher
     {
         if( defined( "AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY") && AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY == true) {
             $dbDriver = DBDriverFactory::gen();
-            $sql = "INSERT INTO axaio_mtp_process_options (`option_name`,`option_value`) VALUES ('stateOfLayout_{$layoutId}', '{$layStatusId}');";
+            $sql = "INSERT INTO ".DBPREFIX."axaio_mtp_process_options (`option_name`,`option_value`) VALUES ('stateOfLayout_{$layoutId}', '{$layStatusId}');";
             $dbDriver->query($sql);
         }
     }

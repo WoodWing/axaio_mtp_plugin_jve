@@ -300,7 +300,7 @@ class AxaioMadeToPrint_AxaioMadeToPrint_EnterpriseWebApp extends EnterpriseWebAp
     {
         $error = '';
         $dbDriver = DBDriverFactory::gen();
-        $mtpTab = 'axaio_mtp_trigger';
+        $mtpTab = DBPREFIX.'axaio_mtp_trigger';
         $pubTab = $dbDriver->tablename('publications');
         $issTab = $dbDriver->tablename('issues');
         $chnTab = $dbDriver->tablename('channels');

@@ -1,4 +1,4 @@
-CREATE TABLE `axaio_mtp_trigger` (
+CREATE TABLE `{DBPREFIX}axaio_mtp_trigger` (
   `publication_id` int(11) not null ,
   `issue_id` int(11) not null  default '0',
   `state_trigger_layout` int(11) not null ,
@@ -14,9 +14,9 @@ CREATE TABLE `axaio_mtp_trigger` (
    PRIMARY KEY (`publication_id`,`issue_id`,`state_trigger_layout`,`state_trigger_article`,`state_trigger_image`)
 
 ) DEFAULT CHARSET=utf8;
-CREATE  INDEX `ii_mtp` on `axaio_mtp_trigger`(`issue_id`) ;
+CREATE  INDEX `ii_mtp` on `{DBPREFIX}axaio_mtp_trigger`(`issue_id`) ;
 
-CREATE TABLE `axaio_mtp_sentobjects` (
+CREATE TABLE `{DBPREFIX}axaio_mtp_sentobjects` (
   `objid` int(11) not null  default '0',
   `publication_id` int(11) not null ,
   `issue_id` int(11) not null  default '0',
@@ -24,10 +24,10 @@ CREATE TABLE `axaio_mtp_sentobjects` (
   `printstate` mediumint(1) not null ,
   PRIMARY KEY (`objid`, `publication_id`, `issue_id`, `state_trigger_layout`, `printstate`)
 ) DEFAULT CHARSET=utf8;
-CREATE  INDEX `ii_mtpsentobjects` on `axaio_mtp_sentobjects`(`issue_id`) ;
-CREATE  INDEX `ls_mtpsentobjects` on `axaio_mtp_sentobjects`(`state_trigger_layout`) ;
+CREATE  INDEX `ii_mtpsentobjects` on `{DBPREFIX}axaio_mtp_sentobjects`(`issue_id`) ;
+CREATE  INDEX `ls_mtpsentobjects` on `{DBPREFIX}axaio_mtp_sentobjects`(`state_trigger_layout`) ;
 
-CREATE TABLE `axaio_mtp_process_options` (
+CREATE TABLE `{DBPREFIX}axaio_mtp_process_options` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `option_name` varchar(255) DEFAULT NULL,
   `option_value` longtext,
