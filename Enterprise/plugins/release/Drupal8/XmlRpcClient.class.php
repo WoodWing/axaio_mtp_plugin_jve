@@ -600,7 +600,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 
 		// Now the service I/O is logged above, throw exception in case of a fault.
 		$lastResponse = $client->getLastResponse();
-		if ( $lastResponse && $lastResponse->isError() ) {
+		if( $lastResponse && $lastResponse->isError() ) {
 			$errMsg = $lastResponse->getMessage().' (HTTP '.$lastResponse->getStatus().')';
 		} else if( isset($e) ) {
 			$errMsg = $e->getMessage();
@@ -617,7 +617,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 		}
 
 		$message = BizResources::localize('ERR_DRUPAL_UPLOAD_FAILED');
-		if ( $lastResponse->getStatus() == 401 ) {
+		if( $lastResponse && $lastResponse->getStatus() == 401 ) {
 			// Keep the same as in callService
 			$message = 'Could not authenticate. Check the settings for the publication channel.';
 		}
