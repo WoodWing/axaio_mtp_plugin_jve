@@ -136,7 +136,7 @@ class WW_Utils_PhpInfo
 				$show = empty($defValues[$i][1]) ? '<i>'.$defValues[$i][2].'</i>' : $defValues[$i][1];
 
 				// If we check the drupal sites replace the password with ***
-				if($defValue[0] == 'DRUPAL_SITES' || $defValue[0] == 'DRUPAL7_SITES') {
+				if($defValue[0] == 'DRUPAL_SITES' || $defValue[0] == 'DRUPAL8_SITES') {
 					$show = preg_replace('/\[password\] => ([^)|^\ ]*)/', '[password] => ***', $show);
 				}
 				// Check if TESTSUITE replace the password with ***
