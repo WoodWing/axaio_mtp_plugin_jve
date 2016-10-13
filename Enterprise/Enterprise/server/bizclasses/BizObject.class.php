@@ -3790,7 +3790,11 @@ class BizObject
 	                                        Object $object, $currRow )
 	{
 		// Block callers from overruling the Orientation; This is extracted from the native file by the ExifTool integration.
-		$object->MetaData->ContentMetaData->Orientation = null;
+		// Shadow objects do not have a native, so we need them to tell us their orientation.
+		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
+		if( !BizContentSource::isShadowObject( $object ) ) {
+			$object->MetaData->ContentMetaData->Orientation = null;
+		}
 
 		// Enrich object MetaData with any embedded metadata from file
 		require_once BASEDIR.'/server/bizclasses/BizMetaDataPreview.class.php';
