@@ -1796,5 +1796,39 @@ class DBObject extends DBBase
 		$row = $dbDriver->fetch($sth);
 		
 		return $row ? $row['cnt'] : 0;		
-	}	
+	}
+
+	/**
+	 * Selects an object thereby filtering on the name of the object, brand and issue. Also the the object type is used
+	 * to filter.
+	 *
+	 * @param string $objectName
+	 * @param string $objectType
+	 * @param string $brandName
+	 * @param string $issueName
+	 * @return array|boolean Array with the row or false if not found.
+	 */
+	static public function getObjectByTypeAndNames( $objectName, $objectType, $brandName, $issueName )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$odb = $dbDriver->tablename( 'objects' );
+		$tdb = $dbDriver->tablename( 'targets' );
+		$pdb = $dbDriver->tablename( 'publications' );
+		$idb = $dbDriver->tablename( 'issues' );
+
+		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' ) ).' as "version"';
+		$sql = "SELECT o.`id`, o.`name`, o.`storename`, $verFld ";
+		$sql .= "FROM $odb o ";
+		$sql .= "LEFT JOIN $tdb t ON (o.`id` = t.`objectid`) ";
+		$sql .= ", $pdb p, $idb i ";
+		$sql .= "WHERE o.`name` = ? AND o.`type` = ? AND
+						o.`publication` = p.`id` AND p.`publication` = ? AND 
+						t.`issueid` = i.`id` AND i.`name` = ? ";
+		$params = array( $objectName, $objectType, $brandName, $issueName );
+
+		$sth = $dbDriver->query( $sql, $params );
+		$row = $dbDriver->fetch( $sth );
+
+		return $row;
+	}
 }

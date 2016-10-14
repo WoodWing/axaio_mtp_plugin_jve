@@ -147,6 +147,21 @@ class DBChannel extends DBBase
 	}
 
 	/**
+	 * Get PubChannelInfo object, filter on name.
+	 *
+	 * @param int $brandId
+	 * @param string $pubChannelName
+	 * @return object PubChannelInfo object
+	 * @since v7.0.13
+	 */
+	public static function getPubChannelObjByBrandAndName( $brandId, $pubChannelName )
+	{
+		$row = self::getRow( self::TABLENAME, '`publicationid` = ? AND `name` = ? ', '*', array( $brandId, $pubChannelName ) );
+		if (!$row) return null;
+		return self::rowToObj($row);
+	}
+
+	/**
 	 * Checks if a brand contains a channel for a certain publish system.
 	 * @param integer $pubId	Brand (publication) id.
 	 * @param string  $pubSystem Publish System (e.g. Drupal)
