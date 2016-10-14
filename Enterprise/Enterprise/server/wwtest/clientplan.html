@@ -1,9 +1,9 @@
 <html><body>
 <hr><b>Behaviour rules:</b><br><ul>
-<li>Objects can be identified in two ways; by Pub+Issue+Name+Type -OR- by object id.</li>
-<li>For CreateAdverts and CreateLayouts, objects are always identified by Pub+Issue+Name+Type.</li>
-<li>Identification by Pub+Issue+Name+Type is always name based (not using internal/database ids)</li>
-<li>When NO object id is given, Publication+Name+Type must be given and must exist.</li>
+<li>Objects can be identified in two ways; by Pub+Issue+Name+Type (and optional the Channel Name) -OR- by object id.</li>
+<li>For CreateAdverts and CreateLayouts, objects are always identified by Pub+Issue+Name+Type (and optional the Channel Name).</li>
+<li>Identification by Pub+Issue+Name+Type (and optional the Channel Name) is always name based (not using internal/database ids)</li>
+<li>When NO object id is given, Publication+Name+Type (and optional the Channel Name) must be given and must exist.</li>
 <li>When object id is given, but any of Pub/Issue/Name/Type is not given, the current values are used (and remains unchanged).</li>
 <li>When Status and/or Section are not given, the first* ones for which the user has write access will be used. *=Respecting the configured order.</li>
 <li>When Issue and/or Section are given, but do not exist, they are created automatically.</li>
@@ -36,6 +36,7 @@ It is recommended to use ids since objects can be renamed in the editorial syste
 </li><br /><li>The <b>layout_id</b> parameter points to an existing layout. If you know the object id, you can avoid creating new layouts by specifying this parameter. All modifications are then done to the existing layout.
 </li><li>The <b>advert_id</b> parameter points to an existing advert. If you know the object id, you can avoid creating new advert by specifying this parameter. All modifications are then done to the existing advert. 
 </li><li>The <b>publication</b> and <b>issue </b> parameters define the location where to create/modify layouts/adverts. Default are resp. 'WW News' and '2nd Issue'.
+</li><li>The <b>channelName </b> The publication channel of the issue. If the issue does not exist in the channel it is created within the channel.
 </li><li>The <b>lay_name</b> and <b>adv_name </b> parameters specify name of layout or advert. Default is random name.
 </li><li>The <b>lay_section</b> and <b>adv_section </b> parameters specify section for layout or advert. Default is empty to let Enterprise choose first found with write access.
 </li><li>The <b>lay_status</b> and <b>adv_status </b> parameters specify status of layout or advert. Default is empty to let Enterprise choose first found with write access.

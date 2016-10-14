@@ -32,6 +32,7 @@ $advertId = isset( $_GET["advert_id"] ) ? $_GET["advert_id"] : '';
 // Add '?publication=...' and/or '?issue=...' to define location where to create/modify layouts/adverts.
 $publication = isset( $_GET['publication'] ) ? $_GET['publication'] : $suiteOpts['Brand'];
 $issue = isset( $_GET['issue'] ) ? $_GET['issue'] : $suiteOpts['Issue'];
+$channelName = isset($_GET['channelName']) ? $_GET['channelName'] : '';
 // Add '?adv_name=...' and/or '?adv_section=...' and/or '?adv_status=...' to specify name/section/status of advert.
 $advertName = isset( $_GET['adv_name'] ) ? $_GET['adv_name'] : 'new advert '.date( 'Ymd_His' );
 $advertSection = isset( $_GET['adv_section'] ) ? $_GET['adv_section'] : null;
@@ -143,21 +144,21 @@ print "Click <a href='clientplan.html'>here</a> for more info. <br>";
 
 // Show all URL parameters including made-up params.
 echo "<hr><b>Session parameters:</b><br><table border=1 cellpadding=2>";
-echo "<tr><td><b>Common</b></td>           <td><b>Layout</b></td>                             <td><b>Advert</b></tr>";
-echo "<tr><td></td>                        <td>layout_id=$layoutId</td>                         <td>advert_id=$advertId</td></tr>";
-echo "<tr><td>namebased=$nameBased</td>    <td>lay_name=$layoutName</td>                        <td>adv_name=$advertName</td></tr>";
-echo "<tr><td>pubblication=$publication</td>      <td>lay_section=$layoutSection</td>                  <td>adv_section=$advertSection</td></tr>";
-echo "<tr><td>issue=$issue</td>             <td>lay_status=$layoutStatus</td>                    <td>adv_status=$advertStatus</td></tr>";
-echo "<tr><td>act_create=$actionCreate</td>  <td>lay_template=$layoutTemplateName</td>                <td>content=$content</td></tr>";
-echo "<tr><td>act_modify=$actionModify</td>  <td>pagenrs (create)=".implode( ',', $createPageOrdersNoEdition )."</td><td>pagenr (create)=$advertCreatePageNr (= page sequence) (=> page order=".$createPageOrdersNoEdition[ $advertCreatePageNr - 1 ].")</td></tr>";
-echo "<tr><td>act_delete=$actionDelete</td>  <td>pagenrs (modify)=".implode( ',', $modifyPageOrdersNoEdition )."</td><td>pagenr (modify)=$advertModifyPageNr (= page sequence) (=> page order=".$modifyPageOrdersNoEdition[ $advertModifyPageNr - 1 ].")</td></tr>";
-echo "<tr><td>&nbsp;</td>                  <td>edition pagenrs (create)=".print_r( $createPageOrdersByEditions, true )."</td>  <td>left, top, width, height (create)=$advertCreateLeftPosition, $advertCreateTopPosition, $advertCreateWidth, $advertCreateHeight</td></tr>";
-echo "<tr><td>&nbsp;</td>                  <td>edition pagenrs (modify)=".print_r( $modifyPageOrdersByEditions, true )."</td>  <td>left, top, width, height (modify)=$advertModifyLeftPosition, $advertModifyTopPosition, $advertModifyWidth, $advertModifyHeight</td></tr>";
-echo "<tr><td>&nbsp;</td>                  <td>lay_editions=".print_r( $layoutEditionNames, true )."</td><td>adv_editions=".print_r( $advertEditionNames, true )."</td></tr>";
-echo "<tr><td>&nbsp;</td>                  <td>lay_deadline=$layoutDeadline</td>                <td>adv_deadline=$advertDeadline</td></tr>";
-echo "<tr><td>&nbsp;</td>                  <td>&nbsp;</td>                                    <td>adv_dx, adv_dy, adv_scalex, adv_scaley (create)=$advertCreateFrameDeltaX, $advertCreateFrameDeltaY, ".( $advertCreateFrameScaleX * 100 )."%, ".( $advertCreateFrameScaleY * 100 )."%</td></tr>";
-echo "<tr><td>&nbsp;</td>                  <td>&nbsp;</td>                                    <td>adv_dx, adv_dy, adv_scalex, adv_scaley (modify)=$advertModifyFrameDeltaX, $advertModifyFrameDeltaY, ".( $advertModifyFrameScaleX * 100 )."%, ".( $advertModifyFrameScaleY * 100 )."%</td></tr>";
-echo "<tr><td>&nbsp;</td>                  <td>&nbsp;</td>                                    <td>adv_filename=$advertHighResFilename</td></tr>";
+echo "<tr><td><b>Common</b></td>           	<td><b>Layout</b></td>                             											<td><b>Advert</b></tr>";
+echo "<tr><td></td>                        	<td>layout_id=$layoutId</td>                         											<td>advert_id=$advertId</td></tr>";
+echo "<tr><td>namebased=$nameBased</td>    	<td>lay_name=$layoutName</td>                        											<td>adv_name=$advertName</td></tr>";
+echo "<tr><td>pubblication=$publication</td> <td>lay_section=$layoutSection</td>                  											<td>adv_section=$advertSection</td></tr>";
+echo "<tr><td>issue=$issue</td>             	<td>lay_status=$layoutStatus</td>                    											<td>adv_status=$advertStatus</td></tr>";
+echo "<tr><td>pubchannel=$channelName;</td>	<td>lay_template=$layoutTemplateName</td>                									<td>content=$content</td></tr>";
+echo "<tr><td>act_modify=$actionCreate</td>  <td>pagenrs (create)=".implode( ',', $createPageOrdersNoEdition )."</td>            <td>pagenr (create)=$advertCreatePageNr (= page sequence) (=> page order=".$createPageOrdersNoEdition[ $advertCreatePageNr - 1 ].")</td></tr>";
+echo "<tr><td>act_delete=$actionModify</td>  <td>pagenrs (modify)=".implode( ',', $modifyPageOrdersNoEdition )."</td>            <td>pagenr (modify)=$advertModifyPageNr (= page sequence) (=> page order=".$modifyPageOrdersNoEdition[ $advertModifyPageNr - 1 ].")</td></tr>";
+echo "<tr><td>act_create=$actionDelete</td>  <td>edition pagenrs (create)=".print_r( $createPageOrdersByEditions, true )."</td>  <td>left, top, width, height (create)=$advertCreateLeftPosition, $advertCreateTopPosition, $advertCreateWidth, $advertCreateHeight</td></tr>";
+echo "<tr><td>&nbsp;</td>                  	<td>edition pagenrs (modify)=".print_r( $modifyPageOrdersByEditions, true )."</td>  <td>left, top, width, height (modify)=$advertModifyLeftPosition, $advertModifyTopPosition, $advertModifyWidth, $advertModifyHeight</td></tr>";
+echo "<tr><td>&nbsp;</td>                  	<td>lay_editions=".print_r( $layoutEditionNames, true )."</td>                      <td>adv_editions=".print_r( $advertEditionNames, true )."</td></tr>";
+echo "<tr><td>&nbsp;</td>                  	<td>lay_deadline=$layoutDeadline</td>                											<td>adv_deadline=$advertDeadline</td></tr>";
+echo "<tr><td>&nbsp;</td>                  	<td>&nbsp;</td>                                    											<td>adv_dx, adv_dy, adv_scalex, adv_scaley (create)=$advertCreateFrameDeltaX, $advertCreateFrameDeltaY, ".( $advertCreateFrameScaleX * 100 )."%, ".( $advertCreateFrameScaleY * 100 )."%</td></tr>";
+echo "<tr><td>&nbsp;</td>                  	<td>&nbsp;</td>                                    											<td>adv_dx, adv_dy, adv_scalex, adv_scaley (modify)=$advertModifyFrameDeltaX, $advertModifyFrameDeltaY, ".( $advertModifyFrameScaleX * 100 )."%, ".( $advertModifyFrameScaleY * 100 )."%</td></tr>";
+echo "<tr><td>&nbsp;</td>                  	<td>&nbsp;</td>                                    											<td>adv_filename=$advertHighResFilename</td></tr>";
 echo "</table><hr>";
 
 // Generate random text for text fields: comments, description and plain content.
@@ -336,6 +337,7 @@ if( $actionCreate == 'all' || $actionCreate == 'layout' ) {
 		$layoutName,
 		$publication,
 		$issue,
+		$channelName,
 		$layoutSection,
 		$layoutStatus,
 		$layoutPages,
@@ -420,6 +422,7 @@ if( $actionModify == 'all' || $actionModify == 'layout' ) {
 			$layoutName,
 			$publication,
 			$issue,
+			$channelName,
 			$layoutSection,
 			$layoutStatus,
 			$layoutPages,
@@ -428,7 +431,7 @@ if( $actionModify == 'all' || $actionModify == 'layout' ) {
 			null );
 	} else {
 		$layout = new PlnLayout(
-			$layoutId, null, null, null, $layoutSection, $layoutStatus, $layoutPages, $layoutEditions, $layoutDeadline, null );
+			$layoutId, null, null, null, null, $layoutSection, $layoutStatus, $layoutPages, $layoutEditions, $layoutDeadline, null );
 	}
 
 	require_once BASEDIR.'/server/interfaces/services/pln/PlnModifyLayoutsRequest.class.php';
@@ -487,6 +490,7 @@ if( $actionCreate == 'all' || $actionCreate == 'advert' ) {
 		null,
 		$publication,
 		$issue,
+		$channelName,
 		$advertSection,
 		$advertStatus,
 		$advertName,
@@ -570,6 +574,7 @@ if( $actionModify == 'all' || $actionModify == 'advert' ) {
 		null,
 		$publication,
 		$issue,
+		$channelName,
 		$advertSection,
 		$advertStatus,
 		$advertName,
@@ -609,7 +614,7 @@ if( $actionModify == 'all' || $actionModify == 'advert' ) {
 ////////////////////////////////////////////////////////////////////////
 if( $actionDelete == 'all' || $actionDelete == 'advert' ) {
 	if( $nameBased == 'true' ) {
-		$advert = new PlnAdvert( null, null, $publication, $issue, null, null, $advertName );
+		$advert = new PlnAdvert( null, null, $publication, $issue, $channelName, null, null, $advertName );
 	} else {
 		$advert = new PlnAdvert( $advertId );
 	}
@@ -632,7 +637,7 @@ if( $actionDelete == 'all' || $actionDelete == 'advert' ) {
 ////////////////////////////////////////////////////////////////////////
 if( $actionDelete == 'all' || $actionDelete == 'layout' ) {
 	if( $nameBased == 'true' ) {
-		$layout = new PlnLayout( null, $layoutName, $publication, $issue );
+		$layout = new PlnLayout( null, $layoutName, $publication, $issue, $channelName );
 	} else {
 		$layout = new PlnLayout( $layoutId );
 	}
