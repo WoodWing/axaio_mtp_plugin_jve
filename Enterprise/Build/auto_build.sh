@@ -382,11 +382,10 @@ function step1_cleanGetWorkspace {
 	echo "step1i: Create folder for the internal files (not to ship)."
 	mkdir "${WORKSPACE}/internals"
 
-	# Note that the config_overrule.php file is not tracked in Git to avoid merge conflicts.
-	# Instead, it is added to the .gitignore file and here copied to the config folder.
+	# The config_overrule.php.default file will be tracked in Git, while the config_overrule.php file is added to the .gitignore.
 	# This way we can provide an empty placeholder file, so admins don't have to create one.
 	echo "step1j: Install empty placeholder for Enterprise administrators to overrule config options."
-	cp "${WORKSPACE}/Enterprise/Build/config_overrule.php" "${WORKSPACE}/Enterprise/Enterprise/config"
+	cp "${WORKSPACE}/Enterprise/Build/config_overrule.php.default" "${WORKSPACE}/Enterprise/Enterprise/config"
 }
 
 #
