@@ -382,10 +382,10 @@ function step1_cleanGetWorkspace {
 	echo "step1i: Create folder for the internal files (not to ship)."
 	mkdir "${WORKSPACE}/internals"
 
-	# The config_overrule.php.default file will be tracked in Git, while the config_overrule.php file is added to the .gitignore.
-	# This way we can provide an empty placeholder file, so admins don't have to create one.
+	# The .default needs to be removed in order to successfully run the coding tests. The tests expect a healthy system,
+	# which includes an existing config_overrule file. When creating the artifact the filename will be restored.
 	echo "step1j: Install empty placeholder for Enterprise administrators to overrule config options."
-	cp "${WORKSPACE}/Enterprise/Build/config_overrule.php.default" "${WORKSPACE}/Enterprise/Enterprise/config"
+	cp "${WORKSPACE}/Enterprise/Build/config_overrule.php.default" "${WORKSPACE}/Enterprise/Enterprise/config/config_overrule.php"
 }
 
 #
@@ -602,19 +602,22 @@ function step5_ionCubeEncodePhpFiles {
 # Archives the Enterprise Server in a ZIP file. The BuildTest and large sample data are put in separate ZIP files.
 #
 function step6_zipEnterpriseServer {
-	echo "step6a: Zipping BuildTest ..."
+	echo "step6a: Renaming the config file for the archive..."
+	mv "${WORKSPACE}/Enterprise_release/Enterprise/config/config_overrule.php" "${WORKSPACE}/Enterprise_release/Enterprise/config/config_overrule.php.default"
+
+	echo "step6b: Zipping BuildTest..."
 	zipFolder "${WORKSPACE}/Enterprise_release/Enterprise/server/wwtest/testsuite" "BuildTest" "${WORKSPACE}/artifacts" "BuildTest1_${SERVER_VERSION_ZIP}"
 
-	echo "step6b: Zipping large sample data..."
+	echo "step6c: Zipping large sample data..."
 	zipFolder "${WORKSPACE}/Enterprise_release/Enterprise/server/wwtest/testdata" "largeSpeedTestData" "${WORKSPACE}/artifacts" "largeSpeedTestData_${SERVER_VERSION_ZIP}"
 
-	echo "step6c: Excluding (removing) testsuite stuff that not needed for production..."
+	echo "step6d: Excluding (removing) testsuite stuff that not needed for production..."
 	rm -rf "${WORKSPACE}/Enterprise_release/Enterprise/server/wwtest/testsuite/BuildTest"
 	rm -rf "${WORKSPACE}/Enterprise_release/Enterprise/server/wwtest/testsuite/BuildTest2"
 	rm -rf "${WORKSPACE}/Enterprise_release/Enterprise/server/wwtest/testsuite/PhpCodingTest"
 	rm -rf "${WORKSPACE}/Enterprise_release/Enterprise/server/wwtest/testdata/largeSpeedTestData"
 
-	echo "step6d: Zipping Enterprise Server ..."
+	echo "step6e: Zipping Enterprise Server..."
 	zipFolder "${WORKSPACE}/Enterprise_release" "Enterprise" "${WORKSPACE}/artifacts" "EnterpriseServer_${SERVER_VERSION_ZIP}"
 }
 
