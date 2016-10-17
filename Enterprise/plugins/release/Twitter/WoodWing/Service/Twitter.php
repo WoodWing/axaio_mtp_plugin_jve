@@ -79,9 +79,20 @@ class WoodWing_Service_Twitter extends Zend_Service_Twitter
 		}
 
 		$response = new Zend_Service_Twitter_Response( $this->post( $path, $params ) );
+		if( LogHandler::debugMode() ) {
+			LogHandler::logService( 'Twitter::statusesUploadMedia', $response->getRawResponse(), false, 'JSON' );
+		}
 		$responseValues = $response->toValue();
+		LogHandler::Log( 'Twitter', 'DEBUG', __METHOD__.': retrieved media_id_string: '.$responseValues->media_id_string );
 
-		return $responseValues->media_id;
+		// EN-88054: The media_id field can be larger than a max 32 bit integer (2147483647). Such a large number gets
+		// converted by json_decode into a float value when PHP is running in 32 bit mode, which is typically the case
+		// for IIS running FastCGI on Windows. When PHP is running in 64 bit mode (which is typically the case for MacOSX),
+		// the media_id is smaller than a max 64 bit integer (9223372036854775807) and so the problem does not happen.
+		// Once converted to a float value, it is no longer the same as the original value anymore and so round-tripping
+		// a converted media_id value would result into the error "media_ids parameter is invalid". Instead of relying
+		// on the media_id field, we use the media_id_string field that does not get converted by json_decode.
+		return $responseValues->media_id_string;
 	}
 
 	/**
