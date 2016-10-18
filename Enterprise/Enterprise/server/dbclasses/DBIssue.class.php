@@ -31,11 +31,13 @@ class DBIssue extends DBBase
 
 		$rows = self::fetchResults( $sth );
 		return $rows;	
-	}	
-/**
+	}
+
+	/**
 	 * Get all issues by name and channel Id.
 	 *
 	 * @param string $name Issue name
+    * @param int $channelId
 	 * @return array of issue rows
 	 */
 	static public function getIssuesByNameAndChannel( $name, $channelId )
