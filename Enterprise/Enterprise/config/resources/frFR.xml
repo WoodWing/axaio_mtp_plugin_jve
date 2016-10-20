@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Déactivé(e) par l'utilisateur (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Nom d'utilisateur et mot de passe requis</Term>
   <Term key="ERR_USER_BEGINDATE">Compte utilisateur pas encore valable</Term>
-  <Term key="ERR_USER_ENDDATE">Compte utilisateur plus valable</Term>
+  <Term key="ERR_USER_ENDDATE">Compte utilisateur plus valable (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Le nom de l'utilisateur existe déjà.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Nom d'utilisateur requis. Saisissez-en un</Term>
   <Term key="ERR_WRONGLANG">Choisissez une langue (S1052).</Term>
@@ -2150,7 +2150,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">L'élément %1 de l'article %2 a déjà été placé dans l'{EDITION} %3 de la mise en page %4.</Term>
   <Term key="WARN_PAGE_DBL">Pages multiples pour la page:</Term>
   <Term key="WARN_PAGE_START">L'une des pages commence par le numéro:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Mot de passe expiré, veuillez modifier le mot de passe</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Mot de passe expiré, veuillez modifier le mot de passe (S1145)</Term>
   <Term key="WARN_USER_LIMIT">La limite d'utilisateurs simultanés a été atteinte pour cette application ou la limite de connexions simultanées a été atteinte pour le serveur Enterprise.</Term>
   <Term key="WAR_UPLOAD_WARNING">Impossible de créer une image d'aperçu</Term>
   <Term key="WEBFEATURES">Applications</Term>

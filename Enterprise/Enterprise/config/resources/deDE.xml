@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Benutzer deaktiviert (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Benutzername und Kennwort erforderlich.</Term>
   <Term key="ERR_USER_BEGINDATE">Benutzerkonto ist noch nicht gültig</Term>
-  <Term key="ERR_USER_ENDDATE">Benuzterkonto ist nicht mehr gültig</Term>
+  <Term key="ERR_USER_ENDDATE">Benuzterkonto ist nicht mehr gültig (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Benutzername besteht bereits.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Benutzername erforderlich, bitte ausfüllen.</Term>
   <Term key="ERR_WRONGLANG">Sprache auswählen (S1052).</Term>
@@ -2151,7 +2151,7 @@ Nach dem Ändern der Einstellungen müssen Sie den Webdienst bzw. Datenbankdiens
   <Term key="WARN_ELEMENT_PLACED_EDITION">Element %1 von Artikel %2 wurde bereits in {EDITION} %3 von %4 eingefügt.</Term>
   <Term key="WARN_PAGE_DBL">Mehrere Seiten für Seite:</Term>
   <Term key="WARN_PAGE_START">Eine der Seiten beginnt mit Seitenzahl:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Kennwort abgelaufen, bitte änderen</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Kennwort abgelaufen, bitte änderen (S1145)</Term>
   <Term key="WARN_USER_LIMIT">Die Höchstzahl gleichzeitig arbeitender Benutzer für diese Anwendung wurde erreicht oder die Höchstzahl gleichzeitig bestehender Verbindungen für den Enterprise-Server wurde erreicht.</Term>
   <Term key="WAR_UPLOAD_WARNING">Vorschaubild konnte nicht erstellt werden.</Term>
   <Term key="WEBFEATURES">Anwendungen</Term>
