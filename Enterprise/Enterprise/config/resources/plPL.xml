@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Użytkownik zdezaktywowany (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Wymagana jest nazwa użytkownika i hasło</Term>
   <Term key="ERR_USER_BEGINDATE">Konto użytkownika nie jest jeszcze ważne</Term>
-  <Term key="ERR_USER_ENDDATE">Konto użytkownika nie jest już ważne</Term>
+  <Term key="ERR_USER_ENDDATE">Konto użytkownika nie jest już ważne (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Nazwa użytkownika już istnieje.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Wprowadź wymaganą nazwę użytkownika</Term>
   <Term key="ERR_WRONGLANG">Wybierz język (S1052)</Term>
@@ -2151,7 +2151,7 @@ Po zmianie ustawień należy pamiętać o ponownym uruchomieniu usługi WWW i/lu
   <Term key="WARN_ELEMENT_PLACED_EDITION">Element %1 artykułu %2 już jest umieszczony w edycji %3 układu %4.</Term>
   <Term key="WARN_PAGE_DBL">Wiele stron dla strony:</Term>
   <Term key="WARN_PAGE_START">Jedna ze stron rozpoczyna się od numeru strony:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Hasło utraciło ważność. Zmień hasło</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Hasło utraciło ważność. Zmień hasło (S1145)</Term>
   <Term key="WARN_USER_LIMIT">Przekroczono maksymalną dozwoloną liczbę użytkowników korzystających jednocześnie z aplikacji lub osiągnięto limit na serwerze Enterprise.</Term>
   <Term key="WAR_UPLOAD_WARNING">Nie można utworzyć obrazu podglądu</Term>
   <Term key="WEBFEATURES">Funkcje WWW</Term>
