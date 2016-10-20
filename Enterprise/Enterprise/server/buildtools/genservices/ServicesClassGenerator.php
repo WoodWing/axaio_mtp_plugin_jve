@@ -1156,49 +1156,52 @@ abstract class ServicesClassGenerator
 			$outTxt .= " )\n\t{\n";
 			$serviceClass = $serviceName."Service";
 			$outTxt .= "\t\trequire_once BASEDIR.'/server/services/$intfShortLow/$intfShort$serviceClass.class.php';\n";
-			$outTxt .= "\n\t\ttry {\n"; 
 			switch( $protocol ) {
 				case 'soap':
-				break;
+					$outTxt .= "\n\t\ttry {\n";
+					$indent = "\t\t\t";
+					break;
 				case 'json':
 					$requestClass = $intfShort.$serviceName.'Request';
-					$outTxt .= "\t\t\t\$req['__classname__'] = '$requestClass';\n";
-					$outTxt .= "\t\t\t\$req = \$this->arraysToObjects( \$req );\n";
-					$outTxt .= "\t\t\t\$req = \$this->restructureObjects( \$req );\n";
+					$outTxt .= "\t\t\$req['__classname__'] = '$requestClass';\n";
+					$outTxt .= "\t\t\$req = \$this->arraysToObjects( \$req );\n";
+					$outTxt .= "\t\t\$req = \$this->restructureObjects( \$req );\n";
+					$indent = "\t\t";
 				break;
 				case 'amf':
+					$outTxt .= "\n\t\ttry {\n";
 					$requestClass = $intfShort.$serviceName.'Request';
 					$outTxt .= "\t\t\t\$req = \$this->objectToRequest( \$req, '$requestClass' );\n";
 					$reqInc[] = $requestClass;
+					$indent = "\t\t\t";
 				break;
 			}
 			if ($serviceInOut['dimeIn'] == true) {
 				$outTxt .= $this->getUrlToFilePath( $serviceName ); // Translate external url to internal filepath.
 			}
-			$outTxt .= "\t\t\t\$service = new $intfShort$serviceClass();\n";
-			$outTxt .= "\t\t\t\$resp = \$service->execute( \$req );\n";
+			$outTxt .= $indent."\$service = new $intfShort$serviceClass();\n";
+			$outTxt .= $indent."\$resp = \$service->execute( \$req );\n";
 			switch( $protocol ) {
 				case 'amf':
 				case 'soap':
 					break;
 				case 'json':
-					$outTxt .= "\t\t\t\$resp = \$this->restructureObjects( \$resp );\n";
+					$outTxt .= "\t\t\$resp = \$this->restructureObjects( \$resp );\n";
 					break;
 			}
-			$outTxt .= "\t\t} catch( BizException \$e ) {\n";
 			switch( $protocol ) {
 				case 'soap':
+					$outTxt .= "\t\t} catch( BizException \$e ) {\n";
 					$outTxt .= "\t\t\tthrow new SoapFault( \$e->getType(), \$e->getMessage(), '', \$e->getDetail() );\n";
+					$outTxt .= "\t\t}\n";
 				break;
 				case 'amf':
+					$outTxt .= "\t\t} catch( BizException \$e ) {\n";
 					$outTxt .= "\t\t\trequire_once 'Zend/Amf/Server/Exception.php';\n";
 					$outTxt .= "\t\t\tthrow new Zend_Amf_Server_Exception( \$e->getMessage() );\n";
-				break;
-				case 'json':
-					$outTxt .= "\t\t\tthrow new Zend\\Json\\Server\\Exception\\ErrorException( \$e->getMessage() );\n";
+					$outTxt .= "\t\t}\n";
 				break;
 			}
-			$outTxt .= "\t\t}\n";
 			if ($serviceInOut['dimeOut'] == true) {
 				$outTxt .= $this->getFilePathToUrl( $serviceName ); // Translate internal filepath to external url.
 			}			
