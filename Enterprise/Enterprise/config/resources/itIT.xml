@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Utente disabilitato (S1051).</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Nome utente e password obbligatori.</Term>
   <Term key="ERR_USER_BEGINDATE">L'account utente non è ancora stato convalidato</Term>
-  <Term key="ERR_USER_ENDDATE">L'account utente non è più valido</Term>
+  <Term key="ERR_USER_ENDDATE">L'account utente non è più valido (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Nome utente già utilizzato.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Nome utente obbligatorio: immetterlo ora.</Term>
   <Term key="ERR_WRONGLANG">Scegliere una lingua (S1052).</Term>
@@ -2151,7 +2151,7 @@ Dopo avere apportato le modifiche necessarie, riavviare il servizio Web e/o quel
   <Term key="WARN_ELEMENT_PLACED_EDITION">L'elemento %1 dell'articolo %2 è già stato inserito nell'{EDITION} %3 del layout %4.</Term>
   <Term key="WARN_PAGE_DBL">Più pagine su una pagina:</Term>
   <Term key="WARN_PAGE_START">Una delle pagine inizia con il numero di pagina:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Password scaduta</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Password scaduta (S1145)</Term>
   <Term key="WARN_USER_LIMIT">È stato raggiunto il limite massimo di utenti simultanei per questa applicazione o il limite massimo di connessioni simultanee al server Enterprise.</Term>
   <Term key="WAR_UPLOAD_WARNING">Impossibile creare l'immagine di anteprima.</Term>
   <Term key="WEBFEATURES">Applicazioni</Term>

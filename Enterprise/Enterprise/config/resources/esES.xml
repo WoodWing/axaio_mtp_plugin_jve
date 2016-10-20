@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Usuario desactivado (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Se necesita nombre de usuario y contraseña</Term>
   <Term key="ERR_USER_BEGINDATE">La cuenta de usuario aún no es válida.</Term>
-  <Term key="ERR_USER_ENDDATE">La cuenta de usuario ya no es válida.</Term>
+  <Term key="ERR_USER_ENDDATE">La cuenta de usuario ya no es válida. (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Este nombre de usuario ya existe.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Es necesario introducir el nombre de usuario</Term>
   <Term key="ERR_WRONGLANG">Elija un idioma (S1052).</Term>
@@ -2151,7 +2151,7 @@ Después de cambiar la configuración, no olvide reiniciar el servicio Web o el 
   <Term key="WARN_ELEMENT_PLACED_EDITION">El elemento %1 del artículo %2 ya se ha guardado en la {EDITION} %3 del diseño %4.</Term>
   <Term key="WARN_PAGE_DBL">Varias páginas por página:</Term>
   <Term key="WARN_PAGE_START">Una de las páginas empieza con el número:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">La contraseña ha caducado. Introduzca una nueva.</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">La contraseña ha caducado. Introduzca una nueva. (S1145)</Term>
   <Term key="WARN_USER_LIMIT">Se ha alcanzado el límite de usuarios simultáneos para esta aplicación o el límite de conexiones simultáneas para el servidor Enterprise.</Term>
   <Term key="WAR_UPLOAD_WARNING">No se ha podido crear la imagen de vista previa</Term>
   <Term key="WEBFEATURES">Aplicaciones</Term>

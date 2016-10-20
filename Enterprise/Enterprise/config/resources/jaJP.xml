@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">ユーザアカウントが無効になっています(S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">ユーザ名とパスワードが必要です！</Term>
   <Term key="ERR_USER_BEGINDATE">ユーザアカウントの利用可能日を迎えていません</Term>
-  <Term key="ERR_USER_ENDDATE">ユーザアカウントの有効期間は終了しました</Term>
+  <Term key="ERR_USER_ENDDATE">ユーザアカウントの有効期間は終了しました (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">ユーザ名はすでに存在します。</Term>
   <Term key="ERR_USER_NAME_REQUIRED">ユーザ名が必要です。入力してください！</Term>
   <Term key="ERR_WRONGLANG">言語を選択してください(S1052)。</Term>
@@ -2151,7 +2151,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">アーティクル%2の要素%1はすでにレイアウト%4の{EDITION}%3に配置されています。</Term>
   <Term key="WARN_PAGE_DBL">重複しているページがあります:</Term>
   <Term key="WARN_PAGE_START">１つのページ番号とページステータスがあります:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">パスワードは期限切れです</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">パスワードは期限切れです (S1145)</Term>
   <Term key="WARN_USER_LIMIT">このアプリケーションのユーザー数が同時利用者数の上限に達したか、Enterprise サーバへの同時接続者数が上限に達しました。</Term>
   <Term key="WAR_UPLOAD_WARNING">プレビュー画像を作成することができませんでした</Term>
   <Term key="WEBFEATURES">アプリケーション</Term>
