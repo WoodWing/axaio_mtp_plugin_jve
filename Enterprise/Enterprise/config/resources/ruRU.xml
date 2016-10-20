@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Пользователь отключен (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Необходимы имя пользователя и пароль</Term>
   <Term key="ERR_USER_BEGINDATE">Учетная запись пользователя еще недействительна</Term>
-  <Term key="ERR_USER_ENDDATE">Учетная запись пользователя уже недействительна</Term>
+  <Term key="ERR_USER_ENDDATE">Учетная запись пользователя уже недействительна (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Имя пользователя уже существует.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Необходимо имя пользователя, введите его</Term>
   <Term key="ERR_WRONGLANG">Выберите язык (S1052)</Term>
@@ -2151,7 +2151,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">Элемент %1 статьи %2 уже был размещен в издании %3 макета %4.</Term>
   <Term key="WARN_PAGE_DBL">Несколько страниц для страницы:</Term>
   <Term key="WARN_PAGE_START">Одна из страниц начинается с номера:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Истек срок действия пароля</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Истек срок действия пароля (S1145)</Term>
   <Term key="WARN_USER_LIMIT">Достигнут предел одновременных пользователей для этого приложения, или достигнут предел одновременных подключений для сервера WoodWing Enterprise.</Term>
   <Term key="WAR_UPLOAD_WARNING">Невозможно создание изображения для предварительного просмотра</Term>
   <Term key="WEBFEATURES">Приложения</Term>
