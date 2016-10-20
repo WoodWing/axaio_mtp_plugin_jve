@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Uživatel byl deaktivován (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Je vyžadované jméno uživatele a heslo</Term>
   <Term key="ERR_USER_BEGINDATE">Účet uživatele ještě není platný</Term>
-  <Term key="ERR_USER_ENDDATE">Účet uživatele již není platný</Term>
+  <Term key="ERR_USER_ENDDATE">Účet uživatele již není platný (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Uživatel s tímto jménem již existuje.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Zadejte prosím vyžadované jméno uživatele</Term>
   <Term key="ERR_WRONGLANG">Vyberte jazyk (S1052)</Term>
@@ -2150,7 +2150,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">Součást %1 článku %2 již byla umístěna do {EDITION} %3 v rozvržení %4.</Term>
   <Term key="WARN_PAGE_DBL">Více stránek pro stránku:</Term>
   <Term key="WARN_PAGE_START">Jedna z těchto stránek začíná číslem stránky:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Heslo je prošlé, změňte ho prosím</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Heslo je prošlé, změňte ho prosím (S1145)</Term>
   <Term key="WARN_USER_LIMIT">Byl dosažen limit počtu současných uživatelů pro tuto aplikaci nebo byl dosažen limit počtu současných připojení pro server Enterprise.</Term>
   <Term key="WAR_UPLOAD_WARNING">Nelze vytvořit náhledový obraz</Term>
   <Term key="WEBFEATURES">Aplikace</Term>

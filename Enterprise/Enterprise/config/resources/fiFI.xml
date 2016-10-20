@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Käyttäjätili deaktivoitu (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Käyttäjänimeä ja salasanaa vaaditaan</Term>
   <Term key="ERR_USER_BEGINDATE">Käyttäjätiliä ei ole vielä validoitu</Term>
-  <Term key="ERR_USER_ENDDATE">Käyttäjätili ei ole enää voimassa</Term>
+  <Term key="ERR_USER_ENDDATE">Käyttäjätili ei ole enää voimassa (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Käyttäjänimi on jo olemassa.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Kirjoita vaadittu käyttäjänimi</Term>
   <Term key="ERR_WRONGLANG">Valitse kieli (S1052)</Term>
@@ -2150,7 +2150,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">Artikkelin %1 komponentti %2 on jo sijoitettu asettelun {EDITION} kohtaan %3 %4.</Term>
   <Term key="WARN_PAGE_DBL">Monta viestiä samalle sivulle:</Term>
   <Term key="WARN_PAGE_START">Yksi sivu alkaa sivunumerolla:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Salasana on vanhentunut, vaihda salasana</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Salasana on vanhentunut, vaihda salasana (S1145)</Term>
   <Term key="WARN_USER_LIMIT">Tämän sovelluksen samanaikaisten käyttäjien raja tai Enterprise Serverin sallimien samanaikaisten yhteyksien määrä on täyttynyt.</Term>
   <Term key="WAR_UPLOAD_WARNING">Esikatselukuvaa ei voitu luoda</Term>
   <Term key="WEBFEATURES">Sovellukset</Term>
