@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Gebruiker gedeactiveerd (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Gebruikersnaam en wachtwoord zijn verplicht</Term>
   <Term key="ERR_USER_BEGINDATE">Gebruikersaccount nog niet geldig</Term>
-  <Term key="ERR_USER_ENDDATE">Gebruikersaccount niet meer geldig</Term>
+  <Term key="ERR_USER_ENDDATE">Gebruikersaccount niet meer geldig (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Gebruikersnaam bestaat al.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Invullen van gebruikersnaam is verplicht</Term>
   <Term key="ERR_WRONGLANG">Kies een taal (S1052).</Term>
@@ -2150,7 +2150,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">Component %1 van artikel %2 is al geplaatst in {EDITION} %3 van layout %4.</Term>
   <Term key="WARN_PAGE_DBL">Meerdere pagina's voor pagina</Term>
   <Term key="WARN_PAGE_START">Eén van de pagina's begint met paginanummer</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Wachtwoord verlopen, verander wachtwoord</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Wachtwoord verlopen, verander wachtwoord (S1145)</Term>
   <Term key="WARN_USER_LIMIT">De concurrent gebruikerslimiet voor deze applicatie is bereikt, of de concurrent verbindingslimiet voor Enterprise server is bereikt.</Term>
   <Term key="WAR_UPLOAD_WARNING">Kan geen afbeelding van de voorvertoning maken</Term>
   <Term key="WEBFEATURES">Toepassingen</Term>

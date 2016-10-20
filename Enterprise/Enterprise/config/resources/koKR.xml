@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">사용자 어카운트가 유효하지 않습니다(S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">사용자명으로 패스워드가 필요합니다!</Term>
   <Term key="ERR_USER_BEGINDATE">사용자 어카운트의 이용 가능일을 맞이하고 있지 않습니다</Term>
-  <Term key="ERR_USER_ENDDATE">사용자 어카운트의 유효기간은 종료했습니다</Term>
+  <Term key="ERR_USER_ENDDATE">사용자 어카운트의 유효기간은 종료했습니다 (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">사용자명은 벌써 존재합니다.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">사용자명이 필요합니다.입력해 주십시오!</Term>
   <Term key="ERR_WRONGLANG">언어를 선택해 주십시오(S1052).</Term>
@@ -2150,7 +2150,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">기사 %2의 컴포넌트 %1은 %4 레이아웃의 {EDITION} %3 내에 이미 위치합니다</Term>
   <Term key="WARN_PAGE_DBL">중복 하고 있는 페이지가 있습니다:</Term>
   <Term key="WARN_PAGE_START">1개의 페이지 번호와 페이지 상태가 있습니다:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">패스워드는 기한 마감입니다</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">패스워드는 기한 마감입니다 (S1145)</Term>
   <Term key="WARN_USER_LIMIT">동시 사용자 한계 이 신청을 위해 도달했다, 또는 동시 연결 한계는 똑똑한 연결 기업 서버를 위해 도달했다.</Term>
   <Term key="WAR_UPLOAD_WARNING">프리뷰 화상을 생성할 수 없었습니다</Term>
   <Term key="WEBFEATURES">Web 어플리케이션 기능</Term>
