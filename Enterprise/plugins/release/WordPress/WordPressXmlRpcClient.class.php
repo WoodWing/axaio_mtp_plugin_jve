@@ -1,4 +1,10 @@
 <?php
+/**
+ * @package    Enterprise
+ * @subpackage ServerPlugins
+ * @since      v9.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once BASEDIR . '/server/utils/EnterpriseXmlRpcClient.class.php';
 require_once dirname(__FILE__) . '/config.php';

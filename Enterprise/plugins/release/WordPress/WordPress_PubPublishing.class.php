@@ -1,19 +1,10 @@
 <?php
-/****************************************************************************
-   Copyright 2013 WoodWing Software BV
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-****************************************************************************/
+/**
+ * @package    Enterprise
+ * @subpackage ServerPlugins
+ * @since      v9.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once BASEDIR.'/server/interfaces/plugins/connectors/PubPublishing_EnterpriseConnector.class.php';
 require_once dirname(__FILE__).'/WordPressXmlRpcClient.class.php';
@@ -63,6 +54,101 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		if( $e ) {
 			$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
 		}
+		return $pubFields;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 * @throws BizException
+	 */
+	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
+	{
+		// Bail out if there is no publish form in the dossier (should never happen).
+		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
+		}
+
+		// Prepare post content.
+		$pubFields = array();
+		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
+
+		$e = null;
+		try {
+			$postContents = $this->preparePost( $publishForm, $publishFormObjects, $dossier, $objectsInDossier, $publishTarget, 'update' );
+			$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+			$objXMLRPClientWordPress->uploadPost( $postContents, $dossier->ExternalId );
+			$url = $this->getPostUrl( $dossier->ExternalId, $publishTarget );
+			$pubFields[] = new PubField( 'URL', 'string', array( $url ) );
+		} catch( BizException $e ) {
+		}
+
+		// Remove temp files from transfer server folder as prepared by getFormFields().
+		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
+
+		if( $e ) {
+			$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
+		}
+		return $pubFields;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
+	{
+		$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+
+		try {
+			$objXMLRPClientWordPress->deleteOldPublishedPreviews(); // delete all old previews
+			try {
+				$objXMLRPClientWordPress->deletePostAndContent( $dossier->ExternalId );
+				$dossier->ExternalId = '';
+			} catch( BizException $e) {
+				$this->reThrowDetailedError( $dossier, $e, 'UnpublishDossier' );
+			}
+		} catch( BizException $e ) { // we want to continue when we could not remove the previews
+			LogHandler::Log( 'SERVER', 'WARN', 'Could not remove old published reviews', $e );
+		}
+		return array();
+	}
+
+	/**
+	 * {@inheritdoc}
+	 * @throws BizException
+	 */
+	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
+	{
+		// Bail out if there is no publish form in the dossier (should never happen).
+		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
+		}
+
+		// Prepare post content.
+		$pubFields = array();
+		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
+
+		$e = null;
+		try {
+			$postContents = $this->preparePost( $publishForm, $publishFormObjects, $dossier, $objectsInDossier, $publishTarget, 'preview' );
+			$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+			$result = $objXMLRPClientWordPress->uploadPost( $postContents, null, true );
+			if( $result ) {
+				$pubFields[] = new PubField( 'URL', 'string', array( $result ) );
+			}
+		} catch( BizException $e ) {
+		}
+
+		// Remove temp files from transfer server folder as prepared by getFormFields().
+		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
+
+		if( $e ) {
+			throw new BizException( 'WORDPRESS_ERROR_PREVIEW', 'SERVER', 'ERROR', null, array( $publishForm->MetaData->BasicMetaData->Name ) );
+		}
+
 		return $pubFields;
 	}
 
@@ -412,78 +498,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		throw new BizException( null, 'Server', $detail, $msg );
 	}
 
-	/**
-	 * Updates/republishes a published dossier with contained objects (articles. images, etc.) to an 
-	 * external publishing system, using the $publishForm->ExternalId to identify the dosier to the
-	 * publishing system. The plugin is supposed to update/republish the dossier and it's articles 
-	 * and fill in some fields for reference.
-	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PubPublishTarget $publishTarget
-	 * @return array|void of PubField containing information from publishing system
-	 * @throws BizException
-	 */
-	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
-	{
-		// Bail out if there is no publish form in the dossier (should never happen).
-		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
-		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
-		if( !$publishForm ) {
-			return array();
-		}
-
-		// Prepare post content.
-		$pubFields = array();
-		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
-
-		$e = null;
-		try {
-			$postContents = $this->preparePost( $publishForm, $publishFormObjects, $dossier, $objectsInDossier, $publishTarget, 'update' );
-			$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
-			$objXMLRPClientWordPress->uploadPost( $postContents, $dossier->ExternalId );
-			$url = $this->getPostUrl( $dossier->ExternalId, $publishTarget );
-			$pubFields[] = new PubField( 'URL', 'string', array( $url ) );
-		} catch( BizException $e ) {
-		}
-
-		// Remove temp files from transfer server folder as prepared by getFormFields().
-		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
-
-		if( $e ) {
-			$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
-		}
-		return $pubFields;
-	}
-
-	/**
-	 * Removes/unpublishes a published dossier from an external publishing system
-	 * using the $publishForm->ExternalId to identify the dosier to the publishing system.
-	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PubPublishTarget $publishTarget
-	 *
-	 * @return array of PubField containing information from publishing system
-	 */
-	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget ) 
-	{
-		$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
-
-		try {
-			$objXMLRPClientWordPress->deleteOldPublishedPreviews(); // delete all old previews
-			try {
-				$objXMLRPClientWordPress->deletePostAndContent( $dossier->ExternalId );
-				$dossier->ExternalId = '';
-			} catch( BizException $e) {
-				$this->reThrowDetailedError( $dossier, $e, 'UnpublishDossier' );
-			}
-		} catch( BizException $e ) { // we want to continue when we could not remove the previews
-			LogHandler::Log( 'SERVER', 'WARN', 'Could not remove old published reviews', $e );
-		}
-		return array();
-	}
-
     /**
      * Get the Url for a certain post.
      *
@@ -499,13 +513,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
     }
 
 	/**
-	 * Requests field values from an external publishing system
-	 * using the $dossier->ExternalId to identify the Dossier to the publishing system.
-	 *
-	 * @param Object $dossier The Dossier to request field values from.
-	 * @param array $objectsInDossier The objects in the Dossier.
-	 * @param PubPublishTarget $publishTarget The target.
-	 * @return array List of PubField with its values.
+	 * {@inheritdoc}
 	 */
 	public function requestPublishFields( $dossier, $objectsInDossier, $publishTarget )
 	{
@@ -519,7 +527,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Upload al images in the dossier to WordPress.
+	 * Upload all images in the dossier to WordPress.
 	 *
 	 * This function is used to upload images, it processes the images and checks if they need to be uploaded or only updated.
 	 * It calls the upload image or update image for every image that is in the dossier.
@@ -788,64 +796,10 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Requests dossier URL from an external publishing system
-	 * using the $publishForm->ExternalId to identify the dosier to the publishing system.
-	 *
-	 * @param Object $dossier
-	 * @param array $objectsInDossier Array of Object.
-	 * @param PubPublishTarget $publishTarget
-	 *
-	 * @return string URL to published item
+	 * {@inheritdoc}
 	 */
 	public function getDossierURL( $dossier, $objectsInDossier, $publishTarget )
-	{
-	}
-
-	/**
-	 * Previews a dossier with contained objects (articles. images, etc.) to an external publishing 
-	 * system. The plugin is supposed to send the dossier and it's articles to the publishing system 
-	 * and fill in the URL field for reference.
-	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PubPublishTarget $publishTarget
-	 *
-	 * @throws BizException
-	 * @return array of Fields containing information from Publishing system
-	 */
-	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
-	{
-		// Bail out if there is no publish form in the dossier (should never happen).
-		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
-		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
-		if( !$publishForm ) {
-			return array();
-		}
-
-		// Prepare post content.
-		$pubFields = array();
-		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
-
-		$e = null;
-		try {
-			$postContents = $this->preparePost( $publishForm, $publishFormObjects, $dossier, $objectsInDossier, $publishTarget, 'preview' );
-			$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
-			$result = $objXMLRPClientWordPress->uploadPost( $postContents, null, true );
-			if( $result ) {
-				$pubFields[] = new PubField( 'URL', 'string', array( $result ) );
-			}
-		} catch( BizException $e ) {
-		}
-
-		// Remove temp files from transfer server folder as prepared by getFormFields().
-		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
-
-		if( $e ) {
-			throw new BizException( 'WORDPRESS_ERROR_PREVIEW', 'SERVER', 'ERROR', null, array( $publishForm->MetaData->BasicMetaData->Name ) );
-		}
-
-		return $pubFields;
-	}
+	{}
 
 	/**
 	 * {@inheritdoc}
