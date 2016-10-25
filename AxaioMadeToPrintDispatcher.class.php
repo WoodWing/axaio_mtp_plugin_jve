@@ -675,9 +675,12 @@ class AxaioMadeToPrintDispatcher
 	 */
 	static private function calledByIDSAutomation( $ticket )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';
-
-		$idsJob = BizInDesignServerJobs::getJobIdForRunningJobByTicketAndJobType( $ticket, 'IDS_AUTOMATION' );
+		$idsJob = FALSE;
+		
+                require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';
+		if(method_exists(BizInDesignServerJobs, 'getJobIdForRunningJobByTicketAndJobType')) {
+			$idsJob = BizInDesignServerJobs::getJobIdForRunningJobByTicketAndJobType( $ticket, 'IDS_AUTOMATION' );
+		}
 
 		return (bool)$idsJob;
 	}
