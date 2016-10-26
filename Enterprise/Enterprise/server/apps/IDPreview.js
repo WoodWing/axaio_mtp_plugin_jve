@@ -33,6 +33,8 @@ const DEBUGLEVEL = LOG_FILE;
 const PREVIEW_RESOLUTION = 150.0;
 const PREVIEW_QUALITY = JPEGOptionsQuality.HIGH;
 
+app.serverSettings.imagePreview = true;
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 

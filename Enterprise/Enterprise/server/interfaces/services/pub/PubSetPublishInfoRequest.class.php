@@ -99,6 +99,9 @@ class PubSetPublishInfoRequest
 				}
 			}
 		}
+		if( is_object( $this->PublishedIssue ) ) {
+			$this->PublishedIssue->sanitizeProperties4Php();
+		}
 	}
 
 	public function mightHaveContent() { return false; }

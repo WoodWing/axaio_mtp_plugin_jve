@@ -21,17 +21,12 @@ class WW_JSON_SysServices extends WW_JSON_Services
 	public function GetSubApplications( $req )
 	{
 		require_once BASEDIR.'/server/services/sys/SysGetSubApplicationsService.class.php';
-
-		try {
-			$req['__classname__'] = 'SysGetSubApplicationsRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new SysGetSubApplicationsService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'SysGetSubApplicationsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new SysGetSubApplicationsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 

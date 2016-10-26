@@ -42,8 +42,23 @@ class WW_JSON_Server extends Server
 		}
 
 		//ob_start(); // Catch any unexpected output to make sure it does not mixed through JSON output!
+		parent::setReturnResponse( true );
 		$this->logJsonRequest();
-		$output = parent::handle();
+		$resp = parent::handle();
+
+		// Replace BizException with just its detail property to act same as SOAP faults (EN-88154).
+		if( $resp ) {
+			$error = $resp->getError();
+			if( $error instanceof Zend\Json\Server\Error ) {
+				$e = $error->getData();
+				if( $e instanceof BizException ) {
+					$data = new stdClass();
+					$data->detail = $e->getDetail();
+					$error->setData( $data );
+				}
+			}
+		}
+
 		$this->logJsonResponse();
 
 		// Report if there is data sent through output. See above for details.
@@ -55,7 +70,7 @@ class WW_JSON_Server extends Server
 		
 		// Return JSON response
 		//LogHandler::Log( __CLASS__, 'INFO', 'returns: ['.$output.']' );
-		echo $output;
+		echo $resp;
 	}
 
 	/**

@@ -18,18 +18,12 @@ class Elvis_WflRestoreVersion extends WflRestoreVersion_EnterpriseConnector
 
 	final public function runBefore( WflRestoreVersionRequest &$req )
 	{
-		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; // keep code analyzer happy
-		
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_BEFOREAFTER with RUNMODE_AFTER when this hook is not needed.
 	} 
 
 	final public function runAfter( WflRestoreVersionRequest $req, WflRestoreVersionResponse &$resp )
 	{
-		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; $resp = $resp; // keep code analyzer happy
-
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_BEFOREAFTER with RUNMODE_BEFORE when this hook is not needed.
 	} 
@@ -37,6 +31,5 @@ class Elvis_WflRestoreVersion extends WflRestoreVersion_EnterpriseConnector
 	// Not called.
 	final public function runOverruled( WflRestoreVersionRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
 	} 
 }

@@ -22,7 +22,7 @@ class SipsUtils
 	 *	Finally, read the outputfile from convertFile, and return it.
 	 *	Clean up the temporary files.
 	 *
-	 * @param imagedata 	$data			Image data to convert to JPG
+	 * @param string 	$data			Image data to convert to JPG
 	 * @param int			$size			Maximum width/height for the resulting image
 	 * @param MetaData		$meta			Meta data of the image object
 	 * @param boolean		$filePathUsage 	The given file is assumed to be a file path (else it is passed in memory)
@@ -73,7 +73,8 @@ class SipsUtils
 		}
 
 		// Call Sips to generate image preview
-		self::convertFile( $inputFilename, $outputFilename, $size );
+		$orientation = isset($meta->ContentMetaData->Orientation) ? $meta->ContentMetaData->Orientation : 1;
+		self::convertFile( $inputFilename, $outputFilename, $size, $orientation );
 		if ( $cleanupInputFile ) {
 			unlink( $inputFilename );
 		}
@@ -108,9 +109,10 @@ class SipsUtils
 	 * @param string 	$inputfilename	Full path of image to convert
 	 * @param string 	$outputfilename	Full path of destination image
 	 * @param int 		$size			Maximum width/height for the resulting image
-	 * @return int		0 on succes, error code on failure
+	 * @param int     $orientation EXIF orientation flag
+	 * @return int		0 on success, error code on failure
 	*/
-	private static function convertFile( $inputfilename, $outputfilename, $size )
+	private static function convertFile( $inputfilename, $outputfilename, $size, $orientation )
 	{
 		// delete any previous export files so that we can detect if export was succesful
 		if (file_exists($outputfilename)) {
@@ -124,8 +126,8 @@ class SipsUtils
 		self::ReDimensionJPEG( $width, $height, $size, $newWidth, $newHeight );
 		
 		$cmd = SIPS_COMMAND . ' -s format jpeg -s dpiHeight 72 -s dpiWidth 72' . " -z $newHeight $newWidth" .
-			   ' -m ' . escapeshellarg(SIPS_RGB_PROFILE) . ' ' . escapeshellarg(
-				$inputfilename) . ' --out ' . escapeshellarg($outputfilename) . ' 2>&1';
+			' -m ' . escapeshellarg(SIPS_RGB_PROFILE) . ' ' . self::composeOrientationCmdParams( $orientation ) .
+			escapeshellarg($inputfilename) . ' --out ' . escapeshellarg($outputfilename) . ' 2>&1';
 		
 		LogHandler::Log('SipsPreview', 'DEBUG', "Sips command line: $cmd" );
 
@@ -216,5 +218,42 @@ class SipsUtils
 			$result = $outFilenamePsToPdf;
 		}
 		return $result;
+	}
+
+	/**
+	 * Composes command line parameters to pass on to Sips to rotate/mirror an image.
+	 *
+	 * @param int $orientation How to rotate/mirror the image; EXIF/IFD0 standard with values 1...8
+	 * @return string Parameters for the command line. Empty for none.
+	 */
+	private static function composeOrientationCmdParams( $orientation )
+	{
+		$cmdParams = '';
+		switch( $orientation ) {
+			case 1: // Horizontal (normal)
+				break;
+			case 2: // Mirror horizontal
+				$cmdParams = ' -f horizontal ';
+				break;
+			case 3: // Rotate 180 CW
+				$cmdParams = ' -r 180 ';
+				break;
+			case 4: // Flip vertical
+				$cmdParams = ' -f vertical ';
+				break;
+			case 5: // First flip vertical, then rotate 90 CW
+				$cmdParams = ' -r 90 -f vertical '; // these two operations are executed in opposite order!
+				break;
+			case 6: // Rotate 90 CW
+				$cmdParams = ' -r 90 ';
+				break;
+			case 7: // First mirror horizontal, then rotate 90 CW
+				$cmdParams = ' -r 90 -f horizontal '; // these two operations are executed in opposite order!
+				break;
+			case 8: // Rotate 270 CW
+				$cmdParams = ' -r 270 ';
+				break;
+		}
+		return $cmdParams;
 	}
 }

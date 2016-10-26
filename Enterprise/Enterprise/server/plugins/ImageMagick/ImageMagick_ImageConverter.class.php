@@ -56,9 +56,16 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 	public function convertImage()
 	{
 		$retVal = false;
-		if( $this->applyCrop || $this->applyScale || $this->applyRotate || $this->applyMirror || $this->applyResize ) {
+		if( $this->applyCrop || $this->applyScale || $this->applyRotate || $this->applyMirror || $this->applyResize || $this->inputOrientation > 1 ) {
 
 			$this->addCommonParams();
+
+			// Assumed is that the crop dimensions are defined in 'human readable' manner. Therefore we first
+			// 'straighten' the image according to the way (orientation) the camera was held *before* applying crop.
+			if( $this->inputOrientation > 1 ) {
+				$this->addOrientationCmdParams();
+			}
+
 			if( $this->applyCrop ) {
 				$this->addCmdParam( 'crop', $this->cropWidth.'x'.$this->cropHeight.'+'.$this->cropLeft.'+'.$this->cropTop );
 			}
@@ -67,8 +74,8 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 				$scaleY = $this->scaleFactorY * 100;
 				$this->addCmdParam( 'resize', $scaleX.'%x'.$scaleY.'%' );
 			}
-			if( $this->applyRotate ) {
-				$this->addCmdParam( 'rotate', $this->rotateDegrees );
+			if( $this->applyResize ) {
+				$this->addCmdParam( 'resize', $this->outputWidth.'x'.$this->outputHeight );
 			}
 			if( $this->applyMirror ) {
 				if( $this->mirrorHorizontal ) {
@@ -78,8 +85,8 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 					$this->addCmdParam( 'flip' );
 				}
 			}
-			if( $this->applyResize ) {
-				$this->addCmdParam( 'resize', $this->outputWidth.'x'.$this->outputHeight );
+			if( $this->applyRotate ) {
+				$this->addCmdParam( 'rotate', 360 - $this->rotateDegrees );
 			}
 
 			$cmdName = 'convert';
@@ -158,6 +165,40 @@ class ImageMagick_ImageConverter extends ImageConverter_EnterpriseConnector
 		$this->addCmdParam( 'strip', null, true );
 		$this->addCmdParam( 'background', 'none', true );
 		$this->addCmdParam( 'layers', 'merge', true );
+	}
+
+	/**
+	 * Adds command line parameters to pass on to Sips to rotate/mirror an image.
+	 */
+	private function addOrientationCmdParams()
+	{
+		switch( $this->inputOrientation ) {
+			case 1: // Horizontal (normal)
+				break;
+			case 2: // Mirror horizontal
+				$this->addCmdParam( 'flop' );
+				break;
+			case 3: // Rotate 180 CW
+				$this->addCmdParam( 'rotate', 180 );
+				break;
+			case 4: // Flip vertical
+				$this->addCmdParam( 'flip' );
+				break;
+			case 5: // First rotate 270 CW, then flip vertical
+				$this->addCmdParam( 'rotate', 270 );
+				$this->addCmdParam( 'flip' );
+				break;
+			case 6: // Rotate 90 CW
+				$this->addCmdParam( 'rotate', 90 );
+				break;
+			case 7: // First rotate 270 CW, then mirror horizontal
+				$this->addCmdParam( 'rotate', 270 );
+				$this->addCmdParam( 'flop' );
+				break;
+			case 8: // Rotate 270 CW
+				$this->addCmdParam( 'rotate', 270 );
+				break;
+		}
 	}
 
 	/**

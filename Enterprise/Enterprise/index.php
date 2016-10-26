@@ -13,6 +13,15 @@ require_once dirname(__FILE__).'/config/config.php';
 require_once BASEDIR.'/server/services/Entry.php';
 set_time_limit(3600);
 
+// Give HTTP 200 when the Health Check testing the URL.
+if( isset($_GET['test']) && $_GET['test'] ) {
+	$message = 'Workflow service index page is accessible.';
+	header('HTTP/1.1 200 OK');
+	header('Status: 200 OK - '.$message );
+	LogHandler::Log( 'WorkflowService', 'INFO', $message );
+	exit();
+}
+
 class WW_WorkflowServiceEntry extends WW_Services_Entry
 {
 	public function __construct()

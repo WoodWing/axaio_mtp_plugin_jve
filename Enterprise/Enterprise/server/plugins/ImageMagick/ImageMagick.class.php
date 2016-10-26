@@ -55,8 +55,9 @@ class ImageMagick
 			fwrite( $tmpin, $data );
 			fclose( $tmpin );
 		}
-		
-		self::convertFile( $inputFilename, $outputFilename, $size );
+
+		$orientation = isset($meta->ContentMetaData->Orientation) ? $meta->ContentMetaData->Orientation : 1;
+		self::convertFile( $inputFilename, $outputFilename, $size, $orientation );
 
 		if ( $filePathUsage ) {
 			// Set back to original name.
@@ -115,9 +116,10 @@ class ImageMagick
 	 * @param string 	$inputFilename	Full path of image to convert
 	 * @param string 	$outputFilename	Full path of destination image
 	 * @param int 		$imageSize		Maximum width/height for the resulting image
+	 * @param int     $orientation EXIF orientation flag
 	 * @return int		0 on success else error code on failure
 	*/
-	protected static function convertFile( $inputFilename, $outputFilename, $imageSize )
+	private static function convertFile( $inputFilename, $outputFilename, $imageSize, $orientation )
 	{
 		$size = intval( $imageSize ); // robustness: just to make sure having numeric value
 		$cmdline = self::makeExecutable( IMAGE_MAGICK_APP_PATH, 'convert' ) . ' ';
@@ -127,6 +129,7 @@ class ImageMagick
 		$cmdline .= escapeshellarg( $inputFilename ).'[0] '; // adding [0] to the filename to take the first layer only.
 		// Ensures that limit is applied to both sides and it only scales down. Fix: Added double quotes (BZ#10971)
 		$cmdline .= '-size '.$size.' -thumbnail '.escapeshellarg($size.'x'.$size.'>'). ' ';
+		$cmdline .= self::composeOrientationCmdParams( $orientation );
 		// BZ#31389 - Added option -layers merge to fix the converted black background image.
 		if ( defined( 'IMAGE_MAGICK_OPTIONS' ) ) {
 			$cmdline .= ' '.IMAGE_MAGICK_OPTIONS.' ';	
@@ -135,6 +138,43 @@ class ImageMagick
 		}	
 		$cmdline .= escapeshellarg( $outputFilename );
 		return self::imageMagickCmd( 'convert', $cmdline );
+	}
+
+	/**
+	 * Composes command line parameters to pass on to Sips to rotate/mirror an image.
+	 *
+	 * @param int $orientation How to rotate/mirror the image; EXIF/IFD0 standard with values 1...8
+	 * @return string Parameters for the command line. Empty for none.
+	 */
+	private static function composeOrientationCmdParams( $orientation )
+	{
+		$cmdParams = '';
+		switch( $orientation ) {
+			case 1: // Horizontal (normal)
+				break;
+			case 2: // Mirror horizontal
+				$cmdParams = '-flop ';
+				break;
+			case 3: // Rotate 180 CW
+				$cmdParams = '-rotate 180 ';
+				break;
+			case 4: // Flip vertical
+				$cmdParams = '-flip ';
+				break;
+			case 5: // First rotate 270 CW, then flip vertical
+				$cmdParams = '-rotate 270 -flip ';
+				break;
+			case 6: // Rotate 90 CW
+				$cmdParams = '-rotate 90 ';
+				break;
+			case 7: // First rotate 270 CW, then mirror horizontal
+				$cmdParams = '-rotate 270 -flop ';
+				break;
+			case 8: // Rotate 270 CW
+				$cmdParams = '-rotate 270 ';
+				break;
+		}
+		return $cmdParams;
 	}
 
 	/**

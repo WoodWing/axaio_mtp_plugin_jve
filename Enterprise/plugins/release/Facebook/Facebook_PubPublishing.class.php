@@ -128,16 +128,34 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 							// The getFormField returns an object when there is only 1 object else it returns an array.
 							$imageObjects = array( $imageObjects );
 						}
-						if( $imageObjects ) foreach( $imageObjects as $imageObject ) {
+						if( $imageObjects ) foreach( $imageObjects as $frameOrder => $imageObject ) {
 							$imageId = $imageObject->MetaData->BasicMetaData->ID;
-							$imageAttachment = $this->getCroppedImage( $publishForm, $imageId, 'C_FACEBOOK_MULTI_IMAGES' );
-							if( !$imageAttachment ) {
-								$imageAttachment = $imageObject->Files[0]; // fallback to native image
+							$convertedPlacement = $this->getConvertedPlacement( $publishForm, $imageId, 'C_FACEBOOK_MULTI_IMAGES', $frameOrder );
+
+							if( $convertedPlacement ) {
+								$imagePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
+							} else {
+								$imagePath = null;
+								// Fall back to native image, if we have one.
+								foreach( $imageObject->Files as $file ) {
+									if( $file->Rendition == 'native' ) {
+										$imagePath = $file->FilePath;
+									}
+								}
 							}
-							if( $imageAttachment ) {
-								$imagePath = $imageAttachment->FilePath;
-								$this->uploadImageToAlbum( $publishForm, $dossier, $publishTarget, $imageObject, $imagePath, $pageId );
+
+							$externalId = null;
+							if( $imagePath ) {
+								$externalId = $this->uploadImageToAlbum( $publishForm, $dossier, $publishTarget, $imageObject, $imagePath, $pageId );
+							}
+
+							if( $externalId ) {
 								$imageCheck = true;
+								if( $convertedPlacement ) {
+									$convertedPlacement->ConvertedImageToPublish->ExternalId = $externalId;
+								} elseif( array_key_exists( $imageId, $objectsInDossier ) ) {
+									$objectsInDossier[$imageId]->ExternalId = $externalId;
+								}
 							}
 						}
 					}
@@ -161,6 +179,44 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
+	 * Retrieves a placement of an image crop made on a given Publish Form.
+	 *
+	 * The end user may have cropped the image placed on the Publish Form.
+	 * When a crop is found, the caller should prefer the cropped image (over the native image).
+	 *
+	 * The cropped image is dynamically set by the core server during the publish operation at Placement->ConvertedImageToPublish->Attachment.
+	 * Note that this property is not defined in the WSDL. When the property is missing, there is no crop.
+	 *
+	 * @since 10.1.0
+	 * @param Object $publishForm The form object being published.
+	 * @param string $childId Id of placed image object to get the attachment for.
+	 * @param integer $formWidgetId The publish form template object id used to create the publish form.
+	 * @param integer $frameOrder The position of the placement within the publishform field.
+	 * @return Placement|null The cropped image. NULL when no crop found.
+	 */
+	private function getConvertedPlacement( $publishForm, $childId, $formWidgetId, $frameOrder )
+	{
+		$convertedPlacement = null;
+		foreach( $publishForm->Relations as $relation ) {
+			if( $relation->Type == 'Placed' &&
+				$relation->Child == $childId &&
+				$relation->Parent == $publishForm->MetaData->BasicMetaData->ID
+			) {
+				foreach( $relation->Placements as $placement ) {
+					if( $placement->FormWidgetId &&
+						$placement->FormWidgetId == $formWidgetId &&
+						$placement->FrameOrder == $frameOrder &&
+						isset( $placement->ConvertedImageToPublish )
+					) {
+						$convertedPlacement = $placement;
+					}
+				}
+			}
+		}
+		return $convertedPlacement;
+	}
+
+	/**
 	 * Retrieves an image crop made on a given Publish Form.
 	 *
 	 * The end user may have cropped the image placed on the Publish Form.
@@ -177,7 +233,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	private function getCroppedImage( $publishForm, $childId, $formWidgetId )
 	{
-		$cropppedImage = null;
+		$croppedImage = null;
 		foreach( $publishForm->Relations as $relation ) {
 			if( $relation->Type == 'Placed' &&
 				$relation->Child == $childId &&
@@ -188,12 +244,12 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 						$placement->FormWidgetId == $formWidgetId &&
 						isset( $placement->ConvertedImageToPublish )
 					) {
-						$cropppedImage = $placement->ConvertedImageToPublish->Attachment;
+						$croppedImage = $placement->ConvertedImageToPublish->Attachment;
 					}
 				}
 			}
 		}
-		return $cropppedImage;
+		return $croppedImage;
 	}
 
 	/**
@@ -205,6 +261,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $imageObject
 	 * @param string $imagePath
 	 * @param int $pageId
+	 * @return string External file id of the uploaded image.
 	 */
 	private function uploadImageToAlbum( $publishForm, $dossier, $publishTarget, $imageObject, $imagePath, $pageId )
 	{
@@ -218,8 +275,9 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		$imageDescription = $this->getImageDescription( $imageObject );
 
 		// Post the album.
+		$externalId = null;
 		try {
-			$imageObject->ExternalId = $facebookPublisher->uploadPictureToPage( $pageId, $imagePath, $imageDescription,
+			$externalId = $facebookPublisher->uploadPictureToPage( $pageId, $imagePath, $imageDescription,
 				$albumName, $albumDescription, $albumId );
 			if( $albumId ) {
 				$dossier->ExternalId = $albumId;
@@ -227,6 +285,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		} catch( Exception $e ) {
 			$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
 		}
+		return $externalId;
 	}
 
 	/**
@@ -299,14 +358,12 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 
 	/**
 	 * Note: UnPublishing a Dossier with an album does not delete the album itself, it only deletes the pictures
-	 * in the dossier from Facebook. Facebook API does not support deleting albums.
+	 * in the dossier from Facebook. Facebook Graph API does not support deleting albums.
 	 *
 	 * {@inheritdoc}
 	 */
 	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
 	{
-		require_once BASEDIR.'/server/dbclasses/DBPublishedObjectsHist.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBPublishHistory.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 
 		$pubChannelId = $publishTarget->PubChannelID;
@@ -336,10 +393,13 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 
 			//Facebook photo album
 			case $this->getDocumentIdPrefix().'2' :
+				require_once BASEDIR.'/server/dbclasses/DBPublishHistory.class.php';
+				require_once BASEDIR.'/server/dbclasses/DBPublishedObjectsHist.class.php';
+
 				$dossiersPublished = DBPublishHistory::getPublishHistoryDossier( $dossier->MetaData->BasicMetaData->ID, $pubChannelId, $publishTarget->IssueID, null, true );
 				$dossierPublished = reset( $dossiersPublished ); // Get the first dossier.
 				$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist( $dossierPublished['id'] );
-				foreach( $publishedObjects as $publishedObject ) {
+				if( $publishedObjects ) foreach( $publishedObjects as $publishedObject ) {
 					if( $publishedObject['type'] == 'Image' ) {
 						$externalId = DBPublishedObjectsHist::getObjectExternalId( $dossier->MetaData->BasicMetaData->ID, $publishedObject['objectid'], $pubChannelId, $publishTarget->IssueID, null, $dossierPublished['id'] );
 						if( !empty( $externalId ) ) {
@@ -349,6 +409,13 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 								$this->reThrowDetailedError( $publishForm, $e, 'UnpublishDossier' );
 							}
 						}
+					}
+				}
+
+				$publishedPlacements = DBPubPublishedPlacementsHistory::listPublishedPlacements( $dossierPublished['id'] );
+				if( $publishedPlacements ) foreach( $publishedPlacements as $publishedPlacement ) {
+					if( $publishedPlacement->ExternalId ) {
+						$facebookPublisher->deleteMessageFromFeed( $pageId, $publishedPlacement->ExternalId );
 					}
 				}
 				$dossier->ExternalId = '';

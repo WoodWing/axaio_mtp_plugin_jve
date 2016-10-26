@@ -109,6 +109,18 @@ class WflGetPagesInfoRequest
 				}
 			}
 		}
+		if( is_object( $this->Issue ) ) {
+			$this->Issue->sanitizeProperties4Php();
+		}
+		if( is_object( $this->Edition ) ) {
+			$this->Edition->sanitizeProperties4Php();
+		}
+		if( is_object( $this->Category ) ) {
+			$this->Category->sanitizeProperties4Php();
+		}
+		if( is_object( $this->State ) ) {
+			$this->State->sanitizeProperties4Php();
+		}
 	}
 
 	public function mightHaveContent() { return false; }

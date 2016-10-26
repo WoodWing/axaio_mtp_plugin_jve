@@ -16,6 +16,8 @@ public class Layout  implements java.io.Serializable {
 
     private java.lang.String issue;
 
+    private java.lang.String pubChannel;
+
     private java.lang.String section;
 
     private java.lang.String status;
@@ -36,6 +38,7 @@ public class Layout  implements java.io.Serializable {
            java.lang.String name,
            java.lang.String publication,
            java.lang.String issue,
+           java.lang.String pubChannel,
            java.lang.String section,
            java.lang.String status,
            com.woodwing.enterprise.interfaces.services.pln.Page[] pages,
@@ -46,6 +49,7 @@ public class Layout  implements java.io.Serializable {
            this.name = name;
            this.publication = publication;
            this.issue = issue;
+           this.pubChannel = pubChannel;
            this.section = section;
            this.status = status;
            this.pages = pages;
@@ -132,6 +136,26 @@ public class Layout  implements java.io.Serializable {
      */
     public void setIssue(java.lang.String issue) {
         this.issue = issue;
+    }
+
+
+    /**
+     * Gets the pubChannel value for this Layout.
+     * 
+     * @return pubChannel
+     */
+    public java.lang.String getPubChannel() {
+        return pubChannel;
+    }
+
+
+    /**
+     * Sets the pubChannel value for this Layout.
+     * 
+     * @param pubChannel
+     */
+    public void setPubChannel(java.lang.String pubChannel) {
+        this.pubChannel = pubChannel;
     }
 
 
@@ -278,6 +302,9 @@ public class Layout  implements java.io.Serializable {
             ((this.issue==null && other.getIssue()==null) || 
              (this.issue!=null &&
               this.issue.equals(other.getIssue()))) &&
+            ((this.pubChannel==null && other.getPubChannel()==null) || 
+             (this.pubChannel!=null &&
+              this.pubChannel.equals(other.getPubChannel()))) &&
             ((this.section==null && other.getSection()==null) || 
              (this.section!=null &&
               this.section.equals(other.getSection()))) &&
@@ -318,6 +345,9 @@ public class Layout  implements java.io.Serializable {
         }
         if (getIssue() != null) {
             _hashCode += getIssue().hashCode();
+        }
+        if (getPubChannel() != null) {
+            _hashCode += getPubChannel().hashCode();
         }
         if (getSection() != null) {
             _hashCode += getSection().hashCode();
@@ -385,6 +415,13 @@ public class Layout  implements java.io.Serializable {
         elemField.setFieldName("issue");
         elemField.setXmlName(new javax.xml.namespace.QName("", "Issue"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("pubChannel");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "PubChannel"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setMinOccurs(0);
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();

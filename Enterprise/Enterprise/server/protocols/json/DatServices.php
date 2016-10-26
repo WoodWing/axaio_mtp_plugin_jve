@@ -21,119 +21,84 @@ class WW_JSON_DatServices extends WW_JSON_Services
 	public function QueryDatasources( $req )
 	{
 		require_once BASEDIR.'/server/services/dat/DatQueryDatasourcesService.class.php';
-
-		try {
-			$req['__classname__'] = 'DatQueryDatasourcesRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new DatQueryDatasourcesService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'DatQueryDatasourcesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new DatQueryDatasourcesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function GetDatasource( $req )
 	{
 		require_once BASEDIR.'/server/services/dat/DatGetDatasourceService.class.php';
-
-		try {
-			$req['__classname__'] = 'DatGetDatasourceRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new DatGetDatasourceService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'DatGetDatasourceRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new DatGetDatasourceService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function GetRecords( $req )
 	{
 		require_once BASEDIR.'/server/services/dat/DatGetRecordsService.class.php';
-
-		try {
-			$req['__classname__'] = 'DatGetRecordsRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new DatGetRecordsService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'DatGetRecordsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new DatGetRecordsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function SetRecords( $req )
 	{
 		require_once BASEDIR.'/server/services/dat/DatSetRecordsService.class.php';
-
-		try {
-			$req['__classname__'] = 'DatSetRecordsRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new DatSetRecordsService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'DatSetRecordsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new DatSetRecordsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function HasUpdates( $req )
 	{
 		require_once BASEDIR.'/server/services/dat/DatHasUpdatesService.class.php';
-
-		try {
-			$req['__classname__'] = 'DatHasUpdatesRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new DatHasUpdatesService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'DatHasUpdatesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new DatHasUpdatesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function OnSave( $req )
 	{
 		require_once BASEDIR.'/server/services/dat/DatOnSaveService.class.php';
-
-		try {
-			$req['__classname__'] = 'DatOnSaveRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new DatOnSaveService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'DatOnSaveRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new DatOnSaveService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function GetUpdates( $req )
 	{
 		require_once BASEDIR.'/server/services/dat/DatGetUpdatesService.class.php';
-
-		try {
-			$req['__classname__'] = 'DatGetUpdatesRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new DatGetUpdatesService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'DatGetUpdatesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new DatGetUpdatesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 

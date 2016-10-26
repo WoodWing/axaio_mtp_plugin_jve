@@ -59,7 +59,7 @@ class TransferEntry
 
 		// Log the footprint of Enterprise Server (= startup time).
 		$footprint = sprintf( '%03d', round( ( microtime( true ) - $beforeInclude ) * 1000 ) );
-		LogHandler::Log( 'transfer', 'CONTEXT', 'Enterprise Server footprint: '.$footprint.'ms (= startup time).' );
+		LogHandler::Log( 'TransferServer', 'CONTEXT', 'Enterprise Server footprint: '.$footprint.'ms (= startup time).' );
 
 		// Only load the util when it is available.
 		// This allows this file to be copied into older versions of Enterprise Server. Needed for the download option in Content Station HTML.

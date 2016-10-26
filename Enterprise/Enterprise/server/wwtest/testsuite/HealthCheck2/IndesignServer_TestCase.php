@@ -82,29 +82,7 @@ class WW_TestSuite_HealthCheck2_InDesignServer_TestCase extends TestCase
     		}
     		rmdir(WEBEDITDIR.'wwtest');
     	}
-/*  no longer needed since v6, multiple InDesign Servers support
-    	// Test INDESIGNSERV_HOST setting
-		if( !defined('INDESIGNSERV_HOST') || INDESIGNSERV_HOST == '' ) {
-	    	$help = 'The INDESIGNSERV_HOST setting in the configserver.php is undefined or left empty.';
-	    	$help .= 'Therefor Enterprise assumes InDesign Server is not installed and so it will <b>not</b> be used by the CS Editor.';
-	    	$help .= 'That means the CS Editor runs fine, but you can <b>not</b> write-to-fit nor generate PDF/Preview.<br>';
-			$errmsg = 'InDesign Server not configured/installed.';
-    		LogHandler::Log('wwtest', 'WARN', $errmsg );
-    		$this->testresult = '<font color="orange">[WARNING]</font><br/>'.$errmsg;
-    		return false;
-		}
 
-    	$help = 'Please make sure you have correctly filled in the INDESIGNSERV_HOST setting in the configserver.php.<br>';
-		$help .= 'Check Indesign Server console log to see if it is running on the port you have configured, for example:<pre>&nbsp;&nbsp;&nbsp;Servicing SOAP requests on port 18383</pre>';
-		$help .= 'See also Admin Guide on how to install and configure CS Editor and ID Server.';
-
-		if( InDesignServer::isResponsive(INDESIGNSERV_HOST) === false ) {
-			$errmsg = 'InDesign Server did not respond within 5 seconds.';
-    		LogHandler::Log('wwtest', 'ERROR', $errmsg );
-    		$this->testresult = '<font color="red">[FAILED]</font><br/>'.$errmsg;
-    		return false;
-		}
-*/
     	// Test WEBEDITDIRIDSERV setting
     	$help = 'Please make sure you have correcty filled in the WEBEDITDIRIDSERV setting in the configserver.php.<br/>';
     	$help .= 'This is the workfolder of the InDesign Server which should be mounted on the server.<br/>';
@@ -128,7 +106,7 @@ class WW_TestSuite_HealthCheck2_InDesignServer_TestCase extends TestCase
 		require_once BASEDIR.'/server/bizclasses/BizInDesignServer.class.php';
    		$idsObjs = BizInDesignServer::listInDesignServers();
 		foreach( $idsObjs as $idsObj ) {
-			$msgPrefix = '<h3><font style="color: white; background-color:gray;">&nbsp;InDesign Server:&nbsp;</font>&nbsp;'.$idsObj->Name.'</h3>';
+			$msgPrefix = '<h3><span style="color:white; background-color:gray;">&nbsp;InDesign Server:&nbsp;></span>&nbsp;'.$idsObj->Name.'</h3>';
     		if( $idsObj->Active ) {
 				$this->checkInDesignServer( $idsObj, $msgPrefix );
 			} else {
@@ -358,16 +336,23 @@ class WW_TestSuite_HealthCheck2_InDesignServer_TestCase extends TestCase
     		return;
 		}
 
-		$resonseData =  explode( ' ', $scriptResult ); // Limit is set to ' ' as neither the ticket nor the URL contain a ' '.
-		$ticket = $resonseData[0];
+		$responseData =  explode( ' ', $scriptResult ); // Limit is set to ' ' as neither the ticket nor the URL contain a ' '.
+		$ticket = $responseData[0];
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		if ( !DBTicket::getTicket( $ticket ) ) {
-			$serverURL = htmlentities($resonseData[1]);
-			$errmsg = 'Configuration error. InDesign Server is connnecting to another Enterprise Server ('.$serverURL.').';
+			$serverURL = htmlentities($responseData[1]);
+			$errmsg = 'Configuration error. InDesign Server is connecting to another Enterprise Server ('.$serverURL.').';
 			$help = 'Check if the WWSettings.xml file contains servers with the same name. '.
 					'Next, check if the APPLICATION_SERVERS setting in the configserver.php file is correct.';
 			$this->setResult( 'ERROR', $errmsg, $help );
 			return;
+		}
+
+		$previewOption = $responseData[2];
+		if ( $previewOption == 'ImagePreviewOptionNotSet' ) {
+			$help = 'Please check if the \'-previews\' option is added to the start command or start parameters. ';
+			$errmsg = 'InDesign Server is started without the \'-previews\' option. This could result in missing image previews.';
+			$this->setResult( 'ERROR', $errmsg, $help );
 		}
 	}
 }

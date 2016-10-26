@@ -107,6 +107,7 @@ CREATE TABLE SMART_DELETEDOBJECTS (
   RATING int default 0,
   INDEXED  varchar(2) default '',
   CLOSED  varchar(2) default '',
+  ORIENTATION int default '0',
   ROUTETOUSERID int default '0',
   ROUTETOGROUPID int default '0',
   PRIMARY KEY (ID)
@@ -288,6 +289,7 @@ CREATE TABLE SMART_OBJECTS (
   CLOSED  varchar(2) default '',
   ROUTETOUSERID int default '0',
   ROUTETOGROUPID int default '0',
+  ORIENTATION int default '0',
   PRIMARY KEY (ID)
 );
 
@@ -324,6 +326,7 @@ CREATE TABLE SMART_OBJECTVERSIONS (
   PLAINCONTENT  clob,
   FILESIZE int default '0',
   COLORSPACE varchar(20) default '',
+  ORIENTATION int default '0',
   STATE int default '0',
   MAJORVERSION int default '0',
   PRIMARY KEY (ID)

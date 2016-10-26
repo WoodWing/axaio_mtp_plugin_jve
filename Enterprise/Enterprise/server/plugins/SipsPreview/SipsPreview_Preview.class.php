@@ -66,7 +66,6 @@ class SipsPreview_Preview extends Preview_EnterpriseConnector
 	 */
 	public function generatePreview( Attachment $attachment, $max, &$previewFormat, &$meta, $bizMetaDataPreview )
 	{
-		$bizMetaDataPreview = $bizMetaDataPreview; // keep analyzer happy
 		LogHandler::Log('SipsPreview', 'DEBUG', 'Creating preview for '.$attachment->Type );
 		require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 		// Set the DYLD_LIBRARY to empty. This fixes a library confilct issue that caused SIPS to fail

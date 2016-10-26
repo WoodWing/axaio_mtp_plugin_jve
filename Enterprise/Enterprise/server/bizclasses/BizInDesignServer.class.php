@@ -384,7 +384,7 @@ class BizInDesignServer
 			$jobResult = $soapclient->RunScript( $soapParams );
 			$jobResult = (array)$jobResult; // let's act like it was before (v6.1 or earlier)
 			if( $jobResult['errorNumber'] == 0 ) {
-				if( $jobResult['scriptResult'] == 'BUSY' ) {
+				if( $jobResult['scriptResult']->data == 'BUSY' ) {
 					LogHandler::Log( 'idserver', 'INFO', 'InDesign Server ['.$server->ServerURL.'] is still busy' );
 				} else {
 					LogHandler::Log( 'idserver', 'INFO', 'InDesign Server ['.$server->ServerURL.'] is not busy' );

@@ -211,4 +211,99 @@ class ElvisObjectUtils
 	{
 		return self::isArchivedStatus( $oldStatusName ) && !self::isArchivedStatus( $newStatusName );
 	}
+
+	/**
+	 * Compare the object's version between Enterprise and Elvis, if the Elvis object's version contain newer version,
+	 * perform update on the same object in Enterprise with the latest version from Elvis.
+	 *
+	 * @param $objects
+	 */
+	public static function updateObjectsVersion( $objects )
+	{
+		if( $objects ) {
+			require_once BASEDIR.'/server/bizclasses/BizVersion.class.php';
+			require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
+			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+			require_once BASEDIR.'/server/dbclasses/DBVersion.class.php';
+
+			foreach( $objects as $object ) {
+				$isShadowObject = BizContentSource::isShadowObject($object);
+				if( $isShadowObject && $object->MetaData->BasicMetaData->Type == 'Image'  ) {
+					$id = $object->MetaData->BasicMetaData->ID;
+					$enterpriseObjectVersion = BizVersion::getCurrentVersionNrFromId( $id );
+					$elvisAssetVersion = $object->MetaData->WorkflowMetaData->Version;
+					if( $enterpriseObjectVersion && version_compare( $enterpriseObjectVersion,  $elvisAssetVersion, '<' ) ) {
+						$values = array();
+						DBVersion::splitMajorMinorVersion( $elvisAssetVersion, $values );
+						$success = DBObject::updateRowValues( $id, $values );
+						if( !$success ) {
+							LogHandler::Log(__CLASS__ . '::' . __FUNCTION__, 'INFO', 'Object: ' . $id .
+										' could not be updated with the latest version from Elvis Content Source.');
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Set the VersionInfo's state to the best matching version status from Enterprise.
+	 *
+	 * This is needed when there is a gap between versions stored in Enterprise and Elvis.
+	 * For example:
+	 * In Elvis, the asset versions are 0.1, 0.2, 0.3, 0.4, 0.5.
+	 * In Enterprise the shadow object versions are 0.1, 0.2, 0.5.
+	 * In this case, the versions 0.3 and 0.4 do not exist in Enterprise. The version status
+	 * will be set to the last previous version status as stored in Enterprise, which is the status of version 0.2.
+	 * In Enterprise, the shadow object's status hasn't changed between version 0.2 and 0.5,
+	 * therefore the logic is to replace the 0.3 and 0.4 version status with the last previous version.
+	 *
+	 * @param int $shadowId Enterprise shadow object id
+	 * @param array $elvisAssetVersions List of shadow object version retrieve from Elvis
+	 * @return array
+	 */
+	public static function setVersionStatusFromEnterprise( $shadowId, array $elvisAssetVersions )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizVersion.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBVersion.class.php';
+
+		$objProps = DBObject::getObjectProps( $shadowId );
+		$states = BizVersion::getVersionStatuses( $objProps, null );
+		$enterpriseObjectVersions = DBVersion::getVersions( $shadowId );
+
+		// Add current object version with limited number of fields but sufficient to perform comparison.
+		$currentObjectVersion = array(
+										'objid' => $shadowId,
+										'version' => BizVersion::getCurrentVersionNumber( $objProps ),
+										'state' => $objProps['StateId'],
+										'comment' => $objProps['Comment'],
+										'slugline' => $objProps['Slugline']
+										);
+		$enterpriseObjectVersions[] = $currentObjectVersion;
+
+		if( $elvisAssetVersions ) foreach( $elvisAssetVersions as $elvisAssetVersion ) {
+			$previousVersionInEnterprise = null;
+			foreach( $enterpriseObjectVersions as $enterpriseObjectVersion ) {
+				if( version_compare( $enterpriseObjectVersion['version'], $elvisAssetVersion->Version ) == 0 ) {
+					$elvisAssetVersion->State = $states[$enterpriseObjectVersion['state']];
+					$previousVersionInEnterprise = null;
+					break;
+				} elseif( version_compare( $enterpriseObjectVersion['version'], $elvisAssetVersion->Version, '<' ) ) {
+					if( $previousVersionInEnterprise ) {
+						if( version_compare( $previousVersionInEnterprise['version'], $enterpriseObjectVersion['version'], '<' ) ) {
+							$previousVersionInEnterprise = $enterpriseObjectVersion;
+						}
+					} else {
+						$previousVersionInEnterprise = $enterpriseObjectVersion;
+					}
+				}
+			}
+			if( $previousVersionInEnterprise ) {
+				$elvisAssetVersion->State = $states[$previousVersionInEnterprise['state']];
+			}
+		}
+
+		return $elvisAssetVersions;
+	}
 }

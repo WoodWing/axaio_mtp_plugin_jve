@@ -17,18 +17,12 @@ class Elvis_WflUpdateObjectRelations extends WflUpdateObjectRelations_Enterprise
 
 	final public function runBefore( WflUpdateObjectRelationsRequest &$req )
 	{
-		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; // keep code analyzer happy
-		
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_BEFOREAFTER with RUNMODE_AFTER when this hook is not needed.
 	} 
 
 	final public function runAfter( WflUpdateObjectRelationsRequest $req, WflUpdateObjectRelationsResponse &$resp )
 	{
-		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; $resp = $resp; // keep code analyzer happy
-
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_BEFOREAFTER with RUNMODE_BEFORE when this hook is not needed.
 	} 
@@ -36,6 +30,5 @@ class Elvis_WflUpdateObjectRelations extends WflUpdateObjectRelations_Enterprise
 	// Not called.
 	final public function runOverruled( WflUpdateObjectRelationsRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
 	} 
 }

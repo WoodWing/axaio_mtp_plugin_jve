@@ -23,8 +23,6 @@ class Elvis_WflRestoreObjects extends WflRestoreObjects_EnterpriseConnector
 	 */
 	final public function runBefore( WflRestoreObjectsRequest &$req )
 	{
-		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; // keep code analyzer happy
 	}
 
 	/**
@@ -35,12 +33,10 @@ class Elvis_WflRestoreObjects extends WflRestoreObjects_EnterpriseConnector
 	 */
 	final public function runAfter( WflRestoreObjectsRequest $req, WflRestoreObjectsResponse &$resp )
 	{
-		require_once dirname(__FILE__) . '/config.php';
-		$resp = $resp; // keep code analyzer happy
-
-		require_once dirname(__FILE__) . '/util/ElvisObjectUtils.class.php';
-		require_once dirname(__FILE__) . '/util/ElvisObjectRelationUtils.class.php';
-		require_once dirname(__FILE__) . '/logic/ElvisUpdateManager.class.php';
+		require_once dirname(__FILE__).'/config.php';
+		require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
+		require_once dirname(__FILE__).'/util/ElvisObjectRelationUtils.class.php';
+		require_once dirname(__FILE__).'/logic/ElvisUpdateManager.class.php';
 
 		// Get restored shadow relations per layout/dossier, retrieved from DB.
 		$reqLayoutIds = ElvisObjectUtils::filterRelevantIdsFromObjectIds( $req->IDs ); // Only interested in placements of layouts
@@ -71,6 +67,5 @@ class Elvis_WflRestoreObjects extends WflRestoreObjects_EnterpriseConnector
 	 */
 	final public function runOverruled( WflRestoreObjectsRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
 	} 
 }

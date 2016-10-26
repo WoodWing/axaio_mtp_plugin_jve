@@ -254,29 +254,31 @@ class DBObject extends DBBase
 		return $sth;
 	}
 
-	/**
-	 * Returns the database row of an object, either from the Workflow or from the Trash.
-	 *
-	 * @param int|string $objectId Id of the object.
-	 * @param boolean $workflow Found in the Workflow.
-	 * @return array database row when found else empty.
-	 */
-	static public function getObjectRow( $objectId, &$workflow )
-	{
-		$result = array();
-		$sth = self::getObject( intval( $objectId ), array('Workflow') );
-		if ( $sth ) {
-			$workflow = true;
-		} else {
-			$sth = self::getObject( intval( $objectId ), array('Trash') );
-			$workflow = false;
-		}
+    /**
+     * Returns the database row of an object, either from the Workflow or from the Trash.
+     * First the Workflow area is checked and if nothing is found the Trash Can is checked.
+     *
+     * @param int|string $objectId Id of the object.
+     * @param boolean $workflow Found in the Workflow.
+     * @return array database row when found else empty.
+     */
+    static public function getObjectRow( $objectId, &$workflow )
+    {
+        $areas = array ( 'Workflow', 'Trash' );
+        $result = array();
+        foreach ( $areas as $area ) {
+            $sth = self::getObject( intval( $objectId ), array( $area ) );
+            if( $sth ) {
+                $result = self::fetchResults( $sth );
+            }
+            if ( $result ) {
+                $workflow = ( $area == 'Workflow' ) ? true : false ;
+                break;
+            }
+        }
 
-		if ( $sth ) {
-			$result = self::fetchResults( $sth );
-		}
-		return $result ? $result[0] : $result; // database row or empty array;
-	}
+        return $result ? $result[0] : $result; // database row or empty array;
+    }
 
 	/**
 	 * Returns the current version of an object. The format is <majorversion>.<minorversion>
@@ -1265,7 +1267,7 @@ class DBObject extends DBBase
 		$rows = DBBase::listRows(self::TABLENAME, 'id', $property, $where, array($dbColumn));		
 		return $rows;
 	}
-	
+
 	/**
 	 * Generates a part of a sql-statement that can be used to update/insert object
 	 * information in the database. Typically used if an object is added/updated.
@@ -1723,6 +1725,30 @@ class DBObject extends DBBase
 	}
 
 	/**
+	 * Retrieves values of column names from smart_objects and/or smart_deletedobjects table.
+	 *
+	 * @param integer[] $objectIds The object ids for retrieve values for.
+	 * @param string[] $areas Where to search in: 'Workflow' (smart_objects) and/or 'Trash' (smart_deletedobjects).
+	 * @param string[] $columnNames The names of the columns to retrieve values for.
+	 * @return array
+	 */
+	static public function getColumnsValuesForObjectIds( $objectIds, $areas, $columnNames )
+	{
+		$results = array();
+		if( $objectIds && $areas && $columnNames ) {
+			foreach( $areas as $area ) {
+				$tableName = ( $area == 'Workflow' ) ? self::TABLENAME : 'deletedobjects';
+				$where = '`id` IN ('.implode( ',', $objectIds ).')';
+				$objRows = self::listRows( $tableName, 'id', '', $where, $columnNames );
+				if( $objRows ) foreach( $objRows as $objectId => $objRow ) {
+					$results[ $objectId ] = $objRow;
+				}
+			}
+		}
+		return $results;
+	}
+
+	/**
 	 * Updates values on an Object.
 	 *
 	 * @param int $id DB id of the object to be updated.
@@ -1803,5 +1829,39 @@ class DBObject extends DBBase
 		$row = $dbDriver->fetch($sth);
 		
 		return $row ? $row['cnt'] : 0;		
-	}	
+	}
+
+	/**
+	 * Selects an object thereby filtering on the name of the object, brand and issue. Also the the object type is used
+	 * to filter.
+	 *
+	 * @param string $objectName
+	 * @param string $objectType
+	 * @param string $brandName
+	 * @param string $issueName
+	 * @return array|boolean Array with the row or false if not found.
+	 */
+	static public function getObjectByTypeAndNames( $objectName, $objectType, $brandName, $issueName )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$odb = $dbDriver->tablename( 'objects' );
+		$tdb = $dbDriver->tablename( 'targets' );
+		$pdb = $dbDriver->tablename( 'publications' );
+		$idb = $dbDriver->tablename( 'issues' );
+
+		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' ) ).' as "version"';
+		$sql = "SELECT o.`id`, o.`name`, o.`storename`, $verFld ";
+		$sql .= "FROM $odb o ";
+		$sql .= "LEFT JOIN $tdb t ON (o.`id` = t.`objectid`) ";
+		$sql .= ", $pdb p, $idb i ";
+		$sql .= "WHERE o.`name` = ? AND o.`type` = ? AND
+						o.`publication` = p.`id` AND p.`publication` = ? AND 
+						t.`issueid` = i.`id` AND i.`name` = ? ";
+		$params = array( $objectName, $objectType, $brandName, $issueName );
+
+		$sth = $dbDriver->query( $sql, $params );
+		$row = $dbDriver->fetch( $sth );
+
+		return $row;
+	}
 }
