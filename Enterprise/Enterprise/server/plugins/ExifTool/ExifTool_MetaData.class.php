@@ -324,6 +324,22 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 			}
 		}
 
+		// PNG
+		if( !isset( $this->entMetaData[ 'Dpi' ] ) ) {
+			if( $pngImageHeight == $this->entMetaData['Height'] && $pngImageWidth == $this->entMetaData['Width'] ) { // PNG reliable?
+				$pngXResolution = $this->mapFieldValue( 'PNG', 'PixelsPerUnitX', null, array( $this, 'castToIntegerWhenPositive' ) );
+				if( $pngXResolution ) {
+					// PNG: Unit of PixelUnits: '0' = no-unit, '1' = meters
+					$pngPixelUnits = $this->mapFieldValue( 'PNG', 'PixelUnits', null, array( $this, 'castToIntegerWhenZeroOrPositive' ) );
+					$pngXResolution = $this->convertPngResolutionToInches( $pngXResolution, $pngPixelUnits );
+					if( $pngXResolution ) {
+						$this->entMetaData['Dpi'] = $pngXResolution;
+						LogHandler::Log( 'ExifTool', 'DEBUG', 'Derived DPI from PNG: '.$this->entMetaData['Dpi'] );
+					}
+				}
+			}
+		}
+
 		// Photoshop
 		if( !isset( $this->entMetaData[ 'Dpi' ] ) ) {
 			if( $psImageHeight == $this->entMetaData['Height'] && $psImageWidth == $this->entMetaData['Width'] ) { // Photoshop reliable?
@@ -457,6 +473,30 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 					break;
 				case 3: // centimeters
 					$resolution = $resolution * 25.4; // convert cm to inches
+					break;
+				default: // unsupported
+					$resolution = null;
+			}
+		}
+		return $resolution;
+	}
+
+	/**
+	 * Converts the given PNG resolution to inches, given a resolution unit.
+	 *
+	 * @param float $resolution The resolution to convert.
+	 * @param integer $unit 0=none, 1=meters.
+	 * @return float|null Converted resolution. NULL when unsupported unit provided (to indicate should not be mapped to Enterprise).
+	 */
+	private function convertPngResolutionToInches( $resolution, $unit )
+	{
+		if( !is_null($unit) ) {
+			switch( $unit ) {
+				case 0: // none
+					$resolution = null;
+					break;
+				case 1: // meters
+					$resolution = $resolution * 0.0254; // convert meters to inches
 					break;
 				default: // unsupported
 					$resolution = null;
