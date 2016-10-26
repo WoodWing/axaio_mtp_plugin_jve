@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Usuário desativado (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Nome de usuário e senha obrigatórios.</Term>
   <Term key="ERR_USER_BEGINDATE">A conta do usuário ainda não é válida</Term>
-  <Term key="ERR_USER_ENDDATE">A conta do usuário não é mais válida</Term>
+  <Term key="ERR_USER_ENDDATE">A conta do usuário não é mais válida (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">O nome do usuário já existe.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">O nome do usuário é obrigatório, preencha-o.</Term>
   <Term key="ERR_WRONGLANG">Selecione um idioma (S1052).</Term>
@@ -2151,7 +2151,7 @@ Após alterar as configurações, não se esqueça de reiniciar o serviço da We
   <Term key="WARN_ELEMENT_PLACED_EDITION">Elemento %1 do artigo %2 já foi inserido na {EDITION} %3 do layout %4.</Term>
   <Term key="WARN_PAGE_DBL">Várias páginas para a página:</Term>
   <Term key="WARN_PAGE_START">Uma das páginas inicia com o número de página:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">A senha expirou</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">A senha expirou (S1145)</Term>
   <Term key="WARN_USER_LIMIT">O limite de usuários simultâneos foi atingido nesse aplicativo ou o limite de conexões simultâneas foi atingido para o servidor Enterprise.</Term>
   <Term key="WAR_UPLOAD_WARNING">Não foi possível criar imagem de pré-visualização</Term>
   <Term key="WEBFEATURES">Aplicativos</Term>

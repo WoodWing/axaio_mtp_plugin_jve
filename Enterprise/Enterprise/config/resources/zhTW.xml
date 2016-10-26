@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">用戶已撤銷 (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">需要用戶名字及密碼</Term>
   <Term key="ERR_USER_BEGINDATE">用戶帳號還未有效</Term>
-  <Term key="ERR_USER_ENDDATE">用戶帳號不再有效</Term>
+  <Term key="ERR_USER_ENDDATE">用戶帳號不再有效 (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">用戶名字已存在</Term>
   <Term key="ERR_USER_NAME_REQUIRED">請輸入所需要的用戶名字</Term>
   <Term key="ERR_WRONGLANG">選擇一種語言(S1052)</Term>
@@ -2150,7 +2150,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">文章%2的元件%1已經被置入版面%4的 {EDITION} %3版本中</Term>
   <Term key="WARN_PAGE_DBL">頁面包含複合頁:</Term>
   <Term key="WARN_PAGE_START">其中一頁開始頁碼:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">密碼已過期</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">密碼已過期 (S1145)</Term>
   <Term key="WARN_USER_LIMIT">已到達此應用程式所給予的同時使用者最高限額，或以到達 WoodWing Enterprise伺服器所給予的同時使用者最高限額．</Term>
   <Term key="WAR_UPLOAD_WARNING">不能產生預視圖像</Term>
   <Term key="WEBFEATURES">網上功能</Term>
