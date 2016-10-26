@@ -18,18 +18,12 @@ class Elvis_WflDeleteObjectTargets extends WflDeleteObjectTargets_EnterpriseConn
 
 	final public function runBefore( WflDeleteObjectTargetsRequest &$req )
 	{
-		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; // keep code analyzer happy
-		
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_BEFOREAFTER with RUNMODE_AFTER when this hook is not needed.
 	} 
 
 	final public function runAfter( WflDeleteObjectTargetsRequest $req, WflDeleteObjectTargetsResponse &$resp )
 	{
-		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; $resp = $resp; // keep code analyzer happy
-
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_BEFOREAFTER with RUNMODE_BEFORE when this hook is not needed.
 	} 
@@ -37,6 +31,5 @@ class Elvis_WflDeleteObjectTargets extends WflDeleteObjectTargets_EnterpriseConn
 	// Not called.
 	final public function runOverruled( WflDeleteObjectTargetsRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
 	} 
 }

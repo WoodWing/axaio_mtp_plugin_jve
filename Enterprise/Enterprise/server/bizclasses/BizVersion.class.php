@@ -570,7 +570,7 @@ class BizVersion
 	 * @return array
 	 * @throws BizException
 	 */
-	static private function getVersionStatuses( $objProps, $getStateId=null )
+	static public function getVersionStatuses( $objProps, $getStateId=null )
 	{
 		$pubId 	 = $objProps['PublicationId'];
 		$issId 	 = array_key_exists( 'issueId', $objProps) ? $objProps['IssueId'] : null;

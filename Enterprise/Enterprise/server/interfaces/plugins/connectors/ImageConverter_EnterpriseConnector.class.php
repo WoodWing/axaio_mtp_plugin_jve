@@ -34,6 +34,9 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 	/** @var float $inputDpi Pixel density (DPI) of the input image.  */
 	protected $inputDpi;
 
+	/** @var integer $inputOrientation How to rotate/mirror the input image; EXIF/IFD0 standard with values 1...8  */
+	protected $inputOrientation;
+
 	/** @var float $outputDpi Pixel density (DPI) of the output image.  */
 	protected $outputDpi;
 
@@ -74,7 +77,7 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 	protected $applyRotate;
 
 	// - - - - - - - - - - - - - - - - - - - - - - - - -
-	/** @var boolean $resizeWidth Whether or not to flip the input image (or its crop frame) horizontally.  */
+	/** @var boolean $mirrorHorizontal Whether or not to flip the input image (or its crop frame) horizontally.  */
 	protected $mirrorHorizontal;
 
 	/** @var boolean $mirrorVertical Whether or not to flip the input image (or its crop frame) vertically.  */
@@ -120,12 +123,14 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 	 * @param integer $width Number of horizontal pixels.
 	 * @param integer $height Number of vertical pixels.
 	 * @param float $dpi Number of pixels per inch.
+	 * @param integer $orientation How to rotate/mirror the image; EXIF/IFD0 standard with values 1...8
 	 */
-	public function setInputDimension( $width, $height, $dpi )
+	public function setInputDimension( $width, $height, $dpi, $orientation )
 	{
 		$this->inputWidth = $width;
 		$this->inputHeight = $height;
 		$this->inputDpi = $dpi;
+		$this->inputOrientation = $orientation;
 		$this->recalcOutputDpi();
 		$this->pt2pxFactor = $dpi / 72; // assumption: 72 points per inch
 		$this->resetOperations();
@@ -158,8 +163,13 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 		// Default no crop.
 		$this->cropLeft = 0;
 		$this->cropTop = 0;
-		$this->cropWidth = $this->inputWidth;
-		$this->cropHeight = $this->inputHeight;
+		if( $this->inputOrientation < 5 ) {
+			$this->cropWidth = $this->inputWidth;
+			$this->cropHeight = $this->inputHeight;
+		} else { // rotated 90 degrees CW or CCW
+			$this->cropWidth = $this->inputHeight;
+			$this->cropHeight = $this->inputWidth;
+		}
 		$this->applyCrop = false;
 
 		// Default no rotate.
@@ -172,8 +182,13 @@ abstract class ImageConverter_EnterpriseConnector extends DefaultConnector
 		$this->applyMirror = false;
 
 		// Default no resize.
-		$this->resizeWidth = $this->inputWidth;
-		$this->resizeHeight = $this->inputHeight;
+		if( $this->inputOrientation < 5 ) {
+			$this->resizeWidth = $this->inputWidth;
+			$this->resizeHeight = $this->inputHeight;
+		} else { // rotated 90 degrees CW or CCW
+			$this->resizeWidth = $this->inputHeight;
+			$this->resizeHeight = $this->inputWidth;
+		}
 		$this->applyResize = false;
 
 		$this->recalcOutputDimentions();

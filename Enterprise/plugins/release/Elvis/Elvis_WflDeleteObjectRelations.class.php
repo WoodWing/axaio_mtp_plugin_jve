@@ -23,8 +23,8 @@ class Elvis_WflDeleteObjectRelations extends WflDeleteObjectRelations_Enterprise
 
 	final public function runBefore( WflDeleteObjectRelationsRequest &$req )
 	{
-		require_once dirname(__FILE__) . '/util/ElvisObjectUtils.class.php';
-		require_once dirname(__FILE__) . '/util/ElvisObjectRelationUtils.class.php';
+		require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
+		require_once dirname(__FILE__).'/util/ElvisObjectRelationUtils.class.php';
 
 		// Collect changed layouts due restored elvis shadow objects
 		$childIds = array();
@@ -37,9 +37,7 @@ class Elvis_WflDeleteObjectRelations extends WflDeleteObjectRelations_Enterprise
 
 	final public function runAfter( WflDeleteObjectRelationsRequest $req, WflDeleteObjectRelationsResponse &$resp )
 	{
-		$req = $req; $resp = $resp; // keep code analyzer happy
-
-		require_once dirname(__FILE__) . '/logic/ElvisUpdateManager.class.php';
+		require_once dirname(__FILE__).'/logic/ElvisUpdateManager.class.php';
 
 		// Update Elvis with new shadow relations (if any) of changed layouts
 		if( $this->changedLayoutIds ) {
@@ -50,6 +48,5 @@ class Elvis_WflDeleteObjectRelations extends WflDeleteObjectRelations_Enterprise
 	// Not called.
 	final public function runOverruled( WflDeleteObjectRelationsRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
 	} 
 }

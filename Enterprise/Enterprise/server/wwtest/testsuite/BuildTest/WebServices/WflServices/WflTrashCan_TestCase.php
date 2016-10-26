@@ -191,6 +191,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflTrashCan_TestCase extend
 		$request->Objects[0]->MetaData->ContentMetaData->KeyFrameEveryFrames = null;
 		$request->Objects[0]->MetaData->ContentMetaData->Channels = 'Print';
 		$request->Objects[0]->MetaData->ContentMetaData->AspectRatio = null;
+		$request->Objects[0]->MetaData->ContentMetaData->Orientation = '1';
+		$request->Objects[0]->MetaData->ContentMetaData->Dimensions = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$request->Objects[0]->MetaData->WorkflowMetaData->Deadline = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Urgency = null;
@@ -280,6 +282,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflTrashCan_TestCase extend
 		$response->Objects[0]->MetaData->ContentMetaData->KeyFrameEveryFrames = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->Channels = 'Print';
 		$response->Objects[0]->MetaData->ContentMetaData->AspectRatio = '';
+		$response->Objects[0]->MetaData->ContentMetaData->Orientation = '1';
+		$response->Objects[0]->MetaData->ContentMetaData->Dimensions = '24 x 24';
 		$response->Objects[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$response->Objects[0]->MetaData->WorkflowMetaData->Deadline = null;
 		$response->Objects[0]->MetaData->WorkflowMetaData->Urgency = '';
@@ -396,6 +400,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflTrashCan_TestCase extend
 		$request->Objects[0]->MetaData->ContentMetaData->KeyFrameEveryFrames = null;
 		$request->Objects[0]->MetaData->ContentMetaData->Channels = 'Print';
 		$request->Objects[0]->MetaData->ContentMetaData->AspectRatio = null;
+		$request->Objects[0]->MetaData->ContentMetaData->Orientation = '1';
+		$request->Objects[0]->MetaData->ContentMetaData->Dimensions = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$request->Objects[0]->MetaData->WorkflowMetaData->Deadline = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Urgency = null;
@@ -481,6 +487,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflTrashCan_TestCase extend
 		$response->Objects[0]->MetaData->ContentMetaData->KeyFrameEveryFrames = '0';
 		$response->Objects[0]->MetaData->ContentMetaData->Channels = 'Print';
 		$response->Objects[0]->MetaData->ContentMetaData->AspectRatio = '';
+		$response->Objects[0]->MetaData->ContentMetaData->Orientation = '1';
+		$response->Objects[0]->MetaData->ContentMetaData->Dimensions = '24 x 24';
 		$response->Objects[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
 		$response->Objects[0]->MetaData->WorkflowMetaData->Deadline = null;
 		$response->Objects[0]->MetaData->WorkflowMetaData->Urgency = '';
@@ -886,6 +894,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflTrashCan_TestCase extend
 		$request->MinimalProps[2] = 'State';
 		$request->MinimalProps[3] = 'Format';
 		$request->MinimalProps[4] = 'LockedBy';
+		$request->MinimalProps[5] = 'Deleted';
 		$request->RequestProps = null;
 		$request->Areas = array();
 		$request->Areas[0] = $atWorkflow ? 'Workflow' : 'Trash';

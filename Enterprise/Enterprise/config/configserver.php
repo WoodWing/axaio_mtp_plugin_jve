@@ -412,33 +412,47 @@ if( !defined('INDESIGNSERV_APPSERVER') ) {
 }
 
 // INDESIGNSERV_JOBQUEUES:
-//    For each job type a priority can be specified that overrules the default priority
-//    that is hard-coded in the job implementation itself. High priority jobs are handled first. 
+//    For each job type a priority can be specified that overrules the default priority
+//    that is hard-coded in the job implementation itself. High priority jobs are handled first.
 //
-//    There are 5 priorities:
-//       1 = Very High
-//       2 = High
-//       3 = Medium
-//       4 = Low
-//       5 = Very Low
+//    There are 5 priorities:
+//       1 = Very High    (foreground)
+//       2 = High         (background)
+//       3 = Medium       (background)
+//       4 = Low          (background)
+//       5 = Very Low     (background)
 //
-//    Specifying which Job priorities an InDesign Server instance should pick up is done on
-//    the InDesign Server Maintenance page.
-//   
-//    This priority system can also be seen as a job queue: on the one hand an InDesign Server 
-//    processes the highest priority jobs first while on the other hand it only processes jobs 
-//    of which the Job Priority matches the Job Priority configuration of the InDesign Server 
-//    instance.
-//    Example: when a pool of InDesign Servers is configured to process a Job with priority 2 and 3,
-//    they will never pick up a Job with priority 1, even when they are idle. When they are
-//    all busy processing priority 3 Jobs while a priority 2 Job arrives, the priority 2 Job has 
-//    to wait until the first InDesign Server of that pool is ready processing its current Job.
-//   
-//    The job type for the preview operations of the Multi-Channel Text Editor in Content 
-//    Station is named 'WEB_EDITOR' and has a default priority of "2" (high). To lower it 
-//    to "3" (medium) add the following line (without the leading //):
-//       'WEB_EDITOR' => 3,
-//   
+//    Specifying which Job priorities an InDesign Server instance should pick up is done on
+//    the InDesign Server Maintenance page.
+//
+//    This priority system can also be seen as a job queue: on the one hand an InDesign Server
+//    processes the highest priority jobs first while on the other hand it only processes jobs
+//    of which the Job Priority matches the Job Priority configuration of the InDesign Server
+//    instance.
+//    Example: when a pool of InDesign Servers is configured to process a Job with priority 2 and 3,
+//    they will never pick up a Job with priority 1, even when they are idle. When they are
+//    all busy processing priority 3 Jobs while a priority 2 Job arrives, the priority 2 Job has
+//    to wait until the first InDesign Server of that pool is ready processing its current Job.
+//
+//    Priority 1 is reserved for foreground jobs. Those are executed in the context of the workflow
+//    operation itself while letting the end-user wait for the results. The other priorities are
+//    reserved for background jobs. Those jobs are created by workflow operations without letting
+//    the end-user wait for the results. A background process takes care of the job execution.
+//
+//    The job type for the preview operations of the Multi-Channel Text Editor in Content
+//    Station is named 'WEB_EDITOR' and has a priority of 1 (Very High). This cannot be changed
+//    because this job type runs in foreground.
+//
+//    The job type for the InDesign Server Automation feature is named 'IDS_AUTOMATION' and has a
+//    default priority of 4 (Low). Because this job type runs in the background, it can be changed
+//    into any value in the range of [2 - 5]. For normal usage there is no need to change the priority,
+//    but when many custom job types are installed it could be useful to tweak the priorities.
+//    Example: Two custom job types exist, one with priority 4 and the other with priority 5. It is
+//    decided that both are less urgent to execute than the 'IDS_AUTOMATION' which has a default
+//    priority of 4. In that case you may want to assign priority 3 to the InDesign Server Automation feature.
+//    This can be done by adding the following line (without the leading //) to the INDESIGNSERV_JOBQUEUES option:
+//       'IDS_AUTOMATION' => 3,
+//
 if( !defined('INDESIGNSERV_JOBQUEUES') ) {
 	define( 'INDESIGNSERV_JOBQUEUES', serialize(array(
 		// job type name => job priority number

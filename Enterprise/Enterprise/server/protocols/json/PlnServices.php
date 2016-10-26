@@ -21,96 +21,69 @@ class WW_JSON_PlnServices extends WW_JSON_Services
 	public function LogOn( $req )
 	{
 		require_once BASEDIR.'/server/services/pln/PlnLogOnService.class.php';
-
-		try {
-			$req['__classname__'] = 'PlnLogOnRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PlnLogOnService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PlnLogOnRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PlnLogOnService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function LogOff( $req )
 	{
 		require_once BASEDIR.'/server/services/pln/PlnLogOffService.class.php';
-
-		try {
-			$req['__classname__'] = 'PlnLogOffRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PlnLogOffService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PlnLogOffRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PlnLogOffService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function CreateLayouts( $req )
 	{
 		require_once BASEDIR.'/server/services/pln/PlnCreateLayoutsService.class.php';
-
-		try {
-			$req['__classname__'] = 'PlnCreateLayoutsRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PlnCreateLayoutsService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PlnCreateLayoutsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PlnCreateLayoutsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function ModifyLayouts( $req )
 	{
 		require_once BASEDIR.'/server/services/pln/PlnModifyLayoutsService.class.php';
-
-		try {
-			$req['__classname__'] = 'PlnModifyLayoutsRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PlnModifyLayoutsService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PlnModifyLayoutsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PlnModifyLayoutsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function DeleteLayouts( $req )
 	{
 		require_once BASEDIR.'/server/services/pln/PlnDeleteLayoutsService.class.php';
-
-		try {
-			$req['__classname__'] = 'PlnDeleteLayoutsRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PlnDeleteLayoutsService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PlnDeleteLayoutsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PlnDeleteLayoutsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function CreateAdverts( $req )
 	{
 		require_once BASEDIR.'/server/services/pln/PlnCreateAdvertsService.class.php';
-
-		try {
-			$req['__classname__'] = 'PlnCreateAdvertsRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
+		$req['__classname__'] = 'PlnCreateAdvertsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
 			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 			$transferServer = new BizTransferServer();
 			if( $req->Adverts ) foreach( $req->Adverts as $advert ) {
@@ -123,23 +96,18 @@ class WW_JSON_PlnServices extends WW_JSON_Services
 					}
 				}
 			}
-			$service = new PlnCreateAdvertsService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$service = new PlnCreateAdvertsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function ModifyAdverts( $req )
 	{
 		require_once BASEDIR.'/server/services/pln/PlnModifyAdvertsService.class.php';
-
-		try {
-			$req['__classname__'] = 'PlnModifyAdvertsRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
+		$req['__classname__'] = 'PlnModifyAdvertsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
 			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 			$transferServer = new BizTransferServer();
 			if( $req->Adverts ) foreach( $req->Adverts as $advert ) {
@@ -152,29 +120,21 @@ class WW_JSON_PlnServices extends WW_JSON_Services
 					}
 				}
 			}
-			$service = new PlnModifyAdvertsService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$service = new PlnModifyAdvertsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function DeleteAdverts( $req )
 	{
 		require_once BASEDIR.'/server/services/pln/PlnDeleteAdvertsService.class.php';
-
-		try {
-			$req['__classname__'] = 'PlnDeleteAdvertsRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PlnDeleteAdvertsService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PlnDeleteAdvertsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PlnDeleteAdvertsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 

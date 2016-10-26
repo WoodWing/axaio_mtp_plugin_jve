@@ -275,72 +275,74 @@
 
 			<complexType name="BasicMetaData">
 				<all>
-					<element name="ID"				type="xsd:string"			nillable="true"/>	<!-- nillable since v4.2 -->
-					<element name="DocumentID"		type="xsd:string"			nillable="true"/>	<!-- XMP document ID - nillable since v4.2 -->
-					<element name="Name"			type="xsd:string"			nillable="true"/>	<!-- nillable since v4.2 -->
-					<element name="Type"			type="tns:ObjectType"		nillable="true"/>	<!-- nillable since v4.2 -->
-					<element name="Publication"		type="tns:Publication"		nillable="true"/>	<!-- v6.0: Publication that ‘owns’ the object -->
-					<element name="Category"		type="tns:Category"			nillable="true"/>	<!-- v6.0: Category of the object, formerly named Section -->
-					<element name="ContentSource"	type="xsd:string"			nillable="true"/>	<!-- v6.0: Content provider, this is technical thing, for example DAM system ID -->
+					<element name="ID"              type="xsd:string"           nillable="true"/>   <!-- nillable since v4.2 -->
+					<element name="DocumentID"      type="xsd:string"           nillable="true"/>   <!-- XMP document ID - nillable since v4.2 -->
+					<element name="Name"            type="xsd:string"           nillable="true"/>   <!-- nillable since v4.2 -->
+					<element name="Type"            type="tns:ObjectType"       nillable="true"/>   <!-- nillable since v4.2 -->
+					<element name="Publication"     type="tns:Publication"      nillable="true"/>   <!-- v6.0: Publication that ‘owns’ the object -->
+					<element name="Category"        type="tns:Category"         nillable="true"/>   <!-- v6.0: Category of the object, formerly named Section -->
+					<element name="ContentSource"   type="xsd:string"           nillable="true"/>   <!-- v6.0: Content provider, this is technical thing, for example DAM system ID -->
 				</all>
 			</complexType>
 			<complexType name="RightsMetaData">
 				<all>
-					<element name="CopyrightMarked" type="xsd:boolean"			nillable="true"/>	<!-- InDesign FileInfo dialog, description tab-->
-					<element name="Copyright"		type="xsd:string"			nillable="true"/>	<!-- InDesign FileInfo dialog, description tab-->
-					<element name="CopyrightURL"	type="xsd:string"			nillable="true"/>	<!-- InDesign FileInfo dialog, description tab-->
+					<element name="CopyrightMarked" type="xsd:boolean"          nillable="true"/>   <!-- InDesign FileInfo dialog, description tab-->
+					<element name="Copyright"       type="xsd:string"           nillable="true"/>   <!-- InDesign FileInfo dialog, description tab-->
+					<element name="CopyrightURL"    type="xsd:string"           nillable="true"/>   <!-- InDesign FileInfo dialog, description tab-->
 				</all>
 			</complexType>
 			<complexType name="SourceMetaData">
 				<all>
-					<element name="Credit" 			type="xsd:string"			nillable="true"/>	<!-- InDesign FileInfo dialog, origin tab-->
-					<element name="Source" 			type="xsd:string"			nillable="true"/>	<!-- InDesign FileInfo dialog, origin tab-->
-					<element name="Author" 			type="xsd:string"			nillable="true"/>	<!-- InDesign FileInfo dialog, description tab-->
+					<element name="Credit"          type="xsd:string"           nillable="true"/>   <!-- InDesign FileInfo dialog, origin tab-->
+					<element name="Source"          type="xsd:string"           nillable="true"/>   <!-- InDesign FileInfo dialog, origin tab-->
+					<element name="Author"          type="xsd:string"           nillable="true"/>   <!-- InDesign FileInfo dialog, description tab-->
 				</all>
 			</complexType>
 			<complexType name="ContentMetaData">
 				<all>
-					<element name="Description" 	type="xsd:string"			nillable="true"/>	<!-- InDesign FileInfo dialog, description tab-->
-					<element name="DescriptionAuthor" type="xsd:string"			nillable="true"/>	<!-- InDesign FileInfo dialog, description tab-->
-					<element name="Keywords" 		type="tns:ArrayOfString"	nillable="true"/>	<!-- InDesign FileInfo dialog, description tab-->
-					<element name="Slugline" 		type="xsd:string"			nillable="true"/>	<!-- Contents snippet -->
-					<element name="Format" 			type="xsd:string"			nillable="true"/>	<!-- nillable since v4.2 - Mime filetype  -->
-					<element name="Columns" 		type="xsd:int"				nillable="true"/>
-					<element name="Width" 			type="xsd:double"			nillable="true"/>	<!-- Width in pixels for Images -->	
-					<element name="Height" 			type="xsd:double"			nillable="true"/>	<!-- Height in pixels for Images -->
-					<element name="Dpi" 			type="xsd:double"			nillable="true"/>	<!-- Dots per inch for images. Since 10.1 changed from unsignedInt to double. -->
-					<element name="LengthWords"		type="xsd:unsignedInt"		nillable="true"/>	<!-- Articles only -->
-					<element name="LengthChars"		type="xsd:unsignedInt"		nillable="true"/>	<!-- Articles only -->
-					<element name="LengthParas"		type="xsd:unsignedInt"		nillable="true"/>	<!-- Articles only -->
-					<element name="LengthLines"		type="xsd:unsignedInt"		nillable="true"/>	<!-- Articles only -->
-					<element name="PlainContent"	type="xsd:string"			nillable="true"/>	<!-- Articles only -->
-					<element name="FileSize"		type="xsd:unsignedInt"		nillable="true"/>	<!-- Articles only -->
-					<element name="ColorSpace"		type="xsd:string"			nillable="true"/>	<!-- Bitmap, Grayscale, Indexed, RGB, CMYK, Multichannel, Duotone, Lab (Only for Image, Video, Audio, Advert and Layout objects) -->
-					<element name="HighResFile"		type="xsd:string"			nillable="true"/>	<!-- Relative file location (to HighResStore feature) of highres advert/image output. Use foreward slashes. -->
-					<element name="Encoding"		type="xsd:string"			nillable="true"/>	<!-- Audio/Video only -->
-					<element name="Compression"		type="xsd:string"			nillable="true"/>	<!-- Audio/Video/Image only -->
-					<element name="KeyFrameEveryFrames"	type="xsd:unsignedInt"	nillable="true"/>	<!-- Audio/Video only -->
-					<element name="Channels"		type="xsd:string"			nillable="true"/>	<!-- Audio/Video only -->
-					<element name="AspectRatio"		type="xsd:string"			nillable="true"/>	<!-- Video only -->
+					<element name="Description"     type="xsd:string"           nillable="true"/>   <!-- InDesign FileInfo dialog, description tab-->
+					<element name="DescriptionAuthor" type="xsd:string"         nillable="true"/>   <!-- InDesign FileInfo dialog, description tab-->
+					<element name="Keywords"        type="tns:ArrayOfString"    nillable="true"/>   <!-- InDesign FileInfo dialog, description tab-->
+					<element name="Slugline"        type="xsd:string"           nillable="true"/>   <!-- Contents snippet -->
+					<element name="Format"          type="xsd:string"           nillable="true"/>   <!-- nillable since v4.2 - Mime filetype  -->
+					<element name="Columns"         type="xsd:int"              nillable="true"/>
+					<element name="Width"           type="xsd:double"           nillable="true"/>   <!-- Width in pixels for Images -->   
+					<element name="Height"          type="xsd:double"           nillable="true"/>   <!-- Height in pixels for Images -->
+					<element name="Dpi"             type="xsd:double"           nillable="true"/>   <!-- Dots per inch for images. Since 10.1 changed from unsignedInt to double. -->
+					<element name="LengthWords"     type="xsd:unsignedInt"      nillable="true"/>   <!-- Articles only -->
+					<element name="LengthChars"     type="xsd:unsignedInt"      nillable="true"/>   <!-- Articles only -->
+					<element name="LengthParas"     type="xsd:unsignedInt"      nillable="true"/>   <!-- Articles only -->
+					<element name="LengthLines"     type="xsd:unsignedInt"      nillable="true"/>   <!-- Articles only -->
+					<element name="PlainContent"    type="xsd:string"           nillable="true"/>   <!-- Articles only -->
+					<element name="FileSize"        type="xsd:unsignedInt"      nillable="true"/>   <!-- Articles only -->
+					<element name="ColorSpace"      type="xsd:string"           nillable="true"/>   <!-- Bitmap, Grayscale, Indexed, RGB, CMYK, Multichannel, Duotone, Lab (Only for Image, Video, Audio, Advert and Layout objects) -->
+					<element name="HighResFile"     type="xsd:string"           nillable="true"/>   <!-- Relative file location (to HighResStore feature) of highres advert/image output. Use foreward slashes. -->
+					<element name="Encoding"        type="xsd:string"           nillable="true"/>   <!-- Audio/Video only -->
+					<element name="Compression"     type="xsd:string"           nillable="true"/>   <!-- Audio/Video/Image only -->
+					<element name="KeyFrameEveryFrames" type="xsd:unsignedInt"  nillable="true"/>   <!-- Audio/Video only -->
+					<element name="Channels"        type="xsd:string"           nillable="true"/>   <!-- Audio/Video only -->
+					<element name="AspectRatio"     type="xsd:string"           nillable="true"/>   <!-- Video only -->
+					<element name="Orientation"     type="xsd:unsignedInt"      nillable="true" minOccurs="0" maxOccurs="1"/> <!-- v10.1: Image orientation value, as specified in Exif IFD0. Default value is 1 = Horizontal (normal). Can only be set through uploads of image files having embedded Exif metadata, so not directly through web services. Nil when not resolved. -->
+					<element name="Dimensions"      type="xsd:string"           nillable="true" minOccurs="0" maxOccurs="1"/> <!-- v10.1: Measurements of an image in "Width x Height" format. When the image Orientation is set to 90 degrees rotation, the Width and Height values are switched. This field is for UI purposes and is derived from Width, Height and Orientation. -->
 				</all>
 			</complexType>
 			<complexType name="WorkflowMetaData">
 				<all>
-					<element name="Deadline"		type="tns:dateTimeOrEmpty"		nillable="true"/>
-					<element name="Urgency" 		type="xsd:string"							nillable="true"/>
-					<element name="Modifier" 		type="xsd:string"							nillable="true"/>	<!-- At creation, will be original modifier, if known -->
-					<element name="Modified" 		type="xsd:dateTime"						nillable="true"/>	<!-- At creation, will be original modified, if known -->
-					<element name="Creator" 		type="xsd:string"							nillable="true"/>	<!-- At creation, will be original creator, if known -->
-					<element name="Created" 		type="xsd:dateTime"						nillable="true"/>	<!-- At creation, will be original created, if known -->
-					<element name="Comment" 		type="xsd:string"							nillable="true"/>
-					<element name="State" 			type="tns:State"							nillable="true"/>
-					<element name="RouteTo"			type="xsd:string"							nillable="true"/>
-					<element name="LockedBy"		type="xsd:string"							nillable="true"/>			
-					<element name="Version"			type="xsd:string"							nillable="true"/>			
-					<element name="DeadlineSoft"	type="tns:dateTimeOrEmpty"	nillable="true"/>	<!-- v5.0 -->
-					<element name="Rating"			type="xsd:unsignedInt"				nillable="true"/>	<!-- v6.0: Object's rating, 0 means not rated -->
-					<element name="Deletor"			type="xsd:string"							nillable="true"/>	<!-- v8.0 -->
-					<element name="Deleted"			type="xsd:dateTime"						nillable="true"/>	<!-- v8.0 -->
+					<element name="Deadline"        type="tns:dateTimeOrEmpty"  nillable="true"/>
+					<element name="Urgency"         type="xsd:string"           nillable="true"/>
+					<element name="Modifier"        type="xsd:string"           nillable="true"/>   <!-- At creation, will be original modifier, if known -->
+					<element name="Modified"        type="xsd:dateTime"         nillable="true"/>   <!-- At creation, will be original modified, if known -->
+					<element name="Creator"         type="xsd:string"           nillable="true"/>   <!-- At creation, will be original creator, if known -->
+					<element name="Created"         type="xsd:dateTime"         nillable="true"/>   <!-- At creation, will be original created, if known -->
+					<element name="Comment"         type="xsd:string"           nillable="true"/>
+					<element name="State"           type="tns:State"            nillable="true"/>
+					<element name="RouteTo"         type="xsd:string"           nillable="true"/>
+					<element name="LockedBy"        type="xsd:string"           nillable="true"/>         
+					<element name="Version"         type="xsd:string"           nillable="true"/>         
+					<element name="DeadlineSoft"    type="tns:dateTimeOrEmpty"  nillable="true"/>   <!-- v5.0 -->
+					<element name="Rating"          type="xsd:unsignedInt"      nillable="true"/>   <!-- v6.0: Object's rating, 0 means not rated -->
+					<element name="Deletor"         type="xsd:string"           nillable="true"/>   <!-- v8.0 -->
+					<element name="Deleted"         type="xsd:dateTime"         nillable="true"/>   <!-- v8.0 -->
 				</all>
 			</complexType>
 			

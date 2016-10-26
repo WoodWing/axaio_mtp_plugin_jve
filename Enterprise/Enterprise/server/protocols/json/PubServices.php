@@ -21,187 +21,132 @@ class WW_JSON_PubServices extends WW_JSON_Services
 	public function PublishDossiers( $req )
 	{
 		require_once BASEDIR.'/server/services/pub/PubPublishDossiersService.class.php';
-
-		try {
-			$req['__classname__'] = 'PubPublishDossiersRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PubPublishDossiersService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PubPublishDossiersRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PubPublishDossiersService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function UpdateDossiers( $req )
 	{
 		require_once BASEDIR.'/server/services/pub/PubUpdateDossiersService.class.php';
-
-		try {
-			$req['__classname__'] = 'PubUpdateDossiersRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PubUpdateDossiersService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PubUpdateDossiersRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PubUpdateDossiersService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function UnPublishDossiers( $req )
 	{
 		require_once BASEDIR.'/server/services/pub/PubUnPublishDossiersService.class.php';
-
-		try {
-			$req['__classname__'] = 'PubUnPublishDossiersRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PubUnPublishDossiersService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PubUnPublishDossiersRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PubUnPublishDossiersService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function GetDossierURL( $req )
 	{
 		require_once BASEDIR.'/server/services/pub/PubGetDossierURLService.class.php';
-
-		try {
-			$req['__classname__'] = 'PubGetDossierURLRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PubGetDossierURLService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PubGetDossierURLRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PubGetDossierURLService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function GetPublishInfo( $req )
 	{
 		require_once BASEDIR.'/server/services/pub/PubGetPublishInfoService.class.php';
-
-		try {
-			$req['__classname__'] = 'PubGetPublishInfoRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PubGetPublishInfoService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PubGetPublishInfoRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PubGetPublishInfoService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function SetPublishInfo( $req )
 	{
 		require_once BASEDIR.'/server/services/pub/PubSetPublishInfoService.class.php';
-
-		try {
-			$req['__classname__'] = 'PubSetPublishInfoRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PubSetPublishInfoService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PubSetPublishInfoRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PubSetPublishInfoService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function PreviewDossiers( $req )
 	{
 		require_once BASEDIR.'/server/services/pub/PubPreviewDossiersService.class.php';
-
-		try {
-			$req['__classname__'] = 'PubPreviewDossiersRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PubPreviewDossiersService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PubPreviewDossiersRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PubPreviewDossiersService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function GetDossierOrder( $req )
 	{
 		require_once BASEDIR.'/server/services/pub/PubGetDossierOrderService.class.php';
-
-		try {
-			$req['__classname__'] = 'PubGetDossierOrderRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PubGetDossierOrderService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PubGetDossierOrderRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PubGetDossierOrderService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function UpdateDossierOrder( $req )
 	{
 		require_once BASEDIR.'/server/services/pub/PubUpdateDossierOrderService.class.php';
-
-		try {
-			$req['__classname__'] = 'PubUpdateDossierOrderRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PubUpdateDossierOrderService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PubUpdateDossierOrderRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PubUpdateDossierOrderService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function AbortOperation( $req )
 	{
 		require_once BASEDIR.'/server/services/pub/PubAbortOperationService.class.php';
-
-		try {
-			$req['__classname__'] = 'PubAbortOperationRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PubAbortOperationService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PubAbortOperationRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PubAbortOperationService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 
 	public function OperationProgress( $req )
 	{
 		require_once BASEDIR.'/server/services/pub/PubOperationProgressService.class.php';
-
-		try {
-			$req['__classname__'] = 'PubOperationProgressRequest';
-			$req = $this->arraysToObjects( $req );
-			$req = $this->restructureObjects( $req );
-			$service = new PubOperationProgressService();
-			$resp = $service->execute( $req );
-			$resp = $this->restructureObjects( $resp );
-		} catch( BizException $e ) {
-			throw new Zend\Json\Server\Exception\ErrorException( $e->getMessage() );
-		}
+		$req['__classname__'] = 'PubOperationProgressRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new PubOperationProgressService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
 		return $resp;
 	}
 

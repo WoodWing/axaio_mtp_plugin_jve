@@ -114,6 +114,9 @@ class PubMessageContext
 				}
 			}
 		}
+		if( is_object( $this->Page ) ) {
+			$this->Page->sanitizeProperties4Php();
+		}
 	}
 }
 class PubReportMessage
@@ -135,6 +138,12 @@ class PubReportMessage
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->UserMessage ) ) {
+			$this->UserMessage->sanitizeProperties4Php();
+		}
+		if( is_object( $this->Context ) ) {
+			$this->Context->sanitizeProperties4Php();
+		}
 	}
 }
 class PubPublishedDossier
@@ -189,6 +198,12 @@ class PubPublishedDossier
 				}
 			}
 		}
+		if( is_object( $this->Target ) ) {
+			$this->Target->sanitizeProperties4Php();
+		}
+		if( is_object( $this->PublishMessage ) ) {
+			$this->PublishMessage->sanitizeProperties4Php();
+		}
 	}
 }
 class PubPublishedIssue
@@ -242,6 +257,9 @@ class PubPublishedIssue
 					$complexField->sanitizeProperties4Php();
 				}
 			}
+		}
+		if( is_object( $this->Target ) ) {
+			$this->Target->sanitizeProperties4Php();
 		}
 	}
 }

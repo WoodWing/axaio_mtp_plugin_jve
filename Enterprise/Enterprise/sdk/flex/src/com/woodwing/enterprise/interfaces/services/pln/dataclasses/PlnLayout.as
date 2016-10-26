@@ -18,6 +18,7 @@ package com.woodwing.enterprise.interfaces.services.pln.dataclasses
 		private var _Name:String;
 		private var _Publication:String;
 		private var _Issue:String;
+		private var _PubChannel:String;
 		private var _Section:String;
 		private var _Status:String;
 		private var _Pages:Array;
@@ -54,6 +55,13 @@ package com.woodwing.enterprise.interfaces.services.pln.dataclasses
 		}
 		public function set Issue(Issue:String):void {
 			this._Issue = Issue;
+		}
+
+		public function get PubChannel():String {
+			return this._PubChannel;
+		}
+		public function set PubChannel(PubChannel:String):void {
+			this._PubChannel = PubChannel;
 		}
 
 		public function get Section():String {

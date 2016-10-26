@@ -1,7 +1,13 @@
 ALTER TABLE `smart_authorizations`
 ADD   `bundle` int(11) not null  default '0';
+ALTER TABLE `smart_deletedobjects`
+ADD   `orientation` tinyint(4) not null  default '0';
 ALTER TABLE `smart_deletedobjects` CHANGE `dpi`   `dpi` double not null  default '0';
+ALTER TABLE `smart_objects`
+ADD   `orientation` tinyint(4) not null  default '0';
 ALTER TABLE `smart_objects` CHANGE `dpi`   `dpi` double not null  default '0';
+ALTER TABLE `smart_objectversions`
+ADD   `orientation` tinyint(4) not null  default '0';
 ALTER TABLE `smart_objectversions` CHANGE `dpi`   `dpi` double not null  default '0';
 
 CREATE TABLE `smart_publishedplcmtshist` (

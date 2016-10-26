@@ -36,7 +36,7 @@ class ElvisAMFClient
 	 * @param $operation
 	 * @param $params
 	 * @param bool $secure
-	 * @return mixed|null
+	 * @return ElvisEntHit|null
 	 * @throws BizException
 	 */
 	public static function sendUnParsed($service, $operation, $params, $secure=true, $timeout=60)

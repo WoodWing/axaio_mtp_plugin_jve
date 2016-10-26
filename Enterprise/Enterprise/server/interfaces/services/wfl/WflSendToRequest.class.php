@@ -78,6 +78,9 @@ class WflSendToRequest
 				}
 			}
 		}
+		if( is_object( $this->WorkflowMetaData ) ) {
+			$this->WorkflowMetaData->sanitizeProperties4Php();
+		}
 	}
 
 	public function mightHaveContent() { return false; }
