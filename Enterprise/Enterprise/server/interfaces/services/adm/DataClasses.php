@@ -697,6 +697,9 @@ class AdmStatus
 		if (!is_null($this->AutomaticallySendToNext)){ $this->AutomaticallySendToNext = ('true' == $this->AutomaticallySendToNext) ? true : false; }
 		if (!is_null($this->ReadyForPublishing)){ $this->ReadyForPublishing = ('true' == $this->ReadyForPublishing) ? true : false; }
 		if (!is_null($this->SkipIdsa)){ $this->SkipIdsa = ('true' == $this->SkipIdsa) ? true : false; }
+		if( is_object( $this->DefaultRouteTo ) ) {
+			$this->DefaultRouteTo->sanitizeProperties4Php();
+		}
 	}
 }
 class AdmTermEntity

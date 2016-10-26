@@ -1,5 +1,7 @@
 ALTER TABLE [smart_authorizations] ADD 
   [bundle] int not null  default '0';
+ALTER TABLE [smart_deletedobjects] ADD 
+  [orientation] tinyint not null  default '0';
 CREATE PROCEDURE [dbo].[SCE_GetConstraintName] ( @tablename sysname, @columnName sysname, @constraintName sysname OUTPUT ) AS
 SELECT @constraintName = o1.name FROM sysobjects o1
 INNER JOIN sysobjects o2 ON o1.parent_obj = o2.id
@@ -11,12 +13,16 @@ SET @sql = 'ALTER TABLE smart_deletedobjects DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
 ALTER TABLE smart_deletedobjects ALTER COLUMN   [dpi] real not null ;
 ALTER TABLE [smart_deletedobjects] ADD DEFAULT ('0') FOR [dpi];
+ALTER TABLE [smart_objects] ADD 
+  [orientation] tinyint not null  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_objects', @columnName = 'dpi', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_objects DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
 ALTER TABLE smart_objects ALTER COLUMN   [dpi] real not null ;
 ALTER TABLE [smart_objects] ADD DEFAULT ('0') FOR [dpi];
+ALTER TABLE [smart_objectversions] ADD 
+  [orientation] tinyint not null  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_objectversions', @columnName = 'dpi', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_objectversions DROP CONSTRAINT ' + @constraintName

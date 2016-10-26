@@ -164,7 +164,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 
 	/**
 	 * Previews a dossier with contained objects (articles. images, etc.) to an external publishing 
-	 * system. The plugin is supposed to send the dossier and it's articles to the publishing system 
+	 * system. The plugin is supposed to send the dossier and its articles to the publishing system
 	 * and fill in the URL field for reference.
 	 *
 	 * @param Object $dossier            [writable]

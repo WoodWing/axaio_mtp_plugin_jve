@@ -160,6 +160,7 @@ class smartevent
 		}
 		$this->addfield('Version', $object->MetaData->WorkflowMetaData->Version);
 		$this->addfield('Format', $object->MetaData->ContentMetaData->Format);
+		$this->addfield('Dimensions', $object->MetaData->ContentMetaData->Dimensions);
 
 		// Resolve targets from parent relations (BZ#20453)
 		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';

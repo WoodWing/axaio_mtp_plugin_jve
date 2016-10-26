@@ -98,6 +98,9 @@ class WflAutocompleteRequest
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->Property ) ) {
+			$this->Property->sanitizeProperties4Php();
+		}
 	}
 
 	public function mightHaveContent() { return false; }

@@ -318,6 +318,7 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 					$values[ $field ] = $value;
 				}
 
+				$isNativePublished = false;
 				// Now loop through our field values to upload the files.
 				if( $value ) foreach( $value as $key => $attachmentAndMetaData ) {
 					$fileId = null;
@@ -338,6 +339,7 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 							$fileId = $convertedPlacement->ConvertedImageToPublish->ExternalId;
 						}
 					} else { // Handle normal file uploads
+						$isNativePublished = true;
 						$uploadNeeded = $this->isUploadChildNeeded( $publishForm, $objectsInDossier[ $childId ], $publishTarget );
 						if( $uploadNeeded ) {
 							$fileId = $drupalXmlRpcClient->uploadAttachment(
@@ -350,6 +352,14 @@ class Drupal8_PubPublishing extends PubPublishing_EnterpriseConnector
 						} else { // No changes since uploaded, so used back the existing ExternalId.
 							$fileId = $objectsInDossier[ $childId ]->ExternalId;
 						}
+					}
+
+					// The ExternalId of a child object refers to a native file uploaded to the publish channel. However, now
+					// we use cropping, it could be that a publish action is done without any native images, which deletes them
+					// on the channel. Enterprise Server should not persist the ExternalId in this case, as it leads to believe
+					// that the native still exists on the publish channel and should not have to be re-uploaded.
+					if( !$isNativePublished ) {
+						unset( $objectsInDossier[ $childId ]->ExternalId );
 					}
 
 					// Set the additional MetaData values needed by Drupal.

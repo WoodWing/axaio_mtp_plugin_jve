@@ -446,6 +446,20 @@ class WflContentMetaDataValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'Orientation' ) ) {
+			$validator->enterPath( 'Orientation' );
+			if( !is_null( $datObj->Orientation ) ) {
+				$validator->checkType( $datObj->Orientation, 'unsignedInt' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Dimensions' ) ) {
+			$validator->enterPath( 'Dimensions' );
+			if( !is_null( $datObj->Dimensions ) ) {
+				$validator->checkType( $datObj->Dimensions, 'string' );
+			}
+			$validator->leavePath();
+		}
 	}
 }
 

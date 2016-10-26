@@ -112,6 +112,9 @@ class WflCopyObjectRequest
 				}
 			}
 		}
+		if( is_object( $this->MetaData ) ) {
+			$this->MetaData->sanitizeProperties4Php();
+		}
 	}
 
 	public function mightHaveContent() { return false; }

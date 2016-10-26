@@ -166,10 +166,6 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	/**
 	 * Previews a Dossier.
 	 *
-	 * Previews a Dossier with contained objects (articles. images, etc.) to an external publishing system.
-	 * The plugin is supposed to send the dossier and it's articles to the publishing system and fill in the URL field
-	 * for reference.
-	 *
 	 * {@inheritdoc}
 	 */
 	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
@@ -313,6 +309,7 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 					$values[ $field ] = $value;
 				}
 
+				$isNativePublished = false;
 				// Now loop through our field values to upload the files.
 				if( $value ) foreach( $value as $key => $attachmentAndMetaData ) {
 					$fileId = null;
@@ -333,6 +330,7 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 							$fileId = $convertedPlacement->ConvertedImageToPublish->ExternalId;
 						}
 					} else { // Handle normal file uploads
+						$isNativePublished = true;
 						$uploadNeeded = $this->isUploadChildNeeded( $publishForm, $objectsInDossier[ $childId ], $publishTarget );
 						if( $uploadNeeded ) {
 							$fileId = $drupalXmlRpcClient->uploadAttachment(
@@ -345,6 +343,14 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 						} else { // No changes since uploaded, so used back the existing ExternalId.
 							$fileId = $objectsInDossier[ $childId ]->ExternalId;
 						}
+					}
+
+					// The ExternalId of a child object refers to a native file uploaded to the publish channel. However, now
+					// we use cropping, it could be that a publish action is done without any native images, which deletes them
+					// on the channel. Enterprise Server should not persist the ExternalId in this case, as it leads to believe
+					// that the native still exists on the publish channel and should not have to be re-uploaded.
+					if( !$isNativePublished ) {
+						unset( $objectsInDossier[ $childId ]->ExternalId );
 					}
 
 					// Set the additional MetaData values needed by Drupal.
@@ -524,18 +530,10 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Requests Publish Fields from Drupal.
-	 *
-	 * Uses the dossier->ExternalId to identify the dossier in Drupal. Called by the core (BizPublishing.class.php).
-	 *
-	 * @param Object $dossier
-	 * @param Object[] $objectsindossier
-	 * @param PubPublishTarget $publishTarget
-	 * @return PubField[] Array containing information gathered from Drupal.
+	 * {@inheritdoc}
 	 */
 	public function requestPublishFields( $dossier, $objectsInDossier, $publishTarget )
 	{
-		$objectsInDossier = $objectsInDossier; // keep analyzer happy.
 		$result = array();
 		$map = array(
 			'Views'    => 'int',
@@ -563,18 +561,10 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Requests the Dossier URL from Drupal.
-	 *
-	 * Uses the $dossier->ExternalId to identify the dosier to Drupal. (Called by the core, BizPublishing.class.php)
-	 *
-	 * @param Object $dossier
-	 * @param array of Object $objectsindossier
-	 * @param PubPublishTarget $publishTarget
-	 * @return string The url to the content.
+	 * {@inheritdoc}
 	 */
 	public function getDossierURL( $dossier, $objectsInDossier, $publishTarget )
 	{
-		$objectsInDossier = $objectsInDossier; // keep analyzer happy
 		require_once dirname(__FILE__).'/DrupalXmlRpcClient.class.php';
 		$drupalXmlRpcClient = new DrupalXmlRpcClient($publishTarget);
 		$url = $drupalXmlRpcClient->getUrl($dossier);
@@ -599,10 +589,7 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function validateDossierForPublishing( $type, $dossierId, $issueId )
 	{
-		$type = $type; // Keep analyzer happy.
-		$dossierId = $dossierId; // Keep analyzer happy.
-		$issueId = $issueId; // Keep analyzer happy.
-		// If Content Station 7.1.x is used you can use this to validate the input before publishing or updaing
+		// If Content Station 7.1.x is used you can use this to validate the input before publishing or updating.
 		return array('errors' => array(), 'warnings' => array(), 'infos' => array());
 	}
 
@@ -650,6 +637,7 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * Refer to PubPublishing_EnterpriseConnector::getPublishFormTemplates() header.
 	 *
 	 * @param int $pubChannelId The publicationId for which to retrieve the templates, default null.
+	 * @return Object[]
 	 */
 	public function getPublishFormTemplates( $pubChannelId )
 	{

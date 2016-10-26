@@ -24,6 +24,7 @@ try {
 	var srvr = app.entSession.activeServer;
 	var srvrURL = app.entSession.activeUrl;
 	var ticket = app.entSession.activeTicket;
+	var imagePreviewOption = app.serverSettings.imagePreview ? 'ImagePreviewIsSet' : 'ImagePreviewOptionNotSet' ;
 
 	app.consoleout('active server: [' + srvr + ']');
 	app.consoleout('active server URL: [' + srvrURL + ']');
@@ -53,6 +54,7 @@ try {
 	throw( e );
 }
 
-// Return the ticket/URL to Enterprise Server to validate the origin.
-var response = ticket + " " + srvrURL;
+// Return the ticket/URL to Enterprise Server to validate the origin. The imagePreviewOption is needed to make sure
+// that the -previews flag will be set.
+var response = ticket + " " + srvrURL + " " + imagePreviewOption;
 response;

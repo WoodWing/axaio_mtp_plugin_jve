@@ -40,7 +40,7 @@ abstract class MetaData_EnterpriseConnector extends DefaultConnector
 	 * 
 	 * @return array key values of meta data, keys all in lowercase or null in case of failure.
 	 */
-	abstract public function readMetaData(Attachment $attachment, $bizMetaDataPreview );
+	abstract public function readMetaData( Attachment $attachment, $bizMetaDataPreview );
 
 	/**
 	 * handleMetaData
@@ -52,9 +52,9 @@ abstract class MetaData_EnterpriseConnector extends DefaultConnector
 	 * 
 	 * @return boolean	true if implementation handles this, false to let core server handle this
 	 */
-	public function handleMetaData( $metaData, Object &$object )
+	public function handleMetaData( $metaData, /** @noinspection PhpLanguageLevelInspection */
+	                                Object &$object )
 	{
-		$metaData = $metaData; $object = $object; // keep analyzer happy
 		return false;
 	}
 	

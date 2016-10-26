@@ -10,7 +10,7 @@
  */
 
 // Plug-in config file
-require_once dirname(__FILE__) . '/config.php';
+require_once dirname(__FILE__).'/config.php';
 // Enterprise includes
 require_once BASEDIR.'/server/interfaces/plugins/connectors/ContentSource_EnterpriseConnector.class.php';
 
@@ -20,12 +20,12 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	private $metadataHandler;
 
 	/**
-	 * @return MetdataHandler
+	 * @return MetadataHandler
 	 */
 	private function getMetadataHandler()
 	{
-		require_once dirname(__FILE__) . '/model/MetadataHandler.class.php';
-		if(!isset($this->metadataHandler)) {
+		require_once dirname(__FILE__).'/model/MetadataHandler.class.php';
+		if( !isset($this->metadataHandler) ) {
 			$this->metadataHandler = new MetadataHandler();
 		}
 		return $this->metadataHandler;
@@ -64,7 +64,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * @param $order
 	 * @return null
 	 */
-	final public function doNamedQuery($query, $params, $firstEntry, $maxEntries, $order)
+	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{
 		return null;
 	}
@@ -81,21 +81,21 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *
 	 * @return Object
 	 */
-	final public function getAlienObject($alienId, $rendition, $lock) {
-		LogHandler::Log ( 'ELVIS', 'DEBUG', 'ContentSource::getAlienObject called for alienId:' . $alienId . '; rendition:' . $rendition . '; lock:' . $lock );
+	final public function getAlienObject( $alienId, $rendition, $lock )
+	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getAlienObject called for alienId:' . $alienId . '; rendition:' . $rendition . '; lock:' . $lock );
 		
-		require_once dirname ( __FILE__ ) . '/util/ElvisUtils.class.php';
+		require_once dirname ( __FILE__ ).'/util/ElvisUtils.class.php';
+		$elvisId = ElvisUtils::getElvisId( $alienId );
+		$hit = ElvisUtils::getHit( $elvisId );
+		$files = $this->getFiles( $hit, $rendition );
 		
-		$elvisId = ElvisUtils::getElvisId ( $alienId );
-		$hit = ElvisUtils::getHit ( $elvisId );
-		$files = $this->getFiles ( $hit, $rendition );
-		
-		$object = new Object ();
-		$object->MetaData = new MetaData ();
-		$object->Relations = array ();
+		$object = new Object();
+		$object->MetaData = new MetaData();
+		$object->Relations = array();
 		$object->Files = $files;
 		
-		$this->fillMetadata ( $object, $hit );
+		$this->fillMetadata( $object, $hit );
 		
 		return $object;
 	}
@@ -107,16 +107,16 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *
 	 * @param string	$alienId		Alien id
 	 */
-	public function deleteAlienObject($alienId)
+	public function deleteAlienObject( $alienId )
 	{
-		LogHandler::Log ( 'ELVIS', 'DEBUG', 'ContentSource::deleteAlienObject called for alienId:' . $alienId );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::deleteAlienObject called for alienId:' . $alienId );
 		
-		require_once dirname ( __FILE__ ) . '/logic/ElvisContentSourceService.php';
-		require_once dirname ( __FILE__ ) . '/util/ElvisUtils.class.php';
-		
-		$service = new ElvisContentSourceService ();
-		$elvisId = ElvisUtils::getElvisId ( $alienId );
-		$service->remove ( $elvisId );
+		require_once dirname ( __FILE__ ).'/logic/ElvisContentSourceService.php';
+		require_once dirname ( __FILE__ ).'/util/ElvisUtils.class.php';
+
+		$service = new ElvisContentSourceService();
+		$elvisId = ElvisUtils::getElvisId( $alienId );
+		$service->remove( $elvisId );
 	}
 	
 	/**
@@ -132,15 +132,13 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *
 	 * @return array of VersionInfo
 	 */
-	public function listAlienObjectVersions($alienId, $rendition)
+	public function listAlienObjectVersions( $alienId, $rendition )
 	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::listAlienObjectVersions called for alienId:' . $alienId );
 
-		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::listAlienObjectVersions called for alienId:' . $alienId);
-
-		require_once dirname(__FILE__) . '/model/VersionHandler.class.php';
-
+		require_once dirname(__FILE__).'/model/VersionHandler.class.php';
 		$versionHandler = new VersionHandler();
-		return $versionHandler->listVersions($alienId, $rendition);
+		return $versionHandler->listVersions( $alienId, $rendition );
 	}
 
 	/**
@@ -157,15 +155,13 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *
 	 * @return VersionInfo
 	 */
-	public function getAlienObjectVersion($alienId, $version, $rendition)
+	public function getAlienObjectVersion( $alienId, $version, $rendition )
 	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getAlienObjectVersion called for alienId:' . $alienId . '; version:' . $version . '; rendition:' . $rendition );
 
-		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::getAlienObjectVersion called for alienId:' . $alienId . '; version:' . $version . '; rendition:' . $rendition);
-
-		require_once dirname(__FILE__) . '/model/VersionHandler.class.php';
-
+		require_once dirname(__FILE__).'/model/VersionHandler.class.php';
 		$versionHandler = new VersionHandler();
-		return $versionHandler->retrieveVersion($alienId, $version, $rendition);
+		return $versionHandler->retrieveVersion( $alienId, $version, $rendition );
 	}
 
 	/**
@@ -174,20 +170,18 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * Restores versions of alien object
 	 *
 	 * Default implementation throws invalid operation exception, but this should never be called
-	 * if listAlientObjectVersions returns an empty array.
+	 * if listAlienObjectVersions returns an empty array.
 	 *
 	 * @param string	$alienId	Alien id
 	 * @param string 	$version	Version to get as returned by listAlienObjectVersions
 	 */
-	public function restoreAlienObjectVersion($alienId, $version)
+	public function restoreAlienObjectVersion( $alienId, $version )
 	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getAlienObjectVersion called for alienId:' . $alienId . '; version:' . $version );
 
-		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::getAlienObjectVersion called for alienId:' . $alienId . '; version:' . $version);
-
-		require_once dirname(__FILE__) . '/model/VersionHandler.class.php';
-
+		require_once dirname(__FILE__).'/model/VersionHandler.class.php';
 		$versionHandler = new VersionHandler();
-		$versionHandler->promoteVersion($alienId, $version);
+		$versionHandler->promoteVersion( $alienId, $version );
 	}
 	
 	/**
@@ -205,20 +199,18 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * Default implementation does nothing, leaving it all up to Enterprise
 	 *
 	 * @param string	$alienId 	Alien object id
-	 * @param string	$object 	Shadow object from Enterprise
+	 * @param Object	$object 	Shadow object from Enterprise
 	 * @param array		$objprops 	Array of all properties, both the public (also in Object) as well as internals
 	 * @param boolean	$lock		Whether object should be locked
 	 * @param string	$rendition	Rendition to get
-	 *
-	 * @return Object
 	 */
-	public function getShadowObject($alienId, &$object, $objprops, $lock, $rendition)
+	public function getShadowObject( $alienId, &$object, $objprops, $lock, $rendition )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-		$this->checkUserEditRight( $lock, $rendition );
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject called for alienId:' . $alienId . '; lock:' . $lock . '; rendition:' . $rendition );
 
-		LogHandler::Log ( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject called for alienId:' . $alienId . '; lock:' . $lock . '; rendition:' . $rendition );
-		$this->getShadowObject2($alienId, $object, $objprops, $lock, $rendition, null);
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+		$this->checkUserEditRight( $lock, $rendition );
+		$this->getShadowObject2( $alienId, $object, $objprops, $lock, $rendition, null );
 	}
 
 	/**
@@ -235,30 +227,29 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * If Files is null, Enterprise will fill in the files
 	 * 
 	 * @param string $alienId
-	 * @param string $object
+	 * @param Object $object
 	 * @param array $objprops
 	 * @param bool $lock
 	 * @param string $rendition
 	 * @param string $haveVersion
-	 * @return Object
 	 */
 	public function getShadowObject2( $alienId, &$object, $objprops, $lock, $rendition, $haveVersion )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-		$this->checkUserEditRight( $lock, $rendition );
 		LogHandler::Log ( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject2 called for alienId:' . $alienId . '; lock:' . $lock . '; rendition:' . $rendition );
 
-		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
-		require_once dirname ( __FILE__ ) . '/logic/ElvisContentSourceService.php';
-		require_once dirname ( __FILE__ ) . '/util/ElvisUtils.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+		$this->checkUserEditRight( $lock, $rendition );
 
-		$elvisId = ElvisUtils::getElvisId($alienId);
-		$hit = ElvisUtils::getHit($elvisId, $lock);
+		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+		require_once dirname ( __FILE__ ).'/logic/ElvisContentSourceService.php';
+		require_once dirname ( __FILE__ ).'/util/ElvisUtils.class.php';
+		$elvisId = ElvisUtils::getElvisId( $alienId );
+		$hit = ElvisUtils::getHit( $elvisId, $lock );
 		
 		if( !$haveVersion || version_compare( $haveVersion, ElvisUtils::getEnterpriseVersionNumber($hit->metadata['versionNumber']), '<' ) ) {
-			$object->Files = $this->getFiles($hit, $rendition);
+			$object->Files = $this->getFiles( $hit, $rendition );
 		}
-		$this->getMetadataHandler()->read($object, $hit->metadata);
+		$this->getMetadataHandler()->read( $object, $hit->metadata );
 
 		/*
 		 * When creating a new shadow object some metadata needs to be set from Enterprise -> Elvis. However,
@@ -267,11 +258,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		 * There are way more scenario's to trigger this method except for creating a new shadow object, so check if the
 		 * Enterprise object Id is already set, if not, only then update the metadata.  
 		 */
-		if(!array_key_exists('sceId', $hit->{'metadata'}) && empty($hit->{'metadata'}['sceId'])) {
+		if( !array_key_exists('sceId', $hit->{'metadata'}) && empty($hit->{'metadata'}['sceId']) ) {
 			LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject2 setting Enterprise metadata.' );
 
-			$elvisMetadata = $this->fillElvisEnterpriseMetadata($object->MetaData);
-
+			$elvisMetadata = $this->fillElvisEnterpriseMetadata( $object->MetaData );
 			$elvisMetadata['sceId'] = $object->MetaData->BasicMetaData->ID;
 			$elvisMetadata['sceCreated'] = $objprops['Created'];
 			$elvisMetadata['sceCreator'] = $objprops['Creator'];
@@ -279,7 +269,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			$elvisMetadata['sceModifier'] = $objprops['Modifier'];
 
 			$service = new ElvisContentSourceService();
-			$service->updateWorkflowMetadata($elvisId, $elvisMetadata);
+			$service->updateWorkflowMetadata( $elvisId, $elvisMetadata );
 		}
 	}
 
@@ -292,7 +282,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	private function checkUserEditRight( $lock, $rendition )
 	{
-		require_once dirname(__FILE__) . '/util/ElvisSessionUtil.php';
+		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';
 		if ( $lock && $rendition == 'native' ) {
 			$restricted = ElvisSessionUtil::getSessionVar( 'restricted' );
 			if ( $restricted || is_null( $restricted ) ) {
@@ -317,78 +307,78 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *
 	 * @return Object	filled in with all fields, the actual creation of the Enterprise object is done by Enterprise.
 	 */
-	final public function createShadowObject($alienId, $destObject)
+	final public function createShadowObject( $alienId, $destObject )
 	{
-		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::createShadowObject called for alienId:' . $alienId);
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createShadowObject called for alienId:' . $alienId );
 
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once dirname(__FILE__) . '/util/ElvisUtils.class.php';
+		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
 
-		$elvisId = ElvisUtils::getElvisId($alienId);
-		$hit = ElvisUtils::getHit($elvisId);
+		$elvisId = ElvisUtils::getElvisId( $alienId );
+		$hit = ElvisUtils::getHit( $elvisId );
 
 		// Register shadow object in Elvis. Throws BizException if not possible (e.g. already linked)
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-		require_once dirname(__FILE__) . '/logic/ElvisObjectManager.php';
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+		require_once dirname(__FILE__).'/logic/ElvisObjectManager.php';
 		$systemId = BizSession::getEnterpriseSystemId();
 		ElvisObjectManager::registerShadowObject( $elvisId, $systemId );
 
-		if (!$destObject) {
+		if( !$destObject ) {
 			$destObject = new Object();
 			$destObject->MetaData = new MetaData();
 			$destObject->Relations = array();
 		}
-		
-		$this->fillMetadata($destObject, $hit);
+		$this->fillMetadata( $destObject, $hit );
 		$destObject->Files = array();
+
 		return $destObject;
 	}
 	
-	final public function createCopyObject($alienId, $destObject)
+	final public function createCopyObject( $alienId, $destObject )
 	{
-		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::createCopyObject called for alienId:' . $alienId);
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createCopyObject called for alienId:' . $alienId );
 		
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once dirname(__FILE__) . '/util/ElvisUtils.class.php';
-		require_once dirname(__FILE__) . '/logic/ElvisContentSourceService.php';
+		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
+		require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
 		
-		$elvisId = ElvisUtils::getElvisId($alienId);
-		$hit = ElvisUtils::getHit($elvisId);
+		$elvisId = ElvisUtils::getElvisId( $alienId );
+		$hit = ElvisUtils::getHit( $elvisId );
 		
 		// Export original asset file to Enterprise
 		$service = new ElvisContentSourceService();
-		$fileUrl = $service->exportOriginalForAsset($elvisId);
+		$fileUrl = $service->exportOriginalForAsset( $elvisId );
 		
-		if (!$destObject) {
+		if( !$destObject ) {
 			$destObject = new Object();
 			$destObject->MetaData = new MetaData();
 			$destObject->Relations = array();
 		}
-		
 		$this->fillMetadata($destObject, $hit);
 		
 		// Remove Elvis related metadata
 		$destObject->MetaData->BasicMetaData->DocumentID = null;
 		$destObject->MetaData->BasicMetaData->ContentSource = null;
 		
-		$attachment = self::createAttachment($fileUrl, $destObject->MetaData->ContentMetaData->Format);
-		$destObject->Files = array($attachment);
-		$destObject->Files = array_merge($destObject->Files,$this->getFiles($hit, 'preview')); 
-		$destObject->Files = array_merge($destObject->Files,$this->getFiles($hit, 'thumb'));
+		$attachment = self::createAttachment( $fileUrl, $destObject->MetaData->ContentMetaData->Format );
+		$destObject->Files = array( $attachment );
+		$destObject->Files = array_merge( $destObject->Files,$this->getFiles($hit, 'preview') );
+		$destObject->Files = array_merge( $destObject->Files,$this->getFiles($hit, 'thumb') );
 		
 		return $destObject;
 	}
 	
-	private function createAttachment($fileUrl, $type) {
-		require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
+	private function createAttachment( $fileUrl, $type )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 		
-		//Create File attachement
+		// Create File attachement
 		$attachment = new Attachment();
 		$attachment->FileUrl = $fileUrl;
 		$attachment->Rendition = "native";
 		$attachment->Type = $type;
 		
-		//Change FileUrl to FilePath
+		// Change FileUrl to FilePath
 		$transferServer = new BizTransferServer();
 		$transferServer->urlToFilePath($attachment);
 		
@@ -397,7 +387,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 	/**
 	 * Multi version of createShadowObject, but never called by Enterprise.
-	 * Just here to supress warning in health test.
+	 * Just here to suppress warning in health test.
 	 *
 	 * @param string[] $alienIds
 	 * @return array|Object[]
@@ -422,21 +412,19 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *
 	 * @param string	$alienId		Alien id of shadow object
 	 * @param string	$object
-	 *
-	 * @return Object
 	 */
-	public function saveShadowObject($alienId, &$object)
+	public function saveShadowObject( $alienId, &$object )
 	{
-		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::saveShadowObject called for alienId:' . $alienId);
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::saveShadowObject called for alienId:' . $alienId );
 		
-		require_once dirname(__FILE__) . '/util/ElvisUtils.class.php';
-		$elvisId = ElvisUtils::getElvisId($alienId);
+		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
+		$elvisId = ElvisUtils::getElvisId( $alienId );
 		
 		// upload original to Elvis
-		if( $object->Files ){
-			foreach($object->Files as $file) {
-				if ($file->Rendition == 'native' && $file->FilePath != null) {
-					/*$metadata = */$this->getMetadataHandler()->update($elvisId, $object->MetaData, $file);
+		if( $object->Files ) {
+			foreach( $object->Files as $file ) {
+				if( $file->Rendition == 'native' && $file->FilePath != null ) {
+					/*$metadata = */$this->getMetadataHandler()->update( $elvisId, $object->MetaData, $file );
 				}
 			}
 		}
@@ -459,49 +447,49 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	public function setShadowObjectProperties( $alienId, &$object )
 	{
-		if ($this->triggeredBySyncJob()) {
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::setShadowObjectProperties called for alienId:'.$alienId );
+
+		if( $this->triggeredBySyncJob() ) {
 			// Update coming from Elvis Sync job, prevent update round-trips
 			return;
 		}
 
-		require_once dirname(__FILE__) . '/util/ElvisUtils.class.php';
-		require_once dirname(__FILE__) . '/util/ElvisSessionUtil.php';
-		require_once dirname(__FILE__) . '/util/ElvisObjectUtils.class.php';
-		require_once dirname(__FILE__) . '/logic/ElvisContentSourceService.php';
-				
-		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::setShadowObjectProperties called for alienId:'.$alienId);
-		
+		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';
 		$sessionId = ElvisSessionUtil::getSessionId();
 		
 		// This function is indirectly called when exporting shadow objects from Elvis
 		// At this point there is no active session and the write can safely be ignored.
-		if(isset($sessionId)) {
-			$elvisId = ElvisUtils::getElvisId($alienId);
+		if( isset($sessionId) ) {
+			require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
+			require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
+			require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
+
+			$elvisId = ElvisUtils::getElvisId( $alienId );
 			$service = new ElvisContentSourceService();
 				
 			// Revert smart connection checkout when changing properties
-			if(ElvisUtils::isSmartConnection()) {
-				$service->undoCheckout($elvisId);
+			if( ElvisUtils::isSmartConnection() ) {
+				$service->undoCheckout( $elvisId );
 			}
 			
-			if (!ElvisObjectUtils::isArchivedStatus( $object->MetaData->WorkflowMetaData->State->Name )) {
+			if( !ElvisObjectUtils::isArchivedStatus( $object->MetaData->WorkflowMetaData->State->Name ) ) {
 				// Normally all metadata is set using the REST client. These are set using 
 				// the permissions of the current user. However there are some specific
 				// Enterprise metadata properties defined in Elvis, which needs to be set 
 				// whatever permission the current user has, so these are set using AMF; this
 				// only set sce prefixed metadata properties as a super user. 
-				$elvisMetadata = $this->fillElvisEnterpriseMetadata($object->MetaData);
+				$elvisMetadata = $this->fillElvisEnterpriseMetadata( $object->MetaData );
 
 				$elvisMetadata['sceModified'] = $object->MetaData->WorkflowMetaData->Modified;
 				$elvisMetadata['sceModifier'] = $object->MetaData->WorkflowMetaData->Modifier;
 				$elvisMetadata['sceArchivedInEnterprise'] = "false";
 
-				$service->updateWorkflowMetadata($elvisId, $elvisMetadata);
-				$this->getMetadataHandler()->update($elvisId, $object->MetaData);
+				$service->updateWorkflowMetadata( $elvisId, $elvisMetadata );
+				$this->getMetadataHandler()->update( $elvisId, $object->MetaData );
 			} else {
 				$elvisMetadata = array();
 				$elvisMetadata['sceArchivedInEnterprise'] = "true";
-				$service->updateWorkflowMetadata($elvisId, $elvisMetadata);
+				$service->updateWorkflowMetadata( $elvisId, $elvisMetadata );
 			}
 		}
 	}
@@ -516,22 +504,21 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	public function multiSetShadowObjectProperties( $shadowObjectIds, $metaDataValues )
 	{
-		if ($this->triggeredBySyncJob()) {
+		if( $this->triggeredBySyncJob() ) {
 			// Update coming from Elvis Sync job, prevent update round-trips
 			return;
 		}
-		
-		require_once dirname(__FILE__) . '/util/ElvisUtils.class.php';
-		require_once dirname(__FILE__) . '/util/ElvisSessionUtil.php';
-		require_once dirname(__FILE__) . '/logic/ElvisContentSourceService.php';
-		require_once BASEDIR.'/server/dbclasses/DBSection.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBWorkflow.class.php';
 
+		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';
 		$sessionId = ElvisSessionUtil::getSessionId();
 
 		// This function is indirectly called when exporting shadow objects from Elvis
 		// At this point there is no active session and the write can safely be ignored.
-		if(isset($sessionId)) {
+		if( isset($sessionId) ) {
+			require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
+			require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
+			require_once BASEDIR.'/server/dbclasses/DBSection.class.php';
+			require_once BASEDIR.'/server/dbclasses/DBWorkflow.class.php';
 
 			// Add Category name if needed. Normally only the Ids are sent, but we want to display the name in Elvis too.
 			$metaDataCategoryId = $this->findMetaDataByField( 'CategoryId', $metaDataValues );
@@ -545,16 +532,13 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			}
 
 			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-
 			// Collect Elvis Ids
 			// 9.2.0 bug: shadowObjectIds key should be the CS ID, but instead is index 0.
 			$elvisIds = array();
 			$Ids = isset( $shadowObjectIds[ELVIS_CONTENTSOURCEID] ) ? $shadowObjectIds[ELVIS_CONTENTSOURCEID] : $shadowObjectIds[0];
 			foreach( $Ids as $ObjId ) {
 				$elvisId = DBObject::getColumnValueByName( $ObjId, 'Workflow', 'documentid' );
-
-				LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::multiSetShadowObjectProperties called for alienId:'.$elvisId);
-
+				LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::multiSetShadowObjectProperties called for alienId:'.$elvisId );
 				$elvisIds[] = $elvisId;
 			}
 
@@ -563,12 +547,12 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			// Enterprise metadata properties defined in Elvis, which needs to be set
 			// whatever permission the current user has, so these are set using AMF; this
 			// only set sce prefixed metadata properties as a super user.
-			$elvisMetadata = $this->fillElvisEnterpriseMetadataMulti($metaDataValues);
+			$elvisMetadata = $this->fillElvisEnterpriseMetadataMulti( $metaDataValues );
 			$service = new ElvisContentSourceService();
-			$service->updateWorkflowMetadata($elvisIds, $elvisMetadata);
+			$service->updateWorkflowMetadata( $elvisIds, $elvisMetadata );
 
 			// Bulk REST client update
-			$this->getMetadataHandler()->updateBulk($elvisIds, $metaDataValues);
+			$this->getMetadataHandler()->updateBulk( $elvisIds, $metaDataValues );
 		}
 	}
 
@@ -582,29 +566,29 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * @param bool $restore if object is restored from trash
 	 * @throws Exception
 	 */
-	public function deleteShadowObject($alienId, $shadowId, $permanent, $restore)
+	public function deleteShadowObject( $alienId, $shadowId, $permanent, $restore )
 	{
-		if ($this->triggeredBySyncJob()) {
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::deleteShadowObject called for alienId:' . $alienId .
+								'; shadowId:' . $shadowId . '; permanent:' . $permanent . '; restore:' . $restore );
+
+		if( $this->triggeredBySyncJob() ) {
 			// Update coming from Elvis Sync job, prevent update round-trips
 			return;
 		}
 		
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-
-		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::deleteShadowObject called for alienId:' . $alienId . '; shadowId:' . $shadowId . '; permanent:' . $permanent . '; restore:' . $restore);
-		
-		require_once dirname(__FILE__) . '/util/ElvisUtils.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
 		// Only remove the system id in Elvis when the asset is completely removed in Enterprise (removed from the trash)
-		$elvisId = ElvisUtils::getElvisId($alienId);
+		$elvisId = ElvisUtils::getElvisId( $alienId );
 
-		require_once dirname(__FILE__) . '/logic/ElvisObjectManager.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
+		require_once dirname(__FILE__).'/logic/ElvisObjectManager.php';
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$systemId = BizSession::getEnterpriseSystemId();
-		if (!$restore) {
+		if( !$restore ) {
 			try {
 				ElvisObjectManager::unregisterShadowObject( $elvisId, $systemId );
-			} catch (Exception $exception) {
-				LogHandler::Log('ELVIS', 'WARN', 'Unable to unregister asset in Elvis: ' . $exception);
+			} catch ( Exception $exception ) {
+				LogHandler::Log( 'ELVIS', 'WARN', 'Unable to unregister asset in Elvis: ' . $exception );
 			}
 		} else {
 			ElvisObjectManager::registerShadowObject( $elvisId, $systemId );
@@ -624,15 +608,19 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *
 	 * @return array of VersionInfo or null if Enterprise should handle this
 	 */
-	public function listShadowObjectVersions($alienId, $shadowId, $rendition)
+	public function listShadowObjectVersions( $alienId, $shadowId, $rendition )
 	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::listShadowObjectVersions called for alienId:' . $alienId .
+														'; shadowId:' . $shadowId . '; rendition:' . $rendition );
 
-		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::listShadowObjectVersions called for alienId:' . $alienId . '; shadowId:' . $shadowId . '; rendition:' . $rendition);
-
-		require_once dirname(__FILE__) . '/model/VersionHandler.class.php';
-
+		require_once dirname(__FILE__).'/model/VersionHandler.class.php';
 		$versionHandler = new VersionHandler();
-		return $versionHandler->listVersions($alienId, $rendition);
+		$elvisAssetVersions = $versionHandler->listVersions( $alienId, $rendition );
+
+		require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
+		$elvisAssetVersions = ElvisObjectUtils::setVersionStatusFromEnterprise( $shadowId, $elvisAssetVersions );
+
+		return $elvisAssetVersions;
 	}
 
 	/**
@@ -649,15 +637,14 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *
 	 * @return VersionInfo or null if Enterprise should handle this
 	 */
-	public function getShadowObjectVersion($alienId, $shadowId, $version, $rendition)
+	public function getShadowObjectVersion( $alienId, $shadowId, $version, $rendition )
 	{
+		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObjectVersion called for alienId:' . $alienId .
+														'; shadowId:' . $shadowId . '; version:' . $version . '; rendition:' . $rendition);
 
-		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::getShadowObjectVersion called for alienId:' . $alienId . '; shadowId:' . $shadowId . '; version:' . $version . '; rendition:' . $rendition);
-
-		require_once dirname(__FILE__) . '/model/VersionHandler.class.php';
-
+		require_once dirname(__FILE__).'/model/VersionHandler.class.php';
 		$versionHandler = new VersionHandler();
-		return $versionHandler->retrieveVersion($alienId, $version, $rendition);
+		return $versionHandler->retrieveVersion( $alienId, $version, $rendition );
 	}
 
 	/**
@@ -673,15 +660,14 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *
 	 * @return true when handled or null if Enterprise should handle this
 	 */
-	public function restoreShadowObjectVersion($alienId, $shadowId, $version)
+	public function restoreShadowObjectVersion( $alienId, $shadowId, $version )
 	{
+		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::restoreShadowObjectVersion called for alienId:' . $alienId .
+														'; shadowId:' . $shadowId . '; version:' . $version);
 
-		LogHandler::Log('ELVIS', 'DEBUG', 'ContentSource::restoreShadowObjectVersion called for alienId:' . $alienId . '; shadowId:' . $shadowId . '; version:' . $version);
-
-		require_once dirname(__FILE__) . '/model/VersionHandler.class.php';
-
+		require_once dirname(__FILE__).'/model/VersionHandler.class.php';
 		$versionHandler = new VersionHandler();
-		$versionHandler->promoteVersion($alienId, $version);
+		$versionHandler->promoteVersion( $alienId, $version );
 
 		return true;
 	}
@@ -702,27 +688,24 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *
 	 * @return Object	filled in with all fields, the actual creation of the Enterprise object is done by Enterprise.
 	 */
-	public function copyShadowObject($alienId, $srcObject, $destObject)
+	public function copyShadowObject( $alienId, $srcObject, $destObject )
 	{
-
-		// keep analyzer happy
-		$srcObject = $srcObject;
-
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once dirname(__FILE__) . '/util/ElvisUtils.class.php';
-		require_once dirname(__FILE__) . '/logic/ElvisContentSourceService.php';
+		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
+		require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
 		
 		$service = new ElvisContentSourceService();
 		$destName = $destObject->MetaData->BasicMetaData->Name;
-		
-		$assetId = ElvisUtils::getElvisId($alienId);
-		$copyId = $service->copy($assetId, $destName);
-		
-		$destId = ElvisUtils::getAlienId($copyId);
 
-		LogHandler::Log('ContentSource', 'DEBUG', 'ContentSource::copyShadowObject called for alienId:' . $alienId . 'destId:' . $destId);
+		$assetId = ElvisUtils::getElvisId($alienId);
+		$copyId = $service->copy( $assetId, $destName );
 		
-		$shadowObject = $this->createShadowObject($destId, $destObject);
+		$destId = ElvisUtils::getAlienId( $copyId );
+
+		LogHandler::Log( 'ContentSource', 'DEBUG', 'ContentSource::copyShadowObject called for alienId:' . $alienId . 'destId:' . $destId );
+
+		$shadowObject = $this->createShadowObject( $destId, $destObject );
+
 		return $shadowObject;
 	}
 
@@ -757,10 +740,6 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	$brandId, $overruleIssueId, $categoryId, $objectType, $statusId,
 	$alienId, $contentSource, $documentId )
 	{
-		// keep analyzer happy:
-		$user=$user; $right=$right; $alienId=$alienId; $contentSource=$contentSource; $documentId=$documentId;
-		$brandId=$brandId; $overruleIssueId=$overruleIssueId; $categoryId=$categoryId; $objectType=$objectType; $statusId=$statusId;
-	
 		return true;
 	}
 	
@@ -784,10 +763,6 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			$brandId, $overruleIssueId, $categoryId, $objectType, $statusId,
 			$shadowId, $contentSource, $documentId )
 	{
-		// keep analyzer happy:
-		$user=$user; $right=$right; $shadowId=$shadowId; $contentSource=$contentSource; $documentId=$documentId;
-		$brandId=$brandId; $overruleIssueId=$overruleIssueId; $categoryId=$categoryId; $objectType=$objectType; $statusId=$statusId;
-	
 		return null;
 	}
 	
@@ -821,9 +796,8 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	public static function completeUser( AdmUser $user )
 	{
-		require_once dirname(__FILE__) . '/util/ElvisUtils.class.php';
-		
-		return ElvisUtils::enrichUser($user);
+		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
+		return ElvisUtils::enrichUser( $user );
 	}
 
 	/**
@@ -844,25 +818,23 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	/**
 	 * Helper to make array filled with default Enterprise metadata 
 	 * fields required for Elvis.
-	 * @param array $metadata Enterprise metadata object 
+	 * @param MetaData $metadata Enterprise metadata object
 	 * @return array $elvisMetaData Map containing Enterprise metadata properties which are always synchronized to Elvis  
 	 */
-	private function fillElvisEnterpriseMetadata($metadata)
+	private function fillElvisEnterpriseMetadata( $metadata )
 	{
 		$elvisMetadata = array();
-		
 		$elvisMetadata['sceCategoryId'] = $metadata->BasicMetaData->Category->Id;
 		$elvisMetadata['sceCategory'] = $metadata->BasicMetaData->Category->Name;
 		$elvisMetadata['scePublicationId'] = $metadata->BasicMetaData->Publication->Id;
 		$elvisMetadata['scePublication'] = $metadata->BasicMetaData->Publication->Name;
-		
+
 		return $elvisMetadata;
 	}
 
-	private function fillElvisEnterpriseMetadataMulti($metadataValues)
+	private function fillElvisEnterpriseMetadataMulti( $metadataValues )
 	{
 		$elvisMetadata = array();
-
 		foreach( $metadataValues as $metadataValue ) {
 			switch( $metadataValue->Property ) {
 				case 'Category':
@@ -888,21 +860,20 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * @param null $version
 	 * @return array A list of Attachments.
 	 */
-	private function getFiles($hit, $rendition, $version = null)
+	private function getFiles( $hit, $rendition, $version = null )
 	{
-		require_once dirname( __FILE__ ) . '/util/ElvisUtils.class.php';
+		require_once dirname( __FILE__ ).'/util/ElvisUtils.class.php';
 
 		$files = array();
-		
 		//isContentSourceFileLinksRequested is only supported for Enterprise 9.7 and up.
 		//In order to remain backwards compatible with 9.6 and lower we need to check for the method here.
 		$fileLinksRequested = (method_exists( $this, 'isContentSourceFileLinksRequested' )) 
 			? $this->isContentSourceFileLinksRequested() : false;
-		
 		$file = ElvisUtils::getAttachment( $hit, $rendition, $fileLinksRequested );
 		if( !is_null( $file ) ) {
 			$files[] = $file;
 		}
+
 		return $files;
 	}
 		
@@ -910,10 +881,9 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * @param Object $smartObject Object of MetaData that will filled
 	 * @param Hit $hit returned from elvis server
 	 */
-	private function fillMetadata($smartObject, $hit)
+	private function fillMetadata( $smartObject, $hit )
 	{
-
-		$this->getMetadataHandler()->read($smartObject, $hit->metadata);
+		$this->getMetadataHandler()->read( $smartObject, $hit->metadata );
 
 		//Note: we are not handling state here, it will be processed by Enterprise if needed
 	}
@@ -927,11 +897,12 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	private function findMetaDataByField( $fieldToIndex, $metaDataValues )
 	{
-		foreach ($metaDataValues as $metaDataValue) {
-			if ($metaDataValue->Property == $fieldToIndex) {
+		foreach( $metaDataValues as $metaDataValue ) {
+			if( $metaDataValue->Property == $fieldToIndex ) {
 				return $metaDataValue;
 			}
 		}
+
 		return null;
 	}
 
@@ -941,7 +912,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * @param object $metaDataValue Metadata value structure of which the first value needs to be retrieved
 	 * @return The metadata value
 	 */
-	private function getFirstMetaDataValue($metaDataValue)
+	private function getFirstMetaDataValue( $metaDataValue )
 	{
 		if( !is_null($metaDataValue->Values) ) {
 			return $metaDataValue->Values[0];
@@ -952,7 +923,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	
 	private function triggeredBySyncJob() 
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		return (BizSession::getServiceName() == 'ElvisSync');
 	}
 }

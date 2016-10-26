@@ -82,7 +82,7 @@ class BizImageConverter
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 		$user = BizSession::getShortUserName();
 		$reqProps = array(
-			'ID', 'Type', 'Dpi', 'Height', 'Width', 'Format', // required by this class
+			'ID', 'Type', 'Dpi', 'Height', 'Width', 'Format', 'Orientation', // required by this class
 			'Version', 'Types', 'StoreName' ); // required by BizStorage::getFile
 		$propsPerObject = BizObject::getMultipleObjectsPropertiesByObjectIds( $user, array( $imageId ), $reqProps );
 		$this->inputImageProps = count( $propsPerObject ) > 0 ? reset( $propsPerObject ) : null;
@@ -104,24 +104,21 @@ class BizImageConverter
 				return false;
 			}
 		}
-		return $this->doesImageNeedCrop( $imageId, $placement ) ||
-			$this->doesImageNeedScale( $placement );
+		return $this->doesImageNeedCrop( $placement ) ||
+			$this->doesImageNeedScale( $placement ) ||
+			$this->inputImageProps['Orientation'] > 1;
 	}
 
 	/**
 	 * Tells whether or not the image needs to be cropped, based on a given placement.
 	 *
-	 * @param integer $imageId
 	 * @param Placement $placement
 	 * @return bool
 	 */
-	private function doesImageNeedCrop( $imageId, $placement )
+	private function doesImageNeedCrop( $placement )
 	{
 		$retVal = false;
 		if( $placement->Width && $placement->Height ) {
-			if( !$this->inputImageProps ) {
-				$this->loadPropertiesForInputImage( $imageId );
-			}
 			if( $placement->ContentDx || $placement->ContentDy ||
 				$this->inputImageProps['Width'] != $placement->Width ||
 				$this->inputImageProps['Height'] != $placement->Height ) {
@@ -156,9 +153,18 @@ class BizImageConverter
 				return false;
 			}
 		}
+		$this->inputImageAttachment = null;
 		try {
-			require_once BASEDIR.'/server/bizclasses/BizStorage.php';
-			$this->inputImageAttachment = BizStorage::getFile( $this->inputImageProps, 'native', $this->inputImageProps['Version'] );
+			// Note that we can not call BizStorage::getFile() to retrieve the native file from filestore because
+			// the image could be a shadow object (e.g. managed by Elvis). Instead we call BizObject::getObject().
+			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+			$object = BizObject::getObject( $imageId, BizSession::getShortUserName(), false, 'native', array('MetaData') );
+			if( $object->Files ) foreach( $object->Files as $attachment ) {
+				if( $attachment->Rendition == 'native' ) {
+					$this->inputImageAttachment = $attachment;
+					break;
+				}
+			}
 		} catch( BizException $e ) {
 		}
 		return (bool)$this->inputImageAttachment;
@@ -195,16 +201,14 @@ class BizImageConverter
 
 		// Collect all operations that need to be done on the image based on the placement data.
 		$conversionOperations = array();
-		if( $this->doesImageNeedCrop( $this->inputImageProps['ID'], $placement ) ) {
+		if( $this->doesImageNeedCrop( $placement ) ) {
 			$conversionOperations[] = 'crop';
 		}
 		if( $this->doesImageNeedScale( $placement ) ) {
 			$conversionOperations[] = 'scale';
 		}
-		if( !$conversionOperations ) {
-			throw new BizException( 'ERR_ARGUMENT', 'Client', 'No crop or scale operations defined for image. '.
-				'Please do not call this function when doesImageNeedConversion() returns false.' );
-		}
+		// The $conversionOperations collection is empty when image does not require a crop or scale but the
+		// Orientation > 1. In that case, we need to call convertImage() too to let the connector handle it.
 
 		// Lookup a connector that supports the most preferred output mime type (file format).
 		$supportedOutputFormats = $this->getSupportedOutputFormats( $channelId );
@@ -232,7 +236,8 @@ class BizImageConverter
 		BizServerPlugin::runConnector( $connector, 'setOutputFilePath', array(
 			$this->outputImageAttachment->FilePath ) );
 		BizServerPlugin::runConnector( $connector, 'setInputDimension', array(
-			$this->inputImageProps['Width'], $this->inputImageProps['Height'], $this->inputImageProps['Dpi'] ) );
+			$this->inputImageProps['Width'], $this->inputImageProps['Height'],
+			$this->inputImageProps['Dpi'], $this->inputImageProps['Orientation'] ) );
 		BizServerPlugin::runConnector( $connector, 'setOutputDpi', array(
 			$this->getDpiForOutputImage( $channelId ) ) );
 

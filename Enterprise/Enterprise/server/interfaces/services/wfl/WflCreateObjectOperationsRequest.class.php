@@ -79,6 +79,9 @@ class WflCreateObjectOperationsRequest
 				}
 			}
 		}
+		if( is_object( $this->HaveVersion ) ) {
+			$this->HaveVersion->sanitizeProperties4Php();
+		}
 	}
 
 	public function mightHaveContent() { return false; }

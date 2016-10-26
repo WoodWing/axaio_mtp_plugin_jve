@@ -54,13 +54,12 @@ class BizMetaDataPreview extends BizServerJobHandler
 	}
 	
 	/**
-	 * Updates object's metadata with specified metadata from file
+	 * Updates object's metadata with specified metadata (extracted from file by caller).
+	 *
 	 * Fields already specified in MetaData are not updated.
 	 * 
 	 * @param array 	$metaData	metadata key-value array as read from file
 	 * @param Object 	$object		object with files to get metadata from.
-	 *
-	 * @return void		$object->MetaData is updated
 	 */
 	private function handleMetaData( array $metaData, /** @noinspection PhpLanguageLevelInspection */
 									 Object &$object )

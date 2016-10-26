@@ -52,7 +52,7 @@ class ElvisUtils {
 	 * Returns hit from server, base on provided elvis id
 	 * @param $elvisId - for hit to be returned
 	 * @param $lock - true if we have lock on Elvis server
-	 * @return mixed - hit from Elvis server
+	 * @return ElvisEntHit - hit from Elvis server
 	 * @throws BizException - thrown if more then on hit found for specified elvis ID
 	 */
 	public static function getHit($elvisId, $lock = false)

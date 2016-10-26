@@ -282,6 +282,9 @@ class DBStruct
 						  			'alters' => array('v' => '599', 'name' => 'rating',			'type' => 'tinyint(4)',			'default' => "'0'") ),
 					      	array('v' => '599', 'name' => 'indexed',		'type' => 'char(2)', 			'default' => "''"),
 					      	array('v' => '599', 'name' => 'closed',			'type' => 'char(2)', 			'default' => "''" ),
+							array('v' => '1010', 'name' => 'orientation',	'type' => 'tinyint(4)',			'default' => "'0'",
+								'comment' => 'EXIF orientation flag extracted from embedded metadata. Value range [1..8]. '.
+									'Zero (0) when not resolved e.g. for non-images, images without orientation or images last saved before DB migration.' ),
 							array('v' => '610', 'name' => 'routetouserid',		'type' => 'int(11)', 			'default' => "'0'",
 									'alters' => array('v' => '599', 'name' => 'routetouserid',		'type' => 'mediumint(9)', 			'default' => "'0'"), ),
 							array('v' => '610', 'name' => 'routetogroupid',	'type' => 'int(11)', 			'default' => "'0'",
@@ -586,6 +589,9 @@ class DBStruct
 					      		'alters' => array('v' => '599', 'name' => 'routetouserid',		'type' => 'mediumint(9)', 			'default' => "'0'"), ),
 					      array('v' => '610', 'name' => 'routetogroupid',	'type' => 'int(11)', 			'default' => "'0'",
 					      		'alters' => array('v' => '599', 'name' => 'routetogroupid',	'type' => 'mediumint(9)', 			'default' => "'0'"), ),
+						   array('v' => '1010', 'name' => 'orientation',	'type' => 'tinyint(4)',			'default' => "'0'",
+							   'comment' => 'EXIF orientation flag extracted from embedded metadata. Value range [1..8]. '.
+								   'Zero (0) when not resolved e.g. for non-images, images without orientation or images last saved before DB migration.' ),
 						),
 						'indexes' => array(
 							array('v' => '420', 'name' => 'nm_objects', 	'fields' => 'name'),
@@ -653,6 +659,9 @@ class DBStruct
 						  array('v' => '330', 'name' => 'plaincontent',	'type' => 'blob',				'default' => ""),
 						  array('v' => '330', 'name' => 'filesize',		'type' => 'int(15)',			'default' => "'0'"),
 						  array('v' => '330', 'name' => 'colorspace',	'type' => 'varchar(20)',		'default' => "''"),
+						  array('v' => '1010', 'name' => 'orientation',	'type' => 'tinyint(4)',			'default' => "'0'",
+							  'comment' => 'EXIF orientation flag extracted from embedded metadata. Value range [1..8]. '.
+								  'Zero (0) when not resolved e.g. for non-images, images without orientation or images last saved before DB migration.' ),
 						  array('v' => '610', 'name' => 'state',		'type' => 'int(11)',		'default' => "'0'",
 						  		'alters' => array('v' => '420', 'name' => 'state',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
 						  array('v' => '599', 'name' => 'majorversion',	'type' => 'mediumint(9)',		'default' => "'0'",

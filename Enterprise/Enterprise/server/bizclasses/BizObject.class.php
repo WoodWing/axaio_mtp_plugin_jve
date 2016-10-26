@@ -3479,8 +3479,65 @@ class BizObject
 			$meta->ContentMetaData->HighResFile = $highresfile;
 		}
 
+		// Make sure that the Orientation is in range [1...8] or null.
+		self::validateAndRepairOrientation( $meta );
+
+		// Derive the Dimensions property value from Width, Height and Orientation.
+		self::determineDimensions( $meta );
+
 		// Validate overruled publications
 		self::validateOverruledPublications( $user, $meta, $targets );
+	}
+
+	/**
+	 * Make sure that the Orientation is in range [1...8] or null.
+	 *
+	 * When not in range, null is assigned to tell callers (e.g. GetObjects) there is no Orientation set
+	 * for the object, or to tell the database (e.g. SaveObjects) that the orientation should not be stored.
+	 *
+	 * Note that when there is no Orientation, there is a zero (0) stored in the database. Unlike other properties,
+	 * this should be converted to null when read from DB to tell clients there is no Orientation set for the object.
+	 * Also note that only for images (and adverts?) the Orientation property makes sense.
+	 *
+	 * @since 10.1.0
+	 * @param MetaData $meta
+	 */
+	private static function validateAndRepairOrientation( MetaData $meta )
+	{
+		if( isset( $meta->ContentMetaData->Orientation ) ) {
+			if( !ctype_digit( strval( $meta->ContentMetaData->Orientation ) ) ||
+				$meta->ContentMetaData->Orientation < 1 ||
+				$meta->ContentMetaData->Orientation > 8 ) {
+				$meta->ContentMetaData->Orientation = null; // repair
+			}
+		}
+	}
+
+	/**
+	 * Determines the Dimensions property value, which is not(!) stored in DB, readonly, and for UI purposes only.
+	 *
+	 * When Width and Height are set, the Dimensions will get value "Width x Height" unless the Orientation tells that
+	 * the image should be rotated 90 degrees, it will get value "Height x Width". When Width and Height are not set
+	 * the Dimensions will remain undetermined (unset).
+	 *
+	 * IMPORTANT: Please keep this function in-sync with BizQueryBase::determineDimensions() !
+	 *
+	 * @since 10.1.0
+	 * @param MetaData $meta
+	 */
+	private static function determineDimensions( MetaData $meta )
+	{
+		if( isset( $meta->ContentMetaData->Width ) && $meta->ContentMetaData->Width > 0 &&
+			isset( $meta->ContentMetaData->Height ) && $meta->ContentMetaData->Height > 0 ) {
+			if( isset( $meta->ContentMetaData->Orientation ) && $meta->ContentMetaData->Orientation >= 5 ) { // 90 degrees rotated?
+				$lhs = $meta->ContentMetaData->Height;
+				$rhs = $meta->ContentMetaData->Width;
+			} else {
+				$lhs = $meta->ContentMetaData->Width;
+				$rhs = $meta->ContentMetaData->Height;
+			}
+			$meta->ContentMetaData->Dimensions = "$lhs x $rhs";
+		}
 	}
 
 	/**
@@ -3732,6 +3789,9 @@ class BizObject
 	private static function validateForSave($user, /** @noinspection PhpLanguageLevelInspection */
 	                                        Object $object, $currRow )
 	{
+		// Block callers from overruling the Orientation; This is extracted from the native file by the ExifTool integration.
+		$object->MetaData->ContentMetaData->Orientation = null;
+
 		// Enrich object MetaData with any embedded metadata from file
 		require_once BASEDIR.'/server/bizclasses/BizMetaDataPreview.class.php';
 		$bizMetaPreview = new BizMetaDataPreview();
@@ -4492,6 +4552,12 @@ class BizObject
 				$meta->ContentMetaData->Description = '';
 			}
 			$meta->ExtraMetaData = $extramd;
+
+			// Make sure that the Orientation is in range [1...8] or null.
+			self::validateAndRepairOrientation( $meta );
+
+			// Derive the Dimensions property value from Width, Height and Orientation.
+			self::determineDimensions( $meta );
 		}
 		return $meta;
 	}

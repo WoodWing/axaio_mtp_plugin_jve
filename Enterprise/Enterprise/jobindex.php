@@ -14,11 +14,11 @@ set_time_limit(3600);    // Run this PHP script for at least one hour.
 ignore_user_abort(true); // Disallow the Scheduler/Crontab or cURL to end the watchdog or job processor.
 
 // Give HTTP 200 when the Health Check testing the URL.
-if( isset($_GET['test']) && $_GET['test']) {
+if( isset($_GET['test']) && $_GET['test'] ) {
 	$message = 'Server Jobs index page is accessible.';
 	header('HTTP/1.1 200 OK');
 	header('Status: 200 OK - '.$message );
-	LogHandler::Log( 'TransferServer', 'INFO', $message );
+	LogHandler::Log( 'ServerJob', 'INFO', $message );
 	exit();
 }
 
