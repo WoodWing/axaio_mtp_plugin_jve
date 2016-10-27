@@ -21,7 +21,7 @@ class WW_TestSuite_HealthCheck2_AxaioMadeToPrint_TestCase extends TestCase
 	
 	final public function runTest()
 	{
-		require_once dirname(__FILE__).'/config.php';
+		require_once BASEDIR.'/config/plugins/AxaioMadeToPrint/config.php';
         LogHandler::Log('wwtest', 'INFO', 'Testing MadeToPrint configuration');
 
         if( !$this->checkInstalled() ) {

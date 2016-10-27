@@ -324,13 +324,6 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 										// while BuildTest test cases are shipped with the core server.)
 										break; // we can skip further testing
 									}
-									// This works for PHP 5.2-
-									$pathPart = str_replace( '../', '', $incPath );
-									if( strpos( $incRealPath, $pathPart ) === false ) { // case compare for Linux!
-										$this->setResult( 'ERROR', $this->getFileInfoStr( $filePath ).
-											'Upper/lower case mismatch for [<b>'.$incPath.'</b>]' );
-										break; // we can skip further testing
-									}
 									// This works for PHP 5.3+ since realpath() does no longer resolve upper/lower case file names
 									if( isset( $this->phpFilePathsLower[ strtolower( $incRealPath ) ] ) && !isset( $this->phpFilePathsMixed[ ucfirst( $incRealPath ) ] ) ) {
 										$this->setResult( 'ERROR', $this->getFileInfoStr( $filePath ).
