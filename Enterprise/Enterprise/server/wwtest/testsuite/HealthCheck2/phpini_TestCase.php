@@ -218,9 +218,14 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 		}
 		LogHandler::Log('wwtest', 'INFO', 'date.timezone checked. Set to: ['.$tz.']');
 
-        if( version_compare($this->phpVersion, '5.6.0') >= 0 && ini_get('always_populate_raw_post_data') != -1 ) {
-            $this->setResult( 'ERROR', "PHP setting <b>\"always_populate_raw_post_data\"</b> is enabled. Please disable this (deprecated) option in php.ini by setting its value to \"-1\".", $help );
-        }
+		// The always_populate_raw_post_data option is deprecated since PHP 5.6 and obsoleted since PHP 7.0.
+		// For PHP 5.6 we want the option to be set to -1 to simulate the deprecation and be prepared for PHP 7.0.
+		// For PHP 7.0 we can not test option because it is gone (obsoleted).
+		if( version_compare($this->phpVersion, '7.0.0') < 0 ) {
+			if( version_compare( $this->phpVersion, '5.6.0' ) >= 0 && ini_get( 'always_populate_raw_post_data' ) != -1 ) {
+				$this->setResult( 'ERROR', "PHP setting <b>\"always_populate_raw_post_data\"</b> is enabled. Please disable this (deprecated) option in php.ini by setting its value to \"-1\".", $help );
+			}
+		}
 		LogHandler::Log('wwtest', 'INFO', 'always_populate_raw_post_data checked.');
 
 		// BZ#11308

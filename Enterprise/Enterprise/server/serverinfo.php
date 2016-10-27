@@ -17,7 +17,8 @@ $supportedPhpVersions = array(
     // '1.2.3+' >>> php version 1.2.3...1.2.x is supported (so 1.2.x with patch >= 3)
     // '-1.2.3' >>> php version 1.2.3 NOT supported
     '5.5.16+',
-    '5.6.14+'
+    '5.6.14+',
+	 '7.0.12+'
 );
 if( OS == 'LINUX' ) { // PHP 5.4.16+ supported on LINUX platform only
    $supportedPhpVersions[] = '5.4.16+';
