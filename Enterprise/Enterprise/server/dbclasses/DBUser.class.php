@@ -1008,7 +1008,7 @@ class DBUser extends DBBase
 	 *  Ir return an object with the mapping value for row to object
 	 *  @param array $row row contains key values
 	 *  @param bool $isAdmin To determine if the user is a System admin
-	 *  @return object of user
+	 *  @return AdmUser
 	 */
 	static public function rowToUserObj ( $row, $isAdmin = null )
 	{
@@ -1433,7 +1433,7 @@ class DBUser extends DBBase
 	 * @param string $where
 	 * @param array $params
 	 * @throws BizException
-	 * @return array
+	 * @return AdmUser[]
 	 */
 	public static function getUsersByWhere($where, $params = array())
 	{
