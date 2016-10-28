@@ -69,6 +69,7 @@ class ElvisUtils {
 		$metadataToReturn[] = 'filename'; // needed to determine mimetype on receive thumb/preview/origin
 		$metadataToReturn[] = 'sceId';
 		$metadataToReturn[] = 'sceSystemId';
+		$metadataToReturn[] = 'resolutionUnit'; // required to convert Elvis resolutionX to Enterprise Dpi
 
 		try {
 			$hit = $service->retrieve($elvisId, $lock, $metadataToReturn);
