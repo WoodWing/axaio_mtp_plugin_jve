@@ -123,6 +123,7 @@ if( !defined('IMAGE_RESTORE_LOCATION') ) {
 
 require_once dirname(__FILE__) . '/model/fieldHandler/ReadOnlyFieldHandler.class.php';
 require_once dirname(__FILE__) . '/model/fieldHandler/ReadWriteFieldHandler.class.php';
+require_once dirname(__FILE__) . '/model/fieldHandler/ResolutionFieldHandler.class.php';
 
 $cfgFieldHandlers = array();
 
@@ -141,7 +142,7 @@ $cfgFieldHandlers['DescriptionAuthor'] = new ReadWriteFieldHandler("captionWrite
 $cfgFieldHandlers['AspectRatio'] = new ReadOnlyFieldHandler("aspectRatio", false, "decimal", "AspectRatio");
 $cfgFieldHandlers['Channels'] =    new ReadOnlyFieldHandler("audioChannels", false, "text", "Channels");
 $cfgFieldHandlers['ColorSpace'] =  new ReadOnlyFieldHandler("colorSpace", false, "text", "ColorSpace");
-$cfgFieldHandlers['Dpi'] =         new ReadOnlyFieldHandler("resolutionX", false, "number", "Dpi");
+$cfgFieldHandlers['Dpi'] =         new ResolutionFieldHandler("resolutionX", false, "number", "Dpi");
 $cfgFieldHandlers['Encoding'] =    new ReadOnlyFieldHandler("videoCodec", false, "text", "Encoding");
 $cfgFieldHandlers['Width'] =       new ReadOnlyFieldHandler("width", false, "number", "Width");
 $cfgFieldHandlers['Height'] =      new ReadOnlyFieldHandler("height", false, "number", "Height");
