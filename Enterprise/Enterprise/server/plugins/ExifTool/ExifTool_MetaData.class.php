@@ -472,7 +472,7 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 				case 2: // inches
 					break;
 				case 3: // centimeters
-					$resolution = $resolution * 25.4; // convert cm to inches
+					$resolution = $resolution * 2.54; // convert cm to inches
 					break;
 				default: // unsupported
 					$resolution = null;
