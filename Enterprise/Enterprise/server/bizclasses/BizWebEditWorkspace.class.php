@@ -464,7 +464,7 @@ class BizWebEditWorkspace
 		// That avoids (in the succeeding code below) that the base XML gets emptied as well.
 		if( !filesize( $composeUpdateXmlFile ) ) {
 			unlink( $composeUpdateXmlFile );
-			clearstatcache(); // reflect unlink() disk operation back into PHP
+			clearstatcache( true, $composeUpdateXmlFile ); // reflect unlink() disk operation back into PHP
 		}
 
 		// Make sure there is always a base XML file. Only the first time preview there is
