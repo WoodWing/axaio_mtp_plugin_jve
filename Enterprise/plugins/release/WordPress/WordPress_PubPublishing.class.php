@@ -666,7 +666,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * @since 10.1.0
 	 * @param string|null $externalId The external id to be updated. If null, the externalid value will be unset.
-	 * @param $objectsInDossier List of objects contained in the dossier. Used for updating metadata.
+	 * @param Object[] $objectsInDossier List of objects contained in the dossier. Used for updating metadata.
 	 * @param int $objectId The id of the object to be updated.
 	 * @param Placement|null $convertedPlacement If provided, the externalid will be updated on this resource (for converted images).
 	 */
@@ -738,15 +738,16 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		$convertedPlacement = $this->getConvertedPlacement( $publishForm, $featuredImage->MetaData->BasicMetaData->ID, 'C_WORDPRESS_FEATURED_IMAGE', 0 );
 
 		try {
-			if( $convertedPlacement ) {
+			if( $convertedPlacement && $convertedPlacement->ConvertImageToPublish->Attachment ) {
 				$filePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
+				$format = $convertedPlacement->ConvertedImageToPublish->Attachment->Type;
 			} else {
-				$filePath = $this->saveLocal( $featuredImage->MetaData->BasicMetaData->ID );
+				$filePath = $featuredImage->Files[0]->FilePath;
+				$format = $featuredImage->MetaData->ContentMetaData->Format;
 			}
-			$extension = pathinfo($filePath, PATHINFO_EXTENSION);
-			$imageName = $featuredImage->MetaData->BasicMetaData->Name . '.' . $extension ;
+			$imageName = $featuredImage->MetaData->BasicMetaData->Name . MimeTypeHandler::mimeType2FileExt( $format ); ;
 
-			$retVal = $wpClient->uploadMediaLibraryImage( $imageName, $filePath, $featuredImage->MetaData->ContentMetaData->Format );
+			$retVal = $wpClient->uploadMediaLibraryImage( $imageName, $filePath, $format );
 			$externalId = $retVal['id'];
 			if( $externalId ) {
 				$imageDescription = null;
@@ -803,26 +804,26 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 
 		if( $uploadNeeded ) {
 			$filePath = null;
-			$extension = $imageObj->Relations[0]->ChildInfo->Format;
-			if( $convertedPlacement ) {
-				if( $convertedPlacement->ConvertedImageToPublish->Attachment ) {
-					$filePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
-				}
+			$format = null;
+			if( $convertedPlacement && $convertedPlacement->ConvertImageToPublish->Attachment ) {
+				$filePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
+				$format = $convertedPlacement->ConvertedImageToPublish->Attachment->Type;
 			} else {
-				$filePath = $this->saveLocal( $imageObj->MetaData->BasicMetaData->ID );
+				$filePath = $imageObj->Files[0]->FilePath;
+				$format = $imageObj->MetaData->ContentMetaData->Format;
 			}
 
 			if( $filePath ) {
-				$imageName = $imageObj->MetaData->BasicMetaData->Name.'.'.pathinfo( $filePath, PATHINFO_EXTENSION );
+				$imageName = $imageObj->MetaData->BasicMetaData->Name . MimeTypeHandler::mimeType2FileExt( $format );
 				if( $externalId ) { // update existing?
 					try {
-						$response = $wpClient->updateImage( $imageName, $filePath, $extension, $galleryId, $externalId );
+						$response = $wpClient->updateImage( $imageName, $filePath, $format, $galleryId, $externalId );
 					} catch( BizException $e ) {
 						throw new BizException( 'WORDPRESS_ERROR_UPDATE_IMAGE', 'SERVER', $e->getDetail() );
 					}
 				} else { // upload new?
 					try {
-						$response = $wpClient->uploadImage( $imageName, $filePath, $extension, $galleryId );
+						$response = $wpClient->uploadImage( $imageName, $filePath, $format, $galleryId );
 					} catch( BizException $e ) {
 						throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail() );
 					}
@@ -1324,108 +1325,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	public function getPrio() { return self::PRIO_DEFAULT; }
-
-	/**
-	 * Retrieves an object from the ObjectsService and stores a local copy to be uploaded.
-	 *
-	 * File structure from the object can differ.
-	 *
-	 * @param int $id The id for the object to be stored.
-	 *
-	 * @return string $exportName The name of the exported object.
-	 *
-	 * @throws BizException Throws an exception if something goes wrong.
-	 */
-	public function saveLocal( $id )
-	{
-		// Check and create the directory as needed.
-		if( !is_dir(TEMPDIRECTORY) ) {
-			require_once BASEDIR . '/server/utils/FolderUtils.class.php';
-			FolderUtils::mkFullDir(TEMPDIRECTORY);
-			// Check if the directory was created.
-			if( !is_dir(TEMPDIRECTORY) ) {
-				$msg = 'The directory: "' . TEMPDIRECTORY . '" does not exist, or could not be created.';
-				$detail = 'The directory "' . TEMPDIRECTORY . '" could not be created. Either create it manually and '
-					. 'ensure the web server can write to it, or check that the webserver has rights to write to the sub-'
-					. 'directories in the path.';
-
-				throw new BizException(null, 'Server', $detail, $msg);
-			}
-		}
-
-		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
-		$object = $this->getObject( $id );
-		$type = $object->MetaData->BasicMetaData->Type;
-		// We need to get a unique name for the object, in case there are multiple objects with the same name.
-		$name = $id . $type;
-		// Get the format, and the proper extension for the format.
-		$format = $object->MetaData->ContentMetaData->Format;
-		$extension = MimeTypeHandler::mimeType2FileExt( $format );
-		$exportName = TEMPDIRECTORY . '/' . $name . $extension;
-
-		// Retrieve file data.
-		$filePath = null;
-		if( isset($object->Files[0]->FilePath) ) {
-			$filePath = $object->Files[0]->FilePath;
-		}
-		$content = file_get_contents($filePath);
-
-		if( is_null($content) ) {
-			$msg = 'Could not retrieve file contents';
-			$detail = (is_string($filePath)) ? $filePath : 'Attachment (' . $id . ')';
-			$detail .= ' did not yield proper content.';
-			throw new BizException(null, 'Server', $detail, $msg);
-		}
-		file_put_contents( $exportName, $content );
-
-		// Check if the file was created.
-		if( !file_exists($exportName) ) {
-			$detail = 'File: ' . $exportName . ' for ' . $type . ', object (ID: ' . $id . ') Does not seem to be a valid file.';
-			$msg = 'Unable to save ' . $type . ' data locally.';
-			throw new BizException(null, 'Server', $detail, $msg);
-		}
-
-		return $exportName;
-	}
-
-	/**
-	 * Uses the GetObjectsService to return a business object by its id.
-	 *
-	 * Retrieves the business object by id, uses the WflGetObjectsService to retrieve
-	 * the object.
-	 *
-	 * @param string $id The id of the object to be retrieved.
-	 * @param bool $lock Whether to lock the object or not.
-	 * @param string $rendition Rendition option.
-	 * @param array $requestInfo Request specific information by changing the array.
-	 *
-	 * @return null|Object $object The retrieved object.
-	 *
-	 * @see /Enterprise/server/bizclasses/BizObject.class.php
-	 */
-	private function getObject( $id, $lock = false, $rendition = 'native', $requestInfo = array() )
-	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
-		$service = new WflGetObjectsService();
-		$request = new WflGetObjectsRequest();
-		$request->Ticket = BizSession::getTicket();
-		$request->IDs = array( $id );
-		$request->Lock = $lock;
-		$request->Rendition = $rendition;
-		$request->RequestInfo = $requestInfo;
-		$request->HaveVersions = null;
-		$request->Areas = null;
-		$request->EditionId = null;
-
-		/* @var WflGetObjectsResponse $resp */
-		$resp = $service->execute($request);
-
-		if( $resp->Objects ) {
-			return $resp->Objects[0];
-		}
-		return null;
-	}
 
 	/**
 	 * Get the first object in a dossier which match with object type
