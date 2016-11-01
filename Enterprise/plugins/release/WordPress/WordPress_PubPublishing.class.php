@@ -747,7 +747,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 			$imageName = $featuredImage->MetaData->BasicMetaData->Name . '.' . $extension ;
 
 			$retVal = $wpClient->uploadMediaLibraryImage( $imageName, $filePath, $featuredImage->MetaData->ContentMetaData->Format );
-			$externalId = $retVal['Id'];
+			$externalId = $retVal['id'];
 			if( $externalId ) {
 				$imageDescription = null;
 				foreach( $featuredImage->MetaData->ExtraMetaData as $extraData ) {
