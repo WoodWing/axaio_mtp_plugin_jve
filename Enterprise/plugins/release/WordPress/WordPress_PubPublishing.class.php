@@ -735,7 +735,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	private function uploadFeaturedImage( $wpClient, $publishForm, $objectsInDossier, $featuredImage )
 	{
-		$convertedPlacement = $this->getConvertedPlacement( $publishForm, $featuredImage->MetaData->BasicMetaData->ID, 'C_WORDPRESS_FEATURE_IMAGE', 0 );
+		$convertedPlacement = $this->getConvertedPlacement( $publishForm, $featuredImage->MetaData->BasicMetaData->ID, 'C_WORDPRESS_FEATURED_IMAGE', 0 );
 
 		try {
 			if( $convertedPlacement ) {
