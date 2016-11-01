@@ -391,6 +391,57 @@ function step1_cleanGetWorkspace {
 	mkdir "${WORKSPACE}/internals"
 }
 
+function updateResourceFiles {
+	PRODUCT=$1
+	PATH=$2
+	STEP=$3
+	VERSION=$4
+	PRODUCTLC=$( echo ${PRODUCT} | tr "[:upper:]" "[:lower:]" )
+
+	echo "${STEP}1: Retrieve timestamp of last update from TMS for the ${PRODUCT} plugin."
+	URL="curl http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20Server%20${PRODUCT}/version/10.0/"
+	tmsLastUpdate=$( curl ${URL} )
+	if [ ! -n "${tmsLastUpdate}"  ]; then
+		echo "Could not retrieve last modification timestamp from TMS (for the ${PRODUCT} project). Is TMS down?";
+		exit 1;
+	fi
+
+	echo "${STEP}2: Retrieve timestamp of last update from local resource file for ${PRODUCT} plugin."
+	resLastUpdate=$( cat "${SOURCE_BASE}{$PATH}${PRODUCT}/resources/_lastupdate.txt" )
+	if [ "${tmsLastUpdate}" == "${resLastUpdate}" ]; then
+		echo "${STEP}3: Repository and TMS are in sync. No update needed."
+	else
+		echo "${STEP}3: Repository is out-of-sync with TMS. Downloading resources..."
+		wget "http://tms.woodwing.net/product/getexport/user/woodwing/pass/QjQjI2VyVmxAQDE=/versionid/${VERSION}" -O ./tms_resources/${PRODUCTLC}.zip
+
+		echo "${STEP}4: Extract resource archive and overwrite local resources."
+		cd ${SOURCE_BASE}${PATH}${PRODUCT}/resources
+		7za e -y "${WORKSPACE}/tms_resources/${PRODUCTLC}.zip" "Server/config/resources"
+		rm -f "${WORKSPACE}/tms_resources/${PRODUCTLC}.zip"
+		cd -
+
+		echo "${STEP}5: Prefix the resource keys with ${PRODUCT}."
+		php "${WORKSPACE}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE}/Enterprise/${PATH}${PRODUCT}/resources" ${PRODUCT}
+
+		echo "${STEP}6: Write timestamp of last update from TMS into the resource folder of ${PRODUCT} plugin."
+		echo "${tmsLastUpdate}" > ${SOURCE_BASE}${PATH}${PRODUCT}/resources/_lastupdate.txt
+
+		echo "${STEP}7: Remove the timestamp from the downloaded XML files."
+		for icFile in $(find "${SOURCE_BASE}${PATH}${PRODUCT}/resources/" -name '*.xml'); do
+			sed '/<!--Last edit date in TMS:.*-->/d' "${icFile}" > ./temp && mv ./temp "${icFile}"
+		done
+
+		echo "${STEP}8: Commit changed resource files to repository."
+		git add ${SOURCE_BASE}${PATH}${PRODUCT}/resources/*.xml
+		git add --force ${SOURCE_BASE}${PATH}${PRODUCT}/resources/_lastupdate.txt
+		git commit -m "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) ${PRODUCT} resource files from TMS for server build ${BUILD_NUMBER}."
+
+		echo "${STEP}9: Push changed resource files to Git."
+		git push --set-upstream origin "${GIT_BRANCH}"
+	fi
+}
+
+
 #
 # Downloads the latest Enterprise Server resource files from TMS and submits changes to the repository.
 #
@@ -453,46 +504,21 @@ function step2a_updateResourceFilesForCoreServer {
 # (that resides in the resource folder) which allows us to compare timestamps and skip submits.
 #
 function step2b_updateResourceFilesForAdobeAEM {
-	echo "step2b1: Retrieve timestamp of last update from TMS for AdobeDps2 plugin."
-	tmsLastUpdate=`curl http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20Server%20AdobeDps2/version/10.0/`
-	if [ ! -n "${tmsLastUpdate}"  ]; then
-		echo 'Could not retrieve last modification timestamp from TMS (for the AdobeDps2 project). Is TMS down?';
-		exit 1;
-	fi
+	updateResourceFiles AdobeDps2 plugins/release/ step2b 117
+}
 
-	echo "step2b2: Retrieve timestamp of last update from local resource file for AdobeDps2 plugin."
-	resLastUpdate=`cat "${SOURCE_BASE}plugins/release/AdobeDps2/resources/_lastupdate.txt"`
-	if [ "${tmsLastUpdate}" == "${resLastUpdate}" ]; then
-		echo "step2b3: Repository and TMS are in sync. No update needed."
-	else
-		echo "step2b3: Repository is out-of-sync with TMS. Downloading resources..."
-		wget "http://tms.woodwing.net/product/getexport/user/woodwing/pass/QjQjI2VyVmxAQDE=/versionid/117" -O ./tms_resources/adobedps2.zip
-		# L> update the versionid param when migrating to new AdobeDps2 major version: 99=9.0, 117=10.0
-
-		echo "step2b4: Extract resource archive and overwrite local resources."
-		cd ${SOURCE_BASE}plugins/release/AdobeDps2/resources
-		7za e -y "${WORKSPACE}/tms_resources/adobedps2.zip" "Server/config/resources"
-		cd -
-
-		echo "step2b5: Prefix the resource keys with AdobeDps2."
-		php "${WORKSPACE}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE}/Enterprise/plugins/release/AdobeDps2/resources" AdobeDps2
-
-		echo "step2b6: Write timestamp of last update from TMS into the resource folder of AdobeDps2 plugin."
-		echo "${tmsLastUpdate}" > ${SOURCE_BASE}plugins/release/AdobeDps2/resources/_lastupdate.txt
-
-		echo "step2b7: Remove the timestamp from the downloaded XML files."
-		for icFile in $(find "${SOURCE_BASE}plugins/release/AdobeDps2/resources/" -name '*.xml'); do
-			sed '/<!--Last edit date in TMS:.*-->/d' "${icFile}" > ./temp && mv ./temp "${icFile}"
-		done
-
-		echo "step2b8: Commit changed resource files to repository."
-		git add ${SOURCE_BASE}plugins/release/AdobeDps2/resources/*.xml
-		git add --force ${SOURCE_BASE}plugins/release/AdobeDps2/resources/_lastupdate.txt
-		git commit -m "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) AdobeDps2 resource files from TMS for server build ${BUILD_NUMBER}."
-
-		echo "step2b9: Push changed resource files to Git."
-		git push --set-upstream origin "${GIT_BRANCH}"
-	fi
+#
+# Downloads the latest Maintenance Mode resource files from TMS and submits changes to the repository.
+#
+# Note that for historical reasons the XML resource files downloaded from TMS contain a timestamp
+# at the second line, such as: <!--Last edit date in TMS: 31-05-2016 07:08:39 GMT-->
+# However, this leads to conflicts when merging code branches and so we take out those lines.
+# Nevertheless, to avoid unnecessary daily submits without changes (that would blur the view)
+# we keep track of the last modification timestamp of TMS in the a file named "_lastupdate.txt"
+# (that resides in the resource folder) which allows us to compare timestamps and skip submits.
+#
+function step2c_updateResourceFilesForMaintenanceMode {
+	updateResourceFiles MaintenanceMode Enterprise/server/plugins/ step2c 122
 }
 
 #
@@ -704,6 +730,7 @@ step1_cleanGetWorkspace
 set +x; echo "================ Step 2 ================"; set -x
 step2a_updateResourceFilesForCoreServer
 step2b_updateResourceFilesForAdobeAEM
+step2c_updateResourceFilesForMaintenanceMode
 set +x; echo "================ Step 3 ================"; set -x
 step3a_updateVersionInfo
 step3b_updateVersionInRepository
