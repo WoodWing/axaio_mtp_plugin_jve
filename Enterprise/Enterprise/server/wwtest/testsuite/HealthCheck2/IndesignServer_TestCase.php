@@ -151,6 +151,7 @@ class WW_TestSuite_HealthCheck2_InDesignServer_TestCase extends TestCase
 			// Let ID Server (JavaScript) try to create products.xml file in its workspace.
 			// This is done to check if ID Server (JS) has write access. 
 			// Note that ID Server is a different process than PHP and might act for different users and so have different access profile!
+			clearstatcache( true, $prodInfoPath );
 			if( file_exists($prodInfoPath) ) {
 				if( !unlink( $prodInfoPath ) ) { // clear previous runs
 			    	$errmsg = 'Could not remove test file of previous runs:<pre>&nbsp;&nbsp;&nbsp;'.$prodInfoPath.'</pre>';
@@ -185,7 +186,7 @@ class WW_TestSuite_HealthCheck2_InDesignServer_TestCase extends TestCase
 				$idsObj, null, null, // ids obj, min ids version, max ids version
 				'Health Check' // context
 			);
-			clearstatcache(); // Make sure that file_exists() not fails as the products.xml has just been deleted above. 
+			clearstatcache( true, $prodInfoPath ); // Make sure that file_exists() not fails as the products.xml has just been deleted above.
 		} catch( BizException $e ) {
 			$errmsg = 'The getprodinfo request failed. '.$e->getMessage();
     		$this->setResult( 'ERROR', $msgPrefix.$errmsg, $help );
