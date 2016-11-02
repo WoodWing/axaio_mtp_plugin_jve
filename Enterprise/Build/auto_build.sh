@@ -392,51 +392,51 @@ function step1_cleanGetWorkspace {
 }
 
 function updateResourceFiles {
-	PRODUCT=$1
-	PATH=$2
-	STEP=$3
-	VERSION=$4
-	PRODUCTLC=$( echo ${PRODUCT} | tr "[:upper:]" "[:lower:]" )
+	product=$1
+	dir=$2
+	step=$3
+	version=$4
+	productlc=$( echo ${product} | tr "[:upper:]" "[:lower:]" )
 
-	echo "${STEP}1: Retrieve timestamp of last update from TMS for the ${PRODUCT} plugin."
-	URL="http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20Server%20${PRODUCT}/version/10.0/"
-	tmsLastUpdate=`curl ${URL}`
+	echo "${step}1: Retrieve timestamp of last update from TMS for the ${product} plugin."
+	URL="http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20Server%20${product}/version/10.0/"
+	tmsLastUpdate=$( curl ${URL} )
 	if [ ! -n "${tmsLastUpdate}"  ]; then
-		echo "Could not retrieve last modification timestamp from TMS (for the ${PRODUCT} project). Is TMS down?";
+		echo "Could not retrieve last modification timestamp from TMS (for the ${product} project). Is TMS down?";
 		exit 1;
 	fi
 
-	echo "${STEP}2: Retrieve timestamp of last update from local resource file for ${PRODUCT} plugin."
-	resLastUpdate=$( cat "${SOURCE_BASE}{$PATH}${PRODUCT}/resources/_lastupdate.txt" )
+	echo "${step}2: Retrieve timestamp of last update from local resource file for ${product} plugin."
+	resLastUpdate=$( cat "${SOURCE_BASE}{$dir}${product}/resources/_lastupdate.txt" )
 	if [ "${tmsLastUpdate}" == "${resLastUpdate}" ]; then
-		echo "${STEP}3: Repository and TMS are in sync. No update needed."
+		echo "${step}3: Repository and TMS are in sync. No update needed."
 	else
-		echo "${STEP}3: Repository is out-of-sync with TMS. Downloading resources..."
-		wget "http://tms.woodwing.net/product/getexport/user/woodwing/pass/QjQjI2VyVmxAQDE=/versionid/${VERSION}" -O ./tms_resources/${PRODUCTLC}.zip
+		echo "${step}3: Repository is out-of-sync with TMS. Downloading resources..."
+		wget "http://tms.woodwing.net/product/getexport/user/woodwing/pass/QjQjI2VyVmxAQDE=/versionid/${version}" -O ./tms_resources/${productlc}.zip
 
-		echo "${STEP}4: Extract resource archive and overwrite local resources."
-		cd ${SOURCE_BASE}${PATH}${PRODUCT}/resources
-		7za e -y "${WORKSPACE}/tms_resources/${PRODUCTLC}.zip" "Server/config/resources"
-		rm -f "${WORKSPACE}/tms_resources/${PRODUCTLC}.zip"
+		echo "${step}4: Extract resource archive and overwrite local resources."
+		cd ${SOURCE_BASE}${dir}${product}/resources
+		7za e -y "${WORKSPACE}/tms_resources/${productlc}.zip" "Server/config/resources"
+		rm -f "${WORKSPACE}/tms_resources/${productlc}.zip"
 		cd -
 
-		echo "${STEP}5: Prefix the resource keys with ${PRODUCT}."
-		php "${WORKSPACE}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE}/Enterprise/${PATH}${PRODUCT}/resources" ${PRODUCT}
+		echo "${step}5: Prefix the resource keys with ${product}."
+		php "${WORKSPACE}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE}/Enterprise/${dir}${product}/resources" ${product}
 
-		echo "${STEP}6: Write timestamp of last update from TMS into the resource folder of ${PRODUCT} plugin."
-		echo "${tmsLastUpdate}" > ${SOURCE_BASE}${PATH}${PRODUCT}/resources/_lastupdate.txt
+		echo "${step}6: Write timestamp of last update from TMS into the resource folder of ${product} plugin."
+		echo "${tmsLastUpdate}" > ${SOURCE_BASE}${dir}${product}/resources/_lastupdate.txt
 
-		echo "${STEP}7: Remove the timestamp from the downloaded XML files."
-		for icFile in $(find "${SOURCE_BASE}${PATH}${PRODUCT}/resources/" -name '*.xml'); do
+		echo "${step}7: Remove the timestamp from the downloaded XML files."
+		for icFile in $(find "${SOURCE_BASE}${dir}${product}/resources/" -name '*.xml'); do
 			sed '/<!--Last edit date in TMS:.*-->/d' "${icFile}" > ./temp && mv ./temp "${icFile}"
 		done
 
-		echo "${STEP}8: Commit changed resource files to repository."
-		git add ${SOURCE_BASE}${PATH}${PRODUCT}/resources/*.xml
-		git add --force ${SOURCE_BASE}${PATH}${PRODUCT}/resources/_lastupdate.txt
-		git commit -m "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) ${PRODUCT} resource files from TMS for server build ${BUILD_NUMBER}."
+		echo "${step}8: Commit changed resource files to repository."
+		git add ${SOURCE_BASE}${dir}${product}/resources/*.xml
+		git add --force ${SOURCE_BASE}${dir}${product}/resources/_lastupdate.txt
+		git commit -m "[Ent Server ${SERVER_VERSION}] Jenkins: Updated latest (${tmsLastUpdate}) ${product} resource files from TMS for server build ${BUILD_NUMBER}."
 
-		echo "${STEP}9: Push changed resource files to Git."
+		echo "${step}9: Push changed resource files to Git."
 		git push --set-upstream origin "${GIT_BRANCH}"
 	fi
 }
