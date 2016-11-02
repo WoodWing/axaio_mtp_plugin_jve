@@ -1198,8 +1198,8 @@ class BizPublishing
 	 *
 	 * @param integer $dossierId
 	 * @param PubPublishTarget $publishTarget
-	 * @param Object $dossier
-	 * @param Object[] $children
+	 * @param Object $dossier Dossier object
+	 * @param Object[] $children All objects contained within the dossier
 	 */
 	static protected function fetchDossier( $dossierId, $publishTarget, &$dossier, &$children )
 	{
