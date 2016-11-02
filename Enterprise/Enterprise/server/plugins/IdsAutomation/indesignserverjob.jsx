@@ -26,6 +26,7 @@ var logfile     = app.scriptArgs.get("logfile"); // variable needs to be called 
 var pDelay      = app.scriptArgs.get("delay"); // wait for n seconds between opening and saving layout
 
 app.serverSettings.imagePreview = true;
+
 initlog(logfile);
 logSystemInfo();
 
