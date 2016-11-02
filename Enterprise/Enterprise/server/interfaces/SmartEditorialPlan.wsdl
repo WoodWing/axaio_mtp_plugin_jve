@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <!-- 
 	Generic SOAP interface. 
 	Implemented by Editorial system and called by Planning System.
@@ -131,6 +131,7 @@
 					<element name="Name"        type="xsd:string"         nillable="true"/>
 					<element name="Publication" type="xsd:string"         nillable="true"/>
 					<element name="Issue"       type="xsd:string"         nillable="true"/>
+					<element name="PubChannel"  type="xsd:string"         nillable="true"	minOccurs="0" maxOccurs="1"/> <!-- Publication Channel, added in v9.8.1 QP, EN-88057 -->
 					<element name="Section"     type="xsd:string"         nillable="true"/>
 					<element name="Status"      type="xsd:string"         nillable="true"/>
 					<element name="Pages"       type="tns:ArrayOfPage"    nillable="true"/> <!-- List of planned pages which needs to be complete since it overwrites all previous pages!! -->
@@ -185,8 +186,9 @@
 					<element name="Id" nillable="true" type="xsd:string"/>      <!-- Advert id of editorial system -->
 					<element name="AlienId" nillable="true" type="xsd:string"/> <!-- Advert id of advert system -->
 					<element name="Publication" nillable="true" type="xsd:string"/>  
-					<element name="Issue" nillable="true" type="xsd:string"/>  
-					<element name="Section" nillable="true" type="xsd:string"/>  
+					<element name="Issue" nillable="true" type="xsd:string"/>
+					<element name="PubChannel"  type="xsd:string"  nillable="true"	minOccurs="0" maxOccurs="1"/> <!-- Publication Channel, added in v9.8.1 QP, EN-88057 -->
+					<element name="Section" nillable="true" type="xsd:string"/>
 					<element name="Status" nillable="true" type="xsd:string"/>  
 					<element name="Name" nillable="true" type="xsd:string"/>           <!-- Name, doesn't have to be unique -->
 					<element name="AdType" nillable="true" type="xsd:string"/>         <!-- Advert type: for future usage -->
