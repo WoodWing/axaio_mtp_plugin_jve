@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LocalizationMap language="enUS">
+<LocalizationMap language="ruRU">
   <Term key="MaintenanceMode.LOGIN_DISABLE_DATE_FIELD">Disable from</Term>
   <Term key="MaintenanceMode.LOGIN_DISABLE_FIELD">Disable User Log In</Term>
   <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DATE">User log in is disabled from %1 onwards.</Term>
