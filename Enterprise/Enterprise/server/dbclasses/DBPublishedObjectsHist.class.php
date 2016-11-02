@@ -61,7 +61,7 @@ class DBPublishedObjectsHist extends DBBase
 		$objHistTable = $dbDriver->tablename( self::TABLENAME );
 		$objVersTable = $dbDriver->tablename( 'objectversions' );
 
-		$sql = "SELECT poh.`objectid`, poh.`majorversion`, poh.`minorversion`, poh.`objectname` AS name, poh.`objecttype` AS type, poh.`objectformat` as format "
+		$sql = "SELECT poh.`objectid`, poh.`majorversion`, poh.`minorversion`, poh.`objectname` AS name, poh.`objecttype` AS type, poh.`objectformat`as format, poh.`externalid` AS externalid "
 				."FROM (SELECT * FROM {$objHistTable} WHERE publishid = ?) poh "
 				."LEFT JOIN {$objVersTable} ov "
 				."ON (ov.`objid` = poh.`objectid` AND ov.`majorversion` = poh.`majorversion` AND ov.`minorversion` = poh.`minorversion`) ";

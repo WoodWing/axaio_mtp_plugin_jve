@@ -21,7 +21,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 
 	/**
 	 * Publishes a dossier with contained objects (articles. images, etc.) to an external publishing system.
-	 * The plugin is supposed to publish the dossier and it's articles and fill in some fields for reference.
+	 * The plugin is supposed to publish the dossier and its articles and fill in some fields for reference.
 	 *
 	 * @param Object $dossier            [writable]
 	 * @param Object[] $objectsInDossier [writable]
@@ -59,7 +59,7 @@ abstract class PubPublishing_EnterpriseConnector extends DefaultConnector
 
 	/**
 	 * Updates/republishes a published dossier with contained objects (articles. images, etc.) to an 
-	 * external publishing system, using the $dossier->ExternalId to identify the dosier to the 
+	 * external publishing system, using the $dossier->ExternalId to identify the dossier to the
 	 * publishing system. The plugin is supposed to update/republish the dossier and it's articles 
 	 * and fill in some fields for reference.
 	 *
