@@ -451,20 +451,21 @@ class BizSession
 		// Let user overrule the company language to tell client apps what language this user is speaking
 		require_once BASEDIR.'/server/bizclasses/BizServerInfo.class.php';
 		$serverInfo = BizServerInfo::getServerInfo();
-		$featureSet = &$serverInfo->FeatureSet;
 		$compLangFeature = null;
-		foreach( $featureSet as &$feature ) { // Search through featureset for company language setting
+		foreach( $serverInfo->FeatureSet as $feature ) { // Search through featureset for company language setting
 			if( $feature->Key == 'CompanyLanguage' ) {
-				$compLangFeature = &$feature;
+				$compLangFeature = $feature;
+				break;
 			}
 		}
+
 		if( $compLangFeature ) {
 			if( trim($compLangFeature->Value) == '' ) {
 				$compLangFeature->Value = 'enUS'; // Empty (bad) comp lang configured; take English as default
 			}
 		} else { // No comp lang configured at all; take English as default
 			$compLangFeature = new Feature( 'CompanyLanguage', 'enUS' );
-			$serverInfo->FeatureSet[] = &$compLangFeature;
+			$serverInfo->FeatureSet[] = $compLangFeature;
 		}
 		if( self::getUserInfo('language') != '') {
 			$compLangFeature->Value = self::getUserInfo('language'); // Let user overrule
@@ -473,7 +474,7 @@ class BizSession
 		// Add the server feature FileUploadUrl (if proper define is set).
 		require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 		$transferServer = new BizTransferServer();
-		$transferServer->addFeatures($serverInfo);
+		$transferServer->addFeatures( $serverInfo );
 
 		// Determine whether or not the user works from remote location.
 		require_once BASEDIR.'/server/utils/IpAddressRange.class.php';
@@ -488,27 +489,27 @@ class BizSession
 			'adding IsRemoteUser='.$isRemote.' option to ServerInfo->FeatureSet in LogOnResponse. ' );
 
 		// Add the Labels feature to the FeatureSet.
-		self::addFeatureLabels( $serverInfo->FeatureSet );
+		self::addFeatureLabels( $serverInfo );
 
 		// Add the Client features (CLIENTFEATURES) to the FeatureSet.
-		self::addFeaturesForClient( $serverInfo->FeatureSet, $isRemote == 'true', $ticket );
+		self::addFeaturesForClient( $serverInfo, $isRemote == 'true', $ticket );
 
 		// Add the AutomatedPrintWorkflow feature to the FeatureSet.
-		self::addFeatureForAutomatedPrintWorkflow( $serverInfo->FeatureSet );
+		self::addFeatureForAutomatedPrintWorkflow( $serverInfo );
 
 		// Add the ContentSourceFileLinks feature to the FeatureSet.
-		self::addFeatureForContentSourceFileLinks( $serverInfo->FeatureSet );
+		self::addFeatureForContentSourceFileLinks( $serverInfo );
 
 		// Add Output Devices to the FeatureSet.
 		require_once BASEDIR.'/server/bizclasses/BizAdmOutputDevice.class.php';
 		$bizDevice = new BizAdmOutputDevice();
-		$bizDevice->addFeatureOutputDevices( $serverInfo->FeatureSet );
+		$bizDevice->addFeatureOutputDevices( $serverInfo );
 
-		// add ExtensionMap feature. 
+		// add ExtensionMap feature.
 		// NOTE: Might change in the future, added in v6.1 for Content Station
-		self::addFeatureExtensionMap( $serverInfo->FeatureSet );
+		self::addFeatureExtensionMap( $serverInfo );
 
-		foreach( $featureSet as &$feature ) {
+		foreach( $serverInfo->FeatureSet as $feature ) {
 			if ( !is_null($feature->Value) && !is_string($feature->Value) ) {
 				if ( is_bool($feature->Value) ) {
 					// Only bool values can't are currently convert as:
@@ -826,15 +827,15 @@ class BizSession
 	 * Adds the "Labels" feature to the given feature set. "Labels" is the
 	 * content of componentDefs.xml
 	 *
-	 * @param Feature[] $features Feature set to add the "Labels" feature.
+	 * @param ServerInfo $serverInfo Holds a FeatureSet to add the "Labels" feature.
 	 */
-	private static function addFeatureLabels( array &$features )
+	private static function addFeatureLabels( ServerInfo $serverInfo )
 	{
 		$filePath = BASEDIR . '/config/componentDefs.xml';
 		if (is_file($filePath)) {
 			$contents = file_get_contents($filePath);
 			if ($contents !== FALSE){
-				$features[] = new Feature('Labels', $contents);
+				$serverInfo->FeatureSet[] = new Feature('Labels', $contents);
 			}
 		}
 	}
@@ -851,9 +852,9 @@ class BizSession
 	 *
 	 * The values are read form EXTENSIONMAP defined in configserver.php
 	 *
-	 * @param Feature[] $features Feature set to add the "ExtensionMap" feature.
+	 * @param ServerInfo $serverInfo Holds a FeatureSet to add the "ExtensionMap" feature.
 	 */
-	private static function addFeatureExtensionMap( array &$features )
+	private static function addFeatureExtensionMap( ServerInfo $serverInfo )
 	{
 		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
 		// Create <extensions> XML element and iterate thru EXTENSIONMAP to add
@@ -877,7 +878,7 @@ class BizSession
 			}
 		}
 
-		$features[] = new Feature('ExtensionMap', $xmlTree->asXML());
+		$serverInfo->FeatureSet[] = new Feature('ExtensionMap', $xmlTree->asXML());
 	}
 
 	/**
@@ -887,11 +888,11 @@ class BizSession
 	 * subcollection of features (configured in CLIENTFEATURES) to add.
 	 *
 	 * @since 9.7.0
-	 * @param Feature[] $features Feature set to add the client features.
+	 * @param ServerInfo $serverInfo Holds a FeatureSet to add the client features.
 	 * @param boolean $isRemote
 	 * @param string $ticket The requested ticket
 	 */
-	private static function addFeaturesForClient( array &$features, $isRemote, $ticket )
+	private static function addFeaturesForClient( ServerInfo $serverInfo, $isRemote, $ticket )
 	{
 		$clientName = BizSession::getClientName();
 		if( $clientName == 'InDesign Server' ) {
@@ -903,7 +904,7 @@ class BizSession
 		}
 		$options = unserialize( CLIENTFEATURES );
 		if( isset( $options[$clientName][$subEntry] ) && $options[$clientName][$subEntry] ) {
-			$features = array_merge( $features, $options[$clientName][$subEntry] );
+			$features = array_merge( $serverInfo->FeatureSet, $options[$clientName][$subEntry] );
 		}
 	}
 
@@ -912,13 +913,13 @@ class BizSession
 	 * has the AutomatedPrintWorkflow business connector interface implemented.
 	 *
 	 * @since 9.8.0
-	 * @param Feature[] $features Feature set to update.
+	 * @param ServerInfo $serverInfo Holds the FeatureSet to update.
 	 */
-	private static function addFeatureForAutomatedPrintWorkflow( array &$features )
+	private static function addFeatureForAutomatedPrintWorkflow( ServerInfo $serverInfo )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		if( BizServerPlugin::hasActivePlugins( 'AutomatedPrintWorkflow' ) ) {
-			$features[] = new Feature( 'ContentStationAutomatedPrintWorkflow' );
+			$serverInfo->FeatureSet[] = new Feature( 'ContentStationAutomatedPrintWorkflow' );
 		}
 	}
 
@@ -927,9 +928,9 @@ class BizSession
 	 * has enabled this feature.
 	 *
 	 * @since 9.7.0
-	 * @param Feature[] $features Feature set to update.
+	 * @param ServerInfo $serverInfo Holds a FeatureSet to update.
 	 */
-	private static function addFeatureForContentSourceFileLinks( array &$features )
+	private static function addFeatureForContentSourceFileLinks( ServerInfo $serverInfo )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		BizServerPlugin::runDefaultConnectors(
@@ -942,7 +943,7 @@ class BizSession
 			}
 		}
 		if( count($contentSources) > 0 ) {
-			$features[] = new Feature( 'ContentSourceFileLinks', implode($contentSources, ',') );
+			$serverInfo->FeatureSet[] = new Feature( 'ContentSourceFileLinks', implode($contentSources, ',') );
 		}
 	}
 
