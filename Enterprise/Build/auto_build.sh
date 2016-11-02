@@ -399,7 +399,7 @@ function updateResourceFiles {
 	PRODUCTLC=$( echo ${PRODUCT} | tr "[:upper:]" "[:lower:]" )
 
 	echo "${STEP}1: Retrieve timestamp of last update from TMS for the ${PRODUCT} plugin."
-	URL="curl http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20Server%20${PRODUCT}/version/10.0/"
+	URL="http://tms.woodwing.net/product/lastupdateversion/productname/Enterprise%20Server%20${PRODUCT}/version/10.0/"
 	tmsLastUpdate=$( curl ${URL} )
 	if [ ! -n "${tmsLastUpdate}"  ]; then
 		echo "Could not retrieve last modification timestamp from TMS (for the ${PRODUCT} project). Is TMS down?";
