@@ -80,10 +80,18 @@ class BizResources
 				$langCode = BizUser::validUserLanguage( $sLanguage_code );
 				$resFile = BASEDIR.'/config/plugins/'.$pluginName.'/resources/'.$langCode.'.xml';
 				$resFileFound = file_exists( $resFile );
+				if ( !$resFileFound ) {
+					$resFile = BASEDIR.'/server/plugins/'.$pluginName.'/resources/'.$langCode.'.xml';
+					$resFileFound = file_exists( $resFile );
+				}
 				if( !$resFileFound && $langCode != 'enUS' ) {
 					$langCode = 'enUS';
 					$resFile = BASEDIR.'/config/plugins/'.$pluginName.'/resources/'.$langCode.'.xml';
 					$resFileFound = file_exists( $resFile );
+					if ( !$resFileFound ) {
+						$resFile = BASEDIR.'/server/plugins/'.$pluginName.'/resources/'.$langCode.'.xml';
+						$resFileFound = file_exists( $resFile );
+					}
 				}
 				if( $resFileFound ) {
 					$resourceTable = self::readResourceTable( $resFile );

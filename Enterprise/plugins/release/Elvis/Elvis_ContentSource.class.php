@@ -331,6 +331,16 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		$this->fillMetadata( $destObject, $hit );
 		$destObject->Files = array();
 
+		// Elvis communicates the UI dimensions of images to Enterprise server, which means that the orientation is already
+		// applied to the height and width. Since Enterprise Server uses the orientation to calculate the dimensions on
+		// the fly, we need to revert the height and width to their pre-orientation values in the case of rotation (orientation = 5-8).
+		if( $destObject->MetaData->ContentMetaData->Orientation && $destObject->MetaData->ContentMetaData->Orientation > 4 ) {
+			$width = $destObject->MetaData->ContentMetaData->Width;
+			$height = $destObject->MetaData->ContentMetaData->Height;
+			$destObject->MetaData->ContentMetaData->Height = $width;
+			$destObject->MetaData->ContentMetaData->Width = $height;
+		}
+
 		return $destObject;
 	}
 	
