@@ -516,6 +516,20 @@ function step2c_updateResourceFilesForMaintenanceMode {
 }
 
 #
+# Downloads the latest Elvis content source resource files from TMS and submits changes to the repository.
+#
+# Note that for historical reasons the XML resource files downloaded from TMS contain a timestamp
+# at the second line, such as: <!--Last edit date in TMS: 31-05-2016 07:08:39 GMT-->
+# However, this leads to conflicts when merging code branches and so we take out those lines.
+# Nevertheless, to avoid unnecessary daily submits without changes (that would blur the view)
+# we keep track of the last modification timestamp of TMS in the a file named "_lastupdate.txt"
+# (that resides in the resource folder) which allows us to compare timestamps and skip submits.
+#
+function step2d_updateResourceFilesForElvis {
+	updateResourceFiles Elvis plugins/release/ step2d 124
+}
+
+#
 # Updates version info embedded in PHP modules.
 #
 function step3a_updateVersionInfo {
@@ -724,6 +738,7 @@ set +x; echo "================ Step 2 ================"; set -x
 step2a_updateResourceFilesForCoreServer
 step2b_updateResourceFilesForAdobeAEM
 step2c_updateResourceFilesForMaintenanceMode
+step2d_updateResourceFilesForElvis
 set +x; echo "================ Step 3 ================"; set -x
 step3a_updateVersionInfo
 step3b_updateVersionInRepository
