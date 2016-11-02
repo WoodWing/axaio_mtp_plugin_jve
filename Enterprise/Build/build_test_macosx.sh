@@ -144,6 +144,9 @@ function step2_determineEnterpriseDir {
 	elif [[ "${GIT_BRANCH}" == work* ]]; then
 		masterWorkNr=`echo "${GIT_BRANCH}" | ${SED_BIN} -r "s/work(([[:digit:]]+))?/\2/g"`
 		ENT_DIR="EntMasterWork${masterWorkNr}"
+	elif [[ "${GIT_BRANCH}" == release/* ]]; then
+		releaseNr=`echo "${GIT_BRANCH}" | cut -d "/" -f2- | tr -d '.'`
+		ENT_DIR="EntRelease${releaseNr}"
 	else
 		echo "Could not interpret the GIT_BRANCH value: ${GIT_BRANCH}"
 		ENT_DIR=""
@@ -188,12 +191,7 @@ function step4_deployArtifactsToWebServer {
 		if [ ${plugin} == "Adobe_AEM" ]; then
 			plugin="AdobeDps2" 
 		fi
-		# if a config.php file exists in a config folder do not overwrite it for the demo plugins.
-		if [ -s ${DOCROOT}/${ENT_DIR}/config/plugins/${plugin}/config.php ]; then
-				rsync -av --exclude 'config.php' --delete "${WORKSPACE}/artifacts/${plugin}" "${DOCROOT}/${ENT_DIR}/config/plugins/" 1>/dev/null
-		else
-				rsync -av --delete "${WORKSPACE}/artifacts/${plugin}" "${DOCROOT}/${ENT_DIR}/config/plugins/" 1>/dev/null
-		fi
+		rsync -av --delete "${WORKSPACE}/artifacts/${plugin}" "${DOCROOT}/${ENT_DIR}/config/plugins/" 1>/dev/null
 	done
 }
 

@@ -185,7 +185,7 @@ class BizImageConverter
 	}
 
 	/**
-	 * Invokes the best image converter connector and requests for crop and scale operaions.
+	 * Invokes the best image converter connector and requests for crop and scale operations.
 	 *
 	 * @param Placement $placement Definition of the image crop frame, scale and dimensions.
 	 * @param integer $channelId The ID of the Publication Channel.

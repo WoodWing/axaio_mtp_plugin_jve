@@ -612,7 +612,7 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 		}
 
 		$message = BizResources::localize('ERR_DRUPAL_UPLOAD_FAILED');
-		if ( $lastResponse->getStatus() == 401 ) {
+		if( $lastResponse && $lastResponse->getStatus() == 401 ) {
 			// Keep the same as in callService
 			$message = 'Could not authenticate. Check the settings for the publication channel.';
 		}
