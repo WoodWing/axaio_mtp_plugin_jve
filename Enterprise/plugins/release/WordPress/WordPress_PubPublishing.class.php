@@ -226,8 +226,8 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 					$dossiersPublished = DBPublishHistory::getPublishHistoryDossier( $dossier->MetaData->BasicMetaData->ID, $publishTarget->PubChannelID, $publishTarget->IssueID, null, true );
 					$dossierPublished = reset( $dossiersPublished ); // Get the first dossier.
 
-					/** @var $imagesToDelete array List of the external ids of the images that should be deleted. */
-					$imagesToDelete = array();
+					/** @var $imagesToDeleteFromGallery array List of the external ids of the images that should be deleted. */
+					$imagesToDeleteFromGallery = array();
 
 					/** @var $nativeExternalsToRemove array List of object ids of which the external id should be unset.
 					   Since this id is stored on object level, it needs to be unset once the (native) is removed from the publish form. */
@@ -259,8 +259,14 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 
 							// Delete in case that the published image has been removed from the publish form
 							if( !in_array( $publishedObject['objectid'], $nativeImageIds ) ) {
-								$imagesToDelete[] = $publishedObject['externalid'];
-								$nativeExternalsToRemove[] = $publishedObject['objectid'];
+								$imagesToDeleteFromGallery[] = $publishedObject['externalid'];
+
+								// Before removing the external id, we should check whether or not the image is used in a different
+								// element in the publish form. If it is not in the objectsInDossier list, it is not part of the
+								// publish form anymore.
+								if( !array_key_exists( $publishedObject['objectid'], $objectsInDossier ) ) {
+									$nativeExternalsToRemove[] = $publishedObject['objectid'];
+								}
 							}
 						}
 					}
@@ -273,16 +279,16 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 
 							// Delete if the crop has been removed from the image.
 							if( !isset( $convertedPlacements[$publishedPlacement->ObjectId] ) ) {
-								$imagesToDelete[] = $publishedPlacement->ExternalId;
+								$imagesToDeleteFromGallery[] = $publishedPlacement->ExternalId;
 							}
 							// Delete if the placement hash of the to-be-published image does not match with the published image's.
 							elseif( $convertedPlacements[$publishedPlacement->ObjectId]->ConvertedImageToPublish->PlacementHash !== $publishedPlacement->PlacementHash) {
-								$imagesToDelete[] = $publishedPlacement->ExternalId;
+								$imagesToDeleteFromGallery[] = $publishedPlacement->ExternalId;
 							}
 						}
 					}
 
-					if( $imagesToDelete ) foreach( $imagesToDelete as $id ) {
+					if( $imagesToDeleteFromGallery ) foreach( $imagesToDeleteFromGallery as $id ) {
 						$wpClient->deleteImage( $id );
 					}
 
