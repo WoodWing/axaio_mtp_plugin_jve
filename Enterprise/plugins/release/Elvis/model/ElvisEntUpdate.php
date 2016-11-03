@@ -32,7 +32,7 @@ class ElvisEntUpdate extends AbstractRemoteObject {
 	public $username;
 	
 	/**
-	 * @var map
+	 * @var BasicMap
 	 */
 	public $metadata;
 

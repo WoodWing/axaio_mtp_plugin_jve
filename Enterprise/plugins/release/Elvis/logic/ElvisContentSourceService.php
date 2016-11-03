@@ -438,7 +438,7 @@ class ElvisContentSourceService
 	 *
 	 * @param string $enterpriseSystemId The id identifying the Enterprise server
 	 * @param int Timeout in seconds after which the call should return with no updates
-	 * @return List of updates
+	 * @return ElvisEntUpdate[] Updates
 	 * @throws BizException
 	 */
 	public function retrieveAssetUpdates( $enterpriseSystemId, $timeout )
