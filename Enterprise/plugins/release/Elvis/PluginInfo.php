@@ -31,6 +31,7 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 			'ContentSource_EnterpriseConnector',
 			'SysGetSubApplications_EnterpriseConnector',
 			'Version_EnterpriseConnector',
+			'AdminProperties_EnterpriseConnector',
 			'WflLogOn_EnterpriseConnector',
 			'WflLogOff_EnterpriseConnector',
 			'WflCopyObject_EnterpriseConnector',
