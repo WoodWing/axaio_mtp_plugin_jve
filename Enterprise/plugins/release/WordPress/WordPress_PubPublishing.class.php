@@ -252,21 +252,15 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 
 					// Look through the published native images.
 					$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist( $dossierPublished['id'] );
-					if( $publishedObjects ) foreach( $publishedObjects as $publishedObject ) {
+   				if( $publishedObjects ) foreach( $publishedObjects as $publishedObject ) {
 
 						// Only look at images that have actually been published, i.e. that have an external id.
 						if( $publishedObject['type'] == 'Image' && $publishedObject['externalid'] ) {
 
 							// Delete in case that the published image has been removed from the publish form
 							if( !in_array( $publishedObject['objectid'], $nativeImageIds ) ) {
-								$imagesToDeleteFromGallery[] = $publishedObject['externalid'];
-
-								// Before removing the external id, we should check whether or not the image is used in a different
-								// element in the publish form. If it is not in the objectsInDossier list, it is not part of the
-								// publish form anymore.
-								if( !array_key_exists( $publishedObject['objectid'], $objectsInDossier ) ) {
-									$nativeExternalsToRemove[] = $publishedObject['objectid'];
-								}
+							   $imagesToDeleteFromGallery[] = $publishedObject['externalid'];
+								$nativeExternalsToRemove[] = $publishedObject['objectid'];
 							}
 						}
 					}
@@ -313,7 +307,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				$galleryId = $uploadImagesResult['galleryId'];
 			}
 
-			// Cleanup the temporary created images files.
+			// Cleanup the temporary created inline images files.
 			if( $attachments ) {
 				require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 				$transferServer = new BizTransferServer();
@@ -593,15 +587,15 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		$result = null;
 		$wpClient = new WordPressXmlRpcClient( $publishTarget );
 
+		if( isset( $publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'] ) ) {
+			$result['featured-image'] = $this->uploadFeaturedImage( $wpClient, $publishForm, $objectsInDossier,
+				$publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'] );
+		}
+
 		if( isset( $publishFormObjects['C_WORDPRESS_MULTI_IMAGES'] ) ) {
 			$this->uploadGalleryImages( $wpClient, $publishFormObjects['C_WORDPRESS_MULTI_IMAGES'], $publishForm, $objectsInDossier,
 				$publishTarget, $galleryId, $galleryName, $preview );
 			$result['galleryId'] = $galleryId;
-		}
-
-		if( isset( $publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'] ) ) {
-			$result['featured-image'] = $this->uploadFeaturedImage( $wpClient, $publishForm, $objectsInDossier,
-				$publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'] );
 		}
 
 		if( $attachments ) {
@@ -744,7 +738,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		$convertedPlacement = $this->getConvertedPlacement( $publishForm, $featuredImage->MetaData->BasicMetaData->ID, 'C_WORDPRESS_FEATURED_IMAGE', 0 );
 
 		try {
-			if( $convertedPlacement && $convertedPlacement->ConvertImageToPublish->Attachment ) {
+			if( $convertedPlacement && $convertedPlacement->ConvertedImageToPublish->Attachment ) {
 				$filePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
 				$format = $convertedPlacement->ConvertedImageToPublish->Attachment->Type;
 			} else {
@@ -768,7 +762,9 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		} catch( BizException $e ) {
 			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail() );
 		}
-		$this->updateExternalId( $externalId, $objectsInDossier, $featuredImage->MetaData->BasicMetaData->ID, $convertedPlacement );
+
+		// The external id is purposefully not set on the Enterprise object itself for featured images. This is because
+		// Enterprise does not use the externalid in order to delete or update a featured image.
 		return $externalId;
 	}
 
@@ -811,7 +807,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		if( $uploadNeeded ) {
 			$filePath = null;
 			$format = null;
-			if( $convertedPlacement && $convertedPlacement->ConvertImageToPublish->Attachment ) {
+			if( $convertedPlacement && $convertedPlacement->ConvertedImageToPublish->Attachment ) {
 				$filePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
 				$format = $convertedPlacement->ConvertedImageToPublish->Attachment->Type;
 			} else {
