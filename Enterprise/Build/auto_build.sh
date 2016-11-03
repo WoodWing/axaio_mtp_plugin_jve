@@ -37,6 +37,7 @@ function validateEnvironmentVariableNotEmpty {
 # @param integer $3 New build number to replace the old one with.
 #
 function replaceVersionFile {
+	touch "${1}"
 	echo -n "${2} Build ${3}" > "${1}"
 
 	# Error when the new version can not be found in the updated file.
