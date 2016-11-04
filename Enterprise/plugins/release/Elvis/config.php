@@ -75,6 +75,21 @@ if( !defined('ELVIS_CREATE_COPY') ) {
 }
 
 /**
+ * Default value for the Production Zone property shown on the Brand Maintenance page.
+ * Folder location in Elvis images are copied to just before they are used by Enterprise.
+ *
+ * The following placeholders can be used:
+ *   ${brand}         => This will be replaced with the brand name once the brand is created.
+ *   ${date:<format>} => This will be replaced with the current date once the Elvis asset is copied.
+ *                       The <format> is specified here: http://php.net/manual/en/function.date.php
+ *
+ * This option is available since Enterprise 10.1.1 and requires Elvis 5.18 (or newer).
+ */
+if( !defined('ELVIS_PUBLISH_ZONE') ) {
+	define( 'ELVIS_PUBLISH_ZONE', '/Enterprise/${brand}/${date:Y-m}' );
+}
+
+/**
  * The location to which images are restored when restoring a layout from Elvis.
  * it supports the following options:
  *

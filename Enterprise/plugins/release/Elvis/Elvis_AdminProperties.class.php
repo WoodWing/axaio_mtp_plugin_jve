@@ -5,7 +5,7 @@
  * @since      v10.1.1
  * @copyright  WoodWing Software bv. All Rights Reserved.
  *
- * Connector that adds the "Elvis production zone" property to the Brand Maintenance page.
+ * Connector that adds the "Production Zone" property to the Brand Maintenance page under the "Elvis" section.
  */
 
 require_once BASEDIR . '/server/interfaces/plugins/connectors/AdminProperties_EnterpriseConnector.class.php';
