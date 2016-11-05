@@ -35,8 +35,8 @@ class Elvis_AdmCreatePublications extends AdmCreatePublications_EnterpriseConnec
 	 */
 	final public function runBefore( AdmCreatePublicationsRequest &$req )
 	{
-		require_once __DIR__.'/config.php'; // DEFAULT_ELVIS_PRODUCTION_ZONE
-		if( defined( 'DEFAULT_ELVIS_PRODUCTION_ZONE' ) && DEFAULT_ELVIS_PRODUCTION_ZONE ) {
+		require_once __DIR__.'/config.php'; // ELVIS_CREATE_COPY
+		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone'  ) {
 			require_once __DIR__.'/util/ElvisBrandAdminConfig.class.php';
 			if( $req->Publications ) foreach( $req->Publications as $publication ) {
 				if( $publication->ExtraMetaData ) {

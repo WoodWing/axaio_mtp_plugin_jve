@@ -66,12 +66,17 @@ if( !defined('ELVIS_ARCHIVED_STATUSES') ) {
 }
 
 /**
- * By default Elvis will create a shadow object in Enterprise that is linked to the asset in Elvis.
- * When set to true, a copy of the asset will be uploaded to Enterprise and is not linked to the 
- * original in Elvis.
+ * Defines how the system should link or copy an Elvis asset when the user is about to use it in Enterprise.
+ *
+ * There are the following three possible options:
+ * - 'Copy_To_Production_Zone'  Copy the asset to the Production Zone in Elvis and create a shadow object in Enterprise that is linked to the copy.
+ * - 'Hard_Copy_To_Enterprise'  Simply copy the asset from Elvis directly to Enterprise. No link is made, no shadow is made.
+ * - 'Shadow_Only'              Create a shadow object in Enterprise that is linked to the asset in Elvis. No copy is made.
+ *
+ * Note that this option has changed since Enterprise 10.1.1.
  */
 if( !defined('ELVIS_CREATE_COPY') ) {
-	define( 'ELVIS_CREATE_COPY', 'false' );
+	define( 'ELVIS_CREATE_COPY', 'Shadow_Only' );
 }
 
 /**

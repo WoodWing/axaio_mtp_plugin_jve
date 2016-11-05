@@ -70,9 +70,12 @@ class Elvis_AdminProperties extends AdminProperties_EnterpriseConnector
 		// during Brand creation ($action =='Create'). Once the brand is created by admin user, its properties are
 		// shown again in the Brand Maintenance page, but now in the update mode ($action=='Update'). In this mode
 		// we -do- show the field since that has been populated by our AdmCreatePublications connector in the meantime.
-		if( $action == 'Update' ) {
-			// Let's simply add our custom props at the end of all properties.
-			$showWidgets += $this->doCollectDialogWidgets( $entity, 'draw_dialog' );
+		require_once __DIR__.'/config.php'; // DEFAULT_ELVIS_PRODUCTION_ZONE, ELVIS_CREATE_COPY
+		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
+			if( $action == 'Update' ) {
+				// Let's simply add our custom props at the end of all properties.
+				$showWidgets += $this->doCollectDialogWidgets( $entity, 'draw_dialog' );
+			}
 		}
 	}
 }
