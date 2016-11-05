@@ -13,7 +13,9 @@ require_once BASEDIR . '/server/interfaces/plugins/PluginInfoData.class.php';
 
 class Elvis_EnterprisePlugin extends EnterprisePlugin
 {
-
+	/**
+	 * @inheritdoc
+	 */
 	public function getPluginInfo()
 	{
 		$info = new PluginInfoData();
@@ -24,6 +26,9 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 		return $info;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	final public function getConnectorInterfaces()
 	{
 		$interfaces = array(
@@ -61,36 +66,12 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 		return $interfaces;
 	}
 
-	public function runInstallation()
-	{
-		$configFile = dirname(__FILE__).'/config.php';
-
-		require_once $configFile;
-
-		if( !defined('ELVIS_URL') ) {
-			$detail = 'Missing configuration property ELVIS_URL in "' . $configFile . '"';
-			throw new BizException( '', 'Server', null, $detail );
-		}
-		if( !defined('ELVIS_CLIENT_URL') ) {
-			$detail = 'Missing configuration property ELVIS_CLIENT_URL in "' . $configFile . '"';
-			throw new BizException( '', 'Server', null, $detail );
-		}
-	}
-	
 	/**
-	 * In case the server plug-in depends on new Enterprise Server core features, it is recommended
-	 * to implement this function and return the minimum required server version which introduces
-	 * those features. (Note that Build numbers must be part of the string but are not checked.)
-	 *
-	 * Please return the following format:
-	 *       '<major>.<minor>.<patch> Build <buildnr>'
-	 * For example:
-	 *       '9.0.0 Build 1'
-	 *
-	 * @return string|null Server version. NULL to accept all versions (skip version check).
+	 * @inheritdoc
 	 */
 	public function requiredServerVersion()
 	{
-		return '8.3.3 Build 1';
+		// SysGetSubApplications is introduced since 9.0
+		return '9.0.0 Build 0';
 	}
 }
