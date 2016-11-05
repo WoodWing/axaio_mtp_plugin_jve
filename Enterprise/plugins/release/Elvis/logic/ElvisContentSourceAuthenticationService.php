@@ -13,8 +13,8 @@ class ElvisContentSourceAuthenticationService
 	/**
 	 * Connect to the Elvis server
 	 *  
-	 * @param LoginRequest $loginRequest
-	 * @return LoginResponse
+	 * @param ElvisLoginRequest $loginRequest
+	 * @return ElvisLoginResponse
 	 */
 	public function login($loginRequest)
 	{
@@ -32,7 +32,7 @@ class ElvisContentSourceAuthenticationService
 	 * Get the version of Elvis running in Content Station. 
 	 * This is a non-secured call as Content Station requests this before login.
 	 * 
-	 * @return version as String
+	 * @return string|null Version
 	 */
 	public function getContentStationClientVersion()
 	{

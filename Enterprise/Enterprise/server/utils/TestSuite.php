@@ -75,13 +75,12 @@ class WW_Utils_TestSuite
 			}
 			if( ($validateOpts & self::VALIDATE_DEFINE_MANDATORY) == self::VALIDATE_DEFINE_MANDATORY ) {
 				if( !defined($defineName) ) {
-					$pleaseCheck = is_null($help) ? 'Please add it to the '.$configFile.' file. Check out the Admin Guide how this needs to be done.' : $help;
+					$pleaseCheck = is_null($help) ? 'Please add it to the '.$configFile.' file. ' : $help;
 					$testCase->setResult( $errorLevel, "The $defineName option is not defined.", $pleaseCheck );
 					$valid = false;
 					continue;
 				}
-				$pleaseCheck = is_null( $help ) ? 'Please fill in a value at the '.$configFile.
-								' file. Check out the Admin Guide how this needs to be done.' : $help;
+				$pleaseCheck = is_null( $help ) ? 'Please fill in a value at the '.$configFile.' file. ' : $help;
 				switch( $defineType ) {
 					case 'string':
 						if( ($validateOpts & self::VALIDATE_DEFINE_NOT_EMPTY) == self::VALIDATE_DEFINE_NOT_EMPTY ) {

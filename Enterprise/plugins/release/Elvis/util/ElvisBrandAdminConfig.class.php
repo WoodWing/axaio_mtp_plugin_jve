@@ -36,13 +36,7 @@ class ElvisBrandAdminConfig
 	}
 
 	/**
-	 * Returns the Project reference, as configured for a given 'dps2' Publication Channel.
-	 *
-	 * From Adobe DPS point of view, this is the external id, and is stored in Enterprise Server.
-	 * In the API this is called publication name. In the Adobe UI this is called "Link Reference"
-	 * which can be found on the "Project" configuration page.
-	 * Note that this field is read-only at the Publication Channel Maintenance page. It can only
-	 * be set through the registration procedure.
+	 * Returns the custom Production Zone property value of a given Publication.
 	 *
 	 * @param AdmPublication $publication
 	 * @return string|null The project reference. NULL when none found.
@@ -53,7 +47,7 @@ class ElvisBrandAdminConfig
 	}
 
 	/**
-	 * Saves the Project reference and id. See getProjectRef() / getProjectId() function headers for more info.
+	 * Saves the custom Production Zone property value for a given Publication.
 	 *
 	 * @param AdmPublication $publication
 	 * @param string $productionZone
@@ -62,6 +56,18 @@ class ElvisBrandAdminConfig
 	{
 		$productionZone = str_replace( '${brand}', $publication->Name, $productionZone );
 		self::setOptionValue( $publication->ExtraMetaData, 'C_ELVIS_PRODUCTION_ZONE', $productionZone );
+	}
+
+	/**
+	 * Adds the custom Production Zone property value for a given Publication.
+	 *
+	 * @param AdmPublication $publication
+	 * @param string $productionZone
+	 */
+	public static function addProductionZone( AdmPublication $publication, $productionZone )
+	{
+		$productionZone = str_replace( '${brand}', $publication->Name, $productionZone );
+		$publication->ExtraMetaData[] = new AdmExtraMetaData( 'C_ELVIS_PRODUCTION_ZONE', array( $productionZone ) );
 	}
 
 	/**
