@@ -39,11 +39,11 @@ class Elvis_AdmCreatePublications extends AdmCreatePublications_EnterpriseConnec
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone'  ) {
 			require_once __DIR__.'/util/ElvisBrandAdminConfig.class.php';
 			if( $req->Publications ) foreach( $req->Publications as $publication ) {
-				if( $publication->ExtraMetaData ) {
-					$productionZone = ElvisBrandAdminConfig::getProductionZone( $publication );
-					if( !$productionZone ) {
-						ElvisBrandAdminConfig::setProductionZone( $publication, DEFAULT_ELVIS_PRODUCTION_ZONE );
-					}
+				$productionZone = ElvisBrandAdminConfig::getProductionZone( $publication );
+				if( is_null( $productionZone ) ) {
+					ElvisBrandAdminConfig::addProductionZone( $publication, DEFAULT_ELVIS_PRODUCTION_ZONE );
+				} elseif( !$productionZone ) {
+					ElvisBrandAdminConfig::setProductionZone( $publication, DEFAULT_ELVIS_PRODUCTION_ZONE );
 				}
 			}
 		}

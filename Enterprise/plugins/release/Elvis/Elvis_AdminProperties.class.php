@@ -38,7 +38,7 @@ class Elvis_AdminProperties extends AdminProperties_EnterpriseConnector
 				$title = BizResources::localize('Elvis.PRODUCTION_ZONE');
 				$widgets['C_ELVIS_PRODUCTION_ZONE'] = new DialogWidget(
 					new PropertyInfo( 'C_ELVIS_PRODUCTION_ZONE', $title, null, 'string', '' ),
-					new PropertyUsage( 'C_ELVIS_PRODUCTION_ZONE', true, false, false )
+					new PropertyUsage( 'C_ELVIS_PRODUCTION_ZONE', true, true, false )
 				);
 				break;
 		}
@@ -58,7 +58,14 @@ class Elvis_AdminProperties extends AdminProperties_EnterpriseConnector
 	 */
 	public function collectDialogWidgetsForContext( AdminProperties_Context $context, $entity, $action )
 	{
-		return $this->doCollectDialogWidgets( $entity, 'extend_entity' );
+		require_once __DIR__.'/config.php'; // ELVIS_CREATE_COPY
+		$widgets = array();
+		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
+			if( $action == 'Update' ) {
+				$widgets = $this->doCollectDialogWidgets( $entity, 'extend_entity' );
+			}
+		}
+		return $widgets;
 	}
 
 	/**
@@ -70,7 +77,7 @@ class Elvis_AdminProperties extends AdminProperties_EnterpriseConnector
 		// during Brand creation ($action =='Create'). Once the brand is created by admin user, its properties are
 		// shown again in the Brand Maintenance page, but now in the update mode ($action=='Update'). In this mode
 		// we -do- show the field since that has been populated by our AdmCreatePublications connector in the meantime.
-		require_once __DIR__.'/config.php'; // DEFAULT_ELVIS_PRODUCTION_ZONE, ELVIS_CREATE_COPY
+		require_once __DIR__.'/config.php'; // ELVIS_CREATE_COPY
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
 			if( $action == 'Update' ) {
 				// Let's simply add our custom props at the end of all properties.
