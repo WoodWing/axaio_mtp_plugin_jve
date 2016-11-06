@@ -88,7 +88,7 @@ class ElvisUpdateManager
 	/**
 	 * Composes DeleteObject operations and communicates it to Elvis.
 	 *
-	 * @param $objects List of objects for which shadow relations need to be deleted from Elvis.
+	 * @param Object[] $objects List of objects for which shadow relations need to be deleted from Elvis.
 	 * @throws BizException
 	 */
 	public static function sendDeleteObjects( $objects )
@@ -212,7 +212,8 @@ class ElvisUpdateManager
 	 * @param null|Placement[] $shadowPlacements List of shadow object placements.
 	 * @return null|ElvisPlacement[]
 	 */
-	private static function composeElvisPlacements( Object $object, $shadowPlacements )
+	private static function composeElvisPlacements( /** @noinspection PhpLanguageLevelInspection */
+		Object $object, $shadowPlacements )
 	{
 		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisPlacement.php';
 		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisPage.php';
@@ -227,27 +228,27 @@ class ElvisUpdateManager
 			ElvisPlacementUtils::resolvePasteBoardInPlacements( $entPlacements );
 
 			$elvisPlacements = array();
-			foreach( $entPlacements as $layoutPlacement ) {
+			if( $entPlacements ) foreach( $entPlacements as $entPlacement ) {
 				$elvisPlacement = new ElvisPlacement();
 
 				$elvisPlacement->page = new ElvisPage();
-				$elvisPlacement->page->number = strval( $layoutPlacement->PageNumber ); // Human readable.
+				$elvisPlacement->page->number = strval( $entPlacement->PageNumber ); // Human readable.
 				if( $object->Pages ) foreach( $object->Pages as $page ) {
-					if( $page->PageNumber == $layoutPlacement->PageNumber ) {
+					if( $page->PageNumber == $entPlacement->PageNumber ) {
 						$elvisPlacement->page->width = floatval( $page->Width );
 						$elvisPlacement->page->height = floatval( $page->Height );
 						break;
 					}
 				}
 
-				$elvisPlacement->top  = floatval( $layoutPlacement->Top );
-				$elvisPlacement->left  = floatval( $layoutPlacement->Left );
-				$elvisPlacement->width  = floatval( $layoutPlacement->Width );
-				$elvisPlacement->height  = floatval( $layoutPlacement->Height );
-				$elvisPlacement->onPasteBoard  = (boolean)$layoutPlacement->onPasteBoard; // Enterprise<->Elvis internal property.
-				$elvisPlacement->onMasterPage = (boolean)ElvisPlacementUtils::isPlacedOnMasterPage( $layoutPlacement );
+				$elvisPlacement->top  = floatval( $entPlacement->Top );
+				$elvisPlacement->left  = floatval( $entPlacement->Left );
+				$elvisPlacement->width  = floatval( $entPlacement->Width );
+				$elvisPlacement->height  = floatval( $entPlacement->Height );
+				$elvisPlacement->onPasteBoard  = (boolean)$entPlacement->onPasteBoard; // Enterprise<->Elvis internal property.
+				$elvisPlacement->onMasterPage = (boolean)ElvisPlacementUtils::isPlacedOnMasterPage( $entPlacement );
 				$elvisPlacement->editions = array();
-				if( isset( $layoutPlacement->Editions ) ) foreach( $layoutPlacement->Editions as $edition ) {
+				if( isset( $entPlacement->Editions ) ) foreach( $entPlacement->Editions as $edition ) {
 					$elvisEdition = new ElvisEntityDescriptor();
 					$elvisEdition->id = strval( $edition->Id );
 					$elvisEdition->name = strval( $edition->Name );

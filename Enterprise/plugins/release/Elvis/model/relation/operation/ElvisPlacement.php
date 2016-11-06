@@ -1,53 +1,39 @@
 <?php
 
-require_once dirname(__FILE__) . '/../../AbstractRemoteObject.php';
+require_once __DIR__.'/../../AbstractRemoteObject.php';
 
-class ElvisPlacement extends AbstractRemoteObject {
+class ElvisPlacement extends AbstractRemoteObject
+{
 
 	/**
 	 * Return the fully qualified name of the Java class
 	 */
-	public static function getJavaClassName() {
+	public static function getJavaClassName()
+	{
 		return 'com.ds.acm.api.contentsource.model.operation.Placement';
 	}
 
-	/**
-	 * @var Page
-	 */
+	/** @var Page $page */
 	public $page;
-	
-	/**
-	 * @var double
-	 */
+
+	/** @var double $top */
 	public $top;
-	
-	/**
-	 * @var double
-	 */
+
+	/** @var double $left */
 	public $left;
-	
-	/**
-	 * @var double
-	 */
+
+	/** @var double $width */
 	public $width;
-	
-	/**
-	 * @var double
-	 */
+
+	/** @var double $height */
 	public $height;
-	
-	/**
-	 * @var boolean
-	 */
+
+	/** @var boolean $onPasteBoard */
 	public $onPasteBoard;
 
-	/**
-	 * @var boolean
-	 */
+	/** @var boolean $onMasterPage */
 	public $onMasterPage;
 
-	/**
-	 * @var SabreAMF_ArrayCollection<EntityDescriptor>
-	 */
+	/** @var ElvisEntityDescriptor[] */
 	public $editions;
 }

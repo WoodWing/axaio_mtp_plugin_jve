@@ -1,23 +1,22 @@
 <?php
 
-require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
 require_once 'ReadOnlyFieldHandler.class.php';
 
-class TypeFieldHandler extends ReadOnlyFieldHandler {
-	
-	function __construct() {
-		parent::__construct("assetDomain", false, "text", "Type");
+class TypeFieldHandler extends ReadOnlyFieldHandler
+{
+	public function __construct()
+	{
+		parent::__construct( "assetDomain", false, "text", "Type" );
 	}
-	
+
 	/**
-	 * 
-	 * @param unknown_type $smartObject
-	 * @param SimpleHit $hit
+	 * @inheritdoc
 	 */
-	public function read($entMetadata, $elvisMetadata) {
+	public function read( $entMetadata, $elvisMetadata )
+	{
+		require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
 		$mimeType = '';
 		$entMetadata->{$this->entMetadataCategory}->{$this->property->Name} =
-		MimeTypeHandler::filename2ObjType($mimeType, $elvisMetadata['filename'], false);
+			MimeTypeHandler::filename2ObjType( $mimeType, $elvisMetadata['filename'], false );
 	}
 }
-?>

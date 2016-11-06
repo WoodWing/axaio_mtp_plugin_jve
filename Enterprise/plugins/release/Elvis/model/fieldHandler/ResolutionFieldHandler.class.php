@@ -12,7 +12,7 @@
  * while mapping resolutionX into Dpi.
  */
 
-require_once dirname(__FILE__).'/ReadOnlyFieldHandler.class.php';
+require_once 'ReadOnlyFieldHandler.class.php';
 
 class ResolutionFieldHandler extends ReadOnlyFieldHandler
 {
