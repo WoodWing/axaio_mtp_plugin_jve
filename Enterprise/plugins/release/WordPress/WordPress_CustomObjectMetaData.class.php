@@ -7,7 +7,6 @@
  */
 
 require_once BASEDIR . '/server/interfaces/plugins/connectors/CustomObjectMetaData_EnterpriseConnector.class.php';
-require_once dirname(__FILE__) . '/WordPress_Utils.class.php';
 
 class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConnector
 {
@@ -19,6 +18,7 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 	 */
 	private function getPublishFormPropertyDefinition()
 	{
+		require_once dirname(__FILE__) . '/WordPress_Utils.class.php';
 		$props = array();
 
 		// Article Component Selector.
@@ -63,36 +63,36 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 		$albumDescriptionComponent->PublishSystem = WordPress_Utils::WORDPRESS_PLUGIN_NAME;
 		$props[] = $albumDescriptionComponent;
 
-        // *** single image ***
-        // File Selector Template Properties.
+		// *** single image ***
+		// File Selector Template Properties.
 
-        // File: C_WORDPRESS_MULTI_IMAGES_FILE
-        $fileFeaturedImagePropertyInfo = new PropertyInfo();
-        $fileFeaturedImagePropertyInfo->Name = 'C_WORDPRESS_FEATURED_IMAGE_FILE';
-        $fileFeaturedImagePropertyInfo->DisplayName = 'Selected image';
-        $fileFeaturedImagePropertyInfo->Category = null; // Make sure the Category is always empty, we should let Client resolve it.
-        $fileFeaturedImagePropertyInfo->Type = 'file';
-        $fileFeaturedImagePropertyInfo->DefaultValue = null;
-        $fileFeaturedImagePropertyInfo->PropertyValues = self::getMediaPropertyValues();
-        $fileFeaturedImagePropertyInfo->Widgets = null;
-        $fileFeaturedImagePropertyInfo->AdminUI = false;
-        $fileFeaturedImagePropertyInfo->PublishSystem = WordPress_Utils::WORDPRESS_PLUGIN_NAME;
-        $props[] = $fileFeaturedImagePropertyInfo;
+		// File: C_WORDPRESS_MULTI_IMAGES_FILE
+		$fileFeaturedImagePropertyInfo = new PropertyInfo();
+		$fileFeaturedImagePropertyInfo->Name = 'C_WORDPRESS_FEATURED_IMAGE_FILE';
+		$fileFeaturedImagePropertyInfo->DisplayName = 'Selected image';
+		$fileFeaturedImagePropertyInfo->Category = null; // Make sure the Category is always empty, we should let Client resolve it.
+		$fileFeaturedImagePropertyInfo->Type = 'file';
+		$fileFeaturedImagePropertyInfo->DefaultValue = null;
+		$fileFeaturedImagePropertyInfo->PropertyValues = self::getMediaPropertyValues();
+		$fileFeaturedImagePropertyInfo->Widgets = null;
+		$fileFeaturedImagePropertyInfo->AdminUI = false;
+		$fileFeaturedImagePropertyInfo->PublishSystem = WordPress_Utils::WORDPRESS_PLUGIN_NAME;
+		$props[] = $fileFeaturedImagePropertyInfo;
 
-        // FileSelector: C_WORDPRESS_MULTI_IMAGES
-        $selectorFeaturedImagePropertyInfo = new PropertyInfo();
-        $selectorFeaturedImagePropertyInfo->Name = 'C_WORDPRESS_FEATURED_IMAGE';
-        $selectorFeaturedImagePropertyInfo->DisplayName = 'Featured image';
-        $selectorFeaturedImagePropertyInfo->Category = null;
-        $selectorFeaturedImagePropertyInfo->Type = 'fileselector';
-        $selectorFeaturedImagePropertyInfo->MinValue = 0; // Empty allowed.
-        $selectorFeaturedImagePropertyInfo->MaxValue = 1; // One images allowed.
-        $selectorFeaturedImagePropertyInfo->ValueList = null;
-        $selectorFeaturedImagePropertyInfo->AdminUI = false;
-        $selectorFeaturedImagePropertyInfo->Widgets = array( $fileFeaturedImagePropertyInfo );
-        $selectorFeaturedImagePropertyInfo->PropertyValues = array();
-        $selectorFeaturedImagePropertyInfo->PublishSystem = WordPress_Utils::WORDPRESS_PLUGIN_NAME;
-        $props[] = $selectorFeaturedImagePropertyInfo;
+		// FileSelector: C_WORDPRESS_MULTI_IMAGES
+		$selectorFeaturedImagePropertyInfo = new PropertyInfo();
+		$selectorFeaturedImagePropertyInfo->Name = 'C_WORDPRESS_FEATURED_IMAGE';
+		$selectorFeaturedImagePropertyInfo->DisplayName = 'Featured image';
+		$selectorFeaturedImagePropertyInfo->Category = null;
+		$selectorFeaturedImagePropertyInfo->Type = 'fileselector';
+		$selectorFeaturedImagePropertyInfo->MinValue = 0; // Empty allowed.
+		$selectorFeaturedImagePropertyInfo->MaxValue = 1; // One images allowed.
+		$selectorFeaturedImagePropertyInfo->ValueList = null;
+		$selectorFeaturedImagePropertyInfo->AdminUI = false;
+		$selectorFeaturedImagePropertyInfo->Widgets = array( $fileFeaturedImagePropertyInfo );
+		$selectorFeaturedImagePropertyInfo->PropertyValues = array();
+		$selectorFeaturedImagePropertyInfo->PublishSystem = WordPress_Utils::WORDPRESS_PLUGIN_NAME;
+		$props[] = $selectorFeaturedImagePropertyInfo;
 
 		// *** MultipleImages ***
 		// File Selector Template Properties.
@@ -205,7 +205,7 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 	 */
 	private function getPropertyFromWordPress( $props )
 	{
-		require_once dirname(__FILE__) . '/WordPress_PubPublishing.class.php';
+		require_once dirname(__FILE__) . '/WordPress_Utils.class.php';
 		$wordpressUtils = new WordPress_Utils();
 		// getAllCategoriesAndFormats() is needed here because else the getAllCategoriesAndFormats() wil be called every time we do a getProperty()
 		$sites = $wordpressUtils->getAllCategoriesAndFormats();
@@ -266,6 +266,8 @@ class WordPress_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 	 */
 	private function getOtherPropertyDefinitions()
 	{
+		require_once dirname(__FILE__) . '/WordPress_Utils.class.php';
+		
 		// The following properties are applicable for ANY ObjectType.
 
 		// FileSelector: C_WORDPRESS_IMAGE_DESCRIPTION
