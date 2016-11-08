@@ -81,10 +81,10 @@ if( !defined('ELVIS_CREATE_COPY') ) {
 
 /**
  * Default value for the Production Zone property shown on the Brand Maintenance page.
- * Folder location in Elvis images are copied to just before they are used by Enterprise.
+ * It defines the folder location in Elvis where images are copied to just before they are used by Enterprise.
  *
  * The following placeholders can be used:
- *   ${brand}         => This will be replaced with the brand name once the brand is created.
+ *   ${brand}         => This will be replaced with the Brand name once the Brand is created.
  *   ${date:<format>} => This will be replaced with the current date once the Elvis asset is copied.
  *                       The <format> is specified here: http://php.net/manual/en/function.date.php
  *
