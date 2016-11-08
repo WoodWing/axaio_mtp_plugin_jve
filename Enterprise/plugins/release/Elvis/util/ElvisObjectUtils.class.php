@@ -94,15 +94,14 @@ class ElvisObjectUtils
 	/**
 	 * Tests if object based on type should be tested for shadow relations.
 	 *
-	 * @param string|null $objectType Object type to be tested
+	 * @param string $objectType Object type to be tested
 	 * @return bool True if of interest to Elvis
 	 */
 	public static function isObjectTypeOfElvisInterest( $objectType )
 	{
 		static $objTypes = array(
-			'Layout' => '',
-			//'LayoutModule' => '',
-			//'Dossier' => '',
+			'Layout' => true,
+			'PublishForm' => true // since 10.1.1
 		);
 		return array_key_exists( $objectType, $objTypes );
 	}

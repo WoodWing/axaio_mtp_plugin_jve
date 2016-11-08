@@ -403,7 +403,7 @@ class DBProperty extends DBBase
 	 * @param string $entity Entity of the property. Default is 'Object'. Set to 'all' for all types of entity.
 	 * @param mixed $publ Publication Id. Null for all publications (0 and any other Pub Id)
 	 * @param array $whereConditions Extra conditions(Optional).An array of key=>value pairs. Read function header**.
-	 * @return array List of PropertyInfo returned by the query requested.
+	 * @return PropertyInfo[] List returned by the query requested.
 	 */	 
 	public static function getPropertyByNameAndFields( $name, $entity='Object', $publ = null, $whereConditions = array() )
 	{

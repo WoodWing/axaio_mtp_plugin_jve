@@ -21,6 +21,7 @@ class ElvisAMFClient
 	 * @param $operation
 	 * @param $params
 	 * @param bool $secure
+	 * @param int $timeout The timeout for the call in seconds
 	 * @return mixed
 	 */
 	public static function send($service, $operation, $params, $secure=true, $timeout=60)
@@ -36,6 +37,7 @@ class ElvisAMFClient
 	 * @param $operation
 	 * @param $params
 	 * @param bool $secure
+	 * @param int $timeout The timeout for the call in seconds
 	 * @return ElvisEntHit|null
 	 * @throws BizException
 	 */

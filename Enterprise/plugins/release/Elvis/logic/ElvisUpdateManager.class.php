@@ -227,36 +227,64 @@ class ElvisUpdateManager
 			// Add pasteBoard property to placements
 			ElvisPlacementUtils::resolvePasteBoardInPlacements( $entPlacements );
 
+			$isPublishForm = $object->MetaData->BasicMetaData->Type == 'PublishForm';
+			if( $isPublishForm ) {
+				require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+				list( $publishSystem, $templateId ) = BizObject::getPublishSystemAndTemplateId( $object->MetaData->BasicMetaData->ID );
+			} else {
+				list( $publishSystem, $templateId ) = array( null, null );
+			}
+
 			$elvisPlacements = array();
 			if( $entPlacements ) foreach( $entPlacements as $entPlacement ) {
 				$elvisPlacement = new ElvisPlacement();
-
-				$elvisPlacement->page = new ElvisPage();
-				$elvisPlacement->page->number = strval( $entPlacement->PageNumber ); // Human readable.
-				if( $object->Pages ) foreach( $object->Pages as $page ) {
-					if( $page->PageNumber == $entPlacement->PageNumber ) {
-						$elvisPlacement->page->width = floatval( $page->Width );
-						$elvisPlacement->page->height = floatval( $page->Height );
-						break;
-					}
-				}
-
-				$elvisPlacement->top  = floatval( $entPlacement->Top );
-				$elvisPlacement->left  = floatval( $entPlacement->Left );
 				$elvisPlacement->width  = floatval( $entPlacement->Width );
 				$elvisPlacement->height  = floatval( $entPlacement->Height );
-				$elvisPlacement->onPasteBoard  = (boolean)$entPlacement->onPasteBoard; // Enterprise<->Elvis internal property.
-				$elvisPlacement->onMasterPage = (boolean)ElvisPlacementUtils::isPlacedOnMasterPage( $entPlacement );
-				$elvisPlacement->editions = array();
-				if( isset( $entPlacement->Editions ) ) foreach( $entPlacement->Editions as $edition ) {
-					$elvisEdition = new ElvisEntityDescriptor();
-					$elvisEdition->id = strval( $edition->Id );
-					$elvisEdition->name = strval( $edition->Name );
-					
-					if( is_array( $elvisPlacement->editions ) && !in_array($elvisEdition, $elvisPlacement->editions)) {
-						$elvisPlacement->editions[] = $elvisEdition;
+				if( $isPublishForm ) {
+					$elvisPlacement->page = null;
+					$elvisPlacement->top  = 0.0;
+					$elvisPlacement->left  = 0.0;
+					$elvisPlacement->onPasteBoard = false;
+					$elvisPlacement->onMasterPage = false;
+					$elvisPlacement->editions = null;
+					if( $entPlacement->FormWidgetId && $templateId ) {
+						require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
+						$entProperties = DBProperty::getPropertyByNameAndFields( $entPlacement->FormWidgetId, 'Object', null, array(
+							'templateid' => $templateId, 'objtype' => 'PublishForm' ) );
+						if( $entProperties ) {
+							$entProperty = reset( $entProperties );
+							$elvisPlacement->widget = new ElvisEntityDescriptor();
+							$elvisPlacement->widget->id = $entPlacement->FormWidgetId;
+							$elvisPlacement->widget->name = $entProperty->DisplayName;
+						}
 					}
+				} else { // layout
+					$elvisPlacement->page = new ElvisPage();
+					$elvisPlacement->page->number = strval( $entPlacement->PageNumber ); // Human readable.
+					if( $object->Pages ) foreach( $object->Pages as $page ) {
+						if( $page->PageNumber == $entPlacement->PageNumber ) {
+							$elvisPlacement->page->width = floatval( $page->Width );
+							$elvisPlacement->page->height = floatval( $page->Height );
+							break;
+						}
+					}
+					$elvisPlacement->top  = floatval( $entPlacement->Top );
+					$elvisPlacement->left  = floatval( $entPlacement->Left );
+					$elvisPlacement->onPasteBoard  = (boolean)$entPlacement->onPasteBoard; // Enterprise<->Elvis internal property.
+					$elvisPlacement->onMasterPage = (boolean)ElvisPlacementUtils::isPlacedOnMasterPage( $entPlacement );
+					$elvisPlacement->editions = array();
+					if( isset( $entPlacement->Editions ) ) foreach( $entPlacement->Editions as $edition ) {
+						$elvisEdition = new ElvisEntityDescriptor();
+						$elvisEdition->id = strval( $edition->Id );
+						$elvisEdition->name = strval( $edition->Name );
+
+						if( is_array( $elvisPlacement->editions ) && !in_array($elvisEdition, $elvisPlacement->editions)) {
+							$elvisPlacement->editions[] = $elvisEdition;
+						}
+					}
+					$elvisPlacement->widget = null;
 				}
+
 				$elvisPlacements[] = $elvisPlacement;
 			}
 		}
