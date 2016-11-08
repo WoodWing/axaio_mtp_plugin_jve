@@ -173,12 +173,11 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		$result = true;
 		if( version_compare( $this->serverInfo->version, '4.6.4', '<' ) ) {
 			$result = false;
-		} elseif( version_compare( $this->serverInfo->version, '5.0.60', '<' ) ){
+		} elseif(
+			version_compare( $this->serverInfo->version, '5.0', '>=' ) &&
+			version_compare( $this->serverInfo->version, '5.0.60', '<' ) ){
 			$result = false;
-		} elseif( version_compare( $this->serverInfo->version, '5.0.62', '>' ) &&
-			version_compare( $this->serverInfo->version, '5.3.1', '<' ) )  {
-			$result = false;
-		} // else: version >= '5.3.1'
+		}
 		if( !$result ) {
 			$help = 'Please check the Compatibility Matrix.';
 			$message = 'Elvis Server v'.$this->serverInfo->version.' is not compatible with Enterprise Server v'.SERVERVERSION.'.';
