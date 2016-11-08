@@ -70,11 +70,17 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		// Check the defines that should exist and should be filled in (not empty).
 		$nonEmptyDefines = array(
 			'ELVIS_URL', 'ELVIS_CLIENT_URL', 'ELVIS_NAMEDQUERY',
-			'ELVIS_ENT_ADMIN_USER', 'ELVIS_ENT_ADMIN_PASS',
-			'ELVIS_SUPER_USER', 'ELVIS_SUPER_USER_PASS',
+			'ELVIS_ENT_ADMIN_USER', 'ELVIS_SUPER_USER',
 			'ELVIS_CREATE_COPY', 'IMAGE_RESTORE_LOCATION'
 		);
 		if( !$this->utils->validateDefines( $this, $nonEmptyDefines, self::CONFIG_FILES, 'ERROR' ) ) {
+			$result = false;
+		}
+
+		// Check the passwords that should exist and should be filled in (not empty), but suppress logging the values.
+		$nonEmptySecureDefines = array( 'ELVIS_ENT_ADMIN_PASS', 'ELVIS_SUPER_USER_PASS' );
+		if( !$this->utils->validateDefines( $this, $nonEmptySecureDefines, self::CONFIG_FILES, 'ERROR',
+			WW_Utils_TestSuite::VALIDATE_DEFINE_ALL, null, function( $defineName ) { return '***'; } ) ) {
 			$result = false;
 		}
 
