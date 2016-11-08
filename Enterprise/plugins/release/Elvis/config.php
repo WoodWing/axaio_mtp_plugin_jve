@@ -68,10 +68,10 @@ if( !defined('ELVIS_ARCHIVED_STATUSES') ) {
 /**
  * Defines how the system should link or copy an Elvis asset when the user is about to use it in Enterprise.
  *
- * There are the following three possible options:
+ * Use one of the following options:
  * - 'Copy_To_Production_Zone'  Copy the asset to the Production Zone in Elvis and create a shadow object in Enterprise that is linked to the copy.
- * - 'Hard_Copy_To_Enterprise'  Simply copy the asset from Elvis directly to Enterprise. No link is made, no shadow is made.
- * - 'Shadow_Only'              Create a shadow object in Enterprise that is linked to the asset in Elvis. No copy is made.
+ * - 'Hard_Copy_To_Enterprise'  Copy the asset from Elvis directly to Enterprise. No link or shadow object is created.
+ * - 'Shadow_Only'              Create a shadow object in Enterprise that is linked to the asset in Elvis. No copy is created.
  *
  * Note that this option has changed since Enterprise 10.1.1.
  */
