@@ -23,6 +23,8 @@ class ElvisAMFClient
 	 * @param bool $secure
 	 * @param int $timeout The timeout for the call in seconds
 	 * @return mixed
+	 * @throws object ElvisCSException converted by Sabre/AMF
+	 * @throws BizException
 	 */
 	public static function send($service, $operation, $params, $secure=true, $timeout=60)
 	{
@@ -38,19 +40,20 @@ class ElvisAMFClient
 	 * @param $params
 	 * @param bool $secure
 	 * @param int $timeout The timeout for the call in seconds
-	 * @return ElvisEntHit|null
+	 * @return mixed
+	 * @throws object ElvisCSException converted by Sabre/AMF
 	 * @throws BizException
 	 */
-	public static function sendUnParsed($service, $operation, $params, $secure=true, $timeout=60)
+	private static function sendUnParsed($service, $operation, $params, $secure=true, $timeout=60)
 	{
 		$servicePath = $service . '.' . $operation;
-	
 		$url = self::getEndpointUrl($secure);
 		$client = new SabreAMF_Client($url, self::DESTINATION);
 		$client->setEncoding(SabreAMF_Const::FLEXMSG);
 		
-		LogHandler::Log('ELVIS', 'DEBUG', 'ElvisAMFClient - sendUnParsed - url:' . $url . '; service:' . $service . '; operation:' . $operation . '; params:' . print_r($params, true) . '; secure:' . $secure);
-				
+		LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.' - url:' . $url . '; secure:' . $secure );
+		self::logService( 'Elvis_'.$service.'_'.$operation, $params, true );
+
 		$result = null;
 		try {
 			$result = $client->sendRequest($servicePath, $params, $timeout);
@@ -79,7 +82,8 @@ class ElvisAMFClient
 				self::handleError($result, $service, $operation);
 			}
 		}
-				
+
+		self::logService( 'Elvis_'.$service.'_'.$operation, $result, false );
 		return $result;
 	}
 	
@@ -100,8 +104,8 @@ class ElvisAMFClient
 	
 	/**
 	 * Does a synchronized login to make sure the user does not login twice if requests are fired close to each other
+	 *
 	 * @param string $credentials
-	 * @throws Exception
 	 * @throws BizException
 	 * @return string sessionId
 	 */
@@ -115,7 +119,7 @@ class ElvisAMFClient
 				$sessionId = self::loginByCredentials ($credentials);
 				ElvisSessionUtil::stopLogin();
 				return $sessionId;
-			} catch (Exception $e) {
+			} catch (BizException $e) {
 				ElvisSessionUtil::stopLogin();
 				throw $e;
 			}
@@ -196,14 +200,30 @@ class ElvisAMFClient
 		$detail = $message . '; faultCode: ' . $error->faultCode . '; faultDetail: ' . $error->faultDetail;
 
 		if (isset($error->rootCause) && $error->rootCause instanceof ElvisCSException) {
-			$error->rootCause->setMessage( $message );
-			$error->rootCause->setDetail( $detail );
-			throw $error->rootCause;
+			/** @var ElvisCSException $rootCause */
+			$rootCause = $error->rootCause;
+			$rootCause->setMessage( $message );
+			$rootCause->setDetail( $detail );
+			throw $rootCause;
 		}
 		else {
 			// This part is only called if no CSException is returned from Elvis, which would indicate an error.
 			throw new BizException(null, 'Server', $detail, $message);
 		}
 	}
-	
+
+	/**
+	 * In debug mode, performs a print_r on $transData and logs the service as AMF.
+	 *
+	 * @param string $methodName Service method used to give log file a name.
+	 * @param string $transData Transport data to be written in log file using print_r.
+	 * @param boolean $isRequest TRUE to indicate a request, FALSE for a response, or NULL for error.
+	 */
+	private static function logService( $methodName, $transData, $isRequest )
+	{
+		if( LogHandler::debugMode() ) {
+			$dataStream = print_r( $transData, true );
+			LogHandler::logService( $methodName, $dataStream, $isRequest, 'AMF' );
+		}
+	}
 }

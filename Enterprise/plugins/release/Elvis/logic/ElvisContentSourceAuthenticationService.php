@@ -15,6 +15,7 @@ class ElvisContentSourceAuthenticationService
 	 *  
 	 * @param ElvisLoginRequest $loginRequest
 	 * @return ElvisLoginResponse
+	 * @throws BizException
 	 */
 	public function login($loginRequest)
 	{
@@ -24,7 +25,12 @@ class ElvisContentSourceAuthenticationService
 
 		ElvisAMFClient::registerClass(ElvisLoginRequest::getName());
 		ElvisAMFClient::registerClass(ElvisLoginResponse::getName());
-		$loginResponse = ElvisAMFClient::send(self::SERVICE, 'login', array($loginRequest), false);
+		$loginResponse = null;
+		try {
+			$loginResponse = ElvisAMFClient::send( self::SERVICE, 'login', array( $loginRequest ), false );
+		} catch( ElvisCSException $e ) {
+			throw $e->toBizException();
+		}
 		return $loginResponse;
 	}
 	

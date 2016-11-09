@@ -63,7 +63,7 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 	 * Only if both log on attempts fail a warning is logged.
 	 *
 	 * @param string $user Acting user.
-	 * $param string $password Password of the acting user.
+	 * @param string $password Password of the acting user.
 	 * @throws BizException
 	 */
 	private function setUserType( $user, $password )

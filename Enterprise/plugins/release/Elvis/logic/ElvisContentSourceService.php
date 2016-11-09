@@ -70,27 +70,12 @@ class ElvisContentSourceService
 //	}
 
 	/**
-	 * In debug mode, performs a print_r on $transData and logs the service as AMF.
-	 *
-	 * @param string $methodName Service method used to give log file a name.
-	 * @param string $transData Transport data to be written in log file using print_r.
-	 * @param boolean $isRequest TRUE to indicate a request, FALSE for a response, or NULL for error.
-	 */
-	private function logService( $methodName, $transData, $isRequest )
-	{
-		if( LogHandler::debugMode() ) {
-			$dataStream = print_r( $transData, true );
-			LogHandler::logService( $methodName, $dataStream, $isRequest, 'AMF' );
-		}
-	}
-
-	/**
 	 * Retrieves an asset.
 	 *
 	 * @param string $assetId
 	 * @param bool $checkout
 	 * @param string[] $metadataToReturn
-	 * @return ElvisEntHit $resp
+	 * @return ElvisEntHit
 	 * @throws BizException
 	 */
 	public function retrieve( $assetId, $checkout, $metadataToReturn )
@@ -104,11 +89,7 @@ class ElvisContentSourceService
 		$resp = null;
 
 		try {
-			self::logService( 'Elvis_retrieve', $params, true );
-
 			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieve', $params, true );
-
-			self::logService( 'Elvis_retrieve', $resp, false );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -129,11 +110,7 @@ class ElvisContentSourceService
 		$id = null;
 
 		try {
-			self::logService( 'Elvis_createCollection', $params, true );
-
 			$id = ElvisAMFClient::send( self::SERVICE, 'createCollection', $params, true );
-
-			self::logService( 'Elvis_createCollection', $id, false );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -151,15 +128,11 @@ class ElvisContentSourceService
 	{
 		$params = array( $assetId );
 
-		self::logService( 'Elvis_remove', $params, true );
-
 		try {
-			$resp = ElvisAMFClient::send( self::SERVICE, 'remove', $params, true );
+			ElvisAMFClient::send( self::SERVICE, 'remove', $params, true );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
-
-		self::logService( 'Elvis_remove', $resp, false );
 	}
 
 	/**
@@ -167,7 +140,7 @@ class ElvisContentSourceService
 	 *
 	 * @param string $assetId
 	 * @param string $name
-	 * @return mixed
+	 * @return string Elvis id of the copied asset
 	 * @throws BizException
 	 */
 	public function copy( $assetId, $name )
@@ -176,11 +149,7 @@ class ElvisContentSourceService
 		$copyId = null;
 
 		try {
-			self::logService( 'Elvis_copy', $params, true );
-
 			$copyId = ElvisAMFClient::send( self::SERVICE, 'copy', $params, true );
-
-			self::logService( 'Elvis_copy', $copyId, false );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -207,11 +176,7 @@ class ElvisContentSourceService
 		$params = array( $assetId, $destFolderPath, $entSystemId );
 
 		try {
-			self::logService( 'Elvis_CopyTo', $params, true );
-
 			$resp = ElvisAMFClient::send( self::SERVICE, 'copyTo', $params, true );
-
-			self::logService( 'Elvis_CopyTo', $resp, false );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -223,7 +188,7 @@ class ElvisContentSourceService
 	 * Lists the versions of an asset.
 	 *
 	 * @param string $assetId
-	 * @return mixed
+	 * @return ElvisEntHit[]
 	 * @throws BizException
 	 */
 	public function listVersions( $assetId )
@@ -235,11 +200,7 @@ class ElvisContentSourceService
 		$hits = null;
 
 		try {
-			self::logService( 'Elvis_listVersions', $params, true );
-
 			$hits = ElvisAMFClient::send( self::SERVICE, 'listVersions', $params, true );
-
-			self::logService( 'Elvis_listVersions', $hits, false );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -259,11 +220,7 @@ class ElvisContentSourceService
 		$params = array( $assetId, $versionNumber );
 
 		try {
-			self::logService( 'Elvis_promoteVersion', $params, true );
-
-			$resp = ElvisAMFClient::send( self::SERVICE, 'promoteVersion', $params, true );
-
-			self::logService( 'Elvis_promoteVersion', $resp, false );
+			ElvisAMFClient::send( self::SERVICE, 'promoteVersion', $params, true );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -274,7 +231,7 @@ class ElvisContentSourceService
 	 *
 	 * @param string $assetId
 	 * @param string $versionNumber
-	 * @return mixed
+	 * @return ElvisEntHit
 	 * @throws BizException
 	 */
 	public function retrieveVersion( $assetId, $versionNumber )
@@ -287,11 +244,7 @@ class ElvisContentSourceService
 		$resp = null;
 
 		try {
-			self::logService( 'Elvis_retrieveVersion', $params, true );
-
 			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieveVersion', $params, true );
-
-			self::logService( 'Elvis_retrieveVersion', $resp, false );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -309,11 +262,7 @@ class ElvisContentSourceService
 	{
 		try {
 			$params = array( $assetId );
-			self::logService( 'Elvis_undoCheckout', $params, true );
-
-			$resp = ElvisAMFClient::send( self::SERVICE, 'undoCheckout', $params, true );
-
-			self::logService( 'Elvis_undoCheckout', $resp, false );
+			ElvisAMFClient::send( self::SERVICE, 'undoCheckout', $params, true );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -336,12 +285,7 @@ class ElvisContentSourceService
 					$assetIds = array( $assetIds );
 				}
 				$params = array( $assetIds, $metadata );
-				self::logService( 'Elvis_updateWorkflowMetadata', $params, true );
-
-
-				$resp = ElvisAMFClient::send( self::SERVICE, 'updateWorkflowMetadata', $params, true );
-
-				self::logService( 'Elvis_updateWorkflowMetadata', $resp, false );
+				ElvisAMFClient::send( self::SERVICE, 'updateWorkflowMetadata', $params, true );
 			}
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
@@ -366,16 +310,10 @@ class ElvisContentSourceService
 
 		try {
 			$params = array( $updateOperations );
-			self::logService( 'Elvis_updateObjects', $updateOperations, true );
-
-			$resp = ElvisAMFClient::send( self::SERVICE, 'updateObjects', $params, true );
-
-			self::logService( 'Elvis_updateObjects', $resp, false );
+			ElvisAMFClient::send( self::SERVICE, 'updateObjects', $params, true );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
-
-
 	}
 
 	/**
@@ -390,17 +328,11 @@ class ElvisContentSourceService
 		ElvisAMFClient::registerClass( ElvisObjectDescriptor::getName() );
 
 		try {
-			self::logService( 'Elvis_deleteObjects', $deleteOperations, true );
-
 			$params = array( $deleteOperations );
-			$resp = ElvisAMFClient::send( self::SERVICE, 'deleteObjects', $params, true );
-
-			self::logService( 'Elvis_deleteObjects', $resp, false );
+			ElvisAMFClient::send( self::SERVICE, 'deleteObjects', $params, true );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
-
-
 	}
 
 	/**
@@ -416,12 +348,8 @@ class ElvisContentSourceService
 		ElvisAMFClient::registerClass( ElvisShadowObjectIdentity::getName() );
 
 		try {
-			self::logService( 'Elvis_registerShadowObjects', $shadowObjectIdentity, true );
-
 			$params = array( $shadowObjectIdentity );
-			$resp = ElvisAMFClient::send( self::SERVICE, 'registerShadowObject', $params, true );
-
-			self::logService( 'Elvis_registerShadowObjects', $resp, false );
+			ElvisAMFClient::send( self::SERVICE, 'registerShadowObject', $params, true );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -440,12 +368,8 @@ class ElvisContentSourceService
 		ElvisAMFClient::registerClass( ElvisShadowObjectIdentity::getName() );
 
 		try {
-			self::logService( 'Elvis_unregisterShadowObjects', $shadowObjectIdentity, true );
-
 			$params = array( $shadowObjectIdentity );
-			$resp = ElvisAMFClient::send( self::SERVICE, 'unregisterShadowObject', $params, true );
-
-			self::logService( 'Elvis_unregisterShadowObjects', $resp, false );
+			ElvisAMFClient::send( self::SERVICE, 'unregisterShadowObject', $params, true );
 		} catch( ElvisCSException $e ) {
 			// Ignore asset not found exception
 			// May result in an asset flagged as used in Enterprise while it was deleted
@@ -479,13 +403,10 @@ class ElvisContentSourceService
 
 		try {
 			$params = array( $enterpriseSystemId, $timeout );
-			self::logService( 'Elvis_retrieveAssetUpdates', $params, true );
 
 			// We will max wait the configured timeout + 60 seconds before we expect the AMF call to return
 			$httpTimeout = $timeout + 60;
 			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieveAssetUpdates', $params, true, $httpTimeout );
-
-			self::logService( 'Elvis_retrieveAssetUpdates', $resp, false );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -503,11 +424,7 @@ class ElvisContentSourceService
 	{
 		try {
 			$params = array( $enterpriseSystemId, $updateIds );
-			self::logService( 'Elvis_confirmAssetUpdates', $params, true );
-
-			$resp = ElvisAMFClient::send( self::SERVICE, 'confirmAssetUpdates', $params, true );
-
-			self::logService( 'Elvis_confirmAssetUpdates', $resp, false );
+			ElvisAMFClient::send( self::SERVICE, 'confirmAssetUpdates', $params, true );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -525,11 +442,7 @@ class ElvisContentSourceService
 	{
 		try {
 			$params = array( $enterpriseSystemId, $fields );
-			self::logService( 'Elvis_configureMetadataFields', $params, true );
-
-			$resp = ElvisAMFClient::send( self::SERVICE, 'configureMetadataFields', $params, true );
-
-			self::logService( 'Elvis_configureMetadataFields', $resp, false );
+			ElvisAMFClient::send( self::SERVICE, 'configureMetadataFields', $params, true );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -541,7 +454,7 @@ class ElvisContentSourceService
 	 * Can only be requested by users with SUPER_USER permissions
 	 *
 	 * @param string $username The username of the user to request the info for
-	 * @return User information or null if the user could not be found
+	 * @return ElvisEntUserDetails User information or null if the user could not be found
 	 * @throws BizException
 	 */
 	public function getUserDetails( $username )
@@ -550,27 +463,26 @@ class ElvisContentSourceService
 
 		try {
 			$params = array( $username );
-			self::logService( 'Elvis_getUserDetails', $params, true );
-
 			$resp = ElvisAMFClient::send( self::SERVICE, 'getUserDetails', $params, true );
-
-			self::logService( 'Elvis_getUserDetails', $resp, false );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
 		return $resp;
 	}
 
+	/**
+	 * Export the original for a given asset.
+	 *
+	 * @param string $assetId
+	 * @return string File URL
+	 * @throws BizException
+	 */
 	public function exportOriginalForAsset( $assetId )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		try {
 			$params = array( $assetId, HTTP_FILE_TRANSFER_REMOTE_URL, BizSession::getTicket() );
-			self::logService( 'Elvis_exportOriginal', $params, true );
-
 			$resp = ElvisAMFClient::send( self::SERVICE, 'exportOriginal', $params, true );
-
-			self::logService( 'Elvis_exportOriginal', $resp, false );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
