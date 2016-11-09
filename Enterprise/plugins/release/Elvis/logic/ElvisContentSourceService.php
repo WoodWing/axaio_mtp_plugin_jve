@@ -189,6 +189,37 @@ class ElvisContentSourceService
 	}
 
 	/**
+	 * Copies an asset in Elvis to a pre-defined folder and returns the copy to Enterprise.
+	 * The copied asset is already registered as shadow object in Elvis.
+	 *
+	 * @param string $assetId Id of the original Elvis asset to be copied.
+	 * @param string $destFolderPath Path on Elvis where the asset will be copied to.
+	 * @param string $entSystemId Enterprise system id.
+	 * @return ElvisEntHit The copied Elvis asset.
+	 * @throws BizException
+	 */
+	public function copyTo( $assetId, $destFolderPath, $entSystemId )
+	{
+		ElvisAMFClient::registerClass( ElvisEntHit::getName() );
+		ElvisAMFClient::registerClass( ElvisFormattedValue::getName() );
+		ElvisAMFClient::registerClass( BasicMap::getName() );
+		$resp = null;
+		$params = array( $assetId, $destFolderPath, $entSystemId );
+
+		try {
+			self::logService( 'Elvis_CopyTo', $params, true );
+
+			$resp = ElvisAMFClient::send( self::SERVICE, 'copyTo', $params, true );
+
+			self::logService( 'Elvis_CopyTo', $resp, false );
+		} catch( ElvisCSException $e ) {
+			throw $e->toBizException();
+		}
+
+		return $resp;
+	}
+
+	/**
 	 * Lists the versions of an asset.
 	 *
 	 * @param string $assetId

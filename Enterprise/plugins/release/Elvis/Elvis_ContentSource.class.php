@@ -300,28 +300,46 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * responsibility to keep these up to date. This could for example be checked whenever the object
 	 * is requested via getShadowObject
 	 *
-	 * @param string	$alienId 		Alien object id, so include the _<ContentSourceId>_ prefix
-	 * @param Object	$destObject		In some cases (CopyObject, SendToNext, Create relation)
-	 this can be partly filled in by user, in other cases this is null.
-	 * 									In some cases this is mostly empty, so be aware.
-	 *
+	 * @param string $alienId     Alien object id, so include the _<ContentSourceId>_ prefix
+	 * @param Object $destObject  In some cases (CopyObject, SendToNext, Create relation)
+	 *                            this can be partly filled in by user, in other cases this is null.
+	 *                            In some cases this is mostly empty, so be aware.
 	 * @return Object	filled in with all fields, the actual creation of the Enterprise object is done by Enterprise.
 	 */
 	final public function createShadowObject( $alienId, $destObject )
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createShadowObject called for alienId:' . $alienId );
 
-		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
-
+		require_once __DIR__ . '/util/ElvisUtils.class.php';
 		$elvisId = ElvisUtils::getElvisId( $alienId );
-		$hit = ElvisUtils::getHit( $elvisId );
 
-		// Register shadow object in Elvis. Throws BizException if not possible (e.g. already linked)
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-		require_once dirname(__FILE__).'/logic/ElvisObjectManager.php';
-		$systemId = BizSession::getEnterpriseSystemId();
-		ElvisObjectManager::registerShadowObject( $elvisId, $systemId );
+		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
+			require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
+			require_once BASEDIR . '/server/bizclasses/BizAdmPublication.class.php';
+			require_once __DIR__ . '/util/ElvisBrandAdminConfig.class.php';
+
+			$pubId = $destObject->MetaData->BasicMetaData->Publication->Id;
+			$admPub = BizAdmPublication::listPublicationsObj( BizSession::getShortUserName(), array(), array( $pubId ) );
+			if( !empty( $admPub ) ) {
+				$productionZone = ElvisBrandAdminConfig::getProductionZone( $admPub[0] );
+				$productionZone = ElvisBrandAdminConfig::substituteDateInProductionZone( $productionZone );
+
+				require_once __DIR__ . '/logic/ElvisContentSourceService.php';
+				$service = new ElvisContentSourceService();
+				$hit = $service->copyTo( $elvisId, $productionZone, BizSession::getEnterpriseSystemId() );
+			} else {
+				// Only for absolute certainty, as an Elvis asset will always be saved in a Brand.
+				LogHandler::Log( 'ELVIS', 'WARN', 'The Brand to save the object in could not be determined.' );
+			}
+		} else {
+			$hit = ElvisUtils::getHit( $elvisId );
+
+			// Register shadow object in Elvis. Throws BizException if not possible (e.g. already linked)
+			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+			require_once dirname(__FILE__).'/logic/ElvisObjectManager.php';
+			$systemId = BizSession::getEnterpriseSystemId();
+			ElvisObjectManager::registerShadowObject( $elvisId, $systemId );
+		}
 
 		if( !$destObject ) {
 			$destObject = new Object();
@@ -382,7 +400,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 		
-		// Create File attachement
+		// Create File attachment
 		$attachment = new Attachment();
 		$attachment->FileUrl = $fileUrl;
 		$attachment->Rendition = "native";
@@ -889,7 +907,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		
 	/**
 	 * @param Object $smartObject Object of MetaData that will filled
-	 * @param Hit $hit returned from elvis server
+	 * @param ElvisEntHit $hit returned from elvis server
 	 */
 	private function fillMetadata( $smartObject, $hit )
 	{

@@ -91,7 +91,7 @@ if( !defined('ELVIS_CREATE_COPY') ) {
  * This option is available since Enterprise 10.1.1 and requires Elvis 5.18 (or newer).
  */
 if( !defined('DEFAULT_ELVIS_PRODUCTION_ZONE') ) {
-	define( 'DEFAULT_ELVIS_PRODUCTION_ZONE', '/Enterprise/${brand}/${date:Y-m}' );
+	define( 'DEFAULT_ELVIS_PRODUCTION_ZONE', '/Production Zone/${brand}/${date:Y-m}' );
 }
 
 /**
