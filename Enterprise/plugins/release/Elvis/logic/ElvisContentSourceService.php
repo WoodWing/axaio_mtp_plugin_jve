@@ -338,7 +338,7 @@ class ElvisContentSourceService
 	/**
 	 * Links shadow objects to Elvis assets.
 	 *
-	 * @param ShadowObjectIdentity $shadowObjectIdentity
+	 * @param ElvisShadowObjectIdentity $shadowObjectIdentity
 	 * @throws BizException
 	 */
 	public function registerShadowObjects( $shadowObjectIdentity )
@@ -358,7 +358,7 @@ class ElvisContentSourceService
 	/**
 	 * Un-links shadow objects to Elvis assets.
 	 *
-	 * @param ShadowObjectIdentity $shadowObjectIdentity
+	 * @param ElvisShadowObjectIdentity $shadowObjectIdentity
 	 * @throws BizException
 	 */
 	public function unregisterShadowObjects( $shadowObjectIdentity )

@@ -100,6 +100,13 @@ class ElvisAMFClient
 		require_once dirname(__FILE__) . '/../logic/ElvisRESTClient.php';
 		$allAssetInfo = ElvisRESTClient::fieldInfo();
 		ElvisSessionUtil::setAllAssetInfo($allAssetInfo);
+
+		// Remember the version of the Elvis Server we are connected with.
+		$client = new ElvisRESTClient();
+		$serverInfo = $client->getElvisServerInfo();
+		if( $serverInfo ) {
+			ElvisSessionUtil::setSessionVar( 'elvisServerVersion', $serverInfo->version );
+		}
 	}
 	
 	/**
@@ -168,6 +175,34 @@ class ElvisAMFClient
 	public static function registerClass($clazz)
 	{
 		SabreAMF_ClassMapper::registerClass($clazz::getJavaClassName(), $clazz::getName());
+	}
+
+	/**
+	 * Determine the interface version of the AMF model of the Enterprise-Elvis integration.
+	 *
+	 * When adding properties to the data classes of this model, the integration would break
+	 * because Java data classes are mapped onto PHP data classes automatically and when there
+	 * are mismatches found in Java (Elvis Server) it will raise an error.
+	 *
+	 * To avoid this from happening, data classes can be versioned at the PHP side. Instead of
+	 * simply adding a new property, the data class should be sub-classed and the property should
+	 * be added to the sub-class instead.
+	 *
+	 * Having that in place, this function can be called to determine which data class to be used.
+	 * Therefore, whenever the AMF data model changes in a backwards incompatible manner a new interface
+	 * version should be introduced by this function.
+	 *
+	 * @since 10.1.1
+	 * @return int Interface version number.
+	 */
+	public static function getInterfaceVersion()
+	{
+		$elvisVersion = ElvisSessionUtil::getSessionVar( 'elvisServerVersion' );
+		$ifVersion = 1;
+		if( version_compare( $elvisVersion, '5.18','>=' ) ) {
+			$ifVersion = 2;
+		}
+		return $ifVersion;
 	}
 	
 	private static function getEndpointUrl($includeSessionId=true)

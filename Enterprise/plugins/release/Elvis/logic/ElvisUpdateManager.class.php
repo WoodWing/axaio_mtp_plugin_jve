@@ -237,7 +237,7 @@ class ElvisUpdateManager
 
 			$elvisPlacements = array();
 			if( $entPlacements ) foreach( $entPlacements as $entPlacement ) {
-				$elvisPlacement = new ElvisPlacement();
+				$elvisPlacement = ElvisPlacementFactory::create();
 				$elvisPlacement->width  = floatval( $entPlacement->Width );
 				$elvisPlacement->height  = floatval( $entPlacement->Height );
 				if( $isPublishForm ) {
@@ -247,15 +247,17 @@ class ElvisUpdateManager
 					$elvisPlacement->onPasteBoard = false;
 					$elvisPlacement->onMasterPage = false;
 					$elvisPlacement->editions = null;
-					if( $entPlacement->FormWidgetId && $templateId ) {
-						require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
-						$entProperties = DBProperty::getPropertyByNameAndFields( $entPlacement->FormWidgetId, 'Object', null, array(
-							'templateid' => $templateId, 'objtype' => 'PublishForm' ) );
-						if( $entProperties ) {
-							$entProperty = reset( $entProperties );
-							$elvisPlacement->widget = new ElvisEntityDescriptor();
-							$elvisPlacement->widget->id = $entPlacement->FormWidgetId;
-							$elvisPlacement->widget->name = $entProperty->DisplayName;
+					if( property_exists( $elvisPlacement, 'widget' ) ) {
+						if( $entPlacement->FormWidgetId && $templateId ) {
+							require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
+							$entProperties = DBProperty::getPropertyByNameAndFields( $entPlacement->FormWidgetId, 'Object', null, array(
+								'templateid' => $templateId, 'objtype' => 'PublishForm' ) );
+							if( $entProperties ) {
+								$entProperty = reset( $entProperties );
+								$elvisPlacement->widget = new ElvisEntityDescriptor();
+								$elvisPlacement->widget->id = $entPlacement->FormWidgetId;
+								$elvisPlacement->widget->name = $entProperty->DisplayName;
+							}
 						}
 					}
 				} else { // layout
@@ -282,7 +284,9 @@ class ElvisUpdateManager
 							$elvisPlacement->editions[] = $elvisEdition;
 						}
 					}
-					$elvisPlacement->widget = null;
+					if( property_exists( $elvisPlacement, 'widget' ) ) {
+						$elvisPlacement->widget = null;
+					}
 				}
 
 				$elvisPlacements[] = $elvisPlacement;
