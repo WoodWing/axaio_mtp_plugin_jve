@@ -35,9 +35,9 @@ class ElvisAMFClient
 	/**
 	 * Send AMF message to Elvis.
 	 *
-	 * @param $service
-	 * @param $operation
-	 * @param $params
+	 * @param string $service
+	 * @param string $operation
+	 * @param array $params
 	 * @param bool $secure
 	 * @param int $timeout The timeout for the call in seconds
 	 * @return mixed
@@ -216,12 +216,19 @@ class ElvisAMFClient
 	 * In debug mode, performs a print_r on $transData and logs the service as AMF.
 	 *
 	 * @param string $methodName Service method used to give log file a name.
-	 * @param string $transData Transport data to be written in log file using print_r.
+	 * @param mixed $transData Transport data to be written in log file using print_r.
 	 * @param boolean $isRequest TRUE to indicate a request, FALSE for a response, or NULL for error.
 	 */
 	private static function logService( $methodName, $transData, $isRequest )
 	{
 		if( LogHandler::debugMode() ) {
+			// For the logon request the credentials are base64, so we hide that from the logging.
+			if( $methodName == 'Elvis_contentSourceAuthenticationService_login' && $isRequest ) {
+				if( isset($transData[0]->cred) ) {
+					$transData = unserialize( serialize( $transData ) ); // deep clone to avoid changing request
+					$transData[0]->cred = '***';
+				}
+			}
 			$dataStream = print_r( $transData, true );
 			LogHandler::logService( $methodName, $dataStream, $isRequest, 'AMF' );
 		}
