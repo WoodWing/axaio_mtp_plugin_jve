@@ -38,6 +38,12 @@ class Elvis_Session extends Session_EnterpriseConnector
 			}
 
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			if( defined( 'ELVIS_CURL_OPTIONS') ) { // hidden option
+				$options = unserialize( ELVIS_CURL_OPTIONS );
+				if( $options ) foreach( $options as $key => $value ) {
+					curl_setopt( $ch, $key, $value );
+				}
+			}
 			$success = curl_exec( $ch );
 			if( !$success ) {
 				$errno = curl_errno( $ch );
