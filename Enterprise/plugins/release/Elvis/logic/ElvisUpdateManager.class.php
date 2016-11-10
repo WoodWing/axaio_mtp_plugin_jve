@@ -332,10 +332,10 @@ class ElvisUpdateManager
 					$elvisPlacement->onMasterPage = false;
 					$elvisPlacement->editions = null;
 					if( property_exists( $elvisPlacement, 'widget' ) ) {
-						if( $entPlacement->FormWidgetId && $templateId ) {
+						if( $entPlacement->FormWidgetId && $templateId && $publishSystem ) {
 							require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
 							$entProperties = DBProperty::getPropertyByNameAndFields( $entPlacement->FormWidgetId, 'Object', null, array(
-								'templateid' => $templateId, 'objtype' => 'PublishForm' ) );
+								'templateid' => $templateId, 'publishsystem' => $publishSystem, 'objtype' => 'PublishForm' ) );
 							if( $entProperties ) {
 								$entProperty = reset( $entProperties );
 								$elvisPlacement->widget = new ElvisEntityDescriptor();
