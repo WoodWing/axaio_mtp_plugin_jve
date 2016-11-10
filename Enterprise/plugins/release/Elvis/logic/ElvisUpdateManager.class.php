@@ -177,14 +177,26 @@ class ElvisUpdateManager
 			$operation->object->publication = $elvisPublication;
 			$operation->object->category = $elvisCategory;
 			
+			// Determine the publish date for layouts.
+			$publishDate = null;
+			$isPublishForm = $object->MetaData->BasicMetaData->Type == 'PublishForm';
+			if( !$isPublishForm && $object->Targets ) {
+				/** @var Target $target */
+				$target = reset( $object->Targets );
+				if( $target->Issue->Id ) {
+					require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
+					$row = DBBase::getRow( 'issues', '`id`= ?', array( 'publdate' ), array( $target->Issue->Id ) );
+					$publishDate = $row ? $row['publdate'] : null;
+				}
+			}
+
+			// Handle the relations
 			$shadowObjectRelations = $shadowObjectRelationsPerLayout[$objId];
-
 			$elvisRelations = null;
-
 			if( $object->Relations ) foreach( $object->Relations as $shadowRelation ) {
 				// Only add the relation if it is a shadow relation
 				if( array_key_exists( $shadowRelation->Child, $shadowObjectRelations )) {
-					$elvisRelation = new ElvisObjectRelation();
+					$elvisRelation = ElvisObjectRelationFactory::create();
 					$elvisRelation->type = strval( $shadowRelation->Type );
 
 					require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
@@ -192,6 +204,20 @@ class ElvisUpdateManager
 					$elvisRelation->assetId = strval( $documentId );
 
 					$elvisRelation->placements = self::composeElvisPlacements( $object, $shadowRelation->Placements );
+
+					if( property_exists( $elvisRelation, 'publicationDate' ) ) {
+						$elvisRelation->publicationDate = null;
+						if( $isPublishForm ) {
+							$shadowTarget = reset( $shadowRelation->Targets );
+							if( $shadowTarget ) {
+								$elvisRelation->publicationDate = self::getPublishedDate(
+									$object->MetaData->BasicMetaData->ID, $shadowTarget->PubChannel->Id,
+									$shadowTarget->Issue->Id, $shadowRelation->Child );
+							}
+						} else { // layout
+							$elvisRelation->publicationDate = $publishDate;
+						}
+					}
 					$elvisRelations[] = $elvisRelation;
 				}
 				$operation->relations = $elvisRelations;
@@ -201,6 +227,64 @@ class ElvisUpdateManager
 			$operations[] = $operation;
 		}
 		return $operations;
+	}
+
+	/**
+	 * Resolves the Publish Date (from the publish history) for an object that is placed on a Publish Form.
+	 *
+	 * @since 10.1.1
+	 * @param integer $publishFormId
+	 * @param integer $pubChannelId
+	 * @param integer $issueId
+	 * @param integer $placedObjectId
+	 * @return string|null Datetime when found, else NULL.
+	 */
+	private static function getPublishedDate( $publishFormId, $pubChannelId, $issueId, $placedObjectId )
+	{
+		$publishedDate = null;
+		$dossierId = self::getDossierOfPublishForm( $publishFormId );
+		if( $dossierId ) {
+			require_once BASEDIR.'/server/dbclasses/DBPublishHistory.class.php';
+			$dossiersPublished = DBPublishHistory::getPublishHistoryDossier( $dossierId, $pubChannelId, $issueId,
+				null, true ); // null: forms don't have editions, true: last publish action only
+			if( $dossiersPublished ) {
+				$dossierPublished = reset( $dossiersPublished ); // above, we requested for one record only
+				if( $dossierPublished['action'] === 'publishDossier' || $dossierPublished['action'] === 'updateDossier' ) {
+					require_once BASEDIR.'/server/dbclasses/DBPublishedObjectsHist.class.php';
+					$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist( $dossierPublished['id'] );
+					if( $publishedObjects ) foreach( $publishedObjects as $publishedObject ) {
+						if( $placedObjectId == $publishedObject['objectid'] ) {
+							$publishedDate = $dossierPublished['publisheddate'];
+							break;
+						}
+					}
+				}
+			}
+		}
+		return $publishedDate;
+	}
+
+	/**
+	 * Resolves the Dossier object that contains a given Publish Form.
+	 *
+	 * @since 10.1.1
+	 * @param integer $publishFormId
+	 * @return integer|null The dossier id, or NULL when not found.
+	 * @throws BizException
+	 */
+	private static function getDossierOfPublishForm( $publishFormId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
+		$dossierId = null;
+		try {
+			$rows = DBObjectRelation::getObjectRelations( $publishFormId, 'parents', 'Contained' );
+			if( $rows ) {
+				$row = reset( $rows );
+				$dossierId = $row['parent'];
+			}
+		} catch( BizException $e ) {} // ignore
+		return $dossierId;
+
 	}
 
 	/**
