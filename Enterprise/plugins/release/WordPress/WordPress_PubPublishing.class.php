@@ -245,7 +245,8 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 						// If an image has been converted, we should be on the safe side and always use the newest one.
 						$convertedPlacement = $this->getConvertedPlacement( $publishForm, $image->MetaData->BasicMetaData->ID, 'C_WORDPRESS_MULTI_IMAGES', $frameOrder );
 						if( $convertedPlacement ) {
-							$convertedPlacements[$image->MetaData->BasicMetaData->ID] = $convertedPlacement;
+							// Since one native can be cropped multiple times, we can have multiple convertedPlacements for the same image id.
+							$convertedPlacements[$image->MetaData->BasicMetaData->ID][] = $convertedPlacement;
 						} else {
 							$nativeImageIds[] = $image->MetaData->BasicMetaData->ID;
 						}
@@ -274,13 +275,21 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 						// Only look at images that have actually been published, i.e. that have an external id.
 						if( $publishedPlacement->ExternalId ) {
 
-							// Delete if the crop has been removed from the image.
+							// Delete if the crop (by image id) has been removed from the image.
 							if( !isset( $convertedPlacements[$publishedPlacement->ObjectId] ) ) {
 								$imagesToDeleteFromGallery[] = $publishedPlacement->ExternalId;
-							}
-							// Delete if the placement hash of the to-be-published image does not match with the published image's.
-							elseif( $convertedPlacements[$publishedPlacement->ObjectId]->ConvertedImageToPublish->PlacementHash !== $publishedPlacement->PlacementHash) {
-								$imagesToDeleteFromGallery[] = $publishedPlacement->ExternalId;
+							} else {
+								// See if the published placement hash matches any of the to-be-published placement hashes.
+								$foundMatch = false;
+								foreach( $convertedPlacements[$publishedPlacement->ObjectId] as $convertedPlacement ) {
+									if( $convertedPlacement->ConvertedImageToPublish->PlacementHash === $publishedPlacement->PlacementHash ) {
+										$foundMatch = true;
+									}
+								}
+								// Only if there is no match, we can delete the converted image.
+								if( !$foundMatch ) {
+									$imagesToDeleteFromGallery[] = $publishedPlacement->ExternalId;
+								}
 							}
 						}
 					}
