@@ -135,7 +135,7 @@ class ElvisUpdateManager
 	 *
 	 * @param Object[]|null $objects List of Layout object.
 	 * @param Relation[] $shadowObjectRelationsPerLayout Refer to function header.
-	 * @return UpdateObjectOperation[]
+	 * @return ElvisUpdateObjectOperation[]
 	 */
 	private static function composeElvisUpdateObjects( $objects, array $shadowObjectRelationsPerLayout )
 	{

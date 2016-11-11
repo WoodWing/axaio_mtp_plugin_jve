@@ -31,7 +31,7 @@ class ElvisBrandAdminConfig
 	 */
 	private static function setOptionValue( $extraMetaData, $optionName, $optionValue )
 	{
-		require_once BASEDIR .'/server/bizclasses/BizAdmProperty.class.php';
+		require_once BASEDIR . '/server/bizclasses/BizAdmProperty.class.php';
 		BizAdmProperty::setCustomPropVal( $extraMetaData, $optionName, $optionValue );
 	}
 
@@ -44,6 +44,23 @@ class ElvisBrandAdminConfig
 	public static function getProductionZone( AdmPublication $publication )
 	{
 		return self::getOptionValue( $publication->ExtraMetaData, 'C_ELVIS_PRODUCTION_ZONE' );
+	}
+
+	/**
+	 * Query the database for the Elvis Production Zone value of the publication
+	 *
+	 * @param string $pubId Publication id.
+	 * @return string|null Production zone of the publication.
+	 */
+	public static function getProductionZoneByPubId( $pubId )
+	{
+		$where  = '`publication` = ? AND `name` = "C_ELVIS_PRODUCTION_ZONE"';
+		$params[] = $pubId;
+
+		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
+		$row = DBBase::getRow( 'channeldata', $where, array('value'), $params );
+
+		return $row ? reset($row) : null;
 	}
 
 	/**

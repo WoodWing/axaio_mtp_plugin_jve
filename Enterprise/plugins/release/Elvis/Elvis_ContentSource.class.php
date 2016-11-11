@@ -310,33 +310,28 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createShadowObject called for alienId:' . $alienId );
 
+		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once __DIR__ . '/util/ElvisUtils.class.php';
 		$elvisId = ElvisUtils::getElvisId( $alienId );
 
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
-			require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-			require_once BASEDIR . '/server/bizclasses/BizAdmPublication.class.php';
 			require_once __DIR__ . '/util/ElvisBrandAdminConfig.class.php';
+			$productionZone = ElvisBrandAdminConfig::getProductionZoneByPubId( $destObject->MetaData->BasicMetaData->Publication->Id );
 
-			$pubId = $destObject->MetaData->BasicMetaData->Publication->Id;
-			$admPub = BizAdmPublication::listPublicationsObj( BizSession::getShortUserName(), array(), array( $pubId ) );
-			if( !empty( $admPub ) ) {
-				$productionZone = ElvisBrandAdminConfig::getProductionZone( $admPub[0] );
+			if( $productionZone ) {
 				$productionZone = ElvisBrandAdminConfig::substituteDateInProductionZone( $productionZone );
 
-				require_once __DIR__ . '/logic/ElvisContentSourceService.php';
+				require_once __DIR__.'/logic/ElvisContentSourceService.php';
 				$service = new ElvisContentSourceService();
 				$hit = $service->copyTo( $elvisId, $productionZone, BizSession::getEnterpriseSystemId() );
 			} else {
-				// Only for absolute certainty, as an Elvis asset will always be saved in a Brand.
-				LogHandler::Log( 'ELVIS', 'WARN', 'The Brand to save the object in could not be determined.' );
+				throw new BizException( 'ERR_INVALID_PROPERTY', 'Server', 'Unable to find the production zone property.' );
 			}
 		} else {
 			$hit = ElvisUtils::getHit( $elvisId );
 
 			// Register shadow object in Elvis. Throws BizException if not possible (e.g. already linked)
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-			require_once dirname(__FILE__).'/logic/ElvisObjectManager.php';
+			require_once dirname(__FILE__) . '/logic/ElvisObjectManager.php';
 			$systemId = BizSession::getEnterpriseSystemId();
 			ElvisObjectManager::registerShadowObject( $elvisId, $systemId );
 		}
