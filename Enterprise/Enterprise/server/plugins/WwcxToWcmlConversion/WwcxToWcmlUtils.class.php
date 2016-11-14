@@ -31,7 +31,7 @@ class WwcxToWcmlUtils
 	 * Sets the latest converted content back to the given attachment
 	 *
 	 * @param string $wcmlPath
-	 * @param object $attachment
+	 * @param Attachment $attachment
 	 * @param string $format The object file's mime type
 	 */
 	public function setContent( $wcmlPath, Attachment $attachment, $format )

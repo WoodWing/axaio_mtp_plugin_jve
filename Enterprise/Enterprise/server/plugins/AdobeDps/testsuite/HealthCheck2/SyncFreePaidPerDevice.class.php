@@ -115,6 +115,8 @@ class SyncFreePaidPerDevice
 
 	/**
 	 * Stores a variable in the database to denote that the conversion was done successfully.
+	 *
+	 * @param string $flag
 	 * @return bool Whether or not the updated flag was set correctly.
 	 */
 	static private function setSyncFlag( $flag )

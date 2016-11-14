@@ -48,6 +48,7 @@ class EnchantPhpSpelling_Spelling extends Spelling_EnterpriseConnector
 
 	/**
 	 * Refer to abstract class getSuggestions() header.
+	 * @inheritdoc
 	 */
 	public function getSuggestions( array $dictionaries, $wordForSuggestions ) 
 	{

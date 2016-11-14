@@ -14,8 +14,10 @@ class HunspellShellSpelling_Spelling extends Spelling_EnterpriseConnector
 	private $tmpFile = null;
 	private $stdErrOutputFile = null;
 	private $installedDictionaries = null;
+
 	/**
 	 * Refer to abstract class checkSpelling() header.
+	 * @inheritdoc
 	 */
 	public function checkSpelling( array $dictionaries, array $wordsToCheck ) 
 	{
@@ -70,6 +72,7 @@ class HunspellShellSpelling_Spelling extends Spelling_EnterpriseConnector
 
 	/**
 	 * Refer to abstract class getSuggestions() header.
+	 * @inheritdoc
 	 */
 	public function getSuggestions( array $dictionaries, $wordForSuggestions ) 
 	{
@@ -113,6 +116,7 @@ class HunspellShellSpelling_Spelling extends Spelling_EnterpriseConnector
 	
 	/**
 	 * Refer to abstract class getEngineVersion() header.
+	 * @inheritdoc
 	 */
 	public function getEngineVersion()
 	{
@@ -148,6 +152,7 @@ class HunspellShellSpelling_Spelling extends Spelling_EnterpriseConnector
 	
 	/**
 	 * Refer to abstract class getInstalledDictionaries() header.
+	 * @inheritdoc
 	 */	
 	public function getInstalledDictionaries()
 	{
@@ -155,19 +160,20 @@ class HunspellShellSpelling_Spelling extends Spelling_EnterpriseConnector
 	}
 	
 	/**
-	*	Returns installed dictionaries together with the full path.
-	**/
+	 *	Returns installed dictionaries together with the full path.
+	 */
 	public function getInstalledDictionariesAndPath()
 	{
 		return $this->getInstalledDictionariesByCommand( false );
 	}
 	
 	/**
-	* Retrieves installed dictionary for Hunspell via command execution.
-	* @param bool $baseName True to return only base name of the dictionary; False to return the full path of dictionary.
-	* @throws BizException when failed to retrieves dictionary.
-	* @returns array of dictionary(s) (With / Without path) (Dictionaries returned are ALWAYS WITHOUT .aff or .dic extension)
-	*/
+	 * Retrieves installed dictionary for Hunspell via command execution.
+	 *
+	 * @param bool $baseName True to return only base name of the dictionary; False to return the full path of dictionary.
+	 * @throws BizException when failed to retrieves dictionary.
+	 * @returns array of dictionary(s) (With / Without path) (Dictionaries returned are ALWAYS WITHOUT .aff or .dic extension)
+	 */
 	private function getInstalledDictionariesByCommand( $baseName )
 	{
 		$dictionaries = array();

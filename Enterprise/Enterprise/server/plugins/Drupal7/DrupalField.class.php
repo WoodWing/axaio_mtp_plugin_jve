@@ -444,6 +444,7 @@ class DrupalField {
 	/**
 	 * Determines the FieldInfoField type.
 	 *
+	 * @param DrupalField $drupalField
 	 * @return null|string The DrupalField Type.
 	 */
 	private function determineFieldInfoFieldType( DrupalField $drupalField )

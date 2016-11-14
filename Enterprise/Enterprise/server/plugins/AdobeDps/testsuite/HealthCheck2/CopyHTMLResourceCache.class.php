@@ -89,6 +89,8 @@ class CopyHTMLResourceCache
 
 	/**
 	 * Stores a variable in the database to denote that the folder copy was done successfully.
+	 *
+	 * @param string $flag
 	 * @return bool Whether or not the updated flag was set correctly.
 	 */
 	private function setCopyFlag( $flag )

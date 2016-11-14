@@ -51,10 +51,20 @@ class SolrSearchEngine extends BizQuery
 	protected $resultComponents = null;
 
 	/**
-	 * Constructor
+	 * SolrSearchEngine constructor.
 	 *
 	 * Establish and test Solr connection and sets up the default search parameters shared by all search functions
 	 * supported by this engine (search, facetSearch and inboxSearch).
+	 *
+	 * @param array $searchParams
+	 * @param int $firstEntry
+	 * @param int $maxEntries
+	 * @param null $queryMode
+	 * @param bool $hierarchical
+	 * @param array $order
+	 * @param null $minimalProps
+	 * @param null $requestProps
+	 * @throws BizException when Solr connection can not be established.
 	 */
 	public function __construct( $searchParams = array(), $firstEntry = 0, $maxEntries = 0, $queryMode = null, $hierarchical = false, $order = array(), $minimalProps = null, $requestProps = null )
 	{
@@ -424,7 +434,7 @@ class SolrSearchEngine extends BizQuery
 	/**
 	 * Updates a set of metaDataValues for a list of Object IDs.
 	 *
-	 * @param array $ids Enterprise object ids to update
+	 * @param array $objectIDs Enterprise object ids to update
 	 * @param array $metaDataValues MetaDataValues to be updated
 	 * @param Bool $directCommit Direct commit setting for Solr
 	 * @throws BizException

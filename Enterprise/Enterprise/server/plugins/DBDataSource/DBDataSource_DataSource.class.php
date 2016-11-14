@@ -160,8 +160,11 @@ class DBDataSource_DataSource extends DataSource_EnterpriseConnector
 	 * If a datasource is bidirectional, this function should handle
 	 * the user's changes to the records, made in the client.
 	 *
-	 * @param Array of Records	 	$records
-	 * @return String				$message
+	 * @param array $records List of records
+	 * @param string $recordid
+	 * @param $queryparameters
+	 * @return string
+	 * @throws BizException when the data record field name has an unknown value type.
 	 */
 	final public function setRecords( $records, $recordid, $queryparameters )
 	{
@@ -211,8 +214,8 @@ class DBDataSource_DataSource extends DataSource_EnterpriseConnector
 	 * Plutus will call this function if it recieves an update notification.
 	 * The output (Array of Records) will be sent to the Client.
 	 * 
-	 * @param 	Array of FamilyValues 	$familyvalues
-	 * @return Array of Records		$records 
+	 * @param array $familyvalue List of FamilyValues
+	 * @return array of Records
 	 */
 	final public function getUpdates( $familyvalue )
 	{

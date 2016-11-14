@@ -356,9 +356,10 @@ class InCopyHTMLConversion
 	/**
 	 * Compose an object with element information
 	 *
-	 * @param Object 		$object
-	 * @param Element Label $label
-	 * @param DOMDocument 	$artDoc
+	 * @param Object $object
+	 * @param string $label
+	 * @param DOMDocument $artDoc
+	 * @param string $contentId Default = "".
 	 * @return Element Object
 	 * 
 	 * @todo; refactor ... horrible name
@@ -541,6 +542,7 @@ class InCopyHTMLConversion
 	 * @param DOMXPath $xpath
 	 * @param array $allTemplateStories (BZ#20793) Returns -all- story nodes (array of DOMElement).
 	 * @return array with key: lowercase element name; value: DOMElement story
+	 * @throws BizException if the article template does not contain stories.
 	 */
 	protected static function getTemplateStories( DOMXPath $xpath, array &$allTemplateStories )
 	{

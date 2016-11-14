@@ -74,6 +74,7 @@ class AddArticleAccessProp
 	 * Stores a variable in the database to denote if the conversion has been started
 	 * or has been completed.
 	 *
+	 * @param string $flag
 	 * @return bool Whether or not the conversion flag was set correctly.
 	 */
 	static private function setAddArticleAccessPropFlag( $flag )

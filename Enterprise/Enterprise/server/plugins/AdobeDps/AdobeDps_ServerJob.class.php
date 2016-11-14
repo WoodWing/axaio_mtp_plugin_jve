@@ -99,10 +99,9 @@ class AdobeDps_ServerJob extends ServerJob_EnterpriseConnector
 	 * Deletes a given folder from the Export Folder.
 	 * When it cannot be deleted due to any problem (e.g. an access problem),
 	 * an ERROR entry is created in server logging.
-	 * When the ffolder does not exists, assumed is that the file was deleted before.
+	 * When the folder does not exists, assumed is that the file was deleted before.
 	 *
 	 * @param string $filePath File to delete.
-	 * @param boolean $deleted TRUE when the file was ours and could be deleted (or was deleted before).
 	 */
 	private function deleteFolder( $filePath )
 	{

@@ -183,7 +183,7 @@ class PreviewMetaPHP_MetaData extends MetaData_EnterpriseConnector
 	/**
 	 * Check if the XMP package is belongs to InCopy type file
 	 *
-	 * @param array $metadataXMP Array of metadata read from XMP
+	 * @param array $metaDataXMP Array of metadata read from XMP
 	 * @return bool True|False Return true when it is InCopy XMP, false when it is not
 	 */
 	private function isInCopyXmp( $metaDataXMP )

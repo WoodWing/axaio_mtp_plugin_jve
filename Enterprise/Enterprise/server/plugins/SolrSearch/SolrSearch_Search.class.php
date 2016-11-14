@@ -226,6 +226,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 	 * See BZ#17707
 	 *
 	 * @param array $objects array of Object
+	 * @param array $areas
 	 */
 	protected static function setClosedProperty($objects, $areas = array('Workflow'))
 	{

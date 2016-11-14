@@ -282,9 +282,9 @@ class WW_TestSuite_BuildTest_WwcxToWcml_ArticleConversion_TestCase extends TestC
 	}
 
 	/**
-	 * Extract Nth story ($nthStory) from given article content ($objId).
+	 * Extract Nth story ($nthStory) from given article content ($content).
 	 *
-	 * @param string $objId The article DB id (when $this->useTestData) or else the file base name at testdata folder.
+	 * @param string $content Article content
 	 * @param string $format Article format
 	 * @param int $nthStory Nth story with first story starts from index 0.
 	 * @return object Element of $nthStory story (with Content in embedded XML format).

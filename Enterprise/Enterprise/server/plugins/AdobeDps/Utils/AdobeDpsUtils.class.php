@@ -113,7 +113,8 @@ class AdobeDpsUtils
 	 * Get the manifest.xml file from the given zip archive.
 	 *
 	 * @param string $filePath
-	 * @return string 
+	 * @return string
+	 * @throws BizException if the manifest file can't be found or is invalid.
 	 */
 	public static function getManifestFromZip( $filePath )
 	{		
@@ -178,8 +179,9 @@ class AdobeDpsUtils
 	 * 
 	 * @param string $zipPath
 	 * @param string $requestedFile
-	 * @return string 
-	 */	
+	 * @return string
+	 * @throws BizException if the zip file can't be read.
+	 */
 	private static function getFileFromZip( $zipPath, $requestedFile )
 	{		
 		$tmpFile = tempnam(TEMPDIRECTORY, 'Zip_' . __CLASS__); // Create temperary file in the filestore temp directory

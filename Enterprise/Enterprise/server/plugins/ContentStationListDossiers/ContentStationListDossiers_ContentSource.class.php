@@ -81,12 +81,11 @@ class ContentStationListDossiers_ContentSource extends ContentSource_EnterpriseC
 	 * 
 	 * Execute query on content source.
 	 *
-	 * @param string 				$query		Query name as obtained from getQueries
-	 * @param array of Property 	$params		Query parameters as filled in by user
-	 * @param unsigned int			$firstEntry	Index of first requested object of total count (TotalEntries) 
-	 * @param unsigned int			$maxEntries Max count of requested objects (zero for all, nil for default)
-	 * @param array of QueryOrder	$order		
-	 * 
+	 * @param string $query Query name as obtained from getQueries
+	 * @param Property[] $params Query parameters as filled in by user
+	 * @param int (unsigned) $firstEntry Index of first requested object of total count (TotalEntries)
+	 * @param int (unsigned) $maxEntries Max count of requested objects (zero for all, nil for default)
+	 * @param QueryOrder[]	$order
 	 * @return WflNamedQueryResponse
 	 */
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
@@ -146,18 +145,8 @@ class ContentStationListDossiers_ContentSource extends ContentSource_EnterpriseC
 	}
 	
 	/**
-	 * getAlienObject
-	 * 
-	 * Gets alien object. In case of rendition 'none' the lock param can be set to true, this is the 
-	 * situation that Properties dialog is shown. If content source allows this, return the object
-	 * on failure the dialog will be read-only. If Property dialog is ok-ed, a shadow object will 
-	 * be created. The object is assumed NOT be locked, hence there is no unlock sent to content source.
-	 *
-	 * @param string	$alienId	Alien object id, so include the _<ContentSourceId>_ prefix
-	 * @param string	$rendition	'none' (to get properties only), 'thumb', 'preview' or 'native'
-	 * @param boolean	$lock		See method comment.
-	 * 
-	 * @return Object
+	 * @inheritdoc
+	 * @throws BizException when called since this function is not supported.
 	 */
 	final public function getAlienObject( $alienID, $rendition, $lock )
 	{
@@ -171,9 +160,10 @@ class ContentStationListDossiers_ContentSource extends ContentSource_EnterpriseC
 	 * Create object record in Enterprise with thumb and preview, native to stay in file-system.
 	 * For simplicity of this example, we assume that we only deal with jpg images
 	 *
-	 * @param string	$id 		Alien object id, so include the _<ContentSourceID>_ prefix
-	 * 
+	 * @param string $alienID Alien object id, so include the _<ContentSourceID>_ prefix
+	 * @param Object $destObject
 	 * @return Object
+	 * @throws BizException when called since this function is not supported.
 	 */
 	final public function createShadowObject( $alienID, $destObject )
 	{

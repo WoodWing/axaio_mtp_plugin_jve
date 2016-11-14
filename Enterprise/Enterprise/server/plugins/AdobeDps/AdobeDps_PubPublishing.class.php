@@ -98,6 +98,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * This function asks the BizPublishing class to do so (publish the next dossier(if any)).
 	 *
 	 * @since 7.6.7
+	 * @param string $connId
 	 * @return bool TRUE when it did fire a publishDossier request. FALSE on error or no more dossiers left to publish.
 	 */
 	public function processNextDossier( $connId )
@@ -180,6 +181,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @since 7.5
 	 * @param PubPublishTarget $publishTarget
 	 * @param string $operation Publish, Update, UnPublish or Preview
+	 * @throws BizException
 	 */
 	public function beforeOperation( $publishTarget, $operation ) 
 	{
@@ -891,18 +893,20 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 
 		return $publishedIssue;
 	}
-	
+
 	/**
 	 * Allows connector to act on changes to published issue properties. To get full control
 	 * of the issue being changed, the original published issue ($orgIssue) is provided.
 	 * The passed $newIssue contains only those properties that actually are different from $orgIssue.
 	 * The connector may adjust $newIssue Fields property when needed. The core server merges both and updates the DB after.
-	 * 
+	 *
 	 * @since 7.5
-	 * @param AdmIssue $admIssue            The configured admin issue properties.
-	 * @param PubPublishedIssue $orgIssue   The latest properties, just read from DB.
-	 * @param PubPublishedIssue $newIssue   The properties that are about to get changed.
-	 * @return string|null                  The report as string|Null when there's no update needed.
+	 * @param AdmIssue $admIssue The configured admin issue properties.
+	 * @param PubPublishedIssue $orgIssue The latest properties, just read from DB.
+	 * @param PubPublishedIssue $newIssue The properties that are about to get changed.
+	 * @return null|string The report as string|Null when there's no update needed.
+	 * @throws BizException
+	 * @throws null
 	 */
 	public function setPublishInfoForIssue( $admIssue, $orgIssue, $newIssue )
 	{
@@ -1410,6 +1414,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	/**
 	 * Checks if a layout object has an alternate page layout.
 	 *
+	 * @param int $dossierId
 	 * @param Object $object The layout to have its page orientations to be checked.
 	 * @return bool Whether or not the operation was succesful.
 	 */
@@ -1926,6 +1931,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * Returns the dossier folio.xml file path (dossier manifest).
 	 *
 	 * @param PubPublishTarget $publishTarget
+	 * @param int $dossierId
 	 * @param string $operation Preview, Publish, Update or UnPublish
 	 * @param string $operationId Client generated system wide GUID in 8-4-4-4-12 format.
 	 * @return string
@@ -1940,6 +1946,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * Returns directory path to the StackResources
 	 *
 	 * @param PubPublishTarget $publishTarget
+	 * @param int $dossierId
 	 * @param string $operation Preview, Publish, Update or UnPublish
 	 * @param string $operationId Client generated system wide GUID in 8-4-4-4-12 format.
 	 * @return string
@@ -2683,6 +2690,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * @param PubPublishTarget $publishTarget
 	 * @param string $folioXmlFilePath Folio.xml filepath
+	 * @throws BizException
 	 */
 	public function buildIssueFolioXml( $publishTarget, $folioXmlFilePath=null )
 	{
@@ -2801,7 +2809,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * When it is higher than the one in memory is updated with the given one and
 	 * it always returns the highest version.
 	 *
-	 * @param string $targetViewer
+	 * @param string $version Default = '0.0.0'.
 	 * @return string
 	 */
 	public static function folioVersion( $version = '0.0.0' )
@@ -3990,6 +3998,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * When matching issue folder is found, that folder is returned. Else, when matching brand
 	 * folder is found, that folder is returned. Else, the default folder is returned.
 	 *
+	 * @param Object $article
+	 * @param PubPublishTarget $publishTarget
 	 * @return string
 	 */
 	private function getConfigDpsStylesTextViewFolder( Object $article, PubPublishTarget $publishTarget )
@@ -4375,6 +4385,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param array $objectsInDossier
 	 * @param array $coverImages Cover images. When requested, the key must be set and the value must be an empty array.
 	 * @param PubPublishTarget $publishTarget
+	 * @param int $dossierId
 	 * @param string $imageUsage The usage of the image. Possible values: 'issueCover' or 'sectionCover'(for per dossier)
 	 * @return array Same as $coverImages but values are enriched with found Page Covers or Page Section Covers.
 	 */
@@ -4440,7 +4451,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * 
 	 * @param integer $width
 	 * @param integer $height
-	 * @return 'landscape'/'portrait' or empty (square). 
+	 * @return string 'landscape'/'portrait' or empty (square).
 	 */
 	private function getOrientationByDimension( $width, $height )
 	{
@@ -4636,7 +4647,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 
 	/**
 	 * Check if the image for the cover has the correct mime-type.
-	 * 
+	 *
+	 * @param string $mimeType
 	 * @return boolean
 	 */
 	private function checkMimeTypeCoverImage( $mimeType )
@@ -4669,7 +4681,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 
 	/**
 	 * Check if the image for the vertical text view header has the correct mime-type.
-	 * 
+	 *
+	 * @param string $mimeType
 	 * @return boolean
 	 */
 	private function checkMimeTypeHeaderImage( $mimeType )
@@ -4680,6 +4693,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	/**
 	 * Check if the image for the vertical text tray images has the correct mime-type.
 	 *
+	 * @param string $mimeType
 	 * @return boolean
 	 */
 	private function checkMimeTypeTextViewTrayImage( $mimeType )
@@ -4701,7 +4715,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 
 	/**
 	 * Check if the image for the vertical text view header has the correct mime-type.
-	 * 
+	 *
+	 * @param string $mimeType
 	 * @return boolean
 	 */
 	private function checkMimeTypeArticleForTextView( $mimeType )
@@ -4779,6 +4794,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * Create new DPS client and sign-in at the Adobe Dps server.
 	 *
 	 * @param PubPublishTarget $publishTarget
+	 * @throws BizException
 	 */
 	private function connectToDps( $publishTarget )
 	{
@@ -4998,6 +5014,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @param string $issueStatus
 	 * @return void
+	 * @throws BizException on invalid issue status.
 	 */
 	private function updateIssueStatus( $publishTarget, $issueStatus = null )
 	{
@@ -5047,6 +5064,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * Fire a Push Notification request to the Adobe Distribution Server.
 	 *
 	 * @since 7.6
+	 * @param string $pushNotification
 	 */
 	private function pushNotificationRequest( $pushNotification )
 	{
@@ -5193,7 +5211,9 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 	
 	/**
-	 * @param array $filesToCopy Array of files to copy from $sourcePath to $destPath. Null to copy all files recursively.
+	 * @param string $sourcePath
+	 * @param string $destPath
+	 * @param array $filesToCopy Array of files to copy from $sourcePath to $destPath. Null to copy all files recursively. (Default = null.)
 	 */
 	private function copyFilesToExportFolder( $sourcePath, $destPath, $filesToCopy=null )
 	{
@@ -5524,6 +5544,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param array $verLayoutInfo The Vertical/Portrait Layout.
 	 * @param array $horLayoutInfo The Horizontal/Landscape Layout.
 	 * @param Object $dossier The dossier for which to determine the layouts.
+	 * @param bool $hasAltLayoutBoth
 	 * @return array An array of Layouts to use for the preview TOC image.
 	 */
 	private function determineLayoutsForTocPreview($horParser, $verParser, $verLayoutInfo, $horLayoutInfo, $dossier, $hasAltLayoutBoth)
@@ -5600,7 +5621,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	/**
 	 * Save the HTMLResources dossier ids and the used dossier id in the static $htmlResourcesDossiers variable.
 	 *
-	 * @param integer $issueID
+	 * @param integer $issueId
 	 * @param array $dossierIds
 	 * @param integer $usedDossierId
 	 * @return void
@@ -5701,6 +5722,7 @@ class DigitalMagazinesDpsFolioBuilder extends DigitalMagazinesDpsFolioXml
 	 * @param string $folioNumber
 	 * @param string $version
 	 * @param string $targetViewer
+	 * @param string|null $coverDate Date in the following format: 2011-09-14T12:45:48 (Default = null)
 	 * @return string XML document (the folio.xml content).
 	 */
 	public function build( $date, $orientation, $bindingDirection, $id, 
@@ -5795,6 +5817,7 @@ class DigitalMagazinesDpsFolioBuilder extends DigitalMagazinesDpsFolioXml
 	 * @param string $contentStackId The new ID of the merged Content Stack
 	 * @param string $subfolio The new file name of the merged Content Stack
 	 * @return string Merged folio xml.
+	 * @throws BizException
 	 */
 	public function mergeContentStacksFromXml( DigitalMagazinesDpsFolioXml $xmlParser, $contentStackId, $subfolio )
 	{
@@ -5961,8 +5984,8 @@ class DigitalMagazinesDpsFolioBuilder extends DigitalMagazinesDpsFolioXml
 	/**
 	 * Returns the correct smooth scrolling option when combining both layouts
 	 *
-	 * @param string $smoothScrollingA
-	 * @param string $smoothScrollingB
+	 * @param string $smoothScrollingLandscape
+	 * @param string $smoothScrollingPortrait
 	 * @return string 
 	 */
 	private function getSmoothScrolling( $smoothScrollingLandscape, $smoothScrollingPortrait )
@@ -6101,6 +6124,7 @@ class DigitalMagazinesDpsFolioParser extends DigitalMagazinesDpsFolioXml
 	/**
 	 * Sets the folio id.
 	 *
+	 * @param int|string $id
 	 * @return string
 	 */
 	public function setId( $id )
@@ -6180,6 +6204,7 @@ class DigitalMagazinesDpsFolioParser extends DigitalMagazinesDpsFolioXml
 	 *
 	 * @param string $oldContentStackId
 	 * @param string $newContentStackId
+	 * @param string $newSubfolio
 	 */
 	public function updateContentStack( $oldContentStackId, $newContentStackId, $newSubfolio )
 	{
@@ -6334,6 +6359,7 @@ class DigitalMagazinesDpsFolioParser extends DigitalMagazinesDpsFolioXml
 	 * Update the metadata in the Folio.xml with the updated DB values
 	 *
 	 * @param object $dossier
+	 * @param bool $firstDossier (Default = false)
 	 */
 	public function updateContentStackRegionMetaData( $dossier, $firstDossier = false )
 	{

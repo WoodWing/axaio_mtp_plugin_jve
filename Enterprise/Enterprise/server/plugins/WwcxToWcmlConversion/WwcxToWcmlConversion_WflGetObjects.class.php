@@ -49,6 +49,7 @@ class WwcxToWcmlConversion_WflGetObjects extends WflGetObjects_EnterpriseConnect
 	 * Converts the article object file from WWCX to WCML.
 	 *
 	 * @param object $object The article object
+	 * @throws BizException when conversion fails.
 	 */
 	private function convertArticle( $object )
 	{
@@ -114,6 +115,7 @@ class WwcxToWcmlConversion_WflGetObjects extends WflGetObjects_EnterpriseConnect
 	 *
 	 * @param string $wwcxIdsPath Input file in WWCX format (CS4-)
 	 * @param string $wcmlIdsPath Output file in WCML format (CS5+)
+	 * @throws BizException when article conversion failed.
 	 */
 	private function callInDesignServerToConvertArticle( $wwcxIdsPath, $wcmlIdsPath )
 	{

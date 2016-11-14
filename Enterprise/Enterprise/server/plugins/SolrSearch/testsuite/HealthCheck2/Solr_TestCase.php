@@ -796,6 +796,7 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	 *
 	 * The schema should adhere to the Solr 4.5 version.
 	 *
+	 * @param array $schemaInfo
 	 * @return bool Whether or not the test was passed.
 	 */
 	private function checkSchemaVersion($schemaInfo)
@@ -813,10 +814,9 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	}
 
 	/**
-	 * Retrieves the Schema as a DOM document.
+	 * Retrieves the schema.xml as a DOM Document.
 	 *
-	 * Retrieves the schema.xml as a Dom Document.
-	 *
+	 * @param string $solrSchemaName
 	 * @return bool|DOMDocument Either false if there are errors, or the parsed DOMDocument object.
 	 */
 	private function getSchemaAsDomDocument( $solrSchemaName )
