@@ -305,6 +305,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *                            this can be partly filled in by user, in other cases this is null.
 	 *                            In some cases this is mostly empty, so be aware.
 	 * @return Object	filled in with all fields, the actual creation of the Enterprise object is done by Enterprise.
+	 * @throws BizException in case mode is Copy_To_Production_Zone and no production zone is found.
 	 */
 	final public function createShadowObject( $alienId, $destObject )
 	{
@@ -716,18 +717,29 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
 		require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
-		
-		$service = new ElvisContentSourceService();
-		$destName = $destObject->MetaData->BasicMetaData->Name;
 
-		$assetId = ElvisUtils::getElvisId($alienId);
-		$copyId = $service->copy( $assetId, $destName );
-		
-		$destId = ElvisUtils::getAlienId( $copyId );
+		$shadowObject = null;
+		switch( ELVIS_CREATE_COPY ) {
+			case 'Hard_Copy_To_Enterprise':
+			case 'Shadow_Only':
+				$service = new ElvisContentSourceService();
+				$destName = $destObject->MetaData->BasicMetaData->Name;
 
-		LogHandler::Log( 'ContentSource', 'DEBUG', 'ContentSource::copyShadowObject called for alienId:' . $alienId . 'destId:' . $destId );
+				$assetId = ElvisUtils::getElvisId( $alienId );
+				$copyId = $service->copy( $assetId, $destName );
 
-		$shadowObject = $this->createShadowObject( $destId, $destObject );
+				$destId = ElvisUtils::getAlienId( $copyId );
+
+				LogHandler::Log( 'ContentSource', 'DEBUG', 'ContentSource::copyShadowObject called for alienId:' . $alienId . ', destId:' . $destId );
+
+				$shadowObject = $this->createShadowObject( $destId, $destObject );
+				break;
+
+			case 'Copy_To_Production_Zone':
+				LogHandler::Log( 'ContentSource', 'DEBUG', 'ContentSource::copyShadowObject called for alienId:' . $alienId . '.' );
+				$shadowObject = $this->createShadowObject( $alienId, $destObject );
+				break;
+		}
 
 		return $shadowObject;
 	}
