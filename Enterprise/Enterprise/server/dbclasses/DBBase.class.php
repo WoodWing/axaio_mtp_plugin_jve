@@ -588,7 +588,7 @@ class DBBase
 	 *  @param $where string What records to delete. Can contain placeholders (?).
 	 *  @param $params array containing parameters to be substituted for the placeholders
 	 *         of the where clause.
-	 * @return boolean null in case of error, true in case of succes
+	 * @return boolean|null NULL in case of error, TRUE in case of success
 	 */
 	static public function deleteRows( $tablename, $where, $params = array() )
 	{

@@ -9,6 +9,7 @@
 		- Configure maxerr="0" when a folder should be free of errors.
 		- Configure maxerr="1000000" when all errors of a folder should be suppressed.
 	-->
+	<folder path=".../Enterprise/config/jstree/" maxerr="1000000"/>
 	<folder path=".../Enterprise/config/jquery-ui/" maxerr="1000000"/>
 	<folder path=".../Enterprise/config/plugin-templates/" maxerr="1000000"/>
 	<folder path=".../Enterprise/config/plugins/" maxerr="1000000"/>

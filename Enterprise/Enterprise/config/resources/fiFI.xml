@@ -225,7 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Vie offline-tilaan</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Jätä tyhjäksi suoralle päivitykselle</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Jätä tyhjäksi jos omistaja ja käyttäjä ovat samoja</Term>
-  <Term key="ACT_LESS">Less</Term>
+  <Term key="ACT_LESS">Vähemmän</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">Listattu julkaisun yleiskatsauksessa</Term>
   <Term key="ACT_LOGIN">Kirjaudu</Term>
   <Term key="ACT_LOGOFF">Kirjaudu ulos</Term>
@@ -257,7 +257,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">Avaa</Term>
   <Term key="ACT_OPEN_EDIT">Avaa ja muokkaa</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Avaa ja muokkaa (jos sijoittamatta)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">Avaa uudessa välilehdessä</Term>
   <Term key="ACT_ORDER_BY">Järjestä</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">Tiedostoa %1 ei ole olemassa</Term>
@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">Nimet eivät täsmää, haluatko kuitata tästä huolimatta?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">Vain plain text -muotoiset artikkelit voidaan yhdistää keskenään</Term>
   <Term key="ERR_COMPOSE">Virhe muodostettaessa artikkelia. (S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">Virhe yhdistettäessä palveluun %1. Tarkista yhteys ja yritä uudelleen. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">Virhe yhdistettäessä palvelimeen. Tarkista yhteytesi ja yritä uudelleen (S1068)</Term>
   <Term key="ERR_COPY_FOLDER">Julkaisussa tapahtui virhe. Ota yhteyttä järjestelmänvalvojaan.\n\nLisätiedot: HTML-resurssien välimuistikansiota ei löytynyt. Suorita Toimintatarkastus-sivulla 'Adobe Digital Publishing System (DPS)' testi ja noudata sen ohjeita.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">Tietokantaan ei saatu yhteyttä (S1003)</Term>
@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Käyttäjätili deaktivoitu (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Käyttäjänimeä ja salasanaa vaaditaan</Term>
   <Term key="ERR_USER_BEGINDATE">Käyttäjätiliä ei ole vielä validoitu</Term>
-  <Term key="ERR_USER_ENDDATE">Käyttäjätili ei ole enää voimassa</Term>
+  <Term key="ERR_USER_ENDDATE">Käyttäjätili ei ole enää voimassa (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Käyttäjänimi on jo olemassa.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Kirjoita vaadittu käyttäjänimi</Term>
   <Term key="ERR_WRONGLANG">Valitse kieli (S1052)</Term>
@@ -2150,7 +2150,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">Artikkelin %1 komponentti %2 on jo sijoitettu asettelun {EDITION} kohtaan %3 %4.</Term>
   <Term key="WARN_PAGE_DBL">Monta viestiä samalle sivulle:</Term>
   <Term key="WARN_PAGE_START">Yksi sivu alkaa sivunumerolla:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Salasana on vanhentunut, vaihda salasana</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Salasana on vanhentunut, vaihda salasana (S1145)</Term>
   <Term key="WARN_USER_LIMIT">Tämän sovelluksen samanaikaisten käyttäjien raja tai Enterprise Serverin sallimien samanaikaisten yhteyksien määrä on täyttynyt.</Term>
   <Term key="WAR_UPLOAD_WARNING">Esikatselukuvaa ei voitu luoda</Term>
   <Term key="WEBFEATURES">Sovellukset</Term>

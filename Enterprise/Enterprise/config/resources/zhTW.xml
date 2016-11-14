@@ -225,7 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">採取離線</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">留下空白以直接更新</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">如擁有者與使用者相同，則留下空白</Term>
-  <Term key="ACT_LESS">Less</Term>
+  <Term key="ACT_LESS">顯示較少</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">列出在出版物預覽中</Term>
   <Term key="ACT_LOGIN">登入</Term>
   <Term key="ACT_LOGOFF">登出</Term>
@@ -257,7 +257,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">開啓</Term>
   <Term key="ACT_OPEN_EDIT">開啟編輯</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">打開編輯中 (尚未置入版面)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">在新選項卡中打開</Term>
   <Term key="ACT_ORDER_BY">Order by</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">文件 %1 不存在</Term>
@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">文檔名稱不符，是否繼續登記存入?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">只有平文文章可以連接</Term>
   <Term key="ERR_COMPOSE">構成文章錯誤. (S1067)</Term>
-  <Term key="ERR_CONNECT">錯誤連接 %1. 請檢查您的連線並再試一次. (S1144)</Term>
+  <Term key="ERR_CONNECT">錯誤連接伺服器 %1. 請檢查您的連線並再試一次. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">連接服務器錯誤.請檢查網絡連接並重試(S1068)</Term>
   <Term key="ERR_COPY_FOLDER">發佈時出現了一個錯誤. 請聯繫你的系統管理員.\n\n 原因: HTML Resources 緩存文件夾不存在. 請在健康檢查頁面上運行 'Adobe Digital Publishing System (DPS)' 測試並遵從它的指令.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">不能連接至資料庫 (S1003)</Term>
@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">用戶已撤銷 (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">需要用戶名字及密碼</Term>
   <Term key="ERR_USER_BEGINDATE">用戶帳號還未有效</Term>
-  <Term key="ERR_USER_ENDDATE">用戶帳號不再有效</Term>
+  <Term key="ERR_USER_ENDDATE">用戶帳號不再有效 (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">用戶名字已存在</Term>
   <Term key="ERR_USER_NAME_REQUIRED">請輸入所需要的用戶名字</Term>
   <Term key="ERR_WRONGLANG">選擇一種語言(S1052)</Term>
@@ -2150,7 +2150,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">文章%2的元件%1已經被置入版面%4的 {EDITION} %3版本中</Term>
   <Term key="WARN_PAGE_DBL">頁面包含複合頁:</Term>
   <Term key="WARN_PAGE_START">其中一頁開始頁碼:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">密碼已過期</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">密碼已過期 (S1145)</Term>
   <Term key="WARN_USER_LIMIT">已到達此應用程式所給予的同時使用者最高限額，或以到達 WoodWing Enterprise伺服器所給予的同時使用者最高限額．</Term>
   <Term key="WAR_UPLOAD_WARNING">不能產生預視圖像</Term>
   <Term key="WEBFEATURES">網上功能</Term>

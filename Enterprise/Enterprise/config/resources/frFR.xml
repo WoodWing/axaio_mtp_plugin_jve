@@ -225,7 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Mettre hors ligne</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">laisser vide pour une mise à jour directe</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">laisser vide si le propriétaire est l'utilisateur</Term>
-  <Term key="ACT_LESS">Less</Term>
+  <Term key="ACT_LESS">Moins</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">Listé(e) dans l’aperçu de la publication</Term>
   <Term key="ACT_LOGIN">Connexion</Term>
   <Term key="ACT_LOGOFF">Déconnexion</Term>
@@ -257,7 +257,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">Ouvrir</Term>
   <Term key="ACT_OPEN_EDIT">Ouvrir pour modification</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Ouvrir pour modification (non placés)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">Ouvrir dans un nouvel onglet</Term>
   <Term key="ACT_ORDER_BY">Trier par</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">Le fichier %1 n'existe pas</Term>
@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">Le nom de fichier ne correspond pas, voulez-vous quand même le déposer ?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">Seuls les articles au format texte peuvent être combinés</Term>
   <Term key="ERR_COMPOSE">Erreur au cours de la composition de l’article. (S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">Erreur de connexion au service nommé %1. Vérifiez votre connexion et recommencez. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">Erreur lors de la connexion au serveur. Vérifiez votre connexion et recommencez. (S1068)</Term>
   <Term key="ERR_COPY_FOLDER">Une erreur s'est produite au cours de la publication. Contactez l’administrateur système.\n\nDétails : Le dossier cache des ressources HTML est introuvable. Exécutez le test Adobe Digital Publishing System (DPS) de la page Bilan de santé et conformez-vous aux instructions.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">Connexion à la base de données impossible (S1003)</Term>
@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Déactivé(e) par l'utilisateur (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Nom d'utilisateur et mot de passe requis</Term>
   <Term key="ERR_USER_BEGINDATE">Compte utilisateur pas encore valable</Term>
-  <Term key="ERR_USER_ENDDATE">Compte utilisateur plus valable</Term>
+  <Term key="ERR_USER_ENDDATE">Compte utilisateur plus valable (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Le nom de l'utilisateur existe déjà.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Nom d'utilisateur requis. Saisissez-en un</Term>
   <Term key="ERR_WRONGLANG">Choisissez une langue (S1052).</Term>
@@ -2150,7 +2150,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">L'élément %1 de l'article %2 a déjà été placé dans l'{EDITION} %3 de la mise en page %4.</Term>
   <Term key="WARN_PAGE_DBL">Pages multiples pour la page:</Term>
   <Term key="WARN_PAGE_START">L'une des pages commence par le numéro:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Mot de passe expiré, veuillez modifier le mot de passe</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Mot de passe expiré, veuillez modifier le mot de passe (S1145)</Term>
   <Term key="WARN_USER_LIMIT">La limite d'utilisateurs simultanés a été atteinte pour cette application ou la limite de connexions simultanées a été atteinte pour le serveur Enterprise.</Term>
   <Term key="WAR_UPLOAD_WARNING">Impossible de créer une image d'aperçu</Term>
   <Term key="WEBFEATURES">Applications</Term>

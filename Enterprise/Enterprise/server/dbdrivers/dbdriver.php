@@ -108,8 +108,11 @@ abstract class WW_DbDrivers_DriverBase
 		
 		// Error when placeholders and parameters mismatch.
 		if( substr_count( $sql, '?' ) !== count($params) ) {
-			throw new BizException( 'ERR_ARGUMENT', 'Server',
-				'The number of parameters does not match the number of placeholders.' );
+			$detail = 'The number of parameters does not match the number of placeholders.';
+			if( LogHandler::debugMode() ) { // reveal more details in debug mode
+				$detail .= " => SQL: [$sql] PARAMS: [".implode( ',', $params )."]";
+			}
+			throw new BizException( 'ERR_ARGUMENT', 'Server', $detail );
 		}
 		
 		// Iterate through the provided parameters and substitute one by one.

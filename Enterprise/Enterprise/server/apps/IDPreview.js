@@ -33,6 +33,8 @@ const DEBUGLEVEL = LOG_FILE;
 const PREVIEW_RESOLUTION = 150.0;
 const PREVIEW_QUALITY = JPEGOptionsQuality.HIGH;
 
+app.serverSettings.imagePreview = true;
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -144,7 +146,7 @@ function getOverset(story)
 		}
 		actualLines = getTotalLines( story );
 		try {
-			// Record the index of the last character + 1. This will 
+			// Record the index of the last character + 1. This will
 			// be the index of the first character to remove
 			var endBefore = story.length;
 
@@ -159,6 +161,17 @@ function getOverset(story)
 				}
 			}
 
+			// Work around for EN-88022/EN-88126: Remember paragraph composer, reset it, and set it again.
+			var lastParagraphStyle = story.insertionPoints[-1].appliedParagraphStyle;
+			var origComposer = lastParagraphStyle.composer;
+			var bChangedComposer = false;
+			if (origComposer.indexOf("World") != -1 )
+			{
+				lastParagraphStyle.composer = "Adobe Paragraph Composer";
+				bChangedComposer = true;
+			}
+			// end of first part of work around for EN-88002/EN-88126
+
 			// Fill the story with dummy text
 			fillWithDummyText( story );
 
@@ -170,6 +183,13 @@ function getOverset(story)
 			var endAfter = story.length-1;
 			var charsToRemove = story.characters.itemByRange(endBefore, endAfter);
 			charsToRemove.remove();
+
+			// Revert paragraph composer, if it was changed (EN-88002/EN-88126).
+			if ( bChangedComposer )
+			{
+				lastParagraphStyle.composer = origComposer;
+			}
+			// end of second part of work around for EN-88002/EN-88126
 		}
 		catch (e)
 		{

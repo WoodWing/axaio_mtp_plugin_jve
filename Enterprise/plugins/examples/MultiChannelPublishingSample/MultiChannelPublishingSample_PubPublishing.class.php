@@ -27,7 +27,7 @@ class MultiChannelPublishingSample_PubPublishing extends PubPublishing_Enterpris
 	}
 
 	/**
-	 * Refer to PubPublishing_EnterpriseConnector::doesSupportPublishForms() header.
+	 * {@inheritdoc}
 	 */
 	public function doesSupportPublishForms()
 	{

@@ -103,6 +103,22 @@ class WW_TestSuite_HealthCheck2_ServerPlugins_TestCase extends TestCase
 			}
 		}
 
+		// Since v10.1.0: Error for each mandatory plug-in that has been de-activated (or not installed).
+		$mandadoryPlugins = array(
+			'ExifTool' => 'This plug-in is especially needed for image cropping and image publishing features '.
+				'that require reliable dimension and resolution information from uploaded images.'
+		);
+		foreach( $mandadoryPlugins as $mandadoryPlugin => $reason ) {
+			if( !BizServerPlugin::isPluginActivated( $mandadoryPlugin ) ) {
+				$pluginName = isset($plugins[$mandadoryPlugin]) ? $plugins[$mandadoryPlugin]->DisplayName : $mandadoryPlugin;
+				$this->setResult( 'ERROR',
+					'The "'.$pluginName.'" Server plug-in is currently not activated. Activating it is mandatory; '.
+					'it is required for image cropping and image publishing features that need reliable dimension '.
+					'and resolution information from uploaded images.',
+					'Please run <a href="../../server/admin/serverplugins.php'.'">Server Plug-ins</a> and activate the plug-in.' );
+			}
+		}
+
 		// Since v9.2.0:
 		// Check that plugins that implement the WflSetObjectProperties connector also implement the
 		// WflMultiSetObjectProperties connector and vice versa, report if only one of the two is implemented

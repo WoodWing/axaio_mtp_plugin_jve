@@ -52,7 +52,7 @@ class ElvisUtils {
 	 * Returns hit from server, base on provided elvis id
 	 * @param $elvisId - for hit to be returned
 	 * @param $lock - true if we have lock on Elvis server
-	 * @return mixed - hit from Elvis server
+	 * @return ElvisEntHit - hit from Elvis server
 	 * @throws BizException - thrown if more then on hit found for specified elvis ID
 	 */
 	public static function getHit($elvisId, $lock = false)
@@ -69,6 +69,7 @@ class ElvisUtils {
 		$metadataToReturn[] = 'filename'; // needed to determine mimetype on receive thumb/preview/origin
 		$metadataToReturn[] = 'sceId';
 		$metadataToReturn[] = 'sceSystemId';
+		$metadataToReturn[] = 'resolutionUnit'; // required to convert Elvis resolutionX to Enterprise Dpi
 
 		try {
 			$hit = $service->retrieve($elvisId, $lock, $metadataToReturn);
@@ -96,6 +97,7 @@ class ElvisUtils {
 	 * @param string $rendition - to be extracted
 	 * @param bool $returnFileUrls When true, only file links to the content source are returned, otherwise the complete file cpmtemt/
 	 * @return Attachment - if could be restored or null
+	 * @throws BizException
 	 */
 	public static function getAttachment($hit, $rendition, $returnFileUrls)
 	{
@@ -109,7 +111,9 @@ class ElvisUtils {
 				require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 				$transferServer = new BizTransferServer();
 				$attachment = new Attachment($rendition, $type);
-				$transferServer->copyToFileTransferServer($url, $attachment);
+				if ( !$transferServer->copyToFileTransferServer($url, $attachment) ) {
+					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
+				}
 				$file = $attachment;
 			} else {
 				$file = new Attachment($rendition, $type, null, null, null, null, $url);

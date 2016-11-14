@@ -31,8 +31,26 @@ class DBIssue extends DBBase
 
 		$rows = self::fetchResults( $sth );
 		return $rows;	
-	}	
+	}
 
+	/**
+	 * Get all issues by name and channel Id.
+	 *
+	 * @param string $name Issue name
+    * @param int $channelId
+	 * @return array of issue rows
+	 */
+	static public function getIssuesByNameAndChannel( $name, $channelId )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$dbi = $dbDriver->tablename('issues');
+		$sql = 'SELECT `id`, `name` FROM '.$dbi.' WHERE `name` = ? AND `channelid` = ? ';
+		$params = array( $name, $channelId );
+		$sth = $dbDriver->query( $sql, $params );
+
+		$rows = self::fetchResults( $sth );
+		return $rows;
+	}
 	/**
 	 * Updates an issue in the smart_issues table with a given issue row
 	 *
@@ -138,9 +156,10 @@ class DBIssue extends DBBase
 	 * @param $pubId integer Id of brand that owns the channel
 	 * @param $channelType string Type of channel that owns the issue (e.g. 'print', 'web', etc)
 	 * @param $issueName string Name of issue to search for
-	 * @return mixed Issue Id or null when not found.
+	 * @param $pubChannelId integer Id of the channel that owns the channel
+	 * @return array database row or null if nothing found.
 	 */
-    static public function findIssueId( $pubId, $channelType, $issueName )
+    static public function findIssueId( $pubId, $channelType, $issueName, $pubChannelId = 0 )
     {
 		$dbDriver = DBDriverFactory::gen();
 		$issTable = $dbDriver->tablename('issues');
@@ -151,6 +170,9 @@ class DBIssue extends DBBase
 		$sql .= "FROM $issTable iss ";
 		$sql .= "INNER JOIN $chaTable cha ON (iss.`channelid` = cha.`id`) ";
 		$sql .= "WHERE cha.`publicationid` = $pubId AND cha.`type` = '$channelType' AND iss.`name` = '$issueName' ";
+	   if ( $pubChannelId ) {
+	      $sql .= " AND cha.`id` = $pubChannelId ";
+	   }
 		
 		$sth = $dbDriver->query( $sql );
 		$row = $dbDriver->fetch( $sth );
@@ -362,7 +384,7 @@ class DBIssue extends DBBase
 	
 	/**
 	 *  Lists ALL issues that overrule their publication in a array
-	 *  @return array, key being the issueId and value the publication id of that overrule issue
+	 *  @return array (key-value), key being the issueId and value the publication id of that overrule issue
 	 */
 	static public function listAllOverruleIssuesWithPub()
 	{

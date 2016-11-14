@@ -25,6 +25,7 @@ package com.woodwing.enterprise.interfaces.services.adm.dataclasses
 		private var _SupportsForms:String;
 		private var _Issues:Array;
 		private var _Editions:Array;
+		private var _SupportsCropping:String;
 
 		public function AdmPubChannel() {
 		}
@@ -130,6 +131,19 @@ package com.woodwing.enterprise.interfaces.services.adm.dataclasses
 		}
 		public function set Editions(Editions:Array):void {
 			this._Editions = Editions;
+		}
+
+
+		// _SupportsCropping should be handled like a Boolean, but since Boolean is not a nillable type
+		// we handle it like a String to be able to send it nillable to the server. 
+		public function get SupportsCropping():String {
+			return this._SupportsCropping;
+		}
+
+		// _SupportsCropping should be handled like a Boolean, but since Boolean is not a nillable type
+		// we handle it like a String to be able to send it nillable to the server. 
+		public function set SupportsCropping(SupportsCropping:String):void {
+			this._SupportsCropping = SupportsCropping;
 		}
 
 	}

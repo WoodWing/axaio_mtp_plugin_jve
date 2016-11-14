@@ -18,7 +18,7 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 	{
 		$info = new PluginInfoData();
 		$info->DisplayName = 'Elvis';
-		$info->Version    = '10.0 Build 6075'; // don't use PRODUCTVERSION
+		$info->Version    = getProductVersion(__DIR__); // don't use PRODUCTVERSION
 		$info->Description = 'Elvis Content Source';
 		$info->Copyright = COPYRIGHT_WOODWING;
 		return $info;
@@ -61,7 +61,7 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 
 	public function runInstallation()
 	{
-		$configFile = dirname(__FILE__) . '/config.php';
+		$configFile = dirname(__FILE__).'/config.php';
 
 		require_once $configFile;
 
@@ -91,5 +91,4 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 	{
 		return '8.3.3 Build 1';
 	}
-	
 }

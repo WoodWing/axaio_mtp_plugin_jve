@@ -89,7 +89,7 @@ class EnterpriseService
 	  * @param string 		$interface		The service interface; the class name of the service
 	  * @param boolean 		$checkTicket	whether ticket should be checked
 	  * @param boolean 		$useTransaction	whether service should be executed within db transaction
-	  * @return wflResponse Response object
+	  * @return object Response object
 	  */
 	protected function executeService( $req, $ticket, $type, $interface, $checkTicket, $useTransaction )
 	{

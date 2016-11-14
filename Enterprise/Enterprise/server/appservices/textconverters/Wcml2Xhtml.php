@@ -36,14 +36,12 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	protected $xColors = array();
 	protected $xFrames = array(); // structured output
 	protected $xStyles = null;
-	protected $imageWidth = null;
-	protected $imageHeight = null;
-	
+
 	// The name of the paragraph element
 	protected $paragraphElementName = 'p';
 	
 	// Export inline images indicator
-	protected $exportInlineImages = null;
+	protected $exportInlineImages = false;
 	protected $uniqueInlineImageIds = array();
 
 	/**
@@ -1015,62 +1013,12 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 					$xThisCursor = $this->xCursor; // Set latest insertion point after finish prfocessed nodes under <Change> node
 				break;
 				case 'Rectangle':
-					// If there is an (inline) image in the node, then determine the width and the height for this
-					// image, this is done in the same way as CS handles the inline image dimensions.
-					$this->setImageWidthAndHeight($icNode);
+					// Parse the rectangle to detect inline images.
+					$this->handleRectangle( $icNode );
 
-					// Process even unknown nodes to get out at least Content nodes that might be underneath.
-					// Deep down in there we'll find the Link element.
 					$this->xCursor = $xThisCursor; // insertion point
 					$this->convertContent( $icNode );
-
-					// Unset the image's dimensions since this image should be in the Rectangle element
-					// and should only be used if the inline image is in the Link element (which is within the rectangle element)
-					// which should have been processed in the above convertContent() call.
-					unset( $this->imageWidth );
-					unset( $this->imageHeight );
-
 					break;
-				case 'Link':
-					if( $this->exportInlineImages && $icNode->parentNode->nodeName == 'Image' ) { // To make sure it is under the Image element
-						// We can only export inline images when their LinkResourceURI points to a known image in the
-						// database, therefore we need to doublecheck that we can use the LikResourceURI prior to continuing
-						// to create the link.
-						$icLinkID = $icNode->getAttribute( 'LinkResourceURI' );
-						$icLinkPrefix = mb_substr($icLinkID, 0, 3);
-
-						if ($icLinkPrefix == 'sc:') {
-							$icLinkID = mb_substr( $icLinkID, 3 ); // skip 'sc:' prefix
-							$xImgLink = $this->xDoc->createElement( 'img' );
-							// Set the id and src attribute to the following pattern,
-							// the value being set will be use by ww_enterprise Drupal module to replace the image src value,
-							// after image has been uploaded into Drupal.
-							// id = 'ent_xxx' where 'ent_' is prefix follow by 'xxx' is a object Id
-							// src = 'ww_enterprise'
-							$xImgLink->setAttribute( 'id', 'ent_'. $icLinkID ); // Id must be with prefix 'ent_'
-							$xImgLink->setAttribute( 'src', 'ww_enterprise' ); // Temporary set to 'ww_enterprise' that will replace later
-
-							// Set the dimension of the image retrieved from the rectangle element.
-							if( isset( $this->imageWidth ) && isset( $this->imageHeight )) {
-								$xImgLink->setAttribute( 'width', $this->imageWidth );
-								$xImgLink->setAttribute( 'height', $this->imageHeight );
-							}
-
-							// Collect the inline images per frame.
-							// Not unique collection, duplicates are saved as it is.
-							$xFrame = $this->xFrames[$this->currentGuid];
-							$xFrame->InlineImageIds[] = $icLinkID;
-							// Collect the inline images for the whole story.
-							// It's a unique collection, duplicates are saved one time.
-							$this->uniqueInlineImageIds[$icLinkID] = true;
-
-							$this->xCursor->appendChild( $xImgLink );
-						} else {
-							LogHandler::Log( 'textconv', 'WARN', 'Wcml2Xhtml->convertContent: Could not convert an  '
-								. 'image link. The Link ID does not appear to be a valid Enterprise Object ID: '
-								. $icLinkID);
-						}
-					}
 				break;
 				case 'Note': // user notes => leave out (do not convert to XHTML)
 				break;
@@ -1084,63 +1032,345 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	}
 
 	/**
-	 * Determines the image Width and Height for an image inside a rectangle element.
+	 * Convert inline image (inside given InCopy rectangle) to a HTML image.
 	 *
-	 * Sets the attributes $imageWidth and $imageHeight based on the data in the xml node.
-	 *
-	 * @todo Handle the blue / brown rectangle boxes correctly to match ID / IC behaviour.
-	 *
-	 * @param $icNode The Rectangle node to determine the image height / width for.
-	 * @return void.
+	 * @param DOMNode $icRectangle InCopy rectangle that may contain an inline image.
 	 */
-	private function setImageWidthAndHeight($icNode)
+	private function handleRectangle( DOMNode $icRectangle )
 	{
-		$query = 'Properties/PathGeometry/GeometryPathType/PathPointArray/PathPointType';
-		$icPathPointTypes = $this->icXPath->query( $query, $icNode );
-		unset($xMin); unset($xMax); unset($yMin); unset($yMax);
-		foreach( $icPathPointTypes as $icPathPointType ) {
-			$icLeftDirection = $icPathPointType->getAttribute( 'LeftDirection' );
-			list( $x, $y ) = explode( ' ', $icLeftDirection );
-			if( !isset( $xMin ) || $x < $xMin ) {
-				$xMin = $x;
-			}
-			if( !isset( $xMax ) || $x > $xMax ) {
-				$xMax = $x;
-			}
-			if( !isset( $yMin ) || $y < $yMin ) {
-				$yMin = $y;
-			}
-			if( !isset( $yMax ) || $y > $yMax ) {
-				$yMax = $y;
-			}
-
-			if( isset( $xMin ) && isset( $xMax ) ) {
-				$width = $xMin - $xMax;
-
-				// Make absolute
-				if( $width < 0 ) {
-					$width = floor( abs( $width ) );
-				}
-			}
-			if( isset( $yMin ) && isset( $yMax ) ) {
-				$height = $yMin - $yMax;
-
-				// Make absolute
-				if( $height < 0 ) {
-					$height = floor( abs( $height ) );
-				}
-			}
+		// Bail out if caller is not interested in inline images.
+		if( !$this->exportInlineImages ) {
+			return;
 		}
 
-		// Set the width if available.
-		if (isset($width)) {
-			$this->imageWidth = $width;
+		// Bail out when the image has not Enterprise DB id. Only those we can handle.
+		$imageId = $this->getImageId( $icRectangle );
+		if( !$imageId ) {
+			return;
 		}
 
-		// Set the height if available.
-		if (isset($height)) {
-			$this->imageHeight = $height;
+		// Determine the image Orientation flag.
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		$imageProps = DBObject::getColumnsValuesForObjectIds( array( $imageId ), array( 'Workflow' ), array( 'id', 'orientation' ) );
+		$orientation = $imageProps[$imageId]['orientation'];
+		$orientation = $orientation ? $orientation : 1;
+
+		// Determine the WCML attributes for the inline image.
+		$imageAttributes = $this->getImageAttributes( $icRectangle, $orientation );
+		if( !$imageAttributes ) {
+			return;
 		}
+
+		// Calculate the inline image placement info from its attributes.
+		$placementInfo = $this->calculateImagePlacementInfo( $imageAttributes );
+
+		// Convert the image to HTML.
+		$this->createHtmlImage( $imageId, $placementInfo, $imageAttributes['PpiX'], $imageAttributes['PpiY'] );
+
+		// Collect the inline images per frame.
+		// Not unique collection, duplicates are saved as it is.
+		$xFrame = $this->xFrames[ $this->currentGuid ];
+		$xFrame->InlineImageIds[] = $imageId;
+		$xFrame->InlineImageInfos[] = $placementInfo;
+
+		// Collect the inline images for the whole story.
+		// It's a unique collection, duplicates are saved one time.
+		$this->uniqueInlineImageIds[ $imageId ] = true;
+	}
+
+	/**
+	 * Calculates Enterprise placement info of given WCML inline image attributes.
+	 *
+	 * @param array $attr List of properties with indexes Left, Top, Right, Bottom, ScaleX, ScaleY,
+	 * PpiX, PpiY, CropLeft, CropTop, CropRight, CropBottom
+	 * @return array List of properties with indexes Width, Height, ContentDx, ContentDy, ScaleX and ScaleY
+	 */
+	private function calculateImagePlacementInfo( array $attr )
+	{
+		$info = array();
+
+		$left = $attr['Left'];
+		$right = $attr['Right'];
+		$top = $attr['Top'];
+		$bottom = $attr['Bottom'];
+
+		$info['Width'] = $right - $left - $attr['CropRight'] - $attr['CropLeft'];
+		$info['Width'] *= $attr['ScaleX'];
+
+		$info['Height'] = $bottom - $top - $attr['CropBottom'] - $attr['CropTop'];
+		$info['Height'] *= $attr['ScaleY'];
+
+		$info['ContentDx'] = $left - $attr['CropLeft'];
+		$info['ContentDx'] *= $attr['ScaleX'];
+
+		$info['ContentDy'] = $top - $attr['CropTop'];
+		$info['ContentDy'] *= $attr['ScaleY'];
+
+		$info['ScaleX'] = $attr['ScaleX'];
+		$info['ScaleY'] = $attr['ScaleY'];
+
+		if( LogHandler::debugMode() ) { // avoid expensive print_r() in production
+			LogHandler::Log( 'textconverter', 'DEBUG', 'Inline image placement info: '.print_r( $info, true ) );
+		}
+
+		return $info;
+	}
+	
+	/**
+	 * Retrieves the Enterprise DB id of a given WCML inline image rectangle.
+	 *
+	 * @param DOMNode $icRectangle
+	 * @return string Empty when no valid image DB id found.
+	 */
+	private function getImageId( DOMNode $icRectangle )
+	{
+		$imageId = '';
+		$icLinks = $this->icXPath->query( 'Image/Link', $icRectangle );
+		$icLink = $icLinks && $icLinks->length > 0 ? $icLinks->item( 0 ) : null;
+		if( $icLink ) {
+			$icLinkID = $icLink ? $icLink->getAttribute( 'LinkResourceURI' ) : '';
+			$icLinkPrefix = $icLinkID ? mb_substr( $icLinkID, 0, 3 ) : '';
+			if( $icLinkPrefix == 'sc:' ) {
+				$imageId = mb_substr( $icLinkID, 3 ); // skip 'sc:' prefix
+			} else {
+				LogHandler::Log( 'textconv', 'INFO', 'Wcml2Xhtml->getImageIdForRectangle: Could not convert '.
+					'an image link. The Link ID does not appear to be a valid Enterprise Object ID: '.$icLinkID );
+			}
+		}
+		return $imageId;
+	}
+
+	/**
+	 * Retrieve attributes of a given WCML inline image.
+	 *
+	 * @param DOMNode $icRectangle
+	 * @param int $orientation How to rotate/mirror the image; EXIF/IFD0 standard with values 1...8
+	 * @return array List of properties with indexes Left, Top, Right, Bottom, ScaleX, ScaleY,
+	 * PpiX, PpiY, CropLeft, CropTop, CropRight, CropBottom
+	 */
+	private function getImageAttributes( DOMNode $icRectangle, $orientation )
+	{
+		$attributes = array();
+		$icImages = $this->icXPath->query( 'Image', $icRectangle );
+		$icImage = $icImages && $icImages->length > 0 ? $icImages->item( 0 ) : null;
+		if( $icImage ) {
+			$boundaries = $this->getImageBoundaries( $icImage, $orientation );
+			if( $boundaries ) {
+				$scale = $this->getImageScale( $icImage );
+				$density = $this->getImageDensity( $icImage );
+				$crop = $this->getImageCrop( $icRectangle );
+				$attributes = array_merge( $boundaries, $scale, $density, $crop );
+			}
+		}
+		return $attributes;
+	}
+
+	/**
+	 * Retrieves boundary info of a given WCML inline image.
+	 *
+	 * @param DOMNode $icImage
+	 * @param int $orientation How to rotate/mirror the image; EXIF/IFD0 standard with values 1...8
+	 * @return array List of properties with indexes Left, Top, Right and Bottom
+	 */
+	private function getImageBoundaries( DOMNode $icImage, $orientation )
+	{
+		$bound = array();
+		$icBounds = $this->icXPath->query( 'Properties/GraphicBounds', $icImage );
+		$icBound = $icBounds && $icBounds->length > 0 ? $icBounds->item( 0 ) : null;
+		if( $icBound ) {
+			if( $orientation < 5 ) {
+				$bound['Left'] = $icBound->getAttribute( 'Left' );
+				$bound['Top'] = $icBound->getAttribute( 'Top' );
+				$bound['Right'] = $icBound->getAttribute( 'Right' );
+				$bound['Bottom'] = $icBound->getAttribute( 'Bottom' );
+			} else { // rotate 90 degrees CW or CCW
+				$bound['Left'] = $icBound->getAttribute( 'Top' );
+				$bound['Top'] = $icBound->getAttribute( 'Left' );
+				$bound['Right'] = $icBound->getAttribute( 'Bottom' );
+				$bound['Bottom'] = $icBound->getAttribute( 'Right' );
+			}
+		}
+		return $bound;
+	}
+
+	/**
+	 * Retrieves scale info of a given WCML inline image.
+	 *
+	 * @param DOMNode $icImage
+	 * @return array List of properties with indexes ScaleX and ScaleY
+	 */
+	private function getImageScale( DOMNode $icImage )
+	{
+		$scale = array();
+		$actualPpi = $icImage->getAttribute( 'ActualPpi' );
+		$effectivePpi = $icImage->getAttribute( 'EffectivePpi' );
+		if( $actualPpi && $effectivePpi ) {
+			list( $actualPpiX, $actualPpiY ) = explode( ' ', $actualPpi );
+			list( $effectivePpiX, $effectivePpiY ) = explode( ' ', $effectivePpi );
+			$scale['ScaleX'] = $actualPpiX / $effectivePpiX;
+			$scale['ScaleY'] = $actualPpiY / $effectivePpiY;
+		} else {
+			$scale['ScaleX'] = 1;
+			$scale['ScaleY'] = 1;
+		}
+		return $scale;
+	}
+
+	/**
+	 * Retrieves pixel density info of a given WCML inline image.
+	 *
+	 * @param DOMNode $icImage
+	 * @return array List of properties with indexes PpiX and PpiY
+	 */
+	private function getImageDensity( DOMNode $icImage )
+	{
+		$actualPpi = $icImage->getAttribute( 'ActualPpi' );
+		if( $actualPpi ) {
+			list( $actualPpiX, $actualPpiY ) = explode( ' ', $actualPpi );
+			$imageAttributes['PpiX'] = $actualPpiX;
+			$imageAttributes['PpiY'] = $actualPpiY;
+		} else {
+			$imageAttributes['PpiX'] = 72;
+			$imageAttributes['PpiY'] = 72;
+		}
+		return $imageAttributes;
+	}
+
+	/**
+	 * Retrieves crop info of a given WCML inline image rectangle.
+	 *
+	 * @param DOMNode $icRectangle
+	 * @return array List of properties with indexes CropLeft, CropTop, CropRight and CropBottom
+	 */
+	private function getImageCrop( DOMNode $icRectangle )
+	{
+		$crop = array();
+		$icFittings = $this->icXPath->query( 'FrameFittingOption', $icRectangle );
+		$icFitting = $icFittings && $icFittings->length > 0 ? $icFittings->item( 0 ) : null;
+		if( $icFitting ) {
+			$crop['CropLeft'] = $icFitting->getAttribute( 'LeftCrop' );
+			$crop['CropTop'] = $icFitting->getAttribute( 'TopCrop' );
+			$crop['CropRight'] = $icFitting->getAttribute( 'RightCrop' );
+			$crop['CropBottom'] = $icFitting->getAttribute( 'BottomCrop' );
+		} else {
+			$crop['CropLeft'] = 0;
+			$crop['CropTop'] = 0;
+			$crop['CropRight'] = 0;
+			$crop['CropBottom'] = 0;
+		}
+		return $crop;
+	}
+
+// TODO: determine if the function below is needed, else remove.
+//	/**
+//	 * Determine the image dimensions from a given inline InCopy image rectangle.
+//	 *
+//	 * @param DOMNode $icRectangle
+//	 * @param string[] $imageAttributes
+//	 * @return boolean TRUE when found, else FALSE.
+//	 */
+//	private function getImageDimensions( DOMNode $icRectangle, array &$imageAttributes )
+//	{
+//		$query = 'Properties/PathGeometry/GeometryPathType/PathPointArray/PathPointType';
+//		$icPathPointTypes = $this->icXPath->query( $query, $icRectangle );
+//		foreach( $icPathPointTypes as $icPathPointType ) {
+//			$icLeftDirection = $icPathPointType->getAttribute( 'LeftDirection' );
+//			list( $x, $y ) = explode( ' ', $icLeftDirection );
+//			if( !isset( $xMin ) || $x < $xMin ) {
+//				$xMin = $x;
+//			}
+//			if( !isset( $xMax ) || $x > $xMax ) {
+//				$xMax = $x;
+//			}
+//			if( !isset( $yMin ) || $y < $yMin ) {
+//				$yMin = $y;
+//			}
+//			if( !isset( $yMax ) || $y > $yMax ) {
+//				$yMax = $y;
+//			}
+//
+//			if( isset( $xMin ) && isset( $xMax ) ) {
+//				$width = $xMin - $xMax;
+//
+//				// Make absolute
+//				if( $width < 0 ) {
+//					$width = floor( abs( $width ) );
+//				}
+//			}
+//			if( isset( $yMin ) && isset( $yMax ) ) {
+//				$height = $yMin - $yMax;
+//
+//				// Make absolute
+//				if( $height < 0 ) {
+//					$height = floor( abs( $height ) );
+//				}
+//			}
+//		}
+//
+//		// Set the width if available.
+//		$retVal = false;
+//		if( isset( $width ) && isset( $height ) ) {
+//			$imageAttributes['Width'] = $width;
+//			$imageAttributes['Height'] = $height;
+//			$retVal = true;
+//		}
+//		return $retVal;
+//	}
+
+// TODO: determine if the function below is needed, else remove.
+//	/**
+//	 * Converts a given image resource format type from Adobe- to Enterprise standard.
+//	 *
+//	 * @param string $icFormat Adobe image resource format (used in LinkResourceFormat attribute).
+//	 * @return string Enterprise mime type.
+//	 */
+//	private function convertImageLinkResourceFormatToMimeType( $icFormat )
+//	{
+//		static $map = array(
+//			'TIFF' => 'image/tiff',
+//			'JPEG' => 'image/jpeg',
+//			'BMP (or \'Windows Bitmap\')' => 'image/bmp',
+//			'GIF (or \'CompuServe GIF\')' => 'image/gif',
+//			'Portable Network Graphics (PNG)' => 'image/png',
+//			'Photoshop (*.psd)' => 'image/x-photoshop',
+//			'Adobe Portable Document Formart (PDF) (*.pdf)' => 'application/pdf',
+//			'Adobe Portable Document Formart (PDF) (*.ai)' => 'application/illustrator',
+//			'EPS' => 'application/postscript'
+//		);
+//		$entFormat = null;
+//		if( isset($map[$icFormat]) ) {
+//			$entFormat = $map[$icFormat];
+//		}
+//		return $entFormat;
+//	}
+
+	/**
+	 * Composes an HTML image element from given placement info.
+	 *
+	 * @param string $imageId
+	 * @param string[] $placementInfo
+	 * @param integer $ppiX
+	 * @param integer $ppiY
+	 */
+	private function createHtmlImage( $imageId, array $placementInfo, $ppiX, $ppiY )
+	{
+		// Create the HTML image element.
+		$xImgLink = $this->xDoc->createElement( 'img' );
+
+		// Set the id and src attribute to the following pattern:
+		//   id = 'ent_xxx' where 'ent_' is prefix follow by 'xxx' is a object Id
+		//   src = 'ww_enterprise'
+		// Note that these values will be used by ww_enterprise Drupal module to replace the
+		// image src value once image has been uploaded to Drupal.
+		$xImgLink->setAttribute( 'id', 'ent_'.$imageId ); // Id must be with prefix 'ent_'
+		$xImgLink->setAttribute( 'src', 'ww_enterprise' ); // Temporary set to 'ww_enterprise' that will replace later
+
+		// Set the dimension of the image retrieved from the rectangle element.
+		if( isset( $placementInfo['Width'] ) && isset( $placementInfo['Height'] ) ) {
+			$xImgLink->setAttribute( 'width', $placementInfo['Width'] * ( $ppiX / 72 ) );
+			$xImgLink->setAttribute( 'height', $placementInfo['Height'] * ( $ppiY / 72 ) );
+		}
+		$this->xCursor->appendChild( $xImgLink );
 	}
 	
 	/**

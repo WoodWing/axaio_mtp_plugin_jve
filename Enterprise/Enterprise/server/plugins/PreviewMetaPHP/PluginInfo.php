@@ -24,6 +24,10 @@ class PreviewMetaPHP_EnterprisePlugin extends EnterprisePlugin
 	
 	final public function getConnectorInterfaces() 
 	{ 
-		return array( 'Preview_EnterpriseConnector', 'MetaData_EnterpriseConnector');
+		return array( 
+			'Preview_EnterpriseConnector', 
+			'MetaData_EnterpriseConnector',
+			'ImageConverter_EnterpriseConnector'
+		);
 	}
 }

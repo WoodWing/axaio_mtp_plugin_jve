@@ -225,7 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Převést offline</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Pro přímou aktualizaci nechte prázdné</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Nechte prázdné, pokud je vlastník stejný jako uživatel</Term>
-  <Term key="ACT_LESS">Less</Term>
+  <Term key="ACT_LESS">Méně</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">Uvedeno v přehledu publikací</Term>
   <Term key="ACT_LOGIN">Přihlásit se</Term>
   <Term key="ACT_LOGOFF">Odhlásit se</Term>
@@ -257,7 +257,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">Otevřít</Term>
   <Term key="ACT_OPEN_EDIT">Otevřít pro úpravy</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Otevřít pro úpravy (neumístěno)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">Otevřít v nové záložce</Term>
   <Term key="ACT_ORDER_BY">Uspořádat podle</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">Soubor %1 neexistuje.</Term>
@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">Názvy souborů nesouhlasí, chcete přesto zpřístupnit?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">Slučovat lze pouze články v prostém textu</Term>
   <Term key="ERR_COMPOSE">Chyba vytváření článku. (S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">Během připojování ke službě %1 došlo k chybě. Zkontrolujte připojení a zkuste to znovu. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">Chyba připojení k serveru. Zkontrolujte připojení a opakujte znovu. (S1068)</Term>
   <Term key="ERR_COPY_FOLDER">Během publikace došlo k chybě. Obraťte se na svého správce systému.\n\nPodrobnosti: Složka paměti cache zdrojů HTML nebyla nalezena. Spusťte test 'Adobe Digital Publishing System (DPS)' na stránce Kontroly správnosti a postupujte podle instrukcí.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">Nelze se připojit k databázi (S1003)</Term>
@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Uživatel byl deaktivován (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Je vyžadované jméno uživatele a heslo</Term>
   <Term key="ERR_USER_BEGINDATE">Účet uživatele ještě není platný</Term>
-  <Term key="ERR_USER_ENDDATE">Účet uživatele již není platný</Term>
+  <Term key="ERR_USER_ENDDATE">Účet uživatele již není platný (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Uživatel s tímto jménem již existuje.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Zadejte prosím vyžadované jméno uživatele</Term>
   <Term key="ERR_WRONGLANG">Vyberte jazyk (S1052)</Term>
@@ -2150,7 +2150,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">Součást %1 článku %2 již byla umístěna do {EDITION} %3 v rozvržení %4.</Term>
   <Term key="WARN_PAGE_DBL">Více stránek pro stránku:</Term>
   <Term key="WARN_PAGE_START">Jedna z těchto stránek začíná číslem stránky:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Heslo je prošlé, změňte ho prosím</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Heslo je prošlé, změňte ho prosím (S1145)</Term>
   <Term key="WARN_USER_LIMIT">Byl dosažen limit počtu současných uživatelů pro tuto aplikaci nebo byl dosažen limit počtu současných připojení pro server Enterprise.</Term>
   <Term key="WAR_UPLOAD_WARNING">Nelze vytvořit náhledový obraz</Term>
   <Term key="WEBFEATURES">Aplikace</Term>

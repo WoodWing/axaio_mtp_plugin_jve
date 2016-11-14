@@ -156,6 +156,13 @@ class PlnPageValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'PageNumber' ) ) {
+			$validator->enterPath( 'PageNumber' );
+			if( !is_null( $datObj->PageNumber ) ) {
+				$validator->checkType( $datObj->PageNumber, 'string' );
+			}
+			$validator->leavePath();
+		}
 	}
 }
 
@@ -188,6 +195,13 @@ class PlnLayoutValidator
 			$validator->enterPath( 'Issue' );
 			if( !is_null( $datObj->Issue ) ) {
 				$validator->checkType( $datObj->Issue, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'PubChannel' ) ) {
+			$validator->enterPath( 'PubChannel' );
+			if( !is_null( $datObj->PubChannel ) ) {
+				$validator->checkType( $datObj->PubChannel, 'string' );
 			}
 			$validator->leavePath();
 		}
@@ -387,6 +401,13 @@ class PlnAdvertValidator
 			$validator->enterPath( 'Issue' );
 			if( !is_null( $datObj->Issue ) ) {
 				$validator->checkType( $datObj->Issue, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'PubChannel' ) ) {
+			$validator->enterPath( 'PubChannel' );
+			if( !is_null( $datObj->PubChannel ) ) {
+				$validator->checkType( $datObj->PubChannel, 'string' );
 			}
 			$validator->leavePath();
 		}

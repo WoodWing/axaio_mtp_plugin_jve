@@ -27,8 +27,8 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 											'Unicode characters (Chinese). Therefor SOAP services are called (over HTTP) after which it compares'.
 											'sent data with received data. This is done for several article properties (UTF-8) and for plain-text '.
 											'file content (UTF-16BE). The plain-text file is sent and received as DIME attachment through SOAP.'; }
-    public function getPrio()        { return 10; }
-	
+	public function getPrio()        { return 10; }
+
 	private $suiteOpts = null;    // Array representing the TESTSUITE option (configserver.php)
 	private $ticket = null;       // session ticket
 	private $soapClient = null;   // workflow SOAP client
@@ -47,7 +47,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 	final public function runTest()
 	{
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
-		if( !WW_Utils_UrlUtils::isResponsiveUrl( LOCALURL_ROOT.INETROOT.'/index.php' ) ) {
+		if( !WW_Utils_UrlUtils::isResponsiveUrl( LOCALURL_ROOT.INETROOT.'/index.php?test=ping' ) ) {
 			$this->setResult( 'ERROR', 'It seems to be impossible to connect to "'.LOCALURL_ROOT.'". ',
 				'Please check your LOCALURL_ROOT setting at the config.php file. Make sure the server can access that URL.' );
 			return false;
@@ -81,7 +81,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 			list( $userShort, $userFull )  = $this->getUserName( $unicode );		
 			$successful = true;
 			try {
-				LogHandler::Log('wwtest','INFO', 'Multibyte testing:' . $unicode);
+				LogHandler::Log( 'wwtest','INFO', 'Multibyte testing:' . $unicode );
 				$userId = DBUser::createUser( $userShort, 'ww', $userFull );
 				if( $userId ) {
 					// Check DB Collation
@@ -116,11 +116,9 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 							$help = 'Make sure that the database collation is set to UTF-8. In the Character Sets tab,</br> ' .
 									'select "Use Unicode (AL32UTF8)" and select "UTF8 - ..." as the National Character Set.</br>';
 						}
-
 						$this->setResult( 'ERROR', 'Unicode text (in UTF-8 format) cannot be saved correctly into the database.</br>' .
 									'The configured character set could be incorrect, or the database is accent sensitive or case sensitive.', $help );
 					}
-					
 					// After testing, do clean up.
 					DBUser::deleteUser( $userId );
 				} else {
@@ -132,13 +130,12 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 				$this->setResult( 'ERROR', 'Cannot test the Database collation.', 'Error occured:' . $e->getMessage() );
 				$successful = false;
 			}
-			if( !$successful )
-			{
-				LogHandler::Log('wwtest','ERROR', $unicode . ':Unicode text (in UTF-8 format) cannot be saved correctly into the database.' );
+			if( !$successful ) {
+				LogHandler::Log( 'wwtest','ERROR', $unicode . ':Unicode text (in UTF-8 format) cannot be saved correctly into the database.' );
 				return false; // No point to continue validating.
 			}
 		}
-		LogHandler::Log('wwtest','INFO', 'All unicode text (in UTF-8 format) can be saved corerctly into database.' );
+		LogHandler::Log( 'wwtest','INFO', 'All unicode text (in UTF-8 format) can be saved corerctly into database.' );
 		return true;
 	}
 	
@@ -205,14 +202,14 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 				//$ClientAppName, $ClientAppVersion, $ClientAppSerial, $ClientAppProductKey, $RequestTicket
 				'Logon SOAP Test', 'v'.SERVERVERSION, '', '', false );
 			$resp = $this->soapClient->LogOn( $req );
-			LogHandler::Log('wwtest', 'INFO', 'LogOn successful.');
+			LogHandler::Log( 'wwtest', 'INFO', 'LogOn successful.' );
 			$this->ticket = $resp->Ticket;
-			LogHandler::Log('wwtest', 'INFO', 'Ticket: '.$this->ticket);
+			LogHandler::Log( 'wwtest', 'INFO', 'Ticket: '.$this->ticket );
 			if( count($resp->Publications) > 0 ) {
 				foreach( $resp->Publications as $pub ) {
 					if( $pub->Name == $this->suiteOpts['Brand'] ) {
 						$this->pubId = $pub->Id;
-						LogHandler::Log('wwtest', 'INFO', 'Picked publication: '.$pub->Name." (id=$this->pubId)" );
+						LogHandler::Log( 'wwtest', 'INFO', 'Picked publication: '.$pub->Name." (id=$this->pubId)" );
 					}
 				}
 				if( !$this->pubId ) {
@@ -222,7 +219,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 					$this->setResult( 'ERROR', 'Could not find the configured Brand: "'.$this->suiteOpts['Brand'].'"', $help );
 				}
 			} else {
-				$this->setResult( 'ERROR', 'Could not find any publication at LogOn response.');
+				$this->setResult( 'ERROR', 'Could not find any publication at LogOn response.' );
 			}
 		} catch( SoapFault $e ) {
 			if( stripos( $e->getMessage(), '(S1053)' ) !== false ) { // wrong user/password?
@@ -257,7 +254,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 			$req = new WflGetDialogRequest( $this->ticket, null, $this->pubId, null, null, null,
 							'Article', 'Create', true, true, false, true, true, null, null, null );
 			$resp = $this->soapClient->GetDialog( $req );
-			LogHandler::Log('wwtest', 'INFO', 'GetDialog successful.');
+			LogHandler::Log( 'wwtest', 'INFO', 'GetDialog successful.' );
 
 			// pick first best found issue
 			foreach( $resp->Dialog->MetaData as $mdVal ) {
@@ -273,7 +270,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 				foreach( $resp->PublicationInfo->PubChannels as $chanInfo ) {
 					foreach( $chanInfo->Issues as $issueInfo ) {
 						if( $this->issueId == $issueInfo->Id ) {
-							LogHandler::Log('wwtest', 'INFO', 'Picked issue: '.$issueInfo->Name." (id=$this->issueId)" );
+							LogHandler::Log( 'wwtest', 'INFO', 'Picked issue: '.$issueInfo->Name." (id=$this->issueId)" );
 							if( $issueInfo->OverrulePublication == 'true' ) {
 								$categories = $issueInfo->Sections;
 							}
@@ -293,7 +290,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 			}
 			if( count($categories) > 0 ) {
 				$this->catId = $categories[0]->Id;
-				LogHandler::Log('wwtest', 'INFO', 'Picked category: '.$categories[0]->Name." (id=$this->catId)" );
+				LogHandler::Log( 'wwtest', 'INFO', 'Picked category: '.$categories[0]->Name." (id=$this->catId)" );
 			} else {
 				$help = 'Make sure there are categories configured under ';
 				if( $issueInfo && $issueInfo->OverrulePublication == 'true' ) {
@@ -308,7 +305,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 			$statuses = $resp->GetStatesResponse->States;
 			if( count($statuses) > 0 ) {
 				$this->statusId = $statuses[0]->Id;
-				LogHandler::Log('wwtest', 'INFO', 'Picked status: '.$statuses[0]->Name." (id=$this->statusId)" );
+				LogHandler::Log( 'wwtest', 'INFO', 'Picked status: '.$statuses[0]->Name." (id=$this->statusId)" );
 			} else {
 				$help = 'Make sure there are Article statuses configured under ';
 				if( $issueInfo && $issueInfo->OverrulePublication == 'true' ) {
@@ -365,10 +362,10 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 			$this->createObject = new Object( $md, array(), null, $files, null, null, null );
 			$req = new WflCreateObjectsRequest( $this->ticket, false, array($this->createObject), null, false );
 			$resp = $this->soapClient->CreateObjects( $req );
-			LogHandler::Log('wwtest', 'INFO', 'CreateObjects successful.');
+			LogHandler::Log( 'wwtest', 'INFO', 'CreateObjects successful.' );
 			$this->createObject->Files[0]->Content = $contentUTF16; // repair content release by CreateObjects call
 			$this->objId = $resp->Objects[0]->MetaData->BasicMetaData->ID;
-			LogHandler::Log('wwtest', 'INFO', 'CreateObjects. ID: '.$this->objId);
+			LogHandler::Log( 'wwtest', 'INFO', 'CreateObjects. ID: '.$this->objId );
 		} catch( SoapFault $e ) {
 			$this->setResult( 'ERROR', $e->getMessage(), '' );
 		} catch( BizException $e ) {
@@ -383,20 +380,20 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 	private function getArticle() 
 	{
 		if( !$this->ticket || !$this->objId ) return; // nothing do to
-		LogHandler::Log('wwtest', 'INFO', 'GetObjects. ID: '.$this->objId);
+		LogHandler::Log( 'wwtest', 'INFO', 'GetObjects. ID: '.$this->objId );
 		try {
 			require_once BASEDIR.'/server/interfaces/services/wfl/WflGetObjectsRequest.class.php';
 			require_once BASEDIR.'/server/interfaces/services/wfl/WflGetObjectsResponse.class.php';
 			$req = new WflGetObjectsRequest( $this->ticket, array($this->objId), true, 'native', array() );
 			$resp = $this->soapClient->GetObjects( $req );
 			$this->getObject = $resp->Objects[0];
-			LogHandler::Log('wwtest', 'INFO', 'GetObjects successful.');
+			LogHandler::Log( 'wwtest', 'INFO', 'GetObjects successful.' );
 		} catch( SoapFault $e ) {
 			$this->setResult( 'ERROR', $e->getMessage(), '' );
 		} catch( BizException $e ) {
 			$this->setResult( 'ERROR', $e->getMessage(), '' );
 		}
-		LogHandler::Log('wwtest', 'INFO', 'GetObjects successful.');
+		LogHandler::Log( 'wwtest', 'INFO', 'GetObjects successful.' );
 	}
 
 	/**
@@ -410,7 +407,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 			require_once BASEDIR.'/server/interfaces/services/wfl/WflUnlockObjectsResponse.class.php';
 			$req = new WflUnlockObjectsRequest( $this->ticket, array($this->objId), null );
 			$this->soapClient->UnlockObjects( $req );
-			LogHandler::Log('wwtest', 'INFO', 'UnlockObjects successful.');
+			LogHandler::Log( 'wwtest', 'INFO', 'UnlockObjects successful.' );
 		} catch( SoapFault $e ) {
 			$this->setResult( 'ERROR', $e->getMessage(), '' );
 		} catch( BizException $e ) {
@@ -425,7 +422,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 	private function validateData()
 	{
 		if( !$this->ticket || !$this->objId ) return; // nothing do to
-		LogHandler::Log('wwtest', 'INFO', 'Testing names.');
+		LogHandler::Log( 'wwtest', 'INFO', 'Testing names.' );
 		$errors = array();
 		
 		// check encoding sent data
@@ -470,7 +467,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 				'Also run the "HTTP Server Encoding" test to check your HTTP server settings and make sure default encodings are set to UTF-8. ';
 			$this->setResult( 'ERROR', 'Server is NOT multi-byte safe: <ul><li>'.implode('</li><li>',$errors).'</li></ul>', $help );
 		}
-		LogHandler::Log('wwtest', 'INFO', 'Names are correct. Multi-byte safe server.');
+		LogHandler::Log( 'wwtest', 'INFO', 'Names are correct. Multi-byte safe server.' );
 	}
 
 	/**
@@ -486,7 +483,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 			$resp = $this->soapClient->DeleteObjects( $req );
 			if( !$resp->Reports ) { // Introduced in v8.0 (DeleteObjects Resp support ErrorReport)
 				$this->objId = null;
-				LogHandler::Log('wwtest', 'INFO', 'DeleteObjects successful.');
+				LogHandler::Log( 'wwtest', 'INFO', 'DeleteObjects successful.' );
 			} else {
 				$errMsg = '';
 				foreach( $resp->Reports as $report ){
@@ -514,7 +511,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 			require_once BASEDIR.'/server/interfaces/services/wfl/WflLogOffResponse.class.php';
 			$req = new WflLogOffRequest( $this->ticket, false, null, null );
 			$this->soapClient->LogOff( $req );
-			LogHandler::Log('wwtest', 'INFO', 'LogOff successful.');
+			LogHandler::Log( 'wwtest', 'INFO', 'LogOff successful.' );
 		} catch( SoapFault $e ) {
 			$this->setResult( 'ERROR', $e->getMessage(), '' );
 		} catch( BizException $e ) {

@@ -94,8 +94,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 	 */
 	private function createArticle($vars)
 	{
-		$vars = $vars; // Keep analyzer happy
-
 		// Build the request.
 		require_once BASEDIR . '/server/interfaces/services/wfl/DataClasses.php';
 		require_once BASEDIR . '/server/services/wfl/WflCreateObjectsService.class.php';
@@ -1628,7 +1626,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 			$request->Areas = array('Workflow');
 			$service->execute($request);
 		} catch( BizException $e ) {
-			$e = $e; // Keep analyzer happy
 			$message = 'Article and Dossier could not be deleted.';
 			$help = 'Please see the logs for more information.';
 			LogHandler::Log(self::NAME, 'ERROR', $message );
@@ -1661,7 +1658,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 			$request->Areas = array('Workflow');
 			$service->execute($request);
 		} catch( BizException $e ) {
-			$e = $e; // Keep analyzer happy
 			$message = 'Layout could not be deleted for: ' . $testCase;
 			$help = 'Please see the logs for more information.';
 			LogHandler::Log(self::NAME, 'ERROR', $message );
@@ -1675,7 +1671,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 	/**
 	 * Does various health checks before attempting the test cases.
 	 *
-	 * @param $vars The operational parameters
+	 * @param array $vars The operational parameters
 	 * @return bool Whether the check was succesful or not.
 	 */
 	private function checkHealth($vars)
@@ -1686,47 +1682,17 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 		$this->ticket = @$vars['BuildTest_WebServices_WflServices']['ticket'];
 		if( !$this->ticket ) {
 			$message = 'Could not find ticket to test with.';
-			$help = 'Please enable the WflLogon test.';
+			$help = 'Please enable the "Setup test data" test (WflLogOn_TestCase).';
 			$this->setResult( 'ERROR', $message, $help );
 			return false;
 		}
 
-		// Test the issue.
-		$issueName = $vars['BuildTest_WebServices_WflServices']['issue'];
-		if (empty($issueName)) {
-			$message = 'Issue name should be set in configserver.';
-			$help = 'Please check the settings in configserver.php.';
-			LogHandler::Log(self::NAME, 'ERROR', $message );
-			$this->setResult( 'ERROR',  $message, $help );
-			return false;
-		}
-
-		// Find the issueinfo.
-		$this->publicationInfo = @$vars['BuildTest_WebServices_WflServices']['publication'];
-
-		if (is_null($this->publicationInfo)) {
-			$message = 'Publication could not be retrieved from the session variables.';
-			$help = 'Please enable the WflLogon test.';
-			LogHandler::Log(self::NAME, 'ERROR', $message );
-			$this->setResult( 'ERROR',  $message, $help );
-			return false;
-		}
-
-		// Get the IssueInfo.
-		foreach ($this->publicationInfo->PubChannels as $channel) {
-			if ($channel->Id == $this->publicationInfo->Id) {
-				foreach ($channel->Issues as $issue) {
-					if ($issue->Name == $issueName) {
-						$this->pubChannelInfo = $channel;
-						$this->issueInfo = $issue;
-					}
-				}
-			}
-		}
-
-		if (is_null($this->issueInfo)) {
-			$message = 'IssueInfo could not be retrieved from the publication.';
-			$help = '';
+		$this->publicationInfo = $vars['BuildTest_WebServices_WflServices']['publication'];
+		$this->pubChannelInfo = $vars['BuildTest_WebServices_WflServices']['printPubChannel'];
+		$this->issueInfo = $vars['BuildTest_WebServices_WflServices']['printIssue'];
+		if( !$this->publicationInfo || !$this->pubChannelInfo || !$this->issueInfo ) {
+			$message = 'Publication/PubChannel/Issue could not be retrieved from the session variables.';
+			$help = 'Please enable the "Setup test data" entry (WflLogOn_TestCase.php) and try again.';
 			LogHandler::Log(self::NAME, 'ERROR', $message );
 			$this->setResult( 'ERROR',  $message, $help );
 			return false;

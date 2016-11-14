@@ -225,7 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Ustaw offline</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Pozostaw puste w celu aktualizacji bezpośredniej</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Pozostaw puste, jeżeli właścicielem jest użytkownik</Term>
-  <Term key="ACT_LESS">Less</Term>
+  <Term key="ACT_LESS">Mniej</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">Wymieniono w Przeglądzie publikacji</Term>
   <Term key="ACT_LOGIN">Zaloguj</Term>
   <Term key="ACT_LOGOFF">Wyloguj</Term>
@@ -257,7 +257,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">Otwórz</Term>
   <Term key="ACT_OPEN_EDIT">Otwórz do edycji</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Otwórz do edycji (niewstawiony)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">Otwórz w nowej karcie</Term>
   <Term key="ACT_ORDER_BY">Porządkuj według</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">Plik %1 nie istnieje</Term>
@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">Nazwy plików są różne. Czy nadal chcesz zarejestrować?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">Dopuszczalne jest łączenie tylko artykułów w formacie tekstowym</Term>
   <Term key="ERR_COMPOSE">Błąd komponowania artykułu. (S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">Błąd podczas łączenia z usługą o nazwie %1. Sprawdź połączenie i spróbuj ponownie. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">Błąd łączenia z serwerem. Sprawdź połączenie i spróbuj ponownie. (S1068)</Term>
   <Term key="ERR_COPY_FOLDER">Wystąpił błąd podczas publikacji. Skontaktuj się z administratorem systemu.\n\nSzczegóły: Nie znaleziono folderu bufora zasobów HTML. Uruchom test 'Adobe Digital Publishing System (DPS)' na stronie 'Sprawdzanie stanu' i postępuj zgodnie z instrukcjami.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">Nie można połączyć się z bazą danych (S1003)</Term>
@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Użytkownik zdezaktywowany (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Wymagana jest nazwa użytkownika i hasło</Term>
   <Term key="ERR_USER_BEGINDATE">Konto użytkownika nie jest jeszcze ważne</Term>
-  <Term key="ERR_USER_ENDDATE">Konto użytkownika nie jest już ważne</Term>
+  <Term key="ERR_USER_ENDDATE">Konto użytkownika nie jest już ważne (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Nazwa użytkownika już istnieje.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Wprowadź wymaganą nazwę użytkownika</Term>
   <Term key="ERR_WRONGLANG">Wybierz język (S1052)</Term>
@@ -2151,7 +2151,7 @@ Po zmianie ustawień należy pamiętać o ponownym uruchomieniu usługi WWW i/lu
   <Term key="WARN_ELEMENT_PLACED_EDITION">Element %1 artykułu %2 już jest umieszczony w edycji %3 układu %4.</Term>
   <Term key="WARN_PAGE_DBL">Wiele stron dla strony:</Term>
   <Term key="WARN_PAGE_START">Jedna ze stron rozpoczyna się od numeru strony:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Hasło utraciło ważność. Zmień hasło</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Hasło utraciło ważność. Zmień hasło (S1145)</Term>
   <Term key="WARN_USER_LIMIT">Przekroczono maksymalną dozwoloną liczbę użytkowników korzystających jednocześnie z aplikacji lub osiągnięto limit na serwerze Enterprise.</Term>
   <Term key="WAR_UPLOAD_WARNING">Nie można utworzyć obrazu podglądu</Term>
   <Term key="WEBFEATURES">Funkcje WWW</Term>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <!-- 
 	Generic SOAP interface. 
 	Implemented by Editorial system and called by Planning System.
@@ -111,6 +111,7 @@
 					<element name="Edition"       type="tns:Edition"           nillable="true"/>  <!-- v5.0 Edition to produce page. Nil when same for all editions, or no editions available at pub/iss. -->
 					<element name="Master"        type="xsd:string"            nillable="true"/>  <!-- v5.0 Name of master page in template used to create page. When empty, first master page is taken. -->
 					<element name="PageSequence"  type="xsd:unsignedInt"       nillable="true"/>  <!-- Relative location within the layout, starts at 1 -->
+					<element name="PageNumber"	  type="xsd:string"        	   nillable="true" minOccurs="0" maxOccurs="1"/> <!--v10.0.2 Needed to support different numberings styles. -->
 				</all>
 			</complexType>
 			<complexType name="ArrayOfPage">
@@ -130,6 +131,7 @@
 					<element name="Name"        type="xsd:string"         nillable="true"/>
 					<element name="Publication" type="xsd:string"         nillable="true"/>
 					<element name="Issue"       type="xsd:string"         nillable="true"/>
+					<element name="PubChannel"  type="xsd:string"         nillable="true"	minOccurs="0" maxOccurs="1"/> <!-- Added in 9.8.1 QP, EN-88057 -->
 					<element name="Section"     type="xsd:string"         nillable="true"/>
 					<element name="Status"      type="xsd:string"         nillable="true"/>
 					<element name="Pages"       type="tns:ArrayOfPage"    nillable="true"/> <!-- List of planned pages which needs to be complete since it overwrites all previous pages!! -->
@@ -184,8 +186,9 @@
 					<element name="Id" nillable="true" type="xsd:string"/>      <!-- Advert id of editorial system -->
 					<element name="AlienId" nillable="true" type="xsd:string"/> <!-- Advert id of advert system -->
 					<element name="Publication" nillable="true" type="xsd:string"/>  
-					<element name="Issue" nillable="true" type="xsd:string"/>  
-					<element name="Section" nillable="true" type="xsd:string"/>  
+					<element name="Issue" nillable="true" type="xsd:string"/>
+					<element name="PubChannel"  type="xsd:string"  nillable="true"	minOccurs="0" maxOccurs="1"/> <!-- Publication Channel, added in v9.8.1 QP, EN-88057 -->
+					<element name="Section" nillable="true" type="xsd:string"/>
 					<element name="Status" nillable="true" type="xsd:string"/>  
 					<element name="Name" nillable="true" type="xsd:string"/>           <!-- Name, doesn't have to be unique -->
 					<element name="AdType" nillable="true" type="xsd:string"/>         <!-- Advert type: for future usage -->

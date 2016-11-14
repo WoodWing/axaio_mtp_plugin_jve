@@ -944,12 +944,14 @@ abstract class BaseFacebook
 
     $opts = self::$CURL_OPTS;
     if ($this->getFileUploadSupport()) {
-      // <<< WoodWing: For PHP 5.6 and above, CURLOPT_SAFE_UPLOAD option default to TRUE,
-      //     where TRUE to disable support for the @ prefix for uploading files in CURLOPT_POSTFIELDS,
+      // >>> WoodWing:
+      //     Since PHP 5.5 the CURLOPT_SAFE_UPLOAD option is introduced default to FALSE.
+      //     Since PHP 5.6 the default for CURLOPT_SAFE_UPLOAD option is changed to TRUE.
+      //     Value TRUE tells to disable support for the @ prefix for uploading files in CURLOPT_POSTFIELDS,
       //     which means that values starting with @ can be safely passed as fields.
       //     The usage of the @filename API for file uploading is deprecated. Please use the CURLFile class instead.
       //     In below code, substitute the original @filename to use new CURLFile() to upload.
-      if (version_compare(PHP_VERSION, '5.6.0', '>=')) {
+      if (version_compare(PHP_VERSION, '5.5.0', '>=')) {
         if (!empty($params['image'])) {
           $nameArr = explode('/', $params['image']);
           $name = $nameArr[count($nameArr) - 1];
@@ -957,9 +959,10 @@ abstract class BaseFacebook
           $size = getimagesize($image);
           $mime = $size['mime'];
           $params['image'] = new CurlFile($image, $mime, $name);
+          $opts[CURLOPT_SAFE_UPLOAD] = true;
         }
       }
-      // >>>
+      // <<<
       $opts[CURLOPT_POSTFIELDS] = $params;
     } else {
       $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');

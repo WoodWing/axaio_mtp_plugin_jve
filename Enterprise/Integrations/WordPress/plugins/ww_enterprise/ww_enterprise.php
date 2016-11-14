@@ -3,7 +3,7 @@
  * Plugin Name: WoodWing Enterprise
  * Plugin URI: http://woodwing.com
  * Description: This plugin extends some functionality from WordPress and is used by Enterprise Server.
- * Version: 10.1.0 Build 52
+ * Version: 10.1.0 Build 120
  * Author: WoodWing Software
  */
 

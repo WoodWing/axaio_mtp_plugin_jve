@@ -1,4 +1,10 @@
 <?php
+/**
+ * @package    Enterprise
+ * @subpackage ServerPlugins
+ * @since      v9.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once BASEDIR . '/server/utils/EnterpriseXmlRpcClient.class.php';
 require_once dirname(__FILE__) . '/config.php';
@@ -48,7 +54,7 @@ class WordPressXmlRpcClient
 		$xmlRpcClient = new WW_Utils_XmlRpcClient($url);
 		$xmlRpcClient->setXmlRpcClient($url, $zendHttpClient);
 		try {
-			$retVal = $xmlRpcClient->callRpcService( $action, $params );
+			$retVal = $xmlRpcClient->callRpcService( $action, $params, array( 'WordPress_Utils', 'obfuscatePasswordInRequest' ) );
 		} catch( BizException $e ) {
 			if( strpos( $e->getDetail(), 'permission' ) && strpos( $e->getDetail(), '(403)' ) ) { // given when the user has no the correct rights
 				$errMsg = $e->getDetail();
@@ -218,7 +224,8 @@ class WordPressXmlRpcClient
 				$params = array( 0, $userName, $password, $content, true );
 				return $this->rpcService( $url, 'metaWeblog.newPost', $params );
 			} else {
-				$params = array( $externalId, $userName, $password, $content, true );
+				// WordPress API uses integers for the external id. Need to make sure this type is set correctly.
+				$params = array( (int) $externalId, $userName, $password, $content, true );
 				return $this->rpcService( $url, 'metaWeblog.editPost', $params );
 			}
 		} else {
@@ -248,13 +255,14 @@ class WordPressXmlRpcClient
 	 * This function gets a post from WordPress
 	 * This function uses the XML-RPC API.
 	 *
-	 * @param $externalId
+	 * @param int $externalId
 	 *
 	 * @return mixed
 	 */
 	function getPost( $externalId )
 	{
-		$params = array( $externalId, $this->userName, $this->password );
+		// WordPress API uses integers for the external id. Need to make sure this type is set correctly.
+		$params = array( (int) $externalId, $this->userName, $this->password );
 		return $this->rpcService( $this->url, 'metaWeblog.getPost', $params );
 	}
 
@@ -264,7 +272,7 @@ class WordPressXmlRpcClient
 	 * This function deletes a post from WordPress with all the content.(Inline images and galleries)
 	 * This function uses the XML-RPC API.
 	 *
-	 * @param $externalId
+	 * @param int $externalId
 	 *
 	 * @return mixed
 	 */
@@ -330,18 +338,18 @@ class WordPressXmlRpcClient
 	 *
 	 * @param string $imageName
 	 * @param string $filePath
-	 * @param string $extension
+	 * @param string $mimeType
 	 *
 	 * @throws BizException
 	 *
 	 * @return mixed
 	 */
-	function uploadMediaLibraryImage( $imageName, $filePath, $extension)
+	function uploadMediaLibraryImage( $imageName, $filePath, $mimeType)
 	{
 		$imageFile = file_get_contents( $filePath );
 		$data = array(
 			'name'  => $imageName,
-			'type'  => $extension,
+			'type'  => $mimeType,
 			'bits'  => new IXR_Base64( $imageFile ), // The image convert to base 64 is needed for WordPress
 			'overwrite' => false
 		);
@@ -349,7 +357,7 @@ class WordPressXmlRpcClient
 		$rpc = new IXR_Client( $this->url );
 		$status = $rpc->query( 'metaWeblog.newMediaObject', 0, $this->userName,	$this->password, $data );
 		if( !$status ) {
-			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', '' );
+			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $rpc->getErrorMessage() );
 		}
 
 		return $rpc->getResponse();
@@ -398,18 +406,18 @@ class WordPressXmlRpcClient
 	 * @param string $imageName
 	 * @param string $filePath
 	 * @param int $galleryId
-	 * @param string $extension
+	 * @param string $mimeType
 	 *
 	 * @return mixed
 	 *
 	 * @throws Exception BizException
 	 */
-	function uploadImage( $imageName, $filePath, $extension, $galleryId )
+	function uploadImage( $imageName, $filePath, $mimeType, $galleryId )
 	{
 		$imageFile = file_get_contents( $filePath );
 		$data = array(
 			'name'  => $imageName,
-			'type'  => $extension,
+			'type'  => $mimeType,
 			'bits'  => new IXR_Base64( $imageFile ), // The image convert to base 64 is needed for WordPress
 			'gallery' => $galleryId
 		);
@@ -417,7 +425,7 @@ class WordPressXmlRpcClient
 		$rpc = new IXR_Client( $this->url );
 		$status = $rpc->query( 'ngg.uploadImage', 0, $this->userName,	$this->password, $data );
 		if( !$status ) {
-			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', 'Publishing the image failed. Please contact your system administrator' );
+			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $rpc->getErrorMessage() );
 		}
 
 		return $rpc->getResponse();
@@ -431,16 +439,16 @@ class WordPressXmlRpcClient
 	 *
 	 * @param string $imageName
 	 * @param string $filePath
-	 * @param string $extension
+	 * @param string $mimeType
 	 * @param int $galleryId
 	 * @param string $externalId
 	 *
 	 * @return mixed
 	 */
-	function updateImage( $imageName, $filePath, $extension, $galleryId, $externalId )
+	function updateImage( $imageName, $filePath, $mimeType, $galleryId, $externalId )
 	{
 		$this->deleteImage( $externalId );
-		$result = $this->uploadImage( $imageName, $filePath, $extension, $galleryId );
+		$result = $this->uploadImage( $imageName, $filePath, $mimeType, $galleryId );
 
 		return $result;
 	}

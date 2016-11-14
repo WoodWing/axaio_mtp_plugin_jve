@@ -11,22 +11,36 @@ require_once BASEDIR.'/server/dbclasses/DBServerPlugin.class.php';
 
 class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase extends TestCase
 {
-	private $vars = null;
+	/** @var string $ticket  */
 	private $ticket = null;
+
+	/** @var PublicationInfo $publication  */
 	private $publication = null;
-	private $issue = null;
+
+	/** @var Target $target  */
 	private $target = null;
-	private $editions = null;
-	private $publicationChannel = null;
+
+	/** @var CategoryInfo $category  */
+	private $category = null;
+
+	/** @var BizTransferServer $transferServer  */
 	private $transferServer = null;
 
 	const TRANSFERIMAGE = '/testdata/WflWcml2Xhtml_Image.png';
 	const TRANSFERARTICLE = '/testdata/WflWcml2Xhtml_Article.wcml';
 	const ELEMENTID = '30DE1381-8A7A-41E6-8F6C-5D80D8D9BAF8';
 
+	/** @var Object $dossier */
 	private $dossier = null;
+
+	/** @var Object $image */
 	private $image = null;
+
+	/** @var Object $article */
 	private $article = null;
+
+	/** @var State[] $statuses */
+	private $statuses = array();
 
 	public function getDisplayName() { return 'WCML To XHTML conversion.'; }
 	public function getTestGoals()   { return 'Checks if the Article can be converted to XHTML and that the image '
@@ -40,7 +54,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 	public function getPrio()        { return 113; }
 
 	/**
-	 * Runs the testcase.
+	 * Runs the test case.
 	 *
 	 * @return bool
 	 */
@@ -51,7 +65,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 
 		require_once BASEDIR . '/server/bizclasses/BizPublishForm.class.php';
 		try {
-			$elements = BizPublishForm::extractArticleObjectElements( $this->article );
+			$elements = BizPublishForm::extractArticleObjectElements( $this->article, $this->target->PubChannel->Id );
+			// Note:
 		} catch (BizException $e) {
 			$this->setResult( 'ERROR',  'Extraction failed: ' . $e->getMessage(), 'Test failed.' );
 			$this->teardown();
@@ -67,7 +82,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 					.'with</span></p><p class="para para_$ID/NormalParagraphStyle"><span class="char char_$ID/[No_char'
 					.'acter_style]"/></p><p class="para para_$ID/NormalParagraphStyle"><span class="char char_$ID/[No_'
 					.'character_style]"><img id="ent_' . $this->image->MetaData->BasicMetaData->ID . '" '
-					.'src="ww_enterprise" width="319" height="291"/></span></p><p class="para para_$ID/NormalParagraph'
+					.'src="ww_enterprise" width="319.125" height="291.9512195122"/></span></p><p class="para para_$ID/NormalParagraph'
 					.'Style"><span class="char char_$ID/[No_character_style]"/></p><p class="para para_$ID/Normal'.
 					'ParagraphStyle"><span class="char char_$ID/[No_character_style]">An inline image</span></p></div>';
 				if ($el->Content != $orgContent) {
@@ -83,26 +98,29 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 	}
 
 	/**
-	 * Determines and sets up all the data for our testcase.
+	 * Determines and sets up all the data for our test case.
 	 *
-	 * @return bool Whether or not the setup was succesful.
+	 * @return bool Whether or not the setup was successful.
 	 */
 	private function setup()
 	{
+		// Validate session variables.
+		require_once BASEDIR.'/server/wwtest/testsuite/BuildTest/WebServices/WflServices/Utils.class.php';
+		$wflServicesUtils = new WW_TestSuite_BuildTest_WebServices_WflServices_Utils();
+		if( !$wflServicesUtils->initTest( $this ) ) {
+			return false;
+		}
+
 		// Get all the session related variables.;
 		$this->readSessionVariables();
-
-		// Determine target and editions.
-		$this->determineTargetAndEditions();
 
 		// Get the transferServer
 		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 		$this->transferServer = new BizTransferServer();
 
 		// Create a dossier to test with.
-		$this->dossier = $this->createDossier();
-		if (is_null($this->dossier))
-		{
+		$this->createDossier();
+		if (is_null($this->dossier)) {
 			$this->setResult( 'ERROR',  'Dossier could not be created.', 'Test failed.' );
 			$this->teardown();
 			return false;
@@ -128,83 +146,21 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 
 	/**
 	 * Reads out the session variables and sets them for the test.
-	 *
-	 * @return bool Whether or not reading out the variables was succesful.
 	 */
 	private function readSessionVariables()
 	{
-		// Get Session variables.
-		$this->vars = $this->getSessionVariables();
-
-		// Get the ticket.
-		$this->ticket = @$this->vars['BuildTest_WebServices_WflServices']['ticket'];
-		if( !$this->ticket ) {
-			$this->setResult( 'ERROR',  'Could not find ticket to test with.', 'Please enable the WflLogon test.' );
-			return false;
-		}
-
-		// Get the publication.
-		$this->publication = @$this->vars['BuildTest_WebServices_WflServices']['publication'];
-		if( !$this->publication ) {
-			$this->setResult( 'ERROR',  'Could not find publication to test with.', 'Please enable the WflLogon test.' );
-			return false;
-		}
-
-		// Get the issue.
-		$this->issue = @$this->vars['BuildTest_WebServices_WflServices']['issue'];
-		if( !$this->publication ) {
-			$this->setResult( 'ERROR',  'Could not find an issue to test with.', 'Please enable the WflLogon test.' );
-			return false;
-		}
-		return true;
+		$vars = $this->getSessionVariables();
+		$this->ticket              = $vars['BuildTest_WebServices_WflServices']['ticket'];
+		$this->publication         = $vars['BuildTest_WebServices_WflServices']['publication'];
+		$this->target              = $vars['BuildTest_WebServices_WflServices']['webTarget'];
+		$this->category            = $vars['BuildTest_WebServices_WflServices']['category'];
+		$this->statuses['Image']   = $vars['BuildTest_WebServices_WflServices']['imageStatus'];
+		$this->statuses['Article'] = $vars['BuildTest_WebServices_WflServices']['articleStatus'];
+		$this->statuses['Dossier'] = $vars['BuildTest_WebServices_WflServices']['dossierStatus'];
 	}
 
 	/**
-	 * Determines the Target and Editions for this testcase.
-	 */
-	private function determineTargetAndEditions()
-	{
-		$pubChannel = new PubChannel();
-		$issue = new Issue();
-		$editions = null;
-
-		foreach( $this->publication->PubChannels as $pubChannelInfo ) {
-			if( $pubChannelInfo->Name == 'Print' ) {
-
-				$pubChannel->Id = $pubChannelInfo->Id;
-				$pubChannel->Name = $pubChannelInfo->Name;
-
-				foreach( $pubChannelInfo->Issues as $issInfo ) {
-					if( $issInfo->Name == $this->issue )	{
-						$issue->Id   = $issInfo->Id;
-						$issue->Name = $issInfo->Name;
-						$issue->OverrulePublication = $issInfo->OverrulePublication;
-						break;
-					}
-				}
-
-				$editions = $pubChannelInfo->Editions;
-				break;
-			}
-		}
-
-		// Set the issue.
-		$this->issue = $issue;
-
-		// Set the editions.
-		$this->editions = $editions;
-
-		// Generate a target.
-		$target = new Target();
-		$target->PubChannel = $pubChannel;
-		$target->Issue      = $issue;
-		$target->Editions   = $editions;
-		$this->target = $target;
-		$this->publicationChannel = $target->PubChannel;
-	}
-
-	/**
-	 * Deconstructs the data assembled for the testcase.
+	 * Deconstructs the data assembled for the test case.
 	 */
 	private function teardown()
 	{
@@ -225,25 +181,14 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 	}
 
 	/**
-	 * Creates an image to be used as testdata in an inline image resize action,.
+	 * Creates an image to be used as test data in an inline image resize action.
 	 */
 	private function createImage()
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizWorkflow.class.php';
 
 		// Get the current User.
 		$user = BizSession::checkTicket( $this->ticket );
-
-		// Determine the Publication.
-		$publication = $this->getPublication();
-
-		// Determine the State.
-		$state = BizObjectComposer::getFirstState($user, $this->publication->Id, null, null, 'Image');
-
-		// Determine the Category.
-		$category = BizObjectComposer::getFirstCategory($user, $publication->Id);
 
 		// Determine parent relation (with the Dossier.)
 		$relations = array();
@@ -273,107 +218,99 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 		$inputPath = dirname(__FILE__). self::TRANSFERIMAGE;
 		$this->transferServer->copyToFileTransferServer( $inputPath, $attachment );
 
-		$objects = array();
-		$objects[0] = new Object();
-		$objects[0]->MetaData = new MetaData();
-		$objects[0]->MetaData->BasicMetaData = new BasicMetaData();
-		$objects[0]->MetaData->BasicMetaData->ID = null;
-		$objects[0]->MetaData->BasicMetaData->DocumentID = null;
-		$objects[0]->MetaData->BasicMetaData->Name = 'Screen Shot 2012-12-13 at 12.48.12 PM';
-		$objects[0]->MetaData->BasicMetaData->Type = 'Image';
-		$objects[0]->MetaData->BasicMetaData->Publication = $publication;
-		$objects[0]->MetaData->BasicMetaData->Category = $category;
-		$objects[0]->MetaData->BasicMetaData->ContentSource = null;
-		$objects[0]->MetaData->RightsMetaData = new RightsMetaData();
-		$objects[0]->MetaData->RightsMetaData->CopyrightMarked = false;
-		$objects[0]->MetaData->RightsMetaData->Copyright = null;
-		$objects[0]->MetaData->RightsMetaData->CopyrightURL = null;
-		$objects[0]->MetaData->SourceMetaData = new SourceMetaData();
-		$objects[0]->MetaData->SourceMetaData->Credit = null;
-		$objects[0]->MetaData->SourceMetaData->Source = null;
-		$objects[0]->MetaData->SourceMetaData->Author = null;
-		$objects[0]->MetaData->ContentMetaData = new ContentMetaData();
-		$objects[0]->MetaData->ContentMetaData->Description = null;
-		$objects[0]->MetaData->ContentMetaData->DescriptionAuthor = null;
-		$objects[0]->MetaData->ContentMetaData->Keywords = array();
-		$objects[0]->MetaData->ContentMetaData->Slugline = null;
-		$objects[0]->MetaData->ContentMetaData->Format = 'image/png';
-		$objects[0]->MetaData->ContentMetaData->Columns = null;
-		$objects[0]->MetaData->ContentMetaData->Width = null;
-		$objects[0]->MetaData->ContentMetaData->Height = null;
-		$objects[0]->MetaData->ContentMetaData->Dpi = null;
-		$objects[0]->MetaData->ContentMetaData->LengthWords = null;
-		$objects[0]->MetaData->ContentMetaData->LengthChars = null;
-		$objects[0]->MetaData->ContentMetaData->LengthParas = null;
-		$objects[0]->MetaData->ContentMetaData->LengthLines = null;
-		$objects[0]->MetaData->ContentMetaData->PlainContent = null;
-		$objects[0]->MetaData->ContentMetaData->FileSize = 111109;
-		$objects[0]->MetaData->ContentMetaData->ColorSpace = null;
-		$objects[0]->MetaData->ContentMetaData->HighResFile = null;
-		$objects[0]->MetaData->ContentMetaData->Encoding = null;
-		$objects[0]->MetaData->ContentMetaData->Compression = null;
-		$objects[0]->MetaData->ContentMetaData->KeyFrameEveryFrames = null;
-		$objects[0]->MetaData->ContentMetaData->Channels = null;
-		$objects[0]->MetaData->ContentMetaData->AspectRatio = null;
-		$objects[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
-		$objects[0]->MetaData->WorkflowMetaData->Deadline = null;
-		$objects[0]->MetaData->WorkflowMetaData->Urgency = null;
-		$objects[0]->MetaData->WorkflowMetaData->Modifier = null;
-		$objects[0]->MetaData->WorkflowMetaData->Modified = null;
-		$objects[0]->MetaData->WorkflowMetaData->Creator = null;
-		$objects[0]->MetaData->WorkflowMetaData->Created = null;
-		$objects[0]->MetaData->WorkflowMetaData->Comment = null;
-		$objects[0]->MetaData->WorkflowMetaData->State = $state;
-		$objects[0]->MetaData->WorkflowMetaData->RouteTo = null;
-		$objects[0]->MetaData->WorkflowMetaData->LockedBy = null;
-		$objects[0]->MetaData->WorkflowMetaData->Version = null;
-		$objects[0]->MetaData->WorkflowMetaData->DeadlineSoft = null;
-		$objects[0]->MetaData->WorkflowMetaData->Rating = null;
-		$objects[0]->MetaData->WorkflowMetaData->Deletor = null;
-		$objects[0]->MetaData->WorkflowMetaData->Deleted = null;
-		$objects[0]->MetaData->ExtraMetaData = array();
-		$objects[0]->MetaData->ExtraMetaData[0] = new ExtraMetaData();
-		$objects[0]->MetaData->ExtraMetaData[0]->Property = 'RelatedTargets';
-		$objects[0]->MetaData->ExtraMetaData[0]->Values = array();
-		$objects[0]->MetaData->ExtraMetaData[0]->Values[0] = '';
-		$objects[0]->Relations = $relations;
-		$objects[0]->Pages = null;
-		$objects[0]->Files = array( $attachment );
-		$objects[0]->Messages = null;
-		$objects[0]->Elements = array();
-		$objects[0]->Targets = array();
-		$objects[0]->Renditions = null;
-		$objects[0]->MessageList = null;
+		$image = new Object();
+		$image->MetaData = new MetaData();
+		$image->MetaData->BasicMetaData = new BasicMetaData();
+		$image->MetaData->BasicMetaData->ID = null;
+		$image->MetaData->BasicMetaData->DocumentID = null;
+		$image->MetaData->BasicMetaData->Name = 'Screen Shot 2012-12-13 at 12.48.12 PM';
+		$image->MetaData->BasicMetaData->Type = 'Image';
+		$image->MetaData->BasicMetaData->Publication = new Publication();
+		$image->MetaData->BasicMetaData->Publication->Id = $this->publication->Id;
+		$image->MetaData->BasicMetaData->Publication->Name = $this->publication->Name;
+		$image->MetaData->BasicMetaData->Category = new Category();
+		$image->MetaData->BasicMetaData->Category->Id = $this->category->Id;
+		$image->MetaData->BasicMetaData->Category->Name = $this->category->Name;
+		$image->MetaData->BasicMetaData->ContentSource = null;
+		$image->MetaData->RightsMetaData = new RightsMetaData();
+		$image->MetaData->RightsMetaData->CopyrightMarked = false;
+		$image->MetaData->RightsMetaData->Copyright = null;
+		$image->MetaData->RightsMetaData->CopyrightURL = null;
+		$image->MetaData->SourceMetaData = new SourceMetaData();
+		$image->MetaData->SourceMetaData->Credit = null;
+		$image->MetaData->SourceMetaData->Source = null;
+		$image->MetaData->SourceMetaData->Author = null;
+		$image->MetaData->ContentMetaData = new ContentMetaData();
+		$image->MetaData->ContentMetaData->Description = null;
+		$image->MetaData->ContentMetaData->DescriptionAuthor = null;
+		$image->MetaData->ContentMetaData->Keywords = array();
+		$image->MetaData->ContentMetaData->Slugline = null;
+		$image->MetaData->ContentMetaData->Format = 'image/png';
+		$image->MetaData->ContentMetaData->Columns = null;
+		$image->MetaData->ContentMetaData->Width = null;
+		$image->MetaData->ContentMetaData->Height = null;
+		$image->MetaData->ContentMetaData->Dpi = null;
+		$image->MetaData->ContentMetaData->LengthWords = null;
+		$image->MetaData->ContentMetaData->LengthChars = null;
+		$image->MetaData->ContentMetaData->LengthParas = null;
+		$image->MetaData->ContentMetaData->LengthLines = null;
+		$image->MetaData->ContentMetaData->PlainContent = null;
+		$image->MetaData->ContentMetaData->FileSize = 111109;
+		$image->MetaData->ContentMetaData->ColorSpace = null;
+		$image->MetaData->ContentMetaData->HighResFile = null;
+		$image->MetaData->ContentMetaData->Encoding = null;
+		$image->MetaData->ContentMetaData->Compression = null;
+		$image->MetaData->ContentMetaData->KeyFrameEveryFrames = null;
+		$image->MetaData->ContentMetaData->Channels = null;
+		$image->MetaData->ContentMetaData->AspectRatio = null;
+		$image->MetaData->WorkflowMetaData = new WorkflowMetaData();
+		$image->MetaData->WorkflowMetaData->Deadline = null;
+		$image->MetaData->WorkflowMetaData->Urgency = null;
+		$image->MetaData->WorkflowMetaData->Modifier = null;
+		$image->MetaData->WorkflowMetaData->Modified = null;
+		$image->MetaData->WorkflowMetaData->Creator = null;
+		$image->MetaData->WorkflowMetaData->Created = null;
+		$image->MetaData->WorkflowMetaData->Comment = null;
+		$image->MetaData->WorkflowMetaData->State = $this->statuses['Image'];
+		$image->MetaData->WorkflowMetaData->RouteTo = null;
+		$image->MetaData->WorkflowMetaData->LockedBy = null;
+		$image->MetaData->WorkflowMetaData->Version = null;
+		$image->MetaData->WorkflowMetaData->DeadlineSoft = null;
+		$image->MetaData->WorkflowMetaData->Rating = null;
+		$image->MetaData->WorkflowMetaData->Deletor = null;
+		$image->MetaData->WorkflowMetaData->Deleted = null;
+		$image->MetaData->ExtraMetaData = array();
+		$image->MetaData->ExtraMetaData[0] = new ExtraMetaData();
+		$image->MetaData->ExtraMetaData[0]->Property = 'RelatedTargets';
+		$image->MetaData->ExtraMetaData[0]->Values = array();
+		$image->MetaData->ExtraMetaData[0]->Values[0] = '';
+		$image->Relations = $relations;
+		$image->Pages = null;
+		$image->Files = array( $attachment );
+		$image->Messages = null;
+		$image->Elements = array();
+		$image->Targets = array();
+		$image->Renditions = null;
+		$image->MessageList = null;
 
-		$this->image = $this->createObject($objects);
+		$this->image = $this->createObject( $image );
 	}
 
 	/**
-	 * Creates a test article with a resized inline image for testing purposes.
+	 * Creates a test article with a resize'd inline image for testing purposes.
 	 */
 	private function createArticle()
 	{
 		// Get the current User.
 		$user = BizSession::checkTicket( $this->ticket );
 
-		// Determine the Publication.
-		$publication = $this->getPublication();
-
-		// Determine the State.
-		$state = BizObjectComposer::getFirstState($user, $this->publication->Id, null, null, 'Image');
-
-		// Determine the Category.
-		$category = BizObjectComposer::getFirstCategory($user, $publication->Id);
-
 		// Update the link object id with the image object id.
-
-
 		$find = '{objectid}';
 		$replaceWith = $this->image->MetaData->BasicMetaData->ID;
 
-		$inputPath = dirname(__FILE__). self::TRANSFERARTICLE;
-		$content = file_get_contents($inputPath);
-		$content = str_replace($find, $replaceWith, $content);
+		$inputPath = dirname( __FILE__ ).self::TRANSFERARTICLE;
+		$content = file_get_contents( $inputPath );
+		$content = str_replace( $find, $replaceWith, $content );
 
 		// Set the file(s).
 		$attachment = new Attachment();
@@ -387,222 +324,192 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 		// Place the image on the file transfer server.
 		$this->transferServer->writeContentToFileTransferServer( $content, $attachment );
 
-		$objects = array();
-		$objects[0] = new Object();
-		$objects[0]->MetaData = new MetaData();
-		$objects[0]->MetaData->BasicMetaData = new BasicMetaData();
-		$objects[0]->MetaData->BasicMetaData->ID = null;
-		$objects[0]->MetaData->BasicMetaData->DocumentID = null;
-		$objects[0]->MetaData->BasicMetaData->Name = 'buildtest_inline_img';
-		$objects[0]->MetaData->BasicMetaData->Type = 'Article';
-		$objects[0]->MetaData->BasicMetaData->Publication = $publication;
-		$objects[0]->MetaData->BasicMetaData->Category = $category;
-		$objects[0]->MetaData->BasicMetaData->ContentSource = null;
-		$objects[0]->MetaData->RightsMetaData = new RightsMetaData();
-		$objects[0]->MetaData->RightsMetaData->CopyrightMarked = null;
-		$objects[0]->MetaData->RightsMetaData->Copyright = null;
-		$objects[0]->MetaData->RightsMetaData->CopyrightURL = null;
-		$objects[0]->MetaData->SourceMetaData = new SourceMetaData();
-		$objects[0]->MetaData->SourceMetaData->Credit = null;
-		$objects[0]->MetaData->SourceMetaData->Source = null;
-		$objects[0]->MetaData->SourceMetaData->Author = null;
-		$objects[0]->MetaData->ContentMetaData = new ContentMetaData();
-		$objects[0]->MetaData->ContentMetaData->Description = null;
-		$objects[0]->MetaData->ContentMetaData->DescriptionAuthor = null;
-		$objects[0]->MetaData->ContentMetaData->Keywords = null;
-		$objects[0]->MetaData->ContentMetaData->Slugline = 'A test article with
+		$article = new Object();
+		$article->MetaData = new MetaData();
+		$article->MetaData->BasicMetaData = new BasicMetaData();
+		$article->MetaData->BasicMetaData->ID = null;
+		$article->MetaData->BasicMetaData->DocumentID = null;
+		$article->MetaData->BasicMetaData->Name = 'buildtest_inline_img';
+		$article->MetaData->BasicMetaData->Type = 'Article';
+		$article->MetaData->BasicMetaData->Publication = new Publication();
+		$article->MetaData->BasicMetaData->Publication->Id = $this->publication->Id;
+		$article->MetaData->BasicMetaData->Publication->Name = $this->publication->Name;
+		$article->MetaData->BasicMetaData->Category = new Category();
+		$article->MetaData->BasicMetaData->Category->Id = $this->category->Id;
+		$article->MetaData->BasicMetaData->Category->Name = $this->category->Name;
+		$article->MetaData->BasicMetaData->ContentSource = null;
+		$article->MetaData->RightsMetaData = new RightsMetaData();
+		$article->MetaData->RightsMetaData->CopyrightMarked = null;
+		$article->MetaData->RightsMetaData->Copyright = null;
+		$article->MetaData->RightsMetaData->CopyrightURL = null;
+		$article->MetaData->SourceMetaData = new SourceMetaData();
+		$article->MetaData->SourceMetaData->Credit = null;
+		$article->MetaData->SourceMetaData->Source = null;
+		$article->MetaData->SourceMetaData->Author = null;
+		$article->MetaData->ContentMetaData = new ContentMetaData();
+		$article->MetaData->ContentMetaData->Description = null;
+		$article->MetaData->ContentMetaData->DescriptionAuthor = null;
+		$article->MetaData->ContentMetaData->Keywords = null;
+		$article->MetaData->ContentMetaData->Slugline = 'A test article with
 
-'.chr(0xef).chr(0xbf).chr(0xbc).'
-
-An inline image';
-		$objects[0]->MetaData->ContentMetaData->Format = 'application/incopyicml';
-		$objects[0]->MetaData->ContentMetaData->Columns = 1;
-		$objects[0]->MetaData->ContentMetaData->Width = 440.787402;
-		$objects[0]->MetaData->ContentMetaData->Height = 566.929134;
-		$objects[0]->MetaData->ContentMetaData->Dpi = 0;
-		$objects[0]->MetaData->ContentMetaData->LengthWords = 7;
-		$objects[0]->MetaData->ContentMetaData->LengthChars = 35;
-		$objects[0]->MetaData->ContentMetaData->LengthParas = 5;
-		$objects[0]->MetaData->ContentMetaData->LengthLines = 5;
-		$objects[0]->MetaData->ContentMetaData->PlainContent = 'A test article with
-
-'.chr(0xef).chr(0xbf).chr(0xbc).'
+'.chr( 0xef ).chr( 0xbf ).chr( 0xbc ).'
 
 An inline image';
-		$objects[0]->MetaData->ContentMetaData->FileSize = 322249;
-		$objects[0]->MetaData->ContentMetaData->ColorSpace = null;
-		$objects[0]->MetaData->ContentMetaData->HighResFile = null;
-		$objects[0]->MetaData->ContentMetaData->Encoding = null;
-		$objects[0]->MetaData->ContentMetaData->Compression = null;
-		$objects[0]->MetaData->ContentMetaData->KeyFrameEveryFrames = null;
-		$objects[0]->MetaData->ContentMetaData->Channels = null;
-		$objects[0]->MetaData->ContentMetaData->AspectRatio = null;
-		$objects[0]->MetaData->WorkflowMetaData = new WorkflowMetaData();
-		$objects[0]->MetaData->WorkflowMetaData->Deadline = null;
-		$objects[0]->MetaData->WorkflowMetaData->Urgency = null;
-		$objects[0]->MetaData->WorkflowMetaData->Modifier = null;
-		$objects[0]->MetaData->WorkflowMetaData->Modified = '2013-03-19T12:09:54';
-		$objects[0]->MetaData->WorkflowMetaData->Creator = null;
-		$objects[0]->MetaData->WorkflowMetaData->Created = '2013-03-19T12:09:54';
-		$objects[0]->MetaData->WorkflowMetaData->Comment = '';
-		$objects[0]->MetaData->WorkflowMetaData->State = $state;
-		$objects[0]->MetaData->WorkflowMetaData->RouteTo = null;
-		$objects[0]->MetaData->WorkflowMetaData->LockedBy = null;
-		$objects[0]->MetaData->WorkflowMetaData->Version = null;
-		$objects[0]->MetaData->WorkflowMetaData->DeadlineSoft = null;
-		$objects[0]->MetaData->WorkflowMetaData->Rating = null;
-		$objects[0]->MetaData->WorkflowMetaData->Deletor = null;
-		$objects[0]->MetaData->WorkflowMetaData->Deleted = null;
-		$objects[0]->MetaData->ExtraMetaData = null;
-		$objects[0]->Relations = array();
-		$objects[0]->Relations[0] = new Relation();
-		$objects[0]->Relations[0]->Parent = $this->dossier->MetaData->BasicMetaData->ID;
-		$objects[0]->Relations[0]->Child = '';
-		$objects[0]->Relations[0]->Type = 'Contained';
-		$objects[0]->Relations[0]->Placements = null;
-		$objects[0]->Relations[0]->ParentVersion = null;
-		$objects[0]->Relations[0]->ChildVersion = null;
-		$objects[0]->Relations[0]->Geometry = null;
-		$objects[0]->Relations[0]->Rating = null;
-		$objects[0]->Relations[0]->Targets = null;
-		$objects[0]->Relations[0]->ParentInfo = null;
-		$objects[0]->Relations[0]->ChildInfo = null;
-		$objects[0]->Pages = null;
-		$objects[0]->Files = array( $attachment );
-		$objects[0]->Messages = null;
-		$objects[0]->Elements = array();
-		$objects[0]->Elements[0] = new Element();
-		$objects[0]->Elements[0]->ID = '30DE1381-8A7A-41E6-8F6C-5D80D8D9BAF8';
-		$objects[0]->Elements[0]->Name = 'body';
-		$objects[0]->Elements[0]->LengthWords = 7;
-		$objects[0]->Elements[0]->LengthChars = 35;
-		$objects[0]->Elements[0]->LengthParas = 5;
-		$objects[0]->Elements[0]->LengthLines = 5;
-		$objects[0]->Elements[0]->Snippet = 'A test article with
+		$article->MetaData->ContentMetaData->Format = 'application/incopyicml';
+		$article->MetaData->ContentMetaData->Columns = 1;
+		$article->MetaData->ContentMetaData->Width = 440.787402;
+		$article->MetaData->ContentMetaData->Height = 566.929134;
+		$article->MetaData->ContentMetaData->Dpi = 0;
+		$article->MetaData->ContentMetaData->LengthWords = 7;
+		$article->MetaData->ContentMetaData->LengthChars = 35;
+		$article->MetaData->ContentMetaData->LengthParas = 5;
+		$article->MetaData->ContentMetaData->LengthLines = 5;
+		$article->MetaData->ContentMetaData->PlainContent = 'A test article with
 
-'.chr(0xef).chr(0xbf).chr(0xbc).'
+'.chr( 0xef ).chr( 0xbf ).chr( 0xbc ).'
 
 An inline image';
-		$objects[0]->Elements[0]->Version = 'D08BF04F-1986-4D07-94FC-AAA5EF1927A1';
-		$objects[0]->Elements[0]->Content = null;
-		$objects[0]->Targets = null;
-		$objects[0]->Renditions = null;
-		$objects[0]->MessageList = new MessageList();
-		$objects[0]->MessageList->Messages = null;
-		$objects[0]->MessageList->ReadMessageIDs = null;
-		$objects[0]->MessageList->DeleteMessageIDs = null;
+		$article->MetaData->ContentMetaData->FileSize = 322249;
+		$article->MetaData->ContentMetaData->ColorSpace = null;
+		$article->MetaData->ContentMetaData->HighResFile = null;
+		$article->MetaData->ContentMetaData->Encoding = null;
+		$article->MetaData->ContentMetaData->Compression = null;
+		$article->MetaData->ContentMetaData->KeyFrameEveryFrames = null;
+		$article->MetaData->ContentMetaData->Channels = null;
+		$article->MetaData->ContentMetaData->AspectRatio = null;
+		$article->MetaData->WorkflowMetaData = new WorkflowMetaData();
+		$article->MetaData->WorkflowMetaData->Deadline = null;
+		$article->MetaData->WorkflowMetaData->Urgency = null;
+		$article->MetaData->WorkflowMetaData->Modifier = null;
+		$article->MetaData->WorkflowMetaData->Modified = '2013-03-19T12:09:54';
+		$article->MetaData->WorkflowMetaData->Creator = null;
+		$article->MetaData->WorkflowMetaData->Created = '2013-03-19T12:09:54';
+		$article->MetaData->WorkflowMetaData->Comment = '';
+		$article->MetaData->WorkflowMetaData->State = $this->statuses['Article'];
+		$article->MetaData->WorkflowMetaData->RouteTo = null;
+		$article->MetaData->WorkflowMetaData->LockedBy = null;
+		$article->MetaData->WorkflowMetaData->Version = null;
+		$article->MetaData->WorkflowMetaData->DeadlineSoft = null;
+		$article->MetaData->WorkflowMetaData->Rating = null;
+		$article->MetaData->WorkflowMetaData->Deletor = null;
+		$article->MetaData->WorkflowMetaData->Deleted = null;
+		$article->MetaData->ExtraMetaData = null;
+		$article->Relations = array();
+		$article->Relations[0] = new Relation();
+		$article->Relations[0]->Parent = $this->dossier->MetaData->BasicMetaData->ID;
+		$article->Relations[0]->Child = '';
+		$article->Relations[0]->Type = 'Contained';
+		$article->Relations[0]->Placements = null;
+		$article->Relations[0]->ParentVersion = null;
+		$article->Relations[0]->ChildVersion = null;
+		$article->Relations[0]->Geometry = null;
+		$article->Relations[0]->Rating = null;
+		$article->Relations[0]->Targets = null;
+		$article->Relations[0]->ParentInfo = null;
+		$article->Relations[0]->ChildInfo = null;
+		$article->Pages = null;
+		$article->Files = array( $attachment );
+		$article->Messages = null;
+		$article->Elements = array();
+		$article->Elements[0] = new Element();
+		$article->Elements[0]->ID = '30DE1381-8A7A-41E6-8F6C-5D80D8D9BAF8';
+		$article->Elements[0]->Name = 'body';
+		$article->Elements[0]->LengthWords = 7;
+		$article->Elements[0]->LengthChars = 35;
+		$article->Elements[0]->LengthParas = 5;
+		$article->Elements[0]->LengthLines = 5;
+		$article->Elements[0]->Snippet = 'A test article with
 
-		$this->article = $this->createObject($objects);
+'.chr( 0xef ).chr( 0xbf ).chr( 0xbc ).'
+
+An inline image';
+		$article->Elements[0]->Version = 'D08BF04F-1986-4D07-94FC-AAA5EF1927A1';
+		$article->Elements[0]->Content = null;
+		$article->Targets = null;
+		$article->Renditions = null;
+		$article->MessageList = new MessageList();
+		$article->MessageList->Messages = null;
+		$article->MessageList->ReadMessageIDs = null;
+		$article->MessageList->DeleteMessageIDs = null;
+
+		$this->article = $this->createObject( $article );
 	}
 
 	/**
-	 * Determines the Publication to use for this testcase.
+	 * Creates an Object in DB.
 	 *
-	 * @return Publication The Publication to use for this testcase.
-	 */
-	private function getPublication()
-	{
-		$publication = new Publication();
-		$publication->Id = $this->publication->Id;
-		$publication->Name = $this->publication->Name;
-		return $publication;
-	}
-
-	/**
-	 * Creates an Object.
-	 *
-	 * @param array $objects The objects to be created.
+	 * @param Object $object
 	 * @return null|Object The created Object or null.
 	 */
-	private function createObject($objects)
+	private function createObject( $object )
 	{
-		$object = null;
-
-		// Test creating an object.
+		$response = null;
 		try {
 			require_once BASEDIR.'/server/services/wfl/WflCreateObjectsService.class.php';
+			$request = new WflCreateObjectsRequest();
+			$request->Ticket = $this->ticket;
+			$request->Lock = false;
+			$request->Objects = array( $object );
 			$service = new WflCreateObjectsService();
-			$req = new WflCreateObjectsRequest();
-			$req->Ticket = $this->ticket;
-			$req->Lock = false;
-			$req->Objects = $objects;
-			$response = $service->execute( $req );
-			$object = $response->Objects[0];
+			$response = $service->execute( $request );
 		} catch( BizException $e ) {
-			self::setResult( 'ERROR', 'Creating object failed.' . $e->getMessage());
+			self::setResult( 'ERROR', 'Creating object failed.'.$e->getMessage() );
 		}
-		return $object;
+		return $response ? $response->Objects[0] : null;
 	}
 
-
 	/**
-	 * Creates a Dossier.
-	 *
-	 * Creates a dossier for testing.
-	 *
-	 * @return null|Object The created Dossier or null on a failure.
+	 * Creates a Dossier for testing.
 	 */
 	private function createDossier()
 	{
-		$publication = $this->publication;
-
-		// Retrieve the State.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->ticket );
 
-		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
-		$state = BizObjectComposer::getFirstState($user, $publication->Id, null, null, 'Dossier');
-		$categoryId = BizObjectComposer::getFirstCategory($user, $publication->Id);
+		// Compose new Dossier in memory.
+		$dossier = new Object();
+		$dossier->MetaData = new MetaData();
+		$dossier->MetaData->BasicMetaData = new BasicMetaData();
+		$dossier->MetaData->BasicMetaData->Name = 'WflArticleInlineImageTest';
+		$dossier->MetaData->BasicMetaData->Type = 'Dossier';
+		$dossier->MetaData->BasicMetaData->Publication = new Publication();
+		$dossier->MetaData->BasicMetaData->Publication->Id = $this->publication->Id;
+		$dossier->MetaData->BasicMetaData->Publication->Name = $this->publication->Name;
+		$dossier->MetaData->BasicMetaData->Category = new Category();
+		$dossier->MetaData->BasicMetaData->Category->Id = $this->category->Id;
+		$dossier->MetaData->BasicMetaData->Category->Name = $this->category->Name;
+		$dossier->MetaData->RightsMetaData = new RightsMetaData();
+		$dossier->MetaData->SourceMetaData = new SourceMetaData();
+		$dossier->MetaData->ContentMetaData = new ContentMetaData();
+		$dossier->MetaData->ContentMetaData->Description = 'Temporary dossier for testing inline image conversion.';
+		$dossier->MetaData->WorkflowMetaData = new WorkflowMetaData();
+		$dossier->MetaData->WorkflowMetaData->State = $this->statuses['Dossier'];
+		$dossier->MetaData->ExtraMetaData = array();
+		$dossier->Targets = array( $this->target );
 
-		// The WSDL expects a Publication object, a PublicationInfo object is given, so transform
-		$objectPublication = $this->getPublication();
-
-		// MetaData.
-		$metaData = new MetaData();
-		$metaData->BasicMetaData = new BasicMetaData(null,null,'WflArticleInlineImageTest', 'Dossier'
-			, $objectPublication, $categoryId, null);
-		$metaData->RightsMetaData = new RightsMetaData();
-		$metaData->SourceMetaData = new SourceMetaData();
-		$metaData->ContentMetaData = new ContentMetaData('Temporary dossier for testing inline image conversion.');
-		$metaData->WorkflowMetaData = new WorkflowMetaData(null,null,null,null,null,null,null,$state);
-		$metaData->ExtraMetaData = array();
-
-		// Set the dossier MetaData and Target(s).
-		$dosObject = new Object();
-		$dosObject->MetaData = $metaData;
-		$dosObject->Targets = array($this->target);
-
-		// Create and return the dossier.
-		$object = self::createObject(array($dosObject));
-		return (is_null($object)) ? null : $object;
+		// Create the Dossier in DB.
+		$this->dossier = self::createObject( $dossier );
 	}
 
 	/**
-	 * Deletes an object
-	 *
-	 * Deletes objects permanently.
+	 * Deletes a given Object permanently from DB.
 	 *
 	 * @param object $object The object to be deleted.
-	 * @param bool Whether or not the object was deleted.
+	 * @return bool Whether or not the object was deleted.
 	 */
 	private function deleteObject( $object )
 	{
+		require_once BASEDIR.'/server/services/wfl/WflDeleteObjectsService.class.php';
 		try {
-			require_once BASEDIR.'/server/interfaces/services/wfl/WflDeleteObjectsRequest.class.php';
-			require_once BASEDIR.'/server/interfaces/services/wfl/WflDeleteObjectsResponse.class.php';
-			require_once BASEDIR.'/server/services/wfl/WflDeleteObjectsService.class.php';
-
-			$service = new WflDeleteObjectsService();
 			$request = new WflDeleteObjectsRequest();
-
 			$request->Ticket = $this->ticket;
-			$request->IDs = array($object->MetaData->BasicMetaData->ID);
+			$request->IDs = array( $object->MetaData->BasicMetaData->ID );
 			$request->Permanent = true;
-			$request->Areas = array('Workflow');
-			$service->execute($request);
+			$request->Areas = array( 'Workflow' );
+			$service = new WflDeleteObjectsService();
+			$service->execute( $request );
 		} catch( BizException $e ) {
 			$message = $e->getDetail();
-			self::setResult('ERROR', 'Failed to delete Object: ' . $message );
+			self::setResult( 'ERROR', 'Failed to delete Object: '.$message );
 			return false;
 		}
 		return true;

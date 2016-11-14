@@ -1,19 +1,10 @@
 <?php
-/****************************************************************************
-Copyright 2013 WoodWing Software BV
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- ****************************************************************************/
+/**
+ * @package    Enterprise
+ * @subpackage ServerPlugins
+ * @since      v9.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once dirname(__FILE__) . '/WordPressXmlRpcClient.class.php';
 
@@ -522,5 +513,30 @@ class WordPress_Utils
 				throw new BizException( 'WORDPRESS_ERROR_SITE_NAME_LENGTH_MESSAGE', 'ERROR', $detail, null, array( $siteKey, $cleanSiteKey ) );
 			}
 		}
+	}
+
+	/**
+	 * Obfuscates the passwords in the logging for all WordPress requests by replacing the password with '***'.
+	 *
+	 * This function and its parameters are based on LogHandler::replacePasswordWithAsterisk.
+	 *
+	 * @param string $methodName Request method name.
+	 * @param string $transData Raw request data in XML format.
+	 * @return string The complete request with replaced password.
+	 */
+	public static function obfuscatePasswordInRequest( $methodName, $transData )
+	{
+		$doc = new DOMDocument();
+		$doc->loadXML( $transData );
+		$xpath = new DOMXPath($doc);
+		$params = $xpath->query('//methodCall/params/param/value/*');
+		// WordPress uses different APIs, each of which has a different order of communicating properties.
+		if( substr( $methodName, 0, 9 ) == 'woodwing.' && $methodName !== 'woodwing.GetPreviewUrl' ) {
+			$item = $params->item(1);
+		} else {
+			$item = $params->item(2);
+		}
+		$item->nodeValue = '***';
+		return $doc->saveXML();
 	}
 }

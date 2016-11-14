@@ -21,6 +21,7 @@ class PlnPage
 	public $Edition;
 	public $Master;
 	public $PageSequence;
+	public $PageNumber;
 
 	/**
 	 * @param integer              $PageOrder            
@@ -30,8 +31,9 @@ class PlnPage
 	 * @param Edition              $Edition              Nullable.
 	 * @param string               $Master               Nullable.
 	 * @param integer              $PageSequence         Nullable.
+	 * @param string               $PageNumber           Nullable.
 	 */
-	public function __construct( $PageOrder=null, $Width=null, $Height=null, $Files=null, $Edition=null, $Master=null, $PageSequence=null)
+	public function __construct( $PageOrder=null, $Width=null, $Height=null, $Files=null, $Edition=null, $Master=null, $PageSequence=null, $PageNumber=null)
 	{
 		$this->PageOrder            = $PageOrder;
 		$this->Width                = $Width;
@@ -40,6 +42,7 @@ class PlnPage
 		$this->Edition              = $Edition;
 		$this->Master               = $Master;
 		$this->PageSequence         = $PageSequence;
+		$this->PageNumber           = $PageNumber;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.pln.dataclasses.PlnPage'; } // AMF object type mapping
@@ -65,6 +68,7 @@ class PlnLayout
 	public $Name;
 	public $Publication;
 	public $Issue;
+	public $PubChannel;
 	public $Section;
 	public $Status;
 	public $Pages;
@@ -77,6 +81,7 @@ class PlnLayout
 	 * @param string               $Name                 Nullable.
 	 * @param string               $Publication          Nullable.
 	 * @param string               $Issue                Nullable.
+	 * @param string               $PubChannel           Nullable.
 	 * @param string               $Section              Nullable.
 	 * @param string               $Status               Nullable.
 	 * @param PlnPage[]            $Pages                Nullable.
@@ -84,12 +89,13 @@ class PlnLayout
 	 * @param string               $Deadline             Nullable.
 	 * @param string               $Version              Nullable.
 	 */
-	public function __construct( $Id=null, $Name=null, $Publication=null, $Issue=null, $Section=null, $Status=null, $Pages=null, $Editions=null, $Deadline=null, $Version=null)
+	public function __construct( $Id=null, $Name=null, $Publication=null, $Issue=null, $PubChannel=null, $Section=null, $Status=null, $Pages=null, $Editions=null, $Deadline=null, $Version=null)
 	{
 		$this->Id                   = $Id;
 		$this->Name                 = $Name;
 		$this->Publication          = $Publication;
 		$this->Issue                = $Issue;
+		$this->PubChannel           = $PubChannel;
 		$this->Section              = $Section;
 		$this->Status               = $Status;
 		$this->Pages                = $Pages;
@@ -137,6 +143,9 @@ class PlnLayoutFromTemplate
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->NewLayout ) ) {
+			$this->NewLayout->sanitizeProperties4Php();
+		}
 	}
 }
 class PlnPlacement
@@ -203,6 +212,7 @@ class PlnAdvert
 	public $AlienId;
 	public $Publication;
 	public $Issue;
+	public $PubChannel;
 	public $Section;
 	public $Status;
 	public $Name;
@@ -230,6 +240,7 @@ class PlnAdvert
 	 * @param string               $AlienId              Nullable.
 	 * @param string               $Publication          Nullable.
 	 * @param string               $Issue                Nullable.
+	 * @param string               $PubChannel           Nullable.
 	 * @param string               $Section              Nullable.
 	 * @param string               $Status               Nullable.
 	 * @param string               $Name                 Nullable.
@@ -252,12 +263,13 @@ class PlnAdvert
 	 * @param integer              $PageSequence         Nullable.
 	 * @param string               $Version              Nullable.
 	 */
-	public function __construct( $Id=null, $AlienId=null, $Publication=null, $Issue=null, $Section=null, $Status=null, $Name=null, $AdType=null, $Comment=null, $Source=null, $ColorSpace=null, $Description=null, $PlainContent=null, $File=null, $HighResFile=null, $PageOrder=null, $Page=null, $Placement=null, $PreferredPlacement=null, $PublishPrio=null, $Rate=null, $Editions=null, $Deadline=null, $PageSequence=null, $Version=null)
+	public function __construct( $Id=null, $AlienId=null, $Publication=null, $Issue=null, $PubChannel=null, $Section=null, $Status=null, $Name=null, $AdType=null, $Comment=null, $Source=null, $ColorSpace=null, $Description=null, $PlainContent=null, $File=null, $HighResFile=null, $PageOrder=null, $Page=null, $Placement=null, $PreferredPlacement=null, $PublishPrio=null, $Rate=null, $Editions=null, $Deadline=null, $PageSequence=null, $Version=null)
 	{
 		$this->Id                   = $Id;
 		$this->AlienId              = $AlienId;
 		$this->Publication          = $Publication;
 		$this->Issue                = $Issue;
+		$this->PubChannel           = $PubChannel;
 		$this->Section              = $Section;
 		$this->Status               = $Status;
 		$this->Name                 = $Name;
@@ -294,6 +306,12 @@ class PlnAdvert
 					$complexField->sanitizeProperties4Php();
 				}
 			}
+		}
+		if( is_object( $this->Page ) ) {
+			$this->Page->sanitizeProperties4Php();
+		}
+		if( is_object( $this->Placement ) ) {
+			$this->Placement->sanitizeProperties4Php();
 		}
 	}
 }

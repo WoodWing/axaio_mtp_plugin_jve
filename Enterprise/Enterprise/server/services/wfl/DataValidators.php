@@ -351,7 +351,7 @@ class WflContentMetaDataValidator
 		if( $validator->checkExist( $datObj, 'Dpi' ) ) {
 			$validator->enterPath( 'Dpi' );
 			if( !is_null( $datObj->Dpi ) ) {
-				$validator->checkType( $datObj->Dpi, 'unsignedInt' );
+				$validator->checkType( $datObj->Dpi, 'float' );
 			}
 			$validator->leavePath();
 		}
@@ -443,6 +443,20 @@ class WflContentMetaDataValidator
 			$validator->enterPath( 'AspectRatio' );
 			if( !is_null( $datObj->AspectRatio ) ) {
 				$validator->checkType( $datObj->AspectRatio, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Orientation' ) ) {
+			$validator->enterPath( 'Orientation' );
+			if( !is_null( $datObj->Orientation ) ) {
+				$validator->checkType( $datObj->Orientation, 'unsignedInt' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Dimensions' ) ) {
+			$validator->enterPath( 'Dimensions' );
+			if( !is_null( $datObj->Dimensions ) ) {
+				$validator->checkType( $datObj->Dimensions, 'string' );
 			}
 			$validator->leavePath();
 		}
@@ -2820,6 +2834,13 @@ class WflPubChannelInfoValidator
 			$validator->enterPath( 'SupportsForms' );
 			if( !is_null( $datObj->SupportsForms ) ) {
 				$validator->checkType( $datObj->SupportsForms, 'boolean' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'SupportsCropping' ) ) {
+			$validator->enterPath( 'SupportsCropping' );
+			if( !is_null( $datObj->SupportsCropping ) ) {
+				$validator->checkType( $datObj->SupportsCropping, 'boolean' );
 			}
 			$validator->leavePath();
 		}

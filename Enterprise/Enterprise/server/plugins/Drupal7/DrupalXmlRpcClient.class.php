@@ -611,7 +611,7 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 		}
 
 		$message = BizResources::localize('ERR_DRUPAL_UPLOAD_FAILED');
-		if ( $lastResponse->getStatus() == 401 ) {
+		if( $lastResponse && $lastResponse->getStatus() == 401 ) {
 			// Keep the same as in callService
 			$message = 'Could not authenticate. Check the settings for the publication channel.';
 		}
@@ -673,18 +673,12 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 	}
 
 	/**
-	 * Sends a message to a XML-RPC server using the Zend_XmlRpc classes.
-	 *
-	 * @throws BizException Throws a BizException in case of errors.
-	 *
-	 * @param string $action
-	 * @param mixed $params
-	 * @return mixed - If answer is recieved the object will be returned otherwise null is returned.
+	 * {@inheritdoc}
 	 */
-	public function callRpcService( $action, $params )
+	public function callRpcService( $action, $params, $obfuscatePasswordForLogs = null )
 	{
 		try {
-			$retVal = parent::callRpcService( $action, $params );
+			$retVal = parent::callRpcService( $action, $params, $obfuscatePasswordForLogs );
 		} catch( BizException $e ) {
 			$httpClient = $this->rpcClient->getHttpClient();
 			$lastResponse = $httpClient->getLastResponse();

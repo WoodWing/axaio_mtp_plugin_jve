@@ -225,7 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Offline nemen</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Blanco laten voor directe wijziging</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Blanco laten als de eigenaar ook de gebruiker is</Term>
-  <Term key="ACT_LESS">Less</Term>
+  <Term key="ACT_LESS">Minder</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">Opgenomen in Publicatieoverzicht</Term>
   <Term key="ACT_LOGIN">Inloggen</Term>
   <Term key="ACT_LOGOFF">Afmelden</Term>
@@ -257,7 +257,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">Open</Term>
   <Term key="ACT_OPEN_EDIT">Openen voor bewerken</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Openen voor bewerken (ongeplaatst)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">In een nieuwe tab openen</Term>
   <Term key="ACT_ORDER_BY">Sorteer op</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">Betand %1 bestaat niet</Term>
@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">De bestandsnamen komt niet overeen, wilt u toch inchecken?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">Het is alleen toegestaan om ongeformatteerde artikelen te combineren</Term>
   <Term key="ERR_COMPOSE">Fout tijdens het samenstellen van het artikel. (S1067)</Term>
-  <Term key="ERR_CONNECT">Fout bij het verbinden naar %1. Controleer uw verbinding en probeer het opnieuw.  (S1144)</Term>
+  <Term key="ERR_CONNECT">Fout bij het verbinden naar de service genaamd %1. Controleer uw verbinding en probeer het opnieuw. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">Fout bij het verbinding maken met de server. Controleer uw verbinding en probeer opnieuw. (S1068)</Term>
   <Term key="ERR_COPY_FOLDER">Er is een fout opgetreden bij het publiceren, neem contact op met de systeembeheerder.\n\nDetails: de map HTML Resources was niet gevonden. Gebruik de test ‘Adobe Digital Publishing Systems (DPS)’ van de systeemdiagnose en volg de instructies.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">Kon geen verbinding maken met de database (S1003)</Term>
@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Gebruiker gedeactiveerd (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Gebruikersnaam en wachtwoord zijn verplicht</Term>
   <Term key="ERR_USER_BEGINDATE">Gebruikersaccount nog niet geldig</Term>
-  <Term key="ERR_USER_ENDDATE">Gebruikersaccount niet meer geldig</Term>
+  <Term key="ERR_USER_ENDDATE">Gebruikersaccount niet meer geldig (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Gebruikersnaam bestaat al.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Invullen van gebruikersnaam is verplicht</Term>
   <Term key="ERR_WRONGLANG">Kies een taal (S1052).</Term>
@@ -2150,7 +2150,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">Component %1 van artikel %2 is al geplaatst in {EDITION} %3 van layout %4.</Term>
   <Term key="WARN_PAGE_DBL">Meerdere pagina's voor pagina</Term>
   <Term key="WARN_PAGE_START">Eén van de pagina's begint met paginanummer</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Wachtwoord verlopen, verander wachtwoord</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Wachtwoord verlopen, verander wachtwoord (S1145)</Term>
   <Term key="WARN_USER_LIMIT">De concurrent gebruikerslimiet voor deze applicatie is bereikt, of de concurrent verbindingslimiet voor Enterprise server is bereikt.</Term>
   <Term key="WAR_UPLOAD_WARNING">Kan geen afbeelding van de voorvertoning maken</Term>
   <Term key="WEBFEATURES">Toepassingen</Term>

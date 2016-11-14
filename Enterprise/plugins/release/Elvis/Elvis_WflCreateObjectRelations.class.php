@@ -18,42 +18,44 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 
 	final public function runBefore( WflCreateObjectRelationsRequest &$req )
 	{
-		$req = $req; // keep analyzer happy
-		
-		if (ELVIS_CREATE_COPY === 'true') {
-		
-			require_once dirname(__FILE__) . '/Elvis_ContentSource.class.php';
-			require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
-			require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-			require_once dirname(__FILE__) . '/util/ElvisUtils.class.php';
-			
-			foreach ($req->Relations as $relation)
-			{				
+		if( ELVIS_CREATE_COPY === 'true' ) {
+			require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
+			require_once dirname(__FILE__).'/Elvis_ContentSource.class.php';
+			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+			$user = BizSession::getShortUserName();
+			$ticket = BizSession::getTicket();
+
+			foreach( $req->Relations as $relation ) {
 				$parent = $relation->Parent;
 				$child = $relation->Child;
-				
-				if (ElvisUtils::isElvisId($child)) {
-					$user = BizSession::getShortUserName();
-				
+
+				if( ElvisUtils::isElvisId( $child ) ) {
 					// Create copy of asset
 					$object = new Object();
 					$contentSource = new Elvis_ContentSource();
-					$object = $contentSource->createCopyObject($child, $object);
-				
+					$object = $contentSource->createCopyObject( $child, $object );
+
 					// Add publication related metadata from parent
-					$parentObject = BizObject::getObject($parent, $user, false, 'none');
-				
+					$parentObject = BizObject::getObject( $parent, $user, false, 'none' );
 					$object->MetaData->BasicMetaData->Publication = $parentObject->MetaData->BasicMetaData->Publication;
 					$object->MetaData->BasicMetaData->Category = $parentObject->MetaData->BasicMetaData->Category;
-
 					$object->MetaData->WorkflowMetaData->RouteTo = $user;
 
 					// Create object in Enterprise
-					$createdObject = BizObject::createObject($object, $user, false, false);
-				
+					require_once BASEDIR.'/server/services/wfl/WflCreateObjectsService.class.php';
+					$service = new WflCreateObjectsService();
+					$request = new WflCreateObjectsRequest();
+					$request->Ticket	= $ticket;
+					$request->Objects	= array( $object );
+					$request->Lock		= false;
+					$request->AutoNaming = false;
+					$response = $service->execute($request);
+					$createdObject = $response->Objects[0];
+
 					// Change Child in the relation to the newly created copy of the child
 					$relation->Child = $createdObject->MetaData->BasicMetaData->ID;
-					LogHandler::Log('ELVIS', 'DEBUG', 'Replaced child of relation from ' . $child . ' to ' . $relation->Child);
+					LogHandler::Log( 'ELVIS', 'DEBUG', 'Replaced child of relation from ' . $child . ' to ' . $relation->Child );
 				}
 			}
 		}
@@ -61,21 +63,18 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 
 	final public function runAfter( WflCreateObjectRelationsRequest $req, WflCreateObjectRelationsResponse &$resp )
 	{
-		$req = $req; $resp = $resp; // keep analyzer happy
+		if( ELVIS_CREATE_COPY !== 'true' ) {
+			require_once dirname(__FILE__).'/logic/ElvisUpdateManager.class.php';
+			require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
+			require_once dirname(__FILE__).'/util/ElvisObjectRelationUtils.class.php';
 
-		if (ELVIS_CREATE_COPY !== 'true') {
-			require_once dirname(__FILE__) . '/logic/ElvisUpdateManager.class.php';
-			require_once dirname(__FILE__) . '/util/ElvisObjectUtils.class.php';
-			require_once dirname(__FILE__) . '/util/ElvisObjectRelationUtils.class.php';
-			
 			// Collect Elvis shadow ids
 			$shadowIds = array();
-	
 			foreach( $resp->Relations as $relation ) {
 				$shadowIds[] = $relation->Child;
 			}
 			$shadowIds = ElvisObjectUtils::filterElvisShadowObjects( $shadowIds );
-	
+
 			if( $shadowIds ) {
 				// Collect layout ids for which we are creating shadow object relations
 				$layoutIds = array();
@@ -85,25 +84,24 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 					}
 				}
 				$layoutIds = ElvisObjectUtils::filterRelevantIdsFromObjectIds( $layoutIds );
-	
+
 				if( $layoutIds ) {
 					// Collect shadow relations if any are found and send the updated placements to Elvis
 					$newShadowRelations = ElvisObjectRelationUtils::getCurrentShadowRelationsFromObjectIds( $layoutIds );
-	
+
 					if( $newShadowRelations ) {
 						ElvisUpdateManager::sendUpdateObjectsByIds( $layoutIds, $newShadowRelations );
 					}
 				}
-	
+
 				// For heavy debugging:
 				//LogHandler::logPhpObject( $newShadowRelations, 'print_r', 'newShadowRelations' );
 			}
 		}
-	} 
-	
+	}
+
 	// Not called.
 	final public function runOverruled( WflCreateObjectRelationsRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
-	} 
+	}
 }

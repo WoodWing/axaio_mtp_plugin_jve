@@ -412,33 +412,47 @@ if( !defined('INDESIGNSERV_APPSERVER') ) {
 }
 
 // INDESIGNSERV_JOBQUEUES:
-//    For each job type a priority can be specified that overrules the default priority
-//    that is hard-coded in the job implementation itself. High priority jobs are handled first. 
+//    For each job type a priority can be specified that overrules the default priority
+//    that is hard-coded in the job implementation itself. High priority jobs are handled first.
 //
-//    There are 5 priorities:
-//       1 = Very High
-//       2 = High
-//       3 = Medium
-//       4 = Low
-//       5 = Very Low
+//    There are 5 priorities:
+//       1 = Very High    (foreground)
+//       2 = High         (background)
+//       3 = Medium       (background)
+//       4 = Low          (background)
+//       5 = Very Low     (background)
 //
-//    Specifying which Job priorities an InDesign Server instance should pick up is done on
-//    the InDesign Server Maintenance page.
-//   
-//    This priority system can also be seen as a job queue: on the one hand an InDesign Server 
-//    processes the highest priority jobs first while on the other hand it only processes jobs 
-//    of which the Job Priority matches the Job Priority configuration of the InDesign Server 
-//    instance.
-//    Example: when a pool of InDesign Servers is configured to process a Job with priority 2 and 3,
-//    they will never pick up a Job with priority 1, even when they are idle. When they are
-//    all busy processing priority 3 Jobs while a priority 2 Job arrives, the priority 2 Job has 
-//    to wait until the first InDesign Server of that pool is ready processing its current Job.
-//   
-//    The job type for the preview operations of the Multi-Channel Text Editor in Content 
-//    Station is named 'WEB_EDITOR' and has a default priority of "2" (high). To lower it 
-//    to "3" (medium) add the following line (without the leading //):
-//       'WEB_EDITOR' => 3,
-//   
+//    Specifying which Job priorities an InDesign Server instance should pick up is done on
+//    the InDesign Server Maintenance page.
+//
+//    This priority system can also be seen as a job queue: on the one hand an InDesign Server
+//    processes the highest priority jobs first while on the other hand it only processes jobs
+//    of which the Job Priority matches the Job Priority configuration of the InDesign Server
+//    instance.
+//    Example: when a pool of InDesign Servers is configured to process a Job with priority 2 and 3,
+//    they will never pick up a Job with priority 1, even when they are idle. When they are
+//    all busy processing priority 3 Jobs while a priority 2 Job arrives, the priority 2 Job has
+//    to wait until the first InDesign Server of that pool is ready processing its current Job.
+//
+//    Priority 1 is reserved for foreground jobs. Those are executed in the context of the workflow
+//    operation itself while letting the end-user wait for the results. The other priorities are
+//    reserved for background jobs. Those jobs are created by workflow operations without letting
+//    the end-user wait for the results. A background process takes care of the job execution.
+//
+//    The job type for the preview operations of the Multi-Channel Text Editor in Content
+//    Station is named 'WEB_EDITOR' and has a priority of 1 (Very High). This cannot be changed
+//    because this job type runs in foreground.
+//
+//    The job type for the InDesign Server Automation feature is named 'IDS_AUTOMATION' and has a
+//    default priority of 4 (Low). Because this job type runs in the background, it can be changed
+//    into any value in the range of [2 - 5]. For normal usage there is no need to change the priority,
+//    but when many custom job types are installed it could be useful to tweak the priorities.
+//    Example: Two custom job types exist, one with priority 4 and the other with priority 5. It is
+//    decided that both are less urgent to execute than the 'IDS_AUTOMATION' which has a default
+//    priority of 4. In that case you may want to assign priority 3 to the InDesign Server Automation feature.
+//    This can be done by adding the following line (without the leading //) to the INDESIGNSERV_JOBQUEUES option:
+//       'IDS_AUTOMATION' => 3,
+//
 if( !defined('INDESIGNSERV_JOBQUEUES') ) {
 	define( 'INDESIGNSERV_JOBQUEUES', serialize(array(
 		// job type name => job priority number
@@ -1304,13 +1318,43 @@ if( !defined('IMAGE_MAGICK_APP_PATH') ) {
 }
 
 // IMAGE_MAGICK_OPTIONS:
-// Options passed to the ImageMagick application to influence the quality of previews and thumbnails.
-// For more informtion see: http://www.imagemagick.org/script/command-line-options.php
-// The size (-size) is set by Enterprise and must not be set here.
-// The default value is ' -colorspace sRGB -quality 100 -sharpen 5 -layers merge -depth 8 -strip -density 72x72 '
+//    Options passed to the ImageMagick application to influence the quality of previews and thumbnails.
+//    For more information see: http://www.imagemagick.org/script/command-line-options.php
+//    The size (-size) is set by Enterprise and must not be set here.
+//    The default value is ' -colorspace sRGB -quality 92 -sharpen 5 -layers merge -depth 8 -strip -density 72x72 '
 //
 if( !defined('IMAGE_MAGICK_OPTIONS') ) {
 	define( 'IMAGE_MAGICK_OPTIONS', '-colorspace sRGB -quality 92 -sharpen 5 -layers merge -depth 8 -strip -density 72x72' );
+}
+
+// IMAGE_MAGICK_PUBLISH_OPTIONS:
+//    Options passed to the ImageMagick application to influence the quality of image conversions when published to
+//    Publication Channels of type 'Web'. Conversion takes place when images are cropped or scaled on a Publish Form and
+//    published to Drupal, Wordpress, Twitter or Facebook.
+//
+//    The following options are set by Enterprise and must not be set here:
+//       -verbose, -units, -density, -resize, -crop, -rotate, -flip, -flop
+//
+//    The default setting as shipped with Enterprise is defined as follows:
+//       '-colorspace %colorspace% -quality %quality% -sharpen %sharpen% -depth %depth% -strip -background %background% -layers %layers%'
+//
+//    Before using the default setting, the options are automatically filled in by Enterprise as follows:
+//       -colorspace sRGB -quality 92 -sharpen 5 -depth 8 -strip -background none -layers merge
+//
+//    To change one of these options, replace the placeholder with a fixed value.
+//    Example:
+//       replace: -quality %quality%
+//       with:    -quality 100
+//    In this example the %quality% placeholder will no longer be replaced by Enterprise. Instead of using
+//    the default quality value 92, it is using the configured quality value 100.
+//
+//    Notes:
+//    - Other ImageMagick options that are not mentioned here can also be added to the setting.
+//    - Any of the listed default options can be removed.
+//    - For more information about ImageMagick options see: http://www.imagemagick.org/script/command-line-options.php
+//
+if( !defined('IMAGE_MAGICK_PUBLISH_OPTIONS') ) {
+	define( 'IMAGE_MAGICK_PUBLISH_OPTIONS', '-colorspace %colorspace% -quality %quality% -sharpen %sharpen% -depth %depth% -strip -background %background% -layers %layers%' );
 }
 
 // GHOST_SCRIPT_APP_PATH:
@@ -1325,6 +1369,26 @@ if( !defined('IMAGE_MAGICK_OPTIONS') ) {
 //
 if( !defined('GHOST_SCRIPT_APP_PATH') ) {
 	define( 'GHOST_SCRIPT_APP_PATH', '' );
+}
+
+// -------------------------------------------------------------------------------------------------
+// ExifTool settings
+// -------------------------------------------------------------------------------------------------
+
+// EXIFTOOL_APP_PATH:
+//    Full path to the folder of the ExifTool application.
+//    Use forward slashes and do NOT end with a slash.
+//    Windows:
+//       define( 'EXIFTOOL_APP_PATH', 'C:/Program Files/ExifTool' );
+//    Linux/Mac:
+//       define( 'EXIFTOOL_APP_PATH', '/usr/local/bin' );
+//
+if( !defined('EXIFTOOL_APP_PATH') ) {
+	if( OS == 'WIN' ) {
+		define( 'EXIFTOOL_APP_PATH', 'C:/Program Files/ExifTool' );
+	} else {
+		define( 'EXIFTOOL_APP_PATH', '/usr/local/bin' );
+	}
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -1389,16 +1453,18 @@ if( !defined('GHOST_SCRIPT_APP_PATH') ) {
 //    1. Uncomment the required MessageQueueConnection definitions below by removing the leading slashes (//).
 //    2. For those definitions, replace 'localhost' with the hostname (or IP) of the system on which RabbitMQ is installed.
 //
-define( 'MESSAGE_QUEUE_CONNECTIONS', serialize(array(
-// - - - - Unsecure connection over TCP: - - - -
-//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqp://localhost:5672', true, 'woodwing', 'ww' ),
-//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'http://localhost:15672', true, 'woodwing', 'ww' ),
-//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'ws://localhost:15674/ws', true, 'woodwing', 'ww' ),
-// - - - - Secure connection over SSL: - - - -
-//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqps://localhost:5671', true, 'woodwing', 'ww' ),
-//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'https://localhost:15671', true, 'woodwing', 'ww' ),
-//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'wss://localhost:15673/ws', true, 'woodwing', 'ww' ),
-)));
+if( !defined('MESSAGE_QUEUE_CONNECTIONS') ) {
+	define( 'MESSAGE_QUEUE_CONNECTIONS', serialize(array(
+	// - - - - Unsecure connection over TCP: - - - -
+	//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqp://localhost:5672', true, 'woodwing', 'ww' ),
+	//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'http://localhost:15672', true, 'woodwing', 'ww' ),
+	//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'ws://localhost:15674/ws', true, 'woodwing', 'ww' ),
+	// - - - - Secure connection over SSL: - - - -
+	//  new MessageQueueConnection( 'RabbitMQ', 'AMQP', 'amqps://localhost:5671', true, 'woodwing', 'ww' ),
+	//  new MessageQueueConnection( 'RabbitMQ', 'REST', 'https://localhost:15671', true, 'woodwing', 'ww' ),
+	//  new MessageQueueConnection( 'RabbitMQ', 'STOMPWS', 'wss://localhost:15673/ws', true, 'woodwing', 'ww' ),
+	)));
+}
 
 // -------------------------------------------------------------------------------------------------
 // Debugging - Low-level logging of SQL, SOAP details etc.

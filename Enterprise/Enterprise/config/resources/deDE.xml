@@ -225,7 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">Offline schalten</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">Fuer direktes Update freilassen</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">Freilassen, wenn Eigentuemer identisch mit Benutzer</Term>
-  <Term key="ACT_LESS">Less</Term>
+  <Term key="ACT_LESS">Weniger</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">In Publikationsübersicht aufgeführt</Term>
   <Term key="ACT_LOGIN">Anmelden</Term>
   <Term key="ACT_LOGOFF">Abmelden</Term>
@@ -257,7 +257,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">Öffnen</Term>
   <Term key="ACT_OPEN_EDIT">Zum Bearbeiten öffnen</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">Zum Bearbeiten öffnen (Unplatziert)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">In neuer Registerkarte öffnen</Term>
   <Term key="ACT_ORDER_BY">Sortieren nach</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">Datei %1 ist nicht vorhanden.</Term>
@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">Dateiname stimmt nicht überein, trotzdem einchecken?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">Kombinieren ist nur für Nur-Text-Artikel zulässig</Term>
   <Term key="ERR_COMPOSE">Fehler beim Zusammenstellen des Artikels. (S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">Fehler beim Verbinden mit dem Dienst namens %1. Prüfen Sie die Verbindung und versuchen Sie es erneut. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">Fehler beim Herstellen der Verbindung zum Server. Prüfen Sie die Verbindung, und versuchen Sie es erneut. (S1068)</Term>
   <Term key="ERR_COPY_FOLDER">Bei der Veröffentlichung ist ein Fehler aufgetreten. Wenden Sie sich an Ihren Systemadministrator.\n\nDetails: Der HTML-Ressourcencache-Ordner wurde nicht gefunden. Führen Sie den Test 'Adobe Digital Publishing System (DPS)' auf der Seite 'Systemdiagnose' aus und befolgen Sie die Anweisungen.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">Datenbankverbindung konnte nicht hergestellt werden. (S1003)</Term>
@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">Benutzer deaktiviert (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">Benutzername und Kennwort erforderlich.</Term>
   <Term key="ERR_USER_BEGINDATE">Benutzerkonto ist noch nicht gültig</Term>
-  <Term key="ERR_USER_ENDDATE">Benuzterkonto ist nicht mehr gültig</Term>
+  <Term key="ERR_USER_ENDDATE">Benuzterkonto ist nicht mehr gültig (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">Benutzername besteht bereits.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Benutzername erforderlich, bitte ausfüllen.</Term>
   <Term key="ERR_WRONGLANG">Sprache auswählen (S1052).</Term>
@@ -2151,7 +2151,7 @@ Nach dem Ändern der Einstellungen müssen Sie den Webdienst bzw. Datenbankdiens
   <Term key="WARN_ELEMENT_PLACED_EDITION">Element %1 von Artikel %2 wurde bereits in {EDITION} %3 von %4 eingefügt.</Term>
   <Term key="WARN_PAGE_DBL">Mehrere Seiten für Seite:</Term>
   <Term key="WARN_PAGE_START">Eine der Seiten beginnt mit Seitenzahl:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Kennwort abgelaufen, bitte änderen</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Kennwort abgelaufen, bitte änderen (S1145)</Term>
   <Term key="WARN_USER_LIMIT">Die Höchstzahl gleichzeitig arbeitender Benutzer für diese Anwendung wurde erreicht oder die Höchstzahl gleichzeitig bestehender Verbindungen für den Enterprise-Server wurde erreicht.</Term>
   <Term key="WAR_UPLOAD_WARNING">Vorschaubild konnte nicht erstellt werden.</Term>
   <Term key="WEBFEATURES">Anwendungen</Term>

@@ -67,6 +67,12 @@ class BasicMetaData
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->Publication ) ) {
+			$this->Publication->sanitizeProperties4Php();
+		}
+		if( is_object( $this->Category ) ) {
+			$this->Category->sanitizeProperties4Php();
+		}
 	}
 }
 class RightsMetaData
@@ -142,6 +148,8 @@ class ContentMetaData
 	public $KeyFrameEveryFrames;
 	public $Channels;
 	public $AspectRatio;
+	public $Orientation;
+	public $Dimensions;
 
 	/**
 	 * @param string               $Description          Nullable.
@@ -152,7 +160,7 @@ class ContentMetaData
 	 * @param int                  $Columns              Nullable.
 	 * @param float                $Width                Nullable.
 	 * @param float                $Height               Nullable.
-	 * @param integer              $Dpi                  Nullable.
+	 * @param float                $Dpi                  Nullable.
 	 * @param integer              $LengthWords          Nullable.
 	 * @param integer              $LengthChars          Nullable.
 	 * @param integer              $LengthParas          Nullable.
@@ -166,8 +174,10 @@ class ContentMetaData
 	 * @param integer              $KeyFrameEveryFrames  Nullable.
 	 * @param string               $Channels             Nullable.
 	 * @param string               $AspectRatio          Nullable.
+	 * @param integer              $Orientation          Nullable.
+	 * @param string               $Dimensions           Nullable.
 	 */
-	public function __construct( $Description=null, $DescriptionAuthor=null, $Keywords=null, $Slugline=null, $Format=null, $Columns=null, $Width=null, $Height=null, $Dpi=null, $LengthWords=null, $LengthChars=null, $LengthParas=null, $LengthLines=null, $PlainContent=null, $FileSize=null, $ColorSpace=null, $HighResFile=null, $Encoding=null, $Compression=null, $KeyFrameEveryFrames=null, $Channels=null, $AspectRatio=null)
+	public function __construct( $Description=null, $DescriptionAuthor=null, $Keywords=null, $Slugline=null, $Format=null, $Columns=null, $Width=null, $Height=null, $Dpi=null, $LengthWords=null, $LengthChars=null, $LengthParas=null, $LengthLines=null, $PlainContent=null, $FileSize=null, $ColorSpace=null, $HighResFile=null, $Encoding=null, $Compression=null, $KeyFrameEveryFrames=null, $Channels=null, $AspectRatio=null, $Orientation=null, $Dimensions=null)
 	{
 		$this->Description          = $Description;
 		$this->DescriptionAuthor    = $DescriptionAuthor;
@@ -191,6 +201,8 @@ class ContentMetaData
 		$this->KeyFrameEveryFrames  = $KeyFrameEveryFrames;
 		$this->Channels             = $Channels;
 		$this->AspectRatio          = $AspectRatio;
+		$this->Orientation          = $Orientation;
+		$this->Dimensions           = $Dimensions;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflContentMetaData'; } // AMF object type mapping
@@ -207,6 +219,7 @@ class ContentMetaData
 		if (is_nan($this->LengthLines)){ $this->LengthLines = null; }
 		if (is_nan($this->FileSize)){ $this->FileSize = null; }
 		if (is_nan($this->KeyFrameEveryFrames)){ $this->KeyFrameEveryFrames = null; }
+		if (is_nan($this->Orientation)){ $this->Orientation = null; }
 		if (0 < count($this->Keywords)){
 			if (is_object($this->Keywords[0])){
 				foreach ($this->Keywords as $complexField){
@@ -275,6 +288,9 @@ class WorkflowMetaData
 	public function sanitizeProperties4Php()
 	{
 		if (is_nan($this->Rating)){ $this->Rating = null; }
+		if( is_object( $this->State ) ) {
+			$this->State->sanitizeProperties4Php();
+		}
 	}
 }
 class ExtraMetaData
@@ -459,6 +475,9 @@ class Placement
 				}
 			}
 		}
+		if( is_object( $this->Edition ) ) {
+			$this->Edition->sanitizeProperties4Php();
+		}
 	}
 }
 class Element
@@ -599,6 +618,15 @@ class Relation
 				}
 			}
 		}
+		if( is_object( $this->Geometry ) ) {
+			$this->Geometry->sanitizeProperties4Php();
+		}
+		if( is_object( $this->ParentInfo ) ) {
+			$this->ParentInfo->sanitizeProperties4Php();
+		}
+		if( is_object( $this->ChildInfo ) ) {
+			$this->ChildInfo->sanitizeProperties4Php();
+		}
 	}
 }
 class StickyInfo
@@ -733,6 +761,9 @@ class Message
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->StickyInfo ) ) {
+			$this->StickyInfo->sanitizeProperties4Php();
+		}
 	}
 }
 class MessageList
@@ -930,6 +961,21 @@ class MetaData
 				}
 			}
 		}
+		if( is_object( $this->BasicMetaData ) ) {
+			$this->BasicMetaData->sanitizeProperties4Php();
+		}
+		if( is_object( $this->RightsMetaData ) ) {
+			$this->RightsMetaData->sanitizeProperties4Php();
+		}
+		if( is_object( $this->SourceMetaData ) ) {
+			$this->SourceMetaData->sanitizeProperties4Php();
+		}
+		if( is_object( $this->ContentMetaData ) ) {
+			$this->ContentMetaData->sanitizeProperties4Php();
+		}
+		if( is_object( $this->WorkflowMetaData ) ) {
+			$this->WorkflowMetaData->sanitizeProperties4Php();
+		}
 	}
 }
 class Page
@@ -995,6 +1041,9 @@ class Page
 					$complexField->sanitizeProperties4Php();
 				}
 			}
+		}
+		if( is_object( $this->Edition ) ) {
+			$this->Edition->sanitizeProperties4Php();
 		}
 	}
 }
@@ -1126,6 +1175,12 @@ class Object
 					$complexField->sanitizeProperties4Php();
 				}
 			}
+		}
+		if( is_object( $this->MetaData ) ) {
+			$this->MetaData->sanitizeProperties4Php();
+		}
+		if( is_object( $this->MessageList ) ) {
+			$this->MessageList->sanitizeProperties4Php();
 		}
 	}
 }
@@ -1546,6 +1601,12 @@ class VersionInfo
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->State ) ) {
+			$this->State->sanitizeProperties4Php();
+		}
+		if( is_object( $this->File ) ) {
+			$this->File->sanitizeProperties4Php();
+		}
 	}
 }
 class Attachment
@@ -1630,6 +1691,9 @@ class EditionRenditionsInfo
 					$complexField->sanitizeProperties4Php();
 				}
 			}
+		}
+		if( is_object( $this->Edition ) ) {
+			$this->Edition->sanitizeProperties4Php();
 		}
 	}
 }
@@ -1845,6 +1909,7 @@ class PubChannelInfo
 	public $Type;
 	public $DirectPublish;
 	public $SupportsForms;
+	public $SupportsCropping;
 
 	/**
 	 * @param string               $Id                   
@@ -1855,8 +1920,9 @@ class PubChannelInfo
 	 * @param string               $Type                 Nullable.
 	 * @param boolean              $DirectPublish        Nullable.
 	 * @param boolean              $SupportsForms        Nullable.
+	 * @param boolean              $SupportsCropping     Nullable.
 	 */
-	public function __construct( $Id=null, $Name=null, $Issues=null, $Editions=null, $CurrentIssue=null, $Type=null, $DirectPublish=null, $SupportsForms=null)
+	public function __construct( $Id=null, $Name=null, $Issues=null, $Editions=null, $CurrentIssue=null, $Type=null, $DirectPublish=null, $SupportsForms=null, $SupportsCropping=null)
 	{
 		$this->Id                   = $Id;
 		$this->Name                 = $Name;
@@ -1866,6 +1932,7 @@ class PubChannelInfo
 		$this->Type                 = $Type;
 		$this->DirectPublish        = $DirectPublish;
 		$this->SupportsForms        = $SupportsForms;
+		$this->SupportsCropping     = $SupportsCropping;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflPubChannelInfo'; } // AMF object type mapping
@@ -1874,6 +1941,7 @@ class PubChannelInfo
 	{
 		if (!is_null($this->DirectPublish)){ $this->DirectPublish = ('true' == $this->DirectPublish) ? true : false; }
 		if (!is_null($this->SupportsForms)){ $this->SupportsForms = ('true' == $this->SupportsForms) ? true : false; }
+		if (!is_null($this->SupportsCropping)){ $this->SupportsCropping = ('true' == $this->SupportsCropping) ? true : false; }
 		if (0 < count($this->Issues)){
 			if (is_object($this->Issues[0])){
 				foreach ($this->Issues as $complexField){
@@ -2073,6 +2141,12 @@ class Target
 				}
 			}
 		}
+		if( is_object( $this->PubChannel ) ) {
+			$this->PubChannel->sanitizeProperties4Php();
+		}
+		if( is_object( $this->Issue ) ) {
+			$this->Issue->sanitizeProperties4Php();
+		}
 	}
 }
 class ObjectTargetsInfo
@@ -2100,6 +2174,9 @@ class ObjectTargetsInfo
 					$complexField->sanitizeProperties4Php();
 				}
 			}
+		}
+		if( is_object( $this->BasicMetaData ) ) {
+			$this->BasicMetaData->sanitizeProperties4Php();
 		}
 	}
 }
@@ -2233,6 +2310,12 @@ class DialogWidget
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->PropertyInfo ) ) {
+			$this->PropertyInfo->sanitizeProperties4Php();
+		}
+		if( is_object( $this->PropertyUsage ) ) {
+			$this->PropertyUsage->sanitizeProperties4Php();
+		}
 	}
 }
 class DialogTab
@@ -2371,6 +2454,12 @@ class DialogButton
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->PropertyInfo ) ) {
+			$this->PropertyInfo->sanitizeProperties4Php();
+		}
+		if( is_object( $this->PropertyUsage ) ) {
+			$this->PropertyUsage->sanitizeProperties4Php();
+		}
 	}
 }
 class PropertyValue
@@ -2435,6 +2524,12 @@ class ObjectPageInfo
 					$complexField->sanitizeProperties4Php();
 				}
 			}
+		}
+		if( is_object( $this->MetaData ) ) {
+			$this->MetaData->sanitizeProperties4Php();
+		}
+		if( is_object( $this->MessageList ) ) {
+			$this->MessageList->sanitizeProperties4Php();
 		}
 	}
 }
@@ -2631,6 +2726,9 @@ class ErrorReport
 				}
 			}
 		}
+		if( is_object( $this->BelongsTo ) ) {
+			$this->BelongsTo->sanitizeProperties4Php();
+		}
 	}
 }
 class AutoSuggestTag
@@ -2787,6 +2885,9 @@ class RoutingMetaData
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->State ) ) {
+			$this->State->sanitizeProperties4Php();
+		}
 	}
 }
 class ArticleAtWorkspace
@@ -2941,6 +3042,9 @@ class EditionPages
 				}
 			}
 		}
+		if( is_object( $this->Edition ) ) {
+			$this->Edition->sanitizeProperties4Php();
+		}
 	}
 }
 class PageObject
@@ -3063,6 +3167,12 @@ class LayoutObject
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->Category ) ) {
+			$this->Category->sanitizeProperties4Php();
+		}
+		if( is_object( $this->State ) ) {
+			$this->State->sanitizeProperties4Php();
+		}
 	}
 }
 class PlacedObject
@@ -3099,5 +3209,8 @@ class PlacedObject
 
 	public function sanitizeProperties4Php()
 	{
+		if( is_object( $this->State ) ) {
+			$this->State->sanitizeProperties4Php();
+		}
 	}
 }

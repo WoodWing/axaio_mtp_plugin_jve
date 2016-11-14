@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @package 	SCEnterprise
- * @subpackage 	BizClasses
- * @since 		v5.0
- * @copyright 	WoodWing Software bv. All Rights Reserved.
+ * @package    Enterprise
+ * @subpackage BizClasses
+ * @since      v5.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 class BizProperty
 {
@@ -37,8 +37,8 @@ class BizProperty
 	 */
 	public static function getDynamicPropIds()
 	{
-		return array('ID', 'Type', 'Keywords', 'Slugline', 'Format', 'Columns', 'Width', 'Height', 'Dpi', 'LengthWords',
-			'LengthChars', 'LengthParas', 'LengthLines', 'PlainContent', 'FileSize', 'ColorSpace', 'Deadline',
+		return array('ID', 'Type', 'Keywords', 'Slugline', 'Format', 'Columns', 'Width', 'Height', 'Dimensions', 'Dpi',
+			'LengthWords', 'LengthChars', 'LengthParas', 'LengthLines', 'PlainContent', 'FileSize', 'ColorSpace', 'Deadline',
 			'Modifier', 'Creator', 'Comment', 'RouteTo', 'LockedBy', 'Deletor', 'Deleted', 'Version', 'PlacedOn',
 			'PlacedOnPage', 'Flag', 'FlagMsg',	'PageRange', 'PlannedPageRange', 'ContentSource', 'Encoding',
 			'Compression', 'KeyFrameEveryFrames', 'Channels', 'AspectRatio', 'Rating','ElementName', 'Dossier',
@@ -63,10 +63,12 @@ class BizProperty
 	 */
 	public static function getSystemPropIds()
 	{
-		return array('ID', 'DocumentID', 'Type', 'Format', 'Columns', 'Width', 'Height', 'Dpi', 'LengthWords', 'LengthChars',
-			'LengthParas', 'LengthLines', 'FileSize', 'ColorSpace', 'Modifier', 'Modified', 'Creator', 'Created', 'LockedBy', 'Deletor', 'Deleted',
-			'Version', 'PlacedOn', 'Flag', 'FlagMsg', 'PageRange', 'PlannedPageRange', 'LockForOffline', 'DeadlineChanged', 'DeadlineSoft',
-			'HighResFile', 'PlacedOnPage', 'StateColor', 'StatePhase', 'ElementName', 'PlainContent', /*'Slugline', BZ#31369 */ 'UnreadMessageCount');
+		return array('ID', 'DocumentID', 'Type', 'Format', 'Columns', 'Width', 'Height', 'Dimensions', 'Dpi',
+			'LengthWords', 'LengthChars', 'LengthParas', 'LengthLines', 'FileSize', 'ColorSpace', 'Orientation',
+			'Modifier', 'Modified', 'Creator', 'Created', 'LockedBy', 'Deletor', 'Deleted', 'Version', 'PlacedOn',
+			'Flag', 'FlagMsg', 'PageRange', 'PlannedPageRange', 'LockForOffline', 'DeadlineChanged', 'DeadlineSoft',
+			'HighResFile', 'PlacedOnPage', 'StateColor', 'StatePhase', 'ElementName', 'PlainContent', /*'Slugline', BZ#31369 */
+			'UnreadMessageCount');
 	}
 
 	/**
@@ -636,10 +638,10 @@ class BizProperty
 		self::$JoinProps['Height']  	 = null;
 		self::$JFldProps['Height']  	 = null;
 
-		self::$InfoProps['Dpi']          = new PropertyInfo( 'Dpi',         BizResources::localize( 'OBJ_DPI' ),        null,'int' );
+		self::$InfoProps['Dpi']          = new PropertyInfo( 'Dpi',         BizResources::localize( 'OBJ_DPI' ),        null,'double' );
 		self::$MetaProps['Dpi']          = 'ContentMetaData->Dpi';
 		self::$ObjFProps['Dpi']          = 'dpi';
-		self::$SqlTProps['Dpi']          = 'int';
+		self::$SqlTProps['Dpi']          = 'double';
 		self::$JoinProps['Dpi']  	 	 = null;
 		self::$JFldProps['Dpi']  	 	 = null;
 
@@ -733,6 +735,20 @@ class BizProperty
 		self::$SqlTProps['AspectRatio']  = 'string';
 		self::$JoinProps['AspectRatio']  = null;
 		self::$JFldProps['AspectRatio']	 = null;
+
+		self::$InfoProps['Orientation']  = new PropertyInfo( 'Orientation', 'Orientation', null, 'int' ); // not localized, not shown in UI
+		self::$MetaProps['Orientation']  = 'ContentMetaData->Orientation'; // since v10.1
+		self::$ObjFProps['Orientation']  = 'orientation';
+		self::$SqlTProps['Orientation']  = 'int';
+		self::$JoinProps['Orientation']  = null;
+		self::$JFldProps['Orientation']  = null;
+
+		self::$InfoProps['Dimensions']  = new PropertyInfo( 'Dimensions', BizResources::localize( 'OBJ_DIMENSIONS' ),null,'string' );
+		self::$MetaProps['Dimensions']  = 'ContentMetaData->Dimensions';
+		self::$ObjFProps['Dimensions']  = null;
+		self::$SqlTProps['Dimensions']  = null;
+		self::$JoinProps['Dimensions']  = null;
+		self::$JFldProps['Dimensions']  = null;
 
 		// Obsoleted property names: Snippet(=>>Slugline), Depth(=>>Height), WordCount(=>>LengthChars),
 		//   CharCount(=>>LengthChars), LineCount(=>>LengthLines), Content(=>>PlainContent), Size(=>>FileSize)
@@ -1194,7 +1210,7 @@ class BizProperty
 								}
 							}
 							
-							$customPropertyInfos = DBProperty::getPropertyInfos( $plugin->UniqueName, $propInfo->Name );
+							$customPropertyInfos = DBProperty::getPropertyInfosByBrand( $plugin->UniqueName, $propInfo->Name, $brandId );
 							if( count( $customPropertyInfos ) != 0 ) { // Update
 								if( $customPropertyInfos[0]->Type != $propInfo->Type ) { // Not allow to change the prop 'Type'
 									throw new BizException( 'PLN_CLICKTOREPAIR', 'Client', $connName.'->collectCustomProperties function '.
@@ -1298,11 +1314,11 @@ class BizProperty
 		if( $connRetVals ) foreach( $connRetVals as $connName => $brandProps ) {
 			$plugin = BizServerPlugin::getPluginForConnector( $connName );
 			try {
-				$dbFieldsToAdd = array();
-				$dbFieldsToUpdate = array();
-				$propertiesToUpdate = array();
-				$propertiesToAdd = array();
 				if( $brandProps ) foreach( $brandProps as $brandId => $objTypeProps ) {
+					$dbFieldsToAdd = array();
+					$dbFieldsToUpdate = array();
+					$propertiesToUpdate = array();
+					$propertiesToAdd = array();
 					if( $objTypeProps ) foreach( $objTypeProps as $objType => $propInfos ) {
 						if( $propInfos ) foreach( $propInfos as $propInfo ) {
 							// Debugging: Uncomment the lines below to cleanup the property from DB.
@@ -1327,7 +1343,7 @@ class BizProperty
 								}
 							}
 
-							$customPropertyInfos = DBProperty::getPropertyInfos( $plugin->UniqueName, $propInfo->Name );
+							$customPropertyInfos = DBProperty::getPropertyInfosByBrand( $plugin->UniqueName, $propInfo->Name, $brandId );
 							if( count( $customPropertyInfos ) != 0 ) { // Update
 								$propInfo = self::enrichPropertyInfoWithInternalProps( $propInfo, $brandId, $objType, $plugin );
 
@@ -1453,6 +1469,8 @@ class BizProperty
 	 * It removes all the custom properties introduced by the plugin $pluginName;
 	 * when pluginName is not specified, it removes all custom properties that
 	 * are introduced by the CustomObjectMetaData connector.
+	 * If a custom property is defined for several different Brands the datamodel is updated the moment the last
+	 * custom property is removed.
 	 *
 	 * @since 9.0.0
 	 * @param $pluginName string|null Server Plug-in (name) to run the CustomObjectMetaData connector for.
@@ -1477,16 +1495,18 @@ class BizProperty
 				foreach( $objTypeProps as $objType => $propInfos ) {
 					foreach( $propInfos as $propInfo ) {
 						$continueDelete = true;
-						try {
-							if (!in_array($propInfo->Type, $excludeFromModel)) {
-								BizCustomField::deleteFieldAtModel( 'objects', $propInfo->Name );
+						if ( self::lastDefinedCustomPropertyForPlugin( $pluginName, $propInfo->Name ) ) {
+							try {
+								if( !in_array( $propInfo->Type, $excludeFromModel ) ) {
+									BizCustomField::deleteFieldAtModel( 'objects', $propInfo->Name );
+								}
+							} catch( BizException $e ) {
+								if( !isset( $failedDeletedFields[ $plugin->UniqueName ] ) ) {
+									$failedDeletedFields[ $plugin->UniqueName ] = array();
+								}
+								$failedDeletedFields[ $plugin->UniqueName ][] = $propInfo->Name;
+								$continueDelete = false;
 							}
-						} catch( BizException $e ) {
-							if( !isset( $failedDeletedFields[$plugin->UniqueName] )) {
-								$failedDeletedFields[$plugin->UniqueName] = array();
-							}
-							$failedDeletedFields[$plugin->UniqueName][] = $propInfo->Name;
-							$continueDelete = false;
 						}
 
 						if( $continueDelete ) { // only remove fields from smart_properties and smart_actionproperties table when the above is successful.
@@ -1506,6 +1526,13 @@ class BizProperty
 			}
 		}
 		return $result;
+	}
+
+	static private function lastDefinedCustomPropertyForPlugin( $pluginName, $propertyName )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
+		$timesDefined = count( DBProperty::getPropertyInfos( $pluginName, $propertyName ) );
+		return ( $timesDefined == 1 ? true : false );
 	}
 
 	/**

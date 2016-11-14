@@ -27,15 +27,24 @@ if (LogHandler::debugMode())
 }
 
 if($servername) {
-    if($ip) {
-        $servername = $ip . " " . $servername;
-    }
-    $servername = addslashes(html_entity_decode($servername));
+	if($ip) {
+		$servername = $ip . " " . $servername;
+	}
+	$servername = addslashes(html_entity_decode($servername));
 }
 if($message){
 	$message = preg_replace('/<status>/is', '', $message);
 	$message = preg_replace('@</status>@is', '', $message);
 	$message = addslashes(html_entity_decode($message));
 }
+
+LogHandler::Log('mtp', 'DEBUG', 'postProcess: calling postProcess with: ' .
+	'  $layoutId ' . $layoutId .
+	', $layStatusId ' . $layStatusId .
+	', $layEditionId ' . $layEditionId .
+	', $success ' . $success .
+	', $servername ' . $servername .
+	', $message ' . $message
+);
 
 AxaioMadeToPrintDispatcher::postProcess( $layoutId, $layStatusId, $layEditionId, $success, $message, $servername);

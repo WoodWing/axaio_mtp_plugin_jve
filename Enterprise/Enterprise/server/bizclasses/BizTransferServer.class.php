@@ -343,7 +343,16 @@ class BizTransferServer extends BizServerJobHandler
 	private function createTransferFileName()
 	{
 		require_once BASEDIR.'/server/utils/NumberUtils.class.php';
-		return $this->composeTransferPath( NumberUtils::createGUID(), true );
+		$filePath = $this->composeTransferPath( NumberUtils::createGUID(), true );
+
+		// Hidden debug setting to check if files are leaking in e.g. transfer folder and temp folders.
+		// When set to true, a full stack dump is made of each file for the caller who asked for it.
+		if( $filePath && defined('DEBUG_ORPHAN_FILES') && DEBUG_ORPHAN_FILES == true && LogHandler::debugMode() ) {
+			LogHandler::Log( 'TransferServer', 'DEBUG',
+				'Created file in transfer folder: "'. $filePath.'"<br/>Caller:<br/>'.LogHandler::getDebugBackTrace() );
+		}
+
+		return $filePath;
 	}
 
 	/**
@@ -391,7 +400,7 @@ class BizTransferServer extends BizServerJobHandler
 				}
 			}
 		}
-		
+
 		// Build and return file path, only when subfolder could be created.
 		return $fileFolder ? $fileFolder.'/'.$fileguid : null;
 	}

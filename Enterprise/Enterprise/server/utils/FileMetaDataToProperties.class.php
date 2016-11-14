@@ -3,12 +3,16 @@
  * @package 	Enterprise
  * @subpackage 	utils
  * @since 		v9.7
+ * @deprecated v10.1.0 This file is deprecated and should be removed with v11.
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  *
  * Includes two wrapper classes; one for the convert XMP metadata class and one for the convert IPTC metadata class.
  * Also includes a factory class to create the one of those wrapper classes.
  */
 
+/**
+ * @deprecated v10.1.0 This class is deprecated and should be removed with v11.
+ */
 class WW_Utils_FileMetaDataToProperties_Factory
 {
 	/**
@@ -21,8 +25,10 @@ class WW_Utils_FileMetaDataToProperties_Factory
 	static public function createConverter( $source )
 	{
 		if ( $source == 'iptc' ) {
+			/** @noinspection PhpDeprecationInspection */
 			return new WW_Utils_FileIPTCDataToProperties();
 		} elseif ( $source == 'xmp' ) {
+			/** @noinspection PhpDeprecationInspection */
 			return new WW_Utils_FileXMPDataToProperties();
 		}
 
@@ -30,6 +36,9 @@ class WW_Utils_FileMetaDataToProperties_Factory
 	}
 }
 
+/**
+ * @deprecated v10.1.0 This class is deprecated and should be removed with v11.
+ */
 abstract class WW_Utils_FileMetaDataToProperties
 {
 
@@ -42,6 +51,11 @@ abstract class WW_Utils_FileMetaDataToProperties
 	abstract public function convert( $imageMetaData, &$metaData );
 }
 
+/**
+ * @deprecated v10.1.0 This class is deprecated and should be removed with v11.
+ */
+
+/** @noinspection PhpDeprecationInspection */
 class WW_Utils_FileIPTCDataToProperties extends  WW_Utils_FileMetaDataToProperties
 {
 	/**
@@ -65,9 +79,11 @@ class WW_Utils_FileIPTCDataToProperties extends  WW_Utils_FileMetaDataToProperti
 		if( !array_key_exists('Copyright', $metaData ) && array_key_exists("2#116",$iptcData) ) {
 			$metaData['Copyright'] = UtfString::smart_utf8_encode($iptcData["2#116"][0]);
 		}
-		if( !array_key_exists('Created', $metaData ) && array_key_exists("2#055",$iptcData) ) {
-			$metaData['Created'] = UtfString::smart_utf8_encode($iptcData["2#055"][0]);
-		}
+		// v10.1.0: The format of the two date fields below differ from xsd:datetime and are not converted properly.
+		//          The core server overwrites the creation time stamp anyway, so let's skip them here. (EN-87917)
+		//if( !array_key_exists('Created', $metaData ) && array_key_exists("2#055",$iptcData) ) {
+		//	$metaData['Created'] = UtfString::smart_utf8_encode($iptcData["2#055"][0]);
+		//}
 		if( !array_key_exists('Keywords', $metaData ) && array_key_exists("2#025",$iptcData) ) {
 			$iptcKeywords = $iptcData["2#025"];
 			if( !empty($iptcKeywords) && is_array($iptcKeywords) ) {
@@ -101,7 +117,11 @@ class WW_Utils_FileIPTCDataToProperties extends  WW_Utils_FileMetaDataToProperti
 	}
 }
 
+/**
+ * @deprecated v10.1.0 This class is deprecated and should be removed with v11.
+ */
 
+/** @noinspection PhpDeprecationInspection */
 class WW_Utils_FileXMPDataToProperties extends  WW_Utils_FileMetaDataToProperties
 {
 	/**
@@ -138,10 +158,12 @@ class WW_Utils_FileXMPDataToProperties extends  WW_Utils_FileMetaDataToPropertie
 			if( isset($metaData['Rating'] ) ) {
 				$metaData['Rating'] = intval( $metaData['Rating'] ); // BZ#35029 Make sure that Rating is an integer.
 			}
-			$this->getXMPValue( $metaData, 'Created', 'string', $xmpData, '//xap:CreateDate' );
-			if( !isset($metaData['Created'] ) ) { // Try to find alternative way.
-				$this->getXMPValue( $metaData, 'Created','attrstring', $xmpData, '//rdf:Description', 'http://ns.adobe.com/xap/1.0/', 'CreateDate' );
-			}
+			// v10.1.0: The format of the two date fields below differ from xsd:datetime and are not converted properly.
+			//          The core server overwrites the creation time stamp anyway, so let's skip them here. (EN-87917)
+			//$this->getXMPValue( $metaData, 'Created', 'string', $xmpData, '//xap:CreateDate' );
+			//if( !isset($metaData['Created'] ) ) { // Try to find alternative way.
+			//	$this->getXMPValue( $metaData, 'Created','attrstring', $xmpData, '//rdf:Description', 'http://ns.adobe.com/xap/1.0/', 'CreateDate' );
+			//}
 			$this->getXMPValue( $metaData, 'DocumentID', 'string', $xmpData, '//xapMM:DocumentID' );
 			if( !isset($metaData['DocumentID'] ) ) { // Try to find alternative way.
 				$this->getXMPValue( $metaData, 'DocumentID',	'attrstring', $xmpData, '//rdf:Description', 'http://ns.adobe.com/xap/1.0/mm/', 'DocumentID' );

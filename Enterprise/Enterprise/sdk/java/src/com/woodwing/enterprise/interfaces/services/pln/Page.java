@@ -22,6 +22,8 @@ public class Page  implements java.io.Serializable {
 
     private org.apache.axis.types.UnsignedInt pageSequence;
 
+    private java.lang.String pageNumber;
+
     public Page() {
     }
 
@@ -32,7 +34,8 @@ public class Page  implements java.io.Serializable {
            com.woodwing.enterprise.interfaces.services.pln.Attachment[] files,
            com.woodwing.enterprise.interfaces.services.pln.Edition edition,
            java.lang.String master,
-           org.apache.axis.types.UnsignedInt pageSequence) {
+           org.apache.axis.types.UnsignedInt pageSequence,
+           java.lang.String pageNumber) {
            this.pageOrder = pageOrder;
            this.width = width;
            this.height = height;
@@ -40,6 +43,7 @@ public class Page  implements java.io.Serializable {
            this.edition = edition;
            this.master = master;
            this.pageSequence = pageSequence;
+           this.pageNumber = pageNumber;
     }
 
 
@@ -182,6 +186,26 @@ public class Page  implements java.io.Serializable {
         this.pageSequence = pageSequence;
     }
 
+
+    /**
+     * Gets the pageNumber value for this Page.
+     * 
+     * @return pageNumber
+     */
+    public java.lang.String getPageNumber() {
+        return pageNumber;
+    }
+
+
+    /**
+     * Sets the pageNumber value for this Page.
+     * 
+     * @param pageNumber
+     */
+    public void setPageNumber(java.lang.String pageNumber) {
+        this.pageNumber = pageNumber;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof Page)) return false;
@@ -214,7 +238,10 @@ public class Page  implements java.io.Serializable {
               this.master.equals(other.getMaster()))) &&
             ((this.pageSequence==null && other.getPageSequence()==null) || 
              (this.pageSequence!=null &&
-              this.pageSequence.equals(other.getPageSequence())));
+              this.pageSequence.equals(other.getPageSequence()))) &&
+            ((this.pageNumber==null && other.getPageNumber()==null) || 
+             (this.pageNumber!=null &&
+              this.pageNumber.equals(other.getPageNumber())));
         __equalsCalc = null;
         return _equals;
     }
@@ -254,6 +281,9 @@ public class Page  implements java.io.Serializable {
         }
         if (getPageSequence() != null) {
             _hashCode += getPageSequence().hashCode();
+        }
+        if (getPageNumber() != null) {
+            _hashCode += getPageNumber().hashCode();
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -306,6 +336,13 @@ public class Page  implements java.io.Serializable {
         elemField.setFieldName("pageSequence");
         elemField.setXmlName(new javax.xml.namespace.QName("", "PageSequence"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "unsignedInt"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("pageNumber");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "PageNumber"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setMinOccurs(0);
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
     }

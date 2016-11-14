@@ -17,7 +17,9 @@ class DBPublishHistory extends DBBase
 	
 	/**
 	 * Each time a dossier undertakes a publishing action, this function is called to store publish 
-	 * history at the DB. It accepts a PubPublishedDossier $publishedDossier parameter, of which all
+	 * history at the DB.
+	 *
+	 * It accepts a PubPublishedDossier $publishedDossier parameter, of which all
 	 * properties (defined at that data class) are stored, but also some internal properties, 
 	 * that can be added on-the-fly (by caller) to the passed data object instance ($publishedDossier):
 	 *		PubPublishedDossier->ExternalId: the story identifier of the publishing system
@@ -150,7 +152,7 @@ class DBPublishHistory extends DBBase
 	 * @param int $issueid the issue of the publish channel
 	 * @param int $editionid the edition of the publish channel
 	 * @param boolean $lastRow indicator whether to get the last row history
-	 * @return array of rows. Each row is a histoy record, null if error
+	 * @return array|null List of history records or null on error.
 	 */
 	public static function getPublishHistoryDossier( $dossierid, $channelid, $issueid, $editionid, $lastRow )
 	{
@@ -244,6 +246,7 @@ class DBPublishHistory extends DBBase
 
 	/**
 	 * Method returns if a dossier is published within a specified issue.
+	 *
 	 * Published means that for one of the editions of the issue the last publish action
 	 * is either publishDossier or updateDossier. Next to that we expect that the externalid
 	 * is filled when the update/publish action was successful.
@@ -294,6 +297,7 @@ class DBPublishHistory extends DBBase
 
 	/**
 	 * Method returns if a dossier is published.
+	 *
 	 * Scope can be narrowed from channel to edition.
 	 * Published means that for one of the channels/issues/editions of the issue the last publish action
 	 * is either publishDossier or updateDossier. Next to that we expect that the externalid
@@ -396,6 +400,7 @@ class DBPublishHistory extends DBBase
 
 	/**
 	 * Checks if hold variables are changed.
+	 *
 	 * @param array $row
 	 * @param array $holdKeys
 	 * @return true if values of the hold keys are different from the ones in $row.
@@ -409,6 +414,7 @@ class DBPublishHistory extends DBBase
 
 	/**
 	 * Sets the hold variables to new values from $row
+	 *
 	 * @param array $row
 	 * @param array $holdKeys
 	 * @return array Update array with hold variables.
@@ -421,7 +427,8 @@ class DBPublishHistory extends DBBase
 	}	
 
 	/**
-	 * Returns the latest publish history information of an object (plublished dossier). 
+	 * Returns the latest publish history information of an object (published dossier).
+	 *
 	 * @param integer $objectId Object id (dossier).
 	 * @param integer $channelId Publication channel
 	 * @param integer $issueId Published issue

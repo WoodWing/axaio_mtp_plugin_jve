@@ -810,7 +810,8 @@ class BizObject
 
 			require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
 			if( BizPublication::isCalculateDeadlinesEnabled( $newRow['publication'], $overruleIssueId ) ) {
-				$deadlinehard = DBObject::objectSetDeadline( $id, $issueIdsDL, $newRow['section'], $newRow['state'] );
+				$deadlines = DBObject::objectSetDeadline( $id, $issueIdsDL, $newRow['section'], $newRow['state'] );
+                $deadlinehard = $deadlines['Deadline'];
 				if ( $oldDeadline !== $deadlinehard ) {
 					if ( BizDeadlines::canPassDeadlineToChild( $newRow['type'] ) ) {
 						// Recalculate the deadlines of children without own object-target issue.
@@ -1094,7 +1095,7 @@ class BizObject
 			}
 
 			if ($checkRights) {
-				self::checkAccesRights( $lock, $user, $objectProps );
+				self::checkAccessRights( $lock, $user, $objectProps );
 			}
 
 			if (!empty($objectProps['RouteToUser'])) {
@@ -1588,17 +1589,19 @@ class BizObject
 				throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(C)" );
 			}
 		}
+
 		// Next check if we are allowed to modify the object in its existing place (open for edit access)
 		// When there is no E-access it may still be that we have W-access (BZ#5519). In that case don't fail.
-		if( !BizAccess::checkRightsForObjectRow(
-			$user, 'E', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId ) ) {
-			if( !BizAccess::checkRightsForObjectRow(
-				$user, 'W', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId ) ) {
+		if( !BizAccess::checkRightsForObjectRow( $user, 'E', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId )
+			 && !BizAccess::checkRightsForObjectRow( $user, 'W', BizAccess::DONT_THROW_ON_DENIED, $currRow, $curIssueId )
+				 // If open for edit is disabled, it could be that user can only edit unplaced files. So first check if user
+				 // has that right and if they do check if the object is actually placed.
+			 && (!BizAccess::checkRightsForObjectRow( $user, 'O', BizAccess::THROW_ON_DENIED, $currRow, $curIssueId )
+					|| BizRelation::hasRelationOfType( $id, 'Placed', 'parents' )) ) {
 				throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(E)" );
-			}
 		}
 
-		// Next, check if we have access to destination.
+			// Next, check if we have access to destination.
 		BizAccess::checkRightsForParams( $user, 'W', BizAccess::THROW_ON_DENIED,
 			$newRow['publication'], $newIssueId, $newRow['section'], $newRow['type'], $newRow['state'],
 			$currRow['id'], $currRow['contentsource'], $currRow['documentid'], $currRow['routeto'] );
@@ -2451,7 +2454,7 @@ class BizObject
 			// needed.
 			$currentState = $invokedObjects[$objectId]->WorkflowMetaData->State->Id;
 			$currentCategory = $invokedObjects[$objectId]->BasicMetaData->Category->Id;
-			$contentSouce = $invokedObjects[$objectId]->BasicMetaData->ContentSource;
+			$contentSource = $invokedObjects[$objectId]->BasicMetaData->ContentSource;
 			$documentId = $invokedObjects[$objectId]->BasicMetaData->DocumentID;
 			$routeTo = $invokedObjects[$objectId]->WorkflowMetaData->RouteTo;
 
@@ -2478,10 +2481,10 @@ class BizObject
 					$globAuth->getRights( $user, $publicationId, $issueId, $currentCategory, $objectType );
 					$changeStatusForward = $globAuth->checkright( 'F', // 'Change_Status_Forward'
 						$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-						$objectId, $contentSouce, $documentId, $routeTo );
+						$objectId, $contentSource, $documentId, $routeTo );
 					$changeStatus = $globAuth->checkright( 'C',  // 'Change_Status'
 						$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-						$objectId, $contentSouce, $documentId, $routeTo );
+						$objectId, $contentSource, $documentId, $routeTo );
 
 					// If the next status is requested and we cannot move the status forward we need to report an
 					// error. Change Status allows any transition while change forward only allows moving forward to
@@ -2517,41 +2520,44 @@ class BizObject
 						break;
 					}
 
-					// Check if we are allowed to change the source Object. We check Write access (W) and open/edit rights (E).
+					require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
+					// Check if we are allowed to change the source Object. We check Write access (W) and open/edit rights (E) and open/edit rights for unplaced (O).
 					if( !$globAuth->checkright( 'E',
 							$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-							$objectId, $contentSouce, $documentId, $routeTo  )
+							$objectId, $contentSource, $documentId, $routeTo )
 						&& !$globAuth->checkright( 'W',
 							$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-							$objectId, $contentSouce, $documentId, $routeTo ) ) {
-						try {
-							throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
-								BizResources::localize( 'ERR_AUTHORIZATION' ) . PHP_EOL . 'id=' .$objectId
-								. ' (E)' );
-						} catch( BizException $e ) {
-							self::reportError( 'Authorization', $objectId, null, $e );
-						}
+							$objectId, $contentSource, $documentId, $routeTo )
+						&& ( !$globAuth->checkRight( 'O',
+								$publicationId, $issueId, $currentCategory, $objectType, $currentState,
+								$objectId, $contentSource, $documentId, $routeTo ) || BizRelation::hasRelationOfType( $objectId, 'Placed', 'parents' ) ) ) {
+								try {
+									throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
+										BizResources::localize( 'ERR_AUTHORIZATION' ).PHP_EOL."id={$objectId} (E)" );
+								} catch( BizException $e ) {
+									self::reportError( 'Authorization', $objectId, null, $e );
+								}
 
-						unset( $invokedObjects[$objectId] );
-						$retVal = false;
-						break;
+								unset( $invokedObjects[ $objectId ] );
+								$retVal = false;
+								break;
 					}
 
 					// Check if there is write access to the destination Object (W).
-					$globAuth->getRights($user, $publicationId, $issueId, $newCategoryId, $objectType);
-					if(  !$globAuth->checkright( 'W',
+					$globAuth->getRights( $user, $publicationId, $issueId, $newCategoryId, $objectType );
+					if( !$globAuth->checkright( 'W',
 						$publicationId, $issueId, $newCategoryId, $objectType, $newStateId,
-						$objectId, $contentSouce, $documentId, $routeTo )
-					){
+						$objectId, $contentSource, $documentId, $routeTo )
+					) {
 						try {
 							throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
-								BizResources::localize( 'ERR_AUTHORIZATION' ) . PHP_EOL . 'id=' .$objectId
-								. ' (W)' );
+								BizResources::localize( 'ERR_AUTHORIZATION' ).PHP_EOL.'id='.$objectId
+								.' (W)' );
 						} catch( BizException $e ) {
 							self::reportError( 'Authorization', $objectId, null, $e );
 						}
 
-						unset( $invokedObjects[$objectId] );
+						unset( $invokedObjects[ $objectId ] );
 						$retVal = false;
 						break;
 					}
@@ -2580,7 +2586,7 @@ class BizObject
 					$globAuth->getRights($user, $publicationId, $issueId, $currentCategory, $objectType);
 					if (!$globAuth->checkright( 'P',
 						$publicationId, $issueId, $currentCategory, $objectType, $currentState,
-						$objectId, $contentSouce, $documentId, $routeTo ) ) {
+						$objectId, $contentSource, $documentId, $routeTo ) ) {
 						try {
 							throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
 								BizResources::localize( 'ERR_AUTHORIZATION' ) . PHP_EOL . 'id=' .$objectId
@@ -3473,8 +3479,65 @@ class BizObject
 			$meta->ContentMetaData->HighResFile = $highresfile;
 		}
 
+		// Make sure that the Orientation is in range [1...8] or null.
+		self::validateAndRepairOrientation( $meta );
+
+		// Derive the Dimensions property value from Width, Height and Orientation.
+		self::determineDimensions( $meta );
+
 		// Validate overruled publications
 		self::validateOverruledPublications( $user, $meta, $targets );
+	}
+
+	/**
+	 * Make sure that the Orientation is in range [1...8] or null.
+	 *
+	 * When not in range, null is assigned to tell callers (e.g. GetObjects) there is no Orientation set
+	 * for the object, or to tell the database (e.g. SaveObjects) that the orientation should not be stored.
+	 *
+	 * Note that when there is no Orientation, there is a zero (0) stored in the database. Unlike other properties,
+	 * this should be converted to null when read from DB to tell clients there is no Orientation set for the object.
+	 * Also note that only for images (and adverts?) the Orientation property makes sense.
+	 *
+	 * @since 10.1.0
+	 * @param MetaData $meta
+	 */
+	private static function validateAndRepairOrientation( MetaData $meta )
+	{
+		if( isset( $meta->ContentMetaData->Orientation ) ) {
+			if( !ctype_digit( strval( $meta->ContentMetaData->Orientation ) ) ||
+				$meta->ContentMetaData->Orientation < 1 ||
+				$meta->ContentMetaData->Orientation > 8 ) {
+				$meta->ContentMetaData->Orientation = null; // repair
+			}
+		}
+	}
+
+	/**
+	 * Determines the Dimensions property value, which is not(!) stored in DB, readonly, and for UI purposes only.
+	 *
+	 * When Width and Height are set, the Dimensions will get value "Width x Height" unless the Orientation tells that
+	 * the image should be rotated 90 degrees, it will get value "Height x Width". When Width and Height are not set
+	 * the Dimensions will remain undetermined (unset).
+	 *
+	 * IMPORTANT: Please keep this function in-sync with BizQueryBase::determineDimensions() !
+	 *
+	 * @since 10.1.0
+	 * @param MetaData $meta
+	 */
+	private static function determineDimensions( MetaData $meta )
+	{
+		if( isset( $meta->ContentMetaData->Width ) && $meta->ContentMetaData->Width > 0 &&
+			isset( $meta->ContentMetaData->Height ) && $meta->ContentMetaData->Height > 0 ) {
+			if( isset( $meta->ContentMetaData->Orientation ) && $meta->ContentMetaData->Orientation >= 5 ) { // 90 degrees rotated?
+				$lhs = $meta->ContentMetaData->Height;
+				$rhs = $meta->ContentMetaData->Width;
+			} else {
+				$lhs = $meta->ContentMetaData->Width;
+				$rhs = $meta->ContentMetaData->Height;
+			}
+			$meta->ContentMetaData->Dimensions = "$lhs x $rhs";
+		}
 	}
 
 	/**
@@ -3726,6 +3789,13 @@ class BizObject
 	private static function validateForSave($user, /** @noinspection PhpLanguageLevelInspection */
 	                                        Object $object, $currRow )
 	{
+		// Block callers from overruling the Orientation; This is extracted from the native file by the ExifTool integration.
+		// Shadow objects do not have a native, so we need them to tell us their orientation.
+		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
+		if( !BizContentSource::isShadowObject( $object ) ) {
+			$object->MetaData->ContentMetaData->Orientation = null;
+		}
+
 		// Enrich object MetaData with any embedded metadata from file
 		require_once BASEDIR.'/server/bizclasses/BizMetaDataPreview.class.php';
 		$bizMetaPreview = new BizMetaDataPreview();
@@ -4165,7 +4235,7 @@ class BizObject
 		$arr = array();
 		$systemDeterminedFields = array( 'id', 'created', 'creator', 'modified', 'modifier', 'lockedby', 'majorversion', 'minorversion' );
 		if ( $isShadowObject ) {
-			$systemDeterminedFields = array( 'id', 'majorversion', 'minorversion' );
+			$systemDeterminedFields = array( 'id', 'created', 'majorversion', 'minorversion' );
 		}
 		foreach( $objFields as $propName => $objField ) {
 			$propPath = $propPaths[$propName];
@@ -4272,8 +4342,8 @@ class BizObject
 	// needs to move to apps folder:
 	public static function getTypeIcon($typename)
 	{
-		$icondir = '../../config/images/';
 
+		$icondir = '../../config/images/';
 		switch ($typename)
 		{
 			case 'Article':
@@ -4486,6 +4556,12 @@ class BizObject
 				$meta->ContentMetaData->Description = '';
 			}
 			$meta->ExtraMetaData = $extramd;
+
+			// Make sure that the Orientation is in range [1...8] or null.
+			self::validateAndRepairOrientation( $meta );
+
+			// Derive the Dimensions property value from Width, Height and Orientation.
+			self::determineDimensions( $meta );
 		}
 		return $meta;
 	}
@@ -4618,8 +4694,9 @@ class BizObject
 	 * @param boolean $lock Object is locked
 	 * @param string $user Short User Name
 	 * @param array $objectProps Route User(group)
+	 * @throws BizException on authorization error.
 	 */
-	static private function checkAccesRights( $lock, $user, array $objectProps )
+	static private function checkAccessRights( $lock, $user, array $objectProps )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
@@ -4638,10 +4715,20 @@ class BizObject
 		}
 		//BZ#6468 user needs 'E'-access to lock
 		if ($lock === true) {
+			// Do not check authorization in case of 'Personal' state and user is 'route to
+			// user' or in the 'route to group'.
 			if (! (($objectProps['StateId'] == - 1) && ($routeto == $user || $routetouser))) {
-				// Do not check authorization in case of 'Personal' state and user is 'route to
-				// user' or in the 'route to group'.
-				BizAccess::checkRightsForObjectProps( $user, 'E', BizAccess::THROW_ON_DENIED, $objectProps );
+				//If user has not 'Open for Edit' rights, they could still have 'Open for Edit (Unplaced)' rights.
+				if( !BizAccess::checkRightsForObjectProps( $user, 'E', BizAccess::DONT_THROW_ON_DENIED, $objectProps ) ) {
+
+					// Check if the user has access to unplaced files only. If not, it means the user does not have any edit rights.
+					if( BizAccess::checkRightsForObjectProps( $user, 'O', BizAccess::THROW_ON_DENIED, $objectProps )
+						 && BizRelation::hasRelationOfType( $objectProps['ID'], 'Placed', 'parents' ) ) {
+						//If object to be accessed is placed, throw error since user has only access to unplaced objects.
+						throw new BizException( 'ERR_AUTHORIZATION', 'Client',
+							'User does not have sufficient rights to edit object ('.$objectProps['ID'].').');
+					}
+				}
 			}
 		} else if ($routeto == $user || $routetouser) {
 			;
@@ -6121,7 +6208,7 @@ class BizObject
 	/**
 	 * Get an unique object, when restoring an object or when applyautonaming is true.
 	 *
-	 * Different logic or algorithm will be apply differently for both actions, restoring object or applyautonaing is true.
+	 * Different logic or algorithm will be apply differently for both actions, restoring object or applyautonaming is true.
 	 * When restoring an object, if the object name already exists in DB, autonaming numbering will be append at the end of object name,
 	 * For example:
 	 * Original name                Unique name

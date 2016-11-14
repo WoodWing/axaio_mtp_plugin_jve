@@ -1,9 +1,10 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	PreviewMetaPHP
- * @since 		v6.1
- * @copyright	WoodWing Software bv. All Rights Reserved.
+ * @package    Enterprise
+ * @subpackage PreviewMetaPHP
+ * @since      v6.1
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ * @deprecated v10.1.0 This metadata connector is superseded by the Exiftool @see ExifTool_MetaData and should be removed with 11.0.
  *
  * PHP implementation of meta data reader
 **/

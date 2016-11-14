@@ -35,9 +35,9 @@ class ElvisRESTClient
 	/**
 	 * Performs REST update for provided metadata and file (if any).
 	 *
-	 * @param $elvisId Id of asset
-	 * @param $metadata Changed metadata
-	 * @param null $file
+	 * @param string $elvisId Id of asset
+	 * @param array $metadata Changed metadata
+	 * @param Attachment|null $file
 	 * @throws BizException
 	 */
 	public static function update($elvisId, $metadata, $file=NULL)
@@ -72,8 +72,8 @@ class ElvisRESTClient
 	/**
 	 * Performs REST bulk update for provided metadata.
 	 *
-	 * @param $elvisIds Ids of assets
-	 * @param $metadata Changed metadata
+	 * @param string[] $elvisIds Ids of assets
+	 * @param MetaData|MetaDataValue[] $metadata Changed metadata
 	 * @throws BizException
 	 */
 	public static function updateBulk($elvisIds, $metadata)

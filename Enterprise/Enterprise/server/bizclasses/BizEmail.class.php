@@ -425,6 +425,8 @@ class BizEmail
 	/**
 	 * Generate email body for multiple objects.
 	 * If the category and/or status is changed this function will also update those.
+	 * If the comment is set for all invoked objects, that comment is used. If not, the comment already set on
+	 * the invoked objects is used in the email.
 	 *
 	 * @param Object[] $invokedObjects Objects that we're emailing about
 	 * @param array $objProps The changed data
@@ -488,10 +490,13 @@ class BizEmail
 				<tr><td style="background-color: ' . $objectStatusColor . ';"></td></tr></table></td><td>&nbsp;' . $objectStatusName . '</td>
 				</tr></table>';
 
-			$rowText  = '<td valign="top">' . $object->BasicMetaData->Name . '</td>';
-			$rowText .= '<td valign="top">' . $object->BasicMetaData->Publication->Name . '</td>';
-			$rowText .= '<td valign="top">' . $objectCategory . '</td>';
-			$rowText .= '<td valign="top">' . $objectStatus . '</td>';
+			$rowText = '<td valign="top">'.$object->BasicMetaData->Name.'</td>';
+			$rowText .= '<td valign="top">'.$object->BasicMetaData->Publication->Name.'</td>';
+			$rowText .= '<td valign="top">'.$objectCategory.'</td>';
+			$rowText .= '<td valign="top">'.$objectStatus.'</td>';
+			$rowText .= '<td valign="top">'.self::resolveModifierFromObject( $object ).'</td>';
+			$rowText .= '<td valign="top">'.$object->WorkflowMetaData->Modified.'</td>';
+			$rowText .= '<td valign="top">'.( !empty( $comment ) ? $comment : $object->WorkflowMetaData->Comment ).'</td>';
 
 			if( ($count % 2) == 0 ){ // this is used for the row styling
 				$objectRowsText .= '<tr class="even">' . $rowText . '</tr>';
@@ -512,6 +517,17 @@ class BizEmail
 
 		return $emailTxt;
 	}
+
+    private function resolveModifierFromObject( $object )
+    {
+        require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+        $modifier = '';
+        if( !empty( $object->WorkflowMetaData->Modifier ) ) {
+            $modifier = BizUser::resolveFullUserName( $object->WorkflowMetaData->Modifier );
+        }
+
+        return $modifier;
+    }
 
 	/**
 	 * Figures out if there is something to email

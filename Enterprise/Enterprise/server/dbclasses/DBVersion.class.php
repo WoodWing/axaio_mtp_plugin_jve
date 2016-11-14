@@ -23,10 +23,11 @@ class DBVersion extends DBBase
 			$versionFields = array(
 				'description' => 'blob', 'descriptionauthor' => 'string',  'keywords' => 'blob', 
 				'slugline' => 'string',  'format' => 'string', 
-				'_columns' => 'int', 'width' => 'double', 'depth' => 'double', 'dpi' => 'int', 
+				'_columns' => 'int', 'width' => 'double', 'depth' => 'double', 'dpi' => 'double',
 				'lengthwords' => 'int', 'lengthchars' => 'int', 'lengthparas' => 'int', 'lengthlines' => 'int',
 				'colorspace' => 'string', 'plaincontent' => 'blob', 'filesize' => 'int',
-				'comment' => 'string', 'types' => 'blob', 'modifier' => 'string', 'state' => 'int' 
+				'comment' => 'string', 'types' => 'blob', 'modifier' => 'string', 'state' => 'int',
+				'orientation' => 'int'
 				// these have special treatment: 'majorversion', 'minorversion'
 				);
 		}

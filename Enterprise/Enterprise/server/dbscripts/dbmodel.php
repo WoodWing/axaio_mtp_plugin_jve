@@ -37,7 +37,7 @@ class DBStruct
 			'310', '320', '330', '340', '400', '410', '420', 
 			'500', '599', '600', '610', '700', '750', '760', '800', 
 			'900', '910', '920', '940', '950', '960', '970', '980', 
-			'1000'
+			'1000', '1010'
 		);
 	}
 	
@@ -162,13 +162,15 @@ class DBStruct
 									'alters' => array('v' => '340', 'name' => 'issue',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
 							array('v' => '610', 'name' => 'profile',	'type' => 'int(11)',		'default' => "'0'",
 									'alters' => array('v' => '420', 'name' => 'profile',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '1010', 'name' => 'bundle',	'type' => 'int(11)',		'default' => "'0'",
+								'comment' => 'Group id of rows that should be combined (bundled) in the admin UI.' ),
 						),
 						'indexes' => array(
 							array('v' => '420', 'name' => 'gipu_authorizations', 	'fields' => 'grpid, publication'),
 							array('v' => '420', 'name' => 'gipr_authorizations', 	'fields' => 'grpid, profile'),
 						),
 						'inserts' => array(
-							"1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1",
+							"1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1, 0",
 						),
 						'lookups' => array(
 							array('v' => '420', 'field' => 'grpid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
@@ -225,7 +227,8 @@ class DBStruct
 								'alters' => array('v' => '310', 'name' => 'format',			'type' => 'varchar(40)',		'default' => "''")),
 							array('v' => '310', 'name' => 'width',			'type' => 'double',				'default' => "'0'"),
 							array('v' => '310', 'name' => 'depth',			'type' => 'double',				'default' => "'0'"),
-							array('v' => '310', 'name' => 'dpi',			'type' => 'int(11)',			'default' => "'0'"),
+							array('v' => '1010', 'name' => 'dpi',			'type' => 'double',				'default' => "'0'",
+								'alters' => array('v' => '310', 'name' => 'dpi',		'type' => 'int(11)',	'default' => "'0'") ),
 							array('v' => '310', 'name' => 'lengthwords',	'type' => 'int(11)',			'default' => "'0'"),
 							array('v' => '310', 'name' => 'lengthchars',	'type' => 'int(11)',			'default' => "'0'"),
 							array('v' => '310', 'name' => 'lengthparas',	'type' => 'int(11)',			'default' => "'0'"),
@@ -279,6 +282,9 @@ class DBStruct
 						  			'alters' => array('v' => '599', 'name' => 'rating',			'type' => 'tinyint(4)',			'default' => "'0'") ),
 					      	array('v' => '599', 'name' => 'indexed',		'type' => 'char(2)', 			'default' => "''"),
 					      	array('v' => '599', 'name' => 'closed',			'type' => 'char(2)', 			'default' => "''" ),
+							array('v' => '1010', 'name' => 'orientation',	'type' => 'tinyint(4)',			'default' => "'0'",
+								'comment' => 'EXIF orientation flag extracted from embedded metadata. Value range [1..8]. '.
+									'Zero (0) when not resolved e.g. for non-images, images without orientation or images last saved before DB migration.' ),
 							array('v' => '610', 'name' => 'routetouserid',		'type' => 'int(11)', 			'default' => "'0'",
 									'alters' => array('v' => '599', 'name' => 'routetouserid',		'type' => 'mediumint(9)', 			'default' => "'0'"), ),
 							array('v' => '610', 'name' => 'routetogroupid',	'type' => 'int(11)', 			'default' => "'0'",
@@ -509,7 +515,8 @@ class DBStruct
 						  		'alters' => array('v' => '310', 'name' => 'format',			'type' => 'varchar(40)',		'default' => "''" )),
 						  array('v' => '310', 'name' => 'width',			'type' => 'double',				'default' => "'0'"),
 						  array('v' => '310', 'name' => 'depth',			'type' => 'double',				'default' => "'0'"),
-						  array('v' => '310', 'name' => 'dpi',				'type' => 'int(11)',			'default' => "'0'"),
+						  array('v' => '1010', 'name' => 'dpi',				'type' => 'double',				'default' => "'0'",
+						  	'alters' => array('v' => '310', 'name' => 'dpi',				'type' => 'int(11)',			'default' => "'0'") ),
 						  array('v' => '310', 'name' => 'lengthwords',		'type' => 'int(11)',			'default' => "'0'",
 						  	'comment' => 'Word count (of article)' ),
 						  array('v' => '310', 'name' => 'lengthchars',		'type' => 'int(11)',			'default' => "'0'",
@@ -582,6 +589,9 @@ class DBStruct
 					      		'alters' => array('v' => '599', 'name' => 'routetouserid',		'type' => 'mediumint(9)', 			'default' => "'0'"), ),
 					      array('v' => '610', 'name' => 'routetogroupid',	'type' => 'int(11)', 			'default' => "'0'",
 					      		'alters' => array('v' => '599', 'name' => 'routetogroupid',	'type' => 'mediumint(9)', 			'default' => "'0'"), ),
+						   array('v' => '1010', 'name' => 'orientation',	'type' => 'tinyint(4)',			'default' => "'0'",
+							   'comment' => 'EXIF orientation flag extracted from embedded metadata. Value range [1..8]. '.
+								   'Zero (0) when not resolved e.g. for non-images, images without orientation or images last saved before DB migration.' ),
 						),
 						'indexes' => array(
 							array('v' => '420', 'name' => 'nm_objects', 	'fields' => 'name'),
@@ -634,7 +644,8 @@ class DBStruct
 						  	'alters' => array('v' => '330', 'name' => 'format',		'type' => 'varchar(40)',		'default' => "''"), ),
 						  array('v' => '330', 'name' => 'width',		'type' => 'double',				'default' => "'0'"),
 						  array('v' => '330', 'name' => 'depth',		'type' => 'double',				'default' => "'0'"),
-						  array('v' => '330', 'name' => 'dpi',			'type' => 'int(11)',			'default' => "'0'"),
+						  array('v' => '1010', 'name' => 'dpi',			'type' => 'double',				'default' => "'0'",
+						  	'alters' => array('v' => '330', 'name' => 'dpi',		'type' => 'int(11)',			'default' => "'0'") ),
 						  array('v' => '330', 'name' => 'lengthwords',	'type' => 'int(11)',			'default' => "'0'"),
 						  array('v' => '330', 'name' => 'lengthchars',	'type' => 'int(11)',			'default' => "'0'"),
 						  array('v' => '330', 'name' => 'lengthparas',	'type' => 'int(11)',			'default' => "'0'"),
@@ -648,6 +659,9 @@ class DBStruct
 						  array('v' => '330', 'name' => 'plaincontent',	'type' => 'blob',				'default' => ""),
 						  array('v' => '330', 'name' => 'filesize',		'type' => 'int(15)',			'default' => "'0'"),
 						  array('v' => '330', 'name' => 'colorspace',	'type' => 'varchar(20)',		'default' => "''"),
+						  array('v' => '1010', 'name' => 'orientation',	'type' => 'tinyint(4)',			'default' => "'0'",
+							  'comment' => 'EXIF orientation flag extracted from embedded metadata. Value range [1..8]. '.
+								  'Zero (0) when not resolved e.g. for non-images, images without orientation or images last saved before DB migration.' ),
 						  array('v' => '610', 'name' => 'state',		'type' => 'int(11)',		'default' => "'0'",
 						  		'alters' => array('v' => '420', 'name' => 'state',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
 						  array('v' => '599', 'name' => 'majorversion',	'type' => 'mediumint(9)',		'default' => "'0'",
@@ -1171,8 +1185,7 @@ class DBStruct
 				),
 				array ('v' =>'600 ', 'name' => 'smart_objecteditions', 'comment' => 'Object edition definitions, obsolete since v6.0.',
 					'drops' => array ('v' =>'420', 'name' => 'smart_objecteditions',
-						'comment' => 'Object edition definitions.',
-						'comment' => 'Link object to 1 or more editions.',
+						'comment' => 'Object edition definitions. Link object to 1 or more editions.',
 						'fields' => array(
 						  array('v' => '420', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true),
 						  array('v' => '420', 'name' => 'objid',			'type' => 'mediumint(9)',		'default' => "'0'"),
@@ -2459,6 +2472,41 @@ class DBStruct
 						),
 				),
 
+				array ('v' => '1010', 'name' => 'smart_publishedplcmtshist',
+						'comment' => 'History of object relational placements that are published to a content management system (CMS). '.
+							'For example an image placed on a Publish Form for which a crop is made during the publish operation.',
+						'fields' => array(
+						  	array('v' => '1010', 'name' => 'id',			'type' => 'int(11)',		 'autoincrement' => true),
+							array('v' => '1010', 'name' => 'objectid', 		'type' => 'int(11)', 		'default' => "'0'",
+								'comment' => 'The id of the Enterprise object of which the native file is used for publishing.'),
+							array('v' => '1010', 'name' => 'publishid', 	'type' => 'int(11)', 		'default' => "'0'",
+								'comment' => 'Foreign key that refers to the publish operation of the dossier / publish form.'),
+						  	array('v' => '1010', 'name' => 'majorversion',	'type' => 'mediumint(9)',	'default' => "'0'",
+						  		'comment' => 'Major object version of the object. Coexists with the minorversion field.' ),
+						  	array('v' => '1010', 'name' => 'minorversion',	'type' => 'mediumint(9)',	'default' => "'0'",
+						  		'comment' => 'Minor object version of the object. Coexists with the majorversion field.' ),
+							array('v' => '1010', 'name' => 'externalid',	'type' => 'varchar(200)', 	'default' => "''",
+								'comment' => 'Id retrieved from the CMS that refers to the published file.' ),
+							array('v' => '1010', 'name' => 'placementhash',	'type' => 'varchar(64)', 'default' => "",
+								'comment' => 'SHA256 hash of placement information which can be used for versioning and identification. '.
+									'This information is used to determine whether or not the placement has changed since the previous publish operation. '.
+									'When there is no matching record in this table found, the placement was changed or never published before. '.
+									'In both cases it needs to be re-published to reflect changes at the CMS. E.g. in case of image cropping '.
+									'the crop geometry, scale, form widget id, output mime type and DPI are hashed. The object id and version are excluded. ' ),
+						),
+						'indexes' => array(
+							array('v' => '1010', 'name' => 'obpu_publplchist', 'fields' => 'objectid, publishid'),
+							array('v' => '1010', 'name' => 'puob_publplchist', 'fields' => 'publishid, objectid'),
+						),
+						'inserts' => array(
+						),
+						'lookups' => array(
+							array('v' => '1010', 'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '1010', 'field' => 'publishid', 'reftable' => 'smart_publishhistory', 'reffield' => 'id'),
+							array('v' => '1010', 'field' => 'majorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
+							array('v' => '1010', 'field' => 'minorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
+						),
+				),
 
 				array ('v' => '599', 'name' => 'smart_targeteditions',
 						'comment' => 'Keeps a relation between channel/issue and editions.',
@@ -3266,7 +3314,7 @@ class DBStruct
 			'smart_indesignserverjobs', // id field was removed since 9.7
 			'smart_indesignarticles',
 			'smart_idarticlesplacements',
-		);	
+		);
 	}
 
 	/**
@@ -3767,7 +3815,9 @@ class DBStruct
 
 
 /**
- * Baseclass for all generators, generators get call for each element of DBStruct and return code by txt method
+ * Base class for all generators.
+ *
+ * Generators are called for each element of DBStruct and return code by their txt() method.
  *
  * @package dbgen
  * @subpackage GenericGenerator
@@ -3778,9 +3828,9 @@ abstract class GenericGenerator
 	protected $txt;
 
 	/**
-	 * returns generated txt
+	 * returns generated SQL
 	 *
-	 * @return string           generated text
+	 * @return string
 	 */
 
 	public function txt()
@@ -3791,7 +3841,7 @@ abstract class GenericGenerator
 	/**
 	 * add txt
 	 *
-	 * @param txt string           text
+	 * @param string text
 	 */
 
 	public function addTxt($txt)
@@ -3802,7 +3852,7 @@ abstract class GenericGenerator
 	/**
 	 * materialize in a file
 	 *
-	 * @param $file string           filename
+	 * @param string $file filename
 	 * @return bool TRUE when there was content to write. FALSE when empty.
 	 */
 	public function materialize($file)
@@ -3820,9 +3870,7 @@ abstract class GenericGenerator
 
 	/**
 	 * empties generated txt
-	 *
 	 */
-
 	public function clean()
 	{
 		$this->txt ='';
@@ -3831,23 +3879,16 @@ abstract class GenericGenerator
 	/**
 	 * function to generate start of create table text
 	 *
-	 * @param $table struct		DBStruct table info
+	 * @param array $table DB table info.
 	 */
-	public function tablePre( $table ) 
-	{
-		/** @noinspection PhpUnusedLocalVariableInspection */
-		$table = $table; // keep analyzer happy
-	}
+	abstract public function tablePre( $table );
 
 	/**
 	 * function to generate end of create table text plus additional stuff (sequences etc)
 	 *
-	 * @param array $table tabel info.
+	 * @param array $table table info.
 	 */
-	public function tablePost( $table )
-	{
-		$table = $table; // keep analyzer happy
-	}
+	abstract public function tablePost( $table );
 
 	/**
 	 * Function to generate seperate database fields in create statement
@@ -3857,94 +3898,77 @@ abstract class GenericGenerator
 	 * @param bool $comma Add comma to the (add column) statement.
 	 * @param bool $doDefault Add default value to the field definition.
 	 */
-	public function field( $table, $field, $comma, $doDefault=true )
-	{
-		$table = $table; $field = $field; $comma = $comma; $doDefault = $doDefault; // keep analyzer happy
-	}
+	abstract public function field( $table, $field, $comma, $doDefault=true );
 
 	/**
-	 * function to generate indexes
+	 * Method to generate indexes. The index field can contain a length limitation
+	 * (e.g. documentid(200). Length limitation on index fields is only applicable
+	 * in case of Mysql. For Oracle and Mssql the (200) is removed before the
+	 * index field is quoted.
 	 *
-	 * @param $index struct		DBStruct index info
+	 * @param array $index DB index info.
+	 * @param array $table DB table info.
 	 */
-	public function index( $index, $table )
-	{
-		$index = $index; $table = $table; // keep analyzer happy
-	}
+	abstract public function index( $index, $table );
 
 	/**
 	 * Function to drop indexes
 	 *
-	 * @param array $table tabel info.
-	 * @param array $index index info.
+	 * @param array $index DB index info
+	 * @param array $table DB table info.
 	 */
-	public function dropIndex( $index, $table )
-	{
-		$index = $index; $table = $table; // keep analyzer happy
-	}
-	
+	abstract public function dropIndex( $index, $table );
 
 	/**
 	 * function to generate insert statement
 	 *
-	 * @param $index struct		DBStruct insert info
-	 * @param $table  struct		DBStruct tabel info
-	 * @param $auto   boolean		true if automatch on number of fields needs to be done (beware of , in values!!)
+	 * @param array $index DB index info
+	 * @param array $table DB table info.
+	 * @param bool $auto true if auto-match on number of fields needs to be done (beware of , in values!!)
 	 */
-	public function insert( $index, $table, $auto = true )
-	{
-		$index = $index; $table = $table; $auto = $auto; // keep analyzer happy
-	}
+	abstract public function insert( $index, $table, $auto = true );
 
 	/**
 	 * function to generate statements after all insert statements
 	 *
-	 * @param $table struct		DBStruct table info
+	 * @param array $table DB table info.
 	 */
 	public function insertPost( $table )
 	{
-		$table = $table; // keep analyzer happy
 	}
 
-	public function setVersion( $version )
-	{
-		$version = $version; // keep analyzer happy
-	}
+	/**
+	 * function to stamp database of spec version
+	 *
+	 * @param string $version Version to stamp.
+	 */
+	abstract public function setVersion( $version );
 
 	/**
 	 * function to change an existing field definition
 	 *
-	 * @param $table struct		DBStruct table info
-	 * @param $oldfld struct	DBStruct field info as in the old/source database
-	 * @param $newfld struct	DBStruct field info as in the new/target database
+	 * @param array $table DB table info.
+	 * @param array $oldfld DB field info as in the old/source database.
+	 * @param array $newfld DB field info as in the new/target database.
 	 */
-	public function alterField( $table, $oldfld, $newfld )
-	{
-		$table = $table; $oldfld = $oldfld; $newfld = $newfld; // keep analyzer happy
-	}
+	abstract public function alterField( $table, $oldfld, $newfld );
 
 	/**
 	 * function to drop an existing field definition
 	 *
-	 * @param $table struct		DBStruct table info
-	 * @param $fld struct		DBStruct field info as in the new/target database
+	 * @param array $table DB table info.
+	 * @param array $fld DB field info as in the new/target database.
 	 */
-	public function dropField( $table, $fld )
-	{
-		$table = $table; $fld = $fld; // keep analyzer happy
-	}
+	abstract public function dropField( $table, $fld );
 
 	/**
 	 * function to change an existing index definition
 	 *
-	 * @param $table struct		DBStruct table info
-	 * @param $oldIndex struct	DBStruct index info as in the old/source database
-	 * @param $newIndex struct	DBStruct index info as in the new/target database
+	 * @param array $table DB table info.
+	 * @param array $oldIndex DB index info as in the old/source database.
+	 * @param array $newIndex DB index info as in the new/target database.
 	 */
-	public function alterIndex( $table, $oldIndex, $newIndex )
-	{
-		$table = $table; $oldIndex = $oldIndex; $newIndex = $newIndex; // keep analyzer happy
-	}
+	abstract public function alterIndex( $table, $oldIndex, $newIndex );
 
 	/**
 	 * function called before running upgrade script
@@ -3959,17 +3983,15 @@ abstract class GenericGenerator
 	public function upgradePost()
 	{
 	}
-	
+
 	/**
 	 * function called to see if table must be created
-	 * 
-	 ** @param $table struct		DBStruct table info
+	 *
+	 * @param array $table DB table info.
+	 * @return boolean TRUE when applicable, else FALSE.
 	 */
-	public function isApplicableForDB( $table )
-	{
-		$table = $table; // keep analyzer happy
-	}
-	
+	abstract public function isApplicableForDB( $table );
+
 	/**
 	 * Tells whether or not the field name is allowed for the target DB engine.
 	 *
@@ -3996,9 +4018,8 @@ abstract class StdSqlGenerator extends GenericGenerator
 	/**
 	 * constructor
 	 *
-	 * @param $drop boolean		true means drop statements will be generated
+	 * @param $drop boolean	true means drop statements will be generated
 	 */
-
 	public function __construct($drop)
 	{
 		$this->droptables = $drop;
@@ -4010,9 +4031,7 @@ abstract class StdSqlGenerator extends GenericGenerator
 	}
 
 	/**
-	 * function to generate start of create table text
-	 *
-	 * @param $table struct		DBStruct table info
+	 * {@inheritDoc}
 	 */
 	public function tablePre($table)
 	{
@@ -4027,7 +4046,7 @@ abstract class StdSqlGenerator extends GenericGenerator
 	/**
 	 * function to generate alter table text
 	 *
-	 * @param $table struct		DBStruct table info
+	 * @param array $table DB table info.
 	 */
 	public function alterPre($table)
 	{
@@ -4045,10 +4064,10 @@ abstract class StdSqlGenerator extends GenericGenerator
 	}
 
 	/**
-	 * function to generate alter table add field
+	 * Function to generate alter table add field.
 	 *
-	 * @param array $table table info.
-	 * @param array $field field info.
+	 * @param array $table DB table info.
+	 * @param array $field DB field info.
 	 */
 	public function addField( $table, $field )
 	{
@@ -4057,11 +4076,9 @@ abstract class StdSqlGenerator extends GenericGenerator
 	}
 
 	/**
-	 * function to generate end of create table text plus additional stuff (sequences etc)
-	 *
-	 * @param $table struct		DBStruct table info
+	 * {@inheritDoc}
 	 */
-	public function   tablePost($table)
+	public function tablePost($table)
 	{
 		$primarykey = 'id';
 
@@ -4076,12 +4093,7 @@ abstract class StdSqlGenerator extends GenericGenerator
 	}
 
 	/**
-	 * Function to generate separate database fields in create statement
-	 *
-	 * @param array $table table info.
-	 * @param array $field field info.
-	 * @param bool $comma Add comma to the (add column) statement.
-	 * @param bool $doDefault Add default value to the field definition.
+	 * {@inheritDoc}
 	 */
 	public function field( $table, $field, $comma, $doDefault=true )
 	{
@@ -4144,12 +4156,7 @@ abstract class StdSqlGenerator extends GenericGenerator
 	}
 
 	/**
-	 * Method to generate indexes. The index field can contain a length limitation
-	 * (e.g. documentid(200). Length limitation on index fields is only applicable
-	 * in case of Mysql. For Oracle and Mssql the (200) is removed before the
-	 * index field is quoted.
-	 *
-	 * @param $index struct		DBStruct index info
+	 * {@inheritDoc}
 	 */
 	public function index($index, $table)
 	{
@@ -4203,8 +4210,8 @@ abstract class StdSqlGenerator extends GenericGenerator
 	 * Validates mandatory properties that must be set in a field definition.
 	 * Also checks if all properties used in the field definition are known / supported.
 	 *
-	 * @param array $table DBStruct table info
-	 * @param array $field DBStruct field info
+	 * @param array $table DB table info.
+	 * @param array $field DB field info.
 	 */
 	private function validateField( $table, $field )
 	{
@@ -4234,11 +4241,7 @@ abstract class StdSqlGenerator extends GenericGenerator
 	}
 
 	/**
-	 * Function to change an existing field definition.
-	 *
-	 * @param array $table table info
-	 * @param array $oldfld field info as in the old/source database
-	 * @param array $newfld field info as in the new/target database
+	 * {@inheritDoc}
 	 */
 	public function alterField( $table, $oldfld, $newfld )
 	{
@@ -4256,17 +4259,14 @@ abstract class StdSqlGenerator extends GenericGenerator
 	/**
 	 * function to change an existing field definition
 	 *
-	 * @param array $table  table info.
+	 * @param array $table DB table info.
 	 * @param array $oldfld field info as in the old/source database.
 	 * @param array $newfld field info as in the new/target database.
 	 */
 	abstract protected function doAlterField( $table, $oldfld, $newfld );
-	
+
 	/**
-	 * Method to drop a column of a table
-	 *
-	 * @param $table struct		DBStruct table info
-	 * @param $fld struct		DBStruct field info as in the new/target database
+	 * {@inheritDoc}
 	 */
 	public function dropField($table, $fld)
 	{
@@ -4275,22 +4275,14 @@ abstract class StdSqlGenerator extends GenericGenerator
 	}
 
 	/**
-	 * function to drop indexes
-	 *
-	 * @param $table  struct	DBStruct tabel info
-	 * @param $index struct		DBStruct index info
+	 * {@inheritDoc}
 	 */
 	public function dropIndex( $index, $table )
 	{
-		$index = $index; $table = $table; // keep analyzer happy
 	}
 
 	/**
-	 * Function to generate insert statement
-	 *
-	 * @param $insert struct	DBStruct insert info
-	 * @param $table  struct	DBStruct tabel info
-	 * @param $auto   boolean	True if automatch on number of fields needs to be done (beware of , in values!!)
+	 * {@inheritDoc}
 	 */
 	public function insert($insert, $table, $auto = true)
 	{
@@ -4309,9 +4301,7 @@ abstract class StdSqlGenerator extends GenericGenerator
 	}
 
 	/**
-	 * function to stamp database of spec version
-	 *
-	 * @param $version string		version to stamp
+	 * {@inheritDoc}
 	 */
 	public function setVersion($version)
 	{
@@ -4323,21 +4313,20 @@ abstract class StdSqlGenerator extends GenericGenerator
 	 * script. This function checks if a table must added depending on the version
 	 * which is updated.
 	 *
-	 * @param $oldversion string Version for which the identity script is generated.
+	 * @param string $oldversion Version for which the identity script is generated.
 	 * 							 E.g. '410' or '420'
-	 * @param $table struct		DBStruct table info
-	 * @return Table must be added to the 'update identity' script
+	 * @param array $table DB table info.
+	 * @return boolean Whether or not the table must be added to the 'update identity' script
 	 */
 	public function addToIdentScript( $oldversion, $table )
 	{
-		$oldversion = $oldversion; $table = $table; // keep analyzer happy
 		return false;
 	}
 
 	/**
 	 * function to return autoincrement text (or empty string)
 	 *
-	 * @return string		text for auto_increment
+	 * @return string	SQL fragment
 	 */
 	protected function autoincrement()
 	{
@@ -4347,7 +4336,7 @@ abstract class StdSqlGenerator extends GenericGenerator
 	/**
 	 * function to return not null text (or empty string)
 	 *
-	 * @return string		text for not null
+	 * @return string SQL fragment
 	 */
 	protected function notnull()
 	{
@@ -4357,7 +4346,7 @@ abstract class StdSqlGenerator extends GenericGenerator
 	/**
 	 * function to return 'null' text (or empty string)
 	 *
-	 * @return string		text for not null
+	 * @return string SQL fragment
 	 */
 	protected function addnull()
 	{
@@ -4396,7 +4385,7 @@ abstract class StdSqlGenerator extends GenericGenerator
 	 * Function to convert database types dependent on database
 	 *
 	 * @param  string $type	type before conversion
-	 * @return string  type (after conversion)
+	 * @return string Type (after conversion)
 	 */
 	protected function normtype($type)
 	{
@@ -4406,10 +4395,9 @@ abstract class StdSqlGenerator extends GenericGenerator
 	/**
 	 * Function to generate text for unique key construct.
 	 *
-	 * @param  string $name name of unique key
-	 * @param  string $fields field or list of fields (comma separated).
-	 *
-	 * @return string sql fragment for defining a unique key.
+	 * @param string $name name of unique key
+	 * @param string $fields field or list of fields (comma separated).
+	 * @return string SQL fragment for defining a unique key.
 	 */
 	protected function uniquekey($name, $fields)
 	{
@@ -4419,7 +4407,7 @@ abstract class StdSqlGenerator extends GenericGenerator
 	/**
 	 * function to generate text for closing sql lines
 	 *
-	 * @return string		sql text
+	 * @return string	SQL fragment
 	 */
 	protected function closeline()
 	{
@@ -4429,19 +4417,16 @@ abstract class StdSqlGenerator extends GenericGenerator
 	/**
 	 * function to generate text for drop if exists constructs
 	 *
-	 * @param  name string	name of table
-	 * @return string		sql text
+	 * @param string $name Name of table.
+	 * @return string	SQL fragment
 	 */
 	public function dropTable($name)
 	{
 		return "DROP TABLE IF EXISTS ".$this->quotefields($name) . $this->closeline() . "\r\n";
 	}
-	
+
 	/**
-	 * Checks if table must be created at all.
-	 *
-	 * @param array $table table info.
-	 * @return table must be created.
+	 * {@inheritDoc}
 	 */
 	public function isApplicableForDB($table)
 	{
@@ -4523,7 +4508,7 @@ abstract class StdSqlGenerator extends GenericGenerator
 	/**
 	 * Provides the errors that occur while generating the DB.
 	 *
-	 * @return array List of error messages (strings).
+	 * @return string[] List of error messages.
 	 */
 	public function getErrors()
 	{
@@ -4550,9 +4535,6 @@ abstract class StdSqlGenerator extends GenericGenerator
 	 */
 	public function postTableUpgrade( $table )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$table = $table;
-		return;
 	}
 }
 
@@ -4568,15 +4550,17 @@ class MysqlGenerator extends StdSqlGenerator
 	/**
 	 * function to generate end of create table text plus additional stuff (sequences etc)
 	 *
-	 * @param $table struct		DBStruct table info
+	 * @param $drop boolean	true means drop statements will be generated
 	 */
-
 	public function __construct($drop)
 	{
 		parent::__construct( $drop );
 		$this->myname = "mysql";
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public function tablePost($table)
 	{
 		$primarykey = 'id';
@@ -4617,9 +4601,10 @@ class MysqlGenerator extends StdSqlGenerator
 	 * done in two steps (first the drop of the index and then adding the new)
 	 * this can result in errors if the fields of the index are used in foreign keys
 	 * or the primary key is referred to.
-	 * @param $table struct		DBStruct table info
-	 * @param $oldIndex struct	DBStruct index info as in the old/source database
-	 * @param $newIndex struct	DBStruct index info as in the new/target database
+	 *
+	 * @param array $table DB table info.
+	 * @param array $oldIndex DB index info as in the old/source database
+	 * @param array $newIndex DB index info as in the new/target database
 	 */
 	public function alterIndex($table, $oldIndex, $newIndex)
 	{
@@ -4673,10 +4658,7 @@ class MysqlGenerator extends StdSqlGenerator
 	}
 
 	/**
-	 * function to drop indexes
-	 *
-	 * @param $table  struct	DBStruct tabel info
-	 * @param $index struct		DBStruct index info
+	 * {@inheritDoc}
 	 */
 	public function dropIndex( $index, $table )
 	{
@@ -4685,10 +4667,7 @@ class MysqlGenerator extends StdSqlGenerator
 	}
 
 	/**
-	 * Tells whether or not the field name is allowed for the target DB engine.
-	 *
-	 * @param string $fieldName
-	 * @return boolean TRUE when allowed, else FALSE.
+	 * {@inheritDoc}
 	 */
 	public function isReservedFieldName( $fieldName )
 	{
@@ -4780,6 +4759,10 @@ class OraGenerator extends StdSqlGenerator
 	{
 		return "";
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public function tablePre($table)
 	{
 		$this->thistable = $table['name'];
@@ -4805,6 +4788,7 @@ class OraGenerator extends StdSqlGenerator
 	 * The statements in the block must be separated by ';'. The block must be send as one statement to the DBMS.
 	 * @see \oracledriver::isCompleteStatement
 	 *
+	 * @param string $tableName
 	 * @since 9.7.0
 	 */
 	private function silentRemoveSequence( $tableName )
@@ -4839,8 +4823,11 @@ class OraGenerator extends StdSqlGenerator
 			$this->txtTrx .= "\r\n";
 			$this->txt .= "CREATE GLOBAL TEMPORARY TABLE " . $this->quotefields($this->thistable) . " (\r\n";
 		}
-	}	
-	
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	public function tablePost($table)
 	{
 		if (isset($table['temporary']) && $table['temporary'] == true) {
@@ -4862,11 +4849,12 @@ class OraGenerator extends StdSqlGenerator
 	/**
 	 * Checks if a table definition contains a field with the 'autoincrement' property set.
 	 *
-	 * @param array $tableInfo Table definition.
+	 * @param array $tableInfo DB table info.
 	 * @return bool True if table has an 'autoincrement' field else false.
 	 */
-	private function hasAutoIncrement( $tableInfo ) {
-		if ( $tableInfo['fields'] ) foreach ($tableInfo['fields'] as $field) {
+	private function hasAutoIncrement( $tableInfo )
+	{
+		if ( isset($tableInfo['fields']) ) foreach ($tableInfo['fields'] as $field) {
 			if ( isset( $field['autoincrement'] ) ) {
 				return true;
 			}
@@ -4881,7 +4869,7 @@ class OraGenerator extends StdSqlGenerator
 	 * In the past sequences where created for tables without an 'autoincrement' field. These sequences will be silently
 	 * removed. This means that if a sequence does not exists the delete will not result in an error.
 	 *
-	 * @param array $table Table definition.
+	 * @param array $table DB table info.
 	 */
 	public function postTableUpgrade( $table )
 	{
@@ -4897,13 +4885,9 @@ class OraGenerator extends StdSqlGenerator
 		$this->txt = substr($this->txt, 0, -1);
 		$this->txt .= " ON COMMIT PRESERVE ROWS " . $this->closeline()."\r\n";		
 	}
-	
+
 	/**
-	 * function to generate insert statement
-	 *
-	 * @param $line struct		DBStruct insert info
-	 * @param $table  struct		DBStruct tabel info
-	 * @param $auto   boolean		true if automatch on number of fields needs to be done (beware of , in values!!)
+	 * {@inheritDoc}
 	 */
 	public function insert($line, $table, $auto = true)
 	{
@@ -4937,6 +4921,7 @@ class OraGenerator extends StdSqlGenerator
 	{
 		return $this->txtTrx;
 	}
+
 	public function txtSys()
 	{
 		return $this->txt."\r\n".$this->txtSys;
@@ -4945,7 +4930,7 @@ class OraGenerator extends StdSqlGenerator
 	/**
 	 * materialize statements for Trx in a file
 	 *
-	 * @param $file string           filename
+	 * @param string $file filename
 	 * @return bool TRUE when there was content to write. FALSE when empty.
 	 */
 	public function materializeTrx($file)
@@ -4960,10 +4945,11 @@ class OraGenerator extends StdSqlGenerator
 		}
 		return $wroteContent;
 	}
+
 	/**
 	 * materialize statements for Sys in a file
 	 *
-	 * @param $file string           filename
+	 * @param string $file filename
 	 * @return bool TRUE when there was content to write. FALSE when empty.
 	 */
 	public function materializeSys($file)
@@ -4982,7 +4968,7 @@ class OraGenerator extends StdSqlGenerator
 	/**
 	 * Function to generate text for drop if exists constructs.
 	 *
-	 * @param  string $name name of table
+	 * @param string $name name of table
 	 * @return string sql text
 	 */
 	public function dropTable($name)
@@ -4992,10 +4978,7 @@ class OraGenerator extends StdSqlGenerator
 	}
 
 	/**
-	 * Method to drop a column of a table
-	 *
-	 * @param $table struct		DBStruct table info
-	 * @param $fld struct		DBStruct field info as in the new/target database
+	 * {@inheritDoc}
 	 */
 	public function dropField($table, $fld)
 	{
@@ -5006,7 +4989,7 @@ class OraGenerator extends StdSqlGenerator
 	/**
 	 * Function to generate alter table text before columns are specified.
 	 *
-	 * @param array $table table info.
+	 * @param array $table DB table info.
 	 */
 	public function alterPre($table)
 	{
@@ -5014,10 +4997,7 @@ class OraGenerator extends StdSqlGenerator
 	}
 
 	/**
-	 * Function to generate alter a table and add a field.
-	 *
-	 * @param array $table table info.
-	 * @param array $field field info.
+	 * {@inheritDoc}
 	 */
 	public function addField( $table, $field )
 	{
@@ -5026,7 +5006,6 @@ class OraGenerator extends StdSqlGenerator
 
 	/**
 	 * Function to generate alter table text ending.
-	 *
 	 */
 	public function alterPost()
 	{
@@ -5042,9 +5021,9 @@ class OraGenerator extends StdSqlGenerator
 	 * references the column, an attempt to rename it will generate an error."
 	 * If only the data type of a field is changed an 'ALTER TABLE' is sufficient.
 	 *
-	 * @param array $table table info.
-	 * @param array $oldfld field info as in the old/source database.
-	 * @param array $newfld field info as in the new/target database.
+	 * @param array $table DB table info.
+	 * @param array $oldfld DB field info as in the old/source database.
+	 * @param array $newfld DB field info as in the new/target database.
 	 */
 	protected function doAlterField( $table, $oldfld, $newfld )
 	{
@@ -5077,9 +5056,9 @@ class OraGenerator extends StdSqlGenerator
 	/**
 	 * function to change an existing index definition
 	 *
-	 * @param $table struct		DBStruct table info
-	 * @param $oldIndex struct	DBStruct index info as in the old/source database
-	 * @param $newIndex struct	DBStruct index info as in the new/target database
+	 * @param array $table DB table info.
+	 * @param array $oldIndex DB index info as in the old/source database.
+	 * @param array $newIndex DB index info as in the new/target database.
 	 */
 	public function alterIndex($table, $oldIndex, $newIndex) {
 		//Drop old index
@@ -5116,8 +5095,8 @@ class OraGenerator extends StdSqlGenerator
 	 * These indexes and non-unique indexes can be dropped by using the 'DROP INDEX'
 	 * statement.
 	 *
-	 * @param $table  struct	DBStruct tabel info
-	 * @param $index struct		DBStruct index info
+	 * @param array $index DB index info.
+	 * @param array $table DB table info.
 	 */
 	public function dropIndex($index, $table)
 	{
@@ -5150,8 +5129,7 @@ class OraGenerator extends StdSqlGenerator
 	}
 
 	/**
-	 * Method to check if the type of a table column can be modified to another
-	 * type.
+	 * Check if the type of a table column can be modified to another type.
 	 *
 	 * @param string $old_type (current type)
 	 * @param string $new_type (new type)
@@ -5170,24 +5148,20 @@ class OraGenerator extends StdSqlGenerator
 
 		return $result;
 	}
-	
+
 	/**
-	 * Checks if table must be created at all
-	 *
-	 * @param array $table table info.
-	 * @return bool table must be created.
+	 * {@inheritDoc}
 	 */
 	public function isApplicableForDB( $table )
 	{
-		$table = $table; // keep analyzer happy
-		
 		return true;
 	}	
 
 	/**
-	 * Retrieve the 'default' property value defined in $field.
-	 * @param array $field field properties as defined in dbmodel.
-	 * @return string $default Partial SQL statement to set default value.
+	 * Retrieve the 'default' property value defined in given $field.
+	 *
+	 * @param array $field DB field properties as defined in DB model.
+	 * @return string $default SQL fragment to set default value.
 	 */
 	protected function setDefault( $field )
 	{
@@ -5224,12 +5198,9 @@ class OraGenerator extends StdSqlGenerator
 			'SELECT '.$this->quotefields('smart_config').'_seq.nextval ,'."'$patchName'".', '."'yes'".' '.
 			'FROM ' .$this->quotefields('dual').$this->closeline()."\r\n";
 	}
-	
+
 	/**
-	 * Tells whether or not the field name is allowed for the target DB engine.
-	 *
-	 * @param string $fieldName
-	 * @return boolean TRUE when allowed, else FALSE.
+	 * {@inheritDoc}
 	 */
 	public function isReservedFieldName( $fieldName )
 	{
@@ -5426,7 +5397,9 @@ class MssqlGenerator extends StdSqlGenerator
 
 	/**
 	 * Based on the 'default' property a default value is returned.
-	 * @param array $field field properties as defined in dbmodel.
+	 *
+	 * @param array $field DB field properties as defined in DB model.
+	 * @return string SQL fragment.
 	 */
 	protected function setDefault( $field )
 	{
@@ -5449,12 +5422,18 @@ class MssqlGenerator extends StdSqlGenerator
 		return $default;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public function tablePost($table)
 	{
 		parent::tablePost($table);
 		$this->thistableinserts = 0;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public function insertpost($table)
 	{
 		if ($this->thistableident && $this->thistableinserts) {
@@ -5462,6 +5441,9 @@ class MssqlGenerator extends StdSqlGenerator
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public function insert($line, $table, $auto = true)
 	{
 		if ($this->thistableident && !$this->thistableinserts) {
@@ -5482,16 +5464,20 @@ class MssqlGenerator extends StdSqlGenerator
 		parent::insert($line, $table, $auto);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public function tablePre($table)
 	{
 		$this->thistableident = false;
 		parent::tablePre($table);
 	}
+
 	/**
 	 * function to generate text for drop if exists constructs
 	 *
-	 * @param  name string	name of table
-	 * @return string		sql text
+	 * @param string $name DB table name.
+	 * @return string	SQL fragment.
 	 */
 	public function dropTable($name)
 	{
@@ -5500,7 +5486,7 @@ class MssqlGenerator extends StdSqlGenerator
 	/**
 	 * function to generate alter table text
 	 *
-	 * @param $table struct		DBStruct table info
+	 * @param array $table DB table info.
 	 */
 	public function alterPre($table)
 	{
@@ -5508,10 +5494,7 @@ class MssqlGenerator extends StdSqlGenerator
 	}
 
 	/**
-	 * Function to generate alter table add field.
-	 *
-	 * @param array $table table info.
-	 * @param array $field field info.
+	 * {@inheritDoc}
 	 */
 	public function addField($table, $field)
 	{
@@ -5526,9 +5509,9 @@ class MssqlGenerator extends StdSqlGenerator
 	 * based or give it a default value. You also are unable to alter columns with TEXT, NTEXT, IMAGE, or TIMESTAMP data
 	 * types. Some more restrictions apply; see vendor's documentation for details.
 	 *
-	 * @param array $table table info.
-	 * @param array $oldfld field info as in the old/source database.
-	 * @param array $newfld field info as in the new/target database.
+	 * @param array $table DB table info.
+	 * @param array $oldfld DB field info as in the old/source database.
+	 * @param array $newfld DB field info as in the new/target database.
 	 */
 	protected function doAlterField( $table, $oldfld, $newfld )
 	{
@@ -5600,6 +5583,7 @@ class MssqlGenerator extends StdSqlGenerator
 	 * In that case the field is not yet used as the index is not yet created (indexes are created after the field
 	 * definitions are handled). In that case we check on the 'alters' attribute to see if there is maybe an older
 	 * definition that also uses the field.
+	 *
 	 * @param array $index (including the older definitions)
 	 * @param array $field (definition of the field)
 	 * @return mixed null|array Null if field is not used else the index definition
@@ -5653,10 +5637,7 @@ class MssqlGenerator extends StdSqlGenerator
 	}
 
 	/**
-	 * function to drop a column of a table
-	 *
-	 * @param $table struct		DBStruct table info
-	 * @param $fld struct		DBStruct field info as in the new/target database
+	 * {@inheritDoc}
 	 */
 	public function dropField($table, $fld)
 	{
@@ -5684,6 +5665,7 @@ class MssqlGenerator extends StdSqlGenerator
 	 * cannot be dropped without knowing the exact name of the primary key constraint.
 	 * For this reason the alter index of a primary key is not supported for mssql.
 	 * Syntax depends on the fact if an index is unique or not.
+	 *
 	 * @param array $table table info
 	 * @param array $oldIndex index info as in the old/source database
 	 * @param array $newIndex info as in the new/target database
@@ -5693,7 +5675,7 @@ class MssqlGenerator extends StdSqlGenerator
 
 		if ( (array_key_exists('primary', $oldIndex) && $oldIndex['primary'] == true) &&
 			 (array_key_exists('primary', $newIndex) && $newIndex['primary'] == true)) {
-				$this->storeProcedure_ChangePrimaryIndex( $table['name'], $newIndex['fields'] );
+				$this->storeProcedure_ChangePrimaryIndex( $table['name'] );
 		} else {
 			$this->dropIndex($oldIndex, $table);
 		}
@@ -5736,15 +5718,7 @@ class MssqlGenerator extends StdSqlGenerator
 	}
 
 	/**
-	 * Method to generate indexes. The index field can contain a length limitation
-	 * (e.g. documentid(200). Length limitation on index fields is only applicable
-	 * in case of Mysql. For Oracle and Mssql the (200) is removed before the
-	 * index field is quoted. Furthermore their is a difference between 'primary', 'unique' and
-     * normal indexes.
-	 *
-	 * @param array $index index info.
-	 * @param array $table table info.
-	 * @param $alter bool Index is added because of an index change.
+	 * {@inheritDoc}
 	 */
 	public function index( $index, $table, $alter = false )
 	{
@@ -5807,7 +5781,7 @@ class MssqlGenerator extends StdSqlGenerator
 	}
 
 	/**
-	 * function called before running upgrade script
+	 * {@inheritDoc}
 	 */
 	public function upgradePre()
 	{
@@ -5815,7 +5789,7 @@ class MssqlGenerator extends StdSqlGenerator
 	}
 
 	/**
-	 * function called after running upgrade script
+	 * {@inheritDoc}
 	 */
 	public function upgradePost()
 	{
@@ -5848,9 +5822,9 @@ class MssqlGenerator extends StdSqlGenerator
 	 * has been changed between the old definition and the new definition of a
 	 * field.
 	 *
-	 * @param $field1 struct	DBStruct field info (as in the old/source database)
-	 * @param $field2 struct	DBStruct field info (as in the new/target database)
-	 * @return autoincrement value is the same of two fields
+	 * @param array $field1 DB field info (as in the old/source database)
+	 * @param array $field2 DB field info (as in the new/target database)
+	 * @return bool autoincrement value is the same of two fields
 	 */
 	private function autoincrementIsSame($field1, $field2)
 	{
@@ -5943,10 +5917,10 @@ class MssqlGenerator extends StdSqlGenerator
 	 * script. This function checks if a table must added depending on the version
 	 * which is updated.
 	 *
-	 * @param $oldversion string Version for which the identity script is generated.
+	 * @param string $oldversion Version for which the identity script is generated.
 	 * 							 E.g. '410' or '420'
-	 * @param $table struct		DBStruct table info
-	 * @return Table must be added to the 'update identity' script
+	 * @param array $table DB table info.
+	 * @return bool Whether or not the table must be added to the 'update identity' script.
 	 */
 	public function addToIdentScript($oldversion, $table)
 	{
@@ -5976,9 +5950,7 @@ class MssqlGenerator extends StdSqlGenerator
 	}
 
 	/**
-	 * function to return 'null' text (or empty string)
-	 *
-	 * @return string		text for not null
+	 * {@inheritDoc}
 	 */
 	protected function addnull()
 	{
@@ -5986,10 +5958,7 @@ class MssqlGenerator extends StdSqlGenerator
 	}
 
 	/**
-	 * Tells whether or not the field name is allowed for the target DB engine.
-	 *
-	 * @param string $fieldName
-	 * @return boolean TRUE when allowed, else FALSE.
+	 * {@inheritDoc}
 	 */
 	public function isReservedFieldName( $fieldName )
 	{

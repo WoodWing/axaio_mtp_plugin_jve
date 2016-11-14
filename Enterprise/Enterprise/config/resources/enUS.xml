@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">The file names do not match, do you still want to check in?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">Only plain-text articles are allowed to be combined</Term>
   <Term key="ERR_COMPOSE">Error composing article. (S1067)</Term>
-  <Term key="ERR_CONNECT">Error connecting to %1. Please check your connection and try again. (S1144)</Term>
+  <Term key="ERR_CONNECT">Error connecting to the service named %1. Please check your connection and try again. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">Error connecting to server. Please check your connection and try again. (S1068)</Term>
   <Term key="ERR_COPY_FOLDER">An error occurred during publishing. Please contact your system administrator.nnDetails: The HTML Resources cache folder was not found. Please run the 'Adobe Digital Publishing System (DPS)' test on the Health Check page and follow the instructions.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">Couldn't connect to database (S1003)</Term>
@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">User deactivated (S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">User name and password required</Term>
   <Term key="ERR_USER_BEGINDATE">User account not yet valid</Term>
-  <Term key="ERR_USER_ENDDATE">User account not valid any more</Term>
+  <Term key="ERR_USER_ENDDATE">User account not valid any more (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">User name already exists.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">Please enter the required user name</Term>
   <Term key="ERR_WRONGLANG">Choose a language (S1052)</Term>
@@ -2151,7 +2151,7 @@ After changing the setting(s), don't forget to restart the Web service and/or da
   <Term key="WARN_ELEMENT_PLACED_EDITION">Component %1 of article %2 has already been placed in {EDITION} %3 of layout %4.</Term>
   <Term key="WARN_PAGE_DBL">Multiple pages for page:</Term>
   <Term key="WARN_PAGE_START">One of the pages starts with page number:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">Password expired, please change password</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">Password expired, please change password (S1145)</Term>
   <Term key="WARN_USER_LIMIT">The concurrent user limit has been reached for this application, or the concurrent connection limit has been reached for Enterprise server.</Term>
   <Term key="WAR_UPLOAD_WARNING">Could not create preview image</Term>
   <Term key="WEBFEATURES">Applications</Term>

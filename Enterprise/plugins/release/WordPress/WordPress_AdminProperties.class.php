@@ -1,11 +1,10 @@
 <?php
 /**
- * @package 	Enterprise
- * @subpackage 	ServerPlugins
- * @since 		v9.0
- * @copyright	WoodWing Software bv. All Rights Reserved.
- *
- **/
+ * @package    Enterprise
+ * @subpackage ServerPlugins
+ * @since      v9.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once BASEDIR . '/server/interfaces/plugins/connectors/AdminProperties_EnterpriseConnector.class.php';
 

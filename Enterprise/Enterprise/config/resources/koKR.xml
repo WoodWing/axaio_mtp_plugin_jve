@@ -225,7 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">오프라인 제공</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">직접 갱신을 위하여 공백인 채로 나둠</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">소유자가 사용자가 같은 경우는 공백인 채로 나둠</Term>
-  <Term key="ACT_LESS">Less</Term>
+  <Term key="ACT_LESS">적게</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">퍼블리케이션 보기 일람</Term>
   <Term key="ACT_LOGIN">로그인</Term>
   <Term key="ACT_LOGOFF">로그 오프</Term>
@@ -257,7 +257,7 @@
   <Term key="ACT_OK">선택</Term>
   <Term key="ACT_OPEN">열기</Term>
   <Term key="ACT_OPEN_EDIT">편집</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">편집을 위해 열기 (  배치안됨)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">신규 탭 열기</Term>
   <Term key="ACT_ORDER_BY">명령자</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">파일 %1는 존재하지 않습니다</Term>
@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">파일명이 일치하지 않습니다.이대로 체크인 해도 좋습니까?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">단지 일반텍스트 아티클만 결합할 수 있습니다.</Term>
   <Term key="ERR_COMPOSE">아티클 생성 에러.(S1067)</Term>
-  <Term key="ERR_CONNECT"> %1 연결에 문제가 있습니다. 다시 연결해 주시기 바랍니다. (S1144)</Term>
+  <Term key="ERR_CONNECT">%1 연결에 문제가 있습니다. 다시 연결해 주시기 바랍니다. (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">서버연결이 실패하였습니다. 연결을 점검한 후 다시 서버연결을 시도해 주시기 바랍니다.(S1068)</Term>
   <Term key="ERR_COPY_FOLDER">출판하는 동안 오류가 발생했습니다. 시스템 관리자에게 문의하십시오.\n\n상세: HTML 리소스 캐시 폴더를 찾을수 없습니다. '어도비 디지털 퍼블리싱(DPS)'을 실행하고 상태 체크 페이지를 확인한후 지침을 따르시기 바랍니다.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">데이타베이스에 접속할 수 없습니다(S1003)</Term>
@@ -984,7 +984,7 @@
   <Term key="ERR_USERDISABLED">사용자 어카운트가 유효하지 않습니다(S1051)</Term>
   <Term key="ERR_USERNAME_PASSWORD_REQUIRED">사용자명으로 패스워드가 필요합니다!</Term>
   <Term key="ERR_USER_BEGINDATE">사용자 어카운트의 이용 가능일을 맞이하고 있지 않습니다</Term>
-  <Term key="ERR_USER_ENDDATE">사용자 어카운트의 유효기간은 종료했습니다</Term>
+  <Term key="ERR_USER_ENDDATE">사용자 어카운트의 유효기간은 종료했습니다 (S1146)</Term>
   <Term key="ERR_USER_NAME_ALREADY_EXITS">사용자명은 벌써 존재합니다.</Term>
   <Term key="ERR_USER_NAME_REQUIRED">사용자명이 필요합니다.입력해 주십시오!</Term>
   <Term key="ERR_WRONGLANG">언어를 선택해 주십시오(S1052).</Term>
@@ -2150,7 +2150,7 @@
   <Term key="WARN_ELEMENT_PLACED_EDITION">기사 %2의 컴포넌트 %1은 %4 레이아웃의 {EDITION} %3 내에 이미 위치합니다</Term>
   <Term key="WARN_PAGE_DBL">중복 하고 있는 페이지가 있습니다:</Term>
   <Term key="WARN_PAGE_START">1개의 페이지 번호와 페이지 상태가 있습니다:</Term>
-  <Term key="WARN_PASSWORD_EXPIRED">패스워드는 기한 마감입니다</Term>
+  <Term key="WARN_PASSWORD_EXPIRED">패스워드는 기한 마감입니다 (S1145)</Term>
   <Term key="WARN_USER_LIMIT">동시 사용자 한계 이 신청을 위해 도달했다, 또는 동시 연결 한계는 똑똑한 연결 기업 서버를 위해 도달했다.</Term>
   <Term key="WAR_UPLOAD_WARNING">프리뷰 화상을 생성할 수 없었습니다</Term>
   <Term key="WEBFEATURES">Web 어플리케이션 기능</Term>

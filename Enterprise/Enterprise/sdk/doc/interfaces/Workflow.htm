@@ -17,7 +17,7 @@
 		td.fcc {} /* foot-comment-column */
 	</style>
 </head>
-<body><table><tr><td><img title="" src="woodwing95.gif"/></td><td class="caption"><h1>Workflow interface - Enterprise v10.0</h1></td></table>
+<body><table><tr><td><img title="" src="woodwing95.gif"/></td><td class="caption"><h1>Workflow interface - Enterprise v10.1</h1></td></table>
 <br/><h2>Web Services</h2>
 <div class="section"><h3>AddObjectLabels</h3><p> 
 				Assigns an existing dossier label to one or more objects it contains.
@@ -856,9 +856,9 @@
 <tr><td class="bpc">Slugline</td><td class="btc">string*</td><td class="bcc"> Contents snippet </td></tr>
 <tr><td class="bpc">Format</td><td class="btc">string*</td><td class="bcc"> nillable since v4.2 - Mime filetype  </td></tr>
 <tr><td class="bpc">Columns</td><td class="btc">integer*</td><td class="bcc"></td></tr>
-<tr><td class="bpc">Width</td><td class="btc">double / float*</td><td class="bcc"> Width in points for Images </td></tr>
-<tr><td class="bpc">Height</td><td class="btc">double / float*</td><td class="bcc"> Height in points for Images </td></tr>
-<tr><td class="bpc">Dpi</td><td class="btc">unsigned integer*</td><td class="bcc"> Dots per inch for images </td></tr>
+<tr><td class="bpc">Width</td><td class="btc">double / float*</td><td class="bcc"> Width in pixels for Images </td></tr>
+<tr><td class="bpc">Height</td><td class="btc">double / float*</td><td class="bcc"> Height in pixels for Images </td></tr>
+<tr><td class="bpc">Dpi</td><td class="btc">double / float*</td><td class="bcc"> Dots per inch for images. Since 10.1 changed from unsignedInt to double. </td></tr>
 <tr><td class="bpc">LengthWords</td><td class="btc">unsigned integer*</td><td class="bcc"> Articles only </td></tr>
 <tr><td class="bpc">LengthChars</td><td class="btc">unsigned integer*</td><td class="bcc"> Articles only </td></tr>
 <tr><td class="bpc">LengthParas</td><td class="btc">unsigned integer*</td><td class="bcc"> Articles only </td></tr>
@@ -872,6 +872,8 @@
 <tr><td class="bpc">KeyFrameEveryFrames</td><td class="btc">unsigned integer*</td><td class="bcc"> Audio/Video only </td></tr>
 <tr><td class="bpc">Channels</td><td class="btc">string*</td><td class="bcc"> Audio/Video only </td></tr>
 <tr><td class="bpc">AspectRatio</td><td class="btc">string*</td><td class="bcc"> Video only </td></tr>
+<tr><td class="bpc">Orientation</td><td class="btc">unsigned integer*</td><td class="bcc"> v10.1: Image orientation value, as specified in Exif IFD0. Default value is 1 = Horizontal (normal). Can only be set through uploads of image files having embedded Exif metadata, so not directly through web services. Nil when not resolved. </td></tr>
+<tr><td class="bpc">Dimensions</td><td class="btc">string*</td><td class="bcc"> v10.1: Measurements of an image in "Width x Height" format. When the image Orientation is set to 90 degrees rotation, the Width and Height values are switched. This field is for UI purposes and is derived from Width, Height and Orientation. </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section" id="Dialog"><h3>Dialog</h3><p> v5.0 </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Title</td><td class="btc">string</td><td class="bcc"></td></tr>
@@ -1296,6 +1298,7 @@
 <tr><td class="bpc">Type</td><td class="btc"><a href="#PubChannelType">PubChannelType</a>*</td><td class="bcc"></td></tr>
 <tr><td class="bpc">DirectPublish</td><td class="btc">boolean*</td><td class="bcc"></td></tr>
 <tr><td class="bpc">SupportsForms</td><td class="btc">boolean*</td><td class="bcc"> v9.0: Tells whether the channel supports publish form feature </td></tr>
+<tr><td class="bpc">SupportsCropping</td><td class="btc">boolean*</td><td class="bcc"> v10.1: Tells whether the channel supports image cropping feature </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section" id="Publication"><h3>Publication</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Id</td><td class="btc">string</td><td class="bcc"></td></tr>
@@ -1600,6 +1603,6 @@
 <tr><td class="btc">"native"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"output"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"trailer"</td><td class="bcc"></td></tr>
-</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SCEnterprise.wsdl" file at 21 Jul 2016</p>
+</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SCEnterprise.wsdl" file at 20 Oct 2016</p>
 <p style="font-size: 9pt;" align="right">Confidential, (c) 1998-2016 WoodWing Software bv. All rights reserved.</p></div>
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></body></html>
