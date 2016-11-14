@@ -73,8 +73,9 @@ class AdobeDps_ServerJob extends ServerJob_EnterpriseConnector
 	/**
 	 * Called by BizServerJob when a server job has to be created.
 	 *
-	 * @param boolean $pushIntoQueue True to insert the job into job queue. False to just return the constructed job.
 	 * @since 8.3
+	 * @param boolean $pushIntoQueue True to insert the job into job queue. False to just return the constructed job.
+	 * @return ServerJob The created server job.
 	 */
 	public function createJob( $pushIntoQueue )
 	{

@@ -169,7 +169,7 @@ class AdobeDpsAdminUtils
 	 * Checks if the DPS Product ID is unique and meets the conditions as set by Adobe (length, valid characters and prefix, etc).
 	 * @param AdmIssue $reqIssue The new/modified issue with its properties.
 	 * @param AdmExtraMetaData $extraMetaData Metadata to be validated .
-	 * @param $pubChannelId The id of the publication channel of the issue.
+	 * @param int $pubChannelId The id of the publication channel of the issue.
 	 * @throws BizException
 	 */
 	private function validateDPSProductId( AdmIssue $reqIssue, AdmExtraMetaData $extraMetaData, $pubChannelId )

@@ -104,7 +104,7 @@ class Drupal7_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConnec
 	/**
 	 * Retrieves all field definitions made at Drupal (for all content types).
 	 *
-     * @param AdmPubChannel $pubChannelInfo
+	 * @param PubChannelInfo $pubChannelInfo
 	 * @param null|string $contentType The ContentType for which to get the Fields. Default: NULL
 	 * @return array List of field definitions.
 	 */

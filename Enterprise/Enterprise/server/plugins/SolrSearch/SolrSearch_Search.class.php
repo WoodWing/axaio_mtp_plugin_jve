@@ -15,6 +15,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 {
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function indexObjects( $objects, $areas = array('Workflow') )
 	{
@@ -28,6 +29,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function updateObjects( $objects, $areas = array('Workflow') )
 	{
@@ -36,6 +38,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function updateObjectProperties( $objectIDs, $metaDataValues )
 	{
@@ -47,6 +50,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function unIndexObjects( $objectIds, $deletedObject )
 	{
@@ -58,6 +62,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 	
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function optimizeIndexes()
 	{
@@ -68,6 +73,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function canHandleSearch( $query, $params, $firstEntry, $maxEntries, $queryMode, $hierarchical, $queryOrder, $minimalProps, $requestProps  )
 	{
@@ -124,6 +130,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function doSearch( $query, $params, $firstEntry, $maxEntries, $queryMode, $hierarchical, $queryOrder, $minimalProps, $requestProps, $areas = array('Workflow'))
 	{
@@ -184,9 +191,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 	/**
 	 * See Search_EnterpriseConnector for comments
 	 * 
-	 * @param string $isPropertySearchable
-	 * @param bool $suppressExceptions
-	 * @return Property is searchable by Solr (true/false).
+	 * @inheritdoc
 	 */
 	public function isPropertySearchable( $propertyName )
 	{
@@ -208,7 +213,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 	}
 
 	/**
-	 * Set the _CLosed property on an Enterprise Object.
+	 * Set the _Closed property on an Enterprise Object.
 	 * 
 	 * If you search without Solr, closed objects aren't included. If we don't add
 	 * closed objects to Solr, we cannot find the closed objects at all. So we

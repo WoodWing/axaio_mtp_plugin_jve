@@ -530,7 +530,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * @param int $dossierId The dossier id of which the article access setting will be checked.
 	 * @param PubPublishTarget $publishTarget
-	 * @throws bool True when the Adobe viewer version set at the Issue supports free article access; False otherwise.
+	 * @return bool True when the Adobe viewer version set at the Issue supports free article access; False otherwise.
 	 */
 	private function checkArticleAccessAndViewer( $dossierId, $publishTarget )
 	{
@@ -814,7 +814,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * Affective for publishDossiers(), updateDossiers(), unpublishDossiers() and previewDossiers().
 	 *
 	 * @since 7.5
-	 * @param PublishTarget $publishTarget
+	 * @param PubPublishTarget $publishTarget
 	 * @return PubPublishedIssue
 	 */
 	public function getPublishInfoForIssue( $publishTarget )
@@ -1460,14 +1460,15 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @param string $dossierId
 	 * @param string $objectId
-     * @param boolean $importedFolio
+	 * @param boolean $importedFolio
+	 * @return bool TRUE if the folio was found, FALSE if it was not.
 	 */
 	private function getAndExtractObjectFolio( $publishTarget, $dossierId, $objectId, $importedFolio = false )
 	{
 		// TODO: Skip folios that are not available at filestore (check RenditionsInfo)
 		//       and skip the ones we already have at export folder (version check?).
 
-        $rendition = ($importedFolio) ? "native" : "output";
+		$rendition = ($importedFolio) ? "native" : "output";
 
 		// Download the folio file from filestore.
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
@@ -1909,7 +1910,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * orientation (portrait/landscape).
 	 *  
 	 * @param PubPublishTarget $publishTarget
-	 * @param type $orientation
+	 * @param string $orientation
 	 * @param string $operation Preview, Publish, Update or UnPublish
 	 * @param string $operationId Client generated system wide GUID in 8-4-4-4-12 format.
 	 * @param string $imageUsage 'issueCover' or 'sectionCover' The sub folder name where the issue or section cover should be placed.
@@ -5300,7 +5301,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *  
 	 * @staticvar int $uploadSize Total size of articles to be uploaded.
 	 * @param PubPublishTarget $publishTarget Publish Target
-	 * @param type $dossierId Dossier id
+	 * @param string $dossierId Dossier id
 	 */
 	private function setUploadSize( PubPublishTarget $publishTarget, $dossierId )
 	{
@@ -5520,9 +5521,9 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * @param bool $horParser Whether or not horizontal parsing is possible.
 	 * @param bool $verParser Whether or not vertical parsing is possible.
-	 * @param $verLayoutInfo The Vertical/Portrait Layout.
-	 * @param $horLayoutInfo The Horizontal/Landscape Layout.
-	 * @param array $dossier The dossier for which to determine the layouts.
+	 * @param array $verLayoutInfo The Vertical/Portrait Layout.
+	 * @param array $horLayoutInfo The Horizontal/Landscape Layout.
+	 * @param Object $dossier The dossier for which to determine the layouts.
 	 * @return array An array of Layouts to use for the preview TOC image.
 	 */
 	private function determineLayoutsForTocPreview($horParser, $verParser, $verLayoutInfo, $horLayoutInfo, $dossier, $hasAltLayoutBoth)

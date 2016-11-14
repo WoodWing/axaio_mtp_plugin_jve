@@ -300,7 +300,7 @@ class AdobeDpsUtils
 	 *
 	 * @param integer $objectId	Object Id
 	 * @param string $storeName Store name in the filestore
-	 * @param Object $zipUtility ZipUtility object
+	 * @param WW_Utils_ZipUtility $zipUtility ZipUtility object
 	 * @param DOMXPath $xPath
 	 * @param DOMNode $contentStackNode
 	 * @param integer $subFolioId	Subfolio Id

@@ -400,6 +400,7 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 					$value = strval(implode("<br /><br />", $value));
 					$value = array(nl2br($value));
 					$type = 'string';
+					break;
 				default:
 					break;
 			}

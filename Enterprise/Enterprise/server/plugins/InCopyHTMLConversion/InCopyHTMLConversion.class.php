@@ -16,7 +16,7 @@ class InCopyHTMLConversion
 	 * Convert HTML articles (wwea / html) to InCopy articles
 	 * using a template and the (existing) InCopyTextExport class
 	 *
-	 * @param Article $object
+	 * @param Object $object
 	 */
 	public static function convertHTMLArticle ( &$object )
 	{
@@ -356,7 +356,7 @@ class InCopyHTMLConversion
 	/**
 	 * Compose an object with element information
 	 *
-	 * @param Article 		$object
+	 * @param Object 		$object
 	 * @param Element Label $label
 	 * @param DOMDocument 	$artDoc
 	 * @return Element Object

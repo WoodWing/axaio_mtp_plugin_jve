@@ -725,6 +725,7 @@ class DrupalField {
 				if (!$drupalField->getHasTextFilter()) {
 					$maxLength = $rawField['field_info_fields']['settings']['max_length'];
 				}
+				break;
 			default :
 				break;
 		}
