@@ -18,9 +18,7 @@ class ElvisObjectRelation extends AbstractRemoteObject
 	public static function getName()
 	{
 		require_once __DIR__.'/../../../logic/ElvisAMFClient.php';
-		if( ElvisAMFClient::getInterfaceVersion() >= 2
-&& false // TODO: remove this check once Elvis side is fixed !!!
-			) {
+		if( ElvisAMFClient::getInterfaceVersion() >= 2 ) {
 			$name = 'ElvisObjectRelation_v2';
 		} else {
 			$name = parent::getName();
