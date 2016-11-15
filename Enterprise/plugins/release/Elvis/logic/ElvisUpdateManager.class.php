@@ -179,8 +179,8 @@ class ElvisUpdateManager
 			
 			// Determine the publish date for layouts.
 			$publishDate = null;
-			$isPublishForm = $object->MetaData->BasicMetaData->Type == 'PublishForm';
-			if( !$isPublishForm && $object->Targets ) {
+			$objType = $object->MetaData->BasicMetaData->Type;
+			if( $objType == 'Layout' && $object->Targets ) {
 				/** @var Target $target */
 				$target = reset( $object->Targets );
 				if( $target->Issue->Id ) {
@@ -207,23 +207,35 @@ class ElvisUpdateManager
 
 					if( property_exists( $elvisRelation, 'publicationDate' ) ) {
 						$elvisRelation->publicationDate = null;
-						if( $isPublishForm ) {
-							$shadowTarget = reset( $shadowRelation->Targets );
-							if( $shadowTarget ) {
-								$elvisRelation->publicationDate = self::getPublishedDate(
-									$object->MetaData->BasicMetaData->ID, $shadowTarget->PubChannel->Id,
-									$shadowTarget->Issue->Id, $shadowRelation->Child );
-							}
-						} else { // layout
-							$elvisRelation->publicationDate = $publishDate;
+						switch( $objType ) {
+							case 'PublishForm':
+								$shadowTarget = reset( $shadowRelation->Targets );
+								if( $shadowTarget ) {
+									$elvisRelation->publicationDate = self::getPublishedDate(
+										$object->MetaData->BasicMetaData->ID, $shadowTarget->PubChannel->Id,
+										$shadowTarget->Issue->Id, $shadowRelation->Child );
+								}
+								break;
+							case 'Layout':
+								$elvisRelation->publicationDate = $publishDate;
+								break;
 						}
 					}
 					$elvisRelations[] = $elvisRelation;
 				}
+				// The relational target between Dossier and Publish Form tells us
+				// to which Publication Channel the form is targeted for.
+				if( $objType == 'PublishForm' ) {
+					if( $shadowRelation->Type == 'Contained' && $shadowRelation->Child == $objId ) {
+						$operation->targets = self::composeElvisTargets( $shadowRelation->Targets );
+					}
+				}
 				$operation->relations = $elvisRelations;
 			}
 
-			$operation->targets = self::composeElvisTargets( $object->Targets );
+			if( $objType == 'Layout' ) {
+				$operation->targets = self::composeElvisTargets( $object->Targets );
+			}
 			$operations[] = $operation;
 		}
 		return $operations;

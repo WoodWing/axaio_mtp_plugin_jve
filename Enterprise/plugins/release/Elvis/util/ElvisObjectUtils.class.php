@@ -110,7 +110,7 @@ class ElvisObjectUtils
 	 * Filters objectIds from input Objects array on types interesting for Elvis.
 	 *
 	 * @param Object[] $objects List of objects to be filtered
-	 * @return int[] $reqObjectIds Filtered object ids
+	 * @return string[] $reqObjectIds Filtered object ids
 	 */
 	public static function filterRelevantIdsFromObjects( $objects )
 	{
