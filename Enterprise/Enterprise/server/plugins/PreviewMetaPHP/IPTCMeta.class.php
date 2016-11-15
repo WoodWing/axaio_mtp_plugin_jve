@@ -40,6 +40,7 @@ class IPTCMeta
 		if( $iptc && is_array($iptc) ) {
 			LogHandler::Log( 'IPTCMeta', 'DEBUG', 'Found IPTC data.' );
 			require_once BASEDIR.'/server/utils/FileMetaDataToProperties.class.php';
+			/** @noinspection PhpDeprecationInspection */
 			$converterIPTC = WW_Utils_FileMetaDataToProperties_Factory::createConverter( 'iptc' );
 			$converterIPTC->convert( $iptc, $metaData);
 		} else {
@@ -82,6 +83,7 @@ class IPTCMeta
 		if( $iptc && is_array($iptc) ) {
 			LogHandler::Log( 'IPTCMeta', 'DEBUG', 'Found IPTC data.' );
 			require_once BASEDIR.'/server/utils/FileMetaDataToProperties.class.php';
+			/** @noinspection PhpDeprecationInspection */
 			$converterIPTC = WW_Utils_FileMetaDataToProperties_Factory::createConverter( 'iptc' );
 			$converterIPTC->convert( $iptc, $metaData);
 		} else {

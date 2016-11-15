@@ -93,10 +93,13 @@ class ImageMagick_MetaData extends MetaData_EnterpriseConnector
 		}
 
 		$identifyMetaData = array();
+		/** @noinspection PhpDeprecationInspection */
 		ImageMagick::getBasicMetaData( $inputFilename, $identifyMetaData );
 		$xmpMetaData = array();
+		/** @noinspection PhpDeprecationInspection */
 		ImageMagick::getXMPMetaData( $inputFilename, $xmpMetaData );
 		$iptcMetaData = array();
+		/** @noinspection PhpDeprecationInspection */
 		ImageMagick::getIPTCMetaData( $inputFilename, $iptcMetaData );
 
 		if( strcasecmp( $inputFilename, $attachment->FilePath ) !== 0 ) {

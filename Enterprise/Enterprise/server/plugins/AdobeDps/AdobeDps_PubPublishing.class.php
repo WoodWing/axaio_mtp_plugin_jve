@@ -1989,7 +1989,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $dossier
 	 * @param PubPublishTarget $publishTarget
 	 */
-	private function exportFolios( Object $dossier, PubPublishTarget $publishTarget )
+	private function exportFolios( /** @noinspection PhpLanguageLevelInspection */
+		Object $dossier, PubPublishTarget $publishTarget )
 	{
 		// Build the folio XML file in memory
 		$dossierId = $dossier->MetaData->BasicMetaData->ID;
@@ -2888,7 +2889,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param WW_Utils_ZipUtility $folioZipUtility The folio archive file
 	 * @param boolean $forIssue TRUE when called for issue, FALSE for dossier.
 	 */
-	private function addDossierFilesToFolio( Object $dossier, WW_Utils_ZipUtility $folioZipUtility, $forIssue )
+	private function addDossierFilesToFolio( /** @noinspection PhpLanguageLevelInspection */
+		Object $dossier, WW_Utils_ZipUtility $folioZipUtility, $forIssue )
 	{
 		// Add dossier/layout folio folders (extracted before) to magazine folio.
 		$dossierId = $dossier->MetaData->BasicMetaData->ID;
@@ -3162,7 +3164,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @param Object $dossier
 	 */
-	private function deleteArticleAndFolioFileAndFolder( PubPublishTarget $publishTarget, Object $dossier )
+	private function deleteArticleAndFolioFileAndFolder( PubPublishTarget $publishTarget, /** @noinspection PhpLanguageLevelInspection */
+	                                                     Object $dossier )
 	{
 		$dossierId = $dossier->MetaData->BasicMetaData->ID;
 
@@ -3279,7 +3282,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param array $objectsInDossier
 	 * @param PubPublishTarget $publishTarget
 	 */
-	private function extractTextView( Object $dossier, array $objectsInDossier, PubPublishTarget $publishTarget )
+	private function extractTextView( /** @noinspection PhpLanguageLevelInspection */
+		Object $dossier, array $objectsInDossier, PubPublishTarget $publishTarget )
 	{
 		// Extract the article.
 		$article = $this->findArticleInDossier( $objectsInDossier );
@@ -3820,7 +3824,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @return string File path of created HTML file at export folder.
 	 */
-	private function copyTextViewAssets( Object $article, PubPublishTarget $publishTarget )
+	private function copyTextViewAssets( /** @noinspection PhpLanguageLevelInspection */
+		Object $article, PubPublishTarget $publishTarget )
 	{
 		require_once BASEDIR.'/server/utils/FolderUtils.class.php';
 
@@ -3892,7 +3897,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @return array with article components. Null on error.
 	 */
-	private function getArticleComponentsWCML( Object $article, $articleContents, PubPublishTarget $publishTarget )
+	private function getArticleComponentsWCML( /** @noinspection PhpLanguageLevelInspection */
+		Object $article, $articleContents, PubPublishTarget $publishTarget )
 	{
 		// Get the CSS file that is most specific for the brand/issue
 		$data = array();
@@ -3965,7 +3971,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @return string File path
 	 */
-	private function getConfigCSS( Object $article, &$stylesCSS, PubPublishTarget $publishTarget )
+	private function getConfigCSS( /** @noinspection PhpLanguageLevelInspection */
+		Object $article, &$stylesCSS, PubPublishTarget $publishTarget )
 	{
 		// Pick global TextViewBase.css file, but allow to overrule defintions per brand or even per issue.
 		$path = $this->getConfigDpsStylesTextViewFolder( $article, $publishTarget );
@@ -4002,7 +4009,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @return string
 	 */
-	private function getConfigDpsStylesTextViewFolder( Object $article, PubPublishTarget $publishTarget )
+	private function getConfigDpsStylesTextViewFolder( /** @noinspection PhpLanguageLevelInspection */
+		Object $article, PubPublishTarget $publishTarget )
 	{
 		$globalPath = $this->getConfigDpsStylesTextViewGlobalFolder();
 		$issuePath = $globalPath.'_issue_'.$publishTarget->IssueID;
@@ -4057,7 +4065,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @param string $imageUsage The usage of the image extracted. Possible values: 'issueCover' or 'sectionCover'(for dossier)
 	 */
-	private function extractIssueOrSectionCover( Object $dossier, array $objectsInDossier, PubPublishTarget $publishTarget, $imageUsage )
+	private function extractIssueOrSectionCover( /** @noinspection PhpLanguageLevelInspection */
+		Object $dossier, array $objectsInDossier, PubPublishTarget $publishTarget, $imageUsage )
 	{
 		if( $imageUsage == 'issueCover' ) {
 			// Only for the first dossier (in order) we need to find a Cover Image.
@@ -5388,7 +5397,8 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $dossier
 	 * @param array $objectsInDossier
 	 */
-	private function extractTocImages( Object $dossier, array $objectsInDossier )
+	private function extractTocImages( /** @noinspection PhpLanguageLevelInspection */
+		Object $dossier, array $objectsInDossier )
 	{
 		$dossierId = $dossier->MetaData->BasicMetaData->ID;
 

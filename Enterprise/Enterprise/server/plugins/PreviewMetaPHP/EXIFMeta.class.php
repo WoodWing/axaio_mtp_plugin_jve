@@ -21,6 +21,7 @@ class EXIFMeta
 	public static function readEXIF( $format, $file )
 	{
 		$metaData = array();
+		/** @noinspection PhpDeprecationInspection */
 		if( !self::hasEXIFHeader( $format ) ) {
 			return $metaData;
 		}
