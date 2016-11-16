@@ -233,6 +233,7 @@ class WW_TestSuite_HealthCheck2_WordPress_TestCase extends TestCase
 				$clientWordPress->setConnectionUrl( $site['url'] . '/xmlrpc.php' );
 				$clientWordPress->setConnectionPassword( $site['password'] );
 				$clientWordPress->setConnectionUserName( $site['username'] );
+				$clientWordPress->setCertificate( $site['certificate'] );
 				$retVal = $clientWordPress->pluginTest( $pluginInfo->Version );
 			} catch( BizException $e ) {
 				$reasonParams = array( $siteKey );
