@@ -695,7 +695,7 @@ class BizPlnObject
 			$wflPage->Files = null; // Avoid conflicts.
 			// Set defaults for properties that do not occur in planning WSDL.
 			$wflPage->Instance = 'Planning';
-			if( isset( $page->PageNumber ) && !empty( $page->PageNumber ) ) {
+			if( !isset( $wflPage->PageNumber ) || empty( $wflPage->PageNumber ) ) {
 				$wflPage->PageNumber = strval( $page->PageOrder );
 			}
 			// Create the planned page in DB
