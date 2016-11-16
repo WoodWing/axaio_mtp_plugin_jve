@@ -8,24 +8,26 @@ require_once dirname(__FILE__). '/ExternalUtils/class-IXR.php';
 
 class WordPressXmlRpcClient
 {
-	private $userName;
-	private $password;
-	private $url;
+	/** @var string|null */
+	private $userName = null;
+	/** @var string|null */
+	private $password = null;
+	/** @var string|null */
+	private $url = null;
+	/** @var string|null */
+	private $certificate = null;
 
-	public function __construct( $publishTarget = null, $username = null, $password = null, $url = null )
+	public function __construct( $publishTarget = null )
 	{
 		if( $publishTarget ){
 			require_once dirname(__FILE__) . '/WordPress_Utils.class.php';
 			$wordpressUtils = new WordPress_Utils();
-
 			$credentials = $wordpressUtils->getConnectionInfo( $publishTarget );
 			$this->userName = $credentials['username'];
 			$this->password = $credentials['password'];
 			$this->url = $credentials['connectionUrl'];
-		}else if( $username && $password && $url ){
-			$this->userName = $username;
-			$this->password = $password;
-			$this->url = $url . '/xmlrpc.php';
+			$this->certificate = $credentials['certificate'];
+			require_once BASEDIR . '/server/utils/PublishingUtils.class.php';
 		}
 	}
 
@@ -42,10 +44,8 @@ class WordPressXmlRpcClient
 	 */
 	public function rpcService( $url, $action, $params )
 	{
-		$zendCurlAdapter = new Zend_Http_Client_Adapter_Curl();
-		$zendHttpClient = new Zend_Http_Client($url);
-		$zendHttpClient->setAdapter( $zendCurlAdapter );
-		$xmlRpcClient = new WW_Utils_XmlRpcClient($url);
+		$zendHttpClient = $this->createHttpClient();
+		$xmlRpcClient = new WW_Utils_XmlRpcClient( $url );
 		$xmlRpcClient->setXmlRpcClient($url, $zendHttpClient);
 		try {
 			$retVal = $xmlRpcClient->callRpcService( $action, $params, array( 'WordPress_Utils', 'obfuscatePasswordInRequest' ) );
@@ -102,6 +102,16 @@ class WordPressXmlRpcClient
 	function setConnectionUserName( $username )
 	{
 		$this->userName = $username;
+	}
+
+	/**
+	 * Set the path to the certificate (for https/ssl connections).
+	 *
+	 * @param string $certificate
+	 */
+	function setCertificate( $certificate )
+	{
+		$this->certificate = $certificate;
 	}
 
 	/**
@@ -348,7 +358,7 @@ class WordPressXmlRpcClient
 			'overwrite' => false
 		);
 
-		$rpc = new IXR_Client( $this->url );
+		$rpc = new IXR_Client( $this->url, $this->certificate );
 		$status = $rpc->query( 'metaWeblog.newMediaObject', 0, $this->userName,	$this->password, $data );
 		if( !$status ) {
 			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $rpc->getErrorMessage() );
@@ -416,7 +426,7 @@ class WordPressXmlRpcClient
 			'gallery' => $galleryId
 		);
 
-		$rpc = new IXR_Client( $this->url );
+		$rpc = new IXR_Client( $this->url, $this->certificate );
 		$status = $rpc->query( 'ngg.uploadImage', 0, $this->userName,	$this->password, $data );
 		if( !$status ) {
 			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $rpc->getErrorMessage() );
@@ -594,5 +604,74 @@ class WordPressXmlRpcClient
 	{
 		$params = array( $this->userName, $this->password, $requiredVersion ) ;
 		return $this->rpcService( $this->url, 'woodwing.PluginTest', $params );
+	}
+
+	/**
+	 * Creates a HTTP Client.
+	 *
+	 * Uses basic authentication in WordPress to authenticate the request. Using HTTPS / SSL is possible but requires a
+	 * certificate to be set in the channel configuration.
+	 * To prevent timeout errors for heavy calls the time out is set to 3600 seconds.
+	 *
+	 * @return Zend_Http_Client The created client.
+	 * @throws BizException Can throw an exception if the client could not be created.
+	 */
+	private function createHttpClient()
+	{
+		try {
+			require_once 'Zend/Uri.php';
+			$uri = Zend_Uri::factory( $this->url );
+			$isHttps = $uri && $uri->getScheme() == 'https';
+		} catch( Zend_Http_Client_Exception $e ) {
+			throw new BizException( null, 'Server', null, $e->getMessage().
+				'. Check your "url" option at the WORDPRESS_SITES setting of the WordPress config.php file.' );
+		} catch( Zend_Uri_Exception $e ) {
+			throw new BizException( null, 'Server', null, $e->getMessage().
+				'. Check your "url" option at the WORDPRESS_SITES setting of the WordPress config.php file.' );
+		}
+
+		require_once 'Zend/Http/Client.php';
+		$httpClient = new Zend_Http_Client( $uri );
+
+		if( $this->certificate ) {
+			if( !file_exists($this->certificate) ) {
+				throw new BizException( null, 'Server', null,
+					'The file "'.$this->certificate.'" specified at "local_cert" option does not exists.' );
+			}
+			if( $isHttps ) {
+				$httpClient->setConfig(
+					array(
+						'adapter' => 'Zend_Http_Client_Adapter_Curl',
+						'curloptions' => $this->getCurlOptionsForSsl( $this->certificate )
+					)
+				);
+			}
+		} else {
+			if( $isHttps ) {
+				throw new BizException( null, 'Server', null,
+					'Using HTTPS, but no "certificate" option defined at WORDPRESS_SITES setting.' );
+			}
+		}
+
+		$httpClient->setConfig(array('timeout' => 3600 ));
+//		$httpClient->setCookie(array( 'XDEBUG_SESSION' => <XDEBUG Session Key> )); // To enable debugging of the Drupal site.
+
+		return $httpClient;
+	}
+
+	/**
+	 * Returns a list of options to set to Curl to make HTTP secure (HTTPS).
+	 *
+	 * @param string $localCert File path to the certificate file (PEM). Required for HTTPS (SSL) connection.
+	 * @return array An array of Curl options for SSL.
+	 */
+	private function getCurlOptionsForSsl( $localCert )
+	{
+		return array(
+			//	CURLOPT_SSLVERSION => 2, Let php determine itself. Otherwise 'unknow SSL-protocol' error.
+			CURLOPT_SSL_VERIFYHOST => 2,
+			CURLOPT_SSL_VERIFYPEER => 1,
+			CURLOPT_CAINFO => $localCert
+		);
 	}
 }
