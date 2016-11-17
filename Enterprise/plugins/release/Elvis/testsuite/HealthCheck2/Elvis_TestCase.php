@@ -118,8 +118,15 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			$result = false;
 		}
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' && empty( DEFAULT_ELVIS_PRODUCTION_ZONE ) ) {
-			$message = 'The value "'.ELVIS_CREATE_COPY.'" set for the ELVIS_CREATE_COPY option '.
+			$message = 'The ELVIS_CREATE_COPY is set to "'.ELVIS_CREATE_COPY.'" '.
 				'but the DEFAULT_ELVIS_PRODUCTION_ZONE option is empty.';
+			$this->setResult( 'ERROR', $message , $help );
+			$result = false;
+		}
+		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' && IMAGE_RESTORE_LOCATION == 'Elvis_Original' ) { // [EN-88325]
+			$message = 'The ELVIS_CREATE_COPY option is set to "'.ELVIS_CREATE_COPY.'" and '.
+				'the IMAGE_RESTORE_LOCATION option is set to "'.IMAGE_RESTORE_LOCATION.'". '.
+				'However, this combination is not supported.';
 			$this->setResult( 'ERROR', $message , $help );
 			$result = false;
 		}
@@ -182,6 +189,17 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			$help = 'Please check the Compatibility Matrix.';
 			$message = 'Elvis Server v'.$this->serverInfo->version.' is not compatible with Enterprise Server v'.SERVERVERSION.'.';
 			$this->setResult( 'ERROR', $message, $help );
+		}
+
+		// With the Elvis_Original option there were some problems with older Elvis Server < v5.14. [EN-88325]
+		if( version_compare( $this->serverInfo->version, '5.14', '<=' ) &&
+			IMAGE_RESTORE_LOCATION == 'Elvis_Original' ) {
+			$help = 'Please check the '.self::CONFIG_FILES.' file.';
+			$message = 'The IMAGE_RESTORE_LOCATION option is set to "'.IMAGE_RESTORE_LOCATION.'" '.
+				'but Elvis Server v'.$this->serverInfo->version.' does not support this feature. '.
+				'Please adjust the option or upgrade the Elvis Server.';
+			$this->setResult( 'ERROR', $message, $help );
+			$result = false;
 		}
 		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server version compatibility checked.' );
 		return $result;
