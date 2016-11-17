@@ -54,6 +54,9 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 			'WflUnlockObjects_EnterpriseConnector',
 		//	'WflUpdateObjectRelations_EnterpriseConnector',
 		//	'WflUpdateObjectTargets_EnterpriseConnector'
+			'PubPublishDossiers_EnterpriseConnector',
+			'PubUpdateDossiers_EnterpriseConnector',
+			'PubUnPublishDossiers_EnterpriseConnector',
 		);
 
 		// Dynamically add connector interfaces introduced since Enterprise Server 9.2.

@@ -305,4 +305,47 @@ class ElvisObjectUtils
 
 		return $elvisAssetVersions;
 	}
+
+	/**
+	 * Updates the Published Date property for image assets in Elvis when user has (un/re)published a Publish Form.
+	 * This is done for all the shadow images placed on the form.
+	 *
+	 * @since 10.1.1
+	 * @param PubPublishedDossier[]|null $publishedDossiers
+	 * @throws BizException
+	 */
+	static public function updatePublisFormPlacementsForPublishDossierOperation( $publishedDossiers )
+	{
+		if( $publishedDossiers ) foreach( $publishedDossiers as $pubDossier ) {
+			$pubPublishFormId = null;
+			$pubObjectIds = array();
+			if( $pubDossier->History ) foreach( $pubDossier->History as $history ) {
+				if( $history->PublishedObjects ) foreach( $history->PublishedObjects as $pubObject ) {
+					if( $pubObject->Type == 'PublishForm' ) {
+						$pubPublishFormId = $pubObject->ObjectId;
+					} else {
+						$pubObjectIds[] = $pubObject->ObjectId;
+					}
+				}
+			}
+			if( $pubPublishFormId && $pubObjectIds ) {
+				// To avoid too much performance (calling getObjects) impact on publish operations for which no shadow
+				// objects are involved, we bail out when none of the placed objects are shadows of Elvis assets.
+				$pubShadowObjectIds = ElvisObjectUtils::filterElvisShadowObjects( $pubObjectIds );
+				if( $pubShadowObjectIds ) {
+					require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+					$user = BizSession::getShortUserName();
+					$publishForm = BizObject::getObject( $pubPublishFormId, $user, false, 'none', array( 'Relations', 'Targets' ), null, true );
+					if( $publishForm ) {
+						require_once __DIR__.'/ElvisObjectRelationUtils.class.php';
+						$shadowRelations = ElvisObjectRelationUtils::getShadowRelationsFromObjects( array( $publishForm ) );
+						if( $shadowRelations ) {
+							require_once __DIR__.'/../logic/ElvisUpdateManager.class.php';
+							ElvisUpdateManager::sendUpdateObjects( array( $publishForm ), $shadowRelations );
+						}
+					}
+				}
+			}
+		}
+	}
 }
