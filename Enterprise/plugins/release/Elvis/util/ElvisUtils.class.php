@@ -197,24 +197,31 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Returns a url from a Elvis hit given a specific rendition
+	 * Returns a url from a Elvis hit given a specific rendition.
 	 *
 	 * @param object $hit
 	 * @param string $rendition
-	 * @return string url
+	 * @return string|null download url if a url is set for a rendition, else null.
 	 */
-	public static function getUrlFromRendition($hit, $rendition)
+	public static function getUrlFromRendition( $hit, $rendition )
 	{
-		switch ($rendition) {
+		$result = null;
+		switch( $rendition ) {
 			case 'thumb' :
-				return self::appendSessionId($hit->thumbnailUrl);
+				if( $hit->thumbnailUrl ) {
+					$result = self::appendSessionId( $hit->thumbnailUrl );
+				}
 			case 'preview' :
-				return self::appendSessionId($hit->previewUrl);
+				if( $hit->previewUrl ) {
+					$result = self::appendSessionId( $hit->previewUrl );
+				}
 			case 'native' :
 			case 'placement' :
-				return self::appendSessionId($hit->originalUrl);
+				if( $hit->originalUrl ) {
+					$result = self::appendSessionId( $hit->originalUrl );
+				}
 		}
-		return null;
+		return $result;
 	}
 	
 	/**
