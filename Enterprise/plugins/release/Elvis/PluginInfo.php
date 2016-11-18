@@ -59,13 +59,15 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 			'PubUnPublishDossiers_EnterpriseConnector',
 		);
 
-		// Dynamically add connector interfaces introduced since Enterprise Server 9.2.
+		// Dynamically add connector interfaces introduced since specific Enterprise Server version.
 		$serverVer = explode( ' ', SERVERVERSION ); // split '9.2.0' from 'build 123'
 		require_once BASEDIR . '/server/utils/VersionUtils.class.php';
 		if( VersionUtils::versionCompare( $serverVer[0], '9.2.0', '>=' ) ) {
 			$interfaces[] = 'WflMultiSetObjectProperties_EnterpriseConnector';
 		}
-		
+		if( VersionUtils::versionCompare( $serverVer[0], '10.1.1', '>=' ) ) {
+			$interfaces[] = 'ConfigFiles_EnterpriseConnector';
+		}
 		return $interfaces;
 	}
 

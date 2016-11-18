@@ -21,6 +21,9 @@ require_once BASEDIR . '/server/interfaces/plugins/PluginInfoData.class.php';
 
 class WordPress_EnterprisePlugin extends EnterprisePlugin
 {
+	/**
+	 * @inheritdoc
+	 */
 	public function getPluginInfo()
 	{ 
 		$info = new PluginInfoData(); 
@@ -31,19 +34,26 @@ class WordPress_EnterprisePlugin extends EnterprisePlugin
 		return $info;
 	}
 	
+	/**
+	 * @inheritdoc
+	 */
 	final public function getConnectorInterfaces() 
 	{ 
-		return array( 'CustomObjectMetaData_EnterpriseConnector',
-						'PubPublishing_EnterpriseConnector',
-						'WebApps_EnterpriseConnector',
-						'AdminProperties_EnterpriseConnector',
-						'AutocompleteProvider_EnterpriseConnector'
+		return array(
+			'CustomObjectMetaData_EnterpriseConnector',
+			'PubPublishing_EnterpriseConnector',
+			'WebApps_EnterpriseConnector',
+			'AdminProperties_EnterpriseConnector',
+			'AutocompleteProvider_EnterpriseConnector',
+			'ConfigFiles_EnterpriseConnector', // since 10.1.1
 		);
 	}
 
-	// doesn't matter which build it is, at the time of writing the build number doesn't get checked.
+	/**
+	 * @inheritdoc
+	 */
 	public function requiredServerVersion()
 	{
-		return '9.3.0 Build 0';
+		return '10.1.1 Build 0'; // because of ConfigFiles_EnterpriseConnector
 	}
 }

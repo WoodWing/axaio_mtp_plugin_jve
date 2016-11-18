@@ -63,13 +63,7 @@ class WW_Utils_PhpInfo
 		// Get Enterprise server config files
 		$versionInfo = trim( SERVERVERSION . ' ' . SERVERVERSION_EXTRAINFO );
 		$info .= self::getChapterHeader( 'Enterprise Server v'.$versionInfo, 'Configuration files' );
-		$info .= self::getConfigFile( BASEDIR.'/config/config.php', 'config.php' );
-		$info .= self::getConfigFile( BASEDIR.'/config/configserver.php', 'configserver.php' );
-		$info .= self::getConfigFile( BASEDIR.'/config/config_overrule.php', 'config_overrule.php' );
-		$info .= self::getConfigFile( BASEDIR.'/config/config_dps.php', 'config_dps.php' );
-		$info .= self::getConfigFile( BASEDIR.'/config/config_sips.php', 'config_sips.php' );
-		$info .= self::getConfigFile( BASEDIR.'/config/config_solr.php', 'config_solr.php' );
-		$info .= self::getConfigFile( BASEDIR.'/server/serverinfo.php', 'serverinfo.php' );
+		$info .= self::getConfigFileInfo();
 		$info .= self::getChapterFooter();
 		
 		// Get Enterprise server database details
@@ -96,6 +90,34 @@ class WW_Utils_PhpInfo
 	}
 
 	/**
+	 * Returns all info of the config files, including custom plugins that have the ConfigFiles interface implemented.
+	 *
+	 * @return string
+	 */
+	private static function getConfigFileInfo()
+	{
+		$dbDriver = self::connectToDb( $info );
+		if( $dbDriver ) {
+			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+			$connectors = BizServerPlugin::searchConnectors( 'ConfigFiles', null );
+		} else {
+			$connectors = array();
+		}
+		$info = '';
+		$info .= self::getConfigFile( BASEDIR.'/config/config.php', 'config.php' );
+		$info .= self::getConfigFile( BASEDIR.'/config/configserver.php', 'configserver.php' );
+		$info .= self::getConfigFile( BASEDIR.'/config/config_overrule.php', 'config_overrule.php', $connectors );
+		$info .= self::getConfigFile( BASEDIR.'/server/serverinfo.php', 'serverinfo.php' );
+		if( $connectors ) foreach( $connectors as $connectorClass => $connector ) {
+			$configFiles = BizServerPlugin::runConnector( $connector, 'getConfigFiles', array() );
+			if( $configFiles ) foreach( $configFiles as $displayName => $configFile ) {
+				$info .= self::getConfigFile( $configFile, $displayName, array( $connector ) );
+			}
+		}
+		return $info;
+	}
+
+	/**
 	 * Returns all info from the currently running PHP instance.
 	 *
 	 * @return string HTML fragment with requested info.
@@ -115,11 +137,12 @@ class WW_Utils_PhpInfo
 	 * Returns all names and values of the defines made in a config files (by parsing it manually).
 	 * It also includes the file and asks PHP for actual values of those defines.
 	 *
-	 * @param string $filePath
-	 * @param string $displayName
+	 * @param string $filePath Full file path of the config file.
+	 * @param string $displayName Logical name of the config file e.g. base name of file or short path.
+	 * @param ConfigFiles_EnterpriseConnector[] $connectors (since v10.1.1)
 	 * @return string HTML fragment with requested info.
 	 */
-	public static function getConfigFile( $filePath, $displayName )
+	public static function getConfigFile( $filePath, $displayName, $connectors = array() )
 	{
 		require_once $filePath;
 		$info = self::getSectionHeader( $displayName );
@@ -135,6 +158,11 @@ class WW_Utils_PhpInfo
 			if ( $defValue[0] === 'DBPASS' || $defValue[0] === 'EMAIL_SMTP_PASS' || $defValue[0] === 'MTP_PASSWORD' ) {
 				$defValShow = preg_replace('/.*/i', '***', $defValShow, 1);
 			}
+			
+			// Allow plugins to hide their passwords.
+			if( $connectors ) foreach( $connectors as $connector ) {
+				$defValShow = $connector->displayOptionValue( $displayName, $defValue[0], $defValShow );
+			}
 
 			$showVal = $defValShow;
 			// Show array values in same cell
@@ -144,13 +172,14 @@ class WW_Utils_PhpInfo
 
 				$show = empty($defValues[$i][1]) ? '<i>'.$defValues[$i][2].'</i>' : $defValues[$i][1];
 
-				// If we check the drupal sites replace the password with ***
-				if($defValue[0] == 'DRUPAL_SITES' || $defValue[0] == 'DRUPAL8_SITES') {
-					$show = preg_replace('/\[password\] => ([^)|^\ ]*)/', '[password] => ***', $show);
-				}
 				// Check if TESTSUITE replace the password with ***
 				if( $defValue[0] == 'TESTSUITE' ) {
 					$show = preg_replace('/Password => ([^)|^\ ]*)/', 'Password => ***', $show);
+				}
+
+				// Allow plugins to hide their passwords.
+				if( $connectors ) foreach( $connectors as $connector ) {
+					$show = $connector->displayOptionValue( $displayName, $defValue[0], $show );
 				}
 
 				$showVal .= $show;
