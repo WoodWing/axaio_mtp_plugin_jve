@@ -93,34 +93,38 @@ class ElvisUtils {
 	 * If version specified, it will be taken into account
 	 * Extracted url, if could be resolved then used to copy file to Enterprise Transfer server.
 	 *
-	 * @param object $hit - hit which is used for url extraction
+	 * @param ElvisEntHit $hit - hit which is used for url extraction
 	 * @param string $rendition - to be extracted
-	 * @param bool $returnFileUrls When true, only file links to the content source are returned, otherwise the complete file cpmtemt/
-	 * @return Attachment - if could be restored or null
+	 * @param bool $returnFileUrls When true, only file links to the content source are returned, otherwise the complete file content
+	 * @return Attachment|null
 	 * @throws BizException
 	 */
-	public static function getAttachment($hit, $rendition, $returnFileUrls)
+	public static function getAttachment( $hit, $rendition, $returnFileUrls )
 	{
-		$file = null;
-		$url = ElvisUtils::getUrlFromRendition($hit, $rendition);
-
-		if (!is_null($url)) {
-			$type = self::getMimeType($hit);
-
-			if( !$returnFileUrls ) {
-				require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
-				$transferServer = new BizTransferServer();
-				$attachment = new Attachment($rendition, $type);
-				if ( !$transferServer->copyToFileTransferServer($url, $attachment) ) {
-					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
+		$attachment = null;
+		$url = ElvisUtils::getUrlFromRendition( $hit, $rendition );
+		if( $url ) {
+			$type = self::getMimeType( $hit, $url, $rendition );
+			if( $type ) {
+				$url = self::appendSessionId( $url );
+				if( !$returnFileUrls ) {
+					require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+					$transferServer = new BizTransferServer();
+					$attachment = new Attachment();
+					$attachment->Rendition = $rendition;
+					$attachment->Type = $type;
+					if( !$transferServer->copyToFileTransferServer( $url, $attachment ) ) {
+						throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
+					}
+				} else {
+					$attachment = new Attachment();
+					$attachment->Rendition = $rendition;
+					$attachment->Type = $type;
+					$attachment->ContentSourceFileLink = $url;
 				}
-				$file = $attachment;
-			} else {
-				$file = new Attachment($rendition, $type, null, null, null, null, $url);
 			}
 		}
-
-		return $file;
+		return $attachment;
 	}
 
 	/**
@@ -200,27 +204,30 @@ class ElvisUtils {
 	/**
 	 * Returns a url from a Elvis hit given a specific rendition.
 	 *
-	 * @param object $hit
+	 * @param ElvisEntHit $hit
 	 * @param string $rendition
 	 * @return string|null download url if a url is set for a rendition, else null.
 	 */
-	public static function getUrlFromRendition( $hit, $rendition )
+	private static function getUrlFromRendition( $hit, $rendition )
 	{
 		$result = null;
 		switch( $rendition ) {
 			case 'thumb' :
 				if( $hit->thumbnailUrl ) {
-					$result = self::appendSessionId( $hit->thumbnailUrl );
+					$result = $hit->thumbnailUrl;
 				}
+				break;
 			case 'preview' :
 				if( $hit->previewUrl ) {
-					$result = self::appendSessionId( $hit->previewUrl );
+					$result = $hit->previewUrl;
 				}
+				break;
 			case 'native' :
 			case 'placement' :
 				if( $hit->originalUrl ) {
-					$result = self::appendSessionId( $hit->originalUrl );
+					$result = $hit->originalUrl;
 				}
+				break;
 		}
 		return $result;
 	}
@@ -249,15 +256,35 @@ class ElvisUtils {
 	/**
 	 * Extracts the mime type from the hit
 	 *
-	 * @param object $hit Elvis hit object
-	 * @return string mime type
+	 * @param ElvisEntHit $hit
+	 * @param string $url
+	 * @param string $rendition
+	 * @return string|null Resolved mime type, else NULL.
 	 */
-	public static function getMimeType($hit)
+	private static function getMimeType( $hit, $url, $rendition )
 	{
-		require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
-		return MimeTypeHandler::filePath2MimeType($hit->metadata['filename']);
+		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
+		$fileName = null;
+		switch( $rendition ) {
+			case 'preview':
+			case 'thumb':
+				$parts = parse_url( $url );
+				if( isset($parts['path']) ) {
+					$path = $parts['path'];
+					$pathInfo = pathinfo( $path );
+					if( isset($pathInfo['basename']) ) {
+						$fileName = $pathInfo['basename'];
+					}
+				}
+				break;
+			case 'placement':
+			case 'native':
+				$fileName = $hit->metadata['filename'];
+				break;
+		}
+		return $fileName? MimeTypeHandler::filePath2MimeType( $fileName ) : null;
 	}
-	
+
 	/**
 	 * Returns true if caller is Content Station
 	 *

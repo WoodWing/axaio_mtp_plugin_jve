@@ -890,7 +890,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * Helper function to create an Attachment from an Elvis hit.
 	 * If an Attachment can be extracted based on the rendition, it will be returned in an array.
 	 *
-	 * @param object $hit The Elvis hit from which an attachment will be created.
+	 * @param ElvisEntHit $hit The Elvis hit from which an attachment will be created.
 	 * @param string $rendition Rendition of the file.
 	 * @param null $version
 	 * @return array A list of Attachments.
