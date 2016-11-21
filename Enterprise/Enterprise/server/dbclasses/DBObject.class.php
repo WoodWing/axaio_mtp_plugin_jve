@@ -1800,31 +1800,40 @@ class DBObject extends DBBase
 
 	/**
 	 * Selects an object thereby filtering on the name of the object, brand and issue. Also the the object type is used
-	 * to filter.
+	 * to filter. Optionally the name of the channel can be used as filter option.
 	 *
 	 * @param string $objectName
 	 * @param string $objectType
 	 * @param string $brandName
 	 * @param string $issueName
+	 * @param string $channelName (optional)
 	 * @return array|boolean Array with the row or false if not found.
 	 */
-	static public function getObjectByTypeAndNames( $objectName, $objectType, $brandName, $issueName )
+	static public function getObjectByTypeAndNames( $objectName, $objectType, $brandName, $issueName, $channelName = '' )
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$odb = $dbDriver->tablename( 'objects' );
 		$tdb = $dbDriver->tablename( 'targets' );
 		$pdb = $dbDriver->tablename( 'publications' );
 		$idb = $dbDriver->tablename( 'issues' );
+		$cdb = $dbDriver->tablename( 'channels' );
 
+		$tablesSql = ", $pdb p, $idb i ";
+		$where = "WHERE o.`name` = ? AND o.`type` = ? AND
+					o.`publication` = p.`id` AND p.`publication` = ? AND 
+					t.`issueid` = i.`id` AND i.`name` = ? ";
+		$params = array( $objectName, $objectType, $brandName, $issueName );
+		if ( $channelName ) {
+			$tablesSql .= ", $cdb c ";
+			$where .= "	AND i.`channelid` = c.`id` AND c.`name` = ? ";
+			$params[] = $channelName;
+		}
 		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' ) ).' as "version"';
 		$sql = "SELECT o.`id`, o.`name`, o.`storename`, $verFld ";
 		$sql .= "FROM $odb o ";
 		$sql .= "LEFT JOIN $tdb t ON (o.`id` = t.`objectid`) ";
-		$sql .= ", $pdb p, $idb i ";
-		$sql .= "WHERE o.`name` = ? AND o.`type` = ? AND
-						o.`publication` = p.`id` AND p.`publication` = ? AND 
-						t.`issueid` = i.`id` AND i.`name` = ? ";
-		$params = array( $objectName, $objectType, $brandName, $issueName );
+		$sql .= $tablesSql;
+		$sql .= $where;
 
 		$sth = $dbDriver->query( $sql, $params );
 		$row = $dbDriver->fetch( $sth );
