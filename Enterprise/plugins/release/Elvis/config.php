@@ -99,12 +99,12 @@ if( !defined('DEFAULT_ELVIS_PRODUCTION_ZONE') ) {
  *
  * It supports the following options:
  * - 'Elvis_Copy'     The image is copied in Elvis and is linked via an Enterprise shadow object.
- *                    When the ELVIS_CREATE_COPY option is set to 'Copy_To_Production_Zone' SmartConnection will no longer
- *                    raise a dialog to let the user specify the Elvis folder. Instead, the Production Zone is used as
+ *                    When the ELVIS_CREATE_COPY option is set to 'Copy_To_Production_Zone' Smart Connection will no longer
+ *                    raise a message to let the user specify the Elvis folder. Instead, the Production Zone is used as
  *                    configured for the Brand.
  * - 'Elvis_Original' The image is linked via an Enterprise shadow object. No copy is created.
  *                    This value can NOT be used when the ELVIS_CREATE_COPY option is set to 'Copy_To_Production_Zone'.
- *                    This option requires to have Elvis Server v5.14 (or newer) installed
+ *                    This option requires Elvis Server version 5.14 or higher.
  * - 'Enterprise'     The image is copied to Enterprise. No link or shadow object is created.
  */
 if( !defined('IMAGE_RESTORE_LOCATION') ) {
