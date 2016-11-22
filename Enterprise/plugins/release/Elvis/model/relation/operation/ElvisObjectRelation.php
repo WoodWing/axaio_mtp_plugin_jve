@@ -37,9 +37,9 @@ class ElvisObjectRelation extends AbstractRemoteObject
 }
 
 /**
- * Adds the $publicationDate property to the ElvisObjectRelation data class in backwards compatible manner.
+ * Adds the $publicationDate and $publicationUrl properties to the ElvisObjectRelation data class in backwards compatible manner.
  *
- * This property is introduced since Elvis 5.18 and Enterprise 10.1.1. If both versions are
+ * These properties are introduced since Elvis 5.18 and Enterprise 10.1.1. If both versions are
  * matching or newer, the interface version is set to v2 and this data class is used instead.
  *
  * @since 10.1.1
@@ -48,6 +48,9 @@ class ElvisObjectRelation_v2 extends ElvisObjectRelation
 {
 	/** @var string $publicationDate Datetime in yyyyMMdd'T'HH:mm:ss format */
 	public $publicationDate;
+
+	/** @var string $publicationUrl Web location where image is published to. Used for images placed on Publish Forms. */
+	public $publicationUrl;
 }
 
 class ElvisObjectRelationFactory

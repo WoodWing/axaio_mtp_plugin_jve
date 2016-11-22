@@ -220,6 +220,12 @@ class ElvisUpdateManager
 								$elvisRelation->publicationDate = $publishDate;
 								break;
 						}
+						if( property_exists( $elvisRelation, 'publicationUrl' ) ) {
+							$elvisRelation->publicationUrl = null;
+							if( $objType == 'PublishForm' ) {
+								// TODO: resolve the publicationUrl
+							}
+						}
 					}
 					$elvisRelations[] = $elvisRelation;
 				}
