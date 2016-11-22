@@ -130,6 +130,8 @@ class WW_DbScripts_DbInstaller
 
 	/**
 	 * Initializes the installer.
+	 *
+	 * @param array $checkSystemAdmin Callback function.
 	 */
 	public function __construct( $checkSystemAdmin )
 	{
@@ -179,6 +181,7 @@ class WW_DbScripts_DbInstaller
 			$phases['connect_db'] = $this->localizePhase( 'connect_db' );
 		} else {
 			switch( $this->phase ) {
+				/** @noinspection PhpMissingBreakStatementInspection */
 				case 'connect_db':
 					if( $this->newInstallation ) {
 						$phases['install_db'] = $this->localizePhase( 'install_db' );
@@ -215,6 +218,7 @@ class WW_DbScripts_DbInstaller
 	 */
 	private function localizePhase( $phase )
 	{
+		$localized = '';
 		switch( $phase ) {
 			case 'connect_db'    : $localized = BizResources::localize( 'DBINSTALLER_CONNECTDB_BTN'); break;
 			case 'install_db'    : $localized = BizResources::localize( 'DBINSTALLER_CREATEDB_BTN'); break;
@@ -430,7 +434,6 @@ class WW_DbScripts_DbInstaller
 		// must be reported to screen as a FATAL since it is blocking the installer from
 		// offering next steps in the installation procedure.
 		$map = new BizExceptionSeverityMap( array( 'S1003' => 'INFO' ) );
-		$map = $map; // keep analyzer happy
 
 		// Validate the database version and settings.
 		$help = '';
@@ -467,8 +470,7 @@ class WW_DbScripts_DbInstaller
 		// must be reported to screen as a FATAL since it is blocking the installer from
 		// offering next steps in the installation procedure.
 		$map = new BizExceptionSeverityMap( array( 'S1003' => 'INFO' ) );
-		$map = $map; // keep analyzer happy
-		
+
 		try {
 			require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
 			$installedVersion = DBConfig::getSCEVersion();
@@ -689,6 +691,7 @@ class WW_DbScripts_DbInstaller
 					// In case of an error, update the report to inform admin user.
 					$script = get_class($upgrade['object']).'.class.php';
 					if( $upgrade['upgrade'] === true ) {
+						$result = true;
 						if ( !$this->newInstallation ) {
 							$result = $upgrade['object']->run();
 						}
@@ -832,6 +835,10 @@ class WW_DbScripts_DbInstaller
 	 * server/dbscripts folder. Which files are choosen depends on the DB flavor
 	 * and if it needs a clean installation or an update.
 	 *
+	 * @param int $flatWantedDbVersion The database model version we want to install or update to.
+	 * @param int|null $flatInstalledVersion Current database model version
+	 * @param bool $newInstallation TRUE if this concerns a new installation, FALSE otherwise.
+	 * @param bool $upgrade TRUE if this concerns an upgrade, FALSE otherwise.
 	 * @return string[] List of SQL file names to execute.
 	 */
 	public function getDbModelScripts( $flatWantedDbVersion, $flatInstalledVersion, $newInstallation, $upgrade )
