@@ -53,7 +53,7 @@ class MetadataHandler
 
 
 	/**
-	 * Creates elvis metadata from enteprise metadata
+	 * Creates Elvis metadata from Enterprise metadata
 	 * Provided metadata from Enterprise is translated to Elvis
 	 *
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues

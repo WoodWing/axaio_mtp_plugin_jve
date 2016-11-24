@@ -432,10 +432,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * before any files are stored. This allows content source to save the files externally in
 	 * which case Files can be cleared. If Files not cleared, Enterprise will save the files
 	 *
-	 * Default implementation does nothing, leaving it all up to Enterpruse
+	 * Default implementation does nothing, leaving it all up to Enterprise
 	 *
-	 * @param string	$alienId		Alien id of shadow object
-	 * @param string	$object
+	 * @param string $alienId		Alien id of shadow object
+	 * @param Object &$object
 	 */
 	public function saveShadowObject( $alienId, &$object )
 	{
