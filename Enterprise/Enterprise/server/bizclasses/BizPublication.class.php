@@ -133,29 +133,16 @@ class BizPublication
 				require_once BASEDIR.'/server/bizclasses/BizSpelling.class.php';
 				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';				
 				
-				$ticket = BizSession::getTicket();
-				$clientMajorVersion = null;
-				if( $ticket ) {
-					$clientMajorVersion = intval( BizSession::getClientVersion( null, null, 1 ) );
-				}	
-				if( ( $clientMajorVersion && $clientMajorVersion <= 7 ) || // 7.x (or older) => still using the obsoleted retPub->Issues and ->Editions
-						!$ticket ) { // cannot determine the client version, better be safe, so fill in obsoleted issues and editions.
-					$issues = self::getPublIssueInfos( $userRights, $pubRow );
-					$editions = self::getPublEditionInfos( $userRights, $pubRow );
-				} else { // using client 8 and above, so respect the latest WSDL
-					$issues = null;
-					$editions = null;
-				}
 				$defaultChanRow = DBChannel::getChannel( $pubRow['defaultchannelid'] );
 				
 				$retPub = new PublicationInfo();
 				$retPub->Id           = $pubRow['id'];
 				$retPub->Name         = $pubRow['publication'];
-				$retPub->Issues       = $issues; // obsoleted; use ChannelInfo instead
+				$retPub->Issues       = null; // obsoleted; use ChannelInfo instead
 				$retPub->States       = self::getStateInfos( $userRights, $pubRow );
 				$retPub->ObjectTypeProperties = DBMetaData::getObjectProperties( $pubRow['id'] );
 				$retPub->ActionProperties     = DBMetaData::getActionProperties( $pubRow['id'] );
-				$retPub->Editions             = $editions; // obsoleted; use ChannelInfo instead
+				$retPub->Editions             = null; // obsoleted; use ChannelInfo instead
 				$retPub->FeatureAccessList    = DBFeature::getFeatureAccess( $userName, $pubRow['id'] );
 				$retPub->CurrentIssue = !empty($defaultChanRow['currentissueid']) ? $defaultChanRow['currentissueid'] : null; // obsoleted; use ChannelInfo instead
 				$retPub->PubChannels  = self::getChannelInfos( $userRights, $pubRow, $mode, $extraIssueIds );
