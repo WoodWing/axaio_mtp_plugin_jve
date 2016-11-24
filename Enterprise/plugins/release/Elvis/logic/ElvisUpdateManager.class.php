@@ -205,26 +205,28 @@ class ElvisUpdateManager
 
 					$elvisRelation->placements = self::composeElvisPlacements( $object, $shadowRelation->Placements );
 
-					if( property_exists( $elvisRelation, 'publicationDate' ) ) {
+					if( property_exists( $elvisRelation, 'publicationDate' ) &&
+						property_exists( $elvisRelation, 'publicationUrl' ) ) {
 						$elvisRelation->publicationDate = null;
+						$elvisRelation->publicationUrl = null;
 						switch( $objType ) {
 							case 'PublishForm':
 								$shadowTarget = reset( $shadowRelation->Targets );
 								if( $shadowTarget ) {
-									$elvisRelation->publicationDate = self::getPublishedDate(
+									$pubInfo = self::getPublishedInfo(
 										$object->MetaData->BasicMetaData->ID, $shadowTarget->PubChannel->Id,
 										$shadowTarget->Issue->Id, $shadowRelation->Child );
+									if( isset( $pubInfo['publicationDate'] ) ) {
+										$elvisRelation->publicationDate = 	$pubInfo['publicationDate'];
+									}
+									if( isset( $pubInfo['publicationUrl'] ) ) {
+										$elvisRelation->publicationUrl = $pubInfo['publicationUrl'];
+									}
 								}
 								break;
 							case 'Layout':
 								$elvisRelation->publicationDate = $publishDate;
 								break;
-						}
-						if( property_exists( $elvisRelation, 'publicationUrl' ) ) {
-							$elvisRelation->publicationUrl = null;
-							if( $objType == 'PublishForm' ) {
-								// TODO: resolve the publicationUrl
-							}
 						}
 					}
 					$elvisRelations[] = $elvisRelation;
@@ -248,17 +250,18 @@ class ElvisUpdateManager
 	}
 
 	/**
-	 * Resolves the Publish Date (from the publish history) for an object that is placed on a Publish Form.
+	 * Resolves the Publish Date and Publish URL (from the publish history) for an object that is placed on a Publish Form.
 	 *
 	 * @since 10.1.1
 	 * @param integer $publishFormId
 	 * @param integer $pubChannelId
 	 * @param integer $issueId
 	 * @param integer $placedObjectId
-	 * @return string|null Datetime when found, else NULL.
+	 * @return string[] Resolved properties 'publicationDate' and 'publicationUrl'. When a property is not found, it is left out.
 	 */
-	private static function getPublishedDate( $publishFormId, $pubChannelId, $issueId, $placedObjectId )
+	private static function getPublishedInfo( $publishFormId, $pubChannelId, $issueId, $placedObjectId )
 	{
+		$publishedInfo = array();
 		$publishedDate = null;
 		$dossierId = self::getDossierOfPublishForm( $publishFormId );
 		if( $dossierId ) {
@@ -272,14 +275,19 @@ class ElvisUpdateManager
 					$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist( $dossierPublished['id'] );
 					if( $publishedObjects ) foreach( $publishedObjects as $publishedObject ) {
 						if( $placedObjectId == $publishedObject['objectid'] ) {
-							$publishedDate = $dossierPublished['publisheddate'];
+							$publishedInfo['publicationDate'] = $dossierPublished['publisheddate'];
 							break;
 						}
+					}
+					if( isset($dossierPublished['fields']) && $dossierPublished['fields'] ) {
+						require_once BASEDIR . '/server/utils/PublishingFields.class.php';
+						$pubFields = unserialize( $dossierPublished['fields'] );
+						$publishedInfo['publicationUrl'] = WW_Utils_PublishingFields::getFieldAsString( $pubFields, 'URL' );
 					}
 				}
 			}
 		}
-		return $publishedDate;
+		return $publishedInfo;
 	}
 
 	/**

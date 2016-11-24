@@ -144,8 +144,9 @@ class DBPublishHistory extends DBBase
 // 	}
 	
 	/**
-	 * Method returns complete history of publish actions of a dossier
-	 * for a certain target.
+	 * Method returns the history of publish actions of a dossier for a certain target.
+	 *
+	 * Since 10.1.1 each publish history record also contains 'fields'.
 	 *
 	 * @param int $dossierId object id of the published dossier
 	 * @param int $channelId the publish channel
@@ -160,7 +161,7 @@ class DBPublishHistory extends DBBase
 		$publHistTable = $dbDriver->tablename( self::TABLENAME );
 
 		$sql  = "SELECT publHist.`id`, publHist.`publisheddate`, publHist.`actiondate`, ";
-		$sql .= "publHist.`action`, publHist.`user` ";
+		$sql .= "publHist.`action`, publHist.`user`, publHist.`fields` ";
 		$sql .= "FROM $publHistTable publHist ";
 		$sql .= "WHERE publHist.`objectid` = {$dossierId} ";
 		$sql .= "AND publHist.`channelid` = {$channelId} ";
