@@ -80,12 +80,8 @@ class BizQueryBase
 				$mode = 'indesign';
 			} elseif (stristr($app, 'content station')) {
 				$mode = 'contentstation';
-			} elseif (stristr($app, 'smart browser')) {
-				$mode = 'smartbrowser';
 			} elseif (stristr($app, 'incopy')) {
 				$mode = 'incopy';
-			} elseif (stristr($app, 'plan')) {  // Deprecated in v6: For plan client we use hardcoded plan set for backwards compatibility reasons
-				$mode = 'plan';
 			} else {
 				$mode = '';
 			}
@@ -116,9 +112,6 @@ class BizQueryBase
 			case 'deleted':
 				$action = "QueryOutDeleted";
 				break;
-			case 'smartbrowser':
-				$action = "QueryOutSmartBrowser";
-				break;
 			case 'Planning':	// Content Planning view, used by Content Station
 				$action = "QueryOutPlanning";
 				break;
@@ -137,50 +130,38 @@ class BizQueryBase
 	 * @param array $areas 
 	 * @return array of property names (strings)
 	 */
-    static protected function getQueryProperties( $mode, $areas = array('Workflow') )
-    {
+	static protected function getQueryProperties( $mode, $areas = array( 'Workflow' ) )
+	{
 		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBActionproperty.class.php';
 
 		$dbDriver = DBDriverFactory::gen();
-		if( $mode == 'plan' ) { // Deprecated, fixed set for planning applications:
-			// Add default fields
-	        $needs = array('ID', 'Type', 'Name', 'LockedBy',
-                           'PlacedOn', 'PlacedOnPage', 'Modifier', 'Modified', 'Creator',
-                           'Publication', 'Issue', 'Section', 'State', 'Format',
-                           'Comment','RouteTo','PageRange','PlannedPageRange','Deadline', 'Version');
-			// Add custom fields
-			$sth = DBProperty::getPropertiesSth(0);
-			while( ($row = $dbDriver->fetch($sth)) ){
-				$needs[] = $row['name'];
-			}
-		} else {
-			// These are always needed (clients are depending on it!)
-			$needs = array('ID', 'Type', 'Name');
-			$orgNeedsCount = count($needs);
-			$action = self::getQueryAction( $mode );
 
-			// Get actionproperties for this action to limit fields
-			$sth = DBActionproperty::getPropertyUsagesSth( 0, null, $action );
-			while( ($row = $dbDriver->fetch($sth)) ) {
+		// These are always needed (clients are depending on it!)
+		$needs = array( 'ID', 'Type', 'Name' );
+		$orgNeedsCount = count( $needs );
+		$action = self::getQueryAction( $mode );
+
+		// Get actionproperties for this action to limit fields
+		$sth = DBActionproperty::getPropertyUsagesSth( 0, null, $action );
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+			$needs[] = $row['property'];
+		}
+		// When none, fall back at actionprops defined for common QueryOut
+		if( $orgNeedsCount == count( $needs ) && $action != 'QueryOut' ) {
+			// No entries: try general queryout
+			$sth = DBActionproperty::getPropertyUsagesSth( 0, null, 'QueryOut' );
+			while( ( $row = $dbDriver->fetch( $sth ) ) ) {
 				$needs[] = $row['property'];
 			}
-			// When none, fall back at actionprops defined for common QueryOut
-			if( $orgNeedsCount == count($needs) && $action != 'QueryOut') {
-				// No entries: try general queryout
-				$sth = DBActionproperty::getPropertyUsagesSth( 0, null, 'QueryOut' );
-				while (($row = $dbDriver->fetch($sth)) ) {
-					$needs[] = $row['property'];
-				}
-			}
-			// When still none, do backwards compatible mode
-			if( $orgNeedsCount == count($needs) ) {
-				require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
-				if( ($mode == 'web') || ($mode=='deleted') ) {
-					$needs = BizProperty::getWebQueryPropIds( $areas );
-				} else {
-					$needs = BizProperty::getStandardQueryPropIds( $areas );
-				}
+		}
+		// When still none, do backwards compatible mode
+		if( $orgNeedsCount == count( $needs ) ) {
+			require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+			if( ( $mode == 'web' ) || ( $mode == 'deleted' ) ) {
+				$needs = BizProperty::getWebQueryPropIds( $areas );
+			} else {
+				$needs = BizProperty::getStandardQueryPropIds( $areas );
 			}
 		}
 		return $needs;
