@@ -711,7 +711,7 @@ class BizQueryBase
 				}
 			} else {
 				if ( $addTargets && !isset( $row['Targets'] ) ) { // Prevent overwriting, see header.
-					$row['Targets'] = null;
+					$row['Targets'] = array();
 				}
 			}
 		}
