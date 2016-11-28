@@ -158,7 +158,8 @@ class ImprezzeoSearchEngine extends BizQuery
 		
 		// Restrict the images set to the entered selection criteria.
 		// queryObjects also handles access rights.
-		$restrictions = self::queryObjects($this->ticket, $this->shortUserName, $paramsRestrictions, null, 0, 0, null, false, null, null, null);
+		$restrictions = self::queryObjects(
+			$this->ticket, $this->shortUserName, $paramsRestrictions, null, 0, null, false, null, null, null );
 		
 		//Find the index that points to ID
 		$index = 0;
@@ -219,7 +220,8 @@ class ImprezzeoSearchEngine extends BizQuery
 		}
 		
 		//Compose facets
-		$queryResult = self::queryObjects($this->ticket, $this->shortUserName, $queryParams, null, 0, 0, null, false, null, null, null);
+		$queryResult = self::queryObjects(
+			$this->ticket, $this->shortUserName, $queryParams, null, 0, null, false, null, null, null );
 		if (property_exists($queryResult, 'Facets')) {
 			$this->facets = $queryResult->Facets;
 		}	

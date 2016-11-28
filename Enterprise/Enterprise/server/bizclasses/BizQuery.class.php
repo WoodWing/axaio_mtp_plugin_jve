@@ -33,16 +33,15 @@ class BizQuery extends BizQueryBase
 		}
 		return $queryOrder;
 	}
-	
+
 	/**
 	 * @param string $ticket Ticket assigned to user in this session
 	 * @param string $user Username of the current user
 	 * @param array $params List of query-parameters in fact containing where-statements
 	 * @param int $firstEntry Where to start fetching records
 	 * @param int $maxEntries How many records to fetch
-	 * @param bool $deletedobjects When true search the deletedobjects-table in stead of objects
 	 * @param string $forceapp Application name to use the properties defined for that application or null for generic,
-	 *        determines the $mode if set except when $deletedobjects == true in which case the mode='deleted'
+	 *        determines the $mode if set.
 	 * @param bool $hierarchical When true return the objects as a tree instead of in a list
 	 * @param array $queryOrder The order in which the result set is returned.
 	 * @param string[] $minimalProps Which properties needs to be returned for sure (independent of config)
@@ -53,19 +52,13 @@ class BizQuery extends BizQueryBase
 	 *          1 = Listed in Search Results (View) right
 	 *          2 = Read right
 	 *          11 = List in Publication Overview
+	 * @return mixed
 	 * @throws BizException
-	 * @return mixed WflQueryObjectsResponse or WflNamedQueryResponse
 	 */
-	static public function queryObjects( $ticket, $user, $params, $firstEntry = null, $maxEntries = null, 
-										$deletedobjects = false, $forceapp = null, $hierarchical = false, $queryOrder = null, 
-										$minimalProps = null, $requestProps = null, $areas=null, $accessRight = 1 )
+	static public function queryObjects( $ticket, $user, $params, $firstEntry = null, $maxEntries = null, $forceapp = null, $hierarchical = false, $queryOrder = null, $minimalProps = null, $requestProps = null, $areas = null, $accessRight = 1 )
 	{
 		if( is_null($areas) ){ //v7 client doesn't understand $area, and therefore null $area which is also indicating 'Workflow' area.
 			$areas = array('Workflow');
-		}
-
-		if( is_array($areas) && in_array('Trash',$areas) ){
-			$deletedobjects = true;
 		}
 
 		// IMPORTANT: The block below has been disabled for BZ#30544 see below.
@@ -100,8 +93,7 @@ class BizQuery extends BizQueryBase
 			}
 		}
 
-		$mode = self::getQueryMode( $ticket, false/*$deletedobjects*/, $forceapp ); 
-		//$deletedobjects is always = False in order to query for the appropriate Data in respective to the client App(ID/IC/CS) for Workflow/Trash Area
+		$mode = self::getQueryMode( $ticket, $forceapp );
 
 		if (empty($firstEntry)) {
             $firstEntry = 0;
@@ -118,36 +110,34 @@ class BizQuery extends BizQueryBase
 	       	$maxEntries = 0;
         }
 
-		// See if there is a Search Connector for this Query. Searches on deletedobjects are not passed to Search Connectors.
-		// Note: in v6.1 we had a way to pass this to a Content Source. Starting v7 we only support
-		// this via a Search Connector
 		require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
 		if (isset($params)) {
 			$params = self::resolvePublicationNameParams($params);
 			$params = self::resolveSpecialParams($params);
 		}
-	// IMPORTANT: The block below has been disabled for BZ#30544 the reason behind this is that when searching as a normal
-	// user the search results are limited to objects which are targeted to issues while there might be orphaned objects
-	// belonging to a brand that will become unfindable because they are not targeted, this especially is a problem for
-	// customers who do not adhere to using Dossiers for organizing their objects.
-	//
-	// The original fix was put in place for BZ #1856 with CL # 44985 to Hide objects from query results that are
-	// assigned to inactive issues.
-	//
-	// Once a proper fix is done the lines below should be enabled again to limit results to targeted objects again.
-	// Additionally the code related to the $foundIssueId param (lines above in this function) need to be enabled again as
-    // well.
+		// IMPORTANT: The block below has been disabled for BZ#30544 the reason behind this is that when searching as a normal
+		// user the search results are limited to objects which are targeted to issues while there might be orphaned objects
+		// belonging to a brand that will become unfindable because they are not targeted, this especially is a problem for
+		// customers who do not adhere to using Dossiers for organizing their objects.
+		//
+		// The original fix was put in place for BZ #1856 with CL # 44985 to Hide objects from query results that are
+		// assigned to inactive issues.
+		//
+		// Once a proper fix is done the lines below should be enabled again to limit results to targeted objects again.
+		// Additionally the code related to the $foundIssueId param (lines above in this function) need to be enabled again as
+		 // well.
 
-	/*
-		if( !$foundIssueId ){
-			require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
-			if( !DBUser::isAdminUser( $user )){  // System Admin user?
-				$params = self::addActiveIssuesIntoParam( $user, $params );
+		/*
+			if( !$foundIssueId ){
+				require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+				if( !DBUser::isAdminUser( $user )){  // System Admin user?
+					$params = self::addActiveIssuesIntoParam( $user, $params );
+				}
 			}
-		}
-	*/
+		*/
 
-		$searchSucces = false; //If search by (Solr) search engine is succesful skip database search.
+		// See if there is a Search Connector for this Query.
+		$searchSucces = false; //If search by (Solr) search engine is successful skip database search.
 		$ret = null;
 		if( ( $accessRight == 1 ) // Only for normal browse/search queries ($accessRight == 1 ) go to Solr.
 			&& BizSearch::handleSearch( '_QueryObjects_', $params, $firstEntry, $maxEntries, $mode, $hierarchical, $queryOrder, $minimalProps, $requestProps ) ) {
@@ -160,11 +150,10 @@ class BizQuery extends BizQueryBase
 				}
 			}
 		}
-		//if search not successful
-		if (!$searchSucces){ //If search by (Solr) search engine is succesful skip database search.
-			$ret = self::runDatabaseUserQuery( $user, $params, $firstEntry, $maxEntries, $queryOrder, $mode, $minimalProps, $requestProps, $deletedobjects, $areas, $accessRight, $hierarchical );
-		}
 
+		if (!$searchSucces){ //If search by (Solr) search engine is successful skip database search.
+			$ret = self::runDatabaseUserQuery( $user, $params, $firstEntry, $maxEntries, $queryOrder, $mode, $minimalProps, $requestProps, $areas, $accessRight, $hierarchical );
+		}
 
 		// After getting the items in a dossier let Solr determine how these items
 		// are distributed over the defined facets.
@@ -255,44 +244,47 @@ class BizQuery extends BizQueryBase
 	 * generated for the select/join/where/order by clauses. Missing tables are added, columns not suitable for ordering
 	 * are handled etc. After the rows are selected they are enriched by adding targets, placed on information etc.
 	 * Also the children belonging to the rows on top level are resolved. These child rows are also enriched with extra
-	 * information. The enriching process (processResultRows) is limitied to objects that are not placed many, many times.
+	 * information. The enriching process (processResultRows) is limited to objects that are not placed many, many times.
 	 * Examples of many placed objects are images used as icon on each layout or an article with some default text used in
 	 * each issue. The reason is that the resolving of the issues, editions etc takes a lot of time without adding any
 	 * useful information. To resolve the user authorizations temporary tables are used with the ids of objects the user
-	 * is entilted to. 
-	 * Entilted to can mean having View rights or having Read rights. Normally the View right is checked but it is also
+	 * is entitled to.
+	 * Entitled to can mean having View rights or having Read rights. Normally the View right is checked but it is also
 	 * possible to run the query as if it is a GetObjects call (View right). In some cases no check at all on access rights
 	 * is needed (e.g. for technical internal server queries).
 	 * possible to run the query as if it is a GetObjects call.
-	 * 
-	 * @param string	$shortusername 	User who is running the query. Needed to resolve the authorization.
-	 * @param array 	$params 		Contains QueryParam objects to build the where statement. 
-	 * @param int 		$firstEntry		Specifies the offset of the first row to return (used for paging).			
-	 * @param int		$maxEntries		Specifies the maximum number of rows to return (on top level).
-	 * @param array 	$queryOrder		Contains QueryOrder objects to specify the column(s) and direction of the sorting. 	
-	 * @param string 	$mode			Specifies how the query was initiated (InDesign, Content Station etc). 	
-	 * @param array 	$minimalProps	The minimal set of properties needed by the client. 
-	 * @param array 	$requestProps	Other properties requested
-	 * @param bool 	    $deletedObjects When true search the deletedobjects-table in stead of objects
-	 * @param array 	$areas 			'Workflow' or 'Trash'
-	 * @param int       $accessRight - access right applicable for the current search:
+	 *
+	 * @param string $shortusername User who is running the query. Needed to resolve the authorization.
+	 * @param array $params Contains QueryParam objects to build the where statement.
+	 * @param int $firstEntry Specifies the offset of the first row to return (used for paging).
+	 * @param int $maxEntries Specifies the maximum number of rows to return (on top level).
+	 * @param array $queryOrder Contains QueryOrder objects to specify the column(s) and direction of the sorting.
+	 * @param string $mode Specifies how the query was initiated (InDesign, Content Station etc).
+	 * @param array $minimalProps The minimal set of properties needed by the client.
+	 * @param array $requestProps Other properties requested
+	 * @param array $areas 'Workflow' or 'Trash'
+	 * @param int $accessRight - access right applicable for the current search:
 	 *                         0 = no check on access rights
 	 *                         1 = Listed in Search Results (View) right
 	 *                         2 = Read right
 	 *                         11 = List in Publication Overview
 	 * @param bool $hierarchical Add child objects to the top level objects
-	 * @return WflQueryObjectsResponse	Response containing all requested information (rows)
+	 * @return WflQueryObjectsResponse Response containing all requested information (rows)
 	 * @throws BizException
-	 * @throws Exception
+	 * @internal param bool $deletedObjects When true search the deletedobjects-table in stead of objects
 	 * @see BizQuery::queryObjectRows
 	 */
 	static private function runDatabaseUserQuery(
-		$shortusername, $params, $firstEntry, $maxEntries, $queryOrder, $mode, $minimalProps, $requestProps,
-		$deletedObjects, $areas, $accessRight, $hierarchical )
+		$shortusername, $params, $firstEntry, $maxEntries, $queryOrder, $mode, $minimalProps, $requestProps, $areas, $accessRight, $hierarchical )
 	{
 		// Prepare the sql
 		$queryOrder = self::resolveQueryOrder( $queryOrder, $areas );
 		$requestedPropNames = self::getPropNames( $mode, $minimalProps, $requestProps, $areas );
+		if( is_array($areas) && in_array('Trash',$areas) ){
+			$deletedObjects = true;
+		} else {
+			$deletedObjects = false;
+		}
 		$sqlStruct = self::buildSQLArray( $requestedPropNames, $params, $queryOrder, $deletedObjects );
 		if ( empty( $sqlStruct ) )  {
 			require_once BASEDIR.'/server/interfaces/services/BizException.class.php';

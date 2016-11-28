@@ -56,31 +56,26 @@ class BizQueryBase
 		}
 	}
 
-    /**
-     * Determines the query mode, which tells what columns to return (on queries).
-     * Since v8.0, $deletedobjects is obsoleted since deletedobjects will get treated like workflow objects but in both different world recognized by 'Areas'.
-     * DeletedObjects can be browsed in the normal search just like workflow objects, therefore application($app) to display the deletedObjects should be taken care too.
-     * 
-     * @param string  $ticket
-     * @param boolean $deletedobjects
-     * @param boolean $forceapp
-     * @return string The query mode
-     */
-    static protected function getQueryMode( $ticket, $deletedobjects, $forceapp )
+	/**
+	 * Determines the query mode, which tells what columns to return (on queries).
+	 *
+	 * @param string $ticket
+	 * @param boolean $forceapp
+	 * @return string The query mode
+	 */
+	static protected function getQueryMode( $ticket, $forceapp )
 	{
-		if ( $deletedobjects ) {
-			$mode = 'deleted';
-		} elseif ($forceapp) {
+		if( $forceapp ) {
 			$mode = $forceapp;
 		} else {
 			$app = DBTicket::DBappticket( $ticket );
-			if (stristr($app, 'web')) {
+			if( stristr( $app, 'web' ) ) {
 				$mode = 'web';
-			} elseif (stristr($app, 'indesign')) {
+			} elseif( stristr( $app, 'indesign' ) ) {
 				$mode = 'indesign';
-			} elseif (stristr($app, 'content station')) {
+			} elseif( stristr( $app, 'content station' ) ) {
 				$mode = 'contentstation';
-			} elseif (stristr($app, 'incopy')) {
+			} elseif( stristr( $app, 'incopy' ) ) {
 				$mode = 'incopy';
 			} else {
 				$mode = '';

@@ -495,9 +495,16 @@ if ($v_deadlinetill) {
 
 // handle export to CSV file
 if (isset($_REQUEST["butCSV"]) && $_REQUEST["butCSV"]) {
-	$ArrayOfRow = BizQuery::queryObjects( $ticket, $globUser, $ArrayOfQueryParams, 
-			null, 0, 0, "full", $HierarchialView, BizQuery::getQueryOrder($ord, $sort),
-			array('Format') );
+	$ArrayOfRow = BizQuery::queryObjects(
+						$ticket,
+						$globUser,
+						$ArrayOfQueryParams,
+						null,
+						0,
+						"full",
+						$HierarchialView,
+						BizQuery::getQueryOrder( $ord, $sort ),
+						array( 'Format' ) );
 
 	$txt = '';
 	$komma = '';
@@ -553,11 +560,11 @@ try {
 	if ( $emptySearch == 1) {
 		$queryResp = null;
 	} else if( $Number_of_Results != -1 ) {
-		$queryResp = BizQuery::queryObjects( $ticket, $globUser, $ArrayOfQueryParams,
-		$newStartPos, $Number_of_Results, 0,  null, $HierarchialView, BizQuery::getQueryOrder($ord, $sort), array('Format') );
+		$queryResp = BizQuery::queryObjects(
+			$ticket, $globUser, $ArrayOfQueryParams, $newStartPos, $Number_of_Results, null, $HierarchialView, BizQuery::getQueryOrder( $ord, $sort ), array( 'Format' ) );
 	} else {
-		$queryResp = BizQuery::queryObjects( $ticket, $globUser, $ArrayOfQueryParams,
-		null, 0, 0, null, $HierarchialView, BizQuery::getQueryOrder($ord, $sort), array('Format') );
+		$queryResp = BizQuery::queryObjects(
+			$ticket, $globUser, $ArrayOfQueryParams, null, 0, null, $HierarchialView, BizQuery::getQueryOrder( $ord, $sort ), array( 'Format' ) );
 	}
 } catch( BizException $e ) {
 	echo '<font color="red">'.$e->getMessage().'</font><br/>'; // BZ#9890: No more showing $e->getDetail() to avoid sql injection

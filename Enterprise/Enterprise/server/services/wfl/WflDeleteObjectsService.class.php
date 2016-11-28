@@ -70,11 +70,8 @@ class WflDeleteObjectsService extends EnterpriseService
 			}
 			$minimalProps = array('ID', 'Type', 'Name');
 			require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
-			$response = BizQuery::queryObjects($req->Ticket, $this->User, $req->Params, null /*$firstEntry*/, 
-							0/*$maxEntries*/, 0/*$deletedObjects*/, null/*$forceapp*/,
-							false/*$hierarchical*/, null/*$queryOrder*/, $minimalProps, null /*$requestProps*/, $req->Areas );
-
-			
+			$response = BizQuery::queryObjects(
+				$req->Ticket, $this->User, $req->Params, null, 0, null, false, null, $minimalProps, null, $req->Areas );
 			// Determine column indexes to work with
 			$indexes = array_combine( array_values($minimalProps), array_fill(0,count($minimalProps), -1) );//initialize all $minimalProps with -1.
 			foreach( array_keys($indexes) as $colName ) {

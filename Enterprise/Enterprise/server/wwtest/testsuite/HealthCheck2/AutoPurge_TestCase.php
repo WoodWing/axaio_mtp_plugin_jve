@@ -85,10 +85,8 @@ class WW_TestSuite_HealthCheck2_AutoPurge_TestCase extends TestCase
 					require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
 					$pubName = DBPublication::getPublicationName($pubId);
 				
-					$obj =  BizQuery::queryObjects( 
-						$ticket, $this->user, $params, null /*FirstEntry*/, 
-						0 /*MaxEntries = All*/, 0 /* deletedobjects*/, null /* forceapp */, false /*Hierarchical*/, 
-						null /*Order*/, null /*MinimalProps*/, null /*RequestProps*/, array('Trash') );
+					$obj =  BizQuery::queryObjects(
+						$ticket, $this->user, $params, null, 0, null, false, null, null, null, array( 'Trash' ) );
 					if( count( $obj->Rows) >0 ){
 						$help = 'There are \''. count( $obj->Rows ).'\' objects from Brand \'' . $pubName . '\' found in the Trash Can ' .
 						'that are much older than \''.$afterDayForPurging.'\' days. ';
