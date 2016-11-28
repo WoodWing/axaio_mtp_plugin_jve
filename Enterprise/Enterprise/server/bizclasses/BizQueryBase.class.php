@@ -104,9 +104,6 @@ class BizQueryBase
 			case 'contentstation':
 				$action = "QueryOutContentStation";
 				break;
-			case 'deleted':
-				$action = "QueryOutDeleted";
-				break;
 			case 'Planning':	// Content Planning view, used by Content Station
 				$action = "QueryOutPlanning";
 				break;
@@ -119,7 +116,8 @@ class BizQueryBase
 
 	/**
 	 * Determines what columns to return (on queries).
-	 * $areas could be Workflow or Trash(Where deleted objects reside). When it is Trash Area, the column varies as Field like 'Modifier' and 'Modified' are not needed but we need 'Deleter' and 'Deleted'
+	 * $areas could be Workflow or Trash(Where deleted objects reside). When it is Trash Area, the column varies as
+	 * columns like 'Modifier' and 'Modified' are not needed but we need 'Deleter' and 'Deleted'
 	 *
 	 * @param string $mode Taken from {@link: getQueryMode}
 	 * @param array $areas 
@@ -153,7 +151,7 @@ class BizQueryBase
 		// When still none, do backwards compatible mode
 		if( $orgNeedsCount == count( $needs ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
-			if( ( $mode == 'web' ) || ( $mode == 'deleted' ) ) {
+			if( $mode == 'web' ) {
 				$needs = BizProperty::getWebQueryPropIds( $areas );
 			} else {
 				$needs = BizProperty::getStandardQueryPropIds( $areas );

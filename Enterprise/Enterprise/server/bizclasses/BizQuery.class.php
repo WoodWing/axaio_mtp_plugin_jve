@@ -69,9 +69,9 @@ class BizQuery extends BizQueryBase
 		require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
 		if( !empty( $params ) ) {
 			foreach( $params as $paramKey => $param ) {
-				// Iterare thru query params to see if we have 'View' criteria, if so this is used to select the
+				// Iterate through query params to see if we have 'View' criteria, if so this is used to select the
 				// view mode (which columns to return). This is used for example by Content Station to select
-				// another view than the default application view, for exampl the planning view.
+				// another view than the default application view, for example the planning view.
 				if( $param->Property == 'View' ) {
 					// Found it, store the view name to use and remove from params to prevent query errors
 					$forceapp = $param->Value;
@@ -543,8 +543,8 @@ class BizQuery extends BizQueryBase
 			return $requestProps;
 		}
 
-		//All these props require each other, let us make sure they are allways both selected when the other is selected.
-        $reqprops = array();
+		//All these props require each other, let us make sure they are always both selected when the other is selected.
+      $reqprops = array();
 		$reqprops['Publication'] = 'PublicationId';
 		$reqprops['PublicationId'] = 'Publication';
 		$reqprops['Category'] 	 = 'CategoryId';
@@ -1726,7 +1726,7 @@ class BizQuery extends BizQueryBase
 	}
 
 	/**
-	  * Performs QueryObjects operation to get all properties of one object.
+	 * Performs QueryObjects operation to get all properties of one object.
 	 *
 	 * This includes the custom properties. The $publishSystem and $templateId parameters are used
 	 * to limit the amount of custom properties.
@@ -1735,47 +1735,37 @@ class BizQuery extends BizQueryBase
 	 * @param array $areas
 	 * @param string $publishSystem
 	 * @param integer $templateId
-	  * @return array Single QueryObjects Row containing object's property values.
-	  */
-	static public function queryObjectRow($objectId, $areas=null, $publishSystem=null, $templateId=null )
-    {
-    	// Build filter
-        require_once BASEDIR . '/server/bizclasses/BizProperty.class.php';
-
-		// Get all properties, incl. custom properties        
-		//$reqPropIds = array_keys( BizProperty::getPropertiesForObject($objectId) );
-        
-        $params = array( new QueryParam( 'ID', '=', $objectId, false ) );
+	 * @return array Single QueryObjects Row containing object's property values.
+	 */
+	static public function queryObjectRow( $objectId, $areas = array('Workflow') , $publishSystem = null, $templateId = null )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+		$params = array( new QueryParam( 'ID', '=', $objectId, false ) );
 
 		$row = '';
-		if( is_null($areas) || in_array('Workflow', $areas) ){ // null is the same as $areas=array('workflow') Refer to WSDL
-
+		if( is_null( $areas ) || in_array( 'Workflow', $areas ) ) { // null is the same as $areas=array('workflow') Refer to WSDL
 			// Get all properties, incl. custom properties
-            $reqPropIds = array_keys( BizProperty::getPropertiesForObject($objectId, $publishSystem, $templateId) );
-        
-			//Build SQL
+			$reqPropIds = array_keys( BizProperty::getPropertiesForObject( $objectId, $publishSystem, $templateId ) );
 			$sqlArray = self::buildSQLArray( $reqPropIds, $params, null, false ); //false = look in workflow
-			$row = DBQuery::getObjectRow($objectId, $sqlArray);
-
+			$row = DBQuery::getObjectRow( $objectId, $sqlArray );
 		}
 
-		if( !$row && !is_null($areas) && in_array('Trash',$areas)){//when Object not found in 'Workflow' above, look in the 'Trash' but only when it is asked, i.e $area= array('Trash');
-
-			$mode = 'deleted';
-			$minimalProps = array_merge(BizProperty::getStaticPropIds(), BizProperty::getDynamicPropIds(), BizProperty::getInternalPropIds(), BizProperty::getIdentifierPropIds(), BizProperty::getXmpPropIds());
-			$reqPropIds = self::getPropNames( $mode, $minimalProps, null, $areas);
-		// Build SQL
+		if( !$row && !is_null( $areas ) && in_array( 'Trash', $areas ) ) {//when Object not found in 'Workflow' above, look in the 'Trash' but only when it is asked, i.e $area= array('Trash');
+			$mode = '';
+			$minimalProps = array_merge( BizProperty::getStaticPropIds(), BizProperty::getDynamicPropIds(), BizProperty::getInternalPropIds(), BizProperty::getIdentifierPropIds(), BizProperty::getXmpPropIds() );
+			$reqPropIds = self::getPropNames( $mode, $minimalProps, null, $areas );
+			// Build SQL
 			$sqlArray = self::buildSQLArray( $reqPropIds, $params, null, true ); //true = look in trash
-		$row = DBQuery::getObjectRow($objectId, $sqlArray);        
+			$row = DBQuery::getObjectRow( $objectId, $sqlArray );
 		}
 
-		if( $row){
-			$rows = array($row);
+		if( $row ) {
+			$rows = array( $row );
 			self::resolvePersonalStatusesAndFixColors( $rows );
 			$row = $rows[0];
 		}
 		return $row;
-    }
+	}
     
 	/**
 	 * This method handles the retrieval of enriched objects based on the passed object ids.
