@@ -25,7 +25,7 @@
 	<folder path=".../Enterprise/server/buildtools/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/dataclasses/" maxerr="0"/>
 	<folder path=".../Enterprise/server/dbclasses/" maxerr="0"/>
-	<folder path=".../Enterprise/server/dbdrivers/" maxerr="1000000"/>
+	<folder path=".../Enterprise/server/dbdrivers/" maxerr="0"/>
 	<folder path=".../Enterprise/server/dbintclasses/" maxerr="0"/>
 	<folder path=".../Enterprise/server/dbscripts/" maxerr="0"/>
     <folder path=".../Enterprise/server/dgrid/" maxerr="1000000"/>
