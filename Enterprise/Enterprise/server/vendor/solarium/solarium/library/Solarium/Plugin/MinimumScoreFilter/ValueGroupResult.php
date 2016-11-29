@@ -30,70 +30,79 @@
  *
  * @copyright Copyright 2011 Bas de Nooijer <solarium@raspberry.nl>
  * @license http://github.com/basdenooijer/solarium/raw/master/COPYING
+ *
  * @link http://www.solarium-project.org/
  */
 
 /**
  * @namespace
  */
-namespace Solarium\QueryType\Select\Query\Component;
 
-use Solarium\Core\Configurable;
-use Solarium\Core\Query\Query;
-use Solarium\QueryType\Select\ResponseParser\Component\ComponentParserInterface;
-use Solarium\QueryType\Select\RequestBuilder\Component\ComponentRequestBuilderInterface;
+namespace Solarium\Plugin\MinimumScoreFilter;
+
+use Solarium\QueryType\Select\Result\Grouping\ValueGroup as StandardValueGroup;
 
 /**
- * Query component base class
+ * MinimumScoreFilter ValueGroupResult.
  */
-abstract class Component extends Configurable
+class ValueGroupResult extends StandardValueGroup
 {
     /**
-     * @var Query
+     * @var float
      */
-    protected $queryInstance;
+    protected static $overallMaximumScore;
 
     /**
-     * Get component type
-     *
-     * @return string
+     * @var string
      */
-    abstract public function getType();
+    protected $filterMode;
 
     /**
-     * Get the requestbuilder class for this query
-     *
-     * @return ComponentRequestBuilderInterface
+     * @var float
      */
-    abstract public function getRequestBuilder();
+    protected $filterRatio;
 
     /**
-     * Get the response parser class for this query
-     *
-     * @return ComponentParserInterface
+     * @var boolean
      */
-    abstract public function getResponseParser();
+    protected $filtered = false;
 
     /**
-     * Set parent query instance
+     * Constructor.
      *
-     * @param  Query $instance
-     * @return self  Provides fluent interface
+     * @param string $value
+     * @param int    $numFound
+     * @param int    $start
+     * @param array  $documents
+     * @param int    $maximumScore
+     * @param Query  $query
      */
-    public function setQueryInstance(Query $instance)
+    public function __construct($value, $numFound, $start, $documents, $maximumScore, $query)
     {
-        $this->queryInstance = $instance;
+        $this->filterMode = $query->getFilterMode();
+        $this->filterRatio = $query->getFilterRatio();
 
-        return $this;
+        // Use the maximumScore of the first group as maximum for all groups
+        if ($maximumScore > self::$overallMaximumScore) {
+            self::$overallMaximumScore = $maximumScore;
+        }
+
+        parent::__construct($value, $numFound, $start, $documents);
     }
 
     /**
-     * Get parent query instance
+     * Get all documents, apply filter at first use.
      *
-     * @return Query
+     * @return array
      */
-    public function getQueryInstance()
+    public function getDocuments()
     {
-        return $this->queryInstance;
+        if (!$this->filtered) {
+            $filter = new Filter();
+            $this->documents = $filter->filterDocuments($this->documents, self::$overallMaximumScore, $this->filterRatio, $this->filterMode);
+            $this->filtered = true;
+        }
+
+        return $this->documents;
     }
 }
