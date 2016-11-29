@@ -35,8 +35,6 @@ class WflGetObjectsService extends EnterpriseService
 	 */
 	protected function restructureResponse( $req, &$resp )
 	{
-		$req = $req; // Keep analyzer happy.
-		
 		// Restructure messages from 8.0 (or newer) to 7.x (or older), to make old clients happy.
 		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$clientMajorVersion = intval( BizSession::getClientVersion( null, null, 1 ) );
