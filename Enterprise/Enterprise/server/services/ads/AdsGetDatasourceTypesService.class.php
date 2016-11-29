@@ -28,7 +28,6 @@ class AdsGetDatasourceTypesService extends EnterpriseService
 
 	public function runCallback( AdsGetDatasourceTypesRequest $req )
 	{
-		$req = $req; // keep analyzer happy
 		require_once BASEDIR.'/server/bizclasses/BizAdmDatasource.class.php';
 		$ret = BizAdminDatasource::getDatasourceTypes();
 		return new AdsGetDatasourceTypesResponse($ret);

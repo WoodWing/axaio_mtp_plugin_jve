@@ -29,11 +29,15 @@ class WflGetPagesInfoService extends EnterpriseService
 	public function runCallback( WflGetPagesInfoRequest $req )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizPageInfo.class.php';
+
+		// Making a valid assumption here that layout ids are always integers instead of strings.
+		$ids = array_map("intval", $req->IDs);
+
 		$retobj = BizPageInfo::getPages( 
 			$req->Ticket,
 			$this->User,
 			$req->Issue,
-			$req->IDs,
+			$ids,
 			$req->Edition,
 			$req->Category,
 			$req->State);

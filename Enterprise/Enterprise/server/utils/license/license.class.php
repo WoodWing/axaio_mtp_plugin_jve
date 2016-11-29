@@ -3113,7 +3113,7 @@ class License
 	 * @param string $userId Short user name (id)
 	 * @param string $licenseStatus The current license status
 	 * @param string $errorMessage Localized error message. Empty when no error.
-	 * @param string[] $collectedMessages  List of Message objects to show user
+	 * @param Message[] $collectedMessages  List of Message objects to show user
 	 */
 	public function addToUserMessages( $userId, $licenseStatus, $errorMessage, &$collectedMessages )
 	{

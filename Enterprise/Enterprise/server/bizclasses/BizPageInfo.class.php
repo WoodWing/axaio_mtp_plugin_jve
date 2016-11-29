@@ -30,8 +30,7 @@ class BizPageInfo
 	 * @throws BizException Throws BizException when the operation fails.
 	 * @return WflGetPagesInfoResponse
 	 */
-	public static function getPages( /** @noinspection PhpUnusedParameterInspection */ $ticket,
-									$user, $issue, $layoutIds, $edition, $category, $state )
+	public static function getPages( $ticket, $user, $issue, $layoutIds, $edition, $category, $state )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';

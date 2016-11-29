@@ -28,8 +28,6 @@ class WflListArticleWorkspacesService extends EnterpriseService
 
 	public function runCallback( WflListArticleWorkspacesRequest $req )
 	{
-		$req = $req; // keep analyzer happy
-
 		require_once BASEDIR.'/server/bizclasses/BizWebEditWorkspace.class.php';
 		$biz = new BizWebEditWorkspace();
 		$ret = $biz->listArticleWorkspaces();
