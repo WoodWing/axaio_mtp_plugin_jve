@@ -1743,18 +1743,13 @@ class BizQuery extends BizQueryBase
 		$params = array( new QueryParam( 'ID', '=', $objectId, false ) );
 
 		$row = '';
+		$reqPropIds = array_keys( BizProperty::getPropertiesForObject( $objectId, $publishSystem, $templateId ) );
 		if( is_null( $areas ) || in_array( 'Workflow', $areas ) ) { // null is the same as $areas=array('workflow') Refer to WSDL
-			// Get all properties, incl. custom properties
-			$reqPropIds = array_keys( BizProperty::getPropertiesForObject( $objectId, $publishSystem, $templateId ) );
 			$sqlArray = self::buildSQLArray( $reqPropIds, $params, null, false ); //false = look in workflow
 			$row = DBQuery::getObjectRow( $objectId, $sqlArray );
 		}
 
-		if( !$row && !is_null( $areas ) && in_array( 'Trash', $areas ) ) {//when Object not found in 'Workflow' above, look in the 'Trash' but only when it is asked, i.e $area= array('Trash');
-			$mode = '';
-			$minimalProps = array_merge( BizProperty::getStaticPropIds(), BizProperty::getDynamicPropIds(), BizProperty::getInternalPropIds(), BizProperty::getIdentifierPropIds(), BizProperty::getXmpPropIds() );
-			$reqPropIds = self::getPropNames( $mode, $minimalProps, null, $areas );
-			// Build SQL
+		if( !$row && !is_null( $areas ) && in_array( 'Trash', $areas ) ) { // When Object not found in 'Workflow' above, look in the 'Trash' but only when it is asked, i.e $area= array('Trash');
 			$sqlArray = self::buildSQLArray( $reqPropIds, $params, null, true ); //true = look in trash
 			$row = DBQuery::getObjectRow( $objectId, $sqlArray );
 		}
@@ -1766,7 +1761,7 @@ class BizQuery extends BizQueryBase
 		}
 		return $row;
 	}
-    
+
 	/**
 	 * This method handles the retrieval of enriched objects based on the passed object ids.
 	 * This functions is called after an alternative search engine like Solr has done the primary filtering.
@@ -1776,62 +1771,62 @@ class BizQuery extends BizQueryBase
 	 * information. The enriching process (processResultRows) is limitied to objects that are not placed many, many times.
 	 * Examples of many placed objects are images used as icon on each layout or an article with some default text used in
 	 * each issue. The reason is that the resolving of the issues, editions etc takes a lot of time without adding any
-	 * useful information. 
+	 * useful information.
 	 *
 	 * @param array $objectIds Contains all object ids retrieved by the search engine.
 	 * @param string $mode Specifies how the query was initiated (InDesign, Content Station etc).
 	 * @param array $minimalProps The minimal set of properties needed by the client.
 	 * @param array $requestProps Other properties requested
-	 * @param boolean $hierarchical	Specifies if child objects must be resolved.
-	 * @param array	$childRows Contains the ChildRow objects in case of hierarchical view.
-     * @param array	$componentColumns List of Properties used as columns for element components .
-     * @param array	$components	List of element components info.
-	 * @param array	$areas Either 'Workflow' or 'Trash'
-	 * @param array	$queryOrder	Contains QueryOrder objects to specify the column(s) and direction of the sorting.
+	 * @param boolean $hierarchical Specifies if child objects must be resolved.
+	 * @param array $childRows Contains the ChildRow objects in case of hierarchical view.
+	 * @param array $componentColumns List of Properties used as columns for element components .
+	 * @param array $components List of element components info.
+	 * @param array $areas Either 'Workflow' or 'Trash'
+	 * @param array $queryOrder Contains QueryOrder objects to specify the column(s) and direction of the sorting.
 	 * @return array with the top level objects.
 	 * @throws BizException
 	 * @throws Exception
 	 * @see BizQuery::runDatabaseUserQuery
-	 */	
+	 */
 	static public function queryObjectRows(
 		$objectIds, $mode, $minimalProps, $requestProps, $hierarchical, &$childRows, &$componentColumns, &$components,
-		$areas = array('Workflow'), $queryOrder=null)
-    {
-		$requestedPropNames = self::getPropNames( $mode, $minimalProps, $requestProps, $areas);
+		$areas = array( 'Workflow' ), $queryOrder = null )
+	{
+		$requestedPropNames = self::getPropNames( $mode, $minimalProps, $requestProps, $areas );
 		$params = array();
-		
-		// BZ#17057 hidden feature: use operation "in" because many QueryParams can cost about 0.2s
-    	$params[] = new QueryParam( 'ID', 'in', implode(', ',$objectIds), false );
-    	$rowids = array();
-		foreach($objectIds as $objectId) {
-			$rowids[] = array('id' => $objectId);    	
-		}
-		
-		$deletedObjects = in_array('Trash',$areas) ? true : false;
-		$sqlStruct = self::buildSQLArray( $requestedPropNames, $params, null, $deletedObjects );
-		$topRows = DBQuery::getRows($sqlStruct, 'ID');
-		$topView = DBQuery::createTopviewWithRowIDs($rowids);
-		// Top level objects with a limit number of placements.
-		$limitPlacedTopView = DBQuery::createLimitTopView($topView);
-	    $componentRows = array();
-	    self::enrichRows( $topRows, $componentRows, $topView, $limitPlacedTopView, $requestedPropNames);
 
-		if ($hierarchical) {
+		// BZ#17057 hidden feature: use operation "in" because many QueryParams can cost about 0.2s
+		$params[] = new QueryParam( 'ID', 'in', implode( ', ', $objectIds ), false );
+		$rowids = array();
+		foreach( $objectIds as $objectId ) {
+			$rowids[] = array( 'id' => $objectId );
+		}
+
+		$deletedObjects = in_array( 'Trash', $areas ) ? true : false;
+		$sqlStruct = self::buildSQLArray( $requestedPropNames, $params, null, $deletedObjects );
+		$topRows = DBQuery::getRows( $sqlStruct, 'ID' );
+		$topView = DBQuery::createTopviewWithRowIDs( $rowids );
+		// Top level objects with a limit number of placements.
+		$limitPlacedTopView = DBQuery::createLimitTopView( $topView );
+		$componentRows = array();
+		self::enrichRows( $topRows, $componentRows, $topView, $limitPlacedTopView, $requestedPropNames );
+
+		if( $hierarchical ) {
 			$childComponentRows = array();
 			$shortusername = BizSession::getShortUserName();
 			$allChildRows = self::addChildren(
 				$childComponentRows, $sqlStruct, $topView, $deletedObjects, true, $shortusername,
 				$requestedPropNames, $params, $queryOrder );
-			$componentRows = self::mergeComponentRows( $childComponentRows, $componentRows);
-			$componentColumns = self::getComponentColumns($componentRows);
-			$components = self::getComponents($componentRows);
-			$childRows = self::getChildRows($allChildRows);
+			$componentRows = self::mergeComponentRows( $childComponentRows, $componentRows );
+			$componentColumns = self::getComponentColumns( $componentRows );
+			$components = self::getComponents( $componentRows );
+			$childRows = self::getChildRows( $allChildRows );
 		}
 
 		DBQuery::dropRegisteredViews();
 
-        return $topRows;
-    }
+		return $topRows;
+	}
 
 	/**
 	 * Validates objects found by search engine against db objects.
