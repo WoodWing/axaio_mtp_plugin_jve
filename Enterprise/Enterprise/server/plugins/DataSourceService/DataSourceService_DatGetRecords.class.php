@@ -14,14 +14,10 @@ class DataSourceService_DatGetRecords extends DatGetRecords_EnterpriseConnector
 	final public function getPrio()      { return self::PRIO_DEFAULT; }
 	final public function getRunMode()   { return self::RUNMODE_AFTER; }
 
-	final public function runBefore( DatGetRecordsRequest &$req ) // not called
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore( DatGetRecordsRequest &$req ) {}
 	
 	final public function runAfter( DatGetRecordsRequest $req, DatGetRecordsResponse &$resp )
 	{
-		$req = $req; // keep analyzer happy
 		LogHandler::Log("DataSourceService_DatGetRecords","DEBUG","Checking record structure consistency..");
 		
 		$recordSet = &$resp; // the record set
@@ -70,8 +66,5 @@ class DataSourceService_DatGetRecords extends DatGetRecords_EnterpriseConnector
 		LogHandler::Log("DataSourceService_DatGetRecords","DEBUG","Structure consistency: OK!");
 	}
 	
-	final public function runOverruled( DatGetRecordsRequest $req ) // not called
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( DatGetRecordsRequest $req ) {}
 }

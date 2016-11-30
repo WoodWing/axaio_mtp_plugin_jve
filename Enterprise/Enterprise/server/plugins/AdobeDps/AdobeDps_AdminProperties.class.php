@@ -109,6 +109,7 @@ class AdobeDps_AdminProperties extends AdminProperties_EnterpriseConnector
 	/** 
 	 * Collect all possible custom properties for the given entity to extend the DB model. 
 	 * See AdminProperties_EnterpriseConnector interface for details.
+	 * @inheritdoc
 	 */
 	final public function collectDialogWidgets( $entity )
 	{
@@ -118,10 +119,10 @@ class AdobeDps_AdminProperties extends AdminProperties_EnterpriseConnector
 	/** 
 	 * Collect custom properties for the given context to travel along with the entity instance. 
 	 * See AdminProperties_EnterpriseConnector interface for details.
+	 * @inheritdoc
 	 */
 	public function collectDialogWidgetsForContext( AdminProperties_Context $context, $entity, $action )
 	{
-		$action = $action; // keep analyzer happy
 		$widgets = array();
 		if( $entity == 'Issue' ) {
 			$chanType = $context->getPubChannel()->Type;
@@ -138,11 +139,10 @@ class AdobeDps_AdminProperties extends AdminProperties_EnterpriseConnector
 	/** 
 	 * Add (or adjust) given dialog widgets ($showWidgets) to show admin user for given entity+action.
 	 * See AdminProperties_EnterpriseConnector interface for details.
+	 * @inheritdoc
 	 */
 	final public function buildDialogWidgets( AdminProperties_Context $context, $entity, $action, $allWidgets, &$showWidgets )
 	{
-		$action = $action; $allWidgets = $allWidgets; // To make analyzer happy.
-		
 		if( $entity == 'Issue' ) {
 			$chanType = $context->getPubChannel()->Type;
 			if( $chanType == 'dps' ) {

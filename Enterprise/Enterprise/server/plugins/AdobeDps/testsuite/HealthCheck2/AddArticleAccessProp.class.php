@@ -44,7 +44,6 @@ class AddArticleAccessProp
 			try {
 				BizCustomField::insertFieldAtModel( 'objects', 'C_ARTICLE_ACCESS', 'list' );
 			} catch ( BizException $e ) {
-				$e = $e; // To make analzyer happy.
 				$result = false;
 				break;
 			}
@@ -61,7 +60,6 @@ class AddArticleAccessProp
 			try {
 				BizCustomField::deleteFieldAtModel( 'objects', 'C_PROTECT' );
 			} catch( BizException $e ) {
-				$e = $e; // To make analzyer happy.
 				$result = false;
 				break;
 			}
@@ -76,6 +74,7 @@ class AddArticleAccessProp
 	 * Stores a variable in the database to denote if the conversion has been started
 	 * or has been completed.
 	 *
+	 * @param string $flag
 	 * @return bool Whether or not the conversion flag was set correctly.
 	 */
 	static private function setAddArticleAccessPropFlag( $flag )

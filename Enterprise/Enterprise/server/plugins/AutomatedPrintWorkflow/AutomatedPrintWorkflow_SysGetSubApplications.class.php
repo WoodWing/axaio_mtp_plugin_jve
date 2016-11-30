@@ -15,11 +15,7 @@ class AutomatedPrintWorkflow_SysGetSubApplications extends SysGetSubApplications
 	final public function getPrio()     { return self::PRIO_DEFAULT; }
 	final public function getRunMode()  { return self::RUNMODE_AFTER; }
 
-	// Not called.
-	final public function runBefore( SysGetSubApplicationsRequest &$req )
-	{
-		$req = $req; // keep code analyzer happy
-	} 
+	final public function runBefore( SysGetSubApplicationsRequest &$req ) {}
 
 	final public function runAfter( SysGetSubApplicationsRequest $req, SysGetSubApplicationsResponse &$resp )
 	{
@@ -39,9 +35,5 @@ class AutomatedPrintWorkflow_SysGetSubApplications extends SysGetSubApplications
 		}
 	} 
 	
-	// Not called.
-	final public function runOverruled( SysGetSubApplicationsRequest $req )
-	{
-		$req = $req; // keep code analyzer happy
-	} 
+	final public function runOverruled( SysGetSubApplicationsRequest $req ) {}
 }

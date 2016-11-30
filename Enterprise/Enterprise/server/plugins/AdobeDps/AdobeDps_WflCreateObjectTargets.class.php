@@ -13,11 +13,7 @@ class AdobeDps_WflCreateObjectTargets extends WflCreateObjectTargets_EnterpriseC
 	final public function getPrio()      { return self::PRIO_DEFAULT; }
 	final public function getRunMode()   { return self::RUNMODE_AFTER; }
 
-	final public function runBefore( WflCreateObjectTargetsRequest &$req )
-	{
-		// not called
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore( WflCreateObjectTargetsRequest &$req ) {}
 
 	final public function runAfter( WflCreateObjectTargetsRequest $req, WflCreateObjectTargetsResponse &$resp )
 	{
@@ -48,9 +44,5 @@ class AdobeDps_WflCreateObjectTargets extends WflCreateObjectTargets_EnterpriseC
 		}
 	}
 
-	final public function runOverruled( WflCreateObjectTargetsRequest $req )
-	{
-		// not called
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflCreateObjectTargetsRequest $req ) {}
 }

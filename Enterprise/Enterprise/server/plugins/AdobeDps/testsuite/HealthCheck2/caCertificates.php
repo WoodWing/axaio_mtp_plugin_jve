@@ -56,7 +56,6 @@ function downloadFile()
 		file_put_contents(ENTERPRISE_CA_BUNDLE, $response->getBody());
 		print '<font color="green">' . ENTERPRISE_CA_BUNDLE . ' is created!</font>';
 	} catch ( Exception $e ) {
-		$e = $e; // To make analyzer happy.
 		print '<font color="red">' . ENTERPRISE_CA_BUNDLE . ' could not be downloaded!</font>';
 		print '<br/>';
 		print 'You can download the file from: <a href="http://downloads.woodwing.net/certificate-bundles/enterprise-server/ca-bundle.crt" target="_blank">http://downloads.woodwing.net/certificate-bundles/enterprise-server/ca-bundle.crt</a>.';

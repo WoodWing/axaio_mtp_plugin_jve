@@ -322,7 +322,6 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 				return false;
 			}
 		} catch( Exception $e ) {
-			$e = $e; // Keep analyzer happy...
 			return false;
 		}
 		return true;
@@ -756,7 +755,6 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 			$versionNumber = (false != $versionNumber) ? $versionNumber[0] : $default;
 		} catch( Exception $e ) {
 			// Continue, return default
-			$e = $e; // Keep analyzer happy
 		}
 
 		// Found nothing? Try get the Solr 3 version number instead
@@ -778,7 +776,6 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 				}
 			} catch( Exception $e ) {
 				// Continue, return default
-				$e = $e; // Keep analyzer happy
 			}
 		}
 
@@ -799,6 +796,7 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	 *
 	 * The schema should adhere to the Solr 4.5 version.
 	 *
+	 * @param array $schemaInfo
 	 * @return bool Whether or not the test was passed.
 	 */
 	private function checkSchemaVersion($schemaInfo)
@@ -816,10 +814,9 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	}
 
 	/**
-	 * Retrieves the Schema as a DOM document.
+	 * Retrieves the schema.xml as a DOM Document.
 	 *
-	 * Retrieves the schema.xml as a Dom Document.
-	 *
+	 * @param string $solrSchemaName
 	 * @return bool|DOMDocument Either false if there are errors, or the parsed DOMDocument object.
 	 */
 	private function getSchemaAsDomDocument( $solrSchemaName )
