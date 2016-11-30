@@ -2,13 +2,25 @@
 
 class ReadWriteFieldHandler
 {
-	public $lvsFieldName;            // String
-	protected $multiValue;            // Boolean
-	protected $dataType;            // String
-	protected $entMetadataCategory;      // String
-	protected $property;            // Enterprise PropertyInfo (Name, DisplayName, Type)
-	protected $customProperty = false;   // Boolean
+	/** @var string $lvsFieldName */
+	public $lvsFieldName;
+	/** @var boolean $multiValue */
+	protected $multiValue;
+	/** @var string $dataType */
+	protected $dataType;
+	/** @var string $entMetadataCategory */
+	protected $entMetadataCategory;
+	/** @var PropertyInfo $property */
+	protected $property;
+	/** @var bool $customProperty */
+	protected $customProperty = false;
 
+	/**
+	 * @param string $lvsFieldName Elvis metadata field name
+	 * @param boolean $multiValue TRUE if field has multiple values, FALSE otherwise.
+	 * @param string $dataType String representation of the Elvis field's data type.
+	 * @param string $entPropertyName Enterprise metadata property name.
+	 */
 	public function __construct( $lvsFieldName, $multiValue, $dataType, $entPropertyName )
 	{
 		$this->lvsFieldName = $lvsFieldName;
@@ -20,11 +32,6 @@ class ReadWriteFieldHandler
 			$this->entMetadataCategory = 'ExtraMetaData';
 			$this->customProperty = true;
 			$entPropertyName = strtoupper( $entPropertyName );
-
-			//require_once BASEDIR . '/server/dbclasses/DBProperty.class.php';
-			//$customProps = DBProperty::getProperties( 0, '', false );
-			//LogHandler::logPhpObject($customProps, 'var_dump', 'customProps');
-			//$this->property = $customProps[strtoupper($entPropertyName)];
 
 			// TODO: Jikes, this causes a lot of DB calls!
 			$propType = BizProperty::getCustomPropertyType( $entPropertyName );
@@ -150,7 +157,6 @@ class ReadWriteFieldHandler
 	}
 
 	/**
-	 *
 	 * @param string $enterpriseFieldName
 	 * @param mixed[] $elvisMetadata
 	 * @return mixed

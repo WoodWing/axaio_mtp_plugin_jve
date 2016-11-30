@@ -317,7 +317,7 @@ class BizProperty
 
 	/**
 	 * The complete list of PropertyInfo, typically used in GetDialog and QueryObjects services
-	 * @return array of PropertyInfo, See also workflow WSDL.
+	 * @return PropertyInfo[], See also workflow WSDL.
 	 */
 	public static function getPropertyInfos()
 	{
@@ -337,7 +337,7 @@ class BizProperty
 	 * @param null|string $publishSystem For which Publish System the property is applicable.
 	 * @param null|integer $templateId The unique publishing form template database id.
 	 * @param bool $getTermEntityPropOnly When set to true,only Term Entity properties are returned, else all properties are returned.
-	 * @return array An array of PropertyInfo objects.
+	 * @return PropertyInfo[]
 	 */
 	public static function getFullPropertyInfos($pluginName = null, $propName = null, $objectType = null,
 	                                            $publishSystem = null, $templateId = null, $getTermEntityPropOnly = false )
@@ -350,7 +350,7 @@ class BizProperty
 	 * Returns the display name of a (custom) property.
 	 *
 	 * @param string $property
-	 * @return true id display name is found else false
+	 * @return bool TRUE if display name is found, FALSE otherwise.
 	 */
 	public static function getPropertyDisplayName($property)
 	{
