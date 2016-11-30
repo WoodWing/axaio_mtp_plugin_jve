@@ -24,11 +24,11 @@ class InCopyTextExport implements TextExport
 	public 	$ihcPluginReplaceVersionGuid = true; // If elements have a proper GUID then the GUID must be re-used.
 
 	/**
-	 * Convert a collection of XHTML frames into a file in InCopy (XML) text format. <br>
+	 * Convert a collection of XHTML frames into a file in InCopy (XML) text format.
 	 *
-	 * @param array  $xFrames    Collection of XHTML DOMDocument each representing one text frame. <br>
-	 * @param string $icFile     Full path of file to be written with InCopy (XML) text. <br>
-	 * @param boolean $draft     Perform draft save (false for permantent save). Keeps embedded object definitions to allow undo operations. <br>
+	 * @param array  $xFrames    Collection of XHTML DOMDocument each representing one text frame.
+	 * @param string $icFile     Full path of file to be written with InCopy (XML) text.
+	 * @param boolean $draft     Perform draft save (false for permantent save). Keeps embedded object definitions to allow undo operations.
 	 */ 
 	public function exportFile( $xFrames, $icFile, $draft )
 	{
@@ -87,11 +87,11 @@ class InCopyTextExport implements TextExport
 	}
 	
 	/**
-	 * Convert a collection of XHTML frames to a memory buffer in InCopy (XML) text format. <br>
+	 * Convert a collection of XHTML frames to a memory buffer in InCopy (XML) text format.
 	 *
-	 * @param array  $xFrames     Collection of XHTML DOMDocument each representing one text frame. <br>
-	 * @param DOMDocument $icDoc  Returned InCopy (XML) document. <br>
-	 * @param boolean $draft      Perform draft save (false for permantent save). Keeps embedded object definitions to allow undo operations. <br>
+	 * @param array  $xFrames     Collection of XHTML DOMDocument each representing one text frame.
+	 * @param DOMDocument $icDoc  Returned InCopy (XML) document.
+	 * @param boolean $draft      Perform draft save (false for permantent save). Keeps embedded object definitions to allow undo operations.
 	 */ 
 	public function exportBuf( $xFrames, &$icDoc, $draft )
 	{
@@ -161,6 +161,8 @@ class InCopyTextExport implements TextExport
 				$icVerTxt = $xpath->query( 'StoryInfo/SI_Version/text()', $icStory );
 				if( $icVerTxt->length > 0 ) {
 					if (! $this->ihcPlugin || ($this->ihcPlugin && $this->ihcPluginReplaceVersionGuid)) { // No CS article or CS article without version GUID
+						/** @noinspection PhpUndefinedVariableInspection
+						 * Too complex to make code changes here. $newVerGUID is defined above in an if with the exact same conditions. */
 						LogHandler::Log('textconv', 'DEBUG', 'InCopyFileExport->export(): Updating StoryInfo->SI_Version version GUID [' . $icVerTxt->item(0)->textContent . '] with new GUID [' . $newVerGUID . '] for story.');
 						$icNewText = $icDoc->createTextNode($newVerGUID);
 						$icVerTxt->item(0)->parentNode->replaceChild($icNewText, $icVerTxt->item(0));
@@ -221,8 +223,8 @@ class InCopyTextExport implements TextExport
 	/**
 	 * Remove embedded IC DB objects, which are no longer unreferenced (-> user has removed icon/anchor from text)
 	 *
-	 * @param DOMDocument $icDoc (in)  InCopy document. <br/>
-	 * @param array  $icDBRefIds (in)  List of used references (ids) from text (icons/anchors) to embedded IC DB objects. <br/>
+	 * @param DOMDocument $icDoc (in)  InCopy document.
+	 * @param array  $icDBRefIds (in)  List of used references (ids) from text (icons/anchors) to embedded IC DB objects.
 	 */
 	private function deleteUnreferencedObjects( $icDoc, $icDBRefIds )
 	{
@@ -260,18 +262,18 @@ class InCopyTextExport implements TextExport
 	}
 	
 	/**
-	 * Creates an XHTML elements inside a paragraph into IC (XML) text format. <br>
+	 * Creates an XHTML elements inside a paragraph into IC (XML) text format.
 	 *
-	 * @param DOMDocument $icDoc (in)    InCopy document. <br>
-	 * @param DOMNode $icCflo (in)       InCopy cflo element (=> root of story contents). <br>
-	 * @param DOMNode $icInsPoint (in)   Insertion point to add InCopy txsr elements <br>
-	 * @param array   $iterTxsrAttr (in) List of collected attributes that needs to be applied to the new icTxsr <br>
-	 * @param DOMNode $icTxsr (in/out)   Current InCopy txsr element to reuse. Pass null to create new one. <br>
-	 * @param DOMNode $icPcnt (in/out)   Current InCopy pcnt element to reuse. Pass null to create new one. <br>
-	 * @param DOMNode $xFrame (in)       XHTML document (text frame) being parsed. <br>
-	 * @param DOMNode $xParent (in)      XHTML parent element being parsed. <br>
-	 * @param DOMNode $trackEOL (in/out) Tells if the last parsed element was a hard enter (EOL). <br>
-	 * @param array  $icDBRefIds (out)   List of used references (ids) from text (icons/anchors) to embedded IC DB objects. <br/>
+	 * @param DOMDocument $icDoc (in)    InCopy document.
+	 * @param DOMNode $icCflo (in)       InCopy cflo element (=> root of story contents).
+	 * @param DOMNode $icInsPoint (in)   Insertion point to add InCopy txsr elements
+	 * @param array   $iterTxsrAttr (in) List of collected attributes that needs to be applied to the new icTxsr
+	 * @param DOMNode $icTxsr (in/out)   Current InCopy txsr element to reuse. Pass null to create new one.
+	 * @param DOMNode $icPcnt (in/out)   Current InCopy pcnt element to reuse. Pass null to create new one.
+	 * @param DOMDocument $xFrame (in)   XHTML document (text frame) being parsed.
+	 * @param DOMNode $xParent (in)      XHTML parent element being parsed.
+	 * @param stdClass $trackEOL (in/out) Tells if the last parsed element was a hard enter (EOL).
+	 * @param array  $icDBRefIds (out)   List of used references (ids) from text (icons/anchors) to embedded IC DB objects.
 	 */
 	private function handleStory( &$icDoc, $icCflo, $icInsPoint, $iterTxsrAttr, &$icTxsr, &$icPcnt, $xFrame, $xParent, &$trackEOL, &$icDBRefIds )
 	{
@@ -309,6 +311,9 @@ class InCopyTextExport implements TextExport
 					}
 					break;
 				case 'p': // paragraph element
+					$xStyleProps = null;
+					$orgProp1 = null;
+
 					//$icTxsr = null; $icPcnt = null; // force create new txsr+pcnt
 					$trackEOL->lastWasEOL = false;
 					$class = substr( $xElem->getAttribute( 'class' ), 4 ); // skip "para" prefix
@@ -354,6 +359,10 @@ class InCopyTextExport implements TextExport
 					}
 					break;
 				case 'span': // span element, used for character styles
+					$xStyleProps = null;
+					$orgProp1 = null;
+					$unhandTxsrAttrs = null;
+
 					//if( $icPcnt && !$icPcnt->hasChildNodes() ) $icPcnt->parentNode->removeChild( $icPcnt ); // avoid empty <pcnt/> elements
 					//$icPcnt = null; // force create new pcnt (but keep same txsr)
 					//$this->addTxsrPcnt( $icDoc, $icCflo, $icInsPoint, $iterTxsrAttr, $icTxsr, $icPcnt, $xElem, true );
@@ -432,6 +441,10 @@ class InCopyTextExport implements TextExport
 					$this->popTxsrAttr( $iterTxsrAttr, $xOrgProp );
 					break;
 				case 'font': // font (face, size and colors)
+					$xStyleProps = null;
+					$xOrgProp1 = null;
+					$xOrgProp2 = null;
+
 					$face = $xElem->getAttribute('face');
 					$color = $xElem->getAttribute('color');
 					if( $color ) $color = $this->findColorRef( $icDoc, $icCflo->parentNode, $color );
@@ -613,13 +626,13 @@ class InCopyTextExport implements TextExport
 	}
 
 	/**
-	 * Pushes all "unknown" txsr attributes onto stack of the given InCopy txsr element ($iterTxsrAttr). <br>
-	 * These are all attributes except "prst" and "crst" that are handled in p->class and span->class at HTML. <br>
-	 * This is all done to maintain free formating to text selections (not to be confused with para/char styles). <br>
-	 * The unknown attributes are serialized in the span->id attribute in HTML (outside this function). <br>
+	 * Pushes all "unknown" txsr attributes onto stack of the given InCopy txsr element ($iterTxsrAttr).
+	 * These are all attributes except "prst" and "crst" that are handled in p->class and span->class at HTML.
+	 * This is all done to maintain free formating to text selections (not to be confused with para/char styles).
+	 * The unknown attributes are serialized in the span->id attribute in HTML (outside this function).
 	 *
-	 * @param string  $txsrAttrs (in)    Unknown txsr attributes (as carried through in span->id at HTML) <br>
-	 * @param array   $iterTxsrAttr (in/out) List of collected attributes that needs to be applied to the new icTxsr <br>
+	 * @param array  $txsrAttrs (in)    Unknown txsr attributes (as carried through in span->id at HTML)
+	 * @param array   $iterTxsrAttr (in/out) List of collected attributes that needs to be applied to the new icTxsr
 	 * @return array of pushed txsr attributes onto stack
 	 */
 	function pushTsxrAttrs( $txsrAttrs, &$iterTxsrAttr )
@@ -632,16 +645,16 @@ class InCopyTextExport implements TextExport
 	}
 	
 	/**
-	 * Pushes all properties of the given HTML style attribute onto stack of the given InCopy txsr element ($iterTxsrAttr). <br> 
-	 * Styles are typically set to HTML paragraphs, spans and colors. <br>
+	 * Pushes all properties of the given HTML style attribute onto stack of the given InCopy txsr element ($iterTxsrAttr).
+	 * Styles are typically set to HTML paragraphs, spans and colors.
 	 * 
 	 * Typically Safari uses <span style="font-weight: bold" class="Apple-style-span">...</span> to mark text bold,
 	 * while other browers use <b>...</b>. This function handles those Safari styles as well.
 	 *
-	 * @param DOMDocument $icDoc (in)    InCopy document. <br>
-	 * @param DOMNode $icCflo (in)       InCopy cflo element (=> root of story contents). <br>
-	 * @param string  $styleAttr (in)    HTML style attribute <br>
-	 * @param array   $iterTxsrAttr (in/out) List of collected attributes that needs to be applied to the new icTxsr <br>
+	 * @param DOMDocument $icDoc (in)    InCopy document.
+	 * @param DOMNode $icCflo (in)       InCopy cflo element (=> root of story contents).
+	 * @param string  $styleAttr (in)    HTML style attribute
+	 * @param array   $iterTxsrAttr (in/out) List of collected attributes that needs to be applied to the new icTxsr
 	 * @return array of pushed style attributes to track
 	 */
 	private function pushTsxrStyleAttrs( $icDoc, $icCflo, $styleAttr, &$iterTxsrAttr )
@@ -713,9 +726,9 @@ class InCopyTextExport implements TextExport
 	}
 	
 	/**
-	 * Parses the given HTML style attributes and returns properties inside as array of key-value pair. <br> 
+	 * Parses the given HTML style attributes and returns properties inside as array of key-value pair.
 	 * 
-	 * @param string  $styleAttr  HTML style attribute <br>
+	 * @param string  $styleAttr  HTML style attribute
 	 * @return array of style properties
 	 */
 	private function getStyleValues( $styleAttr )
@@ -849,6 +862,10 @@ class InCopyTextExport implements TextExport
 	 * This object can be given at {@link:popTxsrAttr} function to perform reverse operation while backtracking.
 	 * This is used to track text formattings while stepping down parsing the XHTML element tree.
 	 * When there is actually something to output in InCopy format, the attributes are used to build a txsr.
+	 *
+	 * @param array &$iterTxsrAttr
+	 * @param string $attrName
+	 * @param string $attrVal
 	 * @return object Attribute with name and value.
 	 */
 	private function pushTxsrAttr( &$iterTxsrAttr, $attrName, $attrVal )
@@ -895,12 +912,12 @@ class InCopyTextExport implements TextExport
 	}
 	
 	/**
-	 * Removes all txsr elements from all stories. <br>
-	 * After that, the IC document is ready to receive new typed content from XHTML. <br>
+	 * Removes all txsr elements from all stories.
+	 * After that, the IC document is ready to receive new typed content from XHTML.
 	 *
-	 * @param DOMDocument $icDoc (in)   InCopy document. <br>
-	 * @param DOMNodeList $icCflos (in) List of InCopy cflo elements (=> roots of story contents). <br>
-	 * @param DOMNode $icInsPoint (out) Returns next sibling of last removed InCopy txsr element. <br>
+	 * @param DOMDocument $icDoc (in)   InCopy document.
+	 * @param DOMNodeList $icCflos (in) List of InCopy cflo elements (=> roots of story contents).
+	 * @param DOMNode $icInsPoint (out) Returns next sibling of last removed InCopy txsr element.
 	 */
 	/*private function removeAllTxsrs( $icDoc, $icCflos )
 	{
@@ -918,21 +935,21 @@ class InCopyTextExport implements TextExport
 	}*/
 
 	/**
-	 * Creates txsr and pcnt elements. <br>
-	 * It also updates the txsr element with prst/crst attributes (para/char styles). <br>
-	 * This is needed to insert any text elements (that are typed in XHTML). <br>
+	 * Creates txsr and pcnt elements.
+	 * It also updates the txsr element with prst/crst attributes (para/char styles).
+	 * This is needed to insert any text elements (that are typed in XHTML).
 	 *
-	 * @param DOMDocument $icDoc (in/out) InCopy document. <br>
-	 * @param DOMNode $icCflo (in)     InCopy cflo element (=> root of story contents). <br>
-	 * @param DOMNode $icInsPoint (in) Insertion point to add InCopy txsr elements <br>
-	 * @param DOMNode $icTxsr (in/out) Current InCopy txsr element to reuse. Pass null to create new one. <br>
-	 * @param DOMNode $icPcnt (in/out) Current InCopy pcnt element to reuse. Pass null to create new one. <br>
-	 * @param DOMNode $xElem (in)      XHTML element being parsed. Can be any of supported: p, span, text, img, pi, text, etc.<br>
+	 * @param DOMDocument $icDoc (in/out) InCopy document.
+	 * @param DOMNode $icCflo (in)     InCopy cflo element (=> root of story contents).
+	 * @param DOMNode $icInsPoint (in) Insertion point to add InCopy txsr elements
+	 * @param array $iterTxsrAttr
+	 * @param DOMNode $icTxsr (in/out) Current InCopy txsr element to reuse. Pass null to create new one.
+	 * @param DOMNode $icPcnt (in/out) Current InCopy pcnt element to reuse. Pass null to create new one.
+	 * @param DOMNode $xElem (in)      XHTML element being parsed. Can be any of supported: p, span, text, img, pi, text, etc.
+	 * @param boolean $forceNewTxsr
 	 */
 	private function addTxsrPcnt( &$icDoc, $icCflo, $icInsPoint, $iterTxsrAttr, &$icTxsr, &$icPcnt, $xElem, $forceNewTxsr )
 	{
-		$xElem = $xElem; // keep analyzer happy
-		
 		// Check we have different attributes collected (iterTxsrAttr) than defined for the last one created (icTxsr)
 		$icTxsrAttr = array();
 		if( $icTxsr ) foreach( $icTxsr->attributes as $attr ) {
@@ -976,14 +993,15 @@ class InCopyTextExport implements TextExport
 	}
 
 	/**
-	 * Resolves paragraph-, character- and color styles from WW template definition. <br>
-	 * It checks if the style is present the given story. If not, it looks up the style definition <br>
-	 * in the WW template element and copies it into the story. Also para/char style colors are copied. <br>
+	 * Resolves paragraph-, character- and color styles from WW template definition.
+	 * It checks if the style is present the given story. If not, it looks up the style definition
+	 * in the WW template element and copies it into the story. Also para/char style colors are copied.
 	 *
-	 * @param DOMDocument $icDoc (in/out) InCopy document. <br>
-	 * @param DOMNode $icStory (in)       InCopy story element. (xpath: //Stories/Story). <br>
-	 * @param DOMNode $icStyleType (in)   Style type: 'psty', 'csty' or 'colr'.<br>
-	 * @param DOMNode $icStyleRef (in)    Style id reference (from txsr element) inlcuding "o_" prefix. <br>
+	 * @param DOMDocument $icDoc (in/out) InCopy document.
+	 * @param DOMNode $icStory (in)       InCopy story element. (xpath: //Stories/Story).
+	 * @param string $icStyleType (in)   Style type: 'psty', 'csty' or 'colr'.
+	 * @param string $icStyleRef (in)    Style id reference (from txsr element) inlcuding "o_" prefix.
+	 * @return boolean TRUE on success, FALSE otherwise.
 	 */
 	private function resolveStyleDef( &$icDoc, $icStory, $icStyleType, $icStyleRef )
 	{
@@ -1054,4 +1072,3 @@ class InCopyTextExport implements TextExport
 		return true;
 	}
 }
-?>

@@ -1,9 +1,9 @@
 <?php
 /**
- * TextExport class for plain text format used by the Web Editor.<br>
+ * TextExport class for plain text format used by the Web Editor.
  *
- * Converts from collection of XHTML frames that have been edit in TinMCE frames back into plain text format. <br>
- * See {@link TextExport} interface for more details. <br>
+ * Converts from collection of XHTML frames that have been edit in TinMCE frames back into plain text format.
+ * See {@link TextExport} interface for more details.
  *
  * @package SCEnterprise
  * @subpackage WebEditor
@@ -17,13 +17,13 @@ require_once BASEDIR.'/server/utils/FileHandler.class.php';
 class PlainTextExport implements TextExport
 {
 	/**
-	 * Convert a collection of XHTML frames into a file in plain text format. <br>
+	 * Convert a collection of XHTML frames into a file in plain text format.
 	 * The encoding is concidered to be UTF-8 in Web Editor (XHTML) and stored as UTF-16BE in the DB.
 	 * This function takes care about conversion between both encodings as well.
 	 *
-	 * @param array  $xFrames    Collection of XHTML DOMDocument each representing one text frame. <br>
-	 * @param string $plainFile  Full path of file to be written with plain text. <br>
-	 * @param boolean $draft     Perform draft save (false for permantent save). Keeps embedded object definitions to allow undo operations. <br>
+	 * @param array  $xFrames    Collection of XHTML DOMDocument each representing one text frame.
+	 * @param string $plainFile  Full path of file to be written with plain text.
+	 * @param boolean $draft     Perform draft save (false for permantent save). Keeps embedded object definitions to allow undo operations.
 	 */ 
 	public function exportFile( $xFrames, $plainFile, $draft )
 	{
@@ -39,16 +39,15 @@ class PlainTextExport implements TextExport
 	}
 
 	/**
-	 * Convert a collection of XHTML frames to a memory buffer in plain text format. <br>
+	 * Convert a collection of XHTML frames to a memory buffer in plain text format.
 	 * BZ#10705: It makes sure text sequence is respected, by jumpng into recursion at (@link: exportNode}
 	 *
-	 * @param array  $xFrames       Collection of XHTML DOMDocument each representing one text frame. <br>
-	 * @param string $plainContent  Returned memory buffer with plain text. <br>
-	 * @param boolean $draft        Perform draft save (false for permantent save). Keeps embedded object definitions to allow undo operations. <br>
+	 * @param array  $xFrames       Collection of XHTML DOMDocument each representing one text frame.
+	 * @param string $plainContent  Returned memory buffer with plain text.
+	 * @param boolean $draft        Perform draft save (false for permantent save). Keeps embedded object definitions to allow undo operations.
 	 */ 
 	public function exportBuf( $xFrames, &$plainContent, $draft )
 	{
-		$draft = $draft; // keep analyzer happy
 		// Walk through all XHTML frames; each should have one body
 		foreach( $xFrames as $xFrame ) {
 			$xpath = new DOMXPath( $xFrame );
@@ -70,12 +69,14 @@ class PlainTextExport implements TextExport
 	}
 
 	/**
-	 * Convert a XHTML element to a memory buffer in plain text format. <br>
+	 * Convert a XHTML element to a memory buffer in plain text format.
 	 *
-	 * @param DOMNode $xFrame (in)  XHTML document (text frame) being parsed. <br>
-	 * @param string $plainContent  Returned memory buffer with plain text. <br>
+	 * @param DOMDocument $xFrame (in)  XHTML document (text frame) being parsed.
+	 * @param DOMNode $xParent
+	 * @param string $plainContent  Returned memory buffer with plain text.
 	 * @param integer $indent       The text indent (typically for lists)
 	 * @param string $numSystem     Numbering system; 'ol' for numbered list or 'ul' bullet list.
+	 * @return boolean TRUE if child element did an enter, FALSE otherwise.
 	 */ 
 	private function exportNode( $xFrame, $xParent, &$plainContent, $indent = 0, $numSystem = 'ul' )
 	{
@@ -172,4 +173,3 @@ class PlainTextExport implements TextExport
 	}
 
 }
-?>

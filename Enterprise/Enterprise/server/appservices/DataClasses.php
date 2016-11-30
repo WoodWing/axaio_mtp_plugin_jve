@@ -33,8 +33,7 @@ class PubChannelIcon
 
 	/**
 	 * @param string               $Id                   
-	 * @param string               $Name                 
-	 * @param array                $Attachments                   
+	 * @param array                $Attachments
 	 */
 	public function __construct( $Id=null, $Attachments=null )
 	{

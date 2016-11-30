@@ -147,5 +147,3 @@ class AppSession extends WW_SOAP_Service
 		return self::returnResponse($ret);
 	}	
 }
-
-?>

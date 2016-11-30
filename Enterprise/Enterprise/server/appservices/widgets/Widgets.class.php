@@ -128,6 +128,7 @@ class Widget
 	 * @param Object $layout (layout widget is placed on).
 	 * @param Page $page, first page of layout, needed to calculate the dimensions in pixels.		 
 	 * @return string The file path of the temporary export folder.
+	 * @throws BizException on download error.
 	 */
 	private function downloadWidgetFile( $dossier, $object, $manifest, $widgetPlacement, $layout, $page )
 	{
@@ -144,9 +145,10 @@ class Widget
 			$widgetUtils->downloadWidgetFile( $dossier, $object, $manifest, $widgetPlacement, $frameDimensions );
 		} catch( BizException $e ) {
 			// When BizException, remove the extracted folder and its contents
-			require_once BASEDIR . '/server/utils/FolderUtils.class.php';
-			FolderUtils::cleanDirRecursive( $widgetUtils->tempFolder, true );
-
+			if( isset( $widgetUtils ) ) {
+				require_once BASEDIR.'/server/utils/FolderUtils.class.php';
+				FolderUtils::cleanDirRecursive( $widgetUtils->tempFolder, true );
+			}
 			throw $e;
 		}
 		return $widgetUtils->tempFolder;
@@ -182,9 +184,8 @@ class Widget
 		$request = new WflGetObjectsRequest( BizSession::getTicket(), array($objId), false, 'none', array() );
 		$service = new WflGetObjectsService();
 		try {
-		$response = $service->execute( $request );
+			$response = $service->execute( $request );
 		} catch ( BizException $e ) {
-			$e = $e;
 			$response = null;
 		}	
 		$object = ( $response && $response->Objects ) ? $response->Objects[0] : null;
@@ -213,6 +214,7 @@ class Widget
 	 * Get the device by editionid from the list of devices
 	 *
 	 * @param string $editionId
+	 * @throws BizException when the device could not be found.
 	 */
 	private function getDevice( $editionId )
 	{
@@ -276,15 +278,15 @@ class Widget
 		switch ( $type ) {
 			case 'x':
 			case 'width':
-				$pixels = $this->device->getScreenWidth( !$this->isHorizontalPage($page, $layout) );
+				$pixels = $this->device->getScreenWidth( !$this->isHorizontalPage($page) );
 				$pointToDevide = $this->widget->Artboard->Width;
 				break;
 			case 'y':
 			case 'height':
-				$pixels 		= $this->device->getScreenHeight( !$this->isHorizontalPage($page, $layout) );
+				$pixels 		= $this->device->getScreenHeight( !$this->isHorizontalPage($page) );
 				$layoutWidth 	= $this->widget->Artboard->Width;
-				$screenWidth 	= $this->device->getScreenWidth( !$this->isHorizontalPage($page, $layout) );
-				$screenHeight 	= $this->device->getScreenHeight( !$this->isHorizontalPage($page, $layout) );
+				$screenWidth 	= $this->device->getScreenWidth( !$this->isHorizontalPage($page) );
+				$screenHeight 	= $this->device->getScreenHeight( !$this->isHorizontalPage($page) );
 				$pointToDevide 	= ( ( $layoutWidth / $screenWidth ) * $screenHeight );
 				break;
 			default:
@@ -340,4 +342,3 @@ class Widget
 		return false;
 	}
 }
-?>
