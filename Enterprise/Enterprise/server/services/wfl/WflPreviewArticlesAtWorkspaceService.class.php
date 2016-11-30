@@ -28,6 +28,9 @@ class WflPreviewArticlesAtWorkspaceService extends EnterpriseService
 	
 	/**
 	 * Note: Keep this function in-sync with WflPreviewArticleAtWorkspaceService (singular Article!)
+	 * @param WflPreviewArticlesAtWorkspaceRequest $req
+	 * @return WflPreviewArticlesAtWorkspaceResponse
+	 * @throws BizException when running the preview operation results in an error.
 	 */
 	public function runCallback( WflPreviewArticlesAtWorkspaceRequest $req )
 	{

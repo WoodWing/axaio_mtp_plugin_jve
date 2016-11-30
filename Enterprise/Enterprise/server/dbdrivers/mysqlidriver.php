@@ -318,7 +318,6 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	
 	public function newid( $table, $after )
 	{
-		$table = $table; // keep analyzer happy
 		if( $after ) { // called AFTER insert statement
 			return $this->dbh->insert_id;
 		}
@@ -328,7 +327,6 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	// See mssqldriver->copyid for comments
 	public function copyid( $table, $after )
 	{
-		$table = $table; $after = $after; // keep analyzer happy	
 		// nothing to do
 	}
 
@@ -605,6 +603,7 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	/**
 	 * Returns proper name for temporary tables
 	 * @param string $name of the temporary table
+	 * @return string The proper name of the temporary table.
 	 */
 	private function makeTempTableName($name)
 	{
@@ -615,7 +614,7 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	 * Retrieves the DB version and checks if this DB driver is compatible with that.
 	 *
 	 * @param string $help Installation notes how to solve a problem (in case an exception is thrown).
-	 * @thows BizException When unsupported DB version is detected.
+	 * @throws BizException When unsupported DB version is detected.
 	 */
 	public function checkDbVersion( &$help )
 	{
@@ -657,7 +656,7 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	 * It checks character encoding and strict SQL mode.
 	 *
 	 * @param string $help Installation notes how to solve a problem (in case an exception is thrown).
-	 * @thows BizException When unsupported DB settings are detected.
+	 * @throws BizException When unsupported DB settings are detected.
 	 */
 	public function checkDbSettings( &$help )
 	{
@@ -797,7 +796,6 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	 */
 	public function composeMultiInsertSql( $tableName, array $fieldNames, array $fieldValues, $autoincrement )
 	{
-		$autoincrement = $autoincrement; // To make code analyzer happy.
 		// $fieldNames = array( a,b,c,d )   $fieldValues = array( array(1,2,3,4), array(5,6,7,8) )
 		// INSERT INTO table (a,b,c,d) VALUES (1,2,3,4), (5,6,7,8)
 		$sql = 'INSERT INTO ' . $this->tablename( $tableName ) . ' ';
@@ -831,14 +829,13 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	 * @param string $tableName Table name without the 'smart_' prefix.
 	 * @param string $keyCol The primary key column to search on.
 	 * @param string $where The where sql clause part.
+	 * @param string $orderBySQL The order by sql clause part.
 	 * @param array $limit, keys: 'min'/ 'max', TRUE=ASC, FALSE=DESC.
 	 * @param array $values The values used for parameter substitution.
 	 * @return string $sql The composed sql statement.
 	 */
 	public function composePagedQuerySql( $tableName, $keyCol, $where, $orderBySQL, $limit, &$values )
 	{
-		$values = $values; // Keep Analyzer happy.
-
 		// Add the beginning of the where clause.
 		$where = ($where != '') ? ' WHERE ' . $where : '';
 

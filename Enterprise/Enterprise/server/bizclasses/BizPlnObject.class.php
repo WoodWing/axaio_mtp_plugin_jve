@@ -90,21 +90,32 @@ class BizPlnObject
 	static public function deleteLayouts( /** @noinspection PhpUnusedParameterInspection */
 		$user, $layouts )
 	{
-		require_once BASEDIR.'/server/dbclasses/DBObjectFlag.class.php';
 		LogHandler::Log( 'PlanningServices', 'DEBUG', 'DeleteLayouts started >>>' );
-
+		require_once BASEDIR.'/server/dbclasses/DBObjectFlag.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		self::checkLayoutIdAndName( $layouts );
 
 		foreach( $layouts as $layout ) {
-			$storeName = '';
-			$version = '';
-			if( !self::resolvePlanObjectProps( $layout->Id, $layout->Name, $layout->Publication, $layout->Issue, 'Layout', $storeName, $version ) ) {
+			if ( $layout->Id ) {
+				$inWorkFlow = false;
+				$dbObjectRow = DBObject::getObjectRow( $layout->Id, $inWorkFlow );
+			} else {
+				$dbObjectRow = DBObject::getObjectByTypeAndNames(
+					$layout->Name,
+					'Layout',
+					$layout->Publication,
+					$layout->Issue,
+					isset( $layout->PubChannel) ? $layout->PubChannel : ''
+				);
+			}
+			if ( empty( $dbObjectRow ) ) {
 				throw new BizException( 'ERR_NOTFOUND', 'Client', 'Layout:'.$layout->Name );
 			}
+			$layout->Id = $dbObjectRow['id'];
 
 			// Remove the planned pages.
 			require_once BASEDIR.'/server/bizclasses/BizPage.class.php';
-			BizPage::cleanPages( null, $layout->Id, 'Planning', $version );
+			BizPage::cleanPages( null, $layout->Id, 'Planning', $dbObjectRow['version'] );
 			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 			DBObject::updatePageRange( $layout->Id, '', 'Planning' );
 
@@ -129,21 +140,29 @@ class BizPlnObject
 
 	static public function modifyLayouts( $user, $layouts )
 	{
+		LogHandler::Log( 'PlanningServices', 'DEBUG', 'ModifyLayouts started >>>' );
 		require_once BASEDIR.'/server/bizclasses/BizStorage.php'; // StorageFactory
 		require_once BASEDIR.'/server/bizclasses/BizPage.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObjectFlag.class.php';
-		LogHandler::Log( 'PlanningServices', 'DEBUG', 'ModifyLayouts started >>>' );
-
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		self::checkLayoutIdAndName( $layouts );
 
 		$modifiedLayouts = array();
 		foreach( $layouts as $layout ) {
-			$storeName = '';
-			$oldVersion = '';
-			if( !self::resolvePlanObjectProps( $layout->Id, $layout->Name, $layout->Publication, $layout->Issue, 'Layout', $storeName, $oldVersion ) ) {
-				throw new BizException( 'ERR_NOTFOUND', 'Client', 'Layout:'.$layout->Name );
+			if ( $layout->Id ) {
+				$inWorkFlow = false;
+				$dbObjectRow = DBObject::getObjectRow( $layout->Id, $inWorkFlow );
+			} else {
+				$dbObjectRow = DBObject::getObjectByTypeAndNames(
+					$layout->Name,
+					'Layout',
+					$layout->Publication,
+					$layout->Issue,
+					isset( $layout->PubChannel) ? $layout->PubChannel : ''
+				);
 			}
-
+			if ( empty( $dbObjectRow ) ) { throw new BizException( 'ERR_NOTFOUND', 'Client', 'Layout:'.$layout->Name ); }
+			$layout->Id = $dbObjectRow['id'];
 			$lay_props = array();
 			isset( $layout->Id ) ? $lay_props['id'] = $layout->Id : $lay_props['id'] = '' ;
 			isset( $layout->Name ) ? $lay_props['name'] = $layout->Name : $lay_props['name'] = '';
@@ -188,7 +207,7 @@ class BizPlnObject
 				$wflPages[] = $wflPage;
 			}
 			$layout->Pages = $wflPages;
-			BizPage::savePages( null, $layout->Id, 'Planning', $layout->Pages, true, $oldVersion, $lay_props['version'] ); // replace planned pages
+			BizPage::savePages( null, $layout->Id, 'Planning', $layout->Pages, true, $dbObjectRow['version'], $lay_props['version'] ); // replace planned pages
 
 			$modifiedLayout = new PlnLayout();
 			$modifiedLayout->Id = $layout->Id;
@@ -286,18 +305,15 @@ class BizPlnObject
 
 			// add to existing layout
 			if( !isset( $layoutId ) || $layoutId == '' ) {
-				$layoutStoreName = '';
-				$layoutVersion = '';
-				if( !self::resolvePlanObjectProps(
-					$layoutId,
+				require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+				$dbObjectRow = DBObject::getObjectByTypeAndNames(
 					$layoutName,
+					'Layout',
 					$advert->Publication,
 					$advert->Issue,
-					'Layout', $layoutStoreName,
-					$layoutVersion )
-				) {
-					throw new BizException( 'ERR_NOTFOUND', 'Client', 'Layout:'.$layoutName );
-				}
+					isset( $advert->PubChannel ) ? $advert->PubChannel : '' );
+				if( !$dbObjectRow ) { throw new BizException( 'ERR_NOTFOUND', 'Client', 'Layout:'.$layoutName ); }
+				$layoutId = $dbObjectRow['id'];
 			}
 
 			LogHandler::Log( 'PlanningServices', 'DEBUG', 'CreateAdverts 4: advert=['.$advert->Id.'] layout=['.$layoutId.']' );
@@ -387,19 +403,21 @@ class BizPlnObject
 
 		LogHandler::Log( 'PlanningServices', 'DEBUG', 'DeleteAdverts 1' );
 		foreach( $adverts as $advert ) {
-			$storeName = '';
-			$version = '';
-			if( !self::resolvePlanObjectProps(
-				$advert->Id,
-				$advert->Name,
-				$advert->Publication,
-				$advert->Issue,
-				'Advert',
-				$storeName,
-				$version )
-			) {
-				throw new BizException( 'ERR_NOTFOUND', 'Client', 'Advert:'.$advert->Name );
+			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+			if ( $advert->Id ) {
+				$inWorkFlow = false;
+				$dbObjectRow = DBObject::getObjectRow( $advert->Id, $inWorkFlow );
+			} else {
+				$dbObjectRow = DBObject::getObjectByTypeAndNames(
+					$advert->Name,
+					'Advert',
+					$advert->Publication,
+					$advert->Issue,
+					isset( $advert->PubChannel) ? $advert->PubChannel : ''
+				);
 			}
+			if( !$dbObjectRow ) { throw new BizException( 'ERR_NOTFOUND', 'Client', 'Advert:'.$advert->Name ); }
+			$advert->Id = $dbObjectRow['id'];
 
 			require_once BASEDIR.'/server/bizclasses/BizDeletedObject.class.php';
 			BizDeletedObject::deleteObject( $user, $advert->Id, false );
@@ -438,11 +456,21 @@ class BizPlnObject
 
 		$modifiedAdverts = array();
 		foreach( $adverts as $advert ) {
-			$storeName = '';
-			$version = '';
-			if( !self::resolvePlanObjectProps( $advert->Id, $advert->Name, $advert->Publication, $advert->Issue, 'Advert', $storeName, $version ) ) {
-				throw new BizException( 'ERR_NOTFOUND', 'Client', 'Advert:'.$advert->Name );
+			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+			if ( $advert->Id ) {
+				$inWorkFlow = false;
+				$dbObjectRow = DBObject::getObjectRow( $advert->Id, $inWorkFlow );
+			} else {
+				$dbObjectRow = DBObject::getObjectByTypeAndNames(
+					$advert->Name,
+					'Advert',
+					$advert->Publication,
+					$advert->Issue,
+					isset( $advert->PubChannel) ? $advert->PubChannel : ''
+				);
 			}
+			if( !$dbObjectRow ) { throw new BizException( 'ERR_NOTFOUND', 'Client', 'Advert:'.$advert->Name ); }
+			$advert->Id = $dbObjectRow['id'];
 
 			$props = array(
 				'id' => $advert->Id,
@@ -459,7 +487,7 @@ class BizPlnObject
 				'plaincontent' => $advert->PlainContent,
 				'highresfile' => $advert->HighResFile,
 				'pageorder' => isset( $advert->PageOrder ) && $advert->PageOrder != '' ? $advert->PageOrder : $advert->Page->PageOrder,
-				'storeName' => $storeName,
+				'storeName' => $dbObjectRow['storename'],
 				'format' => self::getMimeType( $advert ),
 				'type' => 'Advert',
 				'width' => $advert->Placement->Width,
@@ -491,11 +519,16 @@ class BizPlnObject
 
 			if( !isset( $layoutId ) || $layoutId == '' ) {
 				// Find parent layout.
-				$layoutStoreName = '';
-				$layoutVersion = '';
-				if( !self::resolvePlanObjectProps( $layoutId, $layoutName, $advert->Publication, $advert->Issue, 'Layout', $layoutStoreName, $layoutVersion ) ) {
-					throw new BizException( 'ERR_NOTFOUND', 'Client', 'Layout:'.$layoutName );
-				}
+				require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+				$dbObjectRow = DBObject::getObjectByTypeAndNames(
+					$layoutName,
+					'Layout',
+					$advert->Publication,
+					$advert->Issue,
+					isset( $advert->PubChannel) ? $advert->PubChannel : ''
+				);
+				if( !$dbObjectRow ) { throw new BizException( 'ERR_NOTFOUND', 'Client', 'Layout:'.$layoutName ); }
+				$layoutId = $dbObjectRow['id'];
 			}
 
 			// Flag source layout when about to move the advert to a different layout.
@@ -561,27 +594,6 @@ class BizPlnObject
 		}
 		LogHandler::Log( 'PlanningServices', 'DEBUG', 'ModifyAdverts completed <<<' );
 		return $modifiedAdverts;
-	}
-
-	static private function resolvePlanObjectProps( &$objId, &$objName, $pubName, $issName, $objType, &$storeName, &$version )
-	{
-		if( $objId ) {
-			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-			$workflowArea = false;
-			$dbRow = DBObject::getObjectRow( $objId, $workflowArea );
-		} else {
-			$dbRow = DBObject::getObjectByTypeAndNames( $objName, $objType, $pubName, $issName );
-		}
-
-		if( $dbRow ) {
-			$objId = $dbRow['id'];
-			$objName = $dbRow['name'];
-			$storeName = $dbRow['storename'];
-			$version = $dbRow['version'];
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
@@ -695,7 +707,7 @@ class BizPlnObject
 			$wflPage->Files = null; // Avoid conflicts.
 			// Set defaults for properties that do not occur in planning WSDL.
 			$wflPage->Instance = 'Planning';
-			if( isset( $page->PageNumber ) && !empty( $page->PageNumber ) ) {
+			if( !isset( $wflPage->PageNumber ) || empty( $wflPage->PageNumber ) ) {
 				$wflPage->PageNumber = strval( $page->PageOrder );
 			}
 			// Create the planned page in DB

@@ -302,7 +302,6 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 
 	public function newid($table, $after)
 	{
-		$table = $table; // keep analyzer happy
 		if ($after){
 			// We use SCOPE_IDENTIY, this returns most recent ID in our scope. Event trigger that has create
 			// rows won't effect this. Event triggers are not used by us, but clients might do this.
@@ -686,17 +685,19 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	/**
 	 * Returns proper name for temporary tables
 	 * @param string $name of the temporary table
+	 * @return string The proper name of the temporary table.
 	 */
 	public function makeTempTableName($name)
 	{
 		return $this->quoteIdentifier('#' . $name);
 	}	
 
+	/** @noinspection PhpDocMissingThrowsInspection PhpDoc expects a '@throws null' since $e is initialized as null. */
 	/**
 	 * Retrieves the DB version and checks if this DB driver is compatible with that.
 	 *
 	 * @param string $help Installation notes how to solve a problem (in case an exception is thrown).
-	 * @thows BizException When unsupported DB version is detected.
+	 * @throws BizException When unsupported DB version is detected.
 	 */
 	public function checkDbVersion( &$help )
 	{
@@ -750,7 +751,6 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	 */
 	public function resetAutoIncreament( $tableName, $autoIncrementValue )
 	{
-		$tableName = $tableName; $autoIncrementValue = $autoIncrementValue;
 		// TODO: Reset the auto increment for MSSQL
 	}
 	
@@ -833,8 +833,6 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	 */
 	public function composeMultiInsertSql( $tableName, array $fieldNames, array $fieldValues, $autoincrement )
 	{
-		$autoincrement = $autoincrement; // To make code analyzer happy.
-
 		// $fieldNames = array( a,b,c,d )   $fieldValues = array( array(1,2,3,4), array(5,6,7,8) )
 		// INSERT INTO table_name (a,b,c,d) VALUES (1,2,3,4), (5,6,7,8)
 		$sql = 'INSERT INTO ' . $this->tablename( $tableName ) . ' ';
@@ -868,6 +866,7 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	 * @param string $tableName Table name without the 'smart_' prefix.
 	 * @param string $keyCol The primary key column to search on.
 	 * @param string $where The where sql clause part.
+	 * @param string $orderBySQL The order by sql clause part.
 	 * @param array $limit, keys: 'min'/ 'max', TRUE=ASC, FALSE=DESC.
 	 * @param array $values, the values to be used for parameter substitution.
 	 * @return string $sql The composed sql statement.

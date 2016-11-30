@@ -25,14 +25,14 @@
 	<folder path=".../Enterprise/server/buildtools/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/dataclasses/" maxerr="0"/>
 	<folder path=".../Enterprise/server/dbclasses/" maxerr="0"/>
-	<folder path=".../Enterprise/server/dbdrivers/" maxerr="1000000"/>
+	<folder path=".../Enterprise/server/dbdrivers/" maxerr="0"/>
 	<folder path=".../Enterprise/server/dbintclasses/" maxerr="0"/>
-	<folder path=".../Enterprise/server/dbscripts/" maxerr="1000000"/>
+	<folder path=".../Enterprise/server/dbscripts/" maxerr="0"/>
     <folder path=".../Enterprise/server/dgrid/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/interfaces/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/plugins/" maxerr="0"/>
 	<folder path=".../Enterprise/server/protocols/" maxerr="1000000"/>
-	<folder path=".../Enterprise/server/services/" maxerr="1000000"/>
+	<folder path=".../Enterprise/server/services/" maxerr="0"/>
 	<folder path=".../Enterprise/server/useful/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/utils/javascript/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/utils/" maxerr="0"/>
