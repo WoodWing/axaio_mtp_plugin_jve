@@ -2,7 +2,7 @@
 /**
  * @package     Enterprise
  * @subpackage  MaintenanceMode
- * @since       v10.0
+ * @since       v10.0.3
  * @copyright   WoodWing Software bv. All Rights Reserved.
  *
  * Admin web application to configure this plugin.
@@ -29,21 +29,33 @@ class MaintenanceMode_Configure_EnterpriseWebApp extends EnterpriseWebApp
 	/** @var string Html body. */
 	private $htmlBody = '';
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function isEmbedded()
 	{
 		return true;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function getAccessType()
 	{
 		return 'admin';
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function getTitle()
 	{
 		return 'Maintenance Mode';
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function getHtmlBody()
 	{
 		$htmlTemplateFile = dirname( __FILE__ ).'/MaintenanceMode_Configure_Template.htm';
@@ -52,7 +64,7 @@ class MaintenanceMode_Configure_EnterpriseWebApp extends EnterpriseWebApp
 		if( $this->isSubmitted() ) {
 			$this->readAndSaveSettings();
 		} else {
-			$this->getPreviousSettings();
+			$this->getStoredSettingsOrSetDefaults();
 		}
 
 		$this->updateHtmlBody();
@@ -61,7 +73,7 @@ class MaintenanceMode_Configure_EnterpriseWebApp extends EnterpriseWebApp
 
 	private function isSubmitted()
 	{
-		if( isset( $_POST['save'] ) && $_POST['save'] == 'Save' ) {
+		if( isset( $_POST['save'] ) ) {
 			return true;
 		}
 
@@ -71,8 +83,8 @@ class MaintenanceMode_Configure_EnterpriseWebApp extends EnterpriseWebApp
 	private function readAndSaveSettings()
 	{
 		$this->readInput();
-		$this->validateDateSetting();
-		if( $this->saveConfig() ) {
+		$this->setMessageBasedOnDateSetting();
+		if( $this->saveSettings() ) {
 			$this->message .= $this->markupMsg( BizResources::localize( 'WORDPRESS_SAVE_COMPLETED' ), self::INFO );
 		} else {
 			$this->message .= $this->markupMsg( BizResources::localize( 'MaintenanceMode.SAVE_FAILED' ), self::ERROR );
@@ -101,7 +113,13 @@ class MaintenanceMode_Configure_EnterpriseWebApp extends EnterpriseWebApp
 		}
 	}
 
-	private function validateDateSetting()
+	/**
+	 * Based on the entered date a message is formatted that will be displayed to give feedback.
+	 * If the log in is disabled and the date/time lies in the past the user is informed that the log in is disabled with
+	 * immediate effect. Else just a message with a formatted date is set.
+	 * If the date could not be formatted an error is set.
+	 */
+	private function setMessageBasedOnDateSetting()
 	{
 		$disabledFromTimeStamp = strtotime( $this->disableFromDateTimeISO );
 		if( $this->disableLogIn ) {
@@ -119,7 +137,7 @@ class MaintenanceMode_Configure_EnterpriseWebApp extends EnterpriseWebApp
 		}
 	}
 
-	private function getPreviousSettings()
+	private function getStoredSettingsOrSetDefaults()
 	{
 		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
 		$serializedSettings = DBConfig::getValue( self::PLUGIN_UNIQUE_NAME.'_settings' );
@@ -141,7 +159,7 @@ class MaintenanceMode_Configure_EnterpriseWebApp extends EnterpriseWebApp
 		$this->disableLogIn = false;
 	}
 
-	private function saveConfig()
+	private function saveSettings()
 	{
 		$settings = array(
 			'disableLogIn' => $this->disableLogIn,
@@ -161,7 +179,7 @@ class MaintenanceMode_Configure_EnterpriseWebApp extends EnterpriseWebApp
 		$checked = $this->disableLogIn ? 'checked' : '';
 		$disableLogIn = inputvar( 'disablelogin', $checked, 'checkbox', null, true );
 		$disableFromDateTime = inputvar( 'disablefrom', $this->disableFromDateTimeISO, 'datetime', null, true );
-		$disableLogInMessage = inputvar( 'disableloginmessage', $this->disableLogInMessage, null );
+		$disableLogInMessage = inputvar( 'disableloginmessage', $this->disableLogInMessage, 'area' );
 
 		$this->htmlBody = str_replace( '<!--DISABLE_LOGIN_FIELD-->', BizResources::localize( 'MaintenanceMode.LOGIN_DISABLE_FIELD' ), $this->htmlBody );
 		$this->htmlBody = str_replace( '<!--DISABLE_LOGIN-->', $disableLogIn, $this->htmlBody );
@@ -169,6 +187,7 @@ class MaintenanceMode_Configure_EnterpriseWebApp extends EnterpriseWebApp
 		$this->htmlBody = str_replace( '<!--DISABLE_FROM_DATE_TIME-->', $disableFromDateTime, $this->htmlBody );
 		$this->htmlBody = str_replace( '<!--DISABLE_MESSAGE_FIELD-->', BizResources::localize( 'LIC_MESSAGE' ), $this->htmlBody );
 		$this->htmlBody = str_replace( '<!--DISABLE_MESSAGE-->', $disableLogInMessage, $this->htmlBody );
+		$this->htmlBody = str_replace( '<!--RES:ACT_SAVE-->', BizResources::localize( 'ACT_SAVE' ), $this->htmlBody );
 		$this->htmlBody = str_replace( '<!--MESSAGES-->', $this->message, $this->htmlBody );
 	}
 
