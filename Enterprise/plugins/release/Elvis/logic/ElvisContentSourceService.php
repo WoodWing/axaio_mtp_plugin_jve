@@ -163,17 +163,18 @@ class ElvisContentSourceService
 	 *
 	 * @param string $assetId Id of the original Elvis asset to be copied.
 	 * @param string $destFolderPath Path on Elvis where the asset will be copied to.
+	 * @param string $name The name of the asset.
 	 * @param string $entSystemId Enterprise system id.
 	 * @return ElvisEntHit The copied Elvis asset.
 	 * @throws BizException
 	 */
-	public function copyTo( $assetId, $destFolderPath, $entSystemId )
+	public function copyTo( $assetId, $destFolderPath, $name, $entSystemId )
 	{
 		ElvisAMFClient::registerClass( ElvisEntHit::getName() );
 		ElvisAMFClient::registerClass( ElvisFormattedValue::getName() );
 		ElvisAMFClient::registerClass( BasicMap::getName() );
 		$resp = null;
-		$params = array( $assetId, $destFolderPath, $entSystemId );
+		$params = array( $assetId, $destFolderPath, $name, $entSystemId );
 
 		try {
 			$resp = ElvisAMFClient::send( self::SERVICE, 'copyTo', $params, true );

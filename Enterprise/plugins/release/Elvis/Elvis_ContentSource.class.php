@@ -324,7 +324,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 				require_once __DIR__.'/logic/ElvisContentSourceService.php';
 				$service = new ElvisContentSourceService();
-				$hit = $service->copyTo( $elvisId, $productionZone, BizSession::getEnterpriseSystemId() );
+				$hit = $service->copyTo( $elvisId, $productionZone, $destObject->MetaData->BasicMetaData->Name, BizSession::getEnterpriseSystemId() );
 			} else {
 				throw new BizException( 'ERR_INVALID_PROPERTY', 'Server', 'Unable to find the production zone property.' );
 			}
