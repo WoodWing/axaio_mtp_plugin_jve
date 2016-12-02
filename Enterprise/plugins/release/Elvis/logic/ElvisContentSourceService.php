@@ -163,7 +163,7 @@ class ElvisContentSourceService
 	 *
 	 * @param string $assetId Id of the original Elvis asset to be copied.
 	 * @param string $destFolderPath Path on Elvis where the asset will be copied to.
-	 * @param string $name The name of the asset.
+	 * @param string|null $name The name of the asset. If not set, the value remains empty and Elvis uses the asset filename.
 	 * @param string $entSystemId Enterprise system id.
 	 * @return ElvisEntHit The copied Elvis asset.
 	 * @throws BizException
