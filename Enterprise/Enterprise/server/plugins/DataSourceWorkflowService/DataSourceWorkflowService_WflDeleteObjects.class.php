@@ -14,15 +14,10 @@ class DataSourceWorkflowService_WflDeleteObjects extends WflDeleteObjects_Enterp
 	final public function getPrio()      { return self::PRIO_DEFAULT; }
 	final public function getRunMode()   { return self::RUNMODE_BEFOREAFTER; }
 
-	final public function runBefore( WflDeleteObjectsRequest &$req ) // not called
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore( WflDeleteObjectsRequest &$req ) {}
 	
 	final public function runAfter( WflDeleteObjectsRequest $req, WflDeleteObjectsResponse &$resp ) 
 	{
-		$resp = $resp; // keep analyzer happy
-
 		require_once BASEDIR.'/server/dbclasses/DBDatasource.class.php';
 		
 		// Delete DataSource relations to Objects
@@ -57,8 +52,5 @@ class DataSourceWorkflowService_WflDeleteObjects extends WflDeleteObjects_Enterp
 		}
 	}
 	
-	final public function runOverruled( WflDeleteObjectsRequest $req ) // not called
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflDeleteObjectsRequest $req ) {}
 }

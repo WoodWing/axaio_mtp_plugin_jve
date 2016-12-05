@@ -211,11 +211,11 @@ class BizAdmPublication
 	 *
 	 * @param string $usr Short name of user.
 	 * @param array $subReq RequestModes.
-	 * @param Publication[] $pubs List of publications that needs to be modified.
+	 * @param AdmPublication[] $pubs List of publications that needs to be modified.
 	 * @throws BizException Throws BizException on failure
 	 * @return Publication[] Modified Publication objects.
 	 */
-	public static function modifyPublicationsObj( $usr, /** @noinspection PhpUnusedParameterInspection */ $subReq, $pubs )
+	public static function modifyPublicationsObj( $usr, $subReq, $pubs )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
@@ -243,7 +243,7 @@ class BizAdmPublication
 	 * Delete Publication
 	 * 
 	 * @param string $usr shortusername who should have authorization to delete these publications
-	 * @param string[] $pubIds Array of publication id that needs to be delete
+	 * @param Id[]|int[] $pubIds Array of publication id that needs to be deleted
 	 * @throws BizException
 	 */
 	public static function deletePublicationsObj( $usr, $pubIds )
@@ -723,7 +723,7 @@ class BizAdmPublication
 	 * @param string $pubId Publication that new section belongs to
 	 * @param string $pubChannelId Pubchannel that new edition belongs to
 	 * @param string $issueId Issue that new section belongs to
-	 * @param Edition[] $editions List of Editions
+	 * @param AdmEdition[] $editions List of AdmEditions
 	 * @throws BizException Throws BizException on failure
 	 * @return stdClass[] List of Edition objects
 	 */
@@ -836,7 +836,7 @@ class BizAdmPublication
 	 * @param string $pubId Publication that Edition belongs to
 	 * @param string $pubChannelId Pubchannel that modify edition belongs to
 	 * @param int $issueId Issue that Edition belongs to
-	 * @param Edition[] $editions List of Editions.
+	 * @param AdmEdition[] $editions List of AdmEditions.
 	 * @throws BizException Throws BizException on failure
 	 * @return Edition[] List of modified Edition objects
 	 */

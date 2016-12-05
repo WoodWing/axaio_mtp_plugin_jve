@@ -84,6 +84,7 @@ class SolariumClient
 		// Ping the host and retrieve the result.
 		try {
 			$pingRequest = $this->client->createPing();
+			/** @noinspection PhpInternalEntityUsedInspection */
 			$pingResponse = $this->client->ping( $pingRequest );
 			$data = $pingResponse->getData();
 
@@ -287,6 +288,7 @@ class SolariumClient
 			}
 
 			// Execute the Query.
+			/** @noinspection PhpInternalEntityUsedInspection */
 			$resultSet = $this->client->select( $query );
 
 			if( $debugMode ) {
@@ -325,6 +327,7 @@ class SolariumClient
 				LogHandler::logService( $area, $debugRequest, true, 'txt', 'txt' );
 			}
 
+			/** @noinspection PhpInternalEntityUsedInspection */
 			$resultSet = $this->client->update($update);
 
 			if( $debugMode ) {

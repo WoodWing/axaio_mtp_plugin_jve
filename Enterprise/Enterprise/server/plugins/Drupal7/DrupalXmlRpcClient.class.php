@@ -224,12 +224,13 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 	/**
 	 * Publishes a PublishForm to a Drupal node.
 	 *
-	 * @throws BizException Throws an exception if the node id is set on a Publish action, or unset on an Update action.
 	 * @param $dossier
-	 * @param $publishForm
 	 * @param $values
 	 * @param $attachments
+	 * @param string $action Default = 'Publish'.
+	 * @param bool $preview Default = false.
 	 * @return mixed
+	 * @throws BizException Throws an exception if the node id is set on a Publish action, or unset on an Update action.
 	 */
 	public function saveNode ( $dossier, $values, $attachments, $action='Publish', $preview=false )
 	{
@@ -283,6 +284,7 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 	 *
 	 * @param Object $dossier
 	 * @return array of PubFields containing information from Drupal
+	 * @throws BizException if the dossier does not have an external id.
 	 */
 	public function removeNode( $dossier )
 	{
@@ -384,7 +386,6 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 	public static function getField( $key, $type, $value )
 	{
 		$result = null;
-		$result = $result; // Keep analyzer happy
 		if( !is_null( $value ) ) {
 			switch( $type ) {
 				case 'int':
@@ -401,6 +402,7 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 					$value = strval(implode("<br /><br />", $value));
 					$value = array(nl2br($value));
 					$type = 'string';
+					break;
 				default:
 					break;
 			}
@@ -628,13 +630,14 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 	/**
 	 * Check if the file already exists in Drupal
 	 *
-	 * @param int	 $objectId    Enterprise object id
-	 * @param string $fileName    filename
-	 * @param string $content     file contents
+	 * @param Object $dossier
+	 * @param PubPublishTarget $publishTarget
+	 * @param string $contentType file content type
+	 * @param Object $objectId    Enterprise object id
+	 * @param string $filename    filename
 	 * @param string $contentType file content type
 	 * @param string $version     file version in Enterprise
-	 * @param string $type        file type in Enterprise
-	 * @return array              file information
+	 * @return array file information
 	 */
 	private function checkFileExists( $dossier, $publishTarget, $objectId, $filename, $contentType, $version )
 	{

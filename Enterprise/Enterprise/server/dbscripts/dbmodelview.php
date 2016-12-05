@@ -184,7 +184,7 @@ Confidential, (c) 1998-'.date('Y').' WoodWing Software bv. All rights reserved.<
 function displayVer( $ver )
 {
 	if( substr($ver,-2,1) == 9 && substr($ver,-1,1) == 9 ) { // 5.9.9 should become 6.0.0
-		$ver = (substr($ver,0,1)+1).'.0';
+		$ver = (intval(substr($ver,0,1))+1).'.0';
 	} else {
 		$ver = substr($ver,0,1).'.'.substr($ver,-2,1); //.'.'.substr($ver,-1,1);
 	}

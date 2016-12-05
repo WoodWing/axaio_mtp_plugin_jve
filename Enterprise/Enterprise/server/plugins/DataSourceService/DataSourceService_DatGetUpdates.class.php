@@ -14,10 +14,7 @@ class DataSourceService_DatGetUpdates extends DatGetUpdates_EnterpriseConnector
 	final public function getPrio()      { return self::PRIO_DEFAULT; }
 	final public function getRunMode()   { return self::RUNMODE_AFTER; }
 
-	final public function runBefore( DatGetUpdatesRequest &$req ) // not called
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore( DatGetUpdatesRequest &$req ) {}
 	
 	final public function runAfter( DatGetUpdatesRequest $req, DatGetUpdatesResponse &$resp )
 	{
@@ -98,8 +95,5 @@ class DataSourceService_DatGetUpdates extends DatGetUpdates_EnterpriseConnector
 		BizMessage::sendMessages( $messageList );
 	}
 	
-	final public function runOverruled( DatGetUpdatesRequest $req ) // not called
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( DatGetUpdatesRequest $req ) {}
 }

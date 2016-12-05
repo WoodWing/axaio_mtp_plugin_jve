@@ -58,7 +58,7 @@ abstract class Search_EnterpriseConnector extends DefaultConnector
 	abstract public function updateObjects( $objects, $areas = array('Workflow') );
 
 
-	/*
+	/**
 	 * Updates a set of properties for given objects to the indexes of the Search Server.
 	 *
 	 * This function is intended to update a set of changed properties for
@@ -71,7 +71,7 @@ abstract class Search_EnterpriseConnector extends DefaultConnector
 	 * Unlike for production applications, for system administration applications, thrown exceptions
 	 * are displayed on screen to let admin user solve problems.
 	 *
-	 * @Since v9.2
+	 * @since v9.2
 	 * @param array $objectIDs List of Object IDs.
 	 * @param array $metaDataValues List of changed metadata property/values.
 	 * @return bool true if properties of all objects were successfully updated.
@@ -153,7 +153,7 @@ abstract class Search_EnterpriseConnector extends DefaultConnector
 	/**
 	 * Checks if a property is indexed, searchable, by at least one search engine.
 	 *
-     * @param string $propertyName the property to be checked
+	 * @param string $propertyName the property to be checked
 	 * @return bool true if searchable else false.
 	 */
 	abstract public function  isPropertySearchable ( $propertyName );

@@ -289,8 +289,5 @@ class ContentStationOverruleCompatibility_WflGetDialog2 extends WflGetDialog2_En
 	/**
 	 * @param WflGetDialog2Request $req
 	 */
-	final public function runOverruled (WflGetDialog2Request $req) // Not called because we're just doing run before and after
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled (WflGetDialog2Request $req) {}
 }

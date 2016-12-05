@@ -32,17 +32,12 @@ class AdobeDps_AdmDeleteIssues extends AdmDeleteIssues_EnterpriseConnector
 
 	final public function runAfter( AdmDeleteIssuesRequest $req, AdmDeleteIssuesResponse &$resp )
 	{
-		$resp = $resp;	// keep analyzer happy
-
 		if( $req->dpsIssueIds ) foreach( $req->dpsIssueIds as $issueId ) {
 			$this->cleanUpExportFolder( $issueId );
 		}
 	}
 
-	final public function runOverruled( AdmDeleteIssuesRequest $req )
-	{
-		$req = $req;	// keep analyzer happy
-	}
+	final public function runOverruled( AdmDeleteIssuesRequest $req ) {}
 
 	/**
 	 * Cleans up the Adobe Dps issue export folder.

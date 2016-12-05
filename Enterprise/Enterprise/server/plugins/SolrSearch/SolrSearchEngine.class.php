@@ -51,10 +51,20 @@ class SolrSearchEngine extends BizQuery
 	protected $resultComponents = null;
 
 	/**
-	 * Constructor
+	 * SolrSearchEngine constructor.
 	 *
 	 * Establish and test Solr connection and sets up the default search parameters shared by all search functions
 	 * supported by this engine (search, facetSearch and inboxSearch).
+	 *
+	 * @param array $searchParams
+	 * @param int $firstEntry
+	 * @param int $maxEntries
+	 * @param null $queryMode
+	 * @param bool $hierarchical
+	 * @param array $order
+	 * @param null $minimalProps
+	 * @param null $requestProps
+	 * @throws BizException when Solr connection can not be established.
 	 */
 	public function __construct( $searchParams = array(), $firstEntry = 0, $maxEntries = 0, $queryMode = null, $hierarchical = false, $order = array(), $minimalProps = null, $requestProps = null )
 	{
@@ -424,7 +434,7 @@ class SolrSearchEngine extends BizQuery
 	/**
 	 * Updates a set of metaDataValues for a list of Object IDs.
 	 *
-	 * @param array $ids Enterprise object ids to update
+	 * @param array $objectIDs Enterprise object ids to update
 	 * @param array $metaDataValues MetaDataValues to be updated
 	 * @param Bool $directCommit Direct commit setting for Solr
 	 * @throws BizException
@@ -631,7 +641,7 @@ class SolrSearchEngine extends BizQuery
 	 *
 	 * @param string $fieldToIndex Name of the solr index field
 	 * @param object $object Enterprise object
-	 * @return value of the property
+	 * @return string Value of the property
 	 */
 	private function mapIndexFieldToProperty($fieldToIndex, $object)
 	{
@@ -1434,7 +1444,7 @@ class SolrSearchEngine extends BizQuery
 	 *
 	 * @param array $fieldDefinition Formatted field definition for Solr
 	 * @param string $fieldToIndex Name of field to be indexed.
-	 * @param $indexValue the unformatted index value
+	 * @param string $indexValue The unformatted index value
 	 */
 	private function formatFieldForIndexing( &$fieldDefinition, $fieldToIndex, $indexValue )
 	{
@@ -1636,7 +1646,7 @@ class SolrSearchEngine extends BizQuery
 	 * day.
 	 *
 	 * @param string $searchValue keyword
-	 * @return Solr query value
+	 * @return string Solr query value
 	 */
 	private function addDateSearch($searchValue)
 	{
@@ -1714,7 +1724,7 @@ class SolrSearchEngine extends BizQuery
 			$key = "$facetField:$i";
 			$fq = $facetSet->createFacetQuery($key)->setQuery("$facetField:[$from TO " . strval($range)."]");
 			$this->facetQueries[$key] = $fq->GetQuery();
-			$from = strval($range) + 1;
+			$from = strval($range + 1);
 		}
 		// Add last range 'greater than'
 		$key = "$facetField:".count($ranges);
@@ -1984,7 +1994,7 @@ class SolrSearchEngine extends BizQuery
 	 * Finds metadata for a given field.
 	 *
 	 * @param string $fieldToIndex Name of the field
-	 * @param object $metaData contains the extra meta data of the object
+	 * @param array $metaData contains the extra meta data of the object
 	 * @return metaData found metaData if any. Null if not found.
 	 */
 	private function findMetaDataByField( $fieldToIndex, $metaData )

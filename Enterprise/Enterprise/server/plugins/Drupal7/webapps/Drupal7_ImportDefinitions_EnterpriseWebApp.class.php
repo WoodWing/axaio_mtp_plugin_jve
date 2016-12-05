@@ -479,7 +479,7 @@ class Drupal7_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 							$usages = BizAdmActionProperty::getAdmPropertyUsages($action, $oldTypedDocumentId);
 
 							// If there are usages for the old documentId, remove it as well and let the process later recreate them.
-							if ( count($usages > 0) ) {
+							if ( count($usages) > 0 ) {
 								if (!BizAdmActionProperty::deleteAdmPropertyUsageByActionAndDocumentId($action, $oldTypedDocumentId)) {
 									LogHandler::Log('BizPublishing', 'ERROR', 'Removing existing dialog failed for documentID: '
 										. $oldTypedDocumentId . '. Please remove it manually.');
@@ -503,6 +503,9 @@ class Drupal7_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 	/**
 	 * Queries the Enterprise DB for PublishTemplate objects. For that it uses 
 	 * the built-in "PublishFormTemplates" Named Query.
+	 *
+	 * @param int $pubChannelId
+	 * @return WflNamedQueryResponse
 	 */
 	private function queryTemplatesFromDb( $pubChannelId )
 	{

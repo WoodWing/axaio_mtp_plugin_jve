@@ -57,12 +57,12 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Convert a file from InCopy (XML) text format to collection of XHTML frames. <br>
+	 * Convert a file from InCopy (XML) text format to collection of XHTML frames.
 	 *
-	 * @param string $icFile  Full path of file to be read. <br>
-	 * @param array  $xFrames   (out) Returned collection of XHTML DOMDocument each representing one text frame. <br>
-	 * @param string $stylesCSS (out) Cascade para+char style definition. <br>
-	 * @param string $stylesMap (out) Para+char styles; GUI display name mapped onto CSS name. <br>
+	 * @param string $icFile  Full path of file to be read.
+	 * @param array  $xFrames   (out) Returned collection of XHTML DOMDocument each representing one text frame.
+	 * @param string $stylesCSS (out) Cascade para+char style definition.
+	 * @param string $stylesMap (out) Para+char styles; GUI display name mapped onto CSS name.
 	 * @param integer $domVersion (out) Major version number of the document. Zero when undetermined. CS1=3, CS2=4, CS3=5, CS4=6, etc
 	 */
 	public function importFile( $icFile, &$xFrames, &$stylesCSS, &$stylesMap, &$domVersion )
@@ -86,12 +86,12 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Convert an InCopy template into InCopy document. It creates a new IC document based on the given IC template.<br>
+	 * Convert an InCopy template into InCopy document. It creates a new IC document based on the given IC template.
 	 * The created document contains all typed content, styles, tags, stories and color definitions (swatches).
 	 * The GUIDs of of the stories are updated to make them unique.
 	 *
-	 * @param DOMDocument $icTempl  InCopy template document to be converted. <br>
-	 * @return DOMDocument  The newly created InCopy document. <br>
+	 * @param DOMDocument $icTempl  InCopy template document to be converted.
+	 * @return DOMDocument  The newly created InCopy document.
 	 */
 	public function importTemplate( $icTempl )
 	{
@@ -190,12 +190,12 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Convert a memory buffer from InCopy (XML) text format to collection of XHTML frames. <br>
+	 * Convert a memory buffer from InCopy (XML) text format to collection of XHTML frames.
 	 *
-	 * @param DOMDocument $icDoc  InCopy document to be parsed. <br>
-	 * @param array $xFrames    (out) Returned collection of XHTML DOMDocument each representing one text frame. <br>
-	 * @param string $stylesCSS (out) Cascade para+char style definition. <br>
-	 * @param string $stylesMap (out) Para+char styles; GUI display name mapped onto CSS name. <br>
+	 * @param DOMDocument $icDoc  InCopy document to be parsed.
+	 * @param array $xFrames    (out) Returned collection of XHTML DOMDocument each representing one text frame.
+	 * @param string $stylesCSS (out) Cascade para+char style definition.
+	 * @param string $stylesMap (out) Para+char styles; GUI display name mapped onto CSS name.
 	 * @param integer $domVersion (out) Major version number of the document. Zero when undetermined. CS1=3, CS2=4, CS3=5, CS4=6, etc
 	 */
 	public function importBuf( $icDoc, &$xFrames, &$stylesCSS, &$stylesMap, &$domVersion )
@@ -257,10 +257,10 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Parse the InCopy Story element and returns an xframe with GUID <br>
-	 * InCopy path: Stories/Story/GUID  <br>
+	 * Parse the InCopy Story element and returns an xframe with GUID
+	 * InCopy path: Stories/Story/GUID
 	 *
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
+	 * @param DOMNode     $icStory (in)   InCopy Story element.
 	 * @return string     GUID of graphic
 	 */
 	private function handleGraphicElem( $icStory )
@@ -276,13 +276,13 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Parse the InCopy Story element, convert it into a XHTML and add it to the body element. <br>
-	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr  <br>
+	 * Parse the InCopy Story element, convert it into a XHTML and add it to the body element.
+	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
-	 * @param DOMDocument $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode     $xBody (in/out) XHTML body element. <br>
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @param DOMNode     $icStory (in)   InCopy Story element.
+	 * @param DOMDocument $xDoc (in/out)  XHTML document.
+	 * @param DOMNode     $xBody (in/out) XHTML body element.
 	 * @return string     GUID of story
 	 */
 	private function handleStoryElem( $icDoc, $icStory, &$xDoc, &$xBody )
@@ -349,7 +349,7 @@ class InCopyTextImport implements TextImport
 					// so we can't use it.  Therefore we use XPath instead to get last text element.
 					$query2 = 'pcnt/text()[position()=last()]'; // Get txsr's last text element
 					$entries2 = $xpath->query( $query2, $icTxsr );
-					$lastChars = (count( $entries2 ) > 0 && $entries2->item(0)) ? substr( $entries2->item(0)->nodeValue, -strlen(IC_HARD_EOL) ) : false; // Don't use mb_substr since we do bytes here!
+					$lastChars = ($entries2->length > 0 && $entries2->item(0)) ? substr( $entries2->item(0)->nodeValue, -strlen(IC_HARD_EOL) ) : false; // Don't use mb_substr since we do bytes here!
 					$prevEndsWithEOL = $lastChars && ($lastChars == IC_HARD_EOL);
 				}
 			}
@@ -435,20 +435,20 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Parse the InCopy txsr element, convert it into a XHTML and add it to the paragraph(p) element. <br>
-	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr/pcnt  <br>
+	 * Parse the InCopy txsr element, convert it into a XHTML and add it to the paragraph(p) element.
+	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr/pcnt
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
-	 * @param DOMNode     $icTxsr (in)    InCopy txsr element. <br>
-	 * @param DOMDocument $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode     $xBody (in/out) XHTML body element. <br>
-	 * @param DOMNode     $xPara (in/out) XHTML paragraph element. <br>
-	 * @param DOMNode     $xSpan (in/out) XHTML span (char style) element. <br>
-	 * @param DOMNode     $xList (in/out) XHTML ul or ol element. <br>
-	 * @param String      $key			  Number of processed txsr in InCopy story <br>
-	 * @param Boolean	  $emptyList	  Previous empty LI <br>
-	 * @param Boolean	  $sameRestart	  Same restart value for continuous list item <br>
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @param DOMNode     $icStory (in)   InCopy Story element.
+	 * @param DOMNode     $icTxsr (in)    InCopy txsr element.
+	 * @param DOMDocument $xDoc (in/out)  XHTML document.
+	 * @param DOMNode     $xBody (in/out) XHTML body element.
+	 * @param DOMNode     $xPara (in/out) XHTML paragraph element.
+	 * @param DOMNode     $xSpan (in/out) XHTML span (char style) element.
+	 * @param DOMNode     $xList (in/out) XHTML ul or ol element.
+	 * @param String      $key			  Number of processed txsr in InCopy story
+	 * @param Boolean	  $emptyList	  Previous empty LI
+	 * @param Boolean	  $sameRestart	  Same restart value for continuous list item
 	 */
 	private function handleTxsrElem( $icDoc, $icStory, $icTxsr, &$xDoc, &$xBody, &$xPara, &$xSpan, &$xList, $key, &$emptyList, $sameRestart )
 	{
@@ -569,29 +569,27 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Parse the InCopy text() element, convert it into a XHTML and add it to the span element. <br>
+	 * Parse the InCopy text() element, convert it into a XHTML and add it to the span element.
 	 * Also, hard EOL are converted to p+span elements, and soft EOL to br elements.
-	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr/pcnt/text()  <br>
+	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr/pcnt/text()
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
-	 * @param DOMNode     $icTxsr (in)    InCopy txsr element. <br>
-	 * @param DOMTextNode $icText (in)    InCopy text element. <br>
-	 * @param DOMDocument $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode     $xBody (in/out) XHTML body element. <br>
-	 * @param DOMNode     $xPara (in/out) XHTML paragraph element. <br>
-	 * @param DOMNode     $xSpan (in/out) XHTML span element. <br>
-	 * @param DOMNode     $xList (in/out) XHTML ul or ol element. <br>
-	 * @param DOMNodeType $xPrevNodeType  XHTML Previous Node Type. <br>
-	 * @param DOMNodeType $xNextNodeType  XHTML Next Node Type. <br>
-	 * @param String 	  $xKey  		  Number of processed txsr in InCopy story  <br>
-	 * @param Boolean	  $xEmptyList	  Previous empty LI <br>
-	 * @param Boolean	  $sameRestart	  Same restart value for continuous list item <br>
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @param DOMNode     $icStory (in)   InCopy Story element.
+	 * @param DOMNode     $icTxsr (in)    InCopy txsr element.
+	 * @param DOMTextNode $icText (in)    InCopy text element.
+	 * @param DOMDocument $xDoc (in/out)  XHTML document.
+	 * @param DOMNode     $xBody (in/out) XHTML body element.
+	 * @param DOMNode     $xPara (in/out) XHTML paragraph element.
+	 * @param DOMNode     $xSpan (in/out) XHTML span element.
+	 * @param DOMNode     $xList (in/out) XHTML ul or ol element.
+	 * @param DOMNodeType $xPrevNodeType  XHTML Previous Node Type.
+	 * @param DOMNodeType $xNextNodeType  XHTML Next Node Type.
+	 * @param string 	  $key  		  Number of processed txsr in InCopy story
+	 * @param boolean	  $xEmptyList	  Previous empty LI
+	 * @param boolean	  $sameRestart	  Same restart value for continuous list item
 	 */
 	private function handleText( $icDoc, $icStory, $icTxsr, $icText, &$xDoc, &$xBody, &$xPara, &$xSpan, &$xList, $xPrevNodeType, $xNextNodeType, $key, &$xEmptyList, $sameRestart )
 	{
-		$icDoc = $icDoc; $icStory = $icStory; // keep analyzer happy
-
 		$xLI = null; // list item
 		// BZ#6473 replace IC's nbsp (fixed width) with normal nbsp, or else it won't be shown in HTML
 		$icText = mb_eregi_replace( chr(0xE2).chr(0x80).chr(0xAF), chr(0xC2).chr(0xA0), $icText );
@@ -627,6 +625,7 @@ class InCopyTextImport implements TextImport
 			}
 
 			// Insert container element (to hold new text chunk), which is a p+span (style change) or ol/ul (list)
+			$xTextParent = null;
 			if( $xList ) {
 				if( strlen( $text1 ) > 0 || $addPara ) { // avoid empty list bullets/numbers at end of list except PI_NODE
 					if( $text1 == chr(10)) {
@@ -766,11 +765,11 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Collects all "unknown" txsr attributes of the given InCopy txsr element ($icTxsr). <br>
-	 * This is all done to maintain free formating to text selections (not to be confused with para/char styles). <br>
-	 * The unknown attributes are serialized in the span->id attribute in HTML (outside this function). <br>
+	 * Collects all "unknown" txsr attributes of the given InCopy txsr element ($icTxsr).
+	 * This is all done to maintain free formating to text selections (not to be confused with para/char styles).
+	 * The unknown attributes are serialized in the span->id attribute in HTML (outside this function).
 	 *
-	 * @param DOMNode  $icTxsr (in)  InCopy txsr element. <br>
+	 * @param DOMNode  $icTxsr (in)  InCopy txsr element.
 	 * @return array of txsr attributes (exept prst and crst)
 	 */
 	private function collectTxsrAttrs( $icTxsr )
@@ -792,11 +791,11 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Gets the attribute for the given style element or from its parent. <br>
+	 * Gets the attribute for the given style element or from its parent.
 	 *
-	 * @param DOMNode     $icElem       InCopy paragraph-, character- or color style element. <br>
-	 * @param string      $icAttr       InCopy attribute name. <br>
-	 * @param string      $icStyleType  'para', 'char' or 'colr'. <br>
+	 * @param DOMNode     $icElem       InCopy paragraph-, character- or color style element.
+	 * @param string      $icAttr       InCopy attribute name.
+	 * @param string      $icStyleType  'para', 'char' or 'colr'.
 	 * @return value of the attribute. Empty when not found.
 	 */
 	private function getInheritedAttribute( $icElem, $icAttr, $icStyleType )
@@ -819,21 +818,19 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Parse InCopy symbols, convert it into a XHTML image (place holder) and add it to the span element. <br>
-	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr/pcnt/text()  <br>
+	 * Parse InCopy symbols, convert it into a XHTML image (place holder) and add it to the span element.
+	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr/pcnt/text()
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
-	 * @param string      $icSymbol (in)  InCopy symbol. <br>
-	 * @param DOMDocument $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode     $xSpan (in/out) XHTML span element. <br>
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @param DOMNode     $icStory (in)   InCopy Story element.
+	 * @param string      $icSymbol (in)  InCopy symbol.
+	 * @param DOMDocument $xDoc (in/out)  XHTML document.
+	 * @param DOMNode     $xSpan (in/out) XHTML span element.
 	 */
 	private function handleSymbol( $icDoc, $icStory, $icSymbol, &$xDoc, &$xSpan )
 	{
-		$icDoc = $icDoc; $icStory = $icStory; // keep analyzer happy
-
 		// TODO: Localizations
-		$symbols = array( 'SClB' => 'AC_BREAK_COLUMN', 'SFrB' => 'AC_BREAK_FRAME', 'SPgB' => 'AC_BREAK_PAGE', 'SApn' => 'AC_MARKER_CURRENTPAGE', 'SNpn' => 'AC_MARKER_NEXTPAGE', 'SPpn' => 'AC_MARKER_PREVIOUSPAGE', 'SsnM' => 'AC_MARKER_SECTION', 'SOpB' => 'AC_BREAK_ODDPAGE', 'SEpB' => 'AC_BREAK_EVENPAGE', 'SPtv' => 'Text variable', 'SNbS' => 'AC_WHITESPACE_NONBREAKING', 'SsnM' => 'AC_MARKER_SECTION' );
+		$symbols = array( 'SClB' => 'AC_BREAK_COLUMN', 'SFrB' => 'AC_BREAK_FRAME', 'SPgB' => 'AC_BREAK_PAGE', 'SApn' => 'AC_MARKER_CURRENTPAGE', 'SNpn' => 'AC_MARKER_NEXTPAGE', 'SPpn' => 'AC_MARKER_PREVIOUSPAGE', 'SsnM' => 'AC_MARKER_SECTION', 'SOpB' => 'AC_BREAK_ODDPAGE', 'SEpB' => 'AC_BREAK_EVENPAGE', 'SPtv' => 'Text variable', 'SNbS' => 'AC_WHITESPACE_NONBREAKING' );
 		if( $icSymbol != 'SPtv' ) { // Skip the Text Variables, which are identified with "< ?aid ..." instructions; these are handled in handlePcntPI function.
 			$acKey = array_key_exists( $icSymbol, $symbols ) ? $symbols[$icSymbol] : BizResources::localize( 'ART_SPECIAL_CHAR' );
 
@@ -847,15 +844,15 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Parse the InCopy processing instructions (PI), convert it into a XHTML image (place holder) and add it to the span element. <br>
-	 * Only known instructions (aid and ACE) are converted. Others are passed through as-is. <br>
-	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr/pcnt/text()  <br>
+	 * Parse the InCopy processing instructions (PI), convert it into a XHTML image (place holder) and add it to the span element.
+	 * Only known instructions (aid and ACE) are converted. Others are passed through as-is.
+	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr/pcnt/text()
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
-	 * @param DOMProcessingInstruction $icPI (in) InCopy PI element. <br>
-	 * @param DOMDocument $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode     $xSpan (in/out) XHTML span element. <br>
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @param DOMNode     $icStory (in)   InCopy Story element.
+	 * @param DOMProcessingInstruction $icPI (in) InCopy PI element.
+	 * @param DOMDocument $xDoc (in/out)  XHTML document.
+	 * @param DOMNode     $xSpan (in/out) XHTML span element.
 	 */
 	private function handlePcntPI( $icDoc, $icStory, $icPI, &$xDoc, &$xSpan )
 	{
@@ -881,20 +878,17 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Parse the InCopy ACE processing instructions (PI), convert it into a XHTML image (place holder) and add it to the span element. <br>
-	 * The ACE elements represent all kind of instructions, such as footnote number, right indent tab, auto page number, etc <br>
-	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr/pcnt/text()  <br>
+	 * Parse the InCopy ACE processing instructions (PI), convert it into a XHTML image (place holder) and add it to the span element.
+	 * The ACE elements represent all kind of instructions, such as footnote number, right indent tab, auto page number, etc
+	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr/pcnt/text()
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
-	 * @param string      $icAceId (in)   InCopy ACE id. Taken from: < ?ACE [id]? > <br>
-	 * @param DOMDocument $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode     $xSpan (in/out) XHTML span element. <br>
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @param string      $icAceId (in)   InCopy ACE id. Taken from: < ?ACE [id]? >
+	 * @param DOMDocument $xDoc (in/out)  XHTML document.
+	 * @param DOMNode     $xSpan (in/out) XHTML span element.
 	 */
 	private function handleAcePI( $icDoc, $icAceId, &$xDoc, &$xSpan )
 	{
-		$icDoc = $icDoc; // keep analyzer happy
-
 		// TODO: Localizations
 		$symbols = array( '3' => 'AC_OTHER_ENDNESTEDSTYLE', '4' => 'AC_MARKER_FOOTNOTE', '7' => 'AC_OTHER_INDENTTOHERE', '8' => 'AC_OTHER_RIGHTINDENTTAB', '18' => 'AC_MARKER_CURRENTPAGE', '19' => 'AC_MARKER_SECTION' );
 		$acKey = array_key_exists( $icAceId, $symbols ) ? $symbols[$icAceId] : BizResources::localize( 'ART_SPECIAL_CHAR' );
@@ -909,10 +903,15 @@ class InCopyTextImport implements TextImport
 		}
 	}
 
-	/*
+	/**
 	 * Factory that creates StoryResourceDef object out of given unconvertable InCopy XML element ($icNode). <br/>
 	 *
-	 * @return object StoryResourceDef <br/>
+	 * @param DOMDocument $icDoc
+	 * @param DOMNode $icNode
+	 * @param string $elemId
+	 * @param $elemEndId
+	 * @param $startMarker
+	 * @return StoryResourceDef <br/>
 	 */
 	private function createStoryResourceDef( $icDoc, $icNode, $elemId, $elemEndId, $startMarker )
 	{
@@ -981,6 +980,7 @@ class InCopyTextImport implements TextImport
 		}
 		switch( $icNode->nodeName ) {
 			case 'Note': // inline note
+			/** @noinspection PhpMissingBreakStatementInspection */
 			case 'FNcl': // footnote
 				if( ($dcuz = $icNode->getAttribute('dcuz') ) ) { // user id
 					$userId = mb_substr( $dcuz, 2 ); // skip 'o_' prefix
@@ -1010,6 +1010,7 @@ class InCopyTextImport implements TextImport
 			case 'covl': // inline circle/polygon
 				break;
 			case 'txtf': // inline text
+				$roId = '';
 				if( ($strp = $icNode->getAttribute('strp')) ) {
 					$roId = mb_substr( $strp, 3 ); // skip 'ro_' prefix
 				}
@@ -1071,16 +1072,17 @@ class InCopyTextImport implements TextImport
 
 	/**
 	 * Searches resource definitions at InCopy database for embedded elements referenced from 
-	 * text content by given resource id ($rcId) as held in Processing Instructions. <br>
+	 * text content by given resource id ($rcId) as held in Processing Instructions.
 	 *
 	 * Note that Tracked Changes (Chng) is left out on purpose(!) since we can not round-trip Tracked Changes 
 	 * with InCopy due to technical difficulties at Web Editor. This function skips all changes so they'll  get 
 	 * applied/removed implicitly by opening the article. TODO: Would it be nice to inform user about the applied changes...?
 	 *
-	 * @param DOMDocument $icDoc (in)   InCopy document. <br>
-	 * @param DOMNode     $icStory (in) InCopy Story element. <br>
-	 * @param string      $rcId (in)    Resource id of the embedded element to search for. <br>
-	 * @param DOMNode     $char (in)    Special marker (The Char attribute of the aid PI). <br>
+	 * @param DOMDocument $icDoc (in)   InCopy document.
+	 * @param DOMNode     $icStory (in) InCopy Story element.
+	 * @param string      $rcId (in)    Resource id of the embedded element to search for.
+	 * @param string     $char (in)    Special marker (The Char attribute of the aid PI).
+	 * @return StoryResourceDef|null
 	 */
 	private function searchStoryResourceDefs( $icDoc, $icStory, $rcId, $char )
 	{
@@ -1155,16 +1157,16 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Parse the InCopy aid processing instructions (PI), convert it into a XHTML image (place holder) and add it to the span element. <br>
-	 * The aid elements represent all kind of embedded objects, such as images, tables, user comments, sticky notes, etc <br>
-	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr/pcnt/text()  <br>
+	 * Parse the InCopy aid processing instructions (PI), convert it into a XHTML image (place holder) and add it to the span element.
+	 * The aid elements represent all kind of embedded objects, such as images, tables, user comments, sticky notes, etc
+	 * InCopy path: Stories/Story/SnippetRoot/cflo/txsr/pcnt/text()
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
-	 * @param DOMDocument $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode     $xSpan (in/out) XHTML span element. <br>
-	 * @param DOMNode     $resId (in)     Resource id (The Self attribute of the aid PI). <br>
-	 * @param DOMNode     $char (in)      Special marker (The Char attribute of the aid PI). <br>
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @param DOMNode     $icStory (in)   InCopy Story element.
+	 * @param DOMDocument $xDoc (in/out)  XHTML document.
+	 * @param DOMNode     $xSpan (in/out) XHTML span element.
+	 * @param string     $resId (in)     Resource id (The Self attribute of the aid PI).
+	 * @param string     $char (in)      Special marker (The Char attribute of the aid PI).
 	 */
 	private function handleAidPI( $icDoc, $icStory, &$xDoc, &$xSpan, $resId, $char )
 	{
@@ -1178,8 +1180,8 @@ class InCopyTextImport implements TextImport
 	}
 	
 	/**
-	 * Parse the InCopy aid processing instructions (PI), convert it into a XHTML hyperlink (anchor/<a>) and add it to the span element. <br>
-	 * References made from PI to IC DB are very unlike other embedded objects, such as images, tables, user comments, sticky notes, etc <br>
+	 * Parse the InCopy aid processing instructions (PI), convert it into a XHTML hyperlink (anchor/<a>) and add it to the span element.
+	 * References made from PI to IC DB are very unlike other embedded objects, such as images, tables, user comments, sticky notes, etc
 	 * When you have a link "http://www.myworld.com" defined behind some text "hello world" and named it "myworld", the IC doc looks like this:
 	 *	...
 	 *	<cflo ...>
@@ -1204,11 +1206,11 @@ class InCopyTextImport implements TextImport
 	 * Instead, the handleText() function deals with that. And so we add the link to an internal stack, which is requested by the function.
 	 * When it finds the end marker, the hyperlink object is removed from stack, and so handleText() will continue handling texts normally again.
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
-	 * @param DOMDocument $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode     $xSpan (in/out) XHTML span element. <br>
-	 * @param DOMNode     $resId (in)     Resource id of the aid element. <br>
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @param DOMNode     $icStory (in)   InCopy Story element.
+	 * @param DOMDocument $xDoc (in/out)  XHTML document.
+	 * @param DOMNode     $xSpan (in/out) XHTML span element.
+	 * @param string     $resId (in)     Resource id of the aid element.
 	 */
 	private function handleHyperlink( $icDoc, $icStory, &$xDoc, &$xSpan, $resId )
 	{
@@ -1227,14 +1229,14 @@ class InCopyTextImport implements TextImport
 	}
 	
 	/**
-	 * Creates an XHTML image, which is used as place holder in XHTML for InCopy Processing Instructions. <br>
+	 * Creates an XHTML image, which is used as place holder in XHTML for InCopy Processing Instructions.
 	 *
-	 * @param DOMDocument      $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode          $xSpan (in/out) XHTML span element. <br>
-	 * @param ResourceDataDefs $refObj (in)    Resource object specifying how to create the XHTML image. <br>
-	 * @param string           $rcId (in)      Resource id. <br>
-	 * @param string           $type (in)      XHTML document. <br>
-	 * @return DOMNode XHTML image representing the PI. <br>
+	 * @param DOMDocument      $xDoc (in/out)  XHTML document.
+	 * @param DOMNode          $xSpan (in/out) XHTML span element.
+	 * @param StoryResourceDef $refObj (in)    Resource object specifying how to create the XHTML image.
+	 * @param string           $rcId (in)      Resource id.
+	 * @param string           $type (in)      XHTML document.
+	 * @return DOMNode XHTML image representing the PI.
 	 */
 	private function createImageForPI( &$xDoc, &$xSpan, $refObj, $rcId, $type )
 	{
@@ -1250,17 +1252,18 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	 * Creates an XHTML image, which is used as place holder in XHTML for WW Smart Catalog fields. <br>
+	 * Creates an XHTML image, which is used as place holder in XHTML for WW Smart Catalog fields.
 	 *
-	 * @param DOMDocument      $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode          $xSpan (in/out) XHTML span element. <br>
-	 * @param string           $icWWtg (in)    WWtg attribute, such as: WWtg="x_8_c_SCat_c__c_Products_c__c_ _l_ffffffff_l_ffffffff_c_" <br>
-	 * @param string           $icText (in)    Generated (non-editable) field text. <br>
-	 * @return DOMNode XHTML image representing the SCat field. <br>
+	 * @param DOMDocument      $xDoc (in/out)  XHTML document.
+	 * @param DOMNode          $xSpan (in/out) XHTML span element.
+	 * @param string           $icWWtg (in)    WWtg attribute, such as: WWtg="x_8_c_SCat_c__c_Products_c__c_ _l_ffffffff_l_ffffffff_c_"
+	 * @param string           $icText (in)    Generated (non-editable) field text.
+	 * @return DOMNode XHTML image representing the SCat field.
 	 */
 	private function createImageForWWtg( &$xDoc, &$xSpan, $icWWtg, $icText )
 	{
 		$parts = mb_split( '_', $icWWtg );
+		$title = '';
 		if( count( $parts ) > 7 ) {
 			$title = ( $parts[3] == 'SCat' ) ? 'Smart Catalog: ' : '';
 			$title .= $parts[7] . ': ' . $icText;
@@ -1285,20 +1288,18 @@ class InCopyTextImport implements TextImport
 	private $cssnamesarray = array();
 
 	/**
-	 * Parse the InCopy Story element, convert it into a XHTML and add it to the body element. <br>
-	 * InCopy path: Stories/Story/SnippetRoot/psty  <br>
+	 * Parse the InCopy Story element, convert it into a XHTML and add it to the body element.
+	 * InCopy path: Stories/Story/SnippetRoot/psty
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
-	 * @param DOMDocument $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode     $xBody (in/out) XHTML body element. <br>
-	 * @param string      $stylesCSS (out) Cascade para+char style definition. <br>
-	 * @param string      $stylesMap (out) Para+char styles; GUI display name mapped onto CSS name. <br>
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @param DOMNode     $icStory (in)   InCopy Story element.
+	 * @param DOMDocument $xDoc (in/out)  XHTML document.
+	 * @param DOMNode     $xBody (in/out) XHTML body element.
+	 * @param string      $stylesCSS (out) Cascade para+char style definition.
+	 * @param string      $stylesMap (out) Para+char styles; GUI display name mapped onto CSS name.
 	 */
 	private function handleStyleElems( $icDoc, $icStory, $xDoc, $xBody, &$stylesCSS, &$stylesMap )
 	{
-		$xDoc = $xDoc; $xBody = $xBody; // keep analyzer happy
-		
 		// Color styles
 		$xpath = new DOMXPath( $icDoc );
 		$queries = array( 'SnippetRoot/colr' => $icStory,
@@ -1490,9 +1491,12 @@ class InCopyTextImport implements TextImport
 	}
 
 	/**
-	  * @param DOMNode $icStyle     InCopy para/char style element (psty/csty) <br>
-	  * @param string $styleType    Style to generate: 'para' or 'char' <br>
-	  */
+	 * @param DOMNode $icStyle     InCopy para/char style element (psty/csty)
+	 * @param string $styleType    Style to generate: 'para' or 'char'
+	 * @param array $css
+	 * @param string|null $self
+	 * @return array
+	 */
 	private function generateCSS( $icStyle, $styleType, $css = array(), $self = null )
 	{
 		if( !is_object($icStyle) ) {
@@ -1679,11 +1683,11 @@ class InCopyTextImport implements TextImport
 	/**
 	 * Create ordered/unordered list UL/OL element.
 	 *
-	 * @param DOMNode     $icTxsr (in)    InCopy txsr element. <br>
-	 * @param DOMDocument $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode     $xBody (in/out) XHTML body element. <br>
-	 * @param DOMNode     $xPara (in/out) XHTML paragraph element. <br>
-	 * @param DOMNode     $xList (in/out) XHTML ul or ol element. <br>
+	 * @param DOMNode     $icTxsr (in)    InCopy txsr element.
+	 * @param DOMDocument $xDoc (in/out)  XHTML document.
+	 * @param DOMNode     $xBody (in/out) XHTML body element.
+	 * @param DOMNode     $xPara (in/out) XHTML paragraph element.
+	 * @param DOMNode     $xList (in/out) XHTML ul or ol element.
 	 */
 	private function createListElement( $icTxsr, &$xDoc, &$xBody, &$xPara, &$xList )
 	{
@@ -1719,12 +1723,12 @@ class InCopyTextImport implements TextImport
 	/**
 	 * Create ordered/unordered list item LI element.
 	 *
-	 * @param DOMNode     $icTxsr (in)    InCopy txsr element. <br>
-	 * @param DOMDocument $xDoc (in/out)  XHTML document. <br>
-	 * @param DOMNode     $xSpan (in/out) XHTML span element. <br>
-	 * @param DOMNode     $xList (in/out) XHTML ul or ol element. <br>
-	 * @param Boolean	  $xEmptyList	  Previous empty LI. <br>
-	 * @param String 	  $key1  		  Number of hard return in one processed text item.  <br>
+	 * @param DOMNode     $icTxsr (in)    InCopy txsr element.
+	 * @param DOMDocument $xDoc (in/out)  XHTML document.
+	 * @param DOMNode     $xSpan (in/out) XHTML span element.
+	 * @param DOMNode     $xList (in/out) XHTML ul or ol element.
+	 * @param Boolean	  $xEmptyList	  Previous empty LI.
+	 * @param String 	  $key1  		  Number of hard return in one processed text item.
 	 */
 	private function createListItem( $icTxsr, &$xDoc, &$xSpan, &$xList, &$xEmptyList, $key1 )
 	{
@@ -1743,18 +1747,22 @@ class InCopyTextImport implements TextImport
 			// If it is having same prst, then we don't create a new li, instead of appending the text to the previous li
 			// This is to avoid create multiple li in WE.
 			if( $xList->lastChild ) {
-				$liChild 	= $xList->lastChild;
-				$liClass	= $liChild->getAttribute( 'class' );
-				$liClass	= substr($liClass, 4);
+				$liChild = $xList->lastChild;
+				$liClass = $liChild->getAttribute( 'class' );
+				$liClass = substr($liClass, 4);
 				if( $liChild->lastChild ) {
-					$spanChild 	= $liChild->lastChild;
-					$spanClass	= $spanChild->getAttribute( 'class' );
-					$spanClass	= substr($spanClass, 4);
+					$spanChild = $liChild->lastChild;
+					$spanClass = $spanChild->getAttribute( 'class' );
+					$spanClass = substr($spanClass, 4);
 				}
 				if( $icPrst == $liClass ) {
 					$xLI 	= $liChild;
+					/** @noinspection PhpUndefinedVariableInspection $spanClass
+					  * Too complex to make changes here, as setting a default value might already change behaviour. */
 					if( $icCrst == $spanClass ) {
-						$xSpan 	= $spanChild;
+						/** @noinspection PhpUndefinedVariableInspection $spanChild
+						 * Too complex to make changes here, as setting a default value might already change behaviour. */
+						$xSpan = $spanChild;
 					}
 					else {
 						$xSpan = $xDoc->createElement( 'span' );
@@ -1785,4 +1793,3 @@ class InCopyTextImport implements TextImport
 		return null;
 	}
 }
-?>

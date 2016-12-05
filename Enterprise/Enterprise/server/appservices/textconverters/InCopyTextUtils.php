@@ -151,8 +151,8 @@ class InCopyUtils
 	}
 	
 	
-	/*
-	 * Generate unique GUID (in 8-4-4-4-12 format) that can be used for Adobe InCopy stories. <br>
+	/**
+	 * Generate unique GUID (in 8-4-4-4-12 format) that can be used for Adobe InCopy stories.
 	 *
 	 * @return string   GUID
 	 */
@@ -226,6 +226,9 @@ class InCopyUtils
 	/**
 	 * Determines the default paragraph style for the given InCopy story.
 	 * This style is typically used when no style is explicitly set by user.
+	 *
+	 * @param DOMDocument $icDoc
+	 * @param DOMNode $icStory
 	 * @return string Name of the style (without "rc_" prefix). Empty on error.
 	 */
 	static public function getDefaultParaStyle( $icDoc, $icStory )
@@ -249,7 +252,6 @@ class InCopyUtils
 				}
 			}
 		} catch( DOMException $e ) {
-			$e = $e; // keep analyzer happy
 		}
 		return ''; // should never happen?
 	}
@@ -257,6 +259,9 @@ class InCopyUtils
 	/**
 	 * Determines the default character style for the given InCopy story.
 	 * This style is typically used when no style is explicitly set by user.
+	 *
+	 * @param DOMDocument $icDoc
+	 * @param DOMNode $icStory
 	 * @return string Name of the style (without "rc_" prefix). Empty on error.
 	 */
 	static public function getDefaultCharStyle( $icDoc, $icStory )
@@ -278,7 +283,6 @@ class InCopyUtils
 				}
 			}
 		} catch( DOMException $e ) {
-			$e = $e; // keep analyzer happy
 		}
 		return ''; // should never happen?
 	}
@@ -893,9 +897,9 @@ class ICDBHyperlink
 	/**
 	 * Lookup hyperlink in InCopy database ($icDoc) for given story ($icStory).
 	 * Properties are taken from given XHTML hyperlink ($xLink).
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
-	 * @param DOMNode     $xLink (in)     XHTML hyperlink (anchor) element. <br>
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @param DOMNode     $icStory (in)   InCopy Story element.
+	 * @param DOMNode     $xLink (in)     XHTML hyperlink (anchor) element.
 	 * @return boolean Wether or not the hyperlink could be found at InCopy database.
 	 */
 	public function findHyperlink4Href( $icDoc, $icStory, $xLink )
@@ -907,16 +911,16 @@ class ICDBHyperlink
 		
 		if( $resId ){
 			$entries = $xpath->query( 'SnippetRoot/HLOB[@Self="'.$resId.'"]', $icStory );
-			if( count($entries) > 0 && ($icHLOB = $entries->item(0)) ) {
+			if( $entries->length > 0 && ($icHLOB = $entries->item(0)) ) {
 				$resId = 'rc_'.mb_substr( $icHLOB->getAttribute( 'hlds' ), 2 ); // replace 'o_' prefix with 'rc_'
 				$entries = $xpath->query( 'SnippetRoot/HLUd[@Self="'.$resId.'"]', $icStory ); 
-				if( count($entries) > 0 && ($icHLUd = $entries->item(0)) ) {
+				if( $entries->length > 0 && ($icHLUd = $entries->item(0)) ) {
 					$icHLUd->setAttribute( 'hURL', 'c_'.$href );
 					$icHLUd->setAttribute( 'pname', 'c_'.$title );
 				}
 				$resId = 'rc_'.mb_substr( $icHLOB->getAttribute( 'hlsc' ), 2 ); // replace 'o_' prefix with 'rc_'
 				$entries = $xpath->query( 'SnippetRoot/HLTs[@Self="'.$resId.'"]', $icStory ); 
-				if( count($entries) > 0 && ($icHLTs = $entries->item(0)) ) {
+				if( $entries->length > 0 && ($icHLTs = $entries->item(0)) ) {
 					$icHLTs->setAttribute( 'pname', 'c_'.$title );
 					$icHsTx = $icHLTs->getAttribute( 'hsTx' );
 					$resIds = explode( ':', $icHsTx ); // get out start+stop resource ids, such as: hsTx="o_ubdcins4:ubdcins8"
@@ -1047,8 +1051,8 @@ class ICDBHyperlink
 	 * Creates processing instruction which represents the start marker for InCopy content pointing 
 	 * to the InCopy database that holds the hyperlink definition found with findHyperlink() function.
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @return processing instruction
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @return DOMProcessingInstruction The new DOMProcessingInstruction or false if an error occured.
 	 */
 	public function createStartPI( $icDoc )
 	{
@@ -1059,8 +1063,8 @@ class ICDBHyperlink
 	 * Creates processing instruction which represents the end marker for InCopy content pointing 
 	 * to the InCopy database that holds the hyperlink definition found with findHyperlink() function.
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @return processing instruction
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @return DOMProcessingInstruction The new DOMProcessingInstruction or false if an error occured.
 	 */
 	public function createEndPI( $icDoc )
 	{
@@ -1073,9 +1077,9 @@ class ICDBHyperlink
 	 * Markers are processing instructions that wrap the hyperlink at content and refer to the InCopy 
 	 * database where the hyperlink definition (properties) can be found.
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
-	 * @param string      $resId (in)     The resource id of the hyperlink. <br>
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @param DOMNode     $icStory (in)   InCopy Story element.
+	 * @param string      $resId (in)     The resource id of the hyperlink.
 	 * @return integer MARKER_START or MARKER_END when $resId is start- or end marker. Return MARKER_NOT_FOUND when not found.
 	 */
 	public function findHyperlink4ResId( $icDoc, $icStory, $resId )
@@ -1113,9 +1117,9 @@ class ICDBHyperlink
 	 * Call the findHyperlink4ResId() function before calling this function.
 	 * Returns null when properties could not be determined (should never happen).
 	 *
-	 * @param DOMDocument $icDoc (in)     InCopy document. <br>
-	 * @param DOMNode     $icStory (in)   InCopy Story element. <br>
-	 * @param DOMDocument $xDoc (in)      XHTML document. <br>
+	 * @param DOMDocument $icDoc (in)     InCopy document.
+	 * @param DOMNode     $icStory (in)   InCopy Story element.
+	 * @param DOMDocument $xDoc (in)      XHTML document.
 	 * @return DOMNode The XHTML hyperlink object.
 	 */
 	public function createHyperlinkXHTML( $icDoc, $icStory, $xDoc )
@@ -1157,7 +1161,7 @@ class ICDBToken
 	
 	/**
 	 * Parse a token, by splitting up given token string into type and value.
-	 * @param string $strToken Type and value separated by "_"
+	 * @param string $tokenStr Type and value separated by "_"
 	 */
 	public function __construct( $tokenStr )
 	{
@@ -1177,5 +1181,3 @@ class ICDBToken
 		return $this->type.'_'.$this->value;
 	}
 }
-
-?>

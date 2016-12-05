@@ -45,7 +45,6 @@ class oracledriver extends WW_DbDrivers_DriverBase
 			}
 	
 			// ORACLE does not use DBSELECT, this should be set as default tablespace for user
-			$dbselect = $dbselect; // keep analyzer happy
 		}
 		PerformanceProfiler::stopProfile( 'db connect (oracle)', 4 );
 	}
@@ -557,7 +556,6 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	// See mssqldriver->copyid for comments
 	public function copyid( $table, $after )
 	{
-		$table = $table; $after = $after; // keep analyzer happy	
 		// nothing to do
 	}
 	
@@ -660,7 +658,6 @@ class oracledriver extends WW_DbDrivers_DriverBase
 
     public function nextId($seqname, $ondemand = true)
     {
-    	$ondemand = $ondemand; // keep analyzer happy
         $seqname = $this->getSequenceName($seqname);
         $sth = $this->query("SELECT ${seqname}.nextval FROM dual");
         $arr = $this->fetch($sth);
@@ -683,15 +680,18 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	 * Handles statements involving blob or large blob inserts/updates. In case of large blob
 	 * only one large blob per statement is supported. In case of blobs multiple blobs can be
 	 * inserted/updated.
-	 * @param $stmt Prepared statement with bind variables
-	 * @param $data Array of blob data to be inserted/updated
-	 * @param $largeblob data is of type large blob.
+	 *
+	 * @param resource $stmt Prepared statement with bind variables
+	 * @param array $data Array of blob data to be inserted/updated
+	 * @param boolean $largeblob data is of type large blob.
+	 * @return resource
 	 */
 	private function _oracleexecute($stmt, $data = array(), $largeblob = false)
 	{
 		PerformanceProfiler::startProfile( '_oracleexecute', 5 );
 		$this->last_stmt = $stmt;
 
+		$blobDescriptor = null;
 		if ($largeblob) {
 			if ( $data ) { // The variable $data can be an empty array if empty_blob() has been called.  
 				$blobDescriptor = oci_new_descriptor($this->dbh, OCI_D_LOB);
@@ -1180,6 +1180,7 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	/**
 	 * Returns proper name for temporary tables
 	 * @param string $name of the temporary table
+	 * @return string The proper name of the temporary table.
 	 */
 	public function makeTempTableName($name)
 	{
@@ -1203,7 +1204,7 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	 * Checks if the character encoding is set correctly.
 	 *
 	 * @param string $help Installation notes how to solve a problem (in case an exception is thrown).
-	 * @thows BizException When unsupported DB settings are detected.
+	 * @throws BizException When unsupported DB settings are detected.
 	 */
 	public function checkDbSettings( &$help )
 	{
@@ -1268,7 +1269,6 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	 */
 	public function resetAutoIncreament( $tableName, $autoIncrementValue )
 	{
-		$tableName = $tableName; $autoIncrementValue = $autoIncrementValue;
 		// TODO: Reset the auto increment for Oracle
 	}
 
@@ -1286,7 +1286,7 @@ class oracledriver extends WW_DbDrivers_DriverBase
 
 	/**
 	 * Returns the names of the indexes of a table.
-	 * @param type $tableName (incl. pre-fix).
+	 * @param string $tableName (incl. pre-fix).
 	 * @return array with the names of indexes.
 	 */
 	public function listIndexOnTable( $tableName )
@@ -1410,6 +1410,7 @@ class oracledriver extends WW_DbDrivers_DriverBase
 			array_unshift( $fieldNames, 'ID' );
 			$numberOfFieldNames += 1;
 		}
+		$fieldNamesVariables = array();
 		for( $ctr=0; $ctr<$numberOfFieldNames; $ctr++ ) {
 			if( $autoincrement && $ctr == 0 ) {
 				// $fieldNamesVariables[] = '&&val0'; // Same for this, need to investigate further.
@@ -1459,20 +1460,13 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	 * @param string $tableName Table name without the 'smart_' prefix.
 	 * @param string $keyCol The primary key column to search on.
 	 * @param string $where The where sql clause part.
+	 * @param string $orderBySQL The order by sql clause part.
 	 * @param array $limit, keys: 'min'/ 'max', TRUE=ASC, FALSE=DESC.
 	 * @param array $values Values used for parameter substitution.
 	 * @return string $sql The composed sql statement.
 	 */
 	public function composePagedQuerySql( $tableName, $keyCol, $where, $orderBySQL, $limit, &$values )
 	{
-		// Keep Analyzer Happy.
-		$tableName = $tableName;
-		$keyCol = $keyCol;
-		$where = $where;
-		$orderBySQL = $orderBySQL;
-		$limit = $limit;
-		$values = $values;
-
 		// There is no actual updated query for paging Oracle SQL results.
 		return false;
 	}
@@ -1622,8 +1616,6 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	 */
 	public function composeDropIndexStatement( $tableName, $indexName )
 	{
-		/** @noinspection PhpUnusedLocalVariableInspection */
-		$tableName = $tableName;
 		$statement = 'DROP INDEX `'.$indexName.'`';
 		return $statement;
 	}

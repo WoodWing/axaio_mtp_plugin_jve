@@ -74,5 +74,3 @@ interface TextExport
 	public function exportFile( $xFrames, $filePath, $draft );
 	public function exportBuf( $xFrames, &$docOut, $draft );
 }
-
-?>

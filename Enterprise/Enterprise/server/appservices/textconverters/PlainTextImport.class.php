@@ -17,12 +17,15 @@ require_once BASEDIR.'/server/utils/FileHandler.class.php';
 class PlainTextImport implements TextImport
 {
 	/**
-	 * Convert a file from plain text format to collection of XHTML frames. <br>
+	 * Convert a file from plain text format to collection of XHTML frames.
 	 * The encoding is concidered to be UTF-8 in Web Editor (XHTML) and stored as UTF-16BE in the DB.
 	 * This function takes care about conversion between both encodings as well.
 	 *
-	 * @param string $plainFile  Full path of file to be read. <br>
-	 * @param array  $xFrames    Returned collection of XHTML DOMDocument each representing one text frame. <br>
+	 * @param string $plainFile  Full path of file to be read.
+	 * @param array  &$xFrames   Returned collection of XHTML DOMDocument each representing one text frame.
+	 * @param array &$stylesCSS
+	 * @param array &$stylesMap
+	 * @param &$domVersion
 	 */ 
 	public function importFile( $plainFile, &$xFrames, &$stylesCSS, &$stylesMap, &$domVersion )
 	{
@@ -41,10 +44,13 @@ class PlainTextImport implements TextImport
 	}
 
 	/**
-	 * Convert a memory buffer from plain text format to collection of XHTML frames. <br>
+	 * Convert a memory buffer from plain text format to collection of XHTML frames.
 	 *
-	 * @param string $plainContent  Memory buffer to be read. <br>
-	 * @param array  $xFrames       Returned collection of XHTML DOMDocument each representing one text frame. <br>
+	 * @param string $plainContent  Memory buffer to be read.
+	 * @param array  $xFrames       Returned collection of XHTML DOMDocument each representing one text frame.
+	 * @param array &$stylesCSS
+	 * @param array &$stylesMap
+	 * @param &$domVersion
 	 */ 
 	public function importBuf( $plainContent, &$xFrames, &$stylesCSS, &$stylesMap, &$domVersion )
 	{
@@ -75,7 +81,6 @@ class PlainTextImport implements TextImport
 		// We might want to fill in some defaults here
 		//$stylesCSS[] = ...
 		//$stylesMap[] = ...
-		$stylesCSS = $stylesCSS; $stylesMap = $stylesMap; $domVersion = $domVersion; // keep analyzer happy
 	}
 
 	/**
@@ -96,4 +101,3 @@ class PlainTextImport implements TextImport
 		return null;
 	}
 }
-?>

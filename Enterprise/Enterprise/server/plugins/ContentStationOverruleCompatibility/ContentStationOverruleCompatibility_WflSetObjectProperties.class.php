@@ -46,8 +46,5 @@ class ContentStationOverruleCompatibility_WflSetObjectProperties extends WflSetO
 	/**
 	 * @param WflSetObjectPropertiesRequest $req
 	 */
-	final public function runOverruled (WflSetObjectPropertiesRequest $req) // Not called because we're just doing run before and after
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled (WflSetObjectPropertiesRequest $req) {}
 }

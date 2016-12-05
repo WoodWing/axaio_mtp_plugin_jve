@@ -14,10 +14,7 @@ class DataSourceWorkflowService_WflCopyObject extends WflCopyObject_EnterpriseCo
 	final public function getPrio()      { return self::PRIO_DEFAULT; }
 	final public function getRunMode()   { return self::RUNMODE_AFTER; }
 
-	final public function runBefore( WflCopyObjectRequest &$req ) // not called
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore( WflCopyObjectRequest &$req ) {}
 	
 	final public function runAfter( WflCopyObjectRequest $req, WflCopyObjectResponse &$resp ) 
 	{
@@ -60,8 +57,5 @@ class DataSourceWorkflowService_WflCopyObject extends WflCopyObject_EnterpriseCo
 		}
 	}
 	
-	final public function runOverruled( WflCopyObjectRequest $req ) // not called
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflCopyObjectRequest $req ) {}
 }

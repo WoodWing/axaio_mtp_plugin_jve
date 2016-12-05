@@ -69,7 +69,8 @@ class PubSetPublishInfoService extends EnterpriseService
 		
 		// Let core update the issue info by calling the server plugin publish connectors.
 		if( $req->PublishedDossiers ) {
-			$dossiers = $bizPublishing->setPublishInfoForDossiers( $req->PublishedDossiers );
+			$bizPublishing->setPublishInfoForDossiers( $req->PublishedDossiers );
+			$dossiers = $req->PublishedDossiers;
 		} else {
 			$dossiers = null;
 		}

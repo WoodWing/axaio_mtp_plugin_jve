@@ -46,8 +46,7 @@ class WflQueryObjectsService extends EnterpriseService
 			$req->Params,
 			$req->FirstEntry,
 			$req->MaxEntries,
-			0,		// deletedobjects
-			null,		// forceapp
+			null,
 			$req->Hierarchical,
 			$req->Order,
 			$req->MinimalProps,

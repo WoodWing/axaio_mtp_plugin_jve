@@ -31,7 +31,7 @@ class AdmLogOffService extends EnterpriseService
 		require_once BASEDIR.'/server/services/wfl/WflLogOffService.class.php';
 		$req = EnterpriseService::typecast( $req, 'WflLogOffRequest' );
 		$service = new WflLogOffService();
-		/*$resp =*/ $service->execute( $req );
+		$service->execute( $req );
 		return new AdmLogOffResponse();
 	}
 }

@@ -17,6 +17,7 @@ class Drupal7_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConnec
 
 	/**
 	 * See CustomObjectMetaData_EnterpriseConnector::collectCustomProperties function header.
+	 * @inheritdoc
 	 */
 	final public function collectCustomProperties( $coreInstallation )
 	{
@@ -104,7 +105,7 @@ class Drupal7_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConnec
 	/**
 	 * Retrieves all field definitions made at Drupal (for all content types).
 	 *
-     * @param AdmPubChannel $pubChannelInfo
+	 * @param PubChannelInfo $pubChannelInfo
 	 * @param null|string $contentType The ContentType for which to get the Fields. Default: NULL
 	 * @return array List of field definitions.
 	 */
@@ -121,6 +122,9 @@ class Drupal7_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConnec
 	 * Retrieves the templates from the Enterprise database.
 	 *
 	 * Should maybe be moved to a different location for global use.
+	 *
+	 * @param int $pubChannelId
+	 * @return array
 	 */
 	private function getTemplatesFromDB($pubChannelId)
 	{
