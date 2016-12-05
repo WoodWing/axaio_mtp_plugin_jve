@@ -595,6 +595,7 @@ class InCopyTextImport implements TextImport
 		$icText = mb_eregi_replace( chr(0xE2).chr(0x80).chr(0xAF), chr(0xC2).chr(0xA0), $icText );
 
 		$texts1 = mb_split( IC_HARD_EOL, $icText ); // Hard enter means: start new paragraph or list item
+		$xTextParent = null;
 		foreach( $texts1 as $key1 => $text1 ) {
 			// BZ#8760 - Last line ending before next node type of XML_PI_NODE, should create the line
 			$addPara = false;
@@ -625,7 +626,6 @@ class InCopyTextImport implements TextImport
 			}
 
 			// Insert container element (to hold new text chunk), which is a p+span (style change) or ol/ul (list)
-			$xTextParent = null;
 			if( $xList ) {
 				if( strlen( $text1 ) > 0 || $addPara ) { // avoid empty list bullets/numbers at end of list except PI_NODE
 					if( $text1 == chr(10)) {
