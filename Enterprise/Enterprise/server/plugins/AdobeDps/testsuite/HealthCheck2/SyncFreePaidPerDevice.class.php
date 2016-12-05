@@ -115,6 +115,8 @@ class SyncFreePaidPerDevice
 
 	/**
 	 * Stores a variable in the database to denote that the conversion was done successfully.
+	 *
+	 * @param string $flag
 	 * @return bool Whether or not the updated flag was set correctly.
 	 */
 	static private function setSyncFlag( $flag )
@@ -164,6 +166,7 @@ class SyncFreePaidPerDevice
 	 * Based on the Free/Paid setting retrieved from the Adobe system the setting stored in the database is updated.
 	 * An update is needed if the setting differs. 
 	 * @param array $dpsIssueInfos All issue information retrieved from Adobe Dps.
+	 * @param array $dbPublFieldsByExtId Key = external id, values = published fields.
 	 * @return bool True if no error else false.
 	 */
 	static private function updateFreePaidFlagsOfPublishedIssues( $dpsIssueInfos, $dbPublFieldsByExtId )
@@ -211,8 +214,9 @@ class SyncFreePaidPerDevice
 
 	/**
 	 * Updates the publish fields of an issue/device.
-	 * @param type $externalid
-	 * @param type $dbPublishedFields
+	 * @param string $externalid
+	 * @param array $dbPublishedFields
+	 * @return bool TRUE if succeeded, FALSE if an error occurred.
 	 */
 	static private function updateDBPublishedFields( $externalid, $dbPublishedFields )
 	{

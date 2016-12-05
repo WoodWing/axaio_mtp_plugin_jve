@@ -2,7 +2,7 @@
 /**
  * @package 	Enterprise
  * @subpackage MaintenanceMode
- * @since 		v10.0
+ * @since 		v10.0.3
  * @copyright	WoodWing Software bv. All Rights Reserved.
  *
  * Gives a system administrator the opportunity to disable the log on of normal, non-system, users.
@@ -20,7 +20,7 @@ class MaintenanceMode_WebApps extends WebApps_EnterpriseConnector
 	public function getWebApps() 
 	{
 		$appDefinition = new WebAppDefinition();
-		$appDefinition->IconUrl = 'webapps/woodwing.png'; //Todo Need a different icon?
+		$appDefinition->IconUrl = 'webapps/confg_32.gif';
 		$appDefinition->IconCaption = 'Maintenance Mode';
 		$appDefinition->WebAppId  = 'Configure';
 		$appDefinition->ShowWhenUnplugged = true;

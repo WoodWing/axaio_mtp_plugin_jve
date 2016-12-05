@@ -32,16 +32,7 @@ class Drupal7_AdmModifyPubChannels extends AdmModifyPubChannels_EnterpriseConnec
 		LogHandler::Log( 'Drupal7', 'DEBUG', 'Returns: Drupal7_AdmModifyPubChannels->runBefore()' );
 	} 
 
-	// Not called.
-	final public function runAfter( AdmModifyPubChannelsRequest $req, AdmModifyPubChannelsResponse &$resp )
-	{
-		$req = $req;   // keep code analyzer happy.
-		$resp = $resp; // keep code analyzer happy.
-	} 
+	final public function runAfter( AdmModifyPubChannelsRequest $req, AdmModifyPubChannelsResponse &$resp ) {}
 	
-	// Not called.
-	final public function runOverruled( AdmModifyPubChannelsRequest $req )
-	{
-		$req = $req; // keep code analyzer happy.
-	} 
+	final public function runOverruled( AdmModifyPubChannelsRequest $req ) {}
 }

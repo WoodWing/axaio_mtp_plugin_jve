@@ -2,7 +2,7 @@
 /**
  * @package     Enterprise
  * @subpackage  MaintenanceMode
- * @since       v10.0
+ * @since       v10.0.3
  * @copyright   WoodWing Software bv. All Rights Reserved.
  *
  * Information class of the MaintenanceMode server plugin.

@@ -153,8 +153,6 @@ class CSVDataSource_DataSource extends DataSource_EnterpriseConnector
 	
 	final public function getRecords( $query, $recordid, $queryparameters )
 	{
-		$query = $query; $recordid = $recordid; $queryparameters = $queryparameters; // keep analyzer happy
-		
 		// check the settings of this data source
 		$this->checkSettings();
 		// read the file
@@ -236,14 +234,13 @@ class CSVDataSource_DataSource extends DataSource_EnterpriseConnector
 	 * If a datasource is bidirectional, this function should handle
 	 * the user's changes to the records, made in the client.
 	 *
-	 * @param Array of Records	 	$records
-	 * @return String				$message
+	 * @param array $records List of records
+	 * @param string $recordid
+	 * @param QueryParam[] $queryparameters
+	 * @return string $message
 	 */
 	final public function setRecords( $records, $recordid, $queryparameters )
 	{
-		$records = $records; // made code analyzer happy
-		$recordid = $recordid; // make code analyzer happy
-		$queryparameters = $queryparameters;
 		// not implemented in a standard CSV data source
 	}
 	
@@ -253,21 +250,19 @@ class CSVDataSource_DataSource extends DataSource_EnterpriseConnector
 	 * This function will retrieve updated data from a source of data,
 	 * if a notification is send to plutus.
 	 * 
-	 * Plutus will call this function if it recieves an update notification.
+	 * Plutus will call this function if it receives an update notification.
 	 * The output (Array of Records) will be sent to the Client.
 	 * 
-	 * @param 	Array of FamilyValues 	$familyvalues
-	 * @return Array of Records		$records 
+	 * @param array $familyvalue List of FamilyValues
+	 * @return void Unimplemented
 	 */
 	final public function getUpdates( $familyvalue )
 	{
-		$familyvalue = $familyvalue; // made code analyzer happy
 		// not implemented in a standard CSV data source
 	}
 	
 	/**
 	 * getQueries (mandatory)
-	 *
 	 */
 	final public function getQueries()
 	{

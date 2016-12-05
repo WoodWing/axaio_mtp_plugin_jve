@@ -234,13 +234,11 @@ class DBConversion
 		// to prevent sql errors during upgrade. These scripts can be removed the moment upgrading from version
 		// 8.3.4 - 8.9.9 is not anymore supported.
 		if( self::$previousVersion >= 800 && self::$previousVersion <= 899  ) {
-			self::$dbGenerator->addTxt(
-				self::$dbGenerator->dropIndex(
-					array(
-						'v' => '800', 'name' => 'objid_indesignserverjobs', 'fields' => 'objid'
-					),
-					array( 'name' => 'smart_indesignserverjobs' )
-				)
+			self::$dbGenerator->dropIndex(
+				array(
+					'v' => '800', 'name' => 'objid_indesignserverjobs', 'fields' => 'objid'
+				),
+				array( 'name' => 'smart_indesignserverjobs' )
 			);
 		}
 	}

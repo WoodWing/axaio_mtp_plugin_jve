@@ -111,6 +111,7 @@ class PreviewMetaPHP_MetaData extends MetaData_EnterpriseConnector
 			$xmps = XMPParser::readXmpFromFile( $filePath );
 			if( $xmps ) {
 				require_once BASEDIR.'/server/utils/FileMetaDataToProperties.class.php';
+				/** @noinspection PhpDeprecationInspection */
 				$converterXMP = WW_Utils_FileMetaDataToProperties_Factory::createConverter( 'xmp' );
 				if( $this->isInCopyFormat( $format ) ) {
 					foreach( $xmps as $xmp ) {
@@ -137,6 +138,7 @@ class PreviewMetaPHP_MetaData extends MetaData_EnterpriseConnector
 			}
 			
 			// 2. Continue and read EXIF
+			/** @noinspection PhpDeprecationInspection */
 			$metaDataEXIF = EXIFMeta::readEXIF( $format, $filePath );
 			if( $isDebug ) { // avoid expensive print_r() below
 				LogHandler::Log('PreviewMetaPHP_MetaData', 'DEBUG', 'Read EXIF '.print_r( $metaDataEXIF, 1 ));
@@ -144,6 +146,7 @@ class PreviewMetaPHP_MetaData extends MetaData_EnterpriseConnector
 			
 			// 3. Read IPTC to see if there are any fields we have not found in EXIF or XMP:
 			//IPTCMeta::readIPTC( $format, file_get_contents($filePath), $metaData );
+			/** @noinspection PhpDeprecationInspection */
 			IPTCMeta::readIptcFromFile( $filePath, $metaDataIPTC );
 			if( $isDebug ) { // avoid expensive print_r() below
 				LogHandler::Log('PreviewMetaPHP_MetaData', 'DEBUG', 'Read IPTC '.print_r( $metaDataIPTC, 1));
@@ -183,7 +186,7 @@ class PreviewMetaPHP_MetaData extends MetaData_EnterpriseConnector
 	/**
 	 * Check if the XMP package is belongs to InCopy type file
 	 *
-	 * @param array $metadataXMP Array of metadata read from XMP
+	 * @param array $metaDataXMP Array of metadata read from XMP
 	 * @return bool True|False Return true when it is InCopy XMP, false when it is not
 	 */
 	private function isInCopyXmp( $metaDataXMP )

@@ -21,8 +21,6 @@ class IPTCMeta
 	 */
 	public static function readIPTC( $format, $data, array &$metaData )
 	{
-		$format = $format;
-		
 		// Read the IPTC from file.
 		$iptc = false;
 		$bimPos = strpos( $data, '8BIM' );
@@ -42,6 +40,7 @@ class IPTCMeta
 		if( $iptc && is_array($iptc) ) {
 			LogHandler::Log( 'IPTCMeta', 'DEBUG', 'Found IPTC data.' );
 			require_once BASEDIR.'/server/utils/FileMetaDataToProperties.class.php';
+			/** @noinspection PhpDeprecationInspection */
 			$converterIPTC = WW_Utils_FileMetaDataToProperties_Factory::createConverter( 'iptc' );
 			$converterIPTC->convert( $iptc, $metaData);
 		} else {
@@ -84,6 +83,7 @@ class IPTCMeta
 		if( $iptc && is_array($iptc) ) {
 			LogHandler::Log( 'IPTCMeta', 'DEBUG', 'Found IPTC data.' );
 			require_once BASEDIR.'/server/utils/FileMetaDataToProperties.class.php';
+			/** @noinspection PhpDeprecationInspection */
 			$converterIPTC = WW_Utils_FileMetaDataToProperties_Factory::createConverter( 'iptc' );
 			$converterIPTC->convert( $iptc, $metaData);
 		} else {

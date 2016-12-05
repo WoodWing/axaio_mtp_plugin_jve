@@ -2658,9 +2658,19 @@ class BizObject
 		$accessRight = 2; // Read right
 		$minProps = array( 'ID', 'Type', 'Name' );
 		$requestProps = array_unique( array_merge( $minProps, $requestProps ) );
-		$queryObjResp = BizQuery::queryObjects( $ticket, $user, $params, /*$firstEntry = */null, /*$maxEntries = */null,
-			/*$deletedobjects = */false, /*$forceapp = */null, /*$hierarchical = */false, /*$queryOrder = */null,
-			/*$minimalProps = */null, $requestProps, array( 'Workflow' ), $accessRight );
+		$queryObjResp = BizQuery::queryObjects(
+			$ticket,
+			$user,
+			$params,
+			null,
+			null,
+			null,
+			false,
+			null,
+			null,
+			$requestProps,
+			array( 'Workflow' ),
+			$accessRight );
 
 		// Determine column indexes to work with
 		$indexes = array_combine( array_values( $requestProps ), array_fill( 1, count( $requestProps ), -1 ) );

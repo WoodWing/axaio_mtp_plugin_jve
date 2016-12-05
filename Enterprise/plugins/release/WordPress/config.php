@@ -11,13 +11,15 @@ $sites['{unique_name}'] = array(                   // Logical name of the WordPr
 		'url'        => '{WordPress_url}',         // URL to the WordPress site. Must not end with a slash / (e.g. http://mysite/wordpress)
 		'username'   => '{WordPress_username}',    // WordPress username. The user should have the 'Administrator' role in WordPress.
 		'password'   => '{WordPress_password}',    // WordPress password. This should be the password of the user mentioned above
+		'certificate'   => '{Wordpress_certificate}', // Optional, required for HTTPS (SSL) connections only. The full file path of the local CA certificate file (in PEM format).
 	);
 */
 
 $sites[''] = array(
 	'url'        => '',
 	'username'   => '',
-	'password'   => ''
+	'password'   => '',
+	'certificate' => ''
 );
 
 if( !defined('WORDPRESS_SITES') ) {

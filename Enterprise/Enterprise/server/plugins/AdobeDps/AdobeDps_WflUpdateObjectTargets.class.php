@@ -32,8 +32,6 @@ class AdobeDps_WflUpdateObjectTargets extends WflUpdateObjectTargets_EnterpriseC
 
 	final public function runAfter( WflUpdateObjectTargetsRequest $req, WflUpdateObjectTargetsResponse &$resp )
 	{
-		$resp = $resp; // keep analyzer happy
-
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 		$request = new WflGetObjectsRequest( $req->Ticket, $req->IDs, false, 'none', array('MetaData') );
 		$service = new WflGetObjectsService();
@@ -84,9 +82,5 @@ class AdobeDps_WflUpdateObjectTargets extends WflUpdateObjectTargets_EnterpriseC
 		}
 	}
 
-	final public function runOverruled( WflUpdateObjectTargetsRequest $req )
-	{
-		// not called
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflUpdateObjectTargetsRequest $req ) {}
 }

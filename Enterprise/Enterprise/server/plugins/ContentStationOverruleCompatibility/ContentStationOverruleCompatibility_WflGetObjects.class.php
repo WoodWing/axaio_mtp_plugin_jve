@@ -47,16 +47,10 @@ class ContentStationOverruleCompatibility_WflGetObjects extends WflGetObjects_En
 	/**
 	 * @param WflGetObjectsRequest $req
 	 */
-	final public function runBefore (WflGetObjectsRequest &$req) // Not called because we're just doing run after	
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore (WflGetObjectsRequest &$req) {}
 
 	/**
 	 * @param WflGetObjectsRequest $req
 	 */
-	final public function runOverruled (WflGetObjectsRequest $req) // Not called because we're just doing run after
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled (WflGetObjectsRequest $req) {}
 }

@@ -43,17 +43,16 @@ class EnterpriseService
 	 */
 	protected function restructureRequest( &$request )
 	{
-		$request = $request; // keep code analyzer happy
 	}
 
 	/**
 	 * See restructureRequest().
 	 *
+	 * @param stdClass $request Request object.
 	 * @param stdClass $response Response object to transform (after executing, before returning to client).
 	 */
 	protected function restructureResponse( $request, &$response )
 	{
-		$request = $request; $response = $response; // keep code analyzer happy
 	}
 
 	/**
@@ -61,7 +60,7 @@ class EnterpriseService
 	  *
 	  * @param object $oldObject     Object instance to cast.
 	  * @param string $newClassname  Class to cast object to.
-	  * @return object The casted object instance.
+	  * @return mixed The casted object instance.
 	  */
 	static public function typecast( $oldObject, $newClassname )
 	{
@@ -90,6 +89,7 @@ class EnterpriseService
 	  * @param boolean 		$checkTicket	whether ticket should be checked
 	  * @param boolean 		$useTransaction	whether service should be executed within db transaction
 	  * @return object Response object
+	  * @throws BizException when executing the service results in an error.
 	  */
 	protected function executeService( $req, $ticket, $type, $interface, $checkTicket, $useTransaction )
 	{
@@ -107,14 +107,13 @@ class EnterpriseService
 		// This is for testing purposes only, in case the server log must stay free of errors.
 		if( isset( $_REQUEST['expectedError'] ) ) {
 			$map = new BizExceptionSeverityMap( array( $_REQUEST['expectedError'] => 'INFO' ) );
-			$map = $map; // keep analyzer happy
 		}
 
 		try {
 			// Start business session (and DB transaction)
 			BizSession::startSession( $ticket );
 			if( $useTransaction ) {
-				BizSession::startTransaction( $ticket );
+				BizSession::startTransaction();
 			}
 			if( $checkTicket ) {
 				$this->User = BizSession::checkTicket( $ticket, $serviceName );

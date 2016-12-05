@@ -30,16 +30,10 @@ class ContentStationOverruleCompatibility_WflNamedQuery extends WflNamedQuery_En
 	/**
 	 * @param WflNamedQueryRequest $req
 	 */
-	final public function runBefore( WflNamedQueryRequest &$req ) // Not called because we're just doing run after
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore( WflNamedQueryRequest &$req ) {}
 
 	/**
 	 * @param WflNamedQueryRequest $req
 	 */
-	final public function runOverruled (WflNamedQueryRequest $req) // Not called because we're just doing run after
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled (WflNamedQueryRequest $req) {}
 }

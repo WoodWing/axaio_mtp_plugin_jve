@@ -357,19 +357,7 @@ class BizPubIssue
 			new QueryParam( 'IssueId', '=', $issueId ),
 			new QueryParam( 'Type', '=', 'Dossier' ) );
 		$response = BizQuery::queryObjects(
-						BizSession::getTicket(),
-						BizSession::getShortUserName(),
-						$params,
-						1, // First entry
-						0, // Max entries
-						false, // Deleted objects
-						null, // Force app
-						false, // Hierarchical
-						null, // Order
-						$minProps, // Minimal properties
-						null, // Requested properties
-						null, // Areas
-						0 ); // Access right
+			BizSession::getTicket(), BizSession::getShortUserName(), $params, 1, 0, null, false, null, $minProps, null, null, 0 );
 
 		// Determine column indexes to work with.
 		$indexes = array_combine( array_values($minProps), array_fill(1,count($minProps), -1) );

@@ -46,10 +46,10 @@ class WflGetDialogService extends EnterpriseService
 
 	/**
 	 * @param mixed $req Changes from WflGetDialog2Response (v2) to WflGetDialogResponse (v1)
+	 * {@inheritdoc}
 	 */
 	protected function restructureResponse( $req, &$resp )
 	{
-		$req = $req; // To make analyzer happy.
 		// At this point, make waiting clients happy, by returning v1 response.
 		self::buildOutgoingDialog( $this->resp1 );
 		$resp = $this->resp1;
@@ -79,7 +79,7 @@ class WflGetDialogService extends EnterpriseService
 
 	private static function buildOutgoingDialog( WflGetDialogResponse $resp1 )
 	{
-		// set PropertyValues to null, so that the GetDialogResponse won't containt the v8 structure.
+		// Set PropertyValues to null, so that the GetDialogResponse won't contain the v8 structure.
 		if( $resp1->Dialog ) {
 			// v7 ContentStation(CS) takes 'Category' instead of 'Section', 'Section' will cause properties not shown in CS Properties Pane, so unset it.
 			unset( $resp1->Dialog->MetaData['Section']);

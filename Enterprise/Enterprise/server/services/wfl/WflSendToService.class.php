@@ -88,7 +88,8 @@ class WflSendToService extends EnterpriseService
 				throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Can not set metadata in overrule issues an others at the same time' );				
 			}
 		}
-			
+
+		$retVal = null;
 		foreach( $req->IDs as $id ) {
 			// Backwards compatibility: create full MetaData object out of id and wfmeta
 			$meta = new MetaData(); 
@@ -112,7 +113,6 @@ class WflSendToService extends EnterpriseService
 
 	public function runCallback( WflSendToRequest $req )
 	{
-		$req = $req; // keep analyzer happy
 		// not implemented, because call is redirected to SetObjectProperties
 	}
 }

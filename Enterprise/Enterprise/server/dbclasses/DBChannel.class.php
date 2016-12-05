@@ -180,7 +180,7 @@ class DBChannel extends DBBase
 	/**
 	 * Returns all channels of a certain Publish System.
 	 * @param string $pubSystem Publish System (e.g. Drupal)
-	 * @return array of PubChannelInfo
+	 * @return PubChannelInfo[]
 	 * @since v7.5.0
 	 */
 	public static function getChannelsByPublishSystem( $pubSystem )

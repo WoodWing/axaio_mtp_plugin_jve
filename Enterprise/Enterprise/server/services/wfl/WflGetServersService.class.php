@@ -34,9 +34,7 @@ class WflGetServersService extends EnterpriseService
 		require_once BASEDIR.'/server/bizclasses/BizServerInfo.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizSettings.class.php';
 
-		$req = $req; // keep analyzer happy
-
-		return new WflGetServersResponse( 
+		return new WflGetServersResponse(
 			BizServerInfo::getServers(),
 			BizSettings::getFeatureValue('CompanyLanguage') );
 	}

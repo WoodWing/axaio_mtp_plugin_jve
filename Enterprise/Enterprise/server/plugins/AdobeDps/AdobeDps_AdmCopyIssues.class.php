@@ -59,14 +59,7 @@ class AdobeDps_AdmCopyIssues extends AdmCopyIssues_EnterpriseConnector
 		}
 	}
 	
-	final public function runAfter( AdmCopyIssuesRequest $req, AdmCopyIssuesResponse &$resp )
-	{
-		$req = $req;	// keep analyzer happy
-		$resp = $resp;	// keep analyzer happy
-	}
+	final public function runAfter( AdmCopyIssuesRequest $req, AdmCopyIssuesResponse &$resp ) {}
 	
-	final public function runOverruled( AdmCopyIssuesRequest $req )
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( AdmCopyIssuesRequest $req ) {}
 }

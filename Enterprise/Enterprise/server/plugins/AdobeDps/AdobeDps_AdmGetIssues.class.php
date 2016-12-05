@@ -13,14 +13,10 @@ class AdobeDps_AdmGetIssues extends AdmGetIssues_EnterpriseConnector
 	final public function getPrio()      { return self::PRIO_DEFAULT; }
 	final public function getRunMode()   { return self::RUNMODE_AFTER; }
 
-	final public function runBefore( AdmGetIssuesRequest &$req )
-	{
-		$req = $req;
-	}
+	final public function runBefore( AdmGetIssuesRequest &$req ) {}
 
 	final public function runAfter( AdmGetIssuesRequest $req, AdmGetIssuesResponse &$resp )
 	{
-		$req = $req;
 		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBChannel.class.php';
 		$pubChannelId = $resp->PubChannelId;
@@ -52,9 +48,5 @@ class AdobeDps_AdmGetIssues extends AdmGetIssues_EnterpriseConnector
 		}
 	}
 
-	final public function runOverruled( AdmGetIssuesRequest $req )
-	{
-		$req = $req;	// keep analyzer happy
-	}
-
+	final public function runOverruled( AdmGetIssuesRequest $req ) {}
 }

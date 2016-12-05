@@ -23,7 +23,7 @@ class ImageMagick
 	 * @param int 			$size			Maximum width/height for the resulting image
 	 * @param MetaData		$meta			Meta data of the image object
 	 * @param boolean		$filePathUsage 	The given file is assumed to be a file path (else it is passed in memory)
-	 * @return Returns JPG image of requested size.
+	 * @return string Returns JPG image of requested size.
 	*/
 	public static function convertData( $data, $size, MetaData $meta, $filePathUsage  )
 	{
@@ -434,6 +434,7 @@ class ImageMagick
 	 */
 	public static function getBasicMetaData( $fileName, &$metaData  )
 	{
+		/** @noinspection PhpDeprecationInspection */
 		$outputFilename = self::createOutputFile();
 		$format = ' -units PixelsPerInch -format "Format:%m\nColorSpace:%[colorspace]\nDpi:%x\nHeight:%[height]\nWidth:%[width]" ';
 		$executable = self::makeExecutable(IMAGE_MAGICK_APP_PATH, 'identify');
@@ -444,6 +445,7 @@ class ImageMagick
 			LogHandler::Log( 'ImageMagick_MetaData', 'INFO', 'No basic metadata extracted from the image.' );
 			return false;
 		}
+		/** @noinspection PhpDeprecationInspection */
 		$output = self::readAndCloseOutPutFile( $outputFilename );
 		if ( !$output ) {
 			return false;
@@ -497,6 +499,7 @@ class ImageMagick
 	 */
 	static public function getXMPMetaData( $fileName, &$metaData )
 	{
+		/** @noinspection PhpDeprecationInspection */
 		$outputFilename = self::createOutputFile();
 		$executable = self::makeExecutable(IMAGE_MAGICK_APP_PATH, 'convert');
 		$cmdline = $executable. ' -ping '.escapeshellarg($fileName.'[0]').' xmp:'.escapeshellarg( $outputFilename );
@@ -505,6 +508,7 @@ class ImageMagick
 			LogHandler::Log( 'ImageMagick_MetaData', 'INFO', 'No XMP metadata extracted from the image.' );
 			return false;
 		}
+		/** @noinspection PhpDeprecationInspection */
 		$output = self::readAndCloseOutPutFile( $outputFilename );
 		if ( !$output ) {
 			return false;
@@ -521,6 +525,7 @@ class ImageMagick
 
 		if( $xmpData != null ) {
 			require_once BASEDIR.'/server/utils/FileMetaDataToProperties.class.php';
+			/** @noinspection PhpDeprecationInspection */
 			$converterXMP = WW_Utils_FileMetaDataToProperties_Factory::createConverter( 'xmp' );
 			$converterXMP->convert( $xmpData, $metaData);
 			if( !empty( $metaData ) ) {
@@ -548,6 +553,7 @@ class ImageMagick
 	 */
 	static function getIPTCMetaData( $fileName, &$metaData )
 	{
+		/** @noinspection PhpDeprecationInspection */
 		$outputFilename = self::createOutputFile();
 		$executable = self::makeExecutable(IMAGE_MAGICK_APP_PATH, 'convert');
 		$cmdline = $executable. ' -ping '.escapeshellarg($fileName.'[0]').' iptc:'.escapeshellarg($outputFilename);
@@ -556,6 +562,7 @@ class ImageMagick
 			LogHandler::Log( 'ImageMagick_MetaData', 'INFO', 'No IPTC metadata extracted from the image.' );
 			return false;
 		}
+		/** @noinspection PhpDeprecationInspection */
 		$output = self::readAndCloseOutPutFile( $outputFilename );
 		if ( !$output ) {
 			return false;
@@ -566,6 +573,7 @@ class ImageMagick
 		// Map the IPTC onto Enterprise properties.
 		if( $iptcData && is_array($iptcData) ) {
 			require_once BASEDIR.'/server/utils/FileMetaDataToProperties.class.php';
+			/** @noinspection PhpDeprecationInspection */
 			$converterIPTC = WW_Utils_FileMetaDataToProperties_Factory::createConverter( 'iptc' );
 			$converterIPTC->convert( $iptcData, $metaData);
 			LogHandler::Log( 'ImageMagick_MetaData', 'DEBUG', 'Found IPTC data.' );

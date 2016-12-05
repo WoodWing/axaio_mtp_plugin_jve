@@ -22,15 +22,9 @@ class InCopyHTMLConversion_WflGetObjects extends WflGetObjects_EnterpriseConnect
 		return self::RUNMODE_AFTER;
 	}
 
-	final public function runBefore( WflGetObjectsRequest &$req ) // not called
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore( WflGetObjectsRequest &$req ) {}
 	
-	final public function runOverruled( WflGetObjectsRequest $req ) // not called
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflGetObjectsRequest $req ) {}
 
 	final public function runAfter (WflGetObjectsRequest $req, WflGetObjectsResponse &$resp)
 	{

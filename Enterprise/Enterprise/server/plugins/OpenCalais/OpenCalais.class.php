@@ -123,8 +123,6 @@ class OpenCalais
 				throw new BizException( 'ERR_ERROR', 'Server', $ex->getMessage() );
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpUnusedLocalVariableInspection */
-			$e = $e;
 		}
 		PerformanceProfiler::stopProfile( 'OpenCalais Request', 3 );
 

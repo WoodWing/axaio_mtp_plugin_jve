@@ -215,21 +215,10 @@ class BizPage
 
 			// This could be more efficient, but this is easy:
 			require_once BASEDIR."/server/bizclasses/BizQuery.class.php";
-			$resp = BizQuery::queryObjects( $ticket,		// ticket
-											$user,			// user
-											$queryParams,	// query params
-											1,     // First entry
-											0,     // Max entries
-											false, // Deleted objects
-											null,  // Force App
-											false, // Hierarchical
-											null,  // Order
-											null,  // Minimal properties
-											array( 'ID', 'Type', 'Name' ), // Requested properties
-											null,  // Areas
-											11 );  // Access right
-			
-			// Determine the object ID column index
+			$resp = BizQuery::queryObjects(
+				$ticket, $user, $queryParams, 1, 0, null, false, null, null, array( 'ID', 'Type', 'Name' ), null, 11 );
+
+	// Determine the object ID column index
 			$idIdx = 0;
 			if( isset($resp->Columns) ) foreach( $resp->Columns as $col ) {
 				if( $col->Name == 'ID' ) {

@@ -20,7 +20,7 @@ class BizDiagnostics
 	 * @param array $attachments List of attachments like screen shot, log files etc.
 	 * @return array List of info with the operation status (Success/Failure)
 	 */
-	public static function handle ( $category, $synopsis, $description,  array $attachments )
+	public static function handle ( $category, $synopsis, $description, array $attachments )
 	{
 		// At this moment all diagnostics are handled by sending emails.
 		$succes = self::send($category, $synopsis, $description, $attachments);

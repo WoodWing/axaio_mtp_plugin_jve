@@ -14,16 +14,10 @@ class WwcxToWcmlConversion_WflLogon extends WflLogOn_EnterpriseConnector
 	final public function getPrio()      { return self::PRIO_DEFAULT; }
 	final public function getRunMode()   { return self::RUNMODE_AFTER; }
 
-	final public function runBefore( WflLogOnRequest &$req )
-	{
-		// not called
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore( WflLogOnRequest &$req ) {}
 
 	final public function runAfter( WflLogOnRequest $req, WflLogOnResponse &$resp )
 	{
-		$req = $req; // keep analyzer happy
-
 		if ( isset($resp->ServerInfo->FeatureSet) ) {
 			require_once BASEDIR . '/server/dbclasses/DBTicket.class.php';
 			$app = DBTicket::DBappticket( $resp->Ticket );
@@ -44,9 +38,5 @@ class WwcxToWcmlConversion_WflLogon extends WflLogOn_EnterpriseConnector
 		}
 	}
 
-	final public function runOverruled( WflLogOnRequest $req )
-	{
-		// not called
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflLogOnRequest $req ) {}
 }
