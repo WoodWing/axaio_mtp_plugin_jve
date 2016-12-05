@@ -1,28 +1,20 @@
 <?php
 
-require_once dirname(__FILE__) . '/AbstractRemoteObject.php';
+require_once 'AbstractRemoteObject.php';
 
-class ElvisFormattedValue extends AbstractRemoteObject {
-
+class ElvisFormattedValue extends AbstractRemoteObject
+{
 	/**
 	 * Return the fully qualified name of the Java class
 	 */
-	public static function getJavaClassName() {
+	public static function getJavaClassName()
+	{
 		return 'com.ds.acm.logic.xmlservice.search.model.FormattedValue';
 	}
 
-	/**
-	 * Value
-	 *
-	 * @var object
-	 */
+	/** @var object $value */
 	public $value;
-	
-	/**
-	 * Formatted value
-	 *
-	 * @var string
-	 */
+
+	/** @var string $formatted Formatted value */
 	public $formatted;
-	
 }

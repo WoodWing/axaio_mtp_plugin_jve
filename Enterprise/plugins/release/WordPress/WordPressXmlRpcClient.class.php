@@ -1,4 +1,10 @@
 <?php
+/**
+ * @package    Enterprise
+ * @subpackage ServerPlugins
+ * @since      v9.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once BASEDIR . '/server/utils/EnterpriseXmlRpcClient.class.php';
 require_once dirname(__FILE__) . '/config.php';
@@ -342,18 +348,18 @@ class WordPressXmlRpcClient
 	 *
 	 * @param string $imageName
 	 * @param string $filePath
-	 * @param string $extension
+	 * @param string $mimeType
 	 *
 	 * @throws BizException
 	 *
 	 * @return mixed
 	 */
-	function uploadMediaLibraryImage( $imageName, $filePath, $extension)
+	function uploadMediaLibraryImage( $imageName, $filePath, $mimeType)
 	{
 		$imageFile = file_get_contents( $filePath );
 		$data = array(
 			'name'  => $imageName,
-			'type'  => $extension,
+			'type'  => $mimeType,
 			'bits'  => new IXR_Base64( $imageFile ), // The image convert to base 64 is needed for WordPress
 			'overwrite' => false
 		);
@@ -410,18 +416,18 @@ class WordPressXmlRpcClient
 	 * @param string $imageName
 	 * @param string $filePath
 	 * @param int $galleryId
-	 * @param string $extension
+	 * @param string $mimeType
 	 *
 	 * @return mixed
 	 *
 	 * @throws Exception BizException
 	 */
-	function uploadImage( $imageName, $filePath, $extension, $galleryId )
+	function uploadImage( $imageName, $filePath, $mimeType, $galleryId )
 	{
 		$imageFile = file_get_contents( $filePath );
 		$data = array(
 			'name'  => $imageName,
-			'type'  => $extension,
+			'type'  => $mimeType,
 			'bits'  => new IXR_Base64( $imageFile ), // The image convert to base 64 is needed for WordPress
 			'gallery' => $galleryId
 		);
@@ -443,16 +449,16 @@ class WordPressXmlRpcClient
 	 *
 	 * @param string $imageName
 	 * @param string $filePath
-	 * @param string $extension
+	 * @param string $mimeType
 	 * @param int $galleryId
 	 * @param string $externalId
 	 *
 	 * @return mixed
 	 */
-	function updateImage( $imageName, $filePath, $extension, $galleryId, $externalId )
+	function updateImage( $imageName, $filePath, $mimeType, $galleryId, $externalId )
 	{
 		$this->deleteImage( $externalId );
-		$result = $this->uploadImage( $imageName, $filePath, $extension, $galleryId );
+		$result = $this->uploadImage( $imageName, $filePath, $mimeType, $galleryId );
 
 		return $result;
 	}

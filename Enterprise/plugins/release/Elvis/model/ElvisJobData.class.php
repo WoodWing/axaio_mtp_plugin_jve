@@ -1,7 +1,7 @@
 <?php
 
-class ElvisJobData {
-	
+class ElvisJobData
+{
+	/** @var string $sessionId  */
 	public $sessionId;
-	
 }

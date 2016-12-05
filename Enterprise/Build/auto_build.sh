@@ -324,7 +324,6 @@ function step0_validateEnvironment {
 	fi
 	echo "step0a: Validating required environment variables..."
 	validateEnvironmentVariableNotEmpty ADOBEDPS2_BUILDNR "${ADOBEDPS2_BUILDNR}"
-	validateEnvironmentVariableNotEmpty ELVIS_BUILDNR "${ELVIS_BUILDNR}"
 	validateEnvironmentVariableNotEmpty BUILD_NUMBER "${BUILD_NUMBER}"
 	validateEnvironmentVariableNotEmpty PROXYFORSC_VERSION "${PROXYFORSC_VERSION}"
 	validateEnvironmentVariableNotEmpty PROXYFORSC_BUILDNR "${PROXYFORSC_BUILDNR}"
@@ -516,6 +515,20 @@ function step2c_updateResourceFilesForMaintenanceMode {
 }
 
 #
+# Downloads the latest Elvis content source resource files from TMS and submits changes to the repository.
+#
+# Note that for historical reasons the XML resource files downloaded from TMS contain a timestamp
+# at the second line, such as: <!--Last edit date in TMS: 31-05-2016 07:08:39 GMT-->
+# However, this leads to conflicts when merging code branches and so we take out those lines.
+# Nevertheless, to avoid unnecessary daily submits without changes (that would blur the view)
+# we keep track of the last modification timestamp of TMS in the a file named "_lastupdate.txt"
+# (that resides in the resource folder) which allows us to compare timestamps and skip submits.
+#
+function step2d_updateResourceFilesForElvis {
+	updateResourceFiles Elvis plugins/release/ step2d 124
+}
+
+#
 # Updates version info embedded in PHP modules.
 #
 function step3a_updateVersionInfo {
@@ -532,10 +545,9 @@ function step3a_updateVersionInfo {
 	updatePluginVersions ${SOURCE_BASE}Enterprise/server/plugins ${SERVER_VERSION} ${BUILD_NUMBER}
 	updatePluginVersions ${SOURCE_BASE}plugins/release ${SERVER_VERSION} ${BUILD_NUMBER}
 
-	echo "step3a3: Update version info in AdobeDps2 and Elvis plugins. They have their own buildnr, but use the major.minor of Enterprise."
+	echo "step3a3: Update version info in AdobeDps2 plugin. It has its own buildnr, but use the major.minor of Enterprise."
 	twoDigitVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)(\.[0-9]+)?/\1/g"` # ignores patch nr
 	replaceVersionFile ${SOURCE_BASE}plugins/release/AdobeDps2/_productversion.txt "${twoDigitVersion}" ${ADOBEDPS2_BUILDNR}
-	replaceVersionFile ${SOURCE_BASE}plugins/release/Elvis/_productversion.txt "${twoDigitVersion}" ${ELVIS_BUILDNR}
 
 	echo "step3a4: Update version info of the ProxyForSC solution."
 	replaceVersionFile ${SOURCE_BASE}ProxyForSC/proxyserver/_productversion.txt ${PROXYFORSC_VERSION} ${PROXYFORSC_BUILDNR}
@@ -657,8 +669,7 @@ function step7_zipExternalModules {
 	echo "step7b: Zipping release plug-ins ..."
 	twoDigitVersion=`echo "${SERVER_VERSION}" | sed -r "s/([0-9]+\.[0-9]+)(\.[0-9]+)?/\1/g"` # ignores patch nr
 	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "AdobeDps2" "${WORKSPACE}/artifacts" "Adobe_AEM_Build_${ADOBEDPS2_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
-	zipFolder "${WORKSPACE}/Enterprise_release/plugins/release" "Elvis" "${WORKSPACE}/artifacts" "Elvis_Build_${ELVIS_BUILDNR}_for_Enterprise_${twoDigitVersion}.zip"
-	plugins="Facebook Twitter WordPress Drupal8"
+	plugins="Facebook Twitter WordPress Drupal8 Elvis"
 	for plugin in ${plugins}; do
 		# For Drupal 8 we want to modify the name to indicate this is the plugin (and not the module)
 		if [ "${plugin}" == "Drupal8" ]; then
@@ -724,6 +735,7 @@ set +x; echo "================ Step 2 ================"; set -x
 step2a_updateResourceFilesForCoreServer
 step2b_updateResourceFilesForAdobeAEM
 step2c_updateResourceFilesForMaintenanceMode
+step2d_updateResourceFilesForElvis
 set +x; echo "================ Step 3 ================"; set -x
 step3a_updateVersionInfo
 step3b_updateVersionInRepository

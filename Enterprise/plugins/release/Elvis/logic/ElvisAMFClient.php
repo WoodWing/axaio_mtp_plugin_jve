@@ -21,7 +21,10 @@ class ElvisAMFClient
 	 * @param $operation
 	 * @param $params
 	 * @param bool $secure
+	 * @param int $timeout The timeout for the call in seconds
 	 * @return mixed
+	 * @throws object ElvisCSException converted by Sabre/AMF
+	 * @throws BizException
 	 */
 	public static function send($service, $operation, $params, $secure=true, $timeout=60)
 	{
@@ -32,23 +35,25 @@ class ElvisAMFClient
 	/**
 	 * Send AMF message to Elvis.
 	 *
-	 * @param $service
-	 * @param $operation
-	 * @param $params
+	 * @param string $service
+	 * @param string $operation
+	 * @param array $params
 	 * @param bool $secure
-	 * @return ElvisEntHit|null
+	 * @param int $timeout The timeout for the call in seconds
+	 * @return mixed
+	 * @throws object ElvisCSException converted by Sabre/AMF
 	 * @throws BizException
 	 */
-	public static function sendUnParsed($service, $operation, $params, $secure=true, $timeout=60)
+	private static function sendUnParsed($service, $operation, $params, $secure=true, $timeout=60)
 	{
 		$servicePath = $service . '.' . $operation;
-	
 		$url = self::getEndpointUrl($secure);
 		$client = new SabreAMF_Client($url, self::DESTINATION);
 		$client->setEncoding(SabreAMF_Const::FLEXMSG);
 		
-		LogHandler::Log('ELVIS', 'DEBUG', 'ElvisAMFClient - sendUnParsed - url:' . $url . '; service:' . $service . '; operation:' . $operation . '; params:' . print_r($params, true) . '; secure:' . $secure);
-				
+		LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.' - url:' . $url . '; secure:' . $secure );
+		self::logService( 'Elvis_'.$service.'_'.$operation, $params, true );
+
 		$result = null;
 		try {
 			$result = $client->sendRequest($servicePath, $params, $timeout);
@@ -77,7 +82,8 @@ class ElvisAMFClient
 				self::handleError($result, $service, $operation);
 			}
 		}
-				
+
+		self::logService( 'Elvis_'.$service.'_'.$operation, $result, false );
 		return $result;
 	}
 	
@@ -94,12 +100,19 @@ class ElvisAMFClient
 		require_once dirname(__FILE__) . '/../logic/ElvisRESTClient.php';
 		$allAssetInfo = ElvisRESTClient::fieldInfo();
 		ElvisSessionUtil::setAllAssetInfo($allAssetInfo);
+
+		// Remember the version of the Elvis Server we are connected with.
+		$client = new ElvisRESTClient();
+		$serverInfo = $client->getElvisServerInfo();
+		if( $serverInfo ) {
+			ElvisSessionUtil::setSessionVar( 'elvisServerVersion', $serverInfo->version );
+		}
 	}
 	
 	/**
 	 * Does a synchronized login to make sure the user does not login twice if requests are fired close to each other
+	 *
 	 * @param string $credentials
-	 * @throws Exception
 	 * @throws BizException
 	 * @return string sessionId
 	 */
@@ -113,7 +126,7 @@ class ElvisAMFClient
 				$sessionId = self::loginByCredentials ($credentials);
 				ElvisSessionUtil::stopLogin();
 				return $sessionId;
-			} catch (Exception $e) {
+			} catch (BizException $e) {
 				ElvisSessionUtil::stopLogin();
 				throw $e;
 			}
@@ -163,6 +176,34 @@ class ElvisAMFClient
 	{
 		SabreAMF_ClassMapper::registerClass($clazz::getJavaClassName(), $clazz::getName());
 	}
+
+	/**
+	 * Determine the interface version of the AMF model of the Enterprise-Elvis integration.
+	 *
+	 * When adding properties to the data classes of this model, the integration would break
+	 * because Java data classes are mapped onto PHP data classes automatically and when there
+	 * are mismatches found in Java (Elvis Server) it will raise an error.
+	 *
+	 * To avoid this from happening, data classes can be versioned at the PHP side. Instead of
+	 * simply adding a new property, the data class should be sub-classed and the property should
+	 * be added to the sub-class instead.
+	 *
+	 * Having that in place, this function can be called to determine which data class to be used.
+	 * Therefore, whenever the AMF data model changes in a backwards incompatible manner a new interface
+	 * version should be introduced by this function.
+	 *
+	 * @since 10.1.1
+	 * @return int Interface version number.
+	 */
+	public static function getInterfaceVersion()
+	{
+		$elvisVersion = ElvisSessionUtil::getSessionVar( 'elvisServerVersion' );
+		$ifVersion = 1;
+		if( version_compare( $elvisVersion, '5.18','>=' ) ) {
+			$ifVersion = 2;
+		}
+		return $ifVersion;
+	}
 	
 	private static function getEndpointUrl($includeSessionId=true)
 	{
@@ -194,14 +235,37 @@ class ElvisAMFClient
 		$detail = $message . '; faultCode: ' . $error->faultCode . '; faultDetail: ' . $error->faultDetail;
 
 		if (isset($error->rootCause) && $error->rootCause instanceof ElvisCSException) {
-			$error->rootCause->setMessage( $message );
-			$error->rootCause->setDetail( $detail );
-			throw $error->rootCause;
+			/** @var ElvisCSException $rootCause */
+			$rootCause = $error->rootCause;
+			$rootCause->setMessage( $message );
+			$rootCause->setDetail( $detail );
+			throw $rootCause;
 		}
 		else {
 			// This part is only called if no CSException is returned from Elvis, which would indicate an error.
 			throw new BizException(null, 'Server', $detail, $message);
 		}
 	}
-	
+
+	/**
+	 * In debug mode, performs a print_r on $transData and logs the service as AMF.
+	 *
+	 * @param string $methodName Service method used to give log file a name.
+	 * @param mixed $transData Transport data to be written in log file using print_r.
+	 * @param boolean $isRequest TRUE to indicate a request, FALSE for a response, or NULL for error.
+	 */
+	private static function logService( $methodName, $transData, $isRequest )
+	{
+		if( LogHandler::debugMode() ) {
+			// For the logon request the credentials are base64, so we hide that from the logging.
+			if( $methodName == 'Elvis_contentSourceAuthenticationService_login' && $isRequest ) {
+				if( isset($transData[0]->cred) ) {
+					$transData = unserialize( serialize( $transData ) ); // deep clone to avoid changing request
+					$transData[0]->cred = '***';
+				}
+			}
+			$dataStream = print_r( $transData, true );
+			LogHandler::logService( $methodName, $dataStream, $isRequest, 'AMF' );
+		}
+	}
 }

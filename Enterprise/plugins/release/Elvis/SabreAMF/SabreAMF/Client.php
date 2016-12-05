@@ -150,6 +150,12 @@
             curl_setopt($ch,CURLOPT_TIMEOUT,$timeout);
             curl_setopt($ch,CURLOPT_HTTPHEADER,array('Content-type: ' . SabreAMF_Const::MIMETYPE));
             curl_setopt($ch,CURLOPT_POSTFIELDS,$this->amfOutputStream->getRawData());
+            if( defined( 'ELVIS_CURL_OPTIONS') ) { // hidden option
+                $options = unserialize( ELVIS_CURL_OPTIONS );
+                if( $options ) foreach( $options as $key => $value ) {
+                    curl_setopt( $ch, $key, $value );
+                }
+            }
     		if ($this->httpProxy) {
     			curl_setopt($ch,CURLOPT_PROXY,$this->httpProxy);
     		}

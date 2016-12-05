@@ -1,19 +1,10 @@
 <?php
-/****************************************************************************
-   Copyright 2013 WoodWing Software BV
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-****************************************************************************/
+/**
+ * @package    Enterprise
+ * @subpackage ServerPlugins
+ * @since      v9.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ */
 
 require_once BASEDIR.'/server/interfaces/plugins/connectors/PubPublishing_EnterpriseConnector.class.php';
 require_once dirname(__FILE__).'/WordPressXmlRpcClient.class.php';
@@ -25,9 +16,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	const SITE_ID = '0';
 
 	/**
-	 * Publishes a dossier with contained objects (articles. images, etc.) to an external publishing system.
-	 * The plugin is supposed to publish the dossier and it's articles and fill in some fields for reference.
-	 *
 	 * {@inheritdoc}
 	 * @throws BizException
 	 */
@@ -67,6 +55,101 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
+	 * {@inheritdoc}
+	 * @throws BizException
+	 */
+	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
+	{
+		// Bail out if there is no publish form in the dossier (should never happen).
+		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
+		}
+
+		// Prepare post content.
+		$pubFields = array();
+		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
+
+		$e = null;
+		try {
+			$postContents = $this->preparePost( $publishForm, $publishFormObjects, $dossier, $objectsInDossier, $publishTarget, 'update' );
+			$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+			$objXMLRPClientWordPress->uploadPost( $postContents, $dossier->ExternalId );
+			$url = $this->getPostUrl( $dossier->ExternalId, $publishTarget );
+			$pubFields[] = new PubField( 'URL', 'string', array( $url ) );
+		} catch( BizException $e ) {
+		}
+
+		// Remove temp files from transfer server folder as prepared by getFormFields().
+		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
+
+		if( $e ) {
+			$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
+		}
+		return $pubFields;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
+	{
+		$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+
+		try {
+			$objXMLRPClientWordPress->deleteOldPublishedPreviews(); // delete all old previews
+			try {
+				$objXMLRPClientWordPress->deletePostAndContent( $dossier->ExternalId );
+				$dossier->ExternalId = '';
+			} catch( BizException $e) {
+				$this->reThrowDetailedError( $dossier, $e, 'UnpublishDossier' );
+			}
+		} catch( BizException $e ) { // we want to continue when we could not remove the previews
+			LogHandler::Log( 'SERVER', 'WARN', 'Could not remove old published reviews', $e );
+		}
+		return array();
+	}
+
+	/**
+	 * {@inheritdoc}
+	 * @throws BizException
+	 */
+	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
+	{
+		// Bail out if there is no publish form in the dossier (should never happen).
+		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
+		}
+
+		// Prepare post content.
+		$pubFields = array();
+		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
+
+		$e = null;
+		try {
+			$postContents = $this->preparePost( $publishForm, $publishFormObjects, $dossier, $objectsInDossier, $publishTarget, 'preview' );
+			$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+			$result = $objXMLRPClientWordPress->uploadPost( $postContents, null, true );
+			if( $result ) {
+				$pubFields[] = new PubField( 'URL', 'string', array( $result ) );
+			}
+		} catch( BizException $e ) {
+		}
+
+		// Remove temp files from transfer server folder as prepared by getFormFields().
+		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
+
+		if( $e ) {
+			throw new BizException( 'WORDPRESS_ERROR_PREVIEW', 'SERVER', 'ERROR', null, array( $publishForm->MetaData->BasicMetaData->Name ) );
+		}
+
+		return $pubFields;
+	}
+
+	/**
 	 * Publish or Update post to WordPress.
 	 *
 	 * This function is used to update or publish a post from WordPress.
@@ -87,15 +170,16 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		$postContent = array();
 		$article = $this->getFirstObjectWithType( $objectsInDossier, 'Article' );
 
-		$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
+		$wpClient = new WordPressXmlRpcClient( $publishTarget );
 		try {
-			$objXMLRPClientWordPress->deleteOldPublishedPreviews(); // delete all old previews
-		} catch( BizException $e ) { // we want to continue when we could not remove the previews
-			LogHandler::Log( 'SERVER', 'WARN', 'Could not remove old published reviews', $e );
+			$wpClient->deleteOldPublishedPreviews();
+		} catch( BizException $e ) {
+			// Failing to remove the preview should not stop the operation.
+			LogHandler::Log( 'SERVER', 'WARN', 'Could not remove old published previews.', $e );
 		}
 
-		$wordpressUtils = new WordPress_Utils();
-		$siteName = $wordpressUtils->getSiteName( $publishTarget );
+		$wpUtils = new WordPress_Utils();
+		$siteName = $wpUtils->getSiteName( $publishTarget );
 		$publishFormDocId = BizPublishForm::getDocumentId( $publishForm );
 		if( $publishFormDocId == $this->getDocumentIdPrefix().$siteName ) {
 			$messageText = null;
@@ -105,10 +189,15 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 			$galleriesCustomField = null;
 			$galleryId = null;
 
-			// Get the title
 			$title = isset( $publishFormOBJS['C_WORDPRESS_POST_TITLE'] ) ? $publishFormOBJS['C_WORDPRESS_POST_TITLE'][0] : null;
 			if( !$title ) {
 				throw new BizException( 'WORDPRESS_ERROR_NO_TITLE', 'Server', 'A title is needed but there is no title found.' );
+			}
+
+			// This is needed because the getFormFields does not return a array when it has only 1 object
+			// in that case it will return a object instead of a array. We need a array so here we force it into an array.
+			if( isset($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']) && !is_array($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']) ) {
+				$publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] = array( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] );
 			}
 
 			$articleFields = BizPublishForm::extractFormFieldDataFromFieldValue( 'C_WORDPRESS_PF_MESSAGE_SEL', $article, $publishTarget->PubChannelID, true );
@@ -119,8 +208,9 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 			}
 			$this->validateInlineImageFormat( $attachments );
 
-			if( strtolower( $action ) == 'update' ) { // deleting images from WordPress is only needed when updating
-				$customFieldIds = $objXMLRPClientWordPress->deleteInlineAndFeaturedImages( $dossier->ExternalId );
+			// Deleting images from WordPress is only needed when updating
+			if( strtolower( $action ) == 'update' ) {
+				$customFieldIds = $wpClient->deleteInlineAndFeaturedImages( $dossier->ExternalId );
 				$inlineImagesCustomField = isset( $customFieldIds['inline-custom-field'] ) ? $customFieldIds['inline-custom-field'] : null;
 				$featuredImagesCustomField = isset( $customFieldIds['featured-custom-field'] ) ? $customFieldIds['featured-custom-field'] : null;
 				$gallery = $this->getGalleryByWidgetName( $publishTarget, $dossier->ExternalId, 'C_WORDPRESS_MULTI_IMAGES' );
@@ -131,60 +221,105 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				if( isset( $gallery['galleryId'] ) ) {
 					$galleryId = $gallery['galleryId'];
 				}
-				if( $galleryId ) {
-					$pubChannelId = $publishTarget->PubChannelID;
-					$dossiersPublished = DBPublishHistory::getPublishHistoryDossier( $dossier->MetaData->BasicMetaData->ID, $pubChannelId, $publishTarget->IssueID, null, true );
-					$dossierPublished = reset( $dossiersPublished ); // Get the first dossier.
-					$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist( $dossierPublished['id'] );
 
-					foreach( $publishedObjects as $relation ) {
-						if( $relation['type'] == 'Image' ) {
-							$deleted = true;
-							foreach( $objectsInDossier as $object ) {
-								if( $object->MetaData->BasicMetaData->Type == 'Image' ) {
-									if( $object->MetaData->BasicMetaData->ID == $relation['objectid'] ) {
-										$deleted = false;
-										break;
+				if( $galleryId ) {
+					require_once BASEDIR . '/server/dbclasses/DBPublishHistory.class.php';
+					$publishedDossiersResult = DBPublishHistory::getPublishHistoryDossier( $dossier->MetaData->BasicMetaData->ID, $publishTarget->PubChannelID, $publishTarget->IssueID, null, true );
+					$dossierPublished = reset( $publishedDossiersResult );
+
+					/** @var $imagesToDeleteFromGallery array List of the external ids of the images that should be deleted. */
+					$imagesToDeleteFromGallery = array();
+
+					/** @var $nativeExternalsToRemove array List of object ids of which the external id should be unset.
+					   Since this id is stored on object level, it needs to be unset once the (native) is removed from the publish form. */
+					$nativeExternalsToRemove = array();
+
+					/** @var $nativeImageIds array List of the image ids of the natives to be published in the gallery. value=ImageId */
+					$nativeImageIds = array();
+					/** @var $convertedPlacements array List of converted placements to be published. Key=ImageId, value=Placement */
+					$convertedPlacements = array();
+
+					// Collect all images that are about to be published and save them in two arrays: One for natives and one for converted images.
+					if( isset( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] ) ) foreach( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] as $frameOrder => $image ) {
+
+						// If an image has been converted, we should be on the safe side and always use the newest one.
+						$convertedPlacement = $this->getConvertedPlacement( $publishForm, $image->MetaData->BasicMetaData->ID, 'C_WORDPRESS_MULTI_IMAGES', $frameOrder );
+						if( $convertedPlacement ) {
+							// Since one native can be cropped multiple times, we can have multiple convertedPlacements for the same image id.
+							$convertedPlacements[$image->MetaData->BasicMetaData->ID][] = $convertedPlacement;
+						} else {
+							$nativeImageIds[] = $image->MetaData->BasicMetaData->ID;
+						}
+					}
+
+					// Look through the published native images.
+					require_once BASEDIR . '/server/dbclasses/DBPublishedObjectsHist.class.php';
+					$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist( $dossierPublished['id'] );
+   				if( $publishedObjects ) foreach( $publishedObjects as $publishedObject ) {
+
+						// Only look at images that have actually been published, i.e. that have an external id.
+						if( $publishedObject['type'] == 'Image' && $publishedObject['externalid'] ) {
+
+							// Delete in case that the published image has been removed from the publish form
+							if( !in_array( $publishedObject['objectid'], $nativeImageIds ) ) {
+							   $imagesToDeleteFromGallery[] = $publishedObject['externalid'];
+								$nativeExternalsToRemove[] = $publishedObject['objectid'];
+							}
+						}
+					}
+
+					// Look through the published converted images.
+					require_once BASEDIR . '/server/dbclasses/DBPubPublishedPlacementsHist.class.php';
+					$publishedPlacements = DBPubPublishedPlacementsHistory::listPublishedPlacements( $dossierPublished['id'] );
+					if( $publishedPlacements ) foreach( $publishedPlacements as $publishedPlacement ) {
+						// Only look at images that have actually been published, i.e. that have an external id.
+						if( $publishedPlacement->ExternalId ) {
+
+							// Delete if the crop (by image id) has been removed from the image.
+							if( !isset( $convertedPlacements[$publishedPlacement->ObjectId] ) ) {
+								$imagesToDeleteFromGallery[] = $publishedPlacement->ExternalId;
+							} else {
+								// See if the published placement hash matches any of the to-be-published placement hashes.
+								$foundMatch = false;
+								foreach( $convertedPlacements[$publishedPlacement->ObjectId] as $convertedPlacement ) {
+									if( $convertedPlacement->ConvertedImageToPublish->PlacementHash === $publishedPlacement->PlacementHash ) {
+										$foundMatch = true;
 									}
 								}
-							}
-
-							if( $deleted ) {
-								$externalId = null;
-								$externalId = DBPublishedObjectsHist::getObjectExternalId( $dossier->MetaData->BasicMetaData->ID, $relation['objectid'], $pubChannelId, $publishTarget->IssueID, null, $dossierPublished['id'] );
-								if( $externalId ) {
-									$objXMLRPClientWordPress->deleteImage( $externalId );
+								// Only if there is no match, we can delete the converted image.
+								if( !$foundMatch ) {
+									$imagesToDeleteFromGallery[] = $publishedPlacement->ExternalId;
 								}
 							}
 						}
 					}
+
+					if( $imagesToDeleteFromGallery ) foreach( $imagesToDeleteFromGallery as $id ) {
+						$wpClient->deleteImage( $id );
+					}
+
+					if( $nativeExternalsToRemove ) foreach( $nativeExternalsToRemove as $objectId ) {
+						$this->updateExternalId( null, $objectsInDossier, $objectId, null );
+					}
 				}
 			}
 
-			// This is needed because the getFormFields does not return a array when it has only 1 object
-			// in that case it will return a object instead of a array. We need a array so here we force it into an array.
-			if( isset($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']) ) {
-				if( !is_array($publishFormOBJS['C_WORDPRESS_MULTI_IMAGES']) ) {
-					$publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] = array( $publishFormOBJS['C_WORDPRESS_MULTI_IMAGES'] );
-				}
+			$doPreview = false;
+			$usedGalleryId = $galleryId;
+			if( strtolower($action) == 'preview' ) {
+				$doPreview = true;
+				// In case a preview is done, we want to use a new gallery as to not corrupt a potentially existing one.
+				$usedGalleryId = null;
 			}
 
-			$uploadImagesResult = null;
-			if( strtolower( $action ) == 'preview' ) { // if preview we don't want to save anything or use the existing gallery because that will corrupt the dossier
-				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget,
-					null, $dossier->MetaData->BasicMetaData->Name, $attachments, true );
-			} else if( $galleryId ) { // use already existing gallery
-				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget,
-					$galleryId, null, $attachments );
-			} else { // create a new gallery
-				$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget,
-					null, $dossier->MetaData->BasicMetaData->Name, $attachments );
-				if( isset( $uploadImagesResult['galleryId'] ) ) {
-					$galleryId = $uploadImagesResult['galleryId'];
-				}
+			$uploadImagesResult = $this->uploadImages( $publishForm, $publishFormOBJS, $objectsInDossier, $publishTarget,
+				$usedGalleryId, $dossier->MetaData->BasicMetaData->Name, $attachments, $doPreview );
+
+			if( isset( $uploadImagesResult['galleryId'] ) ) {
+				$galleryId = $uploadImagesResult['galleryId'];
 			}
 
-			// Cleanup the temporary created images files.
+			// Cleanup the temporary created inline images files.
 			if( $attachments ) {
 				require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 				$transferServer = new BizTransferServer();
@@ -270,7 +405,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 
 			if( isset( $publishFormOBJS[ 'C_WORDPRESS_FORMAT_'.strtoupper( $siteName ) ] ) ) {
 				$format = $publishFormOBJS[ 'C_WORDPRESS_FORMAT_'.strtoupper( $siteName ) ][0];
-				$savedFormats = $wordpressUtils->getSavedFormats( $siteName );
+				$savedFormats = $wpUtils->getSavedFormats( $siteName );
 				$savedFormat = $format;
 
 				if( isset( $savedFormats[ $format ] ) ) {
@@ -308,7 +443,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * This function returns the supported WordPress Image Formats.
+	 * Returns the supported WordPress image formats (MIME).
 	 *
 	 * @return array
 	 */
@@ -325,7 +460,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param PubPublishTarget $publishTarget
 	 * @param int $externalId
 	 * @param string $widgetName
-	 * @return array
+	 * @return array|null Array with gallery id and custom field id if found, NULL otherwise.
 	 */
 	private function getGalleryByWidgetName( $publishTarget, $externalId, $widgetName )
 	{
@@ -412,78 +547,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 		throw new BizException( null, 'Server', $detail, $msg );
 	}
 
-	/**
-	 * Updates/republishes a published dossier with contained objects (articles. images, etc.) to an 
-	 * external publishing system, using the $publishForm->ExternalId to identify the dosier to the
-	 * publishing system. The plugin is supposed to update/republish the dossier and it's articles 
-	 * and fill in some fields for reference.
-	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PubPublishTarget $publishTarget
-	 * @return array|void of PubField containing information from publishing system
-	 * @throws BizException
-	 */
-	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
-	{
-		// Bail out if there is no publish form in the dossier (should never happen).
-		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
-		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
-		if( !$publishForm ) {
-			return array();
-		}
-
-		// Prepare post content.
-		$pubFields = array();
-		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
-
-		$e = null;
-		try {
-			$postContents = $this->preparePost( $publishForm, $publishFormObjects, $dossier, $objectsInDossier, $publishTarget, 'update' );
-			$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
-			$objXMLRPClientWordPress->uploadPost( $postContents, $dossier->ExternalId );
-			$url = $this->getPostUrl( $dossier->ExternalId, $publishTarget );
-			$pubFields[] = new PubField( 'URL', 'string', array( $url ) );
-		} catch( BizException $e ) {
-		}
-
-		// Remove temp files from transfer server folder as prepared by getFormFields().
-		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
-
-		if( $e ) {
-			$this->reThrowDetailedError( $publishForm, $e, 'PublishDossier' );
-		}
-		return $pubFields;
-	}
-
-	/**
-	 * Removes/unpublishes a published dossier from an external publishing system
-	 * using the $publishForm->ExternalId to identify the dosier to the publishing system.
-	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PubPublishTarget $publishTarget
-	 *
-	 * @return array of PubField containing information from publishing system
-	 */
-	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget ) 
-	{
-		$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
-
-		try {
-			$objXMLRPClientWordPress->deleteOldPublishedPreviews(); // delete all old previews
-			try {
-				$objXMLRPClientWordPress->deletePostAndContent( $dossier->ExternalId );
-				$dossier->ExternalId = '';
-			} catch( BizException $e) {
-				$this->reThrowDetailedError( $dossier, $e, 'UnpublishDossier' );
-			}
-		} catch( BizException $e ) { // we want to continue when we could not remove the previews
-			LogHandler::Log( 'SERVER', 'WARN', 'Could not remove old published reviews', $e );
-		}
-		return array();
-	}
-
     /**
      * Get the Url for a certain post.
      *
@@ -499,13 +562,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
     }
 
 	/**
-	 * Requests field values from an external publishing system
-	 * using the $dossier->ExternalId to identify the Dossier to the publishing system.
-	 *
-	 * @param Object $dossier The Dossier to request field values from.
-	 * @param array $objectsInDossier The objects in the Dossier.
-	 * @param PubPublishTarget $publishTarget The target.
-	 * @return array List of PubField with its values.
+	 * {@inheritdoc}
 	 */
 	public function requestPublishFields( $dossier, $objectsInDossier, $publishTarget )
 	{
@@ -519,7 +576,7 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Upload al images in the dossier to WordPress.
+	 * Upload all images in the dossier to WordPress.
 	 *
 	 * This function is used to upload images, it processes the images and checks if they need to be uploaded or only updated.
 	 * It calls the upload image or update image for every image that is in the dossier.
@@ -531,67 +588,35 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param integer|null $galleryId
 	 * @param string|null $galleryName
 	 * @param Attachment[]|null $attachments
-	 * @param bool $preview
+	 * @param boolean $preview TRUE if the current action is Preview, FALSE if it is not.
 	 * @return array
 	 * @throws BizException
 	 */
 	public function uploadImages( $publishForm, $publishFormObjects, $objectsInDossier, $publishTarget,
 	                              $galleryId, $galleryName, $attachments, $preview = false )
 	{
+		require_once dirname(__FILE__) . '/WordPressXmlRpcClient.class.php';
+
 		$postId = null;
 		$result = null;
-		$clientWordPress = new WordPressXmlRpcClient( $publishTarget );
+		$wpClient = new WordPressXmlRpcClient( $publishTarget );
 
-		if( isset($publishFormObjects['C_WORDPRESS_MULTI_IMAGES']) || isset($publishFormObjects['C_WORDPRESS_FEATURED_IMAGE']) ) {
+		if( isset( $publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'] ) ) {
+			$result['featured-image'] = $this->uploadFeaturedImage( $wpClient, $publishForm, $objectsInDossier,
+				$publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'] );
+		}
 
-			foreach( $publishForm->Relations as $relation ) {
-				if( $relation->Type == 'Placed' && $relation->ChildInfo->Type == 'Image' ) {
-					foreach( $relation->Placements as $placement ) {
-
-						$convertedPlacement = null;
-						if( isset( $placement->ConvertedImageToPublish ) ) {
-							$convertedPlacement = $placement;
-						}
-
-						switch( $placement->FormWidgetId ) {
-							case 'C_WORDPRESS_MULTI_IMAGES':
-
-								// Check if we have a galleryName or an galleryId when there are images to upload,
-								// this exception is given when the function is called with the wrong parameters
-								if( !$galleryName && !$galleryId ) {
-									throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', 'Please contact your system administrator');
-								}
-
-								// If no GalleryId then create a new Gallery.
-								if( !$galleryId ) {
-									$galleryId = $clientWordPress->createGallery( $galleryName );
-								}
-
-								foreach( $publishFormObjects['C_WORDPRESS_MULTI_IMAGES'] as $imageObj ) {
-									if( $imageObj->MetaData->BasicMetaData->ID == $relation->Child ) {
-										$this->handleGalleryImage( $clientWordPress, $publishForm, $publishTarget, $imageObj,
-											$galleryId, $preview, $convertedPlacement );
-										break; // You can only have one match on image id, so stop looking when we find it.
-									}
-								}
-
-								break;
-							case 'C_WORDPRESS_FEATURED_IMAGE':
-								$result['featured-image'] = $this->handleFeaturedImage( $clientWordPress, $publishForm,
-									$publishFormObjects['C_WORDPRESS_FEATURED_IMAGE'], $convertedPlacement );
-								break;
-
-						}
-					}
-				}
-			}
-
+		if( isset( $publishFormObjects['C_WORDPRESS_MULTI_IMAGES'] ) ) {
+			$this->uploadGalleryImages( $wpClient, $publishFormObjects['C_WORDPRESS_MULTI_IMAGES'], $publishForm, $objectsInDossier,
+				$publishTarget, $galleryId, $galleryName, $preview );
 			$result['galleryId'] = $galleryId;
 		}
 
 		if( $attachments ) {
 			$inlineImages = array_keys($attachments);
+			require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
 			require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
+			require_once BASEDIR . '/server/dbclasses/DBDeletedObject.class.php';
 			foreach( $inlineImages as $imageId ) {
 				$format = $attachments[$imageId]->Type;
 				$extension = MimeTypeHandler::mimeType2FileExt($format);
@@ -599,13 +624,14 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 
 				if( !$inlineImageName ) { // objectName not found in Workflow area
 					$inlineImageName = DBDeletedObject::getObjectName( $imageId ); // so find in Trash area
+
+					if( !$inlineImageName ) {
+						throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server',
+							'The image that you want to upload does not exist (id='.$imageId.').' );
+					}
 				}
-				try {
-					$retVal = $clientWordPress->uploadMediaLibraryImage( $inlineImageName.$extension,
-						$attachments[$imageId]->FilePath, $attachments[$imageId]->Type );
-				} catch( BizException $e ) {
-					throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail());
-				}
+				$retVal = $wpClient->uploadMediaLibraryImage( $inlineImageName.$extension,
+					$attachments[$imageId]->FilePath, $attachments[$imageId]->Type );
 
 				$result['attachments'][$imageId] = $retVal;
 				$result['attachments'][$imageId]['ent_id'] = $imageId;
@@ -617,56 +643,161 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
+	 * Handles the uploading of all images for the gallery.
+	 *
+	 * @param WordPressXmlRpcClient $wpClient Client to communicate to WordPress with.
+	 * @param Object[] $images List of images to be uploaded to the gallery
+	 * @param Object $publishForm
+	 * @param Object[] $objectsInDossier List of all objects in the dossier. Used for updating object metadata.
+	 * @param PubPublishTarget $publishTarget Publishing target for this publish form.
+	 * @param string|null &$galleryId Gallery id. If not set, a new gallery will be created and this property will be
+	 *                                filled in with the new id by reference.
+	 * @since 10.1.1
+	 * @param string $galleryName
+	 * @param boolean $preview TRUE if the current action is Preview, FALSE if it is not.
+	 * @throws BizException
+	 */
+	private function uploadGalleryImages( $wpClient, $images, $publishForm, $objectsInDossier, $publishTarget, &$galleryId, $galleryName, $preview )
+	{
+		if( !$galleryName && !$galleryId ) {
+			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Gallery id and name are both missing. Either of these properties needs to be known.');
+		}
+
+		if( !$galleryId ) {
+			$galleryId = $wpClient->createGallery( $galleryName );
+		}
+
+		if( $images ) foreach( $images as $frameOrder => $imageObj ) {
+			$convertedPlacement = $this->getConvertedPlacement( $publishForm, $imageObj->MetaData->BasicMetaData->ID, 'C_WORDPRESS_MULTI_IMAGES', $frameOrder );
+
+			$externalId = $this->uploadGalleryImage( $wpClient, $publishForm, $publishTarget, $imageObj,
+				$galleryId, $preview, $convertedPlacement );
+
+			$this->updateExternalId( $externalId, $objectsInDossier, $imageObj->MetaData->BasicMetaData->ID, $convertedPlacement );
+		}
+	}
+
+	/**
+	 * Updates the external id on all resources relevant to updating Enterprise objects in the database.
+	 *
+	 * For native images, only the $objectsInDossier list is used to save publish history, so the external
+	 * id needs to be set correctly in order to be able to query it later.
+	 *
+	 * @since 10.1.1
+	 * @param string|null $externalId The external id to be updated. If null, the externalid value will be unset.
+	 * @param Object[] $objectsInDossier List of objects contained in the dossier. Used for updating metadata.
+	 * @param int $objectId The id of the object to be updated.
+	 * @param Placement|null $convertedPlacement If provided, the externalid will be updated on this resource (for converted images).
+	 */
+	private function updateExternalId( $externalId, $objectsInDossier, $objectId, $convertedPlacement )
+	{
+		if( $convertedPlacement ) {
+			$convertedPlacement->ConvertedImageToPublish->ExternalId = $externalId;
+		} else {
+			foreach( $objectsInDossier as $object ) {
+				if( $object->MetaData->BasicMetaData->ID == $objectId ) {
+					$object->ExternalId = $externalId;
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Retrieves a placement of an image crop made on a given Publish Form.
+	 *
+	 * The end user may have cropped the image placed on the Publish Form.
+	 * When a crop is found, the caller should prefer the cropped image (over the native image).
+	 *
+	 * The cropped image is dynamically set by the core server during the publish operation at Placement->ConvertedImageToPublish->Attachment.
+	 * Note that this property is not defined in the WSDL. When the property is missing, there is no crop.
+	 *
+	 * @since 10.1.0
+	 * @param Object $publishForm The form object being published.
+	 * @param string $childId Id of placed image object to get the attachment for.
+	 * @param string $formWidgetId The name of the publishform widget.
+	 * @param integer $frameOrder The position of the placement within the publishform field.
+	 * @return Placement|null The cropped image. NULL when no crop found.
+	 */
+	private function getConvertedPlacement( $publishForm, $childId, $formWidgetId, $frameOrder )
+	{
+		$convertedPlacement = null;
+		if( $publishForm->Relations ) foreach( $publishForm->Relations as $relation ) {
+			if( $relation->Type == 'Placed' &&
+				$relation->Child == $childId &&
+				$relation->Parent == $publishForm->MetaData->BasicMetaData->ID
+			) {
+				if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
+					if( $placement->FormWidgetId &&
+						$placement->FormWidgetId == $formWidgetId &&
+						$placement->FrameOrder == $frameOrder &&
+						isset( $placement->ConvertedImageToPublish )
+					) {
+						$convertedPlacement = $placement;
+					}
+				}
+			}
+		}
+		return $convertedPlacement;
+	}
+
+
+	/**
 	 * Handles the processing and uploading of a featured image.
 	 *
-	 * @param WordPressXmlRpcClient $clientWordPress The client used to communicate with WordPress.
+	 * @param WordPressXmlRpcClient $wpClient The client used to communicate with WordPress.
 	 * @param Object $publishForm PublishForm object.
+	 * @param Object[] $objectsInDossier List of objects in the dossier to be published.
 	 * @param Object $featuredImage Original image object to be uploaded. Contains all metadata.
-	 * @param Placement|null $convertedPlacement The converted image, if any conversion has been done for it. If not this property is null.
 	 * @return string External id of the uploaded image.
 	 * @throws BizException when communicating with WordPress returns an error.
 	 */
-	private function handleFeaturedImage( $clientWordPress, $publishForm, $featuredImage, $convertedPlacement )
+	private function uploadFeaturedImage( $wpClient, $publishForm, $objectsInDossier, $featuredImage )
 	{
-		try {
-			if( $convertedPlacement ) {
-				$filePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
-			} else {
-				$filePath = $this->saveLocal( $featuredImage->MetaData->BasicMetaData->ID );
-			}
-			$extension = pathinfo($filePath, PATHINFO_EXTENSION);
-			$imageName = $featuredImage->MetaData->BasicMetaData->Name . '.' . $extension ;
+		require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
+		$convertedPlacement = $this->getConvertedPlacement( $publishForm, $featuredImage->MetaData->BasicMetaData->ID, 'C_WORDPRESS_FEATURED_IMAGE', 0 );
 
-			$retVal = $clientWordPress->uploadMediaLibraryImage( $imageName, $filePath, $featuredImage->MetaData->ContentMetaData->Format );
-			if( $retVal['id'] ) {
-				$imageDescription = null;
-				foreach( $featuredImage->MetaData->ExtraMetaData as $extraData ) {
-					if( $extraData->Property == 'C_WORDPRESS_IMAGE_DESCRIPTION' ) {
-						$imageDescription = $extraData->Values[0];
-						break;
-					}
-				}
-				$clientWordPress->updateMediaLibraryImageMetaData( $retVal['id'], $featuredImage->MetaData->BasicMetaData->Name, $imageDescription, '' );
-			}
-		} catch( BizException $e ) {
-			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail() );
+		if( $convertedPlacement && $convertedPlacement->ConvertedImageToPublish->Attachment ) {
+			$filePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
+			$format = $convertedPlacement->ConvertedImageToPublish->Attachment->Type;
+		} else {
+			$filePath = $featuredImage->Files[0]->FilePath;
+			$format = $featuredImage->MetaData->ContentMetaData->Format;
 		}
-		return $retVal['id'];
+		$imageName = $featuredImage->MetaData->BasicMetaData->Name . MimeTypeHandler::mimeType2FileExt( $format ); ;
+
+		$retVal = $wpClient->uploadMediaLibraryImage( $imageName, $filePath, $format );
+		$externalId = $retVal['id'];
+		if( $externalId ) {
+			$imageDescription = null;
+			if( $featuredImage->MetaData->ExtraMetaData ) foreach( $featuredImage->MetaData->ExtraMetaData as $extraData ) {
+				if( $extraData->Property == 'C_WORDPRESS_IMAGE_DESCRIPTION' ) {
+					$imageDescription = $extraData->Values[0];
+					break;
+				}
+			}
+			$wpClient->updateMediaLibraryImageMetaData( $externalId, $featuredImage->MetaData->BasicMetaData->Name, $imageDescription, '' );
+		}
+
+		// The external id is purposefully not set on the Enterprise object itself for featured images. This is because
+		// Enterprise does not use the externalid in order to delete or update a featured image.
+		return $externalId;
 	}
 
 	/**
 	 * Uploads or updates an image to/in a specific gallery.
 	 *
-	 * @param WordPressXmlRpcClient $clientWordPress The client used to communicate with WordPress.
+	 * @param WordPressXmlRpcClient $wpClient The client used to communicate with WordPress.
 	 * @param Object $publishForm PublishForm object.
 	 * @param PubPublishTarget $publishTarget
 	 * @param Object $imageObj Original image object to be uploaded. Contains all relevant metadata.
 	 * @param integer $galleryId The gallery to which we need to upload images.
 	 * @param boolean $preview TRUE if the current action is Preview, FALSE if it is not.
 	 * @param Placement|null $convertedPlacement The converted image, if any conversion has been done for it. If not this property is null.
+	 * @return string The external id of the gallery image.
 	 * @throws BizException when communicating with WordPress returns an error.
 	 */
-	private function handleGalleryImage( $clientWordPress, $publishForm, $publishTarget, $imageObj, $galleryId, $preview, $convertedPlacement )
+	private function uploadGalleryImage( $wpClient, $publishForm, $publishTarget, $imageObj, $galleryId, $preview, $convertedPlacement )
 	{
 		$imageDescription = null;
 		$externalId = null;
@@ -684,47 +815,38 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 				$uploadNeeded = $this->isConvertedImageUploadNeeded( $convertedPlacement );
 				$externalId = $convertedPlacement->ConvertedImageToPublish->ExternalId;
 			} else {
+				// External id is set by reference.
 				$uploadNeeded = $this->isUploadChildNeeded( $publishForm, $imageObj, $publishTarget, $externalId );
 			}
 		}
 
 		if( $uploadNeeded ) {
 			$filePath = null;
-			$extension = $imageObj->Relations[0]->ChildInfo->Format;
-			if( $convertedPlacement ) {
-				if( $convertedPlacement->ConvertedImageToPublish->Attachment ) {
-					$filePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
-				}
+			$format = null;
+			if( $convertedPlacement && $convertedPlacement->ConvertedImageToPublish->Attachment ) {
+				$filePath = $convertedPlacement->ConvertedImageToPublish->Attachment->FilePath;
+				$format = $convertedPlacement->ConvertedImageToPublish->Attachment->Type;
 			} else {
-				$filePath = $this->saveLocal( $imageObj->MetaData->BasicMetaData->ID );
+				$filePath = $imageObj->Files[0]->FilePath;
+				$format = $imageObj->MetaData->ContentMetaData->Format;
 			}
 
 			if( $filePath ) {
-				$imageName = $imageObj->MetaData->BasicMetaData->Name.'.'.pathinfo( $filePath, PATHINFO_EXTENSION );
+				require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
+				$imageName = $imageObj->MetaData->BasicMetaData->Name . MimeTypeHandler::mimeType2FileExt( $format );
 				if( $externalId ) { // update existing?
-					try {
-						$response = $clientWordPress->updateImage( $imageName, $filePath, $extension, $galleryId, $externalId );
-					} catch( BizException $e ) {
-						throw new BizException( 'WORDPRESS_ERROR_UPDATE_IMAGE', 'SERVER', $e->getDetail() );
-					}
+					$response = $wpClient->updateImage( $imageName, $filePath, $format, $galleryId, $externalId );
 				} else { // upload new?
-					try {
-						$response = $clientWordPress->uploadImage( $imageName, $filePath, $extension, $galleryId );
-					} catch( BizException $e ) {
-						throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'SERVER', $e->getDetail() );
-					}
+					$response = $wpClient->uploadImage( $imageName, $filePath, $format, $galleryId );
 				}
-				if( $convertedPlacement ) {
-					$convertedPlacement->ConvertedImageToPublish->ExternalId = $response['pid']; // posted file id
-				} else {
-					$imageObj->ExternalId = $response['pid']; // posted file id
-				}
+				$externalId = $response['pid']; // WordPress file id
 			}
 		}
-		if( isset($imageObj->ExternalId) ) {
-			$clientWordPress->updateImageMetaData( $imageObj->ExternalId, $imageObj->MetaData->BasicMetaData->Name, $imageDescription );
+		if( isset($externalId) ) {
+			$wpClient->updateImageMetaData( $externalId, $imageObj->MetaData->BasicMetaData->Name, $imageDescription );
 		}
 
+		return $externalId;
 	}
 
 	/**
@@ -788,64 +910,10 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
-	 * Requests dossier URL from an external publishing system
-	 * using the $publishForm->ExternalId to identify the dosier to the publishing system.
-	 *
-	 * @param Object $dossier
-	 * @param array $objectsInDossier Array of Object.
-	 * @param PubPublishTarget $publishTarget
-	 *
-	 * @return string URL to published item
+	 * {@inheritdoc}
 	 */
 	public function getDossierURL( $dossier, $objectsInDossier, $publishTarget )
-	{
-	}
-
-	/**
-	 * Previews a dossier with contained objects (articles. images, etc.) to an external publishing 
-	 * system. The plugin is supposed to send the dossier and it's articles to the publishing system 
-	 * and fill in the URL field for reference.
-	 *
-	 * @param Object $dossier         [writable]
-	 * @param array $objectsInDossier [writable] Array of Object.
-	 * @param PubPublishTarget $publishTarget
-	 *
-	 * @throws BizException
-	 * @return array of Fields containing information from Publishing system
-	 */
-	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
-	{
-		// Bail out if there is no publish form in the dossier (should never happen).
-		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
-		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
-		if( !$publishForm ) {
-			return array();
-		}
-
-		// Prepare post content.
-		$pubFields = array();
-		$publishFormObjects = BizPublishForm::getFormFields( $publishForm );
-
-		$e = null;
-		try {
-			$postContents = $this->preparePost( $publishForm, $publishFormObjects, $dossier, $objectsInDossier, $publishTarget, 'preview' );
-			$objXMLRPClientWordPress = new WordPressXmlRpcClient( $publishTarget );
-			$result = $objXMLRPClientWordPress->uploadPost( $postContents, null, true );
-			if( $result ) {
-				$pubFields[] = new PubField( 'URL', 'string', array( $result ) );
-			}
-		} catch( BizException $e ) {
-		}
-
-		// Remove temp files from transfer server folder as prepared by getFormFields().
-		BizPublishForm::cleanupFilesReturnedByGetFormFields( $publishFormObjects );
-
-		if( $e ) {
-			throw new BizException( 'WORDPRESS_ERROR_PREVIEW', 'SERVER', 'ERROR', null, array( $publishForm->MetaData->BasicMetaData->Name ) );
-		}
-
-		return $pubFields;
-	}
+	{}
 
 	/**
 	 * {@inheritdoc}
@@ -1268,108 +1336,6 @@ class WordPress_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	public function getPrio() { return self::PRIO_DEFAULT; }
-
-	/**
-	 * Retrieves an object from the ObjectsService and stores a local copy to be uploaded.
-	 *
-	 * File structure from the object can differ.
-	 *
-	 * @param int $id The id for the object to be stored.
-	 *
-	 * @return string $exportName The name of the exported object.
-	 *
-	 * @throws BizException Throws an exception if something goes wrong.
-	 */
-	public function saveLocal( $id )
-	{
-		// Check and create the directory as needed.
-		if( !is_dir(TEMPDIRECTORY) ) {
-			require_once BASEDIR . '/server/utils/FolderUtils.class.php';
-			FolderUtils::mkFullDir(TEMPDIRECTORY);
-			// Check if the directory was created.
-			if( !is_dir(TEMPDIRECTORY) ) {
-				$msg = 'The directory: "' . TEMPDIRECTORY . '" does not exist, or could not be created.';
-				$detail = 'The directory "' . TEMPDIRECTORY . '" could not be created. Either create it manually and '
-					. 'ensure the web server can write to it, or check that the webserver has rights to write to the sub-'
-					. 'directories in the path.';
-
-				throw new BizException(null, 'Server', $detail, $msg);
-			}
-		}
-
-		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
-		$object = $this->getObject( $id );
-		$type = $object->MetaData->BasicMetaData->Type;
-		// We need to get a unique name for the object, in case there are multiple objects with the same name.
-		$name = $id . $type;
-		// Get the format, and the proper extension for the format.
-		$format = $object->MetaData->ContentMetaData->Format;
-		$extension = MimeTypeHandler::mimeType2FileExt( $format );
-		$exportName = TEMPDIRECTORY . '/' . $name . $extension;
-
-		// Retrieve file data.
-		$filePath = null;
-		if( isset($object->Files[0]->FilePath) ) {
-			$filePath = $object->Files[0]->FilePath;
-		}
-		$content = file_get_contents($filePath);
-
-		if( is_null($content) ) {
-			$msg = 'Could not retrieve file contents';
-			$detail = (is_string($filePath)) ? $filePath : 'Attachment (' . $id . ')';
-			$detail .= ' did not yield proper content.';
-			throw new BizException(null, 'Server', $detail, $msg);
-		}
-		file_put_contents( $exportName, $content );
-
-		// Check if the file was created.
-		if( !file_exists($exportName) ) {
-			$detail = 'File: ' . $exportName . ' for ' . $type . ', object (ID: ' . $id . ') Does not seem to be a valid file.';
-			$msg = 'Unable to save ' . $type . ' data locally.';
-			throw new BizException(null, 'Server', $detail, $msg);
-		}
-
-		return $exportName;
-	}
-
-	/**
-	 * Uses the GetObjectsService to return a business object by its id.
-	 *
-	 * Retrieves the business object by id, uses the WflGetObjectsService to retrieve
-	 * the object.
-	 *
-	 * @param string $id The id of the object to be retrieved.
-	 * @param bool $lock Whether to lock the object or not.
-	 * @param string $rendition Rendition option.
-	 * @param array $requestInfo Request specific information by changing the array.
-	 *
-	 * @return null|Object $object The retrieved object.
-	 *
-	 * @see /Enterprise/server/bizclasses/BizObject.class.php
-	 */
-	private function getObject( $id, $lock = false, $rendition = 'native', $requestInfo = array() )
-	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
-		$service = new WflGetObjectsService();
-		$request = new WflGetObjectsRequest();
-		$request->Ticket = BizSession::getTicket();
-		$request->IDs = array( $id );
-		$request->Lock = $lock;
-		$request->Rendition = $rendition;
-		$request->RequestInfo = $requestInfo;
-		$request->HaveVersions = null;
-		$request->Areas = null;
-		$request->EditionId = null;
-
-		/* @var WflGetObjectsResponse $resp */
-		$resp = $service->execute($request);
-
-		if( $resp->Objects ) {
-			return $resp->Objects[0];
-		}
-		return null;
-	}
 
 	/**
 	 * Get the first object in a dossier which match with object type

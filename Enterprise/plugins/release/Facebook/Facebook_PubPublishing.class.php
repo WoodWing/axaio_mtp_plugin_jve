@@ -2,10 +2,10 @@
 /**
  * Class for publishing a Dossier to Facebook.
  *
- * @package 	Enterprise
- * @subpackage	 ServerPlugins
- * @since		 v7.6
- * @copyright	WoodWing Software bv. All Rights Reserved.
+ * @package    Enterprise
+ * @subpackage ServerPlugins
+ * @since      v7.6
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  *
  * This plug-in is provided "as is" without warranty of WoodWing Software.
  */
@@ -179,6 +179,118 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	}
 
 	/**
+	 * Note: Updating a Dossier on Facebook is NOT possible at the moment of this writing.
+	 *
+	 * {@inheritdoc}
+	 */
+	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
+	{
+		// Updating content on Facebook is not possible, the API does not support updating posts or images. They
+		// also do not support a full set of DELETE calls, therefore deleting the old content and uploading it again is
+		// not a possibility from within the plug-in. Deleting content mannually is an option, but is outside of the scope
+		// of the plug-in.
+
+		$msg = 'Updating a Dossier on Facebook is not possible.';
+		$detail = 'Updating is not possible due to restrictions in the Facebook Graph API.';
+		throw new BizException( null, 'Server', $detail, $msg );
+	}
+
+	/**
+	 * Note: UnPublishing a Dossier with an album does not delete the album itself, it only deletes the pictures
+	 * in the dossier from Facebook. Facebook Graph API does not support deleting albums.
+	 *
+	 * {@inheritdoc}
+	 */
+	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
+
+		$pubChannelId = $publishTarget->PubChannelID;
+		$facebookPublisher = new FacebookPublisher( $pubChannelId );
+		$pageId = $facebookPublisher->pageId;
+
+		// Bail out if there is no publish form in the dossier (should never happen).
+		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
+		if( !$publishForm ) {
+			return array();
+		}
+
+		switch( BizPublishForm::getDocumentId( $publishForm ) ) {
+			//Facebook post or Facebook single image
+			case $this->getDocumentIdPrefix().'0' :
+				/** @noinspection PhpMissingBreakStatementInspection */
+			case $this->getDocumentIdPrefix().'1' :
+				if( $dossier->ExternalId != 'publishedFacebook' ) { // needed for older publish forms with the externalId on the object instead of on the dossier, then the code of case '2' is needed
+					try {
+						$facebookPublisher->deleteMessageFromFeed( $pageId, $dossier->ExternalId );
+					} catch( Exception $e ) {
+						$this->reThrowDetailedError( $publishForm, $e, 'UnpublishDossier' );
+					}
+					$dossier->ExternalId = '';
+					break;
+				}
+
+			//Facebook photo album
+			case $this->getDocumentIdPrefix().'2' :
+				require_once BASEDIR.'/server/dbclasses/DBPublishHistory.class.php';
+				require_once BASEDIR.'/server/dbclasses/DBPublishedObjectsHist.class.php';
+
+				$dossiersPublished = DBPublishHistory::getPublishHistoryDossier( $dossier->MetaData->BasicMetaData->ID, $pubChannelId, $publishTarget->IssueID, null, true );
+				$dossierPublished = reset( $dossiersPublished ); // Get the first dossier.
+				$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist( $dossierPublished['id'] );
+				if( $publishedObjects ) foreach( $publishedObjects as $publishedObject ) {
+					if( $publishedObject['type'] == 'Image' ) {
+						$externalId = DBPublishedObjectsHist::getObjectExternalId( $dossier->MetaData->BasicMetaData->ID, $publishedObject['objectid'], $pubChannelId, $publishTarget->IssueID, null, $dossierPublished['id'] );
+						if( !empty( $externalId ) ) {
+							try {
+								$facebookPublisher->deleteMessageFromFeed( $pageId, $externalId );
+							} catch( Exception $e ) {
+								$this->reThrowDetailedError( $publishForm, $e, 'UnpublishDossier' );
+							}
+						}
+					}
+				}
+
+				$publishedPlacements = DBPubPublishedPlacementsHistory::listPublishedPlacements( $dossierPublished['id'] );
+				if( $publishedPlacements ) foreach( $publishedPlacements as $publishedPlacement ) {
+					if( $publishedPlacement->ExternalId ) {
+						$facebookPublisher->deleteMessageFromFeed( $pageId, $publishedPlacement->ExternalId );
+					}
+				}
+				$dossier->ExternalId = '';
+				break;
+		}
+
+		// Un-publishing content from Facebook is not possible because the Graph API does not support a full set of
+		// DELETE calls in their API, meaning we are unable to delete the full set of published content from Facebook.
+		// Some of these calls have been left out of the API by design, others have a very low priority on their bug lists
+		// or never got past user wishlists, the likelihood that they will be implemented therefore is doubtful.
+		//
+		// Delete Video: Not possible through the Facebook Graph API by design, the call can be made, but will return true in
+		// either case, and DOES NOT delete the video.
+		//
+		// Delete Album: Not possible through the Facebook Graph API by design.
+		//
+		// Delete Photo: Can Be done, there is a function for this in the FacebookPublisher class.
+		// Delete Wall post: Can be done, there is a function for this in the FacebookPublisher class.
+
+		return array();
+	}
+
+	/**
+	 * Note: Not possible for Facebook content.
+	 *
+	 * {@inheritdoc}
+	 */
+	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
+	{
+		// Previewing content is not possible for the Facebook plug-in.
+		$msg = 'Previewing a Dossier is not possible on Facebook.';
+		$detail = 'Facebook does not support previewing of Dossiers.';
+		throw new BizException( null, 'Server', $detail, $msg );
+	}
+
+	/**
 	 * Retrieves a placement of an image crop made on a given Publish Form.
 	 *
 	 * The end user may have cropped the image placed on the Publish Form.
@@ -336,118 +448,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 			' with id '.$publishForm->MetaData->BasicMetaData->ID.
 			' produced an error: '.$e->getMessage().$errorCode;
 
-		throw new BizException( null, 'Server', $detail, $msg );
-	}
-
-	/**
-	 * Note: Updating a Dossier on Facebook is NOT possible at the moment of this writing.
-	 *
-	 * {@inheritdoc}
-	 */
-	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
-	{
-		// Updating content on Facebook is not possible, the API does not support updating posts or images. They
-		// also do not support a full set of DELETE calls, therefore deleting the old content and uploading it again is
-		// not a possibility from within the plug-in. Deleting content mannually is an option, but is outside of the scope
-		// of the plug-in.
-
-		$msg = 'Updating a Dossier on Facebook is not possible.';
-		$detail = 'Updating is not possible due to restrictions in the Facebook Graph API.';
-		throw new BizException( null, 'Server', $detail, $msg );
-	}
-
-	/**
-	 * Note: UnPublishing a Dossier with an album does not delete the album itself, it only deletes the pictures
-	 * in the dossier from Facebook. Facebook Graph API does not support deleting albums.
-	 *
-	 * {@inheritdoc}
-	 */
-	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
-	{
-		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
-
-		$pubChannelId = $publishTarget->PubChannelID;
-		$facebookPublisher = new FacebookPublisher( $pubChannelId );
-		$pageId = $facebookPublisher->pageId;
-
-		// Bail out if there is no publish form in the dossier (should never happen).
-		$publishForm = BizPublishForm::findPublishFormInObjects( $objectsInDossier );
-		if( !$publishForm ) {
-			return array();
-		}
-
-		switch( BizPublishForm::getDocumentId( $publishForm ) ) {
-			//Facebook post or Facebook single image
-			case $this->getDocumentIdPrefix().'0' :
-			/** @noinspection PhpMissingBreakStatementInspection */
-			case $this->getDocumentIdPrefix().'1' :
-				if( $dossier->ExternalId != 'publishedFacebook' ) { // needed for older publish forms with the externalId on the object instead of on the dossier, then the code of case '2' is needed
-					try {
-						$facebookPublisher->deleteMessageFromFeed( $pageId, $dossier->ExternalId );
-					} catch( Exception $e ) {
-						$this->reThrowDetailedError( $publishForm, $e, 'UnpublishDossier' );
-					}
-					$dossier->ExternalId = '';
-					break;
-				}
-
-			//Facebook photo album
-			case $this->getDocumentIdPrefix().'2' :
-				require_once BASEDIR.'/server/dbclasses/DBPublishHistory.class.php';
-				require_once BASEDIR.'/server/dbclasses/DBPublishedObjectsHist.class.php';
-
-				$dossiersPublished = DBPublishHistory::getPublishHistoryDossier( $dossier->MetaData->BasicMetaData->ID, $pubChannelId, $publishTarget->IssueID, null, true );
-				$dossierPublished = reset( $dossiersPublished ); // Get the first dossier.
-				$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist( $dossierPublished['id'] );
-				if( $publishedObjects ) foreach( $publishedObjects as $publishedObject ) {
-					if( $publishedObject['type'] == 'Image' ) {
-						$externalId = DBPublishedObjectsHist::getObjectExternalId( $dossier->MetaData->BasicMetaData->ID, $publishedObject['objectid'], $pubChannelId, $publishTarget->IssueID, null, $dossierPublished['id'] );
-						if( !empty( $externalId ) ) {
-							try {
-								$facebookPublisher->deleteMessageFromFeed( $pageId, $externalId );
-							} catch( Exception $e ) {
-								$this->reThrowDetailedError( $publishForm, $e, 'UnpublishDossier' );
-							}
-						}
-					}
-				}
-
-				$publishedPlacements = DBPubPublishedPlacementsHistory::listPublishedPlacements( $dossierPublished['id'] );
-				if( $publishedPlacements ) foreach( $publishedPlacements as $publishedPlacement ) {
-					if( $publishedPlacement->ExternalId ) {
-						$facebookPublisher->deleteMessageFromFeed( $pageId, $publishedPlacement->ExternalId );
-					}
-				}
-				$dossier->ExternalId = '';
-				break;
-		}
-
-		// Un-publishing content from Facebook is not possible because the Graph API does not support a full set of
-		// DELETE calls in their API, meaning we are unable to delete the full set of published content from Facebook.
-		// Some of these calls have been left out of the API by design, others have a very low priority on their bug lists
-		// or never got past user wishlists, the likelihood that they will be implemented therefore is doubtful.
-		//
-		// Delete Video: Not possible through the Facebook Graph API by design, the call can be made, but will return true in
-		// either case, and DOES NOT delete the video.
-		//
-		// Delete Album: Not possible through the Facebook Graph API by design.
-		//
-		// Delete Photo: Can Be done, there is a function for this in the FacebookPublisher class.
-		// Delete Wall post: Can be done, there is a function for this in the FacebookPublisher class.
-
-		return array();
-	}
-
-	/**
-	 * Note: Not possible for Facebook content.
-	 *
-	 * {@inheritdoc}
-	 */
-	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
-	{
-		// Previewing content is not possible for the Facebook plug-in.
-		$msg = 'Previewing a Dossier is not possible on Facebook.';
-		$detail = 'Facebook does not support previewing of Dossiers.';
 		throw new BizException( null, 'Server', $detail, $msg );
 	}
 

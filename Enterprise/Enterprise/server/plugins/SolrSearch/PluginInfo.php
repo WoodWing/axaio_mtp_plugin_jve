@@ -31,6 +31,9 @@ class SolrSearch_EnterprisePlugin extends EnterprisePlugin
 	
 	final public function getConnectorInterfaces() 
 	{ 
-		return array( 	'Search_EnterpriseConnector' ); 
+		return array( 
+			'Search_EnterpriseConnector',
+			'ConfigFiles_EnterpriseConnector', // since 10.1.1
+		);
 	}
 }

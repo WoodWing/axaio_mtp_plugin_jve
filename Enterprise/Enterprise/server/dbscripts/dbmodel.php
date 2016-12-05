@@ -3843,6 +3843,7 @@ abstract class GenericGenerator
 	 *
 	 * @param string text
 	 */
+
 	public function addTxt($txt)
 	{
 		$this->txt .= $txt;

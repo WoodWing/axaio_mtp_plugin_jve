@@ -1,6 +1,7 @@
 <?php
 
-class ElvisTypeConst {
+class ElvisTypeConst
+{
 	/**
 	 * Used for the type in UpdateObjectOperation. For now only Layouts are supported.
 	 */
