@@ -31,7 +31,10 @@ class SipsPreview_EnterprisePlugin extends EnterprisePlugin
 	
 	final public function getConnectorInterfaces() 
 	{ 
-		return array( 'Preview_EnterpriseConnector');
+		return array( 
+			'Preview_EnterpriseConnector',
+			'ConfigFiles_EnterpriseConnector', // since 10.1.1
+		);
 	}
 
 	/**

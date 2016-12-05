@@ -215,9 +215,9 @@ class DBSection extends DBBase
     	}
         return $sections;
     }
-
 	/**
-    * Gets exactly one section object with id $sectionId from DB
+	 * Gets exactly one section object with id $sectionId from DB
+	 * 
     * @param int $sectionId Id of the section to get the values from
     * @return AdmSection|null Object of section if succeeded, null if no record returned
 	 */

@@ -124,7 +124,7 @@ class ElvisSessionUtil
 	 *
 	 * @param string $varName
 	 * @param array $sessionVariables Array of session variable
-	 * @return object null if variable not set, object otherwise.
+	 * @return mixed|null Value when variable is set, NULL otherwise.
 	 */
 	public static function getSessionVar( $varName, $sessionVariables = null )
 	{
@@ -139,7 +139,7 @@ class ElvisSessionUtil
 	 * Set an object in the session.
 	 *
 	 * @param string $key
-	 * @param object $value
+	 * @param mixed $value
 	 */
 	public static function setSessionVar( $key, $value )
 	{

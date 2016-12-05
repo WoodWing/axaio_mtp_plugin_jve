@@ -304,7 +304,7 @@ class DBDriverFactory
 	 * @param $dbPass   string  Database user password used for for DB connection. Default value: DBPASS config option.
 	 * @param $dbSelect string  Database name to connect with. Default value: DBSELECT config option.
 	 * @param $throwException bool Whether or not to throw BizException on connection error.
-	 * @return mysqlidriver|mssqldriver|oracledriver Database driver object.
+	 * @return  WW_DbDrivers_DriverBase Database driver object.
 	 * @throws BizException On DB configuration error or DB connection error (since v8.0).
 	 */
 	static public function gen( $dbType = DBTYPE, $dbServer = DBSERVER, 

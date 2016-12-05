@@ -12,7 +12,7 @@
  * while mapping resolutionX into Dpi.
  */
 
-require_once dirname(__FILE__).'/ReadOnlyFieldHandler.class.php';
+require_once 'ReadOnlyFieldHandler.class.php';
 
 class ResolutionFieldHandler extends ReadOnlyFieldHandler
 {
@@ -21,13 +21,19 @@ class ResolutionFieldHandler extends ReadOnlyFieldHandler
 	 */
 	public function read( $entMetadata, $elvisMetadata )
 	{
-		$elvisResolutionX = $elvisMetadata[ $this->lvsFieldName ];
-		if( $elvisResolutionX ) {
-			$resolutionUnit = $elvisMetadata['resolutionUnit'];
-			if( $resolutionUnit == 3 ) {
-				$elvisResolutionX *= 2.54; // centimeters to inches
+		// Nothing to be done if the resolution isn't set in Elvis.
+		if( array_key_exists( $this->lvsFieldName, $elvisMetadata ) ) {
+			$elvisResolutionX = $elvisMetadata[ $this->lvsFieldName ];
+			if( $elvisResolutionX ) {
+
+				// ResolutionUnit is not a mandatory field in Elvis.
+				if( array_key_exists( 'resolutionUnit', $elvisMetadata ) ) {
+					if( $elvisMetadata['resolutionUnit'] == 3 ) {
+						$elvisResolutionX *= 2.54; // centimeters to inches
+					}
+				}
+				$entMetadata->{$this->entMetadataCategory}->{$this->property->Name} = $elvisResolutionX;
 			}
-			$entMetadata->{$this->entMetadataCategory}->{$this->property->Name} = $elvisResolutionX;
 		}
 	}
 }

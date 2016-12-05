@@ -44,11 +44,22 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 		if( isset($resp->ServerInfo->FeatureSet) ) {
 			require_once dirname(__FILE__).'/config.php'; // Load the Elvis settings
 			// Pass the ElvisServerUrl option in the feature set, as used by Content Station.
-			$feature = new Feature( 'ElvisServerUrl', ELVIS_CLIENT_URL );
-			array_push( $resp->ServerInfo->FeatureSet, $feature );
+			$resp->ServerInfo->FeatureSet[] = new Feature( 'ElvisServerUrl', ELVIS_CLIENT_URL );
 
-			$imageRestoreLocation = new Feature( 'ImageRestoreLocation', IMAGE_RESTORE_LOCATION );
-			array_push( $resp->ServerInfo->FeatureSet, $imageRestoreLocation );
+			// Pass the ImageRestoreLocation option in the feature set, as used by Smart Connection.
+			if( IMAGE_RESTORE_LOCATION == 'Elvis_Copy' && ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
+				// For this specific configuration combination, we 'ask' SC to simply to create a shadow object(*),
+				// but skip explicitly making a copy by itself. This is needed because the Elvis content connector
+				// makes a copy to the Production Zone already. In this situation, SC will not raise a dialog and
+				// ask the user to fill in the Elvis folder to copy to but simply leaves it up the the connector.
+				// In fact, we fool SC to keep the logic server side as much as possible. [EN-88325]
+				// (*) Note that the Elvis content source connector acts on the CreateObjectRelations service as called by SC
+				//     when e.g. placing an image on a layout.
+				$imageRestoreLocation = 'Elvis_Original';
+			} else {
+				$imageRestoreLocation = IMAGE_RESTORE_LOCATION;
+			}
+			$resp->ServerInfo->FeatureSet[] = new Feature( 'ImageRestoreLocation', $imageRestoreLocation );
 		}
 	}
 
@@ -63,7 +74,7 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 	 * Only if both log on attempts fail a warning is logged.
 	 *
 	 * @param string $user Acting user.
-	 * $param string $password Password of the acting user.
+	 * @param string $password Password of the acting user.
 	 * @throws BizException
 	 */
 	private function setUserType( $user, $password )

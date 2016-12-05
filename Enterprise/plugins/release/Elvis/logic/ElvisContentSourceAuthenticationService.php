@@ -13,8 +13,9 @@ class ElvisContentSourceAuthenticationService
 	/**
 	 * Connect to the Elvis server
 	 *  
-	 * @param LoginRequest $loginRequest
-	 * @return LoginResponse
+	 * @param ElvisLoginRequest $loginRequest
+	 * @return ElvisLoginResponse
+	 * @throws BizException
 	 */
 	public function login($loginRequest)
 	{
@@ -24,7 +25,12 @@ class ElvisContentSourceAuthenticationService
 
 		ElvisAMFClient::registerClass(ElvisLoginRequest::getName());
 		ElvisAMFClient::registerClass(ElvisLoginResponse::getName());
-		$loginResponse = ElvisAMFClient::send(self::SERVICE, 'login', array($loginRequest), false);
+		$loginResponse = null;
+		try {
+			$loginResponse = ElvisAMFClient::send( self::SERVICE, 'login', array( $loginRequest ), false );
+		} catch( ElvisCSException $e ) {
+			throw $e->toBizException();
+		}
 		return $loginResponse;
 	}
 	
@@ -32,7 +38,7 @@ class ElvisContentSourceAuthenticationService
 	 * Get the version of Elvis running in Content Station. 
 	 * This is a non-secured call as Content Station requests this before login.
 	 * 
-	 * @return version as String
+	 * @return string|null Version
 	 */
 	public function getContentStationClientVersion()
 	{
