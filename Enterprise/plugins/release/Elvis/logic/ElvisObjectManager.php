@@ -13,10 +13,9 @@ class ElvisObjectManager
 	/**
 	 * Links an Elvis asset to this Enterprise System.
 	 *
-	 * @param $elvisId
-	 * @param $enterpriseSystemId
+	 * @param string $elvisId
+	 * @param string $enterpriseSystemId
 	 * @throws BizException
-	 * @throws Exception
 	 */
 	public static function registerShadowObject($elvisId, $enterpriseSystemId)
 	{
@@ -38,7 +37,6 @@ class ElvisObjectManager
 	 * @param $elvisId
 	 * @param $enterpriseSystemId
 	 * @throws BizException
-	 * @throws Exception
 	 */
 	public static function unregisterShadowObject($elvisId, $enterpriseSystemId)
 	{

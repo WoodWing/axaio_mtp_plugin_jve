@@ -2,17 +2,14 @@
 
 require_once 'ReadOnlyFieldHandler.class.php';
 
-// TODO: remove and us standard ReadWriteFieldHandler? doesn't seem to add a lot of logic...
-class KeywordsFieldHandler extends ReadWriteFieldHandler {
+class KeywordsFieldHandler extends ReadWriteFieldHandler
+{
+	public function __construct()
+	{
+		parent::__construct( "tags", true, "text", 'Keywords' );
 
-	function __construct() {
-		$this->lvsFieldName = "tags";
-		$this->multiValue = true;
-		$this->dataType = "text";
-		
+		// Fix ES problem; For the Keywords property, the data path is not provided by BizProperty::getMetaDataPaths()
+		// and so the metadata category could not be resolved by parent class that is depending on this function.
 		$this->entMetadataCategory = 'ContentMetaData';
-		$propertyInfos = BizProperty::getPropertyInfos();
-		$this->property = $propertyInfos['Keywords'];
 	}
 }
-?>

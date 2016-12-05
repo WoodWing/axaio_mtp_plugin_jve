@@ -1,43 +1,32 @@
 <?php
 
-require_once dirname(__FILE__) . '/AbstractRemoteObject.php';
+require_once 'AbstractRemoteObject.php';
 
 /**
  * Simplified version of com.ds.acm.logic.xmlservice.search.model.SearchResponse
  */
-class ElvisSearchResponse extends AbstractRemoteObject {
-
+class ElvisSearchResponse extends AbstractRemoteObject
+{
 	/**
 	 * Return the fully qualified name of the Java class
 	 */
-	public static function getJavaClassName() {
+	public static function getJavaClassName()
+	{
 		return 'com.ds.acm.logic.xmlservice.search.model.SearchResponse';
 	}
-	
-	/**
-	 * @var int
-	 */
+
+	/** @var int $firstResult */
 	public $firstResult;
 
-	/**
-	 * @var int
-	 */
+	/** @var int $maxResultHits */
 	public $maxResultHits;
 
-	/**
-	 *  @var int
-	 */
+	/** @var int $totalHits */
 	public $totalHits;
 
-	/**
-	 *  @var SabreAMF_ArrayCollection<HitElement>
-	 */
+	/** @var ElvisEntHit $hits */
 	public $hits;
-	
-	/**
-	 * 
-	 * @var unknown_type - not used
-	 */
+
+	/** @var unknown_type $facets not used */
 	public $facets;
-	
 }

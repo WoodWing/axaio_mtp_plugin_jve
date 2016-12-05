@@ -1,14 +1,14 @@
 <?php
 
-abstract class AbstractRemoteObject {
-	
+abstract class AbstractRemoteObject
+{
 	/**
 	 * Return the name of the class
 	 *
 	 * @return string
-     */
-	public static function getName() {
+	 */
+	public static function getName()
+	{
 		return get_called_class();
 	}
-	
 }

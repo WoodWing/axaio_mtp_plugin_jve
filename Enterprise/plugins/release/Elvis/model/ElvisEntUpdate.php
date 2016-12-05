@@ -1,42 +1,33 @@
 <?php
 
-require_once dirname(__FILE__) . '/AbstractRemoteObject.php';
+require_once 'AbstractRemoteObject.php';
 
-class ElvisEntUpdate extends AbstractRemoteObject {
-
+class ElvisEntUpdate extends AbstractRemoteObject
+{
 	/**
 	 * Return the fully qualified name of the Java class
 	 */
-	public static function getJavaClassName() {
+	public static function getJavaClassName()
+	{
 		return 'com.ds.acm.api.contentsource.model.EntUpdate';
 	}
 
-	/**
-	 * @var string
-	 */
+	/** @var string $id */
 	public $id;
 
-	/**
-	 * @var string
-	 */
+	/** @var string $assetId */
 	public $assetId;
 
-	/**
-	 * @var string
-	 */
+	/** @var string $operation */
 	public $operation;
 
-	/**
-	 * @var string
-	 */
+	/** @var string $username */
 	public $username;
-	
-	/**
-	 * @var map
-	 */
+
+	/** @var BasicMap $metadata */
 	public $metadata;
 
 	const UPDATE_METADATA = "UPDATE_METADATA";
-	
+
 	const DELETE = "DELETE";
 }

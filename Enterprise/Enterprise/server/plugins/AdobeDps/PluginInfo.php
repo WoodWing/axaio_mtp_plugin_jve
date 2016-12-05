@@ -48,6 +48,7 @@ class AdobeDps_EnterprisePlugin extends EnterprisePlugin
 			'WflLogOn_EnterpriseConnector',
 			'Version_EnterpriseConnector',
 			'ServerJob_EnterpriseConnector',
+			'ConfigFiles_EnterpriseConnector', // since 10.1.1
 		);
 	}
 
