@@ -21,13 +21,13 @@ class ResolutionFieldHandler extends ReadOnlyFieldHandler
 	 */
 	public function read( $entMetadata, $elvisMetadata )
 	{
-		// Nothing to be done if the resolution isn't set in Elvis.
-		if( array_key_exists( $this->lvsFieldName, $elvisMetadata ) ) {
+		// Nothing to be done if the resolution isn't set in Elvis. (Note: ResolutionX can't be null.)
+		if( isset( $elvisMetadata[ $this->lvsFieldName ] ) ) {
 			$elvisResolutionX = $elvisMetadata[ $this->lvsFieldName ];
 			if( $elvisResolutionX ) {
 
-				// ResolutionUnit is not a mandatory field in Elvis.
-				if( array_key_exists( 'resolutionUnit', $elvisMetadata ) ) {
+				// ResolutionUnit is not a mandatory field in Elvis. (Note: ResolutionUnit can't be null.)
+				if( isset( $elvisMetadata['resolutionUnit'] ) ) {
 					if( $elvisMetadata['resolutionUnit'] == 3 ) {
 						$elvisResolutionX *= 2.54; // centimeters to inches
 					}
