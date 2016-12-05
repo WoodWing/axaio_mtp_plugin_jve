@@ -49,13 +49,7 @@ class AdobeDps_AdmCreateIssues extends AdmCreateIssues_EnterpriseConnector
 		}
 	}
 	
-	final public function runAfter( AdmCreateIssuesRequest $req, AdmCreateIssuesResponse &$resp ) 
-	{
-		$req = $req; $resp = $resp; // To make analyzer happy.
-	}
+	final public function runAfter( AdmCreateIssuesRequest $req, AdmCreateIssuesResponse &$resp ) {}
 	
-	final public function runOverruled( AdmCreateIssuesRequest $req ) 
-	{
-		$req = $req; // To make analyzer happy.
-	}
+	final public function runOverruled( AdmCreateIssuesRequest $req ) {}
 }

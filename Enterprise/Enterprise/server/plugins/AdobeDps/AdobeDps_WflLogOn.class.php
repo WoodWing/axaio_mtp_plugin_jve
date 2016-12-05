@@ -15,8 +15,7 @@ class AdobeDps_WflLogOn extends WflLogOn_EnterpriseConnector
 
 	final public function runAfter( WflLogOnRequest $req, WflLogOnResponse &$resp)
 	{
-		$req = $req; $resp = $resp; // To make analyzer happy.
-		$this->cleanUpExportFolder();	
+		$this->cleanUpExportFolder();
 
 		// Only send the reader version when Content Station tries to login.
 		if ( stristr($req->ClientAppName, 'Content Station') ) {
@@ -36,11 +35,8 @@ class AdobeDps_WflLogOn extends WflLogOn_EnterpriseConnector
 		}
 	}
 	
-	final public function runOverruled( WflLogOnRequest $req) {$req=$req;}
-	final public function runBefore( WflLogOnRequest &$req)	
-	{ 
-		$req = $req; 
-	}
+	final public function runOverruled( WflLogOnRequest $req) {}
+	final public function runBefore( WflLogOnRequest &$req) {}
 	
 	/**
 	 * Cleans up the export folder for digital magazines. All files older than 1

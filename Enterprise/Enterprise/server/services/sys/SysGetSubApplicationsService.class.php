@@ -35,8 +35,6 @@ class SysGetSubApplicationsService extends EnterpriseService
 
 	public function runCallback( SysGetSubApplicationsRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
-		
 		// Note: No biz logics needed so far. (Introduce BizSysSubApplication class when needed.)
 		
 		// Return empty response to let server plug-ins provide their sub apps.

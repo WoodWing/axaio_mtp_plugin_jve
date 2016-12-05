@@ -2624,9 +2624,8 @@ class BizWorkflow
 			//$queryParams[] = new QueryParam('SectionId', '=', $section); // commented out; this gives too few results!
 			$queryParams[] = new QueryParam('Type', '=', 'Dossier');
 			// BZ#22871 - Shouldn't set the result limit, set maxEntries = '' to return all dossiers
-			$result = BizQuery::queryObjects('', $shortUserName, $queryParams, null, '', false, null, false,
-				array( new QueryOrder('Name',true) ), // sort on Name (BZ#16962)
-				null, array('ID', 'Name', 'Type'));
+			$result = BizQuery::queryObjects(
+				'', $shortUserName, $queryParams, null, '', null, false, array( new QueryOrder( 'Name', true ) ), null, array( 'ID', 'Name', 'Type' ) );
 			if (is_array($result->Rows)){
 				foreach ($result->Rows as $row) {
 					if( $row[0] == $defaultDossier ){ // BZ#24829: version#9, scenario 2 & 4:

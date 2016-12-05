@@ -13,10 +13,7 @@ class EnterpriseScripts_SysGetSubApplications extends SysGetSubApplications_Ente
 	final public function getPrio()     { return self::PRIO_DEFAULT; }
 	final public function getRunMode()  { return self::RUNMODE_AFTER; }
 
-	// Not called.
-	final public function runBefore( SysGetSubApplicationsRequest &$req ) {
-		$req = $req; // keep code analyzer happy
-	} 
+	final public function runBefore( SysGetSubApplicationsRequest &$req ) {}
 
 	final public function runAfter( SysGetSubApplicationsRequest $req, SysGetSubApplicationsResponse &$resp ) {
 		if( is_null($req->ClientAppName) ||
@@ -65,9 +62,5 @@ class EnterpriseScripts_SysGetSubApplications extends SysGetSubApplications_Ente
 		}
 	} 
 	
-	// Not called.
-	final public function runOverruled( SysGetSubApplicationsRequest $req )
-	{
-		$req = $req; // keep code analyzer happy
-	} 
+	final public function runOverruled( SysGetSubApplicationsRequest $req ) {}
 }

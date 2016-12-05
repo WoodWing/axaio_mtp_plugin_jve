@@ -665,7 +665,6 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * This function can return a dialog that is shown in Content Station. This is used for the Multi Channel Publishing Feature.
 	 *
 	 * @since 9.0
-	 * @param Object $publishForm
 	 * @param Object $publishFormTemplate
 	 * @return Dialog|null Dialog definition|The default connector returns null which indicates it doesn't support the getDialog call.
 	 */
@@ -789,7 +788,7 @@ class Drupal7_PubPublishing extends PubPublishing_EnterpriseConnector
 	/**
 	 * Composes a Dialog->MetaData list from dialog widgets and custom properties.
 	 *
-	 * @oaram array $extraMetaDatas List of ExtraMetaData elements.
+	 * @param array $extraMetaDatas List of ExtraMetaData elements.
 	 * @param array $widgets List of DialogWidget elements.
 	 * @return array List of MetaDataValue elements.
 	 */

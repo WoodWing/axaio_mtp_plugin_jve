@@ -33,6 +33,7 @@ class WordPress_Utils
 			$clientWordPress->setConnectionPassword( $site['password'] );
 			$clientWordPress->setConnectionUserName( $site['username'] );
 			$clientWordPress->setConnectionUrl( $site['url'] . '/xmlrpc.php' );
+			$clientWordPress->setCertificate( $site['certificate'] );
 
 			$tags = $clientWordPress->getTags();
 			$preparedWordPressTags = array();
@@ -105,6 +106,7 @@ class WordPress_Utils
 		$info['password'] = $site['password'];
 		$info['connectionUrl'] = $url . '/xmlrpc.php';
 		$info['standardUrl'] = $url;
+		$info['certificate'] = $site['certificate'];
 
 		return $info;
 	}
@@ -161,6 +163,7 @@ class WordPress_Utils
 			$clientWordPress->setConnectionUserName( $site['username'] );
 			$clientWordPress->setConnectionPassword( $site['password'] );
 			$clientWordPress->setConnectionUrl( $site['url'] . '/xmlrpc.php' );
+			$clientWordPress->setCertificate( $site['certificate'] );
 
 			try {
 				$retVal[$normalizedSiteKey]['categories'] = $this->prepareCategories( $clientWordPress->getCategories() );
@@ -364,6 +367,7 @@ class WordPress_Utils
 		$clientWordPress->setConnectionUserName( $siteConnectionInfo['username'] );
 		$clientWordPress->setConnectionPassword( $siteConnectionInfo['password'] );
 		$clientWordPress->setConnectionUrl( $siteConnectionInfo['url'] . '/xmlrpc.php' );
+		$clientWordPress->setCertificate( $siteConnectionInfo['certificate'] );
 
 		do {
 			$users = $clientWordPress->getUsers( $numberOfUsers, $offSet, $fields );

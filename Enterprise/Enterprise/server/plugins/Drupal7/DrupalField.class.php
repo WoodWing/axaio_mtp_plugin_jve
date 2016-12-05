@@ -444,6 +444,7 @@ class DrupalField {
 	/**
 	 * Determines the FieldInfoField type.
 	 *
+	 * @param DrupalField $drupalField
 	 * @return null|string The DrupalField Type.
 	 */
 	private function determineFieldInfoFieldType( DrupalField $drupalField )
@@ -725,6 +726,7 @@ class DrupalField {
 				if (!$drupalField->getHasTextFilter()) {
 					$maxLength = $rawField['field_info_fields']['settings']['max_length'];
 				}
+				break;
 			default :
 				break;
 		}
@@ -880,7 +882,6 @@ class DrupalField {
 								$value[] = '';
 							} else {
 								foreach ( $values as $key => $val ) {
-									$val = $val; // Keep analyzer happy.
 									$value[] = (string) $key;
 								}
 							}
@@ -1416,7 +1417,6 @@ class DrupalField {
 				if ($drupalField->getHasAltTextField() || $drupalField->getHasTitleField() || $drupalField->getCardinality() != 1 ) {
 					//TODO: After implementation of the COLLECTION widget uncomment the line below.
 					//$type = self::ENTERPRISE_PROPERTY_TYPE_COLLECTION;
-					$type = $type; // Keep analyzer happy, remove this line after collection is implemented.
 				}
 				break;
 			case self::DRUPAL_FIELD_WIDGET_TYPE_LONG_TEXT :

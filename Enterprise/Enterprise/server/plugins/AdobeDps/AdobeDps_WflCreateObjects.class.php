@@ -28,8 +28,6 @@ class AdobeDps_WflCreateObjects extends WflCreateObjects_EnterpriseConnector
 
 	final public function runAfter( WflCreateObjectsRequest $req, WflCreateObjectsResponse &$resp )
 	{
-		$req = $req; // keep analyzer happy
-		
 		// For dossiers targetted to DPS channels, add the dossier (id) to the dossier ordering.
 		if( $resp->Objects ) foreach( $resp->Objects as $object ) {
 			$objectType = $object->MetaData->BasicMetaData->Type;
@@ -55,9 +53,5 @@ class AdobeDps_WflCreateObjects extends WflCreateObjects_EnterpriseConnector
 		}
 	}
 
-	final public function runOverruled( WflCreateObjectsRequest $req )
-	{
-		// not called
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflCreateObjectsRequest $req ) {}
 }

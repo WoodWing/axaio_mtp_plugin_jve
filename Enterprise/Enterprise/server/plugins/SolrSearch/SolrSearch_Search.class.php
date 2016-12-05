@@ -15,6 +15,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 {
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function indexObjects( $objects, $areas = array('Workflow') )
 	{
@@ -28,6 +29,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function updateObjects( $objects, $areas = array('Workflow') )
 	{
@@ -36,6 +38,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function updateObjectProperties( $objectIDs, $metaDataValues )
 	{
@@ -47,11 +50,10 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function unIndexObjects( $objectIds, $deletedObject )
 	{
-		$deletedObject = $deletedObject; // keep analyzer happy
-		
 		require_once BASEDIR .'/server/plugins/SolrSearch/SolrSearchEngine.class.php';
 		$searchEngine = new SolrSearchEngine();
 		$searchEngine->unindexObjects( $objectIds );
@@ -60,6 +62,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 	
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function optimizeIndexes()
 	{
@@ -70,6 +73,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function canHandleSearch( $query, $params, $firstEntry, $maxEntries, $queryMode, $hierarchical, $queryOrder, $minimalProps, $requestProps  )
 	{
@@ -115,9 +119,6 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 				$retVal += 6;  // Good and fast
 				break;
 			default:
-				// Make analyzer happy:
-				$firstEntry=$firstEntry; $maxEntries=$maxEntries; $queryMode=$queryMode; $hierarchical=$hierarchical;
-				$queryOrder=$queryOrder; $minimalProps=$minimalProps; $requestProps=$requestProps;
 				break;
 		}
 		
@@ -129,6 +130,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 
 	/**
 	 * See Search_EnterpriseConnector for comments
+	 * @inheritdoc
 	 */
 	public function doSearch( $query, $params, $firstEntry, $maxEntries, $queryMode, $hierarchical, $queryOrder, $minimalProps, $requestProps, $areas = array('Workflow'))
 	{
@@ -189,9 +191,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 	/**
 	 * See Search_EnterpriseConnector for comments
 	 * 
-	 * @param string $isPropertySearchable
-	 * @param bool $suppressExceptions
-	 * @return Property is searchable by Solr (true/false).
+	 * @inheritdoc
 	 */
 	public function isPropertySearchable( $propertyName )
 	{
@@ -213,7 +213,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 	}
 
 	/**
-	 * Set the _CLosed property on an Enterprise Object.
+	 * Set the _Closed property on an Enterprise Object.
 	 * 
 	 * If you search without Solr, closed objects aren't included. If we don't add
 	 * closed objects to Solr, we cannot find the closed objects at all. So we
@@ -226,6 +226,7 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 	 * See BZ#17707
 	 *
 	 * @param array $objects array of Object
+	 * @param array $areas
 	 */
 	protected static function setClosedProperty($objects, $areas = array('Workflow'))
 	{

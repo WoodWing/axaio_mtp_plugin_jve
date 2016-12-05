@@ -61,8 +61,6 @@ class OpenCalais_SuggestionProvider extends SuggestionProvider_EnterpriseConnect
 	 */
 	public function suggest( $objectId, $metadata, $suggestForProps )
 	{
-		$objectId = $objectId; // Keep the analyzer happy.
-
 		require_once BASEDIR . '/server/bizclasses/BizAutoSuggest.class.php';
 		require_once BASEDIR . '/server/plugins/OpenCalais/OpenCalais.class.php';
 

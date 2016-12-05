@@ -20,29 +20,16 @@ class ContentStationOverruleCompatibility_WflMultiSetObjectProperties extends Wf
 	/**
 	 * @param WflMultiSetObjectPropertiesRequest $req
 	 */
-	final public function runBefore( WflMultiSetObjectPropertiesRequest &$req )
-	{
-		// Not called.
-		$req = $req; // Keep analyzer happy.
-	}
+	final public function runBefore( WflMultiSetObjectPropertiesRequest &$req ) {}
 
 	/**
 	 * @param WflMultiSetObjectPropertiesRequest $req
 	 * @param WflMultiSetObjectPropertiesResponse $resp
 	 */
-	final public function runAfter( WflMultiSetObjectPropertiesRequest $req, WflMultiSetObjectPropertiesResponse &$resp )
-	{
-		// Not called.
-		$req = $req; // Keep analyzer happy.
-		$resp = $resp; // Keep analyzer happy.
-	}
+	final public function runAfter( WflMultiSetObjectPropertiesRequest $req, WflMultiSetObjectPropertiesResponse &$resp ) {}
 
 	/**
 	 * @param WflMultiSetObjectPropertiesRequest $req
 	 */
-	final public function runOverruled( WflMultiSetObjectPropertiesRequest $req )
-	{
-		// Not called.
-		$req = $req; // Keep analyzer happy.
-	}
+	final public function runOverruled( WflMultiSetObjectPropertiesRequest $req ) {}
 }

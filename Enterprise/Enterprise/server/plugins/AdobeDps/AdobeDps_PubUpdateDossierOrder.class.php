@@ -13,10 +13,7 @@ class AdobeDps_PubUpdateDossierOrder extends PubUpdateDossierOrder_EnterpriseCon
 	final public function getPrio()      { return self::PRIO_DEFAULT; }
 	final public function getRunMode()   { return self::RUNMODE_AFTER; }
 
-	final public function runBefore( PubUpdateDossierOrderRequest &$req )
-	{
-		$req = $req; // Keep analyzer happy
-	}
+	final public function runBefore( PubUpdateDossierOrderRequest &$req ) {}
 
 	final public function runAfter( PubUpdateDossierOrderRequest $req, PubUpdateDossierOrderResponse &$resp )
 	{
@@ -33,8 +30,5 @@ class AdobeDps_PubUpdateDossierOrder extends PubUpdateDossierOrder_EnterpriseCon
 		}
 	}
 
-	final public function runOverruled( PubUpdateDossierOrderRequest $req )
-	{
-		$req = $req; // Keep analyzer happy
-	}
+	final public function runOverruled( PubUpdateDossierOrderRequest $req ) {}
 }

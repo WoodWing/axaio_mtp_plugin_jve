@@ -60,8 +60,6 @@ class AdobeDps_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 
 	final public function runAfter( WflDeleteObjectsRequest $req, WflDeleteObjectsResponse &$resp )
 	{
-		$resp = $resp; // keep analyzer happy
-
 		// For dossiers targetted to DPS channels, remove the dossiers (ids) from the dossier ordering.
 		if( isset($req->adobeDps->dossierIdsByIssue) ) {
 			foreach( $req->adobeDps->dossierIdsByIssue as $issueId => $dossierIds ) {
@@ -78,9 +76,5 @@ class AdobeDps_WflDeleteObjects extends WflDeleteObjects_EnterpriseConnector
 		}
 	}
 
-	final public function runOverruled( WflDeleteObjectsRequest $req )
-	{
-		// not called
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflDeleteObjectsRequest $req ) {}
 }

@@ -23,15 +23,9 @@ class InCopyHTMLConversion_WflGetVersion extends WflGetVersion_EnterpriseConnect
 		return self::RUNMODE_AFTER;
 	}
 
-	final public function runBefore( WflGetVersionRequest &$req ) // not called
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore( WflGetVersionRequest &$req ) {}
 	
-	final public function runOverruled( WflGetVersionRequest $req ) // not called
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflGetVersionRequest $req ) {}
 
 	final public function runAfter( WflGetVersionRequest $req, WflGetVersionResponse &$resp )
 	{

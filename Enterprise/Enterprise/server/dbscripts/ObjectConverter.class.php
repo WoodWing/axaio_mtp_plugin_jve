@@ -80,6 +80,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 		}
 
 		// Determine what workflow / authorizations to copy.
+		$workflowStatuses = array();
 		if ( count( $workflowObjectsToUpdate ) != 0 || count( $deletedObjectsToUpdate ) != 0 ) {
 			// Duplicate the statuses for the $objectTypeFrom flow if present / needed.
 			$workflowStatuses = self::duplicateWorkflowStatuses( $objectTypeFrom, $objectTypeTo );
@@ -346,7 +347,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 	 * created workflow status.
 	 *
 	 * @static
-	 * @param array $statuses The workflow statuses of the old object type and new object type.
+	 * @param array $workflowStatuses The workflow statuses of the old object type and new object type.
 	 * @param string $type Object type.
 	 * @return bool True when record successfully inserted, false otherwise.
 	 */
@@ -484,7 +485,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 	 */
 	static private function arrayToSQLString( $arr )
 	{
-		return (count( $arr > 1 ))
+		return (count( $arr ) > 1)
 			? $arr = '\'' . implode( '\',\'', $arr ) . '\''
 			: "'" . $arr[0] . "'";
 	}
@@ -540,8 +541,8 @@ abstract class ObjectConverter extends DbUpgradeModule
 	 * Gets the (deleted)objects of the requested types.
 	 *
 	 * @static
-	 * @param string[] $objectTypes.
-     * @param $workflow Workflow or Trash
+	 * @param string[] $objectTypes
+	 * @param bool $workflow TRUE if workflow, FALSE if Trash
 	 * @return true if found else false.
 	 */
 	static public function getByTypes($objectTypes, $workflow)

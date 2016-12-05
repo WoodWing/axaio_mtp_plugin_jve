@@ -45,13 +45,7 @@ class AdobeDps_PubPreviewDossiers extends PubPreviewDossiers_EnterpriseConnector
 		}
 	}
 
-	final public function runAfter( PubPreviewDossiersRequest $req, PubPreviewDossiersResponse &$resp )
-	{
-		$req = $req; $resp = $resp; // Keep analyzer happy
-	}
+	final public function runAfter( PubPreviewDossiersRequest $req, PubPreviewDossiersResponse &$resp ) {}
 
-	final public function runOverruled( PubPreviewDossiersRequest $req )
-	{
-		$req = $req; // Keep analyzer happy
-	}
+	final public function runOverruled( PubPreviewDossiersRequest $req ) {}
 }

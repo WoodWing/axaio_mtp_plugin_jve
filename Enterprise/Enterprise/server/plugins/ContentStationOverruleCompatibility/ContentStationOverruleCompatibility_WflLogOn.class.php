@@ -20,7 +20,6 @@ class ContentStationOverruleCompatibility_WflLogOn extends WflLogOn_EnterpriseCo
 		require_once dirname(__FILE__) . '/OverruleCompatibility.class.php';
 		// Bail out if no publications or if client app is not Content Station or if there are no overrule issues at all.
 		if( empty( $resp->Publications ) || count($resp->Publications) < 1 || !OverruleCompatibility::isContentStation($resp->Ticket) ) {
-			$req = $req; // keep code analyzer happy
 			return;
 		}
 		$somethingDone = false;
@@ -154,13 +153,7 @@ class ContentStationOverruleCompatibility_WflLogOn extends WflLogOn_EnterpriseCo
 		}
 	}
 
-	final public function runBefore( WflLogOnRequest &$req ) // Not called because we're just doing run after
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runBefore( WflLogOnRequest &$req ) {} // Not called because we're just doing run after
 	
-	final public function runOverruled( WflLogOnRequest $req ) // Not called because we're just doing run after
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled( WflLogOnRequest $req ) {} // Not called because we're just doing run after
 }

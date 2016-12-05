@@ -13,14 +13,13 @@
 class Diagnostics
 {
 	/**
-	 * 
-	 * @param type $ticket
-	 * @param type $category
-	 * @param type $synopsis
-	 * @param type $description
-	 * @param type $attachment
-	 * @return type
-	 * @throws type
+	 * @param string $ticket Session ticket.
+	 * @param string $category Category of diagnostic (user/system generated).
+	 * @param string $synopsis Summary of the diagnostics.
+	 * @param string $description More info about the circumstances etc.
+	 * @param array $attachment List of attachments like screen shot, log files etc.
+	 * @return array List of info with the operation status (Success/Failure)
+	 * @throws BizException on error.
 	 */
 	public static function execute( $ticket, $category, $synopsis, $description, $attachment )
 	{

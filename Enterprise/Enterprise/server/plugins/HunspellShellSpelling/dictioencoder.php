@@ -187,7 +187,7 @@ if( !$generate ){
 	if( $commands ){
 ?>
 	<h3>Instructions</h3>
-	<p>Please run the following command (one line at a time) on your command prompt/terminal to copy the new dictionaries into the existing dictionaries:</br>
+	<p>Please run the following command (one line at a time) on your command prompt/terminal to copy the new dictionaries into the existing dictionaries:<br/>
 		<font color="red">*Please be reminded that Enterprise will not keep the original dictionaries, please keep a backup if you 
 		still want to keep the original dictionaries.</font>
 	</p>

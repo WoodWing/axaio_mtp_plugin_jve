@@ -2063,8 +2063,9 @@ class BizProperty
 	public static function getPropertiesForObject( $objectID, $publishSystem = null, $templateId = null )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		$objProps = DBObject::getObjectProps( $objectID );
-		return self::getProperties( $objProps['PublicationId'], $objProps['Type'], $publishSystem, $templateId );
+		$isWorkflow = false;
+		$objProps = DBObject::getObjectRow( $objectID, $isWorkflow );
+		return self::getProperties( $objProps['publication'], $objProps['type'], $publishSystem, $templateId );
 	}
 
 	/**

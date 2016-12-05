@@ -78,7 +78,7 @@ class BizNamedQuery extends BizQueryBase
 			}
 
 			$searchSucces = false; //If search by (Solr) search engine is succesful skip database search.		
-			$mode = self::getQueryMode($ticket, 0, false);
+			$mode = self::getQueryMode($ticket, false);
 			require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
 			if (BizSearch::handleSearch( $query, $args, $firstEntry, $maxEntries, $mode, $hierarchicalSearch, $queryOrder, $minimalProps, null ) ) {
 				try {
@@ -138,8 +138,8 @@ class BizNamedQuery extends BizQueryBase
 		require_once BASEDIR . '/server/interfaces/services/wfl/WflNamedQueryResponse.class.php';
 
 		$minimalProps = self::getMinimalPropsForPublishTemplates();
-		$ret = BizQuery::queryObjects( $ticket, $user, $args, $firstEntry, $maxEntries, 0, 
-										null, $hierarchical, $queryOrder, $minimalProps, null );
+		$ret = BizQuery::queryObjects(
+			$ticket, $user, $args, $firstEntry, $maxEntries, null, $hierarchical, $queryOrder, $minimalProps, null );
 
 		// QueryObjects returns a WflQueryObjectsResponse, but a WflNamedQueryResponse is needed.
 		return WW_Utils_PHPClass::typeCast( $ret, 'WflNamedQueryResponse' );
@@ -218,7 +218,7 @@ class BizNamedQuery extends BizQueryBase
 	                                              $queryOrder = null, $requestProps = null, $accessRight = 1 )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php'; // Used for logging the Response Object.
-		$mode = self::getQueryMode( $ticket, false, false );
+		$mode = self::getQueryMode( $ticket, false );
 
 		if (isset($params)) {
 			$params = self::resolvePublicationNameParams($params);
@@ -921,7 +921,8 @@ class BizNamedQuery extends BizQueryBase
 		$minimalProps = array('ID', 'Type', 'Name', 'State', 'Format', 'LockedBy', 'Category' ,'PublicationId', 'SectionId', 'StateId', 'PubChannelIds');
 		$minimalProps = self::addMinPropForOverRuleIssue($mode, $minimalProps);	
 		
-		$result = BizQuery::queryObjects($ticket, $user, $params, $firstEntry, $maxEntries, 0, null, true, $queryOrder, $minimalProps, null);
+		$result = BizQuery::queryObjects(
+			$ticket, $user, $params, $firstEntry, $maxEntries, null, true, $queryOrder, $minimalProps, null );
 		
 		// QueryObjects returns a WflQueryObjectsResponse, but a WflNamedQueryResponse is needed. So parse the object. BZ#17257
 		require_once BASEDIR.'/server/utils/PHPClass.class.php';
@@ -966,7 +967,8 @@ class BizNamedQuery extends BizQueryBase
 		$minimalProps = self::addMinPropForOverRuleIssue($mode, $minimalProps);
 
 		require_once BASEDIR . '/server/bizclasses/BizQuery.class.php';
-		$result = BizQuery::queryObjects($ticket, $user, $params, $firstEntry, $maxEntries, 0, null, $hierarchical, $queryOrder, $minimalProps, null);
+		$result = BizQuery::queryObjects(
+			$ticket, $user, $params, $firstEntry, $maxEntries, null, $hierarchical, $queryOrder, $minimalProps, null );
 
 		require_once BASEDIR.'/server/utils/PHPClass.class.php';
 		$result = WW_Utils_PHPClass::typeCast( $result, 'WflNamedQueryResponse' );

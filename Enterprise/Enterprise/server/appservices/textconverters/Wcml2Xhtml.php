@@ -252,7 +252,6 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	 */
 	protected function postprocessStyles( array $css, DOMNode $icNode, $xNode, $isOverride, $isPara, $styleName )
 	{
-		$icNode = $icNode; $xNode = $xNode; $isOverride = $isOverride; $isPara = $isPara; $styleName = $styleName; // keep analyzer happy
 		return $css;
 	}
 	
@@ -312,6 +311,8 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	/**
 	 * Converts a WCML document/story to XHTML. See convert() for more details.
 	 * InCopy path: /ea:Stories/ea:Story/Document
+	 *
+	 * @param DOMNode $icStoryDoc
 	 */
 	private function convertDocument( DOMNode $icStoryDoc )
 	{
@@ -327,6 +328,8 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	/**
 	 * Converts a WCML document/story to XHTML. See convert() for more details.
 	 * InCopy path: ../Document/Story
+	 *
+	 * @param DOMNode $icStory
 	 */
 	protected function convertStory( DOMNode $icStory )
 	{
@@ -565,6 +568,7 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 				$this->prevCharNode = $icOneChar;  // Set the previous CharacterStyleRange node
 			}
 		} else {
+			$icChars = array();
 			// Read CharacterStyleRange from InCopy
 			$icNodes = $this->icXPath->query( '*', $icPara ); // BZ#33975 - Get all child nodes, including those under <Change> node
 			foreach( $icNodes as $icNode ) {
@@ -610,6 +614,8 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 						$xNoBreak = $this->xDoc->createElement( 'nobr' );
 						$xPara->appendChild( $xNoBreak );
 					}
+					/** @noinspection PhpUndefinedVariableInspection $xNoBreak
+					 * Too complex to make changes here, as setting a default value might already change behaviour. */
 					$this->xCursor = $xNoBreak; // insertion point
 					$prevBreak = true;
 				} else {
@@ -627,6 +633,10 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	/**
 	 * Converts a WCML styled text selection to XHTML. See convert() for more details.
 	 * InCopy path: ../Document/Story/ParagraphStyleRange/CharacterStyleRange
+	 *
+	 * @param DOMNode $icChar
+	 * @param boolean $includeContent (default = TRUE)
+	 * @param boolean $includeStyles (default = TRUE)
 	 */
 	protected function convertCharacterStyleRange( DOMNode $icChar, $includeContent = true, $includeStyles = true )
 	{
@@ -691,6 +701,8 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	 * Converts a WCML table to XHTML. See convert() for more details.
 	 * InCopy path: ../ParagraphStyleRange/CharacterStyleRange/Table
 	 * @todo support table borders
+	 *
+	 * @param DOMNode $icTable
 	 */
 	private function convertTable( DOMNode $icTable )
 	{
@@ -735,6 +747,8 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 
 			// Add table row to XHTML table body
 			$xRow = $this->xDoc->createElement( 'tr' );
+			/** @noinspection PhpUndefinedVariableInspection $xTbody
+			  * Too risky to make changes in the behaviour, since this code is very complex. */
 			$xTbody->appendChild( $xRow );
 
 			for( $col = 0; $col < $icColumnCnt; $col++ ) {
@@ -798,6 +812,8 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	/**
 	 * Converts a WCML text fragment to XHTML. See convert() for more details.
 	 * InCopy path: ../ParagraphStyleRange/CharacterStyleRange/*
+	 *
+	 * @param DOMNode $icChar
 	 */
 	protected function convertContent( DOMNode $icChar )
 	{

@@ -161,9 +161,9 @@ class DBUpgradePublishHistory extends DbUpgradeModule
 	/**
 	 * Executes the query provided.
 	 *
-	 * @param unknown $dbDriver
+	 * @param mysqlidriver|mssqldriver|oracledriver $dbDriver
 	 * @param string $sqlStatement
-	 * @return bool
+	 * @return resource|bool
 	 */
 	public static function excecuteQuery( $dbDriver, $sqlStatement )
 	{

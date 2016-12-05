@@ -215,18 +215,18 @@ class DBSection extends DBBase
     	}
         return $sections;
     }
-	
+
 	/**
-     *  Gets exactly one section object with id $sectionId from DB
-     *  @param  $sectionId Id of the section to get the values from
-     *  @return object of section if succeeded, null if no record returned
-	  */
+    * Gets exactly one section object with id $sectionId from DB
+    * @param int $sectionId Id of the section to get the values from
+    * @return AdmSection|null Object of section if succeeded, null if no record returned
+	 */
 	static public function getSectionObj( $sectionId )
-    {
-    	$row   = self::getRow(self::TABLENAME, "`id` = '$sectionId' ", '*');
-        if (!$row) return null;
-        return self::rowToObj($row);
-    }
+	{
+		$row = self::getRow(self::TABLENAME, "`id` = '$sectionId' ", '*');
+		if (!$row) return null;
+		return self::rowToObj($row);
+	}
 
 	/**
 	 *  Create new section object

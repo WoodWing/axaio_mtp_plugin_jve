@@ -97,7 +97,6 @@ class WW_TestSuite_HealthCheck2_Drupal7Publish_TestCase extends TestCase
 				require_once 'Zend/Uri.php';
 				$uri = Zend_Uri::factory( $url );
 			} catch( Exception $e ) {
-				$e = $e;
 				$uri = null;
 			}
 			if( !$uri ) {

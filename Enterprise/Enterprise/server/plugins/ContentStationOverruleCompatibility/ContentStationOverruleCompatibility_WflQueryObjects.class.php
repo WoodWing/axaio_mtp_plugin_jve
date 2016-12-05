@@ -64,8 +64,5 @@ class ContentStationOverruleCompatibility_WflQueryObjects extends WflQueryObject
 	/**
 	 * @param WflQueryObjectsRequest $req
 	 */
-	final public function runOverruled (WflQueryObjectsRequest $req) // Not called because we're just doing run before and after
-	{
-		$req = $req; // keep analyzer happy
-	}
+	final public function runOverruled (WflQueryObjectsRequest $req) {}
 }

@@ -146,6 +146,7 @@ class WW_TestSuite_HealthCheck2_ImageMagick_TestCase extends TestCase
 
 			// Let ImageMagick retrieve the dimensions of the converted JPEG output file and validate it.
 			$metaData = array();
+			/** @noinspection PhpDeprecationInspection */
 			if( !ImageMagick::getBasicMetaData( $fileNameOut, $metaData  ) ) {
 				LogHandler::Log('ImageMagick', 'ERROR', "Identification of JPEG output image failed for $fileResOut. Used input file {$testFile->FilePath} to convert." );
 				continue;

@@ -68,7 +68,8 @@ class QRCode_PubUnPublishDossiers extends PubUnPublishDossiers_EnterpriseConnect
 		$queryParams[] 	= new QueryParam( 'Name', '=', 'QR '.$issueName.' - '.$dossier->MetaData->BasicMetaData->Name );
 		$queryParams[] 	= new QueryParam( 'Type', '=', 'Image' );
 		$queryParams[] 	= new QueryParam( 'DocumentID', '=', 'QR'.$dossierID );
-		$objects = BizQuery::queryObjects( $req->Ticket, $user, $queryParams,  0, 1 ) ;
+		$objects = BizQuery::queryObjects(
+			$req->Ticket, $user, $queryParams, 0, 1 ) ;
 		
 		// Remove the QR code image from Enterprise DB
 		if( !empty($objects->Rows) ) {
