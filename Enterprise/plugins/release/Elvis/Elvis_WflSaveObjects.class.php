@@ -57,14 +57,14 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 		$this->newShadowRelations = ElvisObjectRelationUtils::getShadowRelationsFromObjects( $req->Objects );
 
 		// Get current old shadow relations per layout, retrieved from DB.
-		$reqLayoutIds = ElvisObjectUtils::filterRelevantIdsFromObjects( $req->Objects );
+		$reqObjectIds = ElvisObjectUtils::filterRelevantIdsFromObjects( $req->Objects );
 		$this->oldObjects = array();
-		foreach( $reqLayoutIds as $objId ) {
+		foreach( $reqObjectIds as $objId ) {
 			$user = BizSession::getShortUserName();
 			$this->oldObjects[$objId] = BizObject::getObject( $objId, $user, false, 'none', array( 'Relations', 'Targets' ), null, true );
 		}
 		$this->oldShadowRelations = ElvisObjectRelationUtils::getShadowRelationsFromObjects( $this->oldObjects );
-		$this->oldStatuses = ElvisObjectUtils::getObjectsStatuses( $reqLayoutIds );
+		$this->oldStatuses = ElvisObjectUtils::getObjectsStatuses( $reqObjectIds );
 
 		// For heavy debugging:
 		/*
@@ -86,14 +86,14 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 		require_once dirname(__FILE__).'/util/ElvisPlacementUtils.class.php';
 		require_once dirname(__FILE__).'/logic/ElvisUpdateManager.class.php';
 
-		// Walk through all placements of the old and new layout objects and collect changed shadow object ids of placements
-		$layoutIds = array_keys( $this->oldShadowRelations ) + array_keys( $this->newShadowRelations );
-		$changedLayoutObjects = array();
-		foreach( $layoutIds as $layoutId ) {
+		// Walk through all placements of the old and new layout/form objects and collect changed shadow object ids of placements
+		$reqObjectIds = array_keys( $this->oldShadowRelations ) + array_keys( $this->newShadowRelations );
+		$changedRequestObjects = array();
+		foreach( $reqObjectIds as $reqObjectId ) {
 			// Find object from response
 			$object = null;
 			foreach( $resp->Objects as $testObject ) {
-				if( $testObject->MetaData->BasicMetaData->ID == $layoutId ) {
+				if( $testObject->MetaData->BasicMetaData->ID == $reqObjectId ) {
 					$object = $testObject;
 					break;
 				}
@@ -104,24 +104,26 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 
 			// First test if the status changed from archived to non-archived status
 			$newStatusName = $object->MetaData->WorkflowMetaData->State->Name;
-			if( array_key_exists( $layoutId, $this->oldStatuses ) &&
-					ElvisObjectUtils::statusChangedToUnarchived( $this->oldStatuses[$layoutId]->Name, $newStatusName ) ) {
-				$changedLayoutObjects[] = $object;
+			if( array_key_exists( $reqObjectId, $this->oldStatuses ) &&
+					ElvisObjectUtils::statusChangedToUnarchived( $this->oldStatuses[$reqObjectId]->Name, $newStatusName ) ) {
+				$changedRequestObjects[] = $object;
 				continue;
 			}
 
 			// Compare if targets changed
-			if( array_key_exists( $layoutId, $this->oldObjects ) ) {
-				$targetsChanged = ElvisObjectUtils::compareLayoutTargets( $object->Targets, $this->oldObjects[$layoutId]->Targets );
-				if( $targetsChanged ) {
-					$changedLayoutObjects[] = $object;
-					continue;
+			if( $object->MetaData->BasicMetaData->Type == 'Layout' ) { // Publish Forms can never change target
+				if( array_key_exists( $reqObjectId, $this->oldObjects ) ) {
+					$targetsChanged = ElvisObjectUtils::compareLayoutTargets( $object->Targets, $this->oldObjects[ $reqObjectId ]->Targets );
+					if( $targetsChanged ) {
+						$changedRequestObjects[] = $object;
+						continue;
+					}
 				}
 			}
 
 			// Compare placements for changes
-			$oldShadowRelations = isset( $this->oldShadowRelations[$layoutId] ) ? $this->oldShadowRelations[$layoutId] : array();
-			$newShadowRelations = isset( $this->newShadowRelations[$layoutId] ) ? $this->newShadowRelations[$layoutId] : array();
+			$oldShadowRelations = isset( $this->oldShadowRelations[$reqObjectId] ) ? $this->oldShadowRelations[$reqObjectId] : array();
+			$newShadowRelations = isset( $this->newShadowRelations[$reqObjectId] ) ? $this->newShadowRelations[$reqObjectId] : array();
 
 			if( !empty( $newShadowRelations ) ) {
 				// Update relations in any case. LVS-6187
@@ -130,16 +132,16 @@ class Elvis_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 				// So $oldShadowRelations and $newShadowRelations contains the same data.
 //				$changedShadowIdsForLayout = ElvisPlacementUtils::findChangedPlacedShadowObjects( $oldShadowRelations, $newShadowRelations );
 //				if( $changedShadowIdsForLayout ) { // avoid adding layoutId for nothing
-					$changedLayoutObjects[] = $object;
+				$changedRequestObjects[] = $object;
 //				}
 			} else if ( !empty( $oldShadowRelations ) ) {
-				$changedLayoutObjects[] = $object;
+				$changedRequestObjects[] = $object;
 			}
 		}
 
-		if( !empty( $changedLayoutObjects ) ) {
+		if( !empty( $changedRequestObjects ) ) {
 			// For each layout-image relation for which placements have been changed, update Elvis.
-			ElvisUpdateManager::sendUpdateObjects( $changedLayoutObjects, $this->newShadowRelations );
+			ElvisUpdateManager::sendUpdateObjects( $changedRequestObjects, $this->newShadowRelations );
 		}
 
 		// Perform update on enterprise object's version when newer version is found on shadow object from Elvis

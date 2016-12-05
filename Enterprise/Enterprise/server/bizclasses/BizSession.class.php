@@ -1081,10 +1081,14 @@ class BizSession
 	 * EMPTY is returned. This is for recurring jobs but also for normal jobs even when
 	 * initiated in context of a web service with acting client. That client is NOT returned.
 	 *
+	 * Since 10.1.1 this function no longer logs a warning when the client did not specify a version
+	 * at the time it did logon. For example the import module of Elvis Server does login without version.
+	 * Note that this function returns EMPTY for those cases.
+	 *
 	 * @param null $ticket Obsoleted since 9.4. Always pass NULL.
 	 * @param null $clientVersion Obsoleted since 9.4. Always pass NULL.
 	 * @param int $digits Number of digits to return [1...4]. For example, 2 digits returns "x.y"
-	 * @return string|null Client version. NULL on error. EMPTY on Server Job context.
+	 * @return string|null Client version. NULL on error. EMPTY on Server Job context. EMPTY when client did not specify a version.
 	 */
 	public static function getClientVersion( $ticket=null, $clientVersion=null, $digits=4 )
 	{
@@ -1109,7 +1113,7 @@ class BizSession
 				if( $clientVersion ) {
 					$retVal = self::formatClientVersion( $clientVersion, $digits );
 				} else {
-					LogHandler::Log( 'BizSession', 'WARN', 'Could not resolve client version from ticket ['.$ticket.'].' );
+					$retVal = '';
 				}
 			}
 		} else {

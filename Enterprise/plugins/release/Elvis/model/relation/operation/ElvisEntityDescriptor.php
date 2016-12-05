@@ -1,23 +1,20 @@
 <?php
 
-require_once dirname(__FILE__) . '/../../AbstractRemoteObject.php';
+require_once __DIR__.'/../../AbstractRemoteObject.php';
 
-class ElvisEntityDescriptor extends AbstractRemoteObject {
-	
+class ElvisEntityDescriptor extends AbstractRemoteObject
+{
 	/**
 	 * Return the fully qualified name of the Java class
 	 */
-	public static function getJavaClassName() {
+	public static function getJavaClassName()
+	{
 		return 'com.ds.acm.api.contentsource.model.operation.EntityDescriptor';
 	}
-	
-	/**
-	 * @var String
-	 */
+
+	/** @var string $id */
 	public $id;
-	
-	/**
-	 * @var String
-	 */
+
+	/** @var string $name */
 	public $name;
 }

@@ -94,15 +94,14 @@ class ElvisObjectUtils
 	/**
 	 * Tests if object based on type should be tested for shadow relations.
 	 *
-	 * @param string|null $objectType Object type to be tested
+	 * @param string $objectType Object type to be tested
 	 * @return bool True if of interest to Elvis
 	 */
 	public static function isObjectTypeOfElvisInterest( $objectType )
 	{
 		static $objTypes = array(
-			'Layout' => '',
-			//'LayoutModule' => '',
-			//'Dossier' => '',
+			'Layout' => true,
+			'PublishForm' => true // since 10.1.1
 		);
 		return array_key_exists( $objectType, $objTypes );
 	}
@@ -111,7 +110,7 @@ class ElvisObjectUtils
 	 * Filters objectIds from input Objects array on types interesting for Elvis.
 	 *
 	 * @param Object[] $objects List of objects to be filtered
-	 * @return int[] $reqObjectIds Filtered object ids
+	 * @return string[] $reqObjectIds Filtered object ids
 	 */
 	public static function filterRelevantIdsFromObjects( $objects )
 	{
@@ -305,5 +304,48 @@ class ElvisObjectUtils
 		}
 
 		return $elvisAssetVersions;
+	}
+
+	/**
+	 * Updates the Published Date property for image assets in Elvis when user has (un/re)published a Publish Form.
+	 * This is done for all the shadow images placed on the form.
+	 *
+	 * @since 10.1.1
+	 * @param PubPublishedDossier[]|null $publishedDossiers
+	 * @throws BizException
+	 */
+	static public function updatePublisFormPlacementsForPublishDossierOperation( $publishedDossiers )
+	{
+		if( $publishedDossiers ) foreach( $publishedDossiers as $pubDossier ) {
+			$pubPublishFormId = null;
+			$pubObjectIds = array();
+			if( $pubDossier->History ) foreach( $pubDossier->History as $history ) {
+				if( $history->PublishedObjects ) foreach( $history->PublishedObjects as $pubObject ) {
+					if( $pubObject->Type == 'PublishForm' ) {
+						$pubPublishFormId = $pubObject->ObjectId;
+					} else {
+						$pubObjectIds[] = $pubObject->ObjectId;
+					}
+				}
+			}
+			if( $pubPublishFormId && $pubObjectIds ) {
+				// To avoid too much performance (calling getObjects) impact on publish operations for which no shadow
+				// objects are involved, we bail out when none of the placed objects are shadows of Elvis assets.
+				$pubShadowObjectIds = ElvisObjectUtils::filterElvisShadowObjects( $pubObjectIds );
+				if( $pubShadowObjectIds ) {
+					require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+					$user = BizSession::getShortUserName();
+					$publishForm = BizObject::getObject( $pubPublishFormId, $user, false, 'none', array( 'Relations', 'Targets' ), null, true );
+					if( $publishForm ) {
+						require_once __DIR__.'/ElvisObjectRelationUtils.class.php';
+						$shadowRelations = ElvisObjectRelationUtils::getShadowRelationsFromObjects( array( $publishForm ) );
+						if( $shadowRelations ) {
+							require_once __DIR__.'/../logic/ElvisUpdateManager.class.php';
+							ElvisUpdateManager::sendUpdateObjects( array( $publishForm ), $shadowRelations );
+						}
+					}
+				}
+			}
+		}
 	}
 }

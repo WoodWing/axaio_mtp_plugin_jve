@@ -1,54 +1,38 @@
 <?php
 
-require_once dirname(__FILE__) . '/AbstractRemoteObject.php';
+require_once 'AbstractRemoteObject.php';
 
-class ElvisLoginRequest extends AbstractRemoteObject {
-	
+class ElvisLoginRequest extends AbstractRemoteObject
+{
 	/**
 	 * Return the fully qualified name of the Java class
 	 */
-	public static function getJavaClassName() {
+	public static function getJavaClassName()
+	{
 		return 'com.ds.acm.api.contentsource.model.LoginRequest';
 	}
-	
-	/**
-	 * Encrypted credentials
-	 * 
-	 * @var string
-	 */
+
+	/** @var string $cred Encrypted credentials */
 	public $cred;
-	
-	/**
-	 * Locale preferred by client
-	 * 
-	 * @var string
-	 */
+
+	/** @var string Locale preferred by client */
 	public $locale;
-	
-	/**
-	 * Timezone offset from UTC in milis
-	 * 
-	 *  @var int
-	 */
+
+	/** @var int $timezoneOffset Timezone offset from UTC in milliseconds */
 	public $timezoneOffset;
 
-    /**
-     * Identification of computer, from which user connected (UUID)
-     *
-     * @var string
-     */
-    public $clientId;
-	
+	/** @var string $clientId Identification of computer, from which user connected (UUID) */
+	public $clientId;
+
 	/**
-	 * 
 	 * @param string $cred
 	 * @param string $locale
 	 * @param int $timezoneOffset
 	 */
-	function __construct($cred, $locale, $timezoneOffset) {
+	public function __construct( $cred, $locale, $timezoneOffset )
+	{
 		$this->cred = $cred;
 		$this->locale = $locale;
 		$this->timezoneOffset = $timezoneOffset;
 	}
-
 }

@@ -314,8 +314,8 @@ class DBChanneldata extends DBBase
 	 * @since 9.0.0
 	 * @param string $entity 'Publication', 'PubChannel' or 'Issue'
 	 * @param integer $id Admin data object ID
-	 * @return array List of AdmExtraMetaData (the retrieved custom props).
 	 * @param array $typeMap Lookup table with custom property names as keys and types as values.
+	 * @return array List of AdmExtraMetaData (the retrieved custom props).
 	 * @throws BizException
 	 */
 	public static function getCustomProperties( $entity, $id, $typeMap )

@@ -300,28 +300,42 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * responsibility to keep these up to date. This could for example be checked whenever the object
 	 * is requested via getShadowObject
 	 *
-	 * @param string	$alienId 		Alien object id, so include the _<ContentSourceId>_ prefix
-	 * @param Object	$destObject		In some cases (CopyObject, SendToNext, Create relation)
-	 this can be partly filled in by user, in other cases this is null.
-	 * 									In some cases this is mostly empty, so be aware.
-	 *
+	 * @param string $alienId     Alien object id, so include the _<ContentSourceId>_ prefix
+	 * @param Object $destObject  In some cases (CopyObject, SendToNext, Create relation)
+	 *                            this can be partly filled in by user, in other cases this is null.
+	 *                            In some cases this is mostly empty, so be aware.
 	 * @return Object	filled in with all fields, the actual creation of the Enterprise object is done by Enterprise.
+	 * @throws BizException in case mode is Copy_To_Production_Zone and no production zone is found.
 	 */
 	final public function createShadowObject( $alienId, $destObject )
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createShadowObject called for alienId:' . $alienId );
 
-		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
-
+		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
+		require_once __DIR__ . '/util/ElvisUtils.class.php';
 		$elvisId = ElvisUtils::getElvisId( $alienId );
-		$hit = ElvisUtils::getHit( $elvisId );
 
-		// Register shadow object in Elvis. Throws BizException if not possible (e.g. already linked)
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-		require_once dirname(__FILE__).'/logic/ElvisObjectManager.php';
-		$systemId = BizSession::getEnterpriseSystemId();
-		ElvisObjectManager::registerShadowObject( $elvisId, $systemId );
+		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' ) {
+			require_once __DIR__ . '/util/ElvisBrandAdminConfig.class.php';
+			$productionZone = ElvisBrandAdminConfig::getProductionZoneByPubId( $destObject->MetaData->BasicMetaData->Publication->Id );
+
+			if( $productionZone ) {
+				$productionZone = ElvisBrandAdminConfig::substituteDateInProductionZone( $productionZone );
+
+				require_once __DIR__.'/logic/ElvisContentSourceService.php';
+				$service = new ElvisContentSourceService();
+				$hit = $service->copyTo( $elvisId, $productionZone, $destObject->MetaData->BasicMetaData->Name, BizSession::getEnterpriseSystemId() );
+			} else {
+				throw new BizException( 'ERR_INVALID_PROPERTY', 'Server', 'Unable to find the production zone property.' );
+			}
+		} else {
+			$hit = ElvisUtils::getHit( $elvisId );
+
+			// Register shadow object in Elvis. Throws BizException if not possible (e.g. already linked)
+			require_once dirname(__FILE__) . '/logic/ElvisObjectManager.php';
+			$systemId = BizSession::getEnterpriseSystemId();
+			ElvisObjectManager::registerShadowObject( $elvisId, $systemId );
+		}
 
 		if( !$destObject ) {
 			$destObject = new Object();
@@ -382,7 +396,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 		
-		// Create File attachement
+		// Create File attachment
 		$attachment = new Attachment();
 		$attachment->FileUrl = $fileUrl;
 		$attachment->Rendition = "native";
@@ -418,10 +432,10 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * before any files are stored. This allows content source to save the files externally in
 	 * which case Files can be cleared. If Files not cleared, Enterprise will save the files
 	 *
-	 * Default implementation does nothing, leaving it all up to Enterpruse
+	 * Default implementation does nothing, leaving it all up to Enterprise
 	 *
-	 * @param string	$alienId		Alien id of shadow object
-	 * @param string	$object
+	 * @param string $alienId		Alien id of shadow object
+	 * @param Object &$object
 	 */
 	public function saveShadowObject( $alienId, &$object )
 	{
@@ -703,18 +717,29 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
 		require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
-		
-		$service = new ElvisContentSourceService();
-		$destName = $destObject->MetaData->BasicMetaData->Name;
 
-		$assetId = ElvisUtils::getElvisId($alienId);
-		$copyId = $service->copy( $assetId, $destName );
-		
-		$destId = ElvisUtils::getAlienId( $copyId );
+		$shadowObject = null;
+		switch( ELVIS_CREATE_COPY ) {
+			case 'Hard_Copy_To_Enterprise':
+			case 'Shadow_Only':
+				$service = new ElvisContentSourceService();
+				$destName = $destObject->MetaData->BasicMetaData->Name;
 
-		LogHandler::Log( 'ContentSource', 'DEBUG', 'ContentSource::copyShadowObject called for alienId:' . $alienId . 'destId:' . $destId );
+				$assetId = ElvisUtils::getElvisId( $alienId );
+				$copyId = $service->copy( $assetId, $destName );
 
-		$shadowObject = $this->createShadowObject( $destId, $destObject );
+				$destId = ElvisUtils::getAlienId( $copyId );
+
+				LogHandler::Log( 'ContentSource', 'DEBUG', 'ContentSource::copyShadowObject called for alienId:' . $alienId . ', destId:' . $destId );
+
+				$shadowObject = $this->createShadowObject( $destId, $destObject );
+				break;
+
+			case 'Copy_To_Production_Zone':
+				LogHandler::Log( 'ContentSource', 'DEBUG', 'ContentSource::copyShadowObject called for alienId:' . $alienId . '.' );
+				$shadowObject = $this->createShadowObject( $alienId, $destObject );
+				break;
+		}
 
 		return $shadowObject;
 	}
@@ -865,7 +890,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * Helper function to create an Attachment from an Elvis hit.
 	 * If an Attachment can be extracted based on the rendition, it will be returned in an array.
 	 *
-	 * @param object $hit The Elvis hit from which an attachment will be created.
+	 * @param ElvisEntHit $hit The Elvis hit from which an attachment will be created.
 	 * @param string $rendition Rendition of the file.
 	 * @param null $version
 	 * @return array A list of Attachments.
@@ -889,7 +914,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		
 	/**
 	 * @param Object $smartObject Object of MetaData that will filled
-	 * @param Hit $hit returned from elvis server
+	 * @param ElvisEntHit $hit returned from elvis server
 	 */
 	private function fillMetadata( $smartObject, $hit )
 	{
