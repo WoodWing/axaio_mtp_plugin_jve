@@ -88,7 +88,7 @@ class ElvisUpdateManager
 	/**
 	 * Composes DeleteObject operations and communicates it to Elvis.
 	 *
-	 * @param $objects List of objects for which shadow relations need to be deleted from Elvis.
+	 * @param Object[] $objects List of objects for which shadow relations need to be deleted from Elvis.
 	 * @throws BizException
 	 */
 	public static function sendDeleteObjects( $objects )
@@ -135,7 +135,7 @@ class ElvisUpdateManager
 	 *
 	 * @param Object[]|null $objects List of Layout object.
 	 * @param Relation[] $shadowObjectRelationsPerLayout Refer to function header.
-	 * @return UpdateObjectOperation[]
+	 * @return ElvisUpdateObjectOperation[]
 	 */
 	private static function composeElvisUpdateObjects( $objects, array $shadowObjectRelationsPerLayout )
 	{
@@ -177,14 +177,26 @@ class ElvisUpdateManager
 			$operation->object->publication = $elvisPublication;
 			$operation->object->category = $elvisCategory;
 			
+			// Determine the publish date for layouts.
+			$publishDate = null;
+			$objType = $object->MetaData->BasicMetaData->Type;
+			if( $objType == 'Layout' && $object->Targets ) {
+				/** @var Target $target */
+				$target = reset( $object->Targets );
+				if( $target->Issue->Id ) {
+					require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
+					$row = DBBase::getRow( 'issues', '`id`= ?', array( 'publdate' ), array( $target->Issue->Id ) );
+					$publishDate = $row ? $row['publdate'] : null;
+				}
+			}
+
+			// Handle the relations
 			$shadowObjectRelations = $shadowObjectRelationsPerLayout[$objId];
-
 			$elvisRelations = null;
-
 			if( $object->Relations ) foreach( $object->Relations as $shadowRelation ) {
 				// Only add the relation if it is a shadow relation
 				if( array_key_exists( $shadowRelation->Child, $shadowObjectRelations )) {
-					$elvisRelation = new ElvisObjectRelation();
+					$elvisRelation = ElvisObjectRelationFactory::create();
 					$elvisRelation->type = strval( $shadowRelation->Type );
 
 					require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
@@ -192,15 +204,113 @@ class ElvisUpdateManager
 					$elvisRelation->assetId = strval( $documentId );
 
 					$elvisRelation->placements = self::composeElvisPlacements( $object, $shadowRelation->Placements );
+
+					if( property_exists( $elvisRelation, 'publicationDate' ) &&
+						property_exists( $elvisRelation, 'publicationUrl' ) ) {
+						$elvisRelation->publicationDate = null;
+						$elvisRelation->publicationUrl = null;
+						switch( $objType ) {
+							case 'PublishForm':
+								$shadowTarget = reset( $shadowRelation->Targets );
+								if( $shadowTarget ) {
+									$pubInfo = self::getPublishedInfo(
+										$object->MetaData->BasicMetaData->ID, $shadowTarget->PubChannel->Id,
+										$shadowTarget->Issue->Id, $shadowRelation->Child );
+									if( isset( $pubInfo['publicationDate'] ) ) {
+										$elvisRelation->publicationDate = 	$pubInfo['publicationDate'];
+									}
+									if( isset( $pubInfo['publicationUrl'] ) ) {
+										$elvisRelation->publicationUrl = $pubInfo['publicationUrl'];
+									}
+								}
+								break;
+							case 'Layout':
+								$elvisRelation->publicationDate = $publishDate;
+								break;
+						}
+					}
 					$elvisRelations[] = $elvisRelation;
+				}
+				// The relational target between Dossier and Publish Form tells us
+				// to which Publication Channel the form is targeted for.
+				if( $objType == 'PublishForm' ) {
+					if( $shadowRelation->Type == 'Contained' && $shadowRelation->Child == $objId ) {
+						$operation->targets = self::composeElvisTargets( $shadowRelation->Targets );
+					}
 				}
 				$operation->relations = $elvisRelations;
 			}
 
-			$operation->targets = self::composeElvisTargets( $object->Targets );
+			if( $objType == 'Layout' ) {
+				$operation->targets = self::composeElvisTargets( $object->Targets );
+			}
 			$operations[] = $operation;
 		}
 		return $operations;
+	}
+
+	/**
+	 * Resolves the Publish Date and Publish URL (from the publish history) for an object that is placed on a Publish Form.
+	 *
+	 * @since 10.1.1
+	 * @param integer $publishFormId
+	 * @param integer $pubChannelId
+	 * @param integer $issueId
+	 * @param integer $placedObjectId
+	 * @return string[] Resolved properties 'publicationDate' and 'publicationUrl'. When a property is not found, it is left out.
+	 */
+	private static function getPublishedInfo( $publishFormId, $pubChannelId, $issueId, $placedObjectId )
+	{
+		$publishedInfo = array();
+		$publishedDate = null;
+		$dossierId = self::getDossierOfPublishForm( $publishFormId );
+		if( $dossierId ) {
+			require_once BASEDIR.'/server/dbclasses/DBPublishHistory.class.php';
+			$dossiersPublished = DBPublishHistory::getPublishHistoryDossier( $dossierId, $pubChannelId, $issueId,
+				null, true ); // null: forms don't have editions, true: last publish action only
+			if( $dossiersPublished ) {
+				$dossierPublished = reset( $dossiersPublished ); // above, we requested for one record only
+				if( $dossierPublished['action'] === 'publishDossier' || $dossierPublished['action'] === 'updateDossier' ) {
+					require_once BASEDIR.'/server/dbclasses/DBPublishedObjectsHist.class.php';
+					$publishedObjects = DBPublishedObjectsHist::getPublishedObjectsHist( $dossierPublished['id'] );
+					if( $publishedObjects ) foreach( $publishedObjects as $publishedObject ) {
+						if( $placedObjectId == $publishedObject['objectid'] ) {
+							$publishedInfo['publicationDate'] = $dossierPublished['publisheddate'];
+							break;
+						}
+					}
+					if( isset($dossierPublished['fields']) && $dossierPublished['fields'] ) {
+						require_once BASEDIR . '/server/utils/PublishingFields.class.php';
+						$pubFields = unserialize( $dossierPublished['fields'] );
+						$publishedInfo['publicationUrl'] = WW_Utils_PublishingFields::getFieldAsString( $pubFields, 'URL' );
+					}
+				}
+			}
+		}
+		return $publishedInfo;
+	}
+
+	/**
+	 * Resolves the Dossier object that contains a given Publish Form.
+	 *
+	 * @since 10.1.1
+	 * @param integer $publishFormId
+	 * @return integer|null The dossier id, or NULL when not found.
+	 * @throws BizException
+	 */
+	private static function getDossierOfPublishForm( $publishFormId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
+		$dossierId = null;
+		try {
+			$rows = DBObjectRelation::getObjectRelations( $publishFormId, 'parents', 'Contained' );
+			if( $rows ) {
+				$row = reset( $rows );
+				$dossierId = $row['parent'];
+			}
+		} catch( BizException $e ) {} // ignore
+		return $dossierId;
+
 	}
 
 	/**
@@ -212,7 +322,8 @@ class ElvisUpdateManager
 	 * @param null|Placement[] $shadowPlacements List of shadow object placements.
 	 * @return null|ElvisPlacement[]
 	 */
-	private static function composeElvisPlacements( Object $object, $shadowPlacements )
+	private static function composeElvisPlacements( /** @noinspection PhpLanguageLevelInspection */
+		Object $object, $shadowPlacements )
 	{
 		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisPlacement.php';
 		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisPage.php';
@@ -226,36 +337,68 @@ class ElvisUpdateManager
 			// Add pasteBoard property to placements
 			ElvisPlacementUtils::resolvePasteBoardInPlacements( $entPlacements );
 
+			$isPublishForm = $object->MetaData->BasicMetaData->Type == 'PublishForm';
+			if( $isPublishForm ) {
+				require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+				list( $publishSystem, $templateId ) = BizObject::getPublishSystemAndTemplateId( $object->MetaData->BasicMetaData->ID );
+			} else {
+				list( $publishSystem, $templateId ) = array( null, null );
+			}
+
 			$elvisPlacements = array();
-			foreach( $entPlacements as $layoutPlacement ) {
-				$elvisPlacement = new ElvisPlacement();
+			if( $entPlacements ) foreach( $entPlacements as $entPlacement ) {
+				$elvisPlacement = ElvisPlacementFactory::create();
+				$elvisPlacement->width  = floatval( $entPlacement->Width );
+				$elvisPlacement->height  = floatval( $entPlacement->Height );
+				if( $isPublishForm ) {
+					$elvisPlacement->page = null;
+					$elvisPlacement->top  = 0.0;
+					$elvisPlacement->left  = 0.0;
+					$elvisPlacement->onPasteBoard = false;
+					$elvisPlacement->onMasterPage = false;
+					$elvisPlacement->editions = null;
+					if( property_exists( $elvisPlacement, 'widget' ) ) {
+						if( $entPlacement->FormWidgetId && $templateId && $publishSystem ) {
+							require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
+							$entProperties = DBProperty::getPropertyByNameAndFields( $entPlacement->FormWidgetId, 'Object', null, array(
+								'templateid' => $templateId, 'publishsystem' => $publishSystem, 'objtype' => 'PublishForm' ) );
+							if( $entProperties ) {
+								$entProperty = reset( $entProperties );
+								$elvisPlacement->widget = new ElvisEntityDescriptor();
+								$elvisPlacement->widget->id = $entPlacement->FormWidgetId;
+								$elvisPlacement->widget->name = $entProperty->DisplayName;
+							}
+						}
+					}
+				} else { // layout
+					$elvisPlacement->page = new ElvisPage();
+					$elvisPlacement->page->number = strval( $entPlacement->PageNumber ); // Human readable.
+					if( $object->Pages ) foreach( $object->Pages as $page ) {
+						if( $page->PageNumber == $entPlacement->PageNumber ) {
+							$elvisPlacement->page->width = floatval( $page->Width );
+							$elvisPlacement->page->height = floatval( $page->Height );
+							break;
+						}
+					}
+					$elvisPlacement->top  = floatval( $entPlacement->Top );
+					$elvisPlacement->left  = floatval( $entPlacement->Left );
+					$elvisPlacement->onPasteBoard  = (boolean)$entPlacement->onPasteBoard; // Enterprise<->Elvis internal property.
+					$elvisPlacement->onMasterPage = (boolean)ElvisPlacementUtils::isPlacedOnMasterPage( $entPlacement );
+					$elvisPlacement->editions = array();
+					if( isset( $entPlacement->Editions ) ) foreach( $entPlacement->Editions as $edition ) {
+						$elvisEdition = new ElvisEntityDescriptor();
+						$elvisEdition->id = strval( $edition->Id );
+						$elvisEdition->name = strval( $edition->Name );
 
-				$elvisPlacement->page = new ElvisPage();
-				$elvisPlacement->page->number = strval( $layoutPlacement->PageNumber ); // Human readable.
-				if( $object->Pages ) foreach( $object->Pages as $page ) {
-					if( $page->PageNumber == $layoutPlacement->PageNumber ) {
-						$elvisPlacement->page->width = floatval( $page->Width );
-						$elvisPlacement->page->height = floatval( $page->Height );
-						break;
+						if( is_array( $elvisPlacement->editions ) && !in_array($elvisEdition, $elvisPlacement->editions)) {
+							$elvisPlacement->editions[] = $elvisEdition;
+						}
+					}
+					if( property_exists( $elvisPlacement, 'widget' ) ) {
+						$elvisPlacement->widget = null;
 					}
 				}
 
-				$elvisPlacement->top  = floatval( $layoutPlacement->Top );
-				$elvisPlacement->left  = floatval( $layoutPlacement->Left );
-				$elvisPlacement->width  = floatval( $layoutPlacement->Width );
-				$elvisPlacement->height  = floatval( $layoutPlacement->Height );
-				$elvisPlacement->onPasteBoard  = (boolean)$layoutPlacement->onPasteBoard; // Enterprise<->Elvis internal property.
-				$elvisPlacement->onMasterPage = (boolean)ElvisPlacementUtils::isPlacedOnMasterPage( $layoutPlacement );
-				$elvisPlacement->editions = array();
-				if( isset( $layoutPlacement->Editions ) ) foreach( $layoutPlacement->Editions as $edition ) {
-					$elvisEdition = new ElvisEntityDescriptor();
-					$elvisEdition->id = strval( $edition->Id );
-					$elvisEdition->name = strval( $edition->Name );
-					
-					if( is_array( $elvisPlacement->editions ) && !in_array($elvisEdition, $elvisPlacement->editions)) {
-						$elvisPlacement->editions[] = $elvisEdition;
-					}
-				}
 				$elvisPlacements[] = $elvisPlacement;
 			}
 		}

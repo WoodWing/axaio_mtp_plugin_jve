@@ -1,33 +1,26 @@
 <?php
 
-require_once dirname(__FILE__) . '/../../AbstractRemoteObject.php';
+require_once __DIR__.'/../../AbstractRemoteObject.php';
 
-class ElvisUpdateObjectOperation extends AbstractRemoteObject {
-
+class ElvisUpdateObjectOperation extends AbstractRemoteObject
+{
 	/**
 	 * Return the fully qualified name of the Java class
 	 */
-	public static function getJavaClassName() {
+	public static function getJavaClassName()
+	{
 		return 'com.ds.acm.api.contentsource.model.operation.UpdateObjectOperation';
 	}
-	
-	/**
-	 * @var String
-	 */
+
+	/** @var string $enterpriseSystemId */
 	public $enterpriseSystemId;
-	
-	/**
-	 * @var ObjectDescriptor
-	 */
+
+	/** @var ElvisObjectDescriptor $object */
 	public $object;
 
-	/**
-	 * @var SabreAMF_ArrayCollection<ObjectRelation>
-	 */
+	/** @var ElvisObjectRelation[] $relations */
 	public $relations;
 
-	/**
-	 * @var SabreAMF_ArrayCollection<Target>
-	 */
+	/** @var ElvisTarget[] $targets */
 	public $targets;
 }

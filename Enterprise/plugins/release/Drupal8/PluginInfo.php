@@ -13,9 +13,7 @@ require_once BASEDIR.'/server/interfaces/plugins/PluginInfoData.class.php';
 class Drupal8_EnterprisePlugin extends EnterprisePlugin
 {
 	/**
-	 * Returns information about the plug-in.
-	 *
-	 * @return PluginInfoData The composed PluginInfoData object.
+	 * @inheritdoc
 	 */
 	public function getPluginInfo()
 	{ 
@@ -28,10 +26,7 @@ class Drupal8_EnterprisePlugin extends EnterprisePlugin
 	}
 
 	/**
-	 * Returns the Connector Interfaces for this Plug-in.
-	 *
-	 * @see EnterprisePlugin.class.php
-	 * @return array An array of connector interfaces.
+	 * @inheritdoc
 	 */
 	final public function getConnectorInterfaces() 
 	{ 
@@ -42,18 +37,23 @@ class Drupal8_EnterprisePlugin extends EnterprisePlugin
 			'AdminProperties_EnterpriseConnector',
 			'AdmModifyPubChannels_EnterpriseConnector',
 			'AutocompleteProvider_EnterpriseConnector',
+			'ConfigFiles_EnterpriseConnector', // since 10.1.1
 		);
 	}
 	
 	/**
-	 * For first time installation, disable this plug-in.
-	 * See EnterprisePlugin class for more details.
-	 *
-	 * @since 9.0.0
-	 * @return boolean
+	 * @inheritdoc
 	 */
 	public function isActivatedByDefault()
 	{
 		return false;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function requiredServerVersion()
+	{
+		return '10.1.1 Build 0'; // because of ConfigFiles_EnterpriseConnector
 	}
 }

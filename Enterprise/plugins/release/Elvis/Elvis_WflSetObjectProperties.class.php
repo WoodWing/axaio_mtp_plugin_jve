@@ -45,7 +45,12 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 			$object = BizObject::getObject( $objectId, $user, false, 'none', array( 'Targets' ), null, true );
 
 			// Compare if targets changed. If Targets is null, no change.
-			$targetsChanged = !is_null( $req->Targets ) && ElvisObjectUtils::compareLayoutTargets( $object->Targets, $req->Targets );
+			$targetsChanged = false;
+			if( $objectType == 'Layout' ) { // Publish Form targets can never change.
+				if( !is_null( $req->Targets ) ) { // Only check when client provided targets at all.
+					$targetsChanged = ElvisObjectUtils::compareLayoutTargets( $object->Targets, $req->Targets );
+				}
+			}
 			if( $targetsChanged ) {
 				$this->objectChanged[] = $objectId;
 			} else if( !is_null( $req->MetaData->WorkflowMetaData ) ) {

@@ -1,37 +1,28 @@
 <?php
-require_once dirname(__FILE__) . '/AbstractRemoteObject.php';
+require_once 'AbstractRemoteObject.php';
 
-class ElvisEntUserDetails extends AbstractRemoteObject {
-
+class ElvisEntUserDetails extends AbstractRemoteObject
+{
 	/**
 	 * Return the fully qualified name of the Java class
 	 */
-	public static function getJavaClassName() {
+	public static function getJavaClassName()
+	{
 		return 'com.ds.acm.api.contentsource.model.EntUserDetails';
 	}
 
-	/**
-	 * @var string
-	 */
+	/** @var string $username */
 	public $username;
-	
-	/**
-	 * @var string
-	 */
+
+	/** @var string $fullName */
 	public $fullName;
-	
-	/**
-	 * @var string
-	 */
+
+	/** @var string $email */
 	public $email;
-	
-	/**
-	 * @var boolean
-	 */
+
+	/** @var boolean $enabled */
 	public $enabled;
-	
-	/**
-	 * @var boolean
-	 */
+
+	/** @var boolean $ldapUser */
 	public $ldapUser;
 }

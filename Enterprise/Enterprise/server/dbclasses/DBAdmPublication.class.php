@@ -42,7 +42,7 @@ class DBAdmPublication extends DBBase
 	 * Returns all publication data objects from DB, as configured by admin users.
 	 *  
 	 * @param array|null $typeMap Lookup table with custom property names as keys and types as values. Pass NULL to skip resolving props (which leaves ExtraMetaData set to null).
-	 * @return array of AdmPublication on success. NULL if no record returned.
+	 * @return AdmPublication[] List of Publication objects on success. NULL if no record returned.
 	 */
 	public static function listPublicationsObj( $typeMap = null )
 	{
@@ -71,7 +71,7 @@ class DBAdmPublication extends DBBase
 	 * @param $pubs array of values to create new publication
 	 * @param array $typeMap Lookup table with custom property names as keys and types as values.
 	 * @throws BizException Throws BizException on failure.
-	 * @return array List of newly created Publication objects.
+	 * @return AdmPublication[] List of newly created Publication objects.
 	 */
 	public static function createPublicationsObj( $pubs, $typeMap )
 	{
@@ -116,7 +116,7 @@ class DBAdmPublication extends DBBase
 	 * @param $pubs array of values to modify existing publication
 	 * @param array $typeMap Lookup table with custom property names as keys and types as values.
 	 * @throws BizException Throws BizException on failure.
-	 * @return array List of modified Publication objects.
+	 * @return AdmPublication[] List of modified Publication objects.
 	 */
 	public static function modifyPublicationsObj( $pubs, $typeMap )
 	{	

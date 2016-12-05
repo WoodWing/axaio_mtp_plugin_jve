@@ -54,11 +54,12 @@ class WW_Utils_TestSuite
 	 * @param string $errorLevel Severity when validation fails. Typically 'ERROR' or 'WARN' can be used.
 	 * @param integer $validateOpts Flags indicating which validation rules to apply.
 	 * @param string $help The custom help string that can be pass by caller
+	 * @param callable $valueToString [v10.1.1] Callback function that serializes the value before written to log.
 	 * @return boolean Whether or not all ok. False when one validation failed. No matter failure, it tests -all- defines.
 	 */
 	public function validateDefines( 
 			TestCase $testCase, array $defineNameTypes, $configFile = 'configserver.php',
-			$errorLevel = 'ERROR', $validateOpts = self::VALIDATE_DEFINE_ALL, $help=null )
+			$errorLevel = 'ERROR', $validateOpts = self::VALIDATE_DEFINE_ALL, $help=null, $valueToString = null )
 	{
 		$valid = true;
 		foreach( $defineNameTypes as $defineName => $defineType ) {
@@ -75,13 +76,12 @@ class WW_Utils_TestSuite
 			}
 			if( ($validateOpts & self::VALIDATE_DEFINE_MANDATORY) == self::VALIDATE_DEFINE_MANDATORY ) {
 				if( !defined($defineName) ) {
-					$pleaseCheck = is_null($help) ? 'Please add it to the '.$configFile.' file. Check out the Admin Guide how this needs to be done.' : $help;
+					$pleaseCheck = is_null($help) ? 'Please add it to the '.$configFile.' file. ' : $help;
 					$testCase->setResult( $errorLevel, "The $defineName option is not defined.", $pleaseCheck );
 					$valid = false;
 					continue;
 				}
-				$pleaseCheck = is_null( $help ) ? 'Please fill in a value at the '.$configFile.
-								' file. Check out the Admin Guide how this needs to be done.' : $help;
+				$pleaseCheck = is_null( $help ) ? 'Please fill in a value at the '.$configFile.' file. ' : $help;
 				switch( $defineType ) {
 					case 'string':
 						if( ($validateOpts & self::VALIDATE_DEFINE_NOT_EMPTY) == self::VALIDATE_DEFINE_NOT_EMPTY ) {
@@ -131,7 +131,8 @@ class WW_Utils_TestSuite
 						}
 						break;
 				}
-				LogHandler::Log('wwtest', 'INFO', "Validated the $defineName option at the $configFile file. Current value: ".constant($defineName) );
+				LogHandler::Log('wwtest', 'INFO', "Validated the $defineName option at the $configFile file.".
+					' Current value: '.( $valueToString ? $valueToString( $defineName ) : constant( $defineName ) ) );
 			} else {
 				if( defined($defineName) ) {
 					$pleaseCheck = is_null($help) ? 'Please remove it from the '.$configFile.' file.' : $help;

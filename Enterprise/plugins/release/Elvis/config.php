@@ -66,21 +66,46 @@ if( !defined('ELVIS_ARCHIVED_STATUSES') ) {
 }
 
 /**
- * By default Elvis will create a shadow object in Enterprise that is linked to the asset in Elvis.
- * When set to true, a copy of the asset will be uploaded to Enterprise and is not linked to the 
- * original in Elvis.
+ * Defines how the system should link or copy an Elvis asset when the user is about to use it in Enterprise.
+ *
+ * Use one of the following options:
+ * - 'Copy_To_Production_Zone'  Copy the asset to the Production Zone in Elvis and create a shadow object in Enterprise that is linked to the copy.
+ * - 'Hard_Copy_To_Enterprise'  Copy the asset from Elvis directly to Enterprise. No link or shadow object is created.
+ * - 'Shadow_Only'              Create a shadow object in Enterprise that is linked to the asset in Elvis. No copy is created.
+ *
+ * Note that this option has changed since Enterprise 10.1.1.
  */
 if( !defined('ELVIS_CREATE_COPY') ) {
-	define( 'ELVIS_CREATE_COPY', 'false' );
+	define( 'ELVIS_CREATE_COPY', 'Shadow_Only' );
+}
+
+/**
+ * Default value for the Production Zone property shown on the Brand Maintenance page.
+ * It defines the folder location in Elvis where images are copied to just before they are used by Enterprise.
+ *
+ * The following placeholders can be used:
+ *   ${brand}         => This will be replaced with the Brand name once the Brand is created.
+ *   ${date:<format>} => This will be replaced with the current date once the Elvis asset is copied.
+ *                       The <format> is specified here: http://php.net/manual/en/function.date.php
+ *
+ * This option is available since Enterprise 10.1.1 and requires Elvis 5.18 (or newer).
+ */
+if( !defined('DEFAULT_ELVIS_PRODUCTION_ZONE') ) {
+	define( 'DEFAULT_ELVIS_PRODUCTION_ZONE', '/Production Zone/${brand}/${date:Y-m}' );
 }
 
 /**
  * The location to which images are restored when restoring a layout from Elvis.
- * it supports the following options:
  *
- * Elvis_Copy: The image is copied in Elvis and is linked via an Enterprise shadow object.
- * Elvis_Original: The image is linked via an Enterprise shadow object.
- * Enterprise: The image is copied to Enterprise.
+ * It supports the following options:
+ * - 'Elvis_Copy'     The image is copied in Elvis and is linked via an Enterprise shadow object.
+ *                    When the ELVIS_CREATE_COPY option is set to 'Copy_To_Production_Zone' Smart Connection will no longer
+ *                    raise a message to let the user specify the Elvis folder. Instead, the Production Zone is used as
+ *                    configured for the Brand.
+ * - 'Elvis_Original' The image is linked via an Enterprise shadow object. No copy is created.
+ *                    This value can NOT be used when the ELVIS_CREATE_COPY option is set to 'Copy_To_Production_Zone'.
+ *                    This option requires Elvis Server version 5.14 or higher.
+ * - 'Enterprise'     The image is copied to Enterprise. No link or shadow object is created.
  */
 if( !defined('IMAGE_RESTORE_LOCATION') ) {
 	define( 'IMAGE_RESTORE_LOCATION', 'Elvis_Copy' );

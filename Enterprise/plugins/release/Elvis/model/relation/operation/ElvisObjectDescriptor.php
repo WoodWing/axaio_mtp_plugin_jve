@@ -1,28 +1,23 @@
 <?php
 
-require_once dirname(__FILE__) . '/ElvisEntityDescriptor.php';
+require_once __DIR__.'/ElvisEntityDescriptor.php';
 
-class ElvisObjectDescriptor extends ElvisEntityDescriptor {
-	
+class ElvisObjectDescriptor extends ElvisEntityDescriptor
+{
 	/**
 	 * Return the fully qualified name of the Java class
 	 */
-	public static function getJavaClassName() {
+	public static function getJavaClassName()
+	{
 		return 'com.ds.acm.api.contentsource.model.operation.ObjectDescriptor';
 	}
 
-	/**
-	 * @var String
-	 */
-	public $type;	
-	
-	/**
-	 * @var EntityDescriptor
-	 */
+	/** @var string $type */
+	public $type;
+
+	/** @var ElvisEntityDescriptor $publication */
 	public $publication;
-	
-	/**
-	 * @var EntityDescriptor
-	 */
+
+	/** @var ElvisEntityDescriptor $category */
 	public $category;
 }
