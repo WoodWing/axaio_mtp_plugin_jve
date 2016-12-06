@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LocalizationMap language="itIT">
-  <Term key="MaintenanceMode.LOGIN_DISABLE_DATE_FIELD">Disable From</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FIELD">Disable User Log-in</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DATE">User log-in is disabled starting from %1.</Term>
-  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DIRECT">User log-in is disabled with immediate effect because the date is set in the past (%1).</Term>
-  <Term key="MaintenanceMode.SAVE_FAILED">The settings could not be saved.</Term>
+  <Term key="MaintenanceMode.LOGIN_DISABLE_DATE_FIELD">Disabilita da</Term>
+  <Term key="MaintenanceMode.LOGIN_DISABLE_FIELD">Disabilita accesso utente</Term>
+  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DATE">L'accesso dell'utente sarà disabilitato a partire da %1.</Term>
+  <Term key="MaintenanceMode.LOGIN_DISABLE_FROM_DIRECT">L'accesso dell'utente è disabilitato con effetto immediato, in quanto la data è impostata nel passato (%1).</Term>
+  <Term key="MaintenanceMode.SAVE_FAILED">Le impostazioni potrebbero non essere salvate.</Term>
 </LocalizationMap>
