@@ -225,7 +225,7 @@
   <Term key="ACT_KEEP_LOCKED">离线编辑</Term>
   <Term key="ACT_LEAVE_EMPTY_FOR_DIRECT_UPDATE">留空以直接更新</Term>
   <Term key="ACT_LEAVE_EMPTY_IF_OWNER_IS_SAME_AS_USER">如所有者是同一个用户，则留空</Term>
-  <Term key="ACT_LESS">Less</Term>
+  <Term key="ACT_LESS">收起</Term>
   <Term key="ACT_LIST_PUB_OVERVIEW">列出在出版物预览中</Term>
   <Term key="ACT_LOGIN">登录</Term>
   <Term key="ACT_LOGOFF">注销</Term>
@@ -257,7 +257,7 @@
   <Term key="ACT_OK">OK</Term>
   <Term key="ACT_OPEN">打开</Term>
   <Term key="ACT_OPEN_EDIT">打开编辑</Term>
-  <Term key="ACT_OPEN_EDIT_UNPLACED">Open for Edit (Unplaced)</Term>
+  <Term key="ACT_OPEN_EDIT_UNPLACED">打开编辑(未选)</Term>
   <Term key="ACT_OPEN_IN_NEW_TAB">在新的标签页中打开</Term>
   <Term key="ACT_ORDER_BY">排序按</Term>
   <Term key="ACT_ORG_FILE_NOT_EXIST">文件 %1 不存在</Term>
@@ -813,7 +813,7 @@
   <Term key="ERR_CHECKIN">文件名称不匹配，是否继续保存?</Term>
   <Term key="ERR_COMBINE_ONLY_PLAIN_TEXT_ALLOWED">只有平文文章可以连接</Term>
   <Term key="ERR_COMPOSE">编辑文章错误. (S1067)</Term>
-  <Term key="ERR_CONNECT">错误连接%1。请检查您的连接，然后再试一次。  (S1144)</Term>
+  <Term key="ERR_CONNECT">连接%1服务时出错。请检查您的连接并重试。  (S1144)</Term>
   <Term key="ERR_CONNECT_TO_SERVER">连接至服务器错误.请检查连接并重试(S1068)</Term>
   <Term key="ERR_COPY_FOLDER">发布时出现了一个错误. 请联系你的系统管理员.\n\n 原因: HTML Resources 缓存文件夹不存在. 请在健康检查页面上运行 'Adobe Digital Publishing System (DPS)' 测试并遵从它的指令.</Term>
   <Term key="ERR_COULD_NOT_CONNECT_TO_DATEBASE">不能连接到数据库 (S1003)</Term>
