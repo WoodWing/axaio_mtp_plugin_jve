@@ -187,7 +187,7 @@ class MaintenanceMode_Configure_EnterpriseWebApp extends EnterpriseWebApp
 		$this->htmlBody = str_replace( '<!--DISABLE_FROM_DATE_TIME-->', $disableFromDateTime, $this->htmlBody );
 		$this->htmlBody = str_replace( '<!--DISABLE_MESSAGE_FIELD-->', BizResources::localize( 'LIC_MESSAGE' ), $this->htmlBody );
 		$this->htmlBody = str_replace( '<!--DISABLE_MESSAGE-->', $disableLogInMessage, $this->htmlBody );
-		$this->htmlBody = str_replace( '<!--RES:ACT_SAVE-->', BizResources::localize( 'ACT_SAVE' ), $this->htmlBody );
+		$this->htmlBody = str_replace( '<!--ACT_SAVE-->', BizResources::localize( 'ACT_SAVE' ), $this->htmlBody );
 		$this->htmlBody = str_replace( '<!--MESSAGES-->', $this->message, $this->htmlBody );
 	}
 
