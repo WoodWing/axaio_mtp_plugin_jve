@@ -123,7 +123,8 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			$this->setResult( 'ERROR', $message , $help );
 			$result = false;
 		}
-		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' && IMAGE_RESTORE_LOCATION == 'Elvis_Original' ) { // [EN-88325]
+		if( ( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' && IMAGE_RESTORE_LOCATION == 'Elvis_Original' ) || // [EN-88325]
+			 ( ELVIS_CREATE_COPY == 'Hard_Copy_To_Enterprise' && IMAGE_RESTORE_LOCATION == 'Elvis_Copy' ) ) {    // [EN-88426]
 			$message = 'The ELVIS_CREATE_COPY option is set to "'.ELVIS_CREATE_COPY.'" and '.
 				'the IMAGE_RESTORE_LOCATION option is set to "'.IMAGE_RESTORE_LOCATION.'". '.
 				'However, this combination is not supported.';
