@@ -364,10 +364,11 @@ class WordPressXmlRpcClient
 			'overwrite' => false
 		);
 
+		try {
 		$rpc = new IXR_Client( $this->url, $this->certificate );
-		$status = $rpc->query( 'metaWeblog.newMediaObject', 0, $this->userName,	$this->password, $data );
-		if( !$status ) {
-			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $rpc->getErrorMessage() );
+			$rpc->query( 'metaWeblog.newMediaObject', 0, $this->userName, $this->password, $data );
+		} catch ( BizException $e ) {
+			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', '' );
 		}
 
 		return $rpc->getResponse();
@@ -419,8 +420,6 @@ class WordPressXmlRpcClient
 	 * @param string $mimeType
 	 *
 	 * @return mixed
-	 *
-	 * @throws Exception BizException
 	 */
 	function uploadImage( $imageName, $filePath, $mimeType, $galleryId )
 	{
@@ -432,10 +431,11 @@ class WordPressXmlRpcClient
 			'gallery' => $galleryId
 		);
 
+		try {
 		$rpc = new IXR_Client( $this->url, $this->certificate );
-		$status = $rpc->query( 'ngg.uploadImage', 0, $this->userName,	$this->password, $data );
-		if( !$status ) {
-			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $rpc->getErrorMessage() );
+			$rpc->query( 'ngg.uploadImage', 0, $this->userName,	$this->password, $data );
+		} catch ( BizException $e ) {
+			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', '' );
 		}
 
 		return $rpc->getResponse();
