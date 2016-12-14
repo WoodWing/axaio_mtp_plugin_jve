@@ -214,9 +214,16 @@ class BizPage
 			$queryParams[] = new QueryParam( 'Type', '=', 'Layout', false );
 
 			// This could be more efficient, but this is easy:
+			require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+			$request = new WflQueryObjectsRequest();
+			$request->Ticket = $ticket;
+			$request->Params = $queryParams;
+			$request->FirstEntry = 1;
+			$request->MaxEntries = 0;
+			$request->Hierarchical = false;
+			$request->RequestProps = array( 'ID', 'Type', 'Name' );
 			require_once BASEDIR."/server/bizclasses/BizQuery.class.php";
-			$resp = BizQuery::queryObjects(
-				$ticket, $user, $queryParams, 1, 0, null, false, null, null, array( 'ID', 'Type', 'Name' ), null, 11 );
+			$resp = BizQuery::queryObjects2( $request, $user, 11 );
 
 	// Determine the object ID column index
 			$idIdx = 0;

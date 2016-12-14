@@ -158,8 +158,14 @@ class ImprezzeoSearchEngine extends BizQuery
 		
 		// Restrict the images set to the entered selection criteria.
 		// queryObjects also handles access rights.
-		$restrictions = self::queryObjects(
-			$this->ticket, $this->shortUserName, $paramsRestrictions, null, 0, null, false, null, null, null );
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = $this->ticket;
+		$request->Params = $paramsRestrictions;
+		$request->MaxEntries = 0;
+		$request->Hierarchical = false;
+		require_once BASEDIR."/server/bizclasses/BizQuery.class.php";
+		$restrictions = self::queryObjects2( $request, $this->shortUserName );
 		
 		//Find the index that points to ID
 		$index = 0;
@@ -220,8 +226,14 @@ class ImprezzeoSearchEngine extends BizQuery
 		}
 		
 		//Compose facets
-		$queryResult = self::queryObjects(
-			$this->ticket, $this->shortUserName, $queryParams, null, 0, null, false, null, null, null );
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = $this->ticket;
+		$request->Params = $queryParams;
+		$request->MaxEntries = 0;
+		$request->Hierarchical = false;
+		require_once BASEDIR."/server/bizclasses/BizQuery.class.php";
+		$queryResult = self::queryObjects2( $request, $this->shortUserName );
 		if (property_exists($queryResult, 'Facets')) {
 			$this->facets = $queryResult->Facets;
 		}	

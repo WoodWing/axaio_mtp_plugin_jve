@@ -2658,19 +2658,15 @@ class BizObject
 		$accessRight = 2; // Read right
 		$minProps = array( 'ID', 'Type', 'Name' );
 		$requestProps = array_unique( array_merge( $minProps, $requestProps ) );
-		$queryObjResp = BizQuery::queryObjects(
-			$ticket,
-			$user,
-			$params,
-			null,
-			null,
-			null,
-			false,
-			null,
-			null,
-			$requestProps,
-			array( 'Workflow' ),
-			$accessRight );
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = $ticket;
+		$request->Params = $params;
+		$request->Hierarchical = false;
+		$request->RequestProps = $requestProps;
+		$request->Areas = array( 'Workflow' );
+		require_once BASEDIR . '/server/bizclasses/BizQuery.class.php';
+		$queryObjResp = BizQuery::queryObjects2( $request, $user, $accessRight );
 
 		// Determine column indexes to work with
 		$indexes = array_combine( array_values( $requestProps ), array_fill( 1, count( $requestProps ), -1 ) );
