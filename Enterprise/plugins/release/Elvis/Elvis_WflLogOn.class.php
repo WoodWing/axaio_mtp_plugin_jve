@@ -61,7 +61,7 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 			}
 			$resp->ServerInfo->FeatureSet[] = new Feature( 'ImageRestoreLocation', $imageRestoreLocation );
 
-			// Pass the Elvis Create Copy setting to Elvis, for backwards compatibility witgh Elvis AIR Client (EN-88464)
+			// Pass the Elvis Create Copy setting to Elvis, for backwards compatibility with Elvis AIR Client (EN-88464)
 			$resp->ServerInfo->FeatureSet[] = new Feature( 'ElvisCreateCopy', ELVIS_CREATE_COPY );
 		}
 	}
