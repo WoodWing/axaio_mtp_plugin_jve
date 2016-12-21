@@ -952,7 +952,7 @@ class BizAdmProperty
 			new PropertyInfo( 'Name', BizResources::localize( 'OBJ_NAME' ), null, 'string', '', null, null, null, 255 ),
 			new PropertyUsage( 'Name', true, true, false, false ) ); // mandatory
 		$widgets['EmailNotify'] = new DialogWidget(
-			new PropertyInfo( 'EmailNotify', BizResources::localize( 'WFL_EMAIL_NOTIFICATIONS' ), null, 'bool', true ),
+			new PropertyInfo( 'EmailNotify', BizResources::localize( 'WFL_EMAIL_NOTIFICATIONS' ), null, 'bool', false ),
 			new PropertyUsage( 'EmailNotify', true, false, false, false ) );
 		$widgets['Description'] = new DialogWidget(
 			new PropertyInfo( 'Description', BizResources::localize( 'OBJ_DESCRIPTION' ), null, 'multiline', '' ),

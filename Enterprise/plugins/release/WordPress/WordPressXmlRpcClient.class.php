@@ -364,12 +364,8 @@ class WordPressXmlRpcClient
 			'overwrite' => false
 		);
 
-		try {
 		$rpc = new IXR_Client( $this->url, $this->certificate );
-			$rpc->query( 'metaWeblog.newMediaObject', 0, $this->userName, $this->password, $data );
-		} catch ( BizException $e ) {
-			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', '' );
-		}
+		$rpc->query( 'metaWeblog.newMediaObject', 0, $this->userName, $this->password, $data );
 
 		return $rpc->getResponse();
 	}
@@ -431,12 +427,8 @@ class WordPressXmlRpcClient
 			'gallery' => $galleryId
 		);
 
-		try {
 		$rpc = new IXR_Client( $this->url, $this->certificate );
-			$rpc->query( 'ngg.uploadImage', 0, $this->userName,	$this->password, $data );
-		} catch ( BizException $e ) {
-			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', '' );
-		}
+		$rpc->query( 'ngg.uploadImage', 0, $this->userName,	$this->password, $data );
 
 		return $rpc->getResponse();
 	}
