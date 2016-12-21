@@ -81,6 +81,7 @@ class NumberUtils
 	 *
 	 * Empty page numbers are removed. E.g. in case of a placement on the pasteboard the page number is null or ''.
 	 * Duplicates are removed and the numbers are sorted.
+	 * Note: by sorting the numbers the index of the array is also 'repaired'. After the sorting the indexes are reset.
 	 *
 	 * @param array $pageNumbers
 	 * @return array sanitized page numbers.
