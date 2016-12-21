@@ -341,8 +341,8 @@ class WordPressXmlRpcClient
 	 * @param string $imageName
 	 * @param string $filePath
 	 * @param string $extension
-	 *
 	 * @return mixed
+	 * @throws BizException
 	 */
 	function uploadMediaLibraryImage( $imageName, $filePath, $extension)
 	{
@@ -404,8 +404,8 @@ class WordPressXmlRpcClient
 	 * @param string $filePath
 	 * @param int $galleryId
 	 * @param string $extension
-	 *
 	 * @return mixed
+	 * @throws BizException
 	 */
 	function uploadImage( $imageName, $filePath, $extension, $galleryId )
 	{

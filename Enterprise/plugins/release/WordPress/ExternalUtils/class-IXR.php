@@ -454,7 +454,7 @@ class IXR_Client
 		}
 
 		if( !$responseRaw->isSuccessful() ) {
-			LogHandler::logService( __METHOD__, $responseRaw->getBody(), false, 'xmlrpc', 'xml', true );
+			LogHandler::logService( __METHOD__, $responseRaw->getBody(), null, 'xmlrpc', 'xml', true );
 			throw new BizException(
 				'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $responseRaw->getStatus().' '.$responseRaw->getMessage() );
 		}
