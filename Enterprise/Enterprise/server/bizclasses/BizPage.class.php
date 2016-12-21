@@ -447,17 +447,17 @@ class BizPage
 	 * is set to null.
 	 *
 	 * @param Pages[] $pages
-	 * @return Int array
+	 * @return int[]
 	 */
 	static private function getEditionsFromPages( array $pages )
 	{
 		$editionIds = array();
 		if( $pages ) foreach( $pages as $page ) {
 			$editionId = $page->Edition == null ? 0 : intval( $page->Edition->Id );
-			$editionIds[ $editionId ] = $editionId;
+			$editionIds[$editionId] = $editionId;
 		}
 
-		return $editionIds;
+		return array_values( $editionIds );
 	}
 
 	/**
@@ -481,14 +481,15 @@ class BizPage
 	 * assigned to all the specific editions.
 	 *
 	 * @param Pages[] $pages
-	 * @param Int[] $editionIds
+	 * @param int[] $editionIds
 	 * @return array Sorted pages by (sorted) editions.
 	 */
 	private static function assignPagesByEditionsSorted( array $pages, array $editionIds )
 	{
 		$allAndSpecificMixed = self::allAndSpecificEditionsMixed( $editionIds );
 		if( $allAndSpecificMixed ) {
-			unset( $editionIds[0] );
+			$key = array_search( 0, $editionIds );
+			unset( $editionIds[$key] );
 		}
 
 		// Assigning pages to editions.
@@ -508,12 +509,12 @@ class BizPage
 		$sortedPagesBySortedEditions = array();
 		if( count( $editionIds ) > 1 ) {
 			require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
-			$sortedDBEditionRows = DBEdition::sortEditionIdsByCode( array_keys( $editionIds ) );
+			$sortedDBEditionRows = DBEdition::sortEditionIdsByCode( $editionIds );
 			if( $sortedDBEditionRows ) foreach( $sortedDBEditionRows as $sortedDBEditionRow ) {
 				$sortedPagesBySortedEditions[ intval( $sortedDBEditionRow['id'] ) ] = array();
 			}
 		} else {
-			$sortedPagesBySortedEditions[ array_shift( $editionIds ) ] = array();
+			$sortedPagesBySortedEditions[reset( $editionIds )] = array();
 		}
 		if( $pagesByEdition ) foreach( $pagesByEdition as $editionId => $pageOrderByPageSequence ) {
 			/*success = */ ksort( $pageOrderByPageSequence, SORT_NUMERIC );
@@ -523,7 +524,15 @@ class BizPage
 		return $sortedPagesBySortedEditions;
 	}
 
-	static private function allAndSpecificEditionsMixed( $editionIds )
+	/**
+	 * Checks if specific editions ( id != 0 ) are mixed up with marker for all editions ( id = 0 ).
+	 *
+	 * The $editionsIds parameter contains unique ids of editions and/or 0 to indicate all editions.
+	 *
+	 * @param array $editionIds
+	 * @return bool
+	 */
+	static private function allAndSpecificEditionsMixed( array $editionIds )
 	{
 		return ( in_array( 0, $editionIds ) && count( $editionIds ) > 1 );
 	}
