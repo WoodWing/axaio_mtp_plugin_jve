@@ -419,8 +419,8 @@ class IXR_Client
 			require_once 'Zend/Uri.php';
 			$this->uri = Zend_Uri::factory( $url );
 		} catch( Exception $e ) {
-			throw new BizException( null, 'Server', null, $e->getMessage().
-				'. Check your connection options at the WORDPRESS_SITES setting of the WordPress config.php file.' );
+			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', null, $e->getMessage().
+				'. Check your connection options at the WORDPRESS_SITES setting of the config/plugins/WordPress/config.php file.' );
 		}
 
 		$this->certificate = $certificate;
@@ -449,17 +449,19 @@ class IXR_Client
 			if( LogHandler::debugMode() ) {
 				LogHandler::logService( __METHOD__, $response, false, 'xmlrpc', 'xml', false );
 			}
-			if( !$responseRaw->isSuccessful() ) {
-				throw new BizException(
-					'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $responseRaw->getStatus().' '.$responseRaw->getMessage() );
-			}
 		} catch( Exception $e ) {
 			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $e->getMessage() );
 		}
 
+		if( !$responseRaw->isSuccessful() ) {
+			LogHandler::logService( __METHOD__, $responseRaw->getBody(), false, 'xmlrpc', 'xml', true );
+			throw new BizException(
+				'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $responseRaw->getStatus().' '.$responseRaw->getMessage() );
+		}
+
 		$this->message = new IXR_Message( $response );
 		if( !$this->message->parse() ) {
-			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', '' );
+			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', 'Response message could not be parsed.' );
 		}
 
 		if( $this->message->getMessageType() == 'fault' ) {
