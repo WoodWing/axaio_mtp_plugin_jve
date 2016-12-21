@@ -232,7 +232,7 @@ class BizAccessFeatureProfiles
 	const TEXT_APPLYCHARFONTSTYLE      = 107;
 	const TEXT_APPLYCHARBASICFORMAT    = 108;
 	const TEXT_APPLYCHARADVFORMAT      = 109;
-	const TEXT_COPYFIT                 = 110;
+//	const TEXT_COPYFIT                 = 110;
 	const TEXT_COMPOSITIONPREFS        = 117;
 
 	/**
@@ -255,8 +255,8 @@ class BizAccessFeatureProfiles
 				'ApplyCharBasicFormats',     '', BizResources::localize('ACT_APPLYCHARBASICFORMATS') ),
 			self::TEXT_APPLYCHARADVFORMAT    => new SysFeatureProfile( self::TEXT_APPLYCHARADVFORMAT,
 				'ApplyCharAdvancedFormats',  '', BizResources::localize('ACT_APPLYCHARADVANCEDFORMATS') ),
-			self::TEXT_COPYFIT               => new SysFeatureProfile( self::TEXT_COPYFIT,
-				'CopyFit',                   '', BizResources::localize('ACT_COPYFIT') ),
+//			self::TEXT_COPYFIT               => new SysFeatureProfile( self::TEXT_COPYFIT,
+//				'CopyFit',                   '', BizResources::localize('ACT_COPYFIT') ),
 			self::TEXT_COMPOSITIONPREFS       => new SysFeatureProfile( self::TEXT_COMPOSITIONPREFS,
 				'CompositionPrefs',          '', BizResources::localize('ACT_COMPOSITIONPREFS') ),
 		);
