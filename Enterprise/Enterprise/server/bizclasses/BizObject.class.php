@@ -6239,7 +6239,7 @@ class BizObject
 	 */
 	private static function getUniqueObjectName( $id, $proposedName, $issueIds, $type, $restore )
 	{
-		$existingNames[ $proposedName ] = true;
+		$existingNames[] = $proposedName;
 		/** @noinspection PhpUnusedLocalVariableInspection */
 		// Initialization of a flag before entering the do-while loop to avoid undefined variable
 		// in the case of the code execution didn't go as expected.
@@ -6249,13 +6249,13 @@ class BizObject
 			if( !$restore ) {
 				if( preg_match('/^(.*?)_(\d+)$/', $proposedName, $matches ) > 0 ) {
 					if(strlen($matches[2]) == AUTONAMING_NUMDIGITS ) {
-						$existingNames[ $proposedName ] = true;
+						$existingNames[] = $proposedName;
 						$proposedName = $matches[1];
 					}
 				}
 			}
 			$proposedName = DBObject::makeNameUnique( $existingNames, $proposedName );
-			$existingNames[ $proposedName ] = true;
+			$existingNames[] = $proposedName;
 			$nameFound = self::objectNameExists( $issueIds, $proposedName, $type, $id );
 			$iterations += 1;
 		} while ( $nameFound && $iterations < 1000 );
