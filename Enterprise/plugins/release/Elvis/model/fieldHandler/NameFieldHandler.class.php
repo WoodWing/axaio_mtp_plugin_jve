@@ -31,7 +31,7 @@ class NameFieldHandler extends ReadWriteFieldHandler {
 		$propertyName = $this->property->Name;
 		$entMetadata->{$this->entMetadataCategory}->{$propertyName} = $this->getFilename($elvisMetadata);
 	}
-	
+
 	/**
 	 * Extracts the filename from the hit
 	 * Removes extension and applies a maximum length
@@ -39,17 +39,18 @@ class NameFieldHandler extends ReadWriteFieldHandler {
 	 * @param object $hit Elvis hit object
 	 * @return string Filename extracted from hit
 	 */
-	private function getFilename($elvisMetadata) {
+	private function getFilename( $elvisMetadata )
+	{
 		$fileName = $elvisMetadata['filename'];
-		$endIdx = strrpos($fileName, '.');
-		if (!$endIdx) {
-			LogHandler::Log('ContentSource', 'WARN', 'NameFieldHandler::getFilename; filename has no extension: ' . $fileName);
+		$endIdx = mb_strrpos( $fileName, '.', 'UTF8' );
+		if( !$endIdx ) {
+			LogHandler::Log( 'ContentSource', 'WARN', 'NameFieldHandler::getFilename; filename has no extension: '.$fileName );
 			return $fileName;
 		}
-		
-		$fileName = substr($fileName, 0, $endIdx);
-		if (strlen($fileName) > 63) {
-			$fileName = substr($fileName, 0, 63);
+		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+		$fileName = mb_substr( $fileName, 0, $endIdx, 'UTF8' );
+		if( mb_strlen( $fileName, 'UTF8' ) > BizProperty::getStandardPropertyMaxLength( 'Name' ) ) {
+			$fileName = mb_substr( $fileName, 0, BizProperty::getStandardPropertyMaxLength( 'Name' ), 'UTF8' );
 		}
 
 		return $fileName;

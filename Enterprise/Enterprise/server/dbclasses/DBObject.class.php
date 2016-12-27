@@ -32,6 +32,7 @@ class DBObject extends DBBase
 	 * @param array of int $issueidsarray: id's of the issues the object is targeted for.
 	 * @param string $proposedobjectname: proposed name of the new object.
 	 * @return either string new objectname or null if no name found.
+	 * @deprecated since 10.0.4 Please use BizObject::getUniqueObjectName() instead.
 	 */
 	static public function getUniqueObjectName($issueidsarray, $objtype, $proposedobjectname)
 	{
@@ -65,7 +66,7 @@ class DBObject extends DBBase
 			// escape4like on $startofname is not needed. $startofname is already validated 
 			$sth = $dbdriver->query($sql);
 			while( ( $row = $dbdriver->fetch($sth) ) ) {
-				$existingnames[$row['name']] = null;
+				$existingnames[] = $row['name'];
 			}
 		}
 
@@ -109,39 +110,47 @@ class DBObject extends DBBase
 		$sth = $dbDriver->query( $sql, $params );
 		$existingChildNames = array();
 		while( ( $row = $dbDriver->fetch($sth) ) ) {
-				$existingChildNames[$row['name']] = null;
+				$existingChildNames[] = $row['name'];
 		}
 
 		$result = self::makeNameUnique( $existingChildNames, $proposedName ); 
 		
 		return $result;	
-	}	
+	}
 
 	/**
 	 * Returns a new name when the name already exists.
-	 * 
+	 *
 	 * A proposed name is checked against an list of existing names. If it is in the list a new is generated. This is
 	 * done by adding a suffix in the format _0000.
+	 * In case long names are used (around the maximum length) the new name cannot be just the old name plus a suffix.
+	 * E.g. if the old name is 60 characters long the new name would become 65 characters long.
+	 * In such cases the proposed name is shorted to the maximum length of Name property minus the 5 characters
+	 * for the suffix.
+	 *
 	 * @param array $existingNames List against which the proposal is checked.
-	 * @param string $startOfName Proposed name.
+	 * @param string $proposedName Proposed name.
 	 * @return string Name, either the proposed one if it is unique or a new one.
 	 */
-	static public function makeNameUnique( $existingNames, $startOfName )
+	static public function makeNameUnique( $existingNames, $proposedName )
 	{
-		//Use the proposedname if it does not exist yet.
-		if (!array_key_exists($startOfName, $existingNames)) {
-			$result = $startOfName;
-		}
-		else { //Else loop through numbers until we find a name that's not in the $existingnames-array yet.
-			$maxn = pow( 10,AUTONAMING_NUMDIGITS + 1 ) - 1;
-			for ( $i=1; $i<=$maxn; $i++ ) {
-				$newName = $startOfName . '_' . str_pad( $i, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
-				if ( !array_key_exists($newName, $existingNames )) {
+		if( !in_array( $proposedName, $existingNames ) ) {
+			$result = $proposedName;
+		} else {
+			require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+			$maxNameLength = BizProperty::getStandardPropertyMaxLength( 'Name' ) - 5 ;
+			if ( mb_strlen( $proposedName, 'UTF8' ) >  $maxNameLength ) {
+				$proposedName = mb_substr( $proposedName, 0, $maxNameLength, 'UTF8' );
+			}
+			$maxSuffix = pow( 10, AUTONAMING_NUMDIGITS + 1 ) - 1;
+			for( $i = 1; $i <= $maxSuffix; $i++ ) {
+				$newName = $proposedName.'_'.str_pad( $i, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
+				if( !in_array( $newName, $existingNames ) ) {
 					$result = $newName;
 					break;
 				}
 			}
-		}	
+		}
 
 		return $result;
 	}
