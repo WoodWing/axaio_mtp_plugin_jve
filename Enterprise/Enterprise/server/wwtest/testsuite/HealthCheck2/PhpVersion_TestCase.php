@@ -92,7 +92,7 @@ class WW_TestSuite_HealthCheck2_PhpVersion_TestCase extends TestCase
 		$data = str_pad( '', 1024 );
 		if (($fh = fopen( $filePath, 'wb' ))) {
 			$filesize = 0;
-			for ($i = 0; $i < 4096; $i ++) {
+			for ($i = 0; $i < 16384; $i ++) {
 				$result = fputs( $fh, $data );
 				if ($result === FALSE){
 					break;
@@ -103,7 +103,7 @@ class WW_TestSuite_HealthCheck2_PhpVersion_TestCase extends TestCase
 			// on some Windows installation, you cannot get the filesize with the function filesize if you
 			// don't have the permission "List Folder / Read Data"
 			LogHandler::Log( 'wwtest', 'INFO', "Created " . $filePath . " with filesize = " . number_format( $filesize ) );
-			if ( $filesize == (1024*4096) ) {
+			if ( $filesize == (1024*16384) ) {
 				$peakStart = memory_get_peak_usage();
 				LogHandler::Log( 'wwtest', 'INFO', "Memory usage at start: " . number_format( memory_get_usage() ) . "; peak: " . number_format( $peakStart ) );
 				
@@ -121,7 +121,7 @@ class WW_TestSuite_HealthCheck2_PhpVersion_TestCase extends TestCase
 					$this->setResult( 'ERROR', 'The memory usage of the function fileread is at least 1.2 times the filesize of the file to be read. Please install an other PHP version.' );
 				}
 			} else {
-				$this->setResult( 'ERROR', 'Could not create test file "' . $filePath . '" with ' . number_format(1024*4096) . ' but with ' . number_format(	$filesize ) . ' bytes' );
+				$this->setResult( 'ERROR', 'Could not create test file "' . $filePath . '" with ' . number_format(1024*16384) . ' but with ' . number_format(	$filesize ) . ' bytes' );
 			}
 			unlink( $filePath );
 		} else {
