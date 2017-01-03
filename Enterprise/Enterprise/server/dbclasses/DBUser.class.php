@@ -318,7 +318,7 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 * Returns the brands and the overrule brand issues for which the user has an authorization profile.
+	 * Returns the unique brands and the unique overrule brand issues for which the user has an authorization profile.
 	 *
 	 * @param int $userId
 	 * @return array Brands, overrule brand issues for which the user is authorized.
@@ -330,11 +330,12 @@ class DBUser extends DBBase
 		$usergrp = $dbDriver->tablename('usrgrp');
 		$authorization = $dbDriver->tablename('authorizations');
 
-		$sql =  'SELECT a.`publication`, a.`issue` '.
+		$sql = 'SELECT a.`publication`, a.`issue` '.
 			'FROM '.$authorization.' a '.
 			'INNER JOIN '.$usergrp.' usrgrp ON ( a.`grpid` = usrgrp.`grpid` ) '.
 			'INNER JOIN '.$users.' u ON ( u.`id` = usrgrp.`usrid` ) '.
-			'WHERE u.`id` = ? ';
+			'WHERE u.`id` = ? '.
+			'GROUP BY a.`publication`, a.`issue` ';
 
 		$params = array( $userId );
 		$sth = $dbDriver->query( $sql, $params );
