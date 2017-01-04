@@ -41,11 +41,12 @@ class NameFieldHandler extends ReadWriteFieldHandler
 	}
 
 	/**
-	 * Extracts the filename from the hit
-	 * Removes extension and applies a maximum length
+	 * Extracts the file name from the meta data returned by Elvis.
 	 *
-	 * @param mixed[] $elvisMetadata
-	 * @return string Filename extracted from hit
+	 * Returned file name is the original file name without the extension.
+	 *
+	 * @param BasicMap $elvisMetadata Elvis metadata.
+	 * @return string Filename (without extension).
 	 */
 	private function getFilename( $elvisMetadata )
 	{
@@ -57,9 +58,6 @@ class NameFieldHandler extends ReadWriteFieldHandler
 		}
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 		$fileName = mb_substr( $fileName, 0, $endIdx, 'UTF8' );
-		if( mb_strlen( $fileName, 'UTF8' ) > BizProperty::getStandardPropertyMaxLength( 'Name' ) ) {
-			$fileName = mb_substr( $fileName, 0, BizProperty::getStandardPropertyMaxLength( 'Name' ), 'UTF8' );
-		}
 
 		return $fileName;
 	}
