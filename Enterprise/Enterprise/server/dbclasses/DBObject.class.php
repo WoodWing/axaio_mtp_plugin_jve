@@ -66,7 +66,7 @@ class DBObject extends DBBase
 			// escape4like on $startofname is not needed. $startofname is already validated 
 			$sth = $dbdriver->query($sql);
 			while( ( $row = $dbdriver->fetch($sth) ) ) {
-				$existingnames[] = $row['name'];
+				$existingnames[$row['name']] = true;
 			}
 		}
 
@@ -74,7 +74,7 @@ class DBObject extends DBBase
 
 		//Add $result to existingnames
 		if (!empty($result)) {
-			$existingnames[$result] = null;
+			$existingnames[$result] = true;
 		}
 
 		return $result;
@@ -110,7 +110,7 @@ class DBObject extends DBBase
 		$sth = $dbDriver->query( $sql, $params );
 		$existingChildNames = array();
 		while( ( $row = $dbDriver->fetch($sth) ) ) {
-				$existingChildNames[] = $row['name'];
+				$existingChildNames[$row['name']] = true;
 		}
 
 		$result = self::makeNameUnique( $existingChildNames, $proposedName ); 
@@ -126,7 +126,7 @@ class DBObject extends DBBase
 	 * In case long names are used (around the maximum length) the new name cannot be just the old name plus a suffix.
 	 * E.g. if the old name is 60 characters long the new name would become 65 characters long.
 	 * In such cases the proposed name is shorted to the maximum length of Name property minus the 5 characters
-	 * for the suffix.
+	 * for the suffix (AUTONAMING_NUMDIGITS + underscore).
 	 *
 	 * @param array $existingNames List against which the proposal is checked.
 	 * @param string $proposedName Proposed name.
@@ -134,19 +134,19 @@ class DBObject extends DBBase
 	 */
 	static public function makeNameUnique( $existingNames, $proposedName )
 	{
-		if( !in_array( $proposedName, $existingNames ) ) {
+		if( !array_key_exists( $proposedName, $existingNames ) ) {
 			$result = $proposedName;
 		} else {
 			require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
-			$maxNameLength = BizProperty::getStandardPropertyMaxLength( 'Name' ) - 5 ;
+			$maxNameLength = BizProperty::getStandardPropertyMaxLength( 'Name' ) - ( AUTONAMING_NUMDIGITS + 1 );
 			if ( mb_strlen( $proposedName, 'UTF8' ) >  $maxNameLength ) {
 				$proposedName = mb_substr( $proposedName, 0, $maxNameLength, 'UTF8' );
 			}
-			$maxSuffix = pow( 10, AUTONAMING_NUMDIGITS + 1 ) - 1;
 			$result = '';
+			$maxSuffix = intval( str_repeat( '9', AUTONAMING_NUMDIGITS) );
 			for( $i = 1; $i <= $maxSuffix; $i++ ) {
 				$newName = $proposedName.'_'.str_pad( $i, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
-				if( !in_array( $newName, $existingNames ) ) {
+				if( !array_key_exists( $newName, $existingNames ) ) {
 					$result = $newName;
 					break;
 				}

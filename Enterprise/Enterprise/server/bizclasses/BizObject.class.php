@@ -3826,12 +3826,8 @@ class BizObject
 
 	private static function validName( $name )
 	{
-		// Max length is 63 to prevent file name issues with 4-byte Unicode strings
-		$nameLen = mb_strlen($name, "UTF8");
-		if( $nameLen > 63) return false;
-
 		$sDangerousCharacters = "`~!@#$%^*\\|;:'<>/?";
-		$sDangerousCharacters .= '"'; // add double quote to dangerous charaters
+		$sDangerousCharacters .= '"'; // Add double quote to dangerous characters.
 
 		$sSubstringStartingWithInvalidCharacter = strpbrk($sDangerousCharacters, $name);
 		return empty($sSubstringStartingWithInvalidCharacter); // true if no invalid character
@@ -6120,18 +6116,18 @@ class BizObject
 	}
 
 	/**
-	 * Get an unique object, when restoring an object or when applyautonaming is true.
+	 * Get an unique object, when restoring an object or when 'apply auto-naming' is true.
 	 *
-	 * Different logic or algorithm will be apply differently for both actions, restoring object or applyautonaing is true.
-	 * When restoring an object, if the object name already exists in DB, autonaming numbering will be append at the end of object name,
+	 * Different logic or algorithm will be apply differently for both actions, restoring object or 'apply auto-naming' is true.
+	 * When restoring an object, if the object name already exists in DB, 'auto naming' numbering will be append at the end of object name,
 	 * For example:
 	 * Original name                Unique name
 	 * =============                ===========
 	 * abc                          abc_0001
 	 * abc_0001                     abc_0001_0001
 	 *
-	 * When applyautonaming is true, if the object name already exist in DB, autonaming numbering will be append at the end of object name,
-	 * when the object contains the autonaming format[abc_0001], incremental autonaming numbering from the last number[abc_0002].
+	 * When 'apply auto-naming' is true, if the object name already exist in DB, auto-naming numbering will be append at the end of object name,
+	 * when the object contains the auto-naming format[abc_0001], incremental auto-naming numbering from the last number[abc_0002].
 	 * For example:
 	 * Original name                Unique name
 	 * =============                ===========
@@ -6147,26 +6143,28 @@ class BizObject
 	 */
 	private static function getUniqueObjectName( $id, $proposedName, $issueIds, $type, $restore )
 	{
-		$existingNames[] = $proposedName;
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		$existingNames[$proposedName] = true;
 		/** @noinspection PhpUnusedLocalVariableInspection */
 		// Initialization of a flag before entering the do-while loop to avoid undefined variable
 		// in the case of the code execution didn't go as expected.
 		$nameFound = false;
 		$iterations = 0;
+		$maxSuffix = intval( str_repeat( '9', AUTONAMING_NUMDIGITS ) );
 		do {
 			if( !$restore ) {
 				if( preg_match('/^(.*?)_(\d+)$/', $proposedName, $matches ) > 0 ) {
 					if(strlen($matches[2]) == AUTONAMING_NUMDIGITS ) {
-						$existingNames[] = $proposedName;
+						$existingNames[$proposedName] = true;
 						$proposedName = $matches[1];
 					}
 				}
 			}
 			$proposedName = DBObject::makeNameUnique( $existingNames, $proposedName );
-			$existingNames[] = $proposedName;
+			$existingNames[$proposedName] = true;
 			$nameFound = self::objectNameExists( $issueIds, $proposedName, $type, $id );
 			$iterations += 1;
-		} while ( $nameFound && $iterations < 1000 );
+		} while ( $nameFound && $iterations < $maxSuffix );
 
 		return $proposedName;
 	}
