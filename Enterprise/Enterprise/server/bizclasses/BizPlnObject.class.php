@@ -79,7 +79,7 @@ class BizPlnObject
 			$createdLayout->Section = $layout->NewLayout->Section;
 			$createdLayout->Status = $layout->NewLayout->Status;
 			$createdLayout->Editions = $layout->NewLayout->Editions;
-			$createdLayout->Editions = $layout->NewLayout->Deadline;
+			$createdLayout->Deadline = $layout->NewLayout->Deadline;
 			$createdLayout->Version = $layout->NewLayout->Version;
 			$createdLayouts[] = $createdLayout;
 		}
@@ -172,7 +172,9 @@ class BizPlnObject
 			isset( $layout->Section ) ? $lay_props['section_name'] = $layout->Section : $lay_props['section_name'] = '';
 			isset( $layout->Status ) ? $lay_props['state_name'] = $layout->Status : $lay_props['state_name'] = '' ; // EN-4014
 			isset( $layout->Editions ) ? $lay_props['editions'] = $layout->Editions : $lay_props['editions'] = '';
-			isset( $layout->Deadline ) ? $lay_props['deadline'] = $layout->Deadline : $lay_props['deadline'] = '';
+			if ( isset( $layout->Deadline ) ) {
+				$lay_props['deadline'] = $layout->Deadline;
+			}
 			$lay_props['type'] = 'Layout';
 			self::modifyObject( $lay_props, $user );
 			$layout->Version = $lay_props['version'];
@@ -218,7 +220,7 @@ class BizPlnObject
 			$modifiedLayout->Section = $layout->Section;
 			$modifiedLayout->Status = $layout->Status;
 			$modifiedLayout->Editions = $layout->Editions;
-			$modifiedLayout->Editions = $layout->Deadline;
+			$modifiedLayout->Deadline = $layout->Deadline;
 			$modifiedLayout->Version = $layout->Version;
 			$modifiedLayouts[] = $modifiedLayout;
 		}
