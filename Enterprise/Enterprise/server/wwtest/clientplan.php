@@ -68,7 +68,7 @@ $advertFrameScaleY = isset( $_GET['ad_scaley'] ) ? $_GET['ad_scaley'] : 0.0;
 // Add '?ad_editions=X;Y;Z' and/or '?ad_deadline=YYYY-MM-DDTHH:MM:SS' to URL to define for which editions the advert occurs and the deadline to meet.
 $advertDeadline = isset( $_GET['adv_deadline'] ) ? $_GET['adv_deadline'] : null;
 $advertEditionNames = isset( $_GET['adv_editions'] ) ? explode( ';', $_GET['adv_editions'] ) : array();
-// Add '?ad_editions=X;Y;Z' and/or '?ad_deadline=YYYY-MM-DDTHH:MM:SS' to URL to define for which editions the advert occurs and the deadline to meet.
+// Add '?lay_editions=X;Y;Z' and/or '?lay_deadline=YYYY-MM-DDTHH:MM:SS' to URL to define the editions of the layout and the deadline to meet.
 $layoutDeadline = isset( $_GET['lay_deadline'] ) ? $_GET['lay_deadline'] : null;
 $layoutEditionNames = isset( $_GET['lay_editions'] ) ? explode( ';', $_GET['lay_editions'] ) : array();
 $pageHeight = isset( $_GET['pag_height'] ) ? $_GET['pag_height'] : 800.0;
