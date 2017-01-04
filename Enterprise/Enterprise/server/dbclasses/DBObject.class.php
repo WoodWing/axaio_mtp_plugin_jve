@@ -144,6 +144,7 @@ class DBObject extends DBBase
 				$proposedName = mb_substr( $proposedName, 0, $maxNameLength, 'UTF8' );
 			}
 			$maxSuffix = pow( 10, AUTONAMING_NUMDIGITS + 1 ) - 1;
+			$result = '';
 			for( $i = 1; $i <= $maxSuffix; $i++ ) {
 				$newName = $proposedName.'_'.str_pad( $i, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
 				if( !in_array( $newName, $existingNames ) ) {
