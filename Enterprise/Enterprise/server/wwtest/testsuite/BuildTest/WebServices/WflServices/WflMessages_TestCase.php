@@ -2679,7 +2679,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		// errors and warnings in the server log.
 		if( $expectedError ) {
 			$map = new BizExceptionSeverityMap( array( $expectedError => 'INFO' ) );
-			$map = $map; // keep analyzer happy
 		}
 		
 		// Run the SaveObjects service.
@@ -3356,15 +3355,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 			require_once BASEDIR.'/server/utils/PhpCompare.class.php';
 			$phpCompare = new WW_Utils_PhpCompare();
 			$phpCompare->initCompare( array(), $this->getCommonPropDiff() ); // all properties should be checked
-			if( $this->isV8Client ) {
-				$recRespMessages = $recResp->Objects[0]->MessageList->Messages;
-				$curRespMessages = $curResp->Objects[0]->MessageList->Messages;
-				$clientVr = 'v8';
-			} else {
-				$recRespMessages = $recResp->Objects[0]->Messages;
-				$curRespMessages = $curResp->Objects[0]->Messages;
-				$clientVr = 'v7';
-			}
+			$recRespMessages = $recResp->Objects[0]->MessageList->Messages;
+			$curRespMessages = $curResp->Objects[0]->MessageList->Messages;
+			$clientVr = 'v8';
 			if( !$phpCompare->compareTwoProps( $recRespMessages, $curRespMessages ) ) {
 				$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', 'callGetObjects001-' . $clientVr );
 				$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', 'callGetObjects001-' . $clientVr );
@@ -3523,13 +3516,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		$messages[3]->Id = '899300503';
 		$messages[3]->IsRead = false;
 		
-		if( $this->isV8Client ) {
-			$response->Objects[0]->MessageList = new MessageList();
-			$response->Objects[0]->MessageList->Messages = $messages;
-		} else {
-			$response->Objects[0]->MessageList = null;
-			$response->Objects[0]->Messages = $messages;
-		}		
+		$response->Objects[0]->MessageList = new MessageList();
+		$response->Objects[0]->MessageList->Messages = $messages;
 		return $response;
 	}
 
@@ -3552,15 +3540,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 			require_once BASEDIR.'/server/utils/PhpCompare.class.php';
 			$phpCompare = new WW_Utils_PhpCompare();
 			$phpCompare->initCompare( array(), $this->getCommonPropDiff() ); // all properties should be checked
-			if( $this->isV8Client ) {
-				$recRespMessages = $recResp->Objects[0]->MessageList->Messages;
-				$curRespMessages = $curResp->Objects[0]->MessageList->Messages;
-				$clientVr = 'v8';
-			} else {
-				$recRespMessages = $recResp->Objects[0]->Messages;
-				$curRespMessages = $curResp->Objects[0]->Messages;
-				$clientVr = 'v7';
-			}
+			$recRespMessages = $recResp->Objects[0]->MessageList->Messages;
+			$curRespMessages = $curResp->Objects[0]->MessageList->Messages;
+			$clientVr = 'v8';
 			if( !$phpCompare->compareTwoProps( $recRespMessages, $curRespMessages ) ) {
 				$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', 'callGetObjects002-' . $clientVr );
 				$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', 'callGetObjects002-' . $clientVr );
@@ -3718,13 +3700,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		$messages[3]->Id = '899300901';
 		$messages[3]->IsRead = false;
 		
-		if( $this->isV8Client ) {
-			$response->Objects[0]->MessageList = new MessageList();
-			$response->Objects[0]->MessageList->Messages = $messages;
-		} else {
-			$response->Objects[0]->MessageList = null;
-			$response->Objects[0]->Messages = $messages;
-		}		
+		$response->Objects[0]->MessageList = new MessageList();
+		$response->Objects[0]->MessageList->Messages = $messages;
 		return $response;
 	}
 
@@ -3747,16 +3724,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 			require_once BASEDIR.'/server/utils/PhpCompare.class.php';
 			$phpCompare = new WW_Utils_PhpCompare();
 			$phpCompare->initCompare( array(), $this->getCommonPropDiff() ); // all properties should be checked
-			if( $this->isV8Client ) {
-				$recRespMessages = $recResp->Objects[0]->MessageList->Messages;
-				$curRespMessages = $curResp->Objects[0]->MessageList->Messages;
-				$clientVr = 'v8';
-			} else {
-				$recRespMessages = $recResp->Objects[0]->Messages;
-				$curRespMessages = $curResp->Objects[0]->Messages;
-				$clientVr = 'v7';
-			}
-			
+			$recRespMessages = $recResp->Objects[0]->MessageList->Messages;
+			$curRespMessages = $curResp->Objects[0]->MessageList->Messages;
+			$clientVr = 'v8';
+
 			if( !$phpCompare->compareTwoProps( $recRespMessages, $curRespMessages ) ) {
 				$recRespFile = LogHandler::logPhpObject( $recResp, 'print_r', 'callGetObjectsForPubOverview-' . $clientVr );
 				$curRespFile = LogHandler::logPhpObject( $curResp, 'print_r', 'callGetObjectsForPubOverview-' . $clientVr );
@@ -3919,13 +3890,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		$messages[3]->Id = '899500324';
 		$messages[3]->IsRead = false;
 		
-		if( $this->isV8Client ) {
-			$response->Objects[0]->MessageList = new MessageList();
-			$response->Objects[0]->MessageList->Messages = $messages;
-		} else {
-			$response->Objects[0]->MessageList = null;
-			$response->Objects[0]->Messages = $messages;
-		}	
+		$response->Objects[0]->MessageList = new MessageList();
+		$response->Objects[0]->MessageList->Messages = $messages;
 		return $response;
 	}
 	
@@ -4191,10 +4157,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		$messages[$indexCounter]->Id = '899500322';
 		$messages[$indexCounter]->IsRead = false;
 		
-		if( $this->isV8Client ) {
-			$response->Objects[0]->MessageList = new MessageList();
-			$response->Objects[0]->MessageList->Messages = $messages;
-		}
+		$response->Objects[0]->MessageList = new MessageList();
+		$response->Objects[0]->MessageList->Messages = $messages;
 		return $response;
 	}
 
