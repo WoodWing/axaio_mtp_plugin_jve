@@ -86,6 +86,8 @@ class WflGetDialog2Service extends EnterpriseService
 			$req->Areas,
 			$req->MultipleObjects );
 		
+		$retVal = unserialize( serialize( $retVal ) ); // Deep clone needed since PHP 7.0 to avoid losing this data structure over SOAP [EN-88522]
+
 		return new WflGetDialog2Response( 
 			$retVal['Dialog'],
 			$retVal['PubChannels'],
