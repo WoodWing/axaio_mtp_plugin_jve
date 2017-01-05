@@ -540,8 +540,8 @@ class BizPage
 	/**
 	 * Inserts object pages into database and filestore
 	 *
-	 * @param string $storename Original object name (used in storage)
-	 * @param string $objid     Object ID (used in DB)
+	 * @param string $storeName Original object name (used in storage)
+	 * @param string $objId     Object ID (used in DB)
 	 * @param string $instance  Page instance ('Production' or 'Planning')
 	 * @param array  $pages     List of Page objects (from workflow WSDL)
 	 * @param boolean $deleteExisting Pass true for Save- or false for Create- operations
@@ -549,21 +549,20 @@ class BizPage
 	 * @param string $newObjVerNr  New object version (major.minor)
 	 * @throws BizException on failure
 	 */
-	public static function savePages( $storename, $objid, $instance, $pages, $deleteExisting, $oldObjVerNr, $newObjVerNr )
+	public static function savePages( $storeName, $objId, $instance, $pages, $deleteExisting, $oldObjVerNr, $newObjVerNr )
 	{
 		if( $deleteExisting ) { // to differentiate between create and save
-			self::cleanPages( $storename, $objid, $instance, $oldObjVerNr );
+			self::cleanPages( $storeName, $objId, $instance, $oldObjVerNr );
 		}
 		
 		if (!empty($pages)) {
 			foreach ($pages as $page) {
-				self::insertPage( $storename, $objid, $page, $newObjVerNr );
+				self::insertPage( $storeName, $objId, $page, $newObjVerNr );
 			}
+			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+			$pagerange = self::calcPageRange($pages);
+			DBObject::updatePageRange($objId, $pagerange, $instance);
 		}
-
-		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		$pagerange = self::calcPageRange($pages);
-		DBObject::updatePageRange($objid, $pagerange, $instance);
 	}
 	
 	/**
