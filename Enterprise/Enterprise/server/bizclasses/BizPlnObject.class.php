@@ -16,6 +16,15 @@ define( 'FLAG_PLACEMENT_DELETED', 6 );
 
 class BizPlnObject
 {
+	/**
+	 * Create layouts.
+	 * Based on the planned layout(s) and a template the layouts are created.
+	 *
+	 * @param string $user Acting user.
+	 * @param PlnLayout[] $layouts
+	 * @return PlnLayout[] Created layouts.
+	 * @throws BizException
+	 */
 	static public function createLayouts( $user, $layouts )
 	{
 		LogHandler::Log( 'PlanningServices', 'DEBUG', 'CreateLayouts started >>>' );
@@ -138,6 +147,15 @@ class BizPlnObject
 		}
 	}
 
+	/**
+	 * Modifies layouts.
+	 * The properties of the layouts are directly updated in the database. No service is invoked.
+	 *
+	 * @param string $user Acting user.
+	 * @param PlnLayout[] $layouts
+	 * @return PlnLayout[] Modified layouts.
+	 * @throws BizException
+	 */
 	static public function modifyLayouts( $user, $layouts )
 	{
 		LogHandler::Log( 'PlanningServices', 'DEBUG', 'ModifyLayouts started >>>' );
@@ -182,7 +200,6 @@ class BizPlnObject
 			// Tell layouter that his/her layout needs to be cuddled since planner has infected layout.
 			$sMsg = BizResources::localize( 'PLAN_MESS_LAYOUT_MODIFIED', true, array( $lay_props['name'] ) );
 			DBObjectFlag::setObjectFlag( $layout->Id, 'Plan System', FLAG_OBJECT_UPDATED, 1, $sMsg );
-			self::sendMessage( $layout->Id, $sMsg, 'Info', 'ModifyLayouts' );
 			self::resolvePublishData( $lay_props );
 			self::copyResolvedPropsFromArray( $layout, $lay_props );
 
@@ -223,6 +240,7 @@ class BizPlnObject
 			$modifiedLayout->Deadline = $layout->Deadline;
 			$modifiedLayout->Version = $layout->Version;
 			$modifiedLayouts[] = $modifiedLayout;
+			self::sendMessage( $layout->Id, $sMsg, 'Info', 'ModifyLayouts' ); //This also takes care of reindexing the object.
 		}
 
 		LogHandler::Log( 'PlanningServices', 'DEBUG', 'ModifyLayouts completed <<<' );
