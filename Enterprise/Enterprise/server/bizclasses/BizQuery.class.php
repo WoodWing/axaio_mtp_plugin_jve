@@ -665,70 +665,168 @@ class BizQuery extends BizQueryBase
         return $sql;
     }
 
-    static private function requireWhere( $wherestring = null )
-    {
-        static $requiredwheres;
-        if (!isset($requiredwheres)) {
-            $requiredwheres = array();   
-        }
-        if (!empty($wherestring)) {
-            $requiredwheres[] = $wherestring;
-        }
-        return $requiredwheres;
-    }
+	static private function requireWhere( $wherestring = null )
+	{
+		static $requiredwheres;
+		if( !isset( $requiredwheres ) ) {
+			$requiredwheres = array();
+		}
+		if( !empty( $wherestring ) ) {
+			$requiredwheres[] = $wherestring;
+		}
+		return $requiredwheres;
+	}
 
-    static public function buildWhere( $params )
-    {
-        $sql = '';
-        $and = ' ';
-        $wheres = array();
-		if (isset($params)) {
-			foreach ($params as $param) {
-				$where = self::buildWhereParam($param);
-				// don't add empty where strings
-				if ($where != '') {
-					if (! array_key_exists($param->Property, $wheres)) {
-						$wheres[$param->Property] = array();
+	/**
+	 * Builds a sql where-clause based on the query parameters.
+	 *
+	 * @param QueryParam[] $params
+	 * @return string
+	 */
+	static public function buildWhere( $params )
+	{
+		$sql = '';
+		$and = ' ';
+		$wheresInfo = array();
+		if( isset( $params ) ) {
+			foreach( $params as $key => $param ) {
+				$whereSql = self::buildWhereParam( $param );
+				if( $whereSql ) {
+					if( !array_key_exists( $param->Property, $wheresInfo ) ) {
+						$wheresInfo[ $param->Property ][$key] = array();
 					}
-					$wheres[$param->Property][] = $where;
+					$wheresInfo[ $param->Property ][$key]['sql'] = $whereSql;
+					$wheresInfo[ $param->Property ][$key]['param'] = $param;
 				}
 			}
-		}   
-		    
-        foreach ($wheres as $whereparam) {
-            
-            $sql .= $and;
-            $and = ' AND ';
-            $sql .= '( ';
-            $or = '';
-            foreach ($whereparam as $paramsql) {
-                $sql .= $or;
-                $or = ' OR ';
-                $sql .= "(" . $paramsql . ")";
-            }
-            $sql .= ' )';
-        }
-        
-        $requiredwheres = self::requireWhere();
-        foreach ($requiredwheres as $wherestring) {
-            $sql .= $and . '(' . $wherestring . ')';
-            $and = ' AND ';
-        }
-        if( empty($sql) ) {
-        	// Even when no params are requested, the where clause must be provided 
-        	// since caller can expand / enhance it, so here we do a trick to allow
-        	// caller add more filers like "WHERE ( 1 ) AND ( blah blah )"
-        	$sql = 'WHERE ( 1 = 1 )';
-        } else {
-        	$sql = 'WHERE ( '.$sql.' )';
-        }
-        return $sql;
-    }
-    
-    static private function buildWhereParam( $param )
-    {
-    	require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
-        $propName = $param->Property;
+		}
+
+		if( $wheresInfo ) foreach( $wheresInfo as $property => $whereInfosQueryParam ) {
+			$logicalOperator = self::determineLogicalOperator( $whereInfosQueryParam );
+			$sql .= $and;
+			$and = ' AND ';
+			$sql .= '( ';
+			$operator = '';
+			if( $whereInfosQueryParam) foreach( $whereInfosQueryParam as $whereInfoQueryParam ) {
+				$sql .= $operator;
+				$operator = $logicalOperator;
+				$sql .= "(".$whereInfoQueryParam['sql'].")";
+			}
+			$sql .= ' )';
+		}
+
+		$requiredWheres = self::requireWhere();
+		if( $requiredWheres ) foreach( $requiredWheres as $whereString ) {
+			$sql .= $and.'('.$whereString.')';
+			$and = ' AND ';
+		}
+		if( empty( $sql ) ) {
+			// Even when no params are requested, the where clause must be provided
+			// since caller can expand/enhance it, so here we do a trick to allow
+			// caller add more filers like "WHERE ( 1 ) AND ( blah blah )"
+			$sql = 'WHERE ( 1 = 1 )';
+		} else {
+			$sql = 'WHERE ( '.$sql.' )';
+		}
+		return $sql;
+	}
+
+	/**
+	 * Checks if the query parameters for the same property must 'glued' by an 'AND' or 'OR'.
+	 * Normally the query parameters are glued by an 'OR'. E.g. suppose there are two query parameters for 'Type' the
+	 * result will be something like 'Type = "Layout" OR Type = "Article"'. In some cases the 'AND' must be used. E.g.
+	 * suppose the '!=' is used. By 'OR' the result would be 'Type != "Layout" OR Type != "Article"'. This is always true
+	 * so no filtering is done. What is expected is 'Type != "Layout" AND Type != "Article"'.
+	 *
+	 * @param array $wheresInfoQueryParam Structure with information for each property to build the where statement.
+	 * @return string
+	 */
+	static private function determineLogicalOperator( array $wheresInfoQueryParam )
+	{
+		$logicalOperator = ' OR ';
+		if( self::shouldBeAnd( $wheresInfoQueryParam ) ) {
+			$logicalOperator = ' AND ';
+		}
+
+		return $logicalOperator;
+	}
+
+	/**
+	 * Checks if the query parameters for the same property must 'glued' by an 'AND'.
+	 * Check is done on the '!=' (is not) usage and the 'in between' usage.
+	 *
+	 * @param array $wheresInfoQueryParam Structure with information for each property to build the where statement.
+	 * @return bool True if the 'AND' is applicable.
+	 */
+	static private function shouldBeAnd( array $wheresInfoQueryParam )
+	{
+		if( self::isNotQueryParams( $wheresInfoQueryParam ) ) {
+			return true;
+		}
+
+		if( self::isBetweenQueryParams( $wheresInfoQueryParam ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks if a query param for a property contains the '!=' operation.
+	 *
+	 * @param array $wheresInfoQueryParam Structure with information for each property to build the where statement.
+	 * @return bool The '!=' is used.
+	 */
+	static private function isNotQueryParams( array $wheresInfoQueryParam )
+	{
+		$result = false;
+		if( $wheresInfoQueryParam ) foreach( $wheresInfoQueryParam as $whereInfo ) {
+			if( $whereInfo['param']->Operation == '!=' ) {
+				$result = true;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * If query params for the same property contain the 'less than' and 'greater than' ('<', '>') it depends on the
+	 * values if a 'between' is meant. E.g.:
+	 * LengthLines < 100, LengthLines > 200 => LengthLines < 100 OR LengthLines > 200
+	 * LengthLines > 100, LengthLines < 200 => LengthLines > 100 AND LengthLines < 200. (between)
+	 * Only if  both the '<' and the '>' are used and no other params the above logic is use. E.g. the following
+	 * LengthLines > 100, LengthLines < 200, LengthLines > 300, LengthLines < 400 will not be resolved.
+	 *
+	 * @param array $wheresInfoQueryParam Structure with information for each property to build the where statement.
+	 * @return bool
+	 */
+	static private function isBetweenQueryParams( $wheresInfoQueryParam )
+	{
+		$result = false;
+		if( count( $wheresInfoQueryParam ) == 2 ) {
+			$lessThanValue = '';
+			$greaterThanValue = '';
+			if( $wheresInfoQueryParam ) foreach( $wheresInfoQueryParam as $whereInfo ) {
+				if( $whereInfo['param']->Operation == '<' ) {
+					$lessThanValue = $whereInfo['param']->Value;
+				}
+				if( $whereInfo['param']->Operation == '>' ) {
+					$greaterThanValue = $whereInfo['param']->Value;
+				}
+			}
+
+			if( $lessThanValue && $greaterThanValue && ( strcmp( $lessThanValue, $greaterThanValue ) > 0 ) ) {
+				$result = true;
+			}
+		}
+
+		return $result;
+	}
+
+	static private function buildWhereParam( $param )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+		$propName = $param->Property;
 
 		// Debug: Fail when property is unknown (but respect custom props)
 		/*
@@ -741,242 +839,211 @@ class BizQuery extends BizQueryBase
 		*/
 
 		$dbdriver = DBDriverFactory::gen();
-        $operation = $param->Operation;
-        $paramvalue = $dbdriver->toDBString($param->Value);
+		$operation = $param->Operation;
+		$paramvalue = $dbdriver->toDBString( $param->Value );
 
 		$sql = "";
 
-        switch( $propName )
-        {
-            case 'Version':
-			{
-				LogHandler::Log('bizquery','DEBUG','Querying on Version not supported');
-				break;	
-			}
-			case 'PublicationId':
-            {
-                $sql = "o.`publication` $operation $paramvalue ";
-                break;
-            }
-            case 'ChannelId':
-            case 'PubChannelId': // Should use this instead of ChannelId, but will not take out ChannelId to avoid breaking the current solution.
-            {
-                BizQueryBase::requireJoin4Where('tar');   
-                BizQueryBase::requireJoin4Where('cha');
-                $sql = "cha.`id` $operation $paramvalue";
-                break;
-            }
-			case 'CategoryId':
-            case 'SectionId':
-            {
-                $sql = "o.`section` $operation $paramvalue";
-                break;
-            }
-            case 'StateId':
-            {
-                $sql = "o.`state` $operation $paramvalue";
-                break;
-            }
-            case 'IssueId':
-            {
-            	self::$issueClauses[] = "iss.`id` $operation $paramvalue";
+		switch( $propName ) {
+			case 'Version': {
+				LogHandler::Log( 'bizquery', 'DEBUG', 'Querying on Version not supported' );
 				break;
-            }
-            case 'IssueIds':
-            {
-            	//BZ#10724 Joining with smart_targets to find out what objects do NOT have an issue assigned
-				if (trim($operation) == '=' && empty($paramvalue)) {
-					BizQueryBase::requireJoin4Where('tar2');
+			}
+			case 'PublicationId': {
+				$sql = "o.`publication` $operation $paramvalue ";
+				break;
+			}
+			case 'ChannelId':
+			case 'PubChannelId': // Should use this instead of ChannelId, but will not take out ChannelId to avoid breaking the current solution.
+			{
+				BizQueryBase::requireJoin4Where( 'tar' );
+				BizQueryBase::requireJoin4Where( 'cha' );
+				$sql = "cha.`id` $operation $paramvalue";
+				break;
+			}
+			case 'CategoryId':
+			case 'SectionId': {
+				$sql = "o.`section` $operation $paramvalue";
+				break;
+			}
+			case 'StateId': {
+				$sql = "o.`state` $operation $paramvalue";
+				break;
+			}
+			case 'IssueId': {
+				self::$issueClauses[] = "iss.`id` $operation $paramvalue";
+				break;
+			}
+			case 'IssueIds': {
+				//BZ#10724 Joining with smart_targets to find out what objects do NOT have an issue assigned
+				if( trim( $operation ) == '=' && empty( $paramvalue ) ) {
+					BizQueryBase::requireJoin4Where( 'tar2' );
 					$sql .= " tar2.`id` IS NULL ";
 				}
 				break;
-            }
-            case 'PubChannelIds':
-            {
-				if (trim($operation) == '=' && empty($paramvalue)) {
-					BizQueryBase::requireJoin4Where('tar');   
+			}
+			case 'PubChannelIds': {
+				if( trim( $operation ) == '=' && empty( $paramvalue ) ) {
+					BizQueryBase::requireJoin4Where( 'tar' );
 					$sql .= "tar.`channelid` IS NULL ";
 				}
 				break;
-            }
-            case 'Issue':
-            {
-                self::$issueClauses[] = self::buildWhereStringParam( $param, 'iss', 'name' );
-                break;
-            }
-            case 'Publication':
-            {
-                BizQueryBase::requireJoin4Where('pub');   
-                $sql = self::buildWhereStringParam( $param, 'pub', 'publication' );
-                break;
-            }
-            case 'Category':
-            case 'Section':
-            {
-                BizQueryBase::requireJoin4Where('tar');   
-                BizQueryBase::requireJoin4Where('sec');   
-                $sql = self::buildWhereStringParam( $param, 'sec', 'section' );
-                break;
-            }
-            case 'State':
-            {
-            	if( $paramvalue == BizResources::localize('PERSONAL_STATE') ) {
-	                $sql = "o.`state` $operation -1 ";
-            	}
-				else {
-					BizQueryBase::requireJoin4Where('sta');   
+			}
+			case 'Issue': {
+				self::$issueClauses[] = self::buildWhereStringParam( $param, 'iss', 'name' );
+				break;
+			}
+			case 'Publication': {
+				BizQueryBase::requireJoin4Where( 'pub' );
+				$sql = self::buildWhereStringParam( $param, 'pub', 'publication' );
+				break;
+			}
+			case 'Category':
+			case 'Section': {
+				BizQueryBase::requireJoin4Where( 'tar' );
+				BizQueryBase::requireJoin4Where( 'sec' );
+				$sql = self::buildWhereStringParam( $param, 'sec', 'section' );
+				break;
+			}
+			case 'State': {
+				if( $paramvalue == BizResources::localize( 'PERSONAL_STATE' ) ) {
+					$sql = "o.`state` $operation -1 ";
+				} else {
+					BizQueryBase::requireJoin4Where( 'sta' );
 					$sql = self::buildWhereStringParam( $param, 'sta', 'state' );
 				}
-                break;
-            }
-            case 'Channel':
-            {
-                BizQueryBase::requireJoin4Where('tar');   
-                BizQueryBase::requireJoin4Where('cha');   
-                $sql = self::buildWhereStringParam( $param, 'cha', 'name' );
-                break;
-            }
-            case 'Edition':
-            case 'EditionId':
-            {
-                $sql = self::buildQueryForEdtion($propName, $operation, $paramvalue, $param);
-                break;
-            }
-            case 'RouteTo':
-            {
-            	BizQueryBase::requireJoin4Where('rtg');   
+				break;
+			}
+			case 'Channel': {
+				BizQueryBase::requireJoin4Where( 'tar' );
+				BizQueryBase::requireJoin4Where( 'cha' );
+				$sql = self::buildWhereStringParam( $param, 'cha', 'name' );
+				break;
+			}
+			case 'Edition':
+			case 'EditionId': {
+				$sql = self::buildQueryForEdtion( $propName, $operation, $paramvalue, $param );
+				break;
+			}
+			case 'RouteTo': {
+				BizQueryBase::requireJoin4Where( 'rtg' );
 				$sql = self::buildWhereStringParam( $param, 'rtg', 'name' );
 				$sql .= ' OR ';
-            	$sql .= self::buildWhereUserString( $param, $propName, $operation, $paramvalue, 'rtu' );
-            	break;
-            }
-            case 'Modifier':
-            {
-            	$sql = self::buildWhereUserString( $param, $propName, $operation, $paramvalue, 'mdf' );
-            	break;
-            }
-            case 'Creator':
-            {
-            	$sql = self::buildWhereUserString( $param, $propName, $operation, $paramvalue, 'crt' );
-            	break;
-            }                        
-			case 'Deletor':
-				{
-					$sql = self::buildWhereUserString( $param, $propName, $operation, $paramvalue, 'dlu' );
-					break;
+				$sql .= self::buildWhereUserString( $param, $propName, $operation, $paramvalue, 'rtu' );
+				break;
+			}
+			case 'Modifier': {
+				$sql = self::buildWhereUserString( $param, $propName, $operation, $paramvalue, 'mdf' );
+				break;
+			}
+			case 'Creator': {
+				$sql = self::buildWhereUserString( $param, $propName, $operation, $paramvalue, 'crt' );
+				break;
+			}
+			case 'Deletor': {
+				$sql = self::buildWhereUserString( $param, $propName, $operation, $paramvalue, 'dlu' );
+				break;
+			}
+			case 'LockedBy': {
+				// Define the sql here because it is different from buildWhereUserString()
+				BizQueryBase::requireJoin4Where( 'lcc' );
+				if( $operation != '!=' ) {
+					$sql = self::buildWhereStringParam( $param, 'lcc', 'fullname' );
+					$sql .= ' OR '; // Support search on short name
+					BizQueryBase::requireJoin4Where( 'lcb' );
+					$sql .= self::buildWhereStringParam( $param, 'lcb', 'usr' );
+				} else {
+					// Handle the IS NOT
+					$sql .= self::buildWhereStringParam( $param, 'lcc', 'fullname' );
+					$sql .= ' AND ';
+					$sql .= self::buildWhereStringParam( $param, 'lcc', 'user' );
+					if( $paramvalue != '' ) {
+						$sql .= ' OR (lcc.`fullname` IS NULL)';
+					}
 				}
-            case 'LockedBy':
-            {
-             	// Define the sql here because it is different from buildWhereUserString()
-             	BizQueryBase::requireJoin4Where('lcc');
-            	if ( $operation != '!=' ) {
-            		$sql = self::buildWhereStringParam( $param, 'lcc', 'fullname' );
-            		$sql .= ' OR '; // Support search on short name
-            		BizQueryBase::requireJoin4Where('lcb');
-            		$sql .= self::buildWhereStringParam( $param, 'lcb', 'usr' );
-            	}
-            	else {
-            		// Handle the IS NOT
-            		$sql .= self::buildWhereStringParam( $param, 'lcc', 'fullname' );
-           	  	$sql .= ' AND ';
-           	  	$sql .= self::buildWhereStringParam( $param, 'lcc', 'user' );
-           	  	if ( $paramvalue != '' ) {
-           	  		$sql .= ' OR (lcc.`fullname` IS NULL)';
-           	  	}
-            	}
-            	break;
-            }
-            case 'PlacedOn':
-            {
-                if ($paramvalue == '') {
-    	        	$objectrelationstable = $dbdriver->tablename("objectrelations");	
-    	        	$objectstable = $dbdriver->tablename("objects");
-    	        	if ( $operation == '!=' ) { // All placed objects (BZ#17511).
-            			$sql .= " o.`id` IN (SELECT chi2.`child` FROM $objectrelationstable chi2, $objectstable obj2 WHERE chi2.`child` = obj2.`id` AND chi2.`type` = 'Placed') ";
-    	        	}
-    	        	else { // Not placed means object, has as a child, no placed relation (BZ#17511).
-            			$sql .= " o.`id` NOT IN (SELECT chi2.`child` FROM $objectrelationstable chi2, $objectstable obj2 WHERE chi2.`child` = obj2.`id` AND chi2.`type` = 'Placed') ";
-    	        	}
-            		
-                }
-                else { // Seaching for placed childs with parent with name like ....
-	            	BizQueryBase::requireJoin4Where('chi');		
-    	        	BizQueryBase::requireJoin4Where('par');		
-            		$sql = self::buildWhereStringParam( $param, 'par', 'name' );
-            		$sql .= "AND chi.`type` = 'Placed' ";
-            		// Placed means parent relation of type 'placed' (BZ#17511).
-                }
 				break;
-            }
-            case 'PlacedOnPage':
-            {
-            	BizQueryBase::requireJoin4Where('chi');		
-	        	BizQueryBase::requireJoin4Where('par');		
-        		$sql = self::buildWhereStringParam( $param, 'par', 'pagerange' );
+			}
+			case 'PlacedOn': {
+				if( $paramvalue == '' ) {
+					$objectrelationstable = $dbdriver->tablename( "objectrelations" );
+					$objectstable = $dbdriver->tablename( "objects" );
+					if( $operation == '!=' ) { // All placed objects (BZ#17511).
+						$sql .= " o.`id` IN (SELECT chi2.`child` FROM $objectrelationstable chi2, $objectstable obj2 WHERE chi2.`child` = obj2.`id` AND chi2.`type` = 'Placed') ";
+					} else { // Not placed means object, has as a child, no placed relation (BZ#17511).
+						$sql .= " o.`id` NOT IN (SELECT chi2.`child` FROM $objectrelationstable chi2, $objectstable obj2 WHERE chi2.`child` = obj2.`id` AND chi2.`type` = 'Placed') ";
+					}
+
+				} else { // Seaching for placed childs with parent with name like ....
+					BizQueryBase::requireJoin4Where( 'chi' );
+					BizQueryBase::requireJoin4Where( 'par' );
+					$sql = self::buildWhereStringParam( $param, 'par', 'name' );
+					$sql .= "AND chi.`type` = 'Placed' ";
+					// Placed means parent relation of type 'placed' (BZ#17511).
+				}
 				break;
-            }             
-            case 'ChildId': // object given is child, so asking for all its parents! (who have this as a child)
-            {
-				BizQueryBase::requireJoin4Where('chi2');		
-				BizQueryBase::requireJoin4Where('par2');		
+			}
+			case 'PlacedOnPage': {
+				BizQueryBase::requireJoin4Where( 'chi' );
+				BizQueryBase::requireJoin4Where( 'par' );
+				$sql = self::buildWhereStringParam( $param, 'par', 'pagerange' );
+				break;
+			}
+			case 'ChildId': // object given is child, so asking for all its parents! (who have this as a child)
+			{
+				BizQueryBase::requireJoin4Where( 'chi2' );
+				BizQueryBase::requireJoin4Where( 'par2' );
 				$sql = self::buildWhereStringParam( $param, 'par2', 'child' );
-            	break;
-            }
-            case 'ChildRelationType':
-            {
-				BizQueryBase::requireJoin4Where('chi2');		
-				BizQueryBase::requireJoin4Where('par2');		
-				$sql = self::buildWhereStringParam( $param, 'par2', 'type' );
-            	break;
-            }
-            case 'ParentId': // object is given parent, so asking for all its childs! (who have this as a parent)
-            {
-            	BizQueryBase::requireJoin4Where('chi');
-   	        	BizQueryBase::requireJoin4Where('par');
-           		$sql = self::buildWhereStringParam( $param, 'chi', 'parent' );
 				break;
-            }
-            case 'ParentRelationType':
-            {
-				BizQueryBase::requireJoin4Where('chi');
-				BizQueryBase::requireJoin4Where('par');
+			}
+			case 'ChildRelationType': {
+				BizQueryBase::requireJoin4Where( 'chi2' );
+				BizQueryBase::requireJoin4Where( 'par2' );
+				$sql = self::buildWhereStringParam( $param, 'par2', 'type' );
+				break;
+			}
+			case 'ParentId': // object is given parent, so asking for all its childs! (who have this as a parent)
+			{
+				BizQueryBase::requireJoin4Where( 'chi' );
+				BizQueryBase::requireJoin4Where( 'par' );
+				$sql = self::buildWhereStringParam( $param, 'chi', 'parent' );
+				break;
+			}
+			case 'ParentRelationType': {
+				BizQueryBase::requireJoin4Where( 'chi' );
+				BizQueryBase::requireJoin4Where( 'par' );
 				$sql = self::buildWhereStringParam( $param, 'chi', 'type' );
-            	break;
-            }
-			case 'Keywords':
-			{	
+				break;
+			}
+			case 'Keywords': {
 				$sql = self::buildDefaultWhereString( $param, $propName, $operation, $paramvalue );
 				//Keywords are passed like 'Dorian,Gray'. Suppose we have a record with Keywords 'Dorian,Edgar,Gray'.
 				//A search on 'Dorian,Gray' will return an empty result set. To make the search a little bit better
 				//a ',' is replaced by a '%'. So it doesn't matter if there are other words between the keywords in the
 				//search. A search on 'Gray,Dorian' still gives an empty result. To prevent that you have to make all
 				//possible permutations and that is too much.
-				$sql = str_replace(',', '%', $sql);
+				$sql = str_replace( ',', '%', $sql );
 				break;
-			}				
-            case 'Search':
-            {
-      		  	// Search is a Solr property but if Solr is down do a search on name (BZ#18354)
-      		  	$param->Property = 'Name';
-      		  	$param->Operation = 'contains';
- 				$sql = self::buildDefaultWhereString($param, $param->Property, $param->Operation, $paramvalue);
-            	break;
-            }
-			case 'ElementName': 
-			{
-				BizQueryBase::requireJoin4Where('elm');
-            	$sql = self::buildWhereStringParam( $param, 'elm', 'name' );
-            	$sql .= "AND o.`type` = 'Article' ";
+			}
+			case 'Search': {
+				// Search is a Solr property but if Solr is down do a search on name (BZ#18354)
+				$param->Property = 'Name';
+				$param->Operation = 'contains';
+				$sql = self::buildDefaultWhereString( $param, $param->Property, $param->Operation, $paramvalue );
 				break;
-			}	
-            default:
-            {
-           		$sql = self::buildDefaultWhereString($param, $propName, $operation, $paramvalue);
-            }
-        }
-        
-        return $sql;
-    }
+			}
+			case 'ElementName': {
+				BizQueryBase::requireJoin4Where( 'elm' );
+				$sql = self::buildWhereStringParam( $param, 'elm', 'name' );
+				$sql .= "AND o.`type` = 'Article' ";
+				break;
+			}
+			default: {
+				$sql = self::buildDefaultWhereString( $param, $propName, $operation, $paramvalue );
+			}
+		}
+
+		return $sql;
+	}
 
     /**
 	 * Builds the query for Edition name or Id.
