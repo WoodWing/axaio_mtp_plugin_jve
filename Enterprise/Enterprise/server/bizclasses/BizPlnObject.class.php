@@ -21,7 +21,7 @@ class BizPlnObject
 	 * Based on the planned layout(s) and a template the layouts are created.
 	 *
 	 * @param string $user Acting user.
-	 * @param PlnLayout[] $layouts
+	 * @param PlnLayoutFromTemplate[] $layouts
 	 * @return PlnLayout[] Created layouts.
 	 * @throws BizException
 	 */
