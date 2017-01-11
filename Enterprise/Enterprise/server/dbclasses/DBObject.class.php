@@ -1441,9 +1441,7 @@ class DBObject extends DBBase
 				break;
 			case 'Name':
 				require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
-				if( mb_strlen( $value, 'UTF8' ) > BizProperty::getStandardPropertyMaxLength( 'Name' ) ) {
-					$formattedValue = mb_substr( $value, 0, BizProperty::getStandardPropertyMaxLength( 'Name' ), 'UTF8' );
-				}
+				$formattedValue = mb_substr( $value, 0, BizProperty::getStandardPropertyMaxLength( 'Name' ), 'UTF8' );
 				break;
 			default:
 				$formattedValue = self::truncatePropertyValue( $propName, $value );
