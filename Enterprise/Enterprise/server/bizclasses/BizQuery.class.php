@@ -685,86 +685,37 @@ class BizQuery extends BizQueryBase
 	 */
 	static public function buildWhere( $params )
 	{
-		$sql = '';
-		$and = ' ';
-		$wheresInfo = array();
-		if( isset( $params ) ) {
-			foreach( $params as $key => $param ) {
-				$whereSql = self::buildWhereParam( $param );
-				if( $whereSql ) {
-					if( !array_key_exists( $param->Property, $wheresInfo ) ) {
-						$wheresInfo[ $param->Property ][$key] = array();
-					}
-					$wheresInfo[ $param->Property ][$key]['sql'] = $whereSql;
-					$wheresInfo[ $param->Property ][$key]['param'] = $param;
-				}
+		$paramsPerProperty = array();
+		$wheresPerProperty = array();
+		if( $params ) foreach( $params as $param ) {
+			$whereSql = self::buildWhereParam( $param );
+			if( $whereSql ) {
+				$paramsPerProperty[$param->Property][] = $param;
+				$wheresPerProperty[$param->Property][] = $whereSql;
 			}
 		}
-
-		if( $wheresInfo ) foreach( $wheresInfo as $property => $whereInfosQueryParam ) {
-			$logicalOperator = self::determineLogicalOperator( $whereInfosQueryParam );
-			$sql .= $and;
-			$and = ' AND ';
-			$sql .= '( ';
-			$operator = '';
-			if( $whereInfosQueryParam) foreach( $whereInfosQueryParam as $whereInfoQueryParam ) {
-				$sql .= $operator;
-				$operator = $logicalOperator;
-				$sql .= "(".$whereInfoQueryParam['sql'].")";
-			}
-			$sql .= ' )';
+		$wheres = array();
+		foreach( $wheresPerProperty as $property => $propertyWheres ) {
+			$operator = self::isAndOperatorNeededForQueryParams( $paramsPerProperty[$property] ) ? 'AND' : 'OR';
+			$wheres[] = '('.implode( ") $operator (", $propertyWheres ).')';
 		}
-
-		$requiredWheres = self::requireWhere();
-		if( $requiredWheres ) foreach( $requiredWheres as $whereString ) {
-			$sql .= $and.'('.$whereString.')';
-			$and = ' AND ';
-		}
-		if( empty( $sql ) ) {
-			// Even when no params are requested, the where clause must be provided
-			// since caller can expand/enhance it, so here we do a trick to allow
-			// caller add more filers like "WHERE ( 1 ) AND ( blah blah )"
-			$sql = 'WHERE ( 1 = 1 )';
-		} else {
-			$sql = 'WHERE ( '.$sql.' )';
-		}
-		return $sql;
-	}
-
-	/**
-	 * Checks if the query parameters for the same property must 'glued' by an 'AND' or 'OR'.
-	 * Normally the query parameters are glued by an 'OR'. E.g. suppose there are two query parameters for 'Type' the
-	 * result will be something like 'Type = "Layout" OR Type = "Article"'. In some cases the 'AND' must be used. E.g.
-	 * suppose the '!=' is used. By 'OR' the result would be 'Type != "Layout" OR Type != "Article"'. This is always true
-	 * so no filtering is done. What is expected is 'Type != "Layout" AND Type != "Article"'.
-	 *
-	 * @param array $wheresInfoQueryParam Structure with information for each property to build the where statement.
-	 * @return string
-	 */
-	static private function determineLogicalOperator( array $wheresInfoQueryParam )
-	{
-		$logicalOperator = ' OR ';
-		if( self::shouldBeAnd( $wheresInfoQueryParam ) ) {
-			$logicalOperator = ' AND ';
-		}
-
-		return $logicalOperator;
+		return $wheres ? '('.implode( ') AND (', $wheres ).')' : '(1 = 1)';
 	}
 
 	/**
 	 * Checks if the query parameters for the same property must 'glued' by an 'AND'.
 	 * Check is done on the '!=' (is not) usage and the 'in between' usage.
 	 *
-	 * @param array $wheresInfoQueryParam Structure with information for each property to build the where statement.
+	 * @param array $propertyQueryParams array with query params for a single property.
 	 * @return bool True if the 'AND' is applicable.
 	 */
-	static private function shouldBeAnd( array $wheresInfoQueryParam )
+	static private function isAndOperatorNeededForQueryParams( array $propertyQueryParams )
 	{
-		if( self::isNotQueryParams( $wheresInfoQueryParam ) ) {
+		if( self::isNotOperatorDefinedByQueryParams( $propertyQueryParams ) ) {
 			return true;
 		}
 
-		if( self::isBetweenQueryParams( $wheresInfoQueryParam ) ) {
+		if( self::isSingleRangeDefinedByQueryParams( $propertyQueryParams ) ) {
 			return true;
 		}
 
@@ -774,15 +725,16 @@ class BizQuery extends BizQueryBase
 	/**
 	 * Checks if a query param for a property contains the '!=' operation.
 	 *
-	 * @param array $wheresInfoQueryParam Structure with information for each property to build the where statement.
+	 * @param array $propertyQueryParams array with query params for a single property.
 	 * @return bool The '!=' is used.
 	 */
-	static private function isNotQueryParams( array $wheresInfoQueryParam )
+	static private function isNotOperatorDefinedByQueryParams( array $propertyQueryParams )
 	{
 		$result = false;
-		if( $wheresInfoQueryParam ) foreach( $wheresInfoQueryParam as $whereInfo ) {
-			if( $whereInfo['param']->Operation == '!=' ) {
+		if( $propertyQueryParams ) foreach( $propertyQueryParams as $propertyQueryParam ) {
+			if( $propertyQueryParam->Operation == '!=' ) {
 				$result = true;
+				break;
 			}
 		}
 
@@ -797,26 +749,34 @@ class BizQuery extends BizQueryBase
 	 * Only if  both the '<' and the '>' are used and no other params the above logic is use. E.g. the following
 	 * LengthLines > 100, LengthLines < 200, LengthLines > 300, LengthLines < 400 will not be resolved.
 	 *
-	 * @param array $wheresInfoQueryParam Structure with information for each property to build the where statement.
+	 * @param array $propertyQueryParams Structure with information for each property to build the where statement.
 	 * @return bool
 	 */
-	static private function isBetweenQueryParams( $wheresInfoQueryParam )
+	static private function isSingleRangeDefinedByQueryParams( $propertyQueryParams )
 	{
 		$result = false;
-		if( count( $wheresInfoQueryParam ) == 2 ) {
-			$lessThanValue = '';
-			$greaterThanValue = '';
-			if( $wheresInfoQueryParam ) foreach( $wheresInfoQueryParam as $whereInfo ) {
-				if( $whereInfo['param']->Operation == '<' ) {
-					$lessThanValue = $whereInfo['param']->Value;
+		if( count( $propertyQueryParams ) == 2 ) {
+			$lessThanValue = null;
+			$greaterThanValue = null;
+			if( $propertyQueryParams ) foreach( $propertyQueryParams as $propertyQueryParam ) {
+				if( $propertyQueryParam->Operation == '<' ) {
+					$lessThanValue = $propertyQueryParam->Value;
 				}
-				if( $whereInfo['param']->Operation == '>' ) {
-					$greaterThanValue = $whereInfo['param']->Value;
+				if( $propertyQueryParam->Operation == '>' ) {
+					$greaterThanValue = $propertyQueryParam->Value;
 				}
 			}
 
-			if( $lessThanValue && $greaterThanValue && ( strcmp( $lessThanValue, $greaterThanValue ) > 0 ) ) {
-				$result = true;
+			if( !is_null( $lessThanValue ) && !is_null( $greaterThanValue )  ) {
+				if ( is_numeric( $lessThanValue ) && is_numeric( $greaterThanValue ) ) {
+					if ( $lessThanValue > $greaterThanValue ) {
+						$result = true;
+					}
+				} else {
+					if ( strcmp( $lessThanValue, $greaterThanValue ) > 0 ) {
+						$result = true;
+					}
+				}
 			}
 		}
 
