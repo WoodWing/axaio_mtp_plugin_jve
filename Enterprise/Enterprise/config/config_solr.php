@@ -4,7 +4,7 @@ if( !defined('SOLR_SERVER_URL') ) {
 	define( 'SOLR_SERVER_URL', 'http://localhost:8983/solr' ); // Solr home
 }
 if( !defined('SOLR_CORE') ) {
-	define( 'SOLR_CORE', 'woodwing' ); // Solr core to use, default collection1.
+	define( 'SOLR_CORE', 'collection1' ); // Solr core to use, default collection1.
 }
 
 /**
