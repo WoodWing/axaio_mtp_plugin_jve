@@ -599,7 +599,7 @@ class BizQuery extends BizQueryBase
 		$objectstable = $deletedobjects ? $dbdriver->tablename('deletedobjects') : $dbdriver->tablename('objects');
 		
         $sqlarray = array();
-        $sqlarray['from'] = "/*FROM*/ " . "from $objectstable o ";
+        $sqlarray['from'] = "/*FROM*/ " . "FROM $objectstable o ";
         $sqlarray['select'] = "/*SELECT*/ " . self::buildSelect($requestedpropnames);
 	    $sqlarray['where'] = (is_null($where))
 	        ? "/*WHERE*/ " . self::buildWhere($params)
@@ -767,7 +767,7 @@ class BizQuery extends BizQueryBase
 			$operator = self::isAndOperatorNeededForQueryParams( $paramsPerProperty[$property] ) ? 'AND' : 'OR';
 			$wheres[] = '('.implode( ") $operator (", $propertyWheres ).')';
 		}
-		return $wheres ? '('.implode( ') AND (', $wheres ).')' : '(1 = 1)';
+		return $wheres ? 'WHERE ('.implode( ') AND (', $wheres ).')' : 'WHERE (1 = 1)';
 	}
 
 	/**
