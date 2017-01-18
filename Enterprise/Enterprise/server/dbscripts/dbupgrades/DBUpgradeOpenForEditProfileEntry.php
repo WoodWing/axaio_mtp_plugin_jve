@@ -43,9 +43,9 @@ class DBUpgradeOpenForEditProfileEntry extends DbUpgradeModule
 			require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 			while( $row = $dbDriver->fetch($result) ) {
 				DBBase::insertRow( 'profilefeatures',
-					array('profile', $row['id'],
-							'feature', $openForEditUnplacedCode,
-							'value', 'Yes') );
+					array('profile' => $row['id'],
+							'feature' => $openForEditUnplacedCode,
+							'value' => 'Yes') );
 			}
 			return true;
 		} catch( Exception $ex ) {
