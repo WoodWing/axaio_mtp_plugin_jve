@@ -270,11 +270,10 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 		$this->icStoryLabels = array();
 		$this->icFootnotes = array();
 
-		// BZ#32485 - Use SI_EL node for element label, as Story->StoryTitle sometimes out of sync
-		$icStoryLabels = $this->icXPath->query( '/ea:Stories/ea:Story/ea:StoryInfo/ea:SI_EL/text()' );
-		foreach( $icStoryLabels as $icStoryLabelNode ) {
-			$guid = $icStoryLabelNode->parentNode->parentNode->parentNode->getAttribute('ea:GUID');
-			$icStoryLabel = $icStoryLabelNode->nodeValue;
+		$icStoryInfos = $this->getStoryInfos();
+		foreach( $icStoryInfos as $icStoryInfoNode ) {
+			$guid = $this->getGuidFromStory( $icStoryInfoNode );
+			$icStoryLabel = $this->getLabelFromStoryInfo( $icStoryInfoNode );
 			$this->icStoryLabels[$guid] = $icStoryLabel;
 
 			// Build compatible frame structure with other text converters
@@ -308,6 +307,48 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 			$this->convertDocument( $icStoryDoc );
 		}
 	}
+
+	/**
+	 * Gets the Story Info elements of the document.
+	 *
+	 * @return DOMNodeList|false
+	 */
+	private function getStoryInfos()
+	{
+		return $this->icXPath->query( '/ea:Stories/ea:Story/ea:StoryInfo' );
+	}
+
+	/**
+	 * Gets the guid of a Story.
+	 *
+	 * @param DOMNode $icStoryInfoNode
+	 * @return string guid
+	 */
+	private function getGuidFromStory( $icStoryInfoNode )
+	{
+		return $icStoryInfoNode->parentNode->getAttribute( 'ea:GUID' );
+	}
+
+	/**
+	 * Gets the Story label (element label) of the Story Info node.
+	 * If no label is set a default value is returned, 'body'. Normally a WCML story has a label. But in case the story
+	 * is created in InCopy without using a template the element label is not set. The document contains in that case
+	 * only story which is regarded as being the 'body'. See EN-88611.
+	 *
+	 * @param DOMNode $icStoryInfoNode
+	 * @return string story label
+	 */
+	private function getLabelFromStoryInfo( $icStoryInfoNode )
+	{
+		$element = $this->icXPath->query( './ea:SI_EL', $icStoryInfoNode );
+		$label = $element[0]->nodeValue;
+		if(  !$label ) {
+			$label = 'body';
+		}
+
+		return $label;
+	}
+
 	
 	/**
 	 * Converts a WCML document/story to XHTML. See convert() for more details.
