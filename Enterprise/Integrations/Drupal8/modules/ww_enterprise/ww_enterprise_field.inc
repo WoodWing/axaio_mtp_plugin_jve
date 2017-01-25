@@ -1192,7 +1192,7 @@ function mapNodeValues( $node, $formValues, $previewMode )
 						$node->$field_machine_name = $val;
 						break;
 					case 'text_long': // text (formatted, long)
-						$content = ( isset( $values[0]['elements'] ) ) ? $values[0]['elements'] : null;
+						$content = ( isset( $values[0]['elements'] ) ) ? $values[0]['elements'] : '';
 						$attachments = ( isset( $values[0]['attachments'] ) ) ? $values[0]['attachments'] : null;
 						$val = resolveInlineImages( $content, $attachments );
 						$node->$field_machine_name->value = $val;
@@ -1200,7 +1200,7 @@ function mapNodeValues( $node, $formValues, $previewMode )
 						break;
 					case 'text_with_summary': // text (formatted, long, summary)
 						// Long text summary
-						$content = null;
+						$content = '';
 						if( isset( $values[0]['elements'] ) ) { // Happens when only 'body' is filled in.
 							$content = $values[0]['elements'];
 						} else if( isset( $values['value'][0]['elements'] ) ) { // Happens when 'body' & 'summary' or only 'summary' is filled in.
