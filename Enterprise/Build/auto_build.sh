@@ -4,7 +4,7 @@
 # @since        9.5
 # @copyright    WoodWing Software bv. All Rights Reserved.
 #
-# Build script for Enterprise Server 10.1 (or later). Designed to run on the Zetes build machine running CentOS7.
+# Build script for Enterprise Server 10.2 (or later). Designed to run on the Zetes build machine running CentOS7.
 # Initially, for 9.5 it was written for Perforce integration but since 10.1 it is redesigned for Git integration.
 #
 # It retrieves source code files from Git and updates version info in the core, plugins and 3rd party modules.
@@ -626,7 +626,7 @@ function step5_ionCubeEncodePhpFiles {
 	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/development
 	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/testsuite/BuildTest/PhpCoding
 	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/testsuite/BuildTest2
-	syncx
+	sync
 
 	echo 'step5c: Acquire license for ionCube Encoded to make sure it is still valid.'
 	sudo "${iONCUBE_ENCODER}" --acquire-license
