@@ -341,7 +341,7 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	private function getLabelFromStoryInfo( $icStoryInfoNode )
 	{
 		$element = $this->icXPath->query( './ea:SI_EL', $icStoryInfoNode );
-		$label = $element[0]->nodeValue;
+		$label = $element->item(0)->nodeValue;
 		if(  !$label ) {
 			$label = 'body';
 		}
