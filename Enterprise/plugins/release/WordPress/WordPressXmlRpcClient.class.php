@@ -362,8 +362,8 @@ class WordPressXmlRpcClient
 			'overwrite' => false
 		);
 
-			$rpc = new IXR_Client( $this->url, $this->certificate );
-			$rpc->query( 'metaWeblog.newMediaObject', 0, $this->userName, $this->password, $data );
+		$rpc = new IXR_Client( $this->url, $this->certificate );
+		$rpc->query( 'metaWeblog.newMediaObject', 0, $this->userName, $this->password, $data );
 
 		return $rpc->getResponse();
 	}
@@ -410,8 +410,13 @@ class WordPressXmlRpcClient
 	 *
 	 * @param string $imageName
 	 * @param string $filePath
+<<<<<<< HEAD
 	 * @param int $galleryId
 	 * @param string $mimeType
+=======
+	 * @param string $mimeType
+	 * @param int $galleryId
+>>>>>>> release/10.1.x
 	 * @return mixed
 	 * @throws BizException
 	 */
@@ -425,8 +430,8 @@ class WordPressXmlRpcClient
 			'gallery' => $galleryId
 		);
 
-			$rpc = new IXR_Client( $this->url, $this->certificate );
-			$rpc->query( 'ngg.uploadImage', 0, $this->userName,	$this->password, $data );
+		$rpc = new IXR_Client( $this->url, $this->certificate );
+		$rpc->query( 'ngg.uploadImage', 0, $this->userName,	$this->password, $data );
 
 		return $rpc->getResponse();
 	}
