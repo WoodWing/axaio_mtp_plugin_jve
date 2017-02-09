@@ -816,4 +816,27 @@ class DBPlacements extends DBBase
 		}
 		return $placement;
 	}
+
+	/**
+	 * Updates a placement record based on the filter of the $whereFields.
+	 *
+	 * @param array $whereFields Filter (column names/values).
+	 * @param Placement Changed placement
+	 */
+	static public function updatePlacement( $whereFields, $placement )
+	{
+		$where = '';
+		$and = '`';
+
+		$params = array();
+		if( $whereFields ) foreach( $whereFields as $field => $value ) {
+			$where .= $and.$field.'` =  ? ';
+			$and = ' AND `';
+			$params[] = $value;
+		}
+
+		$values = self::objToRow( $placement );
+		DBBase::updateRow( self::TABLENAME, $values, $where, $params );
+	}
+
 }

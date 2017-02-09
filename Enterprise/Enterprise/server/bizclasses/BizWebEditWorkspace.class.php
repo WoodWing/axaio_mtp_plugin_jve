@@ -1038,48 +1038,50 @@ class BizWebEditWorkspace
 				// can draw boxes for the sibling frames on the page and allow image/text (re)placements.
 				if( in_array( 'Relations', $requestInfo ) ) {
 					$ret['Relations'] = $this->composeObjectRelations( $xpathObjectDom );
-					
-					// Although the layout resides in workspace, we want to save the placed
-					// relations into the DB. This is done since SC suppresses the CreateObjectRelations
-					// requests in context of IDPreview.js. The suppress is done for performance
-					// reasons, because a few Object Operations may result into many of those requests,
-					// which are all called synchronously and so for poor WANs this would slow down
-					// the preview operation for a few seconds, while the user is waiting.
-					require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-					$user = BizSession::getShortUserName();
-					
-					// Note that the DB updates below are guarded by BizObject::createSemaphoreForSaveLayout()
-					// to avoid SaveObjects being executed in the same time as PreviewArticle(s)AtWorkspace (EN-86722).
+					$rebuildNeeded = $this->rebuildStoredRelationsPlacements( $layoutId, $ret['Relations'] );
+					if( $rebuildNeeded ) {
+						// Although the layout resides in workspace, we want to save the placed
+						// relations into the DB. This is done since SC suppresses the CreateObjectRelations
+						// requests in context of IDPreview.js. The suppress is done for performance
+						// reasons, because a few Object Operations may result into many of those requests,
+						// which are all called synchronously and so for poor WANs this would slow down
+						// the preview operation for a few seconds, while the user is waiting.
+						require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+						$user = BizSession::getShortUserName();
 
-					// Before delete+create object relations, make sure to remove all InDesignArticles
-					// since this does a cascade delete of their object->placements, which may be
-					// referenced through the relation->placements as well; Doing this after would
-					// destroy the InDesignArticle placements set through the relations.
-					if( !is_null( $ret['InDesignArticles'] )) {
-						require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-						DBInDesignArticle::deleteInDesignArticles( $layoutId );
-					}
+						// Note that the DB updates below are guarded by BizObject::createSemaphoreForSaveLayout()
+						// to avoid SaveObjects being executed in the same time as PreviewArticle(s)AtWorkspace (EN-86722).
 
-					// Delete all InDesignArticle placements (v9.7)
-					// Needs to be done BEFORE saveObjectPlacedRelations() since that is ALSO creating
-					// InDesignArticle placements (the ones that are also relational placements).
-					if( !is_null($ret['Placements']) ) {
-						require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
-						DBPlacements::deletePlacements( $layoutId, 0, 'Placed' );
-					}
+						// Before delete+create object relations, make sure to remove all InDesignArticles
+						// since this does a cascade delete of their object->placements, which may be
+						// referenced through the relation->placements as well; Doing this after would
+						// destroy the InDesignArticle placements set through the relations.
+						if( !is_null( $ret['InDesignArticles'] ) ) {
+							require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
+							DBInDesignArticle::deleteInDesignArticles( $layoutId );
+						}
 
-					BizObject::saveObjectPlacedRelations( $user, $layoutId, $ret['Relations'], false, false );
+						// Delete all InDesignArticle placements (v9.7)
+						// Needs to be done BEFORE saveObjectPlacedRelations() since that is ALSO creating
+						// InDesignArticle placements (the ones that are also relational placements).
+						if( !is_null( $ret['Placements'] ) ) {
+							require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+							DBPlacements::deletePlacements( $layoutId, 0, 'Placed' );
+						}
 
-					// Save the Indesign Articles for the layout object (v9.7).
-					if( !is_null($ret['InDesignArticles']) ) {
-						require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-						DBInDesignArticle::createInDesignArticles( $layoutId, $ret['InDesignArticles'] );
-					}
+						BizObject::saveObjectPlacedRelations( $user, $layoutId, $ret['Relations'], false, false );
 
-					// Save the Indesign Article Placements for the layout object (v9.7).
-					if( !is_null( $iaPlacements ) ) {
-						foreach( $iaPlacements as $iaPlacement ) {
-							DBPlacements::insertPlacement( $layoutId, 0, 'Placed', $iaPlacement );
+						// Save the InDesign Articles for the layout object (v9.7).
+						if( !is_null( $ret['InDesignArticles'] ) ) {
+							require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
+							DBInDesignArticle::createInDesignArticles( $layoutId, $ret['InDesignArticles'] );
+						}
+
+						// Save the InDesign Article Placements for the layout object (v9.7).
+						if( !is_null( $iaPlacements ) ) {
+							foreach( $iaPlacements as $iaPlacement ) {
+								DBPlacements::insertPlacement( $layoutId, 0, 'Placed', $iaPlacement );
+							}
 						}
 					}
 					
@@ -2322,5 +2324,467 @@ class BizWebEditWorkspace
 			}
 			$versionGuidAdobe->item(0)->setAttribute( 'VersionGuid', $newVersionGuid );*/
 		}
+	}
+
+	/**
+	 * Compares the composed relations/placements and the stored relations/placements to determine if a total rebuild
+	 * of the stored data is needed.
+	 *
+	 * Rebuild is needed if for example frame Ids are changed or InDesign Articles are changed or the number of stored
+	 * relations and composed relations are not the same. If only a 'harmless' property of a placement is changed then
+	 * the placement is just updated. E.g. if some text is added to an article component the underset/overset changes
+	 * and there is no need to rebuild all relations and placements.
+	 * First the stored relations are enriched with potential InDesignArticle Ids. Next structures are made of unique
+	 * placements. Both for the composed data as the stored data. Finally these structures are compared to see if a
+	 * rebuild is needed.
+	 *
+	 * @param int $layoutId The layout of the preview.
+	 * @param Relations[] $composedRelations The relations as retrieved from the composed data.
+	 * @return bool $rebuildNeeded
+	 */
+	private function rebuildStoredRelationsPlacements( $layoutId, $composedRelations )
+	{
+		PerformanceProfiler::startProfile( 'Preview_Check_On_Placements', 5 );
+		$rebuildNeeded = false;
+		$storedRelations = BizRelation::getObjectRelations( $layoutId, true, false, null, false, false, 'Placed' );
+		$storedInDesignArticlePlacements = DBPlacements::getPlacements( $layoutId, 0, 'Placed');
+		$storedRelationsWithIDSArticles = $this->addInDesignArticleToRelations( $storedRelations, $storedInDesignArticlePlacements );
+		$storedPlacementsByKey = $this->extractPlacementsByKeyFromRelations( $storedRelationsWithIDSArticles );
+		$composedPlacementsByKey = $this->extractPlacementsByKeyFromRelations( $composedRelations );
+		if( !$this->reparablePlacementProperties( $storedPlacementsByKey, $composedPlacementsByKey ) ) {
+			$rebuildNeeded = true;
+		}
+		PerformanceProfiler::stopProfile( 'Preview_Check_On_Placements', 5 );
+
+		return $rebuildNeeded;
+	}
+
+	/**
+	 * Fills InDesignArticleIds of the placements of stored relations.
+	 *
+	 * The (stored) relations and the placements have the same parent. Based on the frame id and the edition a link is made.
+	 *
+	 * @param Relations[] $storedRelations
+	 * @param $inDesignArticlePlacements
+	 * @return Relations[] $storedRelations enriched with ArticleIds
+	 */
+	private function addInDesignArticleToRelations( $storedRelations , $inDesignArticlePlacements )
+	{
+		if( $storedRelations ) foreach( $storedRelations as $storedRelation ) {
+			if( $storedRelation->Placements ) foreach( $storedRelation->Placements as $key => $placement ) {
+				if( $inDesignArticlePlacements ) foreach( $inDesignArticlePlacements as $inDesignArticlePlacement ) {
+					if( ( $inDesignArticlePlacement->FrameID == $placement->FrameID ) &&
+						 ( $inDesignArticlePlacement->Edition == $placement->Edition )
+					) {
+						$storedRelation->Placements[$key]->InDesignArticleIds = $inDesignArticlePlacement->InDesignArticleIds;
+						break;
+					}
+				}
+			}
+		}
+
+		return $storedRelations;
+	}
+
+	/**
+	 * Relations with placements are transformed to an array with with unique placements.
+	 *
+	 * Placements are unique by the parent/child/type/frameid/edition. From these attributes a unique key is made. The
+	 * value of the key is the placement object itself.
+	 *
+	 * @param Relations[] $relations
+	 * @return array with unique placements.
+	 */
+	private function extractPlacementsByKeyFromRelations( $relations )
+	{
+		$flatDownPlacements = array();
+		if( $relations ) foreach ( $relations as $relation ) {
+			$relationKey = strval( $relation->Parent ).'-'.strval( $relation->Child ).'-'.strval( $relation->Type );
+			if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
+				$key = $relationKey;
+				if( empty( $placement->FrameID ) ) {
+					$key .= '-0';
+				} else {
+					$key .= '-'.strval( $placement->FrameID );
+				}
+				if( empty( $placement->Edition ) ) {
+					$key .= '-0';
+				} else {
+					$key .= '-'.( $placement->Edition );
+				}
+				$flatDownPlacements[ $key ] = $placement;
+			}
+		}
+
+		return $flatDownPlacements;
+	}
+
+	/**
+	 * Checks for two arrays with unique placements and repairs small differences.
+	 *
+	 * If two unique placements differ (stored and composed) it sometimes possible to just update the stored one with the
+	 * changed properties of the composed placement. If the difference is to fundamental no repair action is done.
+	 * In case there are only reparable differences the stored placement is updated with the properties of the composed
+	 * one.
+	 *
+	 * @param array $storedPlacementsByKey
+	 * @param array $composedPlacementsByKey
+	 * @return bool true if differences could no be repaired.
+	 */
+	private function reparablePlacementProperties( $storedPlacementsByKey, $composedPlacementsByKey )
+	{
+		$reparable = true;
+		if( $this->diffEmptiness( $storedPlacementsByKey, $composedPlacementsByKey ) ) {
+			$reparable = false;
+		} elseif( is_array( $storedPlacementsByKey ) && is_array( $composedPlacementsByKey ) ) {
+			if( !empty( array_diff_key( $storedPlacementsByKey, $composedPlacementsByKey ) ) ) {
+				$reparable = false;
+			}
+		}
+
+		if( $reparable ) {
+			$changedPlacements = array();
+			if( $storedPlacementsByKey ) foreach( $storedPlacementsByKey as $key => $lhsPlacement ) {
+				$composedPlacementByKey = $composedPlacementsByKey[ $key ];
+				$nonReparableDiffs = 0;
+				$reparableDiffs = 0;
+				$this->equalPlacementProperty( $lhsPlacement, $composedPlacementByKey, $nonReparableDiffs, $reparableDiffs );
+				if( $nonReparableDiffs > 0 ) {
+					$reparable = false;
+					break;
+				} elseif( $reparableDiffs > 0 ) {
+					$changedPlacements[ $key ] = $composedPlacementByKey;
+				}
+			}
+		}
+
+		if( $reparable && $changedPlacements ) {
+			require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+			foreach( $changedPlacements as $keyString => $placement ) {
+				$keyValues = explode( '-', $keyString);
+				$whereFields['parent'] = intval( $keyValues[0] );
+				$whereFields['child'] = intval( $keyValues[1] );
+				$whereFields['type'] = ( $keyValues[2] );
+				$whereFields['frameid'] = ( $keyValues[3] ) ? $keyValues[3] : '';
+				$whereFields['edition'] = intval( $keyValues[4] );
+				DBPlacements::updatePlacement( $whereFields, $placement) ;
+			}
+		}
+
+		return $reparable;
+	}
+
+	/**
+	 * Checks for two placements if they can be seen as the same.
+	 *
+	 * Each corresponding property of the two placements are compared thereby focusing on 'real' differences.
+	 * Eg a Height of 124.345 is the same as 124.3450. But also two strings one is null and one is '' as seen as the
+	 * same.
+	 * In case two properties differ fundamentally like FrameID = 123 and FrameID = 456 this difference is marked as
+	 * not reparable. Other differences can be repaired.
+	 *
+	 * @param $lhsPlacement
+	 * @param $rhsPlacement
+	 * @param $nonReparableDiffs
+	 * @param $reparableDiffs
+	 */
+	private function equalPlacementProperty( $lhsPlacement, $rhsPlacement, &$nonReparableDiffs, &$reparableDiffs )
+	{
+		if ( !$this->sameStrings( $lhsPlacement->Content, $rhsPlacement->Content ) ) {
+			$reparableDiffs += 1;
+		}
+		if( !$this->sameFloats( $lhsPlacement->ContentDx, $rhsPlacement->ContentDx ) ) {
+			$reparableDiffs += 1;
+		}
+		if( !$this->sameFloats( $lhsPlacement->ContentDy, $rhsPlacement->ContentDy ) ) {
+			$reparableDiffs += 1;
+		}
+		if ( !$this->sameStrings( $lhsPlacement->Element, $rhsPlacement->Element ) ) {
+			$nonReparableDiffs += 1;
+		}
+		if ( !$this->sameStrings( $lhsPlacement->ElementID, $rhsPlacement->ElementID  ) ) {
+			$nonReparableDiffs += 1;
+		}
+		if ( !$this->sameStrings( $lhsPlacement->FormWidgetId, $rhsPlacement->FormWidgetId  ) ) {
+			$nonReparableDiffs += 1;
+		}
+		if ( !$this->sameStrings( $lhsPlacement->FrameID, $rhsPlacement->FrameID  ) ) {
+			$nonReparableDiffs += 1;
+		}
+		if ( !$this->sameIntegers( $lhsPlacement->FrameOrder, $rhsPlacement->FrameOrder  ) ) {
+			$nonReparableDiffs += 1;
+		}
+		if ( !$this->sameStrings( $lhsPlacement->FrameType, $rhsPlacement->FrameType  ) ) {
+			$nonReparableDiffs += 1;
+		}
+		if ( !$this->sameFloats( $lhsPlacement->Height, $rhsPlacement->Height ) ) {
+			$reparableDiffs += 1;
+		}
+		if ( !$this->sameStrings( $lhsPlacement->Layer, $rhsPlacement->Layer  ) ) {
+			$reparableDiffs += 1;
+		}
+		if ( !$this->sameFloats( $lhsPlacement->Left, $rhsPlacement->Left ) ) {
+			$reparableDiffs += 1;
+		}
+		if ( !$this->sameIntegers( $lhsPlacement->Overset, $rhsPlacement->Overset  ) ) {
+			$reparableDiffs += 1;
+		}
+		if ( !$this->sameIntegers( $lhsPlacement->OversetChars, $rhsPlacement->OversetChars  ) ) {
+			$reparableDiffs += 1;
+		}
+		if ( !$this->sameIntegers( $lhsPlacement->OversetLines, $rhsPlacement->OversetLines  ) ) {
+			$reparableDiffs += 1;
+		}
+		if ( !$this->sameIntegers( $lhsPlacement->Page, $rhsPlacement->Page  ) ) {
+			$nonReparableDiffs += 1;
+		}
+		if ( !$this->sameIntegers( $lhsPlacement->PageSequence, $rhsPlacement->PageSequence  ) ) {
+			$nonReparableDiffs += 1;
+		}
+		if ( !$this->sameStrings( $lhsPlacement->PageNumber, $rhsPlacement->PageNumber  ) ) {
+			$nonReparableDiffs += 1;
+		}
+		if ( !$this->sameScale( $lhsPlacement->ScaleX, $rhsPlacement->ScaleX ) ) {
+			$reparableDiffs += 1;
+		}
+		if ( !$this->sameScale( $lhsPlacement->ScaleY, $rhsPlacement->ScaleY ) ) {
+			$reparableDiffs += 1;
+		}
+		if ( !$this->sameStrings( $lhsPlacement->SplineID, $rhsPlacement->SplineID  ) ) {
+			$nonReparableDiffs += 1;
+		}
+		if ( !$this->sameFloats( $lhsPlacement->Top, $rhsPlacement->Top ) ) {
+			$reparableDiffs += 1;
+		}
+		if ( !$this->sameFloats( $lhsPlacement->Width, $rhsPlacement->Width ) ) {
+			$reparableDiffs += 1;
+		}
+		if( !$this->sameArrays( $lhsPlacement->InDesignArticleIds, $rhsPlacement->InDesignArticleIds ) ) {
+			$nonReparableDiffs += 1;
+		}
+		if( $lhsPlacement->Tiles || $rhsPlacement->Tiles ) {
+			if( !$this->equalTiles( $lhsPlacement->Tiles, $rhsPlacement->Tiles ) ) {
+				$nonReparableDiffs += 1;
+			}
+		}
+	}
+
+	/**
+	 * Checks is two sets of placement-tiles can be seen as equal.
+	 *
+	 * @param $lhsTiles
+	 * @param $rhsTiles
+	 * @return bool
+	 */
+	private function equalTiles( $lhsTiles, $rhsTiles)
+	{
+		$equal = true;
+		if ( $this->diffEmptiness( $lhsTiles, $rhsTiles ) ) {
+			$equal = false;
+		} elseif ( is_array( $lhsTiles ) && is_array( $rhsTiles ) ) {
+			if( count( $lhsTiles ) != count( $rhsTiles ) ) {
+				$equal = false;
+			}
+		}
+		if( $equal ) {
+			foreach( $lhsTiles as $lhsTile ) {
+				foreach( $rhsTiles as $rhsTile ) {
+					$found = false;
+					if( $lhsTile->PageSequence == $rhsTile->PageSequence ) {
+						$found = true;
+						if ( !$this->sameFloats( $lhsTile->Left, $rhsTile->Left ) ) {
+							$equal = false;
+							break 2;
+						}
+						if ( !$this->sameFloats( $lhsTile->Width, $rhsTile->Width ) ) {
+							$equal = false;
+							break 2;
+						}
+						if ( !$this->sameFloats( $lhsTile->Height, $rhsTile->Height ) ) {
+							$equal = false;
+							break 2;
+						}
+						if ( !$this->sameFloats( $lhsTile->Top, $rhsTile->Top ) ) {
+							$equal = false;
+							break 2;
+						}
+					}
+					if( !$found ) {
+						$equal = false;
+						break 2;
+					}
+				}
+			}
+		}
+
+		return $equal;
+	}
+
+	/**
+	 * Checks if two placement scale properties are the same. Note that scale is null is stored in the database as scale
+	 * is 1.0. So null is first converted to 1.0 before the values are compared.
+	 *
+	 * @param $lhsScale
+	 * @param $rhsScale
+	 * @return bool
+	 */
+	private function sameScale( $lhsScale, $rhsScale )
+	{
+		$result = true;
+		if( is_null( $lhsScale) ) {
+			$lhsScale = 1.0;
+		}
+		if( is_null( $rhsScale ) ) {
+			$rhsScale = 1.0;
+		}
+		if( !$this->sameFloats( $lhsScale, $rhsScale )) {
+			$result = false;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Checks if two float values can be seen as the same.
+	 *
+	 * @param $lhsFloat
+	 * @param $rhsFloat
+	 * @return bool
+	 */
+	private function sameFloats( $lhsFloat, $rhsFloat )
+	{
+		$epsilon = 0.000001;
+		$result = true;
+
+		if ( $this->diffEmptinessFloats( $lhsFloat, $rhsFloat ) ) {
+			$result = false;
+		} elseif ( !empty( floatval( $lhsFloat ) ) && !empty( floatval( $rhsFloat ) ) ) {
+			if( abs( floatval( $lhsFloat ) - floatval( $rhsFloat ) ) > $epsilon ) {
+				$result = false;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Checks is arrays are equal on top level.
+	 *
+	 * Equal is defined as having the same emptiness or if not empty have the same keys.
+	 * E.g if $lhsArray is null and $rhsArray is array[] both are seen as equal.
+	 *
+	 * @param $lhsArray
+	 * @param $rhsArray
+	 * @return bool
+	 */
+	private function sameArrays( $lhsArray, $rhsArray )
+	{
+		$result = true;
+
+		if ( $this->diffEmptiness( $lhsArray, $rhsArray ) ) {
+			$result = false;
+		}  elseif( is_array( $lhsArray ) && is_array( $rhsArray ) ) {
+			if( array_diff( $lhsArray, $rhsArray ) ) {
+				$result = false;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Checks if two string values can be seen as the same.
+	 *
+	 * @param $lhsString
+	 * @param $rhsString
+	 * @return bool
+	 */
+	private function sameStrings( $lhsString, $rhsString )
+	{
+		$result = true;
+
+		if ( $this->diffEmptiness( $lhsString, $rhsString ) ) {
+			$result = false;
+		} elseif ( !empty( $lhsString ) && !empty( $rhsString ) ) {
+			if( strcmp( $lhsString,  $rhsString ) !== 0 ) {
+				$result = false;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Checks if two integer values can be seen as the same.
+	 *
+	 * @param $lhsInteger
+	 * @param $rhsInteger
+	 * @return bool
+	 */
+	private function sameIntegers( $lhsInteger, $rhsInteger )
+	{
+		$result = true;
+
+		if ( $this->diffEmptiness( $lhsInteger, $rhsInteger ) ) {
+			$result = false;
+		} elseif ( !empty( $lhsInteger ) && !empty( $rhsInteger ) ) {
+			if( intval( $lhsInteger ) !== intval( $rhsInteger) ) {
+				$result = false;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Checks if either both values are empty or both are not empty (exclusive or).
+	 *
+	 * @param $lhs
+	 * @param $rhs
+	 * @return bool
+	 */
+	private function diffEmptiness( $lhs, $rhs)
+	{
+		$result = false;
+		if( ( empty( $lhs ) && !empty( $rhs ) ) || ( !empty( $lhs ) && empty( $rhs ) ) ) {
+			$result = true;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Checks if either both float values are empty or both are not empty (exclusive or).
+	 * First a conversion is done so "0.0" (in fact a string which is not empty) becomes 0.0, which is empty.
+	 *
+	 * @param $lhs
+	 * @param $rhs
+	 * @return bool
+	 */
+	private function diffEmptinessFloats( $lhs, $rhs)
+	{
+		$result = false;
+		if( ( empty( floatval( $lhs ) ) && !empty( floatval( $rhs ) ) ) || ( !empty( floatval( $lhs ) ) && empty( floatval( $rhs ) ) ) ) {
+			$result = true;
+		}
+
+		return $result;
+	}
+	/**
+	 * Checks if either both integers values are empty or both are not empty (exclusive or).
+	 * First a conversion is done so "0.0" (which is not empty) becomes 0.0, which is empty.
+	 *
+	 * @param $lhs
+	 * @param $rhs
+	 * @return bool
+	 */
+	private function diffEmptinessIntegers( $lhs, $rhs)
+	{
+		$result = false;
+		if( ( empty( intval( $lhs ) ) && !empty( intval( $rhs ) ) ) || ( !empty( intval( $lhs ) ) && empty( intval( $rhs ) ) ) ) {
+			$result = true;
+		}
+
+		return $result;
 	}
 }
