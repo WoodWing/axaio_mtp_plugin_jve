@@ -117,7 +117,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			$this->setResult( 'ERROR', $message , $help );
 			$result = false;
 		}
-		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' && empty( DEFAULT_ELVIS_PRODUCTION_ZONE ) ) {
+		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' && DEFAULT_ELVIS_PRODUCTION_ZONE == ''  ) {
 			$message = 'The ELVIS_CREATE_COPY is set to "'.ELVIS_CREATE_COPY.'" '.
 				'but the DEFAULT_ELVIS_PRODUCTION_ZONE option is empty.';
 			$this->setResult( 'ERROR', $message , $help );
