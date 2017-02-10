@@ -2339,7 +2339,7 @@ class BizWebEditWorkspace
 	 * rebuild is needed.
 	 *
 	 * @param int $layoutId The layout of the preview.
-	 * @param Relations[] $composedRelations The relations as retrieved from the composed data.
+	 * @param Relation[]|null $composedRelations The relations as retrieved from the composed data.
 	 * @return bool $rebuildNeeded
 	 */
 	private function rebuildStoredRelationsPlacements( $layoutId, $composedRelations )
@@ -2364,9 +2364,9 @@ class BizWebEditWorkspace
 	 *
 	 * The (stored) relations and the placements have the same parent. Based on the frame id and the edition a link is made.
 	 *
-	 * @param Relations[] $storedRelations
+	 * @param Relation[] $storedRelations
 	 * @param $inDesignArticlePlacements
-	 * @return Relations[] $storedRelations enriched with ArticleIds
+	 * @return Relation[] $storedRelations enriched with ArticleIds
 	 */
 	private function addInDesignArticleToRelations( $storedRelations , $inDesignArticlePlacements )
 	{
@@ -2392,7 +2392,7 @@ class BizWebEditWorkspace
 	 * Placements are unique by the parent/child/type/frameid/edition. From these attributes a unique key is made. The
 	 * value of the key is the placement object itself.
 	 *
-	 * @param Relations[] $relations
+	 * @param Relation[]|null $relations
 	 * @return array with unique placements.
 	 */
 	private function extractPlacementsByKeyFromRelations( $relations )
@@ -2442,8 +2442,8 @@ class BizWebEditWorkspace
 			}
 		}
 
+		$changedPlacements = array();
 		if( $reparable ) {
-			$changedPlacements = array();
 			if( $storedPlacementsByKey ) foreach( $storedPlacementsByKey as $key => $lhsPlacement ) {
 				$composedPlacementByKey = $composedPlacementsByKey[ $key ];
 				$nonReparableDiffs = 0;
