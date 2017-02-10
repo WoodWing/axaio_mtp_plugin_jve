@@ -156,6 +156,7 @@ if( !defined('EXTENSIONMAP') ) {
 		'.wcmt' => array( 'application/incopyicmt', 'ArticleTemplate'),
 		'.wwea' => array( 'text/wwea', 'Article'),
 		'.wweat' => array( 'text/wwea', 'ArticleTemplate'), // BZ# 19176: To ensure the article template has the correct icon.
+		'.digital' => array( 'application/ww-digital+json', 'Article'), // added since 10.2.0 to support Content Station Digital Editor articles
 		'.incd' => array( 'application/incopy', 'Article'),
 		'.incx' => array( 'application/incopy', 'Article'),
 		'.indd' => array( 'application/indesign', 'Layout'),
