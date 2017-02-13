@@ -47,8 +47,15 @@ class ElvisSessionUtil
 		}
 		$name = self::getVarName('cred');
 		if (!array_key_exists($name, $sessionVariables)) {
-			$message = 'Elvis credentials not found, please re-log in.';
-			throw new BizException(null, 'Server', $message, $message);
+			// EN-88706 When the Elvis connection is broken, the user works with a ticket that is valid
+			// for Enterprise but that session no longer has a valid ticket (jsessionid) for Elvis.
+			// Basically, the Enterprise ticket is then half broken. To recover from this situation
+			// we should ask the user to re-logon to Enterprise which implicitly will re-logon
+			// to Elvis as well. So here we act as if the Enterprise ticket is no longer valid by
+			// raising a generic ticket invalid error. This will trigger SC/CS to raise the re-logon
+			// dialog. (Note that this is more user friendly than raising an Elvis communication error
+			// for which we'd leave it up to the end-user to manually logout and login again.)
+			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
 		}
 		return $sessionVariables[$name];
 	}
@@ -124,7 +131,7 @@ class ElvisSessionUtil
 	 *
 	 * @param string $varName
 	 * @param array $sessionVariables Array of session variable
-	 * @return object null if variable not set, object otherwise.
+	 * @return mixed|null Value when variable is set, NULL otherwise.
 	 */
 	public static function getSessionVar( $varName, $sessionVariables = null )
 	{
@@ -139,7 +146,7 @@ class ElvisSessionUtil
 	 * Set an object in the session.
 	 *
 	 * @param string $key
-	 * @param object $value
+	 * @param mixed $value
 	 */
 	public static function setSessionVar( $key, $value )
 	{
