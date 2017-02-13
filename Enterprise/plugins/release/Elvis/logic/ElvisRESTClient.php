@@ -8,14 +8,15 @@ class ElvisRESTClient
 	 * It does log the request and response data in DEBUG mode.
 	 *
 	 * @param string $service Service name of the Elvis API.
+	 * @param string $url Request URL (JSON REST)
 	 * @param string[]|null $post Optionally. List of HTTP POST parameters to send along with the request.
 	 * @return mixed Returned
 	 * @throws BizException
 	 */
-	private static function send( $service, $post = null )
+	private static function send( $service, $url, $post = null )
 	{
-		require_once dirname( __FILE__ ).'/../util/ElvisUtils.class.php';
-		$url = ElvisUtils::getServiceUrl( $service );
+		require_once __DIR__.'/../util/ElvisSessionUtil.php';
+		$url = $url. ';jsessionid=' . ElvisSessionUtil::getSessionId();
 		$isDebug = LogHandler::debugMode();
 		if( $isDebug ) {
 			LogHandler::Log( 'ELVIS', 'DEBUG', 'RESTClient calling Elvis web service '.$service );
@@ -33,7 +34,17 @@ class ElvisRESTClient
 		if( isset( $response->errorcode ) ) {
 			$detail = 'Calling Elvis web service '.$service.' failed. '.
 				'Error code: '.$response->errorcode.'; Message: '.$response->message;
-			self::throwExceptionForElvisCommunicationFailure( $detail );
+			// When Elvis session is expired, re-login and try same request again.
+			static $recursion = 0; // paranoid checksum for endless recursion
+			if( $response->errorcode == 401 && $recursion < 3 ) {
+				$recursion += 1;
+				require_once __DIR__.'/ElvisAMFClient.php';
+				ElvisAMFClient::login();
+				self::send( $service, $url, $post );
+				$recursion -= 1;
+			} else {
+				self::throwExceptionForElvisCommunicationFailure( $detail );
+			}
 		}
 		return $response;
 	}
@@ -88,7 +99,7 @@ class ElvisRESTClient
 	 *
 	 * For ES 10.0 or later it throws a S1144 error else it throws S1069.
 	 *
-	 * @since 10.1.1
+	 * @since 10.0.5 / 10.1.1
 	 * @param string $detail
 	 * @throws BizException
 	 */
@@ -121,7 +132,7 @@ class ElvisRESTClient
 		}
 
 		if( isset( $file ) ) {
-			//This class replaces the deprecated "@" syntax of sending files through curl. 
+			//This class replaces the deprecated "@" syntax of sending files through curl.
 			//It is available from PHP 5.5 and onwards, so the old option should be maintained for backwards compatibility.
 			if( class_exists( 'CURLFile' ) ) {
 				$post['Filedata'] = new CURLFile( $file->FilePath, $file->Type );
@@ -130,7 +141,7 @@ class ElvisRESTClient
 			}
 		}
 
-		self::send( 'update', $post );
+		self::send( 'update', ELVIS_URL.'/services/update', $post );
 	}
 
 	/**
@@ -159,7 +170,7 @@ class ElvisRESTClient
 			$post['metadata'] = json_encode( $metadata );
 		}
 
-		self::send( 'updatebulk', $post );
+		self::send( 'updatebulk', ELVIS_URL.'/services/updatebulk', $post );
 	}
 
 	/**
@@ -172,7 +183,7 @@ class ElvisRESTClient
 	public static function logout()
 	{
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
-		if( ElvisSessionUtil::getSessionId() ) {
+		if( ElvisSessionUtil::isSessionIdAvailable() ) {
 			self::logoutSession();
 		}
 	}
@@ -186,7 +197,7 @@ class ElvisRESTClient
 	 */
 	private static function logoutSession()
 	{
-		return self::send( 'logout' );
+		return self::send( 'logout', ELVIS_URL.'/services/logout' );
 	}
 
 	/**
@@ -197,18 +208,31 @@ class ElvisRESTClient
 	 */
 	public static function fieldInfo()
 	{
-		return self::send( 'fieldinfo' );
+		return self::send( 'fieldinfo', ELVIS_URL.'/services/fieldinfo' );
 	}
 
 	/**
 	 * Pings the Elvis Server and retrieves some basic information.
 	 *
+	 * @since 10.1.1
 	 * @return object Info object with properties state, version, available and server.
 	 */
 	public function getElvisServerInfo()
 	{
 		// The Elvis ping service returns a JSON structure like this:
 		//     {"state":"running","version":"5.15.2.9","available":true,"server":"Elvis"}
-		return self::send( 'ping' );
+		return self::send( 'ping', ELVIS_URL.'/services/ping' );
+	}
+
+	/**
+	 * Calls the alive web service over the Elvis JSON REST interface.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return integer $time Current Unix Timestamp
+	 * @throws BizException
+	 */
+	public static function keepAlive( $time )
+	{
+		return self::send( 'alive', ELVIS_URL.'/alive.txt?_='.$time );
 	}
 }
