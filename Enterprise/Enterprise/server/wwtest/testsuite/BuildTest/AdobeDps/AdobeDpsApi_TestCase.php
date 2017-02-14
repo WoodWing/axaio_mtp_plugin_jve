@@ -22,34 +22,34 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsApi_TestCase extends TestCase
 		// web admin: https://digitalpublishing.acrobat.com/app.html
 		// InDesign: Folio Builder (and Overlay Creator) panels
 		
-		require_once BASEDIR.'/config/config_dps.php';
-		$dpsConfigs = unserialize( ADOBEDPS_ACCOUNTS );
-		if( $dpsConfigs ) foreach( $dpsConfigs as $channelId => $dpsAccs ) {
-			foreach( $dpsAccs as $editionId => $dpsAccSettings ) {
-				if( $channelId == 0 && $editionId == 0 ) { // Get the config for test Channel = All and Edition = All
-					$dpsConfig = $dpsAccSettings;
-				}
-			}
-		}
-		
-		$dpsConfig = isset( $dpsConfigs[0][0] ) ? $dpsConfigs[0][0] : null; // Get the config for test Channel = All and Edition = All
-		if( is_null( $dpsConfig )) {
-			$this->setResult( 'ERROR', 'No DPS account is set for all channel(id=0) and all edition(id=0). Please check your config_dps.php file' );
-			return;
-		}
-		
-		if( !isset($dpsConfig['serverurl']) || !isset($dpsConfig['username']) || !isset($dpsConfig['password']) ) {
-			$this->setResult( 'ERROR', 'DPS account is set but some keys are missing. '. 
-									   'There should be \'serverurl\', \'username\' and \'password\'. Please check your config_dps.php file.' );
-			return;
-		}
-		
-		require_once BASEDIR.'/server/utils/DigitalPublishingSuiteClient.class.php';
-		$service = new WW_Utils_DigitalPublishingSuiteClient( $dpsConfig['serverurl'], $dpsConfig['username'] );
-		$service->signIn( $dpsConfig['username'], $dpsConfig['password'] );
-		
-		$this->testIssue( $service, null, 'LatestIssue'/*DPS filter*/ ); // Create new Issue through API
-		$this->testIssue( $service, $this->issueId, 'UpdatedIssue'/*DPS filter*/ ); // Use existing Folio that created earlier
+//		require_once BASEDIR.'/config/config_dps.php';
+//		$dpsConfigs = unserialize( ADOBEDPS_ACCOUNTS );
+//		if( $dpsConfigs ) foreach( $dpsConfigs as $channelId => $dpsAccs ) {
+//			foreach( $dpsAccs as $editionId => $dpsAccSettings ) {
+//				if( $channelId == 0 && $editionId == 0 ) { // Get the config for test Channel = All and Edition = All
+//					$dpsConfig = $dpsAccSettings;
+//				}
+//			}
+//		}
+//
+//		$dpsConfig = isset( $dpsConfigs[0][0] ) ? $dpsConfigs[0][0] : null; // Get the config for test Channel = All and Edition = All
+//		if( is_null( $dpsConfig )) {
+//			$this->setResult( 'ERROR', 'No DPS account is set for all channel(id=0) and all edition(id=0). Please check your config_dps.php file' );
+//			return;
+//		}
+//
+//		if( !isset($dpsConfig['serverurl']) || !isset($dpsConfig['username']) || !isset($dpsConfig['password']) ) {
+//			$this->setResult( 'ERROR', 'DPS account is set but some keys are missing. '.
+//									   'There should be \'serverurl\', \'username\' and \'password\'. Please check your config_dps.php file.' );
+//			return;
+//		}
+//
+//		require_once BASEDIR.'/server/utils/DigitalPublishingSuiteClient.class.php';
+//		$service = new WW_Utils_DigitalPublishingSuiteClient( $dpsConfig['serverurl'], $dpsConfig['username'] );
+//		$service->signIn( $dpsConfig['username'], $dpsConfig['password'] );
+//
+//		$this->testIssue( $service, null, 'LatestIssue'/*DPS filter*/ ); // Create new Issue through API
+//		$this->testIssue( $service, $this->issueId, 'UpdatedIssue'/*DPS filter*/ ); // Use existing Folio that created earlier
 	}
 
 	/**
