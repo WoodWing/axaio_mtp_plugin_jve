@@ -17,20 +17,11 @@ class ElvisRESTClient
 	{
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 		$url = $url. ';jsessionid=' . ElvisSessionUtil::getSessionId();
-		$isDebug = LogHandler::debugMode();
-		if( $isDebug ) {
-			LogHandler::Log( 'ELVIS', 'DEBUG', 'RESTClient calling Elvis web service '.$service );
-			$logRequest = 'URL: '.$url.PHP_EOL.'DATA: '.print_r( $post, true );
-			LogHandler::logService( 'Elvis_'.$service, $logRequest, true, 'JSON' );
-		}
+		$logRequest = 'URL: '.$url.PHP_EOL.'DATA: '.print_r( $post, true );
+		self::logService( $service, $logRequest, true );
 		$response = self::sendUrl( $service, $url, $post );
-		if( $isDebug ) {
-			if( isset( $response->errorcode ) ) {
-				LogHandler::logService( 'Elvis_'.$service, print_r( $response, true ), null, 'JSON' );
-			} else {
-				LogHandler::logService( 'Elvis_'.$service, print_r( $response, true ), false, 'JSON' );
-			}
-		}
+		self::logService( $service, $response, false );
+
 		if( isset( $response->errorcode ) ) {
 			$detail = 'Calling Elvis web service '.$service.' failed. '.
 				'Error code: '.$response->errorcode.'; Message: '.$response->message;
@@ -47,6 +38,30 @@ class ElvisRESTClient
 			}
 		}
 		return $response;
+	}
+
+	/**
+	 * In debug mode, performs a print_r on $transData and logs the service as JSON.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @param string $service Service method used to give log file a name.
+	 * @param mixed $transData Transport data to be written in log file using print_r.
+	 * @param boolean $isRequest TRUE to indicate a request, FALSE for a response (could be an error).
+	 */
+	private static function logService( $service, $transData, $isRequest )
+	{
+		if( LogHandler::debugMode() ) {
+			if( $isRequest ) {
+				LogHandler::Log( 'ELVIS', 'DEBUG', 'RESTClient calling Elvis web service '.$service );
+				LogHandler::logService( 'Elvis_'.$service, print_r( $transData, true ), true, 'JSON' );
+			} else { // response or error
+				if( isset( $transData->errorcode ) ) {
+					LogHandler::logService( 'Elvis_'.$service, print_r( $transData, true ), null, 'JSON' );
+				} else {
+					LogHandler::logService( 'Elvis_'.$service, print_r( $transData, true ), false, 'JSON' );
+				}
+			}
+		}
 	}
 
 	/**
@@ -197,7 +212,7 @@ class ElvisRESTClient
 	 */
 	private static function logoutSession()
 	{
-		return self::send( 'logout', ELVIS_URL.'/services/logout' );
+		self::send( 'logout', ELVIS_URL.'/services/logout' );
 	}
 
 	/**
@@ -228,11 +243,11 @@ class ElvisRESTClient
 	 * Calls the alive web service over the Elvis JSON REST interface.
 	 *
 	 * @since 10.0.5 / 10.1.2
-	 * @return integer $time Current Unix Timestamp
+	 * @param integer $time Current Unix Timestamp
 	 * @throws BizException
 	 */
 	public static function keepAlive( $time )
 	{
-		return self::send( 'alive', ELVIS_URL.'/alive.txt?_='.$time );
+		self::send( 'alive', ELVIS_URL.'/alive.txt?_='.$time );
 	}
 }

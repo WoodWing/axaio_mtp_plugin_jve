@@ -5,6 +5,9 @@ class Elvis_Session extends Session_EnterpriseConnector
 {
 	private static $LAST_KEEP_ALIVE_CALLED_TIME = 'last_keep_alive_called_time';
 
+	/**
+	 * @inheritdoc
+	 */
 	public function ticketExpirationReset( $ticket, $userShort )
 	{
 		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';

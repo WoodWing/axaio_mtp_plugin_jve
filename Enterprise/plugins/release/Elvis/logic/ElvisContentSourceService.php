@@ -198,7 +198,6 @@ class ElvisContentSourceService
 		ElvisAMFClient::registerClass( ElvisFormattedValue::getName() );
 		ElvisAMFClient::registerClass( BasicMap::getName() );
 		$params = array( $assetId );
-		$hits = null;
 
 		try {
 			$hits = ElvisAMFClient::send( self::SERVICE, 'listVersions', $params, true );
@@ -393,7 +392,7 @@ class ElvisContentSourceService
 	 * Returns asset updates waiting in the queue, using long-polling
 	 *
 	 * @param string $enterpriseSystemId The id identifying the Enterprise server
-	 * @param int Timeout in seconds after which the call should return with no updates
+	 * @param int $timeout Timeout in seconds after which the call should return with no updates
 	 * @return ElvisEntUpdate[] Updates
 	 * @throws BizException
 	 */
