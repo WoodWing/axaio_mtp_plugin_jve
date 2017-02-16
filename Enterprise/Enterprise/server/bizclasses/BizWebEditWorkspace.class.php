@@ -1079,9 +1079,7 @@ class BizWebEditWorkspace
 
 						// Save the InDesign Article Placements for the layout object (v9.7).
 						if( !is_null( $iaPlacements ) ) {
-							foreach( $iaPlacements as $iaPlacement ) {
-								DBPlacements::insertPlacement( $layoutId, 0, 'Placed', $iaPlacement );
-							}
+							DBPlacements::insertIDAPlacementsFromScratch( $layoutId, $iaPlacements );
 						}
 					}
 					
