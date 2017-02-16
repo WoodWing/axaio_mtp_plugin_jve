@@ -47,10 +47,10 @@ class ElvisAMFClient
 	private static function sendUnParsed($service, $operation, $params, $secure=true, $timeout=60)
 	{
 		$servicePath = $service . '.' . $operation;
-		$url = self::getEndpointUrl($secure);
+		$url = self::getEndpointUrl( $secure );
 		$client = new SabreAMF_Client($url, self::DESTINATION);
 		$client->setEncoding(SabreAMF_Const::FLEXMSG);
-		
+
 		LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.' - url:' . $url . '; secure:' . $secure );
 		self::logService( 'Elvis_'.$service.'_'.$operation, $params, true );
 
@@ -204,19 +204,22 @@ class ElvisAMFClient
 		}
 		return $ifVersion;
 	}
-	
-	private static function getEndpointUrl($includeSessionId=true)
+
+	/**
+	 * Composes an endpoint (URL) for Elvis AMF service calls.
+	 *
+	 * @param bool $includeSessionId
+	 * @return string URL
+	 */
+	private static function getEndpointUrl( $includeSessionId=true )
 	{
-		//TODO: normalize URL
-		$url = ELVIS_URL . '/graniteamf/amf';
-	
-		if ($includeSessionId) {
-			if (!ElvisSessionUtil::isSessionIdAvailable()) {
+		$url = ELVIS_URL.'/graniteamf/amf';
+		if( $includeSessionId ) {
+			if( !ElvisSessionUtil::isSessionIdAvailable() ) {
 				self::login();
 			}
-			$url .= ';jsessionid=' . ElvisSessionUtil::getSessionId();
+			$url .= ';jsessionid='.ElvisSessionUtil::getSessionId();
 		}
-	
 		return $url;
 	}
 

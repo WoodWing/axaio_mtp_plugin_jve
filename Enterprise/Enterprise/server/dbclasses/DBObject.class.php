@@ -451,28 +451,7 @@ class DBObject extends DBBase
 	 */
 	static public function getMultipleObjectsProperties( array $objectIds )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$objTbl = $dbDriver->tablename( self::TABLENAME );
-		$pubTbl = $dbDriver->tablename( 'publications' );
-		$secTbl = $dbDriver->tablename( 'publsections' );
-		$sttTbl = $dbDriver->tablename( 'states' );
-		$lckTbl = $dbDriver->tablename( 'objectlocks' );
-		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' ) ).' as "version"';
-
-		$sql = 'SELECT o.`id`, o.`documentid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
-			'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, o.`modifier`, o.`comment`, '.
-			'pub.`publication` as "pubname", sec.`section` as "secname", stt.`state` as "sttname", '.
-			'stt.`type` as "stttype", stt.`color` as "sttcolor", o.`routeto`, lck.`usr` as "lockedby", '.$verFld.' '.
-			"FROM $objTbl o ".
-			"INNER JOIN $pubTbl pub ON (o.`publication` = pub.`id` ) ".
-			"LEFT JOIN $secTbl sec ON (o.`section` = sec.`id` ) ".
-			"LEFT JOIN $sttTbl stt ON (o.`state` = stt.`id` ) ". // LEFT JOIN because of Personal status = -1
-			"LEFT JOIN $lckTbl lck ON (o.`id` = lck.`object` ) ".
-			'WHERE o.`id` IN ( '.implode( ',', $objectIds ).' ) ';
-		$params = array();
-		$sth = $dbDriver->query( $sql, $params );
-		$rows = self::fetchResults( $sth, 'id', false, $dbDriver );
-
+		$rows = self::getMultipleObjectDBRows( $objectIds );
 		$mds = array();
 		if( $rows ) foreach( $rows as $row ) {
 
@@ -515,8 +494,41 @@ class DBObject extends DBBase
 		}
 		return $mds;
 	}
-	
-    static public function getTemplateObject( $name, $type )
+
+	/**
+	 * Returns an array of database object rows.
+	 *
+	 * @param array $objectIds
+	 * @return array with object rows.
+	 */
+	static public function getMultipleObjectDBRows( array $objectIds )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$objTbl = $dbDriver->tablename( self::TABLENAME );
+		$pubTbl = $dbDriver->tablename( 'publications' );
+		$secTbl = $dbDriver->tablename( 'publsections' );
+		$sttTbl = $dbDriver->tablename( 'states' );
+		$lckTbl = $dbDriver->tablename( 'objectlocks' );
+		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' ) ).' as "version"';
+
+		$sql = 'SELECT o.`id`, o.`documentid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
+			'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, o.`modifier`, o.`comment`, '.
+			'pub.`publication` as "pubname", sec.`section` as "secname", stt.`state` as "sttname", '.
+			'stt.`type` as "stttype", stt.`color` as "sttcolor", o.`routeto`, lck.`usr` as "lockedby", '.$verFld.' '.
+			"FROM $objTbl o ".
+			"INNER JOIN $pubTbl pub ON (o.`publication` = pub.`id` ) ".
+			"LEFT JOIN $secTbl sec ON (o.`section` = sec.`id` ) ".
+			"LEFT JOIN $sttTbl stt ON (o.`state` = stt.`id` ) ". // LEFT JOIN because of Personal status = -1
+			"LEFT JOIN $lckTbl lck ON (o.`id` = lck.`object` ) ".
+			'WHERE o.`id` IN ( '.implode( ',', $objectIds ).' ) ';
+		$params = array();
+		$sth = $dbDriver->query( $sql, $params );
+		$rows = self::fetchResults( $sth, 'id', false, $dbDriver );
+
+		return $rows;
+	}
+
+	static public function getTemplateObject( $name, $type )
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbo = $dbDriver->tablename("objects");

@@ -328,13 +328,4 @@ class ElvisUtils {
 		LogHandler::Log('ELVIS', 'DEBUG', 'client for ticket '. BizSession::getTicket() . ": ". $activeClient);
 		return (bool)stristr($activeClient, $clientName);
 	}
-
-	/**
-	 * @param $serviceName
-	 * @return string
-	 */
-	public static function getServiceUrl($serviceName)
-	{
-		return self::appendSessionId(ELVIS_URL . "/services/" . $serviceName);
-	}
 }
