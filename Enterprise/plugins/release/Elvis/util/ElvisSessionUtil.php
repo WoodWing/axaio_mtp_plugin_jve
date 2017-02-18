@@ -5,71 +5,23 @@ require_once dirname(__FILE__).'/../config.php';
 class ElvisSessionUtil
 {
 	/**
-	 * Get the sessionId
+	 * Check if there is an Elvis session available.
 	 *
-	 * @param array $sessionVariables Array of session variable
-	 * @return string
-	 */
-	public static function getSessionId( $sessionVariables = null )
-	{
-		$serviceName = BizSession::getServiceName();
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ElvisSessionUtil - getSessionId: $serviceName=' . $serviceName );
-
-		if( is_null($sessionVariables) ) {
-			$sessionVariables = self::getSessionVariables();
-		}
-		$name = self::getVarName('sessionId');
-		return array_key_exists($name, $sessionVariables) ? $sessionVariables[$name] : null;
-	}
-
-	/**
-	 * Check if there is a sessionId available
-	 *
-	 * @param array $sessionVariables Array of session variable
 	 * @return boolean
 	 */
-	public static function isSessionIdAvailable( $sessionVariables = null )
+	public static function hasSession()
 	{
-		return !is_null(self::getSessionId( $sessionVariables ) );
+		return (bool)self::getSessionCookies();
 	}
 
 	/**
 	 * Get the base64 encoded credentials
 	 *
-	 * @param array $sessionVariables Array of session variable
-	 * @throws BizException
 	 * @return string
 	 */
-	public static function getCredentials( $sessionVariables = null )
+	public static function getCredentials()
 	{
-		if( is_null($sessionVariables) ) {
-			$sessionVariables = self::getSessionVariables();
-		}
-		$name = self::getVarName('cred');
-		if (!array_key_exists($name, $sessionVariables)) {
-			// EN-88706 When the Elvis connection is broken, the user works with a ticket that is valid
-			// for Enterprise but that session no longer has a valid ticket (jsessionid) for Elvis.
-			// Basically, the Enterprise ticket is then half broken. To recover from this situation
-			// we should ask the user to re-logon to Enterprise which implicitly will re-logon
-			// to Elvis as well. So here we act as if the Enterprise ticket is no longer valid by
-			// raising a generic ticket invalid error. This will trigger SC/CS to raise the re-logon
-			// dialog. (Note that this is more user friendly than raising an Elvis communication error
-			// for which we'd leave it up to the end-user to manually logout and login again.)
-			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
-		}
-		return $sessionVariables[$name];
-	}
-
-	/**
-	 * Save the session id
-	 *
-	 * @param string $sessionId
-	 */
-	public static function saveSessionId( $sessionId )
-	{
-		$sessionVars = array();
-		$sessionVars[self::getVarName('sessionId')] = $sessionId;
-		BizSession::setSessionVariables($sessionVars);
+		return self::getSessionVar( 'cred' );
 	}
 
 	/**
@@ -80,13 +32,37 @@ class ElvisSessionUtil
 	 */
 	public static function saveCredentials( $username, $password )
 	{
-		/*
-		 * FIXME: We do not want to save the password in a PHP session. For now, we need to
-		 * so we're able to authenticate against Elvis when the session to Elvis is expired.
-		 */
-		$sessionVars = array();
-		$sessionVars[self::getVarName('cred')] = base64_encode($username . ':' . $password);
-		BizSession::setSessionVariables($sessionVars);
+		 // FIXME: We do not want to save the password in a PHP session. For now, we need to
+		 // so we're able to authenticate against Elvis when the session to Elvis is expired.
+		self::setSessionVar( 'cred', base64_encode( $username . ':' . $password ) );
+	}
+
+	/**
+	 * Retrieve the Elvis session cookies from the Enterprise session.
+	 *
+	 * @return array|null Cookies. NULL when no session available.
+	 */
+	public static function getSessionCookies()
+	{
+		return self::getSessionVar( 'sessionCookies' );
+	}
+
+	/**
+	 * Save the Elvis session cookies into the Enterprise session.
+	 *
+	 * @param array $cookies
+	 */
+	public static function saveSessionCookies( array $cookies )
+	{
+		self::setSessionVar( 'sessionCookies', $cookies );
+	}
+
+	/**
+	 * Removes the Elvis session cookies from the Enterprise session.
+	 */
+	public static function clearSessionCookies()
+	{
+		self::saveSessionCookies( array() );
 	}
 
 	/**
@@ -129,17 +105,14 @@ class ElvisSessionUtil
 	/**
 	 * Get a session variable by key.
 	 *
-	 * @param string $varName
-	 * @param array $sessionVariables Array of session variable
+	 * @param string $key
 	 * @return mixed|null Value when variable is set, NULL otherwise.
 	 */
-	public static function getSessionVar( $varName, $sessionVariables = null )
+	public static function getSessionVar( $key )
 	{
-		if( is_null($sessionVariables) ) {
-			$sessionVariables = self::getSessionVariables();
-		}
-		$name = self::getVarName($varName);
-		return array_key_exists($name, $sessionVariables) ?  $sessionVariables[$name] : null;
+		$sessionVariables = BizSession::getSessionVariables();
+		$name = self::getVarName( $key );
+		return array_key_exists( $name, $sessionVariables ) ?  $sessionVariables[$name] : null;
 	}
 
 	/**
@@ -150,10 +123,8 @@ class ElvisSessionUtil
 	 */
 	public static function setSessionVar( $key, $value )
 	{
-		$sessionVars = array();
-		$sessionVars[self::getVarName($key)] = $value;
-
-		BizSession::setSessionVariables($sessionVars);
+		$sessionVars = array( self::getVarName($key) => $value );
+		BizSession::setSessionVariables( $sessionVars );
 	}
 
 	/**
@@ -163,22 +134,17 @@ class ElvisSessionUtil
 	 */
 	public static function getAllAssetInfo()
 	{
-		$sessionVars = BizSession::getSessionVariables();
-		$name = self::getVarName('allAssetInfo');
-		return array_key_exists($name, $sessionVars) ?  $sessionVars[$name] : null;
+		return self::getSessionVar( 'allAssetInfo' );
 	}
 
 	/**
 	 * Set AllAssetInfo
 	 *
-	 * @param $allAssetInfo
+	 * @param object $allAssetInfo
 	 */
 	public static function setAllAssetInfo( $allAssetInfo )
 	{
-		$sessionVars = array();
-		$sessionVars[self::getVarName('allAssetInfo')] = $allAssetInfo;
-
-		BizSession::setSessionVariables( $sessionVars );
+		self::setSessionVar( 'allAssetInfo', $allAssetInfo );
 	}
 
 	/**
@@ -191,16 +157,4 @@ class ElvisSessionUtil
 	{
 		return ELVIS_CONTENTSOURCEPREFIX . $name;
 	}
-
-	/**
-	 * Get session variables
-	 *
-	 * @return array
-	 */
-	public static function getSessionVariables()
-	{
-		$sessionVars = BizSession::getSessionVariables();
-		return $sessionVars;
-	}
-
 }

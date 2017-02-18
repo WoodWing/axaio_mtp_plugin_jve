@@ -16,11 +16,13 @@ class ElvisRESTClient
 	private static function send( $service, $url, $post = null )
 	{
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
-		$url = $url. ';jsessionid=' . ElvisSessionUtil::getSessionId();
-		$logRequest = 'URL: '.$url.PHP_EOL.'DATA: '.print_r( $post, true );
-		self::logService( $service, $logRequest, true );
-		$response = self::sendUrl( $service, $url, $post );
-		self::logService( $service, $response, false );
+		$cookies = ElvisSessionUtil::getSessionCookies();
+		self::logService( $service, $url, $post, $cookies, true );
+		$response = self::sendUrl( $service, $url, $post, $cookies );
+		self::logService( $service, $url, $response, $cookies, false );
+		if( $cookies ) {
+			ElvisSessionUtil::saveSessionCookies( $cookies );
+		}
 
 		if( isset( $response->errorcode ) ) {
 			$detail = 'Calling Elvis web service '.$service.' failed. '.
@@ -45,20 +47,23 @@ class ElvisRESTClient
 	 *
 	 * @since 10.0.5 / 10.1.2
 	 * @param string $service Service method used to give log file a name.
+	 * @param string $url REST URL
 	 * @param mixed $transData Transport data to be written in log file using print_r.
+	 * @param array $cookies HTTP cookies sent with request or returned by response.
 	 * @param boolean $isRequest TRUE to indicate a request, FALSE for a response (could be an error).
 	 */
-	private static function logService( $service, $transData, $isRequest )
+	private static function logService( $service, $url, $transData, $cookies, $isRequest )
 	{
 		if( LogHandler::debugMode() ) {
+			$log = 'URL:'.$url.PHP_EOL.'Cookies:'.print_r( $cookies, true ).PHP_EOL.'JSON:'.print_r( $transData, true );
 			if( $isRequest ) {
 				LogHandler::Log( 'ELVIS', 'DEBUG', 'RESTClient calling Elvis web service '.$service );
-				LogHandler::logService( 'Elvis_'.$service, print_r( $transData, true ), true, 'JSON' );
+				LogHandler::logService( 'Elvis_'.$service, $log, true, 'JSON' );
 			} else { // response or error
 				if( isset( $transData->errorcode ) ) {
-					LogHandler::logService( 'Elvis_'.$service, print_r( $transData, true ), null, 'JSON' );
+					LogHandler::logService( 'Elvis_'.$service, $log, null, 'JSON' );
 				} else {
-					LogHandler::logService( 'Elvis_'.$service, print_r( $transData, true ), false, 'JSON' );
+					LogHandler::logService( 'Elvis_'.$service, $log, false, 'JSON' );
 				}
 			}
 		}
@@ -70,43 +75,39 @@ class ElvisRESTClient
 	 * @param string $service Service name of the Elvis API.
 	 * @param string $url Request URL (JSON REST)
 	 * @param string[]|null $post Optionally. List of HTTP POST parameters to send along with the request.
+	 * @param array $cookies HTTP cookies to sent with request. After call, this is replaced with cookies returned by response.
 	 * @return mixed
 	 * @throws BizException
 	 */
-	private static function sendUrl( $service, $url, $post = null )
+	private static function sendUrl( $service, $url, $post, &$cookies )
 	{
-		$ch = curl_init();
-		if( !$ch ) {
-			$detail = 'Elvis '.$service.' failed. '.
-				'Failed to create a CURL handle for url: '.$url;
-			self::throwExceptionForElvisCommunicationFailure( $detail );
-		}
-
-		curl_setopt( $ch, CURLOPT_URL, $url );
-		curl_setopt( $ch, CURLOPT_HEADER, 0 );
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-		curl_setopt( $ch, CURLOPT_POST, 1 );
-		if( defined( 'ELVIS_CURL_OPTIONS') ) { // hidden option
-			$options = unserialize( ELVIS_CURL_OPTIONS );
-			if( $options ) foreach( $options as $key => $value ) {
-				curl_setopt( $ch, $key, $value );
+		$response = null;
+		try {
+			$client = new Zend\Http\Client();
+			$client->setUri( $url );
+			$client->setMethod( Zend\Http\Request::METHOD_POST );
+			if( defined( 'ELVIS_CURL_OPTIONS' ) ) { // hidden option
+				$client->setOptions( array( 'curloptions' => unserialize( ELVIS_CURL_OPTIONS ) ) );
 			}
+			if( isset( $post ) ) {
+				$client->setParameterPost( $post );
+			}
+			if( $cookies ) {
+				$client->setCookies( $cookies );
+			}
+			$response = $client->send();
+		} catch( Exception $e ) {
+			self::throwExceptionForElvisCommunicationFailure( $e->getMessage() );
 		}
-
-		if( isset( $post ) ) {
-			curl_setopt( $ch, CURLOPT_POSTFIELDS, $post );
+		if( $response->getStatusCode() !== 200 ) {
+			self::throwExceptionForElvisCommunicationFailure( $response->getReasonPhrase() );
 		}
-
-		$result = curl_exec( $ch );
-		if( $result === false ) {
-			$detail = 'Elvis '.$service.' failed. '.
-				'CURL failed with error code '.curl_errno( $ch ).' for url: '.$url;
-			self::throwExceptionForElvisCommunicationFailure( $detail );
+		$cookies = array();
+		$cookieJar = $response->getCookie();
+		if( $cookieJar ) foreach( $cookieJar as $cookie ) {
+			$cookies[$cookie->getName()] = $cookie->getValue();
 		}
-
-		curl_close( $ch );
-
-		return json_decode( $result );
+		return json_decode( $response->getBody() );
 	}
 
 	/**
@@ -198,8 +199,9 @@ class ElvisRESTClient
 	public static function logout()
 	{
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
-		if( ElvisSessionUtil::isSessionIdAvailable() ) {
+		if( ElvisSessionUtil::hasSession() ) {
 			self::logoutSession();
+			ElvisSessionUtil::clearSessionCookies();
 		}
 	}
 

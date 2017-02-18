@@ -92,34 +92,66 @@ class ElvisUtils {
 	 * If version specified, it will be taken into account
 	 * Extracted url, if could be resolved then used to copy file to Enterprise Transfer server.
 	 *
-	 * @param object $hit - hit which is used for url extraction
-	 * @param string $rendition - to be extracted
-	 * @param bool $returnFileUrls When true, only file links to the content source are returned, otherwise the complete file cpmtemt/
-	 * @return Attachment - if could be restored or null
+	 * While copying, the Elvis session id is sent through cookies to authorize the download URL.
+	 * This is done through input stream options.
+	 *
+	 * @param ElvisEntHit $hit Elvis search result (where the URL can be extracted from).
+	 * @param string $rendition File rendition to download.
+	 * @param bool $returnFileUrls TRUE to return a direct link (URL) to the content source, or FALSE to download the file to the transfer server folder and return the URL.
+	 * @return Attachment|null The file attachment, or null when not found.
 	 * @throws BizException
 	 */
-	public static function getAttachment($hit, $rendition, $returnFileUrls)
+	public static function getAttachment( $hit, $rendition, $returnFileUrls )
 	{
-		$file = null;
-		$url = ElvisUtils::getUrlFromRendition($hit, $rendition);
-
-		if (!is_null($url)) {
-			$type = self::getMimeType($hit);
-
-			if( !$returnFileUrls ) {
-				require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
-				$transferServer = new BizTransferServer();
-				$attachment = new Attachment($rendition, $type);
-				if ( !$transferServer->copyToFileTransferServer($url, $attachment) ) {
-					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
+		$attachment = null;
+		$url = self::getUrlFromRendition( $hit, $rendition );
+		if( $url ) {
+			$type = self::getMimeType( $hit );
+			if( $type ) {
+				if( !$returnFileUrls ) {
+					require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
+					$transferServer = new BizTransferServer();
+					$attachment = new Attachment();
+					$attachment->Rendition = $rendition;
+					$attachment->Type = $type;
+					if( !$transferServer->copyToFileTransferServer( $url, $attachment, self::composeSessionOptions() ) ) {
+						throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
+					}
+				} else {
+					// $url = self::appendSessionId( $url );
+					$attachment = new Attachment();
+					$attachment->Rendition = $rendition;
+					$attachment->Type = $type;
+					$attachment->ContentSourceFileLink = $url;
 				}
-				$file = $attachment;
-			} else {
-				$file = new Attachment($rendition, $type, null, null, null, null, $url);
 			}
 		}
+		return $attachment;
+	}
 
-		return $file;
+	/**
+	 * Composes input stream options from Elvis session cookie.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return array|null
+	 */
+	private static function composeSessionOptions()
+	{
+		$options = null;
+		require_once __DIR__.'/ElvisSessionUtil.php';
+		$cookies = ElvisSessionUtil::getSessionCookies();
+		if( $cookies ) {
+			$cookiesHeader = '';
+			foreach( $cookies as $name => $value ) {
+				$cookiesHeader .= "Cookie: $name=$value\r\n";
+			}
+			if( $cookiesHeader ) {
+				$options = array( 'http' => array(
+					'header' => $cookiesHeader
+				) );
+			}
+		}
+		return $options;
 	}
 
 	/**
@@ -203,46 +235,28 @@ class ElvisUtils {
 	 * @param string $rendition
 	 * @return string|null download url if a url is set for a rendition, else null.
 	 */
-	public static function getUrlFromRendition( $hit, $rendition )
+	private static function getUrlFromRendition( $hit, $rendition )
 	{
 		$result = null;
 		switch( $rendition ) {
 			case 'thumb' :
 				if( $hit->thumbnailUrl ) {
-					$result = self::appendSessionId( $hit->thumbnailUrl );
+					$result = $hit->thumbnailUrl;
 				}
+				break;
 			case 'preview' :
 				if( $hit->previewUrl ) {
-					$result = self::appendSessionId( $hit->previewUrl );
+					$result = $hit->previewUrl;
 				}
+				break;
 			case 'native' :
 			case 'placement' :
 				if( $hit->originalUrl ) {
-					$result = self::appendSessionId( $hit->originalUrl );
+					$result = $hit->originalUrl;
 				}
+				break;
 		}
 		return $result;
-	}
-	
-	/**
-	 * Appends ;jssesionid=[sessionId] to the given url
-	 *
-	 * @param string $url
-	 * @return string url
-	 */
-	private static function appendSessionId($url)
-	{
-		require_once dirname(__FILE__) . '/ElvisSessionUtil.php';
-		$jsessionId = ';jsessionid=' . ElvisSessionUtil::getSessionId();
-		
-		// Put ;jsessionid BEFORE querystring, otherwise it doesn't work
-		$idx = strpos($url, '?');
-		if ($idx === false) {
-			$url .= $jsessionId;
-		} else {					
-			$url = substr($url, 0, $idx) . $jsessionId . substr($url, $idx);
-		}
-		return $url;
 	}
 
 	/**
@@ -264,7 +278,7 @@ class ElvisUtils {
 	 */
 	static public function isContentStation()
 	{
-		return ElvisUtils::isClient('content station');
+		return self::isClient('content station');
 	}
 	
 	/**
@@ -274,7 +288,7 @@ class ElvisUtils {
 	 */
 	static public function isSmartConnection()
 	{
-		return ElvisUtils::isClient('InDesign') || ElvisUtils::isClient('InCopy');
+		return self::isClient('InDesign') || self::isClient('InCopy');
 	}
 	
 	/**
@@ -284,7 +298,7 @@ class ElvisUtils {
 	 */
 	static public function isInDesignServer()
 	{
-		return ElvisUtils::isClient('InDesign Server');
+		return self::isClient('InDesign Server');
 	}
 	
 	/**

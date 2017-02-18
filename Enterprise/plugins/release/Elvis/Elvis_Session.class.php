@@ -11,15 +11,14 @@ class Elvis_Session extends Session_EnterpriseConnector
 	public function ticketExpirationReset( $ticket, $userShort )
 	{
 		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';
-		$sessionVariables = ElvisSessionUtil::getSessionVariables();
-		$sessionIDAvailable = ElvisSessionUtil::isSessionIdAvailable( $sessionVariables );
+		$sessionIDAvailable = ElvisSessionUtil::hasSession();
 		LogHandler::Log(  __CLASS__, 'DEBUG', "ticket=$ticket, userShort=$userShort, available=$sessionIDAvailable" );
 		if( !$sessionIDAvailable ) {
 			return true;
 		}
 
 		$time = time();
-		$lastCalledTime = ElvisSessionUtil::getSessionVar( self::$LAST_KEEP_ALIVE_CALLED_TIME, $sessionVariables );
+		$lastCalledTime = ElvisSessionUtil::getSessionVar( self::$LAST_KEEP_ALIVE_CALLED_TIME );
 		if( !$lastCalledTime ) {
 			ElvisSessionUtil::setSessionVar( self::$LAST_KEEP_ALIVE_CALLED_TIME, $time );
 			return true;
