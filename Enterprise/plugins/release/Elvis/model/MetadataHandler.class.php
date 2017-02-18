@@ -84,7 +84,7 @@ class MetadataHandler
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Either full Metadata or a list of changed Metadata values
 	 * @param Attachment|null $file
 	 */
-	public function update( $elvisId, $entMetadataOrValues, $file = null )
+	public function update( $elvisId, $entMetadataOrValues, $file=null )
 	{
 		$elvisMetadata = array();
 		$this->fillElvisMetadata( $entMetadataOrValues, $elvisMetadata );
@@ -94,23 +94,26 @@ class MetadataHandler
 			$elvisMetadata['clearCheckoutState'] = 'false';
 		}
 
-		// enum editable fields
+		// Determine the Elvis fields the user is allowed to edit.
 		$possibleAddFields = array();
-		$allAssetInfo = ElvisSessionUtil::getAllAssetInfo();
-		if( $allAssetInfo != null ) {
-			foreach( $allAssetInfo->fieldInfoByName as $field => $fieldInfo ) {
+		$editableFields = ElvisSessionUtil::getEditableFields();
+		if( $editableFields == null ) { // lazy loading; if not in our session cache, get it from Elvis
+			require_once __DIR__.'/../logic/ElvisRESTClient.php';
+			$fieldInfos = ElvisRESTClient::fieldInfo();
+			if( $fieldInfos ) foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
 				if( ( isset( $fieldInfo->name ) && $fieldInfo->name == 'filename' ) ||
 					( isset( $fieldInfo->editable ) && $fieldInfo->editable == true )
 				) {
-					array_push( $possibleAddFields, $field );
+					$editableFields[] = $field;
 				}
 			}
+			ElvisSessionUtil::setEditableFields( $editableFields );
 		}
-		// send to Elvis only editable matadata fields
-		$elvisMetadata = array_intersect_key( $elvisMetadata, array_flip( $possibleAddFields ) );
 
-		if( !empty( $elvisMetadata ) ) {
-			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
+		// Send to Elvis only editable metadata fields.
+		$elvisMetadata = array_intersect_key( $elvisMetadata, array_flip( $editableFields ) );
+		if( $elvisMetadata ) {
+			require_once __DIR__.'/../logic/ElvisRESTClient.php';
 			ElvisRESTClient::update( $elvisId, $elvisMetadata, $file );
 		}
 	}

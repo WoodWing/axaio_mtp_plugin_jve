@@ -128,23 +128,23 @@ class ElvisSessionUtil
 	}
 
 	/**
-	 * Get AllAssetInfo
+	 * Get those Elvis fields that are editable by user.
 	 *
-	 * @return object AllAssetInfo
+	 * @return string[] Editable fields.
 	 */
-	public static function getAllAssetInfo()
+	public static function getEditableFields()
 	{
-		return self::getSessionVar( 'allAssetInfo' );
+		return self::getSessionVar( 'editableFields' );
 	}
 
 	/**
-	 * Set AllAssetInfo
+	 * Set those Elvis fields that are editable by user.
 	 *
-	 * @param object $allAssetInfo
+	 * @param string[] $editableFields
 	 */
-	public static function setAllAssetInfo( $allAssetInfo )
+	public static function setEditableFields( $editableFields )
 	{
-		self::setSessionVar( 'allAssetInfo', $allAssetInfo );
+		self::setSessionVar( 'editableFields', $editableFields );
 	}
 
 	/**

@@ -118,12 +118,8 @@ class ElvisAMFClient
 		}
 		self::synchronizedLogin( $credentials );
 
-		// set allAssetInfo
-		require_once __DIR__.'/../logic/ElvisRESTClient.php';
-		$allAssetInfo = ElvisRESTClient::fieldInfo();
-		ElvisSessionUtil::setAllAssetInfo($allAssetInfo);
-
 		// Remember the version of the Elvis Server we are connected with.
+		require_once __DIR__.'/ElvisRESTClient.php';
 		$client = new ElvisRESTClient();
 		$serverInfo = $client->getElvisServerInfo();
 		if( $serverInfo ) {
