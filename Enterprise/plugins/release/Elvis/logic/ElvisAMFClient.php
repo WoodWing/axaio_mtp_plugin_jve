@@ -117,11 +117,6 @@ class ElvisAMFClient
 			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
 		}
 		self::synchronizedLogin( $credentials );
-
-		// set allAssetInfo
-		require_once __DIR__.'/../logic/ElvisRESTClient.php';
-		$allAssetInfo = ElvisRESTClient::fieldInfo();
-		ElvisSessionUtil::setAllAssetInfo($allAssetInfo);
 	}
 
 	/**
