@@ -119,7 +119,9 @@ class ElvisUtils {
 						throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
 					}
 				} else {
-					// $url = self::appendSessionId( $url );
+					// EN-88634: We no longer add our jsessionid to the ContentSourceFileLink URL; This URL is requested by
+					// SC which passes on the URL to the Elvis InDesign plugin. This plugin has its own session with Elvis
+					// and so it has its own authorization.
 					$attachment = new Attachment();
 					$attachment->Rendition = $rendition;
 					$attachment->Type = $type;
