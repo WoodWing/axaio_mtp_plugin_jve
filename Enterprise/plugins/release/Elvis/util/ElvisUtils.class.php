@@ -93,30 +93,33 @@ class ElvisUtils {
 	 * If version specified, it will be taken into account
 	 * Extracted url, if could be resolved then used to copy file to Enterprise Transfer server.
 	 *
-	 * @param ElvisEntHit $hit - hit which is used for url extraction
-	 * @param string $rendition - to be extracted
-	 * @param bool $returnFileUrls When true, only file links to the content source are returned, otherwise the complete file content
-	 * @return Attachment|null
+	 * While copying, the Elvis session id is sent through cookies to authorize the download URL.
+	 * This is done through input stream options.
+	 *
+	 * @param ElvisEntHit $hit Elvis search result (where the URL can be extracted from).
+	 * @param string $rendition File rendition to download.
+	 * @param bool $returnFileUrls TRUE to return a direct link (URL) to the content source, or FALSE to download the file to the transfer server folder and return the URL.
+	 * @return Attachment|null The file attachment, or null when not found.
 	 * @throws BizException
 	 */
 	public static function getAttachment( $hit, $rendition, $returnFileUrls )
 	{
 		$attachment = null;
-		$url = ElvisUtils::getUrlFromRendition( $hit, $rendition );
+		$url = self::getUrlFromRendition( $hit, $rendition );
 		if( $url ) {
 			$type = self::getMimeType( $hit, $url, $rendition );
 			if( $type ) {
-				$url = self::appendSessionId( $url );
 				if( !$returnFileUrls ) {
 					require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 					$transferServer = new BizTransferServer();
 					$attachment = new Attachment();
 					$attachment->Rendition = $rendition;
 					$attachment->Type = $type;
-					if( !$transferServer->copyToFileTransferServer( $url, $attachment ) ) {
+					if( !$transferServer->copyToFileTransferServer( $url, $attachment, self::composeSessionOptions() ) ) {
 						throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
 					}
 				} else {
+					// $url = self::appendSessionId( $url );
 					$attachment = new Attachment();
 					$attachment->Rendition = $rendition;
 					$attachment->Type = $type;
@@ -125,6 +128,31 @@ class ElvisUtils {
 			}
 		}
 		return $attachment;
+	}
+
+	/**
+	 * Composes input stream options from Elvis session cookie.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return array|null
+	 */
+	private static function composeSessionOptions()
+	{
+		$options = null;
+		require_once __DIR__.'/ElvisSessionUtil.php';
+		$cookies = ElvisSessionUtil::getSessionCookies();
+		if( $cookies ) {
+			$cookiesHeader = '';
+			foreach( $cookies as $name => $value ) {
+				$cookiesHeader .= "Cookie: $name=$value\r\n";
+			}
+			if( $cookiesHeader ) {
+				$options = array( 'http' => array(
+					'header' => $cookiesHeader
+				) );
+			}
+		}
+		return $options;
 	}
 
 	/**
@@ -231,27 +259,6 @@ class ElvisUtils {
 		}
 		return $result;
 	}
-	
-	/**
-	 * Appends ;jssesionid=[sessionId] to the given url
-	 *
-	 * @param string $url
-	 * @return string url
-	 */
-	private static function appendSessionId($url)
-	{
-		require_once dirname(__FILE__) . '/ElvisSessionUtil.php';
-		$jsessionId = ';jsessionid=' . ElvisSessionUtil::getSessionId();
-		
-		// Put ;jsessionid BEFORE querystring, otherwise it doesn't work
-		$idx = strpos($url, '?');
-		if ($idx === false) {
-			$url .= $jsessionId;
-		} else {					
-			$url = substr($url, 0, $idx) . $jsessionId . substr($url, $idx);
-		}
-		return $url;
-	}
 
 	/**
 	 * Extracts the mime type from the hit
@@ -292,7 +299,7 @@ class ElvisUtils {
 	 */
 	static public function isContentStation()
 	{
-		return ElvisUtils::isClient('content station');
+		return self::isClient('content station');
 	}
 	
 	/**
@@ -302,7 +309,7 @@ class ElvisUtils {
 	 */
 	static public function isSmartConnection()
 	{
-		return ElvisUtils::isClient('InDesign') || ElvisUtils::isClient('InCopy');
+		return self::isClient('InDesign') || self::isClient('InCopy');
 	}
 	
 	/**
@@ -312,7 +319,7 @@ class ElvisUtils {
 	 */
 	static public function isInDesignServer()
 	{
-		return ElvisUtils::isClient('InDesign Server');
+		return self::isClient('InDesign Server');
 	}
 	
 	/**

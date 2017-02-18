@@ -46,58 +46,80 @@ class ElvisAMFClient
 	 */
 	private static function sendUnParsed($service, $operation, $params, $secure=true, $timeout=60)
 	{
-		$servicePath = $service . '.' . $operation;
-		$url = self::getEndpointUrl( $secure );
+		require_once __DIR__.'/../util/ElvisSessionUtil.php';
+
+		$url = self::getEndpointUrl();
 		$client = new SabreAMF_Client($url, self::DESTINATION);
 		$client->setEncoding(SabreAMF_Const::FLEXMSG);
-
+		$cookies = array();
+		if( $secure ) {
+			$cookies = ElvisSessionUtil::getSessionCookies();
+			if( $cookies ) {
+				$client->setCookies( $cookies );
+			}
+		}
+		if( defined( 'ELVIS_CURL_OPTIONS' ) ) { // hidden option
+			$client->setCurlOptions( unserialize( ELVIS_CURL_OPTIONS ) );
+		}
 		LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.' - url:' . $url . '; secure:' . $secure );
-		self::logService( 'Elvis_'.$service.'_'.$operation, $params, true );
+		self::logService( 'Elvis_'.$service.'_'.$operation, $params, $cookies, true );
 
 		$result = null;
+		$cookies = array();
 		try {
-			$result = $client->sendRequest($servicePath, $params, $timeout);
-		} catch (Exception $e) {
-			// SabreAMF uses generic exceptions for both errors in the response and curl errors. Determine type of error from err message.
-			$errMessage = $e->getMessage();
-			if( strpos($errMessage, 'CURL error:') === 0 ) {
-				$message = 'The Elvis server is not available at: ' . ELVIS_URL . '. Please contact your system administrator to check if the Elvis server is running and properly configured for Enterprise.';
-				throw new BizException(null, 'Server', $errMessage, $message, null, 'ERROR' );
-			} else {
-				$message = 'An error occurred while communicating with the Elvis server at: ' . ELVIS_URL . '. Please contact your system administrator to check if the Elvis server is running and properly configured for Enterprise.';
-				throw new BizException(null, 'Server', $errMessage, $message, null, 'ERROR' );
+			$servicePath = $service . '.' . $operation;
+			$result = $client->sendRequest( $servicePath, $params, $timeout );
+			$cookies = $client->getCookies();
+			if( $cookies ) {
+				ElvisSessionUtil::saveSessionCookies( $cookies );
 			}
+		} catch (Exception $e) {
+			$message = 'An error occurred while communicating with the Elvis server at: ' . ELVIS_URL .
+					'. Please contact your system administrator to check if the Elvis server is running and properly configured for Enterprise.';
+			throw new BizException( null, 'Server', $e->getMessage(), $message, null, 'ERROR' );
 		}
 		
 		if (get_class($result) == 'SabreAMF_AMF3_ErrorMessage') {
+			self::logService( 'Elvis_'.$service.'_'.$operation, $result, $cookies, null );
 			if ($result->faultCode == 'Server.Security.NotLoggedIn' || $result->faultCode == 'Server.Security.SessionExpired') {
-				/*
-				 * We're not logged in, probably since the session is expired.
-				 * Login and re-send the service call.
-				 */
+				 // We're not logged in, probably since the session is expired.
+				 // Login and re-send the service call.
 				self::login();
-				return self::sendUnParsed($service, $operation, $params, $secure);
+				return self::sendUnParsed( $service, $operation, $params, $secure );
 			}
 			else {
 				self::handleError($result, $service, $operation);
 			}
 		}
 
-		self::logService( 'Elvis_'.$service.'_'.$operation, $result, false );
+		self::logService( 'Elvis_'.$service.'_'.$operation, $result, $cookies, false );
 		return $result;
 	}
 	
 	/**
-	 * Tries to log into Elvis using the credentials available in the SessionUtil
-	 * The sessionId returned by Elvis will be stored in SessionUtil
+	 * Tries to log into Elvis using the credentials available in the ElvisSessionUtil.
+	 *
+	 * The session cookies returned by Elvis will be tracked by the ElvisSessionUtil for succeeding calls.
 	 */
 	public static function login()
 	{
-		$sessionId = self::synchronizedLogin(ElvisSessionUtil::getCredentials());
-		ElvisSessionUtil::saveSessionId ($sessionId);
+		require_once __DIR__.'/../util/ElvisSessionUtil.php';
+		$credentials = ElvisSessionUtil::getCredentials();
+		if( !$credentials ) {
+			// EN-88706 When the Elvis connection is broken, the user works with a ticket that is valid
+			// for Enterprise but that session no longer has a valid ticket (jsessionid) for Elvis.
+			// Basically, the Enterprise ticket is then half broken. To recover from this situation
+			// we should ask the user to re-logon to Enterprise which implicitly will re-logon
+			// to Elvis as well. So here we act as if the Enterprise ticket is no longer valid by
+			// raising a generic ticket invalid error. This will trigger SC/CS to raise the re-logon
+			// dialog. (Note that this is more user friendly than raising an Elvis communication error
+			// for which we'd leave it up to the end-user to manually logout and login again.)
+			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
+		}
+		self::synchronizedLogin( $credentials );
 
 		// set allAssetInfo
-		require_once dirname(__FILE__) . '/../logic/ElvisRESTClient.php';
+		require_once __DIR__.'/../logic/ElvisRESTClient.php';
 		$allAssetInfo = ElvisRESTClient::fieldInfo();
 		ElvisSessionUtil::setAllAssetInfo($allAssetInfo);
 
@@ -108,24 +130,22 @@ class ElvisAMFClient
 			ElvisSessionUtil::setSessionVar( 'elvisServerVersion', $serverInfo->version );
 		}
 	}
-	
+
 	/**
 	 * Does a synchronized login to make sure the user does not login twice if requests are fired close to each other
 	 *
-	 * @param string $credentials
+	 * @param string $credentials base64 encoded credentials
 	 * @throws BizException
-	 * @return string sessionId
 	 */
-	public static function synchronizedLogin($credentials)
+	private static function synchronizedLogin( $credentials )
 	{
 		LogHandler::Log('ELVIS', 'DEBUG', 'Synchronized login');
 		if (!ElvisSessionUtil::isLoggingIn()) {
 			LogHandler::Log('ELVIS', 'DEBUG', 'Logging in');
 			ElvisSessionUtil::startLogin();
 			try {
-				$sessionId = self::loginByCredentials ($credentials);
+				self::loginByCredentials( $credentials );
 				ElvisSessionUtil::stopLogin();
-				return $sessionId;
 			} catch (BizException $e) {
 				ElvisSessionUtil::stopLogin();
 				throw $e;
@@ -141,7 +161,6 @@ class ElvisAMFClient
 				$message = 'Logging into Elvis failed: timeout expried while waiting for parallel login.';
 				throw new BizException ( null, 'Server', $message, $message );
 			}
-			return ElvisSessionUtil::getSessionId();
 		}
 	}
 	
@@ -152,9 +171,8 @@ class ElvisAMFClient
 	 *
 	 * @param string $credentials base64 encoded credentials
 	 * @throws BizException login failed
-	 * @return string sessionId from the login response
 	 */
-	public static function loginByCredentials($credentials)
+	public static function loginByCredentials( $credentials )
 	{
 		// TODO: Find out where to get the client locale
 		// TODO: Find out where to get the correct timezone offset
@@ -168,8 +186,6 @@ class ElvisAMFClient
 			$message = 'Logging into Elvis failed: ' . $loginResponse->loginFaultMessage;
 			throw new BizException(null, 'Server', $message, $message);
 		}
-		
-		return $loginResponse->sessionId;
 	}
 	
 	public static function registerClass($clazz)
@@ -208,19 +224,11 @@ class ElvisAMFClient
 	/**
 	 * Composes an endpoint (URL) for Elvis AMF service calls.
 	 *
-	 * @param bool $includeSessionId
 	 * @return string URL
 	 */
-	private static function getEndpointUrl( $includeSessionId=true )
+	private static function getEndpointUrl()
 	{
-		$url = ELVIS_URL.'/graniteamf/amf';
-		if( $includeSessionId ) {
-			if( !ElvisSessionUtil::isSessionIdAvailable() ) {
-				self::login();
-			}
-			$url .= ';jsessionid='.ElvisSessionUtil::getSessionId();
-		}
-		return $url;
+		return ELVIS_URL.'/graniteamf/amf';
 	}
 
 	/**
@@ -255,9 +263,10 @@ class ElvisAMFClient
 	 *
 	 * @param string $methodName Service method used to give log file a name.
 	 * @param mixed $transData Transport data to be written in log file using print_r.
+	 * @param array $cookies HTTP cookies sent with request or receieved with response.
 	 * @param boolean $isRequest TRUE to indicate a request, FALSE for a response, or NULL for error.
 	 */
-	private static function logService( $methodName, $transData, $isRequest )
+	private static function logService( $methodName, $transData, $cookies, $isRequest )
 	{
 		if( LogHandler::debugMode() ) {
 			// For the logon request the credentials are base64, so we hide that from the logging.
@@ -267,7 +276,7 @@ class ElvisAMFClient
 					$transData[0]->cred = '***';
 				}
 			}
-			$dataStream = print_r( $transData, true );
+			$dataStream = 'Cookies:'.print_r( $cookies, true ).PHP_EOL.'AMF:'.print_r( $transData, true );
 			LogHandler::logService( $methodName, $dataStream, $isRequest, 'AMF' );
 		}
 	}

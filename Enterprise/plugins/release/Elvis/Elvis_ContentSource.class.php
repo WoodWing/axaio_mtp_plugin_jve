@@ -481,7 +481,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		// This function is indirectly called when exporting shadow objects from Elvis
 		// At this point there is no active session and the write can safely be ignored.
 		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';
-		if( ElvisSessionUtil::isSessionIdAvailable() ) {
+		if( ElvisSessionUtil::hasSession() ) {
 			require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
 			require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
 			require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
@@ -534,7 +534,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 		// This function is indirectly called when exporting shadow objects from Elvis
 		// At this point there is no active session and the write can safely be ignored.
 		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';
-		if( ElvisSessionUtil::isSessionIdAvailable() ) {
+		if( ElvisSessionUtil::hasSession() ) {
 			require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
 			require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
 			require_once BASEDIR.'/server/dbclasses/DBSection.class.php';
