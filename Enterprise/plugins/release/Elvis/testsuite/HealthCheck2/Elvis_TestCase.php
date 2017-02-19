@@ -20,8 +20,8 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	/** @var WW_Utils_TestSuite */
 	private $utils;
 
-	/** @var object Elvis Server information */
-	private $serverInfo;
+	/** @var string Version of Elvis Server */
+	private $serverVersion;
 
 	const CONFIG_FILES = 'Enterprise/config/plugins/Elvis/config.php or Enterprise/config/overrule_config.php';
 
@@ -37,6 +37,13 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		if ( !$this->checkDefinedValues() ) {
 			return;
 		}
+		// Before checking the connection we have to logon to determine the Elvis version first.
+		if ( !$this->checkAdminUser() ) {
+			return;
+		}
+		if ( !$this->checkSuperUser() ) {
+			return;
+		}
 		if ( !$this->checkConnection() ) {
 			return;
 		}
@@ -47,12 +54,6 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			return;
 		}
 		if ( !$this->checkBrandSetup() ) {
-			return;
-		}
-		if ( !$this->checkAdminUser() ) {
-			return;
-		}
-		if ( !$this->checkSuperUser() ) {
 			return;
 		}
 	}
@@ -138,27 +139,33 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	/**
 	 * Checks if the configured ELVIS_URL is valid by trying to connect to Elvis Server.
 	 *
-	 * When successful, it retrieves server info from it and populates $this->serverInfo.
+	 * When successful, it retrieves server info from it and populates $serverInfo.
 	 * When successful, but Elvis tells it is not running / available, a warning is raised.
 	 *
 	 * @return boolean TRUE when could connect (regardless if Elvis is not running / available), else FALSE.
 	 */
 	private function checkConnection()
 	{
+		// The server info service is introduced since Elvis 5.
+		// So we skip this test for Elvis 4 and assume all is ok.
+		if( version_compare( $this->serverVersion, '5.0', '<' ) ) {
+			$this->setResult( 'INFO', 'Connected to Elvis Server v'.$this->serverVersion.'.' );
+			return true;
+		}
 		require_once __DIR__.'/../../logic/ElvisRESTClient.php';
 		$client = new ElvisRESTClient();
-		$this->serverInfo = $client->getElvisServerInfo();
+		$serverInfo = $client->getElvisServerInfo();
 		$help = 'Please check your Elvis installation.';
 		$result = true;
-		if( $this->serverInfo ) {
-			if( $this->serverInfo->state == 'running' && $this->serverInfo->available ) {
-				$this->setResult( 'INFO', 'Elvis Server v'.$this->serverInfo->version.' is available and running.' );
+		if( $serverInfo ) {
+			if( $serverInfo->state == 'running' && $serverInfo->available ) {
+				$this->setResult( 'INFO', 'Elvis Server v'.$this->serverVersion.' is available and running.' );
 			}
-			if( !$this->serverInfo->available ) {
-				$this->setResult( 'WARN', 'Elvis Server v'.$this->serverInfo->version.' is not available.', $help );
+			if( !$serverInfo->available ) {
+				$this->setResult( 'WARN', 'Elvis Server v'.$this->serverVersion.' is not available.', $help );
 				// no hard failure, leave $result == true untouched to continue testing the succeeding cases
-			} elseif( $this->serverInfo->state !== 'running' ) {
-				$this->setResult( 'WARN', 'Elvis Server v'.$this->serverInfo->version.' is not running.', $help );
+			} elseif( $serverInfo->state !== 'running' ) {
+				$this->setResult( 'WARN', 'Elvis Server v'.$this->serverVersion.' is not running.', $help );
 				// no hard failure, leave $result == true untouched to continue testing the succeeding cases
 			}
 		} else {
@@ -179,25 +186,25 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	private function checkVersionCompatibility()
 	{
 		$result = true;
-		if( version_compare( $this->serverInfo->version, '4.6.4', '<' ) ) {
+		if( version_compare( $this->serverVersion, '4.6.4', '<' ) ) {
 			$result = false;
 		} elseif(
-			version_compare( $this->serverInfo->version, '5.0', '>=' ) &&
-			version_compare( $this->serverInfo->version, '5.0.60', '<' ) ){
+			version_compare( $this->serverVersion, '5.0', '>=' ) &&
+			version_compare( $this->serverVersion, '5.0.60', '<' ) ){
 			$result = false;
 		}
 		if( !$result ) {
 			$help = 'Please check the Compatibility Matrix.';
-			$message = 'Elvis Server v'.$this->serverInfo->version.' is not compatible with Enterprise Server v'.SERVERVERSION.'.';
+			$message = 'Elvis Server v'.$this->serverVersion.' is not compatible with Enterprise Server v'.SERVERVERSION.'.';
 			$this->setResult( 'ERROR', $message, $help );
 		}
 
 		// With the Elvis_Original option there were some problems with older Elvis Server < v5.14. [EN-88325]
-		if( version_compare( $this->serverInfo->version, '5.14', '<=' ) &&
+		if( version_compare( $this->serverVersion, '5.14', '<=' ) &&
 			IMAGE_RESTORE_LOCATION == 'Elvis_Original' ) {
 			$help = 'Please check the '.self::CONFIG_FILES.' file.';
 			$message = 'The IMAGE_RESTORE_LOCATION option is set to "'.IMAGE_RESTORE_LOCATION.'" '.
-				'but Elvis Server v'.$this->serverInfo->version.' does not support this feature. '.
+				'but Elvis Server v'.$this->serverVersion.' does not support this feature. '.
 				'Please adjust the option or upgrade the Elvis Server.';
 			$this->setResult( 'ERROR', $message, $help );
 			$result = false;
@@ -216,10 +223,10 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	{
 		$result = true;
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' &&
-			version_compare( $this->serverInfo->version, '5.18', '<' ) ) { // Feature introduced since Elvis 5.18
+			version_compare( $this->serverVersion, '5.18', '<' ) ) { // Feature introduced since Elvis 5.18
 			$help = 'Either change the option or upgrade Elvis Server to v5.18 or newer.';
 			$message = 'The ELVIS_CREATE_COPY option is set to \'Copy_To_Production_Zone\' but this feature is not '.
-				' supported by Elvis Server v'.$this->serverInfo->version.'.';
+				' supported by Elvis Server v'.$this->serverVersion.'.';
 			$this->setResult( 'ERROR', $message, $help );
 			$result = false;
 		}
@@ -320,14 +327,13 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 */
 	private function logOn( $user, $password )
 	{
-		require_once __DIR__.'/../../logic/ElvisAMFClient.php';
-		$result = true;
+		require_once __DIR__.'/../../logic/ElvisRESTClient.php';
+		$this->serverVersion = null;
 		try {
 			$credentials = base64_encode($user . ':' . $password); // User name and password are base 64 encoded.
-			ElvisAMFClient::loginByCredentials( $credentials );
+			$this->serverVersion = ElvisRESTClient::testLoginByCredentials( $credentials );
 		} catch ( BizException $e ) {
-			$result = false;
 		}
-		return $result;
+		return (bool)$this->serverVersion;
 	}
 }

@@ -31,8 +31,7 @@ class ElvisRESTClient
 			static $recursion = 0; // paranoid checksum for endless recursion
 			if( $response->errorcode == 401 && $recursion < 3 ) {
 				$recursion += 1;
-				require_once __DIR__.'/ElvisAMFClient.php';
-				ElvisAMFClient::login();
+				self::login();
 				self::send( $service, $url, $post );
 				$recursion -= 1;
 			} else {
@@ -187,6 +186,35 @@ class ElvisRESTClient
 		}
 
 		self::send( 'updatebulk', ELVIS_URL.'/services/updatebulk', $post );
+	}
+
+	/**
+	 * Tries to log into Elvis using the provided credentials.
+	 *
+	 * Note that this is an Elvis 4 / Elvis 5 compatible way to detect the Elvis Server version.
+	 * This function should be used for testing only (e.g. Health Check) but not for production.
+	 * When needed to login for production, the ElvisAMFClient should be used instead. [EN-88674]
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @param string $credentials base64 encoded credentials
+	 * @return string Elvis Server version.
+	 * @throws BizException login failed
+	 */
+	public static function testLoginByCredentials( $credentials )
+	{
+		require_once __DIR__.'/../util/ElvisSessionUtil.php';
+		$post = array(
+			'cred' => $credentials,
+			'locale' => 'en_US',
+			'timezoneOffset' => 0,
+			'clientId' => ElvisSessionUtil::getClientId()
+		);
+		$response = self::send( 'login', ELVIS_URL.'/services/login', $post );
+		if( !$response->loginSuccess ) {
+			$message = 'Logging into Elvis failed: ' . $response->loginFaultMessage;
+			throw new BizException( null, 'Server', null, $message );
+		}
+		return $response->serverVersion;
 	}
 
 	/**
