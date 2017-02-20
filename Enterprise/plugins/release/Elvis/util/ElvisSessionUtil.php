@@ -17,11 +17,33 @@ class ElvisSessionUtil
 	/**
 	 * Get the base64 encoded credentials
 	 *
-	 * @return string
+	 * @return string|null Credentials, or NULL when not found.
 	 */
 	public static function getCredentials()
 	{
-		return self::getSessionVar( 'cred' );
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+
+		$userShort = BizSession::getShortUserName();
+		$settings = BizUser::getSettings( $userShort, 'ElvisContentSource' );
+		$storage = null;
+		if( $settings ) foreach( $settings as $setting ) {
+			if( $setting->Setting == 'Temp' ) {
+				$storage = $setting->Value;
+				break;
+			}
+		}
+		$credentials = null;
+		if( $storage ) {
+			list( $encrypted, $initVector ) = explode( '::', base64_decode( $storage ), 2 );
+			$encryptionKey = '!Tj0nG3'.$userShort.date( 'z' ); // hardcoded key + user name + day of the year
+			$credentials = openssl_decrypt( $encrypted, 'aes-256-cbc', $encryptionKey,
+				OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $initVector );
+		}
+		return $credentials; // base64
+
+		// [EN-88634#2] Note that tracking Elvis credentials in PHP session does not work for multi AS setup behind ELB,
+		// and therefor the following solution is no longer used:
+		// return self::getSessionVar( 'cred' );
 	}
 
 	/**
@@ -32,9 +54,21 @@ class ElvisSessionUtil
 	 */
 	public static function saveCredentials( $username, $password )
 	{
-		 // FIXME: We do not want to save the password in a PHP session. For now, we need to
-		 // so we're able to authenticate against Elvis when the session to Elvis is expired.
-		self::setSessionVar( 'cred', base64_encode( $username . ':' . $password ) );
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+
+		$userShort = BizSession::getShortUserName(); // do not take $username
+		$credentials = base64_encode( $username.':'.$password );
+		$initVector = openssl_random_pseudo_bytes( openssl_cipher_iv_length( 'aes-256-cbc' ) );
+		$encryptionKey = '!Tj0nG3'.$userShort.date( 'z' ); // hardcoded key + user name + day of the year
+		$encrypted = openssl_encrypt( $credentials, 'aes-256-cbc', $encryptionKey,
+			OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $initVector );
+		$storage = base64_encode( $encrypted.'::'.$initVector );
+		$settings = array( new Setting( 'Temp', $storage ) ); // use vague name to obfuscate
+		BizUser::updateSettings( $userShort, $settings, 'ElvisContentSource' );
+
+		// [EN-88634#2] Note that tracking Elvis credentials in PHP session does not work for multi AS setup behind ELB,
+		// and therefor the following solution is no longer used:
+		// self::setSessionVar( 'cred', base64_encode( $username . ':' . $password ) );
 	}
 
 	/**
