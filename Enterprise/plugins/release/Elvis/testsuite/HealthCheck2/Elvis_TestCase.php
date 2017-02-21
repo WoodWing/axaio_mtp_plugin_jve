@@ -334,7 +334,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			$credentials = base64_encode($user . ':' . $password); // User name and password are base 64 encoded.
 			ElvisAMFClient::loginByCredentials( $credentials );
 		} catch ( BizException $e ) {
-			$reults = false;
+			$result = false;
 		}
 		return $result;
 	}
