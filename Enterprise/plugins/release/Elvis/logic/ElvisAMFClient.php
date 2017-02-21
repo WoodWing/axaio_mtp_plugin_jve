@@ -121,9 +121,9 @@ class ElvisAMFClient
 		// Remember the version of the Elvis Server we are connected with.
 		require_once __DIR__.'/ElvisRESTClient.php';
 		$client = new ElvisRESTClient();
-		$serverInfo = $client->getElvisServerInfo();
-		if( $serverInfo ) {
-			ElvisSessionUtil::setSessionVar( 'elvisServerVersion', $serverInfo->version );
+		$serverVersion = $client->getElvisServerVersion();
+		if( $serverVersion ) {
+			ElvisSessionUtil::setSessionVar( 'elvisServerVersion', $serverVersion );
 		}
 	}
 

@@ -189,35 +189,6 @@ class ElvisRESTClient
 	}
 
 	/**
-	 * Tries to log into Elvis using the provided credentials.
-	 *
-	 * Note that this is an Elvis 4 / Elvis 5 compatible way to detect the Elvis Server version.
-	 * This function should be used for testing only (e.g. Health Check) but not for production.
-	 * When needed to login for production, the ElvisAMFClient should be used instead. [EN-88674]
-	 *
-	 * @since 10.0.5 / 10.1.2
-	 * @param string $credentials base64 encoded credentials
-	 * @return string Elvis Server version.
-	 * @throws BizException login failed
-	 */
-	public static function testLoginByCredentials( $credentials )
-	{
-		require_once __DIR__.'/../util/ElvisSessionUtil.php';
-		$post = array(
-			'cred' => $credentials,
-			'locale' => 'en_US',
-			'timezoneOffset' => 0,
-			'clientId' => ElvisSessionUtil::getClientId()
-		);
-		$response = self::send( 'login', ELVIS_URL.'/services/login', $post );
-		if( !$response->loginSuccess ) {
-			$message = 'Logging into Elvis failed: ' . $response->loginFaultMessage;
-			throw new BizException( null, 'Server', null, $message );
-		}
-		return $response->serverVersion;
-	}
-
-	/**
 	 * Performs REST logout of the acting Enterprise user from Elvis.
 	 *
 	 * Calls the logout web service over the Elvis JSON REST interface.
@@ -259,6 +230,9 @@ class ElvisRESTClient
 	/**
 	 * Pings the Elvis Server and retrieves some basic information.
 	 *
+	 * This function should only be called when connected to Elvis 5 (or newer).
+	 * See {@link:getElvisServerVersion()} to resolve the server version in a Elvis 4 compatible manner.
+	 *
 	 * @since 10.1.1
 	 * @return object Info object with properties state, version, available and server.
 	 */
@@ -279,5 +253,50 @@ class ElvisRESTClient
 	public static function keepAlive( $time )
 	{
 		self::send( 'alive', ELVIS_URL.'/alive.txt?_='.$time );
+	}
+
+	/**
+	 * Requests Elvis Server for its version by calling the version.jsp REST service.
+	 * This service works at least for Elvis 4 (or newer).
+	 *
+	 * Calls the version.jsp web page over HTTP, parses the return XMl file and returns the read version.
+	 * Note that this is an old and home brewed protocol (unlike the other JSON REST services).
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return string
+	 * @throws BizException
+	 */
+	public static function getElvisServerVersion()
+	{
+		$response = null;
+		$url = ELVIS_URL.'/version.jsp';
+		LogHandler::logService( 'Elvis_version_jsp', $url, true, 'REST' );
+		try {
+			$client = new Zend\Http\Client();
+			$client->setUri( $url );
+			$response = $client->send();
+		} catch( Exception $e ) {
+			LogHandler::logService( 'Elvis_version_jsp', $e->getMessage(), null, 'REST' );
+			self::throwExceptionForElvisCommunicationFailure( $e->getMessage() );
+		}
+		if( $response->getStatusCode() !== 200 ) {
+			LogHandler::logService( 'Elvis_version_jsp', $response->getBody(), null, 'REST' );
+			self::throwExceptionForElvisCommunicationFailure( $response->getReasonPhrase() );
+		}
+		$versionXml = trim($response->getBody());
+		LogHandler::logService( 'Elvis_version_jsp', $versionXml, false, 'REST' );
+
+		$serverVersion = '';
+		$xmlDoc = new DOMDocument();
+		if( $xmlDoc->loadXML( $versionXml ) ) {
+			$xPath = new DOMXPath( $xmlDoc );
+			$versionNodeList = $xPath->query( '//elvisServer/version' );
+			$serverVersion = $versionNodeList->length > 0 ? $versionNodeList->item(0)->nodeValue : '';
+		}
+		if( !$serverVersion ) {
+			throw new BizException( null, 'Server', 'Parsing the XML result of version.jsp failed.',
+				'Could not detect Elvis Server version.' );
+		}
+		return $serverVersion;
 	}
 }

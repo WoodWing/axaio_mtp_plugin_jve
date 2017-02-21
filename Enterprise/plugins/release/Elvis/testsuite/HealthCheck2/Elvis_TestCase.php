@@ -37,13 +37,6 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		if ( !$this->checkDefinedValues() ) {
 			return;
 		}
-		// Before checking the connection we have to logon to determine the Elvis version first.
-		if ( !$this->checkAdminUser() ) {
-			return;
-		}
-		if ( !$this->checkSuperUser() ) {
-			return;
-		}
 		if ( !$this->checkConnection() ) {
 			return;
 		}
@@ -54,6 +47,12 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			return;
 		}
 		if ( !$this->checkBrandSetup() ) {
+			return;
+		}
+		if ( !$this->checkAdminUser() ) {
+			return;
+		}
+		if ( !$this->checkSuperUser() ) {
 			return;
 		}
 	}
@@ -146,14 +145,16 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 */
 	private function checkConnection()
 	{
+		require_once __DIR__.'/../../logic/ElvisRESTClient.php';
+		$client = new ElvisRESTClient();
+		$this->serverVersion = $client->getElvisServerVersion();
+
 		// The server info service is introduced since Elvis 5.
 		// So we skip this test for Elvis 4 and assume all is ok.
 		if( version_compare( $this->serverVersion, '5.0', '<' ) ) {
 			$this->setResult( 'INFO', 'Connected to Elvis Server v'.$this->serverVersion.'.' );
 			return true;
 		}
-		require_once __DIR__.'/../../logic/ElvisRESTClient.php';
-		$client = new ElvisRESTClient();
 		$serverInfo = $client->getElvisServerInfo();
 		$help = 'Please check your Elvis installation.';
 		$result = true;
@@ -327,13 +328,14 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	 */
 	private function logOn( $user, $password )
 	{
-		require_once __DIR__.'/../../logic/ElvisRESTClient.php';
-		$this->serverVersion = null;
+		require_once __DIR__.'/../../logic/ElvisAMFClient.php';
+		$result = true;
 		try {
 			$credentials = base64_encode($user . ':' . $password); // User name and password are base 64 encoded.
-			$this->serverVersion = ElvisRESTClient::testLoginByCredentials( $credentials );
+			ElvisAMFClient::loginByCredentials( $credentials );
 		} catch ( BizException $e ) {
+			$reults = false;
 		}
-		return (bool)$this->serverVersion;
+		return $result;
 	}
 }
