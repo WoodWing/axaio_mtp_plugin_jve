@@ -881,7 +881,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">%1 no puede borrarse porque lo están usando algunos objetos eliminados. Use la papelera para eliminar estos objetos de forma permanente y vuelva a intentarlo. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">%1 no puede borrarse porque lo están usando algunos objetos. Busque esos objetos, rompa el vínculo con %1 y vuelva a intentarlo. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">Es necesario renombrar los siguientes elementos restaurados porque ya se están utilizando los nombres originales:</Term>
-  <Term key="ERR_LAY_NOT_SAVED">No se ha guardado el diseño.</Term>
+  <Term key="ERR_LAY_NOT_SAVED">No fue posible generar la vista preliminar del layout debido a que el layout no se guardó o el articulo está fuera del layout.</Term>
   <Term key="ERR_LICENSE">Ocurrió un error de licencia.</Term>
   <Term key="ERR_LOCKED">No se puede realizar esta acción; se ha extraído el archivo. (S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">No se puede realizar esta acción; el archivo está vinculado a otro archivo que se ha extraído. (S1065)</Term>
