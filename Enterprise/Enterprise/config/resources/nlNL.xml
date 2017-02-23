@@ -881,7 +881,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">%1 kan niet worden verwijderd omdat het in gebruik is door verwijderde objectien. Gebruik de Prullenbak om deze objecten permanent te verwijderen en probeer opnieuw. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">%1 kan niet worden verwijderd omdat het door andere objecten in gebruik is. Lokaliseer deze objecten, verbreek de link met %1 en probeer opnieuw. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">De volgende herstelde items zijn hernoemd omdat de oorspronkelijke naam weer in gebruik was:</Term>
-  <Term key="ERR_LAY_NOT_SAVED">Layout is niet opgeslagen.</Term>
+  <Term key="ERR_LAY_NOT_SAVED">De voorvertoning van de layout kon niet worden gegenereerd omdat de layout niet was opgeslagen of omdat het artikel op het plakbord was geplaatst.</Term>
   <Term key="ERR_LICENSE">Er is een fout opgetreden met de licentie.</Term>
   <Term key="ERR_LOCKED">Niet in staat om deze actie uit te voeren; het bestand is uitgechecked. (S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">Niet in staat om deze actie uit te voeren; het bestand is gekoppeld met een ander bestand wat uitgechecked is. (S1065)</Term>
