@@ -27,6 +27,7 @@ require_once BASEDIR.'/server/dbclasses/DBAppSession.class.php';
 class BizWebEditWorkspace
 {
 	private $workspace = null;
+	const SEPARATOR = '/';
 	
 	// ------------------------------------------------------------------
 	// SERVICES
@@ -533,11 +534,6 @@ class BizWebEditWorkspace
 												$layoutVersion = '', $guidsOfChangedStories = array(),
 												array $requestInfo = array() )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$artname = $artname; // Obsolete parameter, keep analyzer happy
-		/** @noinspection PhpSillyAssignmentInspection */
-		$guids = $guids; // Obsolete parameter, keep analyzer happy
-		
 		// Determine the article ids-formats mapping.
 		if( count($articleIdsFormats) == 0 ) { // backwards compatible mode
 			$articleIdsFormats = array( $artid => $format );
@@ -2336,6 +2332,7 @@ class BizWebEditWorkspace
 	 * placements. Both for the composed data as the stored data. Finally these structures are compared to see if a
 	 * rebuild is needed.
 	 *
+	 * @since 10.1.2
 	 * @param int $layoutId The layout of the preview.
 	 * @param Relation[]|null $composedRelations The relations as retrieved from the composed data.
 	 * @return bool $rebuildNeeded
@@ -2344,7 +2341,9 @@ class BizWebEditWorkspace
 	{
 		PerformanceProfiler::startProfile( 'Preview_Check_On_Placements', 5 );
 		$rebuildNeeded = false;
+		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 		$storedRelations = BizRelation::getObjectRelations( $layoutId, true, false, null, false, false, 'Placed' );
+		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 		$storedInDesignArticlePlacements = DBPlacements::getPlacements( $layoutId, 0, 'Placed');
 		$storedRelationsWithIDSArticles = $this->addInDesignArticleToRelations( $storedRelations, $storedInDesignArticlePlacements );
 		$storedPlacementsByKey = $this->extractPlacementsByKeyFromRelations( $storedRelationsWithIDSArticles );
@@ -2362,8 +2361,9 @@ class BizWebEditWorkspace
 	 *
 	 * The (stored) relations and the placements have the same parent. Based on the frame id and the edition a link is made.
 	 *
+	 * @since 10.1.2
 	 * @param Relation[] $storedRelations
-	 * @param $inDesignArticlePlacements
+	 * @param Placement[] $inDesignArticlePlacements
 	 * @return Relation[] $storedRelations enriched with ArticleIds
 	 */
 	private function addInDesignArticleToRelations( $storedRelations , $inDesignArticlePlacements )
@@ -2390,67 +2390,70 @@ class BizWebEditWorkspace
 	 * Placements are unique by the parent/child/type/frameid/edition. From these attributes a unique key is made. The
 	 * value of the key is the placement object itself.
 	 *
+	 * @since 10.1.2
 	 * @param Relation[]|null $relations
-	 * @return array with unique placements.
+	 * @return Placement[] List of unique placements.
 	 */
 	private function extractPlacementsByKeyFromRelations( $relations )
 	{
-		$flatDownPlacements = array();
+		$placements = array();
 		if( $relations ) foreach ( $relations as $relation ) {
-			$relationKey = strval( $relation->Parent ).'-'.strval( $relation->Child ).'-'.strval( $relation->Type );
+			$relationKey = strval( $relation->Parent ).self::SEPARATOR.strval( $relation->Child ).self::SEPARATOR.strval( $relation->Type );
 			if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
 				$key = $relationKey;
 				if( empty( $placement->FrameID ) ) {
-					$key .= '-0';
+					$key .= self::SEPARATOR.'0';
 				} else {
-					$key .= '-'.strval( $placement->FrameID );
+					$key .= self::SEPARATOR.strval( $placement->FrameID );
 				}
-				if( empty( $placement->Edition ) ) {
-					$key .= '-0';
+				if( isset( $placement->Edition->Id ) ) {
+					$key .= self::SEPARATOR.( $placement->Edition->Id );
 				} else {
-					$key .= '-'.( $placement->Edition );
+					$key .= self::SEPARATOR.'0';
 				}
-				$flatDownPlacements[ $key ] = $placement;
+				$placements[ $key ] = $placement;
 			}
 		}
 
-		return $flatDownPlacements;
+		return $placements;
 	}
 
 	/**
 	 * Checks for two arrays with unique placements and repairs small differences.
 	 *
-	 * If two unique placements differ (stored and composed) it sometimes possible to just update the stored one with the
-	 * changed properties of the composed placement. If the difference is to fundamental no repair action is done.
+	 * If two unique placements differ (stored and composed) it is sometimes possible to just update the stored one with
+	 * the changed properties of the composed placement. If the difference is too fundamental no repair action is done.
 	 * In case there are only reparable differences the stored placement is updated with the properties of the composed
 	 * one.
 	 *
-	 * @param array $storedPlacementsByKey
-	 * @param array $composedPlacementsByKey
-	 * @return bool true if differences could no be repaired.
+	 * @since 10.1.2
+	 * @param Placement[] $storedPlacementsByKey
+	 * @param Placement[] $composedPlacementsByKey
+	 * @return bool true if differences could not be repaired.
 	 */
 	private function reparablePlacementProperties( $storedPlacementsByKey, $composedPlacementsByKey )
 	{
 		$reparable = true;
-		if( $this->diffEmptiness( $storedPlacementsByKey, $composedPlacementsByKey ) ) {
+		if( !$this->sameEmptiness( $storedPlacementsByKey, $composedPlacementsByKey ) ) {
 			$reparable = false;
 		} elseif( is_array( $storedPlacementsByKey ) && is_array( $composedPlacementsByKey ) ) {
-			if( !empty( array_diff_key( $storedPlacementsByKey, $composedPlacementsByKey ) ) ) {
+			if( !empty( array_diff_key( $storedPlacementsByKey, $composedPlacementsByKey ) ) ||
+				 !empty( array_diff_key( $composedPlacementsByKey, $storedPlacementsByKey ) ) ) {
 				$reparable = false;
 			}
 		}
 
-		$changedPlacements = array();
 		if( $reparable ) {
-			if( $storedPlacementsByKey ) foreach( $storedPlacementsByKey as $key => $lhsPlacement ) {
+			$changedPlacements = array();
+			require_once BASEDIR.'/server/bizclasses/BizWebEditWorkspace/ComparePlacements.class.php';
+			if( $storedPlacementsByKey ) foreach( $storedPlacementsByKey as $key => $storedPlacementByKey ) {
 				$composedPlacementByKey = $composedPlacementsByKey[ $key ];
-				$nonReparableDiffs = 0;
-				$reparableDiffs = 0;
-				$this->equalPlacementProperty( $lhsPlacement, $composedPlacementByKey, $nonReparableDiffs, $reparableDiffs );
-				if( $nonReparableDiffs > 0 ) {
+				$comparePlacements = new BizWebEditWorkspace_ComparePlacements();
+				$comparePlacements->comparePlacements( $storedPlacementByKey, $composedPlacementByKey );
+				if( $comparePlacements->getElementalDiff() ) {
 					$reparable = false;
 					break;
-				} elseif( $reparableDiffs > 0 ) {
+				} elseif( $comparePlacements->getNonElementalDiff() ) {
 					$changedPlacements[ $key ] = $composedPlacementByKey;
 				}
 			}
@@ -2459,13 +2462,14 @@ class BizWebEditWorkspace
 		if( $reparable && $changedPlacements ) {
 			require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 			foreach( $changedPlacements as $keyString => $placement ) {
-				$keyValues = explode( '-', $keyString);
-				$whereFields['parent'] = intval( $keyValues[0] );
-				$whereFields['child'] = intval( $keyValues[1] );
-				$whereFields['type'] = ( $keyValues[2] );
-				$whereFields['frameid'] = ( $keyValues[3] ) ? $keyValues[3] : '';
-				$whereFields['edition'] = intval( $keyValues[4] );
-				DBPlacements::updatePlacement( $whereFields, $placement) ;
+				$keyValues = explode( self::SEPARATOR, $keyString);
+				$identifier = new stdClass();
+				$identifier->Parent = intval( $keyValues[0] );
+				$identifier->Child = intval( $keyValues[1] );
+				$identifier->Type = ( $keyValues[2] );
+				$identifier->FrameId = ( $keyValues[3] ) ? $keyValues[3] : '';
+				$identifier->EditionId = intval( $keyValues[4] );
+				DBPlacements::updatePlacement( $identifier, $placement) ;
 			}
 		}
 
@@ -2473,316 +2477,15 @@ class BizWebEditWorkspace
 	}
 
 	/**
-	 * Checks for two placements if they can be seen as the same.
-	 *
-	 * Each corresponding property of the two placements are compared thereby focusing on 'real' differences.
-	 * Eg a Height of 124.345 is the same as 124.3450. But also two strings one is null and one is '' as seen as the
-	 * same.
-	 * In case two properties differ fundamentally like FrameID = 123 and FrameID = 456 this difference is marked as
-	 * not reparable. Other differences can be repaired.
-	 *
-	 * @param $lhsPlacement
-	 * @param $rhsPlacement
-	 * @param $nonReparableDiffs
-	 * @param $reparableDiffs
-	 */
-	private function equalPlacementProperty( $lhsPlacement, $rhsPlacement, &$nonReparableDiffs, &$reparableDiffs )
-	{
-		if ( !$this->sameStrings( $lhsPlacement->Content, $rhsPlacement->Content ) ) {
-			$reparableDiffs += 1;
-		}
-		if( !$this->sameFloats( $lhsPlacement->ContentDx, $rhsPlacement->ContentDx ) ) {
-			$reparableDiffs += 1;
-		}
-		if( !$this->sameFloats( $lhsPlacement->ContentDy, $rhsPlacement->ContentDy ) ) {
-			$reparableDiffs += 1;
-		}
-		if ( !$this->sameStrings( $lhsPlacement->Element, $rhsPlacement->Element ) ) {
-			$nonReparableDiffs += 1;
-		}
-		if ( !$this->sameStrings( $lhsPlacement->ElementID, $rhsPlacement->ElementID  ) ) {
-			$nonReparableDiffs += 1;
-		}
-		if ( !$this->sameStrings( $lhsPlacement->FormWidgetId, $rhsPlacement->FormWidgetId  ) ) {
-			$nonReparableDiffs += 1;
-		}
-		if ( !$this->sameStrings( $lhsPlacement->FrameID, $rhsPlacement->FrameID  ) ) {
-			$nonReparableDiffs += 1;
-		}
-		if ( !$this->sameIntegers( $lhsPlacement->FrameOrder, $rhsPlacement->FrameOrder  ) ) {
-			$nonReparableDiffs += 1;
-		}
-		if ( !$this->sameStrings( $lhsPlacement->FrameType, $rhsPlacement->FrameType  ) ) {
-			$nonReparableDiffs += 1;
-		}
-		if ( !$this->sameFloats( $lhsPlacement->Height, $rhsPlacement->Height ) ) {
-			$reparableDiffs += 1;
-		}
-		if ( !$this->sameStrings( $lhsPlacement->Layer, $rhsPlacement->Layer  ) ) {
-			$reparableDiffs += 1;
-		}
-		if ( !$this->sameFloats( $lhsPlacement->Left, $rhsPlacement->Left ) ) {
-			$reparableDiffs += 1;
-		}
-		if ( !$this->sameIntegers( $lhsPlacement->Overset, $rhsPlacement->Overset  ) ) {
-			$reparableDiffs += 1;
-		}
-		if ( !$this->sameIntegers( $lhsPlacement->OversetChars, $rhsPlacement->OversetChars  ) ) {
-			$reparableDiffs += 1;
-		}
-		if ( !$this->sameIntegers( $lhsPlacement->OversetLines, $rhsPlacement->OversetLines  ) ) {
-			$reparableDiffs += 1;
-		}
-		if ( !$this->sameIntegers( $lhsPlacement->Page, $rhsPlacement->Page  ) ) {
-			$nonReparableDiffs += 1;
-		}
-		if ( !$this->sameIntegers( $lhsPlacement->PageSequence, $rhsPlacement->PageSequence  ) ) {
-			$nonReparableDiffs += 1;
-		}
-		if ( !$this->sameStrings( $lhsPlacement->PageNumber, $rhsPlacement->PageNumber  ) ) {
-			$nonReparableDiffs += 1;
-		}
-		if ( !$this->sameScale( $lhsPlacement->ScaleX, $rhsPlacement->ScaleX ) ) {
-			$reparableDiffs += 1;
-		}
-		if ( !$this->sameScale( $lhsPlacement->ScaleY, $rhsPlacement->ScaleY ) ) {
-			$reparableDiffs += 1;
-		}
-		if ( !$this->sameStrings( $lhsPlacement->SplineID, $rhsPlacement->SplineID  ) ) {
-			$nonReparableDiffs += 1;
-		}
-		if ( !$this->sameFloats( $lhsPlacement->Top, $rhsPlacement->Top ) ) {
-			$reparableDiffs += 1;
-		}
-		if ( !$this->sameFloats( $lhsPlacement->Width, $rhsPlacement->Width ) ) {
-			$reparableDiffs += 1;
-		}
-		if( !$this->sameArrays( $lhsPlacement->InDesignArticleIds, $rhsPlacement->InDesignArticleIds ) ) {
-			$nonReparableDiffs += 1;
-		}
-		if( $lhsPlacement->Tiles || $rhsPlacement->Tiles ) {
-			if( !$this->equalTiles( $lhsPlacement->Tiles, $rhsPlacement->Tiles ) ) {
-				$nonReparableDiffs += 1;
-			}
-		}
-	}
-
-	/**
-	 * Checks is two sets of placement-tiles can be seen as equal.
-	 *
-	 * @param $lhsTiles
-	 * @param $rhsTiles
-	 * @return bool
-	 */
-	private function equalTiles( $lhsTiles, $rhsTiles)
-	{
-		$equal = true;
-		if ( $this->diffEmptiness( $lhsTiles, $rhsTiles ) ) {
-			$equal = false;
-		} elseif ( is_array( $lhsTiles ) && is_array( $rhsTiles ) ) {
-			if( count( $lhsTiles ) != count( $rhsTiles ) ) {
-				$equal = false;
-			}
-		}
-		if( $equal ) {
-			foreach( $lhsTiles as $lhsTile ) {
-				foreach( $rhsTiles as $rhsTile ) {
-					$found = false;
-					if( $lhsTile->PageSequence == $rhsTile->PageSequence ) {
-						$found = true;
-						if ( !$this->sameFloats( $lhsTile->Left, $rhsTile->Left ) ) {
-							$equal = false;
-							break 2;
-						}
-						if ( !$this->sameFloats( $lhsTile->Width, $rhsTile->Width ) ) {
-							$equal = false;
-							break 2;
-						}
-						if ( !$this->sameFloats( $lhsTile->Height, $rhsTile->Height ) ) {
-							$equal = false;
-							break 2;
-						}
-						if ( !$this->sameFloats( $lhsTile->Top, $rhsTile->Top ) ) {
-							$equal = false;
-							break 2;
-						}
-					}
-					if( !$found ) {
-						$equal = false;
-						break 2;
-					}
-				}
-			}
-		}
-
-		return $equal;
-	}
-
-	/**
-	 * Checks if two placement scale properties are the same. Note that scale is null is stored in the database as scale
-	 * is 1.0. So null is first converted to 1.0 before the values are compared.
-	 *
-	 * @param $lhsScale
-	 * @param $rhsScale
-	 * @return bool
-	 */
-	private function sameScale( $lhsScale, $rhsScale )
-	{
-		$result = true;
-		if( is_null( $lhsScale) ) {
-			$lhsScale = 1.0;
-		}
-		if( is_null( $rhsScale ) ) {
-			$rhsScale = 1.0;
-		}
-		if( !$this->sameFloats( $lhsScale, $rhsScale )) {
-			$result = false;
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Checks if two float values can be seen as the same.
-	 *
-	 * @param $lhsFloat
-	 * @param $rhsFloat
-	 * @return bool
-	 */
-	private function sameFloats( $lhsFloat, $rhsFloat )
-	{
-		$epsilon = 0.000001;
-		$result = true;
-
-		if ( $this->diffEmptinessFloats( $lhsFloat, $rhsFloat ) ) {
-			$result = false;
-		} elseif ( !empty( floatval( $lhsFloat ) ) && !empty( floatval( $rhsFloat ) ) ) {
-			if( abs( floatval( $lhsFloat ) - floatval( $rhsFloat ) ) > $epsilon ) {
-				$result = false;
-			}
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Checks is arrays are equal on top level.
-	 *
-	 * Equal is defined as having the same emptiness or if not empty have the same keys.
-	 * E.g if $lhsArray is null and $rhsArray is array[] both are seen as equal.
-	 *
-	 * @param $lhsArray
-	 * @param $rhsArray
-	 * @return bool
-	 */
-	private function sameArrays( $lhsArray, $rhsArray )
-	{
-		$result = true;
-
-		if ( $this->diffEmptiness( $lhsArray, $rhsArray ) ) {
-			$result = false;
-		}  elseif( is_array( $lhsArray ) && is_array( $rhsArray ) ) {
-			if( array_diff( $lhsArray, $rhsArray ) ) {
-				$result = false;
-			}
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Checks if two string values can be seen as the same.
-	 *
-	 * @param $lhsString
-	 * @param $rhsString
-	 * @return bool
-	 */
-	private function sameStrings( $lhsString, $rhsString )
-	{
-		$result = true;
-
-		if ( $this->diffEmptiness( $lhsString, $rhsString ) ) {
-			$result = false;
-		} elseif ( !empty( $lhsString ) && !empty( $rhsString ) ) {
-			if( strcmp( $lhsString,  $rhsString ) !== 0 ) {
-				$result = false;
-			}
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Checks if two integer values can be seen as the same.
-	 *
-	 * @param $lhsInteger
-	 * @param $rhsInteger
-	 * @return bool
-	 */
-	private function sameIntegers( $lhsInteger, $rhsInteger )
-	{
-		$result = true;
-
-		if ( $this->diffEmptiness( $lhsInteger, $rhsInteger ) ) {
-			$result = false;
-		} elseif ( !empty( $lhsInteger ) && !empty( $rhsInteger ) ) {
-			if( intval( $lhsInteger ) !== intval( $rhsInteger) ) {
-				$result = false;
-			}
-		}
-
-		return $result;
-	}
-
-	/**
 	 * Checks if either both values are empty or both are not empty (exclusive or).
 	 *
-	 * @param $lhs
-	 * @param $rhs
+	 * @param mixed $lhs
+	 * @param mixed $rhs
 	 * @return bool
 	 */
-	private function diffEmptiness( $lhs, $rhs)
+	private function sameEmptiness( $lhs, $rhs)
 	{
-		$result = false;
-		if( ( empty( $lhs ) && !empty( $rhs ) ) || ( !empty( $lhs ) && empty( $rhs ) ) ) {
-			$result = true;
-		}
-
-		return $result;
+		return empty( $lhs ) == empty( $rhs );
 	}
 
-	/**
-	 * Checks if either both float values are empty or both are not empty (exclusive or).
-	 * First a conversion is done so "0.0" (in fact a string which is not empty) becomes 0.0, which is empty.
-	 *
-	 * @param $lhs
-	 * @param $rhs
-	 * @return bool
-	 */
-	private function diffEmptinessFloats( $lhs, $rhs)
-	{
-		$result = false;
-		if( ( empty( floatval( $lhs ) ) && !empty( floatval( $rhs ) ) ) || ( !empty( floatval( $lhs ) ) && empty( floatval( $rhs ) ) ) ) {
-			$result = true;
-		}
-
-		return $result;
-	}
-	/**
-	 * Checks if either both integers values are empty or both are not empty (exclusive or).
-	 * First a conversion is done so "0.0" (which is not empty) becomes 0.0, which is empty.
-	 *
-	 * @param $lhs
-	 * @param $rhs
-	 * @return bool
-	 */
-	private function diffEmptinessIntegers( $lhs, $rhs)
-	{
-		$result = false;
-		if( ( empty( intval( $lhs ) ) && !empty( intval( $rhs ) ) ) || ( !empty( intval( $lhs ) ) && empty( intval( $rhs ) ) ) ) {
-			$result = true;
-		}
-
-		return $result;
-	}
 }
