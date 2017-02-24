@@ -6,12 +6,13 @@
  * @since v8.2.1
  * @copyright WoodWing Software bv. All Rights Reserved.
  * 
- * Dispatches incomming SOAP requests to System Administration Services.<br>
- * It unpacks/packs the SOAP operations while doing so.
+ * Unwraps incoming SOAP requests and dispatches them to System Administration Services.
+ * Wraps returned service results into outgoing SOAP responses. Also handles exceptions.
+ * This way the SOAP message protocol is entirely hidden from the core Enterprise Server.
  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
- * Use the SysAdminServices.template.php file instead.
+ * Use the server/buildtools/genservices/interfaces/sys/SoapServices.template.php file instead.
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  */
 

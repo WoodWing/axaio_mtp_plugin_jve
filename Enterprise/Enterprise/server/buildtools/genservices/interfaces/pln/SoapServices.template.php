@@ -13,7 +13,7 @@
  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
- * Use the PlanningServices.template.php file instead.
+ * Use the server/buildtools/genservices/interfaces/pln/SoapServices.template.php file instead.
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  */
 

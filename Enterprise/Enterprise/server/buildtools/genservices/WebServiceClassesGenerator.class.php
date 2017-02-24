@@ -1,4 +1,13 @@
 <?php
+/**
+ * @package     Enterprise
+ * @subpackage  BuildTools
+ * @since       7.6.0
+ * @copyright   WoodWing Software bv. All Rights Reserved.
+ *
+ * Generates PHP/Flex/Java classes and HTML documentation from web service interfaces (WSDLs).
+ */
+
 // --------------------------------------------------------
 // Note#001: Note that getDataClassPrefix() is NOT called, but getServiceNameShort().
 // This is because we -always- want a prefix, also for workflow (Wfl).
@@ -29,302 +38,32 @@
 //    [RemoteClass(alias="Message")]
 // --------------------------------------------------------
 
-class WorkflowServicesClassGenerator extends ServicesClassGenerator
-{
-	final public function getServiceNameFull()  { return 'Workflow'; }
-	final public function getServiceNameShort() { return 'Wfl'; }
-	final public function getDataClassesFile()  { return BASEDIR.'/server/interfaces/services/wfl/DataClasses.php'; }
-	final public function getDataClassPrefix()  { return ''; } // no prefix!
-	final public function getNameSpace()        { return 'urn:SmartConnection'; }
-	final public function getExclDataClasses()  { return array('AttachmentContent', 'Row', 'GetStatesResponse'); }
-	final public function getWflDataClasses()   { return array(); }
-	final public function getSoapEntryPoint()   { return "LOCALURL_ROOT.INETROOT.'/index.php'"; }
-	final public function getWsdlFilePath()     { return BASEDIR.'/server/interfaces/SCEnterprise.wsdl'; }
-
-	final public function getUrlToFilePath($serviceName)
-	{ 
-		switch ($serviceName) {
-			case 'CreateObjectRelations':
-			case 'UpdateObjectRelations':
-				$result =
-				"\t\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
-				"\t\t\t\$transferServer = new BizTransferServer();\n" .
-				"\t\t\tif( \$req->Relations ) foreach( \$req->Relations as \$relation ) {\n" .
-				"\t\t\t\tif ( \$relation->Geometry ) {\n".
-				"\t\t\t\t\t\$transferServer->urlToFilePath( \$relation->Geometry );\n" .
-				"\t\t\t\t}\n" .
-				"\t\t\t}\n";
-			break;
-			default:
-				$result =
-				"\t\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
-				"\t\t\t\$transferServer = new BizTransferServer();\n" .
-				"\t\t\tif( \$req->Objects ) foreach( \$req->Objects as \$object ) {\n" .
-				"\t\t\t\t\$transferServer->switchURLToFilePath( \$object );\n" .
-				"\t\t\t}\n";
-			break;
-		} 
-		return $result;
-	 }
-	
-	final public function getFilePathToUrl($serviceName)
-	{
-		switch ($serviceName) {
-			case 'GetObjectRelations':
-				$result =
-				"\n" .
-				"\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
-				"\t\t\$transferServer = new BizTransferServer();\n" .
-				"\t\tif( \$resp->Relations ) foreach( \$resp->Relations as \$relation ) {\n" .
-				"\t\t\tif ( \$relation->Geometry ) {\n".
-				"\t\t\t\t\$transferServer->filePathToURL( \$relation->Geometry );\n" .
-				"\t\t\t}\n" .
-				"\t\t}\n\n";	
-			break;
-			case 'GetVersion':
-				$result =
-				"\n" .
-				"\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
-				"\t\t\$transferServer = new BizTransferServer();\n" .
-				"\t\tif( \$resp->VersionInfo->File ) {\n" .
-				"\t\t\t\$transferServer->filePathToURL( \$resp->VersionInfo->File );\n" .
-				"\t\t}\n\n";																
-			break;
-			case 'ListVersions':
-				$result =
-				"\n" .
-				"\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
-				"\t\t\$transferServer = new BizTransferServer();\n" .
-				"\t\tif( \$resp->Versions ) foreach( \$resp->Versions as \$versionInfo ) {\n" .
-				"\t\t\tif ( \$versionInfo->File ) {\n".
-				"\t\t\t\t\$transferServer->filePathToURL( \$versionInfo->File );\n" .
-				"\t\t\t}\n" .
-				"\t\t}\n\n";	
-			break;
-			case 'GetPages':
-				$result =
-				"\n" .
-				"\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
-				"\t\t\$transferServer = new BizTransferServer();\n" .
-				"\t\tif( \$resp->ObjectPageInfos ) foreach( \$resp->ObjectPageInfos as \$pageInfo ) {\n" .
-				"\t\t\tif( \$pageInfo->Pages ) foreach( \$pageInfo->Pages as \$page ) {\n".
-				"\t\t\t\tif( \$page->Files ) foreach( \$page->Files as \$file ) {\n".
-				"\t\t\t\t\t\$transferServer->filePathToURL( \$file );\n" .
-				"\t\t\t\t}\n" .
-				"\t\t\t}\n" .
-				"\t\t}\n\n";	
-			break;
-			default:
-				$result =
-				"\n" .
-				"\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
-				"\t\t\$transferServer = new BizTransferServer();\n" .
-				"\t\tif( \$resp->Objects ) foreach( \$resp->Objects as \$object ) {\n" .
-				"\t\t\t\$transferServer->switchFilePathToURL( \$object );\n" .
-				"\t\t}\n\n";
-			break;
-		} 
-		return $result;	
-	}
-}
-
-class AdminServicesClassGenerator extends ServicesClassGenerator
-{
-	final public function getServiceNameFull()  { return 'Admin'; }
-	final public function getServiceNameShort() { return 'Adm'; }
-	final public function getDataClassesFile()  { return BASEDIR.'/server/interfaces/services/adm/DataClasses.php'; }
-	final public function getDataClassPrefix()  { return $this->getServiceNameShort(); }
-	final public function getNameSpace()        { return 'urn:SmartConnectionAdmin'; }
-	final public function getExclDataClasses()  { return array(); }
-	final public function getWflDataClasses()   { return array(); }
-	final public function getSoapEntryPoint()   { return "LOCALURL_ROOT.INETROOT.'/adminindex.php'"; }
-	final public function getWsdlFilePath()     { return BASEDIR.'/server/interfaces/SmartConnectionAdmin.wsdl'; }
-	
-	final public function getUrlToFilePath($serviceName)
-	{
-		$serviceName = $serviceName; // keep analyzer happy
-		return "\\\\ Warning no url to filepath translation.\n\n";
-	}
-	
-	final public function getFilePathToUrl($serviceName) {
-		$serviceName = $serviceName; // keep analyzer happy
-		return "\\\\ Warning no filepath to url translation.\n\n";
-	}
-}
-
-class SysAdminServicesClassGenerator extends ServicesClassGenerator
-{
-	final public function getServiceNameFull()  { return 'SysAdmin'; }
-	final public function getServiceNameShort() { return 'Sys'; }
-	final public function getDataClassesFile()  { return BASEDIR.'/server/interfaces/services/sys/DataClasses.php'; }
-	final public function getDataClassPrefix()  { return $this->getServiceNameShort(); }
-	final public function getNameSpace()        { return 'urn:SmartConnectionSysAdmin'; }
-	final public function getExclDataClasses()  { return array(); }
-	final public function getWflDataClasses()   { return array(); }
-	final public function getSoapEntryPoint()   { return "LOCALURL_ROOT.INETROOT.'/sysadminindex.php'"; }
-	final public function getWsdlFilePath()     { return BASEDIR.'/server/interfaces/SystemAdmin.wsdl'; }
-	
-	final public function getUrlToFilePath($serviceName)
-	{
-		$serviceName = $serviceName; // keep analyzer happy
-		return "\\\\ Warning no url to filepath translation.\n\n";
-	}
-	
-	final public function getFilePathToUrl($serviceName) {
-		$serviceName = $serviceName; // keep analyzer happy
-		return "\\\\ Warning no filepath to url translation.\n\n";
-	}
-}
-
-class PlanningServicesClassGenerator extends ServicesClassGenerator
-{
-	final public function getServiceNameFull()  { return 'Planning'; }
-	final public function getServiceNameShort() { return 'Pln'; }
-	final public function getDataClassesFile()  { return BASEDIR.'/server/interfaces/services/pln/DataClasses.php'; }
-	final public function getDataClassPrefix()  { return $this->getServiceNameShort(); }
-	final public function getNameSpace()        { return 'urn:SmartEditorialPlan'; }
-	final public function getExclDataClasses()  { return array('AttachmentContent', 'Edition','Attachment'); }
-	final public function getWflDataClasses()   { return array( 'Edition','Attachment' ); } // already defined by workflow
-	final public function getSoapEntryPoint()   { return "LOCALURL_ROOT.INETROOT.'/editorialplan.php'"; }
-	final public function getWsdlFilePath()     { return BASEDIR.'/server/interfaces/SmartEditorialPlan.wsdl'; }
-	
-	final public function getUrlToFilePath($serviceName) 
-	{
-		$serviceName = $serviceName; // keep analyzer happy
-		return
-			"\t\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
-			"\t\t\t\$transferServer = new BizTransferServer();\n" .
-			"\t\t\tif( \$req->Adverts ) foreach( \$req->Adverts as \$advert ) {\n" .
-			"\t\t\t\tif( \$advert->File ) {\n" .
-			"\t\t\t\t\t\$transferServer->urlToFilePath( \$advert->File );\n" .
-			"\t\t\t\t}\n" .
-			"\t\t\t\tif( !is_null( \$advert->Page ) && isset( \$advert->Page->Files ) ) {\n" .
-			"\t\t\t\t\tforeach( \$advert->Page->Files as \$file ) {\n" .
-			"\t\t\t\t\t\t\$transferServer->urlToFilePath( \$file );\n" .
-			"\t\t\t\t\t}\n" .
-			"\t\t\t\t}\n" .
-			"\t\t\t}\n";
-	}
-	
-	final public function getFilePathToUrl($serviceName)
-	{ 
-		$serviceName = $serviceName; // keep analyzer happy
-		return
-			"\n" .
-			"\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
-			"\t\t\$transferServer = new BizTransferServer();\n" .
-			"\t\tif( \$resp->Adverts ) foreach( \$resp->Adverts as \$advert ) {\n" .
-			"\t\t\tif( \$advert->File ) {\n" .
-			"\t\t\t\t\$transferServer->filePathToURL( \$advert->File );\n" .
-			"\t\t\t}\n" .
-			"\t\t\tif( !is_null( \$advert->Page ) && isset( \$advert->Page->Files ) ) {\n" .
-			"\t\t\t\tforeach( \$advert->Page->Files as \$file ) {\n" .
-			"\t\t\t\t\t\$transferServer->filePathToURL( \$file );\n" .
-			"\t\t\t\t}\n" .
-			"\t\t\t}\n" .
-			"\t\t}\n";
-	}
-}
-
-class DataSourceServicesClassGenerator extends ServicesClassGenerator
-{
-	final public function getServiceNameFull()  { return 'DataSource'; }
-	final public function getServiceNameShort() { return 'Dat'; }
-	final public function getDataClassesFile()  { return BASEDIR.'/server/interfaces/services/dat/DataClasses.php'; }
-	final public function getDataClassPrefix()  { return $this->getServiceNameShort(); }
-	final public function getNameSpace()        { return 'urn:PlutusDatasource'; }
-	final public function getExclDataClasses()  { return array(); }
-	final public function getWflDataClasses()   { return array(); }
-	final public function getSoapEntryPoint()   { return "LOCALURL_ROOT.INETROOT.'/datasourceindex.php'"; }
-	final public function getWsdlFilePath()     { return BASEDIR.'/server/interfaces/PlutusDatasource.wsdl'; }
-	
-	final public function getUrlToFilePath($serviceName)
-	{
-		$serviceName = $serviceName; // keep analyzer happy
-		return "\\\\ Warning no url to filepath translation.\n\n";
-	}
-	
-	final public function getFilePathToUrl($serviceName)
-	{
-		$serviceName = $serviceName; // keep analyzer happy
-		return "\\\\ Warning no filepath to url translation.\n\n";
-	}
-}
-
-class AdmDatSrcServicesClassGenerator extends ServicesClassGenerator
-{
-	final public function getServiceNameFull()  { return 'AdmDatSrc'; }
-	final public function getServiceNameShort() { return 'Ads'; }
-	final public function getDataClassesFile()  { return BASEDIR.'/server/interfaces/services/ads/DataClasses.php'; }
-	final public function getDataClassPrefix()  { return $this->getServiceNameShort(); }
-	final public function getNameSpace()        { return 'urn:PlutusAdmin'; } // not used
-	final public function getExclDataClasses()  { return array(); }
-	final public function getWflDataClasses()   { return array(); }
-	final public function getSoapEntryPoint()   { return "LOCALURL_ROOT.INETROOT.'/datasourceadminindex.php'"; }
-	final public function getWsdlFilePath()     { return BASEDIR.'/server/interfaces/PlutusAdmin.wsdl'; }
-	
-	final public function getUrlToFilePath($serviceName)
-	{
-		$serviceName = $serviceName; // keep analyzer happy
-		return "\\\\ Warning no url to filepath translation.\n\n";
-	}
-	
-	final public function getFilePathToUrl($serviceName)
-	{
-		$serviceName = $serviceName; // keep analyzer happy
-		return "\\\\ Warning no filepath to url translation.\n\n";
-	}
-}
-
-class PublishingServicesClassGenerator extends ServicesClassGenerator
-{
-	final public function getServiceNameFull()  { return 'Publishing'; }
-	final public function getServiceNameShort() { return 'Pub'; }
-	final public function getDataClassesFile()  { return BASEDIR.'/server/interfaces/services/pub/DataClasses.php'; }
-	final public function getDataClassPrefix()  { return $this->getServiceNameShort(); }
-	final public function getNameSpace()        { return 'urn:EnterprisePublishing'; }
-	final public function getExclDataClasses()  { return array(); }
-	final public function getWflDataClasses()   { return array(); }
-	final public function getSoapEntryPoint()   { return "LOCALURL_ROOT.INETROOT.'/publishindex.php'"; }
-	final public function getWsdlFilePath()     { return BASEDIR.'/server/interfaces/EnterprisePublishing.wsdl'; }
-
-	final public function getUrlToFilePath($serviceName)
-	{
-		$serviceName = $serviceName; // keep analyzer happy
-		return "\\\\ Warning no url to filepath translation.\n\n";
-	}
-
-	final public function getFilePathToUrl($serviceName)
-	{
-		$serviceName = $serviceName; // keep analyzer happy
-		return "\\\\ Warning no filepath to url translation.\n\n";
-	}
-}
-
-abstract class ServicesClassGenerator
+class WW_BuildTools_GenServices_WebServiceClassesGenerator
 {
 	public $SuccessFiles = array();
 	public $ErrorFiles = array();
-	public $Warnings = array();
 	public $SkippedFiles = array();
 
-	private $XPath;
-	
-	abstract public function getServiceNameFull();
-	abstract public function getServiceNameShort();
-	abstract public function getDataClassesFile();
-	abstract public function getDataClassPrefix();
-	abstract public function getExclDataClasses();
-	abstract public function getWflDataClasses();
-	abstract public function getSoapEntryPoint();
-	abstract public function getWsdlFilePath();
-	abstract public function getUrlToFilePath($serviceName);
-	abstract public function getFilePathToUrl($serviceName);
+	public $Warnings = array();
+	public $FatalErrors = array();
 
-	public function __construct()
+	/** @var DOMXPath $XPath */
+	private $XPath;
+
+	/** @var WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface $ifDescriptor */
+	private $ifDescriptor;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface $interfaceDescriptor
+	 */
+	public function __construct( WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface $interfaceDescriptor )
 	{
+		$this->ifDescriptor = $interfaceDescriptor;
+
 		// parse wsdl
-		$wsdlFile = $this->getWsdlFilePath();
+		$wsdlFile = $this->ifDescriptor->getWsdlFilePath();
 		$wsdlDoc = new DOMDocument();
 		$cont = file_get_contents( $wsdlFile );
 		if( !$wsdlDoc->loadXML( $cont ) ) die( 'Could not parse '.$wsdlFile );
@@ -332,6 +71,33 @@ abstract class ServicesClassGenerator
 		$this->XPath->registerNameSpace('wsdl', 'http://schemas.xmlsoap.org/wsdl/');
 		$this->XPath->registerNameSpace('schm', 'http://www.w3.org/2001/XMLSchema');
 		$this->XPath->registerNameSpace('dime', 'http://schemas.xmlsoap.org/ws/2002/04/dime/wsdl/');
+	}
+
+	/**
+	 * Composes a list of functions that should be called one by one to generate all classes.
+	 *
+	 * The list is indexed with the logical names of the generation steps. It allows the caller
+	 * to show end user which step is currently processing.
+	 *
+	 * @since 10.2.0
+	 * @return string[] List of functions, indexed with logical names of the processing steps.
+	 */
+	public function getProcessingSteps()
+	{
+		$funcs = array();
+		$funcs['Services class'] = 'generateServicesClasses';
+		$funcs['Service classes'] = 'generateServiceClasses';
+		$funcs['SOAP server+client classes'] = 'generateSoapServerClientClasses';
+		$funcs['JSON client classes'] = 'generateJsonClientClasses';
+		$funcs['Request and response classes for PHP'] = 'generateRequestResponseClasses4Php';
+		$funcs['Request and response classes for Flex'] = 'generateRequestResponseClasses4Flex';
+		$funcs['Interfaces classes'] = 'generateServiceInterfaces';
+		$funcs['Data classes for PHP'] = 'generateDataClasses4Php';
+		$funcs['Data classes for Flex'] = 'generateDataClasses4Flex';
+		$funcs['Data validation classes'] = 'generateDataValidationClasses';
+		$funcs['Readable document'] = 'generateReadableDocument';
+		$funcs['Java classes'] = 'generateJavaClasses';
+		return $funcs;
 	}
 	
 	private function clearErrors()
@@ -356,6 +122,7 @@ abstract class ServicesClassGenerator
 	 * @param string $wsdlType Data type in WSDL terms.
 	 * @param array $imports Key-based list of required package imports.
 	 * @param string $datPackage Base path of package where data classes can be found.
+	 * @return string Flex type.
 	 */
 	private function getWsdl2FlexType( $wsdlType, &$imports, $datPackage )
 	{
@@ -375,7 +142,7 @@ abstract class ServicesClassGenerator
 			$flexType = $typeMap[$type];
 			if ( $wsdlType == 'dateTime' || $wsdlType == 'dateTimeOrEmpty' ) {
 				// When handling dates, we need a utility class for the conversion
-				$imports['com.woodwing.enterprise.interfaces.services.WoodWingUtils'] = true;
+				$imports[$this->composeWebServicesUri().'.WoodWingUtils'] = true;
 			}
 		} else {
 			if( stripos( $type, 'ArrayOf' ) !== false ) {
@@ -391,11 +158,11 @@ abstract class ServicesClassGenerator
 					if( $type == 'AttachmentContent' || $type == 'Row' ) {
 						$flexType = 'String'; // Flatten exceptional types to String
 					} else {
-						$wflClasses = array_flip( $this->getWflDataClasses() );
+						$wflClasses = array_flip( $this->ifDescriptor->getWflDataClasses() );
 						if( isset( $wflClasses[$type] ) ) {
-							$flexType = 'com.woodwing.enterprise.interfaces.services.wfl.dataclasses.Wfl'.$type; // some data classes used in planning are defined in workflow
+							$flexType = $this->composeWebServicesUri().'.wfl.dataclasses.Wfl'.$type; // some data classes used in planning are defined in workflow
 						} else {
-							$flexType = $datPackage.'.'.$this->getServiceNameShort().$type; // See Note#001
+							$flexType = $datPackage.'.'.$this->ifDescriptor->getServiceNameShort().$type; // See Note#001
 						}
 						$imports[$flexType] = true;
 					}
@@ -569,27 +336,133 @@ abstract class ServicesClassGenerator
 	}*/
 
 	/**
+	 * Composes the SDK base folder path.
+	 *
+	 * @since 10.2.0
+	 * @return string
+	 */
+	private function getSdkDir()
+	{
+		$baseDir = $this->ifDescriptor->getProviderBasePath();
+		if( $this->ifDescriptor->getServerPluginName() ) {
+			$sdkDir = "$baseDir/sdk";
+		} else {
+			$sdkDir = "$baseDir/../sdk";
+		}
+		return $sdkDir;
+	}
+
+	/**
+	 * Composes the SDK folder path for a given programming language.
+	 *
+	 * The path for the core server differs from the path for server plugins:
+	 * - server:
+	 *   - java: BASEDIR.'/server/../sdk/java/src/com/woodwing/enterprise/interfaces/services'
+	 *   - flex: BASEDIR.'/server/../sdk/flex/src/com/woodwing/enterprise/interfaces/services'
+	 * - plugin:
+	 *   - java: BASEDIR.'/config/plugins/<plugin>/sdk/java/src/com/woodwing/enterprise/interfaces/services'
+	 *   - flex: BASEDIR.'/config/plugins/<plugin>/sdk/flex/src/com/woodwing/enterprise/interfaces/services'
+	 *
+	 * @since 10.2.0
+	 * @param string $language 'java' or 'flex'
+	 * @return string The SDK file path.
+	 */
+	private function composeSdkDirForLanguage( $language )
+	{
+		return $this->getSdkDir()."/{$language}/src/com/woodwing/enterprise/interfaces/services";
+	}
+
+	/**
+	 * Composes the URI used to classify web services and their interfaces and dataclasses.
+	 *
+	 * The uri for the core server differs from the uri for server plugins:
+	 * - server: com.woodwing.enterprise.interfaces.services
+	 * - plugin: com.woodwing.enterprise.plugins.<plugin>.interfaces.services
+	 *
+	 * @since 10.2.0
+	 * @return string The URI.
+	 */
+	private function composeWebServicesUri()
+	{
+		$pluginName = $this->ifDescriptor->getServerPluginName();
+		$pluginPart = $pluginName ? 'plugins.'.strtolower($pluginName).'.' : '';
+		return "com.woodwing.enterprise{$pluginPart}.interfaces.services";
+	}
+
+	/**
+	 * Generate Java classes from a WSDL.
+	 *
+	 * Those classes can be used by 3rd party integrators to build a client in Java that talks to Enterprise.
+	 *
+	 * @since 10.2.0
+	 */
+	public function generateJavaClasses()
+	{
+		$intfShort = $this->ifDescriptor->getServiceNameShort();
+		$intfShortLow = strtolower($intfShort);
+
+		// Delete output folder recursively (if exists).
+		$outputFolder = $this->composeSdkDirForLanguage( 'java' ).'/'.strtolower( $intfShort );
+		if( file_exists( $outputFolder ) ) {
+			require_once BASEDIR.'/server/utils/FolderUtils.class.php';
+			FolderUtils::cleanDirRecursive( $outputFolder, false );
+		}
+
+		// Call the WSDL2Java tool to generate Java classes from our WSDL.
+		$outClass = $this->composeWebServicesUri().".{$intfShortLow}";
+		$entryPoint = eval( 'return '.$this->ifDescriptor->getSoapEntryPoint().';' );
+		$httpWsdl = "{$entryPoint}?wsdl=ws-i";
+		$sdkDir = $this->getSdkDir();
+		$command = 'java -cp '.escapeshellarg('./wsdl2java/axis-1_4/*:./wsdl2java/javamail-1.4.5/mail.jar').
+			' org.apache.axis.wsdl.WSDL2Java -u -W -p '.escapeshellarg( $outClass ).' '.escapeshellarg( $httpWsdl ).
+			' -o '.escapeshellarg("{$sdkDir}/java/src").' && echo "OK" || (c=$?; echo "NOK"; (exit $c)) ';
+			// L> Note that the exec() does not catch errors given by the WSDL2Java module somehow.
+			//    As a work-around the errors are caught in $? at bash and returned as either OK or NOK.
+
+		// Report any error returned by the WSDL2Java tool.
+		$returnVar = 0;
+		$output = array();
+		$result = exec( $command, $output, $returnVar );
+		if( $result == 'NOK' ) {
+			$this->FatalErrors[] = 'Could not generate Java classes. The WSDL file is not valid: '.
+				$this->ifDescriptor->getWsdlFilePath().PHP_EOL.
+				'Please fix it and try again. Could can manually retry as follows: '.$command.PHP_EOL;
+		}
+
+		// Because we asked Enterprise Server to return WSDL through HTTP, it replaces the entry point for us.
+		// The Java classes are generated on that and the entry point is stored in the service locator.
+		// However, that is an temporary URL and so we replace it again, now with something more generic.
+		$defaultEntryPoint = str_replace( LOCALURL_ROOT.INETROOT.'/', 'http://127.0.0.1/Enterprise/', $entryPoint );
+		list( $prefix, $nameSpace ) = explode( ':', $this->ifDescriptor->getNameSpace(), 2 ); // namespace has 'urn:' prefix
+		$javaFile = $outputFolder.'/'.$nameSpace.'ServiceLocator.java';
+		file_put_contents( $javaFile, str_replace( $entryPoint, $defaultEntryPoint, file_get_contents( $javaFile ) ) );
+	}
+
+	/**
 	 * Generates an include file to incorporate all necessary Request PHP classes for AMF calls.
 	 *
 	 * @param array $requestClasses
-	 * @return void
+	 * @return string PHP code fragment.
 	 */
-	public function generateRequestClassesInclude4AMF(array $requestClasses){
+	public function generateRequestClassesInclude4AMF(array $requestClasses)
+	{
 		$outTxt = "";
 		foreach ($requestClasses as $class){
 			// add a class definition to the include file.
-			$outTxt .= "require_once(BASEDIR.'/server/interfaces/services/" . strtolower($this->getServiceNameShort()) . "/$class.class.php');\n";
+			$outTxt .= "require_once(BASEDIR.'/server/interfaces/services/" . strtolower($this->ifDescriptor->getServiceNameShort()) . "/$class.class.php');\n";
 		}
 		return $outTxt;
 	}
 
 	/**
-	 * Generates an include file to incorporate all necessary typemappings.
+	 * Generates an include file to incorporate all necessary type mappings.
 	 *
-	 * @param array $requestClasses
-	 * @return void
+	 * @param array $map
+	 * @param string $identifier
+	 * @return string PHP code fragment.
 	 */
-	public function generateTypeMap4AMF(array $map, $identifier){
+	public function generateTypeMap4AMF(array $map, $identifier)
+	{
 		$outTxt = "<?php\n\n/**\n"
 			." * @package Enterprise\n"
 			." * @subpackage Services\n"
@@ -598,7 +471,7 @@ abstract class ServicesClassGenerator
 			." * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!\n"
 			." *".'/'."\n\n";
 
-		$fileOut = BASEDIR.'/server/protocols/amf/' . $this->getServiceNameShort() . $identifier . "TypeMap.php";
+		$fileOut = BASEDIR.'/server/protocols/amf/' . $this->ifDescriptor->getServiceNameShort() . $identifier . "TypeMap.php";
 
 		foreach ($map as $asClass => $phpClass){
 			// add a class definition to the include file.
@@ -621,11 +494,11 @@ abstract class ServicesClassGenerator
 	{
 		$this->clearErrors();
 
-		$excludeClasses = array_flip( $this->getExclDataClasses() );
+		$excludeClasses = array_flip( $this->ifDescriptor->getExclDataClasses() );
 		$dataClasses = $this->getDataClasses();
 		$dataClasses = array_diff_key( $dataClasses, $excludeClasses ); // remove exclusions
-		$intfFull = $this->getServiceNameFull();
-		$intfShort = $this->getServiceNameShort();
+		$intfFull = $this->ifDescriptor->getServiceNameFull();
+		$intfShort = $this->ifDescriptor->getServiceNameShort();
 		$intfShortLow = strtolower($intfShort);
 		$classMap = array();
 		$simpleTypeComments = array();
@@ -658,7 +531,7 @@ abstract class ServicesClassGenerator
 			$arrayFields = array();
 
 			// Data class members
-			$dataClassName = $this->getDataClassPrefix().$dataName;
+			$dataClassName = $this->ifDescriptor->getDataClassPrefix().$dataName;
 			$outTxt .= "class ".$dataClassName."\n{\n";
 			foreach( $dataClasses[$dataName] as $propName => $propStruct ) {
 				$outTxt .= "\tpublic \$$propName;\n";
@@ -682,12 +555,12 @@ abstract class ServicesClassGenerator
 				$prefixedPropType = $isEnum ? 'string' : $propType;
 				$prefixedPropType = $propStruct['isarray'] ? $prefixedPropType . '[]' : $prefixedPropType; // Add back the [] for Array type.
 
-				$dataClassPrefix = $this->getDataClassPrefix();
-				$workflowDataClasses = $this->getWflDataClasses();
+				$dataClassPrefix = $this->ifDescriptor->getDataClassPrefix();
+				$workflowDataClasses = $this->ifDescriptor->getWflDataClasses();
 
 				if( !$isEnum && isset($dataClasses[$propType]) ) {
 					if( in_array( $propType, $workflowDataClasses ) ) { // Pln interface is a subset of Wfl, so these data types will not be with Pln prefix($dataClassPrefix)
-						$prefixedPropType = $prefixedPropType; // All Wfl interface do not need 'wfl' prefix.
+						// All Wfl interface do not need 'wfl' prefix.
 					} else {
 						$prefixedPropType = $dataClassPrefix.$prefixedPropType;
 					}
@@ -732,7 +605,7 @@ abstract class ServicesClassGenerator
 			$outTxt .= "\t}\n\n";
 
 			// Flex AMF specific function used for object type mapping
-			$flexDataClassName = $this->getServiceNameShort().$dataName; // See Note#001
+			$flexDataClassName = $this->ifDescriptor->getServiceNameShort().$dataName; // See Note#001
 			$outTxt .= "\tpublic function getASClassName() { return AS_CLASSNAME_PREFIX.'.$intfShortLow.dataclasses.$flexDataClassName'; } // AMF object type mapping\n\n";
 
 			// Generate TypeMapping for AMF.
@@ -773,7 +646,7 @@ abstract class ServicesClassGenerator
 		// write the dataclass mappings.
 		$this->generateTypeMap4AMF($classMap, 'Data');
 
-		$classFile = $this->getDataClassesFile();
+		$classFile = $this->ifDescriptor->getDataClassesFile();
 		if( !$classFile ) {
 			$this->Warnings[] = 'Feature is not supported';
 			return;
@@ -791,14 +664,14 @@ abstract class ServicesClassGenerator
 	{
 		$this->clearErrors();
 
-		$excludeClasses = array_flip( $this->getExclDataClasses() );
+		$excludeClasses = array_flip( $this->ifDescriptor->getExclDataClasses() );
 		$dataClasses = $this->getDataClasses();
 		$dataClasses = array_diff_key( $dataClasses, $excludeClasses ); // remove exclusions
-		$intfFull = $this->getServiceNameFull();
-		$intfShort = $this->getServiceNameShort();
+		$intfFull = $this->ifDescriptor->getServiceNameFull();
+		$intfShort = $this->ifDescriptor->getServiceNameShort();
 		$intfShortLow = strtolower($intfShort);
 
-		$dirOut = BASEDIR.'/sdk/flex/src/com/woodwing/enterprise/interfaces/services/'.$intfShortLow.'/dataclasses';
+		$dirOut = $this->composeSdkDirForLanguage( 'flex' ).'/'.$intfShortLow.'/dataclasses';
 		if( !is_dir($dirOut) ) {
 			require_once BASEDIR.'/server/utils/FolderUtils.class.php';
 			FolderUtils::mkFullDir( $dirOut, 0777 );
@@ -812,9 +685,8 @@ abstract class ServicesClassGenerator
 
 			// File header
 			$imports = array();
-			//$srvPackage = "com.woodwing.enterprise.interfaces.services.$intfShortLow";
-			$datPackage = "com.woodwing.enterprise.interfaces.services.$intfShortLow.dataclasses";
-			$dataClassName = $this->getServiceNameShort().$dataName; // See Note#001
+			$datPackage = $this->composeWebServicesUri().".{$intfShortLow}.dataclasses";
+			$dataClassName = $this->ifDescriptor->getServiceNameShort().$dataName; // See Note#001
 			$outTxt = "/*\n"
 					."\tEnterprise $intfFull Services\n"
 					."\tCopyright (c) WoodWing Software bv. All Rights Reserved.\n\n"
@@ -825,7 +697,7 @@ abstract class ServicesClassGenerator
 			$outTxt .= "package $datPackage\n{\n";
 			$outTxt .= "/*IMPORTS*/"; // to be replaced below
 			$outTxt .= "\t[Bindable]\n";
-			$outTxt .= "\t[RemoteClass(alias=\"".$datPackage.'.'.$this->getServiceNameShort().$dataName."\")]\n\n"; // Note#001
+			$outTxt .= "\t[RemoteClass(alias=\"".$datPackage.'.'.$this->ifDescriptor->getServiceNameShort().$dataName."\")]\n\n"; // Note#001
 			$outTxt .= "\tpublic class $dataClassName\n\t{\n";
 
 			// Compose AMF class components.
@@ -834,7 +706,7 @@ abstract class ServicesClassGenerator
 			$getset = "";
 			foreach( $dataStruct as $propName => $propStruct ) {
 				$flexType = $this->getWsdl2FlexType( $propStruct['rawtype'], $imports, $datPackage );
-				$propName = $this->sanitizePropertyName4Flex($propName, $dataName);
+				$propName = $this->sanitizePropertyName4Flex($propName);
 				$properties .= "\t\tprivate var _$propName:$flexType;\n";
 
 				// Add Getters/Setters.
@@ -866,7 +738,7 @@ abstract class ServicesClassGenerator
 			."\tIMPORTANT: DO NOT EDIT! THIS PACKAGE IS GENERATED FROM WSDL!\n"
 			.'*/'."\n\n";
 
-		$outTxt .= "package com.woodwing.enterprise.interfaces.services"
+		$outTxt .= "package ".$this->composeWebServicesUri()
 			."{\n\n"
 			."\tpublic class WoodWingUtils\n"
 			."\t{\n\n"
@@ -985,7 +857,7 @@ abstract class ServicesClassGenerator
 			."}\n";
 
 
-		$utilsFile = BASEDIR.'/sdk/flex/src/com/woodwing/enterprise/interfaces/services/WoodWingUtils.as';
+		$utilsFile = $this->composeSdkDirForLanguage( 'flex' ).'/WoodWingUtils.as';
 		$fp = @fopen( $utilsFile, 'w+' );
 		if( !$fp || fwrite( $fp, $outTxt ) === false ) {
 			$this->ErrorFiles[] = $utilsFile;
@@ -1074,6 +946,7 @@ abstract class ServicesClassGenerator
 					? $setNumber
 					: "\t\t\treturn this._$propName;\n";
 				break;
+			/** @noinspection PhpMissingBreakStatementInspection */
 			case 'boolean':
 				$header .= "\n\t\t// _$propName should be handled like a Boolean, but since Boolean is not a nillable type\n" .
 					"\t\t// we handle it like a String to be able to send it nillable to the server. \n";
@@ -1122,7 +995,7 @@ abstract class ServicesClassGenerator
 	private function generateServicesClass( $protocol )
 	{
 		$xpath = $this->XPath;
-		$intfShort = $this->getServiceNameShort();
+		$intfShort = $this->ifDescriptor->getServiceNameShort();
 		$intfShortLow = strtolower($intfShort);
 
 		// TODO: Use getServiceMessages() instead of code fragment below
@@ -1150,6 +1023,7 @@ abstract class ServicesClassGenerator
 		}
 		$outTxt = '';
 		$reqInc = array();
+		$indent = '';
 		foreach( $services as $serviceName => $serviceInOut ) {
 			$outTxt .= "\tpublic function $serviceName( "; // start function
 			$outTxt .= '$req';
@@ -1177,7 +1051,7 @@ abstract class ServicesClassGenerator
 				break;
 			}
 			if ($serviceInOut['dimeIn'] == true) {
-				$outTxt .= $this->getUrlToFilePath( $serviceName ); // Translate external url to internal filepath.
+				$outTxt .= $this->ifDescriptor->getUrlToFilePath( $serviceName ); // Translate external url to internal filepath.
 			}
 			$outTxt .= $indent."\$service = new $intfShort$serviceClass();\n";
 			$outTxt .= $indent."\$resp = \$service->execute( \$req );\n";
@@ -1203,7 +1077,7 @@ abstract class ServicesClassGenerator
 				break;
 			}
 			if ($serviceInOut['dimeOut'] == true) {
-				$outTxt .= $this->getFilePathToUrl( $serviceName ); // Translate internal filepath to external url.
+				$outTxt .= $this->ifDescriptor->getFilePathToUrl( $serviceName ); // Translate internal filepath to external url.
 			}			
 			if( $protocol == 'soap' ) { // tmp hack not to break stuff now
 				$outTxt .= "\t\treturn self::returnResponse(\$resp);\n";
@@ -1219,16 +1093,16 @@ abstract class ServicesClassGenerator
 		}
 		
 		// read template file
-		$classFile = BASEDIR.'/server/buildtools/genservices/templates/';
+		$classFile = '';
 		switch( $protocol ) {
 			case 'soap':
-				$classFile .= $this->getServiceNameFull().'Services.template.php';
+				$classFile = BASEDIR.'/server/buildtools/genservices/interfaces/'.$this->ifDescriptor->getServiceNameShort().'/SoapServices.template.php';
 			break;
 			case 'amf':
-				$classFile .= 'AmfServices.template.php';
+				$classFile = BASEDIR.'/server/buildtools/genservices/templates/AmfServices.template.php';
 			break;
 			case 'json':
-				$classFile .= 'JsonServices.template.php';
+				$classFile = BASEDIR.'/server/buildtools/genservices/templates/JsonServices.template.php';
 			break;
 		}
 		
@@ -1246,9 +1120,9 @@ abstract class ServicesClassGenerator
 			$outTxt = str_replace( '/*REQUESTCLASSES*/', $this->generateRequestClassesInclude4AMF($reqInc), $outTxt);
 		}
 		if( $protocol == 'soap' ) { // tmp hack not to break stuff now
-			$classFile = BASEDIR.'/server/protocols/soap/'.$this->getServiceNameShort().'Services.php';
+			$classFile = BASEDIR.'/server/protocols/soap/'.$this->ifDescriptor->getServiceNameShort().'Services.php';
 		} else {
-			$classFile = BASEDIR.'/server/protocols/'.$protocol.'/'.$this->getServiceNameShort().'Services.php';
+			$classFile = BASEDIR.'/server/protocols/'.$protocol.'/'.$this->ifDescriptor->getServiceNameShort().'Services.php';
 		}
 		$fp = @fopen( $classFile, 'w+' );
 		if( !$fp || fwrite( $fp, $outTxt ) === false ) {
@@ -1263,10 +1137,10 @@ abstract class ServicesClassGenerator
 	{
 		$this->clearErrors();
 
-		$intfShort = $this->getServiceNameShort();
+		$intfShort = $this->ifDescriptor->getServiceNameShort();
 		$intfShortLow = strtolower($intfShort);
 		$dataClasses = $this->getDataClasses();
-		//$excludeClasses = array_flip( $this->getExclDataClasses() );
+		//$excludeClasses = array_flip( $this->ifDescriptor->getExclDataClasses() );
 		//$dataClasses = array_diff_key( $dataClasses, $excludeClasses ); // remove exclusions
 		$simpleTypeComments = array();
 		$simpleTypeEnums = $this->getSimpleTypeEnums( $simpleTypeComments ); // Collect enumerations (simpleType) from WSDL
@@ -1315,12 +1189,12 @@ abstract class ServicesClassGenerator
 					$prefixedPropType = $isEnum ? 'string' : $propType;
 					$prefixedPropType = $propStruct['isarray'] ? $prefixedPropType . '[]' : $prefixedPropType; // Add back the [] for Array type.
 
-					$dataClassPrefix = $this->getDataClassPrefix();
-					$workflowDataClasses = $this->getWflDataClasses();
+					$dataClassPrefix = $this->ifDescriptor->getDataClassPrefix();
+					$workflowDataClasses = $this->ifDescriptor->getWflDataClasses();
 
 					if( !$isEnum && isset($dataClasses[$propType]) ) {
 						if( in_array( $propType, $workflowDataClasses ) ) { // Pln interface is a subset of Wfl, so these data types will not be with Pln prefix($dataClassPrefix)
-							$prefixedPropType = $prefixedPropType; // All Wfl interface do not need 'wfl' prefix.
+							// All Wfl interface do not need 'wfl' prefix.
 						} else {
 							$prefixedPropType = $dataClassPrefix.$prefixedPropType;
 						}
@@ -1447,11 +1321,11 @@ abstract class ServicesClassGenerator
 		$this->clearErrors();
 
 		$xpath = $this->XPath;
-		$intfShort = $this->getServiceNameShort();
-		$intfFull = $this->getServiceNameFull();
+		$intfShort = $this->ifDescriptor->getServiceNameShort();
+		$intfFull = $this->ifDescriptor->getServiceNameFull();
 		$intfShortLow = strtolower($intfShort);
 
-		$dirOut = BASEDIR.'/sdk/flex/src/com/woodwing/enterprise/interfaces/services/'.$intfShortLow;
+		$dirOut = $this->composeSdkDirForLanguage( 'flex' ).'/'.$intfShortLow;
 		if( !is_dir($dirOut) ) {
 			require_once BASEDIR.'/server/utils/FolderUtils.class.php';
 			FolderUtils::mkFullDir( $dirOut, 0777 );
@@ -1481,9 +1355,9 @@ abstract class ServicesClassGenerator
 				$elem .= 'Request';
 			}
 			
-			// Request/Reponse class
-			$srvPackage = "com.woodwing.enterprise.interfaces.services.$intfShortLow";
-			$datPackage = "com.woodwing.enterprise.interfaces.services.$intfShortLow.dataclasses";
+			// Request/Response class
+			$srvPackage = $this->composeWebServicesUri().".{$intfShortLow}";
+			$datPackage = $this->composeWebServicesUri().".{$intfShortLow}.dataclasses";
 			$outTxt .= "package $srvPackage\n{\n";
 			$outTxt .= "/*IMPORTS*/"; // to be replaced below
 			$outTxt .= "\t[Bindable]\n";
@@ -1496,7 +1370,7 @@ abstract class ServicesClassGenerator
 			$properties = "";
 			$getset = "";
 
-			// Contructor header
+			// Constructor header
 			if( $entry ) {
 				// get type without namespace
 				$type = preg_replace('/^.*?:/', '', $entry->getAttribute('type'));
@@ -1548,8 +1422,8 @@ abstract class ServicesClassGenerator
 		$this->clearErrors();
 
 		$xpath = $this->XPath;
-		$intfFull = $this->getServiceNameFull();
-		$intfShort = $this->getServiceNameShort();
+		$intfFull = $this->ifDescriptor->getServiceNameFull();
+		$intfShort = $this->ifDescriptor->getServiceNameShort();
 		$intfShortLow = strtolower($intfShort);
 
 		require_once BASEDIR.'/server/serverinfo.php'; // SERVERVERSION
@@ -1603,8 +1477,8 @@ abstract class ServicesClassGenerator
 		$this->clearErrors();
 
 		$xpath = $this->XPath;
-		$intfFull = $this->getServiceNameFull();
-		$intfShort = $this->getServiceNameShort();
+		$intfFull = $this->ifDescriptor->getServiceNameFull();
+		$intfShort = $this->ifDescriptor->getServiceNameShort();
 		$intfShortLow = strtolower($intfShort);
 
 		require_once BASEDIR.'/server/serverinfo.php'; // SERVERVERSION
@@ -1655,8 +1529,8 @@ abstract class ServicesClassGenerator
 	{
 		$this->clearErrors();
 
-		$intfFull = $this->getServiceNameFull();
-		$intfShort = $this->getServiceNameShort();
+		$intfFull = $this->ifDescriptor->getServiceNameFull();
+		$intfShort = $this->ifDescriptor->getServiceNameShort();
 
 		// read template files
 		$classFile = BASEDIR.'/server/buildtools/genservices/templates/SoapServer.template.php';
@@ -1683,8 +1557,8 @@ abstract class ServicesClassGenerator
 
 		// determine class maps
 		$classMaps = '';
-		$excludeClasses = array_flip( $this->getExclDataClasses() );
-		$wflClasses = array_flip( $this->getWflDataClasses() );
+		$excludeClasses = array_flip( $this->ifDescriptor->getExclDataClasses() );
+		$wflClasses = array_flip( $this->ifDescriptor->getWflDataClasses() );
 		$dataClasses = $this->getDataClasses();
 		//$dataClasses = array_diff_key( $dataClasses, $excludeClasses ); // remove exclusions
 		ksort($dataClasses);
@@ -1692,12 +1566,12 @@ abstract class ServicesClassGenerator
 			if( isset( $wflClasses[$dataName] ) ) { // hack: the planning re-uses some workflow classes
 				$classMaps .= "\t\t".'$options[\'classmap\'][\''.$dataName.'\'] = \''.$dataName.'\';'."\n";
 			} else if( !isset( $excludeClasses[$dataName] ) ) {
-				$classMaps .= "\t\t".'$options[\'classmap\'][\''.$dataName.'\'] = \''.$this->getDataClassPrefix().$dataName.'\';'."\n";
+				$classMaps .= "\t\t".'$options[\'classmap\'][\''.$dataName.'\'] = \''.$this->ifDescriptor->getDataClassPrefix().$dataName.'\';'."\n";
 			}
 		}
 		
 		// Compose response object class mapping for the SOAP clients.
-		$intfShort = $this->getServiceNameShort();
+		$intfShort = $this->ifDescriptor->getServiceNameShort();
 		$services = $this->getServiceMessages();
 		$responseClassMaps = '';
 		foreach( $services as $serviceName => $messageStruct ) {
@@ -1717,7 +1591,7 @@ abstract class ServicesClassGenerator
 		$srvrOutTxt = str_replace( '/*INTFSHORT*/', $intfShort, $srvrOutTxt );
 		//$srvrOutTxt = str_replace( '/*TYPEMAPS*/', $typeMaps, $srvrOutTxt );
 		$srvrOutTxt = str_replace( '/*CLASSMAPS*/', $classMaps, $srvrOutTxt );
-		$srvrOutTxt = str_replace( '/*NAMESPACE*/', $this->getNameSpace(), $srvrOutTxt );
+		$srvrOutTxt = str_replace( '/*NAMESPACE*/', $this->ifDescriptor->getNameSpace(), $srvrOutTxt );
 		$srvrOutTxt = str_replace( '/*ENTRYPOINT*/', $location, $srvrOutTxt );
 
 		// replace /*...*/ markers for client
@@ -1725,11 +1599,11 @@ abstract class ServicesClassGenerator
 		$clntOutTxt = str_replace( '/*INTFSHORT*/', $intfShort, $clntOutTxt );
 		//$clntOutTxt = str_replace( '/*TYPEMAPS*/', $typeMaps, $clntOutTxt );
 		$clntOutTxt = str_replace( '/*CLASSMAPS*/', $classMaps.$responseClassMaps, $clntOutTxt );
-		$clntOutTxt = str_replace( '/*NAMESPACE*/', $this->getNameSpace(), $clntOutTxt );
-		$clntOutTxt = str_replace( '/*ENTRYPOINT*/', $this->getSoapEntryPoint(), $clntOutTxt );
+		$clntOutTxt = str_replace( '/*NAMESPACE*/', $this->ifDescriptor->getNameSpace(), $clntOutTxt );
+		$clntOutTxt = str_replace( '/*ENTRYPOINT*/', $this->ifDescriptor->getSoapEntryPoint(), $clntOutTxt );
 
 		// create server class file		
-		$classFile = BASEDIR.'/server/protocols/soap/'.$this->getServiceNameShort().'Server.php';
+		$classFile = BASEDIR.'/server/protocols/soap/'.$this->ifDescriptor->getServiceNameShort().'Server.php';
 		$fp = @fopen( $classFile, 'w+' );
 		if( !$fp || fwrite( $fp, $srvrOutTxt ) === false ) {
 			$this->ErrorFiles[] = $classFile;
@@ -1739,7 +1613,7 @@ abstract class ServicesClassGenerator
 		if( $fp ) fclose( $fp );
 
 		// create client class file		
-		$classFile = BASEDIR.'/server/protocols/soap/'.$this->getServiceNameShort().'Client.php';
+		$classFile = BASEDIR.'/server/protocols/soap/'.$this->ifDescriptor->getServiceNameShort().'Client.php';
 		$fp = @fopen( $classFile, 'w+' );
 		if( !$fp || fwrite( $fp, $clntOutTxt ) === false ) {
 			$this->ErrorFiles[] = $classFile;
@@ -1753,8 +1627,8 @@ abstract class ServicesClassGenerator
 	{
 		$this->clearErrors();
 
-		$intfFull = $this->getServiceNameFull();
-		$intfShort = $this->getServiceNameShort();
+		$intfFull = $this->ifDescriptor->getServiceNameFull();
+		$intfShort = $this->ifDescriptor->getServiceNameShort();
 
 		$classFile = BASEDIR.'/server/buildtools/genservices/templates/JsonClient.template.php';
 		$clntOutTxt = file_get_contents( $classFile );
@@ -1772,11 +1646,11 @@ abstract class ServicesClassGenerator
 		// replace /*...*/ markers for client
 		$clntOutTxt = str_replace( '/*INTFFULL*/', $intfFull, $clntOutTxt );
 		$clntOutTxt = str_replace( '/*INTFSHORT*/', $intfShort, $clntOutTxt );
-		$clntOutTxt = str_replace( '/*NAMESPACE*/', $this->getNameSpace(), $clntOutTxt );
-		$clntOutTxt = str_replace( '/*ENTRYPOINT*/', $this->getSoapEntryPoint(), $clntOutTxt );
+		$clntOutTxt = str_replace( '/*NAMESPACE*/', $this->ifDescriptor->getNameSpace(), $clntOutTxt );
+		$clntOutTxt = str_replace( '/*ENTRYPOINT*/', $this->ifDescriptor->getSoapEntryPoint(), $clntOutTxt );
 
 		// create client class file
-		$classFile = BASEDIR.'/server/protocols/json/'.$this->getServiceNameShort().'Client.php';
+		$classFile = BASEDIR.'/server/protocols/json/'.$this->ifDescriptor->getServiceNameShort().'Client.php';
 		$fp = @fopen( $classFile, 'w+' );
 		if( !$fp || fwrite( $fp, $clntOutTxt ) === false ) {
 			$this->ErrorFiles[] = $classFile;
@@ -1790,6 +1664,7 @@ abstract class ServicesClassGenerator
 	 * Returns simpleType defintions from WSDL that are enumerations.
 	 * Each element in the returned array is an array with 'value' and 'comment' entries.
 	 *
+	 * @param array $simpleTypeComments
 	 * @return array of element definitions
 	 */
 	private function getSimpleTypeEnums( array & $simpleTypeComments )
@@ -1825,8 +1700,8 @@ abstract class ServicesClassGenerator
 		require_once BASEDIR.'/server/serverinfo.php';
 		$version = explode( '.', SERVERVERSION );
 		$version = 'v'.$version[0].'.'.$version[1];
-		$wsdlFile = basename( $this->getWsdlFilePath() );
-		$intfFull = $this->getServiceNameFull();
+		$wsdlFile = basename( $this->ifDescriptor->getWsdlFilePath() );
+		$intfFull = $this->ifDescriptor->getServiceNameFull();
 
 		// Collect messages (requests/responses) from WSDL
 		$xpath = $this->XPath;
@@ -1840,7 +1715,7 @@ abstract class ServicesClassGenerator
 
 		// Collect data classes (complexType) from WSDL
 		$dataClasses = $this->getDataClasses();
-		//$excludeClasses = array_flip( $this->getExclDataClasses() );
+		//$excludeClasses = array_flip( $this->ifDescriptor->getExclDataClasses() );
 		//$dataClasses = array_diff_key( $dataClasses, $excludeClasses ); // remove exclusions
 		ksort($dataClasses);
 
@@ -1920,7 +1795,7 @@ abstract class ServicesClassGenerator
 				$entries = $xpath->query( '/wsdl:definitions/wsdl:types/schm:schema/schm:complexType[@name="'.$dataName.'"]' );
 				$entry = $entries->item(0);
 				$docOutTxt .= '<div class="section" id="'.$dataName.'"><h3>'.$dataName.'</h3>';
-				$comments = $this->grabCommentsFromSibling( $entry, true );
+				$comments = $entry ? $this->grabCommentsFromSibling( $entry, true ) : null;
 				if( $comments ) {
 					$docOutTxt .= '<p>'.$comments.'</p>';
 				}
@@ -1961,7 +1836,7 @@ abstract class ServicesClassGenerator
 		$docOutTxt .= '</body></html>';
 	
 		// Create/save the HTML document file (built above)
-		$classFile = BASEDIR.'/sdk/doc/interfaces/'.$this->getServiceNameFull().'.htm';
+		$classFile = $this->getSdkDir().'/doc/interfaces/'.$this->ifDescriptor->getServiceNameFull().'.htm';
 		$dirOut = dirname( $classFile );
 		if( !is_dir($dirOut) ) {
 			require_once BASEDIR.'/server/utils/FolderUtils.class.php';
@@ -2072,10 +1947,10 @@ abstract class ServicesClassGenerator
 		// Init
 		$this->clearErrors();
 		$dataClasses = $this->getDataClasses();
-		//$excludeClasses = array_flip( $this->getExclDataClasses() );
+		//$excludeClasses = array_flip( $this->ifDescriptor->getExclDataClasses() );
 		//$dataClasses = array_diff_key( $dataClasses, $excludeClasses ); // remove exclusions
 		unset( $dataClasses['AttachmentContent'] );
-		$intfShort = $this->getServiceNameShort();
+		$intfShort = $this->ifDescriptor->getServiceNameShort();
 		$intfShortLow = strtolower($intfShort);
 		$simpleTypeComments = array();
 		$simpleTypeEnums = $this->getSimpleTypeEnums( $simpleTypeComments ); // Collect enumerations (simpleType) from WSDL
@@ -2094,7 +1969,7 @@ abstract class ServicesClassGenerator
 
 		// Build PHP validation class for enumerations
 		foreach( $simpleTypeEnums as $enumName => $enumStructs ) {
-			$outTxt .= "class ".$this->getServiceNameShort().$enumName."Validator\n{\n";
+			$outTxt .= "class ".$this->ifDescriptor->getServiceNameShort().$enumName."Validator\n{\n";
 			$outTxt .= "\tstatic public function validate( \$validator, \$enumVal )\n";
 			$outTxt .= "\t{\n";
 			$outTxt .= "\t\tstatic \$enums = array( ";
@@ -2110,7 +1985,7 @@ abstract class ServicesClassGenerator
 				
 		// Build PHP validation class for complex types
 		foreach( $dataClasses as $dataName => $dataStruct ) {
-			$outTxt .= "class ".$this->getServiceNameShort().$dataName."Validator\n{\n";
+			$outTxt .= "class ".$this->ifDescriptor->getServiceNameShort().$dataName."Validator\n{\n";
 			$outTxt .= "\tstatic public function validate( \$validator, \$datObj )\n";
 			$outTxt .= "\t{\n";
 			if( $dataStruct ) foreach( $dataStruct as $propName => $propStruct ) {
@@ -2173,7 +2048,7 @@ abstract class ServicesClassGenerator
 		);
 		if( $propType == 'Row' ) $propType = 'ArrayOfString';
 		$isArray = strpos( $propType, 'ArrayOf' ) === 0;
-		$dataClassPrefix = $this->getDataClassPrefix();
+		$dataClassPrefix = $this->ifDescriptor->getDataClassPrefix();
 		
 		// Check if types are complete
 		if( !$isArray ) {
@@ -2204,12 +2079,12 @@ abstract class ServicesClassGenerator
 			$outTxt .= "\t\t\t\t\$validator->checkType( \$datObj->$propName, 'array' );\n";
 			$outTxt .= "\t\t\t\tif( !empty(\$datObj"."->$propName) ) foreach( \$datObj"."->$propName as \$listItem ) {\n";
 			$typeCheck = $isEnum ? 'string' : $propType;
-			$workflowDataClasses = $this->getWflDataClasses();
+			$workflowDataClasses = $this->ifDescriptor->getWflDataClasses();
 			if( !$isEnum && (isset($dataClasses[$propType]) || isset($simpleTypeEnums[$propType])) ) {
 				if( $propType == 'GetStatesResponse' && $dataClassPrefix == '' ) { // exception: both data type as response
 					$typeCheck = 'Wfl'.$typeCheck;
-				} else if( in_array( $propType, $workflowDataClasses ) ) { // Pln interface is a subset of Wfl, so these data types will not be with Pln prefix($dataClassPrefix)
-					$typeCheck = $typeCheck; 
+				} else if( in_array( $propType, $workflowDataClasses ) ) {
+					// Pln interface is a subset of Wfl, so these data types will not be with Pln prefix($dataClassPrefix)
 				} else {
 					$typeCheck = $dataClassPrefix.$typeCheck;
 				}
@@ -2217,7 +2092,7 @@ abstract class ServicesClassGenerator
 			$outTxt .= "\t\t\t\t\t\$validator->enterPath( '$propType' );\n";
 			$outTxt .= "\t\t\t\t\t\$validator->checkType( \$listItem, '$typeCheck' );\n";
 			if( isset($dataClasses[$propType]) || $isEnum ) {
-				$outTxt .= "\t\t\t\t\t".$this->getServiceNameShort().$propType."Validator::validate( \$validator, \$listItem );\n";
+				$outTxt .= "\t\t\t\t\t".$this->ifDescriptor->getServiceNameShort().$propType."Validator::validate( \$validator, \$listItem );\n";
 			}
 			$outTxt .= "\t\t\t\t\t\$validator->leavePath();\n";
 			$outTxt .= "\t\t\t\t}\n"; // end foreach
@@ -2225,19 +2100,19 @@ abstract class ServicesClassGenerator
 			$isEnum = isset($simpleTypeEnums[$propType]);
 			if( isset($basicTypes[$propType]) ) $propType = $basicTypes[$propType];
 			$typeCheck = $isEnum ? 'string' : $propType;
-			$workflowDataClasses = $this->getWflDataClasses();
+			$workflowDataClasses = $this->ifDescriptor->getWflDataClasses();
 			if( !$isEnum && (isset($dataClasses[$propType]) || isset($simpleTypeEnums[$propType])) ) {
 				if( $propType == 'GetStatesResponse' && $dataClassPrefix == '' ) { // exception: both data type as response
 					$typeCheck = 'Wfl'.$typeCheck;
-				} else if( in_array( $propType, $workflowDataClasses ) ) { // Pln interface is a subset of Wfl, so these data types will not be with Pln prefix($dataClassPrefix)
-					$typeCheck = $typeCheck;				
+				} else if( in_array( $propType, $workflowDataClasses ) ) {
+					// Pln interface is a subset of Wfl, so these data types will not be with Pln prefix($dataClassPrefix)
 				} else {
 					$typeCheck = $dataClassPrefix.$typeCheck;
 				}
 			}
 			$outTxt .= "\t\t\t\t\$validator->checkType( \$datObj->$propName, '$typeCheck' );\n";
 			if( isset($dataClasses[$propType]) || $isEnum ) {
-				$outTxt .= "\t\t\t\t".$this->getServiceNameShort().$propType."Validator::validate( \$validator, \$datObj->$propName );\n";
+				$outTxt .= "\t\t\t\t".$this->ifDescriptor->getServiceNameShort().$propType."Validator::validate( \$validator, \$datObj->$propName );\n";
 			}
 		}
 		$outTxt .= "\t\t\t}\n"; // end if !is_null()
