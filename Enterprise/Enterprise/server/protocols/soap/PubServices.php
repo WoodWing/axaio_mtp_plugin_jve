@@ -9,7 +9,7 @@
  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
- * Use the DataSourceServices.template.php file instead.
+ * Use the server/buildtools/genservices/interfaces/pub/SoapServices.template.php file instead.
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  */
 

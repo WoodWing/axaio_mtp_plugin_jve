@@ -1,17 +1,17 @@
 <?php
-
 /**
  * @package Enterprise
  * @subpackage Services
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
- * 
- * Dispatches incomming SOAP requests to Administration Services.<br>
- * It unpacks/packs the SOAP operations while doing so.
+ *
+ * Unwraps incoming SOAP requests and dispatches them to Workflow Administration Services.
+ * Wraps returned service results into outgoing SOAP responses. Also handles exceptions.
+ * This way the SOAP message protocol is entirely hidden from the core Enterprise Server.
  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
- * Use the AdminServices.template.php file instead.
+ * Use the server/buildtools/genservices/interfaces/adm/SoapServices.template.php file instead.
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  */
 

@@ -3133,6 +3133,7 @@ class WflRowValidator
 {
 	static public function validate( $validator, $datObj )
 	{
+		$validator = $validator; $datObj = $datObj; // keep validator happy
 	}
 }
 
