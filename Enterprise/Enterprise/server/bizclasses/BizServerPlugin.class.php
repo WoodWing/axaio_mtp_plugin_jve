@@ -114,7 +114,10 @@ class BizServerPlugin
 			// Reason is to preserve their local class members (cached property data).
 			// Then the caller can talk to one connector while data is preserved between the function calls.
 			if( !array_key_exists( $connInfo->ClassName, $connectors )) {
-				$connectors[$connInfo->ClassName] = self::instantiateConnectorObject( $connInfo );
+				$connector = self::instantiateConnectorObject( $connInfo );
+				if( $connector ) {
+					$connectors[ $connInfo->ClassName ] = $connector;
+				}
 			}
 		}
 	}

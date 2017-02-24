@@ -168,14 +168,20 @@ class DBPlacements extends DBBase
 	/**
 	 * Updates a placement record based on the filter of the $whereFields.
 	 *
-	 * @param array $whereFields Filter (column names/values).
+	 * @param stdClass identifier Identifies the unique placement to be updated.
 	 * @param Placement Changed placement
 	 */
-	static public function updatePlacement( $whereFields, $placement )
+	static public function updatePlacement( $identifier, $placement )
 	{
 		$where = '';
 		$and = '`';
-
+		$whereFields = array(
+								'parent' => $identifier->Parent,
+								'child' => $identifier->Child,
+								'type' => $identifier->Type,
+								'edition' => $identifier->EditionId,
+								'frameid' => $identifier->FrameId
+							);
 		$params = array();
 		if( $whereFields ) foreach( $whereFields as $field => $value ) {
 			$where .= $and.$field.'` =  ? ';
