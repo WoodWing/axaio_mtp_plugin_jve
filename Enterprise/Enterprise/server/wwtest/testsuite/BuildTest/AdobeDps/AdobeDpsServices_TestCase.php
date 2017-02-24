@@ -32,115 +32,115 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 
 	final public function runTest()
 	{
-//		require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php';
-//
-//		// - - - - - - - -  Preperation for test data - - - - - - - -
-//		// Ensure that TESTSUITE and the data is defined correctly for usage in testing later on.
-//		$suiteOpts = defined('TESTSUITE') ? unserialize( TESTSUITE ) : array();
-//		if( !$suiteOpts ) {
-//			$this->setResult( 'ERROR', 'Could not find the test data: ', 'Please check the TESTSUITE setting in configserver.php.' );
-//			return;
-//		}
-//
-//		// LogOn test user through workflow interface
-//		require_once BASEDIR.'/server/utils/TestSuite.php';
-//		$utils = new WW_Utils_TestSuite();
-//		$logonResponse = $utils->wflLogOn( $this );
-//		if( is_null($logonResponse) ) {
-//			return;
-//		}
-//
-//		if( !isset( $suiteOpts['DM_Brand'] ) || !isset( $suiteOpts['DM_Issue'] ) ) { // check since those are introduced since 7.5
-//			$this->setResult( 'ERROR', 'Could not find the DM_Brand or DM_Issue option at the TESTSUITE setting.',
-//					'Please check the TESTSUITE setting in configserver.php.' );
-//			return;
-//		}
-//
-//		if( !$this->resolveBrandPubChannelIssue( $logonResponse, $suiteOpts['DM_Brand'], $suiteOpts['DM_Issue'] ) ) {
-//			return;
-//		}
-//
-//		// We call the services synchronously so there is no need to have multiple operation ids.
-//		require_once BASEDIR.'/server/utils/NumberUtils.class.php';
-//		$this->operationId = NumberUtils::createGUID();
-//
-//		$this->ticket = $logonResponse->Ticket;
-//		$this->editionId = $this->pubChannel->Editions[0]->Id;
-//		$this->pubPublishTarget = $this->createPubPublishTarget();
-//
-//		try {
-//			// - - - - - - - - ORDERING - - - - - - - -
-//			// Get dossier Order and verifies it
-//			$this->dossierIdsOrder = $this->callGetDossierOrder();
-//			if( is_array( $this->dossierIdsOrder ) ) {
-//				LogHandler::Log( 'AdobeDps', 'INFO', 'Original Dossier Ids order:'.implode(',', $this->dossierIdsOrder ) );
-//			}
-//			$this->verifyDossierIdsOrder( null, $this->dossierIdsOrder, 'GetDossierOrder' );
-//
-//			// If the dossier order is empty the publish, update etc.
-//			// actions will fail. Therefore create a dossier with an
-//			// imported folio in it so it will export.
-//			if ( empty($this->dossierIdsOrder) ) {
-//				$this->createDossierWithImportedFolio();
-//				// Get dossier Order and verifies it
-//				$this->dossierIdsOrder = $this->callGetDossierOrder();
-//				$this->verifyDossierIdsOrder( null, $this->dossierIdsOrder, 'GetDossierOrder' );
-//			}
-//
-//			// Re-order the dossiers
-//			$this->newDossierIdsOrder = array_reverse( $this->dossierIdsOrder );
-//			if( is_array( $this->newDossierIdsOrder ) ) {
-//				LogHandler::Log( 'AdobeDps', 'INFO', 'NEW Dossier Ids order:'.implode(',', $this->newDossierIdsOrder ) );
-//			}
-//
-//			// Update dossier order and verify updated dossiers order
-//			$updatedDossierIdsOrder = $this->callUpdateDossierOrder();
-//			$this->verifyDossierIdsOrder( $this->newDossierIdsOrder, $updatedDossierIdsOrder, 'UpdateDossierOrder' );
-//			$this->dossierIds = $updatedDossierIdsOrder;
-//
-//			// - - - - - - - -  PREVIEW - - - - - - - -
-//
-//			$previewDossierResp = $this->callPreviewDossiers();
-//			$previewDossierVerified = $this->verifyOperationDossiersResp( $previewDossierResp, 'Preview' );
-//			if( $previewDossierVerified ) {
-//				$this->callAbortOperation(); // Just to hit the code, not able to verify .
-//				$response = $this->callOperationProgress();
-//				$this->verifyOperationProgress( $response, 'Preview' );
-//			}
-//
-//			// - - - - - - - -  PUBLISH - - - - - - - -
-//			$publishDossierResp = $this->callPublishDossiers();
-//			$publishedDossierVerified = $this->verifyOperationDossiersResp( $publishDossierResp, 'Publish' );
-//			if( $publishedDossierVerified ) {
-//				$this->callAbortOperation(); // Just to hit the code, not able to verify.
-//				$response = $this->callOperationProgress();
-//				$this->verifyOperationProgress( $response, 'Publish');
-//
-//				// - - - - - - - -  MISC PUBLISH - - - - - - - -
-//				foreach( $this->dossierIds as $dossierId ) {
-//					$dossierUrl = $this->callGetDossierUrl( $dossierId );
-//					$this->verifyGetDossierUrl( $dossierId, $dossierUrl );
-//				}
-//
-//				$updateDossierResp = $this->callUpdateDossiers();
-//				/* $updateDossierVerified = */$this->verifyOperationDossiersResp( $updateDossierResp, 'Update' );
-//				$response = $this->callGetPublishInfo();
-//				$this->verifyGetPublishInfo( $response );
-//
-//				// - - - - - - SETPUBLISHINFO - - - - - -
-//				$setPublishInfoResp = $this->callSetPublishInfo();
-//				/*$setPublishIssueVerified = */$this->verifyPublishedIssue( $setPublishInfoResp->PublishedIssue, 'SetPublishInfo' );
-//				$response = $this->callGetPublishInfo();
-//				$this->verifyGetPublishInfo( $response );
-//
-//				// - - - - - - UNPUBLISH - - - - - -
-//				$this->callUnPublishDossiers();
-//			}
-//
-//			$utils->wflLogOff( $this, $this->ticket );
-//		} catch ( BizException $e ) {
-//			$this->setResult( 'ERROR', 'Testing failed and is aborted', $e->getMessage() );
-//		}
+		require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php';
+
+		// - - - - - - - -  Preperation for test data - - - - - - - -
+		// Ensure that TESTSUITE and the data is defined correctly for usage in testing later on.
+		$suiteOpts = defined('TESTSUITE') ? unserialize( TESTSUITE ) : array();
+		if( !$suiteOpts ) {
+			$this->setResult( 'ERROR', 'Could not find the test data: ', 'Please check the TESTSUITE setting in configserver.php.' );
+			return;
+		}
+
+		// LogOn test user through workflow interface
+		require_once BASEDIR.'/server/utils/TestSuite.php';
+		$utils = new WW_Utils_TestSuite();
+		$logonResponse = $utils->wflLogOn( $this );
+		if( is_null($logonResponse) ) {
+			return;
+		}
+
+		if( !isset( $suiteOpts['DM_Brand'] ) || !isset( $suiteOpts['DM_Issue'] ) ) { // check since those are introduced since 7.5
+			$this->setResult( 'ERROR', 'Could not find the DM_Brand or DM_Issue option at the TESTSUITE setting.',
+					'Please check the TESTSUITE setting in configserver.php.' );
+			return;
+		}
+
+		if( !$this->resolveBrandPubChannelIssue( $logonResponse, $suiteOpts['DM_Brand'], $suiteOpts['DM_Issue'] ) ) {
+			return;
+		}
+
+		// We call the services synchronously so there is no need to have multiple operation ids.
+		require_once BASEDIR.'/server/utils/NumberUtils.class.php';
+		$this->operationId = NumberUtils::createGUID();
+
+		$this->ticket = $logonResponse->Ticket;
+		$this->editionId = $this->pubChannel->Editions[0]->Id;
+		$this->pubPublishTarget = $this->createPubPublishTarget();
+
+		try {
+			// - - - - - - - - ORDERING - - - - - - - -
+			// Get dossier Order and verifies it
+			$this->dossierIdsOrder = $this->callGetDossierOrder();
+			if( is_array( $this->dossierIdsOrder ) ) {
+				LogHandler::Log( 'AdobeDps', 'INFO', 'Original Dossier Ids order:'.implode(',', $this->dossierIdsOrder ) );
+			}
+			$this->verifyDossierIdsOrder( null, $this->dossierIdsOrder, 'GetDossierOrder' );
+
+			// If the dossier order is empty the publish, update etc.
+			// actions will fail. Therefore create a dossier with an
+			// imported folio in it so it will export.
+			if ( empty($this->dossierIdsOrder) ) {
+				$this->createDossierWithImportedFolio();
+				// Get dossier Order and verifies it
+				$this->dossierIdsOrder = $this->callGetDossierOrder();
+				$this->verifyDossierIdsOrder( null, $this->dossierIdsOrder, 'GetDossierOrder' );
+			}
+
+			// Re-order the dossiers
+			$this->newDossierIdsOrder = array_reverse( $this->dossierIdsOrder );
+			if( is_array( $this->newDossierIdsOrder ) ) {
+				LogHandler::Log( 'AdobeDps', 'INFO', 'NEW Dossier Ids order:'.implode(',', $this->newDossierIdsOrder ) );
+			}
+
+			// Update dossier order and verify updated dossiers order
+			$updatedDossierIdsOrder = $this->callUpdateDossierOrder();
+			$this->verifyDossierIdsOrder( $this->newDossierIdsOrder, $updatedDossierIdsOrder, 'UpdateDossierOrder' );
+			$this->dossierIds = $updatedDossierIdsOrder;
+
+			// - - - - - - - -  PREVIEW - - - - - - - -
+
+			$previewDossierResp = $this->callPreviewDossiers();
+			$previewDossierVerified = $this->verifyOperationDossiersResp( $previewDossierResp, 'Preview' );
+			if( $previewDossierVerified ) {
+				$this->callAbortOperation(); // Just to hit the code, not able to verify .
+				$response = $this->callOperationProgress();
+				$this->verifyOperationProgress( $response, 'Preview' );
+			}
+
+			// - - - - - - - -  PUBLISH - - - - - - - -
+			$publishDossierResp = $this->callPublishDossiers();
+			$publishedDossierVerified = $this->verifyOperationDossiersResp( $publishDossierResp, 'Publish' );
+			if( $publishedDossierVerified ) {
+				$this->callAbortOperation(); // Just to hit the code, not able to verify.
+				$response = $this->callOperationProgress();
+				$this->verifyOperationProgress( $response, 'Publish');
+
+				// - - - - - - - -  MISC PUBLISH - - - - - - - -
+				foreach( $this->dossierIds as $dossierId ) {
+					$dossierUrl = $this->callGetDossierUrl( $dossierId );
+					$this->verifyGetDossierUrl( $dossierId, $dossierUrl );
+				}
+
+				$updateDossierResp = $this->callUpdateDossiers();
+				/* $updateDossierVerified = */$this->verifyOperationDossiersResp( $updateDossierResp, 'Update' );
+				$response = $this->callGetPublishInfo();
+				$this->verifyGetPublishInfo( $response );
+
+				// - - - - - - SETPUBLISHINFO - - - - - -
+				$setPublishInfoResp = $this->callSetPublishInfo();
+				/*$setPublishIssueVerified = */$this->verifyPublishedIssue( $setPublishInfoResp->PublishedIssue, 'SetPublishInfo' );
+				$response = $this->callGetPublishInfo();
+				$this->verifyGetPublishInfo( $response );
+
+				// - - - - - - UNPUBLISH - - - - - -
+				$this->callUnPublishDossiers();
+			}
+
+			$utils->wflLogOff( $this, $this->ticket );
+		} catch ( BizException $e ) {
+			$this->setResult( 'ERROR', 'Testing failed and is aborted', $e->getMessage() );
+		}
 	}
 
 	/**
