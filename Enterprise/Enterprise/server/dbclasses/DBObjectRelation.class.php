@@ -445,19 +445,20 @@ class DBObjectRelation extends DBBase
 	 * @param Relation[] $relations
 	 * @return null|array For each parent/child combinations an infoObj containing the Id and the PageRange.
 	 */
-	static public function getObjectRelationInfoOfPlacedRelations( $relations )
+	static public function getObjectRelationInfoOfRelations( $relations )
 	{
 		$or = '';
 		$where = ' (';
 		$params = array();
 		foreach( $relations as $relation ) {
 			$where .= $or;
-			$where .= '( `parent`= ? AND `child`= ? )';
+			$where .= '( `parent`= ? AND `child`= ? AND `type` = ? ) ';
 			$params[] = $relation->Parent;
 			$params[] = $relation->Child;
-			$or = ' OR ';
+			$params[] = $relation->Type;
+			$or = 'OR ';
 		}
-		$where .= ") AND `type` = 'Placed' ";
+		$where .= ') ';
 		$rows = self::listRows( self::TABLENAME, 'id', '', $where, '*', $params );
 		$result = array();
 		if( $rows ) foreach( $rows as $row ) {

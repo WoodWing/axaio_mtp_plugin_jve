@@ -970,10 +970,10 @@ class BizRelation
 				$involvedObjectsIds[$relation->Child] = $relation->Child;
 				$involvedChildrenIds[$relation->Child] = $relation->Child;
 			}
-			$placementIds = DBPlacements::getPlacementIdsByRelations( $relations, 'Placed' );
+			$placementIds = DBPlacements::getPlacementIdsByRelations( $relations );
 			DBPlacements::deletePlacementsByIds( $placementIds );
 			$objectsDBRows = DBObject::getMultipleObjectDBRows( $involvedObjectsIds ); // DB rows because of the checkWriteAccessForObjRow() later on.
-			$objectRelationInfoByParentIdChildId = DBObjectRelation::getObjectRelationInfoOfPlacedRelations( $relations );
+			$objectRelationInfoByParentIdChildId = DBObjectRelation::getObjectRelationInfoOfRelations( $relations );
 			$manifoldPlacedChildren = DBObjectRelation::childrenPlacedManifold( $involvedChildrenIds, 50 );
 			$objectsToIndex = array();
 			foreach ($relations as $relation) {
