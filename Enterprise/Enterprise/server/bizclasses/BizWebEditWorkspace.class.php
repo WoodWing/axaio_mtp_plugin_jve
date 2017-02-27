@@ -2443,8 +2443,8 @@ class BizWebEditWorkspace
 			}
 		}
 
+		$changedPlacements = array();
 		if( $reparable ) {
-			$changedPlacements = array();
 			require_once BASEDIR.'/server/bizclasses/BizWebEditWorkspace/ComparePlacements.class.php';
 			if( $storedPlacementsByKey ) foreach( $storedPlacementsByKey as $key => $storedPlacementByKey ) {
 				$composedPlacementByKey = $composedPlacementsByKey[ $key ];

@@ -140,17 +140,20 @@ class DBPlacements extends DBBase
 			}
 		}
 
-		$iDAPlacementRows = self::getIDAPlacementRows( $parent, 0, 'Placed' );
+		$iDAPlacementRows = self::getIDAPlacementRows( $parent );
 		$values = array();
+		$rowTemplate =  DBCustomField::getFieldsAtModel( 'idarticlesplacements' );
+		$rowTemplate = array_fill_keys( array_keys( $rowTemplate ), '');
 		// Create relations between the InDesign Articles and their placements.
 		if( $IDAPlacements ) foreach( $IDAPlacements as $plc ) {
+			$newPlacementId = 0;
 			foreach( $iDAPlacementRows as $iDAPlacementRow ) {
 				if( $plc->SplineID == $iDAPlacementRow['splineid'] ) {
 					$newPlacementId = $iDAPlacementRow['id'];
 				}
 			}
 			foreach( $plc->InDesignArticleIds as $idArticleId ) {
-				$row = array();
+				$row = $rowTemplate;
 				$row['objid'] = $parent;
 				$row['artuid'] = $idArticleId;
 				$row['plcid'] = $newPlacementId;
@@ -158,7 +161,7 @@ class DBPlacements extends DBBase
 			}
 		}
 		if( $values ) {
-			$result = self::insertRows( 'idarticlesplacements', array_keys( $row ), $values );
+			$result = self::insertRows( 'idarticlesplacements', array_keys( $rowTemplate ), $values );
 			if( !$result ) {
 				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 			}
@@ -168,7 +171,7 @@ class DBPlacements extends DBBase
 	/**
 	 * Updates a placement record based on the filter of the $whereFields.
 	 *
-	 * @param stdClass identifier Identifies the placement to be updated.
+	 * @param stdClass identifier Identifies the unique placement to be updated.
 	 * @param Placement Changed placement
 	 */
 	static public function updatePlacement( $identifier, $placement )
