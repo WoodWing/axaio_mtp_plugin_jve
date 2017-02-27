@@ -12,6 +12,9 @@
  * You need to set up your own values, of course.
  ***************************************************************************/
 
+// include the server config file
+require_once dirname(__FILE__) . '/../../config.php';
+
 // ----------------------------------------------------------------------------
 // MadeToPrint settings for login
 // ----------------------------------------------------------------------------
@@ -66,6 +69,12 @@ define('AXAIO_MTP_AXAIO_FOLDER_OUT',	'/WW_Hotfolder/OUT/'); // MTP output folder
 // ----------------------------------------------------------------------------
 
 define('AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY', false);
+
+// ----------------------------------------------------------------------------
+// Whether to ignore layout flags. When true, layouts with flag are also processed
+// ----------------------------------------------------------------------------
+
+define('AXAIO_MTP_IGNORE_LAYOUT_FLAGS', false);
 
 // ----------------------------------------------------------------------------
 // MadeToPrint job name default setting. Real value is set up in admin panel

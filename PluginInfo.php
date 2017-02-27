@@ -17,7 +17,7 @@ class AxaioMadeToPrint_EnterprisePlugin extends EnterprisePlugin
 		require_once BASEDIR.'/server/interfaces/plugins/PluginInfoData.class.php';
 		$info = new PluginInfoData();
 		$info->DisplayName = 'axaio MadeToPrint';
-		$info->Version     = '9.9.1 Build 1064';
+		$info->Version     = '9.9.5 Build 1072';
 		$info->Description = 'Automated output using axaio MadeToPrint';
 		$info->Copyright   = 'axaio software GmbH';
 		return $info;
