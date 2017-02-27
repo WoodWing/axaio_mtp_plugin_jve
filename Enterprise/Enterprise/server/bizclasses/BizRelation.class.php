@@ -1195,7 +1195,7 @@ class BizRelation
 	 * @param string $parentType
 	 * @param int $parentId
 	 * @param int $childId
-	 * @param resource $dbDriver
+	 * @param WW_DbDrivers_DriverBase Database $dbDriver
 	 * @throws BizException
 	 */
 	static private function updatePageRangeIfNeeded(
@@ -1392,8 +1392,6 @@ class BizRelation
 					$handled[$relation->Child] = true;
 				} catch ( BizException $e ) {
 					LogHandler::Log( __METHOD__, 'WARN', 'Adding of new target failed. Detail: '. $e->getMessage() );
-					/** @noinspection PhpSillyAssignmentInspection */
-					$e = $e; // don't stop
 				}
 			}
 		}
@@ -1883,7 +1881,7 @@ class BizRelation
 	/**
 	 * Checks if an object is in one dossier exactly.
 	 * @param int $child object id of the 'contained' child
-	 * @return object is in one dossier only (true/false)
+	 * @return bool is in one dossier only (true/false)
 	 */
 	public static function inSingleDossier($child)
 	{
