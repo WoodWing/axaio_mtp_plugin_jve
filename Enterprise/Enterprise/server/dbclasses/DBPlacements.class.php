@@ -168,7 +168,7 @@ class DBPlacements extends DBBase
 	/**
 	 * Updates a placement record based on the filter of the $whereFields.
 	 *
-	 * @param stdClass identifier Identifies the unique placement to be updated.
+	 * @param stdClass identifier Identifies the placement to be updated.
 	 * @param Placement Changed placement
 	 */
 	static public function updatePlacement( $identifier, $placement )
@@ -948,7 +948,7 @@ class DBPlacements extends DBBase
 	 * @param string $type Kind of placement
 	 * @return array|null
 	 */
-	static public function getPlacementIdsByRelations( array $relations, $type = '' )
+	static public function getPlacementIdsByRelations( array $relations )
 	{
 		$placementsIds = array();
 		if( $relations ) {
@@ -957,16 +957,13 @@ class DBPlacements extends DBBase
 			$params = array();
 			foreach( $relations as $relation ) {
 				$where .= $or;
-				$where .= '( `parent`= ? AND `child`= ? )';
+				$where .= '( `parent`= ? AND `child`= ? AND `type` = ? ) ';
 				$params[] = $relation->Parent;
 				$params[] = $relation->Child;
-				$or = ' OR ';
+				$params[] = $relation->Type;
+				$or = 'OR ';
 			}
 			$where .= ')';
-			if( $type ) {
-				$where .= " AND `type` = ? ";
-				$params[] = $type;
-			}
 			$rows = self::listRows( self::TABLENAME, '', '', $where, array('id'), $params );
 			$placementsIds = array_map( function( $row) { return $row['id']; }, $rows);
 		}
