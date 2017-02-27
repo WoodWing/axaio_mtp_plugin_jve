@@ -53,20 +53,25 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	/** @var WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface $ifDescriptor */
 	private $ifDescriptor;
 
+	/** @var string[] $protocols */
+	private $protocols;
+
 	/**
 	 * Constructor.
 	 *
 	 * @param WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface $interfaceDescriptor
+	 * @param string[] $protocols List of protocols required by the web service provider.
 	 */
-	public function __construct( WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface $interfaceDescriptor )
+	public function __construct( WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface $interfaceDescriptor, $protocols )
 	{
 		$this->ifDescriptor = $interfaceDescriptor;
+		$this->protocols = $protocols;
 
 		// parse wsdl
 		$wsdlFile = $this->ifDescriptor->getWsdlFilePath();
 		$wsdlDoc = new DOMDocument();
 		$cont = file_get_contents( $wsdlFile );
-		if( !$wsdlDoc->loadXML( $cont ) ) die( 'Could not parse '.$wsdlFile );
+		if( !$wsdlDoc->loadXML( $cont ) ) die( 'Could not parse '.$wsdlFile.PHP_EOL );
 		$this->XPath = new DOMXPath( $wsdlDoc );
 		$this->XPath->registerNameSpace('wsdl', 'http://schemas.xmlsoap.org/wsdl/');
 		$this->XPath->registerNameSpace('schm', 'http://www.w3.org/2001/XMLSchema');
@@ -84,19 +89,28 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	 */
 	public function getProcessingSteps()
 	{
+		$pluginFull = $this->ifDescriptor->getPluginNameFull();
 		$funcs = array();
 		$funcs['Services class'] = 'generateServicesClasses';
 		$funcs['Service classes'] = 'generateServiceClasses';
-		$funcs['SOAP server+client classes'] = 'generateSoapServerClientClasses';
-		$funcs['JSON client classes'] = 'generateJsonClientClasses';
+		if( in_array( 'soap', $this->protocols ) ) {
+			$funcs['SOAP server+client classes'] = 'generateSoapServerClientClasses';
+			$funcs['SOAP classes for Java'] = 'generateSoapClassesForJava';
+		}
+		if( in_array( 'json', $this->protocols ) ) {
+			$funcs['JSON client classes'] = 'generateJsonClientClasses';
+		}
 		$funcs['Request and response classes for PHP'] = 'generateRequestResponseClasses4Php';
-		$funcs['Request and response classes for Flex'] = 'generateRequestResponseClasses4Flex';
-		$funcs['Interfaces classes'] = 'generateServiceInterfaces';
 		$funcs['Data classes for PHP'] = 'generateDataClasses4Php';
-		$funcs['Data classes for Flex'] = 'generateDataClasses4Flex';
+		if( in_array( 'amf', $this->protocols ) ) {
+			$funcs['AMF request and response classes for Flex'] = 'generateRequestResponseClasses4Flex';
+			$funcs['AMF data classes for Flex'] = 'generateDataClasses4Flex';
+		}
+		if( !$pluginFull ) { // core only
+			$funcs['Interfaces classes'] = 'generateServiceInterfaces';
+		}
 		$funcs['Data validation classes'] = 'generateDataValidationClasses';
 		$funcs['Readable document'] = 'generateReadableDocument';
-		$funcs['Java classes'] = 'generateJavaClasses';
 		return $funcs;
 	}
 	
@@ -107,11 +121,6 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		$this->ErrorFiles = array();
 		$this->Warnings = array();
 		$this->FatalErrors = array();
-	}
-
-	private function getProtocols()
-	{
-		return array( 'soap', 'amf', 'json' );
 	}
 
 	/**
@@ -344,7 +353,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	private function getSdkDir()
 	{
 		$baseDir = $this->ifDescriptor->getProviderBasePath();
-		if( $this->ifDescriptor->getServerPluginName() ) {
+		if( $this->ifDescriptor->getPluginNameFull() ) {
 			$sdkDir = "$baseDir/sdk";
 		} else {
 			$sdkDir = "$baseDir/../sdk";
@@ -384,8 +393,8 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	 */
 	private function composeWebServicesUri()
 	{
-		$pluginName = $this->ifDescriptor->getServerPluginName();
-		$pluginPart = $pluginName ? 'plugins.'.strtolower($pluginName).'.' : '';
+		$pluginFull = $this->ifDescriptor->getPluginNameFull();
+		$pluginPart = $pluginFull ? 'plugins.'.strtolower($pluginFull).'.' : '';
 		return "com.woodwing.enterprise{$pluginPart}.interfaces.services";
 	}
 
@@ -396,7 +405,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	 *
 	 * @since 10.2.0
 	 */
-	public function generateJavaClasses()
+	public function generateSoapClassesForJava()
 	{
 		$intfShort = $this->ifDescriptor->getServiceNameShort();
 		$intfShortLow = strtolower($intfShort);
@@ -479,13 +488,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		}
 
 		// write the outText. in format admRequestClassesInclude.php
-			$fp = @fopen( $fileOut, 'w+' );
-			if( !$fp || fwrite( $fp, $outTxt ) === false ) {
-				$this->ErrorFiles[] = $fileOut;
-			} else {
-				$this->SuccessFiles[] = $fileOut;
-			}
-			if( $fp ) fclose( $fp );
+		$this->saveClassFile( $fileOut, $outTxt );
 
 		return $outTxt;
 	}
@@ -605,11 +608,11 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			$outTxt .= "\t}\n\n";
 
 			// Flex AMF specific function used for object type mapping
-			$flexDataClassName = $this->ifDescriptor->getServiceNameShort().$dataName; // See Note#001
-			$outTxt .= "\tpublic function getASClassName() { return AS_CLASSNAME_PREFIX.'.$intfShortLow.dataclasses.$flexDataClassName'; } // AMF object type mapping\n\n";
-
-			// Generate TypeMapping for AMF.
-			$classMap[AS_CLASSNAME_PREFIX . '.' . $intfShortLow . '.dataclasses.' . $flexDataClassName] = $dataClassName;
+			if( in_array( 'amf', $this->protocols ) ) {
+				$flexDataClassName = $this->ifDescriptor->getServiceNameShort().$dataName; // See Note#001
+				$outTxt .= "\tpublic function getASClassName() { return AS_CLASSNAME_PREFIX.'.$intfShortLow.dataclasses.$flexDataClassName'; } // AMF object type mapping\n\n";
+				$classMap[ AS_CLASSNAME_PREFIX.'.'.$intfShortLow.'.dataclasses.'.$flexDataClassName ] = $dataClassName;
+			}
 
 			// Add a function to cleanup NUMBER and BOOLEAN fields.
 			$outTxt .= "\tpublic function sanitizeProperties4Php()\n\t{\n";
@@ -644,20 +647,16 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		}
 
 		// write the dataclass mappings.
-		$this->generateTypeMap4AMF($classMap, 'Data');
+		if( in_array( 'amf', $this->protocols ) ) {
+			$this->generateTypeMap4AMF( $classMap, 'Data' );
+		}
 
 		$classFile = $this->ifDescriptor->getDataClassesFile();
 		if( !$classFile ) {
 			$this->Warnings[] = 'Feature is not supported';
 			return;
 		}
-		$fp = @fopen( $classFile, 'w+' );
-		if( !$fp || fwrite( $fp, $outTxt ) === false ) {
-			$this->ErrorFiles[] = $classFile;
-		} else {
-			$this->SuccessFiles[] = $classFile;
-		}
-		if( $fp ) fclose( $fp );
+		$this->saveClassFile( $classFile, $outTxt );
 	}
 
 	public function generateDataClasses4Flex()
@@ -722,14 +721,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			
 			// Write Flex class file
 			$classFile = $dirOut.'/'.$dataClassName.'.as';
-
-			$fp = @fopen( $classFile, 'w+' );
-			if( !$fp || fwrite( $fp, $outTxt ) === false ) {
-				$this->ErrorFiles[] = $classFile;
-			} else {
-				$this->SuccessFiles[] = $classFile;
-			}
-			if( $fp ) fclose( $fp );
+			$this->saveClassFile( $classFile, $outTxt );
 		}
 
 		$outTxt = "/*\n"
@@ -858,13 +850,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 
 
 		$utilsFile = $this->composeSdkDirForLanguage( 'flex' ).'/WoodWingUtils.as';
-		$fp = @fopen( $utilsFile, 'w+' );
-		if( !$fp || fwrite( $fp, $outTxt ) === false ) {
-			$this->ErrorFiles[] = $utilsFile;
-		} else {
-			$this->SuccessFiles[] = $utilsFile;
-		}
-		if( $fp ) fclose( $fp );
+		$this->saveClassFile( $utilsFile, $outTxt );
 	}
 
 	/**
@@ -987,7 +973,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	public function generateServicesClasses()
 	{
 		$this->clearErrors();
-		foreach( $this->getProtocols() as $protocol ) {
+		foreach( $this->protocols as $protocol ) {
 			$this->generateServicesClass( $protocol );
 		}
 	}
@@ -997,6 +983,10 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		$xpath = $this->XPath;
 		$intfShort = $this->ifDescriptor->getServiceNameShort();
 		$intfShortLow = strtolower($intfShort);
+		$providerBase = $this->ifDescriptor->getProviderBasePath();
+		$pluginFull = $this->ifDescriptor->getPluginNameFull();
+		$pluginShort = $this->ifDescriptor->getPluginNameShort();
+		$serviceShort = $this->ifDescriptor->getServiceNameShort();
 
 		// TODO: Use getServiceMessages() instead of code fragment below
 		$services = array();
@@ -1028,15 +1018,19 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			$outTxt .= "\tpublic function $serviceName( "; // start function
 			$outTxt .= '$req';
 			$outTxt .= " )\n\t{\n";
-			$serviceClass = $serviceName."Service";
-			$outTxt .= "\t\trequire_once BASEDIR.'/server/services/$intfShortLow/$intfShort$serviceClass.class.php';\n";
+			$serviceClass = "{$pluginShort}{$serviceShort}{$serviceName}Service";
+			if( $pluginFull ) {
+				$outTxt .= "\t\trequire_once __DIR__.'/../../../services/{$intfShortLow}/{$serviceClass}.class.php';\n";
+			} else { // core
+				$outTxt .= "\t\trequire_once BASEDIR.'/server/services/$intfShortLow/{$serviceClass}.class.php';\n";
+			}
 			switch( $protocol ) {
 				case 'soap':
 					$outTxt .= "\n\t\ttry {\n";
 					$indent = "\t\t\t";
 					break;
 				case 'json':
-					$requestClass = $intfShort.$serviceName.'Request';
+					$requestClass = "{$pluginShort}{$serviceShort}{$serviceName}Request";
 					$outTxt .= "\t\t\$req['__classname__'] = '$requestClass';\n";
 					$outTxt .= "\t\t\$req = \$this->arraysToObjects( \$req );\n";
 					$outTxt .= "\t\t\$req = \$this->restructureObjects( \$req );\n";
@@ -1044,7 +1038,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 				break;
 				case 'amf':
 					$outTxt .= "\n\t\ttry {\n";
-					$requestClass = $intfShort.$serviceName.'Request';
+					$requestClass = "{$pluginShort}{$serviceShort}{$serviceName}Request";
 					$outTxt .= "\t\t\t\$req = \$this->objectToRequest( \$req, '$requestClass' );\n";
 					$reqInc[] = $requestClass;
 					$indent = "\t\t\t";
@@ -1053,7 +1047,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			if ($serviceInOut['dimeIn'] == true) {
 				$outTxt .= $this->ifDescriptor->getUrlToFilePath( $serviceName ); // Translate external url to internal filepath.
 			}
-			$outTxt .= $indent."\$service = new $intfShort$serviceClass();\n";
+			$outTxt .= $indent."\$service = new {$serviceClass}();\n";
 			$outTxt .= $indent."\$resp = \$service->execute( \$req );\n";
 			switch( $protocol ) {
 				case 'amf':
@@ -1094,15 +1088,17 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		
 		// read template file
 		$classFile = '';
+		$className = '';
 		switch( $protocol ) {
 			case 'soap':
-				$classFile = BASEDIR.'/server/buildtools/genservices/interfaces/'.$this->ifDescriptor->getServiceNameShort().'/SoapServices.template.php';
+				$classFile = "{$providerBase}/buildtools/genservices/interfaces/{$intfShortLow}/SoapServices.template.php";
 			break;
 			case 'amf':
 				$classFile = BASEDIR.'/server/buildtools/genservices/templates/AmfServices.template.php';
 			break;
 			case 'json':
 				$classFile = BASEDIR.'/server/buildtools/genservices/templates/JsonServices.template.php';
+				$className = $pluginFull ? "{$pluginFull}_Protocols_Json_{$intfShort}_Services" : "WW_JSON_{$intfShort}Services";
 			break;
 		}
 		
@@ -1112,25 +1108,22 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			return;
 		}
 		// replace /*BODY*/ marker with list of service functions (class body)
+		$providerDir = $pluginFull ? "__DIR__.'/../../.." : "BASEDIR.'/server";
 		$outTxt = str_replace( '/*BODY*/', $outTxt, $template );
+		$outTxt = str_replace( '/*CLASSNAME*/', $className, $outTxt );
 		$outTxt = str_replace( '/*INTFSHORT*/', $intfShort, $outTxt );
 		$outTxt = str_replace( '/*INTFSHORTLOW*/', $intfShortLow, $outTxt );
+		$outTxt = str_replace( '/*PROVIDERDIR*/', $providerDir, $outTxt );
 
 		if ($protocol == 'amf'){
 			$outTxt = str_replace( '/*REQUESTCLASSES*/', $this->generateRequestClassesInclude4AMF($reqInc), $outTxt);
 		}
-		if( $protocol == 'soap' ) { // tmp hack not to break stuff now
-			$classFile = BASEDIR.'/server/protocols/soap/'.$this->ifDescriptor->getServiceNameShort().'Services.php';
-		} else {
-			$classFile = BASEDIR.'/server/protocols/'.$protocol.'/'.$this->ifDescriptor->getServiceNameShort().'Services.php';
+		if( $pluginFull ) {
+			$classFile = "{$providerBase}/protocols/{$protocol}/{$intfShortLow}/Services.php";
+		} else { // core
+			$classFile = "{$providerBase}/protocols/{$protocol}/{$intfShort}Services.php";
 		}
-		$fp = @fopen( $classFile, 'w+' );
-		if( !$fp || fwrite( $fp, $outTxt ) === false ) {
-			$this->ErrorFiles[] = $classFile;
-		} else {
-			$this->SuccessFiles[] = $classFile;
-		}
-		if( $fp ) fclose( $fp );
+		$this->saveClassFile( $classFile, $outTxt );
 	}
 
 	public function generateRequestResponseClasses4Php()
@@ -1144,8 +1137,11 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		//$dataClasses = array_diff_key( $dataClasses, $excludeClasses ); // remove exclusions
 		$simpleTypeComments = array();
 		$simpleTypeEnums = $this->getSimpleTypeEnums( $simpleTypeComments ); // Collect enumerations (simpleType) from WSDL
+		$providerBase = $this->ifDescriptor->getProviderBasePath();
+		$pluginFull = $this->ifDescriptor->getPluginNameFull();
+		$pluginShort = $this->ifDescriptor->getPluginNameShort();
 
-		$dirOut = BASEDIR.'/server/interfaces/services/'.$intfShortLow;
+		$dirOut = "{$providerBase}/interfaces/services/{$intfShortLow}";
 		if( !is_dir($dirOut) ) {
 			if( !is_writable($dirOut) ) {
 				$this->FatalErrors[] = 'No write access to folder '.$dirOut;
@@ -1170,7 +1166,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 					." * IMPORTANT: DO NOT EDIT! THIS CLASS IS GENERATED FROM WSDL!\n"
 					." *".'/'."\n\n";
 			// Request/Reponse class
-			$outTxt .= "class $intfShort$serviceName\n{\n";
+			$outTxt .= "class {$pluginShort}{$intfShort}{$serviceName}\n{\n";
 
 			if( count($messageStruct['props']) > 0 ) {
 				foreach( array_keys($messageStruct['props']) as $propName ) {
@@ -1242,7 +1238,11 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			$outTxt .= "\t{\n";
 			if( count($messageStruct['props']) > 0 ) {
 				$outTxt .= "\t\trequire_once BASEDIR.'/server/services/Validator.php';\n";
-				$outTxt .= "\t\trequire_once BASEDIR.'/server/services/$intfShortLow/DataValidators.php';\n";
+				if( $pluginFull ) {
+					$outTxt .= "\t\trequire_once __DIR__.'/../../../services/$intfShortLow/DataValidators.php';\n";
+				} else { // core
+					$outTxt .= "\t\trequire_once BASEDIR.'/server/services/$intfShortLow/DataValidators.php';\n";
+				}
 				$outTxt .= "\t\t\$validator = new WW_Services_Validator(".($isRequest?'true':'false').");\n";
 				$outTxt .= "\t\t\$datObj = \$this;\n\n";
 				$outTxt .= "\t\t\$validator->enterPath( '$serviceName' );\n";
@@ -1254,9 +1254,11 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 				$outTxt .= "\t\t\$validator->leavePath();\n";
 			}
 			$outTxt .= "\t}\n\n"; // end validate()
-			
-			// Flex AMF specific function used for object type mapping
-			$outTxt .= "\tpublic function getASClassName() { return AS_CLASSNAME_PREFIX.'.$intfShortLow.$intfShort$serviceName'; } // AMF object type mapping\n";
+
+			if( in_array( 'amf', $this->protocols ) ) {
+				// Flex AMF specific function used for object type mapping
+				$outTxt .= "\tpublic function getASClassName() { return AS_CLASSNAME_PREFIX.'.$intfShortLow.$intfShort$serviceName'; } // AMF object type mapping\n";
+			}
 
 			if ($isRequest){
 				// Add a function to clean up NUMBER / BOOLEAN fields.
@@ -1296,24 +1298,18 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			$outTxt .= "}\n\n";
 
 			// Write php class file
-			$classFileName = $serviceName.'.class.php';
-			$classFile = $dirOut.'/'.$intfShort.$classFileName;
-
-			$fp = @fopen( $classFile, 'w+' );
-			if( !$fp || fwrite( $fp, $outTxt ) === false ) {
-				$this->ErrorFiles[] = $classFile;
-			} else {
-				$this->SuccessFiles[] = $classFile;
-			}
-			if( $fp ) fclose( $fp );
+			$classFile = "{$dirOut}/{$pluginShort}{$intfShort}{$serviceName}.class.php";
+			$this->saveClassFile( $classFile, $outTxt );
 
 			if ($isRequest){
 				$classMap[AS_CLASSNAME_PREFIX.'.'.$intfShortLow.'.'.$intfShort.$serviceName] = $intfShort.$serviceName;
 			}
 		}
 
-		// write the request class mappings.
-		$this->generateTypeMap4AMF($classMap, 'Request');
+		if( in_array( 'amf', $this->protocols ) ) {
+			// write the request class mappings.
+			$this->generateTypeMap4AMF( $classMap, 'Request' );
+		}
 	}
 
 	public function generateRequestResponseClasses4Flex()
@@ -1406,14 +1402,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			
 			// Write Flex class file
 			$classFile = $dirOut.'/'.$intfShort.$elem.'.as';
-
-			$fp = @fopen( $classFile, 'w+' );
-			if( !$fp || fwrite( $fp, $outTxt ) === false ) {
-				$this->ErrorFiles[] = $classFile;
-			} else {
-				$this->SuccessFiles[] = $classFile;
-			}
-			if( $fp ) fclose( $fp );
+			$this->saveClassFile( $classFile, $outTxt );
 		}
 	}
 
@@ -1425,6 +1414,9 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		$intfFull = $this->ifDescriptor->getServiceNameFull();
 		$intfShort = $this->ifDescriptor->getServiceNameShort();
 		$intfShortLow = strtolower($intfShort);
+		$providerBase = $this->ifDescriptor->getProviderBasePath();
+		$pluginFull = $this->ifDescriptor->getPluginNameFull();
+		$pluginShort = $this->ifDescriptor->getPluginNameShort();
 
 		require_once BASEDIR.'/server/serverinfo.php'; // SERVERVERSION
 		$serverVer = explode( '.', SERVERVERSION );
@@ -1447,25 +1439,24 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 						$this->FatalErrors[] = 'Could not read from file '.$classFile;
 						return;
 					}
+					$providerDir = $pluginFull ? "__DIR__.'/../.." : "BASEDIR.'/server";
 					// fill in template params
 					$outTxt = str_replace( '/*SERVICE*/', $serviceName, $outTxt );
 					$outTxt = str_replace( '/*INTFFULL*/', $intfFull, $outTxt );
 					$outTxt = str_replace( '/*INTFSHORT*/', $intfShort, $outTxt );
 					$outTxt = str_replace( '/*INTFSHORTLOW*/', $intfShortLow, $outTxt );
 					$outTxt = str_replace( '/*SERVERVERSION*/', $serverVersion, $outTxt );
+					$outTxt = str_replace( '/*PLUGINFULL*/', $pluginFull, $outTxt );
+					$outTxt = str_replace( '/*PLUGINSHORT*/', $pluginShort, $outTxt );
+					$outTxt = str_replace( '/*PROVIDERDIR*/', $providerDir, $outTxt );
 					// write template instance into new php class file
-					$classFile = BASEDIR.'/server/services/'.$intfShortLow.'/'.$intfShort.$serviceName.'Service.class.php';
+					$classFile = "{$providerBase}/services/{$intfShortLow}/{$pluginShort}{$intfShort}{$serviceName}Service.class.php";
 					if( file_exists($classFile) ) { // avoid overwriting files that are edit! (after previous generation)
-						$this->Warnings['skip'] = 'Service files that were generated before are intend to get changed manually atferwards. Avoiding losing changes by SKIPPING service files once exists.';
+						$this->Warnings['skip'] = 'Service files that were generated before are intend to get changed manually ".
+							"atferwards. Avoiding losing changes by SKIPPING service files once exists.';
 						$this->SkippedFiles[] = $classFile;
 					} else {
-						$fp = @fopen( $classFile, 'w+' );
-						if( !$fp || fwrite( $fp, $outTxt ) === false ) {
-							$this->ErrorFiles[] = $classFile;
-						} else {
-							$this->SuccessFiles[] = $classFile;
-						}
-						if( $fp ) fclose( $fp );
+						$this->saveClassFile( $classFile, $outTxt );
 					}
 				}
 			}
@@ -1509,16 +1500,11 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 				if( !in_array( $intfShort.$serviceName, $obsoletedServiceInterfaces ) ) {
 					$classFile = BASEDIR.'/server/interfaces/services/'.$intfShortLow.'/'.$intfShort.$serviceName.'_EnterpriseConnector.class.php';
 					if( file_exists($classFile) ) { // avoid overwriting files that are edit! (after previous generation)
-						$this->Warnings['skip'] = 'Service interface files that were generated before are intend to get changed manually atferwards. Avoiding losing changes by SKIPPING service interface files once exists.';
+						$this->Warnings['skip'] = 'Service interface files that were generated before are intend to get changed ".
+							"manually atferwards. Avoiding losing changes by SKIPPING service interface files once exists.';
 						$this->SkippedFiles[] = $classFile;
 					} else {
-						$fp = @fopen( $classFile, 'w+' );
-						if( !$fp || fwrite( $fp, $outTxt ) === false ) {
-							$this->ErrorFiles[] = $classFile;
-						} else {
-							$this->SuccessFiles[] = $classFile;
-						}
-						if( $fp ) fclose( $fp );
+						$this->saveClassFile( $classFile, $outTxt );
 					}
 				}
 			}
@@ -1604,23 +1590,11 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 
 		// create server class file		
 		$classFile = BASEDIR.'/server/protocols/soap/'.$this->ifDescriptor->getServiceNameShort().'Server.php';
-		$fp = @fopen( $classFile, 'w+' );
-		if( !$fp || fwrite( $fp, $srvrOutTxt ) === false ) {
-			$this->ErrorFiles[] = $classFile;
-		} else {
-			$this->SuccessFiles[] = $classFile;
-		}
-		if( $fp ) fclose( $fp );
+		$this->saveClassFile( $classFile, $srvrOutTxt );
 
 		// create client class file		
 		$classFile = BASEDIR.'/server/protocols/soap/'.$this->ifDescriptor->getServiceNameShort().'Client.php';
-		$fp = @fopen( $classFile, 'w+' );
-		if( !$fp || fwrite( $fp, $clntOutTxt ) === false ) {
-			$this->ErrorFiles[] = $classFile;
-		} else {
-			$this->SuccessFiles[] = $classFile;
-		}
-		if( $fp ) fclose( $fp );
+		$this->saveClassFile( $classFile, $clntOutTxt );
 	}
 
 	public function generateJsonClientClasses()
@@ -1629,35 +1603,30 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 
 		$intfFull = $this->ifDescriptor->getServiceNameFull();
 		$intfShort = $this->ifDescriptor->getServiceNameShort();
+		$intfShortLow = strtolower($intfShort);
+		$providerBase = $this->ifDescriptor->getProviderBasePath();
+		$pluginFull = $this->ifDescriptor->getPluginNameFull();
+		$jsonClassName = $pluginFull ? "{$pluginFull}_Protocols_Json_{$intfShort}_Client" : "WW_JSON_{$intfShort}Client";
 
 		$classFile = BASEDIR.'/server/buildtools/genservices/templates/JsonClient.template.php';
-		$clntOutTxt = file_get_contents( $classFile );
-		if( !$clntOutTxt ) {
+		$outTxt = file_get_contents( $classFile );
+		if( !$outTxt ) {
 			$this->FatalErrors[] = 'Could not read from file '.$classFile;
 			return;
 		}
 
-		// Determine service location (SOAP entry point) at WSDL
-		$xpath = $this->XPath;
-		$entries = $xpath->query( '/wsdl:definitions/wsdl:service/wsdl:port/soap:address' );
-		$address = $entries->item(0);
-		$location = $address->getAttribute('location');
-
 		// replace /*...*/ markers for client
-		$clntOutTxt = str_replace( '/*INTFFULL*/', $intfFull, $clntOutTxt );
-		$clntOutTxt = str_replace( '/*INTFSHORT*/', $intfShort, $clntOutTxt );
-		$clntOutTxt = str_replace( '/*NAMESPACE*/', $this->ifDescriptor->getNameSpace(), $clntOutTxt );
-		$clntOutTxt = str_replace( '/*ENTRYPOINT*/', $this->ifDescriptor->getSoapEntryPoint(), $clntOutTxt );
+		$outTxt = str_replace( '/*INTFFULL*/', $intfFull, $outTxt );
+		$outTxt = str_replace( '/*CLASSNAME*/', $jsonClassName, $outTxt );
+		$outTxt = str_replace( '/*ENTRYPOINT*/', $this->ifDescriptor->getSoapEntryPoint(), $outTxt );
 
 		// create client class file
-		$classFile = BASEDIR.'/server/protocols/json/'.$this->ifDescriptor->getServiceNameShort().'Client.php';
-		$fp = @fopen( $classFile, 'w+' );
-		if( !$fp || fwrite( $fp, $clntOutTxt ) === false ) {
-			$this->ErrorFiles[] = $classFile;
-		} else {
-			$this->SuccessFiles[] = $classFile;
+		if( $pluginFull ) {
+			$classFile = "{$providerBase}/protocols/json/{$intfShortLow}/Client.php";
+		} else { // core
+			$classFile = "{$providerBase}/protocols/json/{$intfShort}Client.php";
 		}
-		if( $fp ) fclose( $fp );
+		$this->saveClassFile( $classFile, $outTxt );
 	}
 
 	/**
@@ -1837,18 +1806,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	
 		// Create/save the HTML document file (built above)
 		$classFile = $this->getSdkDir().'/doc/interfaces/'.$this->ifDescriptor->getServiceNameFull().'.htm';
-		$dirOut = dirname( $classFile );
-		if( !is_dir($dirOut) ) {
-			require_once BASEDIR.'/server/utils/FolderUtils.class.php';
-			FolderUtils::mkFullDir( $dirOut, 0777 );
-		}
-		$fp = @fopen( $classFile, 'w+' );
-		if( !$fp || fwrite( $fp, $docOutTxt ) === false ) {
-			$this->ErrorFiles[] = $classFile;
-		} else {
-			$this->SuccessFiles[] = $classFile;
-		}
-		if( $fp ) fclose( $fp );
+		$this->saveClassFile( $classFile, $docOutTxt );
 	}
 
 	/**
@@ -1954,12 +1912,14 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		$intfShortLow = strtolower($intfShort);
 		$simpleTypeComments = array();
 		$simpleTypeEnums = $this->getSimpleTypeEnums( $simpleTypeComments ); // Collect enumerations (simpleType) from WSDL
+		$providerBase = $this->ifDescriptor->getProviderBasePath();
+		$serviceShort = $this->ifDescriptor->getServiceNameShort();
+		$pluginShort = $this->ifDescriptor->getPluginNameShort();
 
 		// Build the PHP class file header		
 		$outTxt = "<?php\n\n/**\n"
 				." * @package Enterprise\n"
 				." * @subpackage Services\n"
-				." * @since v8.0\n"
 				." * @copyright WoodWing Software bv. All Rights Reserved.\n"
 				." * \n"
 				." * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n"
@@ -1969,7 +1929,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 
 		// Build PHP validation class for enumerations
 		foreach( $simpleTypeEnums as $enumName => $enumStructs ) {
-			$outTxt .= "class ".$this->ifDescriptor->getServiceNameShort().$enumName."Validator\n{\n";
+			$outTxt .= "class {$pluginShort}{$serviceShort}{$enumName}Validator\n{\n";
 			$outTxt .= "\tstatic public function validate( \$validator, \$enumVal )\n";
 			$outTxt .= "\t{\n";
 			$outTxt .= "\t\tstatic \$enums = array( ";
@@ -1985,7 +1945,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 				
 		// Build PHP validation class for complex types
 		foreach( $dataClasses as $dataName => $dataStruct ) {
-			$outTxt .= "class ".$this->ifDescriptor->getServiceNameShort().$dataName."Validator\n{\n";
+			$outTxt .= "class {$pluginShort}{$serviceShort}{$dataName}Validator\n{\n";
 			$outTxt .= "\tstatic public function validate( \$validator, \$datObj )\n";
 			$outTxt .= "\t{\n";
 			if( $dataStruct ) foreach( $dataStruct as $propName => $propStruct ) {
@@ -1997,14 +1957,8 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		}
 
 		// Create/save the PHP classes file (built above)
-		$classFile = BASEDIR.'/server/services/'.$intfShortLow.'/DataValidators.php';
-		$fp = @fopen( $classFile, 'w+' );
-		if( !$fp || fwrite( $fp, $outTxt ) === false ) {
-			$this->ErrorFiles[] = $classFile;
-		} else {
-			$this->SuccessFiles[] = $classFile;
-		}
-		if( $fp ) fclose( $fp );		
+		$classFile = "{$providerBase}/services/{$intfShortLow}/DataValidators.php";
+		$this->saveClassFile( $classFile, $outTxt );
 	}
 	
 	/**
@@ -2049,7 +2003,9 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		if( $propType == 'Row' ) $propType = 'ArrayOfString';
 		$isArray = strpos( $propType, 'ArrayOf' ) === 0;
 		$dataClassPrefix = $this->ifDescriptor->getDataClassPrefix();
-		
+		$serviceShort = $this->ifDescriptor->getServiceNameShort();
+		$pluginShort = $this->ifDescriptor->getPluginNameShort();
+
 		// Check if types are complete
 		if( !$isArray ) {
 			$refFound = isset($basicTypes[$propType]);
@@ -2092,7 +2048,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			$outTxt .= "\t\t\t\t\t\$validator->enterPath( '$propType' );\n";
 			$outTxt .= "\t\t\t\t\t\$validator->checkType( \$listItem, '$typeCheck' );\n";
 			if( isset($dataClasses[$propType]) || $isEnum ) {
-				$outTxt .= "\t\t\t\t\t".$this->ifDescriptor->getServiceNameShort().$propType."Validator::validate( \$validator, \$listItem );\n";
+				$outTxt .= "\t\t\t\t\t{$pluginShort}{$serviceShort}{$propType}Validator::validate( \$validator, \$listItem );\n";
 			}
 			$outTxt .= "\t\t\t\t\t\$validator->leavePath();\n";
 			$outTxt .= "\t\t\t\t}\n"; // end foreach
@@ -2112,12 +2068,37 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			}
 			$outTxt .= "\t\t\t\t\$validator->checkType( \$datObj->$propName, '$typeCheck' );\n";
 			if( isset($dataClasses[$propType]) || $isEnum ) {
-				$outTxt .= "\t\t\t\t".$this->ifDescriptor->getServiceNameShort().$propType."Validator::validate( \$validator, \$datObj->$propName );\n";
+				$outTxt .= "\t\t\t\t{$pluginShort}{$serviceShort}{$propType}Validator::validate( \$validator, \$datObj->$propName );\n";
 			}
 		}
 		$outTxt .= "\t\t\t}\n"; // end if !is_null()
 		$outTxt .= "\t\t\t\$validator->leavePath();\n";
 		$outTxt .= "\t\t}\n"; // end if checkExists()
 		return $outTxt;
+	}
+
+	/**
+	 * Creates a file on disk. Also creates the file path in case it does not exists yet.
+	 *
+	 * @since 10.2.0
+	 * @param string $classFile
+	 * @param string $content Class definition to write into $classFile
+	 */
+	private function saveClassFile( $classFile, $content )
+	{
+		$dirOut = dirname( $classFile );
+		if( !is_dir( $dirOut ) ) {
+			require_once BASEDIR.'/server/utils/FolderUtils.class.php';
+			FolderUtils::mkFullDir( $dirOut, 0777 );
+		}
+		$fp = @fopen( $classFile, 'w+' );
+		if( !$fp || fwrite( $fp, $content ) === false ) {
+			$this->ErrorFiles[] = $classFile;
+		} else {
+			$this->SuccessFiles[] = $classFile;
+		}
+		if( $fp ) {
+			fclose( $fp );
+		}
 	}
 }

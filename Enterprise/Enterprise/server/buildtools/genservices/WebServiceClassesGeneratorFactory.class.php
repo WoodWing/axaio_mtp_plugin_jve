@@ -64,6 +64,10 @@ class WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory
 			if( $this->errorMsg ) {
 				break; // bail out
 			}
+			$this->validateServiceProviderProtocols();
+			if( $this->errorMsg ) {
+				break; // bail out
+			}
 		} while( false );
 		return !$this->errorMsg;
 	}
@@ -90,7 +94,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory
 		$generator = null;
 		if( isset($this->interfaceDefs[$webInterface] ) ) {
 			$interfaceDef = $this->interfaceDefs[ $webInterface ];
-			$generator = new WW_BuildTools_GenServices_WebServiceClassesGenerator( $interfaceDef );
+			$generator = new WW_BuildTools_GenServices_WebServiceClassesGenerator( $interfaceDef, $this->provider->getProtocols() );
 		}
 		return $generator;
 	}
@@ -207,6 +211,40 @@ class WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory
 	}
 
 	/**
+	 * Checks if the generator supports the required protocols.
+	 */
+	private function validateServiceProviderProtocols()
+	{
+		$protocols = $this->provider->getProtocols();
+		$provider = $this->plugin ? $this->plugin : 'Enterprise Server';
+		if( $protocols ) {
+			foreach( $protocols as $protocol ) {
+				switch( $protocol ) {
+					case 'soap':
+					case 'amf':
+						if( $this->plugin ) {
+							$this->errorMsg = "The {$provider} service provider seems to require the {$protocol} protocol. ".
+								"Although the generator supports this for the core server, it has no support for server plugins yet. ".
+								"Either make the json protocol as the only requirement or adjust the generator to let it support ".
+								"the required protocol for server plugins.";
+						}
+						break;
+					case 'json':
+						break;
+					default:
+						$this->errorMsg = "The {$provider} service provider seems to require the {$protocol} protocol which is ".
+							"not supported by the generator. Either remove the requirement from the service provider or implement ".
+							"the protocol for the generator.";
+						break;
+				}
+			}
+		} else {
+			$this->errorMsg = "The {$provider} service provider seems to require no protocols, which does not make sense. ".
+				"Please adjust the provider and let it require one or more protocols, such as soap, amf or json.";
+		}
+	}
+
+	/**
 	 * Includes a class module, validates its interface and instantiates a class when valid.
 	 *
 	 * When not valid, $this->errorMsg is set.
@@ -224,8 +262,8 @@ class WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory
 			$classFile = $moduleDir.'/'.$moduleName;
 			if( file_exists( $classFile ) && is_readable( $classFile ) ) {
 				require_once $classFile;
-				$classInstance = new $className;
 				if( class_exists( $className ) ) {
+					$classInstance = new $className;
 					$classInterfaces = class_implements( $classInstance );
 					if( in_array( $interfaceName, $classInterfaces ) ) {
 						$retVal = $classInstance;

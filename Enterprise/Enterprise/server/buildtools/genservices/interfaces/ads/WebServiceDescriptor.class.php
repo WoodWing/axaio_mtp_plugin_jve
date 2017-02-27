@@ -21,7 +21,8 @@ class WW_BuildTools_GenServices_Interfaces_Ads_WebServiceDescriptor implements W
 	final public function getSoapEntryPoint()   { return "LOCALURL_ROOT.INETROOT.'/datasourceadminindex.php'"; }
 	final public function getWsdlFilePath()     { return BASEDIR.'/server/interfaces/PlutusAdmin.wsdl'; }
 	final public function getProviderBasePath() { return BASEDIR.'/server'; }
-	final public function getServerPluginName() { return null; }
+	final public function getPluginNameFull()   { return null; }
+	final public function getPluginNameShort()  { return null; }
 
 	final public function getUrlToFilePath($serviceName)
 	{

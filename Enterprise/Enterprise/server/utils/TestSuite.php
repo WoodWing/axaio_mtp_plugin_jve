@@ -295,10 +295,12 @@ class WW_Utils_TestSuite
 	 * @param string $stepInfo Logical test description.
 	 * @param string|null $expectedErrorCodeOrMsgKey The expected error message key or error code. Null when no error is expected.
 	 * @param bool $throwException TRUE to throw BizException and setError(), FALSE to setError() only, on unexpected failures
+	 * @param string $providerShort Abbreviated name of provider that has implemented the Web Service. EMPTY for the core Enterprise Server, or set for server plugin.
+	 * @param string $providerFull Full name of provider that has implemented the Web Service. EMPTY for the core Enterprise Server, or set for server plugin.
 	 * @return mixed A corresponding response object when service was successful or NULL on error.
 	 */
 	public function callService( TestCase $testCase, $request, $stepInfo, $expectedErrorCodeOrMsgKey = null, 
-		$throwException = false )
+		$throwException = false, $providerShort = '', $providerFull = '' )
 	{
 		$baseName = get_class( $request );
 		$baseName = substr( $baseName, 0, strlen($baseName) - strlen('Request') );
@@ -328,9 +330,9 @@ class WW_Utils_TestSuite
 				$service->suppressRecording();
 				$response = $service->execute( $request );
 			} elseif( $this->protocol == 'SOAP' ) {
-				$response = $this->executeSoap( $request, $expectedSCode );
+				$response = $this->executeSoap( $request, $expectedSCode, $providerShort, $providerFull );
 			} elseif( $this->protocol == 'JSON' ) {
-				$response = $this->executeJson( $request, $expectedSCode );
+				$response = $this->executeJson( $request, $expectedSCode, $providerShort, $providerFull );
 			} else {
 				$message = 'Invalid protocol used for service call: "'.$this->protocol.'"';
 				if( $throwException ) {
@@ -401,17 +403,25 @@ class WW_Utils_TestSuite
 	 *
 	 * @param object $request Request object to execute.
 	 * @param string|null $expectedSCode Expected server error (S-code). Use null to indicate no error is expected.
+	 * @param string $providerShort Abbreviated name of provider that has implemented the Web Service. EMPTY for the core Enterprise Server, or set for server plugin.
+	 * @param string $providerFull Full name of provider that has implemented the Web Service. EMPTY for the core Enterprise Server, or set for server plugin.
 	 * @return object Response object.
 	 * @throws BizException when the web service failed.
 	 */
-	private function executeSoap( $request, $expectedSCode )
+	private function executeSoap( $request, $expectedSCode, $providerShort, $providerFull )
 	{
-		$requestClass = get_class( $request ); // e.g. returns 'WflDeleteObjectsRequest'
-		$servicePrefix = substr( $requestClass, 0, 3 );
-		$function = substr( $requestClass, 3, strlen($requestClass) - 3 - strlen('Request') );
+		$requestClass = get_class( $request ); // e.g. 'WflDeleteObjectsRequest' or 'CsPubPublishArticleRequest'
+		$webInterface = substr( $requestClass, strlen($providerShort), 3 );
+		$funtionNameLen = strlen($requestClass) - strlen($providerShort) - strlen($webInterface) - strlen('Request');
+		$functionName = substr( $requestClass, strlen($providerShort) + strlen($webInterface), $funtionNameLen );
 
-		require_once BASEDIR.'/server/protocols/soap/'.$servicePrefix.'Client.php';
-		$clientClass = 'WW_SOAP_'.$servicePrefix.'Client';
+		if( $providerShort ) { // plugin
+			require_once BASEDIR."/config/plugins/{$providerFull}/protocols/soap/".strtolower($webInterface).'/Client.php';
+			$clientClass = "{$providerFull}_Protocols_Soap_{$webInterface}_Client";
+		} else { // server
+			require_once BASEDIR.'/server/protocols/soap/'.$webInterface.'Client.php';
+			$clientClass = 'WW_SOAP_'.$webInterface.'Client';
+		}
 		$options = array(
 			'transfer' => 'HTTP',
 			'protocol' => 'SOAP',
@@ -420,8 +430,8 @@ class WW_Utils_TestSuite
 			$options['expectedError'] = $expectedSCode;
 		}
 		try {
-			$soapClients[$servicePrefix] = new $clientClass( $options );
-			$response = $soapClients[$servicePrefix]->$function( $request );
+			$client = new $clientClass( $options );
+			$response = $client->$functionName( $request );
 		} catch( SoapFault $e ) {
 			throw new BizException( '', 'Server', '', $e->getMessage() );
 		}
@@ -434,24 +444,32 @@ class WW_Utils_TestSuite
 	 * @since 10.0.0
 	 * @param object $request Request object to execute.
 	 * @param string|null $expectedSCode Expected server error (S-code). Use null to indicate no error is expected.
+	 * @param string $providerShort Abbreviated name of provider that has implemented the Web Service. EMPTY for the core Enterprise Server, or set for server plugin.
+	 * @param string $providerFull Full name of provider that has implemented the Web Service. EMPTY for the core Enterprise Server, or set for server plugin.
 	 * @return object Response object.
 	 * @throws BizException when the web service failed.
 	 */
-	private function executeJson( $request, $expectedSCode )
+	private function executeJson( $request, $expectedSCode, $providerShort, $providerFull )
 	{
-		$requestClass = get_class( $request ); // e.g. returns 'WflDeleteObjectsRequest'
-		$servicePrefix = substr( $requestClass, 0, 3 );
-		$function = substr( $requestClass, 3, strlen($requestClass) - 3 - strlen('Request') );
+		$requestClass = get_class( $request ); // e.g. 'WflDeleteObjectsRequest' or 'CsPubPublishArticleRequest'
+		$webInterface = substr( $requestClass, strlen($providerShort), 3 );
+		$funtionNameLen = strlen($requestClass) - strlen($providerShort) - strlen($webInterface) - strlen('Request');
+		$functionName = substr( $requestClass, strlen($providerShort) + strlen($webInterface), $funtionNameLen );
 
-		require_once BASEDIR.'/server/protocols/json/'.$servicePrefix.'Client.php';
-		$clientClass = 'WW_JSON_'.$servicePrefix.'Client';
+		if( $providerShort ) { // plugin
+			require_once BASEDIR."/config/plugins/{$providerFull}/protocols/json/".strtolower($webInterface).'/Client.php';
+			$clientClass = "{$providerFull}_Protocols_Json_{$webInterface}_Client";
+		} else { // server
+			require_once BASEDIR.'/server/protocols/json/'.$webInterface.'Client.php';
+			$clientClass = 'WW_JSON_'.$webInterface.'Client';
+		}
 		$options = array();
 		if( $expectedSCode ) {
 			$options['expectedError'] = $expectedSCode;
 		}
 		try {
-			$soapClients[$servicePrefix] = new $clientClass( '', $options );
-			$response = $soapClients[$servicePrefix]->$function( $request );
+			$client = new $clientClass( '', $options );
+			$response = $client->$functionName( $request );
 		} catch( Exception $e ) {
 			throw new BizException( '', 'Server', '', $e->getMessage() );
 		}

@@ -19,7 +19,8 @@ interface WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface
 	public function getSoapEntryPoint();
 	public function getWsdlFilePath();
 	public function getProviderBasePath();
-	public function getServerPluginName();
+	public function getPluginNameFull();
+	public function getPluginNameShort();
 
 	public function getUrlToFilePath( $serviceName );
 	public function getFilePathToUrl( $serviceName );

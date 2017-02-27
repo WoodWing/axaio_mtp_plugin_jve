@@ -21,7 +21,8 @@ class WW_BuildTools_GenServices_Interfaces_Pln_WebServiceDescriptor implements W
 	final public function getSoapEntryPoint()   { return "LOCALURL_ROOT.INETROOT.'/editorialplan.php'"; }
 	final public function getWsdlFilePath()     { return BASEDIR.'/server/interfaces/SmartEditorialPlan.wsdl'; }
 	final public function getProviderBasePath() { return BASEDIR.'/server'; }
-	final public function getServerPluginName() { return null; }
+	final public function getPluginNameFull()   { return null; }
+	final public function getPluginNameShort()  { return null; }
 
 	final public function getUrlToFilePath($serviceName)
 	{

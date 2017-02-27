@@ -25,4 +25,12 @@ interface WW_BuildTools_GenServices_WebServiceProviderInterface
 	 * @return string[] List of abbreviated names of interfaces.
 	 */
 	public function getInterfaces();
+
+	/**
+	 * Provides a list of protocols implemented by the web service provider.
+	 *
+	 * @return string[]|null List of protocols.
+	 */
+	public function getProtocols();
+
 }
