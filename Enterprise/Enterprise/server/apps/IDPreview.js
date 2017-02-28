@@ -869,6 +869,8 @@ function main()
 
                                     if ( copyfitBySC() )
                                     {
+                                        wwlog( INFO, "Recomposing story just before copyfit calculation" );
+                                        comp.recompose();
                                         wwlog( INFO, "getting overset/underset from frame data; " );
                                         var frameData = tfs[tfs.length-1].frameData;
                                         var frameDataObj  = eval("(" + frameData + ")");
