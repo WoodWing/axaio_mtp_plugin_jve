@@ -948,7 +948,6 @@ class DBPlacements extends DBBase
 	 * Returns all placement ids belonging to the relations.
 	 *
 	 * @param Relation[] $relations
-	 * @param string $type Kind of placement
 	 * @return array|null
 	 */
 	static public function getPlacementIdsByRelations( array $relations )
