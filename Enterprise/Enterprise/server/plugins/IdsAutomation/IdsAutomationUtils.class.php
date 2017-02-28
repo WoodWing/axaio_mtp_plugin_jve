@@ -195,15 +195,15 @@ class IdsAutomationUtils
 	 * and so the layout should be processed by IDS.
 	 * Please call initLayoutStatusChangeTriggerForIds() before calling this function.
 	 *
-	 * This function return TRUE when ALL of the following criterea are met:
+	 * This function return TRUE when ALL of the following criteria are met:
 	 * - the given object is a Layout or Layout Module
-	 * - the $prevStatusId and $newStatusId are different
 	 * - the $newStatusId is not the Personal status
- 	 * - the $newStatusId has phase Production or Completed
+ 	 * - the $newStatusId has phase Production
  	 * - Ouput renditions should be generated, so ONE of the following criterea are met:
-  	 *    - the $prevStatusId refers to non-Output status and the $newStatusId refers to Output status 
-  	 *      and CLIENTFEATURES for IDS_AUTOMATION has the CreatePagePDFOnProduce or CreatePageEPSOnProduce option
+  	 *    - the $newStatusId refers to Output status and CLIENTFEATURES for IDS_AUTOMATION has the CreatePagePDFOnProduce
+	 *    or CreatePageEPSOnProduce option
 	 *    - CLIENTFEATURES for IDS_AUTOMATION has the CreatePagePDF or CreatePageEPS option
+	 * If the above criteria are not met it is checked if a job is needed to create a folio for Adobe Dps.
 	 *
 	 * @param integer $objId The id of object to be checked.
 	 * @param string $objType The object type.
@@ -222,17 +222,8 @@ class IdsAutomationUtils
 				LogHandler::Log( 'IdsAutomation', 'INFO', "The give object is not a supported layout. No action needed." );
 				break;
 			}
-			if( $prevStatusId == $newStatusId ) {
-				LogHandler::Log( 'IdsAutomation', 'INFO', "The previous- and new statuses are the same. No action needed." );
-				break;
-			}
 			if( $newStatusId == -1 ) {
 				LogHandler::Log( 'IdsAutomation', 'INFO', "The new status is a Personal status. No action needed." );
-				break;
-			}
-			$prevStatus = self::getStatusWithId( $prevStatusId );
-			if( !$prevStatus ) {
-				LogHandler::Log( 'IdsAutomation', 'INFO', "The previous status [$prevStatusId] could not be found in DB. No action needed." );
 				break;
 			}
 			$newStatus = self::getStatusWithId( $newStatusId );
@@ -246,7 +237,7 @@ class IdsAutomationUtils
 			}
 			
 			require_once BASEDIR.'/server/bizclasses/BizPage.class.php';
-			if( !$prevStatus->Produce && $newStatus->Produce ) { // moving into Produce/Output status?
+			if( $newStatus->Produce ) { // Produce/Output status
 				if( self::isIdsClientFeatureValue( 'CreatePagePDFOnProduce' ) &&
 					!BizPage::hasOutputRenditionPDF( $objId ) ) {
 					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePagePDFOnProduce is configured for IDS, '.
