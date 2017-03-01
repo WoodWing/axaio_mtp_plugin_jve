@@ -881,7 +881,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">Kohdetta %1 ei voida poistaa, sillä on poistettujen objektien käytössä. Poista kyseiset objektit lopullisesti roskakorin avulla ja yritä uudelleen. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">Kohdetta %1 ei voida poistaa, sillä on objektien käytössä. Etsi kyseiset objektit, riko kytkökset %1-toiminnolla ja yritä uudelleen. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">Seuraavat palautetut kohteet nimettiin uudelleen, koska alkuperäinen nimi oli jo käytössä:</Term>
-  <Term key="ERR_LAY_NOT_SAVED">Asettelua ei ole tallennettu.</Term>
+  <Term key="ERR_LAY_NOT_SAVED">Asettelun esikatselun luominen ei onnistunut, sillä asettelua ei talletettu tai artikkeli on asetettu liitepöydälle.</Term>
   <Term key="ERR_LICENSE">Ilmeni lisenssivirhe.</Term>
   <Term key="ERR_LOCKED">Toimintoa ei voi suorittaa; tiedosto on tarkistettu. (S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">Toimintoa ei voi suorittaa; tiedosto on linkitetty toiseen tiedostoon, joka on tarkistettu. (S1065)</Term>
