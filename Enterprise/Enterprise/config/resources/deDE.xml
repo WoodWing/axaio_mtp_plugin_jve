@@ -575,7 +575,7 @@
   <Term key="AUT_SURE_QMK">Soll diese Autorisierung gelöscht werden?</Term>
   <Term key="BEFORE">vor</Term>
   <Term key="BEFORE_PUB_DATE">Vor Erscheinungsdatum</Term>
-  <Term key="BEYOND_DATE">Erscheinungsdatum liegt nach dem Abgabedatum</Term>
+  <Term key="BEYOND_DATE">Zu spätes Datum</Term>
   <Term key="BUT_ADD_ACTION_PROPERTY">Vorgangs-Eigenschaft hinzufügen</Term>
   <Term key="BUT_ADVANCED">Erweitert</Term>
   <Term key="BUT_CHANGE">Ändern</Term>
@@ -881,7 +881,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">%1 kann nicht gelöscht werden, da es derzeit von gelöschten Objekten verwendet wird. Verwenden Sie zum endgültigen Löschen dieser Objekte Papierkorp und versuchen Sie es erneut. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">%1 kann nicht gelöscht werden, da es derzeit von Objekten verwendet wird. Suchen Sie diese Objekte, löschen Sie die Verknüpfung mit %1 und versuchen Sie es erneut. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">Folgende wiederhergestellte Objekte wurden umbenannt, da der ursprüngliche Name bereits erneut vergeben wurde:</Term>
-  <Term key="ERR_LAY_NOT_SAVED">Das Layout wurde nicht gespeichert.</Term>
+  <Term key="ERR_LAY_NOT_SAVED">Die Layout-Vorschau konnte nicht erstellt werden, weil das Layout nicht gespeichert wurde oder der Artikel sich in der Zwischenablage befindet.</Term>
   <Term key="ERR_LICENSE">Ein Lizenzfehler ist aufgetreten.</Term>
   <Term key="ERR_LOCKED">Diese Aktion kann nicht ausgeführt werden. Die Datei wurde ausgecheckt. (S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">Diese Aktion kann nicht ausgeführt werden. Die Datei ist mit einer anderen Datei verknüpft, die ausgecheckt ist. (S1065)</Term>
