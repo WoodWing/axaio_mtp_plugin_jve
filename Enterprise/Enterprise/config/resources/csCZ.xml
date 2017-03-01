@@ -881,7 +881,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">%1 nelze odstranit, protože ho v současnosti používají nějaké odstraněné objekty. Vysypte koš, abyste tyto objekty trvale odstranili, a zkuste to znovu. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">%1 nelze odstranit, protože ho v současnosti používají nějaké objekty. Najděte prosím tyto objekty, přerušte vazbu s %1 a zkuste to znovu. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">Následující obnovené položky musely být přejmenovány, protože původní název byl znovu použit:</Term>
-  <Term key="ERR_LAY_NOT_SAVED">Rozvržení nebylo uloženo.</Term>
+  <Term key="ERR_LAY_NOT_SAVED">Náhled rozvržení se nepodařilo vygenerovat, protože rozvržení nebylo uloženo anebo je článek umístěn na nástěnce.</Term>
   <Term key="ERR_LICENSE">Došlo k chybě licence.</Term>
   <Term key="ERR_LOCKED">Tuto akci nelze provést, soubor je rezervován. (S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">Tuto akci nelze provést. Soubor je propojený s jiným souborem, který je rezervovaný. (S1065)</Term>

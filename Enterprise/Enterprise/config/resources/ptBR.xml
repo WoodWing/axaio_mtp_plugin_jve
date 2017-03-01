@@ -881,7 +881,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">%1 não pode ser excluído pois está sendo usado no momento por objetos exluídos. Use a Lixeira para excluir esses objetos permanentemente e tente novamente. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">%1 não pode ser excluído pois está sendo usado no momento por objetos. Localize esses objetos, quebre o vínculo com %1 e tente novamente. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">Os itens restaurados a seguir tiveram que ser renomeados porque o nome original estava ocupado novamente:</Term>
-  <Term key="ERR_LAY_NOT_SAVED">O layout não foi salvo.</Term>
+  <Term key="ERR_LAY_NOT_SAVED">A pré-visualização do leiaute não pôde ser gerada pois o leiaute não foi salvo ou o artigo está aplicado fora da página.</Term>
   <Term key="ERR_LICENSE">Erro de licença.</Term>
   <Term key="ERR_LOCKED">Erro: o arquivo está em edição. (S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">Erro: o arquivo está relacionado à outro arquivo que está sendo editado. (S1065)</Term>
