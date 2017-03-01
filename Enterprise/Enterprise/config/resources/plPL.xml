@@ -881,7 +881,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">Nie można usunąć %1, ponieważ jest obecnie używany przez usunięte obiekty. Usuń te obiekty z kosza na zawsze i ponów próbę. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">Nie można usunąć %1, ponieważ jest obecnie używany przez obiekty. Znajdź te obiekty, przerwij połączenie z %1 i ponów próbę. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">Należy zmienić nazwę poniższych pozycji odzyskanych, ponieważ pierwotne nazwy zostały zajęte:</Term>
-  <Term key="ERR_LAY_NOT_SAVED">Nie zapisano układu.</Term>
+  <Term key="ERR_LAY_NOT_SAVED">Nie można było wygenerować podglądu układu, ponieważ nie zapisano układu lub artykuł umieszczono w obszarze wklejania.</Term>
   <Term key="ERR_LICENSE">Wystąpił błąd licencji.</Term>
   <Term key="ERR_LOCKED">Nie można wykonać tej czynności, ponieważ plik został wyrejestrowany. (S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">Nie można wykonać tej czynności, ponieważ plik jest połączony z innym plikiem, który jest wyrejestrowany. (S1065)</Term>
