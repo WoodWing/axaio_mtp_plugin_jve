@@ -881,7 +881,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">Il est impossible de supprimer %1, car il est en cours d'utilisation par des objets supprimés. Utilisez la corbeille pour éliminer ces objets de façon définitive et réessayez. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">Il est impossible de supprimer %1, car il est en cours d'utilisation par des objets. Localisez ces objets, rompez le lien avec %1 et réessayez. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">Les noms des éléments restaurés suivants ont dû être modifiés, car le nom d'origine était à nouveau pris :</Term>
-  <Term key="ERR_LAY_NOT_SAVED">La mise en page n’a pas été enregistrée.</Term>
+  <Term key="ERR_LAY_NOT_SAVED">L'aperçu de la mise en page n'a pas pu être généré parce que la mise en page n'a pas été enregistrée ou l'article a été placée sur la planche de travail.</Term>
   <Term key="ERR_LICENSE">Erreur de licence.</Term>
   <Term key="ERR_LOCKED">Impossible d'effectuer cette action ; le fichier a été retiré. (S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">Impossible d'effectuer cette action ; le fichier est lié à un autre fichier qui a été retiré. (S1065)</Term>
