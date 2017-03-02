@@ -22,9 +22,9 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Extracts elvis asset id from alien id provided by enterprise
+	 * Extracts Elvis asset id from alien id provided by enterprise
 	 * @param $alienId - id of enterprise object, including _<ContentSourceId>_ prefix
-	 * @return string elvis asset id
+	 * @return string Elvis asset id
 	 */
 	public static function getElvisId($alienId)
 	{
@@ -49,11 +49,11 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Returns hit from server, base on provided elvis id
+	 * Returns hit from server, base on provided Elvis id
 	 * @param $elvisId - for hit to be returned
 	 * @param $lock - true if we have lock on Elvis server
 	 * @return ElvisEntHit - hit from Elvis server
-	 * @throws BizException - thrown if more then on hit found for specified elvis ID
+	 * @throws BizException - thrown if more then on hit found for specified Elvis ID
 	 */
 	public static function getHit($elvisId, $lock = false)
 	{
@@ -88,7 +88,7 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Extract corresponding URL to elvis asset, based on provided rendition.
+	 * Extract corresponding URL to Elvis asset, based on provided rendition.
 	 *
 	 * If version specified, it will be taken into account
 	 * Extracted url, if could be resolved then used to copy file to Enterprise Transfer server.
@@ -158,7 +158,7 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Restore elvis version from enterprise version
+	 * Restore Elvis version from enterprise version
 	 *
 	 * @param string $version - enterprise version
 	 * @return string - Elvis version
@@ -180,7 +180,7 @@ class ElvisUtils {
 	}
 	
 	/**
-	 * Removes the shadow object for the given elvis id
+	 * Removes the shadow object for the given Elvis id
 	 * 
 	 * @param string $elvisId
 	 */

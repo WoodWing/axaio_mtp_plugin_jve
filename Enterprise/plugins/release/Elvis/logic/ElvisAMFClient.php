@@ -38,7 +38,7 @@ class ElvisAMFClient
 	 * @param string $service
 	 * @param string $operation
 	 * @param array $params
-	 * @param bool $secure
+	 * @param bool $secure Whether or not the connection should be secured with session cookies. Typically set FALSE to logon (or for services that don't require authorization).
 	 * @param int $timeout The timeout for the call in seconds
 	 * @return mixed
 	 * @throws object ElvisCSException converted by Sabre/AMF
@@ -65,7 +65,6 @@ class ElvisAMFClient
 		self::logService( 'Elvis_'.$service.'_'.$operation, $params, $cookies, true );
 
 		$result = null;
-		$cookies = array();
 		try {
 			$servicePath = $service . '.' . $operation;
 			$result = $client->sendRequest( $servicePath, $params, $timeout );
@@ -162,7 +161,6 @@ class ElvisAMFClient
 	
 	/**
 	 * Tries to log into Elvis using the provided credentials
-	 * Will return the sessionId obtained from Elvis
 	 * Will not store the session in SessionUtil
 	 *
 	 * @param string $credentials base64 encoded credentials
