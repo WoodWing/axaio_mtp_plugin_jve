@@ -1,6 +1,6 @@
 <?php
 /**
- * Publishes dossiers with contained content.<br>
+ * Publishes dossiers with contained content.
  *
  * @package Enterprise
  * @subpackage Services
