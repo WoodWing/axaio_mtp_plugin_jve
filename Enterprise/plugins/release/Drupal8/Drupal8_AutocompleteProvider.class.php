@@ -1,21 +1,13 @@
 <?php
-/****************************************************************************
-   Copyright 2013 WoodWing Software BV
+/**
+ * @package   Enterprise
+ * @subpackage   ServerPlugins
+ * @copyright   WoodWing Software bv. All Rights Reserved.
+ *
+ * Autocomplete provider connector interface to help end-user fill in dialog property values.
+ */
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-****************************************************************************/
-
-require_once BASEDIR . '/server/interfaces/plugins/connectors/AutocompleteProvider_EnterpriseConnector.class.php';
+require_once BASEDIR.'/server/interfaces/plugins/connectors/AutocompleteProvider_EnterpriseConnector.class.php';
 
 class Drupal8_AutocompleteProvider extends AutocompleteProvider_EnterpriseConnector
 {
@@ -26,20 +18,20 @@ class Drupal8_AutocompleteProvider extends AutocompleteProvider_EnterpriseConnec
 	 */
 	public function getSupportedEntities()
 	{
-		require_once BASEDIR .'/server/bizclasses/BizAdmAutocomplete.class.php';
-		require_once dirname(__FILE__).'/Utils.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizAdmAutocomplete.class.php';
+		require_once dirname( __FILE__ ).'/Utils.class.php';
 		$provider = WW_Plugins_Drupal8_Utils::DRUPAL8_PLUGIN_NAME;
 		$termEntitiesObj = BizAdmAutocomplete::getAutocompleteTermEntities( $provider );
 		static $cachedSupportedEntities;
-		if( !isset( $cachedSupportedEntities[$provider] )) {
+		if( !isset( $cachedSupportedEntities[ $provider ] ) ) {
 			$supportedEntities = array();
 			if( $termEntitiesObj ) foreach( $termEntitiesObj as $termEntityObj ) {
 				$supportedEntities[] = $termEntityObj->Name;
 			}
-			$cachedSupportedEntities[$provider] = $supportedEntities;
+			$cachedSupportedEntities[ $provider ] = $supportedEntities;
 		}
 
-		return $cachedSupportedEntities[$provider];
+		return $cachedSupportedEntities[ $provider ];
 	}
 
 	/**
@@ -56,5 +48,113 @@ class Drupal8_AutocompleteProvider extends AutocompleteProvider_EnterpriseConnec
 	{
 		$entities = $this->getSupportedEntities();
 		return in_array( $termEntity, $entities );
+	}
+
+	/**
+	 * In case of 'entity reference' term fields the suggestions are retrieved from Drupal, otherwise the Suggestion
+	 * Provider ss used.
+	 *
+	 * @since 10.1.2
+	 * @inheritdoc
+	 */
+	public function autocomplete( $provider, $objectId, $propertyName, $termEntityName, $publishSystemId, $ignoreValues, $typedValue )
+	{
+		$tags = array();
+		if( $termEntityName == 'entityreference' ) {
+			if( !mb_strlen( $typedValue ) >= 2 ) { // To get meaningful suggestions at least two characters are needed.
+				return $tags;
+			}
+			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+			$documentId = DBObject::getDocumentIdOfPublishFormTemplateUsedByProperty( $propertyName );
+			if( !( $documentId && $propertyName ) ) {
+				LogHandler::Log( 'Drupal8Publish', 'DEBUG', 'ERROR: Unable to get Drupal content type Id or field Id.' );
+				return $tags;
+			}
+			$drupalFieldId = $this->extractDrupalFieldIdFromPropertyName( $propertyName );
+			$drupalContentTypeId = $this->extractDrupalContentTypeIdFromDocumentId( $documentId );
+			$drupalXmlRpcClient = $this->createDrupalXmlRpcClient( $objectId, $publishSystemId );
+			$drupalFieldValues = $drupalXmlRpcClient->getTermEntityValues( $drupalContentTypeId, $drupalFieldId, $typedValue );
+			$tags = $this->createTagsFromDrupalFieldValues( $drupalFieldValues, $typedValue );
+		} else {
+			$tags = parent::autocomplete( $provider, $objectId, $propertyName, $termEntityName, $publishSystemId, $ignoreValues, $typedValue );
+		}
+
+		LogHandler::Log( 'Drupal8Publish', 'DEBUG', 'Retrieved tags: '.print_r( $tags, 1 ) );
+		return $tags;
+	}
+
+	/**
+	 * Extracts the (term) field identifier from the property name.
+	 *
+	 * @param $propertyName
+	 * @return string
+	 */
+	private function extractDrupalFieldIdFromPropertyName( $propertyName )
+	{
+		$fields = explode( '_', $propertyName );
+		$drupalFieldId = $fields[3];
+
+		return $drupalFieldId;
+	}
+
+	/**
+	 * Extracts the content type identifier from the document id.
+	 *
+	 * @since 10.1.2
+	 * @param string $documentId of a publish form.
+	 * @return string Drupal content Type identifier
+	 */
+	private function extractDrupalContentTypeIdFromDocumentId( $documentId )
+	{
+		$fields = explode( '_', $documentId );
+		$drupalContentTypeId = $fields[2];
+
+		return $drupalContentTypeId;
+	}
+
+	/**
+	 * Create tags based on suggestions.
+	 *
+	 * @since 10.1.2
+	 * @param array $fieldValues Suggestions retrieved from provider
+	 * @param string $typedValue Value used as search argument
+	 * @return AutoSuggestTag[]
+	 */
+	private function createTagsFromDrupalFieldValues( $fieldValues, $typedValue )
+	{
+		$tags = array();
+		if( $fieldValues ) foreach( $fieldValues as $fieldValue ) {
+			$tag = new AutoSuggestTag();
+			$tag->Value = $fieldValue;
+			$tag->Score = 1;
+			$tag->StartPos = mb_strpos( $fieldValue, $typedValue );
+			$tag->Length = mb_strlen( $typedValue );
+			$tags[] = $tag;
+		}
+
+		return $tags;
+	}
+
+	/**
+	 * Creates XmlRpcClient.
+	 *
+	 * @since 10.1.2
+	 * @param int $objectId Object Id
+	 * @param string $publishSystemId Drupal System Id
+	 * @return WW_Plugins_Drupal8_XmlRpcClient $drupalXmlRpcClient;
+	 */
+	private function createDrupalXmlRpcClient( $objectId, $publishSystemId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		$publicationId = DBObject::getObjectPublicationId( $objectId );
+		require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
+		$channelId = DBChannel::getChannelIdForPublishSystemId( $publicationId, $publishSystemId );
+		require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php';
+		$publishTarget = new PubPublishTarget();
+		$publishTarget->PubChannelID = $channelId;
+		require_once dirname( __FILE__ ).'/XmlRpcClient.class.php';
+		$drupalXmlRpcClient = new WW_Plugins_Drupal8_XmlRpcClient( $publishTarget );
+
+		return $drupalXmlRpcClient;
 	}
 }

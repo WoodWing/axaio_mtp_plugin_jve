@@ -654,4 +654,22 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 
 		return $retVal;
 	}
+
+	/**
+	 * Returns entity terms that link to a search value.
+	 *
+	 * @since 10.1.2
+	 * @param string $contentTypeId Drupal Content Type identifier
+	 * @param string $termFieldId Drupal Term field identifier
+	 * @param string $searchValue Value to look for
+	 * @return array Found values.
+	 */
+	public function getTermEntityValues( $contentTypeId, $termFieldId, $searchValue)
+	{
+		$service = 'enterprise.getTermEntityValues';
+		$result = $this->callRpcService( $service, array($contentTypeId, $termFieldId, $searchValue)  );
+
+		return $result;
+	}
+
 }

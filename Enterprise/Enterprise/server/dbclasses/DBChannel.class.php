@@ -247,4 +247,21 @@ class DBChannel extends DBBase
 		$row = self::getRow( self::TABLENAME, $where, $fieldNames, $params );
 		return $row['suggestionprovider'] ? $row['suggestionprovider'] : null;
 	}
+
+	/**
+	 * Returns the channel id of the channel of publish system.
+	 *
+	 * @since 10.1.2
+	 * @param int $publicationId Id of the publication (brand)
+	 * @param string $publishSystemId Unique identifier of the publish system
+	 * @return null|int Channel Id or null when not found.
+	 */
+	static public function getChannelIdForPublishSystemId( $publicationId, $publishSystemId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
+		$where = '`publicationid` = ? AND `publishsystemid` = ? ';
+		$params = array( $publicationId, $publishSystemId );
+		$row = DBBase::getRow( 'channels', $where, array( 'id' ), $params );
+		return isset( $row['id'] ) ? $row['id'] : null;
+	}
 }

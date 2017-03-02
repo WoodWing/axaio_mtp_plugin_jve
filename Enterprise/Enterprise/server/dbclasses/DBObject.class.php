@@ -1898,4 +1898,33 @@ class DBObject extends DBBase
 
 		return $row;
 	}
+
+	/**
+	 * Returns the documentid of a publish form template that uses a specified property.
+	 *
+	 * @since 10.1.2
+	 * @param string $propertyName
+	 * @return string
+	 */
+	static public function getDocumentIdOfPublishFormTemplateUsedByProperty( $propertyName )
+	{
+		$dbh = DBDriverFactory::gen();
+		$objects = $dbh->tablename( 'objects' );
+		$properties = $dbh->tablename( 'properties' );
+		$result = '';
+		$sql =   'SELECT o.`documentid` '.
+			'FROM '.$objects.' as o, '.$properties.' as p '.
+			'WHERE p.`name` = ? '.
+			'AND o.`id` = p.`templateid` ';
+
+		$params = array( $propertyName);
+		$sth = $dbh->query( $sql, $params );
+		if( $sth ) {
+			$row = $dbh->fetch( $sth );
+			$result = $row['documentid'];
+		}
+
+		return $result;
+	}
+
 }
