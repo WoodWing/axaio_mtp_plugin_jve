@@ -881,7 +881,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">Impossibile eliminare %1 perché è attualmente in uso da alcuni oggetti eliminati. Eliminare definitivamente tali oggetti utilizzando il cestino, quindi riprovare. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">Impossibile eliminare %1 perché è attualmente in uso da alcuni oggetti. Individuare tali oggetti, interrompere il collegamento con %1 e riprovare. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">Si è reso necessario rinominare gli elementi riportati di seguito perché i rispettivi nomi originali non erano più disponibili:</Term>
-  <Term key="ERR_LAY_NOT_SAVED">Il layout non è stato salvato.</Term>
+  <Term key="ERR_LAY_NOT_SAVED">Non è stato possibile generare l’anteprima del layout perché questo non è stato salvato oppure il file si trova nell’area di montaggio.</Term>
   <Term key="ERR_LICENSE">Si è verificato un errore di licenza.</Term>
   <Term key="ERR_LOCKED">Impossibile eseguire questa operazione. Il file è stato estratto. (S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">Impossibile eseguire questa operazione. Il file è collegato a un altro file che è estratto. (S1065)</Term>

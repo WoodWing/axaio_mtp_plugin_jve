@@ -1,8 +1,12 @@
 <?php
+use Drupal\Component\Utility\UrlHelper;
+use Drupal\Core\Entity\Element\EntityAutocomplete;
+use Drupal\Core\Entity\EntityReferenceSelection\SelectionWithAutocreateInterface;
 use Drupal\Core\Form\OptGroup;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\filter\Entity\FilterFormat;
+use Drupal\node\NodeInterface;
 use Drupal\user\UserInterface;
 
 /**
@@ -56,7 +60,7 @@ function validateRequest( \Symfony\Component\HttpFoundation\Request $request )
  * @return bool Whether or not the user is allowed to perform the action.
  * @throws Exception if the action does not match any known actions an error is thrown.
  */
-function accessCheck( \Drupal\user\Entity\User $user, $action, &$message, $nodeType=null, $nodeTypelabel=null )
+function accessCheck( \Drupal\user\Entity\User $user, $action, &$message, $nodeType=null, $nodeTypeLabel=null )
 {
 	$errorMessage = 'The post could not be published because the user does not have the following permissions set:';
 
@@ -82,19 +86,19 @@ function accessCheck( \Drupal\user\Entity\User $user, $action, &$message, $nodeT
 			if ( $action == 'saveNodeUpdate' ) {
 				// ...and the edit permission for content.
 				if ( !$user->hasPermission( 'edit any ' . $nodeType . ' content' ) ) {
-					$errorMessage .= ' \'' . $nodeTypelabel . ': Edit any content\'';
+					$errorMessage .= ' \'' . $nodeTypeLabel . ': Edit any content\'';
 					$permitted = false;
 				}
 			} elseif ( $action == 'removeNode' ) {
 				// ...and the delete permission for content.
 				if ( !$user->hasPermission( 'delete any ' . $nodeType . ' content' ) ) {
-					$errorMessage .= ' \'' . $nodeTypelabel . ': Delete any content\'';
+					$errorMessage .= ' \'' . $nodeTypeLabel . ': Delete any content\'';
 					$permitted = false;
 				}
 			} else {
 				// ...and the create permission for new content.
 				if ( !$user->hasPermission( 'create ' . $nodeType . ' content' ) ) {
-					$errorMessage .= ' \'' . $nodeTypelabel . ': Create new content\'';
+					$errorMessage .= ' \'' . $nodeTypeLabel . ': Create new content\'';
 					$permitted = false;
 				}
 			}
@@ -447,7 +451,7 @@ function getEnterpriseNodeFields( $contentType )
 		if ( $field instanceof Drupal\field\Entity\FieldConfig ) {
 			$nodeProperties = initializeDataDefinition( $contentType );
 			$nodeProperties['name'] = $field->getName();
-			$nodeProperties['type'] = $field->getType();
+			$nodeProperties['type'] = $field->getType() == 'link' ? 'string' : $field->getType();
 			$nodeProperties['widget_type'] = ( isset( $formComponents[$key]['type'] ) )
 				? $formComponents[$key]['type'] :
 				'';
@@ -469,6 +473,8 @@ function getEnterpriseNodeFields( $contentType )
 				'text_textarea_with_summary',
 				'email_default',
 				'number',
+				'entity_reference_autocomplete',
+				'dynamic_entity_reference_default'
 			);
 
 			if ( !in_array( $nodeProperties['widget_type'], $knownWidgets ) ) {
@@ -517,28 +523,28 @@ function getEnterpriseNodeFields( $contentType )
 				$nodeProperties['default_value'] = $nodeProperties['list_options'][$defaultId];
 			}
 
-			// @todo Temporary limit support for entity references to term references.
+			// Handling for taxonomy term references.
 			if ($nodeProperties['type'] == 'entity_reference' && $field->getFieldStorageDefinition()->getSetting('target_type') == 'taxonomy_term') {
-
 				$handlerSettings = $field->getSetting('handler_settings');
-
 				if (!empty($handlerSettings['target_bundles'])) {
 					$vid = reset($handlerSettings['target_bundles']);
 					$vocabulary = \Drupal\taxonomy\Entity\Vocabulary::load($vid);
-
 					// Avoid a fatal error if the vocabulary can not be loaded.
 					if ( !$vocabulary ) {
 						\Drupal::logger( 'ww_enterprise' )->error( 'Failed to load vocabulary @vid, used by field @field_name on node type @type.', ['@vid' => $vid, '@field_name' => $key, '@type' => $field->getTargetBundle()] );
 						continue;
 					}
-
 					$nodeProperties['vocabulary_name'] = $vocabulary->label();
 					$nodeProperties['type'] = 'taxonomy_term_reference';
-
 					/** @var \Drupal\taxonomy\Entity\Vocabulary $vocabulary */
 					$storedTermEntity = getWoodWingSuggestionEntity( $vocabulary->uuid() );
 					$nodeProperties['ww_term_entity'] = (!empty($storedTermEntity)) ? $storedTermEntity : null;
 				}
+			} elseif (in_array($nodeProperties['type'], ['entity_reference', 'dynamic_entity_reference', 'simplenews_issue'])) {
+				// Support all other entity reference fields in a generic way.
+				$nodeProperties['vocabulary_name'] = 'entityreference';
+				$nodeProperties['type'] = 'entity_term_reference';
+				$nodeProperties['ww_term_entity'] = NULL;
 			}
 
 			// This is only executed if we were able to detect the referenced
@@ -606,6 +612,12 @@ function getEnterpriseNodeFields( $contentType )
 				$nodeProperties['default_value'] = (isset( $nodeProperties['default_value'][0]['value'] ))
 					? $nodeProperties['default_value'][0]['value']
 					: '';
+				if ($field->getType() == 'link') {
+					$nodeProperties['max_length'] = 255;
+					$nodeProperties['default_value'] = (isset( $nodeProperties['default_value'][0]['url'] ))
+						? $nodeProperties['default_value'][0]['url']
+						: '';
+				}
 			}
 
 			if ( $nodeProperties['widget_type'] == 'file_generic' ) {
@@ -641,7 +653,7 @@ function getEnterpriseNodeFields( $contentType )
 				$nodeProperties['min_value'] = ( empty( $min_value ) ) ?  '-' . $value : $min_value;
 				$nodeProperties['max_value'] = ( empty( $max_value ) ) ? $value : $max_value;
 
-				$nodeProperties['default_value'] = ( $nodeProperties['default_value'][0]['value'] )
+				$nodeProperties['default_value'] = isset( $nodeProperties['default_value'][0]['value'] )
 					? ( $nodeProperties['default_value'][0]['value'] )
 					: null;
 			} elseif ( $nodeProperties['type'] == 'integer') {
@@ -933,6 +945,15 @@ function validateFieldDefinition( &$fieldDefinition, $type, &$warnOnly=false )
 			case 'taxonomy_term_reference' :
 				// Term references may have any cardinality.
 				break;
+			case 'entity_term_reference' :
+				// Entity references may have any cardinality.
+				break;
+			case 'dynamic_entity_reference' :
+				// Dynamic entity references references may have any cardinality.
+				break;
+			case 'simplenews_issue' :
+				// Simplenews issue may have any cardinality.
+				break;
 			default : // Invalid so do nothing.
 				$errors[] = createError( $fieldName, 'Unsupported Field and Field type combination for: Type: \''
 					. $fieldDefinition['type'] . '\', Field: \'' . $fieldDefinition['widget_type'] . '\'. '  . $requiredFieldMessage,
@@ -963,7 +984,7 @@ function getEnterprisePropertyInfoType( $widgetType, $fieldInfoType, $cardinalit
 		case 'options_buttons' :
 		case 'options_select' :
 			$propertyInfoType = 'list';
-			if ( in_array( $fieldInfoType, array( 'list_float', 'list_integer', 'list_string', 'entity_reference', 'taxonomy_term_reference' ) )
+			if ( in_array( $fieldInfoType, array( 'list_float', 'list_integer', 'list_string', 'entity_reference', 'entity_term_reference', 'taxonomy_term_reference' ) )
 				&& $cardinality != 1
 			) {
 				$propertyInfoType = 'multilist';
@@ -997,6 +1018,7 @@ function getEnterprisePropertyInfoType( $widgetType, $fieldInfoType, $cardinalit
 			break;
 		case 'entity_reference_autocomplete' :
 		case 'entity_reference_autocomplete_tags' :
+		case 'dynamic_entity_reference_default' :
 			// @todo Is this the correct behavior for non-tags autocomplete?
 			$propertyInfoType = 'multistring';
 			break;
@@ -1113,11 +1135,12 @@ function resolveInlineImages( $content, $attachments )
 /**
  * Map all fields's values from Publish Form into Drupal node's values.
  *
- * @param Object $node The node to map the values for.
+ * @param \Drupal\node\NodeInterface $node The node to map the values for.
  * @param array $formValues The form values.
  * @param bool $previewMode Whether a preview is generated or not.
+ * @throws Exception
  */
-function mapNodeValues( $node, $formValues, $previewMode )
+function mapNodeValues(NodeInterface $node, $formValues, $previewMode )
 {
 	// Get the custom fields and set them on the node.
 	$basicProperties = array(
@@ -1161,6 +1184,16 @@ function mapNodeValues( $node, $formValues, $previewMode )
 						break;
 					case 'datetime':
 						$val = $values[0];
+						$node->$field_machine_name = $val;
+						break;
+					case 'link':
+						$val = $values[0];
+						if (!empty($val) && !UrlHelper::isValid($val, TRUE)) {
+							throw new Exception(t('Field @field has an invalid url.', [
+								'@field' => $node->$field_machine_name->getFieldDefinition()
+									->label()
+							]));
+						}
 						$node->$field_machine_name = $val;
 						break;
 					case 'list_float':
@@ -1226,29 +1259,77 @@ function mapNodeValues( $node, $formValues, $previewMode )
 						$node->$field_machine_name->format = \Drupal::config('ww_enterprise.settings')->get('default_filter_format');
 						break;
 					case 'entity_reference': //
-						// @todo Expand to support all kinds of references.
-						$termIds = array();
+						$entity_ids = array();
 						foreach ( $values as $value ) {
 							if ($value != '') {
-								$taxonomyEntityTerm = \Drupal::entityManager()->getStorage( 'taxonomy_term' )->loadByProperties( array( 'name' => $value ) );
-								if ( count( $taxonomyEntityTerm ) > 0) { // Existing record, terms already exist in Drupal Database.
-									// So only retrieve them.
-									$termIds[] = key( $taxonomyEntityTerm );
-								} else { // Not yet exists, user has just entered new one.
-									// Save into Drupal database.
-									$fieldDefinition = $node->$field_machine_name->getFieldDefinition();
-									$fieldItemSettings = $fieldDefinition->getItemDefinition()->getSettings();
-									$vocabulary = array_pop( $fieldItemSettings['handler_settings']['target_bundles'] );
-									$taxonomyEntityTerm = \Drupal::entityManager()->getStorage( 'taxonomy_term' )->create(array(
-										'vid' => $vocabulary,
-										'name' => $value
-									));
-									$taxonomyEntityTerm->save();
-									$termIds[] = $taxonomyEntityTerm->id();
+								$field_definition = $node->getFieldDefinition($field_machine_name);
+								/** @var /Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface $handler */
+								$handler = \Drupal::service('plugin.manager.dynamic_entity_reference_selection')->getSelectionHandler($field_definition);
+								$autocreate = FALSE;
+								$autocreate_bundle = NULL;
+								if (!empty($field_definition->getSetting('handler_settings')['auto_create']) && $handler instanceof SelectionWithAutocreateInterface) {
+									$autocreate = TRUE;
+									if ($target_bundles = $field_definition->getSetting('handler_settings')['target_bundles']) {
+										// If there's only one target bundle, use it.
+										if (count($target_bundles) == 1) {
+											$autocreate_bundle = reset($target_bundles);
+										}
+										// Otherwise use the target bundle stored in selection handler settings.
+										elseif (!$autocreate_bundle = $field_definition->getSetting('handler_settings')['auto_create_bundle']) {
+											// If no bundle has been set as auto create target means that there is
+											// an inconsistency in entity reference field settings.
+											trigger_error(
+												sprintf(
+													"The 'Create referenced entities if they don't already exist' option is enabled but a specific destination bundle is not set. You should re-visit and fix the settings of the '%s' (%s) field.",
+													$this->fieldDefinition->getLabel(),
+													$this->fieldDefinition->getName()
+												), E_USER_WARNING
+											);
+										}
+									}
+								}
+								$match = EntityAutocomplete::extractEntityIdFromAutocompleteInput($value);
+								if ($match === NULL) {
+									$entities_by_bundle = $handler->getReferenceableEntities($value, '=', 6);
+									$entities = array_reduce($entities_by_bundle, function ($flattened, $bundle_entities) {
+										return $flattened + $bundle_entities;
+									}, []);
+									if (count($entities) == 1) {
+										$entity_ids[] = key($entities);
+									}
+									elseif ($autocreate) {
+										// Auto-create item. See an example of how this is handled in
+										// \Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem::presave().
+										$new_entity = $handler->createNewEntity($field_definition->getSetting('target_type'), $autocreate_bundle, $value, \Drupal::currentUser()->id());
+										$new_entity->save();
+										$entity_ids[] = $new_entity->id();
+									}
+									else {
+										\Drupal::logger( 'ww_enterprise' )->warning('Unknown value @value for field @field_name', ['@value' => $value, '@field_name' => $field_machine_name]);
+									}
+								}
+								else {
+									$entity_ids[] = $match;
 								}
 							}
 						}
-						$node->$field_machine_name = $termIds;
+						$node->$field_machine_name = $entity_ids;
+						break;
+					case 'dynamic_entity_reference':
+						$entities = array();
+						foreach ( $values as $value ) {
+							if ($value != '') {
+								// Only existing references are supported, match for
+								// (entity_type:id) in the value.
+								if (preg_match("/.+\s\(([\w.]+):(\d+)\)/", $value, $matches)) {
+									$entities[] = [
+										'target_type' => $matches[1],
+										'target_id' => $matches[2],
+									];
+								}
+							}
+						}
+						$node->$field_machine_name = $entities;
 						break;
 					case 'image':
 						$val = null;
@@ -1357,4 +1438,3 @@ function getNodeUrl( $nid, $preview, $hash = '' )
 	}
 	return $url;
 }
-?>
