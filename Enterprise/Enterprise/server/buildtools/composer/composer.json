@@ -1,7 +1,7 @@
 {
 	"require": {
-    	"zendframework/zendframework": "2.4.9",
-    	"solarium/solarium": "3.2.0",
+    	"zendframework/zendframework": "2.5.3",
+    	"solarium/solarium": "3.7.0",
 		"graze/guzzle-jsonrpc": "0.2.3",
 		"php-amqplib/php-amqplib": "2.6.2"
 	}
