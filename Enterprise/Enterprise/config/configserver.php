@@ -1522,8 +1522,6 @@ define( 'DEFAULT_USER_COLOR', '#FF9900' ); // The default user color that is ass
 ini_set('include_path', BASEDIR.'/server/ZendFramework/library'.PATH_SEPARATOR.ini_get('include_path'));
 
 // Init autoloader for Zend Framework 2:
-define('ZF2_PATH', BASEDIR.'/server/vendor/zendframework/zendframework/library');
-require_once ZF2_PATH . '/Zend/Loader/StandardAutoloader.php';
 $loader = new Zend\Loader\StandardAutoloader(array(
     'autoregister_zf' => true,
 ));
