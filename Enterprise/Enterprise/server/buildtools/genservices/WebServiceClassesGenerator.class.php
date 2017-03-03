@@ -425,7 +425,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		$intfShortLow = strtolower( $this->intfDescriptor->getServiceNameShort() );
 
 		// Delete output folder recursively (if exists).
-		$outputFolder = $this->composeSdkDirForLanguage( 'java' )."/${$intfShortLow}";
+		$outputFolder = $this->composeSdkDirForLanguage( 'java' )."/{$intfShortLow}";
 		if( file_exists( $outputFolder ) ) {
 			require_once BASEDIR.'/server/utils/FolderUtils.class.php';
 			FolderUtils::cleanDirRecursive( $outputFolder, false );
@@ -458,7 +458,13 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		$defaultEntryPoint = str_replace( LOCALURL_ROOT.INETROOT.'/', 'http://127.0.0.1/Enterprise/', $entryPoint );
 		list( $prefix, $nameSpace ) = explode( ':', $this->intfDescriptor->getNameSpace(), 2 ); // namespace has 'urn:' prefix
 		$javaFile = $outputFolder.'/'.$nameSpace.'ServiceLocator.java';
-		file_put_contents( $javaFile, str_replace( $entryPoint, $defaultEntryPoint, file_get_contents( $javaFile ) ) );
+		if( !file_exists( $javaFile ) ) {
+			$this->FatalErrors[] = 'Could not generate Java classes. The service locator file is missing in the output: '.
+				$javaFile.PHP_EOL.
+				'Please fix it and try again. You could manually retry as follows: '.$command.PHP_EOL;
+		} else {
+			file_put_contents( $javaFile, str_replace( $entryPoint, $defaultEntryPoint, file_get_contents( $javaFile ) ) );
+		}
 	}
 
 	/**

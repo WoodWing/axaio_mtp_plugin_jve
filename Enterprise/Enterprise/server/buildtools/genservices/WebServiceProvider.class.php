@@ -16,7 +16,7 @@ class WW_BuildTools_GenServices_WebServiceProvider implements WW_BuildTools_GenS
 	 */
 	public function getInterfaces()
 	{
-		return array( 'adm', 'ads', 'dat', 'pln', 'pub', 'wfl' );
+		return array( 'adm', 'ads', 'dat', 'pln', 'pub', 'wfl', 'sys' );
 	}
 
 	/**
