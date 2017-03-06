@@ -881,7 +881,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">%1 不能刪除皆因正在被物件已刪除物件使用. 使用垃圾桶永久地刪除該物件及再嘗試. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">%1 不能刪除皆因正在被物件使用. 請找出該些物件, 切斷與 %1 的連結及再嘗試. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">由於原本名字已存在，以下已回復的項目需重新命名：</Term>
-  <Term key="ERR_LAY_NOT_SAVED">設計版面未保存</Term>
+  <Term key="ERR_LAY_NOT_SAVED">設計版面無法預覽因為設計版面尚未儲存或因為文章仍在黏貼板上</Term>
   <Term key="ERR_LICENSE">許可錯誤</Term>
   <Term key="ERR_LOCKED">錯誤: 正在把已上鎖的物件重複上鎖 (S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">父級已上鎖 (S1065)</Term>
