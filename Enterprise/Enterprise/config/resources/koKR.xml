@@ -881,7 +881,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">%1 can not be deleted since it is currently in use by deleted objects. Use Trash Can to delete those objects permanently and try again. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">객체에 의해 사용되는 %1 은 삭제할 수 없니다. 이 객체의 위치를 %1 과 함께 있는 연결을 끊고 다시 실행하시기 바랍니다. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">기존의 아이템과 이름이 중복 하기 위한(해), 복구한 아이템을 rename 했습니다.</Term>
-  <Term key="ERR_LAY_NOT_SAVED">레이아웃이 저장되지 않았습니다.</Term>
+  <Term key="ERR_LAY_NOT_SAVED">레이아웃을 저장하지 않았거나 아티클을 붙여 넣기 보드에  불러왔기 때문에 레이아웃 미리보기를 생성 할 수 없었습니다.</Term>
   <Term key="ERR_LICENSE">라이센서 에러.</Term>
   <Term key="ERR_LOCKED">에러: 오브젝트가 락 되어 있습니다(S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">parent 락 (S1065)</Term>
