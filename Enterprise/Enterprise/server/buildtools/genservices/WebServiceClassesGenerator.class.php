@@ -1970,8 +1970,6 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			$outTxt .= "\t{\n";
 			if( $dataStruct ) foreach( $dataStruct as $propName => $propStruct ) {
 				$outTxt .= $this->buildValidateFuncBody( $propName, $propStruct['rawtype'], $propStruct['null'], $dataClasses, $simpleTypeEnums );
-			} else {
-				$outTxt .= "\t\t\$validator = \$validator; \$datObj = \$datObj; // keep validator happy\n";
 			}
 			$outTxt .= "\t}\n}\n\n"; // end validate()
 		}
