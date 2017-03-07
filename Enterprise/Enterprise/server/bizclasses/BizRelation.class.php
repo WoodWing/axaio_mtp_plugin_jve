@@ -956,8 +956,8 @@ class BizRelation
 		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
 		require_once BASEDIR.'/server/smartevent.php';
 		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
 
-		$dbDriver = DBDriverFactory::gen();
 		// $updateParentJob = new WW_BizClasses_ObjectJob();  // v8.0: Uncomment when serverJob 'UpdateParentModifierAndModified' is supported again.
 		$relationsUpdated = array();
 		$involvedObjectsIds = array();
@@ -979,14 +979,12 @@ class BizRelation
 			foreach ($relations as $relation) {
 				if (!$relation->Child || !isset( $objectsDBRows[ $relation->Child ] ) ) {
 					throw new BizException( 'ERR_NOTFOUND', 'Client', $relation->Child );
-				} else {
-					$childRow = $objectsDBRows[ $relation->Child ];
 				}
+				$childRow = $objectsDBRows[ $relation->Child ];
 				if ( !$relation->Parent || !isset( $objectsDBRows[ $relation->Parent ] ) ) {
 					throw new BizException( 'ERR_NOTFOUND', 'Client', $relation->Parent );
-				} else {
-					$parentRow = $objectsDBRows[ $relation->Parent ];
 				}
+				$parentRow = $objectsDBRows[ $relation->Parent ];
 				// Now handle alien childs (which is more likely than alien parent):
 				require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
 				if( BizContentSource::isAlienObject( $relation->Child ) ) {
@@ -1010,7 +1008,7 @@ class BizRelation
 				if ( isset( $objectRelationInfoByParentIdChildId[ $relation->Parent ][ $relation->Child]) ) {
 					$relationInfo = $objectRelationInfoByParentIdChildId[ $relation->Parent ][ $relation->Child];
 				} else {
-					throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Server', $relation->Type);
+					throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Server', $relation->Type, null, array( '{OBJ_RELATIONS}' ) );
 				}
 				if ( $checkAccess ) {// Check user authorization. See Note#001!
 					if( $previousParent <> $relation->Parent ) {
@@ -1046,8 +1044,7 @@ class BizRelation
 					$relationInfo,
 					$parentRow['type'],
 					$relation->Parent,
-					$relation->Child,
-					$dbDriver );
+					$relation->Child );
 
 				if( self::canRelationHaveTargets( $parentRow['type'], $relation->Type )) {
 					require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
@@ -1195,7 +1192,6 @@ class BizRelation
 	 * @param string $parentType
 	 * @param int $parentId
 	 * @param int $childId
-	 * @param WW_DbDrivers_DriverBase Database $dbDriver
 	 * @throws BizException
 	 */
 	static private function updatePageRangeIfNeeded(
@@ -1203,8 +1199,7 @@ class BizRelation
 										$relationInfo,
 										$parentType,
 										$parentId,
-										$childId,
-										$dbDriver )
+										$childId )
 	{
 		$storedPageRange = isset( $relationInfo->PageRange ) ? $relationInfo->PageRange : 'notAValidRange';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
@@ -1214,7 +1209,7 @@ class BizRelation
 			if( $storedPageRange != $pagerange ) {
 				require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
 				if( DBObjectRelation::updateObjectRelationPageRange( $parentId, $childId, $pagerange ) ) {
-					throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
+					throw new BizException( 'ERR_DATABASE', 'Server', DBObjectRelation::getError() );
 				}
 			}
 		}

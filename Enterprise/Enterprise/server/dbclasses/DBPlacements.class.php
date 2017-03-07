@@ -101,49 +101,38 @@ class DBPlacements extends DBBase
 	 * Since 9.7: When a placement has InDesignArticleIds defined, another placement is
 	 * created in DB, this time with child = 0. For those records a reference is created
 	 * in the smart_indesignarticlesplacements table.
-	 * The records are inserted by one statement. In that case it is important that for each record all columns are set.
-	 * To ensure this a row template is used in which all values are merged.
 	 * After the placements are added, the InDesignArticle placements are added. These are also added by one statement.
-	 * In this case no template is used (all columns are hard coded). Reason is that DBInDesignArticlePlacement.class.php
-	 * has no rowToObj/objToRow methods.
 	 *
 	 * @since 10.1.2
 	 * @param string $parent Object ID of object on which is placed.
 	 * @param Placement[] $IDAPlacements The placement details
 	 * @throws BizException
 	 */
-	static public function insertIDAPlacementsFromScratch( $parent, $IDAPlacements )
+	static public function insertInDesignArticlePlacementsFromScratch( $parent, $IDAPlacements )
 	{
 		// Whether or not a child was given, first create a placement with child=0
 		// and reference it from smart_indesignarticlesplacements table.
 		$values = array();
-		require_once BASEDIR.'/server/dbclasses/DBCustomField.class.php';
-		$rowTemplate = DBCustomField::getFieldsAtModel( self::TABLENAME );
-		$rowTemplate = array_fill_keys( array_keys( $rowTemplate ), '');
-		unset( $rowTemplate['id'] ); // Is handled by the auto-increment.
 		if( $IDAPlacements ) foreach( $IDAPlacements as $plc ) {
 			if( $plc->InDesignArticleIds ) {
-					$row = self::objToRow( $plc );
+					$row = self::objToRow( $plc, true );
 					$row['parent'] = $parent;
 					$row['type'] = 'Placed';
 					$row['child'] = 0;
 					$row['elementid'] = '';
-					$rowValues = array_merge( $rowTemplate, $row );
-					$values[] = array_values( $rowValues );
+					$values[] = array_values( $row );
 			}
 		}
 
 		if( $values ) {
-			$result = self::insertRows( self::TABLENAME, array_keys( $rowTemplate ), $values );
+			$result = self::insertRows( self::TABLENAME, array_keys( $row ), $values );
 			if( !$result ) {
 				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 			}
 		}
 
-		$iDAPlacementRows = self::getIDAPlacementRows( $parent );
+		$iDAPlacementRows = self::getInDesignArticlePlacementRows( $parent, array( 'id', 'splineid') );
 		$values = array();
-		$rowTemplate =  DBCustomField::getFieldsAtModel( 'idarticlesplacements' );
-		$rowTemplate = array_fill_keys( array_keys( $rowTemplate ), '');
 		// Create relations between the InDesign Articles and their placements.
 		if( $IDAPlacements ) foreach( $IDAPlacements as $plc ) {
 			$newPlacementId = 0;
@@ -153,7 +142,7 @@ class DBPlacements extends DBBase
 				}
 			}
 			foreach( $plc->InDesignArticleIds as $idArticleId ) {
-				$row = $rowTemplate;
+				$row = array();
 				$row['objid'] = $parent;
 				$row['artuid'] = $idArticleId;
 				$row['plcid'] = $newPlacementId;
@@ -161,7 +150,7 @@ class DBPlacements extends DBBase
 			}
 		}
 		if( $values ) {
-			$result = self::insertRows( 'idarticlesplacements', array_keys( $rowTemplate ), $values );
+			$result = self::insertRows( 'idarticlesplacements', array_keys( $row ), $values );
 			if( !$result ) {
 				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 			}
@@ -176,22 +165,20 @@ class DBPlacements extends DBBase
 	 */
 	static public function updatePlacement( $identifier, $placement )
 	{
-		$where = '';
-		$and = '`';
 		$whereFields = array(
-								'parent' => $identifier->Parent,
-								'child' => $identifier->Child,
-								'type' => $identifier->Type,
-								'edition' => $identifier->EditionId,
-								'frameid' => $identifier->FrameId
-							);
-		$params = array();
-		if( $whereFields ) foreach( $whereFields as $field => $value ) {
-			$where .= $and.$field.'` =  ? ';
-			$and = ' AND `';
-			$params[] = $value;
-		}
-
+			'parent' => intval( $identifier->Parent ),
+			'child' => intval( $identifier->Child ),
+			'type' => strval( $identifier->Type ),
+			'edition' => intval( $identifier->EditionId ),
+			'frameid' => strval( $identifier->FrameId )
+		);
+		$where = implode( ' AND ',
+								array_map(
+									function( $column ) { return "`{$column}` = ? "; },
+									array_keys( $whereFields )
+								)
+							 );
+		$params = array_values( $whereFields );
 		$values = self::objToRow( $placement );
 		DBBase::updateRow( self::TABLENAME, $values, $where, $params );
 	}
@@ -208,8 +195,6 @@ class DBPlacements extends DBBase
 	 */
 	static public function copyPlacements( $fromparent, $child, $toparent, $pageOffset = 0, $type = 'Placed' )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$pageOffset = $pageOffset; // To make analyzer happy.
 		$placements = self::getPlacements( $fromparent, $child, $type );
 		if( is_null($placements) ) {
 			return false; // DB error
@@ -540,23 +525,18 @@ class DBPlacements extends DBBase
 	 * In case of InDesign Article placements the child is set to 0 and the type is 'Placed'.
 	 *
 	 * @param string $parent Object ID of object on which is placed.
+	 * @param mixed fields Array with names of the fields to query or '*' to retrieve all.
 	 * @return Placement[]|null The placements, or NULL in case of DB error
 	 */
-	static private function getIDAPlacementRows( $parent )
+	static private function getInDesignArticlePlacementRows( $parent, $fields = array() )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$db = $dbDriver->tablename(self::TABLENAME);
-
-		$sql =  'SELECT * FROM '.$db.' '.
-				  'WHERE `child`= ? AND `parent`= ? AND `type` = ? ';
+		if( !$fields ) {
+			$fields = '*';
+		}
+		$where = ' `child`= ? AND `parent`= ? AND `type` = ? ';
 		$params = array( 0, $parent, 'Placed' );
 
-		$sth = $dbDriver->query($sql, $params );
-		if( !$sth ) {
-			return null; // DB error
-		}
-
-		return DBBase::fetchResults( $sth, 'id' );
+		return self::listRows( self::TABLENAME, '', '', $where, $fields, $params );
 	}
 
 	/**
@@ -818,11 +798,16 @@ class DBPlacements extends DBBase
 	 * Converts a Placement workflow data object into a placement record (array of DB fields).
 	 *
 	 * @param Placement $obj Workflow placement data object
+	 * @param bool $default In case the object property is null set the default (as defined in dbmodel)
 	 * @return array DB placement record (array of DB fields)
 	 */
-	static private function objToRow( $obj )
+	static private function objToRow( $obj, $default = false )
 	{
-		$row = array();
+		if( $default ) {
+			$row = self::setDefaultsForRow();
+		} else {
+			$row = array();
+		}
 		if( !is_null( $obj->Page ) ) $row['page'] = is_numeric( $obj->Page ) ? $obj->Page : 0;
 		if( !is_null( $obj->Element ) ) $row['element'] = $obj->Element;
 		if( !is_null( $obj->ElementID ) ) $row['elementid'] = $obj->ElementID;
@@ -847,6 +832,43 @@ class DBPlacements extends DBBase
 		if( !is_null( $obj->FormWidgetId ) ) $row['formwidgetid'] = $obj->FormWidgetId;
 		if( !is_null( $obj->FrameType ) ) $row['frametype'] = $obj->FrameType;
 		if( !is_null( $obj->SplineID ) ) $row['splineid'] = $obj->SplineID;
+
+		return $row;
+	}
+
+	/**
+	 * Returns columns with their default value.
+	 *
+	 * @return array with column/default as key/value.
+	 */
+	static private function setDefaultsForRow()
+	{
+		$row = array(
+		  'page' => 0,
+		  'element' => '',
+		  'elementid' => '',
+		  'frameorder' => 0,
+		  'frameid' => '',
+		  '_left' => 0,
+		  'top' => 0,
+		  'width' => 0,
+		  'height' => 0,
+		  'overset' => 0,
+		  'oversetchars' => 0,
+		  'oversetlines' => 0,
+		  'layer' => '',
+		  'content' => '',
+		  'edition' => 0,
+		  'contentdx' => 0,
+		  'contentdy' => 0,
+		  'scalex' => 0,
+		  'scaley' => 0,
+		  'pagesequence' => 0,
+		  'pagenumber' => '',
+		  'formwidgetid' => '',
+		  'frametype' => '',
+		  'splineid' => '',
+		);
 
 		return $row;
 	}
