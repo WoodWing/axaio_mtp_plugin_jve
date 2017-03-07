@@ -31,7 +31,8 @@ class ElvisRESTClient
 			static $recursion = 0; // paranoid checksum for endless recursion
 			if( $response->errorcode == 401 && $recursion < 3 ) {
 				$recursion += 1;
-				self::login();
+				require_once __DIR__.'/ElvisAMFClient.php';
+				ElvisAMFClient::login();
 				self::send( $service, $url, $post );
 				$recursion -= 1;
 			} else {

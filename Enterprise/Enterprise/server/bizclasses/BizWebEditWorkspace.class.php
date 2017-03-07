@@ -1034,7 +1034,7 @@ class BizWebEditWorkspace
 				// can draw boxes for the sibling frames on the page and allow image/text (re)placements.
 				if( in_array( 'Relations', $requestInfo ) ) {
 					$ret['Relations'] = $this->composeObjectRelations( $xpathObjectDom );
-					$rebuildNeeded = $this->rebuildStoredRelationsPlacements( $layoutId, $ret['Relations'] );
+					$rebuildNeeded = $this->isRebuildStoredRelationsPlacementsNeeded( $layoutId, $ret['Relations'] );
 					if( $rebuildNeeded ) {
 						// Although the layout resides in workspace, we want to save the placed
 						// relations into the DB. This is done since SC suppresses the CreateObjectRelations
@@ -1075,7 +1075,7 @@ class BizWebEditWorkspace
 
 						// Save the InDesign Article Placements for the layout object (v9.7).
 						if( !is_null( $iaPlacements ) ) {
-							DBPlacements::insertIDAPlacementsFromScratch( $layoutId, $iaPlacements );
+							DBPlacements::insertInDesignArticlePlacementsFromScratch( $layoutId, $iaPlacements );
 						}
 					}
 					
@@ -2337,7 +2337,7 @@ class BizWebEditWorkspace
 	 * @param Relation[]|null $composedRelations The relations as retrieved from the composed data.
 	 * @return bool $rebuildNeeded
 	 */
-	private function rebuildStoredRelationsPlacements( $layoutId, $composedRelations )
+	private function isRebuildStoredRelationsPlacementsNeeded( $layoutId, $composedRelations )
 	{
 		PerformanceProfiler::startProfile( 'Preview_Check_On_Placements', 5 );
 		$rebuildNeeded = false;
@@ -2348,7 +2348,9 @@ class BizWebEditWorkspace
 		$storedRelationsWithIDSArticles = $this->addInDesignArticleToRelations( $storedRelations, $storedInDesignArticlePlacements );
 		$storedPlacementsByKey = $this->extractPlacementsByKeyFromRelations( $storedRelationsWithIDSArticles );
 		$composedPlacementsByKey = $this->extractPlacementsByKeyFromRelations( $composedRelations );
-		if( !$this->reparablePlacementProperties( $storedPlacementsByKey, $composedPlacementsByKey ) ) {
+		if( $this->numberOfPlacementsDiffer( $storedPlacementsByKey, $composedPlacementsByKey )) {
+			$rebuildNeeded = true;
+		} elseif( !$this->compareAndRepairPlacementProperties( $storedPlacementsByKey, $composedPlacementsByKey ) ) {
 			$rebuildNeeded = true;
 		}
 		PerformanceProfiler::stopProfile( 'Preview_Check_On_Placements', 5 );
@@ -2419,6 +2421,30 @@ class BizWebEditWorkspace
 	}
 
 	/**
+	 * Checks if two arrays with placements contain the same number of placements.
+	 *
+	 * Not only the number of placements must be equal but also the identifiers fo the placements (keys of the arrays).
+	 *
+	 * @param Placement[] $lhsPlacementsByKey
+	 * @param Placement[] $rhsPlacementsByKey
+	 * @return bool
+	 */
+	private function numberOfPlacementsDiffer( $lhsPlacementsByKey, $rhsPlacementsByKey )
+	{
+		$numberDiffers = false;
+		if( !$this->sameEmptiness( $lhsPlacementsByKey, $rhsPlacementsByKey ) ) {
+			$numberDiffers = true;
+		} elseif( is_array( $lhsPlacementsByKey ) && is_array( $rhsPlacementsByKey ) ) {
+			if( !empty( array_diff_key( $lhsPlacementsByKey, $rhsPlacementsByKey ) ) ||
+				!empty( array_diff_key( $rhsPlacementsByKey, $lhsPlacementsByKey ) ) ) {
+				$numberDiffers = true;
+			}
+		}	
+		
+		return $numberDiffers;
+	}	
+
+	/**
 	 * Checks for two arrays with unique placements and repairs small differences.
 	 *
 	 * If two unique placements differ (stored and composed) it is sometimes possible to just update the stored one with
@@ -2429,51 +2455,40 @@ class BizWebEditWorkspace
 	 * @since 10.1.2
 	 * @param Placement[] $storedPlacementsByKey
 	 * @param Placement[] $composedPlacementsByKey
-	 * @return bool true if differences could not be repaired.
+	 * @return bool true if no differences found or differences could be repaired, else false
 	 */
-	private function reparablePlacementProperties( $storedPlacementsByKey, $composedPlacementsByKey )
+	private function compareAndRepairPlacementProperties( $storedPlacementsByKey, $composedPlacementsByKey )
 	{
-		$reparable = true;
-		if( !$this->sameEmptiness( $storedPlacementsByKey, $composedPlacementsByKey ) ) {
-			$reparable = false;
-		} elseif( is_array( $storedPlacementsByKey ) && is_array( $composedPlacementsByKey ) ) {
-			if( !empty( array_diff_key( $storedPlacementsByKey, $composedPlacementsByKey ) ) ||
-				 !empty( array_diff_key( $composedPlacementsByKey, $storedPlacementsByKey ) ) ) {
-				$reparable = false;
-			}
-		}
-
+		$isReparable = true;
 		$changedPlacements = array();
-		if( $reparable ) {
-			require_once BASEDIR.'/server/bizclasses/BizWebEditWorkspace/ComparePlacements.class.php';
-			if( $storedPlacementsByKey ) foreach( $storedPlacementsByKey as $key => $storedPlacementByKey ) {
-				$composedPlacementByKey = $composedPlacementsByKey[ $key ];
-				$comparePlacements = new BizWebEditWorkspace_ComparePlacements();
-				$comparePlacements->comparePlacements( $storedPlacementByKey, $composedPlacementByKey );
-				if( $comparePlacements->getElementalDiff() ) {
-					$reparable = false;
-					break;
-				} elseif( $comparePlacements->getNonElementalDiff() ) {
-					$changedPlacements[ $key ] = $composedPlacementByKey;
-				}
+		require_once BASEDIR.'/server/bizclasses/BizWebEditWorkspace/ComparePlacements.class.php';
+		if( $storedPlacementsByKey ) foreach( $storedPlacementsByKey as $key => $storedPlacementByKey ) {
+			$composedPlacementByKey = $composedPlacementsByKey[ $key ];
+			$comparePlacements = new BizWebEditWorkspace_ComparePlacements();
+			$comparePlacements->comparePlacements( $storedPlacementByKey, $composedPlacementByKey );
+			if( $comparePlacements->getElementalDiff() ) {
+				$isReparable = false;
+				break;
+			} elseif( $comparePlacements->getNonElementalDiff() ) {
+				$changedPlacements[ $key ] = $composedPlacementByKey;
 			}
 		}
 
-		if( $reparable && $changedPlacements ) {
+		if( $isReparable && $changedPlacements ) {
 			require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 			foreach( $changedPlacements as $keyString => $placement ) {
-				$keyValues = explode( self::SEPARATOR, $keyString);
+				$keyValues = explode( self::SEPARATOR, $keyString );
 				$identifier = new stdClass();
-				$identifier->Parent = intval( $keyValues[0] );
-				$identifier->Child = intval( $keyValues[1] );
-				$identifier->Type = ( $keyValues[2] );
+				$identifier->Parent = $keyValues[0];
+				$identifier->Child = $keyValues[1];
+				$identifier->Type = $keyValues[2];
 				$identifier->FrameId = ( $keyValues[3] ) ? $keyValues[3] : '';
-				$identifier->EditionId = intval( $keyValues[4] );
-				DBPlacements::updatePlacement( $identifier, $placement) ;
+				$identifier->EditionId = $keyValues[4];
+				DBPlacements::updatePlacement( $identifier, $placement );
 			}
 		}
 
-		return $reparable;
+		return $isReparable;
 	}
 
 	/**

@@ -22,11 +22,15 @@ How to add more packages using Composer?
 2. Text editor: Add required packages to the composer.json file.
 	Path: Enterprise/server/buildtools/composer/composer.json
 3. Terminal:
-	cd Enterprise/server/buildtools/composer
-	sh composer.sh
-	L> Note that this regenerates composer files and downloads required packages.
+	$ cd Enterprise/server/buildtools/composer
+	$ php composer.phar self-update
+		L> Note that this installs the latest version of composer.
+	$ sh composer.sh
+		L> Note that this regenerates composer files and downloads required packages.
 4. Git: Add all modified and new files to the next commit.
-	cmd> git add -all
+	Terminal:
+		$ git add -all
 5. Git:
 	Commit the composer.json and the files under the vendor folder.
-	cmd> git commit -m "Your Commit Message".
+	Terminal:
+		$ git commit -m "Your Commit Message".

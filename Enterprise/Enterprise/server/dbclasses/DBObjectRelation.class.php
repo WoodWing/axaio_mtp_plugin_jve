@@ -26,7 +26,7 @@ class DBObjectRelation extends DBBase
 	 * @static
 	 * @param array $newValues Column/value pairs of the columns to be inserted.
 	 * @param bool $autoIncrement Apply auto increment for primary key (true/false).
-	 * @return integer|bool ID of the inserted record or false on failure.
+	 * @return bool|int
 	 */
 	public static function insert( array $newValues, $autoIncrement )
 	{
@@ -447,19 +447,16 @@ class DBObjectRelation extends DBBase
 	 */
 	static public function getObjectRelationInfoOfRelations( $relations )
 	{
-		$or = '';
-		$where = ' (';
 		$params = array();
+		$wheres = array();
 		foreach( $relations as $relation ) {
-			$where .= $or;
-			$where .= '( `parent`= ? AND `child`= ? AND `type` = ? ) ';
+			$wheres[] = '( `parent`= ? AND `child`= ? AND `type` = ? ) ';
 			$params[] = $relation->Parent;
 			$params[] = $relation->Child;
 			$params[] = $relation->Type;
-			$or = 'OR ';
 		}
-		$where .= ') ';
-		$rows = self::listRows( self::TABLENAME, 'id', '', $where, '*', $params );
+		$where = '('.implode( ' OR ', $wheres ).') ';
+		$rows = self::listRows( self::TABLENAME, 'id', '', $where, array( 'id', 'parent', 'child', 'pagerange' ), $params );
 		$result = array();
 		if( $rows ) foreach( $rows as $row ) {
 			$infoObj = new stdClass();
@@ -478,7 +475,7 @@ class DBObjectRelation extends DBBase
 	 * @param integer $lay_id
 	 * @param integer $publication id
 	 * @param integer $issue id
-	 * @param $section section id
+	 * @param integer $section section id
 	 * @return array|boolean Array with ids of unplaced adverts, false in case of an error.
 	 */
 	static public function unplacedAdverts( $lay_id, $publication, $issue, $section )
@@ -655,14 +652,26 @@ class DBObjectRelation extends DBBase
 	 * @param int $manifold Threshold value for manifold placed objects.
 	 * @return array with the ids of manifold used child objects.
 	 */
-	public static function childrenPlacedManifold( array $childIds, $manifold)
+	public static function childrenPlacedManifold( array $childIds, $manifold )
 	{
-		$where = self::addIntArrayToWhereClause( 'child', $childIds, false );
-		$where .= "AND `type` <> ? ";
-		$params = array( 'Related' );
-
-		$rows = self::listRows( self::TABLENAME, '', '', $where, array( 'child' ), $params, null, null, array( 'child' ), "COUNT(1) > $manifold"  );
-		$manifoldUsed = array_map( function( $row) { return $row[ 'child']; }, $rows );
+		$manifoldUsed = array();
+		if ( $childIds ) {
+			$where = self::addIntArrayToWhereClause( 'child', $childIds, false );
+			$where .= "AND `type` <> ? ";
+			$params = array( 'Related' );
+			$rows = self::listRows(
+						self::TABLENAME,
+						'child',
+						'',
+						$where,
+						array( 'child' ),
+						$params,
+						null,
+						null,
+						array( 'child' ),
+						"COUNT(1) > $manifold" );
+			$manifoldUsed = array_keys( $rows );
+		}
 
 		return $manifoldUsed;
 	}

@@ -22,6 +22,9 @@ class BizWebEditWorkspace_ComparePlacements
 	 * the same.
 	 * In case two properties differ fundamentally like FrameID = 123 and FrameID = 456 this difference is marked as
 	 * as not the same.
+	 * When properties are not the same, it depends on the property itself whether or not this difference are elemental.
+	 * Basically when the property has a relation with something else outside the placement (such as database ids
+	 * referring to other records) it will be marked as elemental, else it will be marked as non-elemental.
 	 *
 	 * @param Placement $lhsPlacement
 	 * @param Placement $rhsPlacement
@@ -32,21 +35,23 @@ class BizWebEditWorkspace_ComparePlacements
 		$objPropertiesRhs = get_object_vars( $rhsPlacement );
 
 		$elementalProperties = $this->elementalProperties();
-		$reparableProperties = $this->nonElementalProperties();
-		$allProperties = array_merge( $elementalProperties, $reparableProperties );
+		$nonElementalProperties = $this->nonElementalProperties();
+		$allProperties = array_merge( $elementalProperties, $nonElementalProperties );
 
 		if ( array_diff_key( $objPropertiesLhs, $allProperties ) || array_diff_key( $objPropertiesRhs, $allProperties )) {
 			$this->elementalDiff = true;
-			LogHandler::Log( __METHOD__, 'DEBUG', 'Placement properties can not be compared as definition is changed' );
+			if ( LogHandler::debugMode() ) {
+				LogHandler::Log( __METHOD__, 'ERROR', 'Placement properties can not be compared as definition is changed' );
+			}
 		} else {
-			if( $elementalProperties ) foreach( $elementalProperties as $nonReparableProperty => $method ) {
-				if( !$this->$method( $objPropertiesLhs[ $nonReparableProperty], $objPropertiesRhs[ $nonReparableProperty]) ) {
+			if( $elementalProperties ) foreach( $elementalProperties as $elementalProperty => $method ) {
+				if( !$this->$method( $objPropertiesLhs[ $elementalProperty], $objPropertiesRhs[ $elementalProperty]) ) {
 					$this->elementalDiff = true;
 					break;
 				}
 			}
-			if( !$this->elementalDiff && $reparableProperties ) foreach( $reparableProperties as $reparableProperty => $method ) {
-				if( !$this->$method( $objPropertiesLhs[ $reparableProperty], $objPropertiesRhs[ $reparableProperty]) ) {
+			if( !$this->elementalDiff && $nonElementalProperties ) foreach( $nonElementalProperties as $nonElementalProperty => $method ) {
+				if( !$this->$method( $objPropertiesLhs[ $nonElementalProperty], $objPropertiesRhs[ $nonElementalProperty]) ) {
 					$this->nonElementalDiff = true;
 					break;
 				}

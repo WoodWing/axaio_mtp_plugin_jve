@@ -372,10 +372,9 @@ class DBTarget extends DBBase
 		$targetIds = self::getTargetIdsByObjectRelationIds( array( $objectRelationId ), $channelId, $issueId );
 		if( $targetIds ) { // $targetIds[843] = array( 'id' => 843 ); $targetIds[574] = array( 'id' => 574 );
 			$targetIds = array_keys( $targetIds ); // Change into $targetIds = array( 843, 574 );
+			$where = self::addIntArrayToWhereClause( 'targetid', $targetIds, false );
+			self::deleteRows( 'targeteditions', $where );
 		}
-
-		$where = self::addIntArrayToWhereClause( 'targetid', $targetIds, false );
-		self::deleteRows( 'targeteditions', $where );
 
 		// Now delete the object relation targets
 		$where = "channelid = ? AND issueid = ? AND objectrelationid = ?";
@@ -775,41 +774,19 @@ class DBTarget extends DBBase
     	
     	return $result;
    }
-    
-	/**
-	 * Returns the relational targets based on the database object-relation Id.
-	 * 
-	 * @param int|string $objectRelationId The database object-relation Id.
-	 * @return Target[]
-	 */
-    static public function getTargetsbyObjectrelationId( $objectRelationId )
-    {
-    	require_once BASEDIR.'/server/dbclasses/DBTargetEdition.class.php';
-        $rows = DBTargetEdition::listTargetEditionRowsByObjectrelationId( array( $objectRelationId ), null);
-		if( $rows ) {
-			$targets = self::composeRelationTargetsOfTargetEditionRows( $rows[$objectRelationId] );
-		} else {
-			$targets = array();
-		}
-		return $targets;
-	}
 
 	/**
-	 * Returns the relational targets based on the database objectrelation Id.
+	 * Returns the relational targets based on the database object-relation Id.
 	 *
-	 * @param array $objectRelationIds The database objectrelation Ids.
-	 * @return Target object by objectrelation Id.
+	 * @param int $objectRelationId The database object-relation Id.
+	 * @return Target[]
 	 */
-    static public function getTargetsByObjectRelationIds(array $objectRelationIds)
-    {
-    	require_once BASEDIR.'/server/dbclasses/DBTargetEdition.class.php';
-    	$targets = array();
-    	$rows = DBTargetEdition::listTargetEditionRowsByObjectrelationId( $objectRelationIds, null);
+	static public function getTargetsbyObjectrelationId( $objectRelationId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBTargetEdition.class.php';
+		$rows = DBTargetEdition::listTargetEditionRowsByObjectrelationId( array( $objectRelationId ), null );
 		if( $rows ) {
-			foreach( $objectRelationIds as $objectRelationId ) {
-				$targetsByObjRelationId = self::composeRelationTargetsOfTargetEditionRows( $rows[$objectRelationId] );
-				$targets[ $objectRelationId ] = $targetsByObjRelationId;
-			}
+			$targets = self::composeRelationTargetsOfTargetEditionRows( $rows[ $objectRelationId ] );
 		} else {
 			$targets = array();
 		}
@@ -821,7 +798,7 @@ class DBTarget extends DBBase
 	 * The input of the method can be the rows as returned by DBTargetEdition::listTargetEditionRowsByObjectrelationId().
 	 *
 	 * @param array $targetEditionRows The target(edition) rows belonging to an objectrelation.
-	 * @return array|Target object
+	 * @return Target[] object
 	 */
 	static public function composeRelationTargetsOfTargetEditionRows( $targetEditionRows )
 	{
