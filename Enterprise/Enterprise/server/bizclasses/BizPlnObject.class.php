@@ -1256,66 +1256,35 @@ class BizPlnObject
 
 	/**
 	 * Resolves channel data and adds it to the properties array.
+	 *
 	 * If a channel name is passed in that channel name (plus brand) is used to resolve the channel data.
-	 * If also an existing issue is provided then that issue must belong to the channel.
-	 * If no channel name is provided the channel data is taken from the channel the issue belongs to.
-	 * If the issue does not exists yet the default channel of the brand is used to resolve the channel data.
+	 * If no channel name is provided the channel data is taken from the print channel of the brand (publication).
+	 * If a brand has more than one print channel the name of the channel is required to resolve the channel.
 	 *
 	 * @param array $arr Contains all kind of information passed in by the request.
 	 * @throws BizException
 	 */
 	private static function resolveChannelProperties( &$arr )
 	{
-		$arr['pubChannelId'] = 0;
-		$arr['pubChannelType'] = 'print';
+		require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
 		if( $arr['pubChannelName'] ) {
-			require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
 			$channelObject = DBChannel::getPubChannelObjByBrandAndName( $arr['publication'], $arr['pubChannelName'] );
-			if( $channelObject ) {
-				$arr['pubChannelId'] = $channelObject->Id;
-				$arr['pubChannelType'] = $channelObject->Type;
+		} else {
+			$printChannels = DBChannel::getChannelsBydBrandIdAndType( $arr['publication'], 'print');
+			if ( count( $printChannels ) === 1 ) {
+				$channelObject = array_shift( $printChannels );
 			} else {
-				throw new BizException( 'ERR_NOTFOUND', 'Client', 'Channel Name: '.$arr['pubChannelName'] );
+				throw new BizException( 'ERR_INVALID_OPERATION', 'Client', '' );
 			}
 		}
 
-		if( $arr['issue_name'] ) {
-			require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-			if( $arr['pubChannelId'] ) {
-				$issueRow = DBIssue::getIssuesByNameAndChannel( $arr['issue_name'], $arr['pubChannelId'] );
-			} else {
-				$issueRow = DBIssue::getIssuesByName( $arr['issue_name'] );
-			}
-			if( $issueRow ) {
-				if( !$arr['pubChannelName'] ) {
-					$channelId = DBIssue::getChannelId( $issueRow[0]['id'] );
-					require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
-					$channelObject = DBChannel::getPubChannelObj( $channelId );
-					$arr['pubChannelId'] = $channelObject->Id;
-					$arr['pubChannelType'] = $channelObject->Type;
-					$arr['pubChannelName'] = $channelObject->Name;
-				}
-			} else {
-				if( !$arr['pubChannelName'] ) {
-					$arr['pubChannelId'] = self::resolveDefaultChannelOfIssue( $arr );
-					if( $arr['pubChannelId'] ) {
-						require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
-						$channelObject = DBChannel::getPubChannelObj( $arr['pubChannelId'] );
-						$arr['pubChannelType'] = $channelObject->Type;
-						$arr['pubChannelName'] = $channelObject->Name;
-					}
-				}
-			}
+		if( $channelObject ) {
+			$arr['pubChannelId'] = $channelObject->Id;
+			$arr['pubChannelType'] = $channelObject->Type;
+			$arr['pubChannelName'] = $channelObject->Name;
+		} else {
+			throw new BizException( 'ERR_NOTFOUND', 'Client', '' );
 		}
-	}
-
-	private static function resolveDefaultChannelOfIssue( $arr )
-	{
-		$publicationId = $arr['publication'];
-		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
-		$publicationRow = DBPublication::getPublication( $publicationId );
-
-		return $publicationRow['defaultchannelid'];
 	}
 
 	// Copies named Pub/Iss/Sec/Status properties from $props into $obj, as well as Name+Id

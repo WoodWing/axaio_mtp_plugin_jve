@@ -247,4 +247,25 @@ class DBChannel extends DBBase
 		$row = self::getRow( self::TABLENAME, $where, $fieldNames, $params );
 		return $row['suggestionprovider'] ? $row['suggestionprovider'] : null;
 	}
+
+	/**
+	 * Returns all channels of a certain type for a brand.
+	 *
+	 * @since 10.1.2
+	 * @param int $brandId
+	 * @param string $type
+	 * @return PubChannelInfo[]
+	 */
+	static public function getChannelsBydBrandIdAndType( $brandId, $type )
+	{
+		$channelObjects = array();
+		$where = '`publicationid` = ? AND `type` = ? ';
+		$params = array( intval( $brandId ), $type );
+		$rows = DBBase::listRows( self::TABLENAME, 'id', '', $where, '*', $params );
+		if( $rows ) foreach( $rows as $row ) {
+			$channelObjects[] = self::rowToObj( $row );
+		}
+
+		return $channelObjects;
+	}
 }
