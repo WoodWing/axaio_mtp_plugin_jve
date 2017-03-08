@@ -258,10 +258,30 @@ class DBChannel extends DBBase
 	 */
 	static public function getChannelIdForPublishSystemId( $publicationId, $publishSystemId )
 	{
-		require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 		$where = '`publicationid` = ? AND `publishsystemid` = ? ';
 		$params = array( $publicationId, $publishSystemId );
 		$row = DBBase::getRow( 'channels', $where, array( 'id' ), $params );
 		return isset( $row['id'] ) ? $row['id'] : null;
+	}
+
+	/**
+	 * Returns all channels of a certain type for a brand.
+	 *
+	 * @since 10.1.2
+	 * @param int $brandId
+	 * @param string $type
+	 * @return PubChannelInfo[]
+	 */
+	static public function getChannelsBydBrandIdAndType( $brandId, $type )
+	{
+		$channelObjects = array();
+		$where = '`publicationid` = ? AND `type` = ? ';
+		$params = array( intval( $brandId ), $type );
+		$rows = DBBase::listRows( self::TABLENAME, 'id', '', $where, '*', $params );
+		if( $rows ) foreach( $rows as $row ) {
+			$channelObjects[] = self::rowToObj( $row );
+		}
+
+		return $channelObjects;
 	}
 }
