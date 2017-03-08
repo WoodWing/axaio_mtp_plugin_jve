@@ -113,6 +113,7 @@ class DBPlacements extends DBBase
 		// Whether or not a child was given, first create a placement with child=0
 		// and reference it from smart_indesignarticlesplacements table.
 		$values = array();
+		$row = array();
 		if( $IDAPlacements ) foreach( $IDAPlacements as $plc ) {
 			if( $plc->InDesignArticleIds ) {
 					$row = self::objToRow( $plc, true );
