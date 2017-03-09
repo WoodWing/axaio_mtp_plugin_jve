@@ -22,6 +22,12 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		require_once dirname( __FILE__)  . '/../../config.php';
 		$testSuitUtils = new WW_Utils_TestSuite();
 
+		if( !$this->checkPhpExtensions() ) {
+			return false;
+		}
+		if( !$this->checkOpenSslCipherMethod() ) {
+			return false;
+		}
 		if ( !$this->checkAccess() ) {
 			return false;
 		}
@@ -33,6 +39,80 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks if the PHP extensions that are required by Elvis ContentSource plugin are installed.
+	 *
+	 * Note that extensions required by the core ES are assumed to be checked already, so not checked here.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return bool Whether or not all required extensions are installed.
+	 */
+	private function checkPhpExtensions()
+	{
+		$result = true;
+		$exts = array(
+			'openssl' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/openssl-installation'
+		);
+		$optExtWarnings = array();
+		foreach( $exts as $ext => $phpManual ) {
+			if( !extension_loaded( $ext ) ) {
+				$extPath = ini_get( 'extension_dir' );
+				$help = 'Please see <a href="'.$phpManual.'" target="_blank">PHP manual</a> for instructions.<br/>'.
+					'Note that the PHP extension path is "'.$extPath.'".<br/>'.
+					'PHP compilation options can be found in <a href="phpinfo.php" target="_blank">PHP info</a>.<br/>'.
+					'Your php.ini file is located at "'.$this->getPhpIni().'".';
+				$msg = 'The PHP library "<b>'.$ext.'</b>" is not loaded.';
+				if( isset( $optExtWarnings[ $ext ] ) ) {
+					$this->setResult( 'WARN', $msg.'<br/>'.$optExtWarnings[ $ext ], $help );
+				} else {
+					$this->setResult( 'ERROR', $msg, $help );
+					$result = false;
+				}
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Checks if the cipher method used for password encryption is supported by PHP's openssl module.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return bool Whether or not the method is supported.
+	 */
+	private function checkOpenSslCipherMethod()
+	{
+		$result = true;
+		$methods = openssl_get_cipher_methods();
+		if( !in_array( 'aes-256-cbc', $methods ) ) {
+			$extPath = ini_get( 'extension_dir' );
+			$phpManual = 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/openssl-installation';
+			$help = 'Please see <a href="'.$phpManual.'" target="_blank">PHP manual</a> for instructions.<br/>'.
+				'Note that the PHP extension path is "'.$extPath.'".<br/>'.
+				'PHP compilation options can be found in <a href="phpinfo.php" target="_blank">PHP info</a>.<br/>'.
+				'Your php.ini file is located at "'.$this->getPhpIni().'".';
+			$msg = 'The openssl cipher method "aes-256-cbc" is not supported.';
+			$this->setResult( 'ERROR', $msg, $help );
+			$result = false;
+		}
+		return $result;
+	}
+
+	/**
+	 * Get the path to the php.ini file.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return string
+	 */
+	private function getPhpIni()
+	{
+		ob_start();
+		phpinfo(INFO_GENERAL);
+		$phpinfo = ob_get_contents();
+		ob_end_clean();
+		$found = array();
+		return preg_match('/\(php.ini\).*<\/td><td[^>]*>([^<]+)/',$phpinfo,$found) ? $found[1] : '';
 	}
 
 	/**

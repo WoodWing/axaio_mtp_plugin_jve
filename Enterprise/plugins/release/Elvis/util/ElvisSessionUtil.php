@@ -37,7 +37,10 @@ class ElvisSessionUtil
 			list( $encrypted, $initVector ) = explode( '::', base64_decode( $storage ), 2 );
 			$encryptionKey = '!Tj0nG3'.$userShort.date( 'z' ); // hardcoded key + user name + day of the year
 			$credentials = openssl_decrypt( $encrypted, 'aes-256-cbc', $encryptionKey,
-				OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $initVector );
+				OPENSSL_RAW_DATA, $initVector );
+			if( !$credentials ) {
+				LogHandler::Log( 'ELVIS', 'ERROR', 'Decryption procedure failed. Please run the Health Check.' );
+			}
 		}
 		return $credentials; // base64
 
@@ -61,10 +64,14 @@ class ElvisSessionUtil
 		$initVector = openssl_random_pseudo_bytes( openssl_cipher_iv_length( 'aes-256-cbc' ) );
 		$encryptionKey = '!Tj0nG3'.$userShort.date( 'z' ); // hardcoded key + user name + day of the year
 		$encrypted = openssl_encrypt( $credentials, 'aes-256-cbc', $encryptionKey,
-			OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $initVector );
-		$storage = base64_encode( $encrypted.'::'.$initVector );
-		$settings = array( new Setting( 'Temp', $storage ) ); // use vague name to obfuscate
-		BizUser::updateSettings( $userShort, $settings, 'ElvisContentSource' );
+			OPENSSL_RAW_DATA, $initVector );
+		if( $encrypted ) {
+			$storage = base64_encode( $encrypted.'::'.$initVector );
+			$settings = array( new Setting( 'Temp', $storage ) ); // use vague name to obfuscate
+			BizUser::updateSettings( $userShort, $settings, 'ElvisContentSource' );
+		} else {
+			LogHandler::Log( 'ELVIS', 'ERROR', 'Encryption procedure failed. Please run the Health Check.' );
+		}
 
 		// [EN-88634#2] Note that tracking Elvis credentials in PHP session does not work for multi AS setup behind ELB,
 		// and therefor the following solution is no longer used:
