@@ -727,18 +727,15 @@ class DBObject extends DBBase
 	}
 
 
-    static public function checkNameObject( $publ, $issue, $name, $type = null, $id = null )
+    static public function checkNameObject( $publ, /** @noinspection PhpUnusedParameterInspection */
+                                            $issue, $name, $type = null, $id = null )
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' )).' as "version"';
 
 		$dbo = $dbDriver->tablename(self::TABLENAME);
 		$publ = $dbDriver->toDBString($publ);
-		$issue = $dbDriver->toDBString($issue);
 		$name = $dbDriver->toDBString($name);
-		if(!$issue){
-			$issue = 0;
-		}
 
 		//TODO BZ#7258
 		//and `issue` = $issue
@@ -1909,15 +1906,15 @@ class DBObject extends DBBase
 	static public function getDocumentIdOfPublishFormTemplateUsedByProperty( $propertyName )
 	{
 		$dbh = DBDriverFactory::gen();
-		$objects = $dbh->tablename( 'objects' );
+		$objects = $dbh->tablename( self::TABLENAME );
 		$properties = $dbh->tablename( 'properties' );
-		$result = '';
-		$sql =   'SELECT o.`documentid` '.
-			'FROM '.$objects.' as o, '.$properties.' as p '.
-			'WHERE p.`name` = ? '.
-			'AND o.`id` = p.`templateid` ';
+		$result = null;
+		$sql = 'SELECT o.`documentid` '.
+				 'FROM '.$objects.' as o, '.$properties.' as p '.
+				 'WHERE p.`name` = ? '.
+				 'AND o.`id` = p.`templateid` ';
 
-		$params = array( $propertyName);
+		$params = array( strval( $propertyName ) );
 		$sth = $dbh->query( $sql, $params );
 		if( $sth ) {
 			$row = $dbh->fetch( $sth );

@@ -259,8 +259,8 @@ class DBChannel extends DBBase
 	static public function getChannelIdForPublishSystemId( $publicationId, $publishSystemId )
 	{
 		$where = '`publicationid` = ? AND `publishsystemid` = ? ';
-		$params = array( $publicationId, $publishSystemId );
-		$row = DBBase::getRow( 'channels', $where, array( 'id' ), $params );
+		$params = array( intval( $publicationId ), strval( $publishSystemId ) );
+		$row = DBBase::getRow( self::TABLENAME, $where, array( 'id' ), $params );
 		return isset( $row['id'] ) ? $row['id'] : null;
 	}
 

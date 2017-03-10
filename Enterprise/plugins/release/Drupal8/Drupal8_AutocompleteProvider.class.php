@@ -61,25 +61,27 @@ class Drupal8_AutocompleteProvider extends AutocompleteProvider_EnterpriseConnec
 	{
 		$tags = array();
 		if( $termEntityName == 'entityreference' ) {
-			if( !mb_strlen( $typedValue ) >= 2 ) { // To get meaningful suggestions at least two characters are needed.
-				return $tags;
+			if( mb_strlen( $typedValue ) >= 2 ) { // To get meaningful suggestions at least two characters are needed.
+				require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+				$documentId = DBObject::getDocumentIdOfPublishFormTemplateUsedByProperty( $propertyName );
+				if( $documentId && $propertyName ) {
+					$drupalFieldId = $this->extractDrupalFieldIdFromPropertyName( $propertyName );
+					$drupalContentTypeId = $this->extractDrupalContentTypeIdFromDocumentId( $documentId );
+					$drupalXmlRpcClient = $this->createDrupalXmlRpcClient( $objectId, $publishSystemId );
+					$drupalFieldValues = $drupalXmlRpcClient->getTermEntityValues( $drupalContentTypeId, $drupalFieldId, $typedValue );
+					$tags = $this->createTagsFromDrupalFieldValues( $drupalFieldValues, $typedValue );
+				} else {
+					LogHandler::Log( 'Drupal8Publish', 'DEBUG', 'ERROR: Unable to resolve Drupal content type Id or field Id. Suggestion: Re-import the content types from Drupal.' );
+				}
 			}
-			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-			$documentId = DBObject::getDocumentIdOfPublishFormTemplateUsedByProperty( $propertyName );
-			if( !( $documentId && $propertyName ) ) {
-				LogHandler::Log( 'Drupal8Publish', 'DEBUG', 'ERROR: Unable to get Drupal content type Id or field Id.' );
-				return $tags;
-			}
-			$drupalFieldId = $this->extractDrupalFieldIdFromPropertyName( $propertyName );
-			$drupalContentTypeId = $this->extractDrupalContentTypeIdFromDocumentId( $documentId );
-			$drupalXmlRpcClient = $this->createDrupalXmlRpcClient( $objectId, $publishSystemId );
-			$drupalFieldValues = $drupalXmlRpcClient->getTermEntityValues( $drupalContentTypeId, $drupalFieldId, $typedValue );
-			$tags = $this->createTagsFromDrupalFieldValues( $drupalFieldValues, $typedValue );
 		} else {
 			$tags = parent::autocomplete( $provider, $objectId, $propertyName, $termEntityName, $publishSystemId, $ignoreValues, $typedValue );
 		}
 
-		LogHandler::Log( 'Drupal8Publish', 'DEBUG', 'Retrieved tags: '.print_r( $tags, 1 ) );
+		if( LogHandler::debugMode() ) {
+			LogHandler::Log( 'Drupal8Publish', 'DEBUG', 'Retrieved tags: '.print_r( $tags, 1 ) );
+		}
+		
 		return $tags;
 	}
 
