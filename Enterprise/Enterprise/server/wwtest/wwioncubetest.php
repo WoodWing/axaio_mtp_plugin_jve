@@ -257,8 +257,7 @@ function php_version_maj_min()
 function is_supported_php_version()
 {
     $v = php_version();
-    // >>> WoodWing: PHP 5.4, 5.5 and 5.6 supported for Enterprise 9.7,
-    //               For PHP 5.4, it is supported on Linux OS only.
+    // >>> WoodWing: PHP 5.5 and 5.6 supported
    return ((($v['major'] == 5) && ($v['minor'] == 5)) ||
           (($v['major'] == 5) && ($v['minor'] == 6)));
 //    return ((($v['major'] == 4) && ($v['minor'] >= 1)) ||
