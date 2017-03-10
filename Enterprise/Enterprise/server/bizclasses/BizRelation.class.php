@@ -1208,7 +1208,7 @@ class BizRelation
 			$pagerange = NumberUtils::createNumberRange( $pageNumbers );
 			if( $storedPageRange != $pagerange ) {
 				require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
-				if( DBObjectRelation::updateObjectRelationPageRange( $parentId, $childId, $pagerange ) ) {
+				if( !DBObjectRelation::updateObjectRelationPageRange( $parentId, $childId, $pagerange ) ) {
 					throw new BizException( 'ERR_DATABASE', 'Server', DBObjectRelation::getError() );
 				}
 			}
