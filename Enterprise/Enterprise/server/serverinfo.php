@@ -19,9 +19,6 @@ $supportedPhpVersions = array(
     '5.5.16+',
     '5.6.14+'
 );
-if( OS == 'LINUX' ) { // PHP 5.4.16+ supported on LINUX platform only
-   $supportedPhpVersions[] = '5.4.16+';
-}
 define ('SCENT_PHPVERSIONS',	serialize($supportedPhpVersions) );
 
 // Minimum and maximum supported version for MySQL
