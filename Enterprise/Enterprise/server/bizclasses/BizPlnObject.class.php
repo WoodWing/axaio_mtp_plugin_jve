@@ -1269,22 +1269,21 @@ class BizPlnObject
 		require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
 		if( $arr['pubChannelName'] ) {
 			$channelObject = DBChannel::getPubChannelObjByBrandAndName( $arr['publication'], $arr['pubChannelName'] );
+			if( !$channelObject ) {
+				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{CHANNEL}', $arr['pubChannelName'] ) );
+			}
 		} else {
-			$printChannels = DBChannel::getChannelsBydBrandIdAndType( $arr['publication'], 'print');
-			if ( count( $printChannels ) === 1 ) {
+			$printChannels = DBChannel::getChannelsBydBrandIdAndType( $arr['publication'], 'print' );
+			if( count( $printChannels ) === 1 ) {
 				$channelObject = array_shift( $printChannels );
 			} else {
 				throw new BizException( 'ERR_INVALID_OPERATION', 'Client', '' );
 			}
 		}
 
-		if( $channelObject ) {
-			$arr['pubChannelId'] = $channelObject->Id;
-			$arr['pubChannelType'] = $channelObject->Type;
-			$arr['pubChannelName'] = $channelObject->Name;
-		} else {
-			throw new BizException( 'ERR_NOTFOUND', 'Client', '' );
-		}
+		$arr['pubChannelId'] = $channelObject->Id;
+		$arr['pubChannelType'] = $channelObject->Type;
+		$arr['pubChannelName'] = $channelObject->Name;
 	}
 
 	// Copies named Pub/Iss/Sec/Status properties from $props into $obj, as well as Name+Id
