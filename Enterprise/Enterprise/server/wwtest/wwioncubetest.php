@@ -2903,8 +2903,7 @@ function default_page($loader_extension = LOADER_EXTENSION_NAME)
 		'To use these files, a component called the \'ionCube Loader\' must be installed.</p>'.
 	// <<<
 	
-    // >>> WoodWing: PHP 5.4, 5.5 and 5.6 are supported by Enterprise 9.7:
-    //               For PHP 5.4, it is supported on Linux OS only.
+    // >>> WoodWing: PHP 5.5 and 5.6 are supported.
     $ionCubeLoaderOk = false;
     if (!is_supported_php_version()) {
         $msg = '<div class="alert">'.
