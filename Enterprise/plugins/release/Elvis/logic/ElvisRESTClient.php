@@ -10,15 +10,16 @@ class ElvisRESTClient
 	 * @param string $service Service name of the Elvis API.
 	 * @param string $url Request URL (JSON REST)
 	 * @param string[]|null $post Optionally. List of HTTP POST parameters to send along with the request.
+	 * @param Attachment|null $file
 	 * @return mixed Returned
 	 * @throws BizException
 	 */
-	private static function send( $service, $url, $post = null )
+	private static function send( $service, $url, $post = null, $file = null )
 	{
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 		$cookies = ElvisSessionUtil::getSessionCookies();
 		self::logService( $service, $url, $post, $cookies, true );
-		$response = self::sendUrl( $service, $url, $post, $cookies );
+		$response = self::sendUrl( $service, $url, $post, $cookies, $file );
 		self::logService( $service, $url, $response, $cookies, false );
 		if( $cookies ) {
 			ElvisSessionUtil::saveSessionCookies( $cookies );
@@ -76,10 +77,11 @@ class ElvisRESTClient
 	 * @param string $url Request URL (JSON REST)
 	 * @param string[]|null $post Optionally. List of HTTP POST parameters to send along with the request.
 	 * @param array $cookies HTTP cookies to sent with request. After call, this is replaced with cookies returned by response.
+	 * @param Attachment|null $file
 	 * @return mixed
 	 * @throws BizException
 	 */
-	private static function sendUrl( $service, $url, $post, &$cookies )
+	private static function sendUrl( $service, $url, $post, &$cookies, $file = null )
 	{
 		$response = null;
 		try {
@@ -94,6 +96,10 @@ class ElvisRESTClient
 			}
 			if( $cookies ) {
 				$client->setCookies( $cookies );
+			}
+			if( $file ) {
+				// Filedata parameter is part of Elvis API: https://helpcenter.woodwing.com/hc/en-us/articles/205654645
+				$client->setFileUpload( $file->FilePath, 'Filedata', null, $file->Type );
 			}
 			$response = $client->send();
 		} catch( Exception $e ) {
@@ -147,17 +153,7 @@ class ElvisRESTClient
 			$post['metadata'] = json_encode( $metadata );
 		}
 
-		if( isset( $file ) ) {
-			//This class replaces the deprecated "@" syntax of sending files through curl.
-			//It is available from PHP 5.5 and onwards, so the old option should be maintained for backwards compatibility.
-			if( class_exists( 'CURLFile' ) ) {
-				$post['Filedata'] = new CURLFile( $file->FilePath, $file->Type );
-			} else {
-				$post['Filedata'] = '@'.$file->FilePath;
-			}
-		}
-
-		self::send( 'update', ELVIS_URL.'/services/update', $post );
+		self::send( 'update', ELVIS_URL.'/services/update', $post, $file );
 	}
 
 	/**
