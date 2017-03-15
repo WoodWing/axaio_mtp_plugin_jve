@@ -145,11 +145,11 @@ class ElvisUtils {
 		if( $cookies ) {
 			$cookiesHeader = '';
 			foreach( $cookies as $name => $value ) {
-				$cookiesHeader .= "Cookie: $name=$value\r\n";
+				$cookiesHeader .= "{$name}={$value}; ";
 			}
 			if( $cookiesHeader ) {
 				$options = array( 'http' => array(
-					'header' => $cookiesHeader
+					'header' => "Cookie: {$cookiesHeader}",
 				) );
 			}
 		}
