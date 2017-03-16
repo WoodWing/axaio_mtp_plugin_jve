@@ -71,7 +71,7 @@ class Drupal8_AutocompleteProvider extends AutocompleteProvider_EnterpriseConnec
 					$drupalFieldValues = $drupalXmlRpcClient->getTermEntityValues( $drupalContentTypeId, $drupalFieldId, $typedValue );
 					$tags = $this->createTagsFromDrupalFieldValues( $drupalFieldValues, $typedValue );
 				} else {
-					LogHandler::Log( 'Drupal8Publish', 'DEBUG', 'ERROR: Unable to resolve Drupal content type Id or field Id. Suggestion: Re-import the content types from Drupal.' );
+					LogHandler::Log( 'Drupal8Publish', 'ERROR', 'ERROR: Unable to resolve Drupal content type Id or field Id. Suggestion: Re-import the content types from Drupal.' );
 				}
 			}
 		} else {
