@@ -147,7 +147,7 @@ echo "<hr><b>Session parameters:</b><br><table border=1 cellpadding=2>";
 echo "<tr><td><b>Common</b></td>           	<td><b>Layout</b></td>                             											<td><b>Advert</b></tr>";
 echo "<tr><td></td>                        	<td>layout_id=$layoutId</td>                         											<td>advert_id=$advertId</td></tr>";
 echo "<tr><td>namebased=$nameBased</td>    	<td>lay_name=$layoutName</td>                        											<td>adv_name=$advertName</td></tr>";
-echo "<tr><td>pubblication=$publication</td> <td>lay_section=$layoutSection</td>                  											<td>adv_section=$advertSection</td></tr>";
+echo "<tr><td>publication=$publication</td> <td>lay_section=$layoutSection</td>                  											<td>adv_section=$advertSection</td></tr>";
 echo "<tr><td>issue=$issue</td>             	<td>lay_status=$layoutStatus</td>                    											<td>adv_status=$advertStatus</td></tr>";
 echo "<tr><td>pubchannel=$channelName;</td>	<td>lay_template=$layoutTemplateName</td>                									<td>content=$content</td></tr>";
 echo "<tr><td>act_modify=$actionCreate</td>  <td>pagenrs (create)=".implode( ',', $createPageOrdersNoEdition )."</td>            <td>pagenr (create)=$advertCreatePageNr (= page sequence) (=> page order=".$createPageOrdersNoEdition[ $advertCreatePageNr - 1 ].")</td></tr>";
