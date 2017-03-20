@@ -8,8 +8,6 @@
  */
 class BizProperty
 {
-	const MULTIVALUE_SEPARATOR = '/';
-
 	static private $InfoProps; // list of PropertyInfo, typically used in GetDialog and QueryObjects services
 	static private $MetaProps; // list of MetaData paths, typically used for CreateObjects, SaveObjects and SetProperties services
 	static private $ObjFProps; // list of column names used in smart_objects table.
