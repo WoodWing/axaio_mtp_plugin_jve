@@ -925,9 +925,9 @@ class WW_Utils_TestSuite
 	 * Non personal statuses are preferred.
 	 *
 	 * @param TestCase $testCase
-	 * @param $pubInfo Publication info object
+	 * @param $pubInfo PublicationInfo info object
 	 * @param string $type Object type (e.g. Article)
-	 * @return Status info object, or null on failure
+	 * @return State|null info object, or null on failure
 	 */
 	public function getFirstStatusInfoForType( TestCase $testCase, $pubInfo, $type )
 	{
