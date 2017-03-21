@@ -243,7 +243,7 @@ class BizAdmPublication
 	 * Delete Publication
 	 * 
 	 * @param string $usr shortusername who should have authorization to delete these publications
-	 * @param Id[]|int[] $pubIds Array of publication id that needs to be deleted
+	 * @param int[] $pubIds Array of publication id that needs to be deleted
 	 * @throws BizException
 	 */
 	public static function deletePublicationsObj( $usr, $pubIds )

@@ -351,13 +351,20 @@ class BizPubIssue
 	private function queryIssueDossierOrder( $issueId )
 	{
 		// Query DB for all dossiers that are assigned to the given issue.
-		require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
 		$minProps = array( 'ID', 'Type', 'Name' );
 		$params = array( 
 			new QueryParam( 'IssueId', '=', $issueId ),
 			new QueryParam( 'Type', '=', 'Dossier' ) );
-		$response = BizQuery::queryObjects(
-			BizSession::getTicket(), BizSession::getShortUserName(), $params, 1, 0, null, false, null, $minProps, null, null, 0 );
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = BizSession::getTicket();
+		$request->Params = $params;
+		$request->FirstEntry = 1;
+		$request->MaxEntries = 0;
+		$request->Hierarchical = false;
+		$request->MinimalProps = $minProps;
+		require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
+		$response = BizQuery::queryObjects2( $request, BizSession::getShortUserName(), 0 );
 
 		// Determine column indexes to work with.
 		$indexes = array_combine( array_values($minProps), array_fill(1,count($minProps), -1) );

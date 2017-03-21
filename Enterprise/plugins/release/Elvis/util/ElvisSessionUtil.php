@@ -5,64 +5,48 @@ require_once dirname(__FILE__).'/../config.php';
 class ElvisSessionUtil
 {
 	/**
-	 * Get the sessionId
+	 * Check if there is an Elvis session available.
 	 *
-	 * @param array $sessionVariables Array of session variable
-	 * @return string
-	 */
-	public static function getSessionId( $sessionVariables = null )
-	{
-		$serviceName = BizSession::getServiceName();
-		LogHandler::Log( 'ELVIS', 'DEBUG', 'ElvisSessionUtil - getSessionId: $serviceName=' . $serviceName );
-
-		if( is_null($sessionVariables) ) {
-			$sessionVariables = self::getSessionVariables();
-		}
-		$name = self::getVarName('sessionId');
-		return array_key_exists($name, $sessionVariables) ? $sessionVariables[$name] : null;
-	}
-
-	/**
-	 * Check if there is a sessionId available
-	 *
-	 * @param array $sessionVariables Array of session variable
 	 * @return boolean
 	 */
-	public static function isSessionIdAvailable( $sessionVariables = null )
+	public static function hasSession()
 	{
-		return !is_null(self::getSessionId( $sessionVariables ) );
+		return (bool)self::getSessionCookies();
 	}
 
 	/**
 	 * Get the base64 encoded credentials
 	 *
-	 * @param array $sessionVariables Array of session variable
-	 * @throws BizException
-	 * @return string
+	 * @return string|null Credentials, or NULL when not found.
 	 */
-	public static function getCredentials( $sessionVariables = null )
+	public static function getCredentials()
 	{
-		if( is_null($sessionVariables) ) {
-			$sessionVariables = self::getSessionVariables();
-		}
-		$name = self::getVarName('cred');
-		if (!array_key_exists($name, $sessionVariables)) {
-			$message = 'Elvis credentials not found, please re-log in.';
-			throw new BizException(null, 'Server', $message, $message);
-		}
-		return $sessionVariables[$name];
-	}
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
 
-	/**
-	 * Save the session id
-	 *
-	 * @param string $sessionId
-	 */
-	public static function saveSessionId( $sessionId )
-	{
-		$sessionVars = array();
-		$sessionVars[self::getVarName('sessionId')] = $sessionId;
-		BizSession::setSessionVariables($sessionVars);
+		$userShort = BizSession::getShortUserName();
+		$settings = BizUser::getSettings( $userShort, 'ElvisContentSource' );
+		$storage = null;
+		if( $settings ) foreach( $settings as $setting ) {
+			if( $setting->Setting == 'Temp' ) {
+				$storage = $setting->Value;
+				break;
+			}
+		}
+		$credentials = null;
+		if( $storage ) {
+			list( $encrypted, $initVector ) = explode( '::', base64_decode( $storage ), 2 );
+			$encryptionKey = '!Tj0nG3'.$userShort.date( 'z' ); // hardcoded key + user name + day of the year
+			$credentials = openssl_decrypt( $encrypted, 'aes-256-cbc', $encryptionKey,
+				OPENSSL_RAW_DATA, $initVector );
+			if( !$credentials ) {
+				LogHandler::Log( 'ELVIS', 'ERROR', 'Decryption procedure failed. Please run the Health Check.' );
+			}
+		}
+		return $credentials; // base64
+
+		// [EN-88634#2] Note that tracking Elvis credentials in PHP session does not work for multi AS setup behind ELB,
+		// and therefor the following solution is no longer used:
+		// return self::getSessionVar( 'cred' );
 	}
 
 	/**
@@ -73,13 +57,53 @@ class ElvisSessionUtil
 	 */
 	public static function saveCredentials( $username, $password )
 	{
-		/*
-		 * FIXME: We do not want to save the password in a PHP session. For now, we need to
-		 * so we're able to authenticate against Elvis when the session to Elvis is expired.
-		 */
-		$sessionVars = array();
-		$sessionVars[self::getVarName('cred')] = base64_encode($username . ':' . $password);
-		BizSession::setSessionVariables($sessionVars);
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+
+		$userShort = BizSession::getShortUserName(); // do not take $username
+		$credentials = base64_encode( $username.':'.$password );
+		$initVector = openssl_random_pseudo_bytes( openssl_cipher_iv_length( 'aes-256-cbc' ) );
+		$encryptionKey = '!Tj0nG3'.$userShort.date( 'z' ); // hardcoded key + user name + day of the year
+		$encrypted = openssl_encrypt( $credentials, 'aes-256-cbc', $encryptionKey,
+			OPENSSL_RAW_DATA, $initVector );
+		if( $encrypted ) {
+			$storage = base64_encode( $encrypted.'::'.$initVector );
+			$settings = array( new Setting( 'Temp', $storage ) ); // use vague name to obfuscate
+			BizUser::updateSettings( $userShort, $settings, 'ElvisContentSource' );
+		} else {
+			LogHandler::Log( 'ELVIS', 'ERROR', 'Encryption procedure failed. Please run the Health Check.' );
+		}
+
+		// [EN-88634#2] Note that tracking Elvis credentials in PHP session does not work for multi AS setup behind ELB,
+		// and therefor the following solution is no longer used:
+		// self::setSessionVar( 'cred', base64_encode( $username . ':' . $password ) );
+	}
+
+	/**
+	 * Retrieve the Elvis session cookies from the Enterprise session.
+	 *
+	 * @return array|null Cookies. NULL when no session available.
+	 */
+	public static function getSessionCookies()
+	{
+		return self::getSessionVar( 'sessionCookies' );
+	}
+
+	/**
+	 * Save the Elvis session cookies into the Enterprise session.
+	 *
+	 * @param array $cookies
+	 */
+	public static function saveSessionCookies( array $cookies )
+	{
+		self::setSessionVar( 'sessionCookies', $cookies );
+	}
+
+	/**
+	 * Removes the Elvis session cookies from the Enterprise session.
+	 */
+	public static function clearSessionCookies()
+	{
+		self::saveSessionCookies( array() );
 	}
 
 	/**
@@ -122,17 +146,14 @@ class ElvisSessionUtil
 	/**
 	 * Get a session variable by key.
 	 *
-	 * @param string $varName
-	 * @param array $sessionVariables Array of session variable
+	 * @param string $key
 	 * @return mixed|null Value when variable is set, NULL otherwise.
 	 */
-	public static function getSessionVar( $varName, $sessionVariables = null )
+	public static function getSessionVar( $key )
 	{
-		if( is_null($sessionVariables) ) {
-			$sessionVariables = self::getSessionVariables();
-		}
-		$name = self::getVarName($varName);
-		return array_key_exists($name, $sessionVariables) ?  $sessionVariables[$name] : null;
+		$sessionVariables = BizSession::getSessionVariables();
+		$name = self::getVarName( $key );
+		return array_key_exists( $name, $sessionVariables ) ?  $sessionVariables[$name] : null;
 	}
 
 	/**
@@ -143,35 +164,28 @@ class ElvisSessionUtil
 	 */
 	public static function setSessionVar( $key, $value )
 	{
-		$sessionVars = array();
-		$sessionVars[self::getVarName($key)] = $value;
-
-		BizSession::setSessionVariables($sessionVars);
-	}
-
-	/**
-	 * Get AllAssetInfo
-	 *
-	 * @return object AllAssetInfo
-	 */
-	public static function getAllAssetInfo()
-	{
-		$sessionVars = BizSession::getSessionVariables();
-		$name = self::getVarName('allAssetInfo');
-		return array_key_exists($name, $sessionVars) ?  $sessionVars[$name] : null;
-	}
-
-	/**
-	 * Set AllAssetInfo
-	 *
-	 * @param $allAssetInfo
-	 */
-	public static function setAllAssetInfo( $allAssetInfo )
-	{
-		$sessionVars = array();
-		$sessionVars[self::getVarName('allAssetInfo')] = $allAssetInfo;
-
+		$sessionVars = array( self::getVarName($key) => $value );
 		BizSession::setSessionVariables( $sessionVars );
+	}
+
+	/**
+	 * Get those Elvis fields that are editable by user.
+	 *
+	 * @return string[] Editable fields.
+	 */
+	public static function getEditableFields()
+	{
+		return self::getSessionVar( 'editableFields' );
+	}
+
+	/**
+	 * Set those Elvis fields that are editable by user.
+	 *
+	 * @param string[] $editableFields
+	 */
+	public static function setEditableFields( $editableFields )
+	{
+		self::setSessionVar( 'editableFields', $editableFields );
 	}
 
 	/**
@@ -184,16 +198,4 @@ class ElvisSessionUtil
 	{
 		return ELVIS_CONTENTSOURCEPREFIX . $name;
 	}
-
-	/**
-	 * Get session variables
-	 *
-	 * @return array
-	 */
-	public static function getSessionVariables()
-	{
-		$sessionVars = BizSession::getSessionVariables();
-		return $sessionVars;
-	}
-
 }

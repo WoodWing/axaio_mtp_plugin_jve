@@ -761,28 +761,29 @@ class DBBase
     		$versionProp = $major.'.'.$minor;
     	}
     }
-	
+
 	/**
 	 * Inserts records with the new params for passed columns.
+	 *
 	 * @param string $table table name
 	 * @param string $dbIntClass DB Integrity class name
 	 * @param array $newValues column/value pairs of the columns to be inserted.
 	 * @param boolean $autoIncrement Apply auto increment for primary key (true/false).
 	 * @param $logExistsErr boolean Log 'already exists' errors. If set to false no error is logged for an insert operations for which this error is fine.
-	 * @return new id or else false.
+	 * @return int|bool id or else false.
 	 */
-	protected static function doInsert( $table, $dbIntClass, array $newValues, $autoIncrement, $logExistsErr=true )
+	protected static function doInsert( $table, $dbIntClass, array $newValues, $autoIncrement, $logExistsErr = true )
 	{
 		self::clearError();
-		
+
 		$intDB = new $dbIntClass;
-        $intDB->beforeInsert( $newValues );
-        
+		$intDB->beforeInsert( $newValues );
+
 		$result = self::insertRow( $table, $newValues, $autoIncrement, null, $logExistsErr );
 
-        $intDB->afterInsert( $result, $newValues );
+		$intDB->afterInsert( $result, $newValues );
 
-        return $result;
+		return $result;
 	}	    
     
 	/**

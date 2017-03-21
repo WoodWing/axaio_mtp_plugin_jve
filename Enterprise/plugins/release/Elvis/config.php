@@ -102,6 +102,7 @@ if( !defined('DEFAULT_ELVIS_PRODUCTION_ZONE') ) {
  *                    When the ELVIS_CREATE_COPY option is set to 'Copy_To_Production_Zone' Smart Connection will no longer
  *                    raise a message to let the user specify the Elvis folder. Instead, the Production Zone is used as
  *                    configured for the Brand.
+ *                    This value can NOT be used when the ELVIS_CREATE_COPY option is set to 'Hard_Copy_To_Enterprise'.
  * - 'Elvis_Original' The image is linked via an Enterprise shadow object. No copy is created.
  *                    This value can NOT be used when the ELVIS_CREATE_COPY option is set to 'Copy_To_Production_Zone'.
  *                    This option requires Elvis Server version 5.14 or higher.

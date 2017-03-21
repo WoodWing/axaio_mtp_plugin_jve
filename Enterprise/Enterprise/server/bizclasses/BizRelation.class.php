@@ -286,7 +286,7 @@ class BizRelation
 					}
 				}
 
-				self::addVersionInfoToCreatedRelation( $relationCreated, $parentId, $childId );
+				self::addParentChildVersionToRelation( $relationCreated );
 				if ( isset( $objRelationTargets ) ) {
 					$relationCreated->Targets = $objRelationTargets;
 				}
@@ -435,25 +435,25 @@ class BizRelation
 	}
 
 	/**
-	 * Adds the major/minor version of the parent and child object to the relation (as returned within the response).
-	 * @param Relation $relationCreated Relation 9returned within response)
-	 * @param int $parentId  Id of the parent object.
-	 * @param int $childId  Id of the child object.
+	 * Adds the major/minor version of the parent and child object to the relation.
+	 *
+	 * Retrieve version info from the database and add it to the relation.
+	 *
+	 * @param Relation $relation
 	 */
-	private static function addVersionInfoToCreatedRelation( Relation $relationCreated, $parentId, $childId )
+	private static function addParentChildVersionToRelation( Relation $relation )
 	{
-		// Geting parent and child object version.
-		require_once BASEDIR . '/server/dbclasses/DBVersion.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizVersion.class.php';
-		$objVersionRows = DBVersion::getObjectVersions( array($parentId, $childId) );
+		require_once BASEDIR.'/server/dbclasses/DBVersion.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizVersion.class.php';
+		$objVersionRows = DBVersion::getObjectVersions( array( $relation->Parent, $relation->Child ) );
 		$versionArray = array();
-		$versionArray['MajorVersion'] = $objVersionRows[$parentId]['majorversion'];
-		$versionArray['MinorVersion'] = $objVersionRows[$parentId]['minorversion'];
-		$relationCreated->ParentVersion = BizVersion::getCurrentVersionNumber( $versionArray );
+		$versionArray['MajorVersion'] = $objVersionRows[$relation->Parent]['majorversion'];
+		$versionArray['MinorVersion'] = $objVersionRows[$relation->Parent]['minorversion'];
+		$relation->ParentVersion = BizVersion::getCurrentVersionNumber( $versionArray );
 
-		$versionArray['MajorVersion'] = $objVersionRows[$childId]['majorversion'];
-		$versionArray['MinorVersion'] = $objVersionRows[$childId]['minorversion'];
-		$relationCreated->ChildVersion = BizVersion::getCurrentVersionNumber( $versionArray );
+		$versionArray['MajorVersion'] = $objVersionRows[$relation->Child]['majorversion'];
+		$versionArray['MinorVersion'] = $objVersionRows[$relation->Child]['minorversion'];
+		$relation->ChildVersion = BizVersion::getCurrentVersionNumber( $versionArray );
 	}
 
 	/**
@@ -938,7 +938,7 @@ class BizRelation
 	 * Update object relations with the passed in $relations.
 	 * @since v7.6.0, this function returns object relation that has been updated.
 	 *
-	 * @param string $user shortusername
+	 * @param string $user short user name
 	 * @param array $relations Relation(s) to be updated.
 	 * @param boolean $fireNcastEvent The n-cast event (broadcast/multicast) is fired by default. When publishing for example the event shouldn't be fired.
 	 * @param boolean $checkAccess Check if the user has the right to update the relation. See Note#001.
@@ -955,111 +955,78 @@ class BizRelation
 		require_once BASEDIR.'/server/bizclasses/BizSearch.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
 		require_once BASEDIR.'/server/smartevent.php';
+		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
 
-		$dbDriver = DBDriverFactory::gen();
 		// $updateParentJob = new WW_BizClasses_ObjectJob();  // v8.0: Uncomment when serverJob 'UpdateParentModifierAndModified' is supported again.
 		$relationsUpdated = array();
+		$involvedObjectsIds = array();
+		$involvedChildrenIds = array();
+		$previousParent = 0;
 		if ($relations){
 			// $serverJobs = array(); // v8.0: Uncomment when serverJob 'UpdateParentModifierAndModified' is supported again.
+			foreach ($relations as $relation) {
+				$involvedObjectsIds[$relation->Parent] = $relation->Parent;
+				$involvedObjectsIds[$relation->Child] = $relation->Child;
+				$involvedChildrenIds[$relation->Child] = $relation->Child;
+			}
+			$placementIds = DBPlacements::getPlacementIdsByRelations( $relations );
+			DBPlacements::deletePlacementsByIds( $placementIds );
+			$objectsDBRows = DBObject::getMultipleObjectDBRows( $involvedObjectsIds ); // DB rows because of the checkWriteAccessForObjRow() later on.
+			$objectRelationInfoByParentIdChildId = DBObjectRelation::getObjectRelationInfoOfRelations( $relations );
+			$manifoldPlacedChildren = DBObjectRelation::childrenPlacedManifold( $involvedChildrenIds, 50 );
 			$objectsToIndex = array();
 			foreach ($relations as $relation) {
-				$parentId = $relation->Parent;
-				$childId = $relation->Child;
-
-				if (!$childId) {
-					throw new BizException( 'ERR_NOTFOUND', 'Client', $childId );
+				if (!$relation->Child || !isset( $objectsDBRows[ $relation->Child ] ) ) {
+					throw new BizException( 'ERR_NOTFOUND', 'Client', $relation->Child );
 				}
-				if (!$parentId) {
-					throw new BizException( 'ERR_NOTFOUND', 'Client', $parentId );
+				$childRow = $objectsDBRows[ $relation->Child ];
+				if ( !$relation->Parent || !isset( $objectsDBRows[ $relation->Parent ] ) ) {
+					throw new BizException( 'ERR_NOTFOUND', 'Client', $relation->Parent );
 				}
-
+				$parentRow = $objectsDBRows[ $relation->Parent ];
 				// Now handle alien childs (which is more likely than alien parent):
 				require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
-				if( BizContentSource::isAlienObject( $childId ) ) {
-					$shadowID = BizContentSource::getShadowObjectID($childId);
+				if( BizContentSource::isAlienObject( $relation->Child ) ) {
+					$shadowID = BizContentSource::getShadowObjectID($relation->Child);
 					if( $shadowID ) {
-						$childId = $shadowID;
+						$relation->Child = $shadowID;
 					} else {
-						// We don't create shadows, should already be done on createrelation
-						throw new BizException( 'ERR_NOTFOUND', 'Client', $childId );
+						// We don't create shadows, should already be done on create relation.
+						throw new BizException( 'ERR_NOTFOUND', 'Client', $relation->Child );
 					}
 				}
-
-				// get object
-				$sth = DBObject::getObject( $childId );
-				if (!$sth) {
-					throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
-				}
-				$childRow = $dbDriver->fetch($sth);
-				if (!$childRow) {
-					throw new BizException( 'ERR_NOTFOUND', 'Client', $childId );
-				}
-				$childType = $childRow['type'];
-
-				// Retrieve parent object from DB (typically dossier or layout)
-				$sth = DBObject::getObject( $parentId );
-				if (!$sth) {
-					throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
-				}
-				$parentRow = $dbDriver->fetch($sth);
-				if (!$parentRow) {
-					throw new BizException( 'ERR_NOTFOUND', 'Client', $parentId );
-				}
-				$parentType = $parentRow['type'];
-
-				require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
-				DBlog::logService( $user, "UpdateObjectRelations", $childId,
-					$childRow['publication'] , '', $childRow['section'], $childRow['state'] ,
-					$parentId, '', '', $childRow['type'], $childRow['routeto'], '', $childRow['version'] );
+				self::logUpdateObjectRelationsService( $user, $childRow, $relation->Parent);
 				if( $relation->Type == 'Related' ) { // Related relations are bi-directional (BZ#17023)
-					DBlog::logService( $user, "UpdateObjectRelations", $parentId,
-						$parentRow['publication'] , '', $parentRow['section'], $parentRow['state'] ,
-						$childId, '', '', $parentRow['type'], $parentRow['routeto'], '', $parentRow['version'] );
+					self::logUpdateObjectRelationsService( $user, $parentRow, $relation->Child );
 				}
-
-				if( $relation->Type == 'Contained' && $childType == 'PublishForm' && $parentType == 'Dossier' ) {
-					self::validateFormContainedByDossier( $childId, null, array( $relation )); // null = Object Target is not interesting here.
-					$dossierTargets = BizTarget::getTargets( $user, $parentId );
-					self::validateDossierContainsForms( $parentId,  $dossierTargets, array( $relation ));
+				if( $relation->Type == 'Contained' && $childRow['type'] == 'PublishForm' && $parentRow['type'] == 'Dossier' ) {
+					self::validateFormContainedByDossier( $relation->Child, null, array( $relation )); // null = Object Target is not interesting here.
+					$dossierTargets = BizTarget::getTargets( $user, $relation->Parent );
+					self::validateDossierContainsForms( $relation->Parent,  $dossierTargets, array( $relation ));
 				}
-
-				// Articles can be placed more than once we use the parent ID as the childType,
-				//  so they can be placed multiple items on separate parents. Multiple placements
-				// inside 1 parent means 1 relation with multiple placements.
-				//$childType = $parent;
-
-				// Check user authorization. See Note#001!
-				if ( $checkAccess ) {
-					self::checkWriteAccessForObjRow( $user, $parentRow );
+				if ( isset( $objectRelationInfoByParentIdChildId[ $relation->Parent ][ $relation->Child]) ) {
+					$relationInfo = $objectRelationInfoByParentIdChildId[ $relation->Parent ][ $relation->Child];
+				} else {
+					throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Server', $relation->Type, null, array( '{OBJ_RELATIONS}' ) );
+				}
+				if ( $checkAccess ) {// Check user authorization. See Note#001!
+					if( $previousParent <> $relation->Parent ) {
+						self::checkWriteAccessForObjRow( $user, $parentRow );
+						$previousParent = $relation->Parent;
+					}
 					if( $relation->Type == 'Related' ) { // Related relations are bi-directional (BZ#17023)
 						self::checkWriteAccessForObjRow( $user, $childRow );
 					}
 				}
-
-				/*
-				  // update object with information from parent
-				  $sth = DBObject::updateParentObject($childId, $user, $p, $se);
-				  if (!$sth) return new SOAP_Fault(TXT_ERR_DATABASE, 'Server', null, $dbDriver->error());
-
-				  // call DB (automatic check on unique id)
-				  require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
-				  $sth = DBObjectRelation::createObjectRelation( $parentId, $childId, $relation->Type, $childType );
-				  if (!$sth && $dbDriver->errorcode() == DB_ERROR_ALREADY_EXISTS)
-				  return new SOAP_Fault(TXT_ERR_OBJECTEXISTS, 'Client',null,$id);
-				  if (!$sth) return new SOAP_Fault(TXT_ERR_DATABASE, 'Server', null, $dbDriver->error());
-				 */
-				// ## should we also update reltype???
-
-				// update placements, during the loop collect page numbers
-				$pagenumbers = array();
-				if ( isset($relation->Placements) && is_array($relation->Placements) ) {
-					// first delete current placements
+				// Update placements, during the loop collect page numbers
+				$pageNumbers = array();
+				if ( $relation->Placements ) {
 					require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
-					DBPlacements::deletePlacements( $parentId, $childId, 'Placed' );
 					foreach ($relation->Placements as &$plc) {
-						$pagenumbers[] = $plc->Page;
+						$pageNumbers[] = $plc->Page;
 						self::validateAndRepairPageNrs( $plc, __METHOD__ );
-						$placementId = DBPlacements::insertPlacement( $parentId, $childId, $relation->Type, $plc );
+						$placementId = DBPlacements::insertPlacement( $relation->Parent, $relation->Child, $relation->Type, $plc );
 						if( !$placementId ) {
 							throw new BizException( 'ERR_DATABASE', 'Server', DBPlacements::getError() );
 						} else {
@@ -1069,24 +1036,17 @@ class BizRelation
 						}
 					}
 				}
-				$objRelId = DBObjectRelation::getObjectRelationId( $parentId, $childId, $relation->Type );
-				if (is_null($objRelId)){
-					throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Server', $relation->Type);
-				}
 
 				// Translate list of page numbers to pagerange and save to DB:
 				// We don't do this for contained relations (tasks and dossier(template)s)
-				require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-				if( BizObject::canObjectContainPages( $parentType ) ) {
-					$pagerange = NumberUtils::createNumberRange( $pagenumbers );
-					require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
-					$sth = DBObjectRelation::updateObjectRelationPageRange( $parentId, $childId, $pagerange );
-					if (!$sth)	{
-						throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
-					}
-				}
+				self::updatePageRangeIfNeeded(
+					$pageNumbers,
+					$relationInfo,
+					$parentRow['type'],
+					$relation->Parent,
+					$relation->Child );
 
-				if( self::canRelationHaveTargets( $parentType, $relation->Type )) {
+				if( self::canRelationHaveTargets( $parentRow['type'], $relation->Type )) {
 					require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
 					require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
 					require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
@@ -1095,11 +1055,11 @@ class BizRelation
 						// Find for the corresponding Target
 						$targetsToBeUpdated = array();
 						$arrivalTargets = $relation->Targets;
-						$existingTargets = DBTarget::getTargetsbyObjectrelationId( $objRelId );
+						$existingTargets = DBTarget::getTargetsbyObjectrelationId( $relationInfo->Id );
 
 						$targetsToBeDeleted = self::objectRelationTargetsToBeDeleted( $arrivalTargets, $existingTargets );
 						if( $targetsToBeDeleted ) {
-							BizTarget::deleteObjectRelationTargets( $objRelId, $targetsToBeDeleted );
+							BizTarget::deleteObjectRelationTargets( $relationInfo->Id, $targetsToBeDeleted );
 						}
 
 						if( $arrivalTargets && $existingTargets ) {
@@ -1133,67 +1093,74 @@ class BizRelation
 						}
 
 						if( $targetsToBeUpdated ) {
-							BizTarget::updateObjectRelationTargets( $user, $objRelId, $targetsToBeUpdated );
+							BizTarget::updateObjectRelationTargets( $user, $relationInfo->Id, $targetsToBeUpdated );
 						}
 						if( $arrivalTargets ) {
-							BizTarget::createObjectRelationTargets($user, $objRelId, $arrivalTargets);
+							BizTarget::createObjectRelationTargets($user, $relationInfo->Id, $arrivalTargets);
 						}
 						// For UpdateObjectRelation response.
-						$objRelationTargets = DBTarget::getTargetsbyObjectrelationId( $objRelId );
+						$objRelationTargets = DBTarget::getTargetsbyObjectrelationId( $relationInfo->Id );
 					}
 				} // else, Related; nothing to do!
 
 				/* v8.0: Uncomment when serverJob 'UpdateParentModifierAndModified' is supported again.
 				if( $relation->Type == 'Contained' ){
-					if( !isset($serverJobs[$parentId]) ){
-						$serverJobs[$parentId] = true;
+					if( !isset($serverJobs[$relation->Parent]) ){
+						$serverJobs[$relation->Parent] = true;
 						$updateParentJob->createUpdateTaskInBgJob( null, // childId
-                                                                   $parentId // parentId );
+                                                                   $relation->Parent // parentId );
 					}
 				}
 				*/
 
 				// Placed relations can have updated editions, so update the relational targets
 				if ( $relation->Type == 'Placed' ) {
-					self::addRelationalTargetsForPlacements( $user, $relation, $parentType, $childType );
+					self::addRelationalTargetsForPlacements( $user, $relation, $parentRow['type'], $childRow['type'] );
 					if ( $relation->Targets ) {
-						BizTarget::updateObjectRelationTargets( $user, $objRelId, $relation->Targets );
+						BizTarget::updateObjectRelationTargets( $user, $relationInfo->Id, $relation->Targets );
 					}
 				}
 
 				// update geometry
 				if ( isset($relation->Geometry) ) {
-					$attachobj = StorageFactory::gen($childRow['storename'], $childId, "geo-$parentId", XMLTYPE, null, null, null, true);
-
-					if( !$attachobj->saveFile( $relation->Geometry->FilePath ) ) {
-						throw new BizException( 'ERR_ATTACHMENT', 'Server', $attachobj->getError() );
+					$attachObject = StorageFactory::gen(
+						$childRow['storename'],
+						$relation->Child,
+						"geo-$relation->Parent",
+						XMLTYPE,
+						null,
+						null,
+						null,
+						true);
+					if( !$attachObject->saveFile( $relation->Geometry->FilePath ) ) {
+						throw new BizException( 'ERR_ATTACHMENT', 'Server', $attachObject->getError() );
 					}
 				}
 
-				if ( self::manifoldPlacedChild( $childId )) {
-					$objectsToIndex[$parentId] = $parentId;
+				if ( in_array( $relation->Child, $manifoldPlacedChildren ) ) {
+					$objectsToIndex[$relation->Parent] = $relation->Parent;
 				} else {
-					$objectsToIndex[$parentId] = $parentId;
-					$objectsToIndex[$childId] = $childId;
+					$objectsToIndex[$relation->Parent] = $relation->Parent;
+					$objectsToIndex[$relation->Child] = $relation->Child;
 				}
 
-				$relationUpdated = DBObjectRelation::getObjectRelationByRelId( $objRelId ); // To be returned to the response.
-				// Getting parent and child object version.
-				self::addVersionInfoToCreatedRelation( $relationUpdated, $parentId, $childId );
+				$relationUpdated = DBObjectRelation::getObjectRelationByRelId( $relationInfo->Id );
+				$relationUpdated->ParentVersion = $parentRow['version'];
+				$relationUpdated->ChildVersion = $childRow['version'];
 
 				if( isset( $objRelationTargets )) {
 					$relationUpdated->Targets = $objRelationTargets;
 				}
 
 				$childInfo = new ObjectInfo;
-				$childInfo->ID = $childId;
+				$childInfo->ID = $relation->Child;
 				$childInfo->Name = $childRow['name'];
 				$childInfo->Type = $childRow['type'];
 				$childInfo->Format = $childRow['format'];
 				$relationUpdated->ChildInfo = $childInfo;
 
 				$parentInfo = new ObjectInfo;
-				$parentInfo->ID = $parentId;
+				$parentInfo->ID = $relation->Parent;
 				$parentInfo->Name = $parentRow['name'];
 				$parentInfo->Type = $parentRow['type'];
 				$parentInfo->Format = $parentRow['format'];
@@ -1203,18 +1170,64 @@ class BizRelation
 
 				if ( $fireNcastEvent ) {
 					// fire event
-					new smartevent_updateobjectrelation( BizSession::getTicket(), $childId, $relation->Type, $parentId, $parentRow['name'] );
+					new smartevent_updateobjectrelation( BizSession::getTicket(), $relation->Child, $relation->Type, $relation->Parent, $parentRow['name'] );
 				}
 				// Notify event plugins
 				require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
-				BizEnterpriseEvent::createObjectEvent( $childId, 'update' );
-				BizEnterpriseEvent::createObjectEvent( $parentId, 'update' );
+				BizEnterpriseEvent::createObjectEvent( $relation->Child, 'update' );
+				BizEnterpriseEvent::createObjectEvent( $relation->Parent, 'update' );
 			}
 			if ( $objectsToIndex ) {
 				BizSearch::indexObjectsByIds( $objectsToIndex );
 			}
 		}
 		return $relationsUpdated;
+	}
+
+	/**
+	 * Checks if the page range has been changed and must be updated.
+	 *
+	 * @param array $pageNumbers
+	 * @param stdClass $relationInfo Contains the stored relation info for parent/child combinations.
+	 * @param string $parentType
+	 * @param int $parentId
+	 * @param int $childId
+	 * @throws BizException
+	 */
+	static private function updatePageRangeIfNeeded(
+										$pageNumbers,
+										$relationInfo,
+										$parentType,
+										$parentId,
+										$childId )
+	{
+		$storedPageRange = isset( $relationInfo->PageRange ) ? $relationInfo->PageRange : 'notAValidRange';
+		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+		if( BizObject::canObjectContainPages( $parentType ) ) {
+			require_once BASEDIR.'/server/utils/NumberUtils.class.php';
+			$pagerange = NumberUtils::createNumberRange( $pageNumbers );
+			if( $storedPageRange != $pagerange ) {
+				require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
+				if( !DBObjectRelation::updateObjectRelationPageRange( $parentId, $childId, $pagerange ) ) {
+					throw new BizException( 'ERR_DATABASE', 'Server', DBObjectRelation::getError() );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Logs detail information of the child of the updated relation.
+	 *
+	 * @param string $user
+	 * @param array $childRow
+	 * @param int $parentId Id
+	 */
+	static private function logUpdateObjectRelationsService( $user, $childRow, $parentId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
+		DBlog::logService( $user, "UpdateObjectRelations", $childRow['id'],
+			$childRow['publication'], '', $childRow['section'], $childRow['state'],
+			$parentId, '', '', $childRow['type'], $childRow['routeto'], '', $childRow['version'] );
 	}
 
 	/**
@@ -1374,8 +1387,6 @@ class BizRelation
 					$handled[$relation->Child] = true;
 				} catch ( BizException $e ) {
 					LogHandler::Log( __METHOD__, 'WARN', 'Adding of new target failed. Detail: '. $e->getMessage() );
-					/** @noinspection PhpSillyAssignmentInspection */
-					$e = $e; // don't stop
 				}
 			}
 		}
@@ -1865,7 +1876,7 @@ class BizRelation
 	/**
 	 * Checks if an object is in one dossier exactly.
 	 * @param int $child object id of the 'contained' child
-	 * @return object is in one dossier only (true/false)
+	 * @return bool is in one dossier only (true/false)
 	 */
 	public static function inSingleDossier($child)
 	{

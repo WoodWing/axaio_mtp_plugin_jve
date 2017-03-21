@@ -27,7 +27,7 @@ class DBPlacements extends DBBase
 	 * @param Placement $plc The placement details
 	 * @return integer|boolean Placement id. False when creation failed (DB error).
 	 */
-	static function insertPlacement( $parent, $child, $type, $plc )
+	static public function insertPlacement( $parent, $child, $type, $plc )
 	{
 		// If child=0, we expect InDesignArticleIds.
 		if( !$child && !$plc->InDesignArticleIds ) {
@@ -39,7 +39,6 @@ class DBPlacements extends DBBase
 		// and reference it from smart_indesignarticlesplacements table.
 		$placementId = false;
 		if( $plc->InDesignArticleIds ) {
-			
 			// To avoid creating duplicate InDesign Article placements (e.g. in context
 			// of UpdateObjectRelations, EN-86772) first check if the DB has a placement
 			// for the InDesign Article with matching spline id.
@@ -80,7 +79,7 @@ class DBPlacements extends DBBase
 				}
 			}
 		}
-		
+
 		// When child given, create one more placement, this time NOT referenced.
 		// This is the object relational placement.
 		if( $child ) {
@@ -93,7 +92,98 @@ class DBPlacements extends DBBase
 
 		return $placementId;
 	}
-	
+
+	/**
+	 * Creates InDesign Article placements for a specific parent object.
+	 *
+	 * Pre-condition is that no IDA-placements are yet inserted. So records are just inserted. No check is done on
+	 * duplicates.
+	 * Since 9.7: When a placement has InDesignArticleIds defined, another placement is
+	 * created in DB, this time with child = 0. For those records a reference is created
+	 * in the smart_indesignarticlesplacements table.
+	 * After the placements are added, the InDesignArticle placements are added. These are also added by one statement.
+	 *
+	 * @since 10.1.2
+	 * @param string $parent Object ID of object on which is placed.
+	 * @param Placement[] $IDAPlacements The placement details
+	 * @throws BizException
+	 */
+	static public function insertInDesignArticlePlacementsFromScratch( $parent, $IDAPlacements )
+	{
+		// Whether or not a child was given, first create a placement with child=0
+		// and reference it from smart_indesignarticlesplacements table.
+		$values = array();
+		$row = array();
+		if( $IDAPlacements ) foreach( $IDAPlacements as $plc ) {
+			if( $plc->InDesignArticleIds ) {
+					$row = self::objToRow( $plc, true );
+					$row['parent'] = $parent;
+					$row['type'] = 'Placed';
+					$row['child'] = 0;
+					$row['elementid'] = '';
+					$values[] = array_values( $row );
+			}
+		}
+
+		if( $values ) {
+			$result = self::insertRows( self::TABLENAME, array_keys( $row ), $values );
+			if( !$result ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
+		}
+
+		$iDAPlacementRows = self::getInDesignArticlePlacementRows( $parent, array( 'id', 'splineid') );
+		$values = array();
+		// Create relations between the InDesign Articles and their placements.
+		if( $IDAPlacements ) foreach( $IDAPlacements as $plc ) {
+			$newPlacementId = 0;
+			foreach( $iDAPlacementRows as $iDAPlacementRow ) {
+				if( $plc->SplineID == $iDAPlacementRow['splineid'] ) {
+					$newPlacementId = $iDAPlacementRow['id'];
+				}
+			}
+			foreach( $plc->InDesignArticleIds as $idArticleId ) {
+				$row = array();
+				$row['objid'] = $parent;
+				$row['artuid'] = $idArticleId;
+				$row['plcid'] = $newPlacementId;
+				$values[] = array_values( $row );
+			}
+		}
+		if( $values ) {
+			$result = self::insertRows( 'idarticlesplacements', array_keys( $row ), $values );
+			if( !$result ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
+		}
+	}
+
+	/**
+	 * Updates a placement record based on the filter of the $whereFields.
+	 *
+	 * @param stdClass identifier Identifies the unique placement to be updated.
+	 * @param Placement Changed placement
+	 */
+	static public function updatePlacement( $identifier, $placement )
+	{
+		$whereFields = array(
+			'parent' => intval( $identifier->Parent ),
+			'child' => intval( $identifier->Child ),
+			'type' => strval( $identifier->Type ),
+			'edition' => intval( $identifier->EditionId ),
+			'frameid' => strval( $identifier->FrameId )
+		);
+		$where = implode( ' AND ',
+								array_map(
+									function( $column ) { return "`{$column}` = ? "; },
+									array_keys( $whereFields )
+								)
+							 );
+		$params = array_values( $whereFields );
+		$values = self::objToRow( $placement );
+		DBBase::updateRow( self::TABLENAME, $values, $where, $params );
+	}
+
 	/**
 	 * Copies placements for specified parent/child object
 	 *
@@ -106,8 +196,6 @@ class DBPlacements extends DBBase
 	 */
 	static public function copyPlacements( $fromparent, $child, $toparent, $pageOffset = 0, $type = 'Placed' )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$pageOffset = $pageOffset; // To make analyzer happy.
 		$placements = self::getPlacements( $fromparent, $child, $type );
 		if( is_null($placements) ) {
 			return false; // DB error
@@ -195,7 +283,7 @@ class DBPlacements extends DBBase
 	 * @param integer[] $placementIds
 	 * @return bool
 	 */
-	private static function deletePlacementsByIds( array $placementIds )
+	public static function deletePlacementsByIds( array $placementIds )
 	{
 		$retVal = true;
 		if( $placementIds ) {
@@ -394,7 +482,7 @@ class DBPlacements extends DBBase
 		
 		$sql = "SELECT pla.*, edi.`name` FROM $db pla ";
 		$sql .= "LEFT JOIN $editionstable edi ON (pla.`edition` = edi.`id`) ";
-		$sql .= "WHERE `child`=$child AND `parent`=$parent";
+		$sql .= "WHERE `child`= $child AND `parent`= $parent";
 		
 		// Never return relations that are marked as 'deleted'.
 		if ($type) {
@@ -430,8 +518,28 @@ class DBPlacements extends DBBase
 		}
 		
 		return array_values( $placements );
-	}	
-	
+	}
+
+	/**
+	 * Returns InDesign Article placements for specified parent object.
+	 *
+	 * In case of InDesign Article placements the child is set to 0 and the type is 'Placed'.
+	 *
+	 * @param string $parent Object ID of object on which is placed.
+	 * @param mixed fields Array with names of the fields to query or '*' to retrieve all.
+	 * @return Placement[]|null The placements, or NULL in case of DB error
+	 */
+	static private function getInDesignArticlePlacementRows( $parent, $fields = array() )
+	{
+		if( !$fields ) {
+			$fields = '*';
+		}
+		$where = ' `child`= ? AND `parent`= ? AND `type` = ? ';
+		$params = array( 0, $parent, 'Placed' );
+
+		return self::listRows( self::TABLENAME, '', '', $where, $fields, $params );
+	}
+
 	/**
 	 * Returns the first placement(s!) for specified parent/child object that allows caller to
 	 * determine the x,y position on the page where the object is placed. Images have one frame.
@@ -624,7 +732,7 @@ class DBPlacements extends DBBase
 		
 		return $retPlacements;
 	}
-	
+
 	/**
 	 * Retrieves placements from DB by given placement ids.
 	 * If a placement consists of threaded frames and only the first one is needed onlyFirstFrame has to be set to true.
@@ -691,36 +799,78 @@ class DBPlacements extends DBBase
 	 * Converts a Placement workflow data object into a placement record (array of DB fields).
 	 *
 	 * @param Placement $obj Workflow placement data object
+	 * @param bool $default In case the object property is null set the default (as defined in dbmodel)
 	 * @return array DB placement record (array of DB fields)
 	 */
-	static private function objToRow( $obj )
+	static private function objToRow( $obj, $default = false )
 	{
-		$row = array();
-		if(!is_null($obj->Page))         		$row['page']			= is_numeric($obj->Page) ? $obj->Page : 0;
-		if(!is_null($obj->Element))				$row['element']			= $obj->Element;
-		if(!is_null($obj->ElementID))			$row['elementid']		= $obj->ElementID;
-		if(!is_null($obj->FrameOrder))   		$row['frameorder']		= is_numeric($obj->FrameOrder) ? $obj->FrameOrder : 0;
-		if(!is_null($obj->FrameID))				$row['frameid']			= $obj->FrameID;
-		if(!is_null($obj->Left))				$row['_left']			= is_numeric($obj->Left) ? $obj->Left : 0;
-		if(!is_null($obj->Top))          		$row['top']				= is_numeric($obj->Top) ? $obj->Top : 0;
-		if(!is_null($obj->Width))				$row['width']			= is_numeric($obj->Width) ? $obj->Width : 0;
-		if(!is_null($obj->Height))				$row['height']			= is_numeric($obj->Height) ? $obj->Height : 0;
-		if(!is_null($obj->Overset))				$row['overset']			= is_numeric($obj->Overset) ? $obj->Overset : 0;
-		if(!is_null($obj->OversetChars)) 		$row['oversetchars']	= is_numeric($obj->OversetChars) ? $obj->OversetChars : 0;
-		if(!is_null($obj->OversetLines))		$row['oversetlines']	= is_numeric($obj->OversetLines) ? $obj->OversetLines : 0;
-		if(!is_null($obj->Layer))				$row['layer']			= $obj->Layer;
-		if(!is_null($obj->Content))				$row['content']			= (strtolower(DBTYPE) == 'mysql') ? mb_strcut( $obj->Content, 0, 64000, 'UTF-8' ) : $obj->Content;
-		if(!is_null($obj->Edition))				$row['edition']			= $obj->Edition->Id ? $obj->Edition->Id : 0;
-		if(!is_null($obj->ContentDx))			$row['contentdx']		= is_numeric($obj->ContentDx) ? $obj->ContentDx : 0;
-		if(!is_null($obj->ContentDy))			$row['contentdy']		= is_numeric($obj->ContentDy) ? $obj->ContentDy : 0;
-		if(!is_null($obj->ScaleX))				$row['scalex']			= is_numeric($obj->ScaleX) ? $obj->ScaleX : 1;
-		if(!is_null($obj->ScaleY))				$row['scaley']			= is_numeric($obj->ScaleY) ? $obj->ScaleY : 1;
-		if(!is_null($obj->PageSequence))		$row['pagesequence']	= is_numeric($obj->PageSequence) ? $obj->PageSequence : 0;
-		if(!is_null($obj->PageNumber))			$row['pagenumber']		= $obj->PageNumber;
-		if(!is_null($obj->FormWidgetId))        $row['formwidgetid']    = $obj->FormWidgetId;
-		if(!is_null($obj->FrameType))           $row['frametype']       = $obj->FrameType;
-		if(!is_null($obj->SplineID))			$row['splineid']		= $obj->SplineID;
-		
+		if( $default ) {
+			$row = self::setDefaultsForRow();
+		} else {
+			$row = array();
+		}
+		if( !is_null( $obj->Page ) ) $row['page'] = is_numeric( $obj->Page ) ? $obj->Page : 0;
+		if( !is_null( $obj->Element ) ) $row['element'] = $obj->Element;
+		if( !is_null( $obj->ElementID ) ) $row['elementid'] = $obj->ElementID;
+		if( !is_null( $obj->FrameOrder ) ) $row['frameorder'] = is_numeric( $obj->FrameOrder ) ? $obj->FrameOrder : 0;
+		if( !is_null( $obj->FrameID ) ) $row['frameid'] = $obj->FrameID;
+		if( !is_null( $obj->Left ) ) $row['_left'] = is_numeric( $obj->Left ) ? $obj->Left : 0;
+		if( !is_null( $obj->Top ) ) $row['top'] = is_numeric( $obj->Top ) ? $obj->Top : 0;
+		if( !is_null( $obj->Width ) ) $row['width'] = is_numeric( $obj->Width ) ? $obj->Width : 0;
+		if( !is_null( $obj->Height ) ) $row['height'] = is_numeric( $obj->Height ) ? $obj->Height : 0;
+		if( !is_null( $obj->Overset ) ) $row['overset'] = is_numeric( $obj->Overset ) ? $obj->Overset : 0;
+		if( !is_null( $obj->OversetChars ) ) $row['oversetchars'] = is_numeric( $obj->OversetChars ) ? $obj->OversetChars : 0;
+		if( !is_null( $obj->OversetLines ) ) $row['oversetlines'] = is_numeric( $obj->OversetLines ) ? $obj->OversetLines : 0;
+		if( !is_null( $obj->Layer ) ) $row['layer'] = $obj->Layer;
+		if( !is_null( $obj->Content ) ) $row['content'] = ( strtolower( DBTYPE ) == 'mysql' ) ? mb_strcut( $obj->Content, 0, 64000, 'UTF-8' ) : $obj->Content;
+		if( !is_null( $obj->Edition ) ) $row['edition'] = $obj->Edition->Id ? $obj->Edition->Id : 0;
+		if( !is_null( $obj->ContentDx ) ) $row['contentdx'] = is_numeric( $obj->ContentDx ) ? $obj->ContentDx : 0;
+		if( !is_null( $obj->ContentDy ) ) $row['contentdy'] = is_numeric( $obj->ContentDy ) ? $obj->ContentDy : 0;
+		if( !is_null( $obj->ScaleX ) ) $row['scalex'] = is_numeric( $obj->ScaleX ) ? $obj->ScaleX : 1;
+		if( !is_null( $obj->ScaleY ) ) $row['scaley'] = is_numeric( $obj->ScaleY ) ? $obj->ScaleY : 1;
+		if( !is_null( $obj->PageSequence ) ) $row['pagesequence'] = is_numeric( $obj->PageSequence ) ? $obj->PageSequence : 0;
+		if( !is_null( $obj->PageNumber ) ) $row['pagenumber'] = $obj->PageNumber;
+		if( !is_null( $obj->FormWidgetId ) ) $row['formwidgetid'] = $obj->FormWidgetId;
+		if( !is_null( $obj->FrameType ) ) $row['frametype'] = $obj->FrameType;
+		if( !is_null( $obj->SplineID ) ) $row['splineid'] = $obj->SplineID;
+
+		return $row;
+	}
+
+	/**
+	 * Returns columns with their default value.
+	 *
+	 * @return array with column/default as key/value.
+	 */
+	static private function setDefaultsForRow()
+	{
+		$row = array(
+		  'page' => 0,
+		  'element' => '',
+		  'elementid' => '',
+		  'frameorder' => 0,
+		  'frameid' => '',
+		  '_left' => 0,
+		  'top' => 0,
+		  'width' => 0,
+		  'height' => 0,
+		  'overset' => 0,
+		  'oversetchars' => 0,
+		  'oversetlines' => 0,
+		  'layer' => '',
+		  'content' => '',
+		  'edition' => 0,
+		  'contentdx' => 0,
+		  'contentdy' => 0,
+		  'scalex' => 0,
+		  'scaley' => 0,
+		  'pagesequence' => 0,
+		  'pagenumber' => '',
+		  'formwidgetid' => '',
+		  'frametype' => '',
+		  'splineid' => '',
+		);
+
 		return $row;
 	}
 
@@ -815,5 +965,34 @@ class DBPlacements extends DBBase
 			$placement->SplineID    = $row['splineid'];
 		}
 		return $placement;
+	}
+
+	/**
+	 * Returns all placement ids belonging to the relations.
+	 *
+	 * @param Relation[] $relations
+	 * @return array|null
+	 */
+	static public function getPlacementIdsByRelations( array $relations )
+	{
+		$placementsIds = array();
+		if( $relations ) {
+			$or = '';
+			$where = '(';
+			$params = array();
+			foreach( $relations as $relation ) {
+				$where .= $or;
+				$where .= '( `parent`= ? AND `child`= ? AND `type` = ? ) ';
+				$params[] = $relation->Parent;
+				$params[] = $relation->Child;
+				$params[] = $relation->Type;
+				$or = 'OR ';
+			}
+			$where .= ')';
+			$rows = self::listRows( self::TABLENAME, '', '', $where, array('id'), $params );
+			$placementsIds = array_map( function( $row) { return $row['id']; }, $rows);
+		}
+
+		return $placementsIds;
 	}
 }

@@ -33,6 +33,7 @@ class DBObject extends DBBase
 	 * @param string $objtype The type of the object.
 	 * @param string $proposedobjectname: proposed name of the new object.
 	 * @return string Either new objectname or null if no name found.
+	 * @deprecated since 10.0.4 Please use BizObject::getUniqueObjectName() instead.
 	 */
 	static public function getUniqueObjectName($issueidsarray, $objtype, $proposedobjectname)
 	{
@@ -66,7 +67,7 @@ class DBObject extends DBBase
 			// escape4like on $startofname is not needed. $startofname is already validated 
 			$sth = $dbdriver->query($sql);
 			while( ( $row = $dbdriver->fetch($sth) ) ) {
-				$existingnames[$row['name']] = null;
+				$existingnames[$row['name']] = true;
 			}
 		}
 
@@ -74,7 +75,7 @@ class DBObject extends DBBase
 
 		//Add $result to existingnames
 		if (!empty($result)) {
-			$existingnames[$result] = null;
+			$existingnames[$result] = true;
 		}
 
 		return $result;
@@ -110,40 +111,48 @@ class DBObject extends DBBase
 		$sth = $dbDriver->query( $sql, $params );
 		$existingChildNames = array();
 		while( ( $row = $dbDriver->fetch($sth) ) ) {
-				$existingChildNames[$row['name']] = null;
+				$existingChildNames[$row['name']] = true;
 		}
 
 		$result = self::makeNameUnique( $existingChildNames, $proposedName ); 
 		
 		return $result;	
-	}	
+	}
 
 	/**
 	 * Returns a new name when the name already exists.
-	 * 
+	 *
 	 * A proposed name is checked against an list of existing names. If it is in the list a new is generated. This is
 	 * done by adding a suffix in the format _0000.
+	 * In case long names are used (around the maximum length) the new name cannot be just the old name plus a suffix.
+	 * E.g. if the old name is 60 characters long the new name would become 65 characters long.
+	 * In such cases the proposed name is shorted to the maximum length of Name property minus the 5 characters
+	 * for the suffix (AUTONAMING_NUMDIGITS + underscore).
+	 *
 	 * @param array $existingNames List against which the proposal is checked.
-	 * @param string $startOfName Proposed name.
+	 * @param string $proposedName Proposed name.
 	 * @return string Name, either the proposed one if it is unique or a new one.
 	 */
-	static public function makeNameUnique( $existingNames, $startOfName )
+	static public function makeNameUnique( $existingNames, $proposedName )
 	{
-		$result = '';
-		//Use the proposedname if it does not exist yet.
-		if (!array_key_exists($startOfName, $existingNames)) {
-			$result = $startOfName;
-		}
-		else { //Else loop through numbers until we find a name that's not in the $existingnames-array yet.
-			$maxn = pow( 10,AUTONAMING_NUMDIGITS + 1 ) - 1;
-			for ( $i=1; $i<=$maxn; $i++ ) {
-				$newName = $startOfName . '_' . str_pad( $i, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
-				if ( !array_key_exists($newName, $existingNames )) {
+		if( !array_key_exists( $proposedName, $existingNames ) ) {
+			$result = $proposedName;
+		} else {
+			require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+			$maxNameLength = BizProperty::getStandardPropertyMaxLength( 'Name' ) - ( AUTONAMING_NUMDIGITS + 1 );
+			if ( mb_strlen( $proposedName, 'UTF8' ) >  $maxNameLength ) {
+				$proposedName = mb_substr( $proposedName, 0, $maxNameLength, 'UTF8' );
+			}
+			$result = '';
+			$maxSuffix = intval( str_repeat( '9', AUTONAMING_NUMDIGITS) );
+			for( $i = 1; $i <= $maxSuffix; $i++ ) {
+				$newName = $proposedName.'_'.str_pad( $i, AUTONAMING_NUMDIGITS, '0', STR_PAD_LEFT );
+				if( !array_key_exists( $newName, $existingNames ) ) {
 					$result = $newName;
 					break;
 				}
 			}
-		}	
+		}
 
 		return $result;
 	}
@@ -442,28 +451,7 @@ class DBObject extends DBBase
 	 */
 	static public function getMultipleObjectsProperties( array $objectIds )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$objTbl = $dbDriver->tablename( self::TABLENAME );
-		$pubTbl = $dbDriver->tablename( 'publications' );
-		$secTbl = $dbDriver->tablename( 'publsections' );
-		$sttTbl = $dbDriver->tablename( 'states' );
-		$lckTbl = $dbDriver->tablename( 'objectlocks' );
-		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' ) ).' as "version"';
-
-		$sql = 'SELECT o.`id`, o.`documentid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
-			'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, o.`modifier`, o.`comment`, '.
-			'pub.`publication` as "pubname", sec.`section` as "secname", stt.`state` as "sttname", '.
-			'stt.`type` as "stttype", stt.`color` as "sttcolor", o.`routeto`, lck.`usr` as "lockedby", '.$verFld.' '.
-			"FROM $objTbl o ".
-			"INNER JOIN $pubTbl pub ON (o.`publication` = pub.`id` ) ".
-			"LEFT JOIN $secTbl sec ON (o.`section` = sec.`id` ) ".
-			"LEFT JOIN $sttTbl stt ON (o.`state` = stt.`id` ) ". // LEFT JOIN because of Personal status = -1
-			"LEFT JOIN $lckTbl lck ON (o.`id` = lck.`object` ) ".
-			'WHERE o.`id` IN ( '.implode( ',', $objectIds ).' ) ';
-		$params = array();
-		$sth = $dbDriver->query( $sql, $params );
-		$rows = self::fetchResults( $sth, 'id', false, $dbDriver );
-
+		$rows = self::getMultipleObjectDBRows( $objectIds );
 		$mds = array();
 		if( $rows ) foreach( $rows as $row ) {
 
@@ -506,8 +494,41 @@ class DBObject extends DBBase
 		}
 		return $mds;
 	}
-	
-    static public function getTemplateObject( $name, $type )
+
+	/**
+	 * Returns an array of database object rows.
+	 *
+	 * @param array $objectIds
+	 * @return array with object rows.
+	 */
+	static public function getMultipleObjectDBRows( array $objectIds )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$objTbl = $dbDriver->tablename( self::TABLENAME );
+		$pubTbl = $dbDriver->tablename( 'publications' );
+		$secTbl = $dbDriver->tablename( 'publsections' );
+		$sttTbl = $dbDriver->tablename( 'states' );
+		$lckTbl = $dbDriver->tablename( 'objectlocks' );
+		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' ) ).' as "version"';
+
+		$sql = 'SELECT o.`id`, o.`documentid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
+			'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, o.`modifier`, o.`comment`, '.
+			'pub.`publication` as "pubname", sec.`section` as "secname", stt.`state` as "sttname", '.
+			'stt.`type` as "stttype", stt.`color` as "sttcolor", o.`routeto`, lck.`usr` as "lockedby", '.$verFld.' '.
+			"FROM $objTbl o ".
+			"INNER JOIN $pubTbl pub ON (o.`publication` = pub.`id` ) ".
+			"LEFT JOIN $secTbl sec ON (o.`section` = sec.`id` ) ".
+			"LEFT JOIN $sttTbl stt ON (o.`state` = stt.`id` ) ". // LEFT JOIN because of Personal status = -1
+			"LEFT JOIN $lckTbl lck ON (o.`id` = lck.`object` ) ".
+			'WHERE o.`id` IN ( '.implode( ',', $objectIds ).' ) ';
+		$params = array();
+		$sth = $dbDriver->query( $sql, $params );
+		$rows = self::fetchResults( $sth, 'id', false, $dbDriver );
+
+		return $rows;
+	}
+
+	static public function getTemplateObject( $name, $type )
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbo = $dbDriver->tablename("objects");
@@ -706,18 +727,15 @@ class DBObject extends DBBase
 	}
 
 
-    static public function checkNameObject( $publ, $issue, $name, $type = null, $id = null )
+    static public function checkNameObject( $publ, /** @noinspection PhpUnusedParameterInspection */
+                                            $issue, $name, $type = null, $id = null )
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' )).' as "version"';
 
 		$dbo = $dbDriver->tablename(self::TABLENAME);
 		$publ = $dbDriver->toDBString($publ);
-		$issue = $dbDriver->toDBString($issue);
 		$name = $dbDriver->toDBString($name);
-		if(!$issue){
-			$issue = 0;
-		}
 
 		//TODO BZ#7258
 		//and `issue` = $issue
@@ -1430,6 +1448,10 @@ class DBObject extends DBBase
 			case 'HighResFile':
 				$formattedValue = addslashes( $value );
 				break;
+			case 'Name':
+				require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+				$formattedValue = mb_substr( $value, 0, BizProperty::getStandardPropertyMaxLength( 'Name' ), 'UTF8' );
+				break;
 			default:
 				$formattedValue = self::truncatePropertyValue( $propName, $value );
 				break;
@@ -1873,4 +1895,33 @@ class DBObject extends DBBase
 
 		return $row;
 	}
+
+	/**
+	 * Returns the documentid of a publish form template that uses a specified property.
+	 *
+	 * @since 10.1.2
+	 * @param string $propertyName
+	 * @return string
+	 */
+	static public function getDocumentIdOfPublishFormTemplateUsedByProperty( $propertyName )
+	{
+		$dbh = DBDriverFactory::gen();
+		$objects = $dbh->tablename( self::TABLENAME );
+		$properties = $dbh->tablename( 'properties' );
+		$result = null;
+		$sql = 'SELECT o.`documentid` '.
+				 'FROM '.$objects.' as o, '.$properties.' as p '.
+				 'WHERE p.`name` = ? '.
+				 'AND o.`id` = p.`templateid` ';
+
+		$params = array( strval( $propertyName ) );
+		$sth = $dbh->query( $sql, $params );
+		if( $sth ) {
+			$row = $dbh->fetch( $sth );
+			$result = $row['documentid'];
+		}
+
+		return $result;
+	}
+
 }

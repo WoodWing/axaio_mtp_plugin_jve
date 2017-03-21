@@ -138,8 +138,16 @@ class BizNamedQuery extends BizQueryBase
 		require_once BASEDIR . '/server/interfaces/services/wfl/WflNamedQueryResponse.class.php';
 
 		$minimalProps = self::getMinimalPropsForPublishTemplates();
-		$ret = BizQuery::queryObjects(
-			$ticket, $user, $args, $firstEntry, $maxEntries, null, $hierarchical, $queryOrder, $minimalProps, null );
+	   require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+	   $request = new WflQueryObjectsRequest();
+	   $request->Ticket = $ticket;
+	   $request->Params = $args;
+	   $request->FirstEntry = $firstEntry;
+	   $request->MaxEntries = $maxEntries;
+	   $request->Hierarchical = $hierarchical;
+	   $request->Order = $queryOrder;
+	   $request->MinimalProps = $minimalProps;
+		$ret = BizQuery::queryObjects2( $request, $user );
 
 		// QueryObjects returns a WflQueryObjectsResponse, but a WflNamedQueryResponse is needed.
 		return WW_Utils_PHPClass::typeCast( $ret, 'WflNamedQueryResponse' );
@@ -919,10 +927,17 @@ class BizNamedQuery extends BizQueryBase
 		
 		// Minimal properties needed for "Inbox' query. BZ#16495
 		$minimalProps = array('ID', 'Type', 'Name', 'State', 'Format', 'LockedBy', 'Category' ,'PublicationId', 'SectionId', 'StateId', 'PubChannelIds');
-		$minimalProps = self::addMinPropForOverRuleIssue($mode, $minimalProps);	
-		
-		$result = BizQuery::queryObjects(
-			$ticket, $user, $params, $firstEntry, $maxEntries, null, true, $queryOrder, $minimalProps, null );
+		$minimalProps = self::addMinPropForOverRuleIssue($mode, $minimalProps);
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = $ticket;
+		$request->Params = $params;
+		$request->FirstEntry = $firstEntry;
+		$request->MaxEntries = $maxEntries;
+		$request->Hierarchical = true;
+		$request->Order = $queryOrder;
+		$request->MinimalProps = $minimalProps;
+		$result = BizQuery::queryObjects2( $request, $user );
 		
 		// QueryObjects returns a WflQueryObjectsResponse, but a WflNamedQueryResponse is needed. So parse the object. BZ#17257
 		require_once BASEDIR.'/server/utils/PHPClass.class.php';
@@ -966,9 +981,17 @@ class BizNamedQuery extends BizQueryBase
 			'PubChannels', 'PubChannelIds', 'State', 'Rating', 'Description');
 		$minimalProps = self::addMinPropForOverRuleIssue($mode, $minimalProps);
 
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = $ticket;
+		$request->Params = $params;
+		$request->FirstEntry = $firstEntry;
+		$request->MaxEntries = $maxEntries;
+		$request->Hierarchical = $hierarchical;
+		$request->Order = $queryOrder;
+		$request->MinimalProps = $minimalProps;
 		require_once BASEDIR . '/server/bizclasses/BizQuery.class.php';
-		$result = BizQuery::queryObjects(
-			$ticket, $user, $params, $firstEntry, $maxEntries, null, $hierarchical, $queryOrder, $minimalProps, null );
+		$result = BizQuery::queryObjects2( $request, $user );
 
 		require_once BASEDIR.'/server/utils/PHPClass.class.php';
 		$result = WW_Utils_PHPClass::typeCast( $result, 'WflNamedQueryResponse' );

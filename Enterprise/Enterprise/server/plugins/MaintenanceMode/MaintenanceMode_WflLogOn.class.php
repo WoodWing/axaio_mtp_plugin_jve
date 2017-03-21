@@ -87,7 +87,9 @@ class MaintenanceMode_WflLogOn extends WflLogOn_EnterpriseConnector
 		if ( BizSession::getRunMode() == BizSession::RUNMODE_BACKGROUND  ) {
 			return true;
 		}
-		if( BizSession::isAppInTicket( null, 'mover-' ) || BizSession::isAppInTicket( null, 'indesign server'  ) ) {
+		if( BizSession::isAppInTicket( null, 'mover-' ) ||
+			BizSession::isAppInTicket( null, 'indesign server'  ) ||
+			BizSession::isAppInTicket( null, 'elvis' )) {
 			return true;
 		}
 

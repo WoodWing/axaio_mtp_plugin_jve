@@ -27,6 +27,7 @@ require_once BASEDIR.'/server/dbclasses/DBAppSession.class.php';
 class BizWebEditWorkspace
 {
 	private $workspace = null;
+	const SEPARATOR = '/';
 	
 	// ------------------------------------------------------------------
 	// SERVICES
@@ -533,11 +534,6 @@ class BizWebEditWorkspace
 												$layoutVersion = '', $guidsOfChangedStories = array(),
 												array $requestInfo = array() )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$artname = $artname; // Obsolete parameter, keep analyzer happy
-		/** @noinspection PhpSillyAssignmentInspection */
-		$guids = $guids; // Obsolete parameter, keep analyzer happy
-		
 		// Determine the article ids-formats mapping.
 		if( count($articleIdsFormats) == 0 ) { // backwards compatible mode
 			$articleIdsFormats = array( $artid => $format );
@@ -1038,48 +1034,48 @@ class BizWebEditWorkspace
 				// can draw boxes for the sibling frames on the page and allow image/text (re)placements.
 				if( in_array( 'Relations', $requestInfo ) ) {
 					$ret['Relations'] = $this->composeObjectRelations( $xpathObjectDom );
-					
-					// Although the layout resides in workspace, we want to save the placed
-					// relations into the DB. This is done since SC suppresses the CreateObjectRelations
-					// requests in context of IDPreview.js. The suppress is done for performance
-					// reasons, because a few Object Operations may result into many of those requests,
-					// which are all called synchronously and so for poor WANs this would slow down
-					// the preview operation for a few seconds, while the user is waiting.
-					require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-					$user = BizSession::getShortUserName();
-					
-					// Note that the DB updates below are guarded by BizObject::createSemaphoreForSaveLayout()
-					// to avoid SaveObjects being executed in the same time as PreviewArticle(s)AtWorkspace (EN-86722).
+					$rebuildNeeded = $this->isRebuildStoredRelationsPlacementsNeeded( $layoutId, $ret['Relations'] );
+					if( $rebuildNeeded ) {
+						// Although the layout resides in workspace, we want to save the placed
+						// relations into the DB. This is done since SC suppresses the CreateObjectRelations
+						// requests in context of IDPreview.js. The suppress is done for performance
+						// reasons, because a few Object Operations may result into many of those requests,
+						// which are all called synchronously and so for poor WANs this would slow down
+						// the preview operation for a few seconds, while the user is waiting.
+						require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+						$user = BizSession::getShortUserName();
 
-					// Before delete+create object relations, make sure to remove all InDesignArticles
-					// since this does a cascade delete of their object->placements, which may be
-					// referenced through the relation->placements as well; Doing this after would
-					// destroy the InDesignArticle placements set through the relations.
-					if( !is_null( $ret['InDesignArticles'] )) {
-						require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-						DBInDesignArticle::deleteInDesignArticles( $layoutId );
-					}
+						// Note that the DB updates below are guarded by BizObject::createSemaphoreForSaveLayout()
+						// to avoid SaveObjects being executed in the same time as PreviewArticle(s)AtWorkspace (EN-86722).
 
-					// Delete all InDesignArticle placements (v9.7)
-					// Needs to be done BEFORE saveObjectPlacedRelations() since that is ALSO creating
-					// InDesignArticle placements (the ones that are also relational placements).
-					if( !is_null($ret['Placements']) ) {
-						require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
-						DBPlacements::deletePlacements( $layoutId, 0, 'Placed' );
-					}
+						// Before delete+create object relations, make sure to remove all InDesignArticles
+						// since this does a cascade delete of their object->placements, which may be
+						// referenced through the relation->placements as well; Doing this after would
+						// destroy the InDesignArticle placements set through the relations.
+						if( !is_null( $ret['InDesignArticles'] ) ) {
+							require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
+							DBInDesignArticle::deleteInDesignArticles( $layoutId );
+						}
 
-					BizObject::saveObjectPlacedRelations( $user, $layoutId, $ret['Relations'], false, false );
+						// Delete all InDesignArticle placements (v9.7)
+						// Needs to be done BEFORE saveObjectPlacedRelations() since that is ALSO creating
+						// InDesignArticle placements (the ones that are also relational placements).
+						if( !is_null( $ret['Placements'] ) ) {
+							require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+							DBPlacements::deletePlacements( $layoutId, 0, 'Placed' );
+						}
 
-					// Save the Indesign Articles for the layout object (v9.7).
-					if( !is_null($ret['InDesignArticles']) ) {
-						require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-						DBInDesignArticle::createInDesignArticles( $layoutId, $ret['InDesignArticles'] );
-					}
+						BizObject::saveObjectPlacedRelations( $user, $layoutId, $ret['Relations'], false, false );
 
-					// Save the Indesign Article Placements for the layout object (v9.7).
-					if( !is_null( $iaPlacements ) ) {
-						foreach( $iaPlacements as $iaPlacement ) {
-							DBPlacements::insertPlacement( $layoutId, 0, 'Placed', $iaPlacement );
+						// Save the InDesign Articles for the layout object (v9.7).
+						if( !is_null( $ret['InDesignArticles'] ) ) {
+							require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
+							DBInDesignArticle::createInDesignArticles( $layoutId, $ret['InDesignArticles'] );
+						}
+
+						// Save the InDesign Article Placements for the layout object (v9.7).
+						if( !is_null( $iaPlacements ) ) {
+							DBPlacements::insertInDesignArticlePlacementsFromScratch( $layoutId, $iaPlacements );
 						}
 					}
 					
@@ -2323,4 +2319,188 @@ class BizWebEditWorkspace
 			$versionGuidAdobe->item(0)->setAttribute( 'VersionGuid', $newVersionGuid );*/
 		}
 	}
+
+	/**
+	 * Compares the composed relations/placements and the stored relations/placements to determine if a total rebuild
+	 * of the stored data is needed.
+	 *
+	 * Rebuild is needed if for example frame Ids are changed or InDesign Articles are changed or the number of stored
+	 * relations and composed relations are not the same. If only a 'harmless' property of a placement is changed then
+	 * the placement is just updated. E.g. if some text is added to an article component the underset/overset changes
+	 * and there is no need to rebuild all relations and placements.
+	 * First the stored relations are enriched with potential InDesignArticle Ids. Next structures are made of unique
+	 * placements. Both for the composed data as the stored data. Finally these structures are compared to see if a
+	 * rebuild is needed.
+	 *
+	 * @since 10.1.2
+	 * @param int $layoutId The layout of the preview.
+	 * @param Relation[]|null $composedRelations The relations as retrieved from the composed data.
+	 * @return bool $rebuildNeeded
+	 */
+	private function isRebuildStoredRelationsPlacementsNeeded( $layoutId, $composedRelations )
+	{
+		PerformanceProfiler::startProfile( 'Preview_Check_On_Placements', 5 );
+		$rebuildNeeded = false;
+		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
+		$storedRelations = BizRelation::getObjectRelations( $layoutId, true, false, null, false, false, 'Placed' );
+		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+		$storedInDesignArticlePlacements = DBPlacements::getPlacements( $layoutId, 0, 'Placed');
+		$storedRelationsWithIDSArticles = $this->addInDesignArticleToRelations( $storedRelations, $storedInDesignArticlePlacements );
+		$storedPlacementsByKey = $this->extractPlacementsByKeyFromRelations( $storedRelationsWithIDSArticles );
+		$composedPlacementsByKey = $this->extractPlacementsByKeyFromRelations( $composedRelations );
+		if( $this->numberOfPlacementsDiffer( $storedPlacementsByKey, $composedPlacementsByKey )) {
+			$rebuildNeeded = true;
+		} elseif( !$this->compareAndRepairPlacementProperties( $storedPlacementsByKey, $composedPlacementsByKey ) ) {
+			$rebuildNeeded = true;
+		}
+		PerformanceProfiler::stopProfile( 'Preview_Check_On_Placements', 5 );
+
+		return $rebuildNeeded;
+	}
+
+	/**
+	 * Fills InDesignArticleIds of the placements of stored relations.
+	 *
+	 * The (stored) relations and the placements have the same parent. Based on the frame id and the edition a link is made.
+	 *
+	 * @since 10.1.2
+	 * @param Relation[] $storedRelations
+	 * @param Placement[] $inDesignArticlePlacements
+	 * @return Relation[] $storedRelations enriched with ArticleIds
+	 */
+	private function addInDesignArticleToRelations( $storedRelations , $inDesignArticlePlacements )
+	{
+		if( $storedRelations ) foreach( $storedRelations as $storedRelation ) {
+			if( $storedRelation->Placements ) foreach( $storedRelation->Placements as $key => $placement ) {
+				if( $inDesignArticlePlacements ) foreach( $inDesignArticlePlacements as $inDesignArticlePlacement ) {
+					if( ( $inDesignArticlePlacement->FrameID == $placement->FrameID ) &&
+						 ( $inDesignArticlePlacement->Edition == $placement->Edition )
+					) {
+						$storedRelation->Placements[$key]->InDesignArticleIds = $inDesignArticlePlacement->InDesignArticleIds;
+						break;
+					}
+				}
+			}
+		}
+
+		return $storedRelations;
+	}
+
+	/**
+	 * Relations with placements are transformed to an array with with unique placements.
+	 *
+	 * Placements are unique by the parent/child/type/frameid/edition. From these attributes a unique key is made. The
+	 * value of the key is the placement object itself.
+	 *
+	 * @since 10.1.2
+	 * @param Relation[]|null $relations
+	 * @return Placement[] List of unique placements.
+	 */
+	private function extractPlacementsByKeyFromRelations( $relations )
+	{
+		$placements = array();
+		if( $relations ) foreach ( $relations as $relation ) {
+			$relationKey = strval( $relation->Parent ).self::SEPARATOR.strval( $relation->Child ).self::SEPARATOR.strval( $relation->Type );
+			if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
+				$key = $relationKey;
+				if( empty( $placement->FrameID ) ) {
+					$key .= self::SEPARATOR.'0';
+				} else {
+					$key .= self::SEPARATOR.strval( $placement->FrameID );
+				}
+				if( isset( $placement->Edition->Id ) ) {
+					$key .= self::SEPARATOR.( $placement->Edition->Id );
+				} else {
+					$key .= self::SEPARATOR.'0';
+				}
+				$placements[ $key ] = $placement;
+			}
+		}
+
+		return $placements;
+	}
+
+	/**
+	 * Checks if two arrays with placements contain the same number of placements.
+	 *
+	 * Not only the number of placements must be equal but also the identifiers fo the placements (keys of the arrays).
+	 *
+	 * @param Placement[] $lhsPlacementsByKey
+	 * @param Placement[] $rhsPlacementsByKey
+	 * @return bool
+	 */
+	private function numberOfPlacementsDiffer( $lhsPlacementsByKey, $rhsPlacementsByKey )
+	{
+		$numberDiffers = false;
+		if( !$this->sameEmptiness( $lhsPlacementsByKey, $rhsPlacementsByKey ) ) {
+			$numberDiffers = true;
+		} elseif( is_array( $lhsPlacementsByKey ) && is_array( $rhsPlacementsByKey ) ) {
+			if( !empty( array_diff_key( $lhsPlacementsByKey, $rhsPlacementsByKey ) ) ||
+				!empty( array_diff_key( $rhsPlacementsByKey, $lhsPlacementsByKey ) ) ) {
+				$numberDiffers = true;
+			}
+		}	
+		
+		return $numberDiffers;
+	}	
+
+	/**
+	 * Checks for two arrays with unique placements and repairs small differences.
+	 *
+	 * If two unique placements differ (stored and composed) it is sometimes possible to just update the stored one with
+	 * the changed properties of the composed placement. If the difference is too fundamental no repair action is done.
+	 * In case there are only reparable differences the stored placement is updated with the properties of the composed
+	 * one.
+	 *
+	 * @since 10.1.2
+	 * @param Placement[] $storedPlacementsByKey
+	 * @param Placement[] $composedPlacementsByKey
+	 * @return bool true if no differences found or differences could be repaired, else false
+	 */
+	private function compareAndRepairPlacementProperties( $storedPlacementsByKey, $composedPlacementsByKey )
+	{
+		$isReparable = true;
+		$changedPlacements = array();
+		require_once BASEDIR.'/server/bizclasses/BizWebEditWorkspace/ComparePlacements.class.php';
+		if( $storedPlacementsByKey ) foreach( $storedPlacementsByKey as $key => $storedPlacementByKey ) {
+			$composedPlacementByKey = $composedPlacementsByKey[ $key ];
+			$comparePlacements = new BizWebEditWorkspace_ComparePlacements();
+			$comparePlacements->comparePlacements( $storedPlacementByKey, $composedPlacementByKey );
+			if( $comparePlacements->getElementalDiff() ) {
+				$isReparable = false;
+				break;
+			} elseif( $comparePlacements->getNonElementalDiff() ) {
+				$changedPlacements[ $key ] = $composedPlacementByKey;
+			}
+		}
+
+		if( $isReparable && $changedPlacements ) {
+			require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+			foreach( $changedPlacements as $keyString => $placement ) {
+				$keyValues = explode( self::SEPARATOR, $keyString );
+				$identifier = new stdClass();
+				$identifier->Parent = $keyValues[0];
+				$identifier->Child = $keyValues[1];
+				$identifier->Type = $keyValues[2];
+				$identifier->FrameId = ( $keyValues[3] ) ? $keyValues[3] : '';
+				$identifier->EditionId = $keyValues[4];
+				DBPlacements::updatePlacement( $identifier, $placement );
+			}
+		}
+
+		return $isReparable;
+	}
+
+	/**
+	 * Checks if either both values are empty or both are not empty (exclusive or).
+	 *
+	 * @param mixed $lhs
+	 * @param mixed $rhs
+	 * @return bool
+	 */
+	private function sameEmptiness( $lhs, $rhs)
+	{
+		return empty( $lhs ) == empty( $rhs );
+	}
+
 }

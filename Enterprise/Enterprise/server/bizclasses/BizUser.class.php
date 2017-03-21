@@ -407,7 +407,7 @@ class BizUser
 	 *
 	 * @param string $shortUser User id (short name). Mandatory!
 	 * @param string $appName   Name of (current) application. Mandatory!
-	 * @return array List of Setting objects
+	 * @return Setting[]
 	 * @since v6.0 [BZ#8744]
 	 */
 	public static function getSettings( $shortUser, $appName )
@@ -441,12 +441,13 @@ class BizUser
 	 * Add/Update user setting
 	 *
 	 * @param string $user
-	 * @param array  $settings 
+	 * @param Setting[] $settings
+	 * @param string $appname
 	 */
 	public static function updateSettings( $user, $settings, $appname )
 	{
 		require_once BASEDIR."/server/dbclasses/DBUserSetting.class.php";
-		foreach( $settings->Setting as $setting ) {
+		if( $settings ) foreach( $settings as $setting ) {
 			if(DBUserSetting::hasSetting( $user, $setting->Setting, $appname )) {
 				DBUserSetting::updateSetting( $user, $setting->Setting, $setting->Value, $appname);
 			} 

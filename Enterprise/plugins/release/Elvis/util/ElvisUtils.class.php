@@ -22,9 +22,9 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Extracts elvis asset id from alien id provided by enterprise
+	 * Extracts Elvis asset id from alien id provided by enterprise
 	 * @param $alienId - id of enterprise object, including _<ContentSourceId>_ prefix
-	 * @return string elvis asset id
+	 * @return string Elvis asset id
 	 */
 	public static function getElvisId($alienId)
 	{
@@ -49,11 +49,11 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Returns hit from server, base on provided elvis id
+	 * Returns hit from server, base on provided Elvis id
 	 * @param $elvisId - for hit to be returned
 	 * @param $lock - true if we have lock on Elvis server
 	 * @return ElvisEntHit - hit from Elvis server
-	 * @throws BizException - thrown if more then on hit found for specified elvis ID
+	 * @throws BizException - thrown if more then on hit found for specified Elvis ID
 	 */
 	public static function getHit($elvisId, $lock = false)
 	{
@@ -88,35 +88,40 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Extract corresponding URL to elvis asset, based on provided rendition.
+	 * Extract corresponding URL to Elvis asset, based on provided rendition.
 	 *
 	 * If version specified, it will be taken into account
 	 * Extracted url, if could be resolved then used to copy file to Enterprise Transfer server.
 	 *
-	 * @param ElvisEntHit $hit - hit which is used for url extraction
-	 * @param string $rendition - to be extracted
-	 * @param bool $returnFileUrls When true, only file links to the content source are returned, otherwise the complete file content
-	 * @return Attachment|null
+	 * While copying, the Elvis session id is sent through cookies to authorize the download URL.
+	 * This is done through input stream options.
+	 *
+	 * @param ElvisEntHit $hit Elvis search result (where the URL can be extracted from).
+	 * @param string $rendition File rendition to download.
+	 * @param bool $returnFileUrls TRUE to return a direct link (URL) to the content source, or FALSE to download the file to the transfer server folder and return the URL.
+	 * @return Attachment|null The file attachment, or null when not found.
 	 * @throws BizException
 	 */
 	public static function getAttachment( $hit, $rendition, $returnFileUrls )
 	{
 		$attachment = null;
-		$url = ElvisUtils::getUrlFromRendition( $hit, $rendition );
+		$url = self::getUrlFromRendition( $hit, $rendition );
 		if( $url ) {
 			$type = self::getMimeType( $hit, $url, $rendition );
 			if( $type ) {
-				$url = self::appendSessionId( $url );
 				if( !$returnFileUrls ) {
 					require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 					$transferServer = new BizTransferServer();
 					$attachment = new Attachment();
 					$attachment->Rendition = $rendition;
 					$attachment->Type = $type;
-					if( !$transferServer->copyToFileTransferServer( $url, $attachment ) ) {
+					if( !$transferServer->copyToFileTransferServer( $url, $attachment, self::composeSessionOptions() ) ) {
 						throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
 					}
 				} else {
+					// EN-88634: We no longer add our jsessionid to the ContentSourceFileLink URL; This URL is requested by
+					// SC which passes on the URL to the Elvis InDesign plugin. This plugin has its own session with Elvis
+					// and so it has its own authorization.
 					$attachment = new Attachment();
 					$attachment->Rendition = $rendition;
 					$attachment->Type = $type;
@@ -128,7 +133,32 @@ class ElvisUtils {
 	}
 
 	/**
-	 * Restore elvis version from enterprise version
+	 * Composes input stream options from Elvis session cookie.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return array|null
+	 */
+	private static function composeSessionOptions()
+	{
+		$options = null;
+		require_once __DIR__.'/ElvisSessionUtil.php';
+		$cookies = ElvisSessionUtil::getSessionCookies();
+		if( $cookies ) {
+			$cookiesHeader = '';
+			foreach( $cookies as $name => $value ) {
+				$cookiesHeader .= "{$name}={$value}; ";
+			}
+			if( $cookiesHeader ) {
+				$options = array( 'http' => array(
+					'header' => "Cookie: {$cookiesHeader}",
+				) );
+			}
+		}
+		return $options;
+	}
+
+	/**
+	 * Restore Elvis version from enterprise version
 	 *
 	 * @param string $version - enterprise version
 	 * @return string - Elvis version
@@ -150,7 +180,7 @@ class ElvisUtils {
 	}
 	
 	/**
-	 * Removes the shadow object for the given elvis id
+	 * Removes the shadow object for the given Elvis id
 	 * 
 	 * @param string $elvisId
 	 */
@@ -231,27 +261,6 @@ class ElvisUtils {
 		}
 		return $result;
 	}
-	
-	/**
-	 * Appends ;jssesionid=[sessionId] to the given url
-	 *
-	 * @param string $url
-	 * @return string url
-	 */
-	private static function appendSessionId($url)
-	{
-		require_once dirname(__FILE__) . '/ElvisSessionUtil.php';
-		$jsessionId = ';jsessionid=' . ElvisSessionUtil::getSessionId();
-		
-		// Put ;jsessionid BEFORE querystring, otherwise it doesn't work
-		$idx = strpos($url, '?');
-		if ($idx === false) {
-			$url .= $jsessionId;
-		} else {					
-			$url = substr($url, 0, $idx) . $jsessionId . substr($url, $idx);
-		}
-		return $url;
-	}
 
 	/**
 	 * Extracts the mime type from the hit
@@ -292,7 +301,7 @@ class ElvisUtils {
 	 */
 	static public function isContentStation()
 	{
-		return ElvisUtils::isClient('content station');
+		return self::isClient('content station');
 	}
 	
 	/**
@@ -302,7 +311,7 @@ class ElvisUtils {
 	 */
 	static public function isSmartConnection()
 	{
-		return ElvisUtils::isClient('InDesign') || ElvisUtils::isClient('InCopy');
+		return self::isClient('InDesign') || self::isClient('InCopy');
 	}
 	
 	/**
@@ -312,7 +321,7 @@ class ElvisUtils {
 	 */
 	static public function isInDesignServer()
 	{
-		return ElvisUtils::isClient('InDesign Server');
+		return self::isClient('InDesign Server');
 	}
 	
 	/**
@@ -327,14 +336,5 @@ class ElvisUtils {
 		$activeClient = BizSession::getClientName();
 		LogHandler::Log('ELVIS', 'DEBUG', 'client for ticket '. BizSession::getTicket() . ": ". $activeClient);
 		return (bool)stristr($activeClient, $clientName);
-	}
-
-	/**
-	 * @param $serviceName
-	 * @return string
-	 */
-	public static function getServiceUrl($serviceName)
-	{
-		return self::appendSessionId(ELVIS_URL . "/services/" . $serviceName);
 	}
 }

@@ -80,6 +80,22 @@
         private $destination = null;
 
         /**
+         * HTTP cookies
+         *
+         * @since 10.0.5 / 10.1.2
+         * @var array
+         */
+        private $cookies = array();
+
+        /**
+         * cURL options for the HTTP connection.
+         *
+         * @since 10.0.5 / 10.1.2
+         * @var array
+         */
+        private $curlOptions = array();
+
+        /**
          * __construct 
          * 
          * @param string $endPoint The url to the AMF gateway
@@ -143,31 +159,8 @@
 
             $this->amfRequest->serialize($this->amfOutputStream);
 
-            // The curl request
-            $ch = curl_init($this->endPoint);
-            curl_setopt($ch,CURLOPT_POST,1);
-            curl_setopt($ch,CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch,CURLOPT_TIMEOUT,$timeout);
-            curl_setopt($ch,CURLOPT_HTTPHEADER,array('Content-type: ' . SabreAMF_Const::MIMETYPE));
-            curl_setopt($ch,CURLOPT_POSTFIELDS,$this->amfOutputStream->getRawData());
-            if( defined( 'ELVIS_CURL_OPTIONS') ) { // hidden option
-                $options = unserialize( ELVIS_CURL_OPTIONS );
-                if( $options ) foreach( $options as $key => $value ) {
-                    curl_setopt( $ch, $key, $value );
-                }
-            }
-    		if ($this->httpProxy) {
-    			curl_setopt($ch,CURLOPT_PROXY,$this->httpProxy);
-    		}
-            $result = curl_exec($ch);
- 
-            if (curl_errno($ch)) {
-                throw new Exception('CURL error: ' . curl_error($ch));
-                false;
-            } else {
-                curl_close($ch);
-            }
-       
+            $result = $this->sendHttpRequest( $timeout );
+
             $this->amfInputStream = new SabreAMF_InputStream($result);
             $this->amfResponse = new SabreAMF_Message(); 
             $this->amfResponse->deserialize($this->amfInputStream);
@@ -179,7 +172,54 @@
                 if (strpos($body['target'],'/1')===0) return $body['data'] ;
 
             }
+        }
 
+        /**
+         * Sends a HTTP request using the Zend Http Client.
+         *
+         * @since 10.0.5 / 10.1.2
+         * @param int $timeout The timeout for the call in seconds
+         * @return string HTTP response body
+         * @throws Exception
+         */
+        private function sendHttpRequest( $timeout )
+        {
+            try {
+                $this->curlOpts[CURLOPT_TIMEOUT] = $timeout;
+                if( $this->httpProxy ) {
+                    $curlOpts[CURLOPT_PROXY] = $this->httpProxy;
+                }
+                $curlOpts[CURLOPT_POSTFIELDS] = $this->amfOutputStream->getRawData();
+
+                $client = new Zend\Http\Client();
+                $client->setUri( $this->endPoint );
+                $client->setMethod( Zend\Http\Request::METHOD_POST );
+                $client->setHeaders( array( 'Content-type' => SabreAMF_Const::MIMETYPE ) );
+                $client->setOptions(
+                   array(
+                      'adapter' => 'Zend\Http\Client\Adapter\Curl',
+                      'curloptions' => $this->curlOptions + $curlOpts
+                       // L> Note that the + operator on arrays does preserve the LHS while taking over data from RHS.
+                       //    This is intended since we want to prefer theirs ($curlOptions) over ours. So no overwrite.
+                   )
+                );
+                if( $this->cookies ) {
+                    $client->setCookies( $this->cookies );
+                }
+                $response = $client->send();
+                if( $response->getStatusCode() !== 200 ) {
+                    throw new Exception( $response->getReasonPhrase() );
+                }
+                $this->cookies = array();
+                $cookieJar = $response->getCookie();
+                if( $cookieJar ) foreach( $cookieJar as $cookie ) {
+                    $this->cookies[$cookie->getName()] = $cookie->getValue();
+                }
+                $result = $response->getBody();
+            } catch( Exception $e ) {
+                throw new Exception( $e->getMessage() );
+            }
+            return $result;
         }
 
         /**
@@ -270,6 +310,38 @@
 
         }
 
+        /**
+         * Set cURL options for the HTTP connection.
+         *
+         * @since 10.0.5 / 10.1.2
+         * @param array $options
+         */
+        public function setCurlOptions( array $options )
+        {
+            $this->curlOptions = $options;
+        }
+
+        /**
+         * Set HTTP cookies to be sent along with the AMF request.
+         *
+         * @since 10.0.5 / 10.1.2
+         * @param array $cookies
+         */
+        public function setCookies( array $cookies )
+        {
+            $this->cookies = $cookies;
+        }
+
+        /**
+         * Get HTTP cookies that were sent back along with the AMF response.
+         *
+         * @since 10.0.5 / 10.1.2
+         * @return array $cookies
+         */
+        public function getCookies()
+        {
+            return $this->cookies;
+        }
     }
 
 

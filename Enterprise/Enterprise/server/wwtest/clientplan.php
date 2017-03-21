@@ -68,7 +68,7 @@ $advertFrameScaleY = isset( $_GET['ad_scaley'] ) ? $_GET['ad_scaley'] : 0.0;
 // Add '?ad_editions=X;Y;Z' and/or '?ad_deadline=YYYY-MM-DDTHH:MM:SS' to URL to define for which editions the advert occurs and the deadline to meet.
 $advertDeadline = isset( $_GET['adv_deadline'] ) ? $_GET['adv_deadline'] : null;
 $advertEditionNames = isset( $_GET['adv_editions'] ) ? explode( ';', $_GET['adv_editions'] ) : array();
-// Add '?ad_editions=X;Y;Z' and/or '?ad_deadline=YYYY-MM-DDTHH:MM:SS' to URL to define for which editions the advert occurs and the deadline to meet.
+// Add '?lay_editions=X;Y;Z' and/or '?lay_deadline=YYYY-MM-DDTHH:MM:SS' to URL to define the editions of the layout and the deadline to meet.
 $layoutDeadline = isset( $_GET['lay_deadline'] ) ? $_GET['lay_deadline'] : null;
 $layoutEditionNames = isset( $_GET['lay_editions'] ) ? explode( ';', $_GET['lay_editions'] ) : array();
 $pageHeight = isset( $_GET['pag_height'] ) ? $_GET['pag_height'] : 800.0;
@@ -147,7 +147,7 @@ echo "<hr><b>Session parameters:</b><br><table border=1 cellpadding=2>";
 echo "<tr><td><b>Common</b></td>           	<td><b>Layout</b></td>                             											<td><b>Advert</b></tr>";
 echo "<tr><td></td>                        	<td>layout_id=$layoutId</td>                         											<td>advert_id=$advertId</td></tr>";
 echo "<tr><td>namebased=$nameBased</td>    	<td>lay_name=$layoutName</td>                        											<td>adv_name=$advertName</td></tr>";
-echo "<tr><td>pubblication=$publication</td> <td>lay_section=$layoutSection</td>                  											<td>adv_section=$advertSection</td></tr>";
+echo "<tr><td>publication=$publication</td> <td>lay_section=$layoutSection</td>                  											<td>adv_section=$advertSection</td></tr>";
 echo "<tr><td>issue=$issue</td>             	<td>lay_status=$layoutStatus</td>                    											<td>adv_status=$advertStatus</td></tr>";
 echo "<tr><td>pubchannel=$channelName;</td>	<td>lay_template=$layoutTemplateName</td>                									<td>content=$content</td></tr>";
 echo "<tr><td>act_modify=$actionCreate</td>  <td>pagenrs (create)=".implode( ',', $createPageOrdersNoEdition )."</td>            <td>pagenr (create)=$advertCreatePageNr (= page sequence) (=> page order=".$createPageOrdersNoEdition[ $advertCreatePageNr - 1 ].")</td></tr>";

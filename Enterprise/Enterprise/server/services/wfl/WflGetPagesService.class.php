@@ -82,15 +82,22 @@ class WflGetPagesService extends EnterpriseService
 			}
 
 			// This could be more efficient, but this is easy:
+			require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+			$request = new WflQueryObjectsRequest();
+			$request->Ticket = $req->Ticket;
+			$request->Params = $req->Params;
+			$request->FirstEntry = 1;
+			$request->MaxEntries = 0;
+			$request->Hierarchical = false;
+			$request->RequestProps = array( 'ID', 'Type', 'Name' );
 			require_once BASEDIR."/server/bizclasses/BizQuery.class.php";
-			$resp = BizQuery::queryObjects(
-				$req->Ticket, $this->User, $req->Params, 1, 0, null, false, null, null, array( 'ID', 'Type', 'Name' ), null, 11 );
+			$resp = BizQuery::queryObjects2( $request, $this->User, 11 );
 
 			// Determine the object ID column index
 			$idIdx = 0;
 			if( isset($resp->Columns) ) foreach( $resp->Columns as $col ) {
 				if( $col->Name == 'ID' ) {
-					break; // found!
+					break;
 				}
 				$idIdx++;
 			}

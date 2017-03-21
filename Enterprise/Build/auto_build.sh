@@ -292,6 +292,7 @@ function ionCubeEnterpriseFiles {
 		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
 		plugins/release/Elvis/Elvis_WflLogOn.class.php \
 		plugins/release/Elvis/Elvis_ContentSource.class.php \
+		plugins/release/Elvis/util/ElvisSessionUtil.php \
 	"
 	for icFile in ${icFiles}; do
 		ionCubeFile "${encodeOptionFile}" "${icFile}"

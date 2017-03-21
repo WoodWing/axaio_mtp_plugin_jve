@@ -641,13 +641,6 @@ class BizPublishForm
 		$attachments = self::getAttachments( $articleObject );
 		$content = $transferServer->getContent( $attachments[0] );
 
-		// Cleanup the temp images from the transfer folder.
-		if( $attachments ) {
-			$transferServer = new BizTransferServer();
-			foreach( $attachments as $attachment ) {
-				$transferServer->deleteFile( $attachment->FilePath );
-			}
-		}
 		return $content;
 	}
 

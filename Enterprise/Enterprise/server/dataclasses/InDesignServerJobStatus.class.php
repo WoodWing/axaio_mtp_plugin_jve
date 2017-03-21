@@ -34,10 +34,10 @@ class InDesignServerJobStatus
 	// Job Status* (from handling, to be set by core server job handler)
 	const PLANNED   = 0x1110; // (=04368) job is created, but not picked up yet
 	const PROGRESS  = 0x1220; // (=04640) job is picked up and being executed
-	const FLOODED   = 0x4430; // (=17416) no server available to execute job within defined time interval
-//  const OVERRUN   = 0x4440; // (=17417) job was queued, but new recurring job has already started
-//  const GAVEUP    = 0x4450; // (=17418) job was started, but has ran longer than expected. Maybe the PHP process (that picked up the job) has crashed.
-//  const DISABLED  = 0x4460; // (=17419) job was created, but at execution time, no IDS server enabled to handle
+	const FLOODED   = 0x4430; // (=17456) no server available to execute job within defined time interval
+//  const OVERRUN   = 0x4440; // (=17472) job was queued, but new recurring job has already started
+//  const GAVEUP    = 0x4450; // (=17488) job was started, but has ran longer than expected. Maybe the PHP process (that picked up the job) has crashed.
+//  const DISABLED  = 0x4460; // (=17504) job was created, but at execution time, no IDS server enabled to handle
 	const LOCKED    = 0x2870; // (=10352) // object currently locked by other user, will retry job later
 	const UNAVAILABLE = 0x2880; // (=10368) no matching IDS instances found for job, will retry later
 	const INCOMPATIBLE = 0x2890; // (=10384) no existing IDS instance found that is compatible with the job version, will retry later (new dispatcher)

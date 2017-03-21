@@ -247,4 +247,41 @@ class DBChannel extends DBBase
 		$row = self::getRow( self::TABLENAME, $where, $fieldNames, $params );
 		return $row['suggestionprovider'] ? $row['suggestionprovider'] : null;
 	}
+
+	/**
+	 * Returns the channel id of the channel of publish system.
+	 *
+	 * @since 10.1.2
+	 * @param int $publicationId Id of the publication (brand)
+	 * @param string $publishSystemId Unique identifier of the publish system
+	 * @return null|int Channel Id or null when not found.
+	 */
+	static public function getChannelIdForPublishSystemId( $publicationId, $publishSystemId )
+	{
+		$where = '`publicationid` = ? AND `publishsystemid` = ? ';
+		$params = array( intval( $publicationId ), strval( $publishSystemId ) );
+		$row = DBBase::getRow( self::TABLENAME, $where, array( 'id' ), $params );
+		return isset( $row['id'] ) ? $row['id'] : null;
+	}
+
+	/**
+	 * Returns all channels of a certain type for a brand.
+	 *
+	 * @since 10.1.2
+	 * @param int $brandId
+	 * @param string $type
+	 * @return PubChannelInfo[]
+	 */
+	static public function getChannelsBydBrandIdAndType( $brandId, $type )
+	{
+		$channelObjects = array();
+		$where = '`publicationid` = ? AND `type` = ? ';
+		$params = array( intval( $brandId ), $type );
+		$rows = DBBase::listRows( self::TABLENAME, 'id', '', $where, '*', $params );
+		if( $rows ) foreach( $rows as $row ) {
+			$channelObjects[] = self::rowToObj( $row );
+		}
+
+		return $channelObjects;
+	}
 }
