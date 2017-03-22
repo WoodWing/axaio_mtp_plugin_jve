@@ -280,17 +280,10 @@ class IXR_Message
 		}
 	}
 
-    public function __construct($callbacks = false, $data = false, $wait = false)
-    {
-        $this->setCapabilities();
-        if ($callbacks) {
-            $this->callbacks = $callbacks;
-        }
-        $this->setCallbacks();
-        if (!$wait) {
-            $this->serve($data);
-        }
-    }
+	private function cdata( $parser, $cdata )
+	{
+		$this->_currentTagContents .= $cdata;
+	}
 
 	private function tag_close( $parser, $tag )
 	{
