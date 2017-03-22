@@ -1431,15 +1431,20 @@ class DBUser extends DBBase
 	/**
 	 * Returns array of AdmUser objects matching where clause
 	 *
-	 * @param string $where
-	 * @param array $params
+	 * E.g: $orderBy = array( 'code' => true, 'id' => true );
+	 * Keys: DB fields; Values: TRUE for ASC or FALSE for DESC. NULL for no ordering.
+	 * 
+	 * @param string $where The where clause to query from the smart_users table.
+	 * @param array $params Contains list of parameters to be substituted for the placeholders in the where clause.
+	 * @param array|null $orderBy List of fields to order. See function header for more details.
 	 * @throws BizException
 	 * @return AdmUser[]
 	 */
-	public static function getUsersByWhere($where, $params = array())
+	public static function getUsersByWhere($where, $params = array(), $orderBy = null )
 	{
 		$users = array();
-		$rows = self::listRows('users', 'id', null, $where, '*', $params);
+		$rows = self::listRows( self::TABLENAME, 'id', null, $where, '*', $params, $orderBy );
+
 		if (is_null($rows)){
 			throw new BizException('', '', self::getError(), self::getError());
 		}
