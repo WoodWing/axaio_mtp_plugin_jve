@@ -866,11 +866,11 @@ class LogHandler
 	 * systems (non-BizExceptions) to get details of the thrower's stack.
 	 * See {@link markupBackTrace()} for details.
 	 *
-	 * @param Exception The caught exception for which to compose the stack trace.
+	 * @param Exception|Throwable $exception The caught exception for which to compose the stack trace. Since PHP7 it can be any kind of Throwable exceptions.
 	 * @param integer $hideToplevels Number of rows on top of stack to hide. E.g. pass 2 to hide getDebugBackTrace() function call and yourself.
 	 * @return string The stack with \n separations.
 	 */
-	public static function getExceptionBackTrace( Exception $exception, $hideToplevels = 1 )
+	public static function getExceptionBackTrace( $exception, $hideToplevels = 1 )
 	{
 		return self::markupBackTrace( $exception->getTrace(), $hideToplevels );
 	}
