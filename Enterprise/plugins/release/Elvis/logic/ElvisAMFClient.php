@@ -105,14 +105,13 @@ class ElvisAMFClient
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 		$credentials = ElvisSessionUtil::getCredentials();
 		if( !$credentials ) {
-			// EN-88706 When the Elvis connection is broken, the user works with a ticket that is valid
-			// for Enterprise but that session no longer has a valid ticket (jsessionid) for Elvis.
-			// Basically, the Enterprise ticket is then half broken. To recover from this situation
-			// we should ask the user to re-logon to Enterprise which implicitly will re-logon
-			// to Elvis as well. So here we act as if the Enterprise ticket is no longer valid by
-			// raising a generic ticket invalid error. This will trigger SC/CS to raise the re-logon
-			// dialog. (Note that this is more user friendly than raising an Elvis communication error
-			// for which we'd leave it up to the end-user to manually logout and login again.)
+			// This piece of code was implemented due to EN-88706 but should be no longer valid.
+			// Since ES 10.0.5/10.1.2/10.2.0 this should never happen anymore because the Elvis user credentials
+			// are no longer stored in the PHP session, but in the DB. Even for an ES setup with multiple
+			// AS machines behind an ELB, the credentials are shared among the AS machines. And, even when
+			// the PHP session would expire before the Enterprise ticket expires (whereby PHP automatically
+			// cleans the session cache data!) the AS has still access to the credentials and can automatically
+			// re-login to repair the backend connection.
 			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
 		}
 		self::synchronizedLogin( $credentials );

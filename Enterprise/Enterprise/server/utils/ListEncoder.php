@@ -30,11 +30,25 @@ print'Decoded: '.print_r( $mvList, true );
 
 class WW_Utils_ListEncoder
 {
+	/**
+	 * The delimiter / glue that will be used to join a list of values.
+	 *
+	 * @var string
+	 */
 	private $delimiter;
+
+	/**
+	 * The character that will be / needs to be escaped by this $escapeChar.
+	 *
+	 * @var string
+	 */
 	private $escapeChar;
 
 	/**
-	 * Constructor.
+	 * WW_Utils_ListEncoder constructor.
+	 *
+	 * @param string $escapeChar
+	 * @param string $delimiter
 	 */
 	public function __construct( $escapeChar, $delimiter )
 	{
