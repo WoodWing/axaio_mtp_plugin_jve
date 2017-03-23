@@ -1379,6 +1379,13 @@ class WflUserValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'EmailAddress' ) ) {
+			$validator->enterPath( 'EmailAddress' );
+			if( !is_null( $datObj->EmailAddress ) ) {
+				$validator->checkType( $datObj->EmailAddress, 'string' );
+			}
+			$validator->leavePath();
+		}
 	}
 }
 

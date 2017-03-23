@@ -191,6 +191,7 @@ class BizSession
 		$user->UserID = self::$userRow['user'];
 		$user->FullName = self::$userRow['fullname'];
 		$user->TrackChangesColor = $trackChangesColor;
+		$user->EmailAddress = self::$userRow['email'];
 		return $user;
 	}
 

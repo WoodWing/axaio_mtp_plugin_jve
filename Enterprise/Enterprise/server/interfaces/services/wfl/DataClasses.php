@@ -837,17 +837,20 @@ class User
 	public $UserID;
 	public $FullName;
 	public $TrackChangesColor;
+	public $EmailAddress;
 
 	/**
 	 * @param string               $UserID               
 	 * @param string               $FullName             
 	 * @param string               $TrackChangesColor    
+	 * @param string               $EmailAddress         Nullable.
 	 */
-	public function __construct( $UserID=null, $FullName=null, $TrackChangesColor=null)
+	public function __construct( $UserID=null, $FullName=null, $TrackChangesColor=null, $EmailAddress=null)
 	{
 		$this->UserID               = $UserID;
 		$this->FullName             = $FullName;
 		$this->TrackChangesColor    = $TrackChangesColor;
+		$this->EmailAddress         = $EmailAddress;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflUser'; } // AMF object type mapping

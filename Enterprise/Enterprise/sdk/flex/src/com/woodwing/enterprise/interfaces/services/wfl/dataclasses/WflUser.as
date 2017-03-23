@@ -15,6 +15,7 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		private var _UserID:String;
 		private var _FullName:String;
 		private var _TrackChangesColor:String;
+		private var _EmailAddress:String;
 
 		public function WflUser() {
 		}
@@ -38,6 +39,13 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		}
 		public function set TrackChangesColor(TrackChangesColor:String):void {
 			this._TrackChangesColor = TrackChangesColor;
+		}
+
+		public function get EmailAddress():String {
+			return this._EmailAddress;
+		}
+		public function set EmailAddress(EmailAddress:String):void {
+			this._EmailAddress = EmailAddress;
 		}
 
 	}

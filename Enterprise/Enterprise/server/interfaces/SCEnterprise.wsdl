@@ -623,6 +623,7 @@
 					<element name="UserID" type="xsd:string"/>
 					<element name="FullName" type="xsd:string"/>
 					<element name="TrackChangesColor" type="tns:Color"/>  <!-- v8.0: User's track changes color in RGB format (without # prefix) -->
+					<element name="EmailAddress" type="xsd:string" nillable="true"/>  <!-- v10.2: Only populated for LogOnResponse->CurrentUser for CSDE publish to email. -->
 				</all>
 			</complexType>
 			<complexType name="UserGroup">
