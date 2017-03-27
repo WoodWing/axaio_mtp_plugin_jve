@@ -499,9 +499,11 @@ class DBTicket extends DBBase
 	 *
 	 * @param string $ticket   Unique ticket; gives user access to the system with given client application
 	 * @param string $service  Not used
-	 * @return string          User id (short name) or FALSE when ticket not exists or expired.
+	 * @param bool $extend     Since 10.2. Whether or not the ticket lifetime should be implicitly extended (when valid).
+	 *                         Pass FALSE when e.g. frequently called and so the its expensive DB update could be skipped.
+	 * @return string|bool     User id (short name) or FALSE when ticket not exists or expired.
 	 */
-	public static function checkTicket( $ticket, $service = '' )
+	public static function checkTicket( $ticket, $service = '', $extend = true )
 	{
 		// Special treatment for background/async server job processing, for which no seat must be taken.
 		if( self::$ServerJob && self::$ServerJob->TicketSeal == $ticket ) {
@@ -529,20 +531,23 @@ class DBTicket extends DBBase
 		$user = $row['usr'];
 		$user = trim($user);
 
-		// user touched server, so postpone expiration
-		$expire = self::_expire($row['appname']);
-		$params = array( $expire, $ticket );
-		$sql = "UPDATE $db SET `expire` = ? WHERE `ticketid` = ?";
-		$sth = $dbdriver->query( $sql, $params );
+		if( $extend ) {
 
-		// Auto-postpone WebEditor ticket when Web(App) goes along, or vice versa(!).
-		// This is to avoid any logon dialogs while user works a while at one of them and then starts using the other one again.
-		if( ($otherTicket  = self::getOtherTicket($row['appname'],$user)) ) {
-			$params = array( $expire, $otherTicket );
+			// user touched server, so postpone expiration
+			$expire = self::_expire( $row['appname'] );
+			$params = array( $expire, $ticket );
 			$sql = "UPDATE $db SET `expire` = ? WHERE `ticketid` = ?";
 			$sth = $dbdriver->query( $sql, $params );
+
+			// Auto-postpone WebEditor ticket when Web(App) goes along, or vice versa(!).
+			// This is to avoid any logon dialogs while user works a while at one of them and then starts using the other one again.
+			if( ( $otherTicket = self::getOtherTicket( $row['appname'], $user ) ) ) {
+				$params = array( $expire, $otherTicket );
+				$sql = "UPDATE $db SET `expire` = ? WHERE `ticketid` = ?";
+				$sth = $dbdriver->query( $sql, $params );
+			}
 		}
-		
+
 		// do some automatic logging
 		//if ($service) $this->DBlog($user, $service); // EKL: let's not do this since it gives duplicate messages with empty data!
 

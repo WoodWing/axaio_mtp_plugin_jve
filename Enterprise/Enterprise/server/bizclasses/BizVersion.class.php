@@ -498,7 +498,7 @@ class BizVersion
 	 * @param string $rendition Rendition of file attachment to return. Typically 'preview'. Pass 'none' for no attachments.
 	 * @param array $areas 'Workflow' or 'Trash' area where the object is resided.
 	 * @throws BizException Throws BizException on failure
-	 * @return object GetVersionResponse
+	 * @return VersionInfo
 	 */
 	static public function getVersion( $id, $user, $version, $rendition, array $areas=null )
 	{

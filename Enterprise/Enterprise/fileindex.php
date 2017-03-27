@@ -1,0 +1,449 @@
+<?php
+/**
+ * @package    Enterprise
+ * @subpackage FileStore service
+ * @since      v10.2
+ * @copyright  WoodWing Software bv. All Rights Reserved.
+ * 
+ * Entry point of the FileStore web service that offers file downloads over HTTP GET.
+ *
+ * Files are directly read from the FileStore and streamed back to caller, without copying to the Transfer Server folder.
+ * The URLs are predictable (can be composed by client) and stable; They don't change between sessions or web service calls.
+ * Support for cookie enabled sessions; The ticket can be provided in a cookie (although it can be set to the URL as well).
+ * When the URL contains a 'version' parameter, a HTTP 404 is returned when that version no longer exists in the history.
+ * If the requested file or version could not be found in the Workflow, the History and the Trash Can will be checked as well.
+ * The CROSS_ORIGIN_HEADERS option (configserver.php) is supported that allows JavaScript clients hosted elsewhere to connect.
+ * Error messages are not localised and so they should not be shown to end users. Clients should act on the HTTP codes.
+ *
+ * When the client calls the GetObjects service, and then downloads the files through fileindex.php without specifying the
+ * object Version returned by GetObjectsResponse, it could happen that the object Version and the downloaded file Version
+ * are not matching due to race-conditions (e.g. another user creates new version). It is the responsibility of the client
+ * to get latest version from both worlds, probably by simply calling again. This entry point returns the file version
+ * through the HTTP header named 'WW-Object-Version' to let client detect and recover whenever needed.
+ *
+ * The fileindex.php supports the following URL parameters:
+ * - ticket:    A valid session ticket that was obtained through a LogOn service call (e.g. see SCEnterprise.wsdl).
+ *              For stable URLs, clients may pass the ticket in the web cookie instead.
+ * - objectid:  The ID of the workflow object in Enterprise. The object may reside in workflow, history or trash can.
+ * - rendition: The file rendition. Options: native, preview, thumb, etc. See SCEnterprise.wsdl for the complete list.
+ * - version:   Optional. The object version to retrieve the file for. When omitted, the last version is returned.
+ * - inline:    Useful for web browsers. When omitted, the preview is downloaded as a file, else shown inline.
+ *
+ * The following HTTP codes may be returned:
+ * - HTTP 200: The file is found and is streamed back to caller.
+ * - HTTP 400: Bad HTTP parameters provided by caller. See above for required parameters.
+ * - HTTP 401: When ticket is no longer valid. This should be detected by the client to do a re-login.
+ *             The new ticket obtained should be applied to URL or cookie to try again.
+ * - HTTP 403: The user has no Read access to the invoked object.
+ * - HTTP 404: The file could not be found in the FileStore.
+ * - HTTP 405: Bad HTTP method requested by caller. Only GET and OPTIONS are supported.
+ * - HTTP 500: Unexpected server error.
+ */
+
+// To deal with large files, avoid script abortion due to low max_execution_time setting
+@ignore_user_abort(1); // Disallow clients to stop server (PHP script) execution.
+@set_time_limit(0);    // Run server (PHP script) forever.
+
+// Dispatch and handle the incoming HTTP request
+$index = new WW_FileIndex();
+$index->handle();
+
+class WW_FileIndex
+{
+	/** @var array $httpParams HTTP input parameters (taken from URL or Cookie). */
+	private $httpParams;
+
+	/**
+	 * Dispatch the incoming HTTP request.
+	 */
+	public function handle()
+	{
+		// Include core basics.
+		$beforeInclude = microtime( true );
+		require_once dirname( __FILE__ ).'/config/config.php';
+
+		// Log the footprint of Enterprise Server (= startup time).
+		$footprint = sprintf( '%03d', round( ( microtime( true ) - $beforeInclude ) * 1000 ) );
+		LogHandler::Log( 'FileStoreService', 'CONTEXT', 'Enterprise Server footprint: '.$footprint.'ms (= startup time).' );
+
+		// First add Cross Origin headers needed by Javascript applications
+		require_once BASEDIR.'/server/utils/CrossOriginHeaderUtil.class.php';
+		WW_Utils_CrossOriginHeaderUtil::addCrossOriginHeaders();
+
+		// The OPTIONS call is send by a web browser as a pre-flight for a CORS request.
+		// This request doesn't send or receive any information. There is no need to validate the ticket,
+		// and when the OPTIONS calls returns an error the error can't be validated within an application.
+		// This is a restriction by web browsers.
+		$httpMethod = $_SERVER['REQUEST_METHOD'];
+		LogHandler::Log( 'FileStoreService', 'CONTEXT', "Incoming HTTP {$httpMethod} request." );
+		PerformanceProfiler::startProfile( 'FileStoreService index', 1 );
+		try {
+			switch( $httpMethod ) {
+				case 'OPTIONS':
+					throw new WW_FileIndex_HttpException( '', 200 );
+				case 'GET':
+					try {
+						$this->parseHttpParams();
+						$this->handleGet();
+					} catch( BizException $e ) { // should not happen, but here for robustness
+						throw WW_FileIndex_HttpException::createFromBizException( $e );
+					}
+					break;
+				default:
+					$message = 'Unknown HTTP method "'.$_SERVER['REQUEST_METHOD'].'" is used which is not supported.';
+					throw new WW_FileIndex_HttpException( $message, 405 );
+			}
+		} catch( WW_FileIndex_HttpException $e ) {
+		}
+		PerformanceProfiler::stopProfile( 'FileStoreService index', 1 );
+		LogHandler::Log( 'FileStoreService', 'CONTEXT', "Outgoing HTTP {$httpMethod} response." );
+	}
+
+	/**
+	 * Populate the $this->httpParams with key-values to work with and validate the values.
+	 *
+	 * @throws WW_FileIndex_HttpException
+	 */
+	private function parseHttpParams()
+	{
+		$this->httpParams = array();
+
+		$this->httpParams['ticket'] = isset($_GET['ticket']) ? $_GET['ticket'] : null;
+		if( !$this->httpParams['ticket'] ) { // support cookie enabled sessions
+			$this->httpParams['ticket'] = isset($_COOKIE['ticket']) ? $_COOKIE['ticket'] : null;
+		}
+		$this->httpParams['rendition'] = isset($_GET['rendition']) ? $_GET['rendition'] : null;
+		$this->httpParams['objectid'] = isset($_GET['objectid']) ? intval($_GET['objectid']) : null;
+		$this->httpParams['inline'] = array_key_exists( 'inline', $_GET );
+		$this->httpParams['version'] = isset($_GET['version']) ? $_GET['version'] : null;
+
+		if( !$this->httpParams['ticket'] ) {
+			$message = 'Please specify "ticket" param at URL or provide it as a web cookie.';
+			throw new WW_FileIndex_HttpException( $message, 400 );
+		}
+		if( !$this->httpParams['objectid'] ) {
+			$message = 'Please specify "objectid" param at URL.';
+			throw new WW_FileIndex_HttpException( $message, 400 );
+		}
+		if( !$this->httpParams['rendition'] ) {
+			$message = 'Please specify "rendition" param at URL.';
+			throw new WW_FileIndex_HttpException( $message, 400 );
+		}
+
+		if( LogHandler::debugMode() ) {
+			$msg = 'Incoming HTTP params: ';
+			foreach( $this->httpParams as $key => $value ) {
+				$msg .= "{$key}=[{$value}] ";
+			}
+			LogHandler::Log( 'FileStoreService', 'DEBUG', $msg );
+		}
+	}
+
+	/**
+	 * Handle the HTTP GET method. Check access rights and stream back the requested file to calling HTTP client.
+	 *
+	 * @throws WW_FileIndex_HttpException when file could not be downloaded.
+	 */
+	private function handleGet()
+	{
+		// Validate ticket. Explicitly request NOT to update ticket expiration date to save time (since DB updates
+		// are expensive). We assume this is settled through regular web services anyway, such as GetObject which are
+		// needed anyway to find out which files are there to download.
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+		$user = DBTicket::checkTicket( $this->httpParams['ticket'], 'FileStore', false );
+		if( $user === false ) {
+			$message = "Invalid ticket.";
+			throw new WW_FileIndex_HttpException( $message, 401 );
+		}
+
+		// Get essential object properties. Don't call GetObjects/QueryObjects to save time.
+		$objectId = $this->httpParams['objectid'];
+		$objectProps = $this->getObjectProperties( $objectId );
+
+		// Check if user has Read access to the object/file.
+		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
+		if( !BizAccess::checkRightsForObjectProps( $user, 'R', BizAccess::DONT_THROW_ON_DENIED, $objectProps ) ) {
+			$message = "No Read access rights for object {$objectId}.";
+			throw new WW_FileIndex_HttpException( $message, 403 );
+		}
+
+		// TODO: Support for Alien/Shadow objects, probably use ContentSourceUrl
+
+		// Determine the file path and stream its content directly from FileStore over HTTP back to caller.
+		$version = $this->httpParams['version'] ? $this->httpParams['version'] : $objectProps['Version'];
+		$filePath = $this->getStorePath( $objectProps, $version, $this->httpParams['rendition'] );
+		if( !$filePath ) {
+			$message = "File not found for object {$objectId}.";
+			throw new WW_FileIndex_HttpException( $message, 404 );
+		}
+		$this->handleDownload( $filePath, $objectProps['Name'], $objectProps['Format'], $version );
+	}
+
+	/**
+	 * Retrieve essential object properties (that are just enough to check access rights and determine download file).
+	 *
+	 * @param integer $objectId
+	 * @return array Object properties (camel case keys)
+	 * @throws WW_FileIndex_HttpException
+	 */
+	protected function getObjectProperties( $objectId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBVersion.class.php';
+
+		$columns = array(
+			'id', 'name', 'format', 'types', 'storename', 'majorversion', 'minorversion', // used by getStorePath
+			'documentid', 'type', 'publication', 'section', 'state', 'contentsource', 'routeto' // used by checkRightsForObjectProps
+		);
+		$propsPerObject = DBObject::getColumnsValuesForObjectIds( array($objectId), array('Workflow'), $columns );
+		if( !isset($propsPerObject[$objectId]) ) {
+			$propsPerObject = DBObject::getColumnsValuesForObjectIds( array($objectId), array('Trash'), $columns );
+		}
+		if( !isset($propsPerObject[$objectId]) ) {
+			$message = "Object {$objectId} not found in Workflow nor Trash Can.";
+			throw new WW_FileIndex_HttpException( $message, 404 );
+		}
+		$objectProps = $propsPerObject[$objectId];
+		$objectProps = array(
+			'ID'            => $objectProps['id'],
+			'Name'          => $objectProps['name'],
+			'Format'        => $objectProps['format'],
+			'Types'         => $objectProps['types'],
+			'StoreName'     => $objectProps['storename'],
+			'Version' 	    => DBVersion::joinMajorMinorVersion( $objectProps ),
+			'PublicationId' => $objectProps['publication'],
+			'SectionId'     => $objectProps['section'],
+			'Type'          => $objectProps['type'],
+			'StateId'       => $objectProps['state'],
+			'ContentSource' => $objectProps['contentsource'],
+			'DocumentID'    => $objectProps['documentid'],
+			'RouteTo'       => $objectProps['storename'],
+		);
+		return $objectProps;
+	}
+
+	/**
+	 * Returns the file path to the FileStore of a given object file rendition.
+	 *
+	 * @param array $objectProps
+	 * @param string $rendition
+	 * @param string $version Object version in major.minor notation.
+	 * @return null|string File path.
+	 * @throws WW_FileIndex_HttpException when the file could not be found.
+	 */
+	protected function getStorePath( $objectProps, $version, $rendition )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizStorage.php';
+
+		$filePath = null;
+		$types = unserialize( $objectProps['Types'] );
+		$storename = $objectProps['StoreName'];
+		if( array_key_exists( $rendition, $types ) ) {
+			$format = $types[ $rendition ];
+			$fileStorage = StorageFactory::gen( $storename, $objectProps['ID'], $rendition, $format, $version );
+			$bFound = $fileStorage->doesFileExist();
+			if( $bFound ) {
+				$filePath = $fileStorage->getFilename();
+			}
+		}
+		if( !$filePath ) {
+			$message = "Rendition {$rendition} not available for object {$objectProps['ID']}.";
+			throw new WW_FileIndex_HttpException( $message, 404 );
+		}
+		return $filePath;
+	}
+
+//	// Commented out; This function takes 250ms, which is 5 times more expensive than current implementation.
+//	private function handleGet()
+//	{
+//		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+//		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+//
+//		$rendition = $this->httpParams['rendition'];
+//		$objectId = $this->httpParams['objectid'];
+//		try {
+//			// Validate ticket. Explicitly request NOT to update ticket expiration date to save time (since DB updates
+//			// are expensive). We assume this is settled through regular web services anyway, such as GetObject which are
+//			// needed anyway to find out which files are there to download.
+//			$user = BizSession::checkTicket( $this->httpParams['ticket'], 'FileStore', false );
+//			BizSession::setServiceName( 'FileStore' );
+//			BizSession::startSession( $this->httpParams['ticket'] );
+//
+//			// PROBLEM: We should avoid copy to transfer server!!!
+//			$object = BizObject::getObject( $objectId, $user, false, $rendition, array( 'NoMetaData' ) );
+//		} catch( BizException $e ) {
+//			throw WW_FileIndex_HttpException::createFromBizException( $e );
+//		}
+//		$attachment = $object->Files[0];
+//		if( !$attachment->FilePath ) {
+//			$message = "File not found for object {$objectId}.";
+//			throw new WW_FileIndex_HttpException( $message, 404 );
+//		}
+//
+//		$inline = $this->httpParams['inline'];
+//		$this->handleDownload( $attachment->FilePath, $attachment->Type, $inline );
+//	}
+
+	/**
+	 * Handles the incoming HTTP GET request.
+	 *
+	 * @param string $filePath
+	 * @param string $fileName
+	 * @param string $format
+	 * @param string $version
+	 * @throws WW_FileIndex_HttpException
+	 */
+	private function handleDownload( $filePath, $fileName, $format, $version )
+	{
+		// The filename that is used for the content-disposition header.
+		require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
+		$filename = $fileName.MimeTypeHandler::mimeType2FileExt( $format );
+		LogHandler::Log( 'FileStoreService', 'DEBUG', 'Using filename: ' . $filename );
+
+		// Make sure the file exists before sending headers
+		$fileDownload = fopen('php://output', 'wb');
+		if( $fileDownload ) {
+			$fileReady = fopen( $filePath, 'rb' );
+			if( $fileReady ) {
+				// Write HTTP headers to output stream...
+				// The following option could corrupt archive files, so disable it
+				// -> http://nl3.php.net/manual/en/function.fpassthru.php#49671
+				ini_set("zlib.output_compression", "Off");
+		
+				// This lets a user download a file while still being able to browse your site.
+				// -> http://nl3.php.net/manual/en/function.fpassthru.php#48244
+				session_write_close();
+
+				// Write HTTP headers and file content to output stream.
+				$this->setHeaders( $filePath, $filename, $format, $version );
+				$this->streamDownloadFile( $fileReady, $fileDownload, $filePath );
+				
+				fflush( $fileReady );
+				fclose( $fileReady );
+			} else {
+				$message = 'Could not open file to download.';
+				throw new WW_FileIndex_HttpException( $message, 500 );
+			}
+			fflush( $fileDownload );
+			fclose( $fileDownload );
+		} else {
+			$message = 'Could not open the output stream (to send out file for download).';
+			throw new WW_FileIndex_HttpException( $message, 500 );
+		}
+		clearstatcache(); // Make sure data get flushed to disk.
+	}
+
+	/**
+	 * Set HTTP headers for file download in output stream.
+	 *
+	 * @param string $filePath
+	 * @param string $filename
+	 * @param string $format Mime type.
+	 * @param string $version Object version in major.minor notation.
+	 */
+	private function setHeaders( $filePath, $filename, $format, $version )
+	{
+		// Make sure to let download work for IE and Mozilla
+		$disposition = $this->httpParams['inline'] ? 'inline' : 'attachment'; // "inline" to view file in browser or "attachment" to download to hard disk
+		$headers = array();
+		if( isset($_SERVER['HTTPS']) ) {
+			header( 'Pragma: ' );
+			header( 'Cache-Control: ' );
+			header( 'Expires: '.gmdate('D, d M Y H:i:s', mktime(date('H')+2, date('i'), date('s'), date('m'), date('d'), date('Y'))).' GMT' );
+			header( 'Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT' );
+			header( 'Cache-Control: no-store, no-cache, must-revalidate' ); // HTTP/1.1
+			header( 'Cache-Control: post-check=0, pre-check=0', false );
+		} else if( $disposition == 'attachment' ) {
+			header( 'Cache-control: private' );
+		} else {
+			header( 'Cache-Control: no-cache, must-revalidate' );
+			header( 'Pragma: no-cache' );
+		}
+		header( 'Content-Type: '. $format );
+		header( "Content-Disposition: $disposition; filename=\"$filename\"");
+		header( 'Content-length: ' . filesize($filePath) );
+		header( 'WW-Object-Version: ' . $version );
+
+		if( LogHandler::debugMode() ) {
+			$msg = 'Outgoing HTTP headers: <ul><li>'.implode( '</li><li>', headers_list() ).'</li></ul>';
+			LogHandler::Log( 'FileStoreService', 'DEBUG', $msg );
+		}
+	}
+
+	/**
+	 * Sends a file through output stream for download (client side).
+	 *
+	 * @param resource $fileReady Local input file to stream.
+	 * @param resource $fileDownload PHP output stream to write into.
+	 * @param string $filePath File path of the file being downloaded.
+	 */
+	private function streamDownloadFile( $fileReady, $fileDownload, $filePath )
+	{
+		// Use buffered output; fpassthru() can die in the middle for large documents!
+		//  -> http://nl3.php.net/manual/en/function.fpassthru.php#18224
+		// And, readfile and fpassthru are about 55% slower than doing a loop with "feof/echo fread".
+		// -> http://nl3.php.net/manual/en/function.fpassthru.php#55001
+		
+		require_once BASEDIR.'/server/utils/FileHandler.class.php';
+		$bufSize = FileHandler::getBufferSize( filesize( $filePath ) ); // 16MB (16x1024x1024)
+		stream_set_write_buffer( $fileDownload, $bufSize );
+//		stream_set_chunk_size( $fileDownload, $bufSize ); // PHP 5.4
+		$bytesCopied = stream_copy_to_stream( $fileReady, $fileDownload );
+		
+		if( LogHandler::debugMode() ) {
+			$message = 'File download statistics: <ul>'.
+				'<li>original file size: '.filesize($filePath). '</li>'.
+				'<li>bytes read from file: '.ftell($fileReady). '</li>'.
+				'<li>bytes copied into stream: '.$bytesCopied. '</li>'.
+				'<li>stream buffer size used: '.$bufSize. '</li>'.
+			'</ul>';
+			LogHandler::Log( __CLASS__, 'DEBUG', $message  );
+		}
+	}
+}
+
+class WW_FileIndex_HttpException extends Exception
+{
+	/**
+	 * @inheritdoc
+	 */
+	public function __construct( $message = "", $code = 0, Exception $previous = null )
+	{
+		$response = new Zend\Http\Response();
+		$response->setStatusCode( $code );
+		$reasonPhrase = $response->getReasonPhrase();
+
+		$statusMessage = "{$code} {$reasonPhrase}";
+		if( $message ) {
+			// Add message to status; for apps that can not reach message body (like Flex)
+			$statusMessage .= " - {$message}";
+		}
+
+		header( "HTTP/1.1 {$code} {$reasonPhrase}" );
+		header( "Status: {$statusMessage}" );
+
+		LogHandler::Log( __CLASS__, $response->isServerError() ? 'ERROR' : 'INFO', $statusMessage );
+		parent::__construct( $message, $code, $previous );
+	}
+
+	/**
+	 * Composes a new HTTP exception from a given BizException.
+	 *
+	 * @param BizException $e
+	 * @return WW_FileIndex_HttpException
+	 */
+	static public function createFromBizException( BizException $e )
+	{
+		$message = $e->getMessage().' '.$e->getDetail();
+		$errorMap = array(
+			'S1002' => 403,
+			'S1029' => 404,
+			'S1036' => 404,
+			'S1080' => 404,
+			'S1043' => 403,
+		);
+		$sCode = $e->getErrorCode();
+		$code = array_key_exists( $sCode, $errorMap ) ? $errorMap[$sCode] : 500;
+		return new WW_FileIndex_HttpException( $message, $code );
+	}
+}

@@ -611,10 +611,12 @@ class BizSession
 	 *
 	 * @param string $ticket Ticket to validate
 	 * @param string $service Service to validate the ticket for, default ''.
+	 * @param bool $extend Since 10.2. Whether or not the ticket lifetime should be implicitly extended (when valid).
+	 *                     Pass FALSE when e.g. frequently called and so the its expensive DB update could be skipped.
 	 * @return string The active user of the session.
 	 * @throws BizException When ticket not valid.
 	 */
-	public static function checkTicket( $ticket, $service='' )
+	public static function checkTicket( $ticket, $service='', $extend = true )
 	{
 		// All web applications validate their ticket before they start operating,
 		// but most of them do not start a session. Here we do a lazy start to avoid
@@ -625,7 +627,7 @@ class BizSession
 
 		// Throw error when ticket is not (or no longer) valid.
 		require_once( BASEDIR . '/server/dbclasses/DBTicket.class.php' );
-		self::$userName = DBTicket::checkTicket( $ticket, $service );
+		self::$userName = DBTicket::checkTicket( $ticket, $service, $extend );
 		if( !self::$userName ) {
 			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
 		}
