@@ -1260,7 +1260,7 @@ class BizObject
 				// BZ#13297 don't get files for native and placement renditions when haveversion is same as object version
 				if ($rendition && $rendition != 'none'
 					&& ! ( ($rendition == 'native' || $rendition == 'placement')
-						&& $haveVersion === $object->MetaData->WorkflowMetaData->Version ) ) {
+						&& $haveVersion === $objectProps['Version'] ) ) {
 					require_once BASEDIR.'/server/bizclasses/BizStorage.php';
 					if( $editionId ) { // edition/device specific rendition
 						require_once BASEDIR.'/server/dbclasses/DBObjectRenditions.class.php';
