@@ -315,7 +315,14 @@ class DBQuery extends DBBase
 			// When the query doesn't return any rows, the $sth parameter is actually set
 			// with an empty resultset. Therefore we can check this way.
 			// This solves BZ#28864 .
-			throw new BizException('ERR_SYSTEM_PROBLEM', 'server', $dbdriver->error());
+
+			// EN-88267:
+			// It used to be "ERR_SYSTEM_PROBLEM", but since it is database-related-error plus
+			// Enterprise should not expose all the database ( especially query syntax errors )
+			// when it is not in Debug mode. With this, the error key 'ERR_SYSTEM_PROBLEM' is
+			// changed to 'ERR_DATABASE' so that we have a better overview / control on suppressing
+			// these errors when Enterprise is not running on Debug mode.
+			throw new BizException( 'ERR_DATABASE', 'server', $dbdriver->error());
 		}
 		return self::fetchResults($sth, 'ID');
 	}
