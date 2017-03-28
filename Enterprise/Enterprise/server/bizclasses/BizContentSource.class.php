@@ -321,7 +321,7 @@ class BizContentSource
 		$connector = self::getContentSourceForAlienObject( $alienId );
 
         // When ContentSourceFileLinks are requested, they need to be enabled for the Content Source plugin.
-        if( in_array( 'ContentSourceFileLinks', $requestInfo ) 
+        if( is_array( $requestInfo ) && in_array( 'ContentSourceFileLinks', $requestInfo )
 			&& is_array( $supportedContentSources ) && in_array( $contentSource, $supportedContentSources ) ) {
             require_once BASEDIR . '/server/bizclasses/BizServerPlugin.class.php';
             BizServerPlugin::runConnector( $connector, 'requestedContentSourceFileLinks', array() );
