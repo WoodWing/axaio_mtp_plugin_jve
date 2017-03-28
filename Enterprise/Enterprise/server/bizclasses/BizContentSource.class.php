@@ -301,15 +301,15 @@ class BizContentSource
 	 * See ContentSource_EnterpriseConnector for comments
 	 * This is a facade hiding the details of calling the method from the right plug-in
 	 *
-	 * @param string	$contentSource
-	 * @param string	$documentId
-	 * @param object 	$object
-	 * @param array 	$objProps
-	 * @param boolean 	$lock
+	 * @param string  $contentSource
+	 * @param string  $documentId
+	 * @param Object  $object
+	 * @param array   $objProps
+	 * @param boolean $lock
 	 * @param string 	$rendition
-     * @param array     $requestInfo
-     * @param array     $supportedContentSources
-	 * @param string	$haveVersion
+	 * @param array   $requestInfo
+	 * @param array   $supportedContentSources
+	 * @param string  $haveVersion
 	 */
 	public static function getShadowObject( $contentSource, $documentId, &$object, $objProps, 
 		$lock, $rendition, $requestInfo = null, $supportedContentSources = null, $haveVersion = null )
