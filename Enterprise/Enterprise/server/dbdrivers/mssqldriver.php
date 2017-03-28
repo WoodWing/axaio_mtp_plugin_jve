@@ -102,6 +102,9 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	{
 		PerformanceProfiler::startProfile( 'db query (mssql)', 4 );
 
+		$logSQL = $writeLog && ( LogHandler::debugMode() || LOGSQL == true ); // BZ#14442
+		$startTime = $logSQL ? microtime( true ) : null;
+
 		try {
 			$sql = self::substituteParams($sql, $params);
 		}
@@ -111,9 +114,7 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 		}		
 		
 		$sql = $this->_dbindep($sql); // See note AAA
-
 		$cleanSql = $sql; // remember for logging (before adding blob data)
-		$logSQL = $writeLog && ( LogHandler::debugMode() || LOGSQL == true ); // BZ#14442
 
 		// handle blobs
 		if( is_null($blob) ) { // Make sure insert/update does not fail in case of #BLOB# and $blob equals null
@@ -186,7 +187,8 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 				LOGFILE_FORMAT == 'html' ? htmlentities( $cleanSql ) : $cleanSql,
 				$rowCnt,
 				__CLASS__,
-				__FUNCTION__ );
+				__FUNCTION__,
+				microtime( true ) - $startTime );
 		}
 
 		PerformanceProfiler::stopProfile( 'db query (mssql)', 4 );

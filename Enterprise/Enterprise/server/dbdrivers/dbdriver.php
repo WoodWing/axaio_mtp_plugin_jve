@@ -42,11 +42,12 @@ abstract class WW_DbDrivers_DriverBase
 	 * @param integer|null $rowCnt Number of rows (on select) or number of affected rows (on update, delete, etc). NULL to skip log.
 	 * @param string $class The calling class name. Should be __CLASS__
 	 * @param string $function The calling function name. Should be __FUNCTION__
+	 * @param float $execDuration Since 10.2. Time it took to execute the SQL in microseconds.
 	 */
-	protected function logSql( $area, $sql, $rowCnt, $class, $function )
+	protected function logSql( $area, $sql, $rowCnt, $class, $function, $execDuration )
 	{
 		PerformanceProfiler::startProfile( 'query logging', 5 );
-		
+
 		// Add SQL to log.
 		$log = 'SQL: '.$sql.'<br/>';
 		
@@ -77,7 +78,8 @@ abstract class WW_DbDrivers_DriverBase
 		if( !is_null($rowCnt) ) {
 			$log .= '=> Number of selected/affected rows: '.$rowCnt.'<br/>';
 		}
-		
+		$log .= '=> Execution time: '.sprintf( '%.3f', $execDuration * 1000 ).'ms<br/>';
+
 		// Log SQL, caller and row count at once.
 		LogHandler::Log( $area, 'INFO', $log );
 

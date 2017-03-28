@@ -201,7 +201,10 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	public function query( $sql, $params=array(), $blob=null, $writeLog=true, $logExistsErr=true )
 	{
 		PerformanceProfiler::startProfile( 'db query (oracle)', 4 );
-		
+
+		$logSQL = $writeLog && ( LogHandler::debugMode() || LOGSQL == true ); // BZ#14442
+		$startTime = $logSQL ? microtime( true ) : null;
+
 		try {
 			$sql = self::substituteParams($sql, $params);
 		}
@@ -211,10 +214,8 @@ class oracledriver extends WW_DbDrivers_DriverBase
 		}	
 				
 		$sql = $this->_dbindep($sql); // See note AAA
-
 		$cleanSql = $sql; // remember for logging (before adding blob data)
-		$logSQL = $writeLog && ( LogHandler::debugMode() || LOGSQL == true ); // BZ#14442
-		
+
 		$this->last_stmt = null;
 		
 		// handle blobs
@@ -295,7 +296,8 @@ class oracledriver extends WW_DbDrivers_DriverBase
 				LOGFILE_FORMAT == 'html' ? htmlentities( $cleanSql ) : $cleanSql,
 				$rowCnt,
 				__CLASS__,
-				__FUNCTION__ );
+				__FUNCTION__,
+				microtime( true ) - $startTime );
 		}
 
 		PerformanceProfiler::stopProfile( 'db query (oracle)', 4 );
