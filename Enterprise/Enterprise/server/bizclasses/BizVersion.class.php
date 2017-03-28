@@ -356,6 +356,8 @@ class BizVersion
 				$wflMetadata->Version = $newRow['version'];
 			}
 			self::removeOldVersionWhenNewIsCreatedByIDSA( $currRow, $newRow );
+		} else {
+			$newRow['version'] = $currRow['version'];
 		}
 
 		self::removeIntermediateVersions( array( $id ), $currRow['type'], array( $id => $currRow['storename'] ),
