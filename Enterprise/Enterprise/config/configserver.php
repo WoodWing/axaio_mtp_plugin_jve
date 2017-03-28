@@ -1420,7 +1420,7 @@ if( !defined('EXIFTOOL_APP_PATH') ) {
 //        'http://example.com' => array(
 //            'Access-Control-Allow-Credentials' => 'true',
 //            'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS, DELETE, PUT, HEAD',
-//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept'
+//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept, X-WoodWing-Application'
 //        ),
 //
 //    - The set of headers to return is determined by the Origin header that is send by the client.
@@ -1433,7 +1433,7 @@ if( !defined('EXIFTOOL_APP_PATH') ) {
 //        'http://example.com' => array(
 //            'Access-Control-Allow-Credentials' => 'true',
 //            'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS, DELETE, PUT, HEAD',
-//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept'
+//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept, X-WoodWing-Application'
 //        ),
 //    )));
 //}
