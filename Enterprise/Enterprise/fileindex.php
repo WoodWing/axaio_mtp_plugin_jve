@@ -53,6 +53,9 @@ class WW_FileIndex
 	/** @var array $httpParams HTTP input parameters (taken from URL or Cookie). */
 	private $httpParams;
 
+	/** @var string[] List of file paths used by this module that it removes after download. */
+	private $transferFiles = array();
+
 	/**
 	 * Dispatch the incoming HTTP request.
 	 */
@@ -108,6 +111,7 @@ class WW_FileIndex
 	{
 		$this->httpParams = array();
 
+		// Grab the parameters we can work with.
 		$this->httpParams['ticket'] = isset($_GET['ticket']) ? $_GET['ticket'] : null;
 		if( !$this->httpParams['ticket'] ) { // support cookie enabled sessions
 			$this->httpParams['ticket'] = isset($_COOKIE['ticket']) ? $_COOKIE['ticket'] : null;
@@ -117,6 +121,7 @@ class WW_FileIndex
 		$this->httpParams['inline'] = array_key_exists( 'inline', $_GET );
 		$this->httpParams['version'] = isset($_GET['version']) ? $_GET['version'] : null;
 
+		// Validate required parameters.
 		if( !$this->httpParams['ticket'] ) {
 			$message = 'Please specify "ticket" param at URL or provide it as a web cookie.';
 			throw new WW_FileIndex_HttpException( $message, 400 );
@@ -130,6 +135,7 @@ class WW_FileIndex
 			throw new WW_FileIndex_HttpException( $message, 400 );
 		}
 
+		// Log the incoming parameters for debugging purposes.
 		if( LogHandler::debugMode() ) {
 			$msg = 'Incoming HTTP params: ';
 			foreach( $this->httpParams as $key => $value ) {
@@ -149,11 +155,13 @@ class WW_FileIndex
 		// Validate ticket. Explicitly request NOT to update ticket expiration date to save time (since DB updates
 		// are expensive). We assume this is settled through regular web services anyway, such as GetObject which are
 		// needed anyway to find out which files are there to download.
-		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-		$user = DBTicket::checkTicket( $this->httpParams['ticket'], 'FileStore', false );
-		if( $user === false ) {
-			$message = "Invalid ticket.";
-			throw new WW_FileIndex_HttpException( $message, 401 );
+		try {
+			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+			$user = BizSession::checkTicket( $this->httpParams['ticket'], 'FileStore', false );
+			BizSession::setServiceName( 'FileStore' );
+			BizSession::startSession( $this->httpParams['ticket'] );
+		} catch( BizException $e ) {
+			throw WW_FileIndex_HttpException::createFromBizException( $e );
 		}
 
 		// Get essential object properties. Don't call GetObjects/QueryObjects to save time.
@@ -167,22 +175,32 @@ class WW_FileIndex
 			throw new WW_FileIndex_HttpException( $message, 403 );
 		}
 
-		// TODO: Support for Alien/Shadow objects, probably use ContentSourceUrl
-
 		// Determine the file path and stream its content directly from FileStore over HTTP back to caller.
 		$version = $this->httpParams['version'] ? $this->httpParams['version'] : $objectProps['Version'];
-		$filePath = $this->getStorePath( $objectProps, $version, $this->httpParams['rendition'] );
+		$contentSource = trim($objectProps['ContentSource']);
+		if( $contentSource ) { // shadow
+			$filePath = $this->getFilePathForShadowObject( $user );
+		} else {
+			$filePath = $this->getStorePath( $objectProps, $version, $this->httpParams['rendition'] );
+		}
 		if( !$filePath ) {
 			$message = "File not found for object {$objectId}.";
 			throw new WW_FileIndex_HttpException( $message, 404 );
 		}
 		$this->handleDownload( $filePath, $objectProps['Name'], $objectProps['Format'], $version );
+
+		if( $this->transferFiles ) {
+			$bizTransfer = new BizTransferServer();
+			foreach( $this->transferFiles as $filePath ) {
+				$bizTransfer->deleteFile( $filePath );
+			}
+		}
 	}
 
 	/**
 	 * Retrieve essential object properties (that are just enough to check access rights and determine download file).
 	 *
-	 * @param integer $objectId
+	 * @param string $objectId
 	 * @return array Object properties (camel case keys)
 	 * @throws WW_FileIndex_HttpException
 	 */
@@ -253,36 +271,75 @@ class WW_FileIndex
 		return $filePath;
 	}
 
-//	// Commented out; This function takes 250ms, which is 5 times more expensive than current implementation.
-//	private function handleGet()
+// Commented out;
+//     The experiment below is much faster than the getFilePathForShadowObject() function but causes troubles in
+//     the core server (logging) and introduces a redundant code fragment taken from BizObjects::getObjects().
+//     Not sure if we should steer into this?
+//	/**
+//	 * Requests the given ContentSource to resolve the file path.
+//	 *
+//	 * @param string $contentSource
+//	 * @param array $objectProps
+//	 * @param string $rendition
+//	 * @return null|string The file path
+//	 * @throws WW_FileIndex_HttpException
+//	 */
+//	private function getFilePathForShadowObject_Experiment( $contentSource, $objectProps, $rendition )
 //	{
-//		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-//		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-//
-//		$rendition = $this->httpParams['rendition'];
-//		$objectId = $this->httpParams['objectid'];
+//		/** @var Object $object */
+//		$object = null;
 //		try {
-//			// Validate ticket. Explicitly request NOT to update ticket expiration date to save time (since DB updates
-//			// are expensive). We assume this is settled through regular web services anyway, such as GetObject which are
-//			// needed anyway to find out which files are there to download.
-//			$user = BizSession::checkTicket( $this->httpParams['ticket'], 'FileStore', false );
-//			BizSession::setServiceName( 'FileStore' );
-//			BizSession::startSession( $this->httpParams['ticket'] );
-//
-//			// PROBLEM: We should avoid copy to transfer server!!!
-//			$object = BizObject::getObject( $objectId, $user, false, $rendition, array( 'NoMetaData' ) );
+//			require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
+//			BizContentSource::getShadowObject( $contentSource,
+//				trim($objectProps['DocumentID']), $object, $objectProps, false, $rendition );
 //		} catch( BizException $e ) {
 //			throw WW_FileIndex_HttpException::createFromBizException( $e );
 //		}
-//		$attachment = $object->Files[0];
-//		if( !$attachment->FilePath ) {
-//			$message = "File not found for object {$objectId}.";
-//			throw new WW_FileIndex_HttpException( $message, 404 );
+//		$filePath = null;
+//		if( isset($object->Files[0]) ) {
+//			$filePath = $object->Files[0]->FilePath;
+//			$this->transferFiles[] = $filePath;
 //		}
-//
-//		$inline = $this->httpParams['inline'];
-//		$this->handleDownload( $attachment->FilePath, $attachment->Type, $inline );
+//		return $filePath;
 //	}
+
+	/**
+	 * Returns the file path to the Transfer Server Folder of a given object file rendition.
+	 *
+	 * It calls the more expensive GetObjects to make sure Shadow objects are handled well.
+	 *
+	 * @param string $user
+	 * @return null|string The file path
+	 * @throws WW_FileIndex_HttpException
+	 */
+	private function getFilePathForShadowObject( $user )
+	{
+		$filePath = null;
+		$rendition = $this->httpParams['rendition'];
+		$objectId = $this->httpParams['objectid'];
+		try {
+// Commented out: Somehow this does not work for Elvis. For now we get latest version only for shadows.
+//			if( $this->httpParams['version'] ) {
+//				require_once BASEDIR.'/server/bizclasses/BizVersion.class.php';
+//				$versionInfo = BizVersion::getVersion( $objectId, $user, $this->httpParams['version'], $rendition, array( 'Workflow', 'Trash' ) );
+//				if( isset($versionInfo->File) ) {
+//					$filePath = $versionInfo->File->FilePath;
+//				}
+//			} else {
+				require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+				$object = BizObject::getObject( $objectId, $user, false, $rendition, array( 'NoMetaData' ) );
+				if( isset($object->Files[0]) ) {
+					$filePath = $object->Files[0]->FilePath;
+				}
+//			}
+		} catch( BizException $e ) {
+			throw WW_FileIndex_HttpException::createFromBizException( $e );
+		}
+		if( $filePath ) {
+			$this->transferFiles[] = $filePath;
+		}
+		return $filePath;
+	}
 
 	/**
 	 * Handles the incoming HTTP GET request.
@@ -414,7 +471,11 @@ class WW_FileIndex_HttpException extends Exception
 		$reasonPhrase = $response->getReasonPhrase();
 
 		$statusMessage = "{$code} {$reasonPhrase}";
-		if( $message ) {
+		if( $message ) { // if there are more lines, take first one only this only one can be sent through HTTP
+			if( strpos( $message, "\n" ) !== false ) {
+				$msgLines = explode( "\n", $message );
+				$message = reset($msgLines);
+			}
 			// Add message to status; for apps that can not reach message body (like Flex)
 			$statusMessage .= " - {$message}";
 		}
@@ -436,11 +497,11 @@ class WW_FileIndex_HttpException extends Exception
 	{
 		$message = $e->getMessage().' '.$e->getDetail();
 		$errorMap = array(
-			'S1002' => 403,
-			'S1029' => 404,
-			'S1036' => 404,
-			'S1080' => 404,
-			'S1043' => 403,
+			'S1002' => 403, // ERR_AUTHORIZATION
+			'S1029' => 404, // ERR_NOTFOUND
+			'S1036' => 404, // ERR_NO_SUBJECTS_FOUND
+			'S1080' => 404, // ERR_NO_CONTENTSOURCE
+			'S1043' => 401, // ERR_TICKET
 		);
 		$sCode = $e->getErrorCode();
 		$code = array_key_exists( $sCode, $errorMap ) ? $errorMap[$sCode] : 500;
