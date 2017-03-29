@@ -40,8 +40,6 @@
  * - HTTP 500: Unexpected server error.
  */
 
-// To deal with large files, avoid script abortion due to low max_execution_time setting
-@ignore_user_abort(1); // Disallow clients to stop server (PHP script) execution.
 @set_time_limit(0);    // Run server (PHP script) forever.
 
 // Dispatch and handle the incoming HTTP request
@@ -201,7 +199,7 @@ class WW_FileIndex
 	 * Retrieve essential object properties (that are just enough to check access rights and determine download file).
 	 *
 	 * @param string $objectId
-	 * @return array Object properties (camel case keys)
+	 * @return array Object properties with upper camel case keys (e.g. ContentSource)
 	 * @throws WW_FileIndex_HttpException
 	 */
 	protected function getObjectProperties( $objectId )

@@ -612,7 +612,7 @@ class BizSession
 	 * @param string $ticket Ticket to validate
 	 * @param string $service Service to validate the ticket for, default ''.
 	 * @param bool $extend Since 10.2. Whether or not the ticket lifetime should be implicitly extended (when valid).
-	 *                     Pass FALSE when e.g. frequently called and so the its expensive DB update could be skipped.
+	 *                     Pass FALSE when e.g. frequently called and so the expensive DB update could be skipped.
 	 * @return string The active user of the session.
 	 * @throws BizException When ticket not valid.
 	 */
