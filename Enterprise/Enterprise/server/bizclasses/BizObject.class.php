@@ -3828,6 +3828,15 @@ class BizObject
 			}
 		}
 
+		// When client provides PlainContent without Slugline, derive the Slugline from the PlainContent.
+		// This happens for the Digital Editor (CSDE). [EN-88921]
+		if( !isset($object->MetaData->ContentMetaData->Slugline) &&
+			isset($object->MetaData->ContentMetaData->PlainContent)) {
+			require_once BASEDIR.'/server/utils/UtfString.class.php';
+			$object->MetaData->ContentMetaData->Slugline = UtfString::truncateMultiByteValue(
+				$object->MetaData->ContentMetaData->PlainContent, 250 );
+		}
+
 		// Validate meta data and targets
 		self::validateMetaDataAndTargets( $user, $object->MetaData, $object->Targets, $object->Relations, false );
 
