@@ -3844,6 +3844,34 @@ class BizObject
 	}
 
 	/**
+	 * Adds the first level of data structure to a given MetaData tree.
+	 *
+	 * @since 10.2.0
+	 * @param MetaData $metadata
+	 */
+	public static function completeMetaDataStructure( MetaData $metadata )
+	{
+		if( !isset($metadata->BasicMetaData) ) {
+			$metadata->BasicMetaData = new BasicMetaData();
+		}
+		if( !isset($metadata->RightsMetaData) ) {
+			$metadata->RightsMetaData = new RightsMetaData();
+		}
+		if( !isset($metadata->SourceMetaData) ) {
+			$metadata->SourceMetaData = new SourceMetaData();
+		}
+		if( !isset($metadata->ContentMetaData) ) {
+			$metadata->ContentMetaData = new ContentMetaData();
+		}
+		if( !isset($metadata->WorkflowMetaData) ) {
+			$metadata->WorkflowMetaData = new WorkflowMetaData();
+		}
+		if( !isset($metadata->ExtraMetaData) ) {
+			$metadata->ExtraMetaData = array();
+		}
+	}
+
+	/**
 	 * This function validates if the native file is available in the filestore for the following
 	 * object types:
 	 * - Article
