@@ -1220,16 +1220,27 @@ function main()
             // Save to reflect updated WCML articles in the local layout, to speedup next previews.
             // Changed stories are then saved and don't need updates over and over again for succeeding previews.
             // This should not be done for articles that are not placed on a layout.
-            if( isSC10plus && !templatefile ) { // SC10+ && article is placed
+			if( isSC10plus && !templatefile ) { // SC10+ && article is placed
+				wwlog( INFO, "Saving document [" + myDoc.fullName + "]" );
                 myDoc.save( myDoc.fullName );
             }
-
+        }
+        catch(e) 
+        {
+            wwlog( ERROR, "Error #6.1: " + e.name + " - " + e.message + " Source: IDPreview.js#" + e.line );
+        }
+        try
+        {
             // Close all documents without saving.
-            while( app.documents.length > 0 ) {
+			while( app.documents.length > 0 ) {
+				wwlog( INFO, "Closing document [" + app.documents.item(0).fullName + "]" );
                 app.documents.item(0).close( SaveOptions.NO );
             }
         }
-        catch(e) {}
+        catch(e) 
+        {
+            wwlog( ERROR, "Error #6.2: " + e.name + " - " + e.message + " Source: IDPreview.js#" + e.line );
+        }
 
         try
         {
@@ -1250,8 +1261,10 @@ function main()
                 app.entSession.logout();
             }
         }
-        catch(err)
-        {}
+        catch(e)
+        {
+            wwlog( ERROR, "Error #7: " + e.name + " - " + e.message + " Source: IDPreview.js#" + e.line );
+        }
 
         if( isSC10plus ) {
             app.disableGeneratingPreview(); // this also clears app.setArticleFileArray()
