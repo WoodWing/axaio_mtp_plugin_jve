@@ -1470,23 +1470,22 @@ class DBQuery extends DBBase
 	 * @param array $issueClauses
 	 * @return string SQL
 	 */
-	public static function getIssueSubSelect(array $issueClauses = array())
+	public static function getIssueSubSelect( array $issueClauses = array() )
 	{
 		$dbdriver = DBDriverFactory::gen();
-		$targetsTable = $dbdriver->tablename("targets");
-		$relationsTable = $dbdriver->tablename("objectrelations");
-		$issuesTable = $dbdriver->tablename("issues");
+		$targetsTable = $dbdriver->tablename( "targets" );
+		$relationsTable = $dbdriver->tablename( "objectrelations" );
+		$issuesTable = $dbdriver->tablename( "issues" );
 
-		$sqlWhere1='';
-		$sqlWhere2='';
-		$whereIssueClauses='';
+		$whereIssueClauses = '';
 		if( $issueClauses ) {
 			$whereIssueClauses = '('.implode( ') OR (', $issueClauses ).')';
 		}
 
 		// For Objects that have their own object-targets.
+		$whereObjectTargets = '';
 		if( $whereIssueClauses ) {
-			$sqlWhere1 = " WHERE {$whereIssueClauses} ";
+			$whereObjectTargets = " WHERE {$whereIssueClauses} ";
 		}
 
 		// For Objects that have relations-targets
@@ -1498,19 +1497,19 @@ class DBQuery extends DBBase
 		// have been deleted to the TrashCan (deleted from the Issue).
 		$whereParts[] = "(rel.`type` NOT LIKE 'Deleted%')"; // EN-88671
 		$whereSql = implode( ' AND ', $whereParts );
-		$sqlWhere2 = " WHERE {$whereSql} ";
+		$whereObjectRelations = " WHERE {$whereSql} ";
 
 		$sql = "\nSELECT tar.`objectid` AS objectid, tar.`issueid` AS issueid"
-			. " FROM $targetsTable tar"
-			. " INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)"
-			. $sqlWhere1
-			. " AND tar.`objectrelationid` = 0"
-			. " UNION /*ChildrenInIssues*/"
-			. " SELECT rel.`child` AS objectid, tar.`issueid` AS issueid"
-			. " FROM $targetsTable tar"
-			. " INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)"
-			. " INNER JOIN $relationsTable rel ON ( rel.`id` = tar.`objectrelationid` )"
-			. $sqlWhere2;
+			." FROM $targetsTable tar"
+			." INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)"
+			.$whereObjectTargets
+			." AND tar.`objectrelationid` = 0"
+			." UNION /*ChildrenInIssues*/"
+			." SELECT rel.`child` AS objectid, tar.`issueid` AS issueid"
+			." FROM $targetsTable tar"
+			." INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)"
+			." INNER JOIN $relationsTable rel ON ( rel.`id` = tar.`objectrelationid` )"
+			.$whereObjectRelations;
 
 		return $sql;
 	}
