@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated 10.2.0 Code can be removed without further notice.
+ */
 ////// graphics
 function graphbar ($stat, $sz=30)
 {

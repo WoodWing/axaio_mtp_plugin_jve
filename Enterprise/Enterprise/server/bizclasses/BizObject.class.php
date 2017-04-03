@@ -222,7 +222,7 @@ class BizObject
 		$status = BizAdmStatus::getStatusWithId( $object->MetaData->WorkflowMetaData->State->Id );
 
 		// Check authorization
-		$rights = 'W'; // check 'Write' access (W)
+		$rights = 'RW'; // check 'Read/Write' access (R and W): Read is added for EN-88613
 		if( $arr['type'] == 'Dossier' || $arr['type'] == 'DossierTemplate' ) {
 			$rights .= 'd'; // check the 'Create Dossier' access (d) (BZ#17051)
 		} else if( $arr['type'] == 'Task' ) {
@@ -1967,6 +1967,7 @@ class BizObject
 			// Flatten the MetaDataValue list and resolve the type, prevalidation is already done by the service and possibly
 			// by the Plugins. We want to create a list of standard properties and custom properties.
 			$objectProperties = array( 'standard' => array(), 'custom' => array() );
+			require_once BASEDIR.'/server/utils/ListEncoder.php';
 			foreach( $metaDataValues as $index => $metaDataValue ) {
 				if( $metaDataValue->PropertyValues ) {
 					// Normalize the property values.
@@ -1992,9 +1993,13 @@ class BizObject
 					} else {
 						$propType = BizProperty::getStandardPropertyType( $metaDataValue->Property );
 					}
-					$val = ( $propType == 'multilist' || $propType == 'multistring')
-						? implode( BizProperty::MULTIVALUE_SEPARATOR, $propValues )
-						: $propValues[0];
+					if( substr( $propType, 0, 5) == 'multi' && $propType != 'multiline' && is_array( $propValues )) { // BZ#13545 exclude multiline!
+						// Typically for multilist or multistring
+						$encoder = new WW_Utils_ListEncoder( '\\', '/' );
+						$val = $encoder->encodeList( $propValues );
+					} else { // single value
+						$val = $propValues[0];
+					}
 					$objectProperties[$key][$metaDataValue->Property] = $val;
 				}
 			}
@@ -4282,6 +4287,7 @@ class BizObject
 			}
 
 			require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
+			require_once BASEDIR.'/server/utils/ListEncoder.php';
 			$extradata = DBProperty::getProperties( $meta->BasicMetaData->Publication->Id, $objType, true, $publishSystem, $templateId );
 			if( $extradata ) foreach ( $extradata as $extra ) {
 				foreach( $extraMetaData as $md ) {
@@ -4315,7 +4321,8 @@ class BizObject
 								$mdValues[] = $mdNode->Values;
 							}// <<<
 							if( substr($extra->Type, 0, 5) == 'multi' && $extra->Type != 'multiline' && is_array($mdValues)) { // BZ#13545 exclude multiline!
-								$value = implode( BizProperty::MULTIVALUE_SEPARATOR, $mdValues ); // typically for multilist and multistring
+								$encoder = new WW_Utils_ListEncoder( '\\', '/' );
+								$value = $encoder->encodeList( $mdValues );
 							} else { // single value
 								$value = $mdValues[0];
 							}
@@ -4465,12 +4472,14 @@ class BizObject
 				require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
 				$extradata = DBProperty::getProperties( $row['PublicationId'], $row['Type'], true, $publishSystem, $templateId );
 				if ($extradata){
+					require_once BASEDIR . '/server/utils/ListEncoder.php';
 					foreach ($extradata as $extra) {
 						$name = $extra->Name;
 						if ( isset( $row[$name] )) {
 							if( substr( $extra->Type, 0, 5 ) == 'multi' && $extra->Type != 'multiline' ) { // BZ#13545 exclude multiline!
 								// typically for multilist and multistring
-								$values = explode( BizProperty::MULTIVALUE_SEPARATOR, $row[$name]);
+								$encoder = new WW_Utils_ListEncoder( '\\', '/' );
+								$values = $encoder->decodeList( $row[$name] );
 							} else {
 								$theVal = $row[$name];
 								settype( $theVal, 'string' ); // BZ#4930: Force <String> elems (to avoid <item> for booleans)
