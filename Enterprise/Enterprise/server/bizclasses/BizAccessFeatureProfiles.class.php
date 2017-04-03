@@ -172,7 +172,7 @@ class BizAccessFeatureProfiles
 			self::WORKFLOW_ADDICIMAGES       => new SysFeatureProfile( self::WORKFLOW_ADDICIMAGES,
 				'AddInCopyImages',           '', BizResources::localize('ACT_ADDINCOPYIMAGES'), 'No' ),
 			self::WORKFLOW_PUBLISH           => new SysFeatureProfile( self::WORKFLOW_PUBLISH,
-				'Publish',                   '', BizResources::localize('ACT_PUBLISH') ),
+				'Publish',                   'p', BizResources::localize('ACT_PUBLISH') ),
 			self::WORKFLOW_CREATETASK        => new SysFeatureProfile( self::WORKFLOW_CREATETASK,
 				'Create_Tasks',              't', BizResources::localize('ACT_CREATE_TASKS') ),
 			self::WORKFLOW_MUTLIPLACEMENT    => new SysFeatureProfile( self::WORKFLOW_MUTLIPLACEMENT,
