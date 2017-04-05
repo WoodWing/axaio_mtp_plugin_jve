@@ -538,11 +538,11 @@ class BizAdmPublication
 	{
 		require_once BASEDIR.'/server/bizclasses/BizDeadlines.class.php';
 		if( $issues ) foreach( $issues as $issue ) {
-			if( self::isCalculateDeadlinesNeeded( $pubId, $issue ) ) {
+			if( !is_null( $issue->Deadline ) ) {
 				if( empty( $issue->Deadline ) ) {
 					// Empty means delete/clear all issue deadlines. Also see function header.
 					BizDeadlines::deleteDeadlines( $issue->Id );
-				} else {
+				} elseif ( self::isCalculateDeadlinesNeeded( $pubId, $issue ) ) {
 					if( !isset( $orgDeadlines[ $issue->Id ] ) || $orgDeadlines[ $issue->Id ] != $issue->Deadline ) {
 						// Filled and changed, so recalculate and update all issue deadlines. Also see function header.
 						if( isset( $orgDeadlines[ $issue->Id ] ) ) {
@@ -570,12 +570,10 @@ class BizAdmPublication
 	{
 		$calculateDeadlines = false;
 		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-		if( !is_null( $issueObj->Deadline ) ) { // null means no update
-			if( $issueObj->OverrulePublication && $issueObj->CalculateDeadlines ) {
-				$calculateDeadlines = true;
-			} elseif( BizPublication::isCalculateDeadlinesEnabled( $publId, 0 ) ) {
-				$calculateDeadlines = true;
-			}
+		if( $issueObj->OverrulePublication && $issueObj->CalculateDeadlines ) {
+			$calculateDeadlines = true;
+		} elseif( BizPublication::isCalculateDeadlinesEnabled( $publId, 0 ) ) {
+			$calculateDeadlines = true;
 		}
 
 		return $calculateDeadlines;
