@@ -1219,9 +1219,9 @@ class oracledriver extends WW_DbDrivers_DriverBase
 		} else {
 			$clientLang = '';
 		}
-		if( !stristr( $clientLang, 'AL32UTF8' ) ) {
+		if( !stristr( $clientLang, 'UTF8' ) ) {
 			$help = 'Change the database character set with: ALTER DATABASE [db_name] CHARACTER SET AL32UTF8;';
-			$detail = 'Client language incorrect: "'.$clientLang.'". Should be AL32UTF8.';
+			$detail = 'Client language incorrect: "'.$clientLang.'". Should be UTF8 compliant, preferable AL32UTF8.';
 			throw new BizException( null, 'Server', $detail, 'Invalid Configuration' );
 		}
 		
