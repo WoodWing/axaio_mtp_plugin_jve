@@ -538,7 +538,7 @@ class BizAdmPublication
 	{
 		require_once BASEDIR.'/server/bizclasses/BizDeadlines.class.php';
 		if( $issues ) foreach( $issues as $issue ) {
-			if( !is_null( $issue->Deadline ) ) {
+			if( !is_null( $issue->Deadline ) ) { // null means no update was taken place.
 				if( empty( $issue->Deadline ) ) {
 					// Empty means delete/clear all issue deadlines. Also see function header.
 					BizDeadlines::deleteDeadlines( $issue->Id );
