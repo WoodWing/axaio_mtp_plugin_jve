@@ -213,7 +213,7 @@ class BizAdmPublication
 	 * @param array $subReq RequestModes.
 	 * @param Publication[] $pubs List of publications that needs to be modified.
 	 * @throws BizException Throws BizException on failure
-	 * @return Publication[] Modified Publication objects.
+	 * @return AdmPublication[] Modified Publication objects.
 	 */
 	public static function modifyPublicationsObj( $usr, /** @noinspection PhpUnusedParameterInspection */ $subReq, $pubs )
 	{

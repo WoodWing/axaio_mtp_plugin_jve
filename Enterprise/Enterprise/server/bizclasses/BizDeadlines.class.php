@@ -43,7 +43,7 @@ class BizDeadlines
 	 *
 	 * @param integer $pubId
 	 * @param integer $issueId
-	 * @param dateTime $issueDeadline
+	 * @param string $issueDeadline
 	 */
 	public static function updateRecalcIssueDeadlines( $pubId, $issueId, $issueDeadline )
 	{
