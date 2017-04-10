@@ -24,7 +24,9 @@ class WflCreateObjectsService extends EnterpriseService
 		// Let's be friendly and don't bother the core and the connectors with that. [EN-88915]
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 		if( $request->Objects ) foreach( $request->Objects as &$object ) {
-			BizObject::completeMetaDataStructure( $object->MetaData );
+			if( isset( $object->MetaData ) ) {
+				BizObject::completeMetaDataStructure( $object->MetaData );
+			}
 		}
 	}
 
