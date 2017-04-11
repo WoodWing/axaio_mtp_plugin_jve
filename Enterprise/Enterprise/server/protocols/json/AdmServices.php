@@ -437,6 +437,270 @@ class WW_JSON_AdmServices extends WW_JSON_Services
 		return $resp;
 	}
 
+	public function CreateStatuses( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateStatusesService.class.php';
+		$req['__classname__'] = 'AdmCreateStatusesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmCreateStatusesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function GetStatuses( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetStatusesService.class.php';
+		$req['__classname__'] = 'AdmGetStatusesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmGetStatusesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function ModifyStatuses( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmModifyStatusesService.class.php';
+		$req['__classname__'] = 'AdmModifyStatusesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmModifyStatusesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function DeleteStatuses( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteStatusesService.class.php';
+		$req['__classname__'] = 'AdmDeleteStatusesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmDeleteStatusesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function CreateAccessProfiles( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateAccessProfilesService.class.php';
+		$req['__classname__'] = 'AdmCreateAccessProfilesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmCreateAccessProfilesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function GetAccessProfiles( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetAccessProfilesService.class.php';
+		$req['__classname__'] = 'AdmGetAccessProfilesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmGetAccessProfilesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function ModifyAccessProfiles( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmModifyAccessProfilesService.class.php';
+		$req['__classname__'] = 'AdmModifyAccessProfilesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmModifyAccessProfilesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function DeleteAccessProfiles( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteAccessProfilesService.class.php';
+		$req['__classname__'] = 'AdmDeleteAccessProfilesRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmDeleteAccessProfilesService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function CreateWorkflowUserGroupAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateWorkflowUserGroupAuthorizationsService.class.php';
+		$req['__classname__'] = 'AdmCreateWorkflowUserGroupAuthorizationsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmCreateWorkflowUserGroupAuthorizationsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function GetWorkflowUserGroupAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetWorkflowUserGroupAuthorizationsService.class.php';
+		$req['__classname__'] = 'AdmGetWorkflowUserGroupAuthorizationsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmGetWorkflowUserGroupAuthorizationsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function ModifyWorkflowUserGroupAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmModifyWorkflowUserGroupAuthorizationsService.class.php';
+		$req['__classname__'] = 'AdmModifyWorkflowUserGroupAuthorizationsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmModifyWorkflowUserGroupAuthorizationsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function DeleteWorkflowUserGroupAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteWorkflowUserGroupAuthorizationsService.class.php';
+		$req['__classname__'] = 'AdmDeleteWorkflowUserGroupAuthorizationsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmDeleteWorkflowUserGroupAuthorizationsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function CreatePublicationAdminAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreatePublicationAdminAuthorizationsService.class.php';
+		$req['__classname__'] = 'AdmCreatePublicationAdminAuthorizationsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmCreatePublicationAdminAuthorizationsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function GetPublicationAdminAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetPublicationAdminAuthorizationsService.class.php';
+		$req['__classname__'] = 'AdmGetPublicationAdminAuthorizationsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmGetPublicationAdminAuthorizationsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function DeletePublicationAdminAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeletePublicationAdminAuthorizationsService.class.php';
+		$req['__classname__'] = 'AdmDeletePublicationAdminAuthorizationsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmDeletePublicationAdminAuthorizationsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function CreateRoutings( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateRoutingsService.class.php';
+		$req['__classname__'] = 'AdmCreateRoutingsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmCreateRoutingsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function GetRoutings( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetRoutingsService.class.php';
+		$req['__classname__'] = 'AdmGetRoutingsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmGetRoutingsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function ModifyRoutings( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmModifyRoutingsService.class.php';
+		$req['__classname__'] = 'AdmModifyRoutingsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmModifyRoutingsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function DeleteRoutings( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteRoutingsService.class.php';
+		$req['__classname__'] = 'AdmDeleteRoutingsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmDeleteRoutingsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function AddTemplateObjects( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmAddTemplateObjectsService.class.php';
+		$req['__classname__'] = 'AdmAddTemplateObjectsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmAddTemplateObjectsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function GetTemplateObjects( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetTemplateObjectsService.class.php';
+		$req['__classname__'] = 'AdmGetTemplateObjectsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmGetTemplateObjectsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
+	public function RemoveTemplateObjects( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmRemoveTemplateObjectsService.class.php';
+		$req['__classname__'] = 'AdmRemoveTemplateObjectsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new AdmRemoveTemplateObjectsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
 	public function CreateAutocompleteTermEntities( $req )
 	{
 		require_once BASEDIR.'/server/services/adm/AdmCreateAutocompleteTermEntitiesService.class.php';

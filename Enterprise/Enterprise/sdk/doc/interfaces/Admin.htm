@@ -23,6 +23,23 @@
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">GroupIds</td><td class="btc">array of integer</td><td class="bcc"></td></tr>
 <tr><td class="bpc">UserId</td><td class="btc">integer</td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>AddTemplateObjectsRequest</h3><p>
+				v10.2 Create new template object access rules at the server.
+
+				Either a publication id or an issue id has to be specified alongside a list of template object access rules.
+
+				Supported RequestModes: GetUserGroups, GetObjectInfos.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
+<tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a></td><td class="bcc"> Asks for relational objects. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> Unique publication identification. (Can be nil in request when IssueId is given.) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> Unique issue identification. (Nil when OverrulePublication is disabled.) </td></tr>
+<tr><td class="bpc">TemplateObjects</td><td class="btc">array of <a href="#TemplateObjectAccess">TemplateObjectAccess</a></td><td class="bcc"> List of template object access rules.</td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>AddTemplateObjectsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">UserGroups</td><td class="btc">array of <a href="#UserGroup">UserGroup</a>*</td><td class="bcc"> List of requested user groups by RequestMode (GetUserGroups). </td></tr>
+<tr><td class="bpc">ObjectInfos</td><td class="btc">array of <a href="#ObjectInfo">ObjectInfo</a>*</td><td class="bcc"> List of requested object information by RequestMode (GetObjectInfos). </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>AddUsersToGroupRequest</h3><p> Add users to an user group. (Create membership.) </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">UserIds</td><td class="btc">array of integer</td><td class="bcc"></td></tr>
@@ -34,6 +51,23 @@
 <tr><td class="bpc">Issues</td><td class="btc">array of <a href="#Issue">Issue</a></td><td class="bcc"> list of target issues (initial properties) </td></tr>
 </table></div><div class="section"><h3>CopyIssuesResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Issues</td><td class="btc">array of <a href="#Issue">Issue</a></td><td class="bcc"> list of copied publications </td></tr>
+</table></div><div class="section"><h3>CreateAccessProfilesRequest</h3><p>
+				 v10.2 Creates one or more access profiles on the server.
+
+			 	 Two different responses can be requested for access profiles: with or without profile features.
+			 	 In order to retrieve access profiles with features, use the Mode "GetProfileFeatures".
+				 In order to retrieve access profiles without features, leave RequestModes empty.
+
+				 If an AccessProfile contains ProfileFeatures, the array of ProfileFeatures has to have the following format:
+				 $array[name] => value
+				 This is done to provide a unified process to handle the ProfileFeatures.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
+<tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a>*</td><td class="bcc"> asks for relations </td></tr>
+<tr><td class="bpc">AccessProfiles</td><td class="btc">array of <a href="#AccessProfile">AccessProfile</a></td><td class="bcc"> array of access profiles to create (no id) </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>CreateAccessProfilesResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">AccessProfiles</td><td class="btc">array of <a href="#AccessProfile">AccessProfile</a></td><td class="bcc"> array of created access profiles </td></tr>
 </table></div><div class="section"><h3>CreateAutocompleteTermEntitiesRequest</h3><p> Create new term entity configurations at server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
 <tr><td class="bpc">TermEntities</td><td class="btc">array of <a href="#TermEntity">TermEntity</a></td><td class="bcc"> Term entity definitions to create. </td></tr>
@@ -75,12 +109,29 @@
 </table></div><div class="section"><h3>CreatePubChannelsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">PublicationId</td><td class="btc">integer</td><td class="bcc"> resolved publication identification </td></tr>
 <tr><td class="bpc">PubChannels</td><td class="btc">array of <a href="#PubChannel">PubChannel</a></td><td class="bcc"> list of created pubchannels </td></tr>
+</table></div><div class="section"><h3>CreatePublicationAdminAuthorizationsRequest</h3><p> v10.2 Create new publication admin authorizations at the server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer</td><td class="bcc"> Unique id of a publication the authorization binds. </td></tr>
+<tr><td class="bpc">UserGroupIds</td><td class="btc">array of integer</td><td class="bcc"> Publication admin authorizations to create. </td></tr>
+</table></div><div class="section"><h3>CreatePublicationAdminAuthorizationsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 </table></div><div class="section"><h3>CreatePublicationsRequest</h3><p> Create a new brand (=publication) configuration at server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a></td><td class="bcc"> asks for relations </td></tr>
 <tr><td class="bpc">Publications</td><td class="btc">array of <a href="#Publication">Publication</a></td><td class="bcc"> list of publications to create </td></tr>
 </table></div><div class="section"><h3>CreatePublicationsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Publications</td><td class="btc">array of <a href="#Publication">Publication</a></td><td class="bcc"> list of created publications </td></tr>
+</table></div><div class="section"><h3>CreateRoutingsRequest</h3><p>
+				v10.2 Create new routing rules at the server.
+
+				Either a publication id or an issue id has to be specified alongside Routing objects.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> Unique publication identification. (Can be nil in request when IssueId is given.) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> Unique issue identification. (Nil when OverrulePublication is disabled.) </td></tr>
+<tr><td class="bpc">Routings</td><td class="btc">array of <a href="#Routing">Routing</a>*</td><td class="bcc"> Routing rules to be created. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>CreateRoutingsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Routings</td><td class="btc">array of <a href="#Routing">Routing</a></td><td class="bcc"> Created routing rules. </td></tr>
 </table></div><div class="section"><h3>CreateSectionsRequest</h3><p> Create a new category (=section) configuration at server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a></td><td class="bcc"> asks for relations </td></tr>
@@ -91,6 +142,14 @@
 <tr><td class="bpc">PublicationId</td><td class="btc">integer</td><td class="bcc"> unique publication identification </td></tr>
 <tr><td class="bpc">IssueId</td><td class="btc">integer</td><td class="bcc"> unique issue identification (zero when OverrulePublication disabled) </td></tr>
 <tr><td class="bpc">Sections</td><td class="btc">array of <a href="#Section">Section</a></td><td class="bcc"> list of created sections </td></tr>
+</table></div><div class="section"><h3>CreateStatusesRequest</h3><p> v10.2 Create a status configuration at server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> unique publication identification (can be nil when IssueId is given) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> unique issue identification (nil when OverrulePublication disabled) </td></tr>
+<tr><td class="bpc">Statuses</td><td class="btc">array of <a href="#Status">Status</a>*</td><td class="bcc"> list of statuses without ids </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>CreateStatusesResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Statuses</td><td class="btc">array of <a href="#Status">Status</a></td><td class="bcc"> list of created statuses </td></tr>
 </table></div><div class="section"><h3>CreateUserGroupsRequest</h3><p> Register new user groups at the server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a></td><td class="bcc"> asks for relations </td></tr>
@@ -103,6 +162,22 @@
 <tr><td class="bpc">Users</td><td class="btc">array of <a href="#User">User</a></td><td class="bcc"> list of users to create </td></tr>
 </table></div><div class="section"><h3>CreateUsersResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Users</td><td class="btc">array of <a href="#User">User</a></td><td class="bcc"> list of created users </td></tr>
+</table></div><div class="section"><h3>CreateWorkflowUserGroupAuthorizationsRequest</h3><p>
+				v10.2 Create new workflow user group authorizations at the server.
+
+				Either a publication id or an issue id has to be specified alongside WorkflowUserGroupAuthorizations.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> Unique publication identification. (Can be nil in request when IssueId is given.) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> Unique issue identification. (Is nil when OverrulePublication is disabled.) </td></tr>
+<tr><td class="bpc">WorkflowUserGroupAuthorizations</td><td class="btc">array of <a href="#WorkflowUserGroupAuthorization">WorkflowUserGroupAuthorization</a></td><td class="bcc"> Workflow user group authorizations to create. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>CreateWorkflowUserGroupAuthorizationsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">WorkflowUserGroupAuthorizations</td><td class="btc">array of <a href="#WorkflowUserGroupAuthorization">WorkflowUserGroupAuthorization</a></td><td class="bcc"> Created workflow user group authorizations. </td></tr>
+</table></div><div class="section"><h3>DeleteAccessProfilesRequest</h3><p> v10.2 Delete one or more access profiles from the server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
+<tr><td class="bpc">AccessProfileIds</td><td class="btc">array of integer</td><td class="bcc"> list of requested access profiles </td></tr>
+</table></div><div class="section"><h3>DeleteAccessProfilesResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 </table></div><div class="section"><h3>DeleteAutocompleteTermEntitiesRequest</h3><p> Delete a term entity configuration from server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
 <tr><td class="bpc">TermEntities</td><td class="btc">array of <a href="#TermEntity">TermEntity</a></td><td class="bcc"> Term entity definitions to delete. </td></tr>
@@ -130,10 +205,36 @@
 <tr><td class="bpc">PublicationId</td><td class="btc">integer</td><td class="bcc"> unique publication identification </td></tr>
 <tr><td class="bpc">PubChannelIds</td><td class="btc">array of integer</td><td class="bcc"> list of pubchannels to delete </td></tr>
 </table></div><div class="section"><h3>DeletePubChannelsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+</table></div><div class="section"><h3>DeletePublicationAdminAuthorizationsRequest</h3><p>
+				v10.2 Delete publication admin authorizations from the server.
+
+				If only a PublicationId is given, all authorizations will be deleted for that publication. 
+				If both are given, only rules for User Groups within the publication will be deleted. 
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer</td><td class="bcc"> Unique id of a publication. (Nil to delete all.) </td></tr>
+<tr><td class="bpc">UserGroupIds</td><td class="btc">array of integer*</td><td class="bcc"> List of publication admin authorizations </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>DeletePublicationAdminAuthorizationsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 </table></div><div class="section"><h3>DeletePublicationsRequest</h3><p> Delete a brand (=publication) configuration from server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">PublicationIds</td><td class="btc">array of integer</td><td class="bcc"> list of publications to delete </td></tr>
 </table></div><div class="section"><h3>DeletePublicationsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+</table></div><div class="section"><h3>DeleteRoutingsRequest</h3><p>
+				v10.2 Delete routing rules from the server.
+
+				Either a PublicationId or IssueId alongside an optional SectionId, or only an array
+				of authorization ids.
+				It is unnecessary to request RoutingIds from multiple publications or issues as there
+				is no real-world application to do this through a service.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> Unique publication identification. (Can be nil in request when IssueId is given.) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> Unique issue identification. (Nil when OverrulePublication is disabled.) </td></tr>
+<tr><td class="bpc">SectionId</td><td class="btc">integer*</td><td class="bcc"> Unique section identification. (Nil for all sections.) </td></tr>
+<tr><td class="bpc">RoutingIds</td><td class="btc">array of integer*</td><td class="bcc"> List of selected workflow user group authorizations (Nil to delete all.) </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>DeleteRoutingsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 </table></div><div class="section"><h3>DeleteSectionsRequest</h3><p> Delete a category (=section) configuration from server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">PublicationId</td><td class="btc">integer</td><td class="bcc"> unique publication identification </td></tr>
@@ -141,6 +242,10 @@
 <tr><td class="bpc">SectionIds</td><td class="btc">array of integer</td><td class="bcc"> list of sections to delete </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>DeleteSectionsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+</table></div><div class="section"><h3>DeleteStatusesRequest</h3><p> v10.2 Delete a status configuration from server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
+<tr><td class="bpc">StatusIds</td><td class="btc">array of integer</td><td class="bcc"> list of statuses to delete </td></tr>
+</table></div><div class="section"><h3>DeleteStatusesResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 </table></div><div class="section"><h3>DeleteUserGroupsRequest</h3><p> Delete user groups from the server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">GroupIds</td><td class="btc">array of integer</td><td class="bcc"> list of user groups to delete </td></tr>
@@ -149,6 +254,37 @@
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">UserIds</td><td class="btc">array of integer</td><td class="bcc"> list of users to delete </td></tr>
 </table></div><div class="section"><h3>DeleteUsersResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+</table></div><div class="section"><h3>DeleteWorkflowUserGroupAuthorizationsRequest</h3><p>
+				v10.2 Delete workflow user group authorizations from the server.
+
+				Either a PublicationId or IssueId alongside an optional UserGroupId, or only an array
+				of authorization ids.
+				It is unnecessary to request WorkflowUserGroupAuthorizationIds from multiple publications 
+				or issues as there is no real-world application to do this through a service.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> Unique publication identification. (Can be nil in request when IssueId is given.) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> Unique issue identification. (Nil when OverrulePublication is disabled.) </td></tr>
+<tr><td class="bpc">UserGroupId</td><td class="btc">integer*</td><td class="bcc"> Unique user group identification. (Nil for all user groups.) </td></tr>
+<tr><td class="bpc">WorkflowUserGroupAuthorizationIds</td><td class="btc">array of integer*</td><td class="bcc"> List of selected workflow user group authorizations (Nil to delete all.) </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>DeleteWorkflowUserGroupAuthorizationsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+</table></div><div class="section"><h3>GetAccessProfilesRequest</h3><p>
+				 v10.2 Retrieve one or more access profiles from the server.
+
+				 Two different responses can be requested for access profiles: with or without profile features.
+			 	 In order to retrieve access profiles with features, use the Mode "GetProfileFeatures".
+				 In order to retrieve access profiles without features, leave RequestModes empty.
+
+				 The property AccessProfileIds accepts an array with only a 0 in it. This can be used when all
+				 profile features have to be retrieved without existing access profiles.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
+<tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a>*</td><td class="bcc"> asks for relations </td></tr>
+<tr><td class="bpc">AccessProfileIds</td><td class="btc">array of integer*</td><td class="bcc"> list of requested access profiles </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>GetAccessProfilesResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">AccessProfiles</td><td class="btc">array of <a href="#AccessProfile">AccessProfile</a></td><td class="bcc"> array of requested access profiles </td></tr>
 </table></div><div class="section"><h3>GetAutocompleteTermEntitiesRequest</h3><p> Retrieve a term entity configuration from server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
 <tr><td class="bpc">AutocompleteProvider</td><td class="btc">string*</td><td class="bcc"> Internal server plug-in name that ships an Autocomplete connector. </td></tr>
@@ -200,6 +336,18 @@
 </table></div><div class="section"><h3>GetPubChannelsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">PublicationId</td><td class="btc">integer</td><td class="bcc"> unique publication identification </td></tr>
 <tr><td class="bpc">PubChannels</td><td class="btc">array of <a href="#PubChannel">PubChannel</a></td><td class="bcc"> list requested (or all) pubchannels of pub </td></tr>
+</table></div><div class="section"><h3>GetPublicationAdminAuthorizationsRequest</h3><p>
+				v10.2 Retrieve publication admin authorizations from the server.
+
+				Supported RequestModes: GetUserGroups, GetStatuses, GetSections.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket </td></tr>
+<tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a></td><td class="bcc"> Asks for relational objects. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer</td><td class="bcc"> Unique id of a publication the authorization binds. </td></tr>
+</table></div><div class="section"><h3>GetPublicationAdminAuthorizationsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">UserGroupIds</td><td class="btc">array of integer</td><td class="bcc"> List of requested publication admin authorizations. </td></tr>
+<tr><td class="bpc">UserGroups</td><td class="btc">array of <a href="#UserGroup">UserGroup</a>*</td><td class="bcc"> List of requested sections by RequestModes. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>GetPublicationsRequest</h3><p> Retrieve a brand (=publication) configuration from server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a></td><td class="bcc"> asks for relations </td></tr>
@@ -207,6 +355,27 @@
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>GetPublicationsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Publications</td><td class="btc">array of <a href="#Publication">Publication</a></td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>GetRoutingsRequest</h3><p>
+				v10.2 Retrieve routing rules from the server.
+
+				Either a PublicationId or IssueId alongside an optional SectionId can be given, or
+				only an array of routing ids.
+				It is unnecessary to request Routing rules from multiple publications as there is no
+				real-world application to do this through a service.
+				Supported RequestModes: GetStatuses, GetSections.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket </td></tr>
+<tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a></td><td class="bcc"> Asks for relational objects. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> Unique publication identification. (Can be nil in request when IssueId is given.) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> Unique issue identification. (Nil when OverrulePublication is disabled.) </td></tr>
+<tr><td class="bpc">SectionId</td><td class="btc">integer*</td><td class="bcc"> Unique user group identification. (Nil for all user groups.) </td></tr>
+<tr><td class="bpc">RoutingIds</td><td class="btc">array of integer*</td><td class="bcc"> List of wanted workflow user group authorizations (Nil to receive all.) </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>GetRoutingsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Routings</td><td class="btc">array of <a href="#Routing">Routing</a></td><td class="bcc"> List of requested workflow user group authorizations. </td></tr>
+<tr><td class="bpc">Sections</td><td class="btc">array of <a href="#Section">Section</a>*</td><td class="bcc"> List of requested sections by RequestModes. </td></tr>
+<tr><td class="bpc">Statuses</td><td class="btc">array of <a href="#Status">Status</a>*</td><td class="bcc"> List of requested statuses by RequestModes. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>GetSectionsRequest</h3><p> Retrieve a category (=section) configuration from server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a></td><td class="bcc"> asks for relations </td></tr>
@@ -218,6 +387,42 @@
 <tr><td class="bpc">PublicationId</td><td class="btc">integer</td><td class="bcc"> resolved publication identification </td></tr>
 <tr><td class="bpc">IssueId</td><td class="btc">integer</td><td class="bcc"> unique issue identification (zero when OverrulePublication disabled) </td></tr>
 <tr><td class="bpc">Sections</td><td class="btc">array of <a href="#Section">Section</a></td><td class="bcc"> list of requested (or all) sections of pub/iss </td></tr>
+</table></div><div class="section"><h3>GetStatusesRequest</h3><p> v10.2 Retrieve one or more statuses from the server.
+				 There are several constraints on this request:
+				 - Either a PublicationId, an IssueId or StatusIds have to be provided. No combination of these is necessary.
+				 - StatusIds can only contain ids of statuses that are part of the same issue or the same brand.
+				 	(Meaning that if you have StatusIds of the same brand, but some are actually part of an overruling issue, this request will be illegal)
+				 - If a PublicationId/IssueId has been provided along with StatusIds, these will need to match with the PublicationId/IssueId of the StatusIds.
+				 - ObjectType is merely used as an extra constraint to further specify the results. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> unique publication identification (can be nil in request when IssueId is given) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> unique issue identification (nil when OverrulePublication disabled) </td></tr>
+<tr><td class="bpc">ObjectType</td><td class="btc"><a href="#ObjectType">ObjectType</a>*</td><td class="bcc"> object type; nil means 'for all types' </td></tr>
+<tr><td class="bpc">StatusIds</td><td class="btc">array of integer*</td><td class="bcc"> list of wanted statuses (nil to receive all) </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>GetStatusesResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Statuses</td><td class="btc">array of <a href="#Status">Status</a></td><td class="bcc"> list of requested statuses of publication or issue </td></tr>
+</table></div><div class="section"><h3>GetTemplateObjectsRequest</h3><p>
+				v10.2 Retrieve template object access rules from the server.
+
+				Either a PublicationId or IssueId alongside an optional TemplateObjectId and/or UserGroupId can be given.
+				It is unnecessary to request template object access rules from multiple publications as there is no
+				real-world application to do this through a service.
+
+				Supported RequestModes: GetUserGroups, GetObjectInfos.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
+<tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a></td><td class="bcc"> Asks for relational objects. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> Unique publication identification. (Can be nil in request when IssueId is given.) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> Unique issue identification. (Nil when OverrulePublication is disabled.) </td></tr>
+<tr><td class="bpc">TemplateObjectId</td><td class="btc">integer*</td><td class="bcc"> Unique template object identification. </td></tr>
+<tr><td class="bpc">UserGroupId</td><td class="btc">integer*</td><td class="bcc"> Unique user group identification. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>GetTemplateObjectsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">TemplateObjects</td><td class="btc">array of <a href="#TemplateObjectAccess">TemplateObjectAccess</a></td><td class="bcc"> List of requested template object access rules. </td></tr>
+<tr><td class="bpc">UserGroups</td><td class="btc">array of <a href="#UserGroup">UserGroup</a>*</td><td class="bcc"> List of requested user groups by RequestMode (GetUserGroups). </td></tr>
+<tr><td class="bpc">ObjectInfos</td><td class="btc">array of <a href="#ObjectInfo">ObjectInfo</a>*</td><td class="bcc"> List of requested object information by RequestMode (GetObjectInfos). </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>GetUserGroupsRequest</h3><p> Retrieve user groups from the server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a></td><td class="bcc"> asks for relations </td></tr>
@@ -234,6 +439,28 @@
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>GetUsersResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Users</td><td class="btc">array of <a href="#User">User</a></td><td class="bcc"> list of requested users </td></tr>
+</table></div><div class="section"><h3>GetWorkflowUserGroupAuthorizationsRequest</h3><p>
+				v10.2 Retrieve workflow user group authorizations from the server.
+
+				Either a PublicationId or IssueId alongside an optional UserGroupId, or only an array of authorization ids.
+				It is unnecessary to request WorkflowUserGroupAuthorizationIds from multiple publications there is no
+				real-world application to do this through a service.
+
+				Supported RequestModes: GetUserGroups, GetStatuses, GetSections.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket </td></tr>
+<tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a></td><td class="bcc"> Asks for relational objects. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> Unique publication identification. (Can be nil in request when IssueId is given.) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> Unique issue identification. (Nil when OverrulePublication is disabled.) </td></tr>
+<tr><td class="bpc">UserGroupId</td><td class="btc">integer*</td><td class="bcc"> Unique user group identification. (Nil for all user groups.) </td></tr>
+<tr><td class="bpc">WorkflowUserGroupAuthorizationIds</td><td class="btc">array of integer*</td><td class="bcc"> List of wanted workflow user group authorizations (Nil to receive all.) </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>GetWorkflowUserGroupAuthorizationsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">WorkflowUserGroupAuthorizations</td><td class="btc">array of <a href="#WorkflowUserGroupAuthorization">WorkflowUserGroupAuthorization</a></td><td class="bcc"> List of requested workflow user group authorizations. </td></tr>
+<tr><td class="bpc">UserGroups</td><td class="btc">array of <a href="#UserGroup">UserGroup</a>*</td><td class="bcc"> List of requested user groups by RequestModes. </td></tr>
+<tr><td class="bpc">Statuses</td><td class="btc">array of <a href="#Status">Status</a>*</td><td class="bcc"> List of requested statuses by RequestModes. </td></tr>
+<tr><td class="bpc">Sections</td><td class="btc">array of <a href="#Section">Section</a>*</td><td class="bcc"> List of requested sections by RequestModes. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>LogOffRequest</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
 </table></div><div class="section"><h3>LogOnRequest</h3><p>
@@ -256,6 +483,23 @@
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>LogOnResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>ModifyAccessProfilesRequest</h3><p>
+				 v10.2 Update one or more access profiles at the server.
+
+				 Two different responses can be requested for access profiles: with or without profile features.
+			 	 In order to retrieve access profiles with features, use the Mode "GetProfileFeatures".
+				 In order to retrieve access profiles without features, leave RequestModes empty.
+
+				 If an AccessProfile contains ProfileFeatures, the array of ProfileFeatures has to have the following format:
+				 $array[name] => value
+				 This is done to provide a unified process to handle the ProfileFeatures.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
+<tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a>*</td><td class="bcc"> asks for relations </td></tr>
+<tr><td class="bpc">AccessProfiles</td><td class="btc">array of <a href="#AccessProfile">AccessProfile</a></td><td class="bcc"> array of acces profiles to be updated </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>ModifyAccessProfilesResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">AccessProfiles</td><td class="btc">array of <a href="#AccessProfile">AccessProfile</a></td><td class="bcc"> array of updated access profiles </td></tr>
 </table></div><div class="section"><h3>ModifyAutocompleteTermEntitiesRequest</h3><p> Update a term entity configuration at server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
 <tr><td class="bpc">TermEntities</td><td class="btc">array of <a href="#TermEntity">TermEntity</a></td><td class="bcc"> Term entity definitions to modify. </td></tr>
@@ -305,6 +549,18 @@
 <tr><td class="bpc">Publications</td><td class="btc">array of <a href="#Publication">Publication</a></td><td class="bcc"> list of publications to update </td></tr>
 </table></div><div class="section"><h3>ModifyPublicationsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Publications</td><td class="btc">array of <a href="#Publication">Publication</a></td><td class="bcc"> list of updated publications </td></tr>
+</table></div><div class="section"><h3>ModifyRoutingsRequest</h3><p>
+				v10.2 Modify existing routing rules at the server.
+
+				Either a publication or an issue id has to be specified alongside Routing objexts.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> Unique publication identification. (Can be nil in request when IssueId is given.) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> Unique issue identification. (Nil when OverrulePublication is disabled.) </td></tr>
+<tr><td class="bpc">Routings</td><td class="btc">array of <a href="#Routing">Routing</a>*</td><td class="bcc"> Routing rules to be modified. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>ModifyRoutingsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Routings</td><td class="btc">array of <a href="#Routing">Routing</a></td><td class="bcc"> Modified routing rules. </td></tr>
 </table></div><div class="section"><h3>ModifySectionsRequest</h3><p> Update a category (=section) configuration at server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">PublicationId</td><td class="btc">integer</td><td class="bcc"> unique publication identification </td></tr>
@@ -314,6 +570,11 @@
 <tr><td class="bpc">PublicationId</td><td class="btc">integer</td><td class="bcc"> resolved publication identification </td></tr>
 <tr><td class="bpc">IssueId</td><td class="btc">integer</td><td class="bcc"> unique issue identification (zero when OverrulePublication disabled) </td></tr>
 <tr><td class="bpc">Sections</td><td class="btc">array of <a href="#Section">Section</a></td><td class="bcc"> list of updated sections </td></tr>
+</table></div><div class="section"><h3>ModifyStatusesRequest</h3><p> v10.2 Update a status configuration at server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
+<tr><td class="bpc">Statuses</td><td class="btc">array of <a href="#Status">Status</a></td><td class="bcc"> list of statuses to update </td></tr>
+</table></div><div class="section"><h3>ModifyStatusesResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Statuses</td><td class="btc">array of <a href="#Status">Status</a></td><td class="bcc"> list of updated statuses </td></tr>
 </table></div><div class="section"><h3>ModifyUserGroupsRequest</h3><p> Update user groups at the server. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">RequestModes</td><td class="btc">array of <a href="#Mode">Mode</a></td><td class="bcc"> asks for relations </td></tr>
@@ -326,16 +587,48 @@
 <tr><td class="bpc">Users</td><td class="btc">array of <a href="#User">User</a></td><td class="bcc"> list of users to update </td></tr>
 </table></div><div class="section"><h3>ModifyUsersResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Users</td><td class="btc">array of <a href="#User">User</a></td><td class="bcc"> list of updated users </td></tr>
+</table></div><div class="section"><h3>ModifyWorkflowUserGroupAuthorizationsRequest</h3><p>
+				v10.2 Modify workflow user group authorizations at the server.
+
+				Either a publication id or an issue id has to be specified alongside WorkflowUserGroupAuthorizations.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> Unique publication identification. (Can be nil in request when IssueId is given.) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> Unique issue identification. (Is nil when OverrulePublication is disabled.) </td></tr>
+<tr><td class="bpc">WorkflowUserGroupAuthorizations</td><td class="btc">array of <a href="#WorkflowUserGroupAuthorization">WorkflowUserGroupAuthorization</a></td><td class="bcc"> Workflow user group authorizations to create. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>ModifyWorkflowUserGroupAuthorizationsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">WorkflowUserGroupAuthorizations</td><td class="btc">array of <a href="#WorkflowUserGroupAuthorization">WorkflowUserGroupAuthorization</a></td><td class="bcc"> List of created workflow user group authorizations. </td></tr>
 </table></div><div class="section"><h3>RemoveGroupsFromUserRequest</h3><p> Remove an user from user groups. (Delete memberships.) </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">GroupIds</td><td class="btc">array of integer</td><td class="bcc"></td></tr>
 <tr><td class="bpc">UserId</td><td class="btc">integer</td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>RemoveTemplateObjectsRequest</h3><p>
+				v10.2 Delete template object access rules from the server.
+
+				Either a PublicationId or IssueId should be given, along with a list of template objects access rules
+				to be deleted. It is unnecessary to delete template object access rules from multiple publications
+				as there is no real-world application to do this through a service.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> Admin user's session ticket. </td></tr>
+<tr><td class="bpc">PublicationId</td><td class="btc">integer*</td><td class="bcc"> Unique publication identification. (Can be nil in request when IssueId is given.) </td></tr>
+<tr><td class="bpc">IssueId</td><td class="btc">integer*</td><td class="bcc"> Unique issue identification. (Nil when OverrulePublication is disabled.) </td></tr>
+<tr><td class="bpc">TemplateObjects</td><td class="btc">array of <a href="#TemplateObjectAccess">TemplateObjectAccess</a></td><td class="bcc"> List of template object access rules. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>RemoveTemplateObjectsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 </table></div><div class="section"><h3>RemoveUsersFromGroupRequest</h3><p> Remove users from an user group. (Delete membership.) </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"> admin user's session ticket </td></tr>
 <tr><td class="bpc">UserIds</td><td class="btc">array of integer</td><td class="bcc"></td></tr>
 <tr><td class="bpc">GroupId</td><td class="btc">integer</td><td class="bcc"></td></tr>
 </table></div><br/><h2>Data Entities</h2>
-<div class="section" id="Edition"><h3>Edition</h3><p> Edition definition with the complete set of properties. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<div class="section" id="AccessProfile"><h3>AccessProfile</h3><p> v10.2 Access profile definition with the complete set of properties. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Id</td><td class="btc">integer*</td><td class="bcc"> unique database id </td></tr>
+<tr><td class="bpc">Name</td><td class="btc">string*</td><td class="bcc"> unique access profile name, can be null for modify > no change </td></tr>
+<tr><td class="bpc">SortOrder</td><td class="btc">integer*</td><td class="bcc"> sort index </td></tr>
+<tr><td class="bpc">Description</td><td class="btc">string*</td><td class="bcc"> description of access profile </td></tr>
+<tr><td class="bpc">ProfileFeatures</td><td class="btc">array of <a href="#ProfileFeature">ProfileFeature</a>*</td><td class="bcc"> array of all features that can be set on an access profile </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section" id="Edition"><h3>Edition</h3><p> Edition definition with the complete set of properties. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Id</td><td class="btc">integer*</td><td class="bcc"> unique db id </td></tr>
 <tr><td class="bpc">Name</td><td class="btc">string*</td><td class="bcc"> unique name </td></tr>
 <tr><td class="bpc">Description</td><td class="btc">string*</td><td class="bcc"> comments about edition </td></tr>
@@ -370,11 +663,37 @@
 <tr><td class="bpc">Routings</td><td class="btc">array of <a href="#IdName">IdName</a>*</td><td class="bcc"> routing rules (references) defined for issue (only when OverrulePublication enabled) </td></tr>
 <tr><td class="bpc">CalculateDeadlines</td><td class="btc">boolean*</td><td class="bcc"> v9.2: Enable/Disable deadline(relative) calculation for the object. </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section" id="ObjectInfo"><h3>ObjectInfo</h3><p> v10.2: Describes simple object properties. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">ID</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Name</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Type</td><td class="btc"><a href="#ObjectType">ObjectType</a></td><td class="bcc"></td></tr>
+<tr><td class="bpc">Format</td><td class="btc">string*</td><td class="bcc"> Object's native file format. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section" id="ProfileFeature"><h3>ProfileFeature</h3><p>
+				Supported values for the Name element are:
+				   View, List_PubOverview, Read, Open_Edit, Write, Delete, Purge, Change_Status_Forward, Change_Status,
+				   Restore_Version, Keep_Locked, Download_Preview, Download_Original, EditStickyNotes, ViewNotes, DeleteNotes,
+				   AddInCopyImages, Publish, Create_Tasks, AllowMultipleArticlePlacements, ChangeEdition, CreateDossier,
+				   CheckinArticleFromLayer, CheckinArticleFromDocument, AbortCheckOut, RestrictedProperties, ChangeIPS,
+				   ApplyParaStyles, EditParaStyles, ApplyCharStyles, EditCharStyles, ApplyParaFormats, ApplyCharFontFamily,
+				   ApplyCharFontStyle, ApplyCharBasicFormats, ApplyCharAdvancedFormats, CopyFit, CompositionPrefs, ForceTrackChanges,
+				   EditTrackChanges, ChangeLanguage, EditDictionary, ResizeTFLines, ResizeTF, ApplySwatches, EditSwatches,
+				   EditTags, ShortCuts, EditTextMacros, AdvElementsPanel, DSUpdate, DSWriteDataToServer, DSCreateField,
+				   DSUpdateContentDatabase, EditTextComp, InsertInlineImage, Query_Browse, Publication_Overview, Upload, Reporting,
+				   Web_Editor, MyProfile, Planning, ContentStationPro
+				Supported values for the Value element are:
+				   - Yes, No (for all features)
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Name</td><td class="btc">string</td><td class="bcc"> unique internal name </td></tr>
+<tr><td class="bpc">DisplayName</td><td class="btc">string*</td><td class="bcc"> public name </td></tr>
+<tr><td class="bpc">Value</td><td class="btc"><a href="#ProfileFeatureValue">ProfileFeatureValue</a></td><td class="bcc"> determines if the feature is active or not </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section" id="PubChannel"><h3>PubChannel</h3><p> Publication Channel definition with the complete set of properties. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Id</td><td class="btc">integer*</td><td class="bcc"> unique db id </td></tr>
 <tr><td class="bpc">Name</td><td class="btc">string*</td><td class="bcc"> unique name </td></tr>
 <tr><td class="bpc">Type</td><td class="btc"><a href="#PubChannelType">PubChannelType</a>*</td><td class="bcc"></td></tr>
 <tr><td class="bpc">Description</td><td class="btc">string*</td><td class="bcc"></td></tr>
+<tr><td class="bpc">SortOrder</td><td class="btc">unsigned integer*</td><td class="bcc"> v10.2 sort index for pubchannel </td></tr>
 <tr><td class="bpc">PublishSystem</td><td class="btc">string*</td><td class="bcc"> v9.0: Type of the publishing system. Use to identify the publishing connector. </td></tr>
 <tr><td class="bpc">PublishSystemId</td><td class="btc">string*</td><td class="bcc"> v9.1: Unique id of the publishing system. Use to bind the publishing storage. </td></tr>
 <tr><td class="bpc">CurrentIssueId</td><td class="btc">integer*</td><td class="bcc"> v9.0  </td></tr>
@@ -407,6 +726,12 @@
 <tr><td class="bpc">Routings</td><td class="btc">array of <a href="#IdName">IdName</a>*</td><td class="bcc"> routing rules (references) defined for pub (overruling issues excluded) </td></tr>
 <tr><td class="bpc">CalculateDeadlines</td><td class="btc">boolean*</td><td class="bcc"> v9.2: Enable/Disable deadline(relative) calculation for the object. </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section" id="Routing"><h3>Routing</h3><p> Routing rule definition with the complete set of properties. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Id</td><td class="btc">integer*</td><td class="bcc"> System wide unique db id, determined by server. (Nil for create.) </td></tr>
+<tr><td class="bpc">SectionId</td><td class="btc">integer*</td><td class="bcc"> Unique id of a section the authorization binds. (Nil for all sections.) </td></tr>
+<tr><td class="bpc">StatusId</td><td class="btc">integer*</td><td class="bcc"> Unique id of a status the authorization binds. (Nil for all statuses.) </td></tr>
+<tr><td class="bpc">RouteTo</td><td class="btc">string</td><td class="bcc"> Unique id of an access profile the authorization binds. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section" id="Section"><h3>Section</h3><p> Category (=section) definition with the complete set of properties. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Id</td><td class="btc">integer*</td><td class="bcc"> unique db id </td></tr>
 <tr><td class="bpc">Name</td><td class="btc">string*</td><td class="bcc"> unique name </td></tr>
@@ -423,7 +748,8 @@
 <tr><td class="bpc">Type</td><td class="btc"><a href="#ObjectType">ObjectType</a>*</td><td class="bcc"> object type; empty means 'for all types' </td></tr>
 <tr><td class="bpc">Produce</td><td class="btc">boolean*</td><td class="bcc"> If true for layouts, output will be send if set in featurelist </td></tr>
 <tr><td class="bpc">Color</td><td class="btc">color (3-byte, hexadecimal)*</td><td class="bcc"> RGB color of status to show in GUI </td></tr>
-<tr><td class="bpc">DefaultRouteTo</td><td class="btc"><a href="#IdName">IdName</a>*</td><td class="bcc"> default route to for this status </td></tr>
+<tr><td class="bpc">DeadlineRelative</td><td class="btc">integer*</td><td class="bcc"> Deadline Relative for Edition </td></tr>
+<tr><td class="bpc">NextStatus</td><td class="btc"><a href="#IdName">IdName</a>*</td><td class="bcc"> Points to the next state in the flow, nil when there is no next state </td></tr>
 <tr><td class="bpc">CreatePermanentVersion</td><td class="btc">boolean*</td><td class="bcc"> If true for layouts, output will be send if set in featurelist </td></tr>
 <tr><td class="bpc">RemoveIntermediateVersions</td><td class="btc">boolean*</td><td class="bcc"> If true for layouts, output will be send if set in featurelist </td></tr>
 <tr><td class="bpc">AutomaticallySendToNext</td><td class="btc">boolean*</td><td class="bcc"> If true for layouts, output will be send if set in featurelist </td></tr>
@@ -431,6 +757,9 @@
 <tr><td class="bpc">Phase</td><td class="btc"><a href="#StatusPhase">StatusPhase</a>*</td><td class="bcc"> v9.4: Phase of which the status resides in during the workflow </td></tr>
 <tr><td class="bpc">SkipIdsa</td><td class="btc">boolean*</td><td class="bcc"> If true for layout(module), no InDesign Server job is created </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section" id="TemplateObjectAccess"><h3>TemplateObjectAccess</h3><p> v10.2 Template object access definition. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">TemplateObjectId</td><td class="btc">integer</td><td class="bcc"> Unique template object identification. </td></tr>
+<tr><td class="bpc">UserGroupId</td><td class="btc">integer</td><td class="bcc"> Unique user group identification. </td></tr>
 </table></div><div class="section" id="TermEntity"><h3>TermEntity</h3><p> Term entity configuration. The Id or Name + AutocompleteProvider should be given. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Id</td><td class="btc">integer*</td><td class="bcc"> System wide unique db id, determined by server. </td></tr>
 <tr><td class="bpc">Name</td><td class="btc">string*</td><td class="bcc"> Unique name within the provider's vocabulary. </td></tr>
@@ -534,6 +863,13 @@
 <tr><td class="bpc">ExternalId</td><td class="btc">string*</td><td class="bcc"> reference to external system, such as LDAP </td></tr>
 <tr><td class="bpc">Users</td><td class="btc">array of <a href="#User">User</a>*</td><td class="bcc"> user members of this group </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section" id="WorkflowUserGroupAuthorization"><h3>WorkflowUserGroupAuthorization</h3><p> Workflow user group authorization rule definition with the complete set of properties. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Id</td><td class="btc">integer*</td><td class="bcc"> System wide unique db id, determined by server. (Nil for create.) </td></tr>
+<tr><td class="bpc">UserGroupId</td><td class="btc">integer</td><td class="bcc"> Unique id of the user group the authorization binds. </td></tr>
+<tr><td class="bpc">SectionId</td><td class="btc">integer*</td><td class="bcc"> Unique id of a section the authorization binds. (Nil for all sections.) </td></tr>
+<tr><td class="bpc">StatusId</td><td class="btc">integer*</td><td class="bcc"> Unique id of a status the authorization binds. (Nil for all statuses.) </td></tr>
+<tr><td class="bpc">AccessProfileId</td><td class="btc">integer</td><td class="bcc"> Unique id of an access profile the authorization binds. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><br/><h2>Enumeration Types</h2>
 <div class="section" id="Mode"><h3>Mode</h3><p>
 				Used for services that can return all kind of data collections. This can be implicitly requested.
@@ -547,6 +883,8 @@
 <tr><td class="btc">"GetStatuses"</td><td class="bcc"> request for related statuses (if any) </td></tr>
 <tr><td class="btc">"GetUsers"</td><td class="bcc"> request for related users (if any) </td></tr>
 <tr><td class="btc">"GetUserGroups"</td><td class="bcc"> request for related user groups (if any) </td></tr>
+<tr><td class="btc">"GetProfileFeatures"</td><td class="bcc"> request for related profile features (if any) </td></tr>
+<tr><td class="btc">"GetObjectInfos"</td><td class="bcc"> request for related objects (if any) </td></tr>
 </table></div><div class="section" id="ObjectType"><h3>ObjectType</h3><p> The type of workflow object. </p><table class="section"><tr><td class="htc">choice of</td><td class="hcc">comment</td></tr>
 <tr><td class="btc">"Article"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"ArticleTemplate"</td><td class="bcc"></td></tr>
@@ -571,6 +909,9 @@
 <tr><td class="btc">"Other"</td><td class="bcc"> For future usage </td></tr>
 <tr><td class="btc">"PublishForm"</td><td class="bcc"> v9.0 feature </td></tr>
 <tr><td class="btc">"PublishFormTemplate"</td><td class="bcc"> v9.0 feature </td></tr>
+</table></div><div class="section" id="ProfileFeatureValue"><h3>ProfileFeatureValue</h3><p></p><table class="section"><tr><td class="htc">choice of</td><td class="hcc">comment</td></tr>
+<tr><td class="btc">"Yes"</td><td class="bcc"></td></tr>
+<tr><td class="btc">"No"</td><td class="bcc"></td></tr>
 </table></div><div class="section" id="PubChannelType"><h3>PubChannelType</h3><p> Publication Channel Type. </p><table class="section"><tr><td class="htc">choice of</td><td class="hcc">comment</td></tr>
 <tr><td class="btc">"print"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"web"</td><td class="bcc"></td></tr>
@@ -583,6 +924,6 @@
 <tr><td class="btc">"Production"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"Completed"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"Archived"</td><td class="bcc"></td></tr>
-</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SmartConnectionAdmin.wsdl" file at 27 Feb 2017</p>
+</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SmartConnectionAdmin.wsdl" file at 9 Apr 2017</p>
 <p style="font-size: 9pt;" align="right">Confidential, (c) 1998-2017 WoodWing Software bv. All rights reserved.</p></div>
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></body></html>

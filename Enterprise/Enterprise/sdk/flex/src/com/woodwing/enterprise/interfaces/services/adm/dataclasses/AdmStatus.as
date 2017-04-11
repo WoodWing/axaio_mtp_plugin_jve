@@ -20,7 +20,8 @@ package com.woodwing.enterprise.interfaces.services.adm.dataclasses
 		private var _Type:String;
 		private var _Produce:String;
 		private var _Color:String;
-		private var _DefaultRouteTo:com.woodwing.enterprise.interfaces.services.adm.dataclasses.AdmIdName;
+		private var _DeadlineRelative:Number;
+		private var _NextStatus:com.woodwing.enterprise.interfaces.services.adm.dataclasses.AdmIdName;
 		private var _CreatePermanentVersion:String;
 		private var _RemoveIntermediateVersions:String;
 		private var _AutomaticallySendToNext:String;
@@ -79,11 +80,18 @@ package com.woodwing.enterprise.interfaces.services.adm.dataclasses
 			this._Color = Color;
 		}
 
-		public function get DefaultRouteTo():com.woodwing.enterprise.interfaces.services.adm.dataclasses.AdmIdName {
-			return this._DefaultRouteTo;
+		public function get DeadlineRelative():Number {
+			return this._DeadlineRelative;
 		}
-		public function set DefaultRouteTo(DefaultRouteTo:com.woodwing.enterprise.interfaces.services.adm.dataclasses.AdmIdName):void {
-			this._DefaultRouteTo = DefaultRouteTo;
+		public function set DeadlineRelative(DeadlineRelative:Number):void {
+			this._DeadlineRelative = DeadlineRelative;
+		}
+
+		public function get NextStatus():com.woodwing.enterprise.interfaces.services.adm.dataclasses.AdmIdName {
+			return this._NextStatus;
+		}
+		public function set NextStatus(NextStatus:com.woodwing.enterprise.interfaces.services.adm.dataclasses.AdmIdName):void {
+			this._NextStatus = NextStatus;
 		}
 
 
