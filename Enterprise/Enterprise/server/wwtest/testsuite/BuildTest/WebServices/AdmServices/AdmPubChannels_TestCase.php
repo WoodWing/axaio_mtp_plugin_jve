@@ -69,6 +69,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmPubChannels_TestCase ext
 		$pubChan->Name              = 'PubChannel_C_' . date('dmy_his');
 		$pubChan->Description       = 'Created PubChannel'; 
 		$pubChan->Type              = 'other';
+		$pubChan->SortOrder         = 10;
 		$pubChan->PublishSystem     = 'Enterprise';
 		$pubChan->CurrentIssueId    = 0;
 		$pubChan->SuggestionProvider = self::SUGGESTION_PROVIDER;

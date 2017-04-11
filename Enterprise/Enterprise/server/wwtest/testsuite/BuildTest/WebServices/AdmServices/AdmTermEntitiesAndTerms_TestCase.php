@@ -327,7 +327,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 	/**
 	 * To validate AdmGetAutocompleteTermEntities response.
 	 *
-	 * @param AdmGetAutocompleteTermEntities $response
+	 * @param AdmGetAutocompleteTermEntitiesResponse $response
 	 * @return bool
 	 */
 	private function verifyGetTermEntitiesResp( $response )
@@ -415,8 +415,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 	 */
 	private function verifyDeleteTermEntitiesResp( $response )
 	{
-		$response = $response; // To make analyzer happy.
-
 		// Since there's nothing returned in the response, we query for the TermEntities
 		// to verify if the TermEntities have really been deleted.
 		$result = true;
@@ -540,8 +538,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 	 */
 	private function verifyTermsResp( $response, $action )
 	{
-		$response = $response; // To make analyzer happy.
-
 		$result = true;
 		require_once BASEDIR .'/server/dbclasses/DBAdmAutocompleteTerm.class.php';
 		foreach( $this->terms as $term ) {
@@ -551,6 +547,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 			$admTerm->NormalizedName = null;
 			$termInDB = DBAdmAutocompleteTerm::getTerm( $admTerm );
 			if( is_null( $termInDB )) { // Not found in the database, error here.
+				$message = '';
+				$serviceName = '';
 				if( $action == 'create' ) {
 					$message = 'created';
 					$serviceName = 'AdmCreateAutocompleteTerms';
@@ -686,8 +684,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 	 */
 	private function verifyDeleteTermsResp( $response )
 	{
-		$response = $response;
-
 		// Since there's nothing returned in the response, we query for the Terms
 		// to verify if the Terms have really been deleted.
 		$result = true;
@@ -710,10 +706,11 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 
 	/**
 	 * Retrieve the City TermEntity from a list of TermEntities($this->termEntities)
-	 * @return AdmTermEntity Car TermEntity.
+	 * @return AdmTermEntity|null Car TermEntity or null when not found
 	 */
 	private function getCityTermEntity()
 	{
+		$cityTermEntity = null;
 		$termEntities = unserialize( serialize( $this->termEntities ));
 		if( $termEntities ) foreach( $termEntities as $termEntity ) {
 			if( $termEntity->Name == 'City' ) {
