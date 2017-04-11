@@ -23,7 +23,7 @@ class DBPublication extends DBBase
 	 */
 	public static function getPublication($pubId)
     {
-        $result = self::getRow(self::TABLENAME, "`id` = '$pubId' ", true);
+        $result = self::getRow(self::TABLENAME, "`id` = '$pubId' ", '*');
         return $result;
     }
     

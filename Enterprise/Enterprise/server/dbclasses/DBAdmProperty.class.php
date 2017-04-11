@@ -24,7 +24,6 @@ class DBAdmProperty extends DBBase
 	 *
 	 * @param AdmPropertyInfo $obj
 	 * @throws BizException on fatal DB error
-	 * @return void
 	 */
 	static public function insertAdmPropertyInfo( AdmPropertyInfo &$obj )
 	{
@@ -50,7 +49,6 @@ class DBAdmProperty extends DBBase
 	 *
 	 * @param AdmPropertyInfo $obj
 	 * @throws BizException on fatal DB error
-	 * @return void
 	 */
 	static public function updateAdmPropertyInfo( AdmPropertyInfo &$obj )
 	{
@@ -92,7 +90,7 @@ class DBAdmProperty extends DBBase
      * Converts a smart_property DB row to a AdmPropertyInfo object.
      *
      * @param array $row DB row (with key values)
-     * @return object PropertyInfo
+     * @return AdmPropertyInfo
     **/
 	final static protected function rowToObj( $row )
 	{
@@ -113,6 +111,8 @@ class DBAdmProperty extends DBBase
 		$obj->DependentProperties = null; // future
 		$obj->PluginName		= $row['serverplugin'];
 		$obj->Entity			= $row['entity'];
+		// future: DependentProperties
+		// @todo: support for adminui, propertyvalues, minresolution, maxresolution, publishsystem, templateid
 		return $obj;
 	}
 
@@ -133,22 +133,22 @@ class DBAdmProperty extends DBBase
 			$row['publication'] = intval($obj->PublicationId);
 		}
 		if(!is_null($obj->ObjectType)){
-			$row['objtype'] 	= $obj->ObjectType;
+			$row['objtype'] 	= strval($obj->ObjectType);
 		}
 		if(!is_null($obj->Name)){
-			$row['name'] 		= $obj->Name;
+			$row['name'] 		= strval($obj->Name);
 		}
 		if(!is_null($obj->DisplayName)){
-			$row['dispname'] 	= $obj->DisplayName;
+			$row['dispname'] 	= strval($obj->DisplayName);
 		}
 		if(!is_null($obj->Category)){
-			$row['category'] 	= $obj->Category;
+			$row['category'] 	= strval($obj->Category);
 		}
 		if(!is_null($obj->Type)){
-			$row['type'] 		= $obj->Type;
+			$row['type'] 		= strval($obj->Type);
 		}
 		if(!is_null($obj->DefaultValue)){
-			$default = (string)$obj->DefaultValue;
+			$default = strval($obj->DefaultValue);
 			if( $obj->Type == 'bool' ) {
 				// Let's be robust and cast all kind of boolean notations to '1' or '0'.
 				$default = strtolower( $default );
@@ -164,10 +164,10 @@ class DBAdmProperty extends DBBase
 			$blobValues[] 		= self::packValueList( $obj->Type, $obj->ValueList );
 		}
 		if(!is_null($obj->MinValue)){
-			$row['minvalue'] 	= $obj->MinValue;
+			$row['minvalue'] 	= strval($obj->MinValue);
 		}
 		if(!is_null($obj->MaxValue)){
-			$row['maxvalue'] 	= $obj->MaxValue;
+			$row['maxvalue'] 	= strval($obj->MaxValue);
 		}
 		if(!is_null($obj->MaxLength)){
 			$row['maxlen'] 		= intval($obj->MaxLength);
@@ -176,12 +176,13 @@ class DBAdmProperty extends DBBase
 			$row['dbupdated']	= ($obj->DBUpdated == false ? 0 : 1);
 		}
 		if(!is_null($obj->PluginName)){
-			$row['serverplugin']= $obj->PluginName;
+			$row['serverplugin']= strval($obj->PluginName);
 		}
 		if(!is_null($obj->Entity)){
-			$row['entity']		= $obj->Entity;
+			$row['entity']		= strval($obj->Entity);
 		}
 		// future: DependentProperties
+		// @todo: support for adminui, propertyvalues, minresolution, maxresolution, publishsystem, templateid
 		return $row;
 	}
 
@@ -201,7 +202,7 @@ class DBAdmProperty extends DBBase
 				$stream = implode( ',', $values );
 				break;
 			default:
-				$stream = $values[0];
+				$stream = strval($values[0]);
 				break;
 		}
 		return $stream;
@@ -237,6 +238,7 @@ class DBAdmProperty extends DBBase
 	 * @param string|null $pluginName Name of the server plug-in. NULL for all.
 	 * @param string|null $propName Name of the custom admin property. NULL for all.
 	 * @return AdmPropertyInfo[] Array of AdmPropertyInfo Objects.
+	 * @throws BizException on SQL error.
 	 */
 	static public function getPropertyInfos( $entity = null, $pluginName = null, $propName = null )
 	{
@@ -256,6 +258,9 @@ class DBAdmProperty extends DBBase
 		}
 		$where = implode( ' AND ', $whereChunks );
 		$rows = self::listRows( self::TABLENAME, 'id', '', $where, '*', $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
 		$objs = array();
 		foreach( $rows as $row ) {
 			$objs[] = self::rowToObj( $row );
@@ -293,7 +298,7 @@ class DBAdmProperty extends DBBase
 	 *
 	 * @param AdmPropertyInfo $obj
 	 * @throws BizException Throws BizException if the object could not be deleted.
-	 * @return bool Whether or not the operation was succesful.
+	 * @return bool Whether or not the operation was successful.
 	 */
 	public static function deleteAdmPropertyInfo( AdmPropertyInfo $obj )
 	{
@@ -301,11 +306,9 @@ class DBAdmProperty extends DBBase
 		$where = '`publication` = ? AND `objtype` = ? AND `name` = ?';
 		$params = array( $obj->PublicationId, $obj->ObjectType, $obj->Name );
 		$result = (bool)self::deleteRows( self::TABLENAME, $where, $params );
-
 		if( self::hasError() ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 		}
-
 		return $result;
 	}
 }

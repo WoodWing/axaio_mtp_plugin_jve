@@ -468,32 +468,27 @@ class DBUser extends DBBase
 	}
 
 	/*
-	 * Remove the given user group from the database. <br>
+	 * Remove a given user group from the database.
 	 *
-	 * @param string $id
+	 * @param integer $id
 	 */
 	public static function deleteUserGroup( $id )
 	{
-		if( !$id ) {
-			self::setError( BizResources::localize( 'ERR_ARGUMENT' ) );
-		} else {
-			// first get user group name (needed later)
-			$where = '`id` = ?';
-			$params = array( $id );
-			$row = self::getRow( 'groups', $where, array( 'name' ), $params );
+		// first get user group name (needed later)
+		$where = '`id` = ?';
+		$params = array( intval( $id ) );
+		$row = self::getRow( 'groups', $where, array( 'name' ), $params );
 
-			if( $row ) {
-				$userGroupName = $row['name'];
+		if( $row ) {
+			$userGroupName = $row['name'];
 
-				self::deleteRows( 'groups', '`id` = ?', $params );						// Delete groups
-				self::deleteRows( 'usrgrp', '`grpid` = ?', $params ); 					// cascading delete usrgrp
-				self::deleteRows( 'authorizations', '`grpid` = ?', $params ); 			// cascading delete authorizations
-				self::deleteRows( 'publadmin', '`grpid` = ?', $params ); 				// cascading delete publadmin
-				self::deleteRows( 'publobjects', '`grpid` = ?', $params );				// cascading delete publobjets
-				self::deleteRows( 'routing', '`routeto` = ?', array( $userGroupName) ); // cascading delete routing
-			}
+			self::deleteRows( 'groups', '`id` = ?', $params );						// Delete groups
+			self::deleteRows( 'usrgrp', '`grpid` = ?', $params ); 					// cascading delete usrgrp
+			self::deleteRows( 'authorizations', '`grpid` = ?', $params ); 			// cascading delete authorizations
+			self::deleteRows( 'publadmin', '`grpid` = ?', $params ); 				// cascading delete publadmin
+			self::deleteRows( 'publobjects', '`grpid` = ?', $params );				// cascading delete publobjets
+			self::deleteRows( 'routing', '`routeto` = ?', array( $userGroupName) ); // cascading delete routing
 		}
-
 	}
 
 	public static function listPublAuthorizations($publid, $fieldnames = '*')
@@ -573,10 +568,28 @@ class DBUser extends DBBase
 	}
 
 	/**
+	 * Returns the count of users who are member of a given user group.
+	 *
+	 * @since 10.2.0
+	 * @param integer $groupId
+	 * @return integer User count.
+	 */
+	public static function countUsersInGroup( $groupId )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$dbu = $dbDriver->tablename('usrgrp');
+		$sql =  "SELECT COUNT(*) AS `c` FROM {$dbu} WHERE `grpid` = ? ";
+		$params = array( intval( $groupId ) );
+		$sth = self::query( $sql, $params );
+		$row = self::fetch( $sth );
+		return $row['c'];
+	}
+
+	/**
 	 *  Gets exactly one user object with specific user id $usrId
 	 *  @param string $usrId Id of the user
 	 *  @param bool $isAdmin To determine if the user is a System admin
-	 *  @return object of publication if succeeded
+	 *  @return AdmUser of publication if succeeded
 	 */
 	public static function getUserObj( $usrId, $isAdmin = null )
 	{
@@ -647,7 +660,7 @@ class DBUser extends DBBase
 	/**
 	 *  Gets exactly one user object with specific user id $usrId
 	 *  @param string $grpId Id of the usergroup
-	 *  @return object of usergroup if succeeded, null if no record returned
+	 *  @return AdmUserGroup|null user group if succeeded, null if user not found (or on SQL error)
 	 */
 	public static function getUserGroupObj( $grpId )
 	{
@@ -677,9 +690,9 @@ class DBUser extends DBBase
 	/**
 	 *  Create new user object
 	 *
-	 *  @param AdmUser $user new user
+	 *  @param AdmUser $user user to create
 	 *  @param bool $isAdmin System admin indicator
-	 *  @return new created User object - throws BizException on failure
+	 *  @return AdmUser created user
 	 */
 	public static function createUserObj( $user, $isAdmin = null )
 	{
@@ -709,10 +722,10 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 *  Create new usergroup object
+	 *  Create a new user group in the database.
 	 *
-	 *  @param $usergroup new usergroup
-	 *  @return new created UserGroup object - throws BizException on failure
+	 *  @param AdmUserGroup $usergroup user group to create
+	 *  @return AdmUserGroup created user group
 	 */
 	public static function createUserGroupObj( $usergroup )
 	{

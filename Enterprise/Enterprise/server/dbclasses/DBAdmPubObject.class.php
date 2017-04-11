@@ -36,7 +36,7 @@ class DBAdmPubObject extends DBBase
 	 * @param string $id pub object id
 	 * @param string $objectId Object id
 	 * @param string $groupId Group id
-	 * @return null|Object
+	 * @return null|array DB row of smart_publobjects table.
 	 */
 	public static function modifyPubObject( $id, $objectId, $groupId )
 	{
@@ -90,7 +90,7 @@ class DBAdmPubObject extends DBBase
      * Get Pub Object
      *
      * @param string $id publ object id
-     * @return Object of publ object
+     * @return array[] DB row from smart_publobjects table
     **/
 	public static function getPubObject( $id )
 	{

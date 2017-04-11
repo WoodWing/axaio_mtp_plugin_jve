@@ -7,24 +7,32 @@ require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
 require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 
-checkSecure('publadmin');
+define( 'HTML_EOL', "\r\n" );
+
+$ticket = checkSecure('publadmin');
 
 // domains
-$typesdomain = getObjectTypeMap();
-asort($typesdomain);
+$typesDomain = getObjectTypeMap();
+asort($typesDomain);
 
-// Create 1 deadlinerelativefields for single input
-$deadlinerelativefield = new HtmlDiffTimeField(null, 'deadlinerelativefield');
+//create 1 deadlineRelativeFields for single input
+$deadlineRelativeField = new HtmlDiffTimeField( null, 'deadlinerelativefield' );
+
+//create 100 deadlineRelative-fields for multiple input
+$deadlineRelativeFields = array();
+for( $i=0; $i<100; $i++ ) {
+	$deadlineRelativeFields[$i] = new HtmlDiffTimeField( null, 'deadlinerelativefield_' . $i );
+}
 
 // determine incoming mode
-$publ  = isset($_REQUEST['publ'])  ? intval($_REQUEST['publ'])  : 0; // zero should never happen
-$issue = isset($_REQUEST['issue']) ? intval($_REQUEST['issue']) : 0; // zero for overruled issues
+$pubId  = isset($_REQUEST['publ'])  ? intval($_REQUEST['publ'])  : 0; // zero should never happen
+$issueId = isset($_REQUEST['issue']) ? intval($_REQUEST['issue']) : 0; // zero for overruled issues
 $type  = isset($_REQUEST['type'])  ? $_REQUEST['type']  : ''; // empty for all types for pub/issue
 
 // Check the brand to see if Deadline calculation is enabled, if it isn't the deadline fields on the states
 // should be hidden.
 require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
-$admPublObj = DBAdmPublication::getPublicationObj( $publ );
+$admPublObj = DBAdmPublication::getPublicationObj( $pubId );
 $useDeadlines = false;
 if ($admPublObj ) {
 	$useDeadlines = ( $admPublObj->CalculateDeadlines );
@@ -35,36 +43,41 @@ $records = isset($_REQUEST['recs']) ? intval($_REQUEST['recs']) : 0;
 $insert = isset($_REQUEST['insert']) ? (bool)$_REQUEST['insert'] : false;
 
 // check publication rights
-checkPublAdmin($publ);
+checkPublAdmin( $pubId );
 
-if (!isset($_REQUEST['type'])) {
+// determine incoming mode
+if( !isset( $_REQUEST['type'] ) ) {
 	$mode = 'select';
-} else if (isset($_REQUEST['update']) && $_REQUEST['update']) {
+} elseif( isset( $_REQUEST['update'] ) && $_REQUEST['update'] ) {
 	$mode = 'update';
-} else if (isset($_REQUEST['delete']) && $_REQUEST['delete']) {
+} elseif( isset( $_REQUEST['delete'] ) && $_REQUEST['delete'] ) {
 	$mode = 'delete';
-} else if (isset($_REQUEST['add']) && $_REQUEST['add']) {
+} elseif( isset($_REQUEST['add'] ) && $_REQUEST['add'] ) {
 	$mode = 'add';
 } else {
 	$mode = 'view';
 }
 $errors = array();
 
-// handle request
+// handle status updates
 if( $records ) {
 	try {
 		// build list of (sorted) status objects from HTTP request
 		$statusList = array();
 		for( $i=0; $i < $records; $i++ ) {
-			// Create deadlinerelative-fields for multiple input
-			$deadlinerelativefields[$i] = new HtmlDiffTimeField( null, 'deadlinerelativefield_' . $i );
-			$statusTmp = StatusAdminApp::httpRequestToStatusObj( $publ, $issue, $type,  
-									$_REQUEST, $deadlinerelativefields[$i]->requestValue(), $i );
-			$statusList[ $statusTmp->SortOrder.'_'.$i ] = $statusTmp;
+			$statusTmp = StatusAdminApp::httpRequestToStatusObj( $type,	$_REQUEST, $deadlineRelativeFields[$i]->requestValue(), $i );
+			$statusList[] = $statusTmp;
 		}
 		krsort( $statusList );
-		// perform DB update with posted statusses
-		$statusList = BizAdmStatus::modifyStatuses( $statusList );
+
+		// send modify request to service layer
+		require_once BASEDIR.'/server/services/adm/AdmModifyStatusesService.class.php';
+		$request = new AdmModifyStatusesRequest();
+		$request->Ticket = $ticket;
+		$request->Statuses = $statusList;
+		$service = new AdmModifyStatusesService();
+		$response = $service->execute( $request );
+		$statusList = $response->Statuses;
 	} catch( BizException $e ) {
 		$errors[] = $e->getMessage();
 		$mode = 'error';
@@ -72,10 +85,17 @@ if( $records ) {
 }
 
 if( $insert ) {
-	$statusIns = StatusAdminApp::httpRequestToStatusObj( $publ, $issue, $type, 
-								$_REQUEST, $deadlinerelativefield->requestValue() );
+	$statusIns = StatusAdminApp::httpRequestToStatusObj( $type, $_REQUEST, $deadlineRelativeField->requestValue() );
 	try {
-		$statusIns = BizAdmStatus::createStatus( $statusIns );
+		require_once BASEDIR.'/server/services/adm/AdmCreateStatusesService.class.php';
+		$request = new AdmCreateStatusesRequest();
+		$request->Ticket = $ticket;
+		$request->PublicationId = $pubId;
+		$request->IssueId = $issueId;
+		$request->Statuses = array( $statusIns );
+		$service = new AdmCreateStatusesService();
+		$response = $service->execute( $request );
+		$statusIns = reset( $response->Statuses );
 	} catch( BizException $e ) {
 		$errors[] = $e->getMessage();
 		$mode = 'errorins';
@@ -87,8 +107,12 @@ if( $mode == 'delete' ) {
 		// Check to see if there are statuses that are still linked to Authorizations.
 		$id = intval($_REQUEST['id']);
 
-		require_once BASEDIR.'/server/bizclasses/BizCascadePub.class.php';
-		BizCascadePub::deleteStatus( $id ); // only for deletions, status id is provided
+		require_once BASEDIR.'/server/services/adm/AdmDeleteStatusesService.class.php';
+		$request = new AdmDeleteStatusesRequest();
+		$request->Ticket = $ticket;
+		$request->StatusIds = array( $id );
+		$service = new AdmDeleteStatusesService();
+		$service->execute( $request );
 	} catch( BizException $e ) {
 		$errors[] = $e->getMessage();
 		$mode = 'error';
@@ -98,28 +122,33 @@ if( $mode == 'delete' ) {
 // generate upper part (info or select fields)
 $txt = HtmlDocument::loadTemplate( 'states.htm' );
 
-// error handling
-$err = '';
-foreach ($errors as $error) {
-	$err .= $error.'<br/>';
-}
-$txt = str_replace('<!--ERROR-->', $err, $txt);
-
-if ($mode == 'select') {
-	$sAll = BizResources::localize('LIS_ALL');
+if( $mode == 'select' ) {
+	$sAll = BizResources::localize( 'LIS_ALL' );
 	$typtxt = '<select name="type" onChange="this.form.submit()">';
-	foreach ($typesdomain as $key => $sDisplayType) {
-		$typtxt .= '<option value="'.$key.'">'.formvar($sDisplayType).'</option>';
+	foreach( $typesDomain as $key => $sDisplayType ) {
+		$typtxt .= '<option value="'.$key.'">'.formvar( $sDisplayType ).'</option>'.PHP_EOL;
 	}
 	$typtxt .= '</select>';
 	$typtxt .= inputvar( 'add', '1', 'hidden' );
 } else {
-	$typtxt = formvar($typesdomain[$type]).inputvar('type',$type,'hidden');
+	$typtxt = formvar( $typesDomain[$type] ).inputvar( 'type', $type, 'hidden' );
 }
 
-require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
-$publName = DBPublication::getPublicationName( $publ );
-$txt = str_replace('<!--VAR:PUBL-->', formvar( $publName ).inputvar('publ',$publ,'hidden'), $txt);
+// Add a publication field to the form
+try {
+	require_once BASEDIR.'/server/services/adm/AdmGetPublicationsService.class.php';
+	$request = new AdmGetPublicationsRequest();
+	$request->Ticket = $ticket;
+	$request->RequestModes = array();
+	$request->PublicationIds = array($pubId);
+	$service = new AdmGetPublicationsService();
+	$response = $service->execute( $request );
+	$pubObj = $response->Publications[0];
+	$txt = str_replace( '<!--VAR:PUBL-->', formvar( $pubObj->Name ).inputvar( 'publ', $pubId, 'hidden' ), $txt );
+} catch( BizException $e ) {
+	$errors[] = $e->getMessage();
+	$mode = 'error';
+}
 
 // Remove the Deadline header in the html document if deadlines are not used.
 if ( !$useDeadlines ) {
@@ -130,111 +159,165 @@ if ( !$useSkipIdsa ) {
 	$txt = preg_replace('/<!--IF:USESKIPIDSA-->.*<!--ENDIF:USESKIPIDSA-->/is', '', $txt);
 }
 
-if ($issue) {
-	require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-	$issueName = DBIssue::getIssueName( $issue );
-	$txt = str_replace('<!--VAR:ISSUE-->', formvar( $issueName ).inputvar('issue',$issue,'hidden'), $txt);
+if( $issueId ) {
+	//Add an issue field to the form
+	try {
+		require_once BASEDIR.'/server/services/adm/AdmGetIssuesService.class.php';
+		$request = new AdmGetIssuesRequest();
+		$request->Ticket = $ticket;
+		$request->RequestModes = array();
+		$request->PublicationId = $pubId;
+		$request->IssueIds = array($issueId);
+		$service = new AdmGetIssuesService();
+		$response = $service->execute( $request );
+		$issueObj = $response->Issues[0];
+		$txt = str_replace( '<!--VAR:ISSUE-->', formvar( $issueObj->Name ).inputvar( 'issue', $issueId, 'hidden' ), $txt );
+	} catch( BizException $e ) {
+		$errors[] = $e->getMessage();
+		$mode = 'error';
+	}
+
 } else {
-	$txt = preg_replace('/<!--IF:STATE-->.*<!--ENDIF-->/is', '', $txt);
+	$txt = preg_replace( '/<!--IF:STATE-->.*<!--ENDIF-->/is', '', $txt );
 }
-$txt = str_replace('<!--VAR:TYPE-->', $typtxt, $txt);
+$txt = str_replace( '<!--VAR:TYPE-->', $typtxt, $txt );
 
 // generate lower part
-$detailtxt = '';
-$boxSize = preg_match("/safari/", strtolower($_SERVER['HTTP_USER_AGENT'])) ? 10 : 13;
-$rows = BizAdmStatus::getStatuses( $publ, $issue, $type );
-$statedomain = array();
-foreach( $rows as $statusTmp ) {
-	$statedomain[ $statusTmp->Id ] = $statusTmp->Name;
+$detailTxt = '';
+$boxSize = preg_match( "/safari/", strtolower( $_SERVER['HTTP_USER_AGENT'] ) ) ? 10 : 13;
+
+try {
+	require_once BASEDIR.'/server/services/adm/AdmGetStatusesService.class.php';
+	$request = new AdmGetStatusesRequest();
+	$request->Ticket = $ticket;
+	$request->PublicationId = $pubId;
+	$request->IssueId = $issueId;
+	if( $type ) {
+		$request->ObjectType = $type;
+	}
+	$service = new AdmGetStatusesService();
+	$response = $service->execute( $request );
+	$statuses = $response->Statuses;
+} catch( BizException $e ) {
+	$errors[] = $e->getMessage();
+	$mode = 'error';
+	$statuses = null;
+}
+$statusDomain = array();
+if( $statuses ) foreach( $statuses as $statusTmp ) {
+	$statusDomain[$statusTmp->Id] = $statusTmp->Name;
+}
+
+// error handling
+$err = '';
+if( $errors ) foreach( $errors as $error ) {
+	$err .= $error.'<br/>';
 }
 $phasedomain = getPhaseTypeMap();
+$txt = str_replace( '<!--ERROR-->', $err, $txt );
 
 switch( $mode ) {
 	case 'view':
 	case 'update':
 	case 'delete':
 	case 'error':
-		if ($mode == 'error') {
+		if( $mode == 'error' ) {
 			// BZ#25049 - When there is no records from request, take the list of status of the publication.
 			// Reason for this is, not to have empty status list.
-			if( $records > 0 ) { 
-				$rows = array();
+			if( $records > 0 ) {
+				$statuses = array();
 				for( $i=0; $i < $records; $i++ ) {
-					// Create deadlinerelative-fields for multiple input
-					$deadlinerelativefields[$i] = new HtmlDiffTimeField( null, 'deadlinerelativefield_' . $i );
-					$rows[] = StatusAdminApp::httpRequestToStatusObj( $publ, $issue, $type, 
-													$_REQUEST, $deadlinerelativefields[$i]->requestValue(), $i );
+					$statuses[] = StatusAdminApp::httpRequestToStatusObj( $type, $_REQUEST, $deadlineRelativeFields[$i]->requestValue(), $i );
 				}
 			}
 		}
 		$i = 0;
-		$color = array (" bgcolor='#eeeeee'", '');
+		$color = array( " bgcolor='#eeeeee'", '' );
 		$flip = 0;
-		if ( $rows ) foreach ($rows as $row) {
+		if( $statuses ) foreach( $statuses as $status ) {
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			$thisdomain = array();
-			// Create deadlinerelative-fields for multiple input
-			$deadlinerelativefields[$i] = new HtmlDiffTimeField( null, 'deadlinerelativefield_' . $i );
-			if ($statedomain) foreach (array_keys($statedomain) as $state) {
-				if( $state != $row->Id ) {
-					$thisdomain[$state] = $statedomain[$state];
+			$thisDomain = array();
+			if( $statusDomain ) foreach( array_keys( $statusDomain ) as $state ) {
+				if( $state != $status->Id ) {
+					$thisDomain[$state] = $statusDomain[$state];
 				} else {
-					$thisdomain[0] = '(' . $statedomain[$state] . ')' ;	
+					$thisDomain[0] = '(' . $statusDomain[$state] . ')' ;
 				}
 			}
-			// get number of objects with this state
-			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-			$cnt = DBObject::getNumberOfObjectsByStatus( $row->Id );
+
+			require_once BASEDIR.'/server/services/wfl/WflQueryObjectsService.class.php';
+			$request = new WflQueryObjectsRequest();
+			$request->Ticket = $ticket;
+			$request->Params = array( new QueryParam( 'State', '=', $status->Id ) );
+			$request->Areas = array( 'Workflow' );
+			$request->RequestProps = array( 'ID', 'Type', 'Name' );
+			$service = new WflQueryObjectsService();
+			$response = $service->execute( $request );
+			$arrayOfWflRow = $response->Rows;
+			$request->Areas = array( 'Trash' );
+			$response = $service->execute( $request );
+			$arrayOfTrashRow = $response->Rows;
+			$cnt = ( $arrayOfWflRow ) ? count( $arrayOfWflRow ) : 0;
+			$cnt += ( $arrayOfTrashRow ) ? count( $arrayOfTrashRow ) : 0;
+
 			$authCount = 0;
 			try {
-				$authId = intval($row->Id);
-				$authCount = BizAdmStatus::getAuthorizationsCountById($authId);
+				$authId = intval( $status->Id );
+				$authCount = BizAdmStatus::getAuthorizationsCountById( $authId );
 			} catch ( BizException $e ) {
 				$errors[] = $e->getMessage();
 				$mode = 'error';
 			}
 
-			$deltxt = '<a href="states.php?publ='.$publ.'&issue='.$issue.'&type='.urlencode($type).'&delete=1&id='.$row->Id.'" onclick="return myconfirm(\'delstate\', ' . $cnt . ', ' . $authCount . ')">'
-					.'<img src="../../config/images/remov_16.gif" border="0" width="16" height="16" title="'.BizResources::localize('ACT_DEL').'"/></a>';
-			$tcolor = $row->Color;
+			$deltxt = '<a href="states.php?publ='.$pubId.'&issue='.$issueId.'&type='.urlencode($type).'&delete=1&id='.$status->Id.'" onclick="return myconfirm(\'delstate\', ' . $cnt . ', ' . $authCount . ')">'.HTML_EOL
+					.'<img src="../../config/images/remov_16.gif" border="0" width="16" height="16" title="'.BizResources::localize('ACT_DEL').'"/></a>'.HTML_EOL;
+			$tcolor = '#'.$status->Color;
+
+			$nextStatusId = $status->NextStatus ? intval( $status->NextStatus->Id ) : 0;
+
 			$disableSkipIdsa = true;
 			if ( $useSkipIdsa ) {
 				require_once BASEDIR.'/server/plugins/IdsAutomation/IdsAutomationUtils.class.php';
-				$disableSkipIdsa = !( IdsAutomationUtils::isLayoutObjectType( $type ) || IdsAutomationUtils::isPlaceableObjectType( $type ) );
+				$disableSkipIdsa = !IdsAutomationUtils::isLayoutObjectType( $type );
 			}
-			$deadlinerelativefields[$i]->setValue( DateTimeFunctions::validRelativeTime( $row->DeadlineRelative ) );
-			$detailtxt .=
-					'<tr'.$clr.'>'
-					.'<td>'.inputvar('code'.$i, $row->SortOrder, 'small').'</td>'
-					.'<td>'.inputvar('state'.$i, $row->Name, 'shortname').'</td>'
-					.'<td>'.inputvar('produce'.$i, trim($row->Produce), 'checkbox').'</td>'
-					.'<td>'.inputvar('createpermanentversion'.$i, trim($row->CreatePermanentVersion), 'checkbox').'</td>'
-					.'<td>'.inputvar('removeintermediateversions'.$i, trim($row->RemoveIntermediateVersions), 'checkbox').'</td>'
-					//.'<td>'.inputvar('automaticallysendtonext'.$i, trim($row->AutomaticallySendToNext), 'checkbox').'</td>'
-					.'<td>'.inputvar('readyforpublishing'.$i, trim($row->ReadyForPublishing), 'checkbox').'</td>';
+
+
+
+			$deadlineRelativeFields[$i]->setValue( $status->DeadlineRelative );
+
+			$detailTxt .=
+				'<tr'.$clr.'>'.HTML_EOL
+					.'<td>'.inputvar('code'.$i, $status->SortOrder, 'small').'</td>'.HTML_EOL
+					.'<td>'.inputvar('state'.$i, $status->Name, 'shortname').'</td>'.HTML_EOL
+					.'<td>'.inputvar('produce'.$i, trim( $status->Produce ), 'checkbox').'</td>'.HTML_EOL
+					.'<td>'.inputvar('createpermanentversion'.$i, trim($status->CreatePermanentVersion), 'checkbox').'</td>'.HTML_EOL
+					.'<td>'.inputvar('removeintermediateversions'.$i, trim($status->RemoveIntermediateVersions), 'checkbox').'</td>'.HTML_EOL
+					//.'<td>'.inputvar('automaticallysendtonext'.$i, trim($status->AutomaticallySendToNext), 'checkbox').'</td>'.HTML_EOL
+					.'<td>'.inputvar('readyforpublishing'.$i, trim($status->ReadyForPublishing), 'checkbox').'</td>'.HTML_EOL;
 					if ( $useSkipIdsa ) {
-						$detailtxt .= '<td>'.inputvar( 'skipidsa'.$i, trim( $row->SkipIdsa ), 'checkbox', null, true, null, $disableSkipIdsa ).'</td>';
+						$detailtxt .= '<td>'.inputvar( 'skipidsa'.$i, trim( $status->SkipIdsa ), 'checkbox', null, true, null, $disableSkipIdsa ).'</td>';
 					}
-					$detailtxt .='<td>'.inputvar('nextstate'.$i, $row->NextStatusId, 'combo', $thisdomain, false).'</td>'
-					.'<td>'.inputvar('phase'.$i, $row->Phase, 'combo', $phasedomain, false).'</td>'
-					//.'<td id="colorpicker'.$i.'" bgcolor="'.$tcolor.'"><input type="hidden" name="color'.$i.'" value="'.$tcolor.'"/>&nbsp;&nbsp;</td>'
-					//."<td><a href='#' onclick=\"cp2.select(document.forms[0].color$i, document.getElementById('colorpicker$i'), 'pick$i');return false;\" name='pick$i' id='pick$i'>".BizResources::localize('PICK').'</a></td>'
-					.'<td align="center">'
-						."<a href='#' onclick=\"cp2.select(document.forms[0].color$i, document.getElementById('colorpicker$i'), 'pick$i');return false;\" name='pick$i' id='pick$i'>"
-							.inputvar("color$i",$tcolor,'hidden').'<table border="1" style="border-collapse: collapse" bordercolor="#606060" height="'.$boxSize.'" width="'.$boxSize.'"><tr><td id="colorpicker'.$i.'" bgcolor="'.$tcolor.'"></td></tr></table></td>'
-						.'</a></td>';
+			$detailTxt .=
+					'<td>'.inputvar('nextstate'.$i, $nextStatusId, 'combo', $thisDomain, false).'</td>'.HTML_EOL
+					.'<td>'.inputvar('phase'.$i, $status->Phase, 'combo', $phasedomain, false).'</td>'.HTML_EOL
+					//.'<td id="colorpicker'.$i.'" bgcolor="'.$tcolor.'"><input type="hidden" name="color'.$i.'" value="'.$tcolor.'"/>&nbsp;&nbsp;</td>'.HTML_EOL
+					//."<td><a href='#' onclick=\"cp2.select(document.forms[0].color$i, document.getElementById('colorpicker$i'), 'pick$i');return false;\" name='pick$i' id='pick$i'>".BizResources::localize('PICK').'</a></td>'.HTML_EOL
+					.'<td align="center">'.HTML_EOL
+						."<a href='#' onclick=\"cp2.select(document.forms[0].color$i, document.getElementById('colorpicker$i'), 'pick$i');return false;\" name='pick$i' id='pick$i'>".HTML_EOL
+							.inputvar("color$i",$tcolor,'hidden').'<table border="1" style="border-collapse: collapse" bordercolor="#606060" height="'.$boxSize.'" width="'.$boxSize.'"><tr><td id="colorpicker'.$i.'" bgcolor="'.$tcolor.'"></td></tr></table></td>'.HTML_EOL
+						.'</a></td>'.HTML_EOL;
 
 			        // Only show the deadline fields if the brand has the calculation of deadlines set to enabled.
 					if ( $useDeadlines ) {
-						$detailtxt .= '<td>'.$deadlinerelativefields[$i]->drawBody().'</td>';
+						$detailTxt .= '<td>'.$deadlineRelativeFields[$i]->drawBody().'</td>'.HTML_EOL;
 					}
-					$detailtxt .= '<td>'.$deltxt.'</td>'
-				.'</tr>';
-			$detailtxt .= inputvar("id$i",$row->Id,'hidden');
+					$detailTxt .= '<td>'.$deltxt.'</td>'.HTML_EOL;
+					$detailTxt .= '</tr>'.HTML_EOL.HTML_EOL;
+			$detailTxt .= inputvar("id$i",$status->Id,'hidden').HTML_EOL;
 			$i++;
 		}
-		$detailtxt .= inputvar('recs',$i,'hidden');
+		$detailTxt .= inputvar('recs',$i,'hidden').HTML_EOL;
 		break;
 	case 'add':
 		$row = array("code"=>'', "state" => '', "produce" => '', 'nextstate' => '', "phase" => $phasedomain['Production'], 'color' => '#a0a0a0',
@@ -243,9 +326,9 @@ switch( $mode ) {
 		// no break
 	case 'errorins':
 		if ($mode == 'errorins') {
-			$row = array( 'code' => $statusIns->SortOrder, 'state' => $statusIns->Name, 'phase' => $statusIns->Phase,
-				'produce' => $statusIns->Produce, 'nextstate' => $statusIns->NextStatusId, 'color' => $statusIns->Color,
-				'deadlinerelative' => (isset($_REQUEST['deadlinerelative']) ? $_REQUEST['deadlinerelative'] : ''),
+			$row = array(
+				'code' => $statusIns->SortOrder, 'state' => $statusIns->Name, 'produce' => $statusIns->Produce,
+				'nextstate' => ($statusIns->NextStatus) ? $statusIns->NextStatus->Id : 0, 'color' => $statusIns->Color,
 				'createpermanentversion' => $statusIns->CreatePermanentVersion, 
 				'removeintermediateversions' => $statusIns->RemoveIntermediateVersions,
 				'automaticallysendtonext' => $statusIns->AutomaticallySendToNext,
@@ -255,76 +338,79 @@ switch( $mode ) {
 		}
 		// 1 row to enter new record
 		$tcolor = $row['color'];
-		$deadlinerelativefield->setValue( DateTimeFunctions::validRelativeTime( $row['deadlinerelative'] ) );
-		$disableSkipIdsa = true;
-		if ( $useSkipIdsa ) {
-			require_once BASEDIR.'/server/plugins/IdsAutomation/IdsAutomationUtils.class.php';
-			$disableSkipIdsa = !IdsAutomationUtils::isLayoutObjectType( $type );
-		}
-		$detailtxt .=
-			'<tr>'
-				.'<td>'.inputvar('code', $row['code'], 'small').'</td>'
-				.'<td>'.inputvar('state', $row['state'], 'shortname').'</td>'
-				.'<td>'.inputvar('produce',trim($row['produce']), 'checkbox').'</td>'
-				.'<td>'.inputvar('createpermanentversion',trim($row['createpermanentversion']), 'checkbox').'</td>'
-				.'<td>'.inputvar('removeintermediateversions',trim($row['removeintermediateversions']), 'checkbox').'</td>'
-				//.'<td>'.inputvar('automaticallysendtonext',trim($row['automaticallysendtonext']), 'checkbox').'</td>'
-				.'<td>'.inputvar('readyforpublishing',trim($row['readyforpublishing']), 'checkbox').'</td>';
+		$deadlineRelativeField->setValue( DateTimeFunctions::validRelativeTime( $row['deadlinerelative'] ) );
+		$detailTxt .=
+			'<tr>'.HTML_EOL
+				.'<td>'.inputvar('code', $row['code'], 'small').'</td>'.HTML_EOL
+				.'<td>'.inputvar('state', $row['state'], 'shortname').'</td>'.HTML_EOL
+				.'<td>'.inputvar('produce',trim($row['produce']), 'checkbox').'</td>'.HTML_EOL
+				.'<td>'.inputvar('createpermanentversion',trim($row['createpermanentversion']), 'checkbox').'</td>'.HTML_EOL
+				.'<td>'.inputvar('removeintermediateversions',trim($row['removeintermediateversions']), 'checkbox').'</td>'.HTML_EOL
+				//.'<td>'.inputvar('automaticallysendtonext',trim($row['automaticallysendtonext']), 'checkbox').'</td>'.HTML_EOL
+				.'<td>'.inputvar('readyforpublishing',trim($row['readyforpublishing']), 'checkbox').'</td>'.HTML_EOL;
 				if ( $useSkipIdsa ) {
 					$detailtxt .= '<td>'.inputvar( 'skipidsa', trim( $row['skipidsa'] ), 'checkbox', null, true, null, $disableSkipIdsa ).'</td>';
 				}
-				$detailtxt .= '<td>'.inputvar('nextstate', $row['nextstate'], 'combo', $statedomain).'</td>'
-				.'<td>'.inputvar('phase', $row['phase'], 'combo', $phasedomain, false).'</td>'
-				//.'<td id="colorpicker" bgcolor="'.$tcolor.'"><input type="hidden" name="color" value="'.$tcolor.'"/>&nbsp;&nbsp;</td>'
-				//."<td><a href='#' onclick=\"cp2.select(document.forms[0].color, document.getElementById('colorpicker'), 'pick');return false;\" name='pick' id='pick'>".BizResources::localize('PICK').'</a></td>'
-				.'<td align="center">'
-					."<a href='#' onclick=\"cp2.select(document.forms[0].color, document.getElementById('colorpicker'), 'pick');return false;\" name='pick' id='pick'>"
-						.'<input type="hidden" name="color" value="'.$tcolor.'"/><table border="1" style="border-collapse: collapse" bordercolor="#606060" height="'.$boxSize.'" width="'.$boxSize.'"><tr><td id="colorpicker" bgcolor="'.$tcolor.'"></td></tr></table></td>'
-					.'</a></td>';
+		$detailTxt .=
+				'<td>'.inputvar('nextstate', $row['nextstate'], 'combo', $statusDomain).'</td>'.HTML_EOL
+				.'<td>'.inputvar('phase', $row['phase'], 'combo', $phasedomain, false).'</td>'.HTML_EOL
+				//.'<td id="colorpicker" bgcolor="'.$tcolor.'"><input type="hidden" name="color" value="'.$tcolor.'"/>&nbsp;&nbsp;</td>'.HTML_EOL
+				//."<td><a href='#' onclick=\"cp2.select(document.forms[0].color, document.getElementById('colorpicker'), 'pick');return false;\" name='pick' id='pick'>".BizResources::localize('PICK').'</a></td>'.HTML_EOL
+				.'<td align="center">'.HTML_EOL
+					."<a href='#' onclick=\"cp2.select(document.forms[0].color, document.getElementById('colorpicker'), 'pick');return false;\" name='pick' id='pick'>".HTML_EOL
+						.'<input type="hidden" name="color" value="'.$tcolor.'"/><table border="1" style="border-collapse: collapse" bordercolor="#606060" height="'.$boxSize.'" width="'.$boxSize.'"><tr><td id="colorpicker" bgcolor="'.$tcolor.'"></td></tr></table></td>'.HTML_EOL
+					.'</a></td>'.HTML_EOL;
 				// Only show the deadline inputs if the calculation of deadlines is enabled for the brand.
 		        if ( $useDeadlines ) {
-					$detailtxt .= '<td>'.$deadlinerelativefield->drawBody().'</td>';
+					$detailTxt .= '<td>'.$deadlineRelativeField->drawBody().'</td>'.HTML_EOL;
 				}
-				$detailtxt .= '<td></td>'
-			.'</tr>';
-		$detailtxt .= inputvar('insert','1','hidden');
+				$detailTxt .= '<td></td>'.HTML_EOL;
+				$detailTxt .= '</tr>'.HTML_EOL.HTML_EOL;
+		$detailTxt .= inputvar('insert','1','hidden').HTML_EOL;
 
-		// show other states as info
-		require_once BASEDIR.'/server/dbclasses/DBStates.class.php';
-		$stateRows = DBStates::getStates( $publ, $issue, $type );
+		require_once BASEDIR.'/server/services/adm/AdmGetStatusesService.class.php';
+		$request = new AdmGetStatusesRequest();
+		$request->Ticket = $ticket;
+		$request->PublicationId = $pubId;
+		$request->IssueId = $issueId;
+		$request->ObjectType = $type;
+		$service = new AdmGetStatusesService();
+		$response = $service->execute( $request );
+		$statuses = $response->Statuses;
+
 		$color = array (' bgcolor="#eeeeee"', '');
 		$flip = 0;
-		if ( $stateRows ) foreach( $stateRows as $row ) {
+		foreach( $statuses as $status ) {
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			$tcolor = $row['color'];
-			$detailtxt .=
-				'<tr'.$clr.'>'
-					.'<td>'.$row['code'].'</td>'
-					.'<td>'.formvar($row['state']).'</td>'
-					.'<td>'.(trim($row['produce'])?CHECKIMAGE:'').'</td>'
-					.'<td>'.(trim($row['createpermanentversion'])?CHECKIMAGE:'').'</td>'
-					.'<td>'.(trim($row['removeintermediateversions'])?CHECKIMAGE:'').'</td>'
-					//.'<td>'.(trim($row['automaticallysendtonext'])?CHECKIMAGE:'').'</td>'
-					.'<td>'.(trim($row['readyforpublishing'])?CHECKIMAGE:'').'</td>'
-					.'<td>'.(trim($row['skipidsa'])?CHECKIMAGE:'').'</td>'
-					.'<td>'.(trim($row['nextstate'])?$statedomain[$row['nextstate']]:'').'</td>'
-					.'<td>'.(trim($row['phase'])?$phasedomain[$row['phase']]:'').'</td>'
-					//.'<td bgcolor="'.$tcolor.'">&nbsp;&nbsp;</td>'
-					.'<td align="center"><table border="1" style="border-collapse: collapse" bordercolor="#606060" height="'.$boxSize.'" width="'.$boxSize.'"><tr><td id="colorpicker" bgcolor="'.$tcolor.'"></td></tr></table></td>'
-					.'<td></td>'
-					.'<td>'.DateTimeFunctions::relativeDate( $row['deadlinerelative'] ).'</td>'
-				.'</tr>';
+			$tcolor = $status->Color;
+			$nextStatusId = isset( $status->NextStatus->Id ) ? intval( $status->NextStatus->Id ) : 0;
+			$detailTxt .=
+				'<tr'.$clr.'>'.HTML_EOL
+					.'<td>'.$status->SortOrder.'</td>'.HTML_EOL
+					.'<td>'.formvar( $status->Name ).'</td>'.HTML_EOL
+					.'<td>'.( trim( $status->Produce ) ? CHECKIMAGE : '' ).'</td>'.HTML_EOL
+					.'<td>'.( trim( $status->CreatePermanentVersion ) ? CHECKIMAGE : '' ).'</td>'.HTML_EOL
+					.'<td>'.( trim( $status->RemoveIntermediateVersions )?CHECKIMAGE:'' ).'</td>'.HTML_EOL
+					//.'<td>'.(trim($status->AutomaticallySendToNext)?CHECKIMAGE:'').'</td>'.HTML_EOL
+					.'<td>'.( trim( $status->ReadyForPublishing ) ? CHECKIMAGE : '' ).'</td>'.HTML_EOL
+					.'<td>'.( trim( $status->SkipIdsa ) ? CHECKIMAGE : '' ).'</td>'
+					.'<td>'.( $nextStatusId ? $statusDomain[$nextStatusId] : '' ).'</td>'.HTML_EOL
+					.'<td>'.(trim( $status->Phase )?$phasedomain[$status->Phase]:'').'</td>'.HTML_EOL
+					//.'<td bgcolor="'.$tcolor.'">&nbsp;&nbsp;</td>'.HTML_EOL
+					.'<td align="center"><table border="1" style="border-collapse: collapse" bordercolor="#606060" height="'.$boxSize.'" width="'.$boxSize.'"><tr><td id="colorpicker" bgcolor="'.$tcolor.'"></td></tr></table></td>'.HTML_EOL
+					.'<td>'.DateTimeFunctions::relativeDate( $status->DeadlineRelative ).'</td>'.HTML_EOL
+				.'</tr>'.HTML_EOL.HTML_EOL;
 		}
 		break;
 }
 
 // generate total page
-$txt = str_replace("<!--ROWS-->", $detailtxt, $txt);
-if ($issue) {
-	$back = "hppublissues.php?id=$issue";
+$txt = str_replace("<!--ROWS-->", $detailTxt, $txt);
+if ($issueId) {
+	$back = "hppublissues.php?id=$issueId";
 } else {
-	$back = "hppublications.php?id=$publ";
+	$back = "hppublications.php?id=$pubId";
 }
 $txt = str_replace("<!--BACK-->", $back, $txt);
 print HtmlDocument::buildDocument($txt);
@@ -347,34 +433,33 @@ function isIdsaUsed()
 class StatusAdminApp
 {
 	/**
-	 *  Converts a HTTP request into a admin status object.
+	 * Converts a HTTP request into a admin status object.
 	 *
+	 * @param string $type The ObjectType
 	 * @param array $req HTTP request
+	 * @param string|integer $deadlineRel
 	 * @param string $i Index; The HTTP request and some indexed properties which vary per status. Others are not indexed, see(*).
 	 * @return object $obj Admin status object
-	 **/
-	static public function httpRequestToStatusObj( $publ, $issue, $type, $req, $deadlineRel, $i = '' )
+	**/
+	static public function httpRequestToStatusObj( $type, $req, $deadlineRel, $i = '' )
 	{
-		$obj = new stdClass();
-		$obj->Id = isset( $req[ 'id'.$i ] ) ? intval( $req[ 'id'.$i ] ) : 0;
-		$obj->PublicationId = $publ;
-		$obj->Type = $type;
-		$obj->Phase = $req[ 'phase'.$i ];
-		$obj->Name = trim( stripslashes( $req[ 'state'.$i ] ) );
-		$obj->Produce = ( isset( $req[ 'produce'.$i ] ) && $req[ 'produce'.$i ] == 'on' ? true : false );
-		$obj->Color = preg_match( '/^#[a-f0-9]{6}$/i', $req[ 'color'.$i ] ) ? $req[ 'color'.$i ] : '#A0A0A0';
+		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
+		$obj = new AdmStatus();
+		$obj->Id                    = isset( $req['id'.$i] ) ? intval($req['id'.$i]) : 0;
+		$obj->Type                = $type; // *
+		$obj->Phase		      = $req['phase'.$i];
+		$obj->Name              = trim( stripslashes( $req['state'.$i] ) );
+		$obj->Produce           = (isset($req['produce'.$i]) && $req['produce'.$i] == 'on' ? true : false);
 		// Validate hex color (starts with # plus 6 alphanumeric characters, BZ#31651.
-		$obj->NextStatusId = intval( $req[ 'nextstate'.$i ] );
-		$obj->SortOrder = intval( $req[ 'code'.$i ] );
-		$obj->IssueId = $issue;
-		$obj->SectionId = 0; // not supported
-		$obj->DeadlineStatusId = $deadlineRel ? $obj->Id : 0;
-		$obj->DeadlineRelative = $deadlineRel;
-		$obj->CreatePermanentVersion = ( isset( $req[ 'createpermanentversion'.$i ] ) && $req[ 'createpermanentversion'.$i ] == 'on' ? true : false );
-		$obj->RemoveIntermediateVersions = ( isset( $req[ 'removeintermediateversions'.$i ] ) && $req[ 'removeintermediateversions'.$i ] == 'on' ? true : false );
-		$obj->AutomaticallySendToNext = ( isset( $req[ 'automaticallysendtonext'.$i ] ) && $req[ 'automaticallysendtonext'.$i ] == 'on' ? true : false );
-		$obj->ReadyForPublishing = ( isset( $req[ 'readyforpublishing'.$i ] ) && $req[ 'readyforpublishing'.$i ] == 'on' ? true : false );
-		$obj->SkipIdsa = ( isset( $req[ 'skipidsa'.$i ] ) && $req[ 'skipidsa'.$i ] == 'on' ? true : false );
+		$obj->Color             = preg_match('/^#[a-f0-9]{6}$/i', $req['color'.$i]) ? substr($req['color'.$i], 1) : 'A0A0A0'; //remove # to make service validator happy
+		$obj->NextStatus         = (intval($req['nextstate'.$i])) ? new AdmIdName( intval($req['nextstate'.$i]), '') : null;
+		$obj->SortOrder         = intval($req['code'.$i]);
+		$obj->DeadlineRelative  = $deadlineRel;
+		$obj->CreatePermanentVersion     = (isset( $req['createpermanentversion'.$i] )     && $req['createpermanentversion'.$i]     == 'on' ? true : false);
+		$obj->RemoveIntermediateVersions = (isset( $req['removeintermediateversions'.$i] ) && $req['removeintermediateversions'.$i] == 'on' ? true : false);
+		$obj->AutomaticallySendToNext    = (isset( $req['automaticallysendtonext'.$i] )    && $req['automaticallysendtonext'.$i]    == 'on' ? true : false);
+		$obj->ReadyForPublishing         = (isset( $req['readyforpublishing'.$i] )         && $req['readyforpublishing'.$i]         == 'on' ? true : false);
+		$obj->SkipIdsa                   = (isset( $req['skipidsa'.$i] )                   && $req['skipidsa'.$i]                   == 'on' ? true : false);
 		return $obj;
 		// *Those properties are the same per submit, so these are not indexed.
 	}

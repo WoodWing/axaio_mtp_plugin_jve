@@ -607,6 +607,40 @@ class DBBase
 	}
 
 	/**
+	 * Makes 'raw' copy of a table row.
+	 * This is without understanding the exact meaning of individual fields.
+	 *
+	 * @since 10.2.0 moved from DBCascadePub to here.
+	 * @param string $tableName  Name of table without prefix or quotes
+	 * @param array  $sourceRow    Row to be copied. Keys are column names, values are field data.
+	 * @param array  $overruleFields Some fields to be filled in during copy
+	 * @param bool   $autoincrement
+	 * @return integer The id of the created row (the copy), or null if copy failed.
+	 */
+	static public function copyRow( $tableName, $sourceRow, $overruleFields = null, $autoincrement = true )
+	{
+		// Copy record in memory (except the id, as handled in insertRow below)
+		$copyRow = $sourceRow;
+
+		// Take care that both $copyRow and $overruleFields have lowercase keys,
+		// as this may not be guaranteed?!?
+		$copyRow = array_change_key_case( $copyRow );
+
+		// Apply overruled data
+		if( $overruleFields ) {
+			$overruleFields = array_change_key_case( $overruleFields );
+			foreach( $overruleFields as $overruleName => $overruleValue ) {
+				if( isset( $copyRow[ $overruleName ] ) ) {
+					$copyRow[ $overruleName ] = $overruleValue;
+				}
+			}
+		}
+
+		// Insert the copy into DB
+		return self::insertRow( $tableName, $copyRow, $autoincrement );
+	}
+
+	/**
 	 * Set(Reset) the $tableName auto increment value to $autoIncrementValue.
 	 * @param string $tableName DB table name with 'smart_' prefix.
 	 * @param integer $autoIncrementValue The value to be reset to in the auto increment.
@@ -616,6 +650,39 @@ class DBBase
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
 		$dbDriver->resetAutoIncreament( $tableName, $autoIncrementValue );
+	}
+
+	/**
+	 * Performs a given SQL query at the DB.
+	 *
+	 * @since 10.2.0
+	 * @param string $sql   The SQL statement.
+	 * @param array $params Parameters for replacement
+	 * @param mixed $blob   Chunck of data to store at DB. It will be converted to a DB string here.
+	 * 				   One blob can be passed or multiple. If muliple are passed $blob is an array.
+	 * @param boolean $writeLog In case of license related queries, this option can be used to not write in the log file.
+	 * @param boolean $logExistsErr Suppress 'already exists' errors. Used for specific insert operations for which this error is fine.
+	 * @return resource|bool DB handle that can be used to fetch results. False when record already exists, in case $logExistsErr is set false.
+	 * @throws BizException on syntax error in SQL.
+	 */
+	static public function query( $sql, $params=array(), $blob=null, $writeLog=true, $logExistsErr=true )
+	{
+		self::clearError();
+		$dbDriver = DBDriverFactory::gen();
+		return $dbDriver->query( $sql, $params, $blob, $writeLog, $logExistsErr );
+	}
+
+	/**
+	 * Fetch a result row as an associative array.
+	 *
+	 * @since 10.2.0
+	 * @param resource $sth The result resource that is being evaluated. This result comes from a call to {@link: query()}.
+	 * @return array Associative array of strings that corresponds to the fetched row, or FALSE if there are no more rows.
+	 */
+	static public function fetch( $sth )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		return $dbDriver->fetch( $sth );
 	}
 
 	/**
@@ -881,49 +948,50 @@ class DBBase
 	}
 
 	/**
-	 * This method converts an array with integer params to a where clause.
-	 * If the array contains one element the '=' operator is used else the 'in'
-	 * operator will be used. If the number of passed array elements exceeds 1000
-	 * then more than one IN-clause is generated.This is because of Oracle limitations.
-	 * This is a very exceptional case.
+	 * Convert a list of integers into a search filter (SQL expression) that can be added to a WHERE clause.
 	 *
-	 * @param string $fieldname database column name
- 	 * @param array (integer) $arrayValues params to filter on
+	 * If the array contains one element the '=' operator is used else the 'IN' operator will be used.
+	 * If the number of passed array elements exceeds 1000 then more than one IN-clause is generated.
+	 * This is because of Oracle limitations. This is a very exceptional case.
+	 *
+	 * @param string $fieldName database column name
+ 	 * @param integer[] $intValues params to filter on
  	 * @param bool $not to negate the params
-	 * @return string which can be added to where clause
+	 * @return string SQL expression that can be added to the WHERE clause. Empty when no list of integer provided.
 	 */
-	static public function addIntArrayToWhereClause( $fieldname, $arrayValues, $not )
+	static public function addIntArrayToWhereClause( $fieldName, $intValues, $not = false )
 	{
 		$where = '';
 
-		if( is_array($arrayValues) && !empty($arrayValues) ) {
-			$count = count( $arrayValues );
-			$alias = explode('.', $fieldname);
-			if (count( $alias ) === 2) { // alias is used e.g. o.id
-				$fieldname = $alias[0].'.'."`$alias[1]`";  
+		if( is_array( $intValues ) && !empty( $intValues ) ) {
+			$intValues = array_map( 'intval', $intValues ); // block sql injection
+			$count = count( $intValues );
+			$alias = explode( '.', $fieldName, 2 );
+			if( count( $alias ) === 2 ) { // alias is used e.g. o.id
+				$fieldName = $alias[0].'.'."`$alias[1]`";
 			} else {
-				$fieldname = "`$fieldname`";  
-			}			
+				$fieldName = "`$fieldName`";
+			}
 			if( $count === 1 ) {
-				$notOperator = $not ? '!' : ''; 
-				$where = "$fieldname $notOperator= " . array_shift($arrayValues) . ' ' ;
-			} elseif ($count < 1000 ) { // Oracle only supports upto 1000 literals in the IN clause (see BZ#27945).
-				$notOperator = $not ? 'NOT' : ''; 
-				$where = "$fieldname $notOperator IN (" . implode(',', $arrayValues) . ') ';
+				$notOperator = $not ? '!' : '';
+				$where = "$fieldName $notOperator= ".reset( $intValues ).' ';
+			} elseif( $count < 1000 ) { // Oracle only supports up to 1000 literals in the IN clause (see BZ#27945).
+				$notOperator = $not ? 'NOT' : '';
+				$where = "$fieldName $notOperator IN (".implode( ',', $intValues ).') ';
 			} else { // More than 1000 literals
-				$notOperator = $not ? 'NOT' : ''; 
+				$notOperator = $not ? 'NOT' : '';
 				$or = '';
-				for ( $offset = 0; $offset < $count; $offset += 1000 ) {
-					$subArray = array_slice($arrayValues, $offset, 1000);
+				for( $offset = 0; $offset < $count; $offset += 1000 ) {
+					$subArray = array_slice( $intValues, $offset, 1000 );
 					$where .= $or;
-					$where .= "$fieldname $notOperator IN (" . implode( ',', $subArray ) . ') ';
+					$where .= "$fieldName $notOperator IN (".implode( ',', $subArray ).') ';
 					$or = 'OR ';
 				}
 			}
 		}
-		
+
 		return $where;
-	}	
+	}
 
 	/**
 	 * Views contain only the ids of objects. This method returns the ids of $rhs view with are not in the $lhs view.

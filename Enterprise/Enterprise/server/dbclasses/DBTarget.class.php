@@ -1454,13 +1454,9 @@ class DBTarget extends DBBase
 	public static function getObjectTargetIssueID( $objectId )
 	{
 		$where = '`objectid` = ? ';
-		$params = array( $objectId );
-		$result = self::getRow(self::TABLENAME, $where, 'issueid', $params);
-
-		if (isset($result['issueid'])) {
-			return $result['issueid'];
-		}
-		return false;
+		$params = array( intval( $objectId ) );
+		$row = self::getRow( self::TABLENAME, $where, array( 'issueid' ), $params );
+		return $row ? $row['issueid'] : false;
 	}
 
 	/**

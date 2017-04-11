@@ -21,10 +21,14 @@ class DBAdmPublication extends DBBase
 	 * @param integer $pubId Publication ID
 	 * @param array $typeMap Lookup table with custom property names as keys and types as values. Pass NULL to skip resolving props (which leaves ExtraMetaData set to null). 
 	 * @return AdmPublication|null Publication on success, or NULL on error.
+	 * @throws BizException on SQL error.
 	 */
 	public static function getPublicationObj( $pubId, $typeMap = null )
 	{
-		$row = self::getRow( self::TABLENAME, '`id` = ?', '*', array( $pubId ) );
+		$row = self::getRow( self::TABLENAME, '`id` = ?', '*', array( intval($pubId) ) );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
 		if( !$row ) {
 			return null;
 		}
@@ -42,22 +46,20 @@ class DBAdmPublication extends DBBase
 	 * Returns all publication data objects from DB, as configured by admin users.
 	 *  
 	 * @param array|null $typeMap Lookup table with custom property names as keys and types as values. Pass NULL to skip resolving props (which leaves ExtraMetaData set to null).
-	 * @return AdmPublication[] List of Publication objects on success. NULL if no record returned.
+	 * @return AdmPublication[]
 	 */
 	public static function listPublicationsObj( $typeMap = null )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php'; 
 		$rows = DBPublication::listPublications();
-		if( !$rows ) {
-			return null;
-		}
-		require_once BASEDIR.'/server/dbclasses/DBChanneldata.class.php';
+
 		$pubObjs = array();
-		foreach( $rows as $row ) {
+		if( $rows ) foreach( $rows as $row ) {
 			$pubObj = self::rowToObj( $row );
 			if( is_null( $typeMap ) ) {
 				$pubObj->ExtraMetaData = null;
 			} else {
+				require_once BASEDIR.'/server/dbclasses/DBChanneldata.class.php';
 				$pubObj->ExtraMetaData = DBChanneldata::getCustomProperties( 'Publication', $row['id'], $typeMap );
 			}
 			$pubObjs[] = $pubObj;
@@ -81,10 +83,14 @@ class DBAdmPublication extends DBBase
 		foreach( $pubs as $pub ) {
 			
 			// Error on duplicates
-			if( self::getRow( self::TABLENAME, '`publication` = ?', 'id', array( $pub->Name ) ) ) {
-				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
+			$row = self::getRow( self::TABLENAME, '`publication` = ?', array('id'), array( strval($pub->Name) ) );
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 			}
-			
+			if( $row ) {
+				throw new BizException( 'ERR_DUPLICATE_NAME', 'Client', $row['id'] );
+			}
+
 			// Auto set the Description and SortOrder when not provided.
 			if( is_null( $pub->Description ) ) {
 				$pub->Description = '';
@@ -128,9 +134,13 @@ class DBAdmPublication extends DBBase
 			// Error on duplicates.
 			if( !is_null($pub->Name) ) {
 				$where = '`publication` = ? AND `id` != ?';
-				$params = array( $pub->Name, $pub->Id );
-				if( self::getRow( self::TABLENAME, $where, 'id', $params ) ) {
-					throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
+				$params = array( strval($pub->Name), intval($pub->Id) );
+				$row = self::getRow( self::TABLENAME, $where, array('id'), $params );
+				if( self::hasError() ) {
+					throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+				}
+				if( $row ) {
+					throw new BizException( 'ERR_DUPLICATE_NAME', 'Client', $row['id']);
 				}
 			}
 			
@@ -139,8 +149,11 @@ class DBAdmPublication extends DBBase
 			
 			// Store standard publication properties in DB.
 			$pubRow = self::objToRow( $pub );
-			$result = self::updateRow( self::TABLENAME, $pubRow, '`id` = ?', array( $pub->Id ) );
-			
+			$result = self::updateRow( self::TABLENAME, $pubRow, '`id` = ?', array( intval($pub->Id) ) );
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
+
 			// Retrieve whole publication from DB. This is to make sure that the caller
 			// gets exactly the same data after a 'save' as after a 'get' operation.
 			if( $result === true ) {
@@ -158,32 +171,32 @@ class DBAdmPublication extends DBBase
 	 */
 	static public function objToRow( $obj )
 	{	
-		$fields = array();
+		$row = array();
 		if(!is_null($obj->Name)){
-			$fields['publication'] 		= $obj->Name;	
+			$row['publication'] 	= strval($obj->Name);
 		}
 		if(!is_null($obj->Description)){
-			$fields['description'] 		= $obj->Description;	
+			$row['description'] 	= strval($obj->Description);
 		}
 		if(!is_null($obj->EmailNotify)){
-			$fields['email'] 	  		= ($obj->EmailNotify == true ? 'on' : '');
+			$row['email'] 	  		= ($obj->EmailNotify == true ? 'on' : '');
 		}
 		if(!is_null($obj->ReversedRead)){
-			$fields['readingorderrev'] 	= ($obj->ReversedRead == true ? 'on' : '');	
+			$row['readingorderrev'] = ($obj->ReversedRead == true ? 'on' : '');	
 		}
 		if(!is_null($obj->AutoPurge)){
-			$fields['autopurge']		= $obj->AutoPurge;
+			$row['autopurge']		= intval($obj->AutoPurge);
 		}
 		if(!is_null($obj->SortOrder)){
-			$fields['code'] 			= $obj->SortOrder ? $obj->SortOrder : 0 ;
+			$row['code'] 			= $obj->SortOrder ? intval($obj->SortOrder) : 0 ;
 		}
 		if(!is_null($obj->DefaultChannelId)){
-			$fields['defaultchannelid'] = $obj->DefaultChannelId;	
+			$row['defaultchannelid'] = intval($obj->DefaultChannelId);
 		}
 		if( !is_null( $obj->CalculateDeadlines ) ) {
-			$fields['calculatedeadlines'] = ( $obj->CalculateDeadlines == true ? 'on' : '' );
+			$row['calculatedeadlines'] = ( $obj->CalculateDeadlines == true ? 'on' : '' );
 		}
-		return $fields;
+		return $row;
 	}
 	
 	/**
@@ -196,14 +209,14 @@ class DBAdmPublication extends DBBase
 	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		$pub = new AdmPublication();
-		$pub->Id               = $row['id'];
+		$pub->Id               = intval($row['id']);
 		$pub->Name             = $row['publication'];
 		$pub->Description      = $row['description'];
 		$pub->EmailNotify      = ($row['email'] == 'on' ? true : false);
 		$pub->ReversedRead     = ($row['readingorderrev'] == 'on' ? true : false);
 		$pub->AutoPurge        = $row['autopurge'];
-		$pub->SortOrder        = $row['code'];
-		$pub->DefaultChannelId = $row['defaultchannelid'];
+		$pub->SortOrder        = intval($row['code']);
+		$pub->DefaultChannelId = intval($row['defaultchannelid']);
 		$pub->CalculateDeadlines = ( $row['calculatedeadlines'] == 'on' ? true : false );
 
 		return $pub;

@@ -5,14 +5,9 @@ require_once BASEDIR.'/server/admin/global_inc.php';
 require_once BASEDIR.'/server/apps/functions.php';
 require_once BASEDIR.'/server/bizclasses/BizAccessFeatureProfiles.class.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
+require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 
-checkSecure('admin');
-
-// database stuff
-$dbh = DBDriverFactory::gen();
-$dbp = $dbh->tablename('profiles');
-$dbpv = $dbh->tablename('profilefeatures');
-$dba = $dbh->tablename('authorizations');
+$ticket = checkSecure('admin');
 
 // determine incoming mode
 $id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
@@ -27,96 +22,114 @@ if (isset($_REQUEST['vdelete']) && $_REQUEST['vdelete']) {
 }
 
 // get param's
-$name = isset($_REQUEST['profile']) ? trim($_REQUEST['profile']) : '';
+$accessProfileName = isset($_REQUEST['profile']) ? trim($_REQUEST['profile']) : '';
 $description = isset($_REQUEST['description']) ? $_REQUEST['description'] : '';
 
 $errors = array();
 
 // handle request
-switch ($mode) {
+switch( $mode ) {
 	case 'update':
-		// check not null
-		if (trim($name) == '') {
-			$errors[] = BizResources::localize("ERR_NOT_EMPTY");
-			$mode = 'error';
-			break;
-		}
+		try {
+			require_once BASEDIR.'/server/services/adm/AdmGetAccessProfilesService.class.php';
+			$request = new AdmGetAccessProfilesRequest();
+			$request->Ticket = $ticket;
+			$request->RequestModes = array( 'GetProfileFeatures' );
+			$request->AccessProfileIds = array( $id );
+			$service = new AdmGetAccessProfilesService();
+			$response = $service->execute( $request );
+			$accessProfile = $response->AccessProfiles[0];
 
-		// check duplicates
-		$sql = "select `id` from $dbp where `profile` = '" . $dbh->toDBString($name) . "' and `id` != $id";
-		$sth = $dbh->query($sql);
-		$row = $dbh->fetch($sth);
-		if ($row) {
-			$errors[] = BizResources::localize("ERR_DUPLICATE_NAME");
-			$mode = 'error';
-			break;
-		}
+			$mutations = getProfileFeatureMutations( $accessProfile->ProfileFeatures );
 
-		// DB
-		$sql = "update $dbp set `profile`='" . $dbh->toDBString($name) . "', `description` = '" . $dbh->toDBString($description) . "' where `id` = $id";
-		$sth = $dbh->query($sql);
-		
-		$sql = "delete from $dbpv where `profile` = $id";
-		$sth = $dbh->query($sql);
-		
-		sql_features($dbh, $id);
-		
+			$accessProfile = new AdmAccessProfile();
+			$accessProfile->Id = intval( $id );
+			$accessProfile->Name = strval( $accessProfileName );
+			$accessProfile->Description = strval( $description );
+			$accessProfile->ProfileFeatures = $mutations;
+
+			require_once BASEDIR.'/server/services/adm/AdmModifyAccessProfilesService.class.php';
+			$request = new AdmModifyAccessProfilesRequest();
+			$request->Ticket = $ticket;
+			$request->RequestModes = array();
+			$request->AccessProfiles = array( $accessProfile );
+			$service = new AdmModifyAccessProfilesService();
+			$service->execute( $request );
+		} catch( BizException $e ) {
+			$errors[] = $e->getMessage();
+			$mode = 'error';
+		}
 		break;
 	case 'insert':
-		// check not null
-		if (trim($name) == '') {
-			$errors[] = BizResources::localize("ERR_NOT_EMPTY");
-			$mode = 'error';
-			break;
-		}
+		try {
+			$mutations = array();
+			foreach( $_REQUEST['checkobj'] as $name => $value ) {
+				$profileFeature = new AdmProfileFeature();
+				$profileFeature->Name = $name;
+				$profileFeature->Value = 'Yes';
+				$mutations[$name] = $profileFeature;
+			}
 
-		// check duplicates
-		$sql = "select `id` from $dbp where `profile` = '" . $dbh->toDBString($name) . "'";
-		$sth = $dbh->query($sql);
-		$row = $dbh->fetch($sth);
-		if ($row) {
-			$errors[] = BizResources::localize("ERR_DUPLICATE_NAME");
-			$mode = 'error';
-			break;
-		}
+			$accessProfile = new AdmAccessProfile();
+			$accessProfile->Name = strval( $accessProfileName );
+			$accessProfile->Description = strval( $description );
+			$accessProfile->SortOrder = 0;
+			$accessProfile->ProfileFeatures = $mutations;
 
-		// DB
-		$sql = "insert INTO $dbp (`profile`, `description`, `code`) VALUES ('" . $dbh->toDBString($name) . "', '" . $dbh->toDBString($description) . "', 0)";
-		$sql = $dbh->autoincrement($sql);
-		$sth = $dbh->query($sql);
-		if (!$id) $id = $dbh->newid($dbp,true);
-		
-		sql_features($dbh, $id);
+			require_once BASEDIR.'/server/services/adm/AdmCreateAccessProfilesService.class.php';
+			$request = new AdmCreateAccessProfilesRequest();
+			$request->Ticket = $ticket;
+			$request->RequestModes = array();
+			$request->AccessProfiles = array( $accessProfile );
+			$service = new AdmCreateAccessProfilesService();
+			$service->execute( $request );
+		} catch( BizException $e ) {
+			$errors[] = $e->getMessage();
+			$mode = 'error';
+		}
 		break;
 	case 'delete':
-		if ($id) {
-			$sql = "delete from $dbp where `id` = $id";
-			$sth = $dbh->query($sql);
-
-			// cascading delete: profilefeatures
-			$sql = "delete from $dbpv where `profile` = $id";
-			$sth = $dbh->query($sql);
-
-			// cascading delete: authorizations
-			$sql = "delete from $dba where `profile` = $id";
-			$sth = $dbh->query($sql);
+		try {
+			require_once BASEDIR.'/server/services/adm/AdmDeleteAccessProfilesService.class.php';
+			$request = new AdmDeleteAccessProfilesRequest();
+			$request->Ticket = $ticket;
+			$request->AccessProfileIds = array( $id );
+			$service = new AdmDeleteAccessProfilesService();
+			$service->execute( $request );
+		} catch( BizException $e ) {
+			$errors[] = $e->getMessage();
+			$mode = 'error';
 		}
 		break;
 }
 // delete: back to overview
-if ($mode == 'delete' || $mode == "insert" || $mode == "update") {
-	header("Location:profiles.php");
+if( $mode == 'delete' || $mode == 'insert' || $mode == 'update' ) {
+	header('Location:profiles.php');
 	exit();
 }
 // generate upper part (edit fields)
-if ($mode == 'error') {
-	$row = array ('profile' => $name, 'description' => $description);
-} elseif ($mode != "new") {
-	$sql = "select * from $dbp where `id` = $id";
-	$sth = $dbh->query($sql);
-	$row = $dbh->fetch($sth);
+if( $mode == 'error' ) {
+	$accessProfile = new AdmAccessProfile();
+	$accessProfile->Name = $accessProfileName;
+	$accessProfile->Description = $description;
+} elseif( $mode != 'new' ) {
+	try {
+		require_once BASEDIR.'/server/services/adm/AdmGetAccessProfilesService.class.php';
+		$request = new AdmGetAccessProfilesRequest();
+		$request->Ticket = $ticket;
+		$request->RequestModes = array( 'GetProfileFeatures' );
+		$request->AccessProfileIds = array( $id );
+		$service = new AdmGetAccessProfilesService();
+		$response = $service->execute( $request );
+		$accessProfile = $response->AccessProfiles[0];
+	} catch( BizException $e ) {
+		$errors[] = $e->getMessage();
+		$mode = 'error';
+	}
 } else {
-	$row = array ('profile' => '', 'description' => '');
+	$accessProfile = new AdmAccessProfile();
+	$accessProfile->Name = '';
+	$accessProfile->Description = '';
 }
 $txt = HtmlDocument::loadTemplate( 'hpprofiles.htm' );
 
@@ -128,33 +141,45 @@ foreach ($errors as $error) {
 $txt = str_replace('<!--ERROR-->', $err, $txt);
 
 // fields
-$txt = str_replace('<!--VAR:NAME-->', '<input maxlength="255" name="profile" value="'.formvar($row['profile']).'"/>', $txt );
+$txt = str_replace('<!--VAR:NAME-->', '<input maxlength="255" name="profile" value="'.formvar($accessProfile->Name).'"/>', $txt );
 $txt = str_replace('<!--VAR:HIDDEN-->', inputvar( 'id', $id, 'hidden' ), $txt );
-$txt = str_replace('<!--VAR:DESCRIPTION-->', inputvar('description', $row['description'], 'area'), $txt );
+$txt = str_replace('<!--VAR:DESCRIPTION-->', inputvar('description', $accessProfile->Description, 'area'), $txt );
 
-if($mode !='new')
+if( $mode !='new' ) {
 	$txt = str_replace('<!--VAR:BUTTON-->', 
 		'<input type="submit" name="bt_update" value="'.BizResources::localize('ACT_UPDATE').'" onclick="return myupdate()"/>'.
 		'<input type="submit" name="bt_delete" value="'.BizResources::localize('ACT_DEL').'" onclick="return mydelete()"/>', $txt );
-else
-	$txt = str_replace('<!--VAR:BUTTON-->', '<input type="submit" name="bt_update" value="'.BizResources::localize('ACT_UPDATE').'" onclick="return myupdate()"/>', $txt );
-
-$ft = array();
-if ($mode == 'error') {
-	$features = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
-	foreach ($features as $fid => $feature) {
-		if ($_REQUEST['checkobj'][$fid]) $ft[$fid] = 'Yes';
-	}
-} else if ($mode != 'new') {
-	$sql = "select * from $dbpv where `profile` = $id";
-	$sth = $dbh->query($sql);
-	while( ($row = $dbh->fetch($sth) ) ) {
-		$ft[$row['feature']] = $row['value'];
-	}
 } else {
-	$features = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
-	foreach ($features as $fid => $feature) {
-		$ft[$fid] = isset($feature->Default) ? $feature->Default : 'Yes';
+	$txt = str_replace('<!--VAR:BUTTON-->', '<input type="submit" name="bt_update" value="'.BizResources::localize('ACT_UPDATE').'" onclick="return myupdate()"/>', $txt );
+}
+$profileFeatures = array();
+if( $mode == 'error' ) {
+	$sysProfileFeatures = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
+	if( $sysProfileFeatures ) foreach( $sysProfileFeatures as $sysFeature ) {
+		if( $_REQUEST['checkobj'][$sysFeature->Name] ) {
+			$profileFeature = new AdmProfileFeature();
+			$profileFeature->Name = $sysFeature->Name;
+			$profileFeature->Value = 'Yes';
+			$profileFeatures[$sysFeature->Name] = $profileFeature;
+		}
+	}
+} else if( $mode != 'new' ) {
+	$profileFeatures = $accessProfile->ProfileFeatures;
+} else {
+	//get template access profile with all profile features
+	try {
+		require_once BASEDIR.'/server/services/adm/AdmGetAccessProfilesService.class.php';
+		$request = new AdmGetAccessProfilesRequest();
+		$request->Ticket = $ticket;
+		$request->RequestModes = array( 'GetProfileFeatures' );
+		$request->AccessProfileIds = array( 0 ); //0 is template id
+		$service = new AdmGetAccessProfilesService();
+		$response = $service->execute( $request );
+		$accessProfile = $response->AccessProfiles[0];
+		$profileFeatures = $accessProfile->ProfileFeatures;
+	} catch( BizException $e ) {
+		$errors[] = $e->getMessage();
+		$mode = 'error';
 	}
 }
 
@@ -193,14 +218,14 @@ foreach ($featureColumns as $featureset) {
 	foreach ($featureset as $featureDisplay => $featureDef ) {
 		$detailtxt .= '<tr><td colspan="2"><u>'.BizResources::localize($featureDisplay).'</u></td></tr>';
 		$arr = array();
-		foreach( $featureDef as $fid => $feature ) {
-			$checked = (isset($ft[$fid]) && $ft[$fid] == 'Yes' ? ' checked="checked"': '');
+		foreach( $featureDef as $feature ) {
+			$checked = (isset($profileFeatures[$feature->Name]) && $profileFeatures[$feature->Name]->Value == 'Yes' ? ' checked="checked"': '');
 			$detailtxt .= 
 				'<tr>'.
 					'<td>'.$feature->Display.'</td>'.
-					'<td><input type="checkbox" name="checkobj['.$fid.']"'. $checked . '/></td>'.
+					'<td><input type="checkbox" name="checkobj['.$feature->Name.']"'. $checked . '/></td>'.
 				'</tr>';
-			$arr[] = '\''.$fid.'\'';
+			$arr[] = '\''.$feature->Name.'\'';
 		}
 		$arrtxt = join(',', $arr);
 		$detailtxt .= 
@@ -227,25 +252,37 @@ $txt .= '<script language="javascript">document.forms[0].profile.focus();</scrip
 
 print HtmlDocument::buildDocument($txt);
 
-function sql_features($dbh, $id)
+function getProfileFeatureMutations( $dbProfileFeatures )
 {
-	// handle insert of features
-	$dbpv = $dbh->tablename('profilefeatures');
+	$mutations = array();
+	if( isset( $_REQUEST['checkobj'] ) ) {
+		$formProfileFeatures = $_REQUEST['checkobj'];
+	} else {
+		$formProfileFeatures = array();
+	}
 
-	$features = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
-	foreach (array_keys($features) as $fid) {
-		$value = isset($_REQUEST['checkobj'][$fid]) ? $_REQUEST['checkobj'][$fid] : '';
-		$save = true;
-		if ($value) {
-			$value = 'Yes';
-		} else {
-			$save = false;
-		}
-		if ($save) {
-			$sql = "INSERT INTO $dbpv (`profile`, `feature`, `value`) ".
-					"VALUES ($id, $fid, '".$dbh->toDBString($value)."')";
-			$sql = $dbh->autoincrement($sql);
-			$dbh->query($sql);
+	$dbPosProfileFeatures = array();
+	foreach( $dbProfileFeatures as $name => $dbProfileFeature ) {
+		if( $dbProfileFeature->Value == 'Yes' ) {
+			$dbPosProfileFeatures[$name] = $dbProfileFeature;
 		}
 	}
+	//creates array of keys that are in form but not in db ("Yes" features)
+	$posDifferences = array_diff_key( $formProfileFeatures, $dbPosProfileFeatures );
+	//creates array of keys that are in db but not in form ("No" features)
+	$negDifferences = array_diff_key( $dbPosProfileFeatures, $formProfileFeatures );
+
+	foreach( array_keys( $posDifferences ) as $name ) {
+		$profileFeature = new AdmProfileFeature();
+		$profileFeature->Name = $name;
+		$profileFeature->Value = 'Yes';
+		$mutations[] = $profileFeature;
+	}
+	foreach( array_keys( $negDifferences ) as $name ) {
+		$profileFeature = new AdmProfileFeature();
+		$profileFeature->Name = $name;
+		$profileFeature->Value = 'No';
+		$mutations[] = $profileFeature;
+	}
+	return $mutations;
 }

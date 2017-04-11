@@ -22,21 +22,19 @@ BizSession::startSession( $ticket );
 $recs = isset($_REQUEST['recs_section']) ? intval($_REQUEST['recs_section']) : 0;
 if ($recs > 0) {
 	for ($i = 1; $i < $recs; $i++) {
-		$tid = intval($_REQUEST["section_order$i"]);
-		$cd = intval($_REQUEST["section_code$i"]);
-		$dbs = $dbh->tablename('publsections');
-		$sql = "update $dbs set `code` = $cd where `id` = $tid";
-		$sth = $dbh->query($sql);
+		$row = array( 'code' => intval($_REQUEST["section_code$i"]) );
+		$where = '`id` = ?';
+		$params = array( intval($_REQUEST["section_order$i"]) );
+		DBBase::updateRow( 'publsections', $row, $where, $params );
 	}
 }
 $recs2 = isset($_REQUEST['recs_edition']) ? intval($_REQUEST['recs_edition']) : 0;
 if ($recs2 > 0) {
 	for ($i = 1; $i < $recs2; $i++) {
-		$tid = intval($_REQUEST["edition_order$i"]);
-		$cd = intval($_REQUEST["edition_code$i"]);
-		$dbe = $dbh->tablename('editions');
-		$sql = "update $dbe set `code` = $cd where `id` = $tid";
-		$sth = $dbh->query($sql);
+		$row = array( 'code' => intval($_REQUEST["edition_code$i"]) );
+		$where = '`id` = ?';
+		$params = array( intval($_REQUEST["edition_order$i"]) );
+		DBBase::updateRow( 'editions', $row, $where, $params );
 	}
 }
 
@@ -103,7 +101,7 @@ $errors = $validateErrors = array();
 $app = new IssueMaintenanceApp();
 try {
 	$issueObj = new AdmIssue();
-	$app->buildIssueObj( $issueObj, $ticket, $publ, $channelid, $id );
+	$app->buildIssueObj( $issueObj, $ticket, $publ, $channelid, $id, $errors );
 } catch( BizException $e ) {
 	$errors[] = addslashes( $e->getMessage() );
 	$mode = 'error';
@@ -136,7 +134,6 @@ if ($mode == 'update' || $mode == 'insert' || $mode == 'recalc') {
 switch ($mode)
 {
 	case 'update':
-	{
 		try {
 			require_once BASEDIR.'/server/services/adm/AdmModifyIssuesService.class.php';
 			$service = new AdmModifyIssuesService();
@@ -154,9 +151,7 @@ switch ($mode)
 			break;
 		}
 		break;
-	}
 	case 'insert':
-	{
 		try {
 			require_once BASEDIR.'/server/services/adm/AdmCreateIssuesService.class.php';
 			$service = new AdmCreateIssuesService();
@@ -166,7 +161,6 @@ switch ($mode)
 			$request->PublicationId = $publ;
 			$request->PubChannelId = $channelid;
 			$request->Issues = array( $issueObj );
-		
 			$response = $service->execute($request);
 			$issueObj = $response->Issues[0]; // We only get one issue back
 		} catch( BizException $e ) {
@@ -175,9 +169,7 @@ switch ($mode)
 			break;
 		}
 		break;
-	}
 	case 'delete':
-	{
 		if( $del > 0 ) {
 			try {
 				require_once BASEDIR.'/server/services/adm/AdmDeleteIssuesService.class.php';
@@ -198,9 +190,7 @@ switch ($mode)
 			}
 		}
 		break;
-	}
 	case 'delsection':
-	{
 		if( $del > 0 ) {
 			try {
 				require_once BASEDIR.'/server/services/adm/AdmDeleteSectionsService.class.php';
@@ -210,7 +200,6 @@ switch ($mode)
 				$request->PublicationId = $publ;
 				$request->IssueId       = null;
 				$request->SectionIds    = array( $del );
-				
 				$service->execute( $request );				
 			} catch( BizException $e ) {
 				if( stripos( $e->getMessage(), '(S1058)' ) !== false || // BZ#25559
@@ -223,34 +212,50 @@ switch ($mode)
 			}
 		}
 		break;
-	}
 	case 'delauthor':
-	{
 		if( $issueObj->Id > 0 && $del > 0 ) {
-			$dba = $dbh->tablename('authorizations');
-			$sql = "delete from $dba where `grpid` = $del and `issue`={$issueObj->Id}";
-			$sth = $dbh->query($sql);
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmDeleteWorkflowUserGroupAuthorizationsService.class.php';
+				$request = new AdmDeleteWorkflowUserGroupAuthorizationsRequest();
+				$request->Ticket = $ticket;
+				$request->PublicationId = $publ;
+				$request->IssueId = $id;
+				$request->UserGroupId = $del;
+				$service = new AdmDeleteWorkflowUserGroupAuthorizationsService();
+				$service->execute( $request );
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
+				$mode = 'error';
+			}
 		}
 		break;
-	}
 	case 'delroute':
-	{
 		if( $issueObj->Id > 0 && $del > 0 ) {
-			$dbr = $dbh->tablename('routing');
-			$sql = "delete from $dbr where `issue`={$issueObj->Id} and `section`=$del";
-			$sth = $dbh->query($sql);
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmDeleteRoutingsService.class.php';
+				$request = new AdmDeleteRoutingsRequest();
+				$request->Ticket = $ticket;
+				$request->IssueId = $issueObj->Id;
+				$request->SectionId = $del;
+				$request->RoutingIds = array( $del );
+				$service = new AdmDeleteRoutingsService();
+				$service->execute( $request );
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
+				$mode = 'error';
+			}
 		}
 		break;
-	}
 	case 'delsectionmapping':
-	{
 		if( $issueObj->Id > 0 && $del > 0 ) {
-			$dbr = $dbh->tablename('channeldata');
-			$sql = "delete from $dbr where `issue`={$issueObj->Id} and `section`=$del";
-			$sth = $dbh->query($sql);
+			$where = '`section` = ? AND `issue` = ?';
+			$params = array( 
+				intval( $del ), // section id
+				intval( $issueObj->Id )
+			);
+			DBBase::deleteRows( 'channeldata', $where, $params );
 		}
 		break;
-	}
 }
 
 // delete: back to overview
@@ -264,11 +269,34 @@ if( $mode != 'new' && $mode != 'error' && $mode != 'recalc' && $mode != 'update'
 }
 
 // resolve brand and channel
-// TODO: call admin services (instead of calling DB layer)
-require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
-$pubObj = DBAdmPublication::getPublicationObj( $publ );
-require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
-$channelObj = DBAdmPubChannel::getPubChannelObj( $channelid );
+try {
+	require_once BASEDIR.'/server/services/adm/AdmGetPublicationsService.class.php';
+	$request = new AdmGetPublicationsRequest();
+	$request->Ticket = $ticket;
+	$request->RequestModes = array();
+	$request->PublicationIds = array( $publ );
+	$service = new AdmGetPublicationsService();
+	$response = $service->execute( $request );
+	$pubObj = $response->Publications[0];
+} catch( BizException $e ) {
+	$errors[] = $e->getMessage();
+	$mode = 'error';
+}
+
+try {
+	require_once BASEDIR.'/server/services/adm/AdmGetPubChannelsService.class.php';
+	$request = new AdmGetPubChannelsRequest();
+	$request->Ticket = $ticket;
+	$request->RequestModes = array();
+	$request->PublicationId = $publ;
+	$request->PubChannelIds = array( $channelid );
+	$service = new AdmGetPubChannelsService();
+	$response = $service->execute( $request );
+	$channelObj = $response->PubChannels[0];
+} catch( BizException $e ) {
+	$errors[] = $e->getMessage();
+	$mode = 'error';
+}
 
 // build form
 $action = ($mode == 'new') ? 'Create' : 'Update';
@@ -283,7 +311,7 @@ $txt = str_replace('<!--CHANNELID-->', $channelid, $txt);
 
 // build lower part forms if overrule pub is turned on (otherwise we don't allow to configure these things on issue level)
 if( $mode != "new" && $issueObj->OverrulePublication ) {
-	$detailtxt = $app->buildOverruleBrandForms( $ticket, $issueObj->Id, $publ, $channelid );
+	$detailtxt = $app->buildOverruleBrandForms( $ticket, $issueObj->Id, $publ, $channelid, $errors );
 } else {
 	$detailtxt = '';
 }
@@ -321,10 +349,16 @@ class IssueMaintenanceApp
 	 * When initially loading the form for an existing admin object, properties are retrieved from DB.
 	 * When user posts typed/changed data, properties are retrieved from HTTP params ($_REQUEST).
 	 *
+	 * @param AdmIssue $issueObj The issue object to be created.
+	 * @param string $ticket The user's session ticket.
+	 * @param integer $publ Publication id.
+	 * @param integer $channelid Channel id.
+	 * @param integer $id Issue id.
+	 * @param array &$errors List of errors.
 	 * @throws BizException On DB error.
 	 * @return AdmIssue
 	 */
-	public function buildIssueObj( $issueObj, $ticket, $publ, $channelid, $id )
+	public function buildIssueObj( $issueObj, $ticket, $publ, $channelid, $id, array &$errors )
 	{
 		$issueObj->Id = $id;
 		require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
@@ -333,14 +367,35 @@ class IssueMaintenanceApp
 		$newObject = ($id == 0); // TRUE: creating new admin object, FALSE: updating existin admin object
 		
 		// TRUE: first time building the form or changed the selection for section mapping, FALSE: user does submit typed changes
-		$firstCall = ( !isset($_REQUEST['Issue_Name']) || ( isset($_REQUEST['changedselection']) && !empty($_REQUEST['changedselection']) ) ); 
-		
+		$firstCall = ( !isset($_REQUEST['Issue_Name']) || ( isset($_REQUEST['changedselection']) && !empty($_REQUEST['changedselection']) ) );
+
 		// resolve brand and channel
-		// TODO: call admin services (instead of calling DB layer)
-		require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
-		$pubObj = DBAdmPublication::getPublicationObj( $publ );
-		require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
-		$channelObj = DBAdmPubChannel::getPubChannelObj( $channelid );
+		try {
+			require_once BASEDIR.'/server/services/adm/AdmGetPublicationsService.class.php';
+			$request = new AdmGetPublicationsRequest();
+			$request->Ticket = $ticket;
+			$request->RequestModes = array();
+			$request->PublicationIds = array( $publ );
+			$service = new AdmGetPublicationsService();
+			$response = $service->execute( $request );
+			$pubObj = $response->Publications[0];
+		} catch( BizException $e ) {
+			$errors[] = $e->getMessage();
+		}
+
+		try {
+			require_once BASEDIR.'/server/services/adm/AdmGetPubChannelsService.class.php';
+			$request = new AdmGetPubChannelsRequest();
+			$request->Ticket = $ticket;
+			$request->RequestModes = array();
+			$request->PublicationId = $publ;
+			$request->PubChannelIds = array( $channelid );
+			$service = new AdmGetPubChannelsService();
+			$response = $service->execute( $request );
+			$channelObj = $response->PubChannels[0];
+		} catch( BizException $e ) {
+			$errors[] = $e->getMessage();
+		}
 		
 		require_once BASEDIR.'/server/interfaces/plugins/connectors/AdminProperties_EnterpriseConnector.class.php'; // AdminProperties_Context
 		$context = new AdminProperties_Context();
@@ -455,11 +510,10 @@ class IssueMaintenanceApp
 		if($sectionMapping) {
 			require_once BASEDIR . '/server/dbclasses/DBSection.class.php';
 			// Get the sections for the current publication
-			$dbSections = DBSection::listSections($pubObj->Id);
+			$rows = DBSection::listSections($pubObj->Id);
 
-			$dbh = DBDriverFactory::gen();
 			// Store the section information in the array
-			while( ($row = $dbh->fetch($dbSections)) ) {
+			if( $rows ) foreach( $rows as $row ) {
 				$section = array();
 				$section['id'] = $row['id'];
 				$section['section'] = $row['section'];
@@ -562,17 +616,17 @@ class IssueMaintenanceApp
 
 			$channeldataTable = $dbh->tablename('channeldata');
 			$sectionsTable = $dbh->tablename('publsections');
-			
-			$sql = "SELECT COUNT(s.`id`) count";
-			$sql .= " FROM $channeldataTable ch";
-			$sql .= " JOIN $sectionsTable s ON ch.`section` = s.`id`";
-			$sql .= " WHERE ch.`issue` = ? AND ch.`section` != 0 GROUP BY s.`id`";
-			
-			$sth = $dbh->query($sql, array($issueObj->Id));
-			$count = 0;
-			while( ($row = $dbh->fetch( $sth )) ) {
-				$count = $row['count'];
-			}
+			$sql =  'SELECT COUNT(s.`id`) AS "cnt" '.
+					"FROM {$channeldataTable} ch ".
+					"JOIN {$sectionsTable} s ON ch.`section` = s.`id` ".
+					'WHERE ch.`issue` = ? AND ch.`section` != ? GROUP BY s.`id` ';
+			$params = array(
+				intval( $issueObj->Id ),
+				0 // section id
+			);
+			$sth = DBBase::query( $sql, $params );
+			$row = DBBase::fetch( $sth );
+			$count = $row ? $row['cnt'] : 0;
 
 			if( !$newIssue && $count > 0 ) {
 				$propsHtml .= "<tr><td colspan=\"2\">";
@@ -588,15 +642,18 @@ class IssueMaintenanceApp
 
 				$channeldataTable = $dbh->tablename('channeldata');
 				$sectionsTable = $dbh->tablename('publsections');
-				
-				$sql = "SELECT DISTINCT s.`id`, s.`section`";
-				$sql .= " FROM $channeldataTable ch";
-				$sql .= " JOIN $sectionsTable s ON ch.`section` = s.`id`";
-				$sql .= " WHERE ch.`issue`=? AND ch.`section` != 0";
-				
-				$sth = $dbh->query($sql, array($issueObj->Id));
+				$sql =  'SELECT DISTINCT s.`id`, s.`section` ';
+						"FROM {$channeldataTable} ch ";
+						"JOIN {$sectionsTable} s ON ch.`section` = s.`id` ";
+						'WHERE ch.`issue` = ? AND ch.`section` != ? ';
+				$params = array(
+					intval( $issueObj->Id ),
+					0 // section id
+				);
+				$sth = DBBase::query( $sql ,$params );
+				$rows = DBBase::fetchResults( $sth );
 
-				while( ($row = $dbh->fetch($sth)) ) {
+				if( $rows ) foreach( $rows as $row ) {
 					$propsHtml .= "<tr>";
 					$propsHtml .= "<td>";
 					$propsHtml .= "<a href=\"javascript:setSelected({$row['id']});\">";
@@ -774,19 +831,20 @@ class IssueMaintenanceApp
 	 *
 	 * @param string $ticket
 	 * @param string $id Issue id
-	 * @param string $publ Publication id
-	 * @param string $channelid Channel id
+	 * @param string $pubId Publication id
+	 * @param string $channelId Channel id
+	 * @param array &$errors List of errors.
 	 * @return string HTML stream
 	 */
-	public function buildOverruleBrandForms( $ticket, $id, $publ, $channelid )
+	public function buildOverruleBrandForms( $ticket, $id, $pubId, $channelId, array &$errors )
 	{
 		// build HTML forms
-		$statuses = $this->buildStatusesForm( $id, $publ );
-		$sections = $this->buildSectionsForm( $id, $publ, $channelid );
-		$editions = $this->buildEditionsForm( $id, $publ, $channelid );
-		$routings = $this->buildRoutingsForm( $ticket, $id, $publ );
-		$authors  = $this->buildAuthorizationsForm( $id, $publ );
-		$dossierTemplates = $this->buildDossierTemplatesForm( $ticket, $id, $publ );
+		$statuses = $this->buildStatusesForm( $ticket, $id, $pubId, $errors );
+		$sections = $this->buildSectionsForm( $ticket, $id, $pubId, $channelId, $errors );
+		$editions = $this->buildEditionsForm( $ticket, $id, $pubId, $channelId, $errors );
+		$routings = $this->buildRoutingsForm( $ticket, $id, $pubId, $errors );
+		$authors  = $this->buildAuthorizationsForm( $ticket, $id, $pubId, $errors );
+		$dossierTemplates = $this->buildDossierTemplatesForm( $ticket, $id, $pubId, $errors );
 		// combine all forms in one HTML table
 		return '
 			<table>
@@ -804,121 +862,159 @@ class IssueMaintenanceApp
 	/**
 	 * Draws HTML pane/form that lists all issue's statuses.
 	 *
+	 * @param string $ticket The user's session ticket.
 	 * @param string $id Issue id
-	 * @param string $publ Publication id
+	 * @param string $pubId Publication id
+	 * @param array &$errors List of errors.
 	 * @return string HTML stream
-	 * @todo Replace SQL with admin service calls
 	 */
-	private function buildStatusesForm( $id, $publ )
+	private function buildStatusesForm( $ticket, $id, $pubId, array &$errors )
 	{
 		$typesdomain = getObjectTypeMap();
 		$detail = '';
-		if ($id > 0) {
-			$dbh = DBDriverFactory::gen();
-			$dbst = $dbh->tablename('states');
-			$sql = "select `type`, `state`, `id` from $dbst where `issue` = $id order by `type`, `code`";
-			$sth = $dbh->query($sql);
-			$arr = array();
-			while (($row = $dbh->fetch($sth))) {
-				if (!isset($arr[$row['type']]))
-					$arr[$row['type']] = array ($row['state']);
-				else
-					$arr[$row['type']][] = $row['state'];
-			}
-			$color = array (" bgcolor='#eeeeee'", '');
-			$flip = 0;
-			foreach (array_keys($arr) as $type) {
-				$clr = $color[$flip];
-				$states = implode($arr[$type], ', ');
-				$detail .= "<tr$clr><td><a href='states.php?publ=$publ&issue=$id&type=$type'>{$typesdomain[$type]}</a></td><td>".formvar($states)."</td><tr>";
-				$flip = 1- $flip;
+		if( $id > 0 ) {
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmGetStatusesService.class.php';
+				$request = new AdmGetStatusesRequest();
+				$request->Ticket = $ticket;
+				$request->IssueId = $id;
+				$service = new AdmGetStatusesService();
+				$response = $service->execute( $request );
+				$statuses = $response->Statuses;
+				//order by type, code
+
+				$arr = array();
+				if( $statuses ) foreach( $statuses as $status ) {
+					if (!isset($arr[$status->Type]))
+						$arr[$status->Type] = array ($status->Name);
+					else
+						$arr[$status->Type][] = $status->Name;
+				}
+				$color = array (" bgcolor='#eeeeee'", '');
+				$flip = 0;
+				foreach( array_keys($arr) as $type ) {
+					$clr = $color[$flip];
+					$states = implode($arr[$type], ', ');
+					$detail .= "<tr$clr><td><a href='states.php?publ=$pubId&issue=$id&type=$type'>{$typesdomain[$type]}</a></td><td>".formvar($states)."</td><tr>";
+					$flip = 1- $flip;
+				}
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
 			}
 		}
-		$detailtxt1 = str_replace("<!--ROWS-->", $detail, HtmlDocument::loadTemplate( 'hpissuesdetstate.htm' ) );
-		$detailtxt1 = str_replace("<!--PUBL-->", $publ, $detailtxt1);
-		$detailtxt1 = str_replace("<!--ISSUE-->", $id, $detailtxt1);
+		$detailtxt1 = HtmlDocument::loadTemplate( 'hpissuesdetstate.htm' );
+		$detailtxt1 = str_replace( '<!--ROWS-->', $detail, $detailtxt1 );
+		$detailtxt1 = str_replace( '<!--PUBL-->', $pubId, $detailtxt1 );
+		$detailtxt1 = str_replace( '<!--ISSUE-->', $id, $detailtxt1 );
 		return $detailtxt1;
 	}
 
 	/**
 	 * Draws HTML pane/form that lists all issue's sections/categories.
 	 *
+	 * @param string $ticket The user's session ticket.
 	 * @param string $id Issue id
-	 * @param string $publ Publication id
-	 * @return string HTML stream
-	 * @todo Replace SQL with admin service calls
+	 * @param string $pubId Publication id
+	 * @param string $channelId Pubchannel id.
+	 * @param array &$errors List of errors.
+	 * @return string HTML pane
 	 */
-	private function buildSectionsForm( $id, $publ, $channelid )
+	private function buildSectionsForm( $ticket, $id, $pubId, $channelId, array &$errors )
 	{
 		$detail = inputvar( 'id', $id, 'hidden' );
-		$detail .= inputvar( 'publ', $publ, 'hidden' );
-		if ($id > 0) {
-			$dbh = DBDriverFactory::gen();
-			$dbs = $dbh->tablename('publsections');
-			$sql = "select * from $dbs where `issue` = $id order by `code`, `section`";
-			$sth = $dbh->query($sql);
-			$color = array (" bgcolor='#eeeeee'", '');
-			$cnt=1;
-			while (($row = $dbh->fetch($sth) )) {
-				$clr = $color[$cnt%2];
-				$tid = $row['id'];
-				$bx = inputvar("section_code$cnt", $row['code'], "small").inputvar( "section_order$cnt", $tid, 'hidden' );
-				$detail .=
-					"<tr$clr><td><a href='hppublsections.php?publ=$publ&issue=$id&id=$tid'>"
-					.formvar($row["section"])."</a></td><td>$bx</td><td><a href='hppublissues.php?delsection=1&id=$id&del="
-					.$row['id']
-					."' onClick='return myconfirm(\"delsection\")'>"
-					."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
-					."</a></td><tr>";
-				$cnt++;
+		$detail .= inputvar( 'publ', $pubId, 'hidden' );
+		if( $id > 0 ) {
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmGetSectionsService.class.php';
+				$request = new AdmGetSectionsRequest();
+				$request->Ticket = $ticket;
+				$request->RequestModes = array();
+				$request->PublicationId = $pubId;
+				$request->IssueId = $id;
+				$service = new AdmGetSectionsService();
+				$response = $service->execute( $request );
+				$sections = $response->Sections;
+				//order by code, section
+
+				$color = array (" bgcolor='#eeeeee'", '');
+				$cnt=1;
+				if( $sections ) foreach( $sections as $section ) {
+					$clr = $color[$cnt%2];
+					$bx = inputvar("section_code$cnt", $section->SortOrder, "small").inputvar( "section_order$cnt", $section->Id, 'hidden' );
+					$detail .=
+						"<tr$clr><td><a href='hppublsections.php?publ=$pubId&issue=$id&id=$section->Id'>"
+						.formvar($section->Name)."</a></td><td>$bx</td><td><a href='hppublissues.php?delsection=1&id=$id&del="
+						.$section->Id
+						."' onClick='return myconfirm(\"delsection\")'>"
+						."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
+						."</a></td><tr>";
+					$cnt++;
+				}
+				$detail .= inputvar( 'recs_section', $cnt, 'hidden' );
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
 			}
-			$detail .= inputvar( 'recs_section', $cnt, 'hidden' );
 		}
-		$detailtxt2 = str_replace("<!--ROWS-->", $detail, HtmlDocument::loadTemplate( 'hpissuesdetsection.htm' ) );
-		$detailtxt2 = str_replace("<!--PUBL-->", $publ, $detailtxt2);
-		$detailtxt2 = str_replace("<!--CHANNELID-->", $channelid, $detailtxt2);
-		$detailtxt2 = str_replace("<!--ISSUE-->", $id, $detailtxt2);
+
+		$detailtxt2 = HtmlDocument::loadTemplate( 'hpissuesdetsection.htm' );
+		$detailtxt2 = str_replace( '<!--ROWS-->', $detail, $detailtxt2 );
+		$detailtxt2 = str_replace( '<!--PUBL-->', $pubId, $detailtxt2 );
+		$detailtxt2 = str_replace( '<!--CHANNELID-->', $channelId, $detailtxt2 );
+		$detailtxt2 = str_replace( '<!--ISSUE-->', $id, $detailtxt2 );
 		return $detailtxt2;
 	}
 
 	/**
 	 * Draws HTML pane/form that lists all issue's editions.
 	 *
+	 * @param string $ticket The user's session ticket.
 	 * @param string $id Issue id
-	 * @param string $publ Publication id
-	 * @return string HTML stream
-	 * @todo Replace SQL with admin service calls
+	 * @param string $pubId Publication id
+	 * @param string $channelId Channel id.
+	 * @param array &$errors List of errors.
+	 * @return string HTML pane
 	 */
-	private function buildEditionsForm( $id, $publ, $channelid )
+	private function buildEditionsForm( $ticket, $id, $pubId, $channelId, array &$errors )
 	{
 		// editions
 		$detail = inputvar( 'id', $id, 'hidden' );
-		$detail .= inputvar( 'publ', $publ, 'hidden' );
+		$detail .= inputvar( 'publ', $pubId, 'hidden' );
 		if ($id > 0) {
-			$dbh = DBDriverFactory::gen();
-			$dbe = $dbh->tablename('editions');
-			$sql = "select * from $dbe where `issueid` = $id order by `code`, `name`";
-			$sth = $dbh->query($sql);
-			$color = array (" bgcolor='#eeeeee'", '');
-			$cnt=1;
-			while (($row = $dbh->fetch($sth) )) {
-				$clr = $color[$cnt%2];
-				$tid = $row['id'];
-				$bx = inputvar("edition_code$cnt", $row['code'], "small").inputvar( "edition_order$cnt", $tid, 'hidden' );
-				$detail .=
-					"<tr$clr><td><a href='hpeditions.php?publ=$publ&issue=$id&id=$tid'>"
-					.formvar($row["name"])."</a></td><td>$bx</td><td><a href='hpeditions.php?delete=1&id="
-					.$row['id']
-					."&issue=$id&publ=$publ' onClick='return myconfirm(\"deledition\")'>"
-					."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
-					."</a></td><tr>";
-				$cnt++;
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmGetEditionsService.class.php';
+				$request = new AdmGetEditionsRequest();
+				$request->Ticket = $ticket;
+				$request->PublicationId = $pubId;
+				$request->PubChannelId = $channelId;
+				$request->IssueId = $id;
+				$service = new AdmGetEditionsService();
+				$response = $service->execute( $request );
+				$editions = $response->Editions;
+				//order by code, name
+
+				$color = array (" bgcolor='#eeeeee'", '');
+				$cnt=1;
+				if( $editions ) foreach( $editions as $edition ) {
+					$clr = $color[$cnt%2];
+					$bx = inputvar("edition_code$cnt", $edition->SortOrder, "small").inputvar( "edition_order$cnt", $edition->Id, 'hidden' );
+					$detail .=
+						"<tr$clr><td><a href='hpeditions.php?publ=$pubId&issue=$id&id=$edition->Id&channelid=$channelId'>"
+						.formvar($edition->Name)."</a></td><td>$bx</td><td><a href='hpeditions.php?delete=1&id="
+						.$edition->Id
+						."&issue=$id&publ=$pubId' onClick='return myconfirm(\"deledition\")'>"
+						."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
+						."</a></td><tr>";
+					$cnt++;
+				}
+				$detail .= inputvar( 'recs_edition', $cnt, 'hidden' );
+
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
 			}
-			$detail .= inputvar( 'recs_edition', $cnt, 'hidden' );
 		}
 		$detailtxt2a = str_replace("<!--ROWS-->", $detail, HtmlDocument::loadTemplate( 'hpissuesdetedition.htm' ) );
-		$detailtxt2a = str_replace("<!--PUBL-->", $publ, $detailtxt2a);
-		$detailtxt2a = str_replace("<!--CHANNELID-->", $channelid, $detailtxt2a);
+		$detailtxt2a = str_replace("<!--PUBL-->", $pubId, $detailtxt2a);
+		$detailtxt2a = str_replace("<!--CHANNELID-->", $channelId, $detailtxt2a);
 		$detailtxt2a = str_replace("<!--ISSUE-->", $id, $detailtxt2a);
 		return $detailtxt2a;
 	}
@@ -926,93 +1022,106 @@ class IssueMaintenanceApp
 	/**
 	 * Draws HTML pane/form that lists all issue's routings.
 	 *
+	 * @param string $ticket The user's session ticket.
 	 * @param string $id Issue id
-	 * @param string $publ Publication id
+	 * @param string $pubId Publication id
+	 * @param array &$errors List of errors.
 	 * @return string HTML stream
-	 * @todo Replace SQL with admin service calls
 	 */
-	private function buildRoutingsForm( $ticket, $id, $publ )
+	private function buildRoutingsForm( $ticket, $id, $pubId, array &$errors )
 	{
 		$detail = '';
 		if ($id > 0) {
-			$dbh = DBDriverFactory::gen();
-			$dbst = $dbh->tablename('states');
-			$sql = "select `id`, `state`, `type` from $dbst where `issue` = $id order by `type`, `code`";
-			$sth = $dbh->query($sql);
-			$statedomain = array();
-			while (($row = $dbh->fetch($sth))) {
-				$statedomain[$row['id']] = $row['type']."/".$row['state'];
-			}
-			$routedomain = array();
-			$arrayOfRoute = listrouteto( $ticket, null, $id );
-			if ($arrayOfRoute) foreach ($arrayOfRoute as $route)
-				$routedomain[$route] = $route;
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmGetRoutingsService.class.php';
+				$request = new AdmGetRoutingsRequest( 'GetSections', 'GetStatuses' );
+				$request->Ticket = $ticket;
+				$request->RequestModes = array( 'GetStatuses', 'GetSections' );
+				$request->PublicationId = null;
+				$request->IssueId = $id;
+				$service = new AdmGetRoutingsService();
+				$response = $service->execute( $request );
+				$routings = $response->Routings;
+				$sections = $response->Sections;
+				$statuses = $response->Statuses;
+				//order by routingsection, statetype, statecode?
 
-			$dbr = $dbh->tablename('routing');
-			$dbs = $dbh->tablename('publsections');
-			$sql = "SELECT s.`id`, s.`section`, r.`routeto`, r.`state` from $dbr r ".
-					"LEFT JOIN $dbs s on (r.`section` = s.`id`) WHERE r.`issue` = $id ".
-					"GROUP BY s.`section`, s.`id`, r.`routeto`, r.`state` ".
-					"ORDER BY s.`section`, s.`id`";
-			$sth = $dbh->query($sql);
-			$color = array (" bgcolor='#eeeeee'", '');
-			$flip = 0;
-			$sAll = BizResources::localize("LIS_ALL");
-			while (($row = $dbh->fetch($sth) )) {
-				$clr = $color[$flip];
-				$sid = $row['id'];
-				$sect = trim($row['section']);
-				if (!$sect) $sect = '<'.$sAll.'>';
-				$detail .= "<tr$clr><td><a href='routing.php?publ=$publ&issue=$id&selsection=$sid'>".formvar($sect)."</a></td>";
-				$routeToDetails = $row['routeto'] ? $routedomain[$row['routeto']] : '<'.$sAll.'>';
-				$statusDetails = $row['state'] ? $statedomain[$row['state']] : '<'.$sAll.'>';
-				$detail .= '<td>'.formvar($statusDetails).'</td><td>'.formvar($routeToDetails).'</td></tr>';
-				$flip = 1- $flip;
+				$statusDomain = array();
+				if( $statuses ) foreach( $statuses as $status ) {
+					$statusDomain[$status->Id] = $status->Type."/".$status->Name;
+				}
+				$sectionDomain = array();
+				if( $sections ) foreach( $sections as $section ) {
+					$sectionDomain[$section->Id] = $section->Name;
+				}
+
+				$color = array (" bgcolor='#eeeeee'", '');
+				$flip = 0;
+				$sAll = BizResources::localize("LIS_ALL");
+				if( $routings ) foreach( $routings as $routing ) {
+					$clr = $color[$flip];
+					$sect = $routing->SectionId ? $sectionDomain[$routing->SectionId] : '<'.$sAll.'>';
+					$detail .= "<tr$clr><td><a href='routing.php?publ=$pubId&issue=$id&selsection=$routing->SectionId'>".formvar($sect)."</a></td>";
+					$routeToDetails = !empty($routing->RouteTo) ? $routing->RouteTo : '<'.$sAll.'>';
+					$statusDetails = !empty($routing->StatusId) ? $statusDomain[$routing->StatusId] : '<'.$sAll.'>';
+					$detail .= '<td>'.formvar($statusDetails).'</td><td>'.formvar($routeToDetails).'</td></tr>';
+					$flip = 1- $flip;
+				}
+			} catch(BizException $e) {
+				$errors[] = $e->getMessage();
 			}
 		}
-		$detailtxt3 = str_replace("<!--ROWS-->", $detail, HtmlDocument::loadTemplate( 'hpissuesdetroute.htm' ) );
-		$detailtxt3 = str_replace("<!--PUBL-->", $publ, $detailtxt3);
-		$detailtxt3 = str_replace("<!--ISSUE-->", $id, $detailtxt3);
+		$detailtxt3 = HtmlDocument::loadTemplate( 'hpissuesdetroute.htm' );
+		$detailtxt3 = str_replace( '<!--ROWS-->', $detail, $detailtxt3 );
+		$detailtxt3 = str_replace( '<!--PUBL-->', $pubId, $detailtxt3 );
+		$detailtxt3 = str_replace( '<!--ISSUE-->', $id, $detailtxt3 );
 		return $detailtxt3;
 	}
 
 	/**
 	 * Draws HTML pane/form that lists all issue's authorizations.
 	 *
+	 * @param string $ticket The user's session ticket.
 	 * @param string $id Issue id
-	 * @param string $publ Publication id
+	 * @param string $pubId Publication id
+	 * @param array &$errors List of errors.
 	 * @return string HTML stream
-	 * @todo Replace SQL with admin service calls
 	 */
-	private function buildAuthorizationsForm( $id, $publ )
+	private function buildAuthorizationsForm( $ticket, $id, $pubId, array &$errors )
 	{
 		$detail = '';
-		if ($id > 0) {
-			$dbh = DBDriverFactory::gen();
-			$dbg = $dbh->tablename("groups");
-			$dba = $dbh->tablename('authorizations');
-			$sql = "SELECT g.`id`, g.`name` FROM $dba a, $dbg g ".
-					"WHERE a.`grpid` = g.`id` and a.`issue` = $id ".
-					"GROUP BY g.`id`, g.`name` ".
-					"ORDER BY g.`name`";
-			$sth = $dbh->query($sql);
-			$color = array (" bgcolor='#eeeeee'", '');
-			$flip = 0;
-			while (($row = $dbh->fetch($sth) )) {
-				$clr = $color[$flip];
-				$detail .= "<tr$clr><td><a href='authorizations.php?publ=$publ&issue=$id&grp="
-					.$row["id"]."'>".$row["name"]
-					."</a></td><td><a href='hppublissues.php?delauthor=1&id=$id&del="
-					.$row['id']
-					."' onClick='return myconfirm(\"delauthor\")'>"
-					."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
-					."</a></td><tr>";
-				$flip = 1- $flip;
+		if( $id > 0 ) {
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmGetWorkflowUserGroupAuthorizationsService.class.php';
+				$request = new AdmGetWorkflowUserGroupAuthorizationsRequest();
+				$request->Ticket = $ticket;
+				$request->RequestModes = array( 'GetUserGroups' );
+				$request->IssueId = $id;
+				$service = new AdmGetWorkflowUserGroupAuthorizationsService();
+				$response = $service->execute( $request );
+				$userGroups = $response->UserGroups;
+
+				$color = array (" bgcolor='#eeeeee'", '');
+				$flip = 0;
+				if( $userGroups ) foreach( $userGroups as $userGroup ) {
+					$clr = $color[$flip];
+					$detail .= "<tr$clr><td><a href='authorizations.php?publ=$pubId&issue=$id&grp="
+						.$userGroup->Id."'>".$userGroup->Name
+						."</a></td><td><a href='hppublissues.php?delauthor=1&id=$id&del="
+						.$userGroup->Id
+						."' onClick='return myconfirm(\"delauthor\")'>"
+						."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
+						."</a></td><tr>";
+					$flip = 1- $flip;
+				}
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
 			}
 		}
-		$detailtxt4 = str_replace("<!--ROWS-->", $detail, HtmlDocument::loadTemplate( 'hpissuesdetauthor.htm' ) );
-		$detailtxt4 = str_replace("<!--PUBL-->", $publ, $detailtxt4);
-		$detailtxt4 = str_replace("<!--ISSUE-->", $id, $detailtxt4);
+		$detailtxt4 = HtmlDocument::loadTemplate( 'hpissuesdetauthor.htm' );
+		$detailtxt4 = str_replace( '<!--ROWS-->', $detail, $detailtxt4 );
+		$detailtxt4 = str_replace( '<!--PUBL-->', $pubId, $detailtxt4 );
+		$detailtxt4 = str_replace( '<!--ISSUE-->', $id, $detailtxt4 );
 		return $detailtxt4;
 	}
 
@@ -1022,56 +1131,68 @@ class IssueMaintenanceApp
 	 * @param string $ticket Ticket
 	 * @param string $id Issue id
 	 * @param string $publ Publication id
+	 * @param array &$errors List of errors.
 	 * @return string HTML stream
 	 */
-	private function buildDossierTemplatesForm( $ticket, $id, $publ )
+	private function buildDossierTemplatesForm( $ticket, $id, $publ, array &$errors )
 	{
 		$detail = '';
 		if ($id > 0) {
-			require_once BASEDIR . '/server/bizclasses/BizAdmPubObject.class.php';
-			$pubObjects = array();
-			$pubObjects = BizAdmPubObject::listPubObjects( $publ, $id );
-	
-			require_once BASEDIR.'/server/services/adm/AdmGetUserGroupsService.class.php';
-			$service = new AdmGetUserGroupsService();			
-			$request = new AdmGetUserGroupsRequest();
-			$request->Ticket = $ticket;
-			$request->RequestModes = array();
-			
-			$response = $service->execute($request);
-			$usergroups = $response->UserGroups;
-			$usergroupsArr = array();
-			$usergroupsArr[0] = '<'.BizResources::localize("LIS_ALL").'>';
-			foreach( $usergroups as $usergroup ) {
-				$usergroupsArr[$usergroup->Id]= $usergroup->Name;
-			}
-	
-			$dosArr = array();
-			$grpArr = array();
-			foreach( $pubObjects as $pubObject ) {
-				$dosArr[$pubObject->ObjectId] = $pubObject->ObjectName;
-				if (!isset($grpArr[$pubObject->ObjectId]))
-					$grpArr[$pubObject->ObjectId] = array ($usergroupsArr[$pubObject->GroupId]);
-				else
-					$grpArr[$pubObject->ObjectId][] = $usergroupsArr[$pubObject->GroupId];
-			}
-	
-			$color = array (" bgcolor='#eeeeee'", '');
-			$cnt=1;
-			foreach (array_keys($dosArr) as $objId) {
-				$clr = $color[$cnt%2];
-				$groups = implode($grpArr[$objId], ', ');
-				$detail .= "<tr$clr><td><a href='dossiertemplates.php?publ=$publ&issue=$id&objid=$objId'>".formvar($dosArr[$objId]).'</a></td>';
-				$detail .= "<td>".formvar($groups)."</td><td><a href='dossiertemplates.php?publ=$publ&issue=$id&delete=1&objid="
+			try {
+				require_once BASEDIR.'/server/services/adm/AdmGetTemplateObjectsService.class.php';
+				$request = new AdmGetTemplateObjectsRequest();
+				$request->Ticket = $ticket;
+				$request->RequestModes = array( 'GetUserGroups', 'GetObjectInfos' );
+				$request->PublicationId = $publ;
+				$request->IssueId = $id;
+				$service = new AdmGetTemplateObjectsService();
+				$response = $service->execute( $request );
+				$templateObjects = $response->TemplateObjects;
+				$resUserGroups = $response->UserGroups;
+				$resObjectInfos = $response->ObjectInfos;
+
+				$userGroupsArr = array();
+				$userGroupsArr[0] = '<'.BizResources::localize("LIS_ALL").'>';
+				if( $resUserGroups ) foreach( $resUserGroups as $userGroup ) {
+					$userGroupsArr[$userGroup->Id] = $userGroup->Name;
+				}
+
+				$objectInfos = array();
+				if( $resObjectInfos ) foreach( $resObjectInfos as $objectInfo ) {
+					$objectInfos[$objectInfo->ID] = $objectInfo;
+				}
+
+				$dosArr = array();
+				$grpArr = array();
+				if( $templateObjects ) foreach( $templateObjects as $templateObject ) {
+					$dosArr[$templateObject->TemplateObjectId] = $objectInfos[$templateObject->TemplateObjectId]->Name;
+					if( !isset($grpArr[$templateObject->TemplateObjectId] ) )
+						$grpArr[$templateObject->TemplateObjectId] = array( $userGroupsArr[$templateObject->UserGroupId] );
+					else
+						$grpArr[$templateObject->TemplateObjectId][] = $userGroupsArr[$templateObject->UserGroupId];
+				}
+
+				$color = array (" bgcolor='#eeeeee'", '');
+				$cnt=1;
+				foreach (array_keys($dosArr) as $objId) {
+					$clr = $color[$cnt%2];
+					$groups = implode($grpArr[$objId], ', ');
+					$detail .= "<tr$clr><td><a href='dossiertemplates.php?publ=$publ&issue=$id&objid=$objId'>".formvar($dosArr[$objId]).'</a></td>';
+					$detail .= "<td>".formvar($groups)."</td><td><a href='dossiertemplates.php?publ=$publ&issue=$id&delete=1&objid="
 						.$objId
 						."' onClick='return myconfirm(\"delpublobjects\")'>"
 						."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
 						."</a></td><tr>";
-				$cnt++;
+					$cnt++;
+				}
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
 			}
-			$detailtxt5 = str_replace("<!--ROWS-->", $detail, HtmlDocument::loadTemplate( 'hpissuesdetdossiertemplate.htm' ) );
-			$detailtxt5 = str_replace("<!--PUBL-->", $publ, $detailtxt5);
-			$detailtxt5 = str_replace("<!--ISSUE-->", $id, $detailtxt5);
+
+			$detailtxt5 = HtmlDocument::loadTemplate( 'hpissuesdetdossiertemplate.htm' );
+			$detailtxt5 = str_replace( '<!--ROWS-->', $detail, $detailtxt5 );
+			$detailtxt5 = str_replace( '<!--PUBL-->', $publ, $detailtxt5 );
+			$detailtxt5 = str_replace( '<!--ISSUE-->', $id, $detailtxt5 );
 			return $detailtxt5;
 		}
 		return $detail;

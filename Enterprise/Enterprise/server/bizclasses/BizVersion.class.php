@@ -297,7 +297,7 @@ class BizVersion
 	 * Calculates the next version to be used for create- and save operations.
 	 * @param object $statusCfg Admin status definition (wherein the object currently resides).
 	 * @param array  $verArr Returned values at keys "majorversion" and "minorversion"
-	 * @return Next object version in major.minor notation (to be used for save/create). Empty on error.
+	 * @return string Next object version in major.minor notation (to be used for save/create). Empty on error.
 	 */
 	public static function determineNextVersionNr( $statusCfg, &$verArr )
 	{
@@ -418,7 +418,7 @@ class BizVersion
 	 *
 	 * @param array    $invokedObjects Essential metadata for each object where keys are the object ids and values its Object. Version is updated when needed.
 	 * @param array    $newRow Updated new values for all objects
-	 * @param DBAdmStatus[] $states All allowed states for the Objects.
+	 * @param AdmStatus[] $states All allowed states for the Objects.
 	 * @throws BizException on failure
 	 */
 	public static function multiCreateVersionIfNeeded( &$invokedObjects, $newRow, $states )

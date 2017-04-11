@@ -27,40 +27,6 @@ class DBCascadePub extends DBBase
 	static private $ChannelsMap;
 
 	/**
-	 * Makes 'raw' copy of a table row.
-	 * This is without understanding the exact meaning of individual fields.
-	 *
-	 * @param string $tableName  Name of table without prefix or quotes
-	 * @param array  $sourceRow    Row to be copied. Keys are column names, values are field data.
-	 * @param array  $overruleFields Some fields to be filled in during copy
-	 * @param boolean $autoincrement
-	 * @return string The id of the created row (the copy), or null if copy failed.
-	 */
-	static private function copyRow( $tableName, $sourceRow, $overruleFields, $autoincrement = true )
-	{
-		// Copy record in memory, except the id
-		$copyRow = $sourceRow;
-
-		// Take care that both $copyRow and $overruleFields have lowercase keys, as this may not be garantueed?!?
-		$copyRow = array_change_key_case($copyRow);
-		$overruleFields = array_change_key_case($overruleFields);
-
-		// Apply overruled data
-		foreach ($overruleFields as $overfieldname => $overvalue) {
-			if (isset($copyRow[$overfieldname])) {
-				$copyRow[$overfieldname] = $overvalue;
-			}
-		}
-
-		// Insert the copy into DB
-		$newId = self::insertRow($tableName, $copyRow, $autoincrement);
-		
-		return $newId;
-		// Get fresh copy to make sure we're looking at correct data, and to get the rid of quoted fields as added above
-		//return self::getRow( $tableName, "`$idFieldName` = $newId" );
-	}
-
-	/**
 	 * Performs cascade copy of a publication.
 	 * It copies all definions that are made for the publication.
 	 * This includes channels, issues, editions, sections, statuses, deadlines, authorizations, workflow and routing.

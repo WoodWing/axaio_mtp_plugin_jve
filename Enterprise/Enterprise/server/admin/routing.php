@@ -4,199 +4,290 @@ require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/admin/global_inc.php';
 require_once BASEDIR."/server/apps/functions.php";
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
+require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 
 $ticket = checkSecure('publadmin');
 
-// database stuff
-$dbh = DBDriverFactory::gen();
-$dbr = $dbh->tablename('routing');
-$dbp = $dbh->tablename('publications');
-$dbs = $dbh->tablename('publsections');
-$dbi = $dbh->tablename('issues');
-$dbst = $dbh->tablename('states');
-$dbg = $dbh->tablename('groups');
-$dbu = $dbh->tablename('users');
-$dba = $dbh->tablename('authorizations');
-$dbx = $dbh->tablename('usrgrp');
-
 // determine incoming mode
-$publ  = isset($_REQUEST['publ'])  ? intval($_REQUEST['publ'])  : 0;
-$issue = isset($_REQUEST['issue']) ? intval($_REQUEST['issue']) : 0; 
-$selsection = isset($_REQUEST['selsection']) ? intval($_REQUEST['selsection']) : 0;
+$pubId  = isset($_REQUEST['publ'])  ? intval($_REQUEST['publ'])  : 0;
+$issueId = isset($_REQUEST['issue']) ? intval($_REQUEST['issue']) : 0; 
+$sectionId = isset($_REQUEST['selsection']) ? intval($_REQUEST['selsection']) : 0;
 $records    = isset($_REQUEST['recs'])       ? intval($_REQUEST['recs']) : 0;
 $insert     = isset($_REQUEST['insert'])     ? (bool)$_REQUEST['insert'] : false;
 
 if (isset($_REQUEST['update']) && $_REQUEST['update']) {
 	$mode = 'update';
-} else if (isset($_REQUEST['delete']) && $_REQUEST['delete']) {
+} elseif (isset($_REQUEST['delete']) && $_REQUEST['delete']) {
 	$mode = 'delete';
-} else if (isset($_REQUEST['add']) && $_REQUEST['add']) {
+} elseif (isset($_REQUEST['add']) && $_REQUEST['add']) {
 	$mode = 'add';
 } else {
 	$mode = 'view';
 }
 
+$errors = array();
+
 // check publication rights
-checkPublAdmin($publ);
+checkPublAdmin($pubId);
 
 // handle request
-if ($records > 0) {
-	for ($i=0; $i < $records; $i++) {
+if( $records > 0 ) {
+	for( $i=0; $i < $records; $i++ ) {
 		$id = isset($_REQUEST["id$i"]) ? intval($_REQUEST["id$i"]) : 0;
 		$section = isset($_REQUEST["section$i"]) ? intval($_REQUEST["section$i"]) : 0;
-		$state   = isset($_REQUEST["state$i"])   ? intval($_REQUEST["state$i"])   : 0;
-		$routeto = isset($_REQUEST["routeto$i"]) ? $_REQUEST["routeto$i"] : '';
-		$sql = "UPDATE $dbr set `publication`=$publ, `issue`=$issue, `section`=$section, ".
-				"`state`=$state, `routeto`='".$dbh->toDBString($routeto)."' WHERE `id` = $id";
-		$sth = $dbh->query($sql);
+		$status   = isset($_REQUEST["state$i"])   ? intval($_REQUEST["state$i"])   : 0;
+		$routeTo = isset($_REQUEST["routeto$i"]) ? $_REQUEST["routeto$i"] : '';
+		if( $id > 0 ) {
+			$routing = new AdmRouting;
+			$routing->Id = $id;
+			$routing->StatusId = $status;
+			$routing->SectionId = $section;
+			$routing->RouteTo = $routeTo;
+
+			try{
+				require_once BASEDIR.'/server/services/adm/AdmModifyRoutingsService.class.php';
+				$request = new AdmModifyRoutingsRequest();
+				$request->Ticket = $ticket;
+				$request->PublicationId = $pubId;
+				$request->IssueId = $issueId;
+				$request->Routings = array( $routing );
+				$service = new AdmModifyRoutingsService();
+				$service->execute( $request );
+			} catch(BizException $e) {
+				$errors[] = $e->getMessage();
+			}
+		}
 	}
 }
-if ($insert === true) {
+if( $insert === true ) {
 	$section = isset($_REQUEST['section']) ? intval($_REQUEST['section']) : 0;
-	$state   = isset($_REQUEST['state'])   ? intval($_REQUEST['state'])   : 0;
-	$routeto = isset($_REQUEST['routeto']) ? $_REQUEST['routeto'] : '';
-	if ($routeto) {
-		$sql = "INSERT INTO $dbr (`publication`, `issue`, `section`, `state`, `routeto`) ".
-				"VALUES ($publ, $issue, $section, $state, '".$dbh->toDBString($routeto)."')";
-		$sql = $dbh->autoincrement($sql);
-		$sth = $dbh->query($sql);
-		$id = $dbh->newid($dbr, true);
+	$status   = isset($_REQUEST['state'])   ? intval($_REQUEST['state'])   : 0;
+	$routeTo = isset($_REQUEST['routeto']) ? $_REQUEST['routeto'] : '';
+
+	$routing = new AdmRouting;
+	$routing->StatusId = $status;
+	$routing->SectionId = $section;
+	$routing->RouteTo = $routeTo;
+
+	try {
+		require_once BASEDIR.'/server/services/adm/AdmCreateRoutingsService.class.php';
+		$request = new AdmCreateRoutingsRequest();
+		$request->Ticket = $ticket;
+		$request->PublicationId = $pubId;
+		$request->IssueId = $issueId;
+		$request->Routings = array( $routing );
+		$service = new AdmCreateRoutingsService();
+		$response = $service->execute( $request );
+		$id = reset( $response->Routings )->Id;
+	} catch(BizException $e) {
+		$errors[] = $e->getMessage();
 	}
 }
-if ($mode == 'delete'){
+if( $mode == 'delete' ) {
 	$id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
-	if ($id > 0) {
-		$sql = "delete from $dbr where `id` = $id";
-		$sth = $dbh->query($sql);
+	if( $id > 0 ) {
+		try {
+			require_once BASEDIR.'/server/services/adm/AdmDeleteRoutingsService.class.php';
+			$request = new AdmDeleteRoutingsRequest();
+			$request->Ticket = $ticket;
+			$request->RoutingIds = array( $id );
+			$service = new AdmDeleteRoutingsService();
+			$response = $service->execute( $request );
+		} catch(BizException $e) {
+			$errors[] = $e->getMessage();
+		}
 	}
 }
 
 // generate upper part (info or select fields)
 $txt = HtmlDocument::loadTemplate( 'routing.htm' );
-$sql = "select `publication` from $dbp where `id` = $publ";
-$sth = $dbh->query($sql);
-$row = $dbh->fetch($sth);
 
-$txt = str_replace('<!--VAR:PUBL-->', formvar($row['publication']).inputvar('publ',$publ,'hidden'), $txt);
+try {
+	require_once BASEDIR.'/server/services/adm/AdmGetPublicationsService.class.php';
+	$request = new AdmGetPublicationsRequest();
+	$request->Ticket = $ticket;
+	$request->RequestModes = array();
+	$request->PublicationIds = array( $pubId );
+	$service = new AdmGetPublicationsService();
+	$response = $service->execute( $request );
+	$pubName = reset( $response->Publications )->Name;
+	$txt = str_replace('<!--VAR:PUBL-->', formvar($pubName).inputvar('publ',$pubId,'hidden'), $txt);
+} catch(BizException $e) {
+	$errors[] = $e->getMessage();
+}
 
 $overrulePub = false;
-if ($issue > 0) {
-	$sql = "select `name`, `overrulepub` from $dbi where `id` = $issue";
-	$sth = $dbh->query($sql);
-	$rowi = $dbh->fetch($sth);
-
-	$overrulePub = ($rowi['overrulepub'] == 'on');
-	$txt = str_replace('<!--VAR:ISSUE-->', formvar($rowi['name']).inputvar('issue',$issue,'hidden'), $txt);
+if ($issueId > 0) {
+	require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+	$overrulePub = DBIssue::isOverruleIssue( $issueId );
+	$issueName = DBIssue::getIssueName( $issueId );
+	$txt = str_replace('<!--VAR:ISSUE-->', formvar($issueName).inputvar('issue',$issueId,'hidden'), $txt);
 } else {
 	$txt = preg_replace('/<!--IF:STATE-->.*<!--ENDIF-->/is', '', $txt);
 }
-$whereIssue = $overrulePub ? $issue : 0;
-$sql = "select `id`, `section` from $dbs where `publication` = $publ and `issue` = $whereIssue order by `code`";
-$sth = $dbh->query($sql);
-$sectiondomain = array();
-$sAll = BizResources::localize('LIS_ALL');
-$seltxt = '<select name="selsection" onChange="this.form.submit()">';
-$seltxt .= '<option value="0">&lt;'.$sAll.'&gt;</option>';
-while (($row = $dbh->fetch($sth))) {
-	$sectiondomain[$row['id']] = $row['section'];
-	$selected = ($selsection == $row['id']) ? 'selected="selected"' : '';
-	$seltxt .= '<option value="'.$row['id'].'" '.$selected.'>'.formvar($row['section']).'</option>';
-}
-$seltxt .= '</select>';
+$whereIssue = $overrulePub ? $issueId : 0;
 
-$txt = str_replace('<!--VAR:SELSECTION-->', $seltxt, $txt);
+$sectionDomain = array();
+$sAll = BizResources::localize('LIS_ALL');
+$selTxt = '<select name="selsection" onChange="this.form.submit()">';
+$selTxt .= '<option value="0">&lt;'.$sAll.'&gt;</option>';
+
+try {
+	require_once BASEDIR.'/server/services/adm/AdmGetSectionsService.class.php';
+	$request = new AdmGetSectionsRequest();
+	$request->Ticket = $ticket;
+	$request->RequestModes = array();
+	$request->PublicationId = $pubId;
+	$request->IssueId = $whereIssue;
+	$service = new AdmGetSectionsService();
+	$response = $service->execute( $request );
+	$sections = $response->Sections;
+	//order by code?
+	if( $sections ) foreach ( $sections as $section ) {
+		$sectionDomain[$section->Id] = $section->Name;
+		$selected = ($sectionId == $section->Id) ? 'selected="selected"' : '';
+		$selTxt .= '<option value="'.$section->Id.'" '.$selected.'>'.formvar($section->Name).'</option>';
+	}
+} catch(BizException $e) {
+	$errors[] = $e->getMessage();
+}
+
+$selTxt .= '</select>';
+$txt = str_replace('<!--VAR:SELSECTION-->', $selTxt, $txt);
 
 // generate lower part
-$detailtxt = '';
+$detailTxt = '';
 
-$sql = "SELECT `id`, `state`, `type` from $dbst ".
-		"WHERE `publication` = $publ and `issue` = $whereIssue ".
-		"ORDER BY `type`, `code`";
-$sth = $dbh->query($sql);
-$statedomain = array();
-while (($row = $dbh->fetch($sth))) {
-	$statedomain[$row['id']] = $row['type'].'/'.$row['state'];
+$statusDomain = array();
+try {
+	require_once BASEDIR.'/server/services/adm/AdmGetStatusesService.class.php';
+	$request = new AdmGetStatusesRequest();
+	$request->Ticket = $ticket;
+	$request->PublicationId = $pubId;
+	$request->IssueId = $whereIssue;
+	$service = new AdmGetStatusesService();
+	$response = $service->execute( $request );
+	$statuses = $response->Statuses;
+
+	if ( $statuses ) foreach ( $statuses as $status ) {
+		$statusDomain[$status->Id] = $status->Type.'/'.$status->Name;
+	}
+	//sort by code?
+} catch(BizException $e) {
+	$errors[] = $e->getMessage();
 }
-$routedomain = array();
-$arrayOfRoute = listrouteto( $ticket, $publ, $overrulePub ? $issue : null );
+
+$routeDomain = array();
+$arrayOfRoute = listrouteto( $ticket, $pubId, $overrulePub ? $issueId : null );
 if ($arrayOfRoute) foreach ($arrayOfRoute as $route) {
-	$routedomain[$route] = $route;
+	$routeDomain[$route] = $route;
 }
+
 $sAll = BizResources::localize('LIS_ALL');
 switch ($mode) {
 	case 'view':
 	case 'update':
 	case 'delete':
-		$sql = "SELECT r.`id`, r.`section`, r.`state`, r.`routeto` from $dbr r ".
-				"LEFT JOIN $dbst st on (r.`state` = st.`id`) ".
-				"WHERE r.`publication` = $publ and r.`issue` = $whereIssue";
-		if ($selsection > 0) $sql .= " and r.`section` = $selsection";
-		$sql .= " ORDER BY r.`section`, st.`type`, st.`code`";
-		
-		$sth = $dbh->query($sql);
-		$i = 0;
-		$color = array (' bgcolor="#eeeeee"', '');
-		$flip = 0;
-		while (($row = $dbh->fetch($sth))) {
-			$clr = $color[$flip];
-			$flip = 1- $flip;
-			$deltxt = '<a href="routing.php?publ='.$publ.'&issue='.$issue.'&delete=1&id='.$row['id'].'" onclick="return myconfirm(\'delroute\')">'.BizResources::localize('ACT_DEL').'</a>';
-			$detailtxt .= "<tr$clr>";
-			if ($selsection > 0) {
-				$detailtxt .= '<td>'.formvar($sectiondomain[$selsection]).inputvar("section$i",$selsection,'hidden').'</td>';
-			} else {
-				$detailtxt .= '<td>'.inputvar("section$i", $row['section'], 'combo', $sectiondomain, $sAll).'</td>';
+		try {
+			require_once BASEDIR.'/server/services/adm/AdmGetRoutingsService.class.php';
+			$request = new AdmGetRoutingsRequest();
+			$request->Ticket = $ticket;
+			$request->RequestModes = array();
+			$request->PublicationId = $pubId;
+			$request->IssueId = $whereIssue;
+			if( $sectionId > 0 ) {
+				$request->SectionId = $sectionId;
 			}
-			$detailtxt .= '<td>'.inputvar("state$i", $row['state'], 'combo', $statedomain, $sAll).'</td>';
-			$detailtxt .= "<td>".inputvar("routeto$i", $row['routeto'], 'combo', $routedomain).'</td>';
-			$detailtxt .= '<td>'.$deltxt.'</td></tr>';
-			$detailtxt .= inputvar( "id$i", $row['id'], 'hidden' );
-			$i++;
+			$service = new AdmGetRoutingsService();
+			$response = $service->execute( $request );
+			$routings = $response->Routings;
+			//order by routingsection, statetype, statecode?
+
+			$i = 0;
+			$color = array (' bgcolor="#eeeeee"', '');
+			$flip = 0;
+			if( $routings ) foreach( $routings as $routing ) {
+				$clr = $color[$flip];
+				$flip = 1- $flip;
+				$delTxt = '<a href="routing.php?publ='.$pubId.'&issue='.$issueId.'&delete=1&id='.$routing->Id.'" onclick="return myconfirm(\'delroute\')">'.BizResources::localize('ACT_DEL').'</a>';
+				$detailTxt .= "<tr$clr>";
+				if ($sectionId > 0) {
+					$detailTxt .= '<td>'.formvar($sectionDomain[$sectionId]).inputvar("section$i",$sectionId,'hidden').'</td>';
+				} else {
+					$detailTxt .= '<td>'.inputvar("section$i", $routing->SectionId, 'combo', $sectionDomain, $sAll).'</td>';
+				}
+				$statusName = $routing->StatusId ? $statusDomain[$routing->StatusId] : '';
+				$detailTxt .= '<td>'.inputvar("state$i", $routing->StatusId, 'combo', $statusDomain, $sAll).'</td>';
+				$detailTxt .= "<td>".inputvar("routeto$i", $routing->RouteTo, 'combo', $routeDomain).'</td>';
+				$detailTxt .= '<td>'.$delTxt.'</td></tr>';
+				$detailTxt .= inputvar( "id$i", $routing->Id, 'hidden' );
+				$i++;
+			}
+			$detailTxt .= inputvar( 'recs', $i, 'hidden' );
+		} catch(BizException $e) {
+			$errors[] = $e->getMessage();
 		}
-		$detailtxt .= inputvar( 'recs', $i, 'hidden' );
 		break;
 	case 'add':
 		// 1 row to enter new record
-		$detailtxt .= '<tr>';
-		if ($selsection > 0) {
-			$detailtxt .= '<td>'.formvar($sectiondomain[$selsection]).inputvar('section',$selsection,'hidden').'</td>';
+		$detailTxt .= '<tr>';
+		if ($sectionId > 0) {
+			$detailTxt .= '<td>'.formvar($sectionDomain[$sectionId]).inputvar('section',$sectionId,'hidden').'</td>';
 		} else {
-			$detailtxt .= '<td>'.inputvar('section', '', 'combo', $sectiondomain, $sAll).'</td>';
+			$detailTxt .= '<td>'.inputvar('section', '', 'combo', $sectionDomain, $sAll).'</td>';
 		}
-		$detailtxt .= '<td>'.inputvar('state','', 'combo', $statedomain, $sAll).'</td>';
-		$detailtxt .= '<td>'.inputvar('routeto', '', 'combo', $routedomain).'</td>';
-		$detailtxt .= '<td></td></tr>';
-		$detailtxt .= inputvar( 'insert', '1', 'hidden' );
+		$detailTxt .= '<td>'.inputvar('state','', 'combo', $statusDomain, $sAll).'</td>';
+		$detailTxt .= '<td>'.inputvar('routeto', '', 'combo', $routeDomain).'</td>';
+		$detailTxt .= '<td></td></tr>';
+		$detailTxt .= inputvar( 'insert', '1', 'hidden' );
 
-		// show other authorizations as info
-		$sql = "SELECT r.`id`, r.`section`, r.`state`, r.`routeto` from $dbr r ".
-				"LEFT JOIN $dbst st on (r.`state` = st.`id`) ".
-				"WHERE r.`publication` = $publ and r.`issue` = $issue ";
-		if ($selsection > 0) $sql .= "and r.`section` = $selsection ";
-		$sql .= "ORDER BY r.`section`, st.`type`, st.`code` ";
-		$sth = $dbh->query($sql);
-		$color = array (" bgcolor='#eeeeee'", '');
-		$flip = 0;
-		while (($row = $dbh->fetch($sth))) {
-			$clr = $color[$flip];
-			$flip = 1- $flip;
-			$sectionDetails = $row['section'] ? $sectiondomain[$row['section']] : '<'.$sAll.'>';
-			$statusDetails = $row['state'] ? $statedomain[$row['state']] : '<'.$sAll.'>';
-			$detailtxt .= "<tr$clr><td>".formvar($sectionDetails).'</td>';
-			$detailtxt .= '<td>'.formvar($statusDetails).'</td>';
-			$detailtxt .= '<td>'.formvar($row['routeto']).'</td>';
-			$detailtxt .= '<td></td></tr>';
+		// show other routings as info
+		try {
+			require_once BASEDIR.'/server/services/adm/AdmGetRoutingsService.class.php';
+			$request = new AdmGetRoutingsRequest();
+			$request->Ticket = $ticket;
+			$request->RequestModes = array();
+			$request->PublicationId = $pubId;
+			$request->IssueId = $whereIssue;
+			if( $sectionId > 0 ) {
+				$request->SectionId = $sectionId;
+			}
+			$service = new AdmGetRoutingsService();
+			$response = $service->execute( $request );
+			$routings = $response->Routings;
+			//order by routingsection, statetype, statecode?
+
+			$color = array (" bgcolor='#eeeeee'", '');
+			$flip = 0;
+			if( $routings ) foreach( $routings as $routing ) {
+				$clr = $color[$flip];
+				$flip = 1- $flip;
+				$sectionDetails = $routing->SectionId ? $sectionDomain[$routing->SectionId] : '<'.$sAll.'>';
+				$statusDetails = $routing->StatusId ? $statusDomain[$routing->StatusId] : '<'.$sAll.'>';
+				$detailTxt .= "<tr$clr><td>".formvar($sectionDetails).'</td>';
+				$detailTxt .= '<td>'.formvar($statusDetails).'</td>';
+				$detailTxt .= '<td>'.formvar($routing->RouteTo).'</td>';
+				$detailTxt .= '<td></td></tr>';
+			}
+		} catch(BizException $e) {
+			$errors[] = $e->getMessage();
 		}
 		break;
 }
 
+// error handling
+$err = '';
+if( $errors ) foreach( $errors as $error ) {
+	$err .= $error.'<br/>';
+}
+$txt = str_replace( '<!--ERROR-->', $err, $txt );
+
 // generate total page
-$txt = str_replace("<!--ROWS-->", $detailtxt, $txt);
-if ($issue > 0) {
-	$back = "hppublissues.php?id=$issue";
+$txt = str_replace("<!--ROWS-->", $detailTxt, $txt);
+if ($issueId > 0) {
+	$back = "hppublissues.php?id=$issueId";
 } else {
-	$back = "hppublications.php?id=$publ";
+	$back = "hppublications.php?id=$pubId";
 }
 $txt = str_replace("<!--BACK-->", $back, $txt);
 print HtmlDocument::buildDocument($txt);
-?>

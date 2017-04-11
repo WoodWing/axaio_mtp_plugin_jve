@@ -30,7 +30,8 @@ class AdmCreateIssuesService extends EnterpriseService
 	{
 		//TODO#7258 replace $pubid by $channelid
 		require_once BASEDIR.'/server/bizclasses/BizAdmPublication.class.php';
-		$newissues = BizAdmPublication::createIssuesObj( $this->User, $req->RequestModes, $req->PublicationId, $req->PubChannelId, $req->Issues );
+		$newissues = BizAdmPublication::createIssuesObj( $this->User, $req->RequestModes,
+			$req->PublicationId, $req->PubChannelId, $req->Issues );
 		return new AdmCreateIssuesResponse( $req->PublicationId, $req->PubChannelId, $newissues );
 	}
 }

@@ -20,17 +20,17 @@ class DBIssue extends DBBase
 	 *
 	 * @param string $name Issue name
 	 * @return array of issue rows
+	 * @throws BizException on SQL error
 	 */
 	static public function getIssuesByName( $name )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$dbi = $dbDriver->tablename('issues');
-		$sql = 'SELECT `id`, `name` FROM '.$dbi.' WHERE `name` = ? ';
-		$params = array( $name );
-		$sth = $dbDriver->query( $sql, $params );
-
-		$rows = self::fetchResults( $sth );
-		return $rows;	
+		$where = '`name` = ?';
+		$params = array( strval($name) );
+		$rows = self::listRows( self::TABLENAME, 'id', 'name', $where, null, $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+		return $rows;
 	}
 
 	/**
@@ -39,6 +39,7 @@ class DBIssue extends DBBase
 	 * @param string $name Issue name
     * @param int $channelId
 	 * @return array of issue rows
+	 * @deprecated since 10.2.0, seems no longer called
 	 */
 	static public function getIssuesByNameAndChannel( $name, $channelId )
 	{
@@ -58,47 +59,55 @@ class DBIssue extends DBBase
 	 * @param array $issueRow array of values to update, indexed by fieldname. $values['issue'] = issue1, etc...
 	 *        The array does NOT need to contain all values, only values that are to be updated.
 	 * @return bool Returns true if succeeded, false if an error occurred.
+	 * @throws BizException on SQL error
 	 */
 	static public function updateIssue( $issueId, $issueRow )
 	{
-		if( isset($issueRow['ExtraMetaData']) ) {
+		if( isset( $issueRow['ExtraMetaData'] ) ) {
 			$extraMetaData = $issueRow['ExtraMetaData'];
-			self::deleteRows('channeldata', "`issue` = $issueId");
-			foreach($extraMetaData as $name => $value) {
-				$data['issue'] = $issueId;
-				$data['name'] = $name;
-				$data['value'] = $value;
-				self::insertRow('channeldata', $data, false);
-			}
-
-			unset($issueRow['ExtraMetaData']);
-		}
-
-		if( isset($issueRow['SectionMapping']) ) {
-			$sectionMapping = $issueRow['SectionMapping'];
-
-			foreach($sectionMapping as $sectionId => $data) {
-				self::deleteRows('channeldata', "`issue` = {$issueId} AND `section` = {$sectionId}");
-				foreach($data as $name => $value) {
-					$row['issue'] = $issueId;
-					$row['section'] = $sectionId;
-					$row['name'] = $name;
-					$row['value'] = $value;
-					self::insertRow('channeldata', $row, false);
+			$where = '`issue` = ?';
+			$params = array( intval( $issueId ) );
+			self::deleteRows( 'channeldata', $where, $params );
+			foreach( $extraMetaData as $name => $value ) {
+				$row = array();
+				$row['issue'] = intval( $issueId );
+				$row['name'] = strval( $name );
+				self::insertRow( 'channeldata', $row, false, $value );
+				if( self::hasError() ) {
+					throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 				}
 			}
-
-			unset($issueRow['SectionMapping']);
+			unset( $issueRow['ExtraMetaData'] );
 		}
 
-		return self::updateRow(self::TABLENAME, $issueRow, " `id` = '$issueId' ");
+		if( isset( $issueRow['SectionMapping'] ) ) {
+			$sectionMapping = $issueRow['SectionMapping'];
+			foreach( $sectionMapping as $sectionId => $data ) {
+				$where = '`issue` = ? AND `section` = ?';
+				$params = array( intval( $issueId ), intval( $sectionId ) );
+				self::deleteRows( 'channeldata', $where, $params );
+				foreach( $data as $name => $value ) {
+					$row = array();
+					$row['issue'] = intval( $issueId );
+					$row['section'] = intval( $sectionId );
+					$row['name'] = strval( $name );
+					self::insertRow( 'channeldata', $row, false, $value );
+					if( self::hasError() ) {
+						throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+					}
+				}
+			}
+			unset( $issueRow['SectionMapping'] );
+		}
+		return self::updateRow( self::TABLENAME, $issueRow, " `id` = '$issueId' " );
 	}
 
 	/**
 	 * Retrieves one issues from smart_issues table with given id.
 	 *
 	 * @param int $issueId Id of the issue to get
-	 * @return array issue row. Null on failure.
+	 * @return array issue row. Null when not found.
+	 * @throws BizException on SQL error
 	 */
 	static public function getIssue( $issueId )
 	{
@@ -107,6 +116,9 @@ class DBIssue extends DBBase
 		$where = '`id` = ?';
 		$params = array( intval( $issueId ) );
 		$result = self::getRow( self::TABLENAME, $where, '*', $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
 		if( $result ) {
 			$result['overrulepub'] = $result['overrulepub'] === 'on' ? true : false;
 			$channel = DBChannel::getChannel( $result['channelid'] );
@@ -120,11 +132,13 @@ class DBIssue extends DBBase
 
 	static public function getIssueName( $issueId )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$dbi = $dbDriver->tablename('issues');
-		$sql = "SELECT `id`, `name` FROM $dbi WHERE `id` = $issueId";
-		$sth = $dbDriver->query($sql);
-		$row = $dbDriver->fetch($sth);
+		$fieldNames = array( 'id', 'name' );
+		$where = '`id` = ?';
+		$params = array( intval( $issueId ) );
+		$row = self::getRow( self::TABLENAME, $where, $fieldNames, $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
 		return $row ? $row['name'] : '';
 	}
 
@@ -133,20 +147,18 @@ class DBIssue extends DBBase
 	 *
 	 * @param int $issueId
 	 * @return boolean True if issue is an overule brand issue, else false.
+	 * @throws BizException on SQL error
 	 */
 	static public function isOverruleIssue( $issueId )
 	{
-		if( $issueId ) {
-			$dbDriver = DBDriverFactory::gen();
-			$dbi = $dbDriver->tablename("issues");
-			$sql = "select `overrulepub` from $dbi where `id` = $issueId";
-			$sth = $dbDriver->query($sql);
-			$rowi = $dbDriver->fetch($sth);
-			return ($rowi['overrulepub'] == 'on');
+		$fieldNames = array( 'overrulepub' );
+		$where = '`id` = ?';
+		$params = array( intval( $issueId ) );
+		$row = self::getRow( self::TABLENAME, $where, $fieldNames, $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 		}
-		else {
-			return false;
-		}
+		return $row ? $row['overrulepub'] == 'on' : false;
 	}
 
 	/**
@@ -159,25 +171,26 @@ class DBIssue extends DBBase
 	 * @param $pubChannelId integer Id of the channel that owns the channel
 	 * @return array database row or null if nothing found.
 	 */
-    static public function findIssueId( $pubId, $channelType, $issueName, $pubChannelId = 0 )
-    {
+	static public function findIssueId( $pubId, $channelType, $issueName, $pubChannelId = 0 )
+	{
 		$dbDriver = DBDriverFactory::gen();
-		$issTable = $dbDriver->tablename('issues');
-		$chaTable = $dbDriver->tablename('channels');
-		$issueName = $dbDriver->toDBString( trim($issueName) );
-		
-		$sql  = "SELECT iss.`id` ";
-		$sql .= "FROM $issTable iss ";
-		$sql .= "INNER JOIN $chaTable cha ON (iss.`channelid` = cha.`id`) ";
-		$sql .= "WHERE cha.`publicationid` = $pubId AND cha.`type` = '$channelType' AND iss.`name` = '$issueName' ";
-	   if ( $pubChannelId ) {
-	      $sql .= " AND cha.`id` = $pubChannelId ";
-	   }
-		
-		$sth = $dbDriver->query( $sql );
+		$issTable = $dbDriver->tablename( self::TABLENAME );
+		$chaTable = $dbDriver->tablename( 'channels' );
+
+		$sql = "SELECT iss.`id` ".
+				"FROM $issTable iss ".
+				"INNER JOIN $chaTable cha ON (iss.`channelid` = cha.`id`) ".
+				"WHERE cha.`publicationid` = ? AND cha.`type` = ? AND iss.`name` = ? ";
+		$params = array( intval( $pubId ), strval( $channelType ), strval( trim( $issueName ) ) );
+		if( $pubChannelId ) {
+			$sql .= " AND cha.`id` = ? ";
+			$params[] = intval( $pubChannelId );
+		}
+
+		$sth = $dbDriver->query( $sql, $params );
 		$row = $dbDriver->fetch( $sth );
 		return $row ? $row['id'] : null;
-    }
+	}
 
 	/**
 	 * Retrieves all issues from smart_issues table that are owned by given publication.
@@ -188,39 +201,47 @@ class DBIssue extends DBBase
 	 * @return array of issue rows
 	 */
 	public static function listPublicationIssues( $pubId, $overruleIssOnly=false )
-    {
-        $dbdriver = DBDriverFactory::gen();
-        $issuestable = $dbdriver->tablename(self::TABLENAME);
-        $channelstable = $dbdriver->tablename('channels');
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$issuesTable = $dbDriver->tablename( self::TABLENAME );
+		$channelsTable = $dbDriver->tablename( 'channels' );
 
-        $sql  = "SELECT i.*, ch.`name` as \"channelname\" ";
-        $sql .= "FROM $channelstable ch ";
-        $sql .= "INNER JOIN $issuestable i ON (i.`channelid` = ch.`id`) ";
-        $sql .= "WHERE (ch.`publicationid` = $pubId) ";
-        if( $overruleIssOnly ) {
-        	$sql .= ' AND (`overrulepub` = \'on\') ';
-        }
-        $sql .= "ORDER BY ch.`publicationid`, ch.`code`, ch.`id`, i.`code` ";
+		$sql = "SELECT i.*, ch.`name` as \"channelname\" ".
+				"FROM {$channelsTable} ch ".
+				"INNER JOIN {$issuesTable} i ON (i.`channelid` = ch.`id`) ".
+				"WHERE ch.`publicationid` = ? ";
+		$params = array( intval( $pubId ) );
+		if( $overruleIssOnly ) {
+			$sql .= ' AND `overrulepub` = ? ';
+			$params[] = 'on';
+		}
+		$sql .= "ORDER BY ch.`publicationid`, ch.`code`, ch.`id`, i.`code` ";
+		$sth = $dbDriver->query( $sql, $params );
 
-        $sth = $dbdriver->query($sql);
-
-        $results = array();
-        while (($row = $dbdriver->fetch($sth))) {
+		$results = array();
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
 			$row['overrulepub'] = $row['overrulepub'] === 'on' ? true : false;
-            $results[$row['id']] = $row;
-        }
-        return $results;
-    }
+			$results[ $row['id'] ] = $row;
+		}
+		return $results;
+	}
 
 	/**
 	 * Retrieves all issue rows from smart_issues table that are owned by the given channel.
 	 *
 	 * @param int $channelId
 	 * @return array of issue rows
+	 * @throws BizException on SQL error
 	 */
 	public static function listChannelIssues( $channelId )
 	{
-		$rows = self::listRows( self::TABLENAME,'id','name',"`channelid` = $channelId ORDER BY `code` ASC, `id` ASC" );
+		$where = '`channelid` = ?';
+		$params = array( intval( $channelId ) );
+		$orderBy = array( 'code' => true, 'id' => true );
+		$rows = self::listRows( self::TABLENAME, 'id', null, $where, '*', $params, $orderBy );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
 		return $rows;
 	}
 
@@ -342,7 +363,8 @@ class DBIssue extends DBBase
 
 	/**
 	 *  Lists ALL issues that overrule their publication in a array
-	 *  @return array of id's of issues that overrule
+	 *
+	 *  @return integer[] of id's of issues that overrule
 	 */
 	static public function listAllOverruleIssues()
 	{
@@ -353,7 +375,7 @@ class DBIssue extends DBBase
 		$sth = $dbdriver->query($sql);
 		$result = array();
 		while (($row = $dbdriver->fetch($sth))) {
-			$result[] = $row['id'];
+			$result[] = intval($row['id']);
 		}
 		return $result;
 	}
@@ -361,23 +383,24 @@ class DBIssue extends DBBase
 	/**
 	 *  Lists ALL issues that non-overrule their publication in an array.
 	 *  @param int Brand Id to filter on.
-	 *  @return array of id's of non-overrule brand issues.
+	 *  @return integer[] of id's of non-overrule brand issues.
 	 */
 	static public function listNonOverruleIssuesByBrand( $brandId )
 	{
-		$dbdriver = DBDriverFactory::gen();
-		$issuestable = $dbdriver->tablename(self::TABLENAME);
-		$channelstable = $dbdriver->tablename('channels');
+		$dbDriver = DBDriverFactory::gen();
+		$issuesTable = $dbDriver->tablename( self::TABLENAME );
+		$channelsTable = $dbDriver->tablename( 'channels' );
 
-		$sql  = "SELECT i.`id` ";
-		$sql .= "FROM $issuestable i ";
-		$sql .= "INNER JOIN $channelstable c ON (i.`channelid` = c.`id`) ";
-		$sql .= "WHERE i.`overrulepub` = '' ";
-		$sql .= "AND c.`publicationid` = $brandId ";
-		$sth = $dbdriver->query($sql);
+		$sql = "SELECT i.`id` ".
+				"FROM {$issuesTable} i ".
+				"INNER JOIN {$channelsTable} c ON (i.`channelid` = c.`id`) ".
+				"WHERE i.`overrulepub` = ? AND c.`publicationid` = ? ";
+		$params = array( '', intval( $brandId ) );
+		$sth = $dbDriver->query( $sql, $params );
+
 		$result = array();
-		while (($row = $dbdriver->fetch($sth))) {
-			$result[] = $row['id'];
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+			$result[] = intval( $row['id'] );
 		}
 		return $result;
 	}
@@ -389,37 +412,42 @@ class DBIssue extends DBBase
 	static public function listAllOverruleIssuesWithPub()
 	{
 		//BZ#7258
-		$dbdriver = DBDriverFactory::gen();
-		$issuestable = $dbdriver->tablename(self::TABLENAME);
-		$channeltable = $dbdriver->tablename('channels');
-		$sql  = "SELECT issues.`id`, channels.`publicationid` ";
-		$sql .= "FROM $issuestable issues ";
-		$sql .= "INNER JOIN $channeltable channels ON (channels.`id` = issues.`channelid`) ";
-		$sql .= "WHERE issues.`overrulepub` = 'on' AND issues.`active` = 'on' ORDER BY issues. `id` ASC";
-		$sth = $dbdriver->query($sql);
+		$dbDriver = DBDriverFactory::gen();
+		$issuesTable = $dbDriver->tablename( self::TABLENAME );
+		$channelsTable = $dbDriver->tablename( 'channels' );
+
+		$sql = "SELECT issues.`id`, channels.`publicationid` ".
+				"FROM {$issuesTable} issues ".
+				"INNER JOIN {$channelsTable} channels ON (channels.`id` = issues.`channelid`) ".
+				"WHERE issues.`overrulepub` = ? AND issues.`active` = ? ".
+				"ORDER BY issues.`id` ASC ";
+		$params = array( 'on', 'on' );
+		$sth = $dbDriver->query( $sql, $params );
+
 		$result = array();
-		while (($row = $dbdriver->fetch($sth))) {
-			$result[$row['id']] = $row['publicationid'];
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+			$result[ intval( $row['id'] ) ] = intval( $row['publicationid'] );
 		}
 		return $result;
 	}
 
 	/**
-	  * Looks up the channel id at smart_issues table.
-	  *
-	  * @param $issueId int
-	  * @return string Channel id. Returns null on failure.
-	  */
+	 * Looks up the channel id at smart_issues table.
+	 *
+	 * @param $issueId int
+	 * @return integer Channel id or null when not found.
+	 * @throws BizException on SQL error
+	 */
 	static public function getChannelId( $issueId )
 	{
-		$dbdriver = DBDriverFactory::gen();
-		$issuesTable = $dbdriver->tablename(self::TABLENAME);
-		$sql = "SELECT `channelid` FROM $issuesTable WHERE `id` = $issueId ";
-		$sth = $dbdriver->query( $sql );
-		if( !$sth ) return null;
-		$row = $dbdriver->fetch( $sth );
-		if( !$row ) return null;
-		return $row['channelid'];
+		$fieldNames = array( 'channelid' );
+		$where = '`id` = ?';
+		$params = array( intval( $issueId ) );
+		$row = self::getRow( self::TABLENAME, $where, $fieldNames, $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+		return $row ? intval( $row['channelid'] ) : null;
 	}
 
 	/**
@@ -428,7 +456,7 @@ class DBIssue extends DBBase
 	 * or else the publication's edition is returned.
 	 *
 	 * @param int $issueId  (Also used to derive publication from.)
-	 * @param boolean $noPubDefs Supresses returning editions owned by publication (issue only).
+	 * @param boolean $noPubDefs Suppresses returning editions owned by publication (issue only).
 	 * @return array List of edition DB rows.
 	 */
 	public static function listIssueEditionDefs( $issueId, $noPubDefs = false )
@@ -442,17 +470,20 @@ class DBIssue extends DBBase
 		}
 	}
 
-	public static function hasOverruleIssue($issueids)
+	public static function hasOverruleIssue( $issueIds )
 	{
-		$dbdriver = DBDriverFactory::gen();
-		$issuestable = $dbdriver->tablename(self::TABLENAME);
-		$sql = "SELECT `id` FROM $issuestable WHERE `overrulepub` = 'on' AND `id` IN (" . implode(',',$issueids) . ")";
-		$sth = $dbdriver->query($sql);
-		$row = $dbdriver->fetch($sth);
-		if ($row) {
-			return $row['id'];
+		$whereIds = self::addIntArrayToWhereClause( 'id', $issueIds );
+		if( !$whereIds ) {
+			return false;
 		}
-		return false;
+		$fieldNames = array( 'id' );
+		$where = "`overrulepub` = ? AND $whereIds ";
+		$params = array( 'on' );
+		$row = self::getRow( self::TABLENAME, $where, $fieldNames, $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+		return $row ? intval( $row['id'] ) : false;
 	}
 
 	/**
@@ -541,7 +572,8 @@ class DBIssue extends DBBase
 	static public function isIssueActive( $issuedId )
 	{
 		$where = " `id` = ? AND `active` = ? ";
-		$result = self::getRow('issues', $where, 'id', array($issuedId, 'on'));
+		$params = array( intval( $issuedId ), 'on' );
+		$result = self::getRow( 'issues', $where, array( 'id' ), $params );
 		return $result ? true : false;
 	}
 }

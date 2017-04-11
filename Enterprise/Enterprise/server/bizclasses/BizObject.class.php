@@ -3325,6 +3325,7 @@ class BizObject
 		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
 
 		$id = $meta->BasicMetaData->ID;
+		$name = $meta->BasicMetaData->Name;
 
 		if ( $id && is_null($targets) ) {
 			// Get the targets when they aren't available (see BZ#35774)
@@ -3385,14 +3386,15 @@ class BizObject
 			}
 		}
 		if( !$foundState ) {
-			$errMsg = 'Found an invalid State ' . $meta->WorkflowMetaData->State->Name . ' for ';
+			$errMsg = "Found an invalid Status (id={$stateId}) for ";
 			if( $numOverruleIssues == 1 ) {
-				$errMsg .= 'Overrule Issue ' . $targets[0]->Issue->Name;
+				$errMsg .= "Overrule Issue (id=" . $targets[0]->Issue->Id.") ";
 			} else {
-				$errMsg .= 'Brand ' . $meta->BasicMetaData->Publication->Name;
+				$errMsg .= "Brand (id={$pubId}) ";
 			}
+			$errMsg .= "when validating Object (id={$id}, name={$name})";
 			throw new BizException( 'ERR_INVALIDSTATE', 'Client',
-				$errMsg . PHP_EOL . 'id=' . $id, null, array( $meta->WorkflowMetaData->State->Name ) );
+				$errMsg, null, array( $meta->WorkflowMetaData->State->Name ) );
 		}
 
 		foreach( $categories as $section ) {
@@ -3402,14 +3404,15 @@ class BizObject
 			}
 		}
 		if( !$foundCategory ) {
-			$errMsg = 'Found an invalid Category ' . $meta->BasicMetaData->Category->Name . ' for ';
+			$errMsg = "Found an invalid Category (id={$catId}) for ";
 			if( $numOverruleIssues == 1 ) {
-				$errMsg .= 'Overrule Issue ' . $targets[0]->Issue->Name;
+				$errMsg .= "Overrule Issue (id={$targets[0]->Issue->Id}) ";
 			} else {
-				$errMsg .= 'Brand ' . $meta->BasicMetaData->Publication->Name;
+				$errMsg .= "Brand (id={$pubId}) ";
 			}
+			$errMsg .= "when validating Object (id={$id}, name={$name})";
 			throw new BizException( 'ERR_INVALIDCATEGORY', 'Client',
-				$errMsg . PHP_EOL . 'id=' . $id, null, array( $meta->BasicMetaData->Category->Name ) );
+				$errMsg, null, array( $meta->BasicMetaData->Category->Name ) );
 		}
 	}
 
@@ -3899,7 +3902,6 @@ class BizObject
 	 *
 	 * @param Object $object
 	 * @throws BizException in case of error
-	 * @return null
 	 */
 	private static function validateFiles( /** @noinspection PhpLanguageLevelInspection */
 		Object $object )
@@ -4448,7 +4450,6 @@ class BizObject
 	 * @param string $user short user name
 	 * @param string $objId Unique object ID
 	 * @param bool $checkAccess check user access right
-	 * @return bool User has lock.
 	 * @throws BizException when locked by someone else or lock fails
 	 */
 	public static function restoreLock( $user, $objId, $checkAccess = true)
@@ -4815,7 +4816,7 @@ class BizObject
 	 * 	3) Do a broadcast after the above updates.
 	 *
 	 * @param ServerJob $job
-	 * @return ServerJobStatus  $jobStatusId
+	 * @return integer job status id
 	 */
 	public static function updateParentObject( $job )
 	{
@@ -5989,9 +5990,8 @@ class BizObject
 	 * @param integer[] $objectIds
 	 * @param string[] $areas Either 'Workflow' or 'Trash'
 	 * @param string[] $propertiesToIndex Properties returned by the search engine(s) needed to build the index.
-	 * @param array $metaDatas
-	 * @param array $targets
-	 * @return MetaData[] List of MetaData, with object ids as keys plus a list of Targets, with object ids as key.
+	 * @param MetaData[] $metaDatas List of MetaData, with object ids
+	 * @param Target[] $targets list of Targets, with object ids as key
 	 */
 	private static function getMetaDatasAndTargetsToIndexForObjectIds(
 		array $objectIds, array $areas, array $propertiesToIndex, array &$metaDatas, array &$targets )

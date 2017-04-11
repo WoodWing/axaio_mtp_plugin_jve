@@ -3,17 +3,14 @@ require_once dirname(__FILE__).'/../../config/config.php';
 require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/admin/global_inc.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
+require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php'; // AdmSection
 
-checkSecure('publadmin');
+$ticket = checkSecure('publadmin');
 
-// database stuff
-$dbh = DBDriverFactory::gen();
-$dbp = $dbh->tablename('publications');
-$dbs = $dbh->tablename('publsections');
-$dbi = $dbh->tablename('issues');
+// get section identification (from URL or form)
+$id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
 
 // determine incoming mode
-$id = isset($_REQUEST['id']) ? intval($_REQUEST['id']) : 0;
 if (isset($_REQUEST['vupdate']) && $_REQUEST['vupdate']) {
 	$mode = ($id > 0) ? 'update' : 'insert';
 } else if (isset($_REQUEST['delete']) && $_REQUEST['delete']) {
@@ -22,103 +19,83 @@ if (isset($_REQUEST['vupdate']) && $_REQUEST['vupdate']) {
 	$mode = ($id > 0) ? 'edit' : 'new';
 }
 
-// get param's
-$name = isset($_REQUEST['sname']) ? trim($_REQUEST['sname']) : '';
-$publ = isset($_REQUEST['publ']) ? intval($_REQUEST['publ']) : 0;
-$channelid = isset($_REQUEST['channelid']) ? intval($_REQUEST['channelid'])  : 0;
-$description = isset($_REQUEST['description']) ? $_REQUEST['description'] : '';
-$deadline = isset($_REQUEST['deadline']) ? $_REQUEST['deadline'] : '';
-$pages = isset($_REQUEST['pages']) ? intval($_REQUEST['pages']) : 0;
-$issue = isset($_REQUEST['issue']) ? intval($_REQUEST['issue']) : 0; 
+// get parent ids (from URL or form)
+$pubId     = isset($_REQUEST['publ']) ? intval($_REQUEST['publ']) : 0;
+$channelId = isset($_REQUEST['channelid']) ? intval($_REQUEST['channelid'])  : 0;
+$issueId   = isset($_REQUEST['issue']) ? intval($_REQUEST['issue']) : 0; 
+
+// compose Section data class (from URL or form)
+$section = new AdmSection();
+$section->Id            = $id ? $id : null;
+$section->Name          = isset($_REQUEST['sname']) ? trim($_REQUEST['sname']) : '';
+$section->Description   = isset($_REQUEST['description']) ? $_REQUEST['description'] : '';
+$section->Deadline      = isset($_REQUEST['deadline']) ? $_REQUEST['deadline'] : '';
+$section->ExpectedPages = isset($_REQUEST['pages']) ? intval($_REQUEST['pages']) : 0;
 
 // check publication rights
-checkPublAdmin($publ);
-
-$errors = array();
+checkPublAdmin($pubId);
 
 // handle request
-switch ($mode) {
-	case 'update':
-		// check not null
-		if (trim($name) == '') {
-			$errors[] = BizResources::localize("ERR_NOT_EMPTY");
-			$mode = 'error';
+$errors = array();
+try {
+	switch ($mode) {
+		case 'edit':
+			require_once BASEDIR.'/server/services/adm/AdmGetSectionsService.class.php';
+			$service = new AdmGetSectionsService();
+			$request = new AdmGetSectionsRequest();
+			$request->Ticket = $ticket;
+			$request->RequestModes = array();
+			$request->PublicationId = $pubId;
+			$request->IssueId = $issueId;
+			$request->SectionIds = array( $id );
+			$response = $service->execute( $request );
+			$section = $response->Sections[0];
 			break;
-		}
-
-		// check duplicates
-		$sql = "select `id` from $dbs where `section` = '" . $dbh->toDBString($name) . "' and `publication` = $publ and `issue` = $issue and `id` != $id";
-		$sth = $dbh->query($sql);
-		$row = $dbh->fetch($sth);
-		if ($row) {
-			$errors[] = BizResources::localize("ERR_DUPLICATE_NAME");
-			$mode = 'error';
+		case 'update':
+			require_once BASEDIR.'/server/services/adm/AdmModifySectionsService.class.php';
+			$service = new AdmModifySectionsService();
+			$request = new AdmModifySectionsRequest();
+			$request->Ticket = $ticket;
+			$request->PublicationId = $pubId;
+			$request->IssueId = $issueId;
+			$request->Sections = array( $section );
+			$response = $service->execute( $request );
+			$section = $response->Sections[0];
 			break;
-		}
-
-		// update section at DB
-		$sql = "update $dbs set `section`='" . $dbh->toDBString($name) . "', `issue` = $issue , ".
-					"`description` = '" . $dbh->toDBString($description) . "', `deadline` = '" . $dbh->toDBString($deadline)."', `pages` = $pages where `id` = $id";
-		$sth = $dbh->query($sql);
-		break;
-		
-	case 'insert':
-		// check not null
-		if (trim($name) == '') {
-			$errors[] = BizResources::localize("ERR_NOT_EMPTY");
-			$mode = 'error';
+		case 'insert':
+			require_once BASEDIR.'/server/services/adm/AdmCreateSectionsService.class.php';
+			$service = new AdmCreateSectionsService();
+			$request = new AdmCreateSectionsRequest();
+			$request->Ticket = $ticket;
+			$request->RequestModes = array();
+			$request->PublicationId = $pubId;
+			$request->IssueId = $issueId;
+			$request->Sections = array( $section );
+			$response = $service->execute( $request );
+			$section = $response->Sections[0];
+			$id = $section->Id;
 			break;
-		}
-
-		// check duplicates
-		$sql = "select `id` from $dbs where `section` = '" . $dbh->toDBString($name) . "' and `publication` = $publ and `issue` = $issue";
-		$sth = $dbh->query($sql);
-		$row = $dbh->fetch($sth);
-		if ($row) {
-			$errors[] = BizResources::localize("ERR_DUPLICATE_NAME");
-			$mode = 'error';
+		case 'delete':
+			die( 'ERROR: Delete section is handled at hppublications.' );
 			break;
-		}
-
-		// create section at DB
-		$sql = "INSERT INTO $dbs (`issue`, `section`, `publication`, `description`, `deadline`, `pages`, `code`) ".
-				"VALUES ($issue, '" . $dbh->toDBString($name) . "', $publ, '" . $dbh->toDBString($description) . "', ".
-				"'" . $dbh->toDBString($deadline)."', $pages, 0)";
-		$sql = $dbh->autoincrement($sql);
-		$sth = $dbh->query($sql);
-		if ($id === 0) $id = $dbh->newid($dbs, true);
-		break;
-
-	case 'delete':
-		die( 'ERROR: Delete section is handled at hppublications.' );
-		break;
+	}
+} catch( BizException $e ) {
+	$errors[] = $e->getMessage();
+	$mode = 'error';
 }
 
 // delete: back to overview
 if ($mode == 'delete' || $mode == 'update' || $mode == 'insert') {
-	if ($issue) {
-		header("Location:hppublissues.php?id=$issue");
+	if ($issueId) {
+		header("Location:hppublissues.php?id=$issueId");
 		exit();
 	} else {
-		header("Location:hppublications.php?id=$publ");
+		header("Location:hppublications.php?id=$pubId");
 		exit();
 	}
 }
 
 // generate upper part (edit fields)
-if ($mode == 'error') {
-	$row = array ('section' => $name);
-} elseif ($mode != "new") {
-	$sql = "select * from $dbs where `id` = $id";
-	$sth = $dbh->query($sql);
-	$row = $dbh->fetch($sth);
-} else {
-	$row = array ('section' => '', 'description' => '', 'deadline' => '', 'pages' => '');
-}
-$sql = "select * from $dbp where `id` = $publ";
-$sthp = $dbh->query($sql);
-$rowp = $dbh->fetch($sthp);
-
 $txt = HtmlDocument::loadTemplate( 'hppublsections.htm' );
 
 // error handling
@@ -128,35 +105,39 @@ foreach ($errors as $error) {
 }
 $txt = str_replace("<!--ERROR-->", $err, $txt);
 
-if ($issue) {
-	$sql = "select `name` from $dbi where `id` = $issue";
-	$sth = $dbh->query($sql);
-	$rowi = $dbh->fetch($sth);
+// Resolve brand's name. TBD: Could be made part of response (WSDL change).
+require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
+$pubName = DBPublication::getPublicationName( $pubId );
 
-	$txt = str_replace("<!--VAR:ISSUE-->", formvar($rowi['name']).inputvar('issue',$issue,'hidden'), $txt);
+// Resolve issue's name. TBD: Could be made part of response (WSDL change).
+if( $issueId > 0 ) { // overrule issue?
+	require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+	$issueName = DBIssue::getIssueName( $issueId );
+	$txt = str_replace("<!--VAR:ISSUE-->", formvar($issueName).inputvar( 'issue', $issueId, 'hidden' ), $txt);
 } else {
-	$txt = preg_replace("/<!--IF:ISSUE-->.*?<!--ENDIF:ISSUE-->/s",'', $txt);
+	$txt = preg_replace("/<!--IF:ISSUE-->.*?<!--ENDIF-->/s",'', $txt);
 }
 
-if( $channelid ) {
+// Resolve channel's name. TBD: Could be made part of response (WSDL change).
+if( $channelId ) {
 	require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
-	$rowc = DBChannel::getChannel( $channelid );
-	$txt = str_replace('<!--VAR:CHANNEL-->', formvar($rowc['name']).inputvar('channelid',$channelid,'hidden'), $txt );
+	$channel = DBChannel::getPubChannelObj( $channelId );
+	$txt = str_replace('<!--VAR:CHANNEL-->', formvar($channel->Name).inputvar('channelid',$channelId,'hidden'), $txt );
 } else {
 	$txt = preg_replace('/<!--IF:CHANNEL-->.*?<!--ENDIF:CHANNEL-->/s','', $txt);
 }
 
 // fields
-$txt = str_replace('<!--VAR:NAME-->', '<input maxlength="255" name="sname" value="'.formvar($row['section']).'"/>', $txt );
-$txt = str_replace('<!--VAR:PUBL-->', formvar($rowp['publication']).inputvar('publ',$publ,'hidden'), $txt );
-$txt = str_replace('<!--VAR:DESCRIPTION-->', inputvar('description', $row['description'], 'area'), $txt );
-$txt = str_replace('<!--VAR:PAGES-->', inputvar('pages', $row['pages'], 'small'), $txt );
+$txt = str_replace('<!--VAR:NAME-->', '<input maxlength="255" name="sname" value="'.formvar($section->Name).'"/>', $txt );
+$txt = str_replace('<!--VAR:PUBL-->', formvar($pubName).inputvar('publ',$pubId,'hidden'), $txt );
+$txt = str_replace('<!--VAR:DESCRIPTION-->', inputvar('description', $section->Description, 'area'), $txt );
+$txt = str_replace('<!--VAR:PAGES-->', inputvar('pages', $section->ExpectedPages, 'small'), $txt );
 $txt = str_replace('<!--VAR:HIDDEN-->', inputvar('id',$id,'hidden'), $txt );
 
-if( $issue > 0 ) {
-	$back = "hppublissues.php?id=$issue";
+if( $issueId > 0 ) {
+	$back = "hppublissues.php?id=$issueId";
 } else {
-	$back = "hppublications.php?id=$publ";
+	$back = "hppublications.php?id=$pubId";
 }
 $txt = str_replace("<!--BACK-->", $back, $txt);
 
@@ -165,4 +146,3 @@ $txt .= "<script language='javascript'>document.forms[0].sname.focus();</script>
 
 // generate total page
 print HtmlDocument::buildDocument($txt);
-?>

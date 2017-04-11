@@ -179,7 +179,7 @@ class BizUser
 	 *
 	 * @param string $userId
 	 * @throws BizException
-	 * @return array of UserGroup
+	 * @return UserGroup[]
 	 */
 	public static function getMemberships( $userId )
 	{
@@ -280,7 +280,7 @@ class BizUser
 	 * @param string $issue issue id, set to null returns groups assigned to given publication (null MUST be given if overrule option is NOT set !)
 	 * @param boolean $onlyrouting only include groups you can send to, else include all (default)
 	 * @throws BizException
-	 * @return array of UserGroup objects
+	 * @return UserGroup[]
 	 */
 	public static function getUserGroups( $publ = null, $issue = null, $onlyrouting = false )
 	{

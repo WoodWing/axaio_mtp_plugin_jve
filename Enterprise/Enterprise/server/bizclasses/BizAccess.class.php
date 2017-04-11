@@ -331,15 +331,15 @@ class BizAccess
 	static public function isUserAuthorizedForBrandAndIssue( $userId, $brandId, $issueId )
 	{
 		if( !is_int($userId) ) {
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'User id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'User id is mandatory.' );
 		}
 
 		if( !is_int($brandId) ) {
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Brand id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Brand id is mandatory.' );
 		}
 
 		if( !is_int($issueId) ) {
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Issue id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Issue id is mandatory.' );
 		}
 
 		require_once BASEDIR.'/server/dbclasses/DBAccess.class.php';
