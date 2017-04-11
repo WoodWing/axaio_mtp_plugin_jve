@@ -340,7 +340,7 @@ class LogHandler
 	 *
 	 * @param string $logFile
 	 * @param integer $fileMode The type of access required to the file.
-	 * @return resource Log file handle or false in case of error.
+	 * @return resource|boolean Log file handle or false in case of error.
 	 */
 	private static function openFile( $logFile, $fileMode )
 	{
@@ -592,6 +592,13 @@ class LogHandler
 				if( get_class($exception) == '' ) {
 					$message .= "\nException Details: ".$exception->getDetail();
 				}
+				if( in_array('Throwable', class_implements($exception)) ) {
+					$message .= "\nFile: ".$exception->getFile();
+					$message .= "\nLine: ".$exception->getLine();
+					$message .= "\nTrace: ".$exception->getTraceAsString();
+				}
+				$p = new Error();
+				$p->
 				$message .= "\nException Stack:\n".self::getExceptionBackTrace( $exception );
 			}
 		}
