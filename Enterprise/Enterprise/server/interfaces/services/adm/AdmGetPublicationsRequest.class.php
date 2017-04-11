@@ -17,7 +17,7 @@ class AdmGetPublicationsRequest
 	/**
 	 * @param string               $Ticket                    
 	 * @param string[]             $RequestModes              
-	 * @param Id[]                 $PublicationIds            Nullable.
+	 * @param integer[]            $PublicationIds            Nullable.
 	 */
 	public function __construct( $Ticket=null, $RequestModes=null, $PublicationIds=null )
 	{
@@ -61,8 +61,8 @@ class AdmGetPublicationsRequest
 			if( !is_null( $datObj->PublicationIds ) ) {
 				$validator->checkType( $datObj->PublicationIds, 'array' );
 				if( !empty($datObj->PublicationIds) ) foreach( $datObj->PublicationIds as $listItem ) {
-					$validator->enterPath( 'integer' );
-					$validator->checkType( $listItem, 'integer' );
+					$validator->enterPath( 'Id' );
+					$validator->checkType( $listItem, 'Id' );
 					$validator->leavePath();
 				}
 			}

@@ -232,7 +232,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	}
 	
 	/**
-	 * Retrieves all complexType defintions for WSDL, but excludes the ArrayOf types.
+	 * Retrieves all complexType definitions for WSDL, but excludes the ArrayOf types.
 	 * It returns structured data (PHP arrays) with the complexType name as key. Each item has
 	 * an array of property details with the property name as key.
 	 *
@@ -263,7 +263,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	}
 	
 	/**
-	 * Retrieves all service message defintions for WSDL.
+	 * Retrieves all service message definitions for WSDL.
 	 * It returns structured data (PHP arrays) with the service name as key. Each item has
 	 * an array of property details with the property name as key.
 	 * Item '__isRequest' indicates the message type; TRUE for Request, or FALSE for Response.
@@ -535,6 +535,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			'dateTime' => 'string',
 			'dateTimeOrEmpty' => 'string',
 			'Color' => 'string',
+			'Id' => 'integer', // admin WSDL
 		);
 
 		$outTxt = "<?php\n\n/**\n"
@@ -1150,6 +1151,17 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	{
 		$this->clearErrors();
 
+		static $basicTypes = array(
+			// WSDL/xsd => PHP:
+			'double' => 'float', // actually 'double' or 'float' are supported in PHP.
+			'integer' => 'integer',
+			'unsignedInt' => 'integer',
+			'dateTime' => 'string',
+			'dateTimeOrEmpty' => 'string',
+			'Color' => 'string',
+			'Id' => 'integer', // admin WSDL
+		);
+
 		$intfShort = $this->intfDescriptor->getServiceNameShort();
 		$intfShortLow = strtolower($intfShort);
 		$dataClasses = $this->getDataClasses();
@@ -1202,6 +1214,9 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 
 					$showNullable = $propStruct['null'] ? 'Nullable.' : '';
 					$isEnum = isset($simpleTypeEnums[$propType]);
+					if( isset($basicTypes[$propType]) ) {
+						$propType = $basicTypes[$propType];
+					}
 					$prefixedPropType = $isEnum ? 'string' : $propType;
 					$prefixedPropType = $propStruct['isarray'] ? $prefixedPropType . '[]' : $prefixedPropType; // Add back the [] for Array type.
 
@@ -2007,7 +2022,6 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			// WSDL/tns => PHP (just to simplify/speed run-time validations):
 			'String' => 'string',
 			'Row' => 'array', // exception needed since it has no 'ArrayOf' in its name
-			'Id' => 'integer', // admin WSDL
 			'FamilyValue' => 'string',
 			'AttachmentContent' => 'SOAP_Attachment',
 
@@ -2015,6 +2029,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			'unsignedInt' => 'unsignedInt',
 			'dateTime' => 'dateTime',
 			'dateTimeOrEmpty' => 'dateTimeOrEmpty',
+			'Id' => 'Id', // admin WSDL
 			'Color' => 'Color',
 			// ... => NOTE: When adding more types, add them to WW_Services_Validator->checkType() as well!!!
 		);

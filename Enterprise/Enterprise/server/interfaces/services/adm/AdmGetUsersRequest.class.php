@@ -19,7 +19,7 @@ class AdmGetUsersRequest
 	 * @param string               $Ticket                    
 	 * @param string[]             $RequestModes              
 	 * @param integer              $GroupId                   Nullable.
-	 * @param Id[]                 $UserIds                   Nullable.
+	 * @param integer[]            $UserIds                   Nullable.
 	 */
 	public function __construct( $Ticket=null, $RequestModes=null, $GroupId=null, $UserIds=null )
 	{
@@ -71,8 +71,8 @@ class AdmGetUsersRequest
 			if( !is_null( $datObj->UserIds ) ) {
 				$validator->checkType( $datObj->UserIds, 'array' );
 				if( !empty($datObj->UserIds) ) foreach( $datObj->UserIds as $listItem ) {
-					$validator->enterPath( 'integer' );
-					$validator->checkType( $listItem, 'integer' );
+					$validator->enterPath( 'Id' );
+					$validator->checkType( $listItem, 'Id' );
 					$validator->leavePath();
 				}
 			}

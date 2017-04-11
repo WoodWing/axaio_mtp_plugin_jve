@@ -16,7 +16,7 @@ class AdmAddUsersToGroupRequest
 
 	/**
 	 * @param string               $Ticket                    
-	 * @param Id[]                 $UserIds                   
+	 * @param integer[]            $UserIds                   
 	 * @param integer              $GroupId                   
 	 */
 	public function __construct( $Ticket=null, $UserIds=null, $GroupId=null )
@@ -48,8 +48,8 @@ class AdmAddUsersToGroupRequest
 			if( !is_null( $datObj->UserIds ) ) {
 				$validator->checkType( $datObj->UserIds, 'array' );
 				if( !empty($datObj->UserIds) ) foreach( $datObj->UserIds as $listItem ) {
-					$validator->enterPath( 'integer' );
-					$validator->checkType( $listItem, 'integer' );
+					$validator->enterPath( 'Id' );
+					$validator->checkType( $listItem, 'Id' );
 					$validator->leavePath();
 				}
 			}
