@@ -1007,7 +1007,9 @@ class BizPublishing
 			}
 
 			//Remove any images that are temporarily saved during image conversion.
-			BizPublishForm::cleanupPlacedFilesCreatedByConversion( $publishForm );
+			if( $publishForm ) {
+				BizPublishForm::cleanupPlacedFilesCreatedByConversion( $publishForm );
+			}
 		} catch( BizException $e ) {
 			// if an exception is thrown, catch it and set $publishedDossier->PublishMessage
 			self::doProcessDossierHandleException( $e, $publishedDossier );

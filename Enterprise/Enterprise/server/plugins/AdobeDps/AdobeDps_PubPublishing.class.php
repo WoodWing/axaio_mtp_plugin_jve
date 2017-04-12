@@ -13,6 +13,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	private $objectFolioInfos;
 	private $folioBuilder;
 	private $report;
+	/** @var WW_Utils_DigitalPublishingSuiteClient $dpsService  */
 	private $dpsService;
 	private $dpsIssueId;
 	private $publishedDossierOrder;
@@ -3022,6 +3023,9 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 			// Determine if the article should be blocked for social sharing.
 			require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
 			$articleAccess = BizAdmProperty::getCustomPropVal( $dossier->MetaData->ExtraMetaData, 'C_ARTICLE_ACCESS');
+			if( !$articleAccess ) {
+				$articleAccess = 'Metered';
+			}
 
 			// Create or Modify the article at Adobe DPS.
 			$manifestXref = $dossierId;
@@ -3822,7 +3826,6 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * @param Object $article
 	 * @param PubPublishTarget $publishTarget
-	 * @return string File path of created HTML file at export folder.
 	 */
 	private function copyTextViewAssets( /** @noinspection PhpLanguageLevelInspection */
 		Object $article, PubPublishTarget $publishTarget )
@@ -6135,7 +6138,6 @@ class DigitalMagazinesDpsFolioParser extends DigitalMagazinesDpsFolioXml
 	 * Sets the folio id.
 	 *
 	 * @param int|string $id
-	 * @return string
 	 */
 	public function setId( $id )
 	{
@@ -6559,7 +6561,6 @@ class DigitalMagazinesDpsFolioParser extends DigitalMagazinesDpsFolioXml
 	 * @param string $webUrl
 	 * @param integer $width
 	 * @param integer $height
-	 * @return null
 	 */
 	public function addTextViewOverlay( $webUrl, $width, $height )
 	{

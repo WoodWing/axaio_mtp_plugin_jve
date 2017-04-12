@@ -54,8 +54,9 @@ class ElvisBrandAdminConfig
 	 */
 	public static function getProductionZoneByPubId( $pubId )
 	{
-		$where  = '`publication` = ? AND `name` = "C_ELVIS_PRODUCTION_ZONE"';
+		$where  = '`publication` = ? AND `name` = ? ';
 		$params[] = $pubId;
+		$params[] = 'C_ELVIS_PRODUCTION_ZONE';
 
 		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
 		$row = DBBase::getRow( 'channeldata', $where, array('value'), $params );
