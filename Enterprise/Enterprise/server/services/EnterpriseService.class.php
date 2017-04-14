@@ -197,7 +197,7 @@ class EnterpriseService
 
 		} catch ( BizException $e ) {
 			// Log error
-			if( $debugMode ) {
+			if( $logService ) {
 				$error = new stdClass();
 				$error->Type = $e->getType();
 				$error->Message = $e->getMessage();
