@@ -67,6 +67,7 @@ class WflLogOnService extends EnterpriseService
 		// known in the IDS job queue, and if found, we check its secrets which tells us
 		// whether or not the seal is valid for that job. When valid, we allow the job to logon.
 		$isValidIdsTicketSeal = false;
+		$checkLicenceStatus = true;
 		if( !empty($req->Ticket) && empty($req->Password) ) {
 			if( $req->ClientAppName == 'InDesign Server' ) {
 				require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
@@ -76,7 +77,7 @@ class WflLogOnService extends EnterpriseService
 						throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket' );
 					}
 					$isValidIdsTicketSeal = true;
-					
+					$checkLicenceStatus = false;
 					// Resolve the acting user by taking the last modifier of the layout.
 					require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 					$shortuser = DBObject::getColumnValueByName( $jobRow['objid'], 'Workflow', 'modifier' );
@@ -179,12 +180,14 @@ class WflLogOnService extends EnterpriseService
 		}
 		
 		// Check the license and number of concurrent users for this application
-		$licenseStatus1 = $lic->getLicenseStatus( $req->ClientAppProductKey, $req->ClientAppSerial, $info, $errorMessage1 );
-		if ( $licenseStatus1 > WW_LICENSE_OK_MAX ) {
-			if( $req->ClientAppName == 'WebEditor' ) { // Make message more readable (BZ#6600)
-				throw new BizException( 'LIC_NO_WEBEDITOR_LICENSE_INSTALLED', 'Server', $errorMessage1 );
-			} else {
-				throw new BizException( 'ERR_LICENSE', 'Server', $errorMessage1 );
+		if( $checkLicenceStatus ) { // Original ticket has been checked.
+			$licenseStatus1 = $lic->getLicenseStatus( $req->ClientAppProductKey, $req->ClientAppSerial, $info, $errorMessage1 );
+			if( $licenseStatus1 > WW_LICENSE_OK_MAX ) {
+				if( $req->ClientAppName == 'WebEditor' ) { // Make message more readable (BZ#6600)
+					throw new BizException( 'LIC_NO_WEBEDITOR_LICENSE_INSTALLED', 'Server', $errorMessage1 );
+				} else {
+					throw new BizException( 'ERR_LICENSE', 'Server', $errorMessage1 );
+				}
 			}
 		}
 
@@ -204,10 +207,12 @@ class WflLogOnService extends EnterpriseService
 		//Check the license and number of concurrent connections for SCE Server
 		//In case no license has been installed yet, appserial will be false and getLicenseStatus() will handle that
 		$errorMessage2 = '';
-		$SCEAppserial = $lic->getSerial( PRODUCTKEY );
-		$licenseStatus2 = $lic->getLicenseStatus( PRODUCTKEY, $SCEAppserial, $info, $errorMessage2, '', $shortuser, $req->ClientAppName );
-		if ( $licenseStatus2 > WW_LICENSE_OK_MAX ) {
-			throw new BizException( 'ERR_LICENSE', 'Server', $errorMessage2 );
+		if( $checkLicenceStatus ) { // Original ticket has been checked.
+			$SCEAppserial = $lic->getSerial( PRODUCTKEY );
+			$licenseStatus2 = $lic->getLicenseStatus( PRODUCTKEY, $SCEAppserial, $info, $errorMessage2, '', $shortuser, $req->ClientAppName );
+			if( $licenseStatus2 > WW_LICENSE_OK_MAX ) {
+				throw new BizException( 'ERR_LICENSE', 'Server', $errorMessage2 );
+			}
 		}
 
 		// Since 9.7 the RequestInfo param is introduced that supersedes RequestTicket.
@@ -240,9 +245,10 @@ class WflLogOnService extends EnterpriseService
 			$masterTicket,
 			$req->Password );
 
-		$lic->addToUserMessages( $shortuser, $licenseStatus1, $errorMessage1, $resp->MessageList->Messages );
-		$lic->addToUserMessages( $shortuser, $licenseStatus2, $errorMessage2, $resp->MessageList->Messages );
-
+		if( $checkLicenceStatus ) {
+			$lic->addToUserMessages( $shortuser, $licenseStatus1, $errorMessage1, $resp->MessageList->Messages );
+			$lic->addToUserMessages( $shortuser, $licenseStatus2, $errorMessage2, $resp->MessageList->Messages );
+		}
 		// If we have a MessageList we need to ensure there is a ReadMessageIDs property.
 		if (isset($resp->MessageList) && !isset($resp->MessageList->ReadMessageIDs)){
 			$resp->MessageList->ReadMessageIDs = array();
