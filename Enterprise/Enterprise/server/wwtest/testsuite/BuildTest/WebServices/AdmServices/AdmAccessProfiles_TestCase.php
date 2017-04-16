@@ -17,7 +17,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmAccessProfiles_TestCase 
 	public function isSelfCleaning() { return true; }
 
 	private $ticket = null;
-	private $utils = null; //WW_Utils_TestSuite
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 
 	private $accessProfileIds = array(); //list of ids of created access profiles
 	private $postfix = 0; //incremented after every created object to ensure unique names etc.
@@ -42,6 +43,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmAccessProfiles_TestCase 
 		require_once BASEDIR . '/server/interfaces/services/adm/DataClasses.php';
 		require_once BASEDIR . '/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		$vars = $this->getSessionVariables();
 		$this->ticket = @$vars['BuildTest_WebServices_AdmServices']['ticket'];

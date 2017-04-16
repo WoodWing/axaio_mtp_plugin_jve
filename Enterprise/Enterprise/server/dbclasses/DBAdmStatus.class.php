@@ -249,7 +249,7 @@ class DBAdmStatus extends DBBase
 		if( $rows ) foreach( $rows as $row ) {
 			$pubId = null;
 			$issueId = null;
-			$statuses[$row['id']] = self::rowToObj( $pubId, $issueId, $row );
+			$statuses[] = self::rowToObj( $pubId, $issueId, $row );
 		}
 		return $statuses;
 	}

@@ -32,14 +32,17 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 	private $userIds = array(); // created user ids (for garbage collector)
 	private $groupIds = array(); // created user group ids (for garbage collector)
 	private $postfix = 0; // internal counter to make users and groups unique
-	private $utils = null; // WW_Utils_TestSuite
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 	
 	final public function runTest()
 	{
 		// Init utils.
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
+
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		// Retrieve the Ticket that has been determined by AdmInitData TestCase.
    		$vars = $this->getSessionVariables();

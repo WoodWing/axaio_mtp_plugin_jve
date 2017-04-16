@@ -256,6 +256,7 @@ class BizAdmAutocompleteDispatcher extends BizAutocompleteDispatcher
 			if( is_null( $provider )) {
 				$termEntityId = $termEntities[0]->Id;
 				if( $termEntityId ) {
+					require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTermEntity.class.php';
 					$termEntityDb = DBAdmAutocompleteTermEntity::getTermEntityById( $termEntityId );
 					$autocompleteProvider = $termEntityDb->AutocompleteProvider;
 					foreach( $termEntities as $termEntity ) {

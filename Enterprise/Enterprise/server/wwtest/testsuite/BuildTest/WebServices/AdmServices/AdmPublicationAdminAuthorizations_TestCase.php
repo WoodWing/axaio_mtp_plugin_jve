@@ -42,7 +42,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmPublicationAdminAuthoriz
 	public function getPrio() { return 180; }
 	public function isSelfCleaning() { return true; }
 
-	private $utils = null;			//The TestSuite utils class.
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 	private $postfix = null;		//Counter to ensure unique objects names.
 
 	private $ticket = null;			//The system admin ticket of the user configured in TESTSUITE.

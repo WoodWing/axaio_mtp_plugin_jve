@@ -16,7 +16,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
     public function getPrio()        { return 140; }
 
 	private $ticket = null; // string, session ticket for admin user
-	private $utils = null; // WW_Utils_TestSuite
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 
 	private $termEntities = null;
 	private $terms = null;
@@ -29,7 +30,9 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 		// Init utils.
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
+
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		// Retrieve the Ticket that has been determined by AdmInitData TestCase.
    		$vars = $this->getSessionVariables();

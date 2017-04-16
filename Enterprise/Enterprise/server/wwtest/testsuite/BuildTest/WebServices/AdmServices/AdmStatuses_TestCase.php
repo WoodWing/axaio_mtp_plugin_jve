@@ -19,7 +19,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmStatuses_TestCase extend
 	private $publicationId = null;
 	private $pubChannelId = null;
 	private $ticket = null;
-	private $utils = null; //WW_Utils_TestSuite
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 
 	//for easy access and garbage collection
 	private $overruleIssueId = null;
@@ -54,7 +55,9 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmStatuses_TestCase extend
 		// Init utils.
 		require_once BASEDIR . '/server/interfaces/services/adm/DataClasses.php';
 		require_once BASEDIR . '/server/utils/TestSuite.php';
+
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		$vars = $this->getSessionVariables();
 		$this->ticket = @$vars['BuildTest_WebServices_AdmServices']['ticket'];

@@ -18,6 +18,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmExitData_TestCase extend
 	private $ticket = null;
 	private $publicationId = null;
 	private $pubChannelId = null;
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 
 	final public function runTest()
 	{
@@ -25,6 +27,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmExitData_TestCase extend
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		// Get ticket as retrieved by the AdmInitData test.
    		$vars = $this->getSessionVariables();

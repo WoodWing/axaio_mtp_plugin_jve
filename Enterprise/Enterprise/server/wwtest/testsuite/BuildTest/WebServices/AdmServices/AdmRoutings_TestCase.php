@@ -62,7 +62,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmRoutings_TestCase extend
 	public function getPrio() { return 200; }
 	public function isSelfCleaning() { return true; }
 
-	private $utils = null;           //The TestSuite utils class.
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 	private $compare = null;         //The PhpCompare utils class.
 	private $ticket = null;          //The system admin ticket of the user created during initialisation of test data.
 	private $publicationId = null;   //The publication id of the publication created during initialisation of test data.
@@ -87,7 +88,10 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmRoutings_TestCase extend
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		require_once BASEDIR.'/server/utils/PhpCompare.class.php';
+
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
+
 		$this->compare = new WW_Utils_PhpCompare();
 		$this->compare->initCompare( array() );
 

@@ -16,6 +16,7 @@ class AdmModifyStatusesService extends EnterpriseService
 {
 	public function execute( AdmModifyStatusesRequest $req )
 	{
+		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 		// Resolve the NextStatus->Name for each status to let plug-ins use/check it in runBefore/runAfter.
 		foreach( $req->Statuses as &$status ) {
 			BizAdmStatus::resolveNextStatus( $status );

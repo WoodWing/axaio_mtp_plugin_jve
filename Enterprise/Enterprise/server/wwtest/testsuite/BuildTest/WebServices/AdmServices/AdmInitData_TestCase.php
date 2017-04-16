@@ -15,16 +15,18 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmInitData_TestCase extend
 	public function getTestMethods() { return 'Does LogOn through admin services.'; }
     public function getPrio()        { return 1; }
 
-	private $utils = null; // WW_Utils_TestSuite
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 	private $publicationId = null;
 	private $pubChannelId = null;
-	
+
 	final public function runTest()
 	{
 		// Init utils.
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		// Logon TESTSUITE user through admin interface.
 		$response = $this->utils->admLogOn( $this );
