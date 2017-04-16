@@ -61,13 +61,11 @@ class AdmRemoveTemplateObjectsService extends EnterpriseService
 			$req->IssueId = 0;
 		}
 
+		require_once( BASEDIR . '/server/bizclasses/BizAdmPublication.class.php' );
 		//This test is only useful if the publication id is not resolved from the issue id.
-		if( !$req->IssueId ) {
-			require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
-			if( !DBPublication::getPublication( $req->PublicationId ) ) {
-				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', 'The given brand with id='.$req->PublicationId.' does not exist.',
+		if( !$req->IssueId && !BizAdmPublication::doesPublicationIdExists( $req->PublicationId ) ) {
+			throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', 'The given brand with id='.$req->PublicationId.' does not exist.',
 					null, array( '{PUBLICATION}', $req->PublicationId ) );
-			}
 		}
 
 		if( $req->TemplateObjects ) foreach( $req->TemplateObjects as $templateObject ) {

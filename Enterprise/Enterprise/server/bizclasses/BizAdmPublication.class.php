@@ -84,6 +84,19 @@ class BizAdmPublication
 		}
 	}
 
+	/**
+	 * Tells whether or not a publication (id) exists in the database.
+	 *
+	 * @since 10.2.0
+	 * @param integer $pubId The DB id of the publication to search for.
+	 * @return boolean true when the publication exists, else false.
+	 */
+	public static function doesPublicationIdExists( $pubId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
+		return DBAdmPublication::doesPublicationIdExists( $pubId );
+	}
+
 	// ------------------------------
 	// --- PUBLICATION OPERATIONS ---
 	// ------------------------------

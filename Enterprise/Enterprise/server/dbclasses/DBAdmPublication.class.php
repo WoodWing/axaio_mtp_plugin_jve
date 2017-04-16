@@ -14,7 +14,28 @@ require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 class DBAdmPublication extends DBBase
 {
 	const TABLENAME = 'publications';
-	
+
+	/**
+	 * Tells whether or not a publication (id) exists in the database.
+	 *
+	 * @param integer $pubId The DB id of the publication to search for.
+	 * @return boolean true when the publication exists, else false.
+	 * @throws BizException on SQL error
+	 */
+	public static function doesPublicationIdExists( $pubId )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$pubTable = $dbDriver->tablename( self::TABLENAME );
+		$sql = "SELECT 1 FROM $pubTable o WHERE `id` = ?";
+		$params = array( intval($pubId) );
+		$sth = $dbDriver->query( $sql, $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+		$row = $dbDriver->fetch($sth);
+		return (bool)$row;
+	}
+
 	/**
 	 * Retrieves one publication data object from DB for a given id ($pubId), as configured by admin users.
 	 *  

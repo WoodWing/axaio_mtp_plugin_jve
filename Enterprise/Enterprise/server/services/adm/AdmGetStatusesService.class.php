@@ -19,12 +19,10 @@ class AdmGetStatusesService extends EnterpriseService
 		//validate the pubId if given
 		if( $req->PublicationId && !$req->IssueId && !$req->StatusIds ) {
 			require_once( BASEDIR . '/server/bizclasses/BizAdmPublication.class.php' );
-			$publications = BizAdmPublication::listPublicationsObj( array(), array( $req->PublicationId ) );
 			//if a brand id is given then the brand has to exist in the database
-			if( !$publications || count($publications) < 1 ) {
-				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', 'The given brand does not exist.', null, array( 'Brand', '(id='.$req->PublicationId.')') );
-			} elseif( count($publications) > 1 ) {
-				throw new BizException( 'ERR_ARGUMENT', 'Client', 'Invalid brand id.' );
+			if( !BizAdmPublication::doesPublicationIdExists( $req->PublicationId ) ) {
+				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server',
+					'The given brand does not exist.', null, array( '{PUBLICATION}', '(id='.$req->PublicationId.')') );
 			}
 		}
 
