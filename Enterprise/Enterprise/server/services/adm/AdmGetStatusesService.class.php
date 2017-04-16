@@ -14,7 +14,10 @@ require_once BASEDIR.'/server/services/EnterpriseService.class.php';
 
 class AdmGetStatusesService extends EnterpriseService
 {
-	public function execute( AdmGetStatusesRequest $req )
+	/**
+	 * @inheritdoc
+	 */
+	protected function restructureRequest( &$req )
 	{
 		//validate the pubId if given
 		if( $req->PublicationId && !$req->IssueId && !$req->StatusIds ) {
@@ -33,7 +36,8 @@ class AdmGetStatusesService extends EnterpriseService
 			//TODO: Replace with a proper resolve function after a BizIssueBase class is made
 			if( !array_key_exists( $req->IssueId, $allOverruleIssues )) {
 				if( !DBIssue::getIssue( $req->IssueId ) ) {
-					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', 'The given issue does not exist', null, array( 'Issue', '(id='.$req->IssueId.')' ) );
+					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server',
+						'The given issue does not exist', null, array( '{ISSUE}', '(id='.$req->IssueId.')' ) );
 				} else {
 					throw new BizException( 'ERR_ARGUMENT', 'Client', 'The given issue id is not an overrule issue.');
 				}
@@ -49,23 +53,29 @@ class AdmGetStatusesService extends EnterpriseService
 		}
 
 		if( $req->StatusIds ) {
+			require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 			$pubId = BizAdmStatus::getPubIdFromStatusIds( $req->StatusIds );
 			$issueId = BizAdmStatus::getIssueIdFromStatusIds( $req->StatusIds );
 
+			if( !$pubId && !$issueId ) {
+				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server',
+					'None of the provided status ids do exist.', null, array( '{STATE}', implode(',',$req->StatusIds) ) );
+			} elseif( $pubId && $issueId ) {
+				throw new BizException( 'ERR_ARGUMENT', 'Client', 'Statuses were selected that belong to a brand as well as an issue.');
+			}
+
 			//validate the pubId resolved from statuses
-			if( $pubId && $issueId == 0 ) {
+			if( $pubId ) {
 				require_once( BASEDIR . '/server/bizclasses/BizAdmPublication.class.php' );
-				$publications = BizAdmPublication::listPublicationsObj( array(), array( $pubId ) );
-				if( !$publications ) {
-					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', 'The given brand does not exist.', null, array( 'Brand', '(id='.$pubId.')') );
+				if( !BizAdmPublication::doesPublicationIdExists( $pubId ) ) {
+					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server',
+						'The given brand does not exist.', null, array( '{PUBLICATION}', '(id='.$pubId.')') );
 				}
 				if( $req->PublicationId && $req->PublicationId != $pubId ) {
 					throw new BizException( 'ERR_ARGUMENT', 'Client', 'The brand id of the statuses is not equal to the given brand id.');
 				}
-			} elseif( $pubId && $issueId ) {
-				throw new BizException( 'ERR_ARGUMENT', 'Client', 'Statuses were selected that belong to a brand as well as an issue.');
+				$req->PublicationId = $pubId;
 			}
-			$req->PublicationId = $pubId;
 
 			//test the issue id resolved from the statuses
 			if( $issueId ) {
@@ -73,16 +83,17 @@ class AdmGetStatusesService extends EnterpriseService
 					throw new BizException( 'ERR_ARGUMENT', 'Client', 'The issue id of the statuses is not equal to the given issue id.');
 				}
 				$req->IssueId = $issueId;
-			} elseif( !$pubId ) {
-				throw new BizException( 'ERR_ARGUMENT', 'Client', 'Statuses of multiple issues were selected.');
 			}
 		}
 
-		if( !$req->PublicationId && $req->IssueId && !$req->StatusIds ) {
+		if( !$req->PublicationId && !$req->IssueId && !$req->StatusIds ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Client', 'No identifiers were given.' );
 		}
+	}
 
-		return $this->executeService( 
+	public function execute( AdmGetStatusesRequest $req )
+	{
+		return $this->executeService(
 			$req, 
 			$req->Ticket, 
 			'AdminService',

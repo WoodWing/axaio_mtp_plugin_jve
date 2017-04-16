@@ -111,7 +111,9 @@ class DBAdmStatus extends DBBase
 		if( !$where ) { // no search filter provided
 			throw new BizException('ERR_ARGUMENT', 'Client', 'No status ids provided.' );
 		}
-		$rows = self::listRows( self::TABLENAME, 'id', 'issue', $where, null );
+		$where .= ' AND `issue` != ? '; // include overrule issues only
+		$params = array( 0 );
+		$rows = self::listRows( self::TABLENAME, 'id', 'issue', $where, null, $params );
 		if( self::hasError() ) { // SQL error
 			throw new BizException('ERR_DATABASE', 'Server', self::getError() );
 		}
@@ -140,7 +142,9 @@ class DBAdmStatus extends DBBase
 		if( !$where ) { // no search filter provided
 			throw new BizException('ERR_ARGUMENT', 'Client', 'No status ids provided.' );
 		}
-		$rows = self::listRows( self::TABLENAME, 'id', 'publication', $where, null );
+		$where .= ' AND `issue` = ? '; // exclude overrule issues
+		$params = array( 0 );
+		$rows = self::listRows( self::TABLENAME, 'id', 'publication', $where, null, $params );
 		if( self::hasError() ) { // SQL error
 			throw new BizException('ERR_DATABASE', 'Server', self::getError() );
 		}
