@@ -14,6 +14,20 @@ require_once BASEDIR.'/server/services/EnterpriseService.class.php';
 
 class AdmModifyAccessProfilesService extends EnterpriseService
 {
+	/**
+	 * @param AdmModifyAccessProfilesRequest $req
+	 * @inheritdoc
+	 */
+	protected function restructureRequest( &$req )
+	{
+		if( $req->AccessProfiles ) foreach( $req->AccessProfiles as &$accessProfile ) {
+			if( !ctype_digit( (string)$accessProfile->Id ) ) {
+				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The given access profile id is not valid.' );
+			}
+			$accessProfile->Id = intval( $accessProfile->Id );
+		}
+	}
+
 	public function execute( AdmModifyAccessProfilesRequest $req )
 	{
 		return $this->executeService( 

@@ -19,6 +19,31 @@ class AdmGetStatusesService extends EnterpriseService
 	 */
 	protected function restructureRequest( &$req )
 	{
+		// simplify request params to ease validation
+		if( !is_null($req->PublicationId) ) {
+			if( !ctype_digit( (string)$req->PublicationId ) ) {
+				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The given publication id is not valid.' );
+			}
+			$req->PublicationId = intval( $req->PublicationId );
+		}
+		if( !is_null($req->IssueId) ) {
+			if( !ctype_digit( (string)$req->IssueId ) ) {
+				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The given issue id is not valid.' );
+			}
+			$req->IssueId = intval( $req->IssueId );
+		}
+		if( !is_null($req->StatusIds) ) {
+			foreach( $req->StatusIds as $statusId ) {
+				if( !ctype_digit( (string)$statusId ) ) {
+					throw new BizException( 'ERR_ARGUMENT', 'Client', "One of the given status ids is not valid (id={$statusId})." );
+				}
+			}
+			$req->StatusIds = array_map( 'intval', $req->StatusIds ); // cast all ids to integer
+		}
+		if( is_array($req->StatusIds) && empty($req->StatusIds) ) {
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'An empty array of status ids given, which is not valid.');
+		}
+
 		//validate the pubId if given
 		if( $req->PublicationId && !$req->IssueId && !$req->StatusIds ) {
 			require_once( BASEDIR . '/server/bizclasses/BizAdmPublication.class.php' );

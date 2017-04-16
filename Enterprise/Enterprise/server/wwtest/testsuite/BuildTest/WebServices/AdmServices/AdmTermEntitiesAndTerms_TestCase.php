@@ -129,11 +129,13 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 			$termEntity = new AdmTermEntity();
 			$termEntity->Name = 'Citi';
 			$termEntity->AutocompleteProvider = self::AUTOCOMPLETE_PROVIDER;
+			$termEntity->PublishSystemId = '';
 			$termEntities[] = $termEntity;
 
 			$termEntity = new AdmTermEntity();
 			$termEntity->Name = 'Countries';
 			$termEntity->AutocompleteProvider = self::AUTOCOMPLETE_PROVIDER . '2';
+			$termEntity->PublishSystemId = '';
 			$termEntities[] = $termEntity;
 
 			$request->TermEntities = $termEntities;
@@ -151,11 +153,13 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 			$termEntity = new AdmTermEntity();
 			$termEntity->Name = 'Citi';
 			$termEntity->AutocompleteProvider = self::AUTOCOMPLETE_PROVIDER;
+			$termEntity->PublishSystemId = '';
 			$this->termEntities[] = $termEntity;
 
 			$termEntity = new AdmTermEntity();
 			$termEntity->Name = 'Countries';
 			$termEntity->AutocompleteProvider = self::AUTOCOMPLETE_PROVIDER;
+			$termEntity->PublishSystemId = '';
 			$this->termEntities[] = $termEntity;
 
 			$request->TermEntities = $this->termEntities;

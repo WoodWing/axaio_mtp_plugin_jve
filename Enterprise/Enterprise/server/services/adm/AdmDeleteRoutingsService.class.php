@@ -87,6 +87,13 @@ class AdmDeleteRoutingsService extends EnterpriseService
 
 		//Test for validity of the routing rule ids.
 		if( is_array( $req->RoutingIds ) && count( $req->RoutingIds ) >= 1 ) {
+			foreach( $req->RoutingIds as $routingId ) {
+				if( !ctype_digit( (string)$routingId ) ) {
+					throw new BizException( 'ERR_ARGUMENT', 'Client', "One of the given routing ids is not valid (id={$routingId})." );
+				}
+			}
+			$req->RoutingIds = array_map( 'intval', $req->RoutingIds ); // cast all ids to integer
+
 			require_once BASEDIR.'/server/bizclasses/BizAdmRouting.class.php';
 			$routingPubId = BizAdmRouting::getPubIdFromRoutingIds( $req->RoutingIds );
 			$routingIssueId = BizAdmRouting::getIssueIdFromRoutingIds( $req->RoutingIds );

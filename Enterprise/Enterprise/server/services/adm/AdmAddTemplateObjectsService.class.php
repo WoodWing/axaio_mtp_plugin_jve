@@ -26,6 +26,10 @@ class AdmAddTemplateObjectsService extends EnterpriseService
 			);
 	}
 
+	/**
+	 * @inheritdoc
+	 * @param AdmAddTemplateObjectsRequest $req
+	 */
 	public function restructureRequest( &$req )
 	{
 		//Nothing can be done without a brand or issue id.
@@ -70,9 +74,17 @@ class AdmAddTemplateObjectsService extends EnterpriseService
 			}
 		}
 
-		if( $req->TemplateObjects ) foreach( $req->TemplateObjects as $templateObject ) {
+		if( $req->TemplateObjects ) foreach( $req->TemplateObjects as &$templateObject ) {
 			$templateObject->PublicationId = $req->PublicationId;
 			$templateObject->IssueId = $req->IssueId;
+			if( !ctype_digit( $templateObject->TemplateObjectId ) ) {
+				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The given template object id is not valid.');
+			}
+			$templateObject->TemplateObjectId = intval($templateObject->TemplateObjectId);
+			if( !ctype_digit( $templateObject->UserGroupId ) ) {
+				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The given user group id is not valid.');
+			}
+			$templateObject->UserGroupId = intval($templateObject->UserGroupId);
 		} else {
 			throw new BizException( 'ERR_ARGUMENT', 'Client', 'No template object access rules were given to be added.' );
 		}

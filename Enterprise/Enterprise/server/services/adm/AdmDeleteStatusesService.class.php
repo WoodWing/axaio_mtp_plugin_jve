@@ -19,6 +19,16 @@ class AdmDeleteStatusesService extends EnterpriseService
 
 	protected function restructureRequest( &$req )
 	{
+		if( !$req->StatusIds ) {
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'No status ids were given.' );
+		}
+		foreach( $req->StatusIds as $statusId ) {
+			if( !ctype_digit( (string)$statusId ) ) {
+				throw new BizException( 'ERR_ARGUMENT', 'Client', "One of the given status ids is not valid (id={$statusId})." );
+			}
+		}
+		$req->StatusIds = array_map( 'intval', $req->StatusIds ); // cast all ids to integer
+
 		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 		$this->pubId = BizAdmStatus::getPubIdFromStatusIds( $req->StatusIds );
 		$this->issueId = BizAdmStatus::getIssueIdFromStatusIds( $req->StatusIds );

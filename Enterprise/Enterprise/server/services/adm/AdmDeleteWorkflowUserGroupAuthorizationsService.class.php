@@ -26,6 +26,10 @@ class AdmDeleteWorkflowUserGroupAuthorizationsService extends EnterpriseService
 			);
 	}
 
+	/**
+	 * @inheritdoc
+	 * @param AdmDeleteWorkflowUserGroupAuthorizationsRequest $req
+	 */
 	public function restructureRequest( &$req )
 	{
 		//Nothing can be done when none of these ids are given.
@@ -36,6 +40,13 @@ class AdmDeleteWorkflowUserGroupAuthorizationsService extends EnterpriseService
 		if( ( $req->PublicationId || $req->IssueId || $req->UserGroupId ) && $req->WorkflowUserGroupAuthorizationIds ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Client',
 				'Either authorization ids or filters (brand/issue/user group) should be used, not both.' );
+		}
+
+		if( $req->WorkflowUserGroupAuthorizationIds ) foreach( $req->WorkflowUserGroupAuthorizationIds  as $authId ) {
+			if( !ctype_digit( (string)$authId ) ) {
+				throw new BizException( 'ERR_ARGUMENT', 'Client', "One of the given authorization ids is not valid (id={$authId})." );
+			}
+			$req->WorkflowUserGroupAuthorizationIds = array_map( 'intval', $req->WorkflowUserGroupAuthorizationIds ); // cast all ids to integer
 		}
 
 		if( $req->PublicationId || $req->IssueId ) {

@@ -70,10 +70,13 @@ class AdmGetTemplateObjectsService extends EnterpriseService
 		}
 
 		if( $req->TemplateObjectId ) {
+			if( !ctype_digit( $req->TemplateObjectId ) ) {
+				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The given user template object id is not valid.');
+			}
+			$req->TemplateObjectId = intval($req->TemplateObjectId);
+
 			require_once BASEDIR.'/server/bizclasses/BizAdmTemplateObject.class.php';
-			if( $req->TemplateObjectId < 0 ) {
-				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The template object id should be a positive number.' );
-			} elseif ( !BizAdmTemplateObject::getObjectInfos( array( $req->TemplateObjectId ) ) ) {
+			if ( !BizAdmTemplateObject::getObjectInfos( array( $req->TemplateObjectId ) ) ) {
 				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client',
 					'The given dossier template with id='.$req->TemplateObjectId.' does not exist.',
 					null, array( '{DOSSIER_TEMPLATE}', $req->TemplateObjectId ) );
@@ -81,10 +84,13 @@ class AdmGetTemplateObjectsService extends EnterpriseService
 		}
 
 		if( $req->UserGroupId ) {
+			if( !ctype_digit( $req->UserGroupId ) ) {
+				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The given user user group id is not valid.');
+			}
+			$req->UserGroupId = intval($req->UserGroupId);
+
 			require_once BASEDIR.'/server/bizclasses/BizAdmUser.class.php';
-			if( $req->UserGroupId < 0 ) {
-				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The user group id should be a positive number.' );
-			} elseif( !BizAdmUser::listUserGroupsObj( $this->User, array(), null, array( $req->UserGroupId ) ) ) {
+			if( !BizAdmUser::listUserGroupsObj( $this->User, array(), null, array( $req->UserGroupId ) ) ) {
 				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', 'The given user group with id='.$req->UserGroupId.' does not exist.',
 					null, array( '{GRP_GROUP}' ) );
 			}

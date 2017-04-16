@@ -26,11 +26,16 @@ class AdmDeletePublicationAdminAuthorizationsService extends EnterpriseService
 			);
 	}
 
+	/**
+	 * @inheritdoc
+	 * @param AdmDeletePublicationAdminAuthorizationsRequest $req
+	 */
 	public function restructureRequest( &$req )
 	{
-		if( !$req->PublicationId ) {
-			throw new BizException( 'ERR_ARGUMENT', 'Client', 'No brand id was given.' );
+		if( !$req->PublicationId || !ctype_digit( (string)$req->PublicationId ) ) {
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'No valid brand id was given.' );
 		}
+		$req->PublicationId = intval($req->PublicationId);
 
 		require_once( BASEDIR . '/server/bizclasses/BizAdmPublication.class.php' );
 		if( !BizAdmPublication::doesPublicationIdExists( $req->PublicationId ) ) {
