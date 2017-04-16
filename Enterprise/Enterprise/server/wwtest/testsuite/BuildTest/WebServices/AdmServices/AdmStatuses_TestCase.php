@@ -297,12 +297,9 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmStatuses_TestCase extend
 	 */
 	private function testCreateAndModifyBadStatuses( $request, $existingStatus, $isBrand )
 	{
-		/*
-		 x any of the ids contain non-numeric string or negative number or sql injection (no ids to be concerned with)
-		 */
+		// any of the ids contain non-numeric string or negative number or sql injection (no ids to be concerned with)
 		$request->Ticket = $this->ticket;
 		$enviro = ($isBrand) ? 'brand' : 'overruling issue';
-		//$noRightsUser = $this->createUser();
 
 		for( $i = 1; $i <= 3; $i++ ) {
 			$status = $this->buildStatus();
@@ -326,20 +323,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmStatuses_TestCase extend
 					$stepInfo = $this->action . ' a status in ' . $enviro . ' with an already existing type/name combination.';
 					$expError = '(S1010)';
 					break;
-				/*case 4:
-					DBTicket::expireTicket( $this->ticket );
-					$stepInfo = $this->action . ' a status in ' . $enviro . ' while the ticket is expired.';
-					$expError = '(S1043)';
-					break;
-				case 5:
-					$this->ticket = '';
-					$response = $this->utils->admLogOn( $this, $noRightsUser->Name, $noRightsUser->Password );
-					BizSession::endSession();
-					$request->Ticket = $response->Ticket;
-					$this->ticket = $response->Ticket;
-					$stepInfo = $this->action . ' a status in ' . $enviro . ' that the user has no access to.';
-					$expError = '(S1002)';
-					break;*/
 			}
 
 			if( $this->action == 'modify' ) {
@@ -348,13 +331,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmStatuses_TestCase extend
 			$request->Statuses = array( $status );
 			$this->utils->callService( $this, $request, $stepInfo, $expError );
 		}
-
-		//$this->utils->admLogOff( $this, $this->ticket );
-		//$this->ticket = '';
-
-		//$response = $this->utils->admLogOn( $this );
-		//$this->ticket = $response->Ticket; //reset ticket to the new admin user's ticket
-		//BizSession::endSession();
 	}
 
 	/**
@@ -387,17 +363,14 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmStatuses_TestCase extend
 		$request = $this->getRequestByAction();
 
 		$request->PublicationId = $this->publicationId;
-		$request->StatusIds = $this->brandStatusIds;
-		$this->testGetAndDeleteStatusesForAll( $request, true, '(some)' );
-		$request->StatusIds = array( reset($this->brandStatusIds) );
-		$this->testGetAndDeleteStatusesForAll( $request, true, '(one)' );
+		$request->IssueId = null;
+		$this->testGetAndDeleteStatusesForAll( $request, true, true, $this->brandStatusIds );
+		$this->brandStatusIds = null;
 
-		unset( $request->PublicationId );
+		$request->PublicationId = null;
 		$request->IssueId = $this->overruleIssueId;
-		$request->StatusIds = $this->issueStatusIds;
-		$this->testGetAndDeleteStatusesForAll( $request, false, '(some)' );
-		$request->StatusIds = array( reset($this->issueStatusIds) );
-		$this->testGetAndDeleteStatusesForAll( $request, false, '(one)' );
+		$this->testGetAndDeleteStatusesForAll( $request, false, true, $this->issueStatusIds );
+		$this->issueStatusIds = null;
 	}
 
 	/**
@@ -406,28 +379,51 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmStatuses_TestCase extend
 	 * First performs tests specifically catered to brands before calling
 	 * other test functions to do more general testing.
 	 *
-	 * @param object $request The necessary request
+	 * @param AdmGetStatusesRequest $request The necessary request
 	 */
 	private function testGetStatusesForBrand( $request )
 	{
-		$request->PublicationId = PHP_INT_MAX-1;
-		$stepInfo = $this->action . ' status(es) in a brand with a non-existing brand id.';
-
-		$request->StatusIds = null;
-		$this->utils->callService( $this, $request, $stepInfo . ' (empty)', '(S1056)' );
-		$request->StatusIds = $this->brandStatusIds;
-		$this->utils->callService( $this, $request, $stepInfo . ' (some)', '(S1000)' );
-		$request->StatusIds = array( reset($this->brandStatusIds) );
-		$this->utils->callService( $this, $request, $stepInfo . ' (one)', '(S1000)' );
+		$request->IssueId = null;
+		for( $i = 1; $i <= 6; $i++ ) {
+			$stepInfo = '';
+			$expError = '';
+			switch( $i ) {
+				case 1:
+					$request->PublicationId = PHP_INT_MAX - 1;
+					$stepInfo = $this->action.' status(es) in a brand providing a non-existing brand id.';
+					$expError = '(S1056)'; // not exists
+					break;
+				case 2:
+					$request->PublicationId = -1;
+					$stepInfo = $this->action.' status(es) in a brand providing a negative brand id.';
+					$expError = '(S1000)'; // bad param
+					break;
+				case 3:
+					$request->PublicationId = 0;
+					$stepInfo = $this->action.' status(es) in a brand providing brand id zero.';
+					$expError = '(S1000)'; // bad param
+					break;
+				case 4:
+					$request->PublicationId = null;
+					$stepInfo = $this->action.' status(es) in a brand providing brand id null.';
+					$expError = '(S1000)'; // bad param
+					break;
+				case 5:
+					$request->PublicationId = 'illegal id';
+					$stepInfo = $this->action.' status(es) in a brand providing a non-numeric brand id.';
+					$expError = '(S1000)'; // bad param
+					break;
+				case 6:
+					$request->PublicationId = '123 OR 1=1';
+					$stepInfo = $this->action.' status(es) in a brand providing a brand id that tries SQL injection.';
+					$expError = '(S1000)'; // bad param
+					break;
+			}
+			$this->utils->callService( $this, $request, $stepInfo, $expError );
+		}
 
 		$request->PublicationId = $this->publicationId; //set brand id back to normal
-
-		$request->StatusIds = null;
-		$this->testGetAndDeleteStatusesForAll( $request, true, '(empty)' );
-		$request->StatusIds = $this->issueStatusIds;
-		$this->testGetAndDeleteStatusesForAll( $request, true, '(some)' );
-		$request->StatusIds = array( reset($this->issueStatusIds) );
-		$this->testGetAndDeleteStatusesForAll( $request, true, '(one)' );
+		$this->testGetAndDeleteStatusesForAll( $request, true, false, $this->brandStatusIds );
 	}
 
 	/**
@@ -440,6 +436,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmStatuses_TestCase extend
 	 */
 	private function testGetStatusesForIssue( $request )
 	{
+		$request->PublicationId = null;
+		$request->StatusIds = null;
 		for( $i = 1; $i <= 3; $i++ ) {
 			$stepInfo = '';
 			$expError = '';
@@ -447,45 +445,26 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmStatuses_TestCase extend
 				case 1:
 					$request->IssueId = PHP_INT_MAX-1;
 					$stepInfo = $this->action . ' status(es) in overruling issue with a non-existing issue id.';
-
-					$request->StatusIds = null;
-					$this->utils->callService( $this, $request, $stepInfo . ' (empty)', '(S1056)' );
-					$request->StatusIds = $this->issueStatusIds;
-					$this->utils->callService( $this, $request, $stepInfo . ' (some)', '(S1000)' );
-					$request->StatusIds = array( reset($this->issueStatusIds) );
-					$this->utils->callService( $this, $request, $stepInfo . ' (one)', '(S1000)' );
+					$expError = '(S1056)'; // not exists
 					break;
 				case 2:
 					$request->IssueId = $this->issueId;
 					$stepInfo = $this->action . ' a status in overruling issue with the issue id of a normal issue.';
-					$expError = '(S1000)';
+					$expError = '(S1000)'; // bad param
 					break;
 				case 3:
-					$request->IssueId = $this->overruleIssueId; //reset the issue id to the overruling issue
 					$request->PublicationId = $this->sparePublId;
+					$request->IssueId = $this->overruleIssueId; //reset the issue id to the overruling issue
 					$stepInfo = $this->action . ' a status in overruling issue with a brand id that does not match the owner of the issue.';
-					$expError = '(S1000)';
+					$expError = '(S1000)'; // bad param
 					break;
 			}
-			if( $i == 1) {
-				continue;
-			}
-			$request->StatusIds = null;
-			$this->utils->callService( $this, $request, $stepInfo . ' (empty)', $expError );
-			$request->StatusIds = $this->issueStatusIds;
-			$this->utils->callService( $this, $request, $stepInfo . ' (some)', $expError );
-			$request->StatusIds = array( reset($this->issueStatusIds) );
-			$this->utils->callService( $this, $request, $stepInfo . ' (one)', $expError );
+			$this->utils->callService( $this, $request, $stepInfo, $expError );
 		}
 
 		$request->PublicationId = $this->publicationId; //reset the publicationid to negate the last test
-
-		$request->StatusIds = null;
-		$this->testGetAndDeleteStatusesForAll( $request, false, '(empty)' );
-		$request->StatusIds = $this->issueStatusIds;
-		$this->testGetAndDeleteStatusesForAll( $request, false, '(some)' );
-		$request->StatusIds = array( reset($this->issueStatusIds) );
-		$this->testGetAndDeleteStatusesForAll( $request, false, '(one)' );
+		$request->IssueId = $this->overruleIssueId; //reset the issue id to the overruling issue
+		$this->testGetAndDeleteStatusesForAll( $request, false, false, $this->issueStatusIds );
 	}
 
 	/**
@@ -496,62 +475,67 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmStatuses_TestCase extend
 	 *
 	 * @param object $request The necessary request
 	 * @param boolean $isBrand Brand if true, overruling issue if false
-	 * @param string $statusIdsType Used to keep track of what kind of StatusIds are to be used in a test
+	 * @param boolean $isDelete true for delete, false for get
+	 * @param array $statusIds The status ids to test with
 	 */
-	private function testGetAndDeleteStatusesForAll( $request, $isBrand, $statusIdsType = 'input' )
+	private function testGetAndDeleteStatusesForAll( $request, $isBrand, $isDelete, $statusIds )
 	{
-		//reinforce the right ticket, when this function is called multiple times the old ticket is still in the request (due to test 7)
-		$request->Ticket = $this->ticket;
 		$enviro = ($isBrand) ? 'brand' : 'overruling issue';
-		//$noRightsUser = $this->createUser();
-
-		//if( $request->StatusIds ) { $tempFirstStatusId = reset( $request->StatusIds ); }
-		$i = ($request->StatusIds) ? 1 : 4; //not all tests can be done when statusIds is null
-		for( $i = 1; $i <= 2; $i++ ) {
+		for( $i = 1; $i <= 9; $i++ ) {
 			$stepInfo = '';
 			$expError = '';
 			switch( $i ) {
-				case 1: //id with string
-					$request->StatusIds[0] = 'illegal id';
-					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' using a non-numeric id. ' . $statusIdsType;
+				case 1:
+					$request->StatusIds = array( 'illegal id' );
+					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' providing a non-numeric status id.';
 					$expError = '(S1000)';
 					break;
 				case 2:
-					$request->StatusIds[0] = '123 OR 1=1';
-					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' with an id that tries SQL injection. ' . $statusIdsType;
+					$request->StatusIds = array( '123 OR 1=1' );
+					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' providing a status id that tries SQL injection.';
 					$expError = '(S1000)';
 					break;
-				/*case 3:
-					$request->StatusIds[0] = -1 * intval( $request->StatusIds[0] );
-					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' when an id is negative. ' . $statusIdsType;
-					$expError = '(S1000)';
+				case 3:
+					// get: all statuses of the brand (or overrule issue)
+					// delete: status ids not allowed to be null
+					$request->StatusIds = null;
+					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' without providing any status ids (null).';
+					$expError = $isDelete ? '(S1000)' : '';
+
 					break;
 				case 4:
-					if( $request->StatusIds ) {
-						$request->StatusIds[0] = $tempFirstStatusId; //reset statusid
-					}
-					DBTicket::expireTicket( $this->ticket );
-					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' while the ticket is expired. ' . $statusIdsType;
-					$expError = '(S1043)';
+					$request->StatusIds = array( 0 );
+					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' providing a zero for status id.';
+					$expError = '(S1056)'; // not exists
 					break;
 				case 5:
-					$this->ticket = '';
-					$response = $this->utils->admLogOn( $this, $noRightsUser->Name, $noRightsUser->Password );
-					BizSession::endSession();
-					$request->Ticket = $response->Ticket;
-					$this->ticket = $response->Ticket;
-					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' that the user has no access to. ' . $statusIdsType;
-					$expError = '(S1002)';
-					break;*/
+					$request->StatusIds = array( PHP_INT_MAX-1 );
+					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' providing an non-existing status id.';
+					$expError = '(S1056)'; // not exists
+					break;
+				case 6:
+					$request->StatusIds = array( -1 );
+					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' providing a negative status id.';
+					$expError = '(S1000)';
+					break;
+				case 7:
+					$request->StatusIds = array();
+					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' providing an empty collection of status ids.';
+					$expError = '(S1000)';
+					break;
+				case 8:
+					$request->StatusIds = array( reset( $statusIds ) );
+					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' providing one valid status id.';
+					$expError = '';
+					break;
+				case 9:
+					$request->StatusIds = array( $statusIds[1], $statusIds[2] );
+					$stepInfo = $this->action . ' status(es) in ' . $enviro . ' providing multiple valid status ids.';
+					$expError = '';
+					break;
 			}
 			$this->utils->callService( $this, $request, $stepInfo, $expError );
 		}
-		//$this->utils->admLogOff( $this, $this->ticket );
-		//$this->ticket = '';
-
-		//$response = $this->utils->admLogOn( $this );
-		//$this->ticket = $response->Ticket; //reset ticket to the new admin user's ticket
-		//BizSession::endSession();
 	}
 
 	/**
@@ -599,15 +583,22 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmStatuses_TestCase extend
 	private function cleanupStatuses()
 	{
 		require_once BASEDIR.'/server/services/adm/AdmDeleteStatusesService.class.php';
-		$request = new AdmDeleteStatusesRequest();
-		$request->Ticket = $this->ticket;
-		$request->StatusIds = $this->brandStatusIds;
-		$stepInfo = 'Garbage collector removing statuses from brand';
-		$this->utils->callService( $this, $request, $stepInfo );
-		$request->StatusIds = $this->issueStatusIds;
-		$stepInfo = 'Garbage collector removing statuses from issue';
-		$this->utils->callService( $this, $request, $stepInfo );
 
+		if( $this->ticket && $this->brandStatusIds ) {
+			$request = new AdmDeleteStatusesRequest();
+			$request->Ticket = $this->ticket;
+			$request->StatusIds = $this->brandStatusIds;
+			$stepInfo = 'Garbage collector removing statuses from brand';
+			$this->utils->callService( $this, $request, $stepInfo );
+		}
+
+		if( $this->ticket && $this->issueStatusIds ) {
+			$request = new AdmDeleteStatusesRequest();
+			$request->Ticket = $this->ticket;
+			$request->StatusIds = $this->issueStatusIds;
+			$stepInfo = 'Garbage collector removing statuses from issue';
+			$this->utils->callService( $this, $request, $stepInfo );
+		}
 	}
 
 	/**
