@@ -123,7 +123,7 @@ class EnterpriseService
 			BizSession::setServiceName( $serviceName );
 			if( $logService ) {
 				LogHandler::Log( __CLASS__, 'DEBUG', 'Procesing service request: '.$serviceName );
-				LogHandler::logService( $serviceName, print_r($req,true), true, 'Service' );
+				LogHandler::logService( $serviceName, LogHandler::prettyPrint( $req ), true, 'Service' );
 			}
 
 			// Validate request
@@ -181,7 +181,7 @@ class EnterpriseService
 			// Log response
 			if( $logService ) {
 				$serviceName = str_replace( 'Response', '', get_class($resp) );
-				LogHandler::logService( $serviceName, print_r($resp,true), false, 'Service' );
+				LogHandler::logService( $serviceName, LogHandler::prettyPrint( $resp ), false, 'Service' );
 			}
 
 			// Stop capturing errors (BizException) into reports.
@@ -203,7 +203,7 @@ class EnterpriseService
 				$error->Message = $e->getMessage();
 				$error->Detail = $e->getDetail();
 				$error->ErrorCode = $e->getErrorCode();
-				LogHandler::logService( $serviceName, print_r($error,true), null, 'Service' );
+				LogHandler::logService( $serviceName, LogHandler::prettyPrint( $error ), null, 'Service' );
 			}
 			
 			// The errors raised by ES are not always thrown up by SC to our IDS script.
