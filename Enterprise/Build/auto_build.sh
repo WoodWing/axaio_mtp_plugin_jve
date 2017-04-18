@@ -288,6 +288,7 @@ function ionCubeEnterpriseFiles {
 		Enterprise/server/regserver.inc.php \
 		Enterprise/server/bizclasses/BizServerJob.class.php \
 		Enterprise/server/bizclasses/BizPublishing.class.php \
+		Enterprise/server/bizclasses/BizSemaphore.class.php \
 		Enterprise/server/utils/DigitalPublishingSuiteClient.class.php \
 		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
 		plugins/release/Elvis/Elvis_WflLogOn.class.php \
