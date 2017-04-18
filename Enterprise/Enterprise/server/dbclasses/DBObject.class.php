@@ -638,27 +638,27 @@ class DBObject extends DBBase
 		return isset( $row['id'] );
 	}
 
- 	/**
- 	 * Checks if the Objects exists.
- 	 *
- 	 * Searches either the smart_deletedobjects or the smart_objects table based on the $area parameter
- 	 * and returns a list of object ids of those objects that do exists in that table.
- 	 *
- 	 * @param integer[] $ids The Object Ids to search for.
- 	 * @param string $area The area to search for 'Trash' or 'Workflow'.
- 	 * @return integer[] Object ids of those Objects that were found in the specified area.
- 	 * @throws BizException Throws an Exception if the Database connection fails.
- 	 */
- 	public static function filterExistingObjectIds( array $ids, $area )
- 	{
-	   $where = self::addIntArrayToWhereClause( 'id', $ids, false );
-	   if( !$where ) { // Bail out for bad collection of ids.
-		   return array();
-	   }
-	   $tableName = $area == 'Workflow' ? self::TABLENAME : 'deletedobjects';
-	   $rows = self::listRows( $tableName, 'id', '', $where );
-	   return $rows ? array_keys( $rows ) : array();
- 	}
+	/**
+	 * Checks if the Objects exists.
+	 *
+	 * Searches either the smart_deletedobjects or the smart_objects table based on the $area parameter
+	 * and returns a list of object ids of those objects that do exists in that table.
+	 *
+	 * @param integer[] $ids The Object Ids to search for.
+	 * @param string $area The area to search for 'Trash' or 'Workflow'.
+	 * @return integer[] Object ids of those Objects that were found in the specified area.
+	 * @throws BizException Throws an Exception if the Database connection fails.
+	 */
+	public static function filterExistingObjectIds( array $ids, $area )
+	{
+		$where = self::addIntArrayToWhereClause( 'id', $ids, false );
+		if( !$where ) { // Bail out for bad collection of ids.
+			return array();
+		}
+		$tableName = $area == 'Workflow' ? self::TABLENAME : 'deletedobjects';
+		$rows = self::listRows( $tableName, 'id', '', $where );
+		return $rows ? array_keys( $rows ) : array();
+	}
 
 	/**
 	 * Tells if a given definition is in use by any object in the DB.
