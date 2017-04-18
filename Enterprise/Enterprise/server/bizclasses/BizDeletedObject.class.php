@@ -731,9 +731,9 @@ class BizDeletedObject
 	/**
 	 * Update the object and its children search indexes.
 	 *
-	 * @param Object $object The deleted/restored Object to be reindexed.
-	 * @param string $area Where the $object is currently resided, so that the reindex can take place on the correct area. 'Worfklow' or 'Trash'.
-	 * @param bool $deletedRelations During retreival of the children, whether it should retrieve for the deleted relations as well.
+	 * @param Object $object The deleted/restored Object to be re-indexed.
+	 * @param string $area Where the $object is currently resided, so that the reindex can take place on the correct area. 'Workflow' or 'Trash'.
+	 * @param bool $deletedRelations During retrieval of the children, whether it should retrieve for the deleted relations as well.
 	 */
 	private static function indexObjectAndItsChildren( $object, $area, $deletedRelations )
 	{
@@ -756,21 +756,21 @@ class BizDeletedObject
 
 			// Child objects that are used too many times whether it is placed/contained etc will not be re-indexed to avoid performance loss.
 			// For example, an icon / logo (an image) that is placed on many layouts - will not be re-indexed.
-			$childToBeReindexed = array();
+			$childIdsToBeReindexed = array();
 			if( $workflowOrTrashChildIds ) foreach( $workflowOrTrashChildIds as $childId ) {
 				if( !BizRelation::manifoldPlacedChild( $childId ) ) {
-					$childToBeReindexed[] = $childId;
+					$childIdsToBeReindexed[] = $childId;
 				}
 			}
 
-			// Finally, reindex only the relevant children.
-			if( $childToBeReindexed ) {
-				BizSearch::indexObjectsByIds( $childToBeReindexed, true, array( 'Workflow' ), true );
+			// Finally, re-index only the relevant children.
+			if( $childIdsToBeReindexed ) {
+				BizSearch::indexObjectsByIds( $childIdsToBeReindexed, true, array( 'Workflow' ) );
 			}
 		}
 
-		// Then, re-indxeing the "subject" object. (the object that got deleted/restored.
-		BizSearch::indexObjects( array( $object ), true/*$suppressExceptions*/, array( $area )/*$areas*/, true );
+		// Then, re-indexing the "subject" object. (the object that got deleted/restored ).
+		BizSearch::indexObjects( array( $object ), true, array( $area ), true );
 	}
 
 	/**
