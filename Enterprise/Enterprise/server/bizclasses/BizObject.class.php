@@ -1967,7 +1967,6 @@ class BizObject
 			// Flatten the MetaDataValue list and resolve the type, prevalidation is already done by the service and possibly
 			// by the Plugins. We want to create a list of standard properties and custom properties.
 			$objectProperties = array( 'standard' => array(), 'custom' => array() );
-			require_once BASEDIR.'/server/utils/ListEncoder.php';
 			foreach( $metaDataValues as $index => $metaDataValue ) {
 				if( $metaDataValue->PropertyValues ) {
 					// Normalize the property values.
@@ -1993,13 +1992,9 @@ class BizObject
 					} else {
 						$propType = BizProperty::getStandardPropertyType( $metaDataValue->Property );
 					}
-					if( substr( $propType, 0, 5) == 'multi' && $propType != 'multiline' && is_array( $propValues )) { // BZ#13545 exclude multiline!
-						// Typically for multilist or multistring
-						$encoder = new WW_Utils_ListEncoder( '\\', '/' );
-						$val = $encoder->encodeList( $propValues );
-					} else { // single value
-						$val = $propValues[0];
-					}
+					$val = ( $propType == 'multilist' || $propType == 'multistring')
+						? implode( BizProperty::MULTIVALUE_SEPARATOR, $propValues )
+						: $propValues[0];
 					$objectProperties[$key][$metaDataValue->Property] = $val;
 				}
 			}
@@ -3849,6 +3844,34 @@ class BizObject
 	}
 
 	/**
+	 * Adds the first level of data structure to a given MetaData tree.
+	 *
+	 * @since 10.2.0
+	 * @param MetaData $metadata
+	 */
+	public static function completeMetaDataStructure( MetaData $metadata )
+	{
+		if( !isset($metadata->BasicMetaData) ) {
+			$metadata->BasicMetaData = new BasicMetaData();
+		}
+		if( !isset($metadata->RightsMetaData) ) {
+			$metadata->RightsMetaData = new RightsMetaData();
+		}
+		if( !isset($metadata->SourceMetaData) ) {
+			$metadata->SourceMetaData = new SourceMetaData();
+		}
+		if( !isset($metadata->ContentMetaData) ) {
+			$metadata->ContentMetaData = new ContentMetaData();
+		}
+		if( !isset($metadata->WorkflowMetaData) ) {
+			$metadata->WorkflowMetaData = new WorkflowMetaData();
+		}
+		if( !isset($metadata->ExtraMetaData) ) {
+			$metadata->ExtraMetaData = array();
+		}
+	}
+
+	/**
 	 * This function validates if the native file is available in the filestore for the following
 	 * object types:
 	 * - Article
@@ -4287,7 +4310,6 @@ class BizObject
 			}
 
 			require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
-			require_once BASEDIR.'/server/utils/ListEncoder.php';
 			$extradata = DBProperty::getProperties( $meta->BasicMetaData->Publication->Id, $objType, true, $publishSystem, $templateId );
 			if( $extradata ) foreach ( $extradata as $extra ) {
 				foreach( $extraMetaData as $md ) {
@@ -4321,8 +4343,7 @@ class BizObject
 								$mdValues[] = $mdNode->Values;
 							}// <<<
 							if( substr($extra->Type, 0, 5) == 'multi' && $extra->Type != 'multiline' && is_array($mdValues)) { // BZ#13545 exclude multiline!
-								$encoder = new WW_Utils_ListEncoder( '\\', '/' );
-								$value = $encoder->encodeList( $mdValues );
+								$value = implode( BizProperty::MULTIVALUE_SEPARATOR, $mdValues ); // typically for multilist and multistring
 							} else { // single value
 								$value = $mdValues[0];
 							}
@@ -4472,14 +4493,12 @@ class BizObject
 				require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
 				$extradata = DBProperty::getProperties( $row['PublicationId'], $row['Type'], true, $publishSystem, $templateId );
 				if ($extradata){
-					require_once BASEDIR . '/server/utils/ListEncoder.php';
 					foreach ($extradata as $extra) {
 						$name = $extra->Name;
 						if ( isset( $row[$name] )) {
 							if( substr( $extra->Type, 0, 5 ) == 'multi' && $extra->Type != 'multiline' ) { // BZ#13545 exclude multiline!
 								// typically for multilist and multistring
-								$encoder = new WW_Utils_ListEncoder( '\\', '/' );
-								$values = $encoder->decodeList( $row[$name] );
+								$values = explode( BizProperty::MULTIVALUE_SEPARATOR, $row[$name]);
 							} else {
 								$theVal = $row[$name];
 								settype( $theVal, 'string' ); // BZ#4930: Force <String> elems (to avoid <item> for booleans)

@@ -1844,16 +1844,18 @@ class BizQuery extends BizQueryBase
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 		$params = array( new QueryParam( 'ID', '=', $objectId, false ) );
 
-		$row = '';
+		$row = array();
 		$reqPropIds = array_keys( BizProperty::getPropertiesForObject( $objectId, $publishSystem, $templateId ) );
-		if( is_null( $areas ) || in_array( 'Workflow', $areas ) ) { // null is the same as $areas=array('workflow') Refer to WSDL
-			$sqlArray = self::buildSQLArray( $reqPropIds, $params, null, false ); //false = look in workflow
-			$row = DBQuery::getObjectRow( $objectId, $sqlArray );
-		}
+		if( $reqPropIds ) { // object found?
+			if( is_null( $areas ) || in_array( 'Workflow', $areas ) ) { // null is the same as $areas=array('workflow') Refer to WSDL
+				$sqlArray = self::buildSQLArray( $reqPropIds, $params, null, false ); //false = look in workflow
+				$row = DBQuery::getObjectRow( $objectId, $sqlArray );
+			}
 
-		if( !$row && !is_null( $areas ) && in_array( 'Trash', $areas ) ) { // When Object not found in 'Workflow' above, look in the 'Trash' but only when it is asked, i.e $area= array('Trash');
-			$sqlArray = self::buildSQLArray( $reqPropIds, $params, null, true ); //true = look in trash
-			$row = DBQuery::getObjectRow( $objectId, $sqlArray );
+			if( !$row && !is_null( $areas ) && in_array( 'Trash', $areas ) ) { // When Object not found in 'Workflow' above, look in the 'Trash' but only when it is asked, i.e $area= array('Trash');
+				$sqlArray = self::buildSQLArray( $reqPropIds, $params, null, true ); //true = look in trash
+				$row = DBQuery::getObjectRow( $objectId, $sqlArray );
+			}
 		}
 
 		if( $row ) {

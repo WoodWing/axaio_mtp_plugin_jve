@@ -14,6 +14,22 @@ require_once BASEDIR.'/server/services/EnterpriseService.class.php';
 
 class WflCreateObjectsService extends EnterpriseService
 {
+	/**
+	 * @inheritdoc
+	 * @since 10.2.0
+	 */
+	protected function restructureRequest( &$request )
+	{
+		// Clients may provide very little structure, such as the Digital Editor (CSDE).
+		// Let's be friendly and don't bother the core and the connectors with that. [EN-88915]
+		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+		if( $request->Objects ) foreach( $request->Objects as &$object ) {
+			if( isset( $object->MetaData ) ) {
+				BizObject::completeMetaDataStructure( $object->MetaData );
+			}
+		}
+	}
+
 	public function execute( WflCreateObjectsRequest $req )
 	{
 		$this->enableReporting();
