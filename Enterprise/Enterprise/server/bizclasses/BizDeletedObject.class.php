@@ -731,6 +731,11 @@ class BizDeletedObject
 	/**
 	 * Update the object and its children search indexes.
 	 *
+	 * If an object is moved to the Trash Can the relations to this object are set to having 'deleted' relation.
+	 * In that case 'deleted' relations must be taken into account so $deletedRelations is set to 'true'.
+	 * If the same object is restored from the Trash Can its relations are no longer marked as 'deleted'
+	 * so $deletedRelations should be passed in as 'false'.
+	 *
 	 * @param Object $object The deleted/restored Object to be re-indexed.
 	 * @param string $area Where the $object is currently resided, so that the reindex can take place on the correct area. 'Workflow' or 'Trash'.
 	 * @param bool $deletedRelations During retrieval of the children, whether it should retrieve for the deleted relations as well.
