@@ -12,6 +12,7 @@
  * Support for cookie enabled sessions; The ticket can be provided in a cookie (although it can be set to the URL as well).
  * When the URL contains a 'version' parameter, a HTTP 404 is returned when that version no longer exists in the history.
  * If the requested file or version could not be found in the Workflow, the History and the Trash Can will be checked as well.
+ * However, the areas parameter can be used to search explicitly into the Workflow or Trash Can, or to swap the search order.
  * The CROSS_ORIGIN_HEADERS option (configserver.php) is supported that allows JavaScript clients hosted elsewhere to connect.
  * Error messages are not localised and so they should not be shown to end users. Clients should act on the HTTP codes.
  *
@@ -26,8 +27,10 @@
  *              For stable URLs, clients may pass the ticket in the web cookie instead.
  * - objectid:  The ID of the workflow object in Enterprise. The object may reside in workflow, history or trash can.
  * - rendition: The file rendition. Options: native, preview, thumb, etc. See SCEnterprise.wsdl for the complete list.
- * - version:   Optional. The object version to retrieve the file for. When omitted, the last version is returned.
  * - inline:    Useful for web browsers. When omitted, the preview is downloaded as a file, else shown inline.
+ * - areas:     In which areas to search for. Supported values are 'Workflow' and 'Trash'. Use comma to specify both.
+ *              When both values are given, the sequence will be respected when searching. By default it searches in
+ *              the Workflow area first, and when not found it searches in Trash area.
  *
  * The following HTTP codes may be returned:
  * - HTTP 200: The file is found and is streamed back to caller.
@@ -35,7 +38,7 @@
  * - HTTP 401: When ticket is no longer valid. This should be detected by the client to do a re-login.
  *             The new ticket obtained should be applied to URL or cookie to try again.
  * - HTTP 403: The user has no Read access to the invoked object.
- * - HTTP 404: The file could not be found in the FileStore.
+ * - HTTP 404: The file could not be found. Either the file rendition is not available in the FileStore or the object is not found in the requested areas.
  * - HTTP 405: Bad HTTP method requested by caller. Only GET and OPTIONS are supported.
  * - HTTP 500: Unexpected server error.
  */
@@ -117,9 +120,21 @@ class WW_FileIndex
 		$this->httpParams['rendition'] = isset($_GET['rendition']) ? $_GET['rendition'] : null;
 		$this->httpParams['objectid'] = isset($_GET['objectid']) ? intval($_GET['objectid']) : null;
 		$this->httpParams['inline'] = array_key_exists( 'inline', $_GET );
-		$this->httpParams['version'] = isset($_GET['version']) ? $_GET['version'] : null;
+		$this->httpParams['areas'] = isset($_GET['areas']) ? $_GET['areas'] : 'Workflow,Trash';
+		$this->httpParams['expectedError'] = isset($_GET['expectedError']) ? $_GET['expectedError'] : null;
 
-		// Validate required parameters.
+		// Transform the comma separated areas param (string) into an array of string values.
+		$areas = explode( ',', $this->httpParams['areas'] );
+		$areas = array_map( 'strval', $areas );
+		$areas = array_map( 'trim', $areas );
+		if( array_diff( $areas, array( 'Workflow', 'Trash' ) ) ) {
+			$message = 'Please specify "Workflow" and/or "Trash" for the "areas" param at URL. '.
+				'Use "areas=Workflow,Trash" to specify both and to look into Workflow first, then Trash Can.';
+			throw new WW_FileIndex_HttpException( $message, 400 );
+		}
+		$this->httpParams['areas'] = $areas;
+
+			// Validate required parameters.
 		if( !$this->httpParams['ticket'] ) {
 			$message = 'Please specify "ticket" param at URL or provide it as a web cookie.';
 			throw new WW_FileIndex_HttpException( $message, 400 );
@@ -137,7 +152,11 @@ class WW_FileIndex
 		if( LogHandler::debugMode() ) {
 			$msg = 'Incoming HTTP params: ';
 			foreach( $this->httpParams as $key => $value ) {
-				$msg .= "{$key}=[{$value}] ";
+				if( is_array( $value ) ) {
+					$msg .= "{$key}=[".implode(',',$value)."] ";
+				} else {
+					$msg .= "{$key}=[{$value}] ";
+				}
 			}
 			LogHandler::Log( 'FileStoreService', 'DEBUG', $msg );
 		}
@@ -164,7 +183,7 @@ class WW_FileIndex
 
 		// Get essential object properties. Don't call GetObjects/QueryObjects to save time.
 		$objectId = $this->httpParams['objectid'];
-		$objectProps = $this->getObjectProperties( $objectId );
+		$objectProps = $this->getObjectProperties( $objectId, $this->httpParams['areas'] );
 
 		// Check if user has Read access to the object/file.
 		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
@@ -174,18 +193,17 @@ class WW_FileIndex
 		}
 
 		// Determine the file path and stream its content directly from FileStore over HTTP back to caller.
-		$version = $this->httpParams['version'] ? $this->httpParams['version'] : $objectProps['Version'];
 		$contentSource = trim($objectProps['ContentSource']);
 		if( $contentSource ) { // shadow
 			$filePath = $this->getFilePathForShadowObject( $user );
 		} else {
-			$filePath = $this->getStorePath( $objectProps, $version, $this->httpParams['rendition'] );
+			$filePath = $this->getStorePath( $objectProps, $this->httpParams['rendition'] );
 		}
 		if( !$filePath ) {
 			$message = "File not found for object {$objectId}.";
 			throw new WW_FileIndex_HttpException( $message, 404 );
 		}
-		$this->handleDownload( $filePath, $objectProps['Name'], $objectProps['Format'], $version );
+		$this->handleDownload( $filePath, $objectProps['Name'], $objectProps['Format'], $objectProps['Version'] );
 
 		if( $this->transferFiles ) {
 			$bizTransfer = new BizTransferServer();
@@ -199,10 +217,11 @@ class WW_FileIndex
 	 * Retrieve essential object properties (that are just enough to check access rights and determine download file).
 	 *
 	 * @param string $objectId
+	 * @param string[] $areas
 	 * @return array Object properties with upper camel case keys (e.g. ContentSource)
 	 * @throws WW_FileIndex_HttpException
 	 */
-	protected function getObjectProperties( $objectId )
+	protected function getObjectProperties( $objectId, $areas )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBVersion.class.php';
@@ -211,12 +230,9 @@ class WW_FileIndex
 			'id', 'name', 'format', 'types', 'storename', 'majorversion', 'minorversion', // used by getStorePath
 			'documentid', 'type', 'publication', 'section', 'state', 'contentsource', 'routeto' // used by checkRightsForObjectProps
 		);
-		$propsPerObject = DBObject::getColumnsValuesForObjectIds( array($objectId), array('Workflow'), $columns );
+		$propsPerObject = DBObject::getColumnsValuesForObjectIds( array( $objectId ), $areas, $columns );
 		if( !isset($propsPerObject[$objectId]) ) {
-			$propsPerObject = DBObject::getColumnsValuesForObjectIds( array($objectId), array('Trash'), $columns );
-		}
-		if( !isset($propsPerObject[$objectId]) ) {
-			$message = "Object {$objectId} not found in Workflow nor Trash Can.";
+			$message = "Object {$objectId} not found in requested areas (".implode(',',$areas).").";
 			throw new WW_FileIndex_HttpException( $message, 404 );
 		}
 		$objectProps = $propsPerObject[$objectId];
@@ -243,23 +259,19 @@ class WW_FileIndex
 	 *
 	 * @param array $objectProps
 	 * @param string $rendition
-	 * @param string $version Object version in major.minor notation.
 	 * @return null|string File path.
 	 * @throws WW_FileIndex_HttpException when the file could not be found.
 	 */
-	protected function getStorePath( $objectProps, $version, $rendition )
+	protected function getStorePath( $objectProps, $rendition )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizStorage.php';
-
 		$filePath = null;
 		$types = unserialize( $objectProps['Types'] );
-		$storename = $objectProps['StoreName'];
 		if( array_key_exists( $rendition, $types ) ) {
-			$format = $types[ $rendition ];
-			$fileStorage = StorageFactory::gen( $storename, $objectProps['ID'], $rendition, $format, $version );
-			$bFound = $fileStorage->doesFileExist();
-			if( $bFound ) {
-				$filePath = $fileStorage->getFilename();
+			require_once BASEDIR.'/server/bizclasses/BizStorage.php';
+			$attachment = BizStorage::getFile( $objectProps, $rendition,
+				$objectProps['Version'], null, false );
+			if( $attachment ) {
+				$filePath = $attachment->FilePath;
 			}
 		}
 		if( !$filePath ) {
@@ -316,20 +328,11 @@ class WW_FileIndex
 		$rendition = $this->httpParams['rendition'];
 		$objectId = $this->httpParams['objectid'];
 		try {
-// Commented out: Somehow this does not work for Elvis. For now we get latest version only for shadows.
-//			if( $this->httpParams['version'] ) {
-//				require_once BASEDIR.'/server/bizclasses/BizVersion.class.php';
-//				$versionInfo = BizVersion::getVersion( $objectId, $user, $this->httpParams['version'], $rendition, array( 'Workflow', 'Trash' ) );
-//				if( isset($versionInfo->File) ) {
-//					$filePath = $versionInfo->File->FilePath;
-//				}
-//			} else {
-				require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-				$object = BizObject::getObject( $objectId, $user, false, $rendition, array( 'NoMetaData' ) );
-				if( isset($object->Files[0]) ) {
-					$filePath = $object->Files[0]->FilePath;
-				}
-//			}
+			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+			$object = BizObject::getObject( $objectId, $user, false, $rendition, array( 'NoMetaData' ) );
+			if( isset($object->Files[0]) ) {
+				$filePath = $object->Files[0]->FilePath;
+			}
 		} catch( BizException $e ) {
 			throw WW_FileIndex_HttpException::createFromBizException( $e );
 		}

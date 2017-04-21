@@ -977,11 +977,11 @@ class WW_Utils_TestSuite
 	 *
 	 * @param TestCase $testCase
 	 * @param string $ticket Ticket retrieved on logon
-	 * @param array $objects List of objects to be created via CreateObjects service call.
+	 * @param Object[] $objects List of objects to be created via CreateObjects service call.
 	 * @param bool $lock Whether or not to lock the object
 	 * @param string|null $stepInfo Optional step info in case an error occurs
 	 * @param string|NULL $expectedErrorCodeOrMsgKey The exception message from BizException->getMessage(), Null when no error is expected.
-	 * @return created objects
+	 * @return WflCreateObjectsResponse
 	 */
 	public function callCreateObjectService( TestCase $testCase, $ticket, $objects, $lock = false, $stepInfo = null, $expectedErrorCodeOrMsgKey = null )
 	{
@@ -993,6 +993,36 @@ class WW_Utils_TestSuite
 		$request->Objects	= $objects;
 
 		$response = self::callService( $testCase, $request, $stepInfo ? $stepInfo : 'Create object', $expectedErrorCodeOrMsgKey );
+		if( is_null($response) ) {
+			return null;
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Save new version of workflow objects into DB / FileStore.
+	 *
+	 * @param TestCase $testCase
+	 * @param string $ticket
+	 * @param Object[] $objects Workflow objects to save.
+	 * @param bool $unlock Whether or not to unlock the object
+	 * @param string|null $stepInfo Optional step info in case an error occurs
+	 * @param string|NULL $expectedErrorCodeOrMsgKey The exception message from BizException->getMessage(), Null when no error is expected.
+	 * @return mixed|null
+	 */
+	public function saveObjects( TestCase $testCase, $ticket, $objects, $unlock, $stepInfo = null, $expectedErrorCodeOrMsgKey = null )
+	{
+		// Create the article objects at Enterprise DB
+		require_once BASEDIR . '/server/services/wfl/WflSaveObjectsService.class.php';
+		$request = new WflSaveObjectsRequest();
+		$request->Ticket = $ticket;
+		$request->CreateVersion = true;
+		$request->ForceCheckIn = false;
+		$request->Unlock = $unlock;
+		$request->Objects = $objects;
+
+		$response = self::callService( $testCase, $request, $stepInfo ? $stepInfo : 'Save object', $expectedErrorCodeOrMsgKey );
 		if( is_null($response) ) {
 			return null;
 		}
