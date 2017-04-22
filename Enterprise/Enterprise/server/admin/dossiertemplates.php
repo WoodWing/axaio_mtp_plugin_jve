@@ -139,18 +139,6 @@ switch( $mode ) {
 		break;
 }
 
-if( $mode == 'delete' ) {
-	if( $object > 0) {
-		if ($issueId) {
-			header("Location:hppublissues.php?id=$issueId");
-			exit();
-		} else {
-			header("Location:hppublications.php?id=$pubId");
-			exit();
-		}
-	}
-}
-
 $txt = HtmlDocument::loadTemplate( 'dossiertemplates.htm' );
 
 // fields
