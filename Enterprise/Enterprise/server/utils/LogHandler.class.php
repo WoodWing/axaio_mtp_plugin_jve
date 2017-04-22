@@ -597,8 +597,6 @@ class LogHandler
 					$message .= "\nLine: ".$exception->getLine();
 					$message .= "\nTrace: ".$exception->getTraceAsString();
 				}
-				$p = new Error();
-				$p->
 				$message .= "\nException Stack:\n".self::getExceptionBackTrace( $exception );
 			}
 		}
