@@ -70,7 +70,7 @@ class AdmGetTemplateObjectsService extends EnterpriseService
 		}
 
 		if( $req->TemplateObjectId ) {
-			if( !ctype_digit( $req->TemplateObjectId ) ) {
+			if( !ctype_digit( (string)$req->TemplateObjectId ) ) {
 				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The given user template object id is not valid.');
 			}
 			$req->TemplateObjectId = intval($req->TemplateObjectId);
@@ -84,7 +84,7 @@ class AdmGetTemplateObjectsService extends EnterpriseService
 		}
 
 		if( $req->UserGroupId ) {
-			if( !ctype_digit( $req->UserGroupId ) ) {
+			if( !ctype_digit( (string)$req->UserGroupId ) ) {
 				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The given user user group id is not valid.');
 			}
 			$req->UserGroupId = intval($req->UserGroupId);

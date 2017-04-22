@@ -75,11 +75,11 @@ class AdmRemoveTemplateObjectsService extends EnterpriseService
 		if( $req->TemplateObjects ) foreach( $req->TemplateObjects as &$templateObject ) {
 			$templateObject->PublicationId = $req->PublicationId;
 			$templateObject->IssueId = $req->IssueId;
-			if( !ctype_digit( $templateObject->UserGroupId ) ) {
+			if( !ctype_digit( (string)$templateObject->UserGroupId ) ) {
 				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The given user user group id is not valid.');
 			}
 			$templateObject->UserGroupId = intval($templateObject->UserGroupId);
-			if( !ctype_digit( $templateObject->TemplateObjectId ) ) {
+			if( !ctype_digit( (string)$templateObject->TemplateObjectId ) ) {
 				throw new BizException( 'ERR_ARGUMENT', 'Client', 'The given template object id is not valid.');
 			}
 			$templateObject->TemplateObjectId = intval($templateObject->TemplateObjectId);
