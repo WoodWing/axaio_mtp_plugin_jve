@@ -11,6 +11,8 @@ $ticket = checkSecure('publadmin');
 // determine incoming mode
 if (isset($_REQUEST['update']) && $_REQUEST['update']) {
 	$mode = 'update';
+} else if (isset($_REQUEST['delete']) && $_REQUEST['delete'] == 2) {
+	$mode = 'delete_all';
 } else if (isset($_REQUEST['delete']) && $_REQUEST['delete']) {
 	$mode = 'delete';
 } else if (isset($_REQUEST['add']) && $_REQUEST['add']) {
@@ -86,43 +88,61 @@ switch( $mode ) {
 			}
 		}
 		break;
-	case 'delete':
-		if( !$groupId ) { //no group id is given when delete is called from publication overview
-			$templateObjects = array();
-			try {
-				require_once BASEDIR.'/server/services/adm/AdmGetTemplateObjectsService.class.php';
-				$request = new AdmGetTemplateObjectsRequest();
-				$request->Ticket = $ticket;
-				$request->RequestModes = array();
-				$request->PublicationId = $pubId;
-				$request->IssueId = $issueId;
-				$request->TemplateObjectId = $object;
-				$request->UserGroupId = null;
-				$service = new AdmGetTemplateObjectsService();
-				$response = $service->execute( $request );
-				$templateObjects = $response->TemplateObjects;
-			} catch( BizException $e ) {
-				$errors[] = $e->getMessage();
-				$mode = 'error';
-			}
-			$userGroupIds = array();
-			if( $templateObjects ) foreach( $templateObjects as $templateObject ) {
-				$userGroupIds[] = $templateObject->UserGroupId;
-			}
-			$templateObjects = array();
-			if( $userGroupIds ) foreach( $userGroupIds as $userGroupId ) {
-				$templateObject = new AdmTemplateObjectAccess();
-				$templateObject->TemplateObjectId = $object;
-				$templateObject->UserGroupId = $userGroupId;
-				$templateObjects[] = $templateObject;
-			}
-		} else { //delete called from the dossiertemplates overview
+	case 'delete_all': // delete is called from Brand Maintenance page
+		$templateObjects = array();
+		try {
+			require_once BASEDIR.'/server/services/adm/AdmGetTemplateObjectsService.class.php';
+			$request = new AdmGetTemplateObjectsRequest();
+			$request->Ticket = $ticket;
+			$request->RequestModes = array();
+			$request->PublicationId = $pubId;
+			$request->IssueId = $issueId;
+			$request->TemplateObjectId = $object;
+			$request->UserGroupId = null;
+			$service = new AdmGetTemplateObjectsService();
+			$response = $service->execute( $request );
+			$templateObjects = $response->TemplateObjects;
+		} catch( BizException $e ) {
+			$errors[] = $e->getMessage();
+			$mode = 'error';
+		}
+		$userGroupIds = array();
+		if( $templateObjects ) foreach( $templateObjects as $templateObject ) {
+			$userGroupIds[] = $templateObject->UserGroupId;
+		}
+		$templateObjects = array();
+		if( $userGroupIds ) foreach( $userGroupIds as $userGroupId ) {
 			$templateObject = new AdmTemplateObjectAccess();
 			$templateObject->TemplateObjectId = $object;
-			$templateObject->UserGroupId = $groupId;
+			$templateObject->UserGroupId = $userGroupId;
 			$templateObjects[] = $templateObject;
 		}
-
+		try {
+			require_once BASEDIR.'/server/services/adm/AdmRemoveTemplateObjectsService.class.php';
+			$request = new AdmRemoveTemplateObjectsRequest();
+			$request->Ticket = $ticket;
+			$request->PublicationId = $pubId;
+			$request->IssueId = $issueId;
+			$request->TemplateObjects = $templateObjects;
+			$service = new AdmRemoveTemplateObjectsService();
+			$service->execute( $request );
+		} catch( BizException $e ) {
+			$errors[] = $e->getMessage();
+			$mode = 'error';
+		}
+		if( $issueId ) {
+			header( "Location:hppublissues.php?id=$issueId" );
+			exit();
+		} else {
+			header( "Location:hppublications.php?id=$pubId" );
+			exit();
+		}
+		break;
+	case 'delete': // delete called from the dossiertemplates page
+		$templateObject = new AdmTemplateObjectAccess();
+		$templateObject->TemplateObjectId = $object;
+		$templateObject->UserGroupId = $groupId;
+		$templateObjects[] = $templateObject;
 		try {
 			require_once BASEDIR.'/server/services/adm/AdmRemoveTemplateObjectsService.class.php';
 			$request = new AdmRemoveTemplateObjectsRequest();

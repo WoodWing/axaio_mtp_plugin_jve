@@ -872,7 +872,7 @@ class PublicationMaintenanceApp
 					$clr = $color[$cnt%2];
 					$groups = implode($grpArr[$objId], ', ');
 					$detail .= "<tr$clr><td><a href='dossiertemplates.php?publ=$id&objid=$objId'>".formvar($dosArr[$objId]).'</a></td>';
-					$detail .= "<td>".formvar($groups)."</td><td><a href='dossiertemplates.php?publ=$id&issue=0&delete=1&objid="
+					$detail .= "<td>".formvar($groups)."</td><td><a href='dossiertemplates.php?publ=$id&issue=0&delete=2&objid="
 							.$objId
 							."' onClick='return myconfirm(\"delpublobjects\")'>"
 							."<img src=\"../../config/images/remov_16.gif\" border=\"0\" title=\"".BizResources::localize("ACT_DELETE")."\"/>"
