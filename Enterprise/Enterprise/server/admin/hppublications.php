@@ -69,6 +69,7 @@ $del = isset($_REQUEST['del']) ? intval($_REQUEST['del']) : 0;
 $errors = array();
 $validateErrors = array();
 $app = new PublicationMaintenanceApp();
+$pubObj = null;
 try {
 	$pubObj = $app->buildPublicationObj( $ticket, $id );
 } catch( BizException $e ) {
@@ -343,6 +344,7 @@ class PublicationMaintenanceApp
 			}
 			$prop = BizAdmProperty::newHtmlField( $doc, $form, $prefix, $widget );
 			$found = false;
+			$mdValue = null;
 			foreach( $mdValues as $mdValue ) {
 				if( $mdValue->Property == $widget->PropertyInfo->Name ) {
 					$found = true;
@@ -376,6 +378,7 @@ class PublicationMaintenanceApp
 			// Only if the property is not a custom property add this to the page. Otherwise the data cannot be saved in the channeldata table.
 			$prop = BizAdmProperty::newHtmlField( $doc, $form, $prefix, $widget );
 			$found = false;
+			$mdValue = null;
 			foreach( $mdValues as $mdValue ) {
 				if( $mdValue->Property == $widget->PropertyInfo->Name ) {
 					$found = true;
@@ -440,7 +443,6 @@ class PublicationMaintenanceApp
 	 */
 	private function drawHtmlField( AdmPublication $pubObj, DialogWidget $widget, Utils_XHtmlField $htmlPropObj, $validateError, $width = 200 )
 	{
-		$pubObj = $pubObj; // keep code analyzer happy
 		if( $widget->PropertyInfo->Name == 'AutoPurge' ) {
 			$postfix = ' '.BizResources::localize('TIME_DAYS');
 			$htmlPropObj->setWidth( 100 );
