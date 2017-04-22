@@ -127,6 +127,23 @@ class WW_Utils_FileStoreClient
 	}
 
 	/**
+	 * Retrieve the file rendition of the downloaded file.
+	 *
+	 * @return string|null The file rendition, or NULL when response was an error.
+	 */
+	public function getAttachmentRendition()
+	{
+		$rendition = null;
+		if( $this->response->isSuccess() ) {
+			$header = $this->response->getHeaders()->get( 'WW-Attachment-Rendition' );
+			if( $header) {
+				$rendition = $header->getFieldValue();
+			}
+		}
+		return $rendition;
+	}
+
+	/**
 	 * If the Transfer Server is accessed over SSL extra options on the Curl adapter has to be set.
 	 *
 	 * @throws BizException

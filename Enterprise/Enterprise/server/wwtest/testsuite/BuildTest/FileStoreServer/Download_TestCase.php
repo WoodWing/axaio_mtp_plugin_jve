@@ -170,11 +170,21 @@ class WW_TestSuite_BuildTest_FileStoreServer_Download_TestCase extends TestCase
 		$client = new WW_Utils_FileStoreClient( $this->ticket );
 		$uploadedImageFilePath = __DIR__.'/testdata/image1.jpg';
 
-		// Download latest version and request to search in both areas.
+		// Download image and request to search in both areas.
 		$downloadedImageFilePath = $client->downloadFile( $imageId, 'native' );
 		$this->assertNotNull( $downloadedImageFilePath, 'Image download failed.' );
 		$this->assertEquals( 200, $client->getLastHttpResponseCode() );
-		$this->assertEquals( '0.1', $client->getObjectVersion() );
+		$this->assertEquals( $imageVersion, $client->getObjectVersion() );
+		$this->assertEquals( 'native', $client->getAttachmentRendition() );
+		$this->assertEquals( md5_file( $uploadedImageFilePath ), md5_file( $downloadedImageFilePath ),
+			'The downloaded file differs from the uploaded file.' );
+
+		// Download native rendition of the image but request for the placement rendition.
+		$downloadedImageFilePath = $client->downloadFile( $imageId, 'placement' );
+		$this->assertNotNull( $downloadedImageFilePath, 'Image download failed.' );
+		$this->assertEquals( 200, $client->getLastHttpResponseCode() );
+		$this->assertEquals( $imageVersion, $client->getObjectVersion() );
+		$this->assertEquals( 'native', $client->getAttachmentRendition() );
 		$this->assertEquals( md5_file( $uploadedImageFilePath ), md5_file( $downloadedImageFilePath ),
 			'The downloaded file differs from the uploaded file.' );
 
@@ -183,6 +193,7 @@ class WW_TestSuite_BuildTest_FileStoreServer_Download_TestCase extends TestCase
 		$this->assertNotNull( $downloadedImageFilePath, 'Image download failed.' );
 		$this->assertEquals( 200, $client->getLastHttpResponseCode() );
 		$this->assertEquals( $imageVersion, $client->getObjectVersion() );
+		$this->assertEquals( 'native', $client->getAttachmentRendition() );
 		$this->assertEquals( md5_file( $uploadedImageFilePath ), md5_file( $downloadedImageFilePath ),
 			'The downloaded file differs from the uploaded file.' );
 
@@ -191,6 +202,7 @@ class WW_TestSuite_BuildTest_FileStoreServer_Download_TestCase extends TestCase
 		$this->assertNotNull( $downloadedImageFilePath, 'Image download failed.' );
 		$this->assertEquals( 200, $client->getLastHttpResponseCode() );
 		$this->assertEquals( $imageVersion, $client->getObjectVersion() );
+		$this->assertEquals( 'native', $client->getAttachmentRendition() );
 		$this->assertEquals( md5_file( $uploadedImageFilePath ), md5_file( $downloadedImageFilePath ),
 			'The downloaded file differs from the uploaded file.' );
 
@@ -254,8 +266,9 @@ class WW_TestSuite_BuildTest_FileStoreServer_Download_TestCase extends TestCase
 		// Download latest version and request to search in both areas.
 		$downloadedImageFilePath = $client->downloadFile( $imageId, 'native' );
 		$this->assertNotNull( $downloadedImageFilePath, 'Image download failed.' );
-		$this->assertEquals( $imageVersion, $client->getObjectVersion() );
 		$this->assertEquals( 200, $client->getLastHttpResponseCode() );
+		$this->assertEquals( $imageVersion, $client->getObjectVersion() );
+		$this->assertEquals( 'native', $client->getAttachmentRendition() );
 		$this->assertEquals( md5_file( $uploadedImageFilePath2 ), md5_file( $downloadedImageFilePath ),
 			'The downloaded file differs from the uploaded file.' );
 
@@ -264,6 +277,7 @@ class WW_TestSuite_BuildTest_FileStoreServer_Download_TestCase extends TestCase
 		$this->assertNotNull( $downloadedImageFilePath, 'Image download failed.' );
 		$this->assertEquals( 200, $client->getLastHttpResponseCode() );
 		$this->assertEquals( $imageVersion, $client->getObjectVersion() );
+		$this->assertEquals( 'native', $client->getAttachmentRendition() );
 		$this->assertEquals( md5_file( $uploadedImageFilePath2 ), md5_file( $downloadedImageFilePath ),
 			'The downloaded file differs from the uploaded file.' );
 	}
@@ -302,6 +316,7 @@ class WW_TestSuite_BuildTest_FileStoreServer_Download_TestCase extends TestCase
 		$this->assertNotNull( $downloadedImageFilePath, 'Image download failed.' );
 		$this->assertEquals( 200, $client->getLastHttpResponseCode() );
 		$this->assertEquals( $imageVersion, $client->getObjectVersion() );
+		$this->assertEquals( 'native', $client->getAttachmentRendition() );
 		$this->assertEquals( md5_file( $uploadedImageFilePath2 ), md5_file( $downloadedImageFilePath ),
 			'The downloaded file differs from the uploaded file.' );
 
@@ -310,6 +325,7 @@ class WW_TestSuite_BuildTest_FileStoreServer_Download_TestCase extends TestCase
 		$this->assertNotNull( $downloadedImageFilePath, 'Image download failed.' );
 		$this->assertEquals( 200, $client->getLastHttpResponseCode() );
 		$this->assertEquals( $imageVersion, $client->getObjectVersion() );
+		$this->assertEquals( 'native', $client->getAttachmentRendition() );
 		$this->assertEquals( md5_file( $uploadedImageFilePath2 ), md5_file( $downloadedImageFilePath ),
 			'The downloaded file differs from the uploaded file.' );
 
