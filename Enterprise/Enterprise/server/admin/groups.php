@@ -9,6 +9,7 @@ require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 $ticket = checkSecure('admin');
 
 // Request for all user groups (system wide).
+$groups = null;
 try {
 	require_once BASEDIR.'/server/services/adm/AdmGetUserGroupsService.class.php';
 	$service = new AdmGetUserGroupsService();
@@ -18,7 +19,6 @@ try {
 	$response = $service->execute( $request );
 	$groups = $response->UserGroups;
 } catch( BizException $e ) {
-	$e = $e; // keep analyzer happy
 	// no error handling; having access, nothing could go wrong while listing groups
 }
 
