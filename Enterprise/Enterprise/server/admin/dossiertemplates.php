@@ -155,6 +155,7 @@ $txt = HtmlDocument::loadTemplate( 'dossiertemplates.htm' );
 
 // fields
 //	Get all publications
+$pubObj = null;
 try {
 	require_once BASEDIR.'/server/services/adm/AdmGetPublicationsService.class.php';
 	$request = new AdmGetPublicationsRequest();
@@ -355,4 +356,3 @@ $txt = str_replace("<!--BACK-->", $back, $txt);
 
 // generate total page
 print HtmlDocument::buildDocument($txt);
-?>
