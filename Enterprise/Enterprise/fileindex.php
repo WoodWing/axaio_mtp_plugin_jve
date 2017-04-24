@@ -120,8 +120,16 @@ class WW_FileIndex
 
 		// Grab the parameters we can work with.
 		$this->httpParams['ticket'] = isset($_GET['ticket']) ? $_GET['ticket'] : null;
-		if( !$this->httpParams['ticket'] ) { // support cookie enabled sessions
-			$this->httpParams['ticket'] = isset($_COOKIE['ticket']) ? $_COOKIE['ticket'] : null;
+		if( !$this->httpParams['ticket'] ) {
+			// Support cookie enabled sessions. When the client has no ticket provided in the URL params, try to grab the ticket
+			// from the HTTP cookies. This is to support JSON clients that run multiple web applications which need to share the
+			// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
+			require_once BASEDIR.'/server/secure.php';
+			$ticket = getOptionalCookie( 'ticket' );
+			if( $ticket ) {
+				setLogCookie( 'ticket', $ticket );
+				$this->httpParams['ticket'] = $ticket;
+			}
 		}
 		$this->httpParams['rendition'] = isset($_GET['rendition']) ? $_GET['rendition'] : null;
 		$this->httpParams['objectid'] = isset($_GET['objectid']) ? intval($_GET['objectid']) : null;
