@@ -22,7 +22,6 @@ class WW_Utils_TestSuite
 	 *
 	 * @since 10.0.0
 	 * @param string|null $protocol The used protocol for service calls. (Options: SOAP or JSON.) If null a regular service call is made.
-	 * @return bool Whether or not all session variables are complete.
 	 */
 	public function initTest( $protocol = null )
 	{
@@ -981,7 +980,7 @@ class WW_Utils_TestSuite
 	 * @param bool $lock Whether or not to lock the object
 	 * @param string|null $stepInfo Optional step info in case an error occurs
 	 * @param string|NULL $expectedErrorCodeOrMsgKey The exception message from BizException->getMessage(), Null when no error is expected.
-	 * @return WflCreateObjectsResponse
+	 * @return WflCreateObjectsResponse|null
 	 */
 	public function callCreateObjectService( TestCase $testCase, $ticket, $objects, $lock = false, $stepInfo = null, $expectedErrorCodeOrMsgKey = null )
 	{
@@ -992,24 +991,20 @@ class WW_Utils_TestSuite
 		$request->Lock		= $lock;
 		$request->Objects	= $objects;
 
-		$response = self::callService( $testCase, $request, $stepInfo ? $stepInfo : 'Create object', $expectedErrorCodeOrMsgKey );
-		if( is_null($response) ) {
-			return null;
-		}
-
-		return $response;
+		return self::callService( $testCase, $request, $stepInfo ? $stepInfo : 'Create object', $expectedErrorCodeOrMsgKey );
 	}
 
 	/**
 	 * Save new version of workflow objects into DB / FileStore.
 	 *
+	 * @since 10.2.0
 	 * @param TestCase $testCase
 	 * @param string $ticket
 	 * @param Object[] $objects Workflow objects to save.
 	 * @param bool $unlock Whether or not to unlock the object
 	 * @param string|null $stepInfo Optional step info in case an error occurs
 	 * @param string|NULL $expectedErrorCodeOrMsgKey The exception message from BizException->getMessage(), Null when no error is expected.
-	 * @return mixed|null
+	 * @return WflSaveObjectsResponse|null
 	 */
 	public function saveObjects( TestCase $testCase, $ticket, $objects, $unlock, $stepInfo = null, $expectedErrorCodeOrMsgKey = null )
 	{
@@ -1022,12 +1017,7 @@ class WW_Utils_TestSuite
 		$request->Unlock = $unlock;
 		$request->Objects = $objects;
 
-		$response = self::callService( $testCase, $request, $stepInfo ? $stepInfo : 'Save object', $expectedErrorCodeOrMsgKey );
-		if( is_null($response) ) {
-			return null;
-		}
-
-		return $response;
+		return self::callService( $testCase, $request, $stepInfo ? $stepInfo : 'Save object', $expectedErrorCodeOrMsgKey );
 	}
 
 	/**
