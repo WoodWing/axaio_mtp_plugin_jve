@@ -218,4 +218,24 @@ class ElvisSessionUtil
 	{
 		return ELVIS_CONTENTSOURCEPREFIX . $name;
 	}
+
+	/**
+	 * Retrieve the password from the saved credentials.
+	 *
+	 * @since 10.1.3
+	 * @param string $user
+	 * @return string password if credentials are found else empty string.
+	 */
+	static public function retrievePasswordFromCredentials( $user )
+	{
+		$password = '';
+		$credentials = self::getCredentials( $user );
+		if( $credentials ) {
+			$credentials = base64_decode( $credentials );
+			$userNamePassword = explode( ':', $credentials );
+			$password = $userNamePassword[1];
+		}
+
+		return $password;
+	}
 }
