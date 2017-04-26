@@ -94,6 +94,8 @@ class EnterpriseService
 	protected function executeService( $req, $ticket, $type, $interface, $checkTicket, $useTransaction )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+		require_once BASEDIR.'/server/secure.php';
+
 		$debugMode = LogHandler::debugMode();
 		$logService = LogHandler::debugMode() && defined('LOG_INTERNAL_SERVICES') && LOG_INTERNAL_SERVICES === true;
 		$serviceName = str_replace( 'Request', '', get_class($req) );
