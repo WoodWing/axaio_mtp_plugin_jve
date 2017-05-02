@@ -1154,9 +1154,11 @@ function main()
                                             if (oPage) {
                                                 var frameData = tfsObj.frameData; // Since SC CS4 v7.3.4 build 295/SC CS5 v7.3.4 build 293 and above
                                                 var idArticleIdsCsv = "";
-                                                var tfsObjIDids = tfsObj.allIndesignArticleIds;
-                                                if( typeof( tfsObjIDids ) != "undefined" ) { // Since SC 10.2
+                                                if (isSC10plus) {
+                                                  var tfsObjIDids = tfsObj.allIndesignArticleIds;
+                                                  if( typeof( tfsObjIDids ) != "undefined" ) { // Since SC 10.2
                                                     idArticleIdsCsv = tfsObjIDids.join(',');
+                                                  }
                                                 }
                                                 var frameHasTiles = false;
                                                 var frameDataObjects  = eval("(" + frameData + ")");
@@ -1478,7 +1480,7 @@ function main()
         {
             // Close all documents without saving.
             while( app.documents.length > 0 ) {
-                wwlog( INFO, "Closing document [" + app.documents.item(0).fullName + "]" );
+                //wwlog( CONSOLE, "Closing document [" + app.documents.item(0).fullName + "]" );
                 app.documents.item(0).close( SaveOptions.NO );
             }
         }
