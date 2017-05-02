@@ -1113,6 +1113,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">K úloze %1 nebyly nalezeny žádné aktivní konfigurace aplikace InDesign Server. Nakonfigurujte aplikaci InDesign Server %2, která obslouží prioritu %3. (S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">InDesign Server neodovídá. (S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">Úlohy s následujícími prioritami nebudou zpracovány: %1</Term>
+  <Term key="IDS_PICKUP_FROM">Pickup From</Term>
   <Term key="IDS_PORTNUMBER">Číslo portu:</Term>
   <Term key="IDS_PRIO">Priority úloh</Term>
   <Term key="IDS_PRIO_1">Velmi vysoká</Term>
