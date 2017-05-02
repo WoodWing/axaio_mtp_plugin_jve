@@ -364,21 +364,21 @@ class ElvisContentSourceService
 	 * Returns asset updates waiting in the queue, using long-polling
 	 *
 	 * @param string $enterpriseSystemId The id identifying the Enterprise server
-	 * @param int $timeout Timeout in seconds after which the call should return with no updates
+	 * @param int $operationTimeout The operartion timeout of the asset updates in seconds.
 	 * @return ElvisEntUpdate[] Updates
 	 * @throws BizException
 	 */
-	public function retrieveAssetUpdates( $enterpriseSystemId, $timeout )
+	public function retrieveAssetUpdates( $enterpriseSystemId, $operationTimeout )
 	{
 		ElvisAMFClient::registerClass( ElvisEntUpdate::getName() );
 		ElvisAMFClient::registerClass( BasicMap::getName() );
 
 		try {
-			$params = array( $enterpriseSystemId, $timeout );
+			$params = array( $enterpriseSystemId, $operationTimeout );
 
 			// We will max wait the configured timeout + 60 seconds before we expect the AMF call to return
-			$httpTimeout = $timeout + 60;
-			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieveAssetUpdates', $params, true, $httpTimeout );
+			$operationTimeout = $operationTimeout + 60;
+			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieveAssetUpdates', $params, true, $operationTimeout );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
