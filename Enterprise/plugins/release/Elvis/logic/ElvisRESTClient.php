@@ -83,37 +83,96 @@ class ElvisRESTClient
 	 */
 	private static function sendUrl( $service, $url, $post, &$cookies, $file = null )
 	{
-		$response = null;
-		try {
-			$client = new Zend\Http\Client();
-			$client->setUri( $url );
-			$client->setMethod( Zend\Http\Request::METHOD_POST );
-			if( defined( 'ELVIS_CURL_OPTIONS' ) ) { // hidden option
-				$client->setOptions( array( 'curloptions' => unserialize( ELVIS_CURL_OPTIONS ) ) );
-			}
-			if( isset( $post ) ) {
-				$client->setParameterPost( $post );
-			}
-			if( $cookies ) {
-				$client->setCookies( $cookies );
-			}
-			if( $file ) {
-				// Filedata parameter is part of Elvis API: https://helpcenter.woodwing.com/hc/en-us/articles/205654645
-				$client->setFileUpload( $file->FilePath, 'Filedata', null, $file->Type );
-			}
-			$response = $client->send();
-		} catch( Exception $e ) {
-			self::throwExceptionForElvisCommunicationFailure( $e->getMessage() );
+		$ch = curl_init();
+		if( !$ch ) {
+			$detail = 'Elvis '.$service.' failed. '.
+				'Failed to create a CURL handle for url: '.$url;
+			self::throwExceptionForElvisCommunicationFailure( $detail );
 		}
-		if( $response->getStatusCode() !== 200 ) {
-			self::throwExceptionForElvisCommunicationFailure( $response->getReasonPhrase() );
+		curl_setopt( $ch, CURLOPT_URL, $url );
+		curl_setopt( $ch, CURLOPT_FAILONERROR, 1 ); // Fail verbosely if the HTTP code returned is >= 400.
+		curl_setopt( $ch, CURLOPT_POST, 1 );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		curl_setopt( $ch, CURLOPT_HEADER, 0 );
+		curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 10 ); // Using the Zend Client default
+		curl_setopt( $ch, CURLOPT_TIMEOUT, 3600 ); // Using the Enterprise default
+
+		// Enable this to print the Header sent out ( After calling curl_exec )
+		if( LogHandler::debugMode() ) {
+			curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 		}
+
+		// Hidden options, in case customer wants to overrule some settings.
+		if( defined( 'ELVIS_CURL_OPTIONS') ) { // hidden option
+			$options = unserialize( ELVIS_CURL_OPTIONS );
+			if( $options ) foreach( $options as $key => $value ) {
+				curl_setopt( $ch, $key, $value );
+			}
+		}
+
+		// To deal with file upload.
+		if( $file ) {
+			if( !isset( $post ) ) {
+				$post = array();
+			}
+			curl_setopt($ch, CURLOPT_SAFE_UPLOAD, true );
+			$post['Filedata'] = new CURLFile( $file->FilePath, $file->Type ); // Needed by Elvis
+		}
+		if( isset( $post ) ) {
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $post );
+		}
+
+		// Setting cookies to be sent over in the Request.
+		if( $cookies ) {
+			$cookieValueArr = array();
+			foreach( $cookies as $cookieKey => $cookieVal ) {
+				$cookieValueArr[] = "$cookieKey=$cookieVal";
+			}
+			$cookieValue = implode( '; ', $cookieValueArr );
+			curl_setopt( $ch, CURLOPT_COOKIE, $cookieValue );
+		}
+
+		// Read the cookies returned by Elvis ( using a callback function )
+		$returnedCookies = array();
+		// Example $headerLine = "Set-Cookie: AWSELB=4A5003EE72F010581";
+		$curlResponseHeaderCallback = function( $ch, $headerLine ) use ( &$returnedCookies ) {
+			if( preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $headerLine, $theSetCookie ) == 1 ) {
+				if( $theSetCookie ) foreach( $theSetCookie[1] as $theSetCookieKeyValue ) {
+					parse_str( $theSetCookieKeyValue, $returnedCookie );
+					$returnedCookies = array_merge( $returnedCookies, $returnedCookie );
+				}
+			}
+			return strlen( $headerLine ); // Needed by CURLOPT_HEADERFUNCTION
+		};
+		curl_setopt($ch, CURLOPT_HEADERFUNCTION, $curlResponseHeaderCallback );
+
+		$result = curl_exec($ch);
+
+		if( LogHandler::debugMode() ) {
+			// Require curl_setopt($ch, CURLINFO_HEADER_OUT, 1); as set above.
+			$headersSent = curl_getinfo( $ch, CURLINFO_HEADER_OUT );
+			LogHandler::Log( 'ELVIS', 'DEBUG', 'RESTClient calling '.$service . ' using PHP cURL.' . PHP_EOL .
+				'Headers Sent:<pre>'. print_r( $headersSent,true ).'</pre>');
+		}
+
+		$httpStatusCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+		if( $httpStatusCode !== 200 ) {
+			$detail = 'Elvis '.$service.' failed with HTTP status code:' . $httpStatusCode . '.' .PHP_EOL;
+			if( curl_errno( $ch ) ){
+				$detail .= 'CURL failed with error code "'.curl_errno( $ch ).'" for url: '.$url . '.' . PHP_EOL . curl_error( $ch );
+			}
+			curl_close($ch);
+			self::throwExceptionForElvisCommunicationFailure( $detail );
+		}
+
+		curl_close($ch);
+
+		// Collecting cookies returned from the Request sent.
 		$cookies = array();
-		$cookieJar = $response->getCookie();
-		if( $cookieJar ) foreach( $cookieJar as $cookie ) {
-			$cookies[$cookie->getName()] = $cookie->getValue();
+		if( $returnedCookies ) foreach( $returnedCookies as $cookieName => $cookieValue ) {
+			$cookies[ $cookieName ] = $cookieValue;
 		}
-		return json_decode( $response->getBody() );
+		return json_decode( $result );
 	}
 
 	/**
