@@ -80,6 +80,10 @@ class IdsAutomationUtils
 		$job->MinServerVersion = $minServerVersion;
 		$job->MaxServerVersion = $maxServerVersion;
 
+		// The server doesn't pickup the newly generated InDesign server job for 20 seconds. Users can override this.
+		$waitTime = defined('IDSA_WAIT_TIMEOUT_AFTER_OBJECT_OPERATION') ? IDSA_WAIT_TIMEOUT_AFTER_OBJECT_OPERATION : 20;
+		$job->PickupTime = date( 'Y-m-d\TH:i:s',time() + $waitTime );
+
 		LogHandler::Log('IdsAutomation', 'DEBUG', "Caling BizInDesignServerJobs::createJob()");
 		require_once BASEDIR . '/server/bizclasses/BizInDesignServerJob.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBObjectLock.class.php';

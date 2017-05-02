@@ -146,6 +146,7 @@ if ( $jobRows ) foreach ( $jobRows as $jobIndex => $jobRow ) {
 		$app->composeObjInfoCell( $jobIndex, $jobRow ).
 		'<td>'.formvar($server).'</td>'.
 		'<td>'.formvar(DateTimeFunctions::iso2date( $jobRow['queuetime'] )).'</td>'.
+		'<td>'.formvar(DateTimeFunctions::iso2date( $jobRow['pickuptime'] )).'</td>'.
 		'<td>'.formvar(DateTimeFunctions::iso2date( $jobRow['starttime'] )).'</td>'.
 		'<td>'.formvar(DateTimeFunctions::iso2date( $jobRow['readytime'] )).'</td>'.
 		'<td>'.formvar($jobRow['attempts']).'</td>'.

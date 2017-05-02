@@ -119,6 +119,10 @@ class BizInDesignServerJobs
 			$job->Initiator = '';
 		}
 		$job->QueueTime = date( 'Y-m-d\TH:i:s', time() );
+		// When the PickupTime is already set respect that time, otherwise it is available for immediate pickup.
+		if( is_null( $job->PickupTime ) ) {
+			$job->PickupTime = $job->QueueTime;
+		}
 
 		if ( is_null( $job->JobStatus ) ) {
 			// Set the job status to the default 'PLANNED' if it has not been set by a connector.
