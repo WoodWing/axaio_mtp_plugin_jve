@@ -17,40 +17,56 @@ class ElvisAMFClient
 	/**
 	 * Send AMF message to Elvis.
 	 *
-	 * @param $service
-	 * @param $operation
-	 * @param $params
-	 * @param bool $secure
-	 * @param int $timeout The timeout for the call in seconds
+	 * For parameter $secure:
+	 * It is to specify whether or not the connection should be secured with session cookies.
+	 * Typically set FALSE to logon (or for services that don't require authorization).
+	 *
+	 * @param string $service The service name to be called.
+	 * @param string $operation The name of the operation to be called in the service.
+	 * @param string[] $params The list of data / information to be sent over in the service call.
+	 * @param bool $secure When set to True, HTTP cookie will be set in the Header to be sent along with the service request.
+	 * @param int $operationTimeout The request / execution timeout of curl in seconds (This is not the connection timeout).
 	 * @return mixed
 	 * @throws object ElvisCSException converted by Sabre/AMF
 	 * @throws BizException
 	 */
-	public static function send($service, $operation, $params, $secure=true, $timeout=60)
+	public static function send($service, $operation, $params, $secure=true, $operationTimeout=3600 )
 	{
-		$result = self::sendUnParsed($service, $operation, $params, $secure, $timeout);
+		$result = self::sendUnParsed($service, $operation, $params, $secure, $operationTimeout );
 		return $result->body;
 	}
 
 	/**
 	 * Send AMF message to Elvis.
 	 *
-	 * @param string $service
-	 * @param string $operation
-	 * @param array $params
-	 * @param bool $secure Whether or not the connection should be secured with session cookies. Typically set FALSE to logon (or for services that don't require authorization).
-	 * @param int $timeout The timeout for the call in seconds
+	 * For parameter $secure:
+	 * It is to specify whether or not the connection should be secured with session cookies.
+	 * Typically set FALSE to logon (or for services that don't require authorization).
+	 *
+	 * @param string $service The service name to be called.
+	 * @param string $operation The name of the operation to be called in the service.
+	 * @param string[] $params The list of data / information to be sent over in the service call.
+	 * @param bool $secure When set to True, HTTP cookie will be set in the Header to be sent along with the service request.
+	 * @param int $operationTimeout The request / execution timeout of curl in seconds (This is not the connection timeout).
 	 * @return mixed
 	 * @throws object ElvisCSException converted by Sabre/AMF
 	 * @throws BizException
 	 */
-	private static function sendUnParsed($service, $operation, $params, $secure=true, $timeout=60)
+	private static function sendUnParsed($service, $operation, $params, $secure=true, $operationTimeout=3600 )
 	{
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 
 		$url = self::getEndpointUrl();
 		$client = new SabreAMF_Client($url, self::DESTINATION);
 		$client->setEncoding(SabreAMF_Const::FLEXMSG);
+
+		$resetCookiesOperationList = array( "login" ); // A list of operation(s) where the cookies should be reset ( to obtain a new session/cookies )
+		if( in_array( $operation, $resetCookiesOperationList ) ) {
+			// Resetting cookies in the memory and in the database ( Typically for Login, we want to refresh everything )
+			$client->setCookies( array() );
+			ElvisSessionUtil::saveSessionCookies( array() );
+		}
+
 		$cookies = array();
 		if( $secure ) {
 			$cookies = ElvisSessionUtil::getSessionCookies();
@@ -67,7 +83,7 @@ class ElvisAMFClient
 		$result = null;
 		try {
 			$servicePath = $service . '.' . $operation;
-			$result = $client->sendRequest( $servicePath, $params, $timeout );
+			$result = $client->sendRequest( $servicePath, $params, $operationTimeout );
 			$cookies = $client->getCookies();
 			if( $cookies ) {
 				ElvisSessionUtil::saveSessionCookies( $cookies );
@@ -85,8 +101,7 @@ class ElvisAMFClient
 				 // Login and re-send the service call.
 				self::login();
 				return self::sendUnParsed( $service, $operation, $params, $secure );
-			}
-			else {
+			} else {
 				self::handleError($result, $service, $operation);
 			}
 		}
