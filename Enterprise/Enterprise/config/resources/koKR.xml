@@ -1113,6 +1113,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">작업 %1의 활성화된 인디자인 서버 환경값을 찾을수 없습니다. 서버 우선순위 %3 인 인디자인 서버 설정값 %2를 설정하십시오.(S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">InDesign Server로부터의 응답이 없습니다 (S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">다음과 같은 우선 순위 작업은 처리되지 않습니다: %1</Term>
+  <Term key="IDS_PICKUP_FROM">Pickup From</Term>
   <Term key="IDS_PORTNUMBER">포트 번호:</Term>
   <Term key="IDS_PRIO">작업 우선순위</Term>
   <Term key="IDS_PRIO_1">매우 높음</Term>
