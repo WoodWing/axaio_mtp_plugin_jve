@@ -609,15 +609,12 @@ class License
 	 *
 	 * @param string $semaName to distinguish more semaphores
 	 * @param int $maxAttempts Maximum number of tries to get the semaphore. Maximum is 20.
-	 * @return bool Semaphore is created (true) else false, should be highly exceptional when a lot of processes request
+	 * @return integer|null Semaphore (id) when created, NULL when failed.
 	 * a semaphore.
 	 *
 	 */
 	private function lo_getSema( $semaName = '0', $maxAttempts = 20 )
 	{
-		//Avoid time outs in case the semaphore can not be set immediately.
-		//When logging on, an error message should occur after 40 seconds.
-		set_time_limit( 0 ); // Todo is this needed?
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 		$attempts = array( 1, 2, 4, 8, 16, 8, 4, 2, 1, 3, 6, 12, 24, 48, 96, 192, 96, 48, 24, 12 );
 		if( $maxAttempts < 20 ) {
@@ -627,25 +624,28 @@ class License
 		$bizSema->setAttempts( $attempts );
 		$bizSema->setLifeTime( 120 );
 		$semaName = 'license_'.$semaName;
+		BizSemaphore::suppressSqlLogging();
 		$semaId = $bizSema->createSemaphore( $semaName );
+		BizSemaphore::enableSqlLogging();
 
 		if( !$semaId ) {
 			$this->mWWLError = WWL_ERR_FILESTORE_SYSDIR;
 		}
 
-		return (bool) $semaId;
+		return $semaId;
 	}
 
 	/**
 	 * Deletes the semaphore from the database.
 	 *
-	 * @param string $semaName to distinguish more semaphores
+	 * @param int $semaId to distinguish semaphores.
 	 */
-	private function lo_releaseSema( $semaName = '0' )
+	private function lo_releaseSema( $semaId )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
-		$semaName = 'license_'.$semaName;
-		BizSemaphore::releaseSemaphoreByEntityId( $semaName );
+		BizSemaphore::suppressSqlLogging();
+		BizSemaphore::releaseSemaphore( $semaId );
+		BizSemaphore::enableSqlLogging();
 	}
 
 
@@ -727,29 +727,29 @@ class License
 
 		ignore_user_abort();
 
-		$sema = $this->lo_getSema();
-		if ( !$sema )
+		$semaId = $this->lo_getSema();
+		if ( !$semaId )
 			return false;
 
 		$val = $this->lo_getFieldDB( $field );
 		if ( $val === false )
 		{
-			$this->lo_releaseSema();
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 		$val2 = $this->lo_getFieldFS( $field );
 		if ( $val2 === false )
 		{
-			$this->lo_releaseSema();
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 		if ( $val != $val2 )
 		{
-			$this->lo_releaseSema();
+			$this->lo_releaseSema( $semaId );
 			$this->mWWLError = WWL_ERR_FILESTORE_DB_MISMATCH;
 			return false;
 		}
-		$this->lo_releaseSema();
+		$this->lo_releaseSema( $semaId );
 		return $val;
 	}
 
@@ -876,24 +876,24 @@ class License
 
 		ignore_user_abort();
 
-		$sema = $this->lo_getSema();
-		if ( !$sema )
+		$semaId = $this->lo_getSema();
+		if ( !$semaId )
 			return false;
 			
 		$curval = $this->lo_getFieldFS( $field );
 		if ( !$this->lo_setFieldFS( $field, $val ))
 		{
-			$this->lo_releaseSema();
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 		if ( !$this->lo_setFieldDB( $field, $val ))
 		{
 			//restore old FS value
 			$this->lo_setFieldFS( $field, $curval );
-			$this->lo_releaseSema();
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
-		$this->lo_releaseSema();
+		$this->lo_releaseSema( $semaId );
 		return true;
 	}
 
@@ -911,21 +911,21 @@ class License
 
 		ignore_user_abort();
 
-		$sema = $this->lo_getSema();
-		if ( !$sema )
+		$semaId = $this->lo_getSema();
+		if ( !$semaId )
 			return false;
 			
 		if ( !$this->lo_removeFieldDB( $field ))
 		{
-			$this->lo_releaseSema();
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 		if ( !$this->lo_removeFieldFS( $field ))
 		{
-			$this->lo_releaseSema();
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
-		$this->lo_releaseSema();
+		$this->lo_releaseSema( $semaId );
 		return true;
 	}
 	
@@ -1059,8 +1059,8 @@ class License
 
 		ignore_user_abort();
 		$semaIdx = 1;
-		$sema = $this->lo_getSema( $semaIdx );
-		if ( !$sema )
+		$semaId = $this->lo_getSema( $semaIdx );
+		if ( !$semaId )
 			return false;
 
 		//First, check whether the product is already known
@@ -1086,7 +1086,7 @@ class License
 			
 			if ( !$this->setLicenseField( "productcodes", $productcodes ))
 			{
-				$this->lo_releaseSema( $semaIdx );
+				$this->lo_releaseSema( $semaId );
 				return false;
 			}
 		}
@@ -1098,10 +1098,10 @@ class License
 		$productinfo = $this->mLicenseString->makeProductInfo( $productname, $enc_serial, $license );
 		if ( !$this->setLicenseField( $productcode, $productinfo ))
 		{
-			$this->lo_releaseSema( $semaIdx );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
-		$this->lo_releaseSema( $semaIdx );
+		$this->lo_releaseSema( $semaId );
 		return true;
 	}
 	
@@ -1241,8 +1241,8 @@ class License
 
 		$now_enc = $now . '-' . $now_enc; //Handy for comparing timestamps: put the current time in front as a prefix
 		$semaIdx = 1;
-		$sema = $this->lo_getSema( $semaIdx );
-		if ( !$sema )
+		$semaId = $this->lo_getSema( $semaIdx );
+		if ( !$semaId )
 			return false;
 
 		//Check whether the current value is less;
@@ -1266,11 +1266,11 @@ class License
 		{
 			if ( !$this->setLicenseField( 'local', $now_enc ))
 			{
-				$this->lo_releaseSema( $semaIdx );
+				$this->lo_releaseSema( $semaId );
 				return false;
 			}
 		}
-		$this->lo_releaseSema( $semaIdx );
+		$this->lo_releaseSema( $semaId );
 		return true;
 	}
 
@@ -1820,18 +1820,14 @@ class License
 	 * @param string logonTime Optional.
 	 * @param string logonUser Optional.
 	 * @param string logonApp  Optional.
-	 * @return int license status, see codes at the start of this module
+	 * @return string license status, see codes at the start of this module
 	 */
 	public function getLicenseStatus( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '', $logonUser='', $logonApp='' )
 	{
 		$startTime = microtime( true );
-		$holdInfo = array();
-		$holdErrorMessage = '';
-		$status = $this->getLicenseStatusNoTiming( $productcode, $appserial, $holdInfo, $holdErrorMessage, $logonTime = '', $logonUser='', $logonApp='' );
-		$info = $holdInfo;
-		$errorMessage = $holdErrorMessage;
+		$status = $this->getLicenseStatusNoTiming( $productcode, $appserial, $info, $errorMessage, $logonTime,  $logonUser, $logonApp );
 		$endTime = microtime( true );
-		LogHandler::Log('License Status', 'DEBUG', sprintf( 'Execution time: %.4f seconds.', $endTime - $startTime ) );
+		LogHandler::Log('license', 'DEBUG', sprintf( 'Execution time for detecting the license status: %.4f seconds.', $endTime - $startTime ) );
 
 		return $status;
 	}
@@ -1840,14 +1836,14 @@ class License
 	 * @see getLicenseStatus()
 	 * @since 10.1.3
 	 *
-	 * @param $productcode
-	 * @param $appserial
-	 * @param $info
-	 * @param $errorMessage
+	 * @param string $productcode
+	 * @param string $appserial
+	 * @param array $info
+	 * @param string $errorMessage
 	 * @param string $logonTime
 	 * @param string $logonUser
 	 * @param string $logonApp
-	 * @return mixed|string
+	 * @return string
 	 */
 	private function getLicenseStatusNoTiming( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '', $logonUser='', $logonApp='' )
 	{
@@ -4183,8 +4179,8 @@ class License
 		
 		//No need to wait until it is free: If someone else is already updating, then we can ignore it now.
 		$maxAttempts = 1;
-		$sema = $this->lo_getSema( $semaName, $maxAttempts );
-		if ( !$sema )
+		$semaId = $this->lo_getSema( $semaName );
+		if ( !$semaId )
 		{
 			//Someone else is already busy now...
 			LogHandler::Log('license', 'DEBUG', "Auto renew: could not get sema" );
@@ -4215,13 +4211,13 @@ class License
 					if ( $debug ) {
 						//In one logon call, the auto renew may be called twice. Ignore the second one.
 						if ( $diff < 60 * 1 ) {
-							$this->lo_releaseSema( $semaName );
+							$this->lo_releaseSema( $semaId );
 							return false;
 						} else {
 							LogHandler::Log('license', 'DEBUG', 'TEST: CONTINUE NOW (not returning)' );
 						}
 					} else {
-						$this->lo_releaseSema( $semaName );
+						$this->lo_releaseSema( $semaId );
 						return false;
 					}
 				}
@@ -4233,7 +4229,7 @@ class License
 		$parameters = $this->getRenewParameters( $productcode );
 		if ( $parameters === false ) {
 			LogHandler::Log('license', 'ERROR', 'Error creating license renew parameters' );
-			$this->lo_releaseSema( $semaName );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 
@@ -4245,13 +4241,13 @@ class License
 		$response = $this->postRenew( $parameters, $errorMessage );
 		if ( $response === false ) {
 			LogHandler::Log('license', 'ERROR', 'Error in license renewal request to WoodWing registration server.' );
-			$this->lo_releaseSema( $semaName );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 
 		if ( !$response ) {
 			LogHandler::Log('license', 'ERROR', 'No response from WoodWing registration server.' );
-			$this->lo_releaseSema( $semaName );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 		
@@ -4259,7 +4255,7 @@ class License
 		$confirmParameters = $this->installLicenseFromResponse( $response );
 		if ( $confirmParameters === false ) {
 			LogHandler::Log('license', 'ERROR', 'Error handling license renew response from WoodWing registration server.' );
-			$this->lo_releaseSema( $semaName );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 		
@@ -4272,14 +4268,14 @@ class License
 		$ok = $this->postConfirmRenew( $confirmParameters );
 		if ( $ok === false ) {
 			LogHandler::Log('license', 'ERROR', 'Error confirming license renewal to WoodWing registration server.' );
-			$this->lo_releaseSema( $semaName );
+			$this->lo_releaseSema( $semaId );
 			return false;
 		}
 		
 		$lastAttempt = date( 'Y-m-d\TH:i:s', $now );
 		$this->lo_setFieldDB( $dbkey, $lastAttempt );
 		
-		$this->lo_releaseSema( $semaName );
+		$this->lo_releaseSema( $semaId );
 		LogHandler::Log('license', 'INFO', 'License has been renewed automatically.' );
 		return true;
 	}

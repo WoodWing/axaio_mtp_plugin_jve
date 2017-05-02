@@ -583,24 +583,26 @@ class DBBase
 	}
 
 	/**
-	 *	Deletes one or more rows from table with $tablename where = $where
-	 *	@param $tablename string Name of the table to delete records from
-	 *  @param $where string What records to delete. Can contain placeholders (?).
-	 *  @param $params array containing parameters to be substituted for the placeholders
+	 * Deletes one or more rows from table with $tablename where = $where
+	 *
+	 * @param string $tablename string Name of the table to delete records from
+	 * @param string $where What records to delete. Can contain placeholders (?).
+	 * @param array $params containing parameters to be substituted for the placeholders
 	 *         of the where clause.
+	 * @param bool $logSQL Whether or not the resulting SQL must be logged.
 	 * @return boolean|null NULL in case of error, TRUE in case of success
 	 */
-	static public function deleteRows( $tablename, $where, $params = array() )
+	static public function deleteRows( $tablename, $where, $params = array(), $logSQL = true )
 	{
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
-		$tablename = $dbDriver->tablename($tablename);
-		
+		$tablename = $dbDriver->tablename( $tablename );
+
 		$sql = " DELETE FROM $tablename WHERE $where ";
-		$queryresult = $dbDriver->query($sql, $params);
+		$queryresult = $dbDriver->query( $sql, $params, null, $logSQL );
 		if( is_null( $queryresult ) ) {
 			$err = trim( $dbDriver->error() );
-			self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
+			self::setError( empty( $err ) ? BizResources::localize( 'ERR_DATABASE' ) : $err );
 			return null;
 		}
 		return true;
