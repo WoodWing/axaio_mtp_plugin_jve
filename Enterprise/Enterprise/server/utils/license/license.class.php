@@ -607,13 +607,13 @@ class License
 	 * To make reading and writing the license info in both the DB and FS an 'atomic' action, we use a semaphore.
 	 * Be sure that the user (web browser) can not stop the execution half way: call ignore_user_abort() before!
 	 *
-	 * @param string $semaName to distinguish more semaphores
+	 * @param string $semaPostfix to distinguish more semaphores
 	 * @param int $maxAttempts Maximum number of tries to get the semaphore. Maximum is 20.
 	 * @return integer|null Semaphore (id) when created, NULL when failed.
 	 * a semaphore.
 	 *
 	 */
-	private function lo_getSema( $semaName = '0', $maxAttempts = 20 )
+	private function lo_getSema( $semaPostfix = 'default', $maxAttempts = 20 )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 		$attempts = array( 1, 2, 4, 8, 16, 8, 4, 2, 1, 3, 6, 12, 24, 48, 96, 192, 96, 48, 24, 12 );
@@ -623,10 +623,10 @@ class License
 		$bizSema = new BizSemaphore();
 		$bizSema->setAttempts( $attempts );
 		$bizSema->setLifeTime( 120 );
-		$semaName = 'license_'.$semaName;
-		BizSemaphore::suppressSqlLogging();
-		$semaId = $bizSema->createSemaphore( $semaName );
-		BizSemaphore::enableSqlLogging();
+		$semaPostfix = 'license_'.$semaPostfix;
+		$previousLogSqlState = BizSemaphore::suppressSqlLogging();
+		$semaId = $bizSema->createSemaphore( $semaPostfix );
+		BizSemaphore::restoreSqlLogging( $previousLogSqlState );
 
 		if( !$semaId ) {
 			$this->mWWLError = WWL_ERR_FILESTORE_SYSDIR;
@@ -643,9 +643,9 @@ class License
 	private function lo_releaseSema( $semaId )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
-		BizSemaphore::suppressSqlLogging();
+		$previousLogSqlState = BizSemaphore::suppressSqlLogging();
 		BizSemaphore::releaseSemaphore( $semaId );
-		BizSemaphore::enableSqlLogging();
+		BizSemaphore::restoreSqlLogging( $previousLogSqlState );
 	}
 
 
@@ -1058,8 +1058,8 @@ class License
 		$productname = $this->safeName( $productname );
 
 		ignore_user_abort();
-		$semaIdx = 1;
-		$semaId = $this->lo_getSema( $semaIdx );
+		$semaPostfix = 'set';
+		$semaId = $this->lo_getSema( $semaPostfix );
 		if ( !$semaId )
 			return false;
 
@@ -1240,8 +1240,8 @@ class License
 		ignore_user_abort();
 
 		$now_enc = $now . '-' . $now_enc; //Handy for comparing timestamps: put the current time in front as a prefix
-		$semaIdx = 1;
-		$semaId = $this->lo_getSema( $semaIdx );
+		$semaPostfix = 'set';
+		$semaId = $this->lo_getSema( $semaPostfix );
 		if ( !$semaId )
 			return false;
 
@@ -4175,11 +4175,11 @@ class License
 	public function tryAutoRenew( $productcode, $force, &$licenseStatus, &$errorMessage )
 	{
 		$debug = 0;
-		$semaName = "autorenew";
+		$semaPostfix = "autorenew";
 		
 		//No need to wait until it is free: If someone else is already updating, then we can ignore it now.
 		$maxAttempts = 1;
-		$semaId = $this->lo_getSema( $semaName );
+		$semaId = $this->lo_getSema( $semaPostfix );
 		if ( !$semaId )
 		{
 			//Someone else is already busy now...

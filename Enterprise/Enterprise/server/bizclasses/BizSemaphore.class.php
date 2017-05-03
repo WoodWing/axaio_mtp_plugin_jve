@@ -34,13 +34,13 @@
  */
 class BizSemaphore
 {
-	/** @var array $attempts Attempts to create the semaphore. Each attempt represents waiting time in ms. */
+	/** @var int[] $attempts Attempts to create the semaphore. Each attempt represents waiting time in ms. */
 	private $attempts;
 	/** @var int $lifeTime Life time of the semaphore in seconds. After that, it automatically expires. */
 	private $lifeTime;
 	/** @var int $sessionSemaphoreId Entity ID for a session. */
 	private static $sessionSemaphoreId;
-	/** @var  bool $logSql Whether or not the resulting SQL must be logged. For now only implemented for the create and
+	/** @var  bool $logSql Whether or not the resulting SQL must be logged. For 10.1.3 only implemented for the create and
 	 *  release of the semaphore. */
 	private static $logSql;
 
@@ -359,20 +359,27 @@ class BizSemaphore
 	 * Disable the the logging of (some of) the SQL-statements.
 	 *
 	 * @since 10.1.3
+	 * @return bool State of the SQL logging before suppressing.
 	 */
 	public static function suppressSqlLogging()
 	{
+		$previousLogSqlState = self::$logSql;
 		self::$logSql = false;
+
+		return $previousLogSqlState;
 	}
 
 	/**
-	 * Enable the the logging of the SQL-statements. Must be called after the logging has been disabled by calling
-	 * suppressSqlLogging()
+	 * Restores the the logging of the SQL-statements.
 	 *
+	 * Must be called after the logging has been disabled by calling suppressSqlLogging().
+	 * The return value of the suppressSqlLogging() should be used as input parameter for this function.
+	 *
+	 * @param bool $restoreLogSqlState State to restore.
 	 * @since 10.1.3
 	 */
-	public static function enableSqlLogging()
+	public static function restoreSqlLogging( $restoreLogSqlState )
 	{
-		self::$logSql = true;
+		self::$logSql = $restoreLogSqlState;
 	}
 }
