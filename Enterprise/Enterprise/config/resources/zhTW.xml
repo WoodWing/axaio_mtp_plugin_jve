@@ -1113,7 +1113,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">沒有被配置作業的InDesign Server %1. 請配置一個InDesign Server %2 優先處理 %3. (S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">InDesign 伺服器沒有回應．(S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">帶有下面優先次序的工作將不會被處理: %1</Term>
-  <Term key="IDS_PICKUP_FROM">Pickup From</Term>
+  <Term key="IDS_PICKUP_FROM">Pickup Time</Term>
   <Term key="IDS_PORTNUMBER">埠號:</Term>
   <Term key="IDS_PRIO">工作優先次序</Term>
   <Term key="IDS_PRIO_1">非常高</Term>
