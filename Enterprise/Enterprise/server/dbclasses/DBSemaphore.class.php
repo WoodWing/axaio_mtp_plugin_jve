@@ -66,14 +66,14 @@ class DBSemaphore extends DBBase
 	 * Release the semaphore obtained through createSemaphore().
 	 *
 	 * @param integer $semaId Semaphore (id)
-	 * @param bool $logSQL Whether or not the resulting SQL must be logged.
+	 * @param bool $logSql Whether or not the resulting SQL must be logged.
 	 * @return boolean
 	 */
-	static public function releaseSemaphore( $semaId, $logSQL )
+	static public function releaseSemaphore( $semaId, $logSql )
 	{
 		$where = "`id` = ?";
 		$params = array( $semaId );
-		return (bool)self::deleteRows( self::TABLENAME, $where, $params, $logSQL );
+		return (bool)self::deleteRows( self::TABLENAME, $where, $params, $logSql );
 	}
 	
 	/**
