@@ -364,7 +364,7 @@ class ElvisContentSourceService
 	 * Returns asset updates waiting in the queue, using long-polling
 	 *
 	 * @param string $enterpriseSystemId The id identifying the Enterprise server
-	 * @param int $operationTimeout The operartion timeout of the asset updates in seconds.
+	 * @param int $operationTimeout The operation timeout of the asset updates in seconds.
 	 * @return ElvisEntUpdate[] Updates
 	 * @throws BizException
 	 */

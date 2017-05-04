@@ -23,7 +23,7 @@ class ElvisAMFClient
 	 *
 	 * @param string $service The service name to be called.
 	 * @param string $operation The name of the operation to be called in the service.
-	 * @param string[] $params The list of data / information to be sent over in the service call.
+	 * @param array $params The list of data / information to be sent over in the service call.
 	 * @param bool $secure When set to True, HTTP cookie will be set in the Header to be sent along with the service request.
 	 * @param int $operationTimeout The request / execution timeout of curl in seconds (This is not the connection timeout).
 	 * @return mixed
@@ -45,7 +45,7 @@ class ElvisAMFClient
 	 *
 	 * @param string $service The service name to be called.
 	 * @param string $operation The name of the operation to be called in the service.
-	 * @param string[] $params The list of data / information to be sent over in the service call.
+	 * @param array $params The list of data / information to be sent over in the service call.
 	 * @param bool $secure When set to True, HTTP cookie will be set in the Header to be sent along with the service request.
 	 * @param int $operationTimeout The request / execution timeout of curl in seconds (This is not the connection timeout).
 	 * @return mixed
