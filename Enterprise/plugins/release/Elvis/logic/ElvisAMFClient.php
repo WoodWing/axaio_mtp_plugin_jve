@@ -86,8 +86,14 @@ class ElvisAMFClient
 			$servicePath = $service . '.' . $operation;
 			$result = $client->sendRequest( $servicePath, $params, $operationTimeout );
 			$cookies = $client->getCookies();
-			if( $cookies ) {
-				ElvisSessionUtil::saveSessionCookies( $cookies );
+			if( $cookies ) { // Any updated cookies?
+				$sessionCookies = ElvisSessionUtil::getSessionCookies();
+				if( $sessionCookies ) {
+					$sessionCookies = array_merge( $sessionCookies, $cookies ); // The new cookie(s) replace(s) the old ones if there's any,
+				} else {
+					$sessionCookies = $cookies; // Happens when previously there's no session cookies.
+				}
+				ElvisSessionUtil::saveSessionCookies( $sessionCookies );
 			}
 		} catch (Exception $e) {
 			$message = 'An error occurred while communicating with the Elvis server at: ' . ELVIS_URL .
