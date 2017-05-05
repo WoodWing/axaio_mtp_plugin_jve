@@ -865,7 +865,6 @@
       <str name="qf">WW_CATCHALL</str>
       <str name="q.alt">*:*</str>
       <str name="bf">recip(ms(NOW/HOUR,Modified),3.16e-11,0.08,0.05)^10</str>
-      <!--  <str name="bf">recip(rord(ms(Modified)),1, 1000,1000)^10</str>-->
 
       <!-- To boost the score on Modified (recent documents get a higher score) raise the factor after the ^ sign -->
       <str name="mm">0%</str> <!-- 0% is equivalent to 'OR', %100 to 'AND' -->
