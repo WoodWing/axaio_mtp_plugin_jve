@@ -158,7 +158,7 @@ class BizAdmAccessProfile
 		//if the array contains only a 0, a template access profile with all profile features should be returned.
 		if( count( $accessProfileIds ) == 1 && $accessProfileIds[0] === 0 ) {
 			$accessProfile = new AdmAccessProfile();
-			$accessProfile->ProfileFeatures = self::resolveProfileFeatures( array() );
+			$accessProfile->ProfileFeatures = self::resolveProfileFeatures( null );
 			return array( $accessProfile );
 		}
 
@@ -223,17 +223,17 @@ class BizAdmAccessProfile
 	 * Enriches a profile feature object from the database with information from
 	 * the workflow sysFeatureProfile object.
 	 *
-	 * @param AdmProfileFeature[] $profileFeatures
+	 * @param AdmProfileFeature[]|null $profileFeatures List to be enriched, or NULL to get new default list (template).
 	 * @return AdmProfileFeature[] Enriched list of profile features.
 	 */
-	public static function resolveProfileFeatures( array $profileFeatures )
+	public static function resolveProfileFeatures( $profileFeatures )
 	{
 		$allProfileFeatures = array();
 
 		require_once BASEDIR.'/server/bizclasses/BizAccessFeatureProfiles.class.php';
 		$sysFeatureProfiles = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
 
-		if( $profileFeatures ) {
+		if( !is_null($profileFeatures) ) {
 			foreach( $sysFeatureProfiles as $sysFeatureProfileId => $sysFeatureProfile ) {
 				if( array_key_exists( $sysFeatureProfileId, $profileFeatures ) ) {
 					$profileFeature = $profileFeatures[$sysFeatureProfileId];
