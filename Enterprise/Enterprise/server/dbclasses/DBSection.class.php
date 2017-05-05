@@ -259,6 +259,31 @@ class DBSection extends DBBase
 	}
 
 	/**
+	 * Gets section objects based on a list of section ids from DB
+	 *
+	 * @since 10.2.0
+	 * @param integer[] $sectionIds List of section ids.
+	 * @return AdmSection[] The list of section objects if succeeded.
+	 * @throws BizException on SQL error
+	 */
+	static public function getSectionObjs( array $sectionIds )
+	{
+		$where = self::addIntArrayToWhereClause( 'id', $sectionIds );
+		if( !$where ) {
+			throw new BizException('ERR_ARGUMENT', 'Client', 'No section ids provided.' );
+		}
+		$rows = self::listRows( self::TABLENAME, null, null, $where );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+		$sections = array();
+		foreach( $rows as $row ) {
+			$sections[] = self::rowToObj( $row );
+		}
+		return $sections;
+	}
+
+	/**
 	 *  Create new section object
 	 *
 	 * @param int $pubId publication that new section belongs to
