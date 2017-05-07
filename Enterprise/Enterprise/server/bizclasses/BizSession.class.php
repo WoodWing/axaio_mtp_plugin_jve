@@ -357,7 +357,7 @@ class BizSession
 		if( !isset(self::$userName) ) {
 			self::$userName = $shortUser;
 		}
-		$userid = self::getUserInfo('id');
+		$userId = self::getUserInfo('id');
 
 		// Return LogOnResponse to client application
 		require_once BASEDIR.'/server/interfaces/services/wfl/WflLogOnResponse.class.php';
@@ -390,7 +390,7 @@ class BizSession
 		}
 		if( in_array( 'Users', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-			$ret->Users         = BizUser::getUsersWithCommonAuthorization( $userid );
+			$ret->Users         = BizUser::getUsersWithCommonAuthorization( $userId );
 		}
 		if( in_array( 'UserGroups', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
@@ -398,7 +398,7 @@ class BizSession
 		}
 		if( in_array( 'Membership', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-			$ret->Membership    = BizUser::getMemberships( $userid );
+			$ret->Membership    = BizUser::getMemberships( $userId );
 		}
 		if( in_array( 'ObjectTypeProperties', $requestInfo ) ) {
 			require_once BASEDIR.'/server/dbclasses/DBMetaData.class.php';
@@ -421,7 +421,7 @@ class BizSession
 		}
 		if( in_array( 'MessageList', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizMessage.class.php';
-			$ret->MessageList          = BizMessage::getMessagesForUser( $shortUser ); // Messages that are pending for this user
+			$ret->MessageList          = BizMessage::getMessagesForUser( $userId ); // Messages that are pending for this user
 		}
 		if( in_array( 'CurrentUser', $requestInfo ) ) {
 			$user = self::getUser();
@@ -430,7 +430,7 @@ class BizSession
 		}
 		if( in_array( 'MessageQueueConnections', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
-			BizMessageQueue::setupMessageQueueConnectionsForLogOn( $ret, $userid, $password );
+			BizMessageQueue::setupMessageQueueConnectionsForLogOn( $ret, $userId, $password );
 		}
 
 		// fire event
@@ -531,7 +531,7 @@ class BizSession
 	public static function logOff( $ticket, $savesettings=null, $settings=null, $messageList=null )
 	{
 		// check ticket (and get user)
-		$user = self::checkTicket( $ticket, 'LogOff' );
+		$shortUserName = self::checkTicket( $ticket, 'LogOff' );
 
 		// Handle messages read/deleted by user.
 		if( $messageList ) {
@@ -541,14 +541,14 @@ class BizSession
 					'Make sure you pass in a MessageList data object at the 4th parameter. ' );
 			}
 			require_once BASEDIR.'/server/bizclasses/BizMessage.class.php';
-			BizMessage::sendMessagesForUser( $user, $messageList );
+			BizMessage::sendMessagesForUser( $shortUserName, $messageList );
 		}
 
 		// Fire event (n-cast the logoff operation to notify client apps).
 		require_once BASEDIR.'/server/smartevent.php';
-		new smartevent_logoff( $ticket, $user );  // fire event now, while ticket is still valid
+		new smartevent_logoff( $ticket, $shortUserName );  // fire event now, while ticket is still valid
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
-		DBlog::logService( $user, 'LogOff' );
+		DBlog::logService( $shortUserName, 'LogOff' );
 
 		//get the appname before deleting the ticket...
 		$appname = DBTicket::DBappticket($ticket);
@@ -571,13 +571,13 @@ class BizSession
 		// settings
 		if( $savesettings ) {
 			require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
-			$sth = DBUserSetting::purgeSettings( $user , $appname );
+			$sth = DBUserSetting::purgeSettings( $shortUserName , $appname );
 			if( !$sth ) {
 				throw new BizException( 'ERR_DATABASE', 'Server',  $dbDriver->error() );
 			}
 
 			if( $settings ) foreach( $settings as $setting ) {
-				$sth = DBUserSetting::addSetting( $user, $setting->Setting, $setting->Value, $appname );
+				$sth = DBUserSetting::addSetting( $shortUserName, $setting->Setting, $setting->Value, $appname );
 				if( !$sth ) {
 					throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
 				}
@@ -613,7 +613,7 @@ class BizSession
 	 * @param string $service Service to validate the ticket for, default ''.
 	 * @param bool $extend Since 10.2. Whether or not the ticket lifetime should be implicitly extended (when valid).
 	 *                     Pass FALSE when e.g. frequently called and so the expensive DB update could be skipped.
-	 * @return string The active user of the session.
+	 * @return string Short user name of the active user of the session.
 	 * @throws BizException When ticket not valid.
 	 */
 	public static function checkTicket( $ticket, $service='', $extend = true )

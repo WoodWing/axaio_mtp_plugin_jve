@@ -90,7 +90,7 @@ class BizMessage
 	/**
 	 * Get all messages sent to a specific user.
 	 *
-	 * @param string $userId
+	 * @param string $userId User DB id.
 	 * @throws BizException Throws BizException when fails.
 	 * @return MessageList
 	 */
@@ -272,7 +272,7 @@ class BizMessage
 	/**
 	 * Deletes messages sent to a given user.
 	 *
-	 * @param string $userId
+	 * @param string $userId User DB id.
 	 * @param string $messageType       Optional. Only delete messages with this type.
 	 * @param string $messageTypeDetail Optional. Only delete messages with this type detail.
 	 * @throws BizException Throws BizException when fails.
@@ -340,9 +340,9 @@ class BizMessage
 			}
 		
 			// Make sure incoming messages are not a bad mixture (=> client programming error).
-			$objectId = null; $userId = null;
+			$objectId = null; $shortUserName = null;
 			try {
-				$destination = self::validateMessageList( $messageList, $objectId, $userId );
+				$destination = self::validateMessageList( $messageList, $objectId, $shortUserName );
 			} catch( BizException $e ) {
 				BizErrorReport::reportException( $e );
 				BizErrorReport::stopReport();
@@ -354,11 +354,13 @@ class BizMessage
 					// Send object messages, per object.
 					require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 					require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-					$userId = BizSession::getShortUserName();
-					$object = BizObject::getObject( $objectId, $userId, false, 'none', array( 'MetaData', 'Targets' ) );
+					$shortUserName = BizSession::getShortUserName();
+					$object = BizObject::getObject( $objectId, $shortUserName, false, 'none', array( 'MetaData', 'Targets' ) );
 					$object->MessageList = $messageList;
 					self::doSendMessagesForObject( $object, $objectId, $notify );
 				} else if( $destination == 'user' ) {
+					require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+					$userId = DBUser::getUserDbIdByShortName( $shortUserName );
 					self::doSendMessagesForUser( $userId, $messageList, $notify );
 				}
 			} catch( BizException $e ) {
@@ -524,18 +526,20 @@ class BizMessage
 	 * which is the case for LogOff requests.
 	 * The passed $messageList gets updated with properties as stored in database.
 	 *
-	 * @param string $userId Short user name.
+	 * @param string $shortUserName Short user name.
 	 * @param MessageList $messageList Messages to send.
 	 * @param bool $notify Whether or not to send network notification (n-cast) per message.
 	 * @throws BizException Throws BizException when fails.
 	 */
-	public static function sendMessagesForUser( $userId, $messageList, $notify = true )
+	public static function sendMessagesForUser( $shortUserName, $messageList, $notify = true )
 	{
 		// Make sure incoming messages are not a bad mixture (=> client programming error).
 		$objectId = null;
-		$destination = self::validateMessageList( $messageList, $objectId, $userId );
+		$destination = self::validateMessageList( $messageList, $objectId, $shortUserName );
 		
 		if( $destination == 'user' ) {
+			require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+			$userId = DBUser::getUserDbIdByShortName( $shortUserName );
 			self::doSendMessagesForUser( $userId, $messageList, $notify );
 		} else if( $destination == 'object' ) {
 			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 
@@ -547,7 +551,7 @@ class BizMessage
 	/**
 	 * Same as sendMessagesForUser function, but without message validation.
 	 *
-	 * @param string $userId User short name.
+	 * @param string $userId User DB id.
 	 * @param MessageList|null $messageList Messages to validate.
 	 * @param bool $notify Whether or not to send network notification (n-cast) per message.
 	 * @throws BizException
@@ -645,7 +649,7 @@ class BizMessage
 	/**
 	 * Send a single message, notification depends on the $notify flag.
 	 *
-	 * @param string $user     User id of the user performing the request. NULL to auto resolve current user.
+	 * @param string $user     Short name of the user performing the request. NULL to auto resolve current user.
 	 * @param Message $message Message to send (the message ids will be updated with the created ones at DB!).
 	 * @param bool $notify     Whether or not to send network notification (n-cast) per message.
 	 * @throws BizException Throws BizException when the operation fails.
@@ -803,11 +807,11 @@ class BizMessage
 	 *
 	 * @param MessageList|null $messageList Messages to validate.
 	 * @param string $objectId [in/out] Filled only when the message belongs to object.
-	 * @param string $userId User short name.
+	 * @param string $shortUserName User short name.
 	 * @return string Where messages are sent to: 'object' or 'user'
 	 * @throws BizException When any of the given messages is not valid.
 	 */
-	private static function validateMessageList( $messageList, &$objectId, &$userId )
+	private static function validateMessageList( $messageList, &$objectId, &$shortUserName )
 	{
 		// Bail out when no there messages at all.
 		if( !$messageList || (
@@ -835,14 +839,14 @@ class BizMessage
 						'Problem found for message id: '.$message->MessageID );
 				}
 				$destination = 'object';
-			} else if( $userId ) { // next message, while first message was an -user- message
+			} else if( $shortUserName ) { // next message, while first message was an -user- message
 				if( $message->ObjectID ) {
 					throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 
 						'Not allowed to store a mixture of object- and user messages at once. '.
 						'Make sure that all Message objects, either the UserID or ObjectID is set. '.
 						'Problem found for message id: '.$message->MessageID );
 				}
-				if( $message->UserID != $userId ) {
+				if( $message->UserID != $shortUserName ) {
 					throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 
 						'Not allowed to store a messages sent to miscellaneous users at once. '.
 						'Make sure that for all Message objects, the UserID is the same. '.
@@ -903,7 +907,9 @@ class BizMessage
 		if( count( $otherMessageIDs ) > 0 ) {
 			require_once BASEDIR.'/server/dbclasses/DBMessage.class.php';
 			$userIds = DBMessage::getUserIdsForMsgIds( $otherMessageIDs );
+			$userId = null;
 			$objectIds = DBMessage::getObjectIdsForMsgIds( $otherMessageIDs );
+			$objectId = null;
 			if( !$destination ) {
 				if( count( $userIds ) > 0 ) {
 					$userId = reset( $userIds );

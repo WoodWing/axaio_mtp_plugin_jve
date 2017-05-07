@@ -501,7 +501,7 @@ class DBTicket extends DBBase
 	 * @param string $service  Not used
 	 * @param bool $extend     Since 10.2. Whether or not the ticket lifetime should be implicitly extended (when valid).
 	 *                         Pass FALSE when e.g. frequently called and so the expensive DB update could be skipped.
-	 * @return string|bool     User id (short name) or FALSE when ticket not exists or expired.
+	 * @return string|bool     Short user name or FALSE when ticket not exists or expired.
 	 */
 	public static function checkTicket( $ticket, $service = '', $extend = true )
 	{
