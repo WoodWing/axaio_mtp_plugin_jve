@@ -157,7 +157,7 @@ class DBSection extends DBBase
 		$sectionDefId = intval( $sectionDefId );
 		$where = '`issue` = ? AND `section` = ? ';
 		$params = array( $issueId, $sectionDefId );
-		$sectionExists = self::getRow( 'issuesection', $where, array('id') );
+		$sectionExists = self::getRow( 'issuesection', $where, array('id'), $params );
 		if( $sectionExists ) {
 			if( $updateIfExists ) {
 				self::updateIssueSection( $sectionExists['id'], $values );
