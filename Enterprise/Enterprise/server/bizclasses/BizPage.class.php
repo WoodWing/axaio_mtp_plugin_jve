@@ -509,9 +509,9 @@ class BizPage
 		$sortedPagesBySortedEditions = array();
 		if( count( $editionIds ) > 1 ) {
 			require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
-			$sortedDBEditionRows = DBEdition::sortEditionIdsByCode( $editionIds );
-			if( $sortedDBEditionRows ) foreach( $sortedDBEditionRows as $sortedDBEditionRow ) {
-				$sortedPagesBySortedEditions[ intval( $sortedDBEditionRow['id'] ) ] = array();
+			$sortedEditionIds = array_keys( DBEdition::sortEditionIdsByCode( $editionIds ) );
+			if( $sortedEditionIds ) foreach( $sortedEditionIds as $sortedEditionId ) {
+				$sortedPagesBySortedEditions[ $sortedEditionId ] = array();
 			}
 		} else {
 			$sortedPagesBySortedEditions[reset( $editionIds )] = array();

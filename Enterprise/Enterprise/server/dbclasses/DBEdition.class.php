@@ -282,7 +282,7 @@ class DBEdition extends DBBase
 			$orderBy = array( 'id' => true, 'code' => true );
 			$rows = self::listRows( self::TABLENAME, 'id', 'code', $where, null, array(), $orderBy );
 			if( $rows ) foreach( $rows as $row ) {
-				$results[ $row['id'] ] = $row['code'];
+				$results[ intval($row['id']) ] = intval($row['code']);
 			}
 		}
 		return $results;
