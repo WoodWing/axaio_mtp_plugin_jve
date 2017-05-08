@@ -3,6 +3,10 @@
 class ElvisRESTClient
 {
 	/**
+	 * @var null|string Type of Load Balancer used with connection to Elvis. e.g: classic load balancer (AWSELB)
+	 */
+	private $loadBalancerType = null;
+	/**
 	 * Calls an Elvis web service over the REST JSON interface.
 	 *
 	 * It does log the request and response data in DEBUG mode.
@@ -313,11 +317,14 @@ class ElvisRESTClient
 	 * Calls the version.jsp web page over HTTP, parses the return XMl file and returns the read version.
 	 * Note that this is an old and home brewed protocol (unlike the other JSON REST services).
 	 *
+	 * Function also retrieves the type of Load Balancer used. Caller can retrieve the type of Load Balancer
+	 * by calling getLoadBalancerType();
+	 *
 	 * @since 10.0.5 / 10.1.2
 	 * @return string
 	 * @throws BizException
 	 */
-	public static function getElvisServerVersion()
+	public function getElvisServerVersion()
 	{
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 
@@ -364,6 +371,42 @@ class ElvisRESTClient
 			throw new BizException( null, 'Server', 'Parsing the XML result of version.jsp failed.',
 				'Could not detect Elvis Server version.' );
 		}
+
+		// Remember the ELB type if there's any.
+		$this->setLoadBalancerType( $cookies );
+
 		return $serverVersion;
+	}
+
+	/**
+	 * Set the Load Balancer type being used with connection to Elvis.
+	 *
+	 * The Load Balancer type can be the Classic Load Balancer ( ELB ),
+	 * or the Application Load Balancer ( ALB ).
+	 *
+	 * @param array $cookies Key-value lists of cookies returned in a response from Elvis.
+	 */
+	private function setLoadBalancerType( $cookies )
+	{
+		if( $cookies ) {
+			if( isset( $cookies['AWSELB'] )) {
+				$this->loadBalancerType = 'AWSELB';
+			} else if( isset( $cookies['AWSALB'] )) {
+				$this->loadBalancerType = 'AWSALB';
+			}
+		}
+	}
+
+	/**
+	 * Returns the Load Balancer type being used with connection to Elvis.
+	 *
+	 * The Load Balancer type can be the Classic Load Balancer ( ELB ),
+	 * or the Application Load Balancer ( ALB ).
+	 *
+	 * @return null|string Returns the type of Load Balancer used with Elvis, Null when no Load Balancer is used.
+	 */
+	public function getLoadBalancerType()
+	{
+		return $this->loadBalancerType;
 	}
 }
