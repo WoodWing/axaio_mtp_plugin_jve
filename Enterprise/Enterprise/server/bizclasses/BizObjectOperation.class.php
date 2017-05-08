@@ -96,6 +96,19 @@ class BizObjectOperation
 		require_once BASEDIR.'/server/dbclasses/DBObjectOperation.class.php';
 		return DBObjectOperation::getOperations( $objectId );
 	}
+
+	/**
+	 * Removes the operation from the DB with te given object id and operation GUID.
+	 *
+	 * @param integer $objectId
+	 * @param string $guid
+	 * @throws BizException On bad given params or fatal SQL errors.
+	 */
+	public static function deleteOperation( $objectId, $guid )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObjectOperation.class.php';
+		DBObjectOperation::deleteOperation( $objectId, $guid );
+	}
 	
 	/**
 	 * Removes the operations from DB that were created for a given object.
