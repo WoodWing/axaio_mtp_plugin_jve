@@ -115,7 +115,7 @@ if( $issueId > 0 ) { // overrule issue?
 	$issueName = DBIssue::getIssueName( $issueId );
 	$txt = str_replace("<!--VAR:ISSUE-->", formvar($issueName).inputvar( 'issue', $issueId, 'hidden' ), $txt);
 } else {
-	$txt = preg_replace("/<!--IF:ISSUE-->.*?<!--ENDIF-->/s",'', $txt);
+	$txt = preg_replace("/<!--IF:ISSUE-->.*?<!--ENDIF:ISSUE-->/s",'', $txt);
 }
 
 // Resolve channel's name. TBD: Could be made part of response (WSDL change).
