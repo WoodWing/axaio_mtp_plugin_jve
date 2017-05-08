@@ -3,6 +3,7 @@ require_once dirname(__FILE__).'/../../config/config.php';
 require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/admin/global_inc.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
+require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 
 $ticket = checkSecure('publadmin');
 
@@ -13,9 +14,7 @@ if ($recs > 0) {
 		$id = intval($_REQUEST["order$i"]);
 		$code = intval($_REQUEST["code$i"]);
 		$where = '`id` = ? ';
-		$params = array( 
-			array( $id, 'integer', $id > 0 )
-		);
+		$params = array( intval( $id ) );
 		$row = array( 'code' => $code );
 		DBBase::updateRow('publications', $row, $where, $params );
 	}
