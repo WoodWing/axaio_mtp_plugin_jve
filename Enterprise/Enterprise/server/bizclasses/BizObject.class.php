@@ -2013,7 +2013,12 @@ class BizObject
 
 			// Retrieve the statuses that are defined for this publication / overrule issue.
 			require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
-			$statuses = BizAdmStatus::getStatuses( $publicationId, $issueId, $objectType );
+			$statuses = array();
+			$gotStatuses = BizAdmStatus::getStatuses( $publicationId, $issueId, $objectType );
+			// $gotStatuses has index [0...N-1] but we need $statuses with status ids as index.
+			if( $gotStatuses ) foreach( $gotStatuses as $status ) {
+				$statuses[$status->Id] = $status;
+			}
 
 			// Initialize variables to hold the allowed Statuses and Categories for MultiSetObjectProperties.
 			$categories = array();
@@ -2099,7 +2104,7 @@ class BizObject
 					if ( $sendToNext ) {
 						// First determine the new State for the Object, if next, determine next.
 						$state = $statuses[$invokedObject->WorkflowMetaData->State->Id];
-						$newStateId = ( $state->NextStatusId ) ? $state->NextStatusId : null;
+						$newStateId = isset( $state->NextStatus->Id ) ? $state->NextStatus->Id : null;
 
 						if ( is_null( $newStateId ) ) {
 							// If there is no state change, then we do not need to include this Object in the set properties so
@@ -2491,7 +2496,8 @@ class BizObject
 					// the next status. This can be skipped if Personal state is involved.
 					if ( $newStateId != -1 && $currentState != -1  ) {
 						$currentStateObject = $statuses[$currentState];
-						if (  $newStateId == $currentStateObject->NextStatusId) {
+						if ( isset($currentStateObject->NextStatus->Id)
+							&& $newStateId == $currentStateObject->NextStatus->Id ) {
 							if ( !$changeStatusForward && !$changeStatus ) {
 								try {
 									throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',

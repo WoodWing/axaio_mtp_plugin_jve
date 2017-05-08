@@ -88,28 +88,32 @@ class MultiChannelPublishingUtils
 	 */
 	public static function createState( $objectType, $name, $publicationId )
 	{
+		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php'; // AdmStatus
+
+		$issueId = 0; // It is not an overrule issue publication, so we leave this 0
+
 		// Compose an object.
-		$object = new stdClass();
+		$object = new AdmStatus();
 		$object->Id = 0;
 		$object->PublicationId	= $publicationId;
 		$object->Type = $objectType;
 		$object->Name = $name;
 		$object->Produce = false;
-		$object->Color = '#FFFF99';
-		$object->NextStatusId = 0;
+		$object->Color = 'FFFF99';
+		$object->NextStatus = null;
 		$object->SortOrder = 0;
 		$object->IssueId = 0;
-		$object->SectionId = 0;
-		$object->DeadlineStatusId = 0;
 		$object->DeadlineRelative = 0;
 		$object->CreatePermanentVersion = false;
 		$object->RemoveIntermediateVersions = false;
 		$object->AutomaticallySendToNext = false;
+		$object->SkipIdsa = false;
 
 		// Insert the State.
 		try {
 			require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
-			$status = BizAdmStatus::createStatus( $object );
+			$statusIds = BizAdmStatus::createStatuses( $publicationId, $issueId, array($object) );
+			$status = BizAdmStatus::getStatusWithId( $statusIds[0] );
 		} catch( BizException $e ) {
 			self::setResult( 'ERROR', 'Creating states failed: ' . $e->getMessage());
 			$status = null;

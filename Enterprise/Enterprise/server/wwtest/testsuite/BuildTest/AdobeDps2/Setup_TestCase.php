@@ -206,18 +206,20 @@ class WW_TestSuite_BuildTest_AdobeDps2_Setup_TestCase extends TestCase
 	private function setupLayoutStatus( $name, $readyForPublishing, $nextStatusId=0 )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
+		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php'; // AdmStatus
 
-		$newStatus = new stdClass();
+		$publicationId = $this->testOptions['Brand']->Id;
+		$issueId = 0; // It is not an overrule issue publication, so we leave this 0
+
+		$newStatus = new AdmStatus();
 		$newStatus->Id = null;
-		$newStatus->PublicationId = $this->testOptions['Brand']->Id;
 		$newStatus->Type = 'Layout';
 		$newStatus->Phase = 'Production';
 		$newStatus->Name = $name;
 		$newStatus->Produce = false;
-		$newStatus->Color = '#A0A0A0';
-		$newStatus->NextStatusId = $nextStatusId;
+		$newStatus->Color = 'A0A0A0';
+		$newStatus->NextStatus = new AdmIdName( $nextStatusId );
 		$newStatus->SortOrder = '';
-		$newStatus->IssueId = 0; // It is not an overrule issue publication, so we leave this 0
 		$newStatus->SectionId = '';
 		$newStatus->DeadlineRelative = '';
 		$newStatus->CreatePermanentVersion = false;
@@ -225,7 +227,8 @@ class WW_TestSuite_BuildTest_AdobeDps2_Setup_TestCase extends TestCase
 		$newStatus->AutomaticallySendToNext = false;
 		$newStatus->ReadyForPublishing = $readyForPublishing;
 		$newStatus->SkipIdsa = false;
-		$layoutStatus = BizAdmStatus::createStatus( $newStatus );
+		$layoutStatusIds = BizAdmStatus::createStatuses( $publicationId, $issueId, array($newStatus) );
+		$layoutStatus = BizAdmStatus::getStatusWithId( $layoutStatusIds[0] );
 
 		// Recompose to please the BuildTest.
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';

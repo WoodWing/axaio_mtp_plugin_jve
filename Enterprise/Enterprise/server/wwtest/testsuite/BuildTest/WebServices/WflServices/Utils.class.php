@@ -255,22 +255,19 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$this->testCase->assertNull( $this->expectedError ); // not supported by this function
 
 		// TODO: call web service layer (instead of calling biz layer)
-		$statusCreated = null;
+		$statusId = null;
 
+		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php'; // AdmStatus
 		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 		$status = new AdmStatus(null, $statusName, $objectType, false, null, 'WoodWing Software');
 		$status->Id = 0;
-		$status->PublicationId	= $publicationId;
 		$status->Type = $objectType;
 		$status->Phase = 'Production';
 		$status->Name = $statusName;
 		$status->Produce = false;
-		$status->Color = '#FFFF99';
-		$status->NextStatusId = $nextStatusId;
+		$status->Color = 'FFFF99';
+		$status->NextStatus = new AdmIdName( $nextStatusId );
 		$status->SortOrder = 0;
-		$status->IssueId = $issueId;
-		$status->SectionId = 0;
-		$status->DeadlineStatusId = 0;
 		$status->DeadlineRelative = 0;
 		$status->CreatePermanentVersion = false;
 		$status->RemoveIntermediateVersions = false;
@@ -278,13 +275,12 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$status->ReadyForPublishing = false;
 		$status->SkipIdsa = false;
 		try {
-			$statusCreated = BizAdmStatus::createStatus( $status );
+			$statusIds = BizAdmStatus::createStatuses( $publicationId, $issueId, array($status) );
+			$statusId = $statusIds[0];
 
 		} catch( BizException $e ) {
 			$this->testCase->throwError( $e->getMessage().'<br/>'.$e->getDetail() );
 		}
-		$this->testCase->assertInstanceOf( 'stdClass', $statusCreated );
-		$statusId = $statusCreated->Id;
 		$this->testCase->assertGreaterThan( 0, $statusId );
 		
 		// TODO: call web service layer (instead of calling biz layer)
@@ -294,7 +290,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 			$this->testCase->throwError( $e->getMessage().'<br/>'.$e->getDetail() );
 			throw $e;
 		}
-		$this->testCase->assertInstanceOf( 'stdClass', $statusCreated );
+		$this->testCase->assertInstanceOf( 'AdmStatus', $statusCreated );
 
 		BizAdmStatus::restructureMetaDataStatusColor( $statusCreated->Id, $status->Color);
 		$statusCreated->Color = $status->Color;
@@ -1241,7 +1237,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		if( !$expectedError ) {
 			$this->testCase->assertAttributeInternalType( 'array', 'Editions', $response );
 			$this->testCase->assertAttributeCount( 1, 'Editions', $response ); // check $response->Editions[0]
-			$this->testCase->assertInstanceOf( 'stdClass', $response->Editions[0] ); // TODO: should be AdmEdition
+			$this->testCase->assertInstanceOf( 'AdmEdition', $response->Editions[0] );
 		}
 		return isset($response->Editions[0]) ? $response->Editions[0] : null;
 	}
