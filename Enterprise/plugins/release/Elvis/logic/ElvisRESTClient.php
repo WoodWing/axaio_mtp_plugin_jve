@@ -21,9 +21,7 @@ class ElvisRESTClient
 		self::logService( $service, $url, $post, $cookies, true );
 		$response = self::sendUrl( $service, $url, $post, $cookies, $file );
 		self::logService( $service, $url, $response, $cookies, false );
-		if( $cookies ) {
-			ElvisSessionUtil::saveSessionCookies( $cookies );
-		}
+		ElvisSessionUtil::updateSessionCookies( $cookies );
 
 		if( isset( $response->errorcode ) ) {
 			$detail = 'Calling Elvis web service '.$service.' failed. '.
@@ -126,20 +124,22 @@ class ElvisRESTClient
 		if( $cookies ) {
 			$cookieValueArr = array();
 			foreach( $cookies as $cookieKey => $cookieVal ) {
-				$cookieValueArr[] = "$cookieKey=$cookieVal";
+				$encodedCookieValue = urlencode( $cookieVal );
+				$cookieValueArr[] = "{$cookieKey}={$encodedCookieValue}";
 			}
 			$cookieValue = implode( '; ', $cookieValueArr );
 			curl_setopt( $ch, CURLOPT_COOKIE, $cookieValue );
 		}
 
 		// Read the cookies returned by Elvis ( using a callback function )
-		$returnedCookies = array();
+		$cookies = array(); // To be passed back(referenced back) to the caller.
 		// Example $headerLine = "Set-Cookie: AWSELB=4A5003EE72F010581";
-		$curlResponseHeaderCallback = function( $ch, $headerLine ) use ( &$returnedCookies ) {
+		$curlResponseHeaderCallback = function( $ch, $headerLine ) use ( &$cookies ) {
 			if( preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $headerLine, $theSetCookie ) == 1 ) {
 				if( $theSetCookie ) foreach( $theSetCookie[1] as $theSetCookieKeyValue ) {
-					parse_str( $theSetCookieKeyValue, $returnedCookie );
-					$returnedCookies = array_merge( $returnedCookies, $returnedCookie );
+					parse_str( $theSetCookieKeyValue, $returnedCookie ); // does urldecode() !
+					$returnedCookie = array_map( 'trim', $returnedCookie );
+					$cookies = array_merge( $cookies, $returnedCookie );
 				}
 			}
 			return strlen( $headerLine ); // Needed by CURLOPT_HEADERFUNCTION
@@ -167,11 +167,6 @@ class ElvisRESTClient
 
 		curl_close($ch);
 
-		// Collecting cookies returned from the Request sent.
-		$cookies = array();
-		if( $returnedCookies ) foreach( $returnedCookies as $cookieName => $cookieValue ) {
-			$cookies[ $cookieName ] = $cookieValue;
-		}
 		return json_decode( $result );
 	}
 
@@ -324,12 +319,18 @@ class ElvisRESTClient
 	 */
 	public static function getElvisServerVersion()
 	{
+		require_once __DIR__.'/../util/ElvisSessionUtil.php';
+
 		$response = null;
 		$url = ELVIS_URL.'/version.jsp';
 		LogHandler::logService( 'Elvis_version_jsp', $url, true, 'REST' );
 		try {
 			$client = new Zend\Http\Client();
 			$client->setUri( $url );
+			$cookies = ElvisSessionUtil::getSessionCookies();
+			if( $cookies ) {
+				$client->setCookies( $cookies );
+			}
 			$response = $client->send();
 		} catch( Exception $e ) {
 			LogHandler::logService( 'Elvis_version_jsp', $e->getMessage(), null, 'REST' );
@@ -339,6 +340,16 @@ class ElvisRESTClient
 			LogHandler::logService( 'Elvis_version_jsp', $response->getBody(), null, 'REST' );
 			self::throwExceptionForElvisCommunicationFailure( $response->getReasonPhrase() );
 		}
+
+		$cookies = array();
+		$cookieJar = $response->getCookie();
+		if( $cookieJar ) foreach( $cookieJar as $cookie ) {
+			$cookies[ $cookie->getName() ] = $cookie->getValue();
+		}
+		if( $cookies ) {
+			ElvisSessionUtil::updateSessionCookies( $cookies );
+		}
+
 		$versionXml = trim($response->getBody());
 		LogHandler::logService( 'Elvis_version_jsp', $versionXml, false, 'REST' );
 

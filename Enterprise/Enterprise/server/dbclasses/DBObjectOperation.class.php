@@ -84,6 +84,35 @@ class DBObjectOperation extends DBBase
 		}
 		return $operations;
 	}
+
+	/**
+	 * Removes the operation from the DB with te given object id and operation GUID.
+	 *
+	 * @param integer $objectId
+	 * @param string $guid
+	 * @throws BizException On bad given params or fatal SQL errors.
+	 */
+	public static function deleteOperation( $objectId, $guid )
+	{
+		// Bail out when invalid parameters provided. (Paranoid check.)
+		$objectId = intval( $objectId );
+		if( !$objectId  ) {
+			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Invalid params provided for '.__METHOD__.'().' );
+		}
+
+		require_once BASEDIR.'/server/utils/NumberUtils.class.php';
+		if( !NumberUtils::validateGUID( $guid ) ) {
+			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Invalid params provided for '.__METHOD__.'().' );
+		}
+
+		$where = '`objid` = ? AND `guid` = ?';
+		$params = array( $objectId, $guid );
+		$deleted = self::deleteRows( self::TABLENAME, $where, $params );
+
+		if( self::hasError() || !$deleted ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+	}
 	
 	/**
 	 * Removes the operations from DB that were created for a given object.
