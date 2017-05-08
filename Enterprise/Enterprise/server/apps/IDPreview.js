@@ -29,8 +29,8 @@ const ERROR = "error";
 
 const LOG_FILE = 1;
 const LOG_CONSOLE = 2;
-const DEBUGLEVEL = LOG_FILE;
-// const DEBUGLEVEL = 0;
+// const DEBUGLEVEL = LOG_FILE;
+const DEBUGLEVEL = 0;
 
 const PREVIEW_RESOLUTION = 150.0;
 const PREVIEW_QUALITY = JPEGOptionsQuality.HIGH;
@@ -573,13 +573,13 @@ function copyfitBySC(version)
 {
     var bCopyFitBySC = false;
 
-    // version > 10.2.5
-    if ( version[0] == 10 && ( (version[1] == 2 && version[2] > 5) || (version[1] > 2) ) )
+    // version >= 10.2.6
+    if ( version[0] == 10 && ( (version[1] == 2 && version[2] >= 6) || (version[1] > 2) ) )
     {
         bCopyFitBySC = true;
     }
-    // version > 11.0.4
-    else if ( version[0] == 11 && ( (version[1] == 0 && version[2] > 4) || (version[1] > 0) ) )
+    // version >= 11.0.5
+    else if ( version[0] == 11 && ( (version[1] == 0 && version[2] >= 5) || (version[1] > 0) ) )
     {
         bCopyFitBySC = true;
     }
@@ -594,17 +594,17 @@ function copyfitBySC(version)
 
 /**
  * Find out whether to save the layout in this script because of performed object operations.
- * Smart Connection > 10.2.7 and > 11.0.5 will save the processed object operations
+ * Smart Connection >= 10.2.8 and >= 11.0.6 will save the processed object operations
  */
 function saveRequired(version)
 {
     var returnValue = true;
 
-    if ( version[0] == 10 && ( (version[1] == 2 && version[2] > 7) || (version[1] > 2) ) ) {
-        // version > 10.2.7
+    if ( version[0] == 10 && ( (version[1] == 2 && version[2] >= 8) || (version[1] > 2) ) ) {
+        // version >= 10.2.8
         returnValue = false;
-    } else if ( version[0] == 11 && ( (version[1] == 0 && version[2] > 5) || (version[1] > 0) ) ) {
-        // version > 11.0.5
+    } else if ( version[0] == 11 && ( (version[1] == 0 && version[2] >= 6) || (version[1] > 0) ) ) {
+        // version >= 11.0.6
         returnValue = false;
     }
     else if ( version [0] > 11 ) {
@@ -1466,8 +1466,8 @@ function main()
             // Save to reflect performed object operations in the locally stored layout so that these
             // are not performed over and over again for succeeding previews.
             // This should not be done for articles that are not placed on a layout.
-            // SC 10.2.8+ and 11.0.7+ contain changes that no longer require this save.
-            if( isSC10plus && !templatefile && saveRequired(pluginVersion) ) { // SC10+ && article is placed && save needed (<10.2.8+ and <11.0.7+)
+            // SC 10.2.8+ and 11.0.6+ contain changes that no longer require this save.
+            if( isSC10plus && !templatefile && saveRequired(pluginVersion) ) { // SC10+ && article is placed && save needed (<10.2.8+ and <11.0.6+)
                 wwlog( INFO, "Saving document [" + myDoc.fullName + "]" );
                 myDoc.save( myDoc.fullName );
             }
