@@ -65,7 +65,7 @@ class ElvisContentSourceService
 //		ElvisAMFClient::registerClass(ElvisFormattedValue::getName());
 //		ElvisAMFClient::registerClass(BasicMap::getName());
 //		$params = array($query, $metadataToReturn, $firstResult, $maxResultHits);
-//		$searchResponse = ElvisAMFClient::send(self::SERVICE, 'search', $params, true);
+//		$searchResponse = ElvisAMFClient::send( self::SERVICE, 'search', $params );
 //		return $searchResponse;
 //	}
 
@@ -89,7 +89,7 @@ class ElvisContentSourceService
 		$resp = null;
 
 		try {
-			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieve', $params, true );
+			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieve', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -110,7 +110,7 @@ class ElvisContentSourceService
 		$id = null;
 
 		try {
-			$id = ElvisAMFClient::send( self::SERVICE, 'createCollection', $params, true );
+			$id = ElvisAMFClient::send( self::SERVICE, 'createCollection', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -129,7 +129,7 @@ class ElvisContentSourceService
 		$params = array( $assetId );
 
 		try {
-			ElvisAMFClient::send( self::SERVICE, 'remove', $params, true );
+			ElvisAMFClient::send( self::SERVICE, 'remove', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -149,7 +149,7 @@ class ElvisContentSourceService
 		$copyId = null;
 
 		try {
-			$copyId = ElvisAMFClient::send( self::SERVICE, 'copy', $params, true );
+			$copyId = ElvisAMFClient::send( self::SERVICE, 'copy', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -172,7 +172,7 @@ class ElvisContentSourceService
 		$params = array( $assetId );
 
 		try {
-			$hits = ElvisAMFClient::send( self::SERVICE, 'listVersions', $params, true );
+			$hits = ElvisAMFClient::send( self::SERVICE, 'listVersions', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -192,7 +192,7 @@ class ElvisContentSourceService
 		$params = array( $assetId, $versionNumber );
 
 		try {
-			ElvisAMFClient::send( self::SERVICE, 'promoteVersion', $params, true );
+			ElvisAMFClient::send( self::SERVICE, 'promoteVersion', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -216,7 +216,7 @@ class ElvisContentSourceService
 		$resp = null;
 
 		try {
-			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieveVersion', $params, true );
+			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieveVersion', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -234,7 +234,7 @@ class ElvisContentSourceService
 	{
 		try {
 			$params = array( $assetId );
-			ElvisAMFClient::send( self::SERVICE, 'undoCheckout', $params, true );
+			ElvisAMFClient::send( self::SERVICE, 'undoCheckout', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -257,7 +257,7 @@ class ElvisContentSourceService
 					$assetIds = array( $assetIds );
 				}
 				$params = array( $assetIds, $metadata );
-				ElvisAMFClient::send( self::SERVICE, 'updateWorkflowMetadata', $params, true );
+				ElvisAMFClient::send( self::SERVICE, 'updateWorkflowMetadata', $params );
 			}
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
@@ -282,7 +282,7 @@ class ElvisContentSourceService
 
 		try {
 			$params = array( $updateOperations );
-			ElvisAMFClient::send( self::SERVICE, 'updateObjects', $params, true );
+			ElvisAMFClient::send( self::SERVICE, 'updateObjects', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -301,7 +301,7 @@ class ElvisContentSourceService
 
 		try {
 			$params = array( $deleteOperations );
-			ElvisAMFClient::send( self::SERVICE, 'deleteObjects', $params, true );
+			ElvisAMFClient::send( self::SERVICE, 'deleteObjects', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -321,7 +321,7 @@ class ElvisContentSourceService
 
 		try {
 			$params = array( $shadowObjectIdentity );
-			ElvisAMFClient::send( self::SERVICE, 'registerShadowObject', $params, true );
+			ElvisAMFClient::send( self::SERVICE, 'registerShadowObject', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -341,7 +341,7 @@ class ElvisContentSourceService
 
 		try {
 			$params = array( $shadowObjectIdentity );
-			ElvisAMFClient::send( self::SERVICE, 'unregisterShadowObject', $params, true );
+			ElvisAMFClient::send( self::SERVICE, 'unregisterShadowObject', $params );
 		} catch( ElvisCSException $e ) {
 			// Ignore asset not found exception
 			// May result in an asset flagged as used in Enterprise while it was deleted
@@ -378,7 +378,7 @@ class ElvisContentSourceService
 
 			// We will max wait the configured timeout + 60 seconds before we expect the AMF call to return
 			$operationTimeout = $operationTimeout + 60;
-			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieveAssetUpdates', $params, true, $operationTimeout );
+			$resp = ElvisAMFClient::send( self::SERVICE, 'retrieveAssetUpdates', $params, $operationTimeout );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -396,7 +396,7 @@ class ElvisContentSourceService
 	{
 		try {
 			$params = array( $enterpriseSystemId, $updateIds );
-			ElvisAMFClient::send( self::SERVICE, 'confirmAssetUpdates', $params, true );
+			ElvisAMFClient::send( self::SERVICE, 'confirmAssetUpdates', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -414,7 +414,7 @@ class ElvisContentSourceService
 	{
 		try {
 			$params = array( $enterpriseSystemId, $fields );
-			ElvisAMFClient::send( self::SERVICE, 'configureMetadataFields', $params, true );
+			ElvisAMFClient::send( self::SERVICE, 'configureMetadataFields', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -435,7 +435,7 @@ class ElvisContentSourceService
 
 		try {
 			$params = array( $username );
-			$resp = ElvisAMFClient::send( self::SERVICE, 'getUserDetails', $params, true );
+			$resp = ElvisAMFClient::send( self::SERVICE, 'getUserDetails', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -454,7 +454,7 @@ class ElvisContentSourceService
 		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		try {
 			$params = array( $assetId, HTTP_FILE_TRANSFER_REMOTE_URL, BizSession::getTicket() );
-			$resp = ElvisAMFClient::send( self::SERVICE, 'exportOriginal', $params, true );
+			$resp = ElvisAMFClient::send( self::SERVICE, 'exportOriginal', $params );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
