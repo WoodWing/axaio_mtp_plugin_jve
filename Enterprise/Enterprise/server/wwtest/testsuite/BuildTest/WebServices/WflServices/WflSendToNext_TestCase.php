@@ -14,20 +14,32 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 {
 	private $ticket = null;
 	private $vars = null;
+	/** @var PublicationInfo $publication */
 	private $publication = null;
+	/** @var AdmPubChannel $pubChannel */
 	private $pubChannel = null;
-	private $printTarget = null; // Target
-	private $utils = null; // WW_Utils_TestSuite
+	/** @var Target $printTarget */
+	private $printTarget = null;
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
+	/** @var WW_TestSuite_BuildTest_WebServices_WflServices_Utils $wflServicesUtils */
 	private $wflServicesUtils = null;
 
 	// Objects used for testing
 	private $createdObjects = array();
+	/** @var AdmUserGroup $userGroup */
 	private $userGroup = null;
+	/** @var AdmUser[] $users */
 	private $users = array();
+	/** @var Category[] $categories */
 	private $categories = array();
+	/** @var AdmStatus[] $states */
 	private $states = array();
+	/** @var integer[] $routing */
 	private $routing = array();
+	/** @var Issue[] $issues  */
 	private $issues = array();
+	/** @var Edition[] $editions */
 	private $editions = array();
 
 	public function getDisplayName() { return 'Send To Next'; }
@@ -695,8 +707,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	{
 		for( $i = 1; $i <= 4; $i++ ) {
 			$stepInfo = 'Creating edition for Send To Next.';
-			$this->editions[] = $this->wflServicesUtils->createEdition( $stepInfo, 
+			$admEdition = $this->wflServicesUtils->createEdition( $stepInfo,
 									$this->publication->Id, $this->pubChannel->Id );
+			$this->editions[] = new Edition( $admEdition->Id, $admEdition->Name );
 		}
 	}
 

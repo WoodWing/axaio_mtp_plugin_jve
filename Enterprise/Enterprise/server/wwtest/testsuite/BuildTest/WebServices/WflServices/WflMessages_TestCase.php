@@ -4644,8 +4644,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		$this->pubChannelObj = $setup->getPubChannelInfo();
 		
 		$this->category = count( $this->pubObj->Categories ) > 0  ? $this->pubObj->Categories[0] : null;
-		require_once BASEDIR . '/server/dbclasses/DBEdition.class.php';
-		$editions = DBEdition::listChannelEditionsObj( $this->pubChannelObj->Id );
+		require_once BASEDIR . '/server/dbclasses/DBAdmEdition.class.php';
+		$editions = DBAdmEdition::listChannelEditionsObj( $this->pubChannelObj->Id );
 		$this->editionObj = ( count($editions) > 0 ) ? $editions[0] : null;
 	}
 

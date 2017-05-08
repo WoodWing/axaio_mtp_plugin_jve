@@ -701,7 +701,7 @@ class BizAdmPublication
 	public static function createEditionsObj( $usr, $pubId, $pubChannelId, $issueId, $editions )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBAdmEdition.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmIssue.class.php';
 
@@ -738,7 +738,7 @@ class BizAdmPublication
 				throw new BizException('ERR_ARGUMENT', 'Client', 'Overrule issue not found');
 			}
 		}
-		return DBEdition::createEditionsObj( $pubChannelId, $issueId, $editions );
+		return DBAdmEdition::createEditionsObj( $pubChannelId, $issueId, $editions );
 	}
 
 	/**
@@ -756,7 +756,7 @@ class BizAdmPublication
 	 */
 	public static function listEditionsObj( $usr, $pubId, $pubChannelId, $issueId, $editionIds )
 	{
-		require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBAdmEdition.class.php';
 		if( !$pubId ) { // client programming error
 			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
@@ -765,7 +765,7 @@ class BizAdmPublication
 		$editions = array();
 		if ( is_null($editionIds) ) {
 			if( !empty($issueId) ) {
-				$editions = DBEdition::listIssueEditionsObj( $issueId );
+				$editions = DBAdmEdition::listIssueEditionsObj( $issueId );
 			} else {
 				require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
 				require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
@@ -782,11 +782,11 @@ class BizAdmPublication
 						throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{CHANNEL}', $pubChannelId ) );
 					}
 				}
-				$editions = DBEdition::listChannelEditionsObj( $pubChannelId );
+				$editions = DBAdmEdition::listChannelEditionsObj( $pubChannelId );
 			}
 		} else {
 			foreach( $editionIds as $editionId ) {
-				$edition = DBEdition::getEditionObj($editionId );
+				$edition = DBAdmEdition::getEditionObj($editionId );
 				if ( is_null($edition) ) {
 					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{EDITION}', $editionId ) );
 				}
@@ -811,7 +811,7 @@ class BizAdmPublication
 	{
 		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBAdmEdition.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmIssue.class.php';
 
 		if( !$pubId ) { // client programming error
@@ -846,9 +846,9 @@ class BizAdmPublication
 				throw new BizException('ERR_ARGUMENT', 'Client', 'Overrule issue not found');
 			}
 		}
-		$modifyEditions = DBEdition::modifyChannelEditionsObj( $pubChannelId, $issueId, $editions );
-		if( DBEdition::hasError() ) {
-			throw new BizException( 'ERR_DATABASE', 'Server', DBEdition::getError() );
+		$modifyEditions = DBAdmEdition::modifyChannelEditionsObj( $pubChannelId, $issueId, $editions );
+		if( DBAdmEdition::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', DBAdmEdition::getError() );
 		}
 		return $modifyEditions;
 	}

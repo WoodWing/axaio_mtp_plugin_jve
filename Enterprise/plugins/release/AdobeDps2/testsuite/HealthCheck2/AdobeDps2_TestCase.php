@@ -390,7 +390,7 @@ class WW_TestSuite_HealthCheck2_AdobeDps2_TestCase extends TestCase
 	private function validateDeviceEditionMapping()
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmOutputDevice.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBAdmEdition.class.php';
 		require_once dirname(__FILE__).'/../../utils/Folio.class.php';
 
 		$allOk = true;
@@ -404,7 +404,7 @@ class WW_TestSuite_HealthCheck2_AdobeDps2_TestCase extends TestCase
 		// Iterate through the 'dps2' channels (which are grouped per brand id).
 		if( $this->pubChannels ) foreach( $this->pubChannels as $pubId => $pubChannels ) {
 			foreach( $pubChannels as $pubChannel ) {
-				$editions = DBEdition::listChannelEditionsObj( $pubChannel->Id );
+				$editions = DBAdmEdition::listChannelEditionsObj( $pubChannel->Id );
 				if( $editions ) {
 					foreach( $editions as $edition ) {
 						$foundDevice = false;

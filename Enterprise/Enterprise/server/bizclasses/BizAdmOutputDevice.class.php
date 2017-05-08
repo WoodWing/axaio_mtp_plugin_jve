@@ -192,10 +192,10 @@ class BizAdmOutputDevice
 		require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBEdition.class.php';
 		$channelId = DBIssue::getChannelId( $issueId );
-		$editions = DBEdition::listChannelEditions( $channelId );
+		$editions = DBEdition::listChannelEditionsObj( $channelId );
 		$enabledDeviceNames = array();
 		if( $editions ) foreach( $editions as $edition ) {
-			$enabledDeviceNames[] = $edition['name'];
+			$enabledDeviceNames[] = $edition->Name;
 		}
 		$numberOfEditions = count( $enabledDeviceNames );
 
