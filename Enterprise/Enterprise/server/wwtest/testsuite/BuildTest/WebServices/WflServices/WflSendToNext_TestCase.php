@@ -88,7 +88,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 			$this->testRouteObjectsHavingPersonalState();
 		} 
 		catch( BizException $e ) {
-			$e = $e; // keep analyzer happy
 		}
 
 		$this->tearDownTestData();
@@ -98,8 +97,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 
 	/**
  	 * Creates issues with overruled brands.
-	 *
-	 * @return bool Whether or not the setup was successful.
 	 */
 	private function setupTestData()
 	{
@@ -116,8 +113,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 
 	/**
 	 * Removes created objects during testing and removes issues with overruled brands.
-	 *
-	 * @return bool Whether or not the deletions were successful.
 	 */
 	private function tearDownTestData()
 	{
@@ -159,7 +154,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 				$this->wflServicesUtils->deleteCategory( $stepInfo, $this->publication->Id, $category->Id );
 			}
 			catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 		}
 		$this->categories = array();
@@ -196,7 +190,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 				$this->wflServicesUtils->deleteStatus( $state->Id );
 			}
 			catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 		}
 		$this->states = array();
@@ -230,14 +223,12 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 				$this->wflServicesUtils->removeUsersFromGroup( $stepInfo, $this->userGroup->Id, array($user->Id) );
 			}
 			catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 			try {
 				$stepInfo = 'Deleting user for Send To Next.';
 				$this->wflServicesUtils->deleteUser( $stepInfo, $user->Id );
 			}
 			catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 		}
 		$this->users = array();
@@ -301,6 +292,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Creates routing profiles for testing.
 	 *
+	 * @param string $scenario
 	 * @throws BizException on failure
 	 */
 	private function setupAdmRouting( $scenario )
@@ -346,7 +338,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Removes routing profiles that were used for testing.
 	 *
-	 * @bool $throwBizException Whether or not to throw BizException on failure.
+	 * @param bool $throwBizException Whether or not to throw BizException on failure.
 	 * @throws BizException on failure when $throwBizException is true
 	 */
 	private function cleanupAdmRouting( $throwBizException )
@@ -381,9 +373,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	 * @param string $dossierName
 	 * @param Issue $issue
 	 * @param Edition[] $editions
-	 * @param AdmState $admState
+	 * @param AdmStatus $admState
 	 * @param Category $category
 	 * @param string $routeTo
+	 * @return Object
 	 * @throws BizException on failure
 	 */
 	private function createDossier( $dossierName, $issue, $editions, $admState, $category, $routeTo )
@@ -437,7 +430,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	/**
 	 * Deletes the object that were used for testing.
 	 *
-	 * @bool $throwBizException Whether or not to throw BizException on failure.
+	 * @param bool $throwBizException Whether or not to throw BizException on failure.
 	 * @throws BizException on failure when $throwBizException is true
 	 */
 	private function cleanupObjects( $throwBizException )
@@ -643,7 +636,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 						$this->issues[0]->Id, $this->userGroup->Id, $category->Id, $status->Id );
 				}
 				catch( BizException $e ) {
-					$e = $e; // keep analyzer happy
 				}
 			}
 		}
@@ -689,7 +681,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 				$this->wflServicesUtils->deleteIssue( $stepInfo, $this->publication->Id, $issue->Id );
 			}
 			catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 		}
 		$this->issues = array();
@@ -721,7 +712,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 										$this->publication->Id, $edition->Id );
 			}
 			catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 		}
 		$this->editions = array();
@@ -756,7 +746,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 										$this->publication->Id, $this->pubChannel->Id );
 			}
 			catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 		}
 		$this->pubChannel = array();
