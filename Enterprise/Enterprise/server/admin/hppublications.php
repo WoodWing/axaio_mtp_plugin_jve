@@ -625,10 +625,16 @@ class PublicationMaintenanceApp
 				$request->PublicationId = $id;
 				$request->IssueId = 0;
 				$service = new AdmGetStatusesService();
+				/** @var AdmGetStatusesResponse $response */
 				$response = $service->execute( $request );
 				$statuses = $response->Statuses;
 
-				if( $statuses ) usort( $statuses, array( $this, 'cmpStatus' ) );
+				// Sort statuses by name, in natural order.
+				if( $statuses ) {
+					usort( $statuses, function( AdmStatus $statusA, AdmStatus $statusB ) {
+						return strcmp( $statusA->Type, $statusB->Type );
+					} );
+				}
 
 				$arr = array();
 				if( $statuses ) foreach( $statuses as $status ) {
@@ -658,22 +664,6 @@ class PublicationMaintenanceApp
 	}
 
 	/**
-	 * Compare function that evaluates the Type properties of two AdmStatus objects.
-	 *
-	 * This function is used as reference in usort. Previously this function was used as a closure,
-	 * but this is not supported by the current Zend Code Analyzer (parse error).
-	 *
-	 * @todo integrate this function as a closure when a suitable code analyzer has been found.
-	 * @param AdmStatus $a The first status
-	 * @param AdmStatus $b The second status
-	 * @return integer Return value of a strcmp, either -1, 0 or 1.
-	 */
-	private function cmpStatus( $a, $b ) {
-		return strcmp( $a->Type, $b->Type );
-	}
-
-	
-	/**
 	 * Builds a HTML pane in memory that lists the user authorizations of a given publication ($id).
 	 *
 	 * @param integer $id Publication ID
@@ -693,8 +683,16 @@ class PublicationMaintenanceApp
 				$request->PublicationId = $id;
 				$request->IssueId = 0;
 				$service = new AdmGetWorkflowUserGroupAuthorizationsService();
+				/** @var AdmGetWorkflowUserGroupAuthorizationsResponse $response */
 				$response = $service->execute( $request );
 				$userGroups = $response->UserGroups;
+
+				// Sort the user groups by name, in natural order.
+				if( $userGroups ) {
+					usort( $userGroups, function( AdmUserGroup $userGroupA, AdmUserGroup $userGroupB ) {
+						return strnatcmp( $userGroupA->Name, $userGroupB->Name );
+					} );
+				}
 
 				$color = array (" bgcolor='#eeeeee'", '');
 				$flip = 0;
@@ -737,8 +735,16 @@ class PublicationMaintenanceApp
 				$request->RequestModes = array( 'GetUserGroups' );
 				$request->PublicationId = $id;
 				$service = new AdmGetPublicationAdminAuthorizationsService();
+				/** @var AdmGetWorkflowUserGroupAuthorizationsResponse $response */
 				$response = $service->execute( $request );
 				$userGroups = $response->UserGroups;
+
+				// Sort the user groups by name, in natural order.
+				if( $userGroups ) {
+					usort( $userGroups, function( AdmUserGroup $userGroupA, AdmUserGroup $userGroupB ) {
+						return strnatcmp( $userGroupA->Name, $userGroupB->Name );
+					} );
+				}
 
 				$color = array (" bgcolor='#eeeeee'", '');
 				$flip = 0;
@@ -782,6 +788,7 @@ class PublicationMaintenanceApp
 				$request->PublicationId = $id;
 				$request->IssueId = 0;
 				$service = new AdmGetRoutingsService();
+				/** @var AdmGetRoutingsResponse $response */
 				$response = $service->execute( $request );
 				$routings = $response->Routings;
 				$sections = $response->Sections;
