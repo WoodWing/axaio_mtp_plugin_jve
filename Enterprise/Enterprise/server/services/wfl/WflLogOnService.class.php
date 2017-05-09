@@ -32,7 +32,6 @@ class WflLogOnService extends EnterpriseService
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		
-		$errorMessage1 = '';
 		$info = Array();
 		$lic = new License();
 		$shortuser = null;
@@ -178,7 +177,9 @@ class WflLogOnService extends EnterpriseService
 				$req->ClientAppProductKey = str_replace('ContentStationPro', 'ContentStationBasic', $req->ClientAppProductKey );
 			}
 		}
-		
+
+		$licenseStatus1 = null;
+		$errorMessage1 = '';
 		// Check the license and number of concurrent users for this application
 		if( $checkLicenceStatus ) { // Original ticket has been checked.
 			$licenseStatus1 = $lic->getLicenseStatus( $req->ClientAppProductKey, $req->ClientAppSerial, $info, $errorMessage1 );
@@ -206,6 +207,7 @@ class WflLogOnService extends EnterpriseService
 				
 		//Check the license and number of concurrent connections for SCE Server
 		//In case no license has been installed yet, appserial will be false and getLicenseStatus() will handle that
+		$licenseStatus2 = null;
 		$errorMessage2 = '';
 		if( $checkLicenceStatus ) { // Original ticket has been checked.
 			$SCEAppserial = $lic->getSerial( PRODUCTKEY );
