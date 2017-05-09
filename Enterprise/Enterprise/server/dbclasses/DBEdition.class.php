@@ -25,7 +25,7 @@ class DBEdition extends DBBase
 		$where = '`id` = ?';
 		$params = array( intval( $editionId ) );
 		$row = self::getRow( self::TABLENAME, $where, $fieldNames, $params );
-		return $row ? new Edition( $row['id'], $row['name'] ) : null;
+		return $row ? self::rowToObj( $row ) : null;
 	}
 
 	/**
@@ -115,7 +115,7 @@ class DBEdition extends DBBase
 		// Now put the list of DB records into data classes
 		$editions = array();
 		if( $rows ) foreach( $rows as $row ) {
-			$editions[] = new Edition( $row['id'], $row['name'] );
+			$editions[] = self::rowToObj( $row );
 		}
 		return $editions;
 	}
@@ -180,7 +180,7 @@ class DBEdition extends DBBase
 		}
 		$editions = array();
 		if( $rows ) foreach( $rows as $row ) {
-			$editions[] = new Edition( $row['id'], $row['name'] );
+			$editions[] = self::rowToObj( $row );
 		}
 		return $editions;
 	}
@@ -198,7 +198,7 @@ class DBEdition extends DBBase
 		$rows = self::listChannelEditions( $channelId );
 		$editions = array();
 		if( $rows ) foreach( $rows as $row ) {
-			$editions[] = new Edition( $row['id'], $row['name'] );
+			$editions[] = self::rowToObj( $row );
 		}
 		return $editions;
 	}
@@ -335,6 +335,21 @@ class DBEdition extends DBBase
 		if( self::hasError() ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 		}
-		return $row ? new Edition( $row['id'], $row['name'] ) : null;
+		return $row ? self::rowToObj( $row ) : null;
 	}
+
+	/**
+	 *  Converts an edition DB row into object.
+	 *
+	 *  @param array $row Edition DB row
+	 *  @return Edition Edition object
+	 */
+	static private function rowToObj ( $row )
+	{
+		$edition = new Edition();
+		$edition->Id   = intval($row['id']);
+		$edition->Name = strval($row['name']);
+		return $edition;
+	}
+
 }
