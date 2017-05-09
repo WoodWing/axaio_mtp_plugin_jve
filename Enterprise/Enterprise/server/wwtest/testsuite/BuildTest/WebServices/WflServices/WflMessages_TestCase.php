@@ -416,7 +416,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 	 *
 	 * @param string $user
 	 * @param string $password
-	 * @return WflogOnResponse on succes. NULL on error.
+	 * @return WflLogOnResponse on success. NULL on error.
 	 */
 	private function logOn( $user, $password )
 	{
@@ -4214,7 +4214,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 
 	/**
 	 * Construct WflQueryObjectsRequest object.
-	 * @return WflGetObjectsRequest
+	 * @return WflQueryObjectsRequest
 	 */	
 	private function getQueryObjectsRequestToGetUnreadMessages()
 	{
@@ -4486,7 +4486,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 
 	/**
 	 * Construct WflSendMessagesRequest object.
-	 * @return WflGetObjectsRequest
+	 * @return WflSendMessagesRequest
 	 */
 	private function getSendMessagesToReplyStickyRequest()
 	{
@@ -4650,10 +4650,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 	}
 
 	/**
-	 * Get trackchangescolor of the given user.
+	 * Retrieve the track changes color of the session user.
 	 *
-	 * @param string $user User shortname to retrieve trackchangescolor of the user.
-	 * @return string Trackchangescolor retrieved from the DB.
+	 * @return string The track changes color, retrieved from the DB.
 	 */
 	private function getUserColor()
 	{
@@ -4666,8 +4665,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 	/**
 	 * Calls a web service. Uses either a SoapClient or calls server directly.
 	 *
-	 * @param $request
-	 * @return response data object
+	 * @param mixed $request request data object
+	 * @return mixed response data object
 	 */
 	private function runService( $request )
 	{
@@ -4680,10 +4679,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 	}
 
 	/**
-	 * Property that needs to be ignored in
-	 * WW_Utils_PhpCompare::compareTwoProps() 
-	 * should be declared here.
+	 * Compose list of properties that needs to be ignored in WW_Utils_PhpCompare::compareTwoProps().
 	 *
+	 * @return array List of property names.
 	 */
 	private function getCommonPropDiff()
 	{
