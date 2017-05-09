@@ -1113,6 +1113,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">Aucune configuration de serveur InDesign active trouvée pour ce travail%1. Veuillez configurer un serveur InDesign %2qui prend en charge les niveaux de priorité%3. (S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">Le serveur InDesign ne répond pas. (S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">Les travaux avec les priorités suivantes ne seront pas traités : %1</Term>
+  <Term key="IDS_PICKUP_FROM">Pickup Time</Term>
   <Term key="IDS_PORTNUMBER">Numéro de port :</Term>
   <Term key="IDS_PRIO">Priorités des travaux</Term>
   <Term key="IDS_PRIO_1">Très haute</Term>

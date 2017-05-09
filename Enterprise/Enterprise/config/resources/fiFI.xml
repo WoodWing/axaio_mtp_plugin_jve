@@ -1113,6 +1113,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">Aktiivisia InDesign Server -palvelinasetuksia ei löydy työlle %1. Konfiguroi sellainen InDesign Server -palvelin %2, joka palvelee prioriteettia %3. (S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">InDesign-palvelin ei vastaa. (S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">Töitä, joilla on seuraavat prioriteetit, ei käsitellä: %1</Term>
+  <Term key="IDS_PICKUP_FROM">Pickup Time</Term>
   <Term key="IDS_PORTNUMBER">Portin numero:</Term>
   <Term key="IDS_PRIO">Työn prioriteetit</Term>
   <Term key="IDS_PRIO_1">Hyvin korkea</Term>
