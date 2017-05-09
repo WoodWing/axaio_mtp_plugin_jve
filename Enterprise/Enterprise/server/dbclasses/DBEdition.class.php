@@ -289,6 +289,13 @@ class DBEdition extends DBBase
 	}
 
 	/**
+	 * Creates new editions at smart_edition table owned by channel and issue.
+	 *
+	 * @param integer $channelId Publication channel (id) that new edition belongs to
+	 * @param integer $issueId Issue (id) that new edition belongs to (in case the issue overrules the publication)
+	 * @param AdmEdition[] $editions to create
+	 * @return AdmEdition[] created editions
+	 * @throws BizException on SQL error or when edition name already exists
 	 * @deprecated since 10.2.0 Use DBAdmEdition instead.
 	 */
 	public static function createEditionsObj( $channelId, $issueId, $editions )
@@ -298,6 +305,13 @@ class DBEdition extends DBBase
 	}
 
 	/**
+	 * Modifies an edition in the smart_editions table.
+	 *
+	 * @param int $channelId Publication channel that own the edition
+	 * @param int $issueId Issue (id) that owns the edition
+	 * @param AdmEdition[] $editions edition to modify
+	 * @return AdmEdition[] modified editions
+	 * @throws BizException on SQL error or when the modified edition name already exists
 	 * @deprecated since 10.2.0 Use DBAdmEdition instead.
 	 */
 	public static function modifyChannelEditionsObj( $channelId, $issueId, $editions )
