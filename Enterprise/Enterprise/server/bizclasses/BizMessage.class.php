@@ -858,7 +858,7 @@ class BizMessage
 					$objectId = $message->ObjectID;
 					$destination = 'object';
 				} else if( $message->UserID ) {
-					$userId = $message->UserID;
+					$shortUserName = $message->UserID;
 					$destination = 'user';
 				} else {
 					throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 
@@ -886,7 +886,7 @@ class BizMessage
 				}
 			}
 			
-			// Colllect references to other messages.
+			// Collect references to other messages.
 			if( $message->ThreadMessageID ) {
 				$otherMessageIDs[] = $message->ThreadMessageID;
 			}
@@ -907,12 +907,10 @@ class BizMessage
 		if( count( $otherMessageIDs ) > 0 ) {
 			require_once BASEDIR.'/server/dbclasses/DBMessage.class.php';
 			$userIds = DBMessage::getUserIdsForMsgIds( $otherMessageIDs );
-			$userId = null;
 			$objectIds = DBMessage::getObjectIdsForMsgIds( $otherMessageIDs );
-			$objectId = null;
 			if( !$destination ) {
 				if( count( $userIds ) > 0 ) {
-					$userId = reset( $userIds );
+					$shortUserName = reset( $userIds );
 					$destination = 'user';
 				} else if( count( $objectIds ) > 0 ) {
 					$objectId = reset( $objectIds );
@@ -927,7 +925,7 @@ class BizMessage
 							'Make sure that ReadMessageIDs, DeleteMessageIDs, ThreadMessageID and ReplyToMessageID are sent to the same user. '.
 							'Problem found for message id: '.$msgId );
 					}
-					if( $iterUserId != $userId ) {
+					if( $iterUserId != $shortUserName ) {
 						throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 
 							'Not allowed to store a mixture of user messages at once. '.
 							'Make sure that ReadMessageIDs, DeleteMessageIDs, ThreadMessageID and ReplyToMessageID are sent to the same user. '.
