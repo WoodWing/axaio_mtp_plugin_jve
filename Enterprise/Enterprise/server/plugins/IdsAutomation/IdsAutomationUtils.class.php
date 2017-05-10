@@ -82,7 +82,7 @@ class IdsAutomationUtils
 		$job->MaxServerVersion = $maxServerVersion;
 
 		if( $delay > 0 ) {
-			// If set, the pickup time will be set to delay the job. If not set, the core will set PickUp time to the creation time. 
+			// If set, the pickup time will be set to delay the job. If not set, the core will set PickUp time to the creation time.
 			$job->PickupTime = date( 'Y-m-d\TH:i:s',time() + $delay );
 		}
 

@@ -86,11 +86,12 @@ class DBObjectOperation extends DBBase
 	}
 
 	/**
-	 * Removes the operation from the DB with te given object id and operation GUID.
+	 * Removes the operation from the DB with the given object id and operation GUID.
 	 *
 	 * @param integer $objectId
 	 * @param string $guid
 	 * @throws BizException On bad given params or fatal SQL errors.
+	 * @since 10.1.3
 	 */
 	public static function deleteOperation( $objectId, $guid )
 	{
