@@ -47,29 +47,34 @@ class BizAdmTemplateObject
 
 		if( !$templateObject->TemplateObjectId ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Client', 'A template object id should be given.' );
-		} elseif( $templateObject->TemplateObjectId <= 0 ) {
+		}
+		if( $templateObject->TemplateObjectId <= 0 ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Client', 'The template object id should be a positive number.' );
 		}
 		if( !DBAdmTemplateObject::getTemplateObjectsByObjectId( array( $templateObject->TemplateObjectId ) ) ) {
 			throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', 'The given object does not exist.', null,
 				array( '{DOSSIER_TEMPLATE}', $templateObject->TemplateObjectId ) );
 		}
-
 		if( !isset( $templateObject->UserGroupId ) ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Client', 'A user group id should be given.' );
-		} elseif( $templateObject->UserGroupId < 0 ) {
+		}
+		if( $templateObject->UserGroupId < 0 ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Client', 'The user group id should be a positive number.' );
-		} elseif( $templateObject->UserGroupId > 0 ) { //A user group id of 0 means 'all' user groups.
+		}
+		if( $templateObject->UserGroupId > 0 ) { //A user group id of 0 means 'all' user groups.
 			$params = array( intval( $templateObject->UserGroupId ) );
-			if( !DBBase::getRow( 'groups', '`id` = ?', 'id', $params ) ) {
+			$userGroupRow = DBBase::getRow( 'groups', '`id` = ?', array('id','name'), $params );
+			if( !$userGroupRow ) {
 				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', 'The given user group does not exist.', null,
 					array( '{GRP_GROUP}', $templateObject->UserGroupId ) );
 			}
+			$userGroupName = $userGroupRow['name'];
+		} else {
+			$userGroupName = '<'.BizResources::localize('LIS_ALL').'>';
 		}
-
 		if( DBAdmTemplateObject::templateObjectExists( $templateObject ) ) {
 			throw new BizException( 'ERR_SUBJECT_EXISTS', 'Client', '', null,
-				array( '{DOSSIER}', $templateObject->TemplateObjectId.' '.$templateObject->UserGroupId ) );
+				array( '{GRP_GROUP}', $userGroupName ) );
 		}
 	}
 

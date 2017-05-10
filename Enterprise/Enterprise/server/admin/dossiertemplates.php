@@ -351,7 +351,7 @@ switch( $mode ) {
 
 $err = '';
 if( $errors ) foreach( $errors as $error ) {
-	$err .= $error.'<br/>';
+	$err .= formvar($error).'<br/>';
 }
 $txt = str_replace( '<!--ERROR-->', $err, $txt );
 
