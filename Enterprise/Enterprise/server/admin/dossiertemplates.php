@@ -30,9 +30,12 @@ $groupId = isset($_REQUEST['group']) ? intval($_REQUEST['group']) : 0;
 $insert = isset($_REQUEST['insert']) ? (bool)$_REQUEST['insert'] : false;
 $records = isset($_REQUEST['recs']) ? intval($_REQUEST['recs']) : 0;
 
-$errors = array();
 // check publication rights
 checkPublAdmin($pubId);
+
+// Check whether Plugin installed and activated
+require_once BASEDIR.'/server/bizclasses/BizAdmTemplateObject.class.php';
+$errors = BizAdmTemplateObject::checkRequiredServerPlugins( $issueId );
 
 // handle request
 switch( $mode ) {

@@ -143,4 +143,54 @@ class BizAdmTemplateObject
 		require_once BASEDIR.'/server/dbclasses/DBAdmTemplateObject.class.php';
 		return DBAdmTemplateObject::getObjectsByType( $pubId, $issueId, $type );
 	}
+
+	/**
+	 * Checks if all required server plugins are enabled for the Template Objects feature.
+	 *
+	 * Required plugins are:
+	 * - "Content Station List Dossiers"
+	 * - "Content Station Overrule Compatibility" (only for overrule issues)
+	 *
+	 * @since 10.2.0 Originated from BizAdmPubObject class which became obsoleted. (Function was named checkPluginError.)
+	 * @param string $issueId The issue id for overrule issues, or zero for normal issues.
+	 * @return string[] List of error messages (one per missing plugin), or empty when all plugins are ok.
+	 */
+	static function checkRequiredServerPlugins( $issueId )
+	{
+		$errors = array();
+		try {
+			$pluginUniqueName = 'ContentStationListDossiers';	// Content Station List Dossiers
+			self::checkActivePlugin( $pluginUniqueName );
+		} catch( BizException $e ) {
+			$errors[] = $e->getMessage();
+		}
+		if( $issueId > 0 ) {
+			try {
+				$pluginUniqueName = 'ContentStationOverruleCompatibility'; // Content Station Overrule Compatibility
+				self::checkActivePlugin( $pluginUniqueName );
+			} catch( BizException $e ) {
+				$errors[] = $e->getMessage();
+			}
+		}
+		return $errors;
+	}
+
+	/**
+	 * Checks if the server plugin is active
+	 *
+	 * @since 10.2.0 Originated from BizAdmPubObject class which became obsoleted.
+	 * @param string $uniqueName Unique name of the server plugin
+	 * @throws BizException When server plugin is not active
+	 */
+	private static function checkActivePlugin( $uniqueName )
+	{
+		require_once BASEDIR.'/server/interfaces/plugins/PluginInfoData.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBServerPlugin.class.php';
+		$info = new PluginInfoData();
+		$info->UniqueName = $uniqueName;
+		$info = DBServerPlugin::getPlugin( $info );
+		if( !$info->IsActive ) {
+			throw new BizException( 'ERR_NONACTIVE_PLUGIN', 'client', null, null, array($info->DisplayName) );
+		}
+	}
 }
