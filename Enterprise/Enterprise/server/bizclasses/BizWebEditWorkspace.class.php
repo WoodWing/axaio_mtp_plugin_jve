@@ -28,15 +28,15 @@ class BizWebEditWorkspace
 {
 	private $workspace = null;
 	const SEPARATOR = '/';
-	
+
 	// ------------------------------------------------------------------
 	// SERVICES
 	// ------------------------------------------------------------------
-	
+
 	/**
 	 * To create article workspace in the server.
 	 * It first creates and stores the application session into DB.
-	 * Followed by creating a directory, the directory name is based on unique GUID generated. 
+	 * Followed by creating a directory, the directory name is based on unique GUID generated.
 	 * Then it stores the $content into a file and the file is placed into the directory created.
 	 * After the above, it returns the workspaceId which is uniquely generated (GUID).
 	 *
@@ -49,11 +49,11 @@ class BizWebEditWorkspace
 	{
 		//$this->validateId( $id, 'Article' ); // article may be null when not created at DB yet (only checked for preview)
 		$this->validateArticleFormat( $format );
-		
+
 		$article = $this->createWorkspaceAtDb( $id, $format, $content ); // Note that if no content given, it gets resolved.
 		$this->storeArticleAtFileSystem( false, $article, null, $content ); // false = create
 		// storeArticleAtFileSystem resolves $this->workspace->DOMVersion so update workspace record at DB
-		$this->saveWorkspaceAtDb(); 
+		$this->saveWorkspaceAtDb();
 		$this->validateWorkspaceAtDb();
 		return $this->workspace->ID;
 	}
@@ -105,7 +105,7 @@ class BizWebEditWorkspace
 		$this->validateWorkspaceId( $workspaceId );
 		$this->validateArticleFormat( $format );
 		$this->validateElementsContent( $elements, $content );
-		
+
 		$this->openWorkspaceAtDb( $workspaceId ); // get workspace data from db
 
 		// Article may be null when not created at DB yet. However, it is not supported
@@ -132,10 +132,10 @@ class BizWebEditWorkspace
 	public function getArticleFromWorkspace( $workspaceId, $articleId )
 	{
 		$this->validateWorkspaceId( $workspaceId );
-		
+
 		$this->openWorkspaceAtDb( $workspaceId ); // get workspace data from db
 		$this->validateWorkspaceAtDb();
-		
+
 		$ret = array();
 		foreach( $this->workspace->Articles as $article ) {
 			if( is_null($articleId) || $article->ID == $articleId ) {
@@ -189,7 +189,7 @@ class BizWebEditWorkspace
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		$userId = BizSession::getShortUserName();
 		$appName = DBTicket::DBappticket( BizSession::getTicket() );
-		
+
 		return $this->getWorkspaceIdsAtDb( $userId, $appName );
 	}
 
@@ -209,7 +209,7 @@ class BizWebEditWorkspace
 	 * @param string[] $requestInfo [9.7] Pass in 'InDesignArticles' to resolve InDesignArticles and populate Placements with their frames.
 	 * @return array 'Elements', 'Placements' and 'Pages'
 	 */
-	public function previewArticleAtWorkspace( $workspaceId, $id, $format, $elements, $content, 
+	public function previewArticleAtWorkspace( $workspaceId, $id, $format, $elements, $content,
 									$action, $layoutId, $editionId, $previewType,
 									array $requestInfo = array() )
 	{
@@ -244,7 +244,7 @@ class BizWebEditWorkspace
 	 * @throws $e
 	 * @return array 'Elements', 'Placements' and 'Pages'
 	 */
-	public function previewArticlesAtWorkspace( $workspaceId, array $articles, 
+	public function previewArticlesAtWorkspace( $workspaceId, array $articles,
 									$action, $layoutId, $editionId, $previewType,
 									array $requestInfo = array() )
 	{
@@ -455,11 +455,14 @@ class BizWebEditWorkspace
 		}
 
 		// Ask IDS to generate the previews / PDFs.
-		self::generateOutputPages( $ticket, $parExpType, $layoutId,
+		$scriptResult = self::generateOutputPages( $ticket, $parExpType, $layoutId,
 			$this->workspace->WebEditor, $this->workspace->InDesignServer, null, null,
 			$editionId, $composeUpdateXmlFileIDS, $outFileIDS, null,
 			$domVersion, null, $previewType, $articleIdsFormats,
 			$layoutVersion, $guidsOfChangedStories, $requestInfo );
+
+		// Store the result returned by the IDS script in the compose update file
+		file_put_contents($composeUpdateXmlFile, $scriptResult->composeData);
 
 		// For robustness, when the update XML file is empty, we simply delete it.
 		// That avoids (in the succeeding code below) that the base XML gets emptied as well.
@@ -524,13 +527,14 @@ class BizWebEditWorkspace
 	 * @param string $layoutVersion     [v9.5] The expected layout object version.
 	 * @param array $guidsOfChangedStories [v9.5] List of stories (GUIDs) that contain text changes which are not saved in filestore yet.
 	 * @param string[] $requestInfo      [9.7] Pass in 'InDesignArticles' to resolve InDesignArticles and populate Placements with their frames.
-	 * @throws BizException [9.7] Raises error when IDS script has failed. 
-	 */		
-	public static function generateOutputPages( $ticket, $exptype, $pageLayout, $workspace_webeditor, 
-												$workspace_indesign, $artname, $guids, $editionId, 
-												$composeXMLfile, $previewfile, $artid, $domVersion, 
-												$format = 'application/incopy', $previewType = 'page', 
-												$articleIdsFormats = array(), 
+	 * @return string|object             [10.2] Result returned by IDS script.
+	 * @throws BizException [9.7] Raises error when IDS script has failed.
+	 */
+	public static function generateOutputPages( $ticket, $exptype, $pageLayout, $workspace_webeditor,
+												$workspace_indesign, $artname, $guids, $editionId,
+												$composeXMLfile, $previewfile, $artid, $domVersion,
+												$format = 'application/incopy', $previewType = 'page',
+												$articleIdsFormats = array(),
 												$layoutVersion = '', $guidsOfChangedStories = array(),
 												array $requestInfo = array() )
 	{
@@ -551,39 +555,39 @@ class BizWebEditWorkspace
 				throw new BizException( 'IDS_ERROR', 'Server', 'Could not find file ['.$url.']' );
 			}
 		}
-		
+
 		if (file_exists($workspace_webeditor . 'InDesignServer.log')) {
 			// remove logfile, only keep latest logfile.
 			unlink($workspace_webeditor . 'InDesignServer.log');
 		}
-		
+
 		$server_indesignFile = '';
 		if( version_compare( $domVersion, '8.9', '<=' ) ) { // SC8.x for CS6 (or before)
 			if( !empty($pageLayout) ) {
-				require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';	
+				require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 				$getObjService = new WflGetObjectsService();
-				
+
 				// Get layout version information  (do not get native file yet)
 				$getObjReq = new WflGetObjectsRequest($ticket, array($pageLayout), false, 'none', array());
 				$getObjResp = $getObjService->execute( $getObjReq );
 				$objects = $getObjResp->Objects;
-				
+
 				$layoutid = $objects[0]->MetaData->BasicMetaData->ID;
 				$version = $objects[0]->MetaData->WorkflowMetaData->Version;
-			
+
 				// do not fetch InDesign document each time
-				// put layout version in filename to see if latest version is allready available	
+				// put layout version in filename to see if latest version is allready available
 				$indesignFile = $workspace_webeditor.$layoutid.'-v'.$version.'.indd';
 				$server_indesignFile = $workspace_indesign.$layoutid.'-v'.$version.'.indd';
-										
+
 				if ( !file_exists( $indesignFile )) { // get InDesign doc from filestore
-					// Get layout information with native file		
+					// Get layout information with native file
 					$getObjReq = new WflGetObjectsRequest($ticket, array($pageLayout), false, 'native', array());
 					$getObjResp = $getObjService->execute( $getObjReq );
 					$objects = $getObjResp->Objects;
 					$filePath = $objects[0]->Files[0]->FilePath;
-					copy( $filePath, $indesignFile );											
-				}			
+					copy( $filePath, $indesignFile );
+				}
 			}
 		}
 
@@ -594,9 +598,9 @@ class BizWebEditWorkspace
 			'webapp_ticket_ContentStationPro'.$prodVer, // cookie name for web apps ticket (CS login)
 			'ticket' // cookie name for web apps ticket (browser login)
 		);
-		
+
 		// Get the name of the Web Editor user by running through cookie information.
-		// Cookie info is set when the Web Editor gets lauched. For the CS editor this is 
+		// Cookie info is set when the Web Editor gets lauched. For the CS editor this is
 		// not the case. See next step below for more info.
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		$weTicket = '';
@@ -614,8 +618,8 @@ class BizWebEditWorkspace
 				}
 			}
 		}
-		
-		// When failed reading CS ticket or Web Editor ticket from cookies (above), try the ticket 
+
+		// When failed reading CS ticket or Web Editor ticket from cookies (above), try the ticket
 		// passed in by caller. This fallback is especially needed for the CS editor that is talking
 		// through web services. In this case typically no cookies are updated (as used above).
 		// (Same happens happens for the Build Test when not logging out from web apps and hitting
@@ -637,11 +641,11 @@ class BizWebEditWorkspace
 		} else {
 			$editionName = '';
 		}
-		
+
 		// Setup parameters to pass to IDPreview.js script.
 		// IMPORTANT: It is far from obvious to communicate UTF-8 chars between PHP and JavaScript...!
 		// See related problems: BZ#7341, BZ#13049, BZ#13062
-		// Note that the PHP functions "urlencode"/"urldecode" are NOT compatible with the Javascript functions 
+		// Note that the PHP functions "urlencode"/"urldecode" are NOT compatible with the Javascript functions
 		// "escape"/"unescape", "encodeURI"/"decodeURI", "encodeURIComponent"/"decodeURIComponent".
 		// See: http://www.captain.at/howto-php-urlencode-javascript-decodeURIComponent.php
 		// However, we can not use that solution since it is under GPL !
@@ -658,22 +662,21 @@ class BizWebEditWorkspace
 			$articlePathsArray[] = $workspace_indesign . $articleId . $fileExt;
 		}
 		$articlePaths = implode( ',', $articlePathsArray );
-		
-		$params = array( 
-			'editionId'		=> $editionId, 
-			'editionName'	=> $editionName, 
+
+		$params = array(
+			'editionId'		=> $editionId,
+			'editionName'	=> $editionName,
 			'previewfile'	=> $previewfile,
 			'template'		=> $pageLayout ? '' : reset($articlePathsArray),
 			'getRelations'  => in_array( 'InDesignArticles', $requestInfo ) || in_array( 'Relations', $requestInfo ) ? 'true' : 'false',
 
 			'dumpfile'		=> $composeXMLfile,
 			'exportType'	=> $exptype,
-			'logfile'		=> $workspace_indesign . 'InDesignServer.log',
 
 			'layoutID'		=> $pageLayout ? $pageLayout : '', // BZ#13012 change zero into empty
 			'layoutVersion'	=> $layoutVersion,
 			'layoutPath'	=> $server_indesignFile,
-			
+
 			'articleIDS'	=> $articleIdString ? $articleIdString : '', // BZ#13012 change zero into empty
 			'articlePaths'	=> $articlePaths ? $articlePaths : '',
 			'guidsOfChangedStoriesCsv' => implode( ',', $guidsOfChangedStories ),
@@ -686,10 +689,10 @@ class BizWebEditWorkspace
 		// Convert parameters to XML
 		$paramDoc = new DOMDocument();
 		$rootElem = $paramDoc->appendChild( new DOMElement('root') );
-		foreach( $params as $name => $value ) { 
+		foreach( $params as $name => $value ) {
 			$rootElem->appendChild( new DOMElement( $name, $value ) );
 		}
-		
+
 		// Determine the required IDS version. The code path for SC10 is quite different
 		// from SC8. For example, for SC8 we did download the layout as a preparation step.
 		// The IDPreview.js also acts quite different in SC8 mode. Therefore we have to
@@ -706,20 +709,23 @@ class BizWebEditWorkspace
 		require_once BASEDIR.'/server/bizclasses/BizInDesignServer.class.php';
 		list( $minReqVersion, $maxReqVersion ) = BizInDesignServer::getServerMinMaxVersionForDocumentVersion( $domVersion );
 
-		// Run IDPreview.js at InDesign Server, which handles the Preview/Compose/PDF request	
+		// Run IDPreview.js at InDesign Server, which handles the Preview/Compose/PDF request
 		require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';
-		$scriptParams = array( 
+		$scriptParams = array(
 			'XMLParams' => $paramDoc->saveXML(),
-			'logfile' => $workspace_indesign . 'InDesignServer.log', // keep IDS jobs happy!
+			'jsonResult' => true
 		);
-		BizInDesignServerJobs::createAndRunJob(
-			file_get_contents(BASEDIR.'/server/apps/IDPreview.js'), $scriptParams,
+		if(LogHandler::debugMode()) {
+			$scriptParams['logfile'] = $workspace_indesign . 'InDesignServer.log';
+		}
+		return BizInDesignServerJobs::createAndRunJob(
+			'file:{{BASEDIR}}/server/apps/IDPreview.js', $scriptParams,
 			'WEB_EDITOR', key($articleIdsFormats), null, // jobtype, object id, ids obj
 			$minReqVersion, $maxReqVersion, // min ids version, max ids version
 			'Content Station' // context
 		);
 	}
-	
+
 	/**
 	 * Merges the update XML file into the base XML file.
 	 *
@@ -737,7 +743,7 @@ class BizWebEditWorkspace
 		$updateXmlDom->loadXML( $updateXmlStr );
 		$updateXpath = new DOMXPath( $updateXmlDom );
 		$baseXpath = new DOMXPath( $baseXmlDom );
-		
+
 		// Detect whether or not the layout id and version are the same as previous request.
 		$updateLayouts = $updateXpath->query('/textcompose/context/layout');
 		$updateLayout = $updateLayouts->length > 0 ? $updateLayouts->item(0) : null;
@@ -760,14 +766,14 @@ class BizWebEditWorkspace
 			$sameLayoutId = true;
 			$sameLayoutVersion = true;
 		}
-		
+
 		// Detect whether or not the IDS request parameters are the same as previous one.
 		$updateContexts = $updateXpath->query('/textcompose/context');
 		$updateContext = $updateContexts->length > 0 ? $updateContexts->item(0) : null;
 		$baseContexts = $baseXpath->query('/textcompose/context');
 		$oldBaseContext = $baseContexts->length > 0 ? $baseContexts->item(0) : null;
 		if( $updateContext && $oldBaseContext ) {
-			$sameRequest = 
+			$sameRequest =
 				$updateContext->getAttribute('editionid') == $oldBaseContext->getAttribute('editionid') &&
 				$updateContext->getAttribute('exporttype') == $oldBaseContext->getAttribute('exporttype') &&
 				$updateContext->getAttribute('previewtype') == $oldBaseContext->getAttribute('previewtype') &&
@@ -780,7 +786,7 @@ class BizWebEditWorkspace
 		} else {
 			$sameRequest = false;
 		}
-		
+
 		// Determine whether we need to merge or replace information in compose_base.xml.
 		$performMerge = $sameRequest && $sameLayoutVersion;
 		if( $performMerge ) {
@@ -788,13 +794,13 @@ class BizWebEditWorkspace
 		} else { // performance full update
 			LogHandler::Log( 'WebEditWorkspace', 'DEBUG', 'Performing full replacement operation on compose data.' );
 		}
-		
+
 		// Replace context and layout info (no matter $performMerge).
 		if( $updateContext && $oldBaseContext ) {
 			$newBaseContext = $baseXmlDom->importNode( $updateContext, true );
 			$oldBaseContext->parentNode->replaceChild( $newBaseContext, $oldBaseContext );
 		}
-		
+
 		// Merge or replace pages.
 		if( $performMerge ) {
 			// Merge pages (based on their sequence number).
@@ -832,7 +838,7 @@ class BizWebEditWorkspace
 				LogHandler::Log( 'WebEditWorkspace', 'ERROR', 'Could not find/update "pages" element in compose_base.xml and/or compose_update.xml.' );
 			}
 		}
-		
+
 		// Merge or replace stories.
 		if( $performMerge ) {
 			// Merge stories (based in their guid).
@@ -881,7 +887,7 @@ class BizWebEditWorkspace
 				LogHandler::Log( 'WebEditWorkspace', 'ERROR', 'Could not find/update "stories" element in compose_base.xml and/or compose_update.xml.' );
 			}
 		}
-		
+
 		// Replace the layout's relations and their placements (no matter $performMerge).
 		$updateLayouts = $updateXpath->query('/textcompose/layout');
 		$updateLayout = $updateLayouts->length > 0 ? $updateLayouts->item(0) : null;
@@ -892,7 +898,7 @@ class BizWebEditWorkspace
 			$oldBaseLayout->parentNode->replaceChild( $newBaseLayout, $oldBaseLayout );
 		}
 	}
-	
+
 	/**
 	 * Parses the compose XML file and builds a response structure based on the XML data found.
 	 *
@@ -906,7 +912,7 @@ class BizWebEditWorkspace
 	 * @throws BizException
 	 * @return array Response structure
 	 */
-	private function parseComposeData( DOMDocument $composeXmlDom, $ticket, $action, 
+	private function parseComposeData( DOMDocument $composeXmlDom, $ticket, $action,
 		$layoutId, $editionId, array $requestInfo, array $articles )
 	{
 		// Build response data
@@ -944,7 +950,7 @@ class BizWebEditWorkspace
 			$page->Files = array( $file );
 			$ret['Pages'][] = $page;
 		}
-		
+
 		$articlePageIds = array();
 		$composeStories = $xpath->query('/textcompose/stories/story');
 		foreach( $composeStories as $composeStory ) {
@@ -960,7 +966,7 @@ class BizWebEditWorkspace
 			$composeFrames = $xpath->query('textframes/textframe', $composeStory);
 			if( $composeFrames->length > 0 ) {
 				foreach( $composeFrames as $composeFrame ) {
-					
+
 					// Parse placement.
 					$placement = new Placement();
 					$placement->ElementID    = $composeStory->getAttribute('guid');
@@ -995,7 +1001,7 @@ class BizWebEditWorkspace
 						}
 					}
 					$articlePageIds[ $placement->PageSequence ] = true;
-					
+
 					// Return placement (and its placement tiles) to caller.
 					$ret['Placements'][] = $placement;
 				}
@@ -1012,28 +1018,26 @@ class BizWebEditWorkspace
 				end($ret['Placements'])->OversetChars = $composeStory->getAttribute('length');
 			}
 		}
-		
+
 		$ret['InDesignArticles'] = null;
 		$ret['Relations'] = null;
 		$iaPlacements = null;
 		if( in_array( 'InDesignArticles', $requestInfo ) || in_array( 'Relations', $requestInfo ) ) {
-			$xpathObjectDom = $this->composeXpathForLayoutObject( $xpath );
-			if( $xpathObjectDom && // Maybe IDPreview.js did not provide this info (e.g. old SC).
-				$layoutId ) { // Having no layout is possible for articles with geometrical info.
-			
+			if( $xpath && $layoutId ) { // Having no layout is possible for articles with geometrical info.
+
 				// Since 9.7, resolve the layout's InDesign Articles and their frames (placements),
 				// but only do that when client has explicitly requested for that (for performance reasons).
 				if( in_array( 'InDesignArticles', $requestInfo ) ) {
 					require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
 					$ret['InDesignArticles'] = DBInDesignArticle::getInDesignArticles( $layoutId );
-					$iaPlacements = $this->composeInDesignArticlesPlacements( $xpathObjectDom );
+					$iaPlacements = $this->composeInDesignArticlesPlacements( $xpath );
 					$ret['Placements'] = array_merge( $ret['Placements'], array_values( $iaPlacements ) );
 				}
 
-				// Since 9.7, resolve the layout's placed relations so that caller (CS preview) 
+				// Since 9.7, resolve the layout's placed relations so that caller (CS preview)
 				// can draw boxes for the sibling frames on the page and allow image/text (re)placements.
 				if( in_array( 'Relations', $requestInfo ) ) {
-					$ret['Relations'] = $this->composeObjectRelations( $xpathObjectDom );
+					$ret['Relations'] = $this->composeObjectRelations( $xpath );
 					$rebuildNeeded = $this->isRebuildStoredRelationsPlacementsNeeded( $layoutId, $ret['Relations'] );
 					if( $rebuildNeeded ) {
 						// Although the layout resides in workspace, we want to save the placed
@@ -1078,7 +1082,7 @@ class BizWebEditWorkspace
 							DBPlacements::insertInDesignArticlePlacementsFromScratch( $layoutId, $iaPlacements );
 						}
 					}
-					
+
 					// Optimizations for CS that does not need all info in this context.
 					if( $ret['Relations'] ) {
 						self::optimizeRelationInfo( $ret['Relations'], $articles, $articlePageIds, $editionId );
@@ -1088,7 +1092,7 @@ class BizWebEditWorkspace
 		}
 		return $ret;
 	}
-	
+
 	/**
 	 * Not all info under PreviewArticleAtWorkspace->Relations data tree is needed by CS.
 	 * For slow WAN networks, big data trees would slow down the preview performance.
@@ -1102,7 +1106,7 @@ class BizWebEditWorkspace
 	private function optimizeRelationInfo( array &$relations, array $articles, array $articlePageIds, $editionId )
 	{
 		$articleIds = array_flip( array_map( function( $article ) { return $article->ID; }, $articles ) );
-		
+
 		if( $relations ) foreach( $relations as $relationIndex => $relation ) {
 
 			// The placements for the article(s) being edit are already returned
@@ -1111,10 +1115,10 @@ class BizWebEditWorkspace
 				unset( $relations[ $relationIndex ] );
 				continue;
 			}
-			
+
 			// Relational targets are not used, so leave it out.
 			$relation->Targets = null;
-			
+
 			// There is always an edition filter, unless the channel has no edition defined.
 			// When the edition mismatches, there is no need to return the placement
 			// since placements for that edition are not shown in the current preview.
@@ -1125,7 +1129,7 @@ class BizWebEditWorkspace
 					}
 				}
 			}
-			
+
 			// When the placement is not on one of the pages the article(s) are placed
 			// onto, leave out those placements.
 			if( $articlePageIds ) {
@@ -1137,29 +1141,7 @@ class BizWebEditWorkspace
 			}
 		}
 	}
-	
-	/**
-	 * The IDPreview.js returns an Object structure in XML which is embedded in the composedata.xml.
-	 * This function composes an XPath that can used to query the DOM of the Object.
-	 *
-	 * @param DOMXPath $xpathComposeDom
-	 * @return DOMXPath|null XPath when embedded XML text node is found under '/textcompose/layout', else NULL.
-	 */
-	private function composeXpathForLayoutObject( DOMXPath $xpathComposeDom )
-	{
-		$xpathObjectDom = null;
-		$xmlLayoutTexts = $xpathComposeDom->query( '/textcompose/layout/text()' );
-		if( $xmlLayoutTexts->length > 0 ) {
-			$xmlObjectText = (string)$xmlLayoutTexts->item(0)->nodeValue;
-			
-			$xmlObjectDom = new DOMDocument();
-			$xmlObjectDom->loadXML( $xmlObjectText );
-			$xpathObjectDom = new DOMXPath( $xmlObjectDom );
-			$xpathObjectDom->registerNamespace( 'xsi', 'http://www.w3.org/2001/XMLSchema-instance' ); // for xsi:nil support
-		}
-		return $xpathObjectDom;
-	}
-	
+
 	/**
 	 * Composes a list of Relation data objects from a given xpath (under '/textcompose/Relations').
 	 *
@@ -1169,7 +1151,7 @@ class BizWebEditWorkspace
 	private function composeObjectRelations( DOMXPath $xpath )
 	{
 		$relations = null;
-		if( ($xmlArrayOfRelation = $this->getElement( $xpath, '/Object/Relations', null )) ) {
+		if( ($xmlArrayOfRelation = $this->getElement( $xpath, '/textcompose/layout/Object/Relations', null )) ) {
 			$relations = array();
 			$xmlRelations = $xpath->query( 'Relation', $xmlArrayOfRelation );
 			if( $xmlRelations->length > 0 ) foreach( $xmlRelations as $xmlRelation ) {
@@ -1221,7 +1203,7 @@ class BizWebEditWorkspace
 				//	}
 				//}
 				// <<<
-				// >>> Not provided by SC: 
+				// >>> Not provided by SC:
 				// if( ($xmlParentInfo = $this->getElement( $xpath, 'ParentInfo', $xmlRelation )) ) {
 				// 	$relation->ParentInfo = new ObjectInfo();
 				// 	$relation->ParentInfo->ID = $this->getTextValue( $xpath, 'ID', $xmlParentInfo );
@@ -1229,7 +1211,7 @@ class BizWebEditWorkspace
 				// 	$relation->ParentInfo->Type = $this->getTextValue( $xpath, 'Type', $xmlParentInfo );
 				// 	$relation->ParentInfo->Format = $this->getTextValue( $xpath, 'Format', $xmlParentInfo );
 				// }
-				// 
+				//
 				// if( ($xmlChildInfo = $this->getElement( $xpath, 'ChildInfo', $xmlRelation )) ) {
 				// 	$relation->ChildInfo = new ObjectInfo();
 				// 	$relation->ChildInfo->ID = $this->getTextValue( $xpath, 'ID', $xmlChildInfo );
@@ -1241,7 +1223,7 @@ class BizWebEditWorkspace
 				$relations[] = $relation;
 			}
 		}
-		// Resolve the ParentInfo and ChildInfo for all relations 
+		// Resolve the ParentInfo and ChildInfo for all relations
 		// (since SC does not provide this info and CS needs it).
 		$relationIds = array();
 		if( $relations ) foreach( $relations as $relation ) {
@@ -1288,7 +1270,7 @@ class BizWebEditWorkspace
 	private function composeInDesignArticlesPlacements( DOMXPath $xpath )
 	{
 		$placements = null;
-		if( ($xmlArrayOfPlacement = $this->getElement( $xpath, '/Object/Placements', null )) ) {
+		if( ($xmlArrayOfPlacement = $this->getElement( $xpath, '/textcompose/layout/Object/Placements', null )) ) {
 			$placements = array();
 			$xmlPlacements = $xpath->query( 'Placement', $xmlArrayOfPlacement );
 			if( $xmlPlacements->length > 0 ) foreach( $xmlPlacements as $xmlPlacement ) {
@@ -1300,7 +1282,7 @@ class BizWebEditWorkspace
 
 	/**
 	 * Composes a Placement data object from a given placement xml node
-	 * 
+	 *
 	 * @param DOMXPath $xpath
 	 * @param DOMNode $xmlPlacement
 	 * @return Placement
@@ -1361,10 +1343,10 @@ class BizWebEditWorkspace
 		$placement->SplineID = $this->getTextValue( $xpath, 'SplineID', $xmlPlacement );
 		return $placement;
 	}
-	
+
 	/**
 	 * Resolves the text of a given XML node.
-	 * 
+	 *
 	 * @param DOMXPath $xpath
 	 * @param string $path
 	 * @param DOMNode|null $contextNode Parent node, or NULL to specify $path from doc root.
@@ -1393,7 +1375,7 @@ class BizWebEditWorkspace
 		}
 		return $retVal;
 	}
-	
+
 	/**
 	 * Returns a child node.
 	 *
@@ -1414,7 +1396,7 @@ class BizWebEditWorkspace
 		}
 		return $retVal;
 	}
-	
+
 	/**
 	 * Tells whether or not the xsi:nil attribute is set for a give XML node.
 	 *
@@ -1430,7 +1412,7 @@ class BizWebEditWorkspace
 		}
 		return $hasNil;
 	}
-	
+
 	/**
 	 * Reads layout info and request info from given compose base XML file.
 	 * This is used to find out this info from the previous preview operation.
@@ -1488,7 +1470,7 @@ class BizWebEditWorkspace
 		$this->validateId( $editionId, 'Edition' );
 
 		// Get workspace data from db
-		$this->openWorkspaceAtDb( $workspaceId ); 
+		$this->openWorkspaceAtDb( $workspaceId );
 
 		// Build and return file path
 		$objectId = $layoutId ? $layoutId : 'article';
@@ -1501,7 +1483,7 @@ class BizWebEditWorkspace
 		LogHandler::Log( 'WebEditWorkspace', 'DEBUG', __METHOD__.' pdfPath = "'.$pdfPath.'".' );
 		return $pdfPath;
 	}
-	
+
 	/**
 	 * Returns the preview file path that resides in the workspace. (The file is generated by InDesign Server
 	 * before through the PreviewArticleAtWorkspace service.). The preview file is in JPEG format and
@@ -1523,7 +1505,7 @@ class BizWebEditWorkspace
 		$this->validatePageSequence( $pageSequence );
 
 		// Get workspace data from db
-		$this->openWorkspaceAtDb( $workspaceId ); 
+		$this->openWorkspaceAtDb( $workspaceId );
 
 		// Build and return file path
 		$pageSequence = $pageSequence == 0 ? '' : $pageSequence;
@@ -1537,11 +1519,11 @@ class BizWebEditWorkspace
 		LogHandler::Log( 'WebEditWorkspace', 'DEBUG', __METHOD__.' previewPath = "' .$previewPath. '".' );
 		return $previewPath;
 	}
-	
+
 	// ------------------------------------------------------------------
 	// DATABASE HANDLING
 	// ------------------------------------------------------------------
-	
+
 	/**
 	 * Refer to createArticleWorkspace().
 	 *
@@ -1566,7 +1548,7 @@ class BizWebEditWorkspace
 		$this->enrichWorkspace();
 		$updatedVersion = false;
 		$article = $this->openArticleAtWorkspace( $id, $format, $content, $updatedVersion );
-		
+
 		// Store session details in DB
 		DBAppSession::createSession( $this->workspace );
 		if( DBAppSession::hasError() ) {
@@ -1574,7 +1556,7 @@ class BizWebEditWorkspace
 		}
 		return $article;
 	}
-	
+
 	/**
 	 * Retrieves workspace data from DB (smart_appsession table).
 	 * Workspace data is enriched with defaults.
@@ -1642,8 +1624,8 @@ class BizWebEditWorkspace
 	 * If the article was not in the workspace yet, it is retrieved from filestore as well.
 	 * For new articles a dummy placeholder is created instead.
 	 *
-	 * Article content will be read from filestore when the article was not yet added to 
-	 * the workspace before, or when a newer version is available in the filestore 
+	 * Article content will be read from filestore when the article was not yet added to
+	 * the workspace before, or when a newer version is available in the filestore
 	 * (than present in workspace). In other cases, content is read from workspace.
 	 *
 	 * @param integer $id
@@ -1653,11 +1635,11 @@ class BizWebEditWorkspace
 	 * @return stdClass The article.
 	 */
 	private function openArticleAtWorkspace( $id, $format, &$content, &$updatedVersion )
-	{	
+	{
 		// The workspace record ($this->workspace) can originate (be read) from DB,
 		// or it can be added by the client on-the-fly.
 		// As long as the article is not created, the $id is null.
-		
+
 		// Lookup the article in the workspace.
 		$article = null;
 		foreach( $this->workspace->Articles as $articleIter ) {
@@ -1666,7 +1648,7 @@ class BizWebEditWorkspace
 				break;
 			}
 		}
-		
+
 		// If not in workspace, create dummy article and add to workspace.
 		if( is_null($article) ) {
 			$article = new stdClass();
@@ -1676,7 +1658,7 @@ class BizWebEditWorkspace
 			$article->Version = null;
 			$this->workspace->Articles[] = $article;
 		}
-		
+
 		if( is_null($id) ) { // new article?
 			$article->Name = 'article';
 		} else { // existing article?
@@ -1684,7 +1666,7 @@ class BizWebEditWorkspace
 			require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 			require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 			$request = new WflGetObjectsRequest( BizSession::getTicket() );
-			
+
 			if( $article->Version ) {
 				$haveVersion = new ObjectVersion();
 				$haveVersion->ID = $id;
@@ -1698,7 +1680,7 @@ class BizWebEditWorkspace
 			$request->Lock = false;
 			$request->Rendition = 'native';
 			$request->RequestInfo = array( 'MetaData' );
-			
+
 			$service  = new WflGetObjectsService();
 			$response = $service->execute( $request );
 			$object  = $response->Objects[0];
@@ -1708,7 +1690,7 @@ class BizWebEditWorkspace
 			$article->Name    = $md->BasicMetaData->Name;
 			$article->Format  = $md->ContentMetaData->Format;
 			$article->Version = $md->WorkflowMetaData->Version;
-			
+
 			$updatedVersion = isset($object->Files[0]);
 			if( $updatedVersion ) {
 				$transferSvr = new BizTransferServer();
@@ -1724,7 +1706,7 @@ class BizWebEditWorkspace
 		}
 		return $article;
 	}
-	
+
 	/**
 	 * Enrich workspace data, typically called after open/create operations.
 	 */
@@ -1732,7 +1714,7 @@ class BizWebEditWorkspace
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-		
+
 		if( !isset($this->workspace->ID) || !$this->workspace->ID ) {
 			require_once BASEDIR.'/server/appservices/textconverters/InCopyTextUtils.php';
 			$this->workspace->ID = InCopyUtils::createGUID(); // Make up new workspaceId
@@ -1761,7 +1743,7 @@ class BizWebEditWorkspace
 			$this->workspace->Articles = array();
 		}
 	}
-	
+
 	/**
 	 * Validates the given workspace for the minimum data set.
 	 * Basically, it validates record data before it gets saved into DB or after retrieval from DB.
@@ -1803,7 +1785,7 @@ class BizWebEditWorkspace
 			}
 		}
 	}
-	
+
 	/**
 	 * Validates workspace ID.
 	 * When empty or invalid workspace ID is detected,
@@ -1817,7 +1799,7 @@ class BizWebEditWorkspace
 		if( !$workspaceId ){
 			throw new BizException( 'ERR_ARGUMENT', 'Server', 'No WorkspaceId given.' );
 		}
-		
+
 		require_once BASEDIR . '/server/utils/NumberUtils.class.php';
 		if( !NumberUtils::validateGUID( $workspaceId ) ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Illegal WorkspaceId given: "'.$workspaceId.'".' );
@@ -1829,10 +1811,10 @@ class BizWebEditWorkspace
 			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Invalid WorkspaceId given: "'.$workspaceId.'". '.
 				'There is no such workspace folder: "'.$workspaceDir.'".' );
 		}
-		// Note: We can not validate $workspace->InDesignServer since that is from InDesign Server 
+		// Note: We can not validate $workspace->InDesignServer since that is from InDesign Server
 		//       perspective and so it might not be accessible from our perspective.
 	}
-	
+
 	/**
 	 * Validates article format.
 	 * When empty format or if the format is not 'application/incopyicml',
@@ -1851,7 +1833,7 @@ class BizWebEditWorkspace
 				'Should be either "application/incopyicml" or "application/incopy".' );
 		}
 	}
-	
+
 	/**
 	 * Validates several types of Id depending on $column that is passed in.
 	 * When the id passed in is not null, this function checks whether it is
@@ -1878,12 +1860,12 @@ class BizWebEditWorkspace
 			}
 		}
 	}
-	
+
 	/**
 	 * This function validates by ensuring there's only
 	 * EITHER elements or content is allowed at one time.
 	 * When both are found to be filled, this function
-	 * throws BizException. 
+	 * throws BizException.
 	 *
 	 * @param array $elements array of Element object
 	 * @param string $content Story contents
@@ -1896,7 +1878,7 @@ class BizWebEditWorkspace
 														'one component is allowed at a time.' );
 		}
 	}
-	
+
 	/**
 	 * Errors when given $action is not 'Compose', 'Preview' or' PDF'.
 	 *
@@ -1906,7 +1888,7 @@ class BizWebEditWorkspace
 	private function validateActionType( $action )
 	{
 		if( $action != 'Compose' && $action != 'Preview' && $action != 'PDF' ){
-			throw new BizException( 'ERR_ARGUMENT', 'Server', 
+			throw new BizException( 'ERR_ARGUMENT', 'Server',
 				'The Action parameter is set to "'.$action.'" which is invalid. '.
 				'Please use one of the following values: "Compose", "Preview" or "PDF". ' );
 		}
@@ -1930,7 +1912,7 @@ class BizWebEditWorkspace
 			if( !$previewType ) { // null or empty
 				$previewType = 'page';
 			} elseif( $previewType != 'page' && $previewType != 'spread' ) {
-				throw new BizException( 'ERR_ARGUMENT', 'Server', 
+				throw new BizException( 'ERR_ARGUMENT', 'Server',
 					'The PreviewType parameter is set to "'.$previewType.'" which is invalid. '.
 					'Please use one of the following values: "page" or "spread". ' );
 			}
@@ -1939,9 +1921,9 @@ class BizWebEditWorkspace
 		}
 		return $previewType;
 	}
-	
+
 	/**
-	 * Throws BizException when page postfix is 
+	 * Throws BizException when page postfix is
 	 * not an integer or it is lower or equal to zero.
 	 *
 	 * @param int $pageSequence
@@ -1954,7 +1936,7 @@ class BizWebEditWorkspace
 															  $pageSequence);
 		}
 	}
-	
+
 	/**
 	 * Verify whether edition id is assigned to the layout.
 	 * Throws BizException when:
@@ -1986,7 +1968,7 @@ class BizWebEditWorkspace
 		if( !is_null( $editionId ) && !$found ){
 			throw new BizException( null, 'Server', null, 'Invalid Edition is passed in,the edition is not assigned to the layout.' );
 		}
-		
+
 		if( is_null( $editionId ) && $editionExists ){
 			throw new BizException( null, 'Server', null, 'Layout is assigned to edition(s), but null edition is passed in. ');
 		}
@@ -2008,11 +1990,11 @@ class BizWebEditWorkspace
 	private function getArticlePath( $article )
 	{
 		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
-		$artId = $article->ID ? $article->ID  : 'article';		
+		$artId = $article->ID ? $article->ID  : 'article';
 		$artExt = MimeTypeHandler::mimeType2FileExt( $article->Format, 'Article' );
 		return $this->workspace->WebEditor . $artId . $artExt;
 	}
-	
+
 	/**
 	 * Returns the DOM Version of the given InCopy WCML document.
 	 *
@@ -2034,27 +2016,27 @@ class BizWebEditWorkspace
 		foreach( $icStoryDocs as $icStoryDoc ) {
 			$majorMinor = $icStoryDoc->getAttribute('DOMVersion');
 			$regs = array();
-			preg_match('/([0-9]+\.[0-9]+)/i', $majorMinor, $regs ); 
+			preg_match('/([0-9]+\.[0-9]+)/i', $majorMinor, $regs );
 			if( count($regs) > 0 ) {
 				$docDomVersion = $regs[1]; // remember for later use
 				break; // stop search
 			}
 		}
 		return $docDomVersion;
-	}	
-	
+	}
+
 	/**
 	 * Create or Save article content. Updates $this->workspace->DOMVersion.
-	 * 
+	 *
 	 * When updating an article, this function expects EITHER $elements or $content ONLY.
-	 * When $content is passed, the whole(full) story get replaced into the workspace article. 
+	 * When $content is passed, the whole(full) story get replaced into the workspace article.
 	 * The full story is normally made up of one or multiple stories.
-	 * 
-	 * When $elements is passed, only the modified story(ies) are passed. It will call parseChangedStories() 
+	 *
+	 * When $elements is passed, only the modified story(ies) are passed. It will call parseChangedStories()
 	 * which will parse $elements (changed stories) and update them into the workspace article.
-	 * parseChangedStories() finds the corresponding changed story by looking up for the unique GUID 
+	 * parseChangedStories() finds the corresponding changed story by looking up for the unique GUID
 	 * in the workspace article. Once found, the new story is placed into the workspace article.
-	 * 
+	 *
 	 *
 	 * @param bool $save Save when TRUE, Create when False.
 	 * @param stdClass $article
@@ -2066,14 +2048,14 @@ class BizWebEditWorkspace
 	{
 		// create physical directory
 		if( !$save ) {
-		
+
 			// Implicity create WebEdit root folder when missing
 			$this->createWorkspaceDir( WEBEDITDIR );
 
 			// Create workspace folder (under WebEdit root folder)
 			$workspaceDir = $this->workspace->WebEditor;
 			if( file_exists( $workspaceDir ) ) { // should not happen
-				throw new BizException( null, 'Server', null, 
+				throw new BizException( null, 'Server', null,
 					'Workspace folder already exists: "'.$workspaceDir.'".' );
 			}
 			$this->createWorkspaceDir( $workspaceDir );
@@ -2088,7 +2070,7 @@ class BizWebEditWorkspace
 				$save = false;
 			}
 		}
-		
+
 		// When a new article was first created in workspace, then only user saved article
 		// into DB, the article should no longer be named as 'article', so need to rename.
 		if( $save && $article->Name != 'article' ) {
@@ -2097,26 +2079,26 @@ class BizWebEditWorkspace
 			$newArticle = clone( $article );
 			$newArticle->ID = 0;
 			$newArticlePath = $this->getArticlePath( $newArticle );
-			
+
 			if( file_exists( $newArticlePath ) ) {
 				rename( $newArticlePath, $artPath );
 			}
 		}
 		if( $save && // we need the article at workspace
 			!file_exists( $artPath ) ) { // should not happen
-			throw new BizException( null, 'Server', null, 
+			throw new BizException( null, 'Server', null,
 				'Could not find article at workspace: "'.$artPath.'".' );
 		}
-		
+
 		// Parse the latest article content.
 		$icDoc = new DOMDocument();
 		$icDoc->loadXML( $content );
-		
+
 		// Update the article content with latest changes.
 		if( $elements ) {
 			$this->parseChangedStories( $icDoc, $article->Format, $elements );
 		}
-		
+
 		// Determine the DOM version of the article.
 		$this->workspace->DOMVersion = $this->getDomVersion( $icDoc, $article->Format );
 		if( !$this->workspace->DOMVersion ) {
@@ -2132,12 +2114,12 @@ class BizWebEditWorkspace
 		chmod($artPath, 0777);
 		umask($oldUmask);
 	}
-	
+
 	/**
 	 * Creates or overwrites the <id>_delta.wcml file in the workspace based on changed stories (elements).
 	 *
 	 * The delta file contains the dirty stories since the last CS preview request only.
-	 * After each preview operation, this file is cleared/overwritten. Note that this file 
+	 * After each preview operation, this file is cleared/overwritten. Note that this file
 	 * is later used by IDPreview.js to reflect these text changes in the layout at workspace.
 	 *
 	 * @param stdClass $article
@@ -2150,7 +2132,7 @@ class BizWebEditWorkspace
 		$deltaContent .= '<ea:Stories xmlns:aic="http://ns.adobe.com/AdobeInCopy/2.0" xmlns:ea="urn:SmartConnection_v3" ea:WWVersion="2.0">'."\r\n";
 		if( $elements ) foreach( $elements as $element ) {
 			$content = $element->Content;
-			// Skip intermediate xml headers since the xml file already has one 
+			// Skip intermediate xml headers since the xml file already has one
 			if( substr( $content, 0, 6 ) == '<?xml ' ) {
 				$endMarker = strpos( $content, '?>' );
 				if( $endMarker !== false ) {
@@ -2160,7 +2142,7 @@ class BizWebEditWorkspace
 			$deltaContent .= $content."\r\n";
 		}
 		$deltaContent .= '</ea:Stories>'."\r\n";
-		
+
 		// Save the delta stories into the workspace.
 		$deltaFile = $this->workspace->WebEditor.'/'.$article->ID.'_delta.wcml';
 		file_put_contents( $deltaFile, $deltaContent );
@@ -2172,7 +2154,7 @@ class BizWebEditWorkspace
 	/**
 	 * Removes the <id>_delta.wcml file from the workspace.
 	 *
-	 * This is an indicator for SCE to use the full article WCML only. 
+	 * This is an indicator for SCE to use the full article WCML only.
 	 *
 	 * @param stdClass $article
 	 */
@@ -2183,7 +2165,7 @@ class BizWebEditWorkspace
 			unlink( $deltaFile );
 		}
 	}
-		
+
 	/**
 	 * Creates a folder when not exists. Used to create or extend the workspace folder.
 	 *
@@ -2202,7 +2184,7 @@ class BizWebEditWorkspace
 			umask($oldUmask);
 		}
 	}
-	
+
 	/**
 	 * Read the article file from workspace
 	 *
@@ -2215,7 +2197,7 @@ class BizWebEditWorkspace
 		// Determine the article path at workspace
 		$artPath = $this->getArticlePath( $article );
 		if( !file_exists( $artPath ) ) { // we need the article at workspace
-			throw new BizException( null, 'Server', null, 
+			throw new BizException( null, 'Server', null,
 				'Could not find article at workspace: "'.$artPath.'".' ); // should not happen
 		}
 
@@ -2223,7 +2205,7 @@ class BizWebEditWorkspace
 		return file_get_contents( $artPath );
 	}
 
-	
+
 	/**
 	 * Delete article and remove directory.
 	 */
@@ -2232,26 +2214,26 @@ class BizWebEditWorkspace
 		// Remove workspace folder from workspace (fail when not exist or can not remove)
 		$workspaceDir = $this->workspace->WebEditor;
 		if( !file_exists( $workspaceDir )) {
-			throw new BizException( null, 'Server', null, 
+			throw new BizException( null, 'Server', null,
 				'Workspace folder does not exist: "'.$workspaceDir.'".' );
 		}
-		
+
 		// Delete article files and directory
 		foreach( $this->workspace->Articles as $article ) {
 			$artPath = $this->getArticlePath( $article );
 			if( unlink( $artPath ) ){ // when manage to clear file, only proceed to remove dir
 				require_once BASEDIR . '/server/utils/FolderUtils.class.php';
 				if( !FolderUtils::cleanDirRecursive( $workspaceDir ) ) {
-					throw new BizException( null, 'Server', null, 
+					throw new BizException( null, 'Server', null,
 						'Could not remove workspace folder: "'.$workspaceDir.'".' );
 				}
 			} else {
-				throw new BizException( null, 'Server', null, 
+				throw new BizException( null, 'Server', null,
 					'Could not remove file "'. $artPath . '".');
 			}
 		}
 	}
-	
+
 	/**
 	 * Refer to storeArticleAtFileSystem() function header
 	 *
@@ -2283,32 +2265,32 @@ class BizWebEditWorkspace
 					' stories. Article format is "'.$format.'".' );
 				continue;
 			}
-			
+
 			// 'Introduce'(import) the changedStory into original story.
 			$changedStory = $icDoc->importNode( $domElement->documentElement, true);
 			$icStory = $icStories->item(0);
 			// Replace the changed story into the original story.
 			$icStory->parentNode->replaceChild( $changedStory, $icStory );
-			
+
 			/*
 			// Commented out since it is assumed that ContentStation will do the version GUID update.
 			// And so the server doesn't need to generate the version GUID do the update (as done below).
 			$newVersionGuid = InCopyUtils::createGUID();
 			// replacing version GUID for WoodWing
 			if( $format == 'application/incopy' ) { // WWCX
-				$versionGuidWW = $xpath->query( 'StoryInfo/SI_Version/text()', $changedStory ); 
+				$versionGuidWW = $xpath->query( 'StoryInfo/SI_Version/text()', $changedStory );
 			} else { // WCML
-				$versionGuidWW = $xpath->query( 'ea:StoryInfo/ea:SI_Version/text()', $changedStory ); 
+				$versionGuidWW = $xpath->query( 'ea:StoryInfo/ea:SI_Version/text()', $changedStory );
 			}
 			if( $versionGuidWW->length != 1 || empty( $versionGuidWW->item(0)->textContent ) ){
 				LogHandler::Log('BizWebEditWorkspace', 'ERROR', 'Corrupted article document: Could not find version GUID at article document' );
 				continue;
 			}
 			$icNewVersionInfo = $icDoc->createTextNode( $newVersionGuid );
-			LogHandler::Log('BizWebEditWorkspace', 'DEBUG', 'Updating StoryInfo->SI_Version version GUID "' . 
+			LogHandler::Log('BizWebEditWorkspace', 'DEBUG', 'Updating StoryInfo->SI_Version version GUID "' .
 								$versionGuidWW->item(0)->textContent . '" with new GUID "' . $newVersionGuid . '" for updated element in story.');
 			$versionGuidWW->item(0)->parentNode->replaceChild( $icNewVersionInfo, $versionGuidWW->item(0) );
-			
+
 			// replacing version GUID for Adobe
 			$versionGuidAdobe = $xpath->query( 'Document/Story', $changedStory );
 			if( $versionGuidAdobe->length != 1 ){
@@ -2439,10 +2421,10 @@ class BizWebEditWorkspace
 				!empty( array_diff_key( $rhsPlacementsByKey, $lhsPlacementsByKey ) ) ) {
 				$numberDiffers = true;
 			}
-		}	
-		
+		}
+
 		return $numberDiffers;
-	}	
+	}
 
 	/**
 	 * Checks for two arrays with unique placements and repairs small differences.
