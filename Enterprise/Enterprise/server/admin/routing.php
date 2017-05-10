@@ -59,7 +59,7 @@ if( $records > 0 ) {
 		}
 	}
 }
-if( $insert === true && $mode == 'update' ) {
+if( $insert === true && ($mode == 'update' || $mode == 'add') ) {
 	$section = isset($_REQUEST['section']) ? intval($_REQUEST['section']) : 0;
 	$status   = isset($_REQUEST['state'])   ? intval($_REQUEST['state'])   : 0;
 	$routeTo = isset($_REQUEST['routeto']) ? $_REQUEST['routeto'] : '';
