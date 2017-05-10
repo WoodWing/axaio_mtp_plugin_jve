@@ -96,33 +96,32 @@ class SabreAMF_Client
 	private $curlOptions = array();
 
 	/**
-	 * __construct
+	 * SabreAMF_Client constructor.
 	 *
 	 * @param string $endPoint The url to the AMF gateway
-	 * @return void
+	 * @param string $destination
 	 */
 	public function __construct( $endPoint, $destination = null )
 	{
-
 		$this->endPoint = $endPoint;
 		$this->destination = $destination;
 
 		$this->amfRequest = new SabreAMF_Message();
 		$this->amfOutputStream = new SabreAMF_OutputStream();
-
 	}
 
 	/**
-	 * sendRequest
+	 * Calling service request to the specified $servicePath.
 	 *
-	 * sendRequest sends the request to the server. It expects the servicepath and methodname, and the parameters of the methodcall
+	 * Function expects the $servicePath to be the service name and the method name.
+	 * The parameters of the method call (method name) should be passed in the $data.
 	 *
 	 * @param string $servicePath The servicepath (e.g.: myservice.mymethod)
-	 * @param array $data The parameters you want to send
-	 * @param int $timeout The timeout for the call in seconds
+	 * @param array $data The list of data / information to be sent over in the service call.
+	 * @param int $operationTimeout The request / execution timeout of curl in seconds (This is not the connection timeout).
 	 * @return mixed
 	 */
-	public function sendRequest( $servicePath, $data, $timeout = 20 )
+	public function sendRequest( $servicePath, $data, $operationTimeout = 3600 )
 	{
 		// Use enpty array to prevent NPE server side
 		if( $data == null ) {
@@ -131,7 +130,6 @@ class SabreAMF_Client
 
 		// We're using the FLEX Messaging framework
 		if( $this->encoding & SabreAMF_Const::FLEXMSG ) {
-
 
 			// Setting up the message
 			$message = new SabreAMF_AMF3_RemotingMessage();
@@ -158,7 +156,7 @@ class SabreAMF_Client
 
 		$this->amfRequest->serialize( $this->amfOutputStream );
 
-		$result = $this->sendHttpRequest( $timeout );
+		$result = $this->sendHttpRequest( $operationTimeout );
 
 		$this->amfInputStream = new SabreAMF_InputStream( $result );
 		$this->amfResponse = new SabreAMF_Message();
@@ -168,23 +166,30 @@ class SabreAMF_Client
 
 		foreach( $this->amfResponse->getBodies() as $body ) {
 
-			if( strpos( $body['target'], '/1' ) === 0 ) return $body['data'];
-
+			if( strpos( $body['target'], '/1' ) === 0 ) {
+				return $body['data'];
+			}
 		}
+		return null; // Should not reach here.
 	}
 
 	/**
 	 * Sends a HTTP request using the Zend Http Client.
 	 *
 	 * @since 10.0.5 / 10.1.2
-	 * @param int $timeout The timeout for the call in seconds
+	 * @param int $operationTimeout The request / execution timeout of curl in seconds (This is not the connection timeout).
 	 * @return string HTTP response body
 	 * @throws Exception
 	 */
-	private function sendHttpRequest( $timeout )
+	private function sendHttpRequest( $operationTimeout )
 	{
 		try {
-			$this->curlOpts[ CURLOPT_TIMEOUT ] = $timeout;
+			$curlOpts = array();
+			// For zendframework v2.5.3:
+			// Make sure that the Execution timeout ( CURLOPT_TIMEOUT is set in the 'curloptions' key ).
+			// Doing $client->setOptions( 'timeout' => 3600 ) will be later on flattened by the Curl Adapter
+			// to have 'CURLOPT_TIMEOUT' the same as the 'CURLOPT_CONNECTTIMEOUT' which is not wanted.
+			$curlOpts[ CURLOPT_TIMEOUT ] = $operationTimeout;
 			if( $this->httpProxy ) {
 				$curlOpts[ CURLOPT_PROXY ] = $this->httpProxy;
 			}

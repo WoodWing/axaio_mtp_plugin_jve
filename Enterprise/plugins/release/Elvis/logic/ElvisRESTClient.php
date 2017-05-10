@@ -3,6 +3,10 @@
 class ElvisRESTClient
 {
 	/**
+	 * @var null|string Type of Load Balancer used with connection to Elvis. e.g: classic load balancer (AWSELB)
+	 */
+	private $loadBalancerType = null;
+	/**
 	 * Calls an Elvis web service over the REST JSON interface.
 	 *
 	 * It does log the request and response data in DEBUG mode.
@@ -21,9 +25,7 @@ class ElvisRESTClient
 		self::logService( $service, $url, $post, $cookies, true );
 		$response = self::sendUrl( $service, $url, $post, $cookies, $file );
 		self::logService( $service, $url, $response, $cookies, false );
-		if( $cookies ) {
-			ElvisSessionUtil::saveSessionCookies( $cookies );
-		}
+		ElvisSessionUtil::updateSessionCookies( $cookies );
 
 		if( isset( $response->errorcode ) ) {
 			$detail = 'Calling Elvis web service '.$service.' failed. '.
@@ -83,37 +85,93 @@ class ElvisRESTClient
 	 */
 	private static function sendUrl( $service, $url, $post, &$cookies, $file = null )
 	{
-		$response = null;
-		try {
-			$client = new Zend\Http\Client();
-			$client->setUri( $url );
-			$client->setMethod( Zend\Http\Request::METHOD_POST );
-			if( defined( 'ELVIS_CURL_OPTIONS' ) ) { // hidden option
-				$client->setOptions( array( 'curloptions' => unserialize( ELVIS_CURL_OPTIONS ) ) );
-			}
-			if( isset( $post ) ) {
-				$client->setParameterPost( $post );
-			}
-			if( $cookies ) {
-				$client->setCookies( $cookies );
-			}
-			if( $file ) {
-				// Filedata parameter is part of Elvis API: https://helpcenter.woodwing.com/hc/en-us/articles/205654645
-				$client->setFileUpload( $file->FilePath, 'Filedata', null, $file->Type );
-			}
-			$response = $client->send();
-		} catch( Exception $e ) {
-			self::throwExceptionForElvisCommunicationFailure( $e->getMessage() );
+		$ch = curl_init();
+		if( !$ch ) {
+			$detail = 'Elvis '.$service.' failed. '.
+				'Failed to create a CURL handle for url: '.$url;
+			self::throwExceptionForElvisCommunicationFailure( $detail );
 		}
-		if( $response->getStatusCode() !== 200 ) {
-			self::throwExceptionForElvisCommunicationFailure( $response->getReasonPhrase() );
+		curl_setopt( $ch, CURLOPT_URL, $url );
+		curl_setopt( $ch, CURLOPT_FAILONERROR, 1 ); // Fail verbosely if the HTTP code returned is >= 400.
+		curl_setopt( $ch, CURLOPT_POST, 1 );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		curl_setopt( $ch, CURLOPT_HEADER, 0 );
+		curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 10 ); // Using the Zend Client default
+		curl_setopt( $ch, CURLOPT_TIMEOUT, 3600 ); // Using the Enterprise default
+
+		// Enable this to print the Header sent out ( After calling curl_exec )
+		if( LogHandler::debugMode() ) {
+			curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
 		}
-		$cookies = array();
-		$cookieJar = $response->getCookie();
-		if( $cookieJar ) foreach( $cookieJar as $cookie ) {
-			$cookies[$cookie->getName()] = $cookie->getValue();
+
+		// Hidden options, in case customer wants to overrule some settings.
+		if( defined( 'ELVIS_CURL_OPTIONS') ) { // hidden option
+			$options = unserialize( ELVIS_CURL_OPTIONS );
+			if( $options ) foreach( $options as $key => $value ) {
+				curl_setopt( $ch, $key, $value );
+			}
 		}
-		return json_decode( $response->getBody() );
+
+		// To deal with file upload.
+		if( $file ) {
+			if( !isset( $post ) ) {
+				$post = array();
+			}
+			curl_setopt($ch, CURLOPT_SAFE_UPLOAD, true );
+			$post['Filedata'] = new CURLFile( $file->FilePath, $file->Type ); // Needed by Elvis
+		}
+		if( isset( $post ) ) {
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $post );
+		}
+
+		// Setting cookies to be sent over in the Request.
+		if( $cookies ) {
+			$cookieValueArr = array();
+			foreach( $cookies as $cookieKey => $cookieVal ) {
+				$encodedCookieValue = urlencode( $cookieVal );
+				$cookieValueArr[] = "{$cookieKey}={$encodedCookieValue}";
+			}
+			$cookieValue = implode( '; ', $cookieValueArr );
+			curl_setopt( $ch, CURLOPT_COOKIE, $cookieValue );
+		}
+
+		// Read the cookies returned by Elvis ( using a callback function )
+		$cookies = array(); // To be passed back(referenced back) to the caller.
+		// Example $headerLine = "Set-Cookie: AWSELB=4A5003EE72F010581";
+		$curlResponseHeaderCallback = function( $ch, $headerLine ) use ( &$cookies ) {
+			if( preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $headerLine, $theSetCookie ) == 1 ) {
+				if( $theSetCookie ) foreach( $theSetCookie[1] as $theSetCookieKeyValue ) {
+					parse_str( $theSetCookieKeyValue, $returnedCookie ); // does urldecode() !
+					$returnedCookie = array_map( 'trim', $returnedCookie );
+					$cookies = array_merge( $cookies, $returnedCookie );
+				}
+			}
+			return strlen( $headerLine ); // Needed by CURLOPT_HEADERFUNCTION
+		};
+		curl_setopt($ch, CURLOPT_HEADERFUNCTION, $curlResponseHeaderCallback );
+
+		$result = curl_exec($ch);
+
+		if( LogHandler::debugMode() ) {
+			// Require curl_setopt($ch, CURLINFO_HEADER_OUT, 1); as set above.
+			$headersSent = curl_getinfo( $ch, CURLINFO_HEADER_OUT );
+			LogHandler::Log( 'ELVIS', 'DEBUG', 'RESTClient calling '.$service . ' using PHP cURL.' . PHP_EOL .
+				'Headers Sent:<pre>'. print_r( $headersSent,true ).'</pre>');
+		}
+
+		$httpStatusCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+		if( $httpStatusCode !== 200 ) {
+			$detail = 'Elvis '.$service.' failed with HTTP status code:' . $httpStatusCode . '.' .PHP_EOL;
+			if( curl_errno( $ch ) ){
+				$detail .= 'CURL failed with error code "'.curl_errno( $ch ).'" for url: '.$url . '.' . PHP_EOL . curl_error( $ch );
+			}
+			curl_close($ch);
+			self::throwExceptionForElvisCommunicationFailure( $detail );
+		}
+
+		curl_close($ch);
+
+		return json_decode( $result );
 	}
 
 	/**
@@ -259,18 +317,27 @@ class ElvisRESTClient
 	 * Calls the version.jsp web page over HTTP, parses the return XMl file and returns the read version.
 	 * Note that this is an old and home brewed protocol (unlike the other JSON REST services).
 	 *
+	 * Function also retrieves the type of Load Balancer used. Caller can retrieve the type of Load Balancer
+	 * by calling getLoadBalancerType();
+	 *
 	 * @since 10.0.5 / 10.1.2
 	 * @return string
 	 * @throws BizException
 	 */
-	public static function getElvisServerVersion()
+	public function getElvisServerVersion()
 	{
+		require_once __DIR__.'/../util/ElvisSessionUtil.php';
+
 		$response = null;
 		$url = ELVIS_URL.'/version.jsp';
 		LogHandler::logService( 'Elvis_version_jsp', $url, true, 'REST' );
 		try {
 			$client = new Zend\Http\Client();
 			$client->setUri( $url );
+			$cookies = ElvisSessionUtil::getSessionCookies();
+			if( $cookies ) {
+				$client->setCookies( $cookies );
+			}
 			$response = $client->send();
 		} catch( Exception $e ) {
 			LogHandler::logService( 'Elvis_version_jsp', $e->getMessage(), null, 'REST' );
@@ -280,6 +347,16 @@ class ElvisRESTClient
 			LogHandler::logService( 'Elvis_version_jsp', $response->getBody(), null, 'REST' );
 			self::throwExceptionForElvisCommunicationFailure( $response->getReasonPhrase() );
 		}
+
+		$cookies = array();
+		$cookieJar = $response->getCookie();
+		if( $cookieJar ) foreach( $cookieJar as $cookie ) {
+			$cookies[ $cookie->getName() ] = $cookie->getValue();
+		}
+		if( $cookies ) {
+			ElvisSessionUtil::updateSessionCookies( $cookies );
+		}
+
 		$versionXml = trim($response->getBody());
 		LogHandler::logService( 'Elvis_version_jsp', $versionXml, false, 'REST' );
 
@@ -294,6 +371,42 @@ class ElvisRESTClient
 			throw new BizException( null, 'Server', 'Parsing the XML result of version.jsp failed.',
 				'Could not detect Elvis Server version.' );
 		}
+
+		// Remember the ELB type if there's any.
+		$this->setLoadBalancerType( $cookies );
+
 		return $serverVersion;
+	}
+
+	/**
+	 * Set the Load Balancer type being used with connection to Elvis.
+	 *
+	 * The Load Balancer type can be the Classic Load Balancer ( ELB ),
+	 * or the Application Load Balancer ( ALB ).
+	 *
+	 * @param array $cookies Key-value lists of cookies returned in a response from Elvis.
+	 */
+	private function setLoadBalancerType( $cookies )
+	{
+		if( $cookies ) {
+			if( isset( $cookies['AWSELB'] )) {
+				$this->loadBalancerType = 'AWSELB';
+			} else if( isset( $cookies['AWSALB'] )) {
+				$this->loadBalancerType = 'AWSALB';
+			}
+		}
+	}
+
+	/**
+	 * Returns the Load Balancer type being used with connection to Elvis.
+	 *
+	 * The Load Balancer type can be the Classic Load Balancer ( ELB ),
+	 * or the Application Load Balancer ( ALB ).
+	 *
+	 * @return null|string Returns the type of Load Balancer used with Elvis, Null when no Load Balancer is used.
+	 */
+	public function getLoadBalancerType()
+	{
+		return $this->loadBalancerType;
 	}
 }

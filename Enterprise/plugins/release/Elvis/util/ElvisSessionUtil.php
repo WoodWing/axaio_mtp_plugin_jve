@@ -17,13 +17,13 @@ class ElvisSessionUtil
 	/**
 	 * Get the base64 encoded credentials
 	 *
+	 * @param string $userShort
 	 * @return string|null Credentials, or NULL when not found.
 	 */
-	public static function getCredentials()
+	public static function getCredentials( $userShort )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
 
-		$userShort = BizSession::getShortUserName();
 		$settings = BizUser::getSettings( $userShort, 'ElvisContentSource' );
 		$storage = null;
 		if( $settings ) foreach( $settings as $setting ) {
@@ -93,7 +93,7 @@ class ElvisSessionUtil
 	 *
 	 * @param array $cookies
 	 */
-	public static function saveSessionCookies( array $cookies )
+	private static function saveSessionCookies( array $cookies )
 	{
 		self::setSessionVar( 'sessionCookies', $cookies );
 	}
@@ -104,6 +104,24 @@ class ElvisSessionUtil
 	public static function clearSessionCookies()
 	{
 		self::saveSessionCookies( array() );
+	}
+
+	/**
+	 * Merge the passed in cookies with the session cookies and store it back to the session.
+	 *
+	 * @param array $cookies List of key-value pair of cookies
+	 */
+	public static function updateSessionCookies( $cookies )
+	{
+		if( $cookies && is_array( $cookies ) ) { // Any updated cookies?
+			$sessionCookies = self::getSessionCookies();
+			if( $sessionCookies && is_array( $sessionCookies ) ) {
+				$sessionCookies = array_merge( $sessionCookies, $cookies ); // The new cookie(s) replace(s) the old ones if there's any,
+			} else {
+				$sessionCookies = $cookies; // Happens when the cookies jar was emptied before (e.g. after Elvis re-login).
+			}
+			self::saveSessionCookies( $sessionCookies );
+		}
 	}
 
 	/**
@@ -197,5 +215,25 @@ class ElvisSessionUtil
 	private static function getVarName( $name )
 	{
 		return ELVIS_CONTENTSOURCEPREFIX . $name;
+	}
+
+	/**
+	 * Retrieve the password from the saved credentials.
+	 *
+	 * @since 10.1.3
+	 * @param string $user
+	 * @return string password if credentials are found else empty string.
+	 */
+	static public function retrievePasswordFromCredentials( $user )
+	{
+		$password = '';
+		$credentials = self::getCredentials( $user );
+		if( $credentials ) {
+			$credentials = base64_decode( $credentials );
+			$userNamePassword = explode( ':', $credentials );
+			$password = $userNamePassword[1];
+		}
+
+		return $password;
 	}
 }

@@ -75,6 +75,13 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 	 * by the Elvis application. See EN-36871.
 	 * If the log on fails ultimately the session variable with the credentials is set as if the user is an Elvis user.
 	 * Only if both log on attempts fail a warning is logged.
+	 * Note that the password can be empty!!! This is the case if log on is initiated by a third application. Example:
+	 * - Open a layout from within Content Station.
+	 * - InDesign is started and the user is logged on to InDesign without password.
+	 * In this case the logon request of InDesign contains the ticket issued to Content Station. This ticket is used
+	 * to validate the user and issue a new ticket for the InDesign application. But as the user is already logged on
+	 * to the third application (Content Station) the password can be retrieved from the credentials stored during that
+	 * logon process. See also EN-88533.
 	 *
 	 * @param string $user Acting user.
 	 * @param string $password Password of the acting user.
@@ -82,6 +89,15 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 	 */
 	private function setUserType( $user, $password )
 	{
+		if( !$password ) {
+			$password = ElvisSessionUtil::retrievePasswordFromCredentials( $user );
+			if( $password ) {
+				LogHandler::Log( __CLASS__, 'INFO', 'No password supplied. Retrieved password from previous stored credentials.' );
+			} else {
+				LogHandler::Log( __CLASS__, 'WARN', 'No password supplied. Continue without password.' );
+			}
+		}
+
 		ElvisSessionUtil::saveCredentials( $user, $password );
 
 		try {
