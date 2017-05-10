@@ -72,7 +72,7 @@ class IdsAutomation_WflCreateObjectOperations extends WflCreateObjectOperations_
 		if( $this->hookedLayoutId ) {
 			require_once dirname(__FILE__).'/IdsAutomationUtils.class.php';
 
-			// The server doesn't pickup the newly generated InDesign server job for 20 seconds. Users can override this.
+			// EN-89035 - The server doesn't pickup the newly generated InDesign server job for 20 seconds. Users can override this.
 			$waitTime = defined('IDSA_WAIT_TIMEOUT_AFTER_OBJECT_OPERATION') ? IDSA_WAIT_TIMEOUT_AFTER_OBJECT_OPERATION : 20;
 			IdsAutomationUtils::createIDSJob( $this->hookedLayoutId, $this->hookedLayoutId, $this->hookedLayoutType, true, $waitTime );
 		}
