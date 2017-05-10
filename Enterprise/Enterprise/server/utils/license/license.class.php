@@ -3287,7 +3287,7 @@ class License
 		$tablebg = '#dddddd';
 		$clientAppUserLimit = false;
 		if ( count( $limitsArr ) > 0 ) {
-			print "<table class='text' width='820'>";
+			print "<table class='text' width='100%'>";
 			$maxmax = 0;
 			$maxcur = 0;
 			$hasNoLimit = false;
@@ -3318,7 +3318,7 @@ class License
 				$max = $nolimit;
 			}
 			
-			$tabwidth = 400;
+			$tabwidth = 50000; // Just a very high random number.
 			if ( $max ) {
 				$scale = intval( $tabwidth/$max );
 			} else {
@@ -3332,9 +3332,9 @@ class License
 			print "<th class='text'>" . BizResources::localize('LIC_RENEW') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_EXPIRES') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_CURRENT') . "</th>";
-			print "<th class='text'>" . BizResources::localize('LIC_USAGE') . "</th>";
+			print "<th class='text' width='150'>" . BizResources::localize('LIC_USAGE') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_LIMIT') . "</th>";
-			print "<th class='text'>" . BizResources::localize('LIC_ACTION') . "</th>";
+			print "<th class='text' width='10'>" . BizResources::localize('LIC_ACTION') . "</th>";
 			print "</tr>";
 			foreach( $limitsArr as $idx => $limitArr2 )
 			{
