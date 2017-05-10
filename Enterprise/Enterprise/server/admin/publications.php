@@ -10,7 +10,7 @@ $ticket = checkSecure('publadmin');
 // Handle sorting listed brands.
 $recs = isset($_REQUEST['recs']) ? intval($_REQUEST['recs']) : 0;
 if ($recs > 0) {
-	for ($i = 1; $i < $recs; $i++) {
+	for ($i = 1; $i <= $recs; $i++) {
 		$id = intval($_REQUEST["order$i"]);
 		$code = intval($_REQUEST["code$i"]);
 		$where = '`id` = ? ';
