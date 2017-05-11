@@ -90,11 +90,12 @@ class BizMessage
 	/**
 	 * Get all messages sent to a specific user.
 	 *
-	 * @param string $userId User DB id.
+	 * @param integer $userId User DB id.
+	 * @param string $userShortName
 	 * @throws BizException Throws BizException when fails.
 	 * @return MessageList
 	 */
-	public static function getMessagesForUser( $userId )
+	public static function getMessagesForUser( $userId, $userShortName )
 	{
 		// Use semaphore to avoid race conditions / data corruption.
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
@@ -111,7 +112,7 @@ class BizMessage
 		// Get messages from DB.
 		try {
 			require_once BASEDIR.'/server/dbclasses/DBMessage.class.php';
-			$messages = DBMessage::getMessagesForUser( $userId );
+			$messages = DBMessage::getMessagesForUser( $userShortName );
 		} catch( BizException $e ) {
 			if( $semaId ) {
 				$bizSema->releaseSemaphore( $semaId );

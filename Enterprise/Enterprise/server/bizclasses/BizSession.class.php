@@ -421,7 +421,7 @@ class BizSession
 		}
 		if( in_array( 'MessageList', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizMessage.class.php';
-			$ret->MessageList          = BizMessage::getMessagesForUser( $userId ); // Messages that are pending for this user
+			$ret->MessageList          = BizMessage::getMessagesForUser( $userId, $shortUser ); // Messages that are pending for this user
 		}
 		if( in_array( 'CurrentUser', $requestInfo ) ) {
 			$user = self::getUser();
