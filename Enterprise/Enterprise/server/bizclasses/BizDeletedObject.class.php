@@ -295,8 +295,7 @@ class BizDeletedObject
 					// When it is a DossierTemplate type object, check whether configuration exist, if yes, then throw exception
 					if( $rc['type'] == 'DossierTemplate' ) {
 						require_once BASEDIR.'/server/bizclasses/BizAdmTemplateObject.class.php';
-						$templates = BizAdmTemplateObject::getTemplateObjects( $rc['publication'], $rc['issue'], $id, 0 );
-						if( count($templates) > 0 ) {
+						if( BizAdmTemplateObject::isTemplateObjectConfigured( $id ) ) {
 							throw new BizException( 'ERR_IN_CONFIG_DOSSIER_TEMPLATE', 'client', null, null, array($rc['name']) );
 						}
 					} else if( $rc['type'] == 'Dossier' ) {

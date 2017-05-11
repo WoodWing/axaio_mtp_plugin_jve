@@ -87,6 +87,27 @@ class DBAdmTemplateObject extends DBBase
 	}
 
 	/**
+	 * Checks if the given template object is configured (for a brand or issue).
+	 *
+	 * @param integer $objectId The object id.
+	 * @return bool TRUE when configured, else FALSE.
+	 * @throws BizException on SQL error.
+	 */
+	public static function isTemplateObjectConfigured( $objectId )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$publObjectsTable = $dbDriver->tablename( self::TABLENAME );
+		$sql = "SELECT 1 FROM $publObjectsTable o WHERE `objectid` = ?";
+		$params = array( intval( $objectId ) );
+		$sth = $dbDriver->query( $sql, $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+		$row = $dbDriver->fetch( $sth );
+		return (bool)$row;
+	}
+
+	/**
 	 * Remove a template object access rule from the database.
 	 *
 	 * @param integer $objId The template object id.

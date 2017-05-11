@@ -110,6 +110,20 @@ class BizAdmTemplateObject
 	}
 
 	/**
+	 * Checks if the given template object is configured (for a brand or issue).
+	 *
+	 * No admin access is checked here since no data is returned and this is called by workflow users.
+	 *
+	 * @param integer $objectId The object id.
+	 * @return bool TRUE when configured, else FALSE.
+	 */
+	public static function isTemplateObjectConfigured( $objectId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBAdmTemplateObject.class.php';
+		return DBAdmTemplateObject::isTemplateObjectConfigured( $objectId );
+	}
+
+	/**
      * Removes access from a template for a certain user group.
      *
      * @param AdmTemplateObjectAccess[] $templateObjects A list of template object access rules to be deleted.
