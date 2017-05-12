@@ -934,7 +934,16 @@ class IssueMaintenanceApp
 				$service = new AdmGetSectionsService();
 				$response = $service->execute( $request );
 				$sections = $response->Sections;
-				//order by code, section
+
+				// Sort the sections by code, then by name in natural order.
+				if( $sections ) {
+					usort( $sections, function( AdmSection $sectionA, AdmSection $sectionB ) {
+						if( $sectionA->SortOrder == $sectionB->SortOrder ) {
+							return strnatcmp( $sectionA->Name, $sectionB->Name );
+						}
+						return $sectionA->SortOrder < $sectionB->SortOrder ? -1 : 1;
+					} );
+				}
 
 				$color = array (" bgcolor='#eeeeee'", '');
 				$cnt=1;
@@ -990,7 +999,16 @@ class IssueMaintenanceApp
 				$service = new AdmGetEditionsService();
 				$response = $service->execute( $request );
 				$editions = $response->Editions;
-				//order by code, name
+
+				// Sort the editions by code, then by name in natural order.
+				if( $editions ) {
+					usort( $editions, function( AdmEdition $editionA, AdmEdition $editionB ) {
+						if( $editionA->SortOrder == $editionB->SortOrder ) {
+							return strnatcmp( $editionA->Name, $editionB->Name );
+						}
+						return $editionA->SortOrder < $editionB->SortOrder ? -1 : 1;
+					} );
+				}
 
 				$color = array (" bgcolor='#eeeeee'", '');
 				$cnt=1;

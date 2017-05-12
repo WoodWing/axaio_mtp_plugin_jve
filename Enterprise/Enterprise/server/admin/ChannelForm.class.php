@@ -585,12 +585,30 @@ class ChannelForm extends HtmlAnyForm
 		require_once BASEDIR . '/server/dbclasses/DBEdition.class.php';
 		if( $this->pubChannelObj->Id > 0 ) {
 			$issues = DBIssue::listChannelIssues( $this->pubChannelObj->Id );
+			// Sort the issues by code, then by name in natural order.
+			if( $issues ) {
+				uasort( $issues, function( array $issueA, array $issueB ) {
+					if( $issueA['code'] == $issueB['code'] ) {
+						return strnatcmp( $issueA['name'], $issueB['name'] );
+					}
+					return $issueA['code'] < $issueB['code'] ? -1 : 1;
+				} );
+			}
 			$this->fetchIssuesTree( $issues );
 
 			if( $this->pubChannelObj->Type == 'print' ||
 				$this->pubChannelObj->Type == 'dps' ||
 				$this->pubChannelObj->Type == 'dps2' ) {
 				$editions = DBEdition::listChannelEditions( $this->pubChannelObj->Id );
+				// Sort the editions by code, then by name in natural order.
+				if( $editions ) {
+					uasort( $editions, function( array $editionA, array $editionB ) {
+						if( $editionA['code'] == $editionB['code'] ) {
+							return strnatcmp( $editionA['name'], $editionB['name'] );
+						}
+						return $editionA['code'] < $editionB['code'] ? -1 : 1;
+					} );
+				}
 				$this->fetchEditionsTree( $editions );
 			}
 		}
