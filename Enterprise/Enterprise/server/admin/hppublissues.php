@@ -1125,6 +1125,13 @@ class IssueMaintenanceApp
 				$response = $service->execute( $request );
 				$userGroups = $response->UserGroups;
 
+				// Sort the user groups by name, in natural order.
+				if( $userGroups ) {
+					usort( $userGroups, function( AdmUserGroup $userGroupA, AdmUserGroup $userGroupB ) {
+						return strnatcmp( $userGroupA->Name, $userGroupB->Name );
+					} );
+				}
+
 				$color = array (" bgcolor='#eeeeee'", '');
 				$flip = 0;
 				if( $userGroups ) foreach( $userGroups as $userGroup ) {
