@@ -102,10 +102,6 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
      */
     public function session_error_handler( $errno, $errstr,  $errfile, $errline, $errcontext )
     {
-        /** @noinspection PhpSillyAssignmentInspection */ $errfile = $errfile; // keep analyzer happy
-        /** @noinspection PhpSillyAssignmentInspection */ $errline = $errline;
-        /** @noinspection PhpSillyAssignmentInspection */ $errcontext = $errcontext;
-
     	throw new Exception( $errstr, $errno );
     }
 

@@ -40,6 +40,5 @@ abstract class DatGetDatasource_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( DatGetDatasourceRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

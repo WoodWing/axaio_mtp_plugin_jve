@@ -40,6 +40,5 @@ abstract class AdsCopyDatasource_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdsCopyDatasourceRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

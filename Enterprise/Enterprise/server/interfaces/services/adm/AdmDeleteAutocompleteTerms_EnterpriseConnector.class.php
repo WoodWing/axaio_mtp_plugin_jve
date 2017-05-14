@@ -40,6 +40,5 @@ abstract class AdmDeleteAutocompleteTerms_EnterpriseConnector extends ServiceCon
 	 */
 	public function onError( AdmDeleteAutocompleteTermsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

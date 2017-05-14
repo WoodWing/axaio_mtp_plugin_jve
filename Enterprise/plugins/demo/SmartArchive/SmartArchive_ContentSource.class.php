@@ -111,9 +111,6 @@ class SmartArchive_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{
-		// Keep code analyzer happy
-		$query=$query; $firstEntry=$firstEntry; $maxEntries=$maxEntries; $order=$order;
-		
 		// Create SOAP client and logon when needed
 		$this->initProxy();
 

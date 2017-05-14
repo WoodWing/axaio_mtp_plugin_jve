@@ -68,9 +68,6 @@ class ImageMagick_Preview extends Preview_EnterpriseConnector
 	 */
 	public function generatePreview(Attachment $attachment, $max, &$previewFormat, &$meta, $bizMetaDataPreview )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$bizMetaDataPreview = $bizMetaDataPreview;
-
 		LogHandler::Log('ImageMagick', 'DEBUG', 'Creating preview for '.$attachment->Type );
 		require_once dirname(__FILE__) . '/ImageMagick.class.php';
 		// Work from disk or from memory.

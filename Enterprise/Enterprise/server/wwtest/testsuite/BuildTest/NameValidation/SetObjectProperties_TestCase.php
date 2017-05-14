@@ -246,7 +246,6 @@ class WW_TestSuite_BuildTest_NameValidation_SetObjectProperties_TestCase extends
 			}
 		}
 		$severityMapHandle = new BizExceptionSeverityMap( $serverityMap );
-		$severityMapHandle = $severityMapHandle; // keep code analyzer happy
 
 		// Call the SetObjectProperties service.
 		require_once BASEDIR . '/server/services/wfl/WflMultiSetObjectPropertiesService.class.php';

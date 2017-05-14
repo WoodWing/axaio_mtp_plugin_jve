@@ -3721,7 +3721,6 @@ xmlrpc_encode_entitites($this->errstr, $GLOBALS['xmlrpc_internalencoding'], $cha
 
 				if( file_exists($sLogFile) ) {
 					list($usec, $sec) = explode(" ", microtime());
-					$sec = $sec; // keep analyzer happy
 					$time = sprintf( '%5.3f', (float)$usec );
 					$sLogFile .= date('His').'_'.$time.'_'.$methodName;
 

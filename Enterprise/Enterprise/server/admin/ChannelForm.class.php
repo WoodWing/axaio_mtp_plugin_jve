@@ -185,7 +185,6 @@ class ChannelForm extends HtmlAnyForm
 	 */
 	private function fillCombos( $action, $widget )
 	{
-		$action = $action; // keep code analyzer happy
 		switch( $widget->PropertyInfo->Name ) {
 			case 'CurrentIssueId':
 				$widget->PropertyInfo->PropertyValues = array();
@@ -301,7 +300,6 @@ class ChannelForm extends HtmlAnyForm
 	 */
 	private function drawHtmlField( AdmPubChannel $channelObj, DialogWidget $widget, Utils_XHtmlField $htmlPropObj, $validateError, $width = 200 )
 	{
-		$channelObj = $channelObj; // keep code analyzer happy
 		$displayName = $widget->PropertyInfo->DisplayName;
 		if( $widget->PropertyInfo->Type == 'separator' ) {
 			$htmlWidget = '<tr><td colspan="2">&nbsp;</td></tr>'."\r\n";

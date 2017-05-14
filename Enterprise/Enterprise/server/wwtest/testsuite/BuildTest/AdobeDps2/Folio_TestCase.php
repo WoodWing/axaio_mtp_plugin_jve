@@ -98,8 +98,6 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 			$this->multisetLayoutProperties();
 
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
 		}
 
 		$this->tearDownTestData();
@@ -172,8 +170,6 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 		try {
 			$this->deletePendingJobs();
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 
@@ -194,8 +190,6 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 				$service->execute( $request );
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 
 		// Delete the layout.
@@ -223,8 +217,6 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 				}
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 	

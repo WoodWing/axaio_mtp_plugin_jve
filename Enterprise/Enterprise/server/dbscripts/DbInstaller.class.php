@@ -430,7 +430,6 @@ class WW_DbScripts_DbInstaller
 		// must be reported to screen as a FATAL since it is blocking the installer from
 		// offering next steps in the installation procedure.
 		$map = new BizExceptionSeverityMap( array( 'S1003' => 'INFO' ) );
-		$map = $map; // keep analyzer happy
 
 		// Validate the database version and settings.
 		$help = '';
@@ -467,8 +466,7 @@ class WW_DbScripts_DbInstaller
 		// must be reported to screen as a FATAL since it is blocking the installer from
 		// offering next steps in the installation procedure.
 		$map = new BizExceptionSeverityMap( array( 'S1003' => 'INFO' ) );
-		$map = $map; // keep analyzer happy
-		
+
 		try {
 			require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
 			$installedVersion = DBConfig::getSCEVersion();

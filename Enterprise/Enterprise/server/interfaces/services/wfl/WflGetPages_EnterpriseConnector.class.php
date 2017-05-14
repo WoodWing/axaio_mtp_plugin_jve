@@ -40,6 +40,5 @@ abstract class WflGetPages_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflGetPagesRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

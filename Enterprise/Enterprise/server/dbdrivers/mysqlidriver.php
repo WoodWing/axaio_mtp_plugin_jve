@@ -968,8 +968,6 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	 */
 	public function isCompleteStatement( &$statement )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$statement = $statement;
 		return true;
 	}
 

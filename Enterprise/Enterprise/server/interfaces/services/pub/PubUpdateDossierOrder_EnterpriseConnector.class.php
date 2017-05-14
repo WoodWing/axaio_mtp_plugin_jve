@@ -40,6 +40,5 @@ abstract class PubUpdateDossierOrder_EnterpriseConnector extends ServiceConnecto
 	 */
 	public function onError( PubUpdateDossierOrderRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

@@ -504,7 +504,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 				$this->setResult( 'ERROR', 'Scenario 7: The Publish Form was restored while its Dossier was in the Trash, this was unexpected.' );
 				break;
 			}
-			$map = $map; // keep analyzer happy
 			unset( $map );
 	
 			// So far so good, now restore the Dossier and attempt the test again.
@@ -575,7 +574,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 				$this->setResult( 'ERROR', 'Scenario 8: The first Publish Form was restored while the Dossier already had an active Publish Form.' );
 				break;
 			}
-			$map = $map; // keep analyzer happy
 			unset( $map );
 
 			// Move the second Publish Form to the Trash Can.
@@ -655,7 +653,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 					'available for the PublishForm, this is not expected.');
 				break;
 			}
-			$map = $map; // keep analyzer happy
 			unset( $map );
 
 			// Adds back the Target(channel) to the Dossier.
@@ -729,7 +726,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 					'available for the PublishForm, this is not expected.');
 				break;
 			}
-			$map = $map; // keep analyzer happy
 			unset( $map );
 
 			if( !$this->addTarget( array($dossierNewTarget) ) ) { // Add back the new Target to the Dossier.
@@ -1007,7 +1003,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 		$user = $this->vars['BuildTest_MultiChannelPublishing']['testOptions']['User'];
 		try{
 			$map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO' ) );
-			$map = $map; // keep code analyzer happy
 			$object = BizObject::getObject( $objectId, $user, false, 'none', array(), null, true, $areas );
 		} catch (BizException $e) {
 			if ($e->getErrorCode() == 'S1029') { // "Record not found"

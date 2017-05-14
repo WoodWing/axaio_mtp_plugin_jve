@@ -37,7 +37,6 @@ abstract class AutomatedPrintWorkflow_EnterpriseConnector extends DefaultConnect
 	 */
 	public function resolveOperation( $objectId, $operation )
 	{
-		$objectId = $objectId; // keep analyzer happy
 		return array( $operation ); // by default no resolve
 	}
 	

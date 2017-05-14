@@ -75,7 +75,6 @@ class WW_TestSuite_BuildTest_Search_UpdateDateField_TestCase extends WW_TestSuit
 			}
 		}
 		$severityMapHandle = new BizExceptionSeverityMap( $serverityMap );
-		$severityMapHandle = $severityMapHandle; // keep code analyzer happy
 
 		// Call the SetObjectProperties service.
 		require_once BASEDIR . '/server/services/wfl/WflMultiSetObjectPropertiesService.class.php';

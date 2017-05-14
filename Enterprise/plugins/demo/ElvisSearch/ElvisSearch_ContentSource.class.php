@@ -89,11 +89,6 @@ class ElvisSearch_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{		
-		// keep code analyzer happy for unused params:
-		$query=$query; $maxEntries=$maxEntries; $order=$order;
-		
-		//LogHandler::Log('FlickrSearch', 'DEBUG', 'FlickrSearch::queryObjects called for: '.$params[0]->Value );
-		
 		// Create array with column definitions
 		$cols = self::getColumns();
 		// Perform search and return in rows
@@ -143,8 +138,6 @@ class ElvisSearch_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	final public function getAlienObject( $alienID, $rendition, $lock )
 	{
-		$lock=$lock ; // we don't use this argument, keep analyzer happy
-		
 		$elvisID = substr( $alienID, strlen(ES_CONTENTSOURCEPREFIX) );
 		
 		$elvisClient = self::getElvisClient();

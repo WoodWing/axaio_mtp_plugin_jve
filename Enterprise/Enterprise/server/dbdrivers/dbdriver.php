@@ -182,17 +182,6 @@ abstract class WW_DbDrivers_DriverBase
 	 */
 	protected function preSerializeParam( $key, $value, $sql, $sqlLhs, &$substSql )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$key = $key; 
-		/** @noinspection PhpSillyAssignmentInspection */
-		$value = $value; 
-		/** @noinspection PhpSillyAssignmentInspection */
-		$sql = $sql; 
-		/** @noinspection PhpSillyAssignmentInspection */
-		$sqlLhs = $sqlLhs; 
-		/** @noinspection PhpSillyAssignmentInspection */
-		$substSql = $substSql;
-
 		return false;
 	}
 

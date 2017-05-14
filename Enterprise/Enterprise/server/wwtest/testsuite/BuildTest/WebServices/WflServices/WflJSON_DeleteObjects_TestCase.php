@@ -117,7 +117,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflJSON_DeleteObjects_TestC
 		$error = true; // Assume unexpected behavior
 		if( $expectedErrorCode ) { // when object is checked out
 			$map = new BizExceptionSeverityMap( array( $expectedErrorCode => 'INFO' ) );
-			$map = $map; // keep analyzer happy
 		}
 		try {
 			$action = $permanent ? 'purge' : 'delete';
@@ -338,7 +337,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflJSON_DeleteObjects_TestC
 	{
 		if( $expectedErrorCode ) {
 			$map = new BizExceptionSeverityMap( array( $expectedErrorCode => 'INFO' ) );
-			$map = $map; // keep analyzer happy
 		}
 		$error = false; // we don't want any unexpected behavior to occur.
 		$title = '';

@@ -30,9 +30,6 @@ class PublishingTest_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function publishDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		// To make code analyzer happy.
-		$dossier = $dossier; $objectsInDossier = $objectsInDossier; $publishTarget = $publishTarget;
-
 		$pubFields = array();
 		$pubFields[] = new PubField('URL','string', array('http://dummy.net'));
 		return $pubFields;
@@ -52,9 +49,6 @@ class PublishingTest_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function updateDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		// To make code analyzer happy.
-		$dossier = $dossier; $objectsInDossier = $objectsInDossier; $publishTarget = $publishTarget;
-
 		$pubFields = array();
 		$pubFields[] = new PubField('URL','string', array('http://dummy.net'));
 		return $pubFields;
@@ -72,9 +66,6 @@ class PublishingTest_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
 	{
-		// To make code analyzer happy.
-		$dossier = $dossier; $objectsInDossier = $objectsInDossier; $publishTarget = $publishTarget;
-
 		return array(); // Return an empty array so the Dossier is saved.
 	}
 
@@ -92,9 +83,6 @@ class PublishingTest_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		// To make code analyzer happy.
-		$dossier = $dossier; $objectsInDossier = $objectsInDossier; $publishTarget = $publishTarget;
-
 		$pubFields = array();
 		$pubFields[] = new PubField('URL','string', array('http://dummy.net'));
 		return $pubFields;
@@ -112,9 +100,6 @@ class PublishingTest_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function requestPublishFields( $dossier, $objectsInDossier, $publishTarget )
 	{
-		// To make code analyzer happy.
-		$dossier = $dossier; $objectsInDossier = $objectsInDossier; $publishTarget = $publishTarget;
-
 		$result = array();
 		$result[] = new PubField( 'key', 'type', 'value' );
 
@@ -133,9 +118,6 @@ class PublishingTest_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getDossierURL( $dossier, $objectsInDossier, $publishTarget )
 	{
-		// To make code analyzer happy.
-		$dossier = $dossier; $objectsInDossier = $objectsInDossier; $publishTarget = $publishTarget;
-
 		$url = 'http://dummy.net?node=xx';
 		return $url;
 	}

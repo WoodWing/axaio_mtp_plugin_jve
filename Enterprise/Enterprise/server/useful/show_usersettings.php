@@ -8,8 +8,6 @@ ini_set('display_errors', '1');
 
 function startElementFormat( $parser, $name, $attrs )
 {
-	$parser = $parser; $attrs = $attrs; // keep analyzer happy
-
     if( $name == 'QUERYPARAM' ) {
     	print "<li><font color='#000ff'>";
     } else if( $name == 'PROPERTY' ) {
@@ -23,8 +21,6 @@ function startElementFormat( $parser, $name, $attrs )
 
 function endElementFormat( $parser, $name ) 
 {
-	$parser = $parser;; // keep analyzer happy
-	
     if( $name == 'QUERYPARAM' ) { 
     	print "</li>"; 
     } else if( $name == 'PROPERTY' ) {
@@ -38,8 +34,6 @@ function endElementFormat( $parser, $name )
 
 function characterDataFormat( $parser, $data )
 {
-	$parser = $parser; // keep analyzer happy
-
     print $data;
 }
 
@@ -48,8 +42,6 @@ function characterDataFormat( $parser, $data )
 $indent = 0;
 function startElementXML( $parser, $name, $attrs ) 
 {
-	$parser = $parser; $attrs = $attrs; // keep analyzer happy
-
     global $indent;
     $indent++;
     for ( $i=0; $i < $indent; $i++ ) {
@@ -60,8 +52,6 @@ function startElementXML( $parser, $name, $attrs )
 
 function endElementXML( $parser, $name ) 
 {
-	$parser = $parser; // keep analyzer happy
-	
 	print "&lt;/<font color='#000ff'>$name</font>&gt;<br>";
     global $indent;
     $indent--;
@@ -69,7 +59,6 @@ function endElementXML( $parser, $name )
 
 function characterDataXML( $parser, $data )
 {
-	$parser = $parser; // keep analyzer happy
     print $data;
 }
 

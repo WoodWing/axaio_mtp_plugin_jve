@@ -1343,7 +1343,6 @@ class BizServerPlugin
 				$pluginObj->runInstallation(); // might throw BizException
 				$pluginInfo->IsInstalled = true;
 			} catch( BizException $e ) { // installation error?
-				$e = $e; // keep code analyzer happy
 				// Continue, since we still need to register the plugin in DB, no matter
 				// whether or not there were installation errors raised by the plugin.
 				// In that case the IsInstalled flag is simply not set.

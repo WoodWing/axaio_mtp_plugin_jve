@@ -96,9 +96,6 @@ class Lucene_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		// Possible enhancement: add paging to this example
 		
-		// keep code analyzer happy for unused params:
-		$query=$query; $firstEntry=$firstEntry; $maxEntries=$maxEntries; $order=$order;
-		
 		LogHandler::Log('Lucene', 'DEBUG', 'Lucene::queryObjects called for: '.$params[0]->Value );
 		
 		// Create array with column definitions
@@ -114,14 +111,12 @@ class Lucene_ContentSource extends ContentSource_EnterpriseConnector
 	final public function getAlienObject( $alienID, $rendition, $lock )
 	{
 		// We use native enterprise ids, so this is never called
-		$lock=$lock ; // we don't use this argument, keep analyzer happy
 		LogHandler::Log('Lucene', 'ERROR', "Lucene::getAlienObject called for $alienID - $rendition" );
 	}
 	
 	final public function createShadowObject( $alienID, $destObject )
 	{
 		// We use native enterprise ids, so this is never called
-		$destObject=$destObject ; // we don't use this argument, keep analyzer happy
 		LogHandler::Log('Lucene', 'ERROR', "Lucene::createShadowObject called for $alienID" );
 	}
 	

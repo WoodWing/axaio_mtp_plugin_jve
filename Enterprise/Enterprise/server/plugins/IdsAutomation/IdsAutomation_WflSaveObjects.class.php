@@ -119,9 +119,6 @@ class IdsAutomation_WflSaveObjects  extends WflSaveObjects_EnterpriseConnector
 
 	final public function runAfter( WflSaveObjectsRequest $req, WflSaveObjectsResponse &$resp )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
-
 		require_once dirname(__FILE__).'/IdsAutomationUtils.class.php';
 		if( $resp->Objects ) foreach( $resp->Objects as $object ) {
 			if( isset( $object->MetaData->BasicMetaData->ID ) ) {
@@ -175,11 +172,6 @@ class IdsAutomation_WflSaveObjects  extends WflSaveObjects_EnterpriseConnector
 
 	final public function onError( WflSaveObjectsRequest $req, BizException $e )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
-		/** @noinspection PhpSillyAssignmentInspection */
-		$e = $e; // keep analyzer happy
-		
 		// Clear service context data.
 		$this->cleanupResources();
 	}
@@ -187,8 +179,6 @@ class IdsAutomation_WflSaveObjects  extends WflSaveObjects_EnterpriseConnector
 	// Not called.
 	final public function runOverruled( WflSaveObjectsRequest $req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
 	}
 	
 	/**

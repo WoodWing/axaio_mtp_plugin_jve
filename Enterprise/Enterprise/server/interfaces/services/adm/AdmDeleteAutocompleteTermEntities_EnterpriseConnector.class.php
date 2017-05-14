@@ -40,6 +40,5 @@ abstract class AdmDeleteAutocompleteTermEntities_EnterpriseConnector extends Ser
 	 */
 	public function onError( AdmDeleteAutocompleteTermEntitiesRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

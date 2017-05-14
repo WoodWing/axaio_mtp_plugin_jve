@@ -40,6 +40,5 @@ abstract class AdmCreatePublicationAdminAuthorizations_EnterpriseConnector exten
 	 */
 	public function onError( AdmCreatePublicationAdminAuthorizationsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

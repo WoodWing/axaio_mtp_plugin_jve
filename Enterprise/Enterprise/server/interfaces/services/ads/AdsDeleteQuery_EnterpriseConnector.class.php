@@ -40,6 +40,5 @@ abstract class AdsDeleteQuery_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdsDeleteQueryRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

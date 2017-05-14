@@ -89,8 +89,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 			$this->addArticleToDossier();
 			$this->removeArticleFromDossier();
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
 		}
 
 		$this->tearDownTestData();
@@ -179,8 +177,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 			$request->IDs    = $objectIds;
 			$service->execute( $request );
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 
@@ -213,8 +209,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 				}
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 

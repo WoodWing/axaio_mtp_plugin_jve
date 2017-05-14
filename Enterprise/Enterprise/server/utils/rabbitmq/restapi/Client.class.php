@@ -519,8 +519,6 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 		try {
 			$httpClient->send();
 		} catch ( Exception $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // To make analyzer happy.
 			$adapter = $httpClient->getAdapter();
 			if ( $adapter instanceof Zend\Http\Client\Adapter\Curl ) {
 				$curl = $adapter->getHandle();
@@ -893,9 +891,6 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	protected function callService( Zend\Http\Client $httpClient, $serviceName, array $request )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$request = $request;
-
 		// Call the remote RabbitMQ service and monitor profiling
 		PerformanceProfiler::startProfile( 'Calling RabbitMQ', 1 );
 		$e = null;

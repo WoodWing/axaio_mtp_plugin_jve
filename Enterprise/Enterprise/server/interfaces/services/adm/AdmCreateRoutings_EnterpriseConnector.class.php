@@ -40,6 +40,5 @@ abstract class AdmCreateRoutings_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdmCreateRoutingsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

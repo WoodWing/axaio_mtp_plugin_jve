@@ -133,7 +133,6 @@ class WW_TestSuite_HealthCheck2_AutoPurge_TestCase extends TestCase
 			
 			$response = $service->execute($request);
 		} catch ( BizException $e ) {
-			$e = $e; // To keep analyzer happy. ( Why logOn failed is not interest of this test case )
 			$this->setResult( 'ERROR', 'Failed to login to check for old deleted objects that need to be purged.', 
 								'Please check the TESTSUITE setting in configserver.php if the test user and password are set correctly.' );
 			return null;								

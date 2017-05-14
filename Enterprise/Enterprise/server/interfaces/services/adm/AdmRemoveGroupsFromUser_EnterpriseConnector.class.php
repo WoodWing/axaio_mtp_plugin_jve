@@ -40,6 +40,5 @@ abstract class AdmRemoveGroupsFromUser_EnterpriseConnector extends ServiceConnec
 	 */
 	public function onError( AdmRemoveGroupsFromUserRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

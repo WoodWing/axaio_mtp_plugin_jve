@@ -40,6 +40,5 @@ abstract class WflInstantiateTemplate_EnterpriseConnector extends ServiceConnect
 	 */
 	public function onError( WflInstantiateTemplateRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

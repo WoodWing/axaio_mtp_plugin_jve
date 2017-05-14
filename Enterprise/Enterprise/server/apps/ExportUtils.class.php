@@ -24,8 +24,6 @@ class ExportUtils
 			$getObjectsResp = $getObjectsService->execute( $getObjectsReq );
 			$objects = $getObjectsResp->Objects;
 		} catch( BizException $e ) {
-			// Ignore failres
-			$e = $e; // keep code analyzer happy
 		}
 
 		if( !$objects || count($objects) != 1) {

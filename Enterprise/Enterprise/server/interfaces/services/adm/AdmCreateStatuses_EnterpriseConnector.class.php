@@ -40,6 +40,5 @@ abstract class AdmCreateStatuses_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdmCreateStatusesRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

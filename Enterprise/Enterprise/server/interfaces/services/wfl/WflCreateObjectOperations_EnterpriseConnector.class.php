@@ -40,6 +40,5 @@ abstract class WflCreateObjectOperations_EnterpriseConnector extends ServiceConn
 	 */
 	public function onError( WflCreateObjectOperationsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

@@ -552,7 +552,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 			$this->testWithRouteTo();
 			$this->testWithSendToActionParam();
 		} catch( BizException $e ) {
-			$e = $e; // keep analyzer happy
 		}
 		$this->teardownTestDataForMultiSetPropertiesTest();
 	}
@@ -732,7 +731,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 			try {
 				$this->wflServicesUtils->deleteObjects( $ids, $stepInfo, $errorReport );
 			} catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 		}
 
@@ -752,7 +750,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 				$params = array( $this->routeToDialogSetupId );
 				DBBase::deleteRows( 'actionproperties', $where, $params );
 			} catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 			$this->routeToDialogSetupId = null;
 		}
@@ -764,7 +761,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 				$params = array( $this->routing1 );
 				DBBase::deleteRows( 'routing', $where, $params );
 			} catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 			$this->routing1 = null;
 		}
@@ -775,7 +771,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 				$params = array( $this->routing2 );
 				DBBase::deleteRows( 'routing', $where, $params );
 			} catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 			$this->routing2 = null;
 		}
@@ -786,7 +781,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 				$stepInfo = 'Deletes a user created by the build test.';
 				$this->wflServicesUtils->deleteUser( $stepInfo, $this->testUser1->Id );
 			} catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 			$this->testUser1 = null;
 		}
@@ -796,7 +790,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 				$stepInfo = 'Deletes a user created by the build test.';
 				$this->wflServicesUtils->deleteUser( $stepInfo, $this->testUser2->Id );
 			} catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 			$this->testUser2 = null;
 		}
@@ -806,7 +799,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 			try {
 				$this->wflServicesUtils->deleteStatus( $this->status2->Id );
 			} catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 			$this->status2 = null;
 		}
@@ -818,7 +810,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 				$stepInfo = 'Delete category that was created for this build test.';
 				$this->wflServicesUtils->deleteCategory( $stepInfo, $pubInfo->Id, $this->category2->Id );
 			} catch( BizException $e ) {
-				$e = $e; // keep analyzer happy
 			}
 			$this->category2 = null;
 		}

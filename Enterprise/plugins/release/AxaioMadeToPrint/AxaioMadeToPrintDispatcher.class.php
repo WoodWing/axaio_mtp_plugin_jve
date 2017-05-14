@@ -180,8 +180,6 @@ class AxaioMadeToPrintDispatcher
      */
     private static function queueLayoutObject( $ticket, $layoutId, $layPubId, $layIssueId, $layStatusId, $layEditions )
     {
-        $layPubId = $layPubId; // keep analyzer happy
-
         require_once BASEDIR . '/server/dbclasses/DBTicket.class.php';
         $user = DBTicket::checkTicket( $ticket );
 
@@ -614,7 +612,6 @@ class AxaioMadeToPrintDispatcher
 
     public static function clearSentObject( $objectId, $newPubId, $newStatusId, $oldStatusId )
     {
-        $objectId = $objectId; $newPubId = $newPubId; $newStatusId = $newStatusId; $oldStatusId = $oldStatusId; // keep analyzer happy
         // EKL: There is no much we can do here?
     }
 

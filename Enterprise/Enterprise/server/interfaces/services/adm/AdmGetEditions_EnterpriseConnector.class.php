@@ -40,6 +40,5 @@ abstract class AdmGetEditions_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdmGetEditionsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

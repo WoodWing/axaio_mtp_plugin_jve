@@ -34,12 +34,10 @@ class Lucene_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 	// Not called. See getRunMode.
 	final public function runBefore( WflSaveObjectsRequest &$req )
 	{
-		$req = $req; // make code analyzer happy
 	}
 	
 	final public function runAfter( WflSaveObjectsRequest $req, WflSaveObjectsResponse &$resp ) 
 	{
-		$req = $req; // make code analyzer happy
 		require_once dirname(__FILE__) . '/Lucene.class.php';
 		if( LUCENE_SYNCHRONOUS_INDEX ) {
 			$lucene = new Lucene;
@@ -50,6 +48,5 @@ class Lucene_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 	// Not called. See getRunMode.
 	final public function runOverruled( WflSaveObjectsRequest $req ) 
 	{
-		$req = $req; // make code analyzer happy
 	}
 }

@@ -40,6 +40,5 @@ abstract class AdmCreateWorkflowUserGroupAuthorizations_EnterpriseConnector exte
 	 */
 	public function onError( AdmCreateWorkflowUserGroupAuthorizationsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

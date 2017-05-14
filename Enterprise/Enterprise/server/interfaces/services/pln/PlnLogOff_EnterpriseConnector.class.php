@@ -40,6 +40,5 @@ abstract class PlnLogOff_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( PlnLogOffRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

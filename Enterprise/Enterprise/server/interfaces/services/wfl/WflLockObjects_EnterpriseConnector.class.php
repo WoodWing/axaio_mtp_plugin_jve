@@ -40,6 +40,5 @@ abstract class WflLockObjects_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflLockObjectsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

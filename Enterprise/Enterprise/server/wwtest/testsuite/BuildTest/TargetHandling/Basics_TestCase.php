@@ -87,8 +87,6 @@ class WW_TestSuite_BuildTest_TargetHandling_Basics_TestCase extends TestCase
 			$this->addLayoutToDossier();
 			$this->changeIssueOfDossier();
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
 		}
 
 		$this->tearDownTestData();
@@ -177,8 +175,6 @@ class WW_TestSuite_BuildTest_TargetHandling_Basics_TestCase extends TestCase
 			$request->IDs    = $objectIds;
 			$service->execute( $request );
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 
@@ -211,8 +207,6 @@ class WW_TestSuite_BuildTest_TargetHandling_Basics_TestCase extends TestCase
 				}
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 

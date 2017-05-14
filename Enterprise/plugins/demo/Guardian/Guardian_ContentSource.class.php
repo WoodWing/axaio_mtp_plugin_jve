@@ -49,10 +49,8 @@ class Guardian_ContentSource extends ContentSource_EnterpriseConnector
 	
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{
-		// keep code analyzer happy for unused params:
 		// maxEntries is ignored because the API just returns 10 or 20 entries per call
-		$maxEntries=$maxEntries; $order=$order;
-		
+
 		LogHandler::Log('Guardian', 'DEBUG', 'doNamedQuery called for search: '.$query );
 		PerformanceProfiler::startProfile( 'Guardian - Search', 3 );
 
@@ -74,7 +72,6 @@ class Guardian_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		LogHandler::Log('Guardian', 'DEBUG', "getAlienObject called for $alienID - $rendition" );
 		PerformanceProfiler::startProfile( 'Guardian - getAlienObject', 3 );
-		$lock=$lock ; // we don't use this argument, keep analyzer happy
 
 		$id 	= substr( urldecode($alienID), strlen(GNL_CONTENTSOURCEPREFIX) ); // Remove prefix from alienID
 

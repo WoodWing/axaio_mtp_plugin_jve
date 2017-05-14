@@ -78,8 +78,6 @@ class GettyImages_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{		
-		$query=$query; $maxEntries=$maxEntries; $order=$order; // keep analyzer happy
-
 		LogHandler::Log('GettyImages', 'DEBUG', 'GettyImages::queryObjects called for: '.$params[0]->Value );
 
 		// Create array with column definitions
@@ -105,8 +103,6 @@ class GettyImages_ContentSource extends ContentSource_EnterpriseConnector
 	final public function getAlienObject( $alienID, $rendition, $lock )
 	{
 		LogHandler::Log('GettyImages', 'DEBUG', "GettyImages::getAlienObject called for $alienID - $rendition" );
-
-		$lock=$lock ; // keep analyzer happy
 
 		PerformanceProfiler::startProfile( 'GettyImages - getAlienObject', 3 );
 

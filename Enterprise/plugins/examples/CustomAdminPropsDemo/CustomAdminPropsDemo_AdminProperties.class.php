@@ -96,7 +96,6 @@ class CustomAdminPropsDemo_AdminProperties extends AdminProperties_EnterpriseCon
 	 */
 	public function collectDialogWidgetsForContext( AdminProperties_Context $context, $entity, $action )
 	{
-		$context = $context; $action = $action; // keep analyzer happy
 		return $this->doCollectDialogWidgets( $entity, 'extend_entity' );
 	}
 	
@@ -106,8 +105,6 @@ class CustomAdminPropsDemo_AdminProperties extends AdminProperties_EnterpriseCon
 	 */
 	final public function buildDialogWidgets( AdminProperties_Context $context, $entity, $action, $allWidgets, &$showWidgets )
 	{
-		$action = $action; $allWidgets = $allWidgets; $context = $context; // keep code analyzer happy
-		
 		// This way you can grab contextual data:
 		//$pubObj = $context->getPublication();
 		//$channelObj = $context->getPubChannel();

@@ -40,6 +40,5 @@ abstract class WflQueryObjects_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflQueryObjectsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

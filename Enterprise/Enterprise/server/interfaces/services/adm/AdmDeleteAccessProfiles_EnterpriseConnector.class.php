@@ -40,6 +40,5 @@ abstract class AdmDeleteAccessProfiles_EnterpriseConnector extends ServiceConnec
 	 */
 	public function onError( AdmDeleteAccessProfilesRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

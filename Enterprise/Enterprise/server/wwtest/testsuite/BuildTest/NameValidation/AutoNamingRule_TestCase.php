@@ -56,8 +56,6 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 			$this->testByWebServiceClient();
 			$this->testByMoverClient();
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
 		}
 		$this->tearDownTestData();
 	}
@@ -393,8 +391,6 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 				}
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 

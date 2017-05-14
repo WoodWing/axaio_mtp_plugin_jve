@@ -40,6 +40,5 @@ abstract class PubGetDossierURL_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( PubGetDossierURLRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

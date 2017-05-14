@@ -101,8 +101,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 			$this->placeDossierOnLayout();
 
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
 		}
 
 		$this->tearDownTestData();
@@ -200,8 +198,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 			$request->IDs    = $objectIds;
 			$service->execute( $request );
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 
@@ -234,8 +230,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 				}
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 	

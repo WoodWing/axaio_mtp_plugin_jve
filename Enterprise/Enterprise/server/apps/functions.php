@@ -124,7 +124,6 @@ function listrouteto( $ticket, $publ = null, $issue = null)
 			$arr[] = $usr->UserID;
 		}
 	} catch( BizException $e ) {
-		$e = $e; // keep code analyzer happy
 		BizSession::endSession();
 	}
 	BizSession::endSession();

@@ -26,8 +26,7 @@ class AxaioMadeToPrint_WflCopyObject extends WflCopyObject_EnterpriseConnector
 	{
 		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Called: AxaioMadeToPrint_WflCopyObject->runBefore()' );
 		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; // keep code analyzer happy
-		
+
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_AFTER with RUNMODE_AFTER when this hook is not needed.
 
@@ -40,7 +39,6 @@ class AxaioMadeToPrint_WflCopyObject extends WflCopyObject_EnterpriseConnector
 		require_once dirname(__FILE__) . '/config.php';
 		require_once dirname(__FILE__) . '/AxaioMadeToPrintDispatcher.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-		$req = $req; $resp = $resp; // keep code analyzer happy
 
 		$ticket = BizSession::getTicket();
 		
@@ -52,6 +50,5 @@ class AxaioMadeToPrint_WflCopyObject extends WflCopyObject_EnterpriseConnector
 	// Not called.
 	final public function runOverruled( WflCopyObjectRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
-	} 
+	}
 }

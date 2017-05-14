@@ -33,7 +33,6 @@ class QRCode_PubUnPublishDossiers extends PubUnPublishDossiers_EnterpriseConnect
 	// Not called. See getRunMode().
 	final public function runBefore( PubUnPublishDossiersRequest &$req ) 
 	{ 
-		$req = $req; // Keep code analyzer happy.
 	}
 
 	/**
@@ -42,8 +41,6 @@ class QRCode_PubUnPublishDossiers extends PubUnPublishDossiers_EnterpriseConnect
 	 */
 	final public function runAfter( PubUnPublishDossiersRequest $req, PubUnPublishDossiersResponse &$resp ) 
 	{
-		$resp = $resp; // Keep code analyzer happy.
-		
 		// Get first dossier & target, multiple dossier are not (yet) passed by client, so ignore that for this demo:
 		$dossierID = $req->DossierIDs[0];
 
@@ -87,6 +84,5 @@ class QRCode_PubUnPublishDossiers extends PubUnPublishDossiers_EnterpriseConnect
 	// Not called. See getRunMode().
 	final public function runOverruled( PubUnPublishDossiersRequest $req ) 
 	{
-		$req = $req; // Keep code analyzer happy.
 	}
 }

@@ -40,6 +40,5 @@ abstract class AdmDeletePublicationAdminAuthorizations_EnterpriseConnector exten
 	 */
 	public function onError( AdmDeletePublicationAdminAuthorizationsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

@@ -40,6 +40,5 @@ abstract class AdsGetSettingsDetails_EnterpriseConnector extends ServiceConnecto
 	 */
 	public function onError( AdsGetSettingsDetailsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

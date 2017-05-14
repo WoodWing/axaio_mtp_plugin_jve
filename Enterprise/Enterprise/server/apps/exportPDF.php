@@ -195,7 +195,6 @@ function getPDF( $ticket, $id, $pageOrd, $edition, &$pubName, &$sectionName, &$l
 				$collectedResponses[$id][0] = $resp;
 			}
 		} catch ( BizException $e ) {
-			$e = $e; // keep analyzer happy
 		}
 	}
 

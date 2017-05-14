@@ -293,7 +293,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMultiSetObjectProperties
 			}
 		}
 		$severityMapHandle = new BizExceptionSeverityMap( $severityMap );
-		$severityMapHandle = $severityMapHandle; // keep code analyzer happy
 
 		// Call the SetObjectProperties service.
 		require_once BASEDIR . '/server/services/wfl/WflMultiSetObjectPropertiesService.class.php';
@@ -567,7 +566,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMultiSetObjectProperties
 				return false;
 			}
 		} catch ( BizException $e ) {
-			$e = $e; // Keep analyzer happy.
 			$this->setResult( 'ERROR',  'Adding field to ' . $table . ' table error for type: ' . $this->type );
 			return false;
 		}
@@ -599,7 +597,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMultiSetObjectProperties
 		try {
 			BizCustomField::deleteFieldAtModel( $table, self::CUSTOM_PROPERTY, 'string' );
 		} catch( BizException $e ) {
-			$e = $e; // Keep analyzer happy.
 			LogHandler::Log( 'CustPropTest', 'ERROR', 'Deleting field from "'.$table.'" '.
 				'table error, while testing for type: '.$this->type );
 			$retVal = false;

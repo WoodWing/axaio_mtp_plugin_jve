@@ -89,11 +89,6 @@ class FlickrSearch_ContentSource extends ContentSource_EnterpriseConnector
 	
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{		
-		// keep code analyzer happy for unused params:
-		$query=$query; $maxEntries=$maxEntries; $order=$order;
-		
-		//LogHandler::Log('FlickrSearch', 'DEBUG', 'FlickrSearch::queryObjects called for: '.$params[0]->Value );
-		
 		// Create array with column definitions
 		$cols = Flickr::getColumns();
 		// Perform search and return in rows
@@ -107,7 +102,6 @@ class FlickrSearch_ContentSource extends ContentSource_EnterpriseConnector
 	final public function getAlienObject( $alienID, $rendition, $lock )
 	{
 		PerformanceProfiler::startProfile( 'Flickr - getAlienObject', 3 );
-		$lock=$lock ; // we don't use this argument, keep analyzer happy
 
 		//LogHandler::Log('FlickrSearch', 'DEBUG', "FlickrSearch::getAlienObject called for $alienID - $rendition" );
 		$Flickr = new Flickr();

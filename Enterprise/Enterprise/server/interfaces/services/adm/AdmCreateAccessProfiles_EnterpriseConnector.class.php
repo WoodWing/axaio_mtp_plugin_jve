@@ -40,6 +40,5 @@ abstract class AdmCreateAccessProfiles_EnterpriseConnector extends ServiceConnec
 	 */
 	public function onError( AdmCreateAccessProfilesRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

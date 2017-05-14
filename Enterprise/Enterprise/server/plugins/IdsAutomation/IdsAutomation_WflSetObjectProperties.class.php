@@ -91,17 +91,10 @@ class IdsAutomation_WflSetObjectProperties extends WflSetObjectProperties_Enterp
 	// No called.
 	final public function runOverruled( WflSetObjectPropertiesRequest $req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
 	}
 
 	final public function onError( WflSetObjectPropertiesRequest $req, BizException $e )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
-		/** @noinspection PhpSillyAssignmentInspection */
-		$e = $e; // keep analyzer happy
-		
 		// Clear service context data.
 		$this->cleanupResources();
 	} 

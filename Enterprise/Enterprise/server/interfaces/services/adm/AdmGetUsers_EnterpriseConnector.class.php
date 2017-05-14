@@ -40,6 +40,5 @@ abstract class AdmGetUsers_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdmGetUsersRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

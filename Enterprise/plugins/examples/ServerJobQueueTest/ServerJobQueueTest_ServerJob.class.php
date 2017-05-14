@@ -89,8 +89,6 @@ class ServerJobQueueTest_ServerJob extends ServerJob_EnterpriseConnector
 	 */
 	public function beforeRunJob( ServerJob $job ) 
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$job = $job; // keep code analyzer happy.
 	}
 
 	/**
@@ -102,8 +100,6 @@ class ServerJobQueueTest_ServerJob extends ServerJob_EnterpriseConnector
 	 */
 	public function createJob( $pushIntoQueue ) 
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$pushIntoQueue = $pushIntoQueue; // To make analyzer happy.
 		return null;
 	}
 

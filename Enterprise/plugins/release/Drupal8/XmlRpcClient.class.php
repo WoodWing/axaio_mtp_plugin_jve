@@ -572,7 +572,6 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 			LogHandler::Log( 'Drupal', 'DEBUG', 'File sent to drupal. File Id: ' . $fileId );
 
 		} catch( Exception $e ) { // any kind of Zend exception !!
-			$e = $e; // keep code analyzer happy
 		}
 
 		// Log request and response (or fault) as plain text

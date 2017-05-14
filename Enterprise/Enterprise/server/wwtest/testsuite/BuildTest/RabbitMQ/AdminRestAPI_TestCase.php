@@ -51,8 +51,6 @@ class WW_TestSuite_BuildTest_RabbitMQ_AdminRestAPI_TestCase extends TestCase
 			$this->testUserManagement();
 		} 
 		catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
 		}
 		$this->tearDownTestData();
 	}

@@ -86,8 +86,6 @@ class WW_TestSuite_BuildTest_AdobeDps2_Setup_TestCase extends TestCase
 		} catch( BizException $e ) {
 			// Catch the error so that it doesn't bail out, want to continue so that the settings that have been
 			// created so far can be deleted in the TearDown class.
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
 		}
 
 		// Save info about our setup into the session data.
