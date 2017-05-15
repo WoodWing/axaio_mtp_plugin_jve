@@ -20,7 +20,7 @@
 	<folder path=".../Enterprise/server/admin/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/apps/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/appservices/" maxerr="0"/>
-	<folder path=".../Enterprise/server/bizclasses/" maxerr="5"/>
+	<folder path=".../Enterprise/server/bizclasses/" maxerr="0"/>
 	<folder path=".../Enterprise/server/buildtools/genservices/templates/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/buildtools/" maxerr="1000000"/>
 	<folder path=".../Enterprise/server/dataclasses/" maxerr="0"/>
