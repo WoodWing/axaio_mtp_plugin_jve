@@ -598,51 +598,14 @@ function step4_validatePhpCode {
 	${PHP_EXE} testphpcodingcli.php "${WORKSPACE}/reports"
 	cd -
 
-	echo "step4b: Temporary move 3rd party libraries aside (to exclude them from phpStorm's code inspection)."
-	mv "${WORKSPACE}/Enterprise/Enterprise/config/plugin-templates" "${WORKSPACE}/code_analyser"
-	mv "${WORKSPACE}/Enterprise/Enterprise/config/plugins" "${WORKSPACE}/code_analyser"
-	
-	mv "${WORKSPACE}/Enterprise/Enterprise/server/dgrid" "${WORKSPACE}/code_analyser"
-	mv "${WORKSPACE}/Enterprise/Enterprise/server/javachart" "${WORKSPACE}/code_analyser"
-	mv "${WORKSPACE}/Enterprise/Enterprise/server/jquery" "${WORKSPACE}/code_analyser"
-	mv "${WORKSPACE}/Enterprise/Enterprise/server/vendor" "${WORKSPACE}/code_analyser"
-	mv "${WORKSPACE}/Enterprise/Enterprise/server/ZendFramework" "${WORKSPACE}/code_analyser"
-	mv "${WORKSPACE}/Enterprise/Enterprise/server/buildtools/genservices/templates" "${WORKSPACE}/code_analyser"
-	
-	mv "${WORKSPACE}/Enterprise/Enterprise/sdk" "${WORKSPACE}/code_analyser"
-	mv "${WORKSPACE}/Enterprise/plugins/release/Elvis/SabreAMF" "${WORKSPACE}/code_analyser"
-	mv "${WORKSPACE}/Enterprise/plugins/external" "${WORKSPACE}/code_analyser"
-	mv "${WORKSPACE}/Enterprise/plugins/examples/GCalDataSource/Zend" "${WORKSPACE}/code_analyser"
-	mv "${WORKSPACE}/Enterprise/plugins/demo/WormGraphviz/graphviz" "${WORKSPACE}/code_analyser"
-	mv "${WORKSPACE}/Enterprise/Libraries" "${WORKSPACE}/code_analyser"
-
-	echo "step4c: Run phpStorm's code inspection on the server folder."
+	echo "step4b: Run phpStorm's code inspection on the server folder."
 	# mkdir ./reports/phpstorm_strict
 	# inspect.sh params: <project file path> <inspection profile path> <output path> -d <directory to be inspected>
 	# see more info: http://www.jetbrains.com/phpstorm/webhelp/running-inspections-offline.html
 	sh /opt/phpstorm/bin/inspect.sh "${WORKSPACE}/Enterprise" "${WORKSPACE}/Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml" "${WORKSPACE}/reports/phpstorm_strict" -d "${WORKSPACE}/Enterprise/Enterprise"
 
-	echo "step4d: Move back the 3rd party libraries (that were temporary moved aside) to their original location."
-	mv "${WORKSPACE}/code_analyser/plugin-templates" "${WORKSPACE}/Enterprise/Enterprise/config"
-	mv "${WORKSPACE}/code_analyser/plugins"   "${WORKSPACE}/Enterprise/Enterprise/config"
-	mv "${WORKSPACE}/code_analyser/plugins"   "${WORKSPACE}/Enterprise/Enterprise/config"
-
-	mv "${WORKSPACE}/code_analyser/dgrid"     "${WORKSPACE}/Enterprise/Enterprise/server"
-	mv "${WORKSPACE}/code_analyser/javachart" "${WORKSPACE}/Enterprise/Enterprise/server"
-	mv "${WORKSPACE}/code_analyser/jquery"    "${WORKSPACE}/Enterprise/Enterprise/server"
-	mv "${WORKSPACE}/code_analyser/vendor"    "${WORKSPACE}/Enterprise/Enterprise/server"
-	mv "${WORKSPACE}/code_analyser/ZendFramework" "${WORKSPACE}/Enterprise/Enterprise/server"
-	mv "${WORKSPACE}/code_analyser/templates" "${WORKSPACE}/Enterprise/Enterprise/server/buildtools/genservices"
-	
-	mv "${WORKSPACE}/code_analyser/sdk"       "${WORKSPACE}/Enterprise/Enterprise"
-	mv "${WORKSPACE}/code_analyser/SabreAMF"  "${WORKSPACE}/Enterprise/plugins/release/Elvis"
-	mv "${WORKSPACE}/code_analyser/external"  "${WORKSPACE}/Enterprise/plugins"
-	mv "${WORKSPACE}/code_analyser/Zend"      "${WORKSPACE}/Enterprise/plugins/examples/GCalDataSource"
-	mv "${WORKSPACE}/code_analyser/graphviz"  "${WORKSPACE}/Enterprise/plugins/demo/WormGraphviz"
-	mv "${WORKSPACE}/code_analyser/Libraries" "${WORKSPACE}/Enterprise"
-
 	cd "${WORKSPACE}/Enterprise/Build/"
-	echo "step4e: Convert folder with XML files (output of phpStorm's code inspection) to one JUnit XML file to display in UI of Jenkins."
+	echo "step4c: Convert folder with XML files (output of phpStorm's code inspection) to one JUnit XML file to display in UI of Jenkins."
 	# phpstorm2junit params: <folder path with code inspector output> <output path for jUnit>
 	${PHP_EXE} phpstorm2junit.php "\"${WORKSPACE}/reports/phpstorm_strict\"" "\"${WORKSPACE}/reports/TEST-PhpStormCodeInspection.xml\""
 	cd -
