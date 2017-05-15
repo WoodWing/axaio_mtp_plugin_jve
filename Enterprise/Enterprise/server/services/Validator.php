@@ -148,7 +148,7 @@ class WW_Services_Validator
 	 * Checks if a property has the correct type.
 	 * It also has hard-coded enumeration checking for SCE's workflow interface.
 	 *
-	 * @param string $propValue   Actual property value
+	 * @param mixed $propValue   Actual property value
 	 * @param string $propType    The WSDL data type. Will be mapped onto PHP types.
 	 * @throws BizException when property has bad type. See {@link raiseFault} for more details.
 	 */

@@ -39,7 +39,7 @@ class EnterpriseService
 	 * structure needs to be recorded, and not the new (transformed) one. Or else, the restructuring 
 	 * would get applied again while playing recorded services, which could go wrong.
 	 *
-	 * @param stdClass $request Request object to transform (after arrival from client, before execution).
+	 * @param object $request Request object to transform (after arrival from client, before execution).
 	 */
 	protected function restructureRequest( &$request )
 	{
@@ -48,8 +48,8 @@ class EnterpriseService
 	/**
 	 * See restructureRequest().
 	 *
-	 * @param stdClass $request Request object.
-	 * @param stdClass $response Response object to transform (after executing, before returning to client).
+	 * @param object $request Request object.
+	 * @param object $response Response object to transform (after executing, before returning to client).
 	 */
 	protected function restructureResponse( $request, &$response )
 	{
