@@ -979,6 +979,7 @@ class InCopyTextImport implements TextImport
 				break;
 		}
 		switch( $icNode->nodeName ) {
+			/** @noinspection PhpMissingBreakStatementInspection */
 			case 'Note': // inline note
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case 'FNcl': // footnote

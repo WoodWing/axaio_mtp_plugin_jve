@@ -2435,8 +2435,8 @@ class BizWebEditWorkspace
 		if( !$this->sameEmptiness( $lhsPlacementsByKey, $rhsPlacementsByKey ) ) {
 			$numberDiffers = true;
 		} elseif( is_array( $lhsPlacementsByKey ) && is_array( $rhsPlacementsByKey ) ) {
-			if( !empty( array_diff_key( $lhsPlacementsByKey, $rhsPlacementsByKey ) ) ||
-				!empty( array_diff_key( $rhsPlacementsByKey, $lhsPlacementsByKey ) ) ) {
+			if( array_diff_key( $lhsPlacementsByKey, $rhsPlacementsByKey ) ||
+				array_diff_key( $rhsPlacementsByKey, $lhsPlacementsByKey ) ) {
 				$numberDiffers = true;
 			}
 		}	

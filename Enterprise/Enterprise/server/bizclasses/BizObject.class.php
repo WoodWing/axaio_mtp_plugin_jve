@@ -1876,7 +1876,7 @@ class BizObject
 	 * Checks if all the Objects have the same publication id and type.
 	 *
 	 * @since 9.2.0
-	 * @param array $objectIds An array of object ids.
+	 * @param integer[] $objectIds An array of object ids.
 	 * @return bool Whether or not all objects have the same publication id and type.
 	 */
 	public static function isSameObjectTypeAndPublication( $objectIds )

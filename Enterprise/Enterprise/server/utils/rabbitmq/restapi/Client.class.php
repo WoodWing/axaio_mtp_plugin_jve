@@ -870,7 +870,8 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 
 			//EN-87488 RabbitMQ on CentOS sends responses with Content-Encoding set, but an empty body.
 			//Zend\Http\Response does not check for empty bodies, and just tries to decode it which goes wrong.
-			if( !empty( (string) $response->getContent() ) ) {
+			$content = (string) $response->getContent();
+			if( !empty( $content ) ) {
 				$responseBody = $response->getBody();
 			}
 		}

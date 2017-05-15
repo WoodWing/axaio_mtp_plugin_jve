@@ -1812,7 +1812,7 @@ class DBObject extends DBBase
 	/**
 	 * Checks if the list of object ids in $objIds belong to the same Object Type and Publication.
 	 *
-	 * @param array $objIds List of Object Ids to check for their object type and publication.
+	 * @param integer[] $objIds List of Object Ids to check for their object type and publication.
 	 * @return bool Whether the ids in $objIds all belong to the same object Type and Publication.
 	 */
 	static public function isSameObjectTypeAndPublication( $objIds )

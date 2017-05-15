@@ -165,9 +165,13 @@ class BizWebEditWorkspace_ComparePlacements
 
 		if ( !$this->sameEmptinessFloats( $lhsFloat, $rhsFloat ) ) {
 			$result = false;
-		} elseif ( !empty( floatval( $lhsFloat ) ) && !empty( floatval( $rhsFloat ) ) ) {
-			if( abs( floatval( $lhsFloat ) - floatval( $rhsFloat ) ) > $epsilon ) {
-				$result = false;
+		} else {
+			$lhsFloat = floatval( $lhsFloat );
+			$rhsFloat = floatval( $rhsFloat );
+			if ( !empty( $lhsFloat ) && !empty( $rhsFloat ) ) {
+				if( abs( $lhsFloat - $rhsFloat ) > $epsilon ) {
+					$result = false;
+				}
 			}
 		}
 
@@ -261,7 +265,9 @@ class BizWebEditWorkspace_ComparePlacements
 	 */
 	private function sameEmptinessFloats( $lhs, $rhs)
 	{
-		return empty( floatval( $lhs ) ) == empty( floatval( $rhs ) );
+		$lhs = floatval( $lhs );
+		$rhs = floatval( $rhs );
+		return empty( $lhs ) == empty( $rhs );
 	}
 
 	/** @noinspection PhpUnusedPrivateMethodInspection */
