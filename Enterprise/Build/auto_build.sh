@@ -14,6 +14,7 @@
 SOURCE_BASE="./Enterprise/"
 TARGET_BASE="./Enterprise_release/"
 iONCUBE_ENCODER="/usr/local/ioncube/9.0/ioncube_encoder56_9.0_64"
+PHPSTORM_INSPECTOR="/opt/phpstorm2017.1/bin/inspect.sh"
 : ${PHP_EXE:=php} #Set default value to base php executable.
 
 #
@@ -602,7 +603,7 @@ function step4_validatePhpCode {
 	# mkdir ./reports/phpstorm_strict
 	# inspect.sh params: <project file path> <inspection profile path> <output path> -d <directory to be inspected>
 	# see more info: http://www.jetbrains.com/phpstorm/webhelp/running-inspections-offline.html
-	sh /opt/phpstorm/bin/inspect.sh "${WORKSPACE}/Enterprise" "${WORKSPACE}/Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml" "${WORKSPACE}/reports/phpstorm_strict" -d "${WORKSPACE}/Enterprise/Enterprise"
+	sh ${PHPSTORM_INSPECTOR} "${WORKSPACE}/Enterprise" "${WORKSPACE}/Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml" "${WORKSPACE}/reports/phpstorm_strict" -d "${WORKSPACE}/Enterprise/Enterprise"
 
 	cd "${WORKSPACE}/Enterprise/Build/"
 	echo "step4c: Convert folder with XML files (output of phpStorm's code inspection) to one JUnit XML file to display in UI of Jenkins."
