@@ -213,7 +213,7 @@ class DBAdmProperty extends DBBase
 	 * Typically used to prepare PropertyInfo->ValueList for DB storage.
 	 *
 	 * @param string $type Primitive data type, e.g. 'integer', 'bool', etc
-	 * @param array $stream Packed DB stream to unpack to list of value(s).
+	 * @param string $stream Packed DB stream to unpack to list of value(s).
 	 * @return array Unpacked list of value(s)
 	 */
 	static private function unpackValueList( $type, $stream )

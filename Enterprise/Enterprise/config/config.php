@@ -167,6 +167,7 @@ if( !defined('AUTOCOMPLETEDIRECTORY') ) {
 // http://msdn.microsoft.com/en-us/library/39cwe7zf%28vs.71%29.aspx
 
 // Attempt to set the locale to US/English, if this fails display an error.
+/** @noinspection PhpParamsInspection Passing options as array is correct */
 if( setlocale( LC_ALL, array('en_US.UTF-8', 'en_US.UTF8', 'us')) === false ) { // Macintosh, Linux, Windows
     echo 'ERROR: The locale could not be set to US English.<br/>';
     echo 'Please check your config.php file for instructions.<br/>';

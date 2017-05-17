@@ -18,7 +18,7 @@ class BizEmail
 	 *
 	 * @param string $mode				Name of the action triggering this, not used.
 	 * @param Object $object			Object for which to send notification
-	 * @param array	$types	            Rendition types for this object
+	 * @param string	$types	            Rendition types for this object (packed as serialized string)
 	 * @param string $previousRouteTo	Short username or group of route-to before the action.
 	 * 									if route-to has not changed we will not send email.
 	 */
@@ -356,7 +356,7 @@ class BizEmail
 	 *
 	 * @param Object	$object		Object that we're emailing about
 	 * @param array		$props		BizProps to insert into body
-	 * @param array		$types		Types for the preview/thumb to embed
+	 * @param string		$types		Types for the preview/thumb to embed (packed as serialized string)
 	 * @param string	$file	    In/out Thumb or preview file
 	 * @param string		$fileFormat	Format of the file
 	 * @return string Email html body

@@ -420,7 +420,7 @@ class BizDatasource
 			$query = DBDatasource::getQuery( $queryId );
 
 			$queryString = null;
-			$queryInterface = array();
+			$queryInterface = '';
 			$queryRecordID = null;
 			if( !$query ) {
 				$query = $myDatasource->getQuery( $queryId );

@@ -2618,7 +2618,7 @@ class BizProperty
 	 * Checks if the default value is an element of the (multi)list.
 	 *
 	 * @param string $type Type of the property.
-	 * @param array $list List containing allowed values.
+	 * @param string $list List containing allowed values (packed as comma separated string).
 	 * @param string $default Default value.
 	 * @throws BizException Throws BizException when the validation fails.
 	 */

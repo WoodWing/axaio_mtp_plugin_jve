@@ -750,7 +750,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	/**
 	 * Constructs a HTTP client class in memory.
 	 *
-	 * @param string[] $request List of request params.
+	 * @param array $request List of request params.
 	 * @return Zend\Http\Client|null Client, or NULL when mocked.
 	 */
 	protected function composeClient( $request )

@@ -418,7 +418,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 		} elseif( $imageCount == 1 ) {
 			LogHandler::Log( 'AutoPrintWfl', 'INFO', "One image (id={$imageIds[0]}) found in dossier, so taking into account." );
 		} else {
-			LogHandler::Log( 'AutoPrintWfl', 'INFO', "Multiple images (ids=".explode(',',$imageIds).") found in dossier, so images are excluded." );
+			LogHandler::Log( 'AutoPrintWfl', 'INFO', "Multiple images (ids=".implode(',',$imageIds).") found in dossier, so images are excluded." );
 		}
 		return $imageCount == 1 ? $imageIds[0] : null;
 	}
