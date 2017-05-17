@@ -27,7 +27,7 @@ class ElvisContentSourceAuthenticationService
 		ElvisAMFClient::registerClass(ElvisLoginResponse::getName());
 		$loginResponse = null;
 		try {
-			$loginResponse = ElvisAMFClient::send( self::SERVICE, 'login', array( $loginRequest ), false );
+			$loginResponse = ElvisAMFClient::send( self::SERVICE, 'login', array( $loginRequest ) );
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
@@ -44,9 +44,9 @@ class ElvisContentSourceAuthenticationService
 	{
 		require_once dirname(__FILE__) . '/ElvisAMFClient.php';
 		try {
-			return ElvisAMFClient::send(self::SERVICE, 'getContentStationClientVersion', null , false);
+			return ElvisAMFClient::send(self::SERVICE, 'getContentStationClientVersion', null );
 		} catch (Exception $e) {
-			// This call should not throw exceptions, neccessary for loading the Enterprise
+			// This call should not throw exceptions, necessary for loading the Enterprise
 			// access profiles configuration. Downloading the Elvis client will still fail.
 			LogHandler::log('ELVIS', 'WARN', "Unable to retrieve content station client version:\n" .
 				$e->getMessage());

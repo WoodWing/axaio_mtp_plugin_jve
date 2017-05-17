@@ -222,7 +222,7 @@ class BizObject
 		$status = BizAdmStatus::getStatusWithId( $object->MetaData->WorkflowMetaData->State->Id );
 
 		// Check authorization
-		$rights = 'W'; // check 'Write' access (W)
+		$rights = 'RW'; // check 'Read/Write' access (R and W): Read is added for EN-88613
 		if( $arr['type'] == 'Dossier' || $arr['type'] == 'DossierTemplate' ) {
 			$rights .= 'd'; // check the 'Create Dossier' access (d) (BZ#17051)
 		} else if( $arr['type'] == 'Task' ) {

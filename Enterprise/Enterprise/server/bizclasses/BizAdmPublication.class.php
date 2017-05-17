@@ -213,7 +213,7 @@ class BizAdmPublication
 	 * @param array $subReq RequestModes.
 	 * @param AdmPublication[] $pubs List of publications that needs to be modified.
 	 * @throws BizException Throws BizException on failure
-	 * @return Publication[] Modified Publication objects.
+	 * @return AdmPublication[] Modified Publication objects.
 	 */
 	public static function modifyPublicationsObj( $usr, $subReq, $pubs )
 	{
@@ -530,7 +530,7 @@ class BizAdmPublication
 	 * There is a huge difference between null (=no update) and empty (=clear all).
 	 *
 	 * @param integer $pubId
-	 * @param array $issues
+	 * @param AdmIssue[] $issues
 	 * @param array $orgDeadlines
 	 * @since v7.0.11
 	 */
@@ -538,25 +538,45 @@ class BizAdmPublication
 	{
 		require_once BASEDIR.'/server/bizclasses/BizDeadlines.class.php';
 		if( $issues ) foreach( $issues as $issue ) {
-			if( !is_null($issue->Deadline) ) { // null means no update
-				if( empty($issue->Deadline) ) {
+			if( !is_null( $issue->Deadline ) ) { // null means no update was taken place.
+				if( empty( $issue->Deadline ) ) {
 					// Empty means delete/clear all issue deadlines. Also see function header.
 					BizDeadlines::deleteDeadlines( $issue->Id );
-				} else {
-					if( !isset($orgDeadlines[$issue->Id]) || $orgDeadlines[$issue->Id] != $issue->Deadline ) {
+				} elseif ( self::isCalculateDeadlinesNeeded( $pubId, $issue ) ) {
+					if( !isset( $orgDeadlines[ $issue->Id ] ) || $orgDeadlines[ $issue->Id ] != $issue->Deadline ) {
 						// Filled and changed, so recalculate and update all issue deadlines. Also see function header.
-						if( isset($orgDeadlines[$issue->Id]) ) {
-							LogHandler::Log( __CLASS__, 'INFO', 'About to start issue deadlines recalculation since the original issue deadline "'.$orgDeadlines[$issue->Id].'" differs from the new deadline "'.$issue->Deadline.'".');
+						if( isset( $orgDeadlines[ $issue->Id ] ) ) {
+							LogHandler::Log( __CLASS__, 'INFO', 'About to start issue deadlines recalculation since the original issue deadline "'.$orgDeadlines[ $issue->Id ].'" differs from the new deadline "'.$issue->Deadline.'".' );
 						} else {
-							LogHandler::Log( __CLASS__, 'INFO', 'About to start issue deadlines recalculation since the issue deadline "'.$issue->Deadline.'" is set for the first time.');
+							LogHandler::Log( __CLASS__, 'INFO', 'About to start issue deadlines recalculation since the issue deadline "'.$issue->Deadline.'" is set for the first time.' );
 						}
 						BizDeadlines::updateRecalcIssueDeadlines( $pubId, $issue->Id, $issue->Deadline );
 					} else {
-						LogHandler::Log( __CLASS__, 'INFO', 'Skipped issue deadlines recalculation since the issue deadline "'.$issue->Deadline.'" has not changed.');
+						LogHandler::Log( __CLASS__, 'INFO', 'Skipped issue deadlines recalculation since the issue deadline "'.$issue->Deadline.'" has not changed.' );
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * Checks if calculating (relative) deadlines is needed and enabled on brand level or overrule brand level.
+	 *
+	 * @param int $publId
+	 * @param AdmIssue $issueObj
+	 * @return bool
+	 */
+	static private function isCalculateDeadlinesNeeded( $publId, $issueObj )
+	{
+		$calculateDeadlines = false;
+		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
+		if( $issueObj->OverrulePublication && $issueObj->CalculateDeadlines ) {
+			$calculateDeadlines = true;
+		} elseif( BizPublication::isCalculateDeadlinesEnabled( $publId, 0 ) ) {
+			$calculateDeadlines = true;
+		}
+
+		return $calculateDeadlines;
 	}
 
 	// -----------------------------

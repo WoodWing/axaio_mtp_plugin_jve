@@ -8,7 +8,8 @@ require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
 
 checkSecure( 'admin' );
 $txt = '';
-$users = DBUser::getUsersByWhere( '', array() );
+$orderBy = array( "user" => true ); // Sort column 'user' in ascending order.
+$users = DBUser::getUsersByWhere( '', array(), $orderBy );
 foreach( $users as $user ) {
 	$disable = $user->Deactivated ? CHECKIMAGE : '';
 	$languagecode = BizUser::validUserLanguage( $user->Language );//BZ#2575 Added showing the name of the language here
