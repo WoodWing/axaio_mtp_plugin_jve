@@ -384,12 +384,9 @@ function step1_cleanGetWorkspace {
 	echo "step1i: Create folder for the internal files (not to ship)."
 	mkdir "${WORKSPACE}/internals"
 
-	echo "step1j: Create folder to temporary exclude files that do not need validation by phpStorm code analyser."
-	mkdir "${WORKSPACE}/code_analyser"
-
 	# The .default needs to be removed in order to successfully run the coding tests. The tests expect a healthy system,
 	# which includes an existing config_overrule file. When creating the artifact the filename will be restored.
-	echo "step1k: Install empty placeholder for Enterprise administrators to overrule config options."
+	echo "step1j: Install empty placeholder for Enterprise administrators to overrule config options."
 	cp "${WORKSPACE}/Enterprise/Build/config_overrule.php.default" "${WORKSPACE}/Enterprise/Enterprise/config/config_overrule.php"
 }
 
