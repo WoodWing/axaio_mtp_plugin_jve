@@ -2374,7 +2374,7 @@ class BizWebEditWorkspace
 			if( $storedRelation->Placements ) foreach( $storedRelation->Placements as $key => $placement ) {
 				if( $inDesignArticlePlacements ) foreach( $inDesignArticlePlacements as $inDesignArticlePlacement ) {
 					if( ( $inDesignArticlePlacement->FrameID == $placement->FrameID ) &&
-						 ( $inDesignArticlePlacement->Edition == $placement->Edition )
+						 ( $inDesignArticlePlacement->Edition->Id == $placement->Edition->Id )
 					) {
 						$storedRelation->Placements[$key]->InDesignArticleIds = $inDesignArticlePlacement->InDesignArticleIds;
 						break;
