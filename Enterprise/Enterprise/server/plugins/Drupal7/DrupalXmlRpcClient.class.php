@@ -381,7 +381,7 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 	 * @param string $key
 	 * @param string $type
 	 * @param mixed $value
-	 * @return Field or null if $value couldn't be converted
+	 * @return PubField or null if $value couldn't be converted
 	 */
 	public static function getField( $key, $type, $value )
 	{

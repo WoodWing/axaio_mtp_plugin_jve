@@ -101,7 +101,7 @@ class BizPublication
 	 * @param array $pubRow
 	 * @param string $mode
 	 * @param array $extraIssueIds
-	 * @return PublicationInfo[]|Publication[] When $mode is 'flat' Publication is returned, else PublicationInfo
+	 * @return PublicationInfo|Publication When $mode is 'flat' Publication is returned, else PublicationInfo
 	 */
 	public static function getPublicationInfo( $userRights, $userName, $pubRow, $mode='full', $extraIssueIds = array() )
 	{

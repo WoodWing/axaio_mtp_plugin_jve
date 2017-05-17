@@ -394,7 +394,7 @@ class DateTimeFunctions
 	 *	The function can work with negative as well as positive timedifferences
 	 *	@param $time1 int time in Unix-seconds
 	 *	@param $time2 int time in Unix-seconds
-	 *	@return Timedifference in seconds between $time1 and $time2, but non-working days are not counted.
+	 *	@return integer Timedifference in seconds between $time1 and $time2, but non-working days are not counted.
 	**/
 	static public function diffTime( $time1, $time2 )
 	{

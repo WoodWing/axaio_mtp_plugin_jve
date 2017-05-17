@@ -354,13 +354,13 @@ class InCopyHTMLConversion
 	}
 	
 	/**
-	 * Compose an object with element information
+	 * Compose a data object with element information
 	 *
 	 * @param Object $object
 	 * @param string $label
 	 * @param DOMDocument $artDoc
 	 * @param string $contentId Default = "".
-	 * @return Element Object
+	 * @return stdClass The element object
 	 * 
 	 * @todo; refactor ... horrible name
 	 */

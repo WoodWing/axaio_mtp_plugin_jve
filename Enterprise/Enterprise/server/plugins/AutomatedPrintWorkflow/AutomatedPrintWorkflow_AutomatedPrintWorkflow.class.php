@@ -264,7 +264,6 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @param Placement[] $iaPlacements [input] Resolved IdArt frames.
 	 * @param string[] $iaFrameLabels [output] All possible frame labels.
 	 * @param string[] $iaFrameTypes [output] All possible frame types.
-	 * @return boolean TRUE when there are labels and frames, FALSE when both zero count.
 	 */
 	private static function determineUsedFrameTypesAndLabels( array $iaPlacements, array &$iaFrameLabels, array &$iaFrameTypes )
 	{

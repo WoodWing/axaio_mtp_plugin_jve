@@ -227,7 +227,7 @@ class BizDatasourceUtils
 	 * @param Item Name				 $name
 	 * @param Item Value			 $value
 	 * @param Item Attributes		 $attributes
-	 * @return List Item			 $listitem
+	 * @return DatList
 	 */
 	public static function listItemToObj( $name, $value, $attributes )
 	{
@@ -246,7 +246,7 @@ class BizDatasourceUtils
 	 * @param Item Name				 $name
 	 * @param Item Value			 $value
 	 * @param Item Attributes		 $attributes
-	 * @return List Item			 $listitem
+	 * @return DatList
 	 */
 	public static function imageListItemToObj( $name, $value, $attributes )
 	{
@@ -264,7 +264,7 @@ class BizDatasourceUtils
 	 *
 	 * @param Attribute Name 		$name
 	 * @param Attribute Value		$value
-	 * @return Attribute			$attribute
+	 * @return DatAttribute
 	 */
 	public static function attributeToObj( $name, $value )
 	{
@@ -476,7 +476,7 @@ class BizDatasourceUtils
 	 *
 	 * @param  string $key
 	 * @param  mixed  $value
-	 * @return ValueType
+	 * @return string
 	 */
 	public static function getValueType( $key, $value )
 	{

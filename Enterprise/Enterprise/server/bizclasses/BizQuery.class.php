@@ -487,7 +487,7 @@ class BizQuery extends BizQueryBase
 	 * 			1 = Listed in Search Results (View) right
 	 * 			2 = Read right
 	 * 			11 = List in Publication Overview
-	 * @return WflQueryObjectsResponse	Response containing all requested information (rows)
+	 * @return array Child rows
 	 * @throws BizException
 	 * @throws Exception
 	 */

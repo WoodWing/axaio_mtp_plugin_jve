@@ -231,7 +231,6 @@ class BizMetaDataPreview extends BizServerJobHandler
 	 * This function generates previews and thumbnails in the background.
 	 *
 	 * @param ServerJob $job
-	 * @return ServerJobStatus
 	 */
 	public function runJob( ServerJob $job )
 	{

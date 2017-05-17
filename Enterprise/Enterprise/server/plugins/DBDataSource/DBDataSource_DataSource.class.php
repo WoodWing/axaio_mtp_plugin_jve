@@ -163,7 +163,6 @@ class DBDataSource_DataSource extends DataSource_EnterpriseConnector
 	 * @param array $records List of records
 	 * @param string $recordid
 	 * @param $queryparameters
-	 * @return string
 	 * @throws BizException when the data record field name has an unknown value type.
 	 */
 	final public function setRecords( $records, $recordid, $queryparameters )
@@ -220,6 +219,7 @@ class DBDataSource_DataSource extends DataSource_EnterpriseConnector
 	final public function getUpdates( $familyvalue )
 	{
 		// not implemented in a standard CSV data source
+		return array();
 	}
 	
 	/**

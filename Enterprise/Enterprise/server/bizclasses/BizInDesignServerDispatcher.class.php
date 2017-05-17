@@ -163,8 +163,6 @@ class BizInDesignServerDispatcher
 	 * Processing phase 1: INITIALIZATION
 	 *
 	 * Gets ready for processing. Should be called once. Starts the stopwatch to measure overall progress.
-	 *
-	 * @return string The logical phase to jump after step.
 	 */
 	private function runInitializationPhase()
 	{
@@ -220,8 +218,6 @@ class BizInDesignServerDispatcher
 	 * using one connection, while other processes keep looking over the fence as long as that dog 
 	 * is sleeping and did not die. In other terms, when the system get quiet, we get quiet, and
 	 * when the system gets busy, we get busy.
-	 *
-	 * @return string The logical phase to jump after step.
 	 */
 	private function runThresholdPhase()
 	{
@@ -266,8 +262,6 @@ class BizInDesignServerDispatcher
 	 * Processing phase 3: DISPATCHING
 	 *
 	 * The processor tries to pick up jobs from the queue and starts processing when found any.
-	 *
-	 * @return string The logical phase to jump after step.
 	 */
 	private function runDispatchingPhase()
 	{
@@ -351,12 +345,9 @@ class BizInDesignServerDispatcher
 	 * Processing phase 4: FINISHING
 	 *
 	 * Stops playing the Dispatcher (if we did) and stops the process timer.
-	 *
-	 * @return string The logical phase to jump after step.
 	 */
 	private function runFinishingPhase()
 	{
-
 		try {
 			// Write the last used nap index for next session.
 			if ( is_int( $this->napIndex ) ) {
@@ -389,7 +380,6 @@ class BizInDesignServerDispatcher
 			$this->newPhase = 'stopped';
 			$this->handlePhaseAfterError( $e );
 		}
-
 	}
 
 	/**
@@ -496,7 +486,7 @@ class BizInDesignServerDispatcher
 	 * @param string $command - command to start
 	 * @param string $args    - parameters for command
 	 * 
-	 * @return process handle id ( or -1 when error starting process )
+	 * @return integer process handle id ( or -1 when error starting process )
 	 */	
 	private function execInBackground( $command, $args = "" ) 
 	{

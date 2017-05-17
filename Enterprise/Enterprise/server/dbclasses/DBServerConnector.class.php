@@ -220,7 +220,7 @@ class DBServerConnector extends DBBase
 	 *  Converts a DB connector record (array) into a connector info data object.
 	 *
 	 *  @param array $row DB connector row
-	 *  @return object ConnectorInfoData
+	 *  @return ConnectorInfoData
 	**/
 	static public function rowToObj( $row )
 	{

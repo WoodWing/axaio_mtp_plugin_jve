@@ -62,7 +62,7 @@ class WW_Utils_License_StealthInstaller
 	 * which are also known to the WoodWing Activation Server (WAS).
 	 *
 	 * @param bool $install TRUE to install, or FALSE to uninstall.
-	 * @return Whether or not the (un)installation was successful.
+	 * @return bool Whether or not the (un)installation was successful.
 	 */
 	public function installProductLicenses( $install = true )
 	{

@@ -919,7 +919,7 @@ class DBInDesignServerJob extends DBBase
 	 * Returns job information for the job currently being processed a specific IDS.
 	 *
 	 * @param integer $serverId The database Id of the InDesign Server.
-	 * @return InDesignSererJob|null Job with JobId, JobType and JobProgress. NULL when IDS not busy.
+	 * @return InDesignServerJob|null Job with JobId, JobType and JobProgress. NULL when IDS not busy.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
 	static public function getCurrentJobInfoForIds( $serverId )

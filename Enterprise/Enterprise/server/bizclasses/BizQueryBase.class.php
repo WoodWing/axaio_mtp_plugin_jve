@@ -584,12 +584,11 @@ class BizQueryBase
 	 * Only fills these values if they are in $reqprops. Method is called more than once for the same set of objects.
 	 * To prevent that value, set in the first call, are overwritten special precautions had to be made.
 	 *
-	 * @param &array $rows rows to add the target-info to
+	 * @param &array $rows rows to add the target-info to ($rows are adjusted by reference!!!)
 	 * @param $targets array of array Target, indexed by objectid
 	 * @param $reqprops array of props to fill.
 	 * @param bool $keepRowValue
-	 * @return nothing (but $rows are adjusted by reference!!!)
-	**/
+	 */
 	static public function resolveTargets(&$rows, $targets, $reqprops, $keepRowValue=false)
 	{
 		$reqIssueIds = in_array('IssueIds', $reqprops) ? true : false;

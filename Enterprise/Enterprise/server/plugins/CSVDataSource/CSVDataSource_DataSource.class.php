@@ -237,7 +237,6 @@ class CSVDataSource_DataSource extends DataSource_EnterpriseConnector
 	 * @param array $records List of records
 	 * @param string $recordid
 	 * @param QueryParam[] $queryparameters
-	 * @return string $message
 	 */
 	final public function setRecords( $records, $recordid, $queryparameters )
 	{
@@ -254,11 +253,12 @@ class CSVDataSource_DataSource extends DataSource_EnterpriseConnector
 	 * The output (Array of Records) will be sent to the Client.
 	 * 
 	 * @param array $familyvalue List of FamilyValues
-	 * @return void Unimplemented
+	 * @return array
 	 */
 	final public function getUpdates( $familyvalue )
 	{
 		// not implemented in a standard CSV data source
+		return array();
 	}
 	
 	/**

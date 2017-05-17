@@ -88,7 +88,7 @@ class EnterpriseService
 	  * @param string 		$interface		The service interface; the class name of the service
 	  * @param boolean 		$checkTicket	whether ticket should be checked
 	  * @param boolean 		$useTransaction	whether service should be executed within db transaction
-	  * @return object Response object
+	  * @return mixed Response object
 	  * @throws BizException when executing the service results in an error.
 	  */
 	protected function executeService( $req, $ticket, $type, $interface, $checkTicket, $useTransaction )

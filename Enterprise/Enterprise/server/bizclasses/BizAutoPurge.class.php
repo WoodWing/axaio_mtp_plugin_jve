@@ -58,7 +58,7 @@ class BizAutoPurge extends BizServerJobHandler
 	 * than the returned DateTime by this function will be selected for purging.
 	 *
 	 * @param int $purgeAfterNoOfDay Number of days older than the current Day
-	 * @return date
+	 * @return string
 	 */
 	public static function getDateForPurging( $purgeAfterNoOfDay=0 )
 	{

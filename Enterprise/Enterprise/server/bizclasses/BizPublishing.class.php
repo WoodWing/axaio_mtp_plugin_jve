@@ -762,7 +762,6 @@ class BizPublishing
 	 *
 	 * @param PubPublishedDossier $inPubDossier
 	 * @param string $operation Preview, Publish, Update or UnPublish
-	 * @return PubPublishedDossier
 	 */
 	private function doProcessDossier( $inPubDossier, $operation )
 	{
@@ -1528,7 +1527,7 @@ class BizPublishing
 	 * @param PubPublishTarget $publishTarget Identification of the magazine.
 	 * @param array $newOrder
 	 * @param array $originalOrder
-	 * @return boolean FALSE for default/core behavior, or TRUE for custom/plugin behavior.
+	 * @return array|null List of dossier ids, or null when failed.
 	 */
 	public function updateDossierOrder( $publishTarget, $newOrder, $originalOrder ) 
 	{

@@ -630,8 +630,7 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	/**
 	 * Truncates table named $tablename. Truncate is faster than 'DELETE'. 
 	 * @param string $tablename name of the table
-	 * @return nothing
-	**/
+	 */
 	public function truncateTable($tablename)
 	{
 		PerformanceProfiler::startProfile( 'truncateTable', 4 );

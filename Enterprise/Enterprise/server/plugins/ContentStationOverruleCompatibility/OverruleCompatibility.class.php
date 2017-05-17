@@ -117,7 +117,6 @@ class OverruleCompatibility
 	 * @param string	$ticket
 	 * @param string	$object			in/out object to be manipulated, see comment above
 	 * @param array		$overruleIssues in/out array to keep track of overruleIssues (key) and the associated pub (val)
-	 * @returns array of CategoryInfo
 	 */
 	static public function convertObjectBefore( $ticket, &$object, &$overruleIssues )
 	{

@@ -860,7 +860,7 @@ class DBBase
 	 * @param string $table Table from which records are deleted.
 	 * @param string $keyColumn  Used as keys at the result array. Leave empty to use [0...N-1] array keys.
 	 * @param string $dbIntClass Class name to instantiate the integrity object from.
-	 * @return number of records updated or null in case of error.
+	 * @return integer|null number of records updated or null in case of error.
 	 */	
 	protected static function doDelete(array $whereParams, $table, $keyColumn, $dbIntClass)
 	{

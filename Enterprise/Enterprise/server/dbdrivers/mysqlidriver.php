@@ -220,7 +220,7 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	 * Fetch a result row as an associative array.
 	 *
 	 * @param resource $sth The result resource that is being evaluated. This result comes from a call to {@link: query()}.
-	 * @return array Associative array of strings that corresponds to the fetched row, or FALSE if there are no more rows.
+	 * @return array|bool Associative array of strings that corresponds to the fetched row, or FALSE if there are no more rows.
 	 */
 	public function fetch( $sth )
 	{
@@ -545,10 +545,10 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	}
 	
 	/**
-	 * Truncates table named $tablename. Truncate is faster than 'DELETE'. 
+	 * Truncates table named $tablename. Truncate is faster than 'DELETE'.
+	 *
 	 * @param string $tablename name of the table
-	 * @return nothing
-	**/
+	 */
 	public function truncateTable($tablename)
 	{
 		PerformanceProfiler::startProfile( 'truncateTable', 4 );

@@ -22,7 +22,7 @@ class DBTarget extends DBBase
 	 *
 	 * @param array $newValues column/value pairs of the columns to be inserted.
 	 * @param boolean $autoIncrement
-	 * @return new id or else false.
+	 * @return int|bool id or else false
 	 */
 	public static function insert( array $newValues, $autoIncrement )
 	{
@@ -223,7 +223,7 @@ class DBTarget extends DBBase
      * @param string $publisheddate date at which object must get/is published
      * @param string $version date at which object must get/is published
      * @param string $user short name of 'publisher'
-     * @return the id of the added entry in the publishhistory table
+     * @return int|bool the id of the added entry in the publishhistory table, or false on error
 	  */
     static public function updatePublishInfoDossier($objectid, $channelid, $issueid, $externalid, $action, $publisheddate, $version, $user )
 	{
@@ -422,7 +422,7 @@ class DBTarget extends DBBase
 	/**
 	 * Deletes records .....  
 	 * @param array $whereParams column/array of value pairs for where clause
-	 * @return number of records updated or null in case of error.
+	 * @return integer number of records updated or null in case of error.
 	 */	
 	public static function delete($whereParams)
     {
@@ -507,7 +507,7 @@ class DBTarget extends DBBase
 	 *
 	 * @param integer $parent objectid of parent
 	 * @param integer $child objectid of child
-	 * @return true if no errors else null
+	 * @return integer|true if no errors else null
 	 */
 	public static function removeTargetObjectRelation( $parent, $child )
 	{

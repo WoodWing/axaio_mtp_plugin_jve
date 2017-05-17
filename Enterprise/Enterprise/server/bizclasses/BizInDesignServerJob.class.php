@@ -385,17 +385,6 @@ class BizInDesignServerJobs
 	}
 	
 	/**
-	 * Returns the highest prio background job from the queue in FCFS order.
-	 *
-	 * @since 9.7.0
-	 * @return string|null Job id, or NULL when not found.
-	 * @throws BizException When invalid params given or fatal SQL error occurs.
-	 */
-	private static function hasPendingForegroundJobs()
-	{
-	}
-	
-	/**
 	 * @param InDesignServerJob $job
 	 * @param InDesignServer $server
 	 * @param boolean $requeue [OUT] Whether or not the job should be requeued.

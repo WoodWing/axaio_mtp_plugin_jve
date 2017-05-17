@@ -820,7 +820,7 @@ class DrupalField {
 	 *
 	 * @static
 	 * @param DrupalField $drupalField The DrupalField object being analyzed.
-	 * @return string A string of values, or null if not found / determined.
+	 * @return array|null list of values, or null if not found / determined.
 	 */
 	private static function determineValues( DrupalField $drupalField )
 	{

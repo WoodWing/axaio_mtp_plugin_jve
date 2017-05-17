@@ -358,7 +358,7 @@ class BizEmail
 	 * @param array		$props		BizProps to insert into body
 	 * @param array		$types		Types for the preview/thumb to embed
 	 * @param string	$file	    In/out Thumb or preview file
-	 * @param array		$fileFormat	Format of the file
+	 * @param string		$fileFormat	Format of the file
 	 * @return string Email html body
 	 */
 	private static function generateEmailBody( $object, $props, $types, &$file, &$fileFormat )

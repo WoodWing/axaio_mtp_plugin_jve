@@ -458,7 +458,7 @@ class BizPubIssue
 	 *
 	 * @param string $channelType Publication channel type
 	 * @param array $dossierIdsOrder Array of dossierIds order
-	 * @return unknown
+	 * @return string
 	 */
 	public function getBase64DossierIds( $channelType, $dossierIdsOrder )
 	{

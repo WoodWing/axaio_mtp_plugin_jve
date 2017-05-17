@@ -3822,7 +3822,6 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	 *
 	 * @param Object $article
 	 * @param PubPublishTarget $publishTarget
-	 * @return string File path of created HTML file at export folder.
 	 */
 	private function copyTextViewAssets( /** @noinspection PhpLanguageLevelInspection */
 		Object $article, PubPublishTarget $publishTarget )
@@ -3855,7 +3854,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 		}
 	}
 	
-	/**                                                                                                                           $dst
+	/**
 	 * Builds a layout (using CSS) for text view of an article.
 	 *
 	 * @param PubPublishTarget $publishTarget
@@ -6135,7 +6134,6 @@ class DigitalMagazinesDpsFolioParser extends DigitalMagazinesDpsFolioXml
 	 * Sets the folio id.
 	 *
 	 * @param int|string $id
-	 * @return string
 	 */
 	public function setId( $id )
 	{
@@ -6559,7 +6557,6 @@ class DigitalMagazinesDpsFolioParser extends DigitalMagazinesDpsFolioXml
 	 * @param string $webUrl
 	 * @param integer $width
 	 * @param integer $height
-	 * @return null
 	 */
 	public function addTextViewOverlay( $webUrl, $width, $height )
 	{

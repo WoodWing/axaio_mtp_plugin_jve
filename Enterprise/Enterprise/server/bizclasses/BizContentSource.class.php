@@ -556,7 +556,7 @@ class BizContentSource
 	 *
 	 * @param string $contentSource Content Source name.
 	 * @throws BizException Throws error when no connector found for the Content Source requested.
-	 * @return EnterpriseConnector
+	 * @return ContentSource_EnterpriseConnector
 	 */
 	private static function getContentSourceConnectorForContentSource( $contentSource )
 	{

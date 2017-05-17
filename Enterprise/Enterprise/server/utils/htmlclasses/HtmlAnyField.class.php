@@ -97,7 +97,7 @@ abstract class HtmlAnyField extends HtmlBase
 	}
 
 	/**
-	 * @param $newvalue Sets the value of $Value. A derived setValue-function must
+	 * @param mixed $newvalue Sets the value of $Value. A derived setValue-function must
 	 *   check if the value is allowed.
 	 * @return null if the value is NOT allowed/set.
 	 */
@@ -127,7 +127,7 @@ abstract class HtmlAnyField extends HtmlBase
 	abstract public function requestValue();
 
 	/**
-	 * @return returns the $Value as set in setValue()
+	 * @return mixed returns the value as set in setValue()
 	 * Can not be used for getting input-values. Use requestValue/requestInput instead.
 	 */
 	public function getValue()

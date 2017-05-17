@@ -667,7 +667,7 @@ class DBMessage extends DBBase
 	 * Converts a message DB record into a Message object.
 	 * 
 	 * @param array $row   Database record with key-values.
-	 * @return object Message
+	 * @return Message
 	 */
 	static public function rowToObj( $row )
 	{

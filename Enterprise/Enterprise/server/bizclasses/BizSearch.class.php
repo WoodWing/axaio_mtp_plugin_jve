@@ -576,7 +576,6 @@ class BizSearch
 	 *
 	 * @param string $query [in/out]
 	 * @param array $params [in/out]
-	 * @return boolean true if any change made
 	 */
 	private static function resolveQueryName( &$query, &$params )
 	{

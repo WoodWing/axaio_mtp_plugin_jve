@@ -84,10 +84,10 @@ class HtmlDateTimeField extends HtmlAnyField
 	}
 	
 	/**
-	 *  @return returns the raw input-value as an array of two strings as
+	 *  @return array|null returns the raw input-value as an array of two strings as
 	 *  in this implementation there are two inputfields.
 	 *  Returns null if not posted.
-	**/	
+	**/
 	public function requestInput()
 	{
 		if (!isset($_REQUEST[$this->Name . '_date'])) {
@@ -101,7 +101,7 @@ class HtmlDateTimeField extends HtmlAnyField
 	}
 
 	/**
-	 *  @return returns the converted raw input-value as an isodatetime-string.
+	 *  @return string|null returns the converted raw input-value as an isodatetime-string.
 	 *  Returns null if not posted or input was not valid.
 	 *  Returns '' if no input given but the field is not required, so no input then, which is ok.
 	**/
