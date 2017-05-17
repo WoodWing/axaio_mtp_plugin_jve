@@ -153,30 +153,14 @@
     <inspection_tool class="Duplicates" enabled="true" level="WEAK WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WEAK WARNING" enabled="true" />
     </inspection_tool>
-    <inspection_tool class="ES6BindWithArrowFunction" enabled="true" level="WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
-    </inspection_tool>
-    <inspection_tool class="ES6ConvertRequireIntoImport" enabled="true" level="INFORMATION" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="INFORMATION" enabled="true" />
-    </inspection_tool>
-    <inspection_tool class="ES6ConvertToForOf" enabled="true" level="INFORMATION" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="INFORMATION" enabled="true" />
-    </inspection_tool>
-    <inspection_tool class="ES6ConvertVarToLetConst" enabled="true" level="WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
-    </inspection_tool>
-    <inspection_tool class="ES6MissingAwait" enabled="true" level="INFORMATION" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="INFORMATION" enabled="true" />
-    </inspection_tool>
-    <inspection_tool class="ES6ModulesDependencies" enabled="true" level="WEAK WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WEAK WARNING" enabled="true" />
-    </inspection_tool>
-    <inspection_tool class="ES6PossiblyAsyncFunction" enabled="true" level="WEAK WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WEAK WARNING" enabled="true" />
-    </inspection_tool>
-    <inspection_tool class="ES6UnusedImports" enabled="true" level="WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
-    </inspection_tool>
+    <inspection_tool class="ES6BindWithArrowFunction" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ES6ConvertRequireIntoImport" enabled="false" level="INFORMATION" enabled_by_default="false" />
+    <inspection_tool class="ES6ConvertToForOf" enabled="false" level="INFORMATION" enabled_by_default="false" />
+    <inspection_tool class="ES6ConvertVarToLetConst" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="ES6MissingAwait" enabled="false" level="INFORMATION" enabled_by_default="false" />
+    <inspection_tool class="ES6ModulesDependencies" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="ES6PossiblyAsyncFunction" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="ES6UnusedImports" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="EmptyEventHandler" enabled="true" level="WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
     </inspection_tool>
@@ -194,16 +178,9 @@
       <shebang>/bin/bash</shebang>
       <shebang>/bin/sh</shebang>
     </inspection_tool>
-    <inspection_tool class="FlowJSConfig" enabled="true" level="WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
-    </inspection_tool>
-    <inspection_tool class="FlowJSFlagCommentPlacement" enabled="true" level="WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
-    </inspection_tool>
+    <inspection_tool class="FlowJSConfig" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="FlowJSFlagCommentPlacement" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="Function overrides internal command" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
-    <inspection_tool class="FunctionWithInconsistentReturnsJS" enabled="true" level="WARNING" enabled_by_default="true">
-      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="false" />
-    </inspection_tool>
     <inspection_tool class="GherkinBrokenTableInspection" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="GherkinMisplacedBackground" enabled="true" level="ERROR" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="ERROR" enabled="true" />
@@ -259,9 +236,7 @@
     </inspection_tool>
     <inspection_tool class="Integer division with remainder found." enabled="false" level="INFO" enabled_by_default="false" />
     <inspection_tool class="JSAccessibilityCheck" enabled="false" level="WARNING" enabled_by_default="false" />
-    <inspection_tool class="JSAnnotator" enabled="true" level="ERROR" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="ERROR" enabled="true" />
-    </inspection_tool>
+    <inspection_tool class="JSAnnotator" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="JSBitwiseOperatorUsage" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSCheckFunctionSignatures" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="JSClosureCompilerSyntax" enabled="false" level="WARNING" enabled_by_default="false" />
@@ -271,17 +246,11 @@
     <inspection_tool class="JSConstructorReturnsPrimitive" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSDeprecatedSymbols" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="JSDuplicatedDeclaration" enabled="false" level="WARNING" enabled_by_default="false" />
-    <inspection_tool class="JSEqualityComparisonWithCoercion" enabled="true" level="WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
-    </inspection_tool>
+    <inspection_tool class="JSEqualityComparisonWithCoercion" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSFieldCanBeLocal" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSFileReferences" enabled="false" level="WARNING" enabled_by_default="false" />
-    <inspection_tool class="JSFunctionExpressionToArrowFunction" enabled="true" level="INFORMATION" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="INFORMATION" enabled="true" />
-    </inspection_tool>
-    <inspection_tool class="JSIgnoredPromiseFromCall" enabled="true" level="WEAK WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WEAK WARNING" enabled="true" />
-    </inspection_tool>
+    <inspection_tool class="JSFunctionExpressionToArrowFunction" enabled="false" level="INFORMATION" enabled_by_default="false" />
+    <inspection_tool class="JSIgnoredPromiseFromCall" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="JSJQueryEfficiency" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSLastCommaInArrayLiteral" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSLastCommaInObjectLiteral" enabled="false" level="ERROR" enabled_by_default="false" />
@@ -290,22 +259,16 @@
       <option name="queries" value="trace,write" />
       <option name="updates" value="pop,push,shift,splice,unshift" />
     </inspection_tool>
-    <inspection_tool class="JSNonASCIINames" enabled="true" level="WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
-    </inspection_tool>
+    <inspection_tool class="JSNonASCIINames" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSPotentiallyInvalidConstructorUsage" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="myConsiderUppercaseFunctionsToBeConstructors" value="true" />
     </inspection_tool>
     <inspection_tool class="JSPotentiallyInvalidTargetOfIndexedPropertyAccess" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSPotentiallyInvalidUsageOfThis" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSPrimitiveTypeWrapperUsage" enabled="false" level="WARNING" enabled_by_default="false" />
-    <inspection_tool class="JSReferencingArgumentsOutsideOfFunction" enabled="true" level="ERROR" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="ERROR" enabled="true" />
-    </inspection_tool>
+    <inspection_tool class="JSReferencingArgumentsOutsideOfFunction" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="JSReferencingMutableVariableFromClosure" enabled="false" level="WARNING" enabled_by_default="false" />
-    <inspection_tool class="JSStringConcatenationToES6Template" enabled="true" level="INFORMATION" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="INFORMATION" enabled="true" />
-    </inspection_tool>
+    <inspection_tool class="JSStringConcatenationToES6Template" enabled="false" level="INFORMATION" enabled_by_default="false" />
     <inspection_tool class="JSSuspiciousNameCombination" enabled="false" level="WARNING" enabled_by_default="false">
       <group names="x,width,left,right" />
       <group names="y,height,top,bottom" />
@@ -316,9 +279,7 @@
     <inspection_tool class="JSUndefinedPropertyAssignment" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="JSUnfilteredForInLoop" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSUnnecessarySemicolon" enabled="false" level="WARNING" enabled_by_default="false" />
-    <inspection_tool class="JSUnresolvedExtXType" enabled="true" level="WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
-    </inspection_tool>
+    <inspection_tool class="JSUnresolvedExtXType" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSUnresolvedFunction" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="JSUnresolvedLibraryURL" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSUnresolvedVariable" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
@@ -328,9 +289,7 @@
     <inspection_tool class="JSValidateJSDoc" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="JSValidateJSON" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="JSValidateTypes" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
-    <inspection_tool class="JSXNamespaceValidation" enabled="true" level="WEAK WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WEAK WARNING" enabled="true" />
-    </inspection_tool>
+    <inspection_tool class="JSXNamespaceValidation" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="JsonDuplicatePropertyKeys" enabled="true" level="WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
     </inspection_tool>
@@ -355,14 +314,10 @@
     <inspection_tool class="MysqlParsingInspection" enabled="true" level="WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
     </inspection_tool>
-    <inspection_tool class="NodeJsCodingAssistanceForCoreModules" enabled="true" level="WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
-    </inspection_tool>
+    <inspection_tool class="NodeJsCodingAssistanceForCoreModules" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="NodeModulesDependencies" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="NodeRequireContents" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
-    <inspection_tool class="NpmUsedModulesInstalled" enabled="true" level="WEAK WARNING" enabled_by_default="false">
-      <scope name="EnterpriseCodeInspection" level="WEAK WARNING" enabled="true" />
-    </inspection_tool>
+    <inspection_tool class="NpmUsedModulesInstalled" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="OctalIntegerJS" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="PhingDomInspection" enabled="false" level="ERROR" enabled_by_default="false" />
     <inspection_tool class="PhpAbstractStaticMethodInspection" enabled="true" level="WARNING" enabled_by_default="false">
@@ -506,6 +461,9 @@
     <inspection_tool class="PhpUnusedPrivateFieldInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="PhpUnusedPrivateMethodInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="PhpVoidFunctionResultUsedInspection" enabled="true" level="WARNING" enabled_by_default="false">
+      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
+    </inspection_tool>
+    <inspection_tool class="PhpWrongCatchClausesOrderInspection" enabled="true" level="WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
     </inspection_tool>
     <inspection_tool class="PhpWrongForeachArgumentTypeInspection" enabled="true" level="WARNING" enabled_by_default="false">
