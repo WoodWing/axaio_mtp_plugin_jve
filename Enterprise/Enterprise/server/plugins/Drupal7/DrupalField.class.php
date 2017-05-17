@@ -1924,7 +1924,7 @@ class DrupalField {
 	 * the determineDefaultValues() function for more details.
 	 *
 	 * @see determineDefaultValues();
-	 * @param string[]|null|string $defaultValues The default values.
+	 * @param string[][]|null|string $defaultValues The default values.
 	 * @return void.
 	 */
 	public function setDefaultValues($defaultValues)
@@ -1937,7 +1937,7 @@ class DrupalField {
 	 *
 	 * Returns the default values for this DrupalField.
 	 *
-	 * @return null|string|string[] The Default values.
+	 * @return null|string|string[][] The Default values.
 	 */
 	public function getDefaultValues()
 	{

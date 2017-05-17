@@ -13,7 +13,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 {
 	/** @var TestCase $testCase */
 	private $testCase = null;
-	/** @var string[] $vars  */
+	/** @var array $vars  */
 	private $vars = null;
 	/** @var string $ticket  */
 	private $ticket = null;

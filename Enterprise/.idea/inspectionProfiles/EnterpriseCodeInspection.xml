@@ -338,6 +338,9 @@
     <inspection_tool class="PhpDeprecationInspection" enabled="true" level="WEAK WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WEAK WARNING" enabled="true" />
     </inspection_tool>
+    <inspection_tool class="PhpDisabledExtensionStubsInspection" enabled="true" level="INFORMATION" enabled_by_default="false">
+      <scope name="EnterpriseCodeInspection" level="INFORMATION" enabled="true" />
+    </inspection_tool>
     <inspection_tool class="PhpDocMissingReturnTagInspection" enabled="true" level="WEAK WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WEAK WARNING" enabled="true" />
     </inspection_tool>
@@ -374,6 +377,9 @@
     <inspection_tool class="PhpIllegalArrayKeyTypeInspection" enabled="true" level="WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
     </inspection_tool>
+    <inspection_tool class="PhpIllegalStringOffsetInspection" enabled="true" level="WARNING" enabled_by_default="false">
+      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
+    </inspection_tool>
     <inspection_tool class="PhpIncludeInspection" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="PhpIncompatibleReturnTypeInspection" enabled="true" level="WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
@@ -404,6 +410,9 @@
       <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
     </inspection_tool>
     <inspection_tool class="PhpNonCompoundUseInspection" enabled="true" level="WARNING" enabled_by_default="false">
+      <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
+    </inspection_tool>
+    <inspection_tool class="PhpNonStrictObjectEqualityInspection" enabled="true" level="WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />
     </inspection_tool>
     <inspection_tool class="PhpParamsInspection" enabled="true" level="WARNING" enabled_by_default="false">
@@ -549,6 +558,9 @@
     </inspection_tool>
     <inspection_tool class="TypeScriptCheckImport" enabled="true" level="ERROR" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="ERROR" enabled="true" />
+    </inspection_tool>
+    <inspection_tool class="TypeScriptMissingAugmentationImport" enabled="true" level="INFORMATION" enabled_by_default="false">
+      <scope name="EnterpriseCodeInspection" level="INFORMATION" enabled="true" />
     </inspection_tool>
     <inspection_tool class="TypeScriptPreferShortImport" enabled="true" level="WARNING" enabled_by_default="false">
       <scope name="EnterpriseCodeInspection" level="WARNING" enabled="true" />

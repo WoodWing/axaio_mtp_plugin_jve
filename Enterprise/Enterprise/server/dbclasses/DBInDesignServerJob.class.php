@@ -525,7 +525,7 @@ class DBInDesignServerJob extends DBBase
 	 *
 	 * @since 9.7.0
 	 * @param boolean $foreground TRUE for FG jobs, FALSE for BG jobs.
-	 * @return array|null Job id, or NULL when not found.
+	 * @return string|null Job id, or NULL when not found.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
 	public static function getHighestFcfsJobId( $foreground )
