@@ -14,7 +14,7 @@
 SOURCE_BASE="./Enterprise/"
 TARGET_BASE="./Enterprise_release/"
 iONCUBE_ENCODER="/usr/local/ioncube/9.0/ioncube_encoder56_9.0_64"
-PHPSTORM_INSPECTOR="/opt/phpstorm2017.1/bin/inspect.sh"
+PHPSTORM_INSPECTOR="/opt/phpstorm2017.1.4/bin/inspect.sh"
 : ${PHP_EXE:=php} #Set default value to base php executable.
 
 #
