@@ -13,6 +13,7 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 	private $objectFolioInfos;
 	private $folioBuilder;
 	private $report;
+	/** @var WW_Utils_DigitalPublishingSuiteClient $dpsService  */
 	private $dpsService;
 	private $dpsIssueId;
 	private $publishedDossierOrder;
@@ -3022,6 +3023,9 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 			// Determine if the article should be blocked for social sharing.
 			require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
 			$articleAccess = BizAdmProperty::getCustomPropVal( $dossier->MetaData->ExtraMetaData, 'C_ARTICLE_ACCESS');
+			if( !$articleAccess ) {
+				$articleAccess = 'Metered';
+			}
 
 			// Create or Modify the article at Adobe DPS.
 			$manifestXref = $dossierId;

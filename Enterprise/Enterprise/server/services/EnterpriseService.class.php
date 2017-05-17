@@ -94,6 +94,8 @@ class EnterpriseService
 	protected function executeService( $req, $ticket, $type, $interface, $checkTicket, $useTransaction )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+		require_once BASEDIR.'/server/secure.php';
+
 		$debugMode = LogHandler::debugMode();
 		$logService = LogHandler::debugMode() && defined('LOG_INTERNAL_SERVICES') && LOG_INTERNAL_SERVICES === true;
 		$serviceName = str_replace( 'Request', '', get_class($req) );
@@ -110,6 +112,23 @@ class EnterpriseService
 		}
 
 		try {
+			// Support cookie enabled sessions. When the client has no ticket provided in the request body, try to grab the ticket
+			// from the HTTP cookies. This is to support JSON clients that run multiple web applications which need to share the
+			// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
+			if( $ticket ) {
+				setLogCookie( 'ticket', $ticket );
+			} else {
+				if( !in_array( $interface, array( 'WflLogOn', 'AdmLogOn', 'PlnLogOn' ) ) ) {
+					$ticket = getOptionalCookie( 'ticket' );
+					if( $ticket ) {
+						setLogCookie( 'ticket', $ticket );
+						if( $interface != 'WflChangePassword' && property_exists( $req, 'Ticket' ) ) {
+							$req->Ticket = $ticket; // repair for connectors being called in restructureRequest/restructureResponse
+						}
+					}
+				}
+			}
+
 			// Start business session (and DB transaction)
 			BizSession::startSession( $ticket );
 			if( $useTransaction ) {
@@ -205,11 +224,11 @@ class EnterpriseService
 				$error->ErrorCode = $e->getErrorCode();
 				LogHandler::logService( $serviceName, LogHandler::prettyPrint( $error ), null, 'Service' );
 			}
-			
+
 			// The errors raised by ES are not always thrown up by SC to our IDS script.
 			// This is a limitation of SC (tested with 10.0.3) but we don't want to lose error
 			// info since that is used by ES to decide whether to retry to give up the job.
-			// Instead of waiting for the job to complete (for which we'd risk losing useful 
+			// Instead of waiting for the job to complete (for which we'd risk losing useful
 			// error info) we already save the error raised by ourself or by the core server.
 			if( $ticket ) { // not set e.g. on LogOn with invallid password
 				require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';

@@ -152,19 +152,13 @@ class TestSuiteFactory
 			$xmlTests = $xmlDoc->createElement( 'Root' );
 			$xmlDoc->appendChild( $xmlTests );
 
-			// Read TestCase class file from disk and create instance
+			// Collect core server testsuite folder if $testSuite exists. (Note that $testSuite could be a relative path.
+			// This path may not exist, in case the testsuite is provided by one of the server plugins.)
 			$suiteDirs = array();
 			$dirName = BASEDIR.'/server/wwtest/testsuite/'.$testSuite;
 			if( is_file( $dirName.'/TestSuite.php' ) ) {
-				$testObj = self::createTestModule( $dirName.'/TestSuite.php', null );
-				if( $testObj ) {
-					$testFile = substr( $dirName.'/TestSuite.php', strlen(BASEDIR) );
-					$testObjs[$testFile] = $testObj;
-					self::addTestObjectsToXmlTree( $xmlDoc, $xmlTests, $testObjs );
-					$xmlTests = self::$CurrentTestsNode; // Set by addTestObjectsToXmlTree()
-				}
+				$suiteDirs[] = $dirName;
 			}
-			$suiteDirs[] = $dirName;
 
 			// Collect server plugin testsuite folders
 			$pluginDirs = array( BASEDIR.'/server/plugins/', BASEDIR.'/config/plugins/' );
@@ -177,6 +171,21 @@ class TestSuiteFactory
 					}
 				}
 			}
+
+			// Read TestCase class file from disk and create instance
+			if( $suiteDirs ) {
+				$dirName = reset($suiteDirs);
+				if( is_file( $dirName.'/TestSuite.php' ) ) {
+					$testObj = self::createTestModule( $dirName.'/TestSuite.php', null );
+					if( $testObj ) {
+						$testFile = substr( $dirName.'/TestSuite.php', strlen(BASEDIR) );
+						$testObjs[$testFile] = $testObj;
+						self::addTestObjectsToXmlTree( $xmlDoc, $xmlTests, $testObjs );
+						$xmlTests = self::$CurrentTestsNode; // Set by addTestObjectsToXmlTree()
+					}
+				}
+			}
+
 			foreach( $suiteDirs as $suiteDir ) {
 				self::readTestObjectsFromFolders( $xmlDoc, $xmlTests, $suiteDir );
 			}

@@ -22,9 +22,10 @@ class BizStorage
 	 * @param string $reqRendition Requested rendition
 	 * @param string $verNr Current object version (in major.minor notation)
 	 * @param integer $editionId Optional.
+	 * @param boolean $copyToTransferFolder Since 10.2.0. Whether or not to copy the file to the Transfer Server Folder.
 	 * @return Attachment (or null on error)
 	 */
-	public static function getFile( $objprops, $reqRendition, $verNr, $editionId = null )
+	public static function getFile( $objprops, $reqRendition, $verNr, $editionId = null, $copyToTransferFolder = true )
 	{
 		// create right attachment
 		$t = $objprops['Type'];  // object type
@@ -99,8 +100,12 @@ class BizStorage
 						}*/
 						$bFound = $attachobj->doesFileExist();
 						if( $bFound ) {
-							$attachment = new Attachment($rendition, $tp, null, null, null, $editionId );
-							$attachobj->copyToFileTransferServer($attachment);
+							$attachment = new Attachment( $rendition, $tp, null, null, null, $editionId );
+							if( $copyToTransferFolder ) {
+								$attachobj->copyToFileTransferServer( $attachment );
+							} else {
+								$attachment->FilePath = $attachobj->getFilename();
+							}
 						}
 					} // else, the DB tells us this rendition is not in the filestore, so we do not try (which also avoids warnings at logging).
 					break;

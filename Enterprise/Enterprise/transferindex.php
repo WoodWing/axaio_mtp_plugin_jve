@@ -109,7 +109,18 @@ class TransferEntry
 		}
 		
 		// Check the mandatory ticket param.		
-		$ticket = $requestParams['ticket'];
+		if( isset($requestParams['ticket']) ) {
+			$ticket = $requestParams['ticket'];
+		} else {
+			// Support cookie enabled sessions. When the client has no ticket provided in the URL params, try to grab the ticket
+			// from the HTTP cookies. This is to support JSON clients that run multiple web applications which need to share the
+			// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
+			require_once BASEDIR.'/server/secure.php';
+			$ticket = getOptionalCookie( 'ticket' );
+			if( $ticket ) {
+				setLogCookie( 'ticket', $ticket );
+			}
+		}
 		if( !$ticket ) {
 			$message = 'Please specify "ticket" param at URL';
 			header('HTTP/1.1 400 Bad Request');
@@ -134,10 +145,10 @@ class TransferEntry
 			}
 		}
 
-		// The OPTIONS call is send by a web browser as a preflight for a CORS request.
+		// The OPTIONS call is send by a web browser as a pre-flight for a CORS request.
 		// This request doesn't send or receive any information. There is no need to validate the ticket,
 		// and when the OPTIONS calls returns an error the error can't be validated within an application.
-		// This is a restiction by web browsers.
+		// This is a restriction by web browsers.
 		if ( $httpMethod == 'OPTIONS' ) {
 			$validateTicket = false;
 		}

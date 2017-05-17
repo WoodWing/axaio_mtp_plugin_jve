@@ -720,11 +720,61 @@ class BizDeletedObject
 		$object->MetaData->WorkflowMetaData->Deletor = $objectRow['deletor'];
 		$object->MetaData->WorkflowMetaData->Deleted = $objectRow['deleted'];
 		if( !$permanent ) {
-			BizSearch::indexObjects( array( $object ), true/*$suppressExceptions*/, array('Trash')/*$areas*/, true );
+			self::indexObjectAndItsChildren( $object, 'Trash', true );
 		}
 
 		LogHandler::Log( 'DeletedObjects', 'DEBUG', "doDeleteObject: $objId end" );
 		return $object;
+	}
+
+	/**
+	 * Update the object and its children search indexes.
+	 *
+	 * If an object is moved to the Trash Can the relations to this object are set to having 'deleted' relation.
+	 * In that case 'deleted' relations must be taken into account so $deletedRelations is set to 'true'.
+	 * If the same object is restored from the Trash Can its relations are no longer marked as 'deleted'
+	 * so $deletedRelations should be passed in as 'false'.
+	 *
+	 * @param Object $object The deleted/restored Object to be re-indexed.
+	 * @param string $area Where the $object is currently resided, so that the reindex can take place on the correct area. 'Workflow' or 'Trash'.
+	 * @param bool $deletedRelations During retrieval of the children, whether it should retrieve for the deleted relations as well.
+	 */
+	private static function indexObjectAndItsChildren( $object, $area, $deletedRelations )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizSearch.class.php';
+
+		$objId = $object->MetaData->BasicMetaData->ID;
+		$childs = DBObjectRelation::getObjectRelations( $objId, 'childs', null, $deletedRelations );
+		if( $childs ) {
+			// Collect the affected children
+			$childIds = array();
+			foreach( $childs as $child ) {
+				$childIds[] = $child['child'];
+			}
+
+			// Children in the Trash is not interesting to be re-indexed ( they are not returned in the normal Search result. )
+			$workflowOrTrashChildIds = DBObject::filterExistingObjectIds( $childIds, 'Workflow' );
+
+			// Child objects that are used too many times whether it is placed/contained etc will not be re-indexed to avoid performance loss.
+			// For example, an icon / logo (an image) that is placed on many layouts - will not be re-indexed.
+			$childIdsToBeReindexed = array();
+			if( $workflowOrTrashChildIds ) foreach( $workflowOrTrashChildIds as $childId ) {
+				if( !BizRelation::manifoldPlacedChild( $childId ) ) {
+					$childIdsToBeReindexed[] = $childId;
+				}
+			}
+
+			// Finally, re-index only the relevant children.
+			if( $childIdsToBeReindexed ) {
+				BizSearch::indexObjectsByIds( $childIdsToBeReindexed, true, array( 'Workflow' ) );
+			}
+		}
+
+		// Then, re-indexing the "subject" object. (the object that got deleted/restored ).
+		BizSearch::indexObjects( array( $object ), true, array( $area ), true );
 	}
 
 	/**
@@ -1333,7 +1383,7 @@ class BizDeletedObject
 
 		// Add to search index:
 		BizSearch::unIndexObjects( array( $id ), array('Trash'), true );
-		BizSearch::indexObjects( array( $object ), true/*$suppressExceptions*/, array('Workflow')/*$areas*/, true  );
+		self::indexObjectAndItsChildren( $object, 'Workflow', false );
 
 		return $object;
 	}

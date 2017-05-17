@@ -359,6 +359,12 @@ class BizSession
 		}
 		$userId = self::getUserInfo('id');
 
+		// Support cookie enabled sessions for JSON clients that run multiple web applications which need to share the
+		// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
+		if( $ticketid ) {
+			setLogCookie( 'ticket', $ticketid );
+		}
+
 		// Return LogOnResponse to client application
 		require_once BASEDIR.'/server/interfaces/services/wfl/WflLogOnResponse.class.php';
 		$ret = new WflLogOnResponse();

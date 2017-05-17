@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated 10.2.0 Code can be removed without further notice.
+ */
 require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
 require_once BASEDIR.'/server/utils/NumberUtils.class.php';

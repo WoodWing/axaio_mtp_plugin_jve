@@ -17,61 +17,72 @@ class ElvisAMFClient
 	/**
 	 * Send AMF message to Elvis.
 	 *
-	 * @param $service
-	 * @param $operation
-	 * @param $params
-	 * @param bool $secure
-	 * @param int $timeout The timeout for the call in seconds
+	 * For parameter $secure:
+	 * It is to specify whether or not the connection should be secured with session cookies.
+	 * Typically set FALSE to logon (or for services that don't require authorization).
+	 *
+	 * @param string $service The service name to be called.
+	 * @param string $operation The name of the operation to be called in the service.
+	 * @param array $params The list of data / information to be sent over in the service call.
+	 * @param int $operationTimeout The request / execution timeout of curl in seconds (This is not the connection timeout).
 	 * @return mixed
 	 * @throws object ElvisCSException converted by Sabre/AMF
 	 * @throws BizException
 	 */
-	public static function send($service, $operation, $params, $secure=true, $timeout=60)
+	public static function send( $service, $operation, $params, $operationTimeout=3600 )
 	{
-		$result = self::sendUnParsed($service, $operation, $params, $secure, $timeout);
+		$result = self::sendUnParsed( $service, $operation, $params, $operationTimeout );
 		return $result->body;
 	}
 
 	/**
 	 * Send AMF message to Elvis.
 	 *
-	 * @param string $service
-	 * @param string $operation
-	 * @param array $params
-	 * @param bool $secure Whether or not the connection should be secured with session cookies. Typically set FALSE to logon (or for services that don't require authorization).
-	 * @param int $timeout The timeout for the call in seconds
+	 * For parameter $secure:
+	 * It is to specify whether or not the connection should be secured with session cookies.
+	 * Typically set FALSE to logon (or for services that don't require authorization).
+	 *
+	 * @param string $service The service name to be called.
+	 * @param string $operation The name of the operation to be called in the service.
+	 * @param array $params The list of data / information to be sent over in the service call.
+	 * @param int $operationTimeout The request / execution timeout of curl in seconds (This is not the connection timeout).
 	 * @return mixed
 	 * @throws object ElvisCSException converted by Sabre/AMF
 	 * @throws BizException
 	 */
-	private static function sendUnParsed($service, $operation, $params, $secure=true, $timeout=60)
+	private static function sendUnParsed( $service, $operation, $params, $operationTimeout=3600 )
 	{
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 
 		$url = self::getEndpointUrl();
 		$client = new SabreAMF_Client($url, self::DESTINATION);
 		$client->setEncoding(SabreAMF_Const::FLEXMSG);
+
+		$resetCookiesOperationList = array( "login" ); // A list of operation(s) where the cookies should be reset ( to obtain a new session/cookies )
+		if( in_array( $operation, $resetCookiesOperationList ) ) {
+			// Resetting cookies in the memory and in the database ( Typically for Login, we want to refresh everything )
+			$client->setCookies( array() );
+			ElvisSessionUtil::clearSessionCookies();
+		}
+
 		$cookies = array();
-		if( $secure ) {
-			$cookies = ElvisSessionUtil::getSessionCookies();
-			if( $cookies ) {
-				$client->setCookies( $cookies );
-			}
+		$cookies = ElvisSessionUtil::getSessionCookies();
+		if( $cookies ) {
+			$client->setCookies( $cookies );
 		}
 		if( defined( 'ELVIS_CURL_OPTIONS' ) ) { // hidden option
 			$client->setCurlOptions( unserialize( ELVIS_CURL_OPTIONS ) );
 		}
-		LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.' - url:' . $url . '; secure:' . $secure );
+		LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.' - url:' . $url );
 		self::logService( 'Elvis_'.$service.'_'.$operation, $params, $cookies, true );
 
 		$result = null;
 		try {
 			$servicePath = $service . '.' . $operation;
-			$result = $client->sendRequest( $servicePath, $params, $timeout );
+			$result = $client->sendRequest( $servicePath, $params, $operationTimeout );
 			$cookies = $client->getCookies();
-			if( $cookies ) {
-				ElvisSessionUtil::saveSessionCookies( $cookies );
-			}
+			ElvisSessionUtil::updateSessionCookies( $cookies );
+
 		} catch (Exception $e) {
 			$message = 'An error occurred while communicating with the Elvis server at: ' . ELVIS_URL .
 					'. Please contact your system administrator to check if the Elvis server is running and properly configured for Enterprise.';
@@ -84,9 +95,8 @@ class ElvisAMFClient
 				 // We're not logged in, probably since the session is expired.
 				 // Login and re-send the service call.
 				self::login();
-				return self::sendUnParsed( $service, $operation, $params, $secure );
-			}
-			else {
+				return self::sendUnParsed( $service, $operation, $params );
+			} else {
 				self::handleError($result, $service, $operation);
 			}
 		}
@@ -103,16 +113,16 @@ class ElvisAMFClient
 	public static function login()
 	{
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
-		$credentials = ElvisSessionUtil::getCredentials();
+		$userShort = BizSession::getShortUserName();
+		$credentials = ElvisSessionUtil::getCredentials( $userShort );
 		if( !$credentials ) {
-			// EN-88706 When the Elvis connection is broken, the user works with a ticket that is valid
-			// for Enterprise but that session no longer has a valid ticket (jsessionid) for Elvis.
-			// Basically, the Enterprise ticket is then half broken. To recover from this situation
-			// we should ask the user to re-logon to Enterprise which implicitly will re-logon
-			// to Elvis as well. So here we act as if the Enterprise ticket is no longer valid by
-			// raising a generic ticket invalid error. This will trigger SC/CS to raise the re-logon
-			// dialog. (Note that this is more user friendly than raising an Elvis communication error
-			// for which we'd leave it up to the end-user to manually logout and login again.)
+			// This piece of code was implemented due to EN-88706 but should be no longer valid.
+			// Since ES 10.0.5/10.1.2/10.2.0 this should never happen anymore because the Elvis user credentials
+			// are no longer stored in the PHP session, but in the DB. Even for an ES setup with multiple
+			// AS machines behind an ELB, the credentials are shared among the AS machines. And, even when
+			// the PHP session would expire before the Enterprise ticket expires (whereby PHP automatically
+			// cleans the session cache data!) the AS has still access to the credentials and can automatically
+			// re-login to repair the backend connection.
 			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
 		}
 		self::synchronizedLogin( $credentials );
@@ -257,7 +267,7 @@ class ElvisAMFClient
 	 *
 	 * @param string $methodName Service method used to give log file a name.
 	 * @param mixed $transData Transport data to be written in log file using print_r.
-	 * @param array $cookies HTTP cookies sent with request or receieved with response.
+	 * @param array $cookies HTTP cookies sent with request or received with response.
 	 * @param boolean $isRequest TRUE to indicate a request, FALSE for a response, or NULL for error.
 	 */
 	private static function logService( $methodName, $transData, $cookies, $isRequest )

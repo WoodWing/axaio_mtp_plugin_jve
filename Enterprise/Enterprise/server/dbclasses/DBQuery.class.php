@@ -316,7 +316,14 @@ class DBQuery extends DBBase
 			// When the query doesn't return any rows, the $sth parameter is actually set
 			// with an empty resultset. Therefore we can check this way.
 			// This solves BZ#28864 .
-			throw new BizException('ERR_SYSTEM_PROBLEM', 'server', $dbdriver->error());
+
+			// EN-88267:
+			// It used to be "ERR_SYSTEM_PROBLEM", but since it is database-related-error plus
+			// Enterprise should not expose all the database ( especially query syntax errors )
+			// when it is not in Debug mode. With this, the error key 'ERR_SYSTEM_PROBLEM' is
+			// changed to 'ERR_DATABASE' so that we have a better overview / control on suppressing
+			// these errors when Enterprise is not running on Debug mode.
+			throw new BizException( 'ERR_DATABASE', 'server', $dbdriver->error());
 		}
 		return self::fetchResults($sth, 'ID');
 	}
@@ -1163,9 +1170,8 @@ class DBQuery extends DBBase
 		if (!empty($overruleissues)){
 			// if tar isn't joined yet, do a left join (prevent error with objects which don't have any issues assgined)
 			if (empty($issues)) {
-				$issueClause[] = " 1 = 1 ";
 				// Also take children into account (via relational targets) BZ#33659.
-				$sql .= " LEFT JOIN (" . self::getIssueSubSelect($issueClause) . ') tar ON (o.`id` = tar.`objectid`) ';	
+				$sql .= " LEFT JOIN (" . self::getIssueSubSelect() . ') tar ON (o.`id` = tar.`objectid`) ';
 			}
 			$wheres[] = '( tar.`issueid` NOT IN (' . implode(',', $overruleissues) . ') OR tar.`issueid` IS NULL )';
 		}
@@ -1447,29 +1453,62 @@ class DBQuery extends DBBase
 	 * with the given issue and objects that have been targetted for the given
 	 * issue or placed on layout with the issue, see BZ#15845
 	 *
+	 * For objects that are targeted for the given Issue, there will be no
+	 * object-relations (with other object's targeted Issue), hence, there
+	 * will be no deleted-relations (such as deletedContained, deletedPlaced).
+	 * Which means, these returned results are always from the Workflow area.
+	 *
+	 * However, for object (children objects) that have object-relations
+	 * (with other object's targeted Issue), these children objects will be
+	 * in a situation where they have deleted-relations (such as deletedContained,
+	 * deletedPlaced) when their parent object is moved to the TrashCan.
+	 * When this happens, these children objects should not be returned in the
+	 * results (since their relation to their parent is seen as -detached-).
+	 *
 	 * @param array $issueClauses
 	 * @return string SQL
 	 */
-	public static function getIssueSubSelect(array $issueClauses = array())
+	public static function getIssueSubSelect( array $issueClauses = array() )
 	{
 		$dbdriver = DBDriverFactory::gen();
-		$targetsTable = $dbdriver->tablename("targets");
-		$relationsTable = $dbdriver->tablename("objectrelations");
-		$issuesTable = $dbdriver->tablename("issues");
-		
-		$issueWhere = implode(' OR ', $issueClauses);
+		$targetsTable = $dbdriver->tablename( "targets" );
+		$relationsTable = $dbdriver->tablename( "objectrelations" );
+		$issuesTable = $dbdriver->tablename( "issues" );
+
+		$whereIssueClauses = '';
+		if( $issueClauses ) {
+			$whereIssueClauses = '('.implode( ') OR (', $issueClauses ).')';
+		}
+
+		// For Objects that have their own object-targets.
+		$whereObjectTargets = '';
+		if( $whereIssueClauses ) {
+			$whereObjectTargets = " WHERE {$whereIssueClauses} ";
+		}
+
+		// For Objects that have relations-targets
+		$whereParts = array();
+		if( $whereIssueClauses ) {
+			$whereParts[] = $whereIssueClauses;
+		}
+		// EN-88671: Children objects should not be returned when the parent objects
+		// have been deleted to the TrashCan (deleted from the Issue).
+		$whereParts[] = "(rel.`type` NOT LIKE 'Deleted%')"; // EN-88671
+		$whereSql = implode( ' AND ', $whereParts );
+		$whereObjectRelations = " WHERE {$whereSql} ";
+
 		$sql = "\nSELECT tar.`objectid` AS objectid, tar.`issueid` AS issueid"
-			. " FROM $targetsTable tar"
-			. " INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)"
-			. " WHERE $issueWhere"
-			. " AND tar.`objectrelationid` = 0"
-			. " UNION /*ChildrenInIssues*/"
-			. " SELECT rel.`child` AS objectid, tar.`issueid` AS issueid"
-			. " FROM $targetsTable tar"
-			. " INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)"
-			. " INNER JOIN $relationsTable rel ON ( rel.`id` = tar.`objectrelationid` )"
-			. " WHERE $issueWhere\n";
-		
+			." FROM $targetsTable tar"
+			." INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)"
+			.$whereObjectTargets
+			." AND tar.`objectrelationid` = 0"
+			." UNION /*ChildrenInIssues*/"
+			." SELECT rel.`child` AS objectid, tar.`issueid` AS issueid"
+			." FROM $targetsTable tar"
+			." INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)"
+			." INNER JOIN $relationsTable rel ON ( rel.`id` = tar.`objectrelationid` )"
+			.$whereObjectRelations;
+
 		return $sql;
 	}
 	

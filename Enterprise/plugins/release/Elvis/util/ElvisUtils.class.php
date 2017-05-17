@@ -144,13 +144,14 @@ class ElvisUtils {
 		require_once __DIR__.'/ElvisSessionUtil.php';
 		$cookies = ElvisSessionUtil::getSessionCookies();
 		if( $cookies ) {
-			$cookiesHeader = '';
+			$cookiesHeader = array();
 			foreach( $cookies as $name => $value ) {
-				$cookiesHeader .= "{$name}={$value}; ";
+				$encodedValue = urlencode( $value );
+				$cookiesHeader[] = "{$name}={$encodedValue}";
 			}
 			if( $cookiesHeader ) {
 				$options = array( 'http' => array(
-					'header' => "Cookie: {$cookiesHeader}",
+					'header' => "Cookie: ".implode('; ',$cookiesHeader ),
 				) );
 			}
 		}

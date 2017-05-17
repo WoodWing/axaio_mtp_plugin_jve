@@ -12,22 +12,19 @@
  * Support for cookie enabled sessions; The ticket can be provided in a cookie (although it can be set to the URL as well).
  * When the URL contains a 'version' parameter, a HTTP 404 is returned when that version no longer exists in the history.
  * If the requested file or version could not be found in the Workflow, the History and the Trash Can will be checked as well.
+ * However, the areas parameter can be used to search explicitly into the Workflow or Trash Can, or to swap the search order.
  * The CROSS_ORIGIN_HEADERS option (configserver.php) is supported that allows JavaScript clients hosted elsewhere to connect.
  * Error messages are not localised and so they should not be shown to end users. Clients should act on the HTTP codes.
- *
- * When the client calls the GetObjects service, and then downloads the files through fileindex.php without specifying the
- * object Version returned by GetObjectsResponse, it could happen that the object Version and the downloaded file Version
- * are not matching due to race-conditions (e.g. another user creates new version). It is the responsibility of the client
- * to get latest version from both worlds, probably by simply calling again. This entry point returns the file version
- * through the HTTP header named 'WW-Object-Version' to let client detect and recover whenever needed.
  *
  * The fileindex.php supports the following URL parameters:
  * - ticket:    A valid session ticket that was obtained through a LogOn service call (e.g. see SCEnterprise.wsdl).
  *              For stable URLs, clients may pass the ticket in the web cookie instead.
  * - objectid:  The ID of the workflow object in Enterprise. The object may reside in workflow, history or trash can.
  * - rendition: The file rendition. Options: native, preview, thumb, etc. See SCEnterprise.wsdl for the complete list.
- * - version:   Optional. The object version to retrieve the file for. When omitted, the last version is returned.
  * - inline:    Useful for web browsers. When omitted, the preview is downloaded as a file, else shown inline.
+ * - areas:     In which areas to search for. Supported values are 'Workflow' and 'Trash'. Use comma to specify both.
+ *              When both values are given, the sequence will be respected when searching. By default it searches in
+ *              the Workflow area first, and when not found it searches in Trash area.
  *
  * The following HTTP codes may be returned:
  * - HTTP 200: The file is found and is streamed back to caller.
@@ -35,9 +32,21 @@
  * - HTTP 401: When ticket is no longer valid. This should be detected by the client to do a re-login.
  *             The new ticket obtained should be applied to URL or cookie to try again.
  * - HTTP 403: The user has no Read access to the invoked object.
- * - HTTP 404: The file could not be found in the FileStore.
+ * - HTTP 404: The file could not be found. Either the file rendition is not available in the FileStore or the object is
+ *             not found in the requested areas.
  * - HTTP 405: Bad HTTP method requested by caller. Only GET and OPTIONS are supported.
  * - HTTP 500: Unexpected server error.
+ *
+ * When HTTP 200 is returned, the following WW properties are returned through the HTTP headers:
+ * - WW-Object-Version: When the client calls the GetObjects service, and then downloads the files through fileindex.php
+ *       it could happen that the object Version and the downloaded file Version are not matching due to race-conditions
+ *       (e.g. another user creates new version). It is the responsibility of the client to get latest version from both
+ *       worlds, probably by simply calling again. This entry point returns the file version through the HTTP header named
+ *       'WW-Object-Version' to let client detect and recover whenever needed.
+ * - WW-Attachment-Rendition: Clients may requests for the special 'placement' rendition, which is not a real rendition
+ *       but a query rendition that needs to resolved. The server will lookup the best rendition that is available in
+ *       FileStore. Which is the best (and 2nd best, etc) depends on object type. Which rendition is picked is returned
+ *       through this header to let the client know. See BizStorage::getFile() for the fallback algorithms per object type.
  */
 
 @set_time_limit(0);    // Run server (PHP script) forever.
@@ -111,15 +120,35 @@ class WW_FileIndex
 
 		// Grab the parameters we can work with.
 		$this->httpParams['ticket'] = isset($_GET['ticket']) ? $_GET['ticket'] : null;
-		if( !$this->httpParams['ticket'] ) { // support cookie enabled sessions
-			$this->httpParams['ticket'] = isset($_COOKIE['ticket']) ? $_COOKIE['ticket'] : null;
+		if( !$this->httpParams['ticket'] ) {
+			// Support cookie enabled sessions. When the client has no ticket provided in the URL params, try to grab the ticket
+			// from the HTTP cookies. This is to support JSON clients that run multiple web applications which need to share the
+			// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
+			require_once BASEDIR.'/server/secure.php';
+			$ticket = getOptionalCookie( 'ticket' );
+			if( $ticket ) {
+				setLogCookie( 'ticket', $ticket );
+				$this->httpParams['ticket'] = $ticket;
+			}
 		}
 		$this->httpParams['rendition'] = isset($_GET['rendition']) ? $_GET['rendition'] : null;
 		$this->httpParams['objectid'] = isset($_GET['objectid']) ? intval($_GET['objectid']) : null;
 		$this->httpParams['inline'] = array_key_exists( 'inline', $_GET );
-		$this->httpParams['version'] = isset($_GET['version']) ? $_GET['version'] : null;
+		$this->httpParams['areas'] = isset($_GET['areas']) ? $_GET['areas'] : 'Workflow,Trash';
+		$this->httpParams['expectedError'] = isset($_GET['expectedError']) ? $_GET['expectedError'] : null;
 
-		// Validate required parameters.
+		// Transform the comma separated areas param (string) into an array of string values.
+		$areas = explode( ',', $this->httpParams['areas'] );
+		$areas = array_map( 'strval', $areas );
+		$areas = array_map( 'trim', $areas );
+		if( array_diff( $areas, array( 'Workflow', 'Trash' ) ) ) {
+			$message = 'Please specify "Workflow" and/or "Trash" for the "areas" param at URL. '.
+				'Use "areas=Workflow,Trash" to specify both and to look into Workflow first, then Trash Can.';
+			throw new WW_FileIndex_HttpException( $message, 400 );
+		}
+		$this->httpParams['areas'] = $areas;
+
+			// Validate required parameters.
 		if( !$this->httpParams['ticket'] ) {
 			$message = 'Please specify "ticket" param at URL or provide it as a web cookie.';
 			throw new WW_FileIndex_HttpException( $message, 400 );
@@ -137,7 +166,11 @@ class WW_FileIndex
 		if( LogHandler::debugMode() ) {
 			$msg = 'Incoming HTTP params: ';
 			foreach( $this->httpParams as $key => $value ) {
-				$msg .= "{$key}=[{$value}] ";
+				if( is_array( $value ) ) {
+					$msg .= "{$key}=[".implode(',',$value)."] ";
+				} else {
+					$msg .= "{$key}=[{$value}] ";
+				}
 			}
 			LogHandler::Log( 'FileStoreService', 'DEBUG', $msg );
 		}
@@ -164,7 +197,7 @@ class WW_FileIndex
 
 		// Get essential object properties. Don't call GetObjects/QueryObjects to save time.
 		$objectId = $this->httpParams['objectid'];
-		$objectProps = $this->getObjectProperties( $objectId );
+		$objectProps = $this->getObjectProperties( $objectId, $this->httpParams['areas'] );
 
 		// Check if user has Read access to the object/file.
 		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
@@ -174,18 +207,17 @@ class WW_FileIndex
 		}
 
 		// Determine the file path and stream its content directly from FileStore over HTTP back to caller.
-		$version = $this->httpParams['version'] ? $this->httpParams['version'] : $objectProps['Version'];
 		$contentSource = trim($objectProps['ContentSource']);
 		if( $contentSource ) { // shadow
-			$filePath = $this->getFilePathForShadowObject( $user );
+			$attachment = $this->getFilePathForShadowObject( $user );
 		} else {
-			$filePath = $this->getStorePath( $objectProps, $version, $this->httpParams['rendition'] );
+			$attachment = $this->getStorePath( $objectProps, $this->httpParams['rendition'] );
 		}
-		if( !$filePath ) {
+		if( !$attachment ) {
 			$message = "File not found for object {$objectId}.";
 			throw new WW_FileIndex_HttpException( $message, 404 );
 		}
-		$this->handleDownload( $filePath, $objectProps['Name'], $objectProps['Format'], $version );
+		$this->handleDownload( $attachment->FilePath, $objectProps['Name'], $objectProps['Format'], $objectProps['Version'], $attachment->Rendition );
 
 		if( $this->transferFiles ) {
 			$bizTransfer = new BizTransferServer();
@@ -199,10 +231,11 @@ class WW_FileIndex
 	 * Retrieve essential object properties (that are just enough to check access rights and determine download file).
 	 *
 	 * @param string $objectId
+	 * @param string[] $areas
 	 * @return array Object properties with upper camel case keys (e.g. ContentSource)
 	 * @throws WW_FileIndex_HttpException
 	 */
-	protected function getObjectProperties( $objectId )
+	protected function getObjectProperties( $objectId, $areas )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBVersion.class.php';
@@ -211,12 +244,9 @@ class WW_FileIndex
 			'id', 'name', 'format', 'types', 'storename', 'majorversion', 'minorversion', // used by getStorePath
 			'documentid', 'type', 'publication', 'section', 'state', 'contentsource', 'routeto' // used by checkRightsForObjectProps
 		);
-		$propsPerObject = DBObject::getColumnsValuesForObjectIds( array($objectId), array('Workflow'), $columns );
+		$propsPerObject = DBObject::getColumnsValuesForObjectIds( array( $objectId ), $areas, $columns );
 		if( !isset($propsPerObject[$objectId]) ) {
-			$propsPerObject = DBObject::getColumnsValuesForObjectIds( array($objectId), array('Trash'), $columns );
-		}
-		if( !isset($propsPerObject[$objectId]) ) {
-			$message = "Object {$objectId} not found in Workflow nor Trash Can.";
+			$message = "Object {$objectId} not found in requested areas (".implode(',',$areas).").";
 			throw new WW_FileIndex_HttpException( $message, 404 );
 		}
 		$objectProps = $propsPerObject[$objectId];
@@ -243,30 +273,20 @@ class WW_FileIndex
 	 *
 	 * @param array $objectProps
 	 * @param string $rendition
-	 * @param string $version Object version in major.minor notation.
-	 * @return null|string File path.
+	 * @return null|Attachment The file descriptor
 	 * @throws WW_FileIndex_HttpException when the file could not be found.
 	 */
-	protected function getStorePath( $objectProps, $version, $rendition )
+	protected function getStorePath( $objectProps, $rendition )
 	{
+		$attachment = null;
 		require_once BASEDIR.'/server/bizclasses/BizStorage.php';
-
-		$filePath = null;
-		$types = unserialize( $objectProps['Types'] );
-		$storename = $objectProps['StoreName'];
-		if( array_key_exists( $rendition, $types ) ) {
-			$format = $types[ $rendition ];
-			$fileStorage = StorageFactory::gen( $storename, $objectProps['ID'], $rendition, $format, $version );
-			$bFound = $fileStorage->doesFileExist();
-			if( $bFound ) {
-				$filePath = $fileStorage->getFilename();
-			}
-		}
-		if( !$filePath ) {
+		$attachment = BizStorage::getFile( $objectProps, $rendition,
+			$objectProps['Version'], null, false );
+		if( !$attachment ) {
 			$message = "Rendition {$rendition} not available for object {$objectProps['ID']}.";
 			throw new WW_FileIndex_HttpException( $message, 404 );
 		}
-		return $filePath;
+		return $attachment;
 	}
 
 // Commented out;
@@ -307,36 +327,27 @@ class WW_FileIndex
 	 * It calls the more expensive GetObjects to make sure Shadow objects are handled well.
 	 *
 	 * @param string $user
-	 * @return null|string The file path
+	 * @return null|Attachment The file descriptor
 	 * @throws WW_FileIndex_HttpException
 	 */
 	private function getFilePathForShadowObject( $user )
 	{
-		$filePath = null;
+		$attachment = null;
 		$rendition = $this->httpParams['rendition'];
 		$objectId = $this->httpParams['objectid'];
 		try {
-// Commented out: Somehow this does not work for Elvis. For now we get latest version only for shadows.
-//			if( $this->httpParams['version'] ) {
-//				require_once BASEDIR.'/server/bizclasses/BizVersion.class.php';
-//				$versionInfo = BizVersion::getVersion( $objectId, $user, $this->httpParams['version'], $rendition, array( 'Workflow', 'Trash' ) );
-//				if( isset($versionInfo->File) ) {
-//					$filePath = $versionInfo->File->FilePath;
-//				}
-//			} else {
-				require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-				$object = BizObject::getObject( $objectId, $user, false, $rendition, array( 'NoMetaData' ) );
-				if( isset($object->Files[0]) ) {
-					$filePath = $object->Files[0]->FilePath;
-				}
-//			}
+			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+			$object = BizObject::getObject( $objectId, $user, false, $rendition, array( 'NoMetaData' ) );
+			if( isset($object->Files[0]) ) {
+				$attachment = $object->Files[0];
+			}
 		} catch( BizException $e ) {
 			throw WW_FileIndex_HttpException::createFromBizException( $e );
 		}
-		if( $filePath ) {
-			$this->transferFiles[] = $filePath;
+		if( $attachment->FilePath ) {
+			$this->transferFiles[] = $attachment->FilePath;
 		}
-		return $filePath;
+		return $attachment;
 	}
 
 	/**
@@ -346,9 +357,10 @@ class WW_FileIndex
 	 * @param string $fileName
 	 * @param string $format
 	 * @param string $version
+	 * @param string $rendition
 	 * @throws WW_FileIndex_HttpException
 	 */
-	private function handleDownload( $filePath, $fileName, $format, $version )
+	private function handleDownload( $filePath, $fileName, $format, $version, $rendition )
 	{
 		// The filename that is used for the content-disposition header.
 		require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
@@ -370,7 +382,7 @@ class WW_FileIndex
 				session_write_close();
 
 				// Write HTTP headers and file content to output stream.
-				$this->setHeaders( $filePath, $filename, $format, $version );
+				$this->setHeaders( $filePath, $filename, $format, $version, $rendition );
 				$this->streamDownloadFile( $fileReady, $fileDownload, $filePath );
 				
 				fflush( $fileReady );
@@ -395,8 +407,9 @@ class WW_FileIndex
 	 * @param string $filename
 	 * @param string $format Mime type.
 	 * @param string $version Object version in major.minor notation.
+	 * @param string $rendition
 	 */
-	private function setHeaders( $filePath, $filename, $format, $version )
+	private function setHeaders( $filePath, $filename, $format, $version, $rendition )
 	{
 		// Make sure to let download work for IE and Mozilla
 		$disposition = $this->httpParams['inline'] ? 'inline' : 'attachment'; // "inline" to view file in browser or "attachment" to download to hard disk
@@ -418,6 +431,7 @@ class WW_FileIndex
 		header( "Content-Disposition: $disposition; filename=\"$filename\"");
 		header( 'Content-length: ' . filesize($filePath) );
 		header( 'WW-Object-Version: ' . $version );
+		header( 'WW-Attachment-Rendition: ' . $rendition );
 
 		if( LogHandler::debugMode() ) {
 			$msg = 'Outgoing HTTP headers: <ul><li>'.implode( '</li><li>', headers_list() ).'</li></ul>';

@@ -860,16 +860,22 @@ if( !defined('SERVERFEATURES') ) {
 //          It is not allowed to have both CreatePagePDFOnProduce and CreatePageEPSOnProduce options enabled.
 //          This option has no effect when the CreatePageEPS option is enabled.
 //       CreatePagePDF
-//          (SC for InDesign feature.) When a Layout is saved in the Filestore, for each page
-//          a PDF file is generated and uploaded along with the document. When a page varies per Edition,
-//          for each Edition a PDF file is generated.
-//          It is not allowed to have both CreatePagePDF and CreatePageEPS options enabled.
+//          (SC for InDesign feature.) When a layout is saved in the Filestore, a PDF file is generated for each page
+//          and uploaded along with the document. When a page varies per Edition, a PDF file is generated for each Edition.
+//          A value can be specified for this option which should match one of the Adobe PDF Presets.
+//          Example: '[Smallest File Size]'.
+//          When this option is defined without a PDF preset value, the '[Press Quality]' will be used as the default
+//          preset.
+//          It is not allowed to have both CreatePagePDF and CreatePageEPS options enabled.
 //       CreatePagePDFOnProduce (default)
-//          (SC for InDesign feature.) Same as CreatePagePDF, but only when the Layout is saved in a Status
-//          for which the Output option is selected in the Workflow Status options.
-//          A value should be specified for this option which should match one of the Adobe PFD Presets,
-//          for example '[High Quality Print]'. Default value: '[Press Quality]'.
-//          This option supersedes the CreatePagePDF option for Statuses with the Output option selected.
+//          (SC for InDesign feature.) Same as CreatePagePDF, but only when the layout is saved in a status for which
+//          the Output option is selected in the Workflow Status options.
+//          A value can be specified for this option which should match one of the Adobe PDF Presets.
+//          Example: '[High Quality Print]'.
+//          Default value: '[Press Quality]'.
+//          This option can be left empty if the Workflow Status name is the same as the PDF preset name and when the
+//          'Output' option is selected for that Workflow Status.
+//          This option supersedes the CreatePagePDF option for Statuses that have the Output option selected.
 //       CreatePagePreview (default)
 //          (SC for InDesign feature.) When a Layout is saved in the Filestore, for each page
 //          a preview (JPEG) file is generated and uploaded along with the document. When a page varies per Edition,
