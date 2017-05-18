@@ -48,6 +48,8 @@ class WW_DIME_Record
 	/**
 	 * DIME length fields must be padded so that the length of the field is a multiple of a 4-byte interval
 	 *
+	 * @param integer $length
+	 * @return integer
 	 */
 	public static function padLength4Bytes ($length)
 	{
@@ -472,8 +474,6 @@ class WW_SOAP_Service
 	public static function getClassMap($soapAction)
 	{
 		// default behaviour: do nothing
-		$soapAction = $soapAction;
-		
 		return array();
 	}
 }
@@ -721,6 +721,7 @@ class WW_SOAP_Server
 	 * Processes a SOAP request, calls necessary functions, and sends a response back.
 	 *
 	 * @return boolean wether or not the request has been handled
+	 * @throws BizException
 	 */
 	public function handle ()
 	{
@@ -1213,6 +1214,8 @@ class WW_SOAP_Server
 	 * The content has only to be written to the transfer server if the content
 	 * is stored within the attachment ($attachment->Content is not null).
 	 * If the client has passed a fileurl the transfer is skipped.
+	 *
+	 * @param Attachment $attachment
 	 */
 	private static function transferAttachmentContent ( $attachment )
 	{
