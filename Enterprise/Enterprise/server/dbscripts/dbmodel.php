@@ -3922,11 +3922,11 @@ abstract class GenericGenerator
 	/**
 	 * function to generate insert statement
 	 *
-	 * @param array $index DB index info
+	 * @param string $line
 	 * @param array $table DB table info.
 	 * @param bool $auto true if auto-match on number of fields needs to be done (beware of , in values!!)
 	 */
-	abstract public function insert( $index, $table, $auto = true );
+	abstract public function insert( $line, $table, $auto = true );
 
 	/**
 	 * function to generate statements after all insert statements

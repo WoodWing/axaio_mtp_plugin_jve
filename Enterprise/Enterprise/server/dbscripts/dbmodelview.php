@@ -10,6 +10,7 @@ $dbStruct = new DBStruct();
 $allVersions = $dbStruct->getVersions();
 
 // use one version when explicitly requested
+$dbVersions = array();
 if( isset($_REQUEST['ver']) ) {
 	if( in_array( $_REQUEST['ver'], $allVersions ) ) {	
 		$dbVersions = array( $_REQUEST['ver'] ); 
