@@ -62,7 +62,6 @@ abstract class IssueEvent_EnterpriseConnector extends DefaultConnector
 	 */
 	public function processData( $eventInfo, $issue, $pluginData )
 	{
-		$pluginData = $pluginData; // Make analyzer happy.
 		LogHandler::Log('IssueEvent_Connector','INFO', 'processData(): Processing data for the Event: <pre>' . print_r( $eventInfo, 1 ) .
 			'</pre> Data:<pre>:' . print_r( $issue, 1 ) . '</pre>' );
 	}

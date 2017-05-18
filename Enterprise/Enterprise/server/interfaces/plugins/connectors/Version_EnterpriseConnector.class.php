@@ -24,8 +24,6 @@ abstract class Version_EnterpriseConnector extends DefaultConnector
 	 */
 	public function createVersion( $objectId, $sourceVersion, $nextVersion, $storename, $setObjPropMode )
 	{
-		$objectId = $objectId; $sourceVersion = $sourceVersion; $nextVersion = $nextVersion; $storename = $storename;
-		$setObjPropMode = $setObjPropMode;
 	}
 
 	/**
@@ -36,7 +34,6 @@ abstract class Version_EnterpriseConnector extends DefaultConnector
 	 */
 	public function deleteVersion( $objectId, $version, $storeName )
 	{
-		$objectId = $objectId; $version = $version; $storeName = $storeName;
 	}
 
 	/**

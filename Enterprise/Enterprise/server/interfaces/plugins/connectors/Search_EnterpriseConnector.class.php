@@ -116,6 +116,8 @@ abstract class Search_EnterpriseConnector extends DefaultConnector
 	 * uses this implementation when reindexing objects, in some special cases it might be necessary to forego the
 	 * AutoCommit functionality and instead do a direct commit, for example in the cases where a race condition might
 	 * occur.
+	 *
+	 * @param bool $directCommit
 	 */
 	/*abstract*/ public function setDirectCommit( $directCommit )
 	{
@@ -140,12 +142,33 @@ abstract class Search_EnterpriseConnector extends DefaultConnector
 	 * 					 9 - Very good and fast
 	 * 					10 - perfect and lightening fast
 	 * 					11 - over the top to overrule it all
+	 *
+	 * @param string $query
+	 * @param array $params
+	 * @param int $firstEntry
+	 * @param int $maxEntries
+	 * @param string $queryMode
+	 * @param bool $hierarchical
+	 * @param QueryOrder[] $queryOrder
+	 * @param string[] $minimalProps
+	 * @param string[] $requestProps
+	 * @return bool
 	 */
 	abstract public function canHandleSearch( $query, $params, $firstEntry, $maxEntries, $queryMode, $hierarchical, $queryOrder, $minimalProps, $requestProps  );
 
 	/**
 	 * Performs the search request.
-	 * 
+	 *
+	 * @param string $query
+	 * @param array $params
+	 * @param int $firstEntry
+	 * @param int $maxEntries
+	 * @param string $queryMode
+	 * @param bool $hierarchical
+	 * @param QueryOrder[] $queryOrder
+	 * @param string[] $minimalProps
+	 * @param string[] $requestProps
+	 * @param array $areas
 	 * @return mixed WflQueryObjectsResponse or WflNamedQueryResponse
 	 */
 	abstract public function doSearch( $query, $params, $firstEntry, $maxEntries, $queryMode, $hierarchical, $queryOrder, $minimalProps, $requestProps, $areas=array());

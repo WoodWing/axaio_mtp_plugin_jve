@@ -24,8 +24,9 @@ abstract class Spelling_EnterpriseConnector extends DefaultConnector
 
 	/**
 	 * Check spelling for words that is passed in.
+	 *
 	 * @param  array $dictionaries Language of the dictionary.
-	 * @param string $stringToCheck The string to get the spelling checked.
+	 * @param array $wordsToCheck The words to get the spelling checked.
 	 * @return array Misspelled words found in sentences passed in.
 	 */
 	abstract public function checkSpelling( array $dictionaries, array $wordsToCheck );
