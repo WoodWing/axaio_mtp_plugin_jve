@@ -47,6 +47,11 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Basics_TestCase 
 		$this->ticket = $this->vars['BuildTest_MultiChannelPublishing']['ticket'];
 
 		do {
+			// Create a Publish Form Template and a Dossier.
+			if( !$this->setupTestData() ) {
+				break;
+			}
+
 			// Scenario 00: Test the basics
 			if( !$this->testScenario00() ) {
 				break;
@@ -66,16 +71,12 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Basics_TestCase 
 	/**
 	 * Performs create, get and delete operations on PublishForm objects.
 	 *
-	 * @return void
+	 * @return bool
 	 */
 	private function testScenario00()
 	{
+		$retVal = true;
 		do {
-			// Create a Publish Form Template and a Dossier.
-			if( !$this->setupTestData() ) {
-				break;
-			}
-
 			// Test creation of a faulty PublishForm, lacking a relation, which should return an null Object.
 			$stepInfo = 'Try to create a faulty Publish Form that has no object relation.';
 			$this->mcpUtils->setExpectedError( '(S1012)' );
@@ -84,6 +85,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Basics_TestCase 
 			if( !is_null($this->form) ) {
 				$this->setResult( 'ERROR', 'Succeeded in creating a PublishForm with a missing '.
 					'relation which should not be possible.' );
+				$retVal = false;
 			}
 
 			// Test creation of a faulty PublishForm, lacking a relational target, which should return an null Object.
@@ -94,6 +96,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Basics_TestCase 
 			if( !is_null($this->form) ) {
 				$this->setResult( 'ERROR', 'Succeeded in creating a PublishForm with a missing '.
 					'relational target which should not be possible.' );
+				$retVal = false;
 			}
 
 			// Create a Publish Form (based on the template) and assign it to the dossier.
@@ -101,17 +104,20 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Basics_TestCase 
 			$this->form = $this->mcpUtils->createPublishFormObject( $this->template, $this->dossier, $stepInfo );
 			if( is_null($this->form) ) {
 				$this->setResult( 'ERROR', 'Could not create Publish Form object.' );
+				$retVal = false;
 			}
 		} while( false );
+		return $retVal;
 	}
 
 	/**
 	 * Tests that upon changing the containing Dossier name that the Publish Form name is changed as well.
 	 *
-	 * @return void
+	 * @return bool
 	 */
 	private function testScenario01()
 	{
+		$retVal = true;
 		do {
 			// Use the created Form, to see the updated result when we update the dossier.
 			require_once BASEDIR.'/server/services/wfl/WflSetObjectPropertiesService.class.php';
@@ -141,16 +147,18 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Basics_TestCase 
 					}
 				}
 			} catch ( BizException $e ) {
-				$e = $e; // Keep the analyzer happy.
 				$this->setResult( 'ERROR', $scenarioString . 'There was an error during the execution of the services ' .
 					'while testing the changed PublishForm name.');
+				$retVal = false;
 				break;
 			}
 
 			if ( !$result ) {
 				$this->setResult( 'ERROR', $scenarioString . 'The PublishForm name does not match the Dossier name.');
+				$retVal = false;
 			}
 		} while( false );
+		return $result;
 	}
 
 	/**

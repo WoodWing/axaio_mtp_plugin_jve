@@ -173,7 +173,8 @@ class WW_TestSuite_HealthCheck2_AutoPurge_TestCase extends TestCase
 		require_once BASEDIR.'/server/bizclasses/BizServerJobConfig.class.php';
 		$bizJobConfig = new BizServerJobConfig();
 		$dbConfigs = $bizJobConfig->listJobConfigs();
-		
+
+		$userId = null;
 		foreach ( $dbConfigs as /* $server => */$jobConfigs ) {
 			foreach( $jobConfigs as $jobConfig ) {
 				if( $jobConfig->JobType == 'AutoPurgeTrashCan' ) {

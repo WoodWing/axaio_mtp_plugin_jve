@@ -119,7 +119,7 @@ class WW_TestSuite_BuildTest_Admin_StatusPhase_TestCase extends TestCase
 	/**
 	 * Change stdClass type status returned from database to State object.
 	 *
-	 * @param stdClass $status Status information received from the database as stdClass.
+	 * @param AdmStatus $status Status information received from the database as stdClass.
 	 *
 	 * @return State new State object to work with in this test.
 	 */

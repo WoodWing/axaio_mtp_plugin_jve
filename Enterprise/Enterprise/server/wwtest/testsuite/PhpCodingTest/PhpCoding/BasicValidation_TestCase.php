@@ -137,8 +137,6 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 
 	/**
 	 * Performs the test as written in module header.
-	 *
-	 * @return boolean Whether or not all PHP files are correct.
 	 */
 	final public function runTest()
 	{
@@ -227,7 +225,6 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 	 * In case the file is encrypted no validation is done.
 	 *
 	 * @param string $filePath Full file path of PHP file.
-	 * @return string Errors and/or warnings. Empty when fine.
 	 */
 	private function checkFile( $filePath )
 	{
@@ -263,7 +260,6 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 	 * @param string $filePath Full file path of PHP file.
 	 * @param string $sourceCode Content of PHP file.
 	 * @param array $tokens Parsed tokens of the PHP file.
-	 * @return string Errors and/or warnings. Empty when fine.
 	 */
 	private function checkInclude( $filePath, &$sourceCode, &$tokens )
 	{
@@ -480,7 +476,6 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 	 * @param string $filePath Full file path of PHP file.
 	 * @param string $sourceCode Content of PHP file.
 	 * @param array $tokens Parsed tokens of the PHP file.
-	 * @return string Errors and/or warnings. Empty when fine.
 	 */
 	private function checkConstructors( $filePath, &$sourceCode, &$tokens )
 	{

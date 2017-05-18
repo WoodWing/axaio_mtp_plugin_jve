@@ -395,6 +395,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 	private function testScenario06()
 	{
 		$errorReport = null;
+		$article = null;
 
 		do {
 			// Create the basic setup.
@@ -925,6 +926,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 	 *
 	 * @param integer $publishFormId The Publish Form Object ID.
 	 * @param bool $setPublished Whether or not to set the Publish Form as Published in the Target. Default true.
+	 * @return bool
 	 */
 	private function setPublishFormPublicationStatus( $publishFormId, $setPublished=true )
 	{
@@ -996,6 +998,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 	 * @param integer $objectId The Object ID to check for.
 	 * @param array $areas The areas to check in.
 	 * @return bool Whether or not an object exists in the specified areas.
+	 * @throws BizException
 	 */
 	private function doesObjectExist( $objectId, $areas )
 	{
@@ -1085,6 +1088,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 	 */
 	private function getLatestObject( $objId, $scenario )
 	{
+		$object = null;
 		try{
 			$user = $this->vars['BuildTest_MultiChannelPublishing']['testOptions']['User'];
 			$object = BizObject::getObject( $objId, $user, false, 'none', array( 'Relations', 'Targets'),

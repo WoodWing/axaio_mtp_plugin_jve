@@ -17,7 +17,6 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_ResourceStrings_TestCase extends Test
     
 	/**
 	 * Performs the test as written in module header.
-	 * @return boolean  Wether or not all PHP files are correct.
 	 */
 	final public function runTest()
 	{

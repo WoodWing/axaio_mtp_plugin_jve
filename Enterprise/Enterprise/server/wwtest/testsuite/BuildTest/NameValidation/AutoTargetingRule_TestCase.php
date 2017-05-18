@@ -141,7 +141,7 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 			$this->state->DefaultRouteTo = 'print';
 
 			// Create a category
-			$this->category = $this->createCategory( $this->publication->Id, 'Create Category' );
+			$this->category = $this->createCategory();
 
 			// Create a Dossier.
 			$stepInfo = 'Create the Dossier object.';
@@ -245,6 +245,7 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 
 		// Delete the dossier.
 		if( $this->dossier->MetaData->BasicMetaData->ID ){
+			$errorReport = null;
 			if( !$this->utils->deleteObject( $this, $this->ticket, $this->dossier->MetaData->BasicMetaData->ID,
 				'Delete dossier object', $errorReport ) ) {
 				$this->setResult( 'ERROR',
@@ -255,28 +256,28 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 		// Delete the first issue.
 		if( $this->issue->Id ){
 			if( !$this->utils->removeIssue( $this, $this->ticket, $this->publication->Id, $this->issue->Id) ) {
-				$this->setResult( 'ERROR',  'Could not tear down issue with id ' . $this->issue->Id . '.' . $errorReport );
+				$this->setResult( 'ERROR',  'Could not tear down issue with id ' . $this->issue->Id . '.' );
 			}
 		}
 
 		// Delete the second issue.
 		if( $this->issue2->Id ){
 			if( !$this->utils->removeIssue( $this, $this->ticket, $this->publication->Id, $this->issue2->Id) ) {
-				$this->setResult( 'ERROR',  'Could not tear down issue with id ' . $this->issue2->Id . '.' . $errorReport );
+				$this->setResult( 'ERROR',  'Could not tear down issue with id ' . $this->issue2->Id . '.' );
 			}
 		}
 
 		// Delete the Facebook channel.
 		if( $this->channel->Id ){
 			if( !$this->utils->removePubChannel( $this, $this->ticket, $this->publication->Id, $this->channel->Id) ) {
-				$this->setResult( 'ERROR',  'Could not tear down channel with id ' . $this->channel->Id . '.' . $errorReport );
+				$this->setResult( 'ERROR',  'Could not tear down channel with id ' . $this->channel->Id . '.' );
 			}
 		}
 
 		// Delete the Print channel.
 		if( $this->channel2->Id ){
 			if( !$this->utils->removePubChannel( $this, $this->ticket, $this->publication->Id, $this->channel2->Id) ) {
-				$this->setResult( 'ERROR',  'Could not tear down channel with id ' . $this->channel2->Id . '.' . $errorReport );
+				$this->setResult( 'ERROR',  'Could not tear down channel with id ' . $this->channel2->Id . '.'  );
 			}
 		}
 
@@ -509,6 +510,7 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 	 * Creates a new category.
 	 *
 	 * @return Category|null Null on error.
+	 * @throws BizException
 	 */
 	public function createCategory()
 	{
@@ -546,7 +548,8 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 	/**
 	 * Deletes a category.
 	 *
-	 * @return Category|null Null on error.
+	 * @return AdmDeleteSectionsResponse
+	 * @throws BizException
 	 */
 	public function deleteCategory()
 	{

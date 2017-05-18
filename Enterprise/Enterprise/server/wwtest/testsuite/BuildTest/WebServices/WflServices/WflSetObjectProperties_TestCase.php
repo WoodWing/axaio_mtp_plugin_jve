@@ -109,7 +109,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSetObjectProperties_Test
 	 * Removes dossiers created at {@link: setupTestData()}.
 	 *
 	 * @param string $tipMsg To be used in the error message if there's any error.
-	 * @return bool Whether or not the deletions were successful.
 	 */
 	private function tearDownTestData( $tipMsg )
 	{
@@ -176,6 +175,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSetObjectProperties_Test
 	 * @param string $stepInfo Extra logging info.
 	 * @param string|null $expectedError S-code when error expected. NULL when no error expected.
 	 * @param array $changedPropPaths List of changed metadata properties, expected to be different.
+	 * @return bool
 	 */
 	private function setObjectProperties( Object $object, $stepInfo, $expectedError, array $changedPropPaths )
 	{

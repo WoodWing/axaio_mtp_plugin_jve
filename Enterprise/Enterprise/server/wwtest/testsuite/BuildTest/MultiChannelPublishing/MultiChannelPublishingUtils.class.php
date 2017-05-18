@@ -376,6 +376,7 @@ class MultiChannelPublishingUtils
 	 * @param string $stepInfo Extra logging info.
 	 * @param string|null $layoutName To give the article a name. Pass NULL to auto-name it: 'BuildTestLayout'+<datetime>
 	 * @param bool $lock Whether to lock the Layout during creation.
+	 * @param string $publicationChannel
 	 * @return Object|null The created layout; Null otherwise.
 	 */
 	public function createLayout( $stepInfo, $layoutName=null, $lock=false, $publicationChannel='print' )
@@ -396,6 +397,8 @@ class MultiChannelPublishingUtils
 		$state = BizObjectComposer::getFirstState( $user, $publication->Id, null, null, 'Layout' );
 		$transferServer = new BizTransferServer();
 
+		$pubChannelInfo = null;
+		$issueInfo = null;
 		if( $publicationChannel == 'web' ) {
 			// Take from 'web' channel
 			$pubChannelInfo = $this->vars['BuildTest_MultiChannelPublishing']['webPubChannel'];
@@ -575,7 +578,7 @@ class MultiChannelPublishingUtils
 	 * @param Object $template The template to base an Object Relation on.
 	 * @param Object $dossier The Dossier to create the Object Relation for
 	 * @param string $stepInfo Extra logging info.
-	 * @param $relationOption how to set up the relations for this object.
+	 * @param string $relationOption how to set up the relations for this object.
 	 * @param MetaData $metaData Optional MetaData object to be set for the object.
 	 * @param array|null $formRelationTargets The form relational targets. When null is sent, the first dossier target is used.
 	 * @return null|Object The created object or null if unsucessful.
@@ -605,8 +608,8 @@ class MultiChannelPublishingUtils
 	 * @param Object $template
 	 * @param Object $dossier
 	 * @param array|null $formRelationTargets The form relational targets. When null is sent, the first dossier target is used.
-	 * @param string $stepInfo Extra logging info.
 	 * @param string|null $case self::RELATION_NORMAL, self::RELATION_MISSING_ERROR or self::RELATION_TARGET_ERROR
+	 * @return Relation[]
 	 */
 	private static function createRelationsForFormObject( $template, $dossier, $formRelationTargets, $case )
 	{
@@ -945,6 +948,7 @@ class MultiChannelPublishingUtils
 	 * @param string &$errorReport To fill in the error message if there's any during the delete operation.
 	 * @param bool $permanent Whether or not to delete the object permanently.
 	 * @param array $areas The areas to test against.
+	 * @return bool
 	 */
 	public function deleteObject( $objId, $stepInfo, &$errorReport, $permanent=true, $areas=array('Workflow'))
 	{
@@ -1024,7 +1028,6 @@ class MultiChannelPublishingUtils
 	 */
 	public static function setResult( $status, $message, $configTip='' )
 	{
-		$configTip = $configTip;
 		$level = $status == 'NOTINSTALLED' ? 'WARN' : $status;
 		$level = $status == 'FATAL' ? 'ERROR' : $status;
 		LogHandler::Log( 'wwtest', $level, $message );
@@ -1053,7 +1056,7 @@ class MultiChannelPublishingUtils
 	 * @param string $childId
 	 * @param string $relationType
 	 * @param Target[] $targets
-	 * @param WflCreateObjectRelationsResponse|null
+	 * @return WflCreateObjectRelationsResponse|null
 	 */
 	public function createRelationObject( $stepInfo, $parentId, $childId, $relationType, $targets=null )
 	{
@@ -1088,7 +1091,7 @@ class MultiChannelPublishingUtils
 	 * @param int $pubId
 	 * @param int $pubChannelId
 	 * @param array $newIssues
-	 * @return AdmCreateIssuesResponse The Issue(s) created.
+	 * @return AdmCreateIssuesResponse|bool The Issue(s) created, or false on error.
 	 */
 	public function createIssues( $stepInfo, $pubId, $pubChannelId, $newIssues )
 	{

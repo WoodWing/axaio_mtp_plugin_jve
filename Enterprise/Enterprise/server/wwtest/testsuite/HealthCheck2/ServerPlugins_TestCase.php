@@ -247,7 +247,7 @@ class WW_TestSuite_HealthCheck2_ServerPlugins_TestCase extends TestCase
 	 * Returns display name of the plugin that has content source $contentSourceName.
 	 *
 	 * @param PluginInfoData[] $pluginInfos List of plugin info data.
-	 * @param ConnectorInfoData[] $connectorInfos List of connector info.
+	 * @param ConnectorInfoData[][] $connectorInfos List of connector info.
 	 * @param string $contentSourceName Content Source name.
 	 * @return null|string The display name of the plugin that has content source $contentSourceName.
 	 */

@@ -237,6 +237,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmIssues_TestCase extends 
 	/**
 	 * Retrieves an issue from the DB through the GetIssues admin web service.
 	 *
+	 * @param integer $issueId
 	 * @return AdmGetIssuesResponse
 	 */	
 	private function getIssue( $issueId )

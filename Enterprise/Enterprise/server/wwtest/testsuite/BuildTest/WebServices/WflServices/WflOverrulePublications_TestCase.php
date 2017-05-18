@@ -163,7 +163,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflOverrulePublications_Tes
 	 * Removes created objects during testing and removes issues with overruled brands.
 	 *
 	 * @param string $tipMsg To be used in the error message if there's any error.
-	 * @return bool Whether or not the deletions were successful.
 	 */
 	private function tearDownTestData( $tipMsg )
 	{
@@ -845,10 +844,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflOverrulePublications_Tes
 	/**
 	 * Creates a new article.
 	 *
-	 * @param $stepInfo Step description used in case of an error
-	 * @param $articleName Name used for object creation
+	 * @param string $stepInfo Step description used in case of an error
+	 * @param string $articleName Name used for object creation
 	 * @param Publication $publication
-	 * @param Issue $issues
+	 * @param Issue[] $issues
 	 * @param State $status
 	 * @param Category $category
 	 * @param array $relations

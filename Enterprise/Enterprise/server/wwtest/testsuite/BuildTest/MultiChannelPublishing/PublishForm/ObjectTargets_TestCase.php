@@ -35,7 +35,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ObjectTargets_Te
 	public function getTestMethods()
 	{
 		return
-			'Test with objects assigned to a print channel: <ul>';
+			'Test with objects assigned to a print channel: <ul>'.
 				'<li>01 Creates a Dossier, a Layout and an Image object (CreateObjects).</li>'.
 				'<li>02 Place the Image onto the Layout (CreateObjectRelations).</li>'.
 				'<li>03 Move the Image and the Layout into the Dossier (CreateObjectRelations).</li>'.
@@ -186,6 +186,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ObjectTargets_Te
 	 * To release the lock of an object.
 	 *
 	 * @param Object $objectToUnlock
+	 * @param string $stepInfo
 	 */
 	private function unlockObject( $objectToUnlock, $stepInfo )
 	{

@@ -1883,7 +1883,7 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 	/**
 	 * Composes a web service request of a delete object relation.
 	 *
-	 * @return WflCreateObjectRelationsResponse
+	 * @return WflDeleteObjectRelationsRequest
 	 */
 	private function composeDetachArticleRequest()
 	{
@@ -1922,7 +1922,7 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 	/**
 	 * Composes a web service request of a create object relation.
 	 *
-	 * @return WflCreateObjectRelationsRequest.
+	 * @return WflDeleteObjectRelationsRequest.
 	 */
 	private function composeDeleteArticleDossierRelationRequest()
 	{

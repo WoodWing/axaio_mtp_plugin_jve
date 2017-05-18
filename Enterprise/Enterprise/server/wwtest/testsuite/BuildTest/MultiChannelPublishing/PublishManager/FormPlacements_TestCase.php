@@ -156,7 +156,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishManager_FormPlacement
 				$request->Relations = array( $relation );
 				$service->execute( $request );
 			} catch( BizException $e ) {
-				$e = $e; // A happy analyzer is a good analyzer.
 				$this->setResult( 'ERROR', 'Scenario 2: Unable to update the ObjectRelation, which is unexpected.' );
 				$retVal = false;
 			}
@@ -312,7 +311,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishManager_FormPlacement
 				}
 			}
 		} catch ( BizException $e ) {
-			$e = $e; // Keep the Analyzer happy.
 			$result = false;
 		}
 		return $result;

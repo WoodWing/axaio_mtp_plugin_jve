@@ -64,6 +64,8 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 		$dbConfig .= '- Database name (DBSELECT): '.DBSELECT.'<br/>';
 		$dbdriver = DBDriverFactory::gen( DBTYPE, DBSERVER, DBUSER, DBPASS, DBSELECT, false );
 		if( !$dbdriver->isPhpDriverExtensionLoaded() ) {
+			$msg = null;
+			$help = null;
 			switch( DBTYPE )
 			{
 				case 'mysql':
@@ -204,25 +206,30 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 	
 	/**
 	 * Function checks if the id of an object in the 'smart_deletedobjects' table is higher than the auto_increment
-	 * value of the 'smart_objects' (BZ#18312) 
+	 * value of the 'smart_objects' (BZ#18312)
+	 *
+	 * @param integer $objectID
+	 * @param integer $deletedId
+	 * @return bool
 	 */
 	private function testDeletedObjectIDs(&$objectID, &$deletedId)
 	{
 		// Get the autoincrement id of the 'smart_objects' table
 		$dbdriver = DBDriverFactory::gen();
+		$nextObjectId = null;
 		$objectsTable = DBPREFIX."objects";
 		if ( DBTYPE == 'mysql' ) {
 			$sql = "SHOW TABLE STATUS LIKE '$objectsTable'";
 			$sth = $dbdriver->query($sql);
 			$row = $dbdriver->fetch($sth);
-			$objectsID = $row['Auto_increment'];
+			$nextObjectId = $row['Auto_increment'];
 			//LogHandler::Log('wwtest', 'DEBUG', 'smart_objects autoincrement ID: '.print_r($objectsID, true));
 		}
 		elseif( DBTYPE == 'mssql') {
 			$sql = "Select IDENT_CURRENT('$objectsTable') as id";
 			$sth = $dbdriver->query($sql);
 			$row = $dbdriver->fetch($sth);
-			$objectsID = $row['id'] + 1; // The next identity value is the current
+			$nextObjectId = $row['id'] + 1; // The next identity value is the current
 										 // value plus 1.
 			//LogHandler::Log('wwtest', 'DEBUG', 'smart_objects autoincrement ID: '.print_r($objectsID, true));
 		}
@@ -248,8 +255,8 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 		//LogHandler::Log('wwtest', 'DEBUG', 'smart_deletedObjects result: '.print_r($deletedObjectsID, true));
 	
 		// Compare the id's. If the deletedObjects ID is equal or higher we are in a fault situation
-		if ( $deletedObjectsID && $deletedObjectsID >= $objectsID ) {
-			$objectID = $objectsID;
+		if ( $deletedObjectsID && $deletedObjectsID >= $nextObjectId ) {
+			$objectID = $nextObjectId;
 			$deletedId = $deletedObjectsID;
 			return false;
 		}

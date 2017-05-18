@@ -340,7 +340,7 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 	/**
 	 * Return the first status found for the object type in publicationInfo.
 	 *
-	 * @param string $objecType
+	 * @param string $objectType
 	 * @return Status
 	 */
 	private function getStatus( $objectType )
@@ -360,6 +360,7 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 	 * @param WflLogOnResponse $logonResponse
 	 * @param string $brandName
 	 * @param string $issueName
+	 * @return bool Whether or not successful
 	 */
 	private function resolveBrandPubChannelIssue( $logonResponse, $brandName, $issueName )
 	{
@@ -695,8 +696,6 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 	
 	/**
 	 * Call AbortOperation publishing service.
-	 *
-	 * @param string $operation Possbile values: Preview, Publish, Update or UnPublish
 	 */
 	private function callAbortOperation()
 	{	
@@ -719,7 +718,7 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 	 * For each phase, it checks for [progress] and [maximum],
 	 * it displays error when [progress] exceeds [maximum]. i.e Progress cannot be more than the Total.
 	 *
-	 * @param OperationProgressResponse $response Response returned by OperationProgress service.
+	 * @param PubOperationProgressResponse $response Response returned by OperationProgress service.
 	 * @param string $operation Possible values: Preview, Publish, Update or UnPublish
 	 */
 	private function verifyOperationProgress( $response, $operation )

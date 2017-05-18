@@ -156,6 +156,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_WflLogon_TestCase extends Te
 	 *
 	 * @param WflLogOnResponse $response
 	 * @param bool Whether or not all test data could be found.
+	 * @return bool
 	 */	
 	private function getAdminSetupFromLogOnResponse( WflLogOnResponse $response )
 	{

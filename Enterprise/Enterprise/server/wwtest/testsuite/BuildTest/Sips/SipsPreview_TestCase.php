@@ -44,6 +44,7 @@ class WW_TestSuite_BuildTest_Sips_SipsPreview_TestCase extends TestCase
 	private function doTest()
 	{			
 		$testImagesDir = dirname(__FILE__) .'/Sips_test_images/';
+		$images = array();
 		if( ($handle = opendir($testImagesDir)) ) {
 			// Loop through the dir to get the all images
 			while (false !== ($file = readdir($handle))) {

@@ -97,6 +97,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 	 * - $this->issues and $this->iss
 	 * - $this->sections and $this->sec
 	 * - $this->statuses and $this->status
+	 *
+	 * @param PublicationInfo $pubInfo
 	 */
 	private function setupTestData( $pubInfo )
 	{
@@ -254,7 +256,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 	 * and $this->status with this first Article status found under that brand.
 	 *
 	 * @param PublicationInfo $pubInfo Brand setup info.
-	 * @return bool Whether or not $this->statuses and $this->status could be initialized.
 	 */
 	private function setupStatuses( $pubInfo )
 	{
@@ -279,10 +280,12 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 	 * Enterprise. 
 	 *
 	 * @param WflGetDialog2Request $req Request to be sent for getDialog2
+	 * @return bool
 	 */
 	private function setupTestDataForRoundTrip( $req )
 	{
 		// Prefer picking another Category. If not available, use the current one.
+		$sec = null;
 		if( $this->sections ) foreach( $this->sections as $sec ) {
 			if( $this->sec->Id != $sec->Id ) {
 				$this->sec = $sec;
@@ -293,6 +296,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 			array( new PropertyValue( $sec->Id, $sec->Name ) ) );
 
 		// Prefer picking another Issue. If not available, use the current one.
+		$iss = null;
 		if( $this->issues ) foreach( $this->issues as $iss ) {
 			if( $this->iss->Id != $iss->Id ){
 				$this->iss = $iss;
@@ -303,6 +307,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 			array( new PropertyValue( $iss->Id, $iss->Name ) ) );
 
 		// Prefer picking another Status. If not available, use the current one.
+		$status = null;
 		if( $this->statuses ) foreach( $this->statuses as $status ){
 			if( $this->status->Id != $status->Id && $status->Type == 'Article' ) {
 				$this->status = $status;
@@ -357,6 +362,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 	 * If any of the above has different value compared to the getDialog2 request or
 	 * having unexpected value, it will raise error.
 	 *
+	 * @param WflGetDialog2Request $req
 	 * @param WflGetDialog2Response $resp GetDialog2 response returned by getDialog2 service.
 	 */
 	private function checkRespMetaData( $req, $resp )
@@ -393,7 +399,13 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 						}
 					}
 					if( !$found ){
-						if( !$this->iss ){ // happens when there's no issue defined in the very first getDialog request
+						if( $this->iss ){ // getDialog request is being sent to server second time onwards
+							$errorMessage	= $metaData->Property . ' is not matched with the chosen one:' . PHP_EOL .
+								$this->iss->Name . '(id=' . $this->iss->Id . ') is sent on request,but ' .
+								$metaData->PropertyValues[0]->Display . '(id=' . $metaData->PropertyValues[0]->Value . ') '.
+								'is returned on response';
+							$tipsMessage	= 'Something went wrong in issue round trip!, check on getDialog2 resp.';
+						} else { // happens when there's no issue defined in the very first getDialog request
 							$errorMessage	= $metaData->Property . ' returned in response is not correct:' . PHP_EOL . 
 											  'No issue is sent on request, but issue '. $metaData->PropertyValues[0]->Display .
 											  '(id=' . $metaData->PropertyValues[0]->Value .
@@ -401,15 +413,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 							$tipsMessage	= 'getDialog2 response is not returning the correct issue. Make sure there are issues ' .
 											  'defined for testing Brand(s).';
 						}
-						
-						if( $this->iss ){ // getDialog request is being sent to server second time onwards
-							$errorMessage	= $metaData->Property . ' is not matched with the chosen one:' . PHP_EOL .
-											  $this->iss->Name . '(id=' . $this->iss->Id . ') is sent on request,but ' . 
-											  $metaData->PropertyValues[0]->Display . '(id=' . $metaData->PropertyValues[0]->Value . ') '.
-											  'is returned on response';
-							$tipsMessage	= 'Something went wrong in issue round trip!, check on getDialog2 resp.';
-						}
-						
 						$this->setResult( 'ERROR',  $errorMessage, $tipsMessage );
 					}
 					break;
@@ -438,7 +441,13 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 						}
 					}
 					if( !$found ){
-						if( !$this->status ){ // happens when there's no status defined in the very first getDialog request
+						if( $this->status ){ // getDialog request is being sent to server second time onwards
+							$errorMessage	= 'Status does not matched with the chosen one:' . PHP_EOL .
+								$this->status->Name . '(id=' . $this->status->Id . ') is sent on request,but ' .
+								$metaData->PropertyValues[0]->Display . '(id=' . $metaData->PropertyValues[0]->Value . ') '.
+								'is returned on response';
+							$tipsMessage	= 'Something went wrong in status round trip!, check on getDialog2 resp.';
+						} else { // happens when there's no status defined in the very first getDialog request
 							$errorMessage	= 'Status returned in response is not correct:' . PHP_EOL .
 											  'No status is sent on request, but status ' . $metaData->PropertyValues[0]->Display .
 											  '(id=' . $metaData->PropertyValues[0]->Value . 
@@ -446,14 +455,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 							
 							$tipsMessage	= 'getDialog2 response is not returning the correct status. Make sure there are status(es) ' .
 											  'defined for testing Brand.';
-						}
-						
-						if( $this->status ){ // getDialog request is being sent to server second time onwards
-							$errorMessage	= 'Status does not matched with the chosen one:' . PHP_EOL .
-											  $this->status->Name . '(id=' . $this->status->Id . ') is sent on request,but ' . 
-											  $metaData->PropertyValues[0]->Display . '(id=' . $metaData->PropertyValues[0]->Value . ') '.
-											  'is returned on response';
-							$tipsMessage	= 'Something went wrong in status round trip!, check on getDialog2 resp.';
 						}
 						$this->setResult( 'ERROR',  $errorMessage, $tipsMessage );
 					}
@@ -480,6 +481,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 		
 		if( $req->Targets ){ // whenever there's Targets sent on request, we check on the response.
 			$error = false;
+			$errorMessage = '';
 			if( !$resp->Targets ){
 				$error			= true;
 				$errorMessage	= 'There\'s no Targets returned on response which is not expected.';
@@ -629,8 +631,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 
 	/**
 	 * Creates Users, Routing profiles.
-	 *
-	 * @return bool
 	 */
 	private function setupUsersAndRouting()
 	{

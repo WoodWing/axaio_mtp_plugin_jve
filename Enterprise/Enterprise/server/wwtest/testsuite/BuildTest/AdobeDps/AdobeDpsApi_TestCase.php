@@ -69,6 +69,7 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsApi_TestCase extends TestCase
 		}
 
 		$articleIds = array();
+		$articleId = null;
 		try {
 			$articlePath = dirname(__FILE__).'/testdata/Enjoy_2011_9_14_12_43_14.folio';
 			$articleId = $service->uploadArticle( $issueId, $articlePath, 1 );

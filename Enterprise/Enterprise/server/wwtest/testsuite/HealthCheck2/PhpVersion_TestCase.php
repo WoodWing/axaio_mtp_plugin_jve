@@ -114,8 +114,6 @@ class WW_TestSuite_HealthCheck2_PhpVersion_TestCase extends TestCase
 				
 				$peakEnd = memory_get_peak_usage();
 				LogHandler::Log( 'wwtest', 'INFO', "Memory usage at afterward: " . number_format( memory_get_usage() ) . "; peak: " . number_format(	$peakEnd ) );
-				// do nothing with y
-				$y = $y;
 				LogHandler::Log( 'wwtest', 'INFO', "Memory used: " . number_format( $peakEnd - $peakStart ) . "; 1.2 x filesize: " . number_format(	1.2 * $filesize ) );
 				if (($peakEnd - $peakStart) >= (1.2 * $filesize)) {
 					$this->setResult( 'ERROR', 'The memory usage of the function fileread is at least 1.2 times the filesize of the file to be read. Please install an other PHP version.' );

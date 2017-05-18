@@ -85,6 +85,7 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsFolio_TestCase extends TestCase
 		$this->secondFolio= 'Folio_2';
 		foreach( $editionIds as $editionId ) {
 			$dossierObj = $this->getDossierObj( false, true, $editionId );
+			$editionObj = null;
 			foreach( $dossierObj->Targets[0]->Editions as $edition ) {
 				if( $edition->Id == $editionId ) {
 					$editionObj = $edition;
@@ -110,6 +111,7 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsFolio_TestCase extends TestCase
 	 * @param WflLogOnResponse $logonResponse
 	 * @param string $brandName
 	 * @param string $issueName
+	 * @return bool Whether or not successful
 	 */
 	private function resolveBrandPubChannelIssue( $logonResponse, $brandName, $issueName )
 	{

@@ -221,7 +221,7 @@ class WW_TestSuite_BuildTest_NameValidation_SetObjectProperties_TestCase extends
 	 *
 	 * @param Object[] $objects Object properties to update. On success, they are updated with the latest info from the DB.
 	 * @param string $stepInfo Extra logging info.
-	 * @param string|null $expectedErrors S-codes per Object when an error is expected, NULL when it isn't.
+	 * @param array|null $expectedErrors S-codes per Object when an error is expected, NULL when it isn't.
 	 * @param MetaDataValue[] $updateProps List of metadata properties to update.
 	 * @param string[] $changedPropPaths List of changed metadata properties, expected to be different.
 	 * @return bool|null Whether the test was succesful, null when a service request fails.
@@ -314,6 +314,7 @@ class WW_TestSuite_BuildTest_NameValidation_SetObjectProperties_TestCase extends
 		foreach( $response->Objects as $respObject ) {
 			
 			// Lookup the original/cached object for the object returned through web service response.
+			$orgObject = null;
 			foreach( $objects as $orgObject ) {
 				if( $orgObject->MetaData->BasicMetaData->ID == $respObject->MetaData->BasicMetaData->ID ) {
 					break; // found

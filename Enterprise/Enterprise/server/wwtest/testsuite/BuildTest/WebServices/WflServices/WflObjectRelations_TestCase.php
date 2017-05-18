@@ -501,7 +501,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectRelations_TestCase
 	/**
 	 * Update object relations by calling UpdateObjectRelations workflow web service.
 	 * 
-	 * @return UpdateObjectRelationsResponse
+	 * @return WflUpdateObjectRelationsResponse
 	 */
 	private function updateObjectRelations()
 	{	
