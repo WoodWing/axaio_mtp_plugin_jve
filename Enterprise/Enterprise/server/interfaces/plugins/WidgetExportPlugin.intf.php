@@ -20,5 +20,6 @@ interface WidgetExportPlugin
 	 * @param array $widgetPlacement - READ ONLY - Info about the placement within the magazine
 	 * @param DOMDocument $manifestDocument - The manifest DOM document. Can be changed
 	 */
-	public function processWidget( Object $entDossier, Object $entWidget, OutputDevice $outputDevice, $widgetRootPath, array $widgetPlacement, DOMDocument $manifestDocument);
+	public function processWidget( /** @noinspection PhpLanguageLevelInspection */ Object $entDossier,
+		Object $entWidget, OutputDevice $outputDevice, $widgetRootPath, array $widgetPlacement, DOMDocument $manifestDocument);
 }

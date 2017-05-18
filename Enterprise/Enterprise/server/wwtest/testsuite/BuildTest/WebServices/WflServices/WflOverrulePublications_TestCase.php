@@ -875,7 +875,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflOverrulePublications_Tes
 	 * @param string|null $expectedError S-code when error expected. NULL when no error expected.
 	 * @return bool Whether or not service response was according to given expectations ($expectedError).
 	 */
-	private function createObject( Object &$object, $stepInfo, $lock = false, $expectedError = null )
+	private function createObject( /** @noinspection PhpLanguageLevelInspection */ Object &$object, $stepInfo, $lock = false, $expectedError = null )
 	{
 		$response = $this->utils->callCreateObjectService( $this, $this->ticket, array( $object ), $lock, $stepInfo, $expectedError );
 
@@ -894,7 +894,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflOverrulePublications_Tes
 	 * @param null $expectedError S-code when an error is expected, null if it is not.
 	 * @return boolean Whether or not service response was according to given expectations ($expectedError).
 	 */
-	private function createObjectFromContentStation( Object &$object, $stepInfo, $lock = false, $expectedError = null )
+	private function createObjectFromContentStation( /** @noinspection PhpLanguageLevelInspection */ Object &$object,
+		$stepInfo, $lock = false, $expectedError = null )
 	{
 		$suiteOpts = defined('TESTSUITE') ? unserialize( TESTSUITE ) : array();
 		if( $suiteOpts ) {

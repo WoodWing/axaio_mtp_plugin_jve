@@ -810,7 +810,7 @@ class AdobeDps2_BizClasses_Publishing
 	 * @param string $projectRef
 	 * @throws BizException
 	 */
-	private static function addToPublishHistory( Object $layout, $editionId, 
+	private static function addToPublishHistory( /** @noinspection PhpLanguageLevelInspection */ Object $layout, $editionId,
 		AdobeDps2_DataClasses_EntityArticle $dpsArticle, $projectId, $projectRef )
 	{
 		require_once BASEDIR . '/server/interfaces/services/pub/DataClasses.php'; // PubField, PubPublishedDossier

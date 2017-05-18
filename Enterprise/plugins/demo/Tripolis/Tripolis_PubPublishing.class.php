@@ -769,7 +769,7 @@ class Tripolis_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $dossier
 	 * @return ImageInfo
 	 */
-	private function upsertImage (Object $object, $publishtarget, Object $dossier, $externalId)
+	private function upsertImage (/** @noinspection PhpLanguageLevelInspection */Object $object, $publishtarget, Object $dossier, $externalId)
 	{
 		$format = $object->MetaData->ContentMetaData->Format;
 		$extension = MimeTypeHandler::mimeType2FileExt( $format );

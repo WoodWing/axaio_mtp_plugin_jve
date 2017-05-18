@@ -583,8 +583,8 @@ class MultiChannelPublishingUtils
 	 * @param array|null $formRelationTargets The form relational targets. When null is sent, the first dossier target is used.
 	 * @return null|Object The created object or null if unsucessful.
 	 */
-	public function createPublishFormObject( Object $template, $dossier, $stepInfo,
-		$relationOption=self::RELATION_NORMAL, $metaData=null, $formRelationTargets=null )
+	public function createPublishFormObject( /** @noinspection PhpLanguageLevelInspection */ Object $template,
+		$dossier, $stepInfo, $relationOption=self::RELATION_NORMAL, $metaData=null, $formRelationTargets=null )
 	{
 		$object = new Object();
 		$object->MetaData 	= null;

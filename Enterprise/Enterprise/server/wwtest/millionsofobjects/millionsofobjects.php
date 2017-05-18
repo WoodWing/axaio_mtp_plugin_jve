@@ -279,7 +279,7 @@ class TestMillionObjects
 	/**
 	 * @todo: Write function header.
 	 */
-	private function createPublishForm(Object $template, Object $dossier)
+	private function createPublishForm( /** @noinspection PhpLanguageLevelInspection */ Object $template, Object $dossier)
 	{
 		$ticket = $_SESSION['ticket'];
 		$object = new Object();
