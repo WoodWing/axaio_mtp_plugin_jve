@@ -140,7 +140,8 @@ class WW_SOAP_Client extends SoapClient
 	/**
 	 * {@inheritdoc}
 	 */
-	public function __soapCall( $function_name, array $arguments, array $options = null, $input_headers = null, array &$output_headers = null )
+	public function __soapCall( $function_name, /** @noinspection PhpSignatureMismatchDuringInheritanceInspection */$arguments,
+	                            $options = null, $input_headers = null, &$output_headers = null )
 	{
 		$this->attachments = array();
 		// find attachments in $arguments
