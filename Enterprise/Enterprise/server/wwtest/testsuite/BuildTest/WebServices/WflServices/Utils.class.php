@@ -252,14 +252,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 */
 	public function createStatus( $statusName, $objectType, $publicationId, $nextStatusId = 0, $issueId = 0 )
 	{
-		$this->testCase->assertNull( $this->expectedError ); // not supported by this function
-
-		// TODO: call web service layer (instead of calling biz layer)
-		$statusId = null;
-
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php'; // AdmStatus
-		require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
-		$status = new AdmStatus(null, $statusName, $objectType, false, null, 'WoodWing Software');
+		$status = new AdmStatus();
 		$status->Id = 0;
 		$status->Type = $objectType;
 		$status->Phase = 'Production';
@@ -274,29 +268,43 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$status->AutomaticallySendToNext = false;
 		$status->ReadyForPublishing = false;
 		$status->SkipIdsa = false;
-		try {
-			$statusIds = BizAdmStatus::createStatuses( $publicationId, $issueId, array($status) );
-			$statusId = $statusIds[0];
 
-		} catch( BizException $e ) {
-			$this->testCase->throwError( $e->getMessage().'<br/>'.$e->getDetail() );
-		}
-		$this->testCase->assertGreaterThan( 0, $statusId );
-		
-		// TODO: call web service layer (instead of calling biz layer)
-		try {
-			$statusCreated = BizAdmStatus::getStatusWithId( $statusId );
-		} catch( BizException $e ) {
-			$this->testCase->throwError( $e->getMessage().'<br/>'.$e->getDetail() );
-			throw $e;
-		}
-		$this->testCase->assertInstanceOf( 'AdmStatus', $statusCreated );
+		require_once BASEDIR.'/server/services/adm/AdmCreateStatusesService.class.php';
+		$request = new AdmCreateStatusesRequest();
+		$request->Ticket = $this->ticket;
+		$request->PublicationId = $publicationId;
+		$request->IssueId = $issueId;
+		$request->Statuses = array( $status );
 
-		BizAdmStatus::restructureMetaDataStatusColor( $statusCreated->Id, $status->Color);
-		$statusCreated->Color = $status->Color;
-		$statusCreated->DefaultRouteTo = null;
+		$stepInfo = "Create status {$statusName}";
+		/** @var AdmCreateStatusesResponse $response */
+		$response = $this->callService( $request, $stepInfo );
 
-		return $statusCreated;
+		$this->testCase->assertInstanceOf( 'AdmCreateStatusesResponse', $response );
+		$this->testCase->assertCount( 1, $response->Statuses );
+		$this->testCase->assertInstanceOf( 'AdmStatus', $response->Statuses[0] );
+		$this->testCase->assertGreaterThan( 0, $response->Statuses[0]->Id );
+
+		return $response->Statuses[0];
+	}
+
+	/**
+	 * Deletes a status
+	 *
+	 * @param integer $statusId
+	 * @throws BizException on failure
+	 */
+	public function deleteStatus( $statusId )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteStatusesService.class.php';
+		$request = new AdmDeleteStatusesRequest();
+		$request->StatusIds = array( $statusId );
+
+		$stepInfo = "Delete status {$statusId}";
+		/** @var AdmDeleteStatusesResponse $response */
+		$response = $this->callService( $request, $stepInfo );
+
+		$this->testCase->assertInstanceOf( 'AdmDeleteStatusesResponse', $response );
 	}
 
 	/**
@@ -756,25 +764,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$this->callService( $request, $stepInfo );
 
 		LogHandler::Log( 'BuildTestUtils', 'INFO', 'Completed validating AdmDeleteUsers.' );
-	}
-
-	/**
-	 * Deletes a status
-	 *
-	 * @param integer $statusId
-	 * @throws BizException on failure
-	 */
-	public function deleteStatus( $statusId )
-	{
-		$this->testCase->assertNull( $this->expectedError ); // not supported by this function
-
-		// TODO: call web service layer (instead of calling biz layer)
-		try {
-			require_once BASEDIR.'/server/bizclasses/BizCascadePub.class.php';
-			BizCascadePub::deleteStatus( $statusId );
-		} catch( BizException $e ) {
-			$this->testCase->throwError( $e->getMessage().'<br/>'.$e->getDetail() );
-		}
 	}
 
 	/**
