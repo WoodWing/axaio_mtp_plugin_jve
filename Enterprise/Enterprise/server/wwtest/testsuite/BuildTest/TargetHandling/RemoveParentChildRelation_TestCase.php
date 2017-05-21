@@ -124,8 +124,8 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 		}
 		$this->editionObjs = @$vars['TargetHandling']['editions'];
 		$this->assertCount( 2, $this->editionObjs );
-		$this->assertInstanceOf( 'stdClass', $this->editionObjs[0] ); // TODO: should be AdmEdition
-		$this->assertInstanceOf( 'stdClass', $this->editionObjs[1] ); // TODO: should be AdmEdition
+		$this->assertInstanceOf( 'AdmEdition', $this->editionObjs[0] );
+		$this->assertInstanceOf( 'AdmEdition', $this->editionObjs[1] );
 		$this->editionObjs = array( $this->editionObjs[0] ); // for now just one edition is good enough
 		$this->layoutStatus = @$vars['TargetHandling']['layoutStatus'];
 		$this->assertInstanceOf( 'State', $this->layoutStatus );

@@ -139,8 +139,8 @@ class WW_TestSuite_BuildTest_AdobeDps2_Folio_TestCase extends TestCase
 		
 		$this->editionObjs = @$vars['BuildTest_AdobeDps2']['editions'];
 		$this->assertCount( 2, $this->editionObjs );
-		$this->assertInstanceOf( 'stdClass', $this->editionObjs[0] ); // TODO: should be AdmEdition
-		$this->assertInstanceOf( 'stdClass', $this->editionObjs[1] ); // TODO: should be AdmEdition
+		$this->assertInstanceOf( 'AdmEdition', $this->editionObjs[0] );
+		$this->assertInstanceOf( 'AdmEdition', $this->editionObjs[1] );
 		$this->editionObjs = array( $this->editionObjs[0] ); // for now just one edition is good enough
 
 		$this->layoutStatus = @$vars['BuildTest_AdobeDps2']['layoutStatus'];
