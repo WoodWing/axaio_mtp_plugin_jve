@@ -298,6 +298,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	{
 		require_once BASEDIR.'/server/services/adm/AdmDeleteStatusesService.class.php';
 		$request = new AdmDeleteStatusesRequest();
+		$request->Ticket = $this->ticket;
 		$request->StatusIds = array( $statusId );
 
 		$stepInfo = "Delete status {$statusId}";
