@@ -189,7 +189,7 @@ class WW_TestSuite_BuildTest_AdobeDps2_Setup_TestCase extends TestCase
 
 		$this->assertAttributeInternalType( 'array', 'Editions', $response );
 		$this->assertAttributeCount( 1, 'Editions', $response ); // check $response->Editions[0]
-		$this->assertInstanceOf( 'stdClass', $response->Editions[0] ); // TODO: should be AdmEdition
+		$this->assertInstanceOf( 'AdmEdition', $response->Editions[0] );
 		return $response->Editions[0];
 	}
 
