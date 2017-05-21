@@ -141,7 +141,7 @@
 			<xsd:complexType name="IdName">
 				<xsd:all>
 					<xsd:element name="Id"   type="xsd:integer"/>
-					<xsd:element name="Name" type="xsd:string"/>
+					<xsd:element name="Name" type="xsd:string" nillable="true"/>
 				</xsd:all>
 			</xsd:complexType>
 			<xsd:complexType name="ArrayOfIdName">

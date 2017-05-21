@@ -19,7 +19,7 @@ class AdmIdName
 
 	/**
 	 * @param integer              $Id                   
-	 * @param string               $Name                 
+	 * @param string               $Name                 Nullable.
 	 */
 	public function __construct( $Id=null, $Name=null)
 	{

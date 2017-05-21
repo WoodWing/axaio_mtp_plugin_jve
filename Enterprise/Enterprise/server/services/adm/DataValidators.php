@@ -69,7 +69,6 @@ class AdmIdNameValidator
 		}
 		if( $validator->checkExist( $datObj, 'Name' ) ) {
 			$validator->enterPath( 'Name' );
-			$validator->checkNull( $datObj->Name );
 			if( !is_null( $datObj->Name ) ) {
 				$validator->checkType( $datObj->Name, 'string' );
 			}
