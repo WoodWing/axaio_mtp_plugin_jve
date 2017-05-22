@@ -176,7 +176,11 @@ class ElvisAMFClient
 		// TODO: Find out where to get the correct timezone offset
 		$loginRequest = new ElvisLoginRequest($credentials, 'en_US', 0);
 		$loginRequest->clientId = ElvisSessionUtil::getClientId();
-		
+
+		$credentials = base64_decode( $credentials );
+		list( $user, $pass ) = explode( ':', $credentials );
+		LogHandler::Log( __CLASS__, 'INFO', 'User used to do the LogIn:'.$user );
+
 		$authService = new ElvisContentSourceAuthenticationService();
 		$loginResponse = $authService->login($loginRequest);
 		

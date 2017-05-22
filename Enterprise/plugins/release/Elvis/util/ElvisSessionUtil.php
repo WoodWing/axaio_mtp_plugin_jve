@@ -34,7 +34,9 @@ class ElvisSessionUtil
 		}
 		$credentials = null;
 		if( $storage ) {
-			list( $encrypted, $initVector ) = explode( '::', base64_decode( $storage ), 2 );
+			list( $encrypted, $initVector ) = explode( '::', $storage, 2 );
+			$encrypted = base64_decode( $encrypted );
+			$initVector = base64_decode( $initVector );
 			$encryptionKey = '!Tj0nG3'.$userShort.date( 'z' ); // hardcoded key + user name + day of the year
 			$credentials = openssl_decrypt( $encrypted, 'aes-256-cbc', $encryptionKey,
 				OPENSSL_RAW_DATA, $initVector );
@@ -66,7 +68,7 @@ class ElvisSessionUtil
 		$encrypted = openssl_encrypt( $credentials, 'aes-256-cbc', $encryptionKey,
 			OPENSSL_RAW_DATA, $initVector );
 		if( $encrypted ) {
-			$storage = base64_encode( $encrypted.'::'.$initVector );
+			$storage = base64_encode( $encrypted ).'::'.base64_encode( $initVector );
 			$settings = array( new Setting( 'Temp', $storage ) ); // use vague name to obfuscate
 			BizUser::updateSettings( $userShort, $settings, 'ElvisContentSource' );
 		} else {
