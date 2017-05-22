@@ -23,6 +23,8 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 	private $issue = null;
 	private $channel2 = null;
 	private $issue2 = null;
+
+	/** @var AdmStatus $state */
 	private $state = null;
 	private $category = null;
 
@@ -642,7 +644,7 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 		$request->Objects[0]->MetaData->WorkflowMetaData->Creator = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Created = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Comment = '';
-		$request->Objects[0]->MetaData->WorkflowMetaData->State = $this->state;
+		$request->Objects[0]->MetaData->WorkflowMetaData->State = new State( $this->state->Id, $this->state->Name );
 		$request->Objects[0]->MetaData->WorkflowMetaData->RouteTo = '';
 		$request->Objects[0]->MetaData->WorkflowMetaData->LockedBy = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Version = null;
