@@ -19,16 +19,23 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Basics_TestCase 
 	public function getPrio()        { return 1; }
 	
 	// Session data:
+	/** @var string $ticket */
 	private $ticket = null;
+	/** @var array $vars */
 	private $vars = null;
 
 	// Objects used for testing:
+	/** @var Object $template */
 	private $template = null;
+	/** @var Object $form */
 	private $form = null;
+	/** @var Object $dossier */
 	private $dossier = null;
 
-	private $utils = null; // WW_Utils_TestSuite
-	private $mcpUtils = null; // MultiChannelPublishingUtils
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
+	/** @var MultiChannelPublishingUtils $mcpUtils  */
+	private $mcpUtils = null;
 
 	/**
 	 * Runs the testcases for this TestSuite.
@@ -131,6 +138,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Basics_TestCase 
 			try {
 				$this->dossier->MetaData->BasicMetaData->Name = $name;
 				$request = new WflSetObjectPropertiesRequest();
+				$request->ID = $this->dossier->MetaData->BasicMetaData->ID;
 				$request->MetaData = $this->dossier->MetaData;
 				$request->Targets = $this->dossier->Targets;
 
