@@ -466,10 +466,7 @@ class BizWebEditWorkspace
 
 		// For robustness, when the update XML file is empty, we simply delete it.
 		// That avoids (in the succeeding code below) that the base XML gets emptied as well.
-		if( !filesize( $composeUpdateXmlFile ) ) {
-			unlink( $composeUpdateXmlFile );
-			clearstatcache( true, $composeUpdateXmlFile ); // reflect unlink() disk operation back into PHP
-		}
+		$this->deleteEmptyComposeUpdateXmlFile( $composeUpdateXmlFile );
 
 		// Make sure there is always a base XML file. Only the first time preview there is
 		// no base, and so we rename the update XML to the base XML.
@@ -503,6 +500,29 @@ class BizWebEditWorkspace
 		// Build response data
 		return $this->parseComposeData( $composeBaseXmlDom, $ticket, $action,
 			$layoutId, $editionId, $requestInfo, $articles );
+	}
+
+	/**
+	 * Deletes an empty (0 bytes) composeUpdateXmlFile.
+	 *
+	 * The file containing the updates to compose the preview is often stored on mounted/shared locations. PHP uses
+	 * a cache to store information on files. For volatile files located on mounted/shared locations it turns out that
+	 * the info of the cache is not reliable. Clearing the cache by calling clearstatcache() is one way to solve the
+	 * problem. But that doesn't do the trick always, see EN-89055. For cifs-systems opening and closing a file updates
+	 * the cache.
+	 *
+	 * @param $composeUpdateXmlFile
+	 */
+	private function deleteEmptyComposeUpdateXmlFile( $composeUpdateXmlFile )
+	{
+		if( file_exists( $composeUpdateXmlFile ) ) {
+			fclose( fopen( $composeUpdateXmlFile, 'a' ) );
+		}
+
+		if( !filesize( $composeUpdateXmlFile ) ) {
+			unlink( $composeUpdateXmlFile );
+			clearstatcache( true, $composeUpdateXmlFile ); // reflect unlink() disk operation back into PHP
+		}
 	}
 
 	/**
@@ -2356,7 +2376,7 @@ class BizWebEditWorkspace
 			if( $storedRelation->Placements ) foreach( $storedRelation->Placements as $key => $placement ) {
 				if( $inDesignArticlePlacements ) foreach( $inDesignArticlePlacements as $inDesignArticlePlacement ) {
 					if( ( $inDesignArticlePlacement->FrameID == $placement->FrameID ) &&
-						 ( $inDesignArticlePlacement->Edition == $placement->Edition )
+						 ( $inDesignArticlePlacement->Edition->Id == $placement->Edition->Id )
 					) {
 						$storedRelation->Placements[$key]->InDesignArticleIds = $inDesignArticlePlacement->InDesignArticleIds;
 						break;

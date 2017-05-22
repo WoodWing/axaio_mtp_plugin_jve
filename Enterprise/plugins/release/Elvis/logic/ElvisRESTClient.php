@@ -122,6 +122,13 @@ class ElvisRESTClient
 		}
 		if( isset( $post ) ) {
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $post );
+		} else {
+			// When there's no post data in a POST method, make sure to clear the CURLOPT_POSTFIELDS.
+			// Otherwise, it seems like for some PHP cURL version, it will send Content-Length = -1
+			// in the Header which is unwanted ( it will lead to a bad request ).
+			// To avoid the above, set the CURLOPT_POSTFIELDS to be empty (array()),
+			// to make sure that the Content-Length is 0.
+			curl_setopt( $ch, CURLOPT_POSTFIELDS, array() );
 		}
 
 		// Setting cookies to be sent over in the Request.
