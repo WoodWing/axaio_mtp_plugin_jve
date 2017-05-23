@@ -319,9 +319,9 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		$loadBalancerType = $client->getLoadBalancerType();
 		if( $loadBalancerType == 'AWSALB' ) {
 			$link = 'https://aws.amazon.com/elasticloadbalancing/classicloadbalancer/';
-			$help = 'Please configure to use the supported AWS Classic Load Balancer. '.
-				'Click <a href="'.$link.'" target="_blank">here </a>to read more.';
-			$message = 'The configured AWS Application Load Balancer is not supported.';
+			$help = 'Use the Amazon AWS Classic Load Balancer. '.
+				'For more information, see the <a href="'.$link.'" target="_blank">Amazon documentation</a>.';
+			$message = 'The Amazon AWS Application Load Balancer that is currently configured is not supported.';
 			$this->setResult( 'ERROR', $message, $help );
 			$result = false;
 		} else if( $loadBalancerType == 'AWSELB' ) {
