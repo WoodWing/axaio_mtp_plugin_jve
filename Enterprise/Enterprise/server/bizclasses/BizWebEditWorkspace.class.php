@@ -2375,11 +2375,12 @@ class BizWebEditWorkspace
 		if( $storedRelations ) foreach( $storedRelations as $storedRelation ) {
 			if( $storedRelation->Placements ) foreach( $storedRelation->Placements as $key => $placement ) {
 				if( $inDesignArticlePlacements ) foreach( $inDesignArticlePlacements as $inDesignArticlePlacement ) {
-					if( ( $inDesignArticlePlacement->FrameID == $placement->FrameID ) &&
-						 ( $inDesignArticlePlacement->Edition->Id == $placement->Edition->Id )
-					) {
-						$storedRelation->Placements[$key]->InDesignArticleIds = $inDesignArticlePlacement->InDesignArticleIds;
-						break;
+					require_once BASEDIR.'/server/bizclasses/BizWebEditWorkspace/ComparePlacements.class.php';
+					$comparePlacements = new BizWebEditWorkspace_ComparePlacements();
+					if( $comparePlacements->sameStrings( $inDesignArticlePlacement->FrameID, $placement->FrameID) &&
+						 $comparePlacements->sameEdition( $inDesignArticlePlacement->Edition, $placement->Edition ) ) {
+							$storedRelation->Placements[$key]->InDesignArticleIds = $inDesignArticlePlacement->InDesignArticleIds;
+							break;
 					}
 				}
 			}
