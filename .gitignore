@@ -25,6 +25,7 @@ Enterprise/.idea/**
 !Enterprise/.idea/codeStyleSettings.xml
 !Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml
 !Enterprise/.idea/scopes/EnterpriseCodeInspection.xml
+!Enterprise/.idea/php.xml
 !Enterprise/.idea/modules.xml
 !Enterprise/.idea/Enterprise.iml
 
