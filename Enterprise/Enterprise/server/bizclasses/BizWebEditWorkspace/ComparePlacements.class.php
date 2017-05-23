@@ -208,7 +208,7 @@ class BizWebEditWorkspace_ComparePlacements
 	 * @param null|string $rhsString
 	 * @return bool True when same, else false
 	 */
-	private function sameStrings( $lhsString, $rhsString )
+	public function sameStrings( $lhsString, $rhsString )
 	{
 		$result = true;
 
@@ -274,7 +274,7 @@ class BizWebEditWorkspace_ComparePlacements
 	 * @param null|Edition $rhsEdition
 	 * @return bool True when same, else false
 	 */
-	private function sameEdition( $lhsEdition, $rhsEdition )
+	public function sameEdition( $lhsEdition, $rhsEdition )
 	{
 		$result = true;
 		if ( !$this->sameEmptiness( $lhsEdition, $rhsEdition ) ) {
