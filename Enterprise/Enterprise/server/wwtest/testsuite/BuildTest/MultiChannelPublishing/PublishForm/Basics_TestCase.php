@@ -151,7 +151,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Basics_TestCase 
 					$object = BizObject::getObject($this->form->MetaData->BasicMetaData->ID, $user, false, 'none',
 						array('Targets','MetaData', 'Relations'), null, false, array('Workflow'));
 					if ( !is_null( $object ) ) {
-						$result = ($object->Metadata->BasicMetaData->Name == $name);
+						$result = ($object->MetaData->BasicMetaData->Name == $name);
 					}
 				}
 			} catch ( BizException $e ) {

@@ -303,9 +303,19 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 
 		$stepInfo = "Delete status {$statusId}";
 		/** @var AdmDeleteStatusesResponse $response */
-		$response = $this->callService( $request, $stepInfo );
+		$this->callService( $request, $stepInfo );
 
-		$this->testCase->assertInstanceOf( 'AdmDeleteStatusesResponse', $response );
+		// Try to retrieve the deleted test Status, which should fail.
+		require_once BASEDIR.'/server/services/adm/AdmGetStatusesService.class.php';
+		$request = new AdmGetStatusesRequest();
+		$request->Ticket = $this->ticket;
+		$request->StatusIds = array( $statusId );
+
+		$this->expectedError = '(S1056)';
+		$stepInfo = 'Calling AdmGetStatuses to validate AdmDeleteStatusesRequest as called before.';
+		$this->callService( $request, $stepInfo );
+
+		LogHandler::Log( 'BuildTestUtils', 'INFO', 'Completed validating AdmDeleteStatusesRequest.' );
 	}
 
 	/**
@@ -1136,7 +1146,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		$pubChan->Name              = !is_null($pubChannelName) ? $pubChannelName : $this->composeName();
 		$pubChan->Description       = 'Created by BuildTest class '.__CLASS__;
 		$pubChan->Type              = 'print';
-		$pubChan->PublishSystem     = 'Enterprise';
+		$pubChan->PublishSystem     = ''; // Enterprise
 		$pubChan->CurrentIssueId    = 0;
 		$pubChan->SuggestionProvider = 'OpenCalais';
 		$pubChan->ExtraMetaData     = array();
