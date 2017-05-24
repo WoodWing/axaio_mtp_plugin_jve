@@ -44,6 +44,9 @@ define ('ADOBE_VERSIONS_ALL',		serialize( array( // used to detect documents ver
 // For online-help articles:
 define ('ONLINEHELP_SERVER_MAJOR_VERSION', '10');
 
+// For ionCube compatibility:
+define ('WW_ES_BASE_VERSION_FOR_IONCUBE', '10.2.0');
+
 // For License:
 define ('PRODUCTMAJORVERSION', '10' );
 define ('PRODUCTMINORVERSION', '0' );
