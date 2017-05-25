@@ -138,6 +138,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Basics_TestCase 
 			try {
 				$this->dossier->MetaData->BasicMetaData->Name = $name;
 				$request = new WflSetObjectPropertiesRequest();
+				$request->Ticket = $this->ticket;
 				$request->ID = $this->dossier->MetaData->BasicMetaData->ID;
 				$request->MetaData = $this->dossier->MetaData;
 				$request->Targets = $this->dossier->Targets;
