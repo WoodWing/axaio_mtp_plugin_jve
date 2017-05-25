@@ -540,7 +540,7 @@ class DBTicket extends DBBase
 		$db = $dbdriver->tablename(self::TABLENAME);
 		
 		// check ticket existence
-		$params = array( $ticket );
+		$params = array( strval($ticket) );
 		$sql = "SELECT `usr`, `appname`, `expire` FROM $db WHERE `ticketid` = ?";
 		$sth = $dbdriver->query( $sql, $params );
 		if (!$sth) return false;
