@@ -561,14 +561,14 @@ class DBTicket extends DBBase
 
 			// user touched server, so postpone expiration
 			$expire = self::_expire( $row['appname'] );
-			$params = array( $expire, $ticket );
+			$params = array( $expire, strval($ticket) );
 			$sql = "UPDATE $db SET `expire` = ? WHERE `ticketid` = ?";
 			$sth = $dbdriver->query( $sql, $params );
 
 			// Auto-postpone WebEditor ticket when Web(App) goes along, or vice versa(!).
 			// This is to avoid any logon dialogs while user works a while at one of them and then starts using the other one again.
 			if( ( $otherTicket = self::getOtherTicket( $row['appname'], $user ) ) ) {
-				$params = array( $expire, $otherTicket );
+				$params = array( $expire, strval($otherTicket) );
 				$sql = "UPDATE $db SET `expire` = ? WHERE `ticketid` = ?";
 				$sth = $dbdriver->query( $sql, $params );
 			}
@@ -597,14 +597,16 @@ class DBTicket extends DBBase
 		if( ($appname = self::DBappticket( $ticket )) && $appname == 'Web' ) {
 			if( ($user = self::DBuserticket( $ticket )) ) {
 				if( ($otherTicket = self::getOtherTicket($appname,$user)) ) {
-					$sql = "DELETE FROM $db WHERE `ticketid` = '$otherTicket'";
-					$dbdriver->query($sql);
+					$params = array( strval($otherTicket) );
+					$sql = "DELETE FROM $db WHERE `ticketid` = ?";
+					$dbdriver->query( $sql, $params );
 				}
 			}
 		}
 		// remove the given ticket
-		$sql = "DELETE FROM $db WHERE `ticketid` = '$ticket'";
-		$sth = $dbdriver->query($sql);
+		$params = array( strval($ticket) );
+		$sql = "DELETE FROM $db WHERE `ticketid` = ?";
+		$sth = $dbdriver->query( $sql, $params );
 		return $sth;
 	}
 
