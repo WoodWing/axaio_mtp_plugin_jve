@@ -3284,7 +3284,7 @@ class License
 	
 		print "<h2>" . BizResources::localize("LIC_LICENSE_STATUS") . "</h2>";
 
-		$tablebg = '#dddddd';
+		$tablebg = '#dddddd'; // Grey
 		$clientAppUserLimit = false;
 		if ( count( $limitsArr ) > 0 ) {
 			print "<table class='text' width='100%'>";
@@ -3324,7 +3324,7 @@ class License
 			} else {
 				$scale = 1;
 			}
-			
+
 			print "<tr bgcolor='#cccccc'>";
 			print "<th class='text'>" . BizResources::localize('LIC_APPLICATION') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_STATUS') . "</th>";
@@ -3341,14 +3341,13 @@ class License
 				$cur = $limitArr2[ 'curusage' ];
 				$max = $limitArr2[ 'maxusage' ];
 				if ( $cur >= $max ) {
-					$c1 = 'red';
+					$c1 = 'red'; // Reached the maximum usage.
 				} else {
-					$c1 = 'green';
+					$c1 = 'green'; // Currently used license
 				}
 				$w1 = $cur * $scale;
-		
-//				$c2 = 'darkgrey';
-				$c2 = '#8A8A8A';
+
+				$c2 = '#8A8A8A'; // dark grey // Un-used license
 				if ( $max == '*' ) {
 					$maxval = $limitsArr[ $idx ][ 'maxval' ];
 				} else {
@@ -3356,10 +3355,9 @@ class License
 				}
 				$w2 = $maxval * $scale - $w1;
 
-//				$c3 = 'grey';
-				$c3 = $tablebg;
+				$c3 = $tablebg; // Grey // Background color - to filled up the space not drawn by the used/unused license bar
 				$w3 = $tabwidth - $w2 - $w1;
-		
+
 				$name = $limitArr2[ 'name' ];
 				$pcode = $limitArr2[ 'pcode' ];
 				
@@ -3384,11 +3382,11 @@ class License
 //				print "<td><img src='images/$c1.gif' width='$w1' height='10'><img src='images/$c2.gif' width='$w2' height='10'><img src='images/$c3.gif' width='$w3' height='10'></td>";
 				print "<td><table cellpadding=0 cellspacing=0 border='0' bgcolor='#d3d3d3'><tr>";
 				if ( $w1 )
-					print "<td bgcolor='$c1' width='$w1' height='10'></td>";
+					print "<td bgcolor='$c1' width='$w1' height='10' style=\"min-width:1px\"></td>";
 				if ( $w2 )
-					print "<td bgcolor='$c2' width='$w2' height='10'></td>";
+					print "<td bgcolor='$c2' width='$w2' height='10' style=\"min-width:1px\"></td>";
 				if ( $w3 )
-					print "<td bgcolor='$c3' width='$w3' height='10'></td>";
+					print "<td bgcolor='$c3' width='$w3' height='10' style=\"min-width:1px\"></td>";
 				print "</tr></table></td>\n";
 				print "<td align='center'><font color='$fontcolor'>$max</font></td>";
 				
