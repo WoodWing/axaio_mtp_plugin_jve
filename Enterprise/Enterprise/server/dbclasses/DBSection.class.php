@@ -342,7 +342,7 @@ class DBSection extends DBBase
 			$values = self::objToRow( $pubId, $issueId, $section );
 
 			// check duplicates
-			$where = '`section` = ? AND `publication` = ? AND `issue` = ? AND`id` != ?';
+			$where = '`section` = ? AND `publication` = ? AND `issue` = ? AND `id` != ?';
 			$params = array( strval($section->Name), intval($values['publication']), intval($values['issue']), intval($section->Id) );
 			$row = self::getRow( self::TABLENAME, $where, array('id'), $params );
 			if( self::hasError() ) {
