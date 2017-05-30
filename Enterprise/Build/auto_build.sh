@@ -14,8 +14,8 @@
 SOURCE_BASE="./Enterprise/"
 TARGET_BASE="./Enterprise_release/"
 iONCUBE_ENCODER="/usr/local/ioncube/9.0/ioncube_encoder56_9.0_64"
-ES_PHP_ENCODER="\"/home/autobuild/workspace/Enterprise Server Build Tools/es_php_encoder.php\""
-ES_PHP_DEFINE="\"/home/autobuild/workspace/Enterprise Server Build Tools/php_define.php\""
+ES_PHP_ENCODER="/home/autobuild/workspace/Enterprise Server Build Tools/es_php_encoder.php"
+ES_PHP_DEFINE="/home/autobuild/workspace/Enterprise Server Build Tools/php_define.php"
 PHPSTORM_INSPECTOR="/opt/phpstorm2017.1.4/bin/inspect.sh"
 : ${PHP_EXE:=php} #Set default value to base php executable.
 
@@ -539,7 +539,7 @@ function step5_ionCubeEncodePhpFiles {
 	sync
 
 	echo 'step5c: Determine the last Enterprise Server version that introduced a new ionCube Encoder.'
-	esBaseVersion=`${PHP_EXE} ${ES_PHP_DEFINE} --get --define=WW_ES_BASE_VERSION_FOR_IONCUBE --stripquotes < "${SOURCE_BASE}/Enterprise/server/serverinfo.php"`
+	esBaseVersion=`${PHP_EXE} "${ES_PHP_DEFINE}" --get --define=WW_ES_BASE_VERSION_FOR_IONCUBE --stripquotes < "${SOURCE_BASE}/Enterprise/server/serverinfo.php"`
 	if [ ! -n "${esBaseVersion}" ]; then
 		echo "ERROR: Failed reading the WW_ES_BASE_VERSION_FOR_IONCUBE option from serverinfo.php."
 		exit 1
@@ -553,7 +553,7 @@ function step5_ionCubeEncodePhpFiles {
 	# "${iONCUBE_ENCODER}" --help | more
 
 	echo "step5e: Encode specific Enterprise core files and folders."
-	ioncubeEncode="${PHP_EXE} ${ES_PHP_ENCODER} --sourcebase=${SOURCE_BASE} --targetbase=${TARGET_BASE} --esversion=${esBaseVersion} --deployment=integrated "
+	ioncubeEncode="${PHP_EXE} "${ES_PHP_ENCODER}" --sourcebase=${SOURCE_BASE} --targetbase=${TARGET_BASE} --esversion=${esBaseVersion} --deployment=integrated "
 	icFoldersOrFiles="\
 		Enterprise/server/admin/license/ \
 		Enterprise/server/dbclasses/ \
