@@ -553,7 +553,7 @@ function step5_ionCubeEncodePhpFiles {
 	# "${iONCUBE_ENCODER}" --help | more
 
 	echo "step5e: Encode specific Enterprise core files and folders."
-	ioncubeEncode="${PHP_EXE} "${ES_PHP_ENCODER}" --sourcebase=${SOURCE_BASE} --targetbase=${TARGET_BASE} --esversion=${esBaseVersion} --deployment=integrated "
+	ioncubeEncodeParams="--sourcebase=${SOURCE_BASE} --targetbase=${TARGET_BASE} --esversion=${esBaseVersion} --deployment=integrated"
 	icFoldersOrFiles="\
 		Enterprise/server/admin/license/ \
 		Enterprise/server/dbclasses/ \
@@ -574,7 +574,7 @@ function step5_ionCubeEncodePhpFiles {
 		plugins/release/Elvis/util/ElvisSessionUtil.php \
 	"
 	for icFoldersOrFile in ${icFoldersOrFiles}; do
-		${ioncubeEncode} --encodelevel=1 --phppath="${icFoldersOrFile}"
+		${PHP_EXE} "${ES_PHP_ENCODER}" ${ioncubeEncodeParams} --encodelevel=1 --phppath="${icFoldersOrFile}"
 	done
 
 	echo "step5f: Encode specific Enterprise core files and folders (in 2nd level of security)."
@@ -582,7 +582,7 @@ function step5_ionCubeEncodePhpFiles {
 		Enterprise/server/utils/license/ \
 	"
 	for icFoldersOrFile in ${icFoldersOrFiles}; do
-		${ioncubeEncode} --encodelevel=2 --phppath="${icFoldersOrFile}"
+		${PHP_EXE} "${ES_PHP_ENCODER}" ${ioncubeEncodeParams} --encodelevel=2 --phppath="${icFoldersOrFile}"
 	done
 }
 
