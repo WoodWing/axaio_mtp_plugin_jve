@@ -14,6 +14,8 @@
 SOURCE_BASE="./Enterprise/"
 TARGET_BASE="./Enterprise_release/"
 iONCUBE_ENCODER="/usr/local/ioncube/9.0/ioncube_encoder56_9.0_64"
+ES_PHP_ENCODER="/home/autobuild/workspace/Enterprise Server Build Tools/es_php_encoder.php"
+ES_PHP_DEFINE="/home/autobuild/workspace/Enterprise Server Build Tools/php_define.php"
 PHPSTORM_INSPECTOR="/opt/phpstorm2017.1.4/bin/inspect.sh"
 : ${PHP_EXE:=php} #Set default value to base php executable.
 
@@ -203,118 +205,6 @@ function determineZipPostfix {
 
 	# Add "_Build<nr>.zip" postfix.
 	SERVER_VERSION_ZIP="${SERVER_VERSION_ZIP}_Build${BUILD_NUMBER}.zip"
-}
-
-#
-# ionCube Encode a given PHP file.
-#
-# It reads from the ${SOURCE_BASE} folder and writes into the ${TARGET_BASE} folder.
-#
-# @param string ${1} ionCube Encoder project options file
-# @param string ${2} Relative path of file to be ionCube encoded
-#
-function ionCubeFile {
-	sourceFile="${SOURCE_BASE}${2}"
-	targetFile="${TARGET_BASE}${2}"
-	for i in `seq 1 10`;
-	do
-		"${iONCUBE_ENCODER}" --project-file "${1}" "${sourceFile}" -o "${targetFile}"
-		set +e
-		checkSum=`grep 'ionCube Loader' ${targetFile}`
-		set -e
-		if [ -n "${checkSum}"  ]; then
-			ionCubeEncodedFiles=$((ionCubeEncodedFiles+1))
-			break
-		else
-			# Sometimes ionCube Encoder silently fails. It turns out that we need
-			# to wait a bit and try again. The exact reason of failure is unknown (EN-87512).
-			echo "WARNING: ${targetFile} is not ionCube Encoded! (will retry)";
-			ionCubeBadAttempts=$((ionCubeBadAttempts+1))
-			sleep 3s
-		fi
-	done
-	if [ ! -n "${checkSum}"  ]; then
-		echo "ERROR: ${targetFile} is not ionCube Encoded! (gave up)";
-		head ${targetFile}
-		exit 1
-	fi
-}
-
-#
-# ionCube Encode all PHP files in a given folder recursively.
-#
-# It reads from the ${SOURCE_BASE} folder and writes into the ${TARGET_BASE} folder.
-#
-# @param string ${1} ionCube Encoder project options file
-# @param string ${2} Relative path of folder to be ionCube encoded recursively
-#
-function ionCubeFolder {
-	for icFile in $(find "${SOURCE_BASE}${2}" -name '*.php'); do
-		ionCubeFile "${1}" "${icFile#$SOURCE_BASE}"
-	done
-}
-
-#
-# ionCube encode specific files and folders in Enterprise Server release folder.
-#
-# Encoding is done for files that are related to the licensing of Enterprise to avoid
-# hackers working with our product without licenses. But also for some files that are
-# rather hard to develop which we do not want to give away for free and for files that
-# integrate with a 3rd party API that should not be exposed to the outside world.
-#
-function ionCubeEnterpriseFiles {
-	# Disable debugger; Else this function gives tons of noise. It validates encodings by itself.
-	set +x
-
-	echo "Encode specific Enterprise core folders."
-	thisYear=`date +%Y`
-	encodeOptionFile="${SOURCE_BASE}encodeoptions.txt"
-	echo "--replace-target --add-comment \"(c) Copyright 2000-${thisYear} WoodWing Software, www.woodwing.com\" --obfuscate locals --obfuscation-key \"de bocht van de ronde tocht\" --optimize max --no-doc-comments --property \"magic='the windmill keeps on turning'\" --message-if-no-loader \"'No Ioncube loader installed. Please run the Health Check page (e.g. http://localhost/Enterprise/server/wwtest/testsuite.php).'\"" > "${encodeOptionFile}"
-	icFolders="\
-		Enterprise/server/admin/license/ \
-		Enterprise/server/dbclasses/ \
-		Enterprise/server/dbdrivers/ \
-		Enterprise/server/services/ \
-		Enterprise/server/appservices/ \
-		Enterprise/server/wwtest/ngrams/ \
-		Enterprise/server/plugins/AdobeDps/ \
-	"
-	for icFolder in ${icFolders}; do
-		ionCubeFolder "${encodeOptionFile}" "${icFolder}"
-	done
-
-	echo "Encode specific Enterprise core files and Elvis plugin files."
-	icFiles="\
-		Enterprise/server/apps/webapplicense.inc.php \
-		Enterprise/server/regserver.inc.php \
-		Enterprise/server/bizclasses/BizServerJob.class.php \
-		Enterprise/server/bizclasses/BizPublishing.class.php \
-		Enterprise/server/bizclasses/BizSemaphore.class.php \
-		Enterprise/server/utils/DigitalPublishingSuiteClient.class.php \
-		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
-		plugins/release/Elvis/Elvis_WflLogOn.class.php \
-		plugins/release/Elvis/Elvis_ContentSource.class.php \
-		plugins/release/Elvis/util/ElvisSessionUtil.php \
-	"
-	for icFile in ${icFiles}; do
-		ionCubeFile "${encodeOptionFile}" "${icFile}"
-	done
-
-	echo "Encode the license folder of Enterprise core."
-	# Note that this step is separately done because it requires extra security options.
-	# These options block non-encoded PHP files from directly including one of our license files.
-	encodeOptionFile2="${SOURCE_BASE}encodeoptions2.txt"
-	cp "${encodeOptionFile}" "${encodeOptionFile2}"
-	echo "--include-if-property \"magic='the windmill keeps on turning'\"" >> "${encodeOptionFile2}"
-	icFolder="Enterprise/server/utils/license/"
-	ionCubeFolder "${encodeOptionFile2}" "${icFolder}"
-
-	# Restore the debugger; Now the encoding is done.
-	set -x
-
-	# Remove the temporary encoding options files.
-	rm -f "${encodeOptionFile}"
-	rm -f "${encodeOptionFile2}"
 }
 
 #
@@ -648,13 +538,52 @@ function step5_ionCubeEncodePhpFiles {
 	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/testsuite/BuildTest2
 	sync
 
-	echo 'step5c: Acquire license for ionCube Encoded to make sure it is still valid.'
+	echo 'step5c: Determine the last Enterprise Server version that introduced a new ionCube Encoder.'
+	esBaseVersion=`${PHP_EXE} "${ES_PHP_DEFINE}" --get --define=WW_ES_BASE_VERSION_FOR_IONCUBE --stripquotes < "${SOURCE_BASE}/Enterprise/server/serverinfo.php"`
+	if [ ! -n "${esBaseVersion}" ]; then
+		echo "ERROR: Failed reading the WW_ES_BASE_VERSION_FOR_IONCUBE option from serverinfo.php."
+		exit 1
+	fi
+	echo "Detected last Enterprise Server version that introduced a new ionCube Encoder: ${esBaseVersion}"
+
+	# TODO: Add the --acquire-license feature to the ES_PHP_ENCODER so that we can remove use of iONCUBE_ENCODER
+	echo 'step5d: Acquire license for ionCube Encoded to make sure it is still valid.'
 	sudo "${iONCUBE_ENCODER}" --acquire-license
 	"${iONCUBE_ENCODER}" -V
 	# "${iONCUBE_ENCODER}" --help | more
 
-	echo 'step5d: ionCube encode some files and folders in Enterprise Server release folder.'
-	ionCubeEnterpriseFiles
+	echo "step5e: Encode specific Enterprise core files and folders."
+	ioncubeEncode="${PHP_EXE} ${ES_PHP_ENCODER} --sourcebase=${SOURCE_BASE} --targetbase=${TARGET_BASE} --esversion=${esBaseVersion} --deployment=integrated "
+	icFoldersOrFiles="\
+		Enterprise/server/admin/license/ \
+		Enterprise/server/dbclasses/ \
+		Enterprise/server/dbdrivers/ \
+		Enterprise/server/services/ \
+		Enterprise/server/appservices/ \
+		Enterprise/server/wwtest/ngrams/ \
+		Enterprise/server/plugins/AdobeDps/ \
+		Enterprise/server/apps/webapplicense.inc.php \
+		Enterprise/server/regserver.inc.php \
+		Enterprise/server/bizclasses/BizServerJob.class.php \
+		Enterprise/server/bizclasses/BizPublishing.class.php \
+		Enterprise/server/bizclasses/BizSemaphore.class.php \
+		Enterprise/server/utils/DigitalPublishingSuiteClient.class.php \
+		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
+		plugins/release/Elvis/Elvis_WflLogOn.class.php \
+		plugins/release/Elvis/Elvis_ContentSource.class.php \
+		plugins/release/Elvis/util/ElvisSessionUtil.php \
+	"
+	for icFoldersOrFile in ${icFoldersOrFiles}; do
+		${ioncubeEncode} --encodelevel=1 --phppath="${icFoldersOrFile}"
+	done
+
+	echo "step5f: Encode specific Enterprise core files and folders (in 2nd level of security)."
+	icFoldersOrFiles="\
+		Enterprise/server/utils/license/ \
+	"
+	for icFoldersOrFile in ${icFoldersOrFiles}; do
+		${ioncubeEncode} --encodelevel=2 --phppath="${icFoldersOrFile}"
+	done
 }
 
 #
