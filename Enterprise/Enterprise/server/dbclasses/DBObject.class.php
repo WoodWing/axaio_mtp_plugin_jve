@@ -528,6 +528,29 @@ class DBObject extends DBBase
 		return $rows;
 	}
 
+	/**
+	 * Retrieves the flag and its message for a list of objects.
+	 *
+	 * Function returns a list of array in the following format:
+	 * $returnRows[objId] = array( 'objid' => 10, 'flag' => 2, 'message' => 'The flag message' )
+	 *
+	 * @param string[] $objectIds
+	 * @return string[] Refer to function header
+	 */
+	public static function getMultipleObjectsFlags( $objectIds )
+	{
+		$objectFlags = array();
+		$dbDriver = DBDriverFactory::gen();
+		$objFlagTbl = $dbDriver->tablename( 'objectflags' );
+
+		$sql = 'SELECT `objid`, `flag`, `message` FROM '. $objFlagTbl .
+				' WHERE `objid` in ('. implode( ',', $objectIds ) .')';
+		$sth = $dbDriver->query( $sql );
+		$rows = self::fetchResults( $sth, 'objid', false, $dbDriver );
+
+		return $rows;
+	}
+
 	static public function getTemplateObject( $name, $type )
 	{
 		$dbDriver = DBDriverFactory::gen();

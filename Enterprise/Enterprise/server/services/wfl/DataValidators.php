@@ -4380,6 +4380,20 @@ class WflLayoutObjectValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'Flag' ) ) {
+			$validator->enterPath( 'Flag' );
+			if( !is_null( $datObj->Flag ) ) {
+				$validator->checkType( $datObj->Flag, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'FlagMsg' ) ) {
+			$validator->enterPath( 'FlagMsg' );
+			if( !is_null( $datObj->FlagMsg ) ) {
+				$validator->checkType( $datObj->FlagMsg, 'string' );
+			}
+			$validator->leavePath();
+		}
 	}
 }
 
