@@ -21,6 +21,8 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		private var _State:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflState;
 		private var _Version:String;
 		private var _LockedBy:String;
+		private var _Flag:Number;
+		private var _FlagMsg:String;
 
 		public function WflLayoutObject() {
 		}
@@ -65,6 +67,20 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		}
 		public function set LockedBy(LockedBy:String):void {
 			this._LockedBy = LockedBy;
+		}
+
+		public function get Flag():Number {
+			return this._Flag;
+		}
+		public function set Flag(Flag:Number):void {
+			this._Flag = Flag;
+		}
+
+		public function get FlagMsg():String {
+			return this._FlagMsg;
+		}
+		public function set FlagMsg(FlagMsg:String):void {
+			this._FlagMsg = FlagMsg;
 		}
 
 	}

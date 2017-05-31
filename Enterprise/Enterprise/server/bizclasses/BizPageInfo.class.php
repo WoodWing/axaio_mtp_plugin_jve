@@ -71,6 +71,9 @@ class BizPageInfo
 		// This is used to figure out which children go on which page when we work through the pages below.
 		$relations = BizRelation::getPlacementsByRelationalParentIds( $layoutIdsAuth );
 
+		// Get layouts' flag and its message (all at once).
+		$layoutsFlagAndMessage = DBObject::getMultipleObjectsFlags( $layoutIds );
+
 		// Get essential metadata of all placed objects (all at once).
 		$childIds = array();
 		if( $relations ) foreach( $relations as $layoutIds ) {
@@ -101,6 +104,8 @@ class BizPageInfo
 			$layoutObject->State    = $layoutMetaData->WorkflowMetaData->State;
 			$layoutObject->Version  = $layoutMetaData->WorkflowMetaData->Version;
 			$layoutObject->LockedBy = strval($layoutMetaData->WorkflowMetaData->LockedBy);
+			$layoutObject->Flag = isset( $layoutsFlagAndMessage[$layoutId]['flag'] ) ? $layoutsFlagAndMessage[$layoutId]['flag'] : 0;
+			$layoutObject->FlagMsg = isset( $layoutsFlagAndMessage[$layoutId]['message'] ) ? $layoutsFlagAndMessage[$layoutId]['message'] : '';
 			$layoutObject->Modified = $layoutMetaData->WorkflowMetaData->Modified;
 
 			$layoutPages = array();			//  array for all the pages in this layout
@@ -134,30 +139,30 @@ class BizPageInfo
 				if( $layoutRelations ) foreach( $layoutRelations as $relation ) {
 					$childId = $relation->Child;
 					if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
-						$editionMatch = ($placement->Edition == null || $placement->Edition->Id == $edition->Id);
+						$editionMatch = ( $placement->Edition == null || $placement->Edition->Id == $edition->Id );
 						// Since 7.6: Placement can have tiles when one text frame is placed on both pages of spread.
 						if( $placement->Tiles ) { // Placement is on both pages of a spread.
 							foreach( $placement->Tiles as $tile ) { // Build extra PlacementInfo based on placement tile.
-								if( ($tile->PageSequence == $pageObject->PageSequence) && $editionMatch ) {
+								if( ( $tile->PageSequence == $pageObject->PageSequence ) && $editionMatch ) {
 									$placementInfos[] = self::buildPlacementInfoObject( $childId, $tile );
 								}
 							}
 						} else { // No tiles: Placement fits onto one page.
-							if( ($placement->PageSequence == $pageObject->PageSequence) && $editionMatch ){
+							if( ( $placement->PageSequence == $pageObject->PageSequence ) && $editionMatch ) {
 								$placementInfos[] = self::buildPlacementInfoObject( $childId, $placement );
 							}
 						}
-						if( !empty($placementInfos) ) {
+						if( !empty( $placementInfos ) ) {
 							//  Also add the child to the PlacedObjects, if we have not already done so.
 							$dup = false;
-							foreach ($placedObjects as $po) {
-								if ($po->Id == $childId) {
+							foreach( $placedObjects as $po ) {
+								if( $po->Id == $childId ) {
 									$dup = true;
 									break;
 								}
 							}
-							if ($dup == false) {
-								$childMetaData = array_key_exists( $childId, $childMetaDatas ) ? $childMetaDatas[$childId] : null;
+							if( $dup == false ) {
+								$childMetaData = array_key_exists( $childId, $childMetaDatas ) ? $childMetaDatas[ $childId ] : null;
 								if( $childMetaData ) {
 									$childStatus = $childMetaData->WorkflowMetaData->State;
 									$po = new PlacedObject();
@@ -170,8 +175,8 @@ class BizPageInfo
 									$po->State->Type = $childStatus->Type;
 									$po->State->Color = $childStatus->Color;
 									$po->Version = $childMetaData->WorkflowMetaData->Version;
-									$po->LockedBy = strval($childMetaData->WorkflowMetaData->LockedBy);
-									$po->Format = $childMetaData->ContentMetaData->Format ;
+									$po->LockedBy = strval( $childMetaData->WorkflowMetaData->LockedBy );
+									$po->Format = $childMetaData->ContentMetaData->Format;
 									$placedObjects[] = $po;
 								}
 							}
@@ -300,7 +305,7 @@ class BizPageInfo
 }
 
 /**
- * Sorts layouts based on the modified date. Lastly modified first and then perviously modified layouts. 
+ * Sorts layouts based on the modified date. Lastly modified first and then previously modified layouts.
  *
  * @param LayoutObject $a
  * @param LayoutObject $b
@@ -396,7 +401,7 @@ class PageNumInfo
  * - Alphabetical, either lower (a, b, c etc.) or upper (A, B, C etc.)
  * Prefixes can be anything.
  * Based on the style a sort order is calculated so that all pages using the same style end up in the same range.
- * Next to that the prefix is determined so that all pages using the same style but a different prefix can be seperated
+ * Next to that the prefix is determined so that all pages using the same style but a different prefix can be separated
  * from each other.
  * Some examples:
  * Display Number		Real Number		Sort Order				Page Prefix
