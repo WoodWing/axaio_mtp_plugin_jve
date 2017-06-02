@@ -682,7 +682,7 @@ class BizInDesignServerJobs
 		$jobId = self::createJob( $job );
 
 		if( $jobId ) {
-			self::repairDetachedServersAndJobs();
+			self::repairDetachedServersAndJobs( true );
 			// Find IDS instance that can handle the job; IDS that is active, has matching
 			// version and can handle the job prio.
 			try {
@@ -876,9 +876,10 @@ class BizInDesignServerJobs
      * This function detects those exceptional cases and unlocks the IDS instance and IDS job
      * so that the IDS can be put back into business again.
      *
-	 * @since 9.8.0
+     * @since 9.8.0
+     * @param bool $onlyForegroundJobs True to only repair foreground jobs, False to repair both foreground and background jobs.
      */
-	public static function repairDetachedServersAndJobs()
+	public static function repairDetachedServersAndJobs( $onlyForegroundJobs =false )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizInDesignServer.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
@@ -889,7 +890,7 @@ class BizInDesignServerJobs
 		LogHandler::Log( 'idserver', 'INFO', 'Repairing detached IDS servers and jobs...' );
 		$startedBefore = defined( 'IDS_AUTOMATION_REPAIRLOCK' ) ? IDS_AUTOMATION_REPAIRLOCK : 5; // hidden opt, default 5 minutes
 		$startedBefore = date( 'Y-m-d\TH:i:s', time() - ( $startedBefore * 60 ) ); // older than 5 minutes (default)
-		$jobs = DBInDesignServerJob::getLockedJobsStartedBefore( $startedBefore );
+		$jobs = DBInDesignServerJob::getLockedJobsStartedBefore( $startedBefore, $onlyForegroundJobs );
 		$maxExecutionTime = time() + 10;
 		$numberOfLockedJobs = count( $jobs );
 		do {

@@ -1148,15 +1148,19 @@ class DBInDesignServerJob extends DBBase
 		return $row ? $row['prio'] : 0;
 	}
 	
-    /**
-     * Returns jobs that are still busy (locked) and started before a given time.
-     *
+	/**
+	 * Returns jobs that are still busy (locked) and started before a given time.
+	 *
+	 * The jobs returned can be foreground jobs or both, foreground and background jobs
+	 * that are still busy and started before a given time.
+	 *
 	 * @since 9.8.0
-     * @param string $startedBefore
-     * @return InDesignServerJob[]
+	 * @param string $startedBefore To retrieve jobs that are started before this time value.
+	 * @param bool $onlyForegroundJobs True to only retrieve foreground jobs, False to retrieve both foreground and background jobs.
+	 * @return InDesignServerJob[]
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
-     */
-	static public function getLockedJobsStartedBefore( $startedBefore )
+	 */
+	static public function getLockedJobsStartedBefore( $startedBefore, $onlyForegroundJobs = false )
 	{
 		// Bail out when invalid parameters provided. (Paranoid check.)
 		$startedBefore = trim( strval( $startedBefore ) );
@@ -1165,8 +1169,9 @@ class DBInDesignServerJob extends DBBase
 		}
 		
 		// Retrieve the jobs from DB.
-		$where = '`locktoken` != ? AND `starttime` < ?';
-		$params = array( '', $startedBefore );
+		$foregroundJobs = $onlyForegroundJobs ? 'on' : '';
+		$where = '`locktoken` != ? AND `starttime` < ? AND `foreground` = ?';
+		$params = array( '', $startedBefore, $foregroundJobs );
 		$select = array( 
 			'jobid', 'assignedserverid', 'objid', 'locktoken', 'attempts',
 			'queuetime', 'starttime', 'readytime', 'jobstatus' ); 
