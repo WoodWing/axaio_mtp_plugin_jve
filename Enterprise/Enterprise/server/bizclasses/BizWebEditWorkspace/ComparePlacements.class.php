@@ -200,7 +200,6 @@ class BizWebEditWorkspace_ComparePlacements
 		return $result;
 	}
 
-	/** @noinspection PhpUnusedPrivateMethodInspection */
 	/**
 	 * Checks if two string values can be seen as the same.
 	 *
@@ -264,7 +263,6 @@ class BizWebEditWorkspace_ComparePlacements
 		return empty( floatval( $lhs ) ) == empty( floatval( $rhs ) );
 	}
 
-	/** @noinspection PhpUnusedPrivateMethodInspection */
 	/**
 	 * Checks if two Edition objects are the same.
 	 *
