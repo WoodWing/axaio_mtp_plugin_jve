@@ -511,7 +511,7 @@ class BizWebEditWorkspace
 	 * problem. But that doesn't do the trick always, see EN-89055. For cifs-systems opening and closing a file updates
 	 * the cache.
 	 *
-	 * @param $composeUpdateXmlFile
+	 * @param string $composeUpdateXmlFile
 	 */
 	private function deleteEmptyComposeUpdateXmlFile( $composeUpdateXmlFile )
 	{
