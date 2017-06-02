@@ -539,12 +539,11 @@ class DBObject extends DBBase
 	 */
 	public static function getMultipleObjectsFlags( $objectIds )
 	{
-		$objectFlags = array();
 		$dbDriver = DBDriverFactory::gen();
 		$objFlagTbl = $dbDriver->tablename( 'objectflags' );
 
 		$sql = 'SELECT `objid`, `flag`, `message` FROM '. $objFlagTbl .
-				' WHERE `objid` in ('. implode( ',', $objectIds ) .')';
+				' WHERE `objid` IN ('. implode( ',', $objectIds ) .')';
 		$sth = $dbDriver->query( $sql );
 		$rows = self::fetchResults( $sth, 'objid', false, $dbDriver );
 
