@@ -1,7 +1,5 @@
 <?php
 
-require_once '../../config/config.php';
-
 /**
  * Raises flags for brands and overrule issues if relative deadlines are configured.
  *
