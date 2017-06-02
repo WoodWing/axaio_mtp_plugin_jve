@@ -155,6 +155,7 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 		// Test: Enterprise Server
 		$exclFolders = FolderUtils::getLibraryFolders();
 		$exclFolders[] = BASEDIR.'/mytests'; // ignore local tests
+		$exclFolders[] = BASEDIR.'/config/plugins'; // ignore custom plugins
 		$exclFolders[] = BASEDIR.'/server/buildtools'; // not shipped, so not tested
 		$exclFolders[] = BASEDIR.'/config/plugin-templates'; // contains templates to be filled in runtime
 		FolderUtils::scanDirForFiles( $this, BASEDIR, array( 'php' ), $exclFolders );
