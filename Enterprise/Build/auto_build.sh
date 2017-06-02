@@ -534,7 +534,7 @@ function step5_ionCubeEncodePhpFiles {
 	rm -f -r ${TARGET_BASE}Enterprise/server/vendor/solarium/solarium/examples
 	rm -f -r ${TARGET_BASE}Enterprise/server/vendor/solarium/solarium/tests
 	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/development
-	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/testsuite/BuildTest/PhpCoding
+	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/testsuite/PhpCoding
 	rm -f -r ${TARGET_BASE}Enterprise/server/wwtest/testsuite/BuildTest2
 	sync
 
