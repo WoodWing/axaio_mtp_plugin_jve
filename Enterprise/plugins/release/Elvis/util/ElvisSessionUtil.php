@@ -220,22 +220,20 @@ class ElvisSessionUtil
 	}
 
 	/**
-	 * Retrieve the password from the saved credentials.
+	 * Retrieve the username and the password from the saved credentials under user $user.
 	 *
 	 * @since 10.1.3
 	 * @param string $user
-	 * @return string password if credentials are found else empty string.
+	 * @return string[] A list where the first item it the username and the second item the password if credentials are found, else returns null when not found.
 	 */
-	static public function retrievePasswordFromCredentials( $user )
+	static public function retrieveUsernamePasswordFromCredentials( $user )
 	{
-		$password = '';
+		$usernamePassword = null;
 		$credentials = self::getCredentials( $user );
 		if( $credentials ) {
 			$credentials = base64_decode( $credentials );
-			$userNamePassword = explode( ':', $credentials );
-			$password = $userNamePassword[1];
+			$usernamePassword = explode( ':', $credentials );
 		}
-
-		return $password;
+		return $usernamePassword;
 	}
 }
