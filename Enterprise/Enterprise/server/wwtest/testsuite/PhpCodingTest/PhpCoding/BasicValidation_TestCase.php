@@ -392,7 +392,7 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 					case T_STRING:
 						if( $incMode ) {
 							if( $text == 'BASEDIR' ) {
-								$incPath .= '../..';
+								$incPath .= '../../..';
 							}
 						}
 						if( array_key_exists( $text, $this->obsoletedPhpFunctions ) ) {
