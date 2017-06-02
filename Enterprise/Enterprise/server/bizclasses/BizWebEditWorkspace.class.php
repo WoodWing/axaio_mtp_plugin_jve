@@ -2372,10 +2372,10 @@ class BizWebEditWorkspace
 	 */
 	private function addInDesignArticleToRelations( $storedRelations , $inDesignArticlePlacements )
 	{
+		require_once BASEDIR.'/server/bizclasses/BizWebEditWorkspace/ComparePlacements.class.php';
 		if( $storedRelations ) foreach( $storedRelations as $storedRelation ) {
 			if( $storedRelation->Placements ) foreach( $storedRelation->Placements as $key => $placement ) {
 				if( $inDesignArticlePlacements ) foreach( $inDesignArticlePlacements as $inDesignArticlePlacement ) {
-					require_once BASEDIR.'/server/bizclasses/BizWebEditWorkspace/ComparePlacements.class.php';
 					$comparePlacements = new BizWebEditWorkspace_ComparePlacements();
 					if( $comparePlacements->sameStrings( $inDesignArticlePlacement->FrameID, $placement->FrameID) &&
 						 $comparePlacements->sameEdition( $inDesignArticlePlacement->Edition, $placement->Edition ) ) {
