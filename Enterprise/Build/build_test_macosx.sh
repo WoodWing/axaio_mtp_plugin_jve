@@ -236,9 +236,9 @@ function step6_testEnterpriseServer {
 	
 	cd "${DOCROOT}/${ENT_DIR}/"
 	echo "step6b: Running the Health Check..."
-	${PHP_BIN} server/wwtest/testcli.php HealthCheck2 "${WORKSPACE}/reports"
+	${PHP_BIN} server/wwtest/testsuite/junitcliclient.php HealthCheck2 "${WORKSPACE}/reports"
 	echo "step6c: Running the Build Test..."
-	${PHP_BIN} server/wwtest/testcli.php BuildTest "${WORKSPACE}/reports"
+	${PHP_BIN} server/wwtest/testsuite/junitcliclient.php BuildTest "${WORKSPACE}/reports"
 	cd -
 }
 

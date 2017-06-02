@@ -486,8 +486,8 @@ function step3b_updateVersionInRepository {
 #
 function step4_validatePhpCode {
 	echo "step4a: Run the PHP Coding Test (testsuite)."
-	cd "${WORKSPACE}/Enterprise/Enterprise/server/wwtest/"
-	${PHP_EXE} testphpcodingcli.php "${WORKSPACE}/reports"
+	cd "${WORKSPACE}/Enterprise/Enterprise/server/wwtest/testsuite/"
+	${PHP_EXE} junitcliclient.php PhpCodingTest "${WORKSPACE}/reports"
 	cd -
 
 	echo "step4b: Temporary move 3rd party libraries aside (to exclude them from phpStorm's code inspection)."
