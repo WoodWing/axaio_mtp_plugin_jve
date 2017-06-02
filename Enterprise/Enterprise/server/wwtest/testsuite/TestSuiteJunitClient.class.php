@@ -114,6 +114,12 @@ class WW_TestSuite_JunitClient
 		return $tests;
 	}
 
+	/**
+	 * Retrieve list of test cases that needs to be executed for the TestSuite.
+	 *
+	 * @return WW_TestSuite_JunitClient_Test[]
+	 * @throws Exception
+	 */
 	private function getTests()
 	{
 		if( $this->coldTest == true ) {
