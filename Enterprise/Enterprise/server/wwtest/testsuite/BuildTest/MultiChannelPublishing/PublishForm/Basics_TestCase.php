@@ -129,7 +129,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Basics_TestCase 
 			// Use the created Form, to see the updated result when we update the dossier.
 			require_once BASEDIR.'/server/services/wfl/WflSetObjectPropertiesService.class.php';
 			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 			$result = false;
 			$name = 'BasicsBuildTest';

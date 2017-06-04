@@ -216,7 +216,6 @@ class TransferEntry
 			}
 		}
 		
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		BizSession::setServiceName( 'FileTransfer' );
 		PerformanceProfiler::startProfile( 'Entry point', 1 );
 		$msg = 'Incoming HTTP '.$httpMethod.' request.<br/>'.

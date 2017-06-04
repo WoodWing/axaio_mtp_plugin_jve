@@ -30,7 +30,6 @@ class BizAdmAccessProfile
 	 */
 	static private function checkSysAdminAccess()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$user = BizSession::getShortUserName();
 		if( !hasRights( DBDriverFactory::gen(), $user ) ) { // not a system admin?
 			throw new BizException( 'ERR_AUTHORIZATION', 'Server', null );

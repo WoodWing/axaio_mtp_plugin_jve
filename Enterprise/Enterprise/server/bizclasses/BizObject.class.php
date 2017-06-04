@@ -1908,7 +1908,6 @@ class BizObject
 	{
 		require_once BASEDIR.'/server/bizclasses/BizEmail.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
 
@@ -2636,7 +2635,6 @@ class BizObject
 	public static function getMultipleObjectsPropertiesByObjectIds( $user, $objIds, $requestProps )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 		// Treat special cases; When prop is configured, we actually want the id instead.
 		// ID,PublicationId,IssueId,SectionId,PubChannelIds,EditionIds are not applicable for multi-set properties.
@@ -4827,7 +4825,6 @@ class BizObject
 	public static function updateParentObject( $job )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBDeletedObject.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
@@ -4980,7 +4977,6 @@ class BizObject
 	private static function updateParentModifierAndModified( $parentId=null, $childId=null, $relation=null, $modifier, $modified )
 	{
 		require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 
 		$isChildRel = isset($relation) && ($relation->Type == 'Contained' || $relation->Type == 'DeletedContained')  && $childId == $relation->Child;
 		if( $parentId || $isChildRel ) {
@@ -5569,7 +5565,6 @@ class BizObject
 
 					// Update the search index, and surpress errors if any.
 					require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
-					require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 					try {
 						$objectsToIndex = array();
 						$user = BizSession::getShortUserName();
@@ -5773,7 +5768,6 @@ class BizObject
 		if ( !is_null( $object ) && $object->MetaData->BasicMetaData->Type == 'Dossier' ) {
 			require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 			require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 			// Update contained PublishForms.
 			$objectsToIndex = array();

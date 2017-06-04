@@ -185,7 +185,6 @@ class BizWebEditWorkspace
 	 */
 	public function listArticleWorkspaces()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		$userId = BizSession::getShortUserName();
 		$appName = DBTicket::DBappticket( BizSession::getTicket() );
@@ -1680,7 +1679,6 @@ class BizWebEditWorkspace
 		if( is_null($id) ) { // new article?
 			$article->Name = 'article';
 		} else { // existing article?
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 			require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 			$request = new WflGetObjectsRequest( BizSession::getTicket() );
@@ -1730,7 +1728,6 @@ class BizWebEditWorkspace
 	 */
 	private function enrichWorkspace()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		
 		if( !isset($this->workspace->ID) || !$this->workspace->ID ) {

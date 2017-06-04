@@ -365,7 +365,6 @@ class BizQuery extends BizQueryBase
 		}
 		$sqlStruct = self::buildSQLArray( $requestedPropNames, $params, $queryOrder, $deletedObjects );
 		if ( empty( $sqlStruct ) )  {
-			require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 			throw new BizException( 'ERR_INVALID_OPERATION', 'Server', 'Invalid sql in query');
 		}
 
@@ -668,7 +667,6 @@ class BizQuery extends BizQueryBase
 			// Debug: Fail when property is unknown (but respect custom props)
 			if( LogHandler::debugMode() ) {
 				if( !array_key_exists( $propertyName, $objFields ) && stripos( $propertyName, 'c_' ) !== 0 ) {
-					require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 					throw new BizException( '', 'Server', '', __METHOD__.' - Querying for unknown property: '.$propertyName );
 				}
 			}
@@ -863,7 +861,6 @@ class BizQuery extends BizQueryBase
 		/*
 		if( LogHandler::debugMode() ) {
 			if( !isset($objFields[$propName]) && stripos( 'c_', $propName ) !== 0 ) {
-				require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 				throw new BizException( '', 'Server', '', __METHOD__.' - Querying for unknown property: '.$propName );
 			}
 		}
@@ -1667,7 +1664,6 @@ class BizQuery extends BizQueryBase
 	{
 		// Check Interval definition
 		if ( self::isProperDateTimeFormat($operation, $value) == false) {
-			require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 			throw new BizException( 'ERR_ARGUMENT', 'Client', $operation . " " . $value);
 		}
 

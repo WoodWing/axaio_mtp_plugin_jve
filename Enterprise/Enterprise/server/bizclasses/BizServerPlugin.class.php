@@ -58,7 +58,6 @@ class BizServerPlugin
 		require_once BASEDIR.'/server/dbclasses/DBServerPlugin.class.php';
 		$pluginInfos = DBServerPlugin::getPlugins();
 		if( DBServerPlugin::hasError() ) {
-			require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 			throw new BizException( 'ERR_DATABASE', 'Server', DBServerPlugin::getError() );
 		}
 		return $pluginInfos;

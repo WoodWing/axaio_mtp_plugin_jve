@@ -32,7 +32,6 @@ class QueryFilter_WflLogOn extends WflLogOn_EnterpriseConnector
 		LogHandler::Log( 'QueryFilter', 'DEBUG', 'Called: QueryFilter_WflLogOn->runAfter()' );
 
 		// Determine if current user has admin rights.
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		$isAdmin = DBUser::isAdminUser( BizSession::getShortUserName() );
 		

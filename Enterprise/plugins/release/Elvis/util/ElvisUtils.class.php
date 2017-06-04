@@ -333,7 +333,6 @@ class ElvisUtils {
 	 */
 	static private function isClient($clientName)
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$activeClient = BizSession::getClientName();
 		LogHandler::Log('ELVIS', 'DEBUG', 'client for ticket '. BizSession::getTicket() . ": ". $activeClient);
 		return (bool)stristr($activeClient, $clientName);

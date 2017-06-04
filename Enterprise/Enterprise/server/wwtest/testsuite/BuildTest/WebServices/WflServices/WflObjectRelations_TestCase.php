@@ -621,7 +621,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectRelations_TestCase
 	 */
 	private function addDossierObjectTarget()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 		$this->newPrintTarget = $this->composeNewTarget();
 

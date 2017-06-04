@@ -188,7 +188,6 @@ class BizMessage
 		if( $messageIds ) {
 			require_once BASEDIR.'/server/dbclasses/DBMessage.class.php';
 			require_once BASEDIR.'/server/smartevent.php';
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			$ticket = BizSession::getTicket();
 			foreach( $messageIds as $messageId ) {
 				$type = DBMessage::getMessageType( $messageId );
@@ -353,7 +352,6 @@ class BizMessage
 			try {			
 				if( $destination == 'object' ) {
 					// Send object messages, per object.
-					require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 					require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 					$shortUserName = BizSession::getShortUserName();
 					$object = BizObject::getObject( $objectId, $shortUserName, false, 'none', array( 'MetaData', 'Targets' ) );
@@ -725,7 +723,6 @@ class BizMessage
 		// (happens only when it is a new sticky note), do so now:
 		if( empty($message->FromUser) ) {
 			if( is_null( $user ) ) {
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				$user = BizSession::getUserInfo('user');
 			}
 			$message->FromUser = $user;
@@ -736,7 +733,6 @@ class BizMessage
 			// When it is a new sticky, color can be determined using the current login user's color.
 			// When it is an update of a sticky, and no color is sent, server assumes no changes needed, so won't do anything.		
 			if( empty( $message->StickyInfo->Color ) && !$stickyAlreadyExists ) {
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				$message->StickyInfo->Color = BizSession::getUserInfo( 'trackchangescolor' );
 			} elseif( !is_null($message->StickyInfo->Color) ) { // if color given, add the hash (#)
 				$message->StickyInfo->Color = '#' . $message->StickyInfo->Color;
@@ -770,7 +766,6 @@ class BizMessage
 		
 		// n-cast the properties of created/update message to client apps.
 		if( $notify === true ) {
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			require_once BASEDIR.'/server/smartevent.php';
 			new smartevent_sendmessage( BizSession::getTicket(), $message );
 		}

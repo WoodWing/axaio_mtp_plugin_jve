@@ -25,7 +25,6 @@
 require_once dirname(__FILE__) . '/config.php';	// Plug-in config file
 require_once BASEDIR.'/server/interfaces/plugins/connectors/ContentSource_EnterpriseConnector.class.php';
 require_once BASEDIR.'/server/interfaces/services/BizDataClasses.php';
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 require_once dirname(__FILE__) . '/GettyImages.class.php';
 
 define ('GI_CONTENTSOURCEID'     , 'GI');		// Unique content source ID

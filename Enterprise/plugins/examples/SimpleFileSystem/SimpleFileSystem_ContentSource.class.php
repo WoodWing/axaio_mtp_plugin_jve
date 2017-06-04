@@ -175,7 +175,6 @@ class SimpleFileSystem_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		LogHandler::Log('SimpleFileSystem', 'DEBUG', "SimpleFileSystem::createShadowObject called for $alienID" );
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/utils/ImageUtils.class.php'; // ResizeJPEG
 		
 		$fullfile  = $this->getFullFilePathFromAlienID( $alienID );
@@ -451,7 +450,6 @@ class SimpleFileSystem_ContentSource extends ContentSource_EnterpriseConnector
 	private function getEnterpriseContext( &$publication, &$category, &$status, $article )
 	{
 		// Get list of publications from Enterpise. If available we use WW News
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
 		$username = BizSession::getShortUserName();
 

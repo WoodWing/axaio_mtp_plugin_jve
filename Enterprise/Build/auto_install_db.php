@@ -12,7 +12,6 @@
  */
 
 require_once dirname(__FILE__).'/../Enterprise/config/config.php';
-require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 
 $installer = new Enterprse_AutoInstallDb();
 $mode = isset($argv[1]) ? $argv[1] : '';

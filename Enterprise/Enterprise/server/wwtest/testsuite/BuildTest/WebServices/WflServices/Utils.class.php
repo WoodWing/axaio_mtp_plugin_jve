@@ -533,7 +533,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	public function createArticleObject( $stepInfo, $articleName=null, $relations=null, $targets=null )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->ticket );
 
 		// The WSDL expects a Publication object, a PublicationInfo object is given, so transform
@@ -613,7 +612,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	public function createDossierObject( $stepInfo, $dossierName=null, $relations=null, $targets=null )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->ticket );
 
 		$publication = $this->getPublication();
@@ -659,7 +657,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	public function createDossierTemplateObject( $stepInfo, $dossierTemplateName=null, $relations=null, $targets=null )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->ticket );
 
 		$publication = $this->getPublication();

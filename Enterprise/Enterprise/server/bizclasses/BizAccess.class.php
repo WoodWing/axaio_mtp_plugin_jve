@@ -57,7 +57,6 @@ class BizAccess
 		Log::LogHandler( 'BizAccess', 'WARN', 'The checkRights() function is obsoleted. '.
 			'Please call the checkRightsForObjectProps() function instead.' );
 
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$issueId = array_key_exists( 'IssueId', $objProps) ? $objProps['IssueId'] : 0; // See Note#001
 		return self::checkRightsForParams(
 			BizSession::getShortUserName(), $rights, self::THROW_ON_DENIED,
@@ -139,7 +138,6 @@ class BizAccess
 		Log::LogHandler( 'BizAccess', 'WARN', 'The checkRightsMetaDataTargets() function is obsoleted. '.
 			'Please call the checkRightsForMetaDataAndTargets() function instead.' );
 
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$issueId = count($targets) > 0 ? $targets[0]->Issue->Id : 0; // See Note#001
 		return self::checkRightsForParams(
 			BizSession::getShortUserName(),

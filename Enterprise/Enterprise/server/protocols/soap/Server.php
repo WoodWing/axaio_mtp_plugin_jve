@@ -8,7 +8,6 @@
  * @since 		v6.1
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
-require_once BASEDIR . '/server/interfaces/services/BizException.class.php';
 
 /**
  * Class to hold one DIME record of a DIME message.

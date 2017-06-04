@@ -110,7 +110,6 @@ class BizInDesignServerJobs
 			}
 		}
 
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		if( BizSession::isStarted() ) { // in context of web services
 			$job->ServiceName = BizSession::getServiceName();
 			$job->Initiator = BizSession::getShortUserName();

@@ -192,7 +192,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetObjects_TestCase exte
 	public function createArticle( $stepInfo, $articleName=null )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = $this->user;
 
 		// The WSDL expects a Publication object, a PublicationInfo object is given, so transform

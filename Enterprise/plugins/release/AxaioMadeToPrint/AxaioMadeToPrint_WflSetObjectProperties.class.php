@@ -38,7 +38,6 @@ class AxaioMadeToPrint_WflSetObjectProperties extends WflSetObjectProperties_Ent
 		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Called: AxaioMadeToPrint_WflSetObjectProperties->runAfter()' );
 		require_once dirname(__FILE__) . '/config.php';
 		require_once dirname(__FILE__) . '/AxaioMadeToPrintDispatcher.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 
 		$ticket = BizSession::getTicket();
 

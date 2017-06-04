@@ -143,13 +143,11 @@ class BizUser
 	{
 		$usrLang = trim($usrLang);
 		
-		require_once BASEDIR.'/server/bizclasses/BizResources.class.php';
-		$allLanguages = BizResources::getLanguageCodes(); 
+		$allLanguages = BizResources::getLanguageCodes();
 		if ( array_key_exists( $usrLang, $allLanguages ) ) { // user language still valid language
 			return $usrLang;
 		}
 		
-		require_once BASEDIR.'/server/bizclasses/BizSettings.class.php';
 		$compLang = BizSettings::getFeatureValue( 'CompanyLanguage' );
 		if (array_key_exists( $compLang, $allLanguages )) { // company language stil valid
 			return $compLang;
@@ -350,7 +348,6 @@ class BizUser
 	{
 		// Check if requested name is current user.
 		// If so, BizSession has cached user info
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		if( BizSession::getShortUserName() == $userName ) {
 			$userLang = BizSession::getUserInfo('language');
 		} else {
@@ -468,7 +465,6 @@ class BizUser
     {
     	// First check if requested name is the current user.
     	// If so, BizSession has cached user info
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		if( BizSession::getShortUserName() == $user ) {
 			return BizSession::getUserInfo('fullname');
 		} else {

@@ -717,7 +717,6 @@ class SolrSearchEngine extends BizQuery
 	{
 		require_once BASEDIR . '/server/bizclasses/BizUser.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 
 		$shortUserName = BizSession::getShortUserName();
 		$userRow = DBUser::getUser($shortUserName);
@@ -1167,7 +1166,6 @@ class SolrSearchEngine extends BizQuery
 	{
 		require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 
 		$resultFacetItems = array();
 		$issueIds = array();

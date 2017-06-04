@@ -34,7 +34,6 @@ require_once dirname(__FILE__) . '/config.php';
 require_once BASEDIR.'/server/interfaces/plugins/connectors/ContentSource_EnterpriseConnector.class.php';
 require_once BASEDIR.'/server/interfaces/services/BizDataClasses.php';
 require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 class Lucene_ContentSource extends ContentSource_EnterpriseConnector
 {

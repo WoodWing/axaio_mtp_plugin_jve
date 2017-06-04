@@ -549,7 +549,6 @@ class AdobeDps_PubPublishing extends PubPublishing_EnterpriseConnector
 			static $issue = null;
 			if( !isset( $issue[ $publishTarget->IssueID ] )) {
 				require_once BASEDIR.'/server/bizclasses/BizAdmPublication.class.php';
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 				// Get Publication Id.
 				$user = BizSession::getShortUserName();

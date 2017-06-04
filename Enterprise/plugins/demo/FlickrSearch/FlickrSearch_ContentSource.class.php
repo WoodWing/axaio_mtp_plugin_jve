@@ -28,7 +28,6 @@ require_once dirname(__FILE__) . '/config.php';
 // Enterprise includes:
 require_once BASEDIR.'/server/interfaces/plugins/connectors/ContentSource_EnterpriseConnector.class.php';
 require_once BASEDIR.'/server/interfaces/services/BizDataClasses.php';
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 require_once dirname(__FILE__) . '/Flickr.class.php';
 
 // specify a Unique ID & prefix for this contentSource

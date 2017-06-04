@@ -167,7 +167,6 @@ class Fotoware_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		LogHandler::Log('SimpleFileSystem', 'DEBUG', "Fotoware::createShadowObject called for $alienID" );
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/utils/ImageUtils.class.php'; // ResizeJPEG
 		
 		$fwID = substr( $alienID, strlen(FOTOWARE_CONTENTSOURCEPREFIX) );
@@ -220,7 +219,6 @@ class Fotoware_ContentSource extends ContentSource_EnterpriseConnector
 	private function getEnterpriseContext( &$publication, &$category, &$status )
 	{
 		// Get list of publications from Enterpise. If available we use WW News
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
 		
 		$username = BizSession::getShortUserName();

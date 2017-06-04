@@ -20,7 +20,6 @@
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
 require_once BASEDIR.'/server/bizclasses/BizServerJobHandler.class.php';
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 class BizAutoPurge extends BizServerJobHandler
 {

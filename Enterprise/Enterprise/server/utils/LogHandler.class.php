@@ -670,7 +670,6 @@ class LogHandler
 	 */
 	public static function suppressLoggingForService( $serviceName = null )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		if( !$serviceName ) {
 			$serviceName = BizSession::getServiceName();
 		}

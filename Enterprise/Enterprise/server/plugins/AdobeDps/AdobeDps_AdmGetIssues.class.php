@@ -17,7 +17,6 @@ class AdobeDps_AdmGetIssues extends AdmGetIssues_EnterpriseConnector
 
 	final public function runAfter( AdmGetIssuesRequest $req, AdmGetIssuesResponse &$resp )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBChannel.class.php';
 		$pubChannelId = $resp->PubChannelId;
 		if( !$pubChannelId ){ 

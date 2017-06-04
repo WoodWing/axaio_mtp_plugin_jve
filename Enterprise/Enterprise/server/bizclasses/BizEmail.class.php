@@ -43,7 +43,6 @@ class BizEmail
 		$transport = self::setupEmailTransport();
 
 		// Get email and full name of user triggering the action, this will be the email sender.
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$senderEmail = EMAIL_SENDER_ADDRESS ? EMAIL_SENDER_ADDRESS : BizSession::getUserInfo('email');
 		$senderName	 = EMAIL_SENDER_NAME ? EMAIL_SENDER_NAME : BizSession::getUserInfo('fullname');
 
@@ -132,7 +131,6 @@ class BizEmail
 			$fullName = $newRouteTo; // routed to a group
 		}
 
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$senderEmail = EMAIL_SENDER_ADDRESS ? EMAIL_SENDER_ADDRESS : BizSession::getUserInfo('email');
 		$senderName	 = EMAIL_SENDER_NAME ? EMAIL_SENDER_NAME : BizSession::getUserInfo('fullname');
 
@@ -238,7 +236,6 @@ class BizEmail
 	 */
 	private static function getFile( $objId, $rendition, $format )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizStorage.php';
 		require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
 		$objectProps = BizQuery::queryObjectRow($objId );
@@ -291,7 +288,6 @@ class BizEmail
 	{
 		$emails = array();
 		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSettings.class.php';
 		$row = DBUser::getUser( $routeTo );
 		if( $row ) {
 			if( trim( $row['email'] ) && !trim( $row['disable'] ) && trim( $row['emailusr'] ) ) {

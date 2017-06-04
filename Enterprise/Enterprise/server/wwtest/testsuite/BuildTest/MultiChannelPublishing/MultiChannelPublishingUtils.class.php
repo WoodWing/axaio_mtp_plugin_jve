@@ -173,7 +173,6 @@ class MultiChannelPublishingUtils
 	public function createArticle( $stepInfo, $articleName=null )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->vars['BuildTest_MultiChannelPublishing']['ticket'] );
 
 		// The WSDL expects a Publication object, a PublicationInfo object is given, so transform
@@ -312,7 +311,6 @@ class MultiChannelPublishingUtils
 		$issue = $this->vars['BuildTest_MultiChannelPublishing']['webIssue'];
 
 		// Retrieve the State.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->vars['BuildTest_MultiChannelPublishing']['ticket'] );
 
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
@@ -381,7 +379,6 @@ class MultiChannelPublishingUtils
 	 */
 	public function createLayout( $stepInfo, $layoutName=null, $lock=false, $publicationChannel='print' )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
 
@@ -766,7 +763,6 @@ class MultiChannelPublishingUtils
 		$publication = $this->vars['BuildTest_MultiChannelPublishing']['publication'];
 
 		// Retrieve the State.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->vars['BuildTest_MultiChannelPublishing']['ticket'] );
 
 		$category = BizObjectComposer::getFirstCategory( $user, $publication->Id );
@@ -886,7 +882,6 @@ class MultiChannelPublishingUtils
 		$issue = $this->vars['BuildTest_MultiChannelPublishing']['webIssue'];
 
 		// Retrieve the State.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->vars['BuildTest_MultiChannelPublishing']['ticket'] );
 
 		// Flush the states cache to ensure we retrieve the latest from the Database.
@@ -1149,7 +1144,6 @@ class MultiChannelPublishingUtils
 	 */
 	public function clearAutocompleteTermEntitiesAndTerms( $provider )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTermEntity.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTerm.class.php';
 		require_once BASEDIR.'/server/services/adm/AdmDeleteAutocompleteTermEntitiesService.class.php';

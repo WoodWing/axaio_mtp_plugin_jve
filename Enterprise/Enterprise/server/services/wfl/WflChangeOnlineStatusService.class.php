@@ -28,8 +28,7 @@ class WflChangeOnlineStatusService extends EnterpriseService
 
 	public function runCallback( WflChangeOnlineStatusRequest $req )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-		BizSession::changeOnlineStatus( 
+		BizSession::changeOnlineStatus(
 			$this->User, // from super class
 			$req->IDs,
 			$req->OnlineStatus );

@@ -244,8 +244,6 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 			throw new BizException(null, 'Server', null, 'This Dossier has not been published yet and therefore cannot be updated.');
 		}
 
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-
 		$valueArray = $this->callRpcService( 'enterprise.saveNode'
 			, array(
 			       array(

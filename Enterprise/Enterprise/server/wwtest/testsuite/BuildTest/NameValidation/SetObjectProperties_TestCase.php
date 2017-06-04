@@ -418,7 +418,6 @@ class WW_TestSuite_BuildTest_NameValidation_SetObjectProperties_TestCase extends
 		}
 
 		// retrieve user (shortname) of the logOn test user.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->vars['BuildTest_NV']['ticket'] );
 
 		// build metadata

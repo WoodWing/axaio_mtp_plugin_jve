@@ -1180,7 +1180,6 @@ class BizTarget
 			}
 		}
 		if( !empty($newTargets) ) { // EN-19188 - Avoid empty target to be updated.
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			self::updateTargets(BizSession::getShortUserName(), $relation['child'], $newTargets);
 		}
 	}
@@ -1306,7 +1305,6 @@ class BizTarget
 	 */
 	public static function canRemoveTargets( $objTargets )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$clientVersion = BizSession::getClientVersion( null, null, 3 );
 		$appName = BizSession::getClientName();
 

@@ -56,7 +56,6 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_ResourceStrings_TestCase extends Test
 		);
 		
 		// Determine supported languages
-		require_once BASEDIR.'/server/bizclasses/BizResources.class.php';
 		$langCodes = BizResources::getLanguageCodes();
 		
 		// Read all resource tables (all languages)

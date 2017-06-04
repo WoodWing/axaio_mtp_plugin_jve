@@ -146,7 +146,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 		// Make sure the save operations are directly reflected at Solr indexes,
 		// or else we risk race-conditions, whereby saved data is not queryable the next
 		// split second, and so tests would fail randomly.
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		BizSession::setDirectCommit( true );
 		
 		// Save the retrieved ticket into session data.
@@ -4656,7 +4655,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 	 */
 	private function getUserColor()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$trackchangescolor = BizSession::getUserInfo( 'trackchangescolor' );
 		$trackchangescolor = substr( $trackchangescolor, 1 );
 		return $trackchangescolor;

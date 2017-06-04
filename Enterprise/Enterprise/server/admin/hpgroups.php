@@ -3,7 +3,6 @@
 require_once dirname(__FILE__).'/../../config/config.php';
 require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/admin/global_inc.php';
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 require_once BASEDIR.'/server/bizclasses/BizWorkflow.class.php';
 require_once BASEDIR.'/server/bizclasses/BizAdmUser.class.php';
 require_once BASEDIR . '/server/interfaces/services/adm/DataClasses.php';

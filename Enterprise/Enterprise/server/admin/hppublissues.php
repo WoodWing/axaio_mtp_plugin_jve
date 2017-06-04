@@ -15,7 +15,6 @@ $ticket = checkSecure('publadmin');
 $dbh = DBDriverFactory::gen();
 
 // Start the session to save the ticket in BizSession
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 BizSession::startSession( $ticket );
 
 // first handle re-orders (if any)

@@ -46,7 +46,6 @@ class QRCode_PubUnPublishDossiers extends PubUnPublishDossiers_EnterpriseConnect
 
 		// Get the Dossier object (being unpublished)
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizDeletedObject.class.php';
 		$user = BizSession::getShortUserName();

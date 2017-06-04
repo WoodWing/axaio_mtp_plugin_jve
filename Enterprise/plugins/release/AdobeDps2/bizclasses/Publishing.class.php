@@ -705,7 +705,6 @@ class AdobeDps2_BizClasses_Publishing
 	 */
 	private static function composeArticleId( $layoutId, $editionId )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$entSystemId = BizSession::getEnterpriseSystemId();
 		return $entSystemId.'_'.$layoutId.'_'.$editionId;
 	}
@@ -721,7 +720,6 @@ class AdobeDps2_BizClasses_Publishing
 	 */
 	private static function composeCollectionId( $issueId, $editionId )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$entSystemId = BizSession::getEnterpriseSystemId();
 		return $entSystemId.'_'.$issueId.'_'.$editionId;
 	}

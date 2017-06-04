@@ -794,7 +794,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflOverrulePublications_Tes
 		$state = $status;
 
 		// retrieve user (shortname) of the logOn test user.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->ticket );
 
 		// build metadata

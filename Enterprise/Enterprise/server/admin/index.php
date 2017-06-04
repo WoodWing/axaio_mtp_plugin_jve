@@ -6,4 +6,3 @@ require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 $ticket = checkSecure();
 $tpl = HtmlDocument::loadTemplate( 'mainadmin.htm' );
 print HtmlDocument::buildDocument($tpl);
-?>

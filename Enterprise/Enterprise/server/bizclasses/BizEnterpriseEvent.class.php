@@ -199,7 +199,6 @@ class BizEnterpriseEvent extends BizServerJobHandler
 	 */
 	private static function convertEventDataIfNeeded( ServerJob $job )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$user = BizSession::getShortUserName();
 
 		// Convert if needed

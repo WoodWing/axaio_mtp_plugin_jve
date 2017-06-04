@@ -10,8 +10,6 @@
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
 
-require_once BASEDIR.'/server/utils/NumberUtils.class.php';
-
 class PerformanceProfiler
 {
 	private static $contexts = array();
@@ -36,7 +34,6 @@ class PerformanceProfiler
 
 	public function __construct()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		if( OUTPUTDIRECTORY != '' ) {
 			$debugLevel = LogHandler::getDebugLevel();
 			if( $debugLevel == 'INFO' || $debugLevel == 'DEBUG' ) {

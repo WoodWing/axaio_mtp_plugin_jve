@@ -463,7 +463,6 @@ class BizAccessFeatureProfiles
 	private static function getSubApps( $idCounter )
 	{
 		$retVal = array();
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/services/sys/SysGetSubApplicationsService.class.php';
 		try {
 			$request = new SysGetSubApplicationsRequest();

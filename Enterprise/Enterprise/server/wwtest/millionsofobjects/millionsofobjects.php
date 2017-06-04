@@ -346,7 +346,6 @@ class TestMillionObjects
 		$this->currentObjectDate = $this->startDate . 'T00:00:00';
 		$this->createOrGetTemplates( $xmlDoc );
 
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$ticket = $_SESSION['ticket'];
 
 		// Create a Dossier.

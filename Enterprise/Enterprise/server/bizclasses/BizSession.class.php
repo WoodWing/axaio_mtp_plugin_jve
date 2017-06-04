@@ -20,12 +20,6 @@
  * differs and it therefore pushed onto the stack.
  */
 
-require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
-require_once BASEDIR.'/server/bizclasses/BizLDAP.class.php';
-require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-require_once BASEDIR.'/server/bizclasses/BizResources.class.php';
-
 class BizSession
 {
 	private static $userRow;
@@ -208,6 +202,7 @@ class BizSession
 	public static function validateUser( $user, $password )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizLDAP.class.php';
 
 		// Decode the user typed password
 		// Although server has given public encryption key to client application, this does *not* imply
@@ -318,6 +313,9 @@ class BizSession
 		/** @noinspection PhpUnusedParameterInspection */ $domain,
 		$appname, $appversion, $appserial, $appproductcode, $requestInfo, $masterTicket, $password )
 	{
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+
 		if( is_null($requestInfo) ) { // null means all
 			$requestInfo = array(
 				'Publications', 'NamedQueries', 'ServerInfo', 'Settings',
@@ -536,6 +534,8 @@ class BizSession
 
 	public static function logOff( $ticket, $savesettings=null, $settings=null, $messageList=null )
 	{
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+
 		// check ticket (and get user)
 		$shortUserName = self::checkTicket( $ticket, 'LogOff' );
 
@@ -561,7 +561,6 @@ class BizSession
 
 		// delete ticket
 		$dbDriver = DBDriverFactory::gen();
-		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		$sth = DBTicket::DBendticket( $ticket );
 		if( !$sth ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
@@ -601,8 +600,9 @@ class BizSession
 	 */
 	public static function getUserLanguage()
 	{
-		global $sLanguage_code;
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
 
+		global $sLanguage_code;
 		$sLanguage_code = self::getUserInfo('language');
 
 		// Check user language, if unknown, assign the default company language (or English when not configured)
@@ -681,6 +681,8 @@ class BizSession
 	 */
 	public static function loadUserLanguage( $userName )
 	{
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+
 		global $sLanguage_code;
 		$sLanguage_code = BizUser::getLanguage( $userName );
 		return $sLanguage_code;
@@ -1119,6 +1121,7 @@ class BizSession
 			if( self::$runMode == self::RUNMODE_BACKGROUND ) { // server job calling?
 				$retVal = '';
 			} else { // web service client calling?
+				require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 				$clientVersion = DBTicket::getClientAppVersion( $ticket );
 				if( $clientVersion ) {
 					$retVal = self::formatClientVersion( $clientVersion, $digits );

@@ -145,7 +145,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 
 		/*
 		// >>> Example to init Enterprise Server when needed to call biz/db layer (by-passing services):
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		BizSession::startSession( $ticket );
 		$user = BizSession::checkTicket( $ticket );
 		$this->setResult( 'INFO',  'Working in the name of user: '.$user, '' );

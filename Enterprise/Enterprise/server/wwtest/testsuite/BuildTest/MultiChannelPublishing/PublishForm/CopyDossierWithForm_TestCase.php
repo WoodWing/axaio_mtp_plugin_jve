@@ -474,7 +474,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_CopyDossierWithF
 	 */
 	private function verifyCopiedDossierWithForm()
 	{
-		require_once BASEDIR .'/server/bizclasses/BizSession.class.php';
 		$result = true;
 		// Verify copied Dossier's relations.
 		if( $this->copiedDossierWithForm->Relations ) {
@@ -636,7 +635,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_CopyDossierWithF
 	 */
 	private function verifyCopiedDossierWithoutForm()
 	{
-		require_once BASEDIR .'/server/bizclasses/BizSession.class.php';
 		$result = true;
 		// Verify copied Dossier's relations.
 		if( $this->copiedDossierWithoutForm->Relations ) {

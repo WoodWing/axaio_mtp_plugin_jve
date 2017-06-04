@@ -144,7 +144,6 @@ class ElvisSync
 	{
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
 		require_once BASEDIR.'/server/services/wfl/WflLogOnService.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once dirname( __FILE__ ).'/PluginInfo.php';
 
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'LogOn' );

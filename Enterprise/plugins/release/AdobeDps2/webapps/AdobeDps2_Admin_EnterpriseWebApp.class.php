@@ -32,7 +32,6 @@ class AdobeDps2_Admin_EnterpriseWebApp extends EnterpriseWebApp
 	 */
 	public function getHtmlBody()
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/utils/htmlclasses/TemplateSection.php';
 		require_once BASEDIR . '/server/utils/htmlclasses/HtmlDocument.class.php';
 		require_once dirname(__FILE__).'/../config.php'; // DPS2_PLUGIN_DISPLAYNAME

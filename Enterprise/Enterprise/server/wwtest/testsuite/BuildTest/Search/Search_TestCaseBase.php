@@ -26,7 +26,6 @@ abstract class WW_TestSuite_BuildTest_Search_Base extends TestCase
 		// Make sure the save operations are directly reflected at Solr indexes,
 		// or else we risk race-conditions, whereby saved data is not queryable the next
 		// split second, and so tests would fail randomly.
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		BizSession::setDirectCommit( true );
 
 		return;

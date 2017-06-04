@@ -67,7 +67,6 @@ class WW_TestSuite_HealthCheck2_AutoPurge_TestCase extends TestCase
 			// within that service call)
 			// BizAutoPurge class needs the session to get the ticket, and therefore, here
 			// HealthCheck startSession with the $ticket returned by the logOn response.
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';			
 			BizSession::startSession( $ticket );
 			
 			$this->checkAutoPurgeUserSettings();

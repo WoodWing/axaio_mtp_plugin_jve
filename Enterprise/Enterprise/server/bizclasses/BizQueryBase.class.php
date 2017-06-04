@@ -236,7 +236,6 @@ class BizQueryBase
 				/*
 				if( LogHandler::debugMode() ) {
 					if( (!array_key_exists( $qo->Property, $objFields ) || !$objFields[$qo->Property]) && stripos( $qo->Property, 'c_' ) !== 0  && !$joins[$qo->Property]) {
-						require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 						throw new BizException( '', 'Server', '', __METHOD__.' - Sorting on unknown property: '.$qo->Property );
 					}
 				}

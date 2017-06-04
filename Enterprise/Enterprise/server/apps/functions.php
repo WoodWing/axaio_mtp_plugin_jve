@@ -107,7 +107,6 @@ function cookieMonster($name, $getcookie, &$p0, &$p1, &$p2, &$p3, &$p4, &$p5, &$
 function listrouteto( $ticket, $publ = null, $issue = null)
 {
 	require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-	require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 	$arr = array();
 	try {
 		BizSession::startSession( $ticket );

@@ -76,7 +76,6 @@ class BizContentSource
 		} else {
 			LogHandler::Log('bizcontentsource','DEBUG','No shadow found for alien object '.$id);
 
-			require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 			require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 			$shadowObject = BizContentSource::createShadowObject( $id, $destObject );
 

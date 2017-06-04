@@ -15,7 +15,6 @@
  */
 
 require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
-require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 
 class DBCascadePub extends DBBase
 {

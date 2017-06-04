@@ -149,7 +149,6 @@ class WW_TestSuite_BuildTest_Search_CreateObject_TestCase extends WW_TestSuite_B
 		}
 
 		// retrieve user (shortname) of the logOn test user.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->vars['BuildTest_Search']['ticket'] );
 
 		// build metadata

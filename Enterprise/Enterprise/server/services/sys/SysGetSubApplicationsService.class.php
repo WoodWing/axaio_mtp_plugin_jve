@@ -17,7 +17,6 @@ class SysGetSubApplicationsService extends EnterpriseService
 	public function execute( SysGetSubApplicationsRequest $req )
 	{
 		// Resolve client app name when caller did left empty.
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		if( !is_null($req->ClientAppName) && empty($req->ClientAppName ) ) {
 			$req->ClientAppName = BizSession::getClientName();
 		}

@@ -1119,7 +1119,6 @@ class DBUser extends DBBase
 	 */
 	static public function checkUser( &$inuser )
 	{
-		require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename('users');
 

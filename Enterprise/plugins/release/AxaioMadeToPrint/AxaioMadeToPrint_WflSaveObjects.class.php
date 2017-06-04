@@ -38,7 +38,6 @@ class AxaioMadeToPrint_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Called: AxaioMadeToPrint_WflSaveObjects->runAfter()' );
 		require_once dirname(__FILE__) . '/config.php';
 		require_once dirname(__FILE__) . '/AxaioMadeToPrintDispatcher.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 
 		$ticket = BizSession::getTicket();
 		foreach($resp->Objects as $respArrKey => $respArrValue)

@@ -6,8 +6,6 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
 **/
 
-require_once BASEDIR . '/server/interfaces/services/BizException.class.php';
-
 class BizPublication
 {
 	/**
@@ -131,8 +129,7 @@ class BizPublication
 				require_once BASEDIR.'/server/dbclasses/DBFeature.class.php';
 				require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
 				require_once BASEDIR.'/server/bizclasses/BizSpelling.class.php';
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';				
-				
+
 				$defaultChanRow = DBChannel::getChannel( $pubRow['defaultchannelid'] );
 				
 				$retPub = new PublicationInfo();

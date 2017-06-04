@@ -266,7 +266,6 @@ class OverruleCompatibility
 				// If query returns PubId, but no IssueId we cannot convert PubId, so raise error
 				// that query is incompatible with Content Station
 				if( $pubIdCol != -1 && $issueIdCol == -1 ) {
-					require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 					$msg = 'Contact your System Administrator. Query definition invalid (missing IssueId) for Content Station in combination with overrule publications.';
 					throw new BizException( 'Config Error', 'Server', $msg, $msg );
 				}
@@ -304,7 +303,6 @@ class OverruleCompatibility
 				// If child query returns PubId, but no IssueId we cannot convert PubId, so raise error
 				// that query is incompatible with Content Station
 				if( $pubIdChildCol != -1 && $issueIdChildCol == -1 ) {
-					require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 					$msg = 'Contact your System Administrator. Query definition invalid (missing child IssueId) for Content Station in combination with overrule publications.';
 					throw new BizException( 'Config Error', 'Server', $msg, $msg );
 				}

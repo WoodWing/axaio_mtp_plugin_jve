@@ -431,8 +431,7 @@ class BizPublishing
 		
 		// Make-up publish history (for future use). 
 		// Respecting same structure as done for published dossiers.
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBUser.class.php'; 
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		$user = BizSession::getShortUserName();
 		$userRow = DBUser::getUser($user);	
 		$history = new PubPublishHistory();
@@ -926,8 +925,7 @@ class BizPublishing
 			
 			if( $operation != 'Preview' ) {
 				// Convert user short name into user db id.
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-				require_once BASEDIR.'/server/dbclasses/DBUser.class.php'; 
+				require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 				$user = BizSession::getShortUserName();
 				$userRow = DBUser::getUser($user);	
 	
@@ -1104,7 +1102,6 @@ class BizPublishing
 		$issueId = $publishTarget->IssueID;
 		$result = DBTarget::checkDossierTarget( $dossierId, $channelid, $issueId );
 		if( $result == false ) {
-			require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 			throw new BizException( 'ERR_NOTFOUND', 'Client', $dossierId );
 		}
 	}
@@ -1213,7 +1210,6 @@ class BizPublishing
 				$dossier = $fetchedDossiers[$dossierId][$publishTarget->IssueID][$editionId]['dossier'];
 				$children = $fetchedDossiers[$dossierId][$publishTarget->IssueID][$editionId]['children'];
 		} else { // read from DB
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			$user = BizSession::getShortUserName();
 			require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 			$dossier = BizObject::getObject( $dossierId, $user, false, null, null );
@@ -1688,7 +1684,6 @@ class BizPublishing
 
 		// Getting the templates from external source like web CMS (Drupal)
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizSearch.class.php';
 		$userName = BizSession::getShortUserName();

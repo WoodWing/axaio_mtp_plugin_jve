@@ -72,7 +72,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 	 */
 	private function testSingleObjectGetDialog2()
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/services/wfl/WflGetDialog2Service.class.php';
 		$request = new WflGetDialog2Request();
 		$request->Ticket	= $this->ticket;
@@ -634,8 +633,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 	 */
 	private function setupUsersAndRouting()
 	{
-		require_once BASEDIR .'/server/bizclasses/BizSession.class.php';
-
 		// Create test Users
 		$stepInfo = 'Creates a new user to test RouteTo field in GetDialog2.';
 		$this->testUser1 = $this->wflServicesUtils->createUser( $stepInfo );

@@ -62,7 +62,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ArticlePlacement
 		$this->issue      = $this->vars['BuildTest_MultiChannelPublishing']['webIssue'];
 		
 		// Start the session for the BuildTest to get the definitions.
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		BizSession::checkTicket( $this->ticket );
 
 		// Remember which templates are already in DB, before the script creates more templates.

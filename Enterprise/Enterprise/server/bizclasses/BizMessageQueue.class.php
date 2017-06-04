@@ -549,7 +549,6 @@ class BizMessageQueue
 	 */
 	private static function encryptPassword( $userId, $semaKey )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$hashedPwd = ww_crypt( $userId.$semaKey, BizSession::getEnterpriseSystemId(), true );
 		return ($hashedPwd) ? $hashedPwd : null;
 	}

@@ -6,7 +6,6 @@ require_once BASEDIR.'/server/utils/StopWatch.class.php';
 require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
 require_once dirname(__FILE__) . '/configImport.php';
 require_once dirname(__FILE__) . '/FlickrImport.class.php';
-require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 $session = array();
 require_once BASEDIR.'/server/protocols/soap/AdmClient.php';
 require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';

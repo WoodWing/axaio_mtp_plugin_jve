@@ -1783,6 +1783,7 @@ $loader->register();
 require_once BASEDIR.'/server/utils/LogHandler.class.php';
 LogHandler::init();
 
+require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 require_once BASEDIR.'/server/interfaces/services/BizErrorReport.class.php';
 require_once BASEDIR.'/server/utils/PerformanceProfiler.class.php';

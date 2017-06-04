@@ -7,7 +7,6 @@
 require_once '../../../config/config.php';
 require_once dirname(__FILE__) . '/Flickr.class.php';
 
-require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 require_once BASEDIR.'/server/ZendFramework/library/Zend/Rest/Client.php';
 
 $Flickr = new Flickr;
