@@ -1504,8 +1504,8 @@ if( !defined('OUTPUTDIRECTORY') ) {
 }
 
 // PROFILELEVEL:
-//    Used for profiling PHP code. Default value: 1. Requires DEBUGLEVELS to be set to 'INFO' or 'DEBUG'  
-//    in order to work, else the value of profile level is ignored. Possible settings are: 0 to 5:
+//    Used for profiling PHP code. Default value: 0. Requires OUTPUTDIRECTORY to be set in order to
+//    work, else the value of profile level is ignored. Possible settings are: 0 to 5:
 //       0: No profiling
 //       1: Web Service => Handling one service call of client application (excl network traffic)
 //       2: PHP Service => Handling one service call without SOAP/AMF/JSON wrapping/unwrapping.
@@ -1514,7 +1514,7 @@ if( !defined('OUTPUTDIRECTORY') ) {
 //       5: PHP Script  => Potential expensive PHP operations, such as loops, regular expressions, etc
 //
 if( !defined('PROFILELEVEL') ) {
-	define( 'PROFILELEVEL', 1 );
+	define( 'PROFILELEVEL', 0 );
 }
 
 // LOGSQL:

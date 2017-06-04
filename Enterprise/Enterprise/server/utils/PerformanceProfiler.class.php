@@ -25,31 +25,9 @@ class PerformanceProfiler
 	private static $mX = 0;
 	private static $mYAvg = 0;
 	private static $mYs = array();
-	 
-	/**
-	 *  
-	 */
-	private static $enabled = false;
-	private static $profileLevel = 1; 	// [0,5] 0: no profiling, 5: most detailed
 
 	public function __construct()
 	{
-		if( OUTPUTDIRECTORY != '' ) {
-			$debugLevel = LogHandler::getDebugLevel();
-			if( $debugLevel == 'INFO' || $debugLevel == 'DEBUG' ) {
-				self::$enabled = true;
-			}
-		}
-		
-		if( self::$enabled ) {
-			if( PROFILELEVEL >= 1) {
-				self::$profileLevel = PROFILELEVEL;
-			}
-			else {
-				self::$enabled = false;
-			}			
-		}
-
 		self::startProfile( strtolower($_SERVER['SCRIPT_NAME']), -1, true );
 	}
 	public function __destruct()
@@ -300,7 +278,7 @@ class PerformanceProfiler
 	 */
 	public static function startProfile( $context, $level, $initiator=false )
 	{
-		if( self::$enabled && self::$profileLevel >= $level ) {
+		if( OUTPUTDIRECTORY != '' && PROFILELEVEL >= $level ) {
 			
 			// All profiles currently running take a hit of this startProfile and the subsequent 
 			// stopProfile.
@@ -364,7 +342,7 @@ class PerformanceProfiler
 	 */
 	public static function stopProfile( $context, $level, $initiator=false, $extraInfo='' )
 	{
-		if( self::$enabled && self::$profileLevel >= $level ) {
+		if( OUTPUTDIRECTORY != '' && PROFILELEVEL >= $level ) {
 
 			if( isset( self::$contexts[$context] ) ) {
 				// context exists
