@@ -79,6 +79,7 @@ class HtmlDocument
 			$wr = array();
 			if( BizSession::isStarted() ) {
 				try {
+					require_once BASEDIR.'/server/secure.php'; // getauthorizations()
 					$dbDriver = DBDriverFactory::gen();
 					$sth = getauthorizations( $dbDriver, $globUser );
 					while( ($row = $dbDriver->fetch($sth) ) ) {
