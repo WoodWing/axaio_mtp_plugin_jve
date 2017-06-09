@@ -121,7 +121,9 @@ class License
 	 * Avoid recursion in auto renew function
 	 */
 
-	private $mInAutoRenew = false; 
+	private $mInAutoRenew = false;
+
+	private $defaultSemaId = null;
 
 	/**
 	 * Construct the License.
@@ -606,6 +608,8 @@ class License
 	/**
 	 * To make reading and writing the license info in both the DB and FS an 'atomic' action, we use a semaphore.
 	 * Be sure that the user (web browser) can not stop the execution half way: call ignore_user_abort() before!
+	 * The interval between two attempts should be long enough to ensure that a second or third attempt is successful.
+	 * So instead of using intervals of 1 or 2 milliseconds, the intervals are set to at least more than 10 milliseconds.
 	 *
 	 * @param string $semaPostfix to distinguish more semaphores
 	 * @param int $maxAttempts Maximum number of tries to get the semaphore. Maximum is 20.
@@ -615,21 +619,29 @@ class License
 	 */
 	private function lo_getSema( $semaPostfix = 'default', $maxAttempts = 20 )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
-		$attempts = array( 1, 2, 4, 8, 16, 8, 4, 2, 1, 3, 6, 12, 24, 48, 96, 192, 96, 48, 24, 12 );
-		if( $maxAttempts < 20 ) {
-			$attempts = array_slice( $attempts, 0, $maxAttempts );
-		}
-		$bizSema = new BizSemaphore();
-		$bizSema->setAttempts( $attempts );
-		$bizSema->setLifeTime( 120 );
-		$semaPostfix = 'license_'.$semaPostfix;
-		$previousLogSqlState = BizSemaphore::suppressSqlLogging();
-		$semaId = $bizSema->createSemaphore( $semaPostfix );
-		BizSemaphore::restoreSqlLogging( $previousLogSqlState );
+		$semaId = null;
+		if( $semaPostfix === 'default' && $this->defaultSemaId ) {
+			$semaId = $this->defaultSemaId;
+		} else {
+			require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+			$attempts = array( 10, 20, 40, 80, 160, 320, 640, 645, 325, 165, 85, 45, 25, 15, 105, 205, 405, 805, 405, 205 );
 
-		if( !$semaId ) {
-			$this->mWWLError = WWL_ERR_FILESTORE_SYSDIR;
+			if( $maxAttempts < 20 ) {
+				$attempts = array_slice( $attempts, 0, $maxAttempts );
+			}
+			$bizSema = new BizSemaphore();
+			$bizSema->setAttempts( $attempts );
+			$bizSema->setLifeTime( 120 );
+			$semaEntityId = 'license_'.$semaPostfix;
+			$previousLogSqlState = BizSemaphore::suppressSqlLogging();
+			$semaId = $bizSema->createSemaphore( $semaEntityId );
+			BizSemaphore::restoreSqlLogging( $previousLogSqlState );
+
+			if( !$semaId ) {
+				$this->mWWLError = WWL_ERR_SET_SEMAPHORE;
+			} elseif( $semaPostfix === 'default' ) {
+				$this->defaultSemaId = $semaId;
+			}
 		}
 
 		return $semaId;
@@ -646,6 +658,9 @@ class License
 		$previousLogSqlState = BizSemaphore::suppressSqlLogging();
 		BizSemaphore::releaseSemaphore( $semaId );
 		BizSemaphore::restoreSqlLogging( $previousLogSqlState );
+		if( $semaId === $this->defaultSemaId ){
+			$this->defaultSemaId = null;
+		}
 	}
 
 
@@ -710,47 +725,79 @@ class License
 	}
 	
 	/**
-	 * return the value of the given field
+	 * Return the value of the given field.
+	 *
 	 * The value is retrieved from both the database and filestore, and these values should match. 
-	 * If not, someome is trying to fool us, or someone restored backups that are different for FS and DB
+	 * If not, someone is trying to fool us, or someone restored backups that are different for FS and DB
 	 *
 	 * @param string field
-	 * @return string value or false on failure
-	 *
+	 * @return bool|string value or false on failure
 	 */
 	public function getLicenseField( $field ) 
 	{
 		$this->mWWLError = 0;
-
-		if ( !$this->initDirectories() )
+		if( !$this->initDirectories() ) {
 			return false;
-
+		}
 		ignore_user_abort();
 
-		$semaId = $this->lo_getSema();
-		if ( !$semaId )
-			return false;
+		if( $this->defaultSemaId ) {
+			return $this->getLicenseFieldDefaultSemaphoreIsSet( $field );
+		} else {
+			return $this->setDefaultSemaphoreAndGetLicenseField( $field );
+		}
 
-		$val = $this->lo_getFieldDB( $field );
-		if ( $val === false )
-		{
-			$this->lo_releaseSema( $semaId );
-			return false;
-		}
-		$val2 = $this->lo_getFieldFS( $field );
-		if ( $val2 === false )
-		{
-			$this->lo_releaseSema( $semaId );
-			return false;
-		}
-		if ( $val != $val2 )
-		{
-			$this->lo_releaseSema( $semaId );
-			$this->mWWLError = WWL_ERR_FILESTORE_DB_MISMATCH;
-			return false;
-		}
-		$this->lo_releaseSema( $semaId );
 		return $val;
+	}
+
+	/**
+	 * Return the value of the given field.
+	 *
+	 * The value is retrieved from both the database and filestore, and these values should match.
+	 * To ensure that both read actions are done in a consistent way a semaphore is set around the read actions.
+	 *
+	 * @param string field
+	 * @return bool|string value or false on failure
+	 */
+	private function setDefaultSemaphoreAndGetLicenseField( $field )
+	{
+		$semaId = $this->lo_getSema();
+		if( !$semaId ) {
+			return false;
+		}
+
+		$result = $this->getLicenseFieldDefaultSemaphoreIsSet( $field );
+
+		$this->lo_releaseSema( $semaId );
+
+		return $result;
+	}
+
+	/**
+	 * Return the value of the given field.
+	 *
+	 * The value is retrieved from both the database and filestore, and these values should match.
+	 * To ensure that both read actions are done in a consistent way a semaphore is set around the read actions.
+	 * This method can be called if the semaphore is already set and will be released by the caller.
+	 *
+	 * @param string field
+	 * @return bool|string value or false on failure
+	 */
+	private function getLicenseFieldDefaultSemaphoreIsSet( $field )
+	{
+		$val = $this->lo_getFieldDB( $field );
+		$result = $val;
+		if( $val !== false ) {
+			$val2 = $this->lo_getFieldFS( $field );
+			if( $val2 === false ) {
+				$result = false;
+			} elseif( $val != $val2 ) {
+				$this->mWWLError = WWL_ERR_FILESTORE_DB_MISMATCH;
+				$result = false;
+			}
+		}
+
+		return $result;
 	}
 
 	/**
@@ -1796,7 +1843,8 @@ class License
 		if( $this->mLicLog ) {
 			LogHandler::Log('license', 'ERROR', 'Error message: '.$errorMessage);
 		}
-		if ( $logoff ) {
+		if ( $logoff && ( $this->mWWLError != WWL_ERR_SET_SEMAPHORE ) ) { // Sometimes a check fails because a semaphore
+			// could not be set. Such a technical issue should not result in a log off of all users.
 			$this->logOffAllUsers( $logoffProdcode, $logoffAppserial );
 		}
 		return $code;
@@ -1824,10 +1872,15 @@ class License
 	 */
 	public function getLicenseStatus( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '', $logonUser='', $logonApp='' )
 	{
-		$startTime = microtime( true );
-		$status = $this->getLicenseStatusNoTiming( $productcode, $appserial, $info, $errorMessage, $logonTime,  $logonUser, $logonApp );
-		$endTime = microtime( true );
-		LogHandler::Log('license', 'DEBUG', sprintf( 'Execution time for detecting the license status: %.4f seconds.', $endTime - $startTime ) );
+		$semaId = $this->lo_getSema();
+		$status = false;
+		if( $semaId ){
+			$startTime = microtime( true );
+			$status = $this->getLicenseStatusNoTiming( $productcode, $appserial, $info, $errorMessage, $logonTime,  $logonUser, $logonApp );
+			$this->lo_releaseSema( $semaId );
+			$endTime = microtime( true );
+			LogHandler::Log('license', 'DEBUG', sprintf( 'Execution time for detecting the license status: %.4f seconds.', $endTime - $startTime ) );
+		}
 
 		return $status;
 	}
