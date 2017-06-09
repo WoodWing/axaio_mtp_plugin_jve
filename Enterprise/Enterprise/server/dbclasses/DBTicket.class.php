@@ -341,7 +341,8 @@ class DBTicket extends DBBase
 		$check = false;
 
 		if( $appName == 'InDesign Server' ) {
-			if( rand( 0, 40 ) === 0 ) {
+			$random = mt_rand( 0, 1600 );
+			if( $random % 40 == 0 ) {
 				$check = true;
 			}
 		} elseif( ($user != $installTicketID) || ( crc32( $ticketId ) != $appSerial ) ) {
@@ -350,7 +351,7 @@ class DBTicket extends DBBase
 
 		return $check;
 	}
-	
+
 	/**
 	 * Search for user's ticket in the database. <br>
 	 * Required: user id (short name) and client application name. <br>
