@@ -1114,6 +1114,8 @@ class BizWebEditWorkspace
 	}
 
 	/**
+	 * Remove unwanted Relations information to optimize speed performance.
+	 *
 	 * Not all info under PreviewArticleAtWorkspace->Relations data tree is needed by CS.
 	 * For slow WAN networks, big data trees would slow down the preview performance.
 	 * This function removes this info from the tree before it gets sent back to CS.
@@ -1150,15 +1152,17 @@ class BizWebEditWorkspace
 				}
 			}
 
-			// When the placement is not on one of the pages the article(s) are placed
-			// onto, leave out those placements.
-			if( $articlePageIds ) {
-				if( $relation->Placements ) foreach( $relation->Placements as $placementIndex => $placement ) {
-					if( !array_key_exists( $placement->PageSequence, $articlePageIds ) ) {
-						unset( $relation->Placements[ $placementIndex ] );
-					}
-				}
-			}
+//>>>		EN-89020: Instead of removing the code, comment it out to make it clear that this part is taken out for a reason.
+//			// When the placement is not on one of the pages the article(s) are placed
+//			// onto, leave out those placements.
+//			if( $articlePageIds ) {
+//				if( $relation->Placements ) foreach( $relation->Placements as $placementIndex => $placement ) {
+//					if( !array_key_exists( $placement->PageSequence, $articlePageIds ) ) {
+//						unset( $relation->Placements[ $placementIndex ] );
+//					}
+//				}
+//			}
+//<<<
 		}
 	}
 
