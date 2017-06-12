@@ -43,7 +43,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		<li>007: Place the article on the layout. (WflCreateObjectRelations)</li>
 		<li>008: Place image1 on the layout. (WflCreateObjectRelations)</li>
 		<li>009: Place image2 on the layout. (WflCreateObjectRelations)</li>
-		<li>010: Place image4 on the layout. (WflCreateObjectRelations)</li>
+		<li>010: Place image3 on the layout. (WflCreateObjectRelations)</li>
 		<li>011: Save the layout. (WflSaveObjects)</li>
 		<li>012: Unlock the layout - Checkin layout. (WflUnlockObjects)</li>
 		<li>013: Open article in Content Station. (WflGetObjects)</li>
@@ -77,8 +77,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 			$this->testService016(); // WflSaveObjects
 			$this->testService017(); // WflDeleteArticleWorkspace
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
 		}
 		// Remove all the test data objects and the test issue.
 		$this->tearDownTestData();
