@@ -742,12 +742,12 @@ class License
 		ignore_user_abort();
 
 		if( $this->defaultSemaId ) {
-			return $this->getLicenseFieldDefaultSemaphoreIsSet( $field );
+			$result = $this->getLicenseFieldDefaultSemaphoreIsSet( $field );
 		} else {
-			return $this->setDefaultSemaphoreAndGetLicenseField( $field );
+			$result = $this->setDefaultSemaphoreAndGetLicenseField( $field );
 		}
 
-		return $val;
+		return $result;
 	}
 
 	/**
