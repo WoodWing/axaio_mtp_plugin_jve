@@ -1151,7 +1151,8 @@ class BizWebEditWorkspace
 				}
 			}
 
-//>>>		EN-89020: Instead of removing the code, comment it out to make it clear that this part is taken out for a reason.
+			//<editor-fold desc="Commented out:Placements on pages without articles-EN-89020.">
+//		    EN-89020: Instead of removing the code, comment it out to make it clear that this part is taken out for a reason.
 //			// When the placement is not on one of the pages the article(s) are placed
 //			// onto, leave out those placements.
 //			if( $articlePageIds ) {
@@ -1161,7 +1162,7 @@ class BizWebEditWorkspace
 //					}
 //				}
 //			}
-//<<<
+			//</editor-fold>
 		}
 	}
 
