@@ -508,14 +508,13 @@ class BizWebEditWorkspace
 	 * The file containing the updates to compose the preview is often stored on mounted/shared locations. PHP uses
 	 * a cache to store information on files. For volatile files located on mounted/shared locations it turns out that
 	 * the info of the cache is not reliable. Clearing the cache by calling clearstatcache() is one way to solve the
-	 * problem. But that doesn't do the trick always, see EN-89055. For cifs-systems opening and closing a file updates
-	 * the cache.
+	 * problem.
 	 *
 	 * @param string $composeUpdateXmlFile
 	 */
 	private function deleteEmptyComposeUpdateXmlFile( $composeUpdateXmlFile )
 	{
-		if( file_exists( $composeUpdateXmlFile ) ) {
+		if( file_exists( $composeUpdateXmlFile ) ) { // EN-89055. For cifs-systems opening and closing a file updates the cache.
 			fclose( fopen( $composeUpdateXmlFile, 'a' ) );
 		}
 
