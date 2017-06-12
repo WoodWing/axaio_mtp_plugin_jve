@@ -123,6 +123,7 @@ class License
 
 	private $mInAutoRenew = false;
 
+	/** @var bool $defaultSemaId Set when a semaphore is created with the 'default' postfix. */
 	private $defaultSemaId = null;
 
 	/**
@@ -730,7 +731,7 @@ class License
 	 * The value is retrieved from both the database and filestore, and these values should match. 
 	 * If not, someone is trying to fool us, or someone restored backups that are different for FS and DB
 	 *
-	 * @param string field
+	 * @param string $field
 	 * @return bool|string value or false on failure
 	 */
 	public function getLicenseField( $field ) 
@@ -742,9 +743,9 @@ class License
 		ignore_user_abort();
 
 		if( $this->defaultSemaId ) {
-			$result = $this->getLicenseFieldDefaultSemaphoreIsSet( $field );
+			$result = $this->getLicenseFieldWithSemaphoreInHand( $field );
 		} else {
-			$result = $this->setDefaultSemaphoreAndGetLicenseField( $field );
+			$result = $this->getLicenseFieldWithoutSemaphoreInHand( $field );
 		}
 
 		return $result;
@@ -756,17 +757,17 @@ class License
 	 * The value is retrieved from both the database and filestore, and these values should match.
 	 * To ensure that both read actions are done in a consistent way a semaphore is set around the read actions.
 	 *
-	 * @param string field
+	 * @param string $field
 	 * @return bool|string value or false on failure
 	 */
-	private function setDefaultSemaphoreAndGetLicenseField( $field )
+	private function getLicenseFieldWithoutSemaphoreInHand( $field )
 	{
 		$semaId = $this->lo_getSema();
 		if( !$semaId ) {
 			return false;
 		}
 
-		$result = $this->getLicenseFieldDefaultSemaphoreIsSet( $field );
+		$result = $this->getLicenseFieldWithSemaphoreInHand( $field );
 
 		$this->lo_releaseSema( $semaId );
 
@@ -780,10 +781,10 @@ class License
 	 * To ensure that both read actions are done in a consistent way a semaphore is set around the read actions.
 	 * This method can be called if the semaphore is already set and will be released by the caller.
 	 *
-	 * @param string field
+	 * @param string $field
 	 * @return bool|string value or false on failure
 	 */
-	private function getLicenseFieldDefaultSemaphoreIsSet( $field )
+	private function getLicenseFieldWithSemaphoreInHand( $field )
 	{
 		$val = $this->lo_getFieldDB( $field );
 		$result = $val;
@@ -1877,7 +1878,7 @@ class License
 		if( $semaId ){
 			$startTime = microtime( true );
 			$status = $this->getLicenseStatusNoTiming( $productcode, $appserial, $info, $errorMessage, $logonTime,  $logonUser, $logonApp );
-			$this->lo_releaseSema( $semaId );
+			$this->lo_releaseSema( $semaId ); // Note that the default semaphore can already be released by a call to lo_releaseSema() in between.
 			$endTime = microtime( true );
 			LogHandler::Log('license', 'DEBUG', sprintf( 'Execution time for detecting the license status: %.4f seconds.', $endTime - $startTime ) );
 		}
