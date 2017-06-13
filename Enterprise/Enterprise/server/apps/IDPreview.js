@@ -1386,7 +1386,7 @@ function main()
             // Since 9.7 request SC for the Object->Relations, Relation->Placements and the Object->Placements
             // because those may change due to ObjectOperation processing. Note that those may NOT be
             // stored in the DB yet, but reside in the layout in the editor workspace only.
-            if (getRelations == 'true') {
+            if (isSC10plus && getRelations == 'true') {
               var rels = myDoc.entWorkflow.relations;
               if (typeof(rels) != "undefined" ) {
                   // remove the xml version processing instruction because the relations will be concatenated into our dump file
