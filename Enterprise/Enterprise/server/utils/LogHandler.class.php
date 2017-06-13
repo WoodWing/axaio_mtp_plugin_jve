@@ -403,20 +403,23 @@ class LogHandler
 	}
 
 	/**
-	 * Returns the full file path of the php.log file. This is used for fatal errors.
+	 * Returns the full file path of php.log file.
 	 *
-	 * @return string File path
+	 * The file php.log is used for fatal errors.
+	 *
+	 * @return string File path of the php.log file or empty string when logging is disabled or when php.log file doesn't exist.
 	 */
 	public static function getPhpLogFile()
 	{
-		$logFolder = self::getLogFolder();
-		if( !is_null($logFolder) ) {
-			$logFile = $logFolder.'php.log';
-			if( file_exists( $logFile ) ) {
-				return $logFile;
-			}
+		if( OUTPUTDIRECTORY == '' ) {
+			return ''; // logging disabled
 		}
-		return '';
+
+		$logFile = '';
+		if( is_dir( OUTPUTDIRECTORY )) { // HealthCheck should take care that this directory exists, so no error handling needed when it doesn't exist.
+			$logFile = file_exists( OUTPUTDIRECTORY.'php.log' ) ? OUTPUTDIRECTORY.'php.log' : '';
+		}
+		return $logFile;
 	}
 	
 	/**
