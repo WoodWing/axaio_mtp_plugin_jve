@@ -44,23 +44,21 @@ class DBPlacements extends DBBase
 			// for the InDesign Article with matching spline id.
 			require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
 			$createNewPlacement = false;
+			$placementIdByArticleId = array();
 			foreach( $plc->InDesignArticleIds as $idArticleId ) {
 				$dbPlacements = DBInDesignArticlePlacement::getPlacementIdsByInDesignArticleIdAndSplineId( $parent, $idArticleId, $plc->SplineID );
+				$found = false;
 				if( $dbPlacements ) {
-					$found = false;
 					foreach( $dbPlacements as $placement ) {
 						// If the edition corresponds to this placement a link should be created.
 						if( $placement['edition'] == 0 || $placement['edition'] == $plc->Edition->Id ) {
-							if( !DBInDesignArticlePlacement::inDesignArticlePlacementExists( $parent, $idArticleId, $placement['plcid'] ) ) {
-								DBInDesignArticlePlacement::linkInDesignArticleToPlacement( $parent, $idArticleId, $placement['plcid'] );
-							}
+							$placementIdByArticleId[$idArticleId] = $placement['plcid'];
 							$found = true;
 						}
 					}
-					if( !$found ) {
-						$createNewPlacement = true;
-					}
-				} else {
+
+				}
+				if( !$found ) {
 					$createNewPlacement = true;
 				}
 			}
@@ -76,9 +74,18 @@ class DBPlacements extends DBBase
 				$row['child']  = 0; 
 				$row['elementid'] = '';
 				$newPlacementId = self::insertRow( self::TABLENAME, $row );
+			}
 
-				// Create relations between the InDesign Articles and their placements.
-				DBInDesignArticlePlacement::linkInDesignArticleToPlacement( $parent, $idArticleId, $newPlacementId );
+			// Create relations between the InDesign Articles and their placements.
+			foreach( $plc->InDesignArticleIds as $idArticleId ) {
+				if( isset( $placementIdByArticleId[$idArticleId] ) ) {
+					$placementId = $placementIdByArticleId[$idArticleId];
+					if( !DBInDesignArticlePlacement::inDesignArticlePlacementExists( $parent, $idArticleId, $placementId ) ) {
+						DBInDesignArticlePlacement::linkInDesignArticleToPlacement( $parent, $idArticleId, $placementId );
+					}
+				} else {
+					DBInDesignArticlePlacement::linkInDesignArticleToPlacement( $parent, $idArticleId, $newPlacementId );
+				}
 			}
 		}
 
