@@ -44,11 +44,22 @@ class DBPlacements extends DBBase
 			// for the InDesign Article with matching spline id.
 			require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
 			$createNewPlacement = false;
-			$placementIdByArticleId = array();
 			foreach( $plc->InDesignArticleIds as $idArticleId ) {
-				$placementId = DBInDesignArticlePlacement::getPlacementIdByInDesignArticleIdAndSplineId( $parent, $idArticleId, $plc->SplineID );
-				if( $placementId ) {
-					$placementIdByArticleId[$idArticleId] = $placementId;
+				$dbPlacements = DBInDesignArticlePlacement::getPlacementIdsByInDesignArticleIdAndSplineId( $parent, $idArticleId, $plc->SplineID );
+				if( $dbPlacements ) {
+					$found = false;
+					foreach( $dbPlacements as $placement ) {
+						// If the edition corresponds to this placement a link should be created.
+						if( $placement['edition'] == 0 || $placement['edition'] == $plc->Edition->Id ) {
+							if( !DBInDesignArticlePlacement::inDesignArticlePlacementExists( $parent, $idArticleId, $placement['plcid'] ) ) {
+								DBInDesignArticlePlacement::linkInDesignArticleToPlacement( $parent, $idArticleId, $placement['plcid'] );
+							}
+							$found = true;
+						}
+					}
+					if( !$found ) {
+						$createNewPlacement = true;
+					}
 				} else {
 					$createNewPlacement = true;
 				}
@@ -65,18 +76,9 @@ class DBPlacements extends DBBase
 				$row['child']  = 0; 
 				$row['elementid'] = '';
 				$newPlacementId = self::insertRow( self::TABLENAME, $row );
-			}
-			
-			// Create relations between the InDesign Articles and their placements.
-			foreach( $plc->InDesignArticleIds as $idArticleId ) {
-				if( isset( $placementIdByArticleId[$idArticleId] ) ) {
-					$placementId = $placementIdByArticleId[$idArticleId];
-					if( !DBInDesignArticlePlacement::inDesignArticlePlacementExists( $parent, $idArticleId, $placementId ) ) {
-						DBInDesignArticlePlacement::linkInDesignArticleToPlacement( $parent, $idArticleId, $placementId );
-					}
-				} else {
-					DBInDesignArticlePlacement::linkInDesignArticleToPlacement( $parent, $idArticleId, $newPlacementId );
-				}
+
+				// Create relations between the InDesign Articles and their placements.
+				DBInDesignArticlePlacement::linkInDesignArticleToPlacement( $parent, $idArticleId, $newPlacementId );
 			}
 		}
 
@@ -360,9 +362,10 @@ class DBPlacements extends DBBase
 	 *
 	 * @param string[] $elementIds
 	 * @param integer $editionId
+	 * @param integer $excludeParentId Optional id of a parent of which the relations should be excluded.
 	 * @return array Map with element ids and edition ids, both as keys.
 	 */
-	static public function getChildsIdsForPlacedElementIdsAndEdition( array $elementIds, $editionId )
+	static public function getChildsIdsForPlacedElementIdsAndEdition( array $elementIds, $editionId, $excludeParentId = null )
 	{
 		$select = array( 'child', 'elementid' );
 		$where = "`elementid` IN ('".implode("','",$elementIds)."') ".
@@ -370,6 +373,12 @@ class DBPlacements extends DBBase
 				"AND `frameorder` = 0 ". // Only include the beginning of stories (start with frame 0).
 				"AND ( `edition` = 0 OR `edition` = ? ) "; // Suppress one placed in North and other in South, which is no duplicate!
 		$params = array( 'Placed', $editionId );
+
+		if( !is_null($excludeParentId) ) {
+			$where .= 'AND `parent` <> ?';
+			$params[] = $excludeParentId;
+		}
+
 		$rows = self::listRows( self::TABLENAME, null, null, $where, $select, $params );
 		
 		$map = array();

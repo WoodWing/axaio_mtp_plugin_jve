@@ -114,10 +114,11 @@ class DBInDesignArticlePlacement extends DBBase
 	 * @since 9.7.0
 	 * @param integer $layoutId
 	 * @param string $indesignArticleId UID
+	 * @param integer $editionId
 	 * @return string[] List of placement ids.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
-	public static function getPlacementIdsByInDesignArticleId( $layoutId, $indesignArticleId )
+	public static function getPlacementIdsByInDesignArticleId( $layoutId, $indesignArticleId, $editionId = null )
 	{
 		// Bail out when invalid parameters provided. (Paranoid check.)
 		$indesignArticleId = trim( $indesignArticleId );
@@ -132,6 +133,13 @@ class DBInDesignArticlePlacement extends DBBase
 				'INNER JOIN '.$placementsTable.' plc ON ( plc.`id` = iap.`plcid` ) '.
 				'WHERE iap.`objid` = ? AND iap.`artuid` = ? AND plc.`type` = ? ';
 		$params = array( $layoutId, $indesignArticleId, 'Placed' );
+
+		if( $editionId ) {
+			// If the edition id is given search for that specific id or 0 (which means all editions)
+			$sql .= ' AND (`edition` = ? OR `edition` = ?) ';
+			$params[] = $editionId;
+			$params[] = 0;
+		}
 		
 		$sth = $dbDriver->query( $sql, $params );
 		if( is_null($sth) ) {
@@ -150,14 +158,14 @@ class DBInDesignArticlePlacement extends DBBase
 	/**
 	 * Retrieves the Placements (ids) of a given InDesign Article (id) and Spline (id).
 	 *
-	 * @since 9.8.0
+	 * @since 10.1.3
 	 * @param integer $layoutId
 	 * @param string $indesignArticleId UID
 	 * @param integer $splineId
-	 * @return string Placement id.
+	 * @return array|null Returns an array of arrays with the placement id (plcid) and edition per placement. If no placements are found null is returned.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
-	public static function getPlacementIdByInDesignArticleIdAndSplineId( $layoutId, $indesignArticleId, $splineId )
+	public static function getPlacementIdsByInDesignArticleIdAndSplineId( $layoutId, $indesignArticleId, $splineId )
 	{
 		// Bail out when invalid parameters provided. (Paranoid check.)
 		$layoutId = intval( $layoutId );
@@ -170,7 +178,7 @@ class DBInDesignArticlePlacement extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$inarticlesTable = $dbDriver->tablename( self::TABLENAME );
 		$placementsTable = $dbDriver->tablename( 'placements' );
-		$sql =  'SELECT `plcid` FROM '.$inarticlesTable.' iap '.
+		$sql =  'SELECT `plcid`, `edition` FROM '.$inarticlesTable.' iap '.
 				'INNER JOIN '.$placementsTable.' plc ON ( plc.`id` = iap.`plcid` ) '.
 				'WHERE iap.`objid` = ? AND iap.`artuid` = ? AND plc.`type` = ? AND plc.`splineid` = ? ';
 		$params = array( $layoutId, $indesignArticleId, 'Placed', $splineId );
@@ -181,8 +189,11 @@ class DBInDesignArticlePlacement extends DBBase
 			self::setError(empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
 			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 		}
-		$row = $dbDriver->fetch($sth);
- 		return $row ? $row['plcid'] : 0;
+		$rows = array();
+		while( ($row = $dbDriver->fetch($sth)) ) {
+			$rows[] = $row;
+		}
+		return $rows ? $rows : null;
 	} 
 	
 	/**
