@@ -539,6 +539,33 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 		return $this->isFileLinksRequested;
 	}
 
+	/**
+	 * To determine if a copy of an image should always be created at the external content source.
+	 *
+	 * When the image from the external content source is brought to Enterprise, the content source
+	 * implementation can determine if a copy is made or not-made at the content source.
+	 * A) When a copy is made, this new copy at the content source will be linked to Enterprise.
+	 * B) When no copy is made, the original image at the content source will be linked to Enterprise.
+	 *
+	 * When setup A) is chosen, a copy will be made once or always depending on this function.
+	 * - When willAlwaysCreateACopyForImage() returns true, a copy is -always- made.
+	 * - When willAlwaysCreateACopyForImage() returns false (default), a copy is done once (for the
+	 * first time) only.
+	 *
+	 * When setup B) is chosen, this function should always return false, otherwise a copy will be
+	 * created which is unwanted.
+	 *
+	 * It is the responsibility of the ContentSource plugin to ensure that this function has the
+	 * correct combination with setup A or setup B.
+	 *
+	 * @since 10.1.3
+	 * @return bool Returns true to always create copy, false(default) to create the copy only one time.
+	 */
+	public function willAlwaysCreateACopyForImage()
+	{
+		return false;
+	}
+
 	// ===================================================================================
 
 	// Generic methods that can be overruled by a connector implementation:

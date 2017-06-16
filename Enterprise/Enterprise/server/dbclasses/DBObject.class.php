@@ -586,6 +586,32 @@ class DBObject extends DBBase
 	}
 
 	/**
+	 * Returns a list of properties for a shadow object.
+	 *
+	 * Currently, function only returns shadow object id and shadow object type in the list.
+	 *
+	 * @param string $contentSource Shadow-object's Content Source.
+	 * @param string $externalId Id that is unique to the ContentSource, which is the documentId in Enterprise.
+	 * @return null|string[]
+	 */
+	public static function getObjectPropsForShadowObject( $contentSource, $externalId )
+	{
+		$dbDriver = DBDriverFactory::gen();
+
+		$dbo = $dbDriver->tablename( self::TABLENAME );
+
+		$sql = "SELECT o.`id`, o.`type` FROM $dbo o WHERE o.`contentsource` = ? AND o.`documentid` = ? ";
+		$params = array( strval( $contentSource ), strval( $externalId ));
+		$sth = $dbDriver->query( $sql, $params );
+
+		$row = null;
+		if( $sth ) {
+			$row = $dbDriver->fetch( $sth );
+		}
+		return $row;
+	}
+
+	/**
 	 * Returns rows of shadow objects for the given alien objects.
 	 *
 	 * The rows returned consists of id, contentsource and documentid db field names.
