@@ -367,6 +367,9 @@ class DBPlacements extends DBBase
 	 * are already placed on a layout for a given edition. This can be used to detect 
 	 * whether or not the user is about to place an element (text component) twice.
 	 *
+	 * Optionally a parent id can be given to exclude the child ids that are placed on the given
+	 * layout id. This is useful when you want to know if the elementIds are placed on another layout.
+	 *
 	 * @param string[] $elementIds
 	 * @param integer $editionId
 	 * @param integer $excludeParentId Optional id of a parent of which the relations should be excluded.
@@ -381,7 +384,7 @@ class DBPlacements extends DBBase
 				"AND ( `edition` = 0 OR `edition` = ? ) "; // Suppress one placed in North and other in South, which is no duplicate!
 		$params = array( 'Placed', $editionId );
 
-		if( !is_null($excludeParentId) ) {
+		if( $excludeParentId ) {
 			$where .= 'AND `parent` <> ?';
 			$params[] = $excludeParentId;
 		}
