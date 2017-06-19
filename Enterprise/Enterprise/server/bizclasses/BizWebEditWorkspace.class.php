@@ -1050,61 +1050,65 @@ class BizWebEditWorkspace
 					require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
 					$ret['InDesignArticles'] = DBInDesignArticle::getInDesignArticles( $layoutId );
 					$iaPlacements = $this->composeInDesignArticlesPlacements( $xpath );
-					$ret['Placements'] = array_merge( $ret['Placements'], array_values( $iaPlacements ) );
+					if ( $iaPlacements ) {
+						$ret['Placements'] = array_merge( $ret['Placements'], array_values( $iaPlacements ) );
+					}
 				}
 
 				// Since 9.7, resolve the layout's placed relations so that caller (CS preview)
 				// can draw boxes for the sibling frames on the page and allow image/text (re)placements.
 				if( in_array( 'Relations', $requestInfo ) ) {
 					$ret['Relations'] = $this->composeObjectRelations( $xpath );
-					$rebuildNeeded = $this->isRebuildStoredRelationsPlacementsNeeded( $layoutId, $ret['Relations'] );
-					if( $rebuildNeeded ) {
-						// Although the layout resides in workspace, we want to save the placed
-						// relations into the DB. This is done since SC suppresses the CreateObjectRelations
-						// requests in context of IDPreview.js. The suppress is done for performance
-						// reasons, because a few Object Operations may result into many of those requests,
-						// which are all called synchronously and so for poor WANs this would slow down
-						// the preview operation for a few seconds, while the user is waiting.
-						require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-						$user = BizSession::getShortUserName();
+					if ( $ret['Relations'] ) {
+						$rebuildNeeded = $this->isRebuildStoredRelationsPlacementsNeeded( $layoutId, $ret['Relations'] );
+						if( $rebuildNeeded ) {
+							// Although the layout resides in workspace, we want to save the placed
+							// relations into the DB. This is done since SC suppresses the CreateObjectRelations
+							// requests in context of IDPreview.js. The suppress is done for performance
+							// reasons, because a few Object Operations may result into many of those requests,
+							// which are all called synchronously and so for poor WANs this would slow down
+							// the preview operation for a few seconds, while the user is waiting.
+							require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+							$user = BizSession::getShortUserName();
 
-						// Note that the DB updates below are guarded by BizObject::createSemaphoreForSaveLayout()
-						// to avoid SaveObjects being executed in the same time as PreviewArticle(s)AtWorkspace (EN-86722).
+							// Note that the DB updates below are guarded by BizObject::createSemaphoreForSaveLayout()
+							// to avoid SaveObjects being executed in the same time as PreviewArticle(s)AtWorkspace (EN-86722).
 
-						// Before delete+create object relations, make sure to remove all InDesignArticles
-						// since this does a cascade delete of their object->placements, which may be
-						// referenced through the relation->placements as well; Doing this after would
-						// destroy the InDesignArticle placements set through the relations.
-						if( !is_null( $ret['InDesignArticles'] ) ) {
-							require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-							DBInDesignArticle::deleteInDesignArticles( $layoutId );
+							// Before delete+create object relations, make sure to remove all InDesignArticles
+							// since this does a cascade delete of their object->placements, which may be
+							// referenced through the relation->placements as well; Doing this after would
+							// destroy the InDesignArticle placements set through the relations.
+							if( !is_null( $ret['InDesignArticles'] ) ) {
+								require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
+								DBInDesignArticle::deleteInDesignArticles( $layoutId );
+							}
+
+							// Delete all InDesignArticle placements (v9.7)
+							// Needs to be done BEFORE saveObjectPlacedRelations() since that is ALSO creating
+							// InDesignArticle placements (the ones that are also relational placements).
+							if( !is_null( $ret['Placements'] ) ) {
+								require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+								DBPlacements::deletePlacements( $layoutId, 0, 'Placed' );
+							}
+
+							BizObject::saveObjectPlacedRelations( $user, $layoutId, $ret['Relations'], false, false );
+
+							// Save the InDesign Articles for the layout object (v9.7).
+							if( !is_null( $ret['InDesignArticles'] ) ) {
+								require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
+								DBInDesignArticle::createInDesignArticles( $layoutId, $ret['InDesignArticles'] );
+							}
+
+							// Save the InDesign Article Placements for the layout object (v9.7).
+							if( !is_null( $iaPlacements ) ) {
+								DBPlacements::insertInDesignArticlePlacementsFromScratch( $layoutId, $iaPlacements );
+							}
 						}
 
-						// Delete all InDesignArticle placements (v9.7)
-						// Needs to be done BEFORE saveObjectPlacedRelations() since that is ALSO creating
-						// InDesignArticle placements (the ones that are also relational placements).
-						if( !is_null( $ret['Placements'] ) ) {
-							require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
-							DBPlacements::deletePlacements( $layoutId, 0, 'Placed' );
+						// Optimizations for CS that does not need all info in this context.
+						if( $ret['Relations'] ) {
+							self::optimizeRelationInfo( $ret['Relations'], $articles, $articlePageIds, $editionId );
 						}
-
-						BizObject::saveObjectPlacedRelations( $user, $layoutId, $ret['Relations'], false, false );
-
-						// Save the InDesign Articles for the layout object (v9.7).
-						if( !is_null( $ret['InDesignArticles'] ) ) {
-							require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-							DBInDesignArticle::createInDesignArticles( $layoutId, $ret['InDesignArticles'] );
-						}
-
-						// Save the InDesign Article Placements for the layout object (v9.7).
-						if( !is_null( $iaPlacements ) ) {
-							DBPlacements::insertInDesignArticlePlacementsFromScratch( $layoutId, $iaPlacements );
-						}
-					}
-
-					// Optimizations for CS that does not need all info in this context.
-					if( $ret['Relations'] ) {
-						self::optimizeRelationInfo( $ret['Relations'], $articles, $articlePageIds, $editionId );
 					}
 				}
 			}
