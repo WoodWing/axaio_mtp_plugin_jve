@@ -153,17 +153,17 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			// access rights. Those are filtered out. When he/she has rights, just give a 
 			// warning instead (but don't filter). When not placed, no message and no filter.
 			// Placements on the same layout are ignored as those are filtered out in the
-			// detirminePlacementsToClear function.
+			// determinePlacementsToClear function.
 			self::filterForMultiplaceAccessRights( $layoutId, $issueId, $editionId, $invokedObjects, $articleElements );
 			if( !$articleElements ) {
 				self::reportNoMatchingElementsFound( $layoutId );
 				break;
 			}
 
-			// Detirmine the placements to clear. If an element was already placed on the layout those
+			// Determine the placements to clear. If an element was already placed on the layout those
 			// frames are cleared (also the ones that aren't placed with the Automated Print Workflow).
 			// For an end user this is seen as a move of the placements.
-			$elementsToClear = self::detirminePlacementsToClear( $layoutId, $editionId, $articleElements );
+			$elementsToClear = self::determinePlacementsToClear( $layoutId, $editionId, $articleElements );
 
 			// Match the element labels with the IdArt frame labels (Placement->Element).
 			// For EACH frame of the selected InDesignArticle, we have to tell the ID script
@@ -500,12 +500,13 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @param Element[] $articleElements
 	 * @return Placement[]
 	 */
-	private static function detirminePlacementsToClear( $layoutId, $editionId, $articleElements )
+	private static function determinePlacementsToClear( $layoutId, $editionId, $articleElements )
 	{
 		$elementObjIds = array_unique( array_map( function( $articleElement ) { return $articleElement->ObjectId; }, $articleElements ) );
 
-		$placementToDelete = array();
+		$placementsToClear = array();
 
+		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 		foreach( $elementObjIds as $elementObjId ) {
 			$placementsForObj = DBPlacements::getPlacements($layoutId, $elementObjId, 'Placed');
 
@@ -513,14 +514,14 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 				foreach ( $articleElements as $articleElement ) {
 					if( $articleElement->ID == $placement->ElementID ) {
 						if( is_null($placement->Edition) || $placement->Edition->Id == $editionId) {
-							$placementToDelete[] = $placement;
+							$placementsToClear[] = $placement;
 						}
 					}
 				}
 			}
 		}
 
-		return $placementToDelete;
+		return $placementsToClear;
 	}
 
 	/**
