@@ -115,27 +115,13 @@ if( !defined('IMAGE_RESTORE_LOCATION') ) {
 /**
  * Defines if a copy of the image should always be created in Elvis.
  *
- * When this option is set to true, each time when an image is brought from Elvis to Enterprise,
+ * When this option is set to 'true', ELVIS_CREATE_COPY option has to be set to 'Copy_To_Production_Zone'.
+ *
+ * When this option is set to true, each time an Elvis image is added from the
+ * Production Zone folder ( defined in DEFAULT_ELVIS_PRODUCTION_ZONE ) to Enterprise,
  * a copy will be created in Elvis and linked to Enterprise.
-
- * When set to true:
- * The following two options must be set to the value as shown below:
- *      ELVIS_CREATE_COPY = 'Copy_To_Production_Zone'
- *      IMAGE_RESTORE_LOCATION = 'Elvis_Copy'
  *
- * When set to false:
- * Only the following combinations are supported:
- *      ELVIS_CREATE_COPY = 'Hard_Copy_To_Enterprise'
- *      IMAGE_RESTORE_LOCATION = 'Enterprise'
- * OR
- *      ELVIS_CREATE_COPY = 'Shadow_Only'
- *      IMAGE_RESTORE_LOCATION = 'Elvis_Original'
- * OR
- * For the following settings, the copy is only made once.
- *      ELVIS_CREATE_COPY = 'Copy_To_Production_Zone'
- *      IMAGE_RESTORE_LOCATION = 'Elvis_Copy'
- *
- * @since 10.1.3
+ * Available since Enterprise Server 10.1.3
  */
 if( !defined('ELVIS_ALWAYS_CREATE_COPY_FOR_IMAGE' )) {
 	define( 'ELVIS_ALWAYS_CREATE_COPY_FOR_IMAGE', false );

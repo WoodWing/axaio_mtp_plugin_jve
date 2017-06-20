@@ -542,6 +542,9 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	/**
 	 * To determine if a copy of an image should always be created at the external content source.
 	 *
+	 * As the function name implies, this function is only called in the case when object type Image
+	 * is handled.
+	 *
 	 * When the image from the external content source is brought to Enterprise, the content source
 	 * implementation can determine if a copy is made or not-made at the content source.
 	 * A) When a copy is made, this new copy at the content source will be linked to Enterprise.
