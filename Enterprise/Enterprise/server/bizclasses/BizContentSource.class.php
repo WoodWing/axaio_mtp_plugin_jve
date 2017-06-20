@@ -150,8 +150,8 @@ class BizContentSource
 	public static function getUsableShadowObjectId( $alienId )
 	{
 		$existingShadowProps = self::getShadowIdAndType( $alienId );
-		$existingShadowId = isset( $existingShadowProps[0] ) ? $existingShadowProps[0] : null;
-		$existingShadowType = isset( $existingShadowProps[1] ) ? $existingShadowProps[1] : null;
+		$existingShadowId = isset( $existingShadowProps['ID'] ) ? $existingShadowProps['ID'] : null;
+		$existingShadowType = isset( $existingShadowProps['Type'] ) ? $existingShadowProps['Type'] : null;
 		$alwaysCreateNewShadow = false;
 		if( $existingShadowType == 'Image' ) {
 			if( self::willAlwaysCreateACopyForImage( $alienId ) ) {
@@ -268,7 +268,7 @@ class BizContentSource
 	 *
 	 * @since 10.1.3
 	 * @param string $alienId Object id that is not recognized in Enterprise to determine its shadow id and type.
-	 * @return string[] Returns a list, array( id, type ) when shadow object is found, empty array when shadow object is not found.
+	 * @return string[] Returns a list, array( 'ID' => id, 'Type' => type ) when shadow object is found, empty array when shadow object is not found.
 	 */
 	private static function getShadowIdAndType( $alienId )
 	{
@@ -278,8 +278,8 @@ class BizContentSource
 
 		$shadowProps = DBObject::getObjectPropsForShadowObject( $contentSource, $documentId );
 		$shadowId = null;
-		if( isset( $shadowProps['id'] )) {
-			$shadowId = $shadowProps['id'];
+		if( isset( $shadowProps['ID'] )) {
+			$shadowId = $shadowProps['ID'];
 		}
 
 		if( LogHandler::debugMode() ) {

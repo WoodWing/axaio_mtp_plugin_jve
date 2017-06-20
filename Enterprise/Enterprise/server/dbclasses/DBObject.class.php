@@ -593,7 +593,7 @@ class DBObject extends DBBase
 	 * @since 10.1.3
 	 * @param string $contentSource Shadow-object's Content Source.
 	 * @param string $externalId Id that is unique to the ContentSource, which is the documentId in Enterprise.
-	 * @return null|string[]
+	 * @return string[]
 	 */
 	public static function getObjectPropsForShadowObject( $contentSource, $externalId )
 	{
@@ -609,7 +609,12 @@ class DBObject extends DBBase
 		if( $sth ) {
 			$row = $dbDriver->fetch( $sth );
 		}
-		return $row;
+
+		$result = array();
+		if( $row ) {
+			$result = array( 'ID' => $row['id'], 'Type' => $row['type'] );
+		}
+		return $result;
 	}
 
 	/**
