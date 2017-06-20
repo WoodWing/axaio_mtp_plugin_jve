@@ -139,8 +139,7 @@ class BizContentSource
 	 *
 	 * When shadow object id is found and if it is an object type of Image, function further
 	 * checks if the shadow-object's ContentSource wants to re-use the same shadow or create a new one.
-	 *
-	 * When a new shadow is desired or when the shadow is not found for this alien,
+	 * When a new shadow object is desired or when the shadow object is not found for this alien,
 	 * a null shadow id is returned (so that the caller can proceed to create a new one),
 	 * otherwise the found shadow id is returned.
 	 *
@@ -150,7 +149,9 @@ class BizContentSource
 	 */
 	public static function getUsableShadowObjectId( $alienId )
 	{
-		list( $existingShadowId, $existingShadowType ) = self::getShadowIdAndType( $alienId );
+		$existingShadowProps = self::getShadowIdAndType( $alienId );
+		$existingShadowId = isset( $existingShadowProps[0] ) ? $existingShadowProps[0] : null;
+		$existingShadowType = isset( $existingShadowProps[1] ) ? $existingShadowProps[1] : null;
 		$alwaysCreateNewShadow = false;
 		if( $existingShadowType == 'Image' ) {
 			if( self::willAlwaysCreateACopyForImage( $alienId ) ) {
@@ -162,9 +163,10 @@ class BizContentSource
 			$shadowId = null;
 			if( LogHandler::debugMode() ) {
 				if( !$existingShadowId ) {
-					LogHandler::Log( 'bizcontentsource', 'DEBUG', 'No shadow found for alien object '.$alienId );
+					LogHandler::Log( 'bizcontentsource', 'DEBUG', 'No shadow object id found for alien object '.$alienId );
 				} else if( $alwaysCreateNewShadow ) {
-					LogHandler::Log( 'bizcontentsource', 'DEBUG', 'A new shadow will be created for alien object '.$alienId );
+					LogHandler::Log( 'bizcontentsource', 'DEBUG', 'Shadow object id is found for alien object '.$alienId . '. '.
+											'However content source plugin requires a new shadow to be created always.' );
 				}
 			}
 		} else {
@@ -248,6 +250,9 @@ class BizContentSource
 	/**
 	 * Whether a copy of the image should be created at the ContentSource.
 	 *
+	 * When the function returns true, the original image at the ContentSource will be copied.
+	 * The shadow Image in Enterprise will be linked to this new copied image at the ContentSource.
+	 *
 	 * @since 10.1.3
 	 * @param string $alienId Object id that is not recognized in Enterprise (yet) to determine object's content source.
 	 * @return bool Returns true when a copy should be created, false otherwise.
@@ -263,7 +268,7 @@ class BizContentSource
 	 *
 	 * @since 10.1.3
 	 * @param string $alienId Object id that is not recognized in Enterprise to determine its shadow id and type.
-	 * @return string[]|null Returns a list (array( shadowId, shadowType )) when shadow is found, null otherwise.
+	 * @return string[] Returns a list, array( id, type ) when shadow object is found, empty array when shadow object is not found.
 	 */
 	private static function getShadowIdAndType( $alienId )
 	{
@@ -285,7 +290,7 @@ class BizContentSource
 			}
 		}
 
-		return $shadowId ? array( $shadowProps['id'], $shadowProps['type'] ) : null;
+		return $shadowId ? $shadowProps : array();
 	}
 
 	// ===================================================================
