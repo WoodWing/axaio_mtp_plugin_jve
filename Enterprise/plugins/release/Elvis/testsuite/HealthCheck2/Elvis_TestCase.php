@@ -141,8 +141,8 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			$result = false;
 		}
 		if( $result ) { // Only continue checking when all the above settings are fine.
-			if( ELVIS_ALWAYS_CREATE_COPY_FOR_IMAGE && ELVIS_CREATE_COPY != 'Copy_To_Production_Zone' ) {
-				$message = 'When ELVIS_ALWAYS_CREATE_COPY_FOR_IMAGE is set to true, ELVIS_CREATE_COPY option has to be set to ' .
+			if( ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE && ELVIS_CREATE_COPY != 'Copy_To_Production_Zone' ) {
+				$message = 'When ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE is set to true, ELVIS_CREATE_COPY option has to be set to ' .
 					'"Copy_To_Production_Zone".';
 				$this->setResult( 'ERROR', $message , $help );
 				$result = false;
