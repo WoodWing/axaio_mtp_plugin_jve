@@ -973,6 +973,6 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	public function willAlwaysCreateACopyForImage()
 	{
-		return ELVIS_ALWAYS_CREATE_COPY_FOR_IMAGE ? true : false;
+		return ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE ? true : false;
 	}
 }

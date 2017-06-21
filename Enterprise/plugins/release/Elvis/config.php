@@ -113,18 +113,16 @@ if( !defined('IMAGE_RESTORE_LOCATION') ) {
 }
 
 /**
- * Defines if a copy of the image should always be created in Elvis.
+ * When an asset is dragged from the Production Zone folder in Elvis (defined
+ * in DEFAULT_ELVIS_PRODUCTION_ZONE) to Enterprise, define if the asset should
+ * be copied in Elvis and linked to Enterprise.
  *
- * When this option is set to 'true', ELVIS_CREATE_COPY option has to be set to 'Copy_To_Production_Zone'.
+ * When set to 'true', the ELVIS_CREATE_COPY option has to be set to 'Copy_To_Production_Zone'.
  *
- * When this option is set to true, each time an Elvis image is added from the
- * Production Zone folder ( defined in DEFAULT_ELVIS_PRODUCTION_ZONE ) to Enterprise,
- * a copy will be created in Elvis and linked to Enterprise.
- *
- * Available since Enterprise Server 10.1.3
+ * Available since Enterprise Server 10.1.3.
  */
-if( !defined('ELVIS_ALWAYS_CREATE_COPY_FOR_IMAGE' )) {
-	define( 'ELVIS_ALWAYS_CREATE_COPY_FOR_IMAGE', false );
+if( !defined('ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE' )) {
+	define( 'ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE', false );
 }
 // Specify a Unique ID & prefix for this contentSource
 
