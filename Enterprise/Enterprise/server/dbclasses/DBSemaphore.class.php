@@ -48,10 +48,9 @@ class DBSemaphore extends DBBase
 		$sql = $dbDriver->autoincrement( $sql );
 		$sth = $dbDriver->query( $sql, $params, null, $logSql, false );
 
-		// Suppress 'already' exists error.
 		if( !$sth ) {
 			$errCode = $dbDriver->errorcode();
-			if( $errCode == DB_ERROR_ALREADY_EXISTS || $errCode == DB_ERROR_CONSTRAINT ) {
+			if( self::expectedErrorDuringAddSemaphore( $errCode ) ) {
 				return 0;
 			} else { // fatal DB error
 				throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
@@ -60,6 +59,29 @@ class DBSemaphore extends DBBase
 		
 		// Return semaphore id to caller.
 		return $dbDriver->newId( self::TABLENAME, true );
+	}
+
+	/**
+	 * Based on the DBMS error the process to add a semaphore should either continue or be stopped.
+	 *
+	 * Adding a semaphore can fail in case there is already a semaphore. This is expected as this is the basic concept of
+	 * semaphores. Next to that locking errors can occur when different processes are querying, deleting or trying to add
+	 * a semaphore. This is not blocking and the process should continue and try again after a short wait.
+	 *
+	 * @param int $errorCode
+	 * @return bool True if error is expected and not blocking, else false.
+	 */
+	static private function expectedErrorDuringAddSemaphore( $errorCode )
+	{
+		$result = false;
+		if( $errorCode == DB_ERROR_ALREADY_EXISTS ||
+			 $errorCode == DB_ERROR_CONSTRAINT ||
+			 $errorCode == DB_ERROR_DEADLOCK_FOUND ||
+			 $errorCode == DB_ERROR_NOT_LOCKED ) {
+			$result = true;
+		}
+
+		return $result;
 	}
 
 	/**
