@@ -166,7 +166,7 @@ abstract class WW_DbDrivers_DriverBase
 	{
 		return implode( ', ', array_map( array( $this, 'quoteIdentifierDBInDependent' ), $columns) );
 	}
-	
+
 	/**
 	 * Allows subclass to serialize a key-value parameter in SQL before the parent class does.
 	 *
@@ -178,19 +178,8 @@ abstract class WW_DbDrivers_DriverBase
 	 * @param string $substSql The SQL statement with (partly) already subst params so far.
 	 * @return bool Whether or not the SQL param subst is overruled (already done).
 	 */
-	protected function preSerializeParam( $key, $value, $sql, $sqlLhs, &$substSql )
+	protected function preSerializeParam(/** @noinspection PhpUnusedParameterInspection */ $key, $value, $sql, $sqlLhs, &$substSql )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$key = $key; 
-		/** @noinspection PhpSillyAssignmentInspection */
-		$value = $value; 
-		/** @noinspection PhpSillyAssignmentInspection */
-		$sql = $sql; 
-		/** @noinspection PhpSillyAssignmentInspection */
-		$sqlLhs = $sqlLhs; 
-		/** @noinspection PhpSillyAssignmentInspection */
-		$substSql = $substSql;
-
 		return false;
 	}
 
@@ -355,7 +344,7 @@ abstract class WW_DbDrivers_DriverBase
 	 *
 	 * @param string $sql SQL statement before the limit clause is added.
 	 * @param int $start The offset of the first row to return.
-	 * @param $count The maximum number of rows to return.
+	 * @param int $count The maximum number of rows to return.
 	 * @return string The SQL statement with the limit clause added.
 	 */
 	abstract public function limitquery($sql, $start, $count);
