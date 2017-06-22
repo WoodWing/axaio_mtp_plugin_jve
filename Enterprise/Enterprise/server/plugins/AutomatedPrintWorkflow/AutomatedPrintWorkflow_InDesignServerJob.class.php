@@ -25,7 +25,6 @@ class AutomatedPrintWorkflow_InDesignServerJob extends InDesignServerJob_Enterpr
 	 */
 	public function skipJobCreation( InDesignServerJob $job ) 
 	{
-		$job = $job;
 		return false;
 	}
 
