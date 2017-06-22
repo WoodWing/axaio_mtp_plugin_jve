@@ -113,8 +113,8 @@ if( !defined('IMAGE_RESTORE_LOCATION') ) {
 }
 
 /**
- * When an asset is dragged from the Production Zone folder in Elvis (defined
- * in DEFAULT_ELVIS_PRODUCTION_ZONE) to Enterprise, define if the asset should
+ * When an image is dragged from the Production Zone folder in Elvis (defined
+ * in DEFAULT_ELVIS_PRODUCTION_ZONE) to Enterprise, define if the image should
  * be copied in Elvis and linked to Enterprise.
  *
  * When set to 'true', the ELVIS_CREATE_COPY option has to be set to 'Copy_To_Production_Zone'.
