@@ -32,7 +32,7 @@ class Elvis_EnterprisePlugin extends EnterprisePlugin
 	final public function getConnectorInterfaces()
 	{
 		$interfaces = array(
-			'Session_EnterpriseConnector',
+//			'Session_EnterpriseConnector',
 			'ContentSource_EnterpriseConnector',
 			'SysGetSubApplications_EnterpriseConnector',
 			'Version_EnterpriseConnector',

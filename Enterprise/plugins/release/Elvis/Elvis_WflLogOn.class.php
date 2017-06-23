@@ -25,7 +25,8 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 	{
 		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';
 		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
-		
+		require_once dirname(__FILE__).'/config.php';
+
 		if (ElvisUtils::isInDesignServer()) {
 			require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 			$actingUser = BizSession::getShortUserName();
@@ -122,6 +123,7 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 			ElvisAMFClient::login();
 			ElvisSessionUtil::setSessionVar( 'restricted', false );
 		} catch ( BizException $e ) {
+			require_once dirname(__FILE__).'/config.php';
 			LogHandler::Log( __CLASS__, 'INFO', 'Log on to Elvis Content Source with normal user credentials failed.');
 			ElvisSessionUtil::saveCredentials( ELVIS_SUPER_USER, ELVIS_SUPER_USER_PASS );
 			try {
