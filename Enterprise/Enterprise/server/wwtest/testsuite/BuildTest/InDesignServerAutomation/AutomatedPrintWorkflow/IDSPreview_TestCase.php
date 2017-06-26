@@ -30,6 +30,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 	// Properties used for the tests.
 	private $objectIds = array(); // array( 'Dossiers' => ids, 'Layouts' => ids, 'Articles' => ids, 'Images' => ids )
 	private $workspaceId = null;
+	private $indesignArticleId = null;
 	
 	public function getDisplayName() { return 'IDS Preview with placements on the layout.'; }
 	public function getTestGoals()   { return 'To make sure that all article and image placements are returned and they are valid.'; }
@@ -40,17 +41,15 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		<li>004: Create image3 in this dossier which be will placed on a layout. (WflCreateObjects)</li>
 		<li>005: Create a new layout with InDesign Article that contains 1 article and 3 graphic frames. (WflCreateObjects)</li>
 		<li>006: Create an article. (WflCreateObjects)</li>
-		<li>007: Place the article on the layout. (WflCreateObjectRelations)</li>
-		<li>008: Place image1 on the layout. (WflCreateObjectRelations)</li>
-		<li>009: Place image2 on the layout. (WflCreateObjectRelations)</li>
-		<li>010: Place image3 on the layout. (WflCreateObjectRelations)</li>
-		<li>011: Save the layout. (WflSaveObjects)</li>
-		<li>012: Unlock the layout - Checkin layout. (WflUnlockObjects)</li>
-		<li>013: Open article in Content Station. (WflGetObjects)</li>
-		<li>014: Create article workspace. (WflCreateArticleWorkspace)</li>
-		<li>015: Preview article in Content Station. (WflPreviewArticlesAtWorkspace)</li>
-		<li>016: Checkin article in Content Station. (WflSaveObjects)</li>
-		<li>017: Delete article workspace. (WflDeleteArticleWorkspace)</li>
+		<li>007: Save the layout. (WflSaveObjects)</li>
+		<li>008: Unlock the layout - Checkin layout. (WflUnlockObjects)</li>
+		<li>009: Place images and article onto the layout. (ObjectOperations)</li>
+		<li>010: Call jobindex.php to run indesign server. (cronjob - idsjobindex.php)</li>
+		<li>011: Open article in Content Station. (WflGetObjects)</li>
+		<li>012: Create article workspace. (WflCreateArticleWorkspace)</li>
+		<li>013: Preview article in Content Station. (WflPreviewArticlesAtWorkspace)</li>
+		<li>014: Checkin article in Content Station. (WflSaveObjects)</li>
+		<li>015: Delete article workspace. (WflDeleteArticleWorkspace)</li>
 		</ol>'; }
 	public function getPrio()        { return 115; }
 	
@@ -65,17 +64,15 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 			$this->testService004(); // WflCreateObjects
 			$this->testService005(); // WflCreateObjects
 			$this->testService006(); // WflCreateObjects
-			$this->testService007(); // WflCreateObjectRelations
-			$this->testService008(); // WflCreateObjectRelations
-			$this->testService009(); // WflCreateObjectRelations
-			$this->testService010(); // WflCreateObjectRelations
-			$this->testService011(); // WflSaveObjects
-			$this->testService012(); // WflUnlockObjects
-			$this->testService013(); // WflGetObjects
-			$this->testService014(); // WflCreateArticleWorkspace
-			$this->testService015(); // WflPreviewArticlesAtWorkspace
-			$this->testService016(); // WflSaveObjects
-			$this->testService017(); // WflDeleteArticleWorkspace
+			$this->testService007(); // WflSaveObjects
+			$this->testService008(); // WflUnlockObjects
+			$this->testService009(); // ObjectOperations
+			$this->testService010(); // Jobindex.php
+			$this->testService011(); // WflGetObjects
+			$this->testService012(); // WflCreateArticleWorkspace
+			$this->testService013(); // WflPreviewArticlesAtWorkspace
+			$this->testService014(); // WflSaveObjects
+			$this->testService015(); // WflDeleteArticleWorkspace
 		} catch( BizException $e ) {
 		}
 		// Remove all the test data objects and the test issue.
@@ -590,6 +587,8 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$objId = $curResp->Objects[0]->MetaData->BasicMetaData->ID;
 		$this->assertGreaterThan( 0, $objId );
 		$this->objectIds['Layouts'][] = $objId;
+
+		$this->indesignArticleId = $curResp->Objects[0]->InDesignArticles[0]->Id;
 	}
 
 	private function getRecordedRequest005()
@@ -1127,170 +1126,18 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->ReplaceGUIDs = null;
 		return $request;
 	}
-	
+
 	private function testService007()
 	{
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
-		require_once BASEDIR.'/server/services/wfl/WflCreateObjectRelationsService.class.php';
+		require_once BASEDIR.'/server/services/wfl/WflSaveObjectsService.class.php';
 		$req = $this->getRecordedRequest007();
 
-		$stepInfo = 'testService#007:Creating the object relation between the layout and the article.';
-		$this->globalUtils->callService( $this, $req, $stepInfo );
-	}
-
-	private function getRecordedRequest007()
-	{
-		$request = new WflCreateObjectRelationsRequest();
-		$request->Ticket = $this->ticket;
-		$request->Relations = array();
-		$request->Relations[0] = new Relation();
-		$request->Relations[0]->Parent = $this->objectIds['Layouts'][0];
-		$request->Relations[0]->Child = $this->objectIds['Articles'][0];
-		$request->Relations[0]->Type = 'Placed';
-		$request->Relations[0]->Placements = array();
-		$request->Relations[0]->Placements[0] = new Placement();
-		$request->Relations[0]->Placements[0]->Page = 3;
-		$request->Relations[0]->Placements[0]->Element = 'body';
-		$request->Relations[0]->Placements[0]->ElementID = 'FBA64985-970D-4AF5-842F-179E826F5508';
-		$request->Relations[0]->Placements[0]->FrameOrder = 0;
-		$request->Relations[0]->Placements[0]->FrameID = '239';
-		$request->Relations[0]->Placements[0]->Left = 0;
-		$request->Relations[0]->Placements[0]->Top = 0;
-		$request->Relations[0]->Placements[0]->Width = 0;
-		$request->Relations[0]->Placements[0]->Height = 0;
-		$request->Relations[0]->Placements[0]->Overset = -18.962086;
-		$request->Relations[0]->Placements[0]->OversetChars = -3;
-		$request->Relations[0]->Placements[0]->OversetLines = 0;
-		$request->Relations[0]->Placements[0]->Layer = 'Layer 1';
-		$request->Relations[0]->Placements[0]->Content = '';
-		$request->Relations[0]->Placements[0]->Edition = null;
-		$request->Relations[0]->Placements[0]->ContentDx = null;
-		$request->Relations[0]->Placements[0]->ContentDy = null;
-		$request->Relations[0]->Placements[0]->ScaleX = null;
-		$request->Relations[0]->Placements[0]->ScaleY = null;
-		$request->Relations[0]->Placements[0]->PageSequence = 2;
-		$request->Relations[0]->Placements[0]->PageNumber = '3';
-		$request->Relations[0]->Placements[0]->Tiles = array();
-		$request->Relations[0]->Placements[0]->FormWidgetId = null;
-		$request->Relations[0]->Placements[0]->InDesignArticleIds = array();
-		$request->Relations[0]->Placements[0]->InDesignArticleIds[0] = '253';
-		$request->Relations[0]->Placements[0]->FrameType = 'text';
-		$request->Relations[0]->Placements[0]->SplineID = '239';
-		$request->Relations[0]->ParentVersion = null;
-		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
-		$request->Relations[0]->Rating = null;
-		$request->Relations[0]->Targets = null;
-		$request->Relations[0]->ParentInfo = null;
-		$request->Relations[0]->ChildInfo = null;
-		$request->Relations[0]->ObjectLabels = null;
-		return $request;
-	}
-	
-	private function testService008()
-	{
-		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
-		require_once BASEDIR.'/server/services/wfl/WflCreateObjectRelationsService.class.php';
-		$req = $this->getRecordedRequest008();
-
-		$stepInfo = 'testService#008:Creating the object relation between the layout and image1.';
-		$this->globalUtils->callService( $this, $req, $stepInfo );
-	}
-
-	private function getRecordedRequest008()
-	{
-		$request = new WflCreateObjectRelationsRequest();
-		$request->Ticket = $this->ticket;
-		$request->Relations = array();
-		$request->Relations[0] = new Relation();
-		$request->Relations[0]->Parent = $this->objectIds['Layouts'][0];
-		$request->Relations[0]->Child = $this->objectIds['Images'][0];
-		$request->Relations[0]->Type = 'Placed';
-		$request->Relations[0]->Placements = array();
-		$request->Relations[0]->ParentVersion = null;
-		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
-		$request->Relations[0]->Rating = null;
-		$request->Relations[0]->Targets = null;
-		$request->Relations[0]->ParentInfo = null;
-		$request->Relations[0]->ChildInfo = null;
-		$request->Relations[0]->ObjectLabels = null;
-		return $request;
-	}
-
-	private function testService009()
-	{
-		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
-		require_once BASEDIR.'/server/services/wfl/WflCreateObjectRelationsService.class.php';
-		$req = $this->getRecordedRequest009();
-
-		$stepInfo = 'testService#009:Creating the object relation between the layout and image2.';
-		$this->globalUtils->callService( $this, $req, $stepInfo );
-	}
-
-	private function getRecordedRequest009()
-	{
-		$request = new WflCreateObjectRelationsRequest();
-		$request->Ticket = $this->ticket;
-		$request->Relations = array();
-		$request->Relations[0] = new Relation();
-		$request->Relations[0]->Parent = $this->objectIds['Layouts'][0];
-		$request->Relations[0]->Child = $this->objectIds['Images'][1];
-		$request->Relations[0]->Type = 'Placed';
-		$request->Relations[0]->Placements = array();
-		$request->Relations[0]->ParentVersion = null;
-		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
-		$request->Relations[0]->Rating = null;
-		$request->Relations[0]->Targets = null;
-		$request->Relations[0]->ParentInfo = null;
-		$request->Relations[0]->ChildInfo = null;
-		$request->Relations[0]->ObjectLabels = null;
-		return $request;
-	}
-	
-	private function testService010()
-	{
-		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
-		require_once BASEDIR.'/server/services/wfl/WflCreateObjectRelationsService.class.php';
-		$req = $this->getRecordedRequest010();
-
-		$stepInfo = 'testService#010:Creating the object relation between the layout and image3.';
-		$this->globalUtils->callService( $this, $req, $stepInfo );
-	}
-
-	private function getRecordedRequest010()
-	{
-		$request = new WflCreateObjectRelationsRequest();
-		$request->Ticket = $this->ticket;
-		$request->Relations = array();
-		$request->Relations[0] = new Relation();
-		$request->Relations[0]->Parent = $this->objectIds['Layouts'][0];
-		$request->Relations[0]->Child = $this->objectIds['Images'][2];
-		$request->Relations[0]->Type = 'Placed';
-		$request->Relations[0]->Placements = array();
-		$request->Relations[0]->ParentVersion = null;
-		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
-		$request->Relations[0]->Rating = null;
-		$request->Relations[0]->Targets = null;
-		$request->Relations[0]->ParentInfo = null;
-		$request->Relations[0]->ChildInfo = null;
-		$request->Relations[0]->ObjectLabels = null;
-		return $request;
-	}
-	
-	private function testService011()
-	{
-		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
-		require_once BASEDIR.'/server/services/wfl/WflSaveObjectsService.class.php';
-		$req = $this->getRecordedRequest011();
-
 		// Compose expected response from recordings and validate against actual response.
-		$expResp = $this->getRecordedResponse011();
+		$expResp = $this->getRecordedResponse007();
 		$this->globalUtils->sortObjectDataForCompare( $expResp->Objects[0] );
 
-		$stepInfo = 'testService#011:Saving the layout.';
+		$stepInfo = 'testService#007:Saving the layout.';
 		$curResp = $this->globalUtils->callService( $this, $req, $stepInfo );
 		// Server does not guarantee order for certain object data items, so we sort here.
 		$this->globalUtils->sortObjectDataForCompare( $curResp->Objects[0] );
@@ -1314,7 +1161,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 			'Objects[0]->Placements', 'SaveObjects for Layout' );
 	}
 
-	private function getRecordedRequest011()
+	private function getRecordedRequest007()
 	{
 		$request = new WflSaveObjectsRequest();
 		$request->Ticket = $this->ticket;
@@ -1590,7 +1437,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Pages[0]->Files[0]->FileUrl = null;
 		$request->Objects[0]->Pages[0]->Files[0]->EditionId = '';
 		$request->Objects[0]->Pages[0]->Files[0]->ContentSourceFileLink = null;
-		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#011_att#000_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#007_att#000_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $request->Objects[0]->Pages[0]->Files[0] );
 		$request->Objects[0]->Pages[0]->Edition = null;
 		$request->Objects[0]->Pages[0]->Master = 'Master';
@@ -1612,7 +1459,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Pages[1]->Files[0]->FileUrl = null;
 		$request->Objects[0]->Pages[1]->Files[0]->EditionId = '';
 		$request->Objects[0]->Pages[1]->Files[0]->ContentSourceFileLink = null;
-		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#011_att#001_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#007_att#001_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $request->Objects[0]->Pages[1]->Files[0] );
 		$request->Objects[0]->Pages[1]->Edition = null;
 		$request->Objects[0]->Pages[1]->Master = 'Master';
@@ -1629,7 +1476,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Files[0]->FileUrl = null;
 		$request->Objects[0]->Files[0]->EditionId = '';
 		$request->Objects[0]->Files[0]->ContentSourceFileLink = null;
-		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#011_att#002_native.indd';
+		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#007_att#002_native.indd';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $request->Objects[0]->Files[0] );
 		$request->Objects[0]->Files[1] = new Attachment();
 		$request->Objects[0]->Files[1]->Rendition = 'thumb';
@@ -1639,7 +1486,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Files[1]->FileUrl = null;
 		$request->Objects[0]->Files[1]->EditionId = '';
 		$request->Objects[0]->Files[1]->ContentSourceFileLink = null;
-		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#011_att#003_thumb.jpg';
+		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#007_att#003_thumb.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $request->Objects[0]->Files[1] );
 		$request->Objects[0]->Messages = null;
 		$request->Objects[0]->Elements = null;
@@ -1678,7 +1525,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		return $request;
 	}
 
-	private function getRecordedResponse011()
+	private function getRecordedResponse007()
 	{
 		$response = new WflSaveObjectsResponse();
 		$response->Objects = array();
@@ -2132,79 +1979,79 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Objects[0]->InDesignArticles[0]->Name = 'Article 1';
 		$response->Objects[0]->Placements = array();
 		$response->Objects[0]->Placements[0] = new Placement();
-		$response->Objects[0]->Placements[0]->Page = '2';
-		$response->Objects[0]->Placements[0]->Element = 'graphic';
+		$response->Objects[0]->Placements[0]->Page = '3';
+		$response->Objects[0]->Placements[0]->Element = 'body';
 		$response->Objects[0]->Placements[0]->ElementID = '';
 		$response->Objects[0]->Placements[0]->FrameOrder = '0';
-		$response->Objects[0]->Placements[0]->FrameID = '258';
-		$response->Objects[0]->Placements[0]->Left = '75.6';
-		$response->Objects[0]->Placements[0]->Top = '96';
-		$response->Objects[0]->Placements[0]->Width = '264';
-		$response->Objects[0]->Placements[0]->Height = '207.6';
-		$response->Objects[0]->Placements[0]->Overset = '0';
-		$response->Objects[0]->Placements[0]->OversetChars = '0';
+		$response->Objects[0]->Placements[0]->FrameID = '239';
+		$response->Objects[0]->Placements[0]->Left = '-237.6';
+		$response->Objects[0]->Placements[0]->Top = '85.2';
+		$response->Objects[0]->Placements[0]->Width = '484.8';
+		$response->Objects[0]->Placements[0]->Height = '218.4';
+		$response->Objects[0]->Placements[0]->Overset = '-18.962086';
+		$response->Objects[0]->Placements[0]->OversetChars = '-3';
 		$response->Objects[0]->Placements[0]->OversetLines = '0';
 		$response->Objects[0]->Placements[0]->Layer = 'Layer 1';
 		$response->Objects[0]->Placements[0]->Content = '';
 		$response->Objects[0]->Placements[0]->Edition = null;
-		$response->Objects[0]->Placements[0]->ContentDx = '-10';
-		$response->Objects[0]->Placements[0]->ContentDy = '15.3';
+		$response->Objects[0]->Placements[0]->ContentDx = '0';
+		$response->Objects[0]->Placements[0]->ContentDy = '0';
 		$response->Objects[0]->Placements[0]->ScaleX = '1';
 		$response->Objects[0]->Placements[0]->ScaleY = '1';
-		$response->Objects[0]->Placements[0]->PageSequence = '1';
-		$response->Objects[0]->Placements[0]->PageNumber = '2';
+		$response->Objects[0]->Placements[0]->PageSequence = '2';
+		$response->Objects[0]->Placements[0]->PageNumber = '3';
 		$response->Objects[0]->Placements[0]->Tiles = array();
 		$response->Objects[0]->Placements[0]->FormWidgetId = '';
 		$response->Objects[0]->Placements[0]->InDesignArticleIds = array();
 		$response->Objects[0]->Placements[0]->InDesignArticleIds[0] = '253';
-		$response->Objects[0]->Placements[0]->FrameType = 'graphic';
-		$response->Objects[0]->Placements[0]->SplineID = '250';
+		$response->Objects[0]->Placements[0]->FrameType = 'text';
+		$response->Objects[0]->Placements[0]->SplineID = '239';
 		$response->Objects[0]->Placements[1] = new Placement();
-		$response->Objects[0]->Placements[1]->Page = '3';
+		$response->Objects[0]->Placements[1]->Page = '2';
 		$response->Objects[0]->Placements[1]->Element = 'graphic';
 		$response->Objects[0]->Placements[1]->ElementID = '';
 		$response->Objects[0]->Placements[1]->FrameOrder = '0';
-		$response->Objects[0]->Placements[1]->FrameID = '266';
-		$response->Objects[0]->Placements[1]->Left = '-199.2';
-		$response->Objects[0]->Placements[1]->Top = '396';
-		$response->Objects[0]->Placements[1]->Width = '408';
-		$response->Objects[0]->Placements[1]->Height = '267.6';
+		$response->Objects[0]->Placements[1]->FrameID = '258';
+		$response->Objects[0]->Placements[1]->Left = '75.6';
+		$response->Objects[0]->Placements[1]->Top = '96';
+		$response->Objects[0]->Placements[1]->Width = '264';
+		$response->Objects[0]->Placements[1]->Height = '207.6';
 		$response->Objects[0]->Placements[1]->Overset = '0';
 		$response->Objects[0]->Placements[1]->OversetChars = '0';
 		$response->Objects[0]->Placements[1]->OversetLines = '0';
 		$response->Objects[0]->Placements[1]->Layer = 'Layer 1';
 		$response->Objects[0]->Placements[1]->Content = '';
 		$response->Objects[0]->Placements[1]->Edition = null;
-		$response->Objects[0]->Placements[1]->ContentDx = '-26.4';
-		$response->Objects[0]->Placements[1]->ContentDy = '-10.2';
+		$response->Objects[0]->Placements[1]->ContentDx = '-10';
+		$response->Objects[0]->Placements[1]->ContentDy = '15.3';
 		$response->Objects[0]->Placements[1]->ScaleX = '1';
 		$response->Objects[0]->Placements[1]->ScaleY = '1';
-		$response->Objects[0]->Placements[1]->PageSequence = '2';
-		$response->Objects[0]->Placements[1]->PageNumber = '3';
+		$response->Objects[0]->Placements[1]->PageSequence = '1';
+		$response->Objects[0]->Placements[1]->PageNumber = '2';
 		$response->Objects[0]->Placements[1]->Tiles = array();
 		$response->Objects[0]->Placements[1]->FormWidgetId = '';
 		$response->Objects[0]->Placements[1]->InDesignArticleIds = array();
 		$response->Objects[0]->Placements[1]->InDesignArticleIds[0] = '253';
 		$response->Objects[0]->Placements[1]->FrameType = 'graphic';
-		$response->Objects[0]->Placements[1]->SplineID = '251';
+		$response->Objects[0]->Placements[1]->SplineID = '250';
 		$response->Objects[0]->Placements[2] = new Placement();
 		$response->Objects[0]->Placements[2]->Page = '3';
 		$response->Objects[0]->Placements[2]->Element = 'graphic';
 		$response->Objects[0]->Placements[2]->ElementID = '';
 		$response->Objects[0]->Placements[2]->FrameOrder = '0';
-		$response->Objects[0]->Placements[2]->FrameID = '275';
-		$response->Objects[0]->Placements[2]->Left = '276';
-		$response->Objects[0]->Placements[2]->Top = '85.2';
-		$response->Objects[0]->Placements[2]->Width = '204';
-		$response->Objects[0]->Placements[2]->Height = '218.4';
+		$response->Objects[0]->Placements[2]->FrameID = '266';
+		$response->Objects[0]->Placements[2]->Left = '-199.2';
+		$response->Objects[0]->Placements[2]->Top = '396';
+		$response->Objects[0]->Placements[2]->Width = '408';
+		$response->Objects[0]->Placements[2]->Height = '267.6';
 		$response->Objects[0]->Placements[2]->Overset = '0';
 		$response->Objects[0]->Placements[2]->OversetChars = '0';
 		$response->Objects[0]->Placements[2]->OversetLines = '0';
 		$response->Objects[0]->Placements[2]->Layer = 'Layer 1';
 		$response->Objects[0]->Placements[2]->Content = '';
 		$response->Objects[0]->Placements[2]->Edition = null;
-		$response->Objects[0]->Placements[2]->ContentDx = '-618';
-		$response->Objects[0]->Placements[2]->ContentDy = '-295.8';
+		$response->Objects[0]->Placements[2]->ContentDx = '-26.4';
+		$response->Objects[0]->Placements[2]->ContentDy = '-10.2';
 		$response->Objects[0]->Placements[2]->ScaleX = '1';
 		$response->Objects[0]->Placements[2]->ScaleY = '1';
 		$response->Objects[0]->Placements[2]->PageSequence = '2';
@@ -2214,25 +2061,25 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Objects[0]->Placements[2]->InDesignArticleIds = array();
 		$response->Objects[0]->Placements[2]->InDesignArticleIds[0] = '253';
 		$response->Objects[0]->Placements[2]->FrameType = 'graphic';
-		$response->Objects[0]->Placements[2]->SplineID = '252';
+		$response->Objects[0]->Placements[2]->SplineID = '251';
 		$response->Objects[0]->Placements[3] = new Placement();
 		$response->Objects[0]->Placements[3]->Page = '3';
-		$response->Objects[0]->Placements[3]->Element = 'body';
+		$response->Objects[0]->Placements[3]->Element = 'graphic';
 		$response->Objects[0]->Placements[3]->ElementID = '';
 		$response->Objects[0]->Placements[3]->FrameOrder = '0';
-		$response->Objects[0]->Placements[3]->FrameID = '239';
-		$response->Objects[0]->Placements[3]->Left = '-237.6';
+		$response->Objects[0]->Placements[3]->FrameID = '275';
+		$response->Objects[0]->Placements[3]->Left = '276';
 		$response->Objects[0]->Placements[3]->Top = '85.2';
-		$response->Objects[0]->Placements[3]->Width = '484.8';
+		$response->Objects[0]->Placements[3]->Width = '204';
 		$response->Objects[0]->Placements[3]->Height = '218.4';
-		$response->Objects[0]->Placements[3]->Overset = '-18.962086';
-		$response->Objects[0]->Placements[3]->OversetChars = '-3';
+		$response->Objects[0]->Placements[3]->Overset = '0';
+		$response->Objects[0]->Placements[3]->OversetChars = '0';
 		$response->Objects[0]->Placements[3]->OversetLines = '0';
 		$response->Objects[0]->Placements[3]->Layer = 'Layer 1';
 		$response->Objects[0]->Placements[3]->Content = '';
 		$response->Objects[0]->Placements[3]->Edition = null;
-		$response->Objects[0]->Placements[3]->ContentDx = '0';
-		$response->Objects[0]->Placements[3]->ContentDy = '0';
+		$response->Objects[0]->Placements[3]->ContentDx = '-618';
+		$response->Objects[0]->Placements[3]->ContentDy = '-295.8';
 		$response->Objects[0]->Placements[3]->ScaleX = '1';
 		$response->Objects[0]->Placements[3]->ScaleY = '1';
 		$response->Objects[0]->Placements[3]->PageSequence = '2';
@@ -2241,25 +2088,25 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Objects[0]->Placements[3]->FormWidgetId = '';
 		$response->Objects[0]->Placements[3]->InDesignArticleIds = array();
 		$response->Objects[0]->Placements[3]->InDesignArticleIds[0] = '253';
-		$response->Objects[0]->Placements[3]->FrameType = 'text';
-		$response->Objects[0]->Placements[3]->SplineID = '239';
+		$response->Objects[0]->Placements[3]->FrameType = 'graphic';
+		$response->Objects[0]->Placements[3]->SplineID = '252';
 		$response->Objects[0]->Operations = null;
 		$response->Reports = array();
 		return $response;
 	}
 
-	private function testService012()
+	private function testService008()
 	{
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		require_once BASEDIR.'/server/services/wfl/WflUnlockObjectsService.class.php';
-		$req = $this->getRecordedRequest012();
+		$req = $this->getRecordedRequest008();
 
-		$stepInfo = 'testService#012:Unlocking the layout.';
+		$stepInfo = 'testService#008:Unlocking the layout.';
 		$this->globalUtils->callService( $this, $req, $stepInfo );
 	
 	}
 
-	private function getRecordedRequest012()
+	private function getRecordedRequest008()
 	{
 		$request = new WflUnlockObjectsRequest();
 		$request->Ticket = $this->ticket;
@@ -2269,21 +2116,183 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->MessageList = null;
 		return $request;
 	}
-	
-	private function testService013()
+
+	private function testService009()
+	{
+		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
+		require_once BASEDIR.'/server/services/wfl/WflCreateObjectOperationsService.class.php';
+		$req = $this->getRecordedRequest009();
+
+		$stepInfo = 'testService009:Object Operations.';
+		$curResp = $this->globalUtils->callService( $this, $req, $stepInfo );
+	}
+
+	private function getRecordedRequest009()
+	{
+		$dossierId = $this->objectIds['Dossiers'][0];
+		$layoutId = $this->objectIds['Layouts'][0];
+		$images = $this->objectIds['Images'];
+		$issueId = $this->issueObj->Id;
+		$inDesignArticleId = $this->indesignArticleId;
+		$editionId = 0; // All
+
+		require_once BASEDIR.'/server/services/wfl/WflCreateObjectOperationsService.class.php';
+		$request = new WflCreateObjectOperationsRequest();
+		$request->Ticket = $this->ticket;
+		$request->HaveVersion = $this->composeObjectVersion( $layoutId );
+		$request->Operations = $this->composePlacements( $inDesignArticleId, $issueId, $editionId, $dossierId, $layoutId, $images );
+
+		return $request;
+	}
+
+	/**
+	 * Compose and returns the ObjectVersion object.
+	 *
+	 * @param int $id
+	 * @return ObjectVersion
+	 */
+	private function composeObjectVersion( $id )
+	{
+		require_once BASEDIR . '/server/interfaces/services/wfl/DataClasses.php';
+		require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
+		$objVersion = new ObjectVersion();
+		$objVersion->ID = $id;
+		$objVersion->Version = DBObject::getObjectVersion( $id );
+
+		return $objVersion;
+	}
+
+	/**
+	 * Compose list of object operations to be in the CreateObjectOperations request.
+	 *
+	 * @param string $inDesignArticleId
+	 * @param integer $issueId
+	 * @param integer $editionId
+	 * @param integer $dossierId
+	 * @param integer $layoutId
+	 * @param integer[] $images
+	 * @return ObjectOperation[]
+	 */
+	private function composePlacements( $inDesignArticleId, $issueId, $editionId, $dossierId, $layoutId, $images=array() )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
+		$iaPlacementIds = DBInDesignArticlePlacement::getPlacementIdsByInDesignArticleId( $layoutId, $inDesignArticleId, $editionId );
+
+		$resolvedOperations = array();
+		if( $iaPlacementIds ) {
+			require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+			$iaPlacements = DBPlacements::getPlacementBasicsByIds( $iaPlacementIds, true );
+
+			// Always assume there's no duplicates. The idea is to just place the images on any graphic frame available.
+			foreach( $iaPlacements as $iaPlacement ) {
+				$iaPlacement->IsDuplicate = false;
+			}
+
+			if( $iaPlacements ) {
+				require_once BASEDIR.'/server/plugins/AutomatedPrintWorkflow/AutomatedPrintWorkflow_AutomatedPrintWorkflow.class.php';
+				$iaFrameLabels = array();
+				$iaFrameTypes = array();
+				$this->determineUsedFrameTypesAndLabels( $iaPlacements, $iaFrameLabels, $iaFrameTypes );
+
+				$childTypes = array( 'Image', 'Article' );
+				$invokedObjects = AutomatedPrintWorkflow_AutomatedPrintWorkflow::getDossierChildrenMetaData( $issueId, $editionId, $dossierId, $childTypes );
+				$articleElements = AutomatedPrintWorkflow_AutomatedPrintWorkflow::getArticleElements( $invokedObjects, $iaFrameLabels );
+
+				$elementsToClear = array(); // Assume there's no placements to clear, so just set it to empty array.
+				if( $images ) {
+					$imgCtr = 0;
+					// It is assumed that total of IDArticle placements = total of article(only body) and image(s).
+					if( $iaPlacements ) foreach( $iaPlacements as $iaPlacementId => $iaPlacement ) {
+						$resolvedOperation = array();
+						if( $iaPlacement->Element == 'graphic' ) { // Image placement
+							$resolvedOperation = AutomatedPrintWorkflow_AutomatedPrintWorkflow::composeOperations(
+								array( $iaPlacement ), $elementsToClear, $articleElements, $images[$imgCtr], $editionId );
+							$imgCtr++;
+						} else if( $iaPlacement->Element == 'body' ) { // Article placement
+							$resolvedOperation = AutomatedPrintWorkflow_AutomatedPrintWorkflow::composeOperations(
+								array( $iaPlacement ), $elementsToClear, $articleElements, null, $editionId );
+						}
+						$resolvedOperations = array_merge( $resolvedOperations, $resolvedOperation );
+					}
+				} else { // Only article frame/placement.
+					$resolvedOperations = AutomatedPrintWorkflow_AutomatedPrintWorkflow::composeOperations(
+						$iaPlacements, $elementsToClear, $articleElements, null, $editionId );
+				}
+			}
+		}
+
+		return $resolvedOperations;
+	}
+
+	/**
+	 * Composes a collection with all possible frame types and label from the resolved IdArt frames.
+	 *
+	 * @param Placement[] $iaPlacements [input] Resolved IdArt frames.
+	 * @param string[] $iaFrameLabels [output] All possible frame labels.
+	 * @param string[] $iaFrameTypes [output] All possible frame types.
+	 */
+	private function determineUsedFrameTypesAndLabels( array $iaPlacements, array &$iaFrameLabels, array &$iaFrameTypes )
+	{
+		$iaFrameTypes = array();
+		$iaFrameLabels = array();
+
+		foreach( $iaPlacements as $iaPlacement ) {
+			if( !$iaPlacement->IsDuplicate ) {
+				$iaFrameTypes[$iaPlacement->FrameType] = true;
+				$iaFrameLabels[$iaPlacement->Element] = true;
+			}
+		}
+
+		$iaFrameTypes = array_keys( $iaFrameTypes );
+		$iaFrameLabels = array_keys( $iaFrameLabels );
+	}
+
+	private function testService010()
+	{
+		$this->callRunServerJobs();
+		sleep( 10 ); // To make sure that the server job is really ended.
+	}
+
+	/**
+	 * Run the job scheduler by calling the jobindex.php.
+	 *
+	 * @param int $maxExecTime The max execution time of jobindex.php in seconds.
+	 * @param int $maxJobProcesses The maximum number of jobs that the job processor is allowed to pick up at any one time.
+	 */
+	public function callRunServerJobs( $maxExecTime = 5, $maxJobProcesses = 3 )
+	{
+		try {
+			require_once 'Zend/Http/Client.php';
+			$url = LOCALURL_ROOT.INETROOT.'/idsjobindex.php';
+			$client = new Zend_Http_Client();
+			$client->setUri( $url );
+			$client->setParameterGet( 'maxexectime', $maxExecTime );
+			$client->setParameterGet( 'maxjobprocesses', $maxJobProcesses );
+			$client->setConfig( array( 'timeout' => $maxExecTime + 30 ) ); // before breaking connection, let's give the job processor 30s more to complete
+			$response = $client->request( Zend_Http_Client::GET );
+
+			if( !$response->isSuccessful() ) {
+				$this->setResult( 'ERROR', 'Failed calling jobindex.php: '.$response->getHeadersAsString( true, '<br/>' ) );
+			}
+		} catch ( Zend_Http_Client_Exception $e ) {
+			$this->setResult( 'ERROR', 'Failed calling jobindex.php: '.$e->getMessage() );
+		}
+	}
+
+	private function testService011()
 	{
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
-		$req = $this->getRecordedRequest013();
+		$req = $this->getRecordedRequest011();
 
-		$stepInfo = 'testService#013:Check out the article.';
+		$stepInfo = 'testService#011:Check out the article.';
 		$curResp = $this->globalUtils->callService( $this, $req, $stepInfo );
 
 		$id = @$curResp->Objects[0]->MetaData->BasicMetaData->ID;
 		$this->assertGreaterThan( 0, $id );
 	}
 
-	private function getRecordedRequest013()
+	private function getRecordedRequest011()
 	{
 		$request = new WflGetObjectsRequest();
 		$request->Ticket = $this->ticket;
@@ -2305,13 +2314,13 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		return $request;
 	}
 	
-	private function testService014()
+	private function testService012()
 	{
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		require_once BASEDIR.'/server/services/wfl/WflCreateArticleWorkspaceService.class.php';
-		$req = $this->getRecordedRequest014();
+		$req = $this->getRecordedRequest012();
 
-		$stepInfo = 'testService#014:Creating Article Workspace.';
+		$stepInfo = 'testService#012:Creating Article Workspace.';
 		$curResp = $this->globalUtils->callService( $this, $req, $stepInfo );
 		$this->workspaceId = $curResp->WorkspaceId;
 		$this->assertNotNull( $this->workspaceId, 'WorkspaceId should not be null but a valid GUID.' );
@@ -2322,7 +2331,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		}
 	}
 
-	private function getRecordedRequest014()
+	private function getRecordedRequest012()
 	{
 		$request = new WflCreateArticleWorkspaceRequest();
 		$request->Ticket = $this->ticket;
@@ -2332,14 +2341,14 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		return $request;
 	}
 	
-	private function testService015()
+	private function testService013()
 	{
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		require_once BASEDIR.'/server/services/wfl/WflPreviewArticlesAtWorkspaceService.class.php';
-		$req = $this->getRecordedRequest015();
-		$expResp = $this->getRecordedResponse015();
+		$req = $this->getRecordedRequest013();
+		$expResp = $this->getRecordedResponse013();
 
-		$stepInfo = 'testService#015:Preview Articles At Workspace.';
+		$stepInfo = 'testService#013:Preview Articles At Workspace.';
 		$curResp = $this->globalUtils->callService( $this, $req, $stepInfo );
 
 		$ignorePaths = array(
@@ -2354,7 +2363,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 
 	}
 
-	private function getRecordedRequest015()
+	private function getRecordedRequest013()
 	{
 		$request = new WflPreviewArticlesAtWorkspaceRequest();
 		$request->Ticket = $this->ticket;
@@ -2375,7 +2384,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		return $request;
 	}
 
-	private function getRecordedResponse015()
+	private function getRecordedResponse013()
 	{
 		$response = new WflPreviewArticlesAtWorkspaceResponse();
 		$response->Placements = array();
@@ -2445,7 +2454,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Pages[0]->Files[0]->FileUrl = 'http://127.0.0.1:8006/Ent101x/previewindex.php?ticket=eccd6330uLYEKH6wAS6U2dKbLadqb7kleOp8jlBw&workspaceid=eda09593-1007-c55a-c6ce-497c8e2ab8d5&action=Preview&layoutid=180101201&editionid=1&pagesequence=1';
 		$response->Pages[0]->Files[0]->EditionId = null;
 		$response->Pages[0]->Files[0]->ContentSourceFileLink = null;
-		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#015_att#000_preview.jpg';
+		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#013_att#000_preview.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->Pages[0]->Files[0] );
 		$response->Pages[0]->Edition = null;
 		$response->Pages[0]->Master = '';
@@ -2467,7 +2476,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Pages[1]->Files[0]->FileUrl = 'http://127.0.0.1:8006/Ent101x/previewindex.php?ticket=eccd6330uLYEKH6wAS6U2dKbLadqb7kleOp8jlBw&workspaceid=eda09593-1007-c55a-c6ce-497c8e2ab8d5&action=Preview&layoutid=180101201&editionid=1&pagesequence=2';
 		$response->Pages[1]->Files[0]->EditionId = null;
 		$response->Pages[1]->Files[0]->ContentSourceFileLink = null;
-		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#015_att#001_preview.jpg';
+		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#013_att#001_preview.jpg';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $response->Pages[1]->Files[0] );
 		$response->Pages[1]->Edition = null;
 		$response->Pages[1]->Master = '';
@@ -2475,7 +2484,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Pages[1]->PageSequence = '2';
 		$response->Pages[1]->Renditions = null;
 		$response->Pages[1]->Orientation = null;
-		$response->LayoutVersion = '0.2';
+		$response->LayoutVersion = '0.3';
 		$response->InDesignArticles = array();
 		$response->InDesignArticles[0] = new InDesignArticle();
 		$response->InDesignArticles[0]->Id = '253';
@@ -2491,7 +2500,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Relations[0]->Placements[0]->Element = 'graphic';
 		$response->Relations[0]->Placements[0]->ElementID = '';
 		$response->Relations[0]->Placements[0]->FrameOrder = '0';
-		$response->Relations[0]->Placements[0]->FrameID = '258';
+		$response->Relations[0]->Placements[0]->FrameID = '334';
 		$response->Relations[0]->Placements[0]->Left = '75.600000';
 		$response->Relations[0]->Placements[0]->Top = '96.000000';
 		$response->Relations[0]->Placements[0]->Width = '264.000000';
@@ -2502,10 +2511,10 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Relations[0]->Placements[0]->Layer = 'Layer 1';
 		$response->Relations[0]->Placements[0]->Content = '';
 		$response->Relations[0]->Placements[0]->Edition = null;
-		$response->Relations[0]->Placements[0]->ContentDx = '-10.000000';
-		$response->Relations[0]->Placements[0]->ContentDy = '15.300000';
-		$response->Relations[0]->Placements[0]->ScaleX = '1.000000';
-		$response->Relations[0]->Placements[0]->ScaleY = '1.000000';
+		$response->Relations[0]->Placements[0]->ContentDx = '0.000000';
+		$response->Relations[0]->Placements[0]->ContentDy = '29.550000';
+		$response->Relations[0]->Placements[0]->ScaleX = '0.183333';
+		$response->Relations[0]->Placements[0]->ScaleY = '0.183333';
 		$response->Relations[0]->Placements[0]->PageSequence = '1';
 		$response->Relations[0]->Placements[0]->PageNumber = '2';
 		$response->Relations[0]->Placements[0]->Tiles = array();
@@ -2540,7 +2549,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Relations[1]->Placements[0]->Element = 'graphic';
 		$response->Relations[1]->Placements[0]->ElementID = '';
 		$response->Relations[1]->Placements[0]->FrameOrder = '0';
-		$response->Relations[1]->Placements[0]->FrameID = '266';
+		$response->Relations[1]->Placements[0]->FrameID = '343';
 		$response->Relations[1]->Placements[0]->Left = '-199.200000';
 		$response->Relations[1]->Placements[0]->Top = '396.000000';
 		$response->Relations[1]->Placements[0]->Width = '408.000000';
@@ -2551,10 +2560,10 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Relations[1]->Placements[0]->Layer = 'Layer 1';
 		$response->Relations[1]->Placements[0]->Content = '';
 		$response->Relations[1]->Placements[0]->Edition = null;
-		$response->Relations[1]->Placements[0]->ContentDx = '-26.400000';
-		$response->Relations[1]->Placements[0]->ContentDy = '-10.200000';
-		$response->Relations[1]->Placements[0]->ScaleX = '1.000000';
-		$response->Relations[1]->Placements[0]->ScaleY = '1.000000';
+		$response->Relations[1]->Placements[0]->ContentDx = '-0.000000';
+		$response->Relations[1]->Placements[0]->ContentDy = '6.300000';
+		$response->Relations[1]->Placements[0]->ScaleX = '0.885417';
+		$response->Relations[1]->Placements[0]->ScaleY = '0.885417';
 		$response->Relations[1]->Placements[0]->PageSequence = '2';
 		$response->Relations[1]->Placements[0]->PageNumber = '3';
 		$response->Relations[1]->Placements[0]->Tiles = array();
@@ -2603,7 +2612,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Relations[2]->Placements[0]->Element = 'graphic';
 		$response->Relations[2]->Placements[0]->ElementID = '';
 		$response->Relations[2]->Placements[0]->FrameOrder = '0';
-		$response->Relations[2]->Placements[0]->FrameID = '275';
+		$response->Relations[2]->Placements[0]->FrameID = '352';
 		$response->Relations[2]->Placements[0]->Left = '276.000000';
 		$response->Relations[2]->Placements[0]->Top = '85.200000';
 		$response->Relations[2]->Placements[0]->Width = '204.000000';
@@ -2614,10 +2623,10 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Relations[2]->Placements[0]->Layer = 'Layer 1';
 		$response->Relations[2]->Placements[0]->Content = '';
 		$response->Relations[2]->Placements[0]->Edition = null;
-		$response->Relations[2]->Placements[0]->ContentDx = '-618.000000';
-		$response->Relations[2]->Placements[0]->ContentDy = '-295.800000';
-		$response->Relations[2]->Placements[0]->ScaleX = '1.000000';
-		$response->Relations[2]->Placements[0]->ScaleY = '1.000000';
+		$response->Relations[2]->Placements[0]->ContentDx = '0.000000';
+		$response->Relations[2]->Placements[0]->ContentDy = '45.629577';
+		$response->Relations[2]->Placements[0]->ScaleX = '0.718310';
+		$response->Relations[2]->Placements[0]->ScaleY = '0.718310';
 		$response->Relations[2]->Placements[0]->PageSequence = '2';
 		$response->Relations[2]->Placements[0]->PageNumber = '3';
 		$response->Relations[2]->Placements[0]->Tiles = array();
@@ -2645,20 +2654,20 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		return $response;
 	}
 	
-	private function testService016()
+	private function testService014()
 	{
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		require_once BASEDIR.'/server/services/wfl/WflSaveObjectsService.class.php';
-		$req = $this->getRecordedRequest016();
+		$req = $this->getRecordedRequest014();
 
-		$stepInfo = 'testService#016:Checkin the article.';
+		$stepInfo = 'testService#014:Checkin the article.';
 		$curResp = $this->globalUtils->callService( $this, $req, $stepInfo );
 
 		$objId = $curResp->Objects[0]->MetaData->BasicMetaData->ID;
 		$this->assertGreaterThan( 0, $objId );
 	}
 
-	private function getRecordedRequest016()
+	private function getRecordedRequest014()
 	{
 		$request = new WflSaveObjectsRequest();
 		$request->Ticket = $this->ticket;
@@ -2742,7 +2751,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$request->Objects[0]->Files[0]->FileUrl = null;
 		$request->Objects[0]->Files[0]->EditionId = null;
 		$request->Objects[0]->Files[0]->ContentSourceFileLink = null;
-		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#016_att#000_native.wcml';
+		$inputPath = dirname(__FILE__).'/IDSPreview_TestData/rec#014_att#000_native.wcml';
 		$this->transferServer->copyToFileTransferServer( $inputPath, $request->Objects[0]->Files[0] );
 		$request->Objects[0]->Messages = null;
 		$request->Objects[0]->Elements = array();
@@ -2768,17 +2777,17 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		return $request;
 	}
 	
-	private function testService017()
+	private function testService015()
 	{
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 		require_once BASEDIR.'/server/services/wfl/WflDeleteArticleWorkspaceService.class.php';
-		$req = $this->getRecordedRequest017();
+		$req = $this->getRecordedRequest015();
 
-		$stepInfo = 'testService#017:Deleting Article Workspace.';
+		$stepInfo = 'testService#015:Deleting Article Workspace.';
 		$curResp = $this->globalUtils->callService( $this, $req, $stepInfo );
 	}
 
-	private function getRecordedRequest017()
+	private function getRecordedRequest015()
 	{
 		$request = new WflDeleteArticleWorkspaceRequest();
 		$request->Ticket = $this->ticket;
@@ -2786,7 +2795,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		return $request;
 	}
 
-	private function getRecordedRequest018()
+	private function getRecordedRequest016()
 	{
 		// Collect all used object ids.
 		$objectIds = array();
@@ -2938,7 +2947,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		if( $this->objectIds ) {
 			require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 			require_once BASEDIR.'/server/services/wfl/WflDeleteObjectsService.class.php';
-			$req = $this->getRecordedRequest018();
+			$req = $this->getRecordedRequest016();
 			$stepInfo = 'testService#051:Deleting all the test objects.';
 			$response = $this->globalUtils->callService( $this, $req, $stepInfo );
 
