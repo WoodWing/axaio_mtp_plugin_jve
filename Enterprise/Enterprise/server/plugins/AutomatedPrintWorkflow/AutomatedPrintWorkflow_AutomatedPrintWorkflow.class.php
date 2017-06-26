@@ -349,7 +349,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @param string[] $childTypes
 	 * @return MetaData[] Invoked child objects
 	 */
-	private static function getDossierChildrenMetaData( $issueId, $editionId, $dossierId, $childTypes )
+	public static function getDossierChildrenMetaData( $issueId, $editionId, $dossierId, $childTypes )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
 		$childIds = DBTarget::getChildrenbyParentTarget( $dossierId, null,
@@ -444,7 +444,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @param string[] $iaFrameLabels The frame labels used by the InDesignArticle.
 	 * @return Element[] The frames of the articles. Empty when none found.
 	 */
-	private static function getArticleElements( array $invokedObjects, $iaFrameLabels )
+	public static function getArticleElements( array $invokedObjects, $iaFrameLabels )
 	{
 		$articleIds = array();
 		foreach( $invokedObjects as $invokedObjectId => $invokedObject ) {
@@ -682,7 +682,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @param integer $editionId
 	 * @return ObjectOperation[] List of operations to place the dossier's children. NULL when no match was made.
 	 */
-	private static function composeOperations( array $iaPlacements, array $placementsToClear, array $articleElements, $imageId, $editionId )
+	public static function composeOperations( array $iaPlacements, array $placementsToClear, array $articleElements, $imageId, $editionId )
 	{
 		$operations = array();
 		$anyFound = false;
