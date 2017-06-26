@@ -35,16 +35,19 @@ class ElvisUtils {
 		 * How it should be: _ELVIS_<ASSETID>
 		 * /_HACK__HACK__ 
 		 */
+		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
 		return str_replace(ELVIS_CONTENTSOURCEPREFIX, "", $alienId);
 	}
 	
 	public static function isElvisId($alienId)
 	{
+		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
 		return strpos($alienId, ELVIS_CONTENTSOURCEPREFIX) !== false;
 	}
 	
 	public static function getAlienId($elvisId)
 	{
+		require_once __DIR__.'/../config.php'; // ELVIS_CONTENTSOURCEPREFIX
 		return ELVIS_CONTENTSOURCEPREFIX . $elvisId;
 	}
 
@@ -166,6 +169,7 @@ class ElvisUtils {
 	 */
 	public static function getElvisVersionNumber($version)
 	{
+		require_once __DIR__.'/../config.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
 		return substr($version, strlen(ELVIS_ENTERPRISE_VERSIONPREFIX));
 	}
 
@@ -177,6 +181,7 @@ class ElvisUtils {
 	 */
 	public static function getEnterpriseVersionNumber($version)
 	{
+		require_once __DIR__.'/../config.php'; // ELVIS_ENTERPRISE_VERSIONPREFIX
 		return ELVIS_ENTERPRISE_VERSIONPREFIX.$version;
 	}
 	
@@ -221,6 +226,7 @@ class ElvisUtils {
 		$userDetails = $service->getUserDetails($user->Name);
 		
 		if ($userDetails) {
+			require_once __DIR__.'/../config.php'; // ELVIS_INTERNAL_USER_POSTFIX
 			$user->FullName = $userDetails->fullName;
 			$user->EmailAddress = $userDetails->email;
 			if (!$userDetails->ldapUser) {

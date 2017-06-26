@@ -18,6 +18,7 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 
 	final public function runBefore( WflCreateObjectRelationsRequest &$req )
 	{
+		require_once dirname( __FILE__ ).'/config.php';
 		if( ELVIS_CREATE_COPY === 'Hard_Copy_To_Enterprise' ) {
 			require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
 			require_once dirname(__FILE__).'/Elvis_ContentSource.class.php';
@@ -63,6 +64,7 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 
 	final public function runAfter( WflCreateObjectRelationsRequest $req, WflCreateObjectRelationsResponse &$resp )
 	{
+		require_once dirname( __FILE__ ).'/config.php';
 		if( ELVIS_CREATE_COPY !== 'Hard_Copy_To_Enterprise' ) {
 			require_once dirname(__FILE__).'/logic/ElvisUpdateManager.class.php';
 			require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';

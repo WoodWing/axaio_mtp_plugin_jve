@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname( __FILE__ ).'/../config.php'; // For ELVIS_URL constant.
+
 class ElvisRESTClient
 {
 	/**
@@ -303,18 +305,6 @@ class ElvisRESTClient
 		// The Elvis ping service returns a JSON structure like this:
 		//     {"state":"running","version":"5.15.2.9","available":true,"server":"Elvis"}
 		return self::send( 'ping', ELVIS_URL.'/services/ping' );
-	}
-
-	/**
-	 * Calls the alive web service over the Elvis JSON REST interface.
-	 *
-	 * @since 10.0.5 / 10.1.2
-	 * @param integer $time Current Unix Timestamp
-	 * @throws BizException
-	 */
-	public static function keepAlive( $time )
-	{
-		self::send( 'alive', ELVIS_URL.'/alive.txt?_='.$time );
 	}
 
 	/**
