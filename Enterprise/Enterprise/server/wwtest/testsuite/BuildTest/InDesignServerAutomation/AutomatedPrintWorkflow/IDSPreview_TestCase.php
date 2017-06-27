@@ -2183,12 +2183,12 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 			require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 			$iaPlacements = DBPlacements::getPlacementBasicsByIds( $iaPlacementIds, true );
 
-			// Always assume there's no duplicates. The idea is to just place the images on any graphic frame available.
-			foreach( $iaPlacements as $iaPlacement ) {
-				$iaPlacement->IsDuplicate = false;
-			}
-
 			if( $iaPlacements ) {
+				// Always assume there's no duplicates. The idea is to just place the images on any graphic frame available.
+				foreach( $iaPlacements as $iaPlacement ) {
+					$iaPlacement->IsDuplicate = false;
+				}
+
 				require_once BASEDIR.'/server/plugins/AutomatedPrintWorkflow/AutomatedPrintWorkflow_AutomatedPrintWorkflow.class.php';
 				$iaFrameLabels = array();
 				$iaFrameTypes = array();
@@ -2202,7 +2202,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 				if( $images ) {
 					$imgCtr = 0;
 					// It is assumed that total of IDArticle placements = total of article(only body) and image(s).
-					if( $iaPlacements ) foreach( $iaPlacements as $iaPlacementId => $iaPlacement ) {
+					foreach( $iaPlacements as $iaPlacementId => $iaPlacement ) {
 						$resolvedOperation = array();
 						if( $iaPlacement->Element == 'graphic' ) { // Image placement
 							$resolvedOperation = AutomatedPrintWorkflow_AutomatedPrintWorkflow::composeOperations(
