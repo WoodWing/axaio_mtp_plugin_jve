@@ -152,7 +152,7 @@ class ReadWriteFieldHandler
 				return (string)$enterpriseValue;
 			default:
 				$message = "Unable to cast to unknown Elvis data type ".$this->dataType." for field ".$this->property->Name;
-				throw new BizException( 'ERR_ERROR', 'Server', $message, $message, 'ERROR' );
+				throw new BizException( 'ERR_ERROR', 'Server', $message );
 		}
 	}
 
@@ -234,10 +234,10 @@ class ReadWriteFieldHandler
 			case 'Section':
 			case 'ArrayOfEdition':
 				$message = "Casting to Enterprise data type ".$this->property->Type." for field ".$this->property->Name." is not supported by Elvis Content Source.";
-				throw new BizException( 'ERR_ERROR', 'Server', $message, $message, 'ERROR' );
+				throw new BizException( 'ERR_ERROR', 'Server', $message );
 			default:
 				$message = "Unable to cast to unknown Enterprise data type ".$this->property->Type." for field ".$this->property->Name;
-				throw new BizException( 'ERR_ERROR', 'Server', $message, $message, 'ERROR' );
+				throw new BizException( 'ERR_ERROR', 'Server', $message );
 		}
 	}
 
