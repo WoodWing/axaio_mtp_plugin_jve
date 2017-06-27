@@ -39,10 +39,16 @@ class ReadWriteFieldHandler
 			$this->property = new PropertyInfo( $entPropertyName, null, $this->entMetadataCategory, $propType );
 		} else {
 			$metadataPaths = BizProperty::getMetaDataPaths();
-			$metadataPath = $metadataPaths[ $entPropertyName ];
-			$this->entMetadataCategory = substr( $metadataPath, 0, strpos( $metadataPath, '->' ) );
-			$propertyInfos = BizProperty::getPropertyInfos();
-			$this->property = $propertyInfos[ $entPropertyName ];
+			if (array_key_exists($entPropertyName,$metadataPaths)) {
+				$metadataPath = $metadataPaths[ $entPropertyName ];
+				$this->entMetadataCategory = substr( $metadataPath, 0, strpos( $metadataPath, '->' ) );
+				$propertyInfos = BizProperty::getPropertyInfos();
+				$this->property = $propertyInfos[ $entPropertyName ];
+			} else {
+				if( LogHandler::debugMode() ) { // for developers/integrators only
+					LogHandler::Log( __METHOD__ , 'ERROR', "Property $entPropertyName not found in metadataPaths: ".print_r($metadataPaths,1));
+				}
+			}
 		}
 	}
 
