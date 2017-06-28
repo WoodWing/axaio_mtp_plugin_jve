@@ -322,7 +322,7 @@ class ElvisRESTClient extends ElvisClient
 		}
 		if( $response->getStatusCode() !== 200 ) {
 			LogHandler::logService( 'Elvis_version_jsp', $response->getBody(), null, 'REST' );
-			self::throwExceptionForElvisCommunicationFailure( $response->getReasonPhrase() );
+			self::throwExceptionForElvisCommunicationFailure( $response->renderStatusLine() );
 		}
 
 		$cookies = array();
