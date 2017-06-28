@@ -1,8 +1,9 @@
 <?php
 
 require_once dirname( __FILE__ ).'/../config.php'; // For ELVIS_URL constant.
+require_once __DIR__.'/ElvisClient.php';
 
-class ElvisRESTClient
+class ElvisRESTClient extends ElvisClient
 {
 	/**
 	 * @var null|string Type of Load Balancer used with connection to Elvis. e.g: classic load balancer (AWSELB)
@@ -30,8 +31,6 @@ class ElvisRESTClient
 		ElvisSessionUtil::updateSessionCookies( $cookies );
 
 		if( isset( $response->errorcode ) ) {
-			$detail = 'Calling Elvis web service '.$service.' failed. '.
-				'Error code: '.$response->errorcode.'; Message: '.$response->message;
 			// When Elvis session is expired, re-login and try same request again.
 			static $recursion = 0; // paranoid checksum for endless recursion
 			if( $response->errorcode == 401 && $recursion < 3 ) {
@@ -41,6 +40,8 @@ class ElvisRESTClient
 				self::send( $service, $url, $post );
 				$recursion -= 1;
 			} else {
+				$detail = 'Calling Elvis web service '.$service.' failed. '.
+					'Error code: '.$response->errorcode.'; Message: '.$response->message;
 				self::throwExceptionForElvisCommunicationFailure( $detail );
 			}
 		}
@@ -182,27 +183,6 @@ class ElvisRESTClient
 
 		return json_decode( $result );
 	}
-
-	/**
-	 * Throws BizException for low level communication errors with Elvis Server.
-	 *
-	 * For ES 10.0 or later it throws a S1144 error else it throws S1069.
-	 *
-	 * @since 10.0.5 / 10.1.1
-	 * @param string $detail
-	 * @throws BizException
-	 */
-	private static function throwExceptionForElvisCommunicationFailure( $detail )
-	{
-		require_once BASEDIR . '/server/utils/VersionUtils.class.php';
-		$serverVer = explode( ' ', SERVERVERSION ); // split '9.2.0' from 'build 123'
-		if( VersionUtils::versionCompare( $serverVer[0], '10.0.0', '>=' ) ) {
-			throw new BizException( 'ERR_CONNECT', 'Server', $detail, null, array( 'Elvis' ) );
-		} else {
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Server', $detail );
-		}
-	}
-
 
 	/**
 	 * Performs REST update for provided metadata and file (if any).
