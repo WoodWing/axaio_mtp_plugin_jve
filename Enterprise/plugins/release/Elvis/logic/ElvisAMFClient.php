@@ -260,6 +260,7 @@ class ElvisAMFClient
 	 */
 	public static function getInterfaceVersion()
 	{
+		require_once __DIR__ . '/../util/ElvisSessionUtil.php';
 		$elvisVersion = ElvisSessionUtil::getSessionVar( 'elvisServerVersion' );
 		$ifVersion = 1;
 		if( version_compare( $elvisVersion, '5.18','>=' ) ) {
