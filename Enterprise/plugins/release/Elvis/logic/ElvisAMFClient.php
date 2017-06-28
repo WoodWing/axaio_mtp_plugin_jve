@@ -80,6 +80,7 @@ class ElvisAMFClient extends ElvisClient
 			$cookies = $client->getCookies();
 			ElvisSessionUtil::updateSessionCookies( $cookies );
 		} catch( Exception $e ) {
+			self::logService( 'Elvis_'.$service.'_'.$operation, $e->getMessage(), $cookies, null );
 			self::throwExceptionForElvisCommunicationFailure( $e->getMessage() );
 		}
 		

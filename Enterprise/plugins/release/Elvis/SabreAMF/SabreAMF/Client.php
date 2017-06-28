@@ -212,7 +212,7 @@ class SabreAMF_Client
 			}
 			$response = $client->send();
 			if( $response->getStatusCode() !== 200 ) {
-				throw new Exception( $response->getReasonPhrase() );
+				throw new Exception( $response->renderStatusLine() );
 			}
 			$this->cookies = array();
 			$cookieJar = $response->getCookie();
