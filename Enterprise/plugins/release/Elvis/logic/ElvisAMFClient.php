@@ -1,10 +1,6 @@
 <?php
 
 require_once dirname(__FILE__) . '/../config.php';
-require_once dirname(__FILE__) . '/../model/ElvisLoginRequest.php';
-require_once dirname(__FILE__) . '/../model/ElvisLoginResponse.php';
-require_once dirname(__FILE__) . '/../util/ElvisSessionUtil.php';
-require_once dirname(__FILE__) . '/ElvisContentSourceAuthenticationService.php';
 require_once dirname(__FILE__) . '/../SabreAMF/SabreAMF/Client.php';
 require_once dirname(__FILE__) . '/../SabreAMF/SabreAMF/ClassMapper.php';
 require_once dirname(__FILE__) . '/../SabreAMF/SabreAMF/AMF3/ErrorMessage.php';
@@ -89,15 +85,17 @@ class ElvisAMFClient
 			throw new BizException( null, 'Server', $e->getMessage(), $message, null, 'ERROR' );
 		}
 		
-		if (get_class($result) == 'SabreAMF_AMF3_ErrorMessage') {
+		if( get_class($result) == 'SabreAMF_AMF3_ErrorMessage' ) {
 			self::logService( 'Elvis_'.$service.'_'.$operation, $result, $cookies, null );
-			if ($result->faultCode == 'Server.Security.NotLoggedIn' || $result->faultCode == 'Server.Security.SessionExpired') {
-				 // We're not logged in, probably since the session is expired.
-				 // Login and re-send the service call.
+			if( $operation != 'login' && // avoid login recursion
+				( $result->faultCode == 'Server.Security.NotLoggedIn' || $result->faultCode == 'Server.Security.SessionExpired' )
+			) {
+				// Service call failed; we either not logging in yet or the session has expired.
+				// Login and re-send (retry) the original service call.
 				self::login();
 				return self::sendUnParsed( $service, $operation, $params );
 			} else {
-				self::handleError($result, $service, $operation);
+				self::handleError( $result, $service, $operation );
 			}
 		}
 
@@ -125,7 +123,7 @@ class ElvisAMFClient
 			// re-login to repair the backend connection.
 			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
 		}
-		self::synchronizedLogin( $credentials );
+		self::loginUserOrSuperuser( $credentials );
 
 		// Remember the version of the Elvis Server we are connected with.
 		require_once __DIR__.'/ElvisRESTClient.php';
@@ -137,6 +135,57 @@ class ElvisAMFClient
 	}
 
 	/**
+	 * Login the user. When authentication failed, login as superuser with restricted rights (e.g. no edit original).
+	 *
+	 * There are two types of users. Users who are known within Enterprise and within Elvis and those only know
+	 * within Enterprise. The last group borrows the credentials from the configured super user to log on to Elvis.
+	 * These users get the same rights as the super user but there is one exception. They are not allowed to open Elvis
+	 * objects to edit them. To make this distinction a session variable is set, 'restricted = true'.
+	 * Users who are able to log on to Elvis with their own credentials are not restricted. Their rights are checked
+	 * by the Elvis application. See EN-36871.
+	 * If the log on fails ultimately the session variable with the credentials is set as if the user is an Elvis user.
+	 * Only if both log on attempts fail a warning is logged.
+	 * Note that the password can be empty!!! This is the case if log on is initiated by a third application. Example:
+	 * - Open a layout from within Content Station.
+	 * - InDesign is started and the user is logged on to InDesign without password.
+	 * In this case the logon request of InDesign contains the ticket issued to Content Station. This ticket is used
+	 * to validate the user and issue a new ticket for the InDesign application. But as the user is already logged on
+	 * to the third application (Content Station) the password can be retrieved from the credentials stored during that
+	 * logon process. See also EN-88533.
+	 *
+	 * @param string $credentials
+	 * @throws BizException
+	 */
+	private static function loginUserOrSuperuser( $credentials )
+	{
+		require_once __DIR__ . '/../util/ElvisSessionUtil.php';
+		try {
+			$map = new BizExceptionSeverityMap( array( 'S1053' => 'INFO' ) ); // Suppress warnings for the HealthCheck.
+			self::synchronizedLogin( $credentials );
+			ElvisSessionUtil::setSessionVar( 'restricted', false );
+		} catch( BizException $e ) {
+			try {
+				require_once __DIR__.'/../config.php';
+				LogHandler::Log( 'ELVIS', 'INFO',
+					'Login to Elvis server with normal user credentials has failed. '.
+					'Now trying to login with configured super user (ELVIS_SUPER_USER) credentials.' );
+				$credentials = base64_encode( ELVIS_SUPER_USER.':'. ELVIS_SUPER_USER_PASS );
+				self::synchronizedLogin( $credentials );
+				ElvisSessionUtil::saveCredentials( ELVIS_SUPER_USER, ELVIS_SUPER_USER_PASS );
+				ElvisSessionUtil::setSessionVar( 'restricted', true );
+				LogHandler::Log( 'ELVIS', 'INFO',
+					'Configured Elvis super user (ELVIS_SUPER_USER) did successfully login to Elvis server. '.
+					'Access rights for this user are set to restricted.' );
+			} catch( BizException $e ) {
+				LogHandler::Log( 'ELVIS', 'ERROR',
+					'Configured Elvis super user (ELVIS_SUPER_USER) can not login to Elvis server. '.
+					'Please check your configuration and run the Health Check .' );
+				throw new BizException( 'ERR_CONNECT', 'Server', null, null, array( 'Elvis' ) );
+			}
+		}
+	}
+
+	/**
 	 * Does a synchronized login to make sure the user does not login twice if requests are fired close to each other
 	 *
 	 * @param string $credentials base64 encoded credentials
@@ -144,6 +193,7 @@ class ElvisAMFClient
 	 */
 	private static function synchronizedLogin( $credentials )
 	{
+		require_once __DIR__ . '/../util/ElvisSessionUtil.php';
 		LogHandler::Log('ELVIS', 'DEBUG', 'Synchronized login');
 		if (!ElvisSessionUtil::isLoggingIn()) {
 			LogHandler::Log('ELVIS', 'DEBUG', 'Logging in');
@@ -163,37 +213,26 @@ class ElvisAMFClient
 				$timeOut --;
 			}
 			if ($timeOut <= 0) {
-				$message = 'Logging into Elvis failed: timeout expried while waiting for parallel login.';
-				throw new BizException ( null, 'Server', $message, $message );
+				$message = 'Logging into Elvis failed: timeout expired while waiting for parallel login.';
+				throw new BizException( null, 'Server', null, $message );
 			}
 		}
 	}
 	
 	/**
-	 * Tries to log into Elvis using the provided credentials
-	 * Will not store the session in SessionUtil
+	 * Tries to login to Elvis using the provided credentials.
 	 *
 	 * @param string $credentials base64 encoded credentials
-	 * @throws BizException login failed
+	 * @throws BizException on connection error or authentication error
 	 */
 	public static function loginByCredentials( $credentials )
 	{
-		// TODO: Find out where to get the client locale
-		// TODO: Find out where to get the correct timezone offset
-		$loginRequest = new ElvisLoginRequest($credentials, 'en_US', 0);
-		$loginRequest->clientId = ElvisSessionUtil::getClientId();
+		list( $user, $pass ) = explode( ':', base64_decode( $credentials ) );
+		LogHandler::Log( 'ELVIS', 'INFO', "Trying to login user $user to Elvis server." );
 
-		$credentials = base64_decode( $credentials );
-		list( $user, $pass ) = explode( ':', $credentials );
-		LogHandler::Log( __CLASS__, 'INFO', 'User used to do the LogIn:'.$user );
-
+		require_once __DIR__.'/ElvisContentSourceAuthenticationService.php';
 		$authService = new ElvisContentSourceAuthenticationService();
-		$loginResponse = $authService->login($loginRequest);
-		
-		if (!$loginResponse->loginSuccess) {
-			$message = 'Logging into Elvis failed: ' . $loginResponse->loginFaultMessage;
-			throw new BizException(null, 'Server', $message, $message);
-		}
+		$authService->login( $credentials );
 	}
 	
 	public static function registerClass($clazz)
