@@ -76,7 +76,7 @@ class ElvisAMFClient extends ElvisClient
 		$result = null;
 		try {
 			$servicePath = $service . '.' . $operation;
-			$result = $client->sendRequest( $servicePath, $params, $operationTimeout );
+			$result = $client->sendRequest( $servicePath, $params, $operationTimeout, ELVIS_CONNECTION_TIMEOUT );
 			$cookies = $client->getCookies();
 			ElvisSessionUtil::updateSessionCookies( $cookies );
 		} catch( Exception $e ) {
@@ -275,7 +275,7 @@ class ElvisAMFClient extends ElvisClient
 	 */
 	private static function getEndpointUrl()
 	{
-		return ELVIS_URL.'/graniteamf/amf';
+		return self::getElvisBaseUrl().'/graniteamf/amf';
 	}
 
 	/**

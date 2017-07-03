@@ -21,4 +21,16 @@ class ElvisClient
 			throw new BizException( 'ERR_INVALID_OPERATION', 'Server', $detail );
 		}
 	}
+
+	/**
+	 * Returns the base URL of Elvis Server.
+	 *
+	 * @return string
+	 * @since 10.1.4
+	 */
+	protected static function getElvisBaseUrl()
+	{
+		require_once __DIR__.'/../config.php'; // For ELVIS_URL constant.
+		return ELVIS_URL;
+	}
 }

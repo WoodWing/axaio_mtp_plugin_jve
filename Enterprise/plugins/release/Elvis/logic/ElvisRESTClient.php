@@ -1,6 +1,5 @@
 <?php
 
-require_once dirname( __FILE__ ).'/../config.php'; // For ELVIS_URL constant.
 require_once __DIR__.'/ElvisClient.php';
 
 class ElvisRESTClient extends ElvisClient
@@ -15,14 +14,14 @@ class ElvisRESTClient extends ElvisClient
 	 * It does log the request and response data in DEBUG mode.
 	 *
 	 * @param string $service Service name of the Elvis API.
-	 * @param string $url Request URL (JSON REST)
 	 * @param string[]|null $post Optionally. List of HTTP POST parameters to send along with the request.
 	 * @param Attachment|null $file
 	 * @return mixed Returned
 	 * @throws BizException
 	 */
-	private static function send( $service, $url, $post = null, $file = null )
+	private static function send( $service, $post = null, $file = null )
 	{
+		$url = self::getElvisBaseUrl().'/'.$service;
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 		$cookies = ElvisSessionUtil::getSessionCookies();
 		self::logService( $service, $url, $post, $cookies, true );
@@ -61,15 +60,16 @@ class ElvisRESTClient extends ElvisClient
 	private static function logService( $service, $url, $transData, $cookies, $isRequest )
 	{
 		if( LogHandler::debugMode() ) {
+			$logService = str_replace( '/', '_', $service );
 			$log = 'URL:'.$url.PHP_EOL.'Cookies:'.print_r( $cookies, true ).PHP_EOL.'JSON:'.print_r( $transData, true );
 			if( $isRequest ) {
 				LogHandler::Log( 'ELVIS', 'DEBUG', 'RESTClient calling Elvis web service '.$service );
-				LogHandler::logService( 'Elvis_'.$service, $log, true, 'JSON' );
+				LogHandler::logService( 'Elvis_'.$logService, $log, true, 'JSON' );
 			} else { // response or error
 				if( isset( $transData->errorcode ) ) {
-					LogHandler::logService( 'Elvis_'.$service, $log, null, 'JSON' );
+					LogHandler::logService( 'Elvis_'.$logService, $log, null, 'JSON' );
 				} else {
-					LogHandler::logService( 'Elvis_'.$service, $log, false, 'JSON' );
+					LogHandler::logService( 'Elvis_'.$logService, $log, false, 'JSON' );
 				}
 			}
 		}
@@ -99,7 +99,7 @@ class ElvisRESTClient extends ElvisClient
 		curl_setopt( $ch, CURLOPT_POST, 1 );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt( $ch, CURLOPT_HEADER, 0 );
-		curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 10 ); // Using the Zend Client default
+		curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, ELVIS_CONNECTION_TIMEOUT );
 		curl_setopt( $ch, CURLOPT_TIMEOUT, 3600 ); // Using the Enterprise default
 
 		// Enable this to print the Header sent out ( After calling curl_exec )
@@ -200,7 +200,7 @@ class ElvisRESTClient extends ElvisClient
 			$post['metadata'] = json_encode( $metadata );
 		}
 
-		self::send( 'update', ELVIS_URL.'/services/update', $post, $file );
+		self::send( 'services/update', $post, $file );
 	}
 
 	/**
@@ -229,7 +229,7 @@ class ElvisRESTClient extends ElvisClient
 			$post['metadata'] = json_encode( $metadata );
 		}
 
-		self::send( 'updatebulk', ELVIS_URL.'/services/updatebulk', $post );
+		self::send( 'services/updatebulk', $post );
 	}
 
 	/**
@@ -257,7 +257,7 @@ class ElvisRESTClient extends ElvisClient
 	 */
 	private static function logoutSession()
 	{
-		self::send( 'logout', ELVIS_URL.'/services/logout' );
+		self::send( 'services/logout' );
 	}
 
 	/**
@@ -268,7 +268,7 @@ class ElvisRESTClient extends ElvisClient
 	 */
 	public static function fieldInfo()
 	{
-		return self::send( 'fieldinfo', ELVIS_URL.'/services/fieldinfo' );
+		return self::send( 'services/fieldinfo' );
 	}
 
 	/**
@@ -284,7 +284,7 @@ class ElvisRESTClient extends ElvisClient
 	{
 		// The Elvis ping service returns a JSON structure like this:
 		//     {"state":"running","version":"5.15.2.9","available":true,"server":"Elvis"}
-		return self::send( 'ping', ELVIS_URL.'/services/ping' );
+		return self::send( 'services/ping' );
 	}
 
 	/**
@@ -306,7 +306,7 @@ class ElvisRESTClient extends ElvisClient
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 
 		$response = null;
-		$url = ELVIS_URL.'/version.jsp';
+		$url = self::getElvisBaseUrl().'/version.jsp';
 		LogHandler::logService( 'Elvis_version_jsp', $url, true, 'REST' );
 		try {
 			$client = new Zend\Http\Client();

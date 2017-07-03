@@ -119,9 +119,10 @@ class SabreAMF_Client
 	 * @param string $servicePath The servicepath (e.g.: myservice.mymethod)
 	 * @param array $data The list of data / information to be sent over in the service call.
 	 * @param int $operationTimeout The request / execution timeout of curl in seconds (This is not the connection timeout).
+	 * @param int $connectionTimeout Max time to wait for network connection to setup.
 	 * @return mixed
 	 */
-	public function sendRequest( $servicePath, $data, $operationTimeout = 3600 )
+	public function sendRequest( $servicePath, $data, $operationTimeout, $connectionTimeout )
 	{
 		// Use enpty array to prevent NPE server side
 		if( $data == null ) {
@@ -156,7 +157,7 @@ class SabreAMF_Client
 
 		$this->amfRequest->serialize( $this->amfOutputStream );
 
-		$result = $this->sendHttpRequest( $operationTimeout );
+		$result = $this->sendHttpRequest( $operationTimeout, $connectionTimeout );
 
 		$this->amfInputStream = new SabreAMF_InputStream( $result );
 		$this->amfResponse = new SabreAMF_Message();
@@ -178,10 +179,11 @@ class SabreAMF_Client
 	 *
 	 * @since 10.0.5 / 10.1.2
 	 * @param int $operationTimeout The request / execution timeout of curl in seconds (This is not the connection timeout).
+	 * @param int $connectionTimeout Max time to wait for network connection to setup.
 	 * @return string HTTP response body
 	 * @throws Exception
 	 */
-	private function sendHttpRequest( $operationTimeout )
+	private function sendHttpRequest( $operationTimeout, $connectionTimeout )
 	{
 		try {
 			$curlOpts = array();
@@ -189,7 +191,16 @@ class SabreAMF_Client
 			// Make sure that the Execution timeout ( CURLOPT_TIMEOUT is set in the 'curloptions' key ).
 			// Doing $client->setOptions( 'timeout' => 3600 ) will be later on flattened by the Curl Adapter
 			// to have 'CURLOPT_TIMEOUT' the same as the 'CURLOPT_CONNECTTIMEOUT' which is not wanted.
-			$curlOpts[ CURLOPT_TIMEOUT ] = $operationTimeout;
+			if( defined( 'CURLOPT_CONNECTTIMEOUT_MS' ) ) {
+				$curlOpts[ CURLOPT_CONNECTTIMEOUT_MS  ] = $connectionTimeout * 1000;
+			} else {
+				$curlOpts[ CURLOPT_CONNECTTIMEOUT ] =  $connectionTimeout;
+			}
+			if( defined( 'CURLOPT_TIMEOUT_MS' ) ) {
+				$curlOpts[ CURLOPT_TIMEOUT_MS ] =  $operationTimeout * 1000;
+			} else {
+				$curlOpts[ CURLOPT_TIMEOUT ] = $operationTimeout;
+			}
 			if( $this->httpProxy ) {
 				$curlOpts[ CURLOPT_PROXY ] = $this->httpProxy;
 			}
@@ -201,6 +212,7 @@ class SabreAMF_Client
 			$client->setHeaders( array( 'Content-type' => SabreAMF_Const::MIMETYPE ) );
 			$client->setOptions(
 				array(
+					'timeout' => null, // trick to allow overruling CURLOPT_TIMEOUT / CURLOPT_CONNECTTIMEOUT above
 					'adapter' => 'Zend\Http\Client\Adapter\Curl',
 					'curloptions' => $this->curlOptions + $curlOpts
 					// L> Note that the + operator on arrays does preserve the LHS while taking over data from RHS.
