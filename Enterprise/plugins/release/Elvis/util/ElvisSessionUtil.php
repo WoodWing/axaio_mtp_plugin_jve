@@ -127,29 +127,93 @@ class ElvisSessionUtil
 	}
 
 	/**
-	 * Set loggingIn session variable to true
+	 * Returns semaphore name to be used for the Login operation for a particular user.
+	 *
+	 * @since 10.1.4
+	 * @return string The Semaphore name which is 'ElvSyncLogIn_' + user_database_Id
 	 */
-	public static function startLogin()
+	public static function getElvisSyncSemaphoreName()
 	{
-		self::setSessionVar('loggingIn', true);
+		require_once BASEDIR .'/server/bizclasses/BizSession.class.php';
+		$userId = BizSession::getUserInfo( 'id' );
+		$semaphoreName = 'ElvSyncLogIn_' . $userId;
+		return $semaphoreName;
 	}
 
 	/**
-	 * Set loggingIn session variable to false
-	 */
-	public static function stopLogin()
-	{
-		self::setSessionVar('loggingIn', false);
-	}
-
-	/**
-	 * Returns current state of loggingIn or false if not set
+	 * Checks if there's any Login operation being executed for this particular user.
+	 *
+	 * @since 10.1.4
+	 * @return bool True when Login is being executed, false otherwise.
 	 */
 	public static function isLoggingIn()
 	{
-		$loggingIn = self::getSessionVar('loggingIn');
-		LogHandler::Log('ELVIS', 'DEBUG', 'Is logging in:'. $loggingIn);
-		return $loggingIn == null ? false : $loggingIn;
+		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+		$syncLoginExpired = BizSemaphore::isSemaphoreExpiredByEntityId( self::getElvisSyncSemaphoreName() );
+		return !$syncLoginExpired ? true : false;
+	}
+
+	/**
+	 * Creates and returns the login semaphore to ensure only one Login at a time.
+	 *
+	 * @since 10.1.4
+	 * @return int|null Semaphore id when the semaphore is successfully gained, null otherwise.
+	 */
+	public static function createLoginSemaphore()
+	{
+		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+		$bizSemaphore = new BizSemaphore();
+		$semaphoreName = self::getElvisSyncSemaphoreName();
+		$bizSemaphore->setLifeTime( 60 ); // 60 seconds.
+		$attempts = array( 0 ); // in milliseconds ( only 1 attempt and no wait )
+		$bizSemaphore->setAttempts( $attempts );
+		$semaphoreId = $bizSemaphore->createSemaphore( $semaphoreName, false );
+		return $semaphoreId;
+	}
+
+	/**
+	 * Waits until the Login operation completes or wait up to maximum 1 minute in time.
+	 *
+	 * Function tries to gain the Login semaphore for a period of 1 minute.
+	 * This is simulating the waiting for the Login operation to be completed by another process.
+	 * When semaphore is granted, meaning the Login by another process is also completed.
+	 * And so, it releases the semaphore right away since the purpose is only to wait for another
+	 * process to finish but not with the intention to do anything with the semaphore.
+	 *
+	 * In case if the Login operation by another process takes very long time, this function will
+	 * only wait for up to maximum of 1 minute.
+	 *
+	 * @since 10.1.4
+	 */
+	public static function waitUntilLoginSemaphoreHasReleased()
+	{
+		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+		$bizSemaphore = new BizSemaphore();
+		$semaphoreName = self::getElvisSyncSemaphoreName();
+		$lifeTime = 60; // in seconds
+		$attempts = array_fill( 0, 4 * $lifeTime, 250 ); // 4*60 attempts x 250ms wait = 60s max total wait
+		$bizSemaphore->setLifeTime( $lifeTime );
+		$bizSemaphore->setAttempts( $attempts );
+		$semaphoreId = $bizSemaphore->createSemaphore( $semaphoreName );
+		if( $semaphoreId ) {
+			// Release semaphore right away since the purpose of having semaphore is not to do an operation
+			// but it is to wait for another process to finish the login operation for the very same user.
+			self::releaseLoginSemaphore( $semaphoreId );
+		}
+	}
+
+	/**
+	 * Releases Login semaphore id gained in createLoginSemaphore().
+	 *
+	 * @since 10.1.4
+	 * @param string $semaphoreId The semaphore id to be released.
+	 */
+	public static function releaseLoginSemaphore( $semaphoreId )
+	{
+		if( $semaphoreId ) {
+			require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+			BizSemaphore::releaseSemaphore( $semaphoreId );
+		}
 	}
 
 	/**
