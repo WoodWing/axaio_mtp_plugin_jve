@@ -237,6 +237,7 @@ class ElvisAMFClient extends ElvisClient
 	 */
 	public static function loginByCredentials( $credentials )
 	{
+		/** @noinspection PhpUnusedLocalVariableInspection */
 		list( $user, $pass ) = explode( ':', base64_decode( $credentials ) );
 		LogHandler::Log( 'ELVIS', 'INFO', "Trying to login user $user to Elvis server." );
 
