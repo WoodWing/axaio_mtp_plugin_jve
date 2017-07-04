@@ -78,7 +78,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 
 		// Check the defines that should exist and should be filled in (not empty).
 		$nonEmptyDefines = array(
-			'ELVIS_URL', 'ELVIS_CLIENT_URL', 'ELVIS_NAMEDQUERY',
+			'ELVIS_URL', 'ELVIS_CLIENT_URL', 'ELVIS_CONNECTION_TIMEOUT', 'ELVIS_NAMEDQUERY',
 			'ELVIS_ENT_ADMIN_USER', 'ELVIS_SUPER_USER',
 			'ELVIS_CREATE_COPY', 'IMAGE_RESTORE_LOCATION'
 		);

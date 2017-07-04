@@ -1,11 +1,12 @@
 <?php
 
-require_once dirname(__FILE__) . '/../config.php';
-require_once dirname(__FILE__) . '/../SabreAMF/SabreAMF/Client.php';
-require_once dirname(__FILE__) . '/../SabreAMF/SabreAMF/ClassMapper.php';
-require_once dirname(__FILE__) . '/../SabreAMF/SabreAMF/AMF3/ErrorMessage.php';
+require_once __DIR__.'/../config.php';
+require_once __DIR__.'/../SabreAMF/SabreAMF/Client.php';
+require_once __DIR__.'/../SabreAMF/SabreAMF/ClassMapper.php';
+require_once __DIR__.'/../SabreAMF/SabreAMF/AMF3/ErrorMessage.php';
+require_once __DIR__.'/ElvisClient.php';
 
-class ElvisAMFClient
+class ElvisAMFClient extends ElvisClient
 {
 	
 	const DESTINATION = 'acm';
@@ -75,14 +76,12 @@ class ElvisAMFClient
 		$result = null;
 		try {
 			$servicePath = $service . '.' . $operation;
-			$result = $client->sendRequest( $servicePath, $params, $operationTimeout );
+			$result = $client->sendRequest( $servicePath, $params, $operationTimeout, ELVIS_CONNECTION_TIMEOUT );
 			$cookies = $client->getCookies();
 			ElvisSessionUtil::updateSessionCookies( $cookies );
-
-		} catch (Exception $e) {
-			$message = 'An error occurred while communicating with the Elvis server at: ' . ELVIS_URL .
-					'. Please contact your system administrator to check if the Elvis server is running and properly configured for Enterprise.';
-			throw new BizException( null, 'Server', $e->getMessage(), $message, null, 'ERROR' );
+		} catch( Exception $e ) {
+			self::logService( 'Elvis_'.$service.'_'.$operation, $e->getMessage(), $cookies, null );
+			self::throwExceptionForElvisCommunicationFailure( $e->getMessage() );
 		}
 		
 		if( get_class($result) == 'SabreAMF_AMF3_ErrorMessage' ) {
@@ -260,6 +259,7 @@ class ElvisAMFClient
 	 */
 	public static function getInterfaceVersion()
 	{
+		require_once __DIR__ . '/../util/ElvisSessionUtil.php';
 		$elvisVersion = ElvisSessionUtil::getSessionVar( 'elvisServerVersion' );
 		$ifVersion = 1;
 		if( version_compare( $elvisVersion, '5.18','>=' ) ) {
@@ -275,7 +275,7 @@ class ElvisAMFClient
 	 */
 	private static function getEndpointUrl()
 	{
-		return ELVIS_URL.'/graniteamf/amf';
+		return self::getElvisBaseUrl().'/graniteamf/amf';
 	}
 
 	/**

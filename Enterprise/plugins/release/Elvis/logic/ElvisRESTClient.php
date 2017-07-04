@@ -1,8 +1,8 @@
 <?php
 
-require_once dirname( __FILE__ ).'/../config.php'; // For ELVIS_URL constant.
+require_once __DIR__.'/ElvisClient.php';
 
-class ElvisRESTClient
+class ElvisRESTClient extends ElvisClient
 {
 	/**
 	 * @var null|string Type of Load Balancer used with connection to Elvis. e.g: classic load balancer (AWSELB)
@@ -14,14 +14,14 @@ class ElvisRESTClient
 	 * It does log the request and response data in DEBUG mode.
 	 *
 	 * @param string $service Service name of the Elvis API.
-	 * @param string $url Request URL (JSON REST)
 	 * @param string[]|null $post Optionally. List of HTTP POST parameters to send along with the request.
 	 * @param Attachment|null $file
 	 * @return mixed Returned
 	 * @throws BizException
 	 */
-	private static function send( $service, $url, $post = null, $file = null )
+	private static function send( $service, $post = null, $file = null )
 	{
+		$url = self::getElvisBaseUrl().'/'.$service;
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 		$cookies = ElvisSessionUtil::getSessionCookies();
 		self::logService( $service, $url, $post, $cookies, true );
@@ -30,8 +30,6 @@ class ElvisRESTClient
 		ElvisSessionUtil::updateSessionCookies( $cookies );
 
 		if( isset( $response->errorcode ) ) {
-			$detail = 'Calling Elvis web service '.$service.' failed. '.
-				'Error code: '.$response->errorcode.'; Message: '.$response->message;
 			// When Elvis session is expired, re-login and try same request again.
 			static $recursion = 0; // paranoid checksum for endless recursion
 			if( $response->errorcode == 401 && $recursion < 3 ) {
@@ -41,6 +39,8 @@ class ElvisRESTClient
 				self::send( $service, $url, $post );
 				$recursion -= 1;
 			} else {
+				$detail = 'Calling Elvis web service '.$service.' failed. '.
+					'Error code: '.$response->errorcode.'; Message: '.$response->message;
 				self::throwExceptionForElvisCommunicationFailure( $detail );
 			}
 		}
@@ -60,15 +60,16 @@ class ElvisRESTClient
 	private static function logService( $service, $url, $transData, $cookies, $isRequest )
 	{
 		if( LogHandler::debugMode() ) {
+			$logService = str_replace( '/', '_', $service );
 			$log = 'URL:'.$url.PHP_EOL.'Cookies:'.print_r( $cookies, true ).PHP_EOL.'JSON:'.print_r( $transData, true );
 			if( $isRequest ) {
 				LogHandler::Log( 'ELVIS', 'DEBUG', 'RESTClient calling Elvis web service '.$service );
-				LogHandler::logService( 'Elvis_'.$service, $log, true, 'JSON' );
+				LogHandler::logService( 'Elvis_'.$logService, $log, true, 'JSON' );
 			} else { // response or error
 				if( isset( $transData->errorcode ) ) {
-					LogHandler::logService( 'Elvis_'.$service, $log, null, 'JSON' );
+					LogHandler::logService( 'Elvis_'.$logService, $log, null, 'JSON' );
 				} else {
-					LogHandler::logService( 'Elvis_'.$service, $log, false, 'JSON' );
+					LogHandler::logService( 'Elvis_'.$logService, $log, false, 'JSON' );
 				}
 			}
 		}
@@ -98,7 +99,7 @@ class ElvisRESTClient
 		curl_setopt( $ch, CURLOPT_POST, 1 );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt( $ch, CURLOPT_HEADER, 0 );
-		curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 10 ); // Using the Zend Client default
+		curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, ELVIS_CONNECTION_TIMEOUT );
 		curl_setopt( $ch, CURLOPT_TIMEOUT, 3600 ); // Using the Enterprise default
 
 		// Enable this to print the Header sent out ( After calling curl_exec )
@@ -184,27 +185,6 @@ class ElvisRESTClient
 	}
 
 	/**
-	 * Throws BizException for low level communication errors with Elvis Server.
-	 *
-	 * For ES 10.0 or later it throws a S1144 error else it throws S1069.
-	 *
-	 * @since 10.0.5 / 10.1.1
-	 * @param string $detail
-	 * @throws BizException
-	 */
-	private static function throwExceptionForElvisCommunicationFailure( $detail )
-	{
-		require_once BASEDIR . '/server/utils/VersionUtils.class.php';
-		$serverVer = explode( ' ', SERVERVERSION ); // split '9.2.0' from 'build 123'
-		if( VersionUtils::versionCompare( $serverVer[0], '10.0.0', '>=' ) ) {
-			throw new BizException( 'ERR_CONNECT', 'Server', $detail, null, array( 'Elvis' ) );
-		} else {
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Server', $detail );
-		}
-	}
-
-
-	/**
 	 * Performs REST update for provided metadata and file (if any).
 	 *
 	 * @param string $elvisId Id of asset
@@ -220,7 +200,7 @@ class ElvisRESTClient
 			$post['metadata'] = json_encode( $metadata );
 		}
 
-		self::send( 'update', ELVIS_URL.'/services/update', $post, $file );
+		self::send( 'services/update', $post, $file );
 	}
 
 	/**
@@ -249,7 +229,7 @@ class ElvisRESTClient
 			$post['metadata'] = json_encode( $metadata );
 		}
 
-		self::send( 'updatebulk', ELVIS_URL.'/services/updatebulk', $post );
+		self::send( 'services/updatebulk', $post );
 	}
 
 	/**
@@ -277,7 +257,7 @@ class ElvisRESTClient
 	 */
 	private static function logoutSession()
 	{
-		self::send( 'logout', ELVIS_URL.'/services/logout' );
+		self::send( 'services/logout' );
 	}
 
 	/**
@@ -288,7 +268,7 @@ class ElvisRESTClient
 	 */
 	public static function fieldInfo()
 	{
-		return self::send( 'fieldinfo', ELVIS_URL.'/services/fieldinfo' );
+		return self::send( 'services/fieldinfo' );
 	}
 
 	/**
@@ -304,7 +284,7 @@ class ElvisRESTClient
 	{
 		// The Elvis ping service returns a JSON structure like this:
 		//     {"state":"running","version":"5.15.2.9","available":true,"server":"Elvis"}
-		return self::send( 'ping', ELVIS_URL.'/services/ping' );
+		return self::send( 'services/ping' );
 	}
 
 	/**
@@ -326,7 +306,7 @@ class ElvisRESTClient
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 
 		$response = null;
-		$url = ELVIS_URL.'/version.jsp';
+		$url = self::getElvisBaseUrl().'/version.jsp';
 		LogHandler::logService( 'Elvis_version_jsp', $url, true, 'REST' );
 		try {
 			$client = new Zend\Http\Client();
@@ -342,7 +322,7 @@ class ElvisRESTClient
 		}
 		if( $response->getStatusCode() !== 200 ) {
 			LogHandler::logService( 'Elvis_version_jsp', $response->getBody(), null, 'REST' );
-			self::throwExceptionForElvisCommunicationFailure( $response->getReasonPhrase() );
+			self::throwExceptionForElvisCommunicationFailure( $response->renderStatusLine() );
 		}
 
 		$cookies = array();

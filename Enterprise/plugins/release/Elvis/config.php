@@ -23,6 +23,33 @@ if( !defined('ELVIS_CLIENT_URL') ) {
 }
 
 /**
+ * Network connection timeout (in seconds) that Enterprise applies to the Elvis server URL.
+ *
+ * When it takes longer than the configured time to connect to Elvis, Enterprise gives up.
+ * Note that this should not be confused with the network operation timeout, which is fixed to 1 hour.
+ *
+ * During workflow operations, Enterprise may need to connect to Elvis to sync data that is changed by the user.
+ * When the user is about to update an Elvis image in Enterprise, there may be a good understanding this communication
+ * is needed between the two backends. However, when the user is changing an article that is placed on a layout
+ * but the layout has placed images as well, the user may not realize that such communication is actually happening.
+ * In other words, for some workflow operations, this backend communication may be unexpected for end users.
+ *
+ * By setting this time too long Enterprise users may get confused. Especially when it is unexpected, users may
+ * may retry or abort if they have to wait too long for any system response. In case an Elvis server node is no longer
+ * accessible (e.g. when the node is restarting) users should be patient and so be informed in time.
+ *
+ * By setting this time too short it could lead into Elvis server connection errors for no good reason. For example,
+ * in case an Elvis server node is very busy serving other user requests. Workflow operations that break half-way
+ * due to Elvis connection errors is something that should be avoided because it may lead to users retrying the same
+ * operation over and over again, causing more stress on the Elvis nodes (that seems to be busy already in this case).
+ *
+ * This option is available since Enterprise 10.1.4.
+ */
+if( !defined('ELVIS_CONNECTION_TIMEOUT') ) {
+	define( 'ELVIS_CONNECTION_TIMEOUT', 5 );
+}
+
+/**
  * Elvis uses the credentials of the currently logged Content Station / Smart Connection 
  * user to connect to Elvis. This means that the WoodWing user also needs access to Elvis.
  */
