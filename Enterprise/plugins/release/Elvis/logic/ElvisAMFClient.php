@@ -159,6 +159,7 @@ class ElvisAMFClient extends ElvisClient
 	{
 		require_once __DIR__ . '/../util/ElvisSessionUtil.php';
 		try {
+			/** @noinspection PhpUnusedLocalVariableInspection */
 			$map = new BizExceptionSeverityMap( array( 'S1053' => 'INFO' ) ); // Suppress warnings for the HealthCheck.
 			self::sequentialLogin( $credentials );
 		} catch( BizException $e ) {
