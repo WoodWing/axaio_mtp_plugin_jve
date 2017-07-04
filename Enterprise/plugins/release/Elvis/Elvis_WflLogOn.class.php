@@ -30,6 +30,8 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 		if( $req->User && $req->Password ) {
 			require_once __DIR__.'/util/ElvisSessionUtil.php';
 			ElvisSessionUtil::saveCredentials( $req->User, $req->Password );
+			ElvisSessionUtil::setRestricted( false );
+			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
 		}
 
 		// Add the feature to the feature set of the logon response.

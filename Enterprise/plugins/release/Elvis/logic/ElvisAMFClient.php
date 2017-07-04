@@ -110,8 +110,7 @@ class ElvisAMFClient extends ElvisClient
 	public static function login()
 	{
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
-		$userShort = BizSession::getShortUserName();
-		$credentials = ElvisSessionUtil::getCredentials( $userShort );
+		$credentials = ElvisSessionUtil::getCredentials();
 		if( !$credentials ) {
 			// This piece of code was implemented due to EN-88706 but should be no longer valid.
 			// Since ES 10.0.5/10.1.2/10.2.0 this should never happen anymore because the Elvis user credentials
@@ -129,7 +128,8 @@ class ElvisAMFClient extends ElvisClient
 		$client = new ElvisRESTClient();
 		$serverVersion = $client->getElvisServerVersion();
 		if( $serverVersion ) {
-			ElvisSessionUtil::setSessionVar( 'elvisServerVersion', $serverVersion );
+			ElvisSessionUtil::setElvisServerVersion( $serverVersion );
+			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
 		}
 	}
 
@@ -161,7 +161,6 @@ class ElvisAMFClient extends ElvisClient
 		try {
 			$map = new BizExceptionSeverityMap( array( 'S1053' => 'INFO' ) ); // Suppress warnings for the HealthCheck.
 			self::sequentialLogin( $credentials );
-			ElvisSessionUtil::setSessionVar( 'restricted', false );
 		} catch( BizException $e ) {
 			try {
 				require_once __DIR__.'/../config.php';
@@ -171,7 +170,7 @@ class ElvisAMFClient extends ElvisClient
 				$credentials = base64_encode( ELVIS_SUPER_USER.':'. ELVIS_SUPER_USER_PASS );
 				self::sequentialLogin( $credentials );
 				ElvisSessionUtil::saveCredentials( ELVIS_SUPER_USER, ELVIS_SUPER_USER_PASS );
-				ElvisSessionUtil::setSessionVar( 'restricted', true );
+				ElvisSessionUtil::setRestricted( true );
 				LogHandler::Log( 'ELVIS', 'INFO',
 					'Configured Elvis super user (ELVIS_SUPER_USER) did successfully login to Elvis server. '.
 					'Access rights for this user are set to restricted.' );
@@ -272,7 +271,8 @@ class ElvisAMFClient extends ElvisClient
 	public static function getInterfaceVersion()
 	{
 		require_once __DIR__ . '/../util/ElvisSessionUtil.php';
-		$elvisVersion = ElvisSessionUtil::getSessionVar( 'elvisServerVersion' );
+		$elvisVersion = ElvisSessionUtil::getElvisServerVersion();
+		// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
 		$ifVersion = 1;
 		if( version_compare( $elvisVersion, '5.18','>=' ) ) {
 			$ifVersion = 2;

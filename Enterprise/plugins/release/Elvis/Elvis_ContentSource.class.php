@@ -207,9 +207,6 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	public function getShadowObject( $alienId, &$object, $objprops, $lock, $rendition )
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject called for alienId:' . $alienId . '; lock:' . $lock . '; rendition:' . $rendition );
-
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-		$this->checkUserEditRight( $lock, $rendition );
 		$this->getShadowObject2( $alienId, $object, $objprops, $lock, $rendition, null );
 	}
 
@@ -282,10 +279,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	private function checkUserEditRight( $lock, $rendition )
 	{
-		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';
 		if ( $lock && $rendition == 'native' ) {
-			$restricted = ElvisSessionUtil::getSessionVar( 'restricted' );
-			if ( $restricted || is_null( $restricted ) ) {
+			require_once __DIR__.'/util/ElvisSessionUtil.php';
+			$restricted = ElvisSessionUtil::getRestricted();
+			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
+			if ( $restricted ) {
 				throw new BizException( 'ERR_AUTHORIZATION', 'Client' );
 			}
 		}
