@@ -160,7 +160,7 @@ class ElvisAMFClient extends ElvisClient
 		require_once __DIR__ . '/../util/ElvisSessionUtil.php';
 		try {
 			$map = new BizExceptionSeverityMap( array( 'S1053' => 'INFO' ) ); // Suppress warnings for the HealthCheck.
-			self::synchronizedLogin( $credentials );
+			self::sequentialLogin( $credentials );
 			ElvisSessionUtil::setSessionVar( 'restricted', false );
 		} catch( BizException $e ) {
 			try {
@@ -169,7 +169,7 @@ class ElvisAMFClient extends ElvisClient
 					'Login to Elvis server with normal user credentials has failed. '.
 					'Now trying to login with configured super user (ELVIS_SUPER_USER) credentials.' );
 				$credentials = base64_encode( ELVIS_SUPER_USER.':'. ELVIS_SUPER_USER_PASS );
-				self::synchronizedLogin( $credentials );
+				self::sequentialLogin( $credentials );
 				ElvisSessionUtil::saveCredentials( ELVIS_SUPER_USER, ELVIS_SUPER_USER_PASS );
 				ElvisSessionUtil::setSessionVar( 'restricted', true );
 				LogHandler::Log( 'ELVIS', 'INFO',
@@ -185,35 +185,47 @@ class ElvisAMFClient extends ElvisClient
 	}
 
 	/**
-	 * Does a synchronized login to make sure the user does not login twice if requests are fired close to each other
+	 * To ensure that there's only one Login being done at any one time.
 	 *
-	 * @param string $credentials base64 encoded credentials
-	 * @throws BizException
+	 * This typically happens when two requests are executed one after another in a very close period.
+	 * When the above happens, this function makes sure that there's only one Login being executed.
+	 * The first request process get to do the Login, while the other request process(es) will just
+	 * wait until the Login ( by the first request process ) is done and simply ends (since the login
+	 * is already executed by the first request process, other process(es) no longer need to do login anymore).
+	 *
+	 * Function throws BizException when the login operation is executed but failed.
+	 * When the process did not get to do the Login due to that there's already another process doing it,
+	 * function throws no error but just silently ends ( when the process that is doing the Login finishes ).
+	 *
+	 * @since 10.1.4
+	 * @param string $credentials Base64 encoded credentials
+	 * @throws BizException See in the function header.
 	 */
-	private static function synchronizedLogin( $credentials )
+	private static function sequentialLogin( $credentials )
 	{
 		require_once __DIR__ . '/../util/ElvisSessionUtil.php';
-		LogHandler::Log('ELVIS', 'DEBUG', 'Synchronized login');
-		if (!ElvisSessionUtil::isLoggingIn()) {
-			LogHandler::Log('ELVIS', 'DEBUG', 'Logging in');
-			ElvisSessionUtil::startLogin();
-			try {
-				self::loginByCredentials( $credentials );
-				ElvisSessionUtil::stopLogin();
-			} catch (BizException $e) {
-				ElvisSessionUtil::stopLogin();
-				throw $e;
-			}
+		if( ElvisSessionUtil::isLoggingIn() ) {
+			LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.
+				': Another process is doing the Login for this user so simply wait for that to complete.' );
+			ElvisSessionUtil::waitUntilLoginSemaphoreHasReleased();
 		} else {
-			LogHandler::Log('ELVIS', 'DEBUG', 'parallel login');
-			$timeOut = 60; // seconds
-			while ($timeOut > 0 && ElvisSessionUtil::isLoggingIn()) {
-				sleep(1);
-				$timeOut --;
-			}
-			if ($timeOut <= 0) {
-				$message = 'Logging into Elvis failed: timeout expired while waiting for parallel login.';
-				throw new BizException( null, 'Server', null, $message );
+			$loginSemaId = ElvisSessionUtil::createLoginSemaphore();
+			if( $loginSemaId ) {
+				LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.
+					': Created a semaphore to make sure only this process handles the Login for the user.' );
+				try {
+					self::loginByCredentials( $credentials );
+					ElvisSessionUtil::releaseLoginSemaphore( $loginSemaId );
+				} catch( BizException $e ) {
+					if( $loginSemaId ) {
+						ElvisSessionUtil::releaseLoginSemaphore( $loginSemaId );
+					}
+					throw $e;
+				}
+			} else { // Failed getting semaphore for Login.
+				LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.
+					': Failed getting semaphore. Another process is doing the login for this user so simply wait for that to complete.' );
+				ElvisSessionUtil::waitUntilLoginSemaphoreHasReleased();
 			}
 		}
 	}
