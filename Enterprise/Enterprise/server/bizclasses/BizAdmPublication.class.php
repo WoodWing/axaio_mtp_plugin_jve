@@ -121,26 +121,36 @@ class BizAdmPublication
 	}
 
 	/**
-	 * Checks all SortOrder fields and updates when list is damaged; other than [1..n].
-	 * This could happen after record removal, DB migration, or any corruption.
-	 * The passed list of publications must be compelete(!) and will be repaired (returned).
+	 * Checks all SortOrder fields and updates when list is damaged.
 	 *
-	 * @param array $pubs List of AdmPublication objects
+	 * If a publication has a sort order, this order will be respected. If it has no order, the order will be set to
+	 * current highest one plus 1 etc.
+	 * Publications without order could happen after record removal, DB migration, or any corruption.
+	 * The passed list of publications must be complete(!) and will be repaired (returned).
+	 *
+	 * @param AdmPublication Publication
 	 */
 	private static function repairPublicationsSortOrder( &$pubs )
 	{
-		$sortOrder = 1;
+		$highestOrder = 0;
 		$damagedPubs = array();
 		foreach( $pubs as $pub ) {
-			if( $pub->SortOrder != $sortOrder ) {
-				$pub->SortOrder = $sortOrder; // repair
+			if( !$pub->SortOrder ) {
 				$damagedPub = new AdmPublication();
 				$damagedPub->Id = $pub->Id;
-				$damagedPub->SortOrder = $pub->SortOrder;
 				$damagedPubs[] = $damagedPub;
+			} else {
+				if( $pub->SortOrder > $highestOrder ) {
+					$highestOrder = $pub->SortOrder;
+				}
 			}
-			$sortOrder++;
 		}
+
+		if( $damagedPubs ) foreach( $damagedPubs as $damagedPub ) {
+			$highestOrder++;
+			$damagedPub->SortOrder = $highestOrder;
+		}
+
 		if( $damagedPubs ) { // save repairs
 			require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
 			require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
