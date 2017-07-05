@@ -91,7 +91,7 @@ class DBAdmPublication extends DBBase
 			}
 			if( is_null( $pub->SortOrder ) ) {
 				$row = self::getRow( self::TABLENAME, '', array('max(`code`) as `m`') );
-				$pub->SortOrder = $row['m'];
+				$pub->SortOrder = intval( $row['m'] ) + 1;
 			}
 
 			// Store standard publication properties in DB.
@@ -149,36 +149,36 @@ class DBAdmPublication extends DBBase
 		}
 		return $modifiedPubs;
 	}
-	
+
 	/**
-	 *  Converts a given AdmPublication data object to a DB row (array).
+	 * Converts a given AdmPublication data object to a DB row (array).
 	 *
-	 *  @param AdmPublication $obj The publication data object to convert.
-	 *  @return array DB row that holds the publication properties as key-value pairs.
+	 * @param AdmPublication $obj The publication data object to convert.
+	 * @return array DB row that holds the publication properties as key-value pairs.
 	 */
 	static public function objToRow( $obj )
-	{	
+	{
 		$fields = array();
-		if(!is_null($obj->Name)){
-			$fields['publication'] 		= $obj->Name;	
+		if( !is_null( $obj->Name ) ) {
+			$fields['publication'] = $obj->Name;
 		}
-		if(!is_null($obj->Description)){
-			$fields['description'] 		= $obj->Description;	
+		if( !is_null( $obj->Description ) ) {
+			$fields['description'] = $obj->Description;
 		}
-		if(!is_null($obj->EmailNotify)){
-			$fields['email'] 	  		= ($obj->EmailNotify == true ? 'on' : '');
+		if( !is_null( $obj->EmailNotify ) ) {
+			$fields['email'] = ( $obj->EmailNotify == true ? 'on' : '' );
 		}
-		if(!is_null($obj->ReversedRead)){
-			$fields['readingorderrev'] 	= ($obj->ReversedRead == true ? 'on' : '');	
+		if( !is_null( $obj->ReversedRead ) ) {
+			$fields['readingorderrev'] = ( $obj->ReversedRead == true ? 'on' : '' );
 		}
-		if(!is_null($obj->AutoPurge)){
-			$fields['autopurge']		= $obj->AutoPurge;
+		if( !is_null( $obj->AutoPurge ) ) {
+			$fields['autopurge'] = intval( $obj->AutoPurge );
 		}
-		if(!is_null($obj->SortOrder)){
-			$fields['code'] 			= $obj->SortOrder ? $obj->SortOrder : 0 ;
+		if( !is_null( $obj->SortOrder ) ) {
+			$fields['code'] = $obj->SortOrder ? intval( $obj->SortOrder ) : 0;
 		}
-		if(!is_null($obj->DefaultChannelId)){
-			$fields['defaultchannelid'] = $obj->DefaultChannelId;	
+		if( !is_null( $obj->DefaultChannelId ) ) {
+			$fields['defaultchannelid'] = intval( $obj->DefaultChannelId );
 		}
 		if( !is_null( $obj->CalculateDeadlines ) ) {
 			$fields['calculatedeadlines'] = ( $obj->CalculateDeadlines == true ? 'on' : '' );
