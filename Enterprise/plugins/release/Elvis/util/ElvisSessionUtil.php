@@ -5,33 +5,81 @@ require_once dirname(__FILE__).'/../config.php';
 class ElvisSessionUtil
 {
 	/**
-	 * Check if there is an Elvis session available.
+	 * Read a Elvis ContentSource session setting from DB that were saved for the given session user.
 	 *
-	 * @return boolean
+	 * @since 10.1.4
+	 * @param string $userShort Short name of the session user.
+	 * @param string $name Name of the setting.
+	 * @return null|string Value of the setting. NULL when setting was never saved before.
 	 */
-	public static function hasSession()
+	private static function getUserSetting( $userShort, $name )
 	{
-		return (bool)self::getSessionCookies();
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+		$settings = BizUser::getSettings( $userShort, 'ElvisContentSource' );
+		$value = null;
+		if( $settings ) foreach( $settings as $setting ) {
+			if( $setting->Setting == $name ) {
+				$value = $setting->Value;
+				break;
+			}
+		}
+		return $value;
+	}
+
+	/**
+	 * Save a Elvis ContentSource session setting into DB for the given session user.
+	 *
+	 * @since 10.1.4
+	 * @param string $userShort Short name of the session user.
+	 * @param string $name Name of the setting.
+	 */
+	private static function setUserSetting( $userShort, $name, $value )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+		$settings = array( new Setting( $name, $value ) );
+		BizUser::updateSettings( $userShort, $settings, 'ElvisContentSource' );
+	}
+
+	/**
+	 * Read the 'Restricted' Elvis ContentSource setting from DB that was stored for the session user during logon.
+	 *
+	 * When the user is known to Enterprise but unknown to Elvis, it is logged in as a guest user (badly called 'super user')
+	 * then this flag is set to TRUE. When the user is known to both back-ends it is set to FALSE.
+	 *
+	 * @since 10.1.4
+	 * @return bool Whether or not the user has restricted access rights.
+	 */
+	public static function getRestricted()
+	{
+		$userShort = BizSession::getShortUserName();
+		$restricted = self::getUserSetting( $userShort, 'Restricted' );
+		return is_null($restricted) ? true : (bool)$restricted;
+	}
+
+	/**
+	 * Saves the 'Restricted' Elvis ContentSource setting into DB for the session user who is about to logon.
+	 *
+	 * When the user is known to Enterprise but unknown to Elvis, it is logged in as a guest user (badly called 'super user')
+	 * then this flag is set to TRUE. When the user is known to both back-ends it is set to FALSE.
+	 *
+	 * @since 10.1.4
+	 * @param bool $restricted
+	 */
+	public static function setRestricted( $restricted )
+	{
+		$userShort = BizSession::getShortUserName();
+		self::setUserSetting( $userShort, 'Restricted', intval($restricted) );
 	}
 
 	/**
 	 * Get the base64 encoded credentials
 	 *
-	 * @param string $userShort
 	 * @return string|null Credentials, or NULL when not found.
 	 */
-	public static function getCredentials( $userShort )
+	public static function getCredentials()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-
-		$settings = BizUser::getSettings( $userShort, 'ElvisContentSource' );
-		$storage = null;
-		if( $settings ) foreach( $settings as $setting ) {
-			if( $setting->Setting == 'Temp' ) {
-				$storage = $setting->Value;
-				break;
-			}
-		}
+		$userShort = BizSession::getShortUserName();
+		$storage = self::getUserSetting( $userShort, 'Temp' );
 		$credentials = null;
 		if( $storage ) {
 			list( $encrypted, $initVector ) = explode( '::', $storage, 2 );
@@ -59,8 +107,6 @@ class ElvisSessionUtil
 	 */
 	public static function saveCredentials( $username, $password )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-
 		$userShort = BizSession::getShortUserName(); // do not take $username
 		$credentials = base64_encode( $username.':'.$password );
 		$initVector = openssl_random_pseudo_bytes( openssl_cipher_iv_length( 'aes-256-cbc' ) );
@@ -69,8 +115,7 @@ class ElvisSessionUtil
 			OPENSSL_RAW_DATA, $initVector );
 		if( $encrypted ) {
 			$storage = base64_encode( $encrypted ).'::'.base64_encode( $initVector );
-			$settings = array( new Setting( 'Temp', $storage ) ); // use vague name to obfuscate
-			BizUser::updateSettings( $userShort, $settings, 'ElvisContentSource' );
+			self::setUserSetting( $userShort, 'Temp', $storage ); // use vague name to obfuscate
 		} else {
 			LogHandler::Log( 'ELVIS', 'ERROR', 'Encryption procedure failed. Please run the Health Check.' );
 		}
@@ -78,6 +123,16 @@ class ElvisSessionUtil
 		// [EN-88634#2] Note that tracking Elvis credentials in PHP session does not work for multi AS setup behind ELB,
 		// and therefor the following solution is no longer used:
 		// self::setSessionVar( 'cred', base64_encode( $username . ':' . $password ) );
+	}
+
+	/**
+	 * Check if there is an Elvis session available.
+	 *
+	 * @return boolean
+	 */
+	public static function hasSession()
+	{
+		return (bool)self::getSessionCookies();
 	}
 
 	/**
@@ -230,10 +285,11 @@ class ElvisSessionUtil
 	/**
 	 * Get a session variable by key.
 	 *
+	 * @since 10.1.4 this function is made private to avoid accidental usage of PHP session data [EN-89334].
 	 * @param string $key
 	 * @return mixed|null Value when variable is set, NULL otherwise.
 	 */
-	public static function getSessionVar( $key )
+	private static function getSessionVar( $key )
 	{
 		$sessionVariables = BizSession::getSessionVariables();
 		$name = self::getVarName( $key );
@@ -243,10 +299,11 @@ class ElvisSessionUtil
 	/**
 	 * Set an object in the session.
 	 *
+	 * @since 10.1.4 this function is made private to avoid accidental usage of PHP session data [EN-89334].
 	 * @param string $key
 	 * @param mixed $value
 	 */
-	public static function setSessionVar( $key, $value )
+	private static function setSessionVar( $key, $value )
 	{
 		$sessionVars = array( self::getVarName($key) => $value );
 		BizSession::setSessionVariables( $sessionVars );
@@ -255,21 +312,53 @@ class ElvisSessionUtil
 	/**
 	 * Get those Elvis fields that are editable by user.
 	 *
-	 * @return string[] Editable fields.
+	 * @since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
+	 * @return string[]| Editable fields. NULL when not stored before.
 	 */
 	public static function getEditableFields()
 	{
-		return self::getSessionVar( 'editableFields' );
+		$userShort = BizSession::getShortUserName();
+		$fields = self::getUserSetting( $userShort, 'EditableFields' );
+		return $fields ? unserialize( $fields ) : null;
 	}
 
 	/**
 	 * Set those Elvis fields that are editable by user.
 	 *
+	 * @since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
 	 * @param string[] $editableFields
 	 */
 	public static function setEditableFields( $editableFields )
 	{
-		self::setSessionVar( 'editableFields', $editableFields );
+		$userShort = BizSession::getShortUserName();
+		if( !$editableFields ) {
+			$editableFields = array();
+		}
+		self::setUserSetting( $userShort, 'EditableFields', serialize( $editableFields ) );
+	}
+
+	/**
+	 * Get the version of the Elvis Server the session user did login.
+	 *
+	 * @since 10.1.4
+	 * @return string|null Elvis Server version. NULL when never saved before.
+	 */
+	public static function getElvisServerVersion()
+	{
+		$userShort = BizSession::getShortUserName();
+		return self::getUserSetting( $userShort, 'ElvisServerVersion' );
+	}
+
+	/**
+	 * Save the version of the Elvis Server the session user did login.
+	 *
+	 * @since 10.1.4
+	 * @param string $version Elvis Server version
+	 */
+	public static function setElvisServerVersion( $version )
+	{
+		$userShort = BizSession::getShortUserName();
+		self::setUserSetting( $userShort, 'ElvisServerVersion', $version );
 	}
 
 	/**
@@ -281,23 +370,5 @@ class ElvisSessionUtil
 	private static function getVarName( $name )
 	{
 		return ELVIS_CONTENTSOURCEPREFIX . $name;
-	}
-
-	/**
-	 * Retrieve the username and the password from the saved credentials under user $user.
-	 *
-	 * @since 10.1.3
-	 * @param string $user
-	 * @return string[] A list where the first item it the username and the second item the password if credentials are found, else returns null when not found.
-	 */
-	static public function retrieveUsernamePasswordFromCredentials( $user )
-	{
-		$usernamePassword = null;
-		$credentials = self::getCredentials( $user );
-		if( $credentials ) {
-			$credentials = base64_decode( $credentials );
-			$usernamePassword = explode( ':', $credentials );
-		}
-		return $usernamePassword;
 	}
 }

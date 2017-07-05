@@ -29,7 +29,8 @@ class ElvisRESTClient extends ElvisClient
 		self::logService( $service, $url, $response, $cookies, false );
 		ElvisSessionUtil::updateSessionCookies( $cookies );
 
-		if( isset( $response->errorcode ) ) {
+		if( isset( $response->errorcode ) &&
+				$service != 'services/logout' ) { // When logout fails, no point to re-login getting the jsessionid and logout again, it is assumed session has 'ended'.
 			// When Elvis session is expired, re-login and try same request again.
 			static $recursion = 0; // paranoid checksum for endless recursion
 			if( $response->errorcode == 401 && $recursion < 3 ) {
