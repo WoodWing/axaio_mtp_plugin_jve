@@ -283,7 +283,7 @@ abstract class WW_DbDrivers_DriverBase
 	 * The transaction is repeated after waiting $milliseconds milliseconds.
 	 *
 	 * @since 10.1.3
-	 * @param string $sql
+	 * @param string|resource $sql
 	 * @param int number of milliseconds before retrying.
 	 * @return mixed
 	 */
@@ -314,15 +314,15 @@ abstract class WW_DbDrivers_DriverBase
 	/**
 	 * Adds prefix to the the table name and puts DBMS specific quotes around it.
 	 *
-	 * @param $tableNameNoPrefix
+	 * @param string $tableNameNoPrefix
 	 * @return string Table name with prefix and quoted.
 	 */
 	abstract	public function tablename( $tableNameNoPrefix );
 
 	/**
-	 * Composes a SQL fragment that can be used to get a concatenated string from the database.
+	 * Composes a SQL fragment that can be used to get multiple columns as a concatenated string from the database.
 	 *
-	 * @param string[] $arguments List of arguments (mainly field names) that should be concatened.
+	 * @param string[] $arguments List of arguments (mainly field names) that should be concatenated.
 	 * @return string SQL fragment
 	**/
 	abstract public function concatFields( $arguments );
@@ -335,12 +335,12 @@ abstract class WW_DbDrivers_DriverBase
 	 * field can contain 4 multibyte characters. If multibyte is not supported it can store 4 bytes which is only
 	 * 2 characters in case each character takes 2 bytes.
 	 *
-	 * @return boolean True if DBMS is myltibyte aware, else false.
+	 * @return boolean True if DBMS is multibyte aware, else false.
 	 */
 	abstract public function hasMultibyteSupport();
 
 	/**
-	 * Changes the SLQ ($slq) in such a way that it returns $count rows starting from $start row onwards.
+	 * Changes the SQL ($slq) in such a way that it returns $count rows starting from $start row onwards.
 	 *
 	 * @param string $sql SQL statement before the limit clause is added.
 	 * @param int $start The offset of the first row to return.

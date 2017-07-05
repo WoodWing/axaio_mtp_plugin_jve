@@ -187,7 +187,9 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	protected function retryAfterLockError( $sql, $milliseconds = 50 )
 	{
 		LogHandler::Log( 'mysql', 'INFO', '(Dead)lock error encountered: Execute statement again.' );
-		LogHandler::Log( 'mysql', 'DEBUG', $this->theerrorcode.': '.$this->error() );
+		if( LogHandler::debugMode() ) {
+			LogHandler::Log( 'mysql', 'DEBUG', $this->theerrorcode.': '.$this->error() );
+		}
 		$maxRetries = 3;
 		for( $retry = 1; $retry <= $maxRetries; $retry++ ) {
 			LogHandler::Log( 'mysql', 'INFO', "(Dead)lock: Retry attempt {$retry} of {$maxRetries}." );
