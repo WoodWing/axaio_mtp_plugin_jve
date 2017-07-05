@@ -282,9 +282,9 @@ abstract class WW_DbDrivers_DriverBase
 	 * If a deadlock is encountered repeat the transaction again.
 	 * The transaction is repeated after waiting $milliseconds milliseconds.
 	 *
-	 * @since 10.1.3
+	 * @since 10.1.4
 	 * @param string|resource $sql
-	 * @param int number of milliseconds before retrying.
+	 * @param int $milliseconds number of milliseconds before retrying.
 	 * @return mixed
 	 */
 	abstract protected function retryAfterLockError( $sql, $milliseconds = 50 );
