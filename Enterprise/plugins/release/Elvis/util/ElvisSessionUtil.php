@@ -5,6 +5,11 @@ require_once dirname(__FILE__).'/../config.php';
 class ElvisSessionUtil
 {
 	/**
+	 * @var int The lifetime of the Login semaphore in seconds.
+	 */
+	private static $loginSemaphoreLifeTime = 60;
+
+	/**
 	 * Read a Elvis ContentSource session setting from DB that were saved for the given session user.
 	 *
 	 * @since 10.1.4
@@ -220,7 +225,7 @@ class ElvisSessionUtil
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 		$bizSemaphore = new BizSemaphore();
 		$semaphoreName = self::getElvisSyncSemaphoreName();
-		$bizSemaphore->setLifeTime( 60 ); // 60 seconds.
+		$bizSemaphore->setLifeTime( self::$loginSemaphoreLifeTime ); // in seconds.
 		$attempts = array( 0 ); // in milliseconds ( only 1 attempt and no wait )
 		$bizSemaphore->setAttempts( $attempts );
 		$semaphoreId = $bizSemaphore->createSemaphore( $semaphoreName, false );
@@ -246,7 +251,7 @@ class ElvisSessionUtil
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 		$bizSemaphore = new BizSemaphore();
 		$semaphoreName = self::getElvisSyncSemaphoreName();
-		$lifeTime = 60; // in seconds
+		$lifeTime = self::$loginSemaphoreLifeTime; // in seconds
 		$attempts = array_fill( 0, 4 * $lifeTime, 250 ); // 4*60 attempts x 250ms wait = 60s max total wait
 		$bizSemaphore->setLifeTime( $lifeTime );
 		$bizSemaphore->setAttempts( $attempts );
