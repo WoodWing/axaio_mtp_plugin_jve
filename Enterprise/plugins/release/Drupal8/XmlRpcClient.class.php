@@ -627,7 +627,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 		if( $errMsg ) {
 			LogHandler::Log( 'Drupal', 'ERROR', 'HTTP UPLOAD "'.$action.'" failed at URL "'.$this->url.'".' );
 			throw new BizException( 'ERR_PUBLISH', 'Server', $errMsg,
-				null, array('Drupal', "${message} ${detailedUserMessage}"));
+				null, array('Drupal', "{$message} {$detailedUserMessage}"));
 		}
 		return $fileId;
 	}

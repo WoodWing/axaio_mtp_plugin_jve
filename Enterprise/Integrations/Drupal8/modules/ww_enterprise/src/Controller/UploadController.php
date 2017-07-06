@@ -164,7 +164,7 @@ class UploadController extends ControllerBase
 			// Check if the file was uploaded correctly.
 			$errors = drupal_get_messages( 'error' );
 			if ( empty ( $files ) || ( is_array( $errors ) && !empty( $errors ) && isset( $errors['error'] ) ) ) {
-				$errorToThrow = implode( 'PHP_EOL', $errors['error'] );
+				$errorToThrow = isset( $errors['error'] ) ? implode( 'PHP_EOL', $errors['error'] ) : 'Upload failed.';
 				throw new \Exception( $errorToThrow );
 			}
 

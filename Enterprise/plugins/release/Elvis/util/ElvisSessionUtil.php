@@ -32,6 +32,7 @@ class ElvisSessionUtil
 	 * @since 10.1.4
 	 * @param string $userShort Short name of the session user.
 	 * @param string $name Name of the setting.
+	 * @param string $value Value of the setting.
 	 */
 	private static function setUserSetting( $userShort, $name, $value )
 	{
@@ -313,7 +314,7 @@ class ElvisSessionUtil
 	 * Get those Elvis fields that are editable by user.
 	 *
 	 * @since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
-	 * @return string[]| Editable fields. NULL when not stored before.
+	 * @return string[]|null Editable fields. NULL when not stored before.
 	 */
 	public static function getEditableFields()
 	{
