@@ -37,7 +37,7 @@ class ElvisRESTClient extends ElvisClient
 				$recursion += 1;
 				require_once __DIR__.'/ElvisAMFClient.php';
 				ElvisAMFClient::login();
-				self::send( $service, $url, $post );
+				self::send( $service, $post, $file );
 				$recursion -= 1;
 			} else {
 				$detail = 'Calling Elvis web service '.$service.' failed. '.
