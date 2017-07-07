@@ -46,7 +46,16 @@ if( !defined('ELVIS_CLIENT_URL') ) {
  * This option is available since Enterprise 10.1.4.
  */
 if( !defined('ELVIS_CONNECTION_TIMEOUT') ) {
-	define( 'ELVIS_CONNECTION_TIMEOUT', 5 );
+	define( 'ELVIS_CONNECTION_TIMEOUT', 4 );
+}
+
+/**
+ * Number of attempts reconnecting to Elvis server in case the connection with a node has dropped.
+ *
+ * This option is available since Enterprise 10.1.4.
+ */
+if( !defined( 'ELVIS_CONNECTION_REATTEMPTS' ) ) {
+	define( 'ELVIS_CONNECTION_REATTEMPTS', 3 );
 }
 
 /**

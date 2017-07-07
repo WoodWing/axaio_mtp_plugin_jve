@@ -115,7 +115,6 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 					if( $logSQL ) {	
 						$postfix = strlen( $blobstr ) > 250 ? '...' : '';
 						$blobLog = substr( $blobstr, 0, 250 );
-						$blobLog = (LOGFILE_FORMAT == 'html') ? htmlentities( $blobLog ) : $blobLog;
 						LogHandler::Log('mysql', 'INFO', 'BLOB: ['.$blobLog.$postfix.']' );
 					}
 					$blob[$key] = "'$blobstr'"; 
@@ -155,7 +154,7 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 				$rowCnt = isset($this->dbh->affected_rows) ? $this->dbh->affected_rows : 0;
 			}
 			$this->logSql( 'mysql',
-				LOGFILE_FORMAT == 'html' ? htmlentities( $cleanSql ) : $cleanSql,
+				$cleanSql,
 				$rowCnt,
 				__CLASS__,
 				__FUNCTION__ );

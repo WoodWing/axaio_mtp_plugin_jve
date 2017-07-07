@@ -307,6 +307,7 @@ class LogHandler
 				$reference = '';
 			}
 			$levColor = ($level == 'ERROR') ? '#ff0000' : (($level == 'WARN') ? '#ffaa00' : '#00cc00'); // red,orange,green
+			$message = self::removeHtmlPhpTags( $message, $area);
 			$line = 
 				'<tr class="d" id="'.$time.'">'.
 					'<td><nobr>'.$time.'</nobr>'.$reference.'</td>'.
@@ -315,6 +316,27 @@ class LogHandler
 				'</tr>'.PHP_EOL;
 		}
 		return $line;
+	}
+
+	/**
+	 * Removes HTML/PHP tags from the message.
+	 *
+	 * Not all tags are removed. For the 'webservice' area the message contains a link and the <a> tag is not stripped
+	 * from the message. If a (new) tag is needed just add it to the $allowedTags. Note that tags between the allowed
+	 * tags are still removed. So '<code>Color 00FFFF7c8ff"><script>alert(1)</script>c24dfbe4f7f<code>' will become
+	 * '<code>Color 00FFFF7c8ff">alert(1)c24dfbe4f7f<code>' after the tags are removed.
+	 * Policy is to allow no tags apart from the exceptions.
+	 * See EN-88894, EN-85255, EN-83733.
+	 *
+	 * @param string $message
+	 * @return string stripped message.
+	 */
+	private static function removeHtmlPhpTags( $message )
+	{
+		$allowedTags = '<br><code><a><p>';
+		$result = strip_tags( $message, $allowedTags );
+
+		return $result;
 	}
 
 	/**
