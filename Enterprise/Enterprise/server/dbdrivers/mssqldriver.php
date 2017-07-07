@@ -133,7 +133,6 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 					if( $logSQL ) {
 						$postfix = strlen( $blobstr ) > 250 ? '...' : '';
 						$blobLog = substr( $blobstr, 0, 250 );
-						$blobLog = (LOGFILE_FORMAT == 'html') ? htmlentities( $blobLog ) : $blobLog;
 						LogHandler::Log('mssql', 'INFO', 'BLOB: ['.$blobLog.$postfix.']' );
 					}
 					$blob[$key] = "'$blobstr'"; 
@@ -175,7 +174,7 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 				$rowCnt = ( $result ) ? sqlsrv_rows_affected( $result ) : 0;
 			}
 			$this->logSql( 'mssql',
-				LOGFILE_FORMAT == 'html' ? htmlentities( $cleanSql ) : $cleanSql,
+				$cleanSql,
 				$rowCnt,
 				__CLASS__,
 				__FUNCTION__ );

@@ -221,7 +221,6 @@ class oracledriver extends WW_DbDrivers_DriverBase
 				foreach ( $blob as $blobItem ) {
 					$postfix = strlen( $blobItem ) > 250 ? '...' : '';
 					$blobLog = substr( $blobItem, 0, 250 );
-					$blobLog = (LOGFILE_FORMAT == 'html') ? htmlentities( $blobLog ) : $blobLog;
 					// SQL logging is only outputted on DEBUG or INFO level
 					LogHandler::Log('oracle', 'INFO', 'BLOB: ['.$blobLog.$postfix.']' );
 				}
@@ -285,7 +284,7 @@ class oracledriver extends WW_DbDrivers_DriverBase
 		if ( $logSQL ) {
 			$rowCnt = ( $sth ) ? oci_num_rows( $sth ) : 0; // Note: for SELECT statements this does not work
 			$this->logSql( 'oracle',
-				LOGFILE_FORMAT == 'html' ? htmlentities( $cleanSql ) : $cleanSql,
+				$cleanSql,
 				$rowCnt,
 				__CLASS__,
 				__FUNCTION__ );
