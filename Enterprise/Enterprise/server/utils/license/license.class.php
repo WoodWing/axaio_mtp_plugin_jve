@@ -121,7 +121,10 @@ class License
 	 * Avoid recursion in auto renew function
 	 */
 
-	private $mInAutoRenew = false; 
+	private $mInAutoRenew = false;
+
+	/** @var bool $defaultSemaId Set when a semaphore is created with the 'default' postfix. */
+	private $defaultSemaId = null;
 
 	/**
 	 * Construct the License.
@@ -606,6 +609,8 @@ class License
 	/**
 	 * To make reading and writing the license info in both the DB and FS an 'atomic' action, we use a semaphore.
 	 * Be sure that the user (web browser) can not stop the execution half way: call ignore_user_abort() before!
+	 * The interval between two attempts should be long enough to ensure that a second or third attempt is successful.
+	 * So instead of using intervals of 1 or 2 milliseconds, the intervals are set to at least more than 10 milliseconds.
 	 *
 	 * @param string $semaPostfix to distinguish more semaphores
 	 * @param int $maxAttempts Maximum number of tries to get the semaphore. Maximum is 20.
@@ -615,21 +620,29 @@ class License
 	 */
 	private function lo_getSema( $semaPostfix = 'default', $maxAttempts = 20 )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
-		$attempts = array( 1, 2, 4, 8, 16, 8, 4, 2, 1, 3, 6, 12, 24, 48, 96, 192, 96, 48, 24, 12 );
-		if( $maxAttempts < 20 ) {
-			$attempts = array_slice( $attempts, 0, $maxAttempts );
-		}
-		$bizSema = new BizSemaphore();
-		$bizSema->setAttempts( $attempts );
-		$bizSema->setLifeTime( 120 );
-		$semaPostfix = 'license_'.$semaPostfix;
-		$previousLogSqlState = BizSemaphore::suppressSqlLogging();
-		$semaId = $bizSema->createSemaphore( $semaPostfix );
-		BizSemaphore::restoreSqlLogging( $previousLogSqlState );
+		$semaId = null;
+		if( $semaPostfix === 'default' && $this->defaultSemaId ) {
+			$semaId = $this->defaultSemaId;
+		} else {
+			require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+			$attempts = array( 10, 20, 40, 80, 160, 320, 640, 645, 325, 165, 85, 45, 25, 15, 105, 205, 405, 805, 405, 205 );
 
-		if( !$semaId ) {
-			$this->mWWLError = WWL_ERR_FILESTORE_SYSDIR;
+			if( $maxAttempts < 20 ) {
+				$attempts = array_slice( $attempts, 0, $maxAttempts );
+			}
+			$bizSema = new BizSemaphore();
+			$bizSema->setAttempts( $attempts );
+			$bizSema->setLifeTime( 120 );
+			$semaEntityId = 'license_'.$semaPostfix;
+			$previousLogSqlState = BizSemaphore::suppressSqlLogging();
+			$semaId = $bizSema->createSemaphore( $semaEntityId );
+			BizSemaphore::restoreSqlLogging( $previousLogSqlState );
+
+			if( !$semaId ) {
+				$this->mWWLError = WWL_ERR_SET_SEMAPHORE;
+			} elseif( $semaPostfix === 'default' ) {
+				$this->defaultSemaId = $semaId;
+			}
 		}
 
 		return $semaId;
@@ -646,6 +659,9 @@ class License
 		$previousLogSqlState = BizSemaphore::suppressSqlLogging();
 		BizSemaphore::releaseSemaphore( $semaId );
 		BizSemaphore::restoreSqlLogging( $previousLogSqlState );
+		if( $semaId === $this->defaultSemaId ){
+			$this->defaultSemaId = null;
+		}
 	}
 
 
@@ -710,47 +726,79 @@ class License
 	}
 	
 	/**
-	 * return the value of the given field
+	 * Return the value of the given field.
+	 *
 	 * The value is retrieved from both the database and filestore, and these values should match. 
-	 * If not, someome is trying to fool us, or someone restored backups that are different for FS and DB
+	 * If not, someone is trying to fool us, or someone restored backups that are different for FS and DB
 	 *
-	 * @param string field
-	 * @return string value or false on failure
-	 *
+	 * @param string $field
+	 * @return bool|string value or false on failure
 	 */
 	public function getLicenseField( $field ) 
 	{
 		$this->mWWLError = 0;
-
-		if ( !$this->initDirectories() )
+		if( !$this->initDirectories() ) {
 			return false;
-
+		}
 		ignore_user_abort();
 
-		$semaId = $this->lo_getSema();
-		if ( !$semaId )
-			return false;
+		if( $this->defaultSemaId ) {
+			$result = $this->getLicenseFieldWithSemaphoreInHand( $field );
+		} else {
+			$result = $this->getLicenseFieldWithoutSemaphoreInHand( $field );
+		}
 
-		$val = $this->lo_getFieldDB( $field );
-		if ( $val === false )
-		{
-			$this->lo_releaseSema( $semaId );
+		return $result;
+	}
+
+	/**
+	 * Return the value of the given field.
+	 *
+	 * The value is retrieved from both the database and filestore, and these values should match.
+	 * To ensure that both read actions are done in a consistent way a semaphore is set around the read actions.
+	 *
+	 * @param string $field
+	 * @return bool|string value or false on failure
+	 */
+	private function getLicenseFieldWithoutSemaphoreInHand( $field )
+	{
+		$semaId = $this->lo_getSema();
+		if( !$semaId ) {
 			return false;
 		}
-		$val2 = $this->lo_getFieldFS( $field );
-		if ( $val2 === false )
-		{
-			$this->lo_releaseSema( $semaId );
-			return false;
-		}
-		if ( $val != $val2 )
-		{
-			$this->lo_releaseSema( $semaId );
-			$this->mWWLError = WWL_ERR_FILESTORE_DB_MISMATCH;
-			return false;
-		}
+
+		$result = $this->getLicenseFieldWithSemaphoreInHand( $field );
+
 		$this->lo_releaseSema( $semaId );
-		return $val;
+
+		return $result;
+	}
+
+	/**
+	 * Return the value of the given field.
+	 *
+	 * The value is retrieved from both the database and filestore, and these values should match.
+	 * To ensure that both read actions are done in a consistent way a semaphore is set around the read actions.
+	 * This method can be called if the semaphore is already set and will be released by the caller.
+	 *
+	 * @param string $field
+	 * @return bool|string value or false on failure
+	 */
+	private function getLicenseFieldWithSemaphoreInHand( $field )
+	{
+		$val = $this->lo_getFieldDB( $field );
+		$result = $val;
+		if( $val !== false ) {
+			$val2 = $this->lo_getFieldFS( $field );
+			if( $val2 === false ) {
+				$result = false;
+			} elseif( $val != $val2 ) {
+				$this->mWWLError = WWL_ERR_FILESTORE_DB_MISMATCH;
+				$result = false;
+			}
+		}
+
+		return $result;
 	}
 
 	/**
@@ -1796,7 +1844,8 @@ class License
 		if( $this->mLicLog ) {
 			LogHandler::Log('license', 'ERROR', 'Error message: '.$errorMessage);
 		}
-		if ( $logoff ) {
+		if ( $logoff && ( $this->mWWLError != WWL_ERR_SET_SEMAPHORE ) ) { // Sometimes a check fails because a semaphore
+			// could not be set. Such a technical issue should not result in a log off of all users.
 			$this->logOffAllUsers( $logoffProdcode, $logoffAppserial );
 		}
 		return $code;
@@ -1824,10 +1873,15 @@ class License
 	 */
 	public function getLicenseStatus( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '', $logonUser='', $logonApp='' )
 	{
-		$startTime = microtime( true );
-		$status = $this->getLicenseStatusNoTiming( $productcode, $appserial, $info, $errorMessage, $logonTime,  $logonUser, $logonApp );
-		$endTime = microtime( true );
-		LogHandler::Log('license', 'DEBUG', sprintf( 'Execution time for detecting the license status: %.4f seconds.', $endTime - $startTime ) );
+		$semaId = $this->lo_getSema();
+		$status = false;
+		if( $semaId ){
+			$startTime = microtime( true );
+			$status = $this->getLicenseStatusNoTiming( $productcode, $appserial, $info, $errorMessage, $logonTime,  $logonUser, $logonApp );
+			$this->lo_releaseSema( $semaId ); // Note that the default semaphore can already be released by a call to lo_releaseSema() in between.
+			$endTime = microtime( true );
+			LogHandler::Log('license', 'DEBUG', sprintf( 'Execution time for detecting the license status: %.4f seconds.', $endTime - $startTime ) );
+		}
 
 		return $status;
 	}
@@ -3283,10 +3337,10 @@ class License
 	
 		print "<h2>" . BizResources::localize("LIC_LICENSE_STATUS") . "</h2>";
 
-		$tablebg = '#dddddd';
+		$tablebg = '#dddddd'; // Grey
 		$clientAppUserLimit = false;
 		if ( count( $limitsArr ) > 0 ) {
-			print "<table class='text' width='820'>";
+			print "<table class='text' width='100%'>";
 			$maxmax = 0;
 			$maxcur = 0;
 			$hasNoLimit = false;
@@ -3317,13 +3371,13 @@ class License
 				$max = $nolimit;
 			}
 			
-			$tabwidth = 400;
+			$tabwidth = 50000; // Just a very high random number.
 			if ( $max ) {
 				$scale = intval( $tabwidth/$max );
 			} else {
 				$scale = 1;
 			}
-			
+
 			print "<tr bgcolor='#cccccc'>";
 			print "<th class='text'>" . BizResources::localize('LIC_APPLICATION') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_STATUS') . "</th>";
@@ -3331,23 +3385,22 @@ class License
 			print "<th class='text'>" . BizResources::localize('LIC_RENEW') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_EXPIRES') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_CURRENT') . "</th>";
-			print "<th class='text'>" . BizResources::localize('LIC_USAGE') . "</th>";
+			print "<th class='text' width='300'>" . BizResources::localize('LIC_USAGE') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_LIMIT') . "</th>";
-			print "<th class='text'>" . BizResources::localize('LIC_ACTION') . "</th>";
+			print "<th class='text' width='10'>" . BizResources::localize('LIC_ACTION') . "</th>";
 			print "</tr>";
 			foreach( $limitsArr as $idx => $limitArr2 )
 			{
 				$cur = $limitArr2[ 'curusage' ];
 				$max = $limitArr2[ 'maxusage' ];
 				if ( $cur >= $max ) {
-					$c1 = 'red';
+					$c1 = 'red'; // Reached the maximum usage.
 				} else {
-					$c1 = 'green';
+					$c1 = 'green'; // Currently used license
 				}
 				$w1 = $cur * $scale;
-		
-//				$c2 = 'darkgrey';
-				$c2 = '#8A8A8A';
+
+				$c2 = '#8A8A8A'; // dark grey // Un-used license
 				if ( $max == '*' ) {
 					$maxval = $limitsArr[ $idx ][ 'maxval' ];
 				} else {
@@ -3355,10 +3408,9 @@ class License
 				}
 				$w2 = $maxval * $scale - $w1;
 
-//				$c3 = 'grey';
-				$c3 = $tablebg;
+				$c3 = $tablebg; // Grey // Background color - to filled up the space not drawn by the used/unused license bar
 				$w3 = $tabwidth - $w2 - $w1;
-		
+
 				$name = $limitArr2[ 'name' ];
 				$pcode = $limitArr2[ 'pcode' ];
 				
@@ -3383,11 +3435,11 @@ class License
 //				print "<td><img src='images/$c1.gif' width='$w1' height='10'><img src='images/$c2.gif' width='$w2' height='10'><img src='images/$c3.gif' width='$w3' height='10'></td>";
 				print "<td><table cellpadding=0 cellspacing=0 border='0' bgcolor='#d3d3d3'><tr>";
 				if ( $w1 )
-					print "<td bgcolor='$c1' width='$w1' height='10'></td>";
+					print "<td bgcolor='$c1' width='$w1' height='10' style=\"min-width:1px\"></td>";
 				if ( $w2 )
-					print "<td bgcolor='$c2' width='$w2' height='10'></td>";
+					print "<td bgcolor='$c2' width='$w2' height='10' style=\"min-width:1px\"></td>";
 				if ( $w3 )
-					print "<td bgcolor='$c3' width='$w3' height='10'></td>";
+					print "<td bgcolor='$c3' width='$w3' height='10' style=\"min-width:1px\"></td>";
 				print "</tr></table></td>\n";
 				print "<td align='center'><font color='$fontcolor'>$max</font></td>";
 				

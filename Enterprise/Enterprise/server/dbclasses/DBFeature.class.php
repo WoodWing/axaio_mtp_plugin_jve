@@ -13,51 +13,55 @@ class DBFeature extends DBBase
 {
 	const TABLENAME = 'profiles';
 
+	/**
+	 * Function returns a list of FeatureProfile object.
+	 *
+	 * For every Profile saved from the Enterprise Admin page, its list of feature(s)
+	 * that is/are not checked ( no access to that particular feature ) will be
+	 * returned.
+	 *
+	 * When the Profile has all features checked (full access for every feature), then
+	 * only the Profile is returned with zero feature (which means full access).
+	 *
+	 * @return FeatureProfile[] Returns list of Profiles. See more in the function header.
+	 */
 	public static function getFeatureProfiles()
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAccessFeatureProfiles.class.php';
-		$ret = array();
+		$featureProfilesToReturn = array();
 
-		$dbdriver = DBDriverFactory::gen();
-		$dbp = $dbdriver->tablename(self::TABLENAME);
-		$dbpv = $dbdriver->tablename('profilefeatures');
+		// Retrieved the full set of available features
+		$fullAvailableFeatures = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
 
-		$features = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
+		// Get all saved Profiles.
+		$profilesFromDb = self::listRows( self::TABLENAME, 'id', '', '',
+													array( 'id', 'profile' ), array(), array( 'code' => true, 'profile' => true ) );
+		if( $profilesFromDb ) {
+			$profilesFromDb = array_column( $profilesFromDb, 'profile', 'id' );
+			$profileIdsFromDb = array_keys( $profilesFromDb );
 
-		// get all profiles
-		$sql = "SELECT * FROM $dbp ORDER BY `code`, `profile`";
-		$sth = $dbdriver->query($sql);
-		while( ($row = $dbdriver->fetch($sth)) ) {
-			$ft = array();
-
-			//@todo Move to profilefeatures
-			// get all profilefeatures
-			$sql = "SELECT * FROM $dbpv WHERE `profile` = ".$row['id'];
-			$sthdet = $dbdriver->query($sql);
-			$db = array();
-			while( ($rowdet = $dbdriver->fetch($sthdet)) ) {
-				$db[$rowdet['feature']] = $rowdet;
+			// From each saved Profile, collect its features that are checked (allow access).
+			$where = DBBase::addIntArrayToWhereClause( 'profile', $profileIdsFromDb, false );
+			$featuresFromDb = self::listRows( 'profilefeatures', 'id', '', $where, array( 'id', 'profile', 'feature' ) );
+			$featuresMapFromDb = array(); // To collect the features by Profile.
+			if( $featuresFromDb ) foreach( $featuresFromDb as $featureProfileId => $featureProfileInfo ) {
+				$featuresMapFromDb[$featureProfileInfo['profile']][$featureProfileInfo['feature']] = true;
 			}
 
-			// determine value of features, only return those values other than "Yes"
-			foreach ($features as $fid => $feature) {
-				unset($value);
-				if (isset($db[$fid])) {
-					$value = @$db[$fid]['value'];
+			// Compiling the to be returned FeatureProfiles. Only features that are unchecked ( no access ) will be returned.
+			foreach( $profilesFromDb as $profileId => $profileName ) {
+				$unCheckedFeaturesSet = array(); // To collect all the features that are unchecked.
+				foreach( $fullAvailableFeatures as $featureId => $featureProfileObject ) {
+					if( !isset( $featuresMapFromDb[$profileId][$featureId] ) ) { // Feature is not found in DB = It is unchecked in the admin page.
+						$unCheckedFeaturesSet[] = new AppFeature( $featureProfileObject->Name, 'No' ); // Only return the feature which is not checked.
+					}
 				}
-				if (!isset($value)) {
-					$value = 'No';
-				}
-				if ($value != 'Yes') {
-					$ft[] = new AppFeature( $feature->Name, $value);
-				}
+				// Add features to its Profile. When Profile has full access, feature list is empty.
+				$featureProfilesToReturn[] = new FeatureProfile( $profileName, $unCheckedFeaturesSet );
 			}
-
-			// add profile
-			$ret[] = new FeatureProfile( $row['profile'],$ft);
 		}
 
-		return $ret;
+		return $featureProfilesToReturn;
 	}
 
 	/**

@@ -373,8 +373,7 @@ abstract class BaseFacebook
     }
 
     $response_params = array();
-    parse_str($access_token_response, $response_params);
-
+    $response_params = json_decode( $access_token_response, true );
     if (!isset($response_params['access_token'])) {
       return false;
     }
@@ -684,26 +683,29 @@ abstract class BaseFacebook
    * and otherwise return false to signal no authorization code was
    * discoverable.
    *
+   * This function has been replaced/updated with the getCode() from sdk 3.2.3
+   * Reason why only this function is replaced and not the entire sdk: The callers
+   * need to be adjusted and we do not want to invest time to implement a deprecated
+   * 3.2.3, so just use the current 3.2.2 and adjust few parts that are needed.
+   *
+   * @since 10.1.3 This function is replaced with the getCode() from sdk 3.2.3
    * @return mixed The authorization code, or false if the authorization
    *               code could not be determined.
    */
   protected function getCode() {
-    if (isset($_REQUEST['code'])) {
-      if ($this->state !== null &&
-          isset($_REQUEST['state']) &&
-          $this->state === $_REQUEST['state']) {
+	  if (!isset($_REQUEST['code']) || !isset($_REQUEST['state'])) {
+		  return false;
+	  }
+	  if ($this->state === $_REQUEST['state']) {
+		  self::errorLog( 'About to clear state:' . $this->state );
+		  // CSRF state has done its job, so clear it
+		  $this->state = null;
+		  $this->clearPersistentData('state');
+		  return $_REQUEST['code'];
+	  }
+	  self::errorLog('CSRF state token does not match one provided.');
 
-        // CSRF state has done its job, so clear it
-        $this->state = null;
-        $this->clearPersistentData('state');
-        return $_REQUEST['code'];
-      } else {
-        self::errorLog('CSRF state token does not match one provided.');
-        return false;
-      }
-    }
-
-    return false;
+	  return false;
   }
 
   /**
@@ -790,7 +792,7 @@ abstract class BaseFacebook
     }
 
     $response_params = array();
-    parse_str($access_token_response, $response_params);
+    $response_params = json_decode( $access_token_response, true );
     if (!isset($response_params['access_token'])) {
       return false;
     }
@@ -1312,13 +1314,18 @@ abstract class BaseFacebook
   /**
    * Prints to the error log if you aren't in command line mode.
    *
+   * WW: Instead of output the error into the php.log file.
+   * The function now log the errors in WW Enterprise format by
+   * calling the LogHandler::Log().
+   *
    * @param string $msg Log message
    */
   protected static function errorLog($msg) {
     // disable error log if we are running in a CLI environment
     // @codeCoverageIgnoreStart
     if (php_sapi_name() != 'cli') {
-      error_log($msg);
+    	LogHandler::Log( 'facebook', 'ERROR', $msg ); // Log error in WW format.
+//      error_log($msg); // Commented by WW.
     }
     // uncomment this if you want to see the errors on the page
     // print 'error_log: '.$msg."\n";

@@ -528,6 +528,28 @@ class DBObject extends DBBase
 		return $rows;
 	}
 
+	/**
+	 * Retrieves the flag and its message for a list of objects.
+	 *
+	 * Function returns a list of array in the following format:
+	 * $returnRows[objId] = array( 'objid' => 10, 'flag' => 2, 'message' => 'The flag message' )
+	 *
+	 * @param string[] $objectIds
+	 * @return string[] Refer to function header
+	 */
+	public static function getMultipleObjectsFlags( $objectIds )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$objFlagTbl = $dbDriver->tablename( 'objectflags' );
+
+		$sql = 'SELECT `objid`, `flag`, `message` FROM '. $objFlagTbl .
+				' WHERE `objid` IN ('. implode( ',', $objectIds ) .')';
+		$sth = $dbDriver->query( $sql );
+		$rows = self::fetchResults( $sth, 'objid', false, $dbDriver );
+
+		return $rows;
+	}
+
 	static public function getTemplateObject( $name, $type )
 	{
 		$dbDriver = DBDriverFactory::gen();
@@ -561,6 +583,38 @@ class DBObject extends DBBase
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns a list of properties for a shadow object.
+	 *
+	 * Currently, function only returns shadow object id and shadow object type in the list.
+	 *
+	 * @since 10.1.3
+	 * @param string $contentSource Shadow-object's Content Source.
+	 * @param string $externalId Id that is unique to the ContentSource, which is the documentId in Enterprise.
+	 * @return string[]
+	 */
+	public static function getObjectPropsForShadowObject( $contentSource, $externalId )
+	{
+		$dbDriver = DBDriverFactory::gen();
+
+		$dbo = $dbDriver->tablename( self::TABLENAME );
+
+		$sql = "SELECT o.`id`, o.`type` FROM $dbo o WHERE o.`contentsource` = ? AND o.`documentid` = ? ";
+		$params = array( strval( $contentSource ), strval( $externalId ));
+		$sth = $dbDriver->query( $sql, $params );
+
+		$row = null;
+		if( $sth ) {
+			$row = $dbDriver->fetch( $sth );
+		}
+
+		$result = array();
+		if( $row ) {
+			$result = array( 'ID' => $row['id'], 'Type' => $row['type'] );
+		}
+		return $result;
 	}
 
 	/**

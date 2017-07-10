@@ -532,8 +532,8 @@ class DBInDesignServerJob extends DBBase
 	{
 		// Fetch the job from the queue.
 		$select = array( 'jobid', 'prio', 'queuetime' );
-		$where = '`foreground` = ? AND `jobprogress` = ? AND `locktoken` = ?';
-		$params = array( $foreground ? 'on' : '', InDesignServerJobStatus::TODO, '' );
+		$where = '`foreground` = ? AND `jobprogress` = ? AND `locktoken` = ? AND `pickuptime` <= ?';
+		$params = array( $foreground ? 'on' : '', InDesignServerJobStatus::TODO, '', date( 'Y-m-d\TH:i:s', time() ) );
 		$orderBy = array( 'prio' => true, 'queuetime' => true );
 		$row = self::getRow( self::TABLENAME, $where, $select, $params, $orderBy );
 		if( self::hasError() ) {
@@ -1023,7 +1023,8 @@ class DBInDesignServerJob extends DBBase
 				'j.`objectmajorversion`, j.`objectminorversion`, '.
 				'j.`minservermajorversion`, j.`minserverminorversion`, '.
 				'j.`maxservermajorversion`, j.`maxserverminorversion`, j.`prio`, '.
-				'j.`actinguser`, j.`initiator`, j.`servicename`, j.`context`, j.`jobstatus` '.
+				'j.`actinguser`, j.`initiator`, j.`servicename`, j.`context`, j.`jobstatus`, '.
+				'j.`pickuptime` '.
 				'FROM '.$jobsTable.' j '.
 				'LEFT JOIN '.$objectsTable.' o ON ( j.`objid`  = o.`id` ) '.
 				'LEFT JOIN '.$delObjectsTable.' d ON ( j.`objid`  = d.`id` ) '.
@@ -1147,15 +1148,19 @@ class DBInDesignServerJob extends DBBase
 		return $row ? $row['prio'] : 0;
 	}
 	
-    /**
-     * Returns jobs that are still busy (locked) and started before a given time.
-     *
+	/**
+	 * Returns jobs that are still busy (locked) and started before a given time.
+	 *
+	 * The jobs returned can be foreground jobs or both, foreground and background jobs
+	 * that are still busy and started before a given time.
+	 *
 	 * @since 9.8.0
-     * @param string $startedBefore
-     * @return InDesignServerJob[]
+	 * @param string $startedBefore To retrieve jobs that are started before this time value.
+	 * @param bool $onlyForegroundJobs True to only retrieve foreground jobs, False to retrieve both foreground and background jobs.
+	 * @return InDesignServerJob[]
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
-     */
-	static public function getLockedJobsStartedBefore( $startedBefore )
+	 */
+	static public function getLockedJobsStartedBefore( $startedBefore, $onlyForegroundJobs = false )
 	{
 		// Bail out when invalid parameters provided. (Paranoid check.)
 		$startedBefore = trim( strval( $startedBefore ) );
@@ -1164,8 +1169,9 @@ class DBInDesignServerJob extends DBBase
 		}
 		
 		// Retrieve the jobs from DB.
-		$where = '`locktoken` != ? AND `starttime` < ?';
-		$params = array( '', $startedBefore );
+		$foregroundJobs = $onlyForegroundJobs ? 'on' : '';
+		$where = '`locktoken` != ? AND `starttime` < ? AND `foreground` = ?';
+		$params = array( '', $startedBefore, $foregroundJobs );
 		$select = array( 
 			'jobid', 'assignedserverid', 'objid', 'locktoken', 'attempts',
 			'queuetime', 'starttime', 'readytime', 'jobstatus' ); 
@@ -1226,6 +1232,9 @@ class DBInDesignServerJob extends DBBase
 		}
 		if( !is_null($obj->QueueTime) ) {
 			$row['queuetime'] = $obj->QueueTime;
+		}
+		if( !is_null($obj->PickupTime) ) {
+			$row['pickuptime'] = $obj->PickupTime;
 		}
 		if( !is_null($obj->StartTime) ) {
 			$row['starttime'] = $obj->StartTime;
@@ -1332,6 +1341,9 @@ class DBInDesignServerJob extends DBBase
 		}
 		if( array_key_exists( 'queuetime', $row ) ) {
 			$obj->QueueTime = $row['queuetime'];
+		}
+		if( array_key_exists( 'pickuptime', $row ) ) {
+			$obj->QueueTime = $row['pickuptime'];
 		}
 		if( array_key_exists( 'starttime', $row ) ) {
 			$obj->StartTime = $row['starttime'];

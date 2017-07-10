@@ -79,14 +79,14 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 		$resolvedOperations = array();
 		do {
 			// Resolve IdArt frames (placements) from given IdArt id (Placement->InDesignArticleIds[0]).
-			$iaPlacements = self::getInDesignArticlePlacements( $layoutId, $inDesignArticleId );
+			$iaPlacements = self::getInDesignArticlePlacements( $layoutId, $inDesignArticleId, $editionId );
 			if( !$iaPlacements ) {
 				self::reportNoMatchingElementsFound( $layoutId );
 				break;
 			}
 
 			// Exclude duplicate IdArt frames; For those we can not decide which one to make a match.
-			if( !self::markDuplicatePlacements( $iaPlacements ) ) {
+			if( !self::markDuplicatePlacements( $iaPlacements, $editionId ) ) {
 				self::reportNoMatchingElementsFound( $layoutId );
 				break;
 			}
@@ -152,18 +152,25 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			// Error for objects that are already placed while the user has no multi-place
 			// access rights. Those are filtered out. When he/she has rights, just give a 
 			// warning instead (but don't filter). When not placed, no message and no filter.
+			// Placements on the same layout are ignored as those are filtered out in the
+			// determinePlacementsToClear function.
 			self::filterForMultiplaceAccessRights( $layoutId, $issueId, $editionId, $invokedObjects, $articleElements );
 			if( !$articleElements ) {
 				self::reportNoMatchingElementsFound( $layoutId );
 				break;
 			}
 
+			// Determine the placements to clear. If an element was already placed on the layout those
+			// frames are cleared (also the ones that aren't placed with the Automated Print Workflow).
+			// For an end user this is seen as a move of the placements.
+			$elementsToClear = self::determinePlacementsToClear( $layoutId, $editionId, $articleElements );
+
 			// Match the element labels with the IdArt frame labels (Placement->Element).
 			// For EACH frame of the selected InDesignArticle, we have to tell the ID script
 			// what to do; either place an element, or remove the existing one.
 			// When child is an Image, only make match when IdArt has one graphic frame 
 			// and exactly one image was found in dossier.
-			$resolvedOperations = self::composeOperations( $iaPlacements, $articleElements, $imageId, $editionId );
+			$resolvedOperations = self::composeOperations( $iaPlacements, $elementsToClear, $articleElements, $imageId, $editionId );
 
 		} while( false ); // do once only
 
@@ -175,12 +182,14 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 *
 	 * @param integer $layoutId
 	 * @param string $inDesignArticleId
+	 * @param integer $editionId
 	 * @return Placement[]
 	 */
-	private static function getInDesignArticlePlacements( $layoutId, $inDesignArticleId )
+	private static function getInDesignArticlePlacements( $layoutId, $inDesignArticleId, $editionId )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
-		$iaPlacementIds = DBInDesignArticlePlacement::getPlacementIdsByInDesignArticleId( $layoutId, $inDesignArticleId );
+		// Only get the placements for this specific edition.
+		$iaPlacementIds = DBInDesignArticlePlacement::getPlacementIdsByInDesignArticleId( $layoutId, $inDesignArticleId, $editionId );
 		if( LogHandler::debugMode() ) {
 			LogHandler::Log( 'AutoPrintWfl', 'DEBUG',
 				'Found IdArt placement ids: '.implode(',',$iaPlacementIds) );
@@ -209,26 +218,30 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * All frames are marked with a boolean property named IsDuplicate, which is added on-the-fly.
 	 *
 	 * @param Placement[] $iaPlacements [input/output]
+	 * @param integer $editionId
 	 * @return boolean TRUE when there are non-duplicate frames, FALSE when all duplicate.
 	 */
-	private static function markDuplicatePlacements( array &$iaPlacements )
+	private static function markDuplicatePlacements( array &$iaPlacements, $editionId )
 	{
 		$iaFrameTypes = array();
 		$iaFrameLabels = array();
 		foreach( $iaPlacements as $iaPlacement ) {
-			if( $iaPlacement->FrameType == 'graphic' ) {
-				if( array_key_exists( $iaPlacement->FrameType, $iaFrameTypes ) ) {
-					$iaFrameTypes[$iaPlacement->FrameType] += 1;
-				} else {
-					$iaFrameTypes[$iaPlacement->FrameType] = 1;
-				}
-			} elseif( $iaPlacement->FrameOrder == 0 ) {
-				if( array_key_exists( $iaPlacement->Element, $iaFrameLabels ) ) {
-					$iaFrameLabels[$iaPlacement->Element] += 1;
-				} else {
-					$iaFrameLabels[$iaPlacement->Element] = 1;
-				}
-			} // else: skip successors of linked text frames
+			// If the edition is null it means all editions.
+			if( is_null( $iaPlacement->Edition ) || $iaPlacement->Edition->Id == $editionId ) {
+				if( $iaPlacement->FrameType == 'graphic' ) {
+					if( array_key_exists( $iaPlacement->FrameType, $iaFrameTypes ) ) {
+						$iaFrameTypes[ $iaPlacement->FrameType ] += 1;
+					} else {
+						$iaFrameTypes[ $iaPlacement->FrameType ] = 1;
+					}
+				} elseif( $iaPlacement->FrameOrder == 0 ) {
+					if( array_key_exists( $iaPlacement->Element, $iaFrameLabels ) ) {
+						$iaFrameLabels[ $iaPlacement->Element ] += 1;
+					} else {
+						$iaFrameLabels[ $iaPlacement->Element ] = 1;
+					}
+				} // else: skip successors of linked text frames
+			}
 		}
 		if( LogHandler::debugMode() ) {
 			LogHandler::Log( 'AutoPrintWfl', 'DEBUG',
@@ -239,9 +252,9 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 		$duplicateCount = 0;
 		foreach( $iaPlacements as $iaPlacement ) {
 			if( $iaPlacement->FrameType == 'graphic' ) {
-				$isDuplicate = $iaFrameTypes[$iaPlacement->FrameType] > 1;
+				$isDuplicate = isset($iaFrameTypes[$iaPlacement->FrameType]) && $iaFrameTypes[$iaPlacement->FrameType] > 1;
 			} else if( $iaPlacement->FrameOrder == 0 ) {
-				$isDuplicate = $iaFrameLabels[$iaPlacement->Element] > 1;
+				$isDuplicate = isset($iaFrameLabels[$iaPlacement->Element]) && $iaFrameLabels[$iaPlacement->Element] > 1;
 			} else {
 				$isDuplicate = true; // mark successors of linked text frames as duplicate to exclude them
 			}
@@ -335,7 +348,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @param string[] $childTypes
 	 * @return MetaData[] Invoked child objects
 	 */
-	private static function getDossierChildrenMetaData( $issueId, $editionId, $dossierId, $childTypes )
+	public static function getDossierChildrenMetaData( $issueId, $editionId, $dossierId, $childTypes )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
 		$childIds = DBTarget::getChildrenbyParentTarget( $dossierId, null,
@@ -430,7 +443,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @param string[] $iaFrameLabels The frame labels used by the InDesignArticle.
 	 * @return Element[] The frames of the articles. Empty when none found.
 	 */
-	private static function getArticleElements( array $invokedObjects, $iaFrameLabels )
+	public static function getArticleElements( array $invokedObjects, $iaFrameLabels )
 	{
 		$articleIds = array();
 		foreach( $invokedObjects as $invokedObjectId => $invokedObject ) {
@@ -478,9 +491,43 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	}
 
 	/**
+	 * Get all the placements on the layout for the given edition id. These placements
+	 * should be cleared so the end user sees a 'move' of the placements.
+	 *
+	 * @param integer $layoutId
+	 * @param integer $editionId
+	 * @param Element[] $articleElements
+	 * @return Placement[]
+	 */
+	private static function determinePlacementsToClear( $layoutId, $editionId, $articleElements )
+	{
+		$elementObjIds = array_unique( array_map( function( $articleElement ) { return $articleElement->ObjectId; }, $articleElements ) );
+
+		$placementsToClear = array();
+
+		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+		foreach( $elementObjIds as $elementObjId ) {
+			$placementsForObj = DBPlacements::getPlacements($layoutId, $elementObjId, 'Placed');
+
+			if( $placementsForObj ) foreach ( $placementsForObj as $placement ) {
+				foreach ( $articleElements as $articleElement ) {
+					if( $articleElement->ID == $placement->ElementID ) {
+						if( is_null($placement->Edition) || $placement->Edition->Id == $editionId) {
+							$placementsToClear[] = $placement;
+						}
+					}
+				}
+			}
+		}
+
+		return $placementsToClear;
+	}
+
+	/**
 	 * Errors for objects that are already placed while the user has no multi-place
 	 * access rights. Those are filtered out. When he/she has rights, just give a
 	 * warning instead (but don't filter). When not placed, no message and no filter.
+	 * Placements on the same layout are ignored as those are cleared later on.
 	 *
 	 * @param integer $layoutId
 	 * @param integer $issueId
@@ -494,12 +541,14 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 		// Determine which elements are placed already for the edition.
 		$articleElementIds = array_map( function( $element ) { return $element->ID; }, $articleElements );
 		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
-		$placedObjectIdsElementIds = DBPlacements::getChildsIdsForPlacedElementIdsAndEdition( $articleElementIds, $editionId );
+		// All placements except for the ones on the current layout.
+		$placedObjectIdsElementIds = DBPlacements::getChildsIdsForPlacedElementIdsAndEdition( $articleElementIds, $editionId, $layoutId );
 		if( !$placedObjectIdsElementIds ) {
 			LogHandler::Log( 'AutoPrintWfl', 'INFO',
 				'Multi-place check; None of the text components (elements) are placed already.' );
 			return;
 		}
+
 		foreach( $placedObjectIdsElementIds as $placedObjectId => $elementIds ) {
 			LogHandler::Log( 'AutoPrintWfl', 'INFO',
 				'Multi-place check; For object '.$placedObjectId.' the following text components (elements) are placed already: '.implode(',',array_keys($elementIds)) );
@@ -626,12 +675,13 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * InDesign Article untouched.
 	 *
 	 * @param Placement[] $iaPlacements The InDesignArticle frames.
+	 * @param Placement[] $placementsToClear
 	 * @param Element[] $articleElements The elements of all dossier's articles.
 	 * @param string $imageId The object id of the dossier's image.
 	 * @param integer $editionId
 	 * @return ObjectOperation[] List of operations to place the dossier's children. NULL when no match was made.
 	 */
-	private static function composeOperations( array $iaPlacements, array $articleElements, $imageId, $editionId )
+	public static function composeOperations( array $iaPlacements, array $placementsToClear, array $articleElements, $imageId, $editionId )
 	{
 		$operations = array();
 		$anyFound = false;
@@ -658,6 +708,12 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 				$operations[] = self::composeClearFrameContentOperation( $editionId, $iaPlacement );
 			}
 		}
+
+		// Also add all the placements that need to be cleared. (Move action).
+		if( $placementsToClear ) foreach( $placementsToClear as $placement) {
+			$operations[] = self::composeClearFrameContentOperation($editionId, $placement);
+		}
+
 		if( !$anyFound ) {
 			LogHandler::Log( 'AutoPrintWfl', 'INFO', 'Bailed out; No candidates found.' );
 		}

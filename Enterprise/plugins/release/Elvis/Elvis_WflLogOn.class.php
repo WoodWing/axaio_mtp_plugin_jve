@@ -27,12 +27,23 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
 		
 		if (ElvisUtils::isInDesignServer()) {
-			// HACK LVS-3497: For InDesign server, use SUPERUSER for logging into Elvis, ignoring 
-			// the current user. This hack is required as InDesign Server performs a special 
-			// forked login only specifying the username, not the password. Which means we cannot
-			// login the normal user. Super user has full access (no restriction).
-			ElvisSessionUtil::saveCredentials( ELVIS_SUPER_USER, ELVIS_SUPER_USER_PASS );
-			ElvisSessionUtil::setSessionVar( 'restricted', false );
+			require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
+			$actingUser = BizSession::getShortUserName();
+			$usernamePassword = ElvisSessionUtil::retrieveUsernamePasswordFromCredentials( $actingUser );
+			if( !$usernamePassword ) {
+				// When the credentials are not found, fall back to super user.
+				// This should be very theoretical: When an IDS job is created and exists in the queue, meaning
+				// the user should have already logged into Enterprise before to trigger the job creation in the queue.
+				// Therefore the credentials should be available in the smart_settings table, but just in case ( for
+				// some reason ) the credentials are not found, fall back to super user.
+				ElvisSessionUtil::saveCredentials( ELVIS_SUPER_USER, ELVIS_SUPER_USER_PASS );
+				ElvisSessionUtil::setSessionVar( 'restricted', false );
+				LogHandler::Log( __CLASS__, 'INFO', 'Preparing Elvis credentials ( for IDS ): '.
+					'No credentials found for acting user '.$actingUser.', using Elvis superuser:' . ELVIS_SUPER_USER );
+			} else {
+				LogHandler::Log( __CLASS__, 'INFO', 'Preparing Elvis credentials ( for IDS ): '.
+					'Using credentials from acting user '.$actingUser .' (elvisusername=' . $usernamePassword[0] .')');
+			}
 		}
 		else {
 			$this->setUserType( $req->User, $req->Password );
@@ -90,15 +101,20 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 	private function setUserType( $user, $password )
 	{
 		if( !$password ) {
-			$password = ElvisSessionUtil::retrievePasswordFromCredentials( $user );
-			if( $password ) {
-				LogHandler::Log( __CLASS__, 'INFO', 'No password supplied. Retrieved password from previous stored credentials.' );
+			$usernamePassword = ElvisSessionUtil::retrieveUsernamePasswordFromCredentials( $user );
+			if( $usernamePassword ) {
+				$username = $usernamePassword[0];
+				$password = $usernamePassword[1];
+				LogHandler::Log( __CLASS__, 'INFO',
+					'No password supplied. Retrieved password from previously stored credentials for acting user '.$user.': ' .
+					"(elvisusername={$username})" );
+				ElvisSessionUtil::saveCredentials( $username, $password );
 			} else {
 				LogHandler::Log( __CLASS__, 'WARN', 'No password supplied. Continue without password.' );
 			}
+		} else {
+			ElvisSessionUtil::saveCredentials( $user, $password );
 		}
-
-		ElvisSessionUtil::saveCredentials( $user, $password );
 
 		try {
 			require_once dirname(__FILE__).'/logic/ElvisAMFClient.php';

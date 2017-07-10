@@ -46,10 +46,19 @@ class DBPlacements extends DBBase
 			$createNewPlacement = false;
 			$placementIdByArticleId = array();
 			foreach( $plc->InDesignArticleIds as $idArticleId ) {
-				$placementId = DBInDesignArticlePlacement::getPlacementIdByInDesignArticleIdAndSplineId( $parent, $idArticleId, $plc->SplineID );
-				if( $placementId ) {
-					$placementIdByArticleId[$idArticleId] = $placementId;
-				} else {
+				$dbPlacements = DBInDesignArticlePlacement::getPlacementIdsByInDesignArticleIdAndSplineId( $parent, $idArticleId, $plc->SplineID );
+				$found = false;
+				if( $dbPlacements ) {
+					foreach( $dbPlacements as $placement ) {
+						// If the edition corresponds to this placement a link should be created.
+						if( $placement['edition'] == 0 || $placement['edition'] == $plc->Edition->Id ) {
+							$placementIdByArticleId[$idArticleId] = $placement['plcid'];
+							$found = true;
+						}
+					}
+
+				}
+				if( !$found ) {
 					$createNewPlacement = true;
 				}
 			}
@@ -66,7 +75,7 @@ class DBPlacements extends DBBase
 				$row['elementid'] = '';
 				$newPlacementId = self::insertRow( self::TABLENAME, $row );
 			}
-			
+
 			// Create relations between the InDesign Articles and their placements.
 			foreach( $plc->InDesignArticleIds as $idArticleId ) {
 				if( isset( $placementIdByArticleId[$idArticleId] ) ) {
@@ -358,11 +367,15 @@ class DBPlacements extends DBBase
 	 * are already placed on a layout for a given edition. This can be used to detect 
 	 * whether or not the user is about to place an element (text component) twice.
 	 *
+	 * Optionally a parent id can be given to exclude the child ids that are placed on the given
+	 * layout id. This is useful when you want to know if the elementIds are placed on another layout.
+	 *
 	 * @param string[] $elementIds
 	 * @param integer $editionId
+	 * @param integer $excludeParentId Optional id of a parent of which the relations should be excluded.
 	 * @return array Map with element ids and edition ids, both as keys.
 	 */
-	static public function getChildsIdsForPlacedElementIdsAndEdition( array $elementIds, $editionId )
+	static public function getChildsIdsForPlacedElementIdsAndEdition( array $elementIds, $editionId, $excludeParentId = null )
 	{
 		$select = array( 'child', 'elementid' );
 		$where = "`elementid` IN ('".implode("','",$elementIds)."') ".
@@ -370,6 +383,12 @@ class DBPlacements extends DBBase
 				"AND `frameorder` = 0 ". // Only include the beginning of stories (start with frame 0).
 				"AND ( `edition` = 0 OR `edition` = ? ) "; // Suppress one placed in North and other in South, which is no duplicate!
 		$params = array( 'Placed', $editionId );
+
+		if( $excludeParentId ) {
+			$where .= 'AND `parent` <> ?';
+			$params[] = $excludeParentId;
+		}
+
 		$rows = self::listRows( self::TABLENAME, null, null, $where, $select, $params );
 		
 		$map = array();
@@ -809,26 +828,26 @@ class DBPlacements extends DBBase
 		} else {
 			$row = array();
 		}
-		if( !is_null( $obj->Page ) ) $row['page'] = is_numeric( $obj->Page ) ? $obj->Page : 0;
+		if( !is_null( $obj->Page ) ) $row['page'] = is_numeric( $obj->Page ) ? intval( $obj->Page ) : 0;
 		if( !is_null( $obj->Element ) ) $row['element'] = $obj->Element;
 		if( !is_null( $obj->ElementID ) ) $row['elementid'] = $obj->ElementID;
-		if( !is_null( $obj->FrameOrder ) ) $row['frameorder'] = is_numeric( $obj->FrameOrder ) ? $obj->FrameOrder : 0;
+		if( !is_null( $obj->FrameOrder ) ) $row['frameorder'] = is_numeric( $obj->FrameOrder ) ? intval( $obj->FrameOrder ) : 0;
 		if( !is_null( $obj->FrameID ) ) $row['frameid'] = $obj->FrameID;
-		if( !is_null( $obj->Left ) ) $row['_left'] = is_numeric( $obj->Left ) ? $obj->Left : 0;
-		if( !is_null( $obj->Top ) ) $row['top'] = is_numeric( $obj->Top ) ? $obj->Top : 0;
-		if( !is_null( $obj->Width ) ) $row['width'] = is_numeric( $obj->Width ) ? $obj->Width : 0;
-		if( !is_null( $obj->Height ) ) $row['height'] = is_numeric( $obj->Height ) ? $obj->Height : 0;
-		if( !is_null( $obj->Overset ) ) $row['overset'] = is_numeric( $obj->Overset ) ? $obj->Overset : 0;
-		if( !is_null( $obj->OversetChars ) ) $row['oversetchars'] = is_numeric( $obj->OversetChars ) ? $obj->OversetChars : 0;
-		if( !is_null( $obj->OversetLines ) ) $row['oversetlines'] = is_numeric( $obj->OversetLines ) ? $obj->OversetLines : 0;
+		if( !is_null( $obj->Left ) ) $row['_left'] = is_numeric( $obj->Left ) ? floatval( $obj->Left ) : 0;
+		if( !is_null( $obj->Top ) ) $row['top'] = is_numeric( $obj->Top ) ? floatval( $obj->Top ) : 0;
+		if( !is_null( $obj->Width ) ) $row['width'] = is_numeric( $obj->Width ) ? floatval( $obj->Width ) : 0;
+		if( !is_null( $obj->Height ) ) $row['height'] = is_numeric( $obj->Height ) ? floatval( $obj->Height ) : 0;
+		if( !is_null( $obj->Overset ) ) $row['overset'] = is_numeric( $obj->Overset ) ? floatval( $obj->Overset ) : 0;
+		if( !is_null( $obj->OversetChars ) ) $row['oversetchars'] = is_numeric( $obj->OversetChars ) ? intval( $obj->OversetChars ) : 0;
+		if( !is_null( $obj->OversetLines ) ) $row['oversetlines'] = is_numeric( $obj->OversetLines ) ? intval( $obj->OversetLines ) : 0;
 		if( !is_null( $obj->Layer ) ) $row['layer'] = $obj->Layer;
 		if( !is_null( $obj->Content ) ) $row['content'] = ( strtolower( DBTYPE ) == 'mysql' ) ? mb_strcut( $obj->Content, 0, 64000, 'UTF-8' ) : $obj->Content;
-		if( !is_null( $obj->Edition ) ) $row['edition'] = $obj->Edition->Id ? $obj->Edition->Id : 0;
-		if( !is_null( $obj->ContentDx ) ) $row['contentdx'] = is_numeric( $obj->ContentDx ) ? $obj->ContentDx : 0;
-		if( !is_null( $obj->ContentDy ) ) $row['contentdy'] = is_numeric( $obj->ContentDy ) ? $obj->ContentDy : 0;
-		if( !is_null( $obj->ScaleX ) ) $row['scalex'] = is_numeric( $obj->ScaleX ) ? $obj->ScaleX : 1;
-		if( !is_null( $obj->ScaleY ) ) $row['scaley'] = is_numeric( $obj->ScaleY ) ? $obj->ScaleY : 1;
-		if( !is_null( $obj->PageSequence ) ) $row['pagesequence'] = is_numeric( $obj->PageSequence ) ? $obj->PageSequence : 0;
+		if( !is_null( $obj->Edition ) ) $row['edition'] = $obj->Edition->Id ? intval( $obj->Edition->Id ) : 0;
+		if( !is_null( $obj->ContentDx ) ) $row['contentdx'] = is_numeric( $obj->ContentDx ) ? floatval( $obj->ContentDx ) : 0;
+		if( !is_null( $obj->ContentDy ) ) $row['contentdy'] = is_numeric( $obj->ContentDy ) ? floatval($obj->ContentDy ) : 0;
+		if( !is_null( $obj->ScaleX ) ) $row['scalex'] = is_numeric( $obj->ScaleX ) ? floatval( $obj->ScaleX ) : 1;
+		if( !is_null( $obj->ScaleY ) ) $row['scaley'] = is_numeric( $obj->ScaleY ) ? floatval( $obj->ScaleY ): 1;
+		if( !is_null( $obj->PageSequence ) ) $row['pagesequence'] = is_numeric( $obj->PageSequence ) ? intval( $obj->PageSequence ) : 0;
 		if( !is_null( $obj->PageNumber ) ) $row['pagenumber'] = $obj->PageNumber;
 		if( !is_null( $obj->FormWidgetId ) ) $row['formwidgetid'] = $obj->FormWidgetId;
 		if( !is_null( $obj->FrameType ) ) $row['frametype'] = $obj->FrameType;

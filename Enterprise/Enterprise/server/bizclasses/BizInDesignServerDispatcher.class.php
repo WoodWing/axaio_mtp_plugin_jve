@@ -365,7 +365,7 @@ class BizInDesignServerDispatcher
 
 			// Deal with IDS crashes; Unlock IDS instances and jobs and replan those jobs.
 			require_once BASEDIR . '/server/bizclasses/BizInDesignServerJob.class.php';
-			BizInDesignServerJobs::repairDetachedServersAndJobs();
+			BizInDesignServerJobs::repairDetachedServersAndJobs( false );
 
 			// Kill the Dispatcher to let another process take over that role.
 			$this->killDispatcher();

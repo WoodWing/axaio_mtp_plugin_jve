@@ -5,7 +5,7 @@ require_once dirname(__FILE__) . '/WW_Facebook.class.php';
 /**
  * Wrapper class for handling Facebook publishing.
  *
- * Note: some methods for unpublishing are missing, this is because not all the unpublish steps are supported by the
+ * Note: some methods for un-publishing are missing, this is because not all the un-publish steps are supported by the
  * Facebook Graph API at the time of this writing.
  *
  * @package	 Enterprise
@@ -43,7 +43,6 @@ class FacebookPublisher
 			$config = array(
 				'appId' => $this->appId,
 				'secret' => $this->appSecret,
-				'cookie' => false,
 			);
 
 			$this->facebook = new WW_Facebook( $config );
@@ -94,7 +93,6 @@ class FacebookPublisher
 		$config = array(
 			'appId' => $this->appId,
 			'secret' => $this->appSecret,
-			'cookie' => false,
 		);
 
 		$this->facebook = new WW_Facebook( $config );
@@ -140,13 +138,22 @@ class FacebookPublisher
 		$config = array(
 			'appId' => $this->appId,
 			'secret' => $this->appSecret,
-			'cookie' => false,
 		);
 
 		$this->facebook = new WW_Facebook( $config );
 		$accessToken = $this->facebook->getAccessTokenFromFbCode( $code );
 		$this->saveAccessToken( $accessToken, $channelId );
 
+		if( !$accessToken ) {
+			LogHandler::Log( 'Facebook', 'ERROR', 'Failed retrieving access token.' . PHP_EOL .
+				'Code:' . $code . PHP_EOL .
+				'ChannelId:' . $channelId );
+		}
+
+		// Access token is already retrieved above, so code and state are no longer needed.
+		// Remove them to avoid "CSRF state token does not match one provided." error.
+		unset( $_REQUEST['code'] );
+		unset( $_REQUEST['state'] );
 		$logOutUri = $this->facebook->getLogoutUrl( array(
 			'access_token' => $accessToken,
 			'next' => SERVERURL_ROOT.INETROOT.'/server/admin/webappindex.php?webappid=ImportDefinitions&plugintype=config&pluginname=Facebook' ) );
@@ -463,7 +470,7 @@ class FacebookPublisher
 	 * @param $pageId String The ID of the page for which to delete a post.
 	 * @param $message_id String The ID of the message to be deleted.
 	 * @return mixed
-	 * @throws Exception Throws an exception if the deletion cannot be completed succesfully.
+	 * @throws Exception Throws an exception if the deletion cannot be completed successfully.
 	 */
 	public function deleteMessageFromFeed( $pageId, $message_id )
 	{

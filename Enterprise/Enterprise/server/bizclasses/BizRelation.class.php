@@ -74,11 +74,17 @@ class BizRelation
 					throw new BizException( 'ERR_ARGUMENT', 'Client', "Cannot create relation with itself ($parentId)" );
 				}
 
-				// Check if  parent is an alien (which is unlikely). If so, we need to get its shadow or, if not available,
-				// we create shadows:
-				// Child is handled below, once we know more about the parent
+				// Create parent shadow if the parent is an alien ( which is unlikely ).
+				// Child object is handled later ( when we know more about the parent ).
 				require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
-				$parentId = BizContentSource::ifAlienGetOrCreateShadowObject( $parentId, null );
+				if( BizContentSource::isAlienObject( $parentId ) ) { // Unlikely to happen.
+					$parentShadowId = BizContentSource::getUsableShadowObjectId( $parentId );
+					if( !$parentShadowId ) { // Parent shadow not found.
+						$parentShadowId = BizContentSource::createShadowObjectInEnterprise( $parentId, null );
+					}
+					$parentId = $parentShadowId;
+				}
+
 				// Update the relation parent id with the correct internal id.
 				$relation->Parent = $parentId;
 
@@ -96,9 +102,10 @@ class BizRelation
 
 				// Now handle alien childs (which is more likely than alien parent):
 				if( BizContentSource::isAlienObject( $childId ) ) {
-					$shadowID = BizContentSource::getShadowObjectID($childId);
-					if( $shadowID ) {
-						$childId = $shadowID;
+					$childShadowId = BizContentSource::getUsableShadowObjectId($childId);
+
+					if ( $childShadowId ) {
+						$childId = $childShadowId;
 					} else {
 						// Use Pub & category of parent, create dest object for this:
 						$publication = new Publication();
@@ -122,7 +129,7 @@ class BizRelation
 								break;
 							}
 						}
-						$childId = BizContentSource::ifAlienGetOrCreateShadowObject( $childId, $destObject );
+						$childId = BizContentSource::createShadowObjectInEnterprise( $childId, $destObject );
 					}
 					// Update the relation child id with the correct internal id.
 					$relation->Child = $childId;

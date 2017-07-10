@@ -3211,6 +3211,8 @@
 					<element name="State"   	type="tns:State"/>
 					<element name="Version"   	type="xsd:string"/>
 					<element name="LockedBy"   	type="xsd:string"/>   <!-- v6.1 -->
+					<element name="Flag"        type="xsd:int"      nillable="true"   minOccurs="0"   maxOccurs="1" /> <!-- v10.1.3 Will be 0 when layout has no flag. -->
+					<element name="FlagMsg"     type="xsd:string"   nillable="true"   minOccurs="0"   maxOccurs="1" /> <!-- v10.1.3 Will be an empty string when layout has no flag message. -->
 				</all>
 			</complexType>
 			

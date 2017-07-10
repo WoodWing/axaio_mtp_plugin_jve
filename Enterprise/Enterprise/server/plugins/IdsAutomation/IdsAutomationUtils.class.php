@@ -23,9 +23,10 @@ class IdsAutomationUtils
 	 * @param integer $objectId The object ID of the object causing the trigger to create the job.
 	 * @param string $objectType The object Type of the object causing the trigger to create the job.
 	 * @param bool $unique TRUE when layout should be unique in the queue. If found, the job is NOT created.
+	 * @param integer $delay If bigger than 0, this delay in seconds is added to the Pickup time.
 	 * @return bool
 	 */
-	public static function createIDSJob( $layoutID, $objectId, $objectType, $unique = true )
+	public static function createIDSJob( $layoutID, $objectId, $objectType, $unique = true, $delay = 0 )
 	{
 		// Bail out when just created an IDS job for this layout.
 		static $processedLayoutIds = array();
@@ -79,6 +80,11 @@ class IdsAutomationUtils
 		$job->Foreground = false; // BG
 		$job->MinServerVersion = $minServerVersion;
 		$job->MaxServerVersion = $maxServerVersion;
+
+		if( $delay > 0 ) {
+			// If set, the pickup time will be set to delay the job. If not set, the core will set PickUp time to the creation time.
+			$job->PickupTime = date( 'Y-m-d\TH:i:s',time() + $delay );
+		}
 
 		LogHandler::Log('IdsAutomation', 'DEBUG', "Caling BizInDesignServerJobs::createJob()");
 		require_once BASEDIR . '/server/bizclasses/BizInDesignServerJob.class.php';

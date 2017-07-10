@@ -112,6 +112,18 @@ if( !defined('IMAGE_RESTORE_LOCATION') ) {
 	define( 'IMAGE_RESTORE_LOCATION', 'Elvis_Copy' );
 }
 
+/**
+ * When an image is dragged from the Production Zone folder in Elvis (defined
+ * in DEFAULT_ELVIS_PRODUCTION_ZONE) to Enterprise, define if the image should
+ * be copied in Elvis and linked to Enterprise.
+ *
+ * When set to 'true', the ELVIS_CREATE_COPY option has to be set to 'Copy_To_Production_Zone'.
+ *
+ * Available since Enterprise Server 10.1.3.
+ */
+if( !defined('ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE' )) {
+	define( 'ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE', false );
+}
 // Specify a Unique ID & prefix for this contentSource
 
 /**

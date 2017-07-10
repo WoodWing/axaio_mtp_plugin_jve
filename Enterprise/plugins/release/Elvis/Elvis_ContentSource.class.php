@@ -946,9 +946,27 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			return $metaDataValue->PropertyValues[0]->Value;
 		}
 	}
-	
+
+	/**
+	 * To determine if the current process is an 'ElvisSync' service call.
+	 *
+	 * @return bool Returns true when it is an 'ElvisSync' service call, false otherwise.
+	 */
 	private function triggeredBySyncJob() 
 	{
 		return (BizSession::getServiceName() == 'ElvisSync');
+	}
+
+	/**
+	 * To determine if a copy of the image should always be created at the external content source.
+	 *
+	 * {@inheritdoc}
+	 *
+	 * @since 10.1.3
+	 * @return bool Returns true to always create new instance, false(default) to create only one time.
+	 */
+	public function willAlwaysCreateACopyForImage()
+	{
+		return ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE ? true : false;
 	}
 }

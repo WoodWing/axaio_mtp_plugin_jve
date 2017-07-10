@@ -339,17 +339,19 @@ class DBTicket extends DBBase
 	static private function licenseCheckIsNeeded( $user, $installTicketID, $ticketId, $appSerial, $appName )
 	{
 		$check = false;
-		$iDSLicenseCheck = ( $appName == 'InDesign Server' ) && ( rand( 0, 40 ) === 0 );
 
-		if( $iDSLicenseCheck ) {
-			$check = true;
+		if( $appName == 'InDesign Server' ) {
+			$random = mt_rand( 0, 1600 );
+			if( $random % 40 == 0 ) {
+				$check = true;
+			}
 		} elseif( ($user != $installTicketID) || ( crc32( $ticketId ) != $appSerial ) ) {
 			$check = true;
 		}
 
 		return $check;
 	}
-	
+
 	/**
 	 * Search for user's ticket in the database. <br>
 	 * Required: user id (short name) and client application name. <br>

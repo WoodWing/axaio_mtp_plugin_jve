@@ -33,7 +33,9 @@ class ElvisSessionUtil
 		}
 		$credentials = null;
 		if( $storage ) {
-			list( $encrypted, $initVector ) = explode( '::', base64_decode( $storage ), 2 );
+			list( $encrypted, $initVector ) = explode( '::', $storage, 2 );
+			$encrypted = base64_decode( $encrypted );
+			$initVector = base64_decode( $initVector );
 			$encryptionKey = '!Tj0nG3'.$userShort.date( 'z' ); // hardcoded key + user name + day of the year
 			$credentials = openssl_decrypt( $encrypted, 'aes-256-cbc', $encryptionKey,
 				OPENSSL_RAW_DATA, $initVector );
@@ -65,7 +67,7 @@ class ElvisSessionUtil
 		$encrypted = openssl_encrypt( $credentials, 'aes-256-cbc', $encryptionKey,
 			OPENSSL_RAW_DATA, $initVector );
 		if( $encrypted ) {
-			$storage = base64_encode( $encrypted.'::'.$initVector );
+			$storage = base64_encode( $encrypted ).'::'.base64_encode( $initVector );
 			$settings = array( new Setting( 'Temp', $storage ) ); // use vague name to obfuscate
 			BizUser::updateSettings( $userShort, $settings, 'ElvisContentSource' );
 		} else {
@@ -217,22 +219,20 @@ class ElvisSessionUtil
 	}
 
 	/**
-	 * Retrieve the password from the saved credentials.
+	 * Retrieve the username and the password from the saved credentials under user $user.
 	 *
 	 * @since 10.1.3
 	 * @param string $user
-	 * @return string password if credentials are found else empty string.
+	 * @return string[] A list where the first item it the username and the second item the password if credentials are found, else returns null when not found.
 	 */
-	static public function retrievePasswordFromCredentials( $user )
+	static public function retrieveUsernamePasswordFromCredentials( $user )
 	{
-		$password = '';
+		$usernamePassword = null;
 		$credentials = self::getCredentials( $user );
 		if( $credentials ) {
 			$credentials = base64_decode( $credentials );
-			$userNamePassword = explode( ':', $credentials );
-			$password = $userNamePassword[1];
+			$usernamePassword = explode( ':', $credentials );
 		}
-
-		return $password;
+		return $usernamePassword;
 	}
 }
