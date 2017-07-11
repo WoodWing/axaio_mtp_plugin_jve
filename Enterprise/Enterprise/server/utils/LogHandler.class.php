@@ -307,7 +307,7 @@ class LogHandler
 				$reference = '';
 			}
 			$levColor = ($level == 'ERROR') ? '#ff0000' : (($level == 'WARN') ? '#ffaa00' : '#00cc00'); // red,orange,green
-			$message = self::removeHtmlPhpTags( $message, $area);
+			$message = self::removeHtmlPhpTags( $message );
 			$line = 
 				'<tr class="d" id="'.$time.'">'.
 					'<td><nobr>'.$time.'</nobr>'.$reference.'</td>'.
