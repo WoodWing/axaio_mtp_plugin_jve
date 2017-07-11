@@ -9,7 +9,7 @@ define ('SERVERVERSION',	        getProductVersion(__DIR__));
 define ('SERVERVERSION_EXTRAINFO', getServerVersionExtraInfo(__DIR__)); // To be used for labels such as Prerelease and Daily
 
 // For internal use, to validate configurations:
-define ('SCENT_DBVERSION',	    '10.1' );
+define ('SCENT_DBVERSION',	    '10.2' );
 
 $supportedPhpVersions = array(
     // format   >>> meaning
