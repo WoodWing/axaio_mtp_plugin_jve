@@ -2862,8 +2862,8 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 
 		$this->editionObjs = @$vars['BuildTest_AutomatedPrintWorkflow']['editions'];
 		$this->assertCount( 2, $this->editionObjs );
-		$this->assertInstanceOf( 'stdClass', $this->editionObjs[0] );
-		$this->assertInstanceOf( 'stdClass', $this->editionObjs[1] );
+		$this->assertInstanceOf( 'AdmEdition', $this->editionObjs[0] );
+		$this->assertInstanceOf( 'AdmEdition', $this->editionObjs[1] );
 
 		$this->layoutStatus = @$vars['BuildTest_AutomatedPrintWorkflow']['layoutStatus'];
 		$this->assertInstanceOf( 'State', $this->layoutStatus );
