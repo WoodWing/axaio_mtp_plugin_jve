@@ -2484,7 +2484,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_IDS
 		$response->Pages[1]->PageSequence = '2';
 		$response->Pages[1]->Renditions = null;
 		$response->Pages[1]->Orientation = null;
-		$response->LayoutVersion = '0.2';
+		$response->LayoutVersion = '0.3';
 		$response->InDesignArticles = array();
 		$response->InDesignArticles[0] = new InDesignArticle();
 		$response->InDesignArticles[0]->Id = '253';
