@@ -441,20 +441,20 @@ class IXR_Client
 			$this->client->setRawData( $xml );
 			PerformanceProfiler::startProfile( 'Send image to WordPress', 3 );
 			if( LogHandler::debugMode() ) {
-				LogHandler::logService( __METHOD__, $xml, true, 'xmlrpc', 'xml', false );
+				LogHandler::logService( $method, $xml, true, 'xmlrpc', 'xml', false );
 			}
 			$responseRaw = $this->client->request();
 			$response = $responseRaw->getBody();
 			PerformanceProfiler::stopProfile( 'Send image to WordPress', 3 );
 			if( LogHandler::debugMode() ) {
-				LogHandler::logService( __METHOD__, $response, false, 'xmlrpc', 'xml', false );
+				LogHandler::logService( $method, $response, false, 'xmlrpc', 'xml', false );
 			}
 		} catch( Exception $e ) {
 			throw new BizException( 'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $e->getMessage() );
 		}
 
 		if( !$responseRaw->isSuccessful() ) {
-			LogHandler::logService( __METHOD__, $responseRaw->getBody(), null, 'xmlrpc', 'xml', true );
+			LogHandler::logService( $method, $responseRaw->getBody(), null, 'xmlrpc', 'xml', true );
 			throw new BizException(
 				'WORDPRESS_ERROR_UPLOAD_IMAGE', 'Server', $responseRaw->getStatus().' '.$responseRaw->getMessage() );
 		}
