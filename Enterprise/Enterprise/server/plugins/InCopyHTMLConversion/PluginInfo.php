@@ -27,4 +27,13 @@ class InCopyHTMLConversion_EnterprisePlugin extends EnterprisePlugin
 		return array( 'WflGetObjects_EnterpriseConnector',
 					  'WflGetVersion_EnterpriseConnector');
 	}
+
+	/**
+	 * @inheritdoc
+	 * @since 10.2.0
+	 */
+	public function isActivatedByDefault()
+	{
+		return false;
+	}
 }

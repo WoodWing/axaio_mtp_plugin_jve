@@ -30,4 +30,13 @@ class WwcxToWcmlConversion_EnterprisePlugin extends EnterprisePlugin
 			'WflGetObjects_EnterpriseConnector'
 		);
 	}
+
+	/**
+	 * @inheritdoc
+	 * @since 10.2.0
+	 */
+	public function isActivatedByDefault()
+	{
+		return false;
+	}
 }
