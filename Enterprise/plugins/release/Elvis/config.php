@@ -29,33 +29,72 @@ if( !defined('ELVIS_CLIENT_URL') ) {
  * Note that this should not be confused with the network operation timeout, which is fixed to 1 hour.
  *
  * During workflow operations, Enterprise may need to connect to Elvis to sync data that is changed by the user.
- * When the user is about to update an Elvis image in Enterprise, there may be a good understanding this communication
+ * When the user is about to update an Elvis image in Enterprise, he/she may have a good understanding that communication
  * is needed between the two backends. However, when the user is changing an article that is placed on a layout
- * but the layout has placed images as well, the user may not realize that such communication is actually happening.
- * In other words, for some workflow operations, this backend communication may be unexpected for end users.
+ * but the layout has placed images as well, he/she may not realize that such communication is actually happening.
+ * In other words, for some workflow operations this backend communication may be unexpected for end users.
  *
  * By setting this time too long Enterprise users may get confused. Especially when it is unexpected, users may
  * may retry or abort if they have to wait too long for any system response. In case an Elvis server node is no longer
- * accessible (e.g. when the node is restarting) users should be patient and so be informed in time.
+ * accessible (e.g. when the node became unhealthy or is restarting) users should be patient and so be informed in time.
  *
  * By setting this time too short it could lead into Elvis server connection errors for no good reason. For example,
  * in case an Elvis server node is very busy serving other user requests. Workflow operations that break half-way
  * due to Elvis connection errors is something that should be avoided because it may lead to users retrying the same
  * operation over and over again, causing more stress on the Elvis nodes (that seems to be busy already in this case).
  *
+ * Note that this option works in conjunction with the ELVIS_CONNECTION_REATTEMPTS option. Both options together will
+ * define the maximum time the user may wait before the Elvis connection error is thrown. For 5 reattempts and a
+ * connection timeout of 3 seconds, the wait time could become 5x3=15 seconds.
+ *
+ * The Enterprise-Elvis communication is synchronous; The user waits for Enterprise and Enterprise waits for Elvis.
+ * When using a Load Balancer (e.g. ELB on AWS) it must support sticky sessions to stick a certain Enterprise session
+ * to an Elvis session. Basically, the whole route from the user via Enterprise to Elvis is sticky. But, when an Elvis
+ * node suddenly became unhealthy, this route should change; Enterprise should pick a healthy Elvis node to continue with.
+ * This should happen silently (without user notice) and is crucial for a stable integration. The next paragraph describes
+ * how that works and what options are important to make this happen.
+ *
+ * When any kind of fatal communication error occurs (HTTP 5xx, timeout, etc) Enterprise will interpret it as a connection
+ * error. In case the error is returned immediately, it will wait for the configured timeout seconds. Then it will try to
+ * re-connect to Elvis for ELVIS_CONNECTION_REATTEMPTS times. This is done by a re-login service call, which clears the
+ * Elvis session cookie that were set on the connection. That releases the stickiness and gives the Load Balancer the
+ * opportunity to redirect the request to a different Elvis node than used before, in the hope that node is healthy.
+ * In the meantime, the Load Balancer continuously polls all Elvis nodes whether or not they are still healthy. Therefor
+ * the interval- and threshold settings applied for these polls should 'match' the two settings ELVIS_CONNECTION_TIMEOUT
+ * and ELVIS_CONNECTION_REATTEMPTS. The idea is that the Load Balancer should be able to find out that the Elvis node
+ * became unhealthy before the last re-logon attempt takes place. In that case the Elvis connection error should never
+ * occur, even when Enterprise was initially talking to an Elvis node that became unhealthy.
+ *
+ * An example of a health check configuration for ELB on AWS:
+ * - Health check timeout:  3 seconds
+ * - Health check interval: 5 seconds
+ * - Unhealthy threshold:   2 times
+ * - Healthy threshold:     4 times
+ * In this configuration, for a specific Elvis node that becomes unhealthy the ELB will find out in 5x2=10 seconds earliest.
+ * When the node hangs, there could be an additional 3 seconds timeout. So then it will find out in 10+3=13 seconds latest.
+ * In the most unlucky situation that Enterprise calls an Elvis service at the very moment the Elvis node became unhealthy,
+ * it will fail and wait. Then it will re-login, which is counted as the first 'reattempt'. As long as the ELB did not detect
+ * the unhealthy Elvis node and by coincidence the next following Enterprise call get picked up by the unhealthy node again,
+ * it will wait and re-login again for ELVIS_CONNECTION_REATTEMPTS times in total. Assuming that the default settings are
+ * applied for ELVIS_CONNECTION_TIMEOUT and ELVIS_CONNECTION_REATTEMPTS options, in this scenario, after 4x3=12 seconds
+ * it has done 4 attempts but still did not give up. The 5th attempt (after 5x3=15 seconds) it will almost certainly find
+ * a healthy node.
+ *
  * This option is available since Enterprise 10.1.4.
+ * The default value for this option is 3.
  */
 if( !defined('ELVIS_CONNECTION_TIMEOUT') ) {
-	define( 'ELVIS_CONNECTION_TIMEOUT', 4 );
+	define( 'ELVIS_CONNECTION_TIMEOUT', 3 );
 }
 
 /**
  * Number of attempts reconnecting to Elvis server in case the connection with a node has dropped.
  *
  * This option is available since Enterprise 10.1.4.
+ * The default value for this option is 5.
  */
 if( !defined( 'ELVIS_CONNECTION_REATTEMPTS' ) ) {
-	define( 'ELVIS_CONNECTION_REATTEMPTS', 3 );
+	define( 'ELVIS_CONNECTION_REATTEMPTS', 5 );
 }
 
 /**
