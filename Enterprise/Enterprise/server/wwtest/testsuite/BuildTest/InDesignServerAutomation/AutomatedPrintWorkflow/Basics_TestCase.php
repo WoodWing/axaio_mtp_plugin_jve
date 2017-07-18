@@ -12,7 +12,10 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Basics_TestCase extends TestCase
 {
-	/** @var WW_Utils_TestSuite $utils */
+	/** @var string $testStartTime */
+	private $testStartTime = null;
+
+	/** @var WW_Utils_TestSuite $globalUtils */
 	private $globalUtils = null;
 
 	/** @var WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Utils $localUtils */
@@ -113,6 +116,8 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 	 */
 	private function setupTestData()
 	{
+		$this->testStartTime = date('Y-m-d\TH:i:s');
+
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->globalUtils = new WW_Utils_TestSuite();
 		
@@ -166,6 +171,8 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 	 */
 	private function tearDownTestData()
 	{
+		$this->clearIdsServerJobsInTheQueue();
+
 		$objectIds = array();
 		$articleId = $this->articleObject ? $this->articleObject->MetaData->BasicMetaData->ID : null;
 		if( $articleId ) {
@@ -182,6 +189,17 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 
 		$this->unlockObjects( $objectIds );
 		$this->deleteObjects( $objectIds );
+	}
+
+	/**
+	 * Clean up all the IDS server jobs in the job queue created by this build test.
+	 */
+	private function clearIdsServerJobsInTheQueue()
+	{
+		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
+		$where = '`queuetime` >= ? ';
+		$params = array( strval( $this->testStartTime ) );
+		$result = DBBase::deleteRows( 'indesignserverjobs', $where, $params );
 	}
 
 	/**
