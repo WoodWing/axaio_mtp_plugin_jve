@@ -255,7 +255,159 @@ class LogHandler
 			}
 		}
 		return self::$logFolder;
-   	}
+	}
+
+	/**
+	 * Validates a given folder name that resides directly under the root log folder.
+	 *
+	 * A valid name should be in 'Ymd' notation representing a date.
+	 *
+	 * @since 10.1.4
+	 * @param string $folder The name of the folder (not the full path).
+	 * @return bool TRUE when valid, else FALSE.
+	 */
+	private static function isValidDailyFolderName( $folder )
+	{
+		return strlen( $folder ) == 8 && ctype_digit( $folder );
+	}
+
+	/**
+	 * Validates a given client ip folder name that resides directly under the daily log folder.
+	 *
+	 * A valid name should represent a valid IP address (either IPv4 or IPv6).
+	 *
+	 * @since 10.1.4
+	 * @param string $folder The name of the folder (not the full path).
+	 * @return bool TRUE when valid, else FALSE.
+	 */
+	private static function isValidClientIpFolderName( $folder )
+	{
+		return filter_var( $folder, FILTER_VALIDATE_IP ) !== false;
+	}
+
+	/**
+	 * Validates a given log file that typically resides directly under the client ip log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $logFile The name of the file (not the full path).
+	 * @return bool TRUE when valid, else FALSE.
+	 */
+	private static function isValidLogFileName( $logFile )
+	{
+		return $logFile &&
+			$logFile[0] !== '.' && // don't reveal hidden files
+			strpos( $logFile, '..' ) === false && // don't allow change dir
+			strpbrk( $logFile, '\\/?*' ) === false; // don't allow suspecious chars
+	}
+
+	/**
+	 * Returns the (daily) folders that resides directly under the root log folder.
+	 *
+	 * @return array List of folder names (not the full paths).
+	 */
+	public static function listDailyRootFolders()
+	{
+		$dailyFolders = array();
+		$rootDir = OUTPUTDIRECTORY;
+		if( $rootDir && is_dir( $rootDir ) ) {
+			$folders = scandir( $rootDir );
+			if( $folders ) foreach( $folders as $folder ) {
+				if( $folder[0] != '.' && is_dir( $rootDir.$folder ) ) {
+					if( self::isValidDailyFolderName( $folder ) ) { // check 'Ymd' date notation (anti hack)
+						$dailyFolders[] = $folder;
+					}
+				}
+			}
+		}
+		return $dailyFolders;
+	}
+
+	/**
+	 * Returns the (client ip) folders that resides directly under the daily log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @return array List of folder names (not the full paths).
+	 */
+	public static function listClientIpSubFolders( $dailyFolder )
+	{
+		$clientIpFolders = array();
+		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
+			$rootDir = OUTPUTDIRECTORY;
+			if( $rootDir && is_dir( $rootDir ) ) {
+				$dailyDir = $rootDir.'/'.$dailyFolder;
+				if( is_dir( $dailyDir ) ) {
+					$folders = scandir( $dailyDir );
+					if( $folders ) foreach( $folders as $folder ) {
+						if( $folder[0] != '.' && is_dir( $dailyDir.'/'.$folder ) ) {
+							if( self::isValidClientIpFolderName( $folder ) ) { // check IP notation (anti hack)
+								$clientIpFolders[] = $folder;
+							}
+						}
+					}
+				}
+			}
+		}
+		return $clientIpFolders;
+	}
+
+	/**
+	 * Returns the log files that resides directly under the client ip log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @param string $clientIpFolder The name of the folder (not the full path).
+	 * @return array List of folder names (not the full paths).
+	 */
+	public static function listLogFiles( $dailyFolder, $clientIpFolder )
+	{
+		$logFiles = array();
+		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
+			if( self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
+				$rootDir = OUTPUTDIRECTORY;
+				if( $rootDir && is_dir( $rootDir ) ) {
+					$clientIpDir = $rootDir.'/'.$dailyFolder.'/'.$clientIpFolder;
+					if( is_dir( $clientIpDir ) ) {
+						$files = scandir( $clientIpDir );
+						if( $files ) foreach( $files as $file ) {
+							if( $file[0] != '.' && is_file( $clientIpDir.'/'.$file ) ) {
+								$logFiles[] = $file;
+							}
+						}
+					}
+				}
+			}
+		}
+		return $logFiles;
+	}
+
+	/**
+	 * Returns the content of a log file that typically resides directly under the client ip log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @param string $clientIpFolder The name of the folder (not the full path).
+	 * @param string $logFile The name of the file (not the full path).
+	 * @return string The file content.
+	 */
+	public static function getLogFileContent( $dailyFolder, $clientIpFolder, $logFile )
+	{
+		$content = '';
+		$rootDir = OUTPUTDIRECTORY;
+		if( $rootDir && is_dir( $rootDir ) ) {
+			if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
+				if( self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
+					if( self::isValidLogFileName( $logFile ) ) { // check dangerous chars (anti hack)
+						$file = OUTPUTDIRECTORY."/$dailyFolder/$clientIpFolder/$logFile";
+						if( is_file( $file ) ) {
+							$content = file_get_contents( $file );
+						}
+					}
+				}
+			}
+		}
+		return $content;
+	}
 
 	/**
 	 * Builds and returns a file header (single line) with column information that matches with 
