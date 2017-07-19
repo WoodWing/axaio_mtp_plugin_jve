@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LocalizationMap language="csCZ">
+  <Term key="Elvis.ERR_CONNECT">An error occurred while getting a file from Elvis because of a lost connection. (S1144)#EOL#Please do the following:#EOL#• Contact your system administrator#EOL#• Wait until the connection is restored before trying to access the file again#EOL#• Do not attempt to open or save files that are stored on Elvis#EOL#• Do not attempt to open or save layouts or Dossiers that contain files that are stored on Elvis</Term>
   <Term key="Elvis.PRODUCTION_ZONE">Zóna produkce</Term>
 </LocalizationMap>
