@@ -16,19 +16,30 @@ class ElvisAMFClient extends ElvisClient
 	static private $lastResponseIsFatalError = false;
 
 	/**
-	 * @var bool $lastResponseNoSessionError When a request is sent to Elvis, but the Elvis session has expired or when Enterprise
+	 * @var bool $lastResponseIsSessionError When a request is sent to Elvis, but the Elvis session has expired or when Enterprise
 	 * did not logon to Elvis before yet, this flag will be set to TRUE. When flagged, assumed is that a relogon makes sense.
 	 * Example: wrong user credentials is NOT seen as a session error. Therefore the flag is FALSE and no relogon is done.
 	 */
-	static private $lastResponseNoSessionError = false;
+	static private $lastResponseIsSessionError = false;
 
 	/**
-	 * @var bool $lastResponseAuthError When a login request is sent to Elvis, but the user credentials are not correct
+	 * @var bool $lastResponseIsAuthError When a login request is sent to Elvis, but the user credentials are not correct
 	 * (e.g. wrong password or user does not exists in Elvis), this flag will be set to TRUE. When flagged, assumed is
 	 * that the Enterprise user is a guest to Elvis and the ELVIS_SUPER_USER user should be used to relogon (as a fallback).
 	 * Note that this flag represents a authentication error (user identification), so not an authorization error (assets access).
 	 */
-	static private $lastResponseAuthError = false;
+	static private $lastResponseIsAuthError = false;
+
+	/**
+	 * @var bool $lastResponseIsExceptionError When a request is sent to Elvis, but Elvis has thrown a 'production' error
+	 * (decided by business logics), this flag will be set to TRUE. When flagged, assumed is that retries won't make sense.
+	 * Examples are ElvisCSAccessDeniedException, ElvisCSNotFoundException, ElvisCSLinkedToOtherSystemException etc.
+	 * These errors mostly are caused by configuration 'mistakes' (e.g. It does not make sense if an asset would be editable
+	 * in Enterprise but not in Elvis). Since Enterprise Server is stuck with it, the error is simply raised to the end user.
+	 * However, doing so, Enterprise breaks halfway out of its web service and does not have a DB rollback feature in
+	 * place which makes it a dangerous situation (it could potentially lead to data corruption).
+	 */
+	static private $lastResponseIsExceptionError = false;
 
 	const DESTINATION = 'acm';
 
@@ -72,9 +83,6 @@ class ElvisAMFClient extends ElvisClient
 		// When performing a logon request but user is not authorized, it means that Elvis is responsive but the user
 		// credentials are not valid. Retry does not make sense so we simply bail out in this case.
 		$isLogin = $operation == 'login';
-		if( $isLogin && self::$lastResponseAuthError ) {
-			self::handleError( $result, $service, $operation ); // bail out
-		}
 
 		// When performing a logon request but the connection with the Elvis node got broken (e.g. ELB says node not healthy)
 		// we enter a bad situation; The end-user is waiting but bailing out may cause serious troubles at Enterprise side
@@ -111,7 +119,7 @@ class ElvisAMFClient extends ElvisClient
 			// - the last reattempt of the logon has failed
 			// - a non-logon request was executed successfully
 			// - a non-logon request was executed but has failed
-			if( ( self::$lastResponseNoSessionError || self::$lastResponseIsFatalError ) && !$isLogin ) {
+			if( ( self::$lastResponseIsSessionError || self::$lastResponseIsFatalError ) && !$isLogin ) {
 				// Service call failed; the user was not logged in yet or the Elvis session has expired in the meantime.
 				// Regardless whether we were logged in already, we login (again) which implicitly clears the session cookies
 				// which includes the LB cookie. That way we detach from the sticky Elvis node that may have become unhealthy
@@ -119,12 +127,9 @@ class ElvisAMFClient extends ElvisClient
 				self::login();
 				$result = self::callElvisAmfServiceAndHandleCookies( $service, $operation, $params, $operationTimeout ); // retry the original service request
 			}
-			if( self::$lastResponseNoSessionError || self::$lastResponseIsFatalError ) {
+			if( self::$lastResponseIsSessionError || self::$lastResponseIsFatalError ) {
 				$detail = 'Calling Elvis web service '.$service.'_'.$operation.' failed (AMF API).';
 				self::throwExceptionForElvisCommunicationFailure( $detail );
-			}
-			if( get_class( $result ) == 'SabreAMF_AMF3_ErrorMessage' ) {
-				self::handleError( $result, $service, $operation ); // bail out
 			}
 		}
 		return $result;
@@ -139,6 +144,8 @@ class ElvisAMFClient extends ElvisClient
 	 * @param array $params The list of data / information to be sent over in the service call.
 	 * @param int $operationTimeout The request / execution timeout of curl in seconds (This is not the connection timeout).
 	 * @return mixed|null
+	 * @throws BizException
+	 * @throws ElvisCSException
 	 */
 	private static function callElvisAmfServiceAndHandleCookies( $service, $operation, $params, $operationTimeout=3600 )
 	{
@@ -180,17 +187,67 @@ class ElvisAMFClient extends ElvisClient
 		} catch( Exception $e ) {
 			self::logService( 'Elvis_'.$service.'_'.$operation, $e->getMessage(), $cookies, null );
 		}
+		self::detectError( $result, $service, $operation );
+		return $result;
+	}
 
-		self::$lastResponseNoSessionError = !is_null( $result ) && get_class( $result ) == 'SabreAMF_AMF3_ErrorMessage' &&
+	/**
+	 * Handle an AMF response; Detect errors and bail out when retry does not make sense.
+	 *
+	 * @since 10.1.4
+	 * @param mixed $result
+	 * @param string $service The service name to be called.
+	 * @param string $operation The name of the operation to be called in the service.
+	 * @throws BizException
+	 * @throws ElvisCSException
+	 */
+	private static function detectError( $result, $service, $operation )
+	{
+		$isAmfErrorMessage = !is_null( $result ) && get_class( $result ) == 'SabreAMF_AMF3_ErrorMessage';
+
+		self::$lastResponseIsSessionError = $isAmfErrorMessage &&
 			( $result->faultCode == 'Server.Security.NotLoggedIn' || $result->faultCode == 'Server.Security.SessionExpired' );
 
-		self::$lastResponseIsFatalError = !self::$lastResponseNoSessionError &&
-			( is_null( $result ) || get_class( $result ) == 'SabreAMF_AMF3_ErrorMessage' );
-
-		self::$lastResponseAuthError = !is_null( $result ) && get_class( $result ) == 'SabreAMF_AMF3_AcknowledgeMessage' &&
+		self::$lastResponseIsAuthError = !is_null( $result ) && get_class( $result ) == 'SabreAMF_AMF3_AcknowledgeMessage' &&
 			$result->body instanceof ElvisLoginResponse && $result->body->loginSuccess == false;
 
-		return $result;
+		self::$lastResponseIsExceptionError = $isAmfErrorMessage &&
+			$result->rootCause instanceof ElvisCSException;
+
+		self::$lastResponseIsFatalError = is_null( $result ) ||
+			( $isAmfErrorMessage && !self::$lastResponseIsSessionError && !self::$lastResponseIsExceptionError );
+
+		if( intval(self::$lastResponseIsSessionError) + intval(self::$lastResponseIsAuthError) +
+			intval(self::$lastResponseIsExceptionError) + intval(self::$lastResponseIsFatalError) > 1 ) {
+			LogHandler::Log( 'ELIVS', 'ERROR', 'There should be only ONE error flag set to TRUE, '.
+				'but we found two or more: '.intval(self::$lastResponseIsSessionError).'|'.intval(self::$lastResponseIsAuthError).
+				'|'.intval(self::$lastResponseIsExceptionError).'|'.intval(self::$lastResponseIsFatalError) );
+		}
+
+		// Below, we bail out for errors on service calls that should never be retried...
+
+		// Bail out when Elvis throws a production error.
+		if( self::$lastResponseIsExceptionError ) {
+			/** @var ElvisCSException $rootCause */
+			$rootCause = $result->rootCause;
+			$rootCause->setMessage( $result->faultString );
+			$rootCause->setDetail( 'Calling Elvis '.$service.'.'.$operation.' failed. '.
+				'faultCode: '.$result->faultCode.'; faultDetail: '.$result->faultDetail );
+			throw $rootCause;
+		}
+
+		// Bail out when user did logon but credentials are not valid.
+		if( self::$lastResponseIsAuthError ) {
+			$detail = 'Calling Elvis '.$service.'.'.$operation.' failed. ';
+			$message = $result->body->loginFaultMessage;
+			throw new BizException(null, 'Server', $detail, $message, null, 'INFO' );
+		}
+
+		// Bail out when the error is totally unknown to us (don't know how to handle).
+		if( !self::$lastResponseIsFatalError && !self::$lastResponseIsSessionError && $isAmfErrorMessage ) {
+			$detail = 'Calling Elvis '.$service.'.'.$operation.' failed. faultCode: '.$result->faultCode.'; faultDetail: '.$result->faultDetail;
+			throw new BizException(null, 'Server', $detail, $result->faultString, null, 'ERROR' );
+		}
 	}
 
 	/**
@@ -258,7 +315,7 @@ class ElvisAMFClient extends ElvisClient
 			$map = new BizExceptionSeverityMap( array( 'S1053' => 'INFO' ) ); // Suppress warnings for the HealthCheck.
 			self::sequentialLogin( $credentials );
 		} catch( BizException $e ) {
-			if( self::$lastResponseAuthError ) {
+			if( self::$lastResponseIsAuthError ) {
 				try {
 					require_once __DIR__.'/../config.php';
 					LogHandler::Log( 'ELVIS', 'INFO',
@@ -396,40 +453,6 @@ class ElvisAMFClient extends ElvisClient
 	private static function getEndpointUrl()
 	{
 		return self::getElvisBaseUrl().'/graniteamf/amf';
-	}
-
-	/**
-	 * Fills in details from ErrorMessage to ElvisCSException. Expects service to handle them.
-	 *
-	 * @param SabreAMF_AMF3_ErrorMessage $error Sabre AMF error structure.
-	 * @param string $service name of service being executed
-	 * @param string $operation name of operation being executed
-	 * @throws ElvisCSException converted by Sabre/AMF
-	 * @throws BizException Generic exception if the exception couldn't be turned into an ElvisCSException
-	 */
-	private static function handleError($error, $service, $operation)
-	{
-		$detail = 'Calling Elvis '.$service.'.'.$operation.' failed. ';
-		if( isset( $error->body->loginSuccess ) && $error->body->loginSuccess == false ) {
-			$message = $error->body->loginFaultMessage;
-			$severity = 'INFO';
-		} else {
-			$message = $error->faultString;
-			$detail .= 'faultCode: '.$error->faultCode.'; faultDetail: '.$error->faultDetail;
-			$severity = 'WARN';
-		}
-
-		if (isset($error->rootCause) && $error->rootCause instanceof ElvisCSException) {
-			/** @var ElvisCSException $rootCause */
-			$rootCause = $error->rootCause;
-			$rootCause->setMessage( $message );
-			$rootCause->setDetail( $detail );
-			throw $rootCause;
-		}
-		else {
-			// This part is only called if no CSException is returned from Elvis, which would indicate an error.
-			throw new BizException(null, 'Server', $detail, $message, null, $severity );
-		}
 	}
 
 	/**
