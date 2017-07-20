@@ -749,7 +749,7 @@ class DBUser extends DBBase
 		foreach( $users as $user ) {
 			$oldUser = self::getUserById( $user->Id );
 			if( !$oldUser ) {
-				self::setError( BizResources::localize( 'ERR_NOTFOUND' ) );
+				LogHandler::Log( __CLASS__, 'ERROR', "Cannot modify user with Id = {$user->Id}. The user does not exist." );
 				continue;
 			}
 			$values = self::objToUserRow( $user );
@@ -1115,9 +1115,8 @@ class DBUser extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename( self::TABLENAME );
 
-		$user = $userName;
 		$sql = "SELECT * FROM $db WHERE `user` = ? OR `fullname`= ? ";
-		$params = array( $user, $user );
+		$params = array( strval( $userName ), strval( $userName ) );
 		$sth = $dbDriver->query($sql, $params);
 		if (!$sth) {
 			throw new BizException( 'ERR_COULD_NOT_CONNECT_TO_DATEBASE', 'Client', '' );

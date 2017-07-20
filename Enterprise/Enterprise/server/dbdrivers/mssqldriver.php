@@ -758,11 +758,11 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 			$e = new BizException( null, 'Server', $detail, 'Invalid Configuration' );
 		}
 		if( $e ) {
-			$infoTable = '';
-			foreach( $mssqlInfo as $key => $value ) {
-				$infoTable .= "<tr><td>$key</td><td>$value</td></tr>";
+			$infoList = '';
+			if( $mssqlInfo ) foreach( $mssqlInfo as $key => $value ) {
+				$infoList .= "$key = $value\r\n";
 			}
-			LogHandler::Log( 'mssql', 'INFO', 'MSSQL driver information: <table>'.$infoTable.'</table>' );
+			LogHandler::Log( 'mssql', 'INFO', "MSSQL driver information:\r\n{$infoList}" );
 			throw $e;
 		}
 	}

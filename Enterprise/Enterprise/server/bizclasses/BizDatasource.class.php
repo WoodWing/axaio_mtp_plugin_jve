@@ -213,7 +213,7 @@ class BizDatasource
 			$sql = BizDatasourceUtils::parseSQL($user, $queryString, $queryInterface, $params, $metadata);
 			$parameters = BizDatasourceUtils::parseParametersToArray($user, $queryString, $queryInterface, $params, $metadata);
 			
-			LogHandler::Log( 'Datasource', 'INFO', 'Datasource->getRecords: <strong>Parsed Query</strong><br>'.$sql ); // BZ#636
+			LogHandler::Log( 'Datasource', 'INFO', "Datasource->getRecords: Parsed Query\r\n".$sql ); // BZ#636
 
 			$records = $myDatasource->getRecords( $sql, $queryRecordID, $parameters );
 			if( $specialfields ) {

@@ -449,7 +449,9 @@ class ImageMagick
 			return false;
 		}
 		$output = mb_convert_encoding( $output, 'UTF-8' );
-		LogHandler::Log('ImageMagick', 'DEBUG', 'ImageMagick identify output:<br/><pre>'.$output.'</pre>' );
+		LogHandler::logRaw('ImageMagick',
+								 'DEBUG',
+								 LogHandler::encodeLogMessage( "ImageMagick identify output:\r\n" ).LogHandler::composeCodeBlock( $output ) );
 	
 		$lines = explode( "\n", $output );
 		if ( $lines ) foreach ( $lines as $line ) {
@@ -514,8 +516,10 @@ class ImageMagick
 		try {
 			$xmpData = @new SimpleXMLElement( $output );
 		} catch( Exception $e) {
-			$printData = str_replace( '<', "<br/>&lt;", $output );
-			LogHandler::Log( 'ImageMagick_MetaData', 'WARN', 'XMP invalid XML: '.$e->getMessage."<code>$printData</code>" );
+			LogHandler::logRaw(
+							'ImageMagick_MetaData',
+							'WARN',
+							LogHandler::encodeLogMessage( "XMP invalid XML: {$e->getMessage}\r\n" ).LogHandler::composeCodeBlock( $output ) );
 			return false;
 		}
 
