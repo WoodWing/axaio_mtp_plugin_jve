@@ -41,6 +41,12 @@ abstract class ObjectEvent_EnterpriseConnector extends DefaultConnector
 			'prepareData():Preparing object data for the event <pre>:' . print_r( $eventInfo, 1 ) .
 			' </pre> with data: <pre>' . print_r( $object, 1 ) . '</pre>' );
 
+		LogHandler::logRaw(
+			'ObjectEvent_Connector',
+			'INFO',
+			'prepareData():Preparing object data for the Event: '.LogHandler::composeCodeBlock( print_r( $eventInfo, 1 ) ).
+			LogHandler::encodeLogMessage( "\r\nData:\r\n" ).LogHandler::composeCodeBlock( print_r( $object, 1 ) ) );
+
 		return null;
 	}
 
@@ -62,9 +68,11 @@ abstract class ObjectEvent_EnterpriseConnector extends DefaultConnector
 	 */
 	public function processData( $eventInfo, $object, $pluginData )
 	{
-		$pluginData = $pluginData; // Make analyzer happy.
-		LogHandler::Log('ObjectEvent_Connector','INFO', 'processData(): Processing data for the Event <pre>:' . print_r( $eventInfo, 1 ) .
-			'</pre> with Data:<pre>:' . print_r( $object, 1 ) . '</pre>' );
+		LogHandler::logRaw(
+			'ObjectEvent_Connector',
+			'INFO',
+			'processData(): Processing data for the Event: '.LogHandler::composeCodeBlock( print_r( $eventInfo, 1 ) ).
+			LogHandler::encodeLogMessage( "\r\nData:\r\n" ).LogHandler::composeCodeBlock( print_r( $object, 1 ) ) );
 	}
 
 	/**

@@ -48,7 +48,7 @@ abstract class WW_DbDrivers_DriverBase
 		PerformanceProfiler::startProfile( 'query logging', 5 );
 		
 		// Add SQL to log.
-		$log = 'SQL: '.$sql.'<br/>';
+		$log = "SQL: {$sql}\r\n";
 		
 		// Add caller (context) to log.
 		require_once BASEDIR.'/server/utils/PHPClass.class.php';
@@ -69,13 +69,13 @@ abstract class WW_DbDrivers_DriverBase
 				if( isset($stackEntry['function']) ) {
 					$log .= $stackEntry['function'];
 				}
-				$log .= '(...)<br/>';
+				$log .= "(...)\r\n";
 			}
 		}
 		
 		// Add row count to log.
 		if( !is_null($rowCnt) ) {
-			$log .= '=> Number of selected/affected rows: '.$rowCnt.'<br/>';
+			$log .= "=> Number of selected/affected rows: {$rowCnt}\r\n";
 		}
 		
 		// Log SQL, caller and row count at once.

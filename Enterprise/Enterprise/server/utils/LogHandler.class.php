@@ -55,7 +55,7 @@ Improvements since v8.0 with changed behavior:
 - Aside to the current HTML format at log files, there is now support for plain UTF-8 text format too.
   HTML is better readable in web browser, but plain format is easier for searching e.g. using grep.
   To distinguish between both formats, an option named LOGFILE_FORMAT is added to configserver.php file.
-- The header that is now removed from all log files. Instead, much more PHP info is written to log folder 
+- The header that is now removed from all log files. Instead, much more PHP info is written to log folder
   (at _phpinfo.htm file) once the client IP folder gets created, which is a more efficient solution.
 - For each log operation (writing a single line), the log file is flushed in DEBUG mode, to make sure the
   last log is actually written in case of unexpected PHP crash. For production, this delay is unwanted, so skipped.
@@ -78,6 +78,23 @@ Example of avoiding expensive print_r() calls...
 		if( LogHandler::debugMode() ) { // Performance check: Avoid print_r for production !!
 			LogHandler::Log('filestore', 'DEBUG', 'Renditions: '.print_r($renditions, true) );
 		}
+
+Improvements since 10.1.4:
+- Messages are passed in without any formatting for the 'html' format. To ensure secure logging the message is
+  properly encoded before added to the (html) log file.
+  - Instead of using <br/> to enforce line breaks, the log message should contain \r\n. This improves the outline of the
+    plain text log file. In case of the 'html' format the \r\n is replaced by <br/> before the message is written to the
+    (html) log file.
+  - All html tags within the message are ignored and are encoded.
+- Method LogHandler::logRaw is added. This can be used to write the message 'as is' to the log file. It is up to the
+  caller to ensure that the encoding of the message is secure. To create a secure message two helper methods are added:
+  - LogHandler::composeCodeBlock(): To format a (part of the) message to be displayed as a code fragment.
+  - LogHandler::encodeLogMessage(): To ensure that the (rest) message is properly encoded.
+  Example: LogHandler::logRaw(
+            __CLASS__,
+				'DEBUG',
+				LogHandler::encodeLogMessage( "Error: {$e->message}\r\nData: \r\n" ).LogHandler::composeCodeBlock( print_r( $data, 1 ) ) );
+  - The LogHandler::logRaw() should only be used for special cases. LogHandler::Log() is standard way used for logging.
 */
 
 class LogHandler
@@ -104,6 +121,72 @@ class LogHandler
 	 * Constructor, made private to avoid creating instances.
 	 */
 	private function __construct() {}
+
+	/**
+	 * Builds and returns a single line in html format.
+	 *
+	 * @since 10.1.4
+	 * @param string $area Indication of caller. It is recommended to pass __CLASS__.
+	 * @param string $level Log level. Should be any value of self::$logLevels.
+	 * @param string $message Message to write to log file.
+	 * @param string $time Current time stamp of the logged message. Leave empty to auto calculate.
+	 * @param string $logFile File name of the current log file. Use to refer from error log to current log.
+	 * @return string Formatted log line.
+	 */
+	private static function composeHtmlLogLine( $level, $area, $message, &$time, $logFile )
+	{
+		if( $logFile ) {
+			$logFileRef = SERVERURL_ROOT.INETROOT.'/server/admin/showlog.php?act=logfile'.
+				'&file='.basename( $logFile ).'#'.$time;
+			$reference = '<br/><a href="'.$logFileRef.'">Show full context</a>';
+		} else {
+			$reference = '';
+		}
+		$levColor = ( $level == 'ERROR' ) ? '#ff0000' : ( ( $level == 'WARN' ) ? '#ffaa00' : '#00cc00' ); // red,orange,green
+		$line =
+			'<tr class="d" id="'.$time.'">'.
+			'<td><nobr>'.$time.'</nobr>'.$reference.'</td>'.
+			'<td><font color="'.$levColor.'">'.$level.'</font></td>'.
+			'<td>'.$area.'</td><td>'.$message.'</td>'.
+			'</tr>'.PHP_EOL;
+		return $line;
+	}
+
+	/**
+	 * Builds and returns a single line in plain text format.
+	 *
+	 * @since 10.1.4
+	 * @param string $area Indication of caller. It is recommended to pass __CLASS__.
+	 * @param string $level Log level. Should be any value of self::$logLevels.
+	 * @param string $message Plain text string to write to log file.
+	 * @param string $time Current time stamp of the logged message. Leave empty to auto calculate.
+	 * @return string Formatted log line.
+	 */
+	private static function composePlainLogLine( $level, $area, $message, &$time )
+	{
+		return sprintf( '%-25s %-8s %-15s %s'.PHP_EOL, $time, $level, $area, $message );
+	}
+
+	/**
+	 * Composes the error stack.
+	 *
+	 * @since 10.1.4
+	 * @param Exception $exception
+	 * @return string The stack that led to the exception.
+	 */
+	private static function composeStack( $exception )
+	{
+		$stack = "\nStack:\n".self::getDebugBackTrace();
+		if( $exception ) {
+			$stack .= "\n-------------\nException Message: ".$exception->getMessage();
+			if( get_class( $exception ) == '' ) {
+				$stack .= "\nException Details: ".$exception->getDetail();
+			}
+			$stack .= "\nException Stack:\n".self::getExceptionBackTrace( $exception );
+		}
+
+		return self::encodeLogMessage( $stack );
+	}
 
 	/**
 	 * Copy constructor, made private to avoid creating instances.
@@ -431,64 +514,31 @@ class LogHandler
 
 	/**
 	 * Builds and returns a single line with given logging information.
-	 * Supports plain and html formats.
-	 * Called for every Log operation.
 	 *
-	 * @param string $area    Indication of caller. It is recomended to pass __CLASS__.
-	 * @param string $level   Log level. Should be any value of self::$logLevels.
+	 * Supports plain and html formats. Called for every Log operation.
+	 *
+	 * @param string $area Indication of caller. It is recommended to pass __CLASS__.
+	 * @param string $level Log level. Should be any value of self::$logLevels.
 	 * @param string $message HTML formatted string to write to log file.
-	 * @param string $time    Current time stamp of the logged message. Leave empty to auto calculate.
+	 * @param string $time Current time stamp of the logged message. Leave empty to auto calculate.
 	 * @param string $logFile File name of the current log file. Use to refer from error log to current log.
 	 * @return string Formatted log line.
 	 */
 	private static function getLogLine( $level, $area, $message, &$time, $logFile )
 	{
 		if( !$time ) {
-			list($ms, $sec) = explode(" ", microtime()); // get seconds with ms part
-			$msFmt = sprintf( '%03d', round( $ms*1000, 0 ));
-			$time = date('Y-m-d H:i:s',$sec).'.'.$msFmt;
+			list( $microSeconds, $seconds ) = explode( " ", microtime() );
+			$microsecondsFormatted = sprintf( '%03d', round( $microSeconds * 1000, 0 ) );
+			$time = date( 'Y-m-d H:i:s', $seconds ).'.'.$microsecondsFormatted;
 		}
+
 		if( LOGFILE_FORMAT == 'plain' ) {
-			$line = sprintf( '%-25s %-8s %-15s %s'.PHP_EOL, $time, $level, $area, $message );
-		} else { // html (or other?)
-			if( $logFile ) {
-				$logFileRef = SERVERURL_ROOT.INETROOT.'/server/admin/showlog.php?act=logfile'.
-								'&file='.basename( $logFile ).'#'.$time;
-				$reference = '<br/><a href="'.$logFileRef.'">Show full context</a>';
-			} else {
-				$reference = '';
-			}
-			$levColor = ($level == 'ERROR') ? '#ff0000' : (($level == 'WARN') ? '#ffaa00' : '#00cc00'); // red,orange,green
-			$message = self::removeHtmlPhpTags( $message );
-			$line = 
-				'<tr class="d" id="'.$time.'">'.
-					'<td><nobr>'.$time.'</nobr>'.$reference.'</td>'.
-					'<td><font color="'.$levColor.'">'.$level.'</font></td>'.
-					'<td>'.$area.'</td><td>'.nl2br($message).'</td>'.
-				'</tr>'.PHP_EOL;
+			$line = self::composePlainLogLine( $level, $area, $message, $time );
+		} else { // HTML.
+			$line = self::composeHtmlLogLine( $level, $area, $message, $time, $logFile );
 		}
+
 		return $line;
-	}
-
-	/**
-	 * Removes HTML/PHP tags from the message.
-	 *
-	 * Not all tags are removed. For the 'webservice' area the message contains a link and the <a> tag is not stripped
-	 * from the message. If a (new) tag is needed just add it to the $allowedTags. Note that tags between the allowed
-	 * tags are still removed. So '<code>Color 00FFFF7c8ff"><script>alert(1)</script>c24dfbe4f7f<code>' will become
-	 * '<code>Color 00FFFF7c8ff">alert(1)c24dfbe4f7f<code>' after the tags are removed.
-	 * Policy is to allow no tags apart from the exceptions.
-	 * See EN-88894, EN-85255, EN-83733.
-	 *
-	 * @param string $message
-	 * @return string stripped message.
-	 */
-	private static function removeHtmlPhpTags( $message )
-	{
-		$allowedTags = '<br><code><a><p>';
-		$result = strip_tags( $message, $allowedTags );
-
-		return $result;
 	}
 
 	/**
@@ -727,50 +777,67 @@ class LogHandler
 
 	/**
 	 * Writes one log entry to the log file.
+	 *
+	 * Before the message is written to the log file it will be encoded in case the log format is HTML.
 	 * Use debugMode() function in case you want to write large amount of data, typically
 	 * through print_r($data,true). See file header of this module how to do such.
 	 *
-	 * @param string $area    Indication of caller. It is recomended to pass __CLASS__.
-	 * @param string $level   Log level. Should be any value of self::$logLevels.
-	 * @param string $message HTML formatted string to write to log file.
+	 * @param string $area Indication of caller. It is recommended to pass __CLASS__.
+	 * @param string $level Log level. Should be any value of self::$logLevels.
+	 * @param string $message String to write to log file.
 	 * @param Exception|null $exception Optionally, provide a caught exception to log all details for as well.
 	 */
-	public static function Log( $area, $level, $message, $exception=null )
+	public static function Log( $area, $level, $message, $exception = null )
+	{
+		$message = self::encodeLogMessage( $message );
+		self::logRaw( $area, $level, $message, $exception );
+	}
+
+	/**
+	 * Writes one log entry to the log file.
+	 *
+	 * No encoding is done on the message. Use this method when message is already correctly encoded. Especially in case
+	 * the log format is HTML it is important that the message is correctly encoded to prevent JavaScript injection.
+	 * To prevent injection use the self::encodeLogMessage generate a secure log message. If a (part of the) message
+	 * should not be encoded use the self::composeCodeBlock method to generate a secure message.
+	 * Use debugMode() function in case you want to write large amount of data, typically
+	 * through print_r($data,true). See file header of this module how to do such.
+	 *
+	 * @since 10.1.4
+	 * @param string $area Indication of caller. It is recommended to pass __CLASS__.
+	 * @param string $level Log level. Should be any value of self::$logLevels.
+	 * @param string $message String to write to log file.
+	 * @param Exception|null $exception Optionally, provide a caught exception to log all details for as well.
+	 */
+	public static function logRaw( $area, $level, $message, $exception = null )
 	{
 		// Quit when logging feature is disabled
 		if( OUTPUTDIRECTORY == '' || self::$debugLevel == 'NONE' ) {
 			return;
 		}
-   		
+
 		// Quit when given log level is too detailed (compared to configured level by system admin)
-		if( self::$logLevels[self::$debugLevel] < self::$logLevels[$level] ) {
+		if( self::$logLevels[ self::$debugLevel ] < self::$logLevels[ $level ] ) {
 			return;
 		}
-   		// Suppress logging for frequently polling services (except when there are errors or warnings).
+		// Suppress logging for frequently polling services (except when there are errors or warnings).
 		if( $level != 'ERROR' && $level != 'WARN' && self::suppressLoggingForService() ) {
 			return;
 		}
 
 		// Insert header with calling script name, only for first log of this session
-		if(self::$logged) {
-			$header = '' ;
-		} else  {
+		if( self::$logged ) {
+			$header = '';
+		} else {
 			$header = self::getLogRequestHeader();
 			self::$logged = true;
 		}
 		$msg = $header;
 
 		// Add calling stack information in debug mode for errors and warnings.
-		$isDebugWarnError = (self::$debugLevel == 'DEBUG' && ($level == 'ERROR' || $level == 'WARN'));
+		$isDebugWarnError = ( self::$debugLevel == 'DEBUG' && ( $level == 'ERROR' || $level == 'WARN' ) );
 		if( $isDebugWarnError ) {
-			$message .= "\nStack:\n".self::getDebugBackTrace();
-			if( $exception ) {
-				$message .= "\n-------------\nException Message: ".$exception->getMessage();
-				if( get_class($exception) == '' ) {
-					$message .= "\nException Details: ".$exception->getDetail();
-				}
-				$message .= "\nException Stack:\n".self::getExceptionBackTrace( $exception );
-			}
+			$message .= self::composeStack( $exception );
 		}
 
 		// Format message to log
@@ -784,7 +851,7 @@ class LogHandler
 		}
 
 		// Insert cached context when not written before
-		if( !empty(self::$context) && !self::$wroteContext ) {
+		if( !empty( self::$context ) && !self::$wroteContext ) {
 			$msg = self::$context.$msg;
 			self::$wroteContext = true;
 			self::$context = '';
@@ -792,11 +859,11 @@ class LogHandler
 
 		// Write log to file
 		$logFile = self::getLogFile();
-		if( !empty($logFile) ) {
+		if( !empty( $logFile ) ) {
 			$handle = self::openFile( $logFile, 'a+' );
 			if( $handle ) {
 				fwrite( $handle, $msg );
-				// In debug mode, make sure the last log is written to file, so in case of an 
+				// In debug mode, make sure the last log is written to file, so in case of an
 				// unexpected PHP crash, we know what happened right before that point.
 				// For production, we do not like the penalty for the delay.
 				if( self::$debugLevel == 'DEBUG' ) {
@@ -808,13 +875,13 @@ class LogHandler
 		// For debugging convenience, collect errors and warning to higher level error log file
 		if( $isDebugWarnError ) {
 			$logFolder = self::getLogFolder();
-			if( !empty($logFolder) ) {
-				$fileExt = (LOGFILE_FORMAT == 'plain') ? '.txt' : '.htm';
+			if( !empty( $logFolder ) ) {
+				$fileExt = ( LOGFILE_FORMAT == 'plain' ) ? '.txt' : '.htm';
 				$handle = self::openFile( $logFolder.'ent_log_errors'.$fileExt, 'a+' );
 				if( $handle ) {
 					$errMsg = $header.self::getLogLine( $level, $area, $message, $time, $logFile );
 					fwrite( $handle, $errMsg );
-					// In debug mode, make sure the last log is written to file, so in case of an 
+					// In debug mode, make sure the last log is written to file, so in case of an
 					// unexpected PHP crash, we know what happened right before that point.
 					// For production, we do not like the penalty for the delay.
 					if( self::$debugLevel == 'DEBUG' ) {
@@ -823,6 +890,45 @@ class LogHandler
 				}
 			}
 		}
+	}
+
+	/**
+	 * Ensures that a string is properly encoded before sending it to the log file.
+	 *
+	 * This is especially needed when the log format is 'html'. All special characters are converted to html entities.
+	 * The new line markers (\r\n) are replaced by '<br/>' to support line breaks in case of 'html' format.
+	 *
+	 * @since 10.1.4
+	 * @param string $message
+	 * @return string encode message
+	 */
+	public static function encodeLogMessage( $message )
+	{
+		$result = $message;
+		if( LOGFILE_FORMAT == 'html' ) {
+			$result = htmlentities( $message, ENT_SUBSTITUTE );
+			$result = nl2br( $result );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Adds formatting to a 'code' fragment so it is nicely displayed.
+	 *
+	 * @since 10.1.4
+	 * @param string $codeBlock
+	 * @return string code fragment ready for display.
+	 */
+	public static function composeCodeBlock( $codeBlock )
+	{
+		$result = $codeBlock;
+		if( LOGFILE_FORMAT == 'html' ) {
+			$result = self::encodeLogMessage( $codeBlock );
+			$result = "<code>$result</code>";
+		}
+
+		return $result;
 	}
 
 	/**
@@ -1020,7 +1126,7 @@ class LogHandler
 				$msg = '<a href="'.SERVERURL_ROOT.INETROOT.'/server/admin/showlog.php?act=logfile'.
 						'&file='.basename($fileName).'">'.$methodName.' '.
 						($isRequest ? 'request' : 'response' ).'</a>';
-				LogHandler::Log( 'webservice', 'DEBUG',  $msg );
+				self::logRaw( 'webservice', 'DEBUG',  $msg );
 			}
 		}
 	}

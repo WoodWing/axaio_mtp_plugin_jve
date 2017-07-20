@@ -425,7 +425,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflJSON_DeleteObjects_TestC
 			// And, INFO should not be logged onto screen, so we skip those.
 			$this->setResult( 'ERROR', $title .'<br/>Details: '. $message );
 		} else {
-			LogHandler::Log('DeleteObjectTest',$logLevel, $title .'<br/>Details: '. $message );
+			LogHandler::Log('DeleteObjectTest',$logLevel, "{$title}\r\nDetails: {$message}" );
 		}
  	}
 }
