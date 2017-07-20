@@ -191,13 +191,13 @@ class ElvisSessionUtil
 	 * Returns semaphore name to be used for the Login operation for a particular user.
 	 *
 	 * @since 10.1.4
-	 * @return string The Semaphore name which is 'ElvSyncLogIn_' + user_database_Id
+	 * @return string The Semaphore name which is 'ElvisSyncLogin_' + user_database_Id
 	 */
-	public static function getElvisSyncSemaphoreName()
+	private static function getElvisSyncLoginSemaphoreName()
 	{
 		require_once BASEDIR .'/server/bizclasses/BizSession.class.php';
 		$userId = BizSession::getUserInfo( 'id' );
-		$semaphoreName = 'ElvSyncLogIn_' . $userId;
+		$semaphoreName = 'ElvisSyncLogin_' . $userId;
 		return $semaphoreName;
 	}
 
@@ -210,7 +210,7 @@ class ElvisSessionUtil
 	public static function isLoggingIn()
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
-		$syncLoginExpired = BizSemaphore::isSemaphoreExpiredByEntityId( self::getElvisSyncSemaphoreName() );
+		$syncLoginExpired = BizSemaphore::isSemaphoreExpiredByEntityId( self::getElvisSyncLoginSemaphoreName() );
 		return !$syncLoginExpired ? true : false;
 	}
 
@@ -224,7 +224,7 @@ class ElvisSessionUtil
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 		$bizSemaphore = new BizSemaphore();
-		$semaphoreName = self::getElvisSyncSemaphoreName();
+		$semaphoreName = self::getElvisSyncLoginSemaphoreName();
 		$bizSemaphore->setLifeTime( self::$loginSemaphoreLifeTime ); // in seconds.
 		$attempts = array( 0 ); // in milliseconds ( only 1 attempt and no wait )
 		$bizSemaphore->setAttempts( $attempts );
@@ -250,7 +250,7 @@ class ElvisSessionUtil
 	{
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 		$bizSemaphore = new BizSemaphore();
-		$semaphoreName = self::getElvisSyncSemaphoreName();
+		$semaphoreName = self::getElvisSyncLoginSemaphoreName();
 		$lifeTime = self::$loginSemaphoreLifeTime; // in seconds
 		$attempts = array_fill( 0, 4 * $lifeTime, 250 ); // 4*60 attempts x 250ms wait = 60s max total wait
 		$bizSemaphore->setLifeTime( $lifeTime );
