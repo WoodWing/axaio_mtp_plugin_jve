@@ -79,9 +79,6 @@ class ElvisAMFClient extends ElvisClient
 	{
 		$started = time();
 		$result = self::callElvisAmfServiceAndHandleCookies( $service, $operation, $params, $operationTimeout );
-
-		// When performing a logon request but user is not authorized, it means that Elvis is responsive but the user
-		// credentials are not valid. Retry does not make sense so we simply bail out in this case.
 		$isLogin = $operation == 'login';
 
 		// When performing a logon request but the connection with the Elvis node got broken (e.g. ELB says node not healthy)
@@ -157,16 +154,11 @@ class ElvisAMFClient extends ElvisClient
 
 		$resetCookiesOperationList = array( "login" ); // A list of operation(s) where the cookies should be reset ( to obtain a new session/cookies )
 		if( in_array( $operation, $resetCookiesOperationList ) ) {
-			// Resetting cookies in the memory and in the database ( Typically for Login, we want to refresh everything )
-			$client->setCookies( array() );
-			ElvisSessionUtil::clearSessionCookies();
+			$cookies = array(); // Reset cookies for Login requests to let the Load Balancer pick a new Elvis node (to release stickyness).
+		} else {
+			$cookies = ElvisSessionUtil::getSessionCookies();
 		}
-
-		$cookies = array();
-		$cookies = ElvisSessionUtil::getSessionCookies();
-		if( $cookies ) {
-			$client->setCookies( $cookies );
-		}
+		$client->setCookies( $cookies );
 		if( defined( 'ELVIS_CURL_OPTIONS' ) ) { // hidden option
 			$client->setCurlOptions( unserialize( ELVIS_CURL_OPTIONS ) );
 		}
@@ -174,11 +166,11 @@ class ElvisAMFClient extends ElvisClient
 		self::logService( 'Elvis_'.$service.'_'.$operation, $params, $cookies, true );
 
 		$result = null;
+		$cookies = null;
 		try {
 			$servicePath = $service.'.'.$operation;
 			$result = $client->sendRequest( $servicePath, $params, $operationTimeout, ELVIS_CONNECTION_TIMEOUT );
 			$cookies = $client->getCookies();
-			ElvisSessionUtil::updateSessionCookies( $cookies );
 			if( get_class( $result ) == 'SabreAMF_AMF3_ErrorMessage' ) {
 				self::logService( 'Elvis_'.$service.'_'.$operation, $result, $cookies, null );
 			} else {
@@ -187,21 +179,25 @@ class ElvisAMFClient extends ElvisClient
 		} catch( Exception $e ) {
 			self::logService( 'Elvis_'.$service.'_'.$operation, $e->getMessage(), $cookies, null );
 		}
-		self::detectError( $result, $service, $operation );
+		self::detectError( $result );
+
+		// If troubles on login or when Elvis node became unhealthy, clear cookies in the PHP session. This tells other
+		// processes that the session with Elvis is lost. That will bring them to the idea to relogin (or to wait for
+		// other parallel process to relogin) before firing new requests.
+		if( !self::$lastResponseIsSessionError && !self::$lastResponseIsAuthError && !self::$lastResponseIsFatalError ) {
+			ElvisSessionUtil::updateSessionCookies( $cookies );
+		}
+		self::throwIfChancelessError( $result, $service, $operation );
 		return $result;
 	}
 
 	/**
-	 * Handle an AMF response; Detect errors and bail out when retry does not make sense.
+	 * Handle an AMF response and detect any error.
 	 *
 	 * @since 10.1.4
 	 * @param mixed $result
-	 * @param string $service The service name to be called.
-	 * @param string $operation The name of the operation to be called in the service.
-	 * @throws BizException
-	 * @throws ElvisCSException
 	 */
-	private static function detectError( $result, $service, $operation )
+	private static function detectError( $result )
 	{
 		$isAmfErrorMessage = !is_null( $result ) && get_class( $result ) == 'SabreAMF_AMF3_ErrorMessage';
 
@@ -217,14 +213,28 @@ class ElvisAMFClient extends ElvisClient
 		self::$lastResponseIsFatalError = is_null( $result ) ||
 			( $isAmfErrorMessage && !self::$lastResponseIsSessionError && !self::$lastResponseIsExceptionError );
 
-		if( intval(self::$lastResponseIsSessionError) + intval(self::$lastResponseIsAuthError) +
-			intval(self::$lastResponseIsExceptionError) + intval(self::$lastResponseIsFatalError) > 1 ) {
+		if( intval( self::$lastResponseIsSessionError ) + intval( self::$lastResponseIsAuthError ) +
+			intval( self::$lastResponseIsExceptionError ) + intval( self::$lastResponseIsFatalError ) > 1
+		) {
 			LogHandler::Log( 'ELIVS', 'ERROR', 'There should be only ONE error flag set to TRUE, '.
-				'but we found two or more: '.intval(self::$lastResponseIsSessionError).'|'.intval(self::$lastResponseIsAuthError).
-				'|'.intval(self::$lastResponseIsExceptionError).'|'.intval(self::$lastResponseIsFatalError) );
+				'but we found two or more: '.intval( self::$lastResponseIsSessionError ).'|'.intval( self::$lastResponseIsAuthError ).
+				'|'.intval( self::$lastResponseIsExceptionError ).'|'.intval( self::$lastResponseIsFatalError ) );
 		}
+	}
 
-		// Below, we bail out for errors on service calls that should never be retried...
+	/**
+	 * Check errors codes and bail out when retry of same request won't make sense.
+	 *
+	 * @since 10.1.4
+	 * @param mixed $result
+	 * @param string $service The service name to be called.
+	 * @param string $operation The name of the operation to be called in the service.
+	 * @throws BizException
+	 * @throws ElvisCSException
+	 */
+	private static function throwIfChancelessError( $result, $service, $operation )
+	{
+		$isAmfErrorMessage = !is_null( $result ) && get_class( $result ) == 'SabreAMF_AMF3_ErrorMessage';
 
 		// Bail out when Elvis throws a production error.
 		if( self::$lastResponseIsExceptionError ) {
@@ -236,7 +246,8 @@ class ElvisAMFClient extends ElvisClient
 			throw $rootCause;
 		}
 
-		// Bail out when user did logon but credentials are not valid.
+		// When performing a logon request but user is not authorized, it means that Elvis is responsive but the user
+		// credentials are not valid. Retry does not make sense so we simply bail out in this case.
 		if( self::$lastResponseIsAuthError ) {
 			$detail = 'Calling Elvis '.$service.'.'.$operation.' failed. ';
 			$message = $result->body->loginFaultMessage;
@@ -358,38 +369,22 @@ class ElvisAMFClient extends ElvisClient
 	 */
 	private static function sequentialLogin( $credentials )
 	{
-		require_once __DIR__ . '/../util/ElvisSessionUtil.php';
-		if( ElvisSessionUtil::isLoggingIn() ) {
+		require_once __DIR__.'/../util/ElvisSessionUtil.php';
+		$loginSemaId = ElvisSessionUtil::createLoginSemaphore();
+		if( $loginSemaId ) {
 			LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.
-				': Another process is doing the Login for this user so simply wait for that to complete.' );
+				': Created a semaphore to make sure only this process handles the Login for the user.' );
+			try {
+				self::loginByCredentials( $credentials );
+				ElvisSessionUtil::releaseLoginSemaphore( $loginSemaId );
+			} catch( BizException $e ) {
+				ElvisSessionUtil::releaseLoginSemaphore( $loginSemaId );
+				throw $e;
+			}
+		} else { // Failed getting semaphore for Login.
+			LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.
+				': Failed getting semaphore. Another process is doing the login for this user so simply wait for that to complete.' );
 			ElvisSessionUtil::waitUntilLoginSemaphoreHasReleased();
-			if( !ElvisSessionUtil::hasSession() ) {
-				$detail = 'Login handled by another process did not seem to be successful.';
-				self::throwExceptionForElvisCommunicationFailure( $detail );
-			}
-		} else {
-			$loginSemaId = ElvisSessionUtil::createLoginSemaphore();
-			if( $loginSemaId ) {
-				LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.
-					': Created a semaphore to make sure only this process handles the Login for the user.' );
-				try {
-					self::loginByCredentials( $credentials );
-					ElvisSessionUtil::releaseLoginSemaphore( $loginSemaId );
-				} catch( BizException $e ) {
-					if( $loginSemaId ) {
-						ElvisSessionUtil::releaseLoginSemaphore( $loginSemaId );
-					}
-					throw $e;
-				}
-			} else { // Failed getting semaphore for Login.
-				LogHandler::Log( 'ELVIS', 'DEBUG', __METHOD__.
-					': Failed getting semaphore. Another process is doing the login for this user so simply wait for that to complete.' );
-				ElvisSessionUtil::waitUntilLoginSemaphoreHasReleased();
-				if( !ElvisSessionUtil::hasSession() ) {
-					$detail = 'Login handled by another process did not seem to be successful.';
-					self::throwExceptionForElvisCommunicationFailure( $detail );
-				}
-			}
 		}
 	}
 	

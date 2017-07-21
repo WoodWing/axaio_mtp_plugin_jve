@@ -132,16 +132,6 @@ class ElvisSessionUtil
 	}
 
 	/**
-	 * Check if there is an Elvis session available.
-	 *
-	 * @return boolean
-	 */
-	public static function hasSession()
-	{
-		return (bool)self::getSessionCookies();
-	}
-
-	/**
 	 * Retrieve the Elvis session cookies from the Enterprise session.
 	 *
 	 * @return array|null Cookies. NULL when no session available.
@@ -159,14 +149,6 @@ class ElvisSessionUtil
 	private static function saveSessionCookies( array $cookies )
 	{
 		self::setSessionVar( 'sessionCookies', $cookies );
-	}
-
-	/**
-	 * Removes the Elvis session cookies from the Enterprise session.
-	 */
-	public static function clearSessionCookies()
-	{
-		self::saveSessionCookies( array() );
 	}
 
 	/**
@@ -199,19 +181,6 @@ class ElvisSessionUtil
 		$userId = BizSession::getUserInfo( 'id' );
 		$semaphoreName = 'ElvisSyncLogin_' . $userId;
 		return $semaphoreName;
-	}
-
-	/**
-	 * Checks if there's any Login operation being executed for this particular user.
-	 *
-	 * @since 10.1.4
-	 * @return bool True when Login is being executed, false otherwise.
-	 */
-	public static function isLoggingIn()
-	{
-		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
-		$syncLoginExpired = BizSemaphore::isSemaphoreExpiredByEntityId( self::getElvisSyncLoginSemaphoreName() );
-		return !$syncLoginExpired ? true : false;
 	}
 
 	/**
