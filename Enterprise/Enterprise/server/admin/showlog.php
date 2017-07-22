@@ -180,13 +180,14 @@ class WW_Admin_ShowLog
 								'<td><a href="'.$archiveUrl.'">'.self::composeArchiveIcon().'</a></td>'.
 								'<td><a href="'.$indexUrl.'">'.formvar( $clientIpFolder ).'</a></td>';
 						} else {
-							$page .= '<tr><td colspan="2"/>';
+							$page .= '<tr><td colspan="3"/>';
 						}
 						$page .= '<td>'.formvar( $onlineUser['User'] ).'</td>'.
 							'<td>'.formvar( $onlineUser['Client'] ).'</td></tr>';
 					}
 				} else {
 					$page .= '<tr><td><a href="'.$deleteUrl.'">'.self::composeDeleteIcon().'</a></td>'.
+						'<td><a href="'.$archiveUrl.'">'.self::composeArchiveIcon().'</a></td>'.
 						'<td><a href="'.$indexUrl.'">'.formvar( $clientIpFolder ).'</a></td><td colspan="2"/></tr>';
 				}
 			}
