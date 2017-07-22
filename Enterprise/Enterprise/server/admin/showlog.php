@@ -119,7 +119,6 @@ switch( $_REQUEST['act'] ) {
  *
  * @since 10.1.4
  * @todo Use a HTML template and make it an official (and localised) admin app under Advanced menu.
- * @todo Support ZIP+download an entire log folder.
  * @todo Make the hyperlinks work for the logfiles itself once downloaded to ease analysing on other machine.
  */
 class WW_Admin_ShowLog
