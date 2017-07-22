@@ -386,6 +386,7 @@ class LogHandler
 	/**
 	 * Returns the (daily) folders that resides directly under the root log folder.
 	 *
+	 * @since 10.1.4
 	 * @return array List of folder names (not the full paths).
 	 */
 	public static function listDailyRootFolders()
@@ -403,6 +404,43 @@ class LogHandler
 			}
 		}
 		return $dailyFolders;
+	}
+
+	/**
+	 * Removes the files and folders under the given daily log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 */
+	public static function deleteDailyRootFolder( $dailyFolder )
+	{
+		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check IP notation (anti hack)
+			$rootDir = OUTPUTDIRECTORY;
+			if( $rootDir && is_dir( $rootDir ) ) {
+				$dailyDir = $rootDir.'/'.$dailyFolder;
+				self::deleteDir( $dailyDir );
+			}
+		}
+	}
+
+	/**
+	 * Archives the files and folders under the given daily log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @return string Name of the archived file.
+	 */
+	public static function archiveDailyRootFolder( $dailyFolder )
+	{
+		$archiveFilePath = '';
+		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check IP notation (anti hack)
+			$rootDir = OUTPUTDIRECTORY;
+			if( $rootDir && is_dir( $rootDir ) ) {
+				$dailyDir = $rootDir.'/'.$dailyFolder;
+				$archiveFilePath = self::archiveDir( $dailyDir );
+			}
+		}
+		return $archiveFilePath;
 	}
 
 	/**
@@ -432,6 +470,45 @@ class LogHandler
 			}
 		}
 		return $clientIpFolders;
+	}
+
+	/**
+	 * Removes the given ip log folder and all the log files that resides inside that folder.
+	 *
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @param string $clientIpFolder The name of the folder (not the full path).
+	 */
+	public static function deleteClientIpSubFolder( $dailyFolder, $clientIpFolder )
+	{
+		if( self::isValidDailyFolderName( $dailyFolder ) && // check 'Ymd' date notation (anti hack)
+			self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
+			$rootDir = OUTPUTDIRECTORY;
+			if( $rootDir && is_dir( $rootDir ) ) {
+				$clientIpDir = $rootDir.'/'.$dailyFolder.'/'.$clientIpFolder;
+				self::deleteDir( $clientIpDir );
+			}
+		}
+	}
+
+	/**
+	 * Archives the given ip log folder and all the log files that resides inside that folder.
+	 *
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @param string $clientIpFolder The name of the folder (not the full path).
+	 * @return string Name of the archived file.
+	 */
+	public static function archiveClientIpSubFolder( $dailyFolder, $clientIpFolder )
+	{
+		$archiveFilePath = '';
+		if( self::isValidDailyFolderName( $dailyFolder ) && // check 'Ymd' date notation (anti hack)
+			self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
+			$rootDir = OUTPUTDIRECTORY;
+			if( $rootDir && is_dir( $rootDir ) ) {
+				$clientIpDir = $rootDir.'/'.$dailyFolder.'/'.$clientIpFolder;
+				$archiveFilePath = self::archiveDir( $clientIpDir );
+			}
+		}
+		return $archiveFilePath;
 	}
 
 	/**
@@ -490,6 +567,47 @@ class LogHandler
 			}
 		}
 		return $content;
+	}
+
+	/**
+	 * Recursively removes the given folder and any files and folders inside.
+	 *
+	 * @since 10.1.4
+	 * @param string $dirPath
+	 */
+	private static function deleteDir( $dirPath )
+	{
+		if( is_dir( $dirPath ) ) {
+			if( substr( $dirPath, strlen( $dirPath ) - 1, 1 ) != '/' ) {
+				$dirPath .= '/';
+			}
+			$files = glob( $dirPath.'*', GLOB_MARK );
+			if( $files ) foreach( $files as $file ) {
+				if( is_dir( $file ) ) {
+					self::deleteDir( $file );
+				} elseif( is_file( $file ) ) {
+					unlink( $file );
+				}
+			}
+			rmdir( $dirPath );
+		}
+	}
+
+	/**
+	 * Creates a ZIP file of a given folder that contains all files and subfolders inside.
+	 *
+	 * @since 10.1.4
+	 * @param string $dirPath
+	 * @return string Path of created archive file.
+	 */
+	private static function archiveDir( $dirPath )
+	{
+		$archivePath = $dirPath.'.zip';
+		require_once BASEDIR.'/server/utils/ZipUtility.class.php';
+		$zipUtility = WW_Utils_ZipUtility_Factory::createZipUtility();
+		$zipUtility->createZipArchive( $archivePath );
+		$zipUtility->addDirectoryToArchive( $dirPath . '/' );
+		return $archivePath;
 	}
 
 	/**
