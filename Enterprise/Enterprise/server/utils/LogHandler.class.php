@@ -384,19 +384,50 @@ class LogHandler
 	}
 
 	/**
+	 * Returns the configured OUTPUTDIRECTORY option value (without ending '/'), but only when folder exists.
+	 *
+	 * @since 10.1.4
+	 * @return string Full file path when valid, or EMPTY when not valid.
+	 */
+	private static function getValidRootLogFolder()
+	{
+		$rootDir = OUTPUTDIRECTORY;
+		if( $rootDir && is_dir( $rootDir ) ) {
+			$rootDir = substr( $rootDir, 0, -1 ); // remove '/' from the end
+		} else {
+			$rootDir = '';
+		}
+		return $rootDir;
+	}
+
+	/**
+	 * Returns the folder name of the root log folder.
+	 *
+	 * @since 10.1.4
+	 * @return string Folder name (not the full path).
+	 */
+	public static function getRootLogFolderName()
+	{
+		$rootFolder = '';
+		if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+			$rootFolder = basename( $rootDir );
+		}
+		return $rootFolder;
+	}
+
+	/**
 	 * Returns the (daily) folders that resides directly under the root log folder.
 	 *
 	 * @since 10.1.4
 	 * @return array List of folder names (not the full paths).
 	 */
-	public static function listDailyRootFolders()
+	public static function listDailySubFolders()
 	{
 		$dailyFolders = array();
-		$rootDir = OUTPUTDIRECTORY;
-		if( $rootDir && is_dir( $rootDir ) ) {
+		if( ( $rootDir = self::getValidRootLogFolder() ) ) {
 			$folders = scandir( $rootDir );
 			if( $folders ) foreach( $folders as $folder ) {
-				if( $folder[0] != '.' && is_dir( $rootDir.$folder ) ) {
+				if( $folder[0] != '.' && is_dir( "{$rootDir}/{$folder}" ) ) {
 					if( self::isValidDailyFolderName( $folder ) ) { // check 'Ymd' date notation (anti hack)
 						$dailyFolders[] = $folder;
 					}
@@ -407,17 +438,43 @@ class LogHandler
 	}
 
 	/**
+	 * Removes the files and folders under the root log folder.
+	 *
+	 * @since 10.1.4
+	 */
+	public static function deleteRootFolder()
+	{
+		if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+			self::deleteDir( $rootDir );
+		}
+	}
+
+	/**
+	 * Archives the files and folders under the root log folder.
+	 *
+	 * @since 10.1.4
+	 * @return string Name of the archived file.
+	 */
+	public static function archiveRootFolder()
+	{
+		$archiveFilePath = '';
+		if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+			$archiveFilePath = self::archiveDir( $rootDir );
+		}
+		return $archiveFilePath;
+	}
+
+	/**
 	 * Removes the files and folders under the given daily log folder.
 	 *
 	 * @since 10.1.4
 	 * @param string $dailyFolder The name of the folder (not the full path).
 	 */
-	public static function deleteDailyRootFolder( $dailyFolder )
+	public static function deleteDailyFolder( $dailyFolder )
 	{
 		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check IP notation (anti hack)
-			$rootDir = OUTPUTDIRECTORY;
-			if( $rootDir && is_dir( $rootDir ) ) {
-				$dailyDir = $rootDir.'/'.$dailyFolder;
+			if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+				$dailyDir = "{$rootDir}/{$dailyFolder}";
 				self::deleteDir( $dailyDir );
 			}
 		}
@@ -430,13 +487,12 @@ class LogHandler
 	 * @param string $dailyFolder The name of the folder (not the full path).
 	 * @return string Name of the archived file.
 	 */
-	public static function archiveDailyRootFolder( $dailyFolder )
+	public static function archiveDailyFolder( $dailyFolder )
 	{
 		$archiveFilePath = '';
 		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check IP notation (anti hack)
-			$rootDir = OUTPUTDIRECTORY;
-			if( $rootDir && is_dir( $rootDir ) ) {
-				$dailyDir = $rootDir.'/'.$dailyFolder;
+			if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+				$dailyDir = "{$rootDir}/{$dailyFolder}";
 				$archiveFilePath = self::archiveDir( $dailyDir );
 			}
 		}
@@ -454,9 +510,8 @@ class LogHandler
 	{
 		$clientIpFolders = array();
 		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
-			$rootDir = OUTPUTDIRECTORY;
-			if( $rootDir && is_dir( $rootDir ) ) {
-				$dailyDir = $rootDir.'/'.$dailyFolder;
+			if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+				$dailyDir = "{$rootDir}/{$dailyFolder}";
 				if( is_dir( $dailyDir ) ) {
 					$folders = scandir( $dailyDir );
 					if( $folders ) foreach( $folders as $folder ) {
@@ -475,6 +530,7 @@ class LogHandler
 	/**
 	 * Removes the given ip log folder and all the log files that resides inside that folder.
 	 *
+	 * @since 10.1.4
 	 * @param string $dailyFolder The name of the folder (not the full path).
 	 * @param string $clientIpFolder The name of the folder (not the full path).
 	 */
@@ -482,9 +538,8 @@ class LogHandler
 	{
 		if( self::isValidDailyFolderName( $dailyFolder ) && // check 'Ymd' date notation (anti hack)
 			self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
-			$rootDir = OUTPUTDIRECTORY;
-			if( $rootDir && is_dir( $rootDir ) ) {
-				$clientIpDir = $rootDir.'/'.$dailyFolder.'/'.$clientIpFolder;
+			if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+				$clientIpDir = "{$rootDir}/{$dailyFolder}/{$clientIpFolder}";
 				self::deleteDir( $clientIpDir );
 			}
 		}
@@ -493,6 +548,7 @@ class LogHandler
 	/**
 	 * Archives the given ip log folder and all the log files that resides inside that folder.
 	 *
+	 * @since 10.1.4
 	 * @param string $dailyFolder The name of the folder (not the full path).
 	 * @param string $clientIpFolder The name of the folder (not the full path).
 	 * @return string Name of the archived file.
@@ -502,9 +558,8 @@ class LogHandler
 		$archiveFilePath = '';
 		if( self::isValidDailyFolderName( $dailyFolder ) && // check 'Ymd' date notation (anti hack)
 			self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
-			$rootDir = OUTPUTDIRECTORY;
-			if( $rootDir && is_dir( $rootDir ) ) {
-				$clientIpDir = $rootDir.'/'.$dailyFolder.'/'.$clientIpFolder;
+			if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+				$clientIpDir = "{$rootDir}/{$dailyFolder}/{$clientIpFolder}";
 				$archiveFilePath = self::archiveDir( $clientIpDir );
 			}
 		}
@@ -522,17 +577,15 @@ class LogHandler
 	public static function listLogFiles( $dailyFolder, $clientIpFolder )
 	{
 		$logFiles = array();
-		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
-			if( self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
-				$rootDir = OUTPUTDIRECTORY;
-				if( $rootDir && is_dir( $rootDir ) ) {
-					$clientIpDir = $rootDir.'/'.$dailyFolder.'/'.$clientIpFolder;
-					if( is_dir( $clientIpDir ) ) {
-						$files = scandir( $clientIpDir );
-						if( $files ) foreach( $files as $file ) {
-							if( $file[0] != '.' && is_file( $clientIpDir.'/'.$file ) ) {
-								$logFiles[] = $file;
-							}
+		if( self::isValidDailyFolderName( $dailyFolder ) && // check 'Ymd' date notation (anti hack)
+			self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
+			if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+				$clientIpDir = "{$rootDir}/{$dailyFolder}/{$clientIpFolder}";
+				if( is_dir( $clientIpDir ) ) {
+					$files = scandir( $clientIpDir );
+					if( $files ) foreach( $files as $file ) {
+						if( $file[0] != '.' && is_file( "{$clientIpDir}/{$file}" ) ) {
+							$logFiles[] = $file;
 						}
 					}
 				}
@@ -553,12 +606,11 @@ class LogHandler
 	public static function getLogFileContent( $dailyFolder, $clientIpFolder, $logFile )
 	{
 		$content = '';
-		$rootDir = OUTPUTDIRECTORY;
-		if( $rootDir && is_dir( $rootDir ) ) {
-			if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
-				if( self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
-					if( self::isValidLogFileName( $logFile ) ) { // check dangerous chars (anti hack)
-						$file = OUTPUTDIRECTORY."/$dailyFolder/$clientIpFolder/$logFile";
+		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
+			if( self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
+				if( self::isValidLogFileName( $logFile ) ) { // check dangerous chars (anti hack)
+					if( ( $rootDir = self::getValidRootLogFolder() ) ) {
+						$file = "{$rootDir}/{$dailyFolder}/{$clientIpFolder}/{$logFile}";
 						if( is_file( $file ) ) {
 							$content = file_get_contents( $file );
 						}
@@ -602,11 +654,14 @@ class LogHandler
 	 */
 	private static function archiveDir( $dirPath )
 	{
-		$archivePath = $dirPath.'.zip';
-		require_once BASEDIR.'/server/utils/ZipUtility.class.php';
-		$zipUtility = WW_Utils_ZipUtility_Factory::createZipUtility();
-		$zipUtility->createZipArchive( $archivePath );
-		$zipUtility->addDirectoryToArchive( $dirPath . '/' );
+		$archivePath = '';
+		if( is_dir( $dirPath ) ) {
+			$archivePath = $dirPath.'.zip';
+			require_once BASEDIR.'/server/utils/ZipUtility.class.php';
+			$zipUtility = WW_Utils_ZipUtility_Factory::createZipUtility();
+			$zipUtility->createZipArchive( $archivePath );
+			$zipUtility->addDirectoryToArchive( $dirPath.'/' );
+		}
 		return $archivePath;
 	}
 

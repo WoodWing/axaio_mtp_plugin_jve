@@ -76,6 +76,17 @@ switch( $_REQUEST['act'] ) {
 		$app->showRootFolderIndex();
 	break;
 
+	case 'deleterootfolder':
+		$app = new WW_Admin_ShowLog();
+		$app->deleteRootFolder();
+		$app->showRootFolderIndex();
+		break;
+
+	case 'archiverootfolder':
+		$app = new WW_Admin_ShowLog();
+		$app->archiveRootFolder();
+		break;
+
 	case 'dailyfolderindex':
 		$app = new WW_Admin_ShowLog();
 		$app->showDailyFolderIndex();
@@ -135,17 +146,41 @@ class WW_Admin_ShowLog
 		$page = '<h2>Server Logging</h2>';
 		$page .= self::composeBreadcrumb().'<h3>Daily log folders</h3>';
 		$page .= '<table><tbody>';
-		$dailyFolders = LogHandler::listDailyRootFolders();
+		$dailyFolders = LogHandler::listDailySubFolders();
 		if( $dailyFolders ) foreach( $dailyFolders as $dailyFolder ) {
 			$indexUrl = 'showlog.php?act=dailyfolderindex&dailyfolder='.urlencode( $dailyFolder );
-			$deleteUrl = 'showlog.php?act=deletedailyfolder&dailyfolder='.urlencode( $dailyFolder );
-			$archiveUrl = 'showlog.php?act=archivedailyfolder&dailyfolder='.urlencode( $dailyFolder );
-			$page .= '<tr><td><a href="'.$deleteUrl.'">'.self::composeDeleteIcon().'</a></td>'.
-				'<td><a href="'.$archiveUrl.'">'.self::composeArchiveIcon().'</a></td>'.
-				'<td><a href="'.$indexUrl.'">'.formvar( $dailyFolder ).'</a></td></tr>';
+			$page .= '<tr><td><a href="'.$indexUrl.'">'.formvar( $dailyFolder ).'</a></td></tr>';
 		}
 		$page .= '</tbody></table>';
 		print HtmlDocument::buildDocument( $page );
+	}
+
+	/**
+	 * Deletes the root log folder and all its files and subfolders.
+	 *
+	 * @since 10.1.4
+	 */
+	public function deleteRootFolder()
+	{
+		$dailyFolder = $_GET['dailyfolder'];
+		LogHandler::deleteRootFolder();
+	}
+
+	/**
+	 * Archives the root log folder and all its files and subfolders.
+	 *
+	 * @since 10.1.4
+	 */
+	public function archiveRootFolder()
+	{
+		$archiveFilePath = LogHandler::archiveRootFolder();
+		if( $archiveFilePath ) {
+			header( 'Content-Type: application/zip' );
+			header( "Content-Disposition: attachment; filename=".basename( $archiveFilePath ) );
+			header( 'Content-length: '.filesize( $archiveFilePath ) );
+			print file_get_contents( $archiveFilePath );
+			unlink( $archiveFilePath );
+		}
 	}
 
 	/**
@@ -161,33 +196,25 @@ class WW_Admin_ShowLog
 		$dailyFolder = $_GET['dailyfolder'];
 		$page = '<h2>Server Logging</h2>';
 		$page .= self::composeBreadcrumb( $dailyFolder ).'<h3>Client IP log folders</h3>';
-		$page .= '<table><thead><tr><td colspan="2"/><td>Client IP</td><td>User</td><td>Application</td></tr></thead><tbody>';
+		$page .= '<table><thead><tr><td>Client IP</td><td>User</td><td>Application</td></tr></thead><tbody>';
 		$clientIpFolders = LogHandler::listClientIpSubFolders( $dailyFolder );
 		if( $clientIpFolders ) {
 			$onlineUsers = self::resolveOnlineUsersFromClientIps( $clientIpFolders );
 			foreach( $clientIpFolders as $clientIpFolder ) {
 				$indexUrl = 'showlog.php?act=clientipfolderindex&dailyfolder='.urlencode( $dailyFolder ).
 					'&clientipfolder='.urlencode( $clientIpFolder );
-				$deleteUrl = 'showlog.php?act=deleteclientipfolder&dailyfolder='.urlencode( $dailyFolder ).
-					'&clientipfolder='.urlencode( $clientIpFolder );
-				$archiveUrl = 'showlog.php?act=archiveclientipfolder&dailyfolder='.urlencode( $dailyFolder ).
-					'&clientipfolder='.urlencode( $clientIpFolder );
 				if( isset( $onlineUsers[ $clientIpFolder ] ) ) {
 					foreach( $onlineUsers[ $clientIpFolder ] as $index => $onlineUser ) {
 						if( $index == 0 ) {
-							$page .= '<tr><td><a href="'.$deleteUrl.'">'.self::composeDeleteIcon().'</a></td>'.
-								'<td><a href="'.$archiveUrl.'">'.self::composeArchiveIcon().'</a></td>'.
-								'<td><a href="'.$indexUrl.'">'.formvar( $clientIpFolder ).'</a></td>';
+							$page .= '<tr><td><a href="'.$indexUrl.'">'.formvar( $clientIpFolder ).'</a></td>';
 						} else {
-							$page .= '<tr><td colspan="3"/>';
+							$page .= '<tr><td/>';
 						}
 						$page .= '<td>'.formvar( $onlineUser['User'] ).'</td>'.
 							'<td>'.formvar( $onlineUser['Client'] ).'</td></tr>';
 					}
 				} else {
-					$page .= '<tr><td><a href="'.$deleteUrl.'">'.self::composeDeleteIcon().'</a></td>'.
-						'<td><a href="'.$archiveUrl.'">'.self::composeArchiveIcon().'</a></td>'.
-						'<td><a href="'.$indexUrl.'">'.formvar( $clientIpFolder ).'</a></td><td colspan="2"/></tr>';
+					$page .= '<tr><td><a href="'.$indexUrl.'">'.formvar( $clientIpFolder ).'</a></td><td colspan="2"/></tr>';
 				}
 			}
 		}
@@ -203,7 +230,7 @@ class WW_Admin_ShowLog
 	public function deleteDailyFolder()
 	{
 		$dailyFolder = $_GET['dailyfolder'];
-		LogHandler::deleteDailyRootFolder( $dailyFolder );
+		LogHandler::deleteDailyFolder( $dailyFolder );
 	}
 
 	/**
@@ -214,7 +241,7 @@ class WW_Admin_ShowLog
 	public function archiveDailyFolder()
 	{
 		$dailyFolder = $_GET['dailyfolder'];
-		$archiveFilePath = LogHandler::archiveDailyRootFolder( $dailyFolder );
+		$archiveFilePath = LogHandler::archiveDailyFolder( $dailyFolder );
 		if( $archiveFilePath ) {
 			header( 'Content-Type: application/zip' );
 			header( "Content-Disposition: attachment; filename=".basename( $archiveFilePath ) );
@@ -324,20 +351,32 @@ class WW_Admin_ShowLog
 	public static function composeBreadcrumb( $dailyFolder = null, $clientIpFolder = null )
 	{
 		$baseUrl = 'showlog.php?act=rootfolderindex';
-		$breadcrumb = '<a href="'.$baseUrl.'">'.formvar( '<root>' ).'</a>';
-
+		$breadcrumb = '... / <a href="'.$baseUrl.'">'.formvar( LogHandler::getRootLogFolderName() ).'</a>';
 		if( $dailyFolder ) {
-			$url = 'showlog.php?act=dailyfolderindex&dailyfolder='.urlencode( $dailyFolder );
-			$breadcrumb .= ' / <a href="'.$url.'">'.formvar( $dailyFolder ).'</a>';
+			$indexUrl = 'showlog.php?act=dailyfolderindex&dailyfolder='.urlencode( $dailyFolder );
+			$breadcrumb .= ' / <a href="'.$indexUrl.'">'.formvar( $dailyFolder ).'</a>';
+		}
+		if( $clientIpFolder ) {
+			$indexUrl = 'showlog.php?act=clientipfolderindex&dailyfolder='.urlencode( $dailyFolder ).
+				'&clientipfolder='.urlencode( $clientIpFolder );
+			$breadcrumb .= ' / <a href="'.$indexUrl.'">'.formvar( $clientIpFolder ).'</a>';
 		}
 
 		if( $clientIpFolder ) {
-			$url = 'showlog.php?act=clientipfolderindex&dailyfolder='.urlencode( $dailyFolder ).
+			$deleteUrl = 'showlog.php?act=deleteclientipfolder&dailyfolder='.urlencode( $dailyFolder ).
 				'&clientipfolder='.urlencode( $clientIpFolder );
-			$breadcrumb .= ' / <a href="'.$url.'">'.formvar( $clientIpFolder ).'</a>';
+			$archiveUrl = 'showlog.php?act=archiveclientipfolder&dailyfolder='.urlencode( $dailyFolder ).
+				'&clientipfolder='.urlencode( $clientIpFolder );
+		} elseif( $dailyFolder ) {
+			$deleteUrl = 'showlog.php?act=deletedailyfolder&dailyfolder='.urlencode( $dailyFolder );
+			$archiveUrl = 'showlog.php?act=archivedailyfolder&dailyfolder='.urlencode( $dailyFolder );
+		} else {
+			$deleteUrl = 'showlog.php?act=deleterootfolder';
+			$archiveUrl = 'showlog.php?act=archiverootfolder';
 		}
-
-		return '<p>Path: '.$breadcrumb.'</p>';
+		return '<table><tr><td>Path: '.$breadcrumb.'</td>'.
+			'<td><a href="'.$deleteUrl.'">'.self::composeDeleteIcon().'</a></td>'.
+			'<td><a href="'.$archiveUrl.'">'.self::composeArchiveIcon().'</a></td></tr></table>';
 	}
 
 	/**
