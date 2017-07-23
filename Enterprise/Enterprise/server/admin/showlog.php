@@ -410,20 +410,9 @@ class WW_Admin_ShowLog
 	 */
 	public static function resolveOnlineUsersFromClientIps( $clientIps )
 	{
-		if( !$clientIps ) {
-			return array();
-		}
-		$dbDriver = DBDriverFactory::gen();
-		$db = $dbDriver->tablename( "tickets" );
-		$sql = "SELECT `ticketid`, `usr`, `clientip`, `appname`, `appversion` ".
-			"FROM $db ".
-			"WHERE `clientip` IN ('".implode( "','", $clientIps )."')";
-		$sth = $dbDriver->query( $sql );
-		if( !$sth ) {
-			return array();
-		}
 		$onlineInfo = array();
-		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+		$rows = DBTicket::resolveOnlineUsersFromClientIps( $clientIps );
+		if( $rows ) foreach( $rows as $row ) {
 			$onlineInfo[ $row['clientip'] ][] = array(
 				'Ticket' => $row['ticketid'],
 				'User' => $row['usr'],
