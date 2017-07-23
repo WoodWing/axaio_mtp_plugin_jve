@@ -410,6 +410,7 @@ class WW_Admin_ShowLog
 	 */
 	public static function resolveOnlineUsersFromClientIps( $clientIps )
 	{
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		$onlineInfo = array();
 		$rows = DBTicket::resolveOnlineUsersFromClientIps( $clientIps );
 		if( $rows ) foreach( $rows as $row ) {
