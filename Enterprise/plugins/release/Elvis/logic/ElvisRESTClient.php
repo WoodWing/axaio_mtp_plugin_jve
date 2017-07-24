@@ -255,10 +255,7 @@ class ElvisRESTClient extends ElvisClient
 	public static function logout()
 	{
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
-		if( ElvisSessionUtil::hasSession() ) {
-			self::logoutSession();
-			ElvisSessionUtil::clearSessionCookies();
-		}
+		self::logoutSession();
 	}
 
 	/**

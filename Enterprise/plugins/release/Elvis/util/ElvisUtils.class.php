@@ -118,7 +118,24 @@ class ElvisUtils {
 					$attachment = new Attachment();
 					$attachment->Rendition = $rendition;
 					$attachment->Type = $type;
-					if( !$transferServer->copyToFileTransferServer( $url, $attachment, self::composeSessionOptions() ) ) {
+					$attempt = 0;
+					do {
+						$attempt += 1;
+						$httpStatus = $transferServer->copyToFileTransferServer( $url, $attachment, self::composeSessionOptions() );
+						$retry = $attempt <= 1 && (      // retry once only; the login() does the configured reattempts already
+							intval($httpStatus) >= 500 || // fatal network problem or Elvis node unhealthy (e.g. LB returns 504)
+							intval($httpStatus) == 401 || // user not logged in or session expired
+							$httpStatus === false); // in case Elvis plugin uses ES < 10.1.4 that returns true/false on any HTTP error
+						if( $retry ) {
+							require_once __DIR__.'/../logic/ElvisAMFClient.php';
+							ElvisAMFClient::login();
+						}
+					} while( $retry );
+					if( intval($httpStatus) >= 500 ) {
+						ElvisAMFClient::throwExceptionForElvisCommunicationFailure(
+							'Failed to copy '.$rendition.' file from Elvis server to Transfer Server folder.' );
+					}
+					if( intval($httpStatus) >= 400 || $httpStatus === false ) { // false: simulate ES < 10.1.4 behaviour
 						throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Server', null, null, array( '{RENDITION}', $rendition ) );
 					}
 				} else {

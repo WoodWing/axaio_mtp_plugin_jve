@@ -649,6 +649,24 @@ class DBTicket extends DBBase
 		}
 	}
 
+	/**
+	 * Resolves the user names and the client applications of online users, given a list of client IPs.
+	 *
+	 * @since 10.1.4
+	 * @param string[] $clientIps
+	 * @return array
+	 */
+	public static function resolveOnlineUsersFromClientIps( $clientIps )
+	{
+		$rows = array();
+		if( $clientIps ) {
+			$fields = array( 'ticketid', 'usr', 'clientip', 'appname', 'appversion' );
+			$where = "`clientip` IN ('".implode( "','", $clientIps )."')";
+			$rows = self::listRows( self::TABLENAME, null, null, $where, $fields );
+		}
+		return $rows;
+	}
+
 	// ------------------------------------------------------------------------
 	// Called ASYNCHRONOUS
 	// ------------------------------------------------------------------------
