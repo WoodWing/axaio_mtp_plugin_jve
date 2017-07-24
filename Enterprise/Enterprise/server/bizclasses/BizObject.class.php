@@ -316,10 +316,6 @@ class BizObject
 			if (!$id) {
 				throw new BizException( 'ERR_DATABASE', 'Server', 'No ID' );
 			}
-			// now we know id: generate storage name and store it
-			$storename = StorageFactory::storename($id, $arr);
-			// $modifier and $modified are null for this function call, they are already set a few lines ago
-			/*$sth = */DBObject::updateObject( $id, null, array(), null, $storename );
 		}
 		$object->MetaData->BasicMetaData->ID = $id;
 
@@ -428,8 +424,11 @@ class BizObject
 
 		// ==== So far it was DB only, now involve files:
 		// Save object's files:
-		self::saveFiles( $storename, $id, $object->Files, $object->MetaData->WorkflowMetaData->Version );
-
+		$storename = StorageFactory::storename( $id, $arr );
+		/*$sth = */ DBObject::updateObject( $id, null, array(), null, $storename );
+		if( $object->Files ) {
+			self::saveFiles( $storename, $id, $object->Files, $object->MetaData->WorkflowMetaData->Version );
+		}
 		// When an image is created, the thumb and preview need to be removed from the TransferServer.
 		if ('Image' == $arr['type'] ){
 			LogHandler::Log('BizObject', 'DEBUG', 'Removing temporary image files from TransferServer.');
@@ -681,6 +680,10 @@ class BizObject
 		// Validate (and correct,fill in) workflow properties
 		BizWorkflow::validateWorkflowData( $object->MetaData, $object->Targets, $user, $curState );
 
+		// The ContentSource property is needed in subsequent calls so it needs to be set. Kind of a hack.
+		if ( !empty( $currRow['contentsource'] && empty( $object->MetaData->BasicMetaData->ContentSource ) ) ) {
+			$object->MetaData->BasicMetaData->ContentSource = $currRow['contentsource'];
+		}
 		// Validate and fill in name and meta data
 		// adjusts $object and returns flattened meta data
 		$newRow = self::validateForSave( $user, $object, $currRow );
@@ -1601,7 +1604,7 @@ class BizObject
 				throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(E)" );
 		}
 
-			// Next, check if we have access to destination.
+		// Next, check if we have access to destination.
 		BizAccess::checkRightsForParams( $user, 'W', BizAccess::THROW_ON_DENIED,
 			$newRow['publication'], $newIssueId, $newRow['section'], $newRow['type'], $newRow['state'],
 			$currRow['id'], $currRow['contentsource'], $currRow['documentid'], $currRow['routeto'] );
@@ -3836,7 +3839,7 @@ class BizObject
 		self::validateFiles( $object );
 
 		// Serialize the types of renditions that this object has.
-		// This is added to flattened meta data only, it's not a property of class Object, but goes with object's db recored
+		// This is added to flattened meta data only, it's not a property of class Object, but goes with object's db record
 		$arr['types'] = self::serializeFileTypes( $object->Files );
 
 		return $arr;
