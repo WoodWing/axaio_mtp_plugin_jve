@@ -158,7 +158,9 @@ class ElvisAMFClient extends ElvisClient
 		} else {
 			$cookies = ElvisSessionUtil::getSessionCookies();
 		}
-		$client->setCookies( $cookies );
+		if( !is_null($cookies) ) {
+			$client->setCookies( $cookies );
+		}
 		if( defined( 'ELVIS_CURL_OPTIONS' ) ) { // hidden option
 			$client->setCurlOptions( unserialize( ELVIS_CURL_OPTIONS ) );
 		}
