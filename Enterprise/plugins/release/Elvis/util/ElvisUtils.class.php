@@ -121,11 +121,8 @@ class ElvisUtils {
 					$attempt = 0;
 					do {
 						$attempt += 1;
-						$httpStatus = $transferServer->copyToFileTransferServer( $url, $attachment, self::composeSessionOptions() );
-						$retry = $attempt <= 1 && (      // retry once only; the login() does the configured reattempts already
-							intval($httpStatus) >= 500 || // fatal network problem or Elvis node unhealthy (e.g. LB returns 504)
-							intval($httpStatus) == 401 || // user not logged in or session expired
-							$httpStatus === false); // in case Elvis plugin uses ES < 10.1.4 that returns true/false on any HTTP error
+						$httpStatus = $transferServer->copyToFileTransferServer( $url, $attachment, self::composeSessionOptions() ); // $httpStatus can be a boolean when running with Server <= 10.1.3
+						$retry = self::retryCopyToFileTransferServer( $attempt, $httpStatus );
 						if( $retry ) {
 							require_once __DIR__.'/../logic/ElvisAMFClient.php';
 							ElvisAMFClient::login();
@@ -150,6 +147,46 @@ class ElvisUtils {
 			}
 		}
 		return $attachment;
+	}
+
+	/**
+	 * Whether or not the copy file to File TransferServer should be re-attempted.
+	 *
+	 * When the copy of a file to File TransferServer has failed, this function will
+	 * determine if a re-attempt of the copy is logical.
+	 *
+	 * Re-attempt is logical when ...
+	 * - the retry is for the first time
+	 *
+	 * AND when the status status code / boolean is one of the following
+	 *
+	 * - the copy fails due to network problem or Elvis node became unhealthy ( status code >= 500 ).
+	 * - user was not logged in / session expired ( status code 401 ).
+	 * - Elvis returns status code 409 due to several reasons:
+	 *      L> request thumb or preview when asset previewState is set to 'failed'
+	 *      L> processing has failed half-way due to unhealthy node
+	 *      L> file is corrupt or could not be processed for some reason
+	 *      L> caching for NFS share is enabled (should be disabled)
+	 *      L> https://jira.woodwing.net/browse/LVS-9614
+	 * - status code of 408, 421 and 429 were never really tested but they retry of the copy() does make sense for these statuses.
+	 * - false: copy() failed and a boolean is returned in the case of Enterprise 10.1.3 and below is used.
+	 *
+	 * @param int $attempt The number of attempts that have been done so far, this will also determine if the reattempt should be done.
+	 * @param bool|int $httpStatus HTTP status code that was returned from the copy()
+	 * @return bool True when a retry is needed, False otherwise.
+	 */
+	private static function retryCopyToFileTransferServer( $attempt, $httpStatus )
+	{
+		$retry = $attempt <= 1 && (      // retry once only; the login() does the configured reattempts already
+				intval($httpStatus) >= 500 || // fatal network problem or Elvis node unhealthy (e.g. LB returns 504)
+				intval($httpStatus) == 401 || // user not logged in or session expired
+				intval($httpStatus) == 408 || // request didn't finish on time, a re-try is possible. https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+				intval($httpStatus) == 409 || // for Elvis, this can happen for several reasons, refer to function header.
+				intval($httpStatus) == 421 || // misdirected request https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+				intval($httpStatus) == 429 || // too many requests in a given amount of time.
+				$httpStatus === false); // in case Elvis plugin uses ES < 10.1.4 that returns true/false on any HTTP error
+
+		return $retry;
 	}
 
 	/**
