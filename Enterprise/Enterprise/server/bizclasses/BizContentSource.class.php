@@ -264,19 +264,19 @@ class BizContentSource
 	}
 
 	/**
-	 * Returns an array with all the renditions stored by the content source.
+	 * Returns an array with all the rendition types stored by the content source.
 	 *
 	 * @since 10.1.4
 	 * @param string $contentSource
 	 * @param string $documentId
 	 * @return array Stored renditions.
 	 */
-	public static function storedRenditions( $contentSource, $documentId )
+	public static function storedRenditionTypes( $contentSource, $documentId )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		$alienId = self::getAlienId( $contentSource, $documentId );
 		$connector = self::getContentSourceForAlienObject( $alienId );
-		return BizServerPlugin::runConnector( $connector, 'supportedRenditions', array() );
+		return BizServerPlugin::runConnector( $connector, 'supportedRenditionTypes', array() );
 	}
 
 	/**

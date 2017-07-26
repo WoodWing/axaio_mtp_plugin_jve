@@ -570,12 +570,12 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	}
 
 	/**
-	 * Returns an array with all the renditions stored by the content source.
+	 * Returns an array with all the rendition types stored by the content source.
 	 *
 	 * @since 10.1.4
 	 * @return array Stored renditions.
 	 */
-	public function storedRenditions()
+	public function storedRenditionTypes()
 	{
 		return array();
 	}

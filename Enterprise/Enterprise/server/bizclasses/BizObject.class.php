@@ -426,9 +426,7 @@ class BizObject
 		// Save object's files:
 		$storename = StorageFactory::storename( $id, $arr );
 		/*$sth = */ DBObject::updateObject( $id, null, array(), null, $storename );
-		if( $object->Files ) {
-			self::saveFiles( $storename, $id, $object->Files, $object->MetaData->WorkflowMetaData->Version );
-		}
+		self::saveFiles( $storename, $id, $object->Files, $object->MetaData->WorkflowMetaData->Version );
 		// When an image is created, the thumb and preview need to be removed from the TransferServer.
 		if ('Image' == $arr['type'] ){
 			LogHandler::Log('BizObject', 'DEBUG', 'Removing temporary image files from TransferServer.');
@@ -4183,8 +4181,8 @@ class BizObject
 			} else {
 				LogHandler::Log( 'bizobject', 'ERROR', 'Tried to save unsupported file rendition "'.$file->Rendition.'".' );
 			}
+			clearstatcache(); // Make sure unlink calls above are reflected!
 		}
-		clearstatcache(); // Make sure unlink calls above are reflected!
 	}
 
 	/**

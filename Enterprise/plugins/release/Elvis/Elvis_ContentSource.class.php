@@ -978,7 +978,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * @since 10.1.4
 	 * @return array Stored renditions.
 	 */
-	public function supportedRenditions()
+	public function storedRenditionTypes()
 	{
 		return array( 'native', 'preview', 'thumb' );
 	}
