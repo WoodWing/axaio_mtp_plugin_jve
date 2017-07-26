@@ -376,7 +376,7 @@ class BizMetaDataPreview extends BizServerJobHandler
 	{
 		$renditionsStoredByContentSource = array();
 		if( BizContentSource::isShadowObject( $object ) ) {
-			$renditionsStoredByContentSource = BizContentSource::storedRenditions(
+			$renditionsStoredByContentSource = BizContentSource::storedRenditionTypes(
 													$object->MetaData->BasicMetaData->ContentSource,
 													$object->MetaData->BasicMetaData->DocumentID);
 			if( in_array( 'preview', $renditionsStoredByContentSource) &&
