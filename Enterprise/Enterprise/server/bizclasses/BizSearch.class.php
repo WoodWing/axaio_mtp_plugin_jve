@@ -70,6 +70,11 @@ class BizSearch
 	 * We assume that default a search engine is installed, that's why we don't check this first before doing the get.
 	 * In the exceptional case that no search engine is installed these gets were a waste, but otherwise the plugin
 	 * test (requiring DB access) would most of times be of waste.
+	 * The object properties to be indexed are restricted to a minimum. This improves performance but also limits the
+	 * the risk on failure. So no renditions are requested as files are not indexed. There is no need to access a
+	 * content source as Solr should just reflect the data stored in the database (this limits the risk on failure when
+	 * the content source is not available). Also no need to check access rights as the index process should always
+	 * be able to access the object.
 	 *
 	 * @param string[] $objectIds List of object ids
 	 * @param boolean $suppressExceptions Whether or not the suppress throwing exceptions
@@ -87,8 +92,8 @@ class BizSearch
 		$objects = array();
 		$user = BizSession::getShortUserName();
 		foreach( $objectIds as $objectId ) {
-			$objects[] = BizObject::getObject($objectId, $user, false/*lock*/, 'none'/*rendition*/, array('Targets','MetaData', 'Relations')/*requestInfo */, 
-				null/*haveVersion*/, false/*checkRights*/, $areas); // no lock, no rendition
+			$objects[] = BizObject::getObject($objectId, $user, false, 'none', array( 'Targets','MetaData', 'Relations' ),
+				null, false, $areas, null, false );
 			// By asking for Targets and Relations also child object targets are added.
 		}
 		self::indexObjects( $objects, $suppressExceptions, $areas );
