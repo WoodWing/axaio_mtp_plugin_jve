@@ -176,7 +176,7 @@ class LogHandler
 	 */
 	private static function composeStack( $exception )
 	{
-		$stack = "\nStack:\n".self::getDebugBackTrace();
+		$stack = "\nStack:\n".self::getDebugBackTrace( 3 );
 		if( $exception ) {
 			$stack .= "\n-------------\nException Message: ".$exception->getMessage();
 			if( get_class( $exception ) == '' ) {
