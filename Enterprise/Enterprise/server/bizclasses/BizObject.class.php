@@ -657,12 +657,15 @@ class BizObject
 		$curSect  = $currRow['section'];
 		$curState = $currRow['state'];
 
-		// Publication, Category are crucial to have, but can be empty on save when they are not changed, so fill them in with current values:
+		// Publication, Category, Content Source are crucial to have, but can be empty on save when they are not changed, so fill them in with current values:
 		if( !$object->MetaData->BasicMetaData->Publication || !$object->MetaData->BasicMetaData->Publication->Id ) {
 			$object->MetaData->BasicMetaData->Publication = new Publication( $curPub );
 		}
 		if( !$object->MetaData->BasicMetaData->Category || !$object->MetaData->BasicMetaData->Category->Id ) {
 			$object->MetaData->BasicMetaData->Category = new Category( $curSect );
+		}
+		if ( !empty( $currRow['contentsource'] && empty( $object->MetaData->BasicMetaData->ContentSource ) ) ) {
+			$object->MetaData->BasicMetaData->ContentSource = $currRow['contentsource'];
 		}
 
 		// Determine the current- and new targets and issue.
@@ -678,10 +681,6 @@ class BizObject
 		// Validate (and correct,fill in) workflow properties
 		BizWorkflow::validateWorkflowData( $object->MetaData, $object->Targets, $user, $curState );
 
-		// The ContentSource property is needed in subsequent calls so it needs to be set. Kind of a hack.
-		if ( !empty( $currRow['contentsource'] && empty( $object->MetaData->BasicMetaData->ContentSource ) ) ) {
-			$object->MetaData->BasicMetaData->ContentSource = $currRow['contentsource'];
-		}
 		// Validate and fill in name and meta data
 		// adjusts $object and returns flattened meta data
 		$newRow = self::validateForSave( $user, $object, $currRow );

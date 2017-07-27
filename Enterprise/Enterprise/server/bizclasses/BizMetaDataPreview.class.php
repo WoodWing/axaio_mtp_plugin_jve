@@ -375,6 +375,7 @@ class BizMetaDataPreview extends BizServerJobHandler
 		Object $object )
 	{
 		$renditionsStoredByContentSource = array();
+		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 		if( BizContentSource::isShadowObject( $object ) ) {
 			$renditionsStoredByContentSource = BizContentSource::storedRenditionTypes(
 													$object->MetaData->BasicMetaData->ContentSource,
