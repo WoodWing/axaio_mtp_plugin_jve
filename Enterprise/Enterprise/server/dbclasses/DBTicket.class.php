@@ -26,12 +26,14 @@ class DBTicket extends DBBase
 	
 	const TABLENAME = 'tickets';
 	
-	/**
-	 * Array that holds the purged ticket ids
-	 * 
-	 * @var array
-	 */
+	/** @var array List of purged tickets (ticket ids). */
 	private static $purgedTickets = array();
+
+	/**
+	 * @var array $ticketCache Cache session data (per ticket) that is frequently asked.
+	 * @since 10.2.0
+	 */
+	private static $ticketCache = array();
 	
 	/**
 	 * The first part of ticket is based on the hashed value of the logon parameters.
@@ -401,6 +403,9 @@ class DBTicket extends DBBase
 	 */
 	public static function getMasterTicket( $ticket )
 	{
+		if( array_key_exists( $ticket, self::$ticketCache ) ) {
+			return self::$ticketCache[ $ticket ][ 'masterticketid' ];
+		}
 		$where = '`ticketid` = ?';
 		$params = array( $ticket );
 		$fields = array( 'masterticketid' );
@@ -481,6 +486,9 @@ class DBTicket extends DBBase
 	 */
 	public static function DBappticket( $ticket )
 	{
+		if( array_key_exists( $ticket, self::$ticketCache ) ) {
+			return self::$ticketCache[ $ticket ][ 'appname' ];
+		}
 		$where = '`ticketid` = ?';
 		$params = array( $ticket );
 		$fields = array( 'appname' );
@@ -497,6 +505,9 @@ class DBTicket extends DBBase
 	 */
 	public static function getClientAppVersion( $ticket )
 	{
+		if( array_key_exists( $ticket, self::$ticketCache ) ) {
+			return self::$ticketCache[ $ticket ][ 'appversion' ];
+		}
 		$where = '`ticketid` = ?';
 		$params = array( $ticket );
 		$fields = array( 'appversion' );
@@ -513,6 +524,9 @@ class DBTicket extends DBBase
 	 */
 	public static function DBuserticket( $ticket )
 	{
+		if( array_key_exists( $ticket, self::$ticketCache ) ) {
+			return self::$ticketCache[ $ticket ][ 'usr' ];
+		}
 		$where = '`ticketid` = ?';
 		$params = array( $ticket );
 		$fields = array( 'usr' );
@@ -543,11 +557,18 @@ class DBTicket extends DBBase
 		
 		// check ticket existence
 		$params = array( strval($ticket) );
-		$sql = "SELECT `usr`, `appname`, `expire` FROM $db WHERE `ticketid` = ?";
+		$sql = "SELECT `usr`, `appname`, `appversion`, `expire`, `masterticketid` FROM $db WHERE `ticketid` = ?";
 		$sth = $dbdriver->query( $sql, $params );
 		if (!$sth) return false;
 		$row = $dbdriver->fetch($sth);
 		if (!$row) return false;
+
+		self::$ticketCache[ $ticket ] = array(
+			'usr' => $row['usr'],
+			'appname' => $row['appname'],
+			'appversion' => $row['appversion'],
+			'masterticketid' => $row['masterticketid']
+		);
 
 		// check expiration
 		$now = date('Y-m-d\TH:i:s');
@@ -590,6 +611,7 @@ class DBTicket extends DBBase
 	 */
 	public static function DBendticket( $ticket )
 	{
+		unset( self::$ticketCache[ $ticket ] );
 		$dbdriver = DBDriverFactory::gen();
 		$db = $dbdriver->tablename(self::TABLENAME);
 
