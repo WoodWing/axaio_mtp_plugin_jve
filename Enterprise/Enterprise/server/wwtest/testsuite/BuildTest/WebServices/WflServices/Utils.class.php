@@ -19,8 +19,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	private $ticket = null;
 	/** @var WW_Utils_TestSuite $utils */
 	private $utils = null;
-	/** @var callable $requestComposer  */
-	private $requestComposer = null;
 	/** @var string $namePrefix  */
 	private $namePrefix = null;
 
@@ -104,7 +102,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 */
 	public function setRequestComposer( $callback ) 
 	{
-		$this->requestComposer = $callback;
+		$this->utils->setRequestComposer( $callback );
 	}
 	
 	/**
@@ -120,15 +118,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 		// Copy and clear expected error since callService() can throw exception.
 		$expectedError = $this->expectedError;
 		$this->expectedError = null; // reset (has to be set per function call)
-		
-		// Copy and clear request composer since it can throw exception.
-		$requestComposer = $this->requestComposer;
-		$this->requestComposer = null; // reset (has to be set per function call)
-		
-		// Let caller overrule request composition.
-		if( $requestComposer ) {
-			call_user_func( $requestComposer, $request );
-		}
 		
 		// Call the web service.
 		$response = $this->utils->callService( $this->testCase, $request, $stepInfo, $expectedError, true );
