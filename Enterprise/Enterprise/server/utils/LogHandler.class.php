@@ -1083,7 +1083,7 @@ class LogHandler
 				$transData = preg_replace('/<Password>(.*)<\/Password>/is', '<Password>***</Password>', $transData, 1 );
 			} elseif( $protocol == 'Service' ) {
 				// e.g. [Password] => xxx => [Password] => ***
-				$transData = preg_replace('/\[Password\] => (.*)\n(.*)/i', "[Password] => ***\n$2", $transData, 1 );
+				$transData = preg_replace('/Password => (.*)\n(.*)/i', "Password => ***\n$2", $transData, 1 );
 			} elseif( $protocol == 'AMF' ) {
 				// e.g. [Password] => xxx => [Password] => ***
 				$transData = preg_replace('/\[Password\] => (.*)\n(.*)/i', "[Password] => ***\n$2", $transData, 1 );
