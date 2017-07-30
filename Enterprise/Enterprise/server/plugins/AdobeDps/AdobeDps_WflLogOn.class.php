@@ -18,20 +18,18 @@ class AdobeDps_WflLogOn extends WflLogOn_EnterpriseConnector
 		$this->cleanUpExportFolder();
 
 		// Only send the reader version when Content Station tries to login.
-		if ( stristr($req->ClientAppName, 'Content Station') ) {
-			require_once BASEDIR.'/config/config_dps.php';
-			$versions = array();
-			if ( defined ( 'ADOBEDPS_READER_VERSIONS' ) ) {
-				$versions = unserialize( ADOBEDPS_READER_VERSIONS );
+		if( isset( $resp->ServerInfo->FeatureSet ) ) { // client requested for server info?
+			if( stristr( $req->ClientAppName, 'Content Station' ) ) {
+				require_once BASEDIR.'/config/config_dps.php';
+				$versions = array();
+				if( defined( 'ADOBEDPS_READER_VERSIONS' ) ) {
+					$versions = unserialize( ADOBEDPS_READER_VERSIONS );
+				}
+				// First prepend an empty option before the list
+				$valueList = array_merge( array( '' ), $versions );
+				// Add the new feature
+				$resp->ServerInfo->FeatureSet[] = new Feature( 'DpsTargetReaderVersions', implode( ',', $valueList ) );
 			}
-			// First prepend an empty option before the list
-			$valueList = array_merge( array( '' ), $versions );
-			if ( !isset($resp->ServerInfo->FeatureSet) || !is_array($resp->ServerInfo->FeatureSet) ) {
-				// Should never happen
-				$resp->ServerInfo->FeatureSet = array();
-			}
-			// Add the new feature
-			$resp->ServerInfo->FeatureSet[] = new Feature('DpsTargetReaderVersions', implode(',',$valueList));
 		}
 	}
 	
