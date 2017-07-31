@@ -75,22 +75,8 @@ class WW_TestSuite_HealthCheck2_TransferServer_TestCase extends TestCase
 		foreach( $httpMethods as $httpMethod ) {
 			if( !WW_Utils_UrlUtils::isResponsiveUrl( $testUrl.'?test=ping', $httpMethod ) ) {
 				if( $httpMethod != 'GET' ) {
-					$testUrlParts = @parse_url( $testUrl );
-					$limit = '<a href="http://httpd.apache.org/docs/2.0/mod/core.html#limit">&lt;Limit&gt;</a>';
-					$limitExcept = '<a href="http://httpd.apache.org/docs/2.0/mod/core.html#limitexcept">&lt;LimitExcept&gt;</a>';
-					$help = 'The Transfer Server index file needs to support GET, POST, PUT and DELETE methods. '.
-						'However, the HTTP server seems to block access for some of those. <br/><br/>'.
-						'When running <b>IIS</b>, check if WebDAV is enabled in Modules. If enabled, please navigate to ' .
-						'IIS manager -> Default Web Site -> Modules. Remove WebDAVModule and restart IIS. <br/><br/>' .						
-						'When running <b>Apache</b>, please check the httpd.conf file (or any .htaccess files) '.
-						'and check for any '.$limit.' or '.$limitExcept.' configurations. '.
-						'You might want to allow explict access to the index file like this:<br/>'.
-						'&lt;Location "'.$testUrlParts['path'].'"&gt;<br/>'.
-						'&nbsp;&nbsp;&nbsp;&lt;Limit GET POST PUT DELETE&gt;<br/>'.
-						'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Allow from all<br/>'.
-						'&nbsp;&nbsp;&nbsp;&lt;/Limit&gt;<br/>'.
-						'&lt;/Location&gt;<br/>';
-					// TODO: Make description for IIS explicit for the index.php, instead of all *.php files.
+					$help = 'See <a href="https://redirect.woodwing.com/v1/?path=enterprise-server/'.ONLINEHELP_SERVER_MAJOR_VERSION.'/help/enable-http-verbs" '.
+						'target="_blank">Enterprise Help</a> for instructions.';
 				}
 				$this->setResult( 'ERROR', 'The Transfer Server is unreachable through "'.
 					$testUrl.'" for HTTP '.$httpMethod.' method.', $help );
