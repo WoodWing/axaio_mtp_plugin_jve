@@ -34,7 +34,7 @@ abstract class WebApps_EnterpriseConnector extends DefaultConnector
 	/**
 	 * Tells which web apps are shipped within the server plug-in.
 	 *
-	 * @return array of WebAppDefinition data objects.
+	 * @return WebAppDefinition[]
 	 */
 	abstract public function getWebApps();
 
@@ -80,4 +80,15 @@ class WebAppDefinition
 	 * @var boolean $ShowWhenUnplugged
 	 */
 	 public $ShowWhenUnplugged;
+
+	/**
+	 * Tells which users can access the web page.
+	 *
+	 * Set to 'admin' to allow system admin users only.
+	 * Set to 'publadmin' to allow brand admin and system admin users.
+	 *
+	 * @since 10.2.0
+	 * @var string $AccessType
+	 */
+	public $AccessType = 'admin';
 }

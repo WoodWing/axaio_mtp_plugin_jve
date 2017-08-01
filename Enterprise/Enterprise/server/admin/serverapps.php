@@ -42,12 +42,15 @@ BizServerPlugin::runDefaultConnectors( 'WebApps', null, 'getWebApps', array(), $
 require_once BASEDIR.'/server/utils/htmlclasses/TemplateSection.php';
 $webAppDefs = array();
 foreach( $connRetVals as $connName => $connRetVal ) {
+	/** @var WebAppDefinition $webAppDef */
 	foreach( $connRetVal as $webAppDef ) {
 		$pluginName = BizServerPlugin::getPluginUniqueNameForConnector( $connName );
 		$pluginObj = BizServerPlugin::getPluginForConnector( $connName );
 		$pluginType = $pluginObj->IsSystem ? 'server' : 'config';
 		if( $pluginObj->IsActive || $webAppDef->ShowWhenUnplugged ) {
-
+			if( !$isadmin && $webAppDef->AccessType == 'admin' ) {
+				continue; // for brand admins, hide system admins apps EN-89484
+			}
 			$params = 'webappid=' . $webAppDef->WebAppId . '&plugintype=' . $pluginType . '&pluginname=' . $pluginName;
 			$webAppUrl = '../../server/admin/webappindex.php?' . $params;
 			if( strpos( $webAppDef->IconUrl, 'data:' ) === 0 ) {
