@@ -429,9 +429,8 @@ class DBDatasource extends DBBase
 		$name = $dbdriver->toDBString($name);
 		
 		$sql = "UPDATE $dbu set `name`='$name', `value`=#BLOB# ".
-				"WHERE `datasourceid`= ? AND `name`= ? ";
-		$params = array( intval( $datasourceid), strval( $name ) );
-		$sth = $dbdriver->query($sql, $params, $value);
+				"WHERE `datasourceid`='$datasourceid' AND `name`='$name'";
+		$sth = $dbdriver->query($sql, array(), $value);
 		if( !$sth ) {
 			self::setError( $dbdriver->error() );
 			return null;
@@ -1059,11 +1058,11 @@ class DBDatasource extends DBBase
 		$params = array();
 		if( $updateid ) {
 			$where = '`updateid` = ? AND `objectid` = ?';
-			$params[] = $updateid;
-			$params[] = $objectid;
+			$params = array($updateid);
+			$params = array($objectid);
 		} elseif( $objectid ) {
 			$where  = '`objectid` = ?';
-			$params[] = $objectid;
+			$params = array($objectid);
 		}		
 		
 		$result = self::deleteRows('dsobjupdates', $where, $params);

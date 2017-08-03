@@ -12,28 +12,28 @@ require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 class DBChannel extends DBBase
 {
 	const TABLENAME = 'channels';
-
-	public static function createChannel( $pubId, $values )
-	{
-		$params = array( intval($pubId ), strval($values['name' ] ) );
-		$row = self::getRow( self::TABLENAME, "`publicationid` = ? AND `name` = ?", '*', $params );
-		if( $row ) {
-			throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null );
+	
+    public static function createChannel( $pubId, $values )
+    {
+        $dbDriver = DBDriverFactory::gen();
+		$row = self::getRow(self::TABLENAME, "`publicationid` = '$pubId' AND `name` = '" . $dbDriver->toDBString($values['name']) . "' ");
+		if ($row) {
+			throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
 		}
 
-		$values['publicationid'] = $pubId;
-		$channelId = self::insertRow( self::TABLENAME, $values );
+        $values['publicationid'] = $pubId;
+        $channelId = self::insertRow( self::TABLENAME, $values );
+        
+        $pubvalues = array(  );
+        $pubvalues['defaultchannelid'] = $channelId;
+        self::updateRow( 'publications', $pubvalues, " `id` = $pubId AND `defaultchannelid` = 0 " );
 
-		$pubvalues = array();
-		$pubvalues['defaultchannelid'] = $channelId;
-		self::updateRow( 'publications', $pubvalues, " `id` = ? AND `defaultchannelid` = 0 ", array( intval( $pubId ) ) );
-
-		return $channelId;
-	}
+        return $channelId;
+    }
 
     public static function listChannels( $pubId )
     {
-        $rows = self::listRows( self::TABLENAME,'id','name',"`publicationid` = ? ORDER BY `code` ASC ", '*', array( intval( $pubId ) ) );
+        $rows = self::listRows( self::TABLENAME,'id','name',"`publicationid` = $pubId ORDER BY `code` ASC " );
         return $rows;
     }
 
@@ -45,7 +45,7 @@ class DBChannel extends DBBase
      */
 	public static function getChannel( $channelId )
 	{
-		$row = self::getRow( self::TABLENAME, "`id` = $channelId", '*', array( intval( $channelId ) ));
+		$row = self::getRow( self::TABLENAME, "`id` = $channelId" );
 		return $row;
 	}
 
@@ -67,20 +67,21 @@ class DBChannel extends DBBase
 
 	public static function updateChannel( $channelId, $values )
 	{
-		$pubId = self::getPublicationId( $channelId ); // unique within same publication (BZ#8106/BZ#8448)
-		$params = array( strval( $values['name'] ), intval( $pubId ), intval( $channelId ) );
-		$row = self::getRow( self::TABLENAME, "`name` = ? AND `publicationid` = ? AND `id` != ? ", '*', $params );
-		if( $row ) {
-			throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null );
+        $dbDriver = DBDriverFactory::gen();
+        $pubId = self::getPublicationId( $channelId ); // unique within same publication (BZ#8106/BZ#8448)
+		$row = self::getRow(self::TABLENAME, "`name` = '" . $dbDriver->toDBString($values['name']) . "' AND `publicationid` = $pubId AND `id` != $channelId ");
+		if ($row) {
+			throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
 		}
 
-		return self::updateRow( self::TABLENAME, $values, "`id` = ?", array( intval( $channelId ) ) );
+		return self::updateRow( self::TABLENAME,$values,"`id` = $channelId" );
 	}
 
 	public static function listPrevCurrentNextIssues( $channelId )
 	{
 		$channelrow = self::getChannel( $channelId );
-
+		//$currentid = $channelrow['currentissueid'];
+		
 		// get previous and next from issue list:
 		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
 		$issues = DBIssue::listChannelIssues( $channelId );
@@ -123,9 +124,8 @@ class DBChannel extends DBBase
 	{
 		$dbdriver = DBDriverFactory::gen();
 		$channelsTable = $dbdriver->tablename(self::TABLENAME);
-		$sql = "SELECT `publicationid` FROM $channelsTable WHERE `id` = ?";
-		$params = array( intval( $channelId ) );
-		$sth = $dbdriver->query( $sql, $params );
+		$sql = "SELECT `publicationid` FROM $channelsTable WHERE `id` = $channelId";
+		$sth = $dbdriver->query( $sql );
 		if( !$sth ) return null;
 		$row = $dbdriver->fetch( $sth );
 		if( !$row ) return null;
@@ -141,7 +141,7 @@ class DBChannel extends DBBase
 	 */
 	public static function getPubChannelObj( $pubChannelId )
 	{
-		$row = self::getRow( self::TABLENAME, "`id` = ?", '*', array( intval( $pubChannelId ) ) );
+		$row = self::getRow( self::TABLENAME, "`id` = $pubChannelId" );
 		if (!$row) return null;
 		return self::rowToObj($row);
 	}
