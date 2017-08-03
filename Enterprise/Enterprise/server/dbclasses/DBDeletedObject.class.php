@@ -101,15 +101,15 @@ class DBDeletedObject extends DBBase
 	 */
 	static private function deleteObjectFromDB( $id, $permanent )
 	{
-		$where = ' `id` = ' . $id;
+		$where = ' `id` = ?';
 
 		// Delete from Trash (smart_deletedobjects table), only if permanent.
 		if( $permanent ) {
-			self::deleteRows(self::TABLENAME, $where);
+			self::deleteRows(self::TABLENAME, $where, array( intval( $id ) ) );
 		}
 
 		// Delete object from Workflow (smart_objects table).
-		return self::deleteRows('objects', $where);
+		return self::deleteRows('objects', $where, array( intval( $id ) ) );
 	}
 	
 	/**
@@ -204,8 +204,9 @@ class DBDeletedObject extends DBBase
 		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' )).' as "version"';
 
 		$dbo = $dbDriver->tablename(self::TABLENAME);
-		$sql = "SELECT o.*, $verFld from $dbo o where o.`id` = $id";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT o.*, $verFld FROM $dbo o WHERE o.`id` = ?";
+		$params = array( intval( $id ) );
+		$sth = $dbDriver->query($sql, $params );
 
 		return $sth;
 	}
@@ -223,8 +224,9 @@ class DBDeletedObject extends DBBase
 
 		$dbDriver = DBDriverFactory::gen();
 		$dbo = $dbDriver->tablename(self::TABLENAME);
-		$sql = "SELECT o.`name` from $dbo o where `id` = $id";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT o.`name` FROM $dbo o WHERE `id` = ?";
+		$params = array( intval( $id ) );
+		$sth = $dbDriver->query($sql, $params );
 		$currRow = $dbDriver->fetch($sth);
 
 		if ($currRow) {
@@ -246,8 +248,9 @@ class DBDeletedObject extends DBBase
 
 		$dbDriver = DBDriverFactory::gen();
 		$dbo = $dbDriver->tablename(self::TABLENAME);
-		$sql = "SELECT o.`type` from $dbo o where `id` = $id";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT o.`type` FROM $dbo o WHERE `id` = ?";
+		$params = array( intval( $id ) );
+		$sth = $dbDriver->query($sql, $params );
 		$currRow = $dbDriver->fetch($sth);
 
 		if ($currRow) {
@@ -284,9 +287,9 @@ class DBDeletedObject extends DBBase
 		$dbo = $dbdriver->tablename(self::TABLENAME);
 		$sql = "SELECT count(*) as `c` FROM $dbo o ";
 		if( $toIndex ) {
-			$sql .= "WHERE o.`indexed`='' "; // un-indexed = needs to be indexed
+			$sql .= "WHERE o.`indexed`= '' "; // un-indexed = needs to be indexed
 		} else { // to un-index
-			$sql .= "WHERE o.`indexed`='on' "; // indexed = needs to be un-indexed
+			$sql .= "WHERE o.`indexed`= 'on' "; // indexed = needs to be un-indexed
 		}
 		$sth = $dbdriver->query($sql);
 		$row = $dbdriver->fetch($sth);
@@ -448,7 +451,7 @@ class DBDeletedObject extends DBBase
 		unset($row['id']);
 
 		$where = ' `id` = ? ';
-		$params[] = $id;
+		$params[] = intval( $id );
 
 		if( self::updateRow( self::TABLENAME, $row, $where, $params) ) {
 			return true;
