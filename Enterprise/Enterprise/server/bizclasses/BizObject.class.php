@@ -3798,7 +3798,9 @@ class BizObject
 		// Shadow objects do not have a native, so we need them to tell us their orientation.
 		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 		if( !BizContentSource::isShadowObject( $object ) ) {
-			$object->MetaData->ContentMetaData->Orientation = null;
+			if ( isset( $object->MetaData->ContentMetaData->Orientation ) ) {
+				$object->MetaData->ContentMetaData->Orientation = null;
+			}
 		}
 
 		// Enrich object MetaData with any embedded metadata from file
