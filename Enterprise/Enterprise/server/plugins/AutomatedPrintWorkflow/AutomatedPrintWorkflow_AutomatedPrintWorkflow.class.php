@@ -16,9 +16,10 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	final public function resolveOperation( $objectId, $operation )
 	{
 		$resolvedOperations = array( $operation ); // by default, don't resolve
-		if( $operation->Type == 'AutomatedPrintWorkflow' && $operation->Name == 'PlaceDossier' ) {
-
-			$resolvedOperations = array(); // always resolve the 'PlaceDossier' operation
+		if( $operation->Type == 'AutomatedPrintWorkflow' &&
+			( $operation->Name == 'PlaceDossier' || $operation->Name == 'PlaceArticle' )
+		) {
+			$resolvedOperations = array(); // always resolve the 'PlaceDossier' and 'PlaceArticle' operations
 
 			require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
 			$parentTargets = DBTarget::getTargetsByObjectId( $objectId );
@@ -27,11 +28,12 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 
 				$params = self::paramsToKeyValues( $operation->Params );
 				$editionId = intval($params['EditionId']);
-				$dossierId = intval($params['DossierId']);
+				$dossierId = isset($params['DossierId']) ? intval($params['DossierId']) : 0; // In case of a 'PlaceDossier' operation
+				$articleId = isset($params['ArticleId']) ? intval($params['ArticleId']) : 0; // In case of a 'PlaceArticle' operation
 				$inDesignArticleId = $params['InDesignArticleId'];
 
-				$resolvedOperations = $this->resolvePlaceDossierOperation(
-					$objectId, $issueId, $editionId, $dossierId, $inDesignArticleId );
+				$resolvedOperations = $this->resolvePlaceOperations(
+					$objectId, $issueId, $editionId, $dossierId, $articleId, $inDesignArticleId, $operation->Name );
 			}
 		}
 		return $resolvedOperations;
@@ -39,15 +41,16 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 
 	/**
 	 * The Automated Print Workflow feature kicks in when SC calls GetObjects with ObjectOperations set
-	 * for RequestInfo; For each PlaceDossier operation the following steps will be done
+	 * for RequestInfo; For each PlaceDossier or PlaceArticle operation the following steps will be done
 	 * server side in this business connector of the AutomatedPrintWorkflow server plug-in:
 	 * 1. Resolve IdArt frames (placements) from given IdArt id (Placement->InDesignArticleIds[0]).
 	 * 2. Exclude duplicate IdArt frames; For those we can not decide which one to make a match.
 	 * 3. Compose collection with all possible frame types from the resolved IdArt frames.
 	 * 4. Derive all possible child obj types from the composed frame types.
 	 * 5. Take the issue from the layout's target and the edition from the given IdArt frame (Placement->Edition).
-	 * 6. Search dossier for Contained Article and Image childs (ids) having layout's target as relational target.
+	 * 6. Either search dossier for Contained Article and Image childs (ids) having layout's target as relational target.
 	 *    L> Note: Exclude Spreadsheets entirely. Those are never placed automatically.
+	 *    Or if the Article Id is already known (as for the 'PlaceArticle' action) get the properties for the given article.
 	 * 7. Exclude childs (ids) for which the user has no read access rights.
 	 *    L> Or when in Personal status and routed to other user.
 	 * 8. When child is an Article:
@@ -64,30 +67,40 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @param integer $issueId
 	 * @param integer $editionId
 	 * @param integer $dossierId
+	 * @param integer $articleId
 	 * @param string $inDesignArticleId
+	 * @param string $operation
 	 * @return ObjectOperation[] Resolved operation
 	 */
-	private function resolvePlaceDossierOperation(
-		$layoutId, $issueId, $editionId, $dossierId, $inDesignArticleId )
+	private function resolvePlaceOperations(
+		$layoutId, $issueId, $editionId, $dossierId, $articleId, $inDesignArticleId, $operation )
 	{
-		LogHandler::Log( 'AutoPrintWfl', 'INFO',
-			"Collecting placement candidates for InDesignArticle (id=$inDesignArticleId) ".
-			"that is placed on layout (id=$layoutId). The candidates must have ".
-			"a relational target set to issue (id=$issueId) and edition (id=$editionId) ".
-			"and should be contained by dossier (id=$dossierId)." );
+		if( $operation == 'PlaceDossier' ) {
+			LogHandler::Log( 'AutoPrintWfl', 'INFO',
+				"Collecting placement candidates for InDesignArticle (id=$inDesignArticleId) ".
+				"that is placed on layout (id=$layoutId). The candidates must have ".
+				"a relational target set to issue (id=$issueId) and edition (id=$editionId) ".
+				"and should be contained by dossier (id=$dossierId)." );
+		} else {
+			LogHandler::Log( 'AutoPrintWfl', 'INFO',
+				"Collecting placement candidates for InDesignArticle (id=$inDesignArticleId) ".
+				"that is placed on layout (id=$layoutId). The placement candidates ".
+				"are retrieved from the given artcle (id=$articleId)." );
+		}
+
 
 		$resolvedOperations = array();
 		do {
 			// Resolve IdArt frames (placements) from given IdArt id (Placement->InDesignArticleIds[0]).
 			$iaPlacements = self::getInDesignArticlePlacements( $layoutId, $inDesignArticleId, $editionId );
 			if( !$iaPlacements ) {
-				self::reportNoMatchingElementsFound( $layoutId );
+				self::reportNoMatchingElementsFound( $layoutId, $operation );
 				break;
 			}
 
 			// Exclude duplicate IdArt frames; For those we can not decide which one to make a match.
 			if( !self::markDuplicatePlacements( $iaPlacements, $editionId ) ) {
-				self::reportNoMatchingElementsFound( $layoutId );
+				self::reportNoMatchingElementsFound( $layoutId, $operation );
 				break;
 			}
 
@@ -99,17 +112,25 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			// Note: This excludes Spreadsheets entirely. Those are not placed automatically.
 			$childTypes = self::determineUsedChildObjectTypes( $iaFrameTypes );
 			if( !$childTypes ) {
-				self::reportNoMatchingElementsFound( $layoutId );
+				self::reportNoMatchingElementsFound( $layoutId, $operation );
 				break;
 			}
 
-			// Search dossier for Contained Article and Image childs (ids) having 
-			// layout's target as relational target.
-			// Resolve essential metadata properties of the child objects found.
-			$invokedObjects = self::getDossierChildrenMetaData( $issueId,
-				$editionId, $dossierId, $childTypes );
+			$invokedObjects = null;
+			if( $operation == 'PlaceDossier' ) {
+				// Search dossier for Contained Article and Image childs (ids) having
+				// layout's target as relational target.
+				// Resolve essential metadata properties of the child objects found.
+				$invokedObjects = self::getDossierChildrenMetaData( $issueId,
+					$editionId, $dossierId, $childTypes );
+			} else {
+				// If the operation is 'PlaceArticle' the article to place is already known so
+				// we can directly get the properties for this article.
+				require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+				$invokedObjects = BizObject::resolveInvokedObjectsForMultiSetProps( array( $articleId ) );
+			}
 			if( !$invokedObjects ) {
-				self::reportNoMatchingElementsFound( $layoutId );
+				self::reportNoMatchingElementsFound( $layoutId, $operation );
 				break;
 			}
 
@@ -117,7 +138,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			// or when in Personal status and routed to other user.
 			self::filterOutInvisibleChildren( $invokedObjects, $issueId );
 			if( !$invokedObjects ) {
-				self::reportNoMatchingElementsFound( $layoutId );
+				self::reportNoMatchingElementsFound( $layoutId, $operation );
 				break;
 			}
 
@@ -125,7 +146,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			// so filter out all images when dossier contains multiple images.
 			$imageId = self::filterOutImagesWhenMultipleFound( $invokedObjects );
 			if( !$invokedObjects ) {
-				self::reportNoMatchingElementsFound( $layoutId );
+				self::reportNoMatchingElementsFound( $layoutId, $operation );
 				break;
 			}
 
@@ -136,7 +157,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			// no article relation with the layout and so there is nothing to show
 			// in the CS preview. In that case, don't place anything and report error.
 			if( !$articleElements ) {
-				self::reportNoMatchingElementsFound( $layoutId );
+				self::reportNoMatchingElementsFound( $layoutId, $operation );
 				break;
 			}
 
@@ -145,7 +166,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			// also exists in the same or other articles.
 			self::filterOutDuplicateArticeElements( $articleElements );
 			if( !$articleElements ) {
-				self::reportNoMatchingElementsFound( $layoutId );
+				self::reportNoMatchingElementsFound( $layoutId, $operation );
 				break;
 			}
 
@@ -154,9 +175,9 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			// warning instead (but don't filter). When not placed, no message and no filter.
 			// Placements on the same layout are ignored as those are filtered out in the
 			// determinePlacementsToClear function.
-			self::filterForMultiplaceAccessRights( $layoutId, $issueId, $editionId, $invokedObjects, $articleElements );
+			self::filterForMultiplaceAccessRights( $layoutId, $issueId, $editionId, $invokedObjects, $articleElements, $operation );
 			if( !$articleElements ) {
-				self::reportNoMatchingElementsFound( $layoutId );
+				self::reportNoMatchingElementsFound( $layoutId, $operation );
 				break;
 			}
 
@@ -535,9 +556,10 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @param integer $editionId
 	 * @param MetaData[] $invokedObjects
 	 * @param Element[] $articleElements [input/output] The elements to check and filter out.
+	 * @param string $operation
 	 */
 	private static function filterForMultiplaceAccessRights( $layoutId, $issueId, $editionId,
-	                                                         array $invokedObjects, array &$articleElements )
+	                                                         array $invokedObjects, array &$articleElements, $operation )
 	{
 		// Determine which elements are placed already for the edition.
 		$articleElementIds = array_map( function( $element ) { return $element->ID; }, $articleElements );
@@ -605,7 +627,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 				$report = BizErrorReport::startReport();
 				$report->Type = 'Object';
 				$report->ID = $layoutId;
-				$report->Role = 'PlaceDossier';
+				$report->Role = $operation;
 				$errorReportEntry = new ErrorReportEntry();
 				if( $hasRights ) {
 					$errorReportEntry->Message = BizResources::localize('APW_WARN_TEXTCOMP_ALREADY_PLACED',
@@ -649,13 +671,14 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * any automated operation. So nothing happened.
 	 *
 	 * @param integer $layoutId
+	 * @param string $operation
 	 */
-	private static function reportNoMatchingElementsFound( $layoutId )
+	private static function reportNoMatchingElementsFound( $layoutId, $operation )
 	{
 		$report = BizErrorReport::startReport();
 		$report->Type = 'Object';
 		$report->ID = $layoutId;
-		$report->Role = 'PlaceDossier';
+		$report->Role = $operation;
 		$errorReportEntry = new ErrorReportEntry();
 		$errorReportEntry->Message = BizResources::localize('APW_ERROR_NO_TEXTCOMP_FOUND');
 		$errorReportEntry->MessageLevel = 'Error';
