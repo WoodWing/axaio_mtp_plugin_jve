@@ -276,7 +276,7 @@ class BizContentSource
 		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 		$alienId = self::getAlienId( $contentSource, $documentId );
 		$connector = self::getContentSourceForAlienObject( $alienId );
-		return BizServerPlugin::runConnector( $connector, 'supportedRenditionTypes', array() );
+		return BizServerPlugin::runConnector( $connector, 'storedRenditionTypes', array() );
 	}
 
 	/**
@@ -502,8 +502,8 @@ class BizContentSource
 	 * The content source implementation should update the $object->Files for all renditions stored by the content source.
 	 * If e.g. all renditions are stored by the content source the $object->Files should be empty (null).
 	 * The database object record has to reflect the renditions types stored in the filestore. So after the content
-	 * source has stored the rendition(s) the database object record is updated to reflect the type(s) stored in the
-	 * filestore.
+	 * source has stored the rendition(s) the database object record is updated to reflect the type(s) (if any) that will
+	 * be stored in the filestore.
 	 *
 	 * @param string $contentSource
 	 * @param string $documentId
