@@ -171,7 +171,7 @@ class DBCascadePub extends DBBase
 	static private function copyChannels( $srcPubId, $copyPubId, $copyIssues )
 	{
 		// Get source publication channels
-		$srcChanRows = self::listRows( 'channels', 'id', 'name', "`publicationid` = $srcPubId" );
+		$srcChanRows = self::listRows( 'channels', 'id', 'name', "`publicationid` = ?", '*', array( intval( $srcPubId ) ) );
 		foreach( $srcChanRows as $srcChanRow ) {
 			// Copy channel
 			$copyChanId = self::copyRow( 'channels', $srcChanRow,
