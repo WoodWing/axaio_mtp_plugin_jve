@@ -107,7 +107,15 @@ abstract class TestCase implements TestModule
 	 * @since 9.5.0
 	 */
 	private $hasWarning = false;
-	
+
+	/**
+	 * Whether or not to auto clean the IDS jobs.
+	 *
+	 * @since 10.1.4
+	 * @var boolean
+	 */
+	private $autoCleanIdsJobs = false;
+
 	const SESSION_NAMESPACE = 'TestCase';
 
 	/**
@@ -226,6 +234,26 @@ abstract class TestCase implements TestModule
 	public function lastAutoIncrement()
 	{
 		return 0;
+	}
+
+	/**
+	 * To set whether or not to auto clean the IDS jobs after each TestCase.
+	 *
+	 * @param boolean $autoCleanIdsJobs True to auto clean the IDS jobs, false otherwise.
+	 */
+	public function setAutoCleanIdsJobs( $autoCleanIdsJobs )
+	{
+		$this->autoCleanIdsJobs = $autoCleanIdsJobs;
+	}
+
+	/**
+	 * Returns boolean whether or not to auto clean the IDS jobs.
+	 *
+	 * @return boolean
+	 */
+	public function getAutoCleanIdsJobs()
+	{
+		return $this->autoCleanIdsJobs;
 	}
 	
 	/** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 

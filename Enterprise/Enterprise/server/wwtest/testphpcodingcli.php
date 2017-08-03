@@ -26,7 +26,7 @@ try {
 
 	foreach ($tests as $test) {
 		require_once BASEDIR . '/server/wwtest/testsuite/TestSuiteFactory.class.php';
-		$contents = TestSuiteFactory::runTest($sessionId, $test->ClassPath);
+		$contents = TestSuiteFactory::runTest($sessionId, $test->ClassPath, $testSuite );
 
 		$xml = new SimpleXMLElement($contents);
 
