@@ -41,7 +41,7 @@ class DBAdmPubObject extends DBBase
 	public static function modifyPubObject( $id, $objectId, $groupId )
 	{
 		$updateValues = array( 'objectid' => $objectId, 'grpid' => $groupId );
-		if( self::updateRow( 'publobjects', $updateValues, " `id` = ? ", array( intval( $id ) ) ) ) {
+		if( self::updateRow( 'publobjects', $updateValues, " `id` = $id" ) ) {
 			return self::getPubObject( $id );
 		}
 
@@ -59,17 +59,17 @@ class DBAdmPubObject extends DBBase
     **/
 	public static function getPubObjects( $pubId, $issueId, $objectId, $groupId )
 	{
+		$params = array();
 		$pubObjects = array();
 		$dbDriver = DBDriverFactory::gen();
 		$dbo = $dbDriver->tablename("objects");
 		$dbpo = $dbDriver->tablename("publobjects");
 
 		$sql = "SELECT po.`id`, o.`id` as `objectid`, o.`name` as `objectname`, po.`grpid` FROM $dbpo po, $dbo o " .
-			   "WHERE po.`publicationid` = ? AND po.`issueid` = ? AND po.`objectid` = o.`id` ";
-		$params = array( intval( $pubId ), intval( $issueId ) );
+			   "WHERE po.`publicationid` = $pubId AND po.`issueid` = $issueId AND po.`objectid` = o.`id` ";
 		if( $objectId > 0 ) {
 			$sql .= "AND po.`objectid` = ? ";
-			$params[] = intval( $objectId );
+			$params[] = $objectId;
 		}
 		if( !is_null($groupId) ) {
 			$sql .= "AND (po.`grpid` = ? OR po.`grpid` = ?) "; // 0 represent ALL group
@@ -133,10 +133,9 @@ class DBAdmPubObject extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$dbo = $dbDriver->tablename('objects');
 		$sql = "SELECT `id`, `name` FROM $dbo ".
-			   "WHERE `type` = ? AND `publication` = ? AND `issue` = ? ".
+			   "WHERE `type` = 'DossierTemplate' AND `publication` = $pubId AND `issue` = $issueId ".
 			   "ORDER BY `name`";
-		$params = array( 'DossierTemplate', intval( $pubId ), intval( $issueId ) );
-		$sth = $dbDriver->query($sql, $params);
+		$sth = $dbDriver->query($sql);
 		$dossierTemplates = array();
 		while ( ($row = $dbDriver->fetch($sth)) ) {
 			$dossierTemplates[] = $row;

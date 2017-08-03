@@ -21,11 +21,11 @@ class DBTargetEdition extends DBBase {
      * Important: there is no check here if the edition belongs to the channel given in $channelId, 
      * so this needs to be checked beforehand.
      * 
-     * @param int $targetId, required id of a target
+     * @param int $targetid, required id of a target
      * @param int $editionId, required id of an edition. 
      * @return string The target-edition id (of new or existing record). Null on error.
      */
-    public static function addTargetEdition( $targetId, $editionId )
+    public static function addTargetEdition( $targetid, $editionId )
     {
 		self::clearError();
 		$editionId = trim($editionId); // paranoid repair
@@ -33,8 +33,8 @@ class DBTargetEdition extends DBBase {
 			self::setError( BizResources::localize('ERR_NO_SUBJECTS_FOUND', true, array('{EDITION}') ) );
 			return null;
 		}
-		$targetId = trim($targetId); // paranoid repair
-		if( ((string)($targetId) !== (string)(int)($targetId)) || $targetId <= 0 ) { // natural and positive
+		$targetid = trim($targetid); // paranoid repair
+		if( ((string)($targetid) !== (string)(int)($targetid)) || $targetid <= 0 ) { // natural and positive
 			self::setError( BizResources::localize('ERR_ARGUMENT') );
 			return null;
 		}
@@ -44,15 +44,14 @@ class DBTargetEdition extends DBBase {
         $targetEditionsTable = $dbDriver->tablename('targeteditions');
         $sql  = "INSERT INTO $targetEditionsTable ";
         $sql .= "(`targetid`, `editionid`) ";
-        $sql .= "VALUES ($targetId, $editionId) ";
+        $sql .= "VALUES ($targetid, $editionId) ";
         $sql = $dbDriver->autoincrement($sql);
         $sth = $dbDriver->query( $sql, array(), null, true, false ); // suppress already exists error!
         $alreadyExists = ($sth === false); 
         if( $alreadyExists ) { // insert failed because record already exists?
 			$sql  = "SELECT `id` FROM $targetEditionsTable ";
-			$sql .= "WHERE `targetid` = ? AND `editionid` = ? ";
-			$params = array( $targetId, $editionId );
-			$sth = $dbDriver->query( $sql, $params );
+			$sql .= "WHERE `targetid` = $targetid AND `editionid` = $editionId ";
+			$sth = $dbDriver->query( $sql );
         }
         if( is_null($sth) ) { // failed?
 			$err = trim( $dbDriver->error() );
@@ -169,46 +168,43 @@ class DBTargetEdition extends DBBase {
 	 * @param string $chanType Channel type, like 'print', 'web', etc. Pass null for all channels.
 	 * @return array DB rows
 	 */
-	static public function listTargetEditionRowsByObjectId( $objectId, $chanType = null )
-	{
+    static public function listTargetEditionRowsByObjectId( $objectId, $chanType = null )
+    {
 		self::clearError();
 
-		$dbDriver = DBDriverFactory::gen();
-		$targetsTable = $dbDriver->tablename( "targets" );
-		$targetEditionsTable = $dbDriver->tablename( "targeteditions" );
-		$channelsTable = $dbDriver->tablename( "channels" );
-		$issuesTable = $dbDriver->tablename( "issues" );
-		$editionsTable = $dbDriver->tablename( "editions" );
-		$sql = "SELECT tar.`objectid`, tar.`channelid`, cha.`name` as \"channelname\", cha.`type` as \"channeltype\", ";
-		$sql .= "tar.`issueid`, iss.`name` as \"issuename\", iss.`overrulepub`, ted.`editionid`, edi.`name` as \"editionname\", ";
-		$sql .= "tar.`publisheddate`, tar.`publishedmajorversion`, tar.`publishedminorversion` ";
-		$sql .= "FROM $targetsTable tar ";
-		$sql .= "LEFT JOIN $targetEditionsTable ted ON (ted.`targetid` = tar.`id`) ";
-		$sql .= "INNER JOIN $channelsTable cha ON (cha.`id` = tar.`channelid`) ";
-		$sql .= "LEFT JOIN $issuesTable iss ON (iss.`id` = tar.`issueid`) ";
-		$sql .= "LEFT JOIN $editionsTable edi ON (edi.`id` = ted.`editionid`) ";
-		$params = array();
-		if( is_array( $objectId ) ) {
-			$sql .= 'WHERE tar.`objectid` IN ('.implode( ',', $objectId ).') ';
+        $dbDriver = DBDriverFactory::gen();
+        $targetsTable = $dbDriver->tablename("targets");
+        $targetEditionsTable = $dbDriver->tablename("targeteditions");
+        $channelsTable = $dbDriver->tablename("channels");
+        $issuesTable = $dbDriver->tablename("issues");
+        $editionsTable = $dbDriver->tablename("editions");
+        $sql  = "SELECT tar.`objectid`, tar.`channelid`, cha.`name` as \"channelname\", cha.`type` as \"channeltype\", ";
+        $sql .=        "tar.`issueid`, iss.`name` as \"issuename\", iss.`overrulepub`, ted.`editionid`, edi.`name` as \"editionname\", ";
+        $sql .=        "tar.`publisheddate`, tar.`publishedmajorversion`, tar.`publishedminorversion` ";
+        $sql .= "FROM $targetsTable tar ";
+        $sql .= "LEFT JOIN $targetEditionsTable ted ON (ted.`targetid` = tar.`id`) ";
+        $sql .= "INNER JOIN $channelsTable cha ON (cha.`id` = tar.`channelid`) ";
+        $sql .= "LEFT JOIN $issuesTable iss ON (iss.`id` = tar.`issueid`) ";
+        $sql .= "LEFT JOIN $editionsTable edi ON (edi.`id` = ted.`editionid`) ";
+		if( is_array($objectId) ) {
+			$sql .= 'WHERE tar.`objectid` IN ('.implode(',', $objectId).') ';
 		} else {
-			$sql .= "WHERE tar.`objectid` = ? ";
-			$params[] = $objectId;
+			$sql .= "WHERE tar.`objectid` = $objectId ";
 		}
-		if( $chanType ) {
-			$sql .= "AND cha.`type` = ? ";
-			$params[] = $chanType;
-		}
-		$sql .= "ORDER BY tar.`objectid`, tar.`channelid`, tar.`issueid`, edi.`code` ";
-		$sth = $dbDriver->query( $sql, $params );
-
-		if( is_null( $sth ) ) {
-			$err = trim( $dbDriver->error() );
-			self::setError( empty( $err ) ? BizResources::localize( 'ERR_DATABASE' ) : $err );
-			return null;
-		}
+        if( $chanType ) {
+	        $sql .= "AND cha.`type` = '$chanType' ";
+        }
+        $sql .= "ORDER BY tar.`objectid`, tar.`channelid`, tar.`issueid`, edi.`code` ";
+        $sth = $dbDriver->query($sql);
+        
+        if (is_null($sth)) {
+            $err = trim( $dbDriver->error() );
+            self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
+            return null;
+        }
 
 		$rows = array();
-		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+		while(($row = $dbDriver->fetch($sth))) {
 			$rows[] = $row;
 		}
 		return $rows;
@@ -217,80 +213,78 @@ class DBTargetEdition extends DBBase {
 	/**
 	 * Returns the target(edition) rows per objectrelation. Each objectrelation can have more rows in case editions are
 	 * used.
-	 *
+	 * 
 	 * @param array $objectRelationIds The database objectrelation Ids.
 	 * @param string $chanType Filter on the channel type.
 	 * @return null|array Target(editions) rows grouped by the objectrelaion Id.
 	 */
 	static public function listTargetEditionRowsByObjectrelationId( array $objectRelationIds, $chanType = null )
-	{
+    {
 		$rows = array();
-		if( !$objectRelationIds ) {
+		if ( !$objectRelationIds ) {
 			return $rows;
-		}
+		} 
 		self::clearError();
 
-		$dbDriver = DBDriverFactory::gen();
-		$targetsTable = $dbDriver->tablename( "targets" );
-		$targetEditionsTable = $dbDriver->tablename( "targeteditions" );
-		$channelsTable = $dbDriver->tablename( "channels" );
-		$issuesTable = $dbDriver->tablename( "issues" );
-		$editionsTable = $dbDriver->tablename( "editions" );
-		$sql = "SELECT tar.`objectrelationid`, tar.`channelid`, cha.`name` as \"channelname\", cha.`type` as \"channeltype\", ";
-		$sql .= "tar.`issueid`, iss.`name` as \"issuename\",  iss.`overrulepub`, ted.`editionid`, edi.`name` as \"editionname\", ";
-		$sql .= "tar.`publisheddate`, tar.`publishedmajorversion`, tar.`publishedminorversion`, ";
-		$sql .= "tar.`externalid` as \"externalid\" ";
-		$sql .= "FROM $targetsTable tar ";
-		$sql .= "LEFT JOIN $targetEditionsTable ted ON (ted.`targetid` = tar.`id`) ";
-		$sql .= "INNER JOIN $channelsTable cha ON (cha.`id` = tar.`channelid`) ";
-		$sql .= "LEFT JOIN $issuesTable iss ON (iss.`id` = tar.`issueid`) "; // Don't replace by INNER JOIN.
+        $dbDriver = DBDriverFactory::gen();
+        $targetsTable = $dbDriver->tablename("targets");
+        $targetEditionsTable = $dbDriver->tablename("targeteditions");
+        $channelsTable = $dbDriver->tablename("channels");
+        $issuesTable = $dbDriver->tablename("issues");
+        $editionsTable = $dbDriver->tablename("editions");
+        $sql  = "SELECT tar.`objectrelationid`, tar.`channelid`, cha.`name` as \"channelname\", cha.`type` as \"channeltype\", ";
+        $sql .=        "tar.`issueid`, iss.`name` as \"issuename\",  iss.`overrulepub`, ted.`editionid`, edi.`name` as \"editionname\", ";
+        $sql .=        "tar.`publisheddate`, tar.`publishedmajorversion`, tar.`publishedminorversion`, ";
+	    $sql .=        "tar.`externalid` as \"externalid\" ";
+        $sql .= "FROM $targetsTable tar ";
+        $sql .= "LEFT JOIN $targetEditionsTable ted ON (ted.`targetid` = tar.`id`) ";
+        $sql .= "INNER JOIN $channelsTable cha ON (cha.`id` = tar.`channelid`) ";
+        $sql .= "LEFT JOIN $issuesTable iss ON (iss.`id` = tar.`issueid`) "; // Don't replace by INNER JOIN.
 		// INNER JOIN results in wrong query plan for Mssql.
-		$sql .= "LEFT JOIN $editionsTable edi ON (edi.`id` = ted.`editionid`) ";
-		$sql .= "WHERE ".self::addIntArrayToWhereClause( 'tar.objectrelationid', $objectRelationIds, false );
-		$params = array();
-		if( $chanType ) {
-			$sql .= "AND cha.`type` = ? ";
-			$params[] = $chanType;
-		}
-		$sql .= "ORDER BY tar.`objectrelationid`, tar.`channelid`, tar.`issueid`, edi.`code` ";
-		$sth = $dbDriver->query( $sql );
+        $sql .= "LEFT JOIN $editionsTable edi ON (edi.`id` = ted.`editionid`) ";
+        $sql .= "WHERE ".self::addIntArrayToWhereClause( 'tar.objectrelationid', $objectRelationIds, false ) ;
+        if( $chanType ) {
+	        $sql .= "AND cha.`type` = '$chanType' ";
+        }
+        $sql .= "ORDER BY tar.`objectrelationid`, tar.`channelid`, tar.`issueid`, edi.`code` ";
+        $sth = $dbDriver->query($sql);
+        
+        if (is_null($sth)) {
+            $err = trim( $dbDriver->error() );
+            self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
+            return null;
+        }
 
-		if( is_null( $sth ) ) {
-			$err = trim( $dbDriver->error() );
-			self::setError( empty( $err ) ? BizResources::localize( 'ERR_DATABASE' ) : $err );
-			return null;
-		}
-
-		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
-			$rows[ $row['objectrelationid'] ][] = $row;
+		while( ($row = $dbDriver->fetch($sth)) ) {
+			$rows[$row['objectrelationid']][] = $row;
 		}
 		return $rows;
-	}
-
-	/**
-	 * Returns the editions related to specific targets.
-	 *
-	 * @param array $targetIds Targets for which the editions are read.
-	 * @return array with target/edition combinations.
-	 */
-	public static function listEditionsByTargetIds( array $targetIds )
-	{
-		$result = array();
-		if( !empty( $targetIds ) ) {
-			$dbDriver = DBDriverFactory::gen();
-			$targetEditionsTable = $dbDriver->tablename( "targeteditions" );
-			$editionsTable = $dbDriver->tablename( "editions" );
+	}	
+	
+   /**
+     * Returns the editions related to specific targets.
+     *
+     * @param array $targetIds Targets for which the editions are read.
+     * @return array with target/edition combinations.
+     */
+    public static function listEditionsByTargetIds(array $targetIds)
+    {
+    	$result = array();
+    	if (!empty($targetIds)){
+	    	$dbDriver = DBDriverFactory::gen();
+	        $targetEditionsTable = $dbDriver->tablename("targeteditions");
+	        $editionsTable = $dbDriver->tablename("editions");
 			$substitutes = array();
-			$where = 'WHERE '.DBBase::makeWhereForSubstitutes( array( 'ted.targetid' => $targetIds ), $substitutes );
-			$sql = "SELECT ted.`targetid`, edi.`id` , edi.`name` "
-				."FROM $targetEditionsTable ted "
-				."INNER JOIN $editionsTable edi ON ( ted.`editionid` = edi.`id` ) "
-				.$where;
+	    	$where = 'WHERE '. DBBase::makeWhereForSubstitutes ( array('ted.targetid' => $targetIds), $substitutes );	
+	    	$sql = "SELECT ted.`targetid`, edi.`id` , edi.`name` "
+				. "FROM $targetEditionsTable ted "
+				. "INNER JOIN $editionsTable edi ON ( ted.`editionid` = edi.`id` ) "
+				. $where;
 			$sth = $dbDriver->query( $sql, $substitutes );
-			$result = self::fetchResults( $sth );
-		}
-		return $result;
-	}
+			$result = self::fetchResults($sth);
+    	}
+    	return $result;
+    }
     
 	/**
 	 * This function returns the target editions for passed targets. 
