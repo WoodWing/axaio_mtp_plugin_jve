@@ -215,7 +215,9 @@ class TestSuiteFactory
 			/** @var TestCase $testObj */
 			$testObj = self::createTestModule( BASEDIR.$classPath, 'TestCase' );
 			$testObj->setSessionId( $sessionId );
-			$testObj->setAutoCleanIdsJobs( $ancestorTestSuite != 'HealthCheck2' ); // By default, auto clear the IDS jobs for BuildTest
+			$autoCleanIdsJobs = ( $ancestorTestSuite != 'HealthCheck2' && // By default, only auto clean for BuildTest
+											$ancestorTestSuite != 'PhpCodingTest' ); // No DB connection yet during this test execution, so exclude.
+			$testObj->setAutoCleanIdsJobs( $autoCleanIdsJobs );
 
 			// Only perform for normal test cases or for test cases that belong to
 			// server plugins that are installed and active.
