@@ -78,7 +78,6 @@ class DBFeature extends DBBase
 	public static function getFeatureAccess( $userShort, $pubIds )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
-		$dbDriver = DBDriverFactory::gen();
 		$rows = DBUser::getRights( $userShort, $pubIds );
 
 		$featureAccessList = array();

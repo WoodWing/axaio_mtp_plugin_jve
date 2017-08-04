@@ -21,7 +21,7 @@ class DBEdition extends DBBase
 	 */
 	static function getEdition( $editionId )
 	{
-		$row = self::getRow( self::TABLENAME, "`id` = '$editionId' ");
+		$row = self::getRow( self::TABLENAME, "`id` = ?", '*', array( intval( $editionId ) ) );
 		return $row ? new Edition( $row['id'], $row['name'] ) : null;
 	}
 
@@ -35,7 +35,7 @@ class DBEdition extends DBBase
 	 */
 	public static function updateEditionDef( $editionId, $editionRow )
 	{
-		return self::updateRow(self::TABLENAME, $editionRow, "`id` = '$editionId' ");
+		return self::updateRow(self::TABLENAME, $editionRow, "`id` = ?", array( intval( $editionId ) ) );
 	}
 	
 	/**
@@ -44,16 +44,16 @@ class DBEdition extends DBBase
 	 *
 	 * @param int $issueId Id of the Issue
 	 * @param int $editionId Id of the edition definition
-	 * @param $editionRow array of values to update, indexed by fieldname. $editionRow['issue'] = issue1, etc...
+	 * @param array $editionRow array of values to update, indexed by fieldname. $editionRow['issue'] = issue1, etc...
 	 *         The array does NOT need to contain all values, only values that are to be updated.
-	 * @param $updateIfExists Should the record be updated if there allready is an edition with this issue and edition-definition
+	 * @param bool $updateIfExists Should the record be updated if there already is an edition with this issue and edition-definition
 	 */
 	public static function insertIssueEdition( $issueId, $editionId, $editionRow, $updateIfExists )
 	{
 		$curEditionRow = self::getRow( 'issueeditions', " `issue` = '$issueId' AND `edition` = '$editionId' ", null );
 		if( $curEditionRow ) {
 			if( $updateIfExists ) {
-				self::updateRow( 'issueeditions', $editionRow, "`id` = '".$curEditionRow['id']."' " );
+				self::updateRow( 'issueeditions', $editionRow, "`id` = ?" ,array( intval( $curEditionRow['id'] ) ));
 			} else {
 				self::setError( 'ERR_RECORDEXISTS' );
 			}
@@ -64,32 +64,35 @@ class DBEdition extends DBBase
 		}
 	}
 
-    private static function listEditionRows($publication, $issue = null, $edition=null, $name=null)
+	private static function listEditionRows( $publication, $issue = null, $edition = null, $name = null )
 	{
-		$dbdriver = DBDriverFactory::gen();		
+		$dbdriver = DBDriverFactory::gen();
 		$editionstable = $dbdriver->tablename( self::TABLENAME );
-        $publicationstable = $dbdriver->tablename( 'publications' );
-		$publication = $dbdriver->toDBString($publication);
+		$publicationstable = $dbdriver->tablename( 'publications' );
+		$publication = $dbdriver->toDBString( $publication );
 
-		$sql  = "SELECT edi.* ";
-        $sql .= "FROM $editionstable edi ";
-        $sql .= "LEFT JOIN $publicationstable pub ON (edi.`channelid` = pub.`defaultchannelid`) ";
-        $sql .= "WHERE pub.`id` = $publication AND edi.`channelid` IS NOT NULL ";
-		
-        if ($issue) {
-			$sql .= " AND (edi.`issueid` = $issue)";
-        }
-		else {
-			$sql .=' AND (edi.`issueid` = 0) ';
-        }
-		if ($edition) {
-            $sql .= " AND edi.`id` = $edition ";
-        }
-		if ($name) {
-            $sql .= " AND edi.`name` = '$name' ";
-        }
+		$sql = "SELECT edi.* ";
+		$sql .= "FROM $editionstable edi ";
+		$sql .= "LEFT JOIN $publicationstable pub ON (edi.`channelid` = pub.`defaultchannelid`) ";
+		$sql .= "WHERE pub.`id` = ? AND edi.`channelid` IS NOT NULL ";
+		$params = array( intval( $publication ) );
+
+		if( $issue ) {
+			$sql .= " AND (edi.`issueid` = ? )";
+			$params[] = array( intval( $issue ) );
+		} else {
+			$sql .= ' AND (edi.`issueid` = 0) ';
+		}
+		if( $edition ) {
+			$sql .= " AND edi.`id` = ? ";
+			$params[] = array( intval( $edition ) );
+		}
+		if( $name ) {
+			$sql .= " AND edi.`name` = ? ";
+			$params[] = array( strval( $name ) );
+		}
 		$sql .= 'ORDER BY edi.`code`, edi.`id`';
-		return $dbdriver->query($sql);
+		return $dbdriver->query( $sql, $params );
 	}
 
 	/*
@@ -122,28 +125,28 @@ class DBEdition extends DBBase
 	}
 
 	/**
-	 * Retrieves editions from smart_editions table that are owned by given publication.
-	 * Editions of issues with Overrule Publication are excluded! Use DBIssue::listIssueEditions for that.
-	 *
-	 * @param $pubId Id of the publication. Pass zero (0) to get all publication's editions.
+     * Retrieves editions from smart_editions table that are owned by given publication.
+     * Editions of issues with Overrule Publication are excluded! Use DBIssue::listIssueEditions for that.
+     *
+     * @param int $pubId Id of the publication. Pass zero (0) to get all publication's editions.
 	 * @return array of edition rows.
-	 **/
+    **/    
+    
+    public static function listPublEditions( $pubId )
+    {
+        $dbdriver = DBDriverFactory::gen();
+        $editionstable = $dbdriver->tablename( self::TABLENAME );
+        $publicationstable = $dbdriver->tablename( 'publications' );
+        
+        $sql  = "SELECT edi.* ";
+        $sql .= "FROM $editionstable edi, $publicationstable pub ";
+        $sql .= "WHERE edi.`channelid` = pub.`defaultchannelid` AND pub.`id` = ? AND edi.`issueid` = 0 ";
+        $params = array( intval( $pubId ) );
+        
+        $sth = $dbdriver->query( $sql, $params );
+        return self::fetchResults($sth, 'id');
+    }
 
-	public static function listPublEditions( $pubId )
-	{
-		$dbdriver = DBDriverFactory::gen();
-		$editionstable = $dbdriver->tablename( self::TABLENAME );
-		$publicationstable = $dbdriver->tablename( 'publications' );
-
-		$sql = "SELECT edi.* ";
-		$sql .= "FROM $editionstable edi, $publicationstable pub ";
-		$sql .= "WHERE edi.`channelid` = pub.`defaultchannelid` AND pub.`id` = ? AND edi.`issueid` = 0 ";
-		$params = array( $pubId );
-
-		$sth = $dbdriver->query( $sql, $params );
-		return self::fetchResults( $sth, 'id' );
-	}
-	
 	/**
 	 * Lists all editions from smart_editions that are owned by the given channel.
 	 * The channel->issue->editions are NOT included!
@@ -153,8 +156,8 @@ class DBEdition extends DBBase
 	 */
 	public static function listChannelEditions( $channelId )
 	{
-		$where = "(`channelid` = '$channelId') AND (`issueid` = 0) ORDER BY `code` ASC, `id` ASC";
-		return self::listRows( self::TABLENAME,'id','name', $where );
+		$where = "(`channelid` = ?) AND (`issueid` = 0) ORDER BY `code` ASC, `id` ASC";
+		return self::listRows( self::TABLENAME,'id','name', $where, '*', array( intval( $channelId ) ) );
 	}
 	
 	/**
@@ -165,10 +168,10 @@ class DBEdition extends DBBase
 	 */
 	static public function listIssueEditionsObj( $issueId )
 	{
-		$where = "`issueid` = '$issueId' ";
+		$where = "`issueid` = ? ";
 		$orderby = " ORDER BY `code` ASC, `id` ASC ";
 		$editions = array();
-		$rows = self::listRows(self::TABLENAME,'id','name', $where . $orderby, '*');
+		$rows = self::listRows(self::TABLENAME,'id','name', $where . $orderby, '*', array( intval( $issueId ) ) );
 		if (!$rows) return null;
 		foreach ($rows as $row) {
 			$editions[] = self::rowToObj($row);	
@@ -275,8 +278,8 @@ class DBEdition extends DBBase
 			$editionRow = self::objToRow( $edition );
 			
 			// check duplicates
-			$row = self::getRow(self::TABLENAME, "`name` = '" . $dbdriver->toDBString($editionRow['name']) . 
-								"' and `channelid` = '$channelId' and `issueid` = '$issueId' ");
+			$params = array( strval( $editionRow['name'] ), intval( $channelId ), intval( $issueId ) );
+			$row = self::getRow(self::TABLENAME, "`name` = ? AND `channelid` = ? AND `issueid` = ? ", '*', $params );
 			if($row) {
 				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
 			}
@@ -301,7 +304,7 @@ class DBEdition extends DBBase
 	 */
 	static public function getEditionObj( $editionId )
 	{
-		$row = self::getRow(self::TABLENAME, "`id` = '$editionId' ", '*');
+		$row = self::getRow(self::TABLENAME, "`id` = ?", '*', array( intval( $editionId ) ) );
 		if (!$row) return null;
 		return self::rowToObj($row);
 	}
@@ -318,21 +321,20 @@ class DBEdition extends DBBase
 	public static function modifyChannelEditionsObj( $channelId, $issueId, $editions )
 	{	
 		$modifyEditions = array();
-		$dbdriver = DBDriverFactory::gen();
-		
+
 		foreach($editions as $edition) {
 			$editionRow = self::objToRow( $edition );
 	
 			// check duplicates
-			$row = self::getRow(self::TABLENAME, "`name` = '".$dbdriver->toDBString($editionRow['name']).
-							"' and `issueid` = '$issueId' and `channelid` = '$channelId' and `id` != '$edition->Id'");
+			$params = array( strval( $editionRow['name'] ), intval( $issueId ), intval( $channelId ), intval( $edition->Id ) );
+			$row = self::getRow(self::TABLENAME, "`name` = ? AND `issueid` = ? AND `channelid` = ? AND `id` != ? ", '*', $params);
 			if($row) {
 				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
 			}
 		
 			$editionRow['channelid'] = $channelId;
 			$editionRow['issueid'] = $issueId;
-			$result = self::updateRow(self::TABLENAME, $editionRow, " `id` = '$edition->Id'");
+			$result = self::updateRow(self::TABLENAME, $editionRow, " `id` = ?", array( intval( $edition->Id ) ) );
 			if( $result === true ){
 				$modifyEdition = self::getEditionObj( $edition->Id );
 				$modifyEditions[] = $modifyEdition;
@@ -432,7 +434,6 @@ class DBEdition extends DBBase
 			return array();
 		}
 		
-		$results = array();
 		$dbDriver = DBDriverFactory::gen();
 		$editionstable = $dbDriver->tablename(self::TABLENAME);
 		
