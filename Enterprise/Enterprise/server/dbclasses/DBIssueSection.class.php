@@ -20,11 +20,11 @@ class DBIssueSection extends DBBase
 	 */
 	static public function getIssueSection($issue, $section)
 	{
-		$result = array();
 		$dbDriver = DBDriverFactory::gen();
 		$dbdis = $dbDriver->tablename(self::TABLENAME);
-		$sql = "select `deadline` from $dbdis where `section` = $section and `issue` = $issue";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT `deadline` FROM $dbdis WHERE `section` = ? AND `issue` = ?";
+		$params = array( intval( $section ), intval( $issue ) );
+		$sth = $dbDriver->query($sql, $params);
 		$result = $dbDriver->fetch($sth);	
 		return $result;
 	}
@@ -48,9 +48,10 @@ class DBIssueSection extends DBBase
 
 		$sql  = " SELECT iss.`deadline` FROM $tb_iss_sec_sta iss ";
 		$sql .= " INNER JOIN $tb_issues issues ON ( iss.`issue` = issues.`id` AND issues.`active` = 'on') ";
-		$sql .= " WHERE iss.`issue` IN ($issues) AND iss.`section` = $sectionid AND iss.`state` = $stateid ";
+		$sql .= " WHERE iss.`issue` IN ($issues) AND iss.`section` = ? AND iss.`state` = ? ";
 		$sql .= " ORDER BY iss.`deadline` ASC ";
-		$sth  = $dbDriver->query($sql);
+		$params = array( intval( $sectionid ), intval( $stateid ) );
+		$sth  = $dbDriver->query( $sql, $params );
 		$row  = $dbDriver->fetch($sth);
 
 		if ( $row ) {
@@ -78,9 +79,10 @@ class DBIssueSection extends DBBase
 
 		$sql  = " SELECT * FROM $tb_iss_sec isec ";
 		$sql .= " INNER JOIN $tb_issues issues ON ( isec.`issue` = issues.`id` AND issues.`active` = 'on') ";
-		$sql .= " WHERE isec.`issue` IN ($issues) AND isec.`section` = $sectionid ";
+		$sql .= " WHERE isec.`issue` IN ($issues) AND isec.`section` = ? ";
 		$sql .= " ORDER BY isec.`deadline` ASC ";
-		$sth = $dbDriver->query($sql);
+		$params = array( intval( $sectionid ) );
+		$sth = $dbDriver->query( $sql, $params );
 		$row = $dbDriver->fetch($sth);
 
 		if ( $row ) {
