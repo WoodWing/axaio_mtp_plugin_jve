@@ -63,7 +63,7 @@ class DBIssue extends DBBase
 	{
 		if( isset($issueRow['ExtraMetaData']) ) {
 			$extraMetaData = $issueRow['ExtraMetaData'];
-			self::deleteRows('channeldata', "`issue` = $issueId");
+			self::deleteRows('channeldata', "`issue` = ?", array( intval( $issueId ) ));
 			foreach($extraMetaData as $name => $value) {
 				$data['issue'] = $issueId;
 				$data['name'] = $name;
@@ -78,7 +78,8 @@ class DBIssue extends DBBase
 			$sectionMapping = $issueRow['SectionMapping'];
 
 			foreach($sectionMapping as $sectionId => $data) {
-				self::deleteRows('channeldata', "`issue` = {$issueId} AND `section` = {$sectionId}");
+				$params = array( intval( $issueId ), intval( $sectionId ) );
+				self::deleteRows('channeldata', "`issue` = ? AND `section` = ?", $params);
 				foreach($data as $name => $value) {
 					$row['issue'] = $issueId;
 					$row['section'] = $sectionId;
@@ -91,7 +92,7 @@ class DBIssue extends DBBase
 			unset($issueRow['SectionMapping']);
 		}
 
-		return self::updateRow(self::TABLENAME, $issueRow, " `id` = '$issueId' ");
+		return self::updateRow(self::TABLENAME, $issueRow, "`id` = ?", array( intval( $issueId ) ) );
 	}
 
 	/**
@@ -122,8 +123,8 @@ class DBIssue extends DBBase
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbi = $dbDriver->tablename('issues');
-		$sql = "SELECT `id`, `name` FROM $dbi WHERE `id` = $issueId";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT `id`, `name` FROM $dbi WHERE `id` = ?";
+		$sth = $dbDriver->query($sql, array( intval( $issueId ) ) );
 		$row = $dbDriver->fetch($sth);
 		return $row ? $row['name'] : '';
 	}
@@ -131,15 +132,16 @@ class DBIssue extends DBBase
 	/**
 	 * Returns if the specified issue has the overrule option set
 	 *
-	 * @param boolean Wether or not the issue overrules the brand
+	 * @param int $issueId
+	 * @return boolean True if overrule brand issue, else false
 	 */
 	static public function isOverruleIssue( $issueId )
 	{
 		if( $issueId ) {
 			$dbDriver = DBDriverFactory::gen();
 			$dbi = $dbDriver->tablename("issues");
-			$sql = "select `overrulepub` from $dbi where `id` = $issueId";
-			$sth = $dbDriver->query($sql);
+			$sql = "SELECT `overrulepub` FROM $dbi WHERE `id` = ?";
+			$sth = $dbDriver->query($sql, array( intval( $issueId ) ) );
 			$rowi = $dbDriver->fetch($sth);
 			return ($rowi['overrulepub'] == 'on');
 		}
@@ -168,12 +170,14 @@ class DBIssue extends DBBase
 		$sql  = "SELECT iss.`id` ";
 		$sql .= "FROM $issTable iss ";
 		$sql .= "INNER JOIN $chaTable cha ON (iss.`channelid` = cha.`id`) ";
-		$sql .= "WHERE cha.`publicationid` = $pubId AND cha.`type` = '$channelType' AND iss.`name` = '$issueName' ";
+		$sql .= "WHERE cha.`publicationid` = ? AND cha.`type` = ? AND iss.`name` = ? ";
+		$params = array( intval( $pubId ), strval( $channelType ), strval( $issueName ) );
 	   if ( $pubChannelId ) {
 	      $sql .= " AND cha.`id` = $pubChannelId ";
+	      $params[] = array( intval( $pubChannelId ) );
 	   }
 		
-		$sth = $dbDriver->query( $sql );
+		$sth = $dbDriver->query( $sql, $params );
 		$row = $dbDriver->fetch( $sth );
 		return $row ? $row['id'] : null;
     }
@@ -195,13 +199,15 @@ class DBIssue extends DBBase
         $sql  = "SELECT i.*, ch.`name` as \"channelname\" ";
         $sql .= "FROM $channelstable ch ";
         $sql .= "INNER JOIN $issuestable i ON (i.`channelid` = ch.`id`) ";
-        $sql .= "WHERE (ch.`publicationid` = $pubId) ";
+        $sql .= "WHERE (ch.`publicationid` = ?) ";
+        $params = array( intval( $pubId ) );
         if( $overruleIssOnly ) {
-        	$sql .= ' AND (`overrulepub` = \'on\') ';
+        	$sql .= ' AND (`overrulepub` = ? ) ';
+        	$params[] = 'on';
         }
         $sql .= "ORDER BY ch.`publicationid`, ch.`code`, ch.`id`, i.`code` ";
 
-        $sth = $dbdriver->query($sql);
+        $sth = $dbdriver->query($sql, $params);
 
         $results = array();
         while (($row = $dbdriver->fetch($sth))) {
@@ -219,7 +225,7 @@ class DBIssue extends DBBase
 	 */
 	public static function listChannelIssues( $channelId )
 	{
-		$rows = self::listRows( self::TABLENAME,'id','name',"`channelid` = $channelId ORDER BY `code` ASC, `id` ASC" );
+		$rows = self::listRows( self::TABLENAME,'id','name',"`channelid` = ? ORDER BY `code` ASC, `id` ASC", '*', array( intval( $channelId ) ) );
 		return $rows;
 	}
 
@@ -359,7 +365,7 @@ class DBIssue extends DBBase
 
 	/**
 	 *  Lists ALL issues that non-overrule their publication in an array.
-	 *  @param int Brand Id to filter on.
+	 *  @param int $brandId Brand Id to filter on.
 	 *  @return array of id's of non-overrule brand issues.
 	 */
 	static public function listNonOverruleIssuesByBrand( $brandId )
@@ -372,8 +378,8 @@ class DBIssue extends DBBase
 		$sql .= "FROM $issuestable i ";
 		$sql .= "INNER JOIN $channelstable c ON (i.`channelid` = c.`id`) ";
 		$sql .= "WHERE i.`overrulepub` = '' ";
-		$sql .= "AND c.`publicationid` = $brandId ";
-		$sth = $dbdriver->query($sql);
+		$sql .= "AND c.`publicationid` = ? ";
+		$sth = $dbdriver->query($sql, array( intval( $brandId ) ) );
 		$result = array();
 		while (($row = $dbdriver->fetch($sth))) {
 			$result[] = $row['id'];
@@ -383,7 +389,7 @@ class DBIssue extends DBBase
 	
 	/**
 	 *  Lists ALL issues that overrule their publication in a array
-	 *  @return key-value array, key being the issueId and value the publication id of that overrule issue
+	 *  @return array, key being the issueId and value the publication id of that overrule issue
 	 */
 	static public function listAllOverruleIssuesWithPub()
 	{
@@ -413,8 +419,8 @@ class DBIssue extends DBBase
 	{
 		$dbdriver = DBDriverFactory::gen();
 		$issuesTable = $dbdriver->tablename(self::TABLENAME);
-		$sql = "SELECT `channelid` FROM $issuesTable WHERE `id` = $issueId ";
-		$sth = $dbdriver->query( $sql );
+		$sql = "SELECT `channelid` FROM $issuesTable WHERE `id` = ? ";
+		$sth = $dbdriver->query( $sql, array( intval( $issueId ) ) );
 		if( !$sth ) return null;
 		$row = $dbdriver->fetch( $sth );
 		if( !$row ) return null;
@@ -434,7 +440,7 @@ class DBIssue extends DBBase
 	{
 		$issueRow = self::getIssue( $issueId );
 		if( $issueRow['overrulepub'] === true ) {
-			return self::listRows( 'editions','id','name',"`issueid` = '$issueId' ORDER BY `code` ASC" );
+			return self::listRows( 'editions','id','name',"`issueid` = ? ORDER BY `code` ASC", '*', array( intval( $issueId ) ) );
 		} else {
 			require_once BASEDIR . '/server/dbclasses/DBEdition.class.php';
 			return $noPubDefs ? null : DBEdition::listPublEditions( $issueRow['publication'] );
@@ -471,9 +477,11 @@ class DBIssue extends DBBase
 		$channelstable = $dbdriver->tablename('channels');
 		$result = array();
 
+		$whereinpublications = array();
 		if (!empty($publications)) {
 			$whereinpublications = implode(',', $publications);
 		}
+		$whereinissues = array();
 		if (!empty($issues)) {
 			$whereinissues = implode(',', $issues);
 		}
@@ -487,7 +495,7 @@ class DBIssue extends DBBase
 
 		$sth = $dbdriver->query($sql);
 		$rows = self::fetchResults($sth);
-		if (count($rows > 0)) {
+		if (count( $rows ) > 0 ) {
 			foreach ($rows as $row) {
 				$result[] = $row['id'];
 			}
@@ -511,11 +519,11 @@ class DBIssue extends DBBase
 		$issuesection = $dbDriver->tablename('issuesection');
 		$issuesectionstate = $dbDriver->tablename('issuesectionstate');
 
-		$sql = "UPDATE $issues SET `deadline` = '' WHERE `id` = $issueId ";
-		$dbDriver->query($sql);
+		$sql = "UPDATE $issues SET `deadline` = '' WHERE `id` = ? ";
+		$dbDriver->query($sql, array( intval( $issueId ) ));
 
-		$sql = "DELETE FROM $issueeditions WHERE `issue` = $issueId ";
-		$dbDriver->query($sql);
+		$sql = "DELETE FROM $issueeditions WHERE `issue` = ? ";
+		$dbDriver->query($sql, array( intval( $issueId ) ) );
 
 		$sql = "DELETE FROM $issuesection WHERE `issue` = $issueId ";
 		$dbDriver->query($sql);
@@ -524,8 +532,8 @@ class DBIssue extends DBBase
 		//as well as deadlines (datetimes). Here be sure to delete only the deadlines by requiring
 		//deadlinerelative = 0 => This can never destroy the relative deadlines as a non-existing row
 		//is interpreted as having an deadlinerelative of 0.
-		$sql = "DELETE FROM $issuesectionstate WHERE `issue` = $issueId AND `deadlinerelative` = 0 ";
-		$dbDriver->query($sql);
+		$sql = "DELETE FROM $issuesectionstate WHERE `issue` = ? AND `deadlinerelative` = 0 ";
+		$dbDriver->query($sql, array( intval( $issueId ) ) );
 	}
 	
 	/**
@@ -533,12 +541,12 @@ class DBIssue extends DBBase
 	 * is in active or inactive status.
 	 *
 	 * @param int $issuedId Database of the issue ID.
-	 * @return  booelan True when active, False otherwise. 
+	 * @return  boolean True when active, False otherwise.
 	 */
 	static public function isIssueActive( $issuedId )
 	{
 		$where = " `id` = ? AND `active` = ? ";
-		$result = self::getRow('issues', $where, 'id', array($issuedId, 'on'));
+		$result = self::getRow('issues', $where, 'id', array( intval( $issuedId ), 'on'));
 		return $result ? true : false;
 	}
 }

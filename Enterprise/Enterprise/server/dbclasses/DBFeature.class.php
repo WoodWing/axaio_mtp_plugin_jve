@@ -32,8 +32,8 @@ class DBFeature extends DBBase
 
 			//@todo Move to profilefeatures
 			// get all profilefeatures
-			$sql = "SELECT * FROM $dbpv WHERE `profile` = ".$row['id'];
-			$sthdet = $dbdriver->query($sql);
+			$sql = "SELECT * FROM $dbpv WHERE `profile` = ? ";
+			$sthdet = $dbdriver->query($sql, array( intval($row['id'] ) ) );
 			$db = array();
 			while( ($rowdet = $dbdriver->fetch($sthdet)) ) {
 				$db[$rowdet['feature']] = $rowdet;
@@ -74,7 +74,6 @@ class DBFeature extends DBBase
 	public static function getFeatureAccess( $userShort, $pubIds )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
-		$dbDriver = DBDriverFactory::gen();
 		$rows = DBUser::getRights( $userShort, $pubIds );
 
 		$featureAccessList = array();

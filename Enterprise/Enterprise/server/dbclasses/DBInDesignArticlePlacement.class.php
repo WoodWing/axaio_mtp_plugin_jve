@@ -19,7 +19,7 @@ class DBInDesignArticlePlacement extends DBBase
 	 *
 	 * @since 9.7.0
 	 * @param integer $layoutId
-	 * @param string idArticleUid
+	 * @param string $idArticleId
 	 * @param integer $placementId
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
@@ -47,7 +47,7 @@ class DBInDesignArticlePlacement extends DBBase
  	 *
 	 * @since 9.8.0
 	 * @param integer $layoutId
-	 * @param string idArticleUid
+	 * @param string $idArticleId
 	 * @param integer $placementId
 	 * @return boolean TRUE when exists, else FALSE.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
@@ -222,7 +222,7 @@ class DBInDesignArticlePlacement extends DBBase
 	 *
 	 * @since 9.7.0
 	 * @param integer $layoutId
-	 * @param string $indesignArticleId UID
+	 * @param string $idArticleId UID
 	 * @param integer $oldPlcId Unlink from this placement id
 	 * @param integer $newPlcId Relink to this placement id
 	 */

@@ -18,7 +18,7 @@ class DBInDesignArticle extends DBBase
 	 * Creates the given InDesign Articles in DB for a certain layout object.
 	 *
 	 * @since 9.7.0
-	 * @param integer layoutId
+	 * @param integer $layoutId
 	 * @param InDesignArticle[] $articles The InDesign Articles to be created.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
@@ -46,7 +46,7 @@ class DBInDesignArticle extends DBBase
 	 * Retrieves the InDesign Articles from DB for a given layout object.
 	 *
 	 * @since 9.7.0
-	 * @param integer layoutId
+	 * @param integer $layoutId
 	 * @return InDesignArticle[] The InDesign Articles. Empty when none found.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
@@ -79,7 +79,7 @@ class DBInDesignArticle extends DBBase
 	 * Deletes the InDesign Articles from DB for a given layout object.
 	 *
 	 * @since 9.7.0
-	 * @param integer layoutId
+	 * @param integer $layoutId
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
  	public static function deleteInDesignArticles( $layoutId )
