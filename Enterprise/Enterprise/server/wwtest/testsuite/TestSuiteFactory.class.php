@@ -13,12 +13,17 @@
 class TestSuiteFactory
 {
 	static private $CurrentTestsNode = null; // "Tests" XML node, which is current insertion point while building XML doc.
+
+	/**
+	 * @var string Date in SOAP standard 'Y-m-d\TH:i:s'.
+	 */
+	static private $testStartTime = null;
 	
 	/**
 	  * Includes TestCase or TestSuite PHP file and creates an instance of its class.
 	  *
 	  * @param string $testFile The PHP file to include
-	  * @return object TestCase or TestSuite.
+	  * @return TestCase|TestSuite.
 	  */
 	static private function createTestModule( $testFile )
 	{
@@ -191,23 +196,27 @@ class TestSuiteFactory
 	}
 	
 	/**
-	  * Includes TestCase or TestSuite PHP file and creates an instance of its class.
-	  * It runs its test method runTest() and collects the results in XML format.
-	  *
-	  * @param string $sessionId Test session. Do NOT confuse with Enterprise sessions (ticket).
-	  * @param string $classPath Relative file path to testsuite folder of the PHP file to include.
-	  * @return string XML stream.
-	  */
-	static public function runTest( $sessionId, $classPath ) 
+	 * Includes TestCase or TestSuite PHP file and creates an instance of its class.
+	 * It runs its test method runTest() and collects the results in XML format.
+	 *
+	 * @param string $sessionId Test session. Do NOT confuse with Enterprise sessions (ticket).
+	 * @param string $classPath Relative file path to testsuite folder of the PHP file to include.
+	 * @param string $ancestorTestSuite The name of the top most TestSuite, e.g 'HealthCheck', 'BuildTest' and etc.
+	 * @return string XML stream.
+	 */
+	static public function runTest( $sessionId, $classPath, $ancestorTestSuite )
 	{
 		// Read TestCase class file from disk, create instance and run its test method
 		$testResults = array();
 		try {
 			// Start test session.
 			ob_start(); // Capture std output. See ob_get_contents() below for details.
+			self::$testStartTime = date('Y-m-d\TH:i:s');
+			/** @var TestCase $testObj */
 			$testObj = self::createTestModule( BASEDIR.$classPath, 'TestCase' );
 			$testObj->setSessionId( $sessionId );
-			
+			$testObj->setAutoCleanIdsJobs( $ancestorTestSuite != 'HealthCheck2' ); // By default, auto clear the IDS jobs for BuildTest
+
 			// Only perform for normal test cases or for test cases that belong to
 			// server plugins that are installed and active.
 			if( !self::skipWhenNotInstalledPlugin( $classPath, $testObj ) ) {
@@ -255,6 +264,9 @@ class TestSuiteFactory
 					$snapAfter = self::getSnapShotOfDbTables();
 					$testResults = self::validateSnapShots( $snapBefore, $snapAfter, $nonCleaningTables );
 				}
+				if( $testObj->getAutoCleanIdsJobs() ){
+					self::clearIdsServerJobsInTheQueue();
+				}
 			}
 			
 			// Combine the collected test results.
@@ -298,6 +310,17 @@ class TestSuiteFactory
 			self::createTextElem( $xmlDoc, $xmlResult, 'ConfigTip', $testResult->ConfigTip );
 		}
 		return $xmlDoc->saveXML(); // return XML stream to caller
+	}
+
+	/**
+	 * Clean up all the IDS jobs in the job queue created by the test case.
+	 */
+	private static function clearIdsServerJobsInTheQueue()
+	{
+		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
+		$where = '`queuetime` >= ? ';
+		$params = array( strval( self::$testStartTime ) );
+		$result = DBBase::deleteRows( 'indesignserverjobs', $where, $params );
 	}
 
 	static private function createTextElem( $xmlDoc, $xmlParent, $nodeName, $nodeText )
