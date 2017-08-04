@@ -2129,14 +2129,14 @@ class BizObject
 						// If RouteTo exists in MetaDataValue, then add  new / old RouteTo value on the fly.
 						$invokedObject->NewRouteTo = isset($objectProperties['standard']['RouteTo'])
 							? $objectProperties['standard']['RouteTo']
-							: $invokedObject->WorkflowMetaData->RouteTo;
+							: null; // When no changes, don't set anything.
 					} else {
 						// If RouteTo not exists in MetaDataValue, then get new RouteTo value[from the configured Auto Routing],
 						// else take the old RouteTo value.
 						if( !is_null($stateIdMetaDataValueIndex) ) {
 							$invokedObject->NewRouteTo = !empty( $routes[$newStateId][$categoryId]) // When empty, no auto routing configured
 								? $routes[$newStateId][$categoryId]
-								: $invokedObject->WorkflowMetaData->RouteTo;
+								: null; // When no changes (taking the old RouteTo value), don't set anything.
 						} else {
 							$invokedObject->NewRouteTo = $invokedObject->WorkflowMetaData->RouteTo;
 						}
@@ -2224,7 +2224,9 @@ class BizObject
 				if ( $sendToNext || ( !$sendToNext && isset( $objectProperties['standard']['StateId'] ) ) ) {
 					$objectProperties['standard']['StateId'] = $stateIdForGroup;
 				}
-				$objectProperties['standard']['RouteTo'] = $routeToForGroup;
+				if( !is_null( $routeToForGroup ) ) { // Only update when there's changes in the RouteTo.
+					$objectProperties['standard']['RouteTo'] = $routeToForGroup;
+				}
 
 				// If a RouteTo change was not requested, add it to the MetaDataValues as it may have been changed.
 				if ( $sendToNext && is_null( $routeToMetaDataValueIndex ) ) {
