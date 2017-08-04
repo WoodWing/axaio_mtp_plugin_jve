@@ -546,7 +546,7 @@ class DBIssue extends DBBase
 	static public function isIssueActive( $issuedId )
 	{
 		$where = " `id` = ? AND `active` = ? ";
-		$result = self::getRow('issues', $where, 'id', array( intval( $issuedId ), 'on'));
+		$result = self::getRow('issues', $where, 'id', '*', array( intval( $issuedId ), 'on'));
 		return $result ? true : false;
 	}
 }
