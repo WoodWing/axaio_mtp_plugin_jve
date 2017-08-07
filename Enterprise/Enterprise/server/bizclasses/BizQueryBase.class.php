@@ -930,11 +930,13 @@ class BizQueryBase
 
 	static public function resolvePublicationNameParams($params)
 	{
-		require_once BASEDIR . '/server/dbclasses/DBPublication.class.php';
-
-		$pubrows = DBPublication::listPublications(array('id','publication'));
+		$pubrows = null;
 		foreach ($params as &$param) {
 			if (strtolower($param->Property == 'publication')) {
+				if( is_null($pubrows)) {
+					require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
+					$pubrows = DBPublication::listPublications( array( 'id', 'publication' ) );
+				}
 				foreach ($pubrows as $pubrow) {
 					if (strtolower($pubrow['publication']) == strtolower($param->Value) && $param->Operation == '=') {
 						$param->Property = 'publicationid';
