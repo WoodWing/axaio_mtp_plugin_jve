@@ -773,7 +773,7 @@ class DBBase
 	 * @param array $newValues column/value pairs of the columns to be inserted.
 	 * @param boolean $autoIncrement Apply auto increment for primary key (true/false).
 	 * @param $logExistsErr boolean Log 'already exists' errors. If set to false no error is logged for an insert operations for which this error is fine.
-	 * @return new id or else false.
+	 * @return integer|bool id or else false.
 	 */
 	protected static function doInsert( $table, $dbIntClass, array $newValues, $autoIncrement, $logExistsErr=true )
 	{
