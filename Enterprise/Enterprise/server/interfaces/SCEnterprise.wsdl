@@ -2068,7 +2068,7 @@
 					<element name="Params"		 	type="tns:ArrayOfQueryParam"/>
 					<element name="FirstEntry"	 	type="xsd:unsignedInt" 			nillable="true"/>	<!-- v4.2: Index of first requested object of total count (TotalEntries) -->
 					<element name="MaxEntries"	 	type="xsd:unsignedInt" 			nillable="true"/>	<!-- v4.2: Max count of requested objects (zero for all, nil for server defined default) -->
-					<element name="Hierarchical" 	type="xsd:boolean" 				nillable="true"/> 	<!-- v4.2: Requests to include ChildRows (placements/components) - Default false! -->
+					<element name="Hierarchical" 	type="xsd:boolean" 				nillable="true"/> 	<!-- v4.2: Requests to include ChildRows/ChildColumns (placements) and ComponentRows/ComponentColumns (text components) - Default false! -->
 					<element name="Order"		 	type="tns:ArrayOfQueryOrder"	nillable="true"/>	<!-- v4.2 -->
 					<element name="MinimalProps"	type="tns:ArrayOfString"		nillable="true"/>	<!-- v6.0: Minimal properties that should be returned even if these are not configured -->
 					<element name="RequestProps" 	type="tns:ArrayOfString"		nillable="true"/>	<!-- v6.0: Which properties to return, be cautious, this overrules server configuration and overrules MinimalProps -->
@@ -2611,7 +2611,7 @@
 					<element name="Params"		 type="tns:ArrayOfQueryParam"/>
 					<element name="FirstEntry"	 type="xsd:unsignedInt" 		nillable="true"/>	<!-- v4.2: Index of first requested object of total count (TotalEntries) -->
 					<element name="MaxEntries"	 type="xsd:unsignedInt" 		nillable="true"/>	<!-- v4.2: Max count of requested objects (zero for all, nil for DBMAXQUERY) -->
-					<element name="Hierarchical" type="xsd:boolean" 			nillable="true"/> 	<!-- v4.2: Requests to include ChildRows (placements/components) - Default false! -->
+					<element name="Hierarchical" type="xsd:boolean" 			nillable="true"/> 	<!-- v4.2: Requests to include ChildRows/ChildColumns (placements) and ComponentRows/ComponentColumns (text components) - Default false! -->
 					<element name="Order"		 type="tns:ArrayOfQueryOrder"	nillable="true"/>	<!-- v4.2 -->
 				</sequence>
 			  </complexType>
