@@ -603,7 +603,7 @@ class DBObjectRelation extends DBBase
 		
 		$sql  = "SELECT `child` ";
 		$sql .= "FROM $objrel ";
-		$sql .= "WHERE `child` = $childId ";
+		$sql .= "WHERE `child` = ? ";
 		$sql .= "AND `type` <> 'Related' ";
 		$sql .= "GROUP BY `child` ";
 		$sql .= "HAVING COUNT(1) > $manifold ";
