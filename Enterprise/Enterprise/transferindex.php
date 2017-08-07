@@ -218,8 +218,7 @@ class TransferEntry
 		
 		BizSession::setServiceName( 'FileTransfer' );
 		PerformanceProfiler::startProfile( 'Entry point', 1 );
-		$msg = 'Incoming HTTP '.$httpMethod.' request.<br/>'.
-				'Ticket=[' . $ticket . '] File GUID=[' . $fileguid .'] ';
+		$msg = "Incoming HTTP {$httpMethod} request\r\nTicket=[{$ticket}] File GUID=[{$fileguid}]";
 		if( $format ) {
 			$msg .= 'Format=['.$format.'] ';
 		}

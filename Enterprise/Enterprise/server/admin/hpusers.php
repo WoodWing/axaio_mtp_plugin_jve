@@ -166,9 +166,20 @@ if( $mode == 'error' ) {
 				'expiredays' => $expireDays, 'language' => $newLanguage, 'trackchangescolor' => $userColor,
 				'organization' => $organization, 'location' => $location );
 } elseif( $mode != "new" ) {
-	$row = DBUser::getUserById($id); 
-	$row['startdate'] = DateTimeFunctions::iso2date( $row['startdate'] );
-	$row['enddate'] = DateTimeFunctions::iso2date( $row['enddate'] );
+	$row = DBUser::getUserById($id);
+	if( $row ) {
+		$row['startdate'] = DateTimeFunctions::iso2date( $row['startdate'] );
+		$row['enddate'] = DateTimeFunctions::iso2date( $row['enddate'] );
+	} else {
+		// Can only happen when an invalid id is passed in as query string on the URL.
+		$row = array ('user' => $user, 'fullname' => $fullName, 'disable' => $disable,
+			'email' => $email, 'emailgrp' => $emailGrp, 'emailusr' => $emailUsr,
+			'fixedpass' => $fixedPass, 'startdate' => $inpStartDate, 'enddate' => $inpEndDate,
+			'expiredays' => $expireDays, 'language' => $newLanguage, 'trackchangescolor' => $userColor,
+			'organization' => $organization, 'location' => $location );
+		$mode = 'error';
+		$errors['ERROR'][] = BizResources::localize( 'ERR_SUBJECT_NOTEXISTS', true, array( '{USR_USER}', $id ) );
+	}
 } else {
 	$row = array ('user' => '', 'fullname' => '', 'disable' => '', 'email' => '', 'emailgrp' => 'on', 
 				'emailusr' => 'on', 'fixedpass' => '', 'startdate' => '', 'enddate' => '', 

@@ -37,9 +37,11 @@ abstract class IssueEvent_EnterpriseConnector extends DefaultConnector
 	 */
 	public function prepareData( $eventInfo, $issue )
 	{
-		LogHandler::Log('IssueEvent_Connector','INFO',
-			'prepareData():Preparing issue data for the event: <pre>' . print_r( $eventInfo, 1 ) .
-			'</pre> with data. <pre>:' . print_r( $issue, 1 ) . '</pre>' );
+		LogHandler::logRaw(
+			'IssueEvent_Connector',
+			'INFO',
+			"processData(): Preparing issue data for the Event: ".LogHandler::composeCodeBlock( print_r( $eventInfo, 1 ) ).
+			LogHandler::encodeLogMessage( "\r\nData: " ).LogHandler::composeCodeBlock( print_r( $issue, 1 ) ) );
 
 		return null;
 	}
@@ -62,8 +64,11 @@ abstract class IssueEvent_EnterpriseConnector extends DefaultConnector
 	 */
 	public function processData( $eventInfo, $issue, $pluginData )
 	{
-		LogHandler::Log('IssueEvent_Connector','INFO', 'processData(): Processing data for the Event: <pre>' . print_r( $eventInfo, 1 ) .
-			'</pre> Data:<pre>:' . print_r( $issue, 1 ) . '</pre>' );
+		LogHandler::logRaw(
+						'IssueEvent_Connector',
+						'INFO',
+						"processData(): Processing data for the Event: ".LogHandler::composeCodeBlock( print_r( $eventInfo, 1 ) ).
+						LogHandler::encodeLogMessage( "\r\nData: " ).LogHandler::composeCodeBlock( print_r( $issue, 1 ) ) );
 	}
 
 	/**

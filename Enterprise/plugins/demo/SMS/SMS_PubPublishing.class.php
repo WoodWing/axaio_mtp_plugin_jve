@@ -251,7 +251,7 @@ class SMS_PubPublishing extends PubPublishing_EnterpriseConnector
 			LogHandler::Log('SMS', 'INFO', 'SMS message sent to '.$sms->successcount.' number(s)!');
 			return '';
 		} else {
-			LogHandler::Log('SMS', 'ERROR', 'Failed to send SMS<br/>Errorcode: '.$sms->resultcode.'<br/>Errormessage: '.$sms->resultmessage );
+			LogHandler::Log('SMS', 'ERROR', "Failed to send SMS\r\nErrorcode: {$sms->resultcode}\r\nErrormessage: {$sms->resultmessage}" );
 			$msg = "Error sending SMS:\n".$sms->resultmessage.' ('.$sms->resultcode.')';
 			throw new BizException( null, 'Server', null, $msg );
 		}

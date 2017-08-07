@@ -36,9 +36,9 @@ class WW_Utils_DigitalPublishingSuiteClient
 		if( !is_null( $dpsAccount ) ) {
 			$this->dpsSessionId = $this->getDpsSessionId( $dpsAccount );
 		}
-		LogHandler::Log( 'AdobeDps', 'DEBUG', 'DPS Url:' . $url . '<br/>' . 
-											  'DPSClientVersion:' . $this->dpsClientVersion . '<br/>'.
-											  'DPSSessionId:' . $this->dpsSessionId .' ('.$dpsAccount.')');
+		LogHandler::Log( 'AdobeDps', 'DEBUG', "DPS Url: {$url}\r\n".
+														"DPSClientVersion: {$this->dpsClientVersion}\r\n".
+											         "DPSSessionId: {$this->dpsSessionId} ({$dpsAccount})");
 	}
 
 	/**

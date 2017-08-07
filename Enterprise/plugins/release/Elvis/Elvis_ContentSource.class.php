@@ -207,8 +207,6 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	public function getShadowObject( $alienId, &$object, $objprops, $lock, $rendition )
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject called for alienId:' . $alienId . '; lock:' . $lock . '; rendition:' . $rendition );
-
-		$this->checkUserEditRight( $lock, $rendition );
 		$this->getShadowObject2( $alienId, $object, $objprops, $lock, $rendition, null );
 	}
 
@@ -280,10 +278,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	private function checkUserEditRight( $lock, $rendition )
 	{
-		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';
 		if ( $lock && $rendition == 'native' ) {
-			$restricted = ElvisSessionUtil::getSessionVar( 'restricted' );
-			if ( $restricted || is_null( $restricted ) ) {
+			require_once __DIR__.'/util/ElvisSessionUtil.php';
+			$restricted = ElvisSessionUtil::getRestricted();
+			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
+			if ( $restricted ) {
 				throw new BizException( 'ERR_AUTHORIZATION', 'Client' );
 			}
 		}
@@ -477,39 +476,37 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 		// This function is indirectly called when exporting shadow objects from Elvis
 		// At this point there is no active session and the write can safely be ignored.
-		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';
-		if( ElvisSessionUtil::hasSession() ) {
-			require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
-			require_once dirname(__FILE__).'/util/ElvisObjectUtils.class.php';
-			require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
+		require_once dirname( __FILE__ ).'/util/ElvisSessionUtil.php';
+		require_once dirname( __FILE__ ).'/util/ElvisUtils.class.php';
+		require_once dirname( __FILE__ ).'/util/ElvisObjectUtils.class.php';
+		require_once dirname( __FILE__ ).'/logic/ElvisContentSourceService.php';
 
-			$elvisId = ElvisUtils::getElvisId( $alienId );
-			$service = new ElvisContentSourceService();
-				
-			// Revert smart connection checkout when changing properties
-			if( ElvisUtils::isSmartConnection() ) {
-				$service->undoCheckout( $elvisId );
-			}
-			
-			if( !ElvisObjectUtils::isArchivedStatus( $object->MetaData->WorkflowMetaData->State->Name ) ) {
-				// Normally all metadata is set using the REST client. These are set using 
-				// the permissions of the current user. However there are some specific
-				// Enterprise metadata properties defined in Elvis, which needs to be set 
-				// whatever permission the current user has, so these are set using AMF; this
-				// only set sce prefixed metadata properties as a super user. 
-				$elvisMetadata = $this->fillElvisEnterpriseMetadata( $object->MetaData );
+		$elvisId = ElvisUtils::getElvisId( $alienId );
+		$service = new ElvisContentSourceService();
 
-				$elvisMetadata['sceModified'] = $object->MetaData->WorkflowMetaData->Modified;
-				$elvisMetadata['sceModifier'] = $object->MetaData->WorkflowMetaData->Modifier;
-				$elvisMetadata['sceArchivedInEnterprise'] = "false";
+		// Revert smart connection checkout when changing properties
+		if( ElvisUtils::isSmartConnection() ) {
+			$service->undoCheckout( $elvisId );
+		}
 
-				$service->updateWorkflowMetadata( $elvisId, $elvisMetadata );
-				$this->getMetadataHandler()->update( $elvisId, $object->MetaData );
-			} else {
-				$elvisMetadata = array();
-				$elvisMetadata['sceArchivedInEnterprise'] = "true";
-				$service->updateWorkflowMetadata( $elvisId, $elvisMetadata );
-			}
+		if( !ElvisObjectUtils::isArchivedStatus( $object->MetaData->WorkflowMetaData->State->Name ) ) {
+			// Normally all metadata is set using the REST client. These are set using
+			// the permissions of the current user. However there are some specific
+			// Enterprise metadata properties defined in Elvis, which needs to be set
+			// whatever permission the current user has, so these are set using AMF; this
+			// only set sce prefixed metadata properties as a super user.
+			$elvisMetadata = $this->fillElvisEnterpriseMetadata( $object->MetaData );
+
+			$elvisMetadata['sceModified'] = $object->MetaData->WorkflowMetaData->Modified;
+			$elvisMetadata['sceModifier'] = $object->MetaData->WorkflowMetaData->Modifier;
+			$elvisMetadata['sceArchivedInEnterprise'] = "false";
+
+			$service->updateWorkflowMetadata( $elvisId, $elvisMetadata );
+			$this->getMetadataHandler()->update( $elvisId, $object->MetaData );
+		} else {
+			$elvisMetadata = array();
+			$elvisMetadata['sceArchivedInEnterprise'] = "true";
+			$service->updateWorkflowMetadata( $elvisId, $elvisMetadata );
 		}
 	}
 
@@ -519,7 +516,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 *
 	 * @since v9.2.0
 	 * @param array[] $shadowObjectIds List of array where key is the content source id and value its list of shadow ids.
-	 * @param MetaDataValues[] $metaDataValues The modified values that needs to be updated at the content source side.
+	 * @param MetaDataValue[] $metaDataValues The modified values that needs to be updated at the content source side.
 	 */
 	public function multiSetShadowObjectProperties( $shadowObjectIds, $metaDataValues )
 	{
@@ -530,47 +527,45 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 		// This function is indirectly called when exporting shadow objects from Elvis
 		// At this point there is no active session and the write can safely be ignored.
-		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';
-		if( ElvisSessionUtil::hasSession() ) {
-			require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
-			require_once dirname(__FILE__).'/logic/ElvisContentSourceService.php';
-			require_once BASEDIR.'/server/dbclasses/DBSection.class.php';
-			require_once BASEDIR.'/server/dbclasses/DBWorkflow.class.php';
+		require_once dirname( __FILE__ ).'/util/ElvisSessionUtil.php';
+		require_once dirname( __FILE__ ).'/util/ElvisUtils.class.php';
+		require_once dirname( __FILE__ ).'/logic/ElvisContentSourceService.php';
+		require_once BASEDIR.'/server/dbclasses/DBSection.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBWorkflow.class.php';
 
-			// Add Category name if needed. Normally only the Ids are sent, but we want to display the name in Elvis too.
-			$metaDataCategoryId = $this->findMetaDataByField( 'CategoryId', $metaDataValues );
-			if( $metaDataCategoryId != null && $this->findMetaDataByField( 'Category', $metaDataValues ) == null ) {
-				$mdValue = new MetaDataValue();
-				$mdValue->Property = 'Category';
-				$propValue = new PropertyValue();
-				$propValue->Value = DBSection::getSectionName( $this->getFirstMetaDataValue( $metaDataCategoryId ) );
-				$mdValue->PropertyValues = array( $propValue );
-				$metaDataValues[] = $mdValue;
-			}
-
-			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-			// Collect Elvis Ids
-			// 9.2.0 bug: shadowObjectIds key should be the CS ID, but instead is index 0.
-			$elvisIds = array();
-			$Ids = isset( $shadowObjectIds[ELVIS_CONTENTSOURCEID] ) ? $shadowObjectIds[ELVIS_CONTENTSOURCEID] : $shadowObjectIds[0];
-			foreach( $Ids as $ObjId ) {
-				$elvisId = DBObject::getColumnValueByName( $ObjId, 'Workflow', 'documentid' );
-				LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::multiSetShadowObjectProperties called for alienId:'.$elvisId );
-				$elvisIds[] = $elvisId;
-			}
-
-			// Normally all metadata is set using the REST client. These are set using
-			// the permissions of the current user. However there are some specific
-			// Enterprise metadata properties defined in Elvis, which needs to be set
-			// whatever permission the current user has, so these are set using AMF; this
-			// only set sce prefixed metadata properties as a super user.
-			$elvisMetadata = $this->fillElvisEnterpriseMetadataMulti( $metaDataValues );
-			$service = new ElvisContentSourceService();
-			$service->updateWorkflowMetadata( $elvisIds, $elvisMetadata );
-
-			// Bulk REST client update
-			$this->getMetadataHandler()->updateBulk( $elvisIds, $metaDataValues );
+		// Add Category name if needed. Normally only the Ids are sent, but we want to display the name in Elvis too.
+		$metaDataCategoryId = $this->findMetaDataByField( 'CategoryId', $metaDataValues );
+		if( $metaDataCategoryId != null && $this->findMetaDataByField( 'Category', $metaDataValues ) == null ) {
+			$mdValue = new MetaDataValue();
+			$mdValue->Property = 'Category';
+			$propValue = new PropertyValue();
+			$propValue->Value = DBSection::getSectionName( $this->getFirstMetaDataValue( $metaDataCategoryId ) );
+			$mdValue->PropertyValues = array( $propValue );
+			$metaDataValues[] = $mdValue;
 		}
+
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		// Collect Elvis Ids
+		// 9.2.0 bug: shadowObjectIds key should be the CS ID, but instead is index 0.
+		$elvisIds = array();
+		$Ids = isset( $shadowObjectIds[ ELVIS_CONTENTSOURCEID ] ) ? $shadowObjectIds[ ELVIS_CONTENTSOURCEID ] : $shadowObjectIds[0];
+		foreach( $Ids as $ObjId ) {
+			$elvisId = DBObject::getColumnValueByName( $ObjId, 'Workflow', 'documentid' );
+			LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::multiSetShadowObjectProperties called for alienId:'.$elvisId );
+			$elvisIds[] = $elvisId;
+		}
+
+		// Normally all metadata is set using the REST client. These are set using
+		// the permissions of the current user. However there are some specific
+		// Enterprise metadata properties defined in Elvis, which needs to be set
+		// whatever permission the current user has, so these are set using AMF; this
+		// only set sce prefixed metadata properties as a super user.
+		$elvisMetadata = $this->fillElvisEnterpriseMetadataMulti( $metaDataValues );
+		$service = new ElvisContentSourceService();
+		$service->updateWorkflowMetadata( $elvisIds, $elvisMetadata );
+
+		// Bulk REST client update
+		$this->getMetadataHandler()->updateBulk( $elvisIds, $metaDataValues );
 	}
 
 	/**
@@ -876,7 +871,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 
 		return $elvisMetadata;
 	}
-	
+
 	/**
 	 * Helper function to create an Attachment from an Elvis hit.
 	 * If an Attachment can be extracted based on the rendition, it will be returned in an array.
@@ -886,7 +881,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * @param null $version
 	 * @return array A list of Attachments.
 	 */
-	private function getFiles( $hit, $rendition, $version = null )
+	private function getFiles( $hit, $rendition, /** @noinspection PhpUnusedParameterInspection */$version = null )
 	{
 		require_once dirname( __FILE__ ).'/util/ElvisUtils.class.php';
 
@@ -936,7 +931,7 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 * Helper function to get the list of values from a metaDataValue.
 	 *
 	 * @param object $metaDataValue Metadata value structure of which the first value needs to be retrieved
-	 * @return The metadata value
+	 * @return mixed The metadata value
 	 */
 	private function getFirstMetaDataValue( $metaDataValue )
 	{
@@ -968,5 +963,18 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	public function willAlwaysCreateACopyForImage()
 	{
 		return ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE ? true : false;
+	}
+
+	/**
+	 * Returns the renditions stored by Elvis.
+	 *
+	 * @inheritDoc
+	 *
+	 * @since 10.1.4
+	 * @return array Stored renditions.
+	 */
+	public function storedRenditionTypes()
+	{
+		return array( 'native', 'preview', 'thumb' );
 	}
 }

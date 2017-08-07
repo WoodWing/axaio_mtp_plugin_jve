@@ -94,11 +94,12 @@ class MetadataHandler
 			$elvisMetadata['clearCheckoutState'] = 'false';
 		}
 
+		require_once dirname( __FILE__ ).'/../util/ElvisSessionUtil.php';
 		// Determine the Elvis fields the user is allowed to edit.
 		$possibleAddFields = array();
 		$editableFields = ElvisSessionUtil::getEditableFields();
 		if( $editableFields == null ) { // lazy loading; if not in our session cache, get it from Elvis
-			require_once __DIR__.'/../logic/ElvisRESTClient.php';
+			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
 			$fieldInfos = ElvisRESTClient::fieldInfo();
 			if( $fieldInfos ) foreach( $fieldInfos->fieldInfoByName as $field => $fieldInfo ) {
 				if( ( isset( $fieldInfo->name ) && $fieldInfo->name == 'filename' ) ||
@@ -113,7 +114,7 @@ class MetadataHandler
 		// Send to Elvis only editable metadata fields.
 		$elvisMetadata = array_intersect_key( $elvisMetadata, array_flip( $editableFields ) );
 		if( $elvisMetadata ) {
-			require_once __DIR__.'/../logic/ElvisRESTClient.php';
+			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
 			ElvisRESTClient::update( $elvisId, $elvisMetadata, $file );
 		}
 	}

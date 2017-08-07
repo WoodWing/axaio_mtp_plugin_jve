@@ -345,7 +345,7 @@ class WW_Utils_TestSuite
 			}
 		}
 				
-		LogHandler::Log( 'TestSuite', 'DEBUG', '<b>Test: '.$stepInfo.'</b>' );
+		LogHandler::Log( 'TestSuite', 'DEBUG', "Test: {$stepInfo}" );
 		$response = null;
 		try {
 			if( !$this->protocol ) {

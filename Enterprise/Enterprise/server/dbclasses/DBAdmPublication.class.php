@@ -118,7 +118,7 @@ class DBAdmPublication extends DBBase
 			}
 			if( is_null( $pub->SortOrder ) ) {
 				$row = self::getRow( self::TABLENAME, '', array('max(`code`) as `m`') );
-				$pub->SortOrder = $row['m'];
+				$pub->SortOrder = intval( $row['m'] ) + 1;
 			}
 
 			// Store standard publication properties in DB.
@@ -183,36 +183,36 @@ class DBAdmPublication extends DBBase
 		}
 		return $modifiedPubs;
 	}
-	
+
 	/**
-	 *  Converts a given AdmPublication data object to a DB row (array).
+	 * Converts a given AdmPublication data object to a DB row (array).
 	 *
-	 *  @param AdmPublication $obj The publication data object to convert.
-	 *  @return array DB row that holds the publication properties as key-value pairs.
+	 * @param AdmPublication $obj The publication data object to convert.
+	 * @return array DB row that holds the publication properties as key-value pairs.
 	 */
 	static public function objToRow( $obj )
-	{	
+	{
 		$row = array();
-		if(!is_null($obj->Name)){
-			$row['publication'] 	= strval($obj->Name);
+		if( !is_null( $obj->Name ) ) {
+			$row['publication'] = strval( $obj->Name );
 		}
-		if(!is_null($obj->Description)){
-			$row['description'] 	= strval($obj->Description);
+		if( !is_null( $obj->Description ) ) {
+			$row['description'] = strval( $obj->Description );
 		}
-		if(!is_null($obj->EmailNotify)){
-			$row['email'] 	  		= ($obj->EmailNotify == true ? 'on' : '');
+		if( !is_null( $obj->EmailNotify ) ) {
+			$row['email'] = ( $obj->EmailNotify == true ? 'on' : '' );
 		}
-		if(!is_null($obj->ReversedRead)){
-			$row['readingorderrev'] = ($obj->ReversedRead == true ? 'on' : '');	
+		if( !is_null( $obj->ReversedRead ) ) {
+			$row['readingorderrev'] = ( $obj->ReversedRead == true ? 'on' : '' );
 		}
-		if(!is_null($obj->AutoPurge)){
-			$row['autopurge']		= intval($obj->AutoPurge);
+		if( !is_null( $obj->AutoPurge ) ) {
+			$row['autopurge'] = intval( $obj->AutoPurge );
 		}
-		if(!is_null($obj->SortOrder)){
-			$row['code'] 			= $obj->SortOrder ? intval($obj->SortOrder) : 0 ;
+		if( !is_null( $obj->SortOrder ) ){
+			$row['code'] = $obj->SortOrder ? intval( $obj->SortOrder ) : 0 ;
 		}
-		if(!is_null($obj->DefaultChannelId)){
-			$row['defaultchannelid'] = intval($obj->DefaultChannelId);
+		if( !is_null( $obj->DefaultChannelId ) ) {
+			$row['defaultchannelid'] = intval( $obj->DefaultChannelId );
 		}
 		if( !is_null( $obj->CalculateDeadlines ) ) {
 			$row['calculatedeadlines'] = ( $obj->CalculateDeadlines == true ? 'on' : '' );

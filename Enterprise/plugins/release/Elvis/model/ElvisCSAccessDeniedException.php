@@ -14,6 +14,6 @@ class ElvisCSAccessDeniedException extends ElvisCSException
 
 	public function toBizException()
 	{
-		return new BizException( 'ERR_AUTHORIZATION', 'Server', $this->detail );
+		return new BizException( 'ERR_AUTHORIZATION', 'Server', $this->detail, null, null, 'INFO' );
 	}
 }

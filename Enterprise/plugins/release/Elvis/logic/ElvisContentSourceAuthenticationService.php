@@ -13,25 +13,33 @@ class ElvisContentSourceAuthenticationService
 	/**
 	 * Connect to the Elvis server
 	 *  
-	 * @param ElvisLoginRequest $loginRequest
-	 * @return ElvisLoginResponse
-	 * @throws BizException
+	 * @param string $credentials
+	 * @throws BizException on connection error or authentication error
 	 */
-	public function login($loginRequest)
+	public function login( $credentials )
 	{
-		require_once dirname(__FILE__) . '/../model/ElvisLoginRequest.php';
-		require_once dirname(__FILE__) . '/../model/ElvisLoginResponse.php';
-		require_once dirname(__FILE__) . '/ElvisAMFClient.php';
+		require_once __DIR__.'/../model/ElvisLoginRequest.php';
+		require_once __DIR__.'/../model/ElvisLoginResponse.php';
+		require_once __DIR__.'/ElvisAMFClient.php';
+		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 
-		ElvisAMFClient::registerClass(ElvisLoginRequest::getName());
-		ElvisAMFClient::registerClass(ElvisLoginResponse::getName());
+		// TODO: Find out where to get the client locale
+		// TODO: Find out where to get the correct timezone offset
+		$loginRequest = new ElvisLoginRequest( $credentials, 'en_US', 0 );
+		$loginRequest->clientId = ElvisSessionUtil::getClientId();
+
+		ElvisAMFClient::registerClass( ElvisLoginRequest::getName() );
+		ElvisAMFClient::registerClass( ElvisLoginResponse::getName() );
 		$loginResponse = null;
 		try {
 			$loginResponse = ElvisAMFClient::send( self::SERVICE, 'login', array( $loginRequest ) );
+			if( !$loginResponse->loginSuccess ) {
+				$message = 'Login to Elvis failed: '.$loginResponse->loginFaultMessage;
+				throw new BizException( null, 'Server', null, $message, null, 'INFO' );
+			}
 		} catch( ElvisCSException $e ) {
 			throw $e->toBizException();
 		}
-		return $loginResponse;
 	}
 	
 	/**

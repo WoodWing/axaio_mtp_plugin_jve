@@ -29,7 +29,7 @@ class BizMetaDataPreview extends BizServerJobHandler
 	 * workers to prevent the need to create multiple tmp files.
 	 * The file is deleted in the destructor of this class
 	 * 
-	 * @param buffer 	$data		buffer with file contents
+	 * @param string 	$data		buffer with file contents
 	 * @return string	tmp file
 	 */
 	 public function getBufferAsFile( $data )
@@ -366,12 +366,26 @@ class BizMetaDataPreview extends BizServerJobHandler
 	 * It calls the Preview connectors of the server plug-ins and detemines who does the best
 	 * in terms of performance and quality. That connector is used to generate the preview/thumb.
 	 * The $object->Files collection is enriched with the generated preview/thumb.
+	 * Previews and thumbs are either stored by the core (filestore) or by the content source. If the content source
+	 * takes care of storing the renditions there is no need to generate these renditions by the core.
 	 *
 	 * @param Object $object Workflow object to generate preview/thumb for.
 	 */
 	public function generatePreviewNow( /** @noinspection PhpLanguageLevelInspection */
 		Object $object )
-	{		
+	{
+		$renditionsStoredByContentSource = array();
+		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
+		if( BizContentSource::isShadowObject( $object ) ) {
+			$renditionsStoredByContentSource = BizContentSource::storedRenditionTypes(
+													$object->MetaData->BasicMetaData->ContentSource,
+													$object->MetaData->BasicMetaData->DocumentID);
+			if( in_array( 'preview', $renditionsStoredByContentSource) &&
+				 in_array( 'thumb', $renditionsStoredByContentSource ) ) {
+				return;
+			}
+		}
+
 		$meta = &$object->MetaData;
 
 		$highresfile = BizObject::getRendition( $object->Files, 'native');
@@ -399,11 +413,11 @@ class BizMetaDataPreview extends BizServerJobHandler
 			}
 		}
 		
-		//Don't convert when lowres already present
+		//Don't convert when low resolutions (low-res) are already present.
 		$maxPreview = 0; $maxThumb = 0; $inputPath = null;
 		$inputFormat = null;
 		if ( !$lowresfile || empty($lowresfile->FilePath) ) {
-			// If lowres was not found at all, we don't have an attachment object, so create that here:
+			// If low-res was not found at all, we don't have an attachment object, so create that here:
 			// but first check if we have a native to create if from. We only check it here, because
 			// if preview is give without native, we can still generate a thumbnail
 			if ( !$highresfile || empty($highresfile->FilePath) ) {
@@ -444,7 +458,7 @@ class BizMetaDataPreview extends BizServerJobHandler
 			$sourceAttachment->FilePath = $inputPath;
 			$this->callPreviewConnector( $sourceAttachment, $maxThumb, $thumb, $thumbFormat,
 										$maxPreview, $preview, $previewFormat, $meta );
-			if ( $maxPreview && !empty($preview) ) {
+			if ( $maxPreview && !empty($preview ) && !in_array( 'preview', $renditionsStoredByContentSource ) ) {
 				require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 				$transferServer = new BizTransferServer();
 				$transferServer->writeContentToFileTransferServer( $preview, $lowresfile );
@@ -456,7 +470,7 @@ class BizMetaDataPreview extends BizServerJobHandler
 					$object->Files[] = $lowresfile;
 				}
 			}
-			if ( $maxThumb && !empty($thumb) ) {
+			if ( $maxThumb && !empty($thumb) && !in_array( 'thumb', $renditionsStoredByContentSource ) ) {
 				require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 				$transferServer = new BizTransferServer();
 				$transferServer->writeContentToFileTransferServer( $thumb, $thumbfile );

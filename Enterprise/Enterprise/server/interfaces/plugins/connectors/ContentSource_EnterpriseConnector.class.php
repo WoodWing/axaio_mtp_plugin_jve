@@ -216,7 +216,7 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	 * Default implementation does nothing, leaving it all up to Enterprise
 	 *
 	 * @param string $alienId Alien object id
-	 * @param string $object Shadow object from Enterprise
+	 * @param Object $object Shadow object from Enterprise
 	 * @param array $objprops Array of all properties, both the public (also in Object) as well as internals
 	 * @param boolean $lock Whether object should be locked
 	 * @param string $rendition Rendition to get
@@ -238,7 +238,7 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	 * Performance could vastly improve by not retrieving files for every request.
 	 *
 	 * @param string $alienId Alien object id
-	 * @param string $object Shadow object from Enterprise
+	 * @param Object $object Shadow object from Enterprise
 	 * @param array $objprops Array of all properties, both the public (also in Object) as well as internals
 	 * @param boolean $lock Whether object should be locked
 	 * @param string $rendition Rendition to get
@@ -313,7 +313,7 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	 *
 	 * @since v9.2.0
 	 * @param array[] $shadowObjectIds List of array where key is the content source id and value its list of shadow ids.
-	 * @param MetaDataValues[] $metaDataValues The modified values that needs to be updated at the content source side.
+	 * @param MetaDataValue[] $metaDataValues The modified values that needs to be updated at the content source side.
 	 */
 	public function multiSetShadowObjectProperties( $shadowObjectIds, $metaDataValues )
 	{
@@ -567,6 +567,17 @@ abstract class ContentSource_EnterpriseConnector extends DefaultConnector
 	public function willAlwaysCreateACopyForImage()
 	{
 		return false;
+	}
+
+	/**
+	 * Returns an array with all the rendition types stored by the content source.
+	 *
+	 * @since 10.1.4
+	 * @return array Stored renditions.
+	 */
+	public function storedRenditionTypes()
+	{
+		return array();
 	}
 
 	// ===================================================================================

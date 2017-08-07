@@ -139,7 +139,7 @@ class DBUser extends DBBase
 				$params = array( $id );
 				self::deleteRows( self::TABLENAME, $where, $params );
 
-				// cascading delete usrgrp
+				// Cascading delete on users by user groups.
 				self::deleteUsrgrpByUserId( $id );
 
 				// cascading delete locks (on name, not id!)
@@ -259,11 +259,12 @@ class DBUser extends DBBase
 
 	/**
 	 * Returns users assigned to given publication and/or issue. <br>
-	 * * Note that null must be given when overrulepub is disabled for that issue !
+	 *
+	 * Note that null must be given when 'overrulepub' is disabled for that issue!
 	 *
 	 * @param string $publ  publication id (null implies all users for all publications)
 	 * @param string $issue issue id (null* implies all users for given publication)
-	 * @param string $sortBy sorting column either by user or fullname, default sort by fullname column
+	 * @param string $sortBy sorting column either by 'user' or 'fullname', default sort by 'fullname' column
 	 * @param boolean $activeOnly Only return active users (true) or all users (activated and deactivated)
 	 * @return array of smart_user db rows.
 	 */
@@ -589,11 +590,11 @@ class DBUser extends DBBase
 	 *  Gets exactly one user object with specific user id $usrId
 	 *  @param string $usrId Id of the user
 	 *  @param bool $isAdmin To determine if the user is a System admin
-	 *  @return AdmUser of publication if succeeded
+	 *  @return AdmUser|null User object or null when not found.
 	 */
 	public static function getUserObj( $usrId, $isAdmin = null )
 	{
-		$usrId = intval($usrId); //Convert to integer
+		$usrId = intval( $usrId );
 		self::clearError();
 		$user = null;
 		$params = array();
@@ -606,7 +607,7 @@ class DBUser extends DBBase
 				$row['trackchangescolor'] = DEFAULT_USER_COLOR; // set to the default color.
 			}
 
-			$user = self::rowToUserObj($row, $isAdmin);
+			$user = self::rowToUserObj( $row, $isAdmin );
 		}
 		return $user;
 	}
@@ -658,54 +659,54 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 *  Gets exactly one user object with specific user id $usrId
-	 *  @param string $grpId Id of the usergroup
-	 *  @return AdmUserGroup|null user group if succeeded, null if user not found (or on SQL error)
+	 * Gets exactly one user group object with specific user group id $grpId.
+	 *
+	 * @param int $grpId Id of the user group.
+	 * @return AdmUserGroup|null user group if succeeded, null if user not found (or on SQL error)
 	 */
 	public static function getUserGroupObj( $grpId )
 	{
-		$grpId = intval($grpId); //Convert to integer
-
+		$grpId = intval( $grpId );
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();
-		$dbg = $dbdriver->tablename('groups');
-		$usergroup = null;
+		$dbDriver = DBDriverFactory::gen();
+		$dbg = $dbDriver->tablename( 'groups' );
+		$userGroup = null;
 
-		$sql = "SELECT * FROM $dbg where `id` = ?";
-		$params = array($grpId);
-		$sth = $dbdriver->query($sql, $params);
+		$sql = "SELECT * FROM $dbg where `id` = ? ";
+		$params = array( $grpId );
+		$sth = $dbDriver->query( $sql, $params );
 
-		if (!$sth) {
-			self::setError( $dbdriver->error() );
+		if( !$sth ) {
+			self::setError( $dbDriver->error() );
 			return null;
 		}
 
-		while( ($row = $dbdriver->fetch($sth)) ) {
-			$usergroup = self::rowToGroupObj($row);
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+			$userGroup = self::rowToGroupObj( $row );
 		}
 
-		return $usergroup;
+		return $userGroup;
 	}
 
 	/**
-	 *  Create new user object
+	 *  Create new user object.
 	 *
-	 *  @param AdmUser $user user to create
-	 *  @param bool $isAdmin System admin indicator
-	 *  @return AdmUser created user
+	 * @param AdmUser $user new user.
+	 * @param bool $isAdmin System admin indicator.
+	 * @return AdmUser|null Created user, or null when user is not created.
 	 */
 	public static function createUserObj( $user, $isAdmin = null )
 	{
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();
+		$dbDriver = DBDriverFactory::gen();
 		$values = self::objToUserRow( $user );
 
-		self::insertRow('users', $values );
-		if(self::hasError()){ // insertion ok
+		self::insertRow( self::TABLENAME, $values );
+		if( self::hasError() ) {
 			return null;
 		}
-		$newid = $dbdriver->newid('users', true);
-		if( is_null($newid) ){
+		$newId = $dbDriver->newid( 'users', true );
+		if( is_null( $newId ) ) {
 			return null;
 		}
 		// save password
@@ -715,76 +716,79 @@ class DBUser extends DBBase
 			$user->Password = $user->EncryptedPassword; // Set the password as encrypted password
 		}
 		if( !self::setPassword( $user->Name, $user->Password, $user->PasswordExpired ) ) {
-			self::setError( $dbdriver->error() );
+			self::setError( $dbDriver->error() );
 			return null;
 		}
-		return DBUser::getUserObj($newid, $isAdmin);
+
+		return DBUser::getUserObj( $newId, $isAdmin );
 	}
 
 	/**
-	 *  Create a new user group in the database.
+	 *  Create new user group object.
 	 *
-	 *  @param AdmUserGroup $usergroup user group to create
-	 *  @return AdmUserGroup created user group
+	 * @param AdmUserGroup $userGroup new user group.
+	 * @return AdmUserGroup|null Created group or null when group is not created.
 	 */
-	public static function createUserGroupObj( $usergroup )
+	public static function createUserGroupObj( $userGroup )
 	{
 		self::clearError();
-		$dbdriver = DBDriverFactory::gen();
-		$newusergroup = null;
+		$dbDriver = DBDriverFactory::gen();
+		$newUserGroup = null;
 
-		$values = self::objToGroupRow( $usergroup );
+		$values = self::objToGroupRow( $userGroup );
 
-		self::insertRow('groups', $values );
-		if(!self::hasError()){ // insertion ok
-			$newid = $dbdriver->newid('groups', true);
-			if( !is_null($newid) ){
-				$newusergroup = DBUser::getUserGroupObj($newid);
+		self::insertRow( 'groups', $values );
+		if( !self::hasError() ) {
+			$newId = $dbDriver->newid( 'groups', true );
+			if( !is_null( $newId ) ) {
+				$newUserGroup = DBUser::getUserGroupObj( $newId );
 			}
 		}
-		return $newusergroup;
+		return $newUserGroup;
 	}
 
 	/**
-	 *  Modify users object
+	 * Modify users objects.
 	 *
-	 *  @param $users array of values to modify existing users
-	 *  @return array of modified User objects - throws BizException on failure
+	 * @param AdmUser[] $users Users objects to be modified.
+	 * @return AdmUser[] Modified user objects.
 	 */
 	public static function modifyUsersObj( $users )
 	{
-		$dbdriver = DBDriverFactory::gen();
-		$modifyusers = array();
+		$dbDriver = DBDriverFactory::gen();
+		$modifyUsers = array();
 
-		foreach($users as $user) {
-			// get old user for later
-			$oldUser = self::getUserById($user->Id);
+		foreach( $users as $user ) {
+			$oldUser = self::getUserById( $user->Id );
+			if( !$oldUser ) {
+				LogHandler::Log( __CLASS__, 'ERROR', "Cannot modify user with Id = {$user->Id}. The user does not exist." );
+				continue;
+			}
 			$values = self::objToUserRow( $user );
+			$result = self::updateRow( self::TABLENAME, $values, " `id` = ? ", array( $user->Id ) );
 
-			$result = self::updateRow('users', $values, " `id` = '$user->Id'");
-
-			if( $result === true){
-				if(!is_null($user->Password)){
-					// save password
-					$user->Password = ww_crypt( $user->Password, null, true ); // BZ#20845 - Always store the password with new SHA-512 hash type
+			if( $result === true ) {
+				if( !is_null( $user->Password ) ) {
+					// Save password, EN-20845 - Always store the password with SHA-512 hash type.
+					$user->Password = ww_crypt( $user->Password, null, true );
 					if( !self::setPassword( $user->Name, $user->Password ) ) {
-						self::setError( $dbdriver->error() );
+						self::setError( $dbDriver->error() );
 						return null;
 					}
 				}
-				// if username has been changed update linked tables too
-				if (! is_null($user->Name) && $user->Name != $oldUser['user']){
-					self::updateUserNameLinks($oldUser['user'], $user->Name);
+				// Update linked tables.
+				if( !is_null( $user->Name ) && $user->Name != $oldUser['user'] ) {
+					self::updateUserNameLinks( $oldUser['user'], $user->Name );
 				}
-				// Update object index when fullname is change
+				// Update linked objects when 'fullname' has changed.
 				if( $user->FullName != $oldUser['fullname'] ) {
 					self::updateUserNameLinksObjectsIndex( $user->Name );
 				}
-				$modifyuser = DBUser::getUserObj($user->Id);
-				$modifyusers[] = $modifyuser;
+				$modifyUser = DBUser::getUserObj( $user->Id );
+				$modifyUsers[] = $modifyUser;
 			}
 		}
-		return $modifyusers;
+		return $modifyUsers;
 	}
 
 	/**
@@ -1018,9 +1022,9 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 *  Converts row value to user object
-	 *  Ir return an object with the mapping value for row to object
-	 *  @param array $row row contains key values
+	 *  Converts db row into a user object.
+	 *
+	 *  @param array $row DB row contains key values.
 	 *  @param bool $isAdmin To determine if the user is a System admin
 	 *  @return AdmUser
 	 */
@@ -1044,6 +1048,7 @@ class DBUser extends DBBase
 		$user->Organization			= $row['organization'];
 		$user->Location				= $row['location'];
 		$user->EncryptedPassword	= $isAdmin ? $row['pass'] : null;
+		/** @noinspection PhpUndefinedFieldInspection */
 		$user->ExternalId			= $row['externalid'];
 		$user->ImportOnLogon        = ($row['importonlogon'] == 'on' ? true : false);
 		return $user;
@@ -1109,24 +1114,21 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 * Checks if pass in user is known as username or full name.
-	 * If so, and user is not disabled the user DB row is returned
-	 * BizException is thrown in case of error
+	 * Checks if the passed user name is known as short user name or full name.
+	 * If so, and user is not disabled, the user DB row is returned
 	 *
-	 * @param string $inuser user name, modified to shortname if it turns out to be long name
+	 * @param string $userName user name, modified to short name if it turns out to be the full name.
+	 * @returns array DB row.
 	 * @throws BizException
-	 * @returns the row found, exception in case of error
 	 */
-	static public function checkUser( &$inuser )
+	static public function checkUser( &$userName )
 	{
 		$dbDriver = DBDriverFactory::gen();
-		$db = $dbDriver->tablename('users');
+		$db = $dbDriver->tablename( self::TABLENAME );
 
-		$user = $inuser;
-		$user = $dbDriver->toDBString($user);
-
-		$sql = "SELECT * FROM $db WHERE `user`='$user' OR `fullname`='$user'";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT * FROM $db WHERE `user` = ? OR `fullname`= ? ";
+		$params = array( strval( $userName ), strval( $userName ) );
+		$sth = $dbDriver->query($sql, $params);
 		if (!$sth) {
 			throw new BizException( 'ERR_COULD_NOT_CONNECT_TO_DATEBASE', 'Client', '' );
 		}
@@ -1134,7 +1136,7 @@ class DBUser extends DBBase
 		if (!$row) {
 			throw new BizException( 'ERR_WRONGPASS', 'Client', '' );
 		}
-		$inuser = $row['user'];		// normalize
+		$userName = $row['user'];
 
 		if (trim($row['disable'])) {
 			throw new BizException( 'ERR_USERDISABLED', 'Client', '' );
@@ -1203,18 +1205,20 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 * Gets user record for specied user id.
+	 * Get db record for specified user id.
 	 *
 	 * @param integer $userId user id
-	 * @return array containing user atributes and values
+	 * @return array|null DB record or null if not found.
 	 */
-	static public function getUserById($userId)
+	static public function getUserById( $userId )
 	{
 		$where = '`id` = ?';
-		$row = self::getRow(self::TABLENAME, $where, '*', array($userId));
-		// Fix for trackchangecolor, put a default one when there's no data
-		if( !$row['trackchangescolor'] ) {
-			$row['trackchangescolor'] = DEFAULT_USER_COLOR; // set to the default color.
+		$row = self::getRow( self::TABLENAME, $where, '*', array( intval( $userId ) ) );
+		if( $row ) {
+			// Fix for trackchangecolor, put a default one when there's no color set.
+			if( !$row['trackchangescolor'] ) {
+				$row['trackchangescolor'] = DEFAULT_USER_COLOR; // set to the default color.
+			}
 		}
 		return $row;
 	}

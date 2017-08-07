@@ -151,9 +151,11 @@ class BizFileStoreXmpFileInfo
 		try {
 			$xmlBlock = @new SimpleXMLElement( $xmpBlockAsString );
 		} catch( Exception $e ) {
-			$xmpBlockAsString = str_replace( '<', '&lt;', $xmpBlockAsString );
-			LogHandler::Log( __CLASS__, 'ERROR', 'XML error in XMP block: '.$e->getMessage().
-				'<br/>Skipping this XMP block:<br/><code>'.$xmpBlockAsString.'</code>' );
+			LogHandler::logRaw(
+				__CLASS__,
+				'ERROR',
+				LogHandler::encodeLogMessage( "XML error in XMP block: {$e->getMessage()}\r\nSkipping this XMP block:\r\n" ).
+				LogHandler::composeCodeBlock( $xmpBlockAsString ) );
 			$xmlBlock = null;
 		}
 		return $xmlBlock;

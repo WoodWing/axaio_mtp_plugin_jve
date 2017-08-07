@@ -4,33 +4,87 @@ require_once dirname(__FILE__).'/../config.php';
 class ElvisSessionUtil
 {
 	/**
-	 * Check if there is an Elvis session available.
-	 *
-	 * @return boolean
+	 * @var int The lifetime of the Login semaphore in seconds.
 	 */
-	public static function hasSession()
+	private static $loginSemaphoreLifeTime = 60;
+
+	/**
+	 * Read a Elvis ContentSource session setting from DB that were saved for the given session user.
+	 *
+	 * @since 10.1.4
+	 * @param string $userShort Short name of the session user.
+	 * @param string $name Name of the setting.
+	 * @return null|string Value of the setting. NULL when setting was never saved before.
+	 */
+	private static function getUserSetting( $userShort, $name )
 	{
-		return (bool)self::getSessionCookies();
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+		$settings = BizUser::getSettings( $userShort, 'ElvisContentSource' );
+		$value = null;
+		if( $settings ) foreach( $settings as $setting ) {
+			if( $setting->Setting == $name ) {
+				$value = $setting->Value;
+				break;
+			}
+		}
+		return $value;
+	}
+
+	/**
+	 * Save a Elvis ContentSource session setting into DB for the given session user.
+	 *
+	 * @since 10.1.4
+	 * @param string $userShort Short name of the session user.
+	 * @param string $name Name of the setting.
+	 * @param string $value Value of the setting.
+	 */
+	private static function setUserSetting( $userShort, $name, $value )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
+		$settings = array( new Setting( $name, $value ) );
+		BizUser::updateSettings( $userShort, $settings, 'ElvisContentSource' );
+	}
+
+	/**
+	 * Read the 'Restricted' Elvis ContentSource setting from DB that was stored for the session user during logon.
+	 *
+	 * When the user is known to Enterprise but unknown to Elvis, it is logged in as a guest user (badly called 'super user')
+	 * then this flag is set to TRUE. When the user is known to both back-ends it is set to FALSE.
+	 *
+	 * @since 10.1.4
+	 * @return bool Whether or not the user has restricted access rights.
+	 */
+	public static function getRestricted()
+	{
+		$userShort = BizSession::getShortUserName();
+		$restricted = self::getUserSetting( $userShort, 'Restricted' );
+		return is_null($restricted) ? true : (bool)$restricted;
+	}
+
+	/**
+	 * Saves the 'Restricted' Elvis ContentSource setting into DB for the session user who is about to logon.
+	 *
+	 * When the user is known to Enterprise but unknown to Elvis, it is logged in as a guest user (badly called 'super user')
+	 * then this flag is set to TRUE. When the user is known to both back-ends it is set to FALSE.
+	 *
+	 * @since 10.1.4
+	 * @param bool $restricted
+	 */
+	public static function setRestricted( $restricted )
+	{
+		$userShort = BizSession::getShortUserName();
+		self::setUserSetting( $userShort, 'Restricted', intval($restricted) );
 	}
 
 	/**
 	 * Get the base64 encoded credentials
 	 *
-	 * @param string $userShort
 	 * @return string|null Credentials, or NULL when not found.
 	 */
-	public static function getCredentials( $userShort )
+	public static function getCredentials()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-
-		$settings = BizUser::getSettings( $userShort, 'ElvisContentSource' );
-		$storage = null;
-		if( $settings ) foreach( $settings as $setting ) {
-			if( $setting->Setting == 'Temp' ) {
-				$storage = $setting->Value;
-				break;
-			}
-		}
+		$userShort = BizSession::getShortUserName();
+		$storage = self::getUserSetting( $userShort, 'Temp' );
 		$credentials = null;
 		if( $storage ) {
 			list( $encrypted, $initVector ) = explode( '::', $storage, 2 );
@@ -58,8 +112,6 @@ class ElvisSessionUtil
 	 */
 	public static function saveCredentials( $username, $password )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-
 		$userShort = BizSession::getShortUserName(); // do not take $username
 		$credentials = base64_encode( $username.':'.$password );
 		$initVector = openssl_random_pseudo_bytes( openssl_cipher_iv_length( 'aes-256-cbc' ) );
@@ -68,8 +120,7 @@ class ElvisSessionUtil
 			OPENSSL_RAW_DATA, $initVector );
 		if( $encrypted ) {
 			$storage = base64_encode( $encrypted ).'::'.base64_encode( $initVector );
-			$settings = array( new Setting( 'Temp', $storage ) ); // use vague name to obfuscate
-			BizUser::updateSettings( $userShort, $settings, 'ElvisContentSource' );
+			self::setUserSetting( $userShort, 'Temp', $storage ); // use vague name to obfuscate
 		} else {
 			LogHandler::Log( 'ELVIS', 'ERROR', 'Encryption procedure failed. Please run the Health Check.' );
 		}
@@ -100,14 +151,6 @@ class ElvisSessionUtil
 	}
 
 	/**
-	 * Removes the Elvis session cookies from the Enterprise session.
-	 */
-	public static function clearSessionCookies()
-	{
-		self::saveSessionCookies( array() );
-	}
-
-	/**
 	 * Merge the passed in cookies with the session cookies and store it back to the session.
 	 *
 	 * @param array $cookies List of key-value pair of cookies
@@ -126,29 +169,80 @@ class ElvisSessionUtil
 	}
 
 	/**
-	 * Set loggingIn session variable to true
+	 * Returns semaphore name to be used for the Login operation for a particular user.
+	 *
+	 * @since 10.1.4
+	 * @return string The Semaphore name which is 'ElvisSyncLogin_' + user_database_Id
 	 */
-	public static function startLogin()
+	private static function getElvisSyncLoginSemaphoreName()
 	{
-		self::setSessionVar('loggingIn', true);
+		require_once BASEDIR .'/server/bizclasses/BizSession.class.php';
+		$userId = BizSession::getUserInfo( 'id' );
+		$semaphoreName = 'ElvisSyncLogin_' . $userId;
+		return $semaphoreName;
 	}
 
 	/**
-	 * Set loggingIn session variable to false
+	 * Creates and returns the login semaphore to ensure only one Login at a time.
+	 *
+	 * @since 10.1.4
+	 * @return int|null Semaphore id when the semaphore is successfully gained, null otherwise.
 	 */
-	public static function stopLogin()
+	public static function createLoginSemaphore()
 	{
-		self::setSessionVar('loggingIn', false);
+		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+		$bizSemaphore = new BizSemaphore();
+		$semaphoreName = self::getElvisSyncLoginSemaphoreName();
+		$bizSemaphore->setLifeTime( self::$loginSemaphoreLifeTime ); // in seconds.
+		$attempts = array( 0 ); // in milliseconds ( only 1 attempt and no wait )
+		$bizSemaphore->setAttempts( $attempts );
+		$semaphoreId = $bizSemaphore->createSemaphore( $semaphoreName, false );
+		return $semaphoreId;
 	}
 
 	/**
-	 * Returns current state of loggingIn or false if not set
+	 * Waits until the Login operation completes or wait up to maximum 1 minute in time.
+	 *
+	 * Function tries to gain the Login semaphore for a period of 1 minute.
+	 * This is simulating the waiting for the Login operation to be completed by another process.
+	 * When semaphore is granted, meaning the Login by another process is also completed.
+	 * And so, it releases the semaphore right away since the purpose is only to wait for another
+	 * process to finish but not with the intention to do anything with the semaphore.
+	 *
+	 * In case if the Login operation by another process takes very long time, this function will
+	 * only wait for up to maximum of 1 minute.
+	 *
+	 * @since 10.1.4
 	 */
-	public static function isLoggingIn()
+	public static function waitUntilLoginSemaphoreHasReleased()
 	{
-		$loggingIn = self::getSessionVar('loggingIn');
-		LogHandler::Log('ELVIS', 'DEBUG', 'Is logging in:'. $loggingIn);
-		return $loggingIn == null ? false : $loggingIn;
+		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+		$bizSemaphore = new BizSemaphore();
+		$semaphoreName = self::getElvisSyncLoginSemaphoreName();
+		$lifeTime = self::$loginSemaphoreLifeTime; // in seconds
+		$attempts = array_fill( 0, 4 * $lifeTime, 250 ); // 4*60 attempts x 250ms wait = 60s max total wait
+		$bizSemaphore->setLifeTime( $lifeTime );
+		$bizSemaphore->setAttempts( $attempts );
+		$semaphoreId = $bizSemaphore->createSemaphore( $semaphoreName );
+		if( $semaphoreId ) {
+			// Release semaphore right away since the purpose of having semaphore is not to do an operation
+			// but it is to wait for another process to finish the login operation for the very same user.
+			self::releaseLoginSemaphore( $semaphoreId );
+		}
+	}
+
+	/**
+	 * Releases Login semaphore id gained in createLoginSemaphore().
+	 *
+	 * @since 10.1.4
+	 * @param string $semaphoreId The semaphore id to be released.
+	 */
+	public static function releaseLoginSemaphore( $semaphoreId )
+	{
+		if( $semaphoreId ) {
+			require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+			BizSemaphore::releaseSemaphore( $semaphoreId );
+		}
 	}
 
 	/**
@@ -165,10 +259,11 @@ class ElvisSessionUtil
 	/**
 	 * Get a session variable by key.
 	 *
+	 * @since 10.1.4 this function is made private to avoid accidental usage of PHP session data [EN-89334].
 	 * @param string $key
 	 * @return mixed|null Value when variable is set, NULL otherwise.
 	 */
-	public static function getSessionVar( $key )
+	private static function getSessionVar( $key )
 	{
 		$sessionVariables = BizSession::getSessionVariables();
 		$name = self::getVarName( $key );
@@ -178,10 +273,11 @@ class ElvisSessionUtil
 	/**
 	 * Set an object in the session.
 	 *
+	 * @since 10.1.4 this function is made private to avoid accidental usage of PHP session data [EN-89334].
 	 * @param string $key
 	 * @param mixed $value
 	 */
-	public static function setSessionVar( $key, $value )
+	private static function setSessionVar( $key, $value )
 	{
 		$sessionVars = array( self::getVarName($key) => $value );
 		BizSession::setSessionVariables( $sessionVars );
@@ -190,21 +286,53 @@ class ElvisSessionUtil
 	/**
 	 * Get those Elvis fields that are editable by user.
 	 *
-	 * @return string[] Editable fields.
+	 * @since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
+	 * @return string[]|null Editable fields. NULL when not stored before.
 	 */
 	public static function getEditableFields()
 	{
-		return self::getSessionVar( 'editableFields' );
+		$userShort = BizSession::getShortUserName();
+		$fields = self::getUserSetting( $userShort, 'EditableFields' );
+		return $fields ? unserialize( $fields ) : null;
 	}
 
 	/**
 	 * Set those Elvis fields that are editable by user.
 	 *
+	 * @since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
 	 * @param string[] $editableFields
 	 */
 	public static function setEditableFields( $editableFields )
 	{
-		self::setSessionVar( 'editableFields', $editableFields );
+		$userShort = BizSession::getShortUserName();
+		if( !$editableFields ) {
+			$editableFields = array();
+		}
+		self::setUserSetting( $userShort, 'EditableFields', serialize( $editableFields ) );
+	}
+
+	/**
+	 * Get the version of the Elvis Server the session user did login.
+	 *
+	 * @since 10.1.4
+	 * @return string|null Elvis Server version. NULL when never saved before.
+	 */
+	public static function getElvisServerVersion()
+	{
+		$userShort = BizSession::getShortUserName();
+		return self::getUserSetting( $userShort, 'ElvisServerVersion' );
+	}
+
+	/**
+	 * Save the version of the Elvis Server the session user did login.
+	 *
+	 * @since 10.1.4
+	 * @param string $version Elvis Server version
+	 */
+	public static function setElvisServerVersion( $version )
+	{
+		$userShort = BizSession::getShortUserName();
+		self::setUserSetting( $userShort, 'ElvisServerVersion', $version );
 	}
 
 	/**
@@ -216,23 +344,5 @@ class ElvisSessionUtil
 	private static function getVarName( $name )
 	{
 		return ELVIS_CONTENTSOURCEPREFIX . $name;
-	}
-
-	/**
-	 * Retrieve the username and the password from the saved credentials under user $user.
-	 *
-	 * @since 10.1.3
-	 * @param string $user
-	 * @return string[] A list where the first item it the username and the second item the password if credentials are found, else returns null when not found.
-	 */
-	static public function retrieveUsernamePasswordFromCredentials( $user )
-	{
-		$usernamePassword = null;
-		$credentials = self::getCredentials( $user );
-		if( $credentials ) {
-			$credentials = base64_decode( $credentials );
-			$usernamePassword = explode( ':', $credentials );
-		}
-		return $usernamePassword;
 	}
 }

@@ -204,7 +204,7 @@ class BizServerJob
 				}
 			}
 			if( !$foundConnectorForJobType ) {
-				LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': No ServerJob connector found to create job '.$jobType.'<br/>');
+				LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": No ServerJob connector found to create job {$jobType}\r\n");
 				// TODO: error
 			}
 		}
@@ -374,7 +374,7 @@ class BizServerJob
  	 */
 	private function runJob( ServerJob $job )
 	{ // L> Anti-hack: Function is made PRIVATE to block any subclass abusing this function!
-		LogHandler::Log( 'ServerJob', 'INFO', __METHOD__.': Let\'s start processing job '.$job->JobType.' (jobid='.$job->JobId.')<br/>');
+		LogHandler::Log( 'ServerJob', 'INFO', __METHOD__.": Let's start processing job {$job->JobType} (jobid = {$job->JobId})\r\n");
 		// TODO: report
 
 		require_once BASEDIR .'/server/dataclasses/ServerJobStatus.class.php';
@@ -417,7 +417,7 @@ class BizServerJob
 				break;
 				default:
 					$foundJobHandler = false;
-					LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': No core server class found to handle job '.$job->JobType.' (jobid='.$job->JobId.')<br/>');
+					LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": No core server class found to handle job {$job->JobType} (jobid = {$job->JobId})\r\n");
 					// TODO: error
 			}
 
@@ -475,7 +475,7 @@ class BizServerJob
 				self::unsetObsoletedFields( $job, $internalPluginName );
 			}
 			if( !$foundConnectorForJobType ) {
-				LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': No ServerJob connector found to handle job '.$job->JobType.' (jobid='.$job->JobId.')<br/>');
+				LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": No ServerJob connector found to handle job {$job->JobType} (jobid = {$job->JobId})\r\n");
 				// TODO: error
 			}
 		}
@@ -557,7 +557,7 @@ class BizServerJob
 	private function beforeRunJob( ServerJob $job )
 	{ // L> Anti-hack: Function is made PRIVATE to block any subclass abusing this function!
 
-		LogHandler::Log( 'ServerJob', 'INFO', __METHOD__.': Let\'s start initialize job '.$job->JobType.' (jobid='.$job->JobId.')<br/>');
+		LogHandler::Log( 'ServerJob', 'INFO', __METHOD__.": Let's start initialize job {$job->JobType} (jobid = {$job->JobId})\r\n");
 		// TODO: report
 
 		require_once BASEDIR .'/server/dataclasses/ServerJobStatus.class.php';
@@ -600,7 +600,7 @@ class BizServerJob
 					break;
 				default:
 					$foundJobHandler = false;
-					LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': No core server class found to handle job '.$job->JobType.' (jobid='.$job->JobId.')<br/>');
+					LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": No core server class found to handle job {$job->JobType} (jobid = {$job->JobId})\r\n");
 				// TODO: error
 			}
 
@@ -644,7 +644,7 @@ class BizServerJob
 				self::unsetObsoletedFields( $job, $internalPluginName );
 			}
 			if( !$foundConnectorForJobType ) {
-				LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': No ServerJob connector found to handle job '.$job->JobType.' (jobid='.$job->JobId.')<br/>');
+				LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": No ServerJob connector found to handle job {$job->JobType} (jobid = {$job->JobId})\r\n");
 				// TODO: error
 			}
 		}
@@ -712,7 +712,7 @@ class BizServerJob
 			if( BizSession::checkTicket( $job->TicketSeal ) ) {
 				$this->createJob( $job );
 			} else {
-				LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': Invallid ticket for job '.$job->JobType.' (jobid='.$job->JobId.')<br/>');
+				LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": Invalid ticket for job {$job->JobType} (jobid = {$job->JobId})\r\n");
 				// TODO: error
 			}
 
@@ -760,7 +760,7 @@ class BizServerJob
 			if( BizSession::checkTicket( $job->TicketSeal ) ) {
 				$this->runJob( $job );
 			} else {
-				LogHandler::Log( 'ServerJob', 'ERROR',  __METHOD__.': Invallid ticket for job '.$job->JobType.' (jobid='.$job->JobId.')<br/>');
+				LogHandler::Log( 'ServerJob', 'ERROR',  __METHOD__.": Invalid ticket for job {$job->JobType} (jobid = {$job->JobId})\r\n");
 				// TODO: error
 			}
 
@@ -808,7 +808,7 @@ class BizServerJob
 			if( BizSession::checkTicket( $job->TicketSeal ) ) {
 				$this->beforeRunJob( $job );
 			} else {
-				LogHandler::Log( 'ServerJob', 'ERROR',  __METHOD__.': Invallid ticket for job '.$job->JobType.' (jobid='.$job->JobId.')<br/>');
+				LogHandler::Log( 'ServerJob', 'ERROR',  __METHOD__.": Invalid ticket for job {$job->JobType} (jobid = {$job->JobId})\r\n");
 				// TODO: error
 			}
 
@@ -838,7 +838,7 @@ class BizServerJob
 
 		// Check if co-worker classes are all delivered by WW
 		if( !$this->buddySecure ) {
-			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': Hey, I do not run jobs for intruders!<br/>');
+			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": Hey, I do not run jobs for intruders!\r\n");
 			// TODO: report
 			return;
 		}
@@ -853,7 +853,7 @@ class BizServerJob
 		if( $ticketSeal == $job->TicketSeal ) { // secure?
 			$this->processJobInNewSession( $job );
 		} else {
-			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': Hey, I do not accept job '.$job->JobType.' (jobid='.$job->JobId.'). Job record created by intruders!<br/>');
+			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": Hey, I do not accept job {$job->JobType} (jobid = {$job->JobId}). Job record created by intruders!\r\n");
 			// TODO: report
 		}
 	}
@@ -874,7 +874,7 @@ class BizServerJob
 
 		// Check if co-worker classes are all delivered by WW
 		if( !$this->buddySecure ) {
-			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': Hey, I do not run jobs for intruders!<br/>');
+			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": Hey, I do not run jobs for intruders!\r\n");
 			// TODO: report
 			return;
 		}
@@ -889,7 +889,7 @@ class BizServerJob
 		if( $ticketSeal == $job->TicketSeal ) { // secure?
 			$this->initializeJobInNewSession( $job );
 		} else {
-			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': Hey, I do not accept job '.$job->JobType.' (jobid='.$job->JobId.'). Job record created by intruders!<br/>');
+			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": Hey, I do not accept job {$job->JobType} (jobid = {$job->JobId}. Job record created by intruders!\r\n");
 			// TODO: report
 		}
 
@@ -907,7 +907,7 @@ class BizServerJob
 	
 		// Check if co-worker classes are all delivered by WW
 		if( !$this->buddySecure ) {
-			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': Hey, I do not create jobs for intruders!<br/>');
+			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": Hey, I do not create jobs for intruders!\r\n");
 
 			// TODO: report
 			return;
@@ -918,7 +918,7 @@ class BizServerJob
 		// precaution by checking the job id(GUID) that has been created.
 		require_once BASEDIR.'/server/utils/NumberUtils.class.php';
 		if( !NumberUtils::validateGUID( $job->JobId ) ) {
-			LogHandler::Log( 'ServerJob', 'ERROR', 'Hey, I do not accept job ['.$job->JobType.'] (jobid='.$job->JobId.'). Job record created by intruders!<br/>');
+			LogHandler::Log( 'ServerJob', 'ERROR', "Hey, I do not accept job [{$job->JobType}] (jobid = {$job->JobId}). Job record created by intruders!\r\n");
 			return;
 		}
 
@@ -932,7 +932,7 @@ class BizServerJob
 		if( $ticketSeal == $job->TicketSeal ) { // secure?
 			$this->createJobInNewSession( $job );
 		} else {
-			LogHandler::Log( 'ServerJob', 'ERROR', 'Hey, I do not accept job '.$job->JobType.' (jobid='.$job->JobId.'). Job record created by intruders!<br/>');
+			LogHandler::Log( 'ServerJob', 'ERROR', "Hey, I do not accept job {$job->JobType} (jobid = {$job->JobId}). Job record created by intruders!\r\n");
 			// TODO: report
 			return;
 		}		
@@ -979,7 +979,7 @@ class BizServerJob
 	{
 		// Check if co-worker classes are all delivered by WW
 		if( !$this->buddySecure ) {
-			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': Hey, I do not lock jobs for intruders!<br/>');
+			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": Hey, I do not lock jobs for intruders!\r\n");
 			// TODO: report
 			return null;
 		}
@@ -1012,7 +1012,7 @@ class BizServerJob
 	{
 		// Check if co-worker classes are all delivered by WW
 		if( !$this->buddySecure ) {
-			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': Hey, I do not lock jobs for intruders!<br/>');
+			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": Hey, I do not lock jobs for intruders!\r\n");
 			// TODO: report
 			return null;
 		}
@@ -1045,7 +1045,7 @@ class BizServerJob
 	{
 		// Check if co-worker classes are all delivered by WW
 		if( !$this->buddySecure ) {
-			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.': Hey, I do not unlock jobs for intruders!<br/>');
+			LogHandler::Log( 'ServerJob', 'ERROR', __METHOD__.": Hey, I do not unlock jobs for intruders!\r\n");
 			// TODO: report
 			return false;
 		}

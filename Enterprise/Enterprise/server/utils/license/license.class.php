@@ -625,7 +625,9 @@ class License
 			$semaId = $this->defaultSemaId;
 		} else {
 			require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
-			$attempts = array( 10, 20, 40, 80, 160, 320, 640, 645, 325, 165, 85, 45, 25, 15, 105, 205, 405, 805, 405, 205 );
+			// During testing it became clear that the intervals between attempts must not be too short as this will lead
+			// to too many failing attempts on MSSQL.
+			$attempts = array( 20, 30, 50, 90, 260, 420, 740, 745, 425, 265, 95, 55, 35, 25, 205, 305, 505, 905, 505, 305 );
 
 			if( $maxAttempts < 20 ) {
 				$attempts = array_slice( $attempts, 0, $maxAttempts );

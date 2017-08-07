@@ -68,7 +68,7 @@ class BizContentSource
 	 */
 	public static function ifAlienGetOrCreateShadowObject( $id, $destObject=null )
 	{
-		if( !BizContentSource::isAlienObject( $id ) ) return $id;
+		if( !BizContentSource::isAlienObject( $id ) ) { return $id; }
 
 		// Check if we already have a shadow object for this alien. If so, return the id.
 		$shadowId = self::getShadowObjectID($id);
@@ -260,6 +260,22 @@ class BizContentSource
 	{
 		$connector = self::getContentSourceForAlienObject( $alienId );
 		return BizServerPlugin::runConnector( $connector, 'willAlwaysCreateACopyForImage', array() );
+	}
+
+	/**
+	 * Returns an array with all the rendition types stored by the content source.
+	 *
+	 * @since 10.1.4
+	 * @param string $contentSource
+	 * @param string $documentId
+	 * @return array Stored renditions.
+	 */
+	public static function storedRenditionTypes( $contentSource, $documentId )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+		$alienId = self::getAlienId( $contentSource, $documentId );
+		$connector = self::getContentSourceForAlienObject( $alienId );
+		return BizServerPlugin::runConnector( $connector, 'storedRenditionTypes', array() );
 	}
 
 	/**
@@ -482,6 +498,11 @@ class BizContentSource
 	/**
 	 * See ContentSource_EnterpriseConnector for comments
 	 * This is a facade hiding the details of calling the method from the right plug-in
+	 * The content source implementation should update the $object->Files for all renditions stored by the content source.
+	 * If e.g. all renditions are stored by the content source the $object->Files should be empty (null).
+	 * The database object record has to reflect the renditions types stored in the filestore. So after the content
+	 * source has stored the rendition(s) the database object record is updated to reflect the type(s) (if any) that will
+	 * be stored in the filestore.
 	 *
 	 * @param string $contentSource
 	 * @param string $documentId
@@ -495,7 +516,25 @@ class BizContentSource
 		// Get content source connector for this alien object
 		$alienId = self::getAlienId( $contentSource, $documentId );
 		$connector = self::getContentSourceForAlienObject( $alienId );
-		return BizServerPlugin::runConnector( $connector, 'saveShadowObject', array($alienId, &$object) );
+		$result = BizServerPlugin::runConnector( $connector, 'saveShadowObject', array($alienId, &$object) );
+		self::updateObjectFilesStorageInformation( $object );
+
+		return $result;
+	}
+
+	/**
+	 * Updates the object database record to reflect the renditions stored in the filestore.
+	 *
+	 * Since 10.1.4
+	 * @param Object $object
+	 */
+	private static function updateObjectFilesStorageInformation( $object  )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+		$types = BizObject::serializeFileTypes( $object->Files );
+		$values = array( 'types' => $types );
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		/*$result = */ DBObject::updateRowValues( $object->MetaData->BasicMetaData->ID, $values );
 	}
 	
 	/**
@@ -524,7 +563,7 @@ class BizContentSource
 	 * Refer to ContentSource_EnterpriseConnector::multiSetShadowObjectProperties() for more details.
 	 *
 	 * @param array[] $shadowObjectIds List of array where key is the content source and value its list of shadow ids.
-	 * @param MetaDataValues[] $metaDataValues The modified value that needs to be updated at the content source side.
+	 * @param MetaDataValue[] $metaDataValues The modified value that needs to be updated at the content source side.
 	 */
 	public static function multiSetShadowObjectProperties( $shadowObjectIds, $metaDataValues )
 	{

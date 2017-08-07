@@ -1005,6 +1005,7 @@ class BizPublishing
 
 			//Remove any images that are temporarily saved during image conversion.
 			if( $publishForm ) {
+				require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 				BizPublishForm::cleanupPlacedFilesCreatedByConversion( $publishForm );
 			}
 		} catch( BizException $e ) {

@@ -14,6 +14,6 @@ class ElvisCSNotFoundException extends ElvisCSException
 
 	public function toBizException()
 	{
-		return new BizException( 'ERR_NOTFOUND', 'Server', $this->detail );
+		return new BizException( 'ERR_NOTFOUND', 'Server', $this->detail, null, null, 'INFO' );
 	}
 }

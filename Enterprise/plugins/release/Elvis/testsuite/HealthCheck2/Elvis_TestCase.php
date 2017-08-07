@@ -78,9 +78,10 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 
 		// Check the defines that should exist and should be filled in (not empty).
 		$nonEmptyDefines = array(
-			'ELVIS_URL', 'ELVIS_CLIENT_URL', 'ELVIS_NAMEDQUERY',
+			'ELVIS_URL', 'ELVIS_CLIENT_URL',
+			'ELVIS_CONNECTION_TIMEOUT', 'ELVIS_CONNECTION_REATTEMPTS',
 			'ELVIS_ENT_ADMIN_USER', 'ELVIS_SUPER_USER',
-			'ELVIS_CREATE_COPY', 'IMAGE_RESTORE_LOCATION'
+			'ELVIS_NAMEDQUERY', 'ELVIS_CREATE_COPY', 'IMAGE_RESTORE_LOCATION'
 		);
 		if( !$this->utils->validateDefines( $this, $nonEmptyDefines, self::CONFIG_FILES, 'ERROR' ) ) {
 			$result = false;

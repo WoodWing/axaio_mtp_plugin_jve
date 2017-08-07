@@ -1,6 +1,8 @@
 <?php
 
-class ElvisRESTClient
+require_once __DIR__.'/ElvisClient.php';
+
+class ElvisRESTClient extends ElvisClient
 {
 	/**
 	 * @var null|string Type of Load Balancer used with connection to Elvis. e.g: classic load balancer (AWSELB)
@@ -9,39 +11,56 @@ class ElvisRESTClient
 	/**
 	 * Calls an Elvis web service over the REST JSON interface.
 	 *
-	 * It does log the request and response data in DEBUG mode.
-	 *
 	 * @param string $service Service name of the Elvis API.
-	 * @param string $url Request URL (JSON REST)
 	 * @param string[]|null $post Optionally. List of HTTP POST parameters to send along with the request.
 	 * @param Attachment|null $file
-	 * @return mixed Returned
+	 * @return mixed Decoded JSON data on success. Object with 'errorcode' attribute on error.
 	 * @throws BizException
 	 */
-	private static function send( $service, $url, $post = null, $file = null )
+	private static function send( $service, $post = null, $file = null )
 	{
-		require_once __DIR__.'/../util/ElvisSessionUtil.php';
-		$cookies = ElvisSessionUtil::getSessionCookies();
-		self::logService( $service, $url, $post, $cookies, true );
-		$response = self::sendUrl( $service, $url, $post, $cookies, $file );
-		self::logService( $service, $url, $response, $cookies, false );
-		ElvisSessionUtil::updateSessionCookies( $cookies );
+		$response = self::callElvisRestServiceAndHandleCookies( $service, $post, $file );
+		$isError = isset( $response->errorcode ) && $response->errorcode != 200;
 
-		if( isset( $response->errorcode ) ) {
-			$detail = 'Calling Elvis web service '.$service.' failed. '.
-				'Error code: '.$response->errorcode.'; Message: '.$response->message;
-			// When Elvis session is expired, re-login and try same request again.
-			static $recursion = 0; // paranoid checksum for endless recursion
-			if( $response->errorcode == 401 && $recursion < 3 ) {
-				$recursion += 1;
-				require_once __DIR__.'/ElvisAMFClient.php';
-				ElvisAMFClient::login();
-				self::send( $service, $url, $post );
-				$recursion -= 1;
-			} else {
+		// This function is called for all kind of services, but never for a logon (since that runs through the AMF client).
+		// In case of an error, we want to be robust and retry, but that is all handled by the AMF client's logon implementation.
+		// So all the REST client needs to do is logon and retry. If the logon fails, we may conclude that all the AMF client's
+		// internal retries have failed so all that is left for us to do is bail out by NOT catching its exception.
+		// The logout service is an exception; when it fails there is no point to re-login logout again. So we suppress any
+		// failure and assume session has ended. If not ended directly, after a while Elvis will expire it automatically anyway.
+		if( $isError && $service != 'services/logout' ) {
+			require_once __DIR__.'/ElvisAMFClient.php';
+			ElvisAMFClient::login();
+			$response = self::callElvisRestServiceAndHandleCookies( $service, $post, $file );
+			$isError = isset( $response->errorcode ) && $response->errorcode != 200;
+			if( $isError ) {
+				$detail = 'Calling Elvis web service '.$service.' failed (REST API). '.
+					'Error code: '.$response->errorcode.'; Message: '.$response->message;
 				self::throwExceptionForElvisCommunicationFailure( $detail );
 			}
 		}
+		return $response;
+	}
+
+	/**
+	 * Call Elvis service, send/receive session data in cookies and log request/response in DEBUG mode.
+	 *
+	 * @since 10.1.4
+	 * @param string $service Service name of the Elvis API.
+	 * @param string[]|null $post Optionally. List of HTTP POST parameters to send along with the request.
+	 * @param Attachment|null $file
+	 * @return mixed Decoded JSON data on success. Object with 'errorcode' attribute on error.
+	 */
+	private static function callElvisRestServiceAndHandleCookies( $service, $post = null, $file = null )
+	{
+		$url = self::getElvisBaseUrl().'/'.$service;
+		require_once __DIR__.'/../util/ElvisSessionUtil.php';
+		$cookies = ElvisSessionUtil::getSessionCookies();
+		self::logService( $service, $url, $post, $cookies, true );
+		$response = self::callElvisService( $service, $url, $post, $cookies, $file );
+		$isError = isset( $response->errorcode ) && $response->errorcode != 200;
+		self::logService( $service, $url, $response, $cookies, $isError ? null : false );
+		ElvisSessionUtil::updateSessionCookies( $cookies );
 		return $response;
 	}
 
@@ -53,37 +72,32 @@ class ElvisRESTClient
 	 * @param string $url REST URL
 	 * @param mixed $transData Transport data to be written in log file using print_r.
 	 * @param array $cookies HTTP cookies sent with request or returned by response.
-	 * @param boolean $isRequest TRUE to indicate a request, FALSE for a response (could be an error).
+	 * @param boolean $isRequest TRUE to indicate a request, FALSE for a response, NULL for error.
 	 */
 	private static function logService( $service, $url, $transData, $cookies, $isRequest )
 	{
 		if( LogHandler::debugMode() ) {
+			$logService = str_replace( '/', '_', $service );
 			$log = 'URL:'.$url.PHP_EOL.'Cookies:'.print_r( $cookies, true ).PHP_EOL.'JSON:'.print_r( $transData, true );
 			if( $isRequest ) {
 				LogHandler::Log( 'ELVIS', 'DEBUG', 'RESTClient calling Elvis web service '.$service );
-				LogHandler::logService( 'Elvis_'.$service, $log, true, 'JSON' );
-			} else { // response or error
-				if( isset( $transData->errorcode ) ) {
-					LogHandler::logService( 'Elvis_'.$service, $log, null, 'JSON' );
-				} else {
-					LogHandler::logService( 'Elvis_'.$service, $log, false, 'JSON' );
-				}
 			}
+			LogHandler::logService( 'Elvis_'.$logService, $log, $isRequest, 'JSON' );
 		}
 	}
 
 	/**
 	 * Calls an Elvis web service over the REST JSON interface.
 	 *
+	 * @since 10.1.4 renamed function from sendUrl into callElvisService.
 	 * @param string $service Service name of the Elvis API.
 	 * @param string $url Request URL (JSON REST)
 	 * @param string[]|null $post Optionally. List of HTTP POST parameters to send along with the request.
 	 * @param array $cookies HTTP cookies to sent with request. After call, this is replaced with cookies returned by response.
 	 * @param Attachment|null $file
-	 * @return mixed
-	 * @throws BizException
+	 * @return mixed Decoded JSON data on success. Object with 'errorcode' attribute on error.
 	 */
-	private static function sendUrl( $service, $url, $post, &$cookies, $file = null )
+	private static function callElvisService( $service, $url, $post, &$cookies, $file = null )
 	{
 		$ch = curl_init();
 		if( !$ch ) {
@@ -96,7 +110,7 @@ class ElvisRESTClient
 		curl_setopt( $ch, CURLOPT_POST, 1 );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt( $ch, CURLOPT_HEADER, 0 );
-		curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 10 ); // Using the Zend Client default
+		curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, ELVIS_CONNECTION_TIMEOUT );
 		curl_setopt( $ch, CURLOPT_TIMEOUT, 3600 ); // Using the Enterprise default
 
 		// Enable this to print the Header sent out ( After calling curl_exec )
@@ -167,40 +181,22 @@ class ElvisRESTClient
 		}
 
 		$httpStatusCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
-		if( $httpStatusCode !== 200 ) {
+		if( $httpStatusCode == 200 ) {
+			$response = json_decode( $result );
+		} else {
 			$detail = 'Elvis '.$service.' failed with HTTP status code:' . $httpStatusCode . '.' .PHP_EOL;
 			if( curl_errno( $ch ) ){
 				$detail .= 'CURL failed with error code "'.curl_errno( $ch ).'" for url: '.$url . '.' . PHP_EOL . curl_error( $ch );
 			}
-			curl_close($ch);
-			self::throwExceptionForElvisCommunicationFailure( $detail );
+			$response = new stdClass();
+			$response->errorcode = $httpStatusCode;
+			$response->message = $detail;
 		}
 
 		curl_close($ch);
 
-		return json_decode( $result );
+		return $response;
 	}
-
-	/**
-	 * Throws BizException for low level communication errors with Elvis Server.
-	 *
-	 * For ES 10.0 or later it throws a S1144 error else it throws S1069.
-	 *
-	 * @since 10.0.5 / 10.1.1
-	 * @param string $detail
-	 * @throws BizException
-	 */
-	private static function throwExceptionForElvisCommunicationFailure( $detail )
-	{
-		require_once BASEDIR . '/server/utils/VersionUtils.class.php';
-		$serverVer = explode( ' ', SERVERVERSION ); // split '9.2.0' from 'build 123'
-		if( VersionUtils::versionCompare( $serverVer[0], '10.0.0', '>=' ) ) {
-			throw new BizException( 'ERR_CONNECT', 'Server', $detail, null, array( 'Elvis' ) );
-		} else {
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Server', $detail );
-		}
-	}
-
 
 	/**
 	 * Performs REST update for provided metadata and file (if any).
@@ -218,7 +214,7 @@ class ElvisRESTClient
 			$post['metadata'] = json_encode( $metadata );
 		}
 
-		self::send( 'update', ELVIS_URL.'/services/update', $post, $file );
+		self::send( 'services/update', $post, $file );
 	}
 
 	/**
@@ -247,35 +243,30 @@ class ElvisRESTClient
 			$post['metadata'] = json_encode( $metadata );
 		}
 
-		self::send( 'updatebulk', ELVIS_URL.'/services/updatebulk', $post );
+		self::send( 'services/updatebulk', $post );
 	}
 
 	/**
 	 * Performs REST logout of the acting Enterprise user from Elvis.
 	 *
 	 * Calls the logout web service over the Elvis JSON REST interface.
-	 *
-	 * @throws BizException
+	 * @since 10.1.4 Any errors are suppressed because sessions will expire automatically anyway.
 	 */
 	public static function logout()
 	{
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
-		if( ElvisSessionUtil::hasSession() ) {
-			self::logoutSession();
-			ElvisSessionUtil::clearSessionCookies();
-		}
+		self::logoutSession();
 	}
 
 	/**
 	 * Does logout of the acting Enterprise user from Elvis.
 	 *
 	 * Calls the logout web service over the Elvis JSON REST interface.
-	 *
-	 * @throws BizException
+	 * @since 10.1.4 Any errors are suppressed because sessions will expire automatically anyway.
 	 */
 	private static function logoutSession()
 	{
-		self::send( 'logout', ELVIS_URL.'/services/logout' );
+		self::send( 'services/logout' );
 	}
 
 	/**
@@ -286,7 +277,7 @@ class ElvisRESTClient
 	 */
 	public static function fieldInfo()
 	{
-		return self::send( 'fieldinfo', ELVIS_URL.'/services/fieldinfo' );
+		return self::send( 'services/fieldinfo' );
 	}
 
 	/**
@@ -302,19 +293,7 @@ class ElvisRESTClient
 	{
 		// The Elvis ping service returns a JSON structure like this:
 		//     {"state":"running","version":"5.15.2.9","available":true,"server":"Elvis"}
-		return self::send( 'ping', ELVIS_URL.'/services/ping' );
-	}
-
-	/**
-	 * Calls the alive web service over the Elvis JSON REST interface.
-	 *
-	 * @since 10.0.5 / 10.1.2
-	 * @param integer $time Current Unix Timestamp
-	 * @throws BizException
-	 */
-	public static function keepAlive( $time )
-	{
-		self::send( 'alive', ELVIS_URL.'/alive.txt?_='.$time );
+		return self::send( 'services/ping' );
 	}
 
 	/**
@@ -336,7 +315,7 @@ class ElvisRESTClient
 		require_once __DIR__.'/../util/ElvisSessionUtil.php';
 
 		$response = null;
-		$url = ELVIS_URL.'/version.jsp';
+		$url = self::getElvisBaseUrl().'/version.jsp';
 		LogHandler::logService( 'Elvis_version_jsp', $url, true, 'REST' );
 		try {
 			$client = new Zend\Http\Client();
@@ -352,7 +331,7 @@ class ElvisRESTClient
 		}
 		if( $response->getStatusCode() !== 200 ) {
 			LogHandler::logService( 'Elvis_version_jsp', $response->getBody(), null, 'REST' );
-			self::throwExceptionForElvisCommunicationFailure( $response->getReasonPhrase() );
+			self::throwExceptionForElvisCommunicationFailure( $response->renderStatusLine() );
 		}
 
 		$cookies = array();

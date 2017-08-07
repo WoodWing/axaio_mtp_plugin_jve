@@ -220,18 +220,18 @@ class BizTransferServer extends BizServerJobHandler
 	 * @param string $inputPath Location of the file to be copied
 	 * @param Attachment $attachment
 	 * @param array|null $options [10.0.5/10.1.2] Optional. Stream context options for $inputPath. For URLs only.
-	 * @return boolean Copy action was successful (true/false)
+	 * @return bool|int Copy action was successful (true/false). Since 10.1.4 when $inputPath is an URL and $options is set, it returns the HTTP status code.
 	 */
 	public function copyToFileTransferServer( $inputPath, Attachment $attachment, $options=null )
 	{
 		$copied = false;
 		$outputPath = $this->createTransferFileName();
 		if( $outputPath ) {
-			if( $this->doFileCopy( $inputPath, $outputPath, $options ) ) {
+			$copied = $this->doFileCopy( $inputPath, $outputPath, $options );
+			if( $copied === true || $copied === 200 ) {
 				$attachment->FilePath = $outputPath;
 				$attachment->FileUrl  = null;
 				$attachment->Content = null;
-				$copied =  true;
 			} else {
 				LogHandler::Log( 'TransferServer', 'ERROR', 
 					'Failed to copy file "'.$inputPath.'" '.
@@ -278,7 +278,7 @@ class BizTransferServer extends BizServerJobHandler
 	 * @param string $srcFile Location of the file to be copied
 	 * @param string $destFile Destination path
 	 * @param array|null $srcOptions [10.0.5/10.1.2] Optional. Stream context options for $srcFile. For URLs only.
-	 * @return boolean Copy action was successful (true/false)
+	 * @return bool|int Copy action was successful (true/false). Since 10.1.4 when $srcFile is an URL and $srcOptions is set, it returns the HTTP status code.
 	 */
 	private function doFileCopy( $srcFile, $destFile, $srcOptions=null )
 	{
@@ -300,8 +300,17 @@ class BizTransferServer extends BizServerJobHandler
 			$retVal = ($srcSize == $destSize);
 		} else {
 			$context = $srcOptions ? stream_context_create( $srcOptions ) : null;
-			if( $context ) {
-				$retVal = copy( $srcFile, $destFile, $context );
+			if( $isUrl && $context ) {
+				if( copy( $srcFile, $destFile, $context ) ) {
+					$retVal = 200;
+				} else {
+					$retVal = 500;
+					// Note that the special variable $http_response_header is set by copy().
+					if( isset($http_response_header) &&
+						preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#i", $http_response_header[0], $httpStatus ) > 0 ) {
+						$retVal = intval( $httpStatus[1] );
+					}
+				}
 			} else {
 				$retVal = copy( $srcFile, $destFile );
 			}

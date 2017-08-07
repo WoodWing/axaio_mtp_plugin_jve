@@ -5,15 +5,20 @@
  * @since v7.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
- 
+
+require_once BASEDIR.'/server/vendor/autoload.php';
 require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 require_once BASEDIR.'/server/dbclasses/DBServerPlugin.class.php';
+require_once BASEDIR.'/server/protocols/json/Client.php';
+require_once BASEDIR.'/server/protocols/json/Services.php';
 
-class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase extends TestCase
+class WW_TestSuite_BuildTest_WebServices_WflServices_WflJSON_DeleteObjects_TestCase extends TestCase
 {
 	// Article test object details
 	private $articleId;
 	private $articleName;
+	private $client = null;
+	private $incrementalID = null;
 	
 	// Properties to use for a test layout
 	private $publicationInfo;
@@ -22,25 +27,24 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase e
 	private $ticket;
 	private $user;
 		
-	public function getDisplayName() { return 'Delete Objects'; }
-	public function getTestGoals()   { return 'Checks if Objects can be deleted and purged successfully'; }
+	public function getDisplayName() { return 'JSON-RPC: Delete Objects'; }
+	public function getTestGoals()   { return 'Checks if Objects can be deleted and purged successfully by using JSON-RPC'; }
 	public function getTestMethods() { return 'Lock an Object and tries to delete it, Unlock the same object and delete the object again.'; }
-	public function getPrio()        { return 9; }
+	public function getPrio()        { return 421; }
 	
 	final public function runTest()
 	{
+		$this->client = new WW_JSON_Client(LOCALURL_ROOT.INETROOT.'/index.php?protocol=JSON');
+		$this->incrementalID = 1;
+
 		// Getting session variables
 		// get ticket ( retrieved from wflLogon Test )
    		$vars = $this->getSessionVariables();
-   		$this->ticket = @$vars['BuildTest_WebServices_WflServices']['ticket'];
+   		$this->ticket = $vars['BuildTest_WebServices_WflServices']['ticket'];
 		if( !$this->ticket ) {
 			$this->setResult( 'ERROR',  'Could not find ticket to test with.', 'Please enable the WflLogon test.' );
 			return;
 		}
-		
-		// Apply the ticket to current session to avoid invalid ticket error during object lock,
-		// which creates a EnterpriseEvent, which requires a ticket for that server job.
-		BizSession::checkTicket( $this->ticket );
 		
 		// get objectIds for object deletion
 		if( is_null( $vars['BuildTest_WebServices_WflServices']['objIds']) ){
@@ -113,6 +117,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase e
 		$error = true; // Assume unexpected behavior
 		if( $expectedErrorCode ) { // when object is checked out
 			$map = new BizExceptionSeverityMap( array( $expectedErrorCode => 'INFO' ) );
+			$map = $map; // keep analyzer happy
 		}
 		try {
 			$action = $permanent ? 'purge' : 'delete';
@@ -121,41 +126,63 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase e
 			
 			require_once BASEDIR.'/server/interfaces/services/wfl/WflDeleteObjectsRequest.class.php';
 			require_once BASEDIR.'/server/interfaces/services/wfl/WflDeleteObjectsResponse.class.php';
-			require_once BASEDIR.'/server/services/wfl/WflDeleteObjectsService.class.php';
-			$service = new WflDeleteObjectsService();
-			$request = new WflDeleteObjectsRequest();
-			$request->Ticket = $this->ticket;
-			$request->IDs = array($objId);
-			$request->Permanent = $permanent;
-			$request->Areas = $areas;
-			$response = $service->execute($request);
+			$DeleteObjectsRequest = new WflDeleteObjectsRequest();
+			$DeleteObjectsRequest->Ticket = $this->ticket;
+			$DeleteObjectsRequest->IDs = array($objId);
+			$DeleteObjectsRequest->Permanent = $permanent;
+			$DeleteObjectsRequest->Areas = $areas;
 
-			$action = $permanent ? 'purged' : 'deleted';
-			if( $expectDeleted ) {
-				if( $response->Reports ) { 
-					// We expect the object to be deleted but we got error.
-					$title = __FUNCTION__.': Unexpected result.';
-					$message = 'ObjectID '. $objId .' should be ' .$action. ' from ' . $areas[0] . ' area but is now not ' .$action . '!';
+			$request = $this->client->request('DeleteObjects', (string) $this->incrementalID, array('req' => $DeleteObjectsRequest));
+			if ( $expectedErrorCode ) {
+				// Add the expected error code to the GET parameters so it becomes a 'INFO' log entry
+				$request->getQuery()->add( 'expectedError', $expectedErrorCode );
+			}
+			$response = $request->send();
+
+			if (!$response instanceof \Graze\Guzzle\JsonRpc\Message\ErrorResponse) {
+
+				$services = new WW_JSON_Services;
+
+				$result = $response->getResult();
+				$result = $services->arraysToObjects($result);
+				$result = WW_JSON_Services::restructureObjects($result);
+
+				$action = $permanent ? 'purged' : 'deleted';
+				if( $expectDeleted ) {
+					if( count($result->Reports) > 0 ) {
+						// We expect the object to be deleted but we got error.
+						$title = __FUNCTION__.': Unexpected result.';
+						$message = 'ObjectID '. $objId .' should be ' .$action. ' from ' . $areas[0] . ' area but is now not ' .$action . '!';
+					} else {
+						$title = __FUNCTION__.': Expected result.';
+						$message = 'ObjectID ' . $objId . ' is ' .$action. ' from ' . $areas['0'] . ' area.';
+						$error = false; // expected behavior
+					}
 				} else {
-					$title = __FUNCTION__.': Expected result.';
-					$message = 'ObjectID ' . $objId . ' is ' .$action. ' from ' . $areas['0'] . ' area.';
-					$error = false; // expected behavior
-				}
-			} else {
-				if( $response->Reports ) { 
-					$title = __FUNCTION__.': Expected result.';
-					$message = 'ObjectID ' . $objId . ' is not ' .$action. ' from ' . $areas['0'] . ' area.';
-					$error = false; // expected behavior
-				} else {
-					// We expect the object NOT to be deleted for which we should receive an error.
-					// However, we received no error which is WRONG, and so we raise an error.
-					$title = __FUNCTION__.': Unexpected result.';
-					$message =  'ObjectID '. $objId .' should not be ' .$action. ' from ' . $areas[0] . ' area but is now ' .$action. '!';
+					if( count($result->Reports) > 0 ) {
+						$title = __FUNCTION__.': Expected result.';
+						$message = 'ObjectID ' . $objId . ' is not ' .$action. ' from ' . $areas['0'] . ' area.';
+						$error = false; // expected behavior
+					} else {
+						// We expect the object NOT to be deleted for which we should receive an error.
+						// However, we received no error which is WRONG, and so we raise an error.
+						$title = __FUNCTION__.': Unexpected result.';
+						$message =  'ObjectID '. $objId .' should not be ' .$action. ' from ' . $areas[0] . ' area but is now ' .$action. '!';
+					}
 				}
 			}
-		} catch( BizException $e ) {
-			$title = __FUNCTION__.': '.$e->getMessage();
-			$message = $e->getDetail();
+		}
+		catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
+			LogHandler::Log( 'JSON-RPC', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
+		}
+		catch( BizException $e ) {
+			LogHandler::Log( 'Services', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
+		}
+		catch (Exception $e) {
+			LogHandler::Log( 'Services', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
 		}
 		$this->logServiceResp( $title, $message, $error );
 	}
@@ -174,34 +201,49 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase e
 		try{
 			require_once BASEDIR.'/server/interfaces/services/wfl/WflRestoreObjectsRequest.class.php';
 			require_once BASEDIR.'/server/interfaces/services/wfl/WflRestoreObjectsResponse.class.php';
-			require_once BASEDIR.'/server/services/wfl/WflRestoreObjectsService.class.php';
-			$service = new WflRestoreObjectsService();
-			$request = new WflRestoreObjectsRequest( $this->ticket, array( $objId) );
-			$response = $service->execute($request);
-			if( $response->Reports ) { // Introduced in v8.0
-				$errMsg = '';
-				$title = '';
-				$message = '';
-				foreach( $response->Reports as $report ){
-					$objId = $report->BelongsTo->ID;
-					foreach( $report->Entries as $reportEntry ) {
-						$errMsg .= $reportEntry->Message . PHP_EOL;
-					}					
-					$title = __FUNCTION__.': Unexpected result.';
-					$message = 'ObjectID ' . $objId . ' should be restored from trashCan to workflow area but it is now not restored!.' .
-						$errMsg;
-					$error = true; // Error occured, which is not expected so flag it and raise error				
+			$RestoreObjectsRequest = new WflRestoreObjectsRequest( $this->ticket, array( $objId) );
+
+			$request = $this->client->request('RestoreObjects', (string) $this->incrementalID, array('req' => $RestoreObjectsRequest));
+			$response = $request->send();
+
+			if (!$response instanceof \Graze\Guzzle\JsonRpc\Message\ErrorResponse) {
+
+				$services = new WW_JSON_Services;
+
+				$result = $response->getResult();
+				$result = $services->arraysToObjects($result);
+				$result = WW_JSON_Services::restructureObjects($result);
+
+				if( count($result->Reports) == 0 ) { // Introduced in v8.0
+					$title = __FUNCTION__.': Expected result.';
+					$message = 'ObjectID ' . $objId . ' is restored from trashCan to workflow area.';
 				}
-			} else {
-				$title = __FUNCTION__.': Expected result.';
-				$message = 'ObjectID ' . $objId . ' is restored from trashCan to workflow area.';
+				else { // Introduced in v8.0
+					$errMsg = '';
+					foreach( $result->Reports as $report ){
+						$objId = $report->BelongsTo->ID;
+						foreach( $report->Entries as $reportEntry ) {
+							$errMsg .= $reportEntry->Message . PHP_EOL;
+						}
+						$title = __FUNCTION__.': Unexpected result.';
+						$message = 'ObjectID ' . $objId . ' should be restored from trashCan to workflow area but it is now not restored!.' .
+							$errMsg;
+						$error = true; // Error occured, which is not expected so flag it and raise error
+					}
+				}
 			}
-		} catch ( BizException $e ){
-			$sCode = $e->getErrorCode();
-			$title = __FUNCTION__.': Unexpected result.';
-			$message = 'ObjectID ' . $objId . ' should be restored from trashCan to workflow area but it is now not restored!.' .
-				$sCode . ':' . $e->getDetail();
-			$error = true; // Error occured, which is not expected so flag it and raise error
+		}
+		catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
+			LogHandler::Log( 'JSON-RPC', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
+		}
+		catch( BizException $e ) {
+			LogHandler::Log( 'Services', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
+		}
+		catch (Exception $e) {
+			LogHandler::Log( 'Services', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
 		}
 		$this->logServiceResp( $title, $message, $error );
 	}
@@ -230,18 +272,42 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase e
 		try{
 			require_once BASEDIR.'/server/interfaces/services/wfl/WflUnlockObjectsRequest.class.php';
 			require_once BASEDIR.'/server/interfaces/services/wfl/WflUnlockObjectsResponse.class.php';
-			require_once BASEDIR.'/server/services/wfl/WflUnlockObjectsService.class.php';
-			$service = new WflUnlockObjectsService();
-			$request = new WflUnlockObjectsRequest( $this->ticket, array($id));
-			/*$response =*/ $service->execute($request);
-			$title = __FUNCTION__.': Expected result.';
-			$message = 'ObjectID ' . $id . ' is unlocked.';
-		}catch ( BizException $e ){
-			$sCode = $e->getErrorCode();
-			$title = __FUNCTION__.': Unexpected result.';
-			$message = 'Encounter error while unlocking objectID ' . $id . '.' .
-					$sCode . ':'. $e->getDetail();
-			$error = true; // Error occured, which is not expected so flag it and raise error
+			$UnlockObjectsRequest = new WflUnlockObjectsRequest( $this->ticket, array($id));
+
+			$request = $this->client->request('UnlockObjects', (string) $this->incrementalID, array('req' => $UnlockObjectsRequest));
+			$response = $request->send();
+
+			if (!$response instanceof \Graze\Guzzle\JsonRpc\Message\ErrorResponse) {
+
+				$services = new WW_JSON_Services;
+
+				$result = $response->getResult();
+				$result = $services->arraysToObjects($result);
+				$result = WW_JSON_Services::restructureObjects($result);
+
+				if ( count($result->Reports) > 0 ) {
+
+					$title = __FUNCTION__.': Unexpected result.';
+					$message = 'ObjectID ' . $id . ' is NOT unlocked.';
+					$error = true;
+				}
+				else {
+					$title = __FUNCTION__.': Expected result.';
+					$message = 'ObjectID ' . $id . ' is unlocked.';
+				}
+			}
+		}
+		catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
+			LogHandler::Log( 'JSON-RPC', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
+		}
+		catch( BizException $e ) {
+			LogHandler::Log( 'Services', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
+		}
+		catch (Exception $e) {
+			LogHandler::Log( 'Services', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
 		}
 		$this->logServiceResp( $title, $message, $error );
 	}
@@ -272,6 +338,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase e
 	{
 		if( $expectedErrorCode ) {
 			$map = new BizExceptionSeverityMap( array( $expectedErrorCode => 'INFO' ) );
+			$map = $map; // keep analyzer happy
 		}
 		$error = false; // we don't want any unexpected behavior to occur.
 		$title = '';
@@ -281,29 +348,55 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase e
 			$goal = __FUNCTION__.': Trying to get' . $lockMsg . 'object ' . $objID .' from '  . $areas['0'] . ' area.';
 			$this->logServiceReqGoal( $goal );
 			
-			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-			if( BizObject::getObject( $objID, $this->user, $lock, 'none', null/*requestInfo*/,null/*haveVersion*/,false/*checkRights*/,$areas) ){
+			require_once BASEDIR.'/server/interfaces/services/wfl/WflGetObjectsRequest.class.php';
+			require_once BASEDIR.'/server/interfaces/services/wfl/WflGetObjectsResponse.class.php';
+
+			$GetObjectsRequest = new WflGetObjectsRequest( $this->ticket );
+			$GetObjectsRequest->IDs = array( $objID );
+			$GetObjectsRequest->Lock = $lock;
+			$GetObjectsRequest->Rendition = 'none';
+			$GetObjectsRequest->RequestInfo = null;
+			$GetObjectsRequest->HaveVersions = null;
+			$GetObjectsRequest->Areas = $areas;
+			$GetObjectsRequest->EditionId = null;
+
+			$request = $this->client->request('GetObjects', (string) $this->incrementalID, array('req' => $GetObjectsRequest));
+			if ( $expectedErrorCode ) {
+				// Add the expected error code to the GET parameters so it becomes a 'INFO' log entry
+				$request->getQuery()->add( 'expectedError', $expectedErrorCode );
+			}
+			$response = $request->send();
+
+			if (!$response instanceof \Graze\Guzzle\JsonRpc\Message\ErrorResponse) {
+
+				$services = new WW_JSON_Services;
+
+				$result = $response->getResult();
+				$result = $services->arraysToObjects($result);
+				$result = WW_JSON_Services::restructureObjects($result);
+
 				if( $expectObj ){
 					$title = __FUNCTION__.': Expected result.';
-					$message = 'ObjectID '. $objID .' found in ' . $areas[0] . ' area.';	
+					$message = 'ObjectID '. $objID .' found in ' . $areas[0] . ' area.';
 				} else { // $expectObj = false, we didn't expect an object but it returned! which is wrong, so raise error
 					$title = __FUNCTION__.': Unexpected result.';
 					$message = 'ObjectID '. $objID .' should not be found in ' . $areas[0] . ' area.';
 					$error = true; // Error occured, which is not expected so flag it and raise error
 				}
 			}
-		} catch( BizException $e ) {
-			$sCode = $e->getErrorCode();
-			if( !$expectObj && $sCode == 'S1029' ){ 
-				$title = __FUNCTION__.': Expected result.';
-				$message = 'ObjectID '. $objID .' not found in ' . $areas[0] . ' area.';
-			} else { // $expectObj=true, we expected an object but it didn't return object, which is wrong, so raise error
-				$title = __FUNCTION__.': Unexpected result.';
-				$message = 'ObjectID '. $objID .' should be found in ' . $areas[0] . ' area but is now not found!';
-				$error = true; // Error occured, which is not expected so flag it and raise error
-			}
 		}
-		
+		catch (\Guzzle\Http\Exception\ClientErrorResponseException $e) {
+			LogHandler::Log( 'JSON-RPC', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
+		}
+		catch( BizException $e ) {
+			LogHandler::Log( 'Services', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
+		}
+		catch (Exception $e) {
+			LogHandler::Log( 'Services', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
+		}
 		$this->logServiceResp( $title, $message, $error );
 	}
 

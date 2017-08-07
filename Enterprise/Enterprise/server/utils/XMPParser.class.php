@@ -56,8 +56,10 @@ class XMPParser
 			try{
 				$sxe=@new SimpleXMLElement($xmpdata);
 			} catch( Exception $e) {
-				$printData = str_replace( '<', "<br/>&lt;", $xmpdata );
-				LogHandler::Log('XMPParser', 'WARN', 'XMP invalid XML: '.$e->getMessage."<code>$printData</code>" );
+				LogHandler::logRaw(
+					'XMPParser',
+					'WARN',
+					LogHandler::encodeLogMessage( "XMP invalid XML: {$e->getMessage}\r\n" ).LogHandler::composeCodeBlock( $xmpdata ) );
 				return null;
 			}
 		}
@@ -120,8 +122,10 @@ class XMPParser
 				try {
 					$retXml[] = @new SimpleXMLElement($xmpData);
 				} catch (Exception $e) {
-					$printData = str_replace('<', "<br/>&lt;", $xmpData);
-					LogHandler::Log('XMPParser', 'WARN', 'XMP invalid XML: ' . $e->getMessage . "<code>$printData</code>");
+					LogHandler::logRaw(
+						'XMPParser',
+						'WARN',
+						LogHandler::encodeLogMessage( "XMP invalid XML: {$e->getMessage}\r\n" ).LogHandler::composeCodeBlock( $xmpData ) );
 				}
 			}
 		}

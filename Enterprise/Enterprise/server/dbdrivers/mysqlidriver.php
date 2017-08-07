@@ -81,15 +81,7 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	}
 	
 	/**
-	 * Performs a given SQL query at the DB.
-	 *
-	 * @param string $sql   The SQL statement.
-	 * @param array $params Parameters for replacement
-	 * @param mixed $blob   Chunck of data to store at DB. It will be converted to a DB string here.
- 	 *                      One blob can be passed or multiple. If muliple are passed $blob is an array.
-	 * @param boolean $writeLog In case of license related queries, this option can be used to not write in the log file.
-	 * @param boolean $logExistsErr Suppress 'already exists' errors. Used for specific insert operations for which this error is fine.
-	 * @return resource|bool|null DB handle that can be used to fetch results. Null when SQL failed. False when record already exists, in case $logExistsErr is set false.
+	 * @inheritDoc
 	 */
 	public function query( $sql, $params=array(), $blob=null, $writeLog=true, $logExistsErr=true )
 	{
@@ -126,7 +118,6 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 					if( $logSQL ) {	
 						$postfix = strlen( $blobstr ) > 250 ? '...' : '';
 						$blobLog = substr( $blobstr, 0, 250 );
-						$blobLog = (LOGFILE_FORMAT == 'html') ? htmlentities( $blobLog ) : $blobLog;
 						LogHandler::Log('mysql', 'INFO', 'BLOB: ['.$blobLog.$postfix.']' );
 					}
 					$blob[$key] = "'$blobstr'"; 
@@ -166,7 +157,7 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 				$rowCnt = isset($this->dbh->affected_rows) ? $this->dbh->affected_rows : 0;
 			}
 			$this->logSql( 'mysql',
-				LOGFILE_FORMAT == 'html' ? htmlentities( $cleanSql ) : $cleanSql,
+				$cleanSql,
 				$rowCnt,
 				__CLASS__,
 				__FUNCTION__,
@@ -182,8 +173,8 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 				($this->errorcode() == DB_ERROR_ALREADY_EXISTS || 
 				 $this->errorcode() == DB_ERROR_CONSTRAINT )) {
 				return false;
-			} elseif( $this->errorcode() == DB_ERROR_DEADLOCK_FOUND ) {
-				return $this->retryAfterDeadlock( $sql );
+			} elseif( $this->errorcode() == DB_ERROR_DEADLOCK_FOUND || $this->errorcode() == DB_ERROR_NOT_LOCKED ) {
+				return $this->retryAfterLockError( $sql, 50 );
 			}
 			if ( $writeLog ) {
 				LogHandler::Log('mysql', 'ERROR', $this->errorcode().':'.$this->error());
@@ -194,33 +185,33 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	}
 
 	/**
-	 * If a deadlock is encountered repeat the transaction again.
-	 * The transaction is repeated after waiting 50 milliseconds.
-	 *
-	 * @param $sql
-	 * @return null
+	 * @inheritDoc
 	 */
-	private function retryAfterDeadlock( $sql )
+	protected function retryAfterLockError( $sql, $milliseconds = 50 )
 	{
-		usleep( 50000 );
-		LogHandler::Log('mysql', 'WARN', $this->dbh->errno.': '.$this->error());
-		LogHandler::Log( 'mysql', 'WARN', 'Deadlock: Execute statement again.' );
-		$result = $this->dbh->query( $sql );
-		if ( !$result ) {
-			LogHandler::Log( 'mysql', 'WARN', 'Deadlock: Retry of statement failed once again.' );
-			$result = null;
-		} else {
-			LogHandler::Log( 'mysql', 'WARN', 'Deadlock: Retry of statement was successful.' );
+		LogHandler::Log( 'mysql', 'INFO', '(Dead)lock error encountered: Execute statement again.' );
+		if( LogHandler::debugMode() ) {
+			LogHandler::Log( 'mysql', 'DEBUG', $this->theerrorcode.': '.$this->error() );
 		}
-
+		$result = null;
+		$maxRetries = 3;
+		for( $retry = 1; $retry <= $maxRetries; $retry++ ) {
+			LogHandler::Log( 'mysql', 'INFO', "(Dead)lock: Retry attempt {$retry} of {$maxRetries}." );
+			usleep( $milliseconds * 1000 );
+			$result = $this->dbh->query( $sql );
+			if( !$result ) {
+				LogHandler::Log( 'mysql', 'WARN', '(Dead)lock: Retry of statement failed once again.' );
+				$result = null;
+			} else {
+				LogHandler::Log( 'mysql', 'INFO', '(Dead)lock: Retry of statement was successful.' );
+				break;
+			}
+		}
 		return $result;
-}
+	}
 
 	/**
-	 * Fetch a result row as an associative array.
-	 *
-	 * @param resource $sth The result resource that is being evaluated. This result comes from a call to {@link: query()}.
-	 * @return array|bool Associative array of strings that corresponds to the fetched row, or FALSE if there are no more rows.
+	 * @inheritDoc
 	 */
 	public function fetch( $sth )
 	{
@@ -319,7 +310,10 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 
 		return $row ? true : false;
 	}
-	
+
+	/**
+	 * @inheritDoc
+	 */
 	public function newid( $table, $after )
 	{
 		if( $after ) { // called AFTER insert statement
@@ -354,12 +348,18 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 			$this->theerrorcode = '';
 		}
 	}
-	
+
+	/**
+	 * @inheritDoc
+	 */
 	public function error()
 	{
 		return $this->errormessage;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function errorcode()
 	{
 		switch ( $this->theerrorcode ) {
@@ -377,20 +377,26 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 		return "`$name`";
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function limitquery($sql, $start, $count)
 	{
 		return "$sql limit $start, $count";
 	}
 
-	public function tablename( $str )
+	/**
+	 * @inheritDoc
+	 */
+	public function tablename( $tableNameNoPrefix )
 	{
 		$prefix = DBPREFIX;
-		return "`{$prefix}{$str}`";
-		
-		// Replaced solution below (60ms) with solution above (3ms) to make it 20x faster.
-		//return $this->quoteIdentifier( DBPREFIX.$str );
+		return "`{$prefix}{$tableNameNoPrefix}`";
 	}
-	
+
+	/**
+	 * @inheritDoc
+	 */
 	public function autoincrement($sql)
 	{
 		return $sql; // no auto increment needed
@@ -452,18 +458,16 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	{
 		return 'now()';
 	}
-	
+
 	/**
-	 * Returns a field concatenation
-	 * @param array $fieldNames List of field names to be concatenated
-	 * @return string Concatenation
-	**/
-	public function concatFields( $fieldNames )
+	 * @inheritDoc
+	 **/
+	public function concatFields( $arguments )
 	{
 		$sql = 'concat( ';
 		$sep = '';
-		foreach( $fieldNames as $fieldName ) {
-			$sql .= $sep.$fieldName;
+		foreach( $arguments as $argument ) {
+			$sql .= $sep.$argument;
 			$sep = ', ';
 		}
 		$sql .= ' ) ';
@@ -760,9 +764,7 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	}
 	
 	/**
-	 * Returns boolean true to indicate that MYSQL supports 
-	 * multibyte data storage.
-	 * @return boolean true.
+	 * @inheritDoc
 	 */
 	public function hasMultibyteSupport()
 	{

@@ -596,6 +596,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 
 		// Now the service I/O is logged above, throw exception in case of a fault.
 		$lastResponse = $client->getLastResponse();
+		$detailedUserMessage = '';
 		if( $lastResponse && $lastResponse->isError() ) {
 			$errMsg = $lastResponse->getMessage().' (HTTP '.$lastResponse->getStatus().')';
 		} else if( isset($e) ) {
@@ -609,6 +610,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 				$xpath = new DOMXPath( $dom );
 				$errorNode = $xpath->query('//error')->item(0);
 				$errMsg = $errorNode->nodeValue;
+				$detailedUserMessage = strip_tags( $errMsg ); // Drupal messages contain html tags.
 			}
 		}
 
@@ -621,7 +623,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 		if( $errMsg ) {
 			LogHandler::Log( 'Drupal', 'ERROR', 'HTTP UPLOAD "'.$action.'" failed at URL "'.$this->url.'".' );
 			throw new BizException( 'ERR_PUBLISH', 'Server', $errMsg,
-				null, array('Drupal', $message));
+				null, array('Drupal', "{$message} {$detailedUserMessage}"));
 		}
 		return $fileId;
 	}

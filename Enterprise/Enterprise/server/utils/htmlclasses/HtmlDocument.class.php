@@ -121,7 +121,7 @@ class HtmlDocument
 			
 			// Check if we are in error... then signal user (happens only in debug mode)
 			$suppressDlg = isset($_COOKIE["suppressdebugdialog"]) && $_COOKIE["suppressdebugdialog"] == '1';
-			if( !$suppressDlg && LogHandler::getDebugErrorLogFile() ) {
+			if( $isadmin && !$suppressDlg && LogHandler::getDebugErrorLogFile() ) { // Show errors only for system admins EN-89438
 				$errServer = '
 					<table id="servererror" border="3" cellpadding="10" bgcolor="red"><tr>
 					<td align="center" bgcolor="red">
@@ -136,7 +136,7 @@ class HtmlDocument
 			} else {
 				$errServer = '';
 			}
-			if( !$suppressDlg && LogHandler::getPhpLogFile() ) {
+			if( $isadmin && !$suppressDlg && LogHandler::getPhpLogFile() ) { // Show errors only for system admins EN-89438
 				$errPHP = '
 					<table id="phperror" border="3" cellpadding="10" bgcolor="orange"><tr>
 					<td align="center" bgcolor="orange">

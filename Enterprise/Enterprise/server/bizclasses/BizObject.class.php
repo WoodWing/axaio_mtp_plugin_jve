@@ -316,10 +316,6 @@ class BizObject
 			if (!$id) {
 				throw new BizException( 'ERR_DATABASE', 'Server', 'No ID' );
 			}
-			// now we know id: generate storage name and store it
-			$storename = StorageFactory::storename($id, $arr);
-			// $modifier and $modified are null for this function call, they are already set a few lines ago
-			/*$sth = */DBObject::updateObject( $id, null, array(), null, $storename );
 		}
 		$object->MetaData->BasicMetaData->ID = $id;
 
@@ -428,8 +424,9 @@ class BizObject
 
 		// ==== So far it was DB only, now involve files:
 		// Save object's files:
+		$storename = StorageFactory::storename( $id, $arr );
+		/*$sth = */ DBObject::updateObject( $id, null, array(), null, $storename );
 		self::saveFiles( $storename, $id, $object->Files, $object->MetaData->WorkflowMetaData->Version );
-
 		// When an image is created, the thumb and preview need to be removed from the TransferServer.
 		if ('Image' == $arr['type'] ){
 			LogHandler::Log('BizObject', 'DEBUG', 'Removing temporary image files from TransferServer.');
@@ -660,12 +657,15 @@ class BizObject
 		$curSect  = $currRow['section'];
 		$curState = $currRow['state'];
 
-		// Publication, Category are crucial to have, but can be empty on save when they are not changed, so fill them in with current values:
+		// Publication, Category, Content Source are crucial to have, but can be empty on save when they are not changed, so fill them in with current values:
 		if( !$object->MetaData->BasicMetaData->Publication || !$object->MetaData->BasicMetaData->Publication->Id ) {
 			$object->MetaData->BasicMetaData->Publication = new Publication( $curPub );
 		}
 		if( !$object->MetaData->BasicMetaData->Category || !$object->MetaData->BasicMetaData->Category->Id ) {
 			$object->MetaData->BasicMetaData->Category = new Category( $curSect );
+		}
+		if ( !empty( $currRow['contentsource'] && empty( $object->MetaData->BasicMetaData->ContentSource ) ) ) {
+			$object->MetaData->BasicMetaData->ContentSource = $currRow['contentsource'];
 		}
 
 		// Determine the current- and new targets and issue.
@@ -1601,7 +1601,7 @@ class BizObject
 				throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(E)" );
 		}
 
-			// Next, check if we have access to destination.
+		// Next, check if we have access to destination.
 		BizAccess::checkRightsForParams( $user, 'W', BizAccess::THROW_ON_DENIED,
 			$newRow['publication'], $newIssueId, $newRow['section'], $newRow['type'], $newRow['state'],
 			$currRow['id'], $currRow['contentsource'], $currRow['documentid'], $currRow['routeto'] );
@@ -3855,7 +3855,7 @@ class BizObject
 		self::validateFiles( $object );
 
 		// Serialize the types of renditions that this object has.
-		// This is added to flattened meta data only, it's not a property of class Object, but goes with object's db recored
+		// This is added to flattened meta data only, it's not a property of class Object, but goes with object's db record
 		$arr['types'] = self::serializeFileTypes( $object->Files );
 
 		return $arr;
@@ -4197,8 +4197,8 @@ class BizObject
 			} else {
 				LogHandler::Log( 'bizobject', 'ERROR', 'Tried to save unsupported file rendition "'.$file->Rendition.'".' );
 			}
+			clearstatcache(); // Make sure unlink calls above are reflected!
 		}
-		clearstatcache(); // Make sure unlink calls above are reflected!
 	}
 
 	/**

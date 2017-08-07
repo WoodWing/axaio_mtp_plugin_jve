@@ -160,14 +160,11 @@ class UploadController extends ControllerBase
 				drupal_mkdir( $path, null, true );
 			}
 			$files = file_save_upload( 'upload', $validators, $path, null, FILE_EXISTS_RENAME );
-			if ( empty ( $files ) ) {
-				throw new \Exception( 'Upload failed.' );
-			}
 
 			// Check if the file was uploaded correctly.
 			$errors = drupal_get_messages( 'error' );
-			if ( is_array( $errors ) && !empty( $errors ) && isset( $errors['error'] ) ) {
-				$errorToThrow = implode( 'PHP_EOL', $errors['error'] );
+			if ( empty ( $files ) || ( is_array( $errors ) && !empty( $errors ) && isset( $errors['error'] ) ) ) {
+				$errorToThrow = isset( $errors['error'] ) ? implode( 'PHP_EOL', $errors['error'] ) : 'Upload failed.';
 				throw new \Exception( $errorToThrow );
 			}
 

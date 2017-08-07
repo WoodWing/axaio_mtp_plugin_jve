@@ -116,7 +116,7 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 			$this->setResult( 'FATAL', $msg , $help );
 			return;
 		}
-		LogHandler::Log('wwtest', 'INFO', 'Database connection established based on:<br/>'.$dbConfig );
+		LogHandler::Log('wwtest', 'INFO', "Database connection established based on:\r\n{$dbConfig}" );
 		
 		// Check DB engine version
 		$driverHelp = '';
