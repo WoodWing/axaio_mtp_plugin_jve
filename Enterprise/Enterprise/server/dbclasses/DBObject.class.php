@@ -30,10 +30,10 @@ class DBObject extends DBBase
 	 * Break of at the (63-6)st character. This leaves 1 for _ and 5 characters for an unique number =>
 	 * So it is assumed that there will not be more than 99999 objects starting with the same proposed name in any issue.
 	 *
-	 * @param array of int $issueidsarray: id's of the issues the object is targeted for.
-	 * @param string $objtype The type of the object.
+	 * @param int[] $issueidsarray: id's of the issues the object is targeted for.
+	 * @param string $objtype
 	 * @param string $proposedobjectname: proposed name of the new object.
-	 * @return string Either new objectname or null if no name found.
+	 * @return mixed string new objectname or null if no name found.
 	 * @deprecated since 10.0.4 Please use BizObject::getUniqueObjectName() instead.
 	 */
 	static public function getUniqueObjectName($issueidsarray, $objtype, $proposedobjectname)
@@ -1990,5 +1990,4 @@ class DBObject extends DBBase
 
 		return $result;
 	}
-
 }
