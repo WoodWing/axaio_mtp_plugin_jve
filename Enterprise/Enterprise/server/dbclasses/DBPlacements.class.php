@@ -93,7 +93,7 @@ class DBPlacements extends DBBase
 
 		return $placementId;
 	}
-	
+
 	/**
 	 * Copies placements for specified parent/child object
 	 *
@@ -104,10 +104,9 @@ class DBPlacements extends DBBase
 	 * @param string $type       Placed or Planned
 	 * @return boolean Whether or not insertion was successfull.
 	 */
-	static public function copyPlacements( $fromparent, $child, $toparent, $pageOffset = 0, $type = 'Placed' )
+	static public function copyPlacements( $fromparent, $child, $toparent,
+											/** @noinspection PhpUnusedParameterInspection */ $pageOffset = 0, $type = 'Placed' )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$pageOffset = $pageOffset; // To make analyzer happy.
 		$placements = self::getPlacements( $fromparent, $child, $type );
 		if( is_null($placements) ) {
 			return false; // DB error
@@ -300,7 +299,7 @@ class DBPlacements extends DBBase
 	 * @static
 	 * @param int $parentId
 	 * @param int $childId
-	 * @return Array an array of rows.
+	 * @return array placement rows.
 	 */
 	static public function getPlacementsWithPageOrientation( $parentId, $childId )
 	{
@@ -314,15 +313,16 @@ class DBPlacements extends DBBase
 		$sql .= "FROM $placementsTable pl, $pageTable pa ";
 		$sql .= "WHERE ";
 		$sql .= " pl.`type` = 'Placed' ";
-		$sql .= " AND pl.`child` = $childId ";
-		$sql .= " AND pl.`parent` = $parentId ";
+		$sql .= " AND pl.`child` = ? ";
+		$sql .= " AND pl.`parent` = ? ";
 		$sql .= " AND (pa.`edition` = pl.`edition` OR pl.`edition` = 0 ) ";
 		$sql .= " AND pa.`pagesequence` = pl.`pagesequence` ";
 		$sql .= " AND pa.`objid` = pl.`parent` ";
 		$sql .= " AND pl.`frameorder` = 0 ";
 		$sql .= "ORDER BY pl.`edition` ASC ";
+		$params = array( intval( $childId ), intval( $parentId ) );
 
-		$sth = $dbDriver->query( $sql );
+		$sth = $dbDriver->query( $sql, $params );
 		$rows = self::fetchResults( $sth );
 		return $rows;
 	}
@@ -358,18 +358,17 @@ class DBPlacements extends DBBase
                 "LEFT JOIN $dbte teb on (tab.`id` = teb.`targetid`) " .
                 "INNER JOIN $dbor ora on (ora.`parent` = pla.`parent` and ora.`child` = pla.`child` and ora.`type` = 'Placed') " .
                 "INNER JOIN $dbor orb on (orb.`parent` = plb.`parent` and orb.`child` = plb.`child` and orb.`type` = 'Placed') " .
-                "WHERE pla.`child` = $childId " .
-                "AND pla.`parent` = $parentId " .
+                "WHERE pla.`child` = ? " .
+                "AND pla.`parent` = ? " .
                 "AND pla.`id` <> plb.`id` " . 
                 "AND ( " .
                 "	 (pla.`edition` = plb.`edition` AND pla.`edition` <> 0 AND plb.`edition` <>0) OR " .
                 "     (tea.`editionid` = plb.`edition` AND pla.`edition` = 0 AND plb.`edition` <> 0) OR " .
                 "     (teb.`editionid` = pla.`edition` AND pla.`edition` <> 0 AND plb.`edition` = 0) OR " .
                 "     (teb.`editionid` = tea.`editionid` AND pla.`edition` = 0 AND plb.`edition` = 0) " .
-                "     ) ";       		
-		
-		
-		$sth = $dbdriver->query($sql);
+                "     ) ";
+		$params = array( intval( $childId ), intval( $parentId ) );
+		$sth = $dbdriver->query($sql, $params );
 		
 		while (($row = $dbdriver->fetch($sth))) {
 			$result[] = $row;
@@ -394,11 +393,13 @@ class DBPlacements extends DBBase
 		
 		$sql = "SELECT pla.*, edi.`name` FROM $db pla ";
 		$sql .= "LEFT JOIN $editionstable edi ON (pla.`edition` = edi.`id`) ";
-		$sql .= "WHERE `child`=$child AND `parent`=$parent";
-		
+		$sql .= "WHERE `child`= ? AND `parent`= ? ";
+		$params = array( intval( $child ), intval( $parent ) );
+
 		// Never return relations that are marked as 'deleted'.
 		if ($type) {
-			$sql .= " AND `type` = '$type'";
+			$sql .= " AND `type` = ? ";
+			$params[] = strval( $type );
 		} else {
 			$sql .= " AND `type` NOT LIKE 'Deleted%'";
 		}
@@ -407,7 +408,7 @@ class DBPlacements extends DBBase
 		// the placements are removed and re-created, the 'id' field can be used.
 		$sql .= ' ORDER BY pla.`id` ASC';
 
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query( $sql, $params );
 		if( !$sth ) {
 			return null; // DB error
 		}
@@ -459,24 +460,26 @@ class DBPlacements extends DBBase
 		$dbp = $dbDriver->tablename(self::TABLENAME);
 		$sql =
 			"SELECT * FROM $dbp a "
-			."WHERE a.`child` = $child AND a.`parent` = $parent AND a.`type` = 'Placed'  "
+			."WHERE a.`child` = ? AND a.`parent` = ? AND a.`type` = 'Placed'  "
 			."AND a.`frameorder` = ( "
 			."	SELECT MIN(b.`frameorder`) "               // Find the *first* frame...
 			."	FROM $dbp b "
-			."	WHERE b.`child` = $child AND b.`parent` = $parent AND b.`type` = 'Placed' "
+			."	WHERE b.`child` = ? AND b.`parent` = ? AND b.`type` = 'Placed' "
 			."	AND b.`width` > 0 AND b.`height` > 0 "     // ...that is placed on a page...
 			."	AND a.`elementid` = b.`elementid` ) "      // ...and belongs to the same story.
-			."	OR ( a.`child` = $child AND a.`parent` = $parent AND a.`type` = 'Placed' "
+			."	OR ( a.`child` = ? AND a.`parent` = ? AND a.`type` = 'Placed' "
 			."  	AND a.`frameorder` = 0 "               // But when all frames are on pasteboard...
 			."		AND a.`height` = 0 AND a.`width` = 0 " // ...take the first frame...
 			."		AND NOT EXISTS ( "                     // ...when *none* of that story are placed on the page!
 			."			SELECT * "
 			."			FROM $dbp c "
-			."			WHERE c.`child` = $child AND c.`parent` = $parent AND c.`type` = 'Placed' "
+			."			WHERE c.`child` = ? AND c.`parent` = ? AND c.`type` = 'Placed' "
 			."			AND c.`width` > 0 AND c.`height` > 0 "
 			."			AND a.`elementid` = c.`elementid`) ) ";
+		$params = array( intval( $child ), intval( $parent ), intval( $child ), intval( $parent ),
+								intval( $child ), intval( $parent ), intval( $child ), intval( $parent ) );
 
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query( $sql, $params );
 		if( !$sth ) {
 			return null; // DB error
 		} 
@@ -529,19 +532,22 @@ class DBPlacements extends DBBase
 			. "LEFT JOIN $editionstable edi ON (pla.`edition` = edi.`id`) "
 			. "LEFT JOIN $tilestable tiles ON (pla.`id` = tiles.`placementid` ) ";
 		$where = '';
+		$params = array();
 		if( $parentId && $childId ) {
 			$where .= '(';
 			if( is_array( $parentId ) ) {
 				$idsCsv = implode( ',', $parentId );
 				$where .= "pla.`parent` IN ($idsCsv) ";
 			} else {
-				$where .= "pla.`parent` = $parentId ";
+				$where .= "pla.`parent` = ? ";
+				$params[] = intval( $parentId );
 			}			
 			if( is_array( $childId ) ) {
 				$idsCsv = implode( ',', $childId );
 				$where .= "OR pla.`child` IN ($idsCsv) ";
 			} else {
-				$where .= "OR pla.`child` = $childId ";
+				$where .= "OR pla.`child` = ? ";
+				$params[] = intval( $childId );
 			}
 			$where .= ')';
 		} elseif( $parentId ) {
@@ -549,21 +555,24 @@ class DBPlacements extends DBBase
 				$idsCsv = implode( ',', $parentId );
 				$where .= "pla.`parent` IN ($idsCsv) ";
 			} else {
-				$where .= "pla.`parent` = $parentId ";
-			}			
+				$where .= "pla.`parent` = ? ";
+				$params[] = intval( $parentId );
+			}
 		} elseif( $childId ) {
 			if( is_array( $childId ) ) {
 				$idsCsv = implode( ',', $childId );
 				$where .= "pla.`child` IN ($idsCsv) ";
 			} else {
-				$where .= "pla.`child` = $childId ";
+				$where .= "pla.`child` = ? ";
+				$params[] = intval( $childId );
 			}
 		}
 		if ($where != ''){
 			$where .= ' AND';
 		}
 		if ($type != ''){
-			$where .= " pla.`type`='".$dbDriver->toDBString($type)."'";
+			$where .= " pla.`type`= ? ";
+			$params[] = strval( $type );
 		} elseif ( $deletedOnes) {
 			$where .= " pla.`type` LIKE 'Deleted%'";
 		} else{
@@ -575,7 +584,7 @@ class DBPlacements extends DBBase
 		// the placements are removed and re-created, the 'id' field can be used.
 		$orderBy = 'ORDER BY pla.`id` ASC';
 
-		$sth = $dbDriver->query( $sql.' WHERE '.$where.' '.$orderBy );
+		$sth = $dbDriver->query( $sql.' WHERE '.$where.' '.$orderBy, $params );
 		if( !$sth ) {
 			return null; // DB error
 		} 

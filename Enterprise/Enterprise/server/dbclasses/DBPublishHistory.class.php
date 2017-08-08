@@ -140,93 +140,97 @@ class DBPublishHistory extends DBBase
 // 		
 // 		return $obj;
 // 	}
-	
+
 	/**
 	 * Method returns complete history of publish actions of a dossier
 	 * for a certain target.
 	 *
-	 * @param int $objectid object id of the published dossier
+	 * @param int $dossierid object id of the published dossier
 	 * @param int $channelid the publish channel
 	 * @param int $issueid the issue of the publish channel
+	 * @param int $editionid the edition Id
 	 * @param boolean $lastRow indicator whether to get the last row history
 	 * @return array of rows. Each row is a histoy record, null if error
 	 */
 	public static function getPublishHistoryDossier( $dossierid, $channelid, $issueid, $editionid, $lastRow )
 	{
-        $dbDriver = DBDriverFactory::gen();
-        $publHistTable = $dbDriver->tablename(self::TABLENAME);
+		$dbDriver = DBDriverFactory::gen();
+		$publHistTable = $dbDriver->tablename( self::TABLENAME );
 
-        $sql  = "SELECT publHist.`id`, publHist.`publisheddate`, publHist.`actiondate`, ";
-        $sql .= "publHist.`action`, publHist.`user` ";
-        $sql .= "FROM $publHistTable publHist ";
-        $sql .= "WHERE publHist.`objectid` = $dossierid ";
-        $sql .= "AND publHist.`channelid` = $channelid ";
-	    if ($issueid) {
-			$sql .= "AND publHist.`issueid` = $issueid ";
+		$sql = "SELECT publHist.`id`, publHist.`publisheddate`, publHist.`actiondate`, ";
+		$sql .= "publHist.`action`, publHist.`user` ";
+		$sql .= "FROM $publHistTable publHist ";
+		$sql .= "WHERE publHist.`objectid` = ? ";
+		$sql .= "AND publHist.`channelid` = ? ";
+		$params = array( intval( $dossierid ), intval( $channelid ) );
+		if( $issueid ) {
+			$sql .= "AND publHist.`issueid` = ? ";
+			$params[] = intval( $issueid );
 		}
-	    if ($editionid) {
-			$sql .= "AND publHist.`editionid` = $editionid ";
+		if( $editionid ) {
+			$sql .= "AND publHist.`editionid` = ? ";
+			$params[] = intval( $editionid );
 		}
 		$sql .= "ORDER BY `actiondate` DESC";
 		if( $lastRow ) {
 			$sql = $dbDriver->limitquery( $sql, 0, 1 );
 		}
-    	$sth = $dbDriver->query($sql);        
+		$sth = $dbDriver->query( $sql, $params );
 
-       	if (is_null($sth)) {
-            $err = trim( $dbDriver->error() );
-            self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
-            return null;
-        }
+		if( is_null( $sth ) ) {
+			$err = trim( $dbDriver->error() );
+			self::setError( empty( $err ) ? BizResources::localize( 'ERR_DATABASE' ) : $err );
+			return null;
+		}
 
 		$rows = array();
-		while( ($row = $dbDriver->fetch($sth)) ) {
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
 			$rows[] = $row;
 		}
-		
-		return $rows;	    
+
+		return $rows;
 	}
 
 	/**
 	 * Returns the latest publish history information of an object contained by
-	 * a published dossier. 
+	 * a published dossier.
 	 *
-	 * @param integer $objectRel Relation id dossier (parent) and contained object (child). 
+	 * @param integer $objectRel Relation id dossier (parent) and contained object (child).
 	 * @param integer $channelId Publication channel
 	 * @param integer $issueId Published issue
-	 * @param integer $editionId A specific published edition (device in case of Adobe DBS channel). 
-	 * @return PubPublishTarget|null 
+	 * @param integer $editionId A specific published edition (device in case of Adobe DBS channel).
+	 * @return PubPublishTarget|null
 	 */
 	public static function resolvePubHistoryForObjRelation( $objectRel, $channelId, $issueId = 0, $editionId = 0 )
 	{
-        $dbDriver = DBDriverFactory::gen();
-        $publHistTable = $dbDriver->tablename(self::TABLENAME);		
-        $publObjHistTable = $dbDriver->tablename('publishedobjectshist');		
-		$objectRelations = $dbDriver->tablename('objectrelations');
-	
-		$sql  = "SELECT pbhist.`publisheddate`, pbobjhist.`majorversion`, pbobjhist.`minorversion`, pbobjhist.`externalid`, pbhist.`actiondate` ";
+		$dbDriver = DBDriverFactory::gen();
+		$publHistTable = $dbDriver->tablename( self::TABLENAME );
+		$publObjHistTable = $dbDriver->tablename( 'publishedobjectshist' );
+		$objectRelations = $dbDriver->tablename( 'objectrelations' );
+
+		$sql = "SELECT pbhist.`publisheddate`, pbobjhist.`majorversion`, pbobjhist.`minorversion`, pbobjhist.`externalid`, pbhist.`actiondate` ";
 		$sql .= "FROM $objectRelations objr ";
 		$sql .= "INNER JOIN $publHistTable pbhist ON (pbhist.`objectid` = objr.`parent` ) ";
 		$sql .= "INNER JOIN $publObjHistTable pbobjhist ON (pbobjhist.`publishid` = pbhist.`id`) ";
 		$sql .= "WHERE objr.`id` = ? AND objr.`child` = pbobjhist.`objectid` ";
 		$sql .= "AND pbhist.`channelid` = ? ";
 		$params = array( $objectRel, $channelId );
-		if ( $issueId > 0 ) {
+		if( $issueId > 0 ) {
 			$sql .= "AND pbhist.`issueid`= ? ";
 			$params[] = $issueId;
 		}
-		if ( $editionId > 0 ) {
+		if( $editionId > 0 ) {
 			$sql .= "AND pbhist.`editionid`= ? ";
 			$params[] = $editionId;
 		}
 		$sql .= "ORDER BY pbhist.`actiondate` DESC ";
-		$sql = $dbDriver->limitquery($sql, 0, 1);
-		
+		$sql = $dbDriver->limitquery( $sql, 0, 1 );
+
 		$result = null;
-		$sth = $dbDriver->query($sql, $params);
-		if ( $sth ) {
+		$sth = $dbDriver->query( $sql, $params );
+		if( $sth ) {
 			$row = $dbDriver->fetch( $sth );
-			if ( $row ) {
+			if( $row ) {
 				require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php';
 				$result = new PubPublishTarget();
 				$result->PubChannelID = $channelId;
@@ -237,7 +241,7 @@ class DBPublishHistory extends DBBase
 				$result->Version = DBVersion::joinMajorMinorVersion( $row );
 			}
 		}
-		
+
 		return $result;
 	}
 
@@ -247,47 +251,48 @@ class DBPublishHistory extends DBBase
 	 * is either publishDossier or updateDossier. Next to that we expect that the externalid
 	 * is filled when the update/publish action was successful.
 	 *
-	 * @param int $objectid object id of the published dossier
+	 * @param int $dossierid object id of the published dossier
 	 * @param int $channelid the publish channel
 	 * @param int $issueid the issue of the publish channel
-	 * @return array of rows. Each row is a histoy record, null if error
+	 * @return bool True if dossier is published else false.
 	 */
 	public static function isDossierWithinIssuePublished( $dossierid, $channelid, $issueid )
 	{
-        $dbDriver = DBDriverFactory::gen();
-        $publHistTable = $dbDriver->tablename(self::TABLENAME);		
+		$dbDriver = DBDriverFactory::gen();
+		$publHistTable = $dbDriver->tablename( self::TABLENAME );
 
-        $sql  = "SELECT publHist.`editionid`, publHist.`action`, publHist.`externalid` ";
-        $sql .= "FROM $publHistTable publHist ";
-        $sql .= "WHERE publHist.`objectid` = $dossierid ";
-        $sql .= "AND publHist.`channelid` = $channelid ";
-		$sql .= "AND publHist.`issueid` = $issueid ";
+		$sql = "SELECT publHist.`editionid`, publHist.`action`, publHist.`externalid` ";
+		$sql .= "FROM $publHistTable publHist ";
+		$sql .= "WHERE publHist.`objectid` = ? ";
+		$sql .= "AND publHist.`channelid` = ? ";
+		$sql .= "AND publHist.`issueid` = ? ";
 		$sql .= "ORDER BY `editionid` ASC, `actiondate` DESC ";
-		
-    	$sth = $dbDriver->query($sql);        
+		$params = array( intval( $dossierid ), intval( $channelid ), intval( $issueid ) );
 
-       	if (is_null($sth)) {
-            $err = trim( $dbDriver->error() );
-            self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
-            return null;
-        }
+		$sth = $dbDriver->query( $sql, $params );
+
+		if( is_null( $sth ) ) {
+			$err = trim( $dbDriver->error() );
+			self::setError( empty( $err ) ? BizResources::localize( 'ERR_DATABASE' ) : $err );
+			return null;
+		}
 
 		$holdEdition = -1;
 		$dossierIsPublished = false;
-		while( ($row = $dbDriver->fetch($sth)) ) {
-			if ( $row['editionid'] === $holdEdition) { // First one is checked, rest is of no interest.
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+			if( $row['editionid'] === $holdEdition ) { // First one is checked, rest is of no interest.
 				continue;
 			} else { //Edition switch, Only check the last action (last action comes first as sorting is
-					 // on `actiondate` DESC ).
+				// on `actiondate` DESC ).
 				$holdEdition = $row['editionid'];
-				if ( ($row['action'] === 'publishDossier' || $row['action'] === 'updateDossier') 
-					&& !empty( $row['externalid']) ) {
+				if( ( $row['action'] === 'publishDossier' || $row['action'] === 'updateDossier' )
+					&& !empty( $row['externalid'] ) ) {
 					$dossierIsPublished = true;
 					break;
 				}
 			}
 		}
-		
+
 		return $dossierIsPublished;
 	}
 
@@ -297,17 +302,17 @@ class DBPublishHistory extends DBBase
 	 * Published means that for one of the channels/issues/editions of the issue the last publish action
 	 * is either publishDossier or updateDossier. Next to that we expect that the externalid
 	 * is filled when the update/publish action was successful.
-	 * 
+	 *
 	 * Example:
 	 * Suppose the next history records are in th database:
 	 * (format of actiondate is actually different but this is just an example)
-	 * channel	issue	edition	actiondate
-	 *   1		  1		  2		24 Sept		=> Check action	
-	 *   1		  1		  2		23 Sept		=> Skip
-	 * 	 1		  1		  3		22 Sept		=> Check action
-	 *   1		  1		  3		21 Sept		=> Skip
-	 *   2		  3		  4		19 Sept		=> Check action
-	 *   2		  3		  4		18 Sept		=> Skip
+	 * channel   issue   edition   actiondate
+	 *   1        1        2      24 Sept      => Check action
+	 *   1        1        2      23 Sept      => Skip
+	 *   1        1        3      22 Sept      => Check action
+	 *   1        1        3      21 Sept      => Skip
+	 *   2        3        4      19 Sept      => Check action
+	 *   2        3        4      18 Sept      => Skip
 	 *
 	 * @param int $dossierId object id of the published dossier
 	 * @param int $channelId the publish channel
@@ -317,51 +322,55 @@ class DBPublishHistory extends DBBase
 	 */
 	public static function isDossierPublished( $dossierId, $channelId, $issueId, $editionId )
 	{
-        $dbDriver = DBDriverFactory::gen();
-        $publHistTable = $dbDriver->tablename(self::TABLENAME);		
+		$dbDriver = DBDriverFactory::gen();
+		$publHistTable = $dbDriver->tablename( self::TABLENAME );
 
-		if ( $issueId && !$channelId ) {
+		if( $issueId && !$channelId ) {
 			require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-			$channelId = DBIssue::getChannelId( $issueId );			
-		}  
+			$channelId = DBIssue::getChannelId( $issueId );
+		}
 
-        $select  = "SELECT publHist.`action`, publHist.`externalid`, publHist.`channelid`, publHist.`issueid`, publHist.`editionid` ";
-        $from = "FROM $publHistTable publHist ";
-        $where = "WHERE publHist.`objectid` = $dossierId ";
+		$select = "SELECT publHist.`action`, publHist.`externalid`, publHist.`channelid`, publHist.`issueid`, publHist.`editionid` ";
+		$from = "FROM $publHistTable publHist ";
+		$where = "WHERE publHist.`objectid` = ? ";
 		$orderBy = "ORDER BY `channelid` ASC, `issueid` ASC, `editionid` ASC, `actiondate` DESC ";
+		$params = array( intval( $dossierId ) );
 
 		$holdKeys = array();
 		// Based on the passed parameters the where and order by clause are composed.
 		// If a column is added to the where clause then it is removed from the order by
 		// (as it is the same for all records).
-		if ( $channelId ) {
-			$where .= "AND publHist.`channelid` = $channelId ";
+		if( $channelId ) {
+			$where .= "AND publHist.`channelid` = ? ";
+			$params[] = intval( $channelId );
 		} else {
 			$holdKeys['channelid'] = '-1';
 		}
-		if ( $issueId ) {
-			$where .= "AND publHist.`issueid` = $issueId ";
+		if( $issueId ) {
+			$where .= "AND publHist.`issueid` = ? ";
+			$params[] = intval( $issueId );
 		} else {
 			$holdKeys['issueid'] = '-1';
 		}
-		if ( $editionId ) {
-			$where .= "AND publHist.`editionid` = $editionId ";
+		if( $editionId ) {
+			$where .= "AND publHist.`editionid` = ? ";
+			$params[] = intval( $editionId );
 		} else {
 			$holdKeys['editionid'] = '-1';
 		}
-		
-        $sql  = $select;
-        $sql .= $from;
-        $sql .= $where; 
-		$sql .= $orderBy; 
-		
-    	$sth = $dbDriver->query($sql);        
 
-       	if (is_null($sth)) {
-            $err = trim( $dbDriver->error() );
-            self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
-            return null;
-        }
+		$sql = $select;
+		$sql .= $from;
+		$sql .= $where;
+		$sql .= $orderBy;
+
+		$sth = $dbDriver->query( $sql, $params );
+
+		if( is_null( $sth ) ) {
+			$err = trim( $dbDriver->error() );
+			self::setError( empty( $err ) ? BizResources::localize( 'ERR_DATABASE' ) : $err );
+			return null;
+		}
 
 		/*
 		 * At this moment only three actions are possible:
@@ -371,25 +380,25 @@ class DBPublishHistory extends DBBase
 		 * So if the last action is not publish- or updateDossier it must have been 'unpublish'.  
 		 */
 		$dossierIsPublished = false;
-		if ( !$holdKeys ) { // Fully specified search, channel/issue/edtion
-			$row = $dbDriver->fetch($sth);
-				if ( ($row['action'] === 'publishDossier' || $row['action'] === 'updateDossier') 
-					&& !empty( $row['externalid']) ) {
-					$dossierIsPublished = true;
-				}
+		if( !$holdKeys ) { // Fully specified search, channel/issue/edtion
+			$row = $dbDriver->fetch( $sth );
+			if( ( $row['action'] === 'publishDossier' || $row['action'] === 'updateDossier' )
+				&& !empty( $row['externalid'] ) ) {
+				$dossierIsPublished = true;
+			}
 		} else {
-			while( ($row = $dbDriver->fetch($sth)) ) {
-				if ( self::holdKeysAreChanged( $row, $holdKeys )) { // Switch from one set to another set. 
-					$holdKeys = self::setHoldKeys($row, $holdKeys);
-					if ( ($row['action'] === 'publishDossier' || $row['action'] === 'updateDossier')
-						&& !empty( $row['externalid']) ) {
+			while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+				if( self::holdKeysAreChanged( $row, $holdKeys ) ) { // Switch from one set to another set.
+					$holdKeys = self::setHoldKeys( $row, $holdKeys );
+					if( ( $row['action'] === 'publishDossier' || $row['action'] === 'updateDossier' )
+						&& !empty( $row['externalid'] ) ) {
 						$dossierIsPublished = true;
 						break;
 					}
 				}
 			}
 		}
-		
+
 		return $dossierIsPublished;
 	}
 
@@ -417,42 +426,43 @@ class DBPublishHistory extends DBBase
 		$newHoldKeys = array_intersect_key($row, $holdKeys); 
 		
 		return $newHoldKeys;
-	}	
+	}
 
 	/**
-	 * Returns the latest publish history information of an object (plublished dossier). 
-	 * @param integer $objectRel Object id (dossier). 
+	 * Returns the latest publish history information of an object (plublished dossier).
+	 *
+	 * @param integer $objectId Object id (dossier).
 	 * @param integer $channelId Publication channel
 	 * @param integer $issueId Published issue
-	 * @param integer $editionId A specific published edition (device in case of Adobe DBS channel). 
-	 * @return type 
+	 * @param integer $editionId A specific published edition (device in case of Adobe DBS channel).
+	 * @return PubPublishTarget|bool The latest publish history or false in case of an database error.
 	 */
-	public static function resolvePubHistoryForObj($objectId, $channelId, $issueId = 0, $editionId = 0 )
+	public static function resolvePubHistoryForObj( $objectId, $channelId, $issueId = 0, $editionId = 0 )
 	{
-        $dbDriver = DBDriverFactory::gen();
-        $publHistTable = $dbDriver->tablename(self::TABLENAME);		
-	
-		$sql  = "SELECT pbhist.`publisheddate`, pbhist.`actiondate` ";
+		$dbDriver = DBDriverFactory::gen();
+		$publHistTable = $dbDriver->tablename( self::TABLENAME );
+
+		$sql = "SELECT pbhist.`publisheddate`, pbhist.`actiondate` ";
 		$sql .= "FROM $publHistTable pbhist  ";
 		$sql .= "WHERE pbhist.`objectid` = ? ";
 		$sql .= "AND pbhist.`channelid` = ? ";
-		$params = array($objectId, $channelId);
-		if ( $issueId > 0 ) {
+		$params = array( $objectId, $channelId );
+		if( $issueId > 0 ) {
 			$sql .= "AND pbhist.`issueid`= ? ";
 			$params[] = $issueId;
 		}
-		if ( $editionId > 0 ) {
+		if( $editionId > 0 ) {
 			$sql .= "AND pbhist.`editionid`= ? ";
 			$params[] = $editionId;
 		}
 		$sql .= "ORDER BY pbhist.`actiondate` DESC ";
-		$sql = $dbDriver->limitquery($sql, 0, 1);
-		
+		$sql = $dbDriver->limitquery( $sql, 0, 1 );
+
 		$result = false;
-		$sth = $dbDriver->query($sql, $params);
-		if ( $sth ) {
+		$sth = $dbDriver->query( $sql, $params );
+		if( $sth ) {
 			$row = $dbDriver->fetch( $sth );
-			if ( $row ) {
+			if( $row ) {
 				require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php';
 				$result = new PubPublishTarget();
 				$result->PubChannelID = $channelId;
@@ -461,7 +471,7 @@ class DBPublishHistory extends DBBase
 				$result->PublishedDate = $row['publisheddate'];
 			}
 		}
-		
+
 		return $result;
 	}
 
@@ -527,5 +537,3 @@ class DBPublishHistory extends DBBase
 // 		return $row ? self::rowToObj( $row ) : null;
 // 	}
 }
-
-?>
