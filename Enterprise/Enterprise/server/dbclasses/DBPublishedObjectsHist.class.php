@@ -13,7 +13,7 @@ require_once BASEDIR . "/server/dbclasses/DBBase.class.php";
 class DBPublishedObjectsHist extends DBBase
 {
 	const TABLENAME = 'publishedobjectshist';
-	
+
 	/**
 	 * This method adds a history record for an object contained in a dossier
 	 * each time a publish action is done on that dossier.
@@ -65,7 +65,7 @@ class DBPublishedObjectsHist extends DBBase
 				."FROM (SELECT * FROM {$objHistTable} WHERE publishid = ?) poh "
 				."LEFT JOIN {$objVersTable} ov "
 				."ON (ov.`objid` = poh.`objectid` AND ov.`majorversion` = poh.`majorversion` AND ov.`minorversion` = poh.`minorversion`) ";
-		$params = array( $publishId );
+		$params = array( intval( $publishId ) );
 
 		$sth = $dbDriver->query( $sql, $params );
 		if (is_null($sth)) {
