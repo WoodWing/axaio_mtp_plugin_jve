@@ -369,7 +369,7 @@ class DBPublishHistory extends DBBase
 		$sql .= $where;
 		$sql .= $orderBy;
 
-    	$sth = $dbDriver->query($sql);        
+    	$sth = $dbDriver->query($sql, $params );
 
 		if( is_null($sth) ) {
 			$err = trim( $dbDriver->error() );
