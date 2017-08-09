@@ -14,6 +14,8 @@ class ReadWriteFieldHandler
 	protected $property;
 	/** @var bool $customProperty */
 	protected $customProperty = false;
+	/** @var int brand Id */
+	protected $brandId = 0;
 
 	/**
 	 * @param string $lvsFieldName Elvis metadata field name
@@ -21,7 +23,7 @@ class ReadWriteFieldHandler
 	 * @param string $dataType String representation of the Elvis field's data type.
 	 * @param string $entPropertyName Enterprise metadata property name.
 	 */
-	public function __construct( $lvsFieldName, $multiValue, $dataType, $entPropertyName )
+	public function __construct( $lvsFieldName, $multiValue, $dataType, $entPropertyName,  $brandId = 0 )
 	{
 		$this->lvsFieldName = $lvsFieldName;
 		$this->multiValue = $multiValue;
@@ -34,10 +36,11 @@ class ReadWriteFieldHandler
 			$entPropertyName = strtoupper( $entPropertyName );
 
 			// TODO: Jikes, this causes a lot of DB calls!
-			$propType = BizProperty::getCustomPropertyType( $entPropertyName );
-
-			$this->property = new PropertyInfo( $entPropertyName, null, $this->entMetadataCategory, $propType );
-		} else {
+			$propType = BizProperty::getCustomPropertyType( $entPropertyName, $brandId );
+			
+			$this->property = new PropertyInfo($entPropertyName, null, $this->entMetadataCategory, $propType);
+		}
+		else {
 			$metadataPaths = BizProperty::getMetaDataPaths();
 			if (array_key_exists($entPropertyName,$metadataPaths)) {
 				$metadataPath = $metadataPaths[ $entPropertyName ];
@@ -123,6 +126,7 @@ class ReadWriteFieldHandler
 	 *
 	 * @param MetaDataValue $metaDataValue Metadata value structure of which the first value needs to be retrieved
 	 * @return string
+	 * @return mixed The metadata value
 	 */
 	private function getFirstMetaDataValue( $metaDataValue )
 	{
@@ -200,8 +204,8 @@ class ReadWriteFieldHandler
 	/**
 	 * Converts the Elvis value to Enterprise value
 	 *
-	 * @param ElvisEntHit $elvisValue
-	 * @return mixed requested by Enterprise
+	 * @param mixed $elvisValue
+	 * @return mixed Datatype requested by Enterprise
 	 * @throws BizException
 	 */
 	protected function getEnterpriseMetadataValue( $elvisValue )
@@ -253,5 +257,17 @@ class ReadWriteFieldHandler
 			return strtolower( $value ) == "true" || $value == "1" || strtolower( $value ) == "yes";
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the Id of the brand for which the mapping is applicable.
+	 *
+	 * If the mapping is applicable for all brands the Id = 0.
+	 *
+	 * @return int Brand Id
+	 */
+	public function mappedToBrand(  )
+	{
+		return $this->brandId;
 	}
 }

@@ -21,9 +21,34 @@ class MetadataHandler
 		$meta = $this->prepareMetadataObject( $smartObject );
 
 		$this->_initFieldHandlers();
-		foreach( $this->fieldHandlers as $fieldHandler ) {
-			$fieldHandler->read( $meta, $elvisMetadata );
+		foreach($this->fieldHandlers as $fieldHandler) {
+			if( $this->fieldsCanBeMapped( $smartObject->MetaData->BasicMetaData, $fieldHandler ) ) {
+				$fieldHandler->read($meta, $elvisMetadata);
+			}
 		}
+	}
+
+	/**
+	 * Checks if there is a mapping between an Elvis property and Enterprise.
+	 *
+	 * Fields can be mapped on an overall level (all brands) or just for one brand.
+	 * If no publication (brand) is specified the mapping holds for all publications (brands). If a specific brand
+	 * is specified then the brand must be the same as the one already set on the Enterprise metadata.
+	 *
+	 * @param BasicMetaData $basicMetaData
+	 * @param ReadWriteFieldHandler $fieldHandler
+	 * @return bool
+	 */
+	private function fieldsCanBeMapped( BasicMetaData $basicMetaData, ReadWriteFieldHandler $fieldHandler  )
+	{
+		$result = false;
+		if( empty( $fieldHandler->mappedToBrand() )  ) {
+			$result = true;
+		} elseif( ( intval($fieldHandler->mappedToBrand() ) == intval( $basicMetaData->Publication->Id ) ) ) {
+			$result = true;
+		}
+
+		return $result;
 	}
 
 	/**
@@ -56,8 +81,13 @@ class MetadataHandler
 	 * Creates Elvis metadata from Enterprise metadata
 	 * Provided metadata from Enterprise is translated to Elvis
 	 *
+<<<<<<< HEAD
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues
 	 * @param mixed[] $elvisMetadata
+=======
+	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Either full Metadata or a list of changed Metadata values
+	 * @param $elvisMetadata
+>>>>>>> release/10.0.x
 	 */
 	public function fillElvisMetadata( $entMetadataOrValues, &$elvisMetadata )
 	{
@@ -96,7 +126,6 @@ class MetadataHandler
 
 		require_once dirname( __FILE__ ).'/../util/ElvisSessionUtil.php';
 		// Determine the Elvis fields the user is allowed to edit.
-		$possibleAddFields = array();
 		$editableFields = ElvisSessionUtil::getEditableFields();
 		if( $editableFields == null ) { // lazy loading; if not in our session cache, get it from Elvis
 			require_once dirname( __FILE__ ).'/../logic/ElvisRESTClient.php';
@@ -123,7 +152,11 @@ class MetadataHandler
 	 * Updates Elvis metadata for multiple assets.
 	 *
 	 * @param string[] $elvisIds Ids of assets
+<<<<<<< HEAD
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Changed metadata
+=======
+	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Either full Metadata or a list of changed Metadata values
+>>>>>>> release/10.0.x
 	 */
 	public function updateBulk( $elvisIds, $entMetadataOrValues )
 	{
@@ -231,7 +264,11 @@ class MetadataHandler
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Get fields mapped from Enterprise to Elvis and populate $this->metadataToUpdate
+=======
+	 * Get fields mapped from Enterprise to Elvis
+>>>>>>> release/10.0.x
 	 */
 	public function getMetadataToUpdate()
 	{
