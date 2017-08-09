@@ -570,7 +570,7 @@ abstract class TestCase implements TestModule
 	 */	
 	public function assertNotEquals( $expected, $actual, $message = '' )
 	{
-		if( $expected != $actual ) {
+		if( $expected == $actual ) { // this check was fixed in EN-89534
 			if( !$message ) {
 				$message = "The expected value $expected equals the actual value $actual, which is unexpected.";
 			}

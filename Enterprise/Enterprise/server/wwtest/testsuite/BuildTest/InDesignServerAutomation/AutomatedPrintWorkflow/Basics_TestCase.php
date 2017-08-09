@@ -505,7 +505,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 		
 		// Validate the response and grab the dossier object.
 		$this->assertInstanceOf( 'Relation', $response->Relations[0] );
-		$this->assertNotEquals( 'Contained', $response->Relations[0]->Type );
+		$this->assertEquals( 'Contained', $response->Relations[0]->Type );
 
 		// Server does not guarantee order object relations, so we sort here.
 		$this->globalUtils->sortObjectRelationsForCompare( $response->Relations );
