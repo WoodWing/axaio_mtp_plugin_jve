@@ -38,9 +38,8 @@ class ReadWriteFieldHandler
 			// TODO: Jikes, this causes a lot of DB calls!
 			$propType = BizProperty::getCustomPropertyType( $entPropertyName, $brandId );
 			
-			$this->property = new PropertyInfo($entPropertyName, null, $this->entMetadataCategory, $propType);
-		}
-		else {
+			$this->property = new PropertyInfo( $entPropertyName, null, $this->entMetadataCategory, $propType );
+		} else {
 			$metadataPaths = BizProperty::getMetaDataPaths();
 			if (array_key_exists($entPropertyName,$metadataPaths)) {
 				$metadataPath = $metadataPaths[ $entPropertyName ];
