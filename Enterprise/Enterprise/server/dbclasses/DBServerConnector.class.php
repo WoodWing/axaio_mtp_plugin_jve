@@ -16,9 +16,9 @@ class DBServerConnector extends DBBase
 	/**
 	 * Checks if the server connector object exists at DB and returns its id
 	 *
-	 *  @param ConnectorInfoData $conn Connector object (ConnectorInfoData) to be checked at DB.
-	 *  @return string Connector id. Zero when not found.
-	**/
+	 * @param ConnectorInfoData $conn Connector object (ConnectorInfoData) to be checked at DB.
+	 * @return string Connector id. Zero when not found.
+	 */
 	static public function getConnectorId( ConnectorInfoData $conn )
 	{
 		$fields = array( '`id`' );
