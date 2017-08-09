@@ -206,7 +206,7 @@ class StorageFactory
 		return FileStorage::objMap( $id );
 	}
 	
-	public static function gen( $storename, $id, $rendition, $format, $version, $page=null, $edition=null, $write=false )
+	public static function gen( $storename, $id, $rendition, $format, $version=null, $page=null, $edition=null, $write=false )
 	{
 		return new FileStorage( $storename, $id, $rendition, $format, $version, $page, $edition, $write );
 	}
@@ -224,7 +224,7 @@ class BaseFileStorage
 	private $fileUrl;	  // External file Url
 	private $errMsg; // error message, set when error occured, empty when fine
 
-	public function __construct( $id, $rendition, $format, $version, $page=null, $edition=null )
+	public function __construct( $id, $rendition, $format, $version=null, $page=null, $edition=null )
 	{
 		$this->clearError(); // init
 		$this->id = $id;
@@ -233,11 +233,11 @@ class BaseFileStorage
 		$this->version = $version;
 		$this->page = $page;
 		$this->edition = $edition;
-		
-		if( !$version && // Since Enterprise v6.0, version must be provided (except for geometry files)
-				$rendition != 'page' && // TODO: remove this check! -> requires BizPage adjustments
-				strpos( $rendition, 'geo-' ) !== 0 ) { 
-			throw new BizException( 'ERR_ARGUMENT', 'Server', 
+
+		// Since ES 6.0 a version must be provided for all renditions except 'page' and 'geo-' files.
+		// Since ES 10.2 the version is made mandatory for native files only to allow custom renditions.
+		if( !$version && $rendition == 'rendition' ) {
+			throw new BizException( 'ERR_ARGUMENT', 'Server',
 				'BaseFileStorage::__construct(): No version specified for ['.$id.'].' );
 		}
 	}
