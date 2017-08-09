@@ -81,13 +81,8 @@ class MetadataHandler
 	 * Creates Elvis metadata from Enterprise metadata
 	 * Provided metadata from Enterprise is translated to Elvis
 	 *
-<<<<<<< HEAD
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues
 	 * @param mixed[] $elvisMetadata
-=======
-	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Either full Metadata or a list of changed Metadata values
-	 * @param $elvisMetadata
->>>>>>> release/10.0.x
 	 */
 	public function fillElvisMetadata( $entMetadataOrValues, &$elvisMetadata )
 	{
@@ -152,11 +147,7 @@ class MetadataHandler
 	 * Updates Elvis metadata for multiple assets.
 	 *
 	 * @param string[] $elvisIds Ids of assets
-<<<<<<< HEAD
 	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Changed metadata
-=======
-	 * @param MetaData|MetaDataValue[] $entMetadataOrValues Either full Metadata or a list of changed Metadata values
->>>>>>> release/10.0.x
 	 */
 	public function updateBulk( $elvisIds, $entMetadataOrValues )
 	{
@@ -264,11 +255,7 @@ class MetadataHandler
 	}
 
 	/**
-<<<<<<< HEAD
 	 * Get fields mapped from Enterprise to Elvis and populate $this->metadataToUpdate
-=======
-	 * Get fields mapped from Enterprise to Elvis
->>>>>>> release/10.0.x
 	 */
 	public function getMetadataToUpdate()
 	{
