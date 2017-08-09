@@ -199,46 +199,97 @@ class BizStorage
 	}
 }
 
+/**
+ * Factory class that creates FileStorage objects.
+ */
 class StorageFactory
 {
+	/**
+	 * Determines the relative path to filestore where the object files resides.
+	 *
+	 * @param string $id Object DB id.
+	 * @param array $arr Not used.
+	 * @return string The folder path.
+	 */
 	public static function storename( $id, /** @noinspection PhpUnusedParameterInspection */ $arr )
 	{
 		return FileStorage::objMap( $id );
 	}
-	
+
+	/**
+	 * Create a helper class that manages reading/writing object files in the filestore.
+	 *
+	 * @param string $storename    Object store name (original name).
+	 * @param string $id           Object DB id.
+	 * @param string $rendition    File rendition (native, preview, thumb, etc).
+	 * @param string $format       File format (mime type).
+	 * @param string|null $version Object version in major.minor notation (used in name to keep versions separated).
+	 * @param string|null $page    The layout page number and rendition index. Typically used for thumb/preview/pdf per page.
+	 * @param string|null $edition The object edition DB id.
+	 * @param boolean $write       Indicates if caller is creating/updating new version.
+	 * @return FileStorage
+	 * @throws BizException
+	 */
 	public static function gen( $storename, $id, $rendition, $format, $version=null, $page=null, $edition=null, $write=false )
 	{
 		return new FileStorage( $storename, $id, $rendition, $format, $version, $page, $edition, $write );
 	}
 }
 
-class BaseFileStorage
+/**
+ * Helper class that manages reading/writing object files in the filestore.
+ */
+class FileStorage
 {
-	protected $id;      // object id
-	protected $rendition; // rendition
-	protected $format;    // mime-type / file format
-	protected $version;   // object version number
-	protected $page;      // pageorder + rendition index
-	protected $edition;   // edition id
-	private $filePath;    // Internal file path
-	private $fileUrl;	  // External file Url
-	private $errMsg; // error message, set when error occured, empty when fine
+	/** @var string $storename Object store name (original name). */
+	private $storename;
+	/** @var integer $id Object DB id. */
+	private $id;
+	/** @var string $rendition File rendition (native, preview, thumb, etc). */
+	private $rendition;
+	/** @var string $format File format (mime type). */
+	private $format;
+	/** @var string|null $version Object version in major.minor notation (used in name to keep versions separated). */
+	private $version;
+	/** @var null|string The layout page number and rendition index. Typically used for thumb/preview/pdf per page. */
+	private $page;
+	/** @var null|integer $edition The object edition DB id. */
+	private $edition;
+	/** @var string $errMsg Error message, set when error occured, empty when fine. */
+	private $errMsg;
+	/** @var string $filename The full path (including file name) of the object file that resides at file store. */
+	private $filename;
 
-	public function __construct( $id, $rendition, $format, $version=null, $page=null, $edition=null )
+	/**
+	 * FileStorage constructor.
+	 *
+	 * @param string $storename    Object store name (original name).
+	 * @param string $id           Object DB id.
+	 * @param string $rendition    File rendition (native, preview, thumb, etc).
+	 * @param string $format       File format (mime type).
+	 * @param string|null $version Object version in major.minor notation (used in name to keep versions separated).
+	 * @param string|null $page    The layout page number and rendition index. Typically used for thumb/preview/pdf per page.
+	 * @param string|null $edition The object edition DB id.
+	 * @param boolean $write       Indicates if caller is creating/updating new version.
+	 * @throws BizException
+	 */
+	public function __construct( $storename, $id, $rendition, $format, $version=null, $page=null, $edition=null, $write=false )
 	{
-		$this->clearError(); // init
+		$this->storename = $storename;
 		$this->id = $id;
 		$this->rendition = $rendition;
 		$this->format = $format;
 		$this->version = $version;
 		$this->page = $page;
 		$this->edition = $edition;
+		$this->clearError(); // init $this->errMsg
+		$this->filename = $this->fileMap( $storename, $id, $rendition, $format, $version, $page, $edition, $write );
 
 		// Since ES 6.0 a version must be provided for all renditions except 'page' and 'geo-' files.
 		// Since ES 10.2 the version is made mandatory for native files only to allow custom renditions.
 		if( !$version && $rendition == 'rendition' ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Server',
-				'BaseFileStorage::__construct(): No version specified for ['.$id.'].' );
+				__METHOD__.': No version specified for ['.$id.'].' );
 		}
 	}
 	
@@ -281,41 +332,6 @@ class BaseFileStorage
 	public function hasError()
 	{
 		return strlen($this->errMsg) > 0 ? true : false;
-	}
-
-	public function setFilePath( $filePath )
-	{
-		$this->filePath = $filePath;
-	}
-
-	public function getFilePath()
-	{
-		return $this->filePath;
-	}
-
-	public function setFileUrl( $fileUrl )
-	{
-		$this->fileUrl = $fileUrl;
-	}
-
-	public function getFileUrl()
-	{
-		return $this->fileUrl;		
-	}
-}
-
-// mapping from attachments to filesystem
-class FileStorage extends BaseFileStorage
-{
-	private $storename;
-	private $filename;
-
-	public function __construct( $storename, $id, $rendition, $format, $version, $page=null, $edition=null, $write=false )
-	{
-		parent::__construct( $id, $rendition, $format, $version, $page, $edition );
-		$this->storename = $storename;
-		$this->filename = $this->fileMap( $storename, $id, $rendition, $format, $version, $page, $edition, $write );
-		// In this situation it calls FileStorage::fileMap -or- RealFileStorage::fileMap!
 	}
 
 	public function getFilename()
@@ -617,9 +633,11 @@ class FileStorage extends BaseFileStorage
 	}
 	
 	/**
-	 * Determines the folder path (relative to file store) where the object file resides.
+	 * Determines the relative path to filestore where the object files resides.
+	 *
 	 * The file name itself is not given. Use {@link fileMap()} for that.
-	 * @param string $id Object id.
+	 *
+	 * @param string $id Object DB id.
 	 * @return string. The folder path.
 	 */
 	static public function objMap( $id )
@@ -641,17 +659,18 @@ class FileStorage extends BaseFileStorage
 
 	/**
 	 * Determines the full path (including file name) of the object file that resides at file store.
-	 * @param string $storename   Object store name (original name)
-	 * @param string $id          Object id
-	 * @param string $rendition   Rendition (native, preview, thumb, etc)
-	 * @param string $format      File format (mime type)
-	 * @param string $version     Object version (used in name to keep versions separated).
-	 * @param string $page        Optional. The layout page number. Typically used for thumb/preview/pdf per page.
-	 * @param string $edition     Optional. The object edition.
-	 * @param boolean $write        Optional. Indicates if caller is creating/updating new version.
-	 * @return string. The file path.
+	 *
+	 * @param string $storename    Object store name (original name)
+	 * @param string $id           Object id
+	 * @param string $rendition    Rendition (native, preview, thumb, etc)
+	 * @param string $format       File format (mime type)
+	 * @param string|null $version Object version (used in name to keep versions separated).
+	 * @param string|null $page    The layout page number. Typically used for thumb/preview/pdf per page.
+	 * @param string|null $edition The object edition.
+	 * @param boolean $write       Indicates if caller is creating/updating new version.
+	 * @return string The file path.
 	 */
-	protected function fileMap( $storename, $id, $rendition, $format, $version, $page=null, $edition=null, $write=false )
+	protected function fileMap( $storename, $id, $rendition, $format, $version=null, $page=null, $edition=null, $write=false )
 	{
 		// normally storename is filled
 		$objname = empty( $storename ) ? self::objMap( $id ) : $storename;
