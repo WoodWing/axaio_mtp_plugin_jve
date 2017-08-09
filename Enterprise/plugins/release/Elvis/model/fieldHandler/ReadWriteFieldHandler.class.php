@@ -3,18 +3,28 @@
 require_once BASEDIR . '/server/bizclasses/BizProperty.class.php';
 
 class ReadWriteFieldHandler {
-	public $lvsFieldName;				// String
-	protected $multiValue;				// Boolean
-	protected $dataType;				// String
-	protected $entMetadataCategory;		// String
-	protected $property;				// Enterprise PropertyInfo (Name, DisplayName, Type)
-	protected $customProperty = false;	// Boolean	
-	
-	public function __construct($lvsFieldName, $multiValue, $dataType, $entPropertyName) {
+
+	/** @var string $lvsFieldName */
+	public $lvsFieldName;
+	/** @var  bool $multiValue */
+	protected $multiValue;
+	/** @var  string $dataType */
+	protected $dataType;
+	/** @var string $entMetadataCategory  */
+	protected $entMetadataCategory;
+	/** @var  PropertyInfo $property */
+	protected $property;
+	/** @var bool $customProperty */
+	protected $customProperty = false;
+	/** @var int brand Id */
+	protected $brandId = 0;  //
+
+	public function __construct( $lvsFieldName, $multiValue, $dataType, $entPropertyName, $brandId = 0 ) {
 		$this->lvsFieldName = $lvsFieldName;
 		$this->multiValue = $multiValue;
 		$this->dataType = $dataType;
-		
+		$this->brandId = $brandId;
+
 		if (BizProperty::isCustomPropertyName($entPropertyName)) {
 			$this->entMetadataCategory = 'ExtraMetaData';
 			$this->customProperty = true;
@@ -26,7 +36,7 @@ class ReadWriteFieldHandler {
 			//$this->property = $customProps[strtoupper($entPropertyName)];
 			
 			// TODO: Jikes, this causes a lot of DB calls!
-			$propType = BizProperty::getCustomPropertyType($entPropertyName);
+			$propType = BizProperty::getCustomPropertyType( $entPropertyName, $brandId );
 			
 			$this->property = new PropertyInfo($entPropertyName, null, $this->entMetadataCategory, $propType);
 		}
@@ -41,8 +51,11 @@ class ReadWriteFieldHandler {
 	
 	/**
 	 * Reads field from Elvis and maps it to Enterprise
+	 *
+	 * @param MetaData $entMetadata
+	 * @param BasicMap $elvisMetadata
 	 */
-	public function read($entMetadata, $elvisMetadata) {
+	public function read( $entMetadata, $elvisMetadata) {
 		$propertyName = $this->property->Name;
 		$enterpriseValue = $this->getEnterpriseValue($propertyName, $elvisMetadata);
 		if ($this->customProperty) {
@@ -76,7 +89,7 @@ class ReadWriteFieldHandler {
 	 * Maps field from Enterprise and writes it to Elvis
 	 *
 	 * @param Metadata|mixed $entMetadataOrValue Either metadata or value
-	 * @param $elvisMetadata Elvis metadata to be filled
+	 * @param MetaData|MetaDataValue[] $elvisMetadata Either full Metadata or a list of changed Metadata values
 	 */
 	public function write($entMetadataOrValue, &$elvisMetadata) {
 		$propertyName = $this->property->Name;
@@ -106,8 +119,8 @@ class ReadWriteFieldHandler {
 	/**
 	 * Helper function to get the list of values from a metaDataValue.
 	 *
-	 * @param object $metaDataValue Metadata value structure of which the first value needs to be retrieved
-	 * @return The metadata value
+	 * @param MetaDataValue $metaDataValue Metadata value structure of which the first value needs to be retrieved
+	 * @return mixed The metadata value
 	 */
 	private function getFirstMetaDataValue($metaDataValue)
 	{
@@ -122,7 +135,7 @@ class ReadWriteFieldHandler {
 	 * Converts the Enterprise value to Elvis value
 	 *
 	 * @param string $enterpriseValue
-	 * @return string|date
+	 * @return mixed
 	 * @throws BizException
 	 */
 	protected function getElvisMetadataValue($enterpriseValue) {
@@ -145,14 +158,14 @@ class ReadWriteFieldHandler {
 				throw new BizException('ERR_ERROR', 'Server', $message, $message, 'ERROR');
 		}
 	}
-	
+
 	/**
 	 *
 	 * @param string $enterpriseFieldName
-	 * @param unknown_type $elvisMetadata
-	 * @return unknown_type
+	 * @param mixed $elvisMetadata
+	 * @return mixed
 	 */
-	protected function getEnterpriseValue($enterpriseFieldName, $elvisMetadata) {
+	protected function getEnterpriseValue(/** @noinspection PhpUnusedParameterInspection */$enterpriseFieldName, $elvisMetadata) {
 		if (is_null($this->lvsFieldName) || !isset($elvisMetadata[$this->lvsFieldName])) {
 			$elvisValue = null;
 		} else {
@@ -183,9 +196,10 @@ class ReadWriteFieldHandler {
 	
 	/**
 	 * Converts the Elvis value to Enterprise value
-	 * @param unknown_type $elvisValue
-	 * @param string $elvisField
-	 * @return Datatype requested by Enterprise
+	 *
+	 * @param mixed $elvisValue
+	 * @return mixed Datatype requested by Enterprise
+	 * @throws BizException
 	 */
 	protected function getEnterpriseMetadataValue($elvisValue) {
 		if (is_null($elvisValue) && ($this->property->Type == 'date' || $this->property->Type == 'datetime')) {
@@ -235,6 +249,16 @@ class ReadWriteFieldHandler {
 		}
 		return false;
 	}
-	
+
+	/**
+	 * Returns the Id of the brand for which the mapping is applicable.
+	 *
+	 * If the mapping is applicable for all brands the Id = 0.
+	 *
+	 * @return int Brand Id
+	 */
+	public function mappedToBrand(  )
+	{
+		return $this->brandId;
+	}
 }
-?>

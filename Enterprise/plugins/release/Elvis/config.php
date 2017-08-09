@@ -142,6 +142,8 @@ $cfgFieldHandlers['C_MultiLineTest'] = new ReadWriteFieldHandler("cf_MultiLineTe
 $cfgFieldHandlers['C_MultiListTestElvisMultiField'] = new ReadWriteFieldHandler("cf_MultiListTestElvisMultiField", true, "text", "C_MultiListTestElvisMultiField");
 $cfgFieldHandlers['C_MultiStringTestElvisMultiField'] = new ReadWriteFieldHandler("cf_MultiStringTestElvisMultiField", true, "text", "C_MultiStringTestElvisMultiField");
 $cfgFieldHandlers['C_StringTest'] = new ReadWriteFieldHandler("cf_StringTest", false, "text", "C_StringTest");
+// In case the mapping is only applicable for a specific brand, the brand Id ( e.g. 1) can be added.
+$cfgFieldHandlers['C_StringTest'] = new ReadWriteFieldHandler("cf_StringTest", false, "text", "C_StringTest", 1 );
 */
 
 //LogHandler::logPhpObject($cfgFieldHandlers);
