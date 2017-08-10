@@ -36,20 +36,22 @@ class DBUserSetting
 		$user = $dbdriver->toDBString( $user );
 
 		// get user's settings
-		$sql = "SELECT * FROM $db WHERE `user` = '$user' ";
+		$sql = "SELECT * FROM $db WHERE `user` = ? ";
+		$params = array( strval( $user ) );
 		if( is_null($appName) ) { // all settings?
 			$sql .= "AND NOT (`appname` = '' OR `appname` is null) "; // exclude migrated settings! -> or else you'll get duplicates!
 		} else {
-			$appName = $dbdriver->toDBString( $appName );
 			if (!empty($appName)) {
-				$sql .= "AND `appname` = '$appName' ";
+				$sql .= "AND `appname` = ? ";
+				$params[] = strval( $appName );
 			}
 			else {
-				$sql .= "AND (`appname` = '$appName' OR `appname` is null) ";
+				$sql .= "AND (`appname` = ? OR `appname` is null) ";
+				$params[] = strval( $appName );
 			}
 		}
 		
-		$sth = $dbdriver->query($sql);
+		$sth = $dbdriver->query( $sql, $params );
 		if (!$sth) {
 			throw new BizException( 'ERR_DATABASE', 'Server', $dbdriver->error() );
 		}
@@ -81,13 +83,13 @@ class DBUserSetting
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename(self::TABLENAME);
 
-		$user = $dbDriver->toDBString($user);
-
-		$sql = "DELETE FROM $db WHERE `user` = '$user'";
+		$sql = "DELETE FROM $db WHERE `user` = ? ";
+		$params = array( strval( $user ) );
 		if (!empty($appname)) {
-			$sql .= " AND `appname` = '$appname' ";
+			$sql .= "AND `appname` = ? ";
+			$params[] = array( strval( $appname ) );
 		}
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query($sql, $params );
 
 		return $sth;
 	}
@@ -125,14 +127,15 @@ class DBUserSetting
 	{
 		$dbdriver = DBDriverFactory::gen();
 		$db = $dbdriver->tablename(self::TABLENAME);
-		$user = $dbdriver->toDBString( $user );
 
-		$sql = "SELECT * FROM $db WHERE `user` = '$user' AND `setting` = '$setting'";
+		$sql = "SELECT * FROM $db WHERE `user` = ? AND `setting` = ? ";
+		$params = array( strval( $user ), strval( $setting ) );
 		if (!empty($appname)) {
-			$sql .= " AND `appname` = '$appname' ";
+			$sql .= " AND `appname` = ? ";
+			$params[] = strval( $appname );
 		}
 		
-		$sth = $dbdriver->query($sql);
+		$sth = $dbdriver->query( $sql, $params );
 		$result = $dbdriver->fetch($sth);
 		if( empty($result) ) {
 			return false;
@@ -153,14 +156,14 @@ class DBUserSetting
 	{	
 		$dbdriver = DBDriverFactory::gen();
 		$db = $dbdriver->tablename(self::TABLENAME);
-		$user = $dbdriver->toDBString( $user );
 
 		if (empty($appname)) {
 			$appname = '';
 		}
 		
-		$sql = "UPDATE $db SET `value` = '$value' WHERE `user` = '$user' AND `setting` = '$setting' AND `appname` = '$appname' ";
-		$sth = $dbdriver->query($sql);
+		$sql = "UPDATE $db SET `value` = '$value' WHERE `user` = ? AND `setting` = ? AND `appname` = ? ";
+		$params = array( strval( $user ), strval( $setting ), strval( $appname ) );
+		$sth = $dbdriver->query($sql, $params );
 		
 		return $sth;
 	}

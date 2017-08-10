@@ -188,8 +188,9 @@ class DBTicket extends DBBase
 	{
 		$dbdriver = DBDriverFactory::gen();
 		$db = $dbdriver->tablename(self::TABLENAME);
-		$sql = 'SELECT * FROM '.$db.' WHERE `ticketid`=\''.$ticket.'\'';
-		$sth = $dbdriver->query($sql);
+		$sql = 'SELECT * FROM '.$db.' WHERE `ticketid` = ? ';
+		$params = strval( $ticket );
+		$sth = $dbdriver->query($sql, $params );
 		$result = $dbdriver->fetch($sth);
 		if( $result ) {
 			return false;
@@ -305,8 +306,8 @@ class DBTicket extends DBBase
 		}
 
 		$db_users = $dbdriver->tablename("users");
-		$sql = "UPDATE $db_users SET `lastlogondate`='$now' WHERE `user`='$usr'";
-		$sth = $dbdriver->query($sql);
+		$sql = "UPDATE $db_users SET `lastlogondate`='$now' WHERE `user`= ? ";
+		$sth = $dbdriver->query($sql, array( strval( $usr ) ) );
 		if ( !$sth )
 		{
 			$errorMessage = $dbdriver->error();
@@ -343,7 +344,8 @@ class DBTicket extends DBBase
 		$appversion = $dbdriver->toDBString($appversion);
 		$appserial = $dbdriver->toDBString($appserial);
 
-		$sql  = "SELECT * FROM $db WHERE `usr`='$usr' ";
+		$sql  = "SELECT * FROM $db WHERE `usr` = ? ";
+		$params = array( strval( $usr ) );
 		$sql .= "AND `appname`= '$appname' ";
 		$sql .= $database ? "AND `db`= '$database' " : '';
 		$sql .= $clientname ? "AND `clientname`= '$clientname' " : '';
@@ -389,8 +391,9 @@ class DBTicket extends DBBase
 		$installTicketID = $lic->getInstallTicketID(); 
 
 		// Get all the tickets that need to be purged
-		$sql = "SELECT `id`, `ticketid` FROM $db WHERE `expire` < '$expire' OR `appname`='$installTicketID'";
-		$sth = $dbdriver->query($sql, array(), null, false); //Don't write in log
+		$sql = "SELECT `id`, `ticketid` FROM $db WHERE `expire` < ? OR `appname`= ? ";
+		$params = array( strval( $expire), strval( $installTicketID ) );
+		$sth = $dbdriver->query($sql, $params, null, false); //Don't write in log
 		
 		$tickets = array();
 		while( ( $row = $dbdriver->fetch( $sth ) ) ) {
@@ -495,8 +498,6 @@ class DBTicket extends DBBase
 	 */
 	public static function checkTicket( $ticket, $service = '' )
 	{
-		$service = $service; // keep analyzer happy
-		
 		// Special treatment for background/async server job processing, for which no seat must be taken.
 		if( self::$ServerJob && self::$ServerJob->TicketSeal == $ticket ) {
 			return self::$ServerJob->ActingUser;
@@ -560,14 +561,14 @@ class DBTicket extends DBBase
 		if( ($appname = self::DBappticket( $ticket )) && $appname == 'Web' ) {
 			if( ($user = self::DBuserticket( $ticket )) ) {
 				if( ($otherTicket = self::getOtherTicket($appname,$user)) ) {
-					$sql = "DELETE FROM $db WHERE `ticketid` = '$otherTicket'";
-					$dbdriver->query($sql);
+					$sql = "DELETE FROM $db WHERE `ticketid` = ? ";
+					$dbdriver->query($sql, array( strval( $otherTicket ) ) );
 				}
 			}
 		}
 		// remove the given ticket
-		$sql = "DELETE FROM $db WHERE `ticketid` = '$ticket'";
-		$sth = $dbdriver->query($sql);
+		$sql = "DELETE FROM $db WHERE `ticketid` = ? ";
+		$sth = $dbdriver->query($sql, array( strval( $ticket ) ) );
 		return $sth;
 	}
 
@@ -591,8 +592,9 @@ class DBTicket extends DBBase
 			$otherApp = null;
 		}
 		if( $otherApp ) {
-			$sql = "SELECT `ticketid` FROM $db WHERE `usr`='$user' AND `appname`='$otherApp'";
-			$sth = $dbdriver->query($sql);
+			$sql = "SELECT `ticketid` FROM $db WHERE `usr`= ? AND `appname`= ? ";
+			$params = array( strval( $user ), strval( $otherApp ) );
+			$sth = $dbdriver->query($sql, $params );
 			$row = $sth ? $dbdriver->fetch($sth) : null;
 			$otherTicket = $row ? $row['ticketid'] : null;
 		} else {
