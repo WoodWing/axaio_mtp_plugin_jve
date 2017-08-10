@@ -171,7 +171,7 @@ class DBServerPlugin extends DBBase
 				$where .= "NOT (`id` = ?) ";
 				$params[] = intval( $plugin->Id );
 			} else if( $plugin->UniqueName ) {
-				$where .= "NOT (`id` = ?) ";
+				$where .= "NOT (`uniquename` = ?) ";
 				$params[] = strval( $plugin->UniqueName );
 			} else {
 				self::setError( BizResources::localize('ERR_ARGUMENT') );
@@ -188,7 +188,7 @@ class DBServerPlugin extends DBBase
 				if( self::hasError() ) {
 					$deletedObjs = array(); // clear
 				} else {
-					self::deleteRows( self::TABLENAME, $where );
+					self::deleteRows( self::TABLENAME, $where, $params );
 				}
 			}
 		}
