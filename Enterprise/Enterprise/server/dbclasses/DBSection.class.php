@@ -297,7 +297,7 @@ class DBSection extends DBBase
 				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null );
 			}
 
-			$result = self::updateRow( self::TABLENAME, $values, " `id` = '$section->Id'" );
+			$result = self::updateRow( self::TABLENAME, $values, "`id` = ?", array( intval( $section->Id ) ) );
 
 			if( $result === true ) {
 				$modifysection = self::getSectionObj( $section->Id );
