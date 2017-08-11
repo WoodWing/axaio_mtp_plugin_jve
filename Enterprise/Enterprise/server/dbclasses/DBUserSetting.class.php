@@ -87,7 +87,7 @@ class DBUserSetting
 		$params = array( strval( $user ) );
 		if (!empty($appname)) {
 			$sql .= "AND `appname` = ? ";
-			$params[] = array( strval( $appname ) );
+			$params[] = strval( $appname );
 		}
 		$sth = $dbDriver->query($sql, $params );
 

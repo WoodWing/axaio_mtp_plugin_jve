@@ -5993,7 +5993,7 @@ class BizObject
 		// Compose MetaData and Targets (based on the found DB rows).
 		if( $rows ) foreach( $rows as $row ) {
 			$objectId = $row['ID'];
-			$targets[$objectId] = array_values($row['Targets']);
+			$targets[$objectId] = isset( $row['Targets'] ) ? array_values($row['Targets']) : null;
 			unset( $row['Targets'] );
 			$customProps = ( $areas && in_array('Trash', $areas) ) ? false : true;
 			$metaDatas[$objectId] = self::queryRow2MetaData( $row, $customProps );
