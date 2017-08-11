@@ -169,7 +169,7 @@ class DBWorkflow extends DBBase
 		$params = array();
 		if( $id != null ) {
 			$sql = "SELECT `nextstate` from $db where `id` = ? ";
-			$params[] = array( intval( $id ) );
+			$params[] = intval( $id );
 		} else {
 			$sql = "SELECT `nextstate` from $db where `id` = '' ";
 		}
