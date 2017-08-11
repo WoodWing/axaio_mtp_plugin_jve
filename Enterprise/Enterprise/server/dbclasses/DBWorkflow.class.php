@@ -192,7 +192,7 @@ class DBWorkflow extends DBBase
 		$params = array();
 		if( $id != null ) {
 			$sql = "SELECT `id` from $db where `id` = ? ";
-			$params[] = array( intval( $id ) );
+			$params[] = intval( $id );
 		} else {
 			$sql = "SELECT `id` from $db where `id` = '' ";
 		}
@@ -351,7 +351,7 @@ class DBWorkflow extends DBBase
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbo = $dbDriver->tablename( self::TABLENAME );
-		$sql = 'SELECT `id`, `state` FROM '.$dbo.' WHERE `id` = ';
+		$sql = 'SELECT `id`, `state` FROM '.$dbo.' WHERE `id` = ? ';
 		$sth = $dbDriver->query( $sql, array( intval( $id ) ) );
 		$row = $dbDriver->fetch( $sth );
 		if( empty( $row ) === false ) {
