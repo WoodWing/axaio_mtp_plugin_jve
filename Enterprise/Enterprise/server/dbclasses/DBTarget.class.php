@@ -71,8 +71,9 @@ class DBTarget extends DBBase
         $alreadyExists = ($sth === false); 
         if( $alreadyExists ) { // insert failed because record already exists?
 			$sql  = "SELECT `id` FROM $targetsTable ";
-			$sql .= "WHERE `objectid` = $objectId AND `channelid` = $channelId AND `issueid` = $issueId ";
-			$sth = $dbDriver->query( $sql );
+			$sql .= "WHERE `objectid` = ? AND `channelid` = ? AND `issueid` = ? ";
+			$params = array( intval( $objectId ), intval( $channelId ), intval( $issueId ) );
+			$sth = $dbDriver->query( $sql, $params );
         }
 		if( is_null($sth) ) { // failed?
 			$err = trim( $dbDriver->error() );
@@ -182,9 +183,9 @@ class DBTarget extends DBBase
 		$sql .= "FROM $ediTable edi ";
 		$sql .= "LEFT JOIN $tedTable ted ON (ted.`editionid` = edi.`id`) ";
 		$sql .= "LEFT JOIN $tarTable tar ON (tar.`id` = ted.`targetid`) ";
-		$sql .= "WHERE tar.`objectid` = $objectId ";
+		$sql .= "WHERE tar.`objectid` = ? ";
 		
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query($sql, array( intval( $objectId ) ));
 		if( is_null($sth) ) {
 			$err = trim( $dbDriver->error() );
 			self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
@@ -229,9 +230,11 @@ class DBTarget extends DBBase
 	{
     	$tablename = self::TABLENAME;
 
-    	$where = "objectid = $objectid AND channelid = $channelid ";
+    	$where = "objectid = ? AND channelid = ? ";
+    	$params = array( intval( $objectid), intval( $channelid) );
     	if ($issueid) {
-			$where .= "AND issueid = $issueid";
+			$where .= "AND issueid = ? ";
+			$params[] = intval( $issueid );
 		}
         $majorminor = explode('.', $version);
         $majorversion = intval($majorminor[0]);
@@ -245,7 +248,7 @@ class DBTarget extends DBBase
 		$values['publishedmajorversion'] = $majorversion;
 		$values['publishedminorversion'] = $minorversion;
 		
-    	self::updateRow($tablename, $values, $where);
+    	self::updateRow($tablename, $values, $where, $params);
 		
    	require_once BASEDIR . '/server/dbclasses/DBPublishHistory.class.php';
 
@@ -383,39 +386,41 @@ class DBTarget extends DBBase
 	}
 
 	/**
-     * @TODO: Is this function still in use?
+	 * @TODO: Is this function still in use?
 	 * Use updateObjectRelationTarget() instead.
-     * This method updates the target of a objectrelatio after publish action.d.
-     *
-     * @param int $relationid Objectrelation id of the dossier/child
-     * @param int $channelid Channel id (of the target)
-     * @param int $issueid Issue id (of the target)
-     * @param string $externalid id of the published object in external system
-     * @param string $publisheddate date at which object must get/is published
-     * @param string $version version of object in format x.x
-     * 
-     */    
-    static public function updatePublishInfoObjectRelation($relationid, $channelid, $issueid, $externalid, $publisheddate, $version)
+	 * This method updates the target of a objectrelation after publish action.
+	 *
+	 * @param int $relationid Objectrelation id of the dossier/child
+	 * @param int $channelid Channel id (of the target)
+	 * @param int $issueid Issue id (of the target)
+	 * @param string $externalid id of the published object in external system
+	 * @param string $publisheddate date at which object must get/is published
+	 * @param string $version version of object in format x.x
+	 *
+	 */
+	static public function updatePublishInfoObjectRelation( $relationid, $channelid, $issueid, $externalid, $publisheddate, $version )
 	{
-   		$tablename = self::TABLENAME;
-        $majorminor = explode('.', $version);
-        $majorversion = intval($majorminor[0]);
-        $minorversion = intval($majorminor[1]);
-   	
-    	$where = "objectrelationid = $relationid AND channelid = $channelid ";
-    	if ($issueid) {
-			$where .= "AND issueid = $issueid";
+		$tablename = self::TABLENAME;
+		$majorminor = explode( '.', $version );
+		$majorversion = intval( $majorminor[0] );
+		$minorversion = intval( $majorminor[1] );
+
+		$where = "objectrelationid = ? AND channelid = ? ";
+		$params = array( intval( $relationid ), intval( $channelid ) );
+		if( $issueid ) {
+			$where .= "AND issueid = ? ";
+			$params[] = intval( $issueid );
 		}
 
-    	$values['objectrelationid'] = $relationid;
+		$values['objectrelationid'] = $relationid;
 		$values['channelid'] = $channelid;
 		$values['issueid'] = $issueid;
 		$values['externalid'] = $externalid;
 		$values['publisheddate'] = $publisheddate;
 		$values['publishedmajorversion'] = $majorversion;
 		$values['publishedminorversion'] = $minorversion;
-        
-    	self::updateRow($tablename, $values, $where);    	
+
+		self::updateRow( $tablename, $values, $where, $params );
 	}
     
 	/**************************** Delete ******************************************/
@@ -758,12 +763,14 @@ class DBTarget extends DBBase
    {
     	$tablename = self::TABLENAME;
     	$value = array('id' => 'id');
-    	$where = "objectid = $objectid AND channelid = $channelid ";
+    	$where = "objectid = ? AND channelid = ? ";
+    	$params = array( intval( $objectid ), intval( $channelid ) );
         if ($issueid) {
-			$where .= "AND issueid = $issueid";;
+			$where .= "AND issueid = ? ";
+			$params[] = intval( $issueid );
 		}
 
-    	$result = self::getRow($tablename, $where, $value);
+    	$result = self::getRow($tablename, $where, $value, $params );
     	
     	if ($result === null) {
     		$result = false;
@@ -872,118 +879,118 @@ class DBTarget extends DBBase
 		return $targets;
 	}
 
-    /**
-     * Returns the targets of objects stored in a temporary table. The  
-     * temporary table contains ids belonging to different views (top level view
-     * or children view). An object can have direct targets (column objectid of the
-     * targets table is filled) or can have indirect targets. Indirect targets are
-     * targets obtained through a child-parent relation.
-     *
-     * @param string $objectViewId View on temporary table, identifying top level or child level ids.
-     * @param bool $deletedObjects
-     * @return array with targets.
-     */
-    protected static function listPubChannelIssuesByObjectViewId($objectViewId, $deletedObjects)
-    {
-        require_once BASEDIR . '/server/dbclasses/DBQuery.class.php';
-    	
-        $dbDriver = DBDriverFactory::gen();
-        $tempids = DBQuery::getTempIds($objectViewId);
-        
-        $targetsTable = $dbDriver->tablename(self::TABLENAME);
-        $channelsTable = $dbDriver->tablename("channels");
-        $issuesTable = $dbDriver->tablename("issues");
-        $relationsTable = $dbDriver->tablename("objectrelations");
-        
-        $selectSQL = 'SELECT ov.`id`, tar.`id` AS "targetid", tar.`channelid`, cha.`name` AS "channelname", tar.`issueid`, iss.`name` AS "issuename" ';
-        $requiredSQL = "INNER JOIN $channelsTable cha ON (tar.`channelid` = cha.`id`) "
-			. "INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)";
-		// select object targets
-		$sql = $selectSQL . "FROM $tempids ov "
-			. "INNER JOIN $targetsTable tar ON (ov.id = tar.`objectid`) "
-			. $requiredSQL;
-		//	. "WHERE tar.objectrelationid = 0"; // No need, if objectid is set objectrelationid is always 0. BZ#22116
-		$sth = $dbDriver->query($sql);
-		$objectRows = self::fetchResults($sth);
+	/**
+	 * Returns the targets of objects stored in a temporary table. The
+	 * temporary table contains ids belonging to different views (top level view
+	 * or children view). An object can have direct targets (column objectid of the
+	 * targets table is filled) or can have indirect targets. Indirect targets are
+	 * targets obtained through a child-parent relation.
+	 *
+	 * @param string $objectViewId View on temporary table, identifying top level or child level ids.
+	 * @param bool $deletedObjects
+	 * @return array with targets.
+	 */
+	protected static function listPubChannelIssuesByObjectViewId( $objectViewId, $deletedObjects )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBQuery.class.php';
 
-	    // Get the childrows object ids.
-	    if ($objectRows) foreach (array_keys($objectRows) as $key) {
-		    $objectRows[$key]['isRelational'] = false;
-	    }
+		$dbDriver = DBDriverFactory::gen();
+		$tempids = DBQuery::getTempIds( $objectViewId );
+
+		$targetsTable = $dbDriver->tablename( self::TABLENAME );
+		$channelsTable = $dbDriver->tablename( "channels" );
+		$issuesTable = $dbDriver->tablename( "issues" );
+		$relationsTable = $dbDriver->tablename( "objectrelations" );
+
+		$selectSQL = 'SELECT ov.`id`, tar.`id` AS "targetid", tar.`channelid`, cha.`name` AS "channelname", tar.`issueid`, iss.`name` AS "issuename" ';
+		$requiredSQL = "INNER JOIN $channelsTable cha ON (tar.`channelid` = cha.`id`) "
+			."INNER JOIN $issuesTable iss ON (tar.`issueid` = iss.`id`)";
+		// select object targets
+		$sql = $selectSQL."FROM $tempids ov "
+			."INNER JOIN $targetsTable tar ON (ov.id = tar.`objectid`) "
+			.$requiredSQL;
+		//	. "WHERE tar.objectrelationid = 0"; // No need, if objectid is set objectrelationid is always 0. BZ#22116
+		$sth = $dbDriver->query( $sql );
+		$objectRows = self::fetchResults( $sth );
+
+		// Get the childrows object ids.
+		if( $objectRows ) foreach( array_keys( $objectRows ) as $key ) {
+			$objectRows[ $key ]['isRelational'] = false;
+		}
 
 		// select targets inherited from a parent
-		if ( $deletedObjects ) {
+		if( $deletedObjects ) {
 			$type = "rel.`type` LIKE 'Deleted%'";
 		} else {
-			$type = "rel.`type` NOT LIKE 'Deleted%'"; 
+			$type = "rel.`type` NOT LIKE 'Deleted%'";
 		}
 		// BZ#32491 - To solve the "OR" operator slowness problem, and also the temporary table problem in 
 		// MySQL[where you cannot refer to a TEMPORARY table more than once in the same query.]
 		// Therefore, split the query into 2 separate queries, and merge both results set into final result.
-		$sql = $selectSQL . "FROM $tempids ov "
-			 . "INNER JOIN $relationsTable rel ON ( ov.`id` = rel.`child` AND $type ) "
-			 . "INNER JOIN $targetsTable tar ON ( rel.`id` = tar.`objectrelationid` ) "
-			 . $requiredSQL;
-		$sth = $dbDriver->query($sql);
-		$relationalRows = self::fetchResults($sth);
+		$sql = $selectSQL."FROM $tempids ov "
+			."INNER JOIN $relationsTable rel ON ( ov.`id` = rel.`child` AND $type ) "
+			."INNER JOIN $targetsTable tar ON ( rel.`id` = tar.`objectrelationid` ) "
+			.$requiredSQL;
+		$sth = $dbDriver->query( $sql );
+		$relationalRows = self::fetchResults( $sth );
 
-	    if ($relationalRows) foreach(array_keys($relationalRows) as $key) {
-		    $relationalRows[$key]['isRelational'] = true;
-	    }
-		return array_merge($objectRows, $relationalRows);
-    }
-    
-    /**
-     * Returns the targets, complete with editions, of objects stored in a temporary
-     * table. The temporary table contains ids belonging to different views (top level view
-     * or children view). An object can have direct targets (column objectid of the
-     * targets table is filled) or can have indirect targets. Indirect targets are
-     * targets obtained through a child-parent relation. Each target can have zero
-     * or more editions.
-     *
-     * @param string $objectViewId View on temporary table, identifying top level
-     * @param bool $deletedObjects
-     * @return array with target objects.
-     */
-    static public function getArrayOfTargetsByObjectViewId( $objectViewId, $deletedObjects=false )
-    {
-    	require_once BASEDIR.'/server/dbclasses/DBTargetEdition.class.php';
+		if( $relationalRows ) foreach( array_keys( $relationalRows ) as $key ) {
+			$relationalRows[ $key ]['isRelational'] = true;
+		}
+		return array_merge( $objectRows, $relationalRows );
+	}
 
-    	$rows = self::listPubChannelIssuesByObjectViewId($objectViewId, $deletedObjects);
-        
-    	$targets = array();
-        $targetIds = array();
-	    $hasEditions = array();
-        
-        // get pubchannels and issues
-    	if ($rows) foreach ($rows as $row){
-		    $target = new Target(new PubChannel($row['channelid'], $row['channelname']), new Issue($row['issueid'], $row['issuename']), array());
+	/**
+	 * Returns the targets, complete with editions, of objects stored in a temporary
+	 * table. The temporary table contains ids belonging to different views (top level view
+	 * or children view). An object can have direct targets (column objectid of the
+	 * targets table is filled) or can have indirect targets. Indirect targets are
+	 * targets obtained through a child-parent relation. Each target can have zero
+	 * or more editions.
+	 *
+	 * @param string $objectViewId View on temporary table, identifying top level
+	 * @param bool $deletedObjects
+	 * @return array with target objects.
+	 */
+	static public function getArrayOfTargetsByObjectViewId( $objectViewId, $deletedObjects = false )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBTargetEdition.class.php';
 
-		    // Set an internal property so we know if it is a relational target or object target
-		    $target->IsRelational = isset($row['isRelational']) ? $row['isRelational'] : false;
+		$rows = self::listPubChannelIssuesByObjectViewId( $objectViewId, $deletedObjects );
 
-		    if (! isset($targets[$row['id']])){
-			    $targets[$row['id']] = array();
-		    }
+		$targets = array();
+		$targetIds = array();
+		$hasEditions = array();
 
-		    $targetIds[$row['targetid']] = $target;
-		    $targets[$row['id']][$row['targetid']] = $target;
-    	}
+		// get pubchannels and issues
+		if( $rows ) foreach( $rows as $row ) {
+			$target = new Target( new PubChannel( $row['channelid'], $row['channelname'] ), new Issue( $row['issueid'], $row['issuename'] ), array() );
 
-    	// get editions
-    	$rows = DBTargetEdition::listEditionsByTargetIds(array_keys($targetIds));
-	    if ($rows) foreach ($rows as $row){
-    		foreach( $targets as $key => $target ) { // Loop through all targets to assign editions
-    			if( isset( $target[$row['targetid']]) ) {
-    				$target =  $target[$row['targetid']];
-					$target->Editions[$row['id']] = new Edition($row['id'], $row['name']);
-				    $hasEditions[] = $key;
-    			}
+			// Set an internal property so we know if it is a relational target or object target
+			$target->IsRelational = isset( $row['isRelational'] ) ? $row['isRelational'] : false;
+
+			if( !isset( $targets[ $row['id'] ] ) ) {
+				$targets[ $row['id'] ] = array();
 			}
-    	}
+
+			$targetIds[ $row['targetid'] ] = $target;
+			$targets[ $row['id'] ][ $row['targetid'] ] = $target;
+		}
+
+		// get editions
+		$rows = DBTargetEdition::listEditionsByTargetIds( array_keys( $targetIds ) );
+		if( $rows ) foreach( $rows as $row ) {
+			foreach( $targets as $key => $target ) { // Loop through all targets to assign editions
+				if( isset( $target[ $row['targetid'] ] ) ) {
+					$target = $target[ $row['targetid'] ];
+					$target->Editions[ $row['id'] ] = new Edition( $row['id'], $row['name'] );
+					$hasEditions[] = $key;
+				}
+			}
+		}
 
 		return $targets;
-    }
+	}
 
 	/**
 	 * This function returns the targets for certain objectrealtions. 
@@ -1490,39 +1497,39 @@ class DBTarget extends DBBase
 		return $target;
 	}
 
-    /**
-     * Removes (deletes) the relational targets of a child object for a certain issue.
-     * First the relational targets are resolved by looking at the the object relations and the issue.
-     * Next the target editions (if any) are deleted for the found targets.
-     * Finally the targets themselves are deleted.
-     *
-     * @param int $childId Object Id of the child object.
-     * @param int $issueId Issue Id
-     */
-    public static function removeRelationalTargetsByChildObjectAndIssue( $childId, $issueId )
-    {
-        $dbDriver = DBDriverFactory::gen();
-        $relationsTable = $dbDriver->tablename('objectrelations');
-        $targetsTable = $dbDriver->tablename(self::TABLENAME);
+	/**
+	 * Removes (deletes) the relational targets of a child object for a certain issue.
+	 * First the relational targets are resolved by looking at the the object relations and the issue.
+	 * Next the target editions (if any) are deleted for the found targets.
+	 * Finally the targets themselves are deleted.
+	 *
+	 * @param int $childId Object Id of the child object.
+	 * @param int $issueId Issue Id
+	 */
+	public static function removeRelationalTargetsByChildObjectAndIssue( $childId, $issueId )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$relationsTable = $dbDriver->tablename( 'objectrelations' );
+		$targetsTable = $dbDriver->tablename( self::TABLENAME );
 
-        $sql =  'SELECT tar.`id` '.
-                'FROM '.$targetsTable.' tar '.
-                'INNER JOIN '.$relationsTable.' rel ON ( rel.`id` = tar.`objectrelationid` ) '.
-	            'WHERE rel.`child` = ? '.
-                'AND tar.`issueid` = ? ';
-        $params = array( $childId, $issueId );
-        $sth = $dbDriver->query( $sql, $params );
-        $rows = DBBase::fetchResults( $sth, 'id' );
-        $targetIds = array_keys( $rows );
-	    if ( $targetIds ) {
-		    $where = DBBase::addIntArrayToWhereClause( 'targetid', $targetIds, false );
-		    // Delete selected target editions
-		    self::deleteRows( 'targeteditions', $where );
-		    $where = DBBase::addIntArrayToWhereClause( 'id', $targetIds, false );
-		    // Delete the targets themselves
-		    self::deleteRows( self::TABLENAME, $where );
-	    }
-    }
+		$sql = 'SELECT tar.`id` '.
+			'FROM '.$targetsTable.' tar '.
+			'INNER JOIN '.$relationsTable.' rel ON ( rel.`id` = tar.`objectrelationid` ) '.
+			'WHERE rel.`child` = ? '.
+			'AND tar.`issueid` = ? ';
+		$params = array( $childId, $issueId );
+		$sth = $dbDriver->query( $sql, $params );
+		$rows = DBBase::fetchResults( $sth, 'id' );
+		$targetIds = array_keys( $rows );
+		if( $targetIds ) {
+			$where = DBBase::addIntArrayToWhereClause( 'targetid', $targetIds, false );
+			// Delete selected target editions
+			self::deleteRows( 'targeteditions', $where );
+			$where = DBBase::addIntArrayToWhereClause( 'id', $targetIds, false );
+			// Delete the targets themselves
+			self::deleteRows( self::TABLENAME, $where );
+		}
+	}
 
 	/**
 	 * Checks if an object has a target of its own (object target).
