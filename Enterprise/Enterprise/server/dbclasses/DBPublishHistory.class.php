@@ -446,14 +446,14 @@ class DBPublishHistory extends DBBase
 		$sql .= "FROM $publHistTable pbhist  ";
 		$sql .= "WHERE pbhist.`objectid` = ? ";
 		$sql .= "AND pbhist.`channelid` = ? ";
-		$params = array( $objectId, $channelId );
+		$params = array( intval( $objectId ), intval( $channelId ) );
 		if( $issueId > 0 ) {
 			$sql .= "AND pbhist.`issueid`= ? ";
-			$params[] = $issueId;
+			$params[] = intval( $issueId );
 		}
 		if( $editionId > 0 ) {
 			$sql .= "AND pbhist.`editionid`= ? ";
-			$params[] = $editionId;
+			$params[] = intval( $editionId );
 		}
 		$sql .= "ORDER BY pbhist.`actiondate` DESC ";
 		$sql = $dbDriver->limitquery( $sql, 0, 1 );
