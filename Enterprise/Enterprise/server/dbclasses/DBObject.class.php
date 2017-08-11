@@ -66,7 +66,7 @@ class DBObject extends DBBase
 			$sql .= "INNER JOIN $targetstable tar ON (o.`id` = tar.`objectid`) ";
 			$sql .= "WHERE o.`name` LIKE '$startofname%' AND tar.`issueid` IN ($issueids) AND o.`type` = ? ";
 			// escape4like on $startofname is not needed. $startofname is already validated 
-			$sth = $dbdriver->query($sql, strval( $objtype ) );
+			$sth = $dbdriver->query($sql, array( strval( $objtype ) ) );
 			while( ( $row = $dbdriver->fetch($sth) ) ) {
 				$existingnames[$row['name']] = true;
 			}
