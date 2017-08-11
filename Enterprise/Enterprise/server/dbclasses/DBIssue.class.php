@@ -173,7 +173,7 @@ class DBIssue extends DBBase
 		$sql .= "WHERE cha.`publicationid` = ? AND cha.`type` = ? AND iss.`name` = ? ";
 		$params = array( intval( $pubId ), strval( $channelType ), strval( $issueName ) );
 	   if ( $pubChannelId ) {
-	      $sql .= " AND cha.`id` = $pubChannelId ";
+	      $sql .= " AND cha.`id` = ? ";
 	      $params[] = array( intval( $pubChannelId ) );
 	   }
 		
