@@ -388,17 +388,17 @@ class DBTarget extends DBBase
 	/**
 	 * @TODO: Is this function still in use?
 	 * Use updateObjectRelationTarget() instead.
-     * This method updates the target of a objectrelatio after publish action.d.
-     *
-     * @param int $relationid Objectrelation id of the dossier/child
-     * @param int $channelid Channel id (of the target)
-     * @param int $issueid Issue id (of the target)
-     * @param string $externalid id of the published object in external system
-     * @param string $publisheddate date at which object must get/is published
-     * @param string $version version of object in format x.x
-     * 
-     */    
-    static public function updatePublishInfoObjectRelation($relationid, $channelid, $issueid, $externalid, $publisheddate, $version)
+	 * This method updates the target of a objectrelation after publish action.
+	 *
+	 * @param int $relationid Objectrelation id of the dossier/child
+	 * @param int $channelid Channel id (of the target)
+	 * @param int $issueid Issue id (of the target)
+	 * @param string $externalid id of the published object in external system
+	 * @param string $publisheddate date at which object must get/is published
+	 * @param string $version version of object in format x.x
+	 *
+	 */
+	static public function updatePublishInfoObjectRelation( $relationid, $channelid, $issueid, $externalid, $publisheddate, $version )
 	{
 		$tablename = self::TABLENAME;
 		$majorminor = explode( '.', $version );

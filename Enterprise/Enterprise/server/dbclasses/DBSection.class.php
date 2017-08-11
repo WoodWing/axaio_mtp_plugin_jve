@@ -98,10 +98,10 @@ class DBSection extends DBBase
 	 * @param  mixed $fieldnames see function description
 	 * @return  null in case of error, otherwise see functiondescription
 	 */
-	public static function listIssueSections( $issueid, $fieldnames = '*' )
-	{
-		return self::listRows('issuesection','id','section',"`issue` = ? ", $fieldnames, array( intval( $issueid ) ));
-	}
+    public static function listIssueSections($issueid, $fieldnames = '*')
+    {
+        return self::listRows('issuesection','id','section',"`issue` = ? ", $fieldnames, array( intval( $issueid ) ));
+    }
 
 	/**
 	 *  Gets exactly one section from issue $issueid, defined by $sectiondefid

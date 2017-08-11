@@ -160,7 +160,7 @@ class DBPublishHistory extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$publHistTable = $dbDriver->tablename( self::TABLENAME );
 
-		$sql  = "SELECT publHist.`id`, publHist.`publisheddate`, publHist.`actiondate`, ";
+		$sql = "SELECT publHist.`id`, publHist.`publisheddate`, publHist.`actiondate`, ";
 		$sql .= "publHist.`action`, publHist.`user`, publHist.`fields` ";
 		$sql .= "FROM $publHistTable publHist ";
 		$sql .= "WHERE publHist.`objectid` = ? ";

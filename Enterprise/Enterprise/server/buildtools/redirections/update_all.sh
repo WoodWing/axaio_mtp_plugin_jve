@@ -91,7 +91,8 @@ function saveAndTestRedirection {
 #
 function saveAndTestHelpCenterRedirections {
 	# https://redirect.woodwing.com/v1/?path=enterprise-server/10/help/zend-opcache
-	saveAndTestRedirection "${1}" "enterprise-server/${2}/help/zend-opcache" "https://helpcenter.woodwing.com/hc/en-us/articles/209990166" 
+	saveAndTestRedirection "${1}" "enterprise-server/${2}/help/zend-opcache" "https://helpcenter.woodwing.com/hc/en-us/articles/209990166"
+	saveAndTestRedirection "${1}" "enterprise-server/${2}/help/enable-http-verbs" "https://helpcenter.woodwing.com/hc/en-us/articles/209990946"
 
 	# Note that this Analytics help page is removed already: https://helpcenter.woodwing.com/hc/en-us/articles/204805639
 }

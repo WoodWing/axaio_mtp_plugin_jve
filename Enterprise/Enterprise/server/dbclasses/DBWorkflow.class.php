@@ -36,7 +36,7 @@ class DBWorkflow extends DBBase
 	{
 		return self::listRows( 'sectionstate', 'id', 'state', "`section` = ?", $fieldnames, array( intval( $sectiondefid ) ) );
 	}
-
+        
 	public static function listPublWorkflowDefs( $publid )
 	{
 		$states = self::listRows( self::TABLENAME, 'id', 'type', "`publication` = ? AND `issue` = '0'", '*', array( intval( $publid ) ) );

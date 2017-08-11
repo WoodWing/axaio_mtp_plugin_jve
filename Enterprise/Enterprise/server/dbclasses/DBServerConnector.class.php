@@ -136,7 +136,8 @@ class DBServerConnector extends DBBase
 	 *
 	 * @param ConnectorInfoData $conn Connector info data object (ConnectorInfoData) that need to be modified
 	 * @return ConnectorInfoData The modified connector object (from DB), or null on failure
-	 */
+	 * @return ConnectorInfoData The modified connector object (from DB), or null on failure
+	 **/
 	static public function updateConnector( ConnectorInfoData $conn )
 	{
 		self::clearError();
