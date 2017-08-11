@@ -532,8 +532,8 @@ class DBQuery extends DBBase
 		$sql .= "WHERE  parent.`id` = ? ";
 		$sql .= "AND    child01.`child` <> parent.`id` ";
 
-		$sth = $dbdriver->query($sql);
-		$rows = self::fetchResults($sth, array( intval( $parentId ) ));
+		$sth = $dbdriver->query($sql, array( intval( $parentId ) ) );
+		$rows = self::fetchResults( $sth );
 
 		$childsIds = array();
 		foreach ($rows as $row) {
@@ -860,7 +860,7 @@ class DBQuery extends DBBase
 			$sql .= "SELECT DISTINCT a.`publication`, a.`issue`, 0, 0 ";//BZ#35240 Brand admin user is also entitled to
 			$sql .= "FROM $authorizationstable a ";						//'overrule brand' issues.
 			$sql .= "WHERE a.`publication` = ? ";
-			$dbdriver->query($sql, array( $publication ));
+			$dbdriver->query($sql, array( intval( $publication ) ) );
 			$handled[$publication] = $publication;
 		}
 		
