@@ -33,7 +33,6 @@ class DBUserSetting
 		// init
 		$dbdriver = DBDriverFactory::gen();
 		$db = $dbdriver->tablename(self::TABLENAME);
-		$user = $dbdriver->toDBString( $user );
 
 		// get user's settings
 		$sql = "SELECT * FROM $db WHERE `user` = ? ";

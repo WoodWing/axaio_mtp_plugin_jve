@@ -189,7 +189,7 @@ class DBTicket extends DBBase
 		$dbdriver = DBDriverFactory::gen();
 		$db = $dbdriver->tablename(self::TABLENAME);
 		$sql = 'SELECT * FROM '.$db.' WHERE `ticketid` = ? ';
-		$params = strval( $ticket );
+		$params = array(strval( $ticket ) );
 		$sth = $dbdriver->query($sql, $params );
 		$result = $dbdriver->fetch($sth);
 		if( $result ) {

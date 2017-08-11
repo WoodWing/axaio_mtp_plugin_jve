@@ -36,7 +36,7 @@ class DBWorkflow extends DBBase
 
 	public static function listSectionStateDefs( $sectiondefid, $fieldnames = '*' )
 	{
-		return self::listRows( 'sectionstate', 'id', 'state', "`section` = '$sectiondefid' ", $fieldnames );
+		return self::listRows( 'sectionstate', 'id', 'state', "`section` = ?", $fieldnames, array( intval( $sectiondefid ) ) );
 	}
 
 	public static function listPublWorkflowDefs( $publid )
@@ -194,7 +194,7 @@ class DBWorkflow extends DBBase
 		$params = array();
 		if( $id != null ) {
 			$sql = "SELECT `id` from $db where `id` = ? ";
-			$params[] = array( intval( $id ) );
+			$params[] = intval( $id );
 		} else {
 			$sql = "SELECT `id` from $db where `id` = '' ";
 		}
@@ -353,7 +353,7 @@ class DBWorkflow extends DBBase
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbo = $dbDriver->tablename( self::TABLENAME );
-		$sql = 'SELECT `id`, `state` FROM '.$dbo.' WHERE `id` = ';
+		$sql = 'SELECT `id`, `state` FROM '.$dbo.' WHERE `id` = ? ';
 		$sth = $dbDriver->query( $sql, array( intval( $id ) ) );
 		$row = $dbDriver->fetch( $sth );
 		if( empty( $row ) === false ) {
