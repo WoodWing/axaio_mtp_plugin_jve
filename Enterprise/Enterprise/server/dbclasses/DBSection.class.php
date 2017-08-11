@@ -195,7 +195,6 @@ class DBSection extends DBBase
 		}
 		if( $sectionName ) { 
 			$sectionName = trim($sectionName);
-			$sectionName = $dbDriver->toDBString( $sectionName );
 			$where .= "AND `section` = ? ";
 			$params[] = strval( $sectionName );
 		}
