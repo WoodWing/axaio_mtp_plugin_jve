@@ -19,9 +19,13 @@ class DBUser extends DBBase
 		$dbu = $dbdriver->tablename('users');
 
 		// Check on name
-		$sql = "SELECT * FROM $dbu WHERE (`user` = '" . $dbdriver->toDBString($user) . "' OR `fullname` = '" . $dbdriver->toDBString($fullname) . "')";
-		if( $id ) { $sql .= " AND `id` != $id"; }
-		$sth = $dbdriver->query($sql);
+		$sql = "SELECT * FROM $dbu WHERE (`user` = ? OR `fullname` = ? )";
+		$params = array( strval( $user ), strval( $fullname ) );
+		if( $id ) {
+			$sql .= " AND `id` != ? ";
+			$params[] = intval( $id );
+		}
+		$sth = $dbdriver->query($sql, $params );
 		if( !$sth ) {
 			self::setError( $dbdriver->error() );
 			return null; // failed
@@ -40,8 +44,8 @@ class DBUser extends DBBase
 		$dbdriver = DBDriverFactory::gen();
 		$dbg = $dbdriver->tablename('groups');
 
-		$sql = "SELECT `id` FROM $dbg WHERE `name` = '" . $dbdriver->toDBString($group) . "'";
-		$sth = $dbdriver->query($sql);
+		$sql = "SELECT `id` FROM $dbg WHERE `name` = ? ";
+		$sth = $dbdriver->query($sql, array( strval( $group ) ) );
 		if( !$sth ) {
 			self::setError( $dbdriver->error() );
 			return null; // failed
@@ -104,8 +108,8 @@ class DBUser extends DBBase
 		$sql .= "`expiredays` = '$expiredays', `email` = '" . $dbdriver->toDBString($email) . "', `emailgrp` = '$emailgrp', ";
 		$sql .= "`emailusr` = '$emailusr', `fixedpass` = '$fixedpass', `trackchangescolor` = '$trackchangescolor', ";
 		$sql .= "`organization` = '" . $dbdriver->toDBString($organization) . "', `location` = '" . $dbdriver->toDBString($location) . "' ";
-		$sql .= " WHERE `id` = $id";
-		$sth = $dbdriver->query($sql);
+		$sql .= " WHERE `id` = ? ";
+		$sth = $dbdriver->query($sql, array( intval( $id ) ) );
 		if( !$sth ) {
 			self::setError( $dbdriver->error() );
 		}
@@ -185,8 +189,8 @@ class DBUser extends DBBase
 		$dbx = $dbdriver->tablename('usrgrp');
 
 		$sql = 'SELECT x.`id` as `ix`, g.`id`, g.`name`, g.`descr`, g.`externalid` ';
-		$sql .= "FROM $dbg g, $dbx x WHERE x.`usrid` = $userId AND x.`grpid` = g.`id` ORDER BY g.`name`";
-		$sth = $dbdriver->query($sql);
+		$sql .= "FROM $dbg g, $dbx x WHERE x.`usrid` = ? AND x.`grpid` = g.`id` ORDER BY g.`name`";
+		$sth = $dbdriver->query($sql, array( intval( $userId ) ) );
 
 		if (!$sth) {
 			self::setError( $dbdriver->error() );
@@ -227,14 +231,16 @@ class DBUser extends DBBase
 		// Remove given memberships
 		if( !is_null($groupsToDelete) && is_array($groupsToDelete) && sizeof($groupsToDelete)>0 ) {
 			$or = '';
-			$sql = "DELETE FROM $dbx WHERE `usrid` = $userId AND (";
+			$sql = "DELETE FROM $dbx WHERE `usrid` = ? AND (";
+			$params = array( intval( $userId ) );
 			foreach( $groupsToDelete as $groupId ) {
-				$sql .= " $or `grpid` = $groupId ";
+				$sql .= " $or `grpid` = ? ";
+				$params[] = intval( $groupId );
 				$or = 'OR';
 			}
 			$sql .= ')';
 
-			$sth = $dbdriver->query($sql);
+			$sth = $dbdriver->query( $sql, $params );
 			if (!$sth) {
 				self::setError( $dbdriver->error() );
 				return;
@@ -499,7 +505,7 @@ class DBUser extends DBBase
 
 	public static function listPublAuthorizations($publid, $fieldnames = '*')
 	{
-		return self::listRows('authorizations', 'id', 'grpid', "`publication` = '$publid' ", $fieldnames);
+		return self::listRows('authorizations', 'id', 'grpid', "`publication` = ? ", $fieldnames, array( intval( $publid ) ) );
 	}
 
 	public static function listIssueAuthorizations($issueid, $fieldnames = '*', $nopubldefs = false)
@@ -507,7 +513,7 @@ class DBUser extends DBBase
 		$issue = DBIssue::getIssue($issueid);
 		if ($issue['overrulepub'] === true)
 		{
-			return self::listRows('authorizations', 'id', 'grpid', "`issue` = '$issueid' ");
+			return self::listRows('authorizations', 'id', 'grpid', "`issue` = ?", '*', array( intval( $issueid ) ) );
 		}
 		else
 		{
@@ -792,7 +798,7 @@ class DBUser extends DBBase
 			$oldUserGroup = DBUser::getUserGroupObj( $usergroup->Id );
 			$values = self::objToGroupRow( $usergroup );
 
-			$result = self::updateRow( 'groups', $values, " `id` = '$usergroup->Id'" );
+			$result = self::updateRow( 'groups', $values, "`id` = ?", array( intval( $usergroup->Id ) ) );
 
 			if( $result === true ) {
 				if( $usergroup->Name != $oldUserGroup->Name ) {
@@ -845,8 +851,8 @@ class DBUser extends DBBase
 	 */
 	public static function removeUsersFromGroup( $usrId, $grpId )
 	{
-		$where = 'usrid = ' . $usrId . ' AND grpid = ' . $grpId;
-		self::deleteRows('usrgrp', $where);
+		$where = 'usrid = ? AND grpid = ?';
+		self::deleteRows('usrgrp', $where, array( intval( $usrId), intval( $grpId) ) );
 	}
 
 	/*
@@ -889,9 +895,9 @@ class DBUser extends DBBase
 	 */
 	public static function removeGroupsFromUser( $grpId, $usrId )
 	{
-		$where = 'usrid = ' . $usrId . ' AND grpid = ' . $grpId;
+		$where = 'usrid = ? AND grpid = ? ';
 
-		self::deleteRows('usrgrp', $where);
+		self::deleteRows('usrgrp', $where, array( intval( $usrId), intval( $grpId) ) );
 	}
 
 
@@ -1095,8 +1101,8 @@ class DBUser extends DBBase
 		$username = $dbdriver->toDBString($username);
 		$db = $dbdriver->tablename('users');
 
-		$sql = "SELECT `language` FROM $db WHERE `user` = '$username'";
-		$sth = $dbdriver->query($sql);
+		$sql = "SELECT `language` FROM $db WHERE `user` = ? ";
+		$sth = $dbdriver->query($sql, array( strval( $username ) ));
 		$row = $dbdriver->fetch($sth);
 		return $row['language'];
 	}
@@ -1146,8 +1152,8 @@ class DBUser extends DBBase
 		else
 			$expire = '';
 
-		$sql = "UPDATE $db SET `pass`='$pass', `expirepassdate` = '$expire' WHERE `user`='$user'";
-		$sth = $dbDriver->query($sql);
+		$sql = "UPDATE $db SET `pass`='$pass', `expirepassdate` = '$expire' WHERE `user` = ? ";
+		$sth = $dbDriver->query($sql, array( strval( $user ) ));
 
 		return $sth;
 	}
@@ -1160,8 +1166,8 @@ class DBUser extends DBBase
 		$user = $dbDriver->toDBString($user);
 		$lang = $dbDriver->toDBString($lang);
 
-		$sql = "UPDATE $db SET `language`='$lang' WHERE `user`='$user'";
-		$sth = $dbDriver->query($sql);
+		$sql = "UPDATE $db SET `language`='$lang' WHERE `user` = ? ";
+		$sth = $dbDriver->query($sql, array( strval( $user ) ));
 
 		return $sth;
 	}
@@ -1178,8 +1184,8 @@ class DBUser extends DBBase
 
 		$user = $dbDriver->toDBString( $user );
 
-		$sql = "SELECT * FROM $db WHERE `user`='$user' OR `fullname`='$user' ";
-		$sth = $dbDriver->query( $sql );
+		$sql = "SELECT * FROM $db WHERE `user`= ? OR `fullname`= ? ";
+		$sth = $dbDriver->query( $sql, array( strval( $user), strval( $user ) ) );
 		if ( !$sth )
 			return null;
 		$row = $dbDriver->fetch( $sth );
@@ -1221,9 +1227,9 @@ class DBUser extends DBBase
 
 		$user = $dbDriver->toDBString($user);
 
-		$sql = "SELECT COUNT(*) as `c` FROM $db1 u, $db2 x, $db3 g WHERE u.`user` = '$user' AND u.`id` = x.`usrid` AND g.`id` = x.`grpid` AND g.`admin` != '' ";
+		$sql = "SELECT COUNT(*) as `c` FROM $db1 u, $db2 x, $db3 g WHERE u.`user` = ? AND u.`id` = x.`usrid` AND g.`id` = x.`grpid` AND g.`admin` != '' ";
 
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query($sql, array( strval( $user ) ));
 		if (!$sth) return false;
 		$row = $dbDriver->fetch($sth);
 		if (!$row) return false;
@@ -1238,8 +1244,8 @@ class DBUser extends DBBase
 		$dbu = $dbDriver->tablename("users");
 		$dbx = $dbDriver->tablename("usrgrp");
 
-		$sql = "SELECT u.* FROM $dbu u, $dbx x, $dbg g WHERE x.`usrid` = u.`id` AND x.`grpid` = g.`id` AND g.`name` = '$grpname'";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT u.* FROM $dbu u, $dbx x, $dbg g WHERE x.`usrid` = u.`id` AND x.`grpid` = g.`id` AND g.`name` = ? ";
+		$sth = $dbDriver->query( $sql, array( strval( $grpname ) ));
 
 		return $sth;
 	}
@@ -1270,27 +1276,33 @@ class DBUser extends DBBase
 			"FROM $db1 u, $db2 x, $db3 a ".
 			"LEFT JOIN $db4 s ON s.`id` = a.`state` ".
 			"INNER JOIN $db5 p ON p.`id` = a.`profile` ".
-			"WHERE u.`user` = '$user' AND u.`id` = x.`usrid` AND x.`grpid` = a.`grpid` ";
+			"WHERE u.`user` = ? AND u.`id` = x.`usrid` AND x.`grpid` = a.`grpid` ";
+		$params = array( strval( $user ) );
 		if( $pubIds ) {
 			if( is_array($pubIds) ) {
 				$sql .= " AND a.`publication` IN (".implode(',',$pubIds).") ";
 			} else {
-				$sql .= " AND a.`publication` = $pubIds ";
+				$sql .= " AND a.`publication` = ? ";
+				$params[] = intval( $pubIds );
 			}
 		}
 		if( $issue ) {
-			$sql .= " AND (a.`issue` = $issue OR a.`issue` = 0) ";
+			$sql .= " AND (a.`issue` = ? OR a.`issue` = 0) ";
+			$params[] = intval( $issue );
 		}
 		if( $sect ) {
-			$sql .=	" AND (a.`section` = $sect OR a.`section` = 0) ";
+			$sql .=	" AND (a.`section` = ? OR a.`section` = 0) ";
+			$params[] = intval( $sect );
 		}
 		if( $type ) {
-			$sql .=	" AND (s.`type` = '$type' OR s.`type`  =  '' OR s.`type` IS NULL ) ";
+			$sql .=	" AND (s.`type` = ? OR s.`type`  =  '' OR s.`type` IS NULL ) ";
+			$params = strval( $type );
 		}
 		if( $state ) {
 			$sql .=	" AND (a.`state` = $state OR a.`state` = 0) ";
+			$params[] = intval( $state );
 		}
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query($sql, $params );
 
 		$result = array();
 		if ( $sth ) {
@@ -1315,8 +1327,8 @@ class DBUser extends DBBase
 		$result = '';
 
 		// Check on name
-		$sql = "SELECT `fullname` FROM $dbu WHERE `user` = '" . $dbDriver->toDBString($usershortname) . "'";
-		$sth = $dbdriver->query($sql);
+		$sql = "SELECT `fullname` FROM $dbu WHERE `user` = ? ";
+		$sth = $dbdriver->query($sql, array( strval( $usershortname ) ) );
 		if( !$sth ) {
 			self::setError($dbdriver->error());
 		}
