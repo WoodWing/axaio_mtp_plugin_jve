@@ -117,9 +117,9 @@ class DBPublishedObjectsHist extends DBBase
 			$sql .= " AND objhist.`publishid` = ? ";
 			$params[] = $publishId;
 		}
-		$sql .= "AND objhist.`objectid` = ? "
-				 ."ORDER BY publishhist.`actiondate` DESC ";
-		$params[] = $childId;
+		$sql .= "AND objhist.`objectid` = ? ";
+		$params[] = intval( $childId );
+		$sql .= "ORDER BY publishhist.`actiondate` DESC ";
 
 		$sql = $dbDriver->limitquery( $sql, 0, 1 );
 
