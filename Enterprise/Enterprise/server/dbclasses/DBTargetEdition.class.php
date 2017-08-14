@@ -51,7 +51,7 @@ class DBTargetEdition extends DBBase {
         if( $alreadyExists ) { // insert failed because record already exists?
 			$sql  = "SELECT `id` FROM $targetEditionsTable ";
 			$sql .= "WHERE `targetid` = ? AND `editionid` = ? ";
-			$params = array( $targetId, $editionId );
+			$params = array( intval( $targetId ), intval( $editionId ));
 			$sth = $dbDriver->query( $sql, $params );
         }
         if( is_null($sth) ) { // failed?
@@ -192,11 +192,11 @@ class DBTargetEdition extends DBBase {
 			$sql .= 'WHERE tar.`objectid` IN ('.implode( ',', $objectId ).') ';
 		} else {
 			$sql .= "WHERE tar.`objectid` = ? ";
-			$params[] = $objectId;
+			$params[] = intval( $objectId );
 		}
 		if( $chanType ) {
 			$sql .= "AND cha.`type` = ? ";
-			$params[] = $chanType;
+			$params[] = strval( $chanType );
 		}
 		$sql .= "ORDER BY tar.`objectid`, tar.`channelid`, tar.`issueid`, edi.`code` ";
 		$sth = $dbDriver->query( $sql, $params );
@@ -250,7 +250,7 @@ class DBTargetEdition extends DBBase {
 		$params = array();
 		if( $chanType ) {
 			$sql .= "AND cha.`type` = ? ";
-			$params[] = $chanType;
+			$params[] = strval( $chanType );
 		}
 		$sql .= "ORDER BY tar.`objectrelationid`, tar.`channelid`, tar.`issueid`, edi.`code` ";
 		$sth = $dbDriver->query( $sql );
