@@ -352,7 +352,7 @@ class DBTicket extends DBBase
 		$sql .= $clientip ? "AND `clientip`= '$clientip' " : '';
 	 	$sql .= $appversion ? " AND `appversion`= '$appversion' " : '';
 		$sql .= $appserial ? "AND `appserial`= '$appserial' " : '';
-		$sth = $dbdriver->query($sql);
+		$sth = $dbdriver->query( $sql, $params );
 		if (!$sth) return false;
 		$row = $dbdriver->fetch($sth);
 		if (!$row) return false;

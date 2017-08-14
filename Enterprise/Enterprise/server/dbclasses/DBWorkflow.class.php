@@ -93,8 +93,15 @@ class DBWorkflow extends DBBase
 	{
 		$issueid = intval( $issueid );
 		$sectiondefid = intval( $sectiondefid );
-		$sectionwhere = ( $sectiondefid != 0 ) ? " AND (`section` = '$sectiondefid') " : ' ';
-		return self::listRows( 'issuesectionstate', 'id', 'state', "(`issue` = '$issueid') $sectionwhere ", $fieldnames );
+		$where = "(`issue` = ? ) ";
+		$params = array( intval( $issueid ) );
+
+		if( $sectiondefid != 0 ) {
+			$where .= "AND (`section` = ? ) ";
+			$params[] = intval( $sectiondefid );
+		}
+
+		return self::listRows( 'issuesectionstate', 'id', 'state', $where, $fieldnames );
 	}
 
 	public static function updateIssueSectionState( $issuesectionstateid, $values )
