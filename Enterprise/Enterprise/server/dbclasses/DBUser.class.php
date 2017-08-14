@@ -1261,7 +1261,7 @@ class DBUser extends DBBase
 		}
 		if( $type ) {
 			$sql .=	" AND (s.`type` = ? OR s.`type`  =  '' OR s.`type` IS NULL ) ";
-			$params = strval( $type );
+			$params[] = strval( $type );
 		}
 		if( $state ) {
 			$sql .=	" AND (a.`state` = ? OR a.`state` = 0) ";
