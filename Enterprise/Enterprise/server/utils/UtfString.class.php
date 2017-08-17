@@ -108,20 +108,21 @@ class UtfString
 	 * Truncate the field value if it exceeds the passed in length value.
 	 * It will truncate the extra characters or bytes, based on DB flavors:
 	 *     L> MYSQL: Truncates length characters.
-	 *     L> MSSQL,ORACLE: Truncates length bytes.
+	 *     L> MSSQL,ORACLE, Mysql blob: Truncates length bytes.
 	 *
 	 * @param string $fieldValue The field value to be checked if it needs to be truncated.
 	 * @param integer $length Maximum number of characters to use from $fieldValue.
+	 * @param bool $isTextField Is the $fieldValue a text field? For an example, blob is not seen as text field hence it is not multi-byte aware in the case of Mysql.
 	 * @return string $fieldValue Value that has been adjusted if the chars/bytes has exceeded length.
 	 */
-	static public function truncateMultiByteValue( $fieldValue, $length )
+	static public function truncateMultiByteValue( $fieldValue, $length, $isTextField = true )
 	{
 		if( $length > 0 ) {
 			$dbdriver = DBDriverFactory::gen();
-			if( $dbdriver->hasMultibyteSupport() ) { // MYSQL
+			if( $dbdriver->hasMultibyteSupport() && $isTextField ) { // MYSQL
 				// mb_substr gets the length of string in number of characters
 				$fieldValue = mb_substr( $fieldValue, 0, $length, 'UTF-8' );
-			} else { // Oracle & MSSQL
+			} else { // Oracle & MSSQL Or Mysql with blob field
 				// mb_strcut gets the length of string in bytes
 				$fieldValue = mb_strcut( $fieldValue, 0, $length, 'UTF-8' );
 			}

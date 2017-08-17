@@ -1423,10 +1423,11 @@ class DBObject extends DBBase
 	{
 		$formattedValue = null;
 		switch ($propName) {
+			case 'Description':
 			case 'PlainContent':
 				if ( DBTYPE == 'mysql' ) {
 					require_once BASEDIR.'/server/utils/UtfString.class.php';
-					$formattedValue = UtfString::truncateMultiByteValue( $value, 64000 );
+					$formattedValue = UtfString::truncateMultiByteValue( $value, 64000, false );
 					// @TODO If applicable for all mysql blobs this can be moved to the dbdriver.
 				} else {
 					$formattedValue = $value;
