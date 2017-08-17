@@ -2125,21 +2125,12 @@ class BizObject
 					}
 
 					// Set new properties and group the remaining invoked Objects.
-					if( !is_null($routeToMetaDataValueIndex) ) {
-						// If RouteTo exists in MetaDataValue, then add  new / old RouteTo value on the fly.
-						$invokedObject->NewRouteTo = isset($objectProperties['standard']['RouteTo'])
-							? $objectProperties['standard']['RouteTo']
-							: null; // When no changes, don't set anything.
-					} else {
-						// If RouteTo not exists in MetaDataValue, then get new RouteTo value[from the configured Auto Routing],
-						// else take the old RouteTo value.
-						if( !is_null($stateIdMetaDataValueIndex) ) {
-							$invokedObject->NewRouteTo = !empty( $routes[$newStateId][$categoryId]) // When empty, no auto routing configured
-								? $routes[$newStateId][$categoryId]
-								: null; // When no changes (taking the old RouteTo value), don't set anything.
-						} else {
-							$invokedObject->NewRouteTo = $invokedObject->WorkflowMetaData->RouteTo;
-						}
+					if( !is_null($routeToMetaDataValueIndex) && isset($objectProperties['standard']['RouteTo']) ) { // Did the user choose a new RouteTo?
+						$invokedObject->NewRouteTo = $objectProperties['standard']['RouteTo'];
+					} else if( !is_null($stateIdMetaDataValueIndex) && !empty( $routes[$newStateId][$categoryId]) ) { // Status changes, any auto routing?
+						$invokedObject->NewRouteTo = $routes[$newStateId][$categoryId];
+					} else { // No changes on RouteTo nor Status
+						$invokedObject->NewRouteTo = null;  // No changes, using back the original RouteTo value.
 					}
 
 					// On a Send To next, we overrule whatever else was sent along for the route and take the RouteTo
