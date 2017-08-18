@@ -257,9 +257,8 @@ function php_version_maj_min()
 function is_supported_php_version()
 {
     $v = php_version(); 
-    // >>> WoodWing: Enterprise 10.2 supports PHP 5.6 and PHP 7.0 only:
-    return ((($v['major'] == 5) && ($v['minor'] == 6)) ||
-            (($v['major'] == 7) && ($v['minor'] == 0)));
+    // >>> WoodWing: Enterprise 10.2 supports PHP 7.0 only:
+    return $v['major'] == 7 && $v['minor'] == 0;
     // return ((($v['major'] == 4) && ($v['minor'] >= 1)) ||
     //  (($v['major'] == 5) && (($v['minor'] >= 1) || ($v['release'] >= 3))) ||
 	//  $v['major'] == 7);
@@ -2913,13 +2912,13 @@ function default_page($loader_extension = LOADER_EXTENSION_NAME)
 		'To use these files, a component called the \'ionCube Loader\' must be installed.</p>'.
 	// <<<
 	
-    // >>> WoodWing: Enterprise 10.2 supports PHP 5.6 and PHP 7.0 only:
+    // >>> WoodWing: Enterprise 10.2 supports PHP 7.0 only:
     $ionCubeLoaderOk = false;
     if (!is_supported_php_version()) {
         $msg = '<div class="alert">'.
         	'<p>Please note that the following problem currently exists with the ionCube Loader installation:</p>'.
         	'<li>Your Web Server is running PHP version ' . PHP_VERSION . ' which is not supported by Enterprise Server.</li>'.
-            '<p>Please make sure that PHP 5.6 or 7.0 is installed.</p></div>';
+            '<p>Please make sure that PHP 7.0 is installed.</p></div>';
         echo $msg;
 	} else { // <<<
 

@@ -16,7 +16,6 @@ $supportedPhpVersions = array(
     // '1.2.3'  >>> php version 1.2.3 is supported
     // '1.2.3+' >>> php version 1.2.3...1.2.x is supported (so 1.2.x with patch >= 3)
     // '-1.2.3' >>> php version 1.2.3 NOT supported
-    '5.6.14+',
 	 '7.0.12+'
 );
 define ('SCENT_PHPVERSIONS',	serialize($supportedPhpVersions) );

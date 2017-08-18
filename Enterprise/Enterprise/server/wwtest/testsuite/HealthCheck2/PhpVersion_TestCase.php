@@ -22,25 +22,32 @@ class WW_TestSuite_HealthCheck2_PhpVersion_TestCase extends TestCase
 	final public function runTest()
 	{
 		require_once BASEDIR.'/server/utils/NumberUtils.class.php';
-    	$help = 'Supported PHP versions: v'.implode(', v', NumberUtils::getSupportedPhpVersions() ).'<br/>';
-    	$unsupportedPhpVersions = NumberUtils::getUnsupportedPhpVersions();
-    	if( $unsupportedPhpVersions ) {
-	    	$help .= 'Unsupported PHP versions: v'.implode(', v', $unsupportedPhpVersions ).'<br/>';
-	    }
-   		$help .= 'Please make sure you have installed a supported version.';
+		$help = 'Supported PHP versions: v'.implode( ', v', NumberUtils::getSupportedPhpVersions() ).'<br/>';
+		$unsupportedPhpVersions = NumberUtils::getUnsupportedPhpVersions();
+		if( $unsupportedPhpVersions ) {
+			$help .= 'Unsupported PHP versions: v'.implode( ', v', $unsupportedPhpVersions ).'<br/>';
+		}
+		$help .= 'Please make sure you have installed a supported version.';
 
 		$phpVersion = NumberUtils::getPhpVersionNumber();
 		if( !NumberUtils::isPhpVersionSupported( $phpVersion ) ) { // unsupported version
-            $this->setResult( 'ERROR', 'Unsupported version of PHP installed: v'.$phpVersion, $help );
+			$this->setResult( 'ERROR', 'Unsupported version of PHP installed: v'.$phpVersion, $help );
 		} else {
-			$customPhpVersions = defined('SCENT_CUSTOM_PHPVERSIONS') ? unserialize(SCENT_CUSTOM_PHPVERSIONS) : array();
-			if( in_array($phpVersion, $customPhpVersions) ) {
+			$customPhpVersions = defined( 'SCENT_CUSTOM_PHPVERSIONS' ) ? unserialize( SCENT_CUSTOM_PHPVERSIONS ) : array();
+			if( in_array( $phpVersion, $customPhpVersions ) ) {
 				// Give a warning on custom php versions
 				$this->setResult( 'WARN', 'Unsupported version of PHP installed: v'.$phpVersion, $help );
 			}
 		}
+		LogHandler::Log( 'wwtest', 'INFO', "Checked PHP version: v{$phpVersion}." );
 
-		LogHandler::Log('wwtest', 'INFO', 'PHP version (v'.$phpVersion.').');
+		// Since 10.2.0: make sure PHP is compiled for 64 bit architecture.
+		$bitSize = NumberUtils::getPhpArchitectureBitSize();
+		if( $bitSize <= 32 ) {
+			$help = 'Please make sure you have installed a 64 bit version.';
+			$this->setResult( 'ERROR', "Unsupported version of PHP installed: {$bitSize} bit.", $help );
+		}
+		LogHandler::Log( 'wwtest', 'INFO', "Checked PHP architecture: {$bitSize} bit." );
 
 		// check if the crypt() function is working for an allowed version. In PHP 5.3.0 this function is bugged for < 4 characters
 		$this->runCryptTest();
