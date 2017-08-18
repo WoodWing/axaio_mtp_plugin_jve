@@ -55,12 +55,30 @@ class UtfString
 		}
 		
 		$instring = mb_convert_encoding($instring, 'UTF-8', MB_ENCODINGS);
-		//Remove non-printable characters from begin and end (TODO check if x7F is really illegal)
-		$instring = trim($instring, "\x7F\x00..\x1F");
-		// BZ#12513 remove illegal XML characters (all before 0x1F except for tab, newline, carriage return)
-		$instring = preg_replace('/[\x00-\x08\x0B-\x0C\x0E-\x1F]/', '', $instring);
+		$instring = self::removeIllegalUnicodeCharacters( $instring );
 		
 		return $instring;
+	}
+
+	/**
+	 * Remove illegal characters from the input string.
+	 *
+	 * Illegal characters refer to characters like control-characters,
+	 * however the tab, newline and carriage return are not seen as
+	 * illegal characters and so they won't be removed.
+	 *
+	 *
+	 * @param string $inString
+	 * @return string
+	 */
+	public static function removeIllegalUnicodeCharacters( $inString )
+	{
+		//Remove non-printable characters from begin and end (TODO check if x7F is really illegal)
+		$inString = trim( $inString, "\x7F\x00..\x1F" );
+		// BZ#12513 remove illegal XML characters (all before 0x1F except for tab, newline, carriage return)
+		$inString = preg_replace('/[\x00-\x08\x0B-\x0C\x0E-\x1F]/', '', $inString );
+
+		return $inString;
 	}
 	
 	/**
