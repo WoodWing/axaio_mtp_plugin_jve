@@ -17,27 +17,30 @@ abstract class AutomatedPrintWorkflow_EnterpriseConnector extends DefaultConnect
 	/**
 	 * Enables this connector to resolve given object operations with other operations.
 	 *
-	 * Called when user places a dossier onto an InDesignArticle in the CS preview.
+	 * Its called when a user places a dossier onto an InDesignArticle in the CS preview.
 	 * CS then calls CreateObjectOperations and so the core server calls this function.
 	 *
-	 * Also through InstantiateTemplate, CreateObjects and SaveObjects, operations can
-	 * be created implicity, and so the core server calls this function.
+	 * Operations can also be created implicitly through InstantiateTemplate, CreateObjects
+	 * and SaveObjects, and so the core server calls this function.
 	 *
-	 * When there are operations listed that needs to be refined/tweaked/resolved server 
-	 * side, the connector can do here. Then, when the layout object is about to open 
+	 * When there are operations that needs to be refined/tweaked/resolved server-side,
+	 * the connector can do that here. Then, when the layout object is about to open
 	 * for editing in SC, the (resolved) operations will be executed on the layout. 
 	 *
-	 * When one operation is passed in, and many are returned, the new operations are
-	 * inserted in the operation list, directly after the first returned operation.
+	 * Default behaviour for a connector is to not resolve any operations.
+	 *
+	 * When multiple operations are resolved from a single operation, the new operations
+	 * will be inserted in place of the initial operation (meaning the initial operation
+	 * is not automatically included).
 	 * Note that operations are identified by their Id field, which requires a GUID value.
 	 *
-	 * @param integer $objectId
+	 * @param integer $objectId Id of the Layout object
 	 * @param ObjectOperation $operation
 	 * @return ObjectOperation[] Resolved operations.
 	 */
 	public function resolveOperation( $objectId, $operation )
 	{
-		return array( $operation ); // by default no resolve
+		return array(); // Do not resolve any operations by default.
 	}
 	
 	/**

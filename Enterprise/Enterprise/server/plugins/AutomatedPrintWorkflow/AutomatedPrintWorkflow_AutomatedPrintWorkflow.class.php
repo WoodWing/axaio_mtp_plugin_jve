@@ -15,12 +15,10 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 */
 	final public function resolveOperation( $objectId, $operation )
 	{
-		$resolvedOperations = array( $operation ); // by default, don't resolve
+		$resolvedOperations = array(); // Do not resolve any operations by default.
 		if( $operation->Type == 'AutomatedPrintWorkflow' &&
 			( $operation->Name == 'PlaceDossier' || $operation->Name == 'PlaceArticle' )
 		) {
-			$resolvedOperations = array(); // always resolve the 'PlaceDossier' and 'PlaceArticle' operations
-
 			require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
 			$parentTargets = DBTarget::getTargetsByObjectId( $objectId );
 			if( $parentTargets && count( $parentTargets ) == 1 ) {

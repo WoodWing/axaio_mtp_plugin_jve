@@ -143,11 +143,18 @@ class BizObjectOperation
 			foreach( $operations as $key => $operation ) {
 				$connectors = BizServerPlugin::searchConnectors( 'AutomatedPrintWorkflow', null );
 				if( $connectors ) {
+					$allConnectorOperations = array();
 					foreach( $connectors as $connector ) {
 						$connectorOperations = BizServerPlugin::runConnector( $connector,
 							'resolveOperation', array( $objectId, $operation )
 						);
-						$resolvedOperations = array_merge( $resolvedOperations, $connectorOperations );
+						$allConnectorOperations = array_merge( $allConnectorOperations, $connectorOperations );
+					}
+					// If the operation cannot be resolved by any of the connectors, add it to the resolved operations list directly.
+					if( empty( $allConnectorOperations ) ) {
+						$resolvedOperations[] = $operation;
+					} else {
+						$resolvedOperations = array_merge( $resolvedOperations, $allConnectorOperations );
 					}
 				}
 			}
