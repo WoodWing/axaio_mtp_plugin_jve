@@ -92,7 +92,7 @@ class BizSearch
 		$objects = array();
 		$user = BizSession::getShortUserName();
 		foreach( $objectIds as $objectId ) {
-			$objects[] = BizObject::getObject($objectId, $user, false, 'none', array( 'Targets','MetaData', 'Relations' ),
+			$objects[] = BizObject::getObject( $objectId, $user, false, 'none', array( 'Targets','MetaData', 'Relations' ),
 				null, false, $areas, null, false );
 			// By asking for Targets and Relations also child object targets are added.
 		}

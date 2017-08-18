@@ -251,10 +251,19 @@ class DBObjectLabels extends DBBase
 	 */
 	private static function objToRow( $objectId, ObjectLabel $obj )
 	{
-		require_once BASEDIR.'/server/utils/UtfString.class.php';
+
 		$row = array();
-		if( !is_null($obj->Id) )   $row['id']   = $obj->Id   ? intval($obj->Id)   : 0;	
-		if( !is_null($obj->Name) ) $row['name'] = $obj->Name ? UtfString::truncateMultiByteValue(strval($obj->Name), 250) : '';
+		if( !is_null($obj->Id) ) {
+			$row['id']   = $obj->Id   ? intval($obj->Id)   : 0;
+		}
+		if( !is_null($obj->Name) ) {
+			$row['name'] = '';
+			if( $obj->Name ) {
+				require_once BASEDIR.'/server/utils/UtfString.class.php';
+				$obj->Name = UtfString::removeIllegalUnicodeCharacters( strval( $obj->Name ) );
+				$row['name'] = UtfString::truncateMultiByteValue( $obj->Name, 250 );
+			}
+		}
 		$row['objid'] = intval($objectId);	
 		return $row;
 	}
