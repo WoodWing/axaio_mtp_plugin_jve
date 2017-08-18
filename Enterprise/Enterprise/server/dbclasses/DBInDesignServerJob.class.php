@@ -846,6 +846,7 @@ class DBInDesignServerJob extends DBBase
 
 		// Save the error for the job.
 		require_once BASEDIR.'/server/utils/UtfString.class.php';
+		$errorMessage = UtfString::removeIllegalUnicodeCharacters( $errorMessage );
 		$errorMessage = UtfString::truncateMultiByteValue( $errorMessage, 1024 );
 		$values = array( 'errormessage' => $errorMessage );
 		$where = '`jobid` = ?';
@@ -1238,6 +1239,7 @@ class DBInDesignServerJob extends DBBase
 		}
 		if( !is_null($obj->ErrorMessage) ) {
 			require_once BASEDIR.'/server/utils/UtfString.class.php';
+			$obj->ErrorMessage = UtfString::removeIllegalUnicodeCharacters( $obj->ErrorMessage );
 			$row['errormessage'] = UtfString::truncateMultiByteValue( $obj->ErrorMessage, 1024 );
 		}
 		if( !is_null($obj->ScriptResult) ) {

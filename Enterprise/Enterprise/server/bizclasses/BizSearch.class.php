@@ -87,8 +87,8 @@ class BizSearch
 		$objects = array();
 		$user = BizSession::getShortUserName();
 		foreach( $objectIds as $objectId ) {
-			$objects[] = BizObject::getObject($objectId, $user, false/*lock*/, 'none'/*rendition*/, array('Targets','MetaData', 'Relations')/*requestInfo */, 
-				null/*haveVersion*/, false/*checkRights*/, $areas); // no lock, no rendition
+			$objects[] = BizObject::getObject( $objectId, $user, false, 'none', array('Targets','MetaData', 'Relations'),
+				null, false, $areas, null, false );
 			// By asking for Targets and Relations also child object targets are added.
 		}
 		self::indexObjects( $objects, $suppressExceptions, $areas );

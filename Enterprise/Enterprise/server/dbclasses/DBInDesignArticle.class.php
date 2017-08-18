@@ -119,6 +119,7 @@ class DBInDesignArticle extends DBBase
 		}
 		if( !is_null($obj->Name) ) {
 			require_once BASEDIR.'/server/utils/UtfString.class.php';
+			$obj->Name = UtfString::removeIllegalUnicodeCharacters( $obj->Name );
 			$row['name'] = UtfString::truncateMultiByteValue( $obj->Name, 200 );
 		}
 		

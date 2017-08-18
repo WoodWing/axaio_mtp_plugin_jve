@@ -1287,10 +1287,12 @@ class DBObject extends DBBase
 	}
 	
 	/**
-	 * Generates a part of a sql-statement that can be used to update/insert object
-	 * information in the database. Typically used if an object is added/updated.
-	 * Furthermore object information is also written to smart_deletedobjects and
-	 * smart_objectversions.
+	 * Generate a partial sql-statement for object update or insert.
+	 *
+	 * The sql-statement is formatted / adjusted to be ready use for update or insertion:
+	 * - removes illegal characters from the string values.
+	 * - truncates the value when needed in order to be able to fit into the database field max length/size.
+	 * - adds quotes to the field's value when needed.
 	 * 
 	 * @param string $operation Fragment is used for update or insert operation
 	 * @param string $dbField name of the field as sent to the dbdriver
@@ -1303,10 +1305,10 @@ class DBObject extends DBBase
 	 */
 	static public function handleObjectUpdateInsert( $operation, $dbField, $propertyName, $value, $dbDriver, $comma, &$blobs )
 	{
-		// $fieldType = string, int, blob, double
-		// DBObject::updateObject
+		require_once BASEDIR . '/server/utils/UtfString.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 
+		$value = is_string( $value ) ? UtfString::removeIllegalUnicodeCharacters( $value ) : $value;
 		if( !BizProperty::isCustomPropertyName( $propertyName ) ) { // Only format DB value for non custom props
 			$formattedDbValue = self::formatDbValue( $propertyName, $value );
 		} else {
@@ -1476,18 +1478,13 @@ class DBObject extends DBBase
 	static private function truncatePropertyValue( $metaKey, $metaValue )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+		require_once BASEDIR.'/server/utils/UtfString.class.php';
 		$infoProps = BizProperty::getPropertyInfos();
 		if( $infoProps[$metaKey] && 
-				isset($infoProps[$metaKey]->MaxLength) && $infoProps[$metaKey]->MaxLength > 0 )
-		{
-			$dbdriver = DBDriverFactory::gen();
-			if( $dbdriver->hasMultibyteSupport() ) { // MYSQL
-				// mb_substr gets the length of string in number of characters
-				$metaValue = mb_substr( $metaValue, 0, $infoProps[$metaKey]->MaxLength, 'UTF-8' );
-			} else { // Oracle & MSSQL
-				// mb_strcut gets the length of string in bytes
-				$metaValue = mb_strcut( $metaValue, 0, $infoProps[$metaKey]->MaxLength, 'UTF-8' );
-			}
+				isset($infoProps[$metaKey]->MaxLength) && $infoProps[$metaKey]->MaxLength > 0 ) {
+
+			require_once BASEDIR . '/server/utils/UtfString.class.php';
+			UtfString::truncateMultiByteValue( $metaValue, $infoProps[$metaKey]->MaxLength );
 		}
 		return $metaValue;
 	}
@@ -1508,14 +1505,8 @@ class DBObject extends DBBase
 		// When the max length is set to 200 or less, use that value, longer values can't be saved.
 		$maxLength = ($property->MaxLength && $property->MaxLength <= 200) ? $property->MaxLength : 200;
 
-		$dbdriver = DBDriverFactory::gen();
-		if( $dbdriver->hasMultibyteSupport() ) { // MYSQL
-			// mb_substr gets the length of string in number of characters
-			$value = mb_substr( $value, 0, $maxLength, 'UTF-8' );
-		} else { // Oracle & MSSQL
-			// mb_strcut gets the length of string in bytes
-			$value = mb_strcut( $value, 0, $maxLength, 'UTF-8' );
-		}
+		require_once BASEDIR . '/server/utils/UtfString.class.php';
+		UtfString::truncateMultiByteValue( $value, $maxLength );
 
 		return $value;
 	}

@@ -465,7 +465,7 @@ class BizObject
 			$requestInfo = self::getDefaultRequestInfos();
 		}
 		$object = self::getObject( $object->MetaData->BasicMetaData->ID, $user, false,
-			$rendition,	$requestInfo );
+			$rendition,	$requestInfo, null, true, null,null, false );
 
 		if( defined( 'HTMLLINKFILES' ) && HTMLLINKFILES == true ) {
 			// Update object's 'link' files (htm) in <FileStore>/_BRANDS_ folder
@@ -5566,6 +5566,7 @@ class BizObject
 			}
 		}
 
+		$newSlugLine = UtfString::removeIllegalUnicodeCharacters( $newSlugLine );
 		$newSlugLine = UtfString::truncateMultiByteValue( $newSlugLine, 250 );
 		return $newSlugLine;
 	}
