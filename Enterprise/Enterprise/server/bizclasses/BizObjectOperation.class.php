@@ -150,12 +150,18 @@ class BizObjectOperation
 						);
 						$allConnectorOperations = array_merge( $allConnectorOperations, $connectorOperations );
 					}
-					// If the operation cannot be resolved by any of the connectors, add it to the resolved operations list directly.
-					if( empty( $allConnectorOperations ) ) {
-						$resolvedOperations[] = $operation;
-					} else {
-						$resolvedOperations = array_merge( $resolvedOperations, $allConnectorOperations );
+
+					if( is_array( $allConnectorOperations ) ) {
+						if( empty( $allConnectorOperations ) ) {
+							// If none of the connectors have been able to resolve operations, it means that the operation has
+							//not been recognized by any of the plugins. In this case the operation will be treated as a
+							// resolved operation by default.
+							$resolvedOperations[] = $operation;
+						} else {
+							$resolvedOperations = array_merge( $resolvedOperations, $allConnectorOperations );
+						}
 					}
+					// else ignore $operation ($allConnectorOperations = null)
 				}
 			}
 		}

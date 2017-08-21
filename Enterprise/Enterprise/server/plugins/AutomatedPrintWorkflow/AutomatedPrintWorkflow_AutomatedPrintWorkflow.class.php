@@ -32,6 +32,12 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 
 				$resolvedOperations = $this->resolvePlaceOperations(
 					$objectId, $issueId, $editionId, $dossierId, $articleId, $inDesignArticleId, $operation->Name );
+
+				// PlaceDossier or PlaceArticle should never be treated as resolved operations if no operations are resolved.
+				// So return null instead of an empty array.
+				if( empty( $resolvedOperations ) ) {
+					$resolvedOperations = null;
+				}
 			}
 		}
 		return $resolvedOperations;
