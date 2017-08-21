@@ -779,7 +779,7 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 		//  12.0 => SQL Server 2014
 		//  13.0 => SQL Server 2016
 		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		$serverVersion = implode( '.', array_slice( explode( '.', $mssqlInfo['SQLServerVersion'] ), 0, 1 ) ); // take out "major" only!
+		$serverVersion = implode( '.', array_slice( explode( '.', $mssqlInfo['SQLServerVersion'] ), 0, 2 ) ); // take out "major.minor" only!
 		if( version_compare( $serverVersion, '12.0' ) !== 0 && version_compare( $serverVersion, '13.0' ) !== 0 ) {
 			$help = 'Install SQL Server 2014 or SQL Server 2016.'; // returned by reference
 			$detail = 'Unsupported version of Microsoft SQL Server. '.
