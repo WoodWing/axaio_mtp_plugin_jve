@@ -32,9 +32,9 @@ class BizAdmOutputDevice
 	public function addFeatureOutputDevices( ServerInfo $serverInfo )
 	{
 		// The 'DigitalMagazine' option is an indication that DPS is enabled.
-		// Therefore we only add it when one of the plugins are enabled.
-		if( !BizServerPlugin::isPluginActivated( 'AdobeDps' ) &&
-			!BizServerPlugin::isPluginActivated( 'AdobeDps2' ) ) {
+		// Therefore we only add it when the Adobe AEM plugin is enabled.
+		// Note that Adobe DPS plugin is removed since 10.2, so no longer checked here.
+		if( !BizServerPlugin::isPluginActivated( 'AdobeDps2' ) ) {
 			return; // Nothing to do
 		}
 
