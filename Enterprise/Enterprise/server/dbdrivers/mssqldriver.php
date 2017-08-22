@@ -739,52 +739,56 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	 */
 	public function checkDbVersion( &$help )
 	{
-		// Check the Microsoft Driver version for PHP.
-		// Note that the dbdriver must be connected (BZ#16885)
-		//    => Too old versions could cause empty SOAP responses (such as BZ#16193) ... !
-		//       This is pretty unpredictable, but seem to happen when an SQL error has occurred before.
 		$mssqlInfo = $this->getClientServerInfo();
-		$extensionVersion = implode( '.', array_slice( explode( '.', $mssqlInfo['ExtensionVer'] ), 0, 2 ) ); // take out "major.minor" only!
-		if( version_compare( $extensionVersion, '4.3' ) !== 0 ) {
-			$help = 'Install Microsoft Driver 4.3 for PHP for SQL Server.'; // returned by reference
-			$detail = 'Unsupported version of Microsoft Driver for PHP for SQL Server. '.
-				'Found v'.$mssqlInfo['ExtensionVer'].' which is not supported.';
-			$e = new BizException( null, 'Server', $detail, 'Invalid Configuration' );
-		}
+		try {
+			// Check the Microsoft Driver version for PHP.
+			// Note that the dbdriver must be connected (BZ#16885)
+			//    => Too old versions could cause empty SOAP responses (such as BZ#16193) ... !
+			//       This is pretty unpredictable, but seem to happen when an SQL error has occurred before.
+			$extensionVersion = implode( '.', array_slice( explode( '.', $mssqlInfo['ExtensionVer'] ), 0, 2 ) ); // take out "major.minor" only!
+			if( version_compare( $extensionVersion, '4.3' ) !== 0 ) {
+				$help = 'Install Microsoft Driver 4.3 for PHP for SQL Server.'; // returned by reference
+				$detail = 'Unsupported version of Microsoft Driver for PHP for SQL Server. '.
+					'Found v'.$mssqlInfo['ExtensionVer'].' which is not supported.';
+				throw new BizException( null, 'Server', $detail, 'Invalid Configuration' );
+			}
 
-		// Check the Microsoft ODBC Driver version.
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		// Microsoft Driver version for PHP => Microsoft ODBC Driver version:
-		//  3.1 => 11.0
-		//  3.2 => 11.0
-		//  4.0 => 11.0 or 13.0
-		//  4.3 => 11.0 or 13.1
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		// Check revision version too! In case of an older revision you cannot read "real" data types from SQL Server.
-		$driverVersion = implode( '.', array_slice( explode( '.', $mssqlInfo['DriverVer'] ), 0, 2 ) ); // take out "major.minor" only!
-		if( version_compare( $mssqlInfo['DriverVer'], '11.00.2100' ) !== -1 || // lower?
-			( version_compare( $driverVersion, '11.0' ) !== 0 && version_compare( $driverVersion, '13.1' ) !== 0 ) ) {
-			$help = 'Install Microsoft ODBC Driver 11 for SQL Server or Microsoft ODBC Driver 13.1 for SQL Server.'; // returned by reference
-			$detail = 'Unsupported version of Microsoft ODBC Driver for SQL Server. '.
-				'Found v'.$mssqlInfo['DriverVer'].' which is not supported.';
-			$e = new BizException( null, 'Server', $detail, 'Invalid Configuration' );
-		}
+			// Check the Microsoft ODBC Driver version.
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+			// Microsoft Driver version for PHP => Microsoft ODBC Driver version:
+			//  3.1 => 11.0
+			//  3.2 => 11.0
+			//  4.0 => 11.0 or 13.0
+			//  4.3 => 11.0 or 13.1
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+			// Check revision version too! In case of an older revision you cannot read "real" data types from SQL Server.
+			$driverVersion = implode( '.', array_slice( explode( '.', $mssqlInfo['DriverVer'] ), 0, 2 ) ); // take out "major.minor" only!
+			if( version_compare( $mssqlInfo['DriverVer'], '11.00.2100' ) !== -1 || // lower?
+				( version_compare( $driverVersion, '11.0' ) !== 0 && version_compare( $driverVersion, '13.1' ) !== 0 ) ) {
+				$help = 'Install Microsoft ODBC Driver 11 for SQL Server or Microsoft ODBC Driver 13.1 for SQL Server.'; // returned by reference
+				$detail = 'Unsupported version of Microsoft ODBC Driver for SQL Server. '.
+					'Found v'.$mssqlInfo['DriverVer'].' which is not supported.';
+				throw new BizException( null, 'Server', $detail, 'Invalid Configuration' );
+			}
 
-		// Check the SQL Server version.
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		// Internal SQL Server version => SQL Server version:
-		//  10.0 => SQL Server 2008
-		//  10.5 => SQL Server 2008 R2
-		//  11.0 => SQL Server 2012
-		//  12.0 => SQL Server 2014
-		//  13.0 => SQL Server 2016
-		// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-		$serverVersion = implode( '.', array_slice( explode( '.', $mssqlInfo['SQLServerVersion'] ), 0, 2 ) ); // take out "major.minor" only!
-		if( version_compare( $serverVersion, '12.0' ) !== 0 && version_compare( $serverVersion, '13.0' ) !== 0 ) {
-			$help = 'Install SQL Server 2014 or SQL Server 2016.'; // returned by reference
-			$detail = 'Unsupported version of Microsoft SQL Server. '.
-				'Found v'.$mssqlInfo['SQLServerVersion'].' which is not supported.';
-			$e = new BizException( null, 'Server', $detail, 'Invalid Configuration' );
+			// Check the SQL Server version.
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+			// Internal SQL Server version => SQL Server version:
+			//  10.0 => SQL Server 2008
+			//  10.5 => SQL Server 2008 R2
+			//  11.0 => SQL Server 2012
+			//  12.0 => SQL Server 2014
+			//  13.0 => SQL Server 2016
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+			$serverVersion = implode( '.', array_slice( explode( '.', $mssqlInfo['SQLServerVersion'] ), 0, 2 ) ); // take out "major.minor" only!
+			if( version_compare( $serverVersion, '12.0' ) !== 0 && version_compare( $serverVersion, '13.0' ) !== 0 ) {
+				$help = 'Install SQL Server 2014 or SQL Server 2016.'; // returned by reference
+				$detail = 'Unsupported version of Microsoft SQL Server. '.
+					'Found v'.$mssqlInfo['SQLServerVersion'].' which is not supported.';
+				throw new BizException( null, 'Server', $detail, 'Invalid Configuration' );
+			}
+		} catch( BizException $e ) {
+			// Throw back the very first found error to caller, yet log ALL version info, as handled below.
 		}
 
 		// Log all DB client/server information.
