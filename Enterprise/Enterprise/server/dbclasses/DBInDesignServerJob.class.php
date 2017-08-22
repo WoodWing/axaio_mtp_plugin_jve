@@ -1239,8 +1239,8 @@ class DBInDesignServerJob extends DBBase
 		}
 		if( !is_null($obj->ErrorMessage) ) {
 			require_once BASEDIR.'/server/utils/UtfString.class.php';
-			$obj->ErrorMessage = UtfString::removeIllegalUnicodeCharacters( $obj->ErrorMessage );
-			$row['errormessage'] = UtfString::truncateMultiByteValue( $obj->ErrorMessage, 1024 );
+			$row['errormessage'] = UtfString::removeIllegalUnicodeCharacters( $obj->ErrorMessage );
+			$row['errormessage'] = UtfString::truncateMultiByteValue( $row['errormessage'], 1024 );
 		}
 		if( !is_null($obj->ScriptResult) ) {
 			$row['scriptresult'] = $obj->ScriptResult;

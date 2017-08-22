@@ -67,7 +67,7 @@ class UtfString
 	 * however the tab, newline and carriage return are not seen as
 	 * illegal characters and so they won't be removed.
 	 *
-	 *
+	 * @since 10.0.6
 	 * @param string $inString
 	 * @return string
 	 */
