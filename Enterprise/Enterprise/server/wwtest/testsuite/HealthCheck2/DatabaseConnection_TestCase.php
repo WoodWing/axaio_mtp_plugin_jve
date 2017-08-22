@@ -77,15 +77,16 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 				case 'mssql':
 					$msg = 'Could not load the PHP extension "Microsoft Driver for PHP for SQL Server".';
 					$help = 'Please make sure that:  <br/>'.
-						 '- The PHP extension for MSSQL (php_sqlsrv.dll) version 3.0 (or higher) is installed. <br/>' .
-						 '- The php_sqlsrv.dll is enabled in the php.ini file.<br/>'.
+						'- The PHP extension for MSSQL (php_sqlsrv) version 4.3 is installed. <br/>' .
+						'- The PHP extension for MSSQL is enabled in the php.ini file.<br/>'.
+						'- The PHP extension for MSSQL is PHP 7.1 and 64 bit compatible.<br/>'.
 						 'For more information about Microsoft Drivers for PHP for SQL Server, '.
 						 'click <a href="http://technet.microsoft.com/en-us/library/cc296170(v=sql.105).aspx">here</a>.<br/>';
 				break;
 				case 'oracle':
-					$msg = 'Could not load one of the PHP extensions "php_oci8", "php_oci8_11g" or "php_oci8_12c".';
+					$msg = 'Could not load one of the PHP extensions "php_oci8_11g" or "php_oci8_12c".';
 					$help = 'Please make sure that:  <br/>'.
-						'- An appropriate PHP extension for Oracle (php_oci8, php_oci8_11g or php_oci8_12c) is installed. <br/>'.
+						'- An appropriate PHP extension for Oracle (php_oci8_11g or php_oci8_12c) is installed. <br/>'.
 						'- The PHP extension for Oracle is enabled in the php.ini file.<br/>'.
 						'- A matching Oracle client library is installed.<br/>'.
 						'For more information, click <a href="http://php.net/manual/en/oci8.requirements.php">here</a> <br/>';
@@ -101,8 +102,8 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 					'configserver.php files:<br/>'.$dbConfig;
 			if ( DBTYPE == 'mssql' ){
 				// BZ#16885 we cannot check version at this point, so show hint
-				$help .= 'Make sure that the Microsoft SQL Server Native Client of version '.
-						'11.00.2100 (or higher) is installed.<br/>';
+				$help .= 'Make sure that Microsoft ODBC Driver 11 (11.00.2100 or higher) for SQL Server or '.
+					'Microsoft ODBC Driver 13.1 for SQL Server is installed.<br/>';
 			}
 			$msg = 'Could not connect to the database.<br/>';
 			$dbError = trim($dbdriver->error());
