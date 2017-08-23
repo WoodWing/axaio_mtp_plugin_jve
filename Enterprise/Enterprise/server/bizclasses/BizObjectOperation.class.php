@@ -148,13 +148,15 @@ class BizObjectOperation
 						$connectorOperations = BizServerPlugin::runConnector( $connector,
 							'resolveOperation', array( $objectId, $operation )
 						);
-						$allConnectorOperations = array_merge( $allConnectorOperations, $connectorOperations );
+						if( is_array( $connectorOperations ) && !empty( $connectorOperations ) ) {
+							$allConnectorOperations = array_merge( $allConnectorOperations, $connectorOperations );
+						}
 					}
 
 					if( is_array( $allConnectorOperations ) ) {
 						if( empty( $allConnectorOperations ) ) {
 							// If none of the connectors have been able to resolve operations, it means that the operation has
-							//not been recognized by any of the plugins. In this case the operation will be treated as a
+							// not been recognized by any of the plugins. In this case the operation will be treated as a
 							// resolved operation by default.
 							$resolvedOperations[] = $operation;
 						} else {
