@@ -469,7 +469,7 @@ class FacebookPublisher
 	 *
 	 * @param $pageId String The ID of the page for which to delete a post.
 	 * @param $message_id String The ID of the message to be deleted.
-	 * @return mixed
+     * @return mixed
 	 * @throws Exception Throws an exception if the deletion cannot be completed successfully.
 	 */
 	public function deleteMessageFromFeed( $pageId, $message_id )
