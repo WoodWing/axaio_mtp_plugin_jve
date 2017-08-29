@@ -948,6 +948,53 @@ class BizQueryBase
 		return $params;
 	}
 
+	/**
+	 * Resolve QueryParam that contains Issue as the Property.
+	 *
+	 * When the Property is sent in as Issue ( the Issue name(s) ),
+	 * function resolves the name(s) to its corresponding Issue id(s).
+	 *
+	 * @param QueryParam[] $params
+	 * @return QueryParam[] With the resolved Issue names to Issue ids when necessary.
+	 */
+	public static function resolveIssueNameParams( $params )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+		$issues = array();
+		if( $params ) foreach( $params as $param ) {
+			if( strtolower( $param->Property == 'Issue' )) {
+				$issueRows = DBIssue::getIssuesByName( $param->Value );
+				if( $issueRows ) foreach( $issueRows as $issueRow ) {
+					$issues[] = $issueRow['id'];
+				}
+			}
+		}
+		if( $issues ) {
+			// Re-construct the QueryParams.
+			$newParams = array();
+
+			// Collect QueryParam that is/are not Issue
+			foreach( $params as $param ) {
+				if( strtolower( $param->Property != 'Issue' )) {
+					$newParams[] = $param;
+				}
+			}
+
+			// Filling in the Issue id(s)
+			require_once BASEDIR .'/server/interfaces/services/wfl/DataClasses.php';
+			foreach ( $issues as $issue ) {
+				$queryParam = new QueryParam();
+				$queryParam->Property = 'IssueId';
+				$queryParam->Operation = '=';
+				$queryParam->Value = $issue;
+				$newParams[] = $queryParam;
+			}
+			$params = $newParams;
+		}
+
+		return $params;
+	}
+
 	static protected function getPropNames($mode, $minimalProps, $requestProps, $areas)
 	{
 		// If $requestProps set, this is the complete list of properties, so if no empty return this

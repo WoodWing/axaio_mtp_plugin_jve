@@ -260,8 +260,8 @@ class DBObjectLabels extends DBBase
 			$row['name'] = '';
 			if( $obj->Name ) {
 				require_once BASEDIR.'/server/utils/UtfString.class.php';
-				$obj->Name = UtfString::removeIllegalUnicodeCharacters( strval( $obj->Name ) );
-				$row['name'] = UtfString::truncateMultiByteValue( $obj->Name, 250 );
+				$row['name'] = UtfString::removeIllegalUnicodeCharacters( strval( $obj->Name ) );
+				$row['name'] = UtfString::truncateMultiByteValue( $row['name'], 250 );
 			}
 		}
 		$row['objid'] = intval($objectId);	

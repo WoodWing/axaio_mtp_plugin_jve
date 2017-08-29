@@ -114,6 +114,7 @@ class BizQuery extends BizQueryBase
 		self::determineMaximumNumberOfResults( $request );
 		if( isset( $request->Params ) ) {
 			$request->Params = self::resolvePublicationNameParams( $request->Params );
+			$request->Params = self::resolveIssueNameParams( $request->Params ) ;
 			$request->Params = self::resolveSpecialParams( $request->Params );
 		}
 

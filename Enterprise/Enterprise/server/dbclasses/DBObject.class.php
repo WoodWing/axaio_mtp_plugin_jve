@@ -1545,7 +1545,6 @@ class DBObject extends DBBase
 	static private function truncatePropertyValue( $metaKey, $metaValue )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
-		require_once BASEDIR.'/server/utils/UtfString.class.php';
 		$infoProps = BizProperty::getPropertyInfos();
 		if( $infoProps[$metaKey] && 
 				isset($infoProps[$metaKey]->MaxLength) && $infoProps[$metaKey]->MaxLength > 0 ) {
