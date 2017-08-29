@@ -122,9 +122,10 @@ class BizQuery extends BizQueryBase
 		// Note: in v6.1 we had a way to pass this to a Content Source. Starting v7 we only support
 		// this via a Search Connector
 		require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
-		if (isset($params)) {
-			$params = self::resolvePublicationNameParams($params);
-			$params = self::resolveSpecialParams($params);
+		if (isset( $params )) {
+			$params = self::resolvePublicationNameParams( $params );
+			$params = self::resolveIssueNameParams( $params ) ;
+			$params = self::resolveSpecialParams( $params );
 		}
 	// IMPORTANT: The block below has been disabled for BZ#30544 the reason behind this is that when searching as a normal
 	// user the search results are limited to objects which are targeted to issues while there might be orphaned objects
