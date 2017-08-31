@@ -39,10 +39,16 @@ class ReadWriteFieldHandler
 			$this->property = new PropertyInfo( $entPropertyName, null, $this->entMetadataCategory, $propType );
 		} else {
 			$metadataPaths = BizProperty::getMetaDataPaths();
-			$metadataPath = $metadataPaths[ $entPropertyName ];
-			$this->entMetadataCategory = substr( $metadataPath, 0, strpos( $metadataPath, '->' ) );
-			$propertyInfos = BizProperty::getPropertyInfos();
-			$this->property = $propertyInfos[ $entPropertyName ];
+			if (array_key_exists($entPropertyName,$metadataPaths)) {
+				$metadataPath = $metadataPaths[ $entPropertyName ];
+				$this->entMetadataCategory = substr( $metadataPath, 0, strpos( $metadataPath, '->' ) );
+				$propertyInfos = BizProperty::getPropertyInfos();
+				$this->property = $propertyInfos[ $entPropertyName ];
+			} else {
+				if( LogHandler::debugMode() ) { // for developers/integrators only
+					LogHandler::Log( __METHOD__ , 'ERROR', "Property $entPropertyName not found in metadataPaths: ".print_r($metadataPaths,1));
+				}
+			}
 		}
 	}
 
@@ -152,7 +158,7 @@ class ReadWriteFieldHandler
 				return (string)$enterpriseValue;
 			default:
 				$message = "Unable to cast to unknown Elvis data type ".$this->dataType." for field ".$this->property->Name;
-				throw new BizException( 'ERR_ERROR', 'Server', $message, $message, 'ERROR' );
+				throw new BizException( 'ERR_ERROR', 'Server', $message );
 		}
 	}
 
@@ -234,10 +240,10 @@ class ReadWriteFieldHandler
 			case 'Section':
 			case 'ArrayOfEdition':
 				$message = "Casting to Enterprise data type ".$this->property->Type." for field ".$this->property->Name." is not supported by Elvis Content Source.";
-				throw new BizException( 'ERR_ERROR', 'Server', $message, $message, 'ERROR' );
+				throw new BizException( 'ERR_ERROR', 'Server', $message );
 			default:
 				$message = "Unable to cast to unknown Enterprise data type ".$this->property->Type." for field ".$this->property->Name;
-				throw new BizException( 'ERR_ERROR', 'Server', $message, $message, 'ERROR' );
+				throw new BizException( 'ERR_ERROR', 'Server', $message );
 		}
 	}
 

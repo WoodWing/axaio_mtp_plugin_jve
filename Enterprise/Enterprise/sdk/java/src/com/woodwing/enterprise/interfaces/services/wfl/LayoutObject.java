@@ -20,6 +20,10 @@ public class LayoutObject  implements java.io.Serializable {
 
     private java.lang.String lockedBy;
 
+    private java.lang.Integer flag;
+
+    private java.lang.String flagMsg;
+
     public LayoutObject() {
     }
 
@@ -29,13 +33,17 @@ public class LayoutObject  implements java.io.Serializable {
            com.woodwing.enterprise.interfaces.services.wfl.Category category,
            com.woodwing.enterprise.interfaces.services.wfl.State state,
            java.lang.String version,
-           java.lang.String lockedBy) {
+           java.lang.String lockedBy,
+           java.lang.Integer flag,
+           java.lang.String flagMsg) {
            this.id = id;
            this.name = name;
            this.category = category;
            this.state = state;
            this.version = version;
            this.lockedBy = lockedBy;
+           this.flag = flag;
+           this.flagMsg = flagMsg;
     }
 
 
@@ -158,6 +166,46 @@ public class LayoutObject  implements java.io.Serializable {
         this.lockedBy = lockedBy;
     }
 
+
+    /**
+     * Gets the flag value for this LayoutObject.
+     * 
+     * @return flag
+     */
+    public java.lang.Integer getFlag() {
+        return flag;
+    }
+
+
+    /**
+     * Sets the flag value for this LayoutObject.
+     * 
+     * @param flag
+     */
+    public void setFlag(java.lang.Integer flag) {
+        this.flag = flag;
+    }
+
+
+    /**
+     * Gets the flagMsg value for this LayoutObject.
+     * 
+     * @return flagMsg
+     */
+    public java.lang.String getFlagMsg() {
+        return flagMsg;
+    }
+
+
+    /**
+     * Sets the flagMsg value for this LayoutObject.
+     * 
+     * @param flagMsg
+     */
+    public void setFlagMsg(java.lang.String flagMsg) {
+        this.flagMsg = flagMsg;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof LayoutObject)) return false;
@@ -187,7 +235,13 @@ public class LayoutObject  implements java.io.Serializable {
               this.version.equals(other.getVersion()))) &&
             ((this.lockedBy==null && other.getLockedBy()==null) || 
              (this.lockedBy!=null &&
-              this.lockedBy.equals(other.getLockedBy())));
+              this.lockedBy.equals(other.getLockedBy()))) &&
+            ((this.flag==null && other.getFlag()==null) || 
+             (this.flag!=null &&
+              this.flag.equals(other.getFlag()))) &&
+            ((this.flagMsg==null && other.getFlagMsg()==null) || 
+             (this.flagMsg!=null &&
+              this.flagMsg.equals(other.getFlagMsg())));
         __equalsCalc = null;
         return _equals;
     }
@@ -216,6 +270,12 @@ public class LayoutObject  implements java.io.Serializable {
         }
         if (getLockedBy() != null) {
             _hashCode += getLockedBy().hashCode();
+        }
+        if (getFlag() != null) {
+            _hashCode += getFlag().hashCode();
+        }
+        if (getFlagMsg() != null) {
+            _hashCode += getFlagMsg().hashCode();
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -262,6 +322,20 @@ public class LayoutObject  implements java.io.Serializable {
         elemField.setXmlName(new javax.xml.namespace.QName("", "LockedBy"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("flag");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "Flag"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "int"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("flagMsg");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "FlagMsg"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
     }
 

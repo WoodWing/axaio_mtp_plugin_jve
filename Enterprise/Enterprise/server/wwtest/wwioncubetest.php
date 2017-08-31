@@ -257,20 +257,9 @@ function php_version_maj_min()
 function is_supported_php_version()
 {
     $v = php_version();
-    // >>> WoodWing: PHP 5.4, 5.5 and 5.6 supported for Enterprise 9.7,
-    //               For PHP 5.4, it is supported on Linux OS only.
-    $un = uname();
-    $os_name = substr($un,0,strpos($un,' '));
-    $os_code = empty($os_name)?'':strtolower(substr($os_name,0,3));
-
-    if( $os_code == 'lin' ) {
-        return ((($v['major'] == 5) && ($v['minor'] == 4)) ||
-                (($v['major'] == 5) && ($v['minor'] == 5)) ||
-                (($v['major'] == 5) && ($v['minor'] == 6)));
-    } else {
-        return ((($v['major'] == 5) && ($v['minor'] == 5)) ||
-                (($v['major'] == 5) && ($v['minor'] == 6)));
-    }
+    // >>> WoodWing: PHP 5.5 and 5.6 supported
+   return ((($v['major'] == 5) && ($v['minor'] == 5)) ||
+          (($v['major'] == 5) && ($v['minor'] == 6)));
 //    return ((($v['major'] == 4) && ($v['minor'] >= 1)) ||
 //      (($v['major'] == 5) && (($v['minor'] >= 1) || ($v['release'] >= 3))));
 	// <<<
@@ -2914,21 +2903,13 @@ function default_page($loader_extension = LOADER_EXTENSION_NAME)
 		'To use these files, a component called the \'ionCube Loader\' must be installed.</p>'.
 	// <<<
 	
-    // >>> WoodWing: PHP 5.4, 5.5 and 5.6 are supported by Enterprise 9.7:
-    //               For PHP 5.4, it is supported on Linux OS only.
-    $un = uname();
-    $os_name = substr($un,0,strpos($un,' '));
-    $os_code = empty($os_name)?'':strtolower(substr($os_name,0,3));
+    // >>> WoodWing: PHP 5.5 and 5.6 are supported.
     $ionCubeLoaderOk = false;
     if (!is_supported_php_version()) {
         $msg = '<div class="alert">'.
         	'<p>Please note that the following problem currently exists with the ionCube Loader installation:</p>'.
         	'<li>Your Web Server is running PHP version ' . PHP_VERSION . ' which is not supported by Enterprise Server.</li>'.
-            '<p>Please make sure that PHP ';
-        if( $os_code == 'lin' ) {
-            $msg .= '5.4 or ';
-        }
-        $msg .= '5.5 or 5.6 is installed.</p></div>';
+            '<p>Please make sure that PHP 5.5 or 5.6 is installed.</p></div>';
         echo $msg;
 	} else { // <<<
 

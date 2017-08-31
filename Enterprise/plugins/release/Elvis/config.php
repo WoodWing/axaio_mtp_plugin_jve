@@ -23,6 +23,85 @@ if( !defined('ELVIS_CLIENT_URL') ) {
 }
 
 /**
+ * Network connection time-out (in seconds) that Enterprise applies to the Elvis server URL.
+ *
+ * When it takes longer than the configured time to connect to Elvis, Enterprise stops trying to connect.
+ * (Note that this should not be confused with the network operation time-out, which is fixed to 1 hour.)
+ *
+ * During workflow operations, Enterprise may need to connect to Elvis to synchronize data that is changed by the user.
+ * When users are about to update an Elvis image in Enterprise, they may have a good understanding that a connection
+ * is needed between the two systems. However, when an article is changed that is placed on a layout containing
+ * placed images, users may not realize that such a connection is also needed.
+ * In other words, for some workflow operations this backend communication may be unexpected for end users.
+ *
+ * USING A SHORT OR LONG TIME-OUT PERIOD?
+ * Using a long time-out period may confuse Enterprise users because this could lead to a situation where the
+ * connection is lost while the user is not yet informed about this. During this period, the user may retry or abort
+ * the action where instead they should be patient and should be informed by the system.
+ *
+ * Using a short time-out period could lead to Elvis server connection errors for no valid reason (for example because
+ * an Elvis server node is busy serving other user requests). Workflow operations that break halfway because of Elvis
+ * connection errors is something that should be avoided because it may lead to users retrying the same operation over
+ * and over again, causing more stress on the Elvis nodes (that seem to be busy already in this case).
+ *
+ * Note that this option works in conjunction with the ELVIS_CONNECTION_REATTEMPTS option. Both options together will
+ * define the maximum time the user may have to wait before the Elvis connection error is thrown. For 5 reattempts and
+ * a connection time-out of 3 seconds, the wait time could be 5x3=15 seconds.
+ *
+ * The Enterprise-Elvis communication is synchronous: the user waits for Enterprise and Enterprise waits for Elvis.
+ * Any Load Balancer that is used (such as ELB on Amazon AWS) must support sticky sessions to stick a certain Enterprise
+ * session to an Elvis session.
+ * Basically, the whole route from the user via Enterprise to Elvis is sticky. But, when an Elvis node suddenly becomes
+ * unhealthy, this route should change; Enterprise should pick a healthy Elvis node to continue with.
+ * This should happen silently (without the user noticing) and is crucial for a stable integration. The next paragraph
+ * describes how this works and what options are important to make this happen.
+ *
+ * When any kind of fatal communication error occurs (HTTP 5xx, time-out, and so on) Enterprise will interpret this as
+ * a connection
+ * error. In case the error is returned immediately, it will wait for the configured time-out seconds. It will then
+ * try to re-connect to Elvis for ELVIS_CONNECTION_REATTEMPTS times.
+ * This is done by a re-login service call, which clears the Elvis session cookie that was set on the connection.
+ * That releases the stickiness and gives the Load Balancer the opportunity to redirect the request to a different
+ * Elvis node than the one used before, in the hope that node is healthy. In the meantime, the Load Balancer continuously
+ * polls all Elvis nodes to monitor their health state.
+ * The interval and threshold settings applied for these polls should therefore 'match' the ELVIS_CONNECTION_TIMEOUT
+ * and ELVIS_CONNECTION_REATTEMPTS settings.
+ * The idea is that the Load Balancer should be able to find out that the Elvis node became unhealthy before the last
+ * re-logon attempt took place. In that case the Elvis connection error should never occur, even when Enterprise was
+ * initially talking to an Elvis node that became unhealthy.
+ *
+ * The following is an example of a health check configuration for ELB on AWS:
+ * - Health check time-out:  3 seconds
+ * - Health check interval: 5 seconds
+ * - Unhealthy threshold:   2 times
+ * - Healthy threshold:     4 times
+ * In this configuration, for a specific Elvis node that becomes unhealthy, the ELB will find out in 5x2=10 seconds earliest.
+ * In the most unlucky situation where Enterprise calls an Elvis service at the very moment the Elvis node becomes unhealthy,
+ * it will fail and wait. It will then re-login, which is counted as the first 'reattempt'. As long as the ELB did not detect
+ * the unhealthy Elvis node and by coincidence the next following Enterprise call gets picked up by the unhealthy node again,
+ * it will wait and re-login again for ELVIS_CONNECTION_REATTEMPTS times in total.
+ * Assuming that the default settings are applied for ELVIS_CONNECTION_TIMEOUT and ELVIS_CONNECTION_REATTEMPTS, in this
+ * scenario, after 4x3=12 seconds it has done 4 attempts but still did not give up. At the 5th attempt (after 5x3=15 seconds)
+ * it will almost certainly find a healthy node.
+ *
+ * This option is available since Enterprise 10.1.4.
+ * The default value for this option is 3.
+ */
+if( !defined('ELVIS_CONNECTION_TIMEOUT') ) {
+	define( 'ELVIS_CONNECTION_TIMEOUT', 3 );
+}
+
+/**
+ * Number of attempts reconnecting to Elvis server in case the connection with a node has dropped.
+ *
+ * This option is available since Enterprise 10.1.4.
+ * The default value for this option is 5.
+ */
+if( !defined( 'ELVIS_CONNECTION_REATTEMPTS' ) ) {
+	define( 'ELVIS_CONNECTION_REATTEMPTS', 5 );
+}
+
+/**
  * Elvis uses the credentials of the currently logged Content Station / Smart Connection 
  * user to connect to Elvis. This means that the WoodWing user also needs access to Elvis.
  */
@@ -102,6 +181,7 @@ if( !defined('DEFAULT_ELVIS_PRODUCTION_ZONE') ) {
  *                    When the ELVIS_CREATE_COPY option is set to 'Copy_To_Production_Zone' Smart Connection will no longer
  *                    raise a message to let the user specify the Elvis folder. Instead, the Production Zone is used as
  *                    configured for the Brand.
+ *                    This value can NOT be used when the ELVIS_CREATE_COPY option is set to 'Hard_Copy_To_Enterprise'.
  * - 'Elvis_Original' The image is linked via an Enterprise shadow object. No copy is created.
  *                    This value can NOT be used when the ELVIS_CREATE_COPY option is set to 'Copy_To_Production_Zone'.
  *                    This option requires Elvis Server version 5.14 or higher.
@@ -111,6 +191,18 @@ if( !defined('IMAGE_RESTORE_LOCATION') ) {
 	define( 'IMAGE_RESTORE_LOCATION', 'Elvis_Copy' );
 }
 
+/**
+ * When an image is dragged from the Production Zone folder in Elvis (defined
+ * in DEFAULT_ELVIS_PRODUCTION_ZONE) to Enterprise, define if the image should
+ * be copied in Elvis and linked to Enterprise.
+ *
+ * When set to 'true', the ELVIS_CREATE_COPY option has to be set to 'Copy_To_Production_Zone'.
+ *
+ * Available since Enterprise Server 10.1.3.
+ */
+if( !defined('ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE' )) {
+	define( 'ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE', false );
+}
 // Specify a Unique ID & prefix for this contentSource
 
 /**

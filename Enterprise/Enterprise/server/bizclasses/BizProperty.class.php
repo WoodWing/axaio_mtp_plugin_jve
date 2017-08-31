@@ -2008,7 +2008,7 @@ class BizProperty
 	 * @param bool $filtered Whether or not to exclude certain fields defined in the function or to return a full set.
 	 * @param bool $customOnly Whether or not to exclude any properties that do not have a database field.
 	 * @param bool $onlyAllObjType Only return "All" object type property.
-	 * @return array of PropertyInfo  PropertyInfo definitions as used in workflow WSDL.
+	 * @return PropertyInfo[] PropertyInfo definitions as used in workflow WSDL.
 	 */
 	public static function getProperties( $publ, $objType, $publishSystem = null, $templateId = null, $filtered = true,
 	                                      $customOnly = false, $onlyAllObjType=false )
@@ -2058,14 +2058,19 @@ class BizProperty
 	 * @param string	$objectID
 	 * @param string 	$publishSystem
 	 * @param integer 	$templateId
-	 * @return array of PropertyInfo  PropertyInfo definitions as used in workflow WSDL.
+	 * @return PropertyInfo[] PropertyInfo definitions as used in workflow WSDL.
 	 */
 	public static function getPropertiesForObject( $objectID, $publishSystem = null, $templateId = null )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		$isWorkflow = false;
 		$objProps = DBObject::getObjectRow( $objectID, $isWorkflow );
-		return self::getProperties( $objProps['publication'], $objProps['type'], $publishSystem, $templateId );
+
+		$propertyInfos = array();
+		if( $objProps ) {
+			$propertyInfos = self::getProperties( $objProps['publication'], $objProps['type'], $publishSystem, $templateId );
+		}
+		return $propertyInfos;
 	}
 
 	/**

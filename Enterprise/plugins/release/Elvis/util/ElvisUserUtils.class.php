@@ -1,7 +1,8 @@
 <?php
 
 class ElvisUserUtils {
-	public static function getOrCreateUser($username){
+	public static function getOrCreateUser($username)
+	{
 		if (empty($username)) {
 			return null;
 		}
@@ -15,6 +16,7 @@ class ElvisUserUtils {
 				// The user is not found
 				$user = self::createUser($username);
 			} else {
+				require_once dirname(__FILE__).'/../config.php';
 				$user = ElvisUserUtils::getUser(ELVIS_ENT_ADMIN_USER);
 			}
 		}

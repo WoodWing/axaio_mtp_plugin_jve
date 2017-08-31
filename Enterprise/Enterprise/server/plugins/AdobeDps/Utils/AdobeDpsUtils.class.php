@@ -751,10 +751,16 @@ class AdobeDpsUtils
 			// C_ARTICLE_ACCESS is a list property. When using contains the property is checked
 			// case insensitive for oracle as well.
 			new QueryParam( 'C_ARTICLE_ACCESS', 'contains', 'Free' ) );
-		$response = BizQuery::queryObjects(
-			BizSession::getTicket(), BizSession::getShortUserName(), $params, 1, 0, null, false, null, $minProps, null, null, 0 );
-
-					$dossiers = array();
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = BizSession::getTicket();
+		$request->Params = $params;
+		$request->FirstEntry = 1;
+		$request->MaxEntries = 0;
+		$request->Hierarchical = false;
+		$request->MinimalProps = $minProps;
+		$response = BizQuery::queryObjects2( $request, BizSession::getShortUserName(), 0 );
+		$dossiers = array();
 		if( $response->Rows ) {
 			// Determine column indexes to work with.
 			$indexes = array_combine( array_values($minProps), array_fill(1,count($minProps), -1) );

@@ -12,7 +12,10 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Basics_TestCase extends TestCase
 {
-	/** @var WW_Utils_TestSuite $utils */
+	/** @var string $testStartTime */
+	private $testStartTime = null;
+
+	/** @var WW_Utils_TestSuite $globalUtils */
 	private $globalUtils = null;
 
 	/** @var WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Utils $localUtils */
@@ -113,6 +116,8 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 	 */
 	private function setupTestData()
 	{
+		$this->testStartTime = date('Y-m-d\TH:i:s');
+
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->globalUtils = new WW_Utils_TestSuite();
 		
@@ -166,6 +171,8 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 	 */
 	private function tearDownTestData()
 	{
+		$this->clearIdsServerJobsInTheQueue();
+
 		$objectIds = array();
 		$articleId = $this->articleObject ? $this->articleObject->MetaData->BasicMetaData->ID : null;
 		if( $articleId ) {
@@ -182,6 +189,17 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 
 		$this->unlockObjects( $objectIds );
 		$this->deleteObjects( $objectIds );
+	}
+
+	/**
+	 * Clean up all the IDS server jobs in the job queue created by this build test.
+	 */
+	private function clearIdsServerJobsInTheQueue()
+	{
+		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
+		$where = '`queuetime` >= ? ';
+		$params = array( strval( $this->testStartTime ) );
+		$result = DBBase::deleteRows( 'indesignserverjobs', $where, $params );
 	}
 
 	/**
@@ -559,7 +577,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 			$expectedOperations, $getObject->Operations, 
 			$expectedOperations, $getObject,
 			'Objects[0]->Operations', 'GetObjects of layout after CreateObjectOperations for layout-dossier placement', 
-			array('[0]->Id' => true) );
+			array('[0]->Id' => true, '[1]->Id' => true, '[2]->Id' => true, '[3]->Id' => true) );
 	}
 	
 	/**
@@ -3132,6 +3150,43 @@ Occupta ate poribusdae peri officipsum, aut et ere qui vit remporporeic to disit
 		$operations[0]->Params[3] = new Param();
 		$operations[0]->Params[3]->Name = 'SplineId';
 		$operations[0]->Params[3]->Value = 780;
+
+		$operations[1] = new ObjectOperation();
+		$operations[1]->Id = null; // random value; can not be compared
+		$operations[1]->Type = 'AutomatedPrintWorkflow';
+		$operations[1]->Name = 'ClearFrameContent';
+		$operations[1]->Params = array();
+		$operations[1]->Params[0] = new Param();
+		$operations[1]->Params[0]->Name = 'EditionId';
+		$operations[1]->Params[0]->Value = $this->editionObjs[0]->Id;
+		$operations[1]->Params[1] = new Param();
+		$operations[1]->Params[1]->Name = 'SplineId';
+		$operations[1]->Params[1]->Value = 294;
+
+		$operations[2] = new ObjectOperation();
+		$operations[2]->Id = null; // random value; can not be compared
+		$operations[2]->Type = 'AutomatedPrintWorkflow';
+		$operations[2]->Name = 'ClearFrameContent';
+		$operations[2]->Params = array();
+		$operations[2]->Params[0] = new Param();
+		$operations[2]->Params[0]->Name = 'EditionId';
+		$operations[2]->Params[0]->Value = $this->editionObjs[0]->Id;
+		$operations[2]->Params[1] = new Param();
+		$operations[2]->Params[1]->Name = 'SplineId';
+		$operations[2]->Params[1]->Value = 299;
+
+		$operations[3] = new ObjectOperation();
+		$operations[3]->Id = null; // random value; can not be compared
+		$operations[3]->Type = 'AutomatedPrintWorkflow';
+		$operations[3]->Name = 'ClearFrameContent';
+		$operations[3]->Params = array();
+		$operations[3]->Params[0] = new Param();
+		$operations[3]->Params[0]->Name = 'EditionId';
+		$operations[3]->Params[0]->Value = $this->editionObjs[0]->Id;
+		$operations[3]->Params[1] = new Param();
+		$operations[3]->Params[1]->Name = 'SplineId';
+		$operations[3]->Params[1]->Value = 328;
+
 		return $operations;
 	}
 }

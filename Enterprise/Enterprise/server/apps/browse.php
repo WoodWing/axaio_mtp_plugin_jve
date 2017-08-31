@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated 10.2.0 Code can be removed without further notice.
+ */
 require_once dirname(__FILE__).'/../../config/config.php';
 require_once BASEDIR.'/server/admin/global_inc.php';
 require_once BASEDIR.'/server/secure.php';
@@ -495,16 +498,15 @@ if ($v_deadlinetill) {
 
 // handle export to CSV file
 if (isset($_REQUEST["butCSV"]) && $_REQUEST["butCSV"]) {
-	$ArrayOfRow = BizQuery::queryObjects(
-						$ticket,
-						$globUser,
-						$ArrayOfQueryParams,
-						null,
-						0,
-						"full",
-						$HierarchialView,
-						BizQuery::getQueryOrder( $ord, $sort ),
-						array( 'Format' ) );
+	require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+	$request = new WflQueryObjectsRequest();
+	$request->Ticket = $ticket;
+	$request->Params = $ArrayOfQueryParams;
+	$request->MaxEntries = 0;
+	$request->Hierarchical = $HierarchialView;
+	$request->Order = BizQuery::getQueryOrder( $ord, $sort );
+	$request->MinimalProps = array( 'Format' );
+	$ArrayOfRow = BizQuery::queryObjects2( $request, $globUser );
 
 	$txt = '';
 	$komma = '';
@@ -560,11 +562,26 @@ try {
 	if ( $emptySearch == 1) {
 		$queryResp = null;
 	} else if( $Number_of_Results != -1 ) {
-		$queryResp = BizQuery::queryObjects(
-			$ticket, $globUser, $ArrayOfQueryParams, $newStartPos, $Number_of_Results, null, $HierarchialView, BizQuery::getQueryOrder( $ord, $sort ), array( 'Format' ) );
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = $ticket;
+		$request->Params = $ArrayOfQueryParams;
+		$request->FirstEntry = $newStartPos;
+		$request->MaxEntries = $Number_of_Results;
+		$request->Hierarchical = $HierarchialView;
+		$request->Order = BizQuery::getQueryOrder( $ord, $sort );
+		$request->MinimalProps = array( 'Format' );
+		$queryResp = BizQuery::queryObjects2( $request, $globUser );
 	} else {
-		$queryResp = BizQuery::queryObjects(
-			$ticket, $globUser, $ArrayOfQueryParams, null, 0, null, $HierarchialView, BizQuery::getQueryOrder( $ord, $sort ), array( 'Format' ) );
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = $ticket;
+		$request->Params = $ArrayOfQueryParams;
+		$request->MaxEntries = 0;
+		$request->Hierarchical = $HierarchialView;
+		$request->Order = BizQuery::getQueryOrder( $ord, $sort );
+		$request->MinimalProps = array( 'Format' );
+		$queryResp = BizQuery::queryObjects2( $request, $globUser );
 	}
 } catch( BizException $e ) {
 	echo '<font color="red">'.$e->getMessage().'</font><br/>'; // BZ#9890: No more showing $e->getDetail() to avoid sql injection

@@ -20,8 +20,8 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	/** @var WW_Utils_TestSuite */
 	private $utils;
 
-	/** @var object Elvis Server information */
-	private $serverInfo;
+	/** @var string Version of Elvis Server */
+	private $serverVersion;
 
 	const CONFIG_FILES = 'Enterprise/config/plugins/Elvis/config.php or Enterprise/config/overrule_config.php';
 
@@ -37,10 +37,19 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		if ( !$this->checkDefinedValues() ) {
 			return;
 		}
+		if( !$this->checkPhpExtensions() ) {
+			return;
+		}
+		if( !$this->checkOpenSslCipherMethod() ) {
+			return;
+		}
 		if ( !$this->checkConnection() ) {
 			return;
 		}
 		if ( !$this->checkVersionCompatibility() ) {
+			return;
+		}
+		if( !$this->checkIsLoadBalancerSupported() ) {
 			return;
 		}
 		if ( !$this->checkFeatureCompatibility() ) {
@@ -72,9 +81,10 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 
 		// Check the defines that should exist and should be filled in (not empty).
 		$nonEmptyDefines = array(
-			'ELVIS_URL', 'ELVIS_CLIENT_URL', 'ELVIS_NAMEDQUERY',
+			'ELVIS_URL', 'ELVIS_CLIENT_URL',
+			'ELVIS_CONNECTION_TIMEOUT', 'ELVIS_CONNECTION_REATTEMPTS',
 			'ELVIS_ENT_ADMIN_USER', 'ELVIS_SUPER_USER',
-			'ELVIS_CREATE_COPY', 'IMAGE_RESTORE_LOCATION'
+			'ELVIS_NAMEDQUERY', 'ELVIS_CREATE_COPY', 'IMAGE_RESTORE_LOCATION'
 		);
 		if( !$this->utils->validateDefines( $this, $nonEmptyDefines, self::CONFIG_FILES, 'ERROR' ) ) {
 			$result = false;
@@ -120,27 +130,111 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			$this->setResult( 'ERROR', $message , $help );
 			$result = false;
 		}
-		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' && empty( DEFAULT_ELVIS_PRODUCTION_ZONE ) ) {
+		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' && DEFAULT_ELVIS_PRODUCTION_ZONE == ''  ) {
 			$message = 'The ELVIS_CREATE_COPY is set to "'.ELVIS_CREATE_COPY.'" '.
 				'but the DEFAULT_ELVIS_PRODUCTION_ZONE option is empty.';
 			$this->setResult( 'ERROR', $message , $help );
 			$result = false;
 		}
-		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' && IMAGE_RESTORE_LOCATION == 'Elvis_Original' ) { // [EN-88325]
+		if( ( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' && IMAGE_RESTORE_LOCATION == 'Elvis_Original' ) || // [EN-88325]
+			( ELVIS_CREATE_COPY == 'Hard_Copy_To_Enterprise' && IMAGE_RESTORE_LOCATION == 'Elvis_Copy' ) ) {    // [EN-88426]
 			$message = 'The ELVIS_CREATE_COPY option is set to "'.ELVIS_CREATE_COPY.'" and '.
 				'the IMAGE_RESTORE_LOCATION option is set to "'.IMAGE_RESTORE_LOCATION.'". '.
 				'However, this combination is not supported.';
 			$this->setResult( 'ERROR', $message , $help );
 			$result = false;
 		}
+		if( $result ) { // Only continue checking when all the above settings are fine.
+			if( ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE && ELVIS_CREATE_COPY != 'Copy_To_Production_Zone' ) {
+				$message = 'When ELVIS_CREATE_COPY_WHEN_MOVED_FROM_PRODUCTION_ZONE is set to true, ELVIS_CREATE_COPY option has to be set to ' .
+					'"Copy_To_Production_Zone".';
+				$this->setResult( 'ERROR', $message , $help );
+				$result = false;
+			}
+		}
+
 		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server defined values checked.' );
 		return $result;
 	}
 
 	/**
+	 * Checks if the PHP extensions that are required by Elvis ContentSource plugin are installed.
+	 *
+	 * Note that extensions required by the core ES are assumed to be checked already, so not checked here.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return bool Whether or not all required extensions are installed.
+	 */
+	private function checkPhpExtensions()
+	{
+		$result = true;
+		$exts = array(
+			'openssl' => 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/openssl-installation'
+		);
+		$optExtWarnings = array();
+		foreach( $exts as $ext => $phpManual ) {
+			if( !extension_loaded( $ext ) ) {
+				$extPath = ini_get( 'extension_dir' );
+				$help = 'Please see <a href="'.$phpManual.'" target="_blank">PHP manual</a> for instructions.<br/>'.
+					'Note that the PHP extension path is "'.$extPath.'".<br/>'.
+					'PHP compilation options can be found in <a href="phpinfo.php" target="_blank">PHP info</a>.<br/>'.
+					'Your php.ini file is located at "'.$this->getPhpIni().'".';
+				$msg = 'The PHP library "<b>'.$ext.'</b>" is not loaded.';
+				if( isset( $optExtWarnings[ $ext ] ) ) {
+					$this->setResult( 'WARN', $msg.'<br/>'.$optExtWarnings[ $ext ], $help );
+				} else {
+					$this->setResult( 'ERROR', $msg, $help );
+					$result = false;
+				}
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Checks if the cipher method used for password encryption is supported by PHP's openssl module.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return bool Whether or not the method is supported.
+	 */
+	private function checkOpenSslCipherMethod()
+	{
+		$result = true;
+		$methods = openssl_get_cipher_methods();
+		if( !in_array( 'aes-256-cbc', $methods ) ) {
+			$extPath = ini_get( 'extension_dir' );
+			$phpManual = 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/openssl-installation';
+			$help = 'Please see <a href="'.$phpManual.'" target="_blank">PHP manual</a> for instructions.<br/>'.
+				'Note that the PHP extension path is "'.$extPath.'".<br/>'.
+				'PHP compilation options can be found in <a href="phpinfo.php" target="_blank">PHP info</a>.<br/>'.
+				'Your php.ini file is located at "'.$this->getPhpIni().'".';
+			$msg = 'The openssl cipher method "aes-256-cbc" is not supported.';
+			$this->setResult( 'ERROR', $msg, $help );
+			$result = false;
+		}
+		return $result;
+	}
+
+	/**
+	 * Get the path to the php.ini file.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return string
+	 */
+	private function getPhpIni()
+	{
+		ob_start();
+		phpinfo(INFO_GENERAL);
+		$phpinfo = ob_get_contents();
+		ob_end_clean();
+		$found = array();
+		return preg_match('/\(php.ini\).*<\/td><td[^>]*>([^<]+)/',$phpinfo,$found) ? $found[1] : '';
+	}
+
+	/**
 	 * Checks if the configured ELVIS_URL is valid by trying to connect to Elvis Server.
 	 *
-	 * When successful, it retrieves server info from it and populates $this->serverInfo.
+	 * When successful, it retrieves server info from it and populates $serverInfo.
 	 * When successful, but Elvis tells it is not running / available, a warning is raised.
 	 *
 	 * @return boolean TRUE when could connect (regardless if Elvis is not running / available), else FALSE.
@@ -149,18 +243,26 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	{
 		require_once __DIR__.'/../../logic/ElvisRESTClient.php';
 		$client = new ElvisRESTClient();
-		$this->serverInfo = $client->getElvisServerInfo();
+		$this->serverVersion = $client->getElvisServerVersion();
+
+		// The server info service is introduced since Elvis 5.
+		// So we skip this test for Elvis 4 and assume all is ok.
+		if( version_compare( $this->serverVersion, '5.0', '<' ) ) {
+			$this->setResult( 'INFO', 'Connected to Elvis Server v'.$this->serverVersion.'.' );
+			return true;
+		}
+		$serverInfo = $client->getElvisServerInfo();
 		$help = 'Please check your Elvis installation.';
 		$result = true;
-		if( $this->serverInfo ) {
-			if( $this->serverInfo->state == 'running' && $this->serverInfo->available ) {
-				$this->setResult( 'INFO', 'Elvis Server v'.$this->serverInfo->version.' is available and running.' );
+		if( $serverInfo ) {
+			if( $serverInfo->state == 'running' && $serverInfo->available ) {
+				$this->setResult( 'INFO', 'Elvis Server v'.$this->serverVersion.' is available and running.' );
 			}
-			if( !$this->serverInfo->available ) {
-				$this->setResult( 'WARN', 'Elvis Server v'.$this->serverInfo->version.' is not available.', $help );
+			if( !$serverInfo->available ) {
+				$this->setResult( 'WARN', 'Elvis Server v'.$this->serverVersion.' is not available.', $help );
 				// no hard failure, leave $result == true untouched to continue testing the succeeding cases
-			} elseif( $this->serverInfo->state !== 'running' ) {
-				$this->setResult( 'WARN', 'Elvis Server v'.$this->serverInfo->version.' is not running.', $help );
+			} elseif( $serverInfo->state !== 'running' ) {
+				$this->setResult( 'WARN', 'Elvis Server v'.$this->serverVersion.' is not running.', $help );
 				// no hard failure, leave $result == true untouched to continue testing the succeeding cases
 			}
 		} else {
@@ -181,30 +283,67 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	private function checkVersionCompatibility()
 	{
 		$result = true;
-		if( version_compare( $this->serverInfo->version, '4.6.4', '<' ) ) {
+		if( version_compare( $this->serverVersion, '4.6.4', '<' ) ) {
 			$result = false;
 		} elseif(
-			version_compare( $this->serverInfo->version, '5.0', '>=' ) &&
-			version_compare( $this->serverInfo->version, '5.0.60', '<' ) ){
+			version_compare( $this->serverVersion, '5.0', '>=' ) &&
+			version_compare( $this->serverVersion, '5.0.60', '<' ) ){
 			$result = false;
 		}
 		if( !$result ) {
 			$help = 'Please check the Compatibility Matrix.';
-			$message = 'Elvis Server v'.$this->serverInfo->version.' is not compatible with Enterprise Server v'.SERVERVERSION.'.';
+			$message = 'Elvis Server v'.$this->serverVersion.' is not compatible with Enterprise Server v'.SERVERVERSION.'.';
 			$this->setResult( 'ERROR', $message, $help );
 		}
 
 		// With the Elvis_Original option there were some problems with older Elvis Server < v5.14. [EN-88325]
-		if( version_compare( $this->serverInfo->version, '5.14', '<=' ) &&
+		if( version_compare( $this->serverVersion, '5.14', '<=' ) &&
 			IMAGE_RESTORE_LOCATION == 'Elvis_Original' ) {
 			$help = 'Please check the '.self::CONFIG_FILES.' file.';
 			$message = 'The IMAGE_RESTORE_LOCATION option is set to "'.IMAGE_RESTORE_LOCATION.'" '.
-				'but Elvis Server v'.$this->serverInfo->version.' does not support this feature. '.
+				'but Elvis Server v'.$this->serverVersion.' does not support this feature. '.
 				'Please adjust the option or upgrade the Elvis Server.';
 			$this->setResult( 'ERROR', $message, $help );
 			$result = false;
 		}
 		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server version compatibility checked.' );
+		return $result;
+	}
+
+	/**
+	 * Function checks on which Load Balancer is/are Elvis connected to.
+	 *
+	 * Currently, only AWS Elastic Load Balancer (ELB) is supported.
+	 * Application Load Balancer (ALB) is not supported.
+	 *
+	 * Function returns a false when an Application Load Balancer is used.
+	 * Returns true when Classic Load Balancer is used / no Load Balancer is used.
+	 *
+	 * @since 10.0.5 / 10.1.2
+	 * @return boolean See function header above.
+	 */
+	private function checkIsLoadBalancerSupported()
+	{
+		$result = true;
+		require_once __DIR__.'/../../logic/ElvisRESTClient.php';
+		$client = new ElvisRESTClient();
+		$this->serverVersion = $client->getElvisServerVersion();
+
+		$loadBalancerType = $client->getLoadBalancerType();
+		if( $loadBalancerType == 'AWSALB' ) {
+			$link = 'https://aws.amazon.com/elasticloadbalancing/classicloadbalancer/';
+			$help = 'Use the Amazon AWS Classic Load Balancer. '.
+				'For more information, see the <a href="'.$link.'" target="_blank">Amazon documentation</a>.';
+			$message = 'The Amazon AWS Application Load Balancer that is currently configured is not supported.';
+			$this->setResult( 'ERROR', $message, $help );
+			$result = false;
+		} else if( $loadBalancerType == 'AWSELB' ) {
+			LogHandler::Log('Elvis','INFO','AWS Classic Load Balancer is configured / used.');
+		} else if( is_null( $loadBalancerType )) {
+			LogHandler::Log('Elvis','INFO','Either no load balancer is configured / used or ' .
+				'the type of Load Balancer is unknown.' );
+		}
+		LogHandler::Log( 'Elvis', 'INFO', 'Elvis Server Load Balancer checked.' );
 		return $result;
 	}
 
@@ -218,10 +357,10 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 	{
 		$result = true;
 		if( ELVIS_CREATE_COPY == 'Copy_To_Production_Zone' &&
-			version_compare( $this->serverInfo->version, '5.18', '<' ) ) { // Feature introduced since Elvis 5.18
+			version_compare( $this->serverVersion, '5.18', '<' ) ) { // Feature introduced since Elvis 5.18
 			$help = 'Either change the option or upgrade Elvis Server to v5.18 or newer.';
 			$message = 'The ELVIS_CREATE_COPY option is set to \'Copy_To_Production_Zone\' but this feature is not '.
-				' supported by Elvis Server v'.$this->serverInfo->version.'.';
+				' supported by Elvis Server v'.$this->serverVersion.'.';
 			$this->setResult( 'ERROR', $message, $help );
 			$result = false;
 		}

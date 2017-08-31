@@ -33,10 +33,11 @@ class AutomatedPrintWorkflow_EnterprisePlugin extends EnterprisePlugin
 	 * @return array An array of connector interfaces.
 	 */
 	final public function getConnectorInterfaces() 
-	{ 
+	{
 		return array(
 			'SysGetSubApplications_EnterpriseConnector',
 			'AutomatedPrintWorkflow_EnterpriseConnector',
+			'InDesignServerJob_EnterpriseConnector',
 		);
 	}
 	

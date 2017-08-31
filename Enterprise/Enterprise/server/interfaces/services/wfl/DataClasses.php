@@ -3144,6 +3144,8 @@ class LayoutObject
 	public $State;
 	public $Version;
 	public $LockedBy;
+	public $Flag;
+	public $FlagMsg;
 
 	/**
 	 * @param string               $Id                   
@@ -3152,8 +3154,10 @@ class LayoutObject
 	 * @param State                $State                
 	 * @param string               $Version              
 	 * @param string               $LockedBy             
+	 * @param int                  $Flag                 Nullable.
+	 * @param string               $FlagMsg              Nullable.
 	 */
-	public function __construct( $Id=null, $Name=null, $Category=null, $State=null, $Version=null, $LockedBy=null)
+	public function __construct( $Id=null, $Name=null, $Category=null, $State=null, $Version=null, $LockedBy=null, $Flag=null, $FlagMsg=null)
 	{
 		$this->Id                   = $Id;
 		$this->Name                 = $Name;
@@ -3161,12 +3165,15 @@ class LayoutObject
 		$this->State                = $State;
 		$this->Version              = $Version;
 		$this->LockedBy             = $LockedBy;
+		$this->Flag                 = $Flag;
+		$this->FlagMsg              = $FlagMsg;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflLayoutObject'; } // AMF object type mapping
 
 	public function sanitizeProperties4Php()
 	{
+		if (is_nan($this->Flag)){ $this->Flag = null; }
 		if( is_object( $this->Category ) ) {
 			$this->Category->sanitizeProperties4Php();
 		}

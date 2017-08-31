@@ -63,14 +63,6 @@ class SmartNews_PubPublishing extends PubPublishing_EnterpriseConnector
 		return $result = array();
 	}
 	
-	private function logPrintr( $array ) {
-		LogHandler::Log("SERVER", "DEBUG", "<pre>".print_r($array, true)."</pre>");
-	}
-	
-	private function log2File( $array ) {
-		file_put_contents(dirname(__FILE__)."/debug/log.txt", print_r($array, true));
-	}
-	
 	private function getNodeComponents ($children, $dossier)
 	{
 		

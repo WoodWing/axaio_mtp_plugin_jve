@@ -33,6 +33,7 @@ class DBStruct
 	 */
 	public function getVersions()
 	{
+		// TODO: When version 1020 (or higher) is added to the list the pickuptime field should be uncommented as well.
 		return array (
 			'310', '320', '330', '340', '400', '410', '420', 
 			'500', '599', '600', '610', '700', '750', '760', '800', 
@@ -2628,6 +2629,9 @@ class DBStruct
 								'comment' => 'Progress of the job execution; Todo=256, Busy=512, Done=1024.' ),
 							array('v' => '970', 'name' => 'attempts',     'type' => 'int(11)',     'default' => 0,
 								'comment' => 'When job pushed into the queue, value is set to zero. After job execution this value is incremented by one.' ),
+//                   TODO: These lines should be uncommented when version 1020 of the database model is introduced.
+//							array('v' => '1020', 'name' => 'pickuptime', 'type' => 'varchar(30)', 'default' => "''", 'patched' => array('1010' => 'idsautomationpickuptime'),
+//								'comment' => 'Time from which the job runnner should pickup the job.' ),
 							
 							// ID Server selection:
 							array('v' => '800', 'name' => 'assignedserverid', 'type' => 'int(9)', 'default' => 0,
@@ -3256,6 +3260,18 @@ class DBStruct
 					),
 				),
 			),
+			array(
+				'version' => '1010',
+				'name' => 'idsautomationpickuptime',
+				'tables' => array(
+					array ('v' => '599', 'name' => 'smart_indesignserverjobs', 'comment' => 'Overview of InDesign Server jobs and their status.',
+						'fields' => array(
+							array('v' => '1010', 'name' => 'pickuptime', 'type' => 'varchar(30)', 'default' => "''", 'patched' => array('1010' => 'idsautomationpickuptime'),
+								'comment' => 'Time from which the job runnner should pickup the job.' ),
+						)
+					)
+				)
+			)
 		);
 	}
 

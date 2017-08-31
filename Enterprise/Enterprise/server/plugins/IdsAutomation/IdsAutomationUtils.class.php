@@ -23,9 +23,10 @@ class IdsAutomationUtils
 	 * @param integer $objectId The object ID of the object causing the trigger to create the job.
 	 * @param string $objectType The object Type of the object causing the trigger to create the job.
 	 * @param bool $unique TRUE when layout should be unique in the queue. If found, the job is NOT created.
+	 * @param integer $delay If bigger than 0, this delay in seconds is added to the Pickup time.
 	 * @return bool
 	 */
-	public static function createIDSJob( $layoutID, $objectId, $objectType, $unique = true )
+	public static function createIDSJob( $layoutID, $objectId, $objectType, $unique = true, $delay = 0 )
 	{
 		// Bail out when just created an IDS job for this layout.
 		static $processedLayoutIds = array();
@@ -79,6 +80,11 @@ class IdsAutomationUtils
 		$job->Foreground = false; // BG
 		$job->MinServerVersion = $minServerVersion;
 		$job->MaxServerVersion = $maxServerVersion;
+
+		if( $delay > 0 ) {
+			// If set, the pickup time will be set to delay the job. If not set, the core will set PickUp time to the creation time.
+			$job->PickupTime = date( 'Y-m-d\TH:i:s',time() + $delay );
+		}
 
 		LogHandler::Log('IdsAutomation', 'DEBUG', "Caling BizInDesignServerJobs::createJob()");
 		require_once BASEDIR . '/server/bizclasses/BizInDesignServerJob.class.php';
@@ -195,15 +201,15 @@ class IdsAutomationUtils
 	 * and so the layout should be processed by IDS.
 	 * Please call initLayoutStatusChangeTriggerForIds() before calling this function.
 	 *
-	 * This function return TRUE when ALL of the following criterea are met:
+	 * This function return TRUE when ALL of the following criteria are met:
 	 * - the given object is a Layout or Layout Module
-	 * - the $prevStatusId and $newStatusId are different
 	 * - the $newStatusId is not the Personal status
- 	 * - the $newStatusId has phase Production or Completed
+ 	 * - the $newStatusId has phase Production
  	 * - Ouput renditions should be generated, so ONE of the following criterea are met:
-  	 *    - the $prevStatusId refers to non-Output status and the $newStatusId refers to Output status 
-  	 *      and CLIENTFEATURES for IDS_AUTOMATION has the CreatePagePDFOnProduce or CreatePageEPSOnProduce option
+  	 *    - the $newStatusId refers to Output status and CLIENTFEATURES for IDS_AUTOMATION has the CreatePagePDFOnProduce
+	 *    or CreatePageEPSOnProduce option
 	 *    - CLIENTFEATURES for IDS_AUTOMATION has the CreatePagePDF or CreatePageEPS option
+	 * If the above criteria are not met it is checked if a job is needed to create a folio for Adobe Dps.
 	 *
 	 * @param integer $objId The id of object to be checked.
 	 * @param string $objType The object type.
@@ -222,17 +228,8 @@ class IdsAutomationUtils
 				LogHandler::Log( 'IdsAutomation', 'INFO', "The give object is not a supported layout. No action needed." );
 				break;
 			}
-			if( $prevStatusId == $newStatusId ) {
-				LogHandler::Log( 'IdsAutomation', 'INFO', "The previous- and new statuses are the same. No action needed." );
-				break;
-			}
 			if( $newStatusId == -1 ) {
 				LogHandler::Log( 'IdsAutomation', 'INFO', "The new status is a Personal status. No action needed." );
-				break;
-			}
-			$prevStatus = self::getStatusWithId( $prevStatusId );
-			if( !$prevStatus ) {
-				LogHandler::Log( 'IdsAutomation', 'INFO', "The previous status [$prevStatusId] could not be found in DB. No action needed." );
 				break;
 			}
 			$newStatus = self::getStatusWithId( $newStatusId );
@@ -246,7 +243,7 @@ class IdsAutomationUtils
 			}
 			
 			require_once BASEDIR.'/server/bizclasses/BizPage.class.php';
-			if( !$prevStatus->Produce && $newStatus->Produce ) { // moving into Produce/Output status?
+			if( $newStatus->Produce ) { // Produce/Output status
 				if( self::isIdsClientFeatureValue( 'CreatePagePDFOnProduce' ) &&
 					!BizPage::hasOutputRenditionPDF( $objId ) ) {
 					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePagePDFOnProduce is configured for IDS, '.

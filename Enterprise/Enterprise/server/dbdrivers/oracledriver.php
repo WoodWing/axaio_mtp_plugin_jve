@@ -188,15 +188,7 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	}	
 
 	/**
-	 * Performs a given SQL query at the DB.
-	 *
-	 * @param string $sql   The SQL statement.
-	 * @param array $params Parameters for replacement
-	 * @param mixed $blob   Chunck of data to store at DB. It will be converted to a DB string here.
-	 * 				   One blob can be passed or multiple. If muliple are passed $blob is an array.
-	 * @param boolean $writeLog In case of license related queries, this option can be used to not write in the log file.
-	 * @param boolean $logExistsErr Suppress 'already exists' errors. Used for specific insert operations for which this error is fine.
-	 * @return resource|bool DB handle that can be used to fetch results.  Null when SQL failed. False when record already exists, in case $logExistsErr is set false.
+	 * @inheritDoc
 	 */
 	public function query( $sql, $params=array(), $blob=null, $writeLog=true, $logExistsErr=true )
 	{
@@ -228,7 +220,6 @@ class oracledriver extends WW_DbDrivers_DriverBase
 				foreach ( $blob as $blobItem ) {
 					$postfix = strlen( $blobItem ) > 250 ? '...' : '';
 					$blobLog = substr( $blobItem, 0, 250 );
-					$blobLog = (LOGFILE_FORMAT == 'html') ? htmlentities( $blobLog ) : $blobLog;
 					// SQL logging is only outputted on DEBUG or INFO level
 					LogHandler::Log('oracle', 'INFO', 'BLOB: ['.$blobLog.$postfix.']' );
 				}
@@ -292,7 +283,7 @@ class oracledriver extends WW_DbDrivers_DriverBase
 		if ( $logSQL ) {
 			$rowCnt = ( $sth ) ? oci_num_rows( $sth ) : 0; // Note: for SELECT statements this does not work
 			$this->logSql( 'oracle',
-				LOGFILE_FORMAT == 'html' ? htmlentities( $cleanSql ) : $cleanSql,
+				$cleanSql,
 				$rowCnt,
 				__CLASS__,
 				__FUNCTION__ );
@@ -307,6 +298,8 @@ class oracledriver extends WW_DbDrivers_DriverBase
 				($this->errorcode() == DB_ERROR_ALREADY_EXISTS || 
 				 $this->errorcode() == DB_ERROR_CONSTRAINT )) {
 				return false;
+			} elseif( $this->errorcode() == DB_ERROR_DEADLOCK_FOUND || $this->errorcode() == DB_ERROR_NOT_LOCKED ) {
+				return $this->retryAfterLockError( $sth, 50 );
 			}
 			if ( $writeLog ) {
 				PerformanceProfiler::startProfile( 'query logging', 5 );
@@ -359,10 +352,7 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	}
 
 	/**
-	 * Fetch a result row as an associative array.
-	 *
-	 * @param resource $sth The result resource that is being evaluated. This result comes from a call to {@link: query()}.
-	 * @return array Associative array of strings that corresponds to the fetched row, or FALSE if there are no more rows.
+	 * @inheritDoc
 	 */
 	public function fetch( $sth )
 	{
@@ -544,6 +534,9 @@ class oracledriver extends WW_DbDrivers_DriverBase
 		return $row ? true : false;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function newid($table, $after)
 	{
 		if ($after) return $this->lastid;
@@ -577,6 +570,9 @@ class oracledriver extends WW_DbDrivers_DriverBase
          }
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function error(){
 		/**
         if (is_resource($this->last_stmt)) {
@@ -591,6 +587,9 @@ class oracledriver extends WW_DbDrivers_DriverBase
 		return $this->errormessage;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function errorcode()
 	{
 		switch( $this->theerrorcode ) {
@@ -598,6 +597,8 @@ class oracledriver extends WW_DbDrivers_DriverBase
 				return DB_ERROR_ALREADY_EXISTS;
 			case 1:
 				return DB_ERROR_CONSTRAINT;
+			case 60:
+				return DB_ERROR_DEADLOCK_FOUND;
 			default:
 				return "ORASQL: ".$this->theerrorcode;
 		}
@@ -613,6 +614,9 @@ class oracledriver extends WW_DbDrivers_DriverBase
 		return strtoupper($name);
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function limitquery($sql, $start, $count)
 	{
 		//return $sql;
@@ -630,9 +634,12 @@ class oracledriver extends WW_DbDrivers_DriverBase
 		return $result;
 	}
 
-	public function tablename($str)
+	/**
+	 * @inheritDoc
+	 */
+	public function tablename( $tableNameNoPrefix)
 	{
-		return $this->quoteIdentifier(DBPREFIX.$str);
+		return $this->quoteIdentifier(DBPREFIX.$tableNameNoPrefix);
 	}
 
 	public function getSequenceName($seqname)
@@ -789,6 +796,9 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	}
 
 
+	/**
+	 * @inheritDoc
+	 */
 	public function autoincrement($sql)
 	{
 		$r = array();
@@ -838,16 +848,14 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	}
 
 	/**
-	 * Returns a field concatenation
-	 * @param array $fieldNames List of field names to be concatenated
-	 * @return string Concatenation
-	**/
-	public function concatFields( $fieldNames )
+	 * @inheritDoc
+	 **/
+	public function concatFields( $arguments )
 	{
 		$sql = '';
 		$sep = '';
-		foreach( $fieldNames as $fieldName ) {
-			$sql .= $sep.$fieldName;
+		foreach( $arguments as $argument ) {
+			$sql .= $sep.$argument;
 			$sep = ' || ';
 		}
 		return $sql;
@@ -1219,9 +1227,9 @@ class oracledriver extends WW_DbDrivers_DriverBase
 		} else {
 			$clientLang = '';
 		}
-		if( !stristr( $clientLang, 'AL32UTF8' ) ) {
+		if( !stristr( $clientLang, 'UTF8' ) ) {
 			$help = 'Change the database character set with: ALTER DATABASE [db_name] CHARACTER SET AL32UTF8;';
-			$detail = 'Client language incorrect: "'.$clientLang.'". Should be AL32UTF8.';
+			$detail = 'Client language incorrect: "'.$clientLang.'". Should be UTF8 compliant, preferable AL32UTF8.';
 			throw new BizException( null, 'Server', $detail, 'Invalid Configuration' );
 		}
 		
@@ -1315,9 +1323,7 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	}
 
 	/**
-	 * Returns boolean false to indicate that Oracle doesn't support 
-	 * multibyte data storage.	 
-	 * @return boolean False.
+	 * @inheritDoc
 	 */
 	public function hasMultibyteSupport()
 	{
@@ -1666,4 +1672,32 @@ class oracledriver extends WW_DbDrivers_DriverBase
 	{
 		return 'TRUNCATE TABLE '.$tableName;
 	}
+
+	/**
+	 * @inheritDoc
+	 *
+	 */
+	protected function retryAfterLockError( $sth, $milliseconds = 50 )
+	{
+		LogHandler::Log( 'oracle', 'INFO', '(Dead)lock error encountered: Execute statement again.' );
+		if( LogHandler::debugMode() ) {
+			LogHandler::Log('oracle', 'DEBUG', $this->theerrorcode.': '.$this->error());
+		}
+		$result = null;
+		$maxRetries = 3;
+		for( $retry = 1; $retry <= $maxRetries; $retry++ ) {
+			LogHandler::Log( 'oracle', 'INFO', "(Dead)lock: Retry attempt {$retry} of {$maxRetries}." );
+			usleep( $milliseconds * 1000 );
+			$result = oci_execute( $sth, OCI_COMMIT_ON_SUCCESS );
+			if( !$result ) {
+				LogHandler::Log( 'oracle', 'WARN', '(Dead)lock: Retry of statement failed once again.' );
+				$result = null;
+			} else {
+				LogHandler::Log( 'oracle', 'INFO', '(Dead)lock: Retry of statement was successful.' );
+			}
+		}
+
+		return $result;
+	}
+
 }

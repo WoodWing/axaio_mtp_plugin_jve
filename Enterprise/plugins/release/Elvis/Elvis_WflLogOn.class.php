@@ -23,26 +23,22 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 
 	final public function runAfter( WflLogOnRequest $req, WflLogOnResponse &$resp ) 
 	{
-		require_once dirname(__FILE__).'/util/ElvisSessionUtil.php';
-		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
-		
-		if (ElvisUtils::isInDesignServer()) {
-			// HACK LVS-3497: For InDesign server, use SUPERUSER for logging into Elvis, ignoring 
-			// the current user. This hack is required as InDesign Server performs a special 
-			// forked login only specifying the username, not the password. Which means we cannot
-			// login the normal user. Super user has full access (no restriction).
-			ElvisSessionUtil::saveCredentials( ELVIS_SUPER_USER, ELVIS_SUPER_USER_PASS );
-			ElvisSessionUtil::setSessionVar( 'restricted', false );
-		}
-		else {
-			$this->setUserType( $req->User, $req->Password );
+		// Lazy logon; The Elvis integration is loosely coupled. We may need to access Elvis, but in this stage we don't
+		// know yet. However, we do have the user credentials in our hands, so all we do is store those for later use.
+		// For the real logon, see plugins/release/Elvis/logic/ElvisAMFClient.php
+		require_once __DIR__.'/util/ElvisUtils.class.php';
+		if( $req->User && $req->Password ) {
+			require_once __DIR__.'/util/ElvisSessionUtil.php';
+			ElvisSessionUtil::saveCredentials( $req->User, $req->Password );
+			ElvisSessionUtil::setRestricted( false );
+			// L> since 10.1.4 this setting is no longer stored in the PHP session but in the DB instead [EN-89334].
 		}
 
 		// Add the feature to the feature set of the logon response.
 		// When a client requests for 'ticket only' the feature set is -not- provided by
 		// the core server, so we need to handle with care.
 		if( isset($resp->ServerInfo->FeatureSet) ) {
-			require_once dirname(__FILE__).'/config.php'; // Load the Elvis settings
+			require_once __DIR__.'/config.php'; // Load the Elvis settings
 			// Pass the ElvisServerUrl option in the feature set, as used by Content Station.
 			$resp->ServerInfo->FeatureSet[] = new Feature( 'ElvisServerUrl', ELVIS_CLIENT_URL );
 
@@ -60,47 +56,9 @@ class Elvis_WflLogOn extends WflLogOn_EnterpriseConnector {
 				$imageRestoreLocation = IMAGE_RESTORE_LOCATION;
 			}
 			$resp->ServerInfo->FeatureSet[] = new Feature( 'ImageRestoreLocation', $imageRestoreLocation );
-		}
-	}
 
-	/**
-	 * There are two types of users. Users who are known within Enterprise and within Elvis and those only know
-	 * within Enterprise. The last group borrows the credentials from the configured super user to log on to Elvis.
-	 * These users get the same rights as the super user but there is one exception. They are not allowed to open Elvis
-	 * objects to edit them. To make this distinction a session variable is set, 'restricted = true'.
-	 * Users who are able to log on to Elvis with their own credentials are not restricted. Their rights are checked
-	 * by the Elvis application. See EN-36871.
-	 * If the log on fails ultimately the session variable with the credentials is set as if the user is an Elvis user.
-	 * Only if both log on attempts fail a warning is logged.
-	 *
-	 * @param string $user Acting user.
-	 * @param string $password Password of the acting user.
-	 * @throws BizException
-	 */
-	private function setUserType( $user, $password )
-	{
-		ElvisSessionUtil::saveCredentials( $user, $password );
-
-		try {
-			require_once dirname(__FILE__).'/logic/ElvisAMFClient.php';
-			$map = new BizExceptionSeverityMap( array( 'S1053' => 'INFO' ) ); // Suppress warnings for the HealthCheck.
-			ElvisAMFClient::login();
-			ElvisSessionUtil::setSessionVar( 'restricted', false );
-		} catch ( BizException $e ) {
-			LogHandler::Log( __CLASS__, 'INFO', 'Log on to Elvis Content Source with normal user credentials failed.');
-			ElvisSessionUtil::saveCredentials( ELVIS_SUPER_USER, ELVIS_SUPER_USER_PASS );
-			try {
-				LogHandler::Log( __CLASS__, 'INFO', 'Try to log on to Elvis Content Source with super user credentials.');
-				ElvisAMFClient::login();
-				LogHandler::Log( __CLASS__, 'INFO', 'Log on to Elvis Content Source with super user credentials is successful.');
-				ElvisSessionUtil::setSessionVar( 'restricted', true );
-				LogHandler::Log( __CLASS__, 'INFO', 'Access rights of the user for Elvis are set to restricted.');
-			} catch ( BizException $e ) {
-				LogHandler::Log( __CLASS__, 'WARN', 'Log on to Elvis Content Source failed.');
-				LogHandler::Log( __CLASS__, 'WARN', 'Please check your configuration and run the Health Check .');
-				ElvisSessionUtil::saveCredentials( $user, $password );
-				ElvisSessionUtil::setSessionVar( 'restricted', false );
-			}
+			// Pass the Elvis Create Copy setting to Elvis, for backwards compatibility with Elvis AIR Client (EN-88464)
+			$resp->ServerInfo->FeatureSet[] = new Feature( 'ElvisCreateCopy', ELVIS_CREATE_COPY );
 		}
 	}
 

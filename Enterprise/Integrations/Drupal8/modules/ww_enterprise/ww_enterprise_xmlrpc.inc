@@ -1,4 +1,7 @@
 <?php
+
+use Drupal\dynamic_entity_reference\Plugin\Field\FieldType\DynamicEntityReferenceItem;
+
 /**
  * Implementation of xmlrpc().
  *
@@ -85,6 +88,19 @@ function ww_enterprise_xmlrpc()
 		array( 'struct', 'string' ),
 		t('Retrieves a specific vocabulary based on the vid.'),
 	);
+
+    $xmlrpc[] = array(
+		'enterprise.getTermEntityValues',
+		'ww_enterprise_xmlrpc_getEntityValues',
+		array(
+			'struct', // Return value.
+			'string', // contentType
+			'string', // termField.
+			'string', // searchValue.
+		),
+		t('Retrieves a specific vocabulary based on the vid.'),
+	);
+
 
 	return $xmlrpc;
 }
@@ -192,42 +208,47 @@ function ww_enterprise_xmlrpc_getFields( $enableTestMode=false )
  * @param bool $testmode Whether or not to test this function.
  * @return array An array of Vocabulary items.
  */
-function ww_enterprise_xmlrpc_getVocabularyNames( $params, $testmode=false )
+function ww_enterprise_xmlrpc_getVocabularyNames( $params, $testmode = false )
 {
 	$params = $params; // Keep analyzer happy.
 	$result = array();
 
 	// Authenticate the request.
 	$user = validateRequest( \Drupal::request() );
-	if ( is_null( $user ) ) {
+	if( is_null( $user ) ) {
 		\Drupal::logger( 'ww_enterprise' )->debug( 'Could not authenticate the user.' );
 		throw new \Exception( 'Could not authenticate the user.' );
 	}
 
 	try {
 		$message = '';
-		if ( !accessCheck( $user, 'getVocabularyNames', $message ) ) {
+		if( !accessCheck( $user, 'getVocabularyNames', $message ) ) {
 			throw new \Exception( $message );
 		}
 
 		// Retrieve the vocabulary names and construct an array.
 		$vocabularies = \Drupal\taxonomy\Entity\Vocabulary::loadMultiple();
-		if ( $vocabularies ) foreach ( $vocabularies as $vocabulary ) {
+		if( $vocabularies ) foreach( $vocabularies as $vocabulary ) {
 			/** @var Drupal\taxonomy\Entity\Vocabulary $vocabulary */
-			$result[$vocabulary->uuid()] = array(
+			$result[ $vocabulary->uuid() ] = array(
 				'uuid' => $vocabulary->uuid(),
 				'vid' => $vocabulary->id(),
 				'name' => $vocabulary->label(),
-				'ww_term_entity' => getWoodWingSuggestionEntity($vocabulary->uuid())
+				'ww_term_entity' => getWoodWingSuggestionEntity( $vocabulary->uuid() )
 			);
 		}
-
+		// Add entityreference as 'known' vocabulary so Enterprise thinks this exists
+		$result['FAKEUID'] = array(
+			'uuid' => 'FAKEUID',
+			'vid' => 'FAKEUIDALSO',
+			'name' => 'entityreference',
+			'ww_term_entity' => 0
+		);
 		// Add the Drupal database instance id to the response.
 		$result['DrupalDatabaseInstanceId'] = \Drupal::config( 'system.site' )->get( 'uuid' );
-
 	} catch( \Exception $e ) {
-		\Drupal::logger('ww_enterprise')->error('getVocabularyNames: ' . $e->getMessage() );
-		$result['errors'] = 'Vocabulary names could not be retrieved: ' . $e->getMessage();
+		\Drupal::logger( 'ww_enterprise' )->error( 'getVocabularyNames: '.$e->getMessage() );
+		$result['errors'] = 'Vocabulary names could not be retrieved: '.$e->getMessage();
 	}
 	return $result;
 }
@@ -383,6 +404,8 @@ function ww_enterprise_xmlrpc_saveNode( $dossierProps, $formValues, $attachments
 
 		// Map all the other fields for this call.
 		mapNodeValues( $node, $formValues, $dossierProps['Preview'] );
+
+		\Drupal::moduleHandler()->alter('ww_enterprise_node_map', $node, $formValues, $dossierProps);
 
 		// Save the node.
 		$node->uid = $uid;
@@ -549,4 +572,79 @@ function ww_enterprise_xmlrpc_getUrl( $nodeId )
 	}
 
 	return getNodeURL( intval($nodeId), false );
+}
+
+/**
+ * Entity autocomplete XML-RPC method.
+ *
+ * @param string $type_uuid The node type.
+ * @param string $field_id The field name.
+ * @param string $searchValue The autocomplete string to search for.
+ * @return string[] A list of suggestions.
+ * @throws \Exception
+ */
+function ww_enterprise_xmlrpc_getEntityValues( $type_uuid, $field_id, $searchValue )
+{
+	// Authenticate the request.
+	$user = validateRequest( \Drupal::request() );
+	if( is_null( $user ) ) {
+		\Drupal::logger( 'ww_enterprise' )->debug( 'Could not authenticate the user.' );
+		throw new \Exception( 'Could not authenticate the user.' );
+	}
+	$node_type = \Drupal::service( 'entity.repository' )->loadEntityByUuid( 'node_type', $type_uuid );
+	if( !$node_type ) {
+		throw new \Exception( 'Unknown content type: '.$type_uuid );
+	}
+	/** @var \Drupal\Core\Field\FieldDefinitionInterface $field_definition */
+	$field_definitions = \Drupal::service( 'entity_field.manager' )->getFieldDefinitions( 'node', $node_type->id() );
+	$field_name = retrieveMachineName( $field_id );
+	if( empty( $field_name ) ) {
+		throw new \Exception( 'Unknown field ID: '.$field_id );
+	}
+	if( !isset( $field_definitions[ $field_name ] ) ) {
+		if( empty( $field_name ) ) {
+			throw new \Exception( 'Field '.$field_name.' ('.$field_id.') not known on node type '.$node_type->id() );
+		}
+	}
+	$field_definition = $field_definitions[ $field_name ];
+	$result = [];
+	switch( $field_definition->getType() ) {
+		case 'entity_reference':
+		case 'simplenews_issue':
+			$handler = \Drupal::service( 'plugin.manager.dynamic_entity_reference_selection' )
+				->getSelectionHandler( $field_definition );
+			// Get an array of matching entities.
+			$match_operator = !empty( $field_definition->getSetting( 'handler_settings' )['match_operator'] ) ?
+										$field_definition->getSetting( 'handler_settings' )['match_operator'] : 'CONTAINS';
+			$entity_labels = $handler->getReferenceableEntities( $searchValue, $match_operator, 10 );
+			// Loop through the entities and convert them into autocomplete output.
+			foreach( $entity_labels as $values ) {
+				foreach( $values as $entity_id => $label ) {
+					$result[ $entity_id ] = $label.' ('.$entity_id.')';
+				}
+			}
+			break;
+		case 'dynamic_entity_reference':
+			// For dynamic references, loop over all target types and provide up to 4
+			// suggestions for each type.
+			foreach( DynamicEntityReferenceItem::getTargetTypes( $field_definition->getSettings() ) as $target_type ) {
+				$handler = \Drupal::service( 'plugin.manager.dynamic_entity_reference_selection' )
+					->getSelectionHandler( $field_definition, null, $target_type );
+				// Get an array of matching entities.
+				$match_operator = !empty( $selection_settings['match_operator'] ) ? $selection_settings['match_operator'] : 'CONTAINS';
+				$entity_labels = $handler->getReferenceableEntities( $searchValue, $match_operator, 4 );
+				$entity_type_label = \Drupal::entityTypeManager()->getDefinition( $target_type )->getLabel();
+				// Loop through the entities and convert them into autocomplete output.
+				foreach( $entity_labels as $values ) {
+					foreach( $values as $entity_id => $label ) {
+						$result[ $target_type.':'.$entity_id ] = $entity_type_label.': '.$label.' ('.$target_type.':'.$entity_id.')';
+					}
+				}
+			}
+			break;
+		default:
+			throw new \Exception( 'Unsuported field '.$field_name.' ('.$field_definition->getType().')' );
+			break;
+	}
+	return $result;
 }

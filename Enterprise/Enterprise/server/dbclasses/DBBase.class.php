@@ -583,24 +583,26 @@ class DBBase
 	}
 
 	/**
-	 *	Deletes one or more rows from table with $tablename where = $where
-	 *	@param $tablename string Name of the table to delete records from
-	 *  @param $where string What records to delete. Can contain placeholders (?).
-	 *  @param $params array containing parameters to be substituted for the placeholders
+	 * Deletes one or more rows from table with $tablename where = $where
+	 *
+	 * @param string $tablename string Name of the table to delete records from
+	 * @param string $where What records to delete. Can contain placeholders (?).
+	 * @param array $params containing parameters to be substituted for the placeholders
 	 *         of the where clause.
+	 * @param bool $logSQL Whether or not the resulting SQL must be logged.
 	 * @return boolean|null NULL in case of error, TRUE in case of success
 	 */
-	static public function deleteRows( $tablename, $where, $params = array() )
+	static public function deleteRows( $tablename, $where, $params = array(), $logSQL = true )
 	{
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
-		$tablename = $dbDriver->tablename($tablename);
-		
+		$tablename = $dbDriver->tablename( $tablename );
+
 		$sql = " DELETE FROM $tablename WHERE $where ";
-		$queryresult = $dbDriver->query($sql, $params);
+		$queryresult = $dbDriver->query( $sql, $params, null, $logSQL );
 		if( is_null( $queryresult ) ) {
 			$err = trim( $dbDriver->error() );
-			self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
+			self::setError( empty( $err ) ? BizResources::localize( 'ERR_DATABASE' ) : $err );
 			return null;
 		}
 		return true;
@@ -761,28 +763,29 @@ class DBBase
     		$versionProp = $major.'.'.$minor;
     	}
     }
-	
+
 	/**
 	 * Inserts records with the new params for passed columns.
+	 *
 	 * @param string $table table name
 	 * @param string $dbIntClass DB Integrity class name
 	 * @param array $newValues column/value pairs of the columns to be inserted.
 	 * @param boolean $autoIncrement Apply auto increment for primary key (true/false).
 	 * @param $logExistsErr boolean Log 'already exists' errors. If set to false no error is logged for an insert operations for which this error is fine.
-	 * @return new id or else false.
+	 * @return int|bool id or else false.
 	 */
-	protected static function doInsert( $table, $dbIntClass, array $newValues, $autoIncrement, $logExistsErr=true )
+	protected static function doInsert( $table, $dbIntClass, array $newValues, $autoIncrement, $logExistsErr = true )
 	{
 		self::clearError();
-		
+
 		$intDB = new $dbIntClass;
-        $intDB->beforeInsert( $newValues );
-        
+		$intDB->beforeInsert( $newValues );
+
 		$result = self::insertRow( $table, $newValues, $autoIncrement, null, $logExistsErr );
 
-        $intDB->afterInsert( $result, $newValues );
+		$intDB->afterInsert( $result, $newValues );
 
-        return $result;
+		return $result;
 	}	    
     
 	/**

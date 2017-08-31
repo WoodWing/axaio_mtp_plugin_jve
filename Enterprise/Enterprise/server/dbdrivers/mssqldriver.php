@@ -88,15 +88,7 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	}
 
 	/**
-	 * Performs a given SQL query at the DB.
-	 *
-	 * @param string $sql   The SQL statement.
-	 * @param array $params Parameters for replacement
-	 * @param mixed $blob   Chunck of data to store at DB. It will be converted to a DB string here.
- 	 *                      One blob can be passed or multiple. If muliple are passed $blob is an array.
-	 * @param boolean $writeLog In case of license related queries, this option can be used to not write in the log file.
-	 * @param boolean $logExistsErr Suppress 'already exists' errors. Used for specific insert operations for which this error is fine.
-	 * @return resource|bool|null DB handle that can be used to fetch results. Null when SQL failed. False when record already exists, in case $logExistsErr is set false.
+	 * @inheritDoc
 	 */
 	public function query( $sql, $params=array(), $blob=null, $writeLog=true, $logExistsErr=true )
 	{
@@ -141,7 +133,6 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 					if( $logSQL ) {
 						$postfix = strlen( $blobstr ) > 250 ? '...' : '';
 						$blobLog = substr( $blobstr, 0, 250 );
-						$blobLog = (LOGFILE_FORMAT == 'html') ? htmlentities( $blobLog ) : $blobLog;
 						LogHandler::Log('mssql', 'INFO', 'BLOB: ['.$blobLog.$postfix.']' );
 					}
 					$blob[$key] = "'$blobstr'"; 
@@ -183,7 +174,7 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 				$rowCnt = ( $result ) ? sqlsrv_rows_affected( $result ) : 0;
 			}
 			$this->logSql( 'mssql',
-				LOGFILE_FORMAT == 'html' ? htmlentities( $cleanSql ) : $cleanSql,
+				$cleanSql,
 				$rowCnt,
 				__CLASS__,
 				__FUNCTION__ );
@@ -198,6 +189,8 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 				($this->errorcode() == DB_ERROR_ALREADY_EXISTS || 
 				 $this->errorcode() == DB_ERROR_CONSTRAINT )) {
 				return false;
+			} elseif( $this->errorcode() == DB_ERROR_DEADLOCK_FOUND || $this->errorcode() == DB_ERROR_NOT_LOCKED ) {
+				return $this->retryAfterLockError( $sql );
 			}
 			if ( $writeLog ) {
 				LogHandler::Log('mssql', 'ERROR', $this->errorcode().':'.$this->error());
@@ -208,10 +201,34 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	}
 
 	/**
-	 * Fetch a result row as an associative array.
-	 *
-	 * @param resource $sth The result resource that is being evaluated. This result comes from a call to {@link: query()}.
-	 * @return array Associative array of strings that corresponds to the fetched row, or FALSE if there are no more rows.
+	 * @inheritDoc
+	 */
+	protected function retryAfterLockError( $sql, $milliseconds = 50 )
+	{
+		LogHandler::Log( 'mssql', 'INFO', '(Dead)lock error encountered: Execute statement again.' );
+		if( LogHandler::debugMode() ) {
+			LogHandler::Log('mssql', 'DEBUG', $this->theerrorcode.': '.$this->error());
+		}
+		$result = null;
+		$maxRetries = 3;
+		for( $retry = 1; $retry <= $maxRetries; $retry++ ) {
+			LogHandler::Log( 'mssql', 'INFO', "(Dead)lock: Retry attempt {$retry} of {$maxRetries}." );
+			usleep( $milliseconds * 1000 );
+			$result = @sqlsrv_query( $this->dbh, $sql );
+			if( !$result ) {
+				LogHandler::Log( 'mssql', 'WARN', '(Dead)lock: Retry of statement failed once again.' );
+				$result = null;
+			} else {
+				LogHandler::Log( 'mssql', 'INFO', '(Dead)lock: Retry of statement was successful.' );
+				break;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @inheritDoc
 	 */
 	public function fetch( $sth )
 	{
@@ -246,11 +263,17 @@ class mssqldriver extends WW_DbDrivers_DriverBase
         }
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function error()
 	{
 		return $this->errormessage;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function errorcode()
 	{
 		switch( $this->theerrorcode ) {
@@ -259,6 +282,12 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 			case 2601:
 			case 2714:
 				return DB_ERROR_ALREADY_EXISTS;
+			case 1203:
+			case 1204:
+			case 1205:
+				return DB_ERROR_DEADLOCK_FOUND;
+			case 1222:
+				return DB_ERROR_NOT_LOCKED;
 			default:
 				return "MSSQL: ".$this->theerrorcode;
 		}
@@ -300,6 +329,9 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 		return $row ? true : false;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function newid($table, $after)
 	{
 		if ($after){
@@ -345,6 +377,9 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 		return "[$name]";
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function limitquery($sql, $start, $count)
 	{
 		/* MSSQL has no LIMIT clause as available for MySQL.
@@ -418,13 +453,16 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 		return $retSql;
 	}
 
-	public function tablename( $str )
+	/**
+	 * @inheritDoc
+	 */
+	public function tablename( $tableNameNoPrefix )
 	{
 		$prefix = DBPREFIX;
-		return "[{$prefix}{$str}]";
+		return "[{$prefix}{$tableNameNoPrefix}]";
 		
 		// Replaced solution below (60ms) with solution above (3ms) to make it 20x faster.
-		//return $this->quoteIdentifier(DBPREFIX.$str);
+		//return $this->quoteIdentifier(DBPREFIX.$tableNameNoPrefix);
 	}
 
 	/**
@@ -469,7 +507,9 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	}
 
 
-
+	/**
+	 * @inheritDoc
+	 */
 	public function autoincrement($sql)
 	{
 		return $sql; // no auto increment needed
@@ -538,18 +578,16 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	{
 		return 'NULL';
 	}
-	
+
 	/**
-	 * Returns a field concatenation
-	 * @param array $fieldNames List of field names to be concatenated
-	 * @return string Concatenation
-	**/
-	public function concatFields( $fieldNames )
+	 * @inheritDoc
+	 **/
+	public function concatFields( $arguments )
 	{
 		$sql = '';
 		$sep = '';
-		foreach( $fieldNames as $fieldName ) {
-			$sql .= "$sep cast($fieldName as varchar)";
+		foreach( $arguments as $argument ) {
+			$sql .= "$sep cast($argument as varchar)";
 			$sep = ' + ';
 		}
 		return $sql;
@@ -723,11 +761,11 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 			$e = new BizException( null, 'Server', $detail, 'Invalid Configuration' );
 		}
 		if( $e ) {
-			$infoTable = '';
-			foreach( $mssqlInfo as $key => $value ) {
-				$infoTable .= "<tr><td>$key</td><td>$value</td></tr>";
+			$infoList = '';
+			if( $mssqlInfo ) foreach( $mssqlInfo as $key => $value ) {
+				$infoList .= "$key = $value\r\n";
 			}
-			LogHandler::Log( 'mssql', 'INFO', 'MSSQL driver information: <table>'.$infoTable.'</table>' );
+			LogHandler::Log( 'mssql', 'INFO', "MSSQL driver information:\r\n{$infoList}" );
 			throw $e;
 		}
 	}
@@ -790,12 +828,10 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	public function flush()
 	{
 		return;
-	}	
-	
+	}
+
 	/**
-	 * Returns boolean false to indicate that MSSQL doesn't support 
-	 * multibyte data storage.	
-	 * @return boolean False.
+	 * @inheritDoc
 	 */
 	public function hasMultibyteSupport()
 	{

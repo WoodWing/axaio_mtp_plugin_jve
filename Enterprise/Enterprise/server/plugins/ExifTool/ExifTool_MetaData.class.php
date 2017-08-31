@@ -32,7 +32,7 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 {
 	/**
 	 * @var array $toolMetaData List of extracted metadata properties read by ExifTool.
-	 * Properties are grouped with keys: File, XMP, EXIF, IPTC, Photoshop, Computed, etc
+	 * Properties are grouped with keys: File, XMP, EXIF, IPTC, Photoshop, GIF (limited), Computed, etc
 	 * The names and values are taken as-is from ExifTool, without any conversion whatsoever.
 	 * See top of this PHP module for references to the supported metadata standards.
 	 */
@@ -288,11 +288,16 @@ class ExifTool_MetaData extends MetaData_EnterpriseConnector
 			'Height', 'Width', array( $this, 'castToFloatWhenPositive' ) );
 		list( $xmpImageHeight, $xmpImageWidth ) = $this->mapFieldPairValues( 'XMP', 'ImageHeight', 'ImageWidth',
 			'Height', 'Width', array( $this, 'castToFloatWhenPositive' ) );
+		list( $gifImageHeight, $gifImageWidth ) = $this->mapFieldPairValues( 'GIF', 'ImageHeight', 'ImageWidth',
+			'Height', 'Width', array( $this, 'castToFloatWhenPositive' ) );
 
 		if( LogHandler::debugMode() ) {
-			LogHandler::Log( 'ExifTool', 'DEBUG', "Extracted image (height={$this->entMetaData['Height']}, width={$this->entMetaData['Width']}) from tags: ".
-				"File($fileHeight, $fileWidth) XMP($xmpImageHeight, $xmpImageWidth) ".
-				"EXIF($exifImageHeight, $exifImageWidth) PNG($pngImageHeight, $pngImageWidth) Photoshop($psImageHeight, $psImageWidth)" );
+			LogHandler::Log(
+				'ExifTool',
+				'DEBUG',
+				"Extracted image (height={$this->entMetaData['Height']}, width={$this->entMetaData['Width']}) from tags: ".
+				"File($fileHeight, $fileWidth) XMP($xmpImageHeight, $xmpImageWidth) EXIF($exifImageHeight, $exifImageWidth) ".
+				"PNG($pngImageHeight, $pngImageWidth) Photoshop($psImageHeight, $psImageWidth GIF($gifImageHeight, $gifImageWidth)" );
 		}
 
 		// To determine the DPI, we need the width and height, so bail out when not found.

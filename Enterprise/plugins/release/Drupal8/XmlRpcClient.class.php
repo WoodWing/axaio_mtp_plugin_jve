@@ -572,7 +572,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 			LogHandler::Log( 'Drupal', 'DEBUG', 'File sent to drupal. File Id: ' . $fileId );
 
 		} catch( Exception $e ) { // any kind of Zend exception !!
-			$e = $e; // keep code analyzer happy
+			// Nothing to do.
 		}
 
 		// Log request and response (or fault) as plain text
@@ -600,6 +600,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 
 		// Now the service I/O is logged above, throw exception in case of a fault.
 		$lastResponse = $client->getLastResponse();
+		$detailedUserMessage = '';
 		if( $lastResponse && $lastResponse->isError() ) {
 			$errMsg = $lastResponse->getMessage().' (HTTP '.$lastResponse->getStatus().')';
 		} else if( isset($e) ) {
@@ -613,6 +614,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 				$xpath = new DOMXPath( $dom );
 				$errorNode = $xpath->query('//error')->item(0);
 				$errMsg = $errorNode->nodeValue;
+				$detailedUserMessage = strip_tags( $errMsg ); // Drupal messages contain html tags.
 			}
 		}
 
@@ -625,7 +627,7 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 		if( $errMsg ) {
 			LogHandler::Log( 'Drupal', 'ERROR', 'HTTP UPLOAD "'.$action.'" failed at URL "'.$this->url.'".' );
 			throw new BizException( 'ERR_PUBLISH', 'Server', $errMsg,
-				null, array('Drupal', $message));
+				null, array('Drupal', "{$message} {$detailedUserMessage}"));
 		}
 		return $fileId;
 	}
@@ -654,4 +656,22 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 
 		return $retVal;
 	}
+
+	/**
+	 * Returns entity terms that link to a search value.
+	 *
+	 * @since 10.1.2
+	 * @param string $contentTypeId Drupal Content Type identifier
+	 * @param string $termFieldId Drupal Term field identifier
+	 * @param string $searchValue Value to look for
+	 * @return array Found values.
+	 */
+	public function getTermEntityValues( $contentTypeId, $termFieldId, $searchValue)
+	{
+		$service = 'enterprise.getTermEntityValues';
+		$result = $this->callRpcService( $service, array($contentTypeId, $termFieldId, $searchValue)  );
+
+		return $result;
+	}
+
 }

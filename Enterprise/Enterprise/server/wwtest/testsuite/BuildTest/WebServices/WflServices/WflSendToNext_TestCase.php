@@ -318,26 +318,26 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 
 		switch ($scenario) {
 			case 1:
-				LogHandler::Log( 'TestSuite', 'DEBUG', '<b>Test: Setup routing profile for state "STN Draft" to '.$routeTo4.'</b>' );
+				LogHandler::Log( 'TestSuite', 'DEBUG', "Test: Setup routing profile for state 'STN Draft' to '{$routeTo4}'" );
 				$this->routing[] = $this->wflServicesUtils->createRoutingProfile( $publicationID, $categoryNewsID, $stateDraftID, $routeTo4 );
 
-				LogHandler::Log( 'TestSuite', 'DEBUG', '<b>Test: Setup routing profile for state "STN Process" to '.$routeTo4.'</b>' );
+				LogHandler::Log( 'TestSuite', 'DEBUG', "Test: Setup routing profile for state 'STN Process' to '{$routeTo4}'" );
 				$this->routing[] = $this->wflServicesUtils->createRoutingProfile( $publicationID, $categoryNewsID, $stateProcessID, $routeTo4 );
 			break;
 			
 			case 2:
-				LogHandler::Log( 'TestSuite', 'DEBUG', '<b>Test: Setup routing profile for state "STN Draft" to '.$routeTo2.'</b>' );
+				LogHandler::Log( 'TestSuite', 'DEBUG', "Test: Setup routing profile for state 'STN Draft' to '{$routeTo2}'" );
 				$this->routing[] = $this->wflServicesUtils->createRoutingProfile( $publicationID, $categoryNewsID, $stateDraftID, $routeTo2 );
 
-				LogHandler::Log( 'TestSuite', 'DEBUG', '<b>Test: Setup routing profile for state "STN Process" to no user</b>' );
+				LogHandler::Log( 'TestSuite', 'DEBUG', "Test: Setup routing profile for state 'STN Process' to no user" );
 				$this->routing[] = $this->wflServicesUtils->createRoutingProfile( $publicationID, $categoryNewsID, $stateProcessID, '' );
 			break;
 			
 			case 3:
-				LogHandler::Log( 'TestSuite', 'DEBUG', '<b>Test: Setup routing profile for state "STN Draft" to '.$routeTo4.'</b>' );
+				LogHandler::Log( 'TestSuite', 'DEBUG', "Test: Setup routing profile for state 'STN Draft' to '{$routeTo4}'" );
 				$this->routing[] = $this->wflServicesUtils->createRoutingProfile( $publicationID, $categoryNewsID, $stateDraftID, $routeTo4 );
 
-				LogHandler::Log( 'TestSuite', 'DEBUG', '<b>Test: Setup routing profile for state "STN Process" to no user</b>' );
+				LogHandler::Log( 'TestSuite', 'DEBUG', "Test: Setup routing profile for state 'STN Process' to no user" );
 				$this->routing[] = $this->wflServicesUtils->createRoutingProfile( $publicationID, $categorySportID, $stateProcessID, '' );
 			break;
 		}
@@ -351,7 +351,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSendToNext_TestCase exte
 	 */
 	private function cleanupAdmRouting( $throwBizException )
 	{
-		LogHandler::Log( 'TestSuite', 'DEBUG', '<b>Test: Cleanup routing profiles</b>' );
+		LogHandler::Log( 'TestSuite', 'DEBUG', 'Test: Cleanup routing profiles' );
 		if( $this->routing ) foreach( $this->routing as $routingId ) {
 			try {
 				$this->wflServicesUtils->deleteRoutingProfile( $routingId );

@@ -12,7 +12,7 @@ class BizInDesignServerJobs
 {
 	/** @var string $lockToken */
 // 	private $lockToken;
-	
+
 	/**
 	 * Keep InDesignServerJobs table healthy.
 	 *
@@ -28,7 +28,7 @@ class BizInDesignServerJobs
 	 *        - Not started within the last 3 minutes.
 	 * @throws BizException
 	 */
-	public static function cleanupJobs() 
+	public static function cleanupJobs()
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAutoPurge.class.php';
 		require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
@@ -48,31 +48,31 @@ class BizInDesignServerJobs
 		LogHandler::Log( 'idserver', 'INFO', 'Foreground jobs queued before '.$beforeDate.' will be set to to FLOODED.' );
 		DBInDesignServerJob::timeoutForegroundJobs( $beforeDate );
 	}
-	
+
 	/**
 	 * Removes an InDesign Server job
 	 *
 	 * @param string $jobId
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
-	public static function removeJob( $jobId ) 
+	public static function removeJob( $jobId )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
 		DBInDesignServerJob::removeJob( $jobId );
 	}
-	
+
 	/**
 	 * Restarts an InDesign Server background job
 	 *
 	 * @param string $jobId
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
-	public static function restartJob( $jobId ) 
+	public static function restartJob( $jobId )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
 		DBInDesignServerJob::restartJob( $jobId );
-	}	
-	
+	}
+
 	/**
 	 * Create a new InDesign Server job, creation allows to skip on the InDesignServerJob connector
 	 *
@@ -89,7 +89,7 @@ class BizInDesignServerJobs
 	 * @param InDesignServerJob $job
 	 * @throws BizException When the job cannot be created.
 	 * @return string ID of the new job.
-	 */	
+	 */
 	public static function createJob( InDesignServerJob $job )
 	{
 		// Always look in the config if the job type is specified there and use that priority.
@@ -119,6 +119,10 @@ class BizInDesignServerJobs
 			$job->Initiator = '';
 		}
 		$job->QueueTime = date( 'Y-m-d\TH:i:s', time() );
+		// When the PickupTime is already set respect that time, otherwise it is available for immediate pickup.
+		if( is_null( $job->PickupTime ) ) {
+			$job->PickupTime = $job->QueueTime;
+		}
 
 		if ( is_null( $job->JobStatus ) ) {
 			// Set the job status to the default 'PLANNED' if it has not been set by a connector.
@@ -150,7 +154,7 @@ class BizInDesignServerJobs
 		}
 		return $job->JobId;
 	}
-	
+
 	/**
 	 * Takes the highest prio background job from the queue and assigns an IDS instance to it.
 	 *
@@ -168,7 +172,7 @@ class BizInDesignServerJobs
 		if( !$server ) {
 			throw new BizException( 'ERR_NOTFOUND', 'Client', $serverId );
 		}
-		
+
 		// Validate the lock tokens. Bail out when empty or mismatching.
 		if( !$lockToken ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Server', 'No lock token given.' );
@@ -182,7 +186,7 @@ class BizInDesignServerJobs
 
 		self::runJob( $jobId, $server, $lockToken );
 	}
-	
+
 	/**
 	 * Determines an IDS instance that could run the given job. It assigns IDS to the job when match found.
 	 *
@@ -226,8 +230,8 @@ class BizInDesignServerJobs
 			if( $selectedServer ) {
 				$idleServerIds = array( $selectedServer->Id );
 			} else {
-				// Last minute check: For the BG job processor, never take an IDS that matches 
-				// a pending FG job (prio 1), unless that IDS instance is dedicated configured 
+				// Last minute check: For the BG job processor, never take an IDS that matches
+				// a pending FG job (prio 1), unless that IDS instance is dedicated configured
 				// for BG jobs only (prio 2-5).
 				$excludePrios = array(); // include all
 				if( !$foreground ) { // BG processing?
@@ -246,7 +250,7 @@ class BizInDesignServerJobs
 					if ( !$foreground ) {
 						//Check again to see if any InDesign Servers exist that can process this job, busy or not.
 						$serverIds = BizInDesignServer::getAvailableServerIdsForJob( $jobId, $busyServers, $excludePrios, true );
-						
+
 						require_once BASEDIR . '/server/dataclasses/InDesignServerJobStatus.class.php';
 						$jobStatus = new InDesignServerJobStatus();
 						$status = ($serverIds) ? InDesignServerJobStatus::UNAVAILABLE : InDesignServerJobStatus::INCOMPATIBLE;
@@ -300,7 +304,7 @@ class BizInDesignServerJobs
 				sleep(1);
 			}
 		}
-		
+
 		if( $assignedServer ) {
 			LogHandler::Log( 'idserver', 'INFO', 'Found IDS instance ['.$assignedServer->Id.'] for job ['.$jobId.'].' );
 		} else {
@@ -311,15 +315,15 @@ class BizInDesignServerJobs
   			// Error when there is no active IDS configured with a matching prio and version.
 			// This can happen e.g. just after an IDS machine went down.
 			if( !BizInDesignServer::getAvailableServerIdsForJob( $jobId, array(), array(), true ) ) {
-				list( $minReqVersion, $maxReqVersion ) = DBInDesignServerJob::getServerVersionOfJob( $jobId ); 
-				$params = array( 
+				list( $minReqVersion, $maxReqVersion ) = DBInDesignServerJob::getServerVersionOfJob( $jobId );
+				$params = array(
 					$jobId,
 					BizInDesignServer::composeRequiredVersionInfo( $minReqVersion, $maxReqVersion ),
 					self::localizeJobPrioValue( DBInDesignServerJob::getJobPrio( $jobId ) )
 				);
 				throw new BizException( 'IDS_NOT_CONFIGURED_FOR_JOB', 'Server', '', null, $params, $severity ); // S1139
 			}
-							
+
 			// Error when there was no active IDS available. This could happen when all are busy.
 			throw new BizException( 'IDS_NOTAVAILABLE', 'Server', '', null, null, $severity ); // S1135
 		}
@@ -353,13 +357,13 @@ class BizInDesignServerJobs
 				break;
 			default:
 				$prioText = ''; // Leave the prio field empty
-				LogHandler::Log( 'idserver', 'ERROR', 
+				LogHandler::Log( 'idserver', 'ERROR',
 					'Priority of the job is: ' . $jobPrio . ' and is out of range [1-5]' );
 				break;
 		}
 		return $prioText;
 	}
-	
+
 	/**
 	 * Provides all supported job priority values.
 	 *
@@ -383,7 +387,7 @@ class BizInDesignServerJobs
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
 		return DBInDesignServerJob::getHighestFcfsJobId( $foreground );
 	}
-	
+
 	/**
 	 * Returns the highest prio background job from the queue in FCFS order.
 	 *
@@ -394,26 +398,27 @@ class BizInDesignServerJobs
 	private static function hasPendingForegroundJobs()
 	{
 	}
-	
+
 	/**
 	 * @param InDesignServerJob $job
 	 * @param InDesignServer $server
 	 * @param boolean $requeue [OUT] Whether or not the job should be requeued.
-	 * @return string Script result
+	 * @return string|object Script result
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
 	private static function runScript( InDesignServerJob $job, InDesignServer $server, &$requeue )
 	{
 		require_once BASEDIR.'/server/protocols/soap/IdsSoapClient.php';
 
-		// If no logfile specified, create one ourself (autolog). 
-		// This will end up in database and removed afterwards.
 		$autolog = false;
-		if( empty($job->JobParams['logfile']) ) {
+		// If 'jsonResult' is specified the caller expects the script to return the log in
+		// the script's response JSON. Else if no logfile specified, create one ourself (autolog).
+		// This will end up in database and the file is removed afterwards.
+		if( !isset( $job->JobParams['jsonResult'] ) && empty($job->JobParams['logfile']) ) {
 			$autolog = true;
 			$job->JobParams['logfile'] = WEBEDITDIRIDSERV.'autolog_'.$job->JobId.'.log';
 		}
-	
+
 		// Provide the ticket to allow the script to login to Enterprise.
 		if( !isset($job->JobParams['ticket']) ) {
 			$job->JobParams['ticket'] = $job->TicketSeal;
@@ -428,10 +433,16 @@ class BizInDesignServerJobs
 		// also overrule PHP execution time-out
 		// otherwise it might end our job and we cannot handle the result...
 		set_time_limit($timeout+10);
-	
+
+		// The JobScript can be either the full script text or a path prefixed with file:
+		$scriptText = $job->JobScript;
+		if(substr( $scriptText, 0, 5 ) === 'file:') {
+			$scriptText = file_get_contents(str_replace('{{BASEDIR}}', BASEDIR, substr( $scriptText, 5)));
+		}
+
 		// Prepare IDS script and its arguments.
 		$scriptParams = array(
-			'scriptText'     => $job->JobScript,
+			'scriptText'     => $scriptText,
 			'scriptLanguage' => 'javascript',
 			'scriptArgs'     => array()
 		);
@@ -441,7 +452,7 @@ class BizInDesignServerJobs
 			}
 		}
 		$soapParams = array( 'runScriptParameters' => $scriptParams );
-	
+
 		// let InDesign Server do the job
 		$soapFault = null;
 		try {
@@ -453,7 +464,7 @@ class BizInDesignServerJobs
 			LogHandler::Log('idserver', 'ERROR', 'Script failed: '.$soapFault );
 		}
 		ini_set( 'default_socket_timeout', $defaultSocketTimeout );
-	
+
 		$errorNumber = '';
 		$errorString = '';
 		if( is_array($jobResult) ) {
@@ -472,9 +483,21 @@ class BizInDesignServerJobs
 			} else {
 				$errorString = BizResources::localize('IDS_ERROR');
 			}
-		}	
+		}
 		$scriptResult = '';
-		if ( !empty($job->JobParams['logfile']) ) {
+		$retVal = isset($jobResult['scriptResult']->data) ? $jobResult['scriptResult']->data : '';
+		if( isset( $job->JobParams['jsonResult'] ) ) {
+			$decoded = json_decode($retVal);
+			// Use the log returned by the IDS script
+			$scriptResult = isset($decoded->log) ? $decoded->log : '';
+			if ( !empty($scriptResult) && !empty($job->JobParams['logfile']) ) {
+				$logfile = str_replace( WEBEDITDIRIDSERV, WEBEDITDIR, $job->JobParams['logfile'] );
+				file_put_contents($logfile, $scriptResult);
+			}
+			// Change the return value to the result defined by the IDS script
+			$retVal = isset($decoded->result) ? $decoded->result : '';
+		}
+		else if ( !empty($job->JobParams['logfile']) ) {
 			// correct path from InDesign server perspective to SCE server perspective
 			$logfile = str_replace( WEBEDITDIRIDSERV, WEBEDITDIR, $job->JobParams['logfile'] );
 			if( file_exists($logfile) ) {
@@ -484,21 +507,20 @@ class BizInDesignServerJobs
 				}
 			}
 		}
-		
+
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
 		DBInDesignServerJob::saveScriptResultForJob( $job->JobId, $errorNumber, $scriptResult );
 		$job->ErrorCode = $errorNumber;
 		$job->ErrorMessage = $errorString;
 		$job->ScriptResult = $scriptResult;
-		
+
 		if( $errorString ) {
 			throw new BizException( null, 'Server', '', $errorString );
 		}
-		
-		$retVal = isset($jobResult['scriptResult']->data) ? $jobResult['scriptResult']->data : '';
+
 		return $retVal;
 	}
-	
+
 	/**
 	 * Runs an IDS job that is present in the queue.
 	 *
@@ -508,15 +530,15 @@ class BizInDesignServerJobs
 	 * @param string $jobId
 	 * @param InDesignServer $server The IDS to use to run the job.
 	 * @param string $lockToken
-	 * @return string IDS script result.
+	 * @return string|object IDS script result.
 	 * @throws BizException When IDS script has failed, when IDS has failed or when no IDS was found.
-	 */		
-	public static function runJob( $jobId, InDesignServer $server, $lockToken ) 
+	 */
+	public static function runJob( $jobId, InDesignServer $server, $lockToken )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
 
 		LogHandler::Log('idserver', 'INFO', "START handling job [$jobId]" );
-		
+
 		try {
 			// Get job from queue. Bail out when not found.
 			$job = DBInDesignServerJob::getJobById( $jobId );
@@ -540,7 +562,7 @@ class BizInDesignServerJobs
 			if( $server->Id != $job->AssignedServerId ) {
 				throw new BizException( 'ERR_ARGUMENT', 'Server', 'Job is not assigned to server.' );
 			}
-			
+
 			// Keep the IDS jobs queue healthy.
 			self::cleanupJobs();
 
@@ -549,20 +571,20 @@ class BizInDesignServerJobs
 				$job->Attempts = 0;
 			}
 			$job->Attempts += 1;
-		
+
 			// Set job to processing.
 			$job->JobStatus = new InDesignServerJobStatus();
 			$job->JobStatus->setStatus( InDesignServerJobStatus::PROGRESS );
-		
+
 			// Pickup job; Set status, attempts, start time and reset error info.
 			$startTime = date( 'Y-m-d\TH:i:s', time() );
 			DBInDesignServerJob::pickupJob( $jobId, $job->JobStatus, $job->Attempts, $startTime );
-			
+
 			// Use SOAP client to call IDS to execute the script.
 			$requeue = false;
 			$retVal = self::runScript( $job, $server, $requeue );
-			
-			// Mark job as completed successfully.			
+
+			// Mark job as completed successfully.
 			$job->JobStatus = new InDesignServerJobStatus();
 			$job->JobStatus->setStatus( InDesignServerJobStatus::COMPLETED );
 			$readyTime = date( 'Y-m-d\TH:i:s', time() );
@@ -571,9 +593,9 @@ class BizInDesignServerJobs
 			// Unlock server and job.
 			DBInDesignServer::unlockServer( $server->Id, $lockToken );
 			DBInDesignServerJob::unassignServerFromJob( $jobId, $server->Id, $lockToken );
-			
+
 			// TODO: Detect IDS crashes. Blacklist layout?
-			
+
 			// REQUEUE mechanism
 			// When IDS crashes, it does not have to be the job that is causing the crash
 			// Therefore, try to process this job once more...
@@ -593,7 +615,7 @@ class BizInDesignServerJobs
 // 					$requeue = false;
 // 				}
 // 			}
-		
+
 		} catch( BizException $e ) {
 			if( isset($job) ) {
 				self::handleProcessJobException( $job, $e );
@@ -603,7 +625,7 @@ class BizInDesignServerJobs
 			DBInDesignServerJob::unassignServerFromJob( $jobId, $server->Id, $lockToken );
 
 			throw $e;
-		}		
+		}
 		LogHandler::Log('idserver', 'INFO', "END handling job [$jobId]" );
 		return $retVal;
 	}
@@ -620,10 +642,10 @@ class BizInDesignServerJobs
 	 * @param string $minReqVersion    Minimum required internal IDS version (major.minor) to run the job. Typically the version that was used to create the article/layout.
 	 * @param string $maxReqVersion    Maximum required internal IDS version (major.minor) to run the job. Typically the version that was used to create the article/layout.
 	 * @param string $context          Additional information in which context the IDS job was pushed into the queue.
-	 * @return string                  Result returned by IDS script.
+	 * @return object|string           Result returned by IDS script.
 	 * @throws BizException            When the IDS script has failed. May happen for foreground jobs only.
 	 */
-	public static function createAndRunJob( $scriptText, array $scriptParams, $jobType, $objId = null, 
+	public static function createAndRunJob( $scriptText, array $scriptParams, $jobType, $objId = null,
 		$server = null, $minReqVersion = null, $maxReqVersion = null, $context = '' )
 	{
 		require_once BASEDIR . '/server/dataclasses/InDesignServerJob.class.php';
@@ -635,7 +657,7 @@ class BizInDesignServerJobs
 		$job->JobPrio    = 1; // FG jobs always have prio 1
 		$job->Context    = $context;
 		$job->Foreground = true;
-		
+
 		if( !is_null($server) ) {
 			$job->MinServerVersion = $server->ServerVersion;
 			$job->MaxServerVersion = $server->ServerVersion;
@@ -660,7 +682,7 @@ class BizInDesignServerJobs
 		$jobId = self::createJob( $job );
 
 		if( $jobId ) {
-			self::repairDetachedServersAndJobs();
+			self::repairDetachedServersAndJobs( true );
 			// Find IDS instance that can handle the job; IDS that is active, has matching
 			// version and can handle the job prio.
 			try {
@@ -674,7 +696,7 @@ class BizInDesignServerJobs
 		// Let the IDS instance run the IDS job.
 		return isset($jobId) ? self::runJob( $jobId, $server, $lockToken ) : '';
 	}
-	
+
 	/**
 	 * Saves a processing error for a given job.
 	 * The given exception severity is mapped onto the job status.
@@ -712,7 +734,7 @@ class BizInDesignServerJobs
 		$readyTime = date( 'Y-m-d\TH:i:s', time() );
 		DBInDesignServerJob::processedJob( $job->JobId, $readyTime, $job->JobStatus );
 	}
-	
+
 	/**
 	 * Updates the IDS job record with a new session ticket, that matches a given ticket seal.
 	 *
@@ -741,16 +763,16 @@ class BizInDesignServerJobs
 	public static function getJobIdForRunningJobByTicketAndJobType( $ticket, $jobType )
 	{
 		// When SC for IDS does login while the DPS tools are enabled, SC does another login.
-		// The first time login is for "InDesign Server" while the second time is for 
+		// The first time login is for "InDesign Server" while the second time is for
 		// "Digital Publishing Tools InDesign Server". From then on, SC will use the first ticket
-		// and second ticket one by one to make sure both tickets won't expire and 
+		// and second ticket one by one to make sure both tickets won't expire and
 		// the DPS seat can not be taken away by another user.
-		 
-		// This behaviour is challenging since we store the ticket in the IDS job 
+
+		// This behaviour is challenging since we store the ticket in the IDS job
 		// which allows us to lookup for which job web services are requested.
-		// To solve this, when the second DPS ticket (slave) is used, we lookup the 
+		// To solve this, when the second DPS ticket (slave) is used, we lookup the
 		// first SC client ticket (master), which is the one stored in the job.
-		
+
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		$app = DBTicket::DBappticket( $ticket );
 		$jobId = null;
@@ -773,7 +795,7 @@ class BizInDesignServerJobs
 		}
 		return $jobId;
 	}
-	
+
 	/**
 	 * Updates the object version of a given job to indicate which version is picked for processing.
 	 *
@@ -787,7 +809,7 @@ class BizInDesignServerJobs
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
 		DBInDesignServerJob::updateObjectVersionByJobId( $jobId, $objectVersion );
 	}
-	
+
 	/**
 	 * Returns the object version that was set for the job once it started processing.
 	 *
@@ -827,9 +849,9 @@ class BizInDesignServerJobs
 	public static function saveErrorForJob( $jobId, $errorMessage )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
-		
+
 		// Avoid overwriting an error having S-code with an error having no S-code.
-		// Reason is that explicit errors may be caught and saved halfway job execution 
+		// Reason is that explicit errors may be caught and saved halfway job execution
 		// by ES itself such as "Access denied (S1002)" on a GetObjects, while SC may throw
 		// a more vague error on app.openObject(), such as "Could not open document".
 		// In those cases we don't want to overwrite the concrete error with the vague error.
@@ -837,26 +859,27 @@ class BizInDesignServerJobs
 		if( $orgErrMsg ) {
 			$errorMessage = $orgErrMsg.' '.$errorMessage; // just add new message, so preserve original
 		}
-		
+
 		// Update the error and the readtime for the job in DB.
 		DBInDesignServerJob::saveErrorForJob( $jobId, $errorMessage );
 	}
-	
+
     /**
      * Put IDS instances/jobs back into business for which we lost track of their processing status.
      *
      * The IDS instances and IDS jobs tracked in our DB should represent what is going on in IDS.
      * However, due to network connection disruptions (between the AS and IDS or the AS and DB)
-     * or due to internal IDS failure, the tracked DB info tells us that we are still waiting 
-     * for a certain IDS instance to complete its job, while in reality the IDS has completed 
-     * the job already or has restarted or recovered from a crash and is ready to serve. 
+     * or due to internal IDS failure, the tracked DB info tells us that we are still waiting
+     * for a certain IDS instance to complete its job, while in reality the IDS has completed
+     * the job already or has restarted or recovered from a crash and is ready to serve.
      *
      * This function detects those exceptional cases and unlocks the IDS instance and IDS job
      * so that the IDS can be put back into business again.
      *
-	 * @since 9.8.0
+     * @since 9.8.0
+     * @param bool $onlyForegroundJobs True to only repair foreground jobs, False to repair both foreground and background jobs.
      */
-	public static function repairDetachedServersAndJobs()
+	public static function repairDetachedServersAndJobs( $onlyForegroundJobs =false )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizInDesignServer.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
@@ -867,7 +890,7 @@ class BizInDesignServerJobs
 		LogHandler::Log( 'idserver', 'INFO', 'Repairing detached IDS servers and jobs...' );
 		$startedBefore = defined( 'IDS_AUTOMATION_REPAIRLOCK' ) ? IDS_AUTOMATION_REPAIRLOCK : 5; // hidden opt, default 5 minutes
 		$startedBefore = date( 'Y-m-d\TH:i:s', time() - ( $startedBefore * 60 ) ); // older than 5 minutes (default)
-		$jobs = DBInDesignServerJob::getLockedJobsStartedBefore( $startedBefore );
+		$jobs = DBInDesignServerJob::getLockedJobsStartedBefore( $startedBefore, $onlyForegroundJobs );
 		$maxExecutionTime = time() + 10;
 		$numberOfLockedJobs = count( $jobs );
 		do {

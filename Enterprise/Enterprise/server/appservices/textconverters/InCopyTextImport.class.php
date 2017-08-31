@@ -909,9 +909,9 @@ class InCopyTextImport implements TextImport
 	 * @param DOMDocument $icDoc
 	 * @param DOMNode $icNode
 	 * @param string $elemId
-	 * @param $elemEndId
-	 * @param $startMarker
-	 * @return StoryResourceDef <br/>
+	 * @param string $elemEndId
+	 * @param boolean $startMarker
+	 * @return StoryResourceDef
 	 */
 	private function createStoryResourceDef( $icDoc, $icNode, $elemId, $elemEndId, $startMarker )
 	{

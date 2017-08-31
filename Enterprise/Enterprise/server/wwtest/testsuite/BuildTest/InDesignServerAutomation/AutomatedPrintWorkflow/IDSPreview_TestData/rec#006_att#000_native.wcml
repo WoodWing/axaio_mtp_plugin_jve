@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?><ea:Stories ea:WWVersion="2.0" xmlns:aic="http://ns.adobe.com/AdobeInCopy/2.0" xmlns:ea="urn:SmartConnection_v3"><ea:Story ea:GUID="FBA64985-970D-4AF5-842F-179E826F5508" pi0="style=&quot;50&quot; type=&quot;snippet&quot; readerVersion=&quot;6.0&quot; featureSet=&quot;257&quot; product=&quot;10.2(104)&quot; " pi1="SnippetType=&quot;InCopyInterchange&quot;"><ea:StoryInfo><ea:SI_EL>body</ea:SI_EL><ea:SI_Words>220</ea:SI_Words><ea:SI_Chars>1476</ea:SI_Chars><ea:SI_Paras>1</ea:SI_Paras><ea:SI_Lines>15</ea:SI_Lines><ea:SI_Snippet>Nequisciam inciumquis endaerchit exera volupie nestem essit in nemquam, offic tota con num aut occusa nossed mi, quo volor asitatisquam atius voluptia sam incipsam, cum repudae nem et acearchic to enducimus dolorib usantia turissi ntibus ut lautempor </ea:SI_Snippet><ea:SI_Version>02DE90FE-D3DC-4C74-B5CC-ACFE20466228</ea:SI_Version></ea:StoryInfo><Document DOMVersion="10.2" Self="d">
+	<Ink Self="Ink/$ID/Process Cyan" Name="$ID/Process Cyan" Angle="75" ConvertToProcess="false" Frequency="70" NeutralDensity="0.61" PrintInk="true" TrapOrder="1" InkType="Normal"/>
+	<Ink Self="Ink/$ID/Process Magenta" Name="$ID/Process Magenta" Angle="15" ConvertToProcess="false" Frequency="70" NeutralDensity="0.76" PrintInk="true" TrapOrder="2" InkType="Normal"/>
+	<Ink Self="Ink/$ID/Process Yellow" Name="$ID/Process Yellow" Angle="0" ConvertToProcess="false" Frequency="70" NeutralDensity="0.16" PrintInk="true" TrapOrder="3" InkType="Normal"/>
+	<Ink Self="Ink/$ID/Process Black" Name="$ID/Process Black" Angle="45" ConvertToProcess="false" Frequency="70" NeutralDensity="1.7" PrintInk="true" TrapOrder="4" InkType="Normal"/>
+	<FontFamily Self="di3f" Name="Minion Pro">
+		<Font Self="di3fFontnMinion Pro Bold Cond" FontFamily="Minion Pro" Name="Minion Pro Bold Cond" PostScriptName="MinionPro-BoldCn" Status="Installed" FontStyleName="Bold Cond" FontType="OpenTypeCFF" WritingScript="0" FullName="Minion Pro Bold Cond" FullNameNative="Minion Pro Bold Cond" FontStyleNameNative="Bold Cond" PlatformName="$ID/" Version="Version 2.112;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="di3fFontnMinion Pro Bold Cond Italic" FontFamily="Minion Pro" Name="Minion Pro Bold Cond Italic" PostScriptName="MinionPro-BoldCnIt" Status="Installed" FontStyleName="Bold Cond Italic" FontType="OpenTypeCFF" WritingScript="0" FullName="Minion Pro Bold Cond Italic" FullNameNative="Minion Pro Bold Cond Italic" FontStyleNameNative="Bold Cond Italic" PlatformName="$ID/" Version="Version 2.112;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="di3fFontnMinion Pro Regular" FontFamily="Minion Pro" Name="Minion Pro Regular" PostScriptName="MinionPro-Regular" Status="Installed" FontStyleName="Regular" FontType="OpenTypeCFF" WritingScript="0" FullName="Minion Pro" FullNameNative="Minion Pro" FontStyleNameNative="Regular" PlatformName="$ID/" Version="Version 2.112;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="di3fFontnMinion Pro Italic" FontFamily="Minion Pro" Name="Minion Pro Italic" PostScriptName="MinionPro-It" Status="Installed" FontStyleName="Italic" FontType="OpenTypeCFF" WritingScript="0" FullName="Minion Pro Italic" FullNameNative="Minion Pro Italic" FontStyleNameNative="Italic" PlatformName="$ID/" Version="Version 2.112;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="di3fFontnMinion Pro Medium" FontFamily="Minion Pro" Name="Minion Pro Medium" PostScriptName="MinionPro-Medium" Status="Installed" FontStyleName="Medium" FontType="OpenTypeCFF" WritingScript="0" FullName="Minion Pro Medium" FullNameNative="Minion Pro Medium" FontStyleNameNative="Medium" PlatformName="$ID/" Version="Version 2.112;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="di3fFontnMinion Pro Medium Italic" FontFamily="Minion Pro" Name="Minion Pro Medium Italic" PostScriptName="MinionPro-MediumIt" Status="Installed" FontStyleName="Medium Italic" FontType="OpenTypeCFF" WritingScript="0" FullName="Minion Pro Medium Italic" FullNameNative="Minion Pro Medium Italic" FontStyleNameNative="Medium Italic" PlatformName="$ID/" Version="Version 2.112;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="di3fFontnMinion Pro Semibold" FontFamily="Minion Pro" Name="Minion Pro Semibold" PostScriptName="MinionPro-Semibold" Status="Installed" FontStyleName="Semibold" FontType="OpenTypeCFF" WritingScript="0" FullName="Minion Pro Semibold" FullNameNative="Minion Pro Semibold" FontStyleNameNative="Semibold" PlatformName="$ID/" Version="Version 2.112;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="di3fFontnMinion Pro Semibold Italic" FontFamily="Minion Pro" Name="Minion Pro Semibold Italic" PostScriptName="MinionPro-SemiboldIt" Status="Installed" FontStyleName="Semibold Italic" FontType="OpenTypeCFF" WritingScript="0" FullName="Minion Pro Semibold Italic" FullNameNative="Minion Pro Semibold Italic" FontStyleNameNative="Semibold Italic" PlatformName="$ID/" Version="Version 2.112;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="di3fFontnMinion Pro Bold" FontFamily="Minion Pro" Name="Minion Pro Bold" PostScriptName="MinionPro-Bold" Status="Installed" FontStyleName="Bold" FontType="OpenTypeCFF" WritingScript="0" FullName="Minion Pro Bold" FullNameNative="Minion Pro Bold" FontStyleNameNative="Bold" PlatformName="$ID/" Version="Version 2.112;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="di3fFontnMinion Pro Bold Italic" FontFamily="Minion Pro" Name="Minion Pro Bold Italic" PostScriptName="MinionPro-BoldIt" Status="Installed" FontStyleName="Bold Italic" FontType="OpenTypeCFF" WritingScript="0" FullName="Minion Pro Bold Italic" FullNameNative="Minion Pro Bold Italic" FontStyleNameNative="Bold Italic" PlatformName="$ID/" Version="Version 2.112;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+	</FontFamily>
+	<FontFamily Self="di96" Name="Myriad Pro">
+		<Font Self="di96FontnMyriad Pro Condensed" FontFamily="Myriad Pro" Name="Myriad Pro Condensed" PostScriptName="MyriadPro-Cond" Status="Installed" FontStyleName="Condensed" FontType="OpenTypeCFF" WritingScript="0" FullName="Myriad Pro Condensed" FullNameNative="Myriad Pro Condensed" FontStyleNameNative="Condensed" PlatformName="$ID/" Version="Version 2.106;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.58329" TypekitID="$ID/"/>
+		<Font Self="di96FontnMyriad Pro Condensed Italic" FontFamily="Myriad Pro" Name="Myriad Pro Condensed Italic" PostScriptName="MyriadPro-CondIt" Status="Installed" FontStyleName="Condensed Italic" FontType="OpenTypeCFF" WritingScript="0" FullName="Myriad Pro Condensed Italic" FullNameNative="Myriad Pro Condensed Italic" FontStyleNameNative="Condensed Italic" PlatformName="$ID/" Version="Version 2.106;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.58329" TypekitID="$ID/"/>
+		<Font Self="di96FontnMyriad Pro Bold Condensed" FontFamily="Myriad Pro" Name="Myriad Pro Bold Condensed" PostScriptName="MyriadPro-BoldCond" Status="Installed" FontStyleName="Bold Condensed" FontType="OpenTypeCFF" WritingScript="0" FullName="Myriad Pro Bold Condensed" FullNameNative="Myriad Pro Bold Condensed" FontStyleNameNative="Bold Condensed" PlatformName="$ID/" Version="Version 2.106;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.58329" TypekitID="$ID/"/>
+		<Font Self="di96FontnMyriad Pro Bold Condensed Italic" FontFamily="Myriad Pro" Name="Myriad Pro Bold Condensed Italic" PostScriptName="MyriadPro-BoldCondIt" Status="Installed" FontStyleName="Bold Condensed Italic" FontType="OpenTypeCFF" WritingScript="0" FullName="Myriad Pro Bold Condensed Italic" FullNameNative="Myriad Pro Bold Condensed Italic" FontStyleNameNative="Bold Condensed Italic" PlatformName="$ID/" Version="Version 2.106;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.58329" TypekitID="$ID/"/>
+		<Font Self="di96FontnMyriad Pro Regular" FontFamily="Myriad Pro" Name="Myriad Pro Regular" PostScriptName="MyriadPro-Regular" Status="Installed" FontStyleName="Regular" FontType="OpenTypeCFF" WritingScript="0" FullName="Myriad Pro" FullNameNative="Myriad Pro" FontStyleNameNative="Regular" PlatformName="$ID/" Version="Version 2.106;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.58329" TypekitID="$ID/"/>
+		<Font Self="di96FontnMyriad Pro Italic" FontFamily="Myriad Pro" Name="Myriad Pro Italic" PostScriptName="MyriadPro-It" Status="Installed" FontStyleName="Italic" FontType="OpenTypeCFF" WritingScript="0" FullName="Myriad Pro Italic" FullNameNative="Myriad Pro Italic" FontStyleNameNative="Italic" PlatformName="$ID/" Version="Version 2.106;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.58329" TypekitID="$ID/"/>
+		<Font Self="di96FontnMyriad Pro Semibold" FontFamily="Myriad Pro" Name="Myriad Pro Semibold" PostScriptName="MyriadPro-Semibold" Status="Installed" FontStyleName="Semibold" FontType="OpenTypeCFF" WritingScript="0" FullName="Myriad Pro Semibold" FullNameNative="Myriad Pro Semibold" FontStyleNameNative="Semibold" PlatformName="$ID/" Version="Version 2.106;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.58329" TypekitID="$ID/"/>
+		<Font Self="di96FontnMyriad Pro Semibold Italic" FontFamily="Myriad Pro" Name="Myriad Pro Semibold Italic" PostScriptName="MyriadPro-SemiboldIt" Status="Installed" FontStyleName="Semibold Italic" FontType="OpenTypeCFF" WritingScript="0" FullName="Myriad Pro Semibold Italic" FullNameNative="Myriad Pro Semibold Italic" FontStyleNameNative="Semibold Italic" PlatformName="$ID/" Version="Version 2.106;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.58329" TypekitID="$ID/"/>
+		<Font Self="di96FontnMyriad Pro Bold" FontFamily="Myriad Pro" Name="Myriad Pro Bold" PostScriptName="MyriadPro-Bold" Status="Installed" FontStyleName="Bold" FontType="OpenTypeCFF" WritingScript="0" FullName="Myriad Pro Bold" FullNameNative="Myriad Pro Bold" FontStyleNameNative="Bold" PlatformName="$ID/" Version="Version 2.106;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.58329" TypekitID="$ID/"/>
+		<Font Self="di96FontnMyriad Pro Bold Italic" FontFamily="Myriad Pro" Name="Myriad Pro Bold Italic" PostScriptName="MyriadPro-BoldIt" Status="Installed" FontStyleName="Bold Italic" FontType="OpenTypeCFF" WritingScript="0" FullName="Myriad Pro Bold Italic" FullNameNative="Myriad Pro Bold Italic" FontStyleNameNative="Bold Italic" PlatformName="$ID/" Version="Version 2.106;PS 2.000;hotconv 1.0.70;makeotf.lib2.5.58329" TypekitID="$ID/"/>
+	</FontFamily>
+	<FontFamily Self="dia3" Name="Kozuka Mincho Pr6N">
+		<Font Self="dia3FontnKozuka Mincho Pr6N EL" FontFamily="Kozuka Mincho Pr6N" Name="Kozuka Mincho Pr6N EL" PostScriptName="KozMinPr6N-ExtraLight" Status="Installed" FontStyleName="EL" FontType="OpenTypeCID" WritingScript="1" FullName="Kozuka Mincho Pr6N EL" FullNameNative="小塚明朝 Pr6N EL" FontStyleNameNative="EL" PlatformName="$ID/" Version="Version 6.017;PS 6.004;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="dia3FontnKozuka Mincho Pr6N L" FontFamily="Kozuka Mincho Pr6N" Name="Kozuka Mincho Pr6N L" PostScriptName="KozMinPr6N-Light" Status="Installed" FontStyleName="L" FontType="OpenTypeCID" WritingScript="1" FullName="Kozuka Mincho Pr6N L" FullNameNative="小塚明朝 Pr6N L" FontStyleNameNative="L" PlatformName="$ID/" Version="Version 6.017;PS 6.004;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="dia3FontnKozuka Mincho Pr6N R" FontFamily="Kozuka Mincho Pr6N" Name="Kozuka Mincho Pr6N R" PostScriptName="KozMinPr6N-Regular" Status="Installed" FontStyleName="R" FontType="OpenTypeCID" WritingScript="1" FullName="Kozuka Mincho Pr6N R" FullNameNative="小塚明朝 Pr6N R" FontStyleNameNative="R" PlatformName="$ID/" Version="Version 6.017;PS 6.004;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="dia3FontnKozuka Mincho Pr6N M" FontFamily="Kozuka Mincho Pr6N" Name="Kozuka Mincho Pr6N M" PostScriptName="KozMinPr6N-Medium" Status="Installed" FontStyleName="M" FontType="OpenTypeCID" WritingScript="1" FullName="Kozuka Mincho Pr6N M" FullNameNative="小塚明朝 Pr6N M" FontStyleNameNative="M" PlatformName="$ID/" Version="Version 6.017;PS 6.004;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="dia3FontnKozuka Mincho Pr6N B" FontFamily="Kozuka Mincho Pr6N" Name="Kozuka Mincho Pr6N B" PostScriptName="KozMinPr6N-Bold" Status="Installed" FontStyleName="B" FontType="OpenTypeCID" WritingScript="1" FullName="Kozuka Mincho Pr6N B" FullNameNative="小塚明朝 Pr6N B" FontStyleNameNative="B" PlatformName="$ID/" Version="Version 6.017;PS 6.004;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+		<Font Self="dia3FontnKozuka Mincho Pr6N H" FontFamily="Kozuka Mincho Pr6N" Name="Kozuka Mincho Pr6N H" PostScriptName="KozMinPr6N-Heavy" Status="Installed" FontStyleName="H" FontType="OpenTypeCID" WritingScript="1" FullName="Kozuka Mincho Pr6N H" FullNameNative="小塚明朝 Pr6N H" FontStyleNameNative="H" PlatformName="$ID/" Version="Version 6.017;PS 6.004;hotconv 1.0.70;makeotf.lib2.5.5900" TypekitID="$ID/"/>
+	</FontFamily>
+	<CompositeFont Self="CompositeFont/$ID/[No composite font]" Name="$ID/[No composite font]">
+		<CompositeFontEntry Self="ua2" Name="$ID/Kanji" FontStyle="$ID/R" RelativeSize="100" HorizontalScale="100" VerticalScale="100" Locked="true" ScaleOption="true" BaselineShift="0">
+			<Properties>
+				<AppliedFont type="string">Kozuka Mincho Pr6N</AppliedFont>
+			</Properties>
+		</CompositeFontEntry>
+		<CompositeFontEntry Self="ua4" Name="$ID/Kana" FontStyle="$ID/R" RelativeSize="100" HorizontalScale="100" VerticalScale="100" CustomCharacters="ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖゝゞァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺーヽヾ" Locked="true" ScaleOption="true" BaselineShift="0">
+			<Properties>
+				<AppliedFont type="string">Kozuka Mincho Pr6N</AppliedFont>
+			</Properties>
+		</CompositeFontEntry>
+		<CompositeFontEntry Self="ua5" Name="$ID/Punctuation" FontStyle="$ID/R" RelativeSize="100" HorizontalScale="100" VerticalScale="100" CustomCharacters="—―‖‘’“”‥…′″∥、。〈〉《》「」『』【】〔〕〜・！（），．／：；？［］｛｝～" Locked="true" ScaleOption="true" BaselineShift="0">
+			<Properties>
+				<AppliedFont type="string">Kozuka Mincho Pr6N</AppliedFont>
+			</Properties>
+		</CompositeFontEntry>
+		<CompositeFontEntry Self="ua6" Name="$ID/Symbols" FontStyle="$ID/R" RelativeSize="100" HorizontalScale="100" VerticalScale="100" CustomCharacters="¢£§¨¬°±´¶×÷ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωЁАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяё‐†‡‰※℃Å←↑→↓⇒⇔∀∂∃∇∈∋−√∝∞∠∧∨∩∪∫∬∴∵∽≒≠≡≦≧≪≫⊂⊃⊆⊇⊥⌒■□▲△▼▽◆◇○◎●◯★☆♀♂♪♭♯〃〆〇〒〓゛゜＃＄％＆＊＋－０１２３４５６７８９＜＝＞＠ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ＼＾＿｀ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ｜￠￡￢￣￥" Locked="true" ScaleOption="true" BaselineShift="0">
+			<Properties>
+				<AppliedFont type="string">Kozuka Mincho Pr6N</AppliedFont>
+			</Properties>
+		</CompositeFontEntry>
+		<CompositeFontEntry Self="ua7" Name="$ID/Alphabetic" FontStyle="$ID/Regular" RelativeSize="100" HorizontalScale="100" VerticalScale="100" CustomCharacters=" !&quot;#$%&amp;'()*+,-./:;&lt;=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ ¡¤¥¦©ª«­®¯²³µ·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿıŒœŠšŸŽžƒˆˇ˘˙˚˛˜˝–‚„•‹›⁄€™∆∏∑≈≤≥◊ﬀﬁﬂﬃﬄﬅﬆ" Locked="true" ScaleOption="false" BaselineShift="0">
+			<Properties>
+				<AppliedFont type="string">Minion Pro</AppliedFont>
+			</Properties>
+		</CompositeFontEntry>
+		<CompositeFontEntry Self="ua8" Name="$ID/Numbers" FontStyle="$ID/Regular" RelativeSize="100" HorizontalScale="100" VerticalScale="100" CustomCharacters="0123456789" Locked="true" ScaleOption="false" BaselineShift="0">
+			<Properties>
+				<AppliedFont type="string">Minion Pro</AppliedFont>
+			</Properties>
+		</CompositeFontEntry>
+	</CompositeFont>
+	<RootCharacterStyleGroup Self="u78">
+		<CharacterStyle Self="CharacterStyle/$ID/[No character style]" Imported="false" SplitDocument="false" EmitCss="true" Name="$ID/[No character style]"/>
+	</RootCharacterStyleGroup>
+	<RootParagraphStyleGroup Self="u77">
+		<ParagraphStyle Self="ParagraphStyle/$ID/NormalParagraphStyle" Name="$ID/NormalParagraphStyle" Imported="false" NextStyle="ParagraphStyle/$ID/NormalParagraphStyle" SplitDocument="false" EmitCss="true" EmptyNestedStyles="true" EmptyLineStyles="true" EmptyGrepStyles="true" KeyboardShortcut="0 0">
+			<Properties>
+				<BasedOn type="string">$ID/[No paragraph style]</BasedOn>
+				<PreviewColor type="enumeration">Nothing</PreviewColor>
+			</Properties>
+		</ParagraphStyle>
+	</RootParagraphStyleGroup>
+	<TinDocumentDataObject>
+		<Properties>
+			<GaijiRefMaps><![CDATA[/////wAAAAAAAAAA]]></GaijiRefMaps>
+		</Properties>
+	</TinDocumentDataObject>
+	<CrossReferenceFormat Self="u97" Name="Full Paragraph &amp; Page Number" AppliedCharacterStyle="n">
+		<BuildingBlock Self="u97BuildingBlock0" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="&quot;" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u97BuildingBlock1" BlockType="FullParagraphBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u97BuildingBlock2" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="&quot; on page " AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u97BuildingBlock3" BlockType="PageNumberBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+	</CrossReferenceFormat>
+	<CrossReferenceFormat Self="u98" Name="Full Paragraph" AppliedCharacterStyle="n">
+		<BuildingBlock Self="u98BuildingBlock0" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="&quot;" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u98BuildingBlock1" BlockType="FullParagraphBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u98BuildingBlock2" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="&quot;" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+	</CrossReferenceFormat>
+	<CrossReferenceFormat Self="u99" Name="Paragraph Text &amp; Page Number" AppliedCharacterStyle="n">
+		<BuildingBlock Self="u99BuildingBlock0" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="&quot;" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u99BuildingBlock1" BlockType="ParagraphTextBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u99BuildingBlock2" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="&quot; on page " AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u99BuildingBlock3" BlockType="PageNumberBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+	</CrossReferenceFormat>
+	<CrossReferenceFormat Self="u9a" Name="Paragraph Text" AppliedCharacterStyle="n">
+		<BuildingBlock Self="u9aBuildingBlock0" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="&quot;" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u9aBuildingBlock1" BlockType="ParagraphTextBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u9aBuildingBlock2" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="&quot;" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+	</CrossReferenceFormat>
+	<CrossReferenceFormat Self="u9b" Name="Paragraph Number &amp; Page Number" AppliedCharacterStyle="n">
+		<BuildingBlock Self="u9bBuildingBlock0" BlockType="ParagraphNumberBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u9bBuildingBlock1" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText=" on page " AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u9bBuildingBlock2" BlockType="PageNumberBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+	</CrossReferenceFormat>
+	<CrossReferenceFormat Self="u9c" Name="Paragraph Number" AppliedCharacterStyle="n">
+		<BuildingBlock Self="u9cBuildingBlock0" BlockType="ParagraphNumberBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+	</CrossReferenceFormat>
+	<CrossReferenceFormat Self="u9d" Name="Text Anchor Name &amp; Page Number" AppliedCharacterStyle="n">
+		<BuildingBlock Self="u9dBuildingBlock0" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="&quot;" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u9dBuildingBlock1" BlockType="BookmarkNameBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u9dBuildingBlock2" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="&quot; on page " AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u9dBuildingBlock3" BlockType="PageNumberBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+	</CrossReferenceFormat>
+	<CrossReferenceFormat Self="u9e" Name="Text Anchor Name" AppliedCharacterStyle="n">
+		<BuildingBlock Self="u9eBuildingBlock0" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="&quot;" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u9eBuildingBlock1" BlockType="BookmarkNameBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u9eBuildingBlock2" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="&quot;" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+	</CrossReferenceFormat>
+	<CrossReferenceFormat Self="u9f" Name="Page Number" AppliedCharacterStyle="n">
+		<BuildingBlock Self="u9fBuildingBlock0" BlockType="CustomStringBuildingBlock" AppliedCharacterStyle="n" CustomText="page " AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+		<BuildingBlock Self="u9fBuildingBlock1" BlockType="PageNumberBuildingBlock" AppliedCharacterStyle="n" CustomText="$ID/" AppliedDelimiter="$ID/" IncludeDelimiter="false"/>
+	</CrossReferenceFormat>
+	<Story Self="udd" AppliedTOCStyle="n" TrackChanges="false" StoryTitle="$ID/body" AppliedNamedGrid="n" Guid="FBA64985-970D-4AF5-842F-179E826F5508" VersionGuid="02DE90FE-D3DC-4C74-B5CC-ACFE20466228" AppliedOsGuid="$ID/" OsApplyOption="1">
+		<StoryPreference OpticalMarginAlignment="false" OpticalMarginSize="12" FrameType="TextFrameType" StoryOrientation="Horizontal" StoryDirection="LeftToRightDirection"/>
+		<MetadataPacketPreference>
+			<Properties>
+				<Contents><![CDATA[<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.6-c014 79.156797, 2014/08/20-09:53:02        ">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+            xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+            xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/"
+            xmlns:stEvt="http://ns.adobe.com/xap/1.0/sType/ResourceEvent#"
+            xmlns:dc="http://purl.org/dc/elements/1.1/">
+         <xmp:CreateDate>2017-06-07T15:27:32+02:00</xmp:CreateDate>
+         <xmp:MetadataDate>2017-06-07T15:27:32+02:00</xmp:MetadataDate>
+         <xmp:ModifyDate>2017-06-07T15:27:32+02:00</xmp:ModifyDate>
+         <xmp:CreatorTool>Adobe InDesign CC 2014 (Macintosh)</xmp:CreatorTool>
+         <xmpMM:InstanceID>xmp.iid:bacc0531-ba31-456c-a843-be77afec6fe5</xmpMM:InstanceID>
+         <xmpMM:DocumentID>xmp.did:bacc0531-ba31-456c-a843-be77afec6fe5</xmpMM:DocumentID>
+         <xmpMM:OriginalDocumentID>xmp.did:bacc0531-ba31-456c-a843-be77afec6fe5</xmpMM:OriginalDocumentID>
+         <xmpMM:History>
+            <rdf:Seq>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>created</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:bacc0531-ba31-456c-a843-be77afec6fe5</stEvt:instanceID>
+                  <stEvt:when>2017-06-07T15:27:32+02:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign CC 2014 (Macintosh)</stEvt:softwareAgent>
+               </rdf:li>
+            </rdf:Seq>
+         </xmpMM:History>
+         <dc:format>application/x-incopy</dc:format>
+         <dc:title>
+            <rdf:Alt>
+               <rdf:li xml:lang="x-default">body</rdf:li>
+            </rdf:Alt>
+         </dc:title>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>]]></Contents>
+			</Properties>
+		</MetadataPacketPreference>
+		<InCopyExportOption IncludeGraphicProxies="true" IncludeAllResources="false"/>
+		<ParagraphStyleRange AppliedParagraphStyle="ParagraphStyle/$ID/NormalParagraphStyle">
+			<CharacterStyleRange AppliedCharacterStyle="CharacterStyle/$ID/[No character style]" OTFContextualAlternate="false">
+				<Content>Nequisciam inciumquis endaerchit exera volupie nestem essit in nemquam, offic tota con num aut occusa nossed mi, quo volor asitatisquam atius voluptia sam incipsam, cum repudae nem et acearchic to enducimus dolorib usantia turissi ntibus ut lautempor am evelit aut lit as ad qui volesequas a autesti a voluptaquia dit dolorro blaut quam, voluptae dolendu citatur ad quidipietus rest, id molupta tiossim incium quam, cus, sit videstemqui dolorpor si ducimagnat quiassi taquis aut est, aut licit, in cullenisquas volor as volendios ea volum evero offic tem quamus corem non natus aliat licias molentota pro quo incto qui reni dus deratus similiquas quo voluptatae vendit doluptibus dolore sinvene ctiumquias destio dicipistet perci volesti officient, coribus et re nonsentur se aut est aut quo te velestota autenit faceperum se secupti sae inctur rempor re nit aut volupta voluptis reptur maximpostio beriorehento totatibusam corentem eum quas sitem simagnis ipidus earum dolut qui alita del exceatur moditaecepe nonse cumquatatium facepro rissectur autem evellab oreprat omnimagnam quatus sitis nam reriossit estiis et acea dere, venimus, voluptat autatam aut inumquia volore omnis abo. Et im eum, sum laborer ioreribus, cora conectionem necte quaerio mo ellacese di omnisit, que restio. Harum rate voluptas elit, odisimet ullecae ped ut verfero dolestest, ommo blantem quatendis nonecum volupta essitiamus simincte omnimus quid molenia dolum re volorpori aut et poriam eventis</Content>
+			</CharacterStyleRange>
+		</ParagraphStyleRange>
+	</Story>
+</Document></ea:Story><ea:wwsd_document ea:version="1.0"><ea:wwsd_styles pi0="style=&quot;50&quot; type=&quot;snippet&quot; readerVersion=&quot;6.0&quot; featureSet=&quot;257&quot; product=&quot;10.2(104)&quot; " pi1="SnippetType=&quot;PageItem&quot;"><Document DOMVersion="10.2" Self="d">
+	<Color Self="Color/Black" Model="Process" Space="CMYK" ColorValue="0 0 0 100" ColorOverride="Specialblack" AlternateSpace="NoAlternateColor" AlternateColorValue="" Name="Black" ColorEditable="false" ColorRemovable="false" Visible="true" SwatchCreatorID="7937"/>
+	<Swatch Self="Swatch/None" Name="None" ColorEditable="false" ColorRemovable="false" Visible="true" SwatchCreatorID="7937"/>
+	<StrokeStyle Self="StrokeStyle/$ID/Solid" Name="$ID/Solid"/>
+	<RootCharacterStyleGroup Self="u78">
+		<CharacterStyle Self="CharacterStyle/$ID/[No character style]" Imported="false" SplitDocument="false" EmitCss="true" Name="$ID/[No character style]"/>
+	</RootCharacterStyleGroup>
+	<NumberingList Self="NumberingList/$ID/[Default]" Name="$ID/[Default]" ContinueNumbersAcrossStories="false" ContinueNumbersAcrossDocuments="false"/>
+	<RootParagraphStyleGroup Self="u77">
+		<ParagraphStyle Self="ParagraphStyle/$ID/[No paragraph style]" Name="$ID/[No paragraph style]" Imported="false" SplitDocument="false" EmitCss="true" EmptyNestedStyles="true" EmptyLineStyles="true" EmptyGrepStyles="true" FillColor="Color/Black" FontStyle="Regular" PointSize="12" HorizontalScale="100" KerningMethod="$ID/Metrics" Ligatures="true" PageNumberType="AutoPageNumber" StrokeWeight="1" Tracking="0" Composer="HL Composer" DropCapCharacters="0" DropCapLines="0" BaselineShift="0" Capitalization="Normal" StrokeColor="Swatch/None" HyphenateLadderLimit="3" VerticalScale="100" LeftIndent="0" RightIndent="0" FirstLineIndent="0" AutoLeading="120" AppliedLanguage="$ID/English: USA" Hyphenation="true" HyphenateAfterFirst="2" HyphenateBeforeLast="2" HyphenateCapitalizedWords="true" HyphenateWordsLongerThan="5" NoBreak="false" HyphenationZone="36" SpaceBefore="0" SpaceAfter="0" Underline="false" OTFFigureStyle="Default" DesiredWordSpacing="100" MaximumWordSpacing="133" MinimumWordSpacing="80" DesiredLetterSpacing="0" MaximumLetterSpacing="0" MinimumLetterSpacing="0" DesiredGlyphScaling="100" MaximumGlyphScaling="100" MinimumGlyphScaling="100" StartParagraph="Anywhere" KeepAllLinesTogether="false" KeepWithNext="0" KeepFirstLines="2" KeepLastLines="2" Position="Normal" StrikeThru="false" CharacterAlignment="AlignEmCenter" KeepLinesTogether="false" StrokeTint="-1" FillTint="-1" OverprintStroke="false" OverprintFill="false" GradientStrokeAngle="0" GradientFillAngle="0" GradientStrokeLength="-1" GradientFillLength="-1" GradientStrokeStart="0 0" GradientFillStart="0 0" Skew="0" RuleAboveLineWeight="1" RuleAboveTint="-1" RuleAboveOffset="0" RuleAboveLeftIndent="0" RuleAboveRightIndent="0" RuleAboveWidth="ColumnWidth" RuleBelowLineWeight="1" RuleBelowTint="-1" RuleBelowOffset="0" RuleBelowLeftIndent="0" RuleBelowRightIndent="0" RuleBelowWidth="ColumnWidth" RuleAboveOverprint="false" RuleBelowOverprint="false" RuleAbove="false" RuleBelow="false" LastLineIndent="0" HyphenateLastWord="true" ParagraphBreakType="Anywhere" SingleWordJustification="FullyJustified" OTFOrdinal="false" OTFFraction="false" OTFDiscretionaryLigature="false" OTFTitling="false" RuleAboveGapTint="-1" RuleAboveGapOverprint="false" RuleBelowGapTint="-1" RuleBelowGapOverprint="false" Justification="LeftAlign" DropcapDetail="1" PositionalForm="None" OTFMark="true" HyphenWeight="5" OTFLocale="true" HyphenateAcrossColumns="true" KeepRuleAboveInFrame="false" IgnoreEdgeAlignment="false" OTFSlashedZero="false" OTFStylisticSets="0" OTFHistorical="false" OTFContextualAlternate="true" UnderlineGapOverprint="false" UnderlineGapTint="-1" UnderlineOffset="-9999" UnderlineOverprint="false" UnderlineTint="-1" UnderlineWeight="-9999" StrikeThroughGapOverprint="false" StrikeThroughGapTint="-1" StrikeThroughOffset="-9999" StrikeThroughOverprint="false" StrikeThroughTint="-1" StrikeThroughWeight="-9999" MiterLimit="4" StrokeAlignment="OutsideAlignment" EndJoin="MiterEndJoin" SpanColumnType="SingleColumn" SplitColumnInsideGutter="6" SplitColumnOutsideGutter="0" KeepWithPrevious="false" SpanColumnMinSpaceBefore="0" SpanColumnMinSpaceAfter="0" OTFSwash="false" Tsume="0" LeadingAki="-1" TrailingAki="-1" KinsokuType="KinsokuPushInFirst" KinsokuHangType="None" BunriKinshi="true" RubyOpenTypePro="true" RubyFontSize="-1" RubyAlignment="RubyJIS" RubyType="PerCharacterRuby" RubyParentSpacing="RubyParent121Aki" RubyXScale="100" RubyYScale="100" RubyXOffset="0" RubyYOffset="0" RubyPosition="AboveRight" RubyAutoAlign="true" RubyParentOverhangAmount="RubyOverhangOneRuby" RubyOverhang="false" RubyAutoScaling="false" RubyParentScalingPercent="66" RubyTint="-1" RubyOverprintFill="Auto" RubyStrokeTint="-1" RubyOverprintStroke="Auto" RubyWeight="-1" KentenKind="None" KentenFontSize="-1" KentenXScale="100" KentenYScale="100" KentenPlacement="0" KentenAlignment="AlignKentenCenter" KentenPosition="AboveRight" KentenCustomCharacter="" KentenCharacterSet="CharacterInput" KentenTint="-1" KentenOverprintFill="Auto" KentenStrokeTint="-1" KentenOverprintStroke="Auto" KentenWeight="-1" Tatechuyoko="false" TatechuyokoXOffset="0" TatechuyokoYOffset="0" AutoTcy="0" AutoTcyIncludeRoman="false" Jidori="0" GridGyoudori="0" GridAlignFirstLineOnly="false" GridAlignment="None" CharacterRotation="0" RotateSingleByteCharacters="false" Rensuuji="true" ShataiMagnification="0" ShataiDegreeAngle="4500" ShataiAdjustTsume="true" ShataiAdjustRotation="false" Warichu="false" WarichuLines="2" WarichuSize="50" WarichuLineSpacing="0" WarichuAlignment="Auto" WarichuCharsBeforeBreak="2" WarichuCharsAfterBreak="2" OTFHVKana="false" OTFProportionalMetrics="false" OTFRomanItalics="false" LeadingModel="LeadingModelAkiBelow" ScaleAffectsLineHeight="false" ParagraphGyoudori="false" CjkGridTracking="false" GlyphForm="None" RubyAutoTcyDigits="0" RubyAutoTcyIncludeRoman="false" RubyAutoTcyAutoScale="true" TreatIdeographicSpaceAsSpace="true" AllowArbitraryHyphenation="false" BulletsAndNumberingListType="NoList" NumberingStartAt="1" NumberingLevel="1" NumberingContinue="true" NumberingApplyRestartPolicy="true" BulletsAlignment="LeftAlign" NumberingAlignment="LeftAlign" NumberingExpression="^#.^t" BulletsTextAfter="^t" DigitsType="DefaultDigits" Kashidas="DefaultKashidas" DiacriticPosition="OpentypePositionFromBaseline" CharacterDirection="DefaultDirection" ParagraphDirection="LeftToRightDirection" ParagraphJustification="DefaultJustification" ParagraphKashidaWidth="2" XOffsetDiacritic="0" YOffsetDiacritic="0" OTFOverlapSwash="false" OTFStylisticAlternate="false" OTFJustificationAlternate="false" OTFStretchedAlternate="false" KeyboardDirection="DefaultDirection">
+			<Properties>
+				<Leading type="enumeration">Auto</Leading>
+				<TabList type="list">
+				</TabList>
+				<AppliedFont type="string">Minion Pro</AppliedFont>
+				<RuleAboveColor type="string">Text Color</RuleAboveColor>
+				<RuleBelowColor type="string">Text Color</RuleBelowColor>
+				<RuleAboveType type="object">StrokeStyle/$ID/Solid</RuleAboveType>
+				<RuleBelowType type="object">StrokeStyle/$ID/Solid</RuleBelowType>
+				<BalanceRaggedLines type="enumeration">NoBalancing</BalanceRaggedLines>
+				<RuleAboveGapColor type="object">Swatch/None</RuleAboveGapColor>
+				<RuleBelowGapColor type="object">Swatch/None</RuleBelowGapColor>
+				<UnderlineColor type="string">Text Color</UnderlineColor>
+				<UnderlineGapColor type="object">Swatch/None</UnderlineGapColor>
+				<UnderlineType type="object">StrokeStyle/$ID/Solid</UnderlineType>
+				<StrikeThroughColor type="string">Text Color</StrikeThroughColor>
+				<StrikeThroughGapColor type="object">Swatch/None</StrikeThroughGapColor>
+				<StrikeThroughType type="object">StrokeStyle/$ID/Solid</StrikeThroughType>
+				<SpanSplitColumnCount type="enumeration">All</SpanSplitColumnCount>
+				<Mojikumi type="enumeration">Nothing</Mojikumi>
+				<KinsokuSet type="enumeration">Nothing</KinsokuSet>
+				<RubyFont type="string">$ID/</RubyFont>
+				<RubyFontStyle type="enumeration">Nothing</RubyFontStyle>
+				<RubyFill type="string">Text Color</RubyFill>
+				<RubyStroke type="string">Text Color</RubyStroke>
+				<KentenFont type="string">$ID/</KentenFont>
+				<KentenFontStyle type="enumeration">Nothing</KentenFontStyle>
+				<KentenFillColor type="string">Text Color</KentenFillColor>
+				<KentenStrokeColor type="string">Text Color</KentenStrokeColor>
+				<BulletChar BulletCharacterType="UnicodeOnly" BulletCharacterValue="8226"/>
+				<NumberingFormat type="string">1, 2, 3, 4...</NumberingFormat>
+				<BulletsFont type="string">$ID/</BulletsFont>
+				<BulletsFontStyle type="enumeration">Nothing</BulletsFontStyle>
+				<AppliedNumberingList type="object">NumberingList/$ID/[Default]</AppliedNumberingList>
+				<NumberingRestartPolicies RestartPolicy="AnyPreviousLevel" LowerLevel="0" UpperLevel="0"/>
+				<BulletsCharacterStyle type="object">CharacterStyle/$ID/[No character style]</BulletsCharacterStyle>
+				<NumberingCharacterStyle type="object">CharacterStyle/$ID/[No character style]</NumberingCharacterStyle>
+			</Properties>
+		</ParagraphStyle>
+		<ParagraphStyle Self="ParagraphStyle/$ID/NormalParagraphStyle" Name="$ID/NormalParagraphStyle" Imported="false" NextStyle="ParagraphStyle/$ID/NormalParagraphStyle" SplitDocument="false" EmitCss="true" EmptyNestedStyles="true" EmptyLineStyles="true" EmptyGrepStyles="true" KeyboardShortcut="0 0">
+			<Properties>
+				<BasedOn type="string">$ID/[No paragraph style]</BasedOn>
+				<PreviewColor type="enumeration">Nothing</PreviewColor>
+			</Properties>
+		</ParagraphStyle>
+	</RootParagraphStyleGroup>
+	<TinDocumentDataObject>
+		<Properties>
+			<GaijiRefMaps><![CDATA[/////wAAAAAAAAAA]]></GaijiRefMaps>
+		</Properties>
+	</TinDocumentDataObject>
+	<TransparencyDefaultContainerObject>
+		<TransparencySetting>
+			<BlendingSetting BlendMode="Normal" Opacity="100" KnockoutGroup="false" IsolateBlending="false"/>
+			<DropShadowSetting Mode="None" BlendMode="Multiply" Opacity="75" XOffset="7" YOffset="7" Size="5" EffectColor="n" Noise="0" Spread="0" UseGlobalLight="false" KnockedOut="true" HonorOtherEffects="false"/>
+			<FeatherSetting Mode="None" Width="9" CornerType="Diffusion" Noise="0" ChokeAmount="0"/>
+			<InnerShadowSetting Applied="false" EffectColor="n" BlendMode="Multiply" Opacity="75" Angle="120" Distance="7" UseGlobalLight="false" ChokeAmount="0" Size="7" Noise="0"/>
+			<OuterGlowSetting Applied="false" BlendMode="Screen" Opacity="75" Noise="0" EffectColor="n" Technique="Softer" Spread="0" Size="7"/>
+			<InnerGlowSetting Applied="false" BlendMode="Screen" Opacity="75" Noise="0" EffectColor="n" Technique="Softer" Spread="0" Size="7" Source="EdgeSourced"/>
+			<BevelAndEmbossSetting Applied="false" Style="InnerBevel" Technique="SmoothContour" Depth="100" Direction="Up" Size="7" Soften="0" Angle="120" Altitude="30" UseGlobalLight="false" HighlightColor="n" HighlightBlendMode="Screen" HighlightOpacity="75" ShadowColor="n" ShadowBlendMode="Multiply" ShadowOpacity="75"/>
+			<SatinSetting Applied="false" EffectColor="n" BlendMode="Multiply" Opacity="50" Angle="120" Distance="7" Size="7" InvertEffect="false"/>
+			<DirectionalFeatherSetting Applied="false" LeftWidth="0" RightWidth="0" TopWidth="0" BottomWidth="0" ChokeAmount="0" Angle="0" FollowShapeMode="LeadingEdge" Noise="0"/>
+			<GradientFeatherSetting Applied="false" Type="Linear" Angle="0" Length="0" GradientStart="0 0" HiliteAngle="0" HiliteLength="0"/>
+		</TransparencySetting>
+		<StrokeTransparencySetting>
+			<BlendingSetting BlendMode="Normal" Opacity="100" KnockoutGroup="false" IsolateBlending="false"/>
+			<DropShadowSetting Mode="None" BlendMode="Multiply" Opacity="75" XOffset="7" YOffset="7" Size="5" EffectColor="n" Noise="0" Spread="0" UseGlobalLight="false" KnockedOut="true" HonorOtherEffects="false"/>
+			<FeatherSetting Mode="None" Width="9" CornerType="Diffusion" Noise="0" ChokeAmount="0"/>
+			<InnerShadowSetting Applied="false" EffectColor="n" BlendMode="Multiply" Opacity="75" Angle="120" Distance="7" UseGlobalLight="false" ChokeAmount="0" Size="7" Noise="0"/>
+			<OuterGlowSetting Applied="false" BlendMode="Screen" Opacity="75" Noise="0" EffectColor="n" Technique="Softer" Spread="0" Size="7"/>
+			<InnerGlowSetting Applied="false" BlendMode="Screen" Opacity="75" Noise="0" EffectColor="n" Technique="Softer" Spread="0" Size="7" Source="EdgeSourced"/>
+			<BevelAndEmbossSetting Applied="false" Style="InnerBevel" Technique="SmoothContour" Depth="100" Direction="Up" Size="7" Soften="0" Angle="120" Altitude="30" UseGlobalLight="false" HighlightColor="n" HighlightBlendMode="Screen" HighlightOpacity="75" ShadowColor="n" ShadowBlendMode="Multiply" ShadowOpacity="75"/>
+			<SatinSetting Applied="false" EffectColor="n" BlendMode="Multiply" Opacity="50" Angle="120" Distance="7" Size="7" InvertEffect="false"/>
+			<DirectionalFeatherSetting Applied="false" LeftWidth="0" RightWidth="0" TopWidth="0" BottomWidth="0" ChokeAmount="0" Angle="0" FollowShapeMode="LeadingEdge" Noise="0"/>
+			<GradientFeatherSetting Applied="false" Type="Linear" Angle="0" Length="0" GradientStart="0 0" HiliteAngle="0" HiliteLength="0"/>
+		</StrokeTransparencySetting>
+		<FillTransparencySetting>
+			<BlendingSetting BlendMode="Normal" Opacity="100" KnockoutGroup="false" IsolateBlending="false"/>
+			<DropShadowSetting Mode="None" BlendMode="Multiply" Opacity="75" XOffset="7" YOffset="7" Size="5" EffectColor="n" Noise="0" Spread="0" UseGlobalLight="false" KnockedOut="true" HonorOtherEffects="false"/>
+			<FeatherSetting Mode="None" Width="9" CornerType="Diffusion" Noise="0" ChokeAmount="0"/>
+			<InnerShadowSetting Applied="false" EffectColor="n" BlendMode="Multiply" Opacity="75" Angle="120" Distance="7" UseGlobalLight="false" ChokeAmount="0" Size="7" Noise="0"/>
+			<OuterGlowSetting Applied="false" BlendMode="Screen" Opacity="75" Noise="0" EffectColor="n" Technique="Softer" Spread="0" Size="7"/>
+			<InnerGlowSetting Applied="false" BlendMode="Screen" Opacity="75" Noise="0" EffectColor="n" Technique="Softer" Spread="0" Size="7" Source="EdgeSourced"/>
+			<BevelAndEmbossSetting Applied="false" Style="InnerBevel" Technique="SmoothContour" Depth="100" Direction="Up" Size="7" Soften="0" Angle="120" Altitude="30" UseGlobalLight="false" HighlightColor="n" HighlightBlendMode="Screen" HighlightOpacity="75" ShadowColor="n" ShadowBlendMode="Multiply" ShadowOpacity="75"/>
+			<SatinSetting Applied="false" EffectColor="n" BlendMode="Multiply" Opacity="50" Angle="120" Distance="7" Size="7" InvertEffect="false"/>
+			<DirectionalFeatherSetting Applied="false" LeftWidth="0" RightWidth="0" TopWidth="0" BottomWidth="0" ChokeAmount="0" Angle="0" FollowShapeMode="LeadingEdge" Noise="0"/>
+			<GradientFeatherSetting Applied="false" Type="Linear" Angle="0" Length="0" GradientStart="0 0" HiliteAngle="0" HiliteLength="0"/>
+		</FillTransparencySetting>
+		<ContentTransparencySetting>
+			<BlendingSetting BlendMode="Normal" Opacity="100" KnockoutGroup="false" IsolateBlending="false"/>
+			<DropShadowSetting Mode="None" BlendMode="Multiply" Opacity="75" XOffset="7" YOffset="7" Size="5" EffectColor="n" Noise="0" Spread="0" UseGlobalLight="false" KnockedOut="true" HonorOtherEffects="false"/>
+			<FeatherSetting Mode="None" Width="9" CornerType="Diffusion" Noise="0" ChokeAmount="0"/>
+			<InnerShadowSetting Applied="false" EffectColor="n" BlendMode="Multiply" Opacity="75" Angle="120" Distance="7" UseGlobalLight="false" ChokeAmount="0" Size="7" Noise="0"/>
+			<OuterGlowSetting Applied="false" BlendMode="Screen" Opacity="75" Noise="0" EffectColor="n" Technique="Softer" Spread="0" Size="7"/>
+			<InnerGlowSetting Applied="false" BlendMode="Screen" Opacity="75" Noise="0" EffectColor="n" Technique="Softer" Spread="0" Size="7" Source="EdgeSourced"/>
+			<BevelAndEmbossSetting Applied="false" Style="InnerBevel" Technique="SmoothContour" Depth="100" Direction="Up" Size="7" Soften="0" Angle="120" Altitude="30" UseGlobalLight="false" HighlightColor="n" HighlightBlendMode="Screen" HighlightOpacity="75" ShadowColor="n" ShadowBlendMode="Multiply" ShadowOpacity="75"/>
+			<SatinSetting Applied="false" EffectColor="n" BlendMode="Multiply" Opacity="50" Angle="120" Distance="7" Size="7" InvertEffect="false"/>
+			<DirectionalFeatherSetting Applied="false" LeftWidth="0" RightWidth="0" TopWidth="0" BottomWidth="0" ChokeAmount="0" Angle="0" FollowShapeMode="LeadingEdge" Noise="0"/>
+			<GradientFeatherSetting Applied="false" Type="Linear" Angle="0" Length="0" GradientStart="0 0" HiliteAngle="0" HiliteLength="0"/>
+		</ContentTransparencySetting>
+	</TransparencyDefaultContainerObject>
+	<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.6-c014 79.156797, 2014/08/20-09:53:02        ">
+   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xmp="http://ns.adobe.com/xap/1.0/" xmlns:xmpGImg="http://ns.adobe.com/xap/1.0/g/img/" xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/" xmlns:stEvt="http://ns.adobe.com/xap/1.0/sType/ResourceEvent#">
+         <dc:format>application/x-indesign</dc:format>
+         <xmp:CreatorTool>Adobe InDesign CC 2014 (Macintosh)</xmp:CreatorTool>
+         <xmp:CreateDate>2017-06-07T15:29:39+02:00</xmp:CreateDate>
+         <xmp:MetadataDate>2017-06-07T15:29:39+02:00</xmp:MetadataDate>
+         <xmp:ModifyDate>2017-06-07T15:29:39+02:00</xmp:ModifyDate>
+         <xmp:Thumbnails>
+            <rdf:Alt>
+               <rdf:li rdf:parseType="Resource">
+                  <xmpGImg:format>JPEG</xmpGImg:format>
+                  <xmpGImg:width>512</xmpGImg:width>
+                  <xmpGImg:height>512</xmpGImg:height>
+                  <xmpGImg:image>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</xmpGImg:image>
+               </rdf:li>
+            </rdf:Alt>
+         </xmp:Thumbnails>
+         <xmpMM:InstanceID>xmp.iid:3aa9f15c-ebc1-4313-b44f-029803120344</xmpMM:InstanceID>
+         <xmpMM:DocumentID>xmp.did:3aa9f15c-ebc1-4313-b44f-029803120344</xmpMM:DocumentID>
+         <xmpMM:OriginalDocumentID>xmp.did:3aa9f15c-ebc1-4313-b44f-029803120344</xmpMM:OriginalDocumentID>
+         <xmpMM:History>
+            <rdf:Seq>
+               <rdf:li rdf:parseType="Resource">
+                  <stEvt:action>created</stEvt:action>
+                  <stEvt:instanceID>xmp.iid:3aa9f15c-ebc1-4313-b44f-029803120344</stEvt:instanceID>
+                  <stEvt:when>2017-06-07T15:29:39+02:00</stEvt:when>
+                  <stEvt:softwareAgent>Adobe InDesign CC 2014 (Macintosh)</stEvt:softwareAgent>
+               </rdf:li>
+            </rdf:Seq>
+         </xmpMM:History>
+      </rdf:Description>
+   </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="r"?>
+</Document></ea:wwsd_styles></ea:wwsd_document></ea:Stories>

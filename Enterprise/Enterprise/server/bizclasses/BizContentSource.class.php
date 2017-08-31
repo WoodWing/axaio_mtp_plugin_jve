@@ -60,6 +60,7 @@ class BizContentSource
 	 * a shadow object will be created.
 	 * If creation of a shadow object fails, a BizException will be thrown
 	 *
+	 * @deprecated Deprecated since 10.1.3, use createShadowObjectInEnterprise instead.
 	 * @param string $id Object id which can be alien or Enterprise object (Including shadow object).
 	 * @param Object|null $destObject
 	 * @throws BizException Throws BizException when the operation fails.
@@ -67,7 +68,7 @@ class BizContentSource
 	 */
 	public static function ifAlienGetOrCreateShadowObject( $id, $destObject=null )
 	{
-		if( !BizContentSource::isAlienObject( $id ) ) return $id;
+		if( !BizContentSource::isAlienObject( $id ) ) { return $id; }
 
 		// Check if we already have a shadow object for this alien. If so, return the id.
 		$shadowId = self::getShadowObjectID($id);
@@ -89,7 +90,92 @@ class BizContentSource
 			return $shadowObject->MetaData->BasicMetaData->ID;
 		}
 	}
-	
+
+	/**
+	 * Creates a shadow object in Enterprise given the alien id.
+	 *
+	 * For $destObject, a null should always be sent in.
+	 * Only for specific cases like CopyObject, SendToNext, CreateObjectRelations,
+	 * a workflow object ($destObject) is provided that can be pre-filled by the caller/user.
+	 *
+	 * It allows the Content Source to instantiate / populate the $destObject and does its
+	 * necessary work. Refer to ContentSource_EnterpriseConnector::createShadowObject() for
+	 * more information on this.
+	 *
+	 * User(s) being used in the populated $destObject will be created on-the-fly when
+	 * they don't exist in Enterprise.
+	 *
+	 * Lastly, the real shadow object is created in Enterprise.
+	 *
+	 * @since 10.1.3
+	 * @param string $alienId Alien object id to create its shadow object.
+	 * @param Object|null $destObject See function header.
+	 * @return string|null The new shadow object id, null when $alienId passed in is not an alien.
+	 * @throws BizException Throws BizException when the creation of the shadow object fails.
+	 */
+	public static function createShadowObjectInEnterprise( $alienId, $destObject=null )
+	{
+		if( !self::isAlienObject( $alienId ) ) {
+			return null;
+		}
+
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+		$shadowObject = self::createShadowObject( $alienId, $destObject );
+
+		// Check if all users in the metadata are known within the system.
+		// If not, create them and import remaining information when such
+		// a user logs in through LDAP when enabled.
+		BizObject::getOrCreateResolvedUsers( $alienId, $shadowObject->MetaData );
+
+		$shadowObject = BizObject::createObject( $shadowObject, BizSession::getShortUserName(), false,
+			empty( $shadowObject->MetaData->BasicMetaData->Name ) /*$autonaming*/ );
+
+		return $shadowObject->MetaData->BasicMetaData->ID; // Shadow Object Id.
+	}
+
+	/**
+	 * Returns shadow object id when exists and it complies to the ContentSource requirement.
+	 *
+	 * When shadow object id is found and if it is an object type of Image, function further
+	 * checks if the shadow-object's ContentSource wants to re-use the same shadow or create a new one.
+	 * When a new shadow object is desired or when the shadow object is not found for this alien,
+	 * a null shadow id is returned (so that the caller can proceed to create a new one),
+	 * otherwise the found shadow id is returned.
+	 *
+	 * @since 10.1.3
+	 * @param string $alienId Object id that is not recognized in Enterprise.
+	 * @return string|null
+	 */
+	public static function getUsableShadowObjectId( $alienId )
+	{
+		$existingShadowProps = self::getShadowIdAndType( $alienId );
+		$existingShadowId = isset( $existingShadowProps['ID'] ) ? $existingShadowProps['ID'] : null;
+		$existingShadowType = isset( $existingShadowProps['Type'] ) ? $existingShadowProps['Type'] : null;
+		$alwaysCreateNewShadow = false;
+		if( $existingShadowType == 'Image' ) {
+			if( self::willAlwaysCreateACopyForImage( $alienId ) ) {
+				$alwaysCreateNewShadow = true;
+			}
+		}
+
+		if( !$existingShadowId || $alwaysCreateNewShadow ) {
+			$shadowId = null;
+			if( LogHandler::debugMode() ) {
+				if( !$existingShadowId ) {
+					LogHandler::Log( 'bizcontentsource', 'DEBUG', 'No shadow object id found for alien object '.$alienId );
+				} else if( $alwaysCreateNewShadow ) {
+					LogHandler::Log( 'bizcontentsource', 'DEBUG', 'Shadow object id is found for alien object '.$alienId . '. '.
+											'However content source plugin requires a new shadow to be created always.' );
+				}
+			}
+		} else {
+			$shadowId = $existingShadowId;
+		}
+
+		return $shadowId;
+	}
+
 	/**
 	 * Returns shadow object id for the alien object. When the object is not an alien or when
 	 * it doesn't have a shadow, null is returned.
@@ -159,6 +245,68 @@ class BizContentSource
 		$endPrefix = strpos( $alienId, '_', 1 );
 		$contentSource = substr( $alienId, 1, $endPrefix-1 );
 		return substr( $alienId, $endPrefix+1 );
+	}
+
+	/**
+	 * Whether a copy of the image should be created at the ContentSource.
+	 *
+	 * When the function returns true, the original image at the ContentSource will be copied.
+	 * The shadow Image in Enterprise will be linked to this new copied image at the ContentSource.
+	 *
+	 * @since 10.1.3
+	 * @param string $alienId Object id that is not recognized in Enterprise (yet) to determine object's content source.
+	 * @return bool Returns true when a copy should be created, false otherwise.
+	 */
+	public static function willAlwaysCreateACopyForImage( $alienId )
+	{
+		$connector = self::getContentSourceForAlienObject( $alienId );
+		return BizServerPlugin::runConnector( $connector, 'willAlwaysCreateACopyForImage', array() );
+	}
+
+	/**
+	 * Returns an array with all the rendition types stored by the content source.
+	 *
+	 * @since 10.1.4
+	 * @param string $contentSource
+	 * @param string $documentId
+	 * @return array Stored renditions.
+	 */
+	public static function storedRenditionTypes( $contentSource, $documentId )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+		$alienId = self::getAlienId( $contentSource, $documentId );
+		$connector = self::getContentSourceForAlienObject( $alienId );
+		return BizServerPlugin::runConnector( $connector, 'storedRenditionTypes', array() );
+	}
+
+	/**
+	 * Get object shadow id and its object type given the alien id.
+	 *
+	 * @since 10.1.3
+	 * @param string $alienId Object id that is not recognized in Enterprise to determine its shadow id and type.
+	 * @return string[] Returns a list, array( 'ID' => id, 'Type' => type ) when shadow object is found, empty array when shadow object is not found.
+	 */
+	private static function getShadowIdAndType( $alienId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		$contentSource ='';
+		$documentId = self::getContentSourceAndDocumentId( $alienId, $contentSource );
+
+		$shadowProps = DBObject::getObjectPropsForShadowObject( $contentSource, $documentId );
+		$shadowId = null;
+		if( isset( $shadowProps['ID'] )) {
+			$shadowId = $shadowProps['ID'];
+		}
+
+		if( LogHandler::debugMode() ) {
+			if( $shadowId ) {
+				LogHandler::Log('bizcontentsource','DEBUG','Shadow '.$shadowId.' found for alien object '. $alienId );
+			} else {
+				LogHandler::Log('bizcontentsource','DEBUG','No shadow found for alien object '. $alienId );
+			}
+		}
+
+		return $shadowId ? $shadowProps : array();
 	}
 
 	// ===================================================================
@@ -351,6 +499,11 @@ class BizContentSource
 	/**
 	 * See ContentSource_EnterpriseConnector for comments
 	 * This is a facade hiding the details of calling the method from the right plug-in
+	 * The content source implementation should update the $object->Files for all renditions stored by the content source.
+	 * If e.g. all renditions are stored by the content source the $object->Files should be empty (null).
+	 * The database object record has to reflect the renditions types stored in the filestore. So after the content
+	 * source has stored the rendition(s) the database object record is updated to reflect the type(s) (if any) that will
+	 * be stored in the filestore.
 	 *
 	 * @param string $contentSource
 	 * @param string $documentId
@@ -364,7 +517,25 @@ class BizContentSource
 		// Get content source connector for this alien object
 		$alienId = self::getAlienId( $contentSource, $documentId );
 		$connector = self::getContentSourceForAlienObject( $alienId );
-		return BizServerPlugin::runConnector( $connector, 'saveShadowObject', array($alienId, &$object) );
+		$result = BizServerPlugin::runConnector( $connector, 'saveShadowObject', array($alienId, &$object) );
+		self::updateObjectFilesStorageInformation( $object );
+
+		return $result;
+	}
+
+	/**
+	 * Updates the object database record to reflect the renditions stored in the filestore.
+	 *
+	 * Since 10.1.4
+	 * @param Object $object
+	 */
+	private static function updateObjectFilesStorageInformation( $object  )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
+		$types = BizObject::serializeFileTypes( $object->Files );
+		$values = array( 'types' => $types );
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		/*$result = */ DBObject::updateRowValues( $object->MetaData->BasicMetaData->ID, $values );
 	}
 	
 	/**
@@ -393,7 +564,7 @@ class BizContentSource
 	 * Refer to ContentSource_EnterpriseConnector::multiSetShadowObjectProperties() for more details.
 	 *
 	 * @param array[] $shadowObjectIds List of array where key is the content source and value its list of shadow ids.
-	 * @param MetaDataValues[] $metaDataValues The modified value that needs to be updated at the content source side.
+	 * @param MetaDataValue[] $metaDataValues The modified value that needs to be updated at the content source side.
 	 */
 	public static function multiSetShadowObjectProperties( $shadowObjectIds, $metaDataValues )
 	{
@@ -540,7 +711,7 @@ class BizContentSource
 	 * Gets content source for specified alien object
 	 *
 	 * @param string 	$alienId	alien object id
-	 * @return ContentSource_EnterpriseConnector that can be passed to BizServerPlugin
+	 * @return EnterpriseConnector that can be passed to BizServerPlugin
 	 * @throws BizException when no content source found for alien
 	 */
 	private static function getContentSourceForAlienObject( $alienId )

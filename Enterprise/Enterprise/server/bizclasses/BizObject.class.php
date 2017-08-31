@@ -222,7 +222,7 @@ class BizObject
 		$status = BizAdmStatus::getStatusWithId( $object->MetaData->WorkflowMetaData->State->Id );
 
 		// Check authorization
-		$rights = 'W'; // check 'Write' access (W)
+		$rights = 'RW'; // check 'Read/Write' access (R and W): Read is added for EN-88613
 		if( $arr['type'] == 'Dossier' || $arr['type'] == 'DossierTemplate' ) {
 			$rights .= 'd'; // check the 'Create Dossier' access (d) (BZ#17051)
 		} else if( $arr['type'] == 'Task' ) {
@@ -316,10 +316,6 @@ class BizObject
 			if (!$id) {
 				throw new BizException( 'ERR_DATABASE', 'Server', 'No ID' );
 			}
-			// now we know id: generate storage name and store it
-			$storename = StorageFactory::storename($id, $arr);
-			// $modifier and $modified are null for this function call, they are already set a few lines ago
-			/*$sth = */DBObject::updateObject( $id, null, array(), null, $storename );
 		}
 		$object->MetaData->BasicMetaData->ID = $id;
 
@@ -428,8 +424,9 @@ class BizObject
 
 		// ==== So far it was DB only, now involve files:
 		// Save object's files:
+		$storename = StorageFactory::storename( $id, $arr );
+		/*$sth = */ DBObject::updateObject( $id, null, array(), null, $storename );
 		self::saveFiles( $storename, $id, $object->Files, $object->MetaData->WorkflowMetaData->Version );
-
 		// When an image is created, the thumb and preview need to be removed from the TransferServer.
 		if ('Image' == $arr['type'] ){
 			LogHandler::Log('BizObject', 'DEBUG', 'Removing temporary image files from TransferServer.');
@@ -660,12 +657,15 @@ class BizObject
 		$curSect  = $currRow['section'];
 		$curState = $currRow['state'];
 
-		// Publication, Category are crucial to have, but can be empty on save when they are not changed, so fill them in with current values:
+		// Publication, Category, Content Source are crucial to have, but can be empty on save when they are not changed, so fill them in with current values:
 		if( !$object->MetaData->BasicMetaData->Publication || !$object->MetaData->BasicMetaData->Publication->Id ) {
 			$object->MetaData->BasicMetaData->Publication = new Publication( $curPub );
 		}
 		if( !$object->MetaData->BasicMetaData->Category || !$object->MetaData->BasicMetaData->Category->Id ) {
 			$object->MetaData->BasicMetaData->Category = new Category( $curSect );
+		}
+		if ( !empty( $currRow['contentsource'] && empty( $object->MetaData->BasicMetaData->ContentSource ) ) ) {
+			$object->MetaData->BasicMetaData->ContentSource = $currRow['contentsource'];
 		}
 
 		// Determine the current- and new targets and issue.
@@ -1601,7 +1601,7 @@ class BizObject
 				throw new BizException( 'ERR_AUTHORIZATION', 'Client', "$id(E)" );
 		}
 
-			// Next, check if we have access to destination.
+		// Next, check if we have access to destination.
 		BizAccess::checkRightsForParams( $user, 'W', BizAccess::THROW_ON_DENIED,
 			$newRow['publication'], $newIssueId, $newRow['section'], $newRow['type'], $newRow['state'],
 			$currRow['id'], $currRow['contentsource'], $currRow['documentid'], $currRow['routeto'] );
@@ -2658,19 +2658,15 @@ class BizObject
 		$accessRight = 2; // Read right
 		$minProps = array( 'ID', 'Type', 'Name' );
 		$requestProps = array_unique( array_merge( $minProps, $requestProps ) );
-		$queryObjResp = BizQuery::queryObjects(
-			$ticket,
-			$user,
-			$params,
-			null,
-			null,
-			null,
-			false,
-			null,
-			null,
-			$requestProps,
-			array( 'Workflow' ),
-			$accessRight );
+		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+		$request = new WflQueryObjectsRequest();
+		$request->Ticket = $ticket;
+		$request->Params = $params;
+		$request->Hierarchical = false;
+		$request->RequestProps = $requestProps;
+		$request->Areas = array( 'Workflow' );
+		require_once BASEDIR . '/server/bizclasses/BizQuery.class.php';
+		$queryObjResp = BizQuery::queryObjects2( $request, $user, $accessRight );
 
 		// Determine column indexes to work with
 		$indexes = array_combine( array_values( $requestProps ), array_fill( 1, count( $requestProps ), -1 ) );
@@ -3841,10 +3837,38 @@ class BizObject
 		self::validateFiles( $object );
 
 		// Serialize the types of renditions that this object has.
-		// This is added to flattened meta data only, it's not a property of class Object, but goes with object's db recored
+		// This is added to flattened meta data only, it's not a property of class Object, but goes with object's db record
 		$arr['types'] = self::serializeFileTypes( $object->Files );
 
 		return $arr;
+	}
+
+	/**
+	 * Adds the first level of data structure to a given MetaData tree.
+	 *
+	 * @since 10.2.0
+	 * @param MetaData $metadata
+	 */
+	public static function completeMetaDataStructure( MetaData $metadata )
+	{
+		if( !isset($metadata->BasicMetaData) ) {
+			$metadata->BasicMetaData = new BasicMetaData();
+		}
+		if( !isset($metadata->RightsMetaData) ) {
+			$metadata->RightsMetaData = new RightsMetaData();
+		}
+		if( !isset($metadata->SourceMetaData) ) {
+			$metadata->SourceMetaData = new SourceMetaData();
+		}
+		if( !isset($metadata->ContentMetaData) ) {
+			$metadata->ContentMetaData = new ContentMetaData();
+		}
+		if( !isset($metadata->WorkflowMetaData) ) {
+			$metadata->WorkflowMetaData = new WorkflowMetaData();
+		}
+		if( !isset($metadata->ExtraMetaData) ) {
+			$metadata->ExtraMetaData = array();
+		}
 	}
 
 	/**
@@ -3905,12 +3929,8 @@ class BizObject
 
 	private static function validName( $name )
 	{
-		// Max length is 63 to prevent file name issues with 4-byte Unicode strings
-		$nameLen = mb_strlen($name, "UTF8");
-		if( $nameLen > 63) return false;
-
 		$sDangerousCharacters = "`~!@#$%^*\\|;:'<>/?";
-		$sDangerousCharacters .= '"'; // add double quote to dangerous charaters
+		$sDangerousCharacters .= '"'; // Add double quote to dangerous characters.
 
 		$sSubstringStartingWithInvalidCharacter = strpbrk($sDangerousCharacters, $name);
 		return empty($sSubstringStartingWithInvalidCharacter); // true if no invalid character
@@ -4160,8 +4180,8 @@ class BizObject
 			} else {
 				LogHandler::Log( 'bizobject', 'ERROR', 'Tried to save unsupported file rendition "'.$file->Rendition.'".' );
 			}
+			clearstatcache(); // Make sure unlink calls above are reflected!
 		}
-		clearstatcache(); // Make sure unlink calls above are reflected!
 	}
 
 	/**
@@ -6216,18 +6236,18 @@ class BizObject
 	}
 
 	/**
-	 * Get an unique object, when restoring an object or when applyautonaming is true.
+	 * Get an unique object, when restoring an object or when 'apply auto-naming' is true.
 	 *
-	 * Different logic or algorithm will be apply differently for both actions, restoring object or applyautonaming is true.
-	 * When restoring an object, if the object name already exists in DB, autonaming numbering will be append at the end of object name,
+	 * Different logic or algorithm will be apply differently for both actions, restoring object or 'apply auto-naming' is true.
+	 * When restoring an object, if the object name already exists in DB, 'auto naming' numbering will be append at the end of object name,
 	 * For example:
 	 * Original name                Unique name
 	 * =============                ===========
 	 * abc                          abc_0001
 	 * abc_0001                     abc_0001_0001
 	 *
-	 * When applyautonaming is true, if the object name already exist in DB, autonaming numbering will be append at the end of object name,
-	 * when the object contains the autonaming format[abc_0001], incremental autonaming numbering from the last number[abc_0002].
+	 * When 'apply auto-naming' is true, if the object name already exist in DB, auto-naming numbering will be append at the end of object name,
+	 * when the object contains the auto-naming format[abc_0001], incremental auto-naming numbering from the last number[abc_0002].
 	 * For example:
 	 * Original name                Unique name
 	 * =============                ===========
@@ -6243,26 +6263,28 @@ class BizObject
 	 */
 	private static function getUniqueObjectName( $id, $proposedName, $issueIds, $type, $restore )
 	{
-		$existingNames[ $proposedName ] = true;
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		$existingNames[$proposedName] = true;
 		/** @noinspection PhpUnusedLocalVariableInspection */
 		// Initialization of a flag before entering the do-while loop to avoid undefined variable
 		// in the case of the code execution didn't go as expected.
 		$nameFound = false;
 		$iterations = 0;
+		$maxSuffix = intval( str_repeat( '9', AUTONAMING_NUMDIGITS ) );
 		do {
 			if( !$restore ) {
 				if( preg_match('/^(.*?)_(\d+)$/', $proposedName, $matches ) > 0 ) {
 					if(strlen($matches[2]) == AUTONAMING_NUMDIGITS ) {
-						$existingNames[ $proposedName ] = true;
+						$existingNames[$proposedName] = true;
 						$proposedName = $matches[1];
 					}
 				}
 			}
 			$proposedName = DBObject::makeNameUnique( $existingNames, $proposedName );
-			$existingNames[ $proposedName ] = true;
+			$existingNames[$proposedName] = true;
 			$nameFound = self::objectNameExists( $issueIds, $proposedName, $type, $id );
 			$iterations += 1;
-		} while ( $nameFound && $iterations < 1000 );
+		} while ( $nameFound && $iterations < $maxSuffix );
 
 		return $proposedName;
 	}

@@ -14,6 +14,7 @@
 SOURCE_BASE="./Enterprise/"
 TARGET_BASE="./Enterprise_release/"
 iONCUBE_ENCODER="/usr/local/ioncube/9.0/ioncube_encoder54_9.0_64"
+: ${PHP_EXE:=php} #Set default value to base php executable.
 
 #
 # Logs a given param name and value and exits with error when param value is empty.
@@ -287,10 +288,12 @@ function ionCubeEnterpriseFiles {
 		Enterprise/server/regserver.inc.php \
 		Enterprise/server/bizclasses/BizServerJob.class.php \
 		Enterprise/server/bizclasses/BizPublishing.class.php \
+		Enterprise/server/bizclasses/BizSemaphore.class.php \
 		Enterprise/server/utils/DigitalPublishingSuiteClient.class.php \
 		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
 		plugins/release/Elvis/Elvis_WflLogOn.class.php \
 		plugins/release/Elvis/Elvis_ContentSource.class.php \
+		plugins/release/Elvis/util/ElvisSessionUtil.php \
 	"
 	for icFile in ${icFiles}; do
 		ionCubeFile "${encodeOptionFile}" "${icFile}"
@@ -417,7 +420,7 @@ function updateResourceFiles {
 		cd -
 
 		echo "${step}5: Prefix the resource keys with ${product}."
-		php "${WORKSPACE}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE}/Enterprise/${dir}${product}/resources" ${product}
+		${PHP_EXE} "${WORKSPACE}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE}/Enterprise/${dir}${product}/resources" ${product}
 
 		echo "${step}6: Write timestamp of last update from TMS into the resource folder of ${product} plugin."
 		echo "${tmsLastUpdate}" > ${SOURCE_BASE}${dir}${product}/resources/_lastupdate.txt
@@ -590,7 +593,7 @@ function step3b_updateVersionInRepository {
 function step4_validatePhpCode {
 	echo "step4a: Run the PHP Coding Test (testsuite)."
 	cd "${WORKSPACE}/Enterprise/Enterprise/server/wwtest/"
-	php testphpcodingcli.php "${WORKSPACE}/reports"
+	${PHP_EXE} testphpcodingcli.php "${WORKSPACE}/reports"
 	cd -
 
 	echo "step4b: Run phpStorm's code inspection on the server folder."
@@ -602,7 +605,7 @@ function step4_validatePhpCode {
 	cd "${WORKSPACE}/Enterprise/Build/"
 	echo "step4c: Convert folder with XML files (output of phpStorm's code inspection) to one JUnit XML file to display in UI of Jenkins."
 	# phpstorm2junit params: <folder path with code inspector output> <output path for jUnit>
-	php phpstorm2junit.php "\"${WORKSPACE}/reports/phpstorm_strict\"" "\"${WORKSPACE}/reports/TEST-PhpStormCodeInspection.xml\""
+	${PHP_EXE} phpstorm2junit.php "\"${WORKSPACE}/reports/phpstorm_strict\"" "\"${WORKSPACE}/reports/TEST-PhpStormCodeInspection.xml\""
 	cd -
 }
 

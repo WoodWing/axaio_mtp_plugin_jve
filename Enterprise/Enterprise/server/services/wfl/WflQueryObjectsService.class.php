@@ -40,18 +40,9 @@ class WflQueryObjectsService extends EnterpriseService
 		}
 
 		require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
-		return BizQuery::queryObjects( 
-			$req->Ticket,
-			$this->User, // from super class
-			$req->Params,
-			$req->FirstEntry,
-			$req->MaxEntries,
-			null,
-			$req->Hierarchical,
-			$req->Order,
-			$req->MinimalProps,
-			$req->RequestProps,
-			$req->Areas, 
+		return BizQuery::queryObjects2(
+			$req,
+			$this->User,
 			$accessRight );
 	}
 }

@@ -69,9 +69,16 @@ class WflDeleteObjectsService extends EnterpriseService
 				$req->Params = array();
 			}
 			$minimalProps = array('ID', 'Type', 'Name');
+			require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
+			$request = new WflQueryObjectsRequest();
+			$request->Ticket = $req->Ticket;
+			$request->Params = $req->Params;
+			$request->MaxEntries = 0;
+			$request->Hierarchical = false;
+			$request->MinimalProps = $minimalProps;
+			$request->Areas = $req->Areas;
 			require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
-			$response = BizQuery::queryObjects(
-				$req->Ticket, $this->User, $req->Params, null, 0, null, false, null, $minimalProps, null, $req->Areas );
+			$response = BizQuery::queryObjects2( $request, $this->User );
 			// Determine column indexes to work with
 			$indexes = array_combine( array_values($minimalProps), array_fill(0,count($minimalProps), -1) );//initialize all $minimalProps with -1.
 			foreach( array_keys($indexes) as $colName ) {
@@ -89,7 +96,7 @@ class WflDeleteObjectsService extends EnterpriseService
 			}
 			$req->Params = null; // indicate we have resolved it, and from now use IDs only
 			
-			$req->IDs = array_unique($req->IDs); //To avoid duplicates ID incase $req->IDs are initially set by the client.
+			$req->IDs = array_unique($req->IDs); //To avoid duplicates ID in case $req->IDs are initially set by the client.
 		}
 	}
 

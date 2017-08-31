@@ -87,9 +87,9 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 						// Go to the login page of Facebook to log in and get an access-code
 						$faceConn->loginToFacebook( $channelId );
 					}
-					echo 'Authorized at Facebook. Enterprise is ready to publish through Facebook.';
 				} catch( Exception $e ) {
-					echo 'ERROR: '.$e->getMessage();
+					LogHandler::Log('Facebook','ERROR',
+						':Error retrieving access token:<pre>'. print_r( $e->getMessage(),1).'</pre>');
 				}
 			} else {
 				$faceConn = new FacebookPublisher();
@@ -120,8 +120,13 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 			$channelUrl = SERVERURL_ROOT.INETROOT.'/server/admin/editChannel.php?publid='.$publId.'&channelid='.$channelInfo->Id;
 			$channelTxt = str_replace( '<!--PAR:PUBCHANNELURL-->', $channelUrl, $channelTxt );
 
-			$faceConn = new FacebookPublisher( $channelInfo->Id );
-			$registered = $faceConn->getAccessToken( $channelInfo->Id ) ? true : false;
+			$registered = null;
+			try{
+				$faceConn = new FacebookPublisher( $channelInfo->Id );
+				$registered = $faceConn->getAccessToken( $channelInfo->Id ) ? true : false;
+			} catch( Exception $e ) {
+				$htmlBody = $htmlBody.'<body class="warning" onLoad="javascript:myFunction(\''.$e->getMessage().'\')">';
+			}
 
 			//Check if the user is a valid user and if he has access to the application, if you don't do this you'll get an error by Facebook.
 			//If the user has no access the access error is triggered and the user will be unregistered.

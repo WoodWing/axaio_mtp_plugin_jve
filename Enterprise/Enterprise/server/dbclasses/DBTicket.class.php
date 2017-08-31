@@ -250,12 +250,9 @@ class DBTicket extends DBBase
 		$now = date('Y-m-d\TH:i:s', $dbtime );
 
 		$db_tickets = $dbdriver->tablename(self::TABLENAME);
-		$installTicketID = $lic->getInstallTicketID(); 
+		$installTicketID = $lic->getInstallTicketID();
 
-		//Always allow the _install_ user to leave a footprint in the tickets table; do not check the license for that.
-		//To distinguish our _install_ user from a real user named _install_, also check the appserial
-		if ( ($usr != $installTicketID) ||( crc32( $ticketid ) != $appserial ))
-		{
+		if ( self::licenseCheckIsNeeded( $usr, $installTicketID, $ticketid, $appserial, $appname ) ) {
 			$errorMessage = '';
 			$info = Array();
 
@@ -323,7 +320,38 @@ class DBTicket extends DBBase
 
 		return true;
 	}
-	
+
+	/**
+	 * Checks if the license status must be checked before a ticket is issued.
+	 *
+	 * In case of InDesign Server the license is checked randomly. Checking the license status for each newly created
+	 * ticket to serve InDesign Server jobs has a too serious performance drawback.
+	 * Secondly always allow the _install_ user to leave a footprint in the tickets table; do not check the license for that.
+	 * To distinguish our _install_ user from a real user named _install_, also check the application serial.
+	 *
+	 * @param string $user
+	 * @param string $installTicketID
+	 * @param string $ticketId
+	 * @param string $appSerial
+	 * @param string $appName
+	 * @return bool License status must be checked.
+	 */
+	static private function licenseCheckIsNeeded( $user, $installTicketID, $ticketId, $appSerial, $appName )
+	{
+		$check = false;
+
+		if( $appName == 'InDesign Server' ) {
+			$random = mt_rand( 0, 1600 );
+			if( $random % 40 == 0 ) {
+				$check = true;
+			}
+		} elseif( ($user != $installTicketID) || ( crc32( $ticketId ) != $appSerial ) ) {
+			$check = true;
+		}
+
+		return $check;
+	}
+
 	/**
 	 * Search for user's ticket in the database. <br>
 	 * Required: user id (short name) and client application name. <br>
@@ -619,6 +647,24 @@ class DBTicket extends DBBase
 			$params = array( $user );
 			self::deleteRows( self::TABLENAME, $where, $params );
 		}
+	}
+
+	/**
+	 * Resolves the user names and the client applications of online users, given a list of client IPs.
+	 *
+	 * @since 10.1.4
+	 * @param string[] $clientIps
+	 * @return array
+	 */
+	public static function resolveOnlineUsersFromClientIps( $clientIps )
+	{
+		$rows = array();
+		if( $clientIps ) {
+			$fields = array( 'ticketid', 'usr', 'clientip', 'appname', 'appversion' );
+			$where = "`clientip` IN ('".implode( "','", $clientIps )."')";
+			$rows = self::listRows( self::TABLENAME, null, null, $where, $fields );
+		}
+		return $rows;
 	}
 
 	// ------------------------------------------------------------------------

@@ -319,7 +319,7 @@ class WW_Utils_TestSuite
 			}
 		}
 				
-		LogHandler::Log( 'TestSuite', 'DEBUG', '<b>Test: '.$stepInfo.'</b>' );
+		LogHandler::Log( 'TestSuite', 'DEBUG', "Test: {$stepInfo}" );
 		$response = null;
 		try {
 			if( !$this->protocol ) {
@@ -1471,6 +1471,13 @@ class WW_Utils_TestSuite
 			}
 			$sortKey = sprintf( '%020d_%020d_%s', $relation->Parent, $relation->Child, $relation->Type );
 			$sortRelations[$sortKey] = $relation;
+
+			// Sort Editions
+			if( $relation->Targets ) foreach( $relation->Targets as $relationTarget ) {
+				if( $relationTarget->Editions ) {
+					$this->sortEditionsForCompare( $relationTarget->Editions );
+				}
+			}
 		}
 		ksort( $sortRelations );
 		$relations = array_values( $sortRelations ); // remove the temp keys
@@ -1492,6 +1499,20 @@ class WW_Utils_TestSuite
 			$placement->Width = round( $placement->Width, 3 ); 
 			$placement->Height = round( $placement->Height, 3 ); 
 			$placement->Overset = round( $placement->Overset, 3 );
+		}
+	}
+
+	/**
+	 * Sorts Editions.
+	 *
+	 * @param Edition[] $editions
+	 */
+	private function sortEditionsForCompare( &$editions )
+	{
+		if( $editions ) {
+			usort( $editions, function( Edition $editionA, Edition $editionB ) {
+				return $editionA->Id < $editionB->Id ? -1 : 1; // assumed that ids are never equal
+			} );
 		}
 	}
 }

@@ -48,7 +48,7 @@ abstract class WW_DbDrivers_DriverBase
 		PerformanceProfiler::startProfile( 'query logging', 5 );
 		
 		// Add SQL to log.
-		$log = 'SQL: '.$sql.'<br/>';
+		$log = "SQL: {$sql}\r\n";
 		
 		// Add caller (context) to log.
 		require_once BASEDIR.'/server/utils/PHPClass.class.php';
@@ -69,13 +69,13 @@ abstract class WW_DbDrivers_DriverBase
 				if( isset($stackEntry['function']) ) {
 					$log .= $stackEntry['function'];
 				}
-				$log .= '(...)<br/>';
+				$log .= "(...)\r\n";
 			}
 		}
 		
 		// Add row count to log.
 		if( !is_null($rowCnt) ) {
-			$log .= '=> Number of selected/affected rows: '.$rowCnt.'<br/>';
+			$log .= "=> Number of selected/affected rows: {$rowCnt}\r\n";
 		}
 		
 		// Log SQL, caller and row count at once.
@@ -166,7 +166,7 @@ abstract class WW_DbDrivers_DriverBase
 	{
 		return implode( ', ', array_map( array( $this, 'quoteIdentifierDBInDependent' ), $columns) );
 	}
-	
+
 	/**
 	 * Allows subclass to serialize a key-value parameter in SQL before the parent class does.
 	 *
@@ -178,19 +178,8 @@ abstract class WW_DbDrivers_DriverBase
 	 * @param string $substSql The SQL statement with (partly) already subst params so far.
 	 * @return bool Whether or not the SQL param subst is overruled (already done).
 	 */
-	protected function preSerializeParam( $key, $value, $sql, $sqlLhs, &$substSql )
+	protected function preSerializeParam(/** @noinspection PhpUnusedParameterInspection */ $key, $value, $sql, $sqlLhs, &$substSql )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$key = $key; 
-		/** @noinspection PhpSillyAssignmentInspection */
-		$value = $value; 
-		/** @noinspection PhpSillyAssignmentInspection */
-		$sql = $sql; 
-		/** @noinspection PhpSillyAssignmentInspection */
-		$sqlLhs = $sqlLhs; 
-		/** @noinspection PhpSillyAssignmentInspection */
-		$substSql = $substSql;
-
 		return false;
 	}
 
@@ -270,7 +259,7 @@ abstract class WW_DbDrivers_DriverBase
 	 * @param string $identifier
 	 * @return string Identifier 'quoted' in the right format.
 	 */
-	abstract function quoteIdentifier( $identifier );
+	abstract public function quoteIdentifier( $identifier );
 
 	/**
 	 * Creates a statement to drop a temporary table.
@@ -278,7 +267,7 @@ abstract class WW_DbDrivers_DriverBase
 	 * @param string $tableName Name of the temporary table.
 	 * @return string sql-statement.
 	 */
-	abstract function composeDropTempTableStatement( $tableName );
+	abstract public function composeDropTempTableStatement( $tableName );
 
 	/**
 	 * Checks if a table exists in the database.
@@ -287,7 +276,118 @@ abstract class WW_DbDrivers_DriverBase
 	 * @param boolean $addPrefix Add the WoodWing table prefix to the table name.
 	 * @return boolean
 	 */
-	abstract function tableExists( $tableName, $addPrefix = true );
+	abstract public function tableExists( $tableName, $addPrefix = true );
+
+	/**
+	 * If a deadlock is encountered repeat the transaction again.
+	 * The transaction is repeated after waiting $milliseconds milliseconds.
+	 *
+	 * @since 10.1.4
+	 * @param string|resource $sql
+	 * @param int $milliseconds number of milliseconds before retrying.
+	 * @return mixed
+	 */
+	abstract protected function retryAfterLockError( $sql, $milliseconds = 50 );
+
+	/**
+	 * Performs a given SQL query at the database.
+	 *
+	 * @param string $sql   The SQL statement.
+	 * @param array $params Parameters for substitution
+	 * @param mixed $blob   Chunk of data to store at the database. One blob can be passed or multiple. If multiple blobs
+	 * are passed $blob is an array.
+	 * @param boolean $writeLog In case of license related queries, this option can be used to not write in the log file.
+	 * @param boolean $logExistsErr Suppress 'already exists' errors. Used for specific insert operations for which this error is fine.
+	 * @return resource|bool|null DB handle that can be used to fetch results. Null when SQL failed.
+	 * False when record already exists, in case $logExistsErr is set false.
+	 */
+	abstract public function query( $sql, $params=array(), $blob=null, $writeLog=true, $logExistsErr=true );
+
+	/**
+	 * Fetch a result row as an associative array from the database.
+	 *
+	 * @param resource $sth The result resource that is being evaluated. This result comes from a call to {@link: query()}.
+	 * @return array Associative array of strings that corresponds to the fetched row, or FALSE if there are no more rows.
+	 */
+	abstract public function fetch( $sth );
+
+	/**
+	 * Adds prefix to the the table name and puts DBMS specific quotes around it.
+	 *
+	 * @param string $tableNameNoPrefix
+	 * @return string Table name with prefix and quoted.
+	 */
+	abstract	public function tablename( $tableNameNoPrefix );
+
+	/**
+	 * Composes a SQL fragment that can be used to get multiple columns as a concatenated string from the database.
+	 *
+	 * @param string[] $arguments List of arguments (mainly field names) that should be concatenated.
+	 * @return string SQL fragment
+	**/
+	abstract public function concatFields( $arguments );
+
+	/**
+	 * The string datatypes used by the DBMS are multibyte aware.
+	 *
+	 * Returns true if the length of a string datatype refers to number of multibyte characters that can be stored
+	 * instead of the number of bytes that can be stored. So a length of 4 means in case of multibyte support that a
+	 * field can contain 4 multibyte characters. If multibyte is not supported it can store 4 bytes which is only
+	 * 2 characters in case each character takes 2 bytes.
+	 *
+	 * @return boolean True if DBMS is multibyte aware, else false.
+	 */
+	abstract public function hasMultibyteSupport();
+
+	/**
+	 * Changes the SQL ($slq) in such a way that it returns $count rows starting from $start row onwards.
+	 *
+	 * @param string $sql SQL statement before the limit clause is added.
+	 * @param int $start The offset of the first row to return.
+	 * @param int $count The maximum number of rows to return.
+	 * @return string The SQL statement with the limit clause added.
+	 */
+	abstract public function limitquery($sql, $start, $count);
+
+	/**
+	 * Returns the last error message returned by the DBMS.
+	 *
+	 * @return string
+	 */
+	abstract public function error();
+
+	/**
+	 * Returns the last error code returned by the DBMS.
+	 *
+	 * Translates certain DBMS specific errors to DBMS agnostic error codes. For all other error codes the DBMS specific
+	 * code is returned.
+	 *
+	 * @return int
+	 */
+	abstract public function errorcode();
+
+	/**
+	 * Updates, if needed, the autoincrement value of a specific table by modifying the SQL statement.
+	 *
+	 * @param string $sql
+	 * @return string Modified SQL-statement or the original statement when no action is needed.
+	 */
+	abstract public function autoincrement($sql);
+
+	/**
+	 * Returns the (next) autoincrement value.
+	 *
+	 * If a record is added to a table with an autoincrement column this method returns the autoincrement value of the
+	 * added record. This is the case that the method is called directly after ($after = true) the record is added.
+	 * In case the method is called before a record is added ($after = false) this method returns the next autoincrement
+	 * value. This second case is not supported by all DBMS.
+	 *
+	 * @param string $table
+	 * @param bool $after
+	 * @return bool|int New id or else false.
+	 */
+	abstract public function newid($table, $after);
+
 
 }
 

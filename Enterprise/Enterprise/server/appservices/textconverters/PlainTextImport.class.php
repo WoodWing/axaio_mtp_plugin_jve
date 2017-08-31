@@ -25,7 +25,7 @@ class PlainTextImport implements TextImport
 	 * @param array  &$xFrames   Returned collection of XHTML DOMDocument each representing one text frame.
 	 * @param array &$stylesCSS
 	 * @param array &$stylesMap
-	 * @param &$domVersion
+	 * @param string &$domVersion
 	 */ 
 	public function importFile( $plainFile, &$xFrames, &$stylesCSS, &$stylesMap, &$domVersion )
 	{
@@ -50,7 +50,7 @@ class PlainTextImport implements TextImport
 	 * @param array  $xFrames       Returned collection of XHTML DOMDocument each representing one text frame.
 	 * @param array &$stylesCSS
 	 * @param array &$stylesMap
-	 * @param &$domVersion
+	 * @param string &$domVersion
 	 */ 
 	public function importBuf( $plainContent, &$xFrames, &$stylesCSS, &$stylesMap, &$domVersion )
 	{

@@ -43,7 +43,7 @@ class BizDeadlines
 	 *
 	 * @param integer $pubId
 	 * @param integer $issueId
-	 * @param dateTime $issueDeadline
+	 * @param string $issueDeadline
 	 */
 	public static function updateRecalcIssueDeadlines( $pubId, $issueId, $issueDeadline )
 	{
@@ -172,7 +172,7 @@ class BizDeadlines
 	 *
 	 * @param integer $pubId
 	 * @param integer $issueId
-	 * @param dateTime $issueDeadline
+	 * @param string $issueDeadline
 	 * @param boolean $reset
 	 * @return array Category DB row enriched with calc deadline info. See above.
 	 */
@@ -216,7 +216,7 @@ class BizDeadlines
 	 *
 	 * @param integer $pubId
 	 * @param integer $issueId
-	 * @param dateTime $issueDeadline
+	 * @param string $issueDeadline
 	 */
 	public static function updateRecalcSectionDefs( $pubId, $issueId, $issueDeadline )
 	{
@@ -294,7 +294,7 @@ class BizDeadlines
 	 *
 	 * @param integer $pubId
 	 * @param integer $issueId
-	 * @param dateTime $issueDeadline
+	 * @param string $issueDeadline
 	 */
 	public static function updateRecalcIssueSectionStates( $pubId, $issueId, $issueDeadline )
 	{

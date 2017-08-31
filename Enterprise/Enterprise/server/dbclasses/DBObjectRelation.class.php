@@ -26,7 +26,7 @@ class DBObjectRelation extends DBBase
 	 * @static
 	 * @param array $newValues Column/value pairs of the columns to be inserted.
 	 * @param bool $autoIncrement Apply auto increment for primary key (true/false).
-	 * @return integer|bool ID of the inserted record or false on failure.
+	 * @return bool|int
 	 */
 	public static function insert( array $newValues, $autoIncrement )
 	{
@@ -83,7 +83,9 @@ class DBObjectRelation extends DBBase
 	 */
 	public static function update(array $whereParams, array $newValues)
 	{
-		return parent::doUpdate($whereParams, self::TABLENAME, self::KEYCOLUMN, self::DBINT_CLASS, $newValues);
+		$params = array();
+		$where = self::makeWhereForSubstitutes($whereParams, $params);
+		return self::updateRow(self::TABLENAME, $newValues, $where, $params);
 	}	
 	
 	/**
@@ -154,7 +156,7 @@ class DBObjectRelation extends DBBase
 	 * @throws BizException Throws BizException when no record found.
 	 * @return Relation
 	 */
-	static public function getOBjectRelationByRelId( $relId )
+	static public function getObjectRelationByRelId( $relId )
 	{
 		$where = 'id = ?';
 		$params = array( $relId );
@@ -435,8 +437,37 @@ class DBObjectRelation extends DBBase
 		$fields = array('id' => 'id');
 		$result = self::getRow( self::TABLENAME, $where, $fields, $params );
 		return is_null($result) ? null : $result['id'];
-	}	
-	
+	}
+
+	/**
+	 * Returns the DB id and page range of a workflow object relations.
+	 *
+	 * @param Relation[] $relations
+	 * @return null|array For each parent/child combinations an infoObj containing the Id and the PageRange.
+	 */
+	static public function getObjectRelationInfoOfRelations( $relations )
+	{
+		$params = array();
+		$wheres = array();
+		foreach( $relations as $relation ) {
+			$wheres[] = '( `parent`= ? AND `child`= ? AND `type` = ? ) ';
+			$params[] = $relation->Parent;
+			$params[] = $relation->Child;
+			$params[] = $relation->Type;
+		}
+		$where = '('.implode( ' OR ', $wheres ).') ';
+		$rows = self::listRows( self::TABLENAME, 'id', '', $where, array( 'id', 'parent', 'child', 'pagerange' ), $params );
+		$result = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$infoObj = new stdClass();
+			$infoObj->Id = $row['id'];
+			$infoObj->PageRange = $row['pagerange'];
+			$result[$row['parent']][$row['child']] = $infoObj;
+		}
+
+		return $result;
+	}
+
 	/**
 	 * Returns unplaced adverts for a certain layout within the specified publication/
 	 * issue/section.
@@ -444,7 +475,7 @@ class DBObjectRelation extends DBBase
 	 * @param integer $lay_id
 	 * @param integer $publication id
 	 * @param integer $issue id
-	 * @param $section section id
+	 * @param integer $section section id
 	 * @return array|boolean Array with ids of unplaced adverts, false in case of an error.
 	 */
 	static public function unplacedAdverts( $lay_id, $publication, $issue, $section )
@@ -610,7 +641,40 @@ class DBObjectRelation extends DBBase
 		
 		return $row ? true : false;
 		
-	}	
+	}
+	/**
+	 * Checks if an object, used as child, has more than $manifold relations.
+	 *
+	 * It is not about 'related' relations but especially  'placed' and 'contained'
+	 * relations.
+	 *
+	 * @param array $childIds 	Array of child ids.
+	 * @param int $manifold Threshold value for manifold placed objects.
+	 * @return array with the ids of manifold used child objects.
+	 */
+	public static function childrenPlacedManifold( array $childIds, $manifold )
+	{
+		$manifoldUsed = array();
+		if ( $childIds ) {
+			$where = self::addIntArrayToWhereClause( 'child', $childIds, false );
+			$where .= "AND `type` <> ? ";
+			$params = array( 'Related' );
+			$rows = self::listRows(
+						self::TABLENAME,
+						'child',
+						'',
+						$where,
+						array( 'child' ),
+						$params,
+						null,
+						null,
+						array( 'child' ),
+						"COUNT(1) > $manifold" );
+			$manifoldUsed = array_keys( $rows );
+		}
+
+		return $manifoldUsed;
+	}
 	/**************************** Other *******************************************/	
 
 	/**

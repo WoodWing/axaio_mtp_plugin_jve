@@ -416,7 +416,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflMessages_TestCase extend
 	 *
 	 * @param string $user
 	 * @param string $password
-	 * @return WflogOnResponse on succes. NULL on error.
+	 * @return WflLogOnResponse on success. NULL on error.
 	 */
 	private function logOn( $user, $password )
 	{

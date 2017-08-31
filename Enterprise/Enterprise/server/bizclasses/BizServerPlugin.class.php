@@ -114,7 +114,10 @@ class BizServerPlugin
 			// Reason is to preserve their local class members (cached property data).
 			// Then the caller can talk to one connector while data is preserved between the function calls.
 			if( !array_key_exists( $connInfo->ClassName, $connectors )) {
-				$connectors[$connInfo->ClassName] = self::instantiateConnectorObject( $connInfo );
+				$connector = self::instantiateConnectorObject( $connInfo );
+				if( $connector ) {
+					$connectors[ $connInfo->ClassName ] = $connector;
+				}
 			}
 		}
 	}
@@ -148,7 +151,7 @@ class BizServerPlugin
 	 * @param string $interface  	Connector interface. E.g: WflCopyObject, PubPublishing, NameValidation, etc
 	 * @param string $type		  	Connector type. E.g: WorflowService, AdminService, etc. NULL for any type.
 	 * @param string $methodName   Method / function to call at connector.
-	 * @param string $methodParams Method params to pass onto $methodName
+	 * @param array $methodParams Method params to pass onto $methodName
 	 * @param boolean $activeOnly  Take only active connectors into account. 
 	 * @param boolean $installedOnly  Take only installed connectors into account. 
 	 * @param array  $returnVals   Collected return values of all connectors. Keys are connector class names.
@@ -315,7 +318,7 @@ class BizServerPlugin
 	 * @param string $interface  	Connector interface. E.g: WflCopyObject, PubPublishing, NameValidation, etc
 	 * @param string $type		  	Connector type. E.g: WorflowService, AdminService, etc. NULL for any type.
 	 * @param string $methodName  	Name of the method to call
-	 * @param string $methodParams Parameters to call
+	 * @param array $methodParams Parameters to call
 	 * @return EnterpriseConnector|null The connector object. Returns null when no connector found.
 	 */
 	static public function searchConnector( $interface, $type, $methodName, $methodParams )

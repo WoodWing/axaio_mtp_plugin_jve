@@ -17,30 +17,41 @@ class DBInDesignArticle extends DBBase
 	/**
 	 * Creates the given InDesign Articles in DB for a certain layout object.
 	 *
+	 * The records are inserted by one statement. In that case it is important that for each record all columns are set.
+	 * To ensure this a row template is used in which all values are merged.
+	 *
 	 * @since 9.7.0
 	 * @param integer layoutId
 	 * @param InDesignArticle[] $articles The InDesign Articles to be created.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
- 	public static function createInDesignArticles( $layoutId, $articles )
- 	{
+	public static function createInDesignArticles( $layoutId, $articles )
+	{
 		// Bail out when invalid parameters provided. (Paranoid check.)
 		$layoutId = intval( $layoutId );
 		if( !$layoutId ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Server', 'Invalid params provided for '.__METHOD__.'().' );
 		}
 		$order = 0;
- 		if( $articles ) foreach( $articles as $article ) {
+		require_once BASEDIR.'/server/dbclasses/DBCustomField.class.php';
+		$rowTemplate = DBCustomField::getFieldsAtModel( self::TABLENAME );
+		$rowTemplate = array_fill_keys( array_keys( $rowTemplate ), '');
+		$values = array();
+		if( $articles ) foreach( $articles as $article ) {
 			$row = self::objToRow( $article );
 			$row['objid'] = $layoutId;
 			$row['code'] = $order;
-			$newId = self::insertRow( self::TABLENAME, $row, false ); // false: no autoincrement because no id field present
-			if( self::hasError() || $newId === false ) {
+			$order += 1;
+			$rowValues = array_merge( $rowTemplate, $row );
+			$values[] = array_values( $rowValues );
+		}
+		if( $values ) {
+			$result = self::insertRows( self::TABLENAME, array_keys( $rowTemplate ), $values, false );
+			if( !$result ) {
 				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 			}
-			$order += 1;
 		}
- 	}
+	}
 
 	/**
 	 * Retrieves the InDesign Articles from DB for a given layout object.

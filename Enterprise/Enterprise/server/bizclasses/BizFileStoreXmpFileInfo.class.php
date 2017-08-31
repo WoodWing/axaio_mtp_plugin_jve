@@ -151,9 +151,11 @@ class BizFileStoreXmpFileInfo
 		try {
 			$xmlBlock = @new SimpleXMLElement( $xmpBlockAsString );
 		} catch( Exception $e ) {
-			$xmpBlockAsString = str_replace( '<', '&lt;', $xmpBlockAsString );
-			LogHandler::Log( __CLASS__, 'ERROR', 'XML error in XMP block: '.$e->getMessage().
-				'<br/>Skipping this XMP block:<br/><code>'.$xmpBlockAsString.'</code>' );
+			LogHandler::logRaw(
+				__CLASS__,
+				'ERROR',
+				LogHandler::encodeLogMessage( "XML error in XMP block: {$e->getMessage()}\r\nSkipping this XMP block:\r\n" ).
+				LogHandler::composeCodeBlock( $xmpBlockAsString ) );
 			$xmlBlock = null;
 		}
 		return $xmlBlock;
@@ -195,6 +197,7 @@ class BizFileStoreXmpFileInfo
 	 *   "Adobe InDesign CC (Windows)"           => 9.2
 	 *   "Adobe InDesign CC 2014 (Macintosh)"    => 10.0
 	 *   "Adobe InDesign CC 2015 (Macintosh)"    => 11.0
+	 *   "Adobe InDesign CC 2017 (Macintosh)"    => 12.0
 	 *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	 * 
 	 * Note that the CreatorTool property contains a diplay version, such as "CS6".
