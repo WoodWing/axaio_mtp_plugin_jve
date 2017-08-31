@@ -655,7 +655,7 @@ function step7_zipExternalModules {
 	done
 
 	echo "step7f: Copying the ionCube Loaders to the artifacts folder ..."
-	cp "${WORKSPACE}/Enterprise/Libraries/ionCube/loaders/v6.0.5_at_2016_10_07/ioncube_loaders_all_platforms.zip" "${WORKSPACE}/artifacts"
+	cp "${WORKSPACE}/Enterprise/Libraries/ionCube/loaders/v10.0.0_at_2017_08_31/ioncube_loaders_all_platforms.zip" "${WORKSPACE}/artifacts"
 	chmod +w "${WORKSPACE}/artifacts/ioncube_loaders_all_platforms.zip"
 }
 

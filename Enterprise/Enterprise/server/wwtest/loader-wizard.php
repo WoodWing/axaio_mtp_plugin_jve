@@ -5,7 +5,7 @@
  *
  * ionCube is a registered trademark of ionCube Ltd. 
  *
- * Copyright (c) ionCube Ltd. 2002-2015
+ * Copyright (c) ionCube Ltd. 2002-2017
  */
 
 
@@ -133,7 +133,7 @@ function php4_http_build_query($formdata, $numeric_prefix = null, $key = null ) 
 
 function script_version()
 {
-    return "2.53";
+    return "2.54";
 }
 
 function retrieve_latest_wizard_version()
