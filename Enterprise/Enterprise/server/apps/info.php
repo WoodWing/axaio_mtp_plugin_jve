@@ -425,7 +425,6 @@ function showObjectRelations( $ticket, $tpl, $object )
 			$response = $service->execute( $request );
 			$objects = $response->Objects;
 		} catch( BizException $e ) {
-			$e = $e; // keep analyzer happy
 		}
 	
 		$relObjMD = $objects[0]->MetaData;

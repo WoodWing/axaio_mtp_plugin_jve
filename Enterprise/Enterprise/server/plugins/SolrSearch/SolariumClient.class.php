@@ -195,7 +195,7 @@ class SolariumClient
 	 * @param array $fields key/value array of fields, containing the updated properties
 	 * @param boolean $directCommit Optional indicates if the change should be directly committed
 	 * @throws BizException
-	 * @return Solarium/QueryType/Update/Result|null $result Solarium result object
+	 * @return Solarium\QueryType\Update\Result|null $result Solarium result object
 	 */
 	public function updateObjectsFields( array $objectIDs, array $fields, $directCommit = false )
 	{
@@ -244,7 +244,7 @@ class SolariumClient
 	 * Creates a new select and returns the query object.
 	 *
 	 * @param array|null $options Array with initial options for select
-	 * @return Solarium/QueryType/Select/Query/Query|null $query
+	 * @return Solarium\QueryType\Select\Query\Query|null $query
 	 */
 	public function createSelect( $options = null )
 	{
@@ -266,7 +266,7 @@ class SolariumClient
 	 *
 	 * @param Solarium/QueryType/Select/Query/Query $query
 	 * @throws BizException
-	 * @return Solarium/QueryType/Select/Result|null $resultSet
+	 * @return Solarium\QueryType\Select\Result\Result|null $resultSet
 	 */
 	public function executeSelect( $query )
 	{
@@ -311,7 +311,7 @@ class SolariumClient
 	 *
 	 * @param Solarium/QueryType/Update/Query/Query $update
 	 * @throws BizException
-	 * @return Solarium/QueryType/Update/Result|null $resultSet
+	 * @return Solarium\QueryType\Update\Result|null $resultSet
 	 */
 	private function executeUpdate( $update )
 	{

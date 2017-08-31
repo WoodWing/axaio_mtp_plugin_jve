@@ -878,6 +878,23 @@ class BizRelation
 								break;
 						}
 						break;
+					// Since 10.2 we allow placing images on articles for the Digital Editor (CSDE).
+					// Some more child types we allow just to be flexible and prepared for the future.
+					case 'Article':
+						switch ($childType) {
+							case 'Image':
+							case 'Audio':
+							case 'Video':
+							case 'Hyperlink':
+							case 'Presentation':
+							case 'Archive':
+							case 'Other':
+								$result = true;
+								break;
+							default:
+								break;
+						}
+						break;
 					default:
 						break;
 				}

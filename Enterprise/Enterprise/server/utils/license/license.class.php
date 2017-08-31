@@ -3245,10 +3245,9 @@ class License
 	}
 	
 	/**
-	 * Return an HTML string that can be used to display the current license status
+	 * Outputs an HTML string that can be used to display the current license status
 	 * 
 	 * @param boolean inAdminTickets
-	 * @return string HTML string
 	 */
 	public function showStatusInHTML( $inAdminTickets=false )
 	{
@@ -4189,7 +4188,7 @@ class License
 	 *
 	 * @param string $productcode (can be handy in the future to send extra info to SmartReg)
 	 * @param string $errorMessage contains error message afterwards
-	 * @return success
+	 * @return bool success
 	 */
 	public function SmartRegContact( $productcode, &$errorMessage )
 	{
@@ -4224,7 +4223,7 @@ class License
 	 * @param boolean $force. If true, ignore the 'once a day' check, and always do it
 	 * @param string $errorMessage, returns the errorMessage associated with the new licenseStatus
 	 * @param integer $licenseStatus, returns the new licenseStatus
-	 * @return success
+	 * @return bool success
 	 */
 	public function tryAutoRenew( $productcode, $force, &$licenseStatus, &$errorMessage )
 	{

@@ -1078,7 +1078,6 @@ class BizProperty
 
 		// Debug: Just check these hugh lists if there are any keys missing (against each other)
 		if( LogHandler::debugMode() ) {
-			require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 			$a = array_diff( array_keys(self::$InfoProps), array_keys(self::$MetaProps) );
 			if( count( $a ) ) {
 				throw new BizException( '', 'Server', '', __METHOD__.' - InfoProps and MetaProps are different: '.implode(',',$a) );
@@ -2623,7 +2622,7 @@ class BizProperty
 	 * Checks if the default value is an element of the (multi)list.
 	 *
 	 * @param string $type Type of the property.
-	 * @param array $list List containing allowed values.
+	 * @param string $list List containing allowed values (packed as comma separated string).
 	 * @param string $default Default value.
 	 * @throws BizException Throws BizException when the validation fails.
 	 */

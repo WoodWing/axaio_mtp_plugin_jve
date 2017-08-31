@@ -30,8 +30,7 @@ class WflLogOnService extends EnterpriseService
 	{
 		require_once BASEDIR.'/server/utils/license/license.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-		
+
 		$info = Array();
 		$lic = new License();
 		$shortuser = null;

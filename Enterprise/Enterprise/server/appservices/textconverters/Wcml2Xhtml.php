@@ -1575,7 +1575,7 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	 * @param bool $isOverride TRUE for override style (becomes 'style' attribute) or FALSE for para/char style definition (referred through 'class' attribute).
 	 * @param bool $isPara TRUE for para style or FALSE for char style.
 	 * @param array $css Style map for internal use.
-	 * @return string CSS definition
+	 * @return array CSS definition
 	 */
 	protected function parseStyles( DOMNode $icStyle, $isOverride, $isPara, $css = array() )
 	{
@@ -1799,8 +1799,6 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 
 	/**
 	 * Parses WCML para/char style definitions and builds $this->xStyles (for XHTML).
-	 *
-	 * @return string
 	 */
 	private function buildStyles()
 	{

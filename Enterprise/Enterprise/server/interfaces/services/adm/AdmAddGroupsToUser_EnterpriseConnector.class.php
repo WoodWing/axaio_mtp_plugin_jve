@@ -40,6 +40,5 @@ abstract class AdmAddGroupsToUser_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdmAddGroupsToUserRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

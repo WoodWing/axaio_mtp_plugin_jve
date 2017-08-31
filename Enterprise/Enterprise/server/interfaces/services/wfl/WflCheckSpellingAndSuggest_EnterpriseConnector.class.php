@@ -40,6 +40,5 @@ abstract class WflCheckSpellingAndSuggest_EnterpriseConnector extends ServiceCon
 	 */
 	public function onError( WflCheckSpellingAndSuggestRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

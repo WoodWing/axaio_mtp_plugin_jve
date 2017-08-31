@@ -161,7 +161,7 @@ class DBUpgradePublishHistory extends DbUpgradeModule
 	/**
 	 * Executes the query provided.
 	 *
-	 * @param unknown $dbDriver
+	 * @param WW_DbDrivers_DriverBase $dbDriver
 	 * @param string $sqlStatement
 	 * @return bool
 	 */

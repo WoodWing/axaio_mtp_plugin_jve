@@ -40,6 +40,5 @@ abstract class PlnModifyAdverts_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( PlnModifyAdvertsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

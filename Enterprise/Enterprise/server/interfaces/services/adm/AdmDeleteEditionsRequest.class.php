@@ -21,7 +21,7 @@ class AdmDeleteEditionsRequest
 	 * @param integer              $PublicationId             
 	 * @param integer              $PubChannelId              Nullable.
 	 * @param integer              $IssueId                   Nullable.
-	 * @param Id[]                 $EditionIds                
+	 * @param integer[]            $EditionIds                
 	 */
 	public function __construct( $Ticket=null, $PublicationId=null, $PubChannelId=null, $IssueId=null, $EditionIds=null )
 	{
@@ -76,8 +76,8 @@ class AdmDeleteEditionsRequest
 			if( !is_null( $datObj->EditionIds ) ) {
 				$validator->checkType( $datObj->EditionIds, 'array' );
 				if( !empty($datObj->EditionIds) ) foreach( $datObj->EditionIds as $listItem ) {
-					$validator->enterPath( 'integer' );
-					$validator->checkType( $listItem, 'integer' );
+					$validator->enterPath( 'Id' );
+					$validator->checkType( $listItem, 'Id' );
 					$validator->leavePath();
 				}
 			}

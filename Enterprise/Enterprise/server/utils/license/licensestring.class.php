@@ -125,7 +125,7 @@ class LicenseString
 	 *
 	 * If the privatey is stored in the source code below, the returned value is a string (that doesn't need to be freed)
 	 *
-	 * @return handle or string the private key
+	 * @return string|bool the private key, false on error
 	 */
 	private function getPrivKey()
 	{
@@ -219,7 +219,7 @@ class LicenseString
 	/**
 	 * Get the public key for openSSL string conversions
 	 *
-	 * @return resource the public key
+	 * @return resource|bool the public key, false on error
 	 */
 	private function getPubKey()
 	{
@@ -446,7 +446,7 @@ class LicenseString
 	/**
 	 * Convert one license key string into an array of separate keys
 	 * @param string the keys in one string
-	 * @return array $arr the separate keys
+	 * @return array|bool array of separate keys, or false on error
 	 */
 	public function getLicenseInfo( $license )
 	{

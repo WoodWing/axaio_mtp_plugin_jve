@@ -24,14 +24,6 @@
 
 ENT_DIR=../../..
 
-# Perforce: make sure vendor- and composer folders in workspace is in sync with latest version:
-p4 sync "${ENT_DIR}/server/vendor/...#head"
-p4 sync "${ENT_DIR}/server/buildtools/composer/...#head"
-
-# Perforce: checkout the entire vendor- and composer folders:
-p4 edit "${ENT_DIR}/server/vendor/..."
-p4 edit "${ENT_DIR}/server/buildtools/composer/..."
-
 # Auto update to latest composer
 php composer.phar --version | grep -q self-update
 if [ $? -eq 0 ]; then
@@ -74,38 +66,5 @@ else
     fi
 fi
 
-# Perforce: revert unchanged files in vendor- and composer folders:
-p4 revert -a "${ENT_DIR}/server/vendor/..."
-p4 revert -a "${ENT_DIR}/server/buildtools/composer/..."
-
-# Perforce: add newly created files (if any) to vendor folder:
-find "${ENT_DIR}/server/vendor" -type f -not -path '*/\.*' -print | p4 -x - add
-# L> "p4 add" command does not allow us to add files recursively (unline the GUI client)
-# L> note that the "find <folder> -type f -print" command lists all files recursively
-# L> note that the "\( ! -iname ".*" \)" expression excludes the hidden files (starting with dot)
-
-############################################## !!! CAUTION !!! ##################################################
-#
-# NOTE: We still have to test this from within this script. Just added this as reference.
-#
-# Use this only in case you know what you are doing! This is an instructional comment, don't run this 'as is'.
-#
-# To make the changes in a local folder 'leading' against Perforce, it's possible to 'reconcile' the local folder.
-# We can do this 'possibly' as follows (${ID_OF_CHANGELIST} = the last changelist created by the reconciliation):
-#
-# p4 reconcile -n -f "${ENT_DIR}/server/vendor/..."
-# p4 change -i
-# ID_OF_CHANGELIST=`p4 counter change`
-# if [[ -f "${ENT_DIR}/server/vendor/composer/autoload_namespaces.php" ]]; then
-#   p4 reconcile -f -c ${ID_OF_CHANGELIST} "${ENT_DIR}/server/vendor/composer/autoload_namespaces.php"
-# fi
-#
-# We can do this 'possibly', because we have not tested this yet.
-#
-# Check in the Perforce client if the changes are as desired to submit. Then submit the changelist.
-#
-############################################## !!! CAUTION !!! ##################################################
-
 echo ------------------------------------------------
 echo "All done!"
-echo "At Perforce, refresh your default Pending Changelist and review re-generated files before submit."

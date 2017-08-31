@@ -38,7 +38,6 @@ function checkSecure($app = null, $userPwdExpir = null, $redir=true, $ticket=nul
 	if( empty($userPwdExpir) ) {
 		$ticket = $ticket != null ? $ticket : getLogCookie('ticket',$redir);
 		try {
-			require_once( BASEDIR . '/server/bizclasses/BizSession.class.php' );
 			$user = BizSession::checkTicket( $ticket );
 		} catch( BizException $e ) {
 			$user = '';

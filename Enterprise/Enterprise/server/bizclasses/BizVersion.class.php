@@ -297,7 +297,7 @@ class BizVersion
 	 * Calculates the next version to be used for create- and save operations.
 	 * @param object $statusCfg Admin status definition (wherein the object currently resides).
 	 * @param array  $verArr Returned values at keys "majorversion" and "minorversion"
-	 * @return Next object version in major.minor notation (to be used for save/create). Empty on error.
+	 * @return string Next object version in major.minor notation (to be used for save/create). Empty on error.
 	 */
 	public static function determineNextVersionNr( $statusCfg, &$verArr )
 	{
@@ -356,6 +356,8 @@ class BizVersion
 				$wflMetadata->Version = $newRow['version'];
 			}
 			self::removeOldVersionWhenNewIsCreatedByIDSA( $currRow, $newRow );
+		} else {
+			$newRow['version'] = $currRow['version'];
 		}
 
 		self::removeIntermediateVersions( array( $id ), $currRow['type'], array( $id => $currRow['storename'] ),
@@ -416,7 +418,7 @@ class BizVersion
 	 *
 	 * @param array    $invokedObjects Essential metadata for each object where keys are the object ids and values its Object. Version is updated when needed.
 	 * @param array    $newRow Updated new values for all objects
-	 * @param DBAdmStatus[] $states All allowed states for the Objects.
+	 * @param AdmStatus[] $states All allowed states for the Objects.
 	 * @throws BizException on failure
 	 */
 	public static function multiCreateVersionIfNeeded( &$invokedObjects, $newRow, $states )
@@ -498,7 +500,7 @@ class BizVersion
 	 * @param string $rendition Rendition of file attachment to return. Typically 'preview'. Pass 'none' for no attachments.
 	 * @param array $areas 'Workflow' or 'Trash' area where the object is resided.
 	 * @throws BizException Throws BizException on failure
-	 * @return object GetVersionResponse
+	 * @return VersionInfo
 	 */
 	static public function getVersion( $id, $user, $version, $rendition, array $areas=null )
 	{

@@ -392,7 +392,6 @@ class AdobeDpsUtils
 	private static function getNativeFile( $objectId )
 	{
 		require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$request = new WflGetObjectsRequest( BizSession::getTicket(), array( $objectId ), false, 'native', array() );
 		
 		$service = new WflGetObjectsService();
@@ -631,7 +630,6 @@ class AdobeDpsUtils
 				AdobeDps_PubPublishing::multipleHTMLResourcesDossersForIssue( $publishTarget->IssueID, $dossierIds, $htmlResourcesDossierId );
 
 				require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				return BizObject::getObject($htmlResourcesDossierId, BizSession::getShortUserName(), false, 'none');
 			}
 		} catch ( BizException $e ) {
@@ -715,8 +713,6 @@ class AdobeDpsUtils
 		require_once BASEDIR . '/server/dbclasses/DBTarget.class.php';
 		$childIds = DBTarget::getChildrenbyParentTarget( $dossierId,
 			$publishTarget->PubChannelID, $publishTarget->IssueID );
-
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$user = BizSession::getShortUserName();
 
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';

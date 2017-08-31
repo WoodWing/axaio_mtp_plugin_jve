@@ -40,7 +40,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_CopyDossierWithF
 	public function getTestMethods()
 	{
 		return
-			'Test with objects assigned to a print channel: <ul>';
+			'Test with objects assigned to a print channel: <ul>'.
 				'<li>01 Creates a Template, Dossier, a PublishForm, an Image and an Article object (CreateObjects).</li>'.
 				'<li>02 Move the Image and the Article into the Dossier (CreateObjectRelations).</li>'.
 				'<li>03 Place the Image and Article into the Dossier (CreateObjectRelations).</li>'.
@@ -474,13 +474,13 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_CopyDossierWithF
 	 */
 	private function verifyCopiedDossierWithForm()
 	{
-		require_once BASEDIR .'/server/bizclasses/BizSession.class.php';
 		$result = true;
 		// Verify copied Dossier's relations.
 		if( $this->copiedDossierWithForm->Relations ) {
 			$articleFound = false;
 			$imageFound = false;
 			$formFound = false;
+			$copiedForm = null;
 			foreach( $this->copiedDossierWithForm->Relations as $relation ) {
 				if( $relation->Type == 'Contained' ) {
 					switch( $relation->ChildInfo->Type ) {
@@ -635,7 +635,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_CopyDossierWithF
 	 */
 	private function verifyCopiedDossierWithoutForm()
 	{
-		require_once BASEDIR .'/server/bizclasses/BizSession.class.php';
 		$result = true;
 		// Verify copied Dossier's relations.
 		if( $this->copiedDossierWithoutForm->Relations ) {

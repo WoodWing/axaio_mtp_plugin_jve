@@ -33,8 +33,8 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 	final public function runTest()
 	{
 		require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php';
-		
-		// - - - - - - - -  Preperation for test data - - - - - - - - 
+
+		// - - - - - - - -  Preperation for test data - - - - - - - -
 		// Ensure that TESTSUITE and the data is defined correctly for usage in testing later on.
 		$suiteOpts = defined('TESTSUITE') ? unserialize( TESTSUITE ) : array();
 		if( !$suiteOpts ) {
@@ -51,11 +51,11 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 		}
 
 		if( !isset( $suiteOpts['DM_Brand'] ) || !isset( $suiteOpts['DM_Issue'] ) ) { // check since those are introduced since 7.5
-			$this->setResult( 'ERROR', 'Could not find the DM_Brand or DM_Issue option at the TESTSUITE setting.', 
+			$this->setResult( 'ERROR', 'Could not find the DM_Brand or DM_Issue option at the TESTSUITE setting.',
 					'Please check the TESTSUITE setting in configserver.php.' );
 			return;
 		}
-		
+
 		if( !$this->resolveBrandPubChannelIssue( $logonResponse, $suiteOpts['DM_Brand'], $suiteOpts['DM_Issue'] ) ) {
 			return;
 		}
@@ -63,13 +63,13 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 		// We call the services synchronously so there is no need to have multiple operation ids.
 		require_once BASEDIR.'/server/utils/NumberUtils.class.php';
 		$this->operationId = NumberUtils::createGUID();
-		
+
 		$this->ticket = $logonResponse->Ticket;
-		$this->editionId = $this->pubChannel->Editions[0]->Id;	
+		$this->editionId = $this->pubChannel->Editions[0]->Id;
 		$this->pubPublishTarget = $this->createPubPublishTarget();
-				
+
 		try {
-			// - - - - - - - - ORDERING - - - - - - - - 
+			// - - - - - - - - ORDERING - - - - - - - -
 			// Get dossier Order and verifies it
 			$this->dossierIdsOrder = $this->callGetDossierOrder();
 			if( is_array( $this->dossierIdsOrder ) ) {
@@ -86,18 +86,18 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 				$this->dossierIdsOrder = $this->callGetDossierOrder();
 				$this->verifyDossierIdsOrder( null, $this->dossierIdsOrder, 'GetDossierOrder' );
 			}
-			
+
 			// Re-order the dossiers
 			$this->newDossierIdsOrder = array_reverse( $this->dossierIdsOrder );
 			if( is_array( $this->newDossierIdsOrder ) ) {
 				LogHandler::Log( 'AdobeDps', 'INFO', 'NEW Dossier Ids order:'.implode(',', $this->newDossierIdsOrder ) );
-			}	
-			
+			}
+
 			// Update dossier order and verify updated dossiers order
-			$updatedDossierIdsOrder = $this->callUpdateDossierOrder();			
+			$updatedDossierIdsOrder = $this->callUpdateDossierOrder();
 			$this->verifyDossierIdsOrder( $this->newDossierIdsOrder, $updatedDossierIdsOrder, 'UpdateDossierOrder' );
 			$this->dossierIds = $updatedDossierIdsOrder;
-			
+
 			// - - - - - - - -  PREVIEW - - - - - - - -
 
 			$previewDossierResp = $this->callPreviewDossiers();
@@ -106,22 +106,22 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 				$this->callAbortOperation(); // Just to hit the code, not able to verify .
 				$response = $this->callOperationProgress();
 				$this->verifyOperationProgress( $response, 'Preview' );
-			}	
+			}
 
-			// - - - - - - - -  PUBLISH - - - - - - - - 
+			// - - - - - - - -  PUBLISH - - - - - - - -
 			$publishDossierResp = $this->callPublishDossiers();
-			$publishedDossierVerified = $this->verifyOperationDossiersResp( $publishDossierResp, 'Publish' );					
+			$publishedDossierVerified = $this->verifyOperationDossiersResp( $publishDossierResp, 'Publish' );
 			if( $publishedDossierVerified ) {
 				$this->callAbortOperation(); // Just to hit the code, not able to verify.
 				$response = $this->callOperationProgress();
 				$this->verifyOperationProgress( $response, 'Publish');
 
-				// - - - - - - - -  MISC PUBLISH - - - - - - - - 
+				// - - - - - - - -  MISC PUBLISH - - - - - - - -
 				foreach( $this->dossierIds as $dossierId ) {
 					$dossierUrl = $this->callGetDossierUrl( $dossierId );
 					$this->verifyGetDossierUrl( $dossierId, $dossierUrl );
 				}
-				
+
 				$updateDossierResp = $this->callUpdateDossiers();
 				/* $updateDossierVerified = */$this->verifyOperationDossiersResp( $updateDossierResp, 'Update' );
 				$response = $this->callGetPublishInfo();
@@ -131,8 +131,8 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 				$setPublishInfoResp = $this->callSetPublishInfo();
 				/*$setPublishIssueVerified = */$this->verifyPublishedIssue( $setPublishInfoResp->PublishedIssue, 'SetPublishInfo' );
 				$response = $this->callGetPublishInfo();
-				$this->verifyGetPublishInfo( $response );				
-				
+				$this->verifyGetPublishInfo( $response );
+
 				// - - - - - - UNPUBLISH - - - - - -
 				$this->callUnPublishDossiers();
 			}
@@ -140,7 +140,7 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 			$utils->wflLogOff( $this, $this->ticket );
 		} catch ( BizException $e ) {
 			$this->setResult( 'ERROR', 'Testing failed and is aborted', $e->getMessage() );
-		}		
+		}
 	}
 
 	/**
@@ -340,7 +340,7 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 	/**
 	 * Return the first status found for the object type in publicationInfo.
 	 *
-	 * @param string $objecType
+	 * @param string $objectType
 	 * @return Status
 	 */
 	private function getStatus( $objectType )
@@ -360,6 +360,7 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 	 * @param WflLogOnResponse $logonResponse
 	 * @param string $brandName
 	 * @param string $issueName
+	 * @return bool Whether or not successful
 	 */
 	private function resolveBrandPubChannelIssue( $logonResponse, $brandName, $issueName )
 	{
@@ -695,8 +696,6 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 	
 	/**
 	 * Call AbortOperation publishing service.
-	 *
-	 * @param string $operation Possbile values: Preview, Publish, Update or UnPublish
 	 */
 	private function callAbortOperation()
 	{	
@@ -719,7 +718,7 @@ class WW_TestSuite_BuildTest_AdobeDps_AdobeDpsServices_TestCase extends TestCase
 	 * For each phase, it checks for [progress] and [maximum],
 	 * it displays error when [progress] exceeds [maximum]. i.e Progress cannot be more than the Total.
 	 *
-	 * @param OperationProgressResponse $response Response returned by OperationProgress service.
+	 * @param PubOperationProgressResponse $response Response returned by OperationProgress service.
 	 * @param string $operation Possible values: Preview, Publish, Update or UnPublish
 	 */
 	private function verifyOperationProgress( $response, $operation )

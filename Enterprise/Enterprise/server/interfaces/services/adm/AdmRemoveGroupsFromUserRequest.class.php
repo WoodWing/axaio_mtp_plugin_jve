@@ -16,7 +16,7 @@ class AdmRemoveGroupsFromUserRequest
 
 	/**
 	 * @param string               $Ticket                    
-	 * @param Id[]                 $GroupIds                  
+	 * @param integer[]            $GroupIds                  
 	 * @param integer              $UserId                    
 	 */
 	public function __construct( $Ticket=null, $GroupIds=null, $UserId=null )
@@ -48,8 +48,8 @@ class AdmRemoveGroupsFromUserRequest
 			if( !is_null( $datObj->GroupIds ) ) {
 				$validator->checkType( $datObj->GroupIds, 'array' );
 				if( !empty($datObj->GroupIds) ) foreach( $datObj->GroupIds as $listItem ) {
-					$validator->enterPath( 'integer' );
-					$validator->checkType( $listItem, 'integer' );
+					$validator->enterPath( 'Id' );
+					$validator->checkType( $listItem, 'Id' );
 					$validator->leavePath();
 				}
 			}

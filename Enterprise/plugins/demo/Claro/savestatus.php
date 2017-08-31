@@ -17,7 +17,6 @@
 
 require_once dirname(__FILE__).'/config.php';		// CLARO
 require_once '../../../config/config.php';
-require_once BASEDIR.'/server/dbdrivers/dbdriver.php';
 
 $id = $_REQUEST['id'];
 if (CLARODEBUG) print "Layout ID = $id\n";

@@ -42,7 +42,7 @@ class BizDiagnostics
 	 * @param string $synopsis Summary of the diagnostics.
 	 * @param string $description more info about the circumstances etc.
 	 * @param array $attachments List of attachments like screen shot, log files etc.
-	 * @return array List of info with the operation status (Success/Failure)
+	 * @return bool Whether or not the email was sent successfully
 	 */
 	private static function send( $category, $synopsis, $description,  array $attachments )
 	{

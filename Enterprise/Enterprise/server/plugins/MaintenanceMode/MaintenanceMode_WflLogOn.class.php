@@ -78,7 +78,6 @@ class MaintenanceMode_WflLogOn extends WflLogOn_EnterpriseConnector
 	 */
 	private function isSystemUser( $ticket )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
 		if( DBUser::isAdminUser( BizSession::getShortUserName() ) ) {

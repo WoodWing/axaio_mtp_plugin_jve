@@ -89,8 +89,6 @@ class PreviewMetaPHP_MetaData extends MetaData_EnterpriseConnector
 	 */
 	public function readMetaData(Attachment $attachment, $bizMetaDataPreview )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$bizMetaDataPreview = $bizMetaDataPreview; // Make analyzer happy
 		$format = $attachment->Type;
 		$filePath = $attachment->FilePath;
 		$metaDataXMP = array();

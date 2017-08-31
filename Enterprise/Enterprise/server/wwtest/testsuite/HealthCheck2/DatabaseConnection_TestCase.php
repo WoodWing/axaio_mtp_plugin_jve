@@ -64,6 +64,8 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 		$dbConfig .= '- Database name (DBSELECT): '.DBSELECT.'<br/>';
 		$dbdriver = DBDriverFactory::gen( DBTYPE, DBSERVER, DBUSER, DBPASS, DBSELECT, false );
 		if( !$dbdriver->isPhpDriverExtensionLoaded() ) {
+			$msg = null;
+			$help = null;
 			switch( DBTYPE )
 			{
 				case 'mysql':
@@ -75,15 +77,16 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 				case 'mssql':
 					$msg = 'Could not load the PHP extension "Microsoft Driver for PHP for SQL Server".';
 					$help = 'Please make sure that:  <br/>'.
-						 '- The PHP extension for MSSQL (php_sqlsrv.dll) version 3.0 (or higher) is installed. <br/>' .
-						 '- The php_sqlsrv.dll is enabled in the php.ini file.<br/>'.
+						'- The PHP extension for MSSQL (php_sqlsrv) version 4.3 is installed. <br/>' .
+						'- The PHP extension for MSSQL is enabled in the php.ini file.<br/>'.
+						'- The PHP extension for MSSQL is PHP 7.1 and 64 bit compatible.<br/>'.
 						 'For more information about Microsoft Drivers for PHP for SQL Server, '.
 						 'click <a href="http://technet.microsoft.com/en-us/library/cc296170(v=sql.105).aspx">here</a>.<br/>';
 				break;
 				case 'oracle':
-					$msg = 'Could not load one of the PHP extensions "php_oci8", "php_oci8_11g" or "php_oci8_12c".';
+					$msg = 'Could not load one of the PHP extensions "php_oci8_11g" or "php_oci8_12c".';
 					$help = 'Please make sure that:  <br/>'.
-						'- An appropriate PHP extension for Oracle (php_oci8, php_oci8_11g or php_oci8_12c) is installed. <br/>'.
+						'- An appropriate PHP extension for Oracle (php_oci8_11g or php_oci8_12c) is installed. <br/>'.
 						'- The PHP extension for Oracle is enabled in the php.ini file.<br/>'.
 						'- A matching Oracle client library is installed.<br/>'.
 						'For more information, click <a href="http://php.net/manual/en/oci8.requirements.php">here</a> <br/>';
@@ -99,8 +102,8 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 					'configserver.php files:<br/>'.$dbConfig;
 			if ( DBTYPE == 'mssql' ){
 				// BZ#16885 we cannot check version at this point, so show hint
-				$help .= 'Make sure that the Microsoft SQL Server Native Client of version '.
-						'11.00.2100 (or higher) is installed.<br/>';
+				$help .= 'Make sure that Microsoft ODBC Driver 11 (11.00.2100 or higher) for SQL Server or '.
+					'Microsoft ODBC Driver 13.1 for SQL Server is installed.<br/>';
 			}
 			$msg = 'Could not connect to the database.<br/>';
 			$dbError = trim($dbdriver->error());
@@ -204,25 +207,30 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 	
 	/**
 	 * Function checks if the id of an object in the 'smart_deletedobjects' table is higher than the auto_increment
-	 * value of the 'smart_objects' (BZ#18312) 
+	 * value of the 'smart_objects' (BZ#18312)
+	 *
+	 * @param integer $objectID
+	 * @param integer $deletedId
+	 * @return bool
 	 */
 	private function testDeletedObjectIDs(&$objectID, &$deletedId)
 	{
 		// Get the autoincrement id of the 'smart_objects' table
 		$dbdriver = DBDriverFactory::gen();
+		$nextObjectId = null;
 		$objectsTable = DBPREFIX."objects";
 		if ( DBTYPE == 'mysql' ) {
 			$sql = "SHOW TABLE STATUS LIKE '$objectsTable'";
 			$sth = $dbdriver->query($sql);
 			$row = $dbdriver->fetch($sth);
-			$objectsID = $row['Auto_increment'];
+			$nextObjectId = $row['Auto_increment'];
 			//LogHandler::Log('wwtest', 'DEBUG', 'smart_objects autoincrement ID: '.print_r($objectsID, true));
 		}
 		elseif( DBTYPE == 'mssql') {
 			$sql = "Select IDENT_CURRENT('$objectsTable') as id";
 			$sth = $dbdriver->query($sql);
 			$row = $dbdriver->fetch($sth);
-			$objectsID = $row['id'] + 1; // The next identity value is the current
+			$nextObjectId = $row['id'] + 1; // The next identity value is the current
 										 // value plus 1.
 			//LogHandler::Log('wwtest', 'DEBUG', 'smart_objects autoincrement ID: '.print_r($objectsID, true));
 		}
@@ -248,8 +256,8 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 		//LogHandler::Log('wwtest', 'DEBUG', 'smart_deletedObjects result: '.print_r($deletedObjectsID, true));
 	
 		// Compare the id's. If the deletedObjects ID is equal or higher we are in a fault situation
-		if ( $deletedObjectsID && $deletedObjectsID >= $objectsID ) {
-			$objectID = $objectsID;
+		if ( $deletedObjectsID && $deletedObjectsID >= $nextObjectId ) {
+			$objectID = $nextObjectId;
 			$deletedId = $deletedObjectsID;
 			return false;
 		}

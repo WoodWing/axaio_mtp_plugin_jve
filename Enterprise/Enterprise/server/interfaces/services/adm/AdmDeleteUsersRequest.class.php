@@ -15,7 +15,7 @@ class AdmDeleteUsersRequest
 
 	/**
 	 * @param string               $Ticket                    
-	 * @param Id[]                 $UserIds                   
+	 * @param integer[]            $UserIds                   
 	 */
 	public function __construct( $Ticket=null, $UserIds=null )
 	{
@@ -45,8 +45,8 @@ class AdmDeleteUsersRequest
 			if( !is_null( $datObj->UserIds ) ) {
 				$validator->checkType( $datObj->UserIds, 'array' );
 				if( !empty($datObj->UserIds) ) foreach( $datObj->UserIds as $listItem ) {
-					$validator->enterPath( 'integer' );
-					$validator->checkType( $listItem, 'integer' );
+					$validator->enterPath( 'Id' );
+					$validator->checkType( $listItem, 'Id' );
 					$validator->leavePath();
 				}
 			}

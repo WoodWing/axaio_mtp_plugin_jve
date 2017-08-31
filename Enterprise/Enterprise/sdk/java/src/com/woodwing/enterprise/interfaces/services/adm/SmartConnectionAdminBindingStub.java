@@ -16,12 +16,14 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
     static org.apache.axis.description.OperationDesc [] _operations;
 
     static {
-        _operations = new org.apache.axis.description.OperationDesc[43];
+        _operations = new org.apache.axis.description.OperationDesc[65];
         _initOperationDesc1();
         _initOperationDesc2();
         _initOperationDesc3();
         _initOperationDesc4();
         _initOperationDesc5();
+        _initOperationDesc6();
+        _initOperationDesc7();
     }
 
     private static void _initOperationDesc1(){
@@ -416,56 +418,54 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
         _operations[34] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("CreateAutocompleteTermEntities");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateAutocompleteTermEntitiesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateAutocompleteTermEntitiesRequest"), com.woodwing.enterprise.interfaces.services.adm.CreateAutocompleteTermEntitiesRequest.class, false, false);
+        oper.setName("CreateStatuses");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateStatusesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateStatusesRequest"), com.woodwing.enterprise.interfaces.services.adm.CreateStatusesRequest.class, false, false);
         oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateAutocompleteTermEntitiesResponse"));
-        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.CreateAutocompleteTermEntitiesResponse.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateAutocompleteTermEntitiesResponse"));
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateStatusesResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.CreateStatusesResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateStatusesResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[35] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("GetAutocompleteTermEntities");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetAutocompleteTermEntitiesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetAutocompleteTermEntitiesRequest"), com.woodwing.enterprise.interfaces.services.adm.GetAutocompleteTermEntitiesRequest.class, false, false);
+        oper.setName("GetStatuses");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetStatusesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetStatusesRequest"), com.woodwing.enterprise.interfaces.services.adm.GetStatusesRequest.class, false, false);
         oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetAutocompleteTermEntitiesResponse"));
-        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.GetAutocompleteTermEntitiesResponse.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetAutocompleteTermEntitiesResponse"));
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetStatusesResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.GetStatusesResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetStatusesResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[36] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("ModifyAutocompleteTermEntities");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyAutocompleteTermEntitiesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyAutocompleteTermEntitiesRequest"), com.woodwing.enterprise.interfaces.services.adm.ModifyAutocompleteTermEntitiesRequest.class, false, false);
+        oper.setName("ModifyStatuses");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyStatusesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyStatusesRequest"), com.woodwing.enterprise.interfaces.services.adm.ModifyStatusesRequest.class, false, false);
         oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyAutocompleteTermEntitiesResponse"));
-        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.ModifyAutocompleteTermEntitiesResponse.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyAutocompleteTermEntitiesResponse"));
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyStatusesResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.ModifyStatusesResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyStatusesResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[37] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("DeleteAutocompleteTermEntities");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeleteAutocompleteTermEntitiesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeleteAutocompleteTermEntitiesRequest"), com.woodwing.enterprise.interfaces.services.adm.DeleteAutocompleteTermEntitiesRequest.class, false, false);
+        oper.setName("DeleteStatuses");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeleteStatusesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeleteStatusesRequest"), com.woodwing.enterprise.interfaces.services.adm.DeleteStatusesRequest.class, false, false);
         oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "anyType"));
-        oper.setReturnClass(java.lang.Object.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeleteAutocompleteTermEntitiesResponse"));
+        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[38] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("CreateAutocompleteTerms");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateAutocompleteTermsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateAutocompleteTermsRequest"), com.woodwing.enterprise.interfaces.services.adm.CreateAutocompleteTermsRequest.class, false, false);
+        oper.setName("CreateAccessProfiles");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateAccessProfilesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateAccessProfilesRequest"), com.woodwing.enterprise.interfaces.services.adm.CreateAccessProfilesRequest.class, false, false);
         oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "anyType"));
-        oper.setReturnClass(java.lang.Object.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateAutocompleteTermsResponse"));
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateAccessProfilesResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.CreateAccessProfilesResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateAccessProfilesResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[39] = oper;
@@ -476,6 +476,256 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
         org.apache.axis.description.OperationDesc oper;
         org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("GetAccessProfiles");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetAccessProfilesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetAccessProfilesRequest"), com.woodwing.enterprise.interfaces.services.adm.GetAccessProfilesRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetAccessProfilesResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.GetAccessProfilesResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetAccessProfilesResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[40] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("ModifyAccessProfiles");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyAccessProfilesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyAccessProfilesRequest"), com.woodwing.enterprise.interfaces.services.adm.ModifyAccessProfilesRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyAccessProfilesResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.ModifyAccessProfilesResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyAccessProfilesResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[41] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("DeleteAccessProfiles");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeleteAccessProfilesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeleteAccessProfilesRequest"), com.woodwing.enterprise.interfaces.services.adm.DeleteAccessProfilesRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[42] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("CreateWorkflowUserGroupAuthorizations");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateWorkflowUserGroupAuthorizationsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateWorkflowUserGroupAuthorizationsRequest"), com.woodwing.enterprise.interfaces.services.adm.CreateWorkflowUserGroupAuthorizationsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateWorkflowUserGroupAuthorizationsResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.CreateWorkflowUserGroupAuthorizationsResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateWorkflowUserGroupAuthorizationsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[43] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("GetWorkflowUserGroupAuthorizations");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetWorkflowUserGroupAuthorizationsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetWorkflowUserGroupAuthorizationsRequest"), com.woodwing.enterprise.interfaces.services.adm.GetWorkflowUserGroupAuthorizationsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetWorkflowUserGroupAuthorizationsResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.GetWorkflowUserGroupAuthorizationsResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetWorkflowUserGroupAuthorizationsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[44] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("ModifyWorkflowUserGroupAuthorizations");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyWorkflowUserGroupAuthorizationsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyWorkflowUserGroupAuthorizationsRequest"), com.woodwing.enterprise.interfaces.services.adm.ModifyWorkflowUserGroupAuthorizationsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyWorkflowUserGroupAuthorizationsResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.ModifyWorkflowUserGroupAuthorizationsResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyWorkflowUserGroupAuthorizationsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[45] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("DeleteWorkflowUserGroupAuthorizations");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeleteWorkflowUserGroupAuthorizationsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeleteWorkflowUserGroupAuthorizationsRequest"), com.woodwing.enterprise.interfaces.services.adm.DeleteWorkflowUserGroupAuthorizationsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "anyType"));
+        oper.setReturnClass(java.lang.Object.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeleteWorkflowUserGroupAuthorizationsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[46] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("CreatePublicationAdminAuthorizations");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreatePublicationAdminAuthorizationsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreatePublicationAdminAuthorizationsRequest"), com.woodwing.enterprise.interfaces.services.adm.CreatePublicationAdminAuthorizationsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "anyType"));
+        oper.setReturnClass(java.lang.Object.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreatePublicationAdminAuthorizationsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[47] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("GetPublicationAdminAuthorizations");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetPublicationAdminAuthorizationsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetPublicationAdminAuthorizationsRequest"), com.woodwing.enterprise.interfaces.services.adm.GetPublicationAdminAuthorizationsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetPublicationAdminAuthorizationsResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.GetPublicationAdminAuthorizationsResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetPublicationAdminAuthorizationsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[48] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("DeletePublicationAdminAuthorizations");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeletePublicationAdminAuthorizationsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeletePublicationAdminAuthorizationsRequest"), com.woodwing.enterprise.interfaces.services.adm.DeletePublicationAdminAuthorizationsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "anyType"));
+        oper.setReturnClass(java.lang.Object.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeletePublicationAdminAuthorizationsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[49] = oper;
+
+    }
+
+    private static void _initOperationDesc6(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("CreateRoutings");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateRoutingsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateRoutingsRequest"), com.woodwing.enterprise.interfaces.services.adm.CreateRoutingsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateRoutingsResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.CreateRoutingsResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateRoutingsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[50] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("ModifyRoutings");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyRoutingsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyRoutingsRequest"), com.woodwing.enterprise.interfaces.services.adm.ModifyRoutingsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyRoutingsResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.ModifyRoutingsResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyRoutingsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[51] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("GetRoutings");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetRoutingsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetRoutingsRequest"), com.woodwing.enterprise.interfaces.services.adm.GetRoutingsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetRoutingsResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.GetRoutingsResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetRoutingsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[52] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("DeleteRoutings");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeleteRoutingsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeleteRoutingsRequest"), com.woodwing.enterprise.interfaces.services.adm.DeleteRoutingsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "anyType"));
+        oper.setReturnClass(java.lang.Object.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeleteRoutingsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[53] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("AddTemplateObjects");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "AddTemplateObjectsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">AddTemplateObjectsRequest"), com.woodwing.enterprise.interfaces.services.adm.AddTemplateObjectsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">AddTemplateObjectsResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.AddTemplateObjectsResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "AddTemplateObjectsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[54] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("GetTemplateObjects");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetTemplateObjectsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetTemplateObjectsRequest"), com.woodwing.enterprise.interfaces.services.adm.GetTemplateObjectsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetTemplateObjectsResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.GetTemplateObjectsResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetTemplateObjectsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[55] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("RemoveTemplateObjects");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "RemoveTemplateObjectsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">RemoveTemplateObjectsRequest"), com.woodwing.enterprise.interfaces.services.adm.RemoveTemplateObjectsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "anyType"));
+        oper.setReturnClass(java.lang.Object.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "RemoveTemplateObjectsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[56] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("CreateAutocompleteTermEntities");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateAutocompleteTermEntitiesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateAutocompleteTermEntitiesRequest"), com.woodwing.enterprise.interfaces.services.adm.CreateAutocompleteTermEntitiesRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateAutocompleteTermEntitiesResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.CreateAutocompleteTermEntitiesResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateAutocompleteTermEntitiesResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[57] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("GetAutocompleteTermEntities");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetAutocompleteTermEntitiesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetAutocompleteTermEntitiesRequest"), com.woodwing.enterprise.interfaces.services.adm.GetAutocompleteTermEntitiesRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetAutocompleteTermEntitiesResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.GetAutocompleteTermEntitiesResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetAutocompleteTermEntitiesResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[58] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("ModifyAutocompleteTermEntities");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyAutocompleteTermEntitiesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyAutocompleteTermEntitiesRequest"), com.woodwing.enterprise.interfaces.services.adm.ModifyAutocompleteTermEntitiesRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyAutocompleteTermEntitiesResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.adm.ModifyAutocompleteTermEntitiesResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyAutocompleteTermEntitiesResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[59] = oper;
+
+    }
+
+    private static void _initOperationDesc7(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("DeleteAutocompleteTermEntities");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeleteAutocompleteTermEntitiesRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeleteAutocompleteTermEntitiesRequest"), com.woodwing.enterprise.interfaces.services.adm.DeleteAutocompleteTermEntitiesRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "anyType"));
+        oper.setReturnClass(java.lang.Object.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeleteAutocompleteTermEntitiesResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[60] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("CreateAutocompleteTerms");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateAutocompleteTermsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateAutocompleteTermsRequest"), com.woodwing.enterprise.interfaces.services.adm.CreateAutocompleteTermsRequest.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "anyType"));
+        oper.setReturnClass(java.lang.Object.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "CreateAutocompleteTermsResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[61] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
         oper.setName("GetAutocompleteTerms");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetAutocompleteTermsRequest"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetAutocompleteTermsRequest"), com.woodwing.enterprise.interfaces.services.adm.GetAutocompleteTermsRequest.class, false, false);
         oper.addParameter(param);
@@ -484,7 +734,7 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "GetAutocompleteTermsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[40] = oper;
+        _operations[62] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("ModifyAutocompleteTerms");
@@ -495,7 +745,7 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ModifyAutocompleteTermsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[41] = oper;
+        _operations[63] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("DeleteAutocompleteTerms");
@@ -506,7 +756,7 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "DeleteAutocompleteTermsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[42] = oper;
+        _operations[64] = oper;
 
     }
 
@@ -560,6 +810,20 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">AddGroupsToUserRequest");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.AddGroupsToUserRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">AddTemplateObjectsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.AddTemplateObjectsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">AddTemplateObjectsResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.AddTemplateObjectsResponse.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -627,6 +891,20 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateAccessProfilesRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.CreateAccessProfilesRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateAccessProfilesResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.CreateAccessProfilesResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateAutocompleteTermEntitiesRequest");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.CreateAutocompleteTermEntitiesRequest.class;
@@ -690,6 +968,13 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreatePublicationAdminAuthorizationsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.CreatePublicationAdminAuthorizationsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreatePublicationsRequest");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.CreatePublicationsRequest.class;
@@ -704,6 +989,20 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateRoutingsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.CreateRoutingsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateRoutingsResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.CreateRoutingsResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateSectionsRequest");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.CreateSectionsRequest.class;
@@ -714,6 +1013,20 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateSectionsResponse");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.CreateSectionsResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateStatusesRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.CreateStatusesRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateStatusesResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.CreateStatusesResponse.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -742,6 +1055,27 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateUsersResponse");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.CreateUsersResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateWorkflowUserGroupAuthorizationsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.CreateWorkflowUserGroupAuthorizationsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">CreateWorkflowUserGroupAuthorizationsResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.CreateWorkflowUserGroupAuthorizationsResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeleteAccessProfilesRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.DeleteAccessProfilesRequest.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -781,9 +1115,23 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeletePublicationAdminAuthorizationsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.DeletePublicationAdminAuthorizationsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeletePublicationsRequest");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.DeletePublicationsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeleteRoutingsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.DeleteRoutingsRequest.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -812,6 +1160,27 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeleteUsersRequest");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.DeleteUsersRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">DeleteWorkflowUserGroupAuthorizationsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.DeleteWorkflowUserGroupAuthorizationsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetAccessProfilesRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.GetAccessProfilesRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetAccessProfilesResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.GetAccessProfilesResponse.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -886,6 +1255,20 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetPublicationAdminAuthorizationsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.GetPublicationAdminAuthorizationsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetPublicationAdminAuthorizationsResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.GetPublicationAdminAuthorizationsResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetPublicationsRequest");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.GetPublicationsRequest.class;
@@ -896,6 +1279,20 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetPublicationsResponse");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.GetPublicationsResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetRoutingsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.GetRoutingsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetRoutingsResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.GetRoutingsResponse.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -928,6 +1325,20 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetTemplateObjectsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.GetTemplateObjectsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetTemplateObjectsResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.GetTemplateObjectsResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetUserGroupsRequest");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.GetUserGroupsRequest.class;
@@ -956,6 +1367,20 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetWorkflowUserGroupAuthorizationsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.GetWorkflowUserGroupAuthorizationsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetWorkflowUserGroupAuthorizationsResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.GetWorkflowUserGroupAuthorizationsResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">LogOffRequest");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.LogOffRequest.class;
@@ -973,6 +1398,20 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">LogOnResponse");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.LogOnResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyAccessProfilesRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.ModifyAccessProfilesRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyAccessProfilesResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.ModifyAccessProfilesResponse.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -1054,6 +1493,35 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyRoutingsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.ModifyRoutingsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyRoutingsResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.ModifyRoutingsResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+    }
+    private void addBindings1() {
+            java.lang.Class cls;
+            javax.xml.namespace.QName qName;
+            javax.xml.namespace.QName qName2;
+            java.lang.Class beansf = org.apache.axis.encoding.ser.BeanSerializerFactory.class;
+            java.lang.Class beandf = org.apache.axis.encoding.ser.BeanDeserializerFactory.class;
+            java.lang.Class enumsf = org.apache.axis.encoding.ser.EnumSerializerFactory.class;
+            java.lang.Class enumdf = org.apache.axis.encoding.ser.EnumDeserializerFactory.class;
+            java.lang.Class arraysf = org.apache.axis.encoding.ser.ArraySerializerFactory.class;
+            java.lang.Class arraydf = org.apache.axis.encoding.ser.ArrayDeserializerFactory.class;
+            java.lang.Class simplesf = org.apache.axis.encoding.ser.SimpleSerializerFactory.class;
+            java.lang.Class simpledf = org.apache.axis.encoding.ser.SimpleDeserializerFactory.class;
+            java.lang.Class simplelistsf = org.apache.axis.encoding.ser.SimpleListSerializerFactory.class;
+            java.lang.Class simplelistdf = org.apache.axis.encoding.ser.SimpleListDeserializerFactory.class;
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifySectionsRequest");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.ModifySectionsRequest.class;
@@ -1110,9 +1578,30 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyWorkflowUserGroupAuthorizationsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.ModifyWorkflowUserGroupAuthorizationsRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">ModifyWorkflowUserGroupAuthorizationsResponse");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.ModifyWorkflowUserGroupAuthorizationsResponse.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">RemoveGroupsFromUserRequest");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.RemoveGroupsFromUserRequest.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">RemoveTemplateObjectsRequest");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.RemoveTemplateObjectsRequest.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -1123,6 +1612,22 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "AccessProfile");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.AccessProfile.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ArrayOfAccessProfile");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.AccessProfile[].class;
+            cachedSerClasses.add(cls);
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "AccessProfile");
+            qName2 = new javax.xml.namespace.QName("", "AccessProfile");
+            cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
+            cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
 
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ArrayOfEdition");
             cachedSerQNames.add(qName);
@@ -1178,6 +1683,24 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
             cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ArrayOfObjectInfo");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.ObjectInfo[].class;
+            cachedSerClasses.add(cls);
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ObjectInfo");
+            qName2 = new javax.xml.namespace.QName("", "ObjectInfo");
+            cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
+            cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ArrayOfProfileFeature");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.ProfileFeature[].class;
+            cachedSerClasses.add(cls);
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ProfileFeature");
+            qName2 = new javax.xml.namespace.QName("", "ProfileFeature");
+            cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
+            cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
+
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ArrayOfPubChannel");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.PubChannel[].class;
@@ -1193,6 +1716,15 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerClasses.add(cls);
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "Publication");
             qName2 = new javax.xml.namespace.QName("", "Publication");
+            cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
+            cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ArrayOfRouting");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.Routing[].class;
+            cachedSerClasses.add(cls);
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "Routing");
+            qName2 = new javax.xml.namespace.QName("", "Routing");
             cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
             cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
 
@@ -1223,6 +1755,15 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
             cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ArrayOfTemplateObjectAccess");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.TemplateObjectAccess[].class;
+            cachedSerClasses.add(cls);
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "TemplateObjectAccess");
+            qName2 = new javax.xml.namespace.QName("", "TemplateObjectAccess");
+            cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
+            cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
+
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ArrayOfTermEntity");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.TermEntity[].class;
@@ -1247,6 +1788,15 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerClasses.add(cls);
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "UserGroup");
             qName2 = new javax.xml.namespace.QName("", "UserGroup");
+            cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
+            cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ArrayOfWorkflowUserGroupAuthorization");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.WorkflowUserGroupAuthorization[].class;
+            cachedSerClasses.add(cls);
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "WorkflowUserGroupAuthorization");
+            qName2 = new javax.xml.namespace.QName("", "WorkflowUserGroupAuthorization");
             cachedSerFactories.add(new org.apache.axis.encoding.ser.ArraySerializerFactory(qName, qName2));
             cachedDeserFactories.add(new org.apache.axis.encoding.ser.ArrayDeserializerFactory());
 
@@ -1285,21 +1835,6 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
-    }
-    private void addBindings1() {
-            java.lang.Class cls;
-            javax.xml.namespace.QName qName;
-            javax.xml.namespace.QName qName2;
-            java.lang.Class beansf = org.apache.axis.encoding.ser.BeanSerializerFactory.class;
-            java.lang.Class beandf = org.apache.axis.encoding.ser.BeanDeserializerFactory.class;
-            java.lang.Class enumsf = org.apache.axis.encoding.ser.EnumSerializerFactory.class;
-            java.lang.Class enumdf = org.apache.axis.encoding.ser.EnumDeserializerFactory.class;
-            java.lang.Class arraysf = org.apache.axis.encoding.ser.ArraySerializerFactory.class;
-            java.lang.Class arraydf = org.apache.axis.encoding.ser.ArrayDeserializerFactory.class;
-            java.lang.Class simplesf = org.apache.axis.encoding.ser.SimpleSerializerFactory.class;
-            java.lang.Class simpledf = org.apache.axis.encoding.ser.SimpleDeserializerFactory.class;
-            java.lang.Class simplelistsf = org.apache.axis.encoding.ser.SimpleListSerializerFactory.class;
-            java.lang.Class simplelistdf = org.apache.axis.encoding.ser.SimpleListDeserializerFactory.class;
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "Id");
             cachedSerQNames.add(qName);
             cls = java.math.BigInteger.class;
@@ -1328,9 +1863,30 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(enumsf);
             cachedDeserFactories.add(enumdf);
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ObjectInfo");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.ObjectInfo.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ObjectType");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.ObjectType.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(enumsf);
+            cachedDeserFactories.add(enumdf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ProfileFeature");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.ProfileFeature.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "ProfileFeatureValue");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.ProfileFeatureValue.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(enumsf);
             cachedDeserFactories.add(enumdf);
@@ -1352,6 +1908,13 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "Publication");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.Publication.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "Routing");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.Routing.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -1384,6 +1947,13 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             cachedSerFactories.add(org.apache.axis.encoding.ser.BaseSerializerFactory.createFactory(org.apache.axis.encoding.ser.SimpleSerializerFactory.class, cls, qName));
             cachedDeserFactories.add(org.apache.axis.encoding.ser.BaseDeserializerFactory.createFactory(org.apache.axis.encoding.ser.SimpleDeserializerFactory.class, cls, qName));
 
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "TemplateObjectAccess");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.TemplateObjectAccess.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "TermEntity");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.TermEntity.class;
@@ -1401,6 +1971,13 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "UserGroup");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.adm.UserGroup.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "WorkflowUserGroupAuthorization");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.adm.WorkflowUserGroupAuthorization.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -2619,12 +3196,746 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
 }
     }
 
-    public com.woodwing.enterprise.interfaces.services.adm.CreateAutocompleteTermEntitiesResponse createAutocompleteTermEntities(com.woodwing.enterprise.interfaces.services.adm.CreateAutocompleteTermEntitiesRequest parameters) throws java.rmi.RemoteException {
+    public com.woodwing.enterprise.interfaces.services.adm.CreateStatusesResponse createStatuses(com.woodwing.enterprise.interfaces.services.adm.CreateStatusesRequest parameters) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
         _call.setOperation(_operations[35]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#CreateStatuses");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "CreateStatuses"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.CreateStatusesResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.CreateStatusesResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.CreateStatusesResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.GetStatusesResponse getStatuses(com.woodwing.enterprise.interfaces.services.adm.GetStatusesRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[36]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#GetStatuses");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "GetStatuses"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.GetStatusesResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.GetStatusesResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.GetStatusesResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.ModifyStatusesResponse modifyStatuses(com.woodwing.enterprise.interfaces.services.adm.ModifyStatusesRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[37]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#ModifyStatuses");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "ModifyStatuses"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.ModifyStatusesResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.ModifyStatusesResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.ModifyStatusesResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public void deleteStatuses(com.woodwing.enterprise.interfaces.services.adm.DeleteStatusesRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[38]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#DeleteStatuses");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "DeleteStatuses"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        extractAttachments(_call);
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.CreateAccessProfilesResponse createAccessProfiles(com.woodwing.enterprise.interfaces.services.adm.CreateAccessProfilesRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[39]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#CreateAccessProfiles");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "CreateAccessProfiles"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.CreateAccessProfilesResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.CreateAccessProfilesResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.CreateAccessProfilesResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.GetAccessProfilesResponse getAccessProfiles(com.woodwing.enterprise.interfaces.services.adm.GetAccessProfilesRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[40]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#GetAccessProfiles");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "GetAccessProfiles"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.GetAccessProfilesResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.GetAccessProfilesResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.GetAccessProfilesResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.ModifyAccessProfilesResponse modifyAccessProfiles(com.woodwing.enterprise.interfaces.services.adm.ModifyAccessProfilesRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[41]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#ModifyAccessProfiles");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "ModifyAccessProfiles"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.ModifyAccessProfilesResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.ModifyAccessProfilesResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.ModifyAccessProfilesResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public void deleteAccessProfiles(com.woodwing.enterprise.interfaces.services.adm.DeleteAccessProfilesRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[42]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#DeleteAccessProfiles");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "DeleteAccessProfiles"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        extractAttachments(_call);
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.CreateWorkflowUserGroupAuthorizationsResponse createWorkflowUserGroupAuthorizations(com.woodwing.enterprise.interfaces.services.adm.CreateWorkflowUserGroupAuthorizationsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[43]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#CreateWorkflowUserGroupAuthorizations");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "CreateWorkflowUserGroupAuthorizations"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.CreateWorkflowUserGroupAuthorizationsResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.CreateWorkflowUserGroupAuthorizationsResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.CreateWorkflowUserGroupAuthorizationsResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.GetWorkflowUserGroupAuthorizationsResponse getWorkflowUserGroupAuthorizations(com.woodwing.enterprise.interfaces.services.adm.GetWorkflowUserGroupAuthorizationsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[44]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#GetWorkflowUserGroupAuthorizations");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "GetWorkflowUserGroupAuthorizations"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.GetWorkflowUserGroupAuthorizationsResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.GetWorkflowUserGroupAuthorizationsResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.GetWorkflowUserGroupAuthorizationsResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.ModifyWorkflowUserGroupAuthorizationsResponse modifyWorkflowUserGroupAuthorizations(com.woodwing.enterprise.interfaces.services.adm.ModifyWorkflowUserGroupAuthorizationsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[45]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#ModifyWorkflowUserGroupAuthorizations");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "ModifyWorkflowUserGroupAuthorizations"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.ModifyWorkflowUserGroupAuthorizationsResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.ModifyWorkflowUserGroupAuthorizationsResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.ModifyWorkflowUserGroupAuthorizationsResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public java.lang.Object deleteWorkflowUserGroupAuthorizations(com.woodwing.enterprise.interfaces.services.adm.DeleteWorkflowUserGroupAuthorizationsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[46]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#DeleteWorkflowUserGroupAuthorizations");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "DeleteWorkflowUserGroupAuthorizations"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (java.lang.Object) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (java.lang.Object) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.Object.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public java.lang.Object createPublicationAdminAuthorizations(com.woodwing.enterprise.interfaces.services.adm.CreatePublicationAdminAuthorizationsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[47]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#CreatePublicationAdminAuthorizations");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "CreatePublicationAdminAuthorizations"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (java.lang.Object) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (java.lang.Object) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.Object.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.GetPublicationAdminAuthorizationsResponse getPublicationAdminAuthorizations(com.woodwing.enterprise.interfaces.services.adm.GetPublicationAdminAuthorizationsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[48]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#GetPublicationAdminAuthorizations");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "GetPublicationAdminAuthorizations"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.GetPublicationAdminAuthorizationsResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.GetPublicationAdminAuthorizationsResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.GetPublicationAdminAuthorizationsResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public java.lang.Object deletePublicationAdminAuthorizations(com.woodwing.enterprise.interfaces.services.adm.DeletePublicationAdminAuthorizationsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[49]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#DeletePublicationAdminAuthorizations");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "DeletePublicationAdminAuthorizations"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (java.lang.Object) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (java.lang.Object) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.Object.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.CreateRoutingsResponse createRoutings(com.woodwing.enterprise.interfaces.services.adm.CreateRoutingsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[50]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#CreateRoutings");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "CreateRoutings"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.CreateRoutingsResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.CreateRoutingsResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.CreateRoutingsResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.ModifyRoutingsResponse modifyRoutings(com.woodwing.enterprise.interfaces.services.adm.ModifyRoutingsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[51]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#ModifyRoutings");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "ModifyRoutings"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.ModifyRoutingsResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.ModifyRoutingsResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.ModifyRoutingsResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.GetRoutingsResponse getRoutings(com.woodwing.enterprise.interfaces.services.adm.GetRoutingsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[52]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#GetRoutings");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "GetRoutings"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.GetRoutingsResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.GetRoutingsResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.GetRoutingsResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public java.lang.Object deleteRoutings(com.woodwing.enterprise.interfaces.services.adm.DeleteRoutingsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[53]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#DeleteRoutings");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "DeleteRoutings"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (java.lang.Object) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (java.lang.Object) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.Object.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.AddTemplateObjectsResponse addTemplateObjects(com.woodwing.enterprise.interfaces.services.adm.AddTemplateObjectsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[54]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#AddTemplateObjects");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "AddTemplateObjects"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.AddTemplateObjectsResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.AddTemplateObjectsResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.AddTemplateObjectsResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.GetTemplateObjectsResponse getTemplateObjects(com.woodwing.enterprise.interfaces.services.adm.GetTemplateObjectsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[55]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#GetTemplateObjects");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "GetTemplateObjects"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (com.woodwing.enterprise.interfaces.services.adm.GetTemplateObjectsResponse) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (com.woodwing.enterprise.interfaces.services.adm.GetTemplateObjectsResponse) org.apache.axis.utils.JavaUtils.convert(_resp, com.woodwing.enterprise.interfaces.services.adm.GetTemplateObjectsResponse.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public java.lang.Object removeTemplateObjects(com.woodwing.enterprise.interfaces.services.adm.RemoveTemplateObjectsRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[56]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnectionAdmin#RemoveTemplateObjects");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "RemoveTemplateObjects"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        else {
+            extractAttachments(_call);
+            try {
+                return (java.lang.Object) _resp;
+            } catch (java.lang.Exception _exception) {
+                return (java.lang.Object) org.apache.axis.utils.JavaUtils.convert(_resp, java.lang.Object.class);
+            }
+        }
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.adm.CreateAutocompleteTermEntitiesResponse createAutocompleteTermEntities(com.woodwing.enterprise.interfaces.services.adm.CreateAutocompleteTermEntitiesRequest parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[57]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnectionAdmin#CreateAutocompleteTermEntities");
         _call.setEncodingStyle(null);
@@ -2658,7 +3969,7 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[36]);
+        _call.setOperation(_operations[58]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnectionAdmin#GetAutocompleteTermEntities");
         _call.setEncodingStyle(null);
@@ -2692,7 +4003,7 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[37]);
+        _call.setOperation(_operations[59]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnectionAdmin#ModifyAutocompleteTermEntities");
         _call.setEncodingStyle(null);
@@ -2726,7 +4037,7 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[38]);
+        _call.setOperation(_operations[60]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnectionAdmin#DeleteAutocompleteTermEntities");
         _call.setEncodingStyle(null);
@@ -2760,7 +4071,7 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[39]);
+        _call.setOperation(_operations[61]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnectionAdmin#CreateAutocompleteTerms");
         _call.setEncodingStyle(null);
@@ -2794,7 +4105,7 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[40]);
+        _call.setOperation(_operations[62]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnectionAdmin#GetAutocompleteTerms");
         _call.setEncodingStyle(null);
@@ -2828,7 +4139,7 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[41]);
+        _call.setOperation(_operations[63]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnectionAdmin#ModifyAutocompleteTerms");
         _call.setEncodingStyle(null);
@@ -2862,7 +4173,7 @@ public class SmartConnectionAdminBindingStub extends org.apache.axis.client.Stub
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[42]);
+        _call.setOperation(_operations[64]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnectionAdmin#DeleteAutocompleteTerms");
         _call.setEncodingStyle(null);

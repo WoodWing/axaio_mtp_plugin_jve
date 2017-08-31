@@ -40,6 +40,5 @@ abstract class WflSendTo_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflSendToRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

@@ -29,7 +29,8 @@ class AdmModifySectionsService extends EnterpriseService
 	public function runCallback( AdmModifySectionsRequest $req )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmPublication.class.php';
-		$modifysections = BizAdmPublication::modifySectionsObj( $this->User, $req->PublicationId, $req->IssueId, $req->Sections );
+		$modifysections = BizAdmPublication::modifySectionsObj( $this->User,
+			$req->PublicationId, $req->IssueId, $req->Sections );
 		return new AdmModifySectionsResponse( $req->PublicationId, $req->IssueId, $modifysections );
 	}
 }

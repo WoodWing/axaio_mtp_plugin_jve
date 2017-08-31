@@ -40,6 +40,5 @@ abstract class WflUpdateObjectTargets_EnterpriseConnector extends ServiceConnect
 	 */
 	public function onError( WflUpdateObjectTargetsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

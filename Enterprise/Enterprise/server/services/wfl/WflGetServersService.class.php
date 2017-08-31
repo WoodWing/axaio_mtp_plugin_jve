@@ -32,7 +32,6 @@ class WflGetServersService extends EnterpriseService
 	public function runCallback( WflGetServersRequest $req )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizServerInfo.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSettings.class.php';
 
 		return new WflGetServersResponse(
 			BizServerInfo::getServers(),

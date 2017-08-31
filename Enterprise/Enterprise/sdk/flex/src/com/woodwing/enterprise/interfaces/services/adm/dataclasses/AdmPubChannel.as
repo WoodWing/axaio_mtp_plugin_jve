@@ -16,6 +16,7 @@ package com.woodwing.enterprise.interfaces.services.adm.dataclasses
 		private var _Name:String;
 		private var _Type:String;
 		private var _Description:String;
+		private var _SortOrder:Number;
 		private var _PublishSystem:String;
 		private var _PublishSystemId:String;
 		private var _CurrentIssueId:Number;
@@ -56,6 +57,13 @@ package com.woodwing.enterprise.interfaces.services.adm.dataclasses
 		}
 		public function set Description(Description:String):void {
 			this._Description = Description;
+		}
+
+		public function get SortOrder():Number {
+			return this._SortOrder;
+		}
+		public function set SortOrder(SortOrder:Number):void {
+			this._SortOrder = SortOrder;
 		}
 
 		public function get PublishSystem():String {

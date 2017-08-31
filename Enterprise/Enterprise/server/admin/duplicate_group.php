@@ -74,29 +74,14 @@ if( $inGID > 0 && !$err ) for( $currIdx = $startIdx; $currIdx < ($startIdx + $co
 		$request->UserIds = $userIds;
 		$response = $service->execute($request);
 
+		// Authorize copied group for the same pub/iss (as the 'source' group)
+		if( $countIdx > 1 ) { // only for multicopy mode
+			require_once BASEDIR.'/server/dbclasses/DBAuthorizations.class.php';
+			DBAuthorizations::copyUserGroupAuthorizations( $inGID, $newID );
+		}
+
 	} catch( BizException $e ) {
 		$err = $e->getMessage();
-	}
-
-	// Authorize copied group for the same pub/iss (as the 'source' group)
-	if( $countIdx > 1 ) { // only for multicopy mode
-		if (!$dbh = DBDriverFactory::gen()) die ( BizResources::localize('ERR_DATABASE') );
-		$dba = $dbh->tablename('authorizations');
-		$sql = "SELECT * FROM $dba WHERE `grpid` = $inGID";
-		$sth = $dbh->query( $sql );
-		if (!$sth) die( BizResources::localize('ERR_ERROR').' '.$dbh->errorcode().': '.$dbh->error()."<br/><br/>\n" );
-		while( ($row = $dbh->fetch($sth))) {
-			$sql = "INSERT INTO $dba (`grpid`, `publication`, `section`, `state`, `profile`,`issue`) VALUES (".
-				$newID.', '.
-				$row['publication'].', '.
-				$row['section'].', '.
-				$row['state'].', '.
-				$row['profile'].', '.
-				$row['issue'].')';
-			$sql = $dbh->autoincrement( $sql );
-			$sth2 = $dbh->query( $sql );
-			if (!$sth) die( BizResources::localize("ERR_ERROR").' '.$dbh->errorcode().': '.$dbh->error()."<br/><br/>\n");
-		}
 	}
 	
 	// Redirect to user groups page only for last iteration

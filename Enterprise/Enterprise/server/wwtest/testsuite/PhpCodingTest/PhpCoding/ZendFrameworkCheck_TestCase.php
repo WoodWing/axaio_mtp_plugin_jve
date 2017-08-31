@@ -26,17 +26,13 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_ZendFrameworkCheck_TestCase extends T
 	
 	private $filesChanged = array();
 
-
-	
 	/**
 	 * Performs the test as written in module header.
-	 * @return boolean  Wether or not all PHP files are correct.
 	 */
 	final public function runTest()
 	{
 		$this->filesChanged[] = PATH_ZENDFRAMEWORK . '/Uri/Http.php';
 		$this->checkCustomized();
-		
 	}
 
 	/**

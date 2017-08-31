@@ -39,6 +39,7 @@ class AxaioMadeToPrintDispatcher
      * @param int  $layEditionId Edition id of the layout
      * @param int  $success      Whether or not the process was successful (=1)
      * @param string $message    Message about the process
+     * @param string|null $servername
      */
     public static function postProcess( $layoutId, $layStatusId, $layEditionId, $success, $message, $servername=null )
     {
@@ -172,6 +173,7 @@ class AxaioMadeToPrintDispatcher
     /**
      * Pushes the given layout into the MtP queue by creating processing scripts.
      *
+     * @param string $ticket
      * @param int  $layoutId     Id of the layout
      * @param int  $layPubId     Publication id of the layout
      * @param int  $layIssueId   Issue id of the layout
@@ -180,8 +182,6 @@ class AxaioMadeToPrintDispatcher
      */
     private static function queueLayoutObject( $ticket, $layoutId, $layPubId, $layIssueId, $layStatusId, $layEditions )
     {
-        $layPubId = $layPubId; // keep analyzer happy
-
         require_once BASEDIR . '/server/dbclasses/DBTicket.class.php';
         $user = DBTicket::checkTicket( $ticket );
 
@@ -231,12 +231,12 @@ class AxaioMadeToPrintDispatcher
 
         self::customize('queueLayoutObject_filterEditions', $layEditions, $layoutId, $layStatusId, $user);
 
-        if( is_array($layEditions) && !empty($layEditions)) {
-            foreach( $layEditions as $layEdition ) {
-                self::outputProcessingFiles( $layoutId, $layStatusId, $layEdition, $jobname, $fullrow, $mtparr, $layPubId );
-            }
+        if( $layEditions ) {
+        	  foreach( $layEditions as $layEdition ) {
+		        self::outputProcessingFiles( $layoutId, $layStatusId, $layEdition, $jobname, $fullrow, $mtparr, $layPubId );
+	        }
         } else { // no edition, so output layout once with default edition
-            self::outputProcessingFiles( $layoutId, $layStatusId, $layEditions, $jobname, $fullrow, $mtparr, $layPubId );
+            self::outputProcessingFiles( $layoutId, $layStatusId, null, $jobname, $fullrow, $mtparr, $layPubId );
         }
     }
 
@@ -257,7 +257,7 @@ class AxaioMadeToPrintDispatcher
      *
      * @param int $layoutId      Id of the layout
      * @param int $layStatusId   Status id of the layout
-     * @param object $layEdition Edition object of layout. Null for no edition.
+     * @param Edition|null $layEdition Edition object of layout. Null for no edition.
      * @param string $jobname    MtP operation to request
      * @param array  $fullrow    List of all layout object properties
      * @param array  $mtparr     List of MtP specific custom properties to send to MtP process
@@ -614,7 +614,6 @@ class AxaioMadeToPrintDispatcher
 
     public static function clearSentObject( $objectId, $newPubId, $newStatusId, $oldStatusId )
     {
-        $objectId = $objectId; $newPubId = $newPubId; $newStatusId = $newStatusId; $oldStatusId = $oldStatusId; // keep analyzer happy
         // EKL: There is no much we can do here?
     }
 
@@ -853,7 +852,7 @@ class AxaioMadeToPrintDispatcher
      * Returns all objects that are placed on the given layout.
      *
      * @param int $layoutId
-     * @retun array List of placed object ids
+     * @return array List of placed object ids
      */
     private static function getPlacedChilds( $layoutId )
     {
@@ -872,7 +871,7 @@ class AxaioMadeToPrintDispatcher
      * Returns all layouts on which the given object is placed.
      *
      * @param int $objectId
-     * @retun array List of layout ids
+     * @return array List of layout ids
      */
     private static function getParentLayouts( $objectId )
     {
@@ -891,7 +890,7 @@ class AxaioMadeToPrintDispatcher
      * Get the configured MadeToPrint configuration for the given layout trigger status
      *
      * @param int $layStatusId  Status id of the layout
-     * @return string Job name
+     * @return array
      */
     private static function getMtpConfig( $layStatusId )
     {

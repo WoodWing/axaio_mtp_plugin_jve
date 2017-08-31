@@ -605,8 +605,6 @@ class WW_TestSuite_HealthCheck2_RabbitMQ_TestCase extends TestCase
 			$service = new WflLogOnService();
 			$response = $service->execute($request);
 		} catch ( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // To keep analyzer happy. ( Why logOn failed is not interest of this test case )
 			$this->setResult( 'ERROR', 'Failed to log in to check the RabbitMQ configuration',
 				'Please check the TESTSUITE setting in configserver.php if the test user and password are set correctly.' );
 			return null;

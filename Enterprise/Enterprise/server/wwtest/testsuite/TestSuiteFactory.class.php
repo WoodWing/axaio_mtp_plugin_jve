@@ -18,7 +18,8 @@ class TestSuiteFactory
 	  * Includes TestCase or TestSuite PHP file and creates an instance of its class.
 	  *
 	  * @param string $testFile The PHP file to include
-	  * @return object TestCase or TestSuite.
+	  * @return TestCase|TestSuite.
+	  * @throws Exception
 	  */
 	static private function createTestModule( $testFile )
 	{
@@ -108,10 +109,13 @@ class TestSuiteFactory
 	}
 
 	/**
-	  * Scans the given folder for subfolder that contains test module php files.
-	  *
-	  * @return array of full paths of found test module php files.
-	  */
+	 * Scans the given folder for subfolder that contains test module php files.
+	 *
+	 * @param DOMDocument $xmlDoc
+	 * @param DOMNode $xmlTests
+	 * @param string $dirName
+	 * @throws Exception
+	 */
 	static private function readTestObjectsFromFolders( $xmlDoc, $xmlTests, $dirName )
 	{
 		$testObjs = array();
@@ -124,9 +128,9 @@ class TestSuiteFactory
 			if( $itemName == '.' || $itemName == '..' || $itemName == '.DS_Store' ) {
 				// cur dir / parent dir
 			} else if( is_file( $dirName.'/'.$itemName ) && strstr( $itemName, '_TestCase.php' ) !== false ) {
-				$testObj = self::createTestModule( $dirName.'/'.$itemName, null );
+				$testObj = self::createTestModule( $dirName.'/'.$itemName );
 			} else if( is_file( $dirName.'/'.$itemName.'/TestSuite.php' ) ) {
-				$testObj = self::createTestModule( $dirName.'/'.$itemName.'/TestSuite.php', null );
+				$testObj = self::createTestModule( $dirName.'/'.$itemName.'/TestSuite.php' );
 			}
 			if( $testObj ) {
 				$testFile = substr( $dirName.'/'.$itemName, strlen(BASEDIR) );
@@ -152,19 +156,13 @@ class TestSuiteFactory
 			$xmlTests = $xmlDoc->createElement( 'Root' );
 			$xmlDoc->appendChild( $xmlTests );
 
-			// Read TestCase class file from disk and create instance
+			// Collect core server testsuite folder if $testSuite exists. (Note that $testSuite could be a relative path.
+			// This path may not exist, in case the testsuite is provided by one of the server plugins.)
 			$suiteDirs = array();
 			$dirName = BASEDIR.'/server/wwtest/testsuite/'.$testSuite;
 			if( is_file( $dirName.'/TestSuite.php' ) ) {
-				$testObj = self::createTestModule( $dirName.'/TestSuite.php', null );
-				if( $testObj ) {
-					$testFile = substr( $dirName.'/TestSuite.php', strlen(BASEDIR) );
-					$testObjs[$testFile] = $testObj;
-					self::addTestObjectsToXmlTree( $xmlDoc, $xmlTests, $testObjs );
-					$xmlTests = self::$CurrentTestsNode; // Set by addTestObjectsToXmlTree()
-				}
+				$suiteDirs[] = $dirName;
 			}
-			$suiteDirs[] = $dirName;
 
 			// Collect server plugin testsuite folders
 			$pluginDirs = array( BASEDIR.'/server/plugins/', BASEDIR.'/config/plugins/' );
@@ -177,6 +175,21 @@ class TestSuiteFactory
 					}
 				}
 			}
+
+			// Read TestCase class file from disk and create instance
+			if( $suiteDirs ) {
+				$dirName = reset($suiteDirs);
+				if( is_file( $dirName.'/TestSuite.php' ) ) {
+					$testObj = self::createTestModule( $dirName.'/TestSuite.php' );
+					if( $testObj ) {
+						$testFile = substr( $dirName.'/TestSuite.php', strlen(BASEDIR) );
+						$testObjs[$testFile] = $testObj;
+						self::addTestObjectsToXmlTree( $xmlDoc, $xmlTests, $testObjs );
+						$xmlTests = self::$CurrentTestsNode; // Set by addTestObjectsToXmlTree()
+					}
+				}
+			}
+
 			foreach( $suiteDirs as $suiteDir ) {
 				self::readTestObjectsFromFolders( $xmlDoc, $xmlTests, $suiteDir );
 			}
@@ -202,10 +215,11 @@ class TestSuiteFactory
 	{
 		// Read TestCase class file from disk, create instance and run its test method
 		$testResults = array();
+		$snapBefore = null;
 		try {
 			// Start test session.
 			ob_start(); // Capture std output. See ob_get_contents() below for details.
-			$testObj = self::createTestModule( BASEDIR.$classPath, 'TestCase' );
+			$testObj = self::createTestModule( BASEDIR.$classPath );
 			$testObj->setSessionId( $sessionId );
 			
 			// Only perform for normal test cases or for test cases that belong to
@@ -314,6 +328,8 @@ class TestSuiteFactory
 	 * If it's a plugin, it checks if it is installed and enabled. If not, it flags
 	 * the test with "Not Installed" and returns TRUE (else FALSE).
 	 *
+	 * @param string $classPath
+	 * @param TestCase $testObj
 	 * @return boolean Whether or test belongs to plugin that is not installed.
 	 */
 	static private function skipWhenNotInstalledPlugin( $classPath, $testObj )

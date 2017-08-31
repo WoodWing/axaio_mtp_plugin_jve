@@ -749,9 +749,7 @@ class GettyImages
 	 */
     static public function calledByContentStation()
     {
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$app = BizSession::getClientName();
-
 		return stristr($app, 'Content Station');
     }
 

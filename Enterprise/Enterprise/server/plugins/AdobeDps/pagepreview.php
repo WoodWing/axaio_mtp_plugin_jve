@@ -28,7 +28,6 @@ ob_start();
 // Includes
 require_once dirname(__FILE__).'/../../../config/config.php';
 require_once BASEDIR.'/server/secure.php';
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 
 $message = null;

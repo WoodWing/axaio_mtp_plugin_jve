@@ -299,7 +299,6 @@ class BizObjectLabels
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$user = BizSession::getShortUserName();
 		$objProps = DBObject::getObjectProps( $objectId, array( 'Workflow' ) );
 		if ( $objProps['StateId'] != -1 ) {

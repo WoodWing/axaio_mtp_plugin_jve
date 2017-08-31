@@ -80,6 +80,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 		}
 
 		// Determine what workflow / authorizations to copy.
+		$workflowStatuses = null;
 		if ( count( $workflowObjectsToUpdate ) != 0 || count( $deletedObjectsToUpdate ) != 0 ) {
 			// Duplicate the statuses for the $objectTypeFrom flow if present / needed.
 			$workflowStatuses = self::duplicateWorkflowStatuses( $objectTypeFrom, $objectTypeTo );
@@ -213,7 +214,6 @@ abstract class ObjectConverter extends DbUpgradeModule
 	/**
 	 * Updates the smart_properties table.
 	 *
-	 * @static
 	 * @param string $objectTypeTo
 	 * @param string $objectTypeFrom
 	 * @return bool
@@ -253,10 +253,9 @@ abstract class ObjectConverter extends DbUpgradeModule
 	 * which tracks the state(status) is also updated(mapped) accordingly with the new
 	 * object type.
 	 *
-	 * @static
 	 * @param string $oldObjType The old object Type that has been converted to $newObjType.
 	 * @param string $newObjType The newly converted object Type(from $oldObjType).
-	 * @param string $ids The object ids that has been affected with the type conversion.
+	 * @param string[] $ids The object ids that has been affected with the type conversion.
 	 * @param array $statuses The workflow statuses of the old object type and new object type.
 	 * @return bool
 	 */
@@ -285,10 +284,9 @@ abstract class ObjectConverter extends DbUpgradeModule
 	 * Use updateLogEntriesWithNewStatus() instead.
 	 * Updates the smart_log table.
 	 *
-	 * @static
-	 * @param $type
-	 * @param $ids
-	 * @param $statuses
+	 * @param string $type
+	 * @param string[] $ids
+	 * @param array $statuses
 	 * @return bool
 	 */
 	static protected function updateLogEntries( $type, $ids, $statuses )
@@ -315,7 +313,6 @@ abstract class ObjectConverter extends DbUpgradeModule
 	 * Updates status of the newly converted object type's object with their
 	 * new status id in smart_objectversions table.
 	 *
-	 * @static
 	 * @param string $type The object type.
 	 * @param array $ids Object ids where the statuses need to be updated.
 	 * @param array $statuses The workflow statuses of the old object type and new object type.
@@ -345,8 +342,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 	 * Insert a new Authorizations into smart_authorizations table for the newly
 	 * created workflow status.
 	 *
-	 * @static
-	 * @param array $statuses The workflow statuses of the old object type and new object type.
+	 * @param array $workflowStatuses The workflow statuses of the old object type and new object type.
 	 * @param string $type Object type.
 	 * @return bool True when record successfully inserted, false otherwise.
 	 */
@@ -451,7 +447,6 @@ abstract class ObjectConverter extends DbUpgradeModule
 	 *
 	 * Duplicates the status and maps it on $states.
 	 *
-	 * @static
 	 * @param array $record The original record to be duplicated
 	 * @param array $states The states array to be expanded by this function.
 	 * @param string $type The new object type for which to make the new Status.
@@ -468,8 +463,10 @@ abstract class ObjectConverter extends DbUpgradeModule
 
 		$record['id'] = '';
 		$record['type'] = (string)$type;
-		$obj = DBAdmStatus::rowToObj( $record );
-		$newStatus = DBAdmStatus::createStatus( $obj );
+		$pubId = null;
+		$issueId = null;
+		$obj = DBAdmStatus::rowToObj( $pubId, $issueId, $record );
+		$newStatus = DBAdmStatus::createStatus( $pubId, $issueId, $obj );
 		$states[$type][$oldId] = intval( $newStatus->Id );
 		return $states;
 	}
@@ -477,16 +474,13 @@ abstract class ObjectConverter extends DbUpgradeModule
 	/**
 	 * Preps an array of values for use as string delimited values.
 	 * Delimits values by ',' and adds quotes.
-	 * @static
 	 *
 	 * @param array $arr The array of values to be transform into a string delimited by comma.
 	 * @return string
 	 */
 	static private function arrayToSQLString( $arr )
 	{
-		return (count( $arr > 1 ))
-			? $arr = '\'' . implode( '\',\'', $arr ) . '\''
-			: "'" . $arr[0] . "'";
+		return $arr = count( $arr ) ? "'" . implode( "','", $arr ) . "'" : '';
 	}
 
 	/**
@@ -505,14 +499,13 @@ abstract class ObjectConverter extends DbUpgradeModule
 		return count( $records ) > 0 ? true : false;
 	}
 
-    /**
-	 * Gets the (deleted)objects of the requested mimetypes.
-     *
-     * @static
-     * @param string[] $mimeTypes
-     * @param boolean $workflow Workflow (true) or not.
-	 * @return int[] with the ids of the found objects.
-     */
+	 /**
+	  * Gets the (deleted)objects of the requested mimetypes.
+	  *
+	  * @param string[] $mimeTypes
+	  * @param boolean $workflow Workflow (true) or not.
+	  * @return int[] with the ids of the found objects.
+	  */
 	static public function getByMimeTypes($mimeTypes, $workflow)
 	{
 		$result = array();
@@ -539,10 +532,9 @@ abstract class ObjectConverter extends DbUpgradeModule
 	/**
 	 * Gets the (deleted)objects of the requested types.
 	 *
-	 * @static
 	 * @param string[] $objectTypes.
-     * @param $workflow Workflow or Trash
-	 * @return true if found else false.
+	 * @param boolean $workflow Workflow or Trash
+	 * @return boolean true if found else false.
 	 */
 	static public function getByTypes($objectTypes, $workflow)
 	{

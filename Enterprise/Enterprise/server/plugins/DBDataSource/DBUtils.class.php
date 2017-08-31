@@ -5,7 +5,6 @@ class DBUtils extends DBBase
 {
 	public static function gen( $settings )
 	{
-		require_once BASEDIR.'/server/dbdrivers/dbdriver.php';
 		try {
 			$driver = DBDriverFactory::gen( $settings["type"], $settings["hostname"], $settings["username"], $settings["password"], $settings["database"] );
 		} catch( BizException $e ) {

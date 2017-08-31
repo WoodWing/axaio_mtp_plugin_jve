@@ -16,13 +16,14 @@ class WW_Utils_TestSuite
 
 	/** @var string $protocol  */
 	private $protocol = null;
+	/** @var callable $requestComposer  */
+	private $requestComposer = null;
 
 	/**
 	 * Initializes this test utils class.
 	 *
 	 * @since 10.0.0
 	 * @param string|null $protocol The used protocol for service calls. (Options: SOAP or JSON.) If null a regular service call is made.
-	 * @return bool Whether or not all session variables are complete.
 	 */
 	public function initTest( $protocol = null )
 	{
@@ -282,6 +283,20 @@ class WW_Utils_TestSuite
 	}
 
 	/**
+	 * Setup a callback function that is called just before calling the webservice.
+	 *
+	 * This enables the caller to manupulate the request that could be composed by other functions.
+	 * The callback function accepts one parameter, which is the request.
+	 *
+	 * @since 10.2.0
+	 * @param callable $callback
+	 */
+	public function setRequestComposer( $callback )
+	{
+		$this->requestComposer = $callback;
+	}
+
+	/**
 	 * Runs any service request. When a given expected error is not raised by the service,
 	 * the test fails. And vice versa, when no error expected, but raised, the test fails.
 	 *
@@ -295,11 +310,22 @@ class WW_Utils_TestSuite
 	 * @param string $stepInfo Logical test description.
 	 * @param string|null $expectedErrorCodeOrMsgKey The expected error message key or error code. Null when no error is expected.
 	 * @param bool $throwException TRUE to throw BizException and setError(), FALSE to setError() only, on unexpected failures
+	 * @param string $providerShort Abbreviated name of provider that has implemented the Web Service. EMPTY for the core Enterprise Server, or set for server plugin.
+	 * @param string $providerFull Full name of provider that has implemented the Web Service. EMPTY for the core Enterprise Server, or set for server plugin.
 	 * @return mixed A corresponding response object when service was successful or NULL on error.
 	 */
 	public function callService( TestCase $testCase, $request, $stepInfo, $expectedErrorCodeOrMsgKey = null, 
-		$throwException = false )
+		$throwException = false, $providerShort = '', $providerFull = '' )
 	{
+		// Copy and clear request composer since it can throw exception.
+		$requestComposer = $this->requestComposer;
+		$this->requestComposer = null; // reset (has to be set per function call)
+
+		// Let caller overrule request composition.
+		if( $requestComposer ) {
+			call_user_func( $requestComposer, $request );
+		}
+
 		$baseName = get_class( $request );
 		$baseName = substr( $baseName, 0, strlen($baseName) - strlen('Request') );
 		$responseName = $baseName.'Response';
@@ -328,9 +354,9 @@ class WW_Utils_TestSuite
 				$service->suppressRecording();
 				$response = $service->execute( $request );
 			} elseif( $this->protocol == 'SOAP' ) {
-				$response = $this->executeSoap( $request, $expectedSCode );
+				$response = $this->executeSoap( $request, $expectedSCode, $providerShort, $providerFull );
 			} elseif( $this->protocol == 'JSON' ) {
-				$response = $this->executeJson( $request, $expectedSCode );
+				$response = $this->executeJson( $request, $expectedSCode, $providerShort, $providerFull );
 			} else {
 				$message = 'Invalid protocol used for service call: "'.$this->protocol.'"';
 				if( $throwException ) {
@@ -401,17 +427,25 @@ class WW_Utils_TestSuite
 	 *
 	 * @param object $request Request object to execute.
 	 * @param string|null $expectedSCode Expected server error (S-code). Use null to indicate no error is expected.
+	 * @param string $providerShort Abbreviated name of provider that has implemented the Web Service. EMPTY for the core Enterprise Server, or set for server plugin.
+	 * @param string $providerFull Full name of provider that has implemented the Web Service. EMPTY for the core Enterprise Server, or set for server plugin.
 	 * @return object Response object.
 	 * @throws BizException when the web service failed.
 	 */
-	private function executeSoap( $request, $expectedSCode )
+	private function executeSoap( $request, $expectedSCode, $providerShort, $providerFull )
 	{
-		$requestClass = get_class( $request ); // e.g. returns 'WflDeleteObjectsRequest'
-		$servicePrefix = substr( $requestClass, 0, 3 );
-		$function = substr( $requestClass, 3, strlen($requestClass) - 3 - strlen('Request') );
+		$requestClass = get_class( $request ); // e.g. 'WflDeleteObjectsRequest' or 'CsPubPublishArticleRequest'
+		$webInterface = substr( $requestClass, strlen($providerShort), 3 );
+		$funtionNameLen = strlen($requestClass) - strlen($providerShort) - strlen($webInterface) - strlen('Request');
+		$functionName = substr( $requestClass, strlen($providerShort) + strlen($webInterface), $funtionNameLen );
 
-		require_once BASEDIR.'/server/protocols/soap/'.$servicePrefix.'Client.php';
-		$clientClass = 'WW_SOAP_'.$servicePrefix.'Client';
+		if( $providerShort ) { // plugin
+			require_once BASEDIR."/config/plugins/{$providerFull}/protocols/soap/".strtolower($webInterface).'/Client.php';
+			$clientClass = "{$providerFull}_Protocols_Soap_{$webInterface}_Client";
+		} else { // server
+			require_once BASEDIR.'/server/protocols/soap/'.$webInterface.'Client.php';
+			$clientClass = 'WW_SOAP_'.$webInterface.'Client';
+		}
 		$options = array(
 			'transfer' => 'HTTP',
 			'protocol' => 'SOAP',
@@ -420,8 +454,8 @@ class WW_Utils_TestSuite
 			$options['expectedError'] = $expectedSCode;
 		}
 		try {
-			$soapClients[$servicePrefix] = new $clientClass( $options );
-			$response = $soapClients[$servicePrefix]->$function( $request );
+			$client = new $clientClass( $options );
+			$response = $client->$functionName( $request );
 		} catch( SoapFault $e ) {
 			throw new BizException( '', 'Server', '', $e->getMessage() );
 		}
@@ -434,24 +468,32 @@ class WW_Utils_TestSuite
 	 * @since 10.0.0
 	 * @param object $request Request object to execute.
 	 * @param string|null $expectedSCode Expected server error (S-code). Use null to indicate no error is expected.
+	 * @param string $providerShort Abbreviated name of provider that has implemented the Web Service. EMPTY for the core Enterprise Server, or set for server plugin.
+	 * @param string $providerFull Full name of provider that has implemented the Web Service. EMPTY for the core Enterprise Server, or set for server plugin.
 	 * @return object Response object.
 	 * @throws BizException when the web service failed.
 	 */
-	private function executeJson( $request, $expectedSCode )
+	private function executeJson( $request, $expectedSCode, $providerShort, $providerFull )
 	{
-		$requestClass = get_class( $request ); // e.g. returns 'WflDeleteObjectsRequest'
-		$servicePrefix = substr( $requestClass, 0, 3 );
-		$function = substr( $requestClass, 3, strlen($requestClass) - 3 - strlen('Request') );
+		$requestClass = get_class( $request ); // e.g. 'WflDeleteObjectsRequest' or 'CsPubPublishArticleRequest'
+		$webInterface = substr( $requestClass, strlen($providerShort), 3 );
+		$funtionNameLen = strlen($requestClass) - strlen($providerShort) - strlen($webInterface) - strlen('Request');
+		$functionName = substr( $requestClass, strlen($providerShort) + strlen($webInterface), $funtionNameLen );
 
-		require_once BASEDIR.'/server/protocols/json/'.$servicePrefix.'Client.php';
-		$clientClass = 'WW_JSON_'.$servicePrefix.'Client';
+		if( $providerShort ) { // plugin
+			require_once BASEDIR."/config/plugins/{$providerFull}/protocols/json/".strtolower($webInterface).'/Client.php';
+			$clientClass = "{$providerFull}_Protocols_Json_{$webInterface}_Client";
+		} else { // server
+			require_once BASEDIR.'/server/protocols/json/'.$webInterface.'Client.php';
+			$clientClass = 'WW_JSON_'.$webInterface.'Client';
+		}
 		$options = array();
 		if( $expectedSCode ) {
 			$options['expectedError'] = $expectedSCode;
 		}
 		try {
-			$soapClients[$servicePrefix] = new $clientClass( '', $options );
-			$response = $soapClients[$servicePrefix]->$function( $request );
+			$client = new $clientClass( '', $options );
+			$response = $client->$functionName( $request );
 		} catch( Exception $e ) {
 			throw new BizException( '', 'Server', '', $e->getMessage() );
 		}
@@ -907,9 +949,9 @@ class WW_Utils_TestSuite
 	 * Non personal statuses are preferred.
 	 *
 	 * @param TestCase $testCase
-	 * @param $pubInfo Publication info object
+	 * @param PublicationInfo $pubInfo
 	 * @param string $type Object type (e.g. Article)
-	 * @return Status info object, or null on failure
+	 * @return State|null Status info, or null on failure.
 	 */
 	public function getFirstStatusInfoForType( TestCase $testCase, $pubInfo, $type )
 	{
@@ -959,11 +1001,11 @@ class WW_Utils_TestSuite
 	 *
 	 * @param TestCase $testCase
 	 * @param string $ticket Ticket retrieved on logon
-	 * @param array $objects List of objects to be created via CreateObjects service call.
+	 * @param Object[] $objects List of objects to be created via CreateObjects service call.
 	 * @param bool $lock Whether or not to lock the object
 	 * @param string|null $stepInfo Optional step info in case an error occurs
 	 * @param string|NULL $expectedErrorCodeOrMsgKey The exception message from BizException->getMessage(), Null when no error is expected.
-	 * @return created objects
+	 * @return WflCreateObjectsResponse|null
 	 */
 	public function callCreateObjectService( TestCase $testCase, $ticket, $objects, $lock = false, $stepInfo = null, $expectedErrorCodeOrMsgKey = null )
 	{
@@ -974,12 +1016,33 @@ class WW_Utils_TestSuite
 		$request->Lock		= $lock;
 		$request->Objects	= $objects;
 
-		$response = self::callService( $testCase, $request, $stepInfo ? $stepInfo : 'Create object', $expectedErrorCodeOrMsgKey );
-		if( is_null($response) ) {
-			return null;
-		}
+		return self::callService( $testCase, $request, $stepInfo ? $stepInfo : 'Create object', $expectedErrorCodeOrMsgKey );
+	}
 
-		return $response;
+	/**
+	 * Save new version of workflow objects into DB / FileStore.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase
+	 * @param string $ticket
+	 * @param Object[] $objects Workflow objects to save.
+	 * @param bool $unlock Whether or not to unlock the object
+	 * @param string|null $stepInfo Optional step info in case an error occurs
+	 * @param string|NULL $expectedErrorCodeOrMsgKey The exception message from BizException->getMessage(), Null when no error is expected.
+	 * @return WflSaveObjectsResponse|null
+	 */
+	public function saveObjects( TestCase $testCase, $ticket, $objects, $unlock, $stepInfo = null, $expectedErrorCodeOrMsgKey = null )
+	{
+		// Create the article objects at Enterprise DB
+		require_once BASEDIR . '/server/services/wfl/WflSaveObjectsService.class.php';
+		$request = new WflSaveObjectsRequest();
+		$request->Ticket = $ticket;
+		$request->CreateVersion = true;
+		$request->ForceCheckIn = false;
+		$request->Unlock = $unlock;
+		$request->Objects = $objects;
+
+		return self::callService( $testCase, $request, $stepInfo ? $stepInfo : 'Save object', $expectedErrorCodeOrMsgKey );
 	}
 
 	/**
@@ -1342,44 +1405,6 @@ class WW_Utils_TestSuite
 	}
 
 	/**
-	 * Creates a new User.
-	 *
-	 * @since 9.0.0
-	 * @param TestCase $testCase The test module calling this function.
-	 * @param string $ticket
-	 * @return AdmCreateUsersResponse|null
-	 * @throws BizException
-	 */
-	public function createNewUser( TestCase $testCase, $ticket )
-	{
-		$newUser = null;
-		try {
-			require_once BASEDIR.'/server/services/adm/AdmCreateUsersService.class.php';
-
-			$user = $this->buildUser();
-			$request = new AdmCreateUsersRequest();
-			$request->Ticket = $ticket;
-			$request->RequestModes = array();
-			$request->Users = array( $user );
-
-			$stepInfo = 'Create new User.';
-			$response = $this->callService( $testCase, $request, $stepInfo );
-			if( $response && count($response->Users) ) {
-				$newUser = $response->Users[0];
-			}
-
-			if ( !$response instanceof AdmCreateUsersResponse ) {
-				throw new BizException( 'ERR_ERROR', 'Server', __FUNCTION__.'()', 'Could not create User' );
-			}
-		}
-		catch ( BizException $e ) {
-			LogHandler::Log( 'Services', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
-			throw ($e);
-		}
-		return $newUser;
-	}
-
-	/**
 	 * Deletes an Issue.
 	 *
 	 * @since 9.0.0
@@ -1434,6 +1459,380 @@ class WW_Utils_TestSuite
 		$user->Organization		= 'WoodWing';
 		$user->Location			= 'Zaandam';
 		return $user;
+	}
+	/**
+	 * Creates a Publication and returns the id.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module calling this function
+	 * @param string $ticket The user's session ticket.
+	 * @param AdmPublication|null $publication The publication to be created.
+	 * @return integer The id of the newly created publication.
+	 */
+	public function createNewPublication( TestCase $testCase, $ticket, $publication = null )
+	{
+		if( !$publication ) {
+			$publication = new AdmPublication();
+			$publication->Name = 'AdmPublication_T_'.date_format( date_create(), 'dmy_his_u' );
+		}
+		require_once BASEDIR.'/server/services/adm/AdmCreatePublicationsService.class.php';
+		$request = new AdmCreatePublicationsRequest();
+		$request->Ticket = $ticket;
+		$request->RequestModes = array();
+		$request->Publications = array( $publication );
+		$response = $this->callService( $testCase, $request, 'Create a publication.' );
+
+		return $response->Publications[0]->Id;
+	}
+
+	/**
+	 * Deletes one or more publications.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module calling this function
+	 * @param string $ticket The user's session ticket.
+	 * @param array $publicationIds
+	 */
+	public function deletePublications( TestCase $testCase, $ticket, array $publicationIds )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeletePublicationsService.class.php';
+		$request = new AdmDeletePublicationsRequest();
+		$request->Ticket = $ticket;
+		$request->PublicationIds = $publicationIds;
+		$this->callService( $testCase, $request, 'Delete one or more publications.' );
+	}
+
+	/**
+	 * Creates a Section and returns the id.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param integer $publicationId The publication id.
+	 * @param integer $issueId The issue id.
+	 * @param AdmSection|null $section The section to be created. If null, a generic section will be created.
+	 * @return integer The id of the created section.
+	 */
+	public function createNewSection( TestCase $testCase, $ticket, $publicationId, $issueId, $section = null )
+	{
+		if( !$section ) {
+			$section = new AdmSection();
+			$section->Name = 'AdmSection_T_'.date_format( date_create(), 'dmy_his_u' );
+		}
+
+		require_once BASEDIR.'/server/services/adm/AdmCreateSectionsService.class.php';
+		$request = new AdmCreateSectionsRequest();
+		$request->Ticket = $ticket;
+		$request->RequestModes = array();
+		$request->PublicationId = $publicationId;
+		$request->IssueId = $issueId;
+		$request->Sections = array( $section );
+		$environment = ( $issueId ) ? 'issue' : 'brand';
+		$stepInfo = 'Create a section for a ' . $environment . '.';
+		$response = $this->callService( $testCase, $request, $stepInfo );
+
+		return $response->Sections[0]->Id;
+	}
+
+	/**
+	 * Deletes one or more sections.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param integer $publicationId The publication id.
+	 * @param integer|null $issueId The issue id.
+	 * @param array $sectionIds A list of section ids to be deleted
+	 */
+	public function deleteSections( TestCase $testCase, $ticket, $publicationId, $issueId, array $sectionIds )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteSectionsService.class.php';
+		$request = new AdmDeleteSectionsRequest();
+		$request->Ticket = $ticket;
+		$request->PublicationId = $publicationId;
+		$request->IssueId = $issueId;
+		$request->SectionIds = $sectionIds;
+		$this->callService( $testCase, $request, 'Delete one or more sections.' );
+	}
+
+	/**
+	 * Create a new access profile.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param AdmAccessProfile|null $accessProfile The access profile to be created. If null, a generic access profile is created.
+	 * @return AdmAccessProfile The created access profile.
+	 */
+	public function createNewAccessProfile( TestCase $testCase, $ticket, $accessProfile = null )
+	{
+		if( !$accessProfile ) {
+			$accessProfile = new AdmAccessProfile();
+			$accessProfile->Name = 'AccessProfile_T_'.date_format( date_create(), 'dmy_his_u' );
+			$accessProfile->Description = 'An access profile created for testing.';
+		}
+		require_once BASEDIR.'/server/services/adm/AdmCreateAccessProfilesService.class.php';
+		$request = new AdmCreateAccessProfilesRequest();
+		$request->Ticket = $ticket;
+		$request->RequestModes = array();
+		$request->AccessProfiles = array( $accessProfile );
+		$response = $this->callService( $testCase, $request, 'Create an access profile.' );
+
+		return $response->AccessProfiles[0];
+	}
+
+	/**
+	 * Delete one or more access profiles.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param array $accessProfileIds List of access profile ids to be deleted.
+	 */
+	public function deleteAccessProfiles( TestCase $testCase, $ticket, array $accessProfileIds)
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteAccessProfilesService.class.php';
+		$request = new AdmDeleteAccessProfilesRequest();
+		$request->Ticket = $ticket;
+		$request->AccessProfileIds = $accessProfileIds;
+		$this->callService( $testCase, $request, 'Delete one or more access profiles.' );
+	}
+
+	/**
+	 * Adds or removes AdmProfileFeatures to an access profile.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param AdmAccessProfile $accessProfile The access profile whose features will be modified.
+	 * @param array $featureNames A list of (unique) feature names.
+	 * @param boolean $doRemove If true, features are removed. If false, features are added.
+	 */
+	public function modifyProfileFeaturesOfProfile( TestCase $testCase, $ticket, AdmAccessProfile $accessProfile, array $featureNames, $doRemove )
+	{
+		$profileFeatures = array();
+		if( $featureNames ) foreach( $featureNames as $featureName ) {
+			$profileFeature = new AdmProfileFeature();
+			$profileFeature->Value = ( $doRemove ) ? 'No' : 'Yes';
+			$profileFeature->Name = $featureName;
+			$profileFeatures[] = $profileFeature;
+		}
+		$accessProfile->ProfileFeatures = $profileFeatures;
+
+		require_once BASEDIR.'/server/services/adm/AdmModifyAccessProfilesService.class.php';
+		$request = new AdmModifyAccessProfilesRequest();
+		$request->Ticket = $ticket;
+		$request->RequestModes = array();
+		$request->AccessProfiles = array( $accessProfile );
+		$this->callService( $testCase, $request,
+			( $doRemove ? 'Removed' : 'Added' ) . ' profile features ' . implode( ', ', $featureNames ) . ' to access profile.' );
+	}
+
+	/**
+	 * Creates a new status.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param integer|null $publicationId The publication id.
+	 * @param integer|null $issueId The issue id.
+	 * @param AdmStatus|null $status The status to be created. If null, a generic status will be created.
+	 * @return integer The id of the newly created status.
+	 */
+	public function createNewStatus( TestCase $testCase, $ticket, $publicationId, $issueId, $status = null )
+	{
+		if( !$status ) {
+			$status = new AdmStatus();
+			$status->Name = 'Status_T_'.date_format( date_create(), 'dmy_his_u' );
+			$status->Color = 'A0A0A0';
+			$status->Type = 'Article';
+		}
+		require_once BASEDIR.'/server/services/adm/AdmCreateStatusesService.class.php';
+		$request = new AdmCreateStatusesRequest();
+		$request->Ticket = $ticket;
+		$request->PublicationId = $publicationId;
+		$request->IssueId = $issueId;
+		$request->Statuses = array( $status );
+		$response = $this->callService( $testCase, $request, 'Create a status.' );
+
+		return reset( $response->Statuses )->Id;
+	}
+
+	/**
+	 * Deletes one or more statuses.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param array $statusIds List of status ids to be deleted.
+	 */
+	public function deleteStatuses( TestCase $testCase, $ticket, array $statusIds )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteStatusesService.class.php';
+		$request = new AdmDeleteStatusesRequest();
+		$request->Ticket = $ticket;
+		$request->StatusIds = $statusIds;
+		$this->callService( $testCase, $request, 'Delete one or more statuses.' );
+	}
+
+	/**
+	 * Creates a new user and returns the id.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase
+	 * @param string $ticket The user's session ticket.
+	 * @param AdmUser|null $user The user to be created. If null, a generic user will be created.
+	 * @return integer|null The id of the newly created user, or null when failed.
+	 */
+	public function createNewUser( TestCase $testCase, $ticket, $user = null )
+	{
+		$userId = null;
+		if( !$user ) {
+			$user = $this->buildUser();
+		}
+
+		try {
+			require_once BASEDIR.'/server/services/adm/AdmCreateUsersService.class.php';
+
+			$request = new AdmCreateUsersRequest();
+			$request->Ticket = $ticket;
+			$request->RequestModes = array();
+			$request->Users = array( $user );
+
+			$stepInfo = 'Create new User.';
+			$response = $this->callService( $testCase, $request, $stepInfo );
+
+			if ( !$response instanceof AdmCreateUsersResponse ) {
+				throw new BizException( 'ERR_ERROR', 'Server', __FUNCTION__.'()', 'Could not create User' );
+			}
+			$userId = $response->Users[0]->Id;
+		}
+		catch ( BizException $e ) {
+			LogHandler::Log( 'Services', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+		}
+
+		return $userId;
+	}
+
+	/**
+	 * Deletes one or more users.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module that called this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param array $userIds The list of user ids to be deleted.
+	 */
+	public function deleteUsers( TestCase $testCase, $ticket, array $userIds )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteUsersService.class.php';
+		$request = new AdmDeleteUsersRequest();
+		$request->Ticket = $ticket;
+		$request->UserIds = $userIds;
+		$this->callService( $testCase, $request, 'Delete one or more users.' );
+	}
+
+	/**
+	 * Create a new user group and returns the id.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param AdmUserGroup|null $userGroup The user group to be created. If null, a general one will be created.
+	 * @return integer The id of the newly created user group.
+	 */
+	public function createNewUserGroup( TestCase $testCase, $ticket, $userGroup = null )
+	{
+		if( !$userGroup ) {
+			$userGroup = new AdmUserGroup();
+			$userGroup->Name = 'UserGroup_T_'.date_format( date_create(), 'dmy_his_u' );
+			$userGroup->Admin = false;
+			$userGroup->Routing = false;
+		}
+
+		require_once BASEDIR.'/server/services/adm/AdmCreateUserGroupsService.class.php';
+		$request = new AdmCreateUserGroupsRequest();
+		$request->Ticket = $ticket;
+		$request->RequestModes = array();
+		$request->UserGroups = array( $userGroup );
+		$response = $this->callService( $testCase, $request, 'Create a new user group.' );
+
+		return $response->UserGroups[0]->Id;
+	}
+
+	/**
+	 * Deletes one or more user groups.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param array $userGroupIds The list of user group ids to be deleted.
+	 */
+	public function deleteUserGroups( TestCase $testCase, $ticket, array $userGroupIds )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizAdmUser.class.php';
+		//TODO: Should call DeleteUserGroupsService in the future
+
+		foreach( $userGroupIds as $userGroupId ) {
+			BizAdmUser::deleteUserGroup( $userGroupId );
+		}
+	}
+
+	/**
+	 * Create a workflow user group authorization rule and returns the id.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param integer|null $publicationId The brand id.
+	 * @param integer|null $issueId The issue id.
+	 * @param integer $userGroupId The user group id.
+	 * @param integer $accessProfileId The access profile id.
+	 * @param integer|null $sectionId The section id. (optional)
+	 * @param integer|null $statusId The status id. (optional)
+	 * @return AdmWorkflowUserGroupAuthorization
+	 */
+	public function createNewWorkflowUserGroupAuthorization(
+		TestCase $testCase, $ticket, $publicationId, $issueId, $userGroupId, $accessProfileId, $sectionId, $statusId )
+	{
+		$wflUGAuth = new AdmWorkflowUserGroupAuthorization();
+		$wflUGAuth->AccessProfileId = $accessProfileId;
+		$wflUGAuth->UserGroupId = $userGroupId;
+		$wflUGAuth->SectionId = $sectionId;
+		$wflUGAuth->StatusId = $statusId;
+
+		require_once BASEDIR.'/server/services/adm/AdmCreateWorkflowUserGroupAuthorizationsService.class.php';
+		$request = new AdmCreateWorkflowUserGroupAuthorizationsRequest();
+		$request->Ticket = $ticket;
+		$request->PublicationId = $publicationId;
+		$request->IssueId = $issueId;
+		$request->WorkflowUserGroupAuthorizations = array( $wflUGAuth );
+		$response = $this->callService( $testCase, $request, 'Create a WorkflowUserGroupAuthorization.' );
+
+		return $response->WorkflowUserGroupAuthorizations[0]->Id;
+	}
+
+	/**
+	 * Deletes one or more workflow user group authorization rules.
+	 *
+	 * @since 10.2.0
+	 * @param TestCase $testCase The test module that calls this function.
+	 * @param string $ticket The user's session ticket.
+	 * @param integer|null $publicationId The brand id.
+	 * @param integer|null $issueId The issue id.
+	 * @param integer|null $userGroupId The user group id.
+	 * @param array|null $wflUGAuthIds List of workflow user group authorization ids.
+	 */
+	public function deleteWorkflowUserGroupAuthorizations(
+		TestCase $testCase, $ticket, $publicationId, $issueId, $userGroupId, $wflUGAuthIds )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteWorkflowUserGroupAuthorizationsService.class.php';
+		$request = new AdmDeleteWorkflowUserGroupAuthorizationsRequest();
+		$request->Ticket = $ticket;
+		$request->PublicationId = $publicationId;
+		$request->IssueId = $issueId;
+		$request->UserGroupId = $userGroupId;
+		$request->WorkflowUserGroupAuthorizationIds = $wflUGAuthIds;
+		$this->callService( $testCase, $request, 'Delete one or more workflow user group authorization rules.' );
 	}
 
 	/**

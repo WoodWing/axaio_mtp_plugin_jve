@@ -717,7 +717,6 @@ class SolrSearchEngine extends BizQuery
 	{
 		require_once BASEDIR . '/server/bizclasses/BizUser.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 
 		$shortUserName = BizSession::getShortUserName();
 		$userRow = DBUser::getUser($shortUserName);
@@ -1167,7 +1166,6 @@ class SolrSearchEngine extends BizQuery
 	{
 		require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 
 		$resultFacetItems = array();
 		$issueIds = array();
@@ -1385,7 +1383,7 @@ class SolrSearchEngine extends BizQuery
 	 * Returns the beginning of a period in 'Y-m-d\TH:i:sZ' format
 	 *
 	 * @param string $period E.g. '1 day', '1 month'
-	 * @return begin of period in'Y-m-d\TH:i:sZ' format
+	 * @return string begin of period in'Y-m-d\TH:i:sZ' format
 	 */
 	private function getPeriodBorder($period)
 	{
@@ -1577,7 +1575,7 @@ class SolrSearchEngine extends BizQuery
 	 *
 	 * @param string $fieldToIndex Name of the field (property).
 	 * @param string $indexValue value to be indexed.
-	 * @return converted value.
+	 * @return string|null converted value.
 	 */
 	private function convertToIndexFormat($fieldToIndex, $indexValue)
 	{
@@ -1978,8 +1976,8 @@ class SolrSearchEngine extends BizQuery
 	/**
 	 * Helper function to get the list of values from a metaDataValue.
 	 *
-	 * @param object $metaDataValue Metadata value structure of which the first value needs to be retrieved
-	 * @return The metadata value
+	 * @param MetaDataValue $metaDataValue Metadata value structure of which the first value needs to be retrieved
+	 * @return string The metadata value
 	 */
 	private function getFirstMetaDataValue($metaDataValue)
 	{
@@ -1994,8 +1992,8 @@ class SolrSearchEngine extends BizQuery
 	 * Finds metadata for a given field.
 	 *
 	 * @param string $fieldToIndex Name of the field
-	 * @param array $metaData contains the extra meta data of the object
-	 * @return metaData found metaData if any. Null if not found.
+	 * @param MetaDataValue[]|ExtraMetaData[] $metaData contains the extra meta data of the object
+	 * @return MetaDataValue|null found metaData if any. Null if not found.
 	 */
 	private function findMetaDataByField( $fieldToIndex, $metaData )
 	{
@@ -2010,8 +2008,8 @@ class SolrSearchEngine extends BizQuery
 	/**
 	 * Handles the indexing of custom fields.
 	 *
-	 * @param object $customData contains the metaData value
-	 * @return array field value ready to be indexed.
+	 * @param MetaDataValue $customData contains the metaData value
+	 * @return string|null field value ready to be indexed.
 	 */
 	private function createCustomValue($customData)
 	{
@@ -2071,7 +2069,7 @@ class SolrSearchEngine extends BizQuery
 	 * Instead we should use the "mb_" variants.
 	 *
 	 * @param $searchString String containing the search terms
-	 * @return array Search terms
+	 * @return string Search terms
 	 */
 	private function handleSearchTerms($searchString)
 	{

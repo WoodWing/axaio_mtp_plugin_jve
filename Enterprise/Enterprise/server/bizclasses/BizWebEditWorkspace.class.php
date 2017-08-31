@@ -185,7 +185,6 @@ class BizWebEditWorkspace
 	 */
 	public function listArticleWorkspaces()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		$userId = BizSession::getShortUserName();
 		$appName = DBTicket::DBappticket( BizSession::getTicket() );
@@ -1690,7 +1689,6 @@ class BizWebEditWorkspace
 		if( is_null($id) ) { // new article?
 			$article->Name = 'article';
 		} else { // existing article?
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 			require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 			$request = new WflGetObjectsRequest( BizSession::getTicket() );
@@ -1740,7 +1738,6 @@ class BizWebEditWorkspace
 	 */
 	private function enrichWorkspace()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 
 		if( !isset($this->workspace->ID) || !$this->workspace->ID ) {
@@ -2384,6 +2381,7 @@ class BizWebEditWorkspace
 		if( $storedRelations ) foreach( $storedRelations as $storedRelation ) {
 			if( $storedRelation->Placements ) foreach( $storedRelation->Placements as $key => $placement ) {
 				if( $inDesignArticlePlacements ) foreach( $inDesignArticlePlacements as $inDesignArticlePlacement ) {
+					require_once BASEDIR.'/server/bizclasses/BizWebEditWorkspace/ComparePlacements.class.php';
 					$comparePlacements = new BizWebEditWorkspace_ComparePlacements();
 					if( $comparePlacements->sameStrings( $inDesignArticlePlacement->FrameID, $placement->FrameID) &&
 						 $comparePlacements->sameEdition( $inDesignArticlePlacement->Edition, $placement->Edition ) ) {
@@ -2446,8 +2444,8 @@ class BizWebEditWorkspace
 		if( !$this->sameEmptiness( $lhsPlacementsByKey, $rhsPlacementsByKey ) ) {
 			$numberDiffers = true;
 		} elseif( is_array( $lhsPlacementsByKey ) && is_array( $rhsPlacementsByKey ) ) {
-			if( !empty( array_diff_key( $lhsPlacementsByKey, $rhsPlacementsByKey ) ) ||
-				!empty( array_diff_key( $rhsPlacementsByKey, $lhsPlacementsByKey ) ) ) {
+			if( array_diff_key( $lhsPlacementsByKey, $rhsPlacementsByKey ) ||
+				array_diff_key( $rhsPlacementsByKey, $lhsPlacementsByKey ) ) {
 				$numberDiffers = true;
 			}
 		}

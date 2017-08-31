@@ -26,8 +26,7 @@ class AxaioMadeToPrint_WflSendToNext extends WflSendToNext_EnterpriseConnector
 	{
 		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Called: AxaioMadeToPrint_WflSendToNext->runBefore()' );
 		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; // keep code analyzer happy
-		
+
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_AFTER with RUNMODE_AFTER when this hook is not needed.
 
@@ -38,7 +37,6 @@ class AxaioMadeToPrint_WflSendToNext extends WflSendToNext_EnterpriseConnector
 	{
 		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Called: AxaioMadeToPrint_WflSendToNext->runAfter()' );
 		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; $resp = $resp; // keep code analyzer happy
 
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_AFTER with RUNMODE_BEFORE when this hook is not needed.
@@ -49,6 +47,5 @@ class AxaioMadeToPrint_WflSendToNext extends WflSendToNext_EnterpriseConnector
 	// Not called.
 	final public function runOverruled( WflSendToNextRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
-	} 
+	}
 }

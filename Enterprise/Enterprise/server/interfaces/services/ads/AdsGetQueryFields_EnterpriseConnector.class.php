@@ -40,6 +40,5 @@ abstract class AdsGetQueryFields_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdsGetQueryFieldsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

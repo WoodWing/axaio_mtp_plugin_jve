@@ -20,7 +20,7 @@ class SyncFreePaidPerDevice
 	 * differ the value in the database is updated. A configuration setting is set to indicate that the process has run. 
 	 * If the run was successful the setting is set to '1'.
 	 *  
-	 * @return Success true/false
+	 * @return bool Success true/false
 	 */
 	static public function doSync()
 	{

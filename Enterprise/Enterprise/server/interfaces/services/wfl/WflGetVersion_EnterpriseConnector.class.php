@@ -40,6 +40,5 @@ abstract class WflGetVersion_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflGetVersionRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

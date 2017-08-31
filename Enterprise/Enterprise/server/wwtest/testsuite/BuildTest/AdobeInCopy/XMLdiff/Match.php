@@ -53,7 +53,6 @@ class Match
 	 *
 	 * @param DOMDocument $doc1 Original document
 	 * @param DOMDocument $doc2 Modified document
-	 * @return NodeSet
 	 */
 	public function fastMatch(DOMDocument $doc1, DOMDocument $doc2)
 	{
@@ -166,6 +165,7 @@ class Match
 	/**
 	 * Return the nodes that are differents in both trees
 	 *
+	 * @param integer $tree
 	 * @return array
 	 */
 	public function getUnmatched($tree)
@@ -209,4 +209,3 @@ class Match
 		return $ret;
 	}
 }
-?>

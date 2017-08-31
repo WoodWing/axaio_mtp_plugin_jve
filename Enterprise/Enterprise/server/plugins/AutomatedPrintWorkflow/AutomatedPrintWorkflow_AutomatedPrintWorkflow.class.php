@@ -15,12 +15,10 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 */
 	final public function resolveOperation( $objectId, $operation )
 	{
-		$resolvedOperations = array( $operation ); // by default, don't resolve
+		$resolvedOperations = array(); // Do not resolve any operations by default.
 		if( $operation->Type == 'AutomatedPrintWorkflow' &&
 			( $operation->Name == 'PlaceDossier' || $operation->Name == 'PlaceArticle' )
 		) {
-			$resolvedOperations = array(); // always resolve the 'PlaceDossier' and 'PlaceArticle' operations
-
 			require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
 			$parentTargets = DBTarget::getTargetsByObjectId( $objectId );
 			if( $parentTargets && count( $parentTargets ) == 1 ) {
@@ -34,6 +32,12 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 
 				$resolvedOperations = $this->resolvePlaceOperations(
 					$objectId, $issueId, $editionId, $dossierId, $articleId, $inDesignArticleId, $operation->Name );
+
+				// PlaceDossier or PlaceArticle should never be treated as resolved operations if no operations are resolved.
+				// So return null instead of an empty array.
+				if( empty( $resolvedOperations ) ) {
+					$resolvedOperations = null;
+				}
 			}
 		}
 		return $resolvedOperations;
@@ -298,7 +302,6 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @param Placement[] $iaPlacements [input] Resolved IdArt frames.
 	 * @param string[] $iaFrameLabels [output] All possible frame labels.
 	 * @param string[] $iaFrameTypes [output] All possible frame types.
-	 * @return boolean TRUE when there are labels and frames, FALSE when both zero count.
 	 */
 	private static function determineUsedFrameTypesAndLabels( array $iaPlacements, array &$iaFrameLabels, array &$iaFrameTypes )
 	{
@@ -453,7 +456,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 		} elseif( $imageCount == 1 ) {
 			LogHandler::Log( 'AutoPrintWfl', 'INFO', "One image (id={$imageIds[0]}) found in dossier, so taking into account." );
 		} else {
-			LogHandler::Log( 'AutoPrintWfl', 'INFO', "Multiple images (ids=".explode(',',$imageIds).") found in dossier, so images are excluded." );
+			LogHandler::Log( 'AutoPrintWfl', 'INFO', "Multiple images (ids=".implode(',',$imageIds).") found in dossier, so images are excluded." );
 		}
 		return $imageCount == 1 ? $imageIds[0] : null;
 	}

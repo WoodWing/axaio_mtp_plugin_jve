@@ -16,7 +16,6 @@
 
 require_once 'config/config.php';
 require_once BASEDIR.'/server/secure.php';
-require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 require_once BASEDIR.'/server/services/Entry.php';
 
 class AppServiceDispatcher extends WW_Services_Entry

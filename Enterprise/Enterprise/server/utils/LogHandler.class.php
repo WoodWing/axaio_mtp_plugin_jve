@@ -384,6 +384,115 @@ class LogHandler
 	}
 
 	/**
+	 * Returns the (daily) folders that resides directly under the root log folder.
+	 *
+	 * @return array List of folder names (not the full paths).
+	 */
+	public static function listDailyRootFolders()
+	{
+		$dailyFolders = array();
+		$rootDir = OUTPUTDIRECTORY;
+		if( $rootDir && is_dir( $rootDir ) ) {
+			$folders = scandir( $rootDir );
+			if( $folders ) foreach( $folders as $folder ) {
+				if( $folder[0] != '.' && is_dir( $rootDir.$folder ) ) {
+					if( self::isValidDailyFolderName( $folder ) ) { // check 'Ymd' date notation (anti hack)
+						$dailyFolders[] = $folder;
+					}
+				}
+			}
+		}
+		return $dailyFolders;
+	}
+
+	/**
+	 * Returns the (client ip) folders that resides directly under the daily log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @return array List of folder names (not the full paths).
+	 */
+	public static function listClientIpSubFolders( $dailyFolder )
+	{
+		$clientIpFolders = array();
+		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
+			$rootDir = OUTPUTDIRECTORY;
+			if( $rootDir && is_dir( $rootDir ) ) {
+				$dailyDir = $rootDir.'/'.$dailyFolder;
+				if( is_dir( $dailyDir ) ) {
+					$folders = scandir( $dailyDir );
+					if( $folders ) foreach( $folders as $folder ) {
+						if( $folder[0] != '.' && is_dir( $dailyDir.'/'.$folder ) ) {
+							if( self::isValidClientIpFolderName( $folder ) ) { // check IP notation (anti hack)
+								$clientIpFolders[] = $folder;
+							}
+						}
+					}
+				}
+			}
+		}
+		return $clientIpFolders;
+	}
+
+	/**
+	 * Returns the log files that resides directly under the client ip log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @param string $clientIpFolder The name of the folder (not the full path).
+	 * @return array List of folder names (not the full paths).
+	 */
+	public static function listLogFiles( $dailyFolder, $clientIpFolder )
+	{
+		$logFiles = array();
+		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
+			if( self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
+				$rootDir = OUTPUTDIRECTORY;
+				if( $rootDir && is_dir( $rootDir ) ) {
+					$clientIpDir = $rootDir.'/'.$dailyFolder.'/'.$clientIpFolder;
+					if( is_dir( $clientIpDir ) ) {
+						$files = scandir( $clientIpDir );
+						if( $files ) foreach( $files as $file ) {
+							if( $file[0] != '.' && is_file( $clientIpDir.'/'.$file ) ) {
+								$logFiles[] = $file;
+							}
+						}
+					}
+				}
+			}
+		}
+		return $logFiles;
+	}
+
+	/**
+	 * Returns the content of a log file that typically resides directly under the client ip log folder.
+	 *
+	 * @since 10.1.4
+	 * @param string $dailyFolder The name of the folder (not the full path).
+	 * @param string $clientIpFolder The name of the folder (not the full path).
+	 * @param string $logFile The name of the file (not the full path).
+	 * @return string The file content.
+	 */
+	public static function getLogFileContent( $dailyFolder, $clientIpFolder, $logFile )
+	{
+		$content = '';
+		$rootDir = OUTPUTDIRECTORY;
+		if( $rootDir && is_dir( $rootDir ) ) {
+			if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
+				if( self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
+					if( self::isValidLogFileName( $logFile ) ) { // check dangerous chars (anti hack)
+						$file = OUTPUTDIRECTORY."/$dailyFolder/$clientIpFolder/$logFile";
+						if( is_file( $file ) ) {
+							$content = file_get_contents( $file );
+						}
+					}
+				}
+			}
+		}
+		return $content;
+	}
+
+	/**
 	 * Returns the configured OUTPUTDIRECTORY option value (without ending '/'), but only when folder exists.
 	 *
 	 * @since 10.1.4
@@ -500,34 +609,6 @@ class LogHandler
 	}
 
 	/**
-	 * Returns the (client ip) folders that resides directly under the daily log folder.
-	 *
-	 * @since 10.1.4
-	 * @param string $dailyFolder The name of the folder (not the full path).
-	 * @return array List of folder names (not the full paths).
-	 */
-	public static function listClientIpSubFolders( $dailyFolder )
-	{
-		$clientIpFolders = array();
-		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
-			if( ( $rootDir = self::getValidRootLogFolder() ) ) {
-				$dailyDir = "{$rootDir}/{$dailyFolder}";
-				if( is_dir( $dailyDir ) ) {
-					$folders = scandir( $dailyDir );
-					if( $folders ) foreach( $folders as $folder ) {
-						if( $folder[0] != '.' && is_dir( $dailyDir.'/'.$folder ) ) {
-							if( self::isValidClientIpFolderName( $folder ) ) { // check IP notation (anti hack)
-								$clientIpFolders[] = $folder;
-							}
-						}
-					}
-				}
-			}
-		}
-		return $clientIpFolders;
-	}
-
-	/**
 	 * Removes the given ip log folder and all the log files that resides inside that folder.
 	 *
 	 * @since 10.1.4
@@ -564,61 +645,6 @@ class LogHandler
 			}
 		}
 		return $archiveFilePath;
-	}
-
-	/**
-	 * Returns the log files that resides directly under the client ip log folder.
-	 *
-	 * @since 10.1.4
-	 * @param string $dailyFolder The name of the folder (not the full path).
-	 * @param string $clientIpFolder The name of the folder (not the full path).
-	 * @return array List of folder names (not the full paths).
-	 */
-	public static function listLogFiles( $dailyFolder, $clientIpFolder )
-	{
-		$logFiles = array();
-		if( self::isValidDailyFolderName( $dailyFolder ) && // check 'Ymd' date notation (anti hack)
-			self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
-			if( ( $rootDir = self::getValidRootLogFolder() ) ) {
-				$clientIpDir = "{$rootDir}/{$dailyFolder}/{$clientIpFolder}";
-				if( is_dir( $clientIpDir ) ) {
-					$files = scandir( $clientIpDir );
-					if( $files ) foreach( $files as $file ) {
-						if( $file[0] != '.' && is_file( "{$clientIpDir}/{$file}" ) ) {
-							$logFiles[] = $file;
-						}
-					}
-				}
-			}
-		}
-		return $logFiles;
-	}
-
-	/**
-	 * Returns the content of a log file that typically resides directly under the client ip log folder.
-	 *
-	 * @since 10.1.4
-	 * @param string $dailyFolder The name of the folder (not the full path).
-	 * @param string $clientIpFolder The name of the folder (not the full path).
-	 * @param string $logFile The name of the file (not the full path).
-	 * @return string The file content.
-	 */
-	public static function getLogFileContent( $dailyFolder, $clientIpFolder, $logFile )
-	{
-		$content = '';
-		if( self::isValidDailyFolderName( $dailyFolder ) ) { // check 'Ymd' date notation (anti hack)
-			if( self::isValidClientIpFolderName( $clientIpFolder ) ) { // check IP notation (anti hack)
-				if( self::isValidLogFileName( $logFile ) ) { // check dangerous chars (anti hack)
-					if( ( $rootDir = self::getValidRootLogFolder() ) ) {
-						$file = "{$rootDir}/{$dailyFolder}/{$clientIpFolder}/{$logFile}";
-						if( is_file( $file ) ) {
-							$content = file_get_contents( $file );
-						}
-					}
-				}
-			}
-		}
-		return $content;
 	}
 
 	/**
@@ -737,7 +763,7 @@ class LogHandler
 	 *
 	 * @param string $logFile
 	 * @param integer $fileMode The type of access required to the file.
-	 * @return resource Log file handle or false in case of error.
+	 * @return resource|boolean Log file handle or false in case of error.
 	 */
 	private static function openFile( $logFile, $fileMode )
 	{
@@ -1121,7 +1147,6 @@ class LogHandler
 	 */
 	public static function suppressLoggingForService( $serviceName = null )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		if( !$serviceName ) {
 			$serviceName = BizSession::getServiceName();
 		}
@@ -1322,11 +1347,11 @@ class LogHandler
 	 * systems (non-BizExceptions) to get details of the thrower's stack.
 	 * See {@link markupBackTrace()} for details.
 	 *
-	 * @param Exception The caught exception for which to compose the stack trace.
+	 * @param Exception|Throwable $exception The caught exception for which to compose the stack trace. Since PHP7 it can be any kind of Throwable exceptions.
 	 * @param integer $hideToplevels Number of rows on top of stack to hide. E.g. pass 2 to hide getDebugBackTrace() function call and yourself.
 	 * @return string The stack with \n separations.
 	 */
-	public static function getExceptionBackTrace( Exception $exception, $hideToplevels = 1 )
+	public static function getExceptionBackTrace( $exception, $hideToplevels = 1 )
 	{
 		return self::markupBackTrace( $exception->getTrace(), $hideToplevels );
 	}
@@ -1380,13 +1405,13 @@ class LogHandler
 				$transData = preg_replace('/<Password>(.*)<\/Password>/is', '<Password>***</Password>', $transData, 1 );
 			} elseif( $protocol == 'Service' ) {
 				// e.g. [Password] => xxx => [Password] => ***
-				$transData = preg_replace('/\[Password\] => (.*)\n(.*)/i', "[Password] => ***\n$2", $transData, 1 );
+				$transData = preg_replace('/Password => (.*)\n(.*)/i', "Password => ***\n$2", $transData, 1 );
 			} elseif( $protocol == 'AMF' ) {
 				// e.g. [Password] => xxx => [Password] => ***
 				$transData = preg_replace('/\[Password\] => (.*)\n(.*)/i', "[Password] => ***\n$2", $transData, 1 );
 			} elseif( $protocol == 'JSON' ) {
 				// e.g. "Password":"xxx" => "Password":"***"
-				$transData = preg_replace('/\"Password\":\"(.*)\"/i', "\"Password\":\"***\"", $transData, 1 );
+				$transData = preg_replace('/\"Password\":\s*\"(.*)\"/i', "\"Password\": \"***\"", $transData, 1 );
 			}
 		}
 		if( $methodName == 'RabbitMQ_createOrUpdateUser' && $protocol == 'REST' ) {

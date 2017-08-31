@@ -54,5 +54,14 @@ class AdobeDps_EnterprisePlugin extends EnterprisePlugin
 
 	// NOTE: The isInstalled() and runInstallation() methods are NOT implemented on purpose.
 	// Reason is that a Health Check test module is shipped within this server plugin that does
-	// the real testing. When admin users want to install the plugin, here we just allow them (BZ#27254).	
+	// the real testing. When admin users want to install the plugin, here we just allow them (BZ#27254).
+
+	/**
+	 * @inheritdoc
+	 * @since 10.2.0
+	 */
+	public function isActivatedByDefault()
+	{
+		return false;
+	}
 }

@@ -21,7 +21,7 @@ class AdmGetEditionsRequest
 	 * @param integer              $PublicationId             
 	 * @param integer              $PubChannelId              Nullable.
 	 * @param integer              $IssueId                   Nullable.
-	 * @param Id[]                 $EditionIds                Nullable.
+	 * @param integer[]            $EditionIds                Nullable.
 	 */
 	public function __construct( $Ticket=null, $PublicationId=null, $PubChannelId=null, $IssueId=null, $EditionIds=null )
 	{
@@ -75,8 +75,8 @@ class AdmGetEditionsRequest
 			if( !is_null( $datObj->EditionIds ) ) {
 				$validator->checkType( $datObj->EditionIds, 'array' );
 				if( !empty($datObj->EditionIds) ) foreach( $datObj->EditionIds as $listItem ) {
-					$validator->enterPath( 'integer' );
-					$validator->checkType( $listItem, 'integer' );
+					$validator->enterPath( 'Id' );
+					$validator->checkType( $listItem, 'Id' );
 					$validator->leavePath();
 				}
 			}

@@ -156,6 +156,8 @@ if( !defined('EXTENSIONMAP') ) {
 		'.wcmt' => array( 'application/incopyicmt', 'ArticleTemplate'),
 		'.wwea' => array( 'text/wwea', 'Article'),
 		'.wweat' => array( 'text/wwea', 'ArticleTemplate'), // BZ# 19176: To ensure the article template has the correct icon.
+		'.digital' => array( 'application/ww-digital+json', 'Article'), // added since 10.2.0 to support Content Station Digital Editor articles
+		'.digitmpl' => array( 'application/ww-digitmpl+json', 'ArticleTemplate'), // added since 10.2.0 to support Content Station Digital Editor articles
 		'.incd' => array( 'application/incopy', 'Article'),
 		'.incx' => array( 'application/incopy', 'Article'),
 		'.indd' => array( 'application/indesign', 'Layout'),
@@ -1424,7 +1426,7 @@ if( !defined('EXIFTOOL_APP_PATH') ) {
 //        'http://example.com' => array(
 //            'Access-Control-Allow-Credentials' => 'true',
 //            'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS, DELETE, PUT, HEAD',
-//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept'
+//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept, X-WoodWing-Application'
 //        ),
 //
 //    - The set of headers to return is determined by the Origin header that is send by the client.
@@ -1437,7 +1439,7 @@ if( !defined('EXIFTOOL_APP_PATH') ) {
 //        'http://example.com' => array(
 //            'Access-Control-Allow-Credentials' => 'true',
 //            'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS, DELETE, PUT, HEAD',
-//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept'
+//            'Access-Control-Allow-Headers' => 'Origin, X-Requested-With, Content-Type, Accept, X-WoodWing-Application'
 //        ),
 //    )));
 //}
@@ -1502,8 +1504,8 @@ if( !defined('OUTPUTDIRECTORY') ) {
 }
 
 // PROFILELEVEL:
-//    Used for profiling PHP code. Default value: 1. Requires DEBUGLEVELS to be set to 'INFO' or 'DEBUG'  
-//    in order to work, else the value of profile level is ignored. Possible settings are: 0 to 5:
+//    Used for profiling PHP code. Default value: 0. Requires OUTPUTDIRECTORY to be set in order to
+//    work, else the value of profile level is ignored. Possible settings are: 0 to 5:
 //       0: No profiling
 //       1: Web Service => Handling one service call of client application (excl network traffic)
 //       2: PHP Service => Handling one service call without SOAP/AMF/JSON wrapping/unwrapping.
@@ -1512,7 +1514,7 @@ if( !defined('OUTPUTDIRECTORY') ) {
 //       5: PHP Script  => Potential expensive PHP operations, such as loops, regular expressions, etc
 //
 if( !defined('PROFILELEVEL') ) {
-	define( 'PROFILELEVEL', 1 );
+	define( 'PROFILELEVEL', 0 );
 }
 
 // LOGSQL:
@@ -1781,6 +1783,7 @@ $loader->register();
 require_once BASEDIR.'/server/utils/LogHandler.class.php';
 LogHandler::init();
 
+require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 require_once BASEDIR.'/server/interfaces/services/BizErrorReport.class.php';
 require_once BASEDIR.'/server/utils/PerformanceProfiler.class.php';

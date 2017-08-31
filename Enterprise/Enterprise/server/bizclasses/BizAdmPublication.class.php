@@ -17,9 +17,8 @@ class BizAdmPublication
 	 */
 	static private function checkPubAdminAccess( $usr, $pubId )
 	{
-		$dbDriver = DBDriverFactory::gen();
 		if( !self::hasPubAdminAccess( $usr, $pubId ) ) {
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
+			throw new BizException( 'ERR_AUTHORIZATION', 'Server', '' );
 		}
 	}
 
@@ -52,7 +51,7 @@ class BizAdmPublication
 	{
 		$dbDriver = DBDriverFactory::gen();
 		if( !hasRights( $dbDriver, $usr ) ) { // not a system admin?
-			throw new BizException( 'ERR_AUTHORIZATION', 'Server', $dbDriver->error() );
+			throw new BizException( 'ERR_AUTHORIZATION', 'Server', '' );
 		}
 	}
 
@@ -83,6 +82,19 @@ class BizAdmPublication
 		if( UtfString::byteCount( $newName ) > 255 ) {
 			throw new BizException( 'ERR_NAME_INVALID', 'client', null, null);
 		}
+	}
+
+	/**
+	 * Tells whether or not a publication (id) exists in the database.
+	 *
+	 * @since 10.2.0
+	 * @param integer $pubId The DB id of the publication to search for.
+	 * @return boolean true when the publication exists, else false.
+	 */
+	public static function doesPublicationIdExists( $pubId )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
+		return DBAdmPublication::doesPublicationIdExists( $pubId );
 	}
 
 	// ------------------------------
@@ -121,72 +133,29 @@ class BizAdmPublication
 	}
 
 	/**
-	 * Checks all SortOrder fields and updates when list is damaged.
-	 *
-	 * If a publication has a sort order, this order will be respected. If it has no order, the order will be set to
-	 * current highest one plus 1 etc.
-	 * Publications without order could happen after record removal, DB migration, or any corruption.
-	 * The passed list of publications must be complete(!) and will be repaired (returned).
-	 *
-	 * @param AdmPublication Publication
-	 */
-	private static function repairPublicationsSortOrder( &$pubs )
-	{
-		$highestOrder = 0;
-		$damagedPubs = array();
-		foreach( $pubs as $pub ) {
-			if( !$pub->SortOrder ) {
-				$damagedPub = new AdmPublication();
-				$damagedPub->Id = $pub->Id;
-				$damagedPubs[] = $damagedPub;
-			} else {
-				if( $pub->SortOrder > $highestOrder ) {
-					$highestOrder = $pub->SortOrder;
-				}
-			}
-		}
-
-		if( $damagedPubs ) foreach( $damagedPubs as $damagedPub ) {
-			$highestOrder++;
-			$damagedPub->SortOrder = $highestOrder;
-		}
-
-		if( $damagedPubs ) { // save repairs
-			require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
-			require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
-			$typeMap = BizAdmProperty::getCustomPropertyTypes( 'Publication' );
-			DBAdmPublication::modifyPublicationsObj( $damagedPubs, $typeMap );
-		}
-	}
-
-	/**
 	 * List Publication Objects
 	 *
 	 * Returns publication objects for the all/specified publication
 	 *
-	 * @param string $usr Short name of user.
 	 * @param array $subReq RequestModes
 	 * @param array $pubIds List of publication ids.
 	 * @throws BizException Throws BizException on failure.
 	 * @return AdmPublication[]
 	 */
-	public static function listPublicationsObj( $usr, /** @noinspection PhpUnusedParameterInspection */ $subReq, $pubIds )
+	public static function listPublicationsObj( /** @noinspection PhpUnusedParameterInspection */ $subReq, $pubIds )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
 
+		$usr = BizSession::getShortUserName();
 		self::checkPubAdminAccess( $usr, null ); // Check if user is admin to any pub
 		$pubs = array();
 		$typeMap = BizAdmProperty::getCustomPropertyTypes( 'Publication' );
 		if( is_null($pubIds) ) {
 			$pubs = DBAdmPublication::listPublicationsObj( $typeMap );
-			if ( is_null($pubs) ) {
-				throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Client', null, null, array( '{PUBLICATIONS}' ) );
-			}
-			self::repairPublicationsSortOrder( $pubs ); // Reorder when damaged
 			// Suppress the publications for which admin user has no rights
 			$touchedPubs = false;
-			foreach( $pubs as $key => $pub ) {
+			if( $pubs ) foreach( $pubs as $key => $pub ) {
 				if( !self::hasPubAdminAccess( $usr, $pub->Id ) ){
 					unset( $pubs[$key] );
 					$touchedPubs = true;
@@ -201,7 +170,7 @@ class BizAdmPublication
 		else {
 			foreach( $pubIds as $pubId ) {
 				if( !$pubId ) { // client programming error
-					throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+					throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 				}
 				self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 				$pub = DBAdmPublication::getPublicationObj( $pubId, $typeMap );
@@ -225,16 +194,16 @@ class BizAdmPublication
 	 * @throws BizException Throws BizException on failure
 	 * @return AdmPublication[] Modified Publication objects.
 	 */
-	public static function modifyPublicationsObj( $usr, $subReq, $pubs )
+	public static function modifyPublicationsObj( $usr, /** @noinspection PhpUnusedParameterInspection */ $subReq, $pubs )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmPublication.class.php';
 
 		self::checkPubAdminAccess( $usr, null ); // Check if user is admin to any pub
 
-		foreach( $pubs as $pub ) {
+		if( $pubs ) foreach( $pubs as $pub ) {
 			if( !$pub->Id ) { // client programming error
-				throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+				throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 			}
 			self::checkPubAdminAccess( $usr, $pub->Id ); // Check if user has admin access to this pub
 			$pub->Name = trim( $pub->Name ); //BZ#12402
@@ -252,20 +221,19 @@ class BizAdmPublication
 	/**
 	 * Delete Publication
 	 * 
-	 * @param string $usr shortusername who should have authorization to delete these publications
-	 * @param int[] $pubIds Array of publication id that needs to be deleted
+	 * @param string $usr Short username who should have authorization to delete these publications
+	 * @param integer[] $pubIds Array of publication id that needs to be deleted
 	 * @throws BizException
 	 */
 	public static function deletePublicationsObj( $usr, $pubIds )
 	{
 		if( !$pubIds ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
-		} else {
-			foreach( $pubIds as $pubId ) {
-				self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
-				require_once BASEDIR.'/server/bizclasses/BizCascadePub.class.php';
-				BizCascadePub::deletePublication( $pubId );
-			}
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
+		}
+		foreach( $pubIds as $pubId ) {
+			self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
+			require_once BASEDIR.'/server/bizclasses/BizCascadePub.class.php';
+			BizCascadePub::deletePublication( $pubId );
 		}
 	}
 
@@ -279,13 +247,13 @@ class BizAdmPublication
 	 *
 	 * Returns new created issues object
 	 *
-	 * @param  string $usr shortusername who should have authorization to create these issues
-	 * @param  array $subReq RequestModes
-	 * @param  string $pubId publication that new issue will belongs to
-	 * @param  string $pubChannelId pubchannel that new issue belongs to
-	 * @param  array $issues array of new issues that will created
+	 * @param string $usr short username who should have authorization to create these issues
+	 * @param string[] $subReq RequestModes
+	 * @param integer $pubId publication that new issue will belongs to
+	 * @param integer $pubChannelId publication channel that new issue belongs to
+	 * @param AdmIssue[] $issues array of new issues that will created
 	 * @throws BizException Throws BizException on failure
-	 * @return array of new created issue objects
+	 * @return AdmIssue[] created issue objects
 	 */
 	public static function createIssuesObj( $usr, /** @noinspection PhpUnusedParameterInspection */ $subReq,
 	                                        $pubId, $pubChannelId, $issues )
@@ -296,12 +264,12 @@ class BizAdmPublication
 		require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
 
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
 		// Validate the issue data
-		foreach( $issues as $issue ) {
+		if( $issues ) foreach( $issues as $issue ) {
 			$issue->Name = trim( $issue->Name ); //BZ#12402
 			self::validateNewName( $issue->Name );
 
@@ -328,10 +296,10 @@ class BizAdmPublication
 			throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{CHANNEL}', $pubChannelId ) );
 		}
 
-		if ($pubChannel->Type != 'print' && $pubChannel->Type != 'dps' && $pubChannel->Type != 'dps2' ) {
-			foreach ($issues as $curissue) {
-				if ($curissue->OverrulePublication != false) {
-					throw new BizException('ERR_INVALID_OPERATION', 'Client', 'Overrule issue can not be in non-Print-channel');
+		if( $pubChannel->Type != 'print' && $pubChannel->Type != 'dps' && $pubChannel->Type != 'dps2' ) {
+			if( $issues ) foreach( $issues as $curissue ) {
+				if( $curissue->OverrulePublication != false ) {
+					throw new BizException( 'ERR_ARGUMENT', 'Client', 'Overrule issue can not be in non-Print-channel' );
 				}
 			}
 		}
@@ -359,11 +327,11 @@ class BizAdmPublication
 	 *
 	 * Returns issue objects for the specified publication id and specified/all issues id
 	 *
-	 * @param  string $usr shortusername who should have authorization to get these issues
-	 * @param  array  $subReq RequestModes
-	 * @param  string $pubId Publication that Issue belongs to
-	 * @param  string $pubChannelId PubChannel that Issue belongs to
-	 * @param  array  $issueIds array of issue id
+	 * @param  string $usr short username who should have authorization to get these issues
+	 * @param  string[] $subReq RequestModes
+	 * @param  integer $pubId Publication that Issue belongs to
+	 * @param  integer $pubChannelId PubChannel that Issue belongs to
+	 * @param  integer[]|null  $issueIds array of issue id
 	 * @throws BizException Throws BizException on failure
 	 * @return array of Issue objects
 	 */
@@ -375,7 +343,7 @@ class BizAdmPublication
 		require_once BASEDIR.'/server/dbclasses/DBAdmIssue.class.php';
 
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 
 		$issues = array();
@@ -394,9 +362,6 @@ class BizAdmPublication
 				}
 			}
 			$issues = DBAdmIssue::listChannelIssuesObj( $pubChannelId );
-			if ( is_null($issues) ) {
-				throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Client', null, null, array( '{ISSUES}' ) );
-			}
 		}
 		else {
 			foreach( $issueIds as $issueId ) {
@@ -415,13 +380,13 @@ class BizAdmPublication
 	 *
 	 * Returns modified issue object
 	 *
-	 * @param  string $usr shortusername who should have authorization to modify these issues
-	 * @param  array $subReq RequestModes
-	 * @param  string $pubId Publication that issue belongs to
-	 * @param  string $pubChannelId PubChannel that Issue belongs to
-	 * @param  array $issues array of issues that need to modify
+	 * @param  string $usr short username who should have authorization to modify these issues
+	 * @param  string[] $subReq RequestModes
+	 * @param  integer $pubId Publication that issue belongs to
+	 * @param  integer $pubChannelId PubChannel that Issue belongs to
+	 * @param  AdmIssue[] $issues issues that need to modify
 	 * @throws BizException Throws BizException on failure
-	 * @return array of modified Issue objects
+	 * @return AdmIssue[] modified issues
 	 */
 	public static function modifyIssuesObj( $usr, /** @noinspection PhpUnusedParameterInspection */ $subReq, $pubId, $pubChannelId, $issues )
 	{
@@ -431,7 +396,7 @@ class BizAdmPublication
 		require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
 
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
@@ -468,7 +433,7 @@ class BizAdmPublication
 		foreach ($issues as $curissue) {
 			if ($curissue->OverrulePublication != false) {
 				if ($pubChannel->Type != 'print' && $pubChannel->Type != 'dps' && $pubChannel->Type != 'dps2' ) {
-					throw new BizException('ERR_INVALID_OPERATION','Client','Overrule issue can not be in non-Print-channel');
+					throw new BizException('ERR_ARGUMENT','Client','Overrule issue can not be in non-Print-channel');
 				}
 			}
 		}
@@ -502,15 +467,15 @@ class BizAdmPublication
 	/**
 	 * Delete Issue Object
 	 * 
-	 * @param string $usr shortusername who should have authorization to delete these issues
-	 * @param string $pubId Publication that issue belongs to
-	 * @param array  $issueIds Array of issue id that needs to be delete
+	 * @param string $usr short username who should have authorization to delete these issues
+	 * @param integer $pubId Publication that issue belongs to
+	 * @param integer[] $issueIds Array of issue id that needs to be delete
 	 * @throws BizException
 	 */
 	public static function deleteIssuesObj( $usr, $pubId, $issueIds )
 	{
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
@@ -600,11 +565,11 @@ class BizAdmPublication
 	 *
 	 * @param string $usr Short username who should have authorization to create sections.
 	 * @param array $subReq RequestModes
-	 * @param string $pubId publication that new section belongs to
-	 * @param string $issueId Issue that new section belongs to
-	 * @param array $sections List of new sections(categories) that will be created.
+	 * @param integer $pubId publication that new section belongs to
+	 * @param integer $issueId Issue that new section belongs to
+	 * @param AdmSection[] $sections new sections(categories) to create
 	 * @throws BizException Throws BizException on failure
-	 * @return Section[]
+	 * @return AdmSection[]
 	 */
 	public static function createSectionsObj( $usr, /** @noinspection PhpUnusedParameterInspection */ $subReq, $pubId, $issueId, $sections )
 	{
@@ -612,7 +577,7 @@ class BizAdmPublication
 		require_once BASEDIR.'/server/dbclasses/DBSection.class.php';
 
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
@@ -635,33 +600,31 @@ class BizAdmPublication
 	}
 
 	/**
-	 * List Section Objects
+	 * List Sections
 	 *
 	 * Returns section objects for the specified publication id, issues id and all/specified section id
 	 *
 	 * @param string $usr Short username.
-	 * @param array $subReq RequestModes.
-	 * @param string $pubId publication id.
-	 * @param string $issueId issue id.
-	 * @param array $sectionIds List of section ids.
+	 * @param string[] $subReq RequestModes.
+	 * @param integer $pubId publication id.
+	 * @param integer $issueId issue id.
+	 * @param integer[] $sectionIds List of section ids.
 	 * @throws BizException Throws BizException on failure.
-	 * @return Section[]
+	 * @return AdmSection[]
 	 */
-	public static function listSectionsObj( $usr,  /** @noinspection PhpUnusedParameterInspection */ $subReq, $pubId, $issueId, $sectionIds )
+	public static function listSectionsObj( $usr,  /** @noinspection PhpUnusedParameterInspection */ $subReq,
+	                                        $pubId, $issueId, $sectionIds )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBSection.class.php';
 
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
 		$sections 	= array();
 		if ( is_null( $sectionIds ) ) {
 			$sections = DBSection::listSectionsObj( $pubId, $issueId );
-			if ( is_null($sections) ) {
-				throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Client', null, null, array( '{SECTIONS}' ) );
-			}
 		}
 		else {
 			foreach( $sectionIds as $sectionId ) {
@@ -676,16 +639,14 @@ class BizAdmPublication
 	}
 
 	/**
-	 * Modify Section Object
-	 *
-	 * Returns modified section object
+	 * Modify Sections (Categories)
 	 *
 	 * @param string $usr Short username.
-	 * @param string $pubId Publication that Section belongs to
-	 * @param string $issueId Issue that Section belongs to
-	 * @param AdmSection[] $sections List of Sections.
+	 * @param integer $pubId Publication that Section belongs to
+	 * @param integer $issueId Issue that Section belongs to
+	 * @param AdmSection[] $sections sections to modify
 	 * @throws BizException Throws BizException on failure.
-	 * @return Section[]
+	 * @return AdmSection[] modified sections
 	 */
 	public static function modifySectionsObj( $usr, $pubId, $issueId, $sections )
 	{
@@ -693,7 +654,7 @@ class BizAdmPublication
 		require_once BASEDIR.'/server/dbclasses/DBSection.class.php';
 
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
@@ -709,27 +670,27 @@ class BizAdmPublication
 			}
 		}
 
-		$modifysections = DBSection::modifySectionsObj( $pubId, $issueId, $sections );
+		$modifiedSections = DBSection::modifySectionsObj( $pubId, $issueId, $sections );
 		if( DBSection::hasError() ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', DBSection::getError() );
 		}
-		return $modifysections;
+		return $modifiedSections;
 	}
 
 	/**
-	 * Delete Section Object
-	 * 
-	 * @param string $usr shortusername who should have authorization to delete these sections
-	 * @param string $pubId Publication that sections belongs to
-	 * @param string $issueId Issue that sections belongs to
-	 * @param array  $sectionIds Array of section id that needs to be delete
+	 * Delete Sections (Categories)
+	 *
+	 * @param string $usr short username who should have authorization to delete these sections
+	 * @param integer $pubId Publication that sections belongs to
+	 * @param integer $issueId Issue that sections belongs to
+	 * @param integer[] $sectionIds sections to delete
 	 * @throws BizException
 	 */
 	public static function deleteSectionsObj( $usr, $pubId, /** @noinspection PhpUnusedParameterInspection */ $issueId,
 	                                          $sectionIds )
 	{
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
@@ -750,22 +711,22 @@ class BizAdmPublication
 	 * Returns new created editions objects
 	 *
 	 * @param string $usr Short username who should have authorization to create these editions
-	 * @param string $pubId Publication that new section belongs to
-	 * @param string $pubChannelId Pubchannel that new edition belongs to
-	 * @param string $issueId Issue that new section belongs to
-	 * @param AdmEdition[] $editions List of AdmEditions
+	 * @param integer $pubId Publication that the new section belongs to
+	 * @param integer $pubChannelId Publication channel that new edition belongs to
+	 * @param integer $issueId Issue that new section belongs to (in case the issue overrules the publication)
+	 * @param AdmEdition[] $editions editions to create
 	 * @throws BizException Throws BizException on failure
-	 * @return stdClass[] List of Edition objects
+	 * @return AdmEdition[] created editions
 	 */
 	public static function createEditionsObj( $usr, $pubId, $pubChannelId, $issueId, $editions )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBAdmEdition.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmIssue.class.php';
 
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
@@ -794,40 +755,37 @@ class BizAdmPublication
 			}
 
 			if( $issue->OverrulePublication != true ) {
-				throw new BizException('ERR_INVALID_OPERATION', 'Client', 'Overrule issue not found');
+				throw new BizException('ERR_ARGUMENT', 'Client', 'Overrule issue not found');
 			}
 		}
-		return DBEdition::createEditionsObj( $pubChannelId, $issueId, $editions );
+		return DBAdmEdition::createEditionsObj( $pubChannelId, $issueId, $editions );
 	}
 
 	/**
-	 * Get Edition Object
+	 * Get Editions.
 	 *
 	 * Returns Edition objects for the specified publication id, issue id and specified/all editions id
 	 *
 	 * @param string $usr Short username who should have authorization to get these editions
-	 * @param string $pubId Publication that Edition belongs to
-	 * @param string $pubChannelId PubChannel that Edition belongs to
-	 * @param string $issueId issue id
-	 * @param array  $editionIds array of edition id
+	 * @param integer $pubId Publication the editions belong to
+	 * @param integer $pubChannelId Publication Channel the editions belong to
+	 * @param integer $issueId issue id the editions belong to (in case the issue overrules the publication)
+	 * @param integer[] $editionIds Ids of the editions to retrieve
 	 * @throws BizException Throws BizException on failure
-	 * @return array of Edition objects
+	 * @return AdmEdition[] the retrieved editions
 	 */
 	public static function listEditionsObj( $usr, $pubId, $pubChannelId, $issueId, $editionIds )
 	{
-		require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBAdmEdition.class.php';
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
 		$editions = array();
 		if ( is_null($editionIds) ) {
 			if( !empty($issueId) ) {
-				$editions = DBEdition::listIssueEditionsObj( $issueId );
-				if ( is_null($editions) ) {
-					throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Client', null, null, array( '{EDITIONS}' ) );
-				}
+				$editions = DBAdmEdition::listIssueEditionsObj( $issueId );
 			} else {
 				require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
 				require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
@@ -844,14 +802,11 @@ class BizAdmPublication
 						throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{CHANNEL}', $pubChannelId ) );
 					}
 				}
-				$editions = DBEdition::listChannelEditionsObj( $pubChannelId );
-				if ( is_null($editions) ) {
-					throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Client', null, null, array( '{EDITIONS}' ) );
-				}
+				$editions = DBAdmEdition::listChannelEditionsObj( $pubChannelId );
 			}
 		} else {
 			foreach( $editionIds as $editionId ) {
-				$edition = DBEdition::getEditionObj($editionId );
+				$edition = DBAdmEdition::getEditionObj($editionId );
 				if ( is_null($edition) ) {
 					throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{EDITION}', $editionId ) );
 				}
@@ -862,23 +817,25 @@ class BizAdmPublication
 	}
 
 	/**
+	 * Modifies Editions.
+	 *
 	 * @param string $usr Short username who should have authorization to modify these editions
-	 * @param string $pubId Publication that Edition belongs to
-	 * @param string $pubChannelId Pubchannel that modify edition belongs to
-	 * @param int $issueId Issue that Edition belongs to
-	 * @param AdmEdition[] $editions List of AdmEditions.
+	 * @param integer $pubId Publication the editions belong to
+	 * @param integer $pubChannelId Publication Channel the editions belong to
+	 * @param integer $issueId Issue the editions belong to (in case the issue overrules the publication)
+	 * @param AdmEdition[] $editions editions to modify
 	 * @throws BizException Throws BizException on failure
-	 * @return Edition[] List of modified Edition objects
+	 * @return AdmEdition[] modified editions
 	 */
 	public static function modifyEditionsObj( $usr, $pubId, $pubChannelId, $issueId, $editions )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBAdmEdition.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmIssue.class.php';
 
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
@@ -906,24 +863,24 @@ class BizAdmPublication
 			}
 
 			if( $issue->OverrulePublication != true ) {
-				throw new BizException('ERR_INVALID_OPERATION', 'Client', 'Overrule issue not found');
+				throw new BizException('ERR_ARGUMENT', 'Client', 'Overrule issue not found');
 			}
 		}
-		$modifyEditions = DBEdition::modifyChannelEditionsObj( $pubChannelId, $issueId, $editions );
-		if( DBEdition::hasError() ) {
-			throw new BizException( 'ERR_DATABASE', 'Server', DBEdition::getError() );
+		$modifyEditions = DBAdmEdition::modifyChannelEditionsObj( $pubChannelId, $issueId, $editions );
+		if( DBAdmEdition::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', DBAdmEdition::getError() );
 		}
 		return $modifyEditions;
 	}
 
 	/**
-	 * Delete Edition Object
+	 * Delete Editions.
 	 * 
-	 * @param string $usr shortusername who should have authorization to delete these editions
-	 * @param string $pubId Publication that editions belongs to
-	 * @param string $pubChannelId PubChannel that editions belongs to
-	 * @param string $issueId Issue that editions belongs to
-	 * @param array  $editionIds Array of edition id that needs to be delete
+	 * @param string $usr short username who should have authorization to delete these editions
+	 * @param integer $pubId Publication the editions belong to
+	 * @param integer $pubChannelId Publication Channel that editions belong to
+	 * @param integer $issueId Issue the editions belong to (in case the issue overrules the publication)
+	 * @param integer[] $editionIds editions (ids) to delete
 	 * @throws BizException
 	 */
 	public static function deleteEditionsObj( $usr, $pubId,
@@ -932,7 +889,7 @@ class BizAdmPublication
 											$editionIds )
 	{
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
@@ -948,16 +905,14 @@ class BizAdmPublication
 	// --------------------------------
 
 	/**
-	 * Create PubChannel Objects
-	 *
-	 * Returns new created pubchannel objects
+	 * Create Publication Channels.
 	 *
 	 * @param string $usr Short username who should have authorization to create these PubChannels
-	 * @param array $subReq RequestModes
-	 * @param string $pubId publication that new PubChannel belongs to
-	 * @param array $pubChannels List of new PubChannels that will be created
-	 * @throws BizException Throws BizException on failure.
-	 * @return AdmPubChannel[] List of newly created PubChannels.
+	 * @param string[] $subReq RequestModes
+	 * @param integer $pubId publication (id) the new channels belong to
+	 * @param AdmPubChannel[] $pubChannels channel to create
+	 * @throws BizException
+	 * @return AdmPubChannel[] created channels
 	 */
 	public static function createPubChannelsObj( $usr,  /** @noinspection PhpUnusedParameterInspection */ $subReq, $pubId, $pubChannels )
 	{
@@ -966,7 +921,7 @@ class BizAdmPublication
 		require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
 
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
@@ -990,16 +945,16 @@ class BizAdmPublication
 	}
 
 	/**
-	 * Get PubChannel Object
+	 * Get Publication Channels.
 	 *
-	 * Returns PubChannel objects for the specified publication id, and specified/all pubchannel id
+	 * Returns channels for the specified publication id, and specified/all pubchannel id
 	 *
-	 * @param  string $usr shortusername who should have authorization to get these pubchannels
-	 * @param  array  $subReq RequestModes
-	 * @param  string $pubId publication id
-	 * @param  array  $pubChannelIds array of pubchannel id
-	 * @throws BizException Throws BizException on failure
-	 * @return array of PubChannel objects
+	 * @param string $usr short username who should have authorization to get these pubchannels
+	 * @param string[] $subReq RequestModes
+	 * @param integer $pubId publication id
+	 * @param integer[] $pubChannelIds channels (ids) to retrieve
+	 * @throws BizException
+	 * @return AdmPubChannel[] retrieved channels
 	 */
 	public static function listPubChannelsObj( $usr,  /** @noinspection PhpUnusedParameterInspection */ $subReq, $pubId, $pubChannelIds )
 	{
@@ -1008,7 +963,7 @@ class BizAdmPublication
 		require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
 
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 		$typeMap = BizAdmProperty::getCustomPropertyTypes( 'PubChannel' );
@@ -1019,9 +974,6 @@ class BizAdmPublication
 				throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{PUBLICATION}', $pubId ) );
 			}
 			$pubChannels = DBAdmPubChannel::listPubChannelsObj( $pubId, $typeMap );
-			if( is_null($pubChannels) ) {
-				throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Client', null, null, array( '{CHANNELS}' ) );
-			}
 			self::enrichPubChannelObjsWithRuntimeValues( $pubChannels );
 		}
 		else {
@@ -1038,16 +990,14 @@ class BizAdmPublication
 	}
 
 	/**
-	 * Modify PubChannel Object
+	 * Modify Publication Channels.
 	 *
-	 * Returns modified pubchannel object
-	 *
-	 * @param  string $usr shortusername who should have authorization to modify these pubchannels
-	 * @param  array  $subReq RequestModes
-	 * @param  string $pubId Publication that PubChannel belongs to
-	 * @param  array  $pubChannels array of PubChannel that need to modify
-	 * @throws BizException Throws BizException on failure
-	 * @return array of modified PubChannel objects
+	 * @param string $usr short username who should have authorization to modify these channels
+	 * @param string[] $subReq RequestModes
+	 * @param integer $pubId Publication that PubChannel belongs to
+	 * @param AdmPubChannel[] $pubChannels channels to modify
+	 * @throws BizException
+	 * @return AdmPubChannel[] modified channels
 	 */
 	public static function modifyPubChannelsObj( $usr,  /** @noinspection PhpUnusedParameterInspection */ $subReq, $pubId, $pubChannels )
 	{
@@ -1056,7 +1006,7 @@ class BizAdmPublication
 		require_once BASEDIR.'/server/dbclasses/DBAdmPubChannel.class.php';
 
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
@@ -1078,11 +1028,11 @@ class BizAdmPublication
 	}
 
 	/**
-	 * It retrieves the deafult publication channel given the Publicaion id.
+	 * Retrieve the default Publication Channel by Publication id.
 	 *
-	 * @param int $pubId
+	 * @param integer $pubId Publication (id) to retrieve the default channel for
 	 * @throws BizException
-	 * @return AdmPubChannel Default Publication Channel of publication $pubId
+	 * @return AdmPubChannel the default channel
 	 */
 	static public function getDefaultPubChannel( $pubId )
 	{
@@ -1102,22 +1052,22 @@ class BizAdmPublication
 	}
 
 	/**
-	 * Delete PubChannel Object
+	 * Delete Publication Channel.
 	 * 
-	 * @param string $usr shortusername who should have authorization to delete these pubchannels
-	 * @param string $pubId Publication that pubchannel belongs to
-	 * @param array  $pubChannelIds Array of pubchannel id that needs to be delete
+	 * @param string $usr short username who should have authorization to delete the channels
+	 * @param integer $pubId Publication (id) the channels belong to
+	 * @param integer[] $pubChannelIds channels (ids) to delete
 	 * @throws BizException
 	 */
 	public static function deletePubChannelsObj( $usr, $pubId, $pubChannelIds )
 	{
 		if( !$pubId ) { // client programming error
-			throw new BizException( 'ERR_INVALID_OPERATION', 'Client', 'Publication id is mandatory.' );
+			throw new BizException( 'ERR_ARGUMENT', 'Client', 'Publication id is mandatory.' );
 		}
 		self::checkPubAdminAccess( $usr, $pubId ); // Check if user has admin access to this pub
 
 		require_once BASEDIR.'/server/bizclasses/BizCascadePub.class.php';
-		foreach( $pubChannelIds as $pubChannelId ) {
+		if( $pubChannelIds ) foreach( $pubChannelIds as $pubChannelId ) {
 			BizCascadePub::deleteChannel( $pubChannelId );
 		}
 	}
@@ -1126,7 +1076,7 @@ class BizAdmPublication
 	 * Some standard properties are calculated run-time (not read from DB).
 	 * This function determines the DirectPublish, SupportsForms and SupportsCropping properties.
 	 *
-	 * @param array List of AdmPubChannel (input/output)
+	 * @param AdmPubChannel[] (input/output)
 	 */
 	static private function enrichPubChannelObjsWithRuntimeValues( &$pubChannels )
 	{
@@ -1139,7 +1089,7 @@ class BizAdmPublication
 	 * Some standard properties are calculated run-time (not read from DB).
 	 * This function determines the DirectPublish, SupportsForms and SupportsCropping properties.
 	 *
-	 * @param array AdmPubChannel (input/output)
+	 * @param AdmPubChannel[] (input/output)
 	 */
 	static private function enrichPubChannelObjWithRuntimeValues( &$pubChannel )
 	{

@@ -10,7 +10,6 @@ require_once BASEDIR.'/server/apps/browse_inc.php';
 require_once BASEDIR.'/server/bizclasses/BizNamedQuery.class.php';
 require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
 require_once BASEDIR.'/server/bizclasses/BizAccessFeatureProfiles.class.php';
-require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 require_once BASEDIR.'/server/bizclasses/PubMgr.class.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';

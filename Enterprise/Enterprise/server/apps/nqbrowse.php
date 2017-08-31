@@ -112,7 +112,7 @@ class Props
 	public $Property;
 	public $Value;
 
-	function Props ($value1, $value2)
+	public function __construct($value1, $value2)
 	{
 		$this->Property = $value1;
 		$this->Value = $value2;

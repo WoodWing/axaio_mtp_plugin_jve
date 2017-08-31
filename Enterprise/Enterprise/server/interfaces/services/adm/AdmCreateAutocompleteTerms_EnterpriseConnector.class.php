@@ -40,6 +40,5 @@ abstract class AdmCreateAutocompleteTerms_EnterpriseConnector extends ServiceCon
 	 */
 	public function onError( AdmCreateAutocompleteTermsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

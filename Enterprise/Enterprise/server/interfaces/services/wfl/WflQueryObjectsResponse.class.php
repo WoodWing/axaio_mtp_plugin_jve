@@ -30,9 +30,9 @@ class WflQueryObjectsResponse
 	 * @param ChildRow[]           $ChildRows                 Nullable.
 	 * @param Property[]           $ComponentColumns          Nullable.
 	 * @param ChildRow[]           $ComponentRows             Nullable.
-	 * @param unsignedInt          $FirstEntry                Nullable.
-	 * @param unsignedInt          $ListedEntries             Nullable.
-	 * @param unsignedInt          $TotalEntries              Nullable.
+	 * @param integer              $FirstEntry                Nullable.
+	 * @param integer              $ListedEntries             Nullable.
+	 * @param integer              $TotalEntries              Nullable.
 	 * @param string               $UpdateID                  Nullable.
 	 * @param Facet[]              $Facets                    Nullable.
 	 * @param Feature[]            $SearchFeatures            Nullable.

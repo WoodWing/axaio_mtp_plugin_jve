@@ -63,7 +63,9 @@ class Elvis_WflSetObjectProperties extends WflSetObjectProperties_EnterpriseConn
 					if( empty( $newStatusName ) ) {
 						require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
 						$curStatusCfg = BizAdmStatus::getStatusWithId( $object->MetaData->WorkflowMetaData->State->Id );
-						$newStatusName = BizAdmStatus::getStatusWithId( $curStatusCfg->NextStatusId )->Name;
+						if( isset($curStatusCfg->NextStatus->Id) ) {
+							$newStatusName = BizAdmStatus::getStatusWithId( $curStatusCfg->NextStatus->Id )->Name;
+						}
 					}
 
 					if( ElvisObjectUtils::statusChangedToUnarchived( $oldStatusName, $newStatusName ) ) {

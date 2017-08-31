@@ -121,8 +121,6 @@ class WW_TestSuite_HealthCheck2_AdobeDps_TestCase extends TestCase
 
 	/**
 	 * Checks if installed PHP version meet minimum PHP 5.3.6 version for Windows environment.
-	 *
-	 * @return boolean Whether it meets minimum PHP 5.3.6 version or not(true/false).
 	 */
 	private function checkPhpVersion()
 	{

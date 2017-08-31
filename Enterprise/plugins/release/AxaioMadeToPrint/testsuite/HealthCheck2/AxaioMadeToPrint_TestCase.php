@@ -10,9 +10,7 @@
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
 
-require_once(BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php');
-#require_once(BASEDIR.'/server/utils/InDesignServer.class.php');
-require_once(BASEDIR.'/config/plugins/AxaioMadeToPrint/config.php');
+require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_HealthCheck2_AxaioMadeToPrint_TestCase extends TestCase
 {
@@ -23,6 +21,7 @@ class WW_TestSuite_HealthCheck2_AxaioMadeToPrint_TestCase extends TestCase
 	
 	final public function runTest()
 	{
+		require_once BASEDIR.'/config/plugins/AxaioMadeToPrint/config.php';
         LogHandler::Log('wwtest', 'INFO', 'Testing MadeToPrint configuration');
 
         if( !$this->checkInstalled() ) {

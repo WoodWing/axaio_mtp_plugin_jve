@@ -98,7 +98,6 @@ class BizSemaphore
 	public function createSemaphore( $entityId, $logError=true )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBSemaphore.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$userShort = BizSession::getShortUserName();
 		if( !$userShort ) {
 			$userShort = '<unknown>';
@@ -315,7 +314,6 @@ class BizSemaphore
 	 */
 	static public function refreshSession( $semaId )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBTicket.class.php';
 
 		DBTicket::checkTicket(BizSession::getTicket());

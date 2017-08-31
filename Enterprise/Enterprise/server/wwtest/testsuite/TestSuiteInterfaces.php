@@ -346,8 +346,8 @@ abstract class TestCase implements TestModule
 		}
 		for( ; $lev <= $countDown; $lev++ ) {
 			$stackClass = isset($trace[$lev]['class']) ? $trace[$lev]['class'] : '';
-			$stackDump .= '<li>'.$trace[$lev]['class'].'::'.$trace[$lev]['function'].'()'.
-				'<br/>at line '.$trace[$lev-1]['line'].' in '.$trace[$lev-1]['file'].'</li>';
+			$stackDump .= '- '.$trace[$lev]['class'].'::'.$trace[$lev]['function'].'()'."\r\n".
+				'at line '.$trace[$lev-1]['line'].' in '.$trace[$lev-1]['file']."\r\n";
 			if( in_array( 'TestCase', class_parents( $stackClass ) ) ) {
 				break;
 			}
@@ -356,7 +356,7 @@ abstract class TestCase implements TestModule
 			$message = $trace[$ourselfIndex]['class'].'::'.$trace[$ourselfIndex]['function'].'(): '.$message;
 		}
 		if( $stackDump ) {
-			$message .= '<br/>Stack:<ol>'.$stackDump.'</ol>';
+			$message .= "\r\n".'Stack:'."\r\n".$stackDump.'';
 		}
 	
 		$this->setResult( 'ERROR', $message, '', false ); // suppress logging since that is done by BizException too
@@ -570,7 +570,7 @@ abstract class TestCase implements TestModule
 	 */	
 	public function assertNotEquals( $expected, $actual, $message = '' )
 	{
-		if( $expected != $actual ) {
+		if( $expected == $actual ) { // this check was fixed in EN-89534
 			if( !$message ) {
 				$message = "The expected value $expected equals the actual value $actual, which is unexpected.";
 			}

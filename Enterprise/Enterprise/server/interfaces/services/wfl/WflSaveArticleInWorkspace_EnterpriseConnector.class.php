@@ -40,6 +40,5 @@ abstract class WflSaveArticleInWorkspace_EnterpriseConnector extends ServiceConn
 	 */
 	public function onError( WflSaveArticleInWorkspaceRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

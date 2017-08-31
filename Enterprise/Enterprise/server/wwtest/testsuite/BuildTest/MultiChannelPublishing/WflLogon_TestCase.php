@@ -156,6 +156,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_WflLogon_TestCase extends Te
 	 *
 	 * @param WflLogOnResponse $response
 	 * @param bool Whether or not all test data could be found.
+	 * @return bool
 	 */	
 	private function getAdminSetupFromLogOnResponse( WflLogOnResponse $response )
 	{
@@ -306,7 +307,8 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_WflLogon_TestCase extends Te
 		require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
 
 		$isValid = true;
-		$supportForms = array( 
+		$supportForms = array(
+			'' => false, // Enterprise
 			'Twitter' => true, 
 			'Facebook' => true, 
 			'Drupal7' => true,
@@ -319,6 +321,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_WflLogon_TestCase extends Te
 			'SMS' => false
 		);
 		$supportCropping = array(
+			'' => false, // Enterprise
 			'Twitter' => true,
 			'Facebook' => true,
 			'Drupal7' => true,

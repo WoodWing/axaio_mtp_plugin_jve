@@ -146,6 +146,8 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 	 */
 	private function getUserName( $unicode ) 
 	{
+		$userShort = null;
+		$userFull = null;
 		switch( $unicode ) {
 			case 'unicode_in_general':
 				// Name = Woodwing Software
@@ -171,7 +173,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 				
 				$userShort = $chineseChar2 . $chineseChar3;
 				$userFull = $chineseChar1 . $userShort;
-			break;			
+			break;
 		}
 
 		$userName = array();		
@@ -266,6 +268,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 				}
 			}
 			$categories = null;
+			$issueInfo = null;
 			if( $this->issueId ) {
 				foreach( $resp->PublicationInfo->PubChannels as $chanInfo ) {
 					foreach( $chanInfo->Issues as $issueInfo ) {

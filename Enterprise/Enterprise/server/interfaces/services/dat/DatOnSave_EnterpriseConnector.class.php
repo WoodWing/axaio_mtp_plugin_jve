@@ -40,6 +40,5 @@ abstract class DatOnSave_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( DatOnSaveRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

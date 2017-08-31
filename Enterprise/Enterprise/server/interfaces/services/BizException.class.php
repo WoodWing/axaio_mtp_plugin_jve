@@ -263,7 +263,6 @@ class BizException extends Exception
  *  public function Foo()
  *  {
  *		$map = new BizExceptionSeverityMap( array( 'S5000' => 'INFO' ) );
- *		$map = $map; // keep code analyzer happy
  *		try {
  *			... // call function that might throw BizException
  *		} catch( BizException $e ) {

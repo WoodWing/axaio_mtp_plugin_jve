@@ -92,7 +92,10 @@ class WW_JSON_Server extends Server
 	{
 		$req = $this->getRequest();
 		$resp = $this->getResponse();
-
-		LogHandler::logService( $req->getMethod(), Json::prettyPrint($resp->__toString()), false, 'JSON' );
+		if( $resp->isError() ) {
+			LogHandler::logService( $req->getMethod(), Json::prettyPrint( $resp->__toString() ), null, 'JSON' );
+		} else {
+			LogHandler::logService( $req->getMethod(), Json::prettyPrint( $resp->__toString() ), false, 'JSON' );
+		}
 	}
 }

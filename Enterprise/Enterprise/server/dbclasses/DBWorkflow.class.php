@@ -110,7 +110,7 @@ class DBWorkflow extends DBBase
     public static function insertSectionStateDef($sectiondefid, $statedefid, $values, $updateifexists = true)
     {
         $result = null;
-        $sectionstateexists = self::getRow('sectionstate', " `section` = '$sectiondefid' AND `state` = '$statedefid' ", null);
+        $sectionstateexists = self::getRow('sectionstate', " `section` = '$sectiondefid' AND `state` = '$statedefid' ", array('id'));
         if ($sectionstateexists)
         {
             if ($updateifexists)
@@ -154,7 +154,7 @@ class DBWorkflow extends DBBase
                                                     $updateIfExists = true)
     {
         $result = null;
-        $stateexists = self::getRow('issuesectionstate', " `issue` = '$issueId' AND `section` = '$categoryId' AND `state` = '$statusId' ", null);
+        $stateexists = self::getRow('issuesectionstate', " `issue` = '$issueId' AND `section` = '$categoryId' AND `state` = '$statusId' ", array('id'));
         if ($stateexists) {
             if ( $updateIfExists ) {
                 $result = self::updateIssueSectionState($stateexists['id'], $values);

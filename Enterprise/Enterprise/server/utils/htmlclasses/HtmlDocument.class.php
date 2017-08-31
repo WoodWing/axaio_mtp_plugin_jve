@@ -9,7 +9,6 @@
  * @copyright WoodWing Software bv. All Rights Reserved.
  */
 
-require_once BASEDIR.'/server/bizclasses/BizResources.class.php';
 require_once BASEDIR.'/server/admin/global_inc.php'; // formvar, inputvar
 
 class HtmlDocument
@@ -80,6 +79,7 @@ class HtmlDocument
 			$wr = array();
 			if( BizSession::isStarted() ) {
 				try {
+					require_once BASEDIR.'/server/secure.php'; // getauthorizations()
 					$dbDriver = DBDriverFactory::gen();
 					$sth = getauthorizations( $dbDriver, $globUser );
 					while( ($row = $dbDriver->fetch($sth) ) ) {
@@ -340,7 +340,6 @@ class HtmlDocument
 		$user = '';
 		try {
 			if( BizSession::isStarted() ) {
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				$user = BizSession::getUserInfo( 'fullname' );
 			}
 		} catch( BizException $e ) { // ignore errors; could be no DB installed!

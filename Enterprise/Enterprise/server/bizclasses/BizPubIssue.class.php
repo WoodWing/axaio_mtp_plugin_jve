@@ -335,7 +335,6 @@ class BizPubIssue
 		
 		// N-cast the new dossier order (to clients listening).
 		require_once BASEDIR.'/server/smartevent.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$base64DossierIds = $this->getBase64DossierIds( $pubChannelObj->Type, $newOrder );
 		new smartevent_issuereorder( 
 			BizSession::getTicket(), $pubChannelObj->Type, $issueId, $base64DossierIds );
@@ -458,7 +457,7 @@ class BizPubIssue
 	 *
 	 * @param string $channelType Publication channel type
 	 * @param array $dossierIdsOrder Array of dossierIds order
-	 * @return unknown
+	 * @return string
 	 */
 	public function getBase64DossierIds( $channelType, $dossierIdsOrder )
 	{

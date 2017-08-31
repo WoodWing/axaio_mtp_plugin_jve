@@ -1798,10 +1798,12 @@ class DBObject extends DBBase
 	/**
 	 * Retrieves values of column names from smart_objects and/or smart_deletedobjects table.
 	 *
+	 * There is NO error raised when records could not be found. It is up to the caller to detect based on the results.
+	 *
 	 * @param integer[] $objectIds The object ids for retrieve values for.
 	 * @param string[] $areas Where to search in: 'Workflow' (smart_objects) and/or 'Trash' (smart_deletedobjects).
 	 * @param string[] $columnNames The names of the columns to retrieve values for.
-	 * @return array
+	 * @return array List of rows found. indexed by object id.
 	 */
 	static public function getColumnsValuesForObjectIds( $objectIds, $areas, $columnNames )
 	{
@@ -1813,6 +1815,10 @@ class DBObject extends DBBase
 				$objRows = self::listRows( $tableName, 'id', '', $where, $columnNames );
 				if( $objRows ) foreach( $objRows as $objectId => $objRow ) {
 					$results[ $objectId ] = $objRow;
+				}
+				// Quit searching when all records are found already.
+				if( count( $objectIds ) == count( $results ) ) {
+					break;
 				}
 			}
 		}
@@ -1861,7 +1867,7 @@ class DBObject extends DBBase
 	/**
 	 * Checks if the list of object ids in $objIds belong to the same Object Type and Publication.
 	 *
-	 * @param array $objIds List of Object Ids to check for their object type and publication.
+	 * @param integer[] $objIds List of Object Ids to check for their object type and publication.
 	 * @return bool Whether the ids in $objIds all belong to the same object Type and Publication.
 	 */
 	static public function isSameObjectTypeAndPublication( $objIds )

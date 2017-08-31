@@ -40,6 +40,5 @@ abstract class WflChangePassword_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflChangePasswordRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

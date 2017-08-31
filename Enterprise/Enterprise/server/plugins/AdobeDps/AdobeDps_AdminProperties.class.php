@@ -34,7 +34,6 @@ class AdobeDps_AdminProperties extends AdminProperties_EnterpriseConnector
 	 */
 	private function doCollectDialogWidgets( $entity, $mode )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizResources.class.php';
 		require_once BASEDIR.'/config/config_dps.php';
 
 		$widgets = array();

@@ -35,7 +35,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_RelationTargets_
 	public function getTestMethods()
 	{
 		return
-			'Test with objects assigned to a web channel: <ul>';
+			'Test with objects assigned to a web channel: <ul>'.
 				'<li>01 Create a Template, Dossier, Form and an Image object (CreateObjects).</li>'.
 				'<li>02 Place the Image onto the Form (CreateObjectRelations).</li>'.
 				'<li>03 Refresh the Form (GetObjects).</li>'.
@@ -98,7 +98,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_RelationTargets_
 		} while( false );
 		
 		// Remove the test objects again.
-		$this->tearDownTestData( $this->dossier );
+		$this->tearDownTestData();
 	}
 
 	/**
@@ -235,7 +235,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_RelationTargets_
 	 * Does 'refresh' the Publish Form by calling GetObjects.
 	 * It also makes sure that the cached Publish Form has the latest Relations from DB.
 	 *
-	 * @return Whether or not the form could be retrieved from database.
+	 * @return bool Whether or not the form could be retrieved from database.
 	 */
 	private function refreshTheForm()
 	{

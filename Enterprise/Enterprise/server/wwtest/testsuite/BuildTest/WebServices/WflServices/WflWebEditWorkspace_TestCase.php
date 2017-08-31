@@ -349,6 +349,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWebEditWorkspace_TestCas
 
 	/**
 	 * Tests the PreviewArticleAtWorkspace workflow service
+	 *
+	 * @param string $action
+	 * @param bool $fullStory
 	 */
 	private function previewArticleAtWorkspace( $action, $fullStory )
 	{
@@ -1147,6 +1150,9 @@ Oluptas pisinct eniatus doluptatiat aut occus molorem coressi nctaepr orrunt vol
 
 	/**
 	 * Create the first article.
+	 *
+	 * @param integer $articleIndex
+	 * @return bool
 	 */
 	private function createArticle( $articleIndex )
 	{
@@ -1306,6 +1312,10 @@ Oluptas pisinct eniatus doluptatiat aut occus molorem coressi nctaepr orrunt vol
 
 	/**
 	 * Create the relation with the layout for the first article.
+	 *
+	 * @param integer $articleIndex
+	 * @param integer $layoutIndex
+	 * @return bool
 	 */
 	private function createObjectRelationsArticle( $articleIndex, $layoutIndex )
 	{

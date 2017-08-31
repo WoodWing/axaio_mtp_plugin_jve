@@ -298,7 +298,6 @@ class CustomDataSourceDemo_DataSource extends DataSource_EnterpriseConnector
 	 */
 	final public function getUpdates( $familyvalue )
 	{
-		$familyvalue = $familyvalue; // made code analyzer happy
 	}
 	
 	/**

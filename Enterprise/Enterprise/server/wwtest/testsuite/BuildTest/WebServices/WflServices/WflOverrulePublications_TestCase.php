@@ -163,7 +163,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflOverrulePublications_Tes
 	 * Removes created objects during testing and removes issues with overruled brands.
 	 *
 	 * @param string $tipMsg To be used in the error message if there's any error.
-	 * @return bool Whether or not the deletions were successful.
 	 */
 	private function tearDownTestData( $tipMsg )
 	{
@@ -795,7 +794,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflOverrulePublications_Tes
 		$state = $status;
 
 		// retrieve user (shortname) of the logOn test user.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->ticket );
 
 		// build metadata
@@ -845,10 +843,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflOverrulePublications_Tes
 	/**
 	 * Creates a new article.
 	 *
-	 * @param $stepInfo Step description used in case of an error
-	 * @param $articleName Name used for object creation
+	 * @param string $stepInfo Step description used in case of an error
+	 * @param string $articleName Name used for object creation
 	 * @param Publication $publication
-	 * @param Issue $issues
+	 * @param Issue[] $issues
 	 * @param State $status
 	 * @param Category $category
 	 * @param array $relations
@@ -876,7 +874,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflOverrulePublications_Tes
 	 * @param string|null $expectedError S-code when error expected. NULL when no error expected.
 	 * @return bool Whether or not service response was according to given expectations ($expectedError).
 	 */
-	private function createObject( Object &$object, $stepInfo, $lock = false, $expectedError = null )
+	private function createObject( /** @noinspection PhpLanguageLevelInspection */ Object &$object, $stepInfo, $lock = false, $expectedError = null )
 	{
 		$response = $this->utils->callCreateObjectService( $this, $this->ticket, array( $object ), $lock, $stepInfo, $expectedError );
 
@@ -895,7 +893,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflOverrulePublications_Tes
 	 * @param null $expectedError S-code when an error is expected, null if it is not.
 	 * @return boolean Whether or not service response was according to given expectations ($expectedError).
 	 */
-	private function createObjectFromContentStation( Object &$object, $stepInfo, $lock = false, $expectedError = null )
+	private function createObjectFromContentStation( /** @noinspection PhpLanguageLevelInspection */ Object &$object,
+		$stepInfo, $lock = false, $expectedError = null )
 	{
 		$suiteOpts = defined('TESTSUITE') ? unserialize( TESTSUITE ) : array();
 		if( $suiteOpts ) {

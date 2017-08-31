@@ -187,7 +187,6 @@ class WW_Utils_UrlUtils
 	 * @param string|null $result The response body of the call, passed by reference.
 	 * @param string|null $httpCode The HTTP Code returned by the call, passed by reference.
 	 * @param string $methodName The name of the method calling this function, used for logging, defaults to '';
-	 * @return null|DomDocument $response The call response as a DomDocument.
 	 */
 	static public function callService( Zend\Http\Client $httpClient, &$result=null, &$httpCode=null, $methodName='')
 	{

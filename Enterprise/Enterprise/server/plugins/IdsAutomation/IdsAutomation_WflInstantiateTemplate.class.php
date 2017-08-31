@@ -17,8 +17,6 @@ class IdsAutomation_WflInstantiateTemplate  extends WflInstantiateTemplate_Enter
 
 	final public function runBefore( WflInstantiateTemplateRequest &$req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
 	}
 
 	final public function runAfter( WflInstantiateTemplateRequest $req, WflInstantiateTemplateResponse &$resp )
@@ -69,7 +67,5 @@ class IdsAutomation_WflInstantiateTemplate  extends WflInstantiateTemplate_Enter
 
 	final public function runOverruled( WflInstantiateTemplateRequest $req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
 	}
 }

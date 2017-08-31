@@ -9,15 +9,14 @@ define ('SERVERVERSION',	        getProductVersion(__DIR__));
 define ('SERVERVERSION_EXTRAINFO', getServerVersionExtraInfo(__DIR__)); // To be used for labels such as Prerelease and Daily
 
 // For internal use, to validate configurations:
-define ('SCENT_DBVERSION',	    '10.1' );
+define ('SCENT_DBVERSION',	    '10.2' );
 
 $supportedPhpVersions = array(
     // format   >>> meaning
     // '1.2.3'  >>> php version 1.2.3 is supported
     // '1.2.3+' >>> php version 1.2.3...1.2.x is supported (so 1.2.x with patch >= 3)
     // '-1.2.3' >>> php version 1.2.3 NOT supported
-    '5.5.16+',
-    '5.6.14+'
+	 '7.0.12+'
 );
 define ('SCENT_PHPVERSIONS',	serialize($supportedPhpVersions) );
 
@@ -45,6 +44,9 @@ define ('ADOBE_VERSIONS_ALL',		serialize( array( // used to detect documents ver
 
 // For online-help articles:
 define ('ONLINEHELP_SERVER_MAJOR_VERSION', '10');
+
+// For ionCube compatibility:
+define ('WW_ES_BASE_VERSION_FOR_IONCUBE', '10.2.0');
 
 // For License:
 define ('PRODUCTMAJORVERSION', '10' );

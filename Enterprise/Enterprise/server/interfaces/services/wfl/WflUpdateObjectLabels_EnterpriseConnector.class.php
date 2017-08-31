@@ -40,6 +40,5 @@ abstract class WflUpdateObjectLabels_EnterpriseConnector extends ServiceConnecto
 	 */
 	public function onError( WflUpdateObjectLabelsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

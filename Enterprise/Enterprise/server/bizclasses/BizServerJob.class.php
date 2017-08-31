@@ -704,7 +704,6 @@ class BizServerJob
 		
 		try {
 			// Start business session (and DB transaction)
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			BizSession::startSession( $job->TicketSeal );
 			BizSession::startTransaction();
 			BizSession::setRunMode( BizSession::RUNMODE_BACKGROUND );
@@ -753,7 +752,6 @@ class BizServerJob
 
 		try {
 			// Start business session (and DB transaction)
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			BizSession::startSession( $job->TicketSeal );
 			BizSession::startTransaction();
 			BizSession::setRunMode( BizSession::RUNMODE_BACKGROUND );
@@ -802,7 +800,6 @@ class BizServerJob
 
 		try {
 			// Start business session (and DB transaction)
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			BizSession::startSession( $job->TicketSeal );
 			BizSession::startTransaction();
 			BizSession::setRunMode( BizSession::RUNMODE_BACKGROUND );

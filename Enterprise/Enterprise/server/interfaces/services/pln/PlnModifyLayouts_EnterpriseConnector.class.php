@@ -40,6 +40,5 @@ abstract class PlnModifyLayouts_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( PlnModifyLayoutsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

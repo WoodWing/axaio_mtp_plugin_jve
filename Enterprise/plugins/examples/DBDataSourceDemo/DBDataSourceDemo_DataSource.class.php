@@ -250,7 +250,6 @@ class DBDataSourceDemo_DataSource extends DataSource_EnterpriseConnector
 	 */
 	final public function getUpdates( $familyvalue )
 	{
-		$familyvalue = $familyvalue; // made code analyzer happy
 		// not implemented in a standard database-datasource
 	}
 	
@@ -270,7 +269,6 @@ class DBDataSourceDemo_DataSource extends DataSource_EnterpriseConnector
 	 */
 	final public function getQuery( $queryid )
 	{
-		$queryid = $queryid; // made code analyzer happy
 		// not implemented in a standard database-datasource
 	}
 }

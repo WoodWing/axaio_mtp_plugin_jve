@@ -3,7 +3,6 @@
 /**
  * @package Enterprise
  * @subpackage Services
- * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  * 
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -13,10 +12,10 @@
  */
 
 require_once BASEDIR.'/server/protocols/json/Services.php';
-require_once BASEDIR.'/server/interfaces/services//*INTFSHORTLOW*//DataClasses.php';
+require_once /*PROVIDERDIR*//interfaces/services//*INTFSHORTLOW*//DataClasses.php';
 require_once BASEDIR.'/server/secure.php';
 
-class WW_JSON_/*INTFSHORT*/Services extends WW_JSON_Services
+class /*CLASSNAME*/ extends WW_JSON_Services
 {
 /*BODY*/
 }

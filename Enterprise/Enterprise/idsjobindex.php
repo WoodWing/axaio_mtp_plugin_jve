@@ -57,6 +57,4 @@ try {
 				'Invalid params provided for the '.basename(__FILE__).' module.' );
 	}
 } catch( BizException $e ) {
-	/** @noinspection PhpSillyAssignmentInspection */
-	$e = $e; // keep analyser happy
 }

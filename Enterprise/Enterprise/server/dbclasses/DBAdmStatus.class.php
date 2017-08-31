@@ -1,61 +1,71 @@
 <?php
 
 /**
- * @package 	SCEnterprise
+ * @package 	Enterprise
  * @subpackage 	DBClasses
  * @since 		v6.0
  * @copyright	WoodWing Software bv. All Rights Reserved.
  */
-
-//@todo Move to new DBStatus class
-
-require_once BASEDIR.'/server/dbclasses/DBBase.class.php'; 
 
 class DBAdmStatus extends DBBase
 {
 	const TABLENAME = 'states';
 
 	/**
-	 * Tells if the given status object already exists in DB.
-	 * If statusses are defined on brand level the type/name
-	 * combination must be unique. On issue level (overrule)
-	 * the type/name must be unique per issue and must not exist 
-	 * on brand level.
-	 * @param object $status
-	 * @return Status object when exists, else null
-	**/
-	static public function statusExists( $status )
+	 * Tests if a status exists
+	 *
+	 * Tells if the given admin status object already exists in DB. If statusses are defined
+	 * on brand level the type/name combination must be unique. On issue level (overrule brand)
+	 * the type/name must be unique per issue and must not exist on brand level.
+	 * 
+	 * @param integer $pubId
+	 * @param integer $issueId
+	 * @param AdmStatus $status
+	 * @return AdmStatus object when exists, else null
+	 * @throws BizException on SQL error.
+	 */
+	static public function statusExists( $pubId, $issueId, $status )
 	{
-		$params = array();
-		
-		$where = '`state` = ? and `publication` = ? and `type` = ? ';
-		$params[] = $status->Name;
-		$params[] = $status->PublicationId;
-		$params[] = $status->Type;
-		if( $status->Id ) { // zero for new records
-			$where .= 'and `id` != ? ';
-			$params[] = $status->Id;
+		$where = '`state` = ? AND `publication` = ? AND `type` = ? ';
+		$params = array(
+			strval( $status->Name ),
+			intval( $pubId ),
+			strval( $status->Type )
+		);
+		if( $status->Id ) { // null for new records
+			$where .= 'AND `id` != ? ';
+			$params[] = intval( $status->Id );
 		}
-		if( $status->IssueId ) {
-			$where .= 'and (`issue` = ? or `issue` = 0) ';
-			$params[] = $status->IssueId;
+		if( $issueId ) {
+			$where .= 'AND (`issue` = ? OR `issue` = ?) ';
+			$params[] = intval( $issueId );
+			$params[] = 0;
 		}
-		return self::listRows( 'states', 'id', 'state', $where, '*', $params );
+		$row = self::getRow( self::TABLENAME, $where, '*', $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+		return $row ? self::rowToObj( $pubId, $issueId, $row ) : null;
 	}
 	
 	/**
-	 * Retrieves one status object from DB
+	 * Retrieves one admin status object from DB.
 	 *
 	 * @param integer $statusId Id of the status to get the values from.
 	 * @return AdmStatus|null Status if succeeded. NULL if not found.
+	 * @throws BizException on SQL error.
 	 */
 	static public function getStatus( $statusId )
 	{
-		$row = self::getRow( 'states', " `id` = '$statusId' ", '*' );
-		if( $row ) {
-			return self::rowToObj( $row );
+		$where = '`id` = ?';
+		$params = array( intval( $statusId ) );
+		$row = self::getRow( self::TABLENAME, $where, '*', $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 		}
-		return null;
+		$pubId = null;
+		$issueId = null;
+		return $row ? self::rowToObj( $pubId, $issueId, $row ) : null;
 	}
 
 	/**
@@ -63,194 +73,287 @@ class DBAdmStatus extends DBBase
 	 *
 	 * The returned status configurations can be accessed by status id.
 	 *
-	 * @param  array $statusIds Ids of the statuses to get the values from
-	 * @return array of objects of status configurations if succeeded, null if no records returned
-	 * @throws BizException Throws an Exception if arguments are invalid
-	 **/
+	 * @param integer[] $statusIds Ids of the statuses to get the values from
+	 * @return AdmStatus[]|null status configurations if succeeded, null on SQL error
+	 * @throws BizException on SQL error or when bad argument provided
+	 */
 	public static function getStatusesForIds( $statusIds )
 	{
-		foreach( $statusIds as $id ) {
-			if( (string)intval($id) != (string)$id || $id <= 0 ) {
-				throw new BizException( 'ERR_INVALID_OPERATION', 'Server', 'Invalid status ids specified' );
-			}
+		$where = self::addIntArrayToWhereClause( 'id', $statusIds );
+		if( !$where ) { // no search filter provided
+			throw new BizException('ERR_ARGUMENT', 'Client', 'No status ids provided.' );
 		}
-
-		$fields = '*';
-		$where = '`id` IN ( ' . implode( ',', $statusIds ) . ' )';
-		$params = array();
-		$rows = self::listRows( self::TABLENAME, 'id', '', $where, $fields, $params );
-		if( !self::hasError() ) {
-			$statuses = array();
-			if( $rows ) foreach( $rows as $id => $row ) {
-				$statuses[$id] = self::rowToObj( $row );
-			}
-			return $statuses;
+		$rows = self::listRows( self::TABLENAME, 'id', '', $where );
+		if( self::hasError() ) { // SQL error
+			throw new BizException('ERR_DATABASE', 'Server', self::getError() );
 		}
-		return null;
-	}
-	
-	 /**
-	 * Create new admin status object
-	 *  
-	 * @param object $status Status that need to be created
-	 * @return object The created status objects (from DB), or null on failure
-	**/
-	public static function createStatus( $status )
-	{	
-		$row = self::objToRow( $status );
-		self::insertRow( 'states', $row );
-		$dbDriver = DBDriverFactory::gen();
-		$newid = $dbDriver->newid( 'states', true );
-		if( !is_null($newid) ) {
-			return self::getStatus( $newid );
+		$statuses = array();
+		if( $rows ) foreach( $rows as $id => $row ) {
+			$pubId = null;
+			$issueId = null;
+			$statuses[$id] = self::rowToObj( $pubId, $issueId, $row );
 		}
-		return null; // failed
-	}
-	
-	 /**
-	 * Modify admin status object
-	 *  
-	 * @param object $status Status that need to be modified
-	 * @return object The modified status object (from DB), or null on failure
-	**/
-	public static function modifyStatus( $status )
-	{	
-		$params = array();
-		
-		$row = self::objToRow( $status );
-		unset($row['id']);
-		$where = ' `id` = ? ';
-		$params[] = $status->Id;
-		
-		if( self::updateRow( 'states', $row, $where, $params) ) {
-			return self::getStatus( $status->Id );
-		}
-		return null; // failed
-	}
-	
-	public static function getStatuses( $publId, $issueId, $objType )
-	{
-		$params = array();
-		$publId = intval($publId); // Convert to integer
-		$issueId = intval($issueId); // Convert to integer
-		$where = "`publication` = ? and `issue` = ? and `type` = ? order by `code`, `id`";
-		$params[] = $publId;
-		$params[] = $issueId;
-		$params[] = $objType;
-		
-		$rows = self::listRows( 'states', 'id', 'state', $where, '*', $params);
-		$objs = array();
-		if( $rows ) foreach( $rows as $row ) {
-			$objs[$row['id']] = self::rowToObj( $row );
-		}
-		return $objs;
+		return $statuses;
 	}
 
-	public static function getDeadlineStatusId( $status )
-	{
-		$params = array();
-		$where = '`publication` = ? and `type` = ?  and `code` > ? and `deadlinerelative` > 0 order by `code`';
-		$params[] = $status->PublicationId;
-		$params[] = $status->Type;
-		$params[] = $status->SortOrder;
-		$row = self::getRow( 'states', $where, 'id', $params);
-		return $row ? $row['id'] : 0;
-	}
-
-	// This function does the same as line 205/206 from states.php version 9 (CL #5717) from 19/7/2006
-	// During research it seems that deadlinestateid is not used anymore, a refactoring issue is created (BZ #17102)
-	public static function updateDeadlineStatusId( $id )
-	{
-		$id = intval($id); //Convert to integer;
-		return self::updateRow( 'states', array( 'deadlinestate' => $id ), " `id` = $id" );
-	}	
 
 	/**
-	 *  Converts a admin status object into a DB status record (array).
-	 *  @param object $obj Admin status object
-	 *  @return array DB status row
-	**/
-	static public function objToRow( $obj )
+	 * Retrieves the issue ids for given status ids.
+	 *
+	 * @param integer[] $statusIds
+	 * @return array|null Paired array with statusId and issueId
+	 * @throws BizException on SQL error or when bad argument provided
+	 * @since 10.2.0
+	 */
+	public static function getIssueIdsForStatusIds( array $statusIds )
+	{
+		$where = self::addIntArrayToWhereClause( 'id', $statusIds );
+		if( !$where ) { // no search filter provided
+			throw new BizException('ERR_ARGUMENT', 'Client', 'No status ids provided.' );
+		}
+		$where .= ' AND `issue` != ? '; // include overrule issues only
+		$params = array( 0 );
+		$rows = self::listRows( self::TABLENAME, 'id', 'issue', $where, null, $params );
+		if( self::hasError() ) { // SQL error
+			throw new BizException('ERR_DATABASE', 'Server', self::getError() );
+		}
+		$map = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$map[ $row[ 'id' ] ] = $row[ 'issue' ];
+		}
+		if( LogHandler::debugMode() ) {
+			LogHandler::Log( __CLASS__, 'DEBUG',
+				'Found issue ids by status ids: '.print_r( $map,true ) );
+		}
+		return $map;
+	}
+
+	/**
+	 * Retrieves the brands ids for given status ids.
+	 *
+	 * @param integer[] $statusIds
+	 * @throws BizException When the returned amount of pub ids is not 1
+	 * @return array|null Paired array with statusId and pubId
+	 * @since 10.2.0
+	 */
+	public static function getPublicationIdsForStatusIds( array $statusIds )
+	{
+		$where = self::addIntArrayToWhereClause( 'id', $statusIds );
+		if( !$where ) { // no search filter provided
+			throw new BizException('ERR_ARGUMENT', 'Client', 'No status ids provided.' );
+		}
+		$where .= ' AND `issue` = ? '; // exclude overrule issues
+		$params = array( 0 );
+		$rows = self::listRows( self::TABLENAME, 'id', 'publication', $where, null, $params );
+		if( self::hasError() ) { // SQL error
+			throw new BizException('ERR_DATABASE', 'Server', self::getError() );
+		}
+		$map = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$map[ $row[ 'id' ] ] = $row[ 'publication' ];
+		}
+		if( LogHandler::debugMode() ) {
+			LogHandler::Log( __CLASS__, 'DEBUG',
+				'Found publication ids by status ids: '.print_r( $map,true ) );
+		}
+		return $map;
+	}
+
+	/**
+	 * Returns the name of a status given an id
+	 *
+	 * @param integer $statusId
+	 * @return string|null Depending on whether a name is found for the given id
+	 * @since 10.2.0
+	 */
+	public static function getStatusName( $statusId )
+	{
+		$where = '`id` = ?';
+		$params = array( intval( $statusId ) );
+		$row = self::getRow( self::TABLENAME, $where, array('state'), $params );
+		return $row ? $row['state'] : null;
+	}
+
+	/**
+	 * Creates a new admin status object in the DB.
+	 * 
+	 * @param integer $pubId
+	 * @param integer $issueId
+	 * @param AdmStatus $status Status that need to be created.
+	 * @return integer|boolean New inserted row DB Id when record is successfully inserted; False otherwise.
+	 * @throws BizException on SQL error.
+	 */
+	public static function createStatus( $pubId, $issueId, $status )
+	{
+		$status->Id = null;
+		$row = self::objToRow( $pubId, $issueId, $status );
+		$newId = self::insertRow( self::TABLENAME, $row );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+		return $newId;
+	}
+	
+	/**
+	 * Modifies an admin status object in the DB.
+	 *
+	 * @param integer $pubId
+	 * @param integer $issueId
+	 * @param AdmStatus $status Status that need to be modified.
+	 * @return boolean True if successful, false otherwise
+	 * @throws BizException on SQL error.
+	 */
+	public static function modifyStatus( $pubId, $issueId, AdmStatus $status )
+	{
+		$row = self::objToRow( $pubId, $issueId, $status );
+		unset( $row['id'] );
+		$where = '`id` = ?';
+		$params = array( intval( $status->Id ) );
+		$updated = self::updateRow( self::TABLENAME, $row, $where, $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+		return $updated;
+	}
+
+	/**
+	 * Retrieve admin status objects from DB for given brand, issue and object type.
+	 *
+	 * @param integer $pubId Brand id.
+	 * @param integer $issueId Filter statuses on (overruling) issue. Provide 0 when there is no overruling issue.
+	 * @param string|null $objType Filter statuses on object type, is null for all object types.
+	 * @param integer[]|null $statusIds An array of status ids or null.
+	 * @return AdmStatus[] List of admin status objects.
+	 * @throws BizException on SQL error.
+	 */
+	public static function getStatuses( $pubId, $issueId, $objType, $statusIds )
+	{
+		$where = '`publication` = ? and `issue` = ? ';
+		$params = array( intval( $pubId ), intval( $issueId ) ); // zero allowed (for non-overrule)
+
+		if( $objType ) {
+			$where .= 'AND `type` = ? ';
+			$params[] = strval( $objType );
+		}
+
+		if( $statusIds ) {
+			$wherePart = self::addIntArrayToWhereClause( 'id', $statusIds );
+			if( $wherePart ) {
+				$where .= "AND {$wherePart} ";
+			}
+		}
+
+		$orderBy = array( 'code' => true, 'id' => true );
+		$rows = self::listRows( self::TABLENAME, null, null, $where, '*', $params, $orderBy );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+
+		$statuses = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$pubId = null;
+			$issueId = null;
+			$statuses[] = self::rowToObj( $pubId, $issueId, $row );
+		}
+		return $statuses;
+	}
+
+
+	/**
+	 * Converts a admin status object into a DB status record (array).
+	 *
+	 * @param integer $pubId
+	 * @param integer $issueId
+	 * @param AdmStatus $obj Admin status object
+	 * @return array DB status row
+	 */
+	static public function objToRow( $pubId, $issueId, $obj )
 	{
 		$row = array();
-		if( !is_null( $obj->Id ) ) { $row['id'] = $obj->Id ? $obj->Id : 0; }
-		if( !is_null( $obj->PublicationId ) ) { $row['publication'] = $obj->PublicationId ? $obj->PublicationId : 0; }
-		if( !is_null( $obj->Type ) ) { $row['type'] = $obj->Type; }
-		if( !is_null( $obj->Phase ) ) { $row['phase'] = $obj->Phase; }
-		if( !is_null( $obj->Name ) ) { $row['state'] = $obj->Name; }
-		if( !is_null( $obj->Produce ) ) { $row['produce'] = ( $obj->Produce == true ? 'on' : '' ); }
-		if( !is_null( $obj->Color ) ) { $row['color'] = $obj->Color ? $obj->Color : '#A0A0A0'; }
-		if( !is_null( $obj->NextStatusId ) ) { $row['nextstate'] = $obj->NextStatusId ? $obj->NextStatusId : 0; }
-		if( !is_null( $obj->SortOrder ) ) { $row['code'] = $obj->SortOrder ? $obj->SortOrder : 0; }
-		if( !is_null( $obj->IssueId ) ) { $row['issue'] = $obj->IssueId ? $obj->IssueId : 0; }
-		if( !is_null( $obj->SectionId ) ) { $row['section'] = $obj->SectionId ? $obj->SectionId : 0; }
-		if( !is_null( $obj->DeadlineStatusId ) ) { $row['deadlinestate'] = $obj->DeadlineStatusId ? $obj->DeadlineStatusId : 0; }
-		if( !is_null( $obj->DeadlineRelative ) ) { $row['deadlinerelative'] = $obj->DeadlineRelative ? $obj->DeadlineRelative : 0; }
-		if( !is_null( $obj->CreatePermanentVersion ) ) { $row['createpermanentversion'] = ( $obj->CreatePermanentVersion == true ? 'on' : '' ); }
-		if( !is_null( $obj->RemoveIntermediateVersions ) ) { $row['removeintermediateversions'] = ( $obj->RemoveIntermediateVersions == true ? 'on' : '' ); }
-		if( !is_null( $obj->AutomaticallySendToNext ) ) { $row['automaticallysendtonext'] = ( $obj->AutomaticallySendToNext == true ? 'on' : '' ); }
-		if( !is_null( $obj->ReadyForPublishing ) ) { $row['readyforpublishing'] = ( $obj->ReadyForPublishing == true ? 'on' : '' ); }
-		if( !is_null( $obj->SkipIdsa ) ) { $row['skipidsa'] = ( $obj->SkipIdsa == true ? 'on' : '' ); }
+		if(!is_null($pubId))           $row['publication']= $pubId ? intval($pubId) : 0;
+		if(!is_null($issueId))         $row['issue']      = $issueId ? intval($issueId) : 0;
+		if(!is_null($obj->Id))         $row['id']         = $obj->Id ? intval($obj->Id) : 0;
+		if(!is_null($obj->Type))       $row['type']       = strval($obj->Type);
+		if(!is_null($obj->Phase))      $row['phase']      = $obj->Phase;
+		if(!is_null($obj->Name))       $row['state']      = strval($obj->Name);
+		if(!is_null($obj->Produce))    $row['produce']    = ($obj->Produce == true ? 'on' : '');
+		if(!is_null($obj->Color))      $row['color']      = $obj->Color ? strval('#'.$obj->Color) : '#A0A0A0';
+		if(!is_null($obj->NextStatus)) $row['nextstate']  = $obj->NextStatus ? intval($obj->NextStatus->Id) : 0;
+		if(!is_null($obj->SortOrder))  $row['code']       = $obj->SortOrder ? intval($obj->SortOrder) : 0;
+		if(!is_null($obj->DeadlineRelative))           $row['deadlinerelative']           = $obj->DeadlineRelative ? intval($obj->DeadlineRelative) : 0;
+		if(!is_null($obj->CreatePermanentVersion))     $row['createpermanentversion']     = ($obj->CreatePermanentVersion == true ? 'on' : '');
+		if(!is_null($obj->RemoveIntermediateVersions)) $row['removeintermediateversions'] = ($obj->RemoveIntermediateVersions == true ? 'on' : '');
+		if(!is_null($obj->AutomaticallySendToNext))    $row['automaticallysendtonext']    = ($obj->AutomaticallySendToNext == true ? 'on' : '');
+		if(!is_null($obj->ReadyForPublishing))         $row['readyforpublishing']         = ($obj->ReadyForPublishing == true ? 'on' : '');
+		if(!is_null($obj->SkipIdsa))                   $row['skipidsa']                   = ($obj->SkipIdsa == true ? 'on' : '');
 		return $row;
 	}
 	
 	/**
-	 *  Converts a DB status record (array) into a admin status object.
-	 *  @param array $row DB status row
-	 *  @return object Admin status object
-	**/
-	static public function rowToObj( $row )
+	 * Converts a DB status record (array) into a admin status object.
+	 *
+	 * @param integer $pubId
+	 * @param integer $issueId
+	 * @param array $row DB status row
+	 * @return AdmStatus Admin status object
+	 */
+	static public function rowToObj( &$pubId, &$issueId, $row )
 	{
-		require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
-		$obj = new stdClass();
-		$obj->Id = $row['id'] ? $row['id'] : '';
-		$obj->PublicationId = $row['publication'] ? $row['publication'] : '';
-		$obj->Type = $row['type'] ? $row['type'] : '';
-		$obj->Phase = $row['phase'] ? $row['phase'] : '';
-		$obj->Name = $row['state'];
-		$obj->Produce = ( $row['produce'] == 'on' ? true : false );
-		$obj->Color = $row['color'] ? $row['color'] : '#A0A0A0';
-		$obj->NextStatusId = $row['nextstate'] ? $row['nextstate'] : '';
-		$obj->SortOrder = $row['code'];
-		$obj->IssueId = $row['issue'] ? $row['issue'] : '';
-		$obj->SectionId = $row['section'] ? $row['section'] : '';
-		$obj->DeadlineStatusId = $row['deadlinestate'] ? $row['deadlinestate'] : '';
-		$obj->DeadlineRelative = DateTimeFunctions::relativeDate( $row['deadlinerelative'] );
-		$obj->CreatePermanentVersion = ( $row['createpermanentversion'] == 'on' ? true : false );
-		$obj->RemoveIntermediateVersions = ( $row['removeintermediateversions'] == 'on' ? true : false );
-		$obj->AutomaticallySendToNext = ( $row['automaticallysendtonext'] == 'on' ? true : false );
-		$obj->ReadyForPublishing = ( $row['readyforpublishing'] == 'on' ? true : false );
+		require_once( BASEDIR . '/server/utils/DateTimeFunctions.class.php' );
+		require_once( BASEDIR . '/server/interfaces/services/adm/DataClasses.php' );
+
+		$pubId = $row['publication'];
+		$issueId = $row['issue'];
+
+		$obj = new AdmStatus();
+		$obj->Id          = intval($row['id']);
+		$obj->Type        = $row['type'];
+		$obj->Phase       = $row['phase'] ? $row['phase'] : '';
+		$obj->Name        = $row['state'];
+		$obj->Produce     = ($row['produce'] == 'on' ? true : false);
+		$obj->Color       = $row['color'] ? substr($row['color'], 1) : 'A0A0A0';
+		if( $row['nextstate'] ) {
+			$statusName = self::getStatusName( $row['nextstate'] );
+			if( $statusName ) {
+				$obj->NextStatus = new AdmIdName( intval($row['nextstate']), $statusName );
+			}
+		}
+		$obj->SortOrder   = intval($row['code']);
+		$obj->DeadlineRelative           = $row['deadlinerelative'];
+		$obj->CreatePermanentVersion     = ($row['createpermanentversion'] == 'on' ? true : false);
+		$obj->RemoveIntermediateVersions = ($row['removeintermediateversions'] == 'on' ? true : false);
+		$obj->AutomaticallySendToNext    = ($row['automaticallysendtonext'] == 'on' ? true : false);
+		$obj->ReadyForPublishing         = ($row['readyforpublishing'] == 'on' ? true : false);
 		$obj->SkipIdsa = ( $row['skipidsa'] == 'on' ? true : false );
 		return $obj;
 	}
 
 	/**
-	 *  Create a new admin status object without(!) storing at DB.
-	 *  @param string $id Status id
-	 *  @param array $name Status name
-	 *  @param array $color Status color
-	 *  @return object Admin status object
-	**/
+	 * Create a new admin status object without(!) storing at DB.
+	 *
+	 * @param integer $id Status id
+	 * @param string $name Status name
+	 * @param string $color Status color
+	 * @return AdmStatus Admin status object
+	 */
 	static public function newObject( $id, $name, $color )
 	{
-		$obj = new stdClass();
-		$obj->Id				= $id;
-		$obj->PublicationId		= null;
-		$obj->Type				= null;
-		$obj->Phase				= null;
-		$obj->Name				= $name;
-		$obj->Produce			= false;
-		$obj->Color				= $color;
-		$obj->NextStatusId		= null;
-		$obj->SortOrder			= null;
-		$obj->IssueId			= null;
-		$obj->SectionId			= null;
-		$obj->DeadlineStatusId	= null;
-		$obj->DeadlineRelative	= null;
-		$obj->CreatePermanentVersion     = false;
-		$obj->RemoveIntermediateVersions = false;
-		$obj->AutomaticallySendToNext    = false;
-		$obj->ReadyForPublishing         = false;
+		require_once BASEDIR .'/server/interfaces/services/adm/DataClasses.php';
+		$obj = new AdmStatus();
+		$obj->Id                = intval($id);
+		$obj->Type              = null;
+		$obj->Phase             = null;
+		$obj->Name              = $name;
+		$obj->Produce           = false;
+		$obj->Color             = $color;
+		$obj->NextStatus        = null;
+		$obj->SortOrder         = null;
+		$obj->DeadlineRelative  = null;
+		$obj->CreatePermanentVersion       = false;
+		$obj->RemoveIntermediateVersions   = false;
+		$obj->AutomaticallySendToNext      = false;
+		$obj->ReadyForPublishing           = false;
+		$obj->SkipIdsa                     = false;
 		return $obj;
 	}
 }

@@ -40,6 +40,5 @@ abstract class WflLogOn_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflLogOnRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

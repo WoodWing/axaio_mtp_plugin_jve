@@ -11,8 +11,7 @@ class DBQuery extends DBBase
 	private static $RegViews;
 
 	/**
-         * After the views have been used they must be dropped...
-         * @return nothing
+	 * After the views have been used they must be dropped...
 	 */
 	static public function dropRegisteredViews()
 	{
@@ -30,10 +29,10 @@ class DBQuery extends DBBase
 	}
 
 	/**
-         * Registers a view with the purpose of dropping it when finished.
-         * @param string $viewname Name of the view to register.
-         * When empty no view is added, but it is still valid to get the array of views.
-         * @return array of registered views.
+	 * Registers a view with the purpose of dropping it when finished.
+	 * @param string $viewname Name of the view to register.
+	 * When empty no view is added, but it is still valid to get the array of views.
+	 * @return array of registered views.
 	 */
 	static private function registerView($viewname = '')
 	{
@@ -847,9 +846,9 @@ class DBQuery extends DBBase
 	}
 
 	/**
-         * Gets the named query named $queryname from the database.
-         * @param string $queryname
-         * @return row containing the namedquery with $queryname
+	 * Gets the named query named $queryname from the database.
+	 * @param string $queryname
+	 * @return array row containing the namedquery with $queryname
 	 */
 	static public function getNamedQueryByName($queryname)
 	{
@@ -1018,7 +1017,6 @@ class DBQuery extends DBBase
 	 * @param bool $hierarchical true if it's a hierarchical query otherwise false
 	 * @param string $objectsWhere extra where clause for preselecting objects without WHERE itself
 	 * @param int	$accessRight Access right to check (database id of the right or 0 when to skip).
-	 * @return nothing
 	 */
 	static public function createAuthorizedObjectsView($shortusername, $deletedobjects = false, $params = null,
 													   $withclosed = false, $hierarchical = false, $objectsWhere = '',

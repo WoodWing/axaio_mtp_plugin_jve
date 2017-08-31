@@ -14,16 +14,20 @@ public class User  implements java.io.Serializable {
 
     private java.lang.String trackChangesColor;
 
+    private java.lang.String emailAddress;
+
     public User() {
     }
 
     public User(
            java.lang.String userID,
            java.lang.String fullName,
-           java.lang.String trackChangesColor) {
+           java.lang.String trackChangesColor,
+           java.lang.String emailAddress) {
            this.userID = userID;
            this.fullName = fullName;
            this.trackChangesColor = trackChangesColor;
+           this.emailAddress = emailAddress;
     }
 
 
@@ -86,6 +90,26 @@ public class User  implements java.io.Serializable {
         this.trackChangesColor = trackChangesColor;
     }
 
+
+    /**
+     * Gets the emailAddress value for this User.
+     * 
+     * @return emailAddress
+     */
+    public java.lang.String getEmailAddress() {
+        return emailAddress;
+    }
+
+
+    /**
+     * Sets the emailAddress value for this User.
+     * 
+     * @param emailAddress
+     */
+    public void setEmailAddress(java.lang.String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof User)) return false;
@@ -106,7 +130,10 @@ public class User  implements java.io.Serializable {
               this.fullName.equals(other.getFullName()))) &&
             ((this.trackChangesColor==null && other.getTrackChangesColor()==null) || 
              (this.trackChangesColor!=null &&
-              this.trackChangesColor.equals(other.getTrackChangesColor())));
+              this.trackChangesColor.equals(other.getTrackChangesColor()))) &&
+            ((this.emailAddress==null && other.getEmailAddress()==null) || 
+             (this.emailAddress!=null &&
+              this.emailAddress.equals(other.getEmailAddress())));
         __equalsCalc = null;
         return _equals;
     }
@@ -126,6 +153,9 @@ public class User  implements java.io.Serializable {
         }
         if (getTrackChangesColor() != null) {
             _hashCode += getTrackChangesColor().hashCode();
+        }
+        if (getEmailAddress() != null) {
+            _hashCode += getEmailAddress().hashCode();
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -154,6 +184,12 @@ public class User  implements java.io.Serializable {
         elemField.setXmlName(new javax.xml.namespace.QName("", "TrackChangesColor"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("emailAddress");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "EmailAddress"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
     }
 

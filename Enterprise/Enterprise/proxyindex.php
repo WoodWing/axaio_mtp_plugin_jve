@@ -908,7 +908,6 @@ class EnterpriseProxy_Server extends EnterpriseProxy_Data
 	 * Return the reponse as sent by Enterprise AS to the client. Based on the
 	 * headers sent by the stub header fields are set. The http body is set by
 	 * the content of the file sent either by Aspera or the file copy.
-	 * @return type 
 	 */
 	private function loadResponse()
 	{

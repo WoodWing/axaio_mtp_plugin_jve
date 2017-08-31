@@ -19,7 +19,7 @@ class SCEntMessenger
 	private $address = NULL;
 	private $port = NULL;
 
-	function SCEntMessenger($address = NULL, $port = NULL)
+	public function __construct($address = NULL, $port = NULL)
 	{
 		$this->address = $address;
 		$this->port = $port;

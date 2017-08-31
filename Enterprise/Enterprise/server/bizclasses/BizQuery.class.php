@@ -18,7 +18,7 @@ class BizQuery extends BizQueryBase
 	  * Determines the query order as preparation to {@link: queryObjects} function.
 	  * @param string $orderBy  The property to sort on
 	  * @param string $sortDir  'asc' or 'desc' or empty for none.
-	  * @return QueryOrder object or null for no sorting
+	  * @return QueryOrder[]|null List of one QueryOrder for sorting, or null for no sorting
 	**/
 	public static function getQueryOrder( $orderBy, $sortDir )
 	{
@@ -40,6 +40,7 @@ class BizQuery extends BizQueryBase
 	 * @param array $params List of query-parameters in fact containing where-statements
 	 * @param int $firstEntry Where to start fetching records
 	 * @param int $maxEntries How many records to fetch
+	 * @param bool $deletedobjects Whether or not also to search in the Trash Can
 	 * @param string $forceapp Application name to use the properties defined for that application or null for generic,
 	 *        determines the $mode if set.
 	 * @param bool $hierarchical When true return the objects as a tree instead of in a list
@@ -52,14 +53,16 @@ class BizQuery extends BizQueryBase
 	 *          1 = Listed in Search Results (View) right
 	 *          2 = Read right
 	 *          11 = List in Publication Overview
-	 * @return mixed
+	 * @return WflQueryObjectsResponse|WflNamedQueryResponse
 	 * @throws BizException
 	 * @deprecated since 10.2.0 Please use queryObjects2 instead.
 	 */
-	static public function queryObjects( $ticket, $user, $params, $firstEntry = null, $maxEntries = null, $deletedobjects = false, $forceapp = null, $hierarchical = false, $queryOrder = null, $minimalProps = null, $requestProps = null, $areas = null, $accessRight = 1 )
+	static public function queryObjects( $ticket, $user, $params, $firstEntry = null, $maxEntries = null, $deletedobjects = false,
+	                                     $forceapp = null, $hierarchical = false, $queryOrder = null, $minimalProps = null,
+	                                     $requestProps = null, $areas = null, $accessRight = 1 )
 	{
 		if( $deletedobjects == true ) {
-			if( !in_array( $areas, 'Trash' ) ) {
+			if( !in_array( 'Trash', $areas ) ) {
 				$areas[] = 'Trash';
 			}
 		}
@@ -362,7 +365,6 @@ class BizQuery extends BizQueryBase
 		}
 		$sqlStruct = self::buildSQLArray( $requestedPropNames, $params, $queryOrder, $deletedObjects );
 		if ( empty( $sqlStruct ) )  {
-			require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 			throw new BizException( 'ERR_INVALID_OPERATION', 'Server', 'Invalid sql in query');
 		}
 
@@ -406,8 +408,8 @@ class BizQuery extends BizQueryBase
 				self::getRows($topRows),
 				$hierarchical ? self::getChildColumns($topRows) : null ,
 				$hierarchical ? self::getChildRows($allChildRows) : null,
-				self::getComponentColumns( $componentRows ),
-				self::getComponents( $componentRows ),
+				$hierarchical ? self::getComponentColumns( $componentRows ) : null,
+				$hierarchical ? self::getComponents( $componentRows ) : null,
 				$firstEntry + 1,
 				count( $topRows ),
 				$topCount,
@@ -484,7 +486,7 @@ class BizQuery extends BizQueryBase
 	 * 			1 = Listed in Search Results (View) right
 	 * 			2 = Read right
 	 * 			11 = List in Publication Overview
-	 * @return WflQueryObjectsResponse	Response containing all requested information (rows)
+	 * @return array Child rows
 	 * @throws BizException
 	 * @throws Exception
 	 */
@@ -665,7 +667,6 @@ class BizQuery extends BizQueryBase
 			// Debug: Fail when property is unknown (but respect custom props)
 			if( LogHandler::debugMode() ) {
 				if( !array_key_exists( $propertyName, $objFields ) && stripos( $propertyName, 'c_' ) !== 0 ) {
-					require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 					throw new BizException( '', 'Server', '', __METHOD__.' - Querying for unknown property: '.$propertyName );
 				}
 			}
@@ -860,7 +861,6 @@ class BizQuery extends BizQueryBase
 		/*
 		if( LogHandler::debugMode() ) {
 			if( !isset($objFields[$propName]) && stripos( 'c_', $propName ) !== 0 ) {
-				require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 				throw new BizException( '', 'Server', '', __METHOD__.' - Querying for unknown property: '.$propName );
 			}
 		}
@@ -1664,7 +1664,6 @@ class BizQuery extends BizQueryBase
 	{
 		// Check Interval definition
 		if ( self::isProperDateTimeFormat($operation, $value) == false) {
-			require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 			throw new BizException( 'ERR_ARGUMENT', 'Client', $operation . " " . $value);
 		}
 

@@ -19,7 +19,7 @@ class AdmIdName
 
 	/**
 	 * @param integer              $Id                   
-	 * @param string               $Name                 
+	 * @param string               $Name                 Nullable.
 	 */
 	public function __construct( $Id=null, $Name=null)
 	{
@@ -32,6 +32,33 @@ class AdmIdName
 	public function sanitizeProperties4Php()
 	{
 		if (is_nan($this->Id)){ $this->Id = null; }
+	}
+}
+class AdmObjectInfo
+{
+	public $ID;
+	public $Name;
+	public $Type;
+	public $Format;
+
+	/**
+	 * @param string               $ID                   
+	 * @param string               $Name                 
+	 * @param string               $Type                 
+	 * @param string               $Format               Nullable.
+	 */
+	public function __construct( $ID=null, $Name=null, $Type=null, $Format=null)
+	{
+		$this->ID                   = $ID;
+		$this->Name                 = $Name;
+		$this->Type                 = $Type;
+		$this->Format               = $Format;
+	}
+
+	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.adm.dataclasses.AdmObjectInfo'; } // AMF object type mapping
+
+	public function sanitizeProperties4Php()
+	{
 	}
 }
 class AdmUser
@@ -321,6 +348,7 @@ class AdmPubChannel
 	public $Name;
 	public $Type;
 	public $Description;
+	public $SortOrder;
 	public $PublishSystem;
 	public $PublishSystemId;
 	public $CurrentIssueId;
@@ -337,6 +365,7 @@ class AdmPubChannel
 	 * @param string               $Name                 Nullable.
 	 * @param string               $Type                 Nullable.
 	 * @param string               $Description          Nullable.
+	 * @param integer              $SortOrder            Nullable.
 	 * @param string               $PublishSystem        Nullable.
 	 * @param string               $PublishSystemId      Nullable.
 	 * @param integer              $CurrentIssueId       Nullable.
@@ -348,12 +377,13 @@ class AdmPubChannel
 	 * @param AdmIdName[]          $Editions             Nullable.
 	 * @param boolean              $SupportsCropping     Nullable.
 	 */
-	public function __construct( $Id=null, $Name=null, $Type=null, $Description=null, $PublishSystem=null, $PublishSystemId=null, $CurrentIssueId=null, $SuggestionProvider=null, $ExtraMetaData=null, $DirectPublish=null, $SupportsForms=null, $Issues=null, $Editions=null, $SupportsCropping=null)
+	public function __construct( $Id=null, $Name=null, $Type=null, $Description=null, $SortOrder=null, $PublishSystem=null, $PublishSystemId=null, $CurrentIssueId=null, $SuggestionProvider=null, $ExtraMetaData=null, $DirectPublish=null, $SupportsForms=null, $Issues=null, $Editions=null, $SupportsCropping=null)
 	{
 		$this->Id                   = $Id;
 		$this->Name                 = $Name;
 		$this->Type                 = $Type;
 		$this->Description          = $Description;
+		$this->SortOrder            = $SortOrder;
 		$this->PublishSystem        = $PublishSystem;
 		$this->PublishSystemId      = $PublishSystemId;
 		$this->CurrentIssueId       = $CurrentIssueId;
@@ -371,6 +401,7 @@ class AdmPubChannel
 	public function sanitizeProperties4Php()
 	{
 		if (is_nan($this->Id)){ $this->Id = null; }
+		if (is_nan($this->SortOrder)){ $this->SortOrder = null; }
 		if (is_nan($this->CurrentIssueId)){ $this->CurrentIssueId = null; }
 		if (!is_null($this->DirectPublish)){ $this->DirectPublish = ('true' == $this->DirectPublish) ? true : false; }
 		if (!is_null($this->SupportsForms)){ $this->SupportsForms = ('true' == $this->SupportsForms) ? true : false; }
@@ -645,7 +676,8 @@ class AdmStatus
 	public $Type;
 	public $Produce;
 	public $Color;
-	public $DefaultRouteTo;
+	public $DeadlineRelative;
+	public $NextStatus;
 	public $CreatePermanentVersion;
 	public $RemoveIntermediateVersions;
 	public $AutomaticallySendToNext;
@@ -660,7 +692,8 @@ class AdmStatus
 	 * @param string               $Type                 Nullable.
 	 * @param boolean              $Produce              Nullable.
 	 * @param string               $Color                Nullable.
-	 * @param AdmIdName            $DefaultRouteTo       Nullable.
+	 * @param int                  $DeadlineRelative     Nullable.
+	 * @param AdmIdName            $NextStatus           Nullable.
 	 * @param boolean              $CreatePermanentVersion Nullable.
 	 * @param boolean              $RemoveIntermediateVersions Nullable.
 	 * @param boolean              $AutomaticallySendToNext Nullable.
@@ -668,7 +701,7 @@ class AdmStatus
 	 * @param string               $Phase                Nullable.
 	 * @param boolean              $SkipIdsa             Nullable.
 	 */
-	public function __construct( $Id=null, $Name=null, $SortOrder=null, $Type=null, $Produce=null, $Color=null, $DefaultRouteTo=null, $CreatePermanentVersion=null, $RemoveIntermediateVersions=null, $AutomaticallySendToNext=null, $ReadyForPublishing=null, $Phase=null, $SkipIdsa=null)
+	public function __construct( $Id=null, $Name=null, $SortOrder=null, $Type=null, $Produce=null, $Color=null, $DeadlineRelative=null, $NextStatus=null, $CreatePermanentVersion=null, $RemoveIntermediateVersions=null, $AutomaticallySendToNext=null, $ReadyForPublishing=null, $Phase=null, $SkipIdsa=null)
 	{
 		$this->Id                   = $Id;
 		$this->Name                 = $Name;
@@ -676,7 +709,8 @@ class AdmStatus
 		$this->Type                 = $Type;
 		$this->Produce              = $Produce;
 		$this->Color                = $Color;
-		$this->DefaultRouteTo       = $DefaultRouteTo;
+		$this->DeadlineRelative     = $DeadlineRelative;
+		$this->NextStatus           = $NextStatus;
 		$this->CreatePermanentVersion = $CreatePermanentVersion;
 		$this->RemoveIntermediateVersions = $RemoveIntermediateVersions;
 		$this->AutomaticallySendToNext = $AutomaticallySendToNext;
@@ -691,15 +725,167 @@ class AdmStatus
 	{
 		if (is_nan($this->Id)){ $this->Id = null; }
 		if (is_nan($this->SortOrder)){ $this->SortOrder = null; }
+		if (is_nan($this->DeadlineRelative)){ $this->DeadlineRelative = null; }
 		if (!is_null($this->Produce)){ $this->Produce = ('true' == $this->Produce) ? true : false; }
 		if (!is_null($this->CreatePermanentVersion)){ $this->CreatePermanentVersion = ('true' == $this->CreatePermanentVersion) ? true : false; }
 		if (!is_null($this->RemoveIntermediateVersions)){ $this->RemoveIntermediateVersions = ('true' == $this->RemoveIntermediateVersions) ? true : false; }
 		if (!is_null($this->AutomaticallySendToNext)){ $this->AutomaticallySendToNext = ('true' == $this->AutomaticallySendToNext) ? true : false; }
 		if (!is_null($this->ReadyForPublishing)){ $this->ReadyForPublishing = ('true' == $this->ReadyForPublishing) ? true : false; }
 		if (!is_null($this->SkipIdsa)){ $this->SkipIdsa = ('true' == $this->SkipIdsa) ? true : false; }
-		if( is_object( $this->DefaultRouteTo ) ) {
-			$this->DefaultRouteTo->sanitizeProperties4Php();
+		if( is_object( $this->NextStatus ) ) {
+			$this->NextStatus->sanitizeProperties4Php();
 		}
+	}
+}
+class AdmAccessProfile
+{
+	public $Id;
+	public $Name;
+	public $SortOrder;
+	public $Description;
+	public $ProfileFeatures;
+
+	/**
+	 * @param integer              $Id                   Nullable.
+	 * @param string               $Name                 Nullable.
+	 * @param integer              $SortOrder            Nullable.
+	 * @param string               $Description          Nullable.
+	 * @param AdmProfileFeature[]  $ProfileFeatures      Nullable.
+	 */
+	public function __construct( $Id=null, $Name=null, $SortOrder=null, $Description=null, $ProfileFeatures=null)
+	{
+		$this->Id                   = $Id;
+		$this->Name                 = $Name;
+		$this->SortOrder            = $SortOrder;
+		$this->Description          = $Description;
+		$this->ProfileFeatures      = $ProfileFeatures;
+	}
+
+	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.adm.dataclasses.AdmAccessProfile'; } // AMF object type mapping
+
+	public function sanitizeProperties4Php()
+	{
+		if (is_nan($this->Id)){ $this->Id = null; }
+		if (is_nan($this->SortOrder)){ $this->SortOrder = null; }
+		if (0 < count($this->ProfileFeatures)){
+			if (is_object($this->ProfileFeatures[0])){
+				foreach ($this->ProfileFeatures as $complexField){
+					$complexField->sanitizeProperties4Php();
+				}
+			}
+		}
+	}
+}
+class AdmProfileFeature
+{
+	public $Name;
+	public $DisplayName;
+	public $Value;
+
+	/**
+	 * @param string               $Name                 
+	 * @param string               $DisplayName          Nullable.
+	 * @param string               $Value                
+	 */
+	public function __construct( $Name=null, $DisplayName=null, $Value=null)
+	{
+		$this->Name                 = $Name;
+		$this->DisplayName          = $DisplayName;
+		$this->Value                = $Value;
+	}
+
+	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.adm.dataclasses.AdmProfileFeature'; } // AMF object type mapping
+
+	public function sanitizeProperties4Php()
+	{
+	}
+}
+class AdmWorkflowUserGroupAuthorization
+{
+	public $Id;
+	public $UserGroupId;
+	public $SectionId;
+	public $StatusId;
+	public $AccessProfileId;
+
+	/**
+	 * @param integer              $Id                   Nullable.
+	 * @param integer              $UserGroupId          
+	 * @param integer              $SectionId            Nullable.
+	 * @param integer              $StatusId             Nullable.
+	 * @param integer              $AccessProfileId      
+	 */
+	public function __construct( $Id=null, $UserGroupId=null, $SectionId=null, $StatusId=null, $AccessProfileId=null)
+	{
+		$this->Id                   = $Id;
+		$this->UserGroupId          = $UserGroupId;
+		$this->SectionId            = $SectionId;
+		$this->StatusId             = $StatusId;
+		$this->AccessProfileId      = $AccessProfileId;
+	}
+
+	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.adm.dataclasses.AdmWorkflowUserGroupAuthorization'; } // AMF object type mapping
+
+	public function sanitizeProperties4Php()
+	{
+		if (is_nan($this->Id)){ $this->Id = null; }
+		if (is_nan($this->UserGroupId)){ $this->UserGroupId = null; }
+		if (is_nan($this->SectionId)){ $this->SectionId = null; }
+		if (is_nan($this->StatusId)){ $this->StatusId = null; }
+		if (is_nan($this->AccessProfileId)){ $this->AccessProfileId = null; }
+	}
+}
+class AdmRouting
+{
+	public $Id;
+	public $SectionId;
+	public $StatusId;
+	public $RouteTo;
+
+	/**
+	 * @param integer              $Id                   Nullable.
+	 * @param integer              $SectionId            Nullable.
+	 * @param integer              $StatusId             Nullable.
+	 * @param string               $RouteTo              
+	 */
+	public function __construct( $Id=null, $SectionId=null, $StatusId=null, $RouteTo=null)
+	{
+		$this->Id                   = $Id;
+		$this->SectionId            = $SectionId;
+		$this->StatusId             = $StatusId;
+		$this->RouteTo              = $RouteTo;
+	}
+
+	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.adm.dataclasses.AdmRouting'; } // AMF object type mapping
+
+	public function sanitizeProperties4Php()
+	{
+		if (is_nan($this->Id)){ $this->Id = null; }
+		if (is_nan($this->SectionId)){ $this->SectionId = null; }
+		if (is_nan($this->StatusId)){ $this->StatusId = null; }
+	}
+}
+class AdmTemplateObjectAccess
+{
+	public $TemplateObjectId;
+	public $UserGroupId;
+
+	/**
+	 * @param integer              $TemplateObjectId     
+	 * @param integer              $UserGroupId          
+	 */
+	public function __construct( $TemplateObjectId=null, $UserGroupId=null)
+	{
+		$this->TemplateObjectId     = $TemplateObjectId;
+		$this->UserGroupId          = $UserGroupId;
+	}
+
+	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.adm.dataclasses.AdmTemplateObjectAccess'; } // AMF object type mapping
+
+	public function sanitizeProperties4Php()
+	{
+		if (is_nan($this->TemplateObjectId)){ $this->TemplateObjectId = null; }
+		if (is_nan($this->UserGroupId)){ $this->UserGroupId = null; }
 	}
 }
 class AdmTermEntity

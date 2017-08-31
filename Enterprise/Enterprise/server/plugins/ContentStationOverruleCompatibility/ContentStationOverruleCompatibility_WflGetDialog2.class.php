@@ -163,7 +163,6 @@ class ContentStationOverruleCompatibility_WflGetDialog2 extends WflGetDialog2_En
 
 		// Populate the overrule issue(s) into dialog-widget['Publication']
 		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-		require_once( BASEDIR . '/server/bizclasses/BizSession.class.php' );
 		$user = BizSession::getShortUserName();
 		if( $resp->Dialog->Tabs )foreach( $resp->Dialog->Tabs as $tab ){
 			if( $tab->Widgets ) foreach( $tab->Widgets as $dialogWidget ){

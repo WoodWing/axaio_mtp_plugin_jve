@@ -248,8 +248,6 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 			throw new BizException(null, 'Server', null, 'This Dossier has not been published yet and therefore cannot be updated.');
 		}
 
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-
 		$valueArray = $this->callRpcService( 'enterprise.saveNode'
 			, array(
 			       array(
@@ -548,7 +546,6 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 		try {
 			// Now it's time to upload the file to Drupal ...
 			require_once 'Zend/Http/Client.php';
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			$client = $this->createHttpClient( $this->url.'ww_enterprise/upload', $this->certificate);
 			$client->setHeaders('Authorization', $this->authentication );
 			// We need to send them as GET parameters, because Zend is including them in the signature when the enctype is set to
@@ -572,7 +569,6 @@ class WW_Plugins_Drupal8_XmlRpcClient extends WW_Utils_XmlRpcClient
 			LogHandler::Log( 'Drupal', 'DEBUG', 'File sent to drupal. File Id: ' . $fileId );
 
 		} catch( Exception $e ) { // any kind of Zend exception !!
-			// Nothing to do.
 		}
 
 		// Log request and response (or fault) as plain text

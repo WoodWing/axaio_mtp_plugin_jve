@@ -81,8 +81,7 @@ abstract class AdminProperties_EnterpriseConnector extends DefaultConnector
 	 */
 	public function collectDialogWidgetsForContext( AdminProperties_Context $context, $entity, $action ) 
 	{ 
-		$context = $context; $entity = $entity; $action = $action; // keep code analyzer happy
-		return null; 
+		return null;
 	}
 	
 	/**

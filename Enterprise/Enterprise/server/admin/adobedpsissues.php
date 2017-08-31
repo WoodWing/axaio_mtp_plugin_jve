@@ -4,7 +4,6 @@ require_once dirname(__FILE__).'/../../config/config.php';
 require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/admin/global_inc.php';
 require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
 // Check the ticket and Determine the user.

@@ -77,7 +77,6 @@ if( !isset($_REQUEST['ID']) || empty($_REQUEST['ID']) ||
 	try {
 		$rendition = isset($_REQUEST['rendition']) ? $_REQUEST['rendition'] : 'native';
 		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$object = BizObject::getObject( $_REQUEST['ID'], $globUser, false, $rendition, null );
 	} catch( BizException $e ) {
 		print '<html><body>ERROR: Could not get object from database. ('.$e->getMessage().')</body></html>';

@@ -26,8 +26,7 @@ class AxaioMadeToPrint_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 	{
 		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Called: AxaioMadeToPrint_WflSaveObjects->runBefore()' );
 		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; // keep code analyzer happy
-		
+
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_AFTER with RUNMODE_AFTER when this hook is not needed.
 
@@ -39,8 +38,6 @@ class AxaioMadeToPrint_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Called: AxaioMadeToPrint_WflSaveObjects->runAfter()' );
 		require_once dirname(__FILE__) . '/config.php';
 		require_once dirname(__FILE__) . '/AxaioMadeToPrintDispatcher.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-		$req = $req; $resp = $resp; // keep code analyzer happy
 
 		$ticket = BizSession::getTicket();
 		foreach($resp->Objects as $respArrKey => $respArrValue)
@@ -59,6 +56,5 @@ class AxaioMadeToPrint_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 	// Not called.
 	final public function runOverruled( WflSaveObjectsRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
-	} 
+	}
 }

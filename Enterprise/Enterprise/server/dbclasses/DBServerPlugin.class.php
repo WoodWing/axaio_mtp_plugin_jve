@@ -37,7 +37,7 @@ class DBServerPlugin extends DBBase
 	 *  Retrieves one server plugin object from DB
 	 *
 	 * @param PluginInfoData $plugin Plugin object (PluginInfoData) to be retrieved from DB
-	 * @return object of PluginInfoData if succeeded, null if no record returned
+	 * @return PluginInfoData|null The plugin data, or null if not found
 	 */
 	static public function getPlugin( PluginInfoData $plugin )
 	{

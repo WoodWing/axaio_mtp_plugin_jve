@@ -27,7 +27,6 @@ class RefreshRemoteTicket_Session extends Session_EnterpriseConnector
 		LogHandler::Log( 'RefreshRemoteTicket', 'DEBUG', 'Service name (context): '.$serviceName );
 		
 		// Retrieve session variables and keep track of our session counter and 'remote' ticket.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$sessionVars = BizSession::getSessionVariables();
 		if( !isset( $sessionVars['RefreshRemoteTicket'] ) ) {
 			require_once BASEDIR.'/server/utils/NumberUtils.class.php';

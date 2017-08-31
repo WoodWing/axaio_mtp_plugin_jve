@@ -62,7 +62,7 @@ class smartevent
 	private $type;
 	/** @var string[] $flds Key-value map containing the fields for a message.  */
 	private $flds = array();
-	/** @var string[] $potentialLargeFields Key-value map containing the fields for a message that can be potentially large.  */
+	/** @var array $potentialLargeFields Key-value map containing the fields for a message that can be potentially large.  */
 	private $potentialLargeFields = array();
 	/** @var string $exchangeName Message exchange whereto the message must be published. */
 	private $exchangeName = null;

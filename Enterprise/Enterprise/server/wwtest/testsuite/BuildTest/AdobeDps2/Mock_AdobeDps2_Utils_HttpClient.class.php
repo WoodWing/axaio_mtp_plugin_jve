@@ -63,7 +63,7 @@ class Mock_AdobeDps2_Utils_HttpClient extends AdobeDps2_Utils_HttpClient
 	 * @param string $serviceName The name of the service to call.
 	 * @param array $request An array of request parameters.
 	 *
-	 * @return null|string|void|Zend_Http_Response
+	 * @return null|string|Zend_Http_Response
 	 */
 	protected function callService( Zend_Http_Client $httpClient, $serviceName, array $request )
 	{

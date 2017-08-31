@@ -15,9 +15,12 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmBrands_TestCase extends 
 	public function getTestMethods() { return 'Call admin brand services with initial property values, modified property values, and delete the created publication'; }
     public function getPrio()        { return 110; }
 
+    /** @var AdmPublication $publication  */
 	private $publication = null; // AdmPublication
-	private $ticket = null; // string, session ticket for admin user
-	private $utils = null; // WW_Utils_TestSuite
+	/** @var string $ticket session ticket for admin user */
+	private $ticket = null;
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 
 	final public function runTest()
 	{
@@ -25,6 +28,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmBrands_TestCase extends 
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		// Retrieve the Ticket that has been determined by AdmInitData TestCase.
    		$vars = $this->getSessionVariables();

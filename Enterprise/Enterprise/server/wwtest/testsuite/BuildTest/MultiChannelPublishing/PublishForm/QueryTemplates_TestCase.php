@@ -136,7 +136,9 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_QueryTemplates_T
 	/**
 	 * Validate the WflNamedQueryResponse result
 	 *
+	 * @param bool $expectedTemplates
 	 * @param object $response WflNamedQueryResponse object
+	 * @param integer $numberTemplatesExpected
 	 * @return boolean 
 	 */
 	private function validateNamedQueryResp( $response, $expectedTemplates = true, $numberTemplatesExpected = null )

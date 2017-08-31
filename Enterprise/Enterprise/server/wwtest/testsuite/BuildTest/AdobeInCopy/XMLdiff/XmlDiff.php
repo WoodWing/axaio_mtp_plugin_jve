@@ -265,6 +265,7 @@ class XmlDiff
 			$regexp_matches = array();
 			// get new node xpath expression
 			preg_match( '/(\w+)\[(\d+)\]$/', $node->getXPath(), $regexp_matches ); // name[pos]
+			$pos = null;
 			if (!empty($regexp_matches)) {
 				$pos  = $regexp_matches[2];
 				$name = $regexp_matches[1];
@@ -314,4 +315,3 @@ class XmlDiff
 		}
 	}
 }
-?>

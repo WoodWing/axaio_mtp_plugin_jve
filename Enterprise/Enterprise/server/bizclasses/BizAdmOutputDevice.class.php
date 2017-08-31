@@ -27,9 +27,9 @@ class BizAdmOutputDevice
 	 * ALso a Feature named 'DigitalMagazine' is added which is a collection of all device ids added.
 	 * This option is only added when the DM plugin or DPS plug-in is enabled.
 	 *
-	 * @param array List of Feature data objects to be enriched.
+	 * @param ServerInfo $serverInfo Holds a FeatureSet to be enriched.
 	 */
-	public function addFeatureOutputDevices( &$features )
+	public function addFeatureOutputDevices( ServerInfo $serverInfo )
 	{
 		// The 'DigitalMagazine' option is an indication that DPS is enabled.
 		// Therefore we only add it when one of the plugins are enabled.
@@ -44,25 +44,25 @@ class BizAdmOutputDevice
 		$ids = array();
 		if( $devices ) foreach( $devices as $device ) {
 			$id = $device->Id;
-			$features[] = new Feature( 'DigitalMagazineDevice_Name_'.$id, $device->Name );
-			
-			$features[] = new Feature( 'DigitalMagazineDevice_PortraitDeviceWidth_'.$id, $device->PortraitWidth );
-			$features[] = new Feature( 'DigitalMagazineDevice_PortraitDeviceHeight_'.$id, $device->PortraitHeight );
-			$features[] = new Feature( 'DigitalMagazineDevice_LandscapeDeviceWidth_'.$id, $device->LandscapeWidth );
-			$features[] = new Feature( 'DigitalMagazineDevice_LandscapeDeviceHeight_'.$id, $device->LandscapeHeight );
-			
-			$features[] = new Feature( 'DigitalMagazineDevice_PixelDensity_'.$id, $device->PixelDensity );
-			$features[] = new Feature( 'DigitalMagazineDevice_PreviewQuality_'.$id, $device->PreviewQuality );
-			$features[] = new Feature( 'DigitalMagazineDevice_LandscapeLayoutWidth_'.$id, $device->LandscapeLayoutWidth );
-			
-			$features[] = new Feature( 'DigitalMagazineDevice_TextViewPadding_'.$id, $device->TextViewPadding );
-			$features[] = new Feature( 'DigitalMagazineDevice_PNGCompression_'.$id, $device->PngCompression );
+			$serverInfo->FeatureSet[] = new Feature( 'DigitalMagazineDevice_Name_'.$id, $device->Name );
+
+			$serverInfo->FeatureSet[] = new Feature( 'DigitalMagazineDevice_PortraitDeviceWidth_'.$id, $device->PortraitWidth );
+			$serverInfo->FeatureSet[] = new Feature( 'DigitalMagazineDevice_PortraitDeviceHeight_'.$id, $device->PortraitHeight );
+			$serverInfo->FeatureSet[] = new Feature( 'DigitalMagazineDevice_LandscapeDeviceWidth_'.$id, $device->LandscapeWidth );
+			$serverInfo->FeatureSet[] = new Feature( 'DigitalMagazineDevice_LandscapeDeviceHeight_'.$id, $device->LandscapeHeight );
+
+			$serverInfo->FeatureSet[] = new Feature( 'DigitalMagazineDevice_PixelDensity_'.$id, $device->PixelDensity );
+			$serverInfo->FeatureSet[] = new Feature( 'DigitalMagazineDevice_PreviewQuality_'.$id, $device->PreviewQuality );
+			$serverInfo->FeatureSet[] = new Feature( 'DigitalMagazineDevice_LandscapeLayoutWidth_'.$id, $device->LandscapeLayoutWidth );
+
+			$serverInfo->FeatureSet[] = new Feature( 'DigitalMagazineDevice_TextViewPadding_'.$id, $device->TextViewPadding );
+			$serverInfo->FeatureSet[] = new Feature( 'DigitalMagazineDevice_PNGCompression_'.$id, $device->PngCompression );
 			
 			$ids[] = $id;
 		}
 		// Always add since the plugins are enabled and so we need to tell our clients. 
 		// So, no matter if devices are found or not.
-		$features[] = new Feature( 'DigitalMagazine', implode( ',' , $ids ) );
+		$serverInfo->FeatureSet[] = new Feature( 'DigitalMagazine', implode( ',' , $ids ) );
 
 		// TODO: Let the plugins enrich the Feature list instead.
 	}
@@ -192,10 +192,10 @@ class BizAdmOutputDevice
 		require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBEdition.class.php';
 		$channelId = DBIssue::getChannelId( $issueId );
-		$editions = DBEdition::listChannelEditions( $channelId );
+		$editions = DBEdition::listChannelEditionsObj( $channelId );
 		$enabledDeviceNames = array();
 		if( $editions ) foreach( $editions as $edition ) {
-			$enabledDeviceNames[] = $edition['name'];
+			$enabledDeviceNames[] = $edition->Name;
 		}
 		$numberOfEditions = count( $enabledDeviceNames );
 

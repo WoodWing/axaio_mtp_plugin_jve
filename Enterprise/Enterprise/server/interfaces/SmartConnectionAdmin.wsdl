@@ -16,12 +16,12 @@
 -->
 
 <wsdl:definitions
-	targetNamespace="urn:SmartConnectionAdmin"
-	xmlns:tns="urn:SmartConnectionAdmin"
-	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-	xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/">
+		targetNamespace="urn:SmartConnectionAdmin"
+		xmlns:tns="urn:SmartConnectionAdmin"
+		xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+		xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/">
 
 
 	<!-- >>>>>>>>>>>>>>>>>>>>>>>>>>>> TYPES  <<<<<<<<<<<<<<<<<<<<<<<<<<< -->
@@ -79,7 +79,7 @@
 					<xsd:enumeration value="print"/>
 					<xsd:enumeration value="web"/>
 					<xsd:enumeration value="sms"/>
-					<xsd:enumeration value="dps"/>    <!-- v7.5 Digital Publishing System -->
+					<xsd:enumeration value="dps"/>      <!-- v7.5 Digital Publishing System -->
 					<xsd:enumeration value="dps2"/>   <!-- v9.6 Adobe DPS (2015) integration -->
 					<xsd:enumeration value="other"/>
 				</xsd:restriction>
@@ -113,6 +113,8 @@
 					<xsd:enumeration value="GetStatuses"/>     <!-- request for related statuses (if any) -->
 					<xsd:enumeration value="GetUsers"/>        <!-- request for related users (if any) -->
 					<xsd:enumeration value="GetUserGroups"/>   <!-- request for related user groups (if any) -->
+					<xsd:enumeration value="GetProfileFeatures"/> <!-- request for related profile features (if any) -->
+					<xsd:enumeration value="GetObjectInfos"/>  <!-- request for related objects (if any) -->
 				</xsd:restriction>
 			</xsd:simpleType>
 			<xsd:complexType name="ArrayOfMode">
@@ -139,7 +141,7 @@
 			<xsd:complexType name="IdName">
 				<xsd:all>
 					<xsd:element name="Id"   type="xsd:integer"/>
-					<xsd:element name="Name" type="xsd:string"/>
+					<xsd:element name="Name" type="xsd:string" nillable="true"/>
 				</xsd:all>
 			</xsd:complexType>
 			<xsd:complexType name="ArrayOfIdName">
@@ -159,6 +161,25 @@
 					<xsd:enumeration value="Archived"/>
 				</xsd:restriction>
 			</xsd:simpleType>
+
+			<!-- v10.2: Describes simple object properties. -->
+			<complexType name="ObjectInfo">
+				<all>
+					<element name="ID" type="xsd:string"/>
+					<element name="Name" type="xsd:string"/>
+					<element name="Type" type="tns:ObjectType"/>
+					<element name="Format" type="xsd:string" nillable="true"/> <!-- Object's native file format. -->
+				</all>
+			</complexType>
+
+			<complexType name="ArrayOfObjectInfo">
+				<complexContent>
+					<restriction base="soap-enc:Array">
+						<attribute ref="soap-enc:arrayType" wsdl:arrayType="tns:ObjectInfo[]"/>
+					</restriction>
+				</complexContent>
+			</complexType>
+
 
 			<!--************* LOGON/LOGOFF - COMPLEX TYPES *****************-->
 
@@ -681,6 +702,7 @@
 					<!-- properties (read/write) -->
 					<xsd:element name="Type"              type="tns:PubChannelType" nillable="true"/>
 					<xsd:element name="Description"       type="xsd:string"         nillable="true"/>
+					<xsd:element name="SortOrder"         type="xsd:unsignedInt"    nillable="true"/>   <!-- v10.2 sort index for pubchannel -->
 					<xsd:element name="PublishSystem"     type="xsd:string"         nillable="true" minOccurs="0" maxOccurs="1"/>  <!-- v9.0: Type of the publishing system. Use to identify the publishing connector. -->
 					<xsd:element name="PublishSystemId"   type="xsd:string"         nillable="true" minOccurs="0" maxOccurs="1"/>  <!-- v9.1: Unique id of the publishing system. Use to bind the publishing storage. -->
 					<xsd:element name="CurrentIssueId"    type="xsd:integer"        nillable="true" minOccurs="0" maxOccurs="1"/>  <!-- v9.0  -->
@@ -1146,20 +1168,22 @@
 			<xsd:complexType name="Status">
 				<xsd:all>
 					<!-- identification (id and/or name should be given) -->
-					<xsd:element name="Id"              type="xsd:integer"      nillable="true" />  <!-- unique db id -->
-					<xsd:element name="Name"            type="xsd:string"       nillable="true" />  <!-- unique name -->
+					<xsd:element name="Id"              type="xsd:integer"      nillable="true" />   <!-- unique db id -->
+					<xsd:element name="Name"            type="xsd:string"       nillable="true" />   <!-- unique name -->
 					<!-- properties (read/write) -->
-					<xsd:element name="SortOrder"       type="xsd:unsignedInt"   nillable="true"/>  <!-- sort index for status -->
-					<xsd:element name="Type"            type="tns:ObjectType"    nillable="true"/>  <!-- object type; empty means 'for all types' -->
-					<xsd:element name="Produce"         type="xsd:boolean"       nillable="true"/>  <!-- If true for layouts, output will be send if set in featurelist -->
-					<xsd:element name="Color"           type="tns:Color"         nillable="true"/>  <!-- RGB color of status to show in GUI -->
-					<xsd:element name="DefaultRouteTo"  type="tns:IdName"        nillable="true"/>  <!-- default route to for this status -->
+					<xsd:element name="SortOrder"       type="xsd:unsignedInt"  nillable="true"/>    <!-- sort index for status -->
+					<xsd:element name="Type"            type="tns:ObjectType"   nillable="true"/>    <!-- object type; empty means 'for all types' -->
+					<xsd:element name="Produce"         type="xsd:boolean"      nillable="true"/>    <!-- If true for layouts, output will be send if set in featurelist -->
+					<xsd:element name="Color"           type="tns:Color"        nillable="true"/>    <!-- RGB color of status to show in GUI -->
+					<xsd:element name="DeadlineRelative"  type="xsd:int"        nillable="true"/>    <!-- Deadline Relative for Edition -->
+					<!-- DefaultRouteTo not implemented here. Is only used for workflow objects -->
+					<xsd:element name="NextStatus"      type="tns:IdName"       nillable="true"/>    <!-- Points to the next state in the flow, nil when there is no next state -->
 					<xsd:element name="CreatePermanentVersion"     type="xsd:boolean" nillable="true"/> <!-- If true for layouts, output will be send if set in featurelist -->
 					<xsd:element name="RemoveIntermediateVersions" type="xsd:boolean" nillable="true"/> <!-- If true for layouts, output will be send if set in featurelist -->
 					<xsd:element name="AutomaticallySendToNext"    type="xsd:boolean" nillable="true"/> <!-- If true for layouts, output will be send if set in featurelist -->
 					<xsd:element name="ReadyForPublishing" type="xsd:boolean" nillable="true"/>         <!-- If true for Dossier or PublishForm, these objects are ready to be Published -->
 					<xsd:element name="Phase"           type="tns:StatusPhase"   nillable="true" minOccurs="0" maxOccurs="1"/>  <!-- v9.4: Phase of which the status resides in during the workflow -->
-					<xsd:element name="SkipIdsa"         type="xsd:boolean"       nillable="true" minOccurs="0" maxOccurs="1"/>  <!-- If true for layout(module), no InDesign Server job is created -->
+					<xsd:element name="SkipIdsa"        type="xsd:boolean"       nillable="true" minOccurs="0" maxOccurs="1"/>  <!-- If true for layout(module), no InDesign Server job is created -->
 				</xsd:all>
 			</xsd:complexType>
 			<xsd:complexType name="ArrayOfStatus">
@@ -1170,75 +1194,615 @@
 				</complexContent>
 			</xsd:complexType>
 
-			<!-- Retrieve a status configuration from server. -->
+			<!-- v10.2 Create a status configuration at server. -->
+			<xsd:element name="CreateStatusesRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- admin user's session ticket -->
+						<xsd:element name="PublicationId" type="xsd:integer" nillable="true"/>       <!-- unique publication identification (can be nil when IssueId is given) -->
+						<xsd:element name="IssueId"       type="xsd:integer" nillable="true"/>       <!-- unique issue identification (nil when OverrulePublication disabled) -->
+						<xsd:element name="Statuses"      type="tns:ArrayOfStatus" nillable="true"/> <!-- list of statuses without ids -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="CreateStatusesResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Statuses"      type="tns:ArrayOfStatus"/>                 <!-- list of created statuses -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!-- v10.2 Retrieve one or more statuses from the server.
+				 There are several constraints on this request:
+				 - Either a PublicationId, an IssueId or StatusIds have to be provided. No combination of these is necessary.
+				 - StatusIds can only contain ids of statuses that are part of the same issue or the same brand.
+				 	(Meaning that if you have StatusIds of the same brand, but some are actually part of an overruling issue, this request will be illegal)
+				 - If a PublicationId/IssueId has been provided along with StatusIds, these will need to match with the PublicationId/IssueId of the StatusIds.
+				 - ObjectType is merely used as an extra constraint to further specify the results. -->
 			<xsd:element name="GetStatusesRequest">
 				<xsd:complexType>
 					<xsd:sequence>
 						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- admin user's session ticket -->
-						<xsd:element name="RequestModes"  type="tns:ArrayOfMode"/>                   <!-- asks for relations -->
-						<xsd:element name="PublicationId" type="xsd:integer"/>                       <!-- unique publication identification -->
-						<xsd:element name="IssueId"       type="xsd:integer"/>                       <!-- unique issue identification (zero when OverrulePublication disabled) -->
-						<xsd:element name="SectionId"     type="xsd:integer"/>                       <!-- unique section identification (zero when OverrulePublication disabled) -->
-						<xsd:element name="StatusIds"     type="tns:ArrayOfId" nillable="true"/>     <!-- list of wanted statuses (empty to receive all) -->
+						<xsd:element name="PublicationId" type="xsd:integer"     nillable="true"/>   <!-- unique publication identification (can be nil in request when IssueId is given) -->
+						<xsd:element name="IssueId"       type="xsd:integer"     nillable="true"/>   <!-- unique issue identification (nil when OverrulePublication disabled) -->
+						<xsd:element name="ObjectType"    type="tns:ObjectType"  nillable="true"/>   <!-- object type; nil means 'for all types' -->
+						<xsd:element name="StatusIds"     type="tns:ArrayOfId"   nillable="true"/>   <!-- list of wanted statuses (nil to receive all) -->
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
-
 			<xsd:element name="GetStatusesResponse">
 				<xsd:complexType>
 					<xsd:sequence>
-						<xsd:element name="PublicationId" type="xsd:integer"/>                       <!-- resolved publication identification -->
-						<xsd:element name="IssueId"       type="xsd:integer"/>                       <!-- resolved issue identification (zero when OverrulePublication disabled) -->
-						<xsd:element name="SectionId"     type="xsd:integer"/>                       <!-- resolved section identification (zero when OverrulePublication disabled) -->
-						<xsd:element name="Statuses"      type="tns:ArrayOfStatus"/>                 <!-- list of requested (or all) statuses of pub/iss/sec -->
+						<xsd:element name="Statuses"      type="tns:ArrayOfStatus"/>                 <!-- list of requested statuses of publication or issue -->
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
 
-			<!-- Update a status configuration at server. -->
+			<!-- v10.2 Update a status configuration at server. -->
 			<xsd:element name="ModifyStatusesRequest">
 				<xsd:complexType>
 					<xsd:sequence>
 						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- admin user's session ticket -->
-						<xsd:element name="RequestModes"  type="tns:ArrayOfMode"/>                   <!-- asks for relations -->
-						<xsd:element name="PublicationId" type="xsd:integer"/>                       <!-- unique publication identification -->
-						<xsd:element name="IssueId"       type="xsd:integer"/>                       <!-- unique issue identification (zero when OverrulePublication disabled) -->
-						<xsd:element name="SectionId"     type="xsd:integer"/>                       <!-- unique section identification (zero when OverrulePublication disabled) -->
 						<xsd:element name="Statuses"      type="tns:ArrayOfStatus"/>                 <!-- list of statuses to update -->
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
-
-			<!-- Update a status configuration at server. -->
 			<xsd:element name="ModifyStatusesResponse">
 				<xsd:complexType>
 					<xsd:sequence>
-						<xsd:element name="PublicationId" type="xsd:integer"/>                       <!-- resolved publication identification -->
-						<xsd:element name="IssueId"       type="xsd:integer"/>                       <!-- resolved issue identification (zero when OverrulePublication disabled) -->
-						<xsd:element name="SectionId"     type="xsd:integer"/>                       <!-- resolved section identification (zero when OverrulePublication disabled) -->
-						<xsd:element name="Statuses"      type="tns:ArrayOfStatus"/>                 <!-- list of updates statuses -->
+						<xsd:element name="Statuses"      type="tns:ArrayOfStatus"/>                 <!-- list of updated statuses -->
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
 
-			<!-- Delete a status configuration from server. -->
+			<!-- v10.2 Delete a status configuration from server. -->
 			<xsd:element name="DeleteStatusesRequest">
 				<xsd:complexType>
 					<xsd:sequence>
 						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- admin user's session ticket -->
-						<xsd:element name="PublicationId" type="xsd:integer"/>                       <!-- unique publication identification -->
-						<xsd:element name="IssueId"       type="xsd:integer"/>                       <!-- unique issue identification (zero when OverrulePublication disabled) -->
-						<xsd:element name="SectionId"     type="xsd:integer"/>                       <!-- unique section identification (zero when OverrulePublication disabled) -->
 						<xsd:element name="StatusIds"     type="tns:ArrayOfId"/>                     <!-- list of statuses to delete -->
 					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
 			<xsd:element name="DeleteStatusesResponse"/>
-<!-- ??? <<< MUTATION POINT >>> ??? -->
 
-			<!--************* AUTHORIZATIONS - COMPLEX TYPES *****************-->
+			<!--************* ACCESS PROFILES - COMPLEX TYPES *************-->
+
+			<!-- v10.2 Access profile definition with the complete set of properties. -->
+			<xsd:complexType name="AccessProfile">
+				<xsd:all>
+					<xsd:element name="Id" type="xsd:integer" nillable="true"/>                      <!-- unique database id -->
+					<xsd:element name="Name" type="xsd:string" nillable="true"/>                     <!-- unique access profile name, can be null for modify > no change -->
+					<xsd:element name="SortOrder" type="xsd:integer" nillable="true"/>               <!-- sort index -->
+					<xsd:element name="Description" type="xsd:string" nillable="true"/>              <!-- description of access profile -->
+					<xsd:element name="ProfileFeatures" type="tns:ArrayOfProfileFeature" nillable="true"/> <!-- array of all features that can be set on an access profile -->
+				</xsd:all>
+			</xsd:complexType>
+			<xsd:complexType name="ArrayOfAccessProfile">
+				<complexContent>
+					<restriction base="soap-enc:Array">
+						<attribute ref="soap-enc:arrayType" wsdl:arrayType="tns:AccessProfile[]"/>
+					</restriction>
+				</complexContent>
+			</xsd:complexType>
+
+			<!--
+				Supported values for the Name element are:
+				   View, List_PubOverview, Read, Open_Edit, Write, Delete, Purge, Change_Status_Forward, Change_Status,
+				   Restore_Version, Keep_Locked, Download_Preview, Download_Original, EditStickyNotes, ViewNotes, DeleteNotes,
+				   AddInCopyImages, Publish, Create_Tasks, AllowMultipleArticlePlacements, ChangeEdition, CreateDossier,
+				   CheckinArticleFromLayer, CheckinArticleFromDocument, AbortCheckOut, RestrictedProperties, ChangeIPS,
+				   ApplyParaStyles, EditParaStyles, ApplyCharStyles, EditCharStyles, ApplyParaFormats, ApplyCharFontFamily,
+				   ApplyCharFontStyle, ApplyCharBasicFormats, ApplyCharAdvancedFormats, CopyFit, CompositionPrefs, ForceTrackChanges,
+				   EditTrackChanges, ChangeLanguage, EditDictionary, ResizeTFLines, ResizeTF, ApplySwatches, EditSwatches,
+				   EditTags, ShortCuts, EditTextMacros, AdvElementsPanel, DSUpdate, DSWriteDataToServer, DSCreateField,
+				   DSUpdateContentDatabase, EditTextComp, InsertInlineImage, Query_Browse, Publication_Overview, Upload, Reporting,
+				   Web_Editor, MyProfile, Planning, ContentStationPro
+				Supported values for the Value element are:
+				   - Yes, No (for all features)
+			-->
+			<xsd:complexType name="ProfileFeature">
+				<xsd:all>
+					<xsd:element name="Name" type="xsd:string"/>                                     <!-- unique internal name -->
+					<xsd:element name="DisplayName" type="xsd:string" nillable="true"/>              <!-- public name -->
+					<xsd:element name="Value" type="tns:ProfileFeatureValue"/>                       <!-- determines if the feature is active or not -->
+				</xsd:all>
+			</xsd:complexType>
+
+			<xsd:simpleType name="ProfileFeatureValue">
+				<xsd:restriction base="string">
+					<xsd:enumeration value="Yes"/>
+					<xsd:enumeration value="No"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+			<xsd:complexType name="ArrayOfProfileFeature">
+				<complexContent>
+					<restriction base="soap-enc:Array">
+						<attribute ref="soap-enc:arrayType" wsdl:arrayType="tns:ProfileFeature[]"/>
+					</restriction>
+				</complexContent>
+			</xsd:complexType>
+
+			<!--
+				 v10.2 Creates one or more access profiles on the server.
+
+			 	 Two different responses can be requested for access profiles: with or without profile features.
+			 	 In order to retrieve access profiles with features, use the Mode "GetProfileFeatures".
+				 In order to retrieve access profiles without features, leave RequestModes empty.
+
+				 If an AccessProfile contains ProfileFeatures, the array of ProfileFeatures has to have the following format:
+				 $array[name] => value
+				 This is done to provide a unified process to handle the ProfileFeatures.
+			-->
+			<xsd:element name="CreateAccessProfilesRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket" type="xsd:string"/>                               <!-- admin user's session ticket -->
+						<xsd:element name="RequestModes" type="tns:ArrayOfMode" nillable="true"/>    <!-- asks for relations -->
+						<xsd:element name="AccessProfiles" type="tns:ArrayOfAccessProfile"/>         <!-- array of access profiles to create (no id) -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="CreateAccessProfilesResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="AccessProfiles" type="tns:ArrayOfAccessProfile"/>         <!-- array of created access profiles -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!--
+				 v10.2 Retrieve one or more access profiles from the server.
+
+				 Two different responses can be requested for access profiles: with or without profile features.
+			 	 In order to retrieve access profiles with features, use the Mode "GetProfileFeatures".
+				 In order to retrieve access profiles without features, leave RequestModes empty.
+
+				 The property AccessProfileIds accepts an array with only a 0 in it. This can be used when all
+				 profile features have to be retrieved without existing access profiles.
+			-->
+			<xsd:element name="GetAccessProfilesRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket" type="xsd:string"/>                               <!-- admin user's session ticket -->
+						<xsd:element name="RequestModes" type="tns:ArrayOfMode" nillable="true"/>    <!-- asks for relations -->
+						<xsd:element name="AccessProfileIds" type="tns:ArrayOfId" nillable="true"/>  <!-- list of requested access profiles -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="GetAccessProfilesResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="AccessProfiles" type="tns:ArrayOfAccessProfile"/>         <!-- array of requested access profiles -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!--
+				 v10.2 Update one or more access profiles at the server.
+
+				 Two different responses can be requested for access profiles: with or without profile features.
+			 	 In order to retrieve access profiles with features, use the Mode "GetProfileFeatures".
+				 In order to retrieve access profiles without features, leave RequestModes empty.
+
+				 If an AccessProfile contains ProfileFeatures, the array of ProfileFeatures has to have the following format:
+				 $array[name] => value
+				 This is done to provide a unified process to handle the ProfileFeatures.
+			-->
+			<xsd:element name="ModifyAccessProfilesRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket" type="xsd:string"/>                               <!-- admin user's session ticket -->
+						<xsd:element name="RequestModes" type="tns:ArrayOfMode" nillable="true"/>    <!-- asks for relations -->
+						<xsd:element name="AccessProfiles" type="tns:ArrayOfAccessProfile"/>         <!-- array of acces profiles to be updated -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="ModifyAccessProfilesResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="AccessProfiles" type="tns:ArrayOfAccessProfile"/>         <!-- array of updated access profiles -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!-- v10.2 Delete one or more access profiles from the server. -->
+			<xsd:element name="DeleteAccessProfilesRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket" type="xsd:string"/>                               <!-- admin user's session ticket -->
+						<xsd:element name="AccessProfileIds" type="tns:ArrayOfId"/>                  <!-- list of requested access profiles -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="DeleteAccessProfilesResponse"/>
+
+			<!--************* USER AUTHORIZATIONS - COMPLEX TYPES *****************-->
+
+			<!-- Workflow user group authorization rule definition with the complete set of properties. -->
+			<xsd:complexType name="WorkflowUserGroupAuthorization">
+				<xsd:all>
+					<xsd:element name="Id"              type="xsd:integer" nillable="true"/>         <!-- System wide unique db id, determined by server. (Nil for create.) -->
+					<xsd:element name="UserGroupId"     type="xsd:integer"/>                         <!-- Unique id of the user group the authorization binds. -->
+					<xsd:element name="SectionId"       type="xsd:integer" nillable="true"/>         <!-- Unique id of a section the authorization binds. (Nil for all sections.) -->
+					<xsd:element name="StatusId"        type="xsd:integer" nillable="true"/>         <!-- Unique id of a status the authorization binds. (Nil for all statuses.) -->
+					<xsd:element name="AccessProfileId" type="xsd:integer"/>                         <!-- Unique id of an access profile the authorization binds. -->
+				</xsd:all>
+			</xsd:complexType>
+			<xsd:complexType name="ArrayOfWorkflowUserGroupAuthorization">
+				<complexContent>
+					<restriction base="soap-enc:Array">
+						<attribute ref="soap-enc:arrayType" wsdl:arrayType="tns:WorkflowUserGroupAuthorization[]"/>
+					</restriction>
+				</complexContent>
+			</xsd:complexType>
+
+			<!--
+				v10.2 Create new workflow user group authorizations at the server.
+
+				Either a publication id or an issue id has to be specified alongside WorkflowUserGroupAuthorizations.
+			-->
+			<xsd:element name="CreateWorkflowUserGroupAuthorizationsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- Admin user's session ticket. -->
+						<xsd:element name="PublicationId" type="xsd:integer"     nillable="true"/>   <!-- Unique publication identification. (Can be nil in request when IssueId is given.) -->
+						<xsd:element name="IssueId"       type="xsd:integer"     nillable="true"/>   <!-- Unique issue identification. (Is nil when OverrulePublication is disabled.) -->
+						<xsd:element name="WorkflowUserGroupAuthorizations" type="tns:ArrayOfWorkflowUserGroupAuthorization"/> <!-- Workflow user group authorizations to create. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="CreateWorkflowUserGroupAuthorizationsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="WorkflowUserGroupAuthorizations" type="tns:ArrayOfWorkflowUserGroupAuthorization"/> <!-- Created workflow user group authorizations. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!--
+				v10.2 Modify workflow user group authorizations at the server.
+
+				Either a publication id or an issue id has to be specified alongside WorkflowUserGroupAuthorizations.
+			-->
+			<xsd:element name="ModifyWorkflowUserGroupAuthorizationsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- Admin user's session ticket. -->
+						<xsd:element name="PublicationId" type="xsd:integer"     nillable="true"/>   <!-- Unique publication identification. (Can be nil in request when IssueId is given.) -->
+						<xsd:element name="IssueId"       type="xsd:integer"     nillable="true"/>   <!-- Unique issue identification. (Is nil when OverrulePublication is disabled.) -->
+						<xsd:element name="WorkflowUserGroupAuthorizations" type="tns:ArrayOfWorkflowUserGroupAuthorization"/> <!-- Workflow user group authorizations to create. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="ModifyWorkflowUserGroupAuthorizationsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="WorkflowUserGroupAuthorizations" type="tns:ArrayOfWorkflowUserGroupAuthorization"/> <!-- List of created workflow user group authorizations. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!--
+				v10.2 Retrieve workflow user group authorizations from the server.
+
+				Either a PublicationId or IssueId alongside an optional UserGroupId, or only an array of authorization ids.
+				It is unnecessary to request WorkflowUserGroupAuthorizationIds from multiple publications there is no
+				real-world application to do this through a service.
+
+				Supported RequestModes: GetUserGroups, GetStatuses, GetSections.
+			-->
+			<xsd:element name="GetWorkflowUserGroupAuthorizationsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- Admin user's session ticket -->
+						<xsd:element name="RequestModes"  type="tns:ArrayOfMode"/>                   <!-- Asks for relational objects. -->
+						<xsd:element name="PublicationId" type="xsd:integer"     nillable="true"/>   <!-- Unique publication identification. (Can be nil in request when IssueId is given.) -->
+						<xsd:element name="IssueId"       type="xsd:integer"     nillable="true"/>   <!-- Unique issue identification. (Nil when OverrulePublication is disabled.) -->
+						<xsd:element name="UserGroupId"   type="xsd:integer"     nillable="true"/>   <!-- Unique user group identification. (Nil for all user groups.) -->
+						<xsd:element name="WorkflowUserGroupAuthorizationIds" type="tns:ArrayOfId" nillable="true"/> <!-- List of wanted workflow user group authorizations (Nil to receive all.) -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="GetWorkflowUserGroupAuthorizationsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="WorkflowUserGroupAuthorizations" type="tns:ArrayOfWorkflowUserGroupAuthorization"/> <!-- List of requested workflow user group authorizations. -->
+						<xsd:element name="UserGroups" type="tns:ArrayOfUserGroup" nillable="true"/> <!-- List of requested user groups by RequestModes. -->
+						<xsd:element name="Statuses"   type="tns:ArrayOfStatus"    nillable="true"/> <!-- List of requested statuses by RequestModes. -->
+						<xsd:element name="Sections"   type="tns:ArrayOfSection"   nillable="true"/> <!-- List of requested sections by RequestModes. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!--
+				v10.2 Delete workflow user group authorizations from the server.
+
+				Either a PublicationId or IssueId alongside an optional UserGroupId, or only an array
+				of authorization ids.
+				It is unnecessary to request WorkflowUserGroupAuthorizationIds from multiple publications 
+				or issues as there is no real-world application to do this through a service.
+			-->
+			<xsd:element name="DeleteWorkflowUserGroupAuthorizationsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- Admin user's session ticket. -->
+						<xsd:element name="PublicationId" type="xsd:integer"  nillable="true"/>      <!-- Unique publication identification. (Can be nil in request when IssueId is given.) -->
+						<xsd:element name="IssueId"       type="xsd:integer"  nillable="true"/>      <!-- Unique issue identification. (Nil when OverrulePublication is disabled.) -->
+						<xsd:element name="UserGroupId"   type="xsd:integer"  nillable="true"/>      <!-- Unique user group identification. (Nil for all user groups.) -->
+						<xsd:element name="WorkflowUserGroupAuthorizationIds" type="tns:ArrayOfId" nillable="true"/> <!-- List of selected workflow user group authorizations (Nil to delete all.) -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="DeleteWorkflowUserGroupAuthorizationsResponse"/>
+
+			<!--************* BRAND AUTHORIZATIONS - COMPLEX TYPES *****************-->
+
+			<!-- v10.2 Create new publication admin authorizations at the server. -->
+			<xsd:element name="CreatePublicationAdminAuthorizationsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- Admin user's session ticket. -->
+						<xsd:element name="PublicationId" type="xsd:integer"/>                       <!-- Unique id of a publication the authorization binds. -->
+						<xsd:element name="UserGroupIds"  type="tns:ArrayOfId"/>                     <!-- Publication admin authorizations to create. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="CreatePublicationAdminAuthorizationsResponse"/>                       <!-- No response necessary, all information is already known. -->
+
+			<!--
+				v10.2 Retrieve publication admin authorizations from the server.
+
+				Supported RequestModes: GetUserGroups, GetStatuses, GetSections.
+			-->
+			<xsd:element name="GetPublicationAdminAuthorizationsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- Admin user's session ticket -->
+						<xsd:element name="RequestModes"  type="tns:ArrayOfMode"/>                   <!-- Asks for relational objects. -->
+						<xsd:element name="PublicationId" type="xsd:integer"/>                       <!-- Unique id of a publication the authorization binds. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="GetPublicationAdminAuthorizationsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="UserGroupIds" type="tns:ArrayOfId"/>                      <!-- List of requested publication admin authorizations. -->
+						<xsd:element name="UserGroups" type="tns:ArrayOfUserGroup" nillable="true"/> <!-- List of requested sections by RequestModes. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!--
+				v10.2 Delete publication admin authorizations from the server.
+
+				If only a PublicationId is given, all authorizations will be deleted for that publication. 
+				If both are given, only rules for User Groups within the publication will be deleted. 
+			-->
+			<xsd:element name="DeletePublicationAdminAuthorizationsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- Admin user's session ticket. -->
+						<xsd:element name="PublicationId" type="xsd:integer"/>                       <!-- Unique id of a publication. (Nil to delete all.) -->
+						<xsd:element name="UserGroupIds"  type="tns:ArrayOfId" nillable="true"/>     <!-- List of publication admin authorizations -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="DeletePublicationAdminAuthorizationsResponse"/>
 
 			<!--************* ROUTING RULES - COMPLEX TYPES *****************-->
+
+			<!-- Routing rule definition with the complete set of properties. -->
+			<xsd:complexType name="Routing">
+				<xsd:all>
+					<xsd:element name="Id"        type="xsd:integer" nillable="true"/>               <!-- System wide unique db id, determined by server. (Nil for create.) -->
+					<xsd:element name="SectionId" type="xsd:integer" nillable="true"/>               <!-- Unique id of a section the authorization binds. (Nil for all sections.) -->
+					<xsd:element name="StatusId"  type="xsd:integer" nillable="true"/>               <!-- Unique id of a status the authorization binds. (Nil for all statuses.) -->
+					<xsd:element name="RouteTo"   type="xsd:string"/>                                <!-- Unique id of an access profile the authorization binds. -->
+				</xsd:all>
+			</xsd:complexType>
+			<xsd:complexType name="ArrayOfRouting">
+				<complexContent>
+					<restriction base="soap-enc:Array">
+						<attribute ref="soap-enc:arrayType" wsdl:arrayType="tns:Routing[]"/>
+					</restriction>
+				</complexContent>
+			</xsd:complexType>
+
+			<!--
+				v10.2 Create new routing rules at the server.
+
+				Either a publication id or an issue id has to be specified alongside Routing objects.
+			-->
+			<xsd:element name="CreateRoutingsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- Admin user's session ticket. -->
+						<xsd:element name="PublicationId" type="xsd:integer"       nillable="true"/> <!-- Unique publication identification. (Can be nil in request when IssueId is given.) -->
+						<xsd:element name="IssueId"       type="xsd:integer"       nillable="true"/> <!-- Unique issue identification. (Nil when OverrulePublication is disabled.) -->
+						<xsd:element name="Routings"      type="tns:ArrayOfRouting" nillable="true"/> <!-- Routing rules to be created. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="CreateRoutingsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Routings" type="tns:ArrayOfRouting"/>                     <!-- Created routing rules. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!--
+				v10.2 Modify existing routing rules at the server.
+
+				Either a publication or an issue id has to be specified alongside Routing objexts.
+			-->
+			<xsd:element name="ModifyRoutingsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- Admin user's session ticket. -->
+						<xsd:element name="PublicationId" type="xsd:integer"       nillable="true"/> <!-- Unique publication identification. (Can be nil in request when IssueId is given.) -->
+						<xsd:element name="IssueId"       type="xsd:integer"       nillable="true"/> <!-- Unique issue identification. (Nil when OverrulePublication is disabled.) -->
+						<xsd:element name="Routings"      type="tns:ArrayOfRouting" nillable="true"/> <!-- Routing rules to be modified. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="ModifyRoutingsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Routings" type="tns:ArrayOfRouting"/>                     <!-- Modified routing rules. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!--
+				v10.2 Retrieve routing rules from the server.
+
+				Either a PublicationId or IssueId alongside an optional SectionId can be given, or
+				only an array of routing ids.
+				It is unnecessary to request Routing rules from multiple publications as there is no
+				real-world application to do this through a service.
+				Supported RequestModes: GetStatuses, GetSections.
+			-->
+			<xsd:element name="GetRoutingsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- Admin user's session ticket -->
+						<xsd:element name="RequestModes"  type="tns:ArrayOfMode"/>                   <!-- Asks for relational objects. -->
+						<xsd:element name="PublicationId" type="xsd:integer"   nillable="true"/>     <!-- Unique publication identification. (Can be nil in request when IssueId is given.) -->
+						<xsd:element name="IssueId"       type="xsd:integer"   nillable="true"/>     <!-- Unique issue identification. (Nil when OverrulePublication is disabled.) -->
+						<xsd:element name="SectionId"     type="xsd:integer"   nillable="true"/>     <!-- Unique user group identification. (Nil for all user groups.) -->
+						<xsd:element name="RoutingIds"    type="tns:ArrayOfId" nillable="true"/>     <!-- List of wanted workflow user group authorizations (Nil to receive all.) -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="GetRoutingsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Routings" type="tns:ArrayOfRouting"/>                   <!-- List of requested workflow user group authorizations. -->
+						<xsd:element name="Sections" type="tns:ArrayOfSection" nillable="true"/>   <!-- List of requested sections by RequestModes. -->
+						<xsd:element name="Statuses" type="tns:ArrayOfStatus"  nillable="true"/>   <!-- List of requested statuses by RequestModes. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!--
+				v10.2 Delete routing rules from the server.
+
+				Either a PublicationId or IssueId alongside an optional SectionId, or only an array
+				of authorization ids.
+				It is unnecessary to request RoutingIds from multiple publications or issues as there
+				is no real-world application to do this through a service.
+			-->
+			<xsd:element name="DeleteRoutingsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"        type="xsd:string"/>                        <!-- Admin user's session ticket. -->
+						<xsd:element name="PublicationId" type="xsd:integer"   nillable="true"/>     <!-- Unique publication identification. (Can be nil in request when IssueId is given.) -->
+						<xsd:element name="IssueId"       type="xsd:integer"   nillable="true"/>     <!-- Unique issue identification. (Nil when OverrulePublication is disabled.) -->
+						<xsd:element name="SectionId"     type="xsd:integer"   nillable="true"/>     <!-- Unique section identification. (Nil for all sections.) -->
+						<xsd:element name="RoutingIds"    type="tns:ArrayOfId" nillable="true"/>     <!-- List of selected workflow user group authorizations (Nil to delete all.) -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="DeleteRoutingsResponse"/>
+
+			<!--************* TEMPLATE OBJECT ACCESS RULES *****************-->
+
+			<!-- v10.2 Template object access definition. -->
+			<xsd:complexType name="TemplateObjectAccess">
+				<xsd:all>
+					<xsd:element name="TemplateObjectId" type="xsd:integer"/>                        <!-- Unique template object identification. -->
+					<xsd:element name="UserGroupId"      type="xsd:integer"/>                        <!-- Unique user group identification. -->
+				</xsd:all>
+			</xsd:complexType>
+			<xsd:complexType name="ArrayOfTemplateObjectAccess">
+				<complexContent>
+					<restriction base="soap-enc:Array">
+						<attribute ref="soap-enc:arrayType" wsdl:arrayType="tns:TemplateObjectAccess[]"/>
+					</restriction>
+				</complexContent>
+			</xsd:complexType>
+
+			<!--
+				v10.2 Create new template object access rules at the server.
+
+				Either a publication id or an issue id has to be specified alongside a list of template object access rules.
+
+				Supported RequestModes: GetUserGroups, GetObjectInfos.
+			-->
+			<xsd:element name="AddTemplateObjectsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"          type="xsd:string"/>                      <!-- Admin user's session ticket. -->
+						<xsd:element name="RequestModes"    type="tns:ArrayOfMode"/>                 <!-- Asks for relational objects. -->
+						<xsd:element name="PublicationId"   type="xsd:integer" nillable="true"/>     <!-- Unique publication identification. (Can be nil in request when IssueId is given.) -->
+						<xsd:element name="IssueId"         type="xsd:integer" nillable="true"/>     <!-- Unique issue identification. (Nil when OverrulePublication is disabled.) -->
+						<xsd:element name="TemplateObjects" type="tns:ArrayOfTemplateObjectAccess"/> <!-- List of template object access rules.-->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="AddTemplateObjectsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="UserGroups"  type="tns:ArrayOfUserGroup"  nillable="true"/> <!-- List of requested user groups by RequestMode (GetUserGroups). -->
+						<xsd:element name="ObjectInfos" type="tns:ArrayOfObjectInfo" nillable="true"/> <!-- List of requested object information by RequestMode (GetObjectInfos). -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!--
+				v10.2 Retrieve template object access rules from the server.
+
+				Either a PublicationId or IssueId alongside an optional TemplateObjectId and/or UserGroupId can be given.
+				It is unnecessary to request template object access rules from multiple publications as there is no
+				real-world application to do this through a service.
+
+				Supported RequestModes: GetUserGroups, GetObjectInfos.
+			-->
+			<xsd:element name="GetTemplateObjectsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"           type="xsd:string"/>                     <!-- Admin user's session ticket. -->
+						<xsd:element name="RequestModes"     type="tns:ArrayOfMode"/>                <!-- Asks for relational objects. -->
+						<xsd:element name="PublicationId"    type="xsd:integer" nillable="true"/>    <!-- Unique publication identification. (Can be nil in request when IssueId is given.) -->
+						<xsd:element name="IssueId"          type="xsd:integer" nillable="true"/>    <!-- Unique issue identification. (Nil when OverrulePublication is disabled.) -->
+						<xsd:element name="TemplateObjectId" type="xsd:integer" nillable="true"/>    <!-- Unique template object identification. -->
+						<xsd:element name="UserGroupId"      type="xsd:integer" nillable="true"/>    <!-- Unique user group identification. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="GetTemplateObjectsResponse">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="TemplateObjects" type="tns:ArrayOfTemplateObjectAccess"/>       <!-- List of requested template object access rules. -->
+						<xsd:element name="UserGroups"      type="tns:ArrayOfUserGroup"  nillable="true"/> <!-- List of requested user groups by RequestMode (GetUserGroups). -->
+						<xsd:element name="ObjectInfos"     type="tns:ArrayOfObjectInfo" nillable="true"/> <!-- List of requested object information by RequestMode (GetObjectInfos). -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<!--
+				v10.2 Delete template object access rules from the server.
+
+				Either a PublicationId or IssueId should be given, along with a list of template objects access rules
+				to be deleted. It is unnecessary to delete template object access rules from multiple publications
+				as there is no real-world application to do this through a service.
+			-->
+			<xsd:element name="RemoveTemplateObjectsRequest">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="Ticket"          type="xsd:string"/>                      <!-- Admin user's session ticket. -->
+						<xsd:element name="PublicationId"   type="xsd:integer" nillable="true"/>     <!-- Unique publication identification. (Can be nil in request when IssueId is given.) -->
+						<xsd:element name="IssueId"         type="xsd:integer" nillable="true"/>     <!-- Unique issue identification. (Nil when OverrulePublication is disabled.) -->
+						<xsd:element name="TemplateObjects" type="tns:ArrayOfTemplateObjectAccess"/> <!-- List of template object access rules. -->
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="RemoveTemplateObjectsResponse"/>
 
 			<!--************* WORFLOW DIALOG - COMPLEX TYPES *****************-->
 
@@ -1442,14 +2006,14 @@
 	<wsdl:message name="DeleteUsersResponse">
 		<wsdl:part name="paramaters"		element="tns:DeleteUsersResponse"/>
 	</wsdl:message>
-<!--
-	<wsdl:message name="CopyUsersRequest">
-		<wsdl:part name="paramaters"		element="tns:CopyUsersRequest"/>
-	</wsdl:message>
-	<wsdl:message name="CopyUsersResponse">
-		<wsdl:part name="paramaters"		element="tns:CopyUsersResponse"/>
-	</wsdl:message>
--->
+	<!--
+		<wsdl:message name="CopyUsersRequest">
+			<wsdl:part name="paramaters"		element="tns:CopyUsersRequest"/>
+		</wsdl:message>
+		<wsdl:message name="CopyUsersResponse">
+			<wsdl:part name="paramaters"		element="tns:CopyUsersResponse"/>
+		</wsdl:message>
+	-->
 
 
 	<!--************* USER GROUPS - MESSAGES *****************-->
@@ -1488,7 +2052,6 @@
 	<wsdl:message name="DeleteUserGroupsResponse">
 		<wsdl:part name="parameters"	element="tns:DeleteUserGroupsResponse"/>
 	</wsdl:message>
-
 
 	<!--************* MEMBERSHIP - MESSAGES *****************-->
 	<wsdl:message name="AddUsersToGroupRequest">
@@ -1539,16 +2102,16 @@
 	</wsdl:message>
 	<wsdl:message name="DeletePublicationsResponse">
 	</wsdl:message>
-<!--
-	<wsdl:message name="CopyPublicationsRequest">
-		<wsdl:part name="parameters"  	element="tns:CopyPublicationsRequest"/>
-	</wsdl:message>
-	<wsdl:message name="CopyPublicationsResponse">
-		<wsdl:part name="parameters"  	element="tns:CopyPublicationsResponse"/>
-	</wsdl:message>
--->
+	<!--
+		<wsdl:message name="CopyPublicationsRequest">
+			<wsdl:part name="parameters"  	element="tns:CopyPublicationsRequest"/>
+		</wsdl:message>
+		<wsdl:message name="CopyPublicationsResponse">
+			<wsdl:part name="parameters"  	element="tns:CopyPublicationsResponse"/>
+		</wsdl:message>
+	-->
 
-<!--************* PUBCHANNEL - MESSAGES *****************-->
+	<!--************* PUBCHANNEL - MESSAGES *****************-->
 
 	<wsdl:message name="CreatePubChannelsRequest">
 		<wsdl:part name="parameters" 	element="tns:CreatePubChannelsRequest"/>
@@ -1577,14 +2140,14 @@
 	<wsdl:message name="DeletePubChannelsResponse">
 		<wsdl:part name="parameters"	element="tns:DeletePubChannelsResponse"/>
 	</wsdl:message>
-<!--
-	<wsdl:message name="CopyPubChannelsRequest">
-		<wsdl:part name="parameters"	element="tns:CopyPubChannelsRequest"/>
-	</wsdl:message>
-	<wsdl:message name="CopyPubChannelsResponse">
-		<wsdl:part name="parameters"	element="tns:CopyPubChannelsResponse"/>
-	</wsdl:message>
--->
+	<!--
+		<wsdl:message name="CopyPubChannelsRequest">
+			<wsdl:part name="parameters"	element="tns:CopyPubChannelsRequest"/>
+		</wsdl:message>
+		<wsdl:message name="CopyPubChannelsResponse">
+			<wsdl:part name="parameters"	element="tns:CopyPubChannelsResponse"/>
+		</wsdl:message>
+	-->
 
 	<!--************* ISSUE - MESSAGES *****************-->
 
@@ -1684,7 +2247,7 @@
 	</wsdl:message>
 
 	<!--************* STATUS - MESSAGES *****************-->
-<!--
+
 	<wsdl:message name="CreateStatusesRequest">
 		<wsdl:part name="parameters"    element="tns:CreateStatusesRequest"/>
 	</wsdl:message>
@@ -1710,14 +2273,142 @@
 		<wsdl:part name="parameters"	element="tns:DeleteStatusesRequest"/>
 	</wsdl:message>
 	<wsdl:message name="DeleteStatusesResponse"/>
--->
 
+	<!--************* ACCESS PROFILES - MESSAGES *****************-->
 
-<!-- ??? <<< MUTATION POINT >>> ??? -->
+	<wsdl:message name="CreateAccessProfilesRequest">
+		<wsdl:part name="parameters"    element="tns:CreateAccessProfilesRequest"/>
+	</wsdl:message>
+	<wsdl:message name="CreateAccessProfilesResponse">
+		<wsdl:part name="parameters" 	element="tns:CreateAccessProfilesResponse"/>
+	</wsdl:message>
 
-	<!--************* AUTHORIZATIONS - MESSAGES *****************-->
+	<wsdl:message name="GetAccessProfilesRequest">
+		<wsdl:part name="parameters" 	element="tns:GetAccessProfilesRequest"/>
+	</wsdl:message>
+	<wsdl:message name="GetAccessProfilesResponse">
+		<wsdl:part name="parameters"	element="tns:GetAccessProfilesResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="ModifyAccessProfilesRequest">
+		<wsdl:part name="parameters"	element="tns:ModifyAccessProfilesRequest"/>
+	</wsdl:message>
+	<wsdl:message name="ModifyAccessProfilesResponse">
+		<wsdl:part name="parameters"	element="tns:ModifyAccessProfilesResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="DeleteAccessProfilesRequest">
+		<wsdl:part name="parameters"	element="tns:DeleteAccessProfilesRequest"/>
+	</wsdl:message>
+	<wsdl:message name="DeleteAccessProfilesResponse"/>
+
+	<!-- ??? <<< MUTATION POINT >>> ??? -->
+
+	<!--************* USER AUTHORIZATIONS - MESSAGES *****************-->
+
+	<wsdl:message name="CreateWorkflowUserGroupAuthorizationsRequest">
+		<wsdl:part name="parameters"	element="tns:CreateWorkflowUserGroupAuthorizationsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="CreateWorkflowUserGroupAuthorizationsResponse">
+		<wsdl:part name="parameters" 	element="tns:CreateWorkflowUserGroupAuthorizationsResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="GetWorkflowUserGroupAuthorizationsRequest">
+		<wsdl:part name="parameters" 	element="tns:GetWorkflowUserGroupAuthorizationsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="GetWorkflowUserGroupAuthorizationsResponse">
+		<wsdl:part name="parameters"	element="tns:GetWorkflowUserGroupAuthorizationsResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="ModifyWorkflowUserGroupAuthorizationsRequest">
+		<wsdl:part name="parameters"	element="tns:ModifyWorkflowUserGroupAuthorizationsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="ModifyWorkflowUserGroupAuthorizationsResponse">
+		<wsdl:part name="parameters"	element="tns:ModifyWorkflowUserGroupAuthorizationsResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="DeleteWorkflowUserGroupAuthorizationsRequest">
+		<wsdl:part name="parameters"	element="tns:DeleteWorkflowUserGroupAuthorizationsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="DeleteWorkflowUserGroupAuthorizationsResponse">
+		<wsdl:part name="parameters"	element="tns:DeleteWorkflowUserGroupAuthorizationsResponse"/>
+	</wsdl:message>
+
+	<!--************* BRAND AUTHORIZATIONS - MESSAGES *****************-->
+	
+	<wsdl:message name="CreatePublicationAdminAuthorizationsRequest">
+		<wsdl:part name="parameters"	element="tns:CreatePublicationAdminAuthorizationsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="CreatePublicationAdminAuthorizationsResponse">
+		<wsdl:part name="parameters" 	element="tns:CreatePublicationAdminAuthorizationsResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="GetPublicationAdminAuthorizationsRequest">
+		<wsdl:part name="parameters" 	element="tns:GetPublicationAdminAuthorizationsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="GetPublicationAdminAuthorizationsResponse">
+		<wsdl:part name="parameters"	element="tns:GetPublicationAdminAuthorizationsResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="DeletePublicationAdminAuthorizationsRequest">
+		<wsdl:part name="parameters"	element="tns:DeletePublicationAdminAuthorizationsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="DeletePublicationAdminAuthorizationsResponse">
+		<wsdl:part name="parameters"	element="tns:DeletePublicationAdminAuthorizationsResponse"/>
+	</wsdl:message>
 
 	<!--************* ROUTING RULES - MESSAGES *****************-->
+
+	<wsdl:message name="CreateRoutingsRequest">
+		<wsdl:part name="parameters"	element="tns:CreateRoutingsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="CreateRoutingsResponse">
+		<wsdl:part name="parameters" 	element="tns:CreateRoutingsResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="GetRoutingsRequest">
+		<wsdl:part name="parameters" 	element="tns:GetRoutingsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="GetRoutingsResponse">
+		<wsdl:part name="parameters"	element="tns:GetRoutingsResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="ModifyRoutingsRequest">
+		<wsdl:part name="parameters"	element="tns:ModifyRoutingsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="ModifyRoutingsResponse">
+		<wsdl:part name="parameters"	element="tns:ModifyRoutingsResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="DeleteRoutingsRequest">
+		<wsdl:part name="parameters"	element="tns:DeleteRoutingsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="DeleteRoutingsResponse">
+		<wsdl:part name="parameters"	element="tns:DeleteRoutingsResponse"/>
+	</wsdl:message>
+
+	<!--************* TEMPLATE ACCESS RULES DIALOG - MESSAGES *****************-->
+
+	<wsdl:message name="AddTemplateObjectsRequest">
+		<wsdl:part name="parameters"	element="tns:AddTemplateObjectsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="AddTemplateObjectsResponse">
+		<wsdl:part name="parameters" 	element="tns:AddTemplateObjectsResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="GetTemplateObjectsRequest">
+		<wsdl:part name="parameters"	element="tns:GetTemplateObjectsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="GetTemplateObjectsResponse">
+		<wsdl:part name="parameters" 	element="tns:GetTemplateObjectsResponse"/>
+	</wsdl:message>
+
+	<wsdl:message name="RemoveTemplateObjectsRequest">
+		<wsdl:part name="parameters"	element="tns:RemoveTemplateObjectsRequest"/>
+	</wsdl:message>
+	<wsdl:message name="RemoveTemplateObjectsResponse">
+		<wsdl:part name="parameters" 	element="tns:RemoveTemplateObjectsResponse"/>
+	</wsdl:message>
 
 	<!--************* WORFLOW DIALOG - MESSAGES *****************-->
 
@@ -1823,12 +2514,12 @@
 			<wsdl:input message="tns:DeleteUsersRequest"/>
 			<wsdl:output message="tns:DeleteUsersResponse"/>
 		</wsdl:operation>
-<!--
-		<wsdl:operation name="CopyUsers">
-			<wsdl:input message="tns:CopyUsersRequest"/>
-			<wsdl:output message="tns:CopyUsersResponse"/>
-		</wsdl:operation>
--->
+		<!--
+				<wsdl:operation name="CopyUsers">
+					<wsdl:input message="tns:CopyUsersRequest"/>
+					<wsdl:output message="tns:CopyUsersResponse"/>
+				</wsdl:operation>
+		-->
 
 		<!--************* USER GROUP - OPERATIONS *****************-->
 		<wsdl:operation name="CreateUserGroups">
@@ -1853,7 +2544,6 @@
 			<wsdl:input message="tns:DeleteUserGroupsRequest"/>
 			<wsdl:output message="tns:DeleteUserGroupsResponse"/>
 		</wsdl:operation>
-
 
 		<!--************* MEMBERSHIP - OPERATIONS *****************-->
 		<wsdl:operation name="AddUsersToGroup">
@@ -1891,12 +2581,12 @@
 			<wsdl:input message="tns:DeletePublicationsRequest"/>
 			<wsdl:output message="tns:DeletePublicationsResponse"/>
 		</wsdl:operation>
-<!--
-		<wsdl:operation name="CopyPublications">
-			<wsdl:input message="tns:CopyPublicationsRequest"/>
-			<wsdl:output message="tns:CopyPublicationsResponse"/>
-		</wsdl:operation>
--->
+		<!--
+				<wsdl:operation name="CopyPublications">
+					<wsdl:input message="tns:CopyPublicationsRequest"/>
+					<wsdl:output message="tns:CopyPublicationsResponse"/>
+				</wsdl:operation>
+		-->
 
 		<!--************* PUBCHANNEL - OPERATIONS *****************-->
 		<wsdl:operation name="CreatePubChannels">
@@ -1915,12 +2605,12 @@
 			<wsdl:input message="tns:DeletePubChannelsRequest"/>
 			<wsdl:output message="tns:DeletePubChannelsResponse"/>
 		</wsdl:operation>
-<!--
-		<wsdl:operation name="CopyPubChannels">
-			<wsdl:input message="tns:CopyPubChannelsRequest"/>
-			<wsdl:output message="tns:CopyPubChannelsResponse"/>
-		</wsdl:operation>
--->
+		<!--
+				<wsdl:operation name="CopyPubChannels">
+					<wsdl:input message="tns:CopyPubChannelsRequest"/>
+					<wsdl:output message="tns:CopyPubChannelsResponse"/>
+				</wsdl:operation>
+		-->
 
 		<!--************* ISSUE - OPERATIONS *****************-->
 		<wsdl:operation name="CreateIssues">
@@ -1971,29 +2661,24 @@
 			<wsdl:input message="tns:GetSectionsRequest"/>
 			<wsdl:output message="tns:GetSectionsResponse"/>
 		</wsdl:operation>
-
 		<wsdl:operation name="ModifySections">
 			<wsdl:input message="tns:ModifySectionsRequest"/>
 			<wsdl:output message="tns:ModifySectionsResponse"/>
 		</wsdl:operation>
-
 		<wsdl:operation name="DeleteSections">
 			<wsdl:input message="tns:DeleteSectionsRequest"/>
 			<wsdl:output message="tns:DeleteSectionsResponse"/>
 		</wsdl:operation>
 
 		<!--************* STATUS - OPERATIONS *****************-->
-<!--
 		<wsdl:operation name="CreateStatuses">
 			<wsdl:input message="tns:CreateStatusesRequest"/>
 			<wsdl:output message="tns:CreateStatusesResponse"/>
 		</wsdl:operation>
-
 		<wsdl:operation name="GetStatuses">
 			<wsdl:input message="tns:GetStatusesRequest"/>
 			<wsdl:output message="tns:GetStatusesResponse"/>
 		</wsdl:operation>
-
 		<wsdl:operation name="ModifyStatuses">
 			<wsdl:input message="tns:ModifyStatusesRequest"/>
 			<wsdl:output message="tns:ModifyStatusesResponse"/>
@@ -2002,13 +2687,92 @@
 			<wsdl:input message="tns:DeleteStatusesRequest"/>
 			<wsdl:output message="tns:DeleteStatusesResponse"/>
 		</wsdl:operation>
--->
 
-<!-- ??? <<< MUTATION POINT >>> ??? -->
+		<!--************* ACCESS PROFILES - OPERATIONS *****************-->
+		<wsdl:operation name="CreateAccessProfiles">
+			<wsdl:input message="tns:CreateAccessProfilesRequest"/>
+			<wsdl:output message="tns:CreateAccessProfilesResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="GetAccessProfiles">
+			<wsdl:input message="tns:GetAccessProfilesRequest"/>
+			<wsdl:output message="tns:GetAccessProfilesResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="ModifyAccessProfiles">
+			<wsdl:input message="tns:ModifyAccessProfilesRequest"/>
+			<wsdl:output message="tns:ModifyAccessProfilesResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="DeleteAccessProfiles">
+			<wsdl:input message="tns:DeleteAccessProfilesRequest"/>
+			<wsdl:output message="tns:DeleteAccessProfilesResponse"/>
+		</wsdl:operation>
 
-		<!--************* AUTHORIZATIONS - OPERATIONS *****************-->
+		<!--************* USER AUTHORIZATIONS - OPERATIONS *****************-->
+		<wsdl:operation name="CreateWorkflowUserGroupAuthorizations">
+			<wsdl:input message="tns:CreateWorkflowUserGroupAuthorizationsRequest"/>
+			<wsdl:output message="tns:CreateWorkflowUserGroupAuthorizationsResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="GetWorkflowUserGroupAuthorizations">
+			<wsdl:input message="tns:GetWorkflowUserGroupAuthorizationsRequest"/>
+			<wsdl:output message="tns:GetWorkflowUserGroupAuthorizationsResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="ModifyWorkflowUserGroupAuthorizations">
+			<wsdl:input message="tns:ModifyWorkflowUserGroupAuthorizationsRequest"/>
+			<wsdl:output message="tns:ModifyWorkflowUserGroupAuthorizationsResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="DeleteWorkflowUserGroupAuthorizations">
+			<wsdl:input message="tns:DeleteWorkflowUserGroupAuthorizationsRequest"/>
+			<wsdl:output message="tns:DeleteWorkflowUserGroupAuthorizationsResponse"/>
+		</wsdl:operation>
+
+		<!--************* BRAND AUTHORIZATIONS - OPERATIONS *****************-->
+		<wsdl:operation name="CreatePublicationAdminAuthorizations">
+			<wsdl:input message="tns:CreatePublicationAdminAuthorizationsRequest"/>
+			<wsdl:output message="tns:CreatePublicationAdminAuthorizationsResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="GetPublicationAdminAuthorizations">
+			<wsdl:input message="tns:GetPublicationAdminAuthorizationsRequest"/>
+			<wsdl:output message="tns:GetPublicationAdminAuthorizationsResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="DeletePublicationAdminAuthorizations">
+			<wsdl:input message="tns:DeletePublicationAdminAuthorizationsRequest"/>
+			<wsdl:output message="tns:DeletePublicationAdminAuthorizationsResponse"/>
+		</wsdl:operation>
 
 		<!--************* ROUTING RULES - OPERATIONS *****************-->
+		<wsdl:operation name="CreateRoutings">
+			<wsdl:input message="tns:CreateRoutingsRequest"/>
+			<wsdl:output message="tns:CreateRoutingsResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="GetRoutings">
+			<wsdl:input message="tns:GetRoutingsRequest"/>
+			<wsdl:output message="tns:GetRoutingsResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="ModifyRoutings">
+			<wsdl:input message="tns:ModifyRoutingsRequest"/>
+			<wsdl:output message="tns:ModifyRoutingsResponse"/>
+		</wsdl:operation>
+		<wsdl:operation name="DeleteRoutings">
+			<wsdl:input message="tns:DeleteRoutingsRequest"/>
+			<wsdl:output message="tns:DeleteRoutingsResponse"/>
+		</wsdl:operation>
+
+		<!--************* TEMPLATE ACCESS RULES DIALOG - OPERATIONS *****************-->
+		<wsdl:operation name="AddTemplateObjects">
+			<wsdl:input message="tns:AddTemplateObjectsRequest"/>
+			<wsdl:output message="tns:AddTemplateObjectsResponse"/>
+		</wsdl:operation>
+
+		<wsdl:operation name="GetTemplateObjects">
+			<wsdl:input message="tns:GetTemplateObjectsRequest"/>
+			<wsdl:output message="tns:GetTemplateObjectsResponse"/>
+		</wsdl:operation>
+
+		<wsdl:operation name="RemoveTemplateObjects">
+			<wsdl:input message="tns:RemoveTemplateObjectsRequest"/>
+			<wsdl:output message="tns:RemoveTemplateObjectsResponse"/>
+		</wsdl:operation>
+
+		<!-- ??? <<< MUTATION POINT >>> ??? -->
 
 		<!--************* WORFLOW DIALOG - OPERATIONS *****************-->
 
@@ -2029,12 +2793,10 @@
 			<wsdl:input message="tns:GetAutocompleteTermEntitiesRequest"/>
 			<wsdl:output message="tns:GetAutocompleteTermEntitiesResponse"/>
 		</wsdl:operation>
-
 		<wsdl:operation name="ModifyAutocompleteTermEntities">
 			<wsdl:input message="tns:ModifyAutocompleteTermEntitiesRequest"/>
 			<wsdl:output message="tns:ModifyAutocompleteTermEntitiesResponse"/>
 		</wsdl:operation>
-
 		<wsdl:operation name="DeleteAutocompleteTermEntities">
 			<wsdl:input message="tns:DeleteAutocompleteTermEntitiesRequest"/>
 			<wsdl:output message="tns:DeleteAutocompleteTermEntitiesResponse"/>
@@ -2049,12 +2811,10 @@
 			<wsdl:input message="tns:GetAutocompleteTermsRequest"/>
 			<wsdl:output message="tns:GetAutocompleteTermsResponse"/>
 		</wsdl:operation>
-
 		<wsdl:operation name="ModifyAutocompleteTerms">
 			<wsdl:input message="tns:ModifyAutocompleteTermsRequest"/>
 			<wsdl:output message="tns:ModifyAutocompleteTermsResponse"/>
 		</wsdl:operation>
-
 		<wsdl:operation name="DeleteAutocompleteTerms">
 			<wsdl:input message="tns:DeleteAutocompleteTermsRequest"/>
 			<wsdl:output message="tns:DeleteAutocompleteTermsResponse"/>
@@ -2105,13 +2865,13 @@
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-<!--
-		<wsdl:operation name="CopyUsers">
-			<soap:operation soapAction="urn:SmartConnectionAdmin#CopyUsers"/>
-			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
-			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
-		</wsdl:operation>
--->
+		<!--
+				<wsdl:operation name="CopyUsers">
+					<soap:operation soapAction="urn:SmartConnectionAdmin#CopyUsers"/>
+					<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+					<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+				</wsdl:operation>
+		-->
 
 		<!--************* USER GROUP - BINDINGS *****************-->
 		<wsdl:operation name="CreateUserGroups">
@@ -2171,7 +2931,6 @@
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="GetPublications">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#GetPublications"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
@@ -2187,13 +2946,13 @@
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-<!--
-		<wsdl:operation name="CopyPublications">
-			<soap:operation soapAction="urn:SmartConnectionAdmin#CopyPublications"/>
-			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
-			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
-		</wsdl:operation>
--->
+		<!--
+				<wsdl:operation name="CopyPublications">
+					<soap:operation soapAction="urn:SmartConnectionAdmin#CopyPublications"/>
+					<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+					<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+				</wsdl:operation>
+		-->
 
 		<!--************* PUBCHANNEL - BINDINGS *****************-->
 		<wsdl:operation name="CreatePubChannels">
@@ -2201,31 +2960,28 @@
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="GetPubChannels">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#GetPubChannels"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="ModifyPubChannels">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#ModifyPubChannels"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="DeletePubChannels">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#DeletePubChannels"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-<!--
-		<wsdl:operation name="CopyPubChannels">
-			<soap:operation soapAction="urn:SmartConnectionAdmin#CopyPubChannels"/>
-			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
-			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
-		</wsdl:operation>
--->
+		<!--
+				<wsdl:operation name="CopyPubChannels">
+					<soap:operation soapAction="urn:SmartConnectionAdmin#CopyPubChannels"/>
+					<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+					<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+				</wsdl:operation>
+		-->
 
 		<!--************* ISSUE - BINDINGS *****************-->
 		<wsdl:operation name="CreateIssues">
@@ -2260,7 +3016,6 @@
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="GetEditions">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#GetEditions"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
@@ -2283,19 +3038,16 @@
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="GetSections">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#GetSections"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="ModifySections">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#ModifySections"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="DeleteSections">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#DeleteSections"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
@@ -2303,19 +3055,16 @@
 		</wsdl:operation>
 
 		<!--************* STATUS - BINDINGS *****************-->
-<!--
 		<wsdl:operation name="CreateStatuses">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#CreateStatuses"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="GetStatuses">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#GetStatuses"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="ModifyStatuses">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#ModifyStatuses"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
@@ -2326,13 +3075,110 @@
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
--->
 
-<!-- ??? <<< MUTATION POINT >>> ??? -->
+		<!--************* ACCESS PROFILES - BINDINGS *************-->
+		<wsdl:operation name="CreateAccessProfiles">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#CreateAccessProfiles"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetAccessProfiles">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#GetAccessProfiles"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="ModifyAccessProfiles">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#ModifyAccessProfiles"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="DeleteAccessProfiles">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#DeleteAccessProfiles"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
 
-		<!--************* AUTHORIZATIONS - BINDINGS *****************-->
+		<!--************* USER AUTHORIZATIONS - BINDINGS *****************-->
+		<wsdl:operation name="CreateWorkflowUserGroupAuthorizations">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#CreateWorkflowUserGroupAuthorizations"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetWorkflowUserGroupAuthorizations">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#GetWorkflowUserGroupAuthorizations"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="ModifyWorkflowUserGroupAuthorizations">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#ModifyWorkflowUserGroupAuthorizations"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="DeleteWorkflowUserGroupAuthorizations">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#DeleteWorkflowUserGroupAuthorizations"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+
+		<!--************* BRAND AUTHORIZATIONS - BINDINGS *****************-->
+		<wsdl:operation name="CreatePublicationAdminAuthorizations">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#CreatePublicationAdminAuthorizations"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetPublicationAdminAuthorizations">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#GetPublicationAdminAuthorizations"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="DeletePublicationAdminAuthorizations">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#DeletePublicationAdminAuthorizations"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
 
 		<!--************* ROUTING RULES - BINDINGS *****************-->
+		<wsdl:operation name="CreateRoutings">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#CreateRoutings"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="ModifyRoutings">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#ModifyRoutings"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetRoutings">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#GetRoutings"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="DeleteRoutings">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#DeleteRoutings"/>
+			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+
+		<!--************* TEMPLATE ACCESS RULES - BINDINGS *****************-->
+		<wsdl:operation name="AddTemplateObjects">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#AddTemplateObjects"/>
+			<wsdl:input> <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+
+		<wsdl:operation name="GetTemplateObjects">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#GetTemplateObjects"/>
+			<wsdl:input> <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+
+		<wsdl:operation name="RemoveTemplateObjects">
+			<soap:operation soapAction="urn:SmartConnectionAdmin#RemoveTemplateObjects"/>
+			<wsdl:input> <soap:body use="literal"/> </wsdl:input>
+			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
+		</wsdl:operation>
+
+		<!-- ??? <<< MUTATION POINT >>> ??? -->
 
 		<!--************* WORFLOW DIALOG - BINDINGS *****************-->
 
@@ -2350,19 +3196,16 @@
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="GetAutocompleteTermEntities">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#GetAutocompleteTermEntities"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="ModifyAutocompleteTermEntities">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#ModifyAutocompleteTermEntities"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="DeleteAutocompleteTermEntities">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#DeleteAutocompleteTermEntities"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
@@ -2376,25 +3219,21 @@
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="GetAutocompleteTerms">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#GetAutocompleteTerms"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="ModifyAutocompleteTerms">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#ModifyAutocompleteTerms"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="DeleteAutocompleteTerms">
 			<soap:operation soapAction="urn:SmartConnectionAdmin#DeleteAutocompleteTerms"/>
 			<wsdl:input>  <soap:body use="literal"/> </wsdl:input>
 			<wsdl:output> <soap:body use="literal"/> </wsdl:output>
 		</wsdl:operation>
-
 
 	</wsdl:binding>
 

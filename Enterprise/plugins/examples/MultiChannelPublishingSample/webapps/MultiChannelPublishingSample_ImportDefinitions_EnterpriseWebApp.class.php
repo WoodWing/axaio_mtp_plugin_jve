@@ -72,7 +72,6 @@ class MultiChannelPublishingSample_ImportDefinitions_EnterpriseWebApp extends En
 	 */
 	private function importTermEntitiesAndTerms()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/services/adm/AdmCreateAutocompleteTermEntitiesService.class.php';
 		require_once BASEDIR.'/server/services/adm/AdmCreateAutocompleteTermsService.class.php';
 
@@ -122,7 +121,6 @@ class MultiChannelPublishingSample_ImportDefinitions_EnterpriseWebApp extends En
 	 */
 	private function clearTermEntitiesAndTerms()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTermEntity.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTerm.class.php';
 		require_once BASEDIR.'/server/services/adm/AdmDeleteAutocompleteTermEntitiesService.class.php';

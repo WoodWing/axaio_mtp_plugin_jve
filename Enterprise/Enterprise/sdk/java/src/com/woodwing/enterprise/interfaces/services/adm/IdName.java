@@ -117,7 +117,7 @@ public class IdName  implements java.io.Serializable {
         elemField.setFieldName("name");
         elemField.setXmlName(new javax.xml.namespace.QName("", "Name"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
-        elemField.setNillable(false);
+        elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
     }
 

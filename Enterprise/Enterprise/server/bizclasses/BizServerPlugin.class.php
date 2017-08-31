@@ -58,7 +58,6 @@ class BizServerPlugin
 		require_once BASEDIR.'/server/dbclasses/DBServerPlugin.class.php';
 		$pluginInfos = DBServerPlugin::getPlugins();
 		if( DBServerPlugin::hasError() ) {
-			require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 			throw new BizException( 'ERR_DATABASE', 'Server', DBServerPlugin::getError() );
 		}
 		return $pluginInfos;
@@ -188,7 +187,7 @@ class BizServerPlugin
 	 * @param string $interface  	Connector interface. E.g: WflCopyObject, PubPublishing, NameValidation, etc
 	 * @param string $type		  	Connector type. E.g: WorflowService, AdminService, etc. NULL for any type.
 	 * @param string $methodName   Method / function to call at connector.
-	 * @param string $methodParams Method params to pass onto $methodName
+	 * @param array $methodParams Method params to pass onto $methodName
 	 * @param boolean $activeOnly  Take only active connectors into account. 
 	 * @param boolean $installedOnly  Take only installed connectors into account. 
 	 * @param array  $returnVals   Collected return values of all connectors. Keys are connector class names.
@@ -1343,7 +1342,6 @@ class BizServerPlugin
 				$pluginObj->runInstallation(); // might throw BizException
 				$pluginInfo->IsInstalled = true;
 			} catch( BizException $e ) { // installation error?
-				$e = $e; // keep code analyzer happy
 				// Continue, since we still need to register the plugin in DB, no matter
 				// whether or not there were installation errors raised by the plugin.
 				// In that case the IsInstalled flag is simply not set.

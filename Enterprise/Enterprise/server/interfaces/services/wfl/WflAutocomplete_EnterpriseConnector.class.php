@@ -40,6 +40,5 @@ abstract class WflAutocomplete_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflAutocompleteRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

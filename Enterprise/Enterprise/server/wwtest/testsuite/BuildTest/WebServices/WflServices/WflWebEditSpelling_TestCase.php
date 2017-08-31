@@ -144,6 +144,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWebEditSpelling_TestCase
 	 */
 	private function getGoodWordsToCheck( $testId )
 	{
+		$wordsToCheck = array();
 		switch( $testId ) {
 			case 1:
 				$wordsToCheck = array( 'obvious' );
@@ -160,6 +161,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWebEditSpelling_TestCase
 	 */
 	private function getBadWordsToCheck( $testId )
 	{
+		$wordsToCheck = array();
 		switch( $testId ) {
 			case 1:
 				$wordsToCheck = array( 'firstt' );
@@ -173,6 +175,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWebEditSpelling_TestCase
 	 *
 	 * @param integer $testId Test run identifier [1...n].
 	 * @param Suggestion[] $suggestions
+	 * @throws BizException
 	 */
 	private function validateSuggestions( $testId, $suggestions )
 	{

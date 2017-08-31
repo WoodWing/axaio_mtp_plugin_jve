@@ -20,7 +20,6 @@ if( $message ) {
 $ticket = resolveTicket();
 
 try {
-	require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 	BizSession::startSession( $ticket );
 	BizSession::startTransaction();
 	MadeToPrintDispatcher::postProcess( $ticket, $layoutId, $layStatusId, $layEditionId, $success, $message );

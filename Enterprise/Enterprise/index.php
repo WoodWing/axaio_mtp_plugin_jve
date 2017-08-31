@@ -15,6 +15,10 @@ set_time_limit(3600);
 
 // Give HTTP 200 when the Health Check testing the URL.
 if( isset($_GET['test']) && $_GET['test'] ) {
+	// First add Cross Origin headers needed by Javascript applications
+	require_once BASEDIR.'/server/utils/CrossOriginHeaderUtil.class.php';
+	WW_Utils_CrossOriginHeaderUtil::addCrossOriginHeaders();
+
 	$message = 'Workflow service index page is accessible.';
 	header('HTTP/1.1 200 OK');
 	header('Status: 200 OK - '.$message );

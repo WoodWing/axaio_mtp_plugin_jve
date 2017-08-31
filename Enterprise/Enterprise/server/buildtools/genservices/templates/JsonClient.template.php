@@ -13,7 +13,7 @@
 
 require_once BASEDIR . '/server/protocols/json/Client.php';
 
-class WW_JSON_/*INTFSHORT*/Client extends WW_JSON_Client
+class /*CLASSNAME*/ extends WW_JSON_Client
 {
 	public function __construct( $baseUrl = '', $config = null )
 	{

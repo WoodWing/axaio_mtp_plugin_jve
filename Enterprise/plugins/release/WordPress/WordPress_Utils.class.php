@@ -285,7 +285,6 @@ class WordPress_Utils
 	 */
 	private function clearTermEntitiesAndTerms()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTermEntity.class.php';
 		require_once BASEDIR.'/server/services/adm/AdmDeleteAutocompleteTermEntitiesService.class.php';
 

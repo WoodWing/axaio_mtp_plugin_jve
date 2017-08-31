@@ -522,7 +522,7 @@ class WW_Utils_WidgetUtils
 	 * @param object $object
 	 * @param DOMNode $node
 	 * @param integer $level
-	 * @return string The JSON representation of the XML document
+	 * @return string|array The JSON encoded string that is a representation of the XML document, or array for special cases
 	 * @throws BizException
 	 */
 	public function xmlToJson( $object, DOMNode $node, $level = 0 )

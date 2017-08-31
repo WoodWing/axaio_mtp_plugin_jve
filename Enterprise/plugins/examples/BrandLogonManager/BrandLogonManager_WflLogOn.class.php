@@ -70,7 +70,6 @@ class BrandLogonManager_WflLogOn extends WflLogOn_EnterpriseConnector
 			$logonsRow = $dbdriver->fetch($sth);
 			if( $logonsRow && $logonsRow['usercount'] >= $limit ) {
 				// Limit reached for this brand, throw exception to prevent logon
-				require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 				$msg = BRANDLOGON_LIMIT_MSG;
 				$msg = str_replace( '$limit', $limit, $msg );
 				$msg = str_replace( '$userOrg', $userOrg, $msg );

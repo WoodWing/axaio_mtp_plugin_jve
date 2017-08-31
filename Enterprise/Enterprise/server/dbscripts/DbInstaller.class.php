@@ -130,6 +130,8 @@ class WW_DbScripts_DbInstaller
 
 	/**
 	 * Initializes the installer.
+	 *
+	 * @param callable $checkSystemAdmin
 	 */
 	public function __construct( $checkSystemAdmin )
 	{
@@ -179,6 +181,7 @@ class WW_DbScripts_DbInstaller
 			$phases['connect_db'] = $this->localizePhase( 'connect_db' );
 		} else {
 			switch( $this->phase ) {
+				/** @noinspection PhpMissingBreakStatementInspection */
 				case 'connect_db':
 					if( $this->newInstallation ) {
 						$phases['install_db'] = $this->localizePhase( 'install_db' );
@@ -211,10 +214,11 @@ class WW_DbScripts_DbInstaller
 	 * @todo Add resource keys to provide localized strings.
 	 *
 	 * @param string $phase 'connect_db', 'install_db', 'update_db' or 'goto_licenses'.
-	 * @return string Human readable phase.
+	 * @return string|null Human readable phase.
 	 */
 	private function localizePhase( $phase )
 	{
+		$localized = null;
 		switch( $phase ) {
 			case 'connect_db'    : $localized = BizResources::localize( 'DBINSTALLER_CONNECTDB_BTN'); break;
 			case 'install_db'    : $localized = BizResources::localize( 'DBINSTALLER_CREATEDB_BTN'); break;
@@ -430,7 +434,6 @@ class WW_DbScripts_DbInstaller
 		// must be reported to screen as a FATAL since it is blocking the installer from
 		// offering next steps in the installation procedure.
 		$map = new BizExceptionSeverityMap( array( 'S1003' => 'INFO' ) );
-		$map = $map; // keep analyzer happy
 
 		// Validate the database version and settings.
 		$help = '';
@@ -467,8 +470,7 @@ class WW_DbScripts_DbInstaller
 		// must be reported to screen as a FATAL since it is blocking the installer from
 		// offering next steps in the installation procedure.
 		$map = new BizExceptionSeverityMap( array( 'S1003' => 'INFO' ) );
-		$map = $map; // keep analyzer happy
-		
+
 		try {
 			require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
 			$installedVersion = DBConfig::getSCEVersion();
@@ -691,15 +693,15 @@ class WW_DbScripts_DbInstaller
 					if( $upgrade['upgrade'] === true ) {
 						if ( !$this->newInstallation ) {
 							$result = $upgrade['object']->run();
-						}
-						if( $result ) {
-							LogHandler::Log( 'DbInstaller', 'INFO', 
-								'Successfully run DB migration script '.$script );
-						} else {
-							$this->report->add( 'DbInstaller', 'FATAL', 'ERROR', 
-								BizResources::localize('DBINSTALLER_DBUPGRADE_FAILED'), 
-								BizResources::localize('SEELOGFILES'),
-								'', array( 'phase' => $this->phase ) );
+							if( $result ) {
+								LogHandler::Log( 'DbInstaller', 'INFO',
+									'Successfully run DB migration script '.$script );
+							} else {
+								$this->report->add( 'DbInstaller', 'FATAL', 'ERROR',
+									BizResources::localize('DBINSTALLER_DBUPGRADE_FAILED'),
+									BizResources::localize('SEELOGFILES'),
+									'', array( 'phase' => $this->phase ) );
+							}
 						}
 					} else {
 						LogHandler::Log( 'DbInstaller', 'INFO', 
@@ -832,6 +834,10 @@ class WW_DbScripts_DbInstaller
 	 * server/dbscripts folder. Which files are choosen depends on the DB flavor
 	 * and if it needs a clean installation or an update.
 	 *
+	 * @param bool $flatWantedDbVersion
+	 * @param bool $flatInstalledVersion
+	 * @param bool $newInstallation
+	 * @param bool $upgrade
 	 * @return string[] List of SQL file names to execute.
 	 */
 	public function getDbModelScripts( $flatWantedDbVersion, $flatInstalledVersion, $newInstallation, $upgrade )

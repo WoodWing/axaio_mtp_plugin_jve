@@ -395,6 +395,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 	private function testScenario06()
 	{
 		$errorReport = null;
+		$article = null;
 
 		do {
 			// Create the basic setup.
@@ -504,7 +505,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 				$this->setResult( 'ERROR', 'Scenario 7: The Publish Form was restored while its Dossier was in the Trash, this was unexpected.' );
 				break;
 			}
-			$map = $map; // keep analyzer happy
 			unset( $map );
 	
 			// So far so good, now restore the Dossier and attempt the test again.
@@ -575,7 +575,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 				$this->setResult( 'ERROR', 'Scenario 8: The first Publish Form was restored while the Dossier already had an active Publish Form.' );
 				break;
 			}
-			$map = $map; // keep analyzer happy
 			unset( $map );
 
 			// Move the second Publish Form to the Trash Can.
@@ -655,7 +654,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 					'available for the PublishForm, this is not expected.');
 				break;
 			}
-			$map = $map; // keep analyzer happy
 			unset( $map );
 
 			// Adds back the Target(channel) to the Dossier.
@@ -729,7 +727,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 					'available for the PublishForm, this is not expected.');
 				break;
 			}
-			$map = $map; // keep analyzer happy
 			unset( $map );
 
 			if( !$this->addTarget( array($dossierNewTarget) ) ) { // Add back the new Target to the Dossier.
@@ -929,6 +926,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 	 *
 	 * @param integer $publishFormId The Publish Form Object ID.
 	 * @param bool $setPublished Whether or not to set the Publish Form as Published in the Target. Default true.
+	 * @return bool
 	 */
 	private function setPublishFormPublicationStatus( $publishFormId, $setPublished=true )
 	{
@@ -1000,6 +998,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 	 * @param integer $objectId The Object ID to check for.
 	 * @param array $areas The areas to check in.
 	 * @return bool Whether or not an object exists in the specified areas.
+	 * @throws BizException
 	 */
 	private function doesObjectExist( $objectId, $areas )
 	{
@@ -1007,7 +1006,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 		$user = $this->vars['BuildTest_MultiChannelPublishing']['testOptions']['User'];
 		try{
 			$map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO' ) );
-			$map = $map; // keep code analyzer happy
 			$object = BizObject::getObject( $objectId, $user, false, 'none', array(), null, true, $areas );
 		} catch (BizException $e) {
 			if ($e->getErrorCode() == 'S1029') { // "Record not found"
@@ -1090,6 +1088,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 	 */
 	private function getLatestObject( $objId, $scenario )
 	{
+		$object = null;
 		try{
 			$user = $this->vars['BuildTest_MultiChannelPublishing']['testOptions']['User'];
 			$object = BizObject::getObject( $objId, $user, false, 'none', array( 'Relations', 'Targets'),

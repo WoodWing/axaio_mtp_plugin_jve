@@ -24,8 +24,8 @@ class WflQueryObjectsRequest
 	/**
 	 * @param string               $Ticket                    
 	 * @param QueryParam[]         $Params                    
-	 * @param unsignedInt          $FirstEntry                Nullable.
-	 * @param unsignedInt          $MaxEntries                Nullable.
+	 * @param integer              $FirstEntry                Nullable.
+	 * @param integer              $MaxEntries                Nullable.
 	 * @param boolean              $Hierarchical              Nullable.
 	 * @param QueryOrder[]         $Order                     Nullable.
 	 * @param string[]             $MinimalProps              Nullable.

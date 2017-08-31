@@ -428,7 +428,6 @@ class DBInDesignServer extends DBBase
 	 * @since 9.7.0
 	 * @param integer $serverId
 	 * @param string $lockToken
-	 * @return boolean Whether or not the IDS was unlocked successfully.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
 	static public function unlockServer( $serverId, $lockToken )

@@ -15,24 +15,27 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmInitData_TestCase extend
 	public function getTestMethods() { return 'Does LogOn through admin services.'; }
     public function getPrio()        { return 1; }
 
-	private $utils = null; // WW_Utils_TestSuite
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 	private $publicationId = null;
 	private $pubChannelId = null;
-	
+
 	final public function runTest()
 	{
 		// Init utils.
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		// Logon TESTSUITE user through admin interface.
 		$response = $this->utils->admLogOn( $this );
 		$this->ticket = $response ? $response->Ticket : null;
 
 		// Create a publication to let successor test cases work on it.
-		$this->createPublication();
+		$publication = $this->createPublication();
 		$this->createPubChannel();
+		$this->setDefaultPubChannel( $publication );
 
 		// Save the retrieved data into session for successor TestCase modules within this TestSuite.
 		$vars = array();
@@ -49,7 +52,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmInitData_TestCase extend
 	{
 		// Without ticket we can not do anything.
 		if( !$this->ticket ) {
-			return;
+			return null;
 		}
 		
 		// Create a new test Publication data object in memory.
@@ -73,6 +76,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmInitData_TestCase extend
 		$stepInfo = 'AdmInitData is creating a Publication to let successor test cases work on it.';
 		$response = $this->utils->callService( $this, $request, $stepInfo );
 		$this->publicationId = $response ? $response->Publications[0]->Id : null;
+		return $response->Publications[0];
 	}
 	
 	/**
@@ -89,7 +93,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmInitData_TestCase extend
 		$pubChan = new AdmPubChannel();
 		$pubChan->Name              = 'PubChannel_T_' . date('dmy_his');
 		$pubChan->Description       = 'Created PubChannel'; 
-		$pubChan->Type              = 'other';
+		$pubChan->Type              = 'print';
 		$pubChan->PublishSystem     = 'Enterprise';
 		$pubChan->CurrentIssueId    = 0;
 		$pubChan->ExtraMetaData     = array(); // since 9.0
@@ -105,5 +109,23 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmInitData_TestCase extend
 		$stepInfo = 'AdmInitData is creating a PubChannel to let successor test cases work on it.';
 		$response = $this->utils->callService( $this, $request, $stepInfo );
 		$this->pubChannelId = $response ? $response->PubChannels[0]->Id : null;
+	}
+
+	/**
+	 * Sets a default publication channel for the Test publication.
+	 *
+	 * @param AdmPublication $publication
+	 */
+	private function setDefaultPubChannel( AdmPublication $publication )
+	{
+		$publication->DefaultChannelId = $this->pubChannelId;
+
+		require_once BASEDIR.'/server/services/adm/AdmModifyPublicationsService.class.php';
+		$request = new AdmModifyPublicationsRequest();
+		$request->Ticket = $this->ticket;
+		$request->RequestModes = array();
+		$request->Publications = array( $publication );
+		$stepInfo = 'AdmInitData sets the created pubChannel as default channel for the publication.';
+		$this->utils->callService( $this, $request, $stepInfo );
 	}
 }

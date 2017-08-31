@@ -209,8 +209,6 @@ class AdobeDps2_BizClasses_Publishing
 				self::$uploadProgress['uploaded_total_filesize'] += self::$uploadProgress['upload_filesize_per_edition'][$editionId];
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // first we need to clear the transfer folder, then we'll throw errors (see below)
 		}
 		
 		// Delete the folio files from the transfer server folder.
@@ -707,7 +705,6 @@ class AdobeDps2_BizClasses_Publishing
 	 */
 	private static function composeArticleId( $layoutId, $editionId )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$entSystemId = BizSession::getEnterpriseSystemId();
 		return $entSystemId.'_'.$layoutId.'_'.$editionId;
 	}
@@ -723,7 +720,6 @@ class AdobeDps2_BizClasses_Publishing
 	 */
 	private static function composeCollectionId( $issueId, $editionId )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$entSystemId = BizSession::getEnterpriseSystemId();
 		return $entSystemId.'_'.$issueId.'_'.$editionId;
 	}
@@ -812,7 +808,7 @@ class AdobeDps2_BizClasses_Publishing
 	 * @param string $projectRef
 	 * @throws BizException
 	 */
-	private static function addToPublishHistory( Object $layout, $editionId, 
+	private static function addToPublishHistory( /** @noinspection PhpLanguageLevelInspection */ Object $layout, $editionId,
 		AdobeDps2_DataClasses_EntityArticle $dpsArticle, $projectId, $projectRef )
 	{
 		require_once BASEDIR . '/server/interfaces/services/pub/DataClasses.php'; // PubField, PubPublishedDossier
@@ -1007,12 +1003,6 @@ class AdobeDps2_BizClasses_Publishing
 	 */
 	public static function curlProgressCallback5( $curl, $downloadSize, $downloaded, $uploadSize, $uploaded )
 	{
-		// keep analyzer happy
-		/** @noinspection PhpSillyAssignmentInspection */ $curl = $curl;
-		/** @noinspection PhpSillyAssignmentInspection */ $downloadSize = $downloadSize;
-		/** @noinspection PhpSillyAssignmentInspection */ $downloaded = $downloaded;
-		/** @noinspection PhpSillyAssignmentInspection */ $uploadSize = $uploadSize;
-
 		// The semaphore expires after 5 minutes (300 seconds) without updates. The ticket
 		// expired after one hour. The semaphore and ticket are updated in the database at 
 		// BizSemaphore::refreshSession(). Updating the database every few miliseconds will 

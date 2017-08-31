@@ -133,13 +133,15 @@ class WW_SOAP_Client extends SoapClient
 	 */
 	public function __call ($function_name, $arguments)
 	{
+		/** @noinspection PhpParamsInspection */
 		return $this->__soapCall($function_name, $arguments);
 	}
 	
 	/**
 	 * {@inheritdoc}
 	 */
-	public function __soapCall ($function_name, $arguments, $options = null, $input_headers = null, &$output_headers = null)
+	public function __soapCall( $function_name, /** @noinspection PhpSignatureMismatchDuringInheritanceInspection */$arguments,
+	                            $options = null, $input_headers = null, &$output_headers = null )
 	{
 		$this->attachments = array();
 		// find attachments in $arguments
@@ -498,7 +500,7 @@ class WW_SOAP_Client extends SoapClient
 	 *
 	 * @param SimpleXMLElement $xmlParent
 	 * @param string $nodeName
-	 * @return SimpleXMLElement The requested node. Null when not found.
+	 * @return mixed The requested SimpleXMLElement node. Null when not found.
 	 */
 	static private function getSimpleChildNode( $xmlParent, $nodeName ) 
 	{
