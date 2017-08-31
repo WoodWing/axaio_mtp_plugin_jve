@@ -82,8 +82,7 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
                     	$faceConn->loginToFacebook($channelId);
 					}
 				} catch( Exception $e ) {
-					LogHandler::Log('Facebook','ERROR',
-						':Error retrieving access token:<pre>'. print_r( $e->getMessage(),1).'</pre>');
+					LogHandler::Log('Facebook','ERROR', ':Error retrieving access token:'. $e->getMessage() );
 				}
 			} else {
 				$faceConn = new FacebookPublisher();
@@ -98,7 +97,6 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 		$htmlBody = str_replace ( '<!--CONTENT-->', $message, $htmlBody );
 		$channelRowsObj = new WW_Utils_HtmlClasses_TemplateSection( 'CHANNEL_ROWS' );
 		$channelRowsTxt = '';
-		$accessError = false;
 
 		if ( $this->pubChannelInfos ) foreach ( $this->pubChannelInfos  as $channelInfo ) {
 			require_once BASEDIR . '/server/dbclasses/DBPublication.class.php';
@@ -119,7 +117,7 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 				$faceConn = new FacebookPublisher( $channelInfo->Id );
 				$registered = $faceConn->getAccessToken( $channelInfo->Id ) ? true : false;
 			} catch( Exception $e ) {
-				$htmlBody = $htmlBody.'<body class="warning" onLoad="javascript:myFunction(\''.$e->getMessage().'\')">';
+				$channelTxt = str_replace ( '<!--PAR:ERROR_MESSAGE-->', $e->getMessage(), $channelTxt );
 			}
 
 			//Check if the user is a valid user and if he has access to the application, if you don't do this you'll get an error by Facebook.
@@ -128,7 +126,10 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 				if($faceConn->checkUser() == null){
 					$faceConn->releaseAccessToken($channelInfo->Id);
 					$registered = false;
-					$accessError = true;
+
+					// Access error
+					$error = BizResources::localize('FACEBOOK_ERROR_MESSAGE_NO_ACCESS');
+					$channelTxt = str_replace ( '<!--PAR:ERROR_MESSAGE-->', $error, $channelTxt );
 				}
 			}
 
@@ -148,11 +149,6 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 			$channelTxt = str_replace ( '<!--PAR:FACEBOOKACCOUNT-->', $userName ? formvar($userName) : '&nbsp;', $channelTxt );
 			$channelTxt = str_replace ( '<!--PAR:BUTTON-->', '<input type="submit" value="'.$btnTitle.'" id="'.$btnId.'" name="'.$btnId.'" />', $channelTxt );
 			$channelRowsTxt .= $channelTxt;
-		}
-
-		if($accessError){
-			$error = BizResources::localize('FACEBOOK_ERROR_MESSAGE_NO_ACCESS');
-			$htmlBody = $htmlBody . '<body class="warning" onLoad="javascript:myFunction(\'' . $error . '\')">';
 		}
 
 		$htmlBody = $channelRowsObj->replaceSection( $htmlBody, $channelRowsTxt );
