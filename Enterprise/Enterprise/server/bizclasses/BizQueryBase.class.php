@@ -967,6 +967,7 @@ class BizQueryBase
 					if (strtolower($pubrow['publication']) == strtolower($param->Value) && $param->Operation == '=') {
 						$param->Property = 'publicationid';
 						$param->Value = $pubrow['id'];
+						break; // found the corresponding publication id
 					}
 				}
 			}
@@ -986,16 +987,13 @@ class BizQueryBase
 	public static function resolveIssueNameParams( $params )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-		$issues = array();
+		$issueIds = array();
 		if( $params ) foreach( $params as $param ) {
 			if( strtolower( $param->Property == 'Issue' )) {
-				$issueRows = DBIssue::getIssuesByName( $param->Value );
-				if( $issueRows ) foreach( $issueRows as $issueRow ) {
-					$issues[] = $issueRow['id'];
-				}
+				$issueIds = array_merge( $issueIds, DBIssue::resolveIssueIdsByNameAndParams( $param->Value, $params ) );
 			}
 		}
-		if( $issues ) {
+		if( $issueIds ) {
 			// Re-construct the QueryParams.
 			$newParams = array();
 
@@ -1008,11 +1006,11 @@ class BizQueryBase
 
 			// Filling in the Issue id(s)
 			require_once BASEDIR .'/server/interfaces/services/wfl/DataClasses.php';
-			foreach ( $issues as $issue ) {
+			foreach ( $issueIds as $issueId ) {
 				$queryParam = new QueryParam();
 				$queryParam->Property = 'IssueId';
 				$queryParam->Operation = '=';
-				$queryParam->Value = $issue;
+				$queryParam->Value = $issueId;
 				$newParams[] = $queryParam;
 			}
 			$params = $newParams;

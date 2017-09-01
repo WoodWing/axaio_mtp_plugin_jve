@@ -221,8 +221,9 @@ class BizNamedQuery extends BizQueryBase
 		$mode = self::getQueryMode( $ticket, false, false );
 
 		if (isset($params)) {
-			$params = self::resolvePublicationNameParams($params);
-			$params = self::resolveSpecialParams($params);
+			$params = self::resolvePublicationNameParams( $params );
+			$params = self::resolveIssueNameParams( $params );
+			$params = self::resolveSpecialParams( $params );
 		}
 
 		$ret = self::runPublishManagerQuery( $user, $params, $firstEntry, $maxEntries, $queryOrder, $mode, $requestProps, $accessRight );

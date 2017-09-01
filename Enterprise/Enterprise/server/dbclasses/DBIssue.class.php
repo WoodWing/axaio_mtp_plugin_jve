@@ -51,6 +51,98 @@ class DBIssue extends DBBase
 		$rows = self::fetchResults( $sth );
 		return $rows;
 	}
+
+	/**
+	 * Resolve the Issue name ($issueName) into its corresponding Issue id(s).
+	 *
+	 * Function iterates through the list of QueryParams passed in.
+	 * It searches for Publication id(s) and Publication Channel id(s) if there're any.
+	 * When found, the two will be taken into account as well
+	 * when resolving the Issue names into the Issue ids.
+	 *
+	 * Nevertheless, it is assumed that for the QueryParam passed in,
+	 * the Publication(s) and Publication channel(s) are already resolved into its id(s).
+	 *
+	 * @param string $issueName The Issue Name of which its corresponding ids should be resolved.
+	 * @param QueryParam[] $params List of QueryParams.
+	 * @return int[] List of resolved issue ids.
+	 * @throws BizException
+	 */
+	public static function resolveIssueIdsByNameAndParams( $issueName, $params )
+	{
+		if( !$issueName ) {
+			throw new BizException( 'ERR_ARGUMENT', 'Server',
+				'Issue name parameter is mandatory for resolveIssueIdsByNameAndParams().' );
+		}
+
+		// Search if there's any Pub id(s) or PubChannel id(s).
+		$pubIds = array();
+		$channelIds = array();
+		if( $params ) foreach( $params as $param ) {
+			if( strtolower($param->Property == 'PublicationId' ) && $param->Operation == '=' ) {
+				$pubIds[] = $param->Value;
+			}
+			if( strtolower($param->Property == 'PublicationIds' ) && $param->Operation == '=' ) {
+				$pubIds = array_merge( $pubIds, explode( ',', $param->Value ) );
+			}
+			if( strtolower($param->Property == 'PubChannelId' ) && $param->Operation == '=' ) {
+				$channelIds[] = $param->Value;
+			}
+			if( strtolower($param->Property == 'PubChannelIds' ) && $param->Operation == '=' ) {
+				$channelIds = array_merge( $channelIds, explode( ',', $param->Value ) );
+			}
+		}
+
+		$dbDriver = DBDriverFactory::gen();
+		$dbi = $dbDriver->tablename( 'issues' );
+		$dbc = $dbDriver->tablename( 'channels' );
+		$where = array();
+		$joins = array();
+		$params = array();
+		// Publication Id(s) if there's any.
+		if( $pubIds ) {
+			$tmpWhere = array();
+			$joins[] = "LEFT JOIN $dbc cha ON ( iss.`channelid` = cha.`id` ) ";
+			foreach( $pubIds as $pubId ) {
+				$tmpWhere[] = "cha.`publicationid` = ? ";
+				$params[] = intval( $pubId );
+			}
+
+			if( $tmpWhere ) {
+				$where[] = "( " . implode( " OR ", $tmpWhere ) . " ) ";
+			}
+		}
+		// Publication Channel Id(s) if there's any.
+		if( $channelIds ) {
+			$tmpWhere = array();
+			foreach( $channelIds as $channelId ) {
+				$tmpWhere[] = "iss.`channelid` = ? ";
+				$params[] = intval( $channelId );
+			}
+
+			if( $tmpWhere ) {
+				$where[] = "( " . implode( " OR ", $tmpWhere ) . " ) ";
+			}
+		}
+
+		// The compulsory Issue Name.
+		$where[] = "iss.`name` = ? ";
+		$params[] = strval( $issueName );
+
+		// Compose the Sql
+		$sql = "SELECT iss.`id` FROM $dbi iss ";
+		$sql .= implode( " ", $joins ); // the join(s)
+		$sql .= "WHERE " . implode( " AND ", $where ); // the where(s)
+
+		$sth = $dbDriver->query( $sql, $params );
+		$rows = self::fetchResults( $sth );
+		$issueIds = array();
+		if( $rows ) foreach( $rows as $id ) {
+			$issueIds[] = $id['id'];
+		}
+		return $issueIds;
+	}
+
 	/**
 	 * Updates an issue in the smart_issues table with a given issue row
 	 *
