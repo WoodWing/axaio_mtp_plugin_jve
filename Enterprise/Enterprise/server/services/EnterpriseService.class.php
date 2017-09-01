@@ -212,40 +212,48 @@ class EnterpriseService
 				BizSession::endTransaction();
 			}
 			BizSession::endSession();
-
-		} catch ( BizException $e ) {
-			// Log error
+		} catch ( Throwable $e ) {
+			// For all errors (Error, Exception, BizException) write the error file when enabled
 			if( $logService ) {
 				$error = new stdClass();
-				$error->Type = $e->getType();
 				$error->Message = $e->getMessage();
-				$error->Detail = $e->getDetail();
-				$error->ErrorCode = $e->getErrorCode();
-				LogHandler::logService( $serviceName, LogHandler::prettyPrint( $error ), null, 'Service' );
-			}
-
-			// The errors raised by ES are not always thrown up by SC to our IDS script.
-			// This is a limitation of SC (tested with 10.0.3) but we don't want to lose error
-			// info since that is used by ES to decide whether to retry to give up the job.
-			// Instead of waiting for the job to complete (for which we'd risk losing useful
-			// error info) we already save the error raised by ourself or by the core server.
-			if( $ticket ) { // not set e.g. on LogOn with invallid password
-				require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';
-				$idsJobId = BizInDesignServerJobs::getJobIdForRunningJobByTicketAndJobType( $ticket, null );
-				if( $idsJobId ) {
-					BizInDesignServerJobs::saveErrorForJob( $idsJobId, $e->getMessage() );
+				if ($e instanceof BizException) { // Only add the 'BizException' information when available
+					$error->Type = $e->getType();
+					$error->Detail = $e->getDetail();
+					$error->ErrorCode = $e->getErrorCode();
 				}
+				LogHandler::logService($serviceName, LogHandler::prettyPrint($error), null, 'Service');
 			}
 
-			// Record exception
-			if( isset($recorder) && $createdRecorder ) {
-				$recorder->recordBizException( $e );
-				$recorder = null; // Reset global recorder. Service call by the real client will end here.
-			}
+			if ($e instanceof BizException) {
+				// The errors raised by ES are not always thrown up by SC to our IDS script.
+				// This is a limitation of SC (tested with 10.0.3) but we don't want to lose error
+				// info since that is used by ES to decide whether to retry to give up the job.
+				// Instead of waiting for the job to complete (for which we'd risk losing useful
+				// error info) we already save the error raised by ourself or by the core server.
+				if ($ticket) { // not set e.g. on LogOn with invallid password
+					require_once BASEDIR . '/server/bizclasses/BizInDesignServerJob.class.php';
+					$idsJobId = BizInDesignServerJobs::getJobIdForRunningJobByTicketAndJobType($ticket, null);
+					if ($idsJobId) {
+						BizInDesignServerJobs::saveErrorForJob($idsJobId, $e->getMessage());
+					}
+				}
 
-			// Stop capturing errors (BizException) into reports.
-			if( $reportingStarted ) {
-				BizErrorReport::stopService();
+				// Record exception
+				if (isset($recorder) && $createdRecorder) {
+					$recorder->recordBizException($e);
+					$recorder = null; // Reset global recorder. Service call by the real client will end here.
+				}
+
+				// Stop capturing errors (BizException) into reports.
+				if ($reportingStarted) {
+					BizErrorReport::stopService();
+				}
+			} else {
+				// Error and Exception throwables are handled by the interface (e.g. SOAP) and do not end up in the logs by default
+				// as they don't trigger the exception handler. Log the information right here. 
+				$error = 'Uncaught throwable "'.get_class($e).'".';
+				LogHandler::Log( 'EnterpriseService', 'ERROR', $error, $e );
 			}
 
 			// Roll-back transaction
