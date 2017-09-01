@@ -373,7 +373,7 @@ class BizQueryBase
 
     static protected function row2string($row)
     {
-        $result = '';
+        $result = array();
 		$row = self::replaceBooleans($row);
 
         $values = array_values( $row );
