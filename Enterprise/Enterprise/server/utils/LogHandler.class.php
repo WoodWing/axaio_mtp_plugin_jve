@@ -844,7 +844,44 @@ class LogHandler
 		}
 		return $logFile;
 	}
-	
+
+	/**
+	 * Compose a unique file name for an object file.
+	 *
+	 * Can be used e.g. for debugging to copy a native object file into the log folder for further analysis.
+	 *
+	 * @since 10.2.0
+	 * @param string $postfix Name to be added to the filename.
+	 * @param string|null $format Mimetype, used in conjunction with $objectType to resolve the file extension.
+	 * @param string|null $objectType
+	 * @return string Full file path
+	 */
+	public static function composeFileNameInLogFolder( $postfix, $format=null, $objectType=null )
+	{
+		$microTime = explode( ' ', microtime() );
+		$time = sprintf( '%03d', round($microTime[0]*1000) );
+		$currTimeStamp = date('His').'_'.$time;
+
+		static $callsCount;
+		static $lastTimeStamp;
+		if( $lastTimeStamp == $currTimeStamp ) {
+			$callsCount++;
+		} else {
+			$callsCount = 0;
+		}
+		$lastTimeStamp = $currTimeStamp;
+		$callerId = chr( $callsCount + 65 );
+
+		$fileExt = '';
+		if( $format ) {
+			require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
+			$fileExt = MimeTypeHandler::mimeType2FileExt( $format, $objectType );
+		}
+
+		$phpLogFile = self::getLogFolder().$currTimeStamp.$callerId.'_'.$postfix.$fileExt;
+		return $phpLogFile;
+	}
+
 	/**
 	 * Dumps the entire content of a given PHP object into a new temp file at server log folder.
 	 * There are several methods supported to dump the PHP object.
