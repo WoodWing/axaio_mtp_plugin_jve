@@ -364,7 +364,7 @@ class BizQueryBase
 
     static protected function getChildRows($rows)
     {
-        $returnrows = '';
+        $returnrows = array();
         foreach ($rows as $row) {
         	$returnrows[] = self::getChildRow($row);
         }
@@ -385,7 +385,7 @@ class BizQueryBase
 
     static protected function childrow2string($row)
     {
-		$result = '';
+		$result = array();
 		$row = self::replaceBooleans($row);
 
         $values = array_values( $row );
