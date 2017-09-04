@@ -315,7 +315,7 @@ class BizQueryBase
 
     static protected function getComponents($rows)
     {
-        $returnrows = '';
+        $returnrows = array();
         foreach ($rows as $row) {
         	$returnrows[] = self::getComponentChildRow($row);
         }
