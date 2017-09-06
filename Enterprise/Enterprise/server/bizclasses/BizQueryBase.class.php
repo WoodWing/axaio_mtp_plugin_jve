@@ -864,10 +864,11 @@ class BizQueryBase
 	 * @return QueryParam[] query parameters with resolved special parameters.
 	 * @throws BizException
 	 */
-	static public function resolveSpecialParams( $params )
+	static public function resolveSpecialIssueParams( $params )
 	{
 		$publicationIds = array();
 		$specialParams = array();
+		$existingIssueIds = array();
 		foreach( $params as $paramKey => $param ) {
 			if( strtolower($param->Property) == 'publicationid' ) {
 				if( !empty($param->Value) && is_numeric($param->Value) ) {
@@ -880,6 +881,9 @@ class BizQueryBase
 				}
 				$specialParams[] = $param;
 				unset( $params[$paramKey] );
+			}
+			if( strtolower( $param->Property ) == 'issueid' && !$param->Special) { // Param is sent in as "real" IssueId
+				$existingIssueIds[] = $param->Value;
 			}
 		}
 		if ( !$specialParams ) {
@@ -919,10 +923,12 @@ class BizQueryBase
 				if( is_null( $modifiedParamValue )) {
 					$modifiedParamValue = -1;
 				}
-				$newParam = clone( $specialParam );
-				$newParam->Value = $modifiedParamValue;
-				$newParam->Special = false;
-				$newParams[] = $newParam; // Add new param object when multiple brand selected
+				if( !in_array( $modifiedParamValue, $existingIssueIds )) {
+					$newParam = clone( $specialParam );
+					$newParam->Value = $modifiedParamValue;
+					$newParam->Special = false;
+					$newParams[] = $newParam; // Add new param object when multiple brand selected
+				}
 			}
 		}
 		$params = array_merge( $params, $newParams ); // Merge with new query params when multiple brand selected.
