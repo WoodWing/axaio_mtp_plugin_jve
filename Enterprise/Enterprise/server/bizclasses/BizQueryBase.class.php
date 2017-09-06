@@ -987,31 +987,38 @@ class BizQueryBase
 	public static function resolveIssueNameParams( $params )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-		$issueIds = array();
+		$issueNames = array();
 		if( $params ) foreach( $params as $param ) {
 			if( strtolower( $param->Property == 'Issue' )) {
-				$issueIds = array_merge( $issueIds, DBIssue::resolveIssueIdsByNameAndParams( $param->Value, $params ) );
+				$issueNames[] = $param->Value;
 			}
 		}
+		$issueIds = $issueNames ? DBIssue::resolveIssueIdsByNameAndParams( $issueNames, $params ) : array();
 		if( $issueIds ) {
 			// Re-construct the QueryParams.
 			$newParams = array();
+			$existingIssueIds = array();
 
 			// Collect QueryParam that is/are not Issue
 			foreach( $params as $param ) {
 				if( strtolower( $param->Property != 'Issue' )) {
 					$newParams[] = $param;
 				}
+				if( strtolower( $param->Property == 'IssueId' )) {
+					$existingIssueIds[] = $param->Value;
+				}
 			}
 
 			// Filling in the Issue id(s)
 			require_once BASEDIR .'/server/interfaces/services/wfl/DataClasses.php';
 			foreach ( $issueIds as $issueId ) {
-				$queryParam = new QueryParam();
-				$queryParam->Property = 'IssueId';
-				$queryParam->Operation = '=';
-				$queryParam->Value = $issueId;
-				$newParams[] = $queryParam;
+				if( !in_array( $issueId, $existingIssueIds )) { // Add in the IssueId only when it does not exist yet to avoid duplicates.
+					$queryParam = new QueryParam();
+					$queryParam->Property = 'IssueId';
+					$queryParam->Operation = '=';
+					$queryParam->Value = $issueId;
+					$newParams[] = $queryParam;
+				}
 			}
 			$params = $newParams;
 		}

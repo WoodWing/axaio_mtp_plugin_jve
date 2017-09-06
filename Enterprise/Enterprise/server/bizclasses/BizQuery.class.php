@@ -124,8 +124,8 @@ class BizQuery extends BizQueryBase
 		require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
 		if (isset( $params )) {
 			$params = self::resolvePublicationNameParams( $params );
-			$params = self::resolveIssueNameParams( $params ) ;
 			$params = self::resolveSpecialParams( $params );
+			$params = self::resolveIssueNameParams( $params ) ;
 		}
 	// IMPORTANT: The block below has been disabled for BZ#30544 the reason behind this is that when searching as a normal
 	// user the search results are limited to objects which are targeted to issues while there might be orphaned objects
