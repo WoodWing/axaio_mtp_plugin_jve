@@ -139,8 +139,8 @@ class DBIssue extends DBBase
 		$sth = $dbDriver->query( $sql, $params );
 		$rows = self::fetchResults( $sth );
 		$issueIds = array();
-		if( $rows ) foreach( $rows as $id ) {
-			$issueIds[] = $id['id'];
+		if( $rows ) foreach( $rows as $row ) {
+			$issueIds[] = $row['id'];
 		}
 		return $issueIds;
 	}
