@@ -53,7 +53,7 @@ class DBIssue extends DBBase
 	}
 
 	/**
-	 * Resolve the Issue name ($issueName) into its corresponding Issue id(s).
+	 * Resolve the Issue names ($issueNames) into its corresponding Issue id(s).
 	 *
 	 * Function iterates through the list of QueryParams passed in.
 	 * It searches for Publication id(s) and Publication Channel id(s) if there're any.
@@ -63,16 +63,16 @@ class DBIssue extends DBBase
 	 * Nevertheless, it is assumed that for the QueryParam passed in,
 	 * the Publication(s) and Publication channel(s) are already resolved into its id(s).
 	 *
-	 * @param string $issueName The Issue Name of which its corresponding ids should be resolved.
+	 * @param string[] $issueNames The list of Issue Names of which its corresponding ids should be resolved.
 	 * @param QueryParam[] $params List of QueryParams.
 	 * @return int[] List of resolved issue ids.
 	 * @throws BizException
 	 */
-	public static function resolveIssueIdsByNameAndParams( $issueName, $params )
+	public static function resolveIssueIdsByNameAndParams( $issueNames, $params )
 	{
-		if( !$issueName ) {
+		if( !$issueNames ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Server',
-				'Issue name parameter is mandatory for resolveIssueIdsByNameAndParams().' );
+				'Issue names parameter is mandatory for resolveIssueIdsByNameAndParams().' );
 		}
 
 		// Search if there's any Pub id(s) or PubChannel id(s).
@@ -94,7 +94,7 @@ class DBIssue extends DBBase
 		}
 
 		$dbDriver = DBDriverFactory::gen();
-		$dbi = $dbDriver->tablename( 'issues' );
+		$dbi = $dbDriver->tablename( self::TABLENAME );
 		$dbc = $dbDriver->tablename( 'channels' );
 		$where = array();
 		$joins = array();
@@ -125,9 +125,11 @@ class DBIssue extends DBBase
 			}
 		}
 
-		// The compulsory Issue Name.
-		$where[] = "iss.`name` = ? ";
-		$params[] = strval( $issueName );
+		// The compulsory Issue Name(s).
+		$nameValues = array( 'iss.`name`' => $issueNames );
+		$nameParams = array();
+		$where[] = self::makeWhereForSubstitutes( $nameValues, $nameParams ) ;
+		$params = array_merge( $params, $nameParams );
 
 		// Compose the Sql
 		$sql = "SELECT iss.`id` FROM $dbi iss ";
