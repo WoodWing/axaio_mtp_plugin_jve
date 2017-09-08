@@ -890,7 +890,7 @@ class BizQueryBase
 	 * @return QueryParam[] query parameters with resolved special parameters.
 	 * @throws BizException
 	 */
-	static public function resolveSpecialIssueParams( $params )
+	static public function resolveSpecialParams( $params )
 	{
 		$publicationIds = array();
 		$specialParams = array();
