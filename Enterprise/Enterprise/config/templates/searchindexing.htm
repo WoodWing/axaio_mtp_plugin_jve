@@ -35,7 +35,7 @@
 			spinningBall( true, "idx_spinningBall" ); // show spinning ball
 			var serverUrl = "../../server/admin/searchindexing.php";
 			//serverUrl += "?start_debug=1"; // Zend Debugger (do not combine with server side debugging!)
-			WWAjax.doHttpRequest( serverUrl, "callbackOnServerResponse", "text/xml", true, "command="+gIndexMode+"&lastObjId="+gLastObjId+"&lastDeletedObjId="+gLastDeletedObjId+"&progress="+gProIdx+"&todoDelObjects="+gTodoDelObjects, true );
+			WWAjax.doHttpRequest( serverUrl, "callbackOnServerResponse", "text/xml", true, "command="+gIndexMode+"&lastObjId="+gLastObjId+"&lastDeletedObjId="+gLastDeletedObjId+"&progress="+gProIdx+"&failedCount="+gFailedCount+"&todoDelObjects="+gTodoDelObjects, true );
 		}
 	}
 
@@ -127,6 +127,7 @@
 			processingStopped();
 			return;
 		}
+        gFailedCount = XPath.selectNodeExtended( "FailedCount/text()", idxResultNodes[0] );
 		gLastObjId = XPath.selectNodeExtended( "LastObjId/text()", idxResultNodes[0] );
 		gLastDeletedObjId = XPath.selectNodeExtended( "LastDeletedObjId/text()", idxResultNodes[0] );
 		gTodoDelObjects = XPath.selectNodeExtended( "TodoDelObjects/text()", idxResultNodes[0] );
@@ -137,11 +138,11 @@
 		gProIdx = pro;
 		var runCompleted = XPath.selectNodeExtended( "RunCompleted/text()", idxResultNodes[0] );
 		// jQuery progressBar
-		var idxProgressPercentage = (pro / max) * 100;
+		var idxProgressPercentage = ((pro-gFailedCount) / max) * 100;
 		$("#idxProgressBar").progressbar( "option", "value", idxProgressPercentage );
 		$("#idxProgressLabel").text( idxProgressPercentage.toFixed(0) + '%' );
 
-		document.getElementById('indexedObjCount').innerHTML = pro;
+		document.getElementById('indexedObjCount').innerHTML = pro-gFailedCount;
 		document.getElementById('idx_storedObjCount').innerHTML = max;
 
 		max = XPath.selectNodeExtended( "Maximum/text()", optResultNodes[0] );
@@ -156,10 +157,15 @@
 		document.getElementById('lastOptimized').innerHTML = lastOpt;
 		document.getElementById('optimizedObjCount').innerHTML = pro;
 		document.getElementById('opt_storedObjCount').innerHTML = max;
-		
+
 		// When end of indexing process reached, we stop, else continue
 		if( runCompleted == 'true' ) {
 			processingStopped();
+            if( gFailedCount > 0 ) { // Only show the error text box when there's error.
+                $("#wid_errorReport").show();
+            } else {
+                $("#wid_errorReport").hide();
+            }
 		} else {
 			// only start new timer when not stopped by user in the meantime
 			if( gAutoTimer != null ) {
@@ -341,18 +347,21 @@
 				<td/>
 			</tr>
 			<tr>
-				<td colspan="2" height="30px"><div style="width:400px" id="idxProgressBar"></div></td>
-				<td height="30px" width="30px" align="right"><span id="idxProgressLabel"></span></td>
+				<td colspan="2" width=400px height="30px"><div style="width:400px" id="idxProgressBar"></div></td>
+				<td height="30px" width="30px" align="left"><span id="idxProgressLabel"></span></td>
 				<td><span id="idx_spinningBall"></span></td>
-			</tr>
-			<tr>
-				<td colspan="4" align="left"><span id="idx_errorReport"></span></td>
 			</tr>
 			<tr>
 				<td colspan="4">
 					<input type="button" name="idx_startBtn" id="idx_startBtn" value="<!--RES:ACT_START-->" onclick="startIndex();" />&nbsp;
 					<input type="button" name="idx_stopBtn" id="idx_stopBtn" value="<!--RES:ACT_STOP-->" onclick="stopProcessing();" />&nbsp; 
 					<input type="button" name="idx_clearBtn" id="idx_clearBtn" value="<!--RES:ACT_CLEAR-->" onclick="startUnindex();" />&nbsp;
+				</td>
+			</tr>
+			<tr id="wid_errorReport" style="display: none">
+				<td colspan="4" align="left" width=400px>
+					Error(s) reported by Solr during indexing:
+					<div id="idx_errorReport" style="height:120px;width:400px;overflow:auto;"></div>
 				</td>
 			</tr>
 		</table>
