@@ -136,38 +136,142 @@ class BizObjectOperation
 	 */
 	public static function resolveOperations( $objectId, $operations )
 	{
-		$resolvedOperations = null;
-		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+		$resolvedOperations = array();
 		if( $operations ) {
-			$resolvedOperations = array();
-			foreach( $operations as $key => $operation ) {
-				$connectors = BizServerPlugin::searchConnectors( 'AutomatedPrintWorkflow', null );
-				if( $connectors ) {
-					$allConnectorOperations = array();
-					foreach( $connectors as $connector ) {
-						$connectorOperations = BizServerPlugin::runConnector( $connector,
-							'resolveOperation', array( $objectId, $operation )
-						);
-						if( is_array( $connectorOperations ) && !empty( $connectorOperations ) ) {
-							$allConnectorOperations = array_merge( $allConnectorOperations, $connectorOperations );
-						}
-					}
-
-					if( is_array( $allConnectorOperations ) ) {
-						if( empty( $allConnectorOperations ) ) {
-							// If none of the connectors have been able to resolve operations, it means that the operation has
-							// not been recognized by any of the plugins. In this case the operation will be treated as a
-							// resolved operation by default.
-							$resolvedOperations[] = $operation;
-						} else {
-							$resolvedOperations = array_merge( $resolvedOperations, $allConnectorOperations );
-						}
-					}
-					// else ignore $operation ($allConnectorOperations = null)
+			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+			$connectors = BizServerPlugin::searchConnectors( 'AutomatedPrintWorkflow', null );
+			if( $connectors ) {
+				foreach( $operations as $operation ) {
+					// Since ES 10.2.0 this part is redesigned to allow recurively resolving operations.
+					// For example PlaceDigitalArticle can be resolved into PlaceArticle which can be resolved into multiple
+					// PlaceArticleElement. This can be done regardless of the order the connectors are called because it
+					// keeps on resolving operation as long as it detects one of the connectors returns different results.
+					$connectorOperations = array();
+					self::resolveOperation( $connectors, $objectId, $operation, $connectorOperations );
+					$resolvedOperations = array_merge( $resolvedOperations, $connectorOperations );
 				}
 			}
 		}
+		if( LogHandler::debugMode() ) {
+			LogHandler::Log( __CLASS__, 'DEBUG', 'Resolved operations for object (id='.$objectId.'): '.
+				self::operationsToString( $resolvedOperations ) );
+		}
 		return $resolvedOperations;
 	}
-	
+
+	/**
+	 * Resolves a give operation by calling the resolveOperation() function of AutomatedPrintWorkflow connectors.
+	 *
+	 * As long as one (or more) connectors resolve the operation into something different, this function recursively
+	 * calls itself until none of the connectors has anything to adjust on the resolved operations.
+	 *
+	 * @param EnterpriseConnector[] $connectors
+	 * @param integer $objectId
+	 * @param ObjectOperation $operation
+	 * @param ObjectOperation[] $connectorOperations
+	 * @return ObjectOperation[]
+	 */
+	private static function resolveOperation( $connectors, $objectId, $operation, &$connectorOperations )
+	{
+		$newOperations = self::resolveOperationByConnectors( $connectors, $objectId, $operation );
+		$resolvedDiffers = empty( $newOperations ) ||
+			( count( $newOperations ) == 1 && !self::isSameOperation( reset($newOperations), $operation ) );
+		if( $resolvedDiffers ) {
+			foreach( $newOperations as $newOperation ) {
+				self::resolveOperation( $connectors, $objectId, $newOperation, $connectorOperations );
+			}
+		} else {
+			$connectorOperations = array_merge( $connectorOperations, $newOperations );
+		}
+		return $connectorOperations;
+	}
+
+	/**
+	 * Tells whether two operations are the same.
+	 *
+	 * @param ObjectOperation $lhs Left hand side
+	 * @param ObjectOperation $rhs Right hand side
+	 * @return bool
+	 */
+	private static function isSameOperation( ObjectOperation $lhs, ObjectOperation $rhs )
+	{
+		return $lhs->Name == $rhs->Name && $lhs->Type == $rhs->Type;
+	}
+
+	/**
+	 * Resolves a give operation by calling the resolveOperation() function of AutomatedPrintWorkflow connectors.
+	 *
+	 * It transforms the returned values of resolveOperation() function calls into something easier to handle by our caller:
+	 * - NULL (connector asks to remove operation) => empty array (asking caller to remove this operation and stop resolving)
+	 * - empty array (connector indicates there is nothing to resolve) => array with the same/given operation (asking caller to add this operation and stop resolving)
+	 * - array with one or more operations (connector tells it did resolve) => array with the resolved operations (asking caller to continue resolving)
+	 *
+	 * @param EnterpriseConnector[] $connectors
+	 * @param integer $objectId
+	 * @param ObjectOperation $operation
+	 * @return ObjectOperation[]
+	 */
+	private static function resolveOperationByConnectors( $connectors, $objectId, $operation )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+
+		$connectorOperations = array();
+		$keepOperation = true;
+		foreach( $connectors as $connectorClass => $connector ) {
+			$thisConnectorOperations = BizServerPlugin::runConnector( $connector,
+				'resolveOperation', array( $objectId, $operation )
+			);
+			if( LogHandler::debugMode() ) {
+				LogHandler::Log( __CLASS__, 'DEBUG',
+					'Connector '.$connectorClass.' resolved operation '.self::operationToString( $operation ).' into: '.
+					self::operationsToString( $thisConnectorOperations )  );
+			}
+			if( is_null( $thisConnectorOperations ) ) {
+				// This connector has recognized the operation and wants to resolve it into nothing (= remove operation).
+				$keepOperation = false;
+				$thisConnectorOperations = array();
+			} elseif( is_array( $thisConnectorOperations ) && !empty( $thisConnectorOperations ) ) {
+				// This connector has recognized the operation and wants to resolve it into something.
+				$connectorOperations = array_merge( $connectorOperations, $thisConnectorOperations );
+			}
+		}
+		if( empty( $connectorOperations ) && $keepOperation ) {
+			// If none of the connectors have been able to resolve operations, it means that the operation has
+			// not been recognized by any of the plugins or it could no longer be transformed into another operation.
+			// Those are simply returned as resolved operations to allow further processing (in InDesign Server script).
+			$connectorOperations[] = $operation;
+		}
+		if( LogHandler::debugMode() ) {
+			LogHandler::Log( __CLASS__, 'DEBUG', 'Connectors have resolved operation '.
+				self::operationToString( $operation ).' into: '.self::operationsToString( $connectorOperations ) );
+		}
+		return $connectorOperations;
+	}
+
+	/**
+	 * Composes a string of a given list of object operations for debug purposes.
+	 *
+	 * @param ObjectOperation[] $operations
+	 * @return string
+	 */
+	private static function operationsToString( $operations )
+	{
+		if( is_null( $operations ) ) {
+			return '(null)';
+		} elseif( empty ( $operations ) ) {
+			return '(empty)';
+		}
+		return implode( ', ', array_map( array( __CLASS__, 'operationToString' ), $operations ) );
+	}
+
+	/**
+	 * Composes a string of a given object operations for debug purposes.
+	 *
+	 * @param ObjectOperation $operation
+	 * @return string
+	 */
+	private static function operationToString( ObjectOperation $operation )
+	{
+		return $operation->Name.' ('.$operation->Type.')';
+	}
 }
