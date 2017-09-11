@@ -73,7 +73,7 @@ class DBAdmPubObject extends DBBase
 		}
 		if( !is_null($groupId) ) {
 			$sql .= "AND (po.`grpid` = ? OR po.`grpid` = ?) "; // 0 represent ALL group
-			$params[] = $groupId;
+			$params[] = intval( $groupId );
 			$params[] = 0;
 		}
 		$sql .= "ORDER BY o.`name`";
