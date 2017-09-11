@@ -1170,49 +1170,50 @@ class SolrSearchEngine extends BizQuery
 	 */
 	private function buildFacetItemsForIssueIds( $facet )
 	{
-		require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
-		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 		$resultFacetItems = array();
 		$issueIds = array();
 		$user = BizSession::getShortUserName();
 		$isAdmin = DBUser::isAdminUser( $user );
 
-		foreach ($facet as $facetItemName => $facetItemNumber) {
-			$issueId = intval($facetItemName);
-			if ($issueId > 0){
+		foreach( $facet as $facetItemName => $facetItemNumber ) {
+			$issueId = intval( $facetItemName );
+			if( $issueId > 0 ) {
 				$issueIds[] = $issueId;
 			}
 		}
 
 		// Get names of issue ids (do we want such a function in DBIssue?).
-		if ( !empty( $issueIds ) ) {
-			$where = 'id IN (' . implode(',', $issueIds) . ') ';
+		if( !empty( $issueIds ) ) {
+			$where = 'id IN ('.implode( ',', $issueIds ).') ';
 			$params = array();
 			if( !$isAdmin ) {
-				// BZ#1856:Hide objects from query results that are assigned to inactive issues
+				// BZ#41856:Hide objects from query results that are assigned to inactive issues
 				$where .= 'AND `active` = ? ';
 				$params[] = 'on';
 			}
 			$select = array( 'id', 'name' );
-			$issueRows = DBBase::listRows('issues', 'id', '', $where, $select, $params );
+			$issueRows = DBBase::listRows( 'issues', 'id', '', $where, $select, $params );
 		}
 
 		foreach( $facet as $facetItemName => $facetItemNumber ) {
-			if ( $facetItemName == '_empty_' ) {
+			$facetItemDisplayName = '';
+			if( $facetItemName == '_empty_' || empty( $facetItemName ) ) {
 				$facetItemName = '';
-				$issueId = -1;
+				$facetItemDisplayName = '<'.BizResources::localize( 'OBJ_UNASSIGNED' ).'>';
 			} else {
-				$issueId = intval($facetItemName);
+				$issueId = intval( $facetItemName );
+				if( isset( $issueRows[ $issueId ]['name'] ) ) {
+					$facetItemDisplayName = $issueRows[ $issueId ]['name'];
+				}
 			}
-			if( isset($issueRows[$issueId]['name'])){
-				$facetItemDisplayName = $issueRows[$issueId]['name'];
-			} else {
-				$facetItemDisplayName = '<'.BizResources::localize('OBJ_UNASSIGNED').'>';
+			if( $facetItemDisplayName ) {
+				$resultFacetItem = new FacetItem( $facetItemName, $facetItemDisplayName, $facetItemNumber );
+				$resultFacetItems[] = $resultFacetItem;
 			}
-			$resultFacetItem = new FacetItem($facetItemName, $facetItemDisplayName, $facetItemNumber);
-			$resultFacetItems[] = $resultFacetItem;
 		}
 
 		return $resultFacetItems;
