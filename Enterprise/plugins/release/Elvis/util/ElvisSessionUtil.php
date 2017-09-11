@@ -222,6 +222,7 @@ class ElvisSessionUtil
 	/**
 	 * Retrieve the username and the password from the saved credentials under user $user.
 	 *
+	 * @since 10.0.6
 	 * @since 10.1.3
 	 * @param string $user
 	 * @return string[] A list where the first item it the username and the second item the password if credentials are found, else returns null when not found.
