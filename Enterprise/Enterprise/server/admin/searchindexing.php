@@ -48,7 +48,7 @@ switch( $command ) {
 		}
 
 		header( 'Content-Type: text/xml' );
-		print SearchServerUtils::getProgressAsXml( $max, $max - $todo, $todo == 0, 0/*$lastObjId*/, 0/*$lastDeletedObjId*/, $todoDelObjects, $optPro, $optLast, $plugins, $errMsg );
+		print SearchServerUtils::getProgressAsXml( $max, $max - $todo, 0, $todo == 0, 0/*$lastObjId*/, 0/*$lastDeletedObjId*/, $todoDelObjects, $optPro, $optLast, $plugins, $errMsg );
 	break;
 
 	case 'IndexStep': // Request to index one step and update progress bar with results
@@ -57,14 +57,24 @@ switch( $command ) {
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBDeletedObject.class.php';
 		
-		$lastObjId = $_REQUEST['lastObjId'];
-		$lastDeletedObjId = $_REQUEST['lastDeletedObjId'];
 		$progress = $_REQUEST['progress'];
-		$todoDelObjects = $_REQUEST['todoDelObjects'];
 		$max = DBObject::countObjects() + DBDeletedObject::countDeletedObjects(); // total Enterprise object AND deleteobject count
+		if( $progress == $max ) { // When indexing is done and user clicks on Start without first clicking on 'Clear'
+			$progress = 0;
+			$lastObjId = 0;
+			$lastDeletedObjId = 0;
+			$failedCount = 0;
+			$todoDelObjects = DBDeletedObject::countDeletedObjectsToIndex( true );
+		} else { // Continuing the indexing operation.
+			$lastObjId = $_REQUEST['lastObjId'];
+			$lastDeletedObjId = $_REQUEST['lastDeletedObjId'];
+			$failedCount = $_REQUEST['failedCount'];
+			$todoDelObjects = $_REQUEST['todoDelObjects'];
+		}
 		$errMsg = '';
 		$stepSize = 0;
 		$prevTodo = 0;
+		$objectCountToIndex = 0;
 		try {
 			if( $command == 'IndexStep' ) {
 				$prevTodo = $max - $progress; // Done equals total minus progress until now
@@ -82,7 +92,7 @@ switch( $command ) {
 					$todoDelObjects = $todoDelObjects - $stepSize > 0 ? $todoDelObjects - $stepSize : 0;
 					$areas = array('Trash');
 				}
-				BizSearch::indexObjectsFromDB( $lastObjId, $lastDeletedObjId, $stepSize, $areas );
+				BizSearch::indexObjectsFromDB( $lastObjId, $lastDeletedObjId, $stepSize, $areas, $objectCountToIndex );
 			} else {
 				$areas = array('Workflow','Trash');
 				BizSearch::unIndexObjects( 
@@ -99,13 +109,17 @@ switch( $command ) {
 			}
 		} catch( BizException $e ) {
 			$errMsg = $e->getMessage();
+			$errMsg = $e->getMessage();
+			$failedCount += $objectCountToIndex;
 		}
 		$todo = ($prevTodo - $stepSize) >= 0 ? ($prevTodo - $stepSize) : ($todoDelObjects > 0 ? $todoDelObjects : 0) ; // Todo = Todo of previous step minus Done in this step
-		$done = (($todo <= 0 && $errMsg == '') || $command == 'UnindexStep'); // nothing (un)indexed and no error implies we're done
+		$done = ( $todo <= 0 || $command == 'UnindexStep' );
+		$newProgress = $max - $todo;
+		$failedCount = ( $done && $newProgress == 0 ) ? 0 : $failedCount;
 		$optLast = BizSearch::getLastOptimized();
 		$optPro = 0; // Number optimized always zero expect after finishing the optimize step
 
-		$response = SearchServerUtils::getProgressAsXml( $max, $max - $todo, $done, $lastObjId, $lastDeletedObjId, $todoDelObjects, $optPro, $optLast, null, $errMsg);
+		$response = SearchServerUtils::getProgressAsXml( $max, $newProgress, $failedCount, $done, $lastObjId, $lastDeletedObjId, $todoDelObjects, $optPro, $optLast, null, $errMsg);
 		//LogHandler::logSOAP( 'SearchIndexing', $response, false ); // heavy debugging only
 
 		header( 'Content-Type: text/xml' );
@@ -132,9 +146,9 @@ switch( $command ) {
 		
 		$optPro = $done ? $max : 0; // After optimze the number of optimized oobjects equals the total
 
-		$response = SearchServerUtils::getProgressAsXml( $max, $max - $todo, $done, $lastObjId, $lastDeletedObjId, $todoDelObjects, $optPro, $optLast, null, $errMsg );
+		$response = SearchServerUtils::getProgressAsXml( $max, $max - $todo, 0, $done, $lastObjId, $lastDeletedObjId, $todoDelObjects, $optPro, $optLast, null, $errMsg );
 		//LogHandler::logSOAP( 'SearchIndexing', $response, false ); // heavy debugging only
-		
+
 		header( 'Content-Type: text/xml' );
 		print $response;
 	break;
@@ -148,11 +162,12 @@ class SearchServerUtils
 	 *
 	 * @param integer $max Maximum; Total number of objects in DB.
 	 * @param integer $idxPro Progress; Number of indexed objects.
+	 * @param integer $failedCount Number of objects that were failed during indexing. This number is for calculation and not for the bar drawing.
 	 * @param boolean $idxRunCompleted; Tells if all iteration steps are taken.
 	 * @param string $errMsg; Error message (if any).
 	 * @return string XML response
 	 */
-	static public function getProgressAsXml( $max, $idxPro, $idxRunCompleted, $idxLastObjId, $idxLastDeletedObjId, $idxTodoDelObjects, $optPro, $optLast, $plugins, $errMsg )
+	static public function getProgressAsXml( $max, $idxPro, $failedCount, $idxRunCompleted, $idxLastObjId, $idxLastDeletedObjId, $idxTodoDelObjects, $optPro, $optLast, $plugins, $errMsg )
 	{
 		// Create XML output stream to return caller
 		$xmlDoc = new DOMDocument();
@@ -163,6 +178,7 @@ class SearchServerUtils
 		$xmlReport->appendChild( $xmlBar );
 		self::createTextElem( $xmlDoc, $xmlBar, 'Maximum', $max );
 		self::createTextElem( $xmlDoc, $xmlBar, 'Progress', $idxPro );
+		self::createTextElem( $xmlDoc, $xmlBar, 'FailedCount', $failedCount );
 		self::createTextElem( $xmlDoc, $xmlBar, 'RunCompleted', $idxRunCompleted ? 'true' : 'false' );
 		self::createTextElem( $xmlDoc, $xmlBar, 'LastObjId', $idxLastObjId );
 		self::createTextElem( $xmlDoc, $xmlBar, 'LastDeletedObjId', $idxLastDeletedObjId );
