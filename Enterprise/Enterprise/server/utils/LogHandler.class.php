@@ -858,27 +858,12 @@ class LogHandler
 	 */
 	public static function composeFileNameInLogFolder( $postfix, $format=null, $objectType=null )
 	{
-		$microTime = explode( ' ', microtime() );
-		$time = sprintf( '%03d', round($microTime[0]*1000) );
-		$currTimeStamp = date('His').'_'.$time;
-
-		static $callsCount;
-		static $lastTimeStamp;
-		if( $lastTimeStamp == $currTimeStamp ) {
-			$callsCount++;
-		} else {
-			$callsCount = 0;
-		}
-		$lastTimeStamp = $currTimeStamp;
-		$callerId = chr( $callsCount + 65 );
-
 		$fileExt = '';
 		if( $format ) {
 			require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
 			$fileExt = MimeTypeHandler::mimeType2FileExt( $format, $objectType );
 		}
-
-		$phpLogFile = self::getLogFolder().$currTimeStamp.$callerId.'_'.$postfix.$fileExt;
+		$phpLogFile = self::getLogFolder().self::getCurrentTimestamp().'_'.$postfix.$fileExt;
 		return $phpLogFile;
 	}
 
@@ -927,9 +912,29 @@ class LogHandler
 				break;
 		}
 
-		// Determine unique file name at logging folder. When calling within the same milisecond,
-		// increase an internal counter. This counter is converted to [a...z] and later to the ms.
+		$objName = is_object( $phpObject ) ? get_class( $phpObject ) : gettype( $phpObject );
+		$phpLogFile = $logFolder.self::getCurrentTimestamp().'_'.$method.'_'.$objName;
+		if( $postfix ) {
+			$phpLogFile .= '_'.$postfix;
+		}
+		$phpLogFile .= '.txt';
 
+		// Write the dumped PHP object data and return file path to caller.
+		file_put_contents( $phpLogFile, $content );
+		return $phpLogFile;
+	}
+
+	/**
+	 * Compose a string with current time indication in micro seconds.
+	 *
+	 * For example it returns "234500_021A" which means 23h 45' 00" and 21 ms for the first caller "A".
+	 * When in the very same micro second this function is called again, it will use new postfix "B", etc.
+	 *
+	 * @since 10.2.0
+	 * @return string
+	 */
+	static private function getCurrentTimestamp()
+	{
 		$microTime = explode( ' ', microtime() );
 		$time = sprintf( '%03d', round($microTime[0]*1000) );
 		$currTimeStamp = date('His').'_'.$time;
@@ -944,16 +949,7 @@ class LogHandler
 		$lastTimeStamp = $currTimeStamp;
 		$callerId = chr( $callsCount + 65 );
 
-		$objName = is_object( $phpObject ) ? get_class( $phpObject ) : gettype( $phpObject );
-		$phpLogFile = $logFolder.$currTimeStamp.$callerId.'_'.$method.'_'.$objName;
-		if( $postfix ) {
-			$phpLogFile .= '_'.$postfix;
-		}
-		$phpLogFile .= '.txt';
-
-		// Write the dumped PHP object data and return file path to caller.
-		file_put_contents( $phpLogFile, $content );
-		return $phpLogFile;
+		return $currTimeStamp.$callerId;
 	}
 
 	/**
