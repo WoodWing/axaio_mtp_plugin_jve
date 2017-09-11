@@ -293,7 +293,7 @@ class AdobeDps2_BizClasses_Publishing
 			/**
 			 * The '$article' param isn't used in the callback as the $dpsArticle param
 			 * is already global. Since these parameters can't have the same name since PHP 7.1
-			 * a different name is chosen, but the inspector sees this parameter as unused. 
+			 * a different name is chosen, but the inspector sees this parameter as unused.
 			 * @noinspection PhpUnusedParameterInspection
 			 */
 			self::$httpClient->safeCreateOrUpdateEntity(

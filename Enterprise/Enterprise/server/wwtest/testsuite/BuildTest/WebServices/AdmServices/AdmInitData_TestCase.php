@@ -31,6 +31,9 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmInitData_TestCase extend
 		// Logon TESTSUITE user through admin interface.
 		$response = $this->utils->admLogOn( $this );
 		$this->ticket = $response ? $response->Ticket : null;
+		if(!$this->ticket) {
+			return;
+		}
 
 		// Create a publication to let successor test cases work on it.
 		$publication = $this->createPublication();

@@ -254,6 +254,7 @@ class EnterpriseService
 				// as they don't trigger the exception handler. Log the information right here. 
 				$error = 'Uncaught throwable "'.get_class($e).'".';
 				LogHandler::Log( 'EnterpriseService', 'ERROR', $error, $e );
+				$e = new Exception($error); // Let the core throw an exception in this case to the client.
 			}
 
 			// Roll-back transaction

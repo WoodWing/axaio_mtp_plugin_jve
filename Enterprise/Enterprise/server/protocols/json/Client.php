@@ -6,18 +6,23 @@
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */
 
-use Graze\Guzzle\JsonRpc\JsonRpcClient;
-use Graze\Guzzle\JsonRpc\Message\Request;
-use Guzzle\Service\Client;
-use Guzzle\Http\Message\RequestInterface;
+use Graze\GuzzleHttp\JsonRpc\Client;
 
-class WW_JSON_Client extends JsonRpcClient
+class WW_JSON_Client
 {
 	/** @var int $incrementalID  */
 	private $incrementalID = 1;
 
 	/**
-	 * {@inheritdoc}
+	 * @var Client $grazeClient
+	 */
+	private $grazeClient;
+
+	/**
+	 * Creates a new instance of the Guzzle JSON-RPC client and
+	 * configures it for use with Enterprise Server.
+	 * @param string $baseUrl
+	 * @param array|null $config
 	 */
 	public function __construct( $baseUrl = '', $config = null )
     {
@@ -47,21 +52,32 @@ class WW_JSON_Client extends JsonRpcClient
 		    $baseUrl .= '&expectedError='. $config['expectedError'];
 	    }
 
-       parent::__construct( $baseUrl, $config );
+	    // Throw an Exception in case of a RPC error.
+	    $config['rpc_error'] = true;
+
+       $this->grazeClient = Client::factory($baseUrl, $config);
     }
 
 	/**
-	 * {@inheritdoc}
+	 * Creates a request for use with the Graze Guzzle JSON-RPC client.
+	 *
+	 * The function will also restructure objects in two ways:
+	 * - Removes elements which are not reflected in the class signature.
+	 * - Adds round trip information.
+	 *
+	 * @param string $method
+	 * @param string $id
+	 * @param array|mixed $params
+	 * @return \Graze\GuzzleHttp\JsonRpc\Message\RequestInterface
 	 */
-	public function request( $method, $id, $params = null, $uri = null, $headers = null )
+	public function request( $method, $id, $params = null )
 	{
 		require_once BASEDIR . '/server/protocols/json/Services.php';
 
 		// Make sure the parameters have extra information, so this client is able to round-trip the interface
 		$params = WW_JSON_Services::restructureObjects( $params );
 
-		// Let parent handle the request.
-		return parent::request( $method, $id, $params, $uri, $headers );
+		return $this->grazeClient->request($id, $method, $params);
 	}
 
 	/**
@@ -75,18 +91,13 @@ class WW_JSON_Client extends JsonRpcClient
 	 */
 	public function __call( $method, $args )
 	{
-		$guzzleRequest = $this->request( $method, (string) $this->incrementalID, array('req' => $args[0] ) );
-		$guzzleResponse = $guzzleRequest->send();
+		$guzzleRequest = $this->request( $method, (string) $this->incrementalID++, array('req' => $args[0] ) );
 
-		if( !$guzzleResponse instanceof \Graze\Guzzle\JsonRpc\Message\ErrorResponse ) {
-			require_once BASEDIR.'/server/protocols/json/Services.php';
-			$services = new WW_JSON_Services;
-			$result = $guzzleResponse->getResult();
-			$result = $services->arraysToObjects( $result );
-			$response = WW_JSON_Services::restructureObjects( $result );
-		} else {
-			throw new \Guzzle\Http\Exception\ClientErrorResponseException( $guzzleResponse->getMessage() );
-		}
-		return $response;
+		$guzzleResponse = $this->grazeClient->send( $guzzleRequest );
+		require_once BASEDIR.'/server/protocols/json/Services.php';
+		$services = new WW_JSON_Services;
+		$result = $guzzleResponse->getRpcResult();
+		$result = $services->arraysToObjects( $result );
+		return WW_JSON_Services::restructureObjects( $result );
 	}
 }
