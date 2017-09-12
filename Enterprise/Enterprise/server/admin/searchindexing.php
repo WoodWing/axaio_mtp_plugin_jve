@@ -57,10 +57,10 @@ switch( $command ) {
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBDeletedObject.class.php';
 		
-		$progress = $_REQUEST['progress'];
+		$progressBeforeIndexing = $_REQUEST['progress'];
 		$max = DBObject::countObjects() + DBDeletedObject::countDeletedObjects(); // total Enterprise object AND deleteobject count
-		if( $progress == $max ) { // When indexing is done and user clicks on Start without first clicking on 'Clear'
-			$progress = 0;
+		if( $progressBeforeIndexing == $max ) { // When indexing is done and user clicks on Start without first clicking on 'Clear'
+			$progressBeforeIndexing = 0;
 			$lastObjId = 0;
 			$lastDeletedObjId = 0;
 			$failedCount = 0;
@@ -74,10 +74,10 @@ switch( $command ) {
 		$errMsg = '';
 		$stepSize = 0;
 		$prevTodo = 0;
-		$objectCountToIndex = 0;
+		$totalObjectsIndexed = 0;
 		try {
 			if( $command == 'IndexStep' ) {
-				$prevTodo = $max - $progress; // Done equals total minus progress until now
+				$prevTodo = $max - $progressBeforeIndexing; // Done equals total minus progress until now
 				$areas = array('Workflow'); // Index the Workflow (smart-objects), first step
 				$oneProcent = ceil($max / 100);
 				if ( $oneProcent > 1000) {
@@ -92,7 +92,7 @@ switch( $command ) {
 					$todoDelObjects = $todoDelObjects - $stepSize > 0 ? $todoDelObjects - $stepSize : 0;
 					$areas = array('Trash');
 				}
-				BizSearch::indexObjectsFromDB( $lastObjId, $lastDeletedObjId, $stepSize, $areas, $objectCountToIndex );
+				BizSearch::indexObjectsFromDB( $lastObjId, $lastDeletedObjId, $stepSize, $areas, $totalObjectsIndexed );
 			} else {
 				$areas = array('Workflow','Trash');
 				BizSearch::unIndexObjects( 
@@ -110,16 +110,17 @@ switch( $command ) {
 		} catch( BizException $e ) {
 			$errMsg = $e->getMessage();
 			$errMsg = $e->getMessage();
-			$failedCount += $objectCountToIndex;
+			$failedCount += $totalObjectsIndexed; // All processed objects are counted as failure: It is either all objects are successfully indexed or all fail (when one fails)
 		}
 		$todo = ($prevTodo - $stepSize) >= 0 ? ($prevTodo - $stepSize) : ($todoDelObjects > 0 ? $todoDelObjects : 0) ; // Todo = Todo of previous step minus Done in this step
 		$done = ( $todo <= 0 || $command == 'UnindexStep' );
-		$newProgress = $max - $todo;
-		$failedCount = ( $done && $newProgress == 0 ) ? 0 : $failedCount;
+		$progressAfterIndexing = $max - $todo;
+		// When the entire indexing is done, reset the failedCount ( in order not to interfere with the next run of indexing )
+		$failedCount = ( $done && $progressAfterIndexing == 0 ) ? 0 : $failedCount;
 		$optLast = BizSearch::getLastOptimized();
 		$optPro = 0; // Number optimized always zero expect after finishing the optimize step
 
-		$response = SearchServerUtils::getProgressAsXml( $max, $newProgress, $failedCount, $done, $lastObjId, $lastDeletedObjId, $todoDelObjects, $optPro, $optLast, null, $errMsg);
+		$response = SearchServerUtils::getProgressAsXml( $max, $progressAfterIndexing, $failedCount, $done, $lastObjId, $lastDeletedObjId, $todoDelObjects, $optPro, $optLast, null, $errMsg);
 		//LogHandler::logSOAP( 'SearchIndexing', $response, false ); // heavy debugging only
 
 		header( 'Content-Type: text/xml' );
