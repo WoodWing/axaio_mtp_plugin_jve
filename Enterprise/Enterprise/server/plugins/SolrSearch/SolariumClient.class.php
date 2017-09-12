@@ -188,6 +188,7 @@ class SolariumClient
 	 * @param array $objectIDs array of objectIDs
 	 * @param array $fields key/value array of fields, containing the updated properties
 	 * @param boolean $directCommit Optional indicates if the change should be directly committed
+	 * @throws BizException
 	 * @return bool True when the indexing is successful, false otherwise.
 	 */
 	public function updateObjectsFields( array $objectIDs, array $fields, $directCommit = false )
