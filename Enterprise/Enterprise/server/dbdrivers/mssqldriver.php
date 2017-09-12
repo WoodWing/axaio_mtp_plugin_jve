@@ -759,12 +759,13 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 			// Microsoft Driver version for PHP => Microsoft ODBC Driver version (and internal version):
 			//  3.1 => ODBC Driver 11 (12.0)
 			//  3.2 => ODBC Driver 11 (12.0)
-			//  4.0 => ODBC Driver 11 / 13 (12.0 / 13.0)
-			//  4.3 => ODBC Driver 11 / 13 (12.0 / 13.1)
+			//  4.0 => ODBC Driver 11 / 13.0 (12.0 / 13.00.811)
+			//  4.3 => ODBC Driver 11 / 13.1 (12.0 / 13.00.4413)
 			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 			// ODBC 11 or 13.1 is required by Driver 4.3
-			$driverVersion = implode( '.', array_slice( explode( '.', $mssqlInfo['DriverVer'] ), 0, 2 ) ); // take out "major.minor" only!
-			if( version_compare( $driverVersion, '12.0' ) !== 0 && version_compare( $driverVersion, '13.1' ) !== 0 ) {
+			$driverVersion = array_slice( explode( '.', $mssqlInfo['DriverVer'] ), 0, 3 ); // Take out major.minor.patch
+			if( ( $driverVersion[0] === '12' && $driverVersion[1] !== '00' )
+				|| ( $driverVersion[0] === '13' && $driverVersion[1] === '00' && intval($driverVersion[2]) < 4413 ) ) {
 				$help = 'Install Microsoft ODBC Driver 11 for SQL Server or Microsoft ODBC Driver 13.1 for SQL Server.'; // returned by reference
 				$detail = 'Unsupported version of Microsoft ODBC Driver for SQL Server. '.
 					'Found v'.$mssqlInfo['DriverVer'].' which is not supported.';
