@@ -54,14 +54,7 @@ class BizSearch
 				LogHandler::Log('BizSearch', 'DEBUG', 'Connector completed.' );
 			}
 			// All connectors did index at this point, so we flag them at Enterprise DB. See Note#001!
-			$handledObjectIds = self::collectHandledObjectIds( $connRetVals );
-			$unhandledObjectIds = self::filterUnhandledObjectIds( $handledObjectIds, $objects );
-			if( $handledObjectIds ) {
-				self::setIndexFlag( $handledObjectIds, $areas );
-			}
-			if( $unhandledObjectIds ) {
-				self::setUnindexFlag( $unhandledObjectIds, $areas );
-			}
+			self::setIndexAndUnindexFlag( $objects, $connRetVals, $areas );
 		} catch( BizException $e ) {
 			// Objects that are supposed to be (re)indexed did not get (re)indexed, so un-indexed them.
 			$unhandledObjectIds = self::filterUnhandledObjectIds( array(), $objects );
@@ -121,14 +114,7 @@ class BizSearch
 			BizServerPlugin::runDefaultConnectors( 'Search', null, 'updateObjects', array($objects, $areas), $connRetVals );
 			// All connectors did index at this point, so we flag them at Enterprise DB. See Note#001!
 
-			$handledObjectIds = self::collectHandledObjectIds( $connRetVals );
-			$unhandledObjectIds = self::filterUnhandledObjectIds( $handledObjectIds, $objects );
-			if( $handledObjectIds ) {
-				self::setIndexFlag( $handledObjectIds, $areas );
-			}
-			if( $unhandledObjectIds ) {
-				self::setUnindexFlag( $unhandledObjectIds, $areas );
-			}
+			self::setIndexAndUnindexFlag( $objects, $connRetVals, $areas );
 		} catch( BizException $e ) {
 			// Objects that are supposed to be (re)indexed did not get (re)indexed, so un-indexed them.
 			$unhandledObjectIds = self::filterUnhandledObjectIds( array(), $objects );
@@ -251,9 +237,10 @@ class BizSearch
 	 * @param int $lastDeletedObjId [In/Out] The last (max) deletedobject id that was indexed the previous time. Used for pagination.
 	 * @param int $maxCount Maximum number of object to index. Used for pagination.
 	 * @param array $areas Whether it is Workflow or Trash area.
-	 * @param int $objectCountToIndex [In/Out] Total number of objects being indexed.
+	 * @param int $totalObjectsIndexed [In/Out]Total numbers of objects that were successfully indexed.
+	 * @throws BizException
 	 */
-	static public function indexObjectsFromDB( &$lastObjId, &$lastDeletedObjId, $maxCount, $areas, &$objectCountToIndex )
+	static public function indexObjectsFromDB( &$lastObjId, &$lastDeletedObjId, $maxCount, $areas, &$totalObjectsIndexed )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBDeletedObject.class.php';
@@ -281,7 +268,7 @@ class BizSearch
 			}
 			$propertiesToIndex = self::getPropertiesToIndex( false );
 			$objects = BizObject::getObjectsToIndexForObjectIds( $objectIds, $areas, $propertiesToIndex );
-			$objectCountToIndex = count( $objects );
+			$totalObjectsIndexed = count( $objects );
 			self::indexObjects( $objects, false, $areas );
 			PerformanceProfiler::stopProfile( 'Search', 3 );
 		}
@@ -593,14 +580,33 @@ class BizSearch
 	 */
 	private static function collectHandledObjectIds( $inputArrays )
 	{
-		//Initalize with first array
-		$intersectionArray = array_shift($inputArrays);
+		$intersectionArray = array();
 		if (!empty($inputArrays)) {
+			$intersectionArray = array_shift($inputArrays); // Initalize with first array
 			foreach ($inputArrays as $inputArray) {
 				$intersectionArray =  array_intersect($intersectionArray, $inputArray);
 			}
 		}
 		return  $intersectionArray;
+	}
+
+	/**
+	 * Setting list of objects to indexed or not-indexed depending on if the reindexing was successful.
+	 *
+	 * @param Object[] $objects Full list of objects sent to all Search connectors for reindexing.
+	 * @param int[] $objectIds List of Key(Search connector)=>Values(object ids) that were successfully handled by all Search connectors.
+	 * @param string[] $areas Workflow or Trash, to determine which database table to set the indexed/not-indexed for the objects.
+	 */
+	private static function setIndexAndUnindexFlag( $objects, $objectIds, $areas )
+	{
+		$handledObjectIds = self::collectHandledObjectIds( $objectIds );
+		$unhandledObjectIds = self::filterUnhandledObjectIds( $handledObjectIds, $objects );
+		if( $handledObjectIds ) {
+			self::setIndexFlag( $handledObjectIds, $areas );
+		}
+		if( $unhandledObjectIds ) {
+			self::setUnindexFlag( $unhandledObjectIds, $areas );
+		}
 	}
 
 	/**
@@ -636,7 +642,6 @@ class BizSearch
 	 *
 	 * @param string $query [in/out]
 	 * @param array $params [in/out]
-	 * @return boolean true if any change made
 	 */
 	private static function resolveQueryName( &$query, &$params )
 	{
