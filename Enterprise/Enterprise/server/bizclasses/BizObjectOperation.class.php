@@ -227,11 +227,11 @@ class BizObjectOperation
 					self::operationsToString( $thisConnectorOperations )  );
 			}
 			if( is_null( $thisConnectorOperations ) ) {
-				// This connector has recognized the operation and wants to resolve it into nothing (= remove operation).
+				// This connector has recognized the operation has resolved it into nothing, so the operation should be removed.
 				$keepOperation = false;
 				$thisConnectorOperations = array();
 			} elseif( is_array( $thisConnectorOperations ) && !empty( $thisConnectorOperations ) ) {
-				// This connector has recognized the operation and wants to resolve it into something.
+				// This connector has recognized the operation has resolved it into something, so those operations should be kept.
 				$connectorOperations = array_merge( $connectorOperations, $thisConnectorOperations );
 			}
 		}
