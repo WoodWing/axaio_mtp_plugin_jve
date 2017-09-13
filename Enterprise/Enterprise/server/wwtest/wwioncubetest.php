@@ -1967,7 +1967,7 @@ function link_to_php_ini_instructions()
 
 function php_ini_instruction_list($server_type)
 {
-    echo '<h4>Installation Instructions</h4>';
+    echo '<h4>Installation instructions</h4>';
     echo '<div class=panel>';
     echo '<ol>';
 
