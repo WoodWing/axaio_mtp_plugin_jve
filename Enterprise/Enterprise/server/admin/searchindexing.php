@@ -30,101 +30,84 @@ switch( $command ) {
 		break;
 
 	case 'InitPage': // Request to initially draw progress bar
-		require_once BASEDIR.'/server/bizclasses/BizSearch.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBDeletedObject.class.php';
-		
 		$max = DBObject::countObjects() + DBDeletedObject::countDeletedObjects();
-		$todoActObjects = DBObject::countObjectsToIndex( true );
-		$todoDelObjects = DBDeletedObject::countDeletedObjectsToIndex( true );
-		$todo = $todoActObjects + $todoDelObjects;
-		$optLast = BizSearch::getLastOptimized();
-		$optPro = 0;// Number optimized always zero except after finishing the optimize step
-		
-		$plugins = BizSearch::installedSearchServerPlugins();
-		$errMsg = '';
-		if( !count($plugins) > 0 ) {
-			$errMsg = 'There is no Search Server installed.';
-		}
-
-		header( 'Content-Type: text/xml' );
-		print SearchServerUtils::getProgressAsXml( $max, $max - $todo, 0, $todo == 0, 0/*$lastObjId*/, 0/*$lastDeletedObjId*/, $todoDelObjects, $optPro, $optLast, $plugins, $errMsg );
+		SearchServerUtils::initPage( $max, true );
 	break;
 
 	case 'IndexStep': // Request to index one step and update progress bar with results
 	case 'UnindexStep':
-		require_once BASEDIR.'/server/bizclasses/BizSearch.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBDeletedObject.class.php';
 		
 		$progressBeforeIndexing = $_REQUEST['progress'];
-		$max = DBObject::countObjects() + DBDeletedObject::countDeletedObjects(); // total Enterprise object AND deleteobject count
-		if( $progressBeforeIndexing == $max ) { // When indexing is done and user clicks on Start without first clicking on 'Clear'
-			$progressBeforeIndexing = 0;
-			$lastObjId = 0;
-			$lastDeletedObjId = 0;
-			$failedCount = 0;
-			$todoDelObjects = DBDeletedObject::countDeletedObjectsToIndex( true );
-		} else { // Continuing the indexing operation.
+		$max = DBObject::countObjects() + DBDeletedObject::countDeletedObjects(); // total Enterprise object AND deleted object count
+		if( $progressBeforeIndexing == $max // When entire indexing is done and the user clicks on Start directly without first clicking on 'Clear'
+			&& $command != 'UnindexStep' ) {
+			SearchServerUtils::initPage( $max, false );
+		} else { // Start / Continue the indexing operation.
+			require_once BASEDIR.'/server/bizclasses/BizSearch.class.php';
 			$lastObjId = $_REQUEST['lastObjId'];
 			$lastDeletedObjId = $_REQUEST['lastDeletedObjId'];
 			$failedCount = $_REQUEST['failedCount'];
 			$todoDelObjects = $_REQUEST['todoDelObjects'];
-		}
-		$errMsg = '';
-		$stepSize = 0;
-		$prevTodo = 0;
-		$totalObjectsIndexed = 0;
-		try {
-			if( $command == 'IndexStep' ) {
-				$prevTodo = $max - $progressBeforeIndexing; // Done equals total minus progress until now
-				$areas = array('Workflow'); // Index the Workflow (smart-objects), first step
-				$oneProcent = ceil($max / 100);
-				if ( $oneProcent > 1000) {
-					$stepSize = 1000;
-				} elseif ( $oneProcent <= 50 ) {
-					$stepSize = 50;
+
+			$errMsg = '';
+			$stepSize = 0;
+			$prevTodo = 0;
+			$totalObjectsIndexed = 0;
+			try {
+				if( $command == 'IndexStep' ) {
+					$prevTodo = $max - $progressBeforeIndexing; // Done equals total minus progress until now
+					$areas = array( 'Workflow' ); // Index the Workflow (smart-objects), first step
+					$oneProcent = ceil( $max / 100 );
+					if( $oneProcent > 1000 ) {
+						$stepSize = 1000;
+					} elseif( $oneProcent <= 50 ) {
+						$stepSize = 50;
+					} else {
+						$stepSize = $oneProcent;
+					}
+					if( ( $prevTodo <= $todoDelObjects ) && ( $todoDelObjects > 0 ) ) { //meaning Workflow area is done and switch to Trash area (smart_deletedobjects)
+						//now check for Trash area
+						$todoDelObjects = $todoDelObjects - $stepSize > 0 ? $todoDelObjects - $stepSize : 0;
+						$areas = array( 'Trash' );
+					}
+					BizSearch::indexObjectsFromDB( $lastObjId, $lastDeletedObjId, $stepSize, $areas, $totalObjectsIndexed );
 				} else {
-					$stepSize = $oneProcent;
+					$areas = array( 'Workflow', 'Trash' );
+					BizSearch::unIndexObjects(
+						null,    // all objects at once
+						$areas, //both world: Workflow and Trash
+						false ); // throw exceptions on errors
+					$stepSize = 0; // Not applicable in case of optimization
+					$prevTodo = $max; // All in one step
+					$todoDelObjects = DBDeletedObject::countDeletedObjectsToIndex( true );
+					// >>> Commented out: The below does not work when objects are moved to trash between index/un-index operations
+					// $stepSize = 250; // un-indexing goes faster, so take larger steps
+					// BizSearch::unindexObjectsFromDB( $lastObjId, $stepSize );
+					// <<<
 				}
-				if(($prevTodo <= $todoDelObjects) && ($todoDelObjects > 0)){ //meaning Workflow area is done and switch to Trash area (smart_deletedobjects)
-					//now check for Trash area
-					$todoDelObjects = $todoDelObjects - $stepSize > 0 ? $todoDelObjects - $stepSize : 0;
-					$areas = array('Trash');
-				}
-				BizSearch::indexObjectsFromDB( $lastObjId, $lastDeletedObjId, $stepSize, $areas, $totalObjectsIndexed );
-			} else {
-				$areas = array('Workflow','Trash');
-				BizSearch::unIndexObjects( 
-					null,    // all objects at once
-					$areas, //both world: Workflow and Trash
-					false ); // throw exceptions on errors
-				$stepSize = 0; // Not applicable in case of optimization
-				$prevTodo = $max; // All in one step
-				$todoDelObjects = DBDeletedObject::countDeletedObjectsToIndex( true );
-				// >>> Commented out: The below does not work when objects are moved to trash between index/unindex operations
-				// $stepSize = 250; // unindexing goes faster, so take larger steps
-				// BizSearch::unindexObjectsFromDB( $lastObjId, $stepSize );
-				// <<<
+			} catch( BizException $e ) {
+				$errMsg = $e->getMessage();
+				$errMsg = $e->getMessage();
+				$failedCount += $totalObjectsIndexed; // All processed objects are counted as failure: It is either all objects are successfully indexed or all fail (when one fails)
 			}
-		} catch( BizException $e ) {
-			$errMsg = $e->getMessage();
-			$errMsg = $e->getMessage();
-			$failedCount += $totalObjectsIndexed; // All processed objects are counted as failure: It is either all objects are successfully indexed or all fail (when one fails)
+			$todo = ( $prevTodo - $stepSize ) >= 0 ? ( $prevTodo - $stepSize ) : ( $todoDelObjects > 0 ? $todoDelObjects : 0 ); // Todo = Todo of previous step minus Done in this step
+			$done = ( $todo <= 0 || $command == 'UnindexStep' );
+			$progressAfterIndexing = $max - $todo;
+			// When the entire indexing is done, reset the failedCount ( in order not to interfere with the next run of indexing )
+			$failedCount = ( $done && $progressAfterIndexing == 0 ) ? 0 : $failedCount;
+			$optLast = BizSearch::getLastOptimized();
+			$optPro = 0; // Number optimized always zero expect after finishing the optimize step
+
+			$response = SearchServerUtils::getProgressAsXml( $max, $progressAfterIndexing, $failedCount, $done, $lastObjId, $lastDeletedObjId, $todoDelObjects, $optPro, $optLast, null, $errMsg );
+			//LogHandler::logSOAP( 'SearchIndexing', $response, false ); // heavy debugging only
+
+			header( 'Content-Type: text/xml' );
+			print $response;
 		}
-		$todo = ($prevTodo - $stepSize) >= 0 ? ($prevTodo - $stepSize) : ($todoDelObjects > 0 ? $todoDelObjects : 0) ; // Todo = Todo of previous step minus Done in this step
-		$done = ( $todo <= 0 || $command == 'UnindexStep' );
-		$progressAfterIndexing = $max - $todo;
-		// When the entire indexing is done, reset the failedCount ( in order not to interfere with the next run of indexing )
-		$failedCount = ( $done && $progressAfterIndexing == 0 ) ? 0 : $failedCount;
-		$optLast = BizSearch::getLastOptimized();
-		$optPro = 0; // Number optimized always zero expect after finishing the optimize step
-
-		$response = SearchServerUtils::getProgressAsXml( $max, $progressAfterIndexing, $failedCount, $done, $lastObjId, $lastDeletedObjId, $todoDelObjects, $optPro, $optLast, null, $errMsg);
-		//LogHandler::logSOAP( 'SearchIndexing', $response, false ); // heavy debugging only
-
-		header( 'Content-Type: text/xml' );
-		print $response;
 	break;
 
 	case 'OptimizeIndexes':
@@ -144,8 +127,8 @@ switch( $command ) {
 		$lastDeletedObjId=0;
 		$todoDelObjects = DBDeletedObject::countDeletedObjectsToIndex( true );
 		$optLast = BizSearch::getLastOptimized();
-		
-		$optPro = $done ? $max : 0; // After optimze the number of optimized oobjects equals the total
+
+		$optPro = $done ? $max : 0; // After optimize the number of optimized objects equals the total
 
 		$response = SearchServerUtils::getProgressAsXml( $max, $max - $todo, 0, $done, $lastObjId, $lastDeletedObjId, $todoDelObjects, $optPro, $optLast, null, $errMsg );
 		//LogHandler::logSOAP( 'SearchIndexing', $response, false ); // heavy debugging only
@@ -165,6 +148,12 @@ class SearchServerUtils
 	 * @param integer $idxPro Progress; Number of indexed objects.
 	 * @param integer $failedCount Number of objects that were failed during indexing. This number is for calculation and not for the bar drawing.
 	 * @param boolean $idxRunCompleted; Tells if all iteration steps are taken.
+	 * @param integer $idxLastObjId The last processed/indexed Workflow object id
+	 * @param integer $idxLastDeletedObjId The last processed/indexed Trash object id
+	 * @param integer $idxTodoDelObjects Total number of deleted objects to be processed/indexed
+	 * @param integer $optPro Total number of optimized objects
+	 * @param string $optLast Datetime of when it was last optimized
+	 * @param string[] $plugins List of installed plugins. Key[SearchPluginName]=>Value[PluginInfoData Object]
 	 * @param string $errMsg; Error message (if any).
 	 * @return string XML response
 	 */
@@ -229,5 +218,39 @@ class SearchServerUtils
 		$xmlText = $xmlDoc->createTextNode( $nodeText );
 		$xmlNode->appendChild( $xmlText );
 		return $xmlNode;
+	}
+
+	/**
+	 * Draws the initial progress bar.
+	 *
+	 * It draws the bar with the updated indexed and un-indexed objects.
+	 *
+	 * @param int $max The total count of workflow objects and deleted objects.
+	 * @param bool $pluginsCheck True to check if the Search server plugins is installed, false when the check is not needed.
+	 */
+	public static function initPage( $max, $pluginsCheck )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBDeletedObject.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizSearch.class.php';
+
+		$todoActObjects = DBObject::countObjectsToIndex( true );
+		$todoDelObjects = DBDeletedObject::countDeletedObjectsToIndex( true );
+		$todo = $todoActObjects + $todoDelObjects;
+		$optLast = BizSearch::getLastOptimized();
+		$optPro = 0;// Number optimized always zero except after finishing the optimize step
+
+		$plugins = null;
+		$errMsg = '';
+		if( $pluginsCheck ) {
+			$plugins = BizSearch::installedSearchServerPlugins();
+			$errMsg = '';
+			if( !count($plugins) > 0 ) {
+				$errMsg = 'There is no Search Server installed.';
+			}
+		}
+
+		header( 'Content-Type: text/xml' );
+		print SearchServerUtils::getProgressAsXml( $max, $max - $todo, 0, $todo == 0, 0, 0, $todoDelObjects, $optPro, $optLast, $plugins, $errMsg );
 	}
 }
