@@ -755,16 +755,7 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 			}
 
 			// Check the Microsoft ODBC Driver version.
-			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-			// Microsoft Driver version for PHP => Microsoft ODBC Driver version (and internal version):
-			//  3.1 => ODBC Driver 11 (12.0)
-			//  3.2 => ODBC Driver 11 (12.0)
-			//  4.0 => ODBC Driver 11 / 13 (12.0 / 13.0)
-			//  4.3 => ODBC Driver 11 / 13 (12.0 / 13.1)
-			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-			// ODBC 11 or 13.1 is required by Driver 4.3
-			$driverVersion = implode( '.', array_slice( explode( '.', $mssqlInfo['DriverVer'] ), 0, 2 ) ); // take out "major.minor" only!
-			if( version_compare( $driverVersion, '12.0' ) !== 0 && version_compare( $driverVersion, '13.1' ) !== 0 ) {
+			if( !$this->isValidMsSqlOdbcDriverVersion( $mssqlInfo['DriverVer'] ) ) {
 				$help = 'Install Microsoft ODBC Driver 11 for SQL Server or Microsoft ODBC Driver 13.1 for SQL Server.'; // returned by reference
 				$detail = 'Unsupported version of Microsoft ODBC Driver for SQL Server. '.
 					'Found v'.$mssqlInfo['DriverVer'].' which is not supported.';
@@ -803,6 +794,32 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 		if( isset( $e ) ) {
 			throw $e;
 		}
+	}
+
+	/**
+	 * Check whether the installed MSSQL ODBC driver version is supported.
+	 *
+	 *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	 * Microsoft Driver version for PHP => Microsoft ODBC Driver version (and internal version):
+	 * 3.1 => ODBC Driver 11 (12.0)
+	 * 3.2 => ODBC Driver 11 (12.0)
+	 * 4.0 => ODBC Driver 11 / 13.0 (12.0 / 13.00.811)
+	 * 4.3 => ODBC Driver 11 / 13.1 (12.0 / 13.00.4413)
+	 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	 * ODBC 11 or 13.1 is required by Driver 4.3
+	 *
+	 * @param $driverVersion
+	 * @return bool
+	 */
+	private function isValidMsSqlOdbcDriverVersion( $driverVersion )
+	{
+		$driverVersionTwoDigits = implode( '.', array_slice( explode( '.', $driverVersion ), 0, 2 ) ); // take out "major.minor" only!
+		$driverVersionThreeDigits = implode( '.', array_slice( explode( '.', $driverVersion ), 0, 3 ) ); // take out "major.minor.patch" only!
+
+		$isValid12 = version_compare( $driverVersionTwoDigits, '12.0', '=' );
+		$isValid13 = version_compare( $driverVersionThreeDigits, '13.0.4413', '>=' ) && version_compare( $driverVersionTwoDigits, '13.1', '<' );
+
+		return ($isValid12 || $isValid13);
 	}
 	
 	/**

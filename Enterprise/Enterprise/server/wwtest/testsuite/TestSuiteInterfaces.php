@@ -983,6 +983,25 @@ abstract class TestCase implements TestModule
 			$this->throwError( $message );
 		}
 	}
+
+	/**
+	 * Helper function that checks whether a callback function throws BizException with a specific server error code.
+	 *
+	 * @since 10.2.0
+	 * @param string $expectedErrorCode The expected server error code (S-code)
+	 * @param callable $callback Function to be called (e.g. closure) for which the exception is expected
+	 */
+	public function assertBizException( $expectedErrorCode, callable $callback )
+	{
+		$map = new BizExceptionSeverityMap( array( $expectedErrorCode => 'INFO' ) );
+		$e = null;
+		try {
+			call_user_func( $callback );
+		} catch( BizException $e ) {
+		}
+		$this->assertInstanceOf( 'BizException', $e );
+		$this->assertEquals( $expectedErrorCode, $e->getErrorCode() );
+	}
 }
 
 class TestResult
