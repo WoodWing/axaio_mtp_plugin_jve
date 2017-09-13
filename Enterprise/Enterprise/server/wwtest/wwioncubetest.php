@@ -111,7 +111,7 @@ define ('WIZARD_EXPIRY_MINUTES',2880);
 define ('IONCUBE_WIZARD_EXPIRY_MINUTES',10080);
 define ('MIN_INITIALISE_TIME',4);
 define ('IC24_ENABLED_INI_PROPERTY',"ic24.enable");
-define ('REQUIRED_LOADER_VERSION', '10.0.0'); // WoodWing: stick to only but this version
+define ('REQUIRED_LOADER_VERSION', '10.0.2'); // WoodWing: stick to only but this version
 
     run();
 
@@ -1607,7 +1607,7 @@ function unix_package_name()
 function loader_download_instructions()
 {
     // >>> WoodWing: because our download archive contains all loaders, adjust installation instructions accordingly:
-	$downloadPage = 'http://downloads.woodwing.net/ioncube-loaders/enterprise-server/ioncube-loader-1000.zip';
+	$downloadPage = 'http://downloads.woodwing.net/ioncube-loaders/enterprise-server/ioncube-loader-1002.zip';
 	echo 
 		'<li><a target="_blank" href="'.$downloadPage.'">Download</a> the ionCube Loader '.REQUIRED_LOADER_VERSION.' archive '.
 			'and extract it locally. '.
