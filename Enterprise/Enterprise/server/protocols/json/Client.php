@@ -19,8 +19,8 @@ class WW_JSON_Client
 	private $grazeClient;
 
 	/**
-	 * Creates a new instance of the Guzzle JSON-RPC client and
-	 * configures it for use with Enterprise Server.
+	 * Creates a new instance of the Guzzle JSON-RPC client.
+	 *
 	 * @param string $baseUrl
 	 * @param array|null $config
 	 */

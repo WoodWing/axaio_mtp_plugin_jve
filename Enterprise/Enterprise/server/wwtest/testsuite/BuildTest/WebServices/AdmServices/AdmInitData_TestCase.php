@@ -53,11 +53,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmInitData_TestCase extend
 	 */
 	private function createPublication()
 	{
-		// Without ticket we can not do anything.
-		if( !$this->ticket ) {
-			return null;
-		}
-		
 		// Create a new test Publication data object in memory.
 		$admPub = new AdmPublication();
 		$admPub->Name              = 'Brand_T_' . date('dmy_his');
@@ -87,8 +82,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmInitData_TestCase extend
 	 */
 	private function createPubChannel()
 	{
-		// Without ticket or parental brand we can not do anything.
-		if( !$this->ticket || !$this->publicationId ) {
+		// Without parental brand we can not do anything.
+		if( !$this->publicationId ) {
 			return;
 		}
 		
