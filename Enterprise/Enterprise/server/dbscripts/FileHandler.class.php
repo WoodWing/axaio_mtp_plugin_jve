@@ -40,15 +40,11 @@ class WW_DbScripts_FileHandler
 	private function majorMinorVersionToInt( $version )
 	{
 		$parts = explode( '.', $version );
-		if( count( $parts ) !== 2 ) {
+		if( count( $parts ) == 2 ) {
+			$version = $parts[0].$parts[1].'0';
+		} else {
 			LogHandler::Log( __CLASS__, 'ERROR', "Bad DB model version format provided {$version}." );
 			$version = 0;
-		} else {
-			if( $parts[1] == '99' ) { // for example convert 5.99 into 599
-				$version = $parts[0].$parts[1];
-			} else { // for example convert 8.0 into 800
-				$version = $parts[0].$parts[1].'0';
-			}
 		}
 		return intval( $version );
 	}
@@ -62,11 +58,8 @@ class WW_DbScripts_FileHandler
 	private function intToMajorMinorVersion( $version )
 	{
 		$version = strval( $version );
-		if( substr( $version, -1 ) == '0' ) {
-			$version = substr( $version, 0, -1 ); // remove the patch
-			$major = substr( $version, 0, -1 ); // take all except last digit
-			$minor = substr( $version, -1 ); // take last digit
-		} else if( substr( $version, -2 ) == '99' ) {
+		if( substr( $version, -1 ) == '0' ) { // last digit represents the patch version
+			$version = substr( $version, 0, -1 ); // remove the patch version
 			$major = substr( $version, 0, -1 ); // take all except last digit
 			$minor = substr( $version, -1 ); // take last digit
 		} else {

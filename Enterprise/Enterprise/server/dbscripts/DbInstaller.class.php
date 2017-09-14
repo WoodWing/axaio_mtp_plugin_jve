@@ -809,12 +809,6 @@ class WW_DbScripts_DbInstaller
 	public function getDbModelScripts( $installedVersion, $newInstallation, $upgrade )
 	{
 		$wantedVersion = SCENT_DBVERSION;
-		$wantedVersionParts = explode( '.', $wantedVersion, 2 );
-		if( $wantedVersionParts[1] == '0' ) {
-			$internalVersion = ($wantedVersionParts[0] - 1).'.99'; // e.g. 5.99, 6.99, 7.99
-		} else {
-			$internalVersion = null;
-		}
 
 		/** @var WW_DbScripts_FileDescriptor[] $selectFiles */
 		$selectFiles = array();
@@ -828,16 +822,6 @@ class WW_DbScripts_DbInstaller
 				}
 			} elseif( $upgrade ) {
 				if( $file->isUpgradeType() || $file->isPreUpgradeType() || $file->isPostUpgradeType() ) {
-					if( $internalVersion ) {
-						if( $file->versionFrom == $installedVersion && $file->versionTo == $internalVersion ) {
-							$selectFiles[] = $file;
-						}
-						if( $file->versionFrom == $internalVersion && $file->versionTo == $wantedVersion ) {
-							if( version_compare( $installedVersion, $internalVersion, '<' ) ) { // first upgrade to internal version
-								$selectFiles[] = $file;
-							}
-						}
-					}
 					if( $file->versionFrom == $installedVersion && $file->versionTo == $wantedVersion ) {
 						$selectFiles[] = $file;
 					}
@@ -858,7 +842,7 @@ class WW_DbScripts_DbInstaller
 			}
 		}
 
-		if( version_compare( $installedVersion, '8.0', '>=' ) && version_compare( $installedVersion, '8.99', '<=' ) ) {
+		if( version_compare( $installedVersion, '8.0', '>=' ) && version_compare( $installedVersion, '9.0', '<' ) ) {
 			// Check if database changes are already made in version 8.3.4 or later. See BZ#34633.
 			$dbdriver = DBDriverFactory::gen();
 			// If the database changes are not found we do not have to remove them. But if they are found the
