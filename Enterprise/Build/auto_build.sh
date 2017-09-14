@@ -19,9 +19,8 @@ PHPSTORM_INSPECTOR="/opt/phpstorm2017.1.4/bin/inspect.sh"
 
 # To maintain the es_php_encoder.php and php_define.php tools that are installed on Zetes, please use the Git repository
 # named "enterprise-server-build-tools" and run the Jenkins project named "Enterprise Server Build Tools" to upgrade.
-# TODO: Revert this path back to the files in the 'master' branch instead of the feature branch.
-ES_PHP_ENCODER="/home/autobuild/workspace/Enterprise Server Build Tools (PHP 7.1)/es_php_encoder.php"
-ES_PHP_DEFINE="/home/autobuild/workspace/Enterprise Server Build Tools (PHP 7.1)/php_define.php"
+ES_PHP_ENCODER="/home/autobuild/workspace/Enterprise Server Build Tools/es_php_encoder.php"
+ES_PHP_DEFINE="/home/autobuild/workspace/Enterprise Server Build Tools/php_define.php"
 
 #
 # Logs a given param name and value and exits with error when param value is empty.
