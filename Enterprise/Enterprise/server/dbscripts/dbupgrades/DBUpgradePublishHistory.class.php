@@ -74,22 +74,22 @@ class DBUpgradePublishHistory extends DbUpgradeModule
 			$historyTable = $dbStruct->getTable( 'smart_publishhistory' );
 
 			$sqlStatements = null;
+			require_once BASEDIR.'/server/dbscripts/generators/Factory.class.php';
+			$generator = WW_DbScripts_Generators_Factory::createGenerator( DBTYPE );
 			switch( DBTYPE ){
 				case 'mysql':
-					$mySqlGen = new MysqlGenerator( null );
-					$mySqlGen->dropField( $historyTable, $column );
+					$generator->dropField( $historyTable, $column );
 
-					$sqlStatements = explode( ';', $mySqlGen->txt() );
+					$sqlStatements = explode( ';', $generator->txt() );
 					array_pop( $sqlStatements ); // remove the last empty element ( after the ; )
 
 					break;
 				case 'mssql':
-					$msSqlGen = new MssqlGenerator( null );
-					$msSqlGen->upgradePre();
-					$msSqlGen->dropField( $historyTable, $column );
-					$msSqlGen->upgradePost();
+					$generator->upgradePre();
+					$generator->dropField( $historyTable, $column );
+					$generator->upgradePost();
 
-					$sqlStatements = explode( ';', $msSqlGen->txt() );
+					$sqlStatements = explode( ';', $generator->txt() );
 					array_pop( $sqlStatements ); // remove the last empty element ( after the ; )
 
 					break;

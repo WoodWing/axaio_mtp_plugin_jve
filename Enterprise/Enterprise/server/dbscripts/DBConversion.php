@@ -14,7 +14,7 @@
  */
 class DBConversion
 {
-	/** @var StdSqlGenerator $dbGenerator */
+	/** @var WW_DbScripts_Generators_Base $dbGenerator */
 	private static $dbGenerator;
 
 	/** @var string $previousVersion in 'major.minor' notation */
@@ -28,12 +28,12 @@ class DBConversion
 	 * If needed, a DB conversion scripts is added to the given DB generator (self::$dbGenerator).
 	 * Whether or not a scripts was added can be requested through self::$dbGenerator->materialize().
 	 *
-	 * @param StdSqlGenerator $dbGenerator
+	 * @param WW_DbScripts_Generators_Base $dbGenerator
 	 * @param string $mode 'pre' or 'post'
 	 * @param string $previousVersion in 'major.minor' notation
 	 * @param string $lastVersion in 'major.minor' notation
 	 */
-	public static function generateDBConvScripts( StdSqlGenerator $dbGenerator, $mode, $previousVersion, $lastVersion )
+	public static function generateDBConvScripts( WW_DbScripts_Generators_Base $dbGenerator, $mode, $previousVersion, $lastVersion )
 	{
 		self::$dbGenerator = $dbGenerator;
 		self::$previousVersion = $previousVersion;

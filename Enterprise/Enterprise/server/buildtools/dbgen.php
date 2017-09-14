@@ -70,16 +70,16 @@ class DbGenTool
 		$this->addedCode = $this->scriptFileHandler->getManuallyCodedSqlFiles();
 
 		// Generate the DD (data definition) scripts.
-		foreach ($this->supportedDBMS as $DBMS ) {
-			$this->generateDDSScripts( $DBMS );
+		foreach ($this->supportedDBMS as $dbms ) {
+			$this->generateDDSScripts( $dbms );
 		}
 
 		// Data conversion.
 		require_once BASEDIR.'/server/dbscripts/DBConversion.php';
 		foreach ( array('pre', 'post') as $mode ) {
 			foreach ( $this->previousVersions as $previousVersion ) {
-				foreach ( $this->supportedDBMS as $DBMS ) {
-					$generator = $this->createGenerator( $DBMS );
+				foreach ( $this->supportedDBMS as $dbms ) {
+					$generator = $this->createGenerator( $dbms );
 					$dbmsName = $generator->getDBName();
 					DBConversion::generateDBConvScripts( $generator, $mode, $previousVersion, $this->lastVersion );
 					$sqlFile = $this->scriptFileHandler->composeFilenameForPrePostUpdateScript( $previousVersion, $this->lastVersion, $dbmsName, $mode );
@@ -97,11 +97,11 @@ class DbGenTool
 	 * Scripts are generated for new installations and for upgrades from previous versions. Finally specific scripts are
 	 * created to handle patches.
 	 *
-	 * @param string DBMS Database Management System
+	 * @param string $dbms DBMS Database Management System
 	 */
-	private function generateDDSScripts( $DBMS )
+	private function generateDDSScripts( $dbms )
 	{
-		$generator = $this->createGenerator( $DBMS );
+		$generator = $this->createGenerator( $dbms );
 		$this->dbStruct->generate( $this->lastVersion, $generator );
 		$generator->setVersion( $this->lastVersion );
 		$dbmsName = $generator->getDBName();
@@ -117,7 +117,7 @@ class DbGenTool
 		foreach( $this->previousVersions as $previousVersion ) {
 			foreach( $this->upgradeVersions as $upgradeVersion ) {
 				if( version_compare( $previousVersion, $upgradeVersion, '<' ) ) {
-					$generator = $this->createGenerator( $DBMS );
+					$generator = $this->createGenerator( $dbms );
 					$this->dbStruct->generateUpgrade( $previousVersion, $upgradeVersion, $generator );
 					if( isset( $this->addedCode[ $dbmsName ] ) ) {
 						foreach( $this->addedCode[ $dbmsName ] as $k => $file ) {
@@ -139,7 +139,7 @@ class DbGenTool
 		}
 
 		// Scripts to handle patches.
-		$this->addPatchScripts( $DBMS );
+		$this->addPatchScripts( $dbms );
 
 		$this->logErrors( $generator->getErrors() );
 		$this->logErrors( $this->dbStruct->getErrors() );
@@ -150,9 +150,9 @@ class DbGenTool
 	 * The patches must be applied when an upgrade is done from a previous, major, version but also when the current
 	 * version is patched.
 	 *
-	 * @param string DBMS Database Management System
+	 * @param string $dbms DBMS Database Management System
 	 */
-	private function addPatchScripts( $DBMS)
+	private function addPatchScripts( $dbms)
 	{
 		$patches = $this->dbStruct->getPatchInfo( $this->lastVersion );
 		$patchVersions = array_merge( $this->previousVersions, $this->upgradeVersions ); // Patches are applied on the
@@ -160,7 +160,7 @@ class DbGenTool
 		foreach ($patchVersions as $patchVersion) {
 			/** @noinspection PhpUnusedLocalVariableInspection */
 			foreach ( $this->upgradeVersions as $upgradeVersion ) {
-				$this->generatePatchScripts( $patches, $DBMS, $patchVersion );
+				$this->generatePatchScripts( $patches, $dbms, $patchVersion );
 			}
 		}
 	}
@@ -210,12 +210,12 @@ class DbGenTool
 	 * scripts are used if the previous version did not have the patch installed.
 	 *
 	 * @param array $patches Patch info.
-	 * @param string $DBMS Name of the database.
+	 * @param string $dbms Name of the database.
 	 * @param string $previousVersion Version from which the upgrade is done.
 	 */
-	private function generatePatchScripts( $patches, $DBMS, $previousVersion )
+	private function generatePatchScripts( $patches, $dbms, $previousVersion )
 	{
-		$generator = $this->createGenerator( $DBMS );
+		$generator = $this->createGenerator( $dbms );
 		$dbmsName = $generator->getDBName();
 		foreach ( $patches as $patch ) {
 			if ( $patch['version'] == $this->lastVersion || $patch['version'] == $previousVersion ) {
@@ -235,7 +235,7 @@ class DbGenTool
 	/**
 	 * Creates files in the scripts folder with the proper extensions.
 	 *
-	 * @param GenericGenerator $generator Generator class with logic and storage
+	 * @param WW_DbScripts_Generators_Base $generator Generator class with logic and storage
 	 * @param string $sqlFile Full path name of the SQL file.
 	 */
 	private function materializeSQLFile( $generator, $sqlFile )
@@ -249,22 +249,12 @@ class DbGenTool
 	/**
 	 * Returns a script generator for a particular DBMS.
 	 *
-	 * @param string $DBMS Name of the Database Management System.
-	 * @return GenericGenerator|null
+	 * @param string $dbms Name of the Database Management System.
+	 * @return WW_DbScripts_Generators_Base|null
 	 */
-	private function createGenerator( $DBMS )
+	private function createGenerator( $dbms )
 	{
-		$generator = null;
-
-		switch ( $DBMS ) {
-			case 'mysql':
-				$generator  = new MysqlGenerator( false );
-				break;
-			case 'mssql':
-				$generator = new MssqlGenerator( false );
-				break;
-		}
-
-		return $generator;
+		require_once BASEDIR.'/server/dbscripts/generators/Factory.class.php';
+		return WW_DbScripts_Generators_Factory::createGenerator( $dbms );
 	}
 }
