@@ -1911,7 +1911,7 @@ class License
 
 		$errorMessage = '';
 		$warningMessage = '';
-return WW_LICENSE_OK; // HACK!!!
+
 		//Obtained via getSerial() while no license is installed?		
 		if ( $appserial === false )
 		{
