@@ -808,7 +808,8 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	 * ODBC 11 or 13.1 is required by Driver 4.3
 	 *
-	 * @param $driverVersion
+	 * @since 10.2.0
+	 * @param string $driverVersion
 	 * @return bool
 	 */
 	private function isValidMsSqlOdbcDriverVersion( $driverVersion )
