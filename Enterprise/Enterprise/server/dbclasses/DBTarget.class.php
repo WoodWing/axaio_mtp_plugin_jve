@@ -1103,13 +1103,8 @@ class DBTarget extends DBBase
         $targetsTable = $dbDriver->tablename(self::TABLENAME);
         $targetEditionsTable = $dbDriver->tablename('targeteditions');
 
-        if (DBTYPE == 'oracle') {
-            $sql  = "DELETE FROM (SELECT * FROM SMART_TARGETEDITIONS ted LEFT JOIN SMART_TARGETS tar ON (ted.`targetid` = tar.`id`) WHERE tar.`channelid` = $channelId)";
-        }
-        else {
-            $sql  = "DELETE ted.* FROM $targetEditionsTable ted, $targetsTable tar ";
-            $sql .= "WHERE ted.`targetid` = tar.`id` AND tar.`channelid` = $channelId ";
-        }
+        $sql  = "DELETE ted.* FROM $targetEditionsTable ted, $targetsTable tar ";
+        $sql .= "WHERE ted.`targetid` = tar.`id` AND tar.`channelid` = $channelId ";
         $sth = $dbDriver->query($sql);
 
 		if( is_null($sth) ) {
@@ -1172,14 +1167,9 @@ class DBTarget extends DBBase
         $targetsTable = $dbDriver->tablename(self::TABLENAME);
         $targetEditionsTable = $dbDriver->tablename('targeteditions');
 
-        if (DBTYPE == 'oracle') {
-            $sql  = "DELETE FROM (SELECT * FROM SMART_TARGETEDITIONS ted LEFT JOIN SMART_TARGETS tar ON (ted.`targetid` = tar.`id`) WHERE tar.`issueid` = $issueId)";
-        }
-        else {        
-            $sql  = "DELETE ted.* ";
-            $sql .= "FROM $targetEditionsTable ted, $targetsTable tar ";
-            $sql .= "WHERE tar.`issueid` = $issueId AND ted.`targetid` = tar.`id`";
-        }
+        $sql  = "DELETE ted.* ";
+        $sql .= "FROM $targetEditionsTable ted, $targetsTable tar ";
+        $sql .= "WHERE tar.`issueid` = $issueId AND ted.`targetid` = tar.`id`";
         $sth = $dbDriver->query($sql);
 
 		if( is_null($sth) ) {

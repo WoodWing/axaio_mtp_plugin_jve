@@ -114,17 +114,7 @@ class TikaDBObjects
         
         switch (DBTYPE)
         {
-            case 'oracle':
-            {
-             	if ($param == '') {
-                	$sql = "(UPPER($tablePrefix.`$paramname`) LIKE UPPER(?) ESCAPE '|') OR $tablePrefix.`$paramname` IS NULL ";
-            	}
-				else {
-                	$sql = "UPPER($tablePrefix.`$paramname`) LIKE UPPER(?) ESCAPE '|' ";
-				}
-                break;
-            }
-            case 'mysql': 
+            case 'mysql':
             {
                 $sql = "CONVERT( $tablePrefix.`$paramname` USING utf8) COLLATE utf8_general_ci LIKE ?";
                 $sql .= " ESCAPE '|' ";

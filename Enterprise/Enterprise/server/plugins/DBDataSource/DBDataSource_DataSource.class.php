@@ -78,7 +78,7 @@ class DBDataSource_DataSource extends DataSource_EnterpriseConnector
 							array("name" => "username", "desc" => "User name", 		"type" => "text"),
 							array("name" => "password", "desc" => "Password", 		"type" => "password"),
 							array("name" => "database", "desc" => "Database", 		"type" => "text"),
-							array("name" => "type",		"desc" => "Database type", 	"type" => "select", "list"=>"mysql/mssql/oracle"),
+							array("name" => "type",		"desc" => "Database type", 	"type" => "select", "list"=>"mysql/mssql"),
 						 );
 
 		if( $this->Settings["DatasourceID"] )

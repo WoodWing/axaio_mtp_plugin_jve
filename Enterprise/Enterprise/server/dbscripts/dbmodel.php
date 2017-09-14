@@ -3061,92 +3061,6 @@ class DBStruct
 					),
 				),
 
-				array ('v' => '6.1', 'name' => 'temp_aov', 'temporary' => true,
-						'comment' => 'Table storing session related authorization data, Oracle only.',
-						'fields' => array(
-							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
-						),
-						'indexes' => array(
-							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
-						),
-				),
-				array ('v' => '6.1', 'name' => 'temp_cv0', 'temporary' => true,
-						'comment' => 'Table storing session related authorization data, Oracle only.',
-						'fields' => array(
-							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
-						),
-						'indexes' => array(
-							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
-						),
-				),
-				array ('v' => '6.1', 'name' => 'temp_cv1', 'temporary' => true,
-						'comment' => 'Table storing session related authorization data, Oracle only.',
-						'fields' => array(
-							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
-						),
-						'indexes' => array(
-							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
-						),
-				),
-				array ('v' => '6.1', 'name' => 'temp_cv2', 'temporary' => true,
-						'comment' => 'Table storing session related authorization data, Oracle only.',
-						'fields' => array(
-							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
-						),
-						'indexes' => array(
-							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
-						),
-				),
-				array ('v' => '6.1', 'name' => 'temp_cv3', 'temporary' => true,
-						'comment' => 'Table storing session related authorization data, Oracle only.',
-						'fields' => array(
-							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
-						),
-						'indexes' => array(
-							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
-						),
-				),
-				array ('v' => '6.1', 'name' => 'temp_cv4', 'temporary' => true,
-						'comment' => 'Table storing session related authorization data, Oracle only.',
-						'fields' => array(
-							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
-						),
-						'indexes' => array(
-							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
-						),
-				),				
-				array ('v' => '6.1', 'name' => 'temp_cv9', 'temporary' => true,
-						'comment' => 'Table storing session related authorization data, Oracle only.',
-						'fields' => array(
-							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
-						),
-						'indexes' => array(
-							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
-						),
-				),
-				array ('v' => '6.1', 'name' => 'temp_tvi', 'temporary' => true,
-						'comment' => 'Table storing session related authorization data, Oracle only.',
-						'fields' => array(
-							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
-						),
-						'indexes' => array(
-							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
-						),
-				),
-				array ('v' => '7.0', 'name' => 'temp_av', 'temporary' => true,
-						'comment' => 'Table storing session related authorization data, Oracle only.',
-						'fields' => array(
-							array('v' => '7.0', 'name' => 'publication',	'type' => 'int(11)', 'autoincrement' => true),
-							array('v' => '7.0', 'name' => 'issue',	        'type' => 'int(11)', 'autoincrement' => true),
-							array('v' => '7.0', 'name' => 'section', 		'type' => 'int(11)', 'autoincrement' => true),
-							array('v' => '7.0', 'name' => 'state',	        'type' => 'int(11)', 'autoincrement' => true),
-						),
-						'indexes' => array(
-							array ('v' => '7.0', 'name' => 'primary', 'fields' => 'publication, issue, section, state', 'primary' => true),
-							array ('v' => '7.0', 'name' => 'ispusest', 'fields' => 'issue, publication, section, state'),
-						),
-				),
-				
 				array('v' => '7.0', 'name' => 'smart_channeldata',
 						'comment' => 
 							'The Brand-, PubChannel- and Issue entities can be extended with custom properties. '.
@@ -3179,33 +3093,6 @@ class DBStruct
 							array('v' => '7.0', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
 						),
 				),
-				array ('v' => '8.0', 'name' => 'temp_cv10', 'temporary' => true,
-						'comment' => 'Table storing session related data, Oracle only.',
-						'fields' => array(
-							array('v' => '7.6', 'name' => 'id',	'type' => 'int(11)', 'autoincrement' => true),
-						),
-						'indexes' => array(
-							array ('v' => '7.6', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
-						),
-				),
-				array ('v' => '8.0', 'name' => 'temp_cv11', 'temporary' => true,
-						'comment' => 'Table storing session related data, Oracle only.',
-						'fields' => array(
-							array('v' => '7.6', 'name' => 'id', 'type' => 'int(11)', 'autoincrement' => true),
-						),
-						'indexes' => array(
-							array ('v' => '7.6', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
-						),
-				),
-				array ('v' => '8.0', 'name' => 'temp_cv12', 'temporary' => true,
-						'comment' => 'Table storing session related data, Oracle only.',
-						'fields' => array(
-							array('v' => '7.6', 'name' => 'id', 'type' => 'int(11)', 'autoincrement' => true),
-						),
-						'indexes' => array(
-							array ('v' => '7.6', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
-						),
-				),				
 			)
 		);
 
@@ -3274,8 +3161,7 @@ class DBStruct
 		$allTables = $this->struct['tables'];
 		$retTables = array();
 		foreach( $allTables as $key => $table ) {
-			if (!self::toBeDropped($table, '0') &&
-				!(isset($table['temporary']) && $table['temporary'] == true) ) {
+			if( !self::toBeDropped($table, '0') ) {
 				$retTables[$key] = $table;
 			}
 		}
@@ -3361,7 +3247,7 @@ class DBStruct
 		$this->errors = array();
 		$generator->clean();
 		foreach ($this->struct['tables'] as $table) {
-			if (!self::toBeDropped($table, '0') && $generator->isApplicableForDB($table)) {
+			if( !self::toBeDropped($table, '0') ) {
 				$this->generateTable($version, $table, $generator, true);
 			}
 		}
@@ -3526,7 +3412,7 @@ class DBStruct
 		$this->errors = array();
 		$generator->upgradePre();
 		foreach ( $tableInfo['tables'] as $table ) {
-			if ( !$generator->isApplicableForDB( $table ) || self::isObsolete( $table, $fromversion ) ) {
+			if ( self::isObsolete( $table, $fromversion ) ) {
 				continue;
 			}
 			$tableToBeDropped = self::toBeDropped( $table, $fromversion );
@@ -3985,14 +3871,6 @@ abstract class GenericGenerator
 	}
 
 	/**
-	 * function called to see if table must be created
-	 *
-	 * @param array $table DB table info.
-	 * @return boolean TRUE when applicable, else FALSE.
-	 */
-	abstract public function isApplicableForDB( $table );
-
-	/**
 	 * Tells whether or not the field name is allowed for the target DB engine.
 	 *
 	 * @param string $fieldName
@@ -4423,20 +4301,6 @@ abstract class StdSqlGenerator extends GenericGenerator
 	public function dropTable($name)
 	{
 		return "DROP TABLE IF EXISTS ".$this->quotefields($name) . $this->closeline() . "\r\n";
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function isApplicableForDB($table)
-	{
-		$result = true;
-
-		if (isset($table['temporary']) && $table['temporary'] == true) {
-			$result = false;
-		}
-		
-		return $result;
 	}
 
 	/**

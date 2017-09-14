@@ -51,7 +51,7 @@ class DBConversion
 
 	/**
 	 * This function does the opposite of insertProfileFeatures().
-	 * It creates DB SQL for all DB flavors(MYSQL,MSSQL,ORACLE).
+	 * It creates DB SQL for all DB flavors (MySQL and MSSQL).
 	 * It is typically used when a profile feature that was supported in 
 	 * previous version is no longer supported(used) in v8.
 	 * 

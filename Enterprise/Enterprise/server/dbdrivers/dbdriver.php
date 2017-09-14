@@ -55,8 +55,7 @@ abstract class WW_DbDrivers_DriverBase
 		require_once BASEDIR.'/server/utils/PHPClass.class.php';
 		$plies = defined('LOGSQL_CALLERS') ? LOGSQL_CALLERS : 1;
 		if( $plies ) {
-			$skipClasses = array( 'DBBase', 'WW_DbDrivers_DriverBase', 
-				'mysqlidriver', 'mssqldriver', 'oracledriver' );
+			$skipClasses = array( 'DBBase', 'WW_DbDrivers_DriverBase', 'mysqlidriver', 'mssqldriver' );
 			$stackEntries = WW_Utils_PHPClass::getCallers( $class, $function, 
 							$skipClasses, $plies );
 			if( $stackEntries ) foreach( $stackEntries as $stackEntry ) {
@@ -400,7 +399,7 @@ class DBDriverFactory
 	 * Creates one of the following database driver objects: mysqldriver, mssqldriver or oracledriver.
 	 * Always use this factory to access a database; Never create a specific driver yourself.
 	 *
-	 * @param $dbType   string  Database type. 'mysql', 'mssql' or 'oracle'. Default value: DBTYPE config option.
+	 * @param $dbType   string  Database type. 'mysql' or 'mssql'. Default value: DBTYPE config option.
 	 * @param $dbServer string  Server machine name that run the database. Default value: DBSERVER config option.
 	 * @param $dbUser   string  Database user name used for for DB connection. Default value: DBUSER config option.
 	 * @param $dbPass   string  Database user password used for for DB connection. Default value: DBPASS config option.
@@ -428,10 +427,6 @@ class DBDriverFactory
 			case 'mssql':
 				require_once BASEDIR.'/server/dbdrivers/mssqldriver.php';
 				$dbDriver = new mssqldriver( $dbServer, $dbUser, $dbPass, $dbSelect );
-				break;
-			case 'oracle':
-				require_once BASEDIR.'/server/dbdrivers/oracledriver.php';
-				$dbDriver = new oracledriver( $dbServer, $dbUser, $dbPass, $dbSelect );
 				break;
 			default:
 				throw new BizException( 'ERR_DATABASE', 'Server', 'Invalid database type: "'.$dbType.'".' );

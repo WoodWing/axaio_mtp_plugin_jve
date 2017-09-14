@@ -124,14 +124,6 @@ class DBUpgradePublishHistory extends DbUpgradeModule
 					$addDeletedObjectMetaSql = 'UPDATE ' . $objectHistTableName . ' INNER JOIN ' . $deletedObjectsTableName . ' o ON  `objectid` =  o.`id` SET  `objectname` =  o.`name` , `objecttype` =  o.`type` , `objectformat` =  o.`format`';
 
 					break;
-				case 'oracle':
-					// add the metadata to the published objects if they exist in smart_objects
-					$addObjectMetaSql = 'UPDATE ' . $objectHistTableName . ' SET (`objectname`, `objecttype`, `objectformat`) =  (SELECT o.`name`, o.`type`, o.`format` FROM ' . $objectsTableName . ' o WHERE `objectid` = o.`id`) ';
-
-					// add the metadata to the published objects if they exist in smart_deletedobjects, if the objects are permanently deleted we won't be able to fill the metadata.
-					$addDeletedObjectMetaSql = 'UPDATE ' . $objectHistTableName . ' SET (`objectname`, `objecttype`, `objectformat`) =  (SELECT o.`name`, o.`type`, o.`format` FROM ' . $deletedObjectsTableName . ' o WHERE `objectid` = o.`id`) ';
-
-					break;
 			}
 
 			if( !self::excecuteQuery( $dbDriver, $addObjectMetaSql )){
