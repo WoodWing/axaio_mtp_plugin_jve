@@ -202,23 +202,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 	private function addIndex( $tableName, $indexName, $dbDriver )
 	{
 		$tableName = $dbDriver->tablename( $tableName );
-
-		$sql = '';
-		switch ( DBTYPE ) {
-			case 'mysql':
-				$sql .= 'CREATE  INDEX `'.$indexName.'` ON '.$tableName.' (`parent`, `child`, `frameid`, `edition`, `type`, `id`) ';
-				break;
-			case 'mssql':
-				$sql .= 'CREATE  INDEX `'.$indexName.'` ON '.$tableName.' (`parent`, `child`, `frameid`, `edition`, `type`, `id`) ';
-				break;
-			case 'oracle':
-				if ( substr( $tableName, -1 ) == '2' ) {
-					$indexName .= '2'; // To enforce an unique key.
-				}
-				$sql .= 'CREATE  INDEX `'.$indexName.'` ON '.$tableName.' (`parent`, `child`, `frameid`, `edition`, `type`, `id`) ';
-				break;
-		}
-
+		$sql = 'CREATE  INDEX `'.$indexName.'` ON '.$tableName.' (`parent`, `child`, `frameid`, `edition`, `type`, `id`) ';
 		return $dbDriver->query( $sql ) ? true : false;
 	}
 
@@ -251,14 +235,6 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 				$result = $dbDriver->query( $sql ) ? true : false;
 				if ( $result ) {
 					$result = $this->addIndex( 'placements2', 'pafridedid',  $dbDriver ) ? true : false;
-				}
-				break;
-			case 'oracle':
-				$sql= 'CREATE TABLE '.$toTable.' AS SELECT * FROM '.$fromTable; // Creates table with data but not the indexes.
-				$result = $dbDriver->query( $sql ) ? true : false;
-				if ( $result ) {
-					$result = $this->addIndex( 'placements2', 'pafridedid2', $dbDriver ) ? true : false;
-					// 'pafridedid2' as index names must be unique within Oracle.
 				}
 				break;
 		}
@@ -311,19 +287,6 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 							'AND P2.`type` = '.$deleteTable.'.`type` '.
 							'AND '.$deleteTable.'.`id` > P2.`id` )';
 				break;
-			case 'oracle':
-				$sql .= 'DELETE '.
-						'FROM '.$deleteTable.' P1 '.
-						'WHERE EXISTS '.
-							'( SELECT P2.ID '.
-							'FROM '.$selectTable.' P2 '.
-							'WHERE P2.PARENT = P1.PARENT '.
-							'AND P2.CHILD = P1.CHILD '.
-							'AND P2.FRAMEID = P1.FRAMEID '.
-							'AND P2.EDITION = P1.EDITION '.
-							'AND P2.TYPE = P1.TYPE '.
-							'AND P1.ID > P2.ID )';
-				break;
 		}
 
 		return $dbDriver->query( $sql ) ? true : false;
@@ -363,14 +326,6 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 						'WHERE P2.`id` = '.$deleteTable.'.`placementid` )';
 
 				break;
-			case 'oracle':
-				$sql .= 'DELETE '.
-						'FROM '.$deleteTable.' P1 '.
-						'WHERE NOT EXISTS '.
-						'( SELECT P2.`id` '.
-						'FROM '.$selectTable.' P2 '.
-						'WHERE P2.`id` = P1.`placementid` )';
-				break;
 		}
 
 		return $dbDriver->query( $sql ) ? true : false;
@@ -386,19 +341,8 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 	 */
 	private function dropTable( $droppedTable, $dbDriver )
 	{
-		$sql = '';
 		$droppedTable = $dbDriver->tablename( $droppedTable );
-
-		switch ( DBTYPE ) {
-			case 'mysql':
-			case 'mssql':
-				$sql .= 'DROP TABLE '.$droppedTable;
-				break;
-			case 'oracle':
-				$sql .= 'DROP TABLE '.$droppedTable.' PURGE';
-				break;
-		}
-
+		$sql = 'DROP TABLE '.$droppedTable;
 		return $dbDriver->query( $sql ) ? true : false;
 	}
 
@@ -411,17 +355,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 	private function dropIndex( $tableName, $dbDriver )
 	{
 		$tableName = $dbDriver->tablename( $tableName );
-		$sql = '';
-		switch ( DBTYPE ) {
-			case 'mysql':
-			case 'mssql':
-				$sql .= 'DROP INDEX `pafridedid` ON '.$tableName;
-				break;
-			case 'oracle':
-				$sql .= 'DROP INDEX `pafridedid` ';
-				break;
-		}
-
+		$sql = 'DROP INDEX `pafridedid` ON '.$tableName;
 		return $dbDriver->query( $sql ) ? true : false;
 	}
 }
