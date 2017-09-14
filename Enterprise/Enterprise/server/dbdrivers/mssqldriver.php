@@ -209,6 +209,7 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 		if( LogHandler::debugMode() ) {
 			LogHandler::Log('mssql', 'DEBUG', $this->theerrorcode.': '.$this->error());
 		}
+		$result = null;
 		$maxRetries = 3;
 		for( $retry = 1; $retry <= $maxRetries; $retry++ ) {
 			LogHandler::Log( 'mssql', 'INFO', "(Dead)lock: Retry attempt {$retry} of {$maxRetries}." );

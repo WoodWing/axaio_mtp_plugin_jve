@@ -189,6 +189,7 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 		if( LogHandler::debugMode() ) {
 			LogHandler::Log( 'mysql', 'DEBUG', $this->theerrorcode.': '.$this->error() );
 		}
+		$result = null;
 		$maxRetries = 3;
 		for( $retry = 1; $retry <= $maxRetries; $retry++ ) {
 			LogHandler::Log( 'mysql', 'INFO', "(Dead)lock: Retry attempt {$retry} of {$maxRetries}." );
