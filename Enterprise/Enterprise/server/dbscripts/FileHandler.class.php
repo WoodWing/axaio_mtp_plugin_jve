@@ -28,46 +28,7 @@ class WW_DbScripts_FileHandler
 	 */
 	private function getScriptFilePrefix()
 	{
-		return 'scent';
-	}
-
-	/**
-	 * Convert a version from 'major.minor' notation to an integer notation used for SQL script file names.
-	 *
-	 * @param string $version in 'major.minor' notation
-	 * @return int version
-	 */
-	private function majorMinorVersionToInt( $version )
-	{
-		$parts = explode( '.', $version );
-		if( count( $parts ) == 2 ) {
-			$version = $parts[0].$parts[1].'0';
-		} else {
-			LogHandler::Log( __CLASS__, 'ERROR', "Bad DB model version format provided {$version}." );
-			$version = 0;
-		}
-		return intval( $version );
-	}
-
-	/**
-	 * Convert a version from an integer notation used for SQL script file names to a 'major.minor' notation.
-	 *
-	 * @param integer $version
-	 * @return string version in 'major.minor' notation
-	 */
-	private function intToMajorMinorVersion( $version )
-	{
-		$version = strval( $version );
-		if( substr( $version, -1 ) == '0' ) { // last digit represents the patch version
-			$version = substr( $version, 0, -1 ); // remove the patch version
-			$major = substr( $version, 0, -1 ); // take all except last digit
-			$minor = substr( $version, -1 ); // take last digit
-		} else {
-			LogHandler::Log( __CLASS__, 'ERROR', "Bad DB model version format provided {$version}." );
-			$major = '0';
-			$minor = '0';
-		}
-		return "{$major}.{$minor}";
+		return 'ent';
 	}
 
 	/**
@@ -79,10 +40,9 @@ class WW_DbScripts_FileHandler
 	 */
 	public function composeFilenameForIFullnstallScript( $dbVersion, $dbmsName )
 	{
-		$dbVersion = $this->majorMinorVersionToInt( $dbVersion );
 		$dir = $this->getScriptsFolder();
 		$prefix = $this->getScriptFilePrefix();
-		return "{$dir}{$prefix}{$dbVersion}.{$dbmsName}.sql";
+		return "{$dir}{$prefix}_{$dbVersion}_{$dbmsName}.sql";
 	}
 
 	/**
@@ -95,11 +55,9 @@ class WW_DbScripts_FileHandler
 	 */
 	public function composeFilenameForUpdateScript( $versionFrom, $versionTo, $dbmsName )
 	{
-		$versionFrom = $this->majorMinorVersionToInt( $versionFrom );
-		$versionTo = $this->majorMinorVersionToInt( $versionTo );
 		$dir = $this->getScriptsFolder();
 		$prefix = $this->getScriptFilePrefix();
-		return "{$dir}{$prefix}{$versionFrom}_{$versionTo}.{$dbmsName}.sql";
+		return "{$dir}{$prefix}_{$versionFrom}_{$versionTo}_{$dbmsName}.sql";
 	}
 
 	/**
@@ -113,11 +71,9 @@ class WW_DbScripts_FileHandler
 	 */
 	public function composeFilenameForPrePostUpdateScript( $versionFrom, $versionTo, $dbmsName, $mode )
 	{
-		$versionFrom = $this->majorMinorVersionToInt( $versionFrom );
-		$versionTo = $this->majorMinorVersionToInt( $versionTo );
 		$dir = $this->getScriptsFolder();
 		$prefix = $this->getScriptFilePrefix();
-		return "{$dir}{$prefix}{$versionFrom}_{$versionTo}_{$mode}.{$dbmsName}.sql";
+		return "{$dir}{$prefix}_{$versionFrom}_{$versionTo}_{$mode}_{$dbmsName}.sql";
 	}
 
 	/**
@@ -131,11 +87,9 @@ class WW_DbScripts_FileHandler
 	 */
 	public function composeFilenameForPatchScript( $versionFrom, $versionTo, $patchName, $dbmsName )
 	{
-		$versionFrom = $this->majorMinorVersionToInt( $versionFrom );
-		$versionTo = $this->majorMinorVersionToInt( $versionTo );
 		$dir = $this->getScriptsFolder();
 		$prefix = $this->getScriptFilePrefix();
-		return "{$dir}{$prefix}{$versionFrom}_{$versionTo}_patch_{$patchName}_{$dbmsName}.sql";
+		return "{$dir}{$prefix}_{$versionFrom}_{$versionTo}_patch_{$patchName}_{$dbmsName}.sql";
 	}
 
 	/**
@@ -150,13 +104,16 @@ class WW_DbScripts_FileHandler
 		$files = scandir( $dir );
 		$sqlFiles = array();
 		foreach( $files as $file ) {
-			if( substr( $file, -4 ) != ".txt" ) {
+			if( substr( $file, 0, 1 ) == '.' ) { // exclude hidden files
+				continue;
+			}
+			if( substr( $file, -4 ) != ".txt" ) { // exclude files that don't have the extension
 				continue;
 			}
 			$r = array();
-			// TODO: suppport major.minor
-			if( preg_match( '/'.$prefix.'([0-9]*)\.([a-z]*).txt/i', $file, $r ) > 0 ) {
+			if( preg_match( '/'.$prefix.'_([0-9]+\.[0-9]+)_([a-z]+).txt/i', $file, $r ) > 0 ) {
 				$sqlFiles[ $r[2] ][ $r[1] ] = $dir.$file;
+				// Example: when $file == 'ent_10.2_mysql.txt' then $r[1] == '10.2' and $r[2] == 'mysql'.
 			}
 		}
 		return $sqlFiles;
@@ -175,29 +132,30 @@ class WW_DbScripts_FileHandler
 		$dir = $this->getScriptsFolder();
 		$prefix = $this->getScriptFilePrefix();
 		$files = scandir( $dir );
+		$fileExt = '.sql';
 		$sqlFiles = array();
 
 		foreach( $files as $file ) {
-			if( substr( $file, 0, 1 ) == '.' ) { // hidden files
+			if( substr( $file, 0, 1 ) == '.' ) { // exclude hidden files
 				continue;
 			}
-			if( substr( $file, -4 ) != '.sql' ) { //extension must be 'sql'
+			if( substr( $file, -strlen( $fileExt ) ) != $fileExt ) { // exclude files that don't have the extension
 				continue;
 			}
-			if( substr( $file, 0, strlen( $prefix ) ) != $prefix ) { // prefix must be 'scent'
+			if( substr( $file, 0, strlen( $prefix ) ) != $prefix ) { // exclude files that don't have the prefix
 				continue;
 			}
-			$parts = explode( '.', str_replace( '_', '.', substr( $file, strlen( $prefix ) ) )  );
-			array_pop( $parts ); // remove file extension
-			if( end( $parts ) != $dbmsName ) { // only include files for requested DBMS
+			$parts = explode( '_', substr( $file, 0, -strlen( $fileExt ) ) );
+			array_shift( $parts ); // remove the prefix
+			if( end( $parts ) != $dbmsName ) { // only include files for the requested DBMS
 				continue;
 			}
-			array_pop( $parts ); // remove DBMS name
+			array_pop( $parts ); // remove the DBMS name
 
 			$sqlFile = new WW_DbScripts_FileDescriptor( $dir.$file );
-			if( count($parts) >= 2 && ctype_digit( $parts[0] ) && ctype_digit( $parts[1] ) ) {
-				$versionFrom = $this->intToMajorMinorVersion( $parts[0] );
-				$versionTo = $this->intToMajorMinorVersion( $parts[1] );
+			if( count($parts) >= 2 && $this->isMajorMinorVersion( $parts[0] ) && $this->isMajorMinorVersion( $parts[1] ) ) {
+				$versionFrom = $parts[0];
+				$versionTo = $parts[1];
 				if( count($parts) >= 4 && $parts[2] == 'patch') {
 					$sqlFile->setPatchType( $versionFrom, $versionTo, $parts[3] );
 				} else {
@@ -211,12 +169,23 @@ class WW_DbScripts_FileHandler
 						$sqlFile->setUpgradeType( $versionFrom, $versionTo );
 					}
 				}
-			} elseif( count($parts) > 0 && ctype_digit( $parts[0] )) {
-				$version = $this->intToMajorMinorVersion( $parts[0] );
-				$sqlFile->setFullInstallType( $version );
+			} elseif( count($parts) > 0 && $this->isMajorMinorVersion( $parts[0] )) {
+				$sqlFile->setFullInstallType( $parts[0] );
 			}
 			$sqlFiles[] = $sqlFile;
 		}
 		return $sqlFiles;
+	}
+
+	/**
+	 * Validate the format of a given version in 'major.minor' notation.
+	 *
+	 * @param string $version version in 'major.minor'
+	 * @return bool Whether or not the format is correct.
+	 */
+	private function isMajorMinorVersion( $version )
+	{
+		$parts = explode( '.', $version );
+		return count( $parts ) == 2 && ctype_digit( $parts[0] ) && ctype_digit( $parts[1] );
 	}
 }
