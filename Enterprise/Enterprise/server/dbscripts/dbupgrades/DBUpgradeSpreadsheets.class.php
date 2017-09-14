@@ -62,6 +62,6 @@ class DBUpgradeSpreadsheets extends ObjectConverter
 
 	public function introduced()
 	{
-		return '800';
+		return '8.0';
 	}
 }

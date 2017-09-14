@@ -81,7 +81,7 @@ class DBUpgradeEnterpriseSystemId extends DbUpgradeModule
 
 	public function introduced()
 	{
-		return '800';
+		return '8.0';
 	}
 
 }

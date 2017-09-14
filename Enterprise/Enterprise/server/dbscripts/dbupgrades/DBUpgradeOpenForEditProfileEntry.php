@@ -55,6 +55,6 @@ class DBUpgradeOpenForEditProfileEntry extends DbUpgradeModule
 
 	public function introduced()
 	{
-		return '1010';
+		return '10.1';
 	}
 }

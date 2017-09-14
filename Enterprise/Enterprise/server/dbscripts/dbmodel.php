@@ -11,12 +11,7 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
 
-define ('SCENT2ORA', serialize(array(
-	"user" => "USERNAME", "date" => "DATED", "comment" => "COMMENTS",
-	"_left" => "LEFTPOS", "lock" => "LOCKED", "_columns" => "NRCOLUMNS"
-)));
-
-define ('MINIMALGENVERSION', '800');
+define ('MINIMALGENVERSION', '8.0');
 
 class DBStruct
 {
@@ -34,10 +29,10 @@ class DBStruct
 	public function getVersions()
 	{
 		return array (
-			'310', '320', '330', '340', '400', '410', '420', 
-			'500', '599', '600', '610', '700', '750', '760', '800', 
-			'900', '910', '920', '940', '950', '960', '970', '980', 
-			'1000', '1010', '1020'
+			'3.1', '3.2', '3.3', '3.4', '4.0', '4.1', '4.2', 
+			'5.0', '5.99', '6.0', '6.1', '7.0', '7.5', '7.6', '8.0',
+			'9.0', '9.1', '9.2', '9.4', '9.5', '9.6', '9.7', '9.8',
+			'10.0', '10.1', '10.2'
 		);
 	}
 	
@@ -77,17 +72,12 @@ class DBStruct
 	{
 		$versions = $this->getVersions();
 		$genVersions = array();
-		$minVersion = intval(MINIMALGENVERSION);
-		$maxVersion = intval(array_pop($versions)); // pop off the last entry and use that as the max version.
-
-		foreach ($versions as $version) {
-			$v = intval($version);
-
-			if ($v >= $minVersion && $v != $maxVersion) {
+		$maxVersion = array_pop( $versions ); // pop off the last entry and use that as the max version.
+		foreach( $versions as $version ) {
+			if( version_compare( $version, MINIMALGENVERSION, '>=' ) && version_compare( $version, $maxVersion, '<' ) ) {
 				$genVersions[] = $version;
 			}
 		}
-
 		return $genVersions;
 	}
 
@@ -111,84 +101,84 @@ class DBStruct
 
 		$this->struct = array (
 			'tables' => array (
-				array ('v' => '330', 'name' => 'smart_actionproperties',
+				array ('v' => '3.3', 'name' => 'smart_actionproperties',
 						'comment' => 'Dialog and query definitions.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-									'alters' => array('v' => '330', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-							array('v' => '610', 'name' => 'publication', 	'type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '330', 'name' => 'publication', 	'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '970', 'name' => 'orderid', 		'type' => 'int(11)',			'default' => "'0'",
-								'alters' => array('v' => '330', 'name' => 'orderid', 		'type' => 'tinyint(4)',			'default' => "'0'"), ),
-							array('v' => '330', 'name' => 'property'	, 	'type' => 'varchar(200)',		'default' => "''"),
-							array('v' => '330', 'name' => 'edit', 			'type' => 'char(2)',			'default' => "''"),
-							array('v' => '330', 'name' => 'mandatory',	 	'type' => 'char(2)',			'default' => "''"),
-							array('v' => '330', 'name' => 'action', 		'type' => 'varchar(40)',		'default' => "''"),
-							array('v' => '330', 'name' => 'type', 			'type' => 'varchar(40)',		'default' => "''"),
-							array('v' => '500', 'name' => 'restricted',		'type' => 'char(2)',			'default' => "''"),
-							array('v' => '800', 'name' => 'refreshonchange','type' => 'char(2)',			'default' => "''",
+							array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+									'alters' => array('v' => '3.3', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+							array('v' => '6.1', 'name' => 'publication', 	'type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '3.3', 'name' => 'publication', 	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '9.7', 'name' => 'orderid', 		'type' => 'int(11)',			'default' => "'0'",
+								'alters' => array('v' => '3.3', 'name' => 'orderid', 		'type' => 'tinyint(4)',			'default' => "'0'"), ),
+							array('v' => '3.3', 'name' => 'property'	, 	'type' => 'varchar(200)',		'default' => "''"),
+							array('v' => '3.3', 'name' => 'edit', 			'type' => 'char(2)',			'default' => "''"),
+							array('v' => '3.3', 'name' => 'mandatory',	 	'type' => 'char(2)',			'default' => "''"),
+							array('v' => '3.3', 'name' => 'action', 		'type' => 'varchar(40)',		'default' => "''"),
+							array('v' => '3.3', 'name' => 'type', 			'type' => 'varchar(40)',		'default' => "''"),
+							array('v' => '5.0', 'name' => 'restricted',		'type' => 'char(2)',			'default' => "''"),
+							array('v' => '8.0', 'name' => 'refreshonchange','type' => 'char(2)',			'default' => "''",
 								'comment' => 'Whether or not to refresh the workflow dialog when the user changes the value of this dialog field.' ),
-							array('v' => '900', 'name' => 'parentfieldid', 'type' => 'int(11)', 'default' => "'0'"),
-							array('v' => '900', 'name' => 'documentid', 'type' => 'varchar(512)','default' => "''"),
-							array('v' => '900', 'name' => 'initialheight', 'type' => 'int(4)', 'default' => "'0'", 'comment' => 'Initial height of the widget.'),
-							array('v' => '920', 'name' => 'multipleobjects','type' => 'char(2)',			'default' => "''",
+							array('v' => '9.0', 'name' => 'parentfieldid', 'type' => 'int(11)', 'default' => "'0'"),
+							array('v' => '9.0', 'name' => 'documentid', 'type' => 'varchar(512)','default' => "''"),
+							array('v' => '9.0', 'name' => 'initialheight', 'type' => 'int(4)', 'default' => "'0'", 'comment' => 'Initial height of the widget.'),
+							array('v' => '9.2', 'name' => 'multipleobjects','type' => 'char(2)',			'default' => "''",
 								'comment' => 'Whether or not the this property should be shown on the Multi Set Properties dialog.' ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'pbac_actionproperties', 	'fields' => 'publication, action'),
+							array('v' => '4.2', 'name' => 'pbac_actionproperties', 	'fields' => 'publication, action'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '330', 'field' => 'property', 'reftable' => 'smart_properties', 'reffield' => 'name'),
-							array('v' => '420', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '3.3', 'field' => 'property', 'reftable' => 'smart_properties', 'reffield' => 'name'),
+							array('v' => '4.2', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
 						),
 				),
-				array('v' => '310', 'name' => 'smart_authorizations',
+				array('v' => '3.1', 'name' => 'smart_authorizations',
 						'comment' => 'Authorizations for user groups.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
-									'alters' => array('v' => '310', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-							array('v' => '610', 'name' => 'grpid',		'type' => 'int(11)',		'default' => "'0'" ,
-									'alters' => array('v' => '310', 'name' => 'grpid',		'type' => 'mediumint(9)',		'default' => "'0'" ), ),
-							array('v' => '610', 'name' => 'publication','type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '310', 'name' => 'publication','type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'section',	'type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '310', 'name' => 'section',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'state',		'type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '310', 'name' => 'state',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '310', 'name' => 'rights',		'type' => 'varchar(40)',		'default' => "''"),
-							array('v' => '610', 'name' => 'issue',		'type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '340', 'name' => 'issue',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'profile',	'type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '420', 'name' => 'profile',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '1010', 'name' => 'bundle',	'type' => 'int(11)',		'default' => "'0'",
+							array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
+									'alters' => array('v' => '3.1', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+							array('v' => '6.1', 'name' => 'grpid',		'type' => 'int(11)',		'default' => "'0'" ,
+									'alters' => array('v' => '3.1', 'name' => 'grpid',		'type' => 'mediumint(9)',		'default' => "'0'" ), ),
+							array('v' => '6.1', 'name' => 'publication','type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '3.1', 'name' => 'publication','type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'section',	'type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '3.1', 'name' => 'section',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'state',		'type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '3.1', 'name' => 'state',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '3.1', 'name' => 'rights',		'type' => 'varchar(40)',		'default' => "''"),
+							array('v' => '6.1', 'name' => 'issue',		'type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '3.4', 'name' => 'issue',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'profile',	'type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '4.2', 'name' => 'profile',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '10.1', 'name' => 'bundle',	'type' => 'int(11)',		'default' => "'0'",
 								'comment' => 'Group id of rows that should be combined (bundled) in the admin UI.' ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'gipu_authorizations', 	'fields' => 'grpid, publication'),
-							array('v' => '420', 'name' => 'gipr_authorizations', 	'fields' => 'grpid, profile'),
+							array('v' => '4.2', 'name' => 'gipu_authorizations', 	'fields' => 'grpid, publication'),
+							array('v' => '4.2', 'name' => 'gipr_authorizations', 	'fields' => 'grpid, profile'),
 						),
 						'inserts' => array(
 							"1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1, 0",
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'grpid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'profile', 'reftable' => 'smart_profiles', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'grpid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'profile', 'reftable' => 'smart_profiles', 'reffield' => 'id'),
 						),
 				),
-				array('v' => '330', 'name' => 'smart_config',
+				array('v' => '3.3', 'name' => 'smart_config',
 						'comment' => 'System configuration.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
-									'alters' => array('v' => '330', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-							array('v' => '330', 'name' => 'name',		'type' => 'varchar(200)',		'default' => "''"),
-							array('v' => '500', 'name' => 'value',		'type' => 'blob',				'default' => "",
-								'alters' => array('v' => '330', 'name' => 'value', 'type' => 'varchar(200)')),
+							array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
+									'alters' => array('v' => '3.3', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+							array('v' => '3.3', 'name' => 'name',		'type' => 'varchar(200)',		'default' => "''"),
+							array('v' => '5.0', 'name' => 'value',		'type' => 'blob',				'default' => "",
+								'alters' => array('v' => '3.3', 'name' => 'value', 'type' => 'varchar(200)')),
 						),
 						'indexes' => array(
 						),
@@ -198,171 +188,171 @@ class DBStruct
 						'lookups' => array(
 						),
 				),
-				array ('v' => '310', 'name' => 'smart_deletedobjects',
+				array ('v' => '3.1', 'name' => 'smart_deletedobjects',
 						'comment' => 'Stores deleted objects until recovery or purging.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-									'alters' => array('v' => '310', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-							array('v' => '610', 'name' => 'documentid',		'type' => 'varchar(512)',		'default' => "''",
-									'alters' => array('v' => '310', 'name' => 'documentid',		'type' => 'varchar(200)',		'default' => "''"), ),
-							array('v' => '310', 'name' => 'type',			'type' => 'varchar(20)',		'default' => "''"),
-							array('v' => '310', 'name' => 'name',			'type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '610', 'name' => 'publication',	'type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '310', 'name' => 'publication',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'issue', 'type' => 'int(11)',	'default' => "'0'",
-									'alters' => array('v' => '310', 'name' => 'issue', 'type' => 'mediumint(9)',	'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'section',		'type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '310', 'name' => 'section',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'state',			'type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '310', 'name' => 'state',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '310', 'name' => 'routeto',		'type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '310', 'name' => 'copyright',		'type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '310', 'name' => 'slugline',		'type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '310', 'name' => 'comment',		'type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '310', 'name' => 'author',			'type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '800', 'name' => 'deadline',		'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-								'alters' => array('v' => '310', 'name' => 'deadline',	'type' => 'varchar(40)', 'default' => "''")),
-							array('v' => '310', 'name' => 'urgency',		'type' => 'varchar(40)',		'default' => "''"),
-							array('v' => '610', 'name' => 'format',			'type' => 'varchar(128)',		'default' => "''",
-								'alters' => array('v' => '310', 'name' => 'format',			'type' => 'varchar(40)',		'default' => "''")),
-							array('v' => '310', 'name' => 'width',			'type' => 'double',				'default' => "'0'"),
-							array('v' => '310', 'name' => 'depth',			'type' => 'double',				'default' => "'0'"),
-							array('v' => '1010', 'name' => 'dpi',			'type' => 'double',				'default' => "'0'",
-								'alters' => array('v' => '310', 'name' => 'dpi',		'type' => 'int(11)',	'default' => "'0'") ),
-							array('v' => '310', 'name' => 'lengthwords',	'type' => 'int(11)',			'default' => "'0'"),
-							array('v' => '310', 'name' => 'lengthchars',	'type' => 'int(11)',			'default' => "'0'"),
-							array('v' => '310', 'name' => 'lengthparas',	'type' => 'int(11)',			'default' => "'0'"),
-							array('v' => '310', 'name' => 'lengthlines',	'type' => 'int(11)',			'default' => "'0'"),
-							array('v' => '310', 'name' => 'keywords',		'type' => 'blob',				'default' => ""),
-							array('v' => '310', 'name' => 'modifier',		'type' => 'varchar(40)',		'default' => "''"),
-						    array('v' => '800', 'name' => 'modified',		'type' => 'varchar(30)',		'default' => "''", 'nullable' => false,
-							  	'comment' => 'yyyy-mm-ddThh:mm:ss', 'alters' => array('v' => '310', 'name' => 'modified',		'type' => 'varchar(30)',		'default' => "NULL", 'nullable' => true,	'comment' => 'yyyy-mm-ddThh:mm:ss') ),
-							array('v' => '310', 'name' => 'creator',		'type' => 'varchar(40)',		'default' => "''"),
-						    array('v' => '800', 'name' => 'created',		'type' => 'varchar(30)',		'default' => "''", 'nullable' => false,
-							  	'comment' => 'yyyy-mm-ddThh:mm:ss',	'alters'  => array('v' => '310', 'name' => 'created',		'type' => 'varchar(30)',		'default' => "NULL", 'nullable' => true,	'comment' => 'yyyy-mm-ddThh:mm:ss')),
-							array('v' => '800', 'name' => 'deletor',		'type' => 'varchar(40)',		'default' => "''"),
-						    array('v' => '800', 'name' => 'deleted',		'type' => 'varchar(30)',		'default' => "''",
+							array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+									'alters' => array('v' => '3.1', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+							array('v' => '6.1', 'name' => 'documentid',		'type' => 'varchar(512)',		'default' => "''",
+									'alters' => array('v' => '3.1', 'name' => 'documentid',		'type' => 'varchar(200)',		'default' => "''"), ),
+							array('v' => '3.1', 'name' => 'type',			'type' => 'varchar(20)',		'default' => "''"),
+							array('v' => '3.1', 'name' => 'name',			'type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '6.1', 'name' => 'publication',	'type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '3.1', 'name' => 'publication',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'issue', 'type' => 'int(11)',	'default' => "'0'",
+									'alters' => array('v' => '3.1', 'name' => 'issue', 'type' => 'mediumint(9)',	'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'section',		'type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '3.1', 'name' => 'section',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'state',			'type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '3.1', 'name' => 'state',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '3.1', 'name' => 'routeto',		'type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '3.1', 'name' => 'copyright',		'type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '3.1', 'name' => 'slugline',		'type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '3.1', 'name' => 'comment',		'type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '3.1', 'name' => 'author',			'type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '8.0', 'name' => 'deadline',		'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+								'alters' => array('v' => '3.1', 'name' => 'deadline',	'type' => 'varchar(40)', 'default' => "''")),
+							array('v' => '3.1', 'name' => 'urgency',		'type' => 'varchar(40)',		'default' => "''"),
+							array('v' => '6.1', 'name' => 'format',			'type' => 'varchar(128)',		'default' => "''",
+								'alters' => array('v' => '3.1', 'name' => 'format',			'type' => 'varchar(40)',		'default' => "''")),
+							array('v' => '3.1', 'name' => 'width',			'type' => 'double',				'default' => "'0'"),
+							array('v' => '3.1', 'name' => 'depth',			'type' => 'double',				'default' => "'0'"),
+							array('v' => '10.1', 'name' => 'dpi',			'type' => 'double',				'default' => "'0'",
+								'alters' => array('v' => '3.1', 'name' => 'dpi',		'type' => 'int(11)',	'default' => "'0'") ),
+							array('v' => '3.1', 'name' => 'lengthwords',	'type' => 'int(11)',			'default' => "'0'"),
+							array('v' => '3.1', 'name' => 'lengthchars',	'type' => 'int(11)',			'default' => "'0'"),
+							array('v' => '3.1', 'name' => 'lengthparas',	'type' => 'int(11)',			'default' => "'0'"),
+							array('v' => '3.1', 'name' => 'lengthlines',	'type' => 'int(11)',			'default' => "'0'"),
+							array('v' => '3.1', 'name' => 'keywords',		'type' => 'blob',				'default' => ""),
+							array('v' => '3.1', 'name' => 'modifier',		'type' => 'varchar(40)',		'default' => "''"),
+						    array('v' => '8.0', 'name' => 'modified',		'type' => 'varchar(30)',		'default' => "''", 'nullable' => false,
+							  	'comment' => 'yyyy-mm-ddThh:mm:ss', 'alters' => array('v' => '3.1', 'name' => 'modified',		'type' => 'varchar(30)',		'default' => "NULL", 'nullable' => true,	'comment' => 'yyyy-mm-ddThh:mm:ss') ),
+							array('v' => '3.1', 'name' => 'creator',		'type' => 'varchar(40)',		'default' => "''"),
+						    array('v' => '8.0', 'name' => 'created',		'type' => 'varchar(30)',		'default' => "''", 'nullable' => false,
+							  	'comment' => 'yyyy-mm-ddThh:mm:ss',	'alters'  => array('v' => '3.1', 'name' => 'created',		'type' => 'varchar(30)',		'default' => "NULL", 'nullable' => true,	'comment' => 'yyyy-mm-ddThh:mm:ss')),
+							array('v' => '8.0', 'name' => 'deletor',		'type' => 'varchar(40)',		'default' => "''"),
+						    array('v' => '8.0', 'name' => 'deleted',		'type' => 'varchar(30)',		'default' => "''",
 							  	'comment' => 'yyyy-mm-ddThh:mm:ss' ),
-							array('v' => '310', 'name' => 'copyrightmarked','type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '310', 'name' => 'copyrighturl',	'type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '310', 'name' => 'credit',			'type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '310', 'name' => 'source',			'type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '800', 'name' => 'description',	'type' => 'blob',				'default' => "''", 'nullable' => false,
-								'alters' => array('v' => '500', 'name' => 'description',	'type' => 'blob',				'default' => "", 'nullable' => true,
-								'alters' => array('v' => '310', 'name' => 'description', 		'type' => 'varchar(255)') )),
-							array('v' => '310', 'name' => 'descriptionauthor','type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '310', 'name' => '_columns',		'type' => 'int(11)',			'default' => "'0'"),
-							array('v' => '310', 'name' => 'plaincontent',	'type' => 'blob',				'default' => ""),
-							array('v' => '310', 'name' => 'filesize',		'type' => 'int(15)',			'default' => "'0'"),
-							array('v' => '310', 'name' => 'colorspace',		'type' => 'varchar(20)',		'default' => "''"),
-							array('v' => '400', 'name' => 'pagenumber',		'type' => 'int(11)',			'default' => "'0'",
+							array('v' => '3.1', 'name' => 'copyrightmarked','type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '3.1', 'name' => 'copyrighturl',	'type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '3.1', 'name' => 'credit',			'type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '3.1', 'name' => 'source',			'type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '8.0', 'name' => 'description',	'type' => 'blob',				'default' => "''", 'nullable' => false,
+								'alters' => array('v' => '5.0', 'name' => 'description',	'type' => 'blob',				'default' => "", 'nullable' => true,
+								'alters' => array('v' => '3.1', 'name' => 'description', 		'type' => 'varchar(255)') )),
+							array('v' => '3.1', 'name' => 'descriptionauthor','type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '3.1', 'name' => '_columns',		'type' => 'int(11)',			'default' => "'0'"),
+							array('v' => '3.1', 'name' => 'plaincontent',	'type' => 'blob',				'default' => ""),
+							array('v' => '3.1', 'name' => 'filesize',		'type' => 'int(15)',			'default' => "'0'"),
+							array('v' => '3.1', 'name' => 'colorspace',		'type' => 'varchar(20)',		'default' => "''"),
+							array('v' => '4.0', 'name' => 'pagenumber',		'type' => 'int(11)',			'default' => "'0'",
 								'comment' => 'Obsoleted. The page field of smart_placements table is used instead.' ),
-							array('v' => '310', 'name' => 'types',			'type' => 'blob',				'default' => ""),
-							array('v' => '340', 'name' => 'storename',		'type' => 'blob',				'default' => ""),
-						    array('v' => '800', 'name' => 'pagerange',		'type' => 'varchar(50)',		'default' => "''", 'nullable' => false,
-						    	'alters' => array('v' => '410', 'name' => 'pagerange',		'type' => 'varchar(50)',		'default' => "''", 'nullable' => true)),
-						    array('v' => '800', 'name' => 'highresfile',	'type' => 'varchar(255)',		'default' => "''", 'nullable' => false, 
-						    'alters' => array('v' => '410', 'name' => 'highresfile',	'type' => 'varchar(255)',		'default' => "''", 'nullable' => true)),
-						    array('v' => '800', 'name' => 'deadlinesoft',		'type' => 'varchar(30)',	'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss' ,
-								'alters' => array('v' => '599', 'name' => 'deadlinesoft',	'type' => 'varchar(40)', 'default' => "''")),
-						    array('v' => '599', 'name' => 'deadlinechanged',	'type' => 'char(1)',		'default' => "''"),
-						    array('v' => '800', 'name' => 'plannedpagerange',	'type' => 'varchar(50)',	'default' => "''", 'nullable' => false,
-						    'alters' => array('v' => '500', 'name' => 'plannedpagerange',	'type' => 'varchar(50)',	'default' => "''", 'nullable' => true)),
-						    array('v' => '599', 'name' => 'majorversion',		'type' => 'mediumint(9)',	'default' => "'-1'",
+							array('v' => '3.1', 'name' => 'types',			'type' => 'blob',				'default' => ""),
+							array('v' => '3.4', 'name' => 'storename',		'type' => 'blob',				'default' => ""),
+						    array('v' => '8.0', 'name' => 'pagerange',		'type' => 'varchar(50)',		'default' => "''", 'nullable' => false,
+						    	'alters' => array('v' => '4.1', 'name' => 'pagerange',		'type' => 'varchar(50)',		'default' => "''", 'nullable' => true)),
+						    array('v' => '8.0', 'name' => 'highresfile',	'type' => 'varchar(255)',		'default' => "''", 'nullable' => false, 
+						    'alters' => array('v' => '4.1', 'name' => 'highresfile',	'type' => 'varchar(255)',		'default' => "''", 'nullable' => true)),
+						    array('v' => '8.0', 'name' => 'deadlinesoft',		'type' => 'varchar(30)',	'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss' ,
+								'alters' => array('v' => '5.99', 'name' => 'deadlinesoft',	'type' => 'varchar(40)', 'default' => "''")),
+						    array('v' => '5.99', 'name' => 'deadlinechanged',	'type' => 'char(1)',		'default' => "''"),
+						    array('v' => '8.0', 'name' => 'plannedpagerange',	'type' => 'varchar(50)',	'default' => "''", 'nullable' => false,
+						    'alters' => array('v' => '5.0', 'name' => 'plannedpagerange',	'type' => 'varchar(50)',	'default' => "''", 'nullable' => true)),
+						    array('v' => '5.99', 'name' => 'majorversion',		'type' => 'mediumint(9)',	'default' => "'-1'",
 						  		'comment' => 'Major object version, used for permanent saves. See also minorversion field. -1 for undetermined version of migrated databases' ),
-						    array('v' => '599', 'name' => 'minorversion',		'type' => 'mediumint(9)',	'default' => "'0'",
+						    array('v' => '5.99', 'name' => 'minorversion',		'type' => 'mediumint(9)',	'default' => "'0'",
 						  		'comment' => 'Minor object version, used for intermediate saves. See also majorversion field.' ),
-							array('v' => '599', 'name' => 'encoding',		'type' => 'varchar(100)',		'default' => "''"),
-							array('v' => '599', 'name' => 'compression',	'type' => 'varchar(100)',		'default' => "''"),
-							array('v' => '599', 'name' => 'keyframeeveryframes','type' => 'mediumint(9)',	'default' => "'0'"),
-							array('v' => '599', 'name' => 'channels',		'type' => 'varchar(100)',		'default' => "''"),
-							array('v' => '599', 'name' => 'aspectratio',	'type' => 'varchar(100)',		'default' => "''"),
-						  	array('v' => '599', 'name' => 'contentsource',	'type' => 'varchar(100)',		'default' => "''" ),
-						  	array('v' => '700', 'name' => 'rating',			'type' => 'tinyint(4)',			'default' => "0", // BZ#20677: Took out '' for default value.
-						  			'alters' => array('v' => '599', 'name' => 'rating',			'type' => 'tinyint(4)',			'default' => "'0'") ),
-					      	array('v' => '599', 'name' => 'indexed',		'type' => 'char(2)', 			'default' => "''"),
-					      	array('v' => '599', 'name' => 'closed',			'type' => 'char(2)', 			'default' => "''" ),
-							array('v' => '1010', 'name' => 'orientation',	'type' => 'tinyint(4)',			'default' => "'0'",
+							array('v' => '5.99', 'name' => 'encoding',		'type' => 'varchar(100)',		'default' => "''"),
+							array('v' => '5.99', 'name' => 'compression',	'type' => 'varchar(100)',		'default' => "''"),
+							array('v' => '5.99', 'name' => 'keyframeeveryframes','type' => 'mediumint(9)',	'default' => "'0'"),
+							array('v' => '5.99', 'name' => 'channels',		'type' => 'varchar(100)',		'default' => "''"),
+							array('v' => '5.99', 'name' => 'aspectratio',	'type' => 'varchar(100)',		'default' => "''"),
+						  	array('v' => '5.99', 'name' => 'contentsource',	'type' => 'varchar(100)',		'default' => "''" ),
+						  	array('v' => '7.0', 'name' => 'rating',			'type' => 'tinyint(4)',			'default' => "0", // BZ#20677: Took out '' for default value.
+						  			'alters' => array('v' => '5.99', 'name' => 'rating',			'type' => 'tinyint(4)',			'default' => "'0'") ),
+					      	array('v' => '5.99', 'name' => 'indexed',		'type' => 'char(2)', 			'default' => "''"),
+					      	array('v' => '5.99', 'name' => 'closed',			'type' => 'char(2)', 			'default' => "''" ),
+							array('v' => '10.1', 'name' => 'orientation',	'type' => 'tinyint(4)',			'default' => "'0'",
 								'comment' => 'EXIF orientation flag extracted from embedded metadata. Value range [1..8]. '.
 									'Zero (0) when not resolved e.g. for non-images, images without orientation or images last saved before DB migration.' ),
-							array('v' => '610', 'name' => 'routetouserid',		'type' => 'int(11)', 			'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'routetouserid',		'type' => 'mediumint(9)', 			'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'routetogroupid',	'type' => 'int(11)', 			'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'routetogroupid',	'type' => 'mediumint(9)', 			'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'routetouserid',		'type' => 'int(11)', 			'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'routetouserid',		'type' => 'mediumint(9)', 			'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'routetogroupid',	'type' => 'int(11)', 			'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'routetogroupid',	'type' => 'mediumint(9)', 			'default' => "'0'"), ),
 						),
 						'indexes' => array(
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '310', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '310', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
-							array('v' => '310', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
-							array('v' => '310', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
-							array('v' => '310', 'field' => 'routeto', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '310', 'field' => 'routeto', 'reftable' => 'smart_groups', 'reffield' => 'name'),
-							array('v' => '310', 'field' => 'modifier', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '310', 'field' => 'creator', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '800', 'field' => 'deletor', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '599', 'field' => 'routetouserid', 'reftable' => 'smart_users', 'reffield' => 'id'),
-							array('v' => '599', 'field' => 'routetogroupid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'routeto', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '3.1', 'field' => 'routeto', 'reftable' => 'smart_groups', 'reffield' => 'name'),
+							array('v' => '3.1', 'field' => 'modifier', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '3.1', 'field' => 'creator', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '8.0', 'field' => 'deletor', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '5.99', 'field' => 'routetouserid', 'reftable' => 'smart_users', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'routetogroupid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'310', 'name' => 'smart_groups',
+				array ('v' =>'3.1', 'name' => 'smart_groups',
 						'comment' => 'User group definitions.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',		'type' => 'int(11)', 	'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',		'type' => 'mediumint(9)', 	'autoincrement' => true), ),
-						  array('v' => '700', 'name' => 'name',		'type' => 'varchar(100)',	'default' => "''",
-						  		'alters' => array('v' => '310', 'name' => 'name',		'type' => 'varchar(40)',	'default' => "''"), ),
-						  array('v' => '310', 'name' => 'descr',	'type' => 'varchar(255)',	'default' => "''"),
-						  array('v' => '310', 'name' => 'admin',	'type' => 'char(2)',		'default' => "''"),
-						  array('v' => '340', 'name' => 'routing',	'type' => 'char(2)',		'default' => "''"),
-						  array('v' => '700', 'name' => 'externalid', 'type' => 'varchar(200)',	'default' => "''",
+						  array('v' => '6.1', 'name' => 'id',		'type' => 'int(11)', 	'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',		'type' => 'mediumint(9)', 	'autoincrement' => true), ),
+						  array('v' => '7.0', 'name' => 'name',		'type' => 'varchar(100)',	'default' => "''",
+						  		'alters' => array('v' => '3.1', 'name' => 'name',		'type' => 'varchar(40)',	'default' => "''"), ),
+						  array('v' => '3.1', 'name' => 'descr',	'type' => 'varchar(255)',	'default' => "''"),
+						  array('v' => '3.1', 'name' => 'admin',	'type' => 'char(2)',		'default' => "''"),
+						  array('v' => '3.4', 'name' => 'routing',	'type' => 'char(2)',		'default' => "''"),
+						  array('v' => '7.0', 'name' => 'externalid', 'type' => 'varchar(200)',	'default' => "''",
 								'comment' => 'External id for the group in an external system e.g. LDAP' ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'idnaro_groups', 	'fields' => 'id, name, routing'),
-							array('v' => '420', 'name' => 'na_groups', 	'fields' => 'name'),
+							array('v' => '4.2', 'name' => 'idnaro_groups', 	'fields' => 'id, name, routing'),
+							array('v' => '4.2', 'name' => 'na_groups', 	'fields' => 'name'),
 						),
 						'inserts' => array(
 							"2, 'admin', 'System Admins', 'on', '', ''",
 						),
 						'lookups' => array()
 				),
-				array ('v' =>'310', 'name' => 'smart_log',
+				array ('v' =>'3.1', 'name' => 'smart_log',
 						'comment' => 'Log SOAP transactions per user, object etc. for reporting purposes.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '310', 'name' => 'user',			'type' => 'varchar(50)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'service',		'type' => 'varchar(50)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'ip',			'type' => 'varchar(30)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'date',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss'),
-						  array('v' => '610', 'name' => 'objectid',		'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'objectid',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'publication',	'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'publication',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'issue',		'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'issue',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'section',		'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'section',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'state',		'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'state',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'parent',		'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'parent',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '420', 'name' => 'lock',			'type' => 'varchar(1)',			'default' => "''"),
-						  array('v' => '420', 'name' => 'rendition',	'type' => 'varchar(10)',		'default' => "''"),
-						  array('v' => '420', 'name' => 'type',			'type' => 'varchar(20)',		'default' => "''"),
-						  array('v' => '420', 'name' => 'routeto',		'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '420', 'name' => 'edition',		'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '599', 'name' => 'minorversion',	'type' => 'mediumint(9)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '3.1', 'name' => 'user',			'type' => 'varchar(50)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'service',		'type' => 'varchar(50)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'ip',			'type' => 'varchar(30)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'date',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss'),
+						  array('v' => '6.1', 'name' => 'objectid',		'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'objectid',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'publication',	'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'publication',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'issue',		'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'issue',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'section',		'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'section',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'state',		'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'state',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'parent',		'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'parent',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '4.2', 'name' => 'lock',			'type' => 'varchar(1)',			'default' => "''"),
+						  array('v' => '4.2', 'name' => 'rendition',	'type' => 'varchar(10)',		'default' => "''"),
+						  array('v' => '4.2', 'name' => 'type',			'type' => 'varchar(20)',		'default' => "''"),
+						  array('v' => '4.2', 'name' => 'routeto',		'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '4.2', 'name' => 'edition',		'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '5.99', 'name' => 'minorversion',	'type' => 'mediumint(9)',		'default' => "'0'",
 						  	'alters' => array( // rename version -> minorversion
-						  		'v' => '420', 'name' => 'version',		'type' => 'mediumint(9)',		'default' => "'0'" ),
+						  		'v' => '4.2', 'name' => 'version',		'type' => 'mediumint(9)',		'default' => "'0'" ),
 					  		'comment' => 'Minor object version at the time server was requested.' ),
-						  array('v' => '610', 'name' => 'channelid',	'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '599', 'name' => 'channelid',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '599', 'name' => 'majorversion',	'type' => 'mediumint(9)',		'default' => "'-1'",
+						  array('v' => '6.1', 'name' => 'channelid',	'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '5.99', 'name' => 'channelid',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '5.99', 'name' => 'majorversion',	'type' => 'mediumint(9)',		'default' => "'-1'",
 					  		'comment' => 'Major object version at the time server was requested. -1 for undetermined version of migrated databases. Values were never set before v6.0.' ),
 						),
 						'indexes' => array(
@@ -370,33 +360,33 @@ class DBStruct
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'user', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '420', 'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'parent', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'routeto', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '420', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
-							array('v' => '599', 'field' => 'channelid', 'reftable' => 'smart_channels', 'reffield' => 'id'),
-							array('v' => '599', 'field' => 'majorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
-							array('v' => '599', 'field' => 'minorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
+							array('v' => '4.2', 'field' => 'user', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '4.2', 'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'parent', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'routeto', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '4.2', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'channelid', 'reftable' => 'smart_channels', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'majorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
+							array('v' => '5.99', 'field' => 'minorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
 						),
 				),
-				array ('v' =>'310', 'name' => 'smart_namedqueries',
+				array ('v' =>'3.1', 'name' => 'smart_namedqueries',
 						'comment' => 'Stores named (raw SQL) queries.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 	'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',			'type' => 'mediumint(9)', 	'autoincrement' => true), ),
-						  array('v' => '310', 'name' => 'query',		'type' => 'varchar(200)',	'default' => "''"),
-						  array('v' => '310', 'name' => 'interface', 	'type' => 'blob',			'default' => ""),
-						  array('v' => '310', 'name' => 'sql', 			'type' => 'blob',			'default' => ""),
-						  array('v' => '310', 'name' => 'comment', 		'type' => 'blob',			'default' => ""),
-						  array('v' => '700', 'name' => 'checkaccess', 	'type' => 'varchar(2)',		'default' => "'on'"),
+						  array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 	'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',			'type' => 'mediumint(9)', 	'autoincrement' => true), ),
+						  array('v' => '3.1', 'name' => 'query',		'type' => 'varchar(200)',	'default' => "''"),
+						  array('v' => '3.1', 'name' => 'interface', 	'type' => 'blob',			'default' => ""),
+						  array('v' => '3.1', 'name' => 'sql', 			'type' => 'blob',			'default' => ""),
+						  array('v' => '3.1', 'name' => 'comment', 		'type' => 'blob',			'default' => ""),
+						  array('v' => '7.0', 'name' => 'checkaccess', 	'type' => 'varchar(2)',		'default' => "'on'"),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'qe_namedqueries', 	'fields' => 'query'),
+							array('v' => '4.2', 'name' => 'qe_namedqueries', 	'fields' => 'query'),
 						),
 						'inserts' => array(
 							"2, 'Templates', '', 0x2f2a53454c4543542a2f0d0a73656c656374206f2e6069646020617320604944602c206f2e607479706560206173206054797065602c206f2e606e616d656020617320604e616d65602c2073742e6073746174656020617320605374617465602c20756c2e6066756c6c6e616d656020617320604c6f636b65644279602c20702e607075626c69636174696f6e6020617320605075626c69636174696f6e602c20732e6073656374696f6e60206173206053656374696f6e602c206f2e60636f6d6d656e74602061732060436f6d6d656e74602c206f2e60726f757465746f602061732060526f757465546f602c20756e2e6066756c6c6e616d6560206173206043726561746f72602c206f2e60666f726d6174602061732060466f726d6174602c20756d2e6066756c6c6e616d656020617320604d6f646966696572602c20702e6069646020617320605075626c69636174696f6e4964602c20732e60696460206173206053656374696f6e4964602c2073742e60696460206173206053746174654964602c2073742e60636f6c6f726020617320605374617465436f6c6f72602c206c2e606c6f636b6f66666c696e656020617320604c6f636b466f724f66666c696e65600d0a2f2a46524f4d2a2f0d0a66726f6d2060736d6172745f6f626a6563747360206f0d0a2f2a4a4f494e532a2f0d0a6c656674206a6f696e2060736d6172745f7075626c69636174696f6e73602070206f6e20286f2e607075626c69636174696f6e60203d20702e60696460290d0a6c656674206a6f696e2060736d6172745f7075626c73656374696f6e73602073206f6e20286f2e6073656374696f6e60203d20732e60696460290d0a6c656674206a6f696e2060736d6172745f73746174657360207374206f6e20286f2e60737461746560203d2073742e60696460290d0a6c656674206a6f696e2060736d6172745f6f626a6563746c6f636b7360206c206f6e20286f2e60696460203d206c2e606f626a65637460290d0a6c656674206a6f696e2060736d6172745f75736572736020756c206f6e20286c2e6075737260203d20756c2e607573657260290d0a6c656674206a6f696e2060736d6172745f75736572736020756d206f6e20286f2e606d6f64696669657260203d20756d2e607573657260290d0a6c656674206a6f696e2060736d6172745f75736572736020756e206f6e20286f2e6063726561746f7260203d20756e2e607573657260290d0a2f2a57484552452a2f0d0a776865726520286f2e607479706560203d20274c61796f757454656d706c61746527206f72206f2e607479706560203d202741727469636c6554656d706c61746527206f72206f2e607479706560203d20274c61796f75744d6f64756c6554656d706c6174652729, 0x53686f777320616c6c206c61796f75742074656d706c617465732e, 'on'",
@@ -405,905 +395,905 @@ class DBStruct
 						'lookups' => array(
 						),
 				),
-				array ('v' =>'310', 'name' => 'smart_objectlocks',
+				array ('v' =>'3.1', 'name' => 'smart_objectlocks',
 						'comment' => 'Object lock administration. Objects are locked on user id only.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'object',		'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '310', 'name' => 'object',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '310', 'name' => 'usr',			'type' => 'varchar(40)',		'default' => "''"),						  
-						  array( 'v' => '750', 'name' => 'timestamp', 'type' => 'timestamp', 'default' => '',
-						  		'alters' => array('v' => '310', 'name' => 'timestamp', 	'type' => 'timestamp(14)',		'default' => "") ),
-						  array('v' => '800', 'name' => 'ip', 			'type' => 'varchar(30)',		'default' => "''", 'nullable' => false,
-						  	'alters' => array('v' => '410', 'name' => 'ip', 			'type' => 'varchar(30)',		'default' => "''", 'nullable' => true)),
-						  array('v' => '800', 'name' => 'lockoffline', 	'type' => 'varchar(2)',			'default' => "''", 'nullable' => false,
-						  	'alters' => array('v' => '410', 'name' => 'lockoffline', 	'type' => 'varchar(2)',			'default' => "''", 'nullable' => true)),
+						  array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'object',		'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.1', 'name' => 'object',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '3.1', 'name' => 'usr',			'type' => 'varchar(40)',		'default' => "''"),						  
+						  array( 'v' => '7.5', 'name' => 'timestamp', 'type' => 'timestamp', 'default' => '',
+						  		'alters' => array('v' => '3.1', 'name' => 'timestamp', 	'type' => 'timestamp(14)',		'default' => "") ),
+						  array('v' => '8.0', 'name' => 'ip', 			'type' => 'varchar(30)',		'default' => "''", 'nullable' => false,
+						  	'alters' => array('v' => '4.1', 'name' => 'ip', 			'type' => 'varchar(30)',		'default' => "''", 'nullable' => true)),
+						  array('v' => '8.0', 'name' => 'lockoffline', 	'type' => 'varchar(2)',			'default' => "''", 'nullable' => false,
+						  	'alters' => array('v' => '4.1', 'name' => 'lockoffline', 	'type' => 'varchar(2)',			'default' => "''", 'nullable' => true)),
 						),
 						'indexes' => array(
-							array('v' => '310', 'name' => 'ob_objectlocks', 'fields' => 'object', 'unique' => true),
-							array('v' => '420', 'name' => 'obusr_objectlocks', 	'fields' => 'object, usr'),
+							array('v' => '3.1', 'name' => 'ob_objectlocks', 'fields' => 'object', 'unique' => true),
+							array('v' => '4.2', 'name' => 'obusr_objectlocks', 	'fields' => 'object, usr'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '310', 'field' => 'object', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '310', 'field' => 'usr', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '3.1', 'field' => 'object', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'usr', 'reftable' => 'smart_users', 'reffield' => 'user'),
 						),
 				),
-				array ('v' =>'310', 'name' => 'smart_objectrelations',
+				array ('v' =>'3.1', 'name' => 'smart_objectrelations',
 						'comment' => 'Object parent-child relations, parent is typically a Layout, child is e.g. an Image or an Article.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'parent',		'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'parent',		'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'Typically a layout' ,
-						  		'alters' => array('v' => '310', 'name' => 'parent',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.1', 'name' => 'parent',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  			'comment' => 'Typically a layout' ), ),
-						  array('v' => '610', 'name' => 'child',		'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'child',		'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'Typically article, image or advert',
-						  		'alters' => array('v' => '310', 'name' => 'child',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.1', 'name' => 'child',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  			'comment' => 'Typically Article, Image or Advert' ), ),
-						  array('v' => '310', 'name' => 'type',			'type' => 'varchar(40)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'type',			'type' => 'varchar(40)',		'default' => "''",
 						  	'comment' => 'planned, placed, contained, related' ),
-						  array('v' => '310', 'name' => 'subid',		'type' => 'varchar(20)',		'default' => "''", 'comment' => 'Object type of the child.'),
-						  array('v' => '800', 'name' => 'pagerange', 	'type' => 'varchar(50)',		'default' => "''", 'nullable' => false,
-						  	'alters' => array('v' => '420', 'name' => 'pagerange', 	'type' => 'varchar(50)',		'default' => "''", 'nullable' => true)),
-						  array('v' => '700', 'name' => 'rating',		'type' => 'tinyint(4)',		'default' => "0", 'nullable' => false, // BZ#20677: Took out '' for default value.
-								'alters' => array( 'v' => '599', 'name' => 'rating',		'type' => 'tinyint(4)',		'default' => "'0'", 'nullable' => true ),
+						  array('v' => '3.1', 'name' => 'subid',		'type' => 'varchar(20)',		'default' => "''", 'comment' => 'Object type of the child.'),
+						  array('v' => '8.0', 'name' => 'pagerange', 	'type' => 'varchar(50)',		'default' => "''", 'nullable' => false,
+						  	'alters' => array('v' => '4.2', 'name' => 'pagerange', 	'type' => 'varchar(50)',		'default' => "''", 'nullable' => true)),
+						  array('v' => '7.0', 'name' => 'rating',		'type' => 'tinyint(4)',		'default' => "0", 'nullable' => false, // BZ#20677: Took out '' for default value.
+								'alters' => array( 'v' => '5.99', 'name' => 'rating',		'type' => 'tinyint(4)',		'default' => "'0'", 'nullable' => true ),
 						  		'comment' => 'Rating for the object in context of this relation' ),
-						  array('v' => '900', 'name' => 'parenttype', 'type' => 'varchar(20)', 'default' => "''", 'comment' => 'Object type of the parent object.' ),
+						  array('v' => '9.0', 'name' => 'parenttype', 'type' => 'varchar(20)', 'default' => "''", 'comment' => 'Object type of the parent object.' ),
 						),
 						'indexes' => array(
-							array('v' => '500', 'name' => 'ch_objectrelations', 'fields' => 'parent, child, subid, type', 'unique' => true,
-								  'alters' => array('v' => '420', 'name' => 'ch_objectrelations', 'unique' => true,
-								   		 'alters' => array('v' => '410', 'name' => 'child', 'unique' => true),
+							array('v' => '5.0', 'name' => 'ch_objectrelations', 'fields' => 'parent, child, subid, type', 'unique' => true,
+								  'alters' => array('v' => '4.2', 'name' => 'ch_objectrelations', 'unique' => true,
+								   		 'alters' => array('v' => '4.1', 'name' => 'child', 'unique' => true),
 								  	), ),
-							array('v' => '420', 'name' => 'pachty_objectrelations', 	'fields' => 'parent, child, type'),
-							array('v' => '500', 'name' => 'child_type_id', 				'fields' => 'child, type, id'),
+							array('v' => '4.2', 'name' => 'pachty_objectrelations', 	'fields' => 'parent, child, type'),
+							array('v' => '5.0', 'name' => 'child_type_id', 				'fields' => 'child, type, id'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'parent', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'child', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'parent', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'child', 'reftable' => 'smart_objects', 'reffield' => 'id'),
 						),
 				),
 
-				array ('v' =>'310', 'name' => 'smart_objects',
+				array ('v' =>'3.1', 'name' => 'smart_objects',
 						'comment' => 'Stores all objects and metadata. Links to publicationstructure by id. Custom meta data properties are added to this tableautomatically, with the prefix C_.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
 						  	'comment' => 'Autoincrement, unique ID' ,
-						  		'alters' => array('v' => '310', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true,
 						  			'comment' => 'Autoincrement, unique ID' ), ),
-						  array('v' => '610', 'name' => 'documentid',		'type' => 'varchar(512)',		'default' => "''",
+						  array('v' => '6.1', 'name' => 'documentid',		'type' => 'varchar(512)',		'default' => "''",
 						  	'comment' => 'Foreign key to remote database such as high-res file system',
-						  		'alters' => array('v' => '310', 'name' => 'documentid',		'type' => 'varchar(200)',		'default' => "''"), ),
-						  array('v' => '310', 'name' => 'type',				'type' => 'varchar(20)',		'default' => "''",
+						  		'alters' => array('v' => '3.1', 'name' => 'documentid',		'type' => 'varchar(200)',		'default' => "''"), ),
+						  array('v' => '3.1', 'name' => 'type',				'type' => 'varchar(20)',		'default' => "''",
 						  	'comment' => 'Object type as defined in WSDL; Article, Layout, Image, etc' ),
-						  array('v' => '310', 'name' => 'name',				'type' => 'varchar(255)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'name',				'type' => 'varchar(255)',		'default' => "''",
 						  	'comment' => 'Objects name, max. 26 characters' ),
-						  array('v' => '610', 'name' => 'publication',		'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'publication',		'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'Publication reference' ,
-						  		'alters' => array('v' => '310', 'name' => 'publication',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.1', 'name' => 'publication',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  			'comment' => 'Publication reference' ), ),
-						  array('v' => '610', 'name' => 'issue', 'type' => 'int(11)', 'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'issue', 'type' => 'int(11)', 'default' => "'0'",
 						  		'comment' => 'Issue reference' ,
-								  'alters' => array('v' => '310', 'name' => 'issue', 'type' => 'mediumint(9)', 'default' => "'0'",
+								  'alters' => array('v' => '3.1', 'name' => 'issue', 'type' => 'mediumint(9)', 'default' => "'0'",
 								  		'comment' => 'Issue reference' ), ),
-						  array('v' => '610', 'name' => 'section',			'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'section',			'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'Section reference' ,
-								  'alters' => array('v' => '310', 'name' => 'section',			'type' => 'mediumint(9)',		'default' => "'0'",
+								  'alters' => array('v' => '3.1', 'name' => 'section',			'type' => 'mediumint(9)',		'default' => "'0'",
 								  	'comment' => 'Section reference' ), ),
-						  array('v' => '610', 'name' => 'state',			'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'state',			'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'Workflow status reference' ,
-								  'alters' => array('v' => '310', 'name' => 'state',			'type' => 'mediumint(9)',		'default' => "'0'",
+								  'alters' => array('v' => '3.1', 'name' => 'state',			'type' => 'mediumint(9)',		'default' => "'0'",
 								  	'comment' => 'Workflow status reference' ), ),
-						  array('v' => '310', 'name' => 'routeto',			'type' => 'varchar(255)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'routeto',			'type' => 'varchar(255)',		'default' => "''",
 						  	'comment' => 'Current routing -> link to smart_users or to smart_groups' ),
-						  array('v' => '310', 'name' => 'copyright',		'type' => 'varchar(255)',		'default' => "''" ),
-						  array('v' => '310', 'name' => 'slugline',			'type' => 'varchar(255)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'copyright',		'type' => 'varchar(255)',		'default' => "''" ),
+						  array('v' => '3.1', 'name' => 'slugline',			'type' => 'varchar(255)',		'default' => "''",
 						  	'comment' => 'Snippet, UTF-8' ),
-						  array('v' => '310', 'name' => 'comment',			'type' => 'varchar(255)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'comment',			'type' => 'varchar(255)',		'default' => "''",
 						  	'comment' => 'Check-in user comment' ),
-						  array('v' => '310', 'name' => 'author',			'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '800', 'name' => 'deadline',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-						  		'alters' => array('v' => '310', 'name' => 'deadline',		'type' => 'varchar(40)',		'default' => "''")),
-						  array('v' => '310', 'name' => 'urgency',			'type' => 'varchar(40)',		'default' => "''"),
-						  array('v' => '610', 'name' => 'format',			'type' => 'varchar(128)',		'default' => "''", 'comment' => 'Mime type of native rendition',
-						  		'alters' => array('v' => '310', 'name' => 'format',			'type' => 'varchar(40)',		'default' => "''" )),
-						  array('v' => '310', 'name' => 'width',			'type' => 'double',				'default' => "'0'"),
-						  array('v' => '310', 'name' => 'depth',			'type' => 'double',				'default' => "'0'"),
-						  array('v' => '1010', 'name' => 'dpi',				'type' => 'double',				'default' => "'0'",
-						  	'alters' => array('v' => '310', 'name' => 'dpi',				'type' => 'int(11)',			'default' => "'0'") ),
-						  array('v' => '310', 'name' => 'lengthwords',		'type' => 'int(11)',			'default' => "'0'",
+						  array('v' => '3.1', 'name' => 'author',			'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '8.0', 'name' => 'deadline',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+						  		'alters' => array('v' => '3.1', 'name' => 'deadline',		'type' => 'varchar(40)',		'default' => "''")),
+						  array('v' => '3.1', 'name' => 'urgency',			'type' => 'varchar(40)',		'default' => "''"),
+						  array('v' => '6.1', 'name' => 'format',			'type' => 'varchar(128)',		'default' => "''", 'comment' => 'Mime type of native rendition',
+						  		'alters' => array('v' => '3.1', 'name' => 'format',			'type' => 'varchar(40)',		'default' => "''" )),
+						  array('v' => '3.1', 'name' => 'width',			'type' => 'double',				'default' => "'0'"),
+						  array('v' => '3.1', 'name' => 'depth',			'type' => 'double',				'default' => "'0'"),
+						  array('v' => '10.1', 'name' => 'dpi',				'type' => 'double',				'default' => "'0'",
+						  	'alters' => array('v' => '3.1', 'name' => 'dpi',				'type' => 'int(11)',			'default' => "'0'") ),
+						  array('v' => '3.1', 'name' => 'lengthwords',		'type' => 'int(11)',			'default' => "'0'",
 						  	'comment' => 'Word count (of article)' ),
-						  array('v' => '310', 'name' => 'lengthchars',		'type' => 'int(11)',			'default' => "'0'",
+						  array('v' => '3.1', 'name' => 'lengthchars',		'type' => 'int(11)',			'default' => "'0'",
 						  	'comment' => 'Character count (of article)' ),
-						  array('v' => '310', 'name' => 'lengthparas',		'type' => 'int(11)',			'default' => "'0'",
+						  array('v' => '3.1', 'name' => 'lengthparas',		'type' => 'int(11)',			'default' => "'0'",
 						  	'comment' => 'Paragraph count (of article)' ),
-						  array('v' => '310', 'name' => 'lengthlines',		'type' => 'int(11)',			'default' => "'0'",
+						  array('v' => '3.1', 'name' => 'lengthlines',		'type' => 'int(11)',			'default' => "'0'",
 						  	'comment' => 'Line count (of article)' ),
-						  array('v' => '310', 'name' => 'keywords', 		'type' => 'blob',				'default' => ""),
-						  array('v' => '310', 'name' => 'modifier',			'type' => 'varchar(40)',		'default' => "''"),
-						  array('v' => '800', 'name' => 'modified',			'type' => 'varchar(30)', 		'default' => "''", 'nullable' => false,
+						  array('v' => '3.1', 'name' => 'keywords', 		'type' => 'blob',				'default' => ""),
+						  array('v' => '3.1', 'name' => 'modifier',			'type' => 'varchar(40)',		'default' => "''"),
+						  array('v' => '8.0', 'name' => 'modified',			'type' => 'varchar(30)', 		'default' => "''", 'nullable' => false,
 						  	'comment' => 'yyyy-mm-ddThh:mm:ss',
-						  	'alters' => array('v' => '310', 'name' => 'modified',			'type' => 'varchar(30)', 		'default' => "NULL", 'nullable' => true,
+						  	'alters' => array('v' => '3.1', 'name' => 'modified',			'type' => 'varchar(30)', 		'default' => "NULL", 'nullable' => true,
 						  	'comment' => 'yyyy-mm-ddThh:mm:ss')),
-						  array('v' => '310', 'name' => 'creator',			'type' => 'varchar(40)',		'default' => "''"),
-						  array('v' => '800', 'name' => 'created',			'type' => 'varchar(30)', 		'default' => "''", 'nullable' => false,
+						  array('v' => '3.1', 'name' => 'creator',			'type' => 'varchar(40)',		'default' => "''"),
+						  array('v' => '8.0', 'name' => 'created',			'type' => 'varchar(30)', 		'default' => "''", 'nullable' => false,
 						  	'comment' => 'yyyy-mm-ddThh:mm:ss',
-						  	'alters' => array('v' => '310', 'name' => 'created',			'type' => 'varchar(30)', 		'default' => "NULL", 'nullable' => true,
+						  	'alters' => array('v' => '3.1', 'name' => 'created',			'type' => 'varchar(30)', 		'default' => "NULL", 'nullable' => true,
 						  	'comment' => 'yyyy-mm-ddThh:mm:ss' ) ),
-						  array('v' => '800', 'name' => 'deletor',			'type' => 'varchar(40)',		'default' => "''"),
-						  array('v' => '800', 'name' => 'deleted',			'type' => 'varchar(30)', 		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss' ),
-						  array('v' => '310', 'name' => 'copyrightmarked',	'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'copyrighturl',		'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'credit',			'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'source',			'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '800', 'name' => 'description',		'type' => 'blob',				'default' => "''", 'nullable' => false,
-						  	'alters' => array('v' => '500', 'name' => 'description',		'type' => 'blob',				'default' => "", 'nullable' => true,
+						  array('v' => '8.0', 'name' => 'deletor',			'type' => 'varchar(40)',		'default' => "''"),
+						  array('v' => '8.0', 'name' => 'deleted',			'type' => 'varchar(30)', 		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss' ),
+						  array('v' => '3.1', 'name' => 'copyrightmarked',	'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'copyrighturl',		'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'credit',			'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'source',			'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '8.0', 'name' => 'description',		'type' => 'blob',				'default' => "''", 'nullable' => false,
+						  	'alters' => array('v' => '5.0', 'name' => 'description',		'type' => 'blob',				'default' => "", 'nullable' => true,
 							'alters' => array(
-								'v' => '310', 'name' => 'description', 		'type' => 'varchar(255)',		'default' => "''", 'nullable' => false),)),
-						  array('v' => '310', 'name' => 'descriptionauthor','type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '310', 'name' => '_columns',			'type' => 'int(11)',			'default' => "'0'"),
-						  array('v' => '310', 'name' => 'plaincontent', 	'type' => 'blob',				'default' => "",
+								'v' => '3.1', 'name' => 'description', 		'type' => 'varchar(255)',		'default' => "''", 'nullable' => false),)),
+						  array('v' => '3.1', 'name' => 'descriptionauthor','type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => '_columns',			'type' => 'int(11)',			'default' => "'0'"),
+						  array('v' => '3.1', 'name' => 'plaincontent', 	'type' => 'blob',				'default' => "",
 						  	'comment' => 'Complete flattened article text UTF-8, for searching purposes (not native)' ),
-						  array('v' => '310', 'name' => 'filesize',			'type' => 'int(15)',			'default' => "'0'"),
-						  array('v' => '310', 'name' => 'colorspace',		'type' => 'varchar(20)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'types', 			'type' => 'blob',				'default' => "",
+						  array('v' => '3.1', 'name' => 'filesize',			'type' => 'int(15)',			'default' => "'0'"),
+						  array('v' => '3.1', 'name' => 'colorspace',		'type' => 'varchar(20)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'types', 			'type' => 'blob',				'default' => "",
 						  	'comment' => 'Renditions stored for the object, such as preview, native, etc (PHP array)' ),
-						  array('v' => '330', 'name' => 'pagenumber',		'type' => 'int(11)',			'default' => "'0'" ,
+						  array('v' => '3.3', 'name' => 'pagenumber',		'type' => 'int(11)',			'default' => "'0'" ,
 								'comment' => 'Obsoleted. The page field of smart_placements table is used instead.' ),
-						  array('v' => '330', 'name' => 'storename', 		'type' => 'blob',				'default' => "",
+						  array('v' => '3.3', 'name' => 'storename', 		'type' => 'blob',				'default' => "",
 						  	'comment' => 'Reference to file store; do never change!' ),
-						  array('v' => '800', 'name' => 'pagerange', 		'type' => 'varchar(50)',		'default' => "''", 'nullable' => false,
-						  	'alters' => array('v' => '410', 'name' => 'pagerange', 		'type' => 'varchar(50)',		'default' => "''", 'nullable' => true)),
-						  array('v' => '800', 'name' => 'highresfile', 		'type' => 'varchar(255)',		'default' => "''", 'nullable' => false,
-						  	'alters' => array('v' => '410', 'name' => 'highresfile', 		'type' => 'varchar(255)',		'default' => "''", 'nullable' => true)),
-						  array('v' => '800', 'name' => 'deadlinesoft',		'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-							  'alters' => array('v' => '420', 'name' => 'deadlinesoft',	'type' => 'varchar(40)', 'default' => "''")),
-						  array('v' => '420', 'name' => 'deadlinechanged',	'type' => 'char(1)',			'default' => "''"),
-						  array('v' => '800', 'name' => 'plannedpagerange',	'type' => 'varchar(50)',		'default' => "''", 'nullable' => false,
-						  	'alters' => array('v' => '500', 'name' => 'plannedpagerange',	'type' => 'varchar(50)',		'default' => "''", 'nullable' => true)),
-						  array('v' => '599', 'name' => 'majorversion',		'type' => 'mediumint(9)',		'default' => "'-1'",
+						  array('v' => '8.0', 'name' => 'pagerange', 		'type' => 'varchar(50)',		'default' => "''", 'nullable' => false,
+						  	'alters' => array('v' => '4.1', 'name' => 'pagerange', 		'type' => 'varchar(50)',		'default' => "''", 'nullable' => true)),
+						  array('v' => '8.0', 'name' => 'highresfile', 		'type' => 'varchar(255)',		'default' => "''", 'nullable' => false,
+						  	'alters' => array('v' => '4.1', 'name' => 'highresfile', 		'type' => 'varchar(255)',		'default' => "''", 'nullable' => true)),
+						  array('v' => '8.0', 'name' => 'deadlinesoft',		'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+							  'alters' => array('v' => '4.2', 'name' => 'deadlinesoft',	'type' => 'varchar(40)', 'default' => "''")),
+						  array('v' => '4.2', 'name' => 'deadlinechanged',	'type' => 'char(1)',			'default' => "''"),
+						  array('v' => '8.0', 'name' => 'plannedpagerange',	'type' => 'varchar(50)',		'default' => "''", 'nullable' => false,
+						  	'alters' => array('v' => '5.0', 'name' => 'plannedpagerange',	'type' => 'varchar(50)',		'default' => "''", 'nullable' => true)),
+						  array('v' => '5.99', 'name' => 'majorversion',		'type' => 'mediumint(9)',		'default' => "'-1'",
 						  		'comment' => 'Major object version, used for permanent saves. See also minorversion field. -1 for undetermined version of migrated databases to resolve by update script.' ),
-						  array('v' => '599', 'name' => 'minorversion',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  array('v' => '5.99', 'name' => 'minorversion',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  		'comment' => 'Minor object version, used for intermediate saves. See also majorversion field.' ),
-						  array('v' => '599', 'name' => 'encoding',			'type' => 'varchar(100)',		'default' => "''"),
-						  array('v' => '599', 'name' => 'compression',		'type' => 'varchar(100)',		'default' => "''"),
-						  array('v' => '599', 'name' => 'keyframeeveryframes','type' => 'mediumint(9)',	'default' => "'0'"),
-						  array('v' => '599', 'name' => 'channels',			'type' => 'varchar(100)',		'default' => "''"),
-						  array('v' => '599', 'name' => 'aspectratio',		'type' => 'varchar(100)',		'default' => "''"),
-						  array('v' => '599', 'name' => 'contentsource',	'type' => 'varchar(100)',		'default' => "''",
+						  array('v' => '5.99', 'name' => 'encoding',			'type' => 'varchar(100)',		'default' => "''"),
+						  array('v' => '5.99', 'name' => 'compression',		'type' => 'varchar(100)',		'default' => "''"),
+						  array('v' => '5.99', 'name' => 'keyframeeveryframes','type' => 'mediumint(9)',	'default' => "'0'"),
+						  array('v' => '5.99', 'name' => 'channels',			'type' => 'varchar(100)',		'default' => "''"),
+						  array('v' => '5.99', 'name' => 'aspectratio',		'type' => 'varchar(100)',		'default' => "''"),
+						  array('v' => '5.99', 'name' => 'contentsource',	'type' => 'varchar(100)',		'default' => "''",
 						  		'comment' => 'External content source that holds the original object, external id stored in documentid' ),
-						  array('v' => '700', 'name' => 'rating',			'type' => 'tinyint(4)', 		'default' => "0", 'nullable' => false, // BZ#20677: Took out '' for default value.
-						  		'alters' => array( 'v' => '599', 'name' => 'rating',			'type' => 'tinyint(4)', 		'default' => "'0'", 'nullable' => true ),
+						  array('v' => '7.0', 'name' => 'rating',			'type' => 'tinyint(4)', 		'default' => "0", 'nullable' => false, // BZ#20677: Took out '' for default value.
+						  		'alters' => array( 'v' => '5.99', 'name' => 'rating',			'type' => 'tinyint(4)', 		'default' => "'0'", 'nullable' => true ),
 						  		'comment' => 'Rating for this object' ),
-					      array('v' => '599', 'name' => 'indexed',			'type' => 'char(2)', 			'default' => "''",
+					      array('v' => '5.99', 'name' => 'indexed',			'type' => 'char(2)', 			'default' => "''",
 						  		'comment' => 'Boolean if this object has been indexed since last modification' ),
-					      array('v' => '599', 'name' => 'closed',			'type' => 'char(2)', 			'default' => "''",
+					      array('v' => '5.99', 'name' => 'closed',			'type' => 'char(2)', 			'default' => "''",
 						  		'comment' => 'For future usage: boolean if this object should be included when doing a normal search, if closed it will not be returned' ),
-					      array('v' => '610', 'name' => 'routetouserid',		'type' => 'int(11)', 			'default' => "'0'",
-					      		'alters' => array('v' => '599', 'name' => 'routetouserid',		'type' => 'mediumint(9)', 			'default' => "'0'"), ),
-					      array('v' => '610', 'name' => 'routetogroupid',	'type' => 'int(11)', 			'default' => "'0'",
-					      		'alters' => array('v' => '599', 'name' => 'routetogroupid',	'type' => 'mediumint(9)', 			'default' => "'0'"), ),
-						   array('v' => '1010', 'name' => 'orientation',	'type' => 'tinyint(4)',			'default' => "'0'",
+					      array('v' => '6.1', 'name' => 'routetouserid',		'type' => 'int(11)', 			'default' => "'0'",
+					      		'alters' => array('v' => '5.99', 'name' => 'routetouserid',		'type' => 'mediumint(9)', 			'default' => "'0'"), ),
+					      array('v' => '6.1', 'name' => 'routetogroupid',	'type' => 'int(11)', 			'default' => "'0'",
+					      		'alters' => array('v' => '5.99', 'name' => 'routetogroupid',	'type' => 'mediumint(9)', 			'default' => "'0'"), ),
+						   array('v' => '10.1', 'name' => 'orientation',	'type' => 'tinyint(4)',			'default' => "'0'",
 							   'comment' => 'EXIF orientation flag extracted from embedded metadata. Value range [1..8]. '.
 								   'Zero (0) when not resolved e.g. for non-images, images without orientation or images last saved before DB migration.' ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'nm_objects', 	'fields' => 'name'),
-							array('v' => '599', 'name' => 'pbsectstate_objects', 	'fields' => 'publication, section, state, closed',
-								'alters' => array('v' => '420', 'name' => 'pbissest_objects', 	'fields' => 'publication, issue, section, state')),
-							array('v' => '599', 'name' => 'pubid_objects', 	'fields' => 'publication, id, closed',
-								'alters' => array('v' => '420', 'name' => 'issest_objects', 	'fields' => 'issue, section, state')),
-							array('v' => '420', 'name' => 'mo_objects', 	'fields' => 'modifier'),
-							array('v' => '420', 'oraname' => 'pc_objects', 	'fields' => 'plaincontent', 'oratype' => 'INDEXTYPE IS CTXSYS.CONTEXT PARAMETERS (\'\')' ),
-							array('v' => '599', 'name' => 'roid_objects', 	'fields' => 'routeto, id, closed'),
-							array('v' => '700', 'name' => 'codo_objects', 	'fields' => 'contentsource, documentid'),
+							array('v' => '4.2', 'name' => 'nm_objects', 	'fields' => 'name'),
+							array('v' => '5.99', 'name' => 'pbsectstate_objects', 	'fields' => 'publication, section, state, closed',
+								'alters' => array('v' => '4.2', 'name' => 'pbissest_objects', 	'fields' => 'publication, issue, section, state')),
+							array('v' => '5.99', 'name' => 'pubid_objects', 	'fields' => 'publication, id, closed',
+								'alters' => array('v' => '4.2', 'name' => 'issest_objects', 	'fields' => 'issue, section, state')),
+							array('v' => '4.2', 'name' => 'mo_objects', 	'fields' => 'modifier'),
+							array('v' => '4.2', 'oraname' => 'pc_objects', 	'fields' => 'plaincontent', 'oratype' => 'INDEXTYPE IS CTXSYS.CONTEXT PARAMETERS (\'\')' ),
+							array('v' => '5.99', 'name' => 'roid_objects', 	'fields' => 'routeto, id, closed'),
+							array('v' => '7.0', 'name' => 'codo_objects', 	'fields' => 'contentsource, documentid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '310', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '310', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
-							array('v' => '310', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
-							array('v' => '310', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
-							array('v' => '310', 'field' => 'routeto', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '310', 'field' => 'routeto', 'reftable' => 'smart_groups', 'reffield' => 'name'),
-							array('v' => '310', 'field' => 'modifier', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '310', 'field' => 'creator', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '800', 'field' => 'deletor', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '599', 'field' => 'routetouserid', 'reftable' => 'smart_users', 'reffield' => 'id'),
-							array('v' => '599', 'field' => 'routetogroupid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'routeto', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '3.1', 'field' => 'routeto', 'reftable' => 'smart_groups', 'reffield' => 'name'),
+							array('v' => '3.1', 'field' => 'modifier', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '3.1', 'field' => 'creator', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '8.0', 'field' => 'deletor', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '5.99', 'field' => 'routetouserid', 'reftable' => 'smart_users', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'routetogroupid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
 						),
 				),
 
-				array ('v' =>'310', 'name' => 'smart_objectversions',
+				array ('v' =>'3.1', 'name' => 'smart_objectversions',
 						'comment' => 'Stores object version history.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'objid',		'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '310', 'name' => 'objid',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '599', 'name' => 'minorversion',	'type' => 'mediumint(9)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'objid',		'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.1', 'name' => 'objid',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '5.99', 'name' => 'minorversion',	'type' => 'mediumint(9)',		'default' => "'0'",
 						  	'alters' => array( // since v6.0 rename version -> minorversion
-						  	    'v' => '310', 'name' => 'version',		'type' => 'mediumint(9)',		'default' => "'0'" ),
+						  	    'v' => '3.1', 'name' => 'version',		'type' => 'mediumint(9)',		'default' => "'0'" ),
 					  		'comment' => 'Minor object version, used for intermediate saves. See also majorversion field.' ),
-						  array('v' => '800', 'name' => 'modifier',		'type' => 'varchar(40)',		'default' => "''", 'nullable' => false,
-						  	'alters' => array('v' => '310', 'name' => 'modifier',		'type' => 'varchar(40)',		'default' => "NULL", 'nullable' => true)),
-						  array('v' => '800', 'name' => 'comment', 		'type' => 'varchar(255)',		'default' => "''", 'nullable' => false,
-						  	'alters' => array('v' => '310', 'name' => 'comment', 		'type' => 'varchar(255)',		'default' => "NULL", 'nullable' => true)),
-						  array('v' => '310', 'name' => 'slugline',		'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '800', 'name' => 'created',		'type' => 'varchar(30)', 		'default' => "''", 'nullable' => false, 'comment' => 'yyyy-mm-ddThh:mm:ss',
-						  	'alters' => array('v' => '310', 'name' => 'created',		'type' => 'varchar(30)', 		'default' => "NULL", 'nullable' => true, 'comment' => 'yyyy-mm-ddThh:mm:ss')),
-						  array('v' => '310', 'name' => 'types',		'type' => 'blob',				'default' => ""),
-						  array('v' => '610', 'name' => 'format',		'type' => 'varchar(128)',		'default' => "''",
-						  	'alters' => array('v' => '330', 'name' => 'format',		'type' => 'varchar(40)',		'default' => "''"), ),
-						  array('v' => '330', 'name' => 'width',		'type' => 'double',				'default' => "'0'"),
-						  array('v' => '330', 'name' => 'depth',		'type' => 'double',				'default' => "'0'"),
-						  array('v' => '1010', 'name' => 'dpi',			'type' => 'double',				'default' => "'0'",
-						  	'alters' => array('v' => '330', 'name' => 'dpi',		'type' => 'int(11)',			'default' => "'0'") ),
-						  array('v' => '330', 'name' => 'lengthwords',	'type' => 'int(11)',			'default' => "'0'"),
-						  array('v' => '330', 'name' => 'lengthchars',	'type' => 'int(11)',			'default' => "'0'"),
-						  array('v' => '330', 'name' => 'lengthparas',	'type' => 'int(11)',			'default' => "'0'"),
-						  array('v' => '330', 'name' => 'lengthlines',	'type' => 'int(11)',			'default' => "'0'"),
-						  array('v' => '330', 'name' => 'keywords',		'type' => 'blob',				'default' => ""),
-						  array('v' => '500', 'name' => 'description',	'type' => 'blob',				'default' => "",
+						  array('v' => '8.0', 'name' => 'modifier',		'type' => 'varchar(40)',		'default' => "''", 'nullable' => false,
+						  	'alters' => array('v' => '3.1', 'name' => 'modifier',		'type' => 'varchar(40)',		'default' => "NULL", 'nullable' => true)),
+						  array('v' => '8.0', 'name' => 'comment', 		'type' => 'varchar(255)',		'default' => "''", 'nullable' => false,
+						  	'alters' => array('v' => '3.1', 'name' => 'comment', 		'type' => 'varchar(255)',		'default' => "NULL", 'nullable' => true)),
+						  array('v' => '3.1', 'name' => 'slugline',		'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '8.0', 'name' => 'created',		'type' => 'varchar(30)', 		'default' => "''", 'nullable' => false, 'comment' => 'yyyy-mm-ddThh:mm:ss',
+						  	'alters' => array('v' => '3.1', 'name' => 'created',		'type' => 'varchar(30)', 		'default' => "NULL", 'nullable' => true, 'comment' => 'yyyy-mm-ddThh:mm:ss')),
+						  array('v' => '3.1', 'name' => 'types',		'type' => 'blob',				'default' => ""),
+						  array('v' => '6.1', 'name' => 'format',		'type' => 'varchar(128)',		'default' => "''",
+						  	'alters' => array('v' => '3.3', 'name' => 'format',		'type' => 'varchar(40)',		'default' => "''"), ),
+						  array('v' => '3.3', 'name' => 'width',		'type' => 'double',				'default' => "'0'"),
+						  array('v' => '3.3', 'name' => 'depth',		'type' => 'double',				'default' => "'0'"),
+						  array('v' => '10.1', 'name' => 'dpi',			'type' => 'double',				'default' => "'0'",
+						  	'alters' => array('v' => '3.3', 'name' => 'dpi',		'type' => 'int(11)',			'default' => "'0'") ),
+						  array('v' => '3.3', 'name' => 'lengthwords',	'type' => 'int(11)',			'default' => "'0'"),
+						  array('v' => '3.3', 'name' => 'lengthchars',	'type' => 'int(11)',			'default' => "'0'"),
+						  array('v' => '3.3', 'name' => 'lengthparas',	'type' => 'int(11)',			'default' => "'0'"),
+						  array('v' => '3.3', 'name' => 'lengthlines',	'type' => 'int(11)',			'default' => "'0'"),
+						  array('v' => '3.3', 'name' => 'keywords',		'type' => 'blob',				'default' => ""),
+						  array('v' => '5.0', 'name' => 'description',	'type' => 'blob',				'default' => "",
 							'alters' => array(
-								'v' => '330', 'name' => 'description',	'type' => 'varchar(255)',		'default' => "''"),),
-						  array('v' => '330', 'name' => 'descriptionauthor','type' => 'varchar(255)',	'default' => "''"),
-						  array('v' => '330', 'name' => '_columns',		'type' => 'int(11)',			'default' => "'0'"),
-						  array('v' => '330', 'name' => 'plaincontent',	'type' => 'blob',				'default' => ""),
-						  array('v' => '330', 'name' => 'filesize',		'type' => 'int(15)',			'default' => "'0'"),
-						  array('v' => '330', 'name' => 'colorspace',	'type' => 'varchar(20)',		'default' => "''"),
-						  array('v' => '1010', 'name' => 'orientation',	'type' => 'tinyint(4)',			'default' => "'0'",
+								'v' => '3.3', 'name' => 'description',	'type' => 'varchar(255)',		'default' => "''"),),
+						  array('v' => '3.3', 'name' => 'descriptionauthor','type' => 'varchar(255)',	'default' => "''"),
+						  array('v' => '3.3', 'name' => '_columns',		'type' => 'int(11)',			'default' => "'0'"),
+						  array('v' => '3.3', 'name' => 'plaincontent',	'type' => 'blob',				'default' => ""),
+						  array('v' => '3.3', 'name' => 'filesize',		'type' => 'int(15)',			'default' => "'0'"),
+						  array('v' => '3.3', 'name' => 'colorspace',	'type' => 'varchar(20)',		'default' => "''"),
+						  array('v' => '10.1', 'name' => 'orientation',	'type' => 'tinyint(4)',			'default' => "'0'",
 							  'comment' => 'EXIF orientation flag extracted from embedded metadata. Value range [1..8]. '.
 								  'Zero (0) when not resolved e.g. for non-images, images without orientation or images last saved before DB migration.' ),
-						  array('v' => '610', 'name' => 'state',		'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'state',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '599', 'name' => 'majorversion',	'type' => 'mediumint(9)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'state',		'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'state',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '5.99', 'name' => 'majorversion',	'type' => 'mediumint(9)',		'default' => "'0'",
 						  		'comment' => 'Major object version, used for permanent saves. See also (minor)version field.' ),
 						),
 						'indexes' => array(
-							array(	'v' => '599', 'name' => 'oive_objectversions', 	'fields' => 'objid, majorversion, minorversion', 'unique' => false,
-								'alters' => array('v' => '420', 'name' => 'oive_objectversions' /*, 'fields' => 'objid, version' */ ),
+							array(	'v' => '5.99', 'name' => 'oive_objectversions', 	'fields' => 'objid, majorversion, minorversion', 'unique' => false,
+								'alters' => array('v' => '4.2', 'name' => 'oive_objectversions' /*, 'fields' => 'objid, version' */ ),
 								),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'modifier', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '420', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'modifier', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '4.2', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'750', 'name' => 'smart_objectrenditions',
+				array ('v' =>'7.5', 'name' => 'smart_objectrenditions',
 						'comment' => 'Stores references to filestore for edition specific files for an object. '.
 							'The non-specific ones ("all" editions") are stored in the "types" field of smart_objects table. '.
 							'Note that most fields in this table are used to lookup files at the filestore. '.
 							'Aside from the "id" and "format" fields, the combination of all other fields uniquely identifies one record. ',
 						'fields' => array(
-							array('v' => '750', 'name' => 'id',           'type' => 'int(11)',      'autoincrement' => true ),
-							array('v' => '750', 'name' => 'objid',        'type' => 'int(11)',      'default' => "'0'",
+							array('v' => '7.5', 'name' => 'id',           'type' => 'int(11)',      'autoincrement' => true ),
+							array('v' => '7.5', 'name' => 'objid',        'type' => 'int(11)',      'default' => "'0'",
 								'comment' => 'Object (ID) for which the rendition is stored.' ),
-							array('v' => '750', 'name' => 'editionid',    'type' => 'int(11)',      'default' => "'0'",
+							array('v' => '7.5', 'name' => 'editionid',    'type' => 'int(11)',      'default' => "'0'",
 								'comment' => 'Edition (ID) for which the rendition is stored.' ),
-							array('v' => '750', 'name' => 'rendition',    'type' => 'varchar(10)',  'default' => "''",
+							array('v' => '7.5', 'name' => 'rendition',    'type' => 'varchar(10)',  'default' => "''",
 								'comment' => 'File rendition, such as "native", "output", etc.' ),
-							array('v' => '750', 'name' => 'format',       'type' => 'varchar(128)', 'default' => "''",
+							array('v' => '7.5', 'name' => 'format',       'type' => 'varchar(128)', 'default' => "''",
 								'comment' => 'File format (mime-type) of the stored rendition.' ),
-						    array('v' => '750', 'name' => 'majorversion', 'type' => 'mediumint(9)', 'default' => "'0'",
+						    array('v' => '7.5', 'name' => 'majorversion', 'type' => 'mediumint(9)', 'default' => "'0'",
 								'comment' => 'Major object version, used for permanent saves. See also minorversion field.' ),
-						    array('v' => '750', 'name' => 'minorversion', 'type' => 'mediumint(9)', 'default' => "'0'",
+						    array('v' => '7.5', 'name' => 'minorversion', 'type' => 'mediumint(9)', 'default' => "'0'",
 								'comment' => 'Minor object version, used for intermediate saves. See also majorversion field.' ),
 						),
 						'inserts' => array(
 						),
 						'indexes' => array(
-							array('v' => '750', 'name' => 'obed_objectrenditions', 'fields' => 'objid, editionid, rendition', 'unique' => false),
+							array('v' => '7.5', 'name' => 'obed_objectrenditions', 'fields' => 'objid, editionid, rendition', 'unique' => false),
 						),
 						'lookups' => array(
-							array('v' => '750', 'field' => 'objid',        'reftable' => 'smart_objects',        'reffield' => 'id'),
-							array('v' => '750', 'field' => 'editionid',    'reftable' => 'smart_editions',       'reffield' => 'id'),
-							array('v' => '750', 'field' => 'majorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
-							array('v' => '750', 'field' => 'minorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
+							array('v' => '7.5', 'field' => 'objid',        'reftable' => 'smart_objects',        'reffield' => 'id'),
+							array('v' => '7.5', 'field' => 'editionid',    'reftable' => 'smart_editions',       'reffield' => 'id'),
+							array('v' => '7.5', 'field' => 'majorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
+							array('v' => '7.5', 'field' => 'minorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
 						),
 				),
-				array ('v' =>'310', 'name' => 'smart_pages',
+				array ('v' =>'3.1', 'name' => 'smart_pages',
 						'comment' => 'Define pages for layout objects (smart_objects.type == Layout).',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'objid',		'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'objid',		'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'Layout object id' ,
-						  		'alters' => array('v' => '310', 'name' => 'objid',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.1', 'name' => 'objid',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  			'comment' => 'Layout object id' ), ),
-						  array('v' => '310', 'name' => 'width',		'type' => 'double',				'default' => "'0'"),
-						  array('v' => '310', 'name' => 'height',		'type' => 'double',				'default' => "'0'"),
-						  array('v' => '310', 'name' => 'pagenumber',	'type' => 'varchar(20)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'width',		'type' => 'double',				'default' => "'0'"),
+						  array('v' => '3.1', 'name' => 'height',		'type' => 'double',				'default' => "'0'"),
+						  array('v' => '3.1', 'name' => 'pagenumber',	'type' => 'varchar(20)',		'default' => "''",
 						  	'comment' => 'Human readable page number (with optional page section prefix)' ),
-						  array('v' => '310', 'name' => 'pageorder',	'type' => 'mediumint(9)',		'default' => "'0'",
+						  array('v' => '3.1', 'name' => 'pageorder',	'type' => 'mediumint(9)',		'default' => "'0'",
 						  	'comment' => 'Sequential page order within an issue' ),
-						  array('v' => '310', 'name' => 'nr',			'type' => 'mediumint(9)',		'default' => "'0'"),
-						  array('v' => '310', 'name' => 'types',		'type' => 'blob',				'default' => ""),
-						  array('v' => '610', 'name' => 'edition',		'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'edition',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '500', 'name' => 'master',		'type' => 'varchar(255)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'nr',			'type' => 'mediumint(9)',		'default' => "'0'"),
+						  array('v' => '3.1', 'name' => 'types',		'type' => 'blob',				'default' => ""),
+						  array('v' => '6.1', 'name' => 'edition',		'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'edition',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '5.0', 'name' => 'master',		'type' => 'varchar(255)',		'default' => "''",
 						  	'comment' => 'Name of master page of layout template to create page' ),
-						  array('v' => '500', 'name' => 'instance',		'type' => 'varchar(40)',		'default' => "'Production'",
+						  array('v' => '5.0', 'name' => 'instance',		'type' => 'varchar(40)',		'default' => "'Production'",
 						  	'comment' => 'Page maintained by Production or Planning system' ),
-						  array('v' => '500', 'name' => 'pagesequence',	'type' => 'mediumint(9)',		'default' => "'0'",
+						  array('v' => '5.0', 'name' => 'pagesequence',	'type' => 'mediumint(9)',		'default' => "'0'",
 						  	'comment' => 'Sequential page order within a layout' ),
-						  array('v' => '800', 'name' => 'orientation',	'type' => 'varchar(9)',		'default' => "''",
+						  array('v' => '8.0', 'name' => 'orientation',	'type' => 'varchar(9)',		'default' => "''",
 						        'comment' => 'The orientation of the page.' ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'obpaed_pages', 	'fields' => 'objid, pageorder, edition'),
+							array('v' => '4.2', 'name' => 'obpaed_pages', 	'fields' => 'objid, pageorder, edition'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'310', 'name' => 'smart_placements',
+				array ('v' =>'3.1', 'name' => 'smart_placements',
 						'comment' => 'Define placed database objects per Layout / Page.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 			'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',			'type' => 'mediumint(9)', 			'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'parent',		'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 			'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',			'type' => 'mediumint(9)', 			'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'parent',		'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'Layout object id' ,
-						  		'alters' => array('v' => '310', 'name' => 'parent',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.1', 'name' => 'parent',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  			'comment' => 'Layout object id' ), ),
-						  array('v' => '610', 'name' => 'child',		'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'child',		'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'Placement object id, typically Articles, Images and Adverts' ,
-						  		'alters' => array('v' => '310', 'name' => 'child',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.1', 'name' => 'child',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  			'comment' => 'Placement object id, typically Articles, Images and Adverts' ), ),
-						  array('v' => '310', 'name' => 'page',			'type' => 'mediumint(9)',		'default' => "'0'",
+						  array('v' => '3.1', 'name' => 'page',			'type' => 'mediumint(9)',		'default' => "'0'",
 						  	'comment' => 'Depricated: Sequential page order within an issue. Better use pagesequence instead.' ),
-						  array('v' => '310', 'name' => 'element',		'type' => 'varchar(200)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'element',		'type' => 'varchar(200)',		'default' => "''",
 						  	'comment' => 'Element name' ),
-						  array('v' => '310', 'name' => 'elementid',	'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'frameorder',	'type' => 'mediumint(9)',		'default' => "'0'"),
-						  array('v' => '310', 'name' => 'frameid',		'type' => 'varchar(200)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'elementid',	'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'frameorder',	'type' => 'mediumint(9)',		'default' => "'0'"),
+						  array('v' => '3.1', 'name' => 'frameid',		'type' => 'varchar(200)',		'default' => "''",
 						  	'comment' => 'Each frame has a Unique ID. For text frames, this ID refers to the spline frame. For graphic frames, this ID refers to the image item frame (which resides inside the spline frame).' ),
-						  array('v' => '310', 'name' => '_left',		'type' => 'double',				'default' => "'0'"),
-						  array('v' => '310', 'name' => 'top',			'type' => 'double',				'default' => "'0'"),
-						  array('v' => '310', 'name' => 'width',		'type' => 'double',				'default' => "'0'"),
-						  array('v' => '310', 'name' => 'height',		'type' => 'double',				'default' => "'0'"),
-						  array('v' => '330', 'name' => 'overset',		'type' => 'double',				'default' => "'0'"),
-						  array('v' => '610', 'name' => 'oversetchars',	'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '330', 'name' => 'oversetchars',	'type' => 'mediumint(11)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'oversetlines',	'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '330', 'name' => 'oversetlines',	'type' => 'mediumint(11)',		'default' => "'0'"), ),
-						  array('v' => '330', 'name' => 'layer',		'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '330', 'name' => 'content',		'type' => 'blob',				'default' => ""),
-						  array('v' => '410', 'name' => 'type',			'type' => 'varchar(40)', 		'default' => ""),
-						  array('v' => '610', 'name' => 'edition',		'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '3.1', 'name' => '_left',		'type' => 'double',				'default' => "'0'"),
+						  array('v' => '3.1', 'name' => 'top',			'type' => 'double',				'default' => "'0'"),
+						  array('v' => '3.1', 'name' => 'width',		'type' => 'double',				'default' => "'0'"),
+						  array('v' => '3.1', 'name' => 'height',		'type' => 'double',				'default' => "'0'"),
+						  array('v' => '3.3', 'name' => 'overset',		'type' => 'double',				'default' => "'0'"),
+						  array('v' => '6.1', 'name' => 'oversetchars',	'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.3', 'name' => 'oversetchars',	'type' => 'mediumint(11)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'oversetlines',	'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.3', 'name' => 'oversetlines',	'type' => 'mediumint(11)',		'default' => "'0'"), ),
+						  array('v' => '3.3', 'name' => 'layer',		'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '3.3', 'name' => 'content',		'type' => 'blob',				'default' => ""),
+						  array('v' => '4.1', 'name' => 'type',			'type' => 'varchar(40)', 		'default' => ""),
+						  array('v' => '6.1', 'name' => 'edition',		'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'Editions' ,
-						  		'alters' => array('v' => '420', 'name' => 'edition',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'edition',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  	'comment' => 'Editions' ), ),
-						  array('v' => '500', 'name' => 'contentdx',	'type' => 'double',				'default' => '0',
+						  array('v' => '5.0', 'name' => 'contentdx',	'type' => 'double',				'default' => '0',
 						  	'comment' => 'Move content relatively to frame (not to page) from left to right in points (pt). Negative for bleed. Zero for no move.' ),
-						  array('v' => '500', 'name' => 'contentdy',	'type' => 'double',				'default' => '0',
+						  array('v' => '5.0', 'name' => 'contentdy',	'type' => 'double',				'default' => '0',
 						  	'comment' => 'Move content relatively to frame (not to page) from top to bottom in points (pt). Negative for bleed. Zero for no move.' ),
-						  array('v' => '500', 'name' => 'scalex',		'type' => 'double',				'default' => '1',
+						  array('v' => '5.0', 'name' => 'scalex',		'type' => 'double',				'default' => '1',
 						  	'comment' => 'Factor to scale content horizontally in its frame. Value 0.15 means 15.2%. Default 100%. Avoid Zero.' ),
-						  array('v' => '500', 'name' => 'scaley',		'type' => 'double',				'default' => '1',
+						  array('v' => '5.0', 'name' => 'scaley',		'type' => 'double',				'default' => '1',
 						  	'comment' => 'Factor to scale content vertically in its frame. Value 0.15 means 15.2%. Default 100%. Avoid Zero.' ),
-						  array('v' => '500', 'name' => 'pagesequence',	'type' => 'mediumint(9)',		'default' => "'0'",
+						  array('v' => '5.0', 'name' => 'pagesequence',	'type' => 'mediumint(9)',		'default' => "'0'",
 						  	'comment' => 'Sequential page order within a layout' ),
-						  array('v' => '599', 'name' => 'pagenumber',	'type' => 'varchar(20)',		'default' => "''",
+						  array('v' => '5.99', 'name' => 'pagenumber',	'type' => 'varchar(20)',		'default' => "''",
 						  	'comment' => 'Human readable page number (with optional page section prefix)' ),
-						  array('v' => '900', 'name' => 'formwidgetid',	'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '970', 'name' => 'frametype',	'type' => 'varchar(20)',		'default' => "''",
+						  array('v' => '9.0', 'name' => 'formwidgetid',	'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '9.7', 'name' => 'frametype',	'type' => 'varchar(20)',		'default' => "''",
 						  	'comment' => 'Tells what content can be placed; '.
 						  		'- "text": can place article or spreadsheet content. '.
 						  		'- "graphic": place image content. '.
 						  		'- "unassigned": can place text or graphic. '.
 						  		'- empty (""): can not place any content into frame. ' ),
-						  array('v' => '970', 'name' => 'splineid',		'type' => 'varchar(200)',		'default' => "''",
+						  array('v' => '9.7', 'name' => 'splineid',		'type' => 'varchar(200)',		'default' => "''",
 						  	'comment' => 'Each spline frame has a Unique ID. For text frames, this is the same as frameid. For graphic frames, this identifies the spline frame (which contains the image item frame). Basically, this frame crops the image on the page.' ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'pachty_placements', 	'fields' => 'parent, child, type'),
-							array('v' => '420', 'name' => 'ei_placements', 	'fields' => 'elementid'),
-							array('v' => '760', 'name' => 'chty_placements', 	'fields' => 'child, type'),
+							array('v' => '4.2', 'name' => 'pachty_placements', 	'fields' => 'parent, child, type'),
+							array('v' => '4.2', 'name' => 'ei_placements', 	'fields' => 'elementid'),
+							array('v' => '7.6', 'name' => 'chty_placements', 	'fields' => 'child, type'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '310', 'field' => 'parent', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '310', 'field' => 'child', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '310', 'field' => 'page', 'reftable' => 'smart_pages', 'reffield' => 'pageorder'),
-							array('v' => '310', 'field' => 'elementid', 'reftable' => 'smart_elements', 'reffield' => 'guid'),
-							array('v' => '420', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
-							array('v' => '500', 'field' => 'pagesequence', 'reftable' => 'smart_pages', 'reffield' => 'pagesequence'),
-							array('v' => '970', 'field' => 'indesignarticleid', 'reftable' => 'smart_indesignarticles', 'reffield' => 'artuid'),
+							array('v' => '3.1', 'field' => 'parent', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'child', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '3.1', 'field' => 'page', 'reftable' => 'smart_pages', 'reffield' => 'pageorder'),
+							array('v' => '3.1', 'field' => 'elementid', 'reftable' => 'smart_elements', 'reffield' => 'guid'),
+							array('v' => '4.2', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
+							array('v' => '5.0', 'field' => 'pagesequence', 'reftable' => 'smart_pages', 'reffield' => 'pagesequence'),
+							array('v' => '9.7', 'field' => 'indesignarticleid', 'reftable' => 'smart_indesignarticles', 'reffield' => 'artuid'),
 						),
 				),
-				array ('v' =>'420', 'name' => 'smart_elements',
+				array ('v' =>'4.2', 'name' => 'smart_elements',
 						'comment' => 'Decompose Article`s text components.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '420', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '420', 'name' => 'guid',			'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '420', 'name' => 'name',			'type' => 'varchar(200)',		'default' => "''",
+						  array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '4.2', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '4.2', 'name' => 'guid',			'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '4.2', 'name' => 'name',			'type' => 'varchar(200)',		'default' => "''",
 						  	'comment' => 'Element tag' ),
-						  array('v' => '800', 'name' => 'objid',	'type' => 'int(11)',	'default' => 0,	'nullable' => false,	'comment' => 'Article object id', 
-						  	'alters' => array('v' => '610', 'name' => 'objid',	'type' => 'int(11)',		'default' => 0, 'nullable' => true,	'comment' => 'Article object id',
-						  	'alters' => array('v' => '420', 'name' => 'objid',		'type' => 'mediumint(9)',		'default' => 0, 'nullable' => true,	'comment' => 'Article object id' ))),
-						  array('v' => '420', 'name' => 'lengthwords',	'type' => 'int(11)',			'default' => "'0'"),
-						  array('v' => '420', 'name' => 'lengthchars',	'type' => 'int(11)',			'default' => "'0'"),
-						  array('v' => '420', 'name' => 'lengthparas',	'type' => 'int(11)',			'default' => "'0'"),
-						  array('v' => '420', 'name' => 'lengthlines',	'type' => 'int(11)',			'default' => "'0'"),
-						  array('v' => '420', 'name' => 'snippet',		'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '420', 'name' => 'version',		'type' => 'varchar(50)',		'default' => "''",
+						  array('v' => '8.0', 'name' => 'objid',	'type' => 'int(11)',	'default' => 0,	'nullable' => false,	'comment' => 'Article object id', 
+						  	'alters' => array('v' => '6.1', 'name' => 'objid',	'type' => 'int(11)',		'default' => 0, 'nullable' => true,	'comment' => 'Article object id',
+						  	'alters' => array('v' => '4.2', 'name' => 'objid',		'type' => 'mediumint(9)',		'default' => 0, 'nullable' => true,	'comment' => 'Article object id' ))),
+						  array('v' => '4.2', 'name' => 'lengthwords',	'type' => 'int(11)',			'default' => "'0'"),
+						  array('v' => '4.2', 'name' => 'lengthchars',	'type' => 'int(11)',			'default' => "'0'"),
+						  array('v' => '4.2', 'name' => 'lengthparas',	'type' => 'int(11)',			'default' => "'0'"),
+						  array('v' => '4.2', 'name' => 'lengthlines',	'type' => 'int(11)',			'default' => "'0'"),
+						  array('v' => '4.2', 'name' => 'snippet',		'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '4.2', 'name' => 'version',		'type' => 'varchar(50)',		'default' => "''",
 						  	'comment' => 'Element version (GUID) used to track and trigger placed content updates.' ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'oigu_elements', 	'fields' => 'objid, guid'),
+							array('v' => '4.2', 'name' => 'oigu_elements', 	'fields' => 'objid, guid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'970', 'name' => 'smart_indesignarticles',
+				array ('v' =>'9.7', 'name' => 'smart_indesignarticles',
 						'comment' => 'InDesign Articles listed in the Articles pallete of Adobe InDesign.',
 						'fields' => array(
-							array('v' => '970', 'name' => 'objid',		'type' => 'int(11)',			'default' => 0,	'nullable' => false,
+							array('v' => '9.7', 'name' => 'objid',		'type' => 'int(11)',			'default' => 0,	'nullable' => false,
 								'comment' => 'Id of layout object that contains the InDesign Articles.' ),
-							array('v' => '970', 'name' => 'artuid',			'type' => 'varchar(40)',	'default' => "''",
+							array('v' => '9.7', 'name' => 'artuid',			'type' => 'varchar(40)',	'default' => "''",
 								'comment' => 'Unique id within the layout object.' ),
-							array('v' => '970', 'name' => 'name',			'type' => 'varchar(200)',	'default' => "''",
+							array('v' => '9.7', 'name' => 'name',			'type' => 'varchar(200)',	'default' => "''",
 								'comment' => 'Unique name within the layout. (User can change.)' ),
-							array('v' => '970', 'name' => 'code',			'type' => 'int(11)',		'default' => "'0'",
+							array('v' => '9.7', 'name' => 'code',			'type' => 'int(11)',		'default' => "'0'",
 						  		'comment' => 'Used to sort on creation order.' ),
 						),
 						'indexes' => array(
-							array('v' => '970', 'name' => 'primary', 	'fields' => 'objid, artuid', 'primary' => true),
+							array('v' => '9.7', 'name' => 'primary', 	'fields' => 'objid, artuid', 'primary' => true),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '970', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '9.7', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'970', 'name' => 'smart_idarticlesplacements',
+				array ('v' =>'9.7', 'name' => 'smart_idarticlesplacements',
 						'comment' => 'Tells which placements belong to an InDesign Article.',
 						'fields' => array(
-							array('v' => '970', 'name' => 'objid',		'type' => 'int(11)',		'default' => 0,	'nullable' => false,
+							array('v' => '9.7', 'name' => 'objid',		'type' => 'int(11)',		'default' => 0,	'nullable' => false,
 								'comment' => 'Foreign key to smart_objects id.' ),
-							array('v' => '970', 'name' => 'artuid',		'type' => 'varchar(40)',	'default' => "''",
+							array('v' => '9.7', 'name' => 'artuid',		'type' => 'varchar(40)',	'default' => "''",
 								'comment' => 'Foreign key to smart_indesignarticles artuid.' ),
-							array('v' => '970', 'name' => 'plcid',		'type' => 'int(11)',		'default' => 0, 'nullable' => false,
+							array('v' => '9.7', 'name' => 'plcid',		'type' => 'int(11)',		'default' => 0, 'nullable' => false,
 								'comment' => 'Foreign key to smart_placements id.' ),
 						),
 						'indexes' => array(
-							array('v' => '970', 'name' => 'primary', 	'fields' => 'objid, artuid, plcid', 'primary' => true),
+							array('v' => '9.7', 'name' => 'primary', 	'fields' => 'objid, artuid, plcid', 'primary' => true),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '970', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '970', 'field' => 'artuid', 'reftable' => 'smart_indesignarticles', 'reffield' => 'artuid'),
-							array('v' => '970', 'field' => 'plcid', 'reftable' => 'smart_placements', 'reffield' => 'id'),
+							array('v' => '9.7', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '9.7', 'field' => 'artuid', 'reftable' => 'smart_indesignarticles', 'reffield' => 'artuid'),
+							array('v' => '9.7', 'field' => 'plcid', 'reftable' => 'smart_placements', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'970', 'name' => 'smart_objectoperations',
+				array ('v' =>'9.7', 'name' => 'smart_objectoperations',
 						'comment' => 'Tells which operations are created for a layout object. Typically be done when layout is not open in SC/ID.',
 						'fields' => array(
-						  	array('v' => '970', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
+						  	array('v' => '9.7', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
 						  		'comment' => 'Used to preserve the creation order, which is tells in what order operations should be executed.' ),
-							array('v' => '970', 'name' => 'objid',		'type' => 'int(11)',		'default' => 0,	'nullable' => false,
+							array('v' => '9.7', 'name' => 'objid',		'type' => 'int(11)',		'default' => 0,	'nullable' => false,
 								'comment' => 'Foreign key to smart_objects id. Refers to the layout object for which operations are created.' ),
-							array('v' => '970', 'name' => 'guid',		'type' => 'varchar(40)',	'default' => "''",
+							array('v' => '9.7', 'name' => 'guid',		'type' => 'varchar(40)',	'default' => "''",
 								'comment' => 'Global unique id (GUID) to be provided by caller. Callers may want to identify operations they created or handled.' ),
-							array('v' => '970', 'name' => 'type',		'type' => 'varchar(200)',	'default' => "''",
+							array('v' => '9.7', 'name' => 'type',		'type' => 'varchar(200)',	'default' => "''",
 								'comment' => 'Type of the operation. See CreateObjectOperations in SCEnterprise.wsdl file for supported values.' ),
-							array('v' => '970', 'name' => 'name',		'type' => 'varchar(200)',	'default' => "''",
+							array('v' => '9.7', 'name' => 'name',		'type' => 'varchar(200)',	'default' => "''",
 								'comment' => 'Name of the operation. See CreateObjectOperations in SCEnterprise.wsdl file for supported values.' ),
-							array('v' => '970', 'name' => 'params',		'type' => 'blob',			'default' => "",
+							array('v' => '9.7', 'name' => 'params',		'type' => 'blob',			'default' => "",
 								'comment' => 'PHP serialized list of Param data objects fed into the operation (javascript function calls) by SC/ID when opening layout.' ),
 						),
 						'indexes' => array(
-							array('v' => '970', 'name' => 'objid_objectoperations', 	'fields' => 'objid'),
+							array('v' => '9.7', 'name' => 'objid_objectoperations', 	'fields' => 'objid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '970', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '9.7', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'330', 'name' => 'smart_properties',
+				array ('v' =>'3.3', 'name' => 'smart_properties',
 						'comment' => 'Custom meta data per publication / object type. WARNING: dont modify this tables, because it is managed together with the smart_(deleted)objects table.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '330', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'publication',	'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '330', 'name' => 'publication',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '330', 'name' => 'objtype',		'type' => 'varchar(40)',		'default' => "''"),
-						  array('v' => '330', 'name' => 'name',			'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '330', 'name' => 'dispname',		'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '330', 'name' => 'category',		'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '330', 'name' => 'type',			'type' => 'varchar(40)',		'default' => "''"),
-						  array('v' => '330', 'name' => 'defaultvalue',	'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '330', 'name' => 'valuelist',	'type' => 'blob',				'default' => ""),
-						  array('v' => '330', 'name' => 'minvalue',		'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '330', 'name' => 'maxvalue',		'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '900', 'name' => 'maxlen',		'type' => 'bigint(8)',			'default' => "'0'",
-						        'alters' => array('v' => '330', 'name' => 'maxlen',		'type' => 'tinyint(4)',			'default' => "'0'"),),
-						  array('v' => '330', 'name' => 'dbupdated',	'type' => 'tinyint(4)',			'default' => "'0'"),
-						  array('v' => '700', 'name' => 'entity',			'type' => 'varchar(20)',		'default' => "'Object'",
+						  array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.3', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'publication',	'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.3', 'name' => 'publication',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '3.3', 'name' => 'objtype',		'type' => 'varchar(40)',		'default' => "''"),
+						  array('v' => '3.3', 'name' => 'name',			'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '3.3', 'name' => 'dispname',		'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '3.3', 'name' => 'category',		'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '3.3', 'name' => 'type',			'type' => 'varchar(40)',		'default' => "''"),
+						  array('v' => '3.3', 'name' => 'defaultvalue',	'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '3.3', 'name' => 'valuelist',	'type' => 'blob',				'default' => ""),
+						  array('v' => '3.3', 'name' => 'minvalue',		'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '3.3', 'name' => 'maxvalue',		'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '9.0', 'name' => 'maxlen',		'type' => 'bigint(8)',			'default' => "'0'",
+						        'alters' => array('v' => '3.3', 'name' => 'maxlen',		'type' => 'tinyint(4)',			'default' => "'0'"),),
+						  array('v' => '3.3', 'name' => 'dbupdated',	'type' => 'tinyint(4)',			'default' => "'0'"),
+						  array('v' => '7.0', 'name' => 'entity',			'type' => 'varchar(20)',		'default' => "'Object'",
 								'comment' => 'For which entity the config is made: Object, Publication, PubChannel, Issue, etc. Set to Object for manual admin configurations.' ),
-						  array('v' => '700', 'name' => 'serverplugin',	'type' => 'varchar(64)',		'default' => "''",
+						  array('v' => '7.0', 'name' => 'serverplugin',	'type' => 'varchar(64)',		'default' => "''",
 								'comment' => 'Internal name of server plug-in. Only filled when owned by a plug-in. Emtpy for manual admin configurations.' ),
-						  array('v' => '900', 'name' => 'adminui',	'type' => 'varchar(2)',		'default' => "'on'",
+						  array('v' => '9.0', 'name' => 'adminui',	'type' => 'varchar(2)',		'default' => "'on'",
 							      'comment' => 'Signifies if this property needs to be shown in the admin UI.' ),
-						  array('v' => '900', 'name' => 'propertyvalues',	'type' => 'blob',			'default' => "",
+						  array('v' => '9.0', 'name' => 'propertyvalues',	'type' => 'blob',			'default' => "",
 							      'comment' => 'Contains PropertyValue objects.' ),
-						  array('v' => '900', 'name' => 'minresolution',	'type' => 'varchar(200)',	'default' => "''",
+						  array('v' => '9.0', 'name' => 'minresolution',	'type' => 'varchar(200)',	'default' => "''",
 							      'comment' => 'Minimum resolution if applicable.' ),
-						  array('v' => '900', 'name' => 'maxresolution',	'type' => 'varchar(200)',		'default' => "''",
+						  array('v' => '9.0', 'name' => 'maxresolution',	'type' => 'varchar(200)',		'default' => "''",
 								'comment' => 'Maximum resolution if applicable.' ),
-						  array('v' => '900', 'name' => 'publishsystem',	'type' => 'varchar(64)',	'default' => "''",
+						  array('v' => '9.0', 'name' => 'publishsystem',	'type' => 'varchar(64)',	'default' => "''",
 							      'comment' => 'For which Publish System this property is applicable.' ),
-						  array('v' => '900', 'name' => 'templateid',	'type' => 'int(11)',			'default' => "0",
+						  array('v' => '9.0', 'name' => 'templateid',	'type' => 'int(11)',			'default' => "0",
 								'comment' => 'Defines the template for this property.' ),
-						  array( 'v' => '910', 'name' => 'termentityid',	'type' => 'int(11)', 'default' => "'0'",
+						  array( 'v' => '9.1', 'name' => 'termentityid',	'type' => 'int(11)', 'default' => "'0'",
 							    'comment' => 'Reference to the termentity and autocomplete provider that helps the user filling in the property.' ),
-						  array( 'v' => '910', 'name' => 'suggestionentity',	'type' => 'varchar(200)', 'default' => "''",
+						  array( 'v' => '9.1', 'name' => 'suggestionentity',	'type' => 'varchar(200)', 'default' => "''",
 								'comment' => 'Defines the suggestion entity that is used by suggestion providers.' ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'puob_properties', 	'fields' => 'publication, objtype'),
-							array('v' => '420', 'name' => 'pudb_properties', 	'fields' => 'publication, dbupdated'),
+							array('v' => '4.2', 'name' => 'puob_properties', 	'fields' => 'publication, objtype'),
+							array('v' => '4.2', 'name' => 'pudb_properties', 	'fields' => 'publication, dbupdated'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '700', 'field' => 'serverplugin', 'reftable' => 'smart_serverplugins', 'reffield' => 'uniquename'),
-							array('v' => '900', 'field' => 'templateid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '910', 'field' => 'termentityid', 'reftable' => 'smart_termentities', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '7.0', 'field' => 'serverplugin', 'reftable' => 'smart_serverplugins', 'reffield' => 'uniquename'),
+							array('v' => '9.0', 'field' => 'templateid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '9.1', 'field' => 'termentityid', 'reftable' => 'smart_termentities', 'reffield' => 'id'),
 						),
 
 				),
-				array ('v' =>'330', 'name' => 'smart_publadmin',
+				array ('v' =>'3.3', 'name' => 'smart_publadmin',
 						'comment' => 'Publication specific admin rights (by user group).',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '330', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'publication',	'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '330', 'name' => 'publication',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'grpid',		'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '330', 'name' => 'grpid',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.3', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'publication',	'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.3', 'name' => 'publication',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'grpid',		'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.3', 'name' => 'grpid',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'pugi_publadmin', 	'fields' => 'publication, grpid'),
+							array('v' => '4.2', 'name' => 'pugi_publadmin', 	'fields' => 'publication, grpid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'grpid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'grpid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'310', 'name' => 'smart_publications',
+				array ('v' =>'3.1', 'name' => 'smart_publications',
 						'comment' => 'Publication definitions.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '310', 'name' => 'publication',		'type' => 'varchar(255)',		'default' => "''",
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '3.1', 'name' => 'publication',		'type' => 'varchar(255)',		'default' => "''",
 						  	'comment' => 'Publication name' ),
-						  array('v' => '340', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'",
+						  array('v' => '3.4', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'",
 						  	'comment' => 'Sorting order' ),
-						  array('v' => '340', 'name' => 'email',			'type' => 'char(2)',			'default' => "''"),
-						  array('v' => '340', 'name' => 'description',		'type' => 'blob',				'default' => ""),
-						  array('v' => '800', 'name' => 'readingorderrev',	'type' => 'varchar(2)',			'default' => "''", 'nullable' => false,
+						  array('v' => '3.4', 'name' => 'email',			'type' => 'char(2)',			'default' => "''"),
+						  array('v' => '3.4', 'name' => 'description',		'type' => 'blob',				'default' => ""),
+						  array('v' => '8.0', 'name' => 'readingorderrev',	'type' => 'varchar(2)',			'default' => "''", 'nullable' => false,
 						  	'comment' => 'Pages printed right to left',
-						  	'alters' => array('v' => '410', 'name' => 'readingorderrev',	'type' => 'varchar(2)',			'default' => "''", 'nullable' => true,
+						  	'alters' => array('v' => '4.1', 'name' => 'readingorderrev',	'type' => 'varchar(2)',			'default' => "''", 'nullable' => true,
 						  	'comment' => 'Pages printed right to left') ),
-						  array('v' => '800', 'name' => 'autopurge',		'type' => 'int(5)',			'default' => "0",
+						  array('v' => '8.0', 'name' => 'autopurge',		'type' => 'int(5)',			'default' => "0",
 						  	'comment' => 'Number of days objects (owned by this brand) may live in the Trash Can. Objects getting older are permanently deleted by the Auto Purge feature. Zero (0) disables this feature. '),
-						  array('v' => '600', 'name' => 'currentissue',	'type' => 'mediumint(9)', 'default' => "'0'",
-						  	'drops' => array ('v' => '420', 'name' => 'currentissue', 'type' => 'mediumint(9)',	'default' => "'0'",
+						  array('v' => '6.0', 'name' => 'currentissue',	'type' => 'mediumint(9)', 'default' => "'0'",
+						  	'drops' => array ('v' => '4.2', 'name' => 'currentissue', 'type' => 'mediumint(9)',	'default' => "'0'",
 						  	'comment' => 'Used to query for current issue of the specified publication' ),
 						  ),
-						  array('v' => '610', 'name' => 'defaultchannelid',		'type' => 'int(11)',	'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'defaultchannelid',		'type' => 'int(11)',	'default' => "'0'",
 							'comment' => 'Default channel, normally the print-channel' ,
-						  		'alters' => array('v' => '599', 'name' => 'defaultchannelid',		'type' => 'mediumint(9)',	'default' => "'0'",
+						  		'alters' => array('v' => '5.99', 'name' => 'defaultchannelid',		'type' => 'mediumint(9)',	'default' => "'0'",
 									'comment' => 'Default channel, normally the print-channel'	), ),
-						  array('v' => '920', 'name' => 'calculatedeadlines', 'type' => 'char(2)',  'default' => "''",
+						  array('v' => '9.2', 'name' => 'calculatedeadlines', 'type' => 'char(2)',  'default' => "''",
 							'comment' => 'A field to indicate whether the deadline should be calculated when deadline field is configured.' ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'pb_publications', 	'fields' => 'publication'),
-							array('v' => '420', 'name' => 'idpb_publications', 	'fields' => 'id, publication'),
+							array('v' => '4.2', 'name' => 'pb_publications', 	'fields' => 'publication'),
+							array('v' => '4.2', 'name' => 'idpb_publications', 	'fields' => 'id, publication'),
 						),
 						'inserts' => array(
 							"1, 'WW News', 0, '', '', '', 0, 1, ''",
 						),
 						'lookups' => array(
 							// commented out; 'currentissue' field is removed since v6.0 and we need to keep dbsanitycheck happy
-							//array('v' => '420', 'field' => 'currentissue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							//array('v' => '4.2', 'field' => 'currentissue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'600', 'name' => 'smart_publissues', 'comment' => 'Issue definitions, obsolete since v6.0.',
-					'drops' => array ('v' =>'310', 'name' => 'smart_publissues', 'comment' => 'Issue definitions.',
+				array ('v' =>'6.0', 'name' => 'smart_publissues', 'comment' => 'Issue definitions, obsolete since v6.0.',
+					'drops' => array ('v' =>'3.1', 'name' => 'smart_publissues', 'comment' => 'Issue definitions.',
 						'fields' => array(
-						  array('v' => '310', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true),
-						  array('v' => '310', 'name' => 'publication',		'type' => 'mediumint(9)',		'default' => "'0'"),
-						  array('v' => '310', 'name' => 'issue',			'type' => 'varchar(255)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true),
+						  array('v' => '3.1', 'name' => 'publication',		'type' => 'mediumint(9)',		'default' => "'0'"),
+						  array('v' => '3.1', 'name' => 'issue',			'type' => 'varchar(255)',		'default' => "''",
 						  	'comment' => 'Issue name' ),
-						  array('v' => '340', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'",
+						  array('v' => '3.4', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'",
 						  	'comment' => 'Sorting order' ),
-						  array('v' => '340', 'name' => 'publdate',			'type' => 'varchar(200)',		'default' => "''",
+						  array('v' => '3.4', 'name' => 'publdate',			'type' => 'varchar(200)',		'default' => "''",
 						  	'comment' => 'Date to publish issue' ),
-						  array('v' => '340', 'name' => 'deadline',			'type' => 'varchar(200)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss'),
-						  array('v' => '340', 'name' => 'pages',			'type' => 'int(4)',				'default' => "'0'",
+						  array('v' => '3.4', 'name' => 'deadline',			'type' => 'varchar(200)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss'),
+						  array('v' => '3.4', 'name' => 'pages',			'type' => 'int(4)',				'default' => "'0'",
 						  	'comment' => 'Planned page count' ),
-						  array('v' => '340', 'name' => 'subject',			'type' => 'blob',				'default' => ""),
-						  array('v' => '340', 'name' => 'description',		'type' => 'blob',				'default' => ""),
-						  array('v' => '340', 'name' => 'active',			'type' => 'char(2)',			'default' => "''",
+						  array('v' => '3.4', 'name' => 'subject',			'type' => 'blob',				'default' => ""),
+						  array('v' => '3.4', 'name' => 'description',		'type' => 'blob',				'default' => ""),
+						  array('v' => '3.4', 'name' => 'active',			'type' => 'char(2)',			'default' => "''",
 						  	'comment' => 'Listed in GUI' ),
-						  array('v' => '340', 'name' => 'overrulepub',		'type' => 'char(2)',			'default' => "''",
+						  array('v' => '3.4', 'name' => 'overrulepub',		'type' => 'char(2)',			'default' => "''",
 						  	'comment' => 'Define workflow at issue level' ),
-						  array('v' => '410', 'name' => 'readingorderrev',	'type' => 'varchar(2)',			'default' => "''", 'nullable' => true,
+						  array('v' => '4.1', 'name' => 'readingorderrev',	'type' => 'varchar(2)',			'default' => "''", 'nullable' => true,
 						  	'comment' => 'Pages printed right to left' ),
-						  array('v' => '420', 'name' => 'icode',			'type' => 'int(4)',				'default' => "'0'"),
+						  array('v' => '4.2', 'name' => 'icode',			'type' => 'int(4)',				'default' => "'0'"),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'pb_publissues', 	'fields' => 'publication'),
-							array('v' => '420', 'name' => 'is_publissues', 	'fields' => 'issue'),
+							array('v' => '4.2', 'name' => 'pb_publissues', 	'fields' => 'publication'),
+							array('v' => '4.2', 'name' => 'is_publissues', 	'fields' => 'issue'),
 						),
 						'inserts' => array(
 							"1, 1, '1st Issue', 10, '', '', 0, '', '', 'on', '', '', 0, 0",
 							"1, 1, '2nd Issue', 20, '', '', 0, '', '', 'on', '', '', 0, 0",
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
 						),
 				),
 				),
-				array ('v' =>'310', 'name' => 'smart_publsections',
+				array ('v' =>'3.1', 'name' => 'smart_publsections',
 						'comment' => 'Section (Category) definitions. Category is since v6.0 the denomination of section',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'publication',		'type' => 'int(11)',		'default' => "'0'" ,
-						  		'alters' => array('v' => '310', 'name' => 'publication',		'type' => 'mediumint(9)',		'default' => "'0'" ), ),
-						  array('v' => '310', 'name' => 'section',			'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '610', 'name' => 'issue',			'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'publication',		'type' => 'int(11)',		'default' => "'0'" ,
+						  		'alters' => array('v' => '3.1', 'name' => 'publication',		'type' => 'mediumint(9)',		'default' => "'0'" ), ),
+						  array('v' => '3.1', 'name' => 'section',			'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '6.1', 'name' => 'issue',			'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'If 0, section for every issue in publication' ,
-						  		'alters' => array('v' => '340', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.4', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'",
 						  			'comment' => 'If 0, section for every issue in publication' ), ),
-						  array('v' => '340', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'"),
-						  array('v' => '340', 'name' => 'description',		'type' => 'blob',				'default' => ""),
-						  array('v' => '340', 'name' => 'pages',			'type' => 'int(4)',				'default' => "'0'",
+						  array('v' => '3.4', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'"),
+						  array('v' => '3.4', 'name' => 'description',		'type' => 'blob',				'default' => ""),
+						  array('v' => '3.4', 'name' => 'pages',			'type' => 'int(4)',				'default' => "'0'",
 						  	'comment' => 'Planned page count' ),
-						  array('v' => '800', 'name' => 'deadline',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-							 'alters' => array('v' => '340', 'name' => 'deadline',			'type' => 'varchar(20)',		'default' => "''") ),
-						  array('v' => '610', 'name' => 'deadlinerelative',	'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'deadlinerelative',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '8.0', 'name' => 'deadline',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+							 'alters' => array('v' => '3.4', 'name' => 'deadline',			'type' => 'varchar(20)',		'default' => "''") ),
+						  array('v' => '6.1', 'name' => 'deadlinerelative',	'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'deadlinerelative',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'pbis_publsections', 	'fields' => 'publication, issue'),
-							array('v' => '420', 'name' => 'se_publsections', 	'fields' => 'section'),
+							array('v' => '4.2', 'name' => 'pbis_publsections', 	'fields' => 'publication, issue'),
+							array('v' => '4.2', 'name' => 'se_publsections', 	'fields' => 'section'),
 						),
 						'inserts' => array(
 							"1, 1, 'News', 0, 10, '', 0, '', 0 ",
 							"2, 1, 'Sport', 0, 20, '', 0, '', 0 ",
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'600', 'name' => 'smart_publeditions', 'comment' => 'Publication edition definitions, obsolete since v6.0.',
-					'drops' => array ('v' =>'420', 'name' => 'smart_publeditions', 
+				array ('v' =>'6.0', 'name' => 'smart_publeditions', 'comment' => 'Publication edition definitions, obsolete since v6.0.',
+					'drops' => array ('v' =>'4.2', 'name' => 'smart_publeditions', 
 						'comment' => 'Publication edition definitions.',
 						'fields' => array(
-						  array('v' => '420', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true),
-						  array('v' => '420', 'name' => 'edition',			'type' => 'varchar(255)',		'default' => "''",
+						  array('v' => '4.2', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true),
+						  array('v' => '4.2', 'name' => 'edition',			'type' => 'varchar(255)',		'default' => "''",
 						  	'comment' => 'Edition name' ),
-						  array('v' => '420', 'name' => 'publication',		'type' => 'mediumint(9)',		'default' => "'0'"),
-						  array('v' => '420', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'"),
-						  array('v' => '420', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'",
+						  array('v' => '4.2', 'name' => 'publication',		'type' => 'mediumint(9)',		'default' => "'0'"),
+						  array('v' => '4.2', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'"),
+						  array('v' => '4.2', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'",
 						  	'comment' => 'Sort order' ),
-						  array('v' => '420', 'name' => 'deadlinerelative',	'type' => 'mediumint(9)',		'default' => "'0'"),
-						  array('v' => '420', 'name' => 'description',		'type' => 'blob',				'default' => ""),
+						  array('v' => '4.2', 'name' => 'deadlinerelative',	'type' => 'mediumint(9)',		'default' => "'0'"),
+						  array('v' => '4.2', 'name' => 'description',		'type' => 'blob',				'default' => ""),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'pbis_publeditions', 	'fields' => 'publication, issue'),
-							array('v' => '420', 'name' => 'is_publeditions', 	'fields' => 'issue'),
-							array('v' => '420', 'name' => 'ed_publeditions', 	'fields' => 'edition'),
+							array('v' => '4.2', 'name' => 'pbis_publeditions', 	'fields' => 'publication, issue'),
+							array('v' => '4.2', 'name' => 'is_publeditions', 	'fields' => 'issue'),
+							array('v' => '4.2', 'name' => 'ed_publeditions', 	'fields' => 'edition'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
 						),
 				),
 				),
-				array ('v' =>'700', 'name' => 'smart_publobjects',
+				array ('v' =>'7.0', 'name' => 'smart_publobjects',
 						'comment' => 'Publication specific objects rights (by user group).',
 						'fields' => array(
-						  array('v' => '700', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true),
-						  array('v' => '700', 'name' => 'publicationid','type' => 'int(11)', 		'default' => "'0'",
+						  array('v' => '7.0', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true),
+						  array('v' => '7.0', 'name' => 'publicationid','type' => 'int(11)', 		'default' => "'0'",
 						  		'comment' => 'Publication id'),
-						  array('v' => '700', 'name' => 'issueid',		'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '7.0', 'name' => 'issueid',		'type' => 'int(11)',		'default' => "'0'",
 						  		'comment' => 'Issue id'),
-						  array('v' => '700', 'name' => 'objectid',		'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '7.0', 'name' => 'objectid',		'type' => 'int(11)',		'default' => "'0'",
 						  		'comment' => 'Object id'),
-						  array('v' => '700', 'name' => 'grpid',		'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '7.0', 'name' => 'grpid',		'type' => 'int(11)',		'default' => "'0'",
 						  		'comment' => 'Usergroup id'),
 						),
 						'indexes' => array(
-							array('v' => '700', 'name' => 'puisobgr_publobjects', 'fields' => 'publicationid, issueid, objectid, grpid', 'unique' => true),
+							array('v' => '7.0', 'name' => 'puisobgr_publobjects', 'fields' => 'publicationid, issueid, objectid, grpid', 'unique' => true),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '700', 'field' => 'publicationid', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '700', 'field' => 'issueid', 'reftable' => 'smart_issues', 'reffield' => 'id'),
-							array('v' => '700', 'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '700', 'field' => 'grpid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
+							array('v' => '7.0', 'field' => 'publicationid', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '7.0', 'field' => 'issueid', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '7.0', 'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '7.0', 'field' => 'grpid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'420', 'name' => 'smart_issueeditions',
+				array ('v' =>'4.2', 'name' => 'smart_issueeditions',
 						'comment' => 'Issue edition definitions.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id', 			'type' => 'int(11)', 		'autoincrement' => true,
-									'alters' => array('v' => '420', 'name' => 'id', 			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-							array('v' => '610', 'name' => 'issue',			'type' => 'int(11)',		'default' => "'0'",
+							array('v' => '6.1', 'name' => 'id', 			'type' => 'int(11)', 		'autoincrement' => true,
+									'alters' => array('v' => '4.2', 'name' => 'id', 			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+							array('v' => '6.1', 'name' => 'issue',			'type' => 'int(11)',		'default' => "'0'",
 							  	'comment' => 'Issue reference. If 0, section for every issue in publication.' ,
-									'alters' => array('v' => '420', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'",
+									'alters' => array('v' => '4.2', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'",
 							  			'comment' => 'Issue reference. If 0, section for every issue in publication.' ), ),
-							array('v' => '610', 'name' => 'edition',		'type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '420', 'name' => 'edition',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '800', 'name' => 'deadline',		'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-								'alters' => array('v' => '420', 'name' => 'deadline',		'type' => 'varchar(20)',		'default' => "''")),
+							array('v' => '6.1', 'name' => 'edition',		'type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '4.2', 'name' => 'edition',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '8.0', 'name' => 'deadline',		'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+								'alters' => array('v' => '4.2', 'name' => 'deadline',		'type' => 'varchar(20)',		'default' => "''")),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'is_issueeditions', 'fields' => 'issue'),
-							array('v' => '420', 'name' => 'ed_issueeditions', 'fields' => 'edition'),
+							array('v' => '4.2', 'name' => 'is_issueeditions', 'fields' => 'issue'),
+							array('v' => '4.2', 'name' => 'ed_issueeditions', 'fields' => 'edition'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
 						),
 				),
 				array ('v' =>'600 ', 'name' => 'smart_objecteditions', 'comment' => 'Object edition definitions, obsolete since v6.0.',
-					'drops' => array ('v' =>'420', 'name' => 'smart_objecteditions',
+					'drops' => array ('v' =>'4.2', 'name' => 'smart_objecteditions',
 						'comment' => 'Object edition definitions. Link object to 1 or more editions.',
 						'fields' => array(
-						  array('v' => '420', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true),
-						  array('v' => '420', 'name' => 'objid',			'type' => 'mediumint(9)',		'default' => "'0'"),
-						  array('v' => '420', 'name' => 'edition',			'type' => 'mediumint(9)',		'default' => "'0'"),
+						  array('v' => '4.2', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true),
+						  array('v' => '4.2', 'name' => 'objid',			'type' => 'mediumint(9)',		'default' => "'0'"),
+						  array('v' => '4.2', 'name' => 'edition',			'type' => 'mediumint(9)',		'default' => "'0'"),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'oi_objecteditions', 'fields' => 'objid'),
-							array('v' => '420', 'name' => 'ed_objecteditions', 'fields' => 'edition'),
+							array('v' => '4.2', 'name' => 'oi_objecteditions', 'fields' => 'objid'),
+							array('v' => '4.2', 'name' => 'ed_objecteditions', 'fields' => 'edition'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
 						),
 				),
 				),
-				array ('v' =>'330', 'name' => 'smart_routing',
+				array ('v' =>'3.3', 'name' => 'smart_routing',
 						'comment' => 'Object routing definitions.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '330', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'publication',		'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '330', 'name' => 'publication',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'section',			'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '330', 'name' => 'section',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'state',			'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '330', 'name' => 'state',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '920', 'name' => 'routeto',			'type' => 'varchar(255)',		'default' => "''",
-						  		'alters' => array('v' => '330', 'name' => 'routeto',			'type' => 'varchar(40)',		'default' => "''"), ),
-						  array('v' => '610', 'name' => 'issue',			'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '340', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.3', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'publication',		'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.3', 'name' => 'publication',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'section',			'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.3', 'name' => 'section',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'state',			'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.3', 'name' => 'state',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '9.2', 'name' => 'routeto',			'type' => 'varchar(255)',		'default' => "''",
+						  		'alters' => array('v' => '3.3', 'name' => 'routeto',			'type' => 'varchar(40)',		'default' => "''"), ),
+						  array('v' => '6.1', 'name' => 'issue',			'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.4', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'pbisse_routing', 	'fields' => 'publication, issue, section'),
-							array('v' => '420', 'name' => 'st_routing', 	'fields' => 'state'),
+							array('v' => '4.2', 'name' => 'pbisse_routing', 	'fields' => 'publication, issue, section'),
+							array('v' => '4.2', 'name' => 'st_routing', 	'fields' => 'state'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'routeto', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '420', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'routeto', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '4.2', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'310', 'name' => 'smart_settings',
+				array ('v' =>'3.1', 'name' => 'smart_settings',
 						'comment' => 'User settings (such as User Queries, Panel Layouts, etc).',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '310', 'name' => 'user',				'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'setting',			'type' => 'varchar(200)',		'default' => "''"),
-  						  array('v' => '800', 'name' => 'value',		'type' => 'mediumblob',		'default' => "",
-						  		'alters' => array('v' => '310', 'name' => 'value',			'type' => 'blob',				'default' => ""), ),
-						  array('v' => '599', 'name' => 'appname',			'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '3.1', 'name' => 'user',				'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'setting',			'type' => 'varchar(200)',		'default' => "''"),
+  						  array('v' => '8.0', 'name' => 'value',		'type' => 'mediumblob',		'default' => "",
+						  		'alters' => array('v' => '3.1', 'name' => 'value',			'type' => 'blob',				'default' => ""), ),
+						  array('v' => '5.99', 'name' => 'appname',			'type' => 'varchar(200)',		'default' => "''"),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'us_settings', 	'fields' => 'user'),
-							array('v' => '420', 'name' => 'se_settings', 	'fields' => 'setting'),
+							array('v' => '4.2', 'name' => 'us_settings', 	'fields' => 'user'),
+							array('v' => '4.2', 'name' => 'se_settings', 	'fields' => 'setting'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'user', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '4.2', 'field' => 'user', 'reftable' => 'smart_users', 'reffield' => 'user'),
 						),
 				),
-				array ('v' =>'310', 'name' => 'smart_states',
+				array ('v' =>'3.1', 'name' => 'smart_states',
 						'comment' => '',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'publication',		'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '310', 'name' => 'publication',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '310', 'name' => 'type',				'type' => 'varchar(40)',		'default' => "''",
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'publication',		'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.1', 'name' => 'publication',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '3.1', 'name' => 'type',				'type' => 'varchar(40)',		'default' => "''",
 						  	'comment' => 'Object type as defined in WSDL; Article, Layout, Image, etc' ),
-						  array('v' => '310', 'name' => 'state',			'type' => 'varchar(40)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'state',			'type' => 'varchar(40)',		'default' => "''",
 						  	'comment' => 'State name' ),
-						  array('v' => '310', 'name' => 'produce',			'type' => 'char(2)',			'default' => "''",
+						  array('v' => '3.1', 'name' => 'produce',			'type' => 'char(2)',			'default' => "''",
 						  	'comment' => 'Object ready for produce' ),
-						  array('v' => '310', 'name' => 'color',			'type' => 'varchar(11)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'color',			'type' => 'varchar(11)',		'default' => "''",
 						  	'comment' => 'Status color (#RRGGBB)' ),
-						  array('v' => '610', 'name' => 'nextstate',		'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'nextstate',		'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'Next state in workflow, used to send objects to next status' ,
-						  		'alters' => array('v' => '310', 'name' => 'nextstate',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.1', 'name' => 'nextstate',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  			'comment' => 'Next state in workflow, used to send objects to next status' ), ),
-						  array('v' => '330', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'",
+						  array('v' => '3.3', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'",
 						  	'comment' => 'Sorting order' ),
-						  array('v' => '610', 'name' => 'issue',			'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'issue',			'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'Issue reference, 0 = for all' ,
-								  'alters' => array('v' => '340', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'",
+								  'alters' => array('v' => '3.4', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'",
 								  	'comment' => 'Issue reference, 0 = for all' ), ),
-						  array('v' => '610', 'name' => 'section',			'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'section',			'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'Section reference, 0 = for all' ,
-								  'alters' => array('v' => '340', 'name' => 'section',			'type' => 'mediumint(9)',		'default' => "'0'",
+								  'alters' => array('v' => '3.4', 'name' => 'section',			'type' => 'mediumint(9)',		'default' => "'0'",
 								  	'comment' => 'Section reference, 0 = for all' ), ),
-						  array('v' => '610', 'name' => 'deadlinestate',	'type' => 'int(11)',		'default' => "'0'",
-								  'alters' => array('v' => '420', 'name' => 'deadlinestate',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'deadlinerelative',	'type' => 'int(11)',		'default' => "'0'",
-								  'alters' => array('v' => '420', 'name' => 'deadlinerelative',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '599', 'name' => 'createpermanentversion',	'type' => 'char(2)',	'default' => "''",
+						  array('v' => '6.1', 'name' => 'deadlinestate',	'type' => 'int(11)',		'default' => "'0'",
+								  'alters' => array('v' => '4.2', 'name' => 'deadlinestate',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'deadlinerelative',	'type' => 'int(11)',		'default' => "'0'",
+								  'alters' => array('v' => '4.2', 'name' => 'deadlinerelative',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '5.99', 'name' => 'createpermanentversion',	'type' => 'char(2)',	'default' => "''",
 						  	'comment' => 'When enabled (default), major (permanent) object versions are created during save operations at this status. When disabled, minor (intermediate) versions are created.' ),
-						  array('v' => '599', 'name' => 'removeintermediateversions','type' => 'char(2)',	'default' => "''",
+						  array('v' => '5.99', 'name' => 'removeintermediateversions','type' => 'char(2)',	'default' => "''",
 						  	'comment' => 'When enabled, minor object versions are cleaned up (removed) during save operations at this status. When disabled (default), minor versions remain untouched.' ),
-						  array('v' => '900', 'name' => 'readyforpublishing',	'type' => 'char(2)',	'default' => "''",
+						  array('v' => '9.0', 'name' => 'readyforpublishing',	'type' => 'char(2)',	'default' => "''",
 								'comment' => 'When enabled, the objects that reach this status will be shown in the publish manager tab when the Publish Status filter is set to "Ready to be published".' ),
-						  array('v' => '599', 'name' => 'automaticallysendtonext',	'type' => 'char(2)',	'default' => "''",
+						  array('v' => '5.99', 'name' => 'automaticallysendtonext',	'type' => 'char(2)',	'default' => "''",
 						  	'comment' => 'When enabled, saved objects are implicitly send to the next status (as configured at workflow).' ),
-						  array('v' => '940', 'name' => 'phase',			'type' => 'varchar(40)',		'default' => "'Production'",
+						  array('v' => '9.4', 'name' => 'phase',			'type' => 'varchar(40)',		'default' => "'Production'",
 							'comment' => 'Each Workflow Status belongs to a Workflow Phase. Possible values: Selection, Production, Completed, Archived. Default: Production.' ),
-							array( 'v' => '1000', 'name' => 'skipidsa', 'type' => 'char(2)', 'default' => "''",'patched' => array('980' => 'idsautomationskipstatus'),
+							array( 'v' => '10.0', 'name' => 'skipidsa', 'type' => 'char(2)', 'default' => "''",'patched' => array('9.8' => 'idsautomationskipstatus'),
 								'comment' => 'When selected do not create InDesign Server Automation job.' ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'st_states', 	'fields' => 'state'),
-							array('v' => '420', 'name' => 'pbistyse_states', 	'fields' => 'publication, issue, type, section'),
-							array('v' => '420', 'name' => 'istyse_states', 	'fields' => 'issue, type, section'),
+							array('v' => '4.2', 'name' => 'st_states', 	'fields' => 'state'),
+							array('v' => '4.2', 'name' => 'pbistyse_states', 	'fields' => 'publication, issue, type, section'),
+							array('v' => '4.2', 'name' => 'istyse_states', 	'fields' => 'issue, type, section'),
 						),
 						'inserts' => array(
 							"1, 1, 'Article', 'Draft text', '', '#FF0000', 2, 10, 0, 0,0,0, '', '', '', '', 'Production', ''",
@@ -1333,161 +1323,161 @@ class DBStruct
 							"25, 1, 'PublishFormTemplate', 'Publish Form Templates', '', '#AAAAAA', 0, 0, 0, 0, 0, 0, 0, '', '', '', 'Production', ''",
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'nextstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'nextstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'800', 'name' => 'smart_storage',
+				array ('v' =>'8.0', 'name' => 'smart_storage',
 						'comment' => 'Not needed since v8.0, only physical file store is used.',
-						'drops' => array ('v' =>'320', 'name' => 'smart_storage', 'comment' => 'This tables is used to store object renditions when no physical file store is used (Oracle only).',
+						'drops' => array ('v' =>'3.2', 'name' => 'smart_storage', 'comment' => 'This tables is used to store object renditions when no physical file store is used (Oracle only).',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '320', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'oid',				'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '320', 'name' => 'oid',				'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '320', 'name' => 'fld',				'type' => 'varchar(100)',		'default' => "''"),
-						  array('v' => '320', 'name' => 'type',				'type' => 'varchar(100)',		'default' => "''"),
-						  array('v' => '600', 'name' => 'minorversion',	'type' => 'mediumint(9)','default' => "'0'",
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.2', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'oid',				'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '3.2', 'name' => 'oid',				'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '3.2', 'name' => 'fld',				'type' => 'varchar(100)',		'default' => "''"),
+						  array('v' => '3.2', 'name' => 'type',				'type' => 'varchar(100)',		'default' => "''"),
+						  array('v' => '6.0', 'name' => 'minorversion',	'type' => 'mediumint(9)','default' => "'0'",
 						  		'alters' => array( // rename version -> minorversion
-						              	'v' => '599', 'name' => 'vers',		'type' => 'mediumint(9)',		'default' => "'0'",
+						              	'v' => '5.99', 'name' => 'vers',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  					'alters' => array( // change type version varchar to int
-						              				'v' => '320', 'name' => 'vers',		'type' => 'varchar(100)',	'default' => "''"),),),
-						  array('v' => '320', 'name' => 'page',				'type' => 'varchar(100)',		'default' => "''"),
-						  array('v' => '320', 'name' => 'content',			'type' => 'longblob',			'default' => ""),
-						  array('v' => '750', 'name' => 'date',				'type' => 'timestamp',		'default' => "",
-						  	'alters' => array('v' => '320', 'name' => 'date',				'type' => 'timestamp(14)',		'default' => "") ), 
-						  array('v' => '610', 'name' => 'edition',			'type' => 'int(11)',		'default' => "'0'",
-								  'alters' => array('v' => '420', 'name' => 'edition',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '599', 'name' => 'majorversion',		'type' => 'mediumint(9)',		'default' => "'-1'",
+						              				'v' => '3.2', 'name' => 'vers',		'type' => 'varchar(100)',	'default' => "''"),),),
+						  array('v' => '3.2', 'name' => 'page',				'type' => 'varchar(100)',		'default' => "''"),
+						  array('v' => '3.2', 'name' => 'content',			'type' => 'longblob',			'default' => ""),
+						  array('v' => '7.5', 'name' => 'date',				'type' => 'timestamp',		'default' => "",
+						  	'alters' => array('v' => '3.2', 'name' => 'date',				'type' => 'timestamp(14)',		'default' => "") ), 
+						  array('v' => '6.1', 'name' => 'edition',			'type' => 'int(11)',		'default' => "'0'",
+								  'alters' => array('v' => '4.2', 'name' => 'edition',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '5.99', 'name' => 'majorversion',		'type' => 'mediumint(9)',		'default' => "'-1'",
 					  		'comment' => 'Major object version at the time server was requested. -1 for undetermined version of migrated databases. Values were never set before v6.0.' ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'oifl_storage', 	'fields' => 'oid, fld'),
+							array('v' => '4.2', 'name' => 'oifl_storage', 	'fields' => 'oid, fld'),
 						),
 						'inserts' => array(),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'oid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'oid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
 						),
 						),
 				),
-				array ('v' =>'310', 'name' => 'smart_tickets',
+				array ('v' =>'3.1', 'name' => 'smart_tickets',
 						'comment' => 'Tickets given to currently logged on users.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-								  'alters' => array('v' => '310', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '310', 'name' => 'ticketid',			'type' => 'varchar(40)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'usr',				'type' => 'varchar(40)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'db',				'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '610', 'name' => 'clientname',		'type' => 'varchar(255)',		'default' => "''",
-						  		'alters' => array('v' => '310', 'name' => 'clientname',		'type' => 'varchar(40)',	'default' => "''")),
-						  array('v' => '310', 'name' => 'clientip',			'type' => 'varchar(40)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'appname',			'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'appversion',		'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '310', 'name' => 'appserial',		'type' => 'varchar(200)',		'default' => "''"),
-						  array('v' => '800', 'name' => 'logon',			'type' => 'varchar(20)', 		'default' => "''", 'nullable' => false, 
-						  	'alters' => array('v' => '310', 'name' => 'logon',			'type' => 'varchar(20)', 		'default' => "NULL", 'nullable' => true,)),
-						  array('v' => '800', 'name' => 'expire',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-						  		'alters' => array('v' => '310', 'name' => 'expire',		'type' => 'varchar(20)',		'default' => "''")),
-						  array('v' => '500', 'name' => 'appproductcode',	'type' => 'varchar(40)',		'default' => "''"),
-						  array('v' => '970', 'name' => 'masterticketid',	'type' => 'varchar(40)',		'default' => "''",
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+								  'alters' => array('v' => '3.1', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '3.1', 'name' => 'ticketid',			'type' => 'varchar(40)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'usr',				'type' => 'varchar(40)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'db',				'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '6.1', 'name' => 'clientname',		'type' => 'varchar(255)',		'default' => "''",
+						  		'alters' => array('v' => '3.1', 'name' => 'clientname',		'type' => 'varchar(40)',	'default' => "''")),
+						  array('v' => '3.1', 'name' => 'clientip',			'type' => 'varchar(40)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'appname',			'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'appversion',		'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '3.1', 'name' => 'appserial',		'type' => 'varchar(200)',		'default' => "''"),
+						  array('v' => '8.0', 'name' => 'logon',			'type' => 'varchar(20)', 		'default' => "''", 'nullable' => false, 
+						  	'alters' => array('v' => '3.1', 'name' => 'logon',			'type' => 'varchar(20)', 		'default' => "NULL", 'nullable' => true,)),
+						  array('v' => '8.0', 'name' => 'expire',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+						  		'alters' => array('v' => '3.1', 'name' => 'expire',		'type' => 'varchar(20)',		'default' => "''")),
+						  array('v' => '5.0', 'name' => 'appproductcode',	'type' => 'varchar(40)',		'default' => "''"),
+						  array('v' => '9.7', 'name' => 'masterticketid',	'type' => 'varchar(40)',		'default' => "''",
 						  	'comment' => 'When client (e.g. IDS for DPS) does logon twice, this field refers to the ticket of the first logon.' ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'ti_tickets', 	'fields' => 'ticketid'),
-							array('v' => '420', 'name' => 'us_tickets', 	'fields' => 'usr'),
-							array('v' => '970', 'name' => 'mtid_tickets', 	'fields' => 'masterticketid'),
+							array('v' => '4.2', 'name' => 'ti_tickets', 	'fields' => 'ticketid'),
+							array('v' => '4.2', 'name' => 'us_tickets', 	'fields' => 'usr'),
+							array('v' => '9.7', 'name' => 'mtid_tickets', 	'fields' => 'masterticketid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'usr', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '970', 'field' => 'masterticketid', 'reftable' => 'smart_tickets', 'reffield' => 'ticketid'),
+							array('v' => '4.2', 'field' => 'usr', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '9.7', 'field' => 'masterticketid', 'reftable' => 'smart_tickets', 'reffield' => 'ticketid'),
 						),
 				),
-				array( 'v' =>'910', 'name' => 'smart_termentities',
+				array( 'v' =>'9.1', 'name' => 'smart_termentities',
 						'comment' => 'To store all Term Entity from various Autocomplete providers.',
 						'fields' => array(
-							array('v' => '910', 'name' => 'id',        'type' => 'int(11)',     'autoincrement' => true ),
-							array('v' => '910', 'name' => 'name',      'type' => 'varchar(255)', 'default' => "''",
+							array('v' => '9.1', 'name' => 'id',        'type' => 'int(11)',     'autoincrement' => true ),
+							array('v' => '9.1', 'name' => 'name',      'type' => 'varchar(255)', 'default' => "''",
 								'comment' => 'Name of the TermEntity. For example: city, country, people.' ),
-							array('v' => '910', 'name' => 'provider',  'type' => 'varchar(40)', 'default' => "''",
+							array('v' => '9.1', 'name' => 'provider',  'type' => 'varchar(40)', 'default' => "''",
 								'comment' => 'The Autocomplete provider name. This is the internal name of the server plugin name that has the Autocomplete connector.' .
 								'When the provider is set to empty, Enterprise core server becomes the provider.'),
-							array('v' => '910', 'name' => 'publishsystemid', 'type' => 'varchar(40)', 'default' => "''",
+							array('v' => '9.1', 'name' => 'publishsystemid', 'type' => 'varchar(40)', 'default' => "''",
 								'comment' => 'Unique id of the publishing system. Use to bind the publishing storage.' ),
 						),
 						'indexes' => array(
-							array('v' => '910', 'name' => 'te_name', 	 'fields' => 'name' ),
-							array('v' => '910', 'name' => 'te_provider', 'fields' => 'provider' ),
-							array('v' => '910', 'name' => 'te_termentity', 'fields' => 'name,provider' ),
+							array('v' => '9.1', 'name' => 'te_name', 	 'fields' => 'name' ),
+							array('v' => '9.1', 'name' => 'te_provider', 'fields' => 'provider' ),
+							array('v' => '9.1', 'name' => 'te_termentity', 'fields' => 'name,provider' ),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
 						),
 				),
-				array( 'v' =>'910', 'name' => 'smart_terms',
+				array( 'v' =>'9.1', 'name' => 'smart_terms',
 						'comment' => 'To store all terms that are grouped by Term Entity.',
 						'fields' => array(
-							array('v' => '910', 'name' => 'entityid',        'type' => 'int(11)',      'default' => "'0'" ),
-							array('v' => '910', 'name' => 'displayname',     'type' => 'varchar(255)', 'default' => "''",
+							array('v' => '9.1', 'name' => 'entityid',        'type' => 'int(11)',      'default' => "'0'" ),
+							array('v' => '9.1', 'name' => 'displayname',     'type' => 'varchar(255)', 'default' => "''",
 								'comment' => 'Human readable term, as shown in the UI.' ),
-							array('v' => '910', 'name' => 'normalizedname',  'type' => 'varchar(255)', 'default' => "''",
+							array('v' => '9.1', 'name' => 'normalizedname',  'type' => 'varchar(255)', 'default' => "''",
 								'comment' => 'Normalized version of the display name. That is lower-cased, without accents, spaces or dashes.' ),
-							array( 'v' => '910', 'name' => 'ligatures', 'type' => 'varchar(255)', 'default' => "''",
+							array( 'v' => '9.1', 'name' => 'ligatures', 'type' => 'varchar(255)', 'default' => "''",
 								'comment' => 'To store the ligatures of the displayname.' ),
 						),
 						'indexes' => array(
-							array('v' => '910', 'name' => 'primary', 'fields' => 'entityid, displayname', 'primary' => true ),
-							array('v' => '910', 'name' => 'tm_entityid', 'fields' => 'entityid' ),
-							array('v' => '910', 'name' => 'tm_normalizedname', 'fields' => 'entityid,normalizedname' ),
+							array('v' => '9.1', 'name' => 'primary', 'fields' => 'entityid, displayname', 'primary' => true ),
+							array('v' => '9.1', 'name' => 'tm_entityid', 'fields' => 'entityid' ),
+							array('v' => '9.1', 'name' => 'tm_normalizedname', 'fields' => 'entityid,normalizedname' ),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '910', 'field' => 'entityid', 'reftable' => 'smart_termentities', 'reffield' => 'id'),
+							array('v' => '9.1', 'field' => 'entityid', 'reftable' => 'smart_termentities', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'310', 'name' => 'smart_users',
+				array ('v' =>'3.1', 'name' => 'smart_users',
 						'comment' => 'User definitions.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '310', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '310', 'name' => 'user',				'type' => 'varchar(40)',		'default' => "''",
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '3.1', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '3.1', 'name' => 'user',				'type' => 'varchar(40)',		'default' => "''",
 						  	'comment' => 'Short user name must be unique' ),
-						  array('v' => '310', 'name' => 'fullname',			'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '910', 'name' => 'pass',				'type' => 'varchar(128)',		'default' => "''",
-								'alters' => array('v' => '310', 'name' => 'pass',				'type' => 'varchar(40)',		'default' => "''"), ),
-						  array('v' => '310', 'name' => 'disable',			'type' => 'char(2)',			'default' => "''"),
-						  array('v' => '340', 'name' => 'fixedpass',		'type' => 'char(2)',			'default' => "''"),
-						  array('v' => '340', 'name' => 'email',			'type' => 'varchar(100)',		'default' => "''"),
-						  array('v' => '340', 'name' => 'emailgrp',			'type' => 'char(2)',			'default' => "''"),
-						  array('v' => '340', 'name' => 'emailusr',			'type' => 'char(2)',			'default' => "''"),
-						  array('v' => '800', 'name' => 'language',			'type' => 'varchar(4)',			'default' => "''", 'nullable' => false,
-						  	'alters' => array('v' => '400', 'name' => 'language',			'type' => 'varchar(4)',			'default' => "''", 'nullable' => true)),
-						  array('v' => '800', 'name' => 'startdate',		'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-						  		'alters' => array('v' => '420', 'name' => 'startdate',		'type' => 'varchar(20)',		'default' => "''"),),
-						  array('v' => '800', 'name' => 'enddate',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-							  	'alters' => array('v' => '420', 'name' => 'enddate',			'type' => 'varchar(20)',		'default' => "''")),
-						  array('v' => '800', 'name' => 'expirepassdate',	'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-						  		'alters' => array('v' => '420', 'name' => 'expirepassdate',		'type' => 'varchar(20)',		'default' => "''")),
-						  array('v' => '420', 'name' => 'expiredays',		'type' => 'int(4)',				'default' => "'0'"),
-						  array('v' => '420', 'name' => 'trackchangescolor','type' => 'varchar(11)',		'default' => "''"),
-						  array('v' => '800', 'name' => 'lastlogondate',	'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-						  		'alters' => array('v' => '500', 'name' => 'lastlogondate',		'type' => 'varchar(20)',		'default' => "''")),
-						  array('v' => '599', 'name' => 'organization',		'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '599', 'name' => 'location',			'type' => 'varchar(255)',		'default' => "''"),
-						  array('v' => '700', 'name' => 'externalid',		'type' => 'varchar(200)',		'default' => "''",
+						  array('v' => '3.1', 'name' => 'fullname',			'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '9.1', 'name' => 'pass',				'type' => 'varchar(128)',		'default' => "''",
+								'alters' => array('v' => '3.1', 'name' => 'pass',				'type' => 'varchar(40)',		'default' => "''"), ),
+						  array('v' => '3.1', 'name' => 'disable',			'type' => 'char(2)',			'default' => "''"),
+						  array('v' => '3.4', 'name' => 'fixedpass',		'type' => 'char(2)',			'default' => "''"),
+						  array('v' => '3.4', 'name' => 'email',			'type' => 'varchar(100)',		'default' => "''"),
+						  array('v' => '3.4', 'name' => 'emailgrp',			'type' => 'char(2)',			'default' => "''"),
+						  array('v' => '3.4', 'name' => 'emailusr',			'type' => 'char(2)',			'default' => "''"),
+						  array('v' => '8.0', 'name' => 'language',			'type' => 'varchar(4)',			'default' => "''", 'nullable' => false,
+						  	'alters' => array('v' => '4.0', 'name' => 'language',			'type' => 'varchar(4)',			'default' => "''", 'nullable' => true)),
+						  array('v' => '8.0', 'name' => 'startdate',		'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+						  		'alters' => array('v' => '4.2', 'name' => 'startdate',		'type' => 'varchar(20)',		'default' => "''"),),
+						  array('v' => '8.0', 'name' => 'enddate',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+							  	'alters' => array('v' => '4.2', 'name' => 'enddate',			'type' => 'varchar(20)',		'default' => "''")),
+						  array('v' => '8.0', 'name' => 'expirepassdate',	'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+						  		'alters' => array('v' => '4.2', 'name' => 'expirepassdate',		'type' => 'varchar(20)',		'default' => "''")),
+						  array('v' => '4.2', 'name' => 'expiredays',		'type' => 'int(4)',				'default' => "'0'"),
+						  array('v' => '4.2', 'name' => 'trackchangescolor','type' => 'varchar(11)',		'default' => "''"),
+						  array('v' => '8.0', 'name' => 'lastlogondate',	'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+						  		'alters' => array('v' => '5.0', 'name' => 'lastlogondate',		'type' => 'varchar(20)',		'default' => "''")),
+						  array('v' => '5.99', 'name' => 'organization',		'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '5.99', 'name' => 'location',			'type' => 'varchar(255)',		'default' => "''"),
+						  array('v' => '7.0', 'name' => 'externalid',		'type' => 'varchar(200)',		'default' => "''",
 								'comment' => 'External id for the user in an external system e.g. LDAP' ),
-                          array('v' => '940', 'name' => 'importonlogon',    'type' => 'char(2)',            'default' => "''",
+                          array('v' => '9.4', 'name' => 'importonlogon',    'type' => 'char(2)',            'default' => "''",
                                 'comment' => 'Import information from LDAP for users who log on and are only partially known in Enterprise Server. After logon this flag is unset.'),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'us_users', 	'fields' => 'user'),
-							array('v' => '420', 'name' => 'fu_users', 	'fields' => 'fullname'),
+							array('v' => '4.2', 'name' => 'us_users', 	'fields' => 'user'),
+							array('v' => '4.2', 'name' => 'fu_users', 	'fields' => 'fullname'),
 						),
 						'inserts' => array(
 							"1, 'woodwing', 'WoodWing Software', '', '', '', '', '', '', 'enUS', '', '', '', 0, '#FF0000', '', '', '', '', '' ",
@@ -1495,267 +1485,267 @@ class DBStruct
 						'lookups' => array(
 						),
 				),
-				array ('v' =>'310', 'name' => 'smart_usrgrp',
+				array ('v' =>'3.1', 'name' => 'smart_usrgrp',
 						'comment' => 'Assign users to user groups.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-								  'alters' => array('v' => '310', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'usrid',			'type' => 'int(11)',		'default' => "'0'",
-						  	  'alters' => array('v' => '310', 'name' => 'usrid',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'grpid',			'type' => 'int(11)',		'default' => "'0'",
-						  	  'alters' => array('v' => '310', 'name' => 'grpid',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+								  'alters' => array('v' => '3.1', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'usrid',			'type' => 'int(11)',		'default' => "'0'",
+						  	  'alters' => array('v' => '3.1', 'name' => 'usrid',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'grpid',			'type' => 'int(11)',		'default' => "'0'",
+						  	  'alters' => array('v' => '3.1', 'name' => 'grpid',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
 						),
 						'indexes' => array(
-							array('v' => '310', 'name' => 'usgi_usrgrp', 'fields' => 'usrid, grpid', 'unique' => true),
-							array('v' => '420', 'name' => 'gi_usrgrp', 	'fields' => 'grpid'),
+							array('v' => '3.1', 'name' => 'usgi_usrgrp', 'fields' => 'usrid, grpid', 'unique' => true),
+							array('v' => '4.2', 'name' => 'gi_usrgrp', 	'fields' => 'grpid'),
 						),
 						'inserts' => array(
 							"2, 1, 2",
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'usrid', 'reftable' => 'smart_users', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'grpid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'usrid', 'reftable' => 'smart_users', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'grpid', 'reftable' => 'smart_groups', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'410', 'name' => 'smart_mtp',
+				array ('v' =>'4.1', 'name' => 'smart_mtp',
 						'comment' => '',
 						'fields' => array(
-							array('v' => '610', 'name' => 'publid', 			'type' => 'int(11)', 'default' => "",
-								  'alters' => array('v' => '410', 'name' => 'publid', 			'type' => 'mediumint(9)', 'default' => ""), ),
-							array('v' => '610', 'name' => 'issueid',			'type' => 'int(11)', 'default' => "'0'",
-								  'alters' => array('v' => '410', 'name' => 'issueid',			'type' => 'mediumint(9)', 'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'laytriggerstate',	'type' => 'int(11)', 'default' => "",
-								  'alters' => array('v' => '410', 'name' => 'laytriggerstate',	'type' => 'mediumint(9)', 'default' => ""), ),
-							array('v' => '800', 'name' => 'arttriggerstate',	'type' => 'int(11)', 'default' => "0", 'nullable' => false,
-								  'alters' => array('v' => '610', 'name' => 'arttriggerstate',	'type' => 'int(11)', 'default' => "", 'nullable' => true,
-								  'alters' => array('v' => '410', 'name' => 'arttriggerstate',	'type' => 'mediumint(9)', 'default' => "", 'nullable' => true ), )),
-							array('v' => '800', 'name' => 'imgtriggerstate',	'type' => 'int(11)', 'default' => "0", 'nullable' => false,
-								  'alters' => array('v' => '610', 'name' => 'imgtriggerstate',	'type' => 'int(11)', 'default' => "", 'nullable' => true,
-								  'alters' => array('v' => '410', 'name' => 'imgtriggerstate',	'type' => 'mediumint(9)', 'default' => "", 'nullable' => true ), )),
-							array('v' => '800', 'name' => 'layprogstate',		'type' => 'int(11)', 'default' => "0", 'nullable' => false,
-								  'alters' => array('v' => '610', 'name' => 'layprogstate',		'type' => 'int(11)', 'default' => "", 'nullable' => true,
-								  'alters' => array('v' => '410', 'name' => 'layprogstate',		'type' => 'mediumint(9)', 'default' => "", 'nullable' => true ), )),
-							array('v' => '800', 'name' => 'artprogstate',		'type' => 'int(11)', 'default' => "0", 'nullable' => false,
-								  'alters' => array('v' => '610', 'name' => 'artprogstate',		'type' => 'int(11)', 'default' => "", 'nullable' => true,
-								  'alters' => array('v' => '410', 'name' => 'artprogstate',		'type' => 'mediumint(9)', 'default' => "", 'nullable' => true ), )),
-							array('v' => '800', 'name' => 'imgprogstate',		'type' => 'int(11)', 'default' => "0", 'nullable' => false,
-								  'alters' => array('v' => '610', 'name' => 'imgprogstate',		'type' => 'int(11)', 'default' => "", 'nullable' => true,
-								  'alters' => array('v' => '410', 'name' => 'imgprogstate',		'type' => 'mediumint(9)', 'default' => "", 'nullable' => true ), )),
-							array('v' => '800', 'name' => 'mtptext',			'type' => 'blob', 'nullable' => false, 'default' => "''",
-								  'alters' => array('v' => '410', 'name' => 'mtptext',			'type' => 'blob', 'nullable' => true, 'default' => "")),
+							array('v' => '6.1', 'name' => 'publid', 			'type' => 'int(11)', 'default' => "",
+								  'alters' => array('v' => '4.1', 'name' => 'publid', 			'type' => 'mediumint(9)', 'default' => ""), ),
+							array('v' => '6.1', 'name' => 'issueid',			'type' => 'int(11)', 'default' => "'0'",
+								  'alters' => array('v' => '4.1', 'name' => 'issueid',			'type' => 'mediumint(9)', 'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'laytriggerstate',	'type' => 'int(11)', 'default' => "",
+								  'alters' => array('v' => '4.1', 'name' => 'laytriggerstate',	'type' => 'mediumint(9)', 'default' => ""), ),
+							array('v' => '8.0', 'name' => 'arttriggerstate',	'type' => 'int(11)', 'default' => "0", 'nullable' => false,
+								  'alters' => array('v' => '6.1', 'name' => 'arttriggerstate',	'type' => 'int(11)', 'default' => "", 'nullable' => true,
+								  'alters' => array('v' => '4.1', 'name' => 'arttriggerstate',	'type' => 'mediumint(9)', 'default' => "", 'nullable' => true ), )),
+							array('v' => '8.0', 'name' => 'imgtriggerstate',	'type' => 'int(11)', 'default' => "0", 'nullable' => false,
+								  'alters' => array('v' => '6.1', 'name' => 'imgtriggerstate',	'type' => 'int(11)', 'default' => "", 'nullable' => true,
+								  'alters' => array('v' => '4.1', 'name' => 'imgtriggerstate',	'type' => 'mediumint(9)', 'default' => "", 'nullable' => true ), )),
+							array('v' => '8.0', 'name' => 'layprogstate',		'type' => 'int(11)', 'default' => "0", 'nullable' => false,
+								  'alters' => array('v' => '6.1', 'name' => 'layprogstate',		'type' => 'int(11)', 'default' => "", 'nullable' => true,
+								  'alters' => array('v' => '4.1', 'name' => 'layprogstate',		'type' => 'mediumint(9)', 'default' => "", 'nullable' => true ), )),
+							array('v' => '8.0', 'name' => 'artprogstate',		'type' => 'int(11)', 'default' => "0", 'nullable' => false,
+								  'alters' => array('v' => '6.1', 'name' => 'artprogstate',		'type' => 'int(11)', 'default' => "", 'nullable' => true,
+								  'alters' => array('v' => '4.1', 'name' => 'artprogstate',		'type' => 'mediumint(9)', 'default' => "", 'nullable' => true ), )),
+							array('v' => '8.0', 'name' => 'imgprogstate',		'type' => 'int(11)', 'default' => "0", 'nullable' => false,
+								  'alters' => array('v' => '6.1', 'name' => 'imgprogstate',		'type' => 'int(11)', 'default' => "", 'nullable' => true,
+								  'alters' => array('v' => '4.1', 'name' => 'imgprogstate',		'type' => 'mediumint(9)', 'default' => "", 'nullable' => true ), )),
+							array('v' => '8.0', 'name' => 'mtptext',			'type' => 'blob', 'nullable' => false, 'default' => "''",
+								  'alters' => array('v' => '4.1', 'name' => 'mtptext',			'type' => 'blob', 'nullable' => true, 'default' => "")),
 						),
 						'indexes' => array(
-							array ('v' => '410', 'name' => 'primary', 'fields' => 'publid, issueid, laytriggerstate', 'primary' => true),
-							array ('v' => '420', 'name' => 'ii_mtp', 'fields' => 'issueid')
+							array ('v' => '4.1', 'name' => 'primary', 'fields' => 'publid, issueid, laytriggerstate', 'primary' => true),
+							array ('v' => '4.2', 'name' => 'ii_mtp', 'fields' => 'issueid')
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '410', 'field' => 'publid', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '410', 'field' => 'issueid', 'reftable' => 'smart_issues', 'reffield' => 'id'),
-							array('v' => '410', 'field' => 'laytriggerstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
-							array('v' => '410', 'field' => 'arttriggerstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
-							array('v' => '410', 'field' => 'imgtriggerstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
-							array('v' => '410', 'field' => 'layprogstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
-							array('v' => '410', 'field' => 'artprogstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
-							array('v' => '410', 'field' => 'imgprogstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.1', 'field' => 'publid', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '4.1', 'field' => 'issueid', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '4.1', 'field' => 'laytriggerstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.1', 'field' => 'arttriggerstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.1', 'field' => 'imgtriggerstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.1', 'field' => 'layprogstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.1', 'field' => 'artprogstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.1', 'field' => 'imgprogstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'410', 'name' => 'smart_mtpsentobjects',
+				array ('v' =>'4.1', 'name' => 'smart_mtpsentobjects',
 						'comment' => '',
 						'fields' => array(
-							array('v' => '610', 'name' => 'objid',			'type' => 'int(11)', 'default' => "'0'",
-									'alters' => array('v' => '500', 'name' => 'objid',			'type' => 'mediumint(9)', 'default' => "'0'",
-										  'alters' => array('v' => '410', 'name' => 'objid', 'type' => 'mediumint(9)', 'default' => "'0'", 'autoincrement' => true)), ),
-							array('v' => '610', 'name' => 'publid',			'type' => 'int(11)', 'default' => "" ,
-									'alters' => array('v' => '410', 'name' => 'publid',			'type' => 'mediumint(9)', 'default' => "" ), ),
-							array('v' => '610', 'name' => 'issueid',		'type' => 'int(11)', 'default' => "'0'",
-									'alters' => array('v' => '410', 'name' => 'issueid',		'type' => 'mediumint(9)', 'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'laytriggerstate','type' => 'int(11)', 'default' => "",
-									'alters' => array('v' => '410', 'name' => 'laytriggerstate','type' => 'mediumint(9)', 'default' => ""), ),
-							array('v' => '410', 'name' => 'printstate',		'type' => 'mediumint(1)', 'default' => ""),
+							array('v' => '6.1', 'name' => 'objid',			'type' => 'int(11)', 'default' => "'0'",
+									'alters' => array('v' => '5.0', 'name' => 'objid',			'type' => 'mediumint(9)', 'default' => "'0'",
+										  'alters' => array('v' => '4.1', 'name' => 'objid', 'type' => 'mediumint(9)', 'default' => "'0'", 'autoincrement' => true)), ),
+							array('v' => '6.1', 'name' => 'publid',			'type' => 'int(11)', 'default' => "" ,
+									'alters' => array('v' => '4.1', 'name' => 'publid',			'type' => 'mediumint(9)', 'default' => "" ), ),
+							array('v' => '6.1', 'name' => 'issueid',		'type' => 'int(11)', 'default' => "'0'",
+									'alters' => array('v' => '4.1', 'name' => 'issueid',		'type' => 'mediumint(9)', 'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'laytriggerstate','type' => 'int(11)', 'default' => "",
+									'alters' => array('v' => '4.1', 'name' => 'laytriggerstate','type' => 'mediumint(9)', 'default' => ""), ),
+							array('v' => '4.1', 'name' => 'printstate',		'type' => 'mediumint(1)', 'default' => ""),
 						),
 						'indexes' => array(
-							array ('v' => '410', 'name' => 'primary', 'fields' => 'objid, publid, issueid, laytriggerstate, printstate', 'primary' => true),
-							array ('v' => '420', 'name' => 'ii_mtpsentobjects', 'fields' => 'issueid'),
-							array ('v' => '420', 'name' => 'ls_mtpsentobjects', 'fields' => 'laytriggerstate')
+							array ('v' => '4.1', 'name' => 'primary', 'fields' => 'objid, publid, issueid, laytriggerstate, printstate', 'primary' => true),
+							array ('v' => '4.2', 'name' => 'ii_mtpsentobjects', 'fields' => 'issueid'),
+							array ('v' => '4.2', 'name' => 'ls_mtpsentobjects', 'fields' => 'laytriggerstate')
 
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '410', 'field' => 'publid', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '410', 'field' => 'issueid', 'reftable' => 'smart_issues', 'reffield' => 'id'),
-							array('v' => '410', 'field' => 'laytriggerstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.1', 'field' => 'publid', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '4.1', 'field' => 'issueid', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '4.1', 'field' => 'laytriggerstate', 'reftable' => 'smart_states', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'410', 'name' => 'smart_messagelog',
+				array ('v' =>'4.1', 'name' => 'smart_messagelog',
 						'comment' => 'Log messages per object / user for reporting purposes.',
 						'fields' => array(
-							array('v' => '800', 'name' => 'id',					'type' => 'bigint(20)', 		'autoincrement' => true,
-									'alters' => array('v' => '610', 'name' => 'id',					'type' => 'int(11)', 			'autoincrement' => true,
-									'alters' => array('v' => '410', 'name' => 'id',					'type' => 'mediumint(9)', 		'autoincrement' => true), )),
-						    array('v' => '800',	'name' => 'objid',	'type' => 'int(11)',	'default' => 0, 	'nullable' => false,
-						    		'alters' => array('v' => '610', 'name' => 'objid', 				'type' => 'int(11)',		'default' => "'0'", 	'nullable' => true,
-						    		'alters' => array('v' => '410', 'name' => 'objid', 				'type' => 'mediumint(9)',		'default' => "'0'", 	'nullable' => true), )),
-						    array('v' => '800', 'name' => 'userid', 			'type' => 'int(11)',		'default' => 0, 	'nullable' => false,
-						    		'alters' => array('v' => '610', 'name' => 'userid', 			'type' => 'int(11)',		'default' => "'0'", 	'nullable' => true,
-						    		'alters' => array('v' => '410', 'name' => 'userid', 			'type' => 'mediumint(9)',		'default' => "'0'", 	'nullable' => true), )),
-							array('v' => '410', 'name' => 'messagetype', 		'type' => 'varchar(255)', 		'default' => ""),
-							array('v' => '410', 'name' => 'messagetypedetail',	'type' => 'varchar(255)', 		'default' => ""),
-							array('v' => '410', 'name' => 'message', 			'type' => 'blob', 				'default' => ""),
-							array('v' => '410', 'name' => 'date',				'type' => 'varchar(30)',		'default' => "''", 'comment' => "'yyyy-mm-ddThh:mm:ss'"),
-							array('v' => '410', 'name' => 'expirationdate',		'type' => 'varchar(30)',		'default' => "''"),
-							array('v' => '410', 'name' => 'messagelevel',		'type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '410', 'name' => 'fromuser',			'type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '420', 'name' => 'msgid',				'type' => 'varchar(200)',		'default' => "''"),
-							array('v' => '420', 'name' => 'anchorx',			'type' => 'double',				'default' => "'0'"),
-							array('v' => '420', 'name' => 'anchory',			'type' => 'double',				'default' => "'0'"),
-							array('v' => '420', 'name' => 'left',				'type' => 'double',				'default' => "'0'"),
-							array('v' => '420', 'name' => 'top',				'type' => 'double',				'default' => "'0'"),
-							array('v' => '420', 'name' => 'width',				'type' => 'double',				'default' => "'0'"),
-							array('v' => '420', 'name' => 'height',				'type' => 'double',				'default' => "'0'"),
-							array('v' => '420', 'name' => 'page',				'type' => 'mediumint(9)',		'default' => "'0'",
+							array('v' => '8.0', 'name' => 'id',					'type' => 'bigint(20)', 		'autoincrement' => true,
+									'alters' => array('v' => '6.1', 'name' => 'id',					'type' => 'int(11)', 			'autoincrement' => true,
+									'alters' => array('v' => '4.1', 'name' => 'id',					'type' => 'mediumint(9)', 		'autoincrement' => true), )),
+						    array('v' => '8.0',	'name' => 'objid',	'type' => 'int(11)',	'default' => 0, 	'nullable' => false,
+						    		'alters' => array('v' => '6.1', 'name' => 'objid', 				'type' => 'int(11)',		'default' => "'0'", 	'nullable' => true,
+						    		'alters' => array('v' => '4.1', 'name' => 'objid', 				'type' => 'mediumint(9)',		'default' => "'0'", 	'nullable' => true), )),
+						    array('v' => '8.0', 'name' => 'userid', 			'type' => 'int(11)',		'default' => 0, 	'nullable' => false,
+						    		'alters' => array('v' => '6.1', 'name' => 'userid', 			'type' => 'int(11)',		'default' => "'0'", 	'nullable' => true,
+						    		'alters' => array('v' => '4.1', 'name' => 'userid', 			'type' => 'mediumint(9)',		'default' => "'0'", 	'nullable' => true), )),
+							array('v' => '4.1', 'name' => 'messagetype', 		'type' => 'varchar(255)', 		'default' => ""),
+							array('v' => '4.1', 'name' => 'messagetypedetail',	'type' => 'varchar(255)', 		'default' => ""),
+							array('v' => '4.1', 'name' => 'message', 			'type' => 'blob', 				'default' => ""),
+							array('v' => '4.1', 'name' => 'date',				'type' => 'varchar(30)',		'default' => "''", 'comment' => "'yyyy-mm-ddThh:mm:ss'"),
+							array('v' => '4.1', 'name' => 'expirationdate',		'type' => 'varchar(30)',		'default' => "''"),
+							array('v' => '4.1', 'name' => 'messagelevel',		'type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '4.1', 'name' => 'fromuser',			'type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '4.2', 'name' => 'msgid',				'type' => 'varchar(200)',		'default' => "''"),
+							array('v' => '4.2', 'name' => 'anchorx',			'type' => 'double',				'default' => "'0'"),
+							array('v' => '4.2', 'name' => 'anchory',			'type' => 'double',				'default' => "'0'"),
+							array('v' => '4.2', 'name' => 'left',				'type' => 'double',				'default' => "'0'"),
+							array('v' => '4.2', 'name' => 'top',				'type' => 'double',				'default' => "'0'"),
+							array('v' => '4.2', 'name' => 'width',				'type' => 'double',				'default' => "'0'"),
+							array('v' => '4.2', 'name' => 'height',				'type' => 'double',				'default' => "'0'"),
+							array('v' => '4.2', 'name' => 'page',				'type' => 'mediumint(9)',		'default' => "'0'",
 							  	'comment' => 'Sequential page order within an issue' ),
-							array('v' => '420', 'name' => 'version',			'type' => 'varchar(200)',		'default' => "''",
+							array('v' => '4.2', 'name' => 'version',			'type' => 'varchar(200)',		'default' => "''",
 								'comment' => 'Sticky info version to track and trigger updates.' ),
-							array('v' => '420', 'name' => 'color',				'type' => 'varchar(11)',		'default' => "''"),
-							array('v' => '500', 'name' => 'pagesequence',		'type' => 'mediumint(9)',		'default' => "'0'",
+							array('v' => '4.2', 'name' => 'color',				'type' => 'varchar(11)',		'default' => "''"),
+							array('v' => '5.0', 'name' => 'pagesequence',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  		'comment' => 'Sequential page order within a layout' ),
-							array('v' => '800', 'name' => 'threadmessageid',    'type' => 'varchar(200)',       'default' => "''",
+							array('v' => '8.0', 'name' => 'threadmessageid',    'type' => 'varchar(200)',       'default' => "''",
 						  		'comment' => 'The msgid of parental message. Can be seen as a message thread.' ),
-							array('v' => '800', 'name' => 'replytomessageid',   'type' => 'varchar(200)',       'default' => "''",
+							array('v' => '8.0', 'name' => 'replytomessageid',   'type' => 'varchar(200)',       'default' => "''",
 						  		'comment' => 'The msgid of previous message the user has replied on.' ),
-							array('v' => '800', 'name' => 'messagestatus',      'type' => 'varchar(15)',        'default' => "'None'",
+							array('v' => '8.0', 'name' => 'messagestatus',      'type' => 'varchar(15)',        'default' => "'None'",
 						  		'comment' => 'Current status of this message, following a basic message workflow.' ),
-						    array('v' => '800', 'name' => 'majorversion',		'type' => 'mediumint(9)',	    'default' => "'0'",
+						    array('v' => '8.0', 'name' => 'majorversion',		'type' => 'mediumint(9)',	    'default' => "'0'",
 						  		'comment' => 'Major object version when this message was created.' ),
-						    array('v' => '800', 'name' => 'minorversion',		'type' => 'mediumint(9)',	    'default' => "'0'",
+						    array('v' => '8.0', 'name' => 'minorversion',		'type' => 'mediumint(9)',	    'default' => "'0'",
 						  		'comment' => 'Minor object version when this message was created. See also majorversion field.' ),
-							array('v' => '800', 'name' => 'isread',             'type' => 'varchar(2)',         'default' => "''",
+							array('v' => '8.0', 'name' => 'isread',             'type' => 'varchar(2)',         'default' => "''",
 						  		'comment' => 'Whether or not this message has been read by any user (or group) in the system.' ),
 						),
 						'indexes' => array(
-							array ('v' => '420', 'name' => 'oimtpa_messagelog', 	'fields' => 'objid, messagetype, page'),
-							array ('v' => '420', 'name' => 'oimtd_messagelog', 	'fields' => 'objid, messagetypedetail', ),
-							array ('v' => '420', 'name' => 'mi_messagelog', 	'fields' => 'msgid'),
-							array ('v' => '800', 'name' => 'uid_messagelog', 	'fields' => 'userid'),
+							array ('v' => '4.2', 'name' => 'oimtpa_messagelog', 	'fields' => 'objid, messagetype, page'),
+							array ('v' => '4.2', 'name' => 'oimtd_messagelog', 	'fields' => 'objid, messagetypedetail', ),
+							array ('v' => '4.2', 'name' => 'mi_messagelog', 	'fields' => 'msgid'),
+							array ('v' => '8.0', 'name' => 'uid_messagelog', 	'fields' => 'userid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'userid', 'reftable' => 'smart_users', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'page', 'reftable' => 'smart_pages', 'reffield' => 'pageorder'),
-							array('v' => '500', 'field' => 'pagesequence', 'reftable' => 'smart_pages', 'reffield' => 'pagesequence'),
+							array('v' => '4.2', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'userid', 'reftable' => 'smart_users', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'page', 'reftable' => 'smart_pages', 'reffield' => 'pageorder'),
+							array('v' => '5.0', 'field' => 'pagesequence', 'reftable' => 'smart_pages', 'reffield' => 'pagesequence'),
 						),
 				),
-				array ('v' =>'410', 'name' => 'smart_objectflags',
+				array ('v' =>'4.1', 'name' => 'smart_objectflags',
 						'comment' => 'Contains volatile object flags, eg. set by planning system when layout is modified.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'objid',			'type' => 'int(11)',		'default' => "",
-									'alters' => array('v' => '410', 'name' => 'objid',			'type' => 'mediumint(9)',		'default' => ""), ),
-							array('v' => '410', 'name' => 'flagorigin',		'type' => 'varchar(255)',		'default' => ""),
-							array('v' => '410', 'name' => 'flag',			'type' => 'mediumint(9)',		'default' => ""),
-							array('v' => '410', 'name' => 'severity',		'type' => 'mediumint(9)',		'default' => ""),
-						    array('v' => '800', 'name' => 'message',		'type' => 'blob',				'default' => "''", 'nullable' => false,
-						    	'alters' => array('v' => '410', 'name' => 'message',		'type' => 'blob',				'default' => "", 'nullable' => true)),
-						    array('v' => '800', 'name' => 'locked',			'type' => 'mediumint(1)',		'default' => "0", 'nullable' => false,
-						    	'alters' => array('v' => '410', 'name' => 'locked',			'type' => 'mediumint(1)',		'default' => "", 'nullable' => true)),
+							array('v' => '6.1', 'name' => 'objid',			'type' => 'int(11)',		'default' => "",
+									'alters' => array('v' => '4.1', 'name' => 'objid',			'type' => 'mediumint(9)',		'default' => ""), ),
+							array('v' => '4.1', 'name' => 'flagorigin',		'type' => 'varchar(255)',		'default' => ""),
+							array('v' => '4.1', 'name' => 'flag',			'type' => 'mediumint(9)',		'default' => ""),
+							array('v' => '4.1', 'name' => 'severity',		'type' => 'mediumint(9)',		'default' => ""),
+						    array('v' => '8.0', 'name' => 'message',		'type' => 'blob',				'default' => "''", 'nullable' => false,
+						    	'alters' => array('v' => '4.1', 'name' => 'message',		'type' => 'blob',				'default' => "", 'nullable' => true)),
+						    array('v' => '8.0', 'name' => 'locked',			'type' => 'mediumint(1)',		'default' => "0", 'nullable' => false,
+						    	'alters' => array('v' => '4.1', 'name' => 'locked',			'type' => 'mediumint(1)',		'default' => "", 'nullable' => true)),
 						),
 						'indexes' => array(
-							array ('v' => '410', 'name' => 'primary', 'fields' => 'objid, flagorigin, flag', 'primary' => true),
+							array ('v' => '4.1', 'name' => 'primary', 'fields' => 'objid, flagorigin, flag', 'primary' => true),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'420', 'name' => 'smart_issuesection',
+				array ('v' =>'4.2', 'name' => 'smart_issuesection',
 						'comment' => '',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '420', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'issue',			'type' => 'int(11)',		'default' => "'0'",
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '4.2', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'issue',			'type' => 'int(11)',		'default' => "'0'",
 						  	'comment' => 'If 0, section for every issue in publication' ,
-								  'alters' => array('v' => '420', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'",
+								  'alters' => array('v' => '4.2', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'",
 								  	'comment' => 'If 0, section for every issue in publication' ), ),
-						  array('v' => '610', 'name' => 'section',			'type' => 'int(11)',		'default' => "'0'",
-								  'alters' => array('v' => '420', 'name' => 'section',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '800', 'name' => 'deadline',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-								'alters' => array('v' => '420', 'name' => 'deadline',			'type' => 'varchar(20)',		'default' => "''")),
+						  array('v' => '6.1', 'name' => 'section',			'type' => 'int(11)',		'default' => "'0'",
+								  'alters' => array('v' => '4.2', 'name' => 'section',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '8.0', 'name' => 'deadline',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+								'alters' => array('v' => '4.2', 'name' => 'deadline',			'type' => 'varchar(20)',		'default' => "''")),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'isse_issuesection', 'fields' => 'issue, section'),
+							array('v' => '4.2', 'name' => 'isse_issuesection', 'fields' => 'issue, section'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'420', 'name' => 'smart_issuesectionstate',
+				array ('v' =>'4.2', 'name' => 'smart_issuesectionstate',
 						'comment' => 'Overrule state/section(category) deadline for issue.',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-						  		'alters' => array('v' => '420', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  array('v' => '610', 'name' => 'issue',			'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'section',			'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'section',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '610', 'name' => 'state',			'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'state',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						  array('v' => '800', 'name' => 'deadline',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-							  	'alters' => array('v' => '420', 'name' => 'deadline',			'type' => 'varchar(20)',		'default' => "''")),
-						  array('v' => '610', 'name' => 'deadlinerelative',	'type' => 'int(11)',		'default' => "'0'",
-						  		'alters' => array('v' => '420', 'name' => 'deadlinerelative',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+						  		'alters' => array('v' => '4.2', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  array('v' => '6.1', 'name' => 'issue',			'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'issue',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'section',			'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'section',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '6.1', 'name' => 'state',			'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'state',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
+						  array('v' => '8.0', 'name' => 'deadline',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+							  	'alters' => array('v' => '4.2', 'name' => 'deadline',			'type' => 'varchar(20)',		'default' => "''")),
+						  array('v' => '6.1', 'name' => 'deadlinerelative',	'type' => 'int(11)',		'default' => "'0'",
+						  		'alters' => array('v' => '4.2', 'name' => 'deadlinerelative',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'issest_issuesectionstate', 'fields' => 'issue, section, state'),
+							array('v' => '4.2', 'name' => 'issest_issuesectionstate', 'fields' => 'issue, section, state'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'420', 'name' => 'smart_sectionstate',
+				array ('v' =>'4.2', 'name' => 'smart_sectionstate',
 						'comment' => 'Overrule statedeadline for section (category).',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-									'alters' => array('v' => '420', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-							array('v' => '610', 'name' => 'section',		'type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '420', 'name' => 'section',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'state',			'type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '420', 'name' => 'state',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'deadlinerelative','type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '420', 'name' => 'deadlinerelative','type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+									'alters' => array('v' => '4.2', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+							array('v' => '6.1', 'name' => 'section',		'type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '4.2', 'name' => 'section',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'state',			'type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '4.2', 'name' => 'state',			'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'deadlinerelative','type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '4.2', 'name' => 'deadlinerelative','type' => 'mediumint(9)',		'default' => "'0'"), ),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'sest_sectionstate', 'fields' => 'section, state'),
+							array('v' => '4.2', 'name' => 'sest_sectionstate', 'fields' => 'section, state'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
-							array('v' => '420', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'state', 'reftable' => 'smart_states', 'reffield' => 'id'),
 						),
 				),
-				array ('v' =>'420', 'name' => 'smart_profiles',
+				array ('v' =>'4.2', 'name' => 'smart_profiles',
 						'comment' => 'Profile definitions.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-									'alters' => array('v' => '420', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-							array('v' => '420', 'name' => 'profile',		'type' => 'varchar(255)',		'default' => "''"),
-							array('v' => '420', 'name' => 'code',			'type' => 'int(4)',				'default' => "'0'"),
-							array('v' => '420', 'name' => 'description',	'type' => 'blob',				'default' => ""),
+							array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+									'alters' => array('v' => '4.2', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+							array('v' => '4.2', 'name' => 'profile',		'type' => 'varchar(255)',		'default' => "''"),
+							array('v' => '4.2', 'name' => 'code',			'type' => 'int(4)',				'default' => "'0'"),
+							array('v' => '4.2', 'name' => 'description',	'type' => 'blob',				'default' => ""),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'pr_profiles', 'fields' => 'profile'),
+							array('v' => '4.2', 'name' => 'pr_profiles', 'fields' => 'profile'),
 						),
 						'inserts' => array(
 							"1, 'Full Control', 0, 'All features enabled'",
@@ -1763,18 +1753,18 @@ class DBStruct
 						'lookups' => array(
 						),
 				),
-				array ('v' =>'420', 'name' => 'smart_profilefeatures',
+				array ('v' =>'4.2', 'name' => 'smart_profilefeatures',
 						'comment' => 'Enabled/disabled server and client features by profile.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-									'alters' => array('v' => '420', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-							array('v' => '610', 'name' => 'profile',		'type' => 'int(11)',		'default' => "'0'",
-									'alters' => array('v' => '420', 'name' => 'profile',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '420', 'name' => 'feature',		'type' => 'mediumint(9)',		'default' => "'0'"),
-							array('v' => '420', 'name' => 'value',			'type' => 'varchar(20)',		'default' => "''"),
+							array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+									'alters' => array('v' => '4.2', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+							array('v' => '6.1', 'name' => 'profile',		'type' => 'int(11)',		'default' => "'0'",
+									'alters' => array('v' => '4.2', 'name' => 'profile',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '4.2', 'name' => 'feature',		'type' => 'mediumint(9)',		'default' => "'0'"),
+							array('v' => '4.2', 'name' => 'value',			'type' => 'varchar(20)',		'default' => "''"),
 						),
 						'indexes' => array(
-							array('v' => '420', 'name' => 'prfe_profiles', 'fields' => 'profile, feature'),
+							array('v' => '4.2', 'name' => 'prfe_profiles', 'fields' => 'profile, feature'),
 						),
 						'inserts' => array(
 							"1, 1, 1, 'Yes'",
@@ -1851,73 +1841,73 @@ class DBStruct
 							"72, 1, 84, 'Yes'",
 						),
 						'lookups' => array(
-							array('v' => '420', 'field' => 'profile', 'reftable' => 'smart_profiles', 'reffield' => 'id'),
+							array('v' => '4.2', 'field' => 'profile', 'reftable' => 'smart_profiles', 'reffield' => 'id'),
 						),
 				),
 
-				array ('v' =>'500', 'name' => 'smart_appsessions',
+				array ('v' =>'5.0', 'name' => 'smart_appsessions',
 						'comment' => 'Allows applications to store specific session data. The Web Editor uses this to keep track of opened articles which are not checked in yet.',
 						'fields' => array(
 
-						 	array('v' => '610', 'name' => 'id',						'type' => 'int(11)', 		'autoincrement' => true,
+						 	array('v' => '6.1', 'name' => 'id',						'type' => 'int(11)', 		'autoincrement' => true,
 								'comment' => 'Autoincrement, unique ID' ,
-								 	'alters' => array('v' => '500', 'name' => 'id',						'type' => 'mediumint(9)', 		'autoincrement' => true,
+								 	'alters' => array('v' => '5.0', 'name' => 'id',						'type' => 'mediumint(9)', 		'autoincrement' => true,
 										'comment' => 'Autoincrement, unique ID' ), ),
-							array('v' => '500', 'name' => 'sessionid',			'type' => 'varchar(40)',		'default' => "''",
+							array('v' => '5.0', 'name' => 'sessionid',			'type' => 'varchar(40)',		'default' => "''",
 								'comment' => 'GUID of the application session.' ),
-							array('v' => '500', 'name' => 'userid',				'type' => 'varchar(40)',		'default' => "''",
+							array('v' => '5.0', 'name' => 'userid',				'type' => 'varchar(40)',		'default' => "''",
 								'comment' => 'Short user name (id) who initiated the application session.' ),
-							array('v' => '500', 'name' => 'appname',				'type' => 'varchar(40)',		'default' => "''",
+							array('v' => '5.0', 'name' => 'appname',				'type' => 'varchar(40)',		'default' => "''",
 								'comment' => 'Application name which started the session.' ),
-							array('v' => '500', 'name' => 'lastsaved',			'type' => 'varchar(20)',		'default' => "''",
+							array('v' => '5.0', 'name' => 'lastsaved',			'type' => 'varchar(20)',		'default' => "''",
 							  	'comment' => 'Last time article was saved in workspace. Timestamp in SOAP datetime format.' ),
-							array('v' => '500', 'name' => 'readonly',				'type' => 'char(2)',				'default' => "''",
+							array('v' => '5.0', 'name' => 'readonly',				'type' => 'char(2)',				'default' => "''",
 							  	'comment' => 'Article opened for reading (on) or opened for editing (empty).' ),
 
-						 	array('v' => '800',	'name' => 'articleid',	'type' => 'int(11)',	'default' => 0,	'nullable' => false,	'comment' => 'Article object id.',
-						 		'alters' => array('v' => '610', 'name' => 'articleid',			'type' => 'int(11)', 		'default' => "'0'",	'nullable' => true,	'comment' => 'Article object id.' ,
-							 	'alters' => array('v' => '500', 'name' => 'articleid',			'type' => 'mediumint(9)', 		'default' => "'0'",	'nullable' => true,	'comment' => 'Article object id.' ) ) ),
-							array('v' => '800', 'name' => 'articlename', 'type' => 'varchar(255)', 'default' => "''", 'nullable' => false,
-							'alters' => array('v' => '500', 'name' => 'articlename',			'type' => 'varchar(255)',		'default' => "NULL",	'nullable' => true),
+						 	array('v' => '8.0',	'name' => 'articleid',	'type' => 'int(11)',	'default' => 0,	'nullable' => false,	'comment' => 'Article object id.',
+						 		'alters' => array('v' => '6.1', 'name' => 'articleid',			'type' => 'int(11)', 		'default' => "'0'",	'nullable' => true,	'comment' => 'Article object id.' ,
+							 	'alters' => array('v' => '5.0', 'name' => 'articleid',			'type' => 'mediumint(9)', 		'default' => "'0'",	'nullable' => true,	'comment' => 'Article object id.' ) ) ),
+							array('v' => '8.0', 'name' => 'articlename', 'type' => 'varchar(255)', 'default' => "''", 'nullable' => false,
+							'alters' => array('v' => '5.0', 'name' => 'articlename',			'type' => 'varchar(255)',		'default' => "NULL",	'nullable' => true),
 								'comment' => 'Article object name.' ),
-							array('v' => '800', 'name' => 'articleformat',		'type' => 'varchar(128)',		'default' => "''",	'nullable' => false,	'comment' => 'Native mime type of article object.',
-								'alters' => array('v' => '610', 'name' => 'articleformat',		'type' => 'varchar(128)',		'default' => "NULL",	'nullable' => true,	'comment' => 'Native mime type of article object.',
-									'alters' => array('v' => '500', 'name' => 'articleformat',		'type' => 'varchar(40)',		'default' => "NULL",	'nullable' => true ) )),
-						 	array('v' => '800', 'name' => 'articleminorversion','type' => 'mediumint(9)',		'default' => 0,	'nullable' => false, 'comment' => 'Current article minor version shown at editor for editing or viewing. Zero for new (uncreated) articles. See also articlemajorversion field.',
-						 	'alters' => array('v' => '599', 'name' => 'articleminorversion','type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true, 'comment' => 'Current article minor version shown at editor for editing or viewing. Zero for new (uncreated) articles. See also articlemajorversion field.',
+							array('v' => '8.0', 'name' => 'articleformat',		'type' => 'varchar(128)',		'default' => "''",	'nullable' => false,	'comment' => 'Native mime type of article object.',
+								'alters' => array('v' => '6.1', 'name' => 'articleformat',		'type' => 'varchar(128)',		'default' => "NULL",	'nullable' => true,	'comment' => 'Native mime type of article object.',
+									'alters' => array('v' => '5.0', 'name' => 'articleformat',		'type' => 'varchar(40)',		'default' => "NULL",	'nullable' => true ) )),
+						 	array('v' => '8.0', 'name' => 'articleminorversion','type' => 'mediumint(9)',		'default' => 0,	'nullable' => false, 'comment' => 'Current article minor version shown at editor for editing or viewing. Zero for new (uncreated) articles. See also articlemajorversion field.',
+						 	'alters' => array('v' => '5.99', 'name' => 'articleminorversion','type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true, 'comment' => 'Current article minor version shown at editor for editing or viewing. Zero for new (uncreated) articles. See also articlemajorversion field.',
 						 		'alters' => array(
-						 		  'v' => '500', 'name' => 'articleversion',		'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true, ))),
+						 		  'v' => '5.0', 'name' => 'articleversion',		'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true, ))),
 
-						 	array('v' => '800', 'name' => 'templateid',			'type' => 'int(11)', 		'default' => 0,	'nullable' => false, 'comment' => 'Article template object id.' , 'alters' =>  array('v' => '610', 'name' => 'templateid',			'type' => 'int(11)', 		'default' => "'0'",	'nullable' => true, 'comment' => 'Article template object id.', 'alters' => array('v' => '500', 'name' => 'templateid',			'type' => 'mediumint(9)', 		'default' => "'0'",	'nullable' => true, 'comment' => 'Article template object id.' ), )),
-							array('v' => '800', 'name' => 'templatename',		'type' => 'varchar(255)',		'default' => "''",	'nullable' => false,	'comment' => 'Article template object name.', 'alters' => array('v' => '500', 'name' => 'templatename',		'type' => 'varchar(255)',		'default' => "NULL",	'nullable' => true,	'comment' => 'Article template object name.') ),
-							array('v' => '800', 'name' => 'templateformat',		'type' => 'varchar(128)',		'default' => "''",	'nullable' => false, 'comment' => 'Native mime type of article template object.', 'alters' => array('v' => '610', 'name' => 'templateformat',		'type' => 'varchar(128)',		'default' => "NULL",	'nullable' => true, 'comment' => 'Native mime type of article template object.',
-									'alters' => array('v' => '500', 'name' => 'templateformat',		'type' => 'varchar(40)',		'default' => "NULL",	'nullable' => true ), )),
+						 	array('v' => '8.0', 'name' => 'templateid',			'type' => 'int(11)', 		'default' => 0,	'nullable' => false, 'comment' => 'Article template object id.' , 'alters' =>  array('v' => '6.1', 'name' => 'templateid',			'type' => 'int(11)', 		'default' => "'0'",	'nullable' => true, 'comment' => 'Article template object id.', 'alters' => array('v' => '5.0', 'name' => 'templateid',			'type' => 'mediumint(9)', 		'default' => "'0'",	'nullable' => true, 'comment' => 'Article template object id.' ), )),
+							array('v' => '8.0', 'name' => 'templatename',		'type' => 'varchar(255)',		'default' => "''",	'nullable' => false,	'comment' => 'Article template object name.', 'alters' => array('v' => '5.0', 'name' => 'templatename',		'type' => 'varchar(255)',		'default' => "NULL",	'nullable' => true,	'comment' => 'Article template object name.') ),
+							array('v' => '8.0', 'name' => 'templateformat',		'type' => 'varchar(128)',		'default' => "''",	'nullable' => false, 'comment' => 'Native mime type of article template object.', 'alters' => array('v' => '6.1', 'name' => 'templateformat',		'type' => 'varchar(128)',		'default' => "NULL",	'nullable' => true, 'comment' => 'Native mime type of article template object.',
+									'alters' => array('v' => '5.0', 'name' => 'templateformat',		'type' => 'varchar(40)',		'default' => "NULL",	'nullable' => true ), )),
 
-						 	array('v' => '800', 'name' => 'layoutid',				'type' => 'int(11)', 		'default' => 0,	'nullable' => false, 'comment' => 'Layout object id. This layout is used for write-to-fit. Zero when article not placed.' ,
-						 	'alters' => array('v' => '610', 'name' => 'layoutid',				'type' => 'int(11)', 		'default' => "'0'",	'nullable' => true, 'comment' => 'Layout object id. This layout is used for write-to-fit. Zero when article not placed.',
-								 	'alters' => array('v' => '500', 'name' => 'layoutid',				'type' => 'mediumint(9)', 		'default' => "'0'",	'nullable' => true,
+						 	array('v' => '8.0', 'name' => 'layoutid',				'type' => 'int(11)', 		'default' => 0,	'nullable' => false, 'comment' => 'Layout object id. This layout is used for write-to-fit. Zero when article not placed.' ,
+						 	'alters' => array('v' => '6.1', 'name' => 'layoutid',				'type' => 'int(11)', 		'default' => "'0'",	'nullable' => true, 'comment' => 'Layout object id. This layout is used for write-to-fit. Zero when article not placed.',
+								 	'alters' => array('v' => '5.0', 'name' => 'layoutid',				'type' => 'mediumint(9)', 		'default' => "'0'",	'nullable' => true,
 										'comment' => 'Layout object id. This layout is used for write-to-fit. Zero when article not placed.' ), )),
-						 	array('v' => '800', 'name' => 'layoutminorversion',	'type' => 'mediumint(9)',		'default' => 0,	'nullable' => false, 'comment' => 'Last layout minor version retrieved from DB to workspace, used for preview, PDF, or write-to-fit. See also layoutmajorversion field.',
-						 	'alters' => array('v' => '599', 'name' => 'layoutminorversion',	'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true, 'comment' => 'Last layout minor version retrieved from DB to workspace, used for preview, PDF, or write-to-fit. See also layoutmajorversion field.', 
+						 	array('v' => '8.0', 'name' => 'layoutminorversion',	'type' => 'mediumint(9)',		'default' => 0,	'nullable' => false, 'comment' => 'Last layout minor version retrieved from DB to workspace, used for preview, PDF, or write-to-fit. See also layoutmajorversion field.',
+						 	'alters' => array('v' => '5.99', 'name' => 'layoutminorversion',	'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true, 'comment' => 'Last layout minor version retrieved from DB to workspace, used for preview, PDF, or write-to-fit. See also layoutmajorversion field.', 
 						 		'alters' => array(
-						 		  'v' => '500', 'name' => 'layoutversion',		'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true, ),)),
+						 		  'v' => '5.0', 'name' => 'layoutversion',		'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true, ),)),
 
-						 	array('v' => '800', 'name' => 'articlemajorversion',	'type' => 'mediumint(9)',		'default' => 0,	'nullable' => false, 'comment' => 'Current article major version shown at editor for editing or viewing. Zero based. See also articleversion field.',
-						 	'alters' => array('v' => '599', 'name' => 'articlemajorversion',	'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true, 'comment' => 'Current article major version shown at editor for editing or viewing. Zero based. See also articleversion field.' )),
-						 	array('v' => '800', 'name' => 'layoutmajorversion',		'type' => 'mediumint(9)',		'default' => 0,	'nullable' => false,
-						 		'comment' => 'Last layout major version retrieved from DB to workspace, used for preview, PDF, or write-to-fit. Zero based. See also layoutversion field.', 'alters' => array('v' => '599', 'name' => 'layoutmajorversion',		'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true,
+						 	array('v' => '8.0', 'name' => 'articlemajorversion',	'type' => 'mediumint(9)',		'default' => 0,	'nullable' => false, 'comment' => 'Current article major version shown at editor for editing or viewing. Zero based. See also articleversion field.',
+						 	'alters' => array('v' => '5.99', 'name' => 'articlemajorversion',	'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true, 'comment' => 'Current article major version shown at editor for editing or viewing. Zero based. See also articleversion field.' )),
+						 	array('v' => '8.0', 'name' => 'layoutmajorversion',		'type' => 'mediumint(9)',		'default' => 0,	'nullable' => false,
+						 		'comment' => 'Last layout major version retrieved from DB to workspace, used for preview, PDF, or write-to-fit. Zero based. See also layoutversion field.', 'alters' => array('v' => '5.99', 'name' => 'layoutmajorversion',		'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true,
 						 		'comment' => 'Last layout major version retrieved from DB to workspace, used for preview, PDF, or write-to-fit. Zero based. See also layoutversion field.') ),
-							array('v' => '800', 'name' => 'dommajorversion',		'type' => 'mediumint(9)',		'default' => "'5'",	'nullable' => false, 
+							array('v' => '8.0', 'name' => 'dommajorversion',		'type' => 'mediumint(9)',		'default' => "'5'",	'nullable' => false, 
 								    'comment' => 'Document model version of article. 5=CS3, 6=CS4, etc. Used as minimum required ID Server version, used for preview, PDF, or write-to-fit. Default value is 5 (=CS3).',
-									'alters' => array('v' => '750', 'name' => 'dommajorversion',		'type' => 'mediumint(9)',		'default' => 5,	'nullable' => true,					
+									'alters' => array('v' => '7.5', 'name' => 'dommajorversion',		'type' => 'mediumint(9)',		'default' => 5,	'nullable' => true,					
 												'comment' => 'Document model version of article. 5=CS3, 6=CS4, etc. Used as minimum required ID Server version, used for preview, PDF, or write-to-fit. Default value is 5 (=CS3).', 
-												'alters' => array('v' => '700', 'name' => 'domversion',		'type' => 'mediumint(9)',		'default' => "'5'",	'nullable' => true,
+												'alters' => array('v' => '7.0', 'name' => 'domversion',		'type' => 'mediumint(9)',		'default' => "'5'",	'nullable' => true,
 													'comment' => 'Document model version of article. 5=CS3, 6=CS4, etc. Used as minimum required ID Server version, used for preview, PDF, or write-to-fit. Default value is 5 (=CS3).' 
 								))),
 
-						 	array('v' => '800', 'name' => 'domminorversion',		'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => false,
+						 	array('v' => '8.0', 'name' => 'domminorversion',		'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => false,
 						 		  'comment' => 'Document model minor version of article. Used as minimum required ID Server version, used for preview, PDF, or write-to-fit. Default value is 0. See also dommajorversion field.',
-						 		  'alters' => array('v' => '750', 'name' => 'domminorversion',		'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true,
+						 		  'alters' => array('v' => '7.5', 'name' => 'domminorversion',		'type' => 'mediumint(9)',		'default' => "'0'",	'nullable' => true,
 							 		'comment' => 'Document model minor version of article. Used as minimum required ID Server version, used for preview, PDF, or write-to-fit. Default value is 0. See also dommajorversion field.' )),
 						),
 						'indexes' => array(
@@ -1925,34 +1915,34 @@ class DBStruct
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '500', 'field' => 'userid', 'reftable' => 'smart_users', 'reffield' => 'user'),
-							array('v' => '500', 'field' => 'articleid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '500', 'field' => 'templateid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '500', 'field' => 'layoutid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '599', 'field' => 'articlemajorversion', 'reftable' => 'smart_objects', 'reffield' => 'majorversion'),
-							array('v' => '599', 'field' => 'articleminorversion', 'reftable' => 'smart_objects', 'reffield' => 'minorversion'),
-							array('v' => '599', 'field' => 'layoutmajorversion', 'reftable' => 'smart_objects', 'reffield' => 'majorversion'),
-							array('v' => '599', 'field' => 'layoutminorversion', 'reftable' => 'smart_objects', 'reffield' => 'minorversion'),
+							array('v' => '5.0', 'field' => 'userid', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '5.0', 'field' => 'articleid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '5.0', 'field' => 'templateid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '5.0', 'field' => 'layoutid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'articlemajorversion', 'reftable' => 'smart_objects', 'reffield' => 'majorversion'),
+							array('v' => '5.99', 'field' => 'articleminorversion', 'reftable' => 'smart_objects', 'reffield' => 'minorversion'),
+							array('v' => '5.99', 'field' => 'layoutmajorversion', 'reftable' => 'smart_objects', 'reffield' => 'majorversion'),
+							array('v' => '5.99', 'field' => 'layoutminorversion', 'reftable' => 'smart_objects', 'reffield' => 'minorversion'),
 						),
 				),
 
-				array(	'v' => '599', 'name' => 'smart_datasources',
+				array(	'v' => '5.99', 'name' => 'smart_datasources',
 						'comment' => 'Datasource definitions (or Datasource Connections).',
 						'fields' => array(
 
-							array('v' => '610', 'name' => 'id',				'type' => 'int(11)',	'autoincrement' => true,
+							array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)',	'autoincrement' => true,
 							'comment' => 'Autoincrement, unique ID' ,
-									'alters' => array('v' => '599', 'name' => 'id',				'type' => 'mediumint(9)',	'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id',				'type' => 'mediumint(9)',	'autoincrement' => true,
 										'comment' => 'Autoincrement, unique ID' ), ),
-							array('v' => '599', 'name' => 'type',			'type' => 'varchar(255)',	'default' => "''",
+							array('v' => '5.99', 'name' => 'type',			'type' => 'varchar(255)',	'default' => "''",
 							'comment' => 'Type of Datasource (filename)' ),
-							array('v' => '599', 'name' => 'name',			'type' => 'varchar(255)',	'default' => "''",
+							array('v' => '5.99', 'name' => 'name',			'type' => 'varchar(255)',	'default' => "''",
 							'comment' => 'Name of the Datasource' ),
-							array('v' => '599', 'name' => 'bidirectional',	'type' => 'char(2)',			'default' => "''",
+							array('v' => '5.99', 'name' => 'bidirectional',	'type' => 'char(2)',			'default' => "''",
 							'comment' => 'Is this Datasource bidirectional (yes/no)' ),
 						),
 						'indexes' => array(
-							array('v' => '599', 'name' => 'na_datasources', 'fields' => 'name'),
+							array('v' => '5.99', 'name' => 'na_datasources', 'fields' => 'name'),
 						),
 						'inserts' => array(
 						),
@@ -1960,170 +1950,170 @@ class DBStruct
 						),
 				),
 
-				array(	'v' => '599', 'name' => 'smart_dspublications',
+				array(	'v' => '5.99', 'name' => 'smart_dspublications',
 						'comment' => 'Datasource / Publication relation(s).',
 						'fields' => array(
 
-							array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 	'autoincrement' => true,
+							array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 	'autoincrement' => true,
 							'comment' => 'Autoincrement, unique ID' ,
-									'alters' => array('v' => '599', 'name' => 'id',				'type' => 'mediumint(9)', 	'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id',				'type' => 'mediumint(9)', 	'autoincrement' => true,
 										'comment' => 'Autoincrement, unique ID' ), ),
-							array('v' => '610', 'name' => 'datasourceid',	'type' => 'int(11)',	'default' => "'0'",
+							array('v' => '6.1', 'name' => 'datasourceid',	'type' => 'int(11)',	'default' => "'0'",
 							'comment' => 'Datasource ID' ,
-									'alters' => array('v' => '599', 'name' => 'datasourceid',	'type' => 'mediumint(9)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'datasourceid',	'type' => 'mediumint(9)',	'default' => "'0'",
 										'comment' => 'Datasource ID' ), ),
-							array('v' => '610', 'name' => 'publicationid',	'type' => 'int(11)',	'default' => "'0'",
+							array('v' => '6.1', 'name' => 'publicationid',	'type' => 'int(11)',	'default' => "'0'",
 							'comment' => 'Publication ID' ,
-									'alters' => array('v' => '599', 'name' => 'publicationid',	'type' => 'mediumint(9)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'publicationid',	'type' => 'mediumint(9)',	'default' => "'0'",
 									'comment' => 'Publication ID' ), ),
 						),
 						'indexes' => array(
-							array('v' => '599', 'name' => 'dsid_dspublications', 'fields' => 'datasourceid'),
-							array('v' => '599', 'name' => 'pubid_dspublications', 'fields' => 'publicationid'),
+							array('v' => '5.99', 'name' => 'dsid_dspublications', 'fields' => 'datasourceid'),
+							array('v' => '5.99', 'name' => 'pubid_dspublications', 'fields' => 'publicationid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '599',	'field' => 'datasourceid', 'reftable' => 'smart_datasources', 'reffield' => 'id'),
-							array('v' => '599', 'field' => 'publicationid', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '5.99',	'field' => 'datasourceid', 'reftable' => 'smart_datasources', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'publicationid', 'reftable' => 'smart_publications', 'reffield' => 'id'),
 						),
 				),
 
-				array(	'v' => '599', 'name' => 'smart_dsqueries',
+				array(	'v' => '5.99', 'name' => 'smart_dsqueries',
 						'comment' => 'Queries.',
 						'fields' => array(
 
-							array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 	'autoincrement' => true,
+							array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 	'autoincrement' => true,
 							'comment' => 'Autoincrement, unique ID' ,
-									'alters' => array('v' => '599', 'name' => 'id',				'type' => 'mediumint(9)', 	'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id',				'type' => 'mediumint(9)', 	'autoincrement' => true,
 										'comment' => 'Autoincrement, unique ID' ), ),
-							array('v' => '599', 'name' => 'name',			'type' => 'varchar(255)',	'default' => "''",
+							array('v' => '5.99', 'name' => 'name',			'type' => 'varchar(255)',	'default' => "''",
 							'comment' => 'Query name' ),
-							array('v' => '599', 'name' => 'query',			'type' => 'blob',		'default' => "''",
+							array('v' => '5.99', 'name' => 'query',			'type' => 'blob',		'default' => "''",
 							'comment' => 'Query' ),
-							array('v' => '599', 'name' => 'comment',		'type' => 'blob',		'default' => "''",
+							array('v' => '5.99', 'name' => 'comment',		'type' => 'blob',		'default' => "''",
 							'comment' => 'Comment(s)' ),
-							array('v' => '599', 'name' => 'interface',		'type' => 'blob',		'default' => "''",
+							array('v' => '5.99', 'name' => 'interface',		'type' => 'blob',		'default' => "''",
 							'comment' => 'Interface (params)' ),
-							array('v' => '610', 'name' => 'datasourceid',	'type' => 'int(11)',			'default' => "'0'",
+							array('v' => '6.1', 'name' => 'datasourceid',	'type' => 'int(11)',			'default' => "'0'",
 							'comment' => 'Datasource ID' ,
-									'alters'=> array('v' => '599', 'name' => 'datasourceid',	'type' => 'mediumint(9)',			'default' => "'0'",
+									'alters'=> array('v' => '5.99', 'name' => 'datasourceid',	'type' => 'mediumint(9)',			'default' => "'0'",
 										'comment' => 'Datasource ID' ), ),
-							array('v' => '599', 'name' => 'recordid',		'type' => 'varchar(255)',	'default' => "''",
+							array('v' => '5.99', 'name' => 'recordid',		'type' => 'varchar(255)',	'default' => "''",
 							'comment' => 'the field in the result that is the ID for the record (e.g: ID)' ),
-							array('v' => '599', 'name' => 'recordfamily',	'type' => 'varchar(255)',	'default' => "''",
+							array('v' => '5.99', 'name' => 'recordfamily',	'type' => 'varchar(255)',	'default' => "''",
 							'comment' => 'the field in the result that defines the records family (e.g: color)' ),
 						),
 						'indexes' => array(
-							array('v' => '599', 'name' => 'dsid_dsqueries', 'fields' => 'datasourceid'),
+							array('v' => '5.99', 'name' => 'dsid_dsqueries', 'fields' => 'datasourceid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '599',	'field' => 'datasourceid', 'reftable' => 'smart_datasources', 'reffield' => 'id'),
+							array('v' => '5.99',	'field' => 'datasourceid', 'reftable' => 'smart_datasources', 'reffield' => 'id'),
 						),
 				),
 
-				array(	'v' => '599', 'name' => 'smart_dsqueryfields',
+				array(	'v' => '5.99', 'name' => 'smart_dsqueryfields',
 						'comment' => 'Query field definitions.',
 						'fields' => array(
 
-							array('v' => '610', 'name' => 'id',				'type' => 'int(11)',	'autoincrement' => true,
+							array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)',	'autoincrement' => true,
 							'comment' => 'Autoincrement, unique ID' ,
-									'alters' => array('v' => '599', 'name' => 'id',				'type' => 'mediumint(9)',	'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id',				'type' => 'mediumint(9)',	'autoincrement' => true,
 										'comment' => 'Autoincrement, unique ID' ), ),
-							array('v' => '610', 'name' => 'queryid',		'type' => 'int(11)',	'default' => "'0'",
+							array('v' => '6.1', 'name' => 'queryid',		'type' => 'int(11)',	'default' => "'0'",
 							'comment' => 'Query ID' ,
-									'alters' => array('v' => '599', 'name' => 'queryid',		'type' => 'mediumint(9)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'queryid',		'type' => 'mediumint(9)',	'default' => "'0'",
 										'comment' => 'Query ID' ), ),
-							array('v' => '599', 'name' => 'priority',		'type' => 'tinyint(4)',			'default' => "'0'",
+							array('v' => '5.99', 'name' => 'priority',		'type' => 'tinyint(4)',			'default' => "'0'",
 							'comment' => 'Priority level (0 = normal, 1 = high)' ),
-							array('v' => '599', 'name' => 'name',			'type' => 'varchar(255)',	'default' => "''",
+							array('v' => '5.99', 'name' => 'name',			'type' => 'varchar(255)',	'default' => "''",
 							'comment' => 'Recordfield name' ),
-							array('v' => '599', 'name' => 'readonly',		'type' => 'tinyint(4)',		'default' => "'0'",
+							array('v' => '5.99', 'name' => 'readonly',		'type' => 'tinyint(4)',		'default' => "'0'",
 							'comment' => 'Is this field readonly (yes/no)' ),
 						),
 						'indexes' => array(
-							array('v' => '599', 'name' => 'queryid_dsqueryfields', 'fields' => 'queryid'),
+							array('v' => '5.99', 'name' => 'queryid_dsqueryfields', 'fields' => 'queryid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '599',	'field' => 'queryid', 'reftable' => 'smart_dsqueries', 'reffield' => 'id'),
+							array('v' => '5.99',	'field' => 'queryid', 'reftable' => 'smart_dsqueries', 'reffield' => 'id'),
 						),
 				),
 
-				array(	'v' => '599', 'name' => 'smart_dssettings',
+				array(	'v' => '5.99', 'name' => 'smart_dssettings',
 						'comment' => 'Settings of a Datasource',
 						'fields' => array(
 
-							array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 	'autoincrement' => true,
+							array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 	'autoincrement' => true,
 							'comment' => 'Autoincrement, unique ID' ,
-									'alters' => array('v' => '599', 'name' => 'id',				'type' => 'mediumint(9)', 	'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id',				'type' => 'mediumint(9)', 	'autoincrement' => true,
 										'comment' => 'Autoincrement, unique ID' ), ),
-							array('v' => '599', 'name' => 'name',			'type' => 'varchar(255)',	'default' => "''",
+							array('v' => '5.99', 'name' => 'name',			'type' => 'varchar(255)',	'default' => "''",
 							'comment' => 'Name of the setting' ),
-							array('v' => '599', 'name' => 'value',			'type' => 'blob',			'default' => "''",
+							array('v' => '5.99', 'name' => 'value',			'type' => 'blob',			'default' => "''",
 							'comment' => 'Value of the setting' ),
-							array('v' => '610', 'name' => 'datasourceid',	'type' => 'int(11)',	'default' => "'0'",
+							array('v' => '6.1', 'name' => 'datasourceid',	'type' => 'int(11)',	'default' => "'0'",
 							'comment' => 'Datasource ID' ,
-									'alters' => array('v' => '599', 'name' => 'datasourceid',	'type' => 'mediumint(9)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'datasourceid',	'type' => 'mediumint(9)',	'default' => "'0'",
 										'comment' => 'Datasource ID' ), ),
 						),
 						'indexes' => array(
-							array('v' => '599', 'name' => 'dsid_dssettings', 'fields' => 'datasourceid'),
+							array('v' => '5.99', 'name' => 'dsid_dssettings', 'fields' => 'datasourceid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '599',	'field' => 'datasourceid', 'reftable' => 'smart_datasources', 'reffield' => 'id'),
+							array('v' => '5.99',	'field' => 'datasourceid', 'reftable' => 'smart_datasources', 'reffield' => 'id'),
 						),
 				),
 
-				array(	'v' => '599', 'name' => 'smart_dsqueryplacements',
+				array(	'v' => '5.99', 'name' => 'smart_dsqueryplacements',
 						'comment' => 'Table that identifies the relation between documents and queries',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',					'type' => 'int(11)',	'autoincrement' => true,
+							array('v' => '6.1', 'name' => 'id',					'type' => 'int(11)',	'autoincrement' => true,
 							'comment' => 'Autoincrement, unique ID' ,
-									'alters' => array('v' => '599', 'name' => 'id',					'type' => 'mediumint(9)',	'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id',					'type' => 'mediumint(9)',	'autoincrement' => true,
 										'comment' => 'Autoincrement, unique ID' ), ),
-							array('v' => '610', 'name' => 'objectid',			'type' => 'int(11)',	'default' => "'0'",
+							array('v' => '6.1', 'name' => 'objectid',			'type' => 'int(11)',	'default' => "'0'",
 							'comment' => 'Document ID' ,
-									'alters' => array('v' => '599', 'name' => 'objectid',			'type' => 'mediumint(9)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'objectid',			'type' => 'mediumint(9)',	'default' => "'0'",
 										'comment' => 'Document ID' ), ),
-							array('v' => '610', 'name' => 'datasourceid',		'type' => 'int(11)',	'default' => "'0'",
+							array('v' => '6.1', 'name' => 'datasourceid',		'type' => 'int(11)',	'default' => "'0'",
 							'comment' => 'Datasource ID' ,
-									'alters' => array('v' => '599', 'name' => 'datasourceid',		'type' => 'mediumint(9)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'datasourceid',		'type' => 'mediumint(9)',	'default' => "'0'",
 									'comment' => 'Datasource ID' ), ),
-							array('v' => '599', 'name' => 'dirty',				'type' => 'char(2)',		'default' => "'0'",
+							array('v' => '5.99', 'name' => 'dirty',				'type' => 'char(2)',		'default' => "'0'",
 							'comment' => 'Dirty flag' ),
 						),
 						'indexes' => array(
-							array('v' => '599', 'name' => 'objid_dsqueryplacements', 	'fields' => 'objectid'),
-							array('v' => '599', 'name' => 'dsid_dsqueryplacements', 	'fields' => 'datasourceid'),
+							array('v' => '5.99', 'name' => 'objid_dsqueryplacements', 	'fields' => 'objectid'),
+							array('v' => '5.99', 'name' => 'dsid_dsqueryplacements', 	'fields' => 'datasourceid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '599',	'field' => 'datasourceid', 'reftable' => 'smart_datasources', 'reffield' => 'id'),
-							array('v' => '599',	'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '5.99',	'field' => 'datasourceid', 'reftable' => 'smart_datasources', 'reffield' => 'id'),
+							array('v' => '5.99',	'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
 						),
 				),
 
-				array(	'v' => '599', 'name' => 'smart_dsqueryfamilies',
+				array(	'v' => '5.99', 'name' => 'smart_dsqueryfamilies',
 						'comment' => 'Table that identifies the relation between queryplacements and family values',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',					'type' => 'int(11)',	'autoincrement' => true,
+							array('v' => '6.1', 'name' => 'id',					'type' => 'int(11)',	'autoincrement' => true,
 							'comment' => 'Autoincrement, unique ID' ,
-									'alters' => array('v' => '599', 'name' => 'id',					'type' => 'mediumint(9)',	'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id',					'type' => 'mediumint(9)',	'autoincrement' => true,
 										'comment' => 'Autoincrement, unique ID' ), ),
-							array('v' => '610', 'name' => 'queryplacementid',	'type' => 'int(11)',	'default' => "'0'",
+							array('v' => '6.1', 'name' => 'queryplacementid',	'type' => 'int(11)',	'default' => "'0'",
 							'comment' => 'Queryplacement ID',
-									'alters' => array('v' => '599', 'name' => 'queryplacementid',	'type' => 'mediumint(9)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'queryplacementid',	'type' => 'mediumint(9)',	'default' => "'0'",
 										'comment' => 'Queryplacement ID' ), ),
-							array('v' => '599', 'name' => 'familyfield',		'type' => 'varchar(255)',	'default' => "''",
+							array('v' => '5.99', 'name' => 'familyfield',		'type' => 'varchar(255)',	'default' => "''",
 							'comment' => 'Family field name' ),
-							array('v' => '599', 'name' => 'familyvalue',		'type' => 'blob',			'default' => "''",
+							array('v' => '5.99', 'name' => 'familyvalue',		'type' => 'blob',			'default' => "''",
 							'comment' => 'Family field value' ),
 						),
 						'indexes' => array(
@@ -2131,20 +2121,20 @@ class DBStruct
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '599',	'field' => 'queryplacementid', 'reftable' => 'smart_dsqueryplacements', 'reffield' => 'id'),
+							array('v' => '5.99',	'field' => 'queryplacementid', 'reftable' => 'smart_dsqueryplacements', 'reffield' => 'id'),
 						),
 				),
 
-				array(	'v' => '599', 'name' => 'smart_dsupdates',
+				array(	'v' => '5.99', 'name' => 'smart_dsupdates',
 						'comment' => 'Table that stores updated record sets',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',					'type' => 'int(11)',	'autoincrement' => true,
+							array('v' => '6.1', 'name' => 'id',					'type' => 'int(11)',	'autoincrement' => true,
 							'comment' => 'Autoincrement, unique ID' ,
-									'alters' => array('v' => '599', 'name' => 'id',					'type' => 'mediumint(9)',	'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id',					'type' => 'mediumint(9)',	'autoincrement' => true,
 										'comment' => 'Autoincrement, unique ID' ), ),
-							array('v' => '599', 'name' => 'recordset',			'type' => 'longblob',		'default' => "''",
+							array('v' => '5.99', 'name' => 'recordset',			'type' => 'longblob',		'default' => "''",
 							'comment' => 'The updated record set' ),
-							array('v' => '599', 'name' => 'familyvalue',		'type' => 'blob',			'default' => "''",
+							array('v' => '5.99', 'name' => 'familyvalue',		'type' => 'blob',			'default' => "''",
 							'comment' => 'Family field value' ),
 						),
 						'indexes' => array(
@@ -2155,20 +2145,20 @@ class DBStruct
 						),
 				),
 
-				array(	'v' => '599', 'name' => 'smart_dsobjupdates',
+				array(	'v' => '5.99', 'name' => 'smart_dsobjupdates',
 						'comment' => 'Table that holds the relation between objects and updates',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',					'type' => 'int(11)',	'autoincrement' => true,
+							array('v' => '6.1', 'name' => 'id',					'type' => 'int(11)',	'autoincrement' => true,
 							'comment' => 'Autoincrement, unique ID' ,
-									'alters' => array('v' => '599', 'name' => 'id',					'type' => 'mediumint(9)',	'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id',					'type' => 'mediumint(9)',	'autoincrement' => true,
 									'comment' => 'Autoincrement, unique ID' ), ),
-							array('v' => '610', 'name' => 'updateid',			'type' => 'int(11)',	'default' => "'0'",
+							array('v' => '6.1', 'name' => 'updateid',			'type' => 'int(11)',	'default' => "'0'",
 							'comment' => 'Update ID',
-									'alters' => array('v' => '599', 'name' => 'updateid',			'type' => 'mediumint(9)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'updateid',			'type' => 'mediumint(9)',	'default' => "'0'",
 										'comment' => 'Update ID' ), ),
-							array('v' => '610', 'name' => 'objectid',			'type' => 'int(11)',	'default' => "'0'",
+							array('v' => '6.1', 'name' => 'objectid',			'type' => 'int(11)',	'default' => "'0'",
 							'comment' => 'Object ID' ,
-									'alters' => array('v' => '599', 'name' => 'objectid',			'type' => 'mediumint(9)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'objectid',			'type' => 'mediumint(9)',	'default' => "'0'",
 										'comment' => 'Object ID' ), ),
 						),
 						'indexes' => array(
@@ -2176,32 +2166,32 @@ class DBStruct
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '599',	'field' => 'updateid', 'reftable' => 'smart_dsupdates', 'reffield' => 'id'),
-							array('v' => '599',	'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '5.99',	'field' => 'updateid', 'reftable' => 'smart_dsupdates', 'reffield' => 'id'),
+							array('v' => '5.99',	'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
 						),
 				),
 
-				array(	'v' => '599', 'name' => 'smart_channels',
+				array(	'v' => '5.99', 'name' => 'smart_channels',
 						'comment' => 'Channels',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id', 'type' => 'int(11)', 'autoincrement' => true,
-									'alters' => array('v' => '599', 'name' => 'id', 'type' => 'mediumint(9)', 'autoincrement' => true), ),
-							array('v' => '599', 'name' => 'name', 'type' => 'varchar(255)', 'default' => "''"),
-							array('v' => '610', 'name' => 'publicationid', 'type' => 'int(11)', 'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'publicationid', 'type' => 'mediumint(9)', 'default' => "'0'"), ),
-							array('v' => '599', 'name' => 'type', 'type' => 'varchar(32)', 'default' => "'print'",
+							array('v' => '6.1', 'name' => 'id', 'type' => 'int(11)', 'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id', 'type' => 'mediumint(9)', 'autoincrement' => true), ),
+							array('v' => '5.99', 'name' => 'name', 'type' => 'varchar(255)', 'default' => "''"),
+							array('v' => '6.1', 'name' => 'publicationid', 'type' => 'int(11)', 'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'publicationid', 'type' => 'mediumint(9)', 'default' => "'0'"), ),
+							array('v' => '5.99', 'name' => 'type', 'type' => 'varchar(32)', 'default' => "'print'",
 								'comment' => 'type is either: print, web, sms, other, dps','dps2'),
-							array('v' => '599', 'name' => 'description', 'type' => 'varchar(255)', 'default' => "''"),
-						  	array('v' => '599', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'"),
-							array('v' => '610', 'name' => 'deadlinerelative',	'type' => 'int(11)',	'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'deadlinerelative',	'type' => 'mediumint(9)',	'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'currentissueid', 'type' => 'int(11)', 'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'currentissueid', 'type' => 'mediumint(9)', 'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'publishsystem',  'type' => 'varchar(64)',  'default' => "''",
+							array('v' => '5.99', 'name' => 'description', 'type' => 'varchar(255)', 'default' => "''"),
+						  	array('v' => '5.99', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'"),
+							array('v' => '6.1', 'name' => 'deadlinerelative',	'type' => 'int(11)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'deadlinerelative',	'type' => 'mediumint(9)',	'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'currentissueid', 'type' => 'int(11)', 'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'currentissueid', 'type' => 'mediumint(9)', 'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'publishsystem',  'type' => 'varchar(64)',  'default' => "''",
 									'comment' => 'System (publishing connector) to publish content of the channel'),
-							array('v' => '910', 'name' => 'suggestionprovider',  'type' => 'varchar(64)',  'default' => "''",
+							array('v' => '9.1', 'name' => 'suggestionprovider',  'type' => 'varchar(64)',  'default' => "''",
 									'comment' => 'Suggestion provider (Suggestion connector) of the channel.'),
-							array('v' => '910', 'name' => 'publishsystemid', 'type' => 'varchar(40)', 'default' => "''",
+							array('v' => '9.1', 'name' => 'publishsystemid', 'type' => 'varchar(40)', 'default' => "''",
 									'comment' => 'Unique id of the publishing system. Use to bind the publishing storage.' ),
 						),
 						'indexes' => array(
@@ -2211,25 +2201,25 @@ class DBStruct
 							"2, 'Web', 1, 'web', 'Web Channel', 20, 0, 0, '', '', '' ",
 						),
 						'lookups' => array(
-							array('v' => '599', 'field' => 'publicationid', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '599', 'field' => 'currentissueid', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'publicationid', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'currentissueid', 'reftable' => 'smart_issues', 'reffield' => 'id'),
 						),
 				),
 
-				array ('v' =>'599', 'name' => 'smart_editions',
+				array ('v' =>'5.99', 'name' => 'smart_editions',
 						'comment' => 'Editions, replaces table smart_publeditions.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 	'autoincrement' => true,
-									'alters' => array('v' => '599', 'name' => 'id',				'type' => 'mediumint(9)', 	'autoincrement' => true), ),
-							array('v' => '599', 'name' => 'name',				'type' => 'varchar(255)',	'default' => "''"),
-							array('v' => '610', 'name' => 'channelid',		'type' => 'int(11)',	'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'channelid',		'type' => 'mediumint(9)',	'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'issueid',			'type' => 'int(11)',	'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'issueid',			'type' => 'mediumint(9)',	'default' => "'0'"), ),
-							array('v' => '599', 'name' => 'code',				'type' => 'int(4)',			'default' => "'0'"),
-							array('v' => '610', 'name' => 'deadlinerelative',	'type' => 'int(11)',	'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'deadlinerelative',	'type' => 'mediumint(9)',	'default' => "'0'"), ),
-							array('v' => '599', 'name' => 'description',		'type' => 'blob',			'default' => ""),
+							array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 	'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id',				'type' => 'mediumint(9)', 	'autoincrement' => true), ),
+							array('v' => '5.99', 'name' => 'name',				'type' => 'varchar(255)',	'default' => "''"),
+							array('v' => '6.1', 'name' => 'channelid',		'type' => 'int(11)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'channelid',		'type' => 'mediumint(9)',	'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'issueid',			'type' => 'int(11)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'issueid',			'type' => 'mediumint(9)',	'default' => "'0'"), ),
+							array('v' => '5.99', 'name' => 'code',				'type' => 'int(4)',			'default' => "'0'"),
+							array('v' => '6.1', 'name' => 'deadlinerelative',	'type' => 'int(11)',	'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'deadlinerelative',	'type' => 'mediumint(9)',	'default' => "'0'"), ),
+							array('v' => '5.99', 'name' => 'description',		'type' => 'blob',			'default' => ""),
 						),
 						'indexes' => array(
 						),
@@ -2238,38 +2228,38 @@ class DBStruct
 							"2, 'South', 1, 0, '20', '', '' ",
 						),
 						'lookups' => array(
-							array('v' => '599', 'field' => 'channelid', 'reftable' => 'smart_channels', 'reffield' => 'id'),
-							array('v' => '599', 'field' => 'issueid', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'channelid', 'reftable' => 'smart_channels', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'issueid', 'reftable' => 'smart_issues', 'reffield' => 'id'),
 						),
 				),
 
-				array ('v' =>'599', 'name' => 'smart_issues',
+				array ('v' =>'5.99', 'name' => 'smart_issues',
 						'comment' => 'Replaces table smart_publissues.',
 						'fields' => array(
-						  	array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
-						  			'alters' => array('v' => '599', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-						  	array('v' => '599', 'name' => 'name',				'type' => 'varchar(255)',		'default' => "''"),
-						  	array('v' => '610', 'name' => 'channelid',		'type' => 'int(11)',		'default' => "'0'",
-						  			'alters' => array('v' => '599', 'name' => 'channelid',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-							array('v' => '599', 'name' => 'overrulepub',		'type' => 'char(2)',			'default' => "''",
+						  	array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true,
+						  			'alters' => array('v' => '5.99', 'name' => 'id',				'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+						  	array('v' => '5.99', 'name' => 'name',				'type' => 'varchar(255)',		'default' => "''"),
+						  	array('v' => '6.1', 'name' => 'channelid',		'type' => 'int(11)',		'default' => "'0'",
+						  			'alters' => array('v' => '5.99', 'name' => 'channelid',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
+							array('v' => '5.99', 'name' => 'overrulepub',		'type' => 'char(2)',			'default' => "''",
 						  	'comment' => 'Define workflow at issue level' ),
-						  	array('v' => '599', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'"),
-						  	array('v' => '800', 'name' => 'publdate',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-								'alters' => array('v' => '599', 'name' => 'publdate',			'type' => 'varchar(200)',		'default' => "''")),
-						  	array('v' => '800', 'name' => 'deadline',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
-								'alters' => array('v' => '599', 'name' => 'deadline',			'type' => 'varchar(200)',		'default' => "''")),
-						  	array('v' => '599', 'name' => 'pages',			'type' => 'int(4)',				'default' => "'0'"),
-						  	array('v' => '599', 'name' => 'subject',			'type' => 'blob',				'default' => ""),
-						  	array('v' => '599', 'name' => 'description',		'type' => 'blob',				'default' => ""),
-						  	array('v' => '599', 'name' => 'active',			'type' => 'char(2)',			'default' => "''"),
-						  	array('v' => '800', 'name' => 'readingorderrev',	'type' => 'varchar(2)',			'default' => "''", 'nullable' => false,
-						  		'alters' => array('v' => '599', 'name' => 'readingorderrev',	'type' => 'varchar(2)',			'default' => "''", 'nullable' => true)),
-							array('v' => '920', 'name' => 'calculatedeadlines', 'type' => 'char(2)',  'default' => "''",
+						  	array('v' => '5.99', 'name' => 'code',				'type' => 'int(4)',				'default' => "'0'"),
+						  	array('v' => '8.0', 'name' => 'publdate',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+								'alters' => array('v' => '5.99', 'name' => 'publdate',			'type' => 'varchar(200)',		'default' => "''")),
+						  	array('v' => '8.0', 'name' => 'deadline',			'type' => 'varchar(30)',		'default' => "''", 'comment' => 'yyyy-mm-ddThh:mm:ss',
+								'alters' => array('v' => '5.99', 'name' => 'deadline',			'type' => 'varchar(200)',		'default' => "''")),
+						  	array('v' => '5.99', 'name' => 'pages',			'type' => 'int(4)',				'default' => "'0'"),
+						  	array('v' => '5.99', 'name' => 'subject',			'type' => 'blob',				'default' => ""),
+						  	array('v' => '5.99', 'name' => 'description',		'type' => 'blob',				'default' => ""),
+						  	array('v' => '5.99', 'name' => 'active',			'type' => 'char(2)',			'default' => "''"),
+						  	array('v' => '8.0', 'name' => 'readingorderrev',	'type' => 'varchar(2)',			'default' => "''", 'nullable' => false,
+						  		'alters' => array('v' => '5.99', 'name' => 'readingorderrev',	'type' => 'varchar(2)',			'default' => "''", 'nullable' => true)),
+							array('v' => '9.2', 'name' => 'calculatedeadlines', 'type' => 'char(2)',  'default' => "''",
 								'comment' => 'A field to indicate whether the deadline should be calculated when deadline field is configured.' ),
 						),
 						'indexes' => array(
-							array('v' => '599', 'name' => 'ch_issues', 	'fields' => 'channelid'),
-							array('v' => '599', 'name' => 'na_issues', 	'fields' => 'name'),
+							array('v' => '5.99', 'name' => 'ch_issues', 	'fields' => 'channelid'),
+							array('v' => '5.99', 'name' => 'na_issues', 	'fields' => 'name'),
 						),
 						'inserts' => array(
 							"1, '1st Issue', 1, '', '10', '', '', 16, '', '', 'on', '', '' ",
@@ -2277,217 +2267,217 @@ class DBStruct
 							"3, 'webissue', 2, '', '10', '', '', 16, '', '', 'on', 'on', '' ",
 						),
 						'lookups' => array(
-							array('v' => '599', 'field' => 'channelid', 'reftable' => 'smart_channels', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'channelid', 'reftable' => 'smart_channels', 'reffield' => 'id'),
 						),
 				),
 
-				array ('v' => '599', 'name' => 'smart_targets',
+				array ('v' => '5.99', 'name' => 'smart_targets',
 						'comment' => 'Objects can be targeted for more than one channel/issue.',
 						'fields' => array(
-						  	array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
-						  			'alters' => array('v' => '599', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
-							array('v' => '610', 'name' => 'objectid', 	'type' => 'int(11)', 'default' => "'0'",
+						  	array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true,
+						  			'alters' => array('v' => '5.99', 'name' => 'id',			'type' => 'mediumint(9)', 		'autoincrement' => true), ),
+							array('v' => '6.1', 'name' => 'objectid', 	'type' => 'int(11)', 'default' => "'0'",
 								'comment' => 'Contains child id in case objectrelationid is filled',
-									'alters' => array('v' => '599', 'name' => 'objectid', 	'type' => 'mediumint(9)', 'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'objectid', 	'type' => 'mediumint(9)', 'default' => "'0'",
 										'comment' => 'Contains child id in case objectrelationid is filled'), ),
-							array('v' => '610', 'name' => 'channelid', 	'type' => 'int(11)', 'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'channelid', 	'type' => 'mediumint(9)', 'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'issueid', 	'type' => 'int(11)', 'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'issueid', 	'type' => 'mediumint(9)', 'default' => "'0'"), ),
-							array('v' => '599', 'name' => 'externalid',	'type' => 'varchar(200)', 	'default' => "''",
+							array('v' => '6.1', 'name' => 'channelid', 	'type' => 'int(11)', 'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'channelid', 	'type' => 'mediumint(9)', 'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'issueid', 	'type' => 'int(11)', 'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'issueid', 	'type' => 'mediumint(9)', 'default' => "'0'"), ),
+							array('v' => '5.99', 'name' => 'externalid',	'type' => 'varchar(200)', 	'default' => "''",
 								'comment' => 'External id for the object in the target' ),
-							array('v' => '610', 'name' => 'objectrelationid', 	'type' => 'int(11)', 'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'objectrelationid', 	'type' => 'mediumint(9)', 'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'publisheddate',	'type' => 'varchar(30)', 	'default' => "''",
+							array('v' => '6.1', 'name' => 'objectrelationid', 	'type' => 'int(11)', 'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'objectrelationid', 	'type' => 'mediumint(9)', 'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'publisheddate',	'type' => 'varchar(30)', 	'default' => "''",
 								'comment' => 'Date/time when published, cleared by undo publish' ),
-						  	array('v' => '610', 'name' => 'publishedmajorversion',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  	array('v' => '6.1', 'name' => 'publishedmajorversion',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  		'comment' => 'Major object version of object(relation) at publish action.' ),
-						  	array('v' => '610', 'name' => 'publishedminorversion',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  	array('v' => '6.1', 'name' => 'publishedminorversion',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  		'comment' => 'Minor object version of object(relation) at publish action.' ),
 						),
 						'indexes' => array(
-							array('v' => '610', 'name' => 'obchisobr_targets', 'fields' => 'objectid, channelid, issueid, objectrelationid', 'unique' => true,
-									'alters' => array('v' => '599', 'name' => 'obchised_targets', 'fields' => 'objectid, channelid, issueid', 'unique' => true),),
-							array('v' => '599', 'name' => 'obrobid_targets', 'fields' => 'objectrelationid, objectid, id', 'unique' => true),
-							array('v' => '800', 'name' => 'issueid_targets', 'fields' => 'issueid'),
+							array('v' => '6.1', 'name' => 'obchisobr_targets', 'fields' => 'objectid, channelid, issueid, objectrelationid', 'unique' => true,
+									'alters' => array('v' => '5.99', 'name' => 'obchised_targets', 'fields' => 'objectid, channelid, issueid', 'unique' => true),),
+							array('v' => '5.99', 'name' => 'obrobid_targets', 'fields' => 'objectrelationid, objectid, id', 'unique' => true),
+							array('v' => '8.0', 'name' => 'issueid_targets', 'fields' => 'issueid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '599', 'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '599', 'field' => 'channelid', 'reftable' => 'smart_channels', 'reffield' => 'id'),
-							array('v' => '599', 'field' => 'issueid', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'channelid', 'reftable' => 'smart_channels', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'issueid', 'reftable' => 'smart_issues', 'reffield' => 'id'),
 						),
 				),
 
-			array ('v' => '610', 'name' => 'smart_publishhistory',
+			array ('v' => '6.1', 'name' => 'smart_publishhistory',
 						'comment' => 'Contains the publish history of dossiers for different targets.',
 						'fields' => array(
 							// Identification
-						  	array('v' => '610', 'name' => 'id',                     'type' => 'int(11)',       'autoincrement' => true),
-							array('v' => '610', 'name' => 'externalid',             'type' => 'varchar(200)',  'default' => "''",
+						  	array('v' => '6.1', 'name' => 'id',                     'type' => 'int(11)',       'autoincrement' => true),
+							array('v' => '6.1', 'name' => 'externalid',             'type' => 'varchar(200)',  'default' => "''",
 								'comment' => 'External id for the published dossier at integrated publish system. Can be empty.' ),
-							array('v' => '610', 'name' => 'objectid',               'type' => 'int(11)',       'default' => "'0'",
+							array('v' => '6.1', 'name' => 'objectid',               'type' => 'int(11)',       'default' => "'0'",
 								'comment' => 'Enterprise object id of published dossier.'),
 
 							// Publish target
-							array('v' => '610', 'name' => 'channelid',              'type' => 'int(11)',       'default' => "'0'",
+							array('v' => '6.1', 'name' => 'channelid',              'type' => 'int(11)',       'default' => "'0'",
 								'comment' => 'Enterprise publication channel id.'),
-							array('v' => '610', 'name' => 'issueid',                'type' => 'int(11)',       'default' => "'0'",
+							array('v' => '6.1', 'name' => 'issueid',                'type' => 'int(11)',       'default' => "'0'",
 								'comment' => 'Enterprise issue id. Zero (0) means "for the whole channel", like SMS.'),
-							array('v' => '750', 'name' => 'editionid',              'type' => 'int(11)',       'default' => "'0'",
+							array('v' => '7.5', 'name' => 'editionid',              'type' => 'int(11)',       'default' => "'0'",
 								'comment' => 'Enterprise edition id. Zero (0) means "all editions" or not applicable.'),
 
 						    // Core data storage
-							array('v' => '610', 'name' => 'publisheddate',	'type' => 'varchar(30)', 	'default' => "''",
+							array('v' => '6.1', 'name' => 'publisheddate',	'type' => 'varchar(30)', 	'default' => "''",
 								'comment' => 'Date/time of publising date' ),
 							
 							// Integration specific data storage
-							array('v' => '750', 'name' => 'fields',                 'type' => 'blob',          'default' => "''",
+							array('v' => '7.5', 'name' => 'fields',                 'type' => 'blob',          'default' => "''",
 								'comment' => 'PHP serialized array. Integration connector specific publishing fields.' ),
-						    array('v' => '750', 'name' => 'fieldsmajorversion',     'type' => 'mediumint(9)',  'default' => "'0'",
+						    array('v' => '7.5', 'name' => 'fieldsmajorversion',     'type' => 'mediumint(9)',  'default' => "'0'",
 						  		'comment' => 'Format version of the fields. Holds Ent Server version that created the record.'.
 							  		'Server plug-in connector (publishing integration) is responsible for backward compatibility.'),
-						    array('v' => '750', 'name' => 'fieldsminorversion',     'type' => 'mediumint(9)',  'default' => "'0'",
+						    array('v' => '7.5', 'name' => 'fieldsminorversion',     'type' => 'mediumint(9)',  'default' => "'0'",
 						  		'comment' => 'To be combined with fieldsmajorversion. Together it represents a major.minor version.' ),
 
 							// Tracking
-							array('v' => '610', 'name' => 'actiondate',             'type' => 'varchar(30)',   'default' => "''",
+							array('v' => '6.1', 'name' => 'actiondate',             'type' => 'varchar(30)',   'default' => "''",
 								'comment' => 'Date/time stamp of the publish action.' ),
-							array('v' => '610', 'name' => 'action',                 'type' => 'varchar(20)',   'default' => "''",
+							array('v' => '6.1', 'name' => 'action',                 'type' => 'varchar(20)',   'default' => "''",
 								'comment' => 'Publish action; publishDossier, updateDossier, unpublishDossier.' ),
-							array('v' => '920', 'name' => 'user',                 	'type' => 'varchar(255)',  'default' => "''",
+							array('v' => '9.2', 'name' => 'user',                 	'type' => 'varchar(255)',  'default' => "''",
 								'comment' => 'Enterprise user (fullname) who did the publishing operation.' ),
 						),
 						'indexes' => array(
-							array('v' => '610', 'name' => 'obchis_publhist', 'fields' => 'objectid, channelid, issueid'),
-							array('v' => '760', 'name' => 'chis_publhist', 'fields' => 'channelid, issueid'),
+							array('v' => '6.1', 'name' => 'obchis_publhist', 'fields' => 'objectid, channelid, issueid'),
+							array('v' => '7.6', 'name' => 'chis_publhist', 'fields' => 'channelid, issueid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '610', 'field' => 'objectid',  'reftable' => 'smart_objects',  'reffield' => 'id'),
-							array('v' => '610', 'field' => 'channelid', 'reftable' => 'smart_channels', 'reffield' => 'id'),
-							array('v' => '610', 'field' => 'issueid',   'reftable' => 'smart_issues',   'reffield' => 'id'),
-							array('v' => '750', 'field' => 'editionid', 'reftable' => 'smart_editions', 'reffield' => 'id'),
+							array('v' => '6.1', 'field' => 'objectid',  'reftable' => 'smart_objects',  'reffield' => 'id'),
+							array('v' => '6.1', 'field' => 'channelid', 'reftable' => 'smart_channels', 'reffield' => 'id'),
+							array('v' => '6.1', 'field' => 'issueid',   'reftable' => 'smart_issues',   'reffield' => 'id'),
+							array('v' => '7.5', 'field' => 'editionid', 'reftable' => 'smart_editions', 'reffield' => 'id'),
 						),
 				),
 
-			array ('v' => '750', 'name' => 'smart_pubpublishedissues',
+			array ('v' => '7.5', 'name' => 'smart_pubpublishedissues',
 						'comment' => 'Contains the info of a published issue/edition (device) combination.',
 						'fields' => array(
 						
 							// Identification
-						  	array('v' => '750', 'name' => 'id',                     'type' => 'int(11)',       'autoincrement' => true),
-							array('v' => '750', 'name' => 'externalid',             'type' => 'varchar(200)',  'default' => "''",
+						  	array('v' => '7.5', 'name' => 'id',                     'type' => 'int(11)',       'autoincrement' => true),
+							array('v' => '7.5', 'name' => 'externalid',             'type' => 'varchar(200)',  'default' => "''",
 								'comment' => 'External id for the published issue at integrated publish system. Can be empty.' ),
 
 							// Publish target
-							array('v' => '750', 'name' => 'channelid',              'type' => 'int(11)',       'default' => "'0'",
+							array('v' => '7.5', 'name' => 'channelid',              'type' => 'int(11)',       'default' => "'0'",
 								'comment' => 'Enterprise publication channel id.'),
-							array('v' => '750', 'name' => 'issueid',                'type' => 'int(11)',       'default' => "'0'",
+							array('v' => '7.5', 'name' => 'issueid',                'type' => 'int(11)',       'default' => "'0'",
 								'comment' => 'Enterprise issue id. Zero (0) means "for the whole channel", like SMS.'),
-							array('v' => '750', 'name' => 'editionid',              'type' => 'int(11)',       'default' => "'0'",
+							array('v' => '7.5', 'name' => 'editionid',              'type' => 'int(11)',       'default' => "'0'",
 								'comment' => 'Enterprise edition id. Zero (0) means "all editions" or not applicable.'),
 
 						    // Core data storage
-							array('v' => '750', 'name' => 'report',                 'type' => 'blob',          'default' => "''",
+							array('v' => '7.5', 'name' => 'report',                 'type' => 'blob',          'default' => "''",
 								'comment' => 'PHP serialized array. Contains publish Report of the publishing operation.' ),
-							array('v' => '750', 'name' => 'dossierorder',           'type' => 'blob',          'default' => "''",
+							array('v' => '7.5', 'name' => 'dossierorder',           'type' => 'blob',          'default' => "''",
 								'comment' => 'PHP serialized array. Contains comma separated dossier ids in -published- order. '.
 									'Can be overruled/implemented by server plug-in (publishing integration), so format can differ. '.
 									'Note that the -production- order is something else, which is stored at the issue itself.' ),
-							array('v' => '750', 'name' => 'publishdate',            'type' => 'varchar(30)',    'default' => "''",
+							array('v' => '7.5', 'name' => 'publishdate',            'type' => 'varchar(30)',    'default' => "''",
 								'comment' => 'Date/time when the issue was published.' ),
-						    array('v' => '750', 'name' => 'issuemajorversion',      'type' => 'mediumint(9)',  'default' => "'0'",
+						    array('v' => '7.5', 'name' => 'issuemajorversion',      'type' => 'mediumint(9)',  'default' => "'0'",
 						  		'comment' => 'The version of the issue when published. This gets increased each publishing operation.'.
 							  		'When content is updated, major is increased. Fields or ordering updates are minor. The version is '.
 							  		'used to recognize if client has latest version. If not, to sync first before sending an update.' ),
-						    array('v' => '750', 'name' => 'issueminorversion',      'type' => 'mediumint(9)',  'default' => "'0'",
+						    array('v' => '7.5', 'name' => 'issueminorversion',      'type' => 'mediumint(9)',  'default' => "'0'",
 						  		'comment' => 'To be combined with issuemajorversion. Together it represents a major.minor version.' ),
 
 							// Integration specific data storage
-							array('v' => '750', 'name' => 'fields',                 'type' => 'blob',          'default' => "''",
+							array('v' => '7.5', 'name' => 'fields',                 'type' => 'blob',          'default' => "''",
 								'comment' => 'PHP serialized array. Integration connector specific publishing fields.' ),
-						    array('v' => '750', 'name' => 'fieldsmajorversion',     'type' => 'mediumint(9)',  'default' => "'0'",
+						    array('v' => '7.5', 'name' => 'fieldsmajorversion',     'type' => 'mediumint(9)',  'default' => "'0'",
 						  		'comment' => 'Format version of the fields. Holds Ent Server version that created the record.'.
 							  		'Server plug-in connector (publishing integration) is responsible for backward compatibility.'),
-						    array('v' => '750', 'name' => 'fieldsminorversion',     'type' => 'mediumint(9)',  'default' => "'0'",
+						    array('v' => '7.5', 'name' => 'fieldsminorversion',     'type' => 'mediumint(9)',  'default' => "'0'",
 						  		'comment' => 'To be combined with fieldsmajorversion. Together it represents a major.minor version.' ),
 
 							// Tracking
-							array('v' => '750', 'name' => 'actiondate',             'type' => 'varchar(30)',   'default' => "''",
+							array('v' => '7.5', 'name' => 'actiondate',             'type' => 'varchar(30)',   'default' => "''",
 								'comment' => 'Date/time stamp of the publish action.' ),
-							array('v' => '750', 'name' => 'action',                 'type' => 'varchar(20)',   'default' => "''",
+							array('v' => '7.5', 'name' => 'action',                 'type' => 'varchar(20)',   'default' => "''",
 								'comment' => 'Publish action; publishIssue, updateIssue or unpublishIssue.' ),
-							array('v' => '750', 'name' => 'userid',                 'type' => 'int(11)',       'default' => "'0'",
+							array('v' => '7.5', 'name' => 'userid',                 'type' => 'int(11)',       'default' => "'0'",
 								'comment' => 'Enterprise user (id) who did the publishing operation.' ),
 						),
 						'indexes' => array(
-							array('v' => '750', 'name' => 'chised_publhist', 'fields' => 'channelid, issueid, editionid'),
+							array('v' => '7.5', 'name' => 'chised_publhist', 'fields' => 'channelid, issueid, editionid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '750', 'field' => 'channelid', 'reftable' => 'smart_channels', 'reffield' => 'id'),
-							array('v' => '750', 'field' => 'issueid',   'reftable' => 'smart_issues',   'reffield' => 'id'),
-							array('v' => '750', 'field' => 'userid',    'reftable' => 'smart_users',    'reffield' => 'id'),
-							array('v' => '750', 'field' => 'editionid', 'reftable' => 'smart_editions', 'reffield' => 'id'),
+							array('v' => '7.5', 'field' => 'channelid', 'reftable' => 'smart_channels', 'reffield' => 'id'),
+							array('v' => '7.5', 'field' => 'issueid',   'reftable' => 'smart_issues',   'reffield' => 'id'),
+							array('v' => '7.5', 'field' => 'userid',    'reftable' => 'smart_users',    'reffield' => 'id'),
+							array('v' => '7.5', 'field' => 'editionid', 'reftable' => 'smart_editions', 'reffield' => 'id'),
 						),
 				),
 				
-			array ('v' => '610', 'name' => 'smart_publishedobjectshist',
+			array ('v' => '6.1', 'name' => 'smart_publishedobjectshist',
 						'comment' => 'History of objects once published in a content management system.',
 						'fields' => array(
-						  	array('v' => '610', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true),
-							array('v' => '610', 'name' => 'objectid', 	'type' => 'int(11)', 'default' => "'0'",
+						  	array('v' => '6.1', 'name' => 'id',			'type' => 'int(11)', 		'autoincrement' => true),
+							array('v' => '6.1', 'name' => 'objectid', 	'type' => 'int(11)', 'default' => "'0'",
 								'comment' => 'Enterprise object id of published dossier or objects within dossier'),
-							array('v' => '610', 'name' => 'publishid', 	'type' => 'int(11)', 'default' => "'0'",
+							array('v' => '6.1', 'name' => 'publishid', 	'type' => 'int(11)', 'default' => "'0'",
 								'comment' => 'Enterprise publish id'),
-						  	array('v' => '610', 'name' => 'majorversion',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  	array('v' => '6.1', 'name' => 'majorversion',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  		'comment' => 'Major object version of object. See also minor version' ),
-						  	array('v' => '610', 'name' => 'minorversion',		'type' => 'mediumint(9)',		'default' => "'0'",
+						  	array('v' => '6.1', 'name' => 'minorversion',		'type' => 'mediumint(9)',		'default' => "'0'",
 						  		'comment' => 'Minor object version of object. See also majorversion field.' ),
-							array('v' => '610', 'name' => 'externalid',	'type' => 'varchar(200)', 		'default' => "''",
+							array('v' => '6.1', 'name' => 'externalid',	'type' => 'varchar(200)', 		'default' => "''",
 								'comment' => 'External id for the published object, can be empty' ),
-							array('v' => '920', 'name' => 'objectname',	'type' => 'varchar(255)', 		'default' => "''",
+							array('v' => '9.2', 'name' => 'objectname',	'type' => 'varchar(255)', 		'default' => "''",
 								'comment' => 'Enterprise object name of published dossier or objects within dossier' ),
-							array('v' => '920', 'name' => 'objecttype',	'type' => 'varchar(40)', 		'default' => "''",
+							array('v' => '9.2', 'name' => 'objecttype',	'type' => 'varchar(40)', 		'default' => "''",
 								'comment' => 'Enterprise object type of published dossier or objects within dossier' ),
-							array('v' => '920', 'name' => 'objectformat',	'type' => 'varchar(128)', 	'default' => "''",
+							array('v' => '9.2', 'name' => 'objectformat',	'type' => 'varchar(128)', 	'default' => "''",
 								'comment' => 'Enterprise object format of published dossier or objects within dossier' ),
 
 						),
 						'indexes' => array(
-							array('v' => '610', 'name' => 'obpu_publobjhist', 'fields' => 'objectid, publishid'),
-							array('v' => '610', 'name' => 'puob_publobjhist', 'fields' => 'publishid, objectid'),
+							array('v' => '6.1', 'name' => 'obpu_publobjhist', 'fields' => 'objectid, publishid'),
+							array('v' => '6.1', 'name' => 'puob_publobjhist', 'fields' => 'publishid, objectid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '610', 'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '610', 'field' => 'publishid', 'reftable' => 'smart_publishhistory', 'reffield' => 'id'),
-							array('v' => '610', 'field' => 'majorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
-							array('v' => '610', 'field' => 'minorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
+							array('v' => '6.1', 'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '6.1', 'field' => 'publishid', 'reftable' => 'smart_publishhistory', 'reffield' => 'id'),
+							array('v' => '6.1', 'field' => 'majorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
+							array('v' => '6.1', 'field' => 'minorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
 						),
 				),
 
-				array ('v' => '1010', 'name' => 'smart_publishedplcmtshist',
+				array ('v' => '10.1', 'name' => 'smart_publishedplcmtshist',
 						'comment' => 'History of object relational placements that are published to a content management system (CMS). '.
 							'For example an image placed on a Publish Form for which a crop is made during the publish operation.',
 						'fields' => array(
-						  	array('v' => '1010', 'name' => 'id',			'type' => 'int(11)',		 'autoincrement' => true),
-							array('v' => '1010', 'name' => 'objectid', 		'type' => 'int(11)', 		'default' => "'0'",
+						  	array('v' => '10.1', 'name' => 'id',			'type' => 'int(11)',		 'autoincrement' => true),
+							array('v' => '10.1', 'name' => 'objectid', 		'type' => 'int(11)', 		'default' => "'0'",
 								'comment' => 'The id of the Enterprise object of which the native file is used for publishing.'),
-							array('v' => '1010', 'name' => 'publishid', 	'type' => 'int(11)', 		'default' => "'0'",
+							array('v' => '10.1', 'name' => 'publishid', 	'type' => 'int(11)', 		'default' => "'0'",
 								'comment' => 'Foreign key that refers to the publish operation of the dossier / publish form.'),
-						  	array('v' => '1010', 'name' => 'majorversion',	'type' => 'mediumint(9)',	'default' => "'0'",
+						  	array('v' => '10.1', 'name' => 'majorversion',	'type' => 'mediumint(9)',	'default' => "'0'",
 						  		'comment' => 'Major object version of the object. Coexists with the minorversion field.' ),
-						  	array('v' => '1010', 'name' => 'minorversion',	'type' => 'mediumint(9)',	'default' => "'0'",
+						  	array('v' => '10.1', 'name' => 'minorversion',	'type' => 'mediumint(9)',	'default' => "'0'",
 						  		'comment' => 'Minor object version of the object. Coexists with the majorversion field.' ),
-							array('v' => '1010', 'name' => 'externalid',	'type' => 'varchar(200)', 	'default' => "''",
+							array('v' => '10.1', 'name' => 'externalid',	'type' => 'varchar(200)', 	'default' => "''",
 								'comment' => 'Id retrieved from the CMS that refers to the published file.' ),
-							array('v' => '1010', 'name' => 'placementhash',	'type' => 'varchar(64)', 'default' => "",
+							array('v' => '10.1', 'name' => 'placementhash',	'type' => 'varchar(64)', 'default' => "",
 								'comment' => 'SHA256 hash of placement information which can be used for versioning and identification. '.
 									'This information is used to determine whether or not the placement has changed since the previous publish operation. '.
 									'When there is no matching record in this table found, the placement was changed or never published before. '.
@@ -2495,72 +2485,72 @@ class DBStruct
 									'the crop geometry, scale, form widget id, output mime type and DPI are hashed. The object id and version are excluded. ' ),
 						),
 						'indexes' => array(
-							array('v' => '1010', 'name' => 'obpu_publplchist', 'fields' => 'objectid, publishid'),
-							array('v' => '1010', 'name' => 'puob_publplchist', 'fields' => 'publishid, objectid'),
+							array('v' => '10.1', 'name' => 'obpu_publplchist', 'fields' => 'objectid, publishid'),
+							array('v' => '10.1', 'name' => 'puob_publplchist', 'fields' => 'publishid, objectid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '1010', 'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '1010', 'field' => 'publishid', 'reftable' => 'smart_publishhistory', 'reffield' => 'id'),
-							array('v' => '1010', 'field' => 'majorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
-							array('v' => '1010', 'field' => 'minorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
+							array('v' => '10.1', 'field' => 'objectid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '10.1', 'field' => 'publishid', 'reftable' => 'smart_publishhistory', 'reffield' => 'id'),
+							array('v' => '10.1', 'field' => 'majorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
+							array('v' => '10.1', 'field' => 'minorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
 						),
 				),
 
-				array ('v' => '599', 'name' => 'smart_targeteditions',
+				array ('v' => '5.99', 'name' => 'smart_targeteditions',
 						'comment' => 'Keeps a relation between channel/issue and editions.',
 						'fields' => array(
-						  	array('v' => '610', 'name' => 'id', 'type' => 'int(11)', 'autoincrement' => true,
-						  			'alters' => array('v' => '599', 'name' => 'id', 'type' => 'mediumint(9)', 'autoincrement' => true), ),
-							array('v' => '610', 'name' => 'targetid', 'type' => 'int(11)', 'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'targetid', 'type' => 'mediumint(9)', 'default' => "'0'"), ),
-							array('v' => '610', 'name' => 'editionid', 'type' => 'int(11)', 'default' => "'0'",
-									'alters' => array('v' => '599', 'name' => 'editionid', 'type' => 'mediumint(9)', 'default' => "'0'"), ),
+						  	array('v' => '6.1', 'name' => 'id', 'type' => 'int(11)', 'autoincrement' => true,
+						  			'alters' => array('v' => '5.99', 'name' => 'id', 'type' => 'mediumint(9)', 'autoincrement' => true), ),
+							array('v' => '6.1', 'name' => 'targetid', 'type' => 'int(11)', 'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'targetid', 'type' => 'mediumint(9)', 'default' => "'0'"), ),
+							array('v' => '6.1', 'name' => 'editionid', 'type' => 'int(11)', 'default' => "'0'",
+									'alters' => array('v' => '5.99', 'name' => 'editionid', 'type' => 'mediumint(9)', 'default' => "'0'"), ),
 						),
 						'indexes' => array(
-							array('v' => '599', 'name' => 'taed_targeteditions', 'fields' => 'targetid, editionid', 'unique' => true),
-							array('v' => '599', 'name' => 'edta_targeteditions', 'fields' => 'editionid, targetid', 'unique' => true),
+							array('v' => '5.99', 'name' => 'taed_targeteditions', 'fields' => 'targetid, editionid', 'unique' => true),
+							array('v' => '5.99', 'name' => 'edta_targeteditions', 'fields' => 'editionid, targetid', 'unique' => true),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '599', 'field' => 'targetid', 'reftable' => 'smart_targets', 'reffield' => 'id'),
-							array('v' => '599', 'field' => 'editionid', 'reftable' => 'smart_editions', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'targetid', 'reftable' => 'smart_targets', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'editionid', 'reftable' => 'smart_editions', 'reffield' => 'id'),
 						),
 				),
 
-				array ('v' => '599', 'name' => 'smart_indesignservers',
+				array ('v' => '5.99', 'name' => 'smart_indesignservers',
 						'comment' => 'Configuration of InDesign Servers.',
 						'fields' => array(
-						  	array('v' => '610', 'name' => 'id',	'type' => 'int(11)', 'autoincrement' => true,
-						  			'alters' => array('v' => '599', 'name' => 'id',	'type' => 'mediumint(9)', 'autoincrement' => true), ),
-							array('v' => '599', 'name' => 'hostname', 'type' => 'varchar(64)', 'default' => "''"),
-							array('v' => '599', 'name' => 'portnumber', 'type' => 'mediumint(9)', 'default' => "'0'"),
-							array('v' => '800', 'name' => 'description', 'type' => 'varchar(255)', 'default' => "''", 'nullable' => false,
-								'alters' => array('v' => '599', 'name' => 'description', 'type' => 'varchar(255)', 'default' => "", 'nullable' => true)),
-							array('v' => '800', 'name' => 'active', 'type' => 'char(2)', 'default' => "''", 'nullable' => false,
-								'alters' => array('v' => '599', 'name' => 'active', 'type' => 'char(2)', 'default' => "", 'nullable' => true)),
-						    array('v' => '750', 'name' => 'servermajorversion', 'type' => 'mediumint(9)', 'default' => "'5'",
-						    	'alters' => array('v' => '700', 'name' => 'serverversion', 'type' => 'mediumint(9)', 'default' => "'5'"),
+						  	array('v' => '6.1', 'name' => 'id',	'type' => 'int(11)', 'autoincrement' => true,
+						  			'alters' => array('v' => '5.99', 'name' => 'id',	'type' => 'mediumint(9)', 'autoincrement' => true), ),
+							array('v' => '5.99', 'name' => 'hostname', 'type' => 'varchar(64)', 'default' => "''"),
+							array('v' => '5.99', 'name' => 'portnumber', 'type' => 'mediumint(9)', 'default' => "'0'"),
+							array('v' => '8.0', 'name' => 'description', 'type' => 'varchar(255)', 'default' => "''", 'nullable' => false,
+								'alters' => array('v' => '5.99', 'name' => 'description', 'type' => 'varchar(255)', 'default' => "", 'nullable' => true)),
+							array('v' => '8.0', 'name' => 'active', 'type' => 'char(2)', 'default' => "''", 'nullable' => false,
+								'alters' => array('v' => '5.99', 'name' => 'active', 'type' => 'char(2)', 'default' => "", 'nullable' => true)),
+						    array('v' => '7.5', 'name' => 'servermajorversion', 'type' => 'mediumint(9)', 'default' => "'5'",
+						    	'alters' => array('v' => '7.0', 'name' => 'serverversion', 'type' => 'mediumint(9)', 'default' => "'5'"),
 						  		'comment' => 'Internal InDesign Server major version; 8=CS6, 10=CC2014, etc' ),
-						    array('v' => '750', 'name' => 'serverminorversion', 'type' => 'mediumint(9)', 'default' => "'0'",
+						    array('v' => '7.5', 'name' => 'serverminorversion', 'type' => 'mediumint(9)', 'default' => "'0'",
 						  		'comment' => 'Internal InDesign Server minor version; See also servermajorversion field.' ),
-							array('v' => '960', 'name' => 'prio1', 'type' => 'char(2)', 'default' => "'on'",
+							array('v' => '9.6', 'name' => 'prio1', 'type' => 'char(2)', 'default' => "'on'",
 								'comment' => 'Internal InDesign Server Prio 1' ),
-							array('v' => '960', 'name' => 'prio2', 'type' => 'char(2)', 'default' => "'on'",
+							array('v' => '9.6', 'name' => 'prio2', 'type' => 'char(2)', 'default' => "'on'",
 								'comment' => 'Internal InDesign Server Prio 2' ),
-							array('v' => '960', 'name' => 'prio3', 'type' => 'char(2)', 'default' => "'on'",
+							array('v' => '9.6', 'name' => 'prio3', 'type' => 'char(2)', 'default' => "'on'",
 								'comment' => 'Internal InDesign Server Prio 3' ),
-							array('v' => '960', 'name' => 'prio4', 'type' => 'char(2)', 'default' => "'on'",
+							array('v' => '9.6', 'name' => 'prio4', 'type' => 'char(2)', 'default' => "'on'",
 								'comment' => 'Internal InDesign Server Prio 4' ),
-							array('v' => '960', 'name' => 'prio5', 'type' => 'char(2)', 'default' => "'on'",
+							array('v' => '9.6', 'name' => 'prio5', 'type' => 'char(2)', 'default' => "'on'",
 								'comment' => 'Internal InDesign Server Prio 5' ),
-							array('v' => '970', 'name' => 'locktoken', 'type' => 'varchar(40)', 'default' => "''",
+							array('v' => '9.7', 'name' => 'locktoken', 'type' => 'varchar(40)', 'default' => "''",
 								'comment' => 'GUID generated by a PHP process to assure it took the lock to pick the IDS instance (blocking other processes accidentally picking the same IDS instance at the same time).' ),
 						),
 						'indexes' => array(
-							array('v' => '599', 'name' => 'hopo_indesignservers', 'fields' => 'hostname, portnumber', 'unique' => true),
+							array('v' => '5.99', 'name' => 'hopo_indesignservers', 'fields' => 'hostname, portnumber', 'unique' => true),
 						),
 						'inserts' => array(
 						),
@@ -2568,141 +2558,141 @@ class DBStruct
 						),
 				),
 
-				array ('v' => '599', 'name' => 'smart_indesignserverjobs',
+				array ('v' => '5.99', 'name' => 'smart_indesignserverjobs',
 						'comment' => 'Overview of InDesign Server jobs and their status.',
 						'fields' => array(
 							// Job definition:
-							array( 'v' => '970', 'name' => 'id', 'drops' =>
-							  	array('v' => '610', 'name' => 'id', 'type' => 'int(11)', 		'autoincrement' => true,
-							  			'alters' => array('v' => '599', 'name' => 'id', 'type' => 'mediumint(9)', 		'autoincrement' => true)),
+							array( 'v' => '9.7', 'name' => 'id', 'drops' =>
+							  	array('v' => '6.1', 'name' => 'id', 'type' => 'int(11)', 		'autoincrement' => true,
+							  			'alters' => array('v' => '5.99', 'name' => 'id', 'type' => 'mediumint(9)', 		'autoincrement' => true)),
 						        'comment' => 'Used to identify the job record. Use jobid instead.'),
-							array('v' => '970', 'name' => 'jobid', 'type' => 'varchar(40)', 		'default' => "''",
+							array('v' => '9.7', 'name' => 'jobid', 'type' => 'varchar(40)', 		'default' => "''",
 								'comment' => 'Unique identifier (GUID) of the job record.' ),
-							array('v' => '599', 'name' => 'foreground', 		'type' => 'char(2)', 		'default' => "''",
+							array('v' => '5.99', 'name' => 'foreground', 		'type' => 'char(2)', 		'default' => "''",
 								'comment' => 'Whether or not end-users are waiting for the job to complete. Background jobs are offloaded from the workflow.' ),
-							array('v' => '800', 'name' => 'objid', 'type' => 'int(11)', 'default' => "0",
-									'alters' => array('v' => '610', 'name' => 'objid', 'type' => 'int(11)', 'default' => "", 'nullable' => true,
-									'alters' => array('v' => '599', 'name' => 'objid', 'type' => 'mediumint(255)', 'default' => "", 'nullable' => true)),
+							array('v' => '8.0', 'name' => 'objid', 'type' => 'int(11)', 'default' => "0",
+									'alters' => array('v' => '6.1', 'name' => 'objid', 'type' => 'int(11)', 'default' => "", 'nullable' => true,
+									'alters' => array('v' => '5.99', 'name' => 'objid', 'type' => 'mediumint(255)', 'default' => "", 'nullable' => true)),
 								'comment' => 'The object id of the Layout or Layout Module that to be processed by the job.'),
-							array( 'v' => '970', 'name' => 'exclusivelock', 'drops' =>
-								array('v' => '800', 'name' => 'exclusivelock', 		'type' => 'char(2)', 		'default' => "''",
-										'alters' => array('v' => '599', 'name' => 'exclusivelock', 		'type' => 'char(2)', 		'default' => "", 'nullable' => true))),
-						    array('v' => '970', 'name' => 'objectmajorversion',	'type' => 'mediumint(9)', 'default' => "'0'", 
+							array( 'v' => '9.7', 'name' => 'exclusivelock', 'drops' =>
+								array('v' => '8.0', 'name' => 'exclusivelock', 		'type' => 'char(2)', 		'default' => "''",
+										'alters' => array('v' => '5.99', 'name' => 'exclusivelock', 		'type' => 'char(2)', 		'default' => "", 'nullable' => true))),
+						    array('v' => '9.7', 'name' => 'objectmajorversion',	'type' => 'mediumint(9)', 'default' => "'0'", 
 						  		'comment' => 'Major object version of Layout or Layout Module being processed. Populated once the job is picked up from the queue.' ),
-						    array('v' => '970', 'name' => 'objectminorversion',	'type' => 'mediumint(9)', 'default' => "'0'", 
+						    array('v' => '9.7', 'name' => 'objectminorversion',	'type' => 'mediumint(9)', 'default' => "'0'", 
 						  		'comment' => 'Minor object version of Layout or Layout Module being processed. Populated once the job is picked up from the queue.' ),
-							array('v' => '599', 'name' => 'jobtype', 'type' => 'varchar(32)', 'default' => "",
+							array('v' => '5.99', 'name' => 'jobtype', 'type' => 'varchar(32)', 'default' => "",
 								'comment' => 'Unique name of this kind of job. Used to configure priorities (JobPrio).' ),
-							array('v' => '599', 'name' => 'jobscript', 'type' => 'blob', 'default' => "",
+							array('v' => '5.99', 'name' => 'jobscript', 'type' => 'blob', 'default' => "",
 								'comment' => 'JavaScript module to be executed in SC for IDS.' ),
-							array('v' => '800', 'name' => 'jobparams', 'type' => 'blob', 'default' => "''",
-									'alters' => array('v' => '599', 'name' => 'jobparams', 'type' => 'blob', 'default' => "", 'nullable' => true),
+							array('v' => '8.0', 'name' => 'jobparams', 'type' => 'blob', 'default' => "''",
+									'alters' => array('v' => '5.99', 'name' => 'jobparams', 'type' => 'blob', 'default' => "", 'nullable' => true),
 								'comment' => 'Parameters to be passed on to the JavaScript module (JobScript) to execute the script.' ),
 							
 							// Job execution:
-							array('v' => '970', 'name' => 'locktoken', 'type' => 'varchar(40)', 'default' => "''",
+							array('v' => '9.7', 'name' => 'locktoken', 'type' => 'varchar(40)', 'default' => "''",
 								'comment' => 'GUID generated by a PHP process to assure it took the lock to execute the job (blocking other processes accidentally running the same job at the same time).' ),
-							array('v' => '599', 'name' => 'queuetime', 'type' => 'varchar(20)', 'default' => "''",
+							array('v' => '5.99', 'name' => 'queuetime', 'type' => 'varchar(20)', 'default' => "''",
 								'comment' => 'Time when the job was pushed into the queue. Format: yyyy-mm-ddThh:mm:ss'),
-							array('v' => '800', 'name' => 'starttime', 'type' => 'varchar(30)', 'default' => "''",
-								'alters' => array('v' => '599', 'name' => 'starttime', 'type' => 'varchar(20)', 'default' => "", 'nullable' => true),
+							array('v' => '8.0', 'name' => 'starttime', 'type' => 'varchar(30)', 'default' => "''",
+								'alters' => array('v' => '5.99', 'name' => 'starttime', 'type' => 'varchar(20)', 'default' => "", 'nullable' => true),
 								'comment' => 'Time when the job was picked from the queue. Format: yyyy-mm-ddThh:mm:ss' ),
-							array('v' => '800', 'name' => 'readytime', 'type' => 'varchar(20)', 'default' => "''",
-								'alters' => array('v' => '599', 'name' => 'readytime', 'type' => 'varchar(20)', 'default' => "", 'nullable' => true),
+							array('v' => '8.0', 'name' => 'readytime', 'type' => 'varchar(20)', 'default' => "''",
+								'alters' => array('v' => '5.99', 'name' => 'readytime', 'type' => 'varchar(20)', 'default' => "", 'nullable' => true),
 								'comment' => 'Time when the job execution was completed. Format: yyyy-mm-ddThh:mm:ss' ),
-							array('v' => '800', 'name' => 'errorcode', 'type' => 'varchar(32)', 'default' => "''",
-								'alters' => array('v' => '599', 'name' => 'errorcode', 'type' => 'varchar(32)', 'default' => "", 'nullable' => true),
+							array('v' => '8.0', 'name' => 'errorcode', 'type' => 'varchar(32)', 'default' => "''",
+								'alters' => array('v' => '5.99', 'name' => 'errorcode', 'type' => 'varchar(32)', 'default' => "", 'nullable' => true),
 								'comment' => 'The error returned by the JavaScript module. Zero when no error. Could represent internal SC error code.' ),
-							array('v' => '970', 'name' => 'errormessage', 'type' => 'varchar(1024)', 'default' => "''",
-								'alters' => array('v' => '800', 'name' => 'errormessage', 'type' => 'varchar(255)', 'default' => "''",
-									'alters' => array('v' => '599', 'name' => 'errormessage', 'type' => 'varchar(255)', 'default' => "", 'nullable' => true)),
+							array('v' => '9.7', 'name' => 'errormessage', 'type' => 'varchar(1024)', 'default' => "''",
+								'alters' => array('v' => '8.0', 'name' => 'errormessage', 'type' => 'varchar(255)', 'default' => "''",
+									'alters' => array('v' => '5.99', 'name' => 'errormessage', 'type' => 'varchar(255)', 'default' => "", 'nullable' => true)),
 								'comment' => 'Error message raised by the JavaScript module (or by Enterprise Server in context of job execution).' ),
-							array('v' => '800', 'name' => 'scriptresult', 'type' => 'blob', 'default' => "''",
-								'alters' => array('v' => '599', 'name' => 'scriptresult', 'type' => 'blob', 'default' => "", 'nullable' => true),
+							array('v' => '8.0', 'name' => 'scriptresult', 'type' => 'blob', 'default' => "''",
+								'alters' => array('v' => '5.99', 'name' => 'scriptresult', 'type' => 'blob', 'default' => "", 'nullable' => true),
 								'comment' => 'Output of the JavaScript module execution. Used for debugging. Typically contains logging and profiling information.' ),
-							array('v' => '970', 'name' => 'jobstatus',    'type' => 'int(11)',     'default' => 0,
+							array('v' => '9.7', 'name' => 'jobstatus',    'type' => 'int(11)',     'default' => 0,
 								'comment' => 'Current status of the job. Combined field; The values of jobcondition and jobprogress are added. See InDesignServerJobStatus.class.php for details.' ),
-							array('v' => '970', 'name' => 'jobcondition', 'type' => 'int(11)',     'default' => 0,
+							array('v' => '9.7', 'name' => 'jobcondition', 'type' => 'int(11)',     'default' => 0,
 								'comment' => 'Healthness of the job execution; 4096=Info, 8192=Warning, 16384=Error.' ),
-							array('v' => '970', 'name' => 'jobprogress',  'type' => 'int(11)',     'default' => 0,
+							array('v' => '9.7', 'name' => 'jobprogress',  'type' => 'int(11)',     'default' => 0,
 								'comment' => 'Progress of the job execution; Todo=256, Busy=512, Done=1024.' ),
-							array('v' => '970', 'name' => 'attempts',     'type' => 'int(11)',     'default' => 0,
+							array('v' => '9.7', 'name' => 'attempts',     'type' => 'int(11)',     'default' => 0,
 								'comment' => 'When job pushed into the queue, value is set to zero. After job execution this value is incremented by one.' ),
-							array('v' => '1020', 'name' => 'pickuptime', 'type' => 'varchar(30)', 'default' => "''", 'patched' => array('1010' => 'idsautomationpickuptime'),
+							array('v' => '10.2', 'name' => 'pickuptime', 'type' => 'varchar(30)', 'default' => "''", 'patched' => array('10.1' => 'idsautomationpickuptime'),
 								'comment' => 'Time from which the job runnner should pickup the job.' ),
 							
 							// ID Server selection:
-							array('v' => '800', 'name' => 'assignedserverid', 'type' => 'int(9)', 'default' => 0,
-								'alters' => array('v' => '610', 'name' => 'assignedserverid', 'type' => 'int(9)', 'default' => "", 'nullable' => true,
-									'alters' => array('v' => '599', 'name' => 'assignedserverid', 'type' => 'mediumint(9)', 'default' => "", 'nullable' => true)),
+							array('v' => '8.0', 'name' => 'assignedserverid', 'type' => 'int(9)', 'default' => 0,
+								'alters' => array('v' => '6.1', 'name' => 'assignedserverid', 'type' => 'int(9)', 'default' => "", 'nullable' => true,
+									'alters' => array('v' => '5.99', 'name' => 'assignedserverid', 'type' => 'mediumint(9)', 'default' => "", 'nullable' => true)),
 								'comment' => 'The InDesign Server instance that is picked to handle the job. When job is retried, it represents the last picked one.' ),
-						    array('v' => '950', 'name' => 'minservermajorversion',	'type' => 'mediumint(9)', 'default' => "'0'", 'patched' => array('940' => 'ids2014ccsupport'),
-						    	'alters' => array('v' => '750', 'name' => 'servermajorversion',	'type' => 'mediumint(9)', 'default' => "'5'",
-						    		'alters' => array('v' => '700', 'name' => 'serverversion',	'type' => 'mediumint(9)', 'default' => "'0'")),
+						    array('v' => '9.5', 'name' => 'minservermajorversion',	'type' => 'mediumint(9)', 'default' => "'0'", 'patched' => array('9.4' => 'ids2014ccsupport'),
+						    	'alters' => array('v' => '7.5', 'name' => 'servermajorversion',	'type' => 'mediumint(9)', 'default' => "'5'",
+						    		'alters' => array('v' => '7.0', 'name' => 'serverversion',	'type' => 'mediumint(9)', 'default' => "'0'")),
 						  		'comment' => 'Minimum required internal major version of IDS that is suitable to execute the job. 8=CS6, 10=CC2014, etc' ),
-						    array('v' => '950', 'name' => 'minserverminorversion',	'type' => 'mediumint(9)', 'default' => "'0'", 'patched' => array('940' => 'ids2014ccsupport'),
-						    	'alters' => array('v' => '750', 'name' => 'serverminorversion',	'type' => 'mediumint(9)', 'default' => "'0'"),
+						    array('v' => '9.5', 'name' => 'minserverminorversion',	'type' => 'mediumint(9)', 'default' => "'0'", 'patched' => array('9.4' => 'ids2014ccsupport'),
+						    	'alters' => array('v' => '7.5', 'name' => 'serverminorversion',	'type' => 'mediumint(9)', 'default' => "'0'"),
 						  		'comment' => 'Minimum required internal minor version of IDS that is suitable to execute the job; See also minservermajorversion field.' ),
-						    array('v' => '950', 'name' => 'maxservermajorversion',	'type' => 'mediumint(9)', 'default' => "'0'", 'patched' => array('940' => 'ids2014ccsupport'),
+						    array('v' => '9.5', 'name' => 'maxservermajorversion',	'type' => 'mediumint(9)', 'default' => "'0'", 'patched' => array('9.4' => 'ids2014ccsupport'),
 						  		'comment' => 'Maximum required internal major version of IDS that is suitable to execute the job. 8=CS6, 10=CC2014, etc' ),
-						    array('v' => '950', 'name' => 'maxserverminorversion',	'type' => 'mediumint(9)', 'default' => "'0'", 'patched' => array('940' => 'ids2014ccsupport'),
+						    array('v' => '9.5', 'name' => 'maxserverminorversion',	'type' => 'mediumint(9)', 'default' => "'0'", 'patched' => array('9.4' => 'ids2014ccsupport'),
 						  		'comment' => 'Maximum required internal minor version of IDS that is suitable to execute the job; See also maxservermajorversion field.' ),
-							array('v' => '960', 'name' => 'prio',	'type' => 'mediumint(1)', 'default' => "'3'",
+							array('v' => '9.6', 'name' => 'prio',	'type' => 'mediumint(1)', 'default' => "'3'",
 								'comment' => 'Priority used to select which InDesign Server instance should pick it up.' ),
 							
 							// Job session context:
-							array('v' => '970', 'name' => 'ticketseal',   'type' => 'varchar(40)', 'default' => "''",
+							array('v' => '9.7', 'name' => 'ticketseal',   'type' => 'varchar(40)', 'default' => "''",
 								'comment' => 'Ticket that can be used by the job script to logon without user name and password.' ),
-							array('v' => '970', 'name' => 'ticket',   'type' => 'varchar(40)', 'default' => "''",
+							array('v' => '9.7', 'name' => 'ticket',   'type' => 'varchar(40)', 'default' => "''",
 								'comment' => 'Ticket of the job itself. Set once the job script has logged in to Enterprise.' ),
-							array('v' => '970', 'name' => 'actinguser',   'type' => 'varchar(40)', 'default' => "''",
+							array('v' => '9.7', 'name' => 'actinguser',   'type' => 'varchar(40)', 'default' => "''",
 								'comment' => 'Short name of user who has logged in through the IDS job.' ),
-							array('v' => '970', 'name' => 'initiator',   'type' => 'varchar(40)', 'default' => "''",
+							array('v' => '9.7', 'name' => 'initiator',   'type' => 'varchar(40)', 'default' => "''",
 								'comment' => 'Short name of user who has pushed the IDS job in the queue.' ),
-							array('v' => '970', 'name' => 'servicename', 'type' => 'varchar(32)', 'default' => "''",
+							array('v' => '9.7', 'name' => 'servicename', 'type' => 'varchar(32)', 'default' => "''",
 								'comment' => 'Name of web service in which context the IDS job was pushed into the queue.' ),
-							array('v' => '970', 'name' => 'context', 'type' => 'varchar(64)', 'default' => "''",
+							array('v' => '9.7', 'name' => 'context', 'type' => 'varchar(64)', 'default' => "''",
 								'comment' => 'Additional information in which context the IDS job was pushed into the queue. Free format, depends per job type.' ),
 						),
 						'indexes' => array(
-							array('v' => '970', 'name' => 'primary', 'fields' => 'jobid', 'primary' => true, 'unique' => true,
-								'alters' => array( 'v' => '800', 'name' => 'primary', 'fields' => 'id', 'primary' => true )
+							array('v' => '9.7', 'name' => 'primary', 'fields' => 'jobid', 'primary' => true, 'unique' => true,
+								'alters' => array( 'v' => '8.0', 'name' => 'primary', 'fields' => 'id', 'primary' => true )
 							),
-							array('v' => '599', 'name' => 'asre_indesignserverjobs', 'fields' => 'assignedserverid, readytime', 'unique' => false),
-							array('v' => '599', 'name' => 'qt_indesignserverjobs', 'fields' => 'queuetime', 'unique' => false),
-							array('v' => '920', 'name' => 'objid_indesignserverjobs', 'fields' => 'objid', 'unique' => false),
-							array('v' => '970', 'name' => 'prid_indesignserverjobs', 'fields' => 'prio, jobid', 'unique' => false,
-								'alters' => array('v' => '960', 'name' => 'prid_indesignserverjobs', 'fields' => 'prio, id', 'unique' => false)
+							array('v' => '5.99', 'name' => 'asre_indesignserverjobs', 'fields' => 'assignedserverid, readytime', 'unique' => false),
+							array('v' => '5.99', 'name' => 'qt_indesignserverjobs', 'fields' => 'queuetime', 'unique' => false),
+							array('v' => '9.2', 'name' => 'objid_indesignserverjobs', 'fields' => 'objid', 'unique' => false),
+							array('v' => '9.7', 'name' => 'prid_indesignserverjobs', 'fields' => 'prio, jobid', 'unique' => false,
+								'alters' => array('v' => '9.6', 'name' => 'prid_indesignserverjobs', 'fields' => 'prio, id', 'unique' => false)
 							),
-							array('v' => '970', 'name' => 'ts_indesignserverjobs', 'fields' => 'ticketseal', 'unique' => false),
-							array('v' => '970', 'name' => 'ttjtstrt_indesignserverjobs', 'fields' => 'ticket, jobtype, starttime, readytime', 'unique' => false),
-							array('v' => '970', 'name' => 'jp_indesignserverjobs', 'fields' => 'jobprogress', 'unique' => false),
-							array('v' => '970', 'name' => 'jspr_indesignserverjobs', 'fields' => 'jobstatus, prio, queuetime', 'unique' => false),
-							array('v' => '980', 'name' => 'lt_indesignserverjobs', 'fields' => 'locktoken', 'unique' => false),
+							array('v' => '9.7', 'name' => 'ts_indesignserverjobs', 'fields' => 'ticketseal', 'unique' => false),
+							array('v' => '9.7', 'name' => 'ttjtstrt_indesignserverjobs', 'fields' => 'ticket, jobtype, starttime, readytime', 'unique' => false),
+							array('v' => '9.7', 'name' => 'jp_indesignserverjobs', 'fields' => 'jobprogress', 'unique' => false),
+							array('v' => '9.7', 'name' => 'jspr_indesignserverjobs', 'fields' => 'jobstatus, prio, queuetime', 'unique' => false),
+							array('v' => '9.8', 'name' => 'lt_indesignserverjobs', 'fields' => 'locktoken', 'unique' => false),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '599', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '970', 'field' => 'objectmajorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
-							array('v' => '970', 'field' => 'objectminorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
-							array('v' => '599', 'field' => 'assignedserverid', 'reftable' => 'smart_indesignservers', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '9.7', 'field' => 'objectmajorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
+							array('v' => '9.7', 'field' => 'objectminorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
+							array('v' => '5.99', 'field' => 'assignedserverid', 'reftable' => 'smart_indesignservers', 'reffield' => 'id'),
 						),
 				),
 
-				array ('v' => '800', 'name' => 'smart_servers',
+				array ('v' => '8.0', 'name' => 'smart_servers',
 						'comment' => 'Configuration of Enterprise Servers.',
 						'fields' => array(
-						  	array('v' => '800', 'name' => 'id',	'type' => 'int(11)', 'autoincrement' => true),
-							array('v' => '800', 'name' => 'name', 'type' => 'varchar(64)', 'default' => "''"),
-							array('v' => '800', 'name' => 'type', 'type' => 'varchar(32)', 'default' => "''"),
-							array('v' => '800', 'name' => 'url', 'type' => 'varchar(1024)', 'default' => "''"),
-							array('v' => '800', 'name' => 'description', 'type' => 'varchar(255)', 'default' => "''"),
-							array('v' => '800', 'name' => 'jobsupport', 'type' => 'char(1)', 'default' => "''",
+						  	array('v' => '8.0', 'name' => 'id',	'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '8.0', 'name' => 'name', 'type' => 'varchar(64)', 'default' => "''"),
+							array('v' => '8.0', 'name' => 'type', 'type' => 'varchar(32)', 'default' => "''"),
+							array('v' => '8.0', 'name' => 'url', 'type' => 'varchar(1024)', 'default' => "''"),
+							array('v' => '8.0', 'name' => 'description', 'type' => 'varchar(255)', 'default' => "''"),
+							array('v' => '8.0', 'name' => 'jobsupport', 'type' => 'char(1)', 'default' => "''",
 								'comment' => 'What Server Job types it handles. A=All, N=None, S=Specified.' ),
 						),
 						'indexes' => array(
-							array('v' => '800', 'name' => 'hopo_servers', 'fields' => 'name', 'unique' => true),
+							array('v' => '8.0', 'name' => 'hopo_servers', 'fields' => 'name', 'unique' => true),
 						),
 						'inserts' => array(
 						),
@@ -2710,137 +2700,137 @@ class DBStruct
 						),
 				),
 
-				array ('v' => '800', 'name' => 'smart_serverjobs',
+				array ('v' => '8.0', 'name' => 'smart_serverjobs',
 						'comment' => 'Overview of Server Jobs and their status.',
 						'fields' => array(
 							// >>> DB fields taken from IDS jobs => TODO: reconsider which ones to embrace
-							array( 'v' => '940', 'name' => 'id', 'drops' =>
-								array( 'v' => '800', 'name' => 'id', 'type' => 'int(11)', 		'autoincrement' => true,
+							array( 'v' => '9.4', 'name' => 'id', 'drops' =>
+								array( 'v' => '8.0', 'name' => 'id', 'type' => 'int(11)', 		'autoincrement' => true,
 						        'comment' => 'Used to identify the job record. Use jobid instead.')),
-							array('v' => '940', 'name' => 'jobid', 'type' => 'varchar(40)', 		'default' => "''",
+							array('v' => '9.4', 'name' => 'jobid', 'type' => 'varchar(40)', 		'default' => "''",
 								'comment' => 'Unique identifier (GUID) of the job record.' ),
-							//array('v' => '800', 'name' => 'foreground', 		'type' => 'char(2)', 		'default' => "''"),
-							array('v' => '940', 'name' => 'attempts', 'type' => 'int(11)', 		'default' => 0,
+							//array('v' => '8.0', 'name' => 'foreground', 		'type' => 'char(2)', 		'default' => "''"),
+							array('v' => '9.4', 'name' => 'attempts', 'type' => 'int(11)', 		'default' => 0,
 								'comment' => 'When job pushed into the queue, value is set to zero. After calling ServerJob_EnterpriseConnector->runJob(), value is incremented by one.' ),
-							array('v' => '940', 'name' => 'queuetime', 'type' => 'varchar(30)', 'default' => "''",
+							array('v' => '9.4', 'name' => 'queuetime', 'type' => 'varchar(30)', 'default' => "''",
 								'comment' => 'Time when the job was pushed into the queue. Unlike other datetimes, this '.
 								'one has an accuracy of microseconds (6 digits). The datetime is stored in the following '.
 								'format: yyyy-mm-ddThh:mm:ss.ssssss.',
-							   'alters' => array('v' => '800', 'name' => 'queuetime', 'type' => 'varchar(20)', 'default' => "''")),
-							array( 'v' => '940', 'name' => 'objid', 'drops' =>
-								array( 'v' => '800', 'name' => 'objid', 'type' => 'int(11)', 'default' => 0 )),
-							array('v' => '800', 'name' => 'servicename', 'type' => 'varchar(32)', 'default' => "''" ),
-							array('v' => '800', 'name' => 'context', 'type' => 'varchar(32)', 'default' => "''"),
-							array( 'v' => '940', 'name' => 'minorversion', 'drops' =>
-								array( 'v' => '800', 'name' => 'minorversion',	'type' => 'mediumint(9)',	'default' => 0,
+							   'alters' => array('v' => '8.0', 'name' => 'queuetime', 'type' => 'varchar(20)', 'default' => "''")),
+							array( 'v' => '9.4', 'name' => 'objid', 'drops' =>
+								array( 'v' => '8.0', 'name' => 'objid', 'type' => 'int(11)', 'default' => 0 )),
+							array('v' => '8.0', 'name' => 'servicename', 'type' => 'varchar(32)', 'default' => "''" ),
+							array('v' => '8.0', 'name' => 'context', 'type' => 'varchar(32)', 'default' => "''"),
+							array( 'v' => '9.4', 'name' => 'minorversion', 'drops' =>
+								array( 'v' => '8.0', 'name' => 'minorversion',	'type' => 'mediumint(9)',	'default' => 0,
 					  			'comment' => 'Minor object version at the time this job was created for it.' )),
-							array( 'v' => '940', 'name' => 'majorversion', 'drops' =>
-								array( 'v' => '800', 'name' => 'majorversion',	'type' => 'mediumint(9)',	'default' => 0,
+							array( 'v' => '9.4', 'name' => 'majorversion', 'drops' =>
+								array( 'v' => '8.0', 'name' => 'majorversion',	'type' => 'mediumint(9)',	'default' => 0,
 					  			'comment' => 'Major object version at the time this job was created for it.' )),
-							//array('v' => '800', 'name' => 'exclusivelock', 		'type' => 'char(2)', 		'default' => ""),
-							array('v' => '800', 'name' => 'servertype', 'type' => 'varchar(32)', 'default' => "''"),
-							array('v' => '800', 'name' => 'jobtype', 'type' => 'varchar(32)', 'default' => "''"),
-							//array('v' => '800', 'name' => 'jobscript', 'type' => 'blob', 'default' => ""),
-							//array('v' => '800', 'name' => 'jobparams', 'type' => 'blob', 'default' => ""),
-							array('v' => '800', 'name' => 'assignedserverid', 'type' => 'int(11)', 'default' => 0 ),
-							array('v' => '800', 'name' => 'starttime', 'type' => 'varchar(30)', 'default' => "'0000-00-00T00:00:00'" ),
-							array('v' => '800', 'name' => 'readytime', 'type' => 'varchar(30)', 'default' => "'0000-00-00T00:00:00'" ),
-							//array('v' => '800', 'name' => 'errorcode', 'type' => 'varchar(32)', 'default' => ""),
-							array('v' => '960', 'name' => 'errormessage', 'type' => 'varchar(1024)', 'default' => "''"),
-							//array('v' => '800', 'name' => 'scriptresult', 'type' => 'blob', 'default' => ""),
-						    //array('v' => '800', 'name' => 'serverversion',	'type' => 'mediumint(9)', 'default' => "'5'",
+							//array('v' => '8.0', 'name' => 'exclusivelock', 		'type' => 'char(2)', 		'default' => ""),
+							array('v' => '8.0', 'name' => 'servertype', 'type' => 'varchar(32)', 'default' => "''"),
+							array('v' => '8.0', 'name' => 'jobtype', 'type' => 'varchar(32)', 'default' => "''"),
+							//array('v' => '8.0', 'name' => 'jobscript', 'type' => 'blob', 'default' => ""),
+							//array('v' => '8.0', 'name' => 'jobparams', 'type' => 'blob', 'default' => ""),
+							array('v' => '8.0', 'name' => 'assignedserverid', 'type' => 'int(11)', 'default' => 0 ),
+							array('v' => '8.0', 'name' => 'starttime', 'type' => 'varchar(30)', 'default' => "'0000-00-00T00:00:00'" ),
+							array('v' => '8.0', 'name' => 'readytime', 'type' => 'varchar(30)', 'default' => "'0000-00-00T00:00:00'" ),
+							//array('v' => '8.0', 'name' => 'errorcode', 'type' => 'varchar(32)', 'default' => ""),
+							array('v' => '9.6', 'name' => 'errormessage', 'type' => 'varchar(1024)', 'default' => "''"),
+							//array('v' => '8.0', 'name' => 'scriptresult', 'type' => 'blob', 'default' => ""),
+						    //array('v' => '8.0', 'name' => 'serverversion',	'type' => 'mediumint(9)', 'default' => "'5'",
 						  	//	'comment' => 'Preferred InDesign Server version to run the job. 5=CS3, 6=CS4, etc' ),
 							// <<<
 						  	
-							array('v' => '800', 'name' => 'locktoken',    'type' => 'varchar(40)', 'default' => "''"),
-							array('v' => '800', 'name' => 'ticketseal',   'type' => 'varchar(40)', 'default' => "''"),
-							array('v' => '800', 'name' => 'actinguser',   'type' => 'varchar(40)', 'default' => "''"),
+							array('v' => '8.0', 'name' => 'locktoken',    'type' => 'varchar(40)', 'default' => "''"),
+							array('v' => '8.0', 'name' => 'ticketseal',   'type' => 'varchar(40)', 'default' => "''"),
+							array('v' => '8.0', 'name' => 'actinguser',   'type' => 'varchar(40)', 'default' => "''"),
 
-							array('v' => '800', 'name' => 'jobstatus',    'type' => 'int(11)',     'default' => 0),
-							array('v' => '800', 'name' => 'jobcondition', 'type' => 'int(11)',     'default' => 0),
-							array('v' => '800', 'name' => 'jobprogress',  'type' => 'int(11)',     'default' => 0),
-							array( 'v' => '940', 'name' => 'jobdata', 'type' => 'mediumblob', 'default' => "",
+							array('v' => '8.0', 'name' => 'jobstatus',    'type' => 'int(11)',     'default' => 0),
+							array('v' => '8.0', 'name' => 'jobcondition', 'type' => 'int(11)',     'default' => 0),
+							array('v' => '8.0', 'name' => 'jobprogress',  'type' => 'int(11)',     'default' => 0),
+							array( 'v' => '9.4', 'name' => 'jobdata', 'type' => 'mediumblob', 'default' => "",
 								'comment' => 'Any data, depending on the job type.' ),
-							array('v' => '940', 'name' => 'dataentity',  'type' => 'varchar(20)',     'default' => "''",
+							array('v' => '9.4', 'name' => 'dataentity',  'type' => 'varchar(20)',     'default' => "''",
 								'comment' => 'possible values:objectid,issueid,object,issue' ),
 						),
 						'indexes' => array(
-							array('v' => '940', 'name' => 'primary', 'fields' => 'jobid', 'primary' => true, 'unique' => true,
-								'alters' => array( 'v' => '800', 'name' => 'primary', 'fields' => 'id', 'primary' => true, )
+							array('v' => '9.4', 'name' => 'primary', 'fields' => 'jobid', 'primary' => true, 'unique' => true,
+								'alters' => array( 'v' => '8.0', 'name' => 'primary', 'fields' => 'id', 'primary' => true, )
 							),
-							//array('v' => '800', 'name' => 'asre_serverjobs', 'fields' => 'assignedserverid, readytime', 'unique' => false),
-							array('v' => '800', 'name' => 'qt_serverjobs', 'fields' => 'queuetime', 'unique' => false),
-							array('v' => '940', 'name' => 'jobinfo', 'fields' => 'locktoken, jobstatus, jobprogress'),
-							array('v' => '940', 'name' => 'aslt_serverjobs', 'fields' => 'assignedserverid, locktoken'),
-						    array('v' => '940', 'name' => 'paged_results', 'fields' => 'queuetime, servertype, jobtype, jobstatus, actinguser')
+							//array('v' => '8.0', 'name' => 'asre_serverjobs', 'fields' => 'assignedserverid, readytime', 'unique' => false),
+							array('v' => '8.0', 'name' => 'qt_serverjobs', 'fields' => 'queuetime', 'unique' => false),
+							array('v' => '9.4', 'name' => 'jobinfo', 'fields' => 'locktoken, jobstatus, jobprogress'),
+							array('v' => '9.4', 'name' => 'aslt_serverjobs', 'fields' => 'assignedserverid, locktoken'),
+						    array('v' => '9.4', 'name' => 'paged_results', 'fields' => 'queuetime, servertype, jobtype, jobstatus, actinguser')
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '800', 'field' => 'jobtype', 'reftable' => 'smart_serverjobconfigs', 'reffield' => 'jobtype'),
-							array('v' => '800', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-							array('v' => '800', 'field' => 'majorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
-							array('v' => '800', 'field' => 'minorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
-							array('v' => '800', 'field' => 'assignedserverid', 'reftable' => 'smart_servers', 'reffield' => 'id'),
+							array('v' => '8.0', 'field' => 'jobtype', 'reftable' => 'smart_serverjobconfigs', 'reffield' => 'jobtype'),
+							array('v' => '8.0', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+							array('v' => '8.0', 'field' => 'majorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'majorversion'),
+							array('v' => '8.0', 'field' => 'minorversion', 'reftable' => 'smart_objectversions', 'reffield' => 'minorversion'),
+							array('v' => '8.0', 'field' => 'assignedserverid', 'reftable' => 'smart_servers', 'reffield' => 'id'),
 						),
 				),
 
-				array ('v' => '940', 'name' => 'smart_serverjobtypesonhold',
+				array ('v' => '9.4', 'name' => 'smart_serverjobtypesonhold',
 					'comment' => 'To remember which Job Type(s) are put on hold. (Jobs wont be picked up for processing.)',
 					'fields' => array(
-						array('v' => '940', 'name' => 'guid', 'type' => 'varchar(40)', 'default' => "''",
+						array('v' => '9.4', 'name' => 'guid', 'type' => 'varchar(40)', 'default' => "''",
 							'comment' => 'Identifier of the record.' ),
-						array('v' => '940', 'name' => 'jobtype', 'type' => 'varchar(32)', 'default' => "''",
+						array('v' => '9.4', 'name' => 'jobtype', 'type' => 'varchar(32)', 'default' => "''",
 							'comment' => 'Which server job type is entirely put on hold for a while.' ),
-						array('v' => '940', 'name' => 'retrytimestamp', 'type' => 'varchar(20)', 'default' => "''",
+						array('v' => '9.4', 'name' => 'retrytimestamp', 'type' => 'varchar(20)', 'default' => "''",
 							'comment' => 'When to start retrying this type of server job again. Calculated by core: now() + replanJobType().' ),
 					),
 					'indexes' => array(
-						array('v' => '940', 'name' => 'primary', 'fields' => 'guid', 'primary' => true, 'unique' => true ),
-						array('v' => '940', 'name' => 'jobtype', 'fields' => 'jobtype' ),
-						array('v' => '940', 'name' => 'retrytime', 'fields' => 'retrytimestamp' ), // used for cleanup old records ( retrytimestamp > now() ).
+						array('v' => '9.4', 'name' => 'primary', 'fields' => 'guid', 'primary' => true, 'unique' => true ),
+						array('v' => '9.4', 'name' => 'jobtype', 'fields' => 'jobtype' ),
+						array('v' => '9.4', 'name' => 'retrytime', 'fields' => 'retrytimestamp' ), // used for cleanup old records ( retrytimestamp > now() ).
 					),
 					'inserts' => array(
 					),
 					'lookups' => array(
-						array('v' => '940', 'field' => 'jobtype', 'reftable' => 'smart_serverjobs', 'reffield' => 'jobtype'),
+						array('v' => '9.4', 'field' => 'jobtype', 'reftable' => 'smart_serverjobs', 'reffield' => 'jobtype'),
 					),
 				),
 
-				array ('v' => '800', 'name' => 'smart_serverjobconfigs',
+				array ('v' => '8.0', 'name' => 'smart_serverjobconfigs',
 						'comment' => 'Configurations of how Server Jobs of a certain type should operate.',
 						'fields' => array(
-						  	array('v' => '800', 'name' => 'id',	'type' => 'int(11)', 'autoincrement' => true),
-							array('v' => '800', 'name' => 'jobtype', 'type' => 'varchar(32)', 'default' => "''",
+						  	array('v' => '8.0', 'name' => 'id',	'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '8.0', 'name' => 'jobtype', 'type' => 'varchar(32)', 'default' => "''",
 								'comment' => 'Unique name of the job.' ),
-							array('v' => '800', 'name' => 'servertype', 'type' => 'varchar(32)', 'default' => "''",
+							array('v' => '8.0', 'name' => 'servertype', 'type' => 'varchar(32)', 'default' => "''",
 								'comment' => 'The kind of server to be taken to run the job. Supported: Enterprise.' ),
-							array('v' => '800', 'name' => 'attempts', 'type' => 'mediumint(9)', 'default' => 0,
+							array('v' => '8.0', 'name' => 'attempts', 'type' => 'mediumint(9)', 'default' => 0,
 								'comment' => 'How many failures (on job runs) befor giving up.' ),
-							array('v' => '800', 'name' => 'active', 'type' => 'char(1)', 'default' => "'N'",
+							array('v' => '8.0', 'name' => 'active', 'type' => 'char(1)', 'default' => "'N'",
 								'comment' => 'Whether or not jobs (of this type) are processed, Y/N' ),
-							array('v' => '800', 'name' => 'sysadmin', 'type' => 'char(1)', 'default' => "'-'",
+							array('v' => '8.0', 'name' => 'sysadmin', 'type' => 'char(1)', 'default' => "'-'",
 								'comment' => 'Whether or not the job requires system admin rights, Y/N/-. '.
 											 'Y = system admin user needs to be configured for this job type at the userid field. N = same, but non-admin user. - = no specification; take acting user.' ),
-							array('v' => '800', 'name' => 'userid', 'type' => 'int(11)', 'default' => "0",
+							array('v' => '8.0', 'name' => 'userid', 'type' => 'int(11)', 'default' => "0",
 								'comment' => 'When zero (by default), the acting user (initiating the job) is used to determine access rights while running the job. '.
 											 'When non-zero, that specified user is always used instead (fixed). Typically used for system admin jobs to gain more access.' ),
-							array('v' => '940', 'name' => 'userconfigneeded', 'type' => 'char(1)', 'default' => "'Y'",
+							array('v' => '9.4', 'name' => 'userconfigneeded', 'type' => 'char(1)', 'default' => "'Y'",
 								'comment' => 'Whether or not the HealthCheck should raise error when userid is not assigned, Y/N. ' .
 											 'When set to Y, HealthCheck will raise error when userid is empty.' ),
-							array('v' => '800', 'name' => 'recurring', 'type' => 'char(1)', 'default' => "'N'",
+							array('v' => '8.0', 'name' => 'recurring', 'type' => 'char(1)', 'default' => "'N'",
 								'comment' => 'Whether or not jobs are recurring, Y/N.' ),
-							array( 'v' => '940', 'name' => 'selfdestructive', 'type' => 'char(1)', 'default' => "'N'",
+							array( 'v' => '9.4', 'name' => 'selfdestructive', 'type' => 'char(1)', 'default' => "'N'",
 								'comment' => 'Whether or not job should be removed from the queue once reach Completed status, Y/N.' ),
 
 							// >>> For recurring jobs only...
-							array('v' => '800', 'name' => 'workingdays', 'type' => 'char(1)', 'default' => "'N'",
+							array('v' => '8.0', 'name' => 'workingdays', 'type' => 'char(1)', 'default' => "'N'",
 								'comment' => 'Days a recurring job can run; working, non-working, all; Y/N/-.' ),
-							array('v' => '800', 'name' => 'dailystarttime',	'type' => 'varchar(30)', 'default' => "'00-00-00T00:00:00'",
+							array('v' => '8.0', 'name' => 'dailystarttime',	'type' => 'varchar(30)', 'default' => "'00-00-00T00:00:00'",
 								'comment' => 'Recurring: When to start each day, yyyy-mm-ddThh:mm:ss.' ),
-							array('v' => '800', 'name' => 'dailystoptime',	'type' => 'varchar(30)', 'default' => "'00-00-00T00:00:00'",
+							array('v' => '8.0', 'name' => 'dailystoptime',	'type' => 'varchar(30)', 'default' => "'00-00-00T00:00:00'",
 								'comment' => 'Recurring: When to stop each day, yyyy-mm-ddThh:mm:ss.' ),
-							array('v' => '800', 'name' => 'timeinterval', 'type' => 'mediumint(9)', 'default' => 0,
+							array('v' => '8.0', 'name' => 'timeinterval', 'type' => 'mediumint(9)', 'default' => 0,
 								'comment' => 'Recurring: Minutes wait between start times (not between end-start). Zero when job is not recurring.' ),
 							// <<<
 						),
@@ -2852,45 +2842,45 @@ class DBStruct
 						),
 				),
 
-				array ('v' => '800', 'name' => 'smart_serverjobsupports',
+				array ('v' => '8.0', 'name' => 'smart_serverjobsupports',
 						'comment' => 'Configuration of which server can handle which Server Job types.',
 						'fields' => array(
-						  	array('v' => '800', 'name' => 'id',	'type' => 'int(11)', 'autoincrement' => true),
-							array('v' => '800', 'name' => 'serverid', 'type' => 'int(11)', 'default' => 0),
-							array('v' => '800', 'name' => 'jobconfigid', 'type' => 'int(11)', 'default' => 0),
+						  	array('v' => '8.0', 'name' => 'id',	'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '8.0', 'name' => 'serverid', 'type' => 'int(11)', 'default' => 0),
+							array('v' => '8.0', 'name' => 'jobconfigid', 'type' => 'int(11)', 'default' => 0),
 						),
 						'indexes' => array(
-							array('v' => '800', 'name' => 'sjs_serverconfigs', 'fields' => 'serverid, jobconfigid', 'unique' => true),
+							array('v' => '8.0', 'name' => 'sjs_serverconfigs', 'fields' => 'serverid, jobconfigid', 'unique' => true),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '800', 'field' => 'serverid', 'reftable' => 'smart_servers', 'reffield' => 'id'),
-							array('v' => '800', 'field' => 'jobconfigid', 'reftable' => 'smart_serverjobconfigs', 'reffield' => 'id'),
+							array('v' => '8.0', 'field' => 'serverid', 'reftable' => 'smart_servers', 'reffield' => 'id'),
+							array('v' => '8.0', 'field' => 'jobconfigid', 'reftable' => 'smart_serverjobconfigs', 'reffield' => 'id'),
 						),
 				),
 				
-				array ('v' => '599', 'name' => 'smart_serverplugins',
+				array ('v' => '5.99', 'name' => 'smart_serverplugins',
 						'comment' => 'Plug-ins installed at the application server.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',          'type' => 'int(11)', 'autoincrement' => true,
-									'alters' => array('v' => '599', 'name' => 'id',          'type' => 'mediumint(9)', 'autoincrement' => true), ),
-							array('v' => '599', 'name' => 'uniquename',  'type' => 'varchar(64)',  'default' => "''"),
-							array('v' => '599', 'name' => 'displayname', 'type' => 'varchar(128)', 'default' => "''"),
-							array('v' => '610', 'name' => 'version',     'type' => 'varchar(64)',  'default' => "''",
-								'alters' => array('v' => '599', 'name' => 'version',     'type' => 'varchar(10)',  'default' => "''"), ),
-							array('v' => '800', 'name' => 'description', 'type' => 'varchar(255)', 'default' => "''", 'nullable' => false,
-								'alters' => array('v' => '599', 'name' => 'description', 'type' => 'varchar(255)', 'default' => "''", 'nullable' => true)),
-							array('v' => '800', 'name' => 'copyright',   'type' => 'varchar(128)', 'default' => "''", 'nullable' => false,
-								'alters' => array('v' => '599', 'name' => 'copyright',   'type' => 'varchar(128)', 'default' => "''", 'nullable' => true)),
-							array('v' => '800', 'name' => 'active',      'type' => 'char(2)',      'default' => "''", 'nullable' => false,
-								'alters' => array('v' => '599', 'name' => 'active',      'type' => 'char(2)',      'default' => "''", 'nullable' => true)),
-							array('v' => '800', 'name' => 'system',      'type' => 'char(2)',      'default' => "''", 'nullable' => false,
-								'alters' => array('v' => '599', 'name' => 'system',      'type' => 'char(2)',      'default' => "''", 'nullable' => true)),
-							array('v' => '800', 'name' => 'installed',   'type' => 'char(2)',      'default' => "''", 'nullable' => false,
-								'alters' => array('v' => '599', 'name' => 'installed',   'type' => 'char(2)',      'default' => "''", 'nullable' => true)),
-						    array('v' => '800', 'name' => 'modified',    'type' => 'varchar(30)',  'default' => "''", 'nullable' => false, 'comment' => 'yyyy-mm-ddThh:mm:ss',
-						    		'alters' => array('v' => '599', 'name' => 'modified',    'type' => 'varchar(30)',  'default' => "NULL", 'nullable' => true, 'comment' => 'yyyy-mm-ddThh:mm:ss')),
+							array('v' => '6.1', 'name' => 'id',          'type' => 'int(11)', 'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id',          'type' => 'mediumint(9)', 'autoincrement' => true), ),
+							array('v' => '5.99', 'name' => 'uniquename',  'type' => 'varchar(64)',  'default' => "''"),
+							array('v' => '5.99', 'name' => 'displayname', 'type' => 'varchar(128)', 'default' => "''"),
+							array('v' => '6.1', 'name' => 'version',     'type' => 'varchar(64)',  'default' => "''",
+								'alters' => array('v' => '5.99', 'name' => 'version',     'type' => 'varchar(10)',  'default' => "''"), ),
+							array('v' => '8.0', 'name' => 'description', 'type' => 'varchar(255)', 'default' => "''", 'nullable' => false,
+								'alters' => array('v' => '5.99', 'name' => 'description', 'type' => 'varchar(255)', 'default' => "''", 'nullable' => true)),
+							array('v' => '8.0', 'name' => 'copyright',   'type' => 'varchar(128)', 'default' => "''", 'nullable' => false,
+								'alters' => array('v' => '5.99', 'name' => 'copyright',   'type' => 'varchar(128)', 'default' => "''", 'nullable' => true)),
+							array('v' => '8.0', 'name' => 'active',      'type' => 'char(2)',      'default' => "''", 'nullable' => false,
+								'alters' => array('v' => '5.99', 'name' => 'active',      'type' => 'char(2)',      'default' => "''", 'nullable' => true)),
+							array('v' => '8.0', 'name' => 'system',      'type' => 'char(2)',      'default' => "''", 'nullable' => false,
+								'alters' => array('v' => '5.99', 'name' => 'system',      'type' => 'char(2)',      'default' => "''", 'nullable' => true)),
+							array('v' => '8.0', 'name' => 'installed',   'type' => 'char(2)',      'default' => "''", 'nullable' => false,
+								'alters' => array('v' => '5.99', 'name' => 'installed',   'type' => 'char(2)',      'default' => "''", 'nullable' => true)),
+						    array('v' => '8.0', 'name' => 'modified',    'type' => 'varchar(30)',  'default' => "''", 'nullable' => false, 'comment' => 'yyyy-mm-ddThh:mm:ss',
+						    		'alters' => array('v' => '5.99', 'name' => 'modified',    'type' => 'varchar(30)',  'default' => "NULL", 'nullable' => true, 'comment' => 'yyyy-mm-ddThh:mm:ss')),
 						),
 						'indexes' => array(
 						),
@@ -2903,25 +2893,25 @@ class DBStruct
 						),
 				),
 
-				array ('v' => '599', 'name' => 'smart_serverconnectors',
+				array ('v' => '5.99', 'name' => 'smart_serverconnectors',
 						'comment' => 'Connectors installed at the application server. One plug-in can have many connectors.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true,
-									'alters' => array('v' => '599', 'name' => 'id',	         'type' => 'mediumint(9)', 'autoincrement' => true), ),
-						  	array('v' => '610', 'name' => 'pluginid',    'type' => 'int(11)', 'default' => "'0'",
-						  			'alters' => array('v' => '599', 'name' => 'pluginid',    'type' => 'mediumint(9)', 'default' => "'0'"), ),
-							array('v' => '599', 'name' => 'classname',   'type' => 'varchar(128)', 'default' => "''"),
-							array('v' => '599', 'name' => 'interface',   'type' => 'varchar(128)', 'default' => "''"),
-							array('v' => '599', 'name' => 'type',        'type' => 'varchar(32)',  'default' => "''"),
-							array('v' => '599', 'name' => 'prio',        'type' => 'mediumint(9)', 'default' => "'0'"),
-							array('v' => '599', 'name' => 'runmode',     'type' => 'varchar(16)',  'default' => "''"),
-							array('v' => '599', 'name' => 'classfile',   'type' => 'varchar(255)', 'default' => "''"),
-						    array('v' => '800', 'name' => 'modified',    'type' => 'varchar(30)',  'default' => "''", 'nullable' => false, 'comment' => 'yyyy-mm-ddThh:mm:ss',
-						    	'alters' => array('v' => '599', 'name' => 'modified',    'type' => 'varchar(30)',  'default' => "NULL", 'nullable' => true, 'comment' => 'yyyy-mm-ddThh:mm:ss')),
+							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true,
+									'alters' => array('v' => '5.99', 'name' => 'id',	         'type' => 'mediumint(9)', 'autoincrement' => true), ),
+						  	array('v' => '6.1', 'name' => 'pluginid',    'type' => 'int(11)', 'default' => "'0'",
+						  			'alters' => array('v' => '5.99', 'name' => 'pluginid',    'type' => 'mediumint(9)', 'default' => "'0'"), ),
+							array('v' => '5.99', 'name' => 'classname',   'type' => 'varchar(128)', 'default' => "''"),
+							array('v' => '5.99', 'name' => 'interface',   'type' => 'varchar(128)', 'default' => "''"),
+							array('v' => '5.99', 'name' => 'type',        'type' => 'varchar(32)',  'default' => "''"),
+							array('v' => '5.99', 'name' => 'prio',        'type' => 'mediumint(9)', 'default' => "'0'"),
+							array('v' => '5.99', 'name' => 'runmode',     'type' => 'varchar(16)',  'default' => "''"),
+							array('v' => '5.99', 'name' => 'classfile',   'type' => 'varchar(255)', 'default' => "''"),
+						    array('v' => '8.0', 'name' => 'modified',    'type' => 'varchar(30)',  'default' => "''", 'nullable' => false, 'comment' => 'yyyy-mm-ddThh:mm:ss',
+						    	'alters' => array('v' => '5.99', 'name' => 'modified',    'type' => 'varchar(30)',  'default' => "NULL", 'nullable' => true, 'comment' => 'yyyy-mm-ddThh:mm:ss')),
 						),
 						'indexes' => array(
-							array('v' => '599', 'name' => 'seco_pluginid', 'fields' => 'pluginid'),
-							array('v' => '599', 'name' => 'seco_typeinterface', 'fields' => 'type, interface'),
+							array('v' => '5.99', 'name' => 'seco_pluginid', 'fields' => 'pluginid'),
+							array('v' => '5.99', 'name' => 'seco_typeinterface', 'fields' => 'type, interface'),
 						),
 						'inserts' => array(
 							"1, 1, 'PreviewMetaPHP_Preview', 'Preview', '', 500, 'Synchron', '/server/plugins/PreviewMetaPHP/PreviewMetaPHP_Preview.class.php', '2008-10-02T09:00:00'",
@@ -2929,76 +2919,76 @@ class DBStruct
 							"3, 3, 'InCopyHTMLConversion_WflGetObjects', 'WflGetObjects', 'WorkflowService', 500, 'After', '/server/plugins/InCopyHTMLConversion/InCopyHTMLConversion_WflGetObjects.class.php', '2008-11-30T09:00:00'",
 						),
 						'lookups' => array(
-							array('v' => '599', 'field' => 'pluginid', 'reftable' => 'smart_serverplugins', 'reffield' => 'id'),
+							array('v' => '5.99', 'field' => 'pluginid', 'reftable' => 'smart_serverplugins', 'reffield' => 'id'),
 						),
 				),
 
-				array ('v' =>'750', 'name' => 'smart_semaphores',
+				array ('v' =>'7.5', 'name' => 'smart_semaphores',
 						'comment' => 'This semaphores table enables PHP processes to implement atomic operations. This can be needed when '.
 							'there is a potential danger that process A could disturb process B. For example, two processes working '.
 							'at the very same folder at file system, both creating, updating and removing files and folders.',
 						'fields' => array(
-							array( 'v' => '750', 'name' => 'id',        'type' => 'int(11)',     'autoincrement' => true,
+							array( 'v' => '7.5', 'name' => 'id',        'type' => 'int(11)',     'autoincrement' => true,
 								'comment' => 'Semaphore id. There can be only one PHP process at the same time having this id.' ),
-							array( 'v' => '750', 'name' => 'entityid',  'type' => 'varchar(40)', 'default' => "'0'",
+							array( 'v' => '7.5', 'name' => 'entityid',  'type' => 'varchar(40)', 'default' => "'0'",
 								'comment' => 'The id of any entity. For example, the issue id for which a publishing operation runs.' ),
-							array( 'v' => '750', 'name' => 'lastupdate', 'type' => 'int(11)',     'default' => "'0'",
+							array( 'v' => '7.5', 'name' => 'lastupdate', 'type' => 'int(11)',     'default' => "'0'",
 								'comment' => 'The last update time, measured in seconds since the Unix Epoch (January 1 1970 00:00:00 GMT). '.
 									'This is to calculate the semaphore expiration (which is implementation specific). '.
 									'Expired semaphores are cleaned automatically when a process ends. Or, they are cleaned implicitly '.
 									'when process A has aborted unexpectedly, the lifetime has elapsed and process B is about to gain access.'.
 									'See comment of the lifetime field for more info.' ),
-							array( 'v' => '960', 'name' => 'lifetime', 'type' => 'int(11)',     'default' => "'0'",
+							array( 'v' => '9.6', 'name' => 'lifetime', 'type' => 'int(11)',     'default' => "'0'",
 								'comment' => 'The number of seconds the semaphore is kept alive by the system. '.
 									'When now() > lastupdate + lifetime then the semaphore expires. '.
 									'Expiration can be avoided by updating the lastupdate field with now(). '.
 									'These updates should be done repeatedly, within the lifetime, so before it expires. '.
 									'See comment of the lastupdate field for more info.' ),
-							array( 'v' => '750', 'name' => 'user',      'type' => 'varchar(40)', 'default' => "''",
+							array( 'v' => '7.5', 'name' => 'user',      'type' => 'varchar(40)', 'default' => "''",
 								'comment' => 'The user short name, for who the PHP server process is running.' ),
-							array( 'v' => '750', 'name' => 'ip',        'type' => 'varchar(30)', 'default' => "''",
+							array( 'v' => '7.5', 'name' => 'ip',        'type' => 'varchar(30)', 'default' => "''",
 								'comment' => 'The IP address of the client for which the PHP server process was created.' ),
 						),
 						'indexes' => array(
-							array( 'v' => '750', 'name' => 'idx_entity',     'fields' => 'entityid', 'unique' => true ),
-							array( 'v' => '750', 'name' => 'idx_entityuser', 'fields' => 'entityid, user' ),
+							array( 'v' => '7.5', 'name' => 'idx_entity',     'fields' => 'entityid', 'unique' => true ),
+							array( 'v' => '7.5', 'name' => 'idx_entityuser', 'fields' => 'entityid, user' ),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '750', 'field' => 'user', 'reftable' => 'smart_users', 'reffield' => 'user'),
+							array('v' => '7.5', 'field' => 'user', 'reftable' => 'smart_users', 'reffield' => 'user'),
 						),
 				),
 
-				array ('v' =>'750', 'name' => 'smart_outputdevices',
+				array ('v' =>'7.5', 'name' => 'smart_outputdevices',
 						'comment' => 'Device definitions, used for publishing.',
 						'fields' => array(
-							array('v' => '750', 'name' => 'id',              'type' => 'int(11)',       'autoincrement' => true ),
-							array('v' => '750', 'name' => 'name',            'type' => 'varchar(255)',  'default' => "''" ),
-							array('v' => '750', 'name' => 'code',            'type' => 'int(4)',        'default' => "'0'" ),
-							array('v' => '750', 'name' => 'description',     'type' => 'blob',          'default' => "" ),
+							array('v' => '7.5', 'name' => 'id',              'type' => 'int(11)',       'autoincrement' => true ),
+							array('v' => '7.5', 'name' => 'name',            'type' => 'varchar(255)',  'default' => "''" ),
+							array('v' => '7.5', 'name' => 'code',            'type' => 'int(4)',        'default' => "'0'" ),
+							array('v' => '7.5', 'name' => 'description',     'type' => 'blob',          'default' => "" ),
 
-							array('v' => '750', 'name' => 'landscapewidth',  'type' => 'int(11)',       'default' => "'0'" ),
-							array('v' => '750', 'name' => 'landscapeheight', 'type' => 'int(11)',       'default' => "'0'" ),
-							array('v' => '750', 'name' => 'portraitwidth',   'type' => 'int(11)',       'default' => "'0'" ),
-							array('v' => '750', 'name' => 'portraitheight',  'type' => 'int(11)',       'default' => "'0'" ),
+							array('v' => '7.5', 'name' => 'landscapewidth',  'type' => 'int(11)',       'default' => "'0'" ),
+							array('v' => '7.5', 'name' => 'landscapeheight', 'type' => 'int(11)',       'default' => "'0'" ),
+							array('v' => '7.5', 'name' => 'portraitwidth',   'type' => 'int(11)',       'default' => "'0'" ),
+							array('v' => '7.5', 'name' => 'portraitheight',  'type' => 'int(11)',       'default' => "'0'" ),
 
-							array('v' => '750', 'name' => 'previewquality',  'type' => 'int(11)',       'default' => "'0'" ),
-							array('v' => '750', 'name' => 'landscapelayoutwidth', 'type' => 'double',  'default' => "'0'" ),
-							array('v' => '750', 'name' => 'pixeldensity',    'type' => 'int(11)',       'default' => "'0'" ),
-							array('v' => '750', 'name' => 'pngcompression',  'type' => 'int(11)',       'default' => "'0'" ),
+							array('v' => '7.5', 'name' => 'previewquality',  'type' => 'int(11)',       'default' => "'0'" ),
+							array('v' => '7.5', 'name' => 'landscapelayoutwidth', 'type' => 'double',  'default' => "'0'" ),
+							array('v' => '7.5', 'name' => 'pixeldensity',    'type' => 'int(11)',       'default' => "'0'" ),
+							array('v' => '7.5', 'name' => 'pngcompression',  'type' => 'int(11)',       'default' => "'0'" ),
 
-							array('v' => '800', 'name' => 'thumbheight',    'drops' => 
-								array('v' => '750', 'name' => 'thumbheight',     'type' => 'int(11)',       'default' => "'130'" )),
-							array('v' => '750', 'name' => 'textviewpadding', 'type' => 'varchar(50)',   'default' => "''" ),
-							array('v' => '800', 'name' => 'processor',       'drops' =>
-								array('v' => '750', 'name' => 'processor',       'type' => 'varchar(50)',   'default' => "''" )),
-							array('v' => '800', 'name' => 'exporthtml5',     'drops' => 
-								array('v' => '750', 'name' => 'exporthtml5',     'type' => 'char(2)',       'default' => "''" )), // default off
-							array('v' => '800', 'name' => 'embedimagesincss','drops' =>
-								array('v' => '750', 'name' => 'embedimagesincss','type' => 'char(2)',       'default' => "'on'" )),
-							array('v' => '800', 'name' => 'textastext',      'drops' =>
-								array('v' => '750', 'name' => 'textastext',      'type' => 'char(2)',       'default' => "''" )), // default off
+							array('v' => '8.0', 'name' => 'thumbheight',    'drops' => 
+								array('v' => '7.5', 'name' => 'thumbheight',     'type' => 'int(11)',       'default' => "'1.3'" )),
+							array('v' => '7.5', 'name' => 'textviewpadding', 'type' => 'varchar(50)',   'default' => "''" ),
+							array('v' => '8.0', 'name' => 'processor',       'drops' =>
+								array('v' => '7.5', 'name' => 'processor',       'type' => 'varchar(50)',   'default' => "''" )),
+							array('v' => '8.0', 'name' => 'exporthtml5',     'drops' => 
+								array('v' => '7.5', 'name' => 'exporthtml5',     'type' => 'char(2)',       'default' => "''" )), // default off
+							array('v' => '8.0', 'name' => 'embedimagesincss','drops' =>
+								array('v' => '7.5', 'name' => 'embedimagesincss','type' => 'char(2)',       'default' => "'on'" )),
+							array('v' => '8.0', 'name' => 'textastext',      'drops' =>
+								array('v' => '7.5', 'name' => 'textastext',      'type' => 'char(2)',       'default' => "''" )), // default off
 						),
 						'indexes' => array(
 						),
@@ -3012,152 +3002,152 @@ class DBStruct
 						),
 				),
 
-				array ('v' =>'760', 'name' => 'smart_placementtiles',
+				array ('v' =>'7.6', 'name' => 'smart_placementtiles',
 						'comment' => 'Contains the of tiles of a placement.',
 						'fields' => array(
-							array('v' => '760', 'name' => 'id',				'type' => 'int(11)',		'autoincrement' => true ),
-							array('v' => '760', 'name' => 'placementid',	'type' => 'int(11)',		'default' => "'0'",
+							array('v' => '7.6', 'name' => 'id',				'type' => 'int(11)',		'autoincrement' => true ),
+							array('v' => '7.6', 'name' => 'placementid',	'type' => 'int(11)',		'default' => "'0'",
 								'comment' => 'Placement id.'),
-							array('v' => '760', 'name' => 'pagesequence',	'type' => 'mediumint(9)',	'default' => "'0'",
+							array('v' => '7.6', 'name' => 'pagesequence',	'type' => 'mediumint(9)',	'default' => "'0'",
 						  		'comment' => 'Sequential page order within a layout' ),
-						  	array('v' => '760', 'name' => 'left',			'type' => 'double',			'default' => "'0'"),
-							array('v' => '760', 'name' => 'top',			'type' => 'double',			'default' => "'0'"),
-							array('v' => '760', 'name' => 'width',			'type' => 'double',			'default' => "'0'"),
-							array('v' => '760', 'name' => 'height',			'type' => 'double',			'default' => "'0'"),
+						  	array('v' => '7.6', 'name' => 'left',			'type' => 'double',			'default' => "'0'"),
+							array('v' => '7.6', 'name' => 'top',			'type' => 'double',			'default' => "'0'"),
+							array('v' => '7.6', 'name' => 'width',			'type' => 'double',			'default' => "'0'"),
+							array('v' => '7.6', 'name' => 'height',			'type' => 'double',			'default' => "'0'"),
 						),
 						'indexes' => array(
-							array('v' => '760', 'name' => 'pi_placementtiles', 'fields' => 'placementid'),
+							array('v' => '7.6', 'name' => 'pi_placementtiles', 'fields' => 'placementid'),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '760', 'field' => 'placementid', 'reftable' => 'smart_placements', 'reffield' => 'id'),
+							array('v' => '7.6', 'field' => 'placementid', 'reftable' => 'smart_placements', 'reffield' => 'id'),
 						),
 				),
 
-				array ('v' =>'910', 'name' => 'smart_objectlabels',
+				array ('v' =>'9.1', 'name' => 'smart_objectlabels',
 					'comment' => 'Contains the object label definitions.',
 					'fields' => array(
-						array('v' => '910', 'name' => 'id',				'type' => 'int(11)',		'autoincrement' => true ),
-						array('v' => '910', 'name' => 'objid',			'type' => 'int(11)', 		'default' => "'0'" ),
-						array('v' => '960', 'name' => 'name',           'type' => 'varchar(250)',  	'default' => "''",
-							'alters' => array('v' => '910', 'name' => 'name',           'type' => 'varchar(64)',  	'default' => "''" ), ),
+						array('v' => '9.1', 'name' => 'id',				'type' => 'int(11)',		'autoincrement' => true ),
+						array('v' => '9.1', 'name' => 'objid',			'type' => 'int(11)', 		'default' => "'0'" ),
+						array('v' => '9.6', 'name' => 'name',           'type' => 'varchar(250)',  	'default' => "''",
+							'alters' => array('v' => '9.1', 'name' => 'name',           'type' => 'varchar(64)',  	'default' => "''" ), ),
 					),
 					'indexes' => array(
-						array('v' => '910', 'name' => 'objlabels_objid', 'fields' => 'objid'),
+						array('v' => '9.1', 'name' => 'objlabels_objid', 'fields' => 'objid'),
 					),
 					'inserts' => array(
 					),
 					'lookups' => array(
-						array('v' => '910', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+						array('v' => '9.1', 'field' => 'objid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
 					),
 				),
 
-				array ('v' =>'910', 'name' => 'smart_objectrelationlabels',
+				array ('v' =>'9.1', 'name' => 'smart_objectrelationlabels',
 					'comment' => 'Links the objects to object labels.',
 					'fields' => array(
-						array('v' => '910', 'name' => 'labelid',			'type' => 'int(11)', 'default' => "'0'" ),
-						array('v' => '910', 'name' => 'childobjid',		    'type' => 'int(11)', 'default' => "'0'" ),
+						array('v' => '9.1', 'name' => 'labelid',			'type' => 'int(11)', 'default' => "'0'" ),
+						array('v' => '9.1', 'name' => 'childobjid',		    'type' => 'int(11)', 'default' => "'0'" ),
 					),
 					'indexes' => array(
-						array('v' => '910', 'name' => 'primary', 'fields' => 'labelid, childobjid', 'primary' => true),
-						array('v' => '910', 'name' => 'objrellabels_childobjid', 'fields' => 'childobjid'),
+						array('v' => '9.1', 'name' => 'primary', 'fields' => 'labelid, childobjid', 'primary' => true),
+						array('v' => '9.1', 'name' => 'objrellabels_childobjid', 'fields' => 'childobjid'),
 					),
 					'inserts' => array(
 					),
 					'lookups' => array(
-						array('v' => '910', 'field' => 'childobjid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
-						array('v' => '910', 'field' => 'labelid', 'reftable' => 'smart_objectlabels', 'reffield' => 'id'),
+						array('v' => '9.1', 'field' => 'childobjid', 'reftable' => 'smart_objects', 'reffield' => 'id'),
+						array('v' => '9.1', 'field' => 'labelid', 'reftable' => 'smart_objectlabels', 'reffield' => 'id'),
 					),
 				),
 
-				array ('v' => '610', 'name' => 'temp_aov', 'temporary' => true,
+				array ('v' => '6.1', 'name' => 'temp_aov', 'temporary' => true,
 						'comment' => 'Table storing session related authorization data, Oracle only.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
 						),
 						'indexes' => array(
-							array ('v' => '610', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
+							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
 						),
 				),
-				array ('v' => '610', 'name' => 'temp_cv0', 'temporary' => true,
+				array ('v' => '6.1', 'name' => 'temp_cv0', 'temporary' => true,
 						'comment' => 'Table storing session related authorization data, Oracle only.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
 						),
 						'indexes' => array(
-							array ('v' => '610', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
+							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
 						),
 				),
-				array ('v' => '610', 'name' => 'temp_cv1', 'temporary' => true,
+				array ('v' => '6.1', 'name' => 'temp_cv1', 'temporary' => true,
 						'comment' => 'Table storing session related authorization data, Oracle only.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
 						),
 						'indexes' => array(
-							array ('v' => '610', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
+							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
 						),
 				),
-				array ('v' => '610', 'name' => 'temp_cv2', 'temporary' => true,
+				array ('v' => '6.1', 'name' => 'temp_cv2', 'temporary' => true,
 						'comment' => 'Table storing session related authorization data, Oracle only.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
 						),
 						'indexes' => array(
-							array ('v' => '610', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
+							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
 						),
 				),
-				array ('v' => '610', 'name' => 'temp_cv3', 'temporary' => true,
+				array ('v' => '6.1', 'name' => 'temp_cv3', 'temporary' => true,
 						'comment' => 'Table storing session related authorization data, Oracle only.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
 						),
 						'indexes' => array(
-							array ('v' => '610', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
+							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
 						),
 				),
-				array ('v' => '610', 'name' => 'temp_cv4', 'temporary' => true,
+				array ('v' => '6.1', 'name' => 'temp_cv4', 'temporary' => true,
 						'comment' => 'Table storing session related authorization data, Oracle only.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
 						),
 						'indexes' => array(
-							array ('v' => '610', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
+							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
 						),
 				),				
-				array ('v' => '610', 'name' => 'temp_cv9', 'temporary' => true,
+				array ('v' => '6.1', 'name' => 'temp_cv9', 'temporary' => true,
 						'comment' => 'Table storing session related authorization data, Oracle only.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
 						),
 						'indexes' => array(
-							array ('v' => '610', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
+							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
 						),
 				),
-				array ('v' => '610', 'name' => 'temp_tvi', 'temporary' => true,
+				array ('v' => '6.1', 'name' => 'temp_tvi', 'temporary' => true,
 						'comment' => 'Table storing session related authorization data, Oracle only.',
 						'fields' => array(
-							array('v' => '610', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '6.1', 'name' => 'id',	         'type' => 'int(11)', 'autoincrement' => true),
 						),
 						'indexes' => array(
-							array ('v' => '610', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
+							array ('v' => '6.1', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
 						),
 				),
-				array ('v' => '700', 'name' => 'temp_av', 'temporary' => true,
+				array ('v' => '7.0', 'name' => 'temp_av', 'temporary' => true,
 						'comment' => 'Table storing session related authorization data, Oracle only.',
 						'fields' => array(
-							array('v' => '700', 'name' => 'publication',	'type' => 'int(11)', 'autoincrement' => true),
-							array('v' => '700', 'name' => 'issue',	        'type' => 'int(11)', 'autoincrement' => true),
-							array('v' => '700', 'name' => 'section', 		'type' => 'int(11)', 'autoincrement' => true),
-							array('v' => '700', 'name' => 'state',	        'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '7.0', 'name' => 'publication',	'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '7.0', 'name' => 'issue',	        'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '7.0', 'name' => 'section', 		'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '7.0', 'name' => 'state',	        'type' => 'int(11)', 'autoincrement' => true),
 						),
 						'indexes' => array(
-							array ('v' => '700', 'name' => 'primary', 'fields' => 'publication, issue, section, state', 'primary' => true),
-							array ('v' => '700', 'name' => 'ispusest', 'fields' => 'issue, publication, section, state'),
+							array ('v' => '7.0', 'name' => 'primary', 'fields' => 'publication, issue, section, state', 'primary' => true),
+							array ('v' => '7.0', 'name' => 'ispusest', 'fields' => 'issue, publication, section, state'),
 						),
 				),
 				
-				array('v' => '700', 'name' => 'smart_channeldata',
+				array('v' => '7.0', 'name' => 'smart_channeldata',
 						'comment' => 
 							'The Brand-, PubChannel- and Issue entities can be extended with custom properties. '.
 							'This table stores the custom property values per admin entity. '.
@@ -3165,55 +3155,55 @@ class DBStruct
 							'Drupal 6 integration uses this table to store properties per Issue-Categpry relation. '.
 							'In that case both issue id and section id are set. ',
 						'fields' => array(
-							array('v' => '900', 'name' => 'publication','type' => 'int(11)',			'default' => "'0'",
+							array('v' => '9.0', 'name' => 'publication','type' => 'int(11)',			'default' => "'0'",
 								'comment' => 'Publication ID. Set when custom properties are defined on Brand level. Zero when defined on other level.' ),
-							array('v' => '900', 'name' => 'pubchannel',	'type' => 'int(11)',			'default' => "'0'",
+							array('v' => '9.0', 'name' => 'pubchannel',	'type' => 'int(11)',			'default' => "'0'",
 								'comment' => 'PubChannel ID. Set when custom properties are defined on Publication Channel level. Zero when defined on other level.' ),
-							array('v' => '700', 'name' => 'issue',		'type' => 'int(11)',			'default' => "'0'",
+							array('v' => '7.0', 'name' => 'issue',		'type' => 'int(11)',			'default' => "'0'",
 								'comment' => 'Issue ID. Set when custom properties are defined on Issue level. Zero when defined on other level.' ),
-							array('v' => '700', 'name' => 'section',	'type' => 'int(11)',			'default' => "'0'",
+							array('v' => '7.0', 'name' => 'section',	'type' => 'int(11)',			'default' => "'0'",
 								'comment' => 'Section ID. Set when custom properties are defined on Issue-Category level (for Drupal 6 only). Zero when defined on other level.' ),
-							array('v' => '700', 'name' => 'name',		'type' => 'varchar(200)',		'default' => "''"),
-							array('v' => '700', 'name' => 'value',		'type' => 'blob',				'default' => "''"),
+							array('v' => '7.0', 'name' => 'name',		'type' => 'varchar(200)',		'default' => "''"),
+							array('v' => '7.0', 'name' => 'value',		'type' => 'blob',				'default' => "''"),
 						),
 						'indexes' => array(
-							array('v' => '900', 'name' => 'primary', 	'fields' => 'publication, pubchannel, issue, section, name', 'primary' => true,
-								'alters' => array('v' => '700', 'name' => 'primary', 	'fields' => 'issue, section, name', 	'primary' => true ) ),
+							array('v' => '9.0', 'name' => 'primary', 	'fields' => 'publication, pubchannel, issue, section, name', 'primary' => true,
+								'alters' => array('v' => '7.0', 'name' => 'primary', 	'fields' => 'issue, section, name', 	'primary' => true ) ),
 						),
 						'inserts' => array(
 						),
 						'lookups' => array(
-							array('v' => '900', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
-							array('v' => '900', 'field' => 'pubchannel', 'reftable' => 'smart_channels', 'reffield' => 'id'),
-							array('v' => '700', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
-							array('v' => '700', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
+							array('v' => '9.0', 'field' => 'publication', 'reftable' => 'smart_publications', 'reffield' => 'id'),
+							array('v' => '9.0', 'field' => 'pubchannel', 'reftable' => 'smart_channels', 'reffield' => 'id'),
+							array('v' => '7.0', 'field' => 'issue', 'reftable' => 'smart_issues', 'reffield' => 'id'),
+							array('v' => '7.0', 'field' => 'section', 'reftable' => 'smart_publsections', 'reffield' => 'id'),
 						),
 				),
-				array ('v' => '800', 'name' => 'temp_cv10', 'temporary' => true,
+				array ('v' => '8.0', 'name' => 'temp_cv10', 'temporary' => true,
 						'comment' => 'Table storing session related data, Oracle only.',
 						'fields' => array(
-							array('v' => '760', 'name' => 'id',	'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '7.6', 'name' => 'id',	'type' => 'int(11)', 'autoincrement' => true),
 						),
 						'indexes' => array(
-							array ('v' => '760', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
+							array ('v' => '7.6', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
 						),
 				),
-				array ('v' => '800', 'name' => 'temp_cv11', 'temporary' => true,
+				array ('v' => '8.0', 'name' => 'temp_cv11', 'temporary' => true,
 						'comment' => 'Table storing session related data, Oracle only.',
 						'fields' => array(
-							array('v' => '760', 'name' => 'id', 'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '7.6', 'name' => 'id', 'type' => 'int(11)', 'autoincrement' => true),
 						),
 						'indexes' => array(
-							array ('v' => '760', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
+							array ('v' => '7.6', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
 						),
 				),
-				array ('v' => '800', 'name' => 'temp_cv12', 'temporary' => true,
+				array ('v' => '8.0', 'name' => 'temp_cv12', 'temporary' => true,
 						'comment' => 'Table storing session related data, Oracle only.',
 						'fields' => array(
-							array('v' => '760', 'name' => 'id', 'type' => 'int(11)', 'autoincrement' => true),
+							array('v' => '7.6', 'name' => 'id', 'type' => 'int(11)', 'autoincrement' => true),
 						),
 						'indexes' => array(
-							array ('v' => '760', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
+							array ('v' => '7.6', 'name' => 'primary', 'fields' => 'id', 'primary' => true),
 						),
 				),				
 			)
@@ -3225,46 +3215,46 @@ class DBStruct
 		// contain the 'autoincrement' column together with the changed/added columns.
 		$this->patches =  array (
 			array(
-				'version' => '940',
+				'version' => '9.4',
 				'name' => 'ids2014ccsupport',
 				'tables' => array (
-					array ('v' => '599', 'name' => 'smart_indesignserverjobs', 'comment' => 'Overview of InDesign Server jobs and their status.',
+					array ('v' => '5.99', 'name' => 'smart_indesignserverjobs', 'comment' => 'Overview of InDesign Server jobs and their status.',
 						'fields' => array(
-							array('v' => '940', 'name' => 'minservermajorversion',	'type' => 'mediumint(9)', 'default' => "'0'",
-								'alters' => array('v' => '750', 'name' => 'servermajorversion',	'type' => 'mediumint(9)', 'default' => "'5'",
-									'alters' => array('v' => '700', 'name' => 'serverversion',	'type' => 'mediumint(9)', 'default' => "'0'")),
+							array('v' => '9.4', 'name' => 'minservermajorversion',	'type' => 'mediumint(9)', 'default' => "'0'",
+								'alters' => array('v' => '7.5', 'name' => 'servermajorversion',	'type' => 'mediumint(9)', 'default' => "'5'",
+									'alters' => array('v' => '7.0', 'name' => 'serverversion',	'type' => 'mediumint(9)', 'default' => "'0'")),
 								'comment' => 'Minimum required InDesign Server internal major version to run the job. 8=CS6, 10=CC2014, etc' ),
-							array('v' => '940', 'name' => 'minserverminorversion',	'type' => 'mediumint(9)', 'default' => "'0'",
-								'alters' => array('v' => '750', 'name' => 'serverminorversion',	'type' => 'mediumint(9)', 'default' => "'0'"),
+							array('v' => '9.4', 'name' => 'minserverminorversion',	'type' => 'mediumint(9)', 'default' => "'0'",
+								'alters' => array('v' => '7.5', 'name' => 'serverminorversion',	'type' => 'mediumint(9)', 'default' => "'0'"),
 								'comment' => 'Minimum required InDesign Server internal minor version to run the job; See also minservermajorversion field.' ),
-							array('v' => '940', 'name' => 'maxservermajorversion',	'type' => 'mediumint(9)', 'default' => "'0'",
+							array('v' => '9.4', 'name' => 'maxservermajorversion',	'type' => 'mediumint(9)', 'default' => "'0'",
 								'comment' => 'Maximum required InDesign Server internal major version to run the job. 8=CS6, 10=CC2014, etc' ),
-							array('v' => '940', 'name' => 'maxserverminorversion',	'type' => 'mediumint(9)', 'default' => "'0'",
+							array('v' => '9.4', 'name' => 'maxserverminorversion',	'type' => 'mediumint(9)', 'default' => "'0'",
 								'comment' => 'Maximum required InDesign Server internal minor version to run the job; See also maxservermajorversion field.' ),
 						)
 					)
 				)
 			),
 			array(
-				'version' => '980',
+				'version' => '9.8',
 				'name' => 'idsautomationskipstatus',
 				'tables' => array(
-					array ('v' =>'310', 'name' => 'smart_states', 'comment' => '',
+					array ('v' =>'3.1', 'name' => 'smart_states', 'comment' => '',
 						'fields' => array(
-						  array('v' => '610', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true, ),
-						  array( 'v' => '980', 'name' => 'skipidsa', 'type' => 'char(2)', 'default' => "''",
+						  array('v' => '6.1', 'name' => 'id',				'type' => 'int(11)', 		'autoincrement' => true, ),
+						  array( 'v' => '9.8', 'name' => 'skipidsa', 'type' => 'char(2)', 'default' => "''",
 							'comment' => 'When selected do not create InDesign Server Automation job.' ),
 						),
 					),
 				),
 			),
 			array(
-				'version' => '1010',
+				'version' => '10.1',
 				'name' => 'idsautomationpickuptime',
 				'tables' => array(
-					array ('v' => '599', 'name' => 'smart_indesignserverjobs', 'comment' => 'Overview of InDesign Server jobs and their status.',
+					array ('v' => '5.99', 'name' => 'smart_indesignserverjobs', 'comment' => 'Overview of InDesign Server jobs and their status.',
 						'fields' => array(
-							array('v' => '1010', 'name' => 'pickuptime', 'type' => 'varchar(30)', 'default' => "''", 'patched' => array('1010' => 'idsautomationpickuptime'),
+							array('v' => '10.1', 'name' => 'pickuptime', 'type' => 'varchar(30)', 'default' => "''", 'patched' => array('10.1' => 'idsautomationpickuptime'),
 								'comment' => 'Time from which the job runnner should pickup the job.' ),
 						)
 					)
@@ -3419,7 +3409,7 @@ class DBStruct
 		$isLastVersion = $version == end($versions);
 		$isTempTable = substr( $table['name'], 0, 5 ) == 'temp_';
 		
-		if ($table ['v'] <= $version) {
+		if( version_compare( $table ['v'], $version, '<=' ) ) {
 			$generator->tablePre($table);
 			$hasIdField = false;
 			foreach ($table['fields'] as $fld) {
@@ -3433,24 +3423,24 @@ class DBStruct
 					$this->errors[] = 'Field '.$table['name'].'::'.$oldfield['name'].' refers to unknown version: '.$oldfield['v'];
 				}
 				// Regular case; field is added in some previous version and not dropped yet. 
-				if ($fld ['v'] <= $version && !$toBeDropped) {
+				if( version_compare( $fld ['v'], $version, '<=' ) && !$toBeDropped) {
 					$generator->field( $table, $fld, true );
 				}
 				elseif ($toBeDropped) {
 					$originalField = self::getDroppedInfo($fld);
 					// Field will be dropped in a future version but is still actual for the version created now.
-					if (intval($fld['v']) > intval($version) && intval($originalField) <= intval($version)) {
+					if( version_compare( $fld['v'], $version, '>' ) && version_compare( $originalField, $version, '<=' ) ) {
 						$generator->field( $table, $originalField, true );
 					}
 				}
 				// Field has been changed.
 				elseif ($oldfield && !$toBeDropped) {
 					// Take the definition that is applicable for this version.
-					// E.g. definition is created in version 500
-					// Definition is changed in version 800
-					// Run is done for version 600.
-					// Take definition of version 500 as version 800 is not yet applicable.
-					if (intval($oldfield['v']) <= intval($version)) {
+					// E.g. definition is created in version 5.0.
+					// Definition is changed in version 8.0.
+					// Run is done for version 6.0.
+					// Take definition of version 5.0 as version 8.0 is not yet applicable.
+					if( version_compare( $oldfield['v'], $version, '<=' ) ) {
 						$generator->field( $table, $oldfield, true );
 					}
 				}
@@ -3497,14 +3487,14 @@ class DBStruct
 					if( !in_array( $ix['v'], $versions ) ) {
 						$this->errors[] = 'Index "'.$table['name'].'->'.$ix['name'].'" refers to unknown version: '.$ix['v'];
 					}
-					if ($ix ['v'] <= $version) {
+					if( version_compare( $ix ['v'], $version, '<=' ) ) {
 						$generator->index ( $ix, $table );
 					}
 					else {	// It is possible that an index is created for an intermediate version and will changed later on.
 							// During creation of the table the latest version of the index is used.
 						$latestindex = self::getAlteredDBInfo($version, $ix);
 						if ($latestindex != null) {
-							if (intval($latestindex['v']) <= intval($version)) {
+							if( version_compare( $latestindex['v'], $version, '<=' ) ) {
 								$generator->index($latestindex, $table);
 							}
 						}
@@ -3544,7 +3534,7 @@ class DBStruct
 			if ( $tableToBeDropped ) {
 				$originalTable = self::getDroppedInfo( $table );
 			}
-			if ( intval( $table['v'] ) <= intval( $fromversion )
+			if( version_compare( $table['v'], $fromversion, '<=' )
 				 && !$tableToBeDropped ) { // Table already exists in the $fromversion and will not be dropped.
 				$addedFields = false   ;   // Look if fields are added/changed or dropped.
 				if ( isset($table['fields'] )){
@@ -3563,27 +3553,27 @@ class DBStruct
 							$patchedFrom = self::patchedDBInfo( $field, $fromversion );
 							if ( !$fieldToBeDropped &&
 								 !$patchedFrom &&
-								 intval($field['v']) > intval($fromversion) &&
-								 intval($field['v']) <= intval($tillversion) ) {
+								version_compare( $field['v'], $fromversion, '>' ) &&
+								version_compare( $field['v'], $tillversion, '<=' ) ) {
 								// Add the field that is added in a version between the from and the till version. 
 								$fieldToAdd = true;
 								$newField = $field;
 							}
 							elseif ( $fieldToBeDropped &&
-									 !$patchedFrom &&
-									 intval($originalField['v']) > intval($fromversion) &&
-									 intval($originalField['v']) <= intval($tillversion) &&
-									 intval($field['v']) > intval($tillversion) ) {
+								!$patchedFrom &&
+								version_compare( $originalField['v'], $fromversion, '>' ) &&
+								version_compare( $originalField['v'], $tillversion, '<=' ) &&
+								version_compare( $field['v'], $tillversion, '>' ) ) {
 								// Add the field also if the field in later conversion is dropped again, but not if it
 								// was as already added via a patch.
 								$fieldToAdd = true;
 								$newField = $originalField;
 							}
 							elseif ( $firstField &&
-									 !$fieldToBeDropped &&
-									 !$patchedFrom &&
-									 intval( $firstField['v'] ) > intval( $fromversion ) &&
-									 intval( $firstField['v'] ) <= intval($tillversion )){
+								!$fieldToBeDropped &&
+								!$patchedFrom &&
+								version_compare( $firstField['v'], $fromversion, '>' ) &&
+								version_compare( $firstField['v'], $tillversion, '<=' ) ) {
 								// Field is added after the from version and before the till version. Next it is changed.
 								// Field must be added before it can be changed later on.
 								$fieldToAdd = true;
@@ -3610,9 +3600,9 @@ class DBStruct
 						$fieldToBeDropped = self::toBeDropped( $field, $fromversion );
 						$patchedFrom = self::patchedDBInfo( $field, $fromversion );
 	    				if( $fromversionField && !$fieldToBeDropped) {
-							if (( intval($changeToField['v'] ) > intval( $fromversion )) &&
-								( intval( $changeToField['v'] ) <= intval( $tillversion )) &&
-						        ( intval( $patchedFrom ) < intval( $field['v'] ))) {
+							if( ( version_compare($changeToField['v'], $fromversion, '>' ) ) &&
+								( version_compare( $changeToField['v'], $tillversion, '<=' ) ) &&
+						        ( version_compare( $patchedFrom, $field['v'], '<' ) ) ) {
 	    						$generator->alterField( $table, $fromversionField, $changeToField );
 	    					}
 	    				}
@@ -3624,8 +3614,8 @@ class DBStruct
 					foreach ( $table['indexes'] as $indexInfo ) {
 						$oldindex = self::getAlteredDBInfo( $fromversion, $indexInfo );
 						if ( $oldindex == null ) { //New index
-							if (( intval( $indexInfo['v'] ) > intval( $fromversion )) &&
-								( intval( $indexInfo['v'] ) <= intval( $tillversion ))) {
+							if ( ( version_compare( $indexInfo['v'], $fromversion, '>' ) ) &&
+								( version_compare( $indexInfo['v'], $tillversion, '<=' ) ) ) {
 								$generator->index( $indexInfo, $table );
 							}
 						}
@@ -3638,8 +3628,8 @@ class DBStruct
 					// because this results in an error.
 					if ( isset( $table['indexes'] )) {
 						foreach ( $table['indexes'] as $indexInfo ) {
-							if (( intval( $indexInfo['v'] ) > intval( $fromversion )) &&
-								( intval($indexInfo['v']) <= intval($tillversion ))) {
+							if( ( version_compare( $indexInfo['v'], $fromversion, '>' ) ) &&
+								( version_compare( $indexInfo['v'], $tillversion, '<=' ) ) ) {
 								$oldindex = self::getAlteredDBInfo( $fromversion, $indexInfo );
 								if ( $oldindex != null ) { //Changed index
 									$generator->alterIndex( $table, $oldindex, $indexInfo );
@@ -3653,8 +3643,8 @@ class DBStruct
 				if( isset( $table['fields'] )){
 					// Check for fields to be dropped.
 					foreach ( $table ['fields'] as $field ) {
-						if ( intval( $field ['v'] ) > intval( $fromversion ) &&
-							 intval( $field['v'] ) <= intval( $tillversion )) {
+						if ( version_compare( $field ['v'], $fromversion, '>' ) &&
+							version_compare( $field['v'], $tillversion, '<=' ) ) {
 							$fieldToBeDropped = self::toBeDropped ( $field, $fromversion );
 							if ( $fieldToBeDropped ) {
 								$generator->dropField ( $table, $field );
@@ -3664,9 +3654,9 @@ class DBStruct
 				}
 				$generator->postTableUpgrade( $table );
 			}
-			elseif (( !$tableToBeDropped &&
-					  intval($table['v'] ) > intval( $fromversion ) &&
-					  intval( $table['v']) <= intval( $tillversion ))) { // Add new tables.
+			elseif( ( !$tableToBeDropped &&
+				version_compare( $table['v'], $fromversion, '>' ) &&
+				version_compare( $table['v'], $tillversion, '<=' ) ) ) { // Add new tables.
 				$insertrecords = false;
 				if ($table['name'] == 'smart_profiles' || $table['name'] == 'smart_profilefeatures') {
 				// Profile 'Full Control' and its features must be inserted even when upgrading
@@ -3674,16 +3664,16 @@ class DBStruct
 				}
 				$this->generateTable($tillversion, $table, $generator, $insertrecords);
 			}
-			elseif (( $tableToBeDropped &&
-					  intval( $originalTable['v'] ) > intval( $fromversion ) &&
-					  intval( $originalTable['v'] ) <= intval( $tillversion ) &&
-					  intval( $table['v'] ) > intval( $tillversion ))) {
-					  // Add new table even if table is dropped later on, else the drop will result in an error.
+			elseif( ( $tableToBeDropped &&
+				version_compare( $originalTable['v'], $fromversion, '>' ) &&
+				version_compare( $originalTable['v'], $tillversion, '<=' ) &&
+				version_compare( $table['v'], $tillversion, '>' )  ) ) {
+				// Add new table even if table is dropped later on, else the drop will result in an error.
 				$this->generateTable($tillversion, $originalTable, $generator, false);
 			}
-			elseif ( $tableToBeDropped &&
-					 intval( $table['v'] ) > intval( $fromversion ) &&
-					 intval( $table['v'] ) <= intval( $tillversion )) { // Drop tables
+			elseif( $tableToBeDropped &&
+				version_compare( $table['v'], $fromversion, '>' ) &&
+				version_compare( $table['v'], $tillversion, '<=' ) ) { // Drop tables
 				$generator->addTxt( $generator->dropTable($table['name'] ));
 			}
 		}
@@ -3704,7 +3694,7 @@ class DBStruct
 
 		if ( array_key_exists( 'alters', $dbInfo )) {
 			if ( is_array($dbInfo['alters'] )) {
-				if ( $dbInfo['alters']['v'] <= $fromversion ) {
+				if ( version_compare( $dbInfo['alters']['v'], $fromversion ,'<=' ) ) {
 					$result = $dbInfo['alters'];
 				}
 				else {
@@ -3727,11 +3717,7 @@ class DBStruct
 	 */
 	static private function isObsolete( $table, $fromVersion )
 	{
-		if ( isset ( $table['drops'] ) &&  intval( $table['v']) < intval( $fromVersion ) ) {
-			return true;
-		}
-
-		return false;
+		return isset ( $table['drops'] ) &&  version_compare( $table['v'], $fromVersion, '<' );
 	}
 
 	/**
@@ -3748,7 +3734,7 @@ class DBStruct
 
 		if ( array_key_exists( 'patched', $dbInfo )) {
 			if ( $dbInfo['patched'] ) foreach ( $dbInfo['patched'] as $patchVersion => $name ) {
-				if ( intval( $patchVersion ) == intval( $version )) {
+				if ( $patchVersion == $version ) {
 					$result = $dbInfo['v'];
 					break;
 				}
@@ -3808,7 +3794,7 @@ class DBStruct
 	private static function toBeDropped($dbInfo, $fromversion)
 	{
 		$result = false;
-		if (( intval($dbInfo['v'] ) > intval( $fromversion ))) {
+		if( ( version_compare($dbInfo['v'], $fromversion, '>' ) ) ) {
     		if (array_key_exists( 'drops' , $dbInfo )) {
     			$result = true;
     		}
@@ -4328,7 +4314,7 @@ abstract class StdSqlGenerator extends GenericGenerator
 	 * which is updated.
 	 *
 	 * @param string $oldversion Version for which the identity script is generated.
-	 * 							 E.g. '410' or '420'
+	 * 							 E.g. '4.1' or '4.2'
 	 * @param array $table DB table info.
 	 * @return boolean Whether or not the table must be added to the 'update identity' script
 	 */
@@ -4689,661 +4675,6 @@ class MysqlGenerator extends StdSqlGenerator
 	}
 }
 
-
-/**
- * Oracle generator
- *
- * @package dbgen
- * @subpackage OraGenerator
-**/
-
-class OraGenerator extends StdSqlGenerator
-{
-
-	protected $txtTrx;
-	protected $txtSys;
-	protected $sysusr;			//
-	protected $trxusr;
-
-	protected $scent2ora;
-
-	function __construct($drop, $sysusr='', $trxusr = '')
-	{
-		parent::__construct( $drop );
-		$this->scent2ora = unserialize(SCENT2ORA);
-		$this->txtTrx = '';
-		$this->txtSys = '';
-		$this->sysusr = $sysusr;
-		$this->trxusr = $trxusr;
-		$this->myname = "ora";
-	}
-	
-	public function clean()
-	{
-		$this->txtTrx = '';
-		$this->txtSys = '';
-		parent::clean();
-	}
-
-	protected function notnull()
-	{
-		return "";
-	}
-	public function quotefields($fld)
-	{
-		$ret = '';
-		$arr = explode(',', $fld);
-		$komma = '';
-		foreach ($arr as $ix) {
-			if (isset($this->scent2ora[trim($ix)])) {
-				$ret .= $komma.$this->scent2ora[trim($ix)];
-			} else {
-				$ret .= $komma.strtoupper(trim($ix));
-			}
-			$komma = ', ';
-		}
-		return $ret;
-	}
-
-	protected function normtype($line)
-	{
-		$line = preg_replace('/bigint\([0-9]*\)/i', 'int', $line);
-		$line = preg_replace('/(medium)*int\([0-9]*\)/i', 'int', $line);
-		$line = preg_replace('/timestamp\([0-9]*\)/i', 'timestamp', $line);
-		$line = preg_replace('/unsigned/i', '', $line);
- 		$line = preg_replace('/(^blob)|(^mediumblob)/i', " clob", $line);
-		$line = preg_replace('/longblob/i', "blob", $line);
-		$line = preg_replace('/double/i', 'real', $line);
-		$line = preg_replace('/tinyint/i', 'int', $line);
-		$line = preg_replace('/^char/i', ' varchar', $line);
-
-		return $line;
-	}
-
-	protected function autoincrement()
-	{
-		return "";
-	}
-	protected function uniquekey($name, $fields)
-	{
-		return " constraint ".$this->quotefields($name)." unique (".$this->quotefields($fields)."),\r\n";
-	}
-
-	protected function dropexists()
-	{
-		return "";
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function tablePre($table)
-	{
-		$this->thistable = $table['name'];
-		if (strlen($this->thistable) > 26) {
-			//Oracle tablenames are limited to 30 charaters. The name of the
-			//sequence table is tablename_seq. So tablename must not exceed 26 charaters.
-			exit ("<h2><b><nobr>Table name, $this->thistable, too long (exceeds 26 characters). Process aborted.</nobr></b></h2>");
-		}
-
-		if (isset($table['temporary']) && $table['temporary'] == true) {
-			self::tablePreTemp();
-		}	
-		else {
-			parent::tablePre($table);
-		}
-	}
-
-	/**
-	 * Upgrade scripts should contain statements to remove superfluous SEQUENCE tables. Before 9.7.0 for every table
-	 * a sequence was created even though the table did not have an autoincrement field. During an upgrade these
-	 * SEQUENCE tables are removed. This should happen silently as we do not want to fail if the SEQUENCE table was
-	 * already removed during a previous upgrade. For this an 'anonymous block' is used.
-	 * The statements in the block must be separated by ';'. The block must be send as one statement to the DBMS.
-	 * @see \oracledriver::isCompleteStatement
-	 *
-	 * @param string $tableName
-	 * @since 9.7.0
-	 */
-	private function silentRemoveSequence( $tableName )
-	{
-		$seq = strtoupper($tableName)."_SEQ";
-		$this->txt .= "BEGIN EXECUTE IMMEDIATE 'DROP SEQUENCE ".$seq."'; EXCEPTION WHEN OTHERS THEN NULL; END".$this->closeline()."\r\n";
-	}
-
-	private function tablePostAddSeqTable()
-	{
-		$seq = strtoupper($this->thistable)."_SEQ";
-		$this->txt .= "\r\n";
-		$this->txt .= 'CREATE SEQUENCE '.$seq." START WITH 100".$this->closeline()."\r\n";
-		
-		if ($this->trxusr) {
-			$this->txtSys .= 'grant select on '.$seq.' to '.$this->trxusr.$this->closeline()."\r\n";
-		}
-		if ($this->sysusr) {
-			$this->txtTrx .= "drop synonym ".$this->trxusr.'.'.$seq.$this->closeline()."\r\n";
-			$this->txtTrx .= "create synonym ".$this->trxusr.'.'.$seq.' for '.$this->sysusr.'.'.$seq.$this->closeline()."\r\n";
-			$this->txtTrx .= "drop synonym ".$this->trxusr.'.'.$this->quotefields($this->thistable).$this->closeline()."\r\n";
-			$this->txtTrx .= "create synonym ".$this->trxusr.'.'.$this->quotefields($this->thistable).' for '.$this->sysusr.'.'.$this->quotefields($this->thistable).$this->closeline()."\r\n";
-			$this->txtTrx .= "\r\n";
-		}
-	}
-	
-	private function tablePreTemp()
-	{
-		if ($this->sysusr) {
-			$this->txtTrx .= "drop synonym ".$this->trxusr.'.'.$this->quotefields($this->thistable).$this->closeline()."\r\n";
-			$this->txtTrx .= "create synonym ".$this->trxusr.'.'.$this->quotefields($this->thistable).' for '.$this->sysusr.'.'.$this->quotefields($this->thistable).$this->closeline()."\r\n";
-			$this->txtTrx .= "\r\n";
-			$this->txt .= "CREATE GLOBAL TEMPORARY TABLE " . $this->quotefields($this->thistable) . " (\r\n";
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function tablePost($table)
-	{
-		if (isset($table['temporary']) && $table['temporary'] == true) {
-			parent::tablePost($table);;
-			self::tablePostTemp();
-		}	
-		else {
-			parent::tablePost($table);;
-			if ( $this->hasAutoIncrement ( $table ) ) {
-				self::tablePostAddSeqTable();
-			}
-		}
-		
-		if ($this->trxusr) {
-			$this->txtSys .= 'grant select,insert,update,delete on '.$this->quotefields($this->thistable).' to '.$this->trxusr.$this->closeline()."\r\n";
-		}
-	}
-
-	/**
-	 * Checks if a table definition contains a field with the 'autoincrement' property set.
-	 *
-	 * @param array $tableInfo DB table info.
-	 * @return bool True if table has an 'autoincrement' field else false.
-	 */
-	private function hasAutoIncrement( $tableInfo )
-	{
-		if ( isset($tableInfo['fields']) ) foreach ($tableInfo['fields'] as $field) {
-			if ( isset( $field['autoincrement'] ) ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * After an existing table is upgraded this method can be used for final steps e.g. some cleaning up or closing
-	 * statements.
-	 * In the past sequences where created for tables without an 'autoincrement' field. These sequences will be silently
-	 * removed. This means that if a sequence does not exists the delete will not result in an error.
-	 *
-	 * @param array $table DB table info.
-	 */
-	public function postTableUpgrade( $table )
-	{
-		if ( !$this->hasAutoIncrement( $table ) ) {
-			$this->silentRemoveSequence( $table['name'] );
-		}
-	}
-
-	private function tablePostTemp()
-	{
-		$this->txt = trim($this->txt);
-		//Remove closing character ;
-		$this->txt = substr($this->txt, 0, -1);
-		$this->txt .= " ON COMMIT PRESERVE ROWS " . $this->closeline()."\r\n";		
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function insert($line, $table, $auto = true)
-	{
-		// handle hex strings (blob in namedqueries)
-		$r = array();
-		while (preg_match("/0x([0-9a-f]*)/i", $line, $r) > 0) {
-			$hex = pack("H*", $r[1]);
-			$hex = str_replace("'", "''", $hex);
-			$line = preg_replace("/0x".$r[1]."/i", "'$hex'", $line);
-
-			$auto = false;
-		}
-
-		// handle named queries
-
-		$line = preg_replace("/as `([^`]*)`/i", 'as "\\1"', $line);
-
-		$r = array();
-		while (preg_match("/`([^`]*)`/i", $line, $r) > 0) {
-			$new = strtoupper($r[1]);
-			if (isset($this->scent2ora[$r[1]])) {
-				$new = $this->scent2ora[$r[1]];
-			}
-			$line = preg_replace("/`".$r[1]."`/i", $new, $line);
-		}
-
-		parent::insert($line, $table, $auto);
-	}
-
-	public function txtTrx()
-	{
-		return $this->txtTrx;
-	}
-
-	public function txtSys()
-	{
-		return $this->txt."\r\n".$this->txtSys;
-	}
-
-	/**
-	 * materialize statements for Trx in a file
-	 *
-	 * @param string $file filename
-	 * @return bool TRUE when there was content to write. FALSE when empty.
-	 */
-	public function materializeTrx($file)
-	{
-		$wroteContent = false;
-		if ($this->txtTrx) {
-			$fp = fopen($file, "w+");
-			if (!$fp) exit ("Cannot open file for writing: $file");
-			fputs($fp, $this->txtTrx);
-			fclose($fp);
-			$wroteContent = true;
-		}
-		return $wroteContent;
-	}
-
-	/**
-	 * materialize statements for Sys in a file
-	 *
-	 * @param string $file filename
-	 * @return bool TRUE when there was content to write. FALSE when empty.
-	 */
-	public function materializeSys($file)
-	{
-		$wroteContent = false;
-		if ($this->txtSys) {
-			$fp = fopen($file, "w+");
-			if (!$fp) exit ("Cannot open file for writing: $file");
-			fputs($fp, $this->txt."\r\n".$this->txtSys);
-			fclose($fp);
-			$wroteContent = true;
-		}
-		return $wroteContent;
-	}
-
-	/**
-	 * Function to generate text for drop if exists constructs.
-	 *
-	 * @param string $name name of table
-	 * @return string sql text
-	 */
-	public function dropTable($name)
-	{
-		return "DROP TABLE ".$this->quotefields($name) . $this->closeline() . "\r\n";
-//		return "begin\r\nexecute immediate 'drop table ".$this->quotefields($name)."';\r\nexception\r\nwhen others then\r\nnull;\r\nend";
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function dropField($table, $fld)
-	{
-		$this->txt .= 'ALTER TABLE ' . $this->quotefields($table['name']) . ' DROP (' .
-					  $this->quotefields($fld['name']) . ') CASCADE CONSTRAINTS'. $this->closeline()."\r\n";
-	}
-
-	/**
-	 * Function to generate alter table text before columns are specified.
-	 *
-	 * @param array $table DB table info.
-	 */
-	public function alterPre($table)
-	{
-		$this->txt .= "ALTER TABLE ".$this->quotefields($table["name"])." ADD (\r\n";
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function addField( $table, $field )
-	{
-		$this->field( $table, $field, true );
-	}
-
-	/**
-	 * Function to generate alter table text ending.
-	 */
-	public function alterPost()
-	{
-		$this->txt = substr($this->txt, 0, -3);		// skip last ,\r\n
-		$this->txt .= ")".$this->closeline()."\r\n";
-	}
-
-	/**
-	 * Change an existing field definition. First check if a field is renamed. If a field is renamed the existing name
-	 * gets an _OLD postfix, a new field definition with the new name is added. Then the data is copied from the old
-	 * field to the new field. Finally the old field is dropped. Just renaming is not possible because of:
-	 * "If a view, trigger, check constraint, foreign key constraint, or generation-clause of a generated column
-	 * references the column, an attempt to rename it will generate an error."
-	 * If only the data type of a field is changed an 'ALTER TABLE' is sufficient.
-	 *
-	 * @param array $table DB table info.
-	 * @param array $oldfld DB field info as in the old/source database.
-	 * @param array $newfld DB field info as in the new/target database.
-	 */
-	protected function doAlterField( $table, $oldfld, $newfld )
-	{
-		$newfldname = $this->quotefields( $newfld['name'] );
-		$oldfldname = $this->quotefields( $oldfld['name'] );
-		$tablename = $this->quotefields( $table['name'] );
-
-		$typeConversionAllowed = $this->typeConversionAllowed( $oldfld['type'], $newfld['type'] );
-		$isTypeChanged = !$this->isTypeEqual( $oldfld['type'], $newfld['type'] );
-		$isDefaultChanged = !$this->isDefaultEqual( $oldfld, $newfld );
-
-		if( !$this->isNameEqual( $oldfld['name'], $newfld['name'] ) ) {
-			$this->txt .= "ALTER TABLE $tablename RENAME COLUMN $oldfldname TO $oldfldname" . '_OLD';
-			$this->txt .= $this->closeline(). "\r\n";
-			$oldfldname = $oldfldname . '_OLD';
-
-			$this->alterPre($table);
-			$this->addField($table, $newfld);
-			$this->alterPost();
-			$this->txt .= "UPDATE $tablename SET $newfldname = $oldfldname";
-			$this->txt .= $this->closeline(). "\r\n";
-			$this->dropColumn($oldfldname, $tablename);
-		} elseif ( ($typeConversionAllowed && $isTypeChanged) || ( $isDefaultChanged && $newfld['type'] != 'blob') ) {
-			$this->txt .= "ALTER TABLE $tablename MODIFY (";
-			$this->field( $table, $newfld, false );
-			$this->txt .= " );\r\n";
-		}
-	}
-
-	/**
-	 * function to change an existing index definition
-	 *
-	 * @param array $table DB table info.
-	 * @param array $oldIndex DB index info as in the old/source database.
-	 * @param array $newIndex DB index info as in the new/target database.
-	 */
-	public function alterIndex($table, $oldIndex, $newIndex) {
-		//Drop old index
-		$this->dropIndex($oldIndex, $table);
-
-		//Add new index
-		if (array_key_exists('primary', $newIndex) && $newIndex['primary'] == true) { //Primary key
-			$this->txt .= 'ALTER TABLE ' . $this->quotefields($table['name']) .
-						  ' ADD PRIMARY KEY (' . $this->quotefields($newIndex['fields']) . ') ';
-			$this->txt .= $this->closeline(). "\r\n";
-		}
-		else { //Non-primary
-			if (array_key_exists('unique', $newIndex) && $newIndex['unique'] == true) { //Unique key
-				$this->txt .= 'CREATE UNIQUE INDEX ' ;
-				$this->txt .= $this->quotefields($newIndex['name']) . ' ON ' .
-				$this->quotefields($table['name']) . '(' .
-				$this->quotefields($newIndex['fields']) . ') ';
-				$this->txt .= $this->closeline(). "\r\n";
-			}
-			else { //Non-unique
-				$this->index($newIndex, $table);
-			}
-		}
-	}
-
-	/**
-	 * function to drop indexes. Depending on the index type and how the index
-	 * was added a drop statement is generated.
-	 * Primary keys are dropped by the DROP PRIMARY KEY statement.
-	 * Untill version 599 (intermediate version for upgrading to version 6.x)
-	 * unique indexes where added by using the 'constraint' keyword. These unique indexes
-	 * will be dropped by using a 'DROP CONSTRAINT'.
-	 * From 599 onwards unique indexes where added by using the 'INDEX' keyword.
-	 * These indexes and non-unique indexes can be dropped by using the 'DROP INDEX'
-	 * statement.
-	 *
-	 * @param array $index DB index info.
-	 * @param array $table DB table info.
-	 */
-	public function dropIndex($index, $table)
-	{
-
-		if (array_key_exists('primary', $index) && $index['primary'] == true) { //Primary key
-			$this->txt .= "ALTER TABLE " . $this->quotefields($table['name']) . ' ';
-			$this->txt .= 'DROP PRIMARY KEY ';
-		}
-		else { //Non-primary keys
-			if (intval($index['v']) < 599 && isset($index['unique']) && $index['unique'] == true) {
-				 $this->txt .= "ALTER TABLE " . $this->quotefields($table['name']) . ' DROP CONSTRAINT ' . $this->quotefields($index['name']) . ' CASCADE ';
-			}
-			else {
-				$this->txt .= 'DROP INDEX ' . $this->quotefields($index['name']) . ' ';
-			}	
-		}
-		$this->txt .= $this->closeline(). "\r\n";
-	}
-
-	/**
-	 * Method to generate statement to drop a column from a table.
-	 *
-	 * @param string $fldname (name of field to be dropped)
-	 * @param string $tablename (name of the table the field belongs to)
-	 */
-	public function dropColumn($fldname, $tablename)
-	{
-		$this->txt .= "ALTER TABLE $tablename DROP ($fldname) CASCADE CONSTRAINTS";
-		$this->txt .= $this->closeline(). "\r\n";
-	}
-
-	/**
-	 * Check if the type of a table column can be modified to another type.
-	 *
-	 * @param string $old_type (current type)
-	 * @param string $new_type (new type)
-	 * @return boolean (true if the type of a column can be modified)
-	 */
-	private function typeConversionAllowed($old_type, $new_type)
-	{
-		$result = true;
-
-		if (strcasecmp(substr($old_type, 0, 7), 'varchar') == 0 && strcasecmp($new_type, 'blob') == 0) {
-			$result = false;
-		}
-		if (strcasecmp(substr($old_type, 0, 7), 'varchar') == 0 && strncasecmp($new_type, 'mediumint', 9) == 0) {
-			        $result = false;
-		}
-
-		return $result;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function isApplicableForDB( $table )
-	{
-		return true;
-	}	
-
-	/**
-	 * Retrieve the 'default' property value defined in given $field.
-	 *
-	 * @param array $field DB field properties as defined in DB model.
-	 * @return string $default SQL fragment to set default value.
-	 */
-	protected function setDefault( $field )
-	{
-		$default = '';
-
-		if( isset($field['default']) &&
-			/** oracle doesn't allow modify blob(clob) column in a straight forward way, we need to copy the old column value into new column
-			 * and drop the old column. For this case, we don't want to go thru the hassle copying values into new column and drop the old column
-			 * just to achieve setting DEFAULT for a blob(clob) value. We presume no one sets a default value for blob type.
-			*/
-			$field['type']  != 'blob' ) { 
-			if ( is_string( $field['default'])) {
-				if (strlen($field['default']) > 0 ) {
-					$default = ' default '.$field['default'];
-				}
-				// default => "" are skipped.
-			} else {
-				$default = ' default '.$field['default'];
-			}
-		}
-
-		return $default;
-	}
-
-	/**
-	 * Updates the smart_config table with the name of an installed patch.
-	 *
-	 * @param string $patchName The name of the patch
-	 */
-	public function insertPatchInfo( $patchName )
-	{
-		$this->txt .= 'INSERT INTO '.$this->quotefields('smart_config').' ('.$this->quotefields('id').', '.$this->quotefields('name').', '.
-			$this->quotefields('value') .') '."\r\n".
-			'SELECT '.$this->quotefields('smart_config').'_seq.nextval ,'."'$patchName'".', '."'yes'".' '.
-			'FROM ' .$this->quotefields('dual').$this->closeline()."\r\n";
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function isReservedFieldName( $fieldName )
-	{
-		// List below is taken from: http://docs.oracle.com/cd/B19306_01/server.102/b14200/ap_keywd.htm
-		static $keywords = array(
-			'ACCESS',
-			'ADD',
-			'ALL',
-			'ALTER',
-			'AND',
-			'ANY',
-			'AS',
-			'ASC',
-			'AUDIT',
-			'BETWEEN',
-			'BY',
-			'CHAR',
-			'CHECK',
-			'CLUSTER',
-			'COLUMN',
-			'COMMENT',
-			'COMPRESS',
-			'CONNECT',
-			'CREATE',
-			'CURRENT',
-			'DATE',
-			'DECIMAL',
-			'DEFAULT',
-			'DELETE',
-			'DESC',
-			'DISTINCT',
-			'DROP',
-			'ELSE',
-			'EXCLUSIVE',
-			'EXISTS',
-			'FILE',
-			'FLOAT',
-			'FOR',
-			'FROM',
-			'GRANT',
-			'GROUP',
-			'HAVING',
-			'IDENTIFIED',
-			'IMMEDIATE',
-			'IN',
-			'INCREMENT',
-			'INDEX',
-			'INITIAL',
-			'INSERT',
-			'INTEGER',
-			'INTERSECT',
-			'INTO',
-			'IS',
-			'LEVEL',
-			'LIKE',
-			'LOCK',
-			'LONG',
-			'MAXEXTENTS',
-			'MINUS',
-			'MLSLABEL',
-			'MODE',
-			'MODIFY',
-			'NOAUDIT',
-			'NOCOMPRESS',
-			'NOT',
-			'NOWAIT',
-			'NULL',
-			'NUMBER',
-			'OF',
-			'OFFLINE',
-			'ON',
-			'ONLINE',
-			'OPTION',
-			'OR',
-			'ORDER',
-			'PCTFREE',
-			'PRIOR',
-			'PRIVILEGES',
-			'PUBLIC',
-			'RAW',
-			'RENAME',
-			'RESOURCE',
-			'REVOKE',
-			'ROW',
-			'ROWID',
-			'ROWNUM',
-			'ROWS',
-			'SELECT',
-			'SESSION',
-			'SET',
-			'SHARE',
-			'SIZE',
-			'SMALLINT',
-			'START',
-			'SUCCESSFUL',
-			'SYNONYM',
-			'SYSDATE',
-			'TABLE',
-			'THEN',
-			'TO',
-			'TRIGGER',
-			'UID',
-			'UNION',
-			'UNIQUE',
-			'UPDATE',
-			'USER',
-			'VALIDATE',
-			'VALUES',
-			'VARCHAR',
-			'VARCHAR2',
-			'VIEW',
-			'WHENEVER',
-			'WHERE',
-			'WITH',
-		);
-		
-		// Let's ignore the fields for which we have a work-around;
-		// Those fields were introduced in the past and are renamed runtime by the DB driver.
-		static $oracledriver = null;
-		if( is_null($oracledriver) ) {
-			require_once BASEDIR.'/server/dbdrivers/oracledriver.php';
-			$oracledriver = new oracledriver();
-		}
-		$fieldName = $oracledriver->getColumnName( $fieldName );
-		
-		return in_array( strtoupper($fieldName), $keywords );
-	}
-}
-
 /**
  * Mssql generator
  *
@@ -5607,12 +4938,12 @@ class MssqlGenerator extends StdSqlGenerator
 		$result = null;
 		$currentIndex = null;
 		
-		if ( $index['v'] < $field['v'] ) {
+		if( version_compare( $index['v'], $field['v'], '<' ) ) {
 			$currentIndex = $index;
 		} elseif ( isset ( $index['alters'] )) {
- 		// Check if the field is used in the previous definition which is the current one as the new one is not yet
-		// current. Indexes are handled after the fields.	
-			if ( $index['alters']['v'] < $field['v'] ) {
+ 		   // Check if the field is used in the previous definition which is the current one as the new one is not yet
+			// current. Indexes are handled after the fields.
+			if( version_compare( $index['alters']['v'], $field['v'], '<' ) ) {
 				$currentIndex = $index['alters'];
 			}	
 		}
@@ -5932,7 +5263,7 @@ class MssqlGenerator extends StdSqlGenerator
 	 * which is updated.
 	 *
 	 * @param string $oldversion Version for which the identity script is generated.
-	 * 							 E.g. '410' or '420'
+	 * 							 E.g. '4.1' or '4.2'
 	 * @param array $table DB table info.
 	 * @return bool Whether or not the table must be added to the 'update identity' script.
 	 */
@@ -5941,16 +5272,16 @@ class MssqlGenerator extends StdSqlGenerator
 		$result = false;
 
 		switch ($oldversion) {
-			case '410':
+			case '4.1':
 				// Prevent loss of custom fields
 				if (!($table["name"]== "smart_objects") && !($table["name"] == "smart_deletedobjects")) {
 					$result = true;
 				}
-				if (intval($table['v']) > intval($oldversion)) {
-					$result = false; // From version 420 onwards the identity is set
+				if( version_compare( $table['v'], $oldversion , '>' ) ) {
+					$result = false; // From version 4.2 onwards the identity is set
 				}
 				break;
-			case '420':
+			case '4.2':
 				// Only the identity of mtpsentobjects is changed.
 				if ($table["name"]== "smart_mtpsentobjects") {
 					$result = true;

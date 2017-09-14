@@ -93,14 +93,6 @@ class DBUpgradePublishHistory extends DbUpgradeModule
 					array_pop( $sqlStatements ); // remove the last empty element ( after the ; )
 
 					break;
-				case 'oracle':
-					$oraSqlGen = new OraGenerator( null );
-					$oraSqlGen->dropField( $historyTable, $column );
-
-					$sqlStatements = explode( ';', $oraSqlGen->txt() );
-					array_pop( $sqlStatements ); // remove the last empty element ( after the ; )
-
-					break;
 			}
 
 			if( $sqlStatements ) foreach( $sqlStatements as $sqlStatement ) {
@@ -155,7 +147,7 @@ class DBUpgradePublishHistory extends DbUpgradeModule
 
 	public function introduced()
 	{
-		return '900';
+		return '9.0';
 	}
 
 	/**

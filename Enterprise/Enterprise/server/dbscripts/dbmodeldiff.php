@@ -25,10 +25,6 @@ switch ( DBTYPE ) {
 		exit( 'MSSQL not supported.' ); // TODO
 		class SelectedDbGenerator extends MssqlGenerator {}
 		break;
-	case 'oracle':
-		exit( 'Oracle not supported.' ); // TODO
-		class SelectedDbGenerator extends OraGenerator {}
-		break;
 }
 class AppliedDbGenerator extends SelectedDbGenerator
 {

@@ -105,7 +105,7 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 
 	public function introduced()
 	{
-		return '920';
+		return '9.2';
 	}
 	
 	/**

@@ -152,8 +152,7 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 			require_once BASEDIR.'/server/dbscripts/DbInstaller.class.php';
 			$checkSystemAdmin = array( $this, '' );
 			$installer = new WW_DbScripts_DbInstaller( $checkSystemAdmin );
-			$targetVersion = $installer->dotVersionToNumber( $version );
-			$sqlScripts = $installer->getDbModelScripts( $targetVersion, $targetVersion, false, false ); // Look for patches();
+			$sqlScripts = $installer->getDbModelScripts( SCENT_DBVERSION, false, false ); // Look for patches();
 			$dbUpgradeScripts = $installer->getDBUpgradeFiles();
 			$notInstalled = false;
 			if ( $dbUpgradeScripts ) foreach ( $dbUpgradeScripts as $dbUpgradeScript ) {

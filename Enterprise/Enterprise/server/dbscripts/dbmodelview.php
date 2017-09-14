@@ -170,25 +170,17 @@ Confidential, (c) 1998-'.date('Y').' WoodWing Software bv. All rights reserved.<
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 </body></html>';
 
-	$fp = fopen( $scriptsDir.'/dbmodel_'.$dbVersion.'.html', 'w' );
-	fwrite( $fp, $html );
-	fclose( $fp ); 
 	echo $html;
 }
 
 /**
- * Converts an internal version format (e.g. 610) to human readable format (e.g. v6.1).
+ * Add a prefix 'v' for a given version in 'major.minor' notation.
  *
  * @param string $ver Internal version
  * @return string Human readable version
  */
 function displayVer( $ver )
 {
-	if( substr($ver,-2,1) == 9 && substr($ver,-1,1) == 9 ) { // 5.9.9 should become 6.0.0
-		$ver = (substr($ver,0,1)+1).'.0';
-	} else {
-		$ver = substr($ver,0,1).'.'.substr($ver,-2,1); //.'.'.substr($ver,-1,1);
-	}
 	return 'v'.$ver;
 }
 

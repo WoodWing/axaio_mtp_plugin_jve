@@ -75,7 +75,7 @@ class DBUpgradeVarCharToTinyText extends DbUpgradeModule
 
 	public function introduced()
 	{
-		return '900';
+		return '9.0';
 	}
 
 	/**

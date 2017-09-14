@@ -23,13 +23,33 @@ $dbGen->generateSqlScripts();
 
 class DbGenTool
 {
-	private $scriptDir;
+	/** @var string[] List of DB driver names that are supported by ES. */
 	private $supportedDBMS;
 
+	/** @var string[] list of versions in 'major.minor' notation  */
+	private $previousVersions;
+
+	/** @var string[] list of versions in 'major.minor' notation  */
+	private $upgradeVersions;
+
+	/** @var WW_DbScripts_FileHandler */
+	private $scriptFileHandler = null;
+
+	/** @var bool */
+	private $verboseMode;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param bool $versboseMode
+	 */
 	public function __construct( $versboseMode )
 	{
 		$this->verboseMode = $versboseMode;
-		$this->supportedDBMS = array( 'mysql', 'mssql', 'oracle' );
+		$this->supportedDBMS = DBDriverFactory::getSupportedDrivers();
+
+		require_once BASEDIR.'/server/dbscripts/FileHandler.class.php';
+		$this->scriptFileHandler = new WW_DbScripts_FileHandler();
 	}
 
 	/**
@@ -37,32 +57,17 @@ class DbGenTool
 	 */
 	public function generateSqlScripts()
 	{
-		// Where to generate files.
-		$this->scriptDir = BASEDIR.'/server/dbscripts';
-
 		// Initiate database structure and determine versions.
 		$this->dbStruct = new DBStruct();
 		$allVersions = $this->dbStruct->getVersions();
-		$this->lastVersionIdx = count($allVersions)-1;
-		$this->lastVersion = $allVersions[$this->lastVersionIdx]; // Example: 800
-		$this->lastMajorMinorVersion = substr($this->lastVersion,0,-2).'.'.substr($this->lastVersion,-2,1); // Example: 8.0
+		$this->lastVersion = end( $allVersions ); // Example: '10.2'
 
 		// Which updates needs to be generated (empty if none).
 		$this->previousVersions = $this->dbStruct->getDbMigrationVersions();
 		$this->upgradeVersions = array($this->lastVersion);
 
 		// Get all, if any, manually coded instructions.
-		$files = scandir($this->scriptDir);
-		$this->addedCode = array();
-		foreach( $files as $file ) {
-			if (substr($file, -4) != ".txt") {
-				continue;
-			}
-			$r = array();
-			if (preg_match('/scent([0-9]*)\.([a-z]*).txt/i', $file, $r) > 0) {
-				$this->addedCode[$r[2]][$r[1]] = $file;
-			}
-		}
+		$this->addedCode = $this->scriptFileHandler->getManuallyCodedSqlFiles();
 
 		// Generate the DD (data definition) scripts.
 		foreach ($this->supportedDBMS as $DBMS ) {
@@ -74,11 +79,11 @@ class DbGenTool
 		foreach ( array('pre', 'post') as $mode ) {
 			foreach ( $this->previousVersions as $previousVersion ) {
 				foreach ( $this->supportedDBMS as $DBMS ) {
-					$generator = $this->createGenerator( $DBMS, false );
+					$generator = $this->createGenerator( $DBMS );
 					$dbmsName = $generator->getDBName();
 					DBConversion::generateDBConvScripts( $generator, $mode, $previousVersion, $this->lastVersion );
-					$sqlFile = "{$this->scriptDir}/scent{$previousVersion}_{$this->lastVersion}_{$mode}.{$dbmsName}";
-					$this->materializeSQLFile( $generator, $sqlFile, false );
+					$sqlFile = $this->scriptFileHandler->composeFilenameForPrePostUpdateScript( $previousVersion, $this->lastVersion, $dbmsName, $mode );
+					$this->materializeSQLFile( $generator, $sqlFile );
 					$this->logErrors( $generator->getErrors() );
 				}
 			}
@@ -87,43 +92,44 @@ class DbGenTool
 	}
 
 	/**
-	 * Generates Data Definitions Statements scripts for specified DBMS (database management system). Scripts are
-	 * generated for new installations and for upgrades from previous versions. Finally specific scripts are created
-	 * to handle patches.
+	 * Generates Data Definitions Statements scripts for specified DBMS (database management system).
+	 *
+	 * Scripts are generated for new installations and for upgrades from previous versions. Finally specific scripts are
+	 * created to handle patches.
 	 *
 	 * @param string DBMS Database Management System
 	 */
 	private function generateDDSScripts( $DBMS )
 	{
-		$generator = $this->createGenerator( $DBMS, true );
-		$this->dbStruct->generate($this->lastVersion, $generator);
-		$generator->setVersion($this->lastMajorMinorVersion);
+		$generator = $this->createGenerator( $DBMS );
+		$this->dbStruct->generate( $this->lastVersion, $generator );
+		$generator->setVersion( $this->lastVersion );
 		$dbmsName = $generator->getDBName();
 
 		// Scripts used for new installations.
-		$sqlFile = "{$this->scriptDir}/scent{$this->lastVersion}.{$dbmsName}";
-		$this->materializeSQLFile( $generator, $sqlFile, true );
+		$sqlFile = $this->scriptFileHandler->composeFilenameForIFullnstallScript( $this->lastVersion, $dbmsName );
+		$this->materializeSQLFile( $generator, $sqlFile );
 
 		$this->logErrors( $generator->getErrors() );
 		$this->logErrors( $this->dbStruct->getErrors() );
 
 		// Scripts used for upgrades.
-		foreach ($this->previousVersions as $previousVersion) {
-			foreach ($this->upgradeVersions as $upgradeVersion) {
-				if (intval($previousVersion) < intval($upgradeVersion)) {
-					$generator = $this->createGenerator( $DBMS, true );
-					$this->dbStruct->generateUpgrade($previousVersion, $upgradeVersion, $generator);
-					if (isset($this->addedCode[$dbmsName])) {
-						foreach ($this->addedCode[$dbmsName] as $k => $file) {
-							if ($k > $previousVersion && $k <= $upgradeVersion) {
-								$generator->addTxt(file_get_contents("{$this->scriptDir}/$file") . "\r\n");
+		foreach( $this->previousVersions as $previousVersion ) {
+			foreach( $this->upgradeVersions as $upgradeVersion ) {
+				if( version_compare( $previousVersion, $upgradeVersion, '<' ) ) {
+					$generator = $this->createGenerator( $DBMS );
+					$this->dbStruct->generateUpgrade( $previousVersion, $upgradeVersion, $generator );
+					if( isset( $this->addedCode[ $dbmsName ] ) ) {
+						foreach( $this->addedCode[ $dbmsName ] as $k => $file ) {
+							if( $k > $previousVersion && $k <= $upgradeVersion ) {
+								$generator->addTxt( file_get_contents( $file )."\r\n" );
 							}
 						}
 					}
-					$generator->setVersion($this->lastMajorMinorVersion);
+					$generator->setVersion( $this->lastVersion );
 
-					$sqlFile = "{$this->scriptDir}/scent$previousVersion" . "_{$upgradeVersion}.{$dbmsName}";
-					$this->materializeSQLFile( $generator, $sqlFile, true );
+					$sqlFile = $this->scriptFileHandler->composeFilenameForUpdateScript( $previousVersion, $upgradeVersion, $dbmsName );
+					$this->materializeSQLFile( $generator, $sqlFile );
 
 					$previousVersion = $upgradeVersion; // Upgrading is done from previous to intermediate versions.
 					$this->logErrors( $generator->getErrors() );
@@ -157,7 +163,6 @@ class DbGenTool
 				$this->generatePatchScripts( $patches, $DBMS, $patchVersion );
 			}
 		}
-
 	}
 
 	/**
@@ -175,9 +180,6 @@ class DbGenTool
 				break;
 			case 'mssql':
 				$title= 'MS SQL';
-				break;
-			case 'ora':
-				$title = 'Oracle';
 				break;
 		}
 		if( $this->verboseMode === true ) {
@@ -213,20 +215,19 @@ class DbGenTool
 	 */
 	private function generatePatchScripts( $patches, $DBMS, $previousVersion )
 	{
-		$generator = $this->createGenerator( $DBMS, true );
+		$generator = $this->createGenerator( $DBMS );
 		$dbmsName = $generator->getDBName();
 		foreach ( $patches as $patch ) {
-			if ( intval( $patch['version'] ) == intval( $this->lastVersion ) ||
-				 intval( $patch['version'] ) == intval( $previousVersion ) ) {
+			if ( $patch['version'] == $this->lastVersion || $patch['version'] == $previousVersion ) {
 				// Generate scripts for patches introduced in previous versions.
 				$generator->clean();
-				$sqlFile = "{$this->scriptDir}/scent{$previousVersion}_{$this->lastVersion}_patch_{$patch['name']}_{$dbmsName}";
+				$sqlFile =  $this->scriptFileHandler->composeFilenameForPatchScript( $previousVersion, $this->lastVersion, $patch['name'], $dbmsName );
 				$allVersions = $this->dbStruct->getVersions();
 				$patchIndex = array_search( $patch['version'], $allVersions );
 				$prePatchVersion = $allVersions[$patchIndex - 1];
 				// Patches are a change compared with the preceding version in which the patch is introduced.
 				$this->dbStruct->generatePatch( $prePatchVersion, $patch['version'], $patch, $generator );
-				$this->materializeSQLFile( $generator, $sqlFile, true );
+				$this->materializeSQLFile( $generator, $sqlFile );
 			}
 		}
 	}
@@ -234,28 +235,14 @@ class DbGenTool
 	/**
 	 * Creates files in the scripts folder with the proper extensions.
 	 *
-	 * @param object $generator	Generator class with logic and storage
-	 * @param string $sqlFile Name of the sql file without extension.
-	 * @param bool $twoUsers If separate scripts must be generated for normal and system users. Only used for Oracle.
+	 * @param GenericGenerator $generator Generator class with logic and storage
+	 * @param string $sqlFile Full path name of the SQL file.
 	 */
-	private function materializeSQLFile( $generator, $sqlFile, $twoUsers = false )
+	private function materializeSQLFile( $generator, $sqlFile )
 	{
 		$dbmsName = $generator->getDBName();
-		$sqlFilePlusExt = $sqlFile.'.sql';
-		if( $generator->materialize( $sqlFilePlusExt ) ) {
-			$this->logSQL( $dbmsName, $sqlFilePlusExt, $this->verboseMode );
-		}
-
-		if ( $dbmsName == 'ora' && $twoUsers ) {
-			$sqlFilePlusExt = $sqlFile.'.sys.sql';
-			if( $generator->materializeSys( $sqlFilePlusExt ) ) {
-				$this->logSQL( $dbmsName, $sqlFilePlusExt );
-			}
-
-			$sqlFilePlusExt = $sqlFile.'.trx.sql';
-			if( $generator->materializeTrx( $sqlFilePlusExt ) ) {
-				$this->logSQL( $dbmsName, $sqlFilePlusExt );
-			}
+		if( $generator->materialize( $sqlFile ) ) {
+			$this->logSQL( $dbmsName, $sqlFile, $this->verboseMode );
 		}
 	}
 
@@ -263,10 +250,9 @@ class DbGenTool
 	 * Returns a script generator for a particular DBMS.
 	 *
 	 * @param string $DBMS Name of the Database Management System.
-	 * @param bool $twoUsers If separate scripts must be generated for normal and system users. Only used for Oracle.
-	 * @return MssqlGenerator|MysqlGenerator|OraGenerator|null
+	 * @return GenericGenerator|null
 	 */
-	private function createGenerator( $DBMS, $twoUsers )
+	private function createGenerator( $DBMS )
 	{
 		$generator = null;
 
@@ -276,13 +262,6 @@ class DbGenTool
 				break;
 			case 'mssql':
 				$generator = new MssqlGenerator( false );
-				break;
-			case 'oracle':
-				if ( $twoUsers) {
-					$generator = new OraGenerator( false, 'root', 'woodwing' );
-				} else {
-					$generator = new OraGenerator( false );
-				}
 				break;
 		}
 

@@ -454,4 +454,17 @@ class DBDriverFactory
 		}
 		return $dbDriver;
 	}
+
+	/**
+	 * Compose a list of internal names of DB drivers supported by Enterprise Server.
+	 *
+	 * Note that since 10.2.0 Oracle support has dropped.
+	 *
+	 * @since 10.2.0
+	 * @return string[]
+	 */
+	static public function getSupportedDrivers()
+	{
+		return array( 'mysql', 'mssql' );
+	}
 }

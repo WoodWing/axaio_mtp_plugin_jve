@@ -28,19 +28,14 @@
 
 class WW_DbScripts_DbInstaller
 {
-	const MINUPDATEVERSION = 800; // To be updated when SQL update scripts for this version are no longer provided
-	const DBSCRIPTPATH = '/server/dbscripts/';
+	/**
+	 * @var string The database model version (taken from smart_config table) of the current installation in 'major.minor' notation.
+	 */
+	private $flatInstalledVersion = null;
 
-	/**
-	 * @var int The database model version (taken from smart_config table) of the current installation
-	 */
-	private $flatInstalledVersion = null; 
-	
-	/**
-	 * @var int The database model version (taken from serverinfo.php) we want to install or update to
-	 */
-	private $flatWantedDbVersion = null;
-	
+	/** @var string The oldest DB model version (in 'major.minor' notation) for which upgrade scripts are shipped with this ES installation.  */
+	private $minGenVersion = null;
+
 	/**
 	 * @var boolean Whether or not the database model needs to be upgraded.
 	 */
@@ -67,7 +62,7 @@ class WW_DbScripts_DbInstaller
 	private $dbDataUpgrade = false;
 
 	/**
-	 * @var string[] List of SQL scripts that are needed to install or upgrade the database model.
+	 * @var WW_DbScripts_FileDescriptor[] List of SQL scripts that are needed to install or upgrade the database model.
 	 */
 	private $dbModelScripts = array();
 
@@ -91,14 +86,21 @@ class WW_DbScripts_DbInstaller
 	 */
 	private $checkSystemAdmin = null;
 
+	/** @var WW_DbScripts_FileHandler */
+	private $scriptFileHandler = null;
+
 	/**
 	 * Retrieves a list of SQL scripts that are needed to install the database.
+	 *
 	 * @return string[]
 	 */
 	public function getAllSqlScripts()
 	{
 		if( $this->canContinue() && $this->phase == 'connect_db' ) {
-			$sqlScripts = $this->dbModelScripts;
+			$sqlScripts = array_map(
+				function( WW_DbScripts_FileDescriptor $fd ) { return basename( $fd->getSqlFilePath() ); },
+				$this->dbModelScripts
+			);
 			if ( $this->dbDataUpgrade ) {
 				$sqlScripts = array_merge( $sqlScripts, $this->dbDataUpgradeScripts );
 			}
@@ -112,6 +114,7 @@ class WW_DbScripts_DbInstaller
 
 	/**
 	 * Retrieves a collection of operation results (errors, warning, infos, etc).
+	 *
 	 * @return WW_Utils_Report
 	 */
 	public function getReport()
@@ -139,6 +142,9 @@ class WW_DbScripts_DbInstaller
 		$this->report = new WW_Utils_Report();
 		$this->sqlReport = new WW_Utils_Report( $checkSystemAdmin );
 		$this->checkSystemAdmin = $checkSystemAdmin;
+
+		require_once BASEDIR.'/server/dbscripts/FileHandler.class.php';
+		$this->scriptFileHandler = new WW_DbScripts_FileHandler();
 	}
 	
 	/**
@@ -233,7 +239,6 @@ class WW_DbScripts_DbInstaller
 	 */
 	private function installDatabase()
 	{
-		$this->flatWantedDbVersion = self::dotVersionToNumber( SCENT_DBVERSION );
 		$this->dbModelScripts = array();
 		$this->dbDataUpgradeScripts = array();
 		
@@ -241,7 +246,12 @@ class WW_DbScripts_DbInstaller
 		if( $this->canContinue() ) {
 			$this->determineRunMode();
 		}
-		
+
+		require_once BASEDIR.'/server/dbscripts/dbmodel.php';
+		$dbStruct = new DBStruct();
+		$dbMigrationVersions = $dbStruct->getDbMigrationVersions();
+		$this->minGenVersion = reset( $dbMigrationVersions );
+
 		// Validate and retrieve database update scripts
 		if( $this->canContinue() ) {
 			$this->dbModelScripts = $this->checkdbModelScripts();
@@ -277,10 +287,10 @@ class WW_DbScripts_DbInstaller
 				// We don't want to convert the old fields data into the new fields format as every
 				// ServerJob Type might carry different type of data. So for convenience, we clear
 				// everything before migrating to the latest version 9.4.
-				// @todo The if-part below can be removed when self::MINUPDATEVERSION >= 930.
+				// @todo The if-part below can be removed when $this->minGenVersion >= 9.3
 				if( $this->dbModelUpgrade &&
-					( $this->flatInstalledVersion >= 800 && $this->flatInstalledVersion <= 920 ) &&
-					  $this->flatWantedDbVersion >= 930 ) {
+					( version_compare( $this->flatInstalledVersion, '8.0', '>=' ) && version_compare( $this->flatInstalledVersion, '9.2', '<=' ) ) &&
+					  version_compare( SCENT_DBVERSION, '9.3', '>=' ) ) {
 					if( !$this->isServerJobsEmpty() ) {
 						$cleanup =  $this->cleanUpTable( 'serverjobs' );
 						$needToExecuteSql = $cleanup; // If the 'serverjobs' table is not empty, do not proceed.
@@ -293,8 +303,8 @@ class WW_DbScripts_DbInstaller
 				// Both fields are primary fields, which is challenging in terms of DB migration.
 				// The DB scripts (SQL modules) support such conversion but the table has to be empty.
 				// Therefore, before the migration, we error when the InDesign Server Jobs table is not empty.
-				// @todo The if-part below can be removed when self::MINUPDATEVERSION >= 970.
-				if( $this->dbModelUpgrade && $this->flatInstalledVersion <= 960 && $this->flatWantedDbVersion >= 970 ) {
+				// @todo The if-part below can be removed when $this->minGenVersion >= 9.7
+				if( $this->dbModelUpgrade && version_compare( $this->flatInstalledVersion, '9.6', '<=' ) && version_compare( $this->flatWantedDbVersion, '9.7', '>=' ) ) {
 					if( !$this->isInDesignServerJobsEmpty() ) {
 						$cleanup =  $this->cleanUpTable( 'indesignserverjobs' );
 						$needToExecuteSql = $cleanup; // If the 'indesignserverjobs' table is not empty, do not proceed.
@@ -306,9 +316,9 @@ class WW_DbScripts_DbInstaller
 				if( $needToExecuteSql ) {
 					$dbDriver = DBDriverFactory::gen();
 					foreach( $this->dbModelScripts as $sqlScript ) {
-						$this->runSqls( $dbDriver, BASEDIR.self::DBSCRIPTPATH.$sqlScript );
+						$this->runSqls( $dbDriver, $sqlScript->getSqlFilePath() );
 						$this->sqlReport->add( 'DbInstaller', 'INFO', 'INFO',
-												$sqlScript, '', '', 
+												$sqlScript->getSqlFilePath(), '', '',
 												array( 'phase' => $this->phase ) );
 					}
 				}
@@ -501,7 +511,6 @@ class WW_DbScripts_DbInstaller
 		$this->dbModelUpgrade = false;
 		$this->dbDataUpgrade = false;
 		$this->majorUpdate = false;
-		$installedVersion = $this->getInstalledDbVersion();
 		if( $this->canContinue() ) {
 
 			if( $this->phase == 'connect_db' ) {
@@ -510,22 +519,21 @@ class WW_DbScripts_DbInstaller
 					array( 'phase' => $this->phase ) );
 			}
 
-			if( $installedVersion === null ) {
+			$this->flatInstalledVersion = $this->getInstalledDbVersion();
+			if( $this->flatInstalledVersion === null ) {
 				$this->newInstallation = true; // No version found
 			} else {
 				// Determine whether or not this is a major update, such as 8.2 => 9.0
 				// It will be set FALSE when there is minor update, such as 8.0 => 8.2
 				require_once BASEDIR.'/server/utils/VersionUtils.class.php';
-				$installedVersionInfo = VersionUtils::getVersionInfo( $installedVersion );
+				$installedVersionInfo = VersionUtils::getVersionInfo( $this->flatInstalledVersion );
 				$wantedVersionInfo = VersionUtils::getVersionInfo( SCENT_DBVERSION );
 				if( $installedVersionInfo !== false && $wantedVersionInfo !== false ) {
 					$this->majorUpdate = $installedVersionInfo['major'] != $wantedVersionInfo['major'];
 				}
 
-				$this->flatInstalledVersion = self::dotVersionToNumber( $installedVersion );
-				$sqlScripts = $this->getDbModelScripts( $this->flatWantedDbVersion, $this->flatInstalledVersion,
-					false, false ); // Look for patches
-				if( $this->flatWantedDbVersion > $this->flatInstalledVersion || count ( $sqlScripts ) > 0 ) { // Need to upgrade
+				$sqlScripts = $this->getDbModelScripts( $this->flatInstalledVersion,false, false ); // Look for patches
+				if( version_compare( SCENT_DBVERSION, $this->flatInstalledVersion, '>' ) || count ( $sqlScripts ) > 0 ) { // Need to upgrade
 					$this->dbModelUpgrade = true;
 					$this->checkPreConditionsUpgrade();
 				} else {
@@ -554,9 +562,9 @@ class WW_DbScripts_DbInstaller
 		// ServerJob Type might carry different type of data. So for convenience, we clear
 		// everything before migrating to the latest version 9.4.
 		// Only show the warning at the initial page load (when checking the connection).
-		// @todo The if-part below can be removed when self::MINUPDATEVERSION >= 920.
-		if( ( $this->flatInstalledVersion >= 800 && $this->flatInstalledVersion <= 920 ) &&
-				$this->flatWantedDbVersion >= 930 ) {
+		// @todo The if-part below can be removed when $this->minGenVersion >= 9.2
+		if( ( version_compare( $this->flatInstalledVersion, '8.0', '>=' ) && version_compare( $this->flatInstalledVersion, '9.2', '<=' ) ) &&
+			version_compare( SCENT_DBVERSION, '9.3', '>=' ) ) {
 			if( !$this->isServerJobsEmpty() && $this->phase == 'connect_db' ) {
 				$this->report->add( 'DbInstaller', 'WARN', 'INFO',
 					BizResources::localize( 'MSG_EMPTY_SERVERJOBS' ), '', '',
@@ -570,8 +578,8 @@ class WW_DbScripts_DbInstaller
 		// The DB scripts (SQL modules) support such conversion but the table has to be empty.
 		// Therefore, before the migration, we error when the InDesign Server Jobs table is not empty.
 		// Only show the warning at the initial page load (when checking the connection).
-		// @todo The if-part below can be removed when self::MINUPDATEVERSION >= 970.
-		if( $this->flatInstalledVersion <= 960  && $this->flatWantedDbVersion >= 970 ) {
+		// @todo The if-part below can be removed when $this->minGenVersion >= 9.7
+		if( version_compare( $this->flatInstalledVersion, '9.6', '<=' )  && version_compare( SCENT_DBVERSION, '9.7', '>=' ) ) {
 			if( !$this->isInDesignServerJobsEmpty() &&  $this->phase == 'connect_db' ) {
 				$this->report->add( 'DbInstaller', 'WARN', 'INFO',
 					BizResources::localize( 'MSG_EMPTY_INDESIGNSERVERJOBS' ), '', '',
@@ -593,8 +601,8 @@ class WW_DbScripts_DbInstaller
 			return $upgrades;
 		}
 		$upgrades = array( 
-			'800' => array(),
-			'900' => array(),
+			'8.0' => array(),
+			'9.0' => array(),
 		);
 
 		$dbUpgradeFiles = $this->getDBUpgradeFiles();
@@ -718,69 +726,33 @@ class WW_DbScripts_DbInstaller
 	}
 	
 	/**
-	 * Converts a version string in '<major>.<minor>[.<patch>]' format into a single version number.
-	 * For example, '8.0' or  '8.0.0' gets converted into 800.
-	 *
-	 * @param string $version Dotted version string.
-	 * @return int Single version number.
-	 */
-	public static function dotVersionToNumber( $version )
-	{
-		$parts = explode( '.', $version );
-		if( count($parts) == 2 ) { // assume patch level 0 when <major>.<minor> is given only
-			$parts[] = '0';
-		}
-		if( count($parts) != 3 ) {
-			LogHandler::Log( __CLASS__, 'ERROR', 'Wrong version provided ['.$version.']. Should be in major.minor[.patch] format. ' );
-		}
-		return implode( '',  $parts );
-	}
-
-	/**
-	 * Converts a single version number into a version string in '<major>.<minor.<patch>' format.
-	 * For example, 800 gets converted into '8.0.0'.
-	 *
-	 * @param int $numVersion Single version number.
-	 * @return string Dotted version string.
-	 */
-	private function numberToDotVersion( $numVersion )
-	{
-		$majVersion = floor( $numVersion / 100 );
-		$minVersion = floor( ($numVersion - ($majVersion*100)) / 10 );
-		return "$majVersion.$minVersion";
-	}
-	
-	/**
 	 * Reads the SQL modules from the server/dbscripts folder and validates if all complete.
 	 *
 	 * NOTE: In theory the system admin could have changed the package. This is far from likely
 	 * to happen, nevertheless this function does all kind of paranoid checksums. Because
 	 * in practice this never will go wrong, error strings are English-only in this function.
 	 *
-	 * @return string[] List of SQL file names to execute.
+	 * @return WW_DbScripts_FileDescriptor[] List of SQL files to execute.
 	 */
 	private function checkdbModelScripts()
 	{
 		$sqlScripts = array();
 		if( $this->canContinue() ) {
 			// Check if the package is complete. This is an extra checksum especially for development and QA.
-			$sqlScripts = $this->getDbModelScripts( $this->flatWantedDbVersion, null, true, false );
+			$sqlScripts = $this->getDbModelScripts( null, true, false );
 			if( count($sqlScripts) == 0 ) {
-				$detail = 'The clean database installation scripts for v'.
-						self::numberToDotVersion($this->flatWantedDbVersion).
-						' are missing at '.BASEDIR.self::DBSCRIPTPATH.'.';
+				$detail = 'The clean database installation scripts for v'.SCENT_DBVERSION.
+						' are missing at '.$this->scriptFileHandler->getScriptsFolder().'.';
 				$this->report->add( 'DbInstaller', 'FATAL', 'ERROR', 
 									'Incomplete installation package.', $detail, '',
 									array( 'phase' => $this->phase ) );
 			}
 		}
 		if( $this->canContinue() && $this->dbModelUpgrade ) {
-			$sqlScripts = $this->getDbModelScripts( $this->flatWantedDbVersion, self::MINUPDATEVERSION, false, true );
+			$sqlScripts = $this->getDbModelScripts( $this->minGenVersion, false, true );
 			if( count($sqlScripts) == 0 ) {
-				$detail = 'The database update scripts for v'.
-						self::numberToDotVersion(self::MINUPDATEVERSION).
-						' => v'.self::numberToDotVersion($this->flatWantedDbVersion).
-						' are missing at '.BASEDIR.self::DBSCRIPTPATH.'.';
+				$detail = 'The database update scripts for v'.$this->minGenVersion.
+						' => v'.SCENT_DBVERSION.' are missing at '.$this->scriptFileHandler->getScriptsFolder().'.';
 				$this->report->add( 'DbInstaller', 'FATAL', 'ERROR', 
 									'Incomplete installation package.', $detail, '',
 									array( 'phase' => $this->phase ) );
@@ -789,11 +761,11 @@ class WW_DbScripts_DbInstaller
 
 		if( $this->canContinue() ) {
 			// Get the SQL scripts to use for the installation or update of the database.
-			$sqlScripts = $this->getDbModelScripts( $this->flatWantedDbVersion, $this->flatInstalledVersion,
+			$sqlScripts = $this->getDbModelScripts( $this->flatInstalledVersion,
 												$this->newInstallation, $this->dbModelUpgrade );
 			if( $this->canContinue() ) {
 				if( count( $sqlScripts ) == 0 )  {
-					if( $this->flatWantedDbVersion > $this->flatInstalledVersion ) {
+					if( version_compare( SCENT_DBVERSION, $this->flatInstalledVersion, '>' ) ) {
 						$help = 'Your database model is too old. First, you need an older version of '.
 							'Enterprise Server to update your database to an intermediate version before '.
 							'you can continue. See Admin Guide for more details.';
@@ -802,18 +774,13 @@ class WW_DbScripts_DbInstaller
 							'to work with this database.';
 					}
 					if( $this->newInstallation ) {
-						$detail = 'Clean installation for v'.
-								self::numberToDotVersion($this->flatInstalledVersion).
-								' is not supported. ';
+						$detail = 'Clean installation for v'.$this->flatInstalledVersion.' is not supported. ';
 						$this->report->add( 'DbInstaller', 'FATAL', 'ERROR', 
 											'No update path available.', $detail, $help,
 											array( 'phase' => $this->phase ) );
 					}
 					if( $this->dbModelUpgrade ) {
-						$detail = 'Update from v'.
-								self::numberToDotVersion($this->flatInstalledVersion).
-								' to v'.self::numberToDotVersion($this->flatWantedDbVersion).
-								' is not supported. ';
+						$detail = 'Update from v'.$this->flatInstalledVersion.' to v'.SCENT_DBVERSION.' is not supported. ';
 						$this->report->add( 'DbInstaller', 'FATAL', 'ERROR', 
 											'No update path available.', $detail, $help,
 											array( 'phase' => $this->phase ) );
@@ -834,92 +801,82 @@ class WW_DbScripts_DbInstaller
 	 * server/dbscripts folder. Which files are choosen depends on the DB flavor
 	 * and if it needs a clean installation or an update.
 	 *
-	 * @param bool $flatWantedDbVersion
-	 * @param bool $flatInstalledVersion
+	 * @param string $installedVersion Currently installed DB version in 'major.minor' notation.
 	 * @param bool $newInstallation
 	 * @param bool $upgrade
-	 * @return string[] List of SQL file names to execute.
+	 * @return WW_DbScripts_FileDescriptor[] List of SQL files to execute.
 	 */
-	public function getDbModelScripts( $flatWantedDbVersion, $flatInstalledVersion, $newInstallation, $upgrade )
+	public function getDbModelScripts( $installedVersion, $newInstallation, $upgrade )
 	{
-		$files = scandir( BASEDIR.self::DBSCRIPTPATH );
-		$selectfiles = array();
-		$type = DBTYPE;
-		$sqlFilePrefix = 'scent';
-		$internalVersion = $flatWantedDbVersion - 1; // e.g. 599, 699, 799
-
-		if( strtolower( $type ) == 'oracle' ) { // ora is shortcut for oracle
-			$type = 'ora';
+		$wantedVersion = SCENT_DBVERSION;
+		$wantedVersionParts = explode( '.', $wantedVersion, 2 );
+		if( $wantedVersionParts[1] == '0' ) {
+			$internalVersion = ($wantedVersionParts[0] - 1).'.99'; // e.g. 5.99, 6.99, 7.99
+		} else {
+			$internalVersion = null;
 		}
 
+		/** @var WW_DbScripts_FileDescriptor[] $selectFiles */
+		$selectFiles = array();
+		$files = $this->scriptFileHandler->getSqlFiles( DBTYPE );
 		foreach( $files as $file ) {
-			if( substr( $file, 0, 1 ) == '.' ) { // hidden files
-				continue;
-			}
-			if( substr( $file, -4 ) != '.sql' ) { //extension must be 'sql'
-				continue;
-			}
-			if( substr( $file, 0, strlen($sqlFilePrefix) ) != $sqlFilePrefix ) { // prefix must be 'scent'
-				continue;
-			}
-			if( !stristr( $file, $type ) ) { // Wrong DBMS type
-				continue;
-			}
 			if( $newInstallation ) {
-				if( preg_match( "/$sqlFilePrefix$flatWantedDbVersion\\./i", $file ) > 0 && stristr( $file, ".$type.sql" ) ) {
-					$selectfiles[] = $file;
+				if( $file->isFullInstallType() ) {
+					if( $file->versionFrom == $wantedVersion ) {
+						$selectFiles[] = $file;
+					}
 				}
 			} elseif( $upgrade ) {
-				$parts = explode( '.', str_replace( '_', '.', substr( $file, strlen( $sqlFilePrefix ) ) )  );
-				if( count($parts) > 1 && ctype_digit( $parts[0] ) && ctype_digit( $parts[1] ) ) {
-					$fromVersion = $parts[0];
-					$toVersion = $parts[1];
-					if( stristr( $file, ".$type.sql" ) && ( $fromVersion == $flatInstalledVersion ) && ( $toVersion == $internalVersion ) ) {
-						$selectfiles[] = $file;
-					}
-					if( stristr( $file, ".$type.sql" ) && ( $fromVersion == $internalVersion ) && ( $toVersion == $flatWantedDbVersion ) ) {
-						if( $flatInstalledVersion < $internalVersion ) { //first upgrade to internal version
-							$selectfiles[] = $file;
+				if( $file->isUpgradeType() || $file->isPreUpgradeType() || $file->isPostUpgradeType() ) {
+					if( $internalVersion ) {
+						if( $file->versionFrom == $installedVersion && $file->versionTo == $internalVersion ) {
+							$selectFiles[] = $file;
+						}
+						if( $file->versionFrom == $internalVersion && $file->versionTo == $wantedVersion ) {
+							if( version_compare( $installedVersion, $internalVersion, '<' ) ) { // first upgrade to internal version
+								$selectFiles[] = $file;
+							}
 						}
 					}
-					if( stristr( $file, ".$type.sql" ) && ( $fromVersion == $flatInstalledVersion ) && ( $toVersion == $flatWantedDbVersion ) ) {
-						$selectfiles[] = $file;
+					if( $file->versionFrom == $installedVersion && $file->versionTo == $wantedVersion ) {
+						$selectFiles[] = $file;
 					}
 				}
 			}
-			if ( !$newInstallation ) { // Patches are not applicable in case of a new installation.
-			// But in case there is no 'normal' upgrade still check if a patch must be installed. Either we are moving
-			// a patched release or the installed version was patched.
-				if (( preg_match( "/{$sqlFilePrefix}{$flatWantedDbVersion}_{$flatInstalledVersion}_patch/i", $file ) > 0  ||
-					preg_match( "/{$sqlFilePrefix}{$flatInstalledVersion}_{$flatWantedDbVersion}_patch/i", $file ) > 0 ) && stristr( $file, "$type.sql" ) ) {
-					$fileParts = explode( '_', $file);
-					$patchName = $fileParts[3];
-					require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
-					if ( !DBConfig::getValue( $patchName )) { // Check if the patch is already installed.
-						$selectfiles[] = $file;
+			if( !$newInstallation ) {
+				if( $file->isPatchType() ) { // Patches are not applicable in case of a new installation.
+					// But in case there is no 'normal' upgrade still check if a patch must be installed. Either we are moving
+					// a patched release or the installed version was patched.
+					if( ( $file->versionFrom == $wantedVersion && $file->versionTo == $installedVersion ) ||
+						( $file->versionFrom == $installedVersion && $file->versionTo == $wantedVersion ) ) {
+						require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
+						if( !DBConfig::getValue( $file->patchName ) ) { // Check if the patch is already installed.
+							$selectFiles[] = $file;
+						}
 					}
 				}
 			}
 		}
 
-		if ( $flatInstalledVersion >= 800 && $flatInstalledVersion <= 899 ) {
+		if( version_compare( $installedVersion, '8.0', '>=' ) && version_compare( $installedVersion, '8.99', '<=' ) ) {
 			// Check if database changes are already made in version 8.3.4 or later. See BZ#34633.
 			$dbdriver = DBDriverFactory::gen();
 			// If the database changes are not found we do not have to remove them. But if they are found the
 			// ...800_920_pre... script must be added. That script will remove the changes so they can be added
 			// later on in the normal ...800_920... script can run without causing errors.
-			if ( !$this->indexOnInDesignServerJobsExists( $dbdriver )) {
-				foreach ( $selectfiles as $key => $selectfile ) {
-					if ( preg_match( '/pre/i', $selectfile ) > 0 && preg_match( '/8[0-9][0-9]/i', $selectfile ) > 0 ) {
-						unset( $selectfiles[$key] );
+			if( !$this->indexOnInDesignServerJobsExists( $dbdriver ) ) {
+				foreach( $selectFiles as $key => $selectFile ) {
+					$isVersionFrom8 = version_compare( $selectFile->versionFrom, '8.0', '>=' ) && version_compare( $selectFile->versionFrom, '9.0', '<' );
+					if( $selectFile->isPreUpgradeType() && $isVersionFrom8 ) {
+						unset( $selectFiles[ $key ] );
 						break;
 					}
 				}
 			}
 		}
 
-		usort( $selectfiles, array($this, 'sortFiles') );
-		return $selectfiles;
+		usort( $selectFiles, array( 'WW_DbScripts_FileDescriptor', 'compare' ) );
+		return $selectFiles;
 	}
 
 	/**
@@ -944,28 +901,7 @@ class WW_DbScripts_DbInstaller
 		$indexes = $dbdriver->listIndexOnTable( $dbdriver->tablename( 'indesignserverjobs' ) );
 		return in_array( 'objid_indesignserverjobs', $indexes );
 	}
-	
-	/**
-	 * Callback function that does sort files on their names.
-	 * The SQL files having a 'pre' as prefix are put on top of the list.
-	 *
-	 * @param stirng $str1 File name (LHS)
-	 * @param stirng $str2 File name (RHS)
-	 * @return int Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.
-	 */
-	private function sortFiles( $str1, $str2 )
-	{
-		if( substr( $str1, 0, 12 ) == substr( $str2, 0, 12 ) ) {
-			if( preg_match( '/pre/i', $str1 ) > 0 ) {
-				return -1;
-			} else {
-				return 1;
-			}
-		} else {
-			return strcmp( $str1, $str2 );
-		}
-	}
-	
+
 	/**
 	 * Runs an SQL script on the database as a part of the installation.
 	 *

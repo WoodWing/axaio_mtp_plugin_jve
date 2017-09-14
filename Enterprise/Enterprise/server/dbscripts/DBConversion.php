@@ -14,19 +14,13 @@
  */
 class DBConversion
 {
-	/**
-	 * @var StdSqlGenerator $dbGenerator
-	 */
+	/** @var StdSqlGenerator $dbGenerator */
 	private static $dbGenerator;
 
-	/**
-	 * @var int $previousVersion
-	 */
+	/** @var string $previousVersion in 'major.minor' notation */
 	private static $previousVersion;
 
-	/**
-	 * @var int $lastVersion
-	 */
+	/** @var string $lastVersion in 'major.minor' notation */
 	private static $lastVersion;
 	
 	/**
@@ -36,14 +30,14 @@ class DBConversion
 	 *
 	 * @param StdSqlGenerator $dbGenerator
 	 * @param string $mode 'pre' or 'post'
-	 * @param string $previousVersion
-	 * @param string $lastVersion
+	 * @param string $previousVersion in 'major.minor' notation
+	 * @param string $lastVersion in 'major.minor' notation
 	 */
 	public static function generateDBConvScripts( StdSqlGenerator $dbGenerator, $mode, $previousVersion, $lastVersion )
 	{
 		self::$dbGenerator = $dbGenerator;
-		self::$previousVersion = intval( $previousVersion );
-		self::$lastVersion = intval( $lastVersion );
+		self::$previousVersion = $previousVersion;
+		self::$lastVersion = $lastVersion;
 		
 		if( $mode == 'post') {
 			self::insertProfileFeaturesWithDependencies();
@@ -62,7 +56,7 @@ class DBConversion
 	 */
 	private static function insertProfileFeaturesWithDependencies()
 	{
-		if( self::$previousVersion < 800 && self::$lastVersion >= 800 ) {
+		if( version_compare( self::$previousVersion, '8.0', '<' ) && version_compare( self::$lastVersion, '8.0', '>=' ) ) {
 			$findInsertFeatures = array(
 				//'Existing Feature Number' => 'New feature number to be added depending on Existing feature number (Seperated with comma)'
 				'1' => '11', 	// Listed in Publication Overview[11], depends Listed in Search Results[1]
@@ -112,8 +106,8 @@ class DBConversion
 	 */
 	private static function insertProfileFeatures()
 	{
-		if( self::$previousVersion < 800 && self::$lastVersion >= 800 ) {
-			$newFeatureNums = array( 
+		if( version_compare( self::$previousVersion, '8.0', '<' ) && version_compare( self::$lastVersion, '8.0', '>=' ) ) {
+			$newFeatureNums = array(
 				'71'     // Enable Access rights for View Notes (Annotations) profile feature
 				//'xxx', // New feature number to be added seperated by comma
 				//'yyy', // New feature number to be added seperated by comma
@@ -154,10 +148,10 @@ class DBConversion
 	private static function removeProfileFeatures()
 	{
         $toBeRemovedFeatures = array();
-		if( self::$previousVersion < 800 && self::$lastVersion >= 800 ) {
+		if( version_compare( self::$previousVersion, '8.0', '<' ) && version_compare( self::$lastVersion, '8.0', '>=' ) ) {
             $toBeRemovedFeatures[] = '89'; // Remove this access rights for Edit Sticky Notes profile feature
 		}
-        if( self::$previousVersion < 950 && self::$lastVersion >= 950 ) {
+		if( version_compare( self::$previousVersion, '9.5', '<' ) && version_compare( self::$lastVersion, '9.5', '>=' ) ) {
 			$toBeRemovedFeatures[] = '1006'; // Web Editor no longer exist, remove this access rights for Web Editor profile feature
         }
 
@@ -178,10 +172,10 @@ class DBConversion
 	private static function changePublicationChannelTypes()
 	{
 		$changeChannelTypes = array();
-		if( self::$previousVersion < 800 && self::$lastVersion >= 800 ) {
+		if( version_compare( self::$previousVersion, '8.0', '<' ) && version_compare( self::$lastVersion, '8.0', '>=' ) ) {
 			$changeChannelTypes['digital magazine'] = 'other';
 		}
-		if( self::$previousVersion < 900 && self::$lastVersion >= 900 ) {
+		if( version_compare( self::$previousVersion, '9.0', '<' ) && version_compare( self::$lastVersion, '9.0', '>=' ) ) {
 			$changeChannelTypes['newsfeed'] = 'other';
 		}
 
@@ -202,7 +196,7 @@ class DBConversion
 	 */
 	private static function setObjectRelationParentType()
 	{
-		if( self::$previousVersion < 900 && self::$lastVersion >= 900 ) {
+		if( version_compare( self::$previousVersion, '9.0', '<' ) && version_compare( self::$lastVersion, '9.0', '>=' ) ) {
 			$objectTypes = array('Article','ArticleTemplate','Layout','LayoutTemplate','Image','Advert','AdvertTemplate',
 			                     'Plan','Audio','Video','Library','Dossier','DossierTemplate','LayoutModule',
 			                     'LayoutModuleTemplate','Task','Hyperlink','Spreadsheet','Other','PublishForm',
@@ -233,10 +227,10 @@ class DBConversion
 		// During patch 7.6.2 database changes are introduced. See BZ#34633. Extra scripts are needed
 		// to prevent sql errors during upgrade. These scripts can be removed the moment upgrading from version
 		// 8.3.4 - 8.9.9 is not anymore supported.
-		if( self::$previousVersion >= 800 && self::$previousVersion <= 899  ) {
+		if( version_compare( self::$previousVersion, '8.0', '>=' ) && version_compare( self::$previousVersion, '9.0', '<' ) ) {
 			self::$dbGenerator->dropIndex(
 				array(
-					'v' => '800',
+					'v' => '8.0',
 					'name' => 'objid_indesignserverjobs',
 					'fields' => 'objid'
 				),

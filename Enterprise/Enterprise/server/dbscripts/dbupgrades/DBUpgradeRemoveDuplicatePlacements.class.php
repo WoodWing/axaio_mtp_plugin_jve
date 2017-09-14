@@ -72,7 +72,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 
 	public function introduced()
 	{
-		return '940';
+		return '9.4';
 	}
 
 	/**
