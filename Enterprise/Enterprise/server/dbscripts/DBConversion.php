@@ -40,8 +40,6 @@ class DBConversion
 		self::$lastVersion = $lastVersion;
 		
 		if( $mode == 'post') {
-			self::insertProfileFeaturesWithDependencies();
-			self::insertProfileFeatures();
 			self::removeProfileFeatures();
 			self::changePublicationChannelTypes();
 			self::setObjectRelationParentType();
@@ -49,91 +47,6 @@ class DBConversion
 		if( $mode == 'pre') {
 			self::dropIndexOnIndesignServerJobs();
 		}
-	}
-
-	/**
-	 * Insert new access feature on the existing profile, with dependency on other access feature
-	 */
-	private static function insertProfileFeaturesWithDependencies()
-	{
-		if( version_compare( self::$previousVersion, '8.0', '<' ) && version_compare( self::$lastVersion, '8.0', '>=' ) ) {
-			$findInsertFeatures = array(
-				//'Existing Feature Number' => 'New feature number to be added depending on Existing feature number (Seperated with comma)'
-				'1' => '11', 	// Listed in Publication Overview[11], depends Listed in Search Results[1]
-				'2' => '12',	// Download Preview[12], depends Read[2]
-				'9' => '13',	// Download Original[13], depends Open for Edit[9]
-				'89' => '70,72');	// Create and Reply notes[70] & Delete notes[72] depends on Edit StickyNotes[89] => 89 will be removed after this mapping.
-		}
-	
-		if (isset($findInsertFeatures)) foreach( array_keys($findInsertFeatures) as $feature ) {
-			$featureNumbers = explode(',', $findInsertFeatures[$feature] );
-			foreach( $featureNumbers as $featureNumber ) {
-				if( strtolower(self::$dbGenerator->getDBName()) == 'ora' ) {
-					self::$dbGenerator->addTxt(
-						'INSERT INTO ' . self::$dbGenerator->quotefields('smart_profilefeatures') . " \r\n" .
-						'(' . self::$dbGenerator->quotefields('id') . ', ' . self::$dbGenerator->quotefields('profile') .
-						', ' . self::$dbGenerator->quotefields('feature') . ', ' . self::$dbGenerator->quotefields('value') . ") \r\n" .
-						'SELECT '. self::$dbGenerator->quotefields('smart_profilefeatures') . '_seq.nextval , ' .
-						self::$dbGenerator->quotefields('profile') . ', ' . $featureNumber . ', '.self::$dbGenerator->quotefields('value')." \r\n" .				 
-						'FROM ' . self::$dbGenerator->quotefields('smart_profilefeatures') . "\r\n" .
-						'WHERE ' . self::$dbGenerator->quotefields('feature') . ' = ' . $feature . ";\r\n\r\n");		 
-				} else {
-					self::$dbGenerator->addTxt(
-						'INSERT INTO ' . self::$dbGenerator->quotefields('smart_profilefeatures') . " \r\n" .
-						'(' . self::$dbGenerator->quotefields('profile') . ', ' . self::$dbGenerator->quotefields('feature') .
-						', ' . self::$dbGenerator->quotefields('value') .  ") \r\n" .
-						'SELECT ' . self::$dbGenerator->quotefields('profile') . ', ' . $featureNumber . ', '.self::$dbGenerator->quotefields('value')." \r\n" .
-						'FROM ' . self::$dbGenerator->quotefields('smart_profilefeatures') . "\r\n" .
-						'WHERE ' . self::$dbGenerator->quotefields('feature') . ' = ' . $feature . ";\r\n\r\n");
-				}
-			}
-		}
-	}
-
-	/**
-	 * To create DB SQL for all DB flavors(MYSQL,MSSQL,ORACLE).
-	 * This function is typically used when a new profile feature is
-	 * introduced in v8 and it has to be enabled. (Setting the access rights to be True)
-	 * It creates SQL that will insert the new profile feature
-	 * into every profile created from previous Enterprise version.
-	 *
-	 * For example, Ent v7 has 3 profiles: 'FullControl','Editor','QA'.
-	 * v8 introduced profile feature called 'View Notes'.
-	 * This function will create SQL that will insert the new profile 
-	 * feature(View Notes) into these three profiles. After
-	 * migration, these three profiles will then automatically have
-	 * the new profile feature introduced enabled.
-	 */
-	private static function insertProfileFeatures()
-	{
-		if( version_compare( self::$previousVersion, '8.0', '<' ) && version_compare( self::$lastVersion, '8.0', '>=' ) ) {
-			$newFeatureNums = array(
-				'71'     // Enable Access rights for View Notes (Annotations) profile feature
-				//'xxx', // New feature number to be added seperated by comma
-				//'yyy', // New feature number to be added seperated by comma
-			);
-		}
-		if (isset($newFeatureNums)) foreach( $newFeatureNums as $newFeatureNum ) {
-			if( strtolower(self::$dbGenerator->getDBName()) == 'ora' ) {
-				self::$dbGenerator->addTxt(
-					'INSERT INTO ' . self::$dbGenerator->quotefields('smart_profilefeatures') . " \r\n" .
-					'(' . self::$dbGenerator->quotefields('id') . ', ' . self::$dbGenerator->quotefields('profile') . ', ' .
-					self::$dbGenerator->quotefields('feature') . ', ' . self::$dbGenerator->quotefields('value') . ") \r\n" .
-									 
-					'SELECT '. self::$dbGenerator->quotefields('smart_profilefeatures') . '_seq.nextval , ' .
-					self::$dbGenerator->quotefields('id') . ', ' . $newFeatureNum . ", 'Yes'\r\n" .
-					'FROM ' . self::$dbGenerator->quotefields('smart_profiles') . ";\r\n\r\n");								 
-			} else {								 
-				self::$dbGenerator->addTxt(
-					'INSERT INTO ' . self::$dbGenerator->quotefields('smart_profilefeatures') . " \r\n" .
-					'(' . self::$dbGenerator->quotefields('profile') . ', ' . self::$dbGenerator->quotefields('feature') . ', ' .
-					self::$dbGenerator->quotefields('value') .  ') ' . "\r\n" .
-					'SELECT '.self::$dbGenerator->quotefields('id').', '.$newFeatureNum. ", 'Yes' \r\n" .
-					'FROM '.self::$dbGenerator->quotefields('smart_profiles')."; \r\n\r\n");
-									 
-			}
-		}	
-	
 	}
 
 	/**
@@ -147,13 +60,10 @@ class DBConversion
 	 */	
 	private static function removeProfileFeatures()
 	{
-        $toBeRemovedFeatures = array();
-		if( version_compare( self::$previousVersion, '8.0', '<' ) && version_compare( self::$lastVersion, '8.0', '>=' ) ) {
-            $toBeRemovedFeatures[] = '89'; // Remove this access rights for Edit Sticky Notes profile feature
-		}
+      $toBeRemovedFeatures = array();
 		if( version_compare( self::$previousVersion, '9.5', '<' ) && version_compare( self::$lastVersion, '9.5', '>=' ) ) {
 			$toBeRemovedFeatures[] = '1006'; // Web Editor no longer exist, remove this access rights for Web Editor profile feature
-        }
+		}
 
 		if (isset($toBeRemovedFeatures)) foreach( $toBeRemovedFeatures as $toBeRemovedFeature ) {
 			self::$dbGenerator->addTxt(
@@ -172,9 +82,6 @@ class DBConversion
 	private static function changePublicationChannelTypes()
 	{
 		$changeChannelTypes = array();
-		if( version_compare( self::$previousVersion, '8.0', '<' ) && version_compare( self::$lastVersion, '8.0', '>=' ) ) {
-			$changeChannelTypes['digital magazine'] = 'other';
-		}
 		if( version_compare( self::$previousVersion, '9.0', '<' ) && version_compare( self::$lastVersion, '9.0', '>=' ) ) {
 			$changeChannelTypes['newsfeed'] = 'other';
 		}
