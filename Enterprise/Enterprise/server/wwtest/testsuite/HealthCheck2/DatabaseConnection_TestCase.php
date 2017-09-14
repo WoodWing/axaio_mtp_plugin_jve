@@ -22,13 +22,13 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 	final public function runTest()
 	{
 		// Check DBTYPE option
-		$help = 'The DBTYPE option in configserver.php should be "mysql", "mssql" or "oracle".';
+		$help = 'The DBTYPE option in configserver.php should be "mysql" or "mssql".';
 		$definedDbType = defined('DBTYPE') ? trim(DBTYPE) : null;
 		if( is_null($definedDbType) || empty($definedDbType) ) {
 			$this->setResult( 'FATAL', 'The DBTYPE option is not defined or not filled in.', $help );
 			return;
 		}
-		if( DBTYPE != 'mysql' && DBTYPE != 'mssql' && DBTYPE != 'oracle' ) {
+		if( DBTYPE != 'mysql' && DBTYPE != 'mssql' ) {
 			$this->setResult( 'FATAL', 'Database type option not recognized: "'.DBTYPE.'"', $help );
 			return;
 		}
@@ -82,14 +82,6 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 						'- The PHP extension for MSSQL is PHP 7.1 and 64 bit compatible.<br/>'.
 						 'For more information about Microsoft Drivers for PHP for SQL Server, '.
 						 'click <a href="http://technet.microsoft.com/en-us/library/cc296170(v=sql.105).aspx">here</a>.<br/>';
-				break;
-				case 'oracle':
-					$msg = 'Could not load one of the PHP extensions "php_oci8_11g" or "php_oci8_12c".';
-					$help = 'Please make sure that:  <br/>'.
-						'- An appropriate PHP extension for Oracle (php_oci8_11g or php_oci8_12c) is installed. <br/>'.
-						'- The PHP extension for Oracle is enabled in the php.ini file.<br/>'.
-						'- A matching Oracle client library is installed.<br/>'.
-						'For more information, click <a href="http://php.net/manual/en/oci8.requirements.php">here</a> <br/>';
 				break;
 			}
 			$this->setResult( 'FATAL', $msg, $help );
@@ -233,19 +225,7 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 										 // value plus 1.
 			//LogHandler::Log('wwtest', 'DEBUG', 'smart_objects autoincrement ID: '.print_r($objectsID, true));
 		}
-		elseif( DBTYPE == 'oracle') {
-			// This issue does not happen on Oracle. The 'auto_increment' is stored in the sequence. When the database
-			// is exported (for backup or migration) the sequences must be exported as well, so the 'auto_increment' value
-			// is restored in the process.
-			
-			// If a fix is needed. Current issue: when calling nextId() (using Oracle function nextVal) the 'auto_increment' value will be increased.
-			// The Oracle function currVal does not work (only works after nextVal and ?? insert).
-			// Discussion with JVE is needed for a Oracle solution.
-	
-			//$objectsID = $dbdriver->nextId(DBPREFIX."objects") - 1;
-			return true;
-		}
-	
+
 		// Get the highest id present in the 'smart_deletedobjects' table
 		$deletedObjectsTable = DBPREFIX."deletedobjects";	
 		$sql = "SELECT MAX(id) as `id` FROM `$deletedObjectsTable`";
