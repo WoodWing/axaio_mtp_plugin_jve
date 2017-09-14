@@ -296,7 +296,7 @@ class BizAdmPublication
 			throw new BizException( 'ERR_SUBJECT_NOTEXISTS', 'Client', null, null, array( '{CHANNEL}', $pubChannelId ) );
 		}
 
-		if( $pubChannel->Type != 'print' && $pubChannel->Type != 'dps' && $pubChannel->Type != 'dps2' ) {
+		if( $pubChannel->Type != 'print' && $pubChannel->Type != 'dps2' ) {
 			if( $issues ) foreach( $issues as $curissue ) {
 				if( $curissue->OverrulePublication != false ) {
 					throw new BizException( 'ERR_ARGUMENT', 'Client', 'Overrule issue can not be in non-Print-channel' );
@@ -432,7 +432,7 @@ class BizAdmPublication
 		//BZ#9152 Build in check for issues having overrule issues in non-print channels: NOT ALLOWED!
 		foreach ($issues as $curissue) {
 			if ($curissue->OverrulePublication != false) {
-				if ($pubChannel->Type != 'print' && $pubChannel->Type != 'dps' && $pubChannel->Type != 'dps2' ) {
+				if ($pubChannel->Type != 'print' && $pubChannel->Type != 'dps2' ) {
 					throw new BizException('ERR_ARGUMENT','Client','Overrule issue can not be in non-Print-channel');
 				}
 			}

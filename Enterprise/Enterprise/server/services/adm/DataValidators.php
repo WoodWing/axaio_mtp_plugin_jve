@@ -23,7 +23,7 @@ class AdmPubChannelTypeValidator
 {
 	static public function validate( $validator, $enumVal )
 	{
-		static $enums = array( 'print', 'web', 'sms', 'dps', 'dps2', 'other' );
+		static $enums = array( 'print', 'web', 'sms', 'dps2', 'other' );
 		$validator->checkEnum( $enums, $enumVal );
 	}
 }

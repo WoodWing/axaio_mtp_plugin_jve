@@ -1409,7 +1409,7 @@ class smartevent_setpublishinfofordossier extends smartevent
 	/**
 	 * @param string $ticket Ticket for the logged in user.
 	 * @param PubPublishedDossier $publishedDossier
-	 * @param string $pubChannelType Publication channel type: e.g: 'dps'
+	 * @param string $pubChannelType Publication channel type: e.g: 'print'
 	 * @since v7.5.0
 	 */
 	public function __construct( $ticket, $publishedDossier, $pubChannelType )
@@ -1436,7 +1436,7 @@ class smartevent_publishissue extends smartevent
 	/**
 	 * @param string $ticket
 	 * @param PubPublishedIssue $publishedIssue
-	 * @param string $pubChannelType Publication channel type: e.g: 'dps'
+	 * @param string $pubChannelType Publication channel type: e.g: 'print'
 	 * @since v7.5.0
 	 */
 	public function __construct( $ticket, $publishedIssue, $pubChannelType  )
@@ -1463,7 +1463,7 @@ class smartevent_updateissue extends smartevent
 	/**
 	 * @param string $ticket
 	 * @param PubPublishedIssue $publishedIssue
-	 * @param string $pubChannelType Publication channel type: e.g: 'dps'
+	 * @param string $pubChannelType Publication channel type: e.g: 'print'
 	 * @since v7.5.0
 	 */
 	public function __construct( $ticket, $publishedIssue, $pubChannelType  )
@@ -1490,7 +1490,7 @@ class smartevent_unpublishissue extends smartevent
 	/**
 	 * @param string $ticket
 	 * @param PubPublishedIssue $publishedIssue
-	 * @param string $pubChannelType Publication channel type: e.g: 'dps'
+	 * @param string $pubChannelType Publication channel type: e.g: 'print'
 	 * @since v7.5.0
 	 */
 	public function __construct( $ticket, $publishedIssue, $pubChannelType  )
@@ -1516,7 +1516,7 @@ class smartevent_setpublishinfoforissue extends smartevent
 	/**
 	 * @param string $ticket Ticket for the logged in user.
 	 * @param PubPublishedIssue $publishedIssue
-	 * @param string $pubChannelType Publication channel type: e.g: 'dps'
+	 * @param string $pubChannelType Publication channel type: e.g: 'print'
 	 * @since v7.5.0
 	 */
 	public function __construct( $ticket, $publishedIssue, $pubChannelType )

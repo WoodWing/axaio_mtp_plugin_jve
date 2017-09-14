@@ -79,7 +79,6 @@
 					<xsd:enumeration value="print"/>
 					<xsd:enumeration value="web"/>
 					<xsd:enumeration value="sms"/>
-					<xsd:enumeration value="dps"/>      <!-- v7.5 Digital Publishing System -->
 					<xsd:enumeration value="dps2"/>   <!-- v9.6 Adobe DPS (2015) integration -->
 					<xsd:enumeration value="other"/>
 				</xsd:restriction>

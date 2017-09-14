@@ -98,7 +98,6 @@
 					<enumeration value="print"/>
 					<enumeration value="web"/>
 					<enumeration value="sms"/>
-					<enumeration value="dps"/>    <!-- v7.5 Digital Publishing System -->
 					<enumeration value="dps2"/>   <!-- v9.6 Adobe DPS (2015) integration -->
 					<enumeration value="other"/>
 				</restriction>

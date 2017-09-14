@@ -444,7 +444,7 @@ class BizPubIssue
 	/**
 	 * Release the semaphore lock obtained by createSemaLock().
 	 *
-	 * @param integer Semaphore id.
+	 * @param integer $semaphoreId Semaphore id.
 	 */
 	private function releaseSemaLock( $semaphoreId )
 	{
@@ -453,22 +453,17 @@ class BizPubIssue
 	}
 
 	/**
-	 * Construct the DossierIds into base64 format
+	 * EN-89567 Adobe DPS support has been dropped which makes this method unneccessary.
+	 * Considering that this method is very deep in the Enterprise logics, we've chosen not to
+	 * cut everything out completely right now and instead clean everything up once we stop
+	 * supporting publish forms.
 	 *
-	 * @param string $channelType Publication channel type
-	 * @param array $dossierIdsOrder Array of dossierIds order
+	 * @param string $channelType
+	 * @param array $dossierIdsOrder
 	 * @return string
 	 */
 	public function getBase64DossierIds( $channelType, $dossierIdsOrder )
 	{
-		$uint32 = '';
-		if( $channelType == 'dps' ) {
-			foreach( $dossierIdsOrder as $dossierId ) {
-				$uint32 .= pack( "V", $dossierId );
-			}
-		}
-		$base64 = base64_encode( $uint32 );
-
-		return $base64;
+		return '';
 	}
 }
