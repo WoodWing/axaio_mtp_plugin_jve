@@ -16,15 +16,13 @@ require_once dirname(__FILE__).'/../../config/config.php';
 ini_set('display_errors', 1);
 
 // Move to dbmodel.php:
-require_once BASEDIR.'/server/dbscripts/dbmodel.php';
 switch ( DBTYPE ) {
 	case 'mysql':
-		class SelectedDbGenerator extends MysqlGenerator {}
+		require_once BASEDIR.'/server/dbscripts/generators/Mysql.class.php';
+		class SelectedDbGenerator extends WW_DbScripts_Generators_Mysql {}
 		break;
 	case 'mssql':
 		exit( 'MSSQL not supported.' ); // TODO
-		class SelectedDbGenerator extends MssqlGenerator {}
-		break;
 }
 class AppliedDbGenerator extends SelectedDbGenerator
 {
@@ -65,6 +63,7 @@ class WW_DbSchema_Index_Definition
 // TODO: Move this function to the DBStruct class:
 function composeDbSchemaFromDefinition()
 {
+	require_once BASEDIR.'/server/dbscripts/dbmodel.php';
 	$dbStruct = new DBStruct();
 	//$dbVersion = end( $dbStruct->getVersions() ); 
 	$tableStructs = $dbStruct->listTables();
