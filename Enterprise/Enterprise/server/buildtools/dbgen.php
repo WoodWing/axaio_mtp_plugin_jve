@@ -38,6 +38,9 @@ class DbGenTool
 	/** @var bool */
 	private $verboseMode;
 
+	/** @var DBStruct */
+	private $dbStruct;
+
 	/**
 	 * Constructor.
 	 *

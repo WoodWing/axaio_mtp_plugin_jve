@@ -15,8 +15,13 @@ define ('MINIMALGENVERSION', '8.0');
 
 class DBStruct
 {
+	/** @var array DB model definition. */
 	protected $struct;
+
+	/** @var array Patches on the DB model. */
 	protected $patches;
+
+	/** @var string[] Errors found when parsing the DB model definition. */
 	private $errors;
 
 	/**
@@ -3233,7 +3238,7 @@ class DBStruct
 	 * Generates sql-scripts for the whole model. Scripts will be stored in generator.
 	 *
 	 * @param string $version			Version to generate
-	 * @param object $generator			Generator class with logic and storage
+	 * @param WW_DbScripts_Generators_Base $generator			Generator class with logic and storage
 	 */
 	public function generate($version, $generator)
 	{
@@ -3254,7 +3259,7 @@ class DBStruct
 	 * @param string $fromversion The previous version which is compared with the 'to' version.
 	 * @param string $toversion The previous minor version.
 	 * @param array $patch Contains the model change plus further patch info.
-	 * @param object $generator	Generator class with logic and storage
+	 * @param WW_DbScripts_Generators_Base $generator	Generator class with logic and storage
 	 */
 	public function generatePatch( $fromversion, $toversion, $patch, $generator )
 	{
@@ -3276,7 +3281,7 @@ class DBStruct
 	 *
 	 * @param string $version Version to generate.
 	 * @param array $table Table info for the table to generate.
-	 * @param object $generator	Generator class with logic and storage.
+	 * @param WW_DbScripts_Generators_Base $generator	Generator class with logic and storage.
 	 * @param boolean $insertrecords True if default data must be inserted, else false.
 	 */
 	protected function generateTable($version, $table, $generator, $insertrecords)
@@ -3286,8 +3291,7 @@ class DBStruct
 			$this->errors[] = 'Table '.$table['name'].' refers to unknown version: '.$table['v'];
 		}
 		$isLastVersion = $version == end($versions);
-		$isTempTable = substr( $table['name'], 0, 5 ) == 'temp_';
-		
+
 		if( version_compare( $table ['v'], $version, '<=' ) ) {
 			$generator->tablePre($table);
 			$hasIdField = false;
@@ -3323,7 +3327,7 @@ class DBStruct
 						$generator->field( $table, $oldfield, true );
 					}
 				}
-				if( !$toBeDropped && !$isTempTable ) {
+				if( !$toBeDropped ) {
 					if( $fld['name'] == 'id' ) {
 						$hasIdField = true;
 					}
@@ -3349,7 +3353,7 @@ class DBStruct
 			$generator->tablePost($table);
 			
 			// Validate tables in DB model against tables in getTablesWithoutAutoIncrement() function.
-			if( $isLastVersion && !$isTempTable ) {
+			if( $isLastVersion ) {
 				$tablesWithoutIncr = $this->getTablesWithoutAutoIncrement();
 				$isListedInTablesWithoutIncr = in_array( $table['name'], $tablesWithoutIncr );
 				if( $hasIdField && $isListedInTablesWithoutIncr ) {
@@ -3390,9 +3394,9 @@ class DBStruct
 	/**
 	 * Generates upgrade scripts from one version (from) to another version (till).
 	 *
-	 * @param $fromversion From version.
-	 * @param $tillversion Till version.
-	 * @param object $generator	Generator class with logic and storage.
+	 * @param string $fromversion
+	 * @param string $tillversion
+	 * @param WW_DbScripts_Generators_Base $generator	Generator class with logic and storage.
 	 */
 	public function generateUpgrade( $fromversion, $tillversion, $generator )
 	{
@@ -3400,6 +3404,14 @@ class DBStruct
 		$this->doGenerateUpgradeScript( $fromversion, $tillversion, $generator, $this->struct );
 	}
 
+	/**
+	 * Generates upgrade scripts from one version (from) to another version (till).
+	 *
+	 * @param string $fromversion
+	 * @param string $tillversion
+	 * @param WW_DbScripts_Generators_Base $generator
+	 * @param array $tableInfo
+	 */
 	private function doGenerateUpgradeScript( $fromversion, $tillversion, $generator, $tableInfo )
 	{
 		$this->errors = array();
@@ -3604,7 +3616,7 @@ class DBStruct
 	 * Returns the original version of the patched structure.
 	 *
 	 * @param array $dbInfo (field) info structure to check.
-	 * @param $version Version on which the patch must be applied.
+	 * @param string $version Version on which the patch must be applied.
 	 * @return string The original version or null if structure has not been patched.
 	 */
 	private function patchedDBInfo( $dbInfo, $version )
