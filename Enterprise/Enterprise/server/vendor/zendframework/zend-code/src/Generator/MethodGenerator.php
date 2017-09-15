@@ -9,6 +9,7 @@
 
 namespace Zend\Code\Generator;
 
+use ReflectionMethod;
 use Zend\Code\Reflection\MethodReflection;
 
 class MethodGenerator extends AbstractMemberGenerator
@@ -29,6 +30,16 @@ class MethodGenerator extends AbstractMemberGenerator
     protected $body = null;
 
     /**
+     * @var null|TypeGenerator
+     */
+    private $returnType;
+
+    /**
+     * @var bool
+     */
+    private $returnsReference = false;
+
+    /**
      * @param  MethodReflection $reflectionMethod
      * @return MethodGenerator
      */
@@ -39,6 +50,7 @@ class MethodGenerator extends AbstractMemberGenerator
 
         $method->setSourceContent($reflectionMethod->getContents(false));
         $method->setSourceDirty(false);
+        $method->setReturnType(self::extractReturnTypeFromMethodReflection($reflectionMethod));
 
         if ($reflectionMethod->getDocComment() != '') {
             $method->setDocBlock(DocBlockGenerator::fromReflection($reflectionMethod->getDocBlock()));
@@ -56,7 +68,7 @@ class MethodGenerator extends AbstractMemberGenerator
 
         $method->setInterface($declaringClass->isInterface());
         $method->setStatic($reflectionMethod->isStatic());
-
+        $method->setReturnsReference($reflectionMethod->returnsReference());
         $method->setName($reflectionMethod->getName());
 
         foreach ($reflectionMethod->getParameters() as $reflectionParameter) {
@@ -82,7 +94,7 @@ class MethodGenerator extends AbstractMemberGenerator
             return $body;
         }
 
-        $lines = explode(PHP_EOL, $body);
+        $lines = explode("\n", $body);
 
         $indention = str_replace(trim($lines[1]), '', $lines[1]);
 
@@ -92,7 +104,7 @@ class MethodGenerator extends AbstractMemberGenerator
             }
         }
 
-        $body = implode(PHP_EOL, $lines);
+        $body = implode("\n", $lines);
 
         return $body;
     }
@@ -153,6 +165,9 @@ class MethodGenerator extends AbstractMemberGenerator
                     break;
                 case 'visibility':
                     $method->setVisibility($value);
+                    break;
+                case 'returntype':
+                    $method->setReturnType($value);
                     break;
             }
         }
@@ -259,6 +274,40 @@ class MethodGenerator extends AbstractMemberGenerator
     }
 
     /**
+     * @param string|null
+     *
+     * @return MethodGenerator
+     */
+    public function setReturnType($returnType = null)
+    {
+        $this->returnType = null === $returnType
+            ? null
+            : TypeGenerator::fromTypeString($returnType);
+
+        return $this;
+    }
+
+    /**
+     * @return TypeGenerator|null
+     */
+    public function getReturnType()
+    {
+        return $this->returnType;
+    }
+
+    /**
+     * @param bool $returnsReference
+     *
+     * @return MethodGenerator
+     */
+    public function setReturnsReference($returnsReference)
+    {
+        $this->returnsReference = (bool) $returnsReference;
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function generate()
@@ -282,7 +331,9 @@ class MethodGenerator extends AbstractMemberGenerator
 
         $output .= $this->getVisibility()
             . (($this->isStatic()) ? ' static' : '')
-            . ' function ' . $this->getName() . '(';
+            . ' function '
+            . ($this->returnsReference ? '& ' : '')
+            . $this->getName() . '(';
 
         $parameters = $this->getParameters();
         if (!empty($parameters)) {
@@ -294,6 +345,10 @@ class MethodGenerator extends AbstractMemberGenerator
         }
 
         $output .= ')';
+
+        if ($this->returnType) {
+            $output .= ' : ' . $this->returnType->generate();
+        }
 
         if ($this->isAbstract()) {
             return $output . ';';
@@ -318,5 +373,47 @@ class MethodGenerator extends AbstractMemberGenerator
     public function __toString()
     {
         return $this->generate();
+    }
+
+    /**
+     * @param MethodReflection $methodReflection
+     *
+     * @return null|string
+     */
+    private static function extractReturnTypeFromMethodReflection(MethodReflection $methodReflection)
+    {
+        $returnType = method_exists($methodReflection, 'getReturnType')
+            ? $methodReflection->getReturnType()
+            : null;
+
+        if (! $returnType) {
+            return null;
+        }
+
+        if (! method_exists($returnType, 'getName')) {
+            return self::expandLiteralType((string) $returnType, $methodReflection);
+        }
+
+        return ($returnType->allowsNull() ? '?' : '')
+            . self::expandLiteralType($returnType->getName(), $methodReflection);
+    }
+
+    /**
+     * @param string           $literalReturnType
+     * @param ReflectionMethod $methodReflection
+     *
+     * @return string
+     */
+    private static function expandLiteralType($literalReturnType, ReflectionMethod $methodReflection)
+    {
+        if ('self' === strtolower($literalReturnType)) {
+            return $methodReflection->getDeclaringClass()->getName();
+        }
+
+        if ('parent' === strtolower($literalReturnType)) {
+            return $methodReflection->getDeclaringClass()->getParentClass()->getName();
+        }
+
+        return $literalReturnType;
     }
 }

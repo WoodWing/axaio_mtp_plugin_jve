@@ -915,7 +915,7 @@ class BizSession
 		}
 		$options = unserialize( CLIENTFEATURES );
 		if( isset( $options[$clientName][$subEntry] ) && $options[$clientName][$subEntry] ) {
-			$features = array_merge( $serverInfo->FeatureSet, $options[$clientName][$subEntry] );
+			$serverInfo->FeatureSet = array_merge( $serverInfo->FeatureSet, $options[$clientName][$subEntry] );
 		}
 	}
 

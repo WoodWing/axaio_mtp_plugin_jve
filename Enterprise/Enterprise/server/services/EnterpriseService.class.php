@@ -89,7 +89,7 @@ class EnterpriseService
 	  * @param boolean 		$checkTicket	whether ticket should be checked
 	  * @param boolean 		$useTransaction	whether service should be executed within db transaction
 	  * @return mixed Response object
-	  * @throws BizException when executing the service results in an error.
+	  * @throws Throwable when executing the service results in an error.
 	  */
 	protected function executeService( $req, $ticket, $type, $interface, $checkTicket, $useTransaction )
 	{
@@ -212,16 +212,25 @@ class EnterpriseService
 				BizSession::endTransaction();
 			}
 			BizSession::endSession();
-
-		} catch ( BizException $e ) {
-			// Log error
+		} catch( Throwable $e ) {
+			// For all errors (Error, Exception, BizException) write the error file when enabled
 			if( $logService ) {
 				$error = new stdClass();
-				$error->Type = $e->getType();
 				$error->Message = $e->getMessage();
-				$error->Detail = $e->getDetail();
-				$error->ErrorCode = $e->getErrorCode();
+				if( $e instanceof BizException ) { // Only add the 'BizException' information when available
+					$error->Type = $e->getType();
+					$error->Detail = $e->getDetail();
+					$error->ErrorCode = $e->getErrorCode();
+				}
 				LogHandler::logService( $serviceName, LogHandler::prettyPrint( $error ), null, 'Service' );
+			}
+
+			if( !$e instanceof BizException ) {
+				// Error and Exception throwables are handled by the interface (e.g. SOAP) and do not end up in the logs by default
+				// as they don't trigger the exception handler. Log the information (including a stacktrace) right here.
+				$error = 'Uncaught throwable "'.get_class( $e ).'".';
+				LogHandler::Log( 'EnterpriseService', 'ERROR', $error, $e );
+				$e = new BizException( null, 'Server', '', $error ); // Let the core throw an exception in this case to the client.
 			}
 
 			// The errors raised by ES are not always thrown up by SC to our IDS script.
@@ -238,7 +247,7 @@ class EnterpriseService
 			}
 
 			// Record exception
-			if( isset($recorder) && $createdRecorder ) {
+			if( isset( $recorder ) && $createdRecorder ) {
 				$recorder->recordBizException( $e );
 				$recorder = null; // Reset global recorder. Service call by the real client will end here.
 			}

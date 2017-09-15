@@ -1,5 +1,6 @@
-.report
+.pid
 .vagrant
 composer.lock
 phpunit.xml
+test/server/node_modules
 vendor

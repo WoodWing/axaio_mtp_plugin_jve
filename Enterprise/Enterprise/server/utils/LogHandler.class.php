@@ -179,6 +179,7 @@ class LogHandler
 		$stack = "\nStack:\n".self::getDebugBackTrace( 3 );
 		if( $exception ) {
 			$stack .= "\n-------------\nException Message: ".$exception->getMessage();
+			$stack .= "\nException File: ".$exception->getFile() . ' ' . $exception->getLine();
 			if( get_class( $exception ) == '' ) {
 				$stack .= "\nException Details: ".$exception->getDetail();
 			}

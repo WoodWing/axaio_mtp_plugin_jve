@@ -290,14 +290,21 @@ class AdobeDps2_BizClasses_Publishing
 			require_once dirname(__FILE__).'/../dataclasses/EntityArticle.class.php';
 			$dpsArticle = new AdobeDps2_DataClasses_EntityArticle();
 			$dpsArticle->entityName = self::composeArticleId( $layoutId, $editionId );
-			self::$httpClient->safeCreateOrUpdateEntity( $projectId, $dpsArticle,
+			/**
+			 * The '$article' param isn't used in the callback as the $dpsArticle param
+			 * is already global. Since these parameters can't have the same name since PHP 7.1
+			 * a different name is chosen, but the inspector sees this parameter as unused.
+			 * @noinspection PhpUnusedParameterInspection
+			 */
+			self::$httpClient->safeCreateOrUpdateEntity(
+				$projectId, $dpsArticle,
 		
 				// This function is called back between the getMetadata and the
 				// createOrUpdateEntity requests. It allows us to set/overwrite
 				// those few properties that we need to set on the latest version
 				// of the article. It may be called multiple times in case of
 				// re-attempts after version conflicts.
-				function( $dpsArticle, $exists ) use ( $layout, $dpsArticle, $pubChannel, $edition ) {
+				function( $article, $exists ) use ( $layout, $dpsArticle, $pubChannel, $edition ) {
 				
 					// Once an article is created, never update its properties, or else 
 					// we might overwrite props that were manually updated in the AP portal.

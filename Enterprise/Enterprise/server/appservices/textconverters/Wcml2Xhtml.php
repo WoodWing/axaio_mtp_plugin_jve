@@ -1146,25 +1146,25 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	{
 		$info = array();
 
-		$left = $attr['Left'];
-		$right = $attr['Right'];
-		$top = $attr['Top'];
-		$bottom = $attr['Bottom'];
+		$left = floatval($attr['Left']);
+		$right = floatval($attr['Right']);
+		$top = floatval($attr['Top']);
+		$bottom = floatval($attr['Bottom']);
 
-		$info['Width'] = $right - $left - $attr['CropRight'] - $attr['CropLeft'];
-		$info['Width'] *= $attr['ScaleX'];
+		$info['Width'] = $right - $left - floatval($attr['CropRight']) - floatval($attr['CropLeft']);
+		$info['Width'] *= floatval($attr['ScaleX']);
 
-		$info['Height'] = $bottom - $top - $attr['CropBottom'] - $attr['CropTop'];
-		$info['Height'] *= $attr['ScaleY'];
+		$info['Height'] = $bottom - $top - floatval($attr['CropBottom']) - floatval($attr['CropTop']);
+		$info['Height'] *= floatval($attr['ScaleY']);
 
-		$info['ContentDx'] = $left - $attr['CropLeft'];
-		$info['ContentDx'] *= $attr['ScaleX'];
+		$info['ContentDx'] = $left - floatval($attr['CropLeft']);
+		$info['ContentDx'] *= floatval($attr['ScaleX']);
 
-		$info['ContentDy'] = $top - $attr['CropTop'];
-		$info['ContentDy'] *= $attr['ScaleY'];
+		$info['ContentDy'] = $top - floatval($attr['CropTop']);
+		$info['ContentDy'] *= floatval($attr['ScaleY']);
 
-		$info['ScaleX'] = $attr['ScaleX'];
-		$info['ScaleY'] = $attr['ScaleY'];
+		$info['ScaleX'] = floatval($attr['ScaleX']);
+		$info['ScaleY'] = floatval($attr['ScaleY']);
 
 		if( LogHandler::debugMode() ) { // avoid expensive print_r() in production
 			LogHandler::Log( 'textconverter', 'DEBUG', 'Inline image placement info: '.print_r( $info, true ) );

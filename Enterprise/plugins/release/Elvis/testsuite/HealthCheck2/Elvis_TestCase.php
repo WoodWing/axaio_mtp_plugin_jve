@@ -64,6 +64,9 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		if ( !$this->checkSuperUser() ) {
 			return;
 		}
+		if ( !$this->checkSyncModule() ) {
+			return;
+		}
 	}
 
 	/**
@@ -464,6 +467,48 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 			$credentials = base64_encode($user . ':' . $password); // User name and password are base 64 encoded.
 			ElvisAMFClient::loginByCredentials( $credentials );
 		} catch ( BizException $e ) {
+			$result = false;
+		}
+		return $result;
+	}
+
+	/**
+	 * Checks whether the sync.php module is currently running and configured correctly.
+	 *
+	 * The sync.php module has checking by itself but it has no good way of communicating errors with the
+	 * system admin user. It is setup with the help of a Crontab/Scheduler but the errors thrown/logged
+	 * by the module may not be visible for the system admin user. Since 10.1.1 the value ranges are changed
+	 * to avoid problems e.g. with AWS ELB that ends a HTTP connection after 60 seconds of no activity, which
+	 * is the case for the long poll as implemented with sync.php. See EN-88406 for more details.
+	 *
+	 * For this reason the Health Check reports errors when anything wrong with the sync.php module.
+	 *
+	 * @since 10.2.0
+	 * @return bool
+	 */
+	private function checkSyncModule()
+	{
+		require_once __DIR__.'/../../ElvisSync.class.php';
+		$result = true;
+
+		// When options on the URL are badly configured, the sync.php module refuses to run.
+		// Therefore we check the option first, and when ok, we check if the module is running.
+		try {
+			$options = ElvisSync::readLastOptions();
+			if( $options ) {
+				ElvisSync::validateOptions( $options );
+			} else {
+				// The module always saves options, so when not options found it won't have ran ever before.
+				// There is no need to report at this point because below we detect and error when not running.
+				// We do NOT set $result to false here to allow detecting ElvisSync::isRunning below.
+			}
+		} catch( BizException $e ) {
+			$this->setResult( 'ERROR', $e->getMessage().' '.$e->getDetail() );
+			$result = false;
+		}
+		if( $result && !ElvisSync::isRunning( 5 ) ) { // wait max 5 seconds for new cron to startup
+			$help = 'Please make sure a Crontab/Scheduler is setup to periodically run this module and has full time coverage.';
+			$this->setResult( 'ERROR', 'The sync.php module does not seems to be running.', $help );
 			$result = false;
 		}
 		return $result;
