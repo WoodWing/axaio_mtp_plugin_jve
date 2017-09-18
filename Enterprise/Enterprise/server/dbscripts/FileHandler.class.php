@@ -1,7 +1,10 @@
 <?php
 /**
- * File handler that can read the SQL files located in the Enterprise/server/dbscripts folder,
+ * File handler that can read the SQL files located in the dbscripts folder,
  * and can compose the names for those files using a specific naming convention.
+ *
+ * The dbscripts folder of the core server is located at Enterprise/server/dbscripts.
+ * Aside to that, any server plug-in could also provide a dbscripts folder.
  *
  * @package    Enterprise
  * @subpackage BizClasses
@@ -11,18 +14,52 @@
 
 class WW_DbScripts_FileHandler
 {
+	/** @var string The full file path of the dbscripts folder where the SQL scripts are located */
+	private $scriptsFolder;
+
 	/**
-	 * Provide the full file path of the Enterprise/server/dbscripts folder where our SQL scripts are located.
+	 * Constructor.
+	 *
+	 * @param string|null $pluginName Internal name of the server plug-in. NULL when scripts should be handled for the core server.
+	 * @throws BizException When plugin is not installed nor activated or when the dbscripts folder does not exists.
+	 */
+	public function __construct( $pluginName )
+	{
+		$this->scriptsFolder = null;
+		if( $pluginName ) {
+			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+			$pluginInfo = BizServerPlugin::getInstalledPluginInfo( $pluginName );
+			if( !$pluginInfo ) {
+				$message = "Could not find an installed server plug-in named {$pluginName}. Please install and try again.";
+				throw new BizException( '', 'Server', '', $message );
+			}
+			if( !$pluginInfo->IsActive ) {
+				$message = "The server plug-in named {$pluginName} is not activated. Please activate and try again.";
+				throw new BizException( '', 'Server', '', $message );
+			}
+			$pluginFolder = BizServerPlugin::getPluginFolder( $pluginInfo );
+			$this->scriptsFolder = $pluginFolder.'dbscripts/';
+		} else {
+			$this->scriptsFolder = BASEDIR.'/server/dbscripts/';
+		}
+		if( !file_exists( $this->scriptsFolder ) ) {
+			$message = "The dbscripts folder {$this->scriptsFolder} does not exists. Please create and try again.";
+			throw new BizException( '', 'Server', '', $message );
+		}
+	}
+
+	/**
+	 * Provide the full file path of the dbscripts folder where the SQL scripts are located.
 	 *
 	 * @return string
 	 */
 	public function getScriptsFolder()
 	{
-		return BASEDIR.'/server/dbscripts/';
+		return $this->scriptsFolder;
 	}
 
 	/**
-	 * Provide the prefix that is used to recognize our SQL scripts to generate or install.
+	 * Provide the prefix that is used to recognize the SQL scripts to generate or install.
 	 *
 	 * @return string
 	 */

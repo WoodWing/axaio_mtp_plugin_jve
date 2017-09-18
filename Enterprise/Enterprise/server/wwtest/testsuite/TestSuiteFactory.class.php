@@ -377,14 +377,17 @@ class TestSuiteFactory
 	 * @return array $map Key-Value array where Key is the *Tablename and Value is the maxId or the total record.
 	 */
 	static private function getSnapShotOfDbTables()
-	{	
-		$map = array();
+	{
+		require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+		require_once BASEDIR.'/server/dbmodel/Definition.class.php';
+
+		$definition = new WW_DbModel_Definition();
+		$reader = new WW_DbModel_Reader( $definition );
 		$dbdriver = DBDriverFactory::gen();
-		require_once BASEDIR.'/server/dbscripts/dbmodel.php';
-		$dbStruct = new DBStruct();
-		$tablesWithoutAutoIncrement = $dbStruct->getTablesWithoutAutoIncrement();
-		$dbTables = $dbStruct->listTables();
-		foreach( $dbTables as $dbTable ) {
+		$tablesWithoutAutoIncrement = $definition->getTablesWithoutAutoIncrement();
+
+		$map = array();
+		foreach( $reader->listTables() as $dbTable ) {
 			$dbFieldId = in_array( $dbTable['name'], $tablesWithoutAutoIncrement ) ? null : 'id';
 			if( $dbFieldId == 'id' ) {
 				$sql = 'SELECT max(`'.$dbFieldId.'`) as `maxid` FROM '. $dbTable['name'] ;
@@ -395,7 +398,6 @@ class TestSuiteFactory
 			$row = $dbdriver->fetch($sth);
 			$map[$dbTable['name']] = isset( $row['maxid'] ) ? $row['maxid'] : 0;
 		}
-		
 		return $map;
 	}
 	
@@ -419,16 +421,17 @@ class TestSuiteFactory
 	 * @return array $testResults An array of TestResult object consists of 'Status', 'Message' and 'ConfigTip'.
 	 */
 	static private function validateSnapShots( $snapBefore, $snapAfter, $nonCleaningTables )
-	{		
-		require_once BASEDIR.'/server/dbscripts/dbmodel.php';
-		$dbStruct = new DBStruct();
-		$tablesWithoutAutoIncrement = $dbStruct->getTablesWithoutAutoIncrement();
+	{
+		require_once BASEDIR.'/server/dbmodel/Definition.class.php';
+
+		$definition = new WW_DbModel_Definition();
+		$tablesWithoutAutoIncrement = $definition->getTablesWithoutAutoIncrement();
 		$testResults = array();
 		foreach( $snapBefore as $tableName => $maxIdBefore ) {
 			if( !in_array( $tableName, $nonCleaningTables ) ) { // skip if table is excluded
 				$maxIdAfter = $snapAfter[$tableName];
 				if( $maxIdBefore != $maxIdAfter ) {
-					$dbTable = str_replace( 'smart_', '', $tableName );
+					$dbTable = str_replace( DBPREFIX, '', $tableName );
 					$dbFieldId = in_array( $tableName, $tablesWithoutAutoIncrement ) ? null : 'id';
 					if( $dbFieldId == 'id' ) { // DB table with primary key
 						$where = '`id` > ? AND `id` <= ?';

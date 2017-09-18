@@ -40,7 +40,7 @@ class Enterprse_AutoInstallDb
 		}
 		
 		// Validate the given mode.
-		if( !in_array( $mode, array( '', 'database', 'license', 'plugins', 'jobs' ) ) ) {
+		if( !in_array( $mode, array( '', 'database', 'license', 'plugins' ) ) ) {
 			$this->scriptOk = false;
 			$this->logMessage( 'ERROR: Unknown mode: '.$mode );
 		}
@@ -61,10 +61,7 @@ class Enterprse_AutoInstallDb
 		}
 		
 		// TODO: Register server jobs at DB.
-		//if( $this->scriptOk && ($mode=='' || $mode=='jobs') ) {
-		//	$this->registerServerJobs();
-		//}
-		
+
 		return $this->scriptOk;
 	}
 	

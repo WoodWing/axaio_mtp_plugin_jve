@@ -77,7 +77,7 @@ abstract class WW_DbDrivers_DriverBase
 		if( !is_null($rowCnt) ) {
 			$log .= "=> Number of selected/affected rows: {$rowCnt}\r\n";
 		}
-		$log .= '=> Execution time: '.sprintf( '%.3f', $execDuration * 1000 ).'ms<br/>';
+		$log .= '=> Execution time: '.sprintf( '%.3f', $execDuration * 1000 ).'ms'."\r\n";
 
 		// Log SQL, caller and row count at once.
 		LogHandler::Log( $area, 'INFO', $log );

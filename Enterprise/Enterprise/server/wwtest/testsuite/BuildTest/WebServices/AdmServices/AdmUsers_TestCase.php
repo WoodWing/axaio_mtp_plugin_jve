@@ -24,7 +24,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmUsers_TestCase extends T
 	}
     public function getPrio()        { return 100; }
 
-	// TODO: Read field lenghts from dbmodel.php instead of these defines:
+	// TODO: Read field lenghts from WW_DbModel_Definition instead of these defines:
 	const ADMTEST_USER_SHORTNAMELEN = 40;
 	const ADMTEST_USER_FULLNAMELEN  = 255;
 	const ADMTEST_USERGROUP_NAMELEN = 100;

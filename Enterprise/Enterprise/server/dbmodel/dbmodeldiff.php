@@ -15,7 +15,7 @@ require_once dirname(__FILE__).'/../../config/config.php';
 
 ini_set('display_errors', 1);
 
-// Move to dbmodel.php:
+// Move to WW_DbScripts_Factory:
 switch ( DBTYPE ) {
 	case 'mysql':
 		require_once BASEDIR.'/server/dbscripts/generators/Mysql.class.php';
@@ -60,13 +60,15 @@ class WW_DbSchema_Index_Definition
 	public $isPrimary;
 }
 
-// TODO: Move this function to the DBStruct class:
+// TODO: Move this function to the WW_DbScripts_Factory class:
 function composeDbSchemaFromDefinition()
 {
-	require_once BASEDIR.'/server/dbscripts/dbmodel.php';
-	$dbStruct = new DBStruct();
-	//$dbVersion = end( $dbStruct->getVersions() ); 
-	$tableStructs = $dbStruct->listTables();
+	require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+	require_once BASEDIR.'/server/dbmodel/Definition.class.php';
+
+	$definition = new WW_DbModel_Definition();
+	$reader = new WW_DbModel_Reader( $definition );
+	$tableStructs = $reader->listTables();
 
 	$model = new WW_DbSchema_Definition();
 	$model->Tables = array();

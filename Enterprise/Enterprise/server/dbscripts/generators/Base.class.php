@@ -517,14 +517,4 @@ abstract class WW_DbScripts_Generators_Base extends WW_DbScripts_Generators_Abst
 			$this->quotefields('value') .') '.'VALUES ('."'$patchName'".', '."'yes'".')'.
 			$this->closeline()."\r\n";
 	}
-
-	/**
-	 * After an existing table is upgraded this method can be used for final steps e.g. some cleaning up or closing
-	 * statements.
-	 *
-	 * @param array $table Table definition.
-	 */
-	public function postTableUpgrade( $table )
-	{
-	}
 }

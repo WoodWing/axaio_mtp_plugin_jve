@@ -274,9 +274,12 @@ class DbAdmin_AdminApp
 	private function tableOverview()
 	{
 		// Retrieve tables names from the database model
-		require_once BASEDIR.'/server/dbscripts/dbmodel.php';
-		$dbStruct = new DBStruct();
-		$tables = $dbStruct->listTables();
+		require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+		require_once BASEDIR.'/server/dbmodel/Definition.class.php';
+
+		$definition = new WW_DbModel_Definition();
+		$reader = new WW_DbModel_Reader( $definition );
+		$tables = $reader->listTables();
 		$dbTables = array();
 		foreach( $tables as $table ) {
 			$dbTables[$table['name']] = true;

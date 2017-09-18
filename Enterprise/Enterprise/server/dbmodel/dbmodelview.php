@@ -1,13 +1,13 @@
 <?php
 require_once dirname(__FILE__).'/../../config/config.php';
-require_once BASEDIR.'/server/dbscripts/dbmodel.php';
+require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+require_once BASEDIR.'/server/dbmodel/Definition.class.php';
 
 ini_set('display_errors', 1);
 
-// where to generate files
-$scriptsDir = BASEDIR."/server/dbscripts";
-$dbStruct = new DBStruct();
-$allVersions = $dbStruct->getVersions();
+$definition = new WW_DbModel_Definition();
+$reader = new WW_DbModel_Reader( $definition );
+$allVersions = $reader->getDbModelProvider()->getVersions();
 
 // use one version when explicitly requested
 $dbVersions = array();
@@ -26,8 +26,8 @@ if( isset($_REQUEST['ver']) ) {
 }
 
 // initiate databasestruct
-$dbTables = $dbStruct->listTables();
-$docChapters = $dbStruct->getCategorizedTableNames();
+$dbTables = $reader->listTables();
+$docChapters = $definition->getCategorizedTableNames();
 
 foreach( $dbVersions as $dbVersion ) {
 
@@ -77,7 +77,7 @@ foreach( $dbVersions as $dbVersion ) {
 	foreach( $docChapters as $docChapter => $docTables ) {
 		$html .= '<br/><h2>'.$docChapter.'</h2>'.PHP_EOL;
 		foreach( $docTables as $docTable ) {
-			$table = $dbStruct->getTable( $docTable );
+			$table = $reader->getTable( $docTable );
 			
 			// Table header (with anchor used for references)
 			$html .= '<div class="section"><h3><a name="'.$table['name'].'"/>Table['.$tables.']: '.$table['name'].' ('.displayVer($dbVersion).')</h3>'.PHP_EOL;
@@ -190,7 +190,7 @@ function displayVer( $ver )
  * When the field definition is never changed, it returns the current version.
  * In other terms, it returns the version when the field was introduced.
  *
- * @param array $field Field definition from dbmodel.php
+ * @param array $field Field definition from WW_DbModel_Definition
  * @return string 3-digit version string, such as 610
  */
 function getOldestVer( $field )
@@ -206,7 +206,7 @@ function getOldestVer( $field )
  * Returns the field defintion that is older than requested, if there are any alters defined.
  * When none found, the closest one is returned.
  *
- * @param array $field Field definition from dbmodel.php
+ * @param array $field Field definition from WW_DbModel_Definition
  * @param string $dbVersion 3-digit version string, such as 610
  * @return array
  */

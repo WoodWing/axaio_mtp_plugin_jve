@@ -14,7 +14,8 @@
 
 require_once dirname(__FILE__).'/../../config/config.php';
 require_once BASEDIR.'/server/secure.php';
-require_once BASEDIR.'/server/dbscripts/dbmodel.php';
+require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+require_once BASEDIR.'/server/dbmodel/Definition.class.php';
 require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 require_once BASEDIR.'/server/dbclasses/DBCascadePub.class.php';
 
@@ -25,9 +26,10 @@ checkSecure('admin');
 $removeOrphanRecords = isset($_REQUEST['del']) ? $_REQUEST['del'] == 'orphans' : false;
 
 // Initiate database struct
-$dbStruct  = new DBStruct();
-$dbTables  = $dbStruct->listTables();
-$catTables = $dbStruct->getCategorizedTableNames();
+$definition = new WW_DbModel_Definition();
+$reader = new WW_DbModel_Reader( $definition );
+$dbTables  = $reader->listTables();
+$catTables = $definition->getCategorizedTableNames();
 $dbDriver  = DBDriverFactory::gen();
 
 // Paranoid check if all tables are categorized
@@ -58,7 +60,7 @@ foreach( $catTables as $catName => $tableNames ) {
 	}
 	foreach( $tableNames as $tableName ) {
 		// Get table definition from DB model
-		$table = $dbStruct->getTable( $tableName );
+		$table = $reader->getTable( $tableName );
 		if( !$table ) {
 			echo '<font color="red">ERROR: Requested table '.$tableName.' does not exist in model.</font><br/>';
 			die();

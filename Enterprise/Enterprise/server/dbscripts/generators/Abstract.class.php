@@ -5,7 +5,7 @@
  *
  * Since 10.2 the class named 'GenericGenerator' was renamed and moved from dbmodel.php into here.
  *
- * Generators are called for each element of DBStruct and return code by their txt() method.
+ * Generators are called for each element of WW_DbModel_Definition and return code by their txt() method.
  *
  * @package Enterprise
  * @subpackage DbScripts/Generators

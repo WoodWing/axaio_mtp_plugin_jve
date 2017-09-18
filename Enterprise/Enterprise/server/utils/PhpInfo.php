@@ -219,9 +219,13 @@ class WW_Utils_PhpInfo
 		$info = '';
 		$dbDriver = self::connectToDb( $info );
 		if( $dbDriver ) {
-			require_once BASEDIR.'/server/dbscripts/dbmodel.php';
-			$dbStruct = new DBStruct();
-			$tables = $dbStruct->listTables();
+
+			require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+			require_once BASEDIR.'/server/dbmodel/Definition.class.php';
+
+			$definition = new WW_DbModel_Definition();
+			$reader = new WW_DbModel_Reader( $definition );
+			$tables = $reader->listTables();
 
 			$info .= self::getSectionHeader( 'Database population ('.count($tables).' tables)' );
 

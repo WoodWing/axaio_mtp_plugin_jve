@@ -68,10 +68,13 @@ class DBUpgradePublishHistory extends DbUpgradeModule
 				return false;
 			}
 
-			require_once BASEDIR . '/server/dbscripts/dbmodel.php';
+			require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+			require_once BASEDIR.'/server/dbmodel/Definition.class.php';
+
+			$definition = new WW_DbModel_Definition();
+			$reader = new WW_DbModel_Reader( $definition );
 			$column = array( 'name' => 'userid' );
-			$dbStruct = new DBStruct();
-			$historyTable = $dbStruct->getTable( 'smart_publishhistory' );
+			$historyTable = $reader->getTable( 'smart_publishhistory' );
 
 			$sqlStatements = null;
 			require_once BASEDIR.'/server/dbscripts/generators/Factory.class.php';
