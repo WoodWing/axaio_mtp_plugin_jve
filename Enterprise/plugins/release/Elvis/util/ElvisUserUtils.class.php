@@ -33,6 +33,30 @@ class ElvisUserUtils
 	}
 
 	/**
+	 * Creates a new Enterprise user.
+	 *
+	 * @deprecated 10.1.4 QP Refer to getOrCreateUser().
+	 * @param string $username
+	 * @return AdmUser|null
+	 */
+	private static function createUser( $username )
+	{
+		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
+		require_once BASEDIR . '/server/interfaces/services/adm/DataClasses.php';
+		require_once dirname(__FILE__) . '/ElvisUtils.class.php';
+
+		$user = new AdmUser();
+		$user->Name = $username;
+		$user->FullName = $username;
+		$user->ImportOnLogon = true;
+
+		$user = ElvisUtils::enrichUser($user);
+		$user = DBUser::createUserObj($user);
+
+		return $user;
+	}
+
+	/**
 	 * Get the Enterprise user from the database.
 	 *
 	 * @param string $username
