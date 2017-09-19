@@ -88,10 +88,11 @@ class ElvisSessionUtil
 		$storage = self::getUserSetting( $userShort, 'Temp' );
 		$credentials = null;
 		if( $storage ) {
-			list( $encrypted, $initVector ) = explode( '::', $storage, 2 );
+			list( $encrypted, $initVector, $date ) = explode( '::', $storage, 3 );
 			$encrypted = base64_decode( $encrypted );
 			$initVector = base64_decode( $initVector );
-			$encryptionKey = '!Tj0nG3'.$userShort.date( 'z' ); // hardcoded key + user name + day of the year
+			$date = base64_decode( $date );
+			$encryptionKey = '!Tj0nG3'.$userShort.strval( date( 'z', $date ) ); // hardcoded key + user name + day of the year
 			$credentials = openssl_decrypt( $encrypted, 'aes-256-cbc', $encryptionKey,
 				OPENSSL_RAW_DATA, $initVector );
 			if( !$credentials ) {
@@ -116,11 +117,12 @@ class ElvisSessionUtil
 		$userShort = BizSession::getShortUserName(); // do not take $username
 		$credentials = base64_encode( $username.':'.$password );
 		$initVector = openssl_random_pseudo_bytes( openssl_cipher_iv_length( 'aes-256-cbc' ) );
-		$encryptionKey = '!Tj0nG3'.$userShort.date( 'z' ); // hardcoded key + user name + day of the year
+		$date = time();
+		$encryptionKey = '!Tj0nG3'.$userShort.strval( date( 'z', $date ) ); // hardcoded key + user name + day of the year
 		$encrypted = openssl_encrypt( $credentials, 'aes-256-cbc', $encryptionKey,
 			OPENSSL_RAW_DATA, $initVector );
 		if( $encrypted ) {
-			$storage = base64_encode( $encrypted ).'::'.base64_encode( $initVector );
+			$storage = base64_encode( $encrypted ).'::'.base64_encode( $initVector ).'::'.base64_encode( $date );
 			self::setUserSetting( $userShort, 'Temp', $storage ); // use vague name to obfuscate
 		} else {
 			LogHandler::Log( 'ELVIS', 'ERROR', 'Encryption procedure failed. Please run the Health Check.' );
