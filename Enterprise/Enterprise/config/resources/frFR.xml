@@ -624,6 +624,7 @@
   <Term key="DBINSTALLER_DBDATA_MIGRATED">La migration des données stockées dans les tableaux a eu lieu avec succès.</Term>
   <Term key="DBINSTALLER_DBINSTALLUPGRADE">Base de données - Installation / Mise à niveau</Term>
   <Term key="DBINSTALLER_DBMODELINFO">Informations sur le modèle de la base de données d'Enterprise :</Term>
+  <Term key="DBINSTALLER_DBMODELINFO_PLUGIN">Informations sur le modèle de la base de données d'Enterprise :</Term>
   <Term key="DBINSTALLER_DBSELECT">Nom de la base de données</Term>
   <Term key="DBINSTALLER_DBSERVER">Serveur de la base de données</Term>
   <Term key="DBINSTALLER_DBSETTINGS_HELP">1. Cochez les options qui définissent votre connexion à la base de données :\n• fichier configserver.php : DBSERVER et DBTYPE\n• fichier config.php : DBSELECT, DBUSER et DBPASS\n2. Vérifiez que votre base de données soit activée et en cours d'exécution, et qu'elle soit accessible à travers la connexion configurée « %1 ».\n3. Assurez-vous que l'utilisateur « %2 » ait accès à la base de données.\n4. En cas de nouvelle installation, assurez-vous qu'une base de données vide (espace disque logique) dénommée « %3 » ait été créée manuellement au préalable.\n5. Une fois que vous aurez réparé la configuration, cliquez sur « %4 ».</Term>
@@ -1113,7 +1114,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">Aucune configuration de serveur InDesign active trouvée pour ce travail%1. Veuillez configurer un serveur InDesign %2qui prend en charge les niveaux de priorité%3. (S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">Le serveur InDesign ne répond pas. (S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">Les travaux avec les priorités suivantes ne seront pas traités : %1</Term>
-  <Term key="IDS_PICKUP_FROM">Pickup Time</Term>
+  <Term key="IDS_PICKUP_FROM">Heure de collecte</Term>
   <Term key="IDS_PORTNUMBER">Numéro de port :</Term>
   <Term key="IDS_PRIO">Priorités des travaux</Term>
   <Term key="IDS_PRIO_1">Très haute</Term>
