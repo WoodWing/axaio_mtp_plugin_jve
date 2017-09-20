@@ -613,9 +613,9 @@
   <Term key="DATE">일자</Term>
   <Term key="DAYS">일</Term>
   <Term key="DBINSTALLER_CLICKTOSHOWTABLES">설치된 엔터프라이즈 테이블의 개요를 참조하십시오.</Term>
-  <Term key="DBINSTALLER_CLICK_CREATEDB_BTN"> '%1' 버튼을 클릭하여 엔터프라이즈에 테이블을 생성하십시오.</Term>
+  <Term key="DBINSTALLER_CLICK_CREATEDB_BTN">'%1' 버튼을 클릭하여 엔터프라이즈에 테이블을 생성하십시오.</Term>
   <Term key="DBINSTALLER_CLICK_LICENSE_BTN"> '%1' 버튼을 클릭하여 라이센스를 확인하십시오.</Term>
-  <Term key="DBINSTALLER_CLICK_UPDATEDB_BTN"> '%1' 버튼을 클릭하여 엔터프라이즈에 테이블을 업그레이드 하십시오.</Term>
+  <Term key="DBINSTALLER_CLICK_UPDATEDB_BTN">'%1' 버튼을 클릭하여 엔터프라이즈에 테이블을 업그레이드 하십시오.</Term>
   <Term key="DBINSTALLER_CONFIGSETTINGS">환경설정:</Term>
   <Term key="DBINSTALLER_CONNECTDB_BTN">데이터베이스 연결</Term>
   <Term key="DBINSTALLER_CONNECTEDTODB">데이터베이스 '%1'에 성공적으로 연결됨.</Term>
