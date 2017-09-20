@@ -624,6 +624,7 @@
   <Term key="DBINSTALLER_DBDATA_MIGRATED">The data stored in Enterprise tables has been successfully migrated.</Term>
   <Term key="DBINSTALLER_DBINSTALLUPGRADE">Database - Installation / Upgrade</Term>
   <Term key="DBINSTALLER_DBMODELINFO">Enterprise Database Model Information:</Term>
+  <Term key="DBINSTALLER_DBMODELINFO_PLUGIN">Server Plug-in Database Model Information:</Term>
   <Term key="DBINSTALLER_DBSELECT">Database Name</Term>
   <Term key="DBINSTALLER_DBSERVER">Database Server</Term>
   <Term key="DBINSTALLER_DBSETTINGS_HELP">1. Check the options that define your database connection:\n• configserver.php file: DBSERVER and DBTYPE\n• config.php file: DBSELECT, DBUSER and DBPASS\n2. Check if your database is up and running and accessible through the configured connection '%1'.\n3. Make sure that user '%2' has access to the database.\n4. In case of a new installation, make sure that an empty database (table space) named '%3' is manually pre-created.\n5. Once you have repaired the configuration, click '%4'.</Term>

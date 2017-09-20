@@ -624,6 +624,7 @@
   <Term key="DBINSTALLER_DBDATA_MIGRATED">Enterprise表中的数据已经成功迁移</Term>
   <Term key="DBINSTALLER_DBINSTALLUPGRADE">数据库- 安装/ 升级</Term>
   <Term key="DBINSTALLER_DBMODELINFO">Enterprise数据库模型信息:</Term>
+  <Term key="DBINSTALLER_DBMODELINFO_PLUGIN">Enterprise数据库模型信息:</Term>
   <Term key="DBINSTALLER_DBSELECT">数据库名字</Term>
   <Term key="DBINSTALLER_DBSERVER">数据库服务器</Term>
   <Term key="DBINSTALLER_DBSETTINGS_HELP">1. 检查定义数据库连接的选项:\n• configserver.php 文件: DBSERVER 和 DBTYPE\n• config.php 文件: DBSELECT, DBUSER and DBPASS\n2. 检查是否数据库服务器是否正在运行之中并能通过已配置的连接 '%1' 访问到.\n3. 确定用户 '%2' 有数据库的访问权限.\n4. 如果是全新安装, 确信空的数据库 (表空间) 名字 '%3' 已预先创建.\n5. 如果你已修复完配置文件请点击 '%4'.</Term>

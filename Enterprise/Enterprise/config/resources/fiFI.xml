@@ -624,6 +624,7 @@
   <Term key="DBINSTALLER_DBDATA_MIGRATED">Enterprisen taulukkojen tiedot on siirretty onnistuneesti.</Term>
   <Term key="DBINSTALLER_DBINSTALLUPGRADE">Tietokanta - Asennus / Päivitys</Term>
   <Term key="DBINSTALLER_DBMODELINFO">Enterprisen tietokantamallin tiedot:</Term>
+  <Term key="DBINSTALLER_DBMODELINFO_PLUGIN">Enterprisen tietokantamallin tiedot:</Term>
   <Term key="DBINSTALLER_DBSELECT">Tietokannan nimi</Term>
   <Term key="DBINSTALLER_DBSERVER">Tietokannan palvelin</Term>
   <Term key="DBINSTALLER_DBSETTINGS_HELP">1. Tarkista tietokantayhteyden asetukset:\n• tiedosto configserver.php: kohdat DBSERVER ja DBTYPE\n• tiedosto config.php: kohdat DBSELECT, DBUSER ja DBPASS\n2. Tarkista, onko tietokantasi käytettävissä ja pystyykö siihen yhdistämään määritetyn yhteyden '%1' kautta.\n3. Varmista, että käyttäjällä '%2' on käyttöoikeudet tietokantaan.\n4. Jos käytät vasta asennettua versiota, varmista että tyhjä tietokanta, jonka nimi on '%3' on luotu.\n5. Kun olet muuttanut asetuksia, valitse '%4'.</Term>
@@ -1113,7 +1114,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">Aktiivisia InDesign Server -palvelinasetuksia ei löydy työlle %1. Konfiguroi sellainen InDesign Server -palvelin %2, joka palvelee prioriteettia %3. (S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">InDesign-palvelin ei vastaa. (S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">Töitä, joilla on seuraavat prioriteetit, ei käsitellä: %1</Term>
-  <Term key="IDS_PICKUP_FROM">Pickup Time</Term>
+  <Term key="IDS_PICKUP_FROM">Noutoaika</Term>
   <Term key="IDS_PORTNUMBER">Portin numero:</Term>
   <Term key="IDS_PRIO">Työn prioriteetit</Term>
   <Term key="IDS_PRIO_1">Hyvin korkea</Term>
