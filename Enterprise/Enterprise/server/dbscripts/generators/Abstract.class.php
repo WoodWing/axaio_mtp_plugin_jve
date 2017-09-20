@@ -130,7 +130,7 @@ abstract class WW_DbScripts_Generators_Abstract
 	 *
 	 * @param string $version Version to stamp.
 	 */
-	abstract public function setVersion( $version );
+	abstract public function setDbModelVersionForCoreServer( $version );
 
 	/**
 	 * function to change an existing field definition

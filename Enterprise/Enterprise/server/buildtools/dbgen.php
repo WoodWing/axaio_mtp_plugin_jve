@@ -75,10 +75,13 @@ class WW_BuildTools_DbGen
 	/** @var string[] Errors found when parsing the DB model definition. */
 	private $errors;
 
+	/** @var string|null Internal name of server plugin, or NULL for core server. */
+	private $pluginName;
+
 	/**
 	 * Constructor.
 	 *
-	 * @param string|null $pluginName
+	 * @param string|null $pluginName Internal name of server plugin, or NULL for core server
 	 */
 	public function __construct( $pluginName )
 	{
@@ -88,6 +91,7 @@ class WW_BuildTools_DbGen
 		} else {
 			$definition = WW_DbModel_Factory::createModelForEnterpriseServer();
 		}
+		$this->pluginName = $pluginName;
 
 		$this->supportedDBMS = DBDriverFactory::getSupportedDrivers();
 
@@ -147,7 +151,12 @@ class WW_BuildTools_DbGen
 	{
 		$generator = $this->createGenerator( $dbms );
 		$this->generateInstallScript( $this->lastVersion, $generator );
-		$generator->setVersion( $this->lastVersion );
+		if( $this->pluginName ) {
+			$generator->setDbModelVersionForServerPlugin( $this->pluginName, $this->lastVersion );
+			$generator->setDbTablePrefixForServerPlugin( $this->pluginName, $this->reader->getDbModelProvider()->getTablePrefix() );
+		} else {
+			$generator->setDbModelVersionForCoreServer( $this->lastVersion );
+		}
 		$dbmsName = $generator->getDBName();
 
 		// Scripts used for new installations.
@@ -169,7 +178,12 @@ class WW_BuildTools_DbGen
 						}
 					}
 				}
-				$generator->setVersion( $this->lastVersion );
+				if( $this->pluginName ) {
+					$generator->setDbModelVersionForServerPlugin( $this->pluginName, $this->lastVersion );
+					$generator->setDbTablePrefixForServerPlugin( $this->pluginName, $this->reader->getDbModelProvider()->getTablePrefix() );
+				} else {
+					$generator->setDbModelVersionForCoreServer( $this->lastVersion );
+				}
 
 				$sqlFile = $this->scriptFileHandler->composeFilenameForUpdateScript( $previousVersion, $this->lastVersion, $dbmsName );
 				$this->materializeSQLFile( $generator, $sqlFile );

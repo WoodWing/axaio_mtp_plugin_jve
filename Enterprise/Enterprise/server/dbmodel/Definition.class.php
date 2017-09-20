@@ -2874,15 +2874,17 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 							'alters' => array('v' => '6.0', 'name' => 'installed',   'type' => 'char(2)',      'default' => "''", 'nullable' => true)),
 						array('v' => '8.0', 'name' => 'modified',    'type' => 'varchar(30)',  'default' => "''", 'nullable' => false, 'comment' => 'yyyy-mm-ddThh:mm:ss',
 							'alters' => array('v' => '6.0', 'name' => 'modified',    'type' => 'varchar(30)',  'default' => "NULL", 'nullable' => true, 'comment' => 'yyyy-mm-ddThh:mm:ss')),
-						//array('v' => '10.2', 'name' => 'dbprefix',   'type' => 'varchar(10)',  'default' => "''"),
-						//array('v' => '10.2', 'name' => 'dbversion',   'type' => 'varchar(10)',  'default' => "''"),
+						array('v' => '10.2', 'name' => 'dbprefix',   'type' => 'varchar(10)',  'default' => "''",
+							'comment' => 'The prefix used for all DB table names shipped by this plug-in.' ),
+						array('v' => '10.2', 'name' => 'dbversion',   'type' => 'varchar(10)',  'default' => "''",
+							'comment' => 'The installed version of the DB model as provived by this plug-in.' ),
 					),
 					'indexes' => array(
 					),
 					'inserts' => array(
-						"1, 'PreviewMetaPHP', 'PHP Preview and Meta Data', 'v6.1', 'Using internal PHP libraries (such as GD) to generate previews and read metadata', '(c) 1998-2008 WoodWing Software bv. All rights reserved.', 'on', 'on', 'on', '2008-10-02T09:00:00'",
-						"2, 'ImageMagick', 'ImageMagick', 'v6.1', 'Use ImageMagick to support extra formats for preview generation', '(c) 1998-2008 WoodWing Software bv. All rights reserved.', '', 'on', '', '2008-10-02T09:00:00'",
-						"3, 'InCopyHTMLConversion', 'InCopy HTML Conversion', 'v6.1', 'Have InCopy and InDesign edit HTML articles by converting the article to text', '(c) 1998-2008 WoodWing Software bv. All rights reserved.', 'on', 'on', 'on', '2008-11-30T09:00:00'",
+						"1, 'PreviewMetaPHP', 'PHP Preview and Meta Data', 'v6.1', 'Using internal PHP libraries (such as GD) to generate previews and read metadata', '(c) 1998-2008 WoodWing Software bv. All rights reserved.', 'on', 'on', 'on', '2008-10-02T09:00:00', '', ''",
+						"2, 'ImageMagick', 'ImageMagick', 'v6.1', 'Use ImageMagick to support extra formats for preview generation', '(c) 1998-2008 WoodWing Software bv. All rights reserved.', '', 'on', '', '2008-10-02T09:00:00', '', ''",
+						"3, 'InCopyHTMLConversion', 'InCopy HTML Conversion', 'v6.1', 'Have InCopy and InDesign edit HTML articles by converting the article to text', '(c) 1998-2008 WoodWing Software bv. All rights reserved.', 'on', 'on', 'on', '2008-11-30T09:00:00', '', ''",
 					),
 					'lookups' => array(
 					),
@@ -3172,17 +3174,17 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 	/**
 	 * Returns all table names logically grouped.
 	 *
-	 * @return array Keys are catetogory names and values are arrays of table names.
+	 * @return array Keys are category names and values are arrays of table names.
 	 */
 	public function getCategorizedTableNames()
 	{
 		return array(
 			'Objects' => array( 'smart_objects', 'smart_objecteditions', 'smart_objectflags', 'smart_objectlocks', 'smart_objectrelations', 'smart_objectversions', 'smart_deletedobjects', 'smart_targets', 'smart_targeteditions', 'smart_objectrenditions', 'smart_objectlabels', 'smart_objectrelationlabels' ),
-			'Object Publishing' => array('smart_publishedobjectshist', 'smart_publishhistory', 'smart_publobjects', 'smart_pubpublishedissues' ),
+			'Object Publishing' => array('smart_publishedobjectshist', 'smart_publishhistory', 'smart_publobjects', 'smart_pubpublishedissues', 'smart_publishedplcmtshist' ),
 			'Brand Structure' => array( 'smart_publications', 'smart_channels', 'smart_issues', 'smart_publissues', 'smart_publsections', 'smart_issuesection', 'smart_publeditions', 'smart_issueeditions', 'smart_editions', 'smart_channeldata' ),
 			'Workflow Definitions' => array( 'smart_states', 'smart_routing', 'smart_sectionstate', 'smart_issuesectionstate' ),
 			'Users, Groups and Authorizations' => array( 'smart_users', 'smart_usrgrp', 'smart_authorizations', 'smart_groups', 'smart_profilefeatures', 'smart_profiles', 'smart_publadmin', 'smart_tickets' ),
-			'Layout and Placements' => array( 'smart_pages', 'smart_elements', 'smart_placements', 'smart_placementtiles', 'smart_indesignarticles', 'smart_idarticlesplacements' ),
+			'Layout and Placements' => array( 'smart_pages', 'smart_elements', 'smart_placements', 'smart_placementtiles', 'smart_indesignarticles', 'smart_idarticlesplacements', 'smart_objectoperations' ),
 			'Autocomplete and Suggestions' => array( 'smart_termentities', 'smart_terms' ),
 			'Output devices' => array( 'smart_outputdevices' ),
 			'Semaphores' => array( 'smart_semaphores' ),
@@ -3192,9 +3194,8 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 			'Made To Print' => array( 'smart_mtp', 'smart_mtpsentobjects' ),
 			'Data Sources' => array( 'smart_datasources', 'smart_dspublications', 'smart_dsqueries', 'smart_dsqueryfamilies', 'smart_dsqueryfields', 'smart_dsqueryplacements', 'smart_dssettings', 'smart_dsupdates', 'smart_dsobjupdates' ),
 			'Server Plug-ins' => array( 'smart_serverplugins', 'smart_serverconnectors' ),
-			'Server Jobs' => array( 'smart_serverjobs', 'smart_serverjobconfigs', 'smart_serverjobsupports', 'smart_servers'  ),
+			'Server Jobs' => array( 'smart_serverjobs', 'smart_serverjobconfigs', 'smart_serverjobsupports', 'smart_servers', 'smart_serverjobtypesonhold'  ),
 			'Web Editor' => array( 'smart_appsessions', 'smart_indesignservers', 'smart_indesignserverjobs' ),
-			'File Storage' => array( 'smart_storage' )
 		);
 	}
 

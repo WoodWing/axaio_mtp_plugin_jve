@@ -1218,11 +1218,13 @@ CREATE TABLE `smart_serverplugins` (
   `system` char(2) not null  default '',
   `installed` char(2) not null  default '',
   `modified` varchar(30) not null  default '',
+  `dbprefix` varchar(10) not null  default '',
+  `dbversion` varchar(10) not null  default '',
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8;
-INSERT INTO `smart_serverplugins` (`id`, `uniquename`, `displayname`, `version`, `description`, `copyright`, `active`, `system`, `installed`, `modified`) VALUES (1, 'PreviewMetaPHP', 'PHP Preview and Meta Data', 'v6.1', 'Using internal PHP libraries (such as GD) to generate previews and read metadata', '(c) 1998-2008 WoodWing Software bv. All rights reserved.', 'on', 'on', 'on', '2008-10-02T09:00:00');
-INSERT INTO `smart_serverplugins` (`id`, `uniquename`, `displayname`, `version`, `description`, `copyright`, `active`, `system`, `installed`, `modified`) VALUES (2, 'ImageMagick', 'ImageMagick', 'v6.1', 'Use ImageMagick to support extra formats for preview generation', '(c) 1998-2008 WoodWing Software bv. All rights reserved.', '', 'on', '', '2008-10-02T09:00:00');
-INSERT INTO `smart_serverplugins` (`id`, `uniquename`, `displayname`, `version`, `description`, `copyright`, `active`, `system`, `installed`, `modified`) VALUES (3, 'InCopyHTMLConversion', 'InCopy HTML Conversion', 'v6.1', 'Have InCopy and InDesign edit HTML articles by converting the article to text', '(c) 1998-2008 WoodWing Software bv. All rights reserved.', 'on', 'on', 'on', '2008-11-30T09:00:00');
+INSERT INTO `smart_serverplugins` (`id`, `uniquename`, `displayname`, `version`, `description`, `copyright`, `active`, `system`, `installed`, `modified`, `dbprefix`, `dbversion`) VALUES (1, 'PreviewMetaPHP', 'PHP Preview and Meta Data', 'v6.1', 'Using internal PHP libraries (such as GD) to generate previews and read metadata', '(c) 1998-2008 WoodWing Software bv. All rights reserved.', 'on', 'on', 'on', '2008-10-02T09:00:00', '', '');
+INSERT INTO `smart_serverplugins` (`id`, `uniquename`, `displayname`, `version`, `description`, `copyright`, `active`, `system`, `installed`, `modified`, `dbprefix`, `dbversion`) VALUES (2, 'ImageMagick', 'ImageMagick', 'v6.1', 'Use ImageMagick to support extra formats for preview generation', '(c) 1998-2008 WoodWing Software bv. All rights reserved.', '', 'on', '', '2008-10-02T09:00:00', '', '');
+INSERT INTO `smart_serverplugins` (`id`, `uniquename`, `displayname`, `version`, `description`, `copyright`, `active`, `system`, `installed`, `modified`, `dbprefix`, `dbversion`) VALUES (3, 'InCopyHTMLConversion', 'InCopy HTML Conversion', 'v6.1', 'Have InCopy and InDesign edit HTML articles by converting the article to text', '(c) 1998-2008 WoodWing Software bv. All rights reserved.', 'on', 'on', 'on', '2008-11-30T09:00:00', '', '');
 
 CREATE TABLE `smart_serverconnectors` (
   `id` int(11) not null  auto_increment,

@@ -15,7 +15,7 @@
 require_once dirname(__FILE__).'/../../config/config.php';
 require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/dbmodel/Reader.class.php';
-require_once BASEDIR.'/server/dbmodel/Definition.class.php';
+require_once BASEDIR.'/server/dbmodel/Factory.class.php';
 require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 require_once BASEDIR.'/server/dbclasses/DBCascadePub.class.php';
 
@@ -25,29 +25,24 @@ checkSecure('admin');
 // Running in clean-up mode to remove orphan records?
 $removeOrphanRecords = isset($_REQUEST['del']) ? $_REQUEST['del'] == 'orphans' : false;
 
-// Initiate database struct
-$definition = new WW_DbModel_Definition();
-$reader = new WW_DbModel_Reader( $definition );
-$dbTables  = $reader->listTables();
-$catTables = $definition->getCategorizedTableNames();
-$dbDriver  = DBDriverFactory::gen();
-
-// Paranoid check if all tables are categorized
-foreach( $dbTables as $dbTable ) {
-	$found = false;
-	foreach( $catTables as $tableNames ) {
-		foreach( $tableNames as $tableName ) {
-			if( $tableName == $dbTable['name'] ) {
-				$found = true;
-				break 2;
-			}
-		}
+// Initiate database
+try {
+	$dbTables = array();
+	$catTables = array();
+	$definitions = WW_DbModel_Factory::createModels();
+	foreach( $definitions as $definition ) {
+		$reader = new WW_DbModel_Reader( $definition );
+		$dbTables = array_merge( $dbTables, $reader->listTables() );
+		$catTables = array_merge( $catTables, $definition->getCategorizedTableNames() );
+		$readers[] = $reader;
 	}
-	if( $found === false ) {
-		echo '<font color="red">ERROR: Table '.$dbTable['name'].' does exist in model but is not requested.</font><br/>';
-		die();
-	}
+} catch( BizException $e ) {
+	exit( $e->getMessage().' '.$e->getDetail() );
+} catch( Throwable $e ) {
+	exit( $e->getMessage() );
 }
+
+$dbDriver = DBDriverFactory::gen();
 
 // Show header
 $html = '<h1>DB Sanity Check</h1>';
@@ -60,7 +55,13 @@ foreach( $catTables as $catName => $tableNames ) {
 	}
 	foreach( $tableNames as $tableName ) {
 		// Get table definition from DB model
-		$table = $reader->getTable( $tableName );
+		$table = null;
+		foreach( $readers as $reader ) {
+			$table = $reader->getTable( $tableName );
+			if( $table ) {
+			    break;
+            }
+		}
 		if( !$table ) {
 			echo '<font color="red">ERROR: Requested table '.$tableName.' does not exist in model.</font><br/>';
 			die();

@@ -85,4 +85,7 @@ ALTER TABLE `smart_indesignserverjobs` CHANGE `id` `id` int(11) NOT NULL, DROP P
 ALTER TABLE `smart_indesignserverjobs` DROP INDEX `prid_indesignserverjobs`, ADD INDEX `prid_indesignserverjobs` (`prio`, `jobid`) ;
 ALTER TABLE `smart_indesignserverjobs` DROP `id`;
 ALTER TABLE `smart_indesignserverjobs` DROP `exclusivelock`;
+ALTER TABLE `smart_serverplugins`
+ADD   `dbprefix` varchar(10) not null  default '',
+ADD   `dbversion` varchar(10) not null  default '';
 UPDATE `smart_config` set `value` = '10.2' where `name` = 'version';

@@ -91,6 +91,7 @@ class WW_DbModel_Reader
 	public function listTables()
 	{
 		$allTables = $this->model->getStruct()['tables'];
+		$catTables = $this->model->getCategorizedTableNames();
 		$retTables = array();
 		foreach( $allTables as $key => $table ) {
 			if( !preg_match( "/^[a-z0-9_]+$/", $table['name'] ) ) {
@@ -125,8 +126,29 @@ class WW_DbModel_Reader
 						"should be in 'major.minor' notation. Please correct and try again. ";
 					throw new BizException( '', 'Server', '', $message );
 				}
+				if( !isset($field['drops']) && !isset($field['type']) ) {
+					$message = "The field name '".$field['name']."' (of DB table '".$table['name']."') has not type property set. ".
+						"Please correct and try again. ";
+					throw new BizException( '', 'Server', '', $message );
+				}
 			}
 			if( !$this->toBeDropped( $table, '0' ) ) {
+				$found = false;
+				foreach( $catTables as $tableNames ) {
+					foreach( $tableNames as $tableName ) {
+						if( $tableName == $table['name'] ) {
+							$found = true;
+							break 2;
+						}
+					}
+				}
+				if( !$found ) {
+					$className = get_class( $this->getDbModelProvider() );
+					$method = $className."::getCategorizedTableNames()";
+					$message = "The table '".$table['name']."' is not categorized by the {$method} function. ".
+						"Please correct and try again. ";
+					throw new BizException( '', 'Server', '', $message );
+				}
 				$retTables[ $key ] = $table;
 			}
 		}

@@ -306,11 +306,44 @@ abstract class WW_DbScripts_Generators_Base extends WW_DbScripts_Generators_Abst
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Add an UPDATE statement to let the generated script save the DB model version after installation.
+	 * The model is provided by a the core server.
+	 *
+	 * @param string $version DB model version in 'major.minor' notation
 	 */
-	public function setVersion($version)
+	public function setDbModelVersionForCoreServer( $version )
 	{
-		$this->txt .= "UPDATE ".$this->quotefields('smart_config')." set ".$this->quotefields('value')." = '$version' where ".$this->quotefields('name')." = 'version'".$this->closeline()."\r\n";
+		$this->txt .= "UPDATE ".$this->quotefields('smart_config').
+			" set ".$this->quotefields('value')." = '$version' where ".
+			$this->quotefields('name')." = 'version'".$this->closeline()."\r\n";
+	}
+
+	/**
+	 * Add an UPDATE statement to let the generated script save the DB model version after installation.
+	 * The model is provided by a server plugin.
+	 *
+	 * @param string $pluginName Internal name of the server plugin
+	 * @param string $version DB model version in 'major.minor' notation
+	 */
+	public function setDbModelVersionForServerPlugin( $pluginName, $version )
+	{
+		$this->txt .= "UPDATE ".$this->quotefields('smart_serverplugins').
+			" SET ".$this->quotefields('dbversion')." = '$version' WHERE ".
+			$this->quotefields('uniquename')." = '$pluginName'".$this->closeline()."\r\n";
+	}
+
+	/**
+	 * Add an UPDATE statement to let the generated script save the DB model version after installation.
+	 * The model is provided by a server plugin.
+	 *
+	 * @param string $pluginName Internal name of the server plugin
+	 * @param string $tablePrefix
+	 */
+	public function setDbTablePrefixForServerPlugin( $pluginName, $tablePrefix )
+	{
+		$this->txt .= "UPDATE ".$this->quotefields('smart_serverplugins').
+			" SET ".$this->quotefields('dbprefix')." = '$tablePrefix' WHERE ".
+			$this->quotefields('uniquename')." = '$pluginName'".$this->closeline()."\r\n";
 	}
 
 	/**

@@ -1,38 +1,38 @@
 <?php
 require_once dirname(__FILE__).'/../../config/config.php';
-require_once BASEDIR.'/server/dbmodel/Reader.class.php';
-require_once BASEDIR.'/server/dbmodel/Definition.class.php';
 
 ini_set('display_errors', 1);
 
-$definition = new WW_DbModel_Definition();
-$reader = new WW_DbModel_Reader( $definition );
-$allVersions = $reader->getDbModelProvider()->getVersions();
-
-// use one version when explicitly requested
-$dbVersions = array();
-if( isset($_REQUEST['ver']) ) {
-	if( in_array( $_REQUEST['ver'], $allVersions ) ) {	
-		$dbVersions = array( $_REQUEST['ver'] ); 
-	} else {
-		die( 'Version '.displayVer($_REQUEST['ver']).' does not exist.' );
-	}
-} else {
-	// take last version if not requested for all versions
-	if( !isset($_REQUEST['all']) ) {
-		$dbVersions = array( end($allVersions) ); 
-	}
-	// else use all versions
+try {
+	showDiff();
+} catch( BizException $e ) {
+	exit( $e->getMessage().' '.$e->getDetail() );
+} catch( Throwable $e ) {
+	exit( $e->getMessage() );
 }
 
-// initiate databasestruct
-$dbTables = $reader->listTables();
-$docChapters = $definition->getCategorizedTableNames();
+function showDiff()
+{
+	require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+	require_once BASEDIR.'/server/dbmodel/Factory.class.php';
 
-foreach( $dbVersions as $dbVersion ) {
+	$dbVersion = null;
+	$definitions = WW_DbModel_Factory::createModels();
+	$dbTables = array();
+	$docChapters = array();
+	$readers = array();
+	foreach( $definitions as $definition ) {
+		$reader = new WW_DbModel_Reader( $definition );
+		if( is_null( $dbVersion ) ) { // only take version for core server (which is assumed to be the first one)
+			$dbVersion = $reader->getDbModelProvider()->getVersion();
+		}
+		$dbTables = array_merge( $dbTables, $reader->listTables() );
+		$docChapters = array_merge( $docChapters, $definition->getCategorizedTableNames() );
+		$readers[] = $reader;
+	}
 
 	$tables = 1;
-	$title = 'Enterprise Database model '.displayVer($dbVersion);
+	$title = 'Enterprise Database model v'.$dbVersion;
 	$html = '
 <html>
 <head>
@@ -77,51 +77,46 @@ foreach( $dbVersions as $dbVersion ) {
 	foreach( $docChapters as $docChapter => $docTables ) {
 		$html .= '<br/><h2>'.$docChapter.'</h2>'.PHP_EOL;
 		foreach( $docTables as $docTable ) {
-			$table = $reader->getTable( $docTable );
-			
-			// Table header (with anchor used for references)
-			$html .= '<div class="section"><h3><a name="'.$table['name'].'"/>Table['.$tables.']: '.$table['name'].' ('.displayVer($dbVersion).')</h3>'.PHP_EOL;
+
+			// Lookup table definition
+			$table = null;
+			foreach( $readers as $reader ) {
+				$table = $reader->getTable( $docTable );
+				if( $table ) {
+					break;
+				}
+			}
+
+			// Skip dropped tables
+			if( isset($table['drops']) ) {
+				continue;
+			}
+
+			// Output able header (with anchor used for references)
+			$html .= '<div class="section"><h3><a name="'.$table['name'].'"/>Table['.$tables.']: '.$table['name'].'</h3>'.PHP_EOL;
 			if( !empty($table['comment']) ) {
 				$html .= $table['comment'].'<br/><br/>';
 			}
 			if( isset($table['fields']) && count($table['fields']) ) {
 				$html .= '<table class="section"><tr><td width="150"><b>Field</b></td><td width="100"><b>Type</b></td><td><b>Since</b></td>';
 				$html .= '<td><b>Null</b></td><td><b>Default</b></td><td width="150"><b>Reference</b></td><td><b>Comment</b></td></tr>'.PHP_EOL;
-				$markedRed = false;
-				$markedGrey = false;
 				foreach( $table['fields'] as $field ) {
-		
-					$field = skipTooNew( $field, $dbVersion );
-					$newIntroduced = !isset($field['alters']) && $field['v'] == $dbVersion;
-					$rowColor = $newIntroduced ? '#FF0000' : ($field['v'] > $dbVersion ? '#888888' : '#000000');
-					$lastFieldDef = isset($field['alters']) ? $field['alters'] : $field;
-					$markedGrey = ($rowColor == '#888888' || $markedGrey);
 
-					// Name column					
-					$cellColor = ($rowColor == '#000000') ? ($field['name'] != $lastFieldDef['name'] && $field['v'] == $dbVersion ? '#FF0000' : '#000000') : $rowColor;
-					$font = '<font color="'.$cellColor.'">';
-					$html .= '<tr><td>'.$font.$field['name'].'</font></td>';
-					$markedRed = ($cellColor == '#FF0000') || $markedRed;
+					// Skip dropped fields
+					if( isset($field['drops']) ) {
+						continue;
+					}
 
-					// Type column					
-					$cellColor = ($rowColor == '#000000') ? ($field['type'] != $lastFieldDef['type'] && $field['v'] == $dbVersion ? '#FF0000' : '#000000') : $rowColor;
-					$font = '<font color="'.$cellColor.'">';
-					$html .= '<td>'.$font.$field['type'].'</font></td>';
-					$markedRed = ($cellColor == '#FF0000') || $markedRed;
+					// Name, Type and Version columns
+					$html .= '<tr><td>'.$field['name'].'</td><td>'.$field['type'].'</td><td>v'.$field['v'].'</td>';
 
-					// Since column					
-					$oldestVer = getOldestVer( $field );
-					$font = '<font color="'.$rowColor.'">';
-					$html .= '<td>'.$font.displayVer($oldestVer).'</font></td>';
-					$markedRed = ($rowColor == '#FF0000') || $markedRed;
-			
 					// Null column
 					$nullable = @$field['nullable'] ? 'Yes' : 'No';
-					$html .= '<td>'.$font.$nullable.'</font></td>';
+					$html .= '<td>'.$nullable.'</td>';
 					
 					// Default column
 					$default = isset($field['default']) ? strval(trim($field['default'],"' ")) : '';
-					$html .= '<td>'.$font.$default.'</font></td>';
+					$html .= '<td>'.$default.'</td>';
 			
 					// Reference column
 					$ref = '';
@@ -134,7 +129,7 @@ foreach( $dbVersions as $dbVersion ) {
 					if( empty( $ref ) ) {
 						$html .= '<td/>';
 					} else {
-						$html .= '<td>'.$font.$ref.'</font></td>';
+						$html .= '<td>'.$ref.'</td>';
 					}
 					
 					// Comment column
@@ -142,23 +137,11 @@ foreach( $dbVersions as $dbVersion ) {
 					if( empty( $comment ) ) {
 						$html .= '<td/>';
 					} else {
-						$html .= '<td>'.$font.$comment.'</font></td>';
+						$html .= '<td>'.$comment.'</td>';
 					}
 					$html .= '</tr>'.PHP_EOL;
 				}
 				$html .= '</table>'.PHP_EOL;
-				
-				// Show legenda
-				if( $markedRed ) {
-					$html .= '<table width="100%"><tr><td class="ftc"><font color="#F0000">'.
-									'red = Introduced or changed since '.displayVer($dbVersion).
-									'</font></td></tr></table>'.PHP_EOL;
-				}
-				if( $markedGrey ) {
-					$html .= '<table width="100%"><tr><td class="ftc"><font color="#888888">'.
-									'grey = Not available '.displayVer($dbVersion).'(introduced later).'.
-									'</font></td></tr></table>'.PHP_EOL;
-				}
 			}
 			$html .= '</div>'.PHP_EOL;
 			$tables++;
@@ -171,51 +154,4 @@ Confidential, (c) 1998-'.date('Y').' WoodWing Software bv. All rights reserved.<
 </body></html>';
 
 	echo $html;
-}
-
-/**
- * Add a prefix 'v' for a given version in 'major.minor' notation.
- *
- * @param string $ver Internal version
- * @return string Human readable version
- */
-function displayVer( $ver )
-{
-	return 'v'.$ver;
-}
-
-/**
- * Finds out the oldest field definition and returns its version.
- * It searches through the 'alters' field (using recursion).
- * When the field definition is never changed, it returns the current version.
- * In other terms, it returns the version when the field was introduced.
- *
- * @param array $field Field definition from WW_DbModel_Definition
- * @return string 3-digit version string, such as 610
- */
-function getOldestVer( $field )
-{
-	if( isset($field['alters']) ) {
-		return getOldestVer( $field['alters'] );
-	} else {
-		return $field['v'];
-	}
-}
-
-/**
- * Returns the field defintion that is older than requested, if there are any alters defined.
- * When none found, the closest one is returned.
- *
- * @param array $field Field definition from WW_DbModel_Definition
- * @param string $dbVersion 3-digit version string, such as 610
- * @return array
- */
-function skipTooNew( $field, $dbVersion )
-{
-	if( $dbVersion < $field['v'] ) {
-		if( isset($field['alters']) ) {
-			return skipTooNew( $field['alters'], $dbVersion );
-		}
-	}
-	return $field;
 }

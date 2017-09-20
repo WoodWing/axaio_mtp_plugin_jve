@@ -181,6 +181,9 @@ CREATE  INDEX `retrytime` on `smart_serverjobtypesonhold`(`retrytimestamp`) ;
 ALTER TABLE `smart_serverjobconfigs`
 ADD   `userconfigneeded` char(1) not null  default 'Y',
 ADD   `selfdestructive` char(1) not null  default 'N';
+ALTER TABLE `smart_serverplugins`
+ADD   `dbprefix` varchar(10) not null  default '',
+ADD   `dbversion` varchar(10) not null  default '';
 ALTER TABLE `smart_semaphores`
 ADD   `lifetime` int(11) not null  default '0';
 

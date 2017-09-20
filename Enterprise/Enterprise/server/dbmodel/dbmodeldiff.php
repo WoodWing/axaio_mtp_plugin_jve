@@ -64,53 +64,54 @@ class WW_DbSchema_Index_Definition
 function composeDbSchemaFromDefinition()
 {
 	require_once BASEDIR.'/server/dbmodel/Reader.class.php';
-	require_once BASEDIR.'/server/dbmodel/Definition.class.php';
-
-	$definition = new WW_DbModel_Definition();
-	$reader = new WW_DbModel_Reader( $definition );
-	$tableStructs = $reader->listTables();
+	require_once BASEDIR.'/server/dbmodel/Factory.class.php';
 
 	$model = new WW_DbSchema_Definition();
 	$model->Tables = array();
-	foreach( $tableStructs as $tableStruct ) {
-		if( isset($tableStruct['fields']) && count($tableStruct['fields']) ) {
-			$table = new WW_DbSchema_Table_Definition();
-			$table->Name = $tableStruct['name'];
-			$table->Fields = array();
-			$table->Indexes = array();
+	$definitions = WW_DbModel_Factory::createModels();
+	foreach( $definitions as $definition ) {
+		$reader = new WW_DbModel_Reader( $definition );
+		$tableStructs = $reader->listTables();
+		foreach( $tableStructs as $tableStruct ) {
+			if( isset( $tableStruct['fields'] ) && count( $tableStruct['fields'] ) ) {
+				$table = new WW_DbSchema_Table_Definition();
+				$table->Name = $tableStruct['name'];
+				$table->Fields = array();
+				$table->Indexes = array();
 
-			foreach( $tableStruct['fields'] as $fieldStruct ) {
-				if( !isset($fieldStruct['drops']) ) {
-					$field = new WW_DbSchema_Field_Definition();
-					$field->Name = $fieldStruct['name'];
-					$field->Type = normalizeFieldType( $fieldStruct['type'] );
-					$field->isAutoIncrement = isset($fieldStruct['autoincrement']) && $fieldStruct['autoincrement'];
-					$field->isNullable = isset($fieldStruct['nullable']) && $fieldStruct['nullable'];
-					$field->Default = isset($fieldStruct['default']) ? normalizeDefaultValue( $field->Type, $fieldStruct['default'] ) : null;
-					$table->Fields[$field->Name] = $field;
-					if( $field->Name == 'id' && $field->isAutoIncrement ) {
-						$index = new WW_DbSchema_Index_Definition();
-						$index->Name = 'primary';
-						$index->Fields = array( 'id' );
-						$table->Indexes[$index->Name] = $index;
-						$index->isPrimary = true;
+				foreach( $tableStruct['fields'] as $fieldStruct ) {
+					if( !isset( $fieldStruct['drops'] ) ) {
+						$field = new WW_DbSchema_Field_Definition();
+						$field->Name = $fieldStruct['name'];
+						$field->Type = normalizeFieldType( $fieldStruct['type'] );
+						$field->isAutoIncrement = isset( $fieldStruct['autoincrement'] ) && $fieldStruct['autoincrement'];
+						$field->isNullable = isset( $fieldStruct['nullable'] ) && $fieldStruct['nullable'];
+						$field->Default = isset( $fieldStruct['default'] ) ? normalizeDefaultValue( $field->Type, $fieldStruct['default'] ) : null;
+						$table->Fields[ $field->Name ] = $field;
+						if( $field->Name == 'id' && $field->isAutoIncrement ) {
+							$index = new WW_DbSchema_Index_Definition();
+							$index->Name = 'primary';
+							$index->Fields = array( 'id' );
+							$table->Indexes[ $index->Name ] = $index;
+							$index->isPrimary = true;
+						}
 					}
 				}
-			}
 
-			foreach( $tableStruct['indexes'] as $indexStruct ) {
-				if( isset($indexStruct['name']) ) { // there is also 'oraname'
-					$index = new WW_DbSchema_Index_Definition();
-					$index->Name = $indexStruct['name'];
-					$index->Fields = array_map( 'trim', explode( ',', $indexStruct['fields'] ) );
-					$index->isPrimary = isset( $indexStruct['primary'] ) ? $indexStruct['primary'] == true : false;
-					$table->Indexes[$index->Name] = $index;
+				foreach( $tableStruct['indexes'] as $indexStruct ) {
+					if( isset( $indexStruct['name'] ) ) { // there is also 'oraname'
+						$index = new WW_DbSchema_Index_Definition();
+						$index->Name = $indexStruct['name'];
+						$index->Fields = array_map( 'trim', explode( ',', $indexStruct['fields'] ) );
+						$index->isPrimary = isset( $indexStruct['primary'] ) ? $indexStruct['primary'] == true : false;
+						$table->Indexes[ $index->Name ] = $index;
+					}
 				}
+
+				ksort( $table->Fields );
+				ksort( $table->Indexes );
+				$model->Tables[ $table->Name ] = $table;
 			}
-			
-			ksort( $table->Fields );
-			ksort( $table->Indexes );
-			$model->Tables[$table->Name] = $table;
 		}
 	}
 

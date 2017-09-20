@@ -123,5 +123,8 @@ EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_indesigns
 SET @sql = 'ALTER TABLE smart_indesignserverjobs DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
 ALTER TABLE [smart_indesignserverjobs] DROP COLUMN [exclusivelock];
+ALTER TABLE [smart_serverplugins] ADD 
+  [dbprefix] varchar(10) not null  default '',
+  [dbversion] varchar(10) not null  default '';
 DROP PROCEDURE [dbo].[SCE_GetConstraintName];
 UPDATE [smart_config] set [value] = '10.2' where [name] = 'version';

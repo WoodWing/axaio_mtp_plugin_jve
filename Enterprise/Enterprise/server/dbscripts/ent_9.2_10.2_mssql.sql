@@ -192,6 +192,9 @@ CREATE  INDEX [retrytime] on [smart_serverjobtypesonhold]([retrytimestamp]) ;
 ALTER TABLE [smart_serverjobconfigs] ADD 
   [userconfigneeded] char(1) not null  default 'Y',
   [selfdestructive] char(1) not null  default 'N';
+ALTER TABLE [smart_serverplugins] ADD 
+  [dbprefix] varchar(10) not null  default '',
+  [dbversion] varchar(10) not null  default '';
 ALTER TABLE [smart_semaphores] ADD 
   [lifetime] int not null  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)

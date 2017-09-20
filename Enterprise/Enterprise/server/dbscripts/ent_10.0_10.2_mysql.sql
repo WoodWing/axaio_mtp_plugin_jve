@@ -24,4 +24,7 @@ CREATE  INDEX `obpu_publplchist` on `smart_publishedplcmtshist`(`objectid`, `pub
 CREATE  INDEX `puob_publplchist` on `smart_publishedplcmtshist`(`publishid`, `objectid`) ;
 ALTER TABLE `smart_indesignserverjobs`
 ADD   `pickuptime` varchar(30) not null  default '';
+ALTER TABLE `smart_serverplugins`
+ADD   `dbprefix` varchar(10) not null  default '',
+ADD   `dbversion` varchar(10) not null  default '';
 UPDATE `smart_config` set `value` = '10.2' where `name` = 'version';

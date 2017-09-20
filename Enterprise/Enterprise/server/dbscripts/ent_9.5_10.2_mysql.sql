@@ -93,6 +93,9 @@ ALTER TABLE `smart_indesignserverjobs` DROP `id`;
 ALTER TABLE `smart_indesignserverjobs` DROP `exclusivelock`;
 ALTER TABLE `smart_serverjobs`
 ADD   `errormessage` varchar(1024) not null  default '';
+ALTER TABLE `smart_serverplugins`
+ADD   `dbprefix` varchar(10) not null  default '',
+ADD   `dbversion` varchar(10) not null  default '';
 ALTER TABLE `smart_semaphores`
 ADD   `lifetime` int(11) not null  default '0';
 ALTER TABLE `smart_objectlabels` CHANGE `name`   `name` varchar(250) not null  default '';
