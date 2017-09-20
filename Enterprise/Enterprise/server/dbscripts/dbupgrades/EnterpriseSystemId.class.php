@@ -14,12 +14,10 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
 
-require_once BASEDIR.'/server/dbscripts/DbUpgradeModule.class.php';
+require_once BASEDIR.'/server/dbscripts/dbupgrades/Module.class.php';
 
-class DBUpgradeEnterpriseSystemId extends DbUpgradeModule
+class WW_DbScripts_DbUpgrades_EnterpriseSystemId extends WW_DbScripts_DbUpgrades_Module
 {
-	const NAME = 'EnterpriseSystemId';
-
 	/**
 	 * See {@link DbUpgradeModule} class.
 	 *
@@ -61,7 +59,7 @@ class DBUpgradeEnterpriseSystemId extends DbUpgradeModule
 		if ( !$stored ) {
 			$stored = DBConfig::storeValue( $this->getUpdateFlag(), NumberUtils::createGUID() );
 			if( !$stored ) {
-				LogHandler::Log( self::NAME, 'ERROR', 'Failed updating flag '.$this->getUpdateFlag() );
+				LogHandler::Log( __CLASS__, 'ERROR', 'Failed updating flag '.$this->getUpdateFlag() );
 			}
 		}
 

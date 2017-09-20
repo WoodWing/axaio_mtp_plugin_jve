@@ -19,12 +19,10 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
 
-require_once BASEDIR.'/server/dbscripts/DbUpgradeModule.class.php';
+require_once BASEDIR.'/server/dbscripts/dbupgrades/Module.class.php';
 
-class DBUpgradeVarCharToTinyText extends DbUpgradeModule
+class WW_DbScripts_DbUpgrades_VarCharToTinyText extends WW_DbScripts_DbUpgrades_Module
 {
-	const NAME = 'ConvertStringToTinyText';
-
 	/**
 	 * See {@link DbUpgradeModule} class.
 	 *
@@ -90,7 +88,7 @@ class DBUpgradeVarCharToTinyText extends DbUpgradeModule
 	{
 		// Generate a DB handle.
 		if ( !$dbh = DBDriverFactory::gen() ) {
-			LogHandler::Log( self::NAME, 'ERROR', 
+			LogHandler::Log( __CLASS__, 'ERROR',
 				'General MySQL error occured when updating table `' . $tableName . '`' );
 			return false;
 		}
@@ -98,13 +96,13 @@ class DBUpgradeVarCharToTinyText extends DbUpgradeModule
 		// Execute the query to update a table.
 		$sth = $dbh->query( $query );
 		if ( !$sth ) {
-			LogHandler::Log( self::NAME, 'ERROR', 
+			LogHandler::Log( __CLASS__, 'ERROR',
 				'Custom properties in table `' . $tableName . '` could not be modified.' );
 			return false;
 		}
 
 		// Succesful completion, log and return.
-		LogHandler::Log( self::NAME, 'INFO', 
+		LogHandler::Log( __CLASS__, 'INFO',
 			'Table `' . $tableName . '` modified succesfully.' );
 		return true;
 	}

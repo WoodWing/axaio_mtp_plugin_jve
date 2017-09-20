@@ -201,4 +201,12 @@ class WW_DbScripts_DbInstaller_CoreServer extends WW_DbScripts_DbInstaller_Base
 	{
 		return BASEDIR.'/server/dbscripts/dbupgrades/';
 	}
+
+	/**
+	 * @inheritdoc
+	 */
+	protected function getDataUpgradeClassPrefix()
+	{
+		return 'WW_DbScripts_DbUpgrades_';
+	}
 }

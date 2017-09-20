@@ -10,12 +10,10 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
 
-require_once BASEDIR.'/server/dbscripts/DbUpgradeModule.class.php';
+require_once BASEDIR.'/server/dbscripts/dbupgrades/Module.class.php';
 
-class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
+class WW_DbScripts_DbUpgrades_RemoveDuplicatePlacements extends WW_DbScripts_DbUpgrades_Module
 {
-	const NAME = 'RemoveDuplicatePlacements';
-
 	/**
 	 * Returns whether or not the DB conversion has already been completed before or not.
 	 *
@@ -38,7 +36,7 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 		require_once BASEDIR . '/server/dbclasses/DBConfig.class.php';
 		$stored = DBConfig::storeValue( $this->getUpdateFlag(), '1' );
 		if( !$stored ) {
-			LogHandler::Log( 'DbUpgradeModule', 'ERROR', 'Failed updating flag '.$this->getUpdateFlag() );
+			LogHandler::Log( __CLASS__, 'ERROR', 'Failed updating flag '.$this->getUpdateFlag() );
 		}
 		return $stored;
 	}
@@ -133,11 +131,11 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 		if ( $success ) {
 			$success = $this->copyTable( 'placements', 'placements2', $dbDriver );
 			if ( !$success ) {
-				LogHandler::Log( self::NAME, 'ERROR', 'Making a copy of the `smart_placements` table has failed.' );
+				LogHandler::Log( __CLASS__, 'ERROR', 'Making a copy of the `smart_placements` table has failed.' );
 				return $success;
 			}
 		} else {
-			LogHandler::Log( self::NAME, 'ERROR', 'Adding index to `smart_placements` table has failed.' );
+			LogHandler::Log( __CLASS__, 'ERROR', 'Adding index to `smart_placements` table has failed.' );
 			return $success;
 		}
 
@@ -157,11 +155,11 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 		if ( $success ) {
 			$success = $this->deleteDuplTiles( 'placementtiles', 'placements', $dbDriver  );
 			if ( !$success ) {
-				LogHandler::Log( self::NAME, 'ERROR', 'Deleting the redundant tiles  of the `smart_placementtiles` table has failed.' );
+				LogHandler::Log( __CLASS__, 'ERROR', 'Deleting the redundant tiles  of the `smart_placementtiles` table has failed.' );
 				return $success;
 			}
 		} else {
-			LogHandler::Log( self::NAME, 'ERROR', 'Deleting the duplicates  of the `smart_placements` table has failed.' );
+			LogHandler::Log( __CLASS__, 'ERROR', 'Deleting the duplicates  of the `smart_placements` table has failed.' );
 			return $success;
 		}
 
@@ -178,12 +176,12 @@ class DBUpgradeRemoveDuplicatePlacements extends DbUpgradeModule
 	{
 		$success = true;
 		if ( !$this->dropTable( 'placements2', $dbDriver ) ) {
-			LogHandler::Log( self::NAME, 'WARN', 'Dropping of the smart_placements2` table has failed.' );
+			LogHandler::Log( __CLASS__, 'WARN', 'Dropping of the smart_placements2` table has failed.' );
 			$success = false;
 		}
 
 		if ( !$this->dropIndex( 'placements', $dbDriver ) ) {
-			LogHandler::Log( self::NAME, 'WARN', 'Dropping of the index `pafridedid` of the table `smart_placements` table has failed.' );
+			LogHandler::Log( __CLASS__, 'WARN', 'Dropping of the index `pafridedid` of the table `smart_placements` table has failed.' );
 			$success = false;
 		}
 

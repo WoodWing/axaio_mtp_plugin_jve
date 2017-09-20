@@ -8,11 +8,10 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
 
-require_once BASEDIR.'/server/dbscripts/DbUpgradeModule.class.php';
+require_once BASEDIR.'/server/dbscripts/dbupgrades/Module.class.php';
 
-class DBUpgradeOpenForEditProfileEntry extends DbUpgradeModule
+class WW_DbScripts_DbUpgrades_OpenForEditProfileEntry extends WW_DbScripts_DbUpgrades_Module
 {
-
 	/**
 	 * See {@link DbUpgradeModule} class.
 	 *

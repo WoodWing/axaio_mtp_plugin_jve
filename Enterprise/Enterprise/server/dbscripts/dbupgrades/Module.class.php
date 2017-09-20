@@ -15,7 +15,7 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
  
-abstract class DbUpgradeModule
+abstract class WW_DbScripts_DbUpgrades_Module
 {
 	/**
 	 * Returns whether or not the DB conversion has already been completed before or not.
@@ -39,7 +39,7 @@ abstract class DbUpgradeModule
 		require_once BASEDIR . '/server/dbclasses/DBConfig.class.php';
 		$stored = DBConfig::storeValue( $this->getUpdateFlag(), '1' );
 		if( !$stored ) {
-			LogHandler::Log( 'DbUpgradeModule', 'ERROR', 'Failed updating flag '.$this->getUpdateFlag() );
+			LogHandler::Log( 'WW_DbScripts_DbUpgrades_Module', 'ERROR', 'Failed updating flag '.$this->getUpdateFlag() );
 		}
 		return $stored;
 	}

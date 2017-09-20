@@ -519,6 +519,16 @@ abstract class WW_DbScripts_DbInstaller_Base
 	}
 
 	/**
+	 * Allows the subclass to provide a prefix that should be used applied to the class names in the dbupgrades folder.
+	 *
+	 * @return string
+	 */
+	protected function getDataUpgradeClassPrefix()
+	{
+		return '';
+	}
+
+	/**
 	 * Determines what data modifications needs to be ran. If the model needs to be updated these scripts are ran after
 	 * the database moel has been changed. If the model is already up to date these scripts can just be executed.
 	 *
@@ -527,16 +537,18 @@ abstract class WW_DbScripts_DbInstaller_Base
 	private function determineDataUpgrades()
 	{
 		$upgrades = array();
+		$classNamePrefix = $this->getDataUpgradeClassPrefix();
 		$dbUpgradeFiles = $this->getDataUpgradeFiles();
 		if( $dbUpgradeFiles ) foreach( $dbUpgradeFiles as $dbUpgradeFile ) {
 			require_once $this->getDataUpgradesFolder().$dbUpgradeFile;
 			$fileParts = explode( '.', $dbUpgradeFile );
-			$className = $fileParts[0];
+			$className = $classNamePrefix.$fileParts[0];
 			$upgradeObject = new $className();
 			$introduced = $upgradeObject->introduced();
 			$upgrades[$introduced][] = array(
 				'upgrade' => !$upgradeObject->isUpdated(),
 				'object' => $upgradeObject,
+				'script' => $this->getDataUpgradesFolder().$dbUpgradeFile
 			);
 		}
 		return $upgrades;
@@ -548,13 +560,17 @@ abstract class WW_DbScripts_DbInstaller_Base
 	 * @throws BizException
 	 * @return array of with the names of the found upgrade files.
 	 */
-	public function getDataUpgradeFiles()
+	private function getDataUpgradeFiles()
 	{
 		$dbDataUpgradeFiles = array();
 		$dirName = $this->getDataUpgradesFolder();
 		if( $dirName && ( $thisDir = opendir( $dirName ) ) ) {
 			while( ( $itemName = readdir( $thisDir ) ) !== false ) {
-				if( is_file( $dirName.$itemName ) && $itemName[0] !== '.' ) { // Skip hidden files.
+				if( is_file( $dirName.$itemName ) &&
+					$itemName[0] !== '.' &&  // Skip hidden files.
+					$itemName !== 'Module.class.php' &&
+					$itemName !== 'ObjectConverter.class.php'
+				) {
 					$dbDataUpgradeFiles[] = $itemName;
 				}
 			}
@@ -595,7 +611,8 @@ abstract class WW_DbScripts_DbInstaller_Base
 		if( $upgrades ) foreach( $upgrades as $version ) {
 			foreach( $version as $upgrade ) {
 				if( $upgrade['upgrade'] === true ) {
-					$scripts[] = get_class($upgrade['object']).'.class.php';
+					$filePath = $upgrade['script'];
+					$scripts[] = substr( $filePath, strlen( dirname( $filePath, 4 ) ) + 1 );
 				}
 			}
 		}
@@ -613,7 +630,7 @@ abstract class WW_DbScripts_DbInstaller_Base
 				if( $this->dbDataUpgrade ) {
 					// If there is a need to update the DB, run the update script.
 					// In case of an error, update the report to inform admin user.
-					$script = get_class($upgrade['object']).'.class.php';
+					$script = basename( $upgrade['script'] );
 					if( $upgrade['upgrade'] === true ) {
 						if ( !$this->newInstallation ) {
 							$result = $upgrade['object']->run();

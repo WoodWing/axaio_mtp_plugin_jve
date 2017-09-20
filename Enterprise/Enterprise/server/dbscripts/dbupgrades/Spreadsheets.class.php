@@ -10,12 +10,10 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
 
-require_once BASEDIR.'/server/dbscripts/ObjectConverter.class.php';
+require_once BASEDIR.'/server/dbscripts/dbupgrades/ObjectConverter.class.php';
 
-class DBUpgradeSpreadsheets extends ObjectConverter
+class WW_DbScripts_DbUpgrades_Spreadsheets extends WW_DbScripts_DbUpgrades_ObjectConverter
 {
-	const NAME = 'DBUpgradeSpreadsheets';
-
  	/**
 	 * See {@link DbUpgradeModule} class.
 	 *

@@ -19,12 +19,10 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
 
-require_once BASEDIR.'/server/dbscripts/DbUpgradeModule.class.php';
+require_once BASEDIR.'/server/dbscripts/dbupgrades/Module.class.php';
 
-class DBUpgradePublishHistory extends DbUpgradeModule
+class WW_DbScripts_DbUpgrades_PublishHistory extends WW_DbScripts_DbUpgrades_Module
 {
-	const NAME = 'ConvertPublishHistory';
-
 	/**
 	 * See {@link DbUpgradeModule} class.
 	 *
@@ -156,7 +154,7 @@ class DBUpgradePublishHistory extends DbUpgradeModule
 	{
 		$sth = $dbDriver->query( $sqlStatement );
 		if( !$sth ) {
-			LogHandler::Log( 'SERVER', 'ERROR' ,$dbDriver->error().' ('.$dbDriver->errorcode().')');
+			LogHandler::Log( __CLASS__, 'ERROR' ,$dbDriver->error().' ('.$dbDriver->errorcode().')');
 			return false;
 		}
 		return $sth;

@@ -33,13 +33,11 @@
  * @since 		v9.2.0
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
- 
-require_once BASEDIR.'/server/dbscripts/DbUpgradeModule.class.php';
- 
-class DBUpgradeDeadlineFlags extends DbUpgradeModule
+
+require_once BASEDIR.'/server/dbscripts/dbupgrades/Module.class.php';
+
+class WW_DbScripts_DbUpgrades_DeadlineFlags extends WW_DbScripts_DbUpgrades_Module
 {
-	const NAME = 'RaiseFlagForCalculatedDeadlines';
-	
 	/**
 	 * See {@link DbUpgradeModule} class.
 	 *
@@ -137,7 +135,7 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 	 */
 	private function getPubIdsForSectionStateTable()
 	{
-		LogHandler::Log( self::NAME, 'INFO', 'Checking for relative deadline configurations '.
+		LogHandler::Log( __CLASS__, 'INFO', 'Checking for relative deadline configurations '.
 						'for brands in smart_sectionstate table...' );
 		$dbDriver = DBDriverFactory::gen();	
 		$pubTbl = $dbDriver->tablename( 'publications' );
@@ -159,11 +157,11 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 		$rows = DBBase::fetchResults( $sth, 'pubid' );
 		if( $rows ) {
 			$pubIds = array_keys( $rows );
-			LogHandler::Log( self::NAME, 'INFO', 
+			LogHandler::Log( __CLASS__, 'INFO',
 				'Deadlines found for brand ids: '.implode(',',$pubIds) );
 		} else {
 			$pubIds = array();
-			LogHandler::Log( self::NAME, 'INFO', 'No deadlines found. No flag needed.' );
+			LogHandler::Log( __CLASS__, 'INFO', 'No deadlines found. No flag needed.' );
 		}
 		return $pubIds;
 	}
@@ -175,7 +173,7 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 	 */
 	private function getIssueIdsForSectionStateTable()
 	{
-		LogHandler::Log( self::NAME, 'INFO', 'Checking for relative deadline configurations '.
+		LogHandler::Log( __CLASS__, 'INFO', 'Checking for relative deadline configurations '.
 						'for overrule issues in smart_sectionstate table...' );
 		$dbDriver = DBDriverFactory::gen();	
 		$issTbl = $dbDriver->tablename( 'issues' );
@@ -197,11 +195,11 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 		$rows = DBBase::fetchResults( $sth, 'issueid' );
 		if( $rows ) {
 			$issueIds = array_keys( $rows );
-			LogHandler::Log( self::NAME, 'INFO', 
+			LogHandler::Log( __CLASS__, 'INFO',
 				'Deadlines found for overrule issue ids: '.implode(',',$issueIds) );
 		} else {
 			$issueIds = array();
-			LogHandler::Log( self::NAME, 'INFO', 'No deadlines found. No flag needed.' );
+			LogHandler::Log( __CLASS__, 'INFO', 'No deadlines found. No flag needed.' );
 		}
 		return $issueIds;
 	}
@@ -213,7 +211,7 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 	 */
 	private function getIssueIdsForIssueSectionTable()
 	{
-		LogHandler::Log( self::NAME, 'INFO', 'Checking for absolute deadline configurations '.
+		LogHandler::Log( __CLASS__, 'INFO', 'Checking for absolute deadline configurations '.
 						'for overrule issues in smart_issuesection table...' );
 		$dbDriver = DBDriverFactory::gen();	
 		$issTbl = $dbDriver->tablename( 'issues' );
@@ -233,11 +231,11 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 		$rows = DBBase::fetchResults( $sth, 'issueid' );
 		if( $rows ) {
 			$issueIds = array_keys( $rows );
-			LogHandler::Log( self::NAME, 'INFO', 
+			LogHandler::Log( __CLASS__, 'INFO',
 				'Deadlines found for overrule issue ids: '.implode(',',$issueIds) );
 		} else {
 			$issueIds = array();
-			LogHandler::Log( self::NAME, 'INFO', 'No deadlines found. No flag needed.' );
+			LogHandler::Log( __CLASS__, 'INFO', 'No deadlines found. No flag needed.' );
 		}
 		return $issueIds;
 	}
@@ -249,7 +247,7 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 	 */
 	private function getIssueIdsForIssueSectionStateTable()
 	{
-		LogHandler::Log( self::NAME, 'INFO', 'Checking for relative or absolute deadline configurations '.
+		LogHandler::Log( __CLASS__, 'INFO', 'Checking for relative or absolute deadline configurations '.
 						'for overrule issues in smart_issuesectionstate table...' );
 		$dbDriver = DBDriverFactory::gen();	
 		$issTbl = $dbDriver->tablename( 'issues' );
@@ -270,11 +268,11 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 		$rows = DBBase::fetchResults( $sth, 'issueid' );
 		if( $rows ) {
 			$issueIds = array_keys( $rows );
-			LogHandler::Log( self::NAME, 'INFO', 
+			LogHandler::Log( __CLASS__, 'INFO',
 				'Deadlines found for overrule issue ids: '.implode(',',$issueIds) );
 		} else {
 			$issueIds = array();
-			LogHandler::Log( self::NAME, 'INFO', 'No deadlines found. No flag needed.' );
+			LogHandler::Log( __CLASS__, 'INFO', 'No deadlines found. No flag needed.' );
 		}
 		return $issueIds;
 	}
@@ -286,7 +284,7 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 	 */
 	private function getPubIdsForStatesTable()
 	{
-		LogHandler::Log( self::NAME, 'INFO', 'Checking for relative deadline configurations '.
+		LogHandler::Log( __CLASS__, 'INFO', 'Checking for relative deadline configurations '.
 						'for brands in smart_states table...' );
 		$dbDriver = DBDriverFactory::gen();	
 		$pubTbl = $dbDriver->tablename( 'publications' );
@@ -306,11 +304,11 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 		$rows = DBBase::fetchResults( $sth, 'pubid' );
 		if( $rows ) {
 			$pubIds = array_keys( $rows );
-			LogHandler::Log( self::NAME, 'INFO', 
+			LogHandler::Log( __CLASS__, 'INFO',
 				'Deadlines found for brand ids: '.implode(',',$pubIds) );
 		} else {
 			$pubIds = array();
-			LogHandler::Log( self::NAME, 'INFO', 'No deadlines found. No flag needed.' );
+			LogHandler::Log( __CLASS__, 'INFO', 'No deadlines found. No flag needed.' );
 		}
 		return $pubIds;
 	}
@@ -322,7 +320,7 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 	 */
 	private function getIssueIdsForStatesTable()
 	{
-		LogHandler::Log( self::NAME, 'INFO', 'Checking for relative deadline configurations '.
+		LogHandler::Log( __CLASS__, 'INFO', 'Checking for relative deadline configurations '.
 						'for overrule issues in smart_states table...' );
 		$dbDriver = DBDriverFactory::gen();	
 		$issTbl = $dbDriver->tablename( 'issues' );
@@ -342,11 +340,11 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 		$rows = DBBase::fetchResults( $sth, 'issueid' );
 		if( $rows ) {
 			$pubIds = array_keys( $rows );
-			LogHandler::Log( self::NAME, 'INFO', 
+			LogHandler::Log( __CLASS__, 'INFO',
 				'Deadlines found for brand ids: '.implode(',',$pubIds) );
 		} else {
 			$pubIds = array();
-			LogHandler::Log( self::NAME, 'INFO', 'No deadlines found. No flag needed.' );
+			LogHandler::Log( __CLASS__, 'INFO', 'No deadlines found. No flag needed.' );
 		}
 		return $pubIds;
 	}
@@ -358,7 +356,7 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 	 */
 	private function getPubIdsForPublSectionsTable()
 	{
-		LogHandler::Log( self::NAME, 'INFO', 'Checking for deadline configurations '.
+		LogHandler::Log( __CLASS__, 'INFO', 'Checking for deadline configurations '.
 						'for brands in smart_publsections table...' );
 		$dbDriver = DBDriverFactory::gen();	
 		$pubTbl = $dbDriver->tablename( 'publications' );
@@ -379,11 +377,11 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 		$rows = DBBase::fetchResults( $sth, 'pubid' );
 		if( $rows ) {
 			$pubIds = array_keys( $rows );
-			LogHandler::Log( self::NAME, 'INFO', 
+			LogHandler::Log( __CLASS__, 'INFO',
 				'Deadlines found for brand ids: '.implode(',',$pubIds) );
 		} else {
 			$pubIds = array();
-			LogHandler::Log( self::NAME, 'INFO', 'No deadlines found. No flag needed.' );
+			LogHandler::Log( __CLASS__, 'INFO', 'No deadlines found. No flag needed.' );
 		}
 		return $pubIds;
 	}
@@ -395,7 +393,7 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 	 */
 	private function getIssueIdsForPublSectionsTable()
 	{
-		LogHandler::Log( self::NAME, 'INFO', 'Checking for deadline configurations '.
+		LogHandler::Log( __CLASS__, 'INFO', 'Checking for deadline configurations '.
 						'for overrule issues in smart_publsections table...' );
 		$dbDriver = DBDriverFactory::gen();	
 		$issTbl = $dbDriver->tablename( 'issues' );
@@ -416,11 +414,11 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 		$rows = DBBase::fetchResults( $sth, 'issueid' );
 		if( $rows ) {
 			$issueIds = array_keys( $rows );
-			LogHandler::Log( self::NAME, 'INFO', 
+			LogHandler::Log( __CLASS__, 'INFO',
 				'Deadlines found for overrule issue ids: '.implode(',',$issueIds) );
 		} else {
 			$issueIds = array();
-			LogHandler::Log( self::NAME, 'INFO', 'No deadlines found. No flag needed.' );
+			LogHandler::Log( __CLASS__, 'INFO', 'No deadlines found. No flag needed.' );
 		}
 		return $issueIds;
 	}
@@ -432,7 +430,7 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 	 */
 	private function raiseFlagsForPubIds( array $pubIds )
 	{
-		LogHandler::Log( self::NAME, 'INFO', 'Raising flags for brand ids: '.implode(',',$pubIds) );
+		LogHandler::Log( __CLASS__, 'INFO', 'Raising flags for brand ids: '.implode(',',$pubIds) );
 		$dbDriver = DBDriverFactory::gen();	
 		$pubTbl = $dbDriver->tablename( 'publications' );
 		$sql =  'UPDATE '.$pubTbl.' SET `calculatedeadlines` = ? '.
@@ -441,10 +439,10 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 
 		$sth = $dbDriver->query( $sql, $params );
 		if( !$sth ) {
-			LogHandler::Log( self::NAME, 'ERROR', 'Failed raising flag for brand ids.' );
+			LogHandler::Log( __CLASS__, 'ERROR', 'Failed raising flag for brand ids.' );
 			$this->upgradeSuccessful = false;
 		} else {
-			LogHandler::Log( self::NAME, 'INFO', 'Successfully raised flags for brand ids.' );
+			LogHandler::Log( __CLASS__, 'INFO', 'Successfully raised flags for brand ids.' );
 		}
 	}
 
@@ -455,7 +453,7 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 	 */
 	private function raiseFlagsForIssueIds( array $issueIds )
 	{
-		LogHandler::Log( self::NAME, 'INFO', 'Raising flags for overrule issue ids: '.implode(',',$issueIds) );
+		LogHandler::Log( __CLASS__, 'INFO', 'Raising flags for overrule issue ids: '.implode(',',$issueIds) );
 		$dbDriver = DBDriverFactory::gen();	
 		$issTbl = $dbDriver->tablename( 'issues' );
 		$sql =  'UPDATE '.$issTbl.' SET `calculatedeadlines` = ? '.
@@ -464,10 +462,10 @@ class DBUpgradeDeadlineFlags extends DbUpgradeModule
 
 		$sth = $dbDriver->query( $sql, $params );
 		if( !$sth ) {
-			LogHandler::Log( self::NAME, 'ERROR', 'Failed raising flag for overrule issue ids.' );
+			LogHandler::Log( __CLASS__, 'ERROR', 'Failed raising flag for overrule issue ids.' );
 			$this->upgradeSuccessful = false;
 		} else {
-			LogHandler::Log( self::NAME, 'INFO', 'Successfully raised flags for overrule issue ids.' );
+			LogHandler::Log( __CLASS__, 'INFO', 'Successfully raised flags for overrule issue ids.' );
 		}
 	}
 	

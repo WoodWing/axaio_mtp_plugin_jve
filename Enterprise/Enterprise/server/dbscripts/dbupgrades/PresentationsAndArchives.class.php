@@ -25,14 +25,13 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
 
-require_once BASEDIR.'/server/dbscripts/ObjectConverter.class.php';
+require_once BASEDIR.'/server/dbscripts/dbupgrades/ObjectConverter.class.php';
 
-class DBUpgradePresentationsAndArchives extends ObjectConverter
+class WW_DbScripts_DbUpgrades_PresentationsAndArchives extends WW_DbScripts_DbUpgrades_ObjectConverter
 {
 	const OBJECT_TYPE_PRESENTATION = 'Presentation';
 	const OBJECT_TYPE_ARCHIVE = 'Archive';
 	const OBJECT_TYPE_OTHER = 'Other';
-	const NAME = 'DBUpgradePresentationsAndArchives';
 
  	/**
 	 * See {@link DbUpgradeModule} class.
@@ -67,7 +66,7 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 
 		// If there are no objects of type 'Other' there is no need to convert.
 		if ( !$needsToUpdateDeletedObjects && !$needsToUpdateObjects ) {
-			LogHandler::Log( self::NAME, 'INFO', 'No objects of type: \'' . self::OBJECT_TYPE_OTHER . '\' to be converted.' );
+			LogHandler::Log( __CLASS__, 'INFO', 'No objects of type: \'' . self::OBJECT_TYPE_OTHER . '\' to be converted.' );
 			return true;
 		}
 
@@ -83,20 +82,20 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 		// Check if we would need to update Deleted Objects.
 		if ( count( $deletedArchiveObjectsToUpdate ) == 0 && count( $deletedPresentationObjectsToUpdate ) == 0 ) {
 			$needsToUpdateDeletedObjects = false;
-			LogHandler::Log(self::NAME, 'INFO', 'No Deleted Objects found to be converted.');
+			LogHandler::Log(__CLASS__, 'INFO', 'No Deleted Objects found to be converted.');
 		}
 
 		// Check if we need to update normal Objects.
 		if ( count( $archiveObjectsToUpdate ) == 0 && count( $presentationObjectsToUpdate ) == 0 ) {
 			$needsToUpdateObjects = false;
-			LogHandler::Log(self::NAME, 'INFO', 'No Objects found to be converted.');
+			LogHandler::Log(__CLASS__, 'INFO', 'No Objects found to be converted.');
 		}
 
 		$needsUpdate = false;
 		if ( $needsToUpdateDeletedObjects || $needsToUpdateObjects ) {
 			$needsUpdate = true;
 		} else {
-			LogHandler::Log( self::NAME, 'INFO', "No objects to be converted." );
+			LogHandler::Log( __CLASS__, 'INFO', "No objects to be converted." );
 			return true;
 		}
 
@@ -163,7 +162,7 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 			// Update object versions.
 			$updated = self::updateObjectVersions(self::OBJECT_TYPE_PRESENTATION, $presentationObjectIds, $workflowStatuses);
 			if (!$updated) {
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR', 
 					"ObjectVersions could not be updated for type: '" . self::OBJECT_TYPE_PRESENTATION . "'" );
 				return false;
 			}
@@ -171,7 +170,7 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 			// Update authorizations for the groups.
 			$updated = self::insertAuthorizations($workflowStatuses, self::OBJECT_TYPE_PRESENTATION);
 			if (!$updated) {
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR', 
 					"Authorizations could not be updated for type: '" . self::OBJECT_TYPE_PRESENTATION . "'" );
 				return false;
 			}
@@ -179,7 +178,7 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 			// Update log entries if needed.
 			$updated = self::updateLogEntries(self::OBJECT_TYPE_PRESENTATION, $presentationObjectIds, $workflowStatuses);
 			if (!$updated){
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR', 
 					"LogEntries could not be updated for type: '" . self::OBJECT_TYPE_PRESENTATION . "'" );
 				return false;
 			}
@@ -187,7 +186,7 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 			// Update properties used in Dialogs.
 			$updated = self::duplicateActionProperties(self::OBJECT_TYPE_PRESENTATION, self::OBJECT_TYPE_OTHER);
 			if (!$updated){
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR', 
 					"ActionProperties could not be updated for type: '" . self::OBJECT_TYPE_PRESENTATION . "'" );
 				return false;
 			}
@@ -195,7 +194,7 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 			// Update properties.
 			$updated = self::updateProperties(self::OBJECT_TYPE_PRESENTATION, self::OBJECT_TYPE_OTHER);
 			if (!$updated){
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR', 
 					"Properties could not be updated for type: '" . self::OBJECT_TYPE_PRESENTATION . "'" );
 				return false;
 			}
@@ -205,7 +204,7 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 			// Update object versions.
 			$updated = self::updateObjectVersions(self::OBJECT_TYPE_ARCHIVE, $archiveObjectIds, $workflowStatuses);
 			if (!$updated) {
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR', 
 					"ObjectVersions could not be updated for type: '" . self::OBJECT_TYPE_ARCHIVE . "'" );
 				return false;
 			}
@@ -213,7 +212,7 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 			//update authorizations for the groups.
 			$updated = self::insertAuthorizations($workflowStatuses, self::OBJECT_TYPE_ARCHIVE);
 			if (!$updated) {
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR', 
 					"Authorizations could not be updated for type: '" . self::OBJECT_TYPE_ARCHIVE . "'" );
 				return false;
 			}
@@ -221,7 +220,7 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 			// Update log entries if needed.
 			$updated = self::updateLogEntries(self::OBJECT_TYPE_ARCHIVE, $archiveObjectIds, $workflowStatuses);
 			if (!$updated){
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR', 
 					"LogEntries could not be updated for type: '" . self::OBJECT_TYPE_ARCHIVE . "'" );
 				return false;
 			}
@@ -229,7 +228,7 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 			// Update properties used in Dialogs.
 			$updated = self::duplicateActionProperties(self::OBJECT_TYPE_ARCHIVE, self::OBJECT_TYPE_OTHER);
 			if (!$updated){
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR', 
 					"ActionProperties could not be updated for type: '" . self::OBJECT_TYPE_ARCHIVE . "'" );
 				return false;
 			}
@@ -237,7 +236,7 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 			// Update properties.
 			$updated = self::updateProperties(self::OBJECT_TYPE_ARCHIVE, self::OBJECT_TYPE_OTHER);
 			if (!$updated){
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR', 
 					"Properties could not be updated for type: '" . self::OBJECT_TYPE_ARCHIVE . "'" );
 				return false;
 			}
@@ -261,25 +260,25 @@ class DBUpgradePresentationsAndArchives extends ObjectConverter
 	 */
 	static private function checkDatabaseState()
 	{
-		LogHandler::Log( self::NAME, 'INFO', 'Checking if objects need to be converted.' );
+		LogHandler::Log( __CLASS__, 'INFO', 'Checking if objects need to be converted.' );
 		
 		// If the database is not yet converted but contains states for Presentation or Archive already.
 		if( self::hasArchiveOrPresentationTypes() ) {
-			LogHandler::Log( self::NAME, 'ERROR', 
+			LogHandler::Log( __CLASS__, 'ERROR', 
 				'Cannot convert objects, database contains statuses for type Presentation or Archive already.' );
 			return true;
 		}
 
 		// Check if there are already Archive or Presentation types in deleted objects.
 		if( self::getByTypes( array(self::OBJECT_TYPE_ARCHIVE, self::OBJECT_TYPE_PRESENTATION), false ) ) {
-			LogHandler::Log( self::NAME, 'ERROR', 
+			LogHandler::Log( __CLASS__, 'ERROR', 
 				'Cannot convert objects, database contains deleted objects for type Presentation or Archive already.' );
 			return true;
 		}
 
 		// Check if there are already Archive or Presentation types in objects.
 		if( self::getByTypes( array(self::OBJECT_TYPE_ARCHIVE, self::OBJECT_TYPE_PRESENTATION), true ) ) {
-			LogHandler::Log( self::NAME, 'ERROR', 
+			LogHandler::Log( __CLASS__, 'ERROR', 
 				'Cannot convert objects, database contains objects for type Presentation or Archive already.' );
 			return true;
 		}

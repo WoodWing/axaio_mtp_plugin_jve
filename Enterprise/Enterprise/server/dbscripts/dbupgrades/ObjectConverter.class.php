@@ -21,12 +21,10 @@
  * smart_states
  *
  */
-require_once BASEDIR.'/server/dbscripts/DbUpgradeModule.class.php';
+require_once BASEDIR.'/server/dbscripts/dbupgrades/Module.class.php';
 
-abstract class ObjectConverter extends DbUpgradeModule
+abstract class WW_DbScripts_DbUpgrades_ObjectConverter extends WW_DbScripts_DbUpgrades_Module
 {
-	const NAME = 'ObjectConverter';
-
 	/**
 	 * Changes the object type from $objectTypeFrom to $objectTypeTo for those objects
 	 * that have one of the given file formats ($fileFormats) as native rendition.
@@ -42,7 +40,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 		if( self::doesObjectAndStateExists( $objectTypeTo ) ) {
 			// when the object or state of type $objectTypeTo already exists, objects of type $objectTypeFrom
 			// cannot be converted to $objectTypeTo.
-			LogHandler::Log( self::NAME, 'ERROR', 
+			LogHandler::Log( __CLASS__, 'ERROR',
 				'Database already has object type of "'.$objectTypeTo.'" or status defined ' .
 				'for object type "'.$objectTypeTo.'".');
 			return false;
@@ -54,7 +52,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 
 		// If there are no objects of type 'Other' there is no need to convert.
 		if ( !$needsToUpdateDeletedObjects && !$needsToUpdateObjects ) {
-			LogHandler::Log( self::NAME, 'INFO', 
+			LogHandler::Log( __CLASS__, 'INFO',
 				'No objects of type: \'' . $objectTypeFrom . '\' to be converted to ' .
 				'\'' . $objectTypeTo . '\'.');
 			return true;
@@ -66,13 +64,13 @@ abstract class ObjectConverter extends DbUpgradeModule
 		// Check if we would need to update Deleted Objects.
 		if ( count( $deletedObjectsToUpdate ) == 0 ) {
 			$needsToUpdateDeletedObjects = false;
-			LogHandler::Log( self::NAME, 'INFO', 'No Deleted Objects found to be converted to "'.$objectTypeTo.'".' );
+			LogHandler::Log( __CLASS__, 'INFO', 'No Deleted Objects found to be converted to "'.$objectTypeTo.'".' );
 		}
 
 		// Check if we need to update normal Objects.
 		if ( count( $workflowObjectsToUpdate ) == 0 ) {
 			$needsToUpdateObjects = false;
-			LogHandler::Log( self::NAME, 'INFO', 'No Objects found to be converted to "'.$objectTypeTo.'".' );
+			LogHandler::Log( __CLASS__, 'INFO', 'No Objects found to be converted to "'.$objectTypeTo.'".' );
 		}
 
 		if ( !$needsToUpdateDeletedObjects && !$needsToUpdateObjects ) {
@@ -118,7 +116,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 			// Update object versions.
 			$updated = self::updateObjectVersions($objectTypeTo, $objToBeConvertedIds, $workflowStatuses);
 			if (!$updated) {
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR',
 					'ObjectVersions could not be updated for type: "' . $objectTypeTo . '"' );
 				return false;
 			}
@@ -126,7 +124,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 			//update authorizations for the groups.
 			$updated = self::insertAuthorizations($workflowStatuses, $objectTypeTo);
 			if (!$updated) {
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR',
 					'Authorizations could not be updated for type: "' . $objectTypeTo . '"' );
 				return false;
 			}
@@ -134,7 +132,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 			// Update log entries if needed.
 			$updated = self::updateLogEntriesWithNewStatus($objectTypeFrom, $objectTypeTo, $objToBeConvertedIds, $workflowStatuses);
 			if (!$updated){
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR',
 					'LogEntries could not be updated for type: "' . $objectTypeTo . '"' );
 				return false;
 			}
@@ -142,7 +140,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 			// Update properties used in Dialogs.
 			$updated = self::duplicateActionProperties($objectTypeTo, $objectTypeFrom);
 			if (!$updated){
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR',
 					'ActionProperties could not be updated for type: "' . $objectTypeTo . '"' );
 				return false;
 			}
@@ -150,7 +148,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 			// Update properties.
 			$updated = self::updateProperties( $objectTypeTo, $objectTypeFrom );
 			if (!$updated){
-				LogHandler::Log( self::NAME, 'ERROR', 
+				LogHandler::Log( __CLASS__, 'ERROR',
 					'Properties could not be updated for type: "' . $objectTypeTo . '"' );
 				return false;
 			}
@@ -391,23 +389,23 @@ abstract class ObjectConverter extends DbUpgradeModule
 	 */
 	static private function doesObjectAndStateExists( $objectType )
 	{
-		LogHandler::Log( self::NAME, 'INFO', 'Checking if objects need to be converted to "'.$objectType.'".' );
+		LogHandler::Log( __CLASS__, 'INFO', 'Checking if objects need to be converted to "'.$objectType.'".' );
 		if( self::hasObjectTypeStates( $objectType ) ) {
-			LogHandler::Log( self::NAME, 'ERROR', 
+			LogHandler::Log( __CLASS__, 'ERROR',
 				'Cannot convert objects, database contains status for type "'.$objectType.'" already.' );
 			return true;
 		}
 
 		// Check if there are already $objectType types in deleted objects.
 		if ( self::getByTypes( array( $objectType ), false ) ) {
-			LogHandler::Log( self::NAME, 'ERROR', 
+			LogHandler::Log( __CLASS__, 'ERROR',
 				'Cannot convert objects, database contains deleted objects for type "'.$objectType.'" already.' );
 			return true;
 		}
 
 		// Check if there are already $objectType types in objects.
 		if ( self::getByTypes( array( $objectType ), true ) ) {
-			LogHandler::Log( self::NAME, 'ERROR', 
+			LogHandler::Log( __CLASS__, 'ERROR',
 				'Cannot convert objects, database contains objects for type "'.$objectType.'" already.' );
 			return true;
 		}

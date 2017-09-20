@@ -8,12 +8,10 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
  */
 
-require_once BASEDIR.'/server/dbscripts/DbUpgradeModule.class.php';
+require_once BASEDIR.'/server/dbscripts/dbupgrades/Module.class.php';
  
-class DBUpgradeHiddenProperties extends DbUpgradeModule
+class WW_DbScripts_DbUpgrades_HiddenProperties extends WW_DbScripts_DbUpgrades_Module
 {
-	const NAME = 'UpgradeHiddenProperties';
-	
 	/**
 	 * See {@link DbUpgradeModule} class.
 	 *
@@ -33,7 +31,7 @@ class DBUpgradeHiddenProperties extends DbUpgradeModule
 	{
 		$result = $this->updatePropertyTable();
 		if( !$result ) {
-			LogHandler::Log( self::NAME, 'ERROR', 'Properties table could not be updated correctly.' );
+			LogHandler::Log( __CLASS__, 'ERROR', 'Properties table could not be updated correctly.' );
 		}
 		return $result;
 	}

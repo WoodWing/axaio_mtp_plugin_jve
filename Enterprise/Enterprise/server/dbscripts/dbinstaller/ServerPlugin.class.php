@@ -68,4 +68,23 @@ class WW_DbScripts_DbInstaller_ServerPlugin extends WW_DbScripts_DbInstaller_Bas
 	{
 		return false;
 	}
+
+	/**
+	 * @inheritdoc
+	 */
+	protected function getDataUpgradesFolder()
+	{
+		require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+		$pluginInfo = BizServerPlugin::getInstalledPluginInfo( $this->pluginName );
+		$pluginFolder = BizServerPlugin::getPluginFolder( $pluginInfo );
+		return $pluginFolder.'dbscripts/dbupgrades/';
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	protected function getDataUpgradeClassPrefix()
+	{
+		return $this->pluginName.'_DbScripts_DbUpgrades_';
+	}
 }
