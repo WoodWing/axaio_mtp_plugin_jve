@@ -624,6 +624,7 @@
   <Term key="DBINSTALLER_DBDATA_MIGRATED">Tabulky serveru Enterprise byly úspěšně převedeny.</Term>
   <Term key="DBINSTALLER_DBINSTALLUPGRADE">Databáze – instalovat / aktualizovat</Term>
   <Term key="DBINSTALLER_DBMODELINFO">Informace o modelu databáze serveru Enterprise:</Term>
+  <Term key="DBINSTALLER_DBMODELINFO_PLUGIN">Informace o modelu databáze serveru Enterprise:</Term>
   <Term key="DBINSTALLER_DBSELECT">Název databáze</Term>
   <Term key="DBINSTALLER_DBSERVER">Databázový server</Term>
   <Term key="DBINSTALLER_DBSETTINGS_HELP">1. Zkontrolujte možnosti, které definují vaše databázové připojení:\n• soubor configserver.php: DBSERVER a DBTYPE\n• soubor config.php: DBSELECT, DBUSER a DBPASS\n2. Zkontrolujte, zda je vaše databáze spuštěná a běží a zda je přístupná konfigurovaným připojením '%1'.\n3. Zkontrolujte, zda uživatel '%2' má přístup do databáze.\n4. V případě nové instalace zkontrolujte, zda je ručně předem vytvořena prázdná databáze (prostor tabulek) s názvem '%3'.\n5. Jakmile je konfigurace opravena, klikněte na '%4'.</Term>
@@ -1113,7 +1114,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">K úloze %1 nebyly nalezeny žádné aktivní konfigurace aplikace InDesign Server. Nakonfigurujte aplikaci InDesign Server %2, která obslouží prioritu %3. (S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">InDesign Server neodovídá. (S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">Úlohy s následujícími prioritami nebudou zpracovány: %1</Term>
-  <Term key="IDS_PICKUP_FROM">Pickup Time</Term>
+  <Term key="IDS_PICKUP_FROM">Doba vyzvednutí</Term>
   <Term key="IDS_PORTNUMBER">Číslo portu:</Term>
   <Term key="IDS_PRIO">Priority úloh</Term>
   <Term key="IDS_PRIO_1">Velmi vysoká</Term>
