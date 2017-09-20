@@ -234,7 +234,7 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 					$this->setResult( 'ERROR', "Database is not initialized for {$pluginInfo->DisplayName} server plug-in.", $help );
 				} else {
 					$help = 'Please update the database through this page: <a href="'.$url.'" target="_top">DB Admin</a>';
-					$this->setResult( 'ERROR', "The actual database model version v{$requiredVersion} ".
+					$this->setResult( 'ERROR', "The actual database model version v{$installedVersion} ".
 						"for {$pluginInfo->DisplayName} server plug-in does not meet the required version v{$requiredVersion}.", $help );
 				}
 				$pluginDbModelsOk = false; // flag as error, but continue checking the other plugins
