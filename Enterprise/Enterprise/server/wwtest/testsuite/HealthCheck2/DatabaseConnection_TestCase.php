@@ -286,14 +286,13 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 	private function checkDeletedObjectIDs()
 	{
 		// Get the autoincrement id of the 'smart_objects' table
-		$this->dbdriver = DBDriverFactory::gen();
 		$nextObjectId = null;
 		$objectsTable = DBPREFIX."objects";
 		if ( DBTYPE == 'mysql' ) {
 			$sql = "SHOW TABLE STATUS LIKE '$objectsTable'";
 			$sth = $this->dbdriver->query($sql);
 			$row = $this->dbdriver->fetch($sth);
-			$this->dbdriver = $row['Auto_increment'];
+			$nextObjectId = $row['Auto_increment'];
 		}
 		elseif( DBTYPE == 'mssql') {
 			$sql = "Select IDENT_CURRENT('$objectsTable') as id";
@@ -324,9 +323,9 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 	}
 	
 	/**
-	 * Check whether exist unused overrule issue
+	 * Warn when an unused overrule issue can be found in the brand setup.
 	 *
-	 * @return string $warnMsg
+	 * @return bool
 	 */
 	private function checkUnusedOverruleBrandIssue()
 	{
@@ -353,7 +352,6 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 		$warnMsg .= empty($warnMsg) ? '' : '.<br/>Unused Overruled Issues will negatively affect query performance, we advice to remove this issue.';
 		if( !empty($warnMsg) ) {
 			$this->setResult( 'WARN', $warnMsg );
-			return false;
 		}
 		LogHandler::Log('wwtest', 'INFO', 'Unused Overrule Issue checked.');
 		return true;
