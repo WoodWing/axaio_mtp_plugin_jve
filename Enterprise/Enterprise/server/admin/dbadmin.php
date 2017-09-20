@@ -297,8 +297,11 @@ class DbAdmin_AdminApp
 	 */
 	private function roundtripHttpGetParamsAndFormPostParams( $tpl )
 	{
-		$param = "<input type='hidden' value='".formvar($this->pluginInfo->UniqueName)."' name='plugin'/>";
-		return str_replace("<!--PAR:HIDDEN-->", $param, $tpl );
+		if( $this->pluginInfo ) {
+			$param = "<input type='hidden' value='".formvar( $this->pluginInfo->UniqueName )."' name='plugin'/>";
+			$tpl = str_replace( "<!--PAR:HIDDEN-->", $param, $tpl );
+		}
+		return $tpl;
 	}
 	
 	/**
