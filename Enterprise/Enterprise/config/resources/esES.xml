@@ -612,7 +612,7 @@
   <Term key="CUST_REPRODEADLINE">Fecha límite de reproducción</Term>
   <Term key="DATE">Fecha</Term>
   <Term key="DAYS">Días</Term>
-  <Term key="DBINSTALLER_CLICKTOSHOWTABLES">Ver un panorama de las tablas de Enterprise instaladas </Term>
+  <Term key="DBINSTALLER_CLICKTOSHOWTABLES">Ver un panorama de las tablas de Enterprise instaladas</Term>
   <Term key="DBINSTALLER_CLICK_CREATEDB_BTN">Dé clic en el botón '%1' para crear las tablas en Enterprise.</Term>
   <Term key="DBINSTALLER_CLICK_LICENSE_BTN">Dé clic en el botón '%1' para revisar sus licencias.</Term>
   <Term key="DBINSTALLER_CLICK_UPDATEDB_BTN">Dé clic en el botón '%1' para actualizar las tablas en Enterprise.</Term>
