@@ -624,6 +624,7 @@
   <Term key="DBINSTALLER_DBDATA_MIGRATED">Enterprise表中的數據已經成功遷移</Term>
   <Term key="DBINSTALLER_DBINSTALLUPGRADE">數據庫- 安裝/ 升級</Term>
   <Term key="DBINSTALLER_DBMODELINFO">Enterprise數據庫模型信息:</Term>
+  <Term key="DBINSTALLER_DBMODELINFO_PLUGIN">Enterprise數據庫模型信息:</Term>
   <Term key="DBINSTALLER_DBSELECT">數據庫名字</Term>
   <Term key="DBINSTALLER_DBSERVER">數據庫服務器</Term>
   <Term key="DBINSTALLER_DBSETTINGS_HELP">1. 檢查定義數據庫連接的選項:\n• configserver.php 文件: DBSERVER 和DBTYPE\n• config.php 文件: DBSELECT, DBUSER and DBPASS\n2. 檢查是否數據庫服務器是否正在運行之中並能通過已配置的連接'%1' 訪問到.\n3. 確定用戶'%2' 有數據庫的訪問權限.\n4. 如果是全新安裝, 確信空的數據庫(表空間) 名字'%3' 已預先創建.\ n5. 如果你已修復完配置文件請點擊'%4'.</Term>
