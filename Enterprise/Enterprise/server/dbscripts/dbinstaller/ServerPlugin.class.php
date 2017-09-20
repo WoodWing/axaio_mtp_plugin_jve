@@ -56,10 +56,16 @@ class WW_DbScripts_DbInstaller_ServerPlugin extends WW_DbScripts_DbInstaller_Bas
 	/**
 	 * @inheritdoc
 	 */
-	public function getNextPhases()
+	protected function gotoLicensePageAfterSuccess()
 	{
-		$phases = parent::getNextPhases();
-		unset( $phases['goto_licenses'] ); // this phase does not make sense for plugins
-		return $phases;
+		return false;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	protected function showSolrReindexMessageAfterSuccess()
+	{
+		return false;
 	}
 }

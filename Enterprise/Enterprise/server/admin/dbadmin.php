@@ -297,7 +297,7 @@ class DbAdmin_AdminApp
 	 */
 	private function roundtripHttpGetParamsAndFormPostParams( $tpl )
 	{
-		$param = "<input type='hidden' value='".formvar($this->pluginName)."' name='plugin'/>";
+		$param = "<input type='hidden' value='".formvar($this->pluginInfo->UniqueName)."' name='plugin'/>";
 		return str_replace("<!--PAR:HIDDEN-->", $param, $tpl );
 	}
 	
@@ -342,8 +342,8 @@ class DbAdmin_AdminApp
 		require_once BASEDIR.'/server/dbmodel/Reader.class.php';
 
 		// Retrieve tables names from the database model
-		if( $this->pluginName ) {
-			$definitions = array( WW_DbModel_Factory::createModelForServerPlugin( $this->pluginName ) );
+		if( $this->pluginInfo->UniqueName ) {
+			$definitions = array( WW_DbModel_Factory::createModelForServerPlugin( $this->pluginInfo->UniqueName ) );
 		} else {
 			$definitions = WW_DbModel_Factory::createModels();
 		}

@@ -176,7 +176,7 @@ abstract class WW_DbScripts_DbInstaller_Base
 
 				case 'install_db':
 				case 'update_db':
-					if( empty( $phases ) ) {
+					if( empty( $phases ) && $this->gotoLicensePageAfterSuccess() ) {
 						$phases['goto_licenses'] = $this->localizePhase( 'goto_licenses' );
 					}
 					break;
@@ -306,26 +306,30 @@ abstract class WW_DbScripts_DbInstaller_Base
 						}
 
 						// For upgrades, but also for clean installations there is a need
-						// to call runUpgrades() to make sure they get flagged afterwards.
+						// to call runDataUpgrades() to make sure they get flagged afterwards.
 						$this->runDataUpgrades();
 
-						// Inform user about upgrade success.
+						// Inform the user about data upgrade success.
 						if( $this->dbDataUpgrade && $this->canContinue() ) {
 							$this->report->add( 'DbInstaller', 'INFO', 'INFO',
 								BizResources::localize( 'DBINSTALLER_DBDATA_MIGRATED' ), '', '',
 								array( 'phase' => $this->phase ) );
 						}
 
-						// For upgrades, remind user to re-index Solr.
-						if( $this->dbModelUpgrade ) {
+						// After a DB model update, remind the user to re-index Solr.
+						if( $this->dbModelUpgrade && $this->showSolrReindexMessageAfterSuccess() ) {
 							$this->report->add( 'DbInstaller', 'INFO', 'INFO',
 								BizResources::localize( 'SOLR_RE_INDEX' ), '', '',
 								array( 'phase' => $this->phase ) );
 						}
-						$params = array( $this->localizePhase('goto_licenses') );
-						$this->report->add( 'DbInstaller', 'INFO', 'INFO',
-							BizResources::localize( 'DBINSTALLER_CLICK_LICENSE_BTN', true, $params ), '', '',
-							array( 'phase' => $this->phase ) );
+
+						// Remind the user to navigate to the license page.
+						if( $this->gotoLicensePageAfterSuccess() ) {
+							$params = array( $this->localizePhase( 'goto_licenses' ) );
+							$this->report->add( 'DbInstaller', 'INFO', 'INFO',
+								BizResources::localize( 'DBINSTALLER_CLICK_LICENSE_BTN', true, $params ), '', '',
+								array( 'phase' => $this->phase ) );
+						}
 
 					}
 					break;
@@ -358,6 +362,26 @@ abstract class WW_DbScripts_DbInstaller_Base
 	 */
 	protected function checkPreConditionsUpgrade()
 	{
+	}
+
+	/**
+	 * Allow subclass to disable the last step offering nagivation to the license page.
+	 *
+	 * @return bool
+	 */
+	protected function gotoLicensePageAfterSuccess()
+	{
+		return true;
+	}
+
+	/**
+	 * Allow subclass to suppress the reminder for user to re-index Solr.
+	 *
+	 * @return bool
+	 */
+	protected function showSolrReindexMessageAfterSuccess()
+	{
+		return true;
 	}
 
 	/**
