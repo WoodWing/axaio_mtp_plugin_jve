@@ -189,7 +189,7 @@ class WW_DbScripts_DbUpgrades_RemoveDuplicatePlacements extends WW_DbScripts_DbU
 	}
 
 	/**
-	 * Adds an index to the placements table or its copy. On Oracle the name of an index must be unique on database level.
+	 * Adds an index to the placements table or its copy.
 	 *
 	 * @param string $tableName Name of the table to add the index.
 	 * @param string $indexName Name of the index.

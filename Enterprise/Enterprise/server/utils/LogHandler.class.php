@@ -928,7 +928,7 @@ class LogHandler
 	/**
 	 * Compose a string with current time indication in micro seconds.
 	 *
-	 * For example it returns "234500_021A" which means 23h 45' 00" and 21 ms for the first caller "A").
+	 * For example it returns "234500_021A" (which means 23h 45' 00" and 21 ms for the first caller "A").
 	 * When in the very same micro second this function is called again, it will use new postfix "B", etc.
 	 *
 	 * @since 10.2.0

@@ -1,45 +1,45 @@
 
 CREATE TABLE [smart_actionproperties] (
-  [id] int not null  IDENTITY(1,1),
-  [publication] int not null  default '0',
-  [orderid] int not null  default '0',
-  [property] varchar(200) not null  default '',
-  [edit] char(2) not null  default '',
-  [mandatory] char(2) not null  default '',
-  [action] varchar(40) not null  default '',
-  [type] varchar(40) not null  default '',
-  [restricted] char(2) not null  default '',
-  [refreshonchange] char(2) not null  default '',
-  [parentfieldid] int not null  default '0',
-  [documentid] varchar(512) not null  default '',
-  [initialheight] int not null  default '0',
-  [multipleobjects] char(2) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [publication] int NOT NULL  default '0',
+  [orderid] int NOT NULL  default '0',
+  [property] varchar(200) NOT NULL  default '',
+  [edit] char(2) NOT NULL  default '',
+  [mandatory] char(2) NOT NULL  default '',
+  [action] varchar(40) NOT NULL  default '',
+  [type] varchar(40) NOT NULL  default '',
+  [restricted] char(2) NOT NULL  default '',
+  [refreshonchange] char(2) NOT NULL  default '',
+  [parentfieldid] int NOT NULL  default '0',
+  [documentid] varchar(512) NOT NULL  default '',
+  [initialheight] int NOT NULL  default '0',
+  [multipleobjects] char(2) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [pbac_actionproperties] on [smart_actionproperties]([publication], [action]) ;
+CREATE  INDEX [pbac_actionproperties] ON [smart_actionproperties]([publication], [action]) ;
 
 CREATE TABLE [smart_authorizations] (
-  [id] int not null  IDENTITY(1,1),
-  [grpid] int not null  default '0',
-  [publication] int not null  default '0',
-  [section] int not null  default '0',
-  [state] int not null  default '0',
-  [rights] varchar(40) not null  default '',
-  [issue] int not null  default '0',
-  [profile] int not null  default '0',
-  [bundle] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [grpid] int NOT NULL  default '0',
+  [publication] int NOT NULL  default '0',
+  [section] int NOT NULL  default '0',
+  [state] int NOT NULL  default '0',
+  [rights] varchar(40) NOT NULL  default '',
+  [issue] int NOT NULL  default '0',
+  [profile] int NOT NULL  default '0',
+  [bundle] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [gipu_authorizations] on [smart_authorizations]([grpid], [publication]) ;
-CREATE  INDEX [gipr_authorizations] on [smart_authorizations]([grpid], [profile]) ;
+CREATE  INDEX [gipu_authorizations] ON [smart_authorizations]([grpid], [publication]) ;
+CREATE  INDEX [gipr_authorizations] ON [smart_authorizations]([grpid], [profile]) ;
 SET IDENTITY_INSERT [smart_authorizations] ON
 INSERT INTO [smart_authorizations] ([id], [grpid], [publication], [section], [state], [rights], [issue], [profile], [bundle]) VALUES (1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1, 0);
 SET IDENTITY_INSERT [smart_authorizations] OFF
 
 CREATE TABLE [smart_config] (
-  [id] int not null  IDENTITY(1,1),
-  [name] varchar(200) not null  default '',
-  [value] text not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [name] varchar(200) NOT NULL  default '',
+  [value] text NOT NULL  default '',
   PRIMARY KEY ([id])
 );
 SET IDENTITY_INSERT [smart_config] ON
@@ -47,119 +47,119 @@ INSERT INTO [smart_config] ([id], [name], [value]) VALUES (1, 'version', '00');
 SET IDENTITY_INSERT [smart_config] OFF
 
 CREATE TABLE [smart_deletedobjects] (
-  [id] int not null  IDENTITY(1,1),
-  [documentid] varchar(512) not null  default '',
-  [type] varchar(20) not null  default '',
-  [name] varchar(255) not null  default '',
-  [publication] int not null  default '0',
-  [issue] int not null  default '0',
-  [section] int not null  default '0',
-  [state] int not null  default '0',
-  [routeto] varchar(255) not null  default '',
-  [copyright] varchar(255) not null  default '',
-  [slugline] varchar(255) not null  default '',
-  [comment] varchar(255) not null  default '',
-  [author] varchar(255) not null  default '',
-  [deadline] varchar(30) not null  default '',
-  [urgency] varchar(40) not null  default '',
-  [format] varchar(128) not null  default '',
-  [width] real not null  default '0',
-  [depth] real not null  default '0',
-  [dpi] real not null  default '0',
-  [lengthwords] int not null  default '0',
-  [lengthchars] int not null  default '0',
-  [lengthparas] int not null  default '0',
-  [lengthlines] int not null  default '0',
-  [keywords] text not null  default '',
-  [modifier] varchar(40) not null  default '',
-  [modified] varchar(30) not null  default '',
-  [creator] varchar(40) not null  default '',
-  [created] varchar(30) not null  default '',
-  [deletor] varchar(40) not null  default '',
-  [deleted] varchar(30) not null  default '',
-  [copyrightmarked] varchar(255) not null  default '',
-  [copyrighturl] varchar(255) not null  default '',
-  [credit] varchar(255) not null  default '',
-  [source] varchar(255) not null  default '',
-  [description] text not null  default '',
-  [descriptionauthor] varchar(255) not null  default '',
-  [_columns] int not null  default '0',
-  [plaincontent] text not null  default '',
-  [filesize] int not null  default '0',
-  [colorspace] varchar(20) not null  default '',
-  [pagenumber] int not null  default '0',
-  [types] text not null  default '',
-  [storename] text not null  default '',
-  [pagerange] varchar(50) not null  default '',
-  [highresfile] varchar(255) not null  default '',
-  [deadlinesoft] varchar(30) not null  default '',
-  [deadlinechanged] char(1) not null  default '',
-  [plannedpagerange] varchar(50) not null  default '',
-  [majorversion] int not null  default '-1',
-  [minorversion] int not null  default '0',
-  [encoding] varchar(100) not null  default '',
-  [compression] varchar(100) not null  default '',
-  [keyframeeveryframes] int not null  default '0',
-  [channels] varchar(100) not null  default '',
-  [aspectratio] varchar(100) not null  default '',
-  [contentsource] varchar(100) not null  default '',
-  [rating] tinyint not null  default 0,
-  [indexed] char(2) not null  default '',
-  [closed] char(2) not null  default '',
-  [orientation] tinyint not null  default '0',
-  [routetouserid] int not null  default '0',
-  [routetogroupid] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [documentid] varchar(512) NOT NULL  default '',
+  [type] varchar(20) NOT NULL  default '',
+  [name] varchar(255) NOT NULL  default '',
+  [publication] int NOT NULL  default '0',
+  [issue] int NOT NULL  default '0',
+  [section] int NOT NULL  default '0',
+  [state] int NOT NULL  default '0',
+  [routeto] varchar(255) NOT NULL  default '',
+  [copyright] varchar(255) NOT NULL  default '',
+  [slugline] varchar(255) NOT NULL  default '',
+  [comment] varchar(255) NOT NULL  default '',
+  [author] varchar(255) NOT NULL  default '',
+  [deadline] varchar(30) NOT NULL  default '',
+  [urgency] varchar(40) NOT NULL  default '',
+  [format] varchar(128) NOT NULL  default '',
+  [width] real NOT NULL  default '0',
+  [depth] real NOT NULL  default '0',
+  [dpi] real NOT NULL  default '0',
+  [lengthwords] int NOT NULL  default '0',
+  [lengthchars] int NOT NULL  default '0',
+  [lengthparas] int NOT NULL  default '0',
+  [lengthlines] int NOT NULL  default '0',
+  [keywords] text NOT NULL  default '',
+  [modifier] varchar(40) NOT NULL  default '',
+  [modified] varchar(30) NOT NULL  default '',
+  [creator] varchar(40) NOT NULL  default '',
+  [created] varchar(30) NOT NULL  default '',
+  [deletor] varchar(40) NOT NULL  default '',
+  [deleted] varchar(30) NOT NULL  default '',
+  [copyrightmarked] varchar(255) NOT NULL  default '',
+  [copyrighturl] varchar(255) NOT NULL  default '',
+  [credit] varchar(255) NOT NULL  default '',
+  [source] varchar(255) NOT NULL  default '',
+  [description] text NOT NULL  default '',
+  [descriptionauthor] varchar(255) NOT NULL  default '',
+  [_columns] int NOT NULL  default '0',
+  [plaincontent] text NOT NULL  default '',
+  [filesize] int NOT NULL  default '0',
+  [colorspace] varchar(20) NOT NULL  default '',
+  [pagenumber] int NOT NULL  default '0',
+  [types] text NOT NULL  default '',
+  [storename] text NOT NULL  default '',
+  [pagerange] varchar(50) NOT NULL  default '',
+  [highresfile] varchar(255) NOT NULL  default '',
+  [deadlinesoft] varchar(30) NOT NULL  default '',
+  [deadlinechanged] char(1) NOT NULL  default '',
+  [plannedpagerange] varchar(50) NOT NULL  default '',
+  [majorversion] int NOT NULL  default '-1',
+  [minorversion] int NOT NULL  default '0',
+  [encoding] varchar(100) NOT NULL  default '',
+  [compression] varchar(100) NOT NULL  default '',
+  [keyframeeveryframes] int NOT NULL  default '0',
+  [channels] varchar(100) NOT NULL  default '',
+  [aspectratio] varchar(100) NOT NULL  default '',
+  [contentsource] varchar(100) NOT NULL  default '',
+  [rating] tinyint NOT NULL  default 0,
+  [indexed] char(2) NOT NULL  default '',
+  [closed] char(2) NOT NULL  default '',
+  [orientation] tinyint NOT NULL  default '0',
+  [routetouserid] int NOT NULL  default '0',
+  [routetogroupid] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
 
 CREATE TABLE [smart_groups] (
-  [id] int not null  IDENTITY(1,1),
-  [name] varchar(100) not null  default '',
-  [descr] varchar(255) not null  default '',
-  [admin] char(2) not null  default '',
-  [routing] char(2) not null  default '',
-  [externalid] varchar(200) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [name] varchar(100) NOT NULL  default '',
+  [descr] varchar(255) NOT NULL  default '',
+  [admin] char(2) NOT NULL  default '',
+  [routing] char(2) NOT NULL  default '',
+  [externalid] varchar(200) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [idnaro_groups] on [smart_groups]([id], [name], [routing]) ;
-CREATE  INDEX [na_groups] on [smart_groups]([name]) ;
+CREATE  INDEX [idnaro_groups] ON [smart_groups]([id], [name], [routing]) ;
+CREATE  INDEX [na_groups] ON [smart_groups]([name]) ;
 SET IDENTITY_INSERT [smart_groups] ON
 INSERT INTO [smart_groups] ([id], [name], [descr], [admin], [routing], [externalid]) VALUES (2, 'admin', 'System Admins', 'on', '', '');
 SET IDENTITY_INSERT [smart_groups] OFF
 
 CREATE TABLE [smart_log] (
-  [id] int not null  IDENTITY(1,1),
-  [user] varchar(50) not null  default '',
-  [service] varchar(50) not null  default '',
-  [ip] varchar(30) not null  default '',
-  [date] varchar(30) not null  default '',
-  [objectid] int not null  default '0',
-  [publication] int not null  default '0',
-  [issue] int not null  default '0',
-  [section] int not null  default '0',
-  [state] int not null  default '0',
-  [parent] int not null  default '0',
-  [lock] varchar(1) not null  default '',
-  [rendition] varchar(10) not null  default '',
-  [type] varchar(20) not null  default '',
-  [routeto] varchar(255) not null  default '',
-  [edition] varchar(255) not null  default '',
-  [minorversion] int not null  default '0',
-  [channelid] int not null  default '0',
-  [majorversion] int not null  default '-1',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [user] varchar(50) NOT NULL  default '',
+  [service] varchar(50) NOT NULL  default '',
+  [ip] varchar(30) NOT NULL  default '',
+  [date] varchar(30) NOT NULL  default '',
+  [objectid] int NOT NULL  default '0',
+  [publication] int NOT NULL  default '0',
+  [issue] int NOT NULL  default '0',
+  [section] int NOT NULL  default '0',
+  [state] int NOT NULL  default '0',
+  [parent] int NOT NULL  default '0',
+  [lock] varchar(1) NOT NULL  default '',
+  [rendition] varchar(10) NOT NULL  default '',
+  [type] varchar(20) NOT NULL  default '',
+  [routeto] varchar(255) NOT NULL  default '',
+  [edition] varchar(255) NOT NULL  default '',
+  [minorversion] int NOT NULL  default '0',
+  [channelid] int NOT NULL  default '0',
+  [majorversion] int NOT NULL  default '-1',
   PRIMARY KEY ([id])
 );
 
 CREATE TABLE [smart_namedqueries] (
-  [id] int not null  IDENTITY(1,1),
-  [query] varchar(200) not null  default '',
-  [interface] text not null  default '',
-  [sql] text not null  default '',
-  [comment] text not null  default '',
-  [checkaccess] varchar(2) not null  default 'on',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [query] varchar(200) NOT NULL  default '',
+  [interface] text NOT NULL  default '',
+  [sql] text NOT NULL  default '',
+  [comment] text NOT NULL  default '',
+  [checkaccess] varchar(2) NOT NULL  default 'on',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [qe_namedqueries] on [smart_namedqueries]([query]) ;
+CREATE  INDEX [qe_namedqueries] ON [smart_namedqueries]([query]) ;
 SET IDENTITY_INSERT [smart_namedqueries] ON
 INSERT INTO [smart_namedqueries] ([id], [query], [interface], [sql], [comment], [checkaccess]) VALUES (2, 'Templates', '', '/*SELECT*/
 select o.`id` as `ID`, o.`type` as `Type`, o.`name` as `Name`, st.`state` as `State`, ul.`fullname` as `LockedBy`, p.`publication` as `Publication`, s.`section` as `Section`, o.`comment` as `Comment`, o.`routeto` as `RouteTo`, un.`fullname` as `Creator`, o.`format` as `Format`, um.`fullname` as `Modifier`, p.`id` as `PublicationId`, s.`id` as `SectionId`, st.`id` as `StateId`, st.`color` as `StateColor`, l.`lockoffline` as `LockForOffline`
@@ -192,382 +192,382 @@ where (o.`type` = ''Library'')', 'Shows all libraries.', 'on');
 SET IDENTITY_INSERT [smart_namedqueries] OFF
 
 CREATE TABLE [smart_objectlocks] (
-  [id] int not null  IDENTITY(1,1),
-  [object] int not null  default '0',
-  [usr] varchar(40) not null  default '',
-  [timestamp] timestamp not null ,
-  [ip] varchar(30) not null  default '',
-  [lockoffline] varchar(2) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [object] int NOT NULL  default '0',
+  [usr] varchar(40) NOT NULL  default '',
+  [timestamp] timestamp NOT NULL ,
+  [ip] varchar(30) NOT NULL  default '',
+  [lockoffline] varchar(2) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE UNIQUE INDEX [ob_objectlocks] on [smart_objectlocks]([object]) ;
-CREATE  INDEX [obusr_objectlocks] on [smart_objectlocks]([object], [usr]) ;
+CREATE UNIQUE INDEX [ob_objectlocks] ON [smart_objectlocks]([object]) ;
+CREATE  INDEX [obusr_objectlocks] ON [smart_objectlocks]([object], [usr]) ;
 
 CREATE TABLE [smart_objectrelations] (
-  [id] int not null  IDENTITY(1,1),
-  [parent] int not null  default '0',
-  [child] int not null  default '0',
-  [type] varchar(40) not null  default '',
-  [subid] varchar(20) not null  default '',
-  [pagerange] varchar(50) not null  default '',
-  [rating] tinyint not null  default 0,
-  [parenttype] varchar(20) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [parent] int NOT NULL  default '0',
+  [child] int NOT NULL  default '0',
+  [type] varchar(40) NOT NULL  default '',
+  [subid] varchar(20) NOT NULL  default '',
+  [pagerange] varchar(50) NOT NULL  default '',
+  [rating] tinyint NOT NULL  default 0,
+  [parenttype] varchar(20) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE UNIQUE INDEX [ch_objectrelations] on [smart_objectrelations]([parent], [child], [subid], [type]) ;
-CREATE  INDEX [pachty_objectrelations] on [smart_objectrelations]([parent], [child], [type]) ;
-CREATE  INDEX [child_type_id] on [smart_objectrelations]([child], [type], [id]) ;
+CREATE UNIQUE INDEX [ch_objectrelations] ON [smart_objectrelations]([parent], [child], [subid], [type]) ;
+CREATE  INDEX [pachty_objectrelations] ON [smart_objectrelations]([parent], [child], [type]) ;
+CREATE  INDEX [child_type_id] ON [smart_objectrelations]([child], [type], [id]) ;
 
 CREATE TABLE [smart_objects] (
-  [id] int not null  IDENTITY(1,1),
-  [documentid] varchar(512) not null  default '',
-  [type] varchar(20) not null  default '',
-  [name] varchar(255) not null  default '',
-  [publication] int not null  default '0',
-  [issue] int not null  default '0',
-  [section] int not null  default '0',
-  [state] int not null  default '0',
-  [routeto] varchar(255) not null  default '',
-  [copyright] varchar(255) not null  default '',
-  [slugline] varchar(255) not null  default '',
-  [comment] varchar(255) not null  default '',
-  [author] varchar(255) not null  default '',
-  [deadline] varchar(30) not null  default '',
-  [urgency] varchar(40) not null  default '',
-  [format] varchar(128) not null  default '',
-  [width] real not null  default '0',
-  [depth] real not null  default '0',
-  [dpi] real not null  default '0',
-  [lengthwords] int not null  default '0',
-  [lengthchars] int not null  default '0',
-  [lengthparas] int not null  default '0',
-  [lengthlines] int not null  default '0',
-  [keywords] text not null  default '',
-  [modifier] varchar(40) not null  default '',
-  [modified] varchar(30) not null  default '',
-  [creator] varchar(40) not null  default '',
-  [created] varchar(30) not null  default '',
-  [deletor] varchar(40) not null  default '',
-  [deleted] varchar(30) not null  default '',
-  [copyrightmarked] varchar(255) not null  default '',
-  [copyrighturl] varchar(255) not null  default '',
-  [credit] varchar(255) not null  default '',
-  [source] varchar(255) not null  default '',
-  [description] text not null  default '',
-  [descriptionauthor] varchar(255) not null  default '',
-  [_columns] int not null  default '0',
-  [plaincontent] text not null  default '',
-  [filesize] int not null  default '0',
-  [colorspace] varchar(20) not null  default '',
-  [types] text not null  default '',
-  [pagenumber] int not null  default '0',
-  [storename] text not null  default '',
-  [pagerange] varchar(50) not null  default '',
-  [highresfile] varchar(255) not null  default '',
-  [deadlinesoft] varchar(30) not null  default '',
-  [deadlinechanged] char(1) not null  default '',
-  [plannedpagerange] varchar(50) not null  default '',
-  [majorversion] int not null  default '-1',
-  [minorversion] int not null  default '0',
-  [encoding] varchar(100) not null  default '',
-  [compression] varchar(100) not null  default '',
-  [keyframeeveryframes] int not null  default '0',
-  [channels] varchar(100) not null  default '',
-  [aspectratio] varchar(100) not null  default '',
-  [contentsource] varchar(100) not null  default '',
-  [rating] tinyint not null  default 0,
-  [indexed] char(2) not null  default '',
-  [closed] char(2) not null  default '',
-  [routetouserid] int not null  default '0',
-  [routetogroupid] int not null  default '0',
-  [orientation] tinyint not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [documentid] varchar(512) NOT NULL  default '',
+  [type] varchar(20) NOT NULL  default '',
+  [name] varchar(255) NOT NULL  default '',
+  [publication] int NOT NULL  default '0',
+  [issue] int NOT NULL  default '0',
+  [section] int NOT NULL  default '0',
+  [state] int NOT NULL  default '0',
+  [routeto] varchar(255) NOT NULL  default '',
+  [copyright] varchar(255) NOT NULL  default '',
+  [slugline] varchar(255) NOT NULL  default '',
+  [comment] varchar(255) NOT NULL  default '',
+  [author] varchar(255) NOT NULL  default '',
+  [deadline] varchar(30) NOT NULL  default '',
+  [urgency] varchar(40) NOT NULL  default '',
+  [format] varchar(128) NOT NULL  default '',
+  [width] real NOT NULL  default '0',
+  [depth] real NOT NULL  default '0',
+  [dpi] real NOT NULL  default '0',
+  [lengthwords] int NOT NULL  default '0',
+  [lengthchars] int NOT NULL  default '0',
+  [lengthparas] int NOT NULL  default '0',
+  [lengthlines] int NOT NULL  default '0',
+  [keywords] text NOT NULL  default '',
+  [modifier] varchar(40) NOT NULL  default '',
+  [modified] varchar(30) NOT NULL  default '',
+  [creator] varchar(40) NOT NULL  default '',
+  [created] varchar(30) NOT NULL  default '',
+  [deletor] varchar(40) NOT NULL  default '',
+  [deleted] varchar(30) NOT NULL  default '',
+  [copyrightmarked] varchar(255) NOT NULL  default '',
+  [copyrighturl] varchar(255) NOT NULL  default '',
+  [credit] varchar(255) NOT NULL  default '',
+  [source] varchar(255) NOT NULL  default '',
+  [description] text NOT NULL  default '',
+  [descriptionauthor] varchar(255) NOT NULL  default '',
+  [_columns] int NOT NULL  default '0',
+  [plaincontent] text NOT NULL  default '',
+  [filesize] int NOT NULL  default '0',
+  [colorspace] varchar(20) NOT NULL  default '',
+  [types] text NOT NULL  default '',
+  [pagenumber] int NOT NULL  default '0',
+  [storename] text NOT NULL  default '',
+  [pagerange] varchar(50) NOT NULL  default '',
+  [highresfile] varchar(255) NOT NULL  default '',
+  [deadlinesoft] varchar(30) NOT NULL  default '',
+  [deadlinechanged] char(1) NOT NULL  default '',
+  [plannedpagerange] varchar(50) NOT NULL  default '',
+  [majorversion] int NOT NULL  default '-1',
+  [minorversion] int NOT NULL  default '0',
+  [encoding] varchar(100) NOT NULL  default '',
+  [compression] varchar(100) NOT NULL  default '',
+  [keyframeeveryframes] int NOT NULL  default '0',
+  [channels] varchar(100) NOT NULL  default '',
+  [aspectratio] varchar(100) NOT NULL  default '',
+  [contentsource] varchar(100) NOT NULL  default '',
+  [rating] tinyint NOT NULL  default 0,
+  [indexed] char(2) NOT NULL  default '',
+  [closed] char(2) NOT NULL  default '',
+  [routetouserid] int NOT NULL  default '0',
+  [routetogroupid] int NOT NULL  default '0',
+  [orientation] tinyint NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [nm_objects] on [smart_objects]([name]) ;
-CREATE  INDEX [pbsectstate_objects] on [smart_objects]([publication], [section], [state], [closed]) ;
-CREATE  INDEX [pubid_objects] on [smart_objects]([publication], [id], [closed]) ;
-CREATE  INDEX [mo_objects] on [smart_objects]([modifier]) ;
-CREATE  INDEX [roid_objects] on [smart_objects]([routeto], [id], [closed]) ;
-CREATE  INDEX [codo_objects] on [smart_objects]([contentsource], [documentid]) ;
+CREATE  INDEX [nm_objects] ON [smart_objects]([name]) ;
+CREATE  INDEX [pbsectstate_objects] ON [smart_objects]([publication], [section], [state], [closed]) ;
+CREATE  INDEX [pubid_objects] ON [smart_objects]([publication], [id], [closed]) ;
+CREATE  INDEX [mo_objects] ON [smart_objects]([modifier]) ;
+CREATE  INDEX [roid_objects] ON [smart_objects]([routeto], [id], [closed]) ;
+CREATE  INDEX [codo_objects] ON [smart_objects]([contentsource], [documentid]) ;
 
 CREATE TABLE [smart_objectversions] (
-  [id] int not null  IDENTITY(1,1),
-  [objid] int not null  default '0',
-  [minorversion] int not null  default '0',
-  [modifier] varchar(40) not null  default '',
-  [comment] varchar(255) not null  default '',
-  [slugline] varchar(255) not null  default '',
-  [created] varchar(30) not null  default '',
-  [types] text not null  default '',
-  [format] varchar(128) not null  default '',
-  [width] real not null  default '0',
-  [depth] real not null  default '0',
-  [dpi] real not null  default '0',
-  [lengthwords] int not null  default '0',
-  [lengthchars] int not null  default '0',
-  [lengthparas] int not null  default '0',
-  [lengthlines] int not null  default '0',
-  [keywords] text not null  default '',
-  [description] text not null  default '',
-  [descriptionauthor] varchar(255) not null  default '',
-  [_columns] int not null  default '0',
-  [plaincontent] text not null  default '',
-  [filesize] int not null  default '0',
-  [colorspace] varchar(20) not null  default '',
-  [orientation] tinyint not null  default '0',
-  [state] int not null  default '0',
-  [majorversion] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [objid] int NOT NULL  default '0',
+  [minorversion] int NOT NULL  default '0',
+  [modifier] varchar(40) NOT NULL  default '',
+  [comment] varchar(255) NOT NULL  default '',
+  [slugline] varchar(255) NOT NULL  default '',
+  [created] varchar(30) NOT NULL  default '',
+  [types] text NOT NULL  default '',
+  [format] varchar(128) NOT NULL  default '',
+  [width] real NOT NULL  default '0',
+  [depth] real NOT NULL  default '0',
+  [dpi] real NOT NULL  default '0',
+  [lengthwords] int NOT NULL  default '0',
+  [lengthchars] int NOT NULL  default '0',
+  [lengthparas] int NOT NULL  default '0',
+  [lengthlines] int NOT NULL  default '0',
+  [keywords] text NOT NULL  default '',
+  [description] text NOT NULL  default '',
+  [descriptionauthor] varchar(255) NOT NULL  default '',
+  [_columns] int NOT NULL  default '0',
+  [plaincontent] text NOT NULL  default '',
+  [filesize] int NOT NULL  default '0',
+  [colorspace] varchar(20) NOT NULL  default '',
+  [orientation] tinyint NOT NULL  default '0',
+  [state] int NOT NULL  default '0',
+  [majorversion] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [oive_objectversions] on [smart_objectversions]([objid], [majorversion], [minorversion]) ;
+CREATE  INDEX [oive_objectversions] ON [smart_objectversions]([objid], [majorversion], [minorversion]) ;
 
 CREATE TABLE [smart_objectrenditions] (
-  [id] int not null  IDENTITY(1,1),
-  [objid] int not null  default '0',
-  [editionid] int not null  default '0',
-  [rendition] varchar(10) not null  default '',
-  [format] varchar(128) not null  default '',
-  [majorversion] int not null  default '0',
-  [minorversion] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [objid] int NOT NULL  default '0',
+  [editionid] int NOT NULL  default '0',
+  [rendition] varchar(10) NOT NULL  default '',
+  [format] varchar(128) NOT NULL  default '',
+  [majorversion] int NOT NULL  default '0',
+  [minorversion] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [obed_objectrenditions] on [smart_objectrenditions]([objid], [editionid], [rendition]) ;
+CREATE  INDEX [obed_objectrenditions] ON [smart_objectrenditions]([objid], [editionid], [rendition]) ;
 
 CREATE TABLE [smart_pages] (
-  [id] int not null  IDENTITY(1,1),
-  [objid] int not null  default '0',
-  [width] real not null  default '0',
-  [height] real not null  default '0',
-  [pagenumber] varchar(20) not null  default '',
-  [pageorder] int not null  default '0',
-  [nr] int not null  default '0',
-  [types] text not null  default '',
-  [edition] int not null  default '0',
-  [master] varchar(255) not null  default '',
-  [instance] varchar(40) not null  default 'Production',
-  [pagesequence] int not null  default '0',
-  [orientation] varchar(9) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [objid] int NOT NULL  default '0',
+  [width] real NOT NULL  default '0',
+  [height] real NOT NULL  default '0',
+  [pagenumber] varchar(20) NOT NULL  default '',
+  [pageorder] int NOT NULL  default '0',
+  [nr] int NOT NULL  default '0',
+  [types] text NOT NULL  default '',
+  [edition] int NOT NULL  default '0',
+  [master] varchar(255) NOT NULL  default '',
+  [instance] varchar(40) NOT NULL  default 'Production',
+  [pagesequence] int NOT NULL  default '0',
+  [orientation] varchar(9) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [obpaed_pages] on [smart_pages]([objid], [pageorder], [edition]) ;
+CREATE  INDEX [obpaed_pages] ON [smart_pages]([objid], [pageorder], [edition]) ;
 
 CREATE TABLE [smart_placements] (
-  [id] int not null  IDENTITY(1,1),
-  [parent] int not null  default '0',
-  [child] int not null  default '0',
-  [page] int not null  default '0',
-  [element] varchar(200) not null  default '',
-  [elementid] varchar(200) not null  default '',
-  [frameorder] int not null  default '0',
-  [frameid] varchar(200) not null  default '',
-  [_left] real not null  default '0',
-  [top] real not null  default '0',
-  [width] real not null  default '0',
-  [height] real not null  default '0',
-  [overset] real not null  default '0',
-  [oversetchars] int not null  default '0',
-  [oversetlines] int not null  default '0',
-  [layer] varchar(200) not null  default '',
-  [content] text not null  default '',
-  [type] varchar(40) not null ,
-  [edition] int not null  default '0',
-  [contentdx] real not null  default 0,
-  [contentdy] real not null  default 0,
-  [scalex] real not null  default 1,
-  [scaley] real not null  default 1,
-  [pagesequence] int not null  default '0',
-  [pagenumber] varchar(20) not null  default '',
-  [formwidgetid] varchar(200) not null  default '',
-  [frametype] varchar(20) not null  default '',
-  [splineid] varchar(200) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [parent] int NOT NULL  default '0',
+  [child] int NOT NULL  default '0',
+  [page] int NOT NULL  default '0',
+  [element] varchar(200) NOT NULL  default '',
+  [elementid] varchar(200) NOT NULL  default '',
+  [frameorder] int NOT NULL  default '0',
+  [frameid] varchar(200) NOT NULL  default '',
+  [_left] real NOT NULL  default '0',
+  [top] real NOT NULL  default '0',
+  [width] real NOT NULL  default '0',
+  [height] real NOT NULL  default '0',
+  [overset] real NOT NULL  default '0',
+  [oversetchars] int NOT NULL  default '0',
+  [oversetlines] int NOT NULL  default '0',
+  [layer] varchar(200) NOT NULL  default '',
+  [content] text NOT NULL  default '',
+  [type] varchar(40) NOT NULL ,
+  [edition] int NOT NULL  default '0',
+  [contentdx] real NOT NULL  default 0,
+  [contentdy] real NOT NULL  default 0,
+  [scalex] real NOT NULL  default 1,
+  [scaley] real NOT NULL  default 1,
+  [pagesequence] int NOT NULL  default '0',
+  [pagenumber] varchar(20) NOT NULL  default '',
+  [formwidgetid] varchar(200) NOT NULL  default '',
+  [frametype] varchar(20) NOT NULL  default '',
+  [splineid] varchar(200) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [pachty_placements] on [smart_placements]([parent], [child], [type]) ;
-CREATE  INDEX [ei_placements] on [smart_placements]([elementid]) ;
-CREATE  INDEX [chty_placements] on [smart_placements]([child], [type]) ;
+CREATE  INDEX [pachty_placements] ON [smart_placements]([parent], [child], [type]) ;
+CREATE  INDEX [ei_placements] ON [smart_placements]([elementid]) ;
+CREATE  INDEX [chty_placements] ON [smart_placements]([child], [type]) ;
 
 CREATE TABLE [smart_elements] (
-  [id] int not null  IDENTITY(1,1),
-  [guid] varchar(200) not null  default '',
-  [name] varchar(200) not null  default '',
-  [objid] int not null  default 0,
-  [lengthwords] int not null  default '0',
-  [lengthchars] int not null  default '0',
-  [lengthparas] int not null  default '0',
-  [lengthlines] int not null  default '0',
-  [snippet] varchar(255) not null  default '',
-  [version] varchar(50) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [guid] varchar(200) NOT NULL  default '',
+  [name] varchar(200) NOT NULL  default '',
+  [objid] int NOT NULL  default 0,
+  [lengthwords] int NOT NULL  default '0',
+  [lengthchars] int NOT NULL  default '0',
+  [lengthparas] int NOT NULL  default '0',
+  [lengthlines] int NOT NULL  default '0',
+  [snippet] varchar(255) NOT NULL  default '',
+  [version] varchar(50) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [oigu_elements] on [smart_elements]([objid], [guid]) ;
+CREATE  INDEX [oigu_elements] ON [smart_elements]([objid], [guid]) ;
 
 CREATE TABLE [smart_indesignarticles] (
-  [objid] int not null  default 0,
-  [artuid] varchar(40) not null  default '',
-  [name] varchar(200) not null  default '',
-  [code] int not null  default '0',
+  [objid] int NOT NULL  default 0,
+  [artuid] varchar(40) NOT NULL  default '',
+  [name] varchar(200) NOT NULL  default '',
+  [code] int NOT NULL  default '0',
   PRIMARY KEY ([objid], [artuid])
 );
 
 CREATE TABLE [smart_idarticlesplacements] (
-  [objid] int not null  default 0,
-  [artuid] varchar(40) not null  default '',
-  [plcid] int not null  default 0,
+  [objid] int NOT NULL  default 0,
+  [artuid] varchar(40) NOT NULL  default '',
+  [plcid] int NOT NULL  default 0,
   PRIMARY KEY ([objid], [artuid], [plcid])
 );
 
 CREATE TABLE [smart_objectoperations] (
-  [id] int not null  IDENTITY(1,1),
-  [objid] int not null  default 0,
-  [guid] varchar(40) not null  default '',
-  [type] varchar(200) not null  default '',
-  [name] varchar(200) not null  default '',
-  [params] text not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [objid] int NOT NULL  default 0,
+  [guid] varchar(40) NOT NULL  default '',
+  [type] varchar(200) NOT NULL  default '',
+  [name] varchar(200) NOT NULL  default '',
+  [params] text NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [objid_objectoperations] on [smart_objectoperations]([objid]) ;
+CREATE  INDEX [objid_objectoperations] ON [smart_objectoperations]([objid]) ;
 
 CREATE TABLE [smart_properties] (
-  [id] int not null  IDENTITY(1,1),
-  [publication] int not null  default '0',
-  [objtype] varchar(40) not null  default '',
-  [name] varchar(200) not null  default '',
-  [dispname] varchar(200) not null  default '',
-  [category] varchar(200) not null  default '',
-  [type] varchar(40) not null  default '',
-  [defaultvalue] varchar(200) not null  default '',
-  [valuelist] text not null  default '',
-  [minvalue] varchar(200) not null  default '',
-  [maxvalue] varchar(200) not null  default '',
-  [maxlen] bigint not null  default '0',
-  [dbupdated] tinyint not null  default '0',
-  [entity] varchar(20) not null  default 'Object',
-  [serverplugin] varchar(64) not null  default '',
-  [adminui] varchar(2) not null  default 'on',
-  [propertyvalues] text not null  default '',
-  [minresolution] varchar(200) not null  default '',
-  [maxresolution] varchar(200) not null  default '',
-  [publishsystem] varchar(64) not null  default '',
-  [templateid] int not null  default 0,
-  [termentityid] int not null  default '0',
-  [suggestionentity] varchar(200) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [publication] int NOT NULL  default '0',
+  [objtype] varchar(40) NOT NULL  default '',
+  [name] varchar(200) NOT NULL  default '',
+  [dispname] varchar(200) NOT NULL  default '',
+  [category] varchar(200) NOT NULL  default '',
+  [type] varchar(40) NOT NULL  default '',
+  [defaultvalue] varchar(200) NOT NULL  default '',
+  [valuelist] text NOT NULL  default '',
+  [minvalue] varchar(200) NOT NULL  default '',
+  [maxvalue] varchar(200) NOT NULL  default '',
+  [maxlen] bigint NOT NULL  default '0',
+  [dbupdated] tinyint NOT NULL  default '0',
+  [entity] varchar(20) NOT NULL  default 'Object',
+  [serverplugin] varchar(64) NOT NULL  default '',
+  [adminui] varchar(2) NOT NULL  default 'on',
+  [propertyvalues] text NOT NULL  default '',
+  [minresolution] varchar(200) NOT NULL  default '',
+  [maxresolution] varchar(200) NOT NULL  default '',
+  [publishsystem] varchar(64) NOT NULL  default '',
+  [templateid] int NOT NULL  default 0,
+  [termentityid] int NOT NULL  default '0',
+  [suggestionentity] varchar(200) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [puob_properties] on [smart_properties]([publication], [objtype]) ;
-CREATE  INDEX [pudb_properties] on [smart_properties]([publication], [dbupdated]) ;
+CREATE  INDEX [puob_properties] ON [smart_properties]([publication], [objtype]) ;
+CREATE  INDEX [pudb_properties] ON [smart_properties]([publication], [dbupdated]) ;
 
 CREATE TABLE [smart_publadmin] (
-  [id] int not null  IDENTITY(1,1),
-  [publication] int not null  default '0',
-  [grpid] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [publication] int NOT NULL  default '0',
+  [grpid] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [pugi_publadmin] on [smart_publadmin]([publication], [grpid]) ;
+CREATE  INDEX [pugi_publadmin] ON [smart_publadmin]([publication], [grpid]) ;
 
 CREATE TABLE [smart_publications] (
-  [id] int not null  IDENTITY(1,1),
-  [publication] varchar(255) not null  default '',
-  [code] int not null  default '0',
-  [email] char(2) not null  default '',
-  [description] text not null  default '',
-  [readingorderrev] varchar(2) not null  default '',
-  [autopurge] int not null  default 0,
-  [defaultchannelid] int not null  default '0',
-  [calculatedeadlines] char(2) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [publication] varchar(255) NOT NULL  default '',
+  [code] int NOT NULL  default '0',
+  [email] char(2) NOT NULL  default '',
+  [description] text NOT NULL  default '',
+  [readingorderrev] varchar(2) NOT NULL  default '',
+  [autopurge] int NOT NULL  default 0,
+  [defaultchannelid] int NOT NULL  default '0',
+  [calculatedeadlines] char(2) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [pb_publications] on [smart_publications]([publication]) ;
-CREATE  INDEX [idpb_publications] on [smart_publications]([id], [publication]) ;
+CREATE  INDEX [pb_publications] ON [smart_publications]([publication]) ;
+CREATE  INDEX [idpb_publications] ON [smart_publications]([id], [publication]) ;
 SET IDENTITY_INSERT [smart_publications] ON
 INSERT INTO [smart_publications] ([id], [publication], [code], [email], [description], [readingorderrev], [autopurge], [defaultchannelid], [calculatedeadlines]) VALUES (1, 'WW News', 0, '', '', '', 0, 1, '');
 SET IDENTITY_INSERT [smart_publications] OFF
 
 CREATE TABLE [smart_publsections] (
-  [id] int not null  IDENTITY(1,1),
-  [publication] int not null  default '0',
-  [section] varchar(255) not null  default '',
-  [issue] int not null  default '0',
-  [code] int not null  default '0',
-  [description] text not null  default '',
-  [pages] int not null  default '0',
-  [deadline] varchar(30) not null  default '',
-  [deadlinerelative] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [publication] int NOT NULL  default '0',
+  [section] varchar(255) NOT NULL  default '',
+  [issue] int NOT NULL  default '0',
+  [code] int NOT NULL  default '0',
+  [description] text NOT NULL  default '',
+  [pages] int NOT NULL  default '0',
+  [deadline] varchar(30) NOT NULL  default '',
+  [deadlinerelative] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [pbis_publsections] on [smart_publsections]([publication], [issue]) ;
-CREATE  INDEX [se_publsections] on [smart_publsections]([section]) ;
+CREATE  INDEX [pbis_publsections] ON [smart_publsections]([publication], [issue]) ;
+CREATE  INDEX [se_publsections] ON [smart_publsections]([section]) ;
 SET IDENTITY_INSERT [smart_publsections] ON
 INSERT INTO [smart_publsections] ([id], [publication], [section], [issue], [code], [description], [pages], [deadline], [deadlinerelative]) VALUES (1, 1, 'News', 0, 10, '', 0, '', 0 );
 INSERT INTO [smart_publsections] ([id], [publication], [section], [issue], [code], [description], [pages], [deadline], [deadlinerelative]) VALUES (2, 1, 'Sport', 0, 20, '', 0, '', 0 );
 SET IDENTITY_INSERT [smart_publsections] OFF
 
 CREATE TABLE [smart_publobjects] (
-  [id] int not null  IDENTITY(1,1),
-  [publicationid] int not null  default '0',
-  [issueid] int not null  default '0',
-  [objectid] int not null  default '0',
-  [grpid] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [publicationid] int NOT NULL  default '0',
+  [issueid] int NOT NULL  default '0',
+  [objectid] int NOT NULL  default '0',
+  [grpid] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE UNIQUE INDEX [puisobgr_publobjects] on [smart_publobjects]([publicationid], [issueid], [objectid], [grpid]) ;
+CREATE UNIQUE INDEX [puisobgr_publobjects] ON [smart_publobjects]([publicationid], [issueid], [objectid], [grpid]) ;
 
 CREATE TABLE [smart_issueeditions] (
-  [id] int not null  IDENTITY(1,1),
-  [issue] int not null  default '0',
-  [edition] int not null  default '0',
-  [deadline] varchar(30) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [issue] int NOT NULL  default '0',
+  [edition] int NOT NULL  default '0',
+  [deadline] varchar(30) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [is_issueeditions] on [smart_issueeditions]([issue]) ;
-CREATE  INDEX [ed_issueeditions] on [smart_issueeditions]([edition]) ;
+CREATE  INDEX [is_issueeditions] ON [smart_issueeditions]([issue]) ;
+CREATE  INDEX [ed_issueeditions] ON [smart_issueeditions]([edition]) ;
 
 CREATE TABLE [smart_routing] (
-  [id] int not null  IDENTITY(1,1),
-  [publication] int not null  default '0',
-  [section] int not null  default '0',
-  [state] int not null  default '0',
-  [routeto] varchar(255) not null  default '',
-  [issue] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [publication] int NOT NULL  default '0',
+  [section] int NOT NULL  default '0',
+  [state] int NOT NULL  default '0',
+  [routeto] varchar(255) NOT NULL  default '',
+  [issue] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [pbisse_routing] on [smart_routing]([publication], [issue], [section]) ;
-CREATE  INDEX [st_routing] on [smart_routing]([state]) ;
+CREATE  INDEX [pbisse_routing] ON [smart_routing]([publication], [issue], [section]) ;
+CREATE  INDEX [st_routing] ON [smart_routing]([state]) ;
 
 CREATE TABLE [smart_settings] (
-  [id] int not null  IDENTITY(1,1),
-  [user] varchar(200) not null  default '',
-  [setting] varchar(200) not null  default '',
-  [value] text not null  default '',
-  [appname] varchar(200) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [user] varchar(200) NOT NULL  default '',
+  [setting] varchar(200) NOT NULL  default '',
+  [value] text NOT NULL  default '',
+  [appname] varchar(200) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [us_settings] on [smart_settings]([user]) ;
-CREATE  INDEX [se_settings] on [smart_settings]([setting]) ;
+CREATE  INDEX [us_settings] ON [smart_settings]([user]) ;
+CREATE  INDEX [se_settings] ON [smart_settings]([setting]) ;
 
 CREATE TABLE [smart_states] (
-  [id] int not null  IDENTITY(1,1),
-  [publication] int not null  default '0',
-  [type] varchar(40) not null  default '',
-  [state] varchar(40) not null  default '',
-  [produce] char(2) not null  default '',
-  [color] varchar(11) not null  default '',
-  [nextstate] int not null  default '0',
-  [code] int not null  default '0',
-  [issue] int not null  default '0',
-  [section] int not null  default '0',
-  [deadlinestate] int not null  default '0',
-  [deadlinerelative] int not null  default '0',
-  [createpermanentversion] char(2) not null  default '',
-  [removeintermediateversions] char(2) not null  default '',
-  [readyforpublishing] char(2) not null  default '',
-  [automaticallysendtonext] char(2) not null  default '',
-  [phase] varchar(40) not null  default 'Production',
-  [skipidsa] char(2) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [publication] int NOT NULL  default '0',
+  [type] varchar(40) NOT NULL  default '',
+  [state] varchar(40) NOT NULL  default '',
+  [produce] char(2) NOT NULL  default '',
+  [color] varchar(11) NOT NULL  default '',
+  [nextstate] int NOT NULL  default '0',
+  [code] int NOT NULL  default '0',
+  [issue] int NOT NULL  default '0',
+  [section] int NOT NULL  default '0',
+  [deadlinestate] int NOT NULL  default '0',
+  [deadlinerelative] int NOT NULL  default '0',
+  [createpermanentversion] char(2) NOT NULL  default '',
+  [removeintermediateversions] char(2) NOT NULL  default '',
+  [readyforpublishing] char(2) NOT NULL  default '',
+  [automaticallysendtonext] char(2) NOT NULL  default '',
+  [phase] varchar(40) NOT NULL  default 'Production',
+  [skipidsa] char(2) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [st_states] on [smart_states]([state]) ;
-CREATE  INDEX [pbistyse_states] on [smart_states]([publication], [issue], [type], [section]) ;
-CREATE  INDEX [istyse_states] on [smart_states]([issue], [type], [section]) ;
+CREATE  INDEX [st_states] ON [smart_states]([state]) ;
+CREATE  INDEX [pbistyse_states] ON [smart_states]([publication], [issue], [type], [section]) ;
+CREATE  INDEX [istyse_states] ON [smart_states]([issue], [type], [section]) ;
 SET IDENTITY_INSERT [smart_states] ON
 INSERT INTO [smart_states] ([id], [publication], [type], [state], [produce], [color], [nextstate], [code], [issue], [section], [deadlinestate], [deadlinerelative], [createpermanentversion], [removeintermediateversions], [readyforpublishing], [automaticallysendtonext], [phase], [skipidsa]) VALUES (1, 1, 'Article', 'Draft text', '', '#FF0000', 2, 10, 0, 0,0,0, '', '', '', '', 'Production', '');
 INSERT INTO [smart_states] ([id], [publication], [type], [state], [produce], [color], [nextstate], [code], [issue], [section], [deadlinestate], [deadlinerelative], [createpermanentversion], [removeintermediateversions], [readyforpublishing], [automaticallysendtonext], [phase], [skipidsa]) VALUES (2, 1, 'Article', 'Ready', '', '#00FF00', 0, 20, 0, 0,0,0, '', '', '', '', 'Production', '');
@@ -597,206 +597,206 @@ INSERT INTO [smart_states] ([id], [publication], [type], [state], [produce], [co
 SET IDENTITY_INSERT [smart_states] OFF
 
 CREATE TABLE [smart_tickets] (
-  [id] int not null  IDENTITY(1,1),
-  [ticketid] varchar(40) not null  default '',
-  [usr] varchar(40) not null  default '',
-  [db] varchar(255) not null  default '',
-  [clientname] varchar(255) not null  default '',
-  [clientip] varchar(40) not null  default '',
-  [appname] varchar(200) not null  default '',
-  [appversion] varchar(200) not null  default '',
-  [appserial] varchar(200) not null  default '',
-  [logon] varchar(20) not null  default '',
-  [expire] varchar(30) not null  default '',
-  [appproductcode] varchar(40) not null  default '',
-  [masterticketid] varchar(40) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [ticketid] varchar(40) NOT NULL  default '',
+  [usr] varchar(40) NOT NULL  default '',
+  [db] varchar(255) NOT NULL  default '',
+  [clientname] varchar(255) NOT NULL  default '',
+  [clientip] varchar(40) NOT NULL  default '',
+  [appname] varchar(200) NOT NULL  default '',
+  [appversion] varchar(200) NOT NULL  default '',
+  [appserial] varchar(200) NOT NULL  default '',
+  [logon] varchar(20) NOT NULL  default '',
+  [expire] varchar(30) NOT NULL  default '',
+  [appproductcode] varchar(40) NOT NULL  default '',
+  [masterticketid] varchar(40) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [ti_tickets] on [smart_tickets]([ticketid]) ;
-CREATE  INDEX [us_tickets] on [smart_tickets]([usr]) ;
-CREATE  INDEX [mtid_tickets] on [smart_tickets]([masterticketid]) ;
+CREATE  INDEX [ti_tickets] ON [smart_tickets]([ticketid]) ;
+CREATE  INDEX [us_tickets] ON [smart_tickets]([usr]) ;
+CREATE  INDEX [mtid_tickets] ON [smart_tickets]([masterticketid]) ;
 
 CREATE TABLE [smart_termentities] (
-  [id] int not null  IDENTITY(1,1),
-  [name] varchar(255) not null  default '',
-  [provider] varchar(40) not null  default '',
-  [publishsystemid] varchar(40) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [name] varchar(255) NOT NULL  default '',
+  [provider] varchar(40) NOT NULL  default '',
+  [publishsystemid] varchar(40) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [te_name] on [smart_termentities]([name]) ;
-CREATE  INDEX [te_provider] on [smart_termentities]([provider]) ;
-CREATE  INDEX [te_termentity] on [smart_termentities]([name], [provider]) ;
+CREATE  INDEX [te_name] ON [smart_termentities]([name]) ;
+CREATE  INDEX [te_provider] ON [smart_termentities]([provider]) ;
+CREATE  INDEX [te_termentity] ON [smart_termentities]([name], [provider]) ;
 
 CREATE TABLE [smart_terms] (
-  [entityid] int not null  default '0',
-  [displayname] varchar(255) not null  default '',
-  [normalizedname] varchar(255) not null  default '',
-  [ligatures] varchar(255) not null  default '',
+  [entityid] int NOT NULL  default '0',
+  [displayname] varchar(255) NOT NULL  default '',
+  [normalizedname] varchar(255) NOT NULL  default '',
+  [ligatures] varchar(255) NOT NULL  default '',
   PRIMARY KEY ([entityid], [displayname])
 );
-CREATE  INDEX [tm_entityid] on [smart_terms]([entityid]) ;
-CREATE  INDEX [tm_normalizedname] on [smart_terms]([entityid], [normalizedname]) ;
+CREATE  INDEX [tm_entityid] ON [smart_terms]([entityid]) ;
+CREATE  INDEX [tm_normalizedname] ON [smart_terms]([entityid], [normalizedname]) ;
 
 CREATE TABLE [smart_users] (
-  [id] int not null  IDENTITY(1,1),
-  [user] varchar(40) not null  default '',
-  [fullname] varchar(255) not null  default '',
-  [pass] varchar(128) not null  default '',
-  [disable] char(2) not null  default '',
-  [fixedpass] char(2) not null  default '',
-  [email] varchar(100) not null  default '',
-  [emailgrp] char(2) not null  default '',
-  [emailusr] char(2) not null  default '',
-  [language] varchar(4) not null  default '',
-  [startdate] varchar(30) not null  default '',
-  [enddate] varchar(30) not null  default '',
-  [expirepassdate] varchar(30) not null  default '',
-  [expiredays] int not null  default '0',
-  [trackchangescolor] varchar(11) not null  default '',
-  [lastlogondate] varchar(30) not null  default '',
-  [organization] varchar(255) not null  default '',
-  [location] varchar(255) not null  default '',
-  [externalid] varchar(200) not null  default '',
-  [importonlogon] char(2) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [user] varchar(40) NOT NULL  default '',
+  [fullname] varchar(255) NOT NULL  default '',
+  [pass] varchar(128) NOT NULL  default '',
+  [disable] char(2) NOT NULL  default '',
+  [fixedpass] char(2) NOT NULL  default '',
+  [email] varchar(100) NOT NULL  default '',
+  [emailgrp] char(2) NOT NULL  default '',
+  [emailusr] char(2) NOT NULL  default '',
+  [language] varchar(4) NOT NULL  default '',
+  [startdate] varchar(30) NOT NULL  default '',
+  [enddate] varchar(30) NOT NULL  default '',
+  [expirepassdate] varchar(30) NOT NULL  default '',
+  [expiredays] int NOT NULL  default '0',
+  [trackchangescolor] varchar(11) NOT NULL  default '',
+  [lastlogondate] varchar(30) NOT NULL  default '',
+  [organization] varchar(255) NOT NULL  default '',
+  [location] varchar(255) NOT NULL  default '',
+  [externalid] varchar(200) NOT NULL  default '',
+  [importonlogon] char(2) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [us_users] on [smart_users]([user]) ;
-CREATE  INDEX [fu_users] on [smart_users]([fullname]) ;
+CREATE  INDEX [us_users] ON [smart_users]([user]) ;
+CREATE  INDEX [fu_users] ON [smart_users]([fullname]) ;
 SET IDENTITY_INSERT [smart_users] ON
 INSERT INTO [smart_users] ([id], [user], [fullname], [pass], [disable], [fixedpass], [email], [emailgrp], [emailusr], [language], [startdate], [enddate], [expirepassdate], [expiredays], [trackchangescolor], [lastlogondate], [organization], [location], [externalid], [importonlogon]) VALUES (1, 'woodwing', 'WoodWing Software', '', '', '', '', '', '', 'enUS', '', '', '', 0, '#FF0000', '', '', '', '', '' );
 SET IDENTITY_INSERT [smart_users] OFF
 
 CREATE TABLE [smart_usrgrp] (
-  [id] int not null  IDENTITY(1,1),
-  [usrid] int not null  default '0',
-  [grpid] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [usrid] int NOT NULL  default '0',
+  [grpid] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE UNIQUE INDEX [usgi_usrgrp] on [smart_usrgrp]([usrid], [grpid]) ;
-CREATE  INDEX [gi_usrgrp] on [smart_usrgrp]([grpid]) ;
+CREATE UNIQUE INDEX [usgi_usrgrp] ON [smart_usrgrp]([usrid], [grpid]) ;
+CREATE  INDEX [gi_usrgrp] ON [smart_usrgrp]([grpid]) ;
 SET IDENTITY_INSERT [smart_usrgrp] ON
 INSERT INTO [smart_usrgrp] ([id], [usrid], [grpid]) VALUES (2, 1, 2);
 SET IDENTITY_INSERT [smart_usrgrp] OFF
 
 CREATE TABLE [smart_mtp] (
-  [publid] int not null ,
-  [issueid] int not null  default '0',
-  [laytriggerstate] int not null ,
-  [arttriggerstate] int not null  default 0,
-  [imgtriggerstate] int not null  default 0,
-  [layprogstate] int not null  default 0,
-  [artprogstate] int not null  default 0,
-  [imgprogstate] int not null  default 0,
-  [mtptext] text not null  default '',
+  [publid] int NOT NULL ,
+  [issueid] int NOT NULL  default '0',
+  [laytriggerstate] int NOT NULL ,
+  [arttriggerstate] int NOT NULL  default 0,
+  [imgtriggerstate] int NOT NULL  default 0,
+  [layprogstate] int NOT NULL  default 0,
+  [artprogstate] int NOT NULL  default 0,
+  [imgprogstate] int NOT NULL  default 0,
+  [mtptext] text NOT NULL  default '',
   PRIMARY KEY ([publid], [issueid], [laytriggerstate])
 );
-CREATE  INDEX [ii_mtp] on [smart_mtp]([issueid]) ;
+CREATE  INDEX [ii_mtp] ON [smart_mtp]([issueid]) ;
 
 CREATE TABLE [smart_mtpsentobjects] (
-  [objid] int not null  default '0',
-  [publid] int not null ,
-  [issueid] int not null  default '0',
-  [laytriggerstate] int not null ,
-  [printstate] int not null ,
+  [objid] int NOT NULL  default '0',
+  [publid] int NOT NULL ,
+  [issueid] int NOT NULL  default '0',
+  [laytriggerstate] int NOT NULL ,
+  [printstate] int NOT NULL ,
   PRIMARY KEY ([objid], [publid], [issueid], [laytriggerstate], [printstate])
 );
-CREATE  INDEX [ii_mtpsentobjects] on [smart_mtpsentobjects]([issueid]) ;
-CREATE  INDEX [ls_mtpsentobjects] on [smart_mtpsentobjects]([laytriggerstate]) ;
+CREATE  INDEX [ii_mtpsentobjects] ON [smart_mtpsentobjects]([issueid]) ;
+CREATE  INDEX [ls_mtpsentobjects] ON [smart_mtpsentobjects]([laytriggerstate]) ;
 
 CREATE TABLE [smart_messagelog] (
-  [id] bigint not null  IDENTITY(1,1),
-  [objid] int not null  default 0,
-  [userid] int not null  default 0,
-  [messagetype] varchar(255) not null ,
-  [messagetypedetail] varchar(255) not null ,
-  [message] text not null  default '',
-  [date] varchar(30) not null  default '',
-  [expirationdate] varchar(30) not null  default '',
-  [messagelevel] varchar(255) not null  default '',
-  [fromuser] varchar(255) not null  default '',
-  [msgid] varchar(200) not null  default '',
-  [anchorx] real not null  default '0',
-  [anchory] real not null  default '0',
-  [left] real not null  default '0',
-  [top] real not null  default '0',
-  [width] real not null  default '0',
-  [height] real not null  default '0',
-  [page] int not null  default '0',
-  [version] varchar(200) not null  default '',
-  [color] varchar(11) not null  default '',
-  [pagesequence] int not null  default '0',
-  [threadmessageid] varchar(200) not null  default '',
-  [replytomessageid] varchar(200) not null  default '',
-  [messagestatus] varchar(15) not null  default 'None',
-  [majorversion] int not null  default '0',
-  [minorversion] int not null  default '0',
-  [isread] varchar(2) not null  default '',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [objid] int NOT NULL  default 0,
+  [userid] int NOT NULL  default 0,
+  [messagetype] varchar(255) NOT NULL ,
+  [messagetypedetail] varchar(255) NOT NULL ,
+  [message] text NOT NULL  default '',
+  [date] varchar(30) NOT NULL  default '',
+  [expirationdate] varchar(30) NOT NULL  default '',
+  [messagelevel] varchar(255) NOT NULL  default '',
+  [fromuser] varchar(255) NOT NULL  default '',
+  [msgid] varchar(200) NOT NULL  default '',
+  [anchorx] real NOT NULL  default '0',
+  [anchory] real NOT NULL  default '0',
+  [left] real NOT NULL  default '0',
+  [top] real NOT NULL  default '0',
+  [width] real NOT NULL  default '0',
+  [height] real NOT NULL  default '0',
+  [page] int NOT NULL  default '0',
+  [version] varchar(200) NOT NULL  default '',
+  [color] varchar(11) NOT NULL  default '',
+  [pagesequence] int NOT NULL  default '0',
+  [threadmessageid] varchar(200) NOT NULL  default '',
+  [replytomessageid] varchar(200) NOT NULL  default '',
+  [messagestatus] varchar(15) NOT NULL  default 'None',
+  [majorversion] int NOT NULL  default '0',
+  [minorversion] int NOT NULL  default '0',
+  [isread] varchar(2) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [oimtpa_messagelog] on [smart_messagelog]([objid], [messagetype], [page]) ;
-CREATE  INDEX [oimtd_messagelog] on [smart_messagelog]([objid], [messagetypedetail]) ;
-CREATE  INDEX [mi_messagelog] on [smart_messagelog]([msgid]) ;
-CREATE  INDEX [uid_messagelog] on [smart_messagelog]([userid]) ;
+CREATE  INDEX [oimtpa_messagelog] ON [smart_messagelog]([objid], [messagetype], [page]) ;
+CREATE  INDEX [oimtd_messagelog] ON [smart_messagelog]([objid], [messagetypedetail]) ;
+CREATE  INDEX [mi_messagelog] ON [smart_messagelog]([msgid]) ;
+CREATE  INDEX [uid_messagelog] ON [smart_messagelog]([userid]) ;
 
 CREATE TABLE [smart_objectflags] (
-  [objid] int not null ,
-  [flagorigin] varchar(255) not null ,
-  [flag] int not null ,
-  [severity] int not null ,
-  [message] text not null  default '',
-  [locked] int not null  default 0,
+  [objid] int NOT NULL ,
+  [flagorigin] varchar(255) NOT NULL ,
+  [flag] int NOT NULL ,
+  [severity] int NOT NULL ,
+  [message] text NOT NULL  default '',
+  [locked] int NOT NULL  default 0,
   PRIMARY KEY ([objid], [flagorigin], [flag])
 );
 
 CREATE TABLE [smart_issuesection] (
-  [id] int not null  IDENTITY(1,1),
-  [issue] int not null  default '0',
-  [section] int not null  default '0',
-  [deadline] varchar(30) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [issue] int NOT NULL  default '0',
+  [section] int NOT NULL  default '0',
+  [deadline] varchar(30) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [isse_issuesection] on [smart_issuesection]([issue], [section]) ;
+CREATE  INDEX [isse_issuesection] ON [smart_issuesection]([issue], [section]) ;
 
 CREATE TABLE [smart_issuesectionstate] (
-  [id] int not null  IDENTITY(1,1),
-  [issue] int not null  default '0',
-  [section] int not null  default '0',
-  [state] int not null  default '0',
-  [deadline] varchar(30) not null  default '',
-  [deadlinerelative] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [issue] int NOT NULL  default '0',
+  [section] int NOT NULL  default '0',
+  [state] int NOT NULL  default '0',
+  [deadline] varchar(30) NOT NULL  default '',
+  [deadlinerelative] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [issest_issuesectionstate] on [smart_issuesectionstate]([issue], [section], [state]) ;
+CREATE  INDEX [issest_issuesectionstate] ON [smart_issuesectionstate]([issue], [section], [state]) ;
 
 CREATE TABLE [smart_sectionstate] (
-  [id] int not null  IDENTITY(1,1),
-  [section] int not null  default '0',
-  [state] int not null  default '0',
-  [deadlinerelative] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [section] int NOT NULL  default '0',
+  [state] int NOT NULL  default '0',
+  [deadlinerelative] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [sest_sectionstate] on [smart_sectionstate]([section], [state]) ;
+CREATE  INDEX [sest_sectionstate] ON [smart_sectionstate]([section], [state]) ;
 
 CREATE TABLE [smart_profiles] (
-  [id] int not null  IDENTITY(1,1),
-  [profile] varchar(255) not null  default '',
-  [code] int not null  default '0',
-  [description] text not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [profile] varchar(255) NOT NULL  default '',
+  [code] int NOT NULL  default '0',
+  [description] text NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [pr_profiles] on [smart_profiles]([profile]) ;
+CREATE  INDEX [pr_profiles] ON [smart_profiles]([profile]) ;
 SET IDENTITY_INSERT [smart_profiles] ON
 INSERT INTO [smart_profiles] ([id], [profile], [code], [description]) VALUES (1, 'Full Control', 0, 'All features enabled');
 SET IDENTITY_INSERT [smart_profiles] OFF
 
 CREATE TABLE [smart_profilefeatures] (
-  [id] int not null  IDENTITY(1,1),
-  [profile] int not null  default '0',
-  [feature] int not null  default '0',
-  [value] varchar(20) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [profile] int NOT NULL  default '0',
+  [feature] int NOT NULL  default '0',
+  [value] varchar(20) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [prfe_profiles] on [smart_profilefeatures]([profile], [feature]) ;
+CREATE  INDEX [prfe_profiles] ON [smart_profilefeatures]([profile], [feature]) ;
 SET IDENTITY_INSERT [smart_profilefeatures] ON
 INSERT INTO [smart_profilefeatures] ([id], [profile], [feature], [value]) VALUES (1, 1, 1, 'Yes');
 INSERT INTO [smart_profilefeatures] ([id], [profile], [feature], [value]) VALUES (2, 1, 2, 'Yes');
@@ -870,122 +870,122 @@ INSERT INTO [smart_profilefeatures] ([id], [profile], [feature], [value]) VALUES
 SET IDENTITY_INSERT [smart_profilefeatures] OFF
 
 CREATE TABLE [smart_appsessions] (
-  [id] int not null  IDENTITY(1,1),
-  [sessionid] varchar(40) not null  default '',
-  [userid] varchar(40) not null  default '',
-  [appname] varchar(40) not null  default '',
-  [lastsaved] varchar(20) not null  default '',
-  [readonly] char(2) not null  default '',
-  [articleid] int not null  default 0,
-  [articlename] varchar(255) not null  default '',
-  [articleformat] varchar(128) not null  default '',
-  [articleminorversion] int not null  default 0,
-  [templateid] int not null  default 0,
-  [templatename] varchar(255) not null  default '',
-  [templateformat] varchar(128) not null  default '',
-  [layoutid] int not null  default 0,
-  [layoutminorversion] int not null  default 0,
-  [articlemajorversion] int not null  default 0,
-  [layoutmajorversion] int not null  default 0,
-  [dommajorversion] int not null  default '5',
-  [domminorversion] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [sessionid] varchar(40) NOT NULL  default '',
+  [userid] varchar(40) NOT NULL  default '',
+  [appname] varchar(40) NOT NULL  default '',
+  [lastsaved] varchar(20) NOT NULL  default '',
+  [readonly] char(2) NOT NULL  default '',
+  [articleid] int NOT NULL  default 0,
+  [articlename] varchar(255) NOT NULL  default '',
+  [articleformat] varchar(128) NOT NULL  default '',
+  [articleminorversion] int NOT NULL  default 0,
+  [templateid] int NOT NULL  default 0,
+  [templatename] varchar(255) NOT NULL  default '',
+  [templateformat] varchar(128) NOT NULL  default '',
+  [layoutid] int NOT NULL  default 0,
+  [layoutminorversion] int NOT NULL  default 0,
+  [articlemajorversion] int NOT NULL  default 0,
+  [layoutmajorversion] int NOT NULL  default 0,
+  [dommajorversion] int NOT NULL  default '5',
+  [domminorversion] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
 
 CREATE TABLE [smart_datasources] (
-  [id] int not null  IDENTITY(1,1),
-  [type] varchar(255) not null  default '',
-  [name] varchar(255) not null  default '',
-  [bidirectional] char(2) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [type] varchar(255) NOT NULL  default '',
+  [name] varchar(255) NOT NULL  default '',
+  [bidirectional] char(2) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [na_datasources] on [smart_datasources]([name]) ;
+CREATE  INDEX [na_datasources] ON [smart_datasources]([name]) ;
 
 CREATE TABLE [smart_dspublications] (
-  [id] int not null  IDENTITY(1,1),
-  [datasourceid] int not null  default '0',
-  [publicationid] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [datasourceid] int NOT NULL  default '0',
+  [publicationid] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [dsid_dspublications] on [smart_dspublications]([datasourceid]) ;
-CREATE  INDEX [pubid_dspublications] on [smart_dspublications]([publicationid]) ;
+CREATE  INDEX [dsid_dspublications] ON [smart_dspublications]([datasourceid]) ;
+CREATE  INDEX [pubid_dspublications] ON [smart_dspublications]([publicationid]) ;
 
 CREATE TABLE [smart_dsqueries] (
-  [id] int not null  IDENTITY(1,1),
-  [name] varchar(255) not null  default '',
-  [query] text not null  default '',
-  [comment] text not null  default '',
-  [interface] text not null  default '',
-  [datasourceid] int not null  default '0',
-  [recordid] varchar(255) not null  default '',
-  [recordfamily] varchar(255) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [name] varchar(255) NOT NULL  default '',
+  [query] text NOT NULL  default '',
+  [comment] text NOT NULL  default '',
+  [interface] text NOT NULL  default '',
+  [datasourceid] int NOT NULL  default '0',
+  [recordid] varchar(255) NOT NULL  default '',
+  [recordfamily] varchar(255) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [dsid_dsqueries] on [smart_dsqueries]([datasourceid]) ;
+CREATE  INDEX [dsid_dsqueries] ON [smart_dsqueries]([datasourceid]) ;
 
 CREATE TABLE [smart_dsqueryfields] (
-  [id] int not null  IDENTITY(1,1),
-  [queryid] int not null  default '0',
-  [priority] tinyint not null  default '0',
-  [name] varchar(255) not null  default '',
-  [readonly] tinyint not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [queryid] int NOT NULL  default '0',
+  [priority] tinyint NOT NULL  default '0',
+  [name] varchar(255) NOT NULL  default '',
+  [readonly] tinyint NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [queryid_dsqueryfields] on [smart_dsqueryfields]([queryid]) ;
+CREATE  INDEX [queryid_dsqueryfields] ON [smart_dsqueryfields]([queryid]) ;
 
 CREATE TABLE [smart_dssettings] (
-  [id] int not null  IDENTITY(1,1),
-  [name] varchar(255) not null  default '',
-  [value] text not null  default '',
-  [datasourceid] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [name] varchar(255) NOT NULL  default '',
+  [value] text NOT NULL  default '',
+  [datasourceid] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [dsid_dssettings] on [smart_dssettings]([datasourceid]) ;
+CREATE  INDEX [dsid_dssettings] ON [smart_dssettings]([datasourceid]) ;
 
 CREATE TABLE [smart_dsqueryplacements] (
-  [id] int not null  IDENTITY(1,1),
-  [objectid] int not null  default '0',
-  [datasourceid] int not null  default '0',
-  [dirty] char(2) not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [objectid] int NOT NULL  default '0',
+  [datasourceid] int NOT NULL  default '0',
+  [dirty] char(2) NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [objid_dsqueryplacements] on [smart_dsqueryplacements]([objectid]) ;
-CREATE  INDEX [dsid_dsqueryplacements] on [smart_dsqueryplacements]([datasourceid]) ;
+CREATE  INDEX [objid_dsqueryplacements] ON [smart_dsqueryplacements]([objectid]) ;
+CREATE  INDEX [dsid_dsqueryplacements] ON [smart_dsqueryplacements]([datasourceid]) ;
 
 CREATE TABLE [smart_dsqueryfamilies] (
-  [id] int not null  IDENTITY(1,1),
-  [queryplacementid] int not null  default '0',
-  [familyfield] varchar(255) not null  default '',
-  [familyvalue] text not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [queryplacementid] int NOT NULL  default '0',
+  [familyfield] varchar(255) NOT NULL  default '',
+  [familyvalue] text NOT NULL  default '',
   PRIMARY KEY ([id])
 );
 
 CREATE TABLE [smart_dsupdates] (
-  [id] int not null  IDENTITY(1,1),
-  [recordset] image not null  default '',
-  [familyvalue] text not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [recordset] image NOT NULL  default '',
+  [familyvalue] text NOT NULL  default '',
   PRIMARY KEY ([id])
 );
 
 CREATE TABLE [smart_dsobjupdates] (
-  [id] int not null  IDENTITY(1,1),
-  [updateid] int not null  default '0',
-  [objectid] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [updateid] int NOT NULL  default '0',
+  [objectid] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
 
 CREATE TABLE [smart_channels] (
-  [id] int not null  IDENTITY(1,1),
-  [name] varchar(255) not null  default '',
-  [publicationid] int not null  default '0',
-  [type] varchar(32) not null  default 'print',
-  [description] varchar(255) not null  default '',
-  [code] int not null  default '0',
-  [deadlinerelative] int not null  default '0',
-  [currentissueid] int not null  default '0',
-  [publishsystem] varchar(64) not null  default '',
-  [suggestionprovider] varchar(64) not null  default '',
-  [publishsystemid] varchar(40) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [name] varchar(255) NOT NULL  default '',
+  [publicationid] int NOT NULL  default '0',
+  [type] varchar(32) NOT NULL  default 'print',
+  [description] varchar(255) NOT NULL  default '',
+  [code] int NOT NULL  default '0',
+  [deadlinerelative] int NOT NULL  default '0',
+  [currentissueid] int NOT NULL  default '0',
+  [publishsystem] varchar(64) NOT NULL  default '',
+  [suggestionprovider] varchar(64) NOT NULL  default '',
+  [publishsystemid] varchar(40) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
 SET IDENTITY_INSERT [smart_channels] ON
@@ -994,13 +994,13 @@ INSERT INTO [smart_channels] ([id], [name], [publicationid], [type], [descriptio
 SET IDENTITY_INSERT [smart_channels] OFF
 
 CREATE TABLE [smart_editions] (
-  [id] int not null  IDENTITY(1,1),
-  [name] varchar(255) not null  default '',
-  [channelid] int not null  default '0',
-  [issueid] int not null  default '0',
-  [code] int not null  default '0',
-  [deadlinerelative] int not null  default '0',
-  [description] text not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [name] varchar(255) NOT NULL  default '',
+  [channelid] int NOT NULL  default '0',
+  [issueid] int NOT NULL  default '0',
+  [code] int NOT NULL  default '0',
+  [deadlinerelative] int NOT NULL  default '0',
+  [description] text NOT NULL  default '',
   PRIMARY KEY ([id])
 );
 SET IDENTITY_INSERT [smart_editions] ON
@@ -1009,23 +1009,23 @@ INSERT INTO [smart_editions] ([id], [name], [channelid], [issueid], [code], [dea
 SET IDENTITY_INSERT [smart_editions] OFF
 
 CREATE TABLE [smart_issues] (
-  [id] int not null  IDENTITY(1,1),
-  [name] varchar(255) not null  default '',
-  [channelid] int not null  default '0',
-  [overrulepub] char(2) not null  default '',
-  [code] int not null  default '0',
-  [publdate] varchar(30) not null  default '',
-  [deadline] varchar(30) not null  default '',
-  [pages] int not null  default '0',
-  [subject] text not null  default '',
-  [description] text not null  default '',
-  [active] char(2) not null  default '',
-  [readingorderrev] varchar(2) not null  default '',
-  [calculatedeadlines] char(2) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [name] varchar(255) NOT NULL  default '',
+  [channelid] int NOT NULL  default '0',
+  [overrulepub] char(2) NOT NULL  default '',
+  [code] int NOT NULL  default '0',
+  [publdate] varchar(30) NOT NULL  default '',
+  [deadline] varchar(30) NOT NULL  default '',
+  [pages] int NOT NULL  default '0',
+  [subject] text NOT NULL  default '',
+  [description] text NOT NULL  default '',
+  [active] char(2) NOT NULL  default '',
+  [readingorderrev] varchar(2) NOT NULL  default '',
+  [calculatedeadlines] char(2) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [ch_issues] on [smart_issues]([channelid]) ;
-CREATE  INDEX [na_issues] on [smart_issues]([name]) ;
+CREATE  INDEX [ch_issues] ON [smart_issues]([channelid]) ;
+CREATE  INDEX [na_issues] ON [smart_issues]([name]) ;
 SET IDENTITY_INSERT [smart_issues] ON
 INSERT INTO [smart_issues] ([id], [name], [channelid], [overrulepub], [code], [publdate], [deadline], [pages], [subject], [description], [active], [readingorderrev], [calculatedeadlines]) VALUES (1, '1st Issue', 1, '', '10', '', '', 16, '', '', 'on', '', '' );
 INSERT INTO [smart_issues] ([id], [name], [channelid], [overrulepub], [code], [publdate], [deadline], [pages], [subject], [description], [active], [readingorderrev], [calculatedeadlines]) VALUES (2, '2nd Issue', 1, '', '20', '', '', 16, '', '', 'on', 'on', '' );
@@ -1033,247 +1033,247 @@ INSERT INTO [smart_issues] ([id], [name], [channelid], [overrulepub], [code], [p
 SET IDENTITY_INSERT [smart_issues] OFF
 
 CREATE TABLE [smart_targets] (
-  [id] int not null  IDENTITY(1,1),
-  [objectid] int not null  default '0',
-  [channelid] int not null  default '0',
-  [issueid] int not null  default '0',
-  [externalid] varchar(200) not null  default '',
-  [objectrelationid] int not null  default '0',
-  [publisheddate] varchar(30) not null  default '',
-  [publishedmajorversion] int not null  default '0',
-  [publishedminorversion] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [objectid] int NOT NULL  default '0',
+  [channelid] int NOT NULL  default '0',
+  [issueid] int NOT NULL  default '0',
+  [externalid] varchar(200) NOT NULL  default '',
+  [objectrelationid] int NOT NULL  default '0',
+  [publisheddate] varchar(30) NOT NULL  default '',
+  [publishedmajorversion] int NOT NULL  default '0',
+  [publishedminorversion] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE UNIQUE INDEX [obchisobr_targets] on [smart_targets]([objectid], [channelid], [issueid], [objectrelationid]) ;
-CREATE UNIQUE INDEX [obrobid_targets] on [smart_targets]([objectrelationid], [objectid], [id]) ;
-CREATE  INDEX [issueid_targets] on [smart_targets]([issueid]) ;
+CREATE UNIQUE INDEX [obchisobr_targets] ON [smart_targets]([objectid], [channelid], [issueid], [objectrelationid]) ;
+CREATE UNIQUE INDEX [obrobid_targets] ON [smart_targets]([objectrelationid], [objectid], [id]) ;
+CREATE  INDEX [issueid_targets] ON [smart_targets]([issueid]) ;
 
 CREATE TABLE [smart_publishhistory] (
-  [id] int not null  IDENTITY(1,1),
-  [externalid] varchar(200) not null  default '',
-  [objectid] int not null  default '0',
-  [channelid] int not null  default '0',
-  [issueid] int not null  default '0',
-  [editionid] int not null  default '0',
-  [publisheddate] varchar(30) not null  default '',
-  [fields] text not null  default '',
-  [fieldsmajorversion] int not null  default '0',
-  [fieldsminorversion] int not null  default '0',
-  [actiondate] varchar(30) not null  default '',
-  [action] varchar(20) not null  default '',
-  [user] varchar(255) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [externalid] varchar(200) NOT NULL  default '',
+  [objectid] int NOT NULL  default '0',
+  [channelid] int NOT NULL  default '0',
+  [issueid] int NOT NULL  default '0',
+  [editionid] int NOT NULL  default '0',
+  [publisheddate] varchar(30) NOT NULL  default '',
+  [fields] text NOT NULL  default '',
+  [fieldsmajorversion] int NOT NULL  default '0',
+  [fieldsminorversion] int NOT NULL  default '0',
+  [actiondate] varchar(30) NOT NULL  default '',
+  [action] varchar(20) NOT NULL  default '',
+  [user] varchar(255) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [obchis_publhist] on [smart_publishhistory]([objectid], [channelid], [issueid]) ;
-CREATE  INDEX [chis_publhist] on [smart_publishhistory]([channelid], [issueid]) ;
+CREATE  INDEX [obchis_publhist] ON [smart_publishhistory]([objectid], [channelid], [issueid]) ;
+CREATE  INDEX [chis_publhist] ON [smart_publishhistory]([channelid], [issueid]) ;
 
 CREATE TABLE [smart_pubpublishedissues] (
-  [id] int not null  IDENTITY(1,1),
-  [externalid] varchar(200) not null  default '',
-  [channelid] int not null  default '0',
-  [issueid] int not null  default '0',
-  [editionid] int not null  default '0',
-  [report] text not null  default '',
-  [dossierorder] text not null  default '',
-  [publishdate] varchar(30) not null  default '',
-  [issuemajorversion] int not null  default '0',
-  [issueminorversion] int not null  default '0',
-  [fields] text not null  default '',
-  [fieldsmajorversion] int not null  default '0',
-  [fieldsminorversion] int not null  default '0',
-  [actiondate] varchar(30) not null  default '',
-  [action] varchar(20) not null  default '',
-  [userid] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [externalid] varchar(200) NOT NULL  default '',
+  [channelid] int NOT NULL  default '0',
+  [issueid] int NOT NULL  default '0',
+  [editionid] int NOT NULL  default '0',
+  [report] text NOT NULL  default '',
+  [dossierorder] text NOT NULL  default '',
+  [publishdate] varchar(30) NOT NULL  default '',
+  [issuemajorversion] int NOT NULL  default '0',
+  [issueminorversion] int NOT NULL  default '0',
+  [fields] text NOT NULL  default '',
+  [fieldsmajorversion] int NOT NULL  default '0',
+  [fieldsminorversion] int NOT NULL  default '0',
+  [actiondate] varchar(30) NOT NULL  default '',
+  [action] varchar(20) NOT NULL  default '',
+  [userid] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [chised_publhist] on [smart_pubpublishedissues]([channelid], [issueid], [editionid]) ;
+CREATE  INDEX [chised_publhist] ON [smart_pubpublishedissues]([channelid], [issueid], [editionid]) ;
 
 CREATE TABLE [smart_publishedobjectshist] (
-  [id] int not null  IDENTITY(1,1),
-  [objectid] int not null  default '0',
-  [publishid] int not null  default '0',
-  [majorversion] int not null  default '0',
-  [minorversion] int not null  default '0',
-  [externalid] varchar(200) not null  default '',
-  [objectname] varchar(255) not null  default '',
-  [objecttype] varchar(40) not null  default '',
-  [objectformat] varchar(128) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [objectid] int NOT NULL  default '0',
+  [publishid] int NOT NULL  default '0',
+  [majorversion] int NOT NULL  default '0',
+  [minorversion] int NOT NULL  default '0',
+  [externalid] varchar(200) NOT NULL  default '',
+  [objectname] varchar(255) NOT NULL  default '',
+  [objecttype] varchar(40) NOT NULL  default '',
+  [objectformat] varchar(128) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [obpu_publobjhist] on [smart_publishedobjectshist]([objectid], [publishid]) ;
-CREATE  INDEX [puob_publobjhist] on [smart_publishedobjectshist]([publishid], [objectid]) ;
+CREATE  INDEX [obpu_publobjhist] ON [smart_publishedobjectshist]([objectid], [publishid]) ;
+CREATE  INDEX [puob_publobjhist] ON [smart_publishedobjectshist]([publishid], [objectid]) ;
 
 CREATE TABLE [smart_publishedplcmtshist] (
-  [id] int not null  IDENTITY(1,1),
-  [objectid] int not null  default '0',
-  [publishid] int not null  default '0',
-  [majorversion] int not null  default '0',
-  [minorversion] int not null  default '0',
-  [externalid] varchar(200) not null  default '',
-  [placementhash] varchar(64) not null ,
+  [id] int NOT NULL  IDENTITY(1,1),
+  [objectid] int NOT NULL  default '0',
+  [publishid] int NOT NULL  default '0',
+  [majorversion] int NOT NULL  default '0',
+  [minorversion] int NOT NULL  default '0',
+  [externalid] varchar(200) NOT NULL  default '',
+  [placementhash] varchar(64) NOT NULL ,
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [obpu_publplchist] on [smart_publishedplcmtshist]([objectid], [publishid]) ;
-CREATE  INDEX [puob_publplchist] on [smart_publishedplcmtshist]([publishid], [objectid]) ;
+CREATE  INDEX [obpu_publplchist] ON [smart_publishedplcmtshist]([objectid], [publishid]) ;
+CREATE  INDEX [puob_publplchist] ON [smart_publishedplcmtshist]([publishid], [objectid]) ;
 
 CREATE TABLE [smart_targeteditions] (
-  [id] int not null  IDENTITY(1,1),
-  [targetid] int not null  default '0',
-  [editionid] int not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [targetid] int NOT NULL  default '0',
+  [editionid] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE UNIQUE INDEX [taed_targeteditions] on [smart_targeteditions]([targetid], [editionid]) ;
-CREATE UNIQUE INDEX [edta_targeteditions] on [smart_targeteditions]([editionid], [targetid]) ;
+CREATE UNIQUE INDEX [taed_targeteditions] ON [smart_targeteditions]([targetid], [editionid]) ;
+CREATE UNIQUE INDEX [edta_targeteditions] ON [smart_targeteditions]([editionid], [targetid]) ;
 
 CREATE TABLE [smart_indesignservers] (
-  [id] int not null  IDENTITY(1,1),
-  [hostname] varchar(64) not null  default '',
-  [portnumber] int not null  default '0',
-  [description] varchar(255) not null  default '',
-  [active] char(2) not null  default '',
-  [servermajorversion] int not null  default '5',
-  [serverminorversion] int not null  default '0',
-  [prio1] char(2) not null  default 'on',
-  [prio2] char(2) not null  default 'on',
-  [prio3] char(2) not null  default 'on',
-  [prio4] char(2) not null  default 'on',
-  [prio5] char(2) not null  default 'on',
-  [locktoken] varchar(40) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [hostname] varchar(64) NOT NULL  default '',
+  [portnumber] int NOT NULL  default '0',
+  [description] varchar(255) NOT NULL  default '',
+  [active] char(2) NOT NULL  default '',
+  [servermajorversion] int NOT NULL  default '5',
+  [serverminorversion] int NOT NULL  default '0',
+  [prio1] char(2) NOT NULL  default 'on',
+  [prio2] char(2) NOT NULL  default 'on',
+  [prio3] char(2) NOT NULL  default 'on',
+  [prio4] char(2) NOT NULL  default 'on',
+  [prio5] char(2) NOT NULL  default 'on',
+  [locktoken] varchar(40) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE UNIQUE INDEX [hopo_indesignservers] on [smart_indesignservers]([hostname], [portnumber]) ;
+CREATE UNIQUE INDEX [hopo_indesignservers] ON [smart_indesignservers]([hostname], [portnumber]) ;
 
 CREATE TABLE [smart_indesignserverjobs] (
-  [jobid] varchar(40) not null  default '',
-  [foreground] char(2) not null  default '',
-  [objid] int not null  default 0,
-  [objectmajorversion] int not null  default '0',
-  [objectminorversion] int not null  default '0',
-  [jobtype] varchar(32) not null ,
-  [jobscript] text not null  default '',
-  [jobparams] text not null  default '',
-  [locktoken] varchar(40) not null  default '',
-  [queuetime] varchar(20) not null  default '',
-  [starttime] varchar(30) not null  default '',
-  [readytime] varchar(20) not null  default '',
-  [errorcode] varchar(32) not null  default '',
-  [errormessage] varchar(1024) not null  default '',
-  [scriptresult] text not null  default '',
-  [jobstatus] int not null  default 0,
-  [jobcondition] int not null  default 0,
-  [jobprogress] int not null  default 0,
-  [attempts] int not null  default 0,
-  [pickuptime] varchar(30) not null  default '',
-  [assignedserverid] int not null  default 0,
-  [minservermajorversion] int not null  default '0',
-  [minserverminorversion] int not null  default '0',
-  [maxservermajorversion] int not null  default '0',
-  [maxserverminorversion] int not null  default '0',
-  [prio] int not null  default '3',
-  [ticketseal] varchar(40) not null  default '',
-  [ticket] varchar(40) not null  default '',
-  [actinguser] varchar(40) not null  default '',
-  [initiator] varchar(40) not null  default '',
-  [servicename] varchar(32) not null  default '',
-  [context] varchar(64) not null  default '',
+  [jobid] varchar(40) NOT NULL  default '',
+  [foreground] char(2) NOT NULL  default '',
+  [objid] int NOT NULL  default 0,
+  [objectmajorversion] int NOT NULL  default '0',
+  [objectminorversion] int NOT NULL  default '0',
+  [jobtype] varchar(32) NOT NULL ,
+  [jobscript] text NOT NULL  default '',
+  [jobparams] text NOT NULL  default '',
+  [locktoken] varchar(40) NOT NULL  default '',
+  [queuetime] varchar(20) NOT NULL  default '',
+  [starttime] varchar(30) NOT NULL  default '',
+  [readytime] varchar(20) NOT NULL  default '',
+  [errorcode] varchar(32) NOT NULL  default '',
+  [errormessage] varchar(1024) NOT NULL  default '',
+  [scriptresult] text NOT NULL  default '',
+  [jobstatus] int NOT NULL  default 0,
+  [jobcondition] int NOT NULL  default 0,
+  [jobprogress] int NOT NULL  default 0,
+  [attempts] int NOT NULL  default 0,
+  [pickuptime] varchar(30) NOT NULL  default '',
+  [assignedserverid] int NOT NULL  default 0,
+  [minservermajorversion] int NOT NULL  default '0',
+  [minserverminorversion] int NOT NULL  default '0',
+  [maxservermajorversion] int NOT NULL  default '0',
+  [maxserverminorversion] int NOT NULL  default '0',
+  [prio] int NOT NULL  default '3',
+  [ticketseal] varchar(40) NOT NULL  default '',
+  [ticket] varchar(40) NOT NULL  default '',
+  [actinguser] varchar(40) NOT NULL  default '',
+  [initiator] varchar(40) NOT NULL  default '',
+  [servicename] varchar(32) NOT NULL  default '',
+  [context] varchar(64) NOT NULL  default '',
   PRIMARY KEY ([jobid])
 );
-CREATE  INDEX [asre_indesignserverjobs] on [smart_indesignserverjobs]([assignedserverid], [readytime]) ;
-CREATE  INDEX [qt_indesignserverjobs] on [smart_indesignserverjobs]([queuetime]) ;
-CREATE  INDEX [objid_indesignserverjobs] on [smart_indesignserverjobs]([objid]) ;
-CREATE  INDEX [prid_indesignserverjobs] on [smart_indesignserverjobs]([prio], [jobid]) ;
-CREATE  INDEX [ts_indesignserverjobs] on [smart_indesignserverjobs]([ticketseal]) ;
-CREATE  INDEX [ttjtstrt_indesignserverjobs] on [smart_indesignserverjobs]([ticket], [jobtype], [starttime], [readytime]) ;
-CREATE  INDEX [jp_indesignserverjobs] on [smart_indesignserverjobs]([jobprogress]) ;
-CREATE  INDEX [jspr_indesignserverjobs] on [smart_indesignserverjobs]([jobstatus], [prio], [queuetime]) ;
-CREATE  INDEX [lt_indesignserverjobs] on [smart_indesignserverjobs]([locktoken]) ;
+CREATE  INDEX [asre_indesignserverjobs] ON [smart_indesignserverjobs]([assignedserverid], [readytime]) ;
+CREATE  INDEX [qt_indesignserverjobs] ON [smart_indesignserverjobs]([queuetime]) ;
+CREATE  INDEX [objid_indesignserverjobs] ON [smart_indesignserverjobs]([objid]) ;
+CREATE  INDEX [prid_indesignserverjobs] ON [smart_indesignserverjobs]([prio], [jobid]) ;
+CREATE  INDEX [ts_indesignserverjobs] ON [smart_indesignserverjobs]([ticketseal]) ;
+CREATE  INDEX [ttjtstrt_indesignserverjobs] ON [smart_indesignserverjobs]([ticket], [jobtype], [starttime], [readytime]) ;
+CREATE  INDEX [jp_indesignserverjobs] ON [smart_indesignserverjobs]([jobprogress]) ;
+CREATE  INDEX [jspr_indesignserverjobs] ON [smart_indesignserverjobs]([jobstatus], [prio], [queuetime]) ;
+CREATE  INDEX [lt_indesignserverjobs] ON [smart_indesignserverjobs]([locktoken]) ;
 
 CREATE TABLE [smart_servers] (
-  [id] int not null  IDENTITY(1,1),
-  [name] varchar(64) not null  default '',
-  [type] varchar(32) not null  default '',
-  [url] varchar(1024) not null  default '',
-  [description] varchar(255) not null  default '',
-  [jobsupport] char(1) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [name] varchar(64) NOT NULL  default '',
+  [type] varchar(32) NOT NULL  default '',
+  [url] varchar(1024) NOT NULL  default '',
+  [description] varchar(255) NOT NULL  default '',
+  [jobsupport] char(1) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE UNIQUE INDEX [hopo_servers] on [smart_servers]([name]) ;
+CREATE UNIQUE INDEX [hopo_servers] ON [smart_servers]([name]) ;
 
 CREATE TABLE [smart_serverjobs] (
-  [jobid] varchar(40) not null  default '',
-  [attempts] int not null  default 0,
-  [queuetime] varchar(30) not null  default '',
-  [servicename] varchar(32) not null  default '',
-  [context] varchar(32) not null  default '',
-  [servertype] varchar(32) not null  default '',
-  [jobtype] varchar(32) not null  default '',
-  [assignedserverid] int not null  default 0,
-  [starttime] varchar(30) not null  default '0000-00-00T00:00:00',
-  [readytime] varchar(30) not null  default '0000-00-00T00:00:00',
-  [errormessage] varchar(1024) not null  default '',
-  [locktoken] varchar(40) not null  default '',
-  [ticketseal] varchar(40) not null  default '',
-  [actinguser] varchar(40) not null  default '',
-  [jobstatus] int not null  default 0,
-  [jobcondition] int not null  default 0,
-  [jobprogress] int not null  default 0,
-  [jobdata] text not null  default '',
-  [dataentity] varchar(20) not null  default '',
+  [jobid] varchar(40) NOT NULL  default '',
+  [attempts] int NOT NULL  default 0,
+  [queuetime] varchar(30) NOT NULL  default '',
+  [servicename] varchar(32) NOT NULL  default '',
+  [context] varchar(32) NOT NULL  default '',
+  [servertype] varchar(32) NOT NULL  default '',
+  [jobtype] varchar(32) NOT NULL  default '',
+  [assignedserverid] int NOT NULL  default 0,
+  [starttime] varchar(30) NOT NULL  default '0000-00-00T00:00:00',
+  [readytime] varchar(30) NOT NULL  default '0000-00-00T00:00:00',
+  [errormessage] varchar(1024) NOT NULL  default '',
+  [locktoken] varchar(40) NOT NULL  default '',
+  [ticketseal] varchar(40) NOT NULL  default '',
+  [actinguser] varchar(40) NOT NULL  default '',
+  [jobstatus] int NOT NULL  default 0,
+  [jobcondition] int NOT NULL  default 0,
+  [jobprogress] int NOT NULL  default 0,
+  [jobdata] text NOT NULL  default '',
+  [dataentity] varchar(20) NOT NULL  default '',
   PRIMARY KEY ([jobid])
 );
-CREATE  INDEX [qt_serverjobs] on [smart_serverjobs]([queuetime]) ;
-CREATE  INDEX [jobinfo] on [smart_serverjobs]([locktoken], [jobstatus], [jobprogress]) ;
-CREATE  INDEX [aslt_serverjobs] on [smart_serverjobs]([assignedserverid], [locktoken]) ;
-CREATE  INDEX [paged_results] on [smart_serverjobs]([queuetime], [servertype], [jobtype], [jobstatus], [actinguser]) ;
+CREATE  INDEX [qt_serverjobs] ON [smart_serverjobs]([queuetime]) ;
+CREATE  INDEX [jobinfo] ON [smart_serverjobs]([locktoken], [jobstatus], [jobprogress]) ;
+CREATE  INDEX [aslt_serverjobs] ON [smart_serverjobs]([assignedserverid], [locktoken]) ;
+CREATE  INDEX [paged_results] ON [smart_serverjobs]([queuetime], [servertype], [jobtype], [jobstatus], [actinguser]) ;
 
 CREATE TABLE [smart_serverjobtypesonhold] (
-  [guid] varchar(40) not null  default '',
-  [jobtype] varchar(32) not null  default '',
-  [retrytimestamp] varchar(20) not null  default '',
+  [guid] varchar(40) NOT NULL  default '',
+  [jobtype] varchar(32) NOT NULL  default '',
+  [retrytimestamp] varchar(20) NOT NULL  default '',
   PRIMARY KEY ([guid])
 );
-CREATE  INDEX [jobtype] on [smart_serverjobtypesonhold]([jobtype]) ;
-CREATE  INDEX [retrytime] on [smart_serverjobtypesonhold]([retrytimestamp]) ;
+CREATE  INDEX [jobtype] ON [smart_serverjobtypesonhold]([jobtype]) ;
+CREATE  INDEX [retrytime] ON [smart_serverjobtypesonhold]([retrytimestamp]) ;
 
 CREATE TABLE [smart_serverjobconfigs] (
-  [id] int not null  IDENTITY(1,1),
-  [jobtype] varchar(32) not null  default '',
-  [servertype] varchar(32) not null  default '',
-  [attempts] int not null  default 0,
-  [active] char(1) not null  default 'N',
-  [sysadmin] char(1) not null  default '-',
-  [userid] int not null  default 0,
-  [userconfigneeded] char(1) not null  default 'Y',
-  [recurring] char(1) not null  default 'N',
-  [selfdestructive] char(1) not null  default 'N',
-  [workingdays] char(1) not null  default 'N',
-  [dailystarttime] varchar(30) not null  default '00-00-00T00:00:00',
-  [dailystoptime] varchar(30) not null  default '00-00-00T00:00:00',
-  [timeinterval] int not null  default 0,
+  [id] int NOT NULL  IDENTITY(1,1),
+  [jobtype] varchar(32) NOT NULL  default '',
+  [servertype] varchar(32) NOT NULL  default '',
+  [attempts] int NOT NULL  default 0,
+  [active] char(1) NOT NULL  default 'N',
+  [sysadmin] char(1) NOT NULL  default '-',
+  [userid] int NOT NULL  default 0,
+  [userconfigneeded] char(1) NOT NULL  default 'Y',
+  [recurring] char(1) NOT NULL  default 'N',
+  [selfdestructive] char(1) NOT NULL  default 'N',
+  [workingdays] char(1) NOT NULL  default 'N',
+  [dailystarttime] varchar(30) NOT NULL  default '00-00-00T00:00:00',
+  [dailystoptime] varchar(30) NOT NULL  default '00-00-00T00:00:00',
+  [timeinterval] int NOT NULL  default 0,
   PRIMARY KEY ([id])
 );
 
 CREATE TABLE [smart_serverjobsupports] (
-  [id] int not null  IDENTITY(1,1),
-  [serverid] int not null  default 0,
-  [jobconfigid] int not null  default 0,
+  [id] int NOT NULL  IDENTITY(1,1),
+  [serverid] int NOT NULL  default 0,
+  [jobconfigid] int NOT NULL  default 0,
   PRIMARY KEY ([id])
 );
-CREATE UNIQUE INDEX [sjs_serverconfigs] on [smart_serverjobsupports]([serverid], [jobconfigid]) ;
+CREATE UNIQUE INDEX [sjs_serverconfigs] ON [smart_serverjobsupports]([serverid], [jobconfigid]) ;
 
 CREATE TABLE [smart_serverplugins] (
-  [id] int not null  IDENTITY(1,1),
-  [uniquename] varchar(64) not null  default '',
-  [displayname] varchar(128) not null  default '',
-  [version] varchar(64) not null  default '',
-  [description] varchar(255) not null  default '',
-  [copyright] varchar(128) not null  default '',
-  [active] char(2) not null  default '',
-  [system] char(2) not null  default '',
-  [installed] char(2) not null  default '',
-  [modified] varchar(30) not null  default '',
-  [dbprefix] varchar(10) not null  default '',
-  [dbversion] varchar(10) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [uniquename] varchar(64) NOT NULL  default '',
+  [displayname] varchar(128) NOT NULL  default '',
+  [version] varchar(64) NOT NULL  default '',
+  [description] varchar(255) NOT NULL  default '',
+  [copyright] varchar(128) NOT NULL  default '',
+  [active] char(2) NOT NULL  default '',
+  [system] char(2) NOT NULL  default '',
+  [installed] char(2) NOT NULL  default '',
+  [modified] varchar(30) NOT NULL  default '',
+  [dbprefix] varchar(10) NOT NULL  default '',
+  [dbversion] varchar(10) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
 SET IDENTITY_INSERT [smart_serverplugins] ON
@@ -1283,19 +1283,19 @@ INSERT INTO [smart_serverplugins] ([id], [uniquename], [displayname], [version],
 SET IDENTITY_INSERT [smart_serverplugins] OFF
 
 CREATE TABLE [smart_serverconnectors] (
-  [id] int not null  IDENTITY(1,1),
-  [pluginid] int not null  default '0',
-  [classname] varchar(128) not null  default '',
-  [interface] varchar(128) not null  default '',
-  [type] varchar(32) not null  default '',
-  [prio] int not null  default '0',
-  [runmode] varchar(16) not null  default '',
-  [classfile] varchar(255) not null  default '',
-  [modified] varchar(30) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [pluginid] int NOT NULL  default '0',
+  [classname] varchar(128) NOT NULL  default '',
+  [interface] varchar(128) NOT NULL  default '',
+  [type] varchar(32) NOT NULL  default '',
+  [prio] int NOT NULL  default '0',
+  [runmode] varchar(16) NOT NULL  default '',
+  [classfile] varchar(255) NOT NULL  default '',
+  [modified] varchar(30) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [seco_pluginid] on [smart_serverconnectors]([pluginid]) ;
-CREATE  INDEX [seco_typeinterface] on [smart_serverconnectors]([type], [interface]) ;
+CREATE  INDEX [seco_pluginid] ON [smart_serverconnectors]([pluginid]) ;
+CREATE  INDEX [seco_typeinterface] ON [smart_serverconnectors]([type], [interface]) ;
 SET IDENTITY_INSERT [smart_serverconnectors] ON
 INSERT INTO [smart_serverconnectors] ([id], [pluginid], [classname], [interface], [type], [prio], [runmode], [classfile], [modified]) VALUES (1, 1, 'PreviewMetaPHP_Preview', 'Preview', '', 500, 'Synchron', '/server/plugins/PreviewMetaPHP/PreviewMetaPHP_Preview.class.php', '2008-10-02T09:00:00');
 INSERT INTO [smart_serverconnectors] ([id], [pluginid], [classname], [interface], [type], [prio], [runmode], [classfile], [modified]) VALUES (2, 1, 'PreviewMetaPHP_MetaData', 'MetaData', '', 500, 'Synchron', '/server/plugins/PreviewMetaPHP/PreviewMetaPHP_MetaData.class.php', '2008-10-02T09:00:00');
@@ -1303,31 +1303,31 @@ INSERT INTO [smart_serverconnectors] ([id], [pluginid], [classname], [interface]
 SET IDENTITY_INSERT [smart_serverconnectors] OFF
 
 CREATE TABLE [smart_semaphores] (
-  [id] int not null  IDENTITY(1,1),
-  [entityid] varchar(40) not null  default '0',
-  [lastupdate] int not null  default '0',
-  [lifetime] int not null  default '0',
-  [user] varchar(40) not null  default '',
-  [ip] varchar(30) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [entityid] varchar(40) NOT NULL  default '0',
+  [lastupdate] int NOT NULL  default '0',
+  [lifetime] int NOT NULL  default '0',
+  [user] varchar(40) NOT NULL  default '',
+  [ip] varchar(30) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE UNIQUE INDEX [idx_entity] on [smart_semaphores]([entityid]) ;
-CREATE  INDEX [idx_entityuser] on [smart_semaphores]([entityid], [user]) ;
+CREATE UNIQUE INDEX [idx_entity] ON [smart_semaphores]([entityid]) ;
+CREATE  INDEX [idx_entityuser] ON [smart_semaphores]([entityid], [user]) ;
 
 CREATE TABLE [smart_outputdevices] (
-  [id] int not null  IDENTITY(1,1),
-  [name] varchar(255) not null  default '',
-  [code] int not null  default '0',
-  [description] text not null  default '',
-  [landscapewidth] int not null  default '0',
-  [landscapeheight] int not null  default '0',
-  [portraitwidth] int not null  default '0',
-  [portraitheight] int not null  default '0',
-  [previewquality] int not null  default '0',
-  [landscapelayoutwidth] real not null  default '0',
-  [pixeldensity] int not null  default '0',
-  [pngcompression] int not null  default '0',
-  [textviewpadding] varchar(50) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [name] varchar(255) NOT NULL  default '',
+  [code] int NOT NULL  default '0',
+  [description] text NOT NULL  default '',
+  [landscapewidth] int NOT NULL  default '0',
+  [landscapeheight] int NOT NULL  default '0',
+  [portraitwidth] int NOT NULL  default '0',
+  [portraitheight] int NOT NULL  default '0',
+  [previewquality] int NOT NULL  default '0',
+  [landscapelayoutwidth] real NOT NULL  default '0',
+  [pixeldensity] int NOT NULL  default '0',
+  [pngcompression] int NOT NULL  default '0',
+  [textviewpadding] varchar(50) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
 SET IDENTITY_INSERT [smart_outputdevices] ON
@@ -1338,39 +1338,39 @@ INSERT INTO [smart_outputdevices] ([id], [name], [code], [description], [landsca
 SET IDENTITY_INSERT [smart_outputdevices] OFF
 
 CREATE TABLE [smart_placementtiles] (
-  [id] int not null  IDENTITY(1,1),
-  [placementid] int not null  default '0',
-  [pagesequence] int not null  default '0',
-  [left] real not null  default '0',
-  [top] real not null  default '0',
-  [width] real not null  default '0',
-  [height] real not null  default '0',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [placementid] int NOT NULL  default '0',
+  [pagesequence] int NOT NULL  default '0',
+  [left] real NOT NULL  default '0',
+  [top] real NOT NULL  default '0',
+  [width] real NOT NULL  default '0',
+  [height] real NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [pi_placementtiles] on [smart_placementtiles]([placementid]) ;
+CREATE  INDEX [pi_placementtiles] ON [smart_placementtiles]([placementid]) ;
 
 CREATE TABLE [smart_objectlabels] (
-  [id] int not null  IDENTITY(1,1),
-  [objid] int not null  default '0',
-  [name] varchar(250) not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [objid] int NOT NULL  default '0',
+  [name] varchar(250) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [objlabels_objid] on [smart_objectlabels]([objid]) ;
+CREATE  INDEX [objlabels_objid] ON [smart_objectlabels]([objid]) ;
 
 CREATE TABLE [smart_objectrelationlabels] (
-  [labelid] int not null  default '0',
-  [childobjid] int not null  default '0',
+  [labelid] int NOT NULL  default '0',
+  [childobjid] int NOT NULL  default '0',
   PRIMARY KEY ([labelid], [childobjid])
 );
-CREATE  INDEX [objrellabels_childobjid] on [smart_objectrelationlabels]([childobjid]) ;
+CREATE  INDEX [objrellabels_childobjid] ON [smart_objectrelationlabels]([childobjid]) ;
 
 CREATE TABLE [smart_channeldata] (
-  [publication] int not null  default '0',
-  [pubchannel] int not null  default '0',
-  [issue] int not null  default '0',
-  [section] int not null  default '0',
-  [name] varchar(200) not null  default '',
-  [value] text not null  default '',
+  [publication] int NOT NULL  default '0',
+  [pubchannel] int NOT NULL  default '0',
+  [issue] int NOT NULL  default '0',
+  [section] int NOT NULL  default '0',
+  [name] varchar(200) NOT NULL  default '',
+  [value] text NOT NULL  default '',
   PRIMARY KEY ([publication], [pubchannel], [issue], [section], [name])
 );
 UPDATE [smart_config] set [value] = '10.2' where [name] = 'version';

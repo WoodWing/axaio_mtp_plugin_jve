@@ -172,9 +172,9 @@ class WW_BuildTools_DbGen
 				$generator = $this->createGenerator( $dbms );
 				$this->generateUpgradeScript( $previousVersion, $this->lastVersion, $generator, $this->reader->getDbModelProvider()->getStruct() );
 				if( isset( $this->addedCode[ $dbmsName ] ) ) {
-					foreach( $this->addedCode[ $dbmsName ] as $k => $file ) {
-						if( $k > $previousVersion && $k <= $this->lastVersion ) {
-							$generator->addTxt( file_get_contents( $file )."\r\n" );
+					foreach( $this->addedCode[ $dbmsName ] as $fileVersion => $filePath ) {
+						if( $fileVersion > $previousVersion && $fileVersion <= $this->lastVersion ) {
+							$generator->addTxt( file_get_contents( $filePath )."\r\n" );
 						}
 					}
 				}

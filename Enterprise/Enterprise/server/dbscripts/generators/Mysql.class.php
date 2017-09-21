@@ -33,13 +33,14 @@ class WW_DbScripts_Generators_Mysql extends WW_DbScripts_Generators_Base
 		$primarykey = 'id';
 
 		// unique keys (if any)
-		if (isset($table['indexes'])) foreach ($table['indexes'] as $ix) {
-			if (isset($ix["primary"]) && $ix["primary"] == true) $primarykey = $ix['fields'];
-//			if (@$ix["unique"]) $this->txt .= $this->uniquekey($ix['name'], $ix['fields']);
+		if( isset( $table['indexes'] ) ) foreach( $table['indexes'] as $ix ) {
+			if( isset( $ix["primary"] ) && $ix["primary"] == true ) {
+				$primarykey = $ix['fields'];
+			}
 		}
 
 		// primary key
-		$keys = $this->quotefields($primarykey);
+		$keys = $this->quotefields( $primarykey );
 		$this->txt .= "  PRIMARY KEY ($keys)\r\n) DEFAULT CHARSET=utf8".$this->closeline()."\r\n";
 	}
 

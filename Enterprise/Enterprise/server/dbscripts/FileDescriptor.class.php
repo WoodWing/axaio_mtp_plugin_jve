@@ -3,7 +3,7 @@
  * File descriptor that represents one of the SQL files located in the Enterprise/server/dbscripts folder.
  *
  * @package    Enterprise
- * @subpackage BizClasses
+ * @subpackage DbScripts
  * @since      v10.2.0
  * @copyright  WoodWing Software bv. All Rights Reserved.
  */

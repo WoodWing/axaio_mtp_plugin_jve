@@ -192,8 +192,7 @@ abstract class WW_DbScripts_Generators_Base extends WW_DbScripts_Generators_Abst
 			$type = $index[$this->myname."type"];
 		}
 
-		// Remove length constraint in case of Oracle or Mssql. So 'documentid(200)'
-		// will be changed into 'documentid'.
+		// Remove length constraint in case of Mssql. So 'documentid(200)' will be changed into 'documentid'.
 		$indexfields = explode(',', $index['fields']);
 		foreach ($indexfields as &$indexfield) {
 			$posBracket = strpos($indexfield, '(', 1);
@@ -206,7 +205,7 @@ abstract class WW_DbScripts_Generators_Base extends WW_DbScripts_Generators_Abst
 		}
 		$index['fields'] = implode(',', $indexfields);
 
-		$this->txt .= "CREATE $unique INDEX ".$this->quotefields($name)." on ".$this->quotefields($table["name"])."(";
+		$this->txt .= "CREATE $unique INDEX ".$this->quotefields($name)." ON ".$this->quotefields($table["name"])."(";
 		$this->txt .= $this->quotefields($index['fields']);
 		$this->txt .= ") $type".$this->closeline()."\r\n";
 	}
@@ -362,7 +361,7 @@ abstract class WW_DbScripts_Generators_Base extends WW_DbScripts_Generators_Abst
 	}
 
 	/**
-	 * function to return autoincrement text (or empty string)
+	 * Return auto_increment text (or empty string).
 	 *
 	 * @return string	SQL fragment
 	 */
@@ -372,17 +371,17 @@ abstract class WW_DbScripts_Generators_Base extends WW_DbScripts_Generators_Abst
 	}
 
 	/**
-	 * function to return not null text (or empty string)
+	 * Return NOT NULL text (or empty string).
 	 *
 	 * @return string SQL fragment
 	 */
 	protected function notnull()
 	{
-		return " not null ";
+		return " NOT NULL ";
 	}
 
 	/**
-	 * function to return 'null' text (or empty string)
+	 * Return NULL text (or empty string).
 	 *
 	 * @return string SQL fragment
 	 */
@@ -392,7 +391,7 @@ abstract class WW_DbScripts_Generators_Base extends WW_DbScripts_Generators_Abst
 	}
 
 	/**
-	 * function to quote database dependent
+	 * Quote a field, database dependently.
 	 *
 	 * @param string $fld field or list of fields (comma separated). The field can contain a length limitation
 	 * in case an index field is passed (e.g. documentid(200). This must be quoted like `documentid`(200).

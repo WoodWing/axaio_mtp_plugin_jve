@@ -438,8 +438,7 @@ class WW_DbScripts_Generators_Mssql extends WW_DbScripts_Generators_Base
 			$type = $index[$this->myname."type"];
 		}
 
-		// Remove length constraint in case of Oracle or Mssql. So 'documentid(200)'
-		// will be changed into 'documentid'.
+		// Remove length constraint in case of Mssql. So 'documentid(200)' will be changed into 'documentid'.
 		$indexfields = explode(',', $index['fields']);
 		foreach ($indexfields as &$indexfield) {
 			$posBracket = strpos($indexfield, '(', 1);
@@ -450,7 +449,7 @@ class WW_DbScripts_Generators_Mssql extends WW_DbScripts_Generators_Base
 		}
 		$index['fields'] = implode(',', $indexfields);
 
-		$this->txt .= "CREATE $unique INDEX ".$this->quotefields($name)." on ".$this->quotefields($table["name"])."(";
+		$this->txt .= "CREATE $unique INDEX ".$this->quotefields($name)." ON ".$this->quotefields($table["name"])."(";
 		$this->txt .= $this->quotefields($index['fields']);
 		$this->txt .= ") $type".$this->closeline()."\r\n";
 	}

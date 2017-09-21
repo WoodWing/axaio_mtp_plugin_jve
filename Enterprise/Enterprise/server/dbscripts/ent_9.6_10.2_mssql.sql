@@ -7,116 +7,116 @@ DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_actionproperties', @columnName = 'orderid', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_actionproperties DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
-ALTER TABLE smart_actionproperties ALTER COLUMN   [orderid] int not null ;
+ALTER TABLE smart_actionproperties ALTER COLUMN   [orderid] int NOT NULL ;
 ALTER TABLE [smart_actionproperties] ADD DEFAULT ('0') FOR [orderid];
 ALTER TABLE [smart_authorizations] ADD 
-  [bundle] int not null  default '0';
+  [bundle] int NOT NULL  default '0';
 ALTER TABLE [smart_deletedobjects] ADD 
-  [orientation] tinyint not null  default '0';
+  [orientation] tinyint NOT NULL  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_deletedobjects', @columnName = 'dpi', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_deletedobjects DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
-ALTER TABLE smart_deletedobjects ALTER COLUMN   [dpi] real not null ;
+ALTER TABLE smart_deletedobjects ALTER COLUMN   [dpi] real NOT NULL ;
 ALTER TABLE [smart_deletedobjects] ADD DEFAULT ('0') FOR [dpi];
 ALTER TABLE [smart_objects] ADD 
-  [orientation] tinyint not null  default '0';
+  [orientation] tinyint NOT NULL  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_objects', @columnName = 'dpi', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_objects DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
-ALTER TABLE smart_objects ALTER COLUMN   [dpi] real not null ;
+ALTER TABLE smart_objects ALTER COLUMN   [dpi] real NOT NULL ;
 ALTER TABLE [smart_objects] ADD DEFAULT ('0') FOR [dpi];
 ALTER TABLE [smart_objectversions] ADD 
-  [orientation] tinyint not null  default '0';
+  [orientation] tinyint NOT NULL  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_objectversions', @columnName = 'dpi', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_objectversions DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
-ALTER TABLE smart_objectversions ALTER COLUMN   [dpi] real not null ;
+ALTER TABLE smart_objectversions ALTER COLUMN   [dpi] real NOT NULL ;
 ALTER TABLE [smart_objectversions] ADD DEFAULT ('0') FOR [dpi];
 ALTER TABLE [smart_placements] ADD 
-  [frametype] varchar(20) not null  default '',
-  [splineid] varchar(200) not null  default '';
+  [frametype] varchar(20) NOT NULL  default '',
+  [splineid] varchar(200) NOT NULL  default '';
 
 CREATE TABLE [smart_indesignarticles] (
-  [objid] int not null  default 0,
-  [artuid] varchar(40) not null  default '',
-  [name] varchar(200) not null  default '',
-  [code] int not null  default '0',
+  [objid] int NOT NULL  default 0,
+  [artuid] varchar(40) NOT NULL  default '',
+  [name] varchar(200) NOT NULL  default '',
+  [code] int NOT NULL  default '0',
   PRIMARY KEY ([objid], [artuid])
 );
 
 CREATE TABLE [smart_idarticlesplacements] (
-  [objid] int not null  default 0,
-  [artuid] varchar(40) not null  default '',
-  [plcid] int not null  default 0,
+  [objid] int NOT NULL  default 0,
+  [artuid] varchar(40) NOT NULL  default '',
+  [plcid] int NOT NULL  default 0,
   PRIMARY KEY ([objid], [artuid], [plcid])
 );
 
 CREATE TABLE [smart_objectoperations] (
-  [id] int not null  IDENTITY(1,1),
-  [objid] int not null  default 0,
-  [guid] varchar(40) not null  default '',
-  [type] varchar(200) not null  default '',
-  [name] varchar(200) not null  default '',
-  [params] text not null  default '',
+  [id] int NOT NULL  IDENTITY(1,1),
+  [objid] int NOT NULL  default 0,
+  [guid] varchar(40) NOT NULL  default '',
+  [type] varchar(200) NOT NULL  default '',
+  [name] varchar(200) NOT NULL  default '',
+  [params] text NOT NULL  default '',
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [objid_objectoperations] on [smart_objectoperations]([objid]) ;
+CREATE  INDEX [objid_objectoperations] ON [smart_objectoperations]([objid]) ;
 ALTER TABLE [smart_states] ADD 
-  [skipidsa] char(2) not null  default '';
+  [skipidsa] char(2) NOT NULL  default '';
 ALTER TABLE [smart_tickets] ADD 
-  [masterticketid] varchar(40) not null  default '';
-CREATE  INDEX [mtid_tickets] on [smart_tickets]([masterticketid]) ;
+  [masterticketid] varchar(40) NOT NULL  default '';
+CREATE  INDEX [mtid_tickets] ON [smart_tickets]([masterticketid]) ;
 
 CREATE TABLE [smart_publishedplcmtshist] (
-  [id] int not null  IDENTITY(1,1),
-  [objectid] int not null  default '0',
-  [publishid] int not null  default '0',
-  [majorversion] int not null  default '0',
-  [minorversion] int not null  default '0',
-  [externalid] varchar(200) not null  default '',
-  [placementhash] varchar(64) not null ,
+  [id] int NOT NULL  IDENTITY(1,1),
+  [objectid] int NOT NULL  default '0',
+  [publishid] int NOT NULL  default '0',
+  [majorversion] int NOT NULL  default '0',
+  [minorversion] int NOT NULL  default '0',
+  [externalid] varchar(200) NOT NULL  default '',
+  [placementhash] varchar(64) NOT NULL ,
   PRIMARY KEY ([id])
 );
-CREATE  INDEX [obpu_publplchist] on [smart_publishedplcmtshist]([objectid], [publishid]) ;
-CREATE  INDEX [puob_publplchist] on [smart_publishedplcmtshist]([publishid], [objectid]) ;
+CREATE  INDEX [obpu_publplchist] ON [smart_publishedplcmtshist]([objectid], [publishid]) ;
+CREATE  INDEX [puob_publplchist] ON [smart_publishedplcmtshist]([publishid], [objectid]) ;
 ALTER TABLE [smart_indesignservers] ADD 
-  [locktoken] varchar(40) not null  default '';
+  [locktoken] varchar(40) NOT NULL  default '';
 ALTER TABLE [smart_indesignserverjobs] ADD 
-  [jobid] varchar(40) not null  default '',
-  [objectmajorversion] int not null  default '0',
-  [objectminorversion] int not null  default '0',
-  [locktoken] varchar(40) not null  default '',
-  [jobstatus] int not null  default 0,
-  [jobcondition] int not null  default 0,
-  [jobprogress] int not null  default 0,
-  [attempts] int not null  default 0,
-  [pickuptime] varchar(30) not null  default '',
-  [ticketseal] varchar(40) not null  default '',
-  [ticket] varchar(40) not null  default '',
-  [actinguser] varchar(40) not null  default '',
-  [initiator] varchar(40) not null  default '',
-  [servicename] varchar(32) not null  default '',
-  [context] varchar(64) not null  default '';
+  [jobid] varchar(40) NOT NULL  default '',
+  [objectmajorversion] int NOT NULL  default '0',
+  [objectminorversion] int NOT NULL  default '0',
+  [locktoken] varchar(40) NOT NULL  default '',
+  [jobstatus] int NOT NULL  default 0,
+  [jobcondition] int NOT NULL  default 0,
+  [jobprogress] int NOT NULL  default 0,
+  [attempts] int NOT NULL  default 0,
+  [pickuptime] varchar(30) NOT NULL  default '',
+  [ticketseal] varchar(40) NOT NULL  default '',
+  [ticket] varchar(40) NOT NULL  default '',
+  [actinguser] varchar(40) NOT NULL  default '',
+  [initiator] varchar(40) NOT NULL  default '',
+  [servicename] varchar(32) NOT NULL  default '',
+  [context] varchar(64) NOT NULL  default '';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_indesignserverjobs', @columnName = 'errormessage', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_indesignserverjobs DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
-ALTER TABLE smart_indesignserverjobs ALTER COLUMN   [errormessage] varchar(1024) not null ;
+ALTER TABLE smart_indesignserverjobs ALTER COLUMN   [errormessage] varchar(1024) NOT NULL ;
 ALTER TABLE [smart_indesignserverjobs] ADD DEFAULT ('') FOR [errormessage];
-CREATE  INDEX [ts_indesignserverjobs] on [smart_indesignserverjobs]([ticketseal]) ;
-CREATE  INDEX [ttjtstrt_indesignserverjobs] on [smart_indesignserverjobs]([ticket], [jobtype], [starttime], [readytime]) ;
-CREATE  INDEX [jp_indesignserverjobs] on [smart_indesignserverjobs]([jobprogress]) ;
-CREATE  INDEX [jspr_indesignserverjobs] on [smart_indesignserverjobs]([jobstatus], [prio], [queuetime]) ;
-CREATE  INDEX [lt_indesignserverjobs] on [smart_indesignserverjobs]([locktoken]) ;
+CREATE  INDEX [ts_indesignserverjobs] ON [smart_indesignserverjobs]([ticketseal]) ;
+CREATE  INDEX [ttjtstrt_indesignserverjobs] ON [smart_indesignserverjobs]([ticket], [jobtype], [starttime], [readytime]) ;
+CREATE  INDEX [jp_indesignserverjobs] ON [smart_indesignserverjobs]([jobprogress]) ;
+CREATE  INDEX [jspr_indesignserverjobs] ON [smart_indesignserverjobs]([jobstatus], [prio], [queuetime]) ;
+CREATE  INDEX [lt_indesignserverjobs] ON [smart_indesignserverjobs]([locktoken]) ;
 DECLARE @SQL1 VARCHAR(4000) SET @SQL1 = 'ALTER TABLE smart_indesignserverjobs DROP CONSTRAINT |ConstraintName|'
 SET @SQL1 = REPLACE(@SQL1, '|ConstraintName|', ( SELECT name FROM sysobjects WHERE xtype = 'PK' AND parent_obj = OBJECT_ID('smart_indesignserverjobs')))
 EXEC (@SQL1);
 ALTER TABLE [smart_indesignserverjobs] ADD PRIMARY KEY ([jobid]);
 DROP INDEX [smart_indesignserverjobs].[prid_indesignserverjobs] ;
-CREATE  INDEX [prid_indesignserverjobs] on [smart_indesignserverjobs]([prio], [jobid]) ;
+CREATE  INDEX [prid_indesignserverjobs] ON [smart_indesignserverjobs]([prio], [jobid]) ;
 ALTER TABLE [smart_indesignserverjobs] DROP COLUMN [id];
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_indesignserverjobs', @columnName = 'exclusivelock', @constraintName = @constraintName OUTPUT
@@ -124,7 +124,7 @@ SET @sql = 'ALTER TABLE smart_indesignserverjobs DROP CONSTRAINT ' + @constraint
 EXEC (@sql);
 ALTER TABLE [smart_indesignserverjobs] DROP COLUMN [exclusivelock];
 ALTER TABLE [smart_serverplugins] ADD 
-  [dbprefix] varchar(10) not null  default '',
-  [dbversion] varchar(10) not null  default '';
+  [dbprefix] varchar(10) NOT NULL  default '',
+  [dbversion] varchar(10) NOT NULL  default '';
 DROP PROCEDURE [dbo].[SCE_GetConstraintName];
 UPDATE [smart_config] set [value] = '10.2' where [name] = 'version';

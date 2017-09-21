@@ -46,11 +46,13 @@ abstract class WW_DbScripts_Generators_Abstract
 	public function materialize($file)
 	{
 		$wroteContent = false;
-		if ($this->txt) {
-			$fp = @fopen($file, "w+");
-			if (!$fp) exit ("Cannot open file for writing: $file");
-			fputs($fp, $this->txt);
-			fclose($fp);
+		if( $this->txt ) {
+			$fp = @fopen( $file, "w+" );
+			if( !$fp ) {
+				exit ( "Cannot open file for writing: $file" );
+			}
+			fputs( $fp, $this->txt );
+			fclose( $fp );
 			$wroteContent = true;
 		}
 		return $wroteContent;
