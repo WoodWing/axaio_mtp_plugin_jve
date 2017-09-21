@@ -14,7 +14,7 @@ class WW_DbScripts_Generators_Factory
 	 * Returns a script generator for a particular DBMS.
 	 *
 	 * @param string $dbms Name of the Database Management System.
-	 * @return WW_DbScripts_Generators_Base|null
+	 * @return WW_DbScripts_Generators_Mysql|WW_DbScripts_Generators_Mssql|null
 	 */
 	public static function createGenerator( $dbms = DBTYPE )
 	{
@@ -33,5 +33,4 @@ class WW_DbScripts_Generators_Factory
 
 		return $generator;
 	}
-
 }

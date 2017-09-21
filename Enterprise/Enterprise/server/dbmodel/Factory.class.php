@@ -25,7 +25,7 @@ class WW_DbModel_Factory
 	/**
 	 * Contruct the DB model definition provided by the (installed and active) server plugins.
 	 *
-	 * @return WW_DbModel_Provider
+	 * @return WW_DbModel_Definition
 	 */
 	static public function createModelForEnterpriseServer()
 	{
