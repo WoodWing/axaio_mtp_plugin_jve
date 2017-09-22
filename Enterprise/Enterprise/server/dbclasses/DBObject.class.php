@@ -1550,7 +1550,7 @@ class DBObject extends DBBase
 				isset($infoProps[$metaKey]->MaxLength) && $infoProps[$metaKey]->MaxLength > 0 ) {
 
 			require_once BASEDIR . '/server/utils/UtfString.class.php';
-			UtfString::truncateMultiByteValue( $metaValue, $infoProps[$metaKey]->MaxLength );
+			$metaValue = UtfString::truncateMultiByteValue( $metaValue, $infoProps[$metaKey]->MaxLength );
 		}
 		return $metaValue;
 	}
@@ -1572,7 +1572,7 @@ class DBObject extends DBBase
 		$maxLength = ($property->MaxLength && $property->MaxLength <= 200) ? $property->MaxLength : 200;
 
 		require_once BASEDIR . '/server/utils/UtfString.class.php';
-		UtfString::truncateMultiByteValue( $value, $maxLength );
+		$value = UtfString::truncateMultiByteValue( $value, $maxLength );
 
 		return $value;
 	}
