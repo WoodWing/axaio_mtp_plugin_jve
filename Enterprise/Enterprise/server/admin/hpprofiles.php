@@ -143,7 +143,7 @@ $txt = str_replace('<!--ERROR-->', $err, $txt);
 // fields
 $txt = str_replace('<!--VAR:NAME-->', '<input maxlength="255" name="profile" value="'.formvar($accessProfile->Name).'"/>', $txt );
 $txt = str_replace('<!--VAR:HIDDEN-->', inputvar( 'id', $id, 'hidden' ), $txt );
-$txt = str_replace('<!--VAR:DESCRIPTION-->', inputvar('description', $accessProfile->Description, 'area'), $txt );
+$txt = str_replace('<!--VAR:DESCRIPTION-->', '<textarea rows="5" cols="18" name="description" style="resize: none;">'.formvar( $accessProfile->Description ).'</textarea>', $txt );
 
 if( $mode !='new' ) {
 	$txt = str_replace('<!--VAR:BUTTON-->', 
@@ -190,58 +190,49 @@ $sUnselectAllRows = BizResources::localize('ACT_UNSELECT_ALL_ROWS');
 $sUnselectAll = BizResources::localize('ACT_UNSELECT_ALL');
 
 $detailtxt = '';
-$featureColumns = array(
-	array(
-		'ACCESSFEATURES'        => BizAccessFeatureProfiles::getFileAccessProfiles(),
-		'WEBFEATURES'           => BizAccessFeatureProfiles::getApplicationsAccessProfiles(),
-	),
-	array(
-		'FEATURE_STYLES'        => BizAccessFeatureProfiles::getTextStylesAccessProfiles(),
-		'FEATURE_TYPOGRAPHY'    => BizAccessFeatureProfiles::getTypographyAccessProfiles(),
-		'FEATURE_TRACKCHANGES'  => BizAccessFeatureProfiles::getTrackChangesAccessProfiles(),
-		'FEATURE_LINGUISTIC'    => BizAccessFeatureProfiles::getLinguisticAccessProfiles(),
-		'FEATURE_CONTENT' 		=> BizAccessFeatureProfiles::getContentStationAccessProfiles(),
-	),
-	array(
-		'FEATURE_LAYOUT'        => BizAccessFeatureProfiles::getInCopyGeometryAccessProfiles(),
-		'FEATURE_COLOR'         => BizAccessFeatureProfiles::getColorAccessProfiles(),
-		/*'FEATURE_IMAGES'      => BizAccessFeatureProfiles::getImagesAccessProfiles(), */
-		'FEATURE_WORKFLOW'      => BizAccessFeatureProfiles::getWorkflowAccessProfiles(), 
-		'FEATURE_CONFIG'        => BizAccessFeatureProfiles::getConfigurationAccessProfiles(), 
-		'FEATURE_DATASOURCES'   => BizAccessFeatureProfiles::getDataSourcesAccessProfiles(),
-		'ANNOTATIONS'           => BizAccessFeatureProfiles::getAnnotationsAccessProfiles(),
-	),
+$featureCategories = array(
+	'ACCESSFEATURES'        => BizAccessFeatureProfiles::getFileAccessProfiles(),
+	'WEBFEATURES'           => BizAccessFeatureProfiles::getApplicationsAccessProfiles(),
+	'FEATURE_STYLES'        => BizAccessFeatureProfiles::getTextStylesAccessProfiles(),
+	'FEATURE_TYPOGRAPHY'    => BizAccessFeatureProfiles::getTypographyAccessProfiles(),
+	'FEATURE_TRACKCHANGES'  => BizAccessFeatureProfiles::getTrackChangesAccessProfiles(),
+	'FEATURE_LINGUISTIC'    => BizAccessFeatureProfiles::getLinguisticAccessProfiles(),
+	'FEATURE_CONTENT' 		=> BizAccessFeatureProfiles::getContentStationAccessProfiles(),
+	'FEATURE_LAYOUT'        => BizAccessFeatureProfiles::getInCopyGeometryAccessProfiles(),
+	'FEATURE_COLOR'         => BizAccessFeatureProfiles::getColorAccessProfiles(),
+	/*'FEATURE_IMAGES'      => BizAccessFeatureProfiles::getImagesAccessProfiles(), */
+	'FEATURE_WORKFLOW'      => BizAccessFeatureProfiles::getWorkflowAccessProfiles(),
+	'FEATURE_CONFIG'        => BizAccessFeatureProfiles::getConfigurationAccessProfiles(),
+	'FEATURE_DATASOURCES'   => BizAccessFeatureProfiles::getDataSourcesAccessProfiles(),
+	'ANNOTATIONS'           => BizAccessFeatureProfiles::getAnnotationsAccessProfiles(),
 );
-$colWidth = floor( 100 / count($featureColumns) );
-foreach ($featureColumns as $featureset) {
-	$detailtxt .= '<td valign="top" width="'.$colWidth.'%"><table class="text" width="100%">';
-	foreach ($featureset as $featureDisplay => $featureDef ) {
-		$detailtxt .= '<tr><td colspan="2"><u>'.BizResources::localize($featureDisplay).'</u></td></tr>';
-		$arr = array();
-		foreach( $featureDef as $feature ) {
-			$checked = (isset($profileFeatures[$feature->Name]) && $profileFeatures[$feature->Name]->Value == 'Yes' ? ' checked="checked"': '');
-			$detailtxt .= 
-				'<tr>'.
-					'<td>'.$feature->Display.'</td>'.
-					'<td><input type="checkbox" name="checkobj['.$feature->Name.']"'. $checked . '/></td>'.
-				'</tr>';
-			$arr[] = '\''.$feature->Name.'\'';
-		}
-		$arrtxt = join(',', $arr);
-		$detailtxt .= 
-			'<tr><td colspan="2">'.
-				'<a href="" onClick="javascript:checkgroup(new Array('.$arrtxt.'), true); return false;" '.
-					'title="'.$sSelectAllRows.'">'.$sSelectAll.
-				'</a>'.
-				'&nbsp;&nbsp;'.
-				'<a href="" onClick="javascript:checkgroup(new Array('.$arrtxt.'), false); return false; " '.
-					'title="'.$sUnselectAllRows.'">'.$sUnselectAll.
-				'</a>'.
-			'</td></tr>';
-		$detailtxt .= '<tr><td>&nbsp;</td></tr>';
+foreach( $featureCategories as $featureCategoryResourceKey => $featureDefinitions ) {
+	$detailtxt .= '<div class="wwes-grid-item"><table>';
+	$detailtxt .= '<tr><td colspan="2"><u>'.BizResources::localize($featureCategoryResourceKey).'</u></td></tr>';
+	$arr = array();
+	foreach( $featureDefinitions as $feature ) {
+		$checked = (isset($profileFeatures[$feature->Name]) && $profileFeatures[$feature->Name]->Value == 'Yes' ? ' checked="checked"': '');
+		$detailtxt .=
+			'<tr>'.
+				'<td>'.formvar($feature->Display).'</td>'.
+				'<td align="right"><input type="checkbox" name="checkobj['.formvar($feature->Name).']" '.$checked.'/></td>'.
+			'</tr>';
+		$arr[] = '\''.formvar($feature->Name).'\'';
 	}
-	$detailtxt .= '</table></td>';
+	$arrtxt = join(',', $arr);
+	$detailtxt .=
+		'<tr><td colspan="2" align="right"><div style="padding-top: 5px">'.
+			'<a href="" onClick="javascript:checkgroup(new Array('.$arrtxt.'), true); return false;" '.
+				'title="'.$sSelectAllRows.'">'.$sSelectAll.
+			'</a>'.
+			'&nbsp;&nbsp;&nbsp;'.
+			'<a href="" onClick="javascript:checkgroup(new Array('.$arrtxt.'), false); return false; " '.
+				'title="'.$sUnselectAllRows.'">'.$sUnselectAll.
+			'</a>'.
+		'</div></td></tr>';
+	$detailtxt .= '</table></div>';
 }
+
 $txt = str_replace('<!--APPLFEATURES-->', $detailtxt, $txt);
 
 // generate total page
