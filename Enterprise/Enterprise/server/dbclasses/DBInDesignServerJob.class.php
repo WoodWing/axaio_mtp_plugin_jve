@@ -1421,10 +1421,6 @@ class DBInDesignServerJob extends DBBase
 
 		switch( strtolower(DBTYPE) )
 		{
-			case 'oracle':
-				$sql = "SELECT DISTINCT TO_CHAR( TO_DATE( `queuetime`, 'YYYY-MM-DD\"T\"HH24:MI:SS' ), 'YYYY-MM-DD' ) as `queuedate` FROM $indserverjobs ORDER BY `queuedate` DESC";
-				break;
-
 			case 'mssql':
 				$sql = "SELECT DISTINCT CONVERT(varchar(10), `queuetime`, 110) as `queuedate` FROM $indserverjobs ORDER BY `queuedate` DESC";
 				break;

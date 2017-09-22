@@ -5,21 +5,42 @@ require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/admin/global_inc.php';
 
 set_time_limit( 3600 );
-$app = new DbAdmin_AdminApp();
-$app->run();
 
+try {
+	$app = new DbAdmin_AdminApp();
+	$app->run();
+} catch( BizException $e ) {
+	exit( $e->getMessage().' '.$e->getDetail() );
+} catch( Throwable $e ) {
+	exit( $e->getMessage() );
+}
 class DbAdmin_AdminApp
 {
-	/**
-	 * @var WW_DbScripts_DbInstaller Core logics to install or update an Enterprise database.
-	 */
+	/** @var WW_DbScripts_DbInstaller_Base Logics to install or update a core- or plugin database. */
 	private $installer;
-	
+
+	/** @var PluginInfoData|null Server plugin, or NULL for core server. */
+	private $pluginInfo;
+
+	/**
+	 * Constructor.
+	 */
 	public function __construct()
 	{
-		require_once BASEDIR.'/server/dbscripts/DbInstaller.class.php';
+		require_once BASEDIR.'/server/utils/HttpRequest.class.php';
+		$requestParams = WW_Utils_HttpRequest::getHttpParams( 'PG' ); // take from POST or GET, but not from cookies
+		$pluginName = isset($requestParams['plugin']) && !empty($requestParams['plugin']) ? $requestParams['plugin'] : null;
+
 		$checkSystemAdmin = array( $this, 'checkSystemAdmin' ); // callback function
-		$this->installer = new WW_DbScripts_DbInstaller( $checkSystemAdmin );
+		if( $pluginName ) {
+			require_once BASEDIR.'/server/dbscripts/dbinstaller/ServerPlugin.class.php';
+			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+			$this->installer = new WW_DbScripts_DbInstaller_ServerPlugin( $checkSystemAdmin, $pluginName );
+			$this->pluginInfo = BizServerPlugin::getInstalledPluginInfo( $pluginName );
+		} else {
+			require_once BASEDIR.'/server/dbscripts/dbinstaller/CoreServer.class.php';
+			$this->installer = new WW_DbScripts_DbInstaller_CoreServer( $checkSystemAdmin );
+		}
 	}
 	
 	/**
@@ -50,14 +71,41 @@ class DbAdmin_AdminApp
 		// Build the HTML page.
 		require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 		$tpl = HtmlDocument::loadTemplate( 'dbadmin.htm' );
+		$tpl = $this->showTitles( $tpl );
 		$tpl = $this->showConfiguration( $tpl );
 		$tpl = $this->showVersionInfo( $tpl );
 		$tpl = $this->showSqlScripts( $tpl );
 		$tpl = $this->showButtonBar( $tpl );
 		$tpl = $this->showMessages( $tpl );
+		$tpl = $this->roundtripHttpGetParamsAndFormPostParams( $tpl );
 		print HtmlDocument::buildDocument( $tpl, true, null, true, false, false );
 	}
-	
+
+	/**
+	 * Update titles in the HTML page to suite either the core server context or the plugin context.
+	 *
+	 * @param string $tpl HTML template to be filled in.
+	 * @return string HTML template enriched with the messages.
+	 */
+	private function showTitles( $tpl )
+	{
+		if( $this->pluginInfo ) {
+			$title1 = '<h1>'.BizResources::localize('PLN_SERVERPLUGIN' ).': '.formvar( $this->pluginInfo->DisplayName ).'</h1>';
+		} else {
+			$title1 = '';
+		}
+		$tpl = str_replace("<!--PAR:PLUGIN_TITLE-->", $title1, $tpl );
+
+		if( $this->pluginInfo ) {
+			$title2 = BizResources::localize('DBINSTALLER_DBMODELINFO_PLUGIN' );
+		} else {
+			$title2 = BizResources::localize('DBINSTALLER_DBMODELINFO' );
+		}
+		$tpl = str_replace( '<!--PAR:DBINSTALLER_DBMODELINFO-->', $title2, $tpl );
+
+		return $tpl;
+	}
+
 	/**
 	 * Displays the Db configuration at the HTML page.
 	 *
@@ -92,6 +140,11 @@ class DbAdmin_AdminApp
 	{
 		$installedVersion = $this->installer->getInstalledDbVersion();
 		$versions = $this->installer->getDbVersions( $installedVersion );
+
+		if( $this->pluginInfo ) {
+			$plugin = BizResources::localize( 'PLN_SERVERPLUGIN' ).': '.formvar( $this->pluginInfo->DisplayName );
+			$versions = array_merge( array( $plugin => formvar( $this->pluginInfo->Version ) ), $versions );
+		}
 
 		$tpl_rec = array();
 		$keysPattern = '/<!--PAR:VERSION_RECORDSET>-->.*<!--<PAR:VERSION_RECORDSET>-->/is';
@@ -161,7 +214,7 @@ class DbAdmin_AdminApp
 		$buttonBar = '';
 		$nextPhases = $this->installer->getNextPhases();
 		if( $nextPhases ) foreach( $nextPhases as $nextPhaseId => $nextPhaseText ) {
-			$actionButton = 
+			$actionButton =
 				'<button type="submit" value="'.$nextPhaseId.'" name="action">'.
 					$nextPhaseText.
 				'</button>';
@@ -235,6 +288,21 @@ class DbAdmin_AdminApp
 		}
 		return $tpl;
 	}
+
+	/**
+	 * Injects HTTP GET params and HTML form post data let them round-trip through the next form post.
+	 *
+	 * @param string $tpl HTML template to be filled in.
+	 * @return string HTML template enriched with the messages.
+	 */
+	private function roundtripHttpGetParamsAndFormPostParams( $tpl )
+	{
+		if( $this->pluginInfo ) {
+			$param = "<input type='hidden' value='".formvar( $this->pluginInfo->UniqueName )."' name='plugin'/>";
+			$tpl = str_replace( "<!--PAR:HIDDEN-->", $param, $tpl );
+		}
+		return $tpl;
+	}
 	
 	/**
 	 * Takes a HTML template section and fills in a key-value of a setting.
@@ -273,13 +341,22 @@ class DbAdmin_AdminApp
 	 */
 	private function tableOverview()
 	{
+		require_once BASEDIR.'/server/dbmodel/Factory.class.php';
+		require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+
 		// Retrieve tables names from the database model
-		require_once BASEDIR.'/server/dbscripts/dbmodel.php';
-		$dbStruct = new DBStruct();
-		$tables = $dbStruct->listTables();
-		$dbTables = array();
-		foreach( $tables as $table ) {
-			$dbTables[$table['name']] = true;
+		if( $this->pluginInfo->UniqueName ) {
+			$definitions = array( WW_DbModel_Factory::createModelForServerPlugin( $this->pluginInfo->UniqueName ) );
+		} else {
+			$definitions = WW_DbModel_Factory::createModels();
+		}
+		foreach( $definitions as $definition ) {
+			$reader = new WW_DbModel_Reader( $definition );
+			$tables = $reader->listTables();
+			$dbTables = array();
+			foreach( $tables as $table ) {
+				$dbTables[ $table['name'] ] = true;
+			}
 		}
 		ksort($dbTables);
 

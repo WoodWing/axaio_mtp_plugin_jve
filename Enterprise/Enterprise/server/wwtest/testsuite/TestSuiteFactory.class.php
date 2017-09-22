@@ -377,15 +377,22 @@ class TestSuiteFactory
 	 * @return array $map Key-Value array where Key is the *Tablename and Value is the maxId or the total record.
 	 */
 	static private function getSnapShotOfDbTables()
-	{	
-		$map = array();
+	{
+		require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+		require_once BASEDIR.'/server/dbmodel/Factory.class.php';
+
+		$dbTables = array();
+		$dbTablesWithoutAutoIncrement = array();
+		foreach( WW_DbModel_Factory::createModels() as $definition ) {
+			$reader = new WW_DbModel_Reader( $definition );
+			$dbTablesWithoutAutoIncrement = array_merge( $dbTablesWithoutAutoIncrement, $definition->getTablesWithoutAutoIncrement() );
+			$dbTables = array_merge( $dbTables, $reader->listTables() );
+		}
+
 		$dbdriver = DBDriverFactory::gen();
-		require_once BASEDIR.'/server/dbscripts/dbmodel.php';
-		$dbStruct = new DBStruct();
-		$tablesWithoutAutoIncrement = $dbStruct->getTablesWithoutAutoIncrement();
-		$dbTables = $dbStruct->listTables();
+		$map = array();
 		foreach( $dbTables as $dbTable ) {
-			$dbFieldId = in_array( $dbTable['name'], $tablesWithoutAutoIncrement ) ? null : 'id';
+			$dbFieldId = in_array( $dbTable['name'], $dbTablesWithoutAutoIncrement ) ? null : 'id';
 			if( $dbFieldId == 'id' ) {
 				$sql = 'SELECT max(`'.$dbFieldId.'`) as `maxid` FROM '. $dbTable['name'] ;
 			} else{
@@ -395,7 +402,6 @@ class TestSuiteFactory
 			$row = $dbdriver->fetch($sth);
 			$map[$dbTable['name']] = isset( $row['maxid'] ) ? $row['maxid'] : 0;
 		}
-		
 		return $map;
 	}
 	
@@ -419,17 +425,21 @@ class TestSuiteFactory
 	 * @return array $testResults An array of TestResult object consists of 'Status', 'Message' and 'ConfigTip'.
 	 */
 	static private function validateSnapShots( $snapBefore, $snapAfter, $nonCleaningTables )
-	{		
-		require_once BASEDIR.'/server/dbscripts/dbmodel.php';
-		$dbStruct = new DBStruct();
-		$tablesWithoutAutoIncrement = $dbStruct->getTablesWithoutAutoIncrement();
+	{
+		require_once BASEDIR.'/server/dbmodel/Factory.class.php';
+
+		$dbTablesWithoutAutoIncrement = array();
+		foreach( WW_DbModel_Factory::createModels() as $definition ) {
+			$dbTablesWithoutAutoIncrement = array_merge( $dbTablesWithoutAutoIncrement, $definition->getTablesWithoutAutoIncrement() );
+		}
+
 		$testResults = array();
 		foreach( $snapBefore as $tableName => $maxIdBefore ) {
 			if( !in_array( $tableName, $nonCleaningTables ) ) { // skip if table is excluded
 				$maxIdAfter = $snapAfter[$tableName];
 				if( $maxIdBefore != $maxIdAfter ) {
-					$dbTable = str_replace( 'smart_', '', $tableName );
-					$dbFieldId = in_array( $tableName, $tablesWithoutAutoIncrement ) ? null : 'id';
+					$dbTable = str_replace( DBPREFIX, '', $tableName );
+					$dbFieldId = in_array( $tableName, $dbTablesWithoutAutoIncrement ) ? null : 'id';
 					if( $dbFieldId == 'id' ) { // DB table with primary key
 						$where = '`id` > ? AND `id` <= ?';
 						$fieldNames = '*';

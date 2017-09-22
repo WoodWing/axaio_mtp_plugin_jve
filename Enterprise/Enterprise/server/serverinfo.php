@@ -26,7 +26,6 @@ define ('SCENT_MYSQLDB_MAXVERSION', '5.7');
 
 define ('ADOBE_VERSIONS',		serialize( array( // used to detect if installed IDS is supported by Enterprise
 	// Major/minor version, oldest version first, latest as last one.
-	'CS6' => '8.0',
 	'CC2014' => '10.0',
 	'CC2015' => '11.0',
 	'CC2017' => '12.0',
