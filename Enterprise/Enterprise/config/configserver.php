@@ -1228,6 +1228,18 @@ if( !defined('ENTERPRISE_CA_BUNDLE') ) {
 	define( 'ENTERPRISE_CA_BUNDLE', WOODWINGSYSTEMDIRECTORY.'/Certificates/ca-bundle.crt' );
 }
 
+// -------------------------------------------------------------------------------------------------
+// Cookies
+// -------------------------------------------------------------------------------------------------
+
+// COOKIES_OVER_SECURE_CONNECTIONS_ONLY:
+//    If the Enterprise Server instance is only accessible over HTTPS/Secure connections,
+//    this setting can be set to 'true' for extra security. The clients will then only send the
+//    cookies over secure connections.
+if( !defined('COOKIES_OVER_SECURE_CONNECTIONS_ONLY') ) {
+	define( 'COOKIES_OVER_SECURE_CONNECTIONS_ONLY', false );
+}
+
 /*
 // -------------------------------------------------------------------------------------------------
 // List of LDAP servers. See '/server/dataclasses/LDAPServer.class.php' for more info.
@@ -1757,6 +1769,11 @@ if( defined('OUTPUTDIRECTORY') && OUTPUTDIRECTORY != '' ) {
 	ini_set('log_errors', '1'); // use 'error_log'
 	ini_set('error_log', OUTPUTDIRECTORY.'php.log'); // Log PHP Errors, Warnings and Noticed to file
 }
+
+// Override cookie settings for the PHPSESSION cookie for extra security. The session id is the same as the Enterprise ticket. 
+ini_set('session.cookie_path', INETROOT);
+ini_set('session.cookie_secure', COOKIES_OVER_SECURE_CONNECTIONS_ONLY);
+ini_set('session.cookie_httponly', true);
 
 if( !defined('DBPREFIX') ) {
 	define( 'DBPREFIX', 'smart_' ); // Prefix used for all database table names. This must not be changed.

@@ -286,6 +286,58 @@ class BizSession
 	}
 
 	/**
+	 * Get the client identifier from the request.
+	 *
+	 * The client identifier is used to select the correct ticket cookie in the request.
+	 * Clients can send this identifier in a customer HTTP header ("X-WoodWing-Application") or
+	 * in the URL parameters ("ww-app").
+	 * @return null|string
+	 */
+	private static function getClientIdentifierFromRequest()
+	{
+		$clientIdentifier = null;
+		if( isset( $_SERVER['HTTP_X_WOODWING_APPLICATION']) && !empty($_SERVER['HTTP_X_WOODWING_APPLICATION']) ) {
+			$clientIdentifier = $_SERVER['HTTP_X_WOODWING_APPLICATION'];
+			LogHandler::Log( 'BizSession', 'DEBUG', 'Detected a client identifier in headers: ' . $clientIdentifier );
+		} else if( isset($_GET['ww-app']) && !empty($_GET['ww-app']) ) {
+			$clientIdentifier = urldecode($_GET['ww-app']);
+			LogHandler::Log( 'BizSession', 'DEBUG', 'Detected a client identifier in URL parameters: ' . $clientIdentifier );
+		} else {
+			LogHandler::Log( 'BizSession', 'DEBUG', 'No client identifier detected.' );
+		}
+		return $clientIdentifier;
+	}
+
+	/**
+	 * Sets or updates the ticket cookie for the webservices.
+	 *
+	 * @param string $ticket
+	 */
+	public static function setTicketCookieForClientIdentifier( $ticket )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+		require_once BASEDIR.'/server/secure.php';
+		$clientIdentifier = DBTicket::DBappticket( $ticket );
+		setLogCookie( 'tickets['.urlencode( $clientIdentifier ).']', $ticket );
+	}
+
+	/**
+	 * Returns the ticket for the client identifier that is given in the request.
+	 *
+	 * The tickets cookies are returned as an array in PHP. To select the correct
+	 * ticket the client identifier can be added to the request by the client.
+	 *
+	 * @return null|string
+	 */
+	public static function getTicketForClientIdentifier()
+	{
+		$clientIdentifier = self::getClientIdentifierFromRequest();
+		require_once BASEDIR.'/server/secure.php';
+		$tickets = getOptionalCookie( 'tickets' );
+		return $clientIdentifier && isset( $tickets[ $clientIdentifier ] ) ? $tickets[ $clientIdentifier ] : null;
+	}
+
+	/**
 	 * Logon the given user (short user id) to the given application.
 	 * Be sure to call 'validateUser' first!
 	 * Generate an exception in case the user can not logon
@@ -360,7 +412,7 @@ class BizSession
 		// Support cookie enabled sessions for JSON clients that run multiple web applications which need to share the
 		// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
 		if( $ticketid ) {
-			setLogCookie( 'ticket', $ticketid );
+			BizSession::setTicketCookieForClientIdentifier($ticketid);
 		}
 
 		// Return LogOnResponse to client application
