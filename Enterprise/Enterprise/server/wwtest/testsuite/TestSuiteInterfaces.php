@@ -346,8 +346,8 @@ abstract class TestCase implements TestModule
 		}
 		for( ; $lev <= $countDown; $lev++ ) {
 			$stackClass = isset($trace[$lev]['class']) ? $trace[$lev]['class'] : '';
-			$stackDump .= '<li>'.$trace[$lev]['class'].'::'.$trace[$lev]['function'].'()'.
-				'<br/>at line '.$trace[$lev-1]['line'].' in '.$trace[$lev-1]['file'].'</li>';
+			$stackDump .= '- '.$trace[$lev]['class'].'::'.$trace[$lev]['function'].'()'."\r\n".
+				'at line '.$trace[$lev-1]['line'].' in '.$trace[$lev-1]['file']."\r\n";
 			if( in_array( 'TestCase', class_parents( $stackClass ) ) ) {
 				break;
 			}
@@ -356,7 +356,7 @@ abstract class TestCase implements TestModule
 			$message = $trace[$ourselfIndex]['class'].'::'.$trace[$ourselfIndex]['function'].'(): '.$message;
 		}
 		if( $stackDump ) {
-			$message .= '<br/>Stack:<ol>'.$stackDump.'</ol>';
+			$message .= "\r\n".'Stack:'."\r\n".$stackDump.'';
 		}
 	
 		$this->setResult( 'ERROR', $message, '', false ); // suppress logging since that is done by BizException too
@@ -982,6 +982,25 @@ abstract class TestCase implements TestModule
 			}
 			$this->throwError( $message );
 		}
+	}
+
+	/**
+	 * Helper function that checks whether a callback function throws BizException with a specific server error code.
+	 *
+	 * @since 10.2.0
+	 * @param string $expectedErrorCode The expected server error code (S-code)
+	 * @param callable $callback Function to be called (e.g. closure) for which the exception is expected
+	 */
+	public function assertBizException( $expectedErrorCode, callable $callback )
+	{
+		$map = new BizExceptionSeverityMap( array( $expectedErrorCode => 'INFO' ) );
+		$e = null;
+		try {
+			call_user_func( $callback );
+		} catch( BizException $e ) {
+		}
+		$this->assertInstanceOf( 'BizException', $e );
+		$this->assertEquals( $expectedErrorCode, $e->getErrorCode() );
 	}
 }
 

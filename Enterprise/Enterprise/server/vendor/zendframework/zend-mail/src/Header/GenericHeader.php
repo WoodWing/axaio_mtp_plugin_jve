@@ -61,7 +61,6 @@ class GenericHeader implements HeaderInterface, UnstructuredInterface
             throw new Exception\InvalidArgumentException('Invalid header value detected');
         }
 
-        $parts[0] = $parts[0];
         $parts[1] = ltrim($parts[1]);
 
         return $parts;
@@ -79,7 +78,7 @@ class GenericHeader implements HeaderInterface, UnstructuredInterface
             $this->setFieldName($fieldName);
         }
 
-        if ($fieldValue) {
+        if ($fieldValue !== null) {
             $this->setFieldValue($fieldValue);
         }
     }
@@ -93,7 +92,7 @@ class GenericHeader implements HeaderInterface, UnstructuredInterface
      */
     public function setFieldName($fieldName)
     {
-        if (!is_string($fieldName) || empty($fieldName)) {
+        if (! is_string($fieldName) || empty($fieldName)) {
             throw new Exception\InvalidArgumentException('Header name must be a string');
         }
 

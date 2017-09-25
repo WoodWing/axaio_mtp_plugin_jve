@@ -13,7 +13,7 @@
 
 SOURCE_BASE="./Enterprise/"
 TARGET_BASE="./Enterprise_release/"
-iONCUBE_ENCODER="/usr/local/ioncube/9.0/ioncube_encoder56_9.0_64"
+iONCUBE_ENCODER="/usr/local/ioncube/10.0/ioncube_encoder71_10.0_64"
 PHPSTORM_INSPECTOR="/opt/phpstorm2017.1.4/bin/inspect.sh"
 : ${PHP_EXE:=php} #Set default value to base php executable.
 
@@ -564,7 +564,6 @@ function step5_ionCubeEncodePhpFiles {
 		Enterprise/server/services/ \
 		Enterprise/server/appservices/ \
 		Enterprise/server/wwtest/ngrams/ \
-		Enterprise/server/apps/webapplicense.inc.php \
 		Enterprise/server/regserver.inc.php \
 		Enterprise/server/bizclasses/BizServerJob.class.php \
 		Enterprise/server/bizclasses/BizPublishing.class.php \
@@ -653,7 +652,7 @@ function step7_zipExternalModules {
 	done
 
 	echo "step7f: Copying the ionCube Loaders to the artifacts folder ..."
-	cp "${WORKSPACE}/Enterprise/Libraries/ionCube/loaders/v6.0.5_at_2016_10_07/ioncube_loaders_all_platforms.zip" "${WORKSPACE}/artifacts"
+	cp "${WORKSPACE}/Enterprise/Libraries/ionCube/loaders/v10.0.2_at_2017_09_13/ioncube_loaders_all_platforms.zip" "${WORKSPACE}/artifacts"
 	chmod +w "${WORKSPACE}/artifacts/ioncube_loaders_all_platforms.zip"
 }
 

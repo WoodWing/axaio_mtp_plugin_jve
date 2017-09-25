@@ -492,7 +492,7 @@ class InDesignServerJobsApp
 		} else {
 			$value = $default;
 		}
-		setcookie( $key, $value, 0, INETROOT );
+		setcookie( $key, $value, 0, INETROOT, null, COOKIES_OVER_SECURE_CONNECTIONS_ONLY, true );
 		return $value;
 	}
 }

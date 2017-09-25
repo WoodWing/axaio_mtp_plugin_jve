@@ -547,6 +547,8 @@ class ClassScanner implements ScannerInterface
      */
     public function getTraitNames()
     {
+        $this->scan();
+
         $return = [];
         foreach ($this->infos as $info) {
             if ($info['type'] !== 'use') {
@@ -562,7 +564,6 @@ class ClassScanner implements ScannerInterface
                     $return[] = $traitName;
                 }
             }
-            break;
         }
 
         return $return;
@@ -575,6 +576,8 @@ class ClassScanner implements ScannerInterface
      */
     public function getTraitAliases()
     {
+        $this->scan();
+
         $return = [];
         foreach ($this->infos as $info) {
             if ($info['type'] !== 'use') {
@@ -598,7 +601,6 @@ class ClassScanner implements ScannerInterface
                     $return[$alias['alias']] = $trait . '::' . $method;
                 }
             }
-            break;
         }
 
         return $return;
@@ -612,6 +614,8 @@ class ClassScanner implements ScannerInterface
      */
     protected function getVisibilityForAlias($aliasName)
     {
+        $this->scan();
+
         $return = null;
         foreach ($this->infos as $info) {
             if ($info['type'] !== 'use') {
@@ -632,7 +636,6 @@ class ClassScanner implements ScannerInterface
                     }
                 }
             }
-            break;
         }
 
         return $return;
@@ -645,6 +648,8 @@ class ClassScanner implements ScannerInterface
      */
     protected function getBlockedTraitMethods()
     {
+        $this->scan();
+
         $return = [];
         foreach ($this->infos as $info) {
             if ($info['type'] !== 'use') {
@@ -668,7 +673,6 @@ class ClassScanner implements ScannerInterface
                     $return[] = $trait . '::' . $method;
                 }
             }
-            break;
         }
 
         return $return;
@@ -919,9 +923,7 @@ class ClassScanner implements ScannerInterface
         SCANNER_TOP:
 
         switch ($tokenType) {
-
             case T_DOC_COMMENT:
-
                 $this->docComment = $tokenContent;
                 goto SCANNER_CONTINUE;
                 //goto no break needed
@@ -931,7 +933,6 @@ class ClassScanner implements ScannerInterface
             case T_CLASS:
             case T_INTERFACE:
             case T_TRAIT:
-
                 // CLASS INFORMATION
 
                 $classContext        = null;
@@ -946,7 +947,6 @@ class ClassScanner implements ScannerInterface
                 $this->lineStart = $tokenLine;
 
                 switch ($tokenType) {
-
                     case T_FINAL:
                         $this->isFinal = true;
                         goto SCANNER_CLASS_INFO_CONTINUE;
@@ -966,10 +966,11 @@ class ClassScanner implements ScannerInterface
                             $this->name = $this->shortName;
                         }
                         goto SCANNER_CLASS_INFO_CONTINUE;
+                        // goto no break needed
 
                     case T_INTERFACE:
                         $this->isInterface = true;
-                        //fall-through
+                        // fall-through
                     case T_CLASS:
                         $this->shortName = $tokens[$tokenIndex + 2][1];
                         if ($this->nameInformation && $this->nameInformation->hasNamespace()) {
@@ -978,20 +979,24 @@ class ClassScanner implements ScannerInterface
                             $this->name = $this->shortName;
                         }
                         goto SCANNER_CLASS_INFO_CONTINUE;
-                        //goto no break needed
+                        // goto no break needed
 
                     case T_NS_SEPARATOR:
                     case T_STRING:
                         switch ($classContext) {
                             case T_EXTENDS:
-                                $this->shortParentClass .= $tokenContent;
+                                if ($this->isInterface) {
+                                    $this->shortInterfaces[$classInterfaceIndex] .= $tokenContent;
+                                } else {
+                                    $this->shortParentClass .= $tokenContent;
+                                }
                                 break;
                             case T_IMPLEMENTS:
                                 $this->shortInterfaces[$classInterfaceIndex] .= $tokenContent;
                                 break;
                         }
                         goto SCANNER_CLASS_INFO_CONTINUE;
-                        //goto no break needed
+                        // goto no break needed
 
                     case T_EXTENDS:
                     case T_IMPLEMENTS:
@@ -1002,14 +1007,14 @@ class ClassScanner implements ScannerInterface
                             $this->shortParentClass = '';
                         }
                         goto SCANNER_CLASS_INFO_CONTINUE;
-                        //goto no break needed
+                        // goto no break needed
 
                     case null:
-                        if ($classContext == T_IMPLEMENTS && $tokenContent == ',') {
+                        if (($classContext == T_IMPLEMENTS && $tokenContent == ',')
+                            || ($classContext == T_EXTENDS && $tokenContent == ',' && $this->isInterface)) {
                             $classInterfaceIndex++;
                             $this->shortInterfaces[$classInterfaceIndex] = '';
                         }
-
                 }
 
                 SCANNER_CLASS_INFO_CONTINUE:
@@ -1022,7 +1027,6 @@ class ClassScanner implements ScannerInterface
                 SCANNER_CLASS_INFO_END:
 
                 goto SCANNER_CONTINUE;
-
         }
 
         if ($tokenType === null && $tokenContent === '{' && $braceCount === 0) {
@@ -1038,9 +1042,7 @@ class ClassScanner implements ScannerInterface
             }
 
             switch ($tokenType) {
-
                 case T_CONST:
-
                     $infos[$infoIndex] = [
                         'type'          => 'constant',
                         'tokenStart'    => $tokenIndex,
@@ -1187,6 +1189,7 @@ class ClassScanner implements ScannerInterface
 
                     $MACRO_INFO_ADVANCE();
                     goto SCANNER_CLASS_BODY_CONTINUE;
+                    // goto no break needed
 
                 case T_DOC_COMMENT:
                 case T_PUBLIC:
@@ -1196,7 +1199,6 @@ class ClassScanner implements ScannerInterface
                 case T_FINAL:
                 case T_VAR:
                 case T_FUNCTION:
-
                     $infos[$infoIndex] = [
                         'type'        => null,
                         'tokenStart'  => $tokenIndex,
@@ -1218,19 +1220,21 @@ class ClassScanner implements ScannerInterface
                                 $braceCount++;
                                 goto SCANNER_CLASS_BODY_MEMBER_CONTINUE;
                                 // goto no break needed
+
                             case '}':
                                 $braceCount--;
                                 goto SCANNER_CLASS_BODY_MEMBER_CONTINUE;
+                                // goto no break needed
 
                             case ';':
                                 $infos[$infoIndex]['tokenEnd'] = $tokenIndex;
                                 goto SCANNER_CLASS_BODY_MEMBER_CONTINUE;
+                                // goto no break needed
                         }
                     }
 
                     if ($memberContext !== null) {
-                        if (
-                            ($memberContext === 'property' && $tokenContent === ';')
+                        if (($memberContext === 'property' && $tokenContent === ';')
                             || ($memberContext === 'method' && $methodBodyStarted && $braceCount === 1)
                             || ($memberContext === 'method' && $this->isInterface && $tokenContent === ';')
                         ) {
@@ -1239,7 +1243,6 @@ class ClassScanner implements ScannerInterface
                     }
 
                     switch ($tokenType) {
-
                         case T_CONST:
                             $memberContext             = 'constant';
                             $infos[$infoIndex]['type'] = 'constant';
@@ -1284,7 +1287,6 @@ class ClassScanner implements ScannerInterface
                     // goto no break needed
 
                 case null: // no type, is a string
-
                     switch ($tokenContent) {
                         case '{':
                             $braceCount++;
@@ -1294,6 +1296,7 @@ class ClassScanner implements ScannerInterface
                         case '}':
                             $braceCount--;
                             goto SCANNER_CLASS_BODY_CONTINUE;
+                            // goto no break needed
                     }
             }
 

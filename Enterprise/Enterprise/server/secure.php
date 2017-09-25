@@ -115,7 +115,7 @@ function getLogCookie( $cookie, $redir=true )
 function setLogCookie( $cookie, $key )
 {
 	$tm = time()+COOKIETIMEOUT;
-	setcookie( $cookie, $key, $tm, INETROOT );
+	setcookie( $cookie, $key, $tm, INETROOT, null, COOKIES_OVER_SECURE_CONNECTIONS_ONLY, true );
 }
 
 function webauthorization($feature)

@@ -16,7 +16,6 @@ require_once BASEDIR.'/server/serverinfo.php';
 //    The type of database used:
 //       'mysql'   MySQL. Default option.
 //       'mssql'   MS SQL Server.
-//       'oracle'  Oracle.
 //    Value must be in lower case.
 //
 if( !defined('DBTYPE') ) {
@@ -26,10 +25,7 @@ if( !defined('DBTYPE') ) {
 //    The database server address. By default the same machine as the
 //    application server of which this configserver.php file is part.
 //    Default value: '127.0.0.1'. (MySQL)
-//    For MSSQL and ORACLE the database machine must be listed. For MySQL use the IP address.
-//    Oracle:
-//       Use Enterprise Manager to configure the so-called "sid" that specifies the host+port+service
-//          define ('DBSERVER', 'MySID' );
+//    For MS SQL the database machine must be listed. For MySQL use the IP address.
 //    MS SQL:
 //       If your machine is called 'MyPC'.
 //          define ('DBSERVER', 'MyPC' );
@@ -1228,6 +1224,18 @@ if( !defined('ENTERPRISE_CA_BUNDLE') ) {
 	define( 'ENTERPRISE_CA_BUNDLE', WOODWINGSYSTEMDIRECTORY.'/Certificates/ca-bundle.crt' );
 }
 
+// -------------------------------------------------------------------------------------------------
+// Cookies
+// -------------------------------------------------------------------------------------------------
+
+// COOKIES_OVER_SECURE_CONNECTIONS_ONLY:
+//    If the Enterprise Server instance is only accessible over HTTPS/Secure connections,
+//    this setting can be set to 'true' for extra security. The clients will then only send the
+//    cookies over secure connections.
+if( !defined('COOKIES_OVER_SECURE_CONNECTIONS_ONLY') ) {
+	define( 'COOKIES_OVER_SECURE_CONNECTIONS_ONLY', false );
+}
+
 /*
 // -------------------------------------------------------------------------------------------------
 // List of LDAP servers. See '/server/dataclasses/LDAPServer.class.php' for more info.
@@ -1757,6 +1765,11 @@ if( defined('OUTPUTDIRECTORY') && OUTPUTDIRECTORY != '' ) {
 	ini_set('log_errors', '1'); // use 'error_log'
 	ini_set('error_log', OUTPUTDIRECTORY.'php.log'); // Log PHP Errors, Warnings and Noticed to file
 }
+
+// Override cookie settings for the PHPSESSION cookie for extra security. The session id is the same as the Enterprise ticket. 
+ini_set('session.cookie_path', INETROOT);
+ini_set('session.cookie_secure', COOKIES_OVER_SECURE_CONNECTIONS_ONLY);
+ini_set('session.cookie_httponly', true);
 
 if( !defined('DBPREFIX') ) {
 	define( 'DBPREFIX', 'smart_' ); // Prefix used for all database table names. This must not be changed.

@@ -16,7 +16,7 @@ $supportedPhpVersions = array(
     // '1.2.3'  >>> php version 1.2.3 is supported
     // '1.2.3+' >>> php version 1.2.3...1.2.x is supported (so 1.2.x with patch >= 3)
     // '-1.2.3' >>> php version 1.2.3 NOT supported
-	 '7.0.12+'
+	 '7.1.9+'
 );
 define ('SCENT_PHPVERSIONS',	serialize($supportedPhpVersions) );
 
@@ -26,7 +26,6 @@ define ('SCENT_MYSQLDB_MAXVERSION', '5.7');
 
 define ('ADOBE_VERSIONS',		serialize( array( // used to detect if installed IDS is supported by Enterprise
 	// Major/minor version, oldest version first, latest as last one.
-	'CS6' => '8.0',
 	'CC2014' => '10.0',
 	'CC2015' => '11.0',
 	'CC2017' => '12.0',

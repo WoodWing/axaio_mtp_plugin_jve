@@ -5,7 +5,7 @@
  *
  * ionCube is a registered trademark of ionCube Ltd. 
  *
- * Copyright (c) ionCube Ltd. 2002-2015
+ * Copyright (c) ionCube Ltd. 2002-2017
  */
 
 
@@ -101,7 +101,7 @@ define ('LOADER_NAME_CHECK',true);
 define ('LOADER_EXTENSION_NAME','ionCube Loader');
 define ('LOADER_SUBDIR','ioncube');
 define ('WINDOWS_IIS_LOADER_DIR', 'system32');
-define ('ADDITIONAL_INI_FILE_NAME','ioncube.ini');
+define ('ADDITIONAL_INI_FILE_NAME','00-ioncube.ini');
 define ('UNIX_SYSTEM_LOADER_DIR','/usr/local/ioncube');
 define ('RECENT_LOADER_VERSION','3.1.24');
 define ('LATEST_LOADER_MAJOR_VERSION',5);
@@ -111,7 +111,7 @@ define ('WIZARD_EXPIRY_MINUTES',2880);
 define ('IONCUBE_WIZARD_EXPIRY_MINUTES',10080);
 define ('MIN_INITIALISE_TIME',4);
 define ('IC24_ENABLED_INI_PROPERTY',"ic24.enable");
-define ('REQUIRED_LOADER_VERSION', '6.0.5'); // WoodWing: stick to only but this version
+define ('REQUIRED_LOADER_VERSION', '10.0.2'); // WoodWing: stick to only but this version
 
     run();
 
@@ -134,7 +134,7 @@ function php4_http_build_query($formdata, $numeric_prefix = null, $key = null ) 
 
 function script_version()
 {
-    return "2.53";
+    return "2.54";
 }
 
 function retrieve_latest_wizard_version()
@@ -257,8 +257,8 @@ function php_version_maj_min()
 function is_supported_php_version()
 {
     $v = php_version(); 
-    // >>> WoodWing: Enterprise 10.2 supports PHP 7.0 only:
-    return $v['major'] == 7 && $v['minor'] == 0;
+    // >>> WoodWing: Enterprise 10.2 supports PHP 7.1 only:
+    return $v['major'] == 7 && $v['minor'] == 1;
     // return ((($v['major'] == 4) && ($v['minor'] >= 1)) ||
     //  (($v['major'] == 5) && (($v['minor'] >= 1) || ($v['release'] >= 3))) ||
 	//  $v['major'] == 7);
@@ -1607,7 +1607,7 @@ function unix_package_name()
 function loader_download_instructions()
 {
     // >>> WoodWing: because our download archive contains all loaders, adjust installation instructions accordingly:
-	$downloadPage = 'http://downloads.woodwing.net/ioncube-loaders/enterprise-server/ioncube-loader-605.zip';
+	$downloadPage = 'http://downloads.woodwing.net/ioncube-loaders/enterprise-server/ioncube-loader-1002.zip';
 	echo 
 		'<li><a target="_blank" href="'.$downloadPage.'">Download</a> the ionCube Loader '.REQUIRED_LOADER_VERSION.' archive '.
 			'and extract it locally. '.
@@ -1906,7 +1906,7 @@ function zend_extension_instructions($server_type,$loader_dir)
             $php_ini_path = find_additional_ioncube_ini();
             if (empty($php_ini_path)) {
                 $php_ini_name = ADDITIONAL_INI_FILE_NAME;
-                echo "<li>Save <a href=\"$base&amp;page=phpconfig&amp;download=1&amp;newlinesonly=1&amp;ininame=$php_ini_name&amp;stype=$server_type_code\">this $php_ini_name file</a> and put it in your ini files directory: <code>${sysinfo['PHP_INI_DIR']}</code>";
+                echo "<li><a href=\"$base&amp;page=phpconfig&amp;download=1&amp;newlinesonly=1&amp;ininame=$php_ini_name&amp;stype=$server_type_code\">Save this $php_ini_name file</a> and put it in your ini files directory, <code>${sysinfo['PHP_INI_DIR']}</code>";
                 $editing_ini = false;
             } else {
                 $php_ini_name = basename($php_ini_path);
@@ -2912,13 +2912,13 @@ function default_page($loader_extension = LOADER_EXTENSION_NAME)
 		'To use these files, a component called the \'ionCube Loader\' must be installed.</p>'.
 	// <<<
 	
-    // >>> WoodWing: Enterprise 10.2 supports PHP 7.0 only:
+    // >>> WoodWing: Enterprise 10.2 supports PHP 7.1 only:
     $ionCubeLoaderOk = false;
     if (!is_supported_php_version()) {
         $msg = '<div class="alert">'.
         	'<p>Please note that the following problem currently exists with the ionCube Loader installation:</p>'.
         	'<li>Your Web Server is running PHP version ' . PHP_VERSION . ' which is not supported by Enterprise Server.</li>'.
-            '<p>Please make sure that PHP 7.0 is installed.</p></div>';
+            '<p>Please make sure that PHP 7.1 is installed.</p></div>';
         echo $msg;
 	} else { // <<<
 
@@ -3017,7 +3017,7 @@ function loader_major_version_instructions($mv)
 
 function loader_already_installed($rtl = null)
 {
-	// >>> WoodWing: Enterprise Server 10.2+ requires ionCube Loader 6.0.5. Not older, not newer.
+	// >>> WoodWing: Enterprise Server 10.2+ requires ionCube Loader 10.0.0. Not older, not newer.
 	$wrongVersionMsg = '';
 	$lv = '';
 	if( function_exists('ioncube_loader_iversion')) { // This function should be available with every loader
@@ -3787,7 +3787,7 @@ function GoDaddy_page()
 
     heading();
 
-        $inst_str = '<h4>GoDaddy installation instructions</h4>';
+        $inst_str = '<h4>GoDaddy Installation Instructions</h4>';
         $inst_str .= '<p>It appears that you are hosted with GoDaddy (<a target="_blank" href="http://www.godaddy.com/">www.godaddy.com</a>). ';
         $inst_str .= "If that is <b>not</b> the case then please <a href=\"$base&amp;page=default&amp;host=ngd\">click here to go to the main page of this installation wizard</a>.</p>";
         $inst_str .= "<p>If you have already installed the loader then please <a href=\"$base&amp;page=loader_check\" onclick=\"showOverlay();\">click here to test the loader</a>.</p>";
@@ -4229,7 +4229,7 @@ function css_page()
 	}
 
     .alert {
-        margin: 1ex 0;
+        margin: 2ex 0;
         border: 1px solid #660000;
         padding: 1ex 1em;
         background-color: #ffeeee;
@@ -4238,7 +4238,7 @@ function css_page()
     }
 
     .warning {
-        margin: 1ex 0;
+        margin: 2ex 0;
         border: 1px solid #FFBF00;
         padding: 1ex 1em;
         background-color: #FDF5E6;
@@ -4247,7 +4247,7 @@ function css_page()
     }
 
     .success {
-        margin: 1ex 0;
+        margin: 2ex 0;
         border: 1px solid #006600;
         padding: 1ex 1em;
         background-color: #EEFFEE;
@@ -4260,7 +4260,6 @@ function css_page()
     }
 
     .panel {
-        margin: 1ex 0;
         border: 1px solid #c0c0c0;
         background-color: #f0f0f0;
         width: 75%;

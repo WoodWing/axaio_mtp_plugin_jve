@@ -1290,6 +1290,19 @@ class BizServerPlugin
 	}
 
 	/**
+	 * Retrieve the installation folder of a given plug-in.
+	 *
+	 * @since 10.2.0
+	 * @param PluginInfoData $pluginInfo
+	 * @return string
+	 */
+	static public function getPluginFolder( PluginInfoData $pluginInfo )
+	{
+		$classDir = $pluginInfo->IsSystem ? BASEDIR.'/server/plugins/' : BASEDIR.'/config/plugins/';
+		return $classDir.$pluginInfo->UniqueName.'/';
+	}
+
+	/**
 	 * Enables (activates) a given server plug-in. The plug-in must have been installed before.
 	 *
 	 * @param string $pluginName

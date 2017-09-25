@@ -20,6 +20,11 @@ class ElvisSync
 	/** @var string $adminPassword */
 	private $adminPassword;
 
+	/** @const SEMAPHORE_ENTITY_ID Name of semaphore used to make sure only one sync module runs at the same time. */
+	const SEMAPHORE_ENTITY_ID = 'ElvisSync';
+	/** @const DB_CONFIG_OPTIONS Name of the DB configuration option to store execution time options passed to this module. */
+	const DB_CONFIG_OPTIONS = 'ElvisSync_Options';
+
 	/**
 	 * Constructor
 	 *
@@ -28,28 +33,23 @@ class ElvisSync
 	 * @param array $options
 	 * @throws BizException
 	 */
-	public function __construct( $username, $password, array $options = array() )
+	public function __construct( $username, $password, $options )
 	{
-		if( !isset( $username ) ) {
-			$message = 'Username is required';
-			throw new BizException( null, 'Server', $message, $message );
-		}
-
 		$this->adminUsername = $username;
 		$this->adminPassword = $password;
 
-		$defaults = array(
-			'maxexectime' => 600,
-			'maxtimeoutperrun' => 60,
-		);
-		$options = array_merge( $defaults, $options );
-
-		$this->maxExecTime = $options['maxexectime'] < 30 ? 30 : $options['maxexectime'];
-		$this->maxTimeoutPerRun = $options['maxtimeoutperrun'] < 5 ? 5 : $options['maxtimeoutperrun'];
-
-		if( $this->maxTimeoutPerRun > $this->maxExecTime ) {
-			$this->maxTimeoutPerRun = $this->maxExecTime;
+		// Good or bad, always save the options in DB to enable the Health Check to report errors too.
+		// This is important since it is hard to fetch errors through the configured Crontab/Scheduler.
+		$lastOptions = self::readLastOptions();
+		if( array_diff_assoc( $options, $lastOptions ) ) {
+			// Only save when options are changed because DB updates are expensive.
+			self::saveLastOptions( $options );
 		}
+
+		// Validate options before accepting them from caller.
+		self::validateOptions( $options );
+		$this->maxExecTime = $options['maxexectime'];
+		$this->maxTimeoutPerRun = $options['maxtimeoutperrun'];
 	}
 
 	/**
@@ -109,14 +109,13 @@ class ElvisSync
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
 
 		$lifeTime = $this->maxExecTime + 60;
-		$name = 'ElvisSync';
 
 		// Try to obtain for 55 seconds, otherwise give up
 		$bizSemaphore = new BizSemaphore();
 		$attempts = array( 10, 20, 70, 100, 200, 600, 1000, 2000, 6000, 10000, 15000, 20000 );
 		$bizSemaphore->setAttempts( $attempts );
 		$bizSemaphore->setLifeTime( $lifeTime );
-		$semaphoreId = $bizSemaphore->createSemaphore( $name, false );
+		$semaphoreId = $bizSemaphore->createSemaphore( self::SEMAPHORE_ENTITY_ID, false );
 
 		return $semaphoreId;
 	}
@@ -132,6 +131,79 @@ class ElvisSync
 
 		$bizSemaphore = new BizSemaphore();
 		$bizSemaphore->releaseSemaphore( $semaphoreId );
+	}
+
+	/**
+	 * Tells whether or not the ElvisSync feafure is currently running.
+	 *
+	 * @since 10.2.0
+	 * @param int $timeout Max seconds to wait when not running to see if it comes up again.
+	 * @return bool
+	 */
+	static public function isRunning( $timeout )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
+		$startTime = microtime( true );
+		do {
+			$timeout = microtime( true ) - $startTime > $timeout;
+			$expired = BizSemaphore::isSemaphoreExpiredByEntityId( self::SEMAPHORE_ENTITY_ID );
+		} while( !$timeout && !$expired );
+		return !$expired;
+	}
+
+
+	/**
+	 * Saves the last used configured execution time options into the DB (smart_config.php table).
+	 *
+	 * @since 10.2.0
+	 * @return array The options. Empty when never saved before.
+	 */
+	static public function readLastOptions()
+	{
+		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
+		$serializedOptions = DBConfig::getValue( self::DB_CONFIG_OPTIONS );
+		return $serializedOptions ? unserialize( $serializedOptions ) : array();
+	}
+
+	/**
+	 * Reads the last used configured execution time options from the DB (smart_config.php table).
+	 *
+	 * @since 10.2.0
+	 * @param array $options
+	 * @return bool
+	 */
+	static private function saveLastOptions( array $options )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
+		$serializedOptions = serialize( $options );
+		return DBConfig::storeValue( self::DB_CONFIG_OPTIONS, $serializedOptions );
+	}
+
+	/**
+	 * Stores the configured execution time options in the DB (smart_config.php table).
+	 *
+	 * This enables the Health Check to read and validate the options configured for sync.php in the Crontab/Scheduler.
+	 *
+	 * @since 10.2.0
+	 * @param array $options
+	 * @throws BizException
+	 */
+	static public function validateOptions( $options )
+	{
+		$message = 'Wrong argument given for sync.php.';
+		$tip = 'Please check your Crontab/Scheduler settings.';
+		if( $options['maxexectime'] < 60 || $options['maxexectime'] > 600 ) {
+			$detail = "The 'maxexectime' parameter is set to {$options['maxexectime']} but should be in range [60-600].";
+			throw new BizException( null, 'Client', $detail.' '.$tip, $message, null, 'ERROR' );
+		}
+		if( $options['maxtimeoutperrun'] < 5 || $options['maxtimeoutperrun'] > 20 ) {
+			$detail = "The 'maxtimeoutperrun' parameter is set to {$options['maxtimeoutperrun']} but should be in range [5-20].";
+			throw new BizException( null, 'Client', $detail.' '.$tip, $message, null, 'ERROR' );
+		}
+		if( $options['maxtimeoutperrun'] > $options['maxexectime'] ) { // can not happen, but just in case we adjust the allowed ranges above
+			$detail = "The 'maxtimeoutperrun' parameter is set higher than the 'maxexectime' parameter which is not allowed.";
+			throw new BizException( null, 'Client', $detail.' '.$tip, $message, null, 'ERROR' );
+		}
 	}
 
 	/**
@@ -235,7 +307,6 @@ class ElvisSync
 		LogHandler::Log( 'ELVISSYNC', 'DEBUG', 'runUpdates' );
 
 		require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
-		$bizSemaphore = new BizSemaphore();
 
 		// We could have a small or large timeoffset depending on the time it took to obtain the lock
 		$timeOffeset = microtime( true ) - $this->syncStartTime;
@@ -254,7 +325,7 @@ class ElvisSync
 			$this->runUpdate( $timeout );
 
 			// Keep everything alive
-			$bizSemaphore->refreshSession( $semaphoreId );
+			BizSemaphore::refreshSession( $semaphoreId );
 
 			$timeRemaining -= microtime( true ) - $startTime;
 		}

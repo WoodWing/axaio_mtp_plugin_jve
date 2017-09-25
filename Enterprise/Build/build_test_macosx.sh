@@ -104,8 +104,8 @@ function step1_determineHttpPortAndPhpVersion {
     compareWith102=$? # catch result of vercomp
 	if (( ${compareWith102} >= 1 )) # >= 10.2.0 ?
     then
-    	HTTP_PORT=8070
-    	PHP_BIN=/opt/local/bin/php70
+    	HTTP_PORT=8071
+    	PHP_BIN=/opt/local/bin/php71
     else
 		vercomp "${SERVER_VERSION}" "9.7.0"
 		compareWith97=$? # catch result of vercomp

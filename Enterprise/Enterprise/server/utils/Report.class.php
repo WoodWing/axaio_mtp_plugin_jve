@@ -110,7 +110,7 @@ class WW_Utils_Report
 			if( $help ) {
 				$logMsg .= PHP_EOL.'Tip: '.$help;
 			}
-			LogHandler::Log( $context, $logSeverity, nl2br($logMsg) );
+			LogHandler::Log( $context, $logSeverity, $logMsg );
 		}
 		
 		// Build report item.

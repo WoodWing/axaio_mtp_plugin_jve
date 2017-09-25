@@ -57,7 +57,7 @@ function cookie($name, $getcookie, &$p0, &$p1, &$p2, &$p3, &$p4, &$p5, &$p6)
 	if( $getcookie ) {
 		getCookieValues( $name, $p0, $p1, $p2, $p3, $p4, $p5, $p6 );
 	}
-	setcookie( $name, "$p0/$p1/$p2/$p3/$p4/$p5/$p6", time()+3600*24*365*10, INETROOT );
+	setcookie( $name, "$p0/$p1/$p2/$p3/$p4/$p5/$p6", time()+3600*24*365*10, INETROOT, null, COOKIES_OVER_SECURE_CONNECTIONS_ONLY, true );
 }
 
 function getCookieValues( $name, &$p0, &$p1, &$p2, &$p3, &$p4, &$p5, &$p6 )
@@ -101,7 +101,7 @@ function cookieMonster($name, $getcookie, &$p0, &$p1, &$p2, &$p3, &$p4, &$p5, &$
 		$p18 = $arr[18];
 		$p19 = $arr[19];
 	}
-	setcookie( $name, "$p0/$p1/$p2/$p3/$p4/$p5/$p6/$p7/$p8/$p9/$p10/$p11/$p12/$p13/$p14/$p15/$p16/$p17/$p18/$p19", time()+3600*24*365*10, INETROOT );
+	setcookie( $name, "$p0/$p1/$p2/$p3/$p4/$p5/$p6/$p7/$p8/$p9/$p10/$p11/$p12/$p13/$p14/$p15/$p16/$p17/$p18/$p19", time()+3600*24*365*10, INETROOT, null, COOKIES_OVER_SECURE_CONNECTIONS_ONLY, true );
 }
 
 function listrouteto( $ticket, $publ = null, $issue = null)

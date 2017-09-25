@@ -219,9 +219,17 @@ class WW_Utils_PhpInfo
 		$info = '';
 		$dbDriver = self::connectToDb( $info );
 		if( $dbDriver ) {
-			require_once BASEDIR.'/server/dbscripts/dbmodel.php';
-			$dbStruct = new DBStruct();
-			$tables = $dbStruct->listTables();
+
+			require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+			require_once BASEDIR.'/server/dbmodel/Factory.class.php';
+
+			$tables = array();
+			$definitions = WW_DbModel_Factory::createModels();
+			foreach( $definitions as $definition ) {
+				$reader = new WW_DbModel_Reader( $definition );
+				$tables = array_merge( $tables, $reader->listTables() );
+			}
+			uasort( $tables, function( $tableA, $tableB ) { return strcmp( $tableA['name'], $tableB['name'] ); } );
 
 			$info .= self::getSectionHeader( 'Database population ('.count($tables).' tables)' );
 
@@ -250,7 +258,7 @@ class WW_Utils_PhpInfo
 				if( !$dbDriver->tableExists( substr( $table['name'], strlen(DBPREFIX) ) ) ) {
 					continue; // skip
 				}
-				
+
 				// Count the records on the table.
 				if( array_key_exists( $table['name'], $bigTablesNames ) ) {
 					// Use index field(not primary field) instead of count(*).
@@ -282,10 +290,23 @@ class WW_Utils_PhpInfo
 		$dbDriver = self::connectToDb( $info );
 		if( $dbDriver ) {
 			require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
+			require_once BASEDIR.'/server/dbmodel/Factory.class.php';
+			require_once BASEDIR.'/server/dbscripts/dbinstaller/ServerPlugin.class.php';
+
+			$installedDbVersion = DBConfig::getSCEVersion();
 			$info .= self::getSectionHeader( 'Database references' );
 			$info .= self::getSetting( 'Enterprise System ID', BizSession::getEnterpriseSystemId() );
-			$info .= self::getSetting( 'Installed DB model version', DBConfig::getSCEVersion() );
-			$info .= self::getSetting( 'Required DB model version', SCENT_DBVERSION );
+			$info .= self::getSetting( 'Installed DB model version for ES', $installedDbVersion );
+			$info .= self::getSetting( 'Required DB model version for ES', SCENT_DBVERSION );
+
+			$definitions = WW_DbModel_Factory::createModelsForServerPlugins();
+			foreach( $definitions as $pluginName => $definition ) {
+				$installer = new WW_DbScripts_DbInstaller_ServerPlugin( null, $pluginName );
+				if( version_compare( $installedDbVersion, '10.2', '>=' ) ) { // 'dbversion' field of smart_plugins table is introduced since 10.2
+					$info .= self::getSetting( "Installed DB model version for {$pluginName} plug-in", $installer->getInstalledDbVersion() );
+				}
+				$info .= self::getSetting( "Required DB model version for {$pluginName} plug-in", $definition->getVersion() );
+			}
 			$info .= self::getSectionFooter();
 		}
 		return $info;

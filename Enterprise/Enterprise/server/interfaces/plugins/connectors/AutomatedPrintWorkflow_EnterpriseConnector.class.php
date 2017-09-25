@@ -17,27 +17,33 @@ abstract class AutomatedPrintWorkflow_EnterpriseConnector extends DefaultConnect
 	/**
 	 * Enables this connector to resolve given object operations with other operations.
 	 *
-	 * Called when user places a dossier onto an InDesignArticle in the CS preview.
-	 * CS then calls CreateObjectOperations and so the core server calls this function.
+	 * This function is called whenever object operations are created. This is done explicitly
+	 * through the CreateObjectOperations webservice (for example when a user places a dossier
+	 * onto an InDesignArticle in the CS preview). Operations can also be created implicitly
+	 * through the InstantiateTemplate, CreateObjects, and SaveObjects webservices.
 	 *
-	 * Also through InstantiateTemplate, CreateObjects and SaveObjects, operations can
-	 * be created implicity, and so the core server calls this function.
+	 * This connector can be used to either:
+	 * 1. Refine or tweak an existing object operation;
+	 * 2. Resolve the given operation into new object operations;
+	 * 3. Acknowledge the operation, but consciously suppress it. (Return NULL)
 	 *
-	 * When there are operations listed that needs to be refined/tweaked/resolved server 
-	 * side, the connector can do here. Then, when the layout object is about to open 
-	 * for editing in SC, the (resolved) operations will be executed on the layout. 
+	 * The default behaviour of this connector is to not acknowledge any operations. (Return empty array)
 	 *
-	 * When one operation is passed in, and many are returned, the new operations are
-	 * inserted in the operation list, directly after the first returned operation.
+	 * When multiple operations are resolved from a single operation, the new operations
+	 * will be inserted in place of the initial operation (meaning the initial operation
+	 * is not automatically included).
 	 * Note that operations are identified by their Id field, which requires a GUID value.
 	 *
-	 * @param integer $objectId
-	 * @param ObjectOperation $operation
-	 * @return ObjectOperation[] Resolved operations.
+	 * Also note that when an operation is not acknowledged by any connector, it will be
+	 * treated as a resolved operation and be added to the layout.
+	 *
+	 * @param integer $objectId Id of the Layout object the operations are going to be added to.
+	 * @param ObjectOperation $operation The operation to resolve.
+	 * @return ObjectOperation[]|null Resolved operations, NULL when $operation is recognized but should not be resolved.
 	 */
 	public function resolveOperation( $objectId, $operation )
 	{
-		return array( $operation ); // by default no resolve
+		return array(); // Do not resolve any operations by default.
 	}
 	
 	/**
