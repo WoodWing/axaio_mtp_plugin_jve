@@ -8,6 +8,24 @@
 			modal: true
 		});
 	}
+
+	// >>>
+	// Running on jQuery UI 1.8.24 and jQuery 1.10, this page gave the following error:
+	//   "Uncaught TypeError: Cannot read property 'msie' of undefined"
+	// It seems that $.browser method has been removed as of jQuery 1.9.
+	// As a work-around the following function is added:
+    jQuery.browser = {};
+    (function () {
+        jQuery.browser.msie = false;
+        jQuery.browser.version = 0;
+        if (navigator.userAgent.match(/MSIE ([0-9]+)\./)) {
+            jQuery.browser.msie = true;
+            jQuery.browser.version = RegExp.$1;
+        }
+    })();
+    // @todo: remove this function after upgrading to newer version of jQuery UI
+    // <<<
+
 </script>
 
 <form action="dbadmin.php" enctype="multipart/form-data" name="DBAdminForm" method="post">
@@ -15,7 +33,7 @@
 <table class="text" width="700">
 	<tr>
 		<td>
-			<h1><!--RES:DBINSTALLER_DBINSTALLUPGRADE--></h1>
+			<h1><!--RES:DBINSTALLER_DBINSTALLUPGRADE--></h1><!--PAR:PLUGIN_TITLE-->
 		</td>
 	</tr>
 </table>
@@ -42,7 +60,7 @@
 <table class="text" width="350">
 	<tr>
 		<th colspan="2">  
-			<h3><!--RES:DBINSTALLER_DBMODELINFO--></h3>
+			<h3><!--PAR:DBINSTALLER_DBMODELINFO--></h3>
 		</th>
 	</tr>
 	<tr></tr>
@@ -114,4 +132,5 @@
 	</div>
 </div>
 
+<!--PAR:HIDDEN-->
 </form>

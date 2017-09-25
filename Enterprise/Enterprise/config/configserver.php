@@ -16,7 +16,6 @@ require_once BASEDIR.'/server/serverinfo.php';
 //    The type of database used:
 //       'mysql'   MySQL. Default option.
 //       'mssql'   MS SQL Server.
-//       'oracle'  Oracle.
 //    Value must be in lower case.
 //
 if( !defined('DBTYPE') ) {
@@ -26,10 +25,7 @@ if( !defined('DBTYPE') ) {
 //    The database server address. By default the same machine as the
 //    application server of which this configserver.php file is part.
 //    Default value: '127.0.0.1'. (MySQL)
-//    For MSSQL and ORACLE the database machine must be listed. For MySQL use the IP address.
-//    Oracle:
-//       Use Enterprise Manager to configure the so-called "sid" that specifies the host+port+service
-//          define ('DBSERVER', 'MySID' );
+//    For MS SQL the database machine must be listed. For MySQL use the IP address.
 //    MS SQL:
 //       If your machine is called 'MyPC'.
 //          define ('DBSERVER', 'MyPC' );

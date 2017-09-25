@@ -358,40 +358,6 @@ class License
 						}
 						break;
 						
-					case 'oracle':
-						$dbh = oci_connect ($dbuser, $dbpass, $dbserver, 'UTF8');
-						if (!$dbh) 
-							return null;
-		//				$sql = "SELECT \"CREATED\" FROM user_objects WHERE \"OBJECT_TYPE\"='TABLE' AND \"OBJECT_NAME\"='SMART_OBJECTS'";
-						$tablename = 'smart_objects';
-						$sql = "SELECT to_char(\"CREATED\",'YYYY-MM-DD HH24:MI:SS') FROM user_objects WHERE \"OBJECT_TYPE\"='TABLE' AND \"OBJECT_NAME\"='$tablename'";
-		
-						$statement = oci_parse($dbh, $sql);
-						$ret = @oci_execute($statement,OCI_COMMIT_ON_SUCCESS);
-						if ($ret)
-						{
-					        $row = oci_fetch_array($statement, OCI_ASSOC | OCI_RETURN_NULLS | OCI_RETURN_LOBS );
-					        //If no row, try uppercase table name
-					        if ( $row === false )
-					        {
-								$tablename = strtoupper($tablename);
-								$sql = "SELECT to_char(\"CREATED\",'YYYY-MM-DD HH24:MI:SS') FROM user_objects WHERE \"OBJECT_TYPE\"='TABLE' AND \"OBJECT_NAME\"='$tablename'";
-								$statement = oci_parse($dbh, $sql);
-								$ret = @oci_execute($statement,OCI_COMMIT_ON_SUCCESS);
-								if ($ret)
-							        $row = oci_fetch_array($statement, OCI_ASSOC | OCI_RETURN_NULLS | OCI_RETURN_LOBS );
-					        }
-							if (is_array($row)) {
-								$keys = array_keys( $row );
-								$dbstamp = $row[ $keys[0] ];
-								$dbstampunix = strtotime( $dbstamp );
-								if ( $dbstampunix === false ) {
-									$dbstampunix = '';
-								}
-							}			
-						}
-						break;
-						
 					case 'mssql':
 						$connectionInfo = array( "UID"=>$dbuser,
                         				 		 "PWD"=>$dbpass,
@@ -582,7 +548,6 @@ class License
 				{
 					case 'mysql': $code = 0; break;
 					case 'mssql': $code = 1; break;
-					case 'oracle': $code = 2; break;
 				}
 				$key3Arr[ 1 ] = $code;
 
@@ -1912,7 +1877,7 @@ class License
 		$errorMessage = '';
 		$warningMessage = '';
 
-		//Obtained via getSerial() while no license is installed?		
+		//Obtained via getSerial() while no license is installed?
 		if ( $appserial === false )
 		{
 			$mainErrorCode = WW_LICENSE_ERR_INVALID_DATA;
@@ -4091,23 +4056,7 @@ class License
 					}
 				}
 				break;
-			case 'oracle':
-				$dbh = oci_connect ($dbuser, $dbpass, $dbserver, 'UTF8');
-				if (!$dbh) {
-					$error = 'connect error';
-				} else {
-					$sql = "SELECT TO_CHAR(CURRENT_TIMESTAMP AT TIME ZONE 'UTC', 'YYYY-MM-DD HH24:MI:SS')".' "UTCTIME"'.' FROM DUAL';
-					// Returns the current time converted to the UTC timezone.
-					$statement = oci_parse($dbh, $sql);
-					$ret = @oci_execute($statement,OCI_COMMIT_ON_SUCCESS);
-					if (!$ret) {
-						$error = 'parse or execute error ' . $sql;
-					} else {
-				        $row = @oci_fetch_array($statement, OCI_ASSOC | OCI_RETURN_NULLS | OCI_RETURN_LOBS );
-						$dbtime = strtotime( $row['UTCTIME'].' UTC' );
-				    }
-			    }
-				break;
+
 			case 'mssql':
 				$dbh = $connectionInfo = array( "UID"=>$dbuser,
                         				 		"PWD"=>$dbpass,

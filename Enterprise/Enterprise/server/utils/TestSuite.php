@@ -777,18 +777,25 @@ class WW_Utils_TestSuite
 	 */
 	public function getDbTablesWithAutoIncrement()
 	{
-		require_once BASEDIR.'/server/dbscripts/dbmodel.php';
+		require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+		require_once BASEDIR.'/server/dbmodel/Factory.class.php';
 
-		$dbTablesWithAutoIncrement = array();
-		$dbStruct = new DBStruct();		
-		$tablesWithoutAutoIncrement = $dbStruct->getTablesWithoutAutoIncrement();
-		$dbTables = $dbStruct->listTables();
+		$dbTablesWithoutAutoIncrement = array();
+		$dbTables = array();
+		$definitions = WW_DbModel_Factory::createModels();
+		foreach( $definitions as $definition ) {
+			$reader = new WW_DbModel_Reader( $definition );
+			$dbTables = array_merge( $dbTables, $reader->listTables() );
+			$dbTablesWithoutAutoIncrement = array_merge( $dbTablesWithoutAutoIncrement, $definition->getTablesWithoutAutoIncrement() );
+		}
+
+		$dbTablesHavingAutoIncrement = array();
 		foreach( $dbTables as $dbTable ) {
-			if( !in_array( $dbTable['name'], $tablesWithoutAutoIncrement )) {
-				$dbTablesWithAutoIncrement[] = $dbTable['name'];
+			if( !in_array( $dbTable['name'], $dbTablesWithoutAutoIncrement )) {
+				$dbTablesHavingAutoIncrement[] = $dbTable['name'];
 			}
 		}
-		return $dbTablesWithAutoIncrement;
+		return $dbTablesHavingAutoIncrement;
 	}
 	
 	/**

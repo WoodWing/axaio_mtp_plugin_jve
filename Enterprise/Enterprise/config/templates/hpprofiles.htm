@@ -1,3 +1,38 @@
+<style type="text/css">
+	#wwes-grid-container {
+	}
+	#wwes-grid-columns {
+		-webkit-column-count: 5;
+		-webkit-column-width: 225px;
+		-webkit-column-break-inside: avoid;
+
+		-moz-column-count: 5;
+		-moz-column-width: 225px;
+		page-break-inside: avoid;
+
+		column-count: 5;
+		column-width: 225px;
+		break-inside: avoid;
+	}
+	.wwes-grid-item {
+		min-width: 210px;
+		display: inline-block;
+		border: 2px solid #FAFAFA;
+		background-color: #EEEEEE;
+		box-shadow: 0 2px 2px rgba(34, 25, 25, 0.4);
+		margin: 0 2px 8px;
+		padding: 5px;
+	}
+	.wwes-grid-item table {
+		width: 100%;
+	}
+	.wwes-td-input {
+		padding-right: 8px;
+	}
+	.wwes-td-input > * {
+		width: 100%;
+	}
+</style>
 <script language="javascript">
 function mydelete()
 {
@@ -66,34 +101,44 @@ function checkitem(name, nr, value)
 
 	<!-- app body -->
 	<form action="hpprofiles.php" method="post" name="frmpub" onSubmit="return check();">
-	<table class="formframe" width="100%"><tr><td>
-		<table class="formbody">
-			<tr>
-				<td valign="top"><!--RES:OBJ_NAME--></td>
-				<td valign="top"><!--VAR:NAME--><br/><font color="#ff0000"><i><!--ERROR--></i></font></td>
-				<td valign="top" align="right"><!--RES:OBJ_DESCRIPTION--></td>
-				<td valign="top" align="right"><!--VAR:DESCRIPTION--></td>
-			</tr>
-		</table>
-	</td></tr><tr><td>
-		<table class="formbody">
-			<tr><!--APPLFEATURES--></tr>
-		</table>
-	</td></tr><tr><td>
-		<table class="formbtnbar">
-			<tr><td>
-				<!--VAR:BUTTON-->
-				<input type="hidden" name="vupdate" value=""/>
-				<input type="hidden" name="vdelete" value=""/>
-				<!--VAR:HIDDEN-->
-			</td></tr>
-		</table>
-	</td></tr></table>
-	</form>
-	
-	<br/>
-	<a href="profiles.php">
-		<img src="../../config/images/back_32.gif" border="0" title="<!--RES:ACT_BACK-->" width="32" height="32"/>
-	</a>
+		<div id="wwes-grid-container">
+			<div id="wwes-grid-columns">
+				<div class="wwes-grid-item">
+					<table>
+						<tr>
+							<td><!--RES:OBJ_NAME--></td>
+						</tr>
+						<tr>
+							<td class="wwes-td-input"><!--VAR:NAME--><br/><font color="#ff0000"><i><!--ERROR--></i></font></td>
+						</tr>
+						<tr>
+							<td><!--RES:OBJ_DESCRIPTION--></td>
+						</tr>
+						<tr>
+							<td class="wwes-td-input"><!--VAR:DESCRIPTION--></td>
+						</tr>
+					</table>
+				</div>
+				<!--APPLFEATURES-->
+			</div>
+		</div>
 
+		<!-- button bar -->
+		<table width="210px">
+			<tr>
+				<td>
+					<a href="profiles.php">
+						<img src="../../config/images/back_32.gif" border="0" title="<!--RES:ACT_BACK-->" width="32" height="32"/>
+					</a>
+				</td>
+				<td align="right">
+					<!--VAR:BUTTON-->
+					<input type="hidden" name="vupdate" value=""/>
+					<input type="hidden" name="vdelete" value=""/>
+					<!--VAR:HIDDEN-->
+				</td>
+			</tr>
+
+		</table>
+	</form>
 </td></tr></table>

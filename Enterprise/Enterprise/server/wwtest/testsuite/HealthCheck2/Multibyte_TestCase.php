@@ -93,7 +93,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 					
 					// Check if DB collation is accent and case in-sensitive (Only for MySQL)
 					// MSSQL and Oracle aren't accent insensitive (BZ#28667)
-					if( (DBTYPE != 'mssql' && DBTYPE != 'oracle') && $unicode == 'unicode_in_general' ) {
+					if( DBTYPE == 'mysql' && $unicode == 'unicode_in_general' ) {
 						$userInfo = DBUser::getUser( 'woodwinghchecktest' ); // Retrieve a userShortName with case-insensitive
 						if( !$userInfo ) {
 							LogHandler::Log( 'wwtest', 'ERROR', 'Database collation is not case insensitive or accent insensitive.');
@@ -103,6 +103,7 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 
 					// Error here if there was any problem found above.
 					if( !$successful ) {
+						$help = '';
 						if( DBTYPE == 'mssql' ) {
 							$help = 'Make sure that: </br>' . PHP_EOL .
 									'- The system locale is set to English(US) under Region and Language->Administrative tab->Change system locale. </br>' . PHP_EOL .
@@ -112,9 +113,6 @@ class WW_TestSuite_HealthCheck2_Multibyte_TestCase extends TestCase
 									'* See the Enterprise Admin Guide for details.';
 						} else if( DBTYPE == 'mysql' ) {
 							$help = 'Make sure that the database collation is set to utf8_general_ci.</br>';
-						} else {
-							$help = 'Make sure that the database collation is set to UTF-8. In the Character Sets tab,</br> ' .
-									'select "Use Unicode (AL32UTF8)" and select "UTF8 - ..." as the National Character Set.</br>';
 						}
 						$this->setResult( 'ERROR', 'Unicode text (in UTF-8 format) cannot be saved correctly into the database.</br>' .
 									'The configured character set could be incorrect, or the database is accent sensitive or case sensitive.', $help );

@@ -136,14 +136,6 @@ switch ($mode) {
 		}
 		$txt = str_replace("<!--ERROR-->", $err, $txt);
 
-		//AAA Remove this?? Now you can't insert a " in a query for Oracle?
-		//In the former situation, dbindep() would replace ` by " for Oracle
-		//Now, the oracle driver will pass the given SQL statement exactly to the database.
-		//So no more tricks here.
-		//if(strtolower(DBTYPE) == strtolower('oracle')){
-		//	$row['sql'] = str_replace('"', '`', $row['sql']);
-		//}
-
 		// fields
 		$txt = str_replace('<!--VAR:QUERY-->', inputvar( 'id', isset($row['id']) ? $row['id'] : 0, 'hidden').
 							'<input maxlength="200" name="query" value="'.formvar($row['query']).'"/>', $txt );

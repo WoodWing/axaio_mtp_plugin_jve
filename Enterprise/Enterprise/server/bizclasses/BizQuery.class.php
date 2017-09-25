@@ -1263,10 +1263,6 @@ class BizQuery extends BizQueryBase
     {
 		$dbdriver = DBDriverFactory::gen();
 		
-        if (DBTYPE == 'oracle') {
-            return self::buildWhereStringParam4Oracle( $param, $tablePrefix, $paramname );
-        }
-        
         $operation = $param->Operation;
         $paramvalue = $dbdriver->toDBString($param->Value);
         
@@ -1313,9 +1309,7 @@ class BizQuery extends BizQueryBase
     {
 		$dbdriver = DBDriverFactory::gen();
 		
-        if (DBTYPE == 'oracle') {
-            return self::buildWhereBlobParam4Oracle( $param, $tablePrefix, $paramname );
-        } else if (DBTYPE == 'mysql'){
+        if (DBTYPE == 'mysql'){
         	return self::buildWhereBlobParam4MySQL( $param, $tablePrefix, $paramname );
         }
         
@@ -1365,110 +1359,6 @@ class BizQuery extends BizQueryBase
         return $sql;    	
     }
 
-    static private function buildWhereStringParam4Oracle( $param, $tablePrefix, $paramname)
-    {
-		$dbdriver = DBDriverFactory::gen();
-        $operation = $param->Operation;
-        $paramvalue = $dbdriver->toDBString($param->Value);
-        
-        $sql = '';
-        
-        switch ($operation) {
-            case '=':
-            {
-            	if ($paramvalue == '') {
-                	$sql = "( UPPER($tablePrefix.`$paramname`) = UPPER('$paramvalue') OR $tablePrefix.`$paramname` IS NULL ) ";
-            	}
-				else {
-                	$sql = "UPPER($tablePrefix.`$paramname`) = UPPER('$paramvalue') ";
-				}
-                break;
-            }
-            case '!=': 
-            {
-            	if ($paramvalue == '') {
-                	$sql = " ( UPPER($tablePrefix.`$paramname`) <> UPPER('$paramvalue') OR $tablePrefix.`$paramname` IS NOT NULL ) ";
-            	}
-				else {
-                	$sql = "UPPER($tablePrefix.`$paramname`) <> UPPER('$paramvalue') ";
-				}
-				break;
-            }
-            case 'contains':
-            {
-                $escaped = DBQuery::escape4like($paramvalue, '|');
-                $sql = "UPPER($tablePrefix.`$paramname`) LIKE UPPER('%$escaped%') ESCAPE '|' ";
-                break;
-            }
-            case 'starts':
-            {
-                $escaped = DBQuery::escape4like($paramvalue, '|');
-                $sql = "UPPER($tablePrefix.`$paramname`) LIKE UPPER('$escaped%') ESCAPE '|' ";
-                break;
-            }
-            case 'ends':
-            {
-                $escaped = DBQuery::escape4like($paramvalue, '|');
-                $sql = "UPPER($tablePrefix.`$paramname`) LIKE UPPER('%$escaped') ESCAPE '|' ";
-                break;
-            }
-        }
-        return $sql;
-    }
-    
-   static private function buildWhereBlobParam4Oracle( $param, $tablePrefix, $paramname)
-    {
-		$dbdriver = DBDriverFactory::gen();
-        $operation = $param->Operation;
-        $paramvalue = $dbdriver->toDBString($param->Value);
-        
-        $sql = '';
-        
-        switch ($operation) {
-            case '=':
-            {
-            	$escaped = DBQuery::escape4like($paramvalue, '|');
-            	if ($paramvalue == '') {
-                	$sql = "(UPPER($tablePrefix.`$paramname`) LIKE UPPER('$escaped') ESCAPE '|') OR $tablePrefix.`$paramname` IS NULL ";
-            	}
-				else {
-                	$sql = "UPPER($tablePrefix.`$paramname`) LIKE UPPER('$escaped') ESCAPE '|' ";
-				}
-                break;
-            }
-            case '!=': 
-            {
-            	$escaped = DBQuery::escape4like($paramvalue, '|');
-            	if ($paramvalue == '') {
-                	$sql = "(UPPER($tablePrefix.`$paramname`) NOT LIKE UPPER('$escaped') ESCAPE '|') OR $tablePrefix.`$paramname` IS NOT NULL ";
-            	}
-				else {
-                	$sql = "UPPER($tablePrefix.`$paramname`) NOT LIKE UPPER('$escaped') ESCAPE '|' ";
-				}
-                break;
-            }
-            case 'contains':
-            {
-                $escaped = DBQuery::escape4like($paramvalue, '|');
-                $sql = "UPPER($tablePrefix.`$paramname`) LIKE UPPER('%$escaped%') ESCAPE '|' ";
-                break;
-            }
-            case 'starts':
-            {
-                $escaped = DBQuery::escape4like($paramvalue, '|');
-                $sql = "UPPER($tablePrefix.`$paramname`) LIKE UPPER('$escaped%') ESCAPE '|' ";
-                break;
-            }
-            case 'ends':
-            {
-                $escaped = DBQuery::escape4like($paramvalue, '|');
-                $sql = "UPPER($tablePrefix.`$paramname`) LIKE UPPER('%$escaped') ESCAPE '|' ";
-                break;
-            }
-        }
-        return $sql;
-    }    
-    
    /**
      * Same as buildWhereBlobParam only specific for MySQL.
      * 

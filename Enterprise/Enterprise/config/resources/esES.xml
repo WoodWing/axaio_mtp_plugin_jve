@@ -612,7 +612,7 @@
   <Term key="CUST_REPRODEADLINE">Fecha límite de reproducción</Term>
   <Term key="DATE">Fecha</Term>
   <Term key="DAYS">Días</Term>
-  <Term key="DBINSTALLER_CLICKTOSHOWTABLES">Ver un panorama de las tablas de Enterprise instaladas </Term>
+  <Term key="DBINSTALLER_CLICKTOSHOWTABLES">Ver un panorama de las tablas de Enterprise instaladas</Term>
   <Term key="DBINSTALLER_CLICK_CREATEDB_BTN">Dé clic en el botón '%1' para crear las tablas en Enterprise.</Term>
   <Term key="DBINSTALLER_CLICK_LICENSE_BTN">Dé clic en el botón '%1' para revisar sus licencias.</Term>
   <Term key="DBINSTALLER_CLICK_UPDATEDB_BTN">Dé clic en el botón '%1' para actualizar las tablas en Enterprise.</Term>
@@ -624,6 +624,7 @@
   <Term key="DBINSTALLER_DBDATA_MIGRATED">La información almacenada en las tablas de Enterprise se migró exitosamente</Term>
   <Term key="DBINSTALLER_DBINSTALLUPGRADE">Instalación / Actualización de la base de datos</Term>
   <Term key="DBINSTALLER_DBMODELINFO">Información del modelo de base de datos de Enterprise</Term>
+  <Term key="DBINSTALLER_DBMODELINFO_PLUGIN">Información del modelo de base de datos de Enterprise</Term>
   <Term key="DBINSTALLER_DBSELECT">Nombre de la base de datos</Term>
   <Term key="DBINSTALLER_DBSERVER">Servidor de la base de datos</Term>
   <Term key="DBINSTALLER_DBSETTINGS_HELP">1. Revise las opciones que definen la conexión a la base de datos:\n• configserver.php archivos: DBSERVER y DBTYPE\n• config.php archivos: DBSELECT, DBUSER y DBPASS\n2. Verifique si su base de datos está funcionando y es accesible a través de la conexión configurada '%1'.\n3. Asegúrese de que el usuario '%2' tenga acceso a la base de datos.\n4. En el caso de una instalación nueva asegúrese de que una base de datos vacía (espacio de tabla) llamada '%3' haya sido creada previamente de forma manual.\n5. Una vez que haya reparado la configuración dé clic en '%4'.</Term>
