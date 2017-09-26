@@ -103,7 +103,7 @@ class WW_BuildTools_DbGen
 	}
 
 	/**
-	 * Generates SQL scripts for MySQL, MS SQL and Oracle
+	 * Generate SQL scripts for MySQL and MS SQL.
 	 */
 	public function generateSqlScripts()
 	{
