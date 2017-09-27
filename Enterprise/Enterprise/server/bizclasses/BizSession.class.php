@@ -296,15 +296,22 @@ class BizSession
 	private static function getClientIdentifierFromRequest()
 	{
 		$clientIdentifier = null;
-		if( isset( $_SERVER['HTTP_X_WOODWING_APPLICATION']) && !empty($_SERVER['HTTP_X_WOODWING_APPLICATION']) ) {
-			$clientIdentifier = $_SERVER['HTTP_X_WOODWING_APPLICATION'];
-			LogHandler::Log( 'BizSession', 'DEBUG', 'Detected a client identifier in headers: ' . $clientIdentifier );
-		} else if( isset($_GET['ww-app']) && !empty($_GET['ww-app']) ) {
-			$clientIdentifier = urldecode($_GET['ww-app']);
-			LogHandler::Log( 'BizSession', 'DEBUG', 'Detected a client identifier in URL parameters: ' . $clientIdentifier );
-		} else {
+		do{
+			if( isset( $_SERVER['HTTP_X_WOODWING_APPLICATION']) && !empty($_SERVER['HTTP_X_WOODWING_APPLICATION']) ) {
+				$clientIdentifier = $_SERVER['HTTP_X_WOODWING_APPLICATION'];
+				LogHandler::Log( 'BizSession', 'DEBUG', 'Detected a client identifier in headers: ' . $clientIdentifier );
+				break;
+			}
+			require_once BASEDIR.'/server/utils/HttpRequest.class.php';
+			$requestParams = WW_Utils_HttpRequest::getHttpParams( 'GP' ); // GET and POST only
+			if(  isset($requestParams['ww-app']) && !empty($requestParams['ww-app']) ) {
+				$clientIdentifier = urldecode($requestParams['ww-app']);
+				LogHandler::Log( 'BizSession', 'DEBUG', 'Detected a client identifier in URL parameters: ' . $clientIdentifier );
+				break;
+			}
 			LogHandler::Log( 'BizSession', 'DEBUG', 'No client identifier detected.' );
-		}
+		} while(false);
+
 		return $clientIdentifier;
 	}
 
