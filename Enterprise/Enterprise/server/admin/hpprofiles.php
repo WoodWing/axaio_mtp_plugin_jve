@@ -149,7 +149,7 @@ $txt = str_replace('<!--VAR:DESCRIPTION-->',
 
 if( $mode !='new' ) {
 	$txt = str_replace('<!--VAR:BUTTON-->',
-		'<input type="submit" name="bt_delete" value="'.BizResources::localize('ACT_DEL').'" onclick="return mydelete()"/>'.
+		'<input type="button" name="bt_delete" value="'.BizResources::localize('ACT_DEL').'" onclick="return mydelete()"/>'.
 		'&nbsp;&nbsp;<input type="submit" name="bt_update" value="'.BizResources::localize('ACT_UPDATE').'" onclick="return myupdate()"/>'
 		, $txt );
 } else {
