@@ -434,7 +434,7 @@ class ElvisSync
 	{
 		require_once dirname( __FILE__ ).'/util/ElvisUserUtils.class.php';
 
-		$user = ElvisUserUtils::getOrCreateUser( $username );
+		$user = ElvisUserUtils::getUserByUsernameOrActingUser( $username );
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'getUsername in: '.( empty( $username ) ? 'empty' : $username ).' out: '.( is_null( $user ) ? 'empty' : $user->Name ) );
 		return is_null( $user ) ? null : $user->Name;
 	}

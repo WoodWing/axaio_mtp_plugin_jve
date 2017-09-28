@@ -103,19 +103,19 @@ class DBPublishedObjectsHist extends DBBase
 				."INNER JOIN {$publishHistTable} publishhist ON (publishhist.`id` = objhist.`publishid`) "
 				."WHERE publishhist.`objectid` = ? "
 				."AND publishhist.`channelid` = ? ";
-		$params = array( $dossierId, $channelId );
+		$params = array( intval( $dossierId ), intval( $channelId ) );
 
 		if( !empty($issueId) ) {
 			$sql .= " AND publishhist.`issueid` = ? ";
-			$params[] = $issueId;
+			$params[] = intval( $issueId );
 		}
 		if( $editionId ) {
 			$sql .= " AND publishhist.`editionid` = ? ";
-			$params[] = $editionId;
+			$params[] = intval( $editionId );
 		}
 		if ( $publishId ) {
 			$sql .= " AND objhist.`publishid` = ? ";
-			$params[] = $publishId;
+			$params[] = intval( $publishId );
 		}
 		$sql .= "AND objhist.`objectid` = ? ";
 		$params[] = intval( $childId );
