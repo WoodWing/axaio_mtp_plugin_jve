@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LocalizationMap language="zhCN">
-  <Term key="Elvis.ERR_CONNECT">An error occurred while getting a file from Elvis because of a lost connection. (S1144)#EOL##EOL#Please contact your system administrator.#EOL##EOL#IMPORTANT: We strongly advise to stop working on ANY of the files in the system until the connection is restored again and to not perform ANY action such as abort check-out, check-in, save version, check-out, opening files or Dossiers and so on.#EOL##EOL#Continuing to work on the files in any way can result in data loss or corrupted files.</Term>
+  <Term key="Elvis.ERR_CONNECT">由于连接丢失从而Elvis获取文件时发生错误。 (S1144)＃EOL ## EOL＃请与系统管理员联系＃EOL ## EOL＃重要信息：我们强烈建议您停止对系统中的任何文件进行任何操作，直到连接重新恢复，并且不执行任何操作 作为中止退出，登录，保存版本，退出，打开文件或文件集等等。＃EOL ## EOL＃继续以任何方式处理文件可能会导致数据丢失或文件损坏。</Term>
   <Term key="Elvis.PRODUCTION_ZONE">生产区域</Term>
 </LocalizationMap>
