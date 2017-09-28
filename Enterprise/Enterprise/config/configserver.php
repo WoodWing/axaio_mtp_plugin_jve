@@ -1229,9 +1229,13 @@ if( !defined('ENTERPRISE_CA_BUNDLE') ) {
 // -------------------------------------------------------------------------------------------------
 
 // COOKIES_OVER_SECURE_CONNECTIONS_ONLY:
-//    If the Enterprise Server instance is only accessible over HTTPS/Secure connections,
-//    this setting can be set to 'true' for extra security. The clients will then only send the
-//    cookies over secure connections.
+//    If the Enterprise Server instance is only accessible over secure (HTTPS) connections,
+//    this setting can be set to 'true' for extra security. Clients that support
+//    cookie based authentication are forced to send cookies only over a secure connection.
+//    When direct access from InDesign Server or direct access to the Admin pages over a regular (HTTP)
+//    connection is needed, this setting can't be set to true.
+//    True to enable. Default value: false.
+//
 if( !defined('COOKIES_OVER_SECURE_CONNECTIONS_ONLY') ) {
 	define( 'COOKIES_OVER_SECURE_CONNECTIONS_ONLY', false );
 }
