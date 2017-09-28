@@ -79,17 +79,17 @@ class DBEdition extends DBBase
 
 		if( $issue ) {
 			$sql .= " AND (edi.`issueid` = ? )";
-			$params[] = array( intval( $issue ) );
+			$params[] = intval( $issue );
 		} else {
 			$sql .= ' AND (edi.`issueid` = 0) ';
 		}
 		if( $edition ) {
 			$sql .= " AND edi.`id` = ? ";
-			$params[] = array( intval( $edition ) );
+			$params[] = intval( $edition );
 		}
 		if( $name ) {
 			$sql .= " AND edi.`name` = ? ";
-			$params[] = array( strval( $name ) );
+			$params[] = strval( $name );
 		}
 		$sql .= 'ORDER BY edi.`code`, edi.`id`';
 		return $dbdriver->query( $sql, $params );

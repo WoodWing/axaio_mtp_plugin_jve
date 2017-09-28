@@ -268,7 +268,7 @@ class DBIssue extends DBBase
 		$params = array( intval( $pubId ), strval( $channelType ), strval( $issueName ) );
 	   if ( $pubChannelId ) {
 	      $sql .= " AND cha.`id` = ? ";
-	      $params[] = array( intval( $pubChannelId ) );
+	      $params[] = intval( $pubChannelId );
 	   }
 		
 		$sth = $dbDriver->query( $sql, $params );

@@ -1163,11 +1163,9 @@ class DBUser extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename('users');
 
-		$user = $dbDriver->toDBString($user);
-		$lang = $dbDriver->toDBString($lang);
-
-		$sql = "UPDATE $db SET `language`='$lang' WHERE `user` = ? ";
-		$sth = $dbDriver->query($sql, array( strval( $user ) ));
+		$sql = "UPDATE $db SET `language`= ? WHERE `user` = ? ";
+		$params = array( strval( $lang ), strval( $user ) );
+		$sth = $dbDriver->query($sql, $params );
 
 		return $sth;
 	}
