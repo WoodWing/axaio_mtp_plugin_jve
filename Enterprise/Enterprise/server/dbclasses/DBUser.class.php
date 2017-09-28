@@ -1658,7 +1658,8 @@ class DBUser extends DBBase
 			$features =
 				BizAccessFeatureProfiles::getFileAccessProfiles() +
 				BizAccessFeatureProfiles::getAnnotationsAccessProfiles() +
-				BizAccessFeatureProfiles::getWorkflowAccessProfiles();
+				BizAccessFeatureProfiles::getWorkflowAccessProfiles() +
+				BizAccessFeatureProfiles::getServerPluginFeatureAccessLists();
 			$dbDriver = DBDriverFactory::gen();
 			$authorizations = $dbDriver->tablename("authorizations");
 			$profilefeatures = $dbDriver->tablename("profilefeatures");

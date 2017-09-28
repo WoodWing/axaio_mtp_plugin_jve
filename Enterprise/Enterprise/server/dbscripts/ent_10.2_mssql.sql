@@ -24,7 +24,7 @@ CREATE TABLE [smart_authorizations] (
   [publication] int NOT NULL  default '0',
   [section] int NOT NULL  default '0',
   [state] int NOT NULL  default '0',
-  [rights] varchar(40) NOT NULL  default '',
+  [rights] varchar(1024) NOT NULL  default '',
   [issue] int NOT NULL  default '0',
   [profile] int NOT NULL  default '0',
   [bundle] int NOT NULL  default '0',
@@ -868,6 +868,15 @@ INSERT INTO [smart_profilefeatures] ([id], [profile], [feature], [value]) VALUES
 INSERT INTO [smart_profilefeatures] ([id], [profile], [feature], [value]) VALUES (71, 1, 72, 'Yes');
 INSERT INTO [smart_profilefeatures] ([id], [profile], [feature], [value]) VALUES (72, 1, 84, 'Yes');
 SET IDENTITY_INSERT [smart_profilefeatures] OFF
+
+CREATE TABLE [smart_featureaccess] (
+  [featurename] varchar(255) NOT NULL  default '',
+  [featureid] int NOT NULL  default '0',
+  [accessflag] varchar(4) NOT NULL  default '',
+  PRIMARY KEY ([featurename])
+);
+CREATE UNIQUE INDEX [faid_profiles] ON [smart_featureaccess]([featureid]) ;
+CREATE UNIQUE INDEX [faaf_profiles] ON [smart_featureaccess]([accessflag]) ;
 
 CREATE TABLE [smart_appsessions] (
   [id] int NOT NULL  IDENTITY(1,1),

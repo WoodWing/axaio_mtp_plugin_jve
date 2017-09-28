@@ -241,18 +241,29 @@ class BizAccess
 			$globAuth = new authorizationmodule( );
 		}
 		$globAuth->getRights( $user, $brandId, $issueId, $categoryId, $objectType, $statusId );
-		for( $i=0; $i < strlen($rights); ++$i ) {
-			$hasAccess = $globAuth->checkright( $rights[$i],
+		$rightFlags = preg_split( '//u', $rights, -1, PREG_SPLIT_NO_EMPTY );
+		foreach( $rightFlags as $rightFlag ) { // iterate through characters in a UTF-8 safe manner
+			$hasAccess = $globAuth->checkright( $rightFlag,
 				$brandId, $issueId, $categoryId, $objectType, $statusId,
 				$objectId, $contentSource, $documentId, $routeTo );
 
 			// When no access: Throw authorization error or return false.
 			if( !$hasAccess ) {
 				if( $throwException ) {
+					// For features provided by core server, clients may rely already on the hard coded flags.
+					// Not to break with those clients, we should keep this behaviour.
+					// For features provided server plugins (since 10.2.0) the flags vary per installation.
+					// However, flags are core internals while feature names are communicated to clients through
+					// the LogOnResponse. So using feature names in errors makes more sense but should only be
+					// applied for features provided by server plug-ins.
+					// Note that when we can resolve a flag from DB, we can assume it is provided by a plugin.
+					require_once BASEDIR.'/server/dbclasses/DBAdmFeatureAccess.class.php';
+					$featureName = DBAdmFeatureAccess::getFeatureNameForFlag( $rightFlag );
+					$featureFlagOrName = $featureName ? $featureName : $rightFlag;
 					if( $objectId ) {
-						$details = $objectId.'('.$rights[$i].')';
+						$details = $objectId.'('.$featureFlagOrName.')';
 					} else {
-						$details = $rights[$i];
+						$details = $featureFlagOrName;
 					}
 					throw new BizException( 'ERR_AUTHORIZATION', 'Client', $details );
 				} else {
@@ -342,5 +353,27 @@ class BizAccess
 
 		require_once BASEDIR.'/server/dbclasses/DBAccess.class.php';
 		return DBAccess::hasUserAuthorizations( $userId, $brandId, $issueId );
+	}
+
+	/**
+	 * Resolve profile feature access rights (flags) that are provided by the server plug-ins.
+	 *
+	 * For the features provided by server plugins, access rights flags are determined per Enterprise installation.
+	 * Therefore they can not be hard-coded (as done for the rights provided by the core server). Instead, this
+	 * function should be called to resolve the rights/flags first. Then any other function provided by this class
+	 * can be called which accepts the $rights parameter, such as checkRights().
+	 *
+	 * Rights provided by the core server are hard-coded and therefore this function should not be used.
+	 *
+	 * @since 10.2.0
+	 * @param string[] $featureNames
+	 * @return string Feature rights (flags).
+	 */
+	static public function resolveRightsForPluginFeatures( array $featureNames )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBAdmFeatureAccess.class.php';
+
+		$flags = DBAdmFeatureAccess::getFeatureFlags( $featureNames );
+		return implode( '', $flags );
 	}
 }
