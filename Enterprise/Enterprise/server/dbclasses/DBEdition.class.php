@@ -54,9 +54,9 @@ class DBEdition extends DBBase
 	 *
 	 * @param int $issueId Id of the Issue
 	 * @param int $editionId Id of the edition definition
-	 * @param $editionRow array of values to update, indexed by fieldname. $editionRow['issue'] = issue1, etc...
+	 * @param array $editionRow array of values to update, indexed by fieldname. $editionRow['issue'] = issue1, etc...
 	 *         The array does NOT need to contain all values, only values that are to be updated.
-	 * @param $updateIfExists Should the record be updated if there allready is an edition with this issue and edition-definition
+	 * @param bool $updateIfExists Should the record be updated if there already is an edition with this issue and edition-definition
 	 * @deprecated since 10.2.0
 	 */
 	public static function insertIssueEdition( $issueId, $editionId, $editionRow, $updateIfExists )
@@ -64,7 +64,7 @@ class DBEdition extends DBBase
 		$curEditionRow = self::getRow( 'issueeditions', " `issue` = '$issueId' AND `edition` = '$editionId' ", null );
 		if( $curEditionRow ) {
 			if( $updateIfExists ) {
-				self::updateRow( 'issueeditions', $editionRow, "`id` = '".$curEditionRow['id']."' " );
+				self::updateRow( 'issueeditions', $editionRow, "`id` = ?" ,array( intval( $curEditionRow['id'] ) ));
 			} else {
 				self::setError( 'ERR_RECORDEXISTS' );
 			}

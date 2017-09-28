@@ -14,6 +14,8 @@ class ReadWriteFieldHandler
 	protected $property;
 	/** @var bool $customProperty */
 	protected $customProperty = false;
+	/** @var int brand Id */
+	protected $brandId = 0;
 
 	/**
 	 * @param string $lvsFieldName Elvis metadata field name
@@ -21,7 +23,7 @@ class ReadWriteFieldHandler
 	 * @param string $dataType String representation of the Elvis field's data type.
 	 * @param string $entPropertyName Enterprise metadata property name.
 	 */
-	public function __construct( $lvsFieldName, $multiValue, $dataType, $entPropertyName )
+	public function __construct( $lvsFieldName, $multiValue, $dataType, $entPropertyName,  $brandId = 0 )
 	{
 		$this->lvsFieldName = $lvsFieldName;
 		$this->multiValue = $multiValue;
@@ -34,8 +36,8 @@ class ReadWriteFieldHandler
 			$entPropertyName = strtoupper( $entPropertyName );
 
 			// TODO: Jikes, this causes a lot of DB calls!
-			$propType = BizProperty::getCustomPropertyType( $entPropertyName );
-
+			$propType = BizProperty::getCustomPropertyType( $entPropertyName, $brandId );
+			
 			$this->property = new PropertyInfo( $entPropertyName, null, $this->entMetadataCategory, $propType );
 		} else {
 			$metadataPaths = BizProperty::getMetaDataPaths();
@@ -122,7 +124,7 @@ class ReadWriteFieldHandler
 	 * Helper function to get the list of values from a metaDataValue.
 	 *
 	 * @param MetaDataValue $metaDataValue Metadata value structure of which the first value needs to be retrieved
-	 * @return string
+	 * @return mixed The metadata value
 	 */
 	private function getFirstMetaDataValue( $metaDataValue )
 	{
@@ -200,8 +202,8 @@ class ReadWriteFieldHandler
 	/**
 	 * Converts the Elvis value to Enterprise value
 	 *
-	 * @param ElvisEntHit $elvisValue
-	 * @return mixed requested by Enterprise
+	 * @param mixed $elvisValue
+	 * @return mixed Datatype requested by Enterprise
 	 * @throws BizException
 	 */
 	protected function getEnterpriseMetadataValue( $elvisValue )
@@ -211,7 +213,7 @@ class ReadWriteFieldHandler
 		}
 
 		//This code relies on Elvis values to be casted to the Enterprise type
-		//If the basic types between Elvis / Enterprise do not match 
+		//If the basic types between Elvis / Enterprise do not match
 		//create a special field handler for it
 		switch( $this->property->Type ) {
 			case 'date':
@@ -253,5 +255,17 @@ class ReadWriteFieldHandler
 			return strtolower( $value ) == "true" || $value == "1" || strtolower( $value ) == "yes";
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the Id of the brand for which the mapping is applicable.
+	 *
+	 * If the mapping is applicable for all brands the Id = 0.
+	 *
+	 * @return int Brand Id
+	 */
+	public function mappedToBrand(  )
+	{
+		return $this->brandId;
 	}
 }

@@ -12,13 +12,15 @@ class DBRouting extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename(self::TABLENAME);
 
-		$sql = "SELECT `section`, `state`, `routeto` FROM $db WHERE `publication` = $publ";
+		$sql = "SELECT `section`, `state`, `routeto` FROM $db WHERE `publication` = ? ";
+		$params = array( intval( $publ ) );
 		if ($issue) {
-			$sql .= " AND (`issue` = $issue OR `issue` = 0)";
+			$sql .= " AND (`issue` = ? OR `issue` = 0)";
+			$params[] = intval( $issue );
 		} else {
 			$sql .= " AND `issue` = 0";
 		}
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query($sql, $params );
 		return $sth;
 	}
 

@@ -106,9 +106,7 @@ class Facebook extends BaseFacebook
     }
 
     $session_var_name = $this->constructSessionVariableName($key);
-	 session_start();
     $_SESSION[$session_var_name] = $value;
-	 session_write_close();
   }
 
   protected function getPersistentData($key, $default = false) {

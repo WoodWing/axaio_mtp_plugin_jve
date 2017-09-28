@@ -688,6 +688,7 @@ abstract class BaseFacebook
    * need to be adjusted and we do not want to invest time to implement a deprecated
    * 3.2.3, so just use the current 3.2.2 and adjust few parts that are needed.
    *
+   * @since 10.0.6 This function is replaced with the getCode() from sdk 3.2.3
    * @since 10.1.3 This function is replaced with the getCode() from sdk 3.2.3
    * @return mixed The authorization code, or false if the authorization
    *               code could not be determined.

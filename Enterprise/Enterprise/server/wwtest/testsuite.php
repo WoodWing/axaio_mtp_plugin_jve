@@ -60,9 +60,10 @@ switch( $command ) {
 	case 'PollTest': // Request to run a single test from testsuite folder
 		$classPath = $_REQUEST['classPath'];
 		$sessionId = $_REQUEST['sessionId'];
+		$testSuite = $_REQUEST['testSuite'];
 		LogHandler::Log( 'wwtest', 'INFO', 'Running test: '.$classPath );
 		require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteFactory.class.php';
 		header( 'Content-Type: text/xml' );
-		print TestSuiteFactory::runTest( $sessionId, $classPath );
+		print TestSuiteFactory::runTest( $sessionId, $classPath, $testSuite );
 	break;
 }
