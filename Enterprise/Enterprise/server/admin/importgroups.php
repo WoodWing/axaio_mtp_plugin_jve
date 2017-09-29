@@ -22,9 +22,9 @@ $parUserName = isset( $_REQUEST['UserName'] ) ? $_REQUEST['UserName'] : $globUse
 $parPassword = isset( $_REQUEST['Password'] ) ? $_REQUEST['Password'] : getOptionalCookie('LdapPasswd');
 
 // Save request params
-setcookie( 'LdapDomain', $parDomain, 0, INETROOT );
-setcookie( 'LdapSearch', $parSearch, 0, INETROOT );
-setcookie( 'LdapPasswd', $parPassword, 0, INETROOT ); // BUG fix! (was $parSearch, and so overwriting search field into password field)
+setcookie( 'LdapDomain', $parDomain, 0, INETROOT, null, COOKIES_OVER_SECURE_CONNECTIONS_ONLY, true );
+setcookie( 'LdapSearch', $parSearch, 0, INETROOT, null, COOKIES_OVER_SECURE_CONNECTIONS_ONLY, true );
+setcookie( 'LdapPasswd', $parPassword, 0, INETROOT, null, COOKIES_OVER_SECURE_CONNECTIONS_ONLY, true ); // BUG fix! (was $parSearch, and so overwriting search field into password field)
 
 $txt = HtmlDocument::loadTemplate( 'importgroups.htm' );
 

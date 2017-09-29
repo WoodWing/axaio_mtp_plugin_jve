@@ -115,12 +115,12 @@ class EnterpriseService
 			// from the HTTP cookies. This is to support JSON clients that run multiple web applications which need to share the
 			// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
 			if( $ticket ) {
-				setLogCookie( 'ticket', $ticket );
+				BizSession::setTicketCookieForClientIdentifier($ticket);
 			} else {
 				if( !in_array( $interface, array( 'WflLogOn', 'AdmLogOn', 'PlnLogOn' ) ) ) {
-					$ticket = getOptionalCookie( 'ticket' );
+					$ticket = BizSession::getTicketForClientIdentifier();
 					if( $ticket ) {
-						setLogCookie( 'ticket', $ticket );
+						BizSession::setTicketCookieForClientIdentifier($ticket);
 						if( $interface != 'WflChangePassword' && property_exists( $req, 'Ticket' ) ) {
 							$req->Ticket = $ticket; // repair for connectors being called in restructureRequest/restructureResponse
 						}

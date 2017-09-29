@@ -24,9 +24,7 @@ class UserFieldHandler extends ReadOnlyFieldHandler
 		if( !empty( $username ) && !strpos( $username, ELVIS_INTERNAL_USER_POSTFIX ) ) {
 			require_once dirname( __FILE__ ).'/../../util/ElvisUserUtils.class.php';
 
-			$user = ElvisUserUtils::getOrCreateUser( $username );
-
-			//LogHandler::logPhpObject($user, 'var_dump', 'User ' . $username);
+			$user = ElvisUserUtils::getUserByUsernameOrActingUser( $username );
 			if( isset( $user ) && isset( $user->FullName ) ) {
 				$fullName = $user->FullName;
 			}

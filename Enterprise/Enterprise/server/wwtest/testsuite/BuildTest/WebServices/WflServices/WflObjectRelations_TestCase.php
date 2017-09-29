@@ -253,7 +253,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectRelations_TestCase
 			$this->setResult( 'ERROR', 'Error occurred in CreateObjects service call.',
 				'In the CreateObjects request, Image was sent without Relational Targets, ' .
 				'Server should auto assign a Target but wrong Target has been assign to the Image.' . PHP_EOL .
-				$phpCompare->getErrors() );
+				implode( PHP_EOL, $phpCompare->getErrors()) );
 			return false;
 		}
 

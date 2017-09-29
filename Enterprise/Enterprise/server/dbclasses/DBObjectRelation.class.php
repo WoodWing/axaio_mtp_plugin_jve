@@ -198,7 +198,7 @@ class DBObjectRelation extends DBBase
 		$db = $dbDriver->tablename($table);
 
 		$where = $isParent ? '`parent`= ?' : '`child`= ?';
-		$params = array( $objectId );
+		$params = array( intval( $objectId ) );
 
 		// Restoring type from 'deleted' to original relation type?
 		if( $restore ) {
@@ -208,10 +208,10 @@ class DBObjectRelation extends DBBase
 			$ids = array();
 			if( $isParent ) {
 				// Looking for a certain parent: check whether child is present in the objects table.
-				$sql = "SELECT `id`, `child` FROM $db where $where";
+				$sql = "SELECT `id`, `child` FROM $db WHERE $where";
 			} else {
 				// Looking for a certain child: check whether parent is present in the objects table.
-				$sql = "SELECT `id`, `parent` FROM $db where $where";
+				$sql = "SELECT `id`, `parent` FROM $db WHERE $where";
 			}
 			$sth = $dbDriver->query( $sql, $params );
 			if( !$sth ) {
@@ -330,17 +330,19 @@ class DBObjectRelation extends DBBase
 		$db = $dbDriver->tablename(self::TABLENAME);
 
 		if ($childs) {
-			$sql = "SELECT `id`, `child`, `type`, `subid`, `pagerange`, `rating` FROM $db WHERE `parent` = $id";
+			$sql = "SELECT `id`, `child`, `type`, `subid`, `pagerange`, `rating` FROM $db WHERE `parent` = ? ";
 		} else {
-			$sql = "SELECT `id`, `parent`, `type`, `subid`, `pagerange`, `rating` FROM $db WHERE `child` = $id";
+			$sql = "SELECT `id`, `parent`, `type`, `subid`, `pagerange`, `rating` FROM $db WHERE `child` = ? ";
 		}
+		$params = array( intval( $id ) );
 		// Never return relations that are marked as 'deleted'.
 		if ($type) {
-			$sql .= " AND `type` = '$type'";
+			$sql .= " AND `type` = ? ";
+			$params[] = strval( $type );
 		} elseif ( !$alsoDeletedOnes ) {
 			$sql .= " AND `type` NOT LIKE 'Deleted%'";
 		}
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query($sql, $params );
 
 		return $sth;
 	}
@@ -482,8 +484,9 @@ class DBObjectRelation extends DBBase
 		$db1 = $dbDriver->tablename("objects");
 		$db2 = $dbDriver->tablename(self::TABLENAME);
 
-		$sql = "SELECT `id` FROM $db1 WHERE `type` = 'Advert' AND `publication` = $publication AND `issue` = $issue AND (`section` = $section or `section` = 0)";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT `id` FROM $db1 WHERE `type` = ? AND `publication` = ? AND `issue` = ? AND (`section` = ? or `section` = ? )";
+		$params = array( 'Advert', intval( $publication), intval( $issue ), intval( $section ), 0 );
+		$sth = $dbDriver->query( $sql, $params );
 		if (!$sth) return false;
 
 		$arr = array();
@@ -493,11 +496,11 @@ class DBObjectRelation extends DBBase
 			$adv_id = $row["id"];
 			$sql = "SELECT 1 FROM $db2 WHERE ";
 			// (`type` = 'Placed' and `child` = $adv_id) or `parent` = $lay_id or (`child` = $adv_id and `parent` != $lay_id) ";
-			$sql .= "(`type` = 'Placed' AND `child` = $adv_id) OR ";
-			$sql .= "(`parent` = $lay_id AND `type` NOT LIKE 'Deleted%') OR ";
-			$sql .= "(`child` = $adv_id AND `parent` != $lay_id AND `type` NOT LIKE 'Deleted%' ) ";
-
-			$sth2 = $dbDriver->query($sql);
+			$sql .= "(`type` = 'Placed' AND `child` = ? ) OR ";
+			$sql .= "(`parent` = ? AND `type` NOT LIKE 'Deleted%') OR ";
+			$sql .= "(`child` = ? AND `parent` != ? AND `type` NOT LIKE 'Deleted%' ) ";
+			$params = array( intval( $adv_id ), intval( $lay_id ), intval( $adv_id ), intval( $lay_id ) );
+			$sth2 = $dbDriver->query($sql, $params );
 			if (!$sth2) return false;
 			$row2 = $dbDriver->fetch($sth2);
 			if (!$row2)
@@ -629,12 +632,13 @@ class DBObjectRelation extends DBBase
 		
 		$sql  = "SELECT `child` ";
 		$sql .= "FROM $objrel ";
-		$sql .= "WHERE `child` = $childId ";
+		$sql .= "WHERE `child` = ? ";
 		$sql .= "AND `type` <> 'Related' ";
 		$sql .= "GROUP BY `child` ";
 		$sql .= "HAVING COUNT(1) > $manifold ";
+		$params = array( intval( $childId ) );
 		
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query( $sql, $params );
 		$row = $dbDriver->fetch($sth); 
 		
 		return $row ? true : false;

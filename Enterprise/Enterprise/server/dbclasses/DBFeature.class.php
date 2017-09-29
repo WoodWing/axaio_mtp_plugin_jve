@@ -78,7 +78,6 @@ class DBFeature extends DBBase
 	public static function getFeatureAccess( $userShort, $pubIds )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
-		$dbDriver = DBDriverFactory::gen();
 		$rows = DBUser::getRights( $userShort, $pubIds );
 
 		$featureAccessList = array();
@@ -111,7 +110,7 @@ class DBFeature extends DBBase
 		$sql =  'SELECT `profile`, `feature` '.
 			'FROM '.$dbpv.' '.
 			'WHERE `profile` IN (' . implode(',', $profileIds ) . ') '.
-			'AND `feature` < 100 '; // [1..99]
+			'AND ( `feature` < 100 OR `feature` >= 5000 ) '; // core basics: [1..99], plug-ins: [5000..5999]
 		$sth = $dbDriver->query($sql);
 		$result = self::fetchResults($sth);
 

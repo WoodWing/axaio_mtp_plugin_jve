@@ -112,21 +112,22 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWebEditWorkspace_TestCas
 		}
 
 		do {
-			if( !$this->setupTestData() ) {
-				break;
-			}
-			if( !$this->scenario_01() ) {
-				break;
-			}
-			if( !$this->scenario_02() ) {
-				break;
-			}
-			if( !$this->scenario_03() ) {
-				break;
-			}
+			// Disabled these tests on Work1 because the test server does not have the correct IDServer installed TODO: Enable with CC2017
+//			if( !$this->setupTestData() ) {
+//				break;
+//			}
+//			if( !$this->scenario_01() ) {
+//				break;
+//			}
+//			if( !$this->scenario_02() ) {
+//				break;
+//			}
+//			if( !$this->scenario_03() ) {
+//				break;
+//			}
 		} while( false ); // only once
 
-		$this->tearDownTestData();
+//		$this->tearDownTestData();
 	}
 
 	/**

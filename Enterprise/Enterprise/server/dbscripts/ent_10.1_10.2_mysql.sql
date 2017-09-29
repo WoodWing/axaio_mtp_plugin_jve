@@ -1,3 +1,13 @@
+ALTER TABLE `smart_authorizations` CHANGE `rights`   `rights` varchar(1024) NOT NULL  default '';
+
+CREATE TABLE `smart_featureaccess` (
+  `featurename` varchar(255) NOT NULL  default '',
+  `featureid` int(4) NOT NULL  default '0',
+  `accessflag` varchar(4) NOT NULL  default '',
+  PRIMARY KEY (`featurename`)
+) DEFAULT CHARSET=utf8;
+CREATE UNIQUE INDEX `faid_profiles` ON `smart_featureaccess`(`featureid`) ;
+CREATE UNIQUE INDEX `faaf_profiles` ON `smart_featureaccess`(`accessflag`) ;
 ALTER TABLE `smart_serverplugins`
 ADD   `dbprefix` varchar(10) NOT NULL  default '',
 ADD   `dbversion` varchar(10) NOT NULL  default '';

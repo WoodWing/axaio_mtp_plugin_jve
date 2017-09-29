@@ -141,20 +141,27 @@ foreach ($errors as $error) {
 $txt = str_replace('<!--ERROR-->', $err, $txt);
 
 // fields
-$txt = str_replace('<!--VAR:NAME-->', '<input maxlength="255" name="profile" value="'.formvar($accessProfile->Name).'"/>', $txt );
+$txt = str_replace('<!--VAR:NAME-->',
+	'<input maxlength="255" name="profile" value="'.formvar($accessProfile->Name).'"/>', $txt );
 $txt = str_replace('<!--VAR:HIDDEN-->', inputvar( 'id', $id, 'hidden' ), $txt );
-$txt = str_replace('<!--VAR:DESCRIPTION-->', '<textarea rows="5" cols="18" name="description" style="resize: none;">'.formvar( $accessProfile->Description ).'</textarea>', $txt );
+$txt = str_replace('<!--VAR:DESCRIPTION-->',
+	'<textarea rows="3" name="description" style="resize: none;">'.formvar( $accessProfile->Description ).'</textarea>', $txt );
 
 if( $mode !='new' ) {
-	$txt = str_replace('<!--VAR:BUTTON-->', 
-		'<input type="submit" name="bt_update" value="'.BizResources::localize('ACT_UPDATE').'" onclick="return myupdate()"/>'.
-		'<input type="submit" name="bt_delete" value="'.BizResources::localize('ACT_DEL').'" onclick="return mydelete()"/>', $txt );
+	$txt = str_replace('<!--VAR:BUTTON-->',
+		'<input type="button" name="bt_delete" value="'.BizResources::localize('ACT_DEL').'" onclick="return mydelete()"/>'.
+		'&nbsp;&nbsp;<input type="submit" name="bt_update" value="'.BizResources::localize('ACT_UPDATE').'" onclick="return myupdate()"/>'
+		, $txt );
 } else {
 	$txt = str_replace('<!--VAR:BUTTON-->', '<input type="submit" name="bt_update" value="'.BizResources::localize('ACT_UPDATE').'" onclick="return myupdate()"/>', $txt );
 }
 $profileFeatures = array();
 if( $mode == 'error' ) {
-	$sysProfileFeatures = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
+	$sysProfileFeatures = null;
+	try {
+		$sysProfileFeatures = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
+	} catch( BizException $e ) {
+	}
 	if( $sysProfileFeatures ) foreach( $sysProfileFeatures as $sysFeature ) {
 		if( $_REQUEST['checkobj'][$sysFeature->Name] ) {
 			$profileFeature = new AdmProfileFeature();
@@ -206,6 +213,13 @@ $featureCategories = array(
 	'FEATURE_DATASOURCES'   => BizAccessFeatureProfiles::getDataSourcesAccessProfiles(),
 	'ANNOTATIONS'           => BizAccessFeatureProfiles::getAnnotationsAccessProfiles(),
 );
+
+$pluginFeatures = BizAccessFeatureProfiles::getServerPluginFeatureAccessLists();
+require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+$connRetVals = array();
+BizServerPlugin::runDefaultConnectors( 'FeatureAccess', null, 'composeFeaturesAccessProfilesDialog',
+	array( &$featureCategories, $pluginFeatures ), $connRetVals );
+
 foreach( $featureCategories as $featureCategoryResourceKey => $featureDefinitions ) {
 	$detailtxt .= '<div class="wwes-grid-item"><table>';
 	$detailtxt .= '<tr><td colspan="2"><u>'.BizResources::localize($featureCategoryResourceKey).'</u></td></tr>';
@@ -222,12 +236,12 @@ foreach( $featureCategories as $featureCategoryResourceKey => $featureDefinition
 	$arrtxt = join(',', $arr);
 	$detailtxt .=
 		'<tr><td colspan="2" align="right"><div style="padding-top: 5px">'.
-			'<a href="" onClick="javascript:checkgroup(new Array('.$arrtxt.'), true); return false;" '.
-				'title="'.$sSelectAllRows.'">'.$sSelectAll.
-			'</a>'.
-			'&nbsp;&nbsp;&nbsp;'.
 			'<a href="" onClick="javascript:checkgroup(new Array('.$arrtxt.'), false); return false; " '.
 				'title="'.$sUnselectAllRows.'">'.$sUnselectAll.
+			'</a>'.
+			'&nbsp;&nbsp;&nbsp;'.
+			'<a href="" onClick="javascript:checkgroup(new Array('.$arrtxt.'), true); return false;" '.
+				'title="'.$sSelectAllRows.'">'.$sSelectAll.
 			'</a>'.
 		'</div></td></tr>';
 	$detailtxt .= '</table></div>';

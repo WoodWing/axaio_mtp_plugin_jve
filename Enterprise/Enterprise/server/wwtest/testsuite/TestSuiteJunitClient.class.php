@@ -182,7 +182,7 @@ class WW_TestSuite_JunitClient
 		$options = array( 'timeout' => 3600 ); // Max 1 hour
 		if( $this->coldTest == true ) {
 			require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteFactory.class.php';
-			$contents = TestSuiteFactory::runTest( $this->sessionId, $test->ClassPath );
+			$contents = TestSuiteFactory::runTest( $this->sessionId, $test->ClassPath, $this->testSuite );
 		} else {
 			$client = new Zend\Http\Client( $this->testUri.'?command=PollTest&classPath='.$test->ClassPath.'&sessionId='.$test->SessionId, $options );
 			$response = $client->send();

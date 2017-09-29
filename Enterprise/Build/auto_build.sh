@@ -565,7 +565,6 @@ function step5_ionCubeEncodePhpFiles {
 		Enterprise/server/appservices/ \
 		Enterprise/server/wwtest/ngrams/ \
 		Enterprise/server/plugins/AdobeDps/ \
-		Enterprise/server/apps/webapplicense.inc.php \
 		Enterprise/server/regserver.inc.php \
 		Enterprise/server/bizclasses/BizServerJob.class.php \
 		Enterprise/server/bizclasses/BizPublishing.class.php \

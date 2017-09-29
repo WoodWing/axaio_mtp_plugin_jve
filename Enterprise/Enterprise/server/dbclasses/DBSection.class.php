@@ -189,10 +189,10 @@ class DBSection extends DBBase
 			return null;
 		}
 		$where = "`publication` = ? ";
-		$params[] = intval($pubId);
+		$params = array( intval( $pubId ) );
 		if( ((string)($issueId) === (string)(int)($issueId)) && $issueId > 0 ) { // natural and positive
 			$where .= "AND (`issue` = ? OR `issue` = ?) ";
-			$params[] = intval($issueId);
+			$params[] = intval( $issueId );
 			$params[] = 0;
 		} else {
 			$where .= "AND `issue` = ? ";
@@ -200,11 +200,11 @@ class DBSection extends DBBase
 		}
 		if( ((string)($sectionId) === (string)(int)($sectionId)) && $sectionId > 0 ) { // natural and positive
 			$where .= "AND `id` = ? ";
-			$params[] = intval($sectionId);
+			$params[] = intval( $sectionId );
 		}
 		if( $sectionName ) { 
 			$where .= "AND `section` = ? ";
-			$params[] = trim(strval($sectionName));
+			$params[] = trim( strval( $sectionName ) );
 		}
 		// run DB query
 		$db = $dbDriver->tablename( self::TABLENAME );
@@ -212,7 +212,7 @@ class DBSection extends DBBase
 		$sth = $dbDriver->query( $sql, $params );
 		return $sth;
 	}
-    
+
 	/**
 	 * Lists all sections of the publication and issue as objects.
 	 *
@@ -230,7 +230,6 @@ class DBSection extends DBBase
 		if( self::hasError() ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 		}
-
 		$sections = array();
 		if( $rows ) {
 			foreach( $rows as $row ) {

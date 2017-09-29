@@ -118,6 +118,7 @@ class BizQuery extends BizQueryBase
 		if( isset( $request->Params ) ) {
 			$request->Params = self::resolvePublicationNameParams( $request->Params );
 			$request->Params = self::resolveSpecialParams( $request->Params );
+			$request->Params = self::resolveIssueNameParams( $request->Params ) ;
 		}
 
 		$queryResult = null;
@@ -878,7 +879,7 @@ class BizQuery extends BizQueryBase
 				break;
 			}
 			case 'PublicationId': {
-				$sql = "o.`publication` $operation $paramvalue ";
+				$sql = "o.`publication` $operation ".intval( $paramvalue );
 				break;
 			}
 			case 'ChannelId':
@@ -886,20 +887,20 @@ class BizQuery extends BizQueryBase
 			{
 				BizQueryBase::requireJoin4Where( 'tar' );
 				BizQueryBase::requireJoin4Where( 'cha' );
-				$sql = "cha.`id` $operation $paramvalue";
+				$sql = "cha.`id` $operation ".intval($paramvalue );
 				break;
 			}
 			case 'CategoryId':
 			case 'SectionId': {
-				$sql = "o.`section` $operation $paramvalue";
+				$sql = "o.`section` $operation ".intval($paramvalue);
 				break;
 			}
 			case 'StateId': {
-				$sql = "o.`state` $operation $paramvalue";
+				$sql = "o.`state` $operation ".intval( $paramvalue );
 				break;
 			}
 			case 'IssueId': {
-				self::$issueClauses[] = "iss.`id` $operation $paramvalue";
+				self::$issueClauses[] = "iss.`id` $operation ".intval( $paramvalue );
 				break;
 			}
 			case 'IssueIds': {
@@ -1094,7 +1095,7 @@ class BizQuery extends BizQueryBase
 		$field = null;
 		switch($propName) {
 			case "EditionId" :
-				$field = "e.id $operation $paramvalue";
+				$field = "e.id $operation ".intval( $paramvalue );
 				break;
 			case "Edition" :
 				$field = self::buildWhereStringParam( $param, 'e', 'name' );

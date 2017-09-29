@@ -846,6 +846,7 @@ class DBInDesignServerJob extends DBBase
 
 		// Save the error for the job.
 		require_once BASEDIR.'/server/utils/UtfString.class.php';
+		$errorMessage = UtfString::removeIllegalUnicodeCharacters( $errorMessage );
 		$errorMessage = UtfString::truncateMultiByteValue( $errorMessage, 1024 );
 		$values = array( 'errormessage' => $errorMessage );
 		$where = '`jobid` = ?';
@@ -975,7 +976,7 @@ class DBInDesignServerJob extends DBBase
 	 * Retrieves an IDS job from the queue.
 	 *
 	 * @since 9.7.0
-	 * @param string jobId
+	 * @param string $jobId
 	 * @return InDesignServerJob|null The job, or NULL when not found.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
@@ -1247,7 +1248,8 @@ class DBInDesignServerJob extends DBBase
 		}
 		if( !is_null($obj->ErrorMessage) ) {
 			require_once BASEDIR.'/server/utils/UtfString.class.php';
-			$row['errormessage'] = UtfString::truncateMultiByteValue( $obj->ErrorMessage, 1024 );
+			$row['errormessage'] = UtfString::removeIllegalUnicodeCharacters( $obj->ErrorMessage );
+			$row['errormessage'] = UtfString::truncateMultiByteValue( $row['errormessage'], 1024 );
 		}
 		if( !is_null($obj->ScriptResult) ) {
 			$row['scriptresult'] = $obj->ScriptResult;

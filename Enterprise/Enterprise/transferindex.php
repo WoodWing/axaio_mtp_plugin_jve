@@ -116,10 +116,8 @@ class TransferEntry
 			// from the HTTP cookies. This is to support JSON clients that run multiple web applications which need to share the
 			// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
 			require_once BASEDIR.'/server/secure.php';
-			$ticket = getOptionalCookie( 'ticket' );
-			if( $ticket ) {
-				setLogCookie( 'ticket', $ticket );
-			}
+			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+			$ticket = BizSession::getTicketForClientIdentifier();
 		}
 		if( !$ticket ) {
 			$message = 'Please specify "ticket" param at URL';
@@ -127,6 +125,8 @@ class TransferEntry
 			header('Status: 400 Bad Request - '.$message );
 			LogHandler::Log( 'TransferServer', 'ERROR', $message );
 			exit( $message );
+		} else {
+			BizSession::setTicketCookieForClientIdentifier($ticket);
 		}
 		
 		// The ticket validation takes around 50ms because of the db UPDATE statement.

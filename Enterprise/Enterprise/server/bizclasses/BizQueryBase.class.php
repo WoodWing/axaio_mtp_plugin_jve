@@ -866,6 +866,7 @@ class BizQueryBase
 	{
 		$publicationIds = array();
 		$specialParams = array();
+		$existingIssueIds = array();
 		foreach( $params as $paramKey => $param ) {
 			if( strtolower($param->Property) == 'publicationid' ) {
 				if( !empty($param->Value) && is_numeric($param->Value) ) {
@@ -878,6 +879,9 @@ class BizQueryBase
 				}
 				$specialParams[] = $param;
 				unset( $params[$paramKey] );
+			}
+			if( strtolower( $param->Property ) == 'issueid' && !$param->Special) { // Param is sent in as "real" IssueId
+				$existingIssueIds[] = $param->Value;
 			}
 		}
 		if ( !$specialParams ) {
@@ -917,10 +921,12 @@ class BizQueryBase
 				if( is_null( $modifiedParamValue )) {
 					$modifiedParamValue = -1;
 				}
-				$newParam = clone( $specialParam );
-				$newParam->Value = $modifiedParamValue;
-				$newParam->Special = false;
-				$newParams[] = $newParam; // Add new param object when multiple brand selected
+				if( !in_array( $modifiedParamValue, $existingIssueIds )) {
+					$newParam = clone( $specialParam );
+					$newParam->Value = $modifiedParamValue;
+					$newParam->Special = false;
+					$newParams[] = $newParam; // Add new param object when multiple brand selected
+				}
 			}
 		}
 		$params = array_merge( $params, $newParams ); // Merge with new query params when multiple brand selected.
@@ -941,10 +947,62 @@ class BizQueryBase
 					if (strtolower($pubrow['publication']) == strtolower($param->Value) && $param->Operation == '=') {
 						$param->Property = 'publicationid';
 						$param->Value = $pubrow['id'];
+						break; // found the corresponding publication id
 					}
 				}
 			}
 		}
+		return $params;
+	}
+
+	/**
+	 * Resolve QueryParam that contains Issue as the Property.
+	 *
+	 * When the Property is sent in as Issue ( the Issue name(s) ),
+	 * function resolves the name(s) to its corresponding Issue id(s).
+	 *
+	 * @param QueryParam[] $params
+	 * @return QueryParam[] With the resolved Issue names to Issue ids when necessary.
+	 */
+	public static function resolveIssueNameParams( $params )
+	{
+		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+		$issueNames = array();
+		if( $params ) foreach( $params as $param ) {
+			if( strtolower( $param->Property == 'Issue' )) {
+				$issueNames[] = $param->Value;
+			}
+		}
+		$issueIds = $issueNames ? DBIssue::resolveIssueIdsByNameAndParams( $issueNames, $params ) : array();
+		if( $issueIds ) {
+			// Re-construct the QueryParams.
+			$newParams = array();
+			$existingIssueIds = array();
+
+			// Collect QueryParam that is/are not Issue
+			foreach( $params as $param ) {
+				if( strtolower( $param->Property != 'Issue' )) {
+					$newParams[] = $param;
+				}
+				if( strtolower( $param->Property == 'IssueId' )) {
+					$existingIssueIds[] = $param->Value;
+				}
+			}
+
+			// Filling in the Issue id(s)
+			require_once BASEDIR .'/server/interfaces/services/wfl/DataClasses.php';
+			foreach ( $issueIds as $issueId ) {
+				if( !in_array( $issueId, $existingIssueIds )) { // Add in the IssueId only when it does not exist yet to avoid duplicates.
+					$queryParam = new QueryParam();
+					$queryParam->Property = 'IssueId';
+					$queryParam->Operation = '=';
+					$queryParam->Value = $issueId;
+					$newParams[] = $queryParam;
+				}
+			}
+			$params = $newParams;
+		}
+
 		return $params;
 	}
 

@@ -52,6 +52,100 @@ class DBIssue extends DBBase
 		$rows = self::fetchResults( $sth );
 		return $rows;
 	}
+
+	/**
+	 * Resolve the Issue names ($issueNames) into its corresponding Issue id(s).
+	 *
+	 * Function iterates through the list of QueryParams passed in.
+	 * It searches for Publication id(s) and Publication Channel id(s) if there're any.
+	 * When found, the two will be taken into account as well
+	 * when resolving the Issue names into the Issue ids.
+	 *
+	 * Nevertheless, it is assumed that for the QueryParam passed in,
+	 * the Publication(s) and Publication channel(s) are already resolved into its id(s).
+	 *
+	 * @param string[] $issueNames The list of Issue Names of which its corresponding ids should be resolved.
+	 * @param QueryParam[] $params List of QueryParams.
+	 * @return int[] List of resolved issue ids.
+	 * @throws BizException
+	 */
+	public static function resolveIssueIdsByNameAndParams( $issueNames, $params )
+	{
+		if( !$issueNames ) {
+			throw new BizException( 'ERR_ARGUMENT', 'Server',
+				'Issue names parameter is mandatory for resolveIssueIdsByNameAndParams().' );
+		}
+
+		// Search if there's any Pub id(s) or PubChannel id(s).
+		$pubIds = array();
+		$channelIds = array();
+		if( $params ) foreach( $params as $param ) {
+			if( strtolower($param->Property == 'PublicationId' ) && $param->Operation == '=' ) {
+				$pubIds[] = $param->Value;
+			}
+			if( strtolower($param->Property == 'PublicationIds' ) && $param->Operation == '=' ) {
+				$pubIds = array_merge( $pubIds, explode( ',', $param->Value ) );
+			}
+			if( strtolower($param->Property == 'PubChannelId' ) && $param->Operation == '=' ) {
+				$channelIds[] = $param->Value;
+			}
+			if( strtolower($param->Property == 'PubChannelIds' ) && $param->Operation == '=' ) {
+				$channelIds = array_merge( $channelIds, explode( ',', $param->Value ) );
+			}
+		}
+
+		$dbDriver = DBDriverFactory::gen();
+		$dbi = $dbDriver->tablename( self::TABLENAME );
+		$dbc = $dbDriver->tablename( 'channels' );
+		$where = array();
+		$joins = array();
+		$params = array();
+		// Publication Id(s) if there's any.
+		if( $pubIds ) {
+			$tmpWhere = array();
+			$joins[] = "LEFT JOIN $dbc cha ON ( iss.`channelid` = cha.`id` ) ";
+			foreach( $pubIds as $pubId ) {
+				$tmpWhere[] = "cha.`publicationid` = ? ";
+				$params[] = intval( $pubId );
+			}
+
+			if( $tmpWhere ) {
+				$where[] = "( " . implode( " OR ", $tmpWhere ) . " ) ";
+			}
+		}
+		// Publication Channel Id(s) if there's any.
+		if( $channelIds ) {
+			$tmpWhere = array();
+			foreach( $channelIds as $channelId ) {
+				$tmpWhere[] = "iss.`channelid` = ? ";
+				$params[] = intval( $channelId );
+			}
+
+			if( $tmpWhere ) {
+				$where[] = "( " . implode( " OR ", $tmpWhere ) . " ) ";
+			}
+		}
+
+		// The compulsory Issue Name(s).
+		$nameValues = array( 'iss.`name`' => $issueNames );
+		$nameParams = array();
+		$where[] = self::makeWhereForSubstitutes( $nameValues, $nameParams ) ;
+		$params = array_merge( $params, $nameParams );
+
+		// Compose the Sql
+		$sql = "SELECT iss.`id` FROM $dbi iss ";
+		$sql .= implode( " ", $joins ); // the join(s)
+		$sql .= "WHERE " . implode( " AND ", $where ); // the where(s)
+
+		$sth = $dbDriver->query( $sql, $params );
+		$rows = self::fetchResults( $sth );
+		$issueIds = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$issueIds[] = $row['id'];
+		}
+		return $issueIds;
+	}
+
 	/**
 	 * Updates an issue in the smart_issues table with a given issue row
 	 *
@@ -99,7 +193,8 @@ class DBIssue extends DBBase
 			}
 			unset( $issueRow['SectionMapping'] );
 		}
-		return self::updateRow( self::TABLENAME, $issueRow, " `id` = '$issueId' " );
+
+		return self::updateRow(self::TABLENAME, $issueRow, "`id` = ?", array( intval( $issueId ) ) );
 	}
 
 	/**
@@ -146,7 +241,7 @@ class DBIssue extends DBBase
 	 * Returns if the specified issue has the overrule option set
 	 *
 	 * @param int $issueId
-	 * @return boolean True if issue is an overule brand issue, else false.
+	 * @return boolean True if the issue is an overule brand issue, else false.
 	 * @throws BizException on SQL error
 	 */
 	static public function isOverruleIssue( $issueId )
@@ -187,6 +282,8 @@ class DBIssue extends DBBase
 			$params[] = intval( $pubChannelId );
 		}
 
+	      $sql .= " AND cha.`id` = ? ";
+	      $params[] = intval( $pubChannelId );
 		$sth = $dbDriver->query( $sql, $params );
 		$row = $dbDriver->fetch( $sth );
 		return $row ? $row['id'] : null;
@@ -382,7 +479,7 @@ class DBIssue extends DBBase
 
 	/**
 	 *  Lists ALL issues that non-overrule their publication in an array.
-	 *  @param int Brand Id to filter on.
+	 *  @param int $brandId Brand Id to filter on.
 	 *  @return integer[] of id's of non-overrule brand issues.
 	 */
 	static public function listNonOverruleIssuesByBrand( $brandId )
@@ -463,7 +560,7 @@ class DBIssue extends DBBase
 	{
 		$issueRow = self::getIssue( $issueId );
 		if( $issueRow['overrulepub'] === true ) {
-			return self::listRows( 'editions','id','name',"`issueid` = '$issueId' ORDER BY `code` ASC" );
+			return self::listRows( 'editions','id','name',"`issueid` = ? ORDER BY `code` ASC", '*', array( intval( $issueId ) ) );
 		} else {
 			require_once BASEDIR . '/server/dbclasses/DBEdition.class.php';
 			return $noPubDefs ? null : DBEdition::listPublEditions( $issueRow['publication'] );
@@ -545,11 +642,11 @@ class DBIssue extends DBBase
 		$issuesection = $dbDriver->tablename('issuesection');
 		$issuesectionstate = $dbDriver->tablename('issuesectionstate');
 
-		$sql = "UPDATE $issues SET `deadline` = '' WHERE `id` = $issueId ";
-		$dbDriver->query($sql);
+		$sql = "UPDATE $issues SET `deadline` = '' WHERE `id` = ? ";
+		$dbDriver->query($sql, array( intval( $issueId ) ));
 
-		$sql = "DELETE FROM $issueeditions WHERE `issue` = $issueId ";
-		$dbDriver->query($sql);
+		$sql = "DELETE FROM $issueeditions WHERE `issue` = ? ";
+		$dbDriver->query($sql, array( intval( $issueId ) ) );
 
 		$sql = "DELETE FROM $issuesection WHERE `issue` = $issueId ";
 		$dbDriver->query($sql);
@@ -558,8 +655,8 @@ class DBIssue extends DBBase
 		//as well as deadlines (datetimes). Here be sure to delete only the deadlines by requiring
 		//deadlinerelative = 0 => This can never destroy the relative deadlines as a non-existing row
 		//is interpreted as having an deadlinerelative of 0.
-		$sql = "DELETE FROM $issuesectionstate WHERE `issue` = $issueId AND `deadlinerelative` = 0 ";
-		$dbDriver->query($sql);
+		$sql = "DELETE FROM $issuesectionstate WHERE `issue` = ? AND `deadlinerelative` = 0 ";
+		$dbDriver->query($sql, array( intval( $issueId ) ) );
 	}
 	
 	/**

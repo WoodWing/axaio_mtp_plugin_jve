@@ -139,14 +139,17 @@ class DBVersion extends DBBase
 		$versionstable = $dbdriver->tablename(self::TABLENAME);
 		$sql  = "SELECT v.*, ";
 		$sql .= $dbdriver->concatFields(array("v.`majorversion`","'.'","v.`minorversion`")) . " as \"version\" ";
-		$sql .= "FROM $versionstable v WHERE v.`objid`=$id";
+		$sql .= "FROM $versionstable v WHERE v.`objid`= ? ";
+		$params = array( intval( $id ) );
 		if( $version ) { // need to get specific version?
 			$verArray = array();
 			self::splitMajorMinorVersion( $version, $verArray );
-			$sql .=' AND v.`majorversion` = '.$verArray['majorversion'].' AND v.`minorversion` = '.$verArray['minorversion'];
+			$sql .=' AND v.`majorversion` = ? AND v.`minorversion` = ? ';
+			$params[] = intval( $verArray['majorversion'] );
+			$params[] = intval( $verArray['minorversion'] );
 		}
 		$sql .= " ORDER BY v.`majorversion`, v.`minorversion` ";
-		$sth = $dbdriver->query($sql);
+		$sth = $dbdriver->query( $sql, $params );
 
 		if( !$sth ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', $dbdriver->error() );

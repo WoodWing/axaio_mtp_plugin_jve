@@ -37,9 +37,6 @@ if ($logout)
 		$service = new WflLogOffService();
 		$service->execute( new WflLogOffRequest( $ticket, false, null, null ) );
 		setLogCookie( 'ticket', '' );
-		
-		require_once BASEDIR.'/server/apps/webapplicense.inc.php';
-		logoffWebApps();
 	}
 	catch( BizException $e ) {
 		$message = $e->getMessage(); // . ': '. $e->getDetail(); // BZ#9890: No details for SQL injection attacks
