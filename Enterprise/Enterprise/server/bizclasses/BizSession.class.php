@@ -291,6 +291,8 @@ class BizSession
 	 * The client identifier is used to select the correct ticket cookie in the request.
 	 * Clients can send this identifier in a customer HTTP header ("X-WoodWing-Application") or
 	 * in the URL parameters ("ww-app").
+	 *
+	 * @since 10.2.0
 	 * @return null|string
 	 */
 	private static function getClientIdentifierFromRequest()
@@ -318,6 +320,7 @@ class BizSession
 	/**
 	 * Sets or updates the ticket cookie for the webservices.
 	 *
+	 * @since 10.2.0
 	 * @param string $ticket
 	 */
 	public static function setTicketCookieForClientIdentifier( $ticket )
@@ -334,6 +337,7 @@ class BizSession
 	 * The tickets cookies are returned as an array in PHP. To select the correct
 	 * ticket the client identifier can be added to the request by the client.
 	 *
+	 * @since 10.2.0
 	 * @return null|string
 	 */
 	public static function getTicketForClientIdentifier()
