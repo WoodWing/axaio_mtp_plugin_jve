@@ -16,9 +16,10 @@ class DBObject extends DBBase
 		$sql  = " UPDATE $objectstable o ";
 		$sql .= " INNER JOIN $targetstable tar ON (tar.`objectid` = o.`id`) ";
 		$sql .= " SET `deadline` = '$deadlinehard' , `deadlinesoft` = '$deadlinesoft' , `deadlinechanged` = 'Y' ";
-		$sql .= " WHERE tar.`issueid` = $issueid AND `section` = $sectiondefid AND `state` = $statedefid AND (`deadline` <> '$deadlinehard' OR `deadline` IS NULL )";
+		$sql .= " WHERE tar.`issueid` = ? AND `section` = ? AND `state` = ? AND (`deadline` <> ? OR `deadline` IS NULL )";
+		$params = array( intval( $issueid ), intval( $sectiondefid ), intval( $statedefid ), strval( $deadlinehard ) );
 
-		$dbdriver->query($sql);
+		$dbdriver->query($sql, $params );
 
 		return 1;
 	}
@@ -29,10 +30,10 @@ class DBObject extends DBBase
 	 * Break of at the (63-6)st character. This leaves 1 for _ and 5 characters for an unique number =>
 	 * So it is assumed that there will not be more than 99999 objects starting with the same proposed name in any issue.
 	 *
-	 * @param array of int $issueidsarray: id's of the issues the object is targeted for.
-	 * @param string $objtype The type of the object.
+	 * @param int[] $issueidsarray: id's of the issues the object is targeted for.
+	 * @param string $objtype
 	 * @param string $proposedobjectname: proposed name of the new object.
-	 * @return string Either new objectname or null if no name found.
+	 * @return mixed string new objectname or null if no name found.
 	 * @deprecated since 10.0.4 Please use BizObject::getUniqueObjectName() instead.
 	 */
 	static public function getUniqueObjectName($issueidsarray, $objtype, $proposedobjectname)
@@ -63,9 +64,9 @@ class DBObject extends DBBase
 			$targetstable = $dbdriver->tablename("targets");
 			$sql  = "SELECT `name` FROM $objectstable o ";
 			$sql .= "INNER JOIN $targetstable tar ON (o.`id` = tar.`objectid`) ";
-			$sql .= "WHERE o.`name` LIKE '$startofname%' AND tar.`issueid` IN ($issueids) AND o.`type` = '$objtype'";
+			$sql .= "WHERE o.`name` LIKE '$startofname%' AND tar.`issueid` IN ($issueids) AND o.`type` = ? ";
 			// escape4like on $startofname is not needed. $startofname is already validated 
-			$sth = $dbdriver->query($sql);
+			$sth = $dbdriver->query($sql, array( strval( $objtype ) ) );
 			while( ( $row = $dbdriver->fetch($sth) ) ) {
 				$existingnames[$row['name']] = true;
 			}
@@ -408,6 +409,7 @@ class DBObject extends DBBase
 	 *
 	 * @param int $id Object DB id.
 	 * @param array $areas 'Workflow' or 'Trash'. Where the object resides.
+	 * @throws BizException
 	 * @return array of DB properties of the object.
 	 * @throws BizException
 	 */
@@ -555,8 +557,9 @@ class DBObject extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$dbo = $dbDriver->tablename("objects");
 
-		$sql = "SELECT `id`, `publication`, `issue` FROM $dbo WHERE `name` = '$name' AND `TYPE` = '$type'";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT `id`, `publication`, `issue` FROM $dbo WHERE `name` = ? AND `TYPE` = ? ";
+		$params = array( strval( $name ), strval( $type ) );
+		$sth = $dbDriver->query($sql, $params );
 
 		return $sth;
 	}
@@ -573,8 +576,9 @@ class DBObject extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 
 		$dbo = $dbDriver->tablename(self::TABLENAME);
-		$sql = "SELECT o.id FROM $dbo o WHERE `contentsource` = '$contentSource' AND `documentid` = '$externalID'";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT o.id FROM $dbo o WHERE `contentsource` = ? AND `documentid` = ? ";
+		$params = array( strval( $contentSource ), strval( $externalID ) );
+		$sth = $dbDriver->query($sql, $params );
 
 		if( $sth) {
 			$currRow = $dbDriver->fetch($sth);
@@ -746,31 +750,38 @@ class DBObject extends DBBase
 		$tedTab = $dbDriver->tablename( 'targeteditions' );
 
 		$sql = "SELECT o.`id` FROM $objTab o ";
+		$params = array();
 		switch( $idType ) {
 			case 'PublicationId':
-				$sql .= "WHERE o.`publication` = $defId ";
+				$sql .= "WHERE o.`publication` = ? ";
+				$params[] = intval( $defId );
 				break;
 			case 'PubChannelId':
 				$sql .= "LEFT JOIN $tarTab tar ON (tar.`objectid` = o.`id`) ";
-				$sql .= "WHERE tar.`channelid` = $defId ";
+				$sql .= "WHERE tar.`channelid` = ? ";
+				$params[] = intval( $defId );
 				break;
 			case 'IssueId':
 				$sql .= "LEFT JOIN $tarTab tar ON (tar.`objectid` = o.`id`) ";
-				$sql .= "WHERE tar.`issueid` = $defId ";
+				$sql .= "WHERE tar.`issueid` = ? ";
+				$params[] = intval( $defId );
 				break;
 			case 'SectionId':
-				$sql .= "WHERE o.`section` = $defId ";
+				$sql .= "WHERE o.`section` = ? ";
+				$params[] = intval( $defId );
 				break;
 			case 'StateId':
-				$sql .= "WHERE o.`state` = $defId ";
+				$sql .= "WHERE o.`state` = ? ";
+				$params[] = intval( $defId );
 				break;
 			case 'EditionId':
 				$sql .= "LEFT JOIN $tarTab tar ON (tar.`objectid` = o.`id`) ";
 				$sql .= "LEFT JOIN $tedTab ted ON (ted.`targetid` = tar.`id`) ";
-				$sql .= "WHERE ted.`editionid` = $defId ";
+				$sql .= "WHERE ted.`editionid` = ? ";
+				$params[] = intval( $defId );
 				break;
 		}
-		$sth = $dbDriver->query( $sql );
+		$sth = $dbDriver->query( $sql, $params );
 		$row = $dbDriver->fetch( $sth );
 		return (bool)$row;
 	}
@@ -786,12 +797,17 @@ class DBObject extends DBBase
 		$publ = $dbDriver->toDBString($publ);
 		$name = $dbDriver->toDBString($name);
 
-		//TODO BZ#7258
-		//and `issue` = $issue
-		$sql = "SELECT o.*, $verFld FROM $dbo o WHERE o.`publication` = $publ AND o.`name` = '$name'";
-		if ($type) $sql .= " AND o.`type` = '$type'";
-		if ($id) $sql .= " AND o.`id` != $id";
-		$sth = $dbDriver->query($sql);
+		$sql = "SELECT o.*, $verFld FROM $dbo o WHERE o.`publication` = ? AND o.`name` =  ? ";
+		$params = array( intval( $publ ), strval( $name ) );
+		if ($type) {
+			$sql .= " AND o.`type` = ? ";
+			$params[] = strval( $type );
+		}
+		if ($id) {
+			 $sql .= " AND o.`id` != ? ";
+			 $params[] = intval( $id );
+		}
+		$sth = $dbDriver->query($sql, $params );
 
 		return $sth;
 	}
@@ -952,11 +968,13 @@ class DBObject extends DBBase
 
 		// Only flag that deadlinechanged when the new deadline differs from the one stored in the database.
 		$sql =  "UPDATE $dbo SET `deadline` = '$deadlineHard', `deadlinesoft` = '$deadlineSoft', `deadlinechanged` = 'Y' ".
-			"WHERE `id` = $objectId ";
+			"WHERE `id` = ? ";
+		$params = array( intval( $objectId ) );
 		if( $checkDeadline ) { // Only add this condition when requires it
-			$sql .= "AND ( `deadline` <> '$deadlineHard' OR `deadline` IS NULL ) ";
+			$sql .= "AND ( `deadline` <> ? OR `deadline` IS NULL ) ";
+			$params[] = strval( $deadlineHard );
 		}
-		$dbDriver->query($sql);
+		$dbDriver->query($sql, $params );
 	}
 
 	/**
@@ -1045,9 +1063,9 @@ class DBObject extends DBBase
 
 		$sql  = "SELECT `pagerange`, `plannedpagerange` "
 			. "FROM $objectsTable "
-			. "WHERE `id` = %d ";
-		$sql = sprintf($sql, $objId);
-		$sth = $dbDriver->query($sql);
+			. "WHERE `id` = ? ";
+		$params = array( intval( $objId ) );
+		$sth = $dbDriver->query($sql, $params );
 		$rows = self::fetchResults($sth);
 
 		$result = null;
@@ -1098,9 +1116,9 @@ class DBObject extends DBBase
 		$sql  = " SELECT o.`id`, o.`section`, o.`state`, tar.`issueid` ";
 		$sql .= " FROM $objectstable o ";
 		$sql .= " INNER JOIN $targetstable tar ON (o.`id` = tar.`objectid`) ";
-		$sql .= " WHERE tar.`issueid` = $issueid ";
+		$sql .= " WHERE tar.`issueid` = ? ";
 		
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query($sql, array( intval( $issueid ) ));
 		
 		//Loop through all rows, resolve the issueids for each object
 		$rows = array();
@@ -1133,10 +1151,10 @@ class DBObject extends DBBase
 			$sql .= " INNER JOIN $targetstable tar ON ( rel.`id` = tar.`objectrelationid` )";
 			$sql .= " WHERE o.`id` NOT IN ( $excludeObjects )";
 			$sql .= " AND o.`type` IN ( $objectTypes )";
-			$sql .= " AND tar.`issueid` = $issueid ";
+			$sql .= " AND tar.`issueid` = ? ";
 			$sql .= " AND rel.`type` IN ( 'Placed', 'Contained' )";
 
-			$sth = $dbDriver->query( $sql );
+			$sth = $dbDriver->query( $sql, array( intval( $issueid ) ) );
 
 			//Loop through all rows, resolve the issueids for each object
 			while (($row = $dbDriver->fetch($sth))) {
@@ -1336,10 +1354,12 @@ class DBObject extends DBBase
 	}
 
 	/**
-	 * Generates a part of a sql-statement that can be used to update/insert object
-	 * information in the database. Typically used if an object is added/updated.
-	 * Furthermore object information is also written to smart_deletedobjects and
-	 * smart_objectversions.
+	 * Generate a partial sql-statement for object update or insert.
+	 *
+	 * The sql-statement is formatted / adjusted to be ready use for update or insertion:
+	 * - removes illegal characters from the string values.
+	 * - truncates the value when needed in order to be able to fit into the database field max length/size.
+	 * - adds quotes to the field's value when needed.
 	 * 
 	 * @param string $operation Fragment is used for update or insert operation
 	 * @param string $dbField name of the field as sent to the dbdriver
@@ -1352,10 +1372,10 @@ class DBObject extends DBBase
 	 */
 	static public function handleObjectUpdateInsert( $operation, $dbField, $propertyName, $value, $dbDriver, $comma, &$blobs )
 	{
-		// $fieldType = string, int, blob, double
-		// DBObject::updateObject
+		require_once BASEDIR . '/server/utils/UtfString.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 
+		$value = is_string( $value ) ? UtfString::removeIllegalUnicodeCharacters( $value ) : $value;
 		if( !BizProperty::isCustomPropertyName( $propertyName ) ) { // Only format DB value for non custom props
 			$formattedDbValue = self::formatDbValue( $propertyName, $value );
 		} else {
@@ -1472,10 +1492,11 @@ class DBObject extends DBBase
 	{
 		$formattedValue = null;
 		switch ($propName) {
+			case 'Description':
 			case 'PlainContent':
 				if ( DBTYPE == 'mysql' ) {
 					require_once BASEDIR.'/server/utils/UtfString.class.php';
-					$formattedValue = UtfString::truncateMultiByteValue( $value, 64000 );
+					$formattedValue = UtfString::truncateMultiByteValue( $value, 64000, false );
 					// @TODO If applicable for all mysql blobs this can be moved to the dbdriver.
 				} else {
 					$formattedValue = $value;
@@ -1526,16 +1547,10 @@ class DBObject extends DBBase
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 		$infoProps = BizProperty::getPropertyInfos();
 		if( $infoProps[$metaKey] && 
-				isset($infoProps[$metaKey]->MaxLength) && $infoProps[$metaKey]->MaxLength > 0 )
-		{
-			$dbdriver = DBDriverFactory::gen();
-			if( $dbdriver->hasMultibyteSupport() ) { // MYSQL
-				// mb_substr gets the length of string in number of characters
-				$metaValue = mb_substr( $metaValue, 0, $infoProps[$metaKey]->MaxLength, 'UTF-8' );
-			} else { // Oracle & MSSQL
-				// mb_strcut gets the length of string in bytes
-				$metaValue = mb_strcut( $metaValue, 0, $infoProps[$metaKey]->MaxLength, 'UTF-8' );
-			}
+				isset($infoProps[$metaKey]->MaxLength) && $infoProps[$metaKey]->MaxLength > 0 ) {
+
+			require_once BASEDIR . '/server/utils/UtfString.class.php';
+			$metaValue = UtfString::truncateMultiByteValue( $metaValue, $infoProps[$metaKey]->MaxLength );
 		}
 		return $metaValue;
 	}
@@ -1556,14 +1571,8 @@ class DBObject extends DBBase
 		// When the max length is set to 200 or less, use that value, longer values can't be saved.
 		$maxLength = ($property->MaxLength && $property->MaxLength <= 200) ? $property->MaxLength : 200;
 
-		$dbdriver = DBDriverFactory::gen();
-		if( $dbdriver->hasMultibyteSupport() ) { // MYSQL
-			// mb_substr gets the length of string in number of characters
-			$value = mb_substr( $value, 0, $maxLength, 'UTF-8' );
-		} else { // Oracle & MSSQL
-			// mb_strcut gets the length of string in bytes
-			$value = mb_strcut( $value, 0, $maxLength, 'UTF-8' );
-		}
+		require_once BASEDIR . '/server/utils/UtfString.class.php';
+		$value = UtfString::truncateMultiByteValue( $value, $maxLength );
 
 		return $value;
 	}
@@ -1756,9 +1765,9 @@ class DBObject extends DBBase
 		$result = null;
 		$dbDriver = DBDriverFactory::gen();
 		$dbo = ($area == 'Workflow') ? $dbDriver->tablename( self::TABLENAME ) : $dbDriver->tablename( 'deletedobjects' );
-		$sql = 'SELECT o.`' . $columnName . '` FROM ' . $dbo . ' o WHERE `id` = ' . $id;
+		$sql = 'SELECT o.`' . $columnName . '` FROM ' . $dbo . ' o WHERE `id` = ? ';
 
-		$sth = $dbDriver->query($sql);
+		$sth = $dbDriver->query($sql, array( intval( $id ) ));
 		$currRow = $dbDriver->fetch($sth);
 
 		if ($currRow) {
@@ -1978,5 +1987,4 @@ class DBObject extends DBBase
 
 		return $result;
 	}
-
 }

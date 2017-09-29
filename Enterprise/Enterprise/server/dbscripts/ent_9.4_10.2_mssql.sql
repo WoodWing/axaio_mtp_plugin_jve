@@ -11,6 +11,12 @@ ALTER TABLE smart_actionproperties ALTER COLUMN   [orderid] int NOT NULL ;
 ALTER TABLE [smart_actionproperties] ADD DEFAULT ('0') FOR [orderid];
 ALTER TABLE [smart_authorizations] ADD 
   [bundle] int NOT NULL  default '0';
+DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
+EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_authorizations', @columnName = 'rights', @constraintName = @constraintName OUTPUT
+SET @sql = 'ALTER TABLE smart_authorizations DROP CONSTRAINT ' + @constraintName
+EXEC (@sql);
+ALTER TABLE smart_authorizations ALTER COLUMN   [rights] varchar(1024) NOT NULL ;
+ALTER TABLE [smart_authorizations] ADD DEFAULT ('') FOR [rights];
 ALTER TABLE [smart_deletedobjects] ADD 
   [orientation] tinyint NOT NULL  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
@@ -69,6 +75,15 @@ ALTER TABLE [smart_states] ADD
 ALTER TABLE [smart_tickets] ADD 
   [masterticketid] varchar(40) NOT NULL  default '';
 CREATE  INDEX [mtid_tickets] ON [smart_tickets]([masterticketid]) ;
+
+CREATE TABLE [smart_featureaccess] (
+  [featurename] varchar(255) NOT NULL  default '',
+  [featureid] int NOT NULL  default '0',
+  [accessflag] varchar(4) NOT NULL  default '',
+  PRIMARY KEY ([featurename])
+);
+CREATE UNIQUE INDEX [faid_profiles] ON [smart_featureaccess]([featureid]) ;
+CREATE UNIQUE INDEX [faaf_profiles] ON [smart_featureaccess]([accessflag]) ;
 
 CREATE TABLE [smart_publishedplcmtshist] (
   [id] int NOT NULL  IDENTITY(1,1),

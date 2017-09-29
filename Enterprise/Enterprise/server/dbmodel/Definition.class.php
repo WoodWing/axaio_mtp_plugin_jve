@@ -140,7 +140,8 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 							'alters' => array('v' => '3.1', 'name' => 'section',	'type' => 'mediumint(9)',		'default' => "'0'"), ),
 						array('v' => '6.1', 'name' => 'state',		'type' => 'int(11)',		'default' => "'0'",
 							'alters' => array('v' => '3.1', 'name' => 'state',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
-						array('v' => '3.1', 'name' => 'rights',		'type' => 'varchar(40)',		'default' => "''"),
+						array('v' => '10.2', 'name' => 'rights',		'type' => 'varchar(1024)',		'default' => "''",
+							'alters' => array('v' => '3.1', 'name' => 'rights',		'type' => 'varchar(40)',		'default' => "''"), ),
 						array('v' => '6.1', 'name' => 'issue',		'type' => 'int(11)',		'default' => "'0'",
 							'alters' => array('v' => '3.4', 'name' => 'issue',		'type' => 'mediumint(9)',		'default' => "'0'"), ),
 						array('v' => '6.1', 'name' => 'profile',	'type' => 'int(11)',		'default' => "'0'",
@@ -1838,6 +1839,28 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 					),
 				),
 
+				array ('v' =>'10.2', 'name' => 'smart_featureaccess',
+					'comment' => 'Profile feature access definitions for features provided by server plug-ins. '.
+						'(Core server features are not included.) This table is used to determine ids and flags '.
+						'that are system wide unique. Other feature attributes (display name, default value) are '.
+						'hard coded and provided by server plugins. Records are never deleted to make sure that when '.
+						'plugins are plugged out and plugged back in again the unique values remain preserved.',
+					'fields' => array(
+						array('v' => '10.2', 'name' => 'featurename', 'type' => 'varchar(255)',  'default' => "''"),
+						array('v' => '10.2', 'name' => 'featureid',   'type' => 'int(4)',        'default' => "'0'"),
+						array('v' => '10.2', 'name' => 'accessflag',  'type' => 'varchar(4)',    'default' => "''"),
+					),
+					'indexes' => array(
+						array('v' => '10.2', 'name' => 'primary', 	'fields' => 'featurename', 'primary' => true ),
+						array('v' => '10.2', 'name' => 'faid_profiles', 'fields' => 'featureid', 'unique' => true ),
+						array('v' => '10.2', 'name' => 'faaf_profiles', 'fields' => 'accessflag', 'unique' => true ),
+					),
+					'inserts' => array(
+					),
+					'lookups' => array(
+					),
+				),
+
 				array ('v' =>'5.0', 'name' => 'smart_appsessions',
 					'comment' => 'Allows applications to store specific session data. The Web Editor uses this to keep track of opened articles which are not checked in yet.',
 					'fields' => array(
@@ -3168,6 +3191,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 			'smart_indesignserverjobs', // id field was removed since 9.7
 			'smart_indesignarticles',
 			'smart_idarticlesplacements',
+			'smart_featureaccess',
 		);
 	}
 
@@ -3183,7 +3207,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 			'Object Publishing' => array('smart_publishedobjectshist', 'smart_publishhistory', 'smart_publobjects', 'smart_pubpublishedissues', 'smart_publishedplcmtshist' ),
 			'Brand Structure' => array( 'smart_publications', 'smart_channels', 'smart_issues', 'smart_publissues', 'smart_publsections', 'smart_issuesection', 'smart_publeditions', 'smart_issueeditions', 'smart_editions', 'smart_channeldata' ),
 			'Workflow Definitions' => array( 'smart_states', 'smart_routing', 'smart_sectionstate', 'smart_issuesectionstate' ),
-			'Users, Groups and Authorizations' => array( 'smart_users', 'smart_usrgrp', 'smart_authorizations', 'smart_groups', 'smart_profilefeatures', 'smart_profiles', 'smart_publadmin', 'smart_tickets' ),
+			'Users, Groups and Authorizations' => array( 'smart_users', 'smart_usrgrp', 'smart_authorizations', 'smart_groups', 'smart_profilefeatures', 'smart_profiles', 'smart_featureaccess', 'smart_publadmin', 'smart_tickets' ),
 			'Layout and Placements' => array( 'smart_pages', 'smart_elements', 'smart_placements', 'smart_placementtiles', 'smart_indesignarticles', 'smart_idarticlesplacements', 'smart_objectoperations' ),
 			'Autocomplete and Suggestions' => array( 'smart_termentities', 'smart_terms' ),
 			'Output devices' => array( 'smart_outputdevices' ),

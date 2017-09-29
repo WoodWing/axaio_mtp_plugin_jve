@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LocalizationMap language="ptBR">
-  <Term key="Elvis.ERR_CONNECT">An error occurred while getting a file from Elvis because of a lost connection. (S1144)#EOL##EOL#Please contact your system administrator.#EOL##EOL#IMPORTANT: We strongly advise to stop working on ANY of the files in the system until the connection is restored again and to not perform ANY action such as abort check-out, check-in, save version, check-out, opening files or Dossiers and so on.#EOL##EOL#Continuing to work on the files in any way can result in data loss or corrupted files.</Term>
+  <Term key="Elvis.ERR_CONNECT">Ocorreu um erro ao obter um arquivo do Elvis por causa de uma conexão perdida. (S1144) #EOL # #EOL # entre em contato com o administrador do sistema. #EOL # #EOL # IMPORTANTE: Aconselhamos fortemente a parar de trabalhar em QUALQUER um dos arquivos no sistema até que a conexão seja restaurada novamente e para não executar QUALQUER ação, como abortar check-out, check-in, salvar versão, check-out, abrindo arquivos ou Dossier e assim por diante. #EOL##EOL#Continuar a trabalhar nos arquivos de qualquer forma pode resultar em perda de dados ou arquivos corrompidos.</Term>
   <Term key="Elvis.PRODUCTION_ZONE">Área de Produção</Term>
 </LocalizationMap>

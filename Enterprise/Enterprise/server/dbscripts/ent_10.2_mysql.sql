@@ -24,7 +24,7 @@ CREATE TABLE `smart_authorizations` (
   `publication` int(11) NOT NULL  default '0',
   `section` int(11) NOT NULL  default '0',
   `state` int(11) NOT NULL  default '0',
-  `rights` varchar(40) NOT NULL  default '',
+  `rights` varchar(1024) NOT NULL  default '',
   `issue` int(11) NOT NULL  default '0',
   `profile` int(11) NOT NULL  default '0',
   `bundle` int(11) NOT NULL  default '0',
@@ -820,6 +820,15 @@ INSERT INTO `smart_profilefeatures` (`id`, `profile`, `feature`, `value`) VALUES
 INSERT INTO `smart_profilefeatures` (`id`, `profile`, `feature`, `value`) VALUES (70, 1, 71, 'Yes');
 INSERT INTO `smart_profilefeatures` (`id`, `profile`, `feature`, `value`) VALUES (71, 1, 72, 'Yes');
 INSERT INTO `smart_profilefeatures` (`id`, `profile`, `feature`, `value`) VALUES (72, 1, 84, 'Yes');
+
+CREATE TABLE `smart_featureaccess` (
+  `featurename` varchar(255) NOT NULL  default '',
+  `featureid` int(4) NOT NULL  default '0',
+  `accessflag` varchar(4) NOT NULL  default '',
+  PRIMARY KEY (`featurename`)
+) DEFAULT CHARSET=utf8;
+CREATE UNIQUE INDEX `faid_profiles` ON `smart_featureaccess`(`featureid`) ;
+CREATE UNIQUE INDEX `faaf_profiles` ON `smart_featureaccess`(`accessflag`) ;
 
 CREATE TABLE `smart_appsessions` (
   `id` int(11) NOT NULL  auto_increment,

@@ -55,6 +55,7 @@
 	var gCurrTestCase = -1;
 	var gTriStates = new Array();
 	var gSessionId = null;
+	var gTestSuite = null;
 
 	var gResultDefines = { 
 		'FATAL'  : { color: 'red',     icon: 'error.png',   bitflag: 64, display: 'FATAL' },
@@ -73,6 +74,7 @@
 		var serverUrl = "../../server/wwtest/testsuite.php";
 		//serverUrl += "?start_debug=1"; // Zend Debugger (do not combine with server side debugging!)
 		//serverUrl += "?XDEBUG_SESSION_START=PHPSTORM"; // PhpStorm debugger
+        gTestSuite = testSuite;
 		WWAjax.doHttpRequest( serverUrl, "callbackTestInit", "text/xml", true, 
 									"command=InitTest&testSuite="+testSuite, true ); // asynchronous call (synchronous fails under Apache+WinXP?)
 	}
@@ -334,7 +336,8 @@
 				var serverUrl = "../../server/wwtest/testsuite.php";
 				//serverUrl += "?start_debug=1"; // Zend Debugger (do not combine with server side debugging!)
 				WWAjax.doHttpRequest( serverUrl, "callbackTestPoll", "text/xml", true, 
-										"command=PollTest&classPath=" + gTestCases[gCurrTestCase].classPath + "&testpoll=" + gPollCount + "&sessionId=" + gSessionId, 
+										"command=PollTest&classPath=" + gTestCases[gCurrTestCase].classPath + "&testpoll=" + gPollCount +
+										"&sessionId=" + gSessionId + "&testSuite=" + gTestSuite,
 										true ); // asynchronous call!
 			} else { // test completed
 				stopTest();

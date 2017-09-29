@@ -55,12 +55,30 @@ class UtfString
 		}
 		
 		$instring = mb_convert_encoding($instring, 'UTF-8', MB_ENCODINGS);
-		//Remove non-printable characters from begin and end (TODO check if x7F is really illegal)
-		$instring = trim($instring, "\x7F\x00..\x1F");
-		// BZ#12513 remove illegal XML characters (all before 0x1F except for tab, newline, carriage return)
-		$instring = preg_replace('/[\x00-\x08\x0B-\x0C\x0E-\x1F]/', '', $instring);
+		$instring = self::removeIllegalUnicodeCharacters( $instring );
 		
 		return $instring;
+	}
+
+	/**
+	 * Remove illegal characters from the input string.
+	 *
+	 * Illegal characters refer to characters like control-characters,
+	 * however the tab, newline and carriage return are not seen as
+	 * illegal characters and so they won't be removed.
+	 *
+	 * @since 10.0.6
+	 * @param string $inString
+	 * @return string
+	 */
+	public static function removeIllegalUnicodeCharacters( $inString )
+	{
+		//Remove non-printable characters from begin and end (TODO check if x7F is really illegal)
+		$inString = trim( $inString, "\x7F\x00..\x1F" );
+		// BZ#12513 remove illegal XML characters (all before 0x1F except for tab, newline, carriage return)
+		$inString = preg_replace('/[\x00-\x08\x0B-\x0C\x0E-\x1F]/', '', $inString );
+
+		return $inString;
 	}
 	
 	/**
@@ -108,20 +126,21 @@ class UtfString
 	 * Truncate the field value if it exceeds the passed in length value.
 	 * It will truncate the extra characters or bytes, based on DB flavors:
 	 *     L> MYSQL: Truncates length characters.
-	 *     L> MSSQL,ORACLE: Truncates length bytes.
+	 *     L> MSSQL,ORACLE, Mysql blob: Truncates length bytes.
 	 *
 	 * @param string $fieldValue The field value to be checked if it needs to be truncated.
 	 * @param integer $length Maximum number of characters to use from $fieldValue.
+	 * @param bool $isTextField Is the $fieldValue a text field? For an example, blob is not seen as text field hence it is not multi-byte aware in the case of Mysql.
 	 * @return string $fieldValue Value that has been adjusted if the chars/bytes has exceeded length.
 	 */
-	static public function truncateMultiByteValue( $fieldValue, $length )
+	static public function truncateMultiByteValue( $fieldValue, $length, $isTextField = true )
 	{
 		if( $length > 0 ) {
 			$dbdriver = DBDriverFactory::gen();
-			if( $dbdriver->hasMultibyteSupport() ) { // MYSQL
+			if( $dbdriver->hasMultibyteSupport() && $isTextField ) { // MYSQL
 				// mb_substr gets the length of string in number of characters
 				$fieldValue = mb_substr( $fieldValue, 0, $length, 'UTF-8' );
-			} else { // Oracle & MSSQL
+			} else { // Oracle & MSSQL Or Mysql with blob field
 				// mb_strcut gets the length of string in bytes
 				$fieldValue = mb_strcut( $fieldValue, 0, $length, 'UTF-8' );
 			}

@@ -13,7 +13,6 @@ require_once BASEDIR . "/server/dbclasses/DBBase.class.php";
 class DBPublishedObjectsHist extends DBBase
 {
 	const TABLENAME = 'publishedobjectshist';
-	
 	/**
 	 * This method adds a history record for an object contained in a dossier
 	 * each time a publish action is done on that dossier.
@@ -65,7 +64,7 @@ class DBPublishedObjectsHist extends DBBase
 				."FROM (SELECT * FROM {$objHistTable} WHERE publishid = ?) poh "
 				."LEFT JOIN {$objVersTable} ov "
 				."ON (ov.`objid` = poh.`objectid` AND ov.`majorversion` = poh.`majorversion` AND ov.`minorversion` = poh.`minorversion`) ";
-		$params = array( $publishId );
+		$params = array( intval( $publishId ) );
 
 		$sth = $dbDriver->query( $sql, $params );
 		if (is_null($sth)) {
@@ -104,23 +103,23 @@ class DBPublishedObjectsHist extends DBBase
 				."INNER JOIN {$publishHistTable} publishhist ON (publishhist.`id` = objhist.`publishid`) "
 				."WHERE publishhist.`objectid` = ? "
 				."AND publishhist.`channelid` = ? ";
-		$params = array( $dossierId, $channelId );
+		$params = array( intval( $dossierId ), intval( $channelId ) );
 
 		if( !empty($issueId) ) {
 			$sql .= " AND publishhist.`issueid` = ? ";
-			$params[] = $issueId;
+			$params[] = intval( $issueId );
 		}
 		if( $editionId ) {
 			$sql .= " AND publishhist.`editionid` = ? ";
-			$params[] = $editionId;
+			$params[] = intval( $editionId );
 		}
 		if ( $publishId ) {
 			$sql .= " AND objhist.`publishid` = ? ";
-			$params[] = $publishId;
+			$params[] = intval( $publishId );
 		}
-		$sql .= "AND objhist.`objectid` = ? "
-				 ."ORDER BY publishhist.`actiondate` DESC ";
-		$params[] = $childId;
+		$sql .= "AND objhist.`objectid` = ? ";
+		$params[] = intval( $childId );
+		$sql .= "ORDER BY publishhist.`actiondate` DESC ";
 
 		$sql = $dbDriver->limitquery( $sql, 0, 1 );
 

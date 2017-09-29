@@ -149,7 +149,7 @@ $txt = str_replace('<!--VAR:DESCRIPTION-->',
 
 if( $mode !='new' ) {
 	$txt = str_replace('<!--VAR:BUTTON-->',
-		'<input type="submit" name="bt_delete" value="'.BizResources::localize('ACT_DEL').'" onclick="return mydelete()"/>'.
+		'<input type="button" name="bt_delete" value="'.BizResources::localize('ACT_DEL').'" onclick="return mydelete()"/>'.
 		'&nbsp;&nbsp;<input type="submit" name="bt_update" value="'.BizResources::localize('ACT_UPDATE').'" onclick="return myupdate()"/>'
 		, $txt );
 } else {
@@ -157,7 +157,11 @@ if( $mode !='new' ) {
 }
 $profileFeatures = array();
 if( $mode == 'error' ) {
-	$sysProfileFeatures = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
+	$sysProfileFeatures = null;
+	try {
+		$sysProfileFeatures = BizAccessFeatureProfiles::getAllFeaturesAccessProfiles();
+	} catch( BizException $e ) {
+	}
 	if( $sysProfileFeatures ) foreach( $sysProfileFeatures as $sysFeature ) {
 		if( $_REQUEST['checkobj'][$sysFeature->Name] ) {
 			$profileFeature = new AdmProfileFeature();
@@ -209,6 +213,13 @@ $featureCategories = array(
 	'FEATURE_DATASOURCES'   => BizAccessFeatureProfiles::getDataSourcesAccessProfiles(),
 	'ANNOTATIONS'           => BizAccessFeatureProfiles::getAnnotationsAccessProfiles(),
 );
+
+$pluginFeatures = BizAccessFeatureProfiles::getServerPluginFeatureAccessLists();
+require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
+$connRetVals = array();
+BizServerPlugin::runDefaultConnectors( 'FeatureAccess', null, 'composeFeaturesAccessProfilesDialog',
+	array( &$featureCategories, $pluginFeatures ), $connRetVals );
+
 foreach( $featureCategories as $featureCategoryResourceKey => $featureDefinitions ) {
 	$detailtxt .= '<div class="wwes-grid-item"><table>';
 	$detailtxt .= '<tr><td colspan="2"><u>'.BizResources::localize($featureCategoryResourceKey).'</u></td></tr>';

@@ -462,7 +462,7 @@ class BizObject
 			$requestInfo = self::getDefaultRequestInfos();
 		}
 		$object = self::getObject( $object->MetaData->BasicMetaData->ID, $user, false,
-			$rendition,	$requestInfo );
+			$rendition,	$requestInfo, null, true, null,null, false );
 
 		if( defined( 'HTMLLINKFILES' ) && HTMLLINKFILES == true ) {
 			// Update object's 'link' files (htm) in <FileStore>/_BRANDS_ folder
@@ -2124,21 +2124,12 @@ class BizObject
 					}
 
 					// Set new properties and group the remaining invoked Objects.
-					if( !is_null($routeToMetaDataValueIndex) ) {
-						// If RouteTo exists in MetaDataValue, then add  new / old RouteTo value on the fly.
-						$invokedObject->NewRouteTo = isset($objectProperties['standard']['RouteTo'])
-							? $objectProperties['standard']['RouteTo']
-							: $invokedObject->WorkflowMetaData->RouteTo;
-					} else {
-						// If RouteTo not exists in MetaDataValue, then get new RouteTo value[from the configured Auto Routing],
-						// else take the old RouteTo value.
-						if( !is_null($stateIdMetaDataValueIndex) ) {
-							$invokedObject->NewRouteTo = !empty( $routes[$newStateId][$categoryId]) // When empty, no auto routing configured
-								? $routes[$newStateId][$categoryId]
-								: $invokedObject->WorkflowMetaData->RouteTo;
-						} else {
-							$invokedObject->NewRouteTo = $invokedObject->WorkflowMetaData->RouteTo;
-						}
+					if( !is_null($routeToMetaDataValueIndex) && isset($objectProperties['standard']['RouteTo']) ) { // Did the user choose a new RouteTo?
+						$invokedObject->NewRouteTo = $objectProperties['standard']['RouteTo'];
+					} else if( !is_null($stateIdMetaDataValueIndex) && !empty( $routes[$newStateId][$categoryId]) ) { // Status changes, any auto routing?
+						$invokedObject->NewRouteTo = $routes[$newStateId][$categoryId];
+					} else { // No changes on RouteTo nor Status
+						$invokedObject->NewRouteTo = null;  // No changes, using back the original RouteTo value.
 					}
 
 					// On a Send To next, we overrule whatever else was sent along for the route and take the RouteTo
@@ -2223,7 +2214,9 @@ class BizObject
 				if ( $sendToNext || ( !$sendToNext && isset( $objectProperties['standard']['StateId'] ) ) ) {
 					$objectProperties['standard']['StateId'] = $stateIdForGroup;
 				}
-				$objectProperties['standard']['RouteTo'] = $routeToForGroup;
+				if( !is_null( $routeToForGroup ) ) { // Only update when there's changes in the RouteTo.
+					$objectProperties['standard']['RouteTo'] = $routeToForGroup;
+				}
 
 				// If a RouteTo change was not requested, add it to the MetaDataValues as it may have been changed.
 				if ( $sendToNext && is_null( $routeToMetaDataValueIndex ) ) {
@@ -3806,7 +3799,7 @@ class BizObject
 		// Shadow objects do not have a native, so we need them to tell us their orientation.
 		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 		if( !BizContentSource::isShadowObject( $object ) ) {
-			if( isset($object->MetaData->ContentMetaData->Orientation) ) {
+			if ( isset( $object->MetaData->ContentMetaData->Orientation ) ) {
 				$object->MetaData->ContentMetaData->Orientation = null;
 			}
 		}
@@ -5697,6 +5690,7 @@ class BizObject
 			}
 		}
 
+		$newSlugLine = UtfString::removeIllegalUnicodeCharacters( $newSlugLine );
 		$newSlugLine = UtfString::truncateMultiByteValue( $newSlugLine, 250 );
 		return $newSlugLine;
 	}

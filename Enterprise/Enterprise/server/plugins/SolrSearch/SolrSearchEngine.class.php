@@ -350,18 +350,20 @@ class SolrSearchEngine extends BizQuery
 	 */
 	public function indexObjects( $objects, $areas = array('Workflow'), $directCommit=false )
 	{
+		$this->handledObjectIds = array();
+		$objIds = array();
 		if( is_null($this->index) ) {
 			return; // quit when bad config / no access / Solr server down
 		}
 		foreach( $objects as $object ) {
-			$this->handledObjectIds[] = $object->MetaData->BasicMetaData->ID; // Passed back to the searcher.
+			$objIds[] = $object->MetaData->BasicMetaData->ID;
 		}
 
 		PerformanceProfiler::startProfile( 'Solr index', 3 );
 		try {
 			// Gather the documents to be indexed.
 			$documents = array();
-			$specialDataByObjId = BizProperty::updateIndexFieldWithSpecialProperties( $this->handledObjectIds, $this->fieldsToIndex );
+			$specialDataByObjId = BizProperty::updateIndexFieldWithSpecialProperties( $objIds, $this->fieldsToIndex );
 			foreach( $objects as $object ) {
 				$objId = $object->MetaData->BasicMetaData->ID;
 				$specialData = array_key_exists($objId, $specialDataByObjId) ? $specialDataByObjId[ $objId ] : array(); 
@@ -371,22 +373,25 @@ class SolrSearchEngine extends BizQuery
 			}
 
 			// Index the documents.
-			$this->commitToIndex( $documents, $directCommit );
-		} catch( Exception $e ) {
+			$resultStatus = $this->commitToIndex( $documents, $directCommit );
+			if( $resultStatus ) {
+				$this->handledObjectIds = $objIds; // For the caller to access this data.
+			}
+		} catch( BizException $e ) {
 			PerformanceProfiler::stopProfile( 'Solr index', 3 );
-			throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array($e->getMessage()), 'ERROR' );
+			throw $e;
 		}
 		PerformanceProfiler::stopProfile( 'Solr index', 3 );
 	}
 
-	/*
+	/**
 	 * Remove given Enterprise objects from index.
+	 *
 	 * The objects are assumed to be deleted first (=> so they reside at smart_deletedobjects table).
 	 *
-	 * @param array of string	$ids	Enterprise object ids to unindex
+	 * @param int[] $ids List of object ids to be unindexed.
 	 * @throws BizException
-	*/
-
+	 */
 	public function unindexObjects( $ids )
 	{
 		if( is_null($this->index) ) {
@@ -399,9 +404,9 @@ class SolrSearchEngine extends BizQuery
 			if (count($ids) > 0 ) {
 				$this->handledObjectIds +=  $ids ;
 			}
-		} catch( Exception $e ) {
+		} catch( BizException $e ) {
 			PerformanceProfiler::stopProfile( 'Solr unindex', 3 );
-			throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array($e->getMessage()), 'ERROR' );
+			throw $e;
 		}
 		PerformanceProfiler::stopProfile( 'Solr unindex', 3 );
 	}
@@ -414,6 +419,8 @@ class SolrSearchEngine extends BizQuery
 	 * Running optimize took 9.9 seconds after which the same search operation took 0.02 sec.
 	 * Adding another document to the index, the optimize took again 9 sec.
 	 * Optimize on 5000 docs (that were never optimized) took 50 sec.
+	 *
+	 * @throws BizException
 	 */
 	public function optimize( )
 	{
@@ -424,9 +431,9 @@ class SolrSearchEngine extends BizQuery
 		PerformanceProfiler::startProfile( 'Solr optimize', 3 );
 		try {
 			$this->index->optimize();
-		} catch ( Exception $e ) {
+		} catch ( BizException $e ) {
 			PerformanceProfiler::stopProfile( 'Solr optimize', 3 );
-			throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array($e->getMessage()), 'ERROR' );
+			throw $e;
 		}
 		PerformanceProfiler::stopProfile( 'Solr optimize', 3 );
 	}
@@ -477,15 +484,10 @@ class SolrSearchEngine extends BizQuery
 			if( !empty( $indexValues ) ) {
 				// Update fields of indexed documents.
 				$result = $this->index->updateObjectsFields( $objectIDs, $indexValues, $directCommit );
-				if( !is_null($result) ) {
-					if ( $result->getResponse()->getStatusCode() != "200" ) {
-						throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array($result->getResponse()->getStatusMessage()), 'ERROR' );
-					}
-				}
 			}
-		} catch( Exception $e ) {
+		} catch( BizException $e ) {
 			PerformanceProfiler::stopProfile( 'Solr index', 3 );
-			throw new BizException( 'ERR_SOLR_SEARCH', 'Server', null, null, array($e->getMessage()), 'ERROR' );
+			throw $e;
 		}
 		PerformanceProfiler::stopProfile( 'Solr update fields', 3 );
 	}
@@ -682,27 +684,30 @@ class SolrSearchEngine extends BizQuery
 	 * may be useful in the case a race condition might occur, but should be used with caution, as overuse
 	 * of this option might affect performance negatively.
 	 *
-	 * @throws Exception
 	 * @param array $documents A list of documents to be indexed.
 	 * @param bool $directCommit Whether to forego the autocommit functionality or not.
-	 * @return void
+	 * @throws BizException
+	 * @return bool True when the indexing is successful, false otherwise.
 	 */
 	private function commitToIndex($documents, $directCommit=false)
 	{
 		LogHandler::Log( 'Solr', 'DEBUG', 'Commit to index with directCommit set to: ' . var_export($directCommit, true) );
 		try {
+			$resultStatus = false;
 			$commit = $directCommit;
 			if (!defined( 'SOLR_AUTOCOMMIT' ) || !SOLR_AUTOCOMMIT || $directCommit ) {
 				$commit = true;
 			}
 
 			PerformanceProfiler::startProfile( 'Solr Add Documents', 3 );
-			$this->index->indexObjects( $documents, $commit );
+			$resultStatus = $this->index->indexObjects( $documents, $commit );
 			PerformanceProfiler::stopProfile( 'Solr Add Documents', 3 );
-		} catch ( Exception $e ) {
-			LogHandler::Log( 'Solr', 'ERROR', 'Index error:'.$e->getMessage() );
+		} catch ( BizException $e ) {
+			PerformanceProfiler::stopProfile( 'Solr Add Documents', 3 );
 			throw $e;
 		}
+
+		return $resultStatus;
 	}
 
 	/**
@@ -1164,48 +1169,49 @@ class SolrSearchEngine extends BizQuery
 	 */
 	private function buildFacetItemsForIssueIds( $facet )
 	{
-		require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
-		require_once BASEDIR . '/server/dbclasses/DBUser.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 
 		$resultFacetItems = array();
 		$issueIds = array();
 		$user = BizSession::getShortUserName();
 		$isAdmin = DBUser::isAdminUser( $user );
 
-		foreach ($facet as $facetItemName => $facetItemNumber) {
-			$issueId = intval($facetItemName);
-			if ($issueId > 0){
+		foreach( $facet as $facetItemName => $facetItemNumber ) {
+			$issueId = intval( $facetItemName );
+			if( $issueId > 0 ) {
 				$issueIds[] = $issueId;
 			}
 		}
 
 		// Get names of issue ids (do we want such a function in DBIssue?).
-		if ( !empty( $issueIds ) ) {
-			$where = 'id IN (' . implode(',', $issueIds) . ') ';
+		if( !empty( $issueIds ) ) {
+			$where = 'id IN ('.implode( ',', $issueIds ).') ';
 			$params = array();
 			if( !$isAdmin ) {
-				// BZ#1856:Hide objects from query results that are assigned to inactive issues
+				// BZ#41856:Hide objects from query results that are assigned to inactive issues
 				$where .= 'AND `active` = ? ';
 				$params[] = 'on';
 			}
 			$select = array( 'id', 'name' );
-			$issueRows = DBBase::listRows('issues', 'id', '', $where, $select, $params );
+			$issueRows = DBBase::listRows( 'issues', 'id', '', $where, $select, $params );
 		}
 
 		foreach( $facet as $facetItemName => $facetItemNumber ) {
-			if ( $facetItemName == '_empty_' ) {
+			$facetItemDisplayName = '';
+			if( $facetItemName == '_empty_' || empty( $facetItemName ) ) {
 				$facetItemName = '';
-				$issueId = -1;
+				$facetItemDisplayName = '<'.BizResources::localize( 'OBJ_UNASSIGNED' ).'>';
 			} else {
-				$issueId = intval($facetItemName);
+				$issueId = intval( $facetItemName );
+				if( isset( $issueRows[ $issueId ]['name'] ) ) {
+					$facetItemDisplayName = $issueRows[ $issueId ]['name'];
+				}
 			}
-			if( isset($issueRows[$issueId]['name'])){
-				$facetItemDisplayName = $issueRows[$issueId]['name'];
-			} else {
-				$facetItemDisplayName = '<'.BizResources::localize('OBJ_UNASSIGNED').'>';
+			if( $facetItemDisplayName ) {
+				$resultFacetItem = new FacetItem( $facetItemName, $facetItemDisplayName, $facetItemNumber );
+				$resultFacetItems[] = $resultFacetItem;
 			}
-			$resultFacetItem = new FacetItem($facetItemName, $facetItemDisplayName, $facetItemNumber);
-			$resultFacetItems[] = $resultFacetItem;
 		}
 
 		return $resultFacetItems;

@@ -220,7 +220,8 @@ class DBElement extends DBBase
 		}
 		if( !is_null($obj->Snippet) ) {
 			require_once BASEDIR.'/server/utils/UtfString.class.php';
-			$row['snippet'] = UtfString::truncateMultiByteValue( $obj->Snippet, 250 ); // BZ#5154
+			$row['snippet'] = UtfString::removeIllegalUnicodeCharacters( $obj->Snippet );
+			$row['snippet'] = UtfString::truncateMultiByteValue( $row['snippet'], 250 ); // BZ#5154
 		}
 		if( !is_null($obj->Version) ) {
 			$row['version'] = $obj->Version;

@@ -3,6 +3,7 @@ ADD   `multipleobjects` char(2) NOT NULL  default '';
 ALTER TABLE `smart_actionproperties` CHANGE `orderid`   `orderid` int(11) NOT NULL  default '0';
 ALTER TABLE `smart_authorizations`
 ADD   `bundle` int(11) NOT NULL  default '0';
+ALTER TABLE `smart_authorizations` CHANGE `rights`   `rights` varchar(1024) NOT NULL  default '';
 ALTER TABLE `smart_deletedobjects`
 ADD   `orientation` tinyint(4) NOT NULL  default '0';
 ALTER TABLE `smart_deletedobjects` CHANGE `dpi`   `dpi` double NOT NULL  default '0';
@@ -52,6 +53,15 @@ ADD   `masterticketid` varchar(40) NOT NULL  default '';
 CREATE  INDEX `mtid_tickets` ON `smart_tickets`(`masterticketid`) ;
 ALTER TABLE `smart_users`
 ADD   `importonlogon` char(2) NOT NULL  default '';
+
+CREATE TABLE `smart_featureaccess` (
+  `featurename` varchar(255) NOT NULL  default '',
+  `featureid` int(4) NOT NULL  default '0',
+  `accessflag` varchar(4) NOT NULL  default '',
+  PRIMARY KEY (`featurename`)
+) DEFAULT CHARSET=utf8;
+CREATE UNIQUE INDEX `faid_profiles` ON `smart_featureaccess`(`featureid`) ;
+CREATE UNIQUE INDEX `faaf_profiles` ON `smart_featureaccess`(`accessflag`) ;
 ALTER TABLE `smart_issues`
 ADD   `calculatedeadlines` char(2) NOT NULL  default '';
 ALTER TABLE `smart_publishhistory`

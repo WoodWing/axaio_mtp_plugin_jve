@@ -52,7 +52,7 @@ abstract class Search_EnterpriseConnector extends DefaultConnector
 	 *
 	 * @param array $objects List of Object objects
 	 * @param array $areas
-	 * @return void
+	 * @return mixed
 	 * @throws BizException When objects could not be indexed.
 	 */
 	abstract public function updateObjects( $objects, $areas = array('Workflow') );
@@ -75,6 +75,7 @@ abstract class Search_EnterpriseConnector extends DefaultConnector
 	 * @param array $objectIDs List of Object IDs.
 	 * @param array $metaDataValues List of changed metadata property/values.
 	 * @return bool true if properties of all objects were successfully updated.
+	 * @throws BizException When objects could not be indexed.
 	 */
 	abstract public function updateObjectProperties( $objectIDs, $metaDataValues );
 
