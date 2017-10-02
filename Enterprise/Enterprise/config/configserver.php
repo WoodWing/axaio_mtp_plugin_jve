@@ -257,7 +257,6 @@ if( !defined('EXTENSIONMAP') ) {
 		'.dmg' => array( 'application/x-apple-diskimage', 'Other' ),
 		'.htmlwidget' => array( 'application/ww-htmlwidget', 'Other'),
 		'.ofip' => array( 'application/x-ofip+zip', 'Other'), // Obsoleted, files can still be downloaded from the system
-	    '.folio' => array( 'application/vnd.adobe.folio+zip', 'Other'), // For DPS
 	)));
 }
 

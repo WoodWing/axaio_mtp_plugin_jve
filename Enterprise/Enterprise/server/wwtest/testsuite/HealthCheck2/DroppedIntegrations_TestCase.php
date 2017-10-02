@@ -28,12 +28,6 @@ class WW_TestSuite_HealthCheck2_DroppedIntegrations_TestCase extends TestCase
 	final public function runTest()
 	{
 		$this->verifyAdobeDps();
-
-		/**
-		 * Let Health Check show help page to clean up:
-		 * Custom object property definitions in DB (C_DPS_IS_FREE, C_READER_LABEL, C_DOSSIER_IS_AD, C_OVERLAYS_IN_BROWSE, C_DOSSIER_INTENT, C_HIDE_FROM_TOC, C_DPS_SECTION, C_DOSSIER_NAVIGATION)
-		 * Custom issue property definitions in DB (C_DPS_PRODUCTID, C_DPS_PAGE_ORIENTATION, C_DPS_NAVIGATION, C_DPS_READINGDIRECTION, C_DPS_PUBLICATION_TITLE, C_DPS_VOLUMENUMBER, C_DPS_FILTER, C_DPS_TARGET_VIEWER_VERSION, C_DPS_COVER_DATE)
-		 */
 	}
 
 	/**
@@ -57,6 +51,8 @@ class WW_TestSuite_HealthCheck2_DroppedIntegrations_TestCase extends TestCase
 		$queryParams = array();
 		$queryParams[] = new QueryParam( 'Type', '=', 'Other' );
 		$queryParams[] = new QueryParam( 'Format', '=', 'application/vnd.adobe.folio+zip' );
+		// Hardcode the view to web, otherwise the healthcheck will generate errors when the user doesn't have a valid ticket
+		$queryParams[] = new QueryParam( 'View', '=', 'web' );
 		require_once BASEDIR.'/server/interfaces/services/wfl/WflQueryObjectsRequest.class.php';
 		$request = new WflQueryObjectsRequest();
 		$request->Areas = array( 'Workflow', 'Trash' );
@@ -132,6 +128,84 @@ class WW_TestSuite_HealthCheck2_DroppedIntegrations_TestCase extends TestCase
 		if( $result ) {
 			$help = '';
 			$this->setResult( 'ERROR', $message, $help );
+		}
+
+		$this->verifyCustomPropertiesForDPS();
+
+		$this->verifyCustomAdminPropertiesForDPS();
+	}
+
+	/**
+	 * Verifies if there are obsolete Adobe DPS (1) properties defined in the database.
+	 */
+	private function verifyCustomPropertiesForDPS()
+	{
+		// List of depecrated properties. C_WIDGET_MANIFEST is still in use by Adobe AEM and therefore not in the list.
+		$customProps = array(
+			'C_READER_LABEL',
+			'C_DOSSIER_IS_AD',
+			'C_OVERLAYS_IN_BROWSE',
+			'C_DOSSIER_INTENT',
+			'C_HIDE_FROM_TOC',
+			'C_DPS_SECTION',
+			'C_DOSSIER_NAVIGATION',
+			'C_INTENT',
+			'C_KICKER',
+			'C_LAYOUT_FOR_TOC',
+			'C_ARTICLE_ACCESS',
+		);
+
+		require_once BASEDIR . '/server/dbclasses/DBProperty.class.php';
+		$defProps = array();
+		foreach( $customProps as $propName ) {
+			$property = DBProperty::getObjectPropertyByName( $propName );
+			if( $property ) {
+				$defProps[] = substr( $propName, 2 );
+			}
+		}
+
+		if( $defProps ) {
+			$msg = 'The following custom ';
+			$msg .= ( count( $defProps ) == 1 ) ? 'property ' : 'properties ';
+			$msg .= 'for Adobe DPS ';
+			$comma = '';
+			foreach( $defProps as $propName ) {
+				$msg .= $comma."\"$propName\"";
+				$comma = ', ';
+			}
+			$msg .= ' ';
+			$msg .= ( count( $defProps ) == 1 ) ? 'is ' : 'are ';
+			$msg .= 'still defined. ';
+			$help = 'Please go to MetaData Setup page to delete the mentioned properties.';
+			$this->setResult( 'ERROR', $msg, $help );
+		}
+	}
+
+	/**
+	 * Verifies if there are obsolete Adobe DPS (1) issue properties defined in the database.
+	 */
+	private function verifyCustomAdminPropertiesForDPS()
+	{
+		require_once BASEDIR . '/server/dbclasses/DBAdmProperty.class.php';
+		$props = DBAdmProperty::getPropertyInfos(null, 'AdobeDps', null);
+		if( $props ) {
+			$msg = 'The following ';
+			$msg .= ( count( $props ) == 1 ) ? 'property ' : 'properties ';
+			$msg .= 'for Adobe DPS ';
+			$comma = '';
+			foreach( $props as $prop ) {
+				$name = substr($prop->Name, 2);
+				$msg .= $comma."\"$name\"";
+				$comma = ', ';
+			}
+			$msg .= ' ';
+			$msg .= ( count( $props ) == 1 ) ? 'is ' : 'are ';
+			$msg .= 'still defined. ';
+
+			$url = SERVERURL_ROOT.INETROOT.'/server/wwtest/testsuite/HealthCheck2/cleanAdobeDpsIssueProperties.php';
+			$help = 'Run <a href="'.$url.'" target="_blank">this</a> script to delete the mentioned properties.';
+			
+			$this->setResult( 'ERROR', $msg, $help );
 		}
 	}
 }
