@@ -187,7 +187,7 @@ class WW_TestSuite_HealthCheck2_DatabaseConnection_TestCase extends TestCase
 				$this->setResult( 'ERROR', 'Database is not initialized.', $help );
 			} else {
 				$help = 'Please update the database through this page: <a href="'.$url.'" target="_top">DB Admin</a>';
-				$this->setResult( 'ERROR', 'The actual database model version v'.$version.
+				$this->setResult( 'ERROR', "The actual database model version v{$version} " .
 					'for the core server does not meet the required version v'.SCENT_DBVERSION, $help );
 			}
 			return false;

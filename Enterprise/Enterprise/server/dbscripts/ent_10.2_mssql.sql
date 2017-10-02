@@ -1,6 +1,6 @@
 
 CREATE TABLE [smart_actionproperties] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [publication] int NOT NULL  default '0',
   [orderid] int NOT NULL  default '0',
   [property] varchar(200) NOT NULL  default '',
@@ -19,7 +19,7 @@ CREATE TABLE [smart_actionproperties] (
 CREATE  INDEX [pbac_actionproperties] ON [smart_actionproperties]([publication], [action]) ;
 
 CREATE TABLE [smart_authorizations] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [grpid] int NOT NULL  default '0',
   [publication] int NOT NULL  default '0',
   [section] int NOT NULL  default '0',
@@ -37,7 +37,7 @@ INSERT INTO [smart_authorizations] ([id], [grpid], [publication], [section], [st
 SET IDENTITY_INSERT [smart_authorizations] OFF
 
 CREATE TABLE [smart_config] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [name] varchar(200) NOT NULL  default '',
   [value] text NOT NULL  default '',
   PRIMARY KEY ([id])
@@ -47,7 +47,7 @@ INSERT INTO [smart_config] ([id], [name], [value]) VALUES (1, 'version', '00');
 SET IDENTITY_INSERT [smart_config] OFF
 
 CREATE TABLE [smart_deletedobjects] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [documentid] varchar(512) NOT NULL  default '',
   [type] varchar(20) NOT NULL  default '',
   [name] varchar(255) NOT NULL  default '',
@@ -128,17 +128,17 @@ INSERT INTO [smart_groups] ([id], [name], [descr], [admin], [routing], [external
 SET IDENTITY_INSERT [smart_groups] OFF
 
 CREATE TABLE [smart_log] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [user] varchar(50) NOT NULL  default '',
   [service] varchar(50) NOT NULL  default '',
   [ip] varchar(30) NOT NULL  default '',
   [date] varchar(30) NOT NULL  default '',
-  [objectid] int NOT NULL  default '0',
+  [objectid] bigint NOT NULL  default '0',
   [publication] int NOT NULL  default '0',
   [issue] int NOT NULL  default '0',
   [section] int NOT NULL  default '0',
   [state] int NOT NULL  default '0',
-  [parent] int NOT NULL  default '0',
+  [parent] bigint NOT NULL  default '0',
   [lock] varchar(1) NOT NULL  default '',
   [rendition] varchar(10) NOT NULL  default '',
   [type] varchar(20) NOT NULL  default '',
@@ -192,8 +192,8 @@ where (o.`type` = ''Library'')', 'Shows all libraries.', 'on');
 SET IDENTITY_INSERT [smart_namedqueries] OFF
 
 CREATE TABLE [smart_objectlocks] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [object] int NOT NULL  default '0',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [object] bigint NOT NULL  default '0',
   [usr] varchar(40) NOT NULL  default '',
   [timestamp] timestamp NOT NULL ,
   [ip] varchar(30) NOT NULL  default '',
@@ -204,9 +204,9 @@ CREATE UNIQUE INDEX [ob_objectlocks] ON [smart_objectlocks]([object]) ;
 CREATE  INDEX [obusr_objectlocks] ON [smart_objectlocks]([object], [usr]) ;
 
 CREATE TABLE [smart_objectrelations] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [parent] int NOT NULL  default '0',
-  [child] int NOT NULL  default '0',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [parent] bigint NOT NULL  default '0',
+  [child] bigint NOT NULL  default '0',
   [type] varchar(40) NOT NULL  default '',
   [subid] varchar(20) NOT NULL  default '',
   [pagerange] varchar(50) NOT NULL  default '',
@@ -219,7 +219,7 @@ CREATE  INDEX [pachty_objectrelations] ON [smart_objectrelations]([parent], [chi
 CREATE  INDEX [child_type_id] ON [smart_objectrelations]([child], [type], [id]) ;
 
 CREATE TABLE [smart_objects] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [documentid] varchar(512) NOT NULL  default '',
   [type] varchar(20) NOT NULL  default '',
   [name] varchar(255) NOT NULL  default '',
@@ -291,8 +291,8 @@ CREATE  INDEX [roid_objects] ON [smart_objects]([routeto], [id], [closed]) ;
 CREATE  INDEX [codo_objects] ON [smart_objects]([contentsource], [documentid]) ;
 
 CREATE TABLE [smart_objectversions] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [objid] int NOT NULL  default '0',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [objid] bigint NOT NULL  default '0',
   [minorversion] int NOT NULL  default '0',
   [modifier] varchar(40) NOT NULL  default '',
   [comment] varchar(255) NOT NULL  default '',
@@ -322,8 +322,8 @@ CREATE TABLE [smart_objectversions] (
 CREATE  INDEX [oive_objectversions] ON [smart_objectversions]([objid], [majorversion], [minorversion]) ;
 
 CREATE TABLE [smart_objectrenditions] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [objid] int NOT NULL  default '0',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [objid] bigint NOT NULL  default '0',
   [editionid] int NOT NULL  default '0',
   [rendition] varchar(10) NOT NULL  default '',
   [format] varchar(128) NOT NULL  default '',
@@ -334,8 +334,8 @@ CREATE TABLE [smart_objectrenditions] (
 CREATE  INDEX [obed_objectrenditions] ON [smart_objectrenditions]([objid], [editionid], [rendition]) ;
 
 CREATE TABLE [smart_pages] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [objid] int NOT NULL  default '0',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [objid] bigint NOT NULL  default '0',
   [width] real NOT NULL  default '0',
   [height] real NOT NULL  default '0',
   [pagenumber] varchar(20) NOT NULL  default '',
@@ -352,9 +352,9 @@ CREATE TABLE [smart_pages] (
 CREATE  INDEX [obpaed_pages] ON [smart_pages]([objid], [pageorder], [edition]) ;
 
 CREATE TABLE [smart_placements] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [parent] int NOT NULL  default '0',
-  [child] int NOT NULL  default '0',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [parent] bigint NOT NULL  default '0',
+  [child] bigint NOT NULL  default '0',
   [page] int NOT NULL  default '0',
   [element] varchar(200) NOT NULL  default '',
   [elementid] varchar(200) NOT NULL  default '',
@@ -387,10 +387,10 @@ CREATE  INDEX [ei_placements] ON [smart_placements]([elementid]) ;
 CREATE  INDEX [chty_placements] ON [smart_placements]([child], [type]) ;
 
 CREATE TABLE [smart_elements] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [guid] varchar(200) NOT NULL  default '',
   [name] varchar(200) NOT NULL  default '',
-  [objid] int NOT NULL  default 0,
+  [objid] bigint NOT NULL  default 0,
   [lengthwords] int NOT NULL  default '0',
   [lengthchars] int NOT NULL  default '0',
   [lengthparas] int NOT NULL  default '0',
@@ -402,7 +402,7 @@ CREATE TABLE [smart_elements] (
 CREATE  INDEX [oigu_elements] ON [smart_elements]([objid], [guid]) ;
 
 CREATE TABLE [smart_indesignarticles] (
-  [objid] int NOT NULL  default 0,
+  [objid] bigint NOT NULL  default 0,
   [artuid] varchar(40) NOT NULL  default '',
   [name] varchar(200) NOT NULL  default '',
   [code] int NOT NULL  default '0',
@@ -410,15 +410,15 @@ CREATE TABLE [smart_indesignarticles] (
 );
 
 CREATE TABLE [smart_idarticlesplacements] (
-  [objid] int NOT NULL  default 0,
+  [objid] bigint NOT NULL  default 0,
   [artuid] varchar(40) NOT NULL  default '',
-  [plcid] int NOT NULL  default 0,
+  [plcid] bigint NOT NULL  default 0,
   PRIMARY KEY ([objid], [artuid], [plcid])
 );
 
 CREATE TABLE [smart_objectoperations] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [objid] int NOT NULL  default 0,
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [objid] bigint NOT NULL  default 0,
   [guid] varchar(40) NOT NULL  default '',
   [type] varchar(200) NOT NULL  default '',
   [name] varchar(200) NOT NULL  default '',
@@ -505,14 +505,14 @@ CREATE TABLE [smart_publobjects] (
   [id] int NOT NULL  IDENTITY(1,1),
   [publicationid] int NOT NULL  default '0',
   [issueid] int NOT NULL  default '0',
-  [objectid] int NOT NULL  default '0',
+  [objectid] bigint NOT NULL  default '0',
   [grpid] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
 CREATE UNIQUE INDEX [puisobgr_publobjects] ON [smart_publobjects]([publicationid], [issueid], [objectid], [grpid]) ;
 
 CREATE TABLE [smart_issueeditions] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [issue] int NOT NULL  default '0',
   [edition] int NOT NULL  default '0',
   [deadline] varchar(30) NOT NULL  default '',
@@ -534,7 +534,7 @@ CREATE  INDEX [pbisse_routing] ON [smart_routing]([publication], [issue], [secti
 CREATE  INDEX [st_routing] ON [smart_routing]([state]) ;
 
 CREATE TABLE [smart_settings] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [user] varchar(200) NOT NULL  default '',
   [setting] varchar(200) NOT NULL  default '',
   [value] text NOT NULL  default '',
@@ -597,7 +597,7 @@ INSERT INTO [smart_states] ([id], [publication], [type], [state], [produce], [co
 SET IDENTITY_INSERT [smart_states] OFF
 
 CREATE TABLE [smart_tickets] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [ticketid] varchar(40) NOT NULL  default '',
   [usr] varchar(40) NOT NULL  default '',
   [db] varchar(255) NOT NULL  default '',
@@ -617,7 +617,7 @@ CREATE  INDEX [us_tickets] ON [smart_tickets]([usr]) ;
 CREATE  INDEX [mtid_tickets] ON [smart_tickets]([masterticketid]) ;
 
 CREATE TABLE [smart_termentities] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [name] varchar(255) NOT NULL  default '',
   [provider] varchar(40) NOT NULL  default '',
   [publishsystemid] varchar(40) NOT NULL  default '',
@@ -628,7 +628,7 @@ CREATE  INDEX [te_provider] ON [smart_termentities]([provider]) ;
 CREATE  INDEX [te_termentity] ON [smart_termentities]([name], [provider]) ;
 
 CREATE TABLE [smart_terms] (
-  [entityid] int NOT NULL  default '0',
+  [entityid] bigint NOT NULL  default '0',
   [displayname] varchar(255) NOT NULL  default '',
   [normalizedname] varchar(255) NOT NULL  default '',
   [ligatures] varchar(255) NOT NULL  default '',
@@ -693,7 +693,7 @@ CREATE TABLE [smart_mtp] (
 CREATE  INDEX [ii_mtp] ON [smart_mtp]([issueid]) ;
 
 CREATE TABLE [smart_mtpsentobjects] (
-  [objid] int NOT NULL  default '0',
+  [objid] bigint NOT NULL  default '0',
   [publid] int NOT NULL ,
   [issueid] int NOT NULL  default '0',
   [laytriggerstate] int NOT NULL ,
@@ -705,7 +705,7 @@ CREATE  INDEX [ls_mtpsentobjects] ON [smart_mtpsentobjects]([laytriggerstate]) ;
 
 CREATE TABLE [smart_messagelog] (
   [id] bigint NOT NULL  IDENTITY(1,1),
-  [objid] int NOT NULL  default 0,
+  [objid] bigint NOT NULL  default 0,
   [userid] int NOT NULL  default 0,
   [messagetype] varchar(255) NOT NULL ,
   [messagetypedetail] varchar(255) NOT NULL ,
@@ -739,7 +739,7 @@ CREATE  INDEX [mi_messagelog] ON [smart_messagelog]([msgid]) ;
 CREATE  INDEX [uid_messagelog] ON [smart_messagelog]([userid]) ;
 
 CREATE TABLE [smart_objectflags] (
-  [objid] int NOT NULL ,
+  [objid] bigint NOT NULL ,
   [flagorigin] varchar(255) NOT NULL ,
   [flag] int NOT NULL ,
   [severity] int NOT NULL ,
@@ -790,7 +790,7 @@ INSERT INTO [smart_profiles] ([id], [profile], [code], [description]) VALUES (1,
 SET IDENTITY_INSERT [smart_profiles] OFF
 
 CREATE TABLE [smart_profilefeatures] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [profile] int NOT NULL  default '0',
   [feature] int NOT NULL  default '0',
   [value] varchar(20) NOT NULL  default '',
@@ -879,20 +879,20 @@ CREATE UNIQUE INDEX [faid_profiles] ON [smart_featureaccess]([featureid]) ;
 CREATE UNIQUE INDEX [faaf_profiles] ON [smart_featureaccess]([accessflag]) ;
 
 CREATE TABLE [smart_appsessions] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [sessionid] varchar(40) NOT NULL  default '',
   [userid] varchar(40) NOT NULL  default '',
   [appname] varchar(40) NOT NULL  default '',
   [lastsaved] varchar(20) NOT NULL  default '',
   [readonly] char(2) NOT NULL  default '',
-  [articleid] int NOT NULL  default 0,
+  [articleid] bigint NOT NULL  default 0,
   [articlename] varchar(255) NOT NULL  default '',
   [articleformat] varchar(128) NOT NULL  default '',
   [articleminorversion] int NOT NULL  default 0,
   [templateid] int NOT NULL  default 0,
   [templatename] varchar(255) NOT NULL  default '',
   [templateformat] varchar(128) NOT NULL  default '',
-  [layoutid] int NOT NULL  default 0,
+  [layoutid] bigint NOT NULL  default 0,
   [layoutminorversion] int NOT NULL  default 0,
   [articlemajorversion] int NOT NULL  default 0,
   [layoutmajorversion] int NOT NULL  default 0,
@@ -953,7 +953,7 @@ CREATE  INDEX [dsid_dssettings] ON [smart_dssettings]([datasourceid]) ;
 
 CREATE TABLE [smart_dsqueryplacements] (
   [id] int NOT NULL  IDENTITY(1,1),
-  [objectid] int NOT NULL  default '0',
+  [objectid] bigint NOT NULL  default '0',
   [datasourceid] int NOT NULL  default '0',
   [dirty] char(2) NOT NULL  default '0',
   PRIMARY KEY ([id])
@@ -979,7 +979,7 @@ CREATE TABLE [smart_dsupdates] (
 CREATE TABLE [smart_dsobjupdates] (
   [id] int NOT NULL  IDENTITY(1,1),
   [updateid] int NOT NULL  default '0',
-  [objectid] int NOT NULL  default '0',
+  [objectid] bigint NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
 
@@ -1042,12 +1042,12 @@ INSERT INTO [smart_issues] ([id], [name], [channelid], [overrulepub], [code], [p
 SET IDENTITY_INSERT [smart_issues] OFF
 
 CREATE TABLE [smart_targets] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [objectid] int NOT NULL  default '0',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [objectid] bigint NOT NULL  default '0',
   [channelid] int NOT NULL  default '0',
   [issueid] int NOT NULL  default '0',
   [externalid] varchar(200) NOT NULL  default '',
-  [objectrelationid] int NOT NULL  default '0',
+  [objectrelationid] bigint NOT NULL  default '0',
   [publisheddate] varchar(30) NOT NULL  default '',
   [publishedmajorversion] int NOT NULL  default '0',
   [publishedminorversion] int NOT NULL  default '0',
@@ -1058,9 +1058,9 @@ CREATE UNIQUE INDEX [obrobid_targets] ON [smart_targets]([objectrelationid], [ob
 CREATE  INDEX [issueid_targets] ON [smart_targets]([issueid]) ;
 
 CREATE TABLE [smart_publishhistory] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [externalid] varchar(200) NOT NULL  default '',
-  [objectid] int NOT NULL  default '0',
+  [objectid] bigint NOT NULL  default '0',
   [channelid] int NOT NULL  default '0',
   [issueid] int NOT NULL  default '0',
   [editionid] int NOT NULL  default '0',
@@ -1077,7 +1077,7 @@ CREATE  INDEX [obchis_publhist] ON [smart_publishhistory]([objectid], [channelid
 CREATE  INDEX [chis_publhist] ON [smart_publishhistory]([channelid], [issueid]) ;
 
 CREATE TABLE [smart_pubpublishedissues] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [externalid] varchar(200) NOT NULL  default '',
   [channelid] int NOT NULL  default '0',
   [issueid] int NOT NULL  default '0',
@@ -1098,9 +1098,9 @@ CREATE TABLE [smart_pubpublishedissues] (
 CREATE  INDEX [chised_publhist] ON [smart_pubpublishedissues]([channelid], [issueid], [editionid]) ;
 
 CREATE TABLE [smart_publishedobjectshist] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [objectid] int NOT NULL  default '0',
-  [publishid] int NOT NULL  default '0',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [objectid] bigint NOT NULL  default '0',
+  [publishid] bigint NOT NULL  default '0',
   [majorversion] int NOT NULL  default '0',
   [minorversion] int NOT NULL  default '0',
   [externalid] varchar(200) NOT NULL  default '',
@@ -1113,9 +1113,9 @@ CREATE  INDEX [obpu_publobjhist] ON [smart_publishedobjectshist]([objectid], [pu
 CREATE  INDEX [puob_publobjhist] ON [smart_publishedobjectshist]([publishid], [objectid]) ;
 
 CREATE TABLE [smart_publishedplcmtshist] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [objectid] int NOT NULL  default '0',
-  [publishid] int NOT NULL  default '0',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [objectid] bigint NOT NULL  default '0',
+  [publishid] bigint NOT NULL  default '0',
   [majorversion] int NOT NULL  default '0',
   [minorversion] int NOT NULL  default '0',
   [externalid] varchar(200) NOT NULL  default '',
@@ -1126,8 +1126,8 @@ CREATE  INDEX [obpu_publplchist] ON [smart_publishedplcmtshist]([objectid], [pub
 CREATE  INDEX [puob_publplchist] ON [smart_publishedplcmtshist]([publishid], [objectid]) ;
 
 CREATE TABLE [smart_targeteditions] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [targetid] int NOT NULL  default '0',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [targetid] bigint NOT NULL  default '0',
   [editionid] int NOT NULL  default '0',
   PRIMARY KEY ([id])
 );
@@ -1155,7 +1155,7 @@ CREATE UNIQUE INDEX [hopo_indesignservers] ON [smart_indesignservers]([hostname]
 CREATE TABLE [smart_indesignserverjobs] (
   [jobid] varchar(40) NOT NULL  default '',
   [foreground] char(2) NOT NULL  default '',
-  [objid] int NOT NULL  default 0,
+  [objid] bigint NOT NULL  default 0,
   [objectmajorversion] int NOT NULL  default '0',
   [objectminorversion] int NOT NULL  default '0',
   [jobtype] varchar(32) NOT NULL ,
@@ -1312,7 +1312,7 @@ INSERT INTO [smart_serverconnectors] ([id], [pluginid], [classname], [interface]
 SET IDENTITY_INSERT [smart_serverconnectors] OFF
 
 CREATE TABLE [smart_semaphores] (
-  [id] int NOT NULL  IDENTITY(1,1),
+  [id] bigint NOT NULL  IDENTITY(1,1),
   [entityid] varchar(40) NOT NULL  default '0',
   [lastupdate] int NOT NULL  default '0',
   [lifetime] int NOT NULL  default '0',
@@ -1347,8 +1347,8 @@ INSERT INTO [smart_outputdevices] ([id], [name], [code], [description], [landsca
 SET IDENTITY_INSERT [smart_outputdevices] OFF
 
 CREATE TABLE [smart_placementtiles] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [placementid] int NOT NULL  default '0',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [placementid] bigint NOT NULL  default '0',
   [pagesequence] int NOT NULL  default '0',
   [left] real NOT NULL  default '0',
   [top] real NOT NULL  default '0',
@@ -1359,16 +1359,16 @@ CREATE TABLE [smart_placementtiles] (
 CREATE  INDEX [pi_placementtiles] ON [smart_placementtiles]([placementid]) ;
 
 CREATE TABLE [smart_objectlabels] (
-  [id] int NOT NULL  IDENTITY(1,1),
-  [objid] int NOT NULL  default '0',
+  [id] bigint NOT NULL  IDENTITY(1,1),
+  [objid] bigint NOT NULL  default '0',
   [name] varchar(250) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
 CREATE  INDEX [objlabels_objid] ON [smart_objectlabels]([objid]) ;
 
 CREATE TABLE [smart_objectrelationlabels] (
-  [labelid] int NOT NULL  default '0',
-  [childobjid] int NOT NULL  default '0',
+  [labelid] bigint NOT NULL  default '0',
+  [childobjid] bigint NOT NULL  default '0',
   PRIMARY KEY ([labelid], [childobjid])
 );
 CREATE  INDEX [objrellabels_childobjid] ON [smart_objectrelationlabels]([childobjid]) ;

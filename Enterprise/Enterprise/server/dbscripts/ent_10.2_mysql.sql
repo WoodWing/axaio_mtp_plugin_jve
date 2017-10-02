@@ -1,6 +1,6 @@
 
 CREATE TABLE `smart_actionproperties` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `publication` int(11) NOT NULL  default '0',
   `orderid` int(11) NOT NULL  default '0',
   `property` varchar(200) NOT NULL  default '',
@@ -19,7 +19,7 @@ CREATE TABLE `smart_actionproperties` (
 CREATE  INDEX `pbac_actionproperties` ON `smart_actionproperties`(`publication`, `action`) ;
 
 CREATE TABLE `smart_authorizations` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `grpid` int(11) NOT NULL  default '0',
   `publication` int(11) NOT NULL  default '0',
   `section` int(11) NOT NULL  default '0',
@@ -35,7 +35,7 @@ CREATE  INDEX `gipr_authorizations` ON `smart_authorizations`(`grpid`, `profile`
 INSERT INTO `smart_authorizations` (`id`, `grpid`, `publication`, `section`, `state`, `rights`, `issue`, `profile`, `bundle`) VALUES (1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1, 0);
 
 CREATE TABLE `smart_config` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `name` varchar(200) NOT NULL  default '',
   `value` blob NOT NULL ,
   PRIMARY KEY (`id`)
@@ -43,7 +43,7 @@ CREATE TABLE `smart_config` (
 INSERT INTO `smart_config` (`id`, `name`, `value`) VALUES (1, 'version', '00');
 
 CREATE TABLE `smart_deletedobjects` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `documentid` varchar(512) NOT NULL  default '',
   `type` varchar(20) NOT NULL  default '',
   `name` varchar(255) NOT NULL  default '',
@@ -122,17 +122,17 @@ CREATE  INDEX `na_groups` ON `smart_groups`(`name`) ;
 INSERT INTO `smart_groups` (`id`, `name`, `descr`, `admin`, `routing`, `externalid`) VALUES (2, 'admin', 'System Admins', 'on', '', '');
 
 CREATE TABLE `smart_log` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `user` varchar(50) NOT NULL  default '',
   `service` varchar(50) NOT NULL  default '',
   `ip` varchar(30) NOT NULL  default '',
   `date` varchar(30) NOT NULL  default '',
-  `objectid` int(11) NOT NULL  default '0',
+  `objectid` bigint(11) NOT NULL  default '0',
   `publication` int(11) NOT NULL  default '0',
   `issue` int(11) NOT NULL  default '0',
   `section` int(11) NOT NULL  default '0',
   `state` int(11) NOT NULL  default '0',
-  `parent` int(11) NOT NULL  default '0',
+  `parent` bigint(11) NOT NULL  default '0',
   `lock` varchar(1) NOT NULL  default '',
   `rendition` varchar(10) NOT NULL  default '',
   `type` varchar(20) NOT NULL  default '',
@@ -158,8 +158,8 @@ INSERT INTO `smart_namedqueries` (`id`, `query`, `interface`, `sql`, `comment`, 
 INSERT INTO `smart_namedqueries` (`id`, `query`, `interface`, `sql`, `comment`, `checkaccess`) VALUES (5, 'Libraries', '', 0x2f2a53454c4543542a2f0d0a73656c656374206f2e6069646020617320604944602c206f2e607479706560206173206054797065602c206f2e606e616d656020617320604e616d65602c2073742e6073746174656020617320605374617465602c20756c2e6066756c6c6e616d656020617320604c6f636b65644279602c20702e607075626c69636174696f6e6020617320605075626c69636174696f6e602c20732e6073656374696f6e60206173206053656374696f6e602c206f2e60636f6d6d656e74602061732060436f6d6d656e74602c206f2e60726f757465746f602061732060526f757465546f602c20756e2e6066756c6c6e616d6560206173206043726561746f72602c206f2e60666f726d6174602061732060466f726d6174602c20756d2e6066756c6c6e616d656020617320604d6f646966696572602c20702e6069646020617320605075626c69636174696f6e4964602c20732e60696460206173206053656374696f6e4964602c2073742e60696460206173206053746174654964602c2073742e60636f6c6f726020617320605374617465436f6c6f72602c206c2e606c6f636b6f66666c696e656020617320604c6f636b466f724f66666c696e65600d0a2f2a46524f4d2a2f0d0a66726f6d2060736d6172745f6f626a6563747360206f0d0a2f2a4a4f494e532a2f0d0a6c656674206a6f696e2060736d6172745f7075626c69636174696f6e73602070206f6e20286f2e607075626c69636174696f6e60203d20702e60696460290d0a6c656674206a6f696e2060736d6172745f7075626c73656374696f6e73602073206f6e20286f2e6073656374696f6e60203d20732e60696460290d0a6c656674206a6f696e2060736d6172745f73746174657360207374206f6e20286f2e60737461746560203d2073742e60696460290d0a6c656674206a6f696e2060736d6172745f6f626a6563746c6f636b7360206c206f6e20286f2e60696460203d206c2e606f626a65637460290d0a6c656674206a6f696e2060736d6172745f75736572736020756c206f6e20286c2e6075737260203d20756c2e607573657260290d0a6c656674206a6f696e2060736d6172745f75736572736020756d206f6e20286f2e606d6f64696669657260203d20756d2e607573657260290d0a6c656674206a6f696e2060736d6172745f75736572736020756e206f6e20286f2e6063726561746f7260203d20756e2e607573657260290d0a2f2a57484552452a2f0d0a776865726520286f2e607479706560203d20274c6962726172792729, 0x53686f777320616c6c206c69627261726965732e, 'on');
 
 CREATE TABLE `smart_objectlocks` (
-  `id` int(11) NOT NULL  auto_increment,
-  `object` int(11) NOT NULL  default '0',
+  `id` bigint(11) NOT NULL  auto_increment,
+  `object` bigint(11) NOT NULL  default '0',
   `usr` varchar(40) NOT NULL  default '',
   `timestamp` timestamp NOT NULL ,
   `ip` varchar(30) NOT NULL  default '',
@@ -170,9 +170,9 @@ CREATE UNIQUE INDEX `ob_objectlocks` ON `smart_objectlocks`(`object`) ;
 CREATE  INDEX `obusr_objectlocks` ON `smart_objectlocks`(`object`, `usr`) ;
 
 CREATE TABLE `smart_objectrelations` (
-  `id` int(11) NOT NULL  auto_increment,
-  `parent` int(11) NOT NULL  default '0',
-  `child` int(11) NOT NULL  default '0',
+  `id` bigint(11) NOT NULL  auto_increment,
+  `parent` bigint(11) NOT NULL  default '0',
+  `child` bigint(11) NOT NULL  default '0',
   `type` varchar(40) NOT NULL  default '',
   `subid` varchar(20) NOT NULL  default '',
   `pagerange` varchar(50) NOT NULL  default '',
@@ -185,7 +185,7 @@ CREATE  INDEX `pachty_objectrelations` ON `smart_objectrelations`(`parent`, `chi
 CREATE  INDEX `child_type_id` ON `smart_objectrelations`(`child`, `type`, `id`) ;
 
 CREATE TABLE `smart_objects` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `documentid` varchar(512) NOT NULL  default '',
   `type` varchar(20) NOT NULL  default '',
   `name` varchar(255) NOT NULL  default '',
@@ -257,8 +257,8 @@ CREATE  INDEX `roid_objects` ON `smart_objects`(`routeto`, `id`, `closed`) ;
 CREATE  INDEX `codo_objects` ON `smart_objects`(`contentsource`, `documentid`) ;
 
 CREATE TABLE `smart_objectversions` (
-  `id` int(11) NOT NULL  auto_increment,
-  `objid` int(11) NOT NULL  default '0',
+  `id` bigint(11) NOT NULL  auto_increment,
+  `objid` bigint(11) NOT NULL  default '0',
   `minorversion` mediumint(9) NOT NULL  default '0',
   `modifier` varchar(40) NOT NULL  default '',
   `comment` varchar(255) NOT NULL  default '',
@@ -288,8 +288,8 @@ CREATE TABLE `smart_objectversions` (
 CREATE  INDEX `oive_objectversions` ON `smart_objectversions`(`objid`, `majorversion`, `minorversion`) ;
 
 CREATE TABLE `smart_objectrenditions` (
-  `id` int(11) NOT NULL  auto_increment,
-  `objid` int(11) NOT NULL  default '0',
+  `id` bigint(11) NOT NULL  auto_increment,
+  `objid` bigint(11) NOT NULL  default '0',
   `editionid` int(11) NOT NULL  default '0',
   `rendition` varchar(10) NOT NULL  default '',
   `format` varchar(128) NOT NULL  default '',
@@ -300,8 +300,8 @@ CREATE TABLE `smart_objectrenditions` (
 CREATE  INDEX `obed_objectrenditions` ON `smart_objectrenditions`(`objid`, `editionid`, `rendition`) ;
 
 CREATE TABLE `smart_pages` (
-  `id` int(11) NOT NULL  auto_increment,
-  `objid` int(11) NOT NULL  default '0',
+  `id` bigint(11) NOT NULL  auto_increment,
+  `objid` bigint(11) NOT NULL  default '0',
   `width` double NOT NULL  default '0',
   `height` double NOT NULL  default '0',
   `pagenumber` varchar(20) NOT NULL  default '',
@@ -318,9 +318,9 @@ CREATE TABLE `smart_pages` (
 CREATE  INDEX `obpaed_pages` ON `smart_pages`(`objid`, `pageorder`, `edition`) ;
 
 CREATE TABLE `smart_placements` (
-  `id` int(11) NOT NULL  auto_increment,
-  `parent` int(11) NOT NULL  default '0',
-  `child` int(11) NOT NULL  default '0',
+  `id` bigint(11) NOT NULL  auto_increment,
+  `parent` bigint(11) NOT NULL  default '0',
+  `child` bigint(11) NOT NULL  default '0',
   `page` mediumint(9) NOT NULL  default '0',
   `element` varchar(200) NOT NULL  default '',
   `elementid` varchar(200) NOT NULL  default '',
@@ -353,10 +353,10 @@ CREATE  INDEX `ei_placements` ON `smart_placements`(`elementid`) ;
 CREATE  INDEX `chty_placements` ON `smart_placements`(`child`, `type`) ;
 
 CREATE TABLE `smart_elements` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `guid` varchar(200) NOT NULL  default '',
   `name` varchar(200) NOT NULL  default '',
-  `objid` int(11) NOT NULL  default 0,
+  `objid` bigint(11) NOT NULL  default 0,
   `lengthwords` int(11) NOT NULL  default '0',
   `lengthchars` int(11) NOT NULL  default '0',
   `lengthparas` int(11) NOT NULL  default '0',
@@ -368,7 +368,7 @@ CREATE TABLE `smart_elements` (
 CREATE  INDEX `oigu_elements` ON `smart_elements`(`objid`, `guid`) ;
 
 CREATE TABLE `smart_indesignarticles` (
-  `objid` int(11) NOT NULL  default 0,
+  `objid` bigint(11) NOT NULL  default 0,
   `artuid` varchar(40) NOT NULL  default '',
   `name` varchar(200) NOT NULL  default '',
   `code` int(11) NOT NULL  default '0',
@@ -376,15 +376,15 @@ CREATE TABLE `smart_indesignarticles` (
 ) DEFAULT CHARSET=utf8;
 
 CREATE TABLE `smart_idarticlesplacements` (
-  `objid` int(11) NOT NULL  default 0,
+  `objid` bigint(11) NOT NULL  default 0,
   `artuid` varchar(40) NOT NULL  default '',
-  `plcid` int(11) NOT NULL  default 0,
+  `plcid` bigint(11) NOT NULL  default 0,
   PRIMARY KEY (`objid`, `artuid`, `plcid`)
 ) DEFAULT CHARSET=utf8;
 
 CREATE TABLE `smart_objectoperations` (
-  `id` int(11) NOT NULL  auto_increment,
-  `objid` int(11) NOT NULL  default 0,
+  `id` bigint(11) NOT NULL  auto_increment,
+  `objid` bigint(11) NOT NULL  default 0,
   `guid` varchar(40) NOT NULL  default '',
   `type` varchar(200) NOT NULL  default '',
   `name` varchar(200) NOT NULL  default '',
@@ -467,14 +467,14 @@ CREATE TABLE `smart_publobjects` (
   `id` int(11) NOT NULL  auto_increment,
   `publicationid` int(11) NOT NULL  default '0',
   `issueid` int(11) NOT NULL  default '0',
-  `objectid` int(11) NOT NULL  default '0',
+  `objectid` bigint(11) NOT NULL  default '0',
   `grpid` int(11) NOT NULL  default '0',
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8;
 CREATE UNIQUE INDEX `puisobgr_publobjects` ON `smart_publobjects`(`publicationid`, `issueid`, `objectid`, `grpid`) ;
 
 CREATE TABLE `smart_issueeditions` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `issue` int(11) NOT NULL  default '0',
   `edition` int(11) NOT NULL  default '0',
   `deadline` varchar(30) NOT NULL  default '',
@@ -496,7 +496,7 @@ CREATE  INDEX `pbisse_routing` ON `smart_routing`(`publication`, `issue`, `secti
 CREATE  INDEX `st_routing` ON `smart_routing`(`state`) ;
 
 CREATE TABLE `smart_settings` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `user` varchar(200) NOT NULL  default '',
   `setting` varchar(200) NOT NULL  default '',
   `value` mediumblob NOT NULL ,
@@ -557,7 +557,7 @@ INSERT INTO `smart_states` (`id`, `publication`, `type`, `state`, `produce`, `co
 INSERT INTO `smart_states` (`id`, `publication`, `type`, `state`, `produce`, `color`, `nextstate`, `code`, `issue`, `section`, `deadlinestate`, `deadlinerelative`, `createpermanentversion`, `removeintermediateversions`, `readyforpublishing`, `automaticallysendtonext`, `phase`, `skipidsa`) VALUES (25, 1, 'PublishFormTemplate', 'Publish Form Templates', '', '#AAAAAA', 0, 0, 0, 0, 0, 0, 0, '', '', '', 'Production', '');
 
 CREATE TABLE `smart_tickets` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `ticketid` varchar(40) NOT NULL  default '',
   `usr` varchar(40) NOT NULL  default '',
   `db` varchar(255) NOT NULL  default '',
@@ -577,7 +577,7 @@ CREATE  INDEX `us_tickets` ON `smart_tickets`(`usr`) ;
 CREATE  INDEX `mtid_tickets` ON `smart_tickets`(`masterticketid`) ;
 
 CREATE TABLE `smart_termentities` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `name` varchar(255) NOT NULL  default '',
   `provider` varchar(40) NOT NULL  default '',
   `publishsystemid` varchar(40) NOT NULL  default '',
@@ -588,7 +588,7 @@ CREATE  INDEX `te_provider` ON `smart_termentities`(`provider`) ;
 CREATE  INDEX `te_termentity` ON `smart_termentities`(`name`, `provider`) ;
 
 CREATE TABLE `smart_terms` (
-  `entityid` int(11) NOT NULL  default '0',
+  `entityid` bigint(11) NOT NULL  default '0',
   `displayname` varchar(255) NOT NULL  default '',
   `normalizedname` varchar(255) NOT NULL  default '',
   `ligatures` varchar(255) NOT NULL  default '',
@@ -649,7 +649,7 @@ CREATE TABLE `smart_mtp` (
 CREATE  INDEX `ii_mtp` ON `smart_mtp`(`issueid`) ;
 
 CREATE TABLE `smart_mtpsentobjects` (
-  `objid` int(11) NOT NULL  default '0',
+  `objid` bigint(11) NOT NULL  default '0',
   `publid` int(11) NOT NULL ,
   `issueid` int(11) NOT NULL  default '0',
   `laytriggerstate` int(11) NOT NULL ,
@@ -661,7 +661,7 @@ CREATE  INDEX `ls_mtpsentobjects` ON `smart_mtpsentobjects`(`laytriggerstate`) ;
 
 CREATE TABLE `smart_messagelog` (
   `id` bigint(20) NOT NULL  auto_increment,
-  `objid` int(11) NOT NULL  default 0,
+  `objid` bigint(11) NOT NULL  default 0,
   `userid` int(11) NOT NULL  default 0,
   `messagetype` varchar(255) NOT NULL ,
   `messagetypedetail` varchar(255) NOT NULL ,
@@ -695,7 +695,7 @@ CREATE  INDEX `mi_messagelog` ON `smart_messagelog`(`msgid`) ;
 CREATE  INDEX `uid_messagelog` ON `smart_messagelog`(`userid`) ;
 
 CREATE TABLE `smart_objectflags` (
-  `objid` int(11) NOT NULL ,
+  `objid` bigint(11) NOT NULL ,
   `flagorigin` varchar(255) NOT NULL ,
   `flag` mediumint(9) NOT NULL ,
   `severity` mediumint(9) NOT NULL ,
@@ -744,7 +744,7 @@ CREATE  INDEX `pr_profiles` ON `smart_profiles`(`profile`) ;
 INSERT INTO `smart_profiles` (`id`, `profile`, `code`, `description`) VALUES (1, 'Full Control', 0, 'All features enabled');
 
 CREATE TABLE `smart_profilefeatures` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `profile` int(11) NOT NULL  default '0',
   `feature` mediumint(9) NOT NULL  default '0',
   `value` varchar(20) NOT NULL  default '',
@@ -831,20 +831,20 @@ CREATE UNIQUE INDEX `faid_profiles` ON `smart_featureaccess`(`featureid`) ;
 CREATE UNIQUE INDEX `faaf_profiles` ON `smart_featureaccess`(`accessflag`) ;
 
 CREATE TABLE `smart_appsessions` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `sessionid` varchar(40) NOT NULL  default '',
   `userid` varchar(40) NOT NULL  default '',
   `appname` varchar(40) NOT NULL  default '',
   `lastsaved` varchar(20) NOT NULL  default '',
   `readonly` char(2) NOT NULL  default '',
-  `articleid` int(11) NOT NULL  default 0,
+  `articleid` bigint(11) NOT NULL  default 0,
   `articlename` varchar(255) NOT NULL  default '',
   `articleformat` varchar(128) NOT NULL  default '',
   `articleminorversion` mediumint(9) NOT NULL  default 0,
   `templateid` int(11) NOT NULL  default 0,
   `templatename` varchar(255) NOT NULL  default '',
   `templateformat` varchar(128) NOT NULL  default '',
-  `layoutid` int(11) NOT NULL  default 0,
+  `layoutid` bigint(11) NOT NULL  default 0,
   `layoutminorversion` mediumint(9) NOT NULL  default 0,
   `articlemajorversion` mediumint(9) NOT NULL  default 0,
   `layoutmajorversion` mediumint(9) NOT NULL  default 0,
@@ -905,7 +905,7 @@ CREATE  INDEX `dsid_dssettings` ON `smart_dssettings`(`datasourceid`) ;
 
 CREATE TABLE `smart_dsqueryplacements` (
   `id` int(11) NOT NULL  auto_increment,
-  `objectid` int(11) NOT NULL  default '0',
+  `objectid` bigint(11) NOT NULL  default '0',
   `datasourceid` int(11) NOT NULL  default '0',
   `dirty` char(2) NOT NULL  default '0',
   PRIMARY KEY (`id`)
@@ -931,7 +931,7 @@ CREATE TABLE `smart_dsupdates` (
 CREATE TABLE `smart_dsobjupdates` (
   `id` int(11) NOT NULL  auto_increment,
   `updateid` int(11) NOT NULL  default '0',
-  `objectid` int(11) NOT NULL  default '0',
+  `objectid` bigint(11) NOT NULL  default '0',
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8;
 
@@ -988,12 +988,12 @@ INSERT INTO `smart_issues` (`id`, `name`, `channelid`, `overrulepub`, `code`, `p
 INSERT INTO `smart_issues` (`id`, `name`, `channelid`, `overrulepub`, `code`, `publdate`, `deadline`, `pages`, `subject`, `description`, `active`, `readingorderrev`, `calculatedeadlines`) VALUES (3, 'webissue', 2, '', '10', '', '', 16, '', '', 'on', 'on', '' );
 
 CREATE TABLE `smart_targets` (
-  `id` int(11) NOT NULL  auto_increment,
-  `objectid` int(11) NOT NULL  default '0',
+  `id` bigint(11) NOT NULL  auto_increment,
+  `objectid` bigint(11) NOT NULL  default '0',
   `channelid` int(11) NOT NULL  default '0',
   `issueid` int(11) NOT NULL  default '0',
   `externalid` varchar(200) NOT NULL  default '',
-  `objectrelationid` int(11) NOT NULL  default '0',
+  `objectrelationid` bigint(11) NOT NULL  default '0',
   `publisheddate` varchar(30) NOT NULL  default '',
   `publishedmajorversion` mediumint(9) NOT NULL  default '0',
   `publishedminorversion` mediumint(9) NOT NULL  default '0',
@@ -1004,9 +1004,9 @@ CREATE UNIQUE INDEX `obrobid_targets` ON `smart_targets`(`objectrelationid`, `ob
 CREATE  INDEX `issueid_targets` ON `smart_targets`(`issueid`) ;
 
 CREATE TABLE `smart_publishhistory` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `externalid` varchar(200) NOT NULL  default '',
-  `objectid` int(11) NOT NULL  default '0',
+  `objectid` bigint(11) NOT NULL  default '0',
   `channelid` int(11) NOT NULL  default '0',
   `issueid` int(11) NOT NULL  default '0',
   `editionid` int(11) NOT NULL  default '0',
@@ -1023,7 +1023,7 @@ CREATE  INDEX `obchis_publhist` ON `smart_publishhistory`(`objectid`, `channelid
 CREATE  INDEX `chis_publhist` ON `smart_publishhistory`(`channelid`, `issueid`) ;
 
 CREATE TABLE `smart_pubpublishedissues` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `externalid` varchar(200) NOT NULL  default '',
   `channelid` int(11) NOT NULL  default '0',
   `issueid` int(11) NOT NULL  default '0',
@@ -1044,9 +1044,9 @@ CREATE TABLE `smart_pubpublishedissues` (
 CREATE  INDEX `chised_publhist` ON `smart_pubpublishedissues`(`channelid`, `issueid`, `editionid`) ;
 
 CREATE TABLE `smart_publishedobjectshist` (
-  `id` int(11) NOT NULL  auto_increment,
-  `objectid` int(11) NOT NULL  default '0',
-  `publishid` int(11) NOT NULL  default '0',
+  `id` bigint(11) NOT NULL  auto_increment,
+  `objectid` bigint(11) NOT NULL  default '0',
+  `publishid` bigint(11) NOT NULL  default '0',
   `majorversion` mediumint(9) NOT NULL  default '0',
   `minorversion` mediumint(9) NOT NULL  default '0',
   `externalid` varchar(200) NOT NULL  default '',
@@ -1059,9 +1059,9 @@ CREATE  INDEX `obpu_publobjhist` ON `smart_publishedobjectshist`(`objectid`, `pu
 CREATE  INDEX `puob_publobjhist` ON `smart_publishedobjectshist`(`publishid`, `objectid`) ;
 
 CREATE TABLE `smart_publishedplcmtshist` (
-  `id` int(11) NOT NULL  auto_increment,
-  `objectid` int(11) NOT NULL  default '0',
-  `publishid` int(11) NOT NULL  default '0',
+  `id` bigint(11) NOT NULL  auto_increment,
+  `objectid` bigint(11) NOT NULL  default '0',
+  `publishid` bigint(11) NOT NULL  default '0',
   `majorversion` mediumint(9) NOT NULL  default '0',
   `minorversion` mediumint(9) NOT NULL  default '0',
   `externalid` varchar(200) NOT NULL  default '',
@@ -1072,8 +1072,8 @@ CREATE  INDEX `obpu_publplchist` ON `smart_publishedplcmtshist`(`objectid`, `pub
 CREATE  INDEX `puob_publplchist` ON `smart_publishedplcmtshist`(`publishid`, `objectid`) ;
 
 CREATE TABLE `smart_targeteditions` (
-  `id` int(11) NOT NULL  auto_increment,
-  `targetid` int(11) NOT NULL  default '0',
+  `id` bigint(11) NOT NULL  auto_increment,
+  `targetid` bigint(11) NOT NULL  default '0',
   `editionid` int(11) NOT NULL  default '0',
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8;
@@ -1101,7 +1101,7 @@ CREATE UNIQUE INDEX `hopo_indesignservers` ON `smart_indesignservers`(`hostname`
 CREATE TABLE `smart_indesignserverjobs` (
   `jobid` varchar(40) NOT NULL  default '',
   `foreground` char(2) NOT NULL  default '',
-  `objid` int(11) NOT NULL  default 0,
+  `objid` bigint(11) NOT NULL  default 0,
   `objectmajorversion` mediumint(9) NOT NULL  default '0',
   `objectminorversion` mediumint(9) NOT NULL  default '0',
   `jobtype` varchar(32) NOT NULL ,
@@ -1254,7 +1254,7 @@ INSERT INTO `smart_serverconnectors` (`id`, `pluginid`, `classname`, `interface`
 INSERT INTO `smart_serverconnectors` (`id`, `pluginid`, `classname`, `interface`, `type`, `prio`, `runmode`, `classfile`, `modified`) VALUES (3, 3, 'InCopyHTMLConversion_WflGetObjects', 'WflGetObjects', 'WorkflowService', 500, 'After', '/server/plugins/InCopyHTMLConversion/InCopyHTMLConversion_WflGetObjects.class.php', '2008-11-30T09:00:00');
 
 CREATE TABLE `smart_semaphores` (
-  `id` int(11) NOT NULL  auto_increment,
+  `id` bigint(11) NOT NULL  auto_increment,
   `entityid` varchar(40) NOT NULL  default '0',
   `lastupdate` int(11) NOT NULL  default '0',
   `lifetime` int(11) NOT NULL  default '0',
@@ -1287,8 +1287,8 @@ INSERT INTO `smart_outputdevices` (`id`, `name`, `code`, `description`, `landsca
 INSERT INTO `smart_outputdevices` (`id`, `name`, `code`, `description`, `landscapewidth`, `landscapeheight`, `portraitwidth`, `portraitheight`, `previewquality`, `landscapelayoutwidth`, `pixeldensity`, `pngcompression`, `textviewpadding`) VALUES (4, 'Xoom', 30, '', 1280, 800, 800, 1280, 4, 1280, 160, 9, '');
 
 CREATE TABLE `smart_placementtiles` (
-  `id` int(11) NOT NULL  auto_increment,
-  `placementid` int(11) NOT NULL  default '0',
+  `id` bigint(11) NOT NULL  auto_increment,
+  `placementid` bigint(11) NOT NULL  default '0',
   `pagesequence` mediumint(9) NOT NULL  default '0',
   `left` double NOT NULL  default '0',
   `top` double NOT NULL  default '0',
@@ -1299,16 +1299,16 @@ CREATE TABLE `smart_placementtiles` (
 CREATE  INDEX `pi_placementtiles` ON `smart_placementtiles`(`placementid`) ;
 
 CREATE TABLE `smart_objectlabels` (
-  `id` int(11) NOT NULL  auto_increment,
-  `objid` int(11) NOT NULL  default '0',
+  `id` bigint(11) NOT NULL  auto_increment,
+  `objid` bigint(11) NOT NULL  default '0',
   `name` varchar(250) NOT NULL  default '',
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8;
 CREATE  INDEX `objlabels_objid` ON `smart_objectlabels`(`objid`) ;
 
 CREATE TABLE `smart_objectrelationlabels` (
-  `labelid` int(11) NOT NULL  default '0',
-  `childobjid` int(11) NOT NULL  default '0',
+  `labelid` bigint(11) NOT NULL  default '0',
+  `childobjid` bigint(11) NOT NULL  default '0',
   PRIMARY KEY (`labelid`, `childobjid`)
 ) DEFAULT CHARSET=utf8;
 CREATE  INDEX `objrellabels_childobjid` ON `smart_objectrelationlabels`(`childobjid`) ;
