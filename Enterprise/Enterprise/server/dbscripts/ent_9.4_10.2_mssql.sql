@@ -190,6 +190,7 @@ CREATE TABLE [smart_idarticlesplacements] (
   [plcid] bigint NOT NULL  default 0,
   PRIMARY KEY ([objid], [artuid], [plcid])
 );
+CREATE  INDEX [plcid_idarticlesplacements] ON [smart_idarticlesplacements]([plcid]) ;
 
 CREATE TABLE [smart_objectoperations] (
   [id] bigint NOT NULL  IDENTITY(1,1),
@@ -219,6 +220,7 @@ EXEC (@sql);
 ALTER TABLE smart_settings ALTER COLUMN   [id] bigint NOT NULL ;
 ALTER TABLE [smart_states] ADD 
   [skipidsa] char(2) NOT NULL  default '';
+CREATE  INDEX [cost_states] ON [smart_states]([code], [state]) ;
 ALTER TABLE [smart_tickets] ADD 
   [masterticketid] varchar(40) NOT NULL  default '';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)

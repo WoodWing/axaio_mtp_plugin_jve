@@ -184,6 +184,7 @@ SET @sql = 'ALTER TABLE smart_idarticlesplacements DROP CONSTRAINT ' + @constrai
 EXEC (@sql);
 ALTER TABLE smart_idarticlesplacements ALTER COLUMN   [plcid] bigint NOT NULL ;
 ALTER TABLE [smart_idarticlesplacements] ADD DEFAULT (0) FOR [plcid];
+CREATE  INDEX [plcid_idarticlesplacements] ON [smart_idarticlesplacements]([plcid]) ;
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_objectoperations', @columnName = 'id', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_objectoperations DROP CONSTRAINT ' + @constraintName
@@ -211,6 +212,7 @@ EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_settings'
 SET @sql = 'ALTER TABLE smart_settings DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
 ALTER TABLE smart_settings ALTER COLUMN   [id] bigint NOT NULL ;
+CREATE  INDEX [cost_states] ON [smart_states]([code], [state]) ;
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_tickets', @columnName = 'id', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_tickets DROP CONSTRAINT ' + @constraintName

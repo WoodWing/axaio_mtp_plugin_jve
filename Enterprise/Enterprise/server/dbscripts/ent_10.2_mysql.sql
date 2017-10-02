@@ -381,6 +381,7 @@ CREATE TABLE `smart_idarticlesplacements` (
   `plcid` bigint(11) NOT NULL  default 0,
   PRIMARY KEY (`objid`, `artuid`, `plcid`)
 ) DEFAULT CHARSET=utf8;
+CREATE  INDEX `plcid_idarticlesplacements` ON `smart_idarticlesplacements`(`plcid`) ;
 
 CREATE TABLE `smart_objectoperations` (
   `id` bigint(11) NOT NULL  auto_increment,
@@ -530,6 +531,7 @@ CREATE TABLE `smart_states` (
 CREATE  INDEX `st_states` ON `smart_states`(`state`) ;
 CREATE  INDEX `pbistyse_states` ON `smart_states`(`publication`, `issue`, `type`, `section`) ;
 CREATE  INDEX `istyse_states` ON `smart_states`(`issue`, `type`, `section`) ;
+CREATE  INDEX `cost_states` ON `smart_states`(`code`, `state`) ;
 INSERT INTO `smart_states` (`id`, `publication`, `type`, `state`, `produce`, `color`, `nextstate`, `code`, `issue`, `section`, `deadlinestate`, `deadlinerelative`, `createpermanentversion`, `removeintermediateversions`, `readyforpublishing`, `automaticallysendtonext`, `phase`, `skipidsa`) VALUES (1, 1, 'Article', 'Draft text', '', '#FF0000', 2, 10, 0, 0,0,0, '', '', '', '', 'Production', '');
 INSERT INTO `smart_states` (`id`, `publication`, `type`, `state`, `produce`, `color`, `nextstate`, `code`, `issue`, `section`, `deadlinestate`, `deadlinerelative`, `createpermanentversion`, `removeintermediateversions`, `readyforpublishing`, `automaticallysendtonext`, `phase`, `skipidsa`) VALUES (2, 1, 'Article', 'Ready', '', '#00FF00', 0, 20, 0, 0,0,0, '', '', '', '', 'Production', '');
 INSERT INTO `smart_states` (`id`, `publication`, `type`, `state`, `produce`, `color`, `nextstate`, `code`, `issue`, `section`, `deadlinestate`, `deadlinerelative`, `createpermanentversion`, `removeintermediateversions`, `readyforpublishing`, `automaticallysendtonext`, `phase`, `skipidsa`) VALUES (3, 1, 'Layout', 'Layouts', '', '#0000FF', 0, 0, 0, 0,0,0, '', '', '', '', 'Production', '');

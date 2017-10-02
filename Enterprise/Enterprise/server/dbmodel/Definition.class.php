@@ -901,6 +901,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 					),
 					'indexes' => array(
 						array('v' => '9.7', 'name' => 'primary', 	'fields' => 'objid, artuid, plcid', 'primary' => true),
+						array('v' => '10.2', 'name' => 'plcid_idarticlesplacements', 	'fields' => 'plcid' ),
 					),
 					'inserts' => array(
 					),
@@ -1326,6 +1327,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 						array('v' => '4.2', 'name' => 'st_states', 	'fields' => 'state'),
 						array('v' => '4.2', 'name' => 'pbistyse_states', 	'fields' => 'publication, issue, type, section'),
 						array('v' => '4.2', 'name' => 'istyse_states', 	'fields' => 'issue, type, section'),
+						array('v' => '10.2', 'name' => 'cost_states', 	'fields' => 'code, state'),
 					),
 					'inserts' => array(
 						"1, 1, 'Article', 'Draft text', '', '#FF0000', 2, 10, 0, 0,0,0, '', '', '', '', 'Production', ''",

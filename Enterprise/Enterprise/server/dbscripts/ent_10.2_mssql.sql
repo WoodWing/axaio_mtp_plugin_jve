@@ -415,6 +415,7 @@ CREATE TABLE [smart_idarticlesplacements] (
   [plcid] bigint NOT NULL  default 0,
   PRIMARY KEY ([objid], [artuid], [plcid])
 );
+CREATE  INDEX [plcid_idarticlesplacements] ON [smart_idarticlesplacements]([plcid]) ;
 
 CREATE TABLE [smart_objectoperations] (
   [id] bigint NOT NULL  IDENTITY(1,1),
@@ -568,6 +569,7 @@ CREATE TABLE [smart_states] (
 CREATE  INDEX [st_states] ON [smart_states]([state]) ;
 CREATE  INDEX [pbistyse_states] ON [smart_states]([publication], [issue], [type], [section]) ;
 CREATE  INDEX [istyse_states] ON [smart_states]([issue], [type], [section]) ;
+CREATE  INDEX [cost_states] ON [smart_states]([code], [state]) ;
 SET IDENTITY_INSERT [smart_states] ON
 INSERT INTO [smart_states] ([id], [publication], [type], [state], [produce], [color], [nextstate], [code], [issue], [section], [deadlinestate], [deadlinerelative], [createpermanentversion], [removeintermediateversions], [readyforpublishing], [automaticallysendtonext], [phase], [skipidsa]) VALUES (1, 1, 'Article', 'Draft text', '', '#FF0000', 2, 10, 0, 0,0,0, '', '', '', '', 'Production', '');
 INSERT INTO [smart_states] ([id], [publication], [type], [state], [produce], [color], [nextstate], [code], [issue], [section], [deadlinestate], [deadlinerelative], [createpermanentversion], [removeintermediateversions], [readyforpublishing], [automaticallysendtonext], [phase], [skipidsa]) VALUES (2, 1, 'Article', 'Ready', '', '#00FF00', 0, 20, 0, 0,0,0, '', '', '', '', 'Production', '');

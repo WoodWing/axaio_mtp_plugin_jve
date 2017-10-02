@@ -55,6 +55,7 @@ CREATE TABLE `smart_idarticlesplacements` (
   `plcid` bigint(11) NOT NULL  default 0,
   PRIMARY KEY (`objid`, `artuid`, `plcid`)
 ) DEFAULT CHARSET=utf8;
+CREATE  INDEX `plcid_idarticlesplacements` ON `smart_idarticlesplacements`(`plcid`) ;
 
 CREATE TABLE `smart_objectoperations` (
   `id` bigint(11) NOT NULL  auto_increment,
@@ -75,6 +76,7 @@ ALTER TABLE `smart_settings` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increm
 ALTER TABLE `smart_states`
 ADD   `phase` varchar(40) NOT NULL  default 'Production',
 ADD   `skipidsa` char(2) NOT NULL  default '';
+CREATE  INDEX `cost_states` ON `smart_states`(`code`, `state`) ;
 ALTER TABLE `smart_tickets`
 ADD   `masterticketid` varchar(40) NOT NULL  default '';
 ALTER TABLE `smart_tickets` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;

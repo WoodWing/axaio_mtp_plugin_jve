@@ -37,11 +37,13 @@ ALTER TABLE `smart_elements` CHANGE `objid`   `objid` bigint(11) NOT NULL  defau
 ALTER TABLE `smart_indesignarticles` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_idarticlesplacements` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_idarticlesplacements` CHANGE `plcid`   `plcid` bigint(11) NOT NULL  default 0;
+CREATE  INDEX `plcid_idarticlesplacements` ON `smart_idarticlesplacements`(`plcid`) ;
 ALTER TABLE `smart_objectoperations` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectoperations` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_publobjects` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_issueeditions` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_settings` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
+CREATE  INDEX `cost_states` ON `smart_states`(`code`, `state`) ;
 ALTER TABLE `smart_tickets` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_termentities` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_terms` CHANGE `entityid`   `entityid` bigint(11) NOT NULL  default '0';
