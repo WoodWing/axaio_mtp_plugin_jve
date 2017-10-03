@@ -144,7 +144,7 @@ class DBAdmFeatureAccess extends DBBase
 			// By starting with 192, we use 2-byte characters for the flags stored by server plugins.
 			// ES 10.2 core server also has around 20 flags, which are all single byte. This may grow in time a little.
 			// So we can store 1024/2 = 512 flags for plugins, but we also need to reserve some space for the core.
-			// By taking a maximum flag of 600, have have used 600-192=408 chars/flags, which takes 2x408=816 bytes.
+			// By taking a maximum flag of 600, we have used 600-192=408 chars/flags, which takes 2x408=816 bytes.
 			// That reserves 1024-816=208 chars/flags for the core server, which is plenty.
 			$detail = "Maximum value ({$maxFlag}) for the 'accessflag' field reached in ".self::TABLENAME." table.";
 			throw new BizException('ERR_DATABASE', 'Server', $detail );
