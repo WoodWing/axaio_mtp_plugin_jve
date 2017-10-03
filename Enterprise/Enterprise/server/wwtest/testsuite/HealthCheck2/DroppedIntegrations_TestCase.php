@@ -106,8 +106,8 @@ class WW_TestSuite_HealthCheck2_DroppedIntegrations_TestCase extends TestCase
 
 		//TODO: Filter on non-completed jobs
 		if( !empty( $result ) ) {
-			$message = '';
-			$help = '';
+			$message = 'Server Jobs of the type \'AdobeDps\' were found.';
+			$help = 'Please remove those Server Jobs on the Server Jobs admin page.';
 			$this->setResult( 'ERROR', $message, $help );
 		}
 
@@ -115,7 +115,7 @@ class WW_TestSuite_HealthCheck2_DroppedIntegrations_TestCase extends TestCase
 		require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
 		$channelInfos = DBChannel::getChannelsByType( 'dps' );
 		if( $channelInfos ) {
-			$help = '';
+			$help = 'Publication Channels of the type \'dps\' were found. Please update or remove these channels.';
 			$this->setResult( 'ERROR', $message, $help );
 		}
 
