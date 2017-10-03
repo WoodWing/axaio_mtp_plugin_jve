@@ -180,35 +180,15 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmIssues_TestCase extends 
 			break;
 			case 'modify4':
 				foreach( $issue->ExtraMetaData as $modExtraMD ){
-					if( $modExtraMD->Property == 'C_DPS_PAGE_ORIENTATION' ){
-						$modExtraMD->Values = array( 'portrait' ); // change from the default 'always' to 'portrait'
+					if( $modExtraMD->Property == 'C_BUILDTEST_PROPERTY' ){
+						$modExtraMD->Values = array( '123' );
 						break;
 					}
 				}
-			break;
+
+				break;
 			case 'copy5':
 				$issue->Name = 'Issue_C_' . date('dmy_his');
-				foreach( $issue->ExtraMetaData as $modExtraMD ){
-					if( $modExtraMD->Property == 'C_DPS_IS_FREE' ){
-						// TODO
-						// In DB, 'C_DPS_IS_FREE is actually waiting for boolean,
-						// but the current Admin WSDL defined that it has to be array of strings.
-						// therefore here we have to send in '' or 0 instead of false(bool).
-						$modExtraMD->Values = array( '' ); // change from true to false.
-					}
-					if( $modExtraMD->Property == 'C_DPS_PUBLICATION_TITLE' ){
-						$modExtraMD->Values = array( 'just title' ); 
-
-					}
-					if( $modExtraMD->Property == 'C_DPS_PRODUCTID' ){
-						$modExtraMD->Values = array( uniqid() ); 
-
-					}
-					if( $modExtraMD->Property == 'C_DPS_VOLUMENUMBER' ){
-						$modExtraMD->Values = array( '100' ); 
-
-					}				
-				}			
 			break;
 		}
 		return $issue;
