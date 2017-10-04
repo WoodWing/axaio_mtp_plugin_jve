@@ -1,6 +1,6 @@
 
 CREATE TABLE [smart_actionproperties] (
-  [id] bigint NOT NULL  IDENTITY(1,1),
+  [id] int NOT NULL  IDENTITY(1,1),
   [publication] int NOT NULL  default '0',
   [orderid] int NOT NULL  default '0',
   [property] varchar(200) NOT NULL  default '',
@@ -19,7 +19,7 @@ CREATE TABLE [smart_actionproperties] (
 CREATE  INDEX [pbac_actionproperties] ON [smart_actionproperties]([publication], [action]) ;
 
 CREATE TABLE [smart_authorizations] (
-  [id] bigint NOT NULL  IDENTITY(1,1),
+  [id] int NOT NULL  IDENTITY(1,1),
   [grpid] int NOT NULL  default '0',
   [publication] int NOT NULL  default '0',
   [section] int NOT NULL  default '0',
@@ -37,7 +37,7 @@ INSERT INTO [smart_authorizations] ([id], [grpid], [publication], [section], [st
 SET IDENTITY_INSERT [smart_authorizations] OFF
 
 CREATE TABLE [smart_config] (
-  [id] bigint NOT NULL  IDENTITY(1,1),
+  [id] int NOT NULL  IDENTITY(1,1),
   [name] varchar(200) NOT NULL  default '',
   [value] text NOT NULL  default '',
   PRIMARY KEY ([id])
@@ -449,7 +449,7 @@ CREATE TABLE [smart_properties] (
   [minresolution] varchar(200) NOT NULL  default '',
   [maxresolution] varchar(200) NOT NULL  default '',
   [publishsystem] varchar(64) NOT NULL  default '',
-  [templateid] int NOT NULL  default 0,
+  [templateid] bigint NOT NULL  default 0,
   [termentityid] int NOT NULL  default '0',
   [suggestionentity] varchar(200) NOT NULL  default '',
   PRIMARY KEY ([id])
@@ -513,7 +513,7 @@ CREATE TABLE [smart_publobjects] (
 CREATE UNIQUE INDEX [puisobgr_publobjects] ON [smart_publobjects]([publicationid], [issueid], [objectid], [grpid]) ;
 
 CREATE TABLE [smart_issueeditions] (
-  [id] bigint NOT NULL  IDENTITY(1,1),
+  [id] int NOT NULL  IDENTITY(1,1),
   [issue] int NOT NULL  default '0',
   [edition] int NOT NULL  default '0',
   [deadline] varchar(30) NOT NULL  default '',
@@ -619,7 +619,7 @@ CREATE  INDEX [us_tickets] ON [smart_tickets]([usr]) ;
 CREATE  INDEX [mtid_tickets] ON [smart_tickets]([masterticketid]) ;
 
 CREATE TABLE [smart_termentities] (
-  [id] bigint NOT NULL  IDENTITY(1,1),
+  [id] int NOT NULL  IDENTITY(1,1),
   [name] varchar(255) NOT NULL  default '',
   [provider] varchar(40) NOT NULL  default '',
   [publishsystemid] varchar(40) NOT NULL  default '',
@@ -792,7 +792,7 @@ INSERT INTO [smart_profiles] ([id], [profile], [code], [description]) VALUES (1,
 SET IDENTITY_INSERT [smart_profiles] OFF
 
 CREATE TABLE [smart_profilefeatures] (
-  [id] bigint NOT NULL  IDENTITY(1,1),
+  [id] int NOT NULL  IDENTITY(1,1),
   [profile] int NOT NULL  default '0',
   [feature] int NOT NULL  default '0',
   [value] varchar(20) NOT NULL  default '',
@@ -891,7 +891,7 @@ CREATE TABLE [smart_appsessions] (
   [articlename] varchar(255) NOT NULL  default '',
   [articleformat] varchar(128) NOT NULL  default '',
   [articleminorversion] int NOT NULL  default 0,
-  [templateid] int NOT NULL  default 0,
+  [templateid] bigint NOT NULL  default 0,
   [templatename] varchar(255) NOT NULL  default '',
   [templateformat] varchar(128) NOT NULL  default '',
   [layoutid] bigint NOT NULL  default 0,

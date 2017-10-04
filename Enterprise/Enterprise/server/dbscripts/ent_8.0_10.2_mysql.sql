@@ -3,13 +3,10 @@ ADD   `parentfieldid` int(11) NOT NULL  default '0',
 ADD   `documentid` varchar(512) NOT NULL  default '',
 ADD   `initialheight` int(4) NOT NULL  default '0',
 ADD   `multipleobjects` char(2) NOT NULL  default '';
-ALTER TABLE `smart_actionproperties` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_actionproperties` CHANGE `orderid`   `orderid` int(11) NOT NULL  default '0';
 ALTER TABLE `smart_authorizations`
 ADD   `bundle` int(11) NOT NULL  default '0';
-ALTER TABLE `smart_authorizations` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_authorizations` CHANGE `rights`   `rights` varchar(1024) NOT NULL  default '';
-ALTER TABLE `smart_config` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_deletedobjects`
 ADD   `orientation` tinyint(4) NOT NULL  default '0';
 ALTER TABLE `smart_deletedobjects` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
@@ -79,14 +76,13 @@ ADD   `propertyvalues` blob NOT NULL ,
 ADD   `minresolution` varchar(200) NOT NULL  default '',
 ADD   `maxresolution` varchar(200) NOT NULL  default '',
 ADD   `publishsystem` varchar(64) NOT NULL  default '',
-ADD   `templateid` int(11) NOT NULL  default 0,
+ADD   `templateid` bigint(11) NOT NULL  default 0,
 ADD   `termentityid` int(11) NOT NULL  default '0',
 ADD   `suggestionentity` varchar(200) NOT NULL  default '';
 ALTER TABLE `smart_properties` CHANGE `maxlen`   `maxlen` bigint(8) NOT NULL  default '0';
 ALTER TABLE `smart_publications`
 ADD   `calculatedeadlines` char(2) NOT NULL  default '';
 ALTER TABLE `smart_publobjects` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
-ALTER TABLE `smart_issueeditions` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_routing` CHANGE `routeto`   `routeto` varchar(255) NOT NULL  default '';
 ALTER TABLE `smart_settings` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_states`
@@ -100,7 +96,7 @@ ALTER TABLE `smart_tickets` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increme
 CREATE  INDEX `mtid_tickets` ON `smart_tickets`(`masterticketid`) ;
 
 CREATE TABLE `smart_termentities` (
-  `id` bigint(11) NOT NULL  auto_increment,
+  `id` int(11) NOT NULL  auto_increment,
   `name` varchar(255) NOT NULL  default '',
   `provider` varchar(40) NOT NULL  default '',
   `publishsystemid` varchar(40) NOT NULL  default '',
@@ -125,7 +121,6 @@ ALTER TABLE `smart_users` CHANGE `pass`   `pass` varchar(128) NOT NULL  default 
 ALTER TABLE `smart_mtpsentobjects` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_messagelog` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_objectflags` CHANGE `objid`   `objid` bigint(11) NOT NULL ;
-ALTER TABLE `smart_profilefeatures` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 
 CREATE TABLE `smart_featureaccess` (
   `featurename` varchar(255) NOT NULL  default '',
@@ -137,6 +132,7 @@ CREATE UNIQUE INDEX `faid_profiles` ON `smart_featureaccess`(`featureid`) ;
 CREATE UNIQUE INDEX `faaf_profiles` ON `smart_featureaccess`(`accessflag`) ;
 ALTER TABLE `smart_appsessions` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_appsessions` CHANGE `articleid`   `articleid` bigint(11) NOT NULL  default 0;
+ALTER TABLE `smart_appsessions` CHANGE `templateid`   `templateid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_appsessions` CHANGE `layoutid`   `layoutid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_dsqueryplacements` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_dsobjupdates` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';

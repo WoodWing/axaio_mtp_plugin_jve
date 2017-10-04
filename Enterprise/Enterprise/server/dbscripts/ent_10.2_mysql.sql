@@ -1,6 +1,6 @@
 
 CREATE TABLE `smart_actionproperties` (
-  `id` bigint(11) NOT NULL  auto_increment,
+  `id` int(11) NOT NULL  auto_increment,
   `publication` int(11) NOT NULL  default '0',
   `orderid` int(11) NOT NULL  default '0',
   `property` varchar(200) NOT NULL  default '',
@@ -19,7 +19,7 @@ CREATE TABLE `smart_actionproperties` (
 CREATE  INDEX `pbac_actionproperties` ON `smart_actionproperties`(`publication`, `action`) ;
 
 CREATE TABLE `smart_authorizations` (
-  `id` bigint(11) NOT NULL  auto_increment,
+  `id` int(11) NOT NULL  auto_increment,
   `grpid` int(11) NOT NULL  default '0',
   `publication` int(11) NOT NULL  default '0',
   `section` int(11) NOT NULL  default '0',
@@ -35,7 +35,7 @@ CREATE  INDEX `gipr_authorizations` ON `smart_authorizations`(`grpid`, `profile`
 INSERT INTO `smart_authorizations` (`id`, `grpid`, `publication`, `section`, `state`, `rights`, `issue`, `profile`, `bundle`) VALUES (1, 2, 1, 0, 0, 'VRWDCKSF', 0, 1, 0);
 
 CREATE TABLE `smart_config` (
-  `id` bigint(11) NOT NULL  auto_increment,
+  `id` int(11) NOT NULL  auto_increment,
   `name` varchar(200) NOT NULL  default '',
   `value` blob NOT NULL ,
   PRIMARY KEY (`id`)
@@ -415,7 +415,7 @@ CREATE TABLE `smart_properties` (
   `minresolution` varchar(200) NOT NULL  default '',
   `maxresolution` varchar(200) NOT NULL  default '',
   `publishsystem` varchar(64) NOT NULL  default '',
-  `templateid` int(11) NOT NULL  default 0,
+  `templateid` bigint(11) NOT NULL  default 0,
   `termentityid` int(11) NOT NULL  default '0',
   `suggestionentity` varchar(200) NOT NULL  default '',
   PRIMARY KEY (`id`)
@@ -475,7 +475,7 @@ CREATE TABLE `smart_publobjects` (
 CREATE UNIQUE INDEX `puisobgr_publobjects` ON `smart_publobjects`(`publicationid`, `issueid`, `objectid`, `grpid`) ;
 
 CREATE TABLE `smart_issueeditions` (
-  `id` bigint(11) NOT NULL  auto_increment,
+  `id` int(11) NOT NULL  auto_increment,
   `issue` int(11) NOT NULL  default '0',
   `edition` int(11) NOT NULL  default '0',
   `deadline` varchar(30) NOT NULL  default '',
@@ -579,7 +579,7 @@ CREATE  INDEX `us_tickets` ON `smart_tickets`(`usr`) ;
 CREATE  INDEX `mtid_tickets` ON `smart_tickets`(`masterticketid`) ;
 
 CREATE TABLE `smart_termentities` (
-  `id` bigint(11) NOT NULL  auto_increment,
+  `id` int(11) NOT NULL  auto_increment,
   `name` varchar(255) NOT NULL  default '',
   `provider` varchar(40) NOT NULL  default '',
   `publishsystemid` varchar(40) NOT NULL  default '',
@@ -746,7 +746,7 @@ CREATE  INDEX `pr_profiles` ON `smart_profiles`(`profile`) ;
 INSERT INTO `smart_profiles` (`id`, `profile`, `code`, `description`) VALUES (1, 'Full Control', 0, 'All features enabled');
 
 CREATE TABLE `smart_profilefeatures` (
-  `id` bigint(11) NOT NULL  auto_increment,
+  `id` int(11) NOT NULL  auto_increment,
   `profile` int(11) NOT NULL  default '0',
   `feature` mediumint(9) NOT NULL  default '0',
   `value` varchar(20) NOT NULL  default '',
@@ -843,7 +843,7 @@ CREATE TABLE `smart_appsessions` (
   `articlename` varchar(255) NOT NULL  default '',
   `articleformat` varchar(128) NOT NULL  default '',
   `articleminorversion` mediumint(9) NOT NULL  default 0,
-  `templateid` int(11) NOT NULL  default 0,
+  `templateid` bigint(11) NOT NULL  default 0,
   `templatename` varchar(255) NOT NULL  default '',
   `templateformat` varchar(128) NOT NULL  default '',
   `layoutid` bigint(11) NOT NULL  default 0,

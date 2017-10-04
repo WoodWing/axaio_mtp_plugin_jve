@@ -9,11 +9,6 @@ INNER JOIN sysobjects o2 ON o1.parent_obj = o2.id
 INNER JOIN syscolumns c ON (o1.id = c.cdefault) OR (c.id = o2.id and c.cdefault = 0 and o1.xtype = 'PK')
 WHERE (o2.name = @tablename) AND (c.name = @columnName);
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
-EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_actionproperties', @columnName = 'id', @constraintName = @constraintName OUTPUT
-SET @sql = 'ALTER TABLE smart_actionproperties DROP CONSTRAINT ' + @constraintName
-EXEC (@sql);
-ALTER TABLE smart_actionproperties ALTER COLUMN   [id] bigint NOT NULL ;
-DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_actionproperties', @columnName = 'orderid', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_actionproperties DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
@@ -22,21 +17,11 @@ ALTER TABLE [smart_actionproperties] ADD DEFAULT ('0') FOR [orderid];
 ALTER TABLE [smart_authorizations] ADD 
   [bundle] int NOT NULL  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
-EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_authorizations', @columnName = 'id', @constraintName = @constraintName OUTPUT
-SET @sql = 'ALTER TABLE smart_authorizations DROP CONSTRAINT ' + @constraintName
-EXEC (@sql);
-ALTER TABLE smart_authorizations ALTER COLUMN   [id] bigint NOT NULL ;
-DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_authorizations', @columnName = 'rights', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_authorizations DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
 ALTER TABLE smart_authorizations ALTER COLUMN   [rights] varchar(1024) NOT NULL ;
 ALTER TABLE [smart_authorizations] ADD DEFAULT ('') FOR [rights];
-DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
-EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_config', @columnName = 'id', @constraintName = @constraintName OUTPUT
-SET @sql = 'ALTER TABLE smart_config DROP CONSTRAINT ' + @constraintName
-EXEC (@sql);
-ALTER TABLE smart_config ALTER COLUMN   [id] bigint NOT NULL ;
 ALTER TABLE [smart_deletedobjects] ADD 
   [orientation] tinyint NOT NULL  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
@@ -216,7 +201,7 @@ ALTER TABLE [smart_properties] ADD
   [minresolution] varchar(200) NOT NULL  default '',
   [maxresolution] varchar(200) NOT NULL  default '',
   [publishsystem] varchar(64) NOT NULL  default '',
-  [templateid] int NOT NULL  default 0,
+  [templateid] bigint NOT NULL  default 0,
   [termentityid] int NOT NULL  default '0',
   [suggestionentity] varchar(200) NOT NULL  default '';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
@@ -233,11 +218,6 @@ SET @sql = 'ALTER TABLE smart_publobjects DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
 ALTER TABLE smart_publobjects ALTER COLUMN   [objectid] bigint NOT NULL ;
 ALTER TABLE [smart_publobjects] ADD DEFAULT ('0') FOR [objectid];
-DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
-EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_issueeditions', @columnName = 'id', @constraintName = @constraintName OUTPUT
-SET @sql = 'ALTER TABLE smart_issueeditions DROP CONSTRAINT ' + @constraintName
-EXEC (@sql);
-ALTER TABLE smart_issueeditions ALTER COLUMN   [id] bigint NOT NULL ;
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_routing', @columnName = 'routeto', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_routing DROP CONSTRAINT ' + @constraintName
@@ -264,7 +244,7 @@ ALTER TABLE smart_tickets ALTER COLUMN   [id] bigint NOT NULL ;
 CREATE  INDEX [mtid_tickets] ON [smart_tickets]([masterticketid]) ;
 
 CREATE TABLE [smart_termentities] (
-  [id] bigint NOT NULL  IDENTITY(1,1),
+  [id] int NOT NULL  IDENTITY(1,1),
   [name] varchar(255) NOT NULL  default '',
   [provider] varchar(40) NOT NULL  default '',
   [publishsystemid] varchar(40) NOT NULL  default '',
@@ -309,11 +289,6 @@ SET @sql = 'ALTER TABLE smart_objectflags DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
 ALTER TABLE smart_objectflags ALTER COLUMN   [objid] bigint NOT NULL ;
 ALTER TABLE [smart_objectflags] ADD DEFAULT () FOR [objid];
-DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
-EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_profilefeatures', @columnName = 'id', @constraintName = @constraintName OUTPUT
-SET @sql = 'ALTER TABLE smart_profilefeatures DROP CONSTRAINT ' + @constraintName
-EXEC (@sql);
-ALTER TABLE smart_profilefeatures ALTER COLUMN   [id] bigint NOT NULL ;
 
 CREATE TABLE [smart_featureaccess] (
   [featurename] varchar(255) NOT NULL  default '',
@@ -334,6 +309,12 @@ SET @sql = 'ALTER TABLE smart_appsessions DROP CONSTRAINT ' + @constraintName
 EXEC (@sql);
 ALTER TABLE smart_appsessions ALTER COLUMN   [articleid] bigint NOT NULL ;
 ALTER TABLE [smart_appsessions] ADD DEFAULT (0) FOR [articleid];
+DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
+EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_appsessions', @columnName = 'templateid', @constraintName = @constraintName OUTPUT
+SET @sql = 'ALTER TABLE smart_appsessions DROP CONSTRAINT ' + @constraintName
+EXEC (@sql);
+ALTER TABLE smart_appsessions ALTER COLUMN   [templateid] bigint NOT NULL ;
+ALTER TABLE [smart_appsessions] ADD DEFAULT (0) FOR [templateid];
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_appsessions', @columnName = 'layoutid', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_appsessions DROP CONSTRAINT ' + @constraintName
