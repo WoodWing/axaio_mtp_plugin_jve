@@ -370,26 +370,34 @@ class DBTicket extends DBBase
 	 */
 	public static function DBfindticket( $usr, $database, $clientname, $clientip, $appname, $appversion, $appserial )
 	{
-		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename(self::TABLENAME);
 		LogHandler::Log('dbticket', 'DEBUG', $usr.' '.$database.' '.$clientname.' '.$clientip.' '.$appname.' '.$appversion.' '.$appserial);
 
-		$usr = $dbdriver->toDBString($usr);
-		$database =	$dbdriver->toDBString($database);
-		$clientname = $dbdriver->toDBString($clientname);
-		$clientip =	$dbdriver->toDBString($clientip);
-		$appname =	$dbdriver->toDBString($appname);
-		$appversion = $dbdriver->toDBString($appversion);
-		$appserial = $dbdriver->toDBString($appserial);
+		$wheres = array( '`usr` = ?', '`appname` = ?' );
+		$params = array( strval( $usr ), strval( $appname ) );
+		if( $database ) {
+			$wheres[] = '`db` = ?';
+			$params[] = strval( $database );
+		}
+		if( $clientname ) {
+			$wheres[] = '`clientname` = ?';
+			$params[] = strval( $clientname );
+		}
+		if( $clientip ) {
+			$wheres[] = '`clientip` = ?';
+			$params[] = strval( $clientip );
+		}
+		if( $appversion ) {
+			$wheres[] = '`appversion` = ?';
+			$params[] = strval( $appversion );
+		}
+		if( $appserial ) {
+			$wheres[] = '`appserial` = ?';
+			$params[] = strval( $appserial );
+		}
 
-		$sql  = "SELECT * FROM $db WHERE `usr` = ? ";
-		$params = array( strval( $usr ) );
-		$sql .= "AND `appname`= '$appname' ";
-		$sql .= $database ? "AND `db`= '$database' " : '';
-		$sql .= $clientname ? "AND `clientname`= '$clientname' " : '';
-		$sql .= $clientip ? "AND `clientip`= '$clientip' " : '';
-	 	$sql .= $appversion ? " AND `appversion`= '$appversion' " : '';
-		$sql .= $appserial ? "AND `appserial`= '$appserial' " : '';
+		$dbdriver = DBDriverFactory::gen();
+		$db = $dbdriver->tablename(self::TABLENAME);
+		$sql = "SELECT `ticketid` FROM $db WHERE ".implode( ' AND ', $wheres );
 		$sth = $dbdriver->query( $sql, $params );
 		if (!$sth) return false;
 		$row = $dbdriver->fetch($sth);
