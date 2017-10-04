@@ -259,7 +259,7 @@ class DBChannel extends DBBase
 	{
 		$where = '`publicationid` = ? AND `publishsystemid` = ? ';
 		$params = array( intval( $publicationId ), strval( $publishSystemId ) );
-		$row = DBBase::getRow( self::TABLENAME, $where, array( 'id' ), $params );
+		$row = self::getRow( self::TABLENAME, $where, array( 'id' ), $params );
 		return isset( $row['id'] ) ? $row['id'] : null;
 	}
 
@@ -276,7 +276,7 @@ class DBChannel extends DBBase
 		$channelObjects = array();
 		$where = '`publicationid` = ? AND `type` = ? ';
 		$params = array( intval( $brandId ), $type );
-		$rows = DBBase::listRows( self::TABLENAME, 'id', '', $where, '*', $params );
+		$rows = self::listRows( self::TABLENAME, 'id', '', $where, '*', $params );
 		if( $rows ) foreach( $rows as $row ) {
 			$channelObjects[] = self::rowToObj( $row );
 		}
@@ -295,8 +295,8 @@ class DBChannel extends DBBase
 	{
 		$channelObjects = array();
 		$where = '`type` = ? ';
-		$params = array( $type );
-		$rows = DBBase::listRows( self::TABLENAME, 'id', '', $where, '*', $params );
+		$params = array( strval( $type ) );
+		$rows = self::listRows( self::TABLENAME, '', '', $where, '*', $params );
 		if( $rows ) foreach( $rows as $row ) {
 			$channelObjects[] = self::rowToObj( $row );
 		}
