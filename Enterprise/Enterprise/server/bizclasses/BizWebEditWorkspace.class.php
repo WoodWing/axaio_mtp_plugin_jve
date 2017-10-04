@@ -295,8 +295,8 @@ class BizWebEditWorkspace
 	 * @return array 'Elements', 'Placements' and 'Pages'
 	 */
 	public function doPreviewArticlesAtWorkspace( $workspaceId, array $articles,
-	                                            $action, $layoutId, $editionId, $previewType,
-	                                            array $requestInfo = array() )
+												$action, $layoutId, $editionId, $previewType,
+												array $requestInfo = array() )
 	{
 		require_once BASEDIR.'/server/utils/UtfString.class.php';
 
@@ -609,46 +609,12 @@ class BizWebEditWorkspace
 			}
 		}
 
-		// Prefer Web Editor ticket. Fall back at Web Apps ticket.
-		$prodVer = PRODUCTMAJORVERSION.PRODUCTMINORVERSION.'0'; // taken from serverinfo.php
-		$ticketCookies = array(
-			'webedit_ticket_ContentStationPro'.$prodVer, // cookie name for Web Editor ticket (CS login)
-			'webapp_ticket_ContentStationPro'.$prodVer, // cookie name for web apps ticket (CS login)
-			'ticket' // cookie name for web apps ticket (browser login)
-		);
-
-		// Get the name of the Web Editor user by running through cookie information.
-		// Cookie info is set when the Web Editor gets lauched. For the CS editor this is
-		// not the case. See next step below for more info.
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-		$weTicket = '';
-		$weUserId = '';
-		foreach( $ticketCookies as $ticketCookie ) {
-			if( isset($_REQUEST[$ticketCookie]) ) {
-				$weTicket = $_REQUEST[$ticketCookie];
-				$weUserId = DBTicket::DBuserticket( $weTicket );
-				if( $weUserId === false ) {
-					// Clear to avoid passing bad tickets! (BZ#11375)
-					$weTicket = '';
-					$weUserId = '';
-				} else {
-					break; // found user!
-				}
-			}
-		}
-
-		// When failed reading CS ticket or Web Editor ticket from cookies (above), try the ticket
-		// passed in by caller. This fallback is especially needed for the CS editor that is talking
-		// through web services. In this case typically no cookies are updated (as used above).
-		// (Same happens happens for the Build Test when not logging out from web apps and hitting
-		// the Test button the next morning, in which case all tickets at cookies are expired).
-		if( !$weTicket && !$weUserId ) {
-			$weTicket = $ticket;
-			$weUserId = DBTicket::DBuserticket( $weTicket );
-			if( $weUserId === false ) { // Clear to avoid passing bad tickets!
-				$weTicket = '';
-				$weUserId = '';
-			}
+		$weTicket = $ticket;
+		$weUserId = DBTicket::DBuserticket( $ticket );
+		if( $weUserId === false ) { // Clear to avoid passing bad tickets!
+			$weUserId = '';
+			$weTicket = '';
 		}
 
 		// Get the specified edition
