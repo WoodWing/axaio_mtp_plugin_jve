@@ -1,10 +1,11 @@
 <?php
 /**
  * TestCase class that checks dropped integrations and belongs to the TestSuite of wwtest.
+ *
  * This class is automatically read and run by TestSuiteFactory class.
  * See TestSuiteInterfaces.php for more details about the TestSuite concept.
  *
- * @package SCEnterprise
+ * @package Enterprise
  * @subpackage TestSuite
  * @since v10.2.0
  * @copyright WoodWing Software bv. All Rights Reserved.
@@ -20,10 +21,10 @@ class WW_TestSuite_HealthCheck2_DroppedIntegrations_TestCase extends TestCase
 
 	public function getTestMethods()
 	{
-		return 'Scenario:'.
-			'<ol>'.
-				'<li></li>'.
-			'</ol>'; }
+		return '<ol>'.
+					'<li>Check if all the resources for the dropped Adobe DPS (1) plugin are cleaned.</li>'.
+				'</ol>';
+	}
 
 	final public function runTest()
 	{
@@ -62,17 +63,16 @@ class WW_TestSuite_HealthCheck2_DroppedIntegrations_TestCase extends TestCase
 		$response = BizQuery::queryObjects2( $request, '', 0 );
 		if( $response->TotalEntries ) {
 			$message = 'Found existing folio objects';
-			$help = 'Please completely remove all objects with Format "application/vnd.adobe.folio+zip"';
-			//TODO: Change this severity to a proper INFO message
-			$this->setResult( 'ERROR', $message, $help );
+			$help = 'All objects with Format "application/vnd.adobe.folio+zip" aren\'t in use anymore by the system and can be archived and removed.';
+			$this->setResult( 'INFO', $message, $help );
 		}
 
 		// EXTENSIONMAP setting having entry '.folio' => 'application/vnd.adobe.folio+zip'
 		$map = unserialize( EXTENSIONMAP );
 		if( array_key_exists( '.folio', $map ) ) {
 			$message = 'The .folio extension still exists in the Enterprise Server configuration';
-			$help = 'Please use the latest configserver.php';
-			$this->setResult( 'ERROR', $message, $help );
+			$help = 'Remove the .folio extension from the EXTENSIONMAP configuration option in config_overrule.php or configserver.php.';
+			$this->setResult( 'INFO', $message, $help );
 		}
 
 		// Export folder in filesystem: define( 'ADOBEDPS_EXPORTDIR', EXPORTDIRECTORY.'AdobeDps/' );
@@ -104,7 +104,6 @@ class WW_TestSuite_HealthCheck2_DroppedIntegrations_TestCase extends TestCase
 		);
 		$result = $biz->listJobs( $params, null, null, null, null, 1 );
 
-		//TODO: Filter on non-completed jobs
 		if( !empty( $result ) ) {
 			$message = 'Server Jobs of the type \'AdobeDps\' were found.';
 			$help = 'Please remove those Server Jobs on the Server Jobs admin page.';
@@ -115,7 +114,14 @@ class WW_TestSuite_HealthCheck2_DroppedIntegrations_TestCase extends TestCase
 		require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
 		$channelInfos = DBChannel::getChannelsByType( 'dps' );
 		if( $channelInfos ) {
-			$help = 'Publication Channels of the type \'dps\' were found. Please update or remove these channels.';
+			$help = 'Publication Channels of the type \'dps\' were found. Please update the channel(s) and set the \'Publish System\' to \'Unknown\' or remove these channels.';
+			$help .= '<br/>';
+			$help .= 'The following channels were found:';
+			$help .= '<br/>';
+			foreach($channelInfos as $channelInfo) {
+				$help .= '<a target="_blank" href="'.SERVERURL_ROOT.INETROOT.'/server/admin/editChannel.php?publid='.$channelInfo->PublicationId.'&channelid='.$channelInfo->Id.'">'.$channelInfo->Name.'</a>';
+				$help .= '<br/>';
+			}
 			$this->setResult( 'ERROR', $message, $help );
 		}
 
@@ -165,7 +171,7 @@ class WW_TestSuite_HealthCheck2_DroppedIntegrations_TestCase extends TestCase
 		}
 
 		if( $defProps ) {
-			$msg = 'The following custom ';
+			$msg = 'The following custom object ';
 			$msg .= ( count( $defProps ) == 1 ) ? 'property ' : 'properties ';
 			$msg .= 'for Adobe DPS ';
 			$comma = '';
@@ -189,7 +195,7 @@ class WW_TestSuite_HealthCheck2_DroppedIntegrations_TestCase extends TestCase
 		require_once BASEDIR . '/server/dbclasses/DBAdmProperty.class.php';
 		$props = DBAdmProperty::getPropertyInfos(null, 'AdobeDps', null);
 		if( $props ) {
-			$msg = 'The following ';
+			$msg = 'The following custom administration ';
 			$msg .= ( count( $props ) == 1 ) ? 'property ' : 'properties ';
 			$msg .= 'for Adobe DPS ';
 			$comma = '';
