@@ -119,7 +119,7 @@ class BizAdmAccessProfile
 			if( $accessProfile->ProfileFeatures ) {
 				$accessProfile->ProfileFeatures = self::resolveProfileFeatureIdsByName( $accessProfile->ProfileFeatures );
 			}
-			DBAdmAccessProfile::modifyAccessProfile( $accessProfile ) ? true : false;
+			DBAdmAccessProfile::modifyAccessProfile( $accessProfile );
 			if( $accessProfile->ProfileFeatures ) {
 				require_once BASEDIR.'/server/dbclasses/DBAdmProfileFeature.class.php';
 				DBAdmProfileFeature::updateProfileFeatures( $accessProfile->Id, $accessProfile->ProfileFeatures );

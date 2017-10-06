@@ -258,7 +258,9 @@ class BizAccess
 					// applied for features provided by server plug-ins.
 					// Note that when we can resolve a flag from DB, we can assume it is provided by a plugin.
 					require_once BASEDIR.'/server/dbclasses/DBAdmFeatureAccess.class.php';
-					$featureName = DBAdmFeatureAccess::getFeatureNameForFlag( $rightFlag );
+					require_once BASEDIR.'/server/dbclasses/DbAdmFeatureAccessFactory.class.php';
+					$dbAdmFeatureAccess = DbAdmFeatureAccessFactory::createDbFeatureAccessForPlugin();
+					$featureName = $dbAdmFeatureAccess->getFeatureNameForFlag( $rightFlag );
 					$featureFlagOrName = $featureName ? $featureName : $rightFlag;
 					if( $objectId ) {
 						$details = $objectId.'('.$featureFlagOrName.')';
@@ -372,8 +374,9 @@ class BizAccess
 	static public function resolveRightsForPluginFeatures( array $featureNames )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBAdmFeatureAccess.class.php';
-
-		$flags = DBAdmFeatureAccess::getFeatureFlags( $featureNames );
+		require_once BASEDIR.'/server/dbclasses/DbAdmFeatureAccessFactory.class.php';
+		$dbAdmFeatureAccess = DbAdmFeatureAccessFactory::createDbFeatureAccessForPlugin();
+		$flags = $dbAdmFeatureAccess->getFeatureFlags( $featureNames );
 		return implode( '', $flags );
 	}
 }

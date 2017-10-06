@@ -13,6 +13,26 @@ require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 class DBAdmFeatureAccess extends DBBase
 {
 	const TABLENAME = 'featureaccess';
+	/**
+	 * @var int $accessFeatureMin The minimum number of the Access Feature range.
+	 */
+	private $accessFeatureMin = null;
+	/**
+	 * @var int $accessFeatureMax The maximum number of the Access Feature range.
+	 */
+	private $accessFeatureMax = null;
+
+	/**
+	 * DBAdmFeatureAccess constructor.
+	 *
+	 * @param int $min
+	 * @param int $max
+	 */
+	public function __construct( $min, $max )
+	{
+		$this->accessFeatureMin = $min;
+		$this->accessFeatureMax = $max;
+	}
 
 	/**
 	 * Retrieve all features from DB that are introduced by (and registered for) server plug-ins.
@@ -20,10 +40,12 @@ class DBAdmFeatureAccess extends DBBase
 	 * @return ProfileFeatureAccess[] Features, indexed by their names.
 	 * @throws BizException on fatal SQL errors
 	 */
-	static public function listFeatures()
+	public function listFeatures()
 	{
 		$features = array();
-		$rows = self::listRows( self::TABLENAME, null, null, '', '*' );
+		$where = "`featureid` >= ? AND `featureid` <= ? ";
+		$params = array( intval( $this->accessFeatureMin ), intval( $this->accessFeatureMax ));
+		$rows = self::listRows( self::TABLENAME, null, null, $where, '*', $params );
 		if( self::hasError() || is_null($rows) ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 		}
@@ -41,9 +63,9 @@ class DBAdmFeatureAccess extends DBBase
 	 * @return ProfileFeatureAccess The stored feature, providing a new Id and optionally a new Flag.
 	 * @throws BizException on fatal SQL errors or when ids or flags have reached max allowed values.
 	 */
-	static public function createFeature( ProfileFeatureAccess $feature )
+	public function createFeature( ProfileFeatureAccess $feature )
 	{
-		$feature->Id = self::determineNewFeatureId();
+		$feature->Id = $this->determineNewFeatureId();
 		if( $feature->Flag === '?' ) {
 			$feature->Flag = self::determineNewFlag();
 		}
@@ -61,7 +83,7 @@ class DBAdmFeatureAccess extends DBBase
 	 * @param string[] $featureNames
 	 * @return string[] The flags, indexed by feature names.
 	 */
-	static public function getFeatureFlags( array $featureNames )
+	public function getFeatureFlags( array $featureNames )
 	{
 		$flags = array();
 		if( $featureNames ) {
@@ -83,7 +105,7 @@ class DBAdmFeatureAccess extends DBBase
 	 * @param string $flag
 	 * @return string|null Feature name, or NULL when not found.
 	 */
-	static public function getFeatureNameForFlag( $flag )
+	public function getFeatureNameForFlag( $flag )
 	{
 		$fields = array( 'featurename' );
 		$where = '`accessflag` = ?';
@@ -98,15 +120,15 @@ class DBAdmFeatureAccess extends DBBase
 	 * @return int|null The new system wide unique feature id.
 	 * @throws BizException when too many ids are in use already.
 	 */
-	static private function determineNewFeatureId()
+	private function determineNewFeatureId()
 	{
-		$maxId = self::getMaxFeatureId();
+		$maxId = $this->getMaxFeatureId();
 		if( !$maxId ) {
-			$featureId = 5000;
-		} elseif( $maxId >= 5999 ) {
+			$featureId = $this->accessFeatureMin;
+		} elseif( $maxId >= $this->accessFeatureMax ) {
 			$detail = "Maximum value ({$maxId}) for the 'featureid' field reached in ".self::TABLENAME." table.";
 			throw new BizException('ERR_DATABASE', 'Server', $detail );
-		} else { // in 5000-5998 range?
+		} else { // Within the supported feature access range $this->accessFeatureMin to $this->accessFeatureMax
 			$featureId = $maxId + 1;
 		}
 		return $featureId;
@@ -117,12 +139,14 @@ class DBAdmFeatureAccess extends DBBase
 	 *
 	 * @return int|null The maximum value, or null when no records found (empty table).
 	 */
-	static private function getMaxFeatureId()
+	private function getMaxFeatureId()
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbTable = $dbDriver->tablename( self::TABLENAME );
-		$sql = "SELECT MAX(`featureid`) as `maxid` FROM $dbTable ";
-		$sth = self::query( $sql );
+		$where = "`featureid` >= ? AND `featureid` <= ? ";
+		$params =  array( intval( $this->accessFeatureMin ), intval( $this->accessFeatureMax ));
+		$sql = "SELECT MAX(`featureid`) as `maxid` FROM $dbTable WHERE $where";
+		$sth = self::query( $sql, $params );
 		$row = self::fetch( $sth );
 		return isset( $row['maxid'] ) ? $row['maxid'] : null;
 	}

@@ -433,10 +433,9 @@ class BizAccessFeatureProfiles
 	 * Build list of access rights. Each access right represents a Sub Application, 
 	 * which can be returned by server plug-ins.
 	 *
-	 * @param integer $idCounter Access ID to be used as starting point to be increased.
 	 * @return ProfileFeatureAccess[]
 	 */
-	private static function getSubApps( $idCounter )
+	private static function getSubApps()
 	{
 		$retVal = array();
 		require_once BASEDIR.'/server/services/sys/SysGetSubApplicationsService.class.php';
@@ -446,9 +445,26 @@ class BizAccessFeatureProfiles
 			$request->ClientAppName = null; // all clients
 			$service = new SysGetSubApplicationsService();
 			$response = $service->execute( $request );
+
+			// Retrieve the subapps/features from DB that were registered before.
+			require_once BASEDIR.'/server/dbclasses/DBAdmFeatureAccess.class.php';
+			require_once BASEDIR.'/server/dbclasses/DbAdmFeatureAccessFactory.class.php';
+			$dbAdmFeatureAccess = DbAdmFeatureAccessFactory::createDbFeatureAccessForSubApplication();
+			$registeredSubAppsFeatures = $dbAdmFeatureAccess->listFeatures();
+
+			// Register the subapps/features in the DB (only the ones not registered yet).
 			if( $response->SubApplications ) foreach( $response->SubApplications as $subApp ) {
-				$retVal[$idCounter] = new ProfileFeatureAccess( $idCounter, $subApp->ID, '', $subApp->DisplayName );
-				$idCounter += 1;
+				if( !isset( $registeredSubAppsFeatures[ $subApp->ID ] ) ) { // Profile feature that is being introduced for the first time ( not yet registered )
+					require_once BASEDIR.'/server/dataclasses/ProfileFeatureAccess.class.php';
+					$subAppFeature = new ProfileFeatureAccess();
+					$subAppFeature->Name = $subApp->ID;
+					$subAppFeature = $dbAdmFeatureAccess->createFeature( $subAppFeature ); // Register in the DB
+					$registeredSubAppsFeatures[ $subAppFeature->Name ] = $subAppFeature;
+				}
+				// Filling in the rest of the elements ( that is taken from the service response / hardcoded )
+				$registeredSubAppsFeatures[ $subApp->ID ]->Display = $subApp->DisplayName; // Taken from the service response.
+				$registeredSubAppsFeatures[ $subApp->ID ]->Default = null; // By default it is checked for this feature when a new Profile is created.
+				$retVal[ $registeredSubAppsFeatures[$subApp->ID]->Id ] = $registeredSubAppsFeatures[ $subApp->ID ];
 			}
 		} catch( BizException $e ) {
 			// ignore errors
@@ -495,7 +511,7 @@ class BizAccessFeatureProfiles
 				'Planning',                  '', BizResources::localize('OBJ_PLANNING') ),
 			self::ACCESS_CONTENTSTATIONPRO   => new ProfileFeatureAccess( self::ACCESS_CONTENTSTATIONPRO,
 				'ContentStationPro',         '', BizResources::localize('ACT_CS_PRO_EDITION') ),
-		) + self::getSubApps( 1501 );
+		) + self::getSubApps();
 	}
 
 	/**
@@ -565,13 +581,14 @@ class BizAccessFeatureProfiles
 
 			// Retrieve the features from DB that were registered before.
 			require_once BASEDIR.'/server/dbclasses/DBAdmFeatureAccess.class.php';
-			$registeredFeatures = DBAdmFeatureAccess::listFeatures();
-
+			require_once BASEDIR.'/server/dbclasses/DbAdmFeatureAccessFactory.class.php';
+			$dbAdmFeatureAccess = DbAdmFeatureAccessFactory::createDbFeatureAccessForPlugin();
+			$registeredFeatures = $dbAdmFeatureAccess->listFeatures();
 			// Register the features in the DB (only the ones not registered yet).
 			foreach( $connRetVals as $connectorName => $pluginFeatures ) {
 				if( $pluginFeatures ) foreach( $pluginFeatures as $pluginFeature ) {
 					if( !isset( $registeredFeatures[ $pluginFeature->Name ] ) ) {
-						$registeredFeature = DBAdmFeatureAccess::createFeature( $pluginFeature );
+						$registeredFeature = $dbAdmFeatureAccess->createFeature( $pluginFeature );
 						$registeredFeatures[ $registeredFeature->Name ] = $registeredFeature;
 					}
 				}
