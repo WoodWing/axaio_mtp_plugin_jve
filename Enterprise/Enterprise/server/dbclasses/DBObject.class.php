@@ -557,7 +557,7 @@ class DBObject extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$dbo = $dbDriver->tablename("objects");
 
-		$sql = "SELECT `id`, `publication`, `issue` FROM $dbo WHERE `name` = ? AND `TYPE` = ? ";
+		$sql = "SELECT `id`, `publication`, `issue` FROM $dbo WHERE `name` = ? AND `type` = ? ";
 		$params = array( strval( $name ), strval( $type ) );
 		$sth = $dbDriver->query($sql, $params );
 
@@ -576,7 +576,7 @@ class DBObject extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 
 		$dbo = $dbDriver->tablename(self::TABLENAME);
-		$sql = "SELECT o.id FROM $dbo o WHERE `contentsource` = ? AND `documentid` = ? ";
+		$sql = "SELECT o.`id` FROM $dbo o WHERE `contentsource` = ? AND `documentid` = ? ";
 		$params = array( strval( $contentSource ), strval( $externalID ) );
 		$sth = $dbDriver->query($sql, $params );
 

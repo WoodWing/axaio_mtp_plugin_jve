@@ -8,12 +8,12 @@
 
 require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
-class WW_TestSuite_BuildTest_PhpUnitTests_KeyValueArray_TestCase extends TestCase
+class WW_TestSuite_BuildTest_PhpUnitTests_ArrayInjector_TestCase extends TestCase
 {
-	public function getDisplayName() { return 'WW_Utils_KeyValueArray class'; }
+	public function getDisplayName() { return 'WW_Utils_ArrayInjector class'; }
 	public function getTestGoals()   { return 'Checks if arrays are properly inserted.'; }
 	public function getPrio()        { return 150; }
-	public function getTestMethods() { return 'Call the functions of the WW_Utils_KeyValueArray class and and validate the expected return values.';	}
+	public function getTestMethods() { return 'Call the functions of the WW_Utils_ArrayInjector class and and validate the expected return values.';	}
 
 	/** @var array The array to insert data into. For each test, it is cloned to avoid side effects with other tests. */
 	private $editArray;
@@ -26,7 +26,7 @@ class WW_TestSuite_BuildTest_PhpUnitTests_KeyValueArray_TestCase extends TestCas
 	 */
 	final public function runTest()
 	{
-		require_once BASEDIR.'/server/utils/KeyValueArray.class.php';
+		require_once BASEDIR.'/server/utils/ArrayInjector.class.php';
 		try {
 			$this->setupTestData();
 
@@ -74,7 +74,7 @@ class WW_TestSuite_BuildTest_PhpUnitTests_KeyValueArray_TestCase extends TestCas
 	private function testInsertBefore1()
 	{
 		$editArrayClone = unserialize( serialize( $this->editArray ) ); // deep clone
-		WW_Utils_KeyValueArray::insertBeforeKey( $editArrayClone, 'aap', $this->insertArray );
+		WW_Utils_ArrayInjector::insertBeforeKey( $editArrayClone, 'aap', $this->insertArray );
 		$expectedArray = array(
 			'vuur' => 3,
 			'boom' => 2,
@@ -91,7 +91,7 @@ class WW_TestSuite_BuildTest_PhpUnitTests_KeyValueArray_TestCase extends TestCas
 	private function testInsertBefore2()
 	{
 		$editArrayClone = unserialize( serialize( $this->editArray ) ); // deep clone
-		WW_Utils_KeyValueArray::insertBeforeKey( $editArrayClone, 'noot', $this->insertArray );
+		WW_Utils_ArrayInjector::insertBeforeKey( $editArrayClone, 'noot', $this->insertArray );
 		$expectedArray = array(
 			'aap' => 1,
 			'vuur' => 3,
@@ -108,7 +108,7 @@ class WW_TestSuite_BuildTest_PhpUnitTests_KeyValueArray_TestCase extends TestCas
 	private function testInsertBefore3()
 	{
 		$editArrayClone = unserialize( serialize( $this->editArray ) ); // deep clone
-		WW_Utils_KeyValueArray::insertBeforeKey( $editArrayClone, 'mies', $this->insertArray );
+		WW_Utils_ArrayInjector::insertBeforeKey( $editArrayClone, 'mies', $this->insertArray );
 		$expectedArray = array(
 			'aap' => 1,
 			'noot' => 10,
@@ -125,7 +125,7 @@ class WW_TestSuite_BuildTest_PhpUnitTests_KeyValueArray_TestCase extends TestCas
 	private function testInsertAfter1()
 	{
 		$editArrayClone = unserialize( serialize( $this->editArray ) ); // deep clone
-		WW_Utils_KeyValueArray::insertAfterKey( $editArrayClone, 'aap', $this->insertArray );
+		WW_Utils_ArrayInjector::insertAfterKey( $editArrayClone, 'aap', $this->insertArray );
 		$expectedArray = array(
 			'aap' => 1,
 			'vuur' => 3,
@@ -142,7 +142,7 @@ class WW_TestSuite_BuildTest_PhpUnitTests_KeyValueArray_TestCase extends TestCas
 	private function testInsertAfter2()
 	{
 		$editArrayClone = unserialize( serialize( $this->editArray ) ); // deep clone
-		WW_Utils_KeyValueArray::insertAfterKey( $editArrayClone, 'noot', $this->insertArray );
+		WW_Utils_ArrayInjector::insertAfterKey( $editArrayClone, 'noot', $this->insertArray );
 		$expectedArray = array(
 			'aap' => 1,
 			'noot' => 10,
@@ -159,7 +159,7 @@ class WW_TestSuite_BuildTest_PhpUnitTests_KeyValueArray_TestCase extends TestCas
 	private function testInsertAfter3()
 	{
 		$editArrayClone = unserialize( serialize( $this->editArray ) ); // deep clone
-		WW_Utils_KeyValueArray::insertAfterKey( $editArrayClone, 'mies', $this->insertArray );
+		WW_Utils_ArrayInjector::insertAfterKey( $editArrayClone, 'mies', $this->insertArray );
 		$expectedArray = array(
 			'aap' => 1,
 			'noot' => 10,
