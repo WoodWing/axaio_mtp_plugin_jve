@@ -1683,7 +1683,7 @@ class BizRelation
 	}
 
 	/**
-	 * Do the folowing automatic relation target assignments:
+	 * Do the following automatic relation target assignments:
 	 * - when a printable object is added to a dossier, target it automatically to the print targets of the dossier
 	 * - when a printable object is added to a layout, target it automatically to the same targets as the layout
 	 * - when a layout is added to a dossier that has the same issue assigned, the target must be added to the layout too
@@ -1738,8 +1738,7 @@ class BizRelation
 					foreach ($parentObjectTargets as $parentObjectTarget){
 						$channel = DBAdmPubChannel::getPubChannelObj($parentObjectTarget->PubChannel->Id);
 						// BZ#18767 - Add to Target when channel type match and channel object type found
-						if( ( $channel->Type == 'print' && isset($printableObjectTypes[$childType]) ) ||
-							( $channel->Type == 'dps' && isset($dpsObjectTypes[$childType]) ) ) {
+						if( ( $channel->Type == 'print' && isset($printableObjectTypes[$childType]) ) ) {
 							BizTarget::addToTargetArray($relation->Targets, $parentObjectTarget);
 						}
 					}

@@ -68,6 +68,7 @@ class BizQueryBase
 		if( $forceapp ) {
 			$mode = $forceapp;
 		} else {
+			require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 			$app = DBTicket::DBappticket( $ticket );
 			if( stristr( $app, 'web' ) ) {
 				$mode = 'web';

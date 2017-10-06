@@ -20,13 +20,11 @@ public class PubChannelType implements java.io.Serializable {
     public static final java.lang.String _print = "print";
     public static final java.lang.String _web = "web";
     public static final java.lang.String _sms = "sms";
-    public static final java.lang.String _dps = "dps";
     public static final java.lang.String _dps2 = "dps2";
     public static final java.lang.String _other = "other";
     public static final PubChannelType print = new PubChannelType(_print);
     public static final PubChannelType web = new PubChannelType(_web);
     public static final PubChannelType sms = new PubChannelType(_sms);
-    public static final PubChannelType dps = new PubChannelType(_dps);
     public static final PubChannelType dps2 = new PubChannelType(_dps2);
     public static final PubChannelType other = new PubChannelType(_other);
     public java.lang.String getValue() { return _value_;}

@@ -448,7 +448,6 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_BasicValidation_TestCase extends Test
 			BASEDIR.'/server/services',
 			BASEDIR.'/server/appservices',
 			BASEDIR.'/server/wwtest/ngrams',
-			BASEDIR.'/server/plugins/AdobeDps',
 		);
 		$isEncodedDir = false;
 		foreach( $encodedDirs as $encodedDir ) {

@@ -234,7 +234,7 @@ ALTER TABLE [smart_objectflags] ADD DEFAULT () FOR [objid];
 CREATE TABLE [smart_featureaccess] (
   [featurename] varchar(255) NOT NULL  default '',
   [featureid] int NOT NULL  default '0',
-  [accessflag] varchar(4) NOT NULL  default '',
+  [accessflag] int NOT NULL  default '0',
   PRIMARY KEY ([featurename])
 );
 CREATE UNIQUE INDEX [faid_profiles] ON [smart_featureaccess]([featureid]) ;

@@ -1146,16 +1146,15 @@ class BizAdmProperty
 		$channelObj = $context->getPubChannel();
 		$issueObj = $context->getIssue();
 		$isPrintChannel    = strtolower($channelObj->Type) == 'print';
-		$isDpsChannel      = strtolower($channelObj->Type) == 'dps';
 		$isApChannel       = strtolower($channelObj->Type) == 'dps2';
 		$showWidgets = $builtinWidgets;
-		if( !$isPrintChannel && !$isDpsChannel && !$isApChannel ) {
+		if( !$isPrintChannel && !$isApChannel ) {
 			unset( $showWidgets['PublicationDate'] );
 			unset( $showWidgets['Deadline'] );
 			unset( $showWidgets['ExpectedPages'] );
 			unset( $showWidgets['OverrulePublication'] );
 		}
-		if( !(($isPrintChannel || $isDpsChannel || $isApChannel) && $issueObj->OverrulePublication) ) {
+		if( !(($isPrintChannel || $isApChannel) && $issueObj->OverrulePublication) ) {
 			unset( $showWidgets['ReversedRead'] );
 		}
 		if( !$issueObj->OverrulePublication ) {

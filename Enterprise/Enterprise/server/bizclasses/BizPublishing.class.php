@@ -79,7 +79,7 @@ class BizPublishing
 		$progress->clearAbort(); // lower the abort flag (just in case when raised -after- last operation).
 		$barData = array( 'operation' => $operation, 'publishTarget' => $publishTarget );
 		$progress->setBarData( serialize($barData) );
-		
+
 		$getXxxPhases = self::operationToConnectorFuncNameForPhases( $operation );
 		$connectorPhases = BizServerPlugin::runChannelConnector( $publishTarget->PubChannelID, $getXxxPhases, array() );
 		if( count($connectorPhases) == 0 ) {
@@ -93,7 +93,7 @@ class BizPublishing
 		// Make current operation id is available for connector
 		BizServerPlugin::runChannelConnector( $publishTarget->PubChannelID, 'setOperation', array( $operation, $operationId ) );
 		BizServerPlugin::runChannelConnector( $publishTarget->PubChannelID, 'beforeOperation', array( $publishTarget, $operation ) );
-		
+
 		// Call the connectors (for each phase and each dossier) to do the actual publishing.
 		$retPubDossiers = array();
 		foreach( array_keys($connectorPhases) as $phaseId ) {
@@ -1492,14 +1492,17 @@ class BizPublishing
 	 */
 	static private function localizeProcessPhase( $key, $value )
 	{
+		// Since 10.2 this function is no longer called but removing callers comes with quite a risk and soon after
+		// the Publish Forms feature will be removed which will cleanup much more code. For the time being, the
+		// resource keys were removed from configlang.php, and so now we using hard-coded strings in the code below.
 		static $transTable = null;
 		if( is_null( $transTable ) ) {
-			$transTable = array( 	
-				'extract'  => BizResources::localize( 'DPS_EXTRACTING' ),
-				'export'   => BizResources::localize( 'DPS_EXPORTING' ),
-				'compress' => BizResources::localize( 'DPS_COMPRESSING' ),
-				'upload'   => BizResources::localize( 'DPS_UPLOADING' ),
-				'cleanup'  => BizResources::localize( 'DPS_CLEANING' )
+			$transTable = array(
+				'extract'  => 'Extracting...',
+				'export'   => 'Exporting...',
+				'compress' => 'Compressing...',
+				'upload'   => 'Uploading...',
+				'cleanup'  => 'Cleaning...'
 			);
 		}
 		return isset( $transTable[$key] ) ? $transTable[$key] : $value;

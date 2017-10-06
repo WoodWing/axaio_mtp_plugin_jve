@@ -595,7 +595,6 @@ class ChannelForm extends HtmlAnyForm
 			$this->fetchIssuesTree( $issues );
 
 			if( $this->pubChannelObj->Type == 'print' ||
-				$this->pubChannelObj->Type == 'dps' ||
 				$this->pubChannelObj->Type == 'dps2' ) {
 				$editions = DBEdition::listChannelEditions( $this->pubChannelObj->Id );
 				// Sort the editions by code, then by name in natural order.
@@ -673,7 +672,6 @@ class ChannelForm extends HtmlAnyForm
 
 		if (!empty($this->pubChannelId) && 
 				($this->pubChannelObj->Type == 'print' ||
-				$this->pubChannelObj->Type == 'dps' || 
 				$this->pubChannelObj->Type == 'dps2' )) {
 			$result .= '
 				<table class="subtitlebar">

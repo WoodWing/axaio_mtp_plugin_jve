@@ -21,6 +21,7 @@ PHPSTORM_INSPECTOR="/opt/phpstorm2017.1.4/bin/inspect.sh"
 # named "enterprise-server-build-tools" and run the Jenkins project named "Enterprise Server Build Tools" to upgrade.
 ES_PHP_ENCODER="/home/autobuild/workspace/Enterprise Server Build Tools/es_php_encoder.php"
 ES_PHP_DEFINE="/home/autobuild/workspace/Enterprise Server Build Tools/php_define.php"
+ES_REPLACE_RESOURCE_KEYS="/home/autobuild/workspace/Enterprise Server Build Tools/replace_resource_keys.php"
 
 #
 # Logs a given param name and value and exits with error when param value is empty.
@@ -317,7 +318,7 @@ function updateResourceFiles {
 		cd -
 
 		echo "${step}5: Prefix the resource keys with ${product}."
-		${PHP_EXE} "${WORKSPACE}/Enterprise/Build/replace_resource_keys.php" "${WORKSPACE}/Enterprise/${dir}${product}/resources" ${product}
+		${PHP_EXE} "${ES_REPLACE_RESOURCE_KEYS}" "${WORKSPACE}/Enterprise/${dir}${product}/resources" ${product}
 
 		echo "${step}6: Write timestamp of last update from TMS into the resource folder of ${product} plugin."
 		echo "${tmsLastUpdate}" > ${SOURCE_BASE}${dir}${product}/resources/_lastupdate.txt
@@ -564,12 +565,10 @@ function step5_ionCubeEncodePhpFiles {
 		Enterprise/server/services/ \
 		Enterprise/server/appservices/ \
 		Enterprise/server/wwtest/ngrams/ \
-		Enterprise/server/plugins/AdobeDps/ \
 		Enterprise/server/regserver.inc.php \
 		Enterprise/server/bizclasses/BizServerJob.class.php \
 		Enterprise/server/bizclasses/BizPublishing.class.php \
 		Enterprise/server/bizclasses/BizSemaphore.class.php \
-		Enterprise/server/utils/DigitalPublishingSuiteClient.class.php \
 		Enterprise/server/wwtest/testsuite/HealthCheck2/Licenses_TestCase.php \
 		plugins/release/Elvis/Elvis_WflLogOn.class.php \
 		plugins/release/Elvis/Elvis_ContentSource.class.php \

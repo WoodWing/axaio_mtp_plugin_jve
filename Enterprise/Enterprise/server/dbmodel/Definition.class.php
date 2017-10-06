@@ -1889,9 +1889,13 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 						'hard coded and provided by server plugins. Records are never deleted to make sure that when '.
 						'plugins are plugged out and plugged back in again the unique values remain preserved.',
 					'fields' => array(
-						array('v' => '10.2', 'name' => 'featurename', 'type' => 'varchar(255)',  'default' => "''"),
-						array('v' => '10.2', 'name' => 'featureid',   'type' => 'int(4)',        'default' => "'0'"),
-						array('v' => '10.2', 'name' => 'accessflag',  'type' => 'varchar(4)',    'default' => "''"),
+						array('v' => '10.2', 'name' => 'featurename', 'type' => 'varchar(255)',  'default' => "''",
+							'comment' => 'Hard-coded id used by server plug-ins and clients to refer to this feature.' ),
+						array('v' => '10.2', 'name' => 'featureid',   'type' => 'int(4)',        'default' => "'0'",
+							'comment' => 'Used to save the features configured for a profile in the Profile Maintenance page.' ),
+						array('v' => '10.2', 'name' => 'accessflag',  'type' => 'int(4)',        'default' => "'0'",
+							'comment' => 'Integer representation of a UTF-8 character that could appear in the rights field of '.
+								'the smart_authorizations table. This is used by the check user access rights server side.' ),
 					),
 					'indexes' => array(
 						array('v' => '10.2', 'name' => 'primary', 	'fields' => 'featurename', 'primary' => true ),
@@ -1901,6 +1905,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 					'inserts' => array(
 					),
 					'lookups' => array(
+						array('v' => '10.2', 'field' => 'featureid', 'reftable' => 'smart_profilefeatures', 'reffield' => 'feature'),
 					),
 				),
 

@@ -227,10 +227,6 @@ class HtmlDocument
 				//	$adminIcons[] = '<a href="'.$admindir.'searchindexing.php"><img src="'.$imagedir.'searchsvr_32.gif" border="0" width="32" height="32"/><br/>'.BizResources::localize('ACT_SEARCH_SERVER').'</a>';
 				//}
 				//if( $isadmin ) { // to do: access profile
-				//	$menu .= '<a id="bullet" class="menu" href="'.$admindir.'adobedpsissues.php"><img src="'.$imagedir.'transparent.gif"/>'.BizResources::localize('DPS_ISSUES').'</a><br/>';
-				//	$adminIcons[] = '<a href="'.$admindir.'adobedpsissues.php"><img src="'.$imagedir.'adobedps_32.gif" border="0" width="32" height="32"/><br/>'.BizResources::localize('DPS_ISSUES').'</a>';
-				//}
-				//if( $isadmin ) { // to do: access profile
 				//	$menu .= '<a id="bullet" class="menu" href="'.$admindir.'log.php"><img src="'.$imagedir.'transparent.gif"/>'.BizResources::localize('MNU_LOG').'</a><br/>';
 				//	$adminIcons[] = '<a href="'.$admindir.'log.php"><img src="'.$imagedir.'log.gif" border="0" width="32" height="32"/><br/>'.BizResources::localize('MNU_LOG').'</a>';
 				//}

@@ -83,7 +83,7 @@ ALTER TABLE `smart_objectflags` CHANGE `objid`   `objid` bigint(11) NOT NULL ;
 CREATE TABLE `smart_featureaccess` (
   `featurename` varchar(255) NOT NULL  default '',
   `featureid` int(4) NOT NULL  default '0',
-  `accessflag` varchar(4) NOT NULL  default '',
+  `accessflag` int(4) NOT NULL  default '0',
   PRIMARY KEY (`featurename`)
 ) DEFAULT CHARSET=utf8;
 CREATE UNIQUE INDEX `faid_profiles` ON `smart_featureaccess`(`featureid`) ;

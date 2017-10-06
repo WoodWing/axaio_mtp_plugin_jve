@@ -904,11 +904,12 @@ class BizObject
 
 
 		// Do notifications
+		$latestRouteTo = isset( $newRow['routeto'] ) ? $newRow['routeto'] : $currRow['routeto']; // when not provided by caller, take original value
 		$issueIds = $issueNames = $editionIds = $editionNames = '';
 		self::listIssuesEditions( $object->Targets, $issueIds, $issueNames, $editionIds, $editionNames );
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
 		DBlog::logService( $user, 'SaveObjects', $id, $newRow['publication'], null, $newRow['section'], $newRow['state'],
-			'', '', '', $newRow['type'], $newRow['routeto'], $editionNames, $newRow['version'] );
+			'', '', '', $newRow['type'], $latestRouteTo, $editionNames, $newRow['version'] );
 		if( MTP_SERVER_DEF_ID != '' ) {
 			require_once BASEDIR.'/server/MadeToPrintDispatcher.class.php';
 			MadeToPrintDispatcher::doPrint( $id, BizSession::getTicket() );
@@ -921,7 +922,7 @@ class BizObject
 		require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
 		BizEnterpriseEvent::createObjectEvent( $object->MetaData->BasicMetaData->ID, 'update' );
 
-		BizEmail::sendNotification( 'save object' , $object, $newRow['types'], $currRow['routeto']);
+		BizEmail::sendNotification( 'save object', $object, $newRow['types'], $currRow['routeto'] );
 
 		// Optionally send geo update for placed articles of a saved layout, but only if we are not using XMLGeo
 		// XMLGeo would require a geo update file per article which we don't have

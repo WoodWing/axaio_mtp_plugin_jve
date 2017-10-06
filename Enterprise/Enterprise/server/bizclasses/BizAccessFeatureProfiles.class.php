@@ -611,14 +611,19 @@ class BizAccessFeatureProfiles
 		foreach( $pluginFeatureAccessList as $pluginFeatureAccess ) {
 			if( !is_null( $pluginFeatureAccess->Flag ) && $pluginFeatureAccess->Flag !== '?' ) {
 				$detail = "{$context} For the item named '{$pluginFeatureAccess->Name}' the Flag attribute is set to ".
-					"'{$pluginFeatureAccess->Flag}'. However, this should be set to null. Alternatively set can be set ".
+					"'{$pluginFeatureAccess->Flag}'. However, this should be set to null. Alternatively it can be set ".
 					"to '?' which makes it possible for plug-ins to check rights server side. Please fix and try again.";
 				throw new BizException( 'ERR_ARGUMENT', 'Server', $detail );
 			}
 			$prefix = $pluginName.'-';
-			if( strpos( $pluginFeatureAccess->Name, $prefix ) !== 0 || strlen( $prefix ) == strlen( $pluginFeatureAccess->Name ) ) {
+			if( strpos( $pluginFeatureAccess->Name, $prefix ) !== 0 ) {
 				$detail = "{$context} The Name attribute '{$pluginFeatureAccess->Name}' should be prefixed with '{$prefix}'. ".
 					"Please fix and try again.";
+				throw new BizException( 'ERR_ARGUMENT', 'Server', $detail );
+			}
+			if( strlen( $prefix ) == strlen( $pluginFeatureAccess->Name ) ) {
+				$detail = "{$context} The Name attribute '{$pluginFeatureAccess->Name}' contains the prefix only but ".
+					"the real name is missing. Please fix and try again.";
 				throw new BizException( 'ERR_ARGUMENT', 'Server', $detail );
 			}
 			list( $pluginName, $postfix ) = explode( '-', $pluginFeatureAccess->Name, 2 );

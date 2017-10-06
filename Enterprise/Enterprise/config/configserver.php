@@ -257,7 +257,6 @@ if( !defined('EXTENSIONMAP') ) {
 		'.dmg' => array( 'application/x-apple-diskimage', 'Other' ),
 		'.htmlwidget' => array( 'application/ww-htmlwidget', 'Other'),
 		'.ofip' => array( 'application/x-ofip+zip', 'Other'), // Obsoleted, files can still be downloaded from the system
-	    '.folio' => array( 'application/vnd.adobe.folio+zip', 'Other'), // For DPS
 	)));
 }
 
@@ -1556,11 +1555,11 @@ if( !defined('LOG_INTERNAL_SERVICES') ) {
 }
 
 // LOG_DPS_SERVICES:
-//    Used for logging DPS Web services in the service log folder. When enabled, DPS requests  
-//    fired by Enterprise Server to Adobe DPS Server and the corresponding responses are logged. 
-//    Adobe DPS is a so called REST server. The REST services are logged in the service folder 
-//    (in OUTPUTDIRECTORY/soap) and have an AdobeDPS_ prefix and a .txt file extension. 
-//    By default, this log feature is disabled. It can be temporary enabled to troubleshoot DPS traffic.
+//    Used for logging Adobe AEM Web services in the service log folder. When enabled, requests
+//    fired by Enterprise Server to Adobe AEM Server and the corresponding responses are logged.
+//    Adobe AEM is a so called REST server. The REST services are logged in the service folder
+//    (in OUTPUTDIRECTORY/soap) and have an AdobeDps2_ prefix and a .txt file extension.
+//    By default, this log feature is disabled. It can be temporary enabled to troubleshoot Adobe AEM traffic.
 //    
 if( !defined('LOG_DPS_SERVICES') ) {
 	define( 'LOG_DPS_SERVICES', false );

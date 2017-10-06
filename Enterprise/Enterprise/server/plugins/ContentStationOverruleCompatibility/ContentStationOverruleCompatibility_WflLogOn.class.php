@@ -33,7 +33,6 @@ class ContentStationOverruleCompatibility_WflLogOn extends WflLogOn_EnterpriseCo
 				$pubChannelCount = count( $pubChannels );
 				for( $pc=$pubChannelCount-1; $pc>=0; $pc-- ) { //Walk thru all channels, start at end to allow deletion during the loop
 					if( $pubChannels[$pc]->Type == 'print' ||
-						$pubChannels[$pc]->Type == 'dps' ||
 						$pubChannels[$pc]->Type == 'dps2') { // Only print related channels can have overrule issues
 						$issues = $pubChannels[$pc]->Issues;
 						if( !empty($issues) && count( $issues) > 0 ) { // double check just to be sure in case we get wrong input
