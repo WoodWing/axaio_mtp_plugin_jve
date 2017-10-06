@@ -1649,6 +1649,8 @@ class BizWebEditWorkspace
 			$article->Name = null;
 			$article->Format = null;
 			$article->Version = null;
+			$article->WcmlVersion = null; // set in storeArticleAtFileSystem
+			$article->SharedContent = null; // only used with version 3.0; set in storeArticleAtFileSystem
 			$this->workspace->Articles[] = $article;
 		}
 
@@ -2015,7 +2017,6 @@ class BizWebEditWorkspace
 		}
 		return $docDomVersion;
 	}
-
 	/**
 	 * Create or Save article content. Updates $this->workspace->DOMVersion.
 	 *
@@ -2099,6 +2100,20 @@ class BizWebEditWorkspace
 		LogHandler::Log( 'BizWebEditWorkspace', 'INFO', 'Found DOMVersion "'.$this->workspace->DOMVersion.'"'.
 						' for workspace ID "'.$this->workspace->ID.'".' );
 
+		if( !isset($article->WcmlVersion)) {
+			$article->WcmlVersion = $icDoc->documentElement->getAttribute( 'ea:WWVersion' );
+			if( $article->WcmlVersion == '3.0' ) {
+				// Collect the wwsd_document from the article for later insertion
+				$icXPath = new DOMXPath( $icDoc );
+				$icXPath->registerNamespace( 'ea', 'urn:SmartConnection_v3' );
+				$icSharedContent = $icXPath->query( '/ea:Stories/ea:wwsd_document' );
+
+				if( $icSharedContent->length > 0 ) {
+					$article->SharedContent = $icDoc->saveXML( $icSharedContent->item( 0 ) );
+				}
+			}
+		}
+
 		// Save the changed content into article file
 		file_put_contents( $artPath, $icDoc->saveXML() ); // BZ#24337/BZ#24387 $icDoc->save() does an implicit URL decode!
 		$oldUmask = umask(0); // Needed for mkdir, see http://www.php.net/umask
@@ -2120,7 +2135,8 @@ class BizWebEditWorkspace
 	{
 		// Compose a delta story, which contains the changed stories since last preview operation.
 		$deltaContent = '<?xml version="1.0"?>'."\r\n";
-		$deltaContent .= '<ea:Stories xmlns:aic="http://ns.adobe.com/AdobeInCopy/2.0" xmlns:ea="urn:SmartConnection_v3" ea:WWVersion="2.0">'."\r\n";
+		$wcmlVersion = isset($article->WcmlVersion) ? $article->WcmlVersion : '2.0';
+		$deltaContent .= '<ea:Stories xmlns:aic="http://ns.adobe.com/AdobeInCopy/2.0" xmlns:ea="urn:SmartConnection_v3" ea:WWVersion="'.$wcmlVersion.'">'."\r\n";
 		if( $elements ) foreach( $elements as $element ) {
 			$content = $element->Content;
 			// Skip intermediate xml headers since the xml file already has one
@@ -2131,6 +2147,9 @@ class BizWebEditWorkspace
 				}
 			}
 			$deltaContent .= $content."\r\n";
+		}
+		if( isset($article->SharedContent) ) {
+			$deltaContent .= $article->SharedContent."\r\n";
 		}
 		$deltaContent .= '</ea:Stories>'."\r\n";
 
