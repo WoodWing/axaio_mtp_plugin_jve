@@ -1900,7 +1900,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 					'indexes' => array(
 						array('v' => '10.2', 'name' => 'primary', 	'fields' => 'featurename', 'primary' => true ),
 						array('v' => '10.2', 'name' => 'faid_profiles', 'fields' => 'featureid', 'unique' => true ),
-						array('v' => '10.2', 'name' => 'faaf_profiles', 'fields' => 'accessflag', 'unique' => true ),
+						array('v' => '10.2', 'name' => 'fafl_profiles', 'fields' => 'accessflag', 'unique' => false ),
 					),
 					'inserts' => array(
 					),

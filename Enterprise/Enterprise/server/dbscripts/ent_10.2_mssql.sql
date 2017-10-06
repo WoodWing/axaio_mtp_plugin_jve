@@ -878,7 +878,7 @@ CREATE TABLE [smart_featureaccess] (
   PRIMARY KEY ([featurename])
 );
 CREATE UNIQUE INDEX [faid_profiles] ON [smart_featureaccess]([featureid]) ;
-CREATE UNIQUE INDEX [faaf_profiles] ON [smart_featureaccess]([accessflag]) ;
+CREATE  INDEX [fafl_profiles] ON [smart_featureaccess]([accessflag]) ;
 
 CREATE TABLE [smart_appsessions] (
   [id] bigint NOT NULL  IDENTITY(1,1),

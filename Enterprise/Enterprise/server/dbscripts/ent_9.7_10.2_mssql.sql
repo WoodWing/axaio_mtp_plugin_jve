@@ -238,7 +238,7 @@ CREATE TABLE [smart_featureaccess] (
   PRIMARY KEY ([featurename])
 );
 CREATE UNIQUE INDEX [faid_profiles] ON [smart_featureaccess]([featureid]) ;
-CREATE UNIQUE INDEX [faaf_profiles] ON [smart_featureaccess]([accessflag]) ;
+CREATE  INDEX [fafl_profiles] ON [smart_featureaccess]([accessflag]) ;
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_appsessions', @columnName = 'id', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_appsessions DROP CONSTRAINT ' + @constraintName

@@ -129,7 +129,7 @@ CREATE TABLE `smart_featureaccess` (
   PRIMARY KEY (`featurename`)
 ) DEFAULT CHARSET=utf8;
 CREATE UNIQUE INDEX `faid_profiles` ON `smart_featureaccess`(`featureid`) ;
-CREATE UNIQUE INDEX `faaf_profiles` ON `smart_featureaccess`(`accessflag`) ;
+CREATE  INDEX `fafl_profiles` ON `smart_featureaccess`(`accessflag`) ;
 ALTER TABLE `smart_appsessions` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_appsessions` CHANGE `articleid`   `articleid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_appsessions` CHANGE `templateid`   `templateid` bigint(11) NOT NULL  default 0;
