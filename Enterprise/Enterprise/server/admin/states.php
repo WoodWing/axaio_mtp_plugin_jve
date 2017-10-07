@@ -282,8 +282,6 @@ switch( $mode ) {
 				$disableSkipIdsa = !IdsAutomationUtils::isLayoutObjectType( $type );
 			}
 
-
-
 			$deadlineRelativeFields[$i]->setValue( $status->DeadlineRelative );
 
 			$detailTxt .=
@@ -296,7 +294,7 @@ switch( $mode ) {
 					//.'<td>'.inputvar('automaticallysendtonext'.$i, trim($status->AutomaticallySendToNext), 'checkbox').'</td>'.HTML_EOL
 					.'<td>'.inputvar('readyforpublishing'.$i, trim($status->ReadyForPublishing), 'checkbox').'</td>'.HTML_EOL;
 					if ( $useSkipIdsa ) {
-						$detailtxt .= '<td>'.inputvar( 'skipidsa'.$i, trim( $status->SkipIdsa ), 'checkbox', null, true, null, $disableSkipIdsa ).'</td>';
+						$detailTxt .= '<td>'.inputvar( 'skipidsa'.$i, trim( $status->SkipIdsa ), 'checkbox', null, true, null, $disableSkipIdsa ).'</td>'.HTML_EOL;
 					}
 			$detailTxt .=
 					'<td>'.inputvar('nextstate'.$i, $nextStatusId, 'combo', $thisDomain, false).'</td>'.HTML_EOL
@@ -349,7 +347,7 @@ switch( $mode ) {
 				//.'<td>'.inputvar('automaticallysendtonext',trim($row['automaticallysendtonext']), 'checkbox').'</td>'.HTML_EOL
 				.'<td>'.inputvar('readyforpublishing',trim($row['readyforpublishing']), 'checkbox').'</td>'.HTML_EOL;
 				if ( $useSkipIdsa ) {
-					$detailtxt .= '<td>'.inputvar( 'skipidsa', trim( $row['skipidsa'] ), 'checkbox', null, true, null, $disableSkipIdsa ).'</td>';
+					$detailTxt .= '<td>'.inputvar( 'skipidsa', trim( $row['skipidsa'] ), 'checkbox', null, true, null, $disableSkipIdsa ).'</td>'.HTML_EOL;
 				}
 		$detailTxt .=
 				'<td>'.inputvar('nextstate', $row['nextstate'], 'combo', $statusDomain).'</td>'.HTML_EOL
@@ -418,16 +416,7 @@ print HtmlDocument::buildDocument($txt);
 function isIdsaUsed()
 {
 	require_once BASEDIR . '/server/bizclasses/BizServerPlugin.class.php';
-	$pluginObj = BizServerPlugin::getPluginForConnector( 'IdsAutomation_WflGetObjects' );
-	if( $pluginObj && $pluginObj->IsInstalled ) {
-		if( !$pluginObj->IsActive ) {
-			return false;
-		}
-	} else {
-		return false;
-	}
-
-	return true;
+	return BizServerPlugin::isPluginActivated( 'IdsAutomation' );
 }
 
 class StatusAdminApp
