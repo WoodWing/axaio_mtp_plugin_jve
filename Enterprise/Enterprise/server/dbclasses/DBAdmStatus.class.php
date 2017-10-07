@@ -278,7 +278,7 @@ class DBAdmStatus extends DBBase
 		if(!is_null($obj->Name))       $row['state']      = strval($obj->Name);
 		if(!is_null($obj->Produce))    $row['produce']    = ($obj->Produce == true ? 'on' : '');
 		if(!is_null($obj->Color))      $row['color']      = $obj->Color ? strval('#'.$obj->Color) : '#A0A0A0';
-		if(!is_null($obj->NextStatus)) $row['nextstate']  = $obj->NextStatus ? intval($obj->NextStatus->Id) : 0;
+		if(!is_null($obj->NextStatus)) $row['nextstate']  = $obj->NextStatus && ($obj->NextStatus->Id != $obj->Id) ? intval($obj->NextStatus->Id) : 0;
 		if(!is_null($obj->SortOrder))  $row['code']       = $obj->SortOrder ? intval($obj->SortOrder) : 0;
 		if(!is_null($obj->DeadlineRelative))           $row['deadlinerelative']           = $obj->DeadlineRelative ? intval($obj->DeadlineRelative) : 0;
 		if(!is_null($obj->CreatePermanentVersion))     $row['createpermanentversion']     = ($obj->CreatePermanentVersion == true ? 'on' : '');

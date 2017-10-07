@@ -325,14 +325,17 @@ switch( $mode ) {
 	case 'errorins':
 		if ($mode == 'errorins') {
 			$row = array(
-				'code' => $statusIns->SortOrder, 'state' => $statusIns->Name, 'produce' => $statusIns->Produce,
-				'nextstate' => ($statusIns->NextStatus) ? $statusIns->NextStatus->Id : 0, 'color' => $statusIns->Color,
+				'code' => $statusIns->SortOrder,
+				'state' => $statusIns->Name,
+				'produce' => $statusIns->Produce,
+				'nextstate' => ($statusIns->NextStatus) ? $statusIns->NextStatus->Id : 0,
+				'color' => $statusIns->Color,
 				'createpermanentversion' => $statusIns->CreatePermanentVersion, 
 				'removeintermediateversions' => $statusIns->RemoveIntermediateVersions,
 				'automaticallysendtonext' => $statusIns->AutomaticallySendToNext,
 				'readyforpublishing' => $statusIns->ReadyForPublishing,
 				'skipidsa' => $statusIns->SkipIdsa,
-				);
+			);
 		}
 		// 1 row to enter new record
 		$tcolor = $row['color'];
@@ -441,7 +444,7 @@ class StatusAdminApp
 		$obj->Produce           = (isset($req['produce'.$i]) && $req['produce'.$i] == 'on' ? true : false);
 		// Validate hex color (starts with # plus 6 alphanumeric characters, BZ#31651.
 		$obj->Color             = preg_match('/^#[a-f0-9]{6}$/i', $req['color'.$i]) ? substr($req['color'.$i], 1) : 'A0A0A0'; //remove # to make service validator happy
-		$obj->NextStatus         = (intval($req['nextstate'.$i])) ? new AdmIdName( intval($req['nextstate'.$i]), '') : null;
+		$obj->NextStatus         = (intval($req['nextstate'.$i])) ? new AdmIdName( intval($req['nextstate'.$i]) ) : new AdmIdName( $obj->Id );
 		$obj->SortOrder         = intval($req['code'.$i]);
 		$obj->DeadlineRelative  = $deadlineRel;
 		$obj->CreatePermanentVersion     = (isset( $req['createpermanentversion'.$i] )     && $req['createpermanentversion'.$i]     == 'on' ? true : false);
