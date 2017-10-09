@@ -206,7 +206,7 @@ class DBAdmEdition extends DBBase
 		$edition->Id               = intval($row['id']);
 		$edition->Name             = strval($row['name']);
 		$edition->Description      = strval($row['description']);
-		$edition->DeadlineRelative = strval($row['deadlinerelative']);
+		$edition->DeadlineRelative = intval($row['deadlinerelative']);
 		$edition->SortOrder        = intval($row['code']);
 		return $edition;
 	}

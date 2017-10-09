@@ -319,7 +319,7 @@ switch( $mode ) {
 		break;
 	case 'add':
 		$row = array("code"=>'', "state" => '', "produce" => '', 'nextstate' => '', "phase" => $phasedomain['Production'], 'color' => '#a0a0a0',
-				'deadlinerelative' => '', 'createpermanentversion' => '', 'automaticallysendtonext' => '',
+				'deadlinerelative' => 0, 'createpermanentversion' => '', 'automaticallysendtonext' => '',
 				'removeintermediateversions' => '', 'readyforpublishing' => '', 'skipidsa' => '' );
 		// no break
 	case 'errorins':
@@ -339,7 +339,13 @@ switch( $mode ) {
 		}
 		// 1 row to enter new record
 		$tcolor = $row['color'];
-		$deadlineRelativeField->setValue( DateTimeFunctions::validRelativeTime( $row['deadlinerelative'] ) );
+		$deadlineRelativeField->setValue( $row['deadlinerelative'] );
+
+		$disableSkipIdsa = true;
+		if ( $useSkipIdsa ) {
+			require_once BASEDIR.'/server/plugins/IdsAutomation/IdsAutomationUtils.class.php';
+			$disableSkipIdsa = !IdsAutomationUtils::isLayoutObjectType( $type );
+		}
 		$detailTxt .=
 			'<tr>'.HTML_EOL
 				.'<td>'.inputvar('code', $row['code'], 'small').'</td>'.HTML_EOL
