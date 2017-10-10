@@ -75,8 +75,12 @@ class ValueGenerator extends AbstractGenerator
      * @param string      $outputMode
      * @param null|SplArrayObject|StdlibArrayObject $constants
      */
-    public function __construct($value = null, $type = self::TYPE_AUTO, $outputMode = self::OUTPUT_MULTIPLE_LINE, $constants = null)
-    {
+    public function __construct(
+        $value = null,
+        $type = self::TYPE_AUTO,
+        $outputMode = self::OUTPUT_MULTIPLE_LINE,
+        $constants = null
+    ) {
         // strict check is important here if $type = AUTO
         if ($value !== null) {
             $this->setValue($value);
@@ -168,8 +172,10 @@ class ValueGenerator extends AbstractGenerator
             $type = $this->type;
         }
 
-        // valid types for constants
-        $scalarTypes = [
+        $validConstantTypes = [
+            self::TYPE_ARRAY,
+            self::TYPE_ARRAY_LONG,
+            self::TYPE_ARRAY_SHORT,
             self::TYPE_BOOLEAN,
             self::TYPE_BOOL,
             self::TYPE_NUMBER,
@@ -182,7 +188,7 @@ class ValueGenerator extends AbstractGenerator
             self::TYPE_NULL
         ];
 
-        return in_array($type, $scalarTypes);
+        return in_array($type, $validConstantTypes);
     }
 
     /**

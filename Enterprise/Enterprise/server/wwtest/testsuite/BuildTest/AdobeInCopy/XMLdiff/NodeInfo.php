@@ -55,6 +55,7 @@ class NodeInfo
 	 * Default constructor
 	 *
 	 * @param mixed $node
+	 * @throws Exception
 	 */
 	public function __construct($node)
 	{
@@ -154,7 +155,7 @@ class NodeInfo
 	/**
 	 * Get node XPath expression
 	 *
-	 * @param string $xpath
+	 * @return string
 	 */
 	public function getXPath()
 	{
@@ -185,6 +186,7 @@ class NodeInfo
 	/**
 	 * Determine if two NodeInfo objects are equals
 	 *
+	 * @param NodeInfo $obj
 	 * @return boolean
 	 */
 	public function equals(NodeInfo $obj)
@@ -246,7 +248,7 @@ class NodeInfo
 	/**
 	 * Get delta actions to transform current node into given node
 	 *
-	 * @param DOMNode $n Node to compare
+	 * @param NodeInfo $n Node to compare
 	 * @return array
 	 */
 	public function getDelta(NodeInfo $n)
@@ -310,4 +312,3 @@ class NodeInfo
 		return $delta;
 	}
 }
-?>

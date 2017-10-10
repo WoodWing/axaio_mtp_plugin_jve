@@ -48,7 +48,7 @@ class WflLogOnResponse
 	 * @param Term[]               $Terms                     Nullable.
 	 * @param FeatureProfile[]     $FeatureProfiles           Nullable.
 	 * @param Message[]            $Messages                  Nullable.
-	 * @param Color                $TrackChangesColor         Nullable.
+	 * @param string               $TrackChangesColor         Nullable.
 	 * @param Dictionary[]         $Dictionaries              Nullable.
 	 * @param MessageList          $MessageList               Nullable.
 	 * @param User                 $CurrentUser               Nullable.

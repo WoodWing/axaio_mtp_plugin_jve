@@ -86,7 +86,10 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	public function query( $sql, $params=array(), $blob=null, $writeLog=true, $logExistsErr=true )
 	{
 		PerformanceProfiler::startProfile( 'db query (mysql)', 4 );
-		
+
+		$logSQL = $writeLog && ( LogHandler::debugMode() || LOGSQL == true ); // BZ#14442
+		$startTime = $logSQL ? microtime( true ) : null;
+
 		try {
 			$sql = self::substituteParams($sql, $params);
 		}
@@ -94,8 +97,8 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 			LogHandler::Log('mysql', 'ERROR', $e->getMessage());
 			return null;
 		}
+
 		$cleanSql = $sql; // remember for logging (before adding blob data)
-		$logSQL = $writeLog && ( LogHandler::debugMode() || LOGSQL == true ); // BZ#14442
 
 		// handle blobs
 		if( is_null($blob) ) {
@@ -157,7 +160,8 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 				$cleanSql,
 				$rowCnt,
 				__CLASS__,
-				__FUNCTION__ );
+				__FUNCTION__,
+				microtime( true ) - $startTime );
 		}
 		
 		PerformanceProfiler::stopProfile( 'db query (mysql)', 4 );
@@ -545,10 +549,10 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	}
 	
 	/**
-	 * Truncates table named $tablename. Truncate is faster than 'DELETE'. 
+	 * Truncates table named $tablename. Truncate is faster than 'DELETE'.
+	 *
 	 * @param string $tablename name of the table
-	 * @return nothing
-	**/
+	 */
 	public function truncateTable($tablename)
 	{
 		PerformanceProfiler::startProfile( 'truncateTable', 4 );
@@ -966,8 +970,6 @@ class mysqlidriver extends WW_DbDrivers_DriverBase
 	 */
 	public function isCompleteStatement( &$statement )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$statement = $statement;
 		return true;
 	}
 

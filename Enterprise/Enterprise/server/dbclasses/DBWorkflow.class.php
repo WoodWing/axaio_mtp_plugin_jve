@@ -99,7 +99,7 @@ class DBWorkflow extends DBBase
 			$params[] = intval( $sectiondefid );
 		}
 
-		return self::listRows( 'issuesectionstate', 'id', 'state', $where, $fieldnames );
+		return self::listRows( 'issuesectionstate', 'id', 'state', $where, $fieldnames, $params );
 	}
 
 	public static function updateIssueSectionState( $issuesectionstateid, $values )
@@ -150,7 +150,7 @@ class DBWorkflow extends DBBase
 	{
 		$result = null;
 		$params = array( intval( $issueId ), intval( $categoryId ), intval( $statusId ) );
-		$stateexists = self::getRow( 'issuesectionstate', " `issue` = ? AND `section` = ? AND `state` = ? ", '*', $params );
+		$stateexists = self::getRow( 'issuesectionstate', " `issue` = ? AND `section` = ? AND `state` = ? ", array('id'), $params );
 		if( $stateexists ) {
 			if( $updateIfExists ) {
 				$result = self::updateIssueSectionState( $stateexists['id'], $values );

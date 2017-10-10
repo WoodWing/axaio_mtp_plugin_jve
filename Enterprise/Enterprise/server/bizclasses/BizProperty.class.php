@@ -1078,7 +1078,6 @@ class BizProperty
 
 		// Debug: Just check these hugh lists if there are any keys missing (against each other)
 		if( LogHandler::debugMode() ) {
-			require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 			$a = array_diff( array_keys(self::$InfoProps), array_keys(self::$MetaProps) );
 			if( count( $a ) ) {
 				throw new BizException( '', 'Server', '', __METHOD__.' - InfoProps and MetaProps are different: '.implode(',',$a) );
@@ -2420,27 +2419,6 @@ class BizProperty
 		 */
 
 		switch (DBTYPE) {
-			case 'oracle':
-				$dbTypeMap = array(
-					"string"			=> "varchar(255) default ''",
-					"multistring"		=> "clob",
-					"multiline"			=> "clob",
-					"bool"				=> ($theTable == 'objects' || $theTable == 'deletedobjects' || $theTable == '') ? "integer default 0" : "varchar(2) default ''",
-					"int"				=> "integer default 0",
-					"double"			=> "float default 0.0",
-					"date"				=> "varchar(20) default ''",
-					"datetime"			=> "varchar(20) default ''",
-					"list"				=> "varchar(255) default ''",
-					"multilist"			=> "clob",
-					"password"			=> "varchar(40) default ''",
-					"language"			=> "varchar(4) default ''",
-					"color"				=> "varchar(11) default ''",
-					"fileselector"		=> "varchar(255) default ''",
-					"file"		        => "varchar(255) default ''",
-					"articlecomponentselector" => "varchar(255) default ''",
-					"articlecomponent"	=> "varchar(255) default ''",
-				);
-				break;
 			case 'mssql':
 				$dbTypeMap = array(
 					"string"			=> "varchar(255) default ''",
@@ -2623,7 +2601,7 @@ class BizProperty
 	 * Checks if the default value is an element of the (multi)list.
 	 *
 	 * @param string $type Type of the property.
-	 * @param array $list List containing allowed values.
+	 * @param string $list List containing allowed values (packed as comma separated string).
 	 * @param string $default Default value.
 	 * @throws BizException Throws BizException when the validation fails.
 	 */

@@ -55,14 +55,13 @@ class DBChannel extends DBBase
 	 * - print
 	 * - web
 	 * - sms
-	 * - dps
-	 * - dps2 (Adobe DPS 2015)
+	 * - dps2 (Adobe AEM)
 	 *
 	 * @return string[]
 	 */
 	public static function listChannelTypes()
 	{
-		return array( 0 => 'other', 1 => 'print', 2 => 'web', 3 => 'sms', 6 => 'dps', 7 => 'dps2' );
+		return array( 0 => 'other', 1 => 'print', 2 => 'web', 3 => 'sms', 7 => 'dps2' );
 	}
 
 	public static function updateChannel( $channelId, $values )
@@ -260,7 +259,7 @@ class DBChannel extends DBBase
 	{
 		$where = '`publicationid` = ? AND `publishsystemid` = ? ';
 		$params = array( intval( $publicationId ), strval( $publishSystemId ) );
-		$row = DBBase::getRow( self::TABLENAME, $where, array( 'id' ), $params );
+		$row = self::getRow( self::TABLENAME, $where, array( 'id' ), $params );
 		return isset( $row['id'] ) ? $row['id'] : null;
 	}
 
@@ -277,7 +276,27 @@ class DBChannel extends DBBase
 		$channelObjects = array();
 		$where = '`publicationid` = ? AND `type` = ? ';
 		$params = array( intval( $brandId ), $type );
-		$rows = DBBase::listRows( self::TABLENAME, 'id', '', $where, '*', $params );
+		$rows = self::listRows( self::TABLENAME, 'id', '', $where, '*', $params );
+		if( $rows ) foreach( $rows as $row ) {
+			$channelObjects[] = self::rowToObj( $row );
+		}
+
+		return $channelObjects;
+	}
+
+	/**
+	 * Returns all channels of a certain type.
+	 *
+	 * @since 10.2.0
+	 * @param string $type
+	 * @return PubChannelInfo[]
+	 */
+	static public function getChannelsByType( $type )
+	{
+		$channelObjects = array();
+		$where = '`type` = ? ';
+		$params = array( strval( $type ) );
+		$rows = self::listRows( self::TABLENAME, '', '', $where, '*', $params );
 		if( $rows ) foreach( $rows as $row ) {
 			$channelObjects[] = self::rowToObj( $row );
 		}

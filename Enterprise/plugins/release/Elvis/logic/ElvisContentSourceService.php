@@ -479,7 +479,6 @@ class ElvisContentSourceService
 	 */
 	public function exportOriginalForAsset( $assetId )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		try {
 			$params = array( $assetId, HTTP_FILE_TRANSFER_REMOTE_URL, BizSession::getTicket() );
 			$resp = ElvisAMFClient::send( self::SERVICE, 'exportOriginal', $params );

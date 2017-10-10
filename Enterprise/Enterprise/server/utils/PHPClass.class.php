@@ -15,7 +15,7 @@ class WW_Utils_PHPClass
 	 *
 	 * @param object $oldObject     Object instance to cast.
 	 * @param string $newClassname  Class to cast object to.
-	 * @return object The casted object instance.
+	 * @return mixed The casted object instance.
 	 * @throws BizException
 	 */
 	static public function typeCast( $oldObject, $newClassname ) 

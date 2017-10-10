@@ -20,7 +20,6 @@
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
 require_once BASEDIR.'/server/bizclasses/BizServerJobHandler.class.php';
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 class BizAutoPurge extends BizServerJobHandler
 {
@@ -58,7 +57,7 @@ class BizAutoPurge extends BizServerJobHandler
 	 * than the returned DateTime by this function will be selected for purging.
 	 *
 	 * @param int $purgeAfterNoOfDay Number of days older than the current Day
-	 * @return date
+	 * @return string
 	 */
 	public static function getDateForPurging( $purgeAfterNoOfDay=0 )
 	{

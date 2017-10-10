@@ -40,6 +40,5 @@ abstract class WflSuggestions_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflSuggestionsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

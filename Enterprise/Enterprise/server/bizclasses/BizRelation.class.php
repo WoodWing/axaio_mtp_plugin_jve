@@ -878,6 +878,23 @@ class BizRelation
 								break;
 						}
 						break;
+					// Since 10.2 we allow placing images on articles for the Digital Editor (CSDE).
+					// Some more child types we allow just to be flexible and prepared for the future.
+					case 'Article':
+						switch ($childType) {
+							case 'Image':
+							case 'Audio':
+							case 'Video':
+							case 'Hyperlink':
+							case 'Presentation':
+							case 'Archive':
+							case 'Other':
+								$result = true;
+								break;
+							default:
+								break;
+						}
+						break;
 					default:
 						break;
 				}
@@ -1666,7 +1683,7 @@ class BizRelation
 	}
 
 	/**
-	 * Do the folowing automatic relation target assignments:
+	 * Do the following automatic relation target assignments:
 	 * - when a printable object is added to a dossier, target it automatically to the print targets of the dossier
 	 * - when a printable object is added to a layout, target it automatically to the same targets as the layout
 	 * - when a layout is added to a dossier that has the same issue assigned, the target must be added to the layout too
@@ -1721,8 +1738,7 @@ class BizRelation
 					foreach ($parentObjectTargets as $parentObjectTarget){
 						$channel = DBAdmPubChannel::getPubChannelObj($parentObjectTarget->PubChannel->Id);
 						// BZ#18767 - Add to Target when channel type match and channel object type found
-						if( ( $channel->Type == 'print' && isset($printableObjectTypes[$childType]) ) ||
-							( $channel->Type == 'dps' && isset($dpsObjectTypes[$childType]) ) ) {
+						if( ( $channel->Type == 'print' && isset($printableObjectTypes[$childType]) ) ) {
 							BizTarget::addToTargetArray($relation->Targets, $parentObjectTarget);
 						}
 					}

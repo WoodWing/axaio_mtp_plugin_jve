@@ -214,7 +214,7 @@ class WW_TestSuite_BuildTest_TargetHandling_Setup_TestCase extends TestCase
 		$response = $this->globalUtils->callService( $this, $request, $stepInfo );
 		$this->assertAttributeInternalType( 'array', 'Editions', $response );
 		$this->assertAttributeCount( 1, 'Editions', $response ); // check $response->Editions[0]
-		$this->assertInstanceOf( 'stdClass', $response->Editions[0] ); // TODO: should be AdmEdition
+		$this->assertInstanceOf( 'AdmEdition', $response->Editions[0] );
 		return $response->Editions[0];
 	}
 }

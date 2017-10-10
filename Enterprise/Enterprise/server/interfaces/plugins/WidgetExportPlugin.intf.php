@@ -14,11 +14,12 @@ interface WidgetExportPlugin
 	 * Process the widget to customize the exported widget.
 	 * 
 	 * @param Object $entDossier - READ ONLY - Current Enterprise dossier object
-	 * @param Object $entObject - READ ONLY - Current Enterprise Widget object
+	 * @param Object $entWidget - READ ONLY - Current Enterprise Widget object
 	 * @param OutputDevice $outputDevice - READ ONLY - Current export device object 
 	 * @param string $widgetRootPath - READ ONLY - Path to the root of the widget
 	 * @param array $widgetPlacement - READ ONLY - Info about the placement within the magazine
 	 * @param DOMDocument $manifestDocument - The manifest DOM document. Can be changed
 	 */
-	public function processWidget( Object $entDossier, Object $entWidget, OutputDevice $outputDevice, $widgetRootPath, array $widgetPlacement, DOMDocument $manifestDocument);
+	public function processWidget( /** @noinspection PhpLanguageLevelInspection */ Object $entDossier,
+		Object $entWidget, OutputDevice $outputDevice, $widgetRootPath, array $widgetPlacement, DOMDocument $manifestDocument);
 }

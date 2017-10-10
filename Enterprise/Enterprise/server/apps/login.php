@@ -37,9 +37,6 @@ if ($logout)
 		$service = new WflLogOffService();
 		$service->execute( new WflLogOffRequest( $ticket, false, null, null ) );
 		setLogCookie( 'ticket', '' );
-		
-		require_once BASEDIR.'/server/apps/webapplicense.inc.php';
-		logoffWebApps();
 	}
 	catch( BizException $e ) {
 		$message = $e->getMessage(); // . ': '. $e->getDetail(); // BZ#9890: No details for SQL injection attacks
@@ -159,7 +156,7 @@ if (!$loginsucceed) {
 
 	$messageList = '';
 	// Running in debug mode?
-	if( OUTPUTDIRECTORY != '' || ini_get('display_errors') != "0" ) {
+	if( LogHandler::debugMode() ) {
 		$messageList .= '<font size="2" color="#ff0000"><b>'.BizResources::localize('ACT_RUNNING_IN_DEBUG_MODE').'</b></font><br/>';
 	}
 	// Message param given?
@@ -174,10 +171,10 @@ if (!$loginsucceed) {
 	$tpl .= "\n" . $errNoJavascript;
 	print HtmlDocument::buildDocument( $tpl, false );
 }
-else	// is succedeed
+else	// is succeeded
 {
 	$shortusername = BizSession::getShortUserName();
-	// homepage for succesfull logon
+	// homepage for successful logon
 	$isadmin = hasRights( DBDriverFactory::gen(), $shortusername, 'Web' );
 	$ispubladmin = publRights( DBDriverFactory::gen(), $shortusername );
 	if( $isadmin || $ispubladmin ) { // admin user

@@ -234,7 +234,7 @@ class SolariumClient
 	 * Creates a new select and returns the query object.
 	 *
 	 * @param array|null $options Array with initial options for select
-	 * @return Solarium/QueryType/Select/Query/Query|null $query
+	 * @return Solarium\QueryType\Select\Query\Query|null $query
 	 */
 	public function createSelect( $options = null )
 	{
@@ -256,7 +256,7 @@ class SolariumClient
 	 *
 	 * @param Solarium/QueryType/Select/Query/Query $query
 	 * @throws BizException
-	 * @return Solarium/QueryType/Select/Result|null $resultSet
+	 * @return Solarium\QueryType\Select\Result\Result|null $resultSet
 	 */
 	public function executeSelect( $query )
 	{

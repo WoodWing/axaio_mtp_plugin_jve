@@ -1,5 +1,4 @@
 <?php
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 require_once dirname(__FILE__).'/../config.php';
 
 class ElvisSessionUtil

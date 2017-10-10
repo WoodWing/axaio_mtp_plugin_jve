@@ -30,7 +30,6 @@ abstract class InDesignServerJob_EnterpriseConnector extends DefaultConnector
 	 */
 	public function skipJobCreation( InDesignServerJob $job )
 	{
-		$job = $job;
 		return false;
 	}
 
@@ -70,7 +69,6 @@ abstract class InDesignServerJob_EnterpriseConnector extends DefaultConnector
 	 */
 	public function beforeCreateJob( InDesignServerJob $job )
 	{
-		$job = $job;
 	}
 
 	// ===================================================================================

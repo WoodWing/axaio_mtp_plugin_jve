@@ -24,8 +24,13 @@ Enterprise/Enterprise/server/_productversionextra.txt
 Enterprise/.idea/**
 !Enterprise/.idea/codeStyleSettings.xml
 !Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml
+!Enterprise/.idea/scopes/EnterpriseCodeInspection.xml
+!Enterprise/.idea/php.xml
 !Enterprise/.idea/modules.xml
 !Enterprise/.idea/Enterprise.iml
 
 # contentstation folder (Content Station HTML)
 Enterprise/Enterprise/contentstation
+
+# Docker folder
+Enterprise/Docker

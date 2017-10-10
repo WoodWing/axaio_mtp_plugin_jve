@@ -155,17 +155,13 @@ class WW_TestSuite_BuildTest_AdobeInCopy_AdobeInCopyConverter_TestCase extends T
 
 	public function skipFile( $filePath, $level )
 	{
-		$filePath = $filePath; $level = $level; // keep analyzer happy
 	}
 
 	public function iterFolder( $folderPath, $level )
 	{
-		$folderPath = $folderPath; $level = $level; // keep analyzer happy
 	}
 
 	public function skipFolder( $folderPath, $level )
 	{
-		$folderPath = $folderPath; $level = $level; // keep analyzer happy
 	}
-
 }

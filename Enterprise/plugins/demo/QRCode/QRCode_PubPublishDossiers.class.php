@@ -58,7 +58,6 @@ class QRCode_PubPublishDossiers extends PubPublishDossiers_EnterpriseConnector
 			// Get the Dossier object (being published)
 			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 			require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			require_once BASEDIR.'/server/bizclasses/BizWorkflow.class.php';
 			$user = BizSession::getShortUserName();
 			$dossier = BizObject::getObject( $dossierID, $user, false, 'none', array() );

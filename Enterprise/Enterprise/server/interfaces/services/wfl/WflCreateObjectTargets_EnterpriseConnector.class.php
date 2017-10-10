@@ -40,6 +40,5 @@ abstract class WflCreateObjectTargets_EnterpriseConnector extends ServiceConnect
 	 */
 	public function onError( WflCreateObjectTargetsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

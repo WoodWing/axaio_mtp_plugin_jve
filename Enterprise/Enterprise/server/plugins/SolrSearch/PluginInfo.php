@@ -36,4 +36,13 @@ class SolrSearch_EnterprisePlugin extends EnterprisePlugin
 			'ConfigFiles_EnterpriseConnector', // since 10.1.1
 		);
 	}
+
+	/**
+	 * @inheritdoc
+	 * @since 10.2.0
+	 */
+	public function isActivatedByDefault()
+	{
+		return false;
+	}
 }

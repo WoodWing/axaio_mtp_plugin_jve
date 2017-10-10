@@ -924,7 +924,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishManager_QueryPublishM
 	/**
 	 * Validate the WflNamedQueryResponse result
 	 *
-	 * @param Object $response WflNamedQueryResponse object
+	 * @param WflNamedQueryResponse $response
 	 * @param string $testCaseName
 	 * @param bool $expectedFormAdded
 	 * @return bool
@@ -988,7 +988,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishManager_QueryPublishM
 	 * Check the Response object to see if we have an Object that matches the passed ID.
 	 *
 	 * @param WflNamedQueryResponse $response The Response Object
-	 * @param int $publishFormId The PublishForm ID.
+	 * @param int $objectId
 	 * @return bool Whether or not the Object ID was found in the Response.
 	 */
 	private function responseContainsObject( WflNamedQueryResponse $response, $objectId )

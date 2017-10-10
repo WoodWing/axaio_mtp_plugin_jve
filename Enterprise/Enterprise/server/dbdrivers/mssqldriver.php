@@ -94,6 +94,9 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	{
 		PerformanceProfiler::startProfile( 'db query (mssql)', 4 );
 
+		$logSQL = $writeLog && ( LogHandler::debugMode() || LOGSQL == true ); // BZ#14442
+		$startTime = $logSQL ? microtime( true ) : null;
+
 		try {
 			$sql = self::substituteParams($sql, $params);
 		}
@@ -103,9 +106,7 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 		}		
 		
 		$sql = $this->_dbindep($sql); // See note AAA
-
 		$cleanSql = $sql; // remember for logging (before adding blob data)
-		$logSQL = $writeLog && ( LogHandler::debugMode() || LOGSQL == true ); // BZ#14442
 
 		// handle blobs
 		if( is_null($blob) ) { // Make sure insert/update does not fail in case of #BLOB# and $blob equals null
@@ -177,7 +178,8 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 				$cleanSql,
 				$rowCnt,
 				__CLASS__,
-				__FUNCTION__ );
+				__FUNCTION__,
+				microtime( true ) - $startTime );
 		}
 
 		PerformanceProfiler::stopProfile( 'db query (mssql)', 4 );
@@ -666,8 +668,7 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	/**
 	 * Truncates table named $tablename. Truncate is faster than 'DELETE'. 
 	 * @param string $tablename name of the table
-	 * @return nothing
-	**/
+	 */
 	public function truncateTable($tablename)
 	{
 		PerformanceProfiler::startProfile( 'truncateTable', 4 );
@@ -730,7 +731,6 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 		return $this->quoteIdentifier('#' . $name);
 	}	
 
-	/** @noinspection PhpDocMissingThrowsInspection PhpDoc expects a '@throws null' since $e is initialized as null. */
 	/**
 	 * Retrieves the DB version and checks if this DB driver is compatible with that.
 	 *
@@ -739,35 +739,88 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	 */
 	public function checkDbVersion( &$help )
 	{
-		// Check MSSQL driver version, dbdriver must be connected (BZ#16885)
-		//    => Too old versions could cause empty SOAP responses (such as BZ#16193) ... !
-		//       This is pretty unpredictable, but seem to happen when an SQL error has occurred before.
-		$e = null;
 		$mssqlInfo = $this->getClientServerInfo();
-		$extVerCmp = implode( '.', array_slice( explode('.',$mssqlInfo['ExtensionVer']), 0, 2 ) ); // take out "major.minor" only!
-		if( version_compare( $extVerCmp, '3.0' ) === -1 ) { // lower?
-			$help = 'Install (or update) the PHP extension for MSSQL.';
-			$detail = 'Unsupported version of PHP extension for MSSQL. '.
-				'Found php_sqlsrv.dll v'.$mssqlInfo['ExtensionVer'].' which is too old. Required is v3.0 (or higher).';
-			$e = new BizException( null, 'Server', $detail, 'Invalid Configuration' );
-		}
-		// Check revision version too! In case of an older revision you cannot read "real" data types from SQL Server.
-		if( version_compare( $mssqlInfo['DriverVer'], '11.00.2100' ) === -1 ) { // lower?
-			$help = 'Install (or update) MSSQL native client 2012, even when you are using MSSQL 2008! ' .
-					'Get it from <a href="http://www.microsoft.com/en-us/download/details.aspx?id=29065">'.
-					'Microsoft SQL Server 2012 Feature Pack.</a>';
-			$detail = 'Unsupported version of Microsoft SQL Server Native Client. '.
-				'Found PHP driver v'.$mssqlInfo['DriverVer'].' which is too old. Required is v11.00.2100 (or higher).';
-			$e = new BizException( null, 'Server', $detail, 'Invalid Configuration' );
-		}
-		if( $e ) {
-			$infoList = '';
-			if( $mssqlInfo ) foreach( $mssqlInfo as $key => $value ) {
-				$infoList .= "$key = $value\r\n";
+		try {
+			// Check the Microsoft Driver version for PHP.
+			// Note that the dbdriver must be connected (BZ#16885)
+			//    => Too old versions could cause empty SOAP responses (such as BZ#16193) ... !
+			//       This is pretty unpredictable, but seem to happen when an SQL error has occurred before.
+			// Driver 4.3 is required by PHP 7.1 which is required by ES 10.2
+			$extensionVersion = implode( '.', array_slice( explode( '.', $mssqlInfo['ExtensionVer'] ), 0, 2 ) ); // take out "major.minor" only!
+			if( version_compare( $extensionVersion, '4.3' ) !== 0 ) {
+				$help = 'Install Microsoft Driver 4.3 for PHP for SQL Server.'; // returned by reference
+				$detail = 'Unsupported version of Microsoft Driver for PHP for SQL Server. '.
+					'Found v'.$mssqlInfo['ExtensionVer'].' which is not supported.';
+				throw new BizException( null, 'Server', $detail, 'Invalid Configuration' );
 			}
-			LogHandler::Log( 'mssql', 'INFO', "MSSQL driver information:\r\n{$infoList}" );
+
+			// Check the Microsoft ODBC Driver version.
+			if( !$this->isValidMsSqlOdbcDriverVersion( $mssqlInfo['DriverVer'] ) ) {
+				$help = 'Install Microsoft ODBC Driver 11 for SQL Server or Microsoft ODBC Driver 13.1 for SQL Server.'; // returned by reference
+				$detail = 'Unsupported version of Microsoft ODBC Driver for SQL Server. '.
+					'Found v'.$mssqlInfo['DriverVer'].' which is not supported.';
+				throw new BizException( null, 'Server', $detail, 'Invalid Configuration' );
+			}
+
+			// Check the SQL Server version.
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+			// Internal SQL Server version => SQL Server version:
+			//  10.0 => SQL Server 2008
+			//  10.5 => SQL Server 2008 R2
+			//  11.0 => SQL Server 2012
+			//  12.0 => SQL Server 2014
+			//  13.0 => SQL Server 2016
+			// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+			// SQL Server 2014 or 2016 is required by ES 10.2
+			$serverVersion = implode( '.', array_slice( explode( '.', $mssqlInfo['SQLServerVersion'] ), 0, 2 ) ); // take out "major.minor" only!
+			if( version_compare( $serverVersion, '12.0' ) !== 0 && version_compare( $serverVersion, '13.0' ) !== 0 ) {
+				$help = 'Install SQL Server 2014 or SQL Server 2016.'; // returned by reference
+				$detail = 'Unsupported version of Microsoft SQL Server. '.
+					'Found v'.$mssqlInfo['SQLServerVersion'].' which is not supported.';
+				throw new BizException( null, 'Server', $detail, 'Invalid Configuration' );
+			}
+		} catch( BizException $e ) {
+			// Throw back the very first found error to caller, yet log ALL version info, as handled below.
+		}
+
+		// Log all DB client/server information.
+		$infoList = '';
+		if( $mssqlInfo ) foreach( $mssqlInfo as $key => $value ) {
+			$infoList .= "$key = $value\r\n";
+		}
+		LogHandler::Log( 'mssql', 'INFO', "MSSQL driver information:\r\n{$infoList}" );
+
+		// Raise error in case unsupported versions were detected above.
+		if( isset( $e ) ) {
 			throw $e;
 		}
+	}
+
+	/**
+	 * Check whether the installed MSSQL ODBC driver version is supported.
+	 *
+	 *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	 * Microsoft Driver version for PHP => Microsoft ODBC Driver version (and internal version):
+	 * 3.1 => ODBC Driver 11 (12.0)
+	 * 3.2 => ODBC Driver 11 (12.0)
+	 * 4.0 => ODBC Driver 11 / 13.0 (12.0 / 13.00.811)
+	 * 4.3 => ODBC Driver 11 / 13.1 (12.0 / 13.00.4413)
+	 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	 * ODBC 11 or 13.1 is required by Driver 4.3
+	 *
+	 * @since 10.2.0
+	 * @param string $driverVersion
+	 * @return bool
+	 */
+	private function isValidMsSqlOdbcDriverVersion( $driverVersion )
+	{
+		$driverVersionTwoDigits = implode( '.', array_slice( explode( '.', $driverVersion ), 0, 2 ) ); // take out "major.minor" only!
+		$driverVersionThreeDigits = implode( '.', array_slice( explode( '.', $driverVersion ), 0, 3 ) ); // take out "major.minor.patch" only!
+
+		$isValid12 = version_compare( $driverVersionTwoDigits, '12.0', '=' );
+		$isValid13 = version_compare( $driverVersionThreeDigits, '13.0.4413', '>=' ) && version_compare( $driverVersionTwoDigits, '13.1', '<' );
+
+		return ($isValid12 || $isValid13);
 	}
 	
 	/**
@@ -1042,9 +1095,6 @@ class mssqldriver extends WW_DbDrivers_DriverBase
 	 */
 	public function isCompleteStatement( &$statement )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$statement = $statement;
-
 		return true;
 	}
 

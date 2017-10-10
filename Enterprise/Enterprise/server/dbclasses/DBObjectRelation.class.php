@@ -389,8 +389,6 @@ class DBObjectRelation extends DBBase
 				}
 				$where .= $typeWhere;
 				$params = array_merge( $paramsIds, $paramsType);
-				/** @noinspection PhpSillyAssignmentInspection */
-				$params = $params; // keep analyzer happy
 				break;
 			case 'childs':
 				if( $multiIds ) {

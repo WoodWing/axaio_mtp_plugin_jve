@@ -72,7 +72,6 @@ class ElvisUpdateManager
 	public static function sendUpdateObjectsByIds( $objectIds, $shadowObjectRelations, $areas = null )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 		$objects = array();
 		if( $objectIds ) foreach( $objectIds as $objectId ) {
@@ -116,7 +115,6 @@ class ElvisUpdateManager
 	public static function sendDeleteObjectsByIds( $objectIds, $areas = null )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 		$objects = array();
 		if( $objectIds ) foreach( $objectIds as $objectId ) {
@@ -139,7 +137,6 @@ class ElvisUpdateManager
 	 */
 	private static function composeElvisUpdateObjects( $objects, array $shadowObjectRelationsPerLayout )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisObjectDescriptor.php';
 		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisUpdateObjectOperation.php';
 		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisObjectRelation.php';
@@ -456,7 +453,6 @@ class ElvisUpdateManager
 	 */
 	public static function composeElvisDeleteObjects( $objects )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisObjectDescriptor.php';
 		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisEntityDescriptor.php';
 		require_once dirname(__FILE__) . '/../model/relation/operation/ElvisDeleteObjectOperation.php';

@@ -20,7 +20,8 @@ class WW_AMF_Services
 	}
 	
 	/**
-	 * Casts a stdClass object to a request object.
+	 * Casts an object to a request object.
+	 *
 	 * This is typical for AMF; On arrival, it is unknown to which service to dispatch
 	 * since the request is binary. After letting Zend parse the request, we know it
 	 * but we are too late to do classmapping. And, we do not want to include all requests
@@ -28,9 +29,9 @@ class WW_AMF_Services
 	 *
 	 * PHP does not support class casting, so we'll simply copy the object members.
 	 *
-	 * @param object $req Request to cast.
+	 * @param mixed $req Request to cast.
 	 * @param string $requestClass Name of request class.
-	 * @return object The cast request.
+	 * @return mixed The cast request.
 	 */
 	public function objectToRequest( $req, $requestClass )
 	{

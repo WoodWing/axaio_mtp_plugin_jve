@@ -22,7 +22,6 @@ require_once BASEDIR.'/server/secure.php';
 // Validate the ticket.
 $ticket = $_GET['ticket'];
 try {
-	require_once( BASEDIR . '/server/bizclasses/BizSession.class.php' );
 	$user = BizSession::checkTicket( $ticket );
 } catch( BizException $e ) {
 	exit; // empty response

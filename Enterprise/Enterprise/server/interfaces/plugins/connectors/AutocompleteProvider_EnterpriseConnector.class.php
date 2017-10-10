@@ -57,9 +57,6 @@ abstract class AutocompleteProvider_EnterpriseConnector extends DefaultConnector
 	 */
 	public function autocomplete( $provider, $objectId, $propertyName, $termEntityName, $publishSystemId, $ignoreValues, $typedValue )
 	{
-		$objectId = $objectId; // keep analyzer happy
-		$propertyName = $propertyName; // keep analyzer happy
-
 		$entities = $this->getSupportedEntities();
 		if( in_array( $termEntityName, $entities ) ) {
 			require_once BASEDIR . '/server/bizclasses/BizAutoSuggest.class.php';
@@ -109,7 +106,6 @@ abstract class AutocompleteProvider_EnterpriseConnector extends DefaultConnector
 	 */
 	public function createAutocompleteTerms( AdmCreateAutocompleteTermsRequest $request )
 	{
-		$request = $request; // Make code analyzer happy.
 		return null;
 	}
 
@@ -121,7 +117,6 @@ abstract class AutocompleteProvider_EnterpriseConnector extends DefaultConnector
 	 */
 	public function modifyAutocompleteTerms( AdmModifyAutocompleteTermsRequest $request )
 	{
-		$request = $request; // Make code analyzer happy.
 		return null;
 	}
 
@@ -133,7 +128,6 @@ abstract class AutocompleteProvider_EnterpriseConnector extends DefaultConnector
 	 */
 	public function getAutocompleteTerms( AdmGetAutocompleteTermsRequest $request )
 	{
-		$request = $request; // Make code analyzer happy.
 		return null;
 	}
 
@@ -145,7 +139,6 @@ abstract class AutocompleteProvider_EnterpriseConnector extends DefaultConnector
 	 */
 	public function deleteAutocompleteTerms( AdmDeleteAutocompleteTermsRequest $request )
 	{
-		$request = $request; // Make code analyzer happy.
 		return null;
 	}
 

@@ -40,6 +40,5 @@ abstract class AdmGetPubChannels_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdmGetPubChannelsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

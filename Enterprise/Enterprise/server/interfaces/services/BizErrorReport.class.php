@@ -232,7 +232,7 @@ class BizErrorReport
 	 * Extracts error code (S-code) from a given message. The S-code is in format S(XXXX).
 	 * When there's no S-code found, an empty string is returned.
 	 *
-	 * @param string $messages
+	 * @param string $message
 	 * @return string S-code. E.g: S1014
 	 */
 	private static function getErrorCode( $message )

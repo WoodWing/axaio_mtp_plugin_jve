@@ -156,6 +156,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_WflLogon_TestCase extends Te
 	 *
 	 * @param WflLogOnResponse $response
 	 * @param bool Whether or not all test data could be found.
+	 * @return bool
 	 */	
 	private function getAdminSetupFromLogOnResponse( WflLogOnResponse $response )
 	{
@@ -295,7 +296,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_WflLogon_TestCase extends Te
 	 * 3) Checks if the PubChannelInfo->SupportForms for all given channels is returned correctly:
 	 *      L> Twitter, Facebook, Drupal7, WordPress and MultiChannelPublishingSample (sample plugin) do support Forms, 
 	 *         hence should return true.
-	 *      L> AdobeDps, Drupal(6) and SMS do not support Forms, hence should return false.
+	 *      L> AdobeDps2 and SMS do not support Forms, hence should return false.
 	 *
 	 * @param PubChannelInfo[] $pubChannels
 	 * @return boolean True when all channels meet the listed criterea, else false.
@@ -306,7 +307,8 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_WflLogon_TestCase extends Te
 		require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
 
 		$isValid = true;
-		$supportForms = array( 
+		$supportForms = array(
+			'' => false, // Enterprise
 			'Twitter' => true, 
 			'Facebook' => true, 
 			'Drupal7' => true,
@@ -314,11 +316,11 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_WflLogon_TestCase extends Te
 			'WordPress' => true,
 			'MultiChannelPublishingSample' => true,
 			'PublishingTest' => false, // Analytics test
-			'AdobeDps' =>  false,
 			'AdobeDps2' =>  false,
 			'SMS' => false
 		);
 		$supportCropping = array(
+			'' => false, // Enterprise
 			'Twitter' => true,
 			'Facebook' => true,
 			'Drupal7' => true,
@@ -326,7 +328,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_WflLogon_TestCase extends Te
 			'WordPress' => true,
 			'MultiChannelPublishingSample' => false,
 			'PublishingTest' => false, // Analytics test
-			'AdobeDps' =>  false,
 			'AdobeDps2' =>  false,
 			'SMS' => false
 		);

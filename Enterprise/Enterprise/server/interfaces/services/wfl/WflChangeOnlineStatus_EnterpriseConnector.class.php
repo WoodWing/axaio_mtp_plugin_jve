@@ -40,6 +40,5 @@ abstract class WflChangeOnlineStatus_EnterpriseConnector extends ServiceConnecto
 	 */
 	public function onError( WflChangeOnlineStatusRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

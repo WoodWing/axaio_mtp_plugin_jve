@@ -195,17 +195,14 @@ class DBAdmActionProperty extends DBBase
 		}
 
 		$rows = self::listRows( self::TABLENAME, 'id', '', $where, '*', $params );
-
 		if( self::hasError() ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 		}
 
 		$ret = array();
-
 		if ($rows) foreach ($rows as $row) {
 			$ret[] = self::rowToObj($row);
 		}
-
 		return $ret;
 	}
 
@@ -214,7 +211,7 @@ class DBAdmActionProperty extends DBBase
      * Currently, there is no AdmPropertyUsage yet, so we temporary use stdClass.
      *
      * @param array $row DB row (with key values)
-     * @return object AdmPropertyUsage
+     * @return AdmPropertyUsage
      */
 	static protected function rowToObj( $row )
 	{

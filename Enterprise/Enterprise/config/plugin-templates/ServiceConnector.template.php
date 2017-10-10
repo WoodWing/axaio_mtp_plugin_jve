@@ -26,8 +26,7 @@ class %plugin%_%service% extends %service%_EnterpriseConnector
 	{
 		LogHandler::Log( '%plugin%', 'DEBUG', 'Called: %plugin%_%service%->runBefore()' );
 		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; // keep code analyzer happy
-		
+
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_BEFOREAFTER with RUNMODE_AFTER when this hook is not needed.
 
@@ -38,7 +37,6 @@ class %plugin%_%service% extends %service%_EnterpriseConnector
 	{
 		LogHandler::Log( '%plugin%', 'DEBUG', 'Called: %plugin%_%service%->runAfter()' );
 		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; $resp = $resp; // keep code analyzer happy
 
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_BEFOREAFTER with RUNMODE_BEFORE when this hook is not needed.
@@ -50,7 +48,6 @@ class %plugin%_%service% extends %service%_EnterpriseConnector
 	{
 		LogHandler::Log( '%plugin%', 'DEBUG', 'Called: %plugin%_%service%->onError()' );
 		require_once dirname(__FILE__) . '/config.php';
-		$req = $req; $e = $e; // keep code analyzer happy
 
 		LogHandler::Log( '%plugin%', 'DEBUG', 'Returns: %plugin%_%service%->onError()' );
 	} 
@@ -58,6 +55,5 @@ class %plugin%_%service% extends %service%_EnterpriseConnector
 	// Not called.
 	final public function runOverruled( %service%Request $req )
 	{
-		$req = $req; // keep code analyzer happy
-	} 
+	}
 }

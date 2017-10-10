@@ -40,6 +40,5 @@ abstract class AdsGetQuery_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdsGetQueryRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

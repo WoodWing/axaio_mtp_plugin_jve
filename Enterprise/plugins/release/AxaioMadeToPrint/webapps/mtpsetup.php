@@ -12,7 +12,6 @@ require_once BASEDIR.'/server/apps/functions.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 require_once BASEDIR.'/server/bizclasses/BizWorkflow.class.php';
 require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 // Special debug/test option:
 //    on = production/safe mode, showing only overrule issues and print channel issues
 //    off = debug/test mode, showing all issues

@@ -16,6 +16,8 @@ public class PubChannel  implements java.io.Serializable {
 
     private java.lang.String description;
 
+    private org.apache.axis.types.UnsignedInt sortOrder;
+
     private java.lang.String publishSystem;
 
     private java.lang.String publishSystemId;
@@ -44,6 +46,7 @@ public class PubChannel  implements java.io.Serializable {
            java.lang.String name,
            com.woodwing.enterprise.interfaces.services.adm.PubChannelType type,
            java.lang.String description,
+           org.apache.axis.types.UnsignedInt sortOrder,
            java.lang.String publishSystem,
            java.lang.String publishSystemId,
            java.math.BigInteger currentIssueId,
@@ -58,6 +61,7 @@ public class PubChannel  implements java.io.Serializable {
            this.name = name;
            this.type = type;
            this.description = description;
+           this.sortOrder = sortOrder;
            this.publishSystem = publishSystem;
            this.publishSystemId = publishSystemId;
            this.currentIssueId = currentIssueId;
@@ -148,6 +152,26 @@ public class PubChannel  implements java.io.Serializable {
      */
     public void setDescription(java.lang.String description) {
         this.description = description;
+    }
+
+
+    /**
+     * Gets the sortOrder value for this PubChannel.
+     * 
+     * @return sortOrder
+     */
+    public org.apache.axis.types.UnsignedInt getSortOrder() {
+        return sortOrder;
+    }
+
+
+    /**
+     * Sets the sortOrder value for this PubChannel.
+     * 
+     * @param sortOrder
+     */
+    public void setSortOrder(org.apache.axis.types.UnsignedInt sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
 
@@ -374,6 +398,9 @@ public class PubChannel  implements java.io.Serializable {
             ((this.description==null && other.getDescription()==null) || 
              (this.description!=null &&
               this.description.equals(other.getDescription()))) &&
+            ((this.sortOrder==null && other.getSortOrder()==null) || 
+             (this.sortOrder!=null &&
+              this.sortOrder.equals(other.getSortOrder()))) &&
             ((this.publishSystem==null && other.getPublishSystem()==null) || 
              (this.publishSystem!=null &&
               this.publishSystem.equals(other.getPublishSystem()))) &&
@@ -426,6 +453,9 @@ public class PubChannel  implements java.io.Serializable {
         }
         if (getDescription() != null) {
             _hashCode += getDescription().hashCode();
+        }
+        if (getSortOrder() != null) {
+            _hashCode += getSortOrder().hashCode();
         }
         if (getPublishSystem() != null) {
             _hashCode += getPublishSystem().hashCode();
@@ -513,6 +543,12 @@ public class PubChannel  implements java.io.Serializable {
         elemField.setFieldName("description");
         elemField.setXmlName(new javax.xml.namespace.QName("", "Description"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("sortOrder");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "SortOrder"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "unsignedInt"));
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();

@@ -251,8 +251,6 @@ class ServerJobProcessor
 				// tons of errors logged by all processes on this machine e.g. when
 				// a DB connection has gone or something. Then the Watch Dog would
 				// keep spinning (and logging problems) instead of all processes.
-				/** @noinspection PhpSillyAssignmentInspection */
-				$e = $e; // keep analyzer happy
 				$this->log( 'ERROR', 'Server Job processor has catched fatal error.' );
 				$this->killWatchDog();
 				$newPhase = 'treshold';

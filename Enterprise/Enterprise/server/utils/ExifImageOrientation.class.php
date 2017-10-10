@@ -245,7 +245,7 @@ class ExifImageOrientation
 	 * Read next byte of the $this->content image file content buffer.
 	 * Helper function of readExifOrientationFromBuf()
 	 *
-	 * @return byte
+	 * @return integer byte
 	 */
 	private function readOneByte()
 	{
@@ -258,7 +258,7 @@ class ExifImageOrientation
 	 * Read the next two bytes of the $this->content image file content buffer.
 	 * Helper function of readExifOrientationFromBuf()
 	 *
-	 * @return two bytes
+	 * @return integer two bytes
 	 */
 	private function readTwoBytes()
 	{
@@ -318,7 +318,7 @@ class ExifImageOrientation
 	 *
 	 * @param resource $imageRes The image resource handler
 	 * @param integer $mode 1 = horizontal, 2 = vertical, 3 = both
-	 * @return resource of the flipped image
+	 * @return resource|bool resource of the flipped image, or false on error
 	 */
 	private function flipImage( $imageRes, $mode )
 	{

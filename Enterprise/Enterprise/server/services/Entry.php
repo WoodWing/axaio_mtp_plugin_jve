@@ -54,7 +54,7 @@ abstract class WW_Services_Entry
 					LogHandler::Log( 'ServiceEntry', 'ERROR', 'Request for unsupported protocol: '.$this->protocol );
 					break;
 			}
-		} catch( Exception $e ) {
+		} catch( Throwable $e ) {
 			LogHandler::Log( 'ServiceEntry', 'ERROR', $e->getMessage() );
 		}
 

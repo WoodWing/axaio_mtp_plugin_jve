@@ -53,7 +53,6 @@ function ww_enterprise_xmlrpc() {
 */
 function ww_enterprise_block($op = 'list', $delta = 0, $edit = array())
 {
-	$edit = $edit; // keep analyzer happy
 	switch ($op) {
         case 'list':
             // If $op is "list", we just need to return a list of block descriptions.
@@ -120,10 +119,6 @@ function block_ww_enterprise_contents($which_block)
 */
 function importVideo($node, $content, $fileName, $ratio, $tempDir, $drupalDir)
 {
-	// keep analyzer happy
-	$node = $node;
-	$content = $content;
-	
 	$return = 0;
     switch ($ratio) {
         case '3_4':
@@ -153,10 +148,6 @@ function importVideo($node, $content, $fileName, $ratio, $tempDir, $drupalDir)
 */
 function importAudio($node, $content, $fileName, $tempDir, $drupalDir)
 {
-	// keep analyzer happy
-	$node = $node;
-	$content = $content;
-	
 	$return = 0;
 	system ("/usr/bin/lame --mp3input -b 96 /var/www/".$tempDir."/".$fileName." /var/www/".$drupalDir.$fileName.".mp3", $return);
     if ($return || !file_exists($drupalDir.$fileName.".mp3")) {
@@ -581,10 +572,6 @@ function _ww_enterprise_getURL ($nid, $preview)
 
 function ww_enterprise_xmlrpc_nodePublish ($logOnParams, $dossierProps, $textelements, $images, $videos, $audios, $hyperlinks, $promote, $publish)
 {
-	// keep analyzer happy
-	$audios = $audios;
-	$hyperlinks = $hyperlinks;
-	
 	$result = null;
 
 	try {
@@ -817,7 +804,6 @@ function ww_enterprise_page_view ($node, $cid = NULL)
 {
 	//TODO generate random key and check it here as identification
 	$return = null;
-	$return = $return; // keep analyzer happy
 	// login as Enterprise user to show unpublished images too
 	global $user;
 	// backup user

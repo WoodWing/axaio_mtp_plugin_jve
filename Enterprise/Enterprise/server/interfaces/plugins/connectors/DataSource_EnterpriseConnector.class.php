@@ -46,7 +46,6 @@ abstract class DataSource_EnterpriseConnector extends DefaultConnector
 	 * @param 	Array of Records 			$records
 	 * @param	Record ID					$recordid
 	 * @param	Array of Query Parameters 	$queryparameters
-	 * @return 	String
 	 */
 	abstract public function setRecords( $records, $recordid, $queryparameters );
 	

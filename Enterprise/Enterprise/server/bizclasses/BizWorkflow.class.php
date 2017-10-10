@@ -1758,7 +1758,6 @@ class BizWorkflow
 
 			// Only check if there's auto-routing configured when any of the edge cases above happen.
 			if( $categoryStateRouteToMixed || $categoryRouteToMixed || $stateRouteToMixed ) {
-				require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 				$user = BizSession::getShortUserName();
 				foreach( $objectsProps as /*$objId => */$objProps ) {
 					$pub = new Publication();
@@ -1896,7 +1895,6 @@ class BizWorkflow
 			// structure( $flatMD ).
 			// Those properties where the objects don't share the same value, it will be
 			// 'scrapped off'(by setting the properties to null) later on.
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			$user = BizSession::getShortUserName();
 			reset( $objectsProps ); // Just get one of the objects.
 			$obj = self::getObjectOrAlien( $user, key($objectsProps), array('Workflow') );
@@ -2145,7 +2143,6 @@ class BizWorkflow
 	 */
 	protected static function isDossierPropertyDisabled( $objTargets )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$clientVersion = BizSession::getClientVersion( null, null, 3 );
 		$appName = BizSession::getClientName();
 

@@ -40,6 +40,5 @@ abstract class AdsSaveSetting_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdsSaveSettingRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

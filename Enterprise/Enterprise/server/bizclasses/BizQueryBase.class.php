@@ -68,6 +68,7 @@ class BizQueryBase
 		if( $forceapp ) {
 			$mode = $forceapp;
 		} else {
+			require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 			$app = DBTicket::DBappticket( $ticket );
 			if( stristr( $app, 'web' ) ) {
 				$mode = 'web';
@@ -236,7 +237,6 @@ class BizQueryBase
 				/*
 				if( LogHandler::debugMode() ) {
 					if( (!array_key_exists( $qo->Property, $objFields ) || !$objFields[$qo->Property]) && stripos( $qo->Property, 'c_' ) !== 0  && !$joins[$qo->Property]) {
-						require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 						throw new BizException( '', 'Server', '', __METHOD__.' - Sorting on unknown property: '.$qo->Property );
 					}
 				}
@@ -316,7 +316,7 @@ class BizQueryBase
 
     static protected function getComponents($rows)
     {
-        $returnrows = '';
+        $returnrows = array();
         foreach ($rows as $row) {
         	$returnrows[] = self::getComponentChildRow($row);
         }
@@ -365,7 +365,7 @@ class BizQueryBase
 
     static protected function getChildRows($rows)
     {
-        $returnrows = '';
+        $returnrows = array();
         foreach ($rows as $row) {
         	$returnrows[] = self::getChildRow($row);
         }
@@ -374,7 +374,7 @@ class BizQueryBase
 
     static protected function row2string($row)
     {
-        $result = '';
+        $result = array();
 		$row = self::replaceBooleans($row);
 
         $values = array_values( $row );
@@ -386,7 +386,7 @@ class BizQueryBase
 
     static protected function childrow2string($row)
     {
-		$result = '';
+		$result = array();
 		$row = self::replaceBooleans($row);
 
         $values = array_values( $row );
@@ -584,12 +584,11 @@ class BizQueryBase
 	 * Only fills these values if they are in $reqprops. Method is called more than once for the same set of objects.
 	 * To prevent that value, set in the first call, are overwritten special precautions had to be made.
 	 *
-	 * @param &array $rows rows to add the target-info to
+	 * @param &array $rows rows to add the target-info to ($rows are adjusted by reference!!!)
 	 * @param $targets array of array Target, indexed by objectid
 	 * @param $reqprops array of props to fill.
 	 * @param bool $keepRowValue
-	 * @return nothing (but $rows are adjusted by reference!!!)
-	**/
+	 */
 	static public function resolveTargets(&$rows, $targets, $reqprops, $keepRowValue=false)
 	{
 		$reqIssueIds = in_array('IssueIds', $reqprops) ? true : false;
@@ -938,11 +937,13 @@ class BizQueryBase
 
 	static public function resolvePublicationNameParams($params)
 	{
-		require_once BASEDIR . '/server/dbclasses/DBPublication.class.php';
-
-		$pubrows = DBPublication::listPublications(array('id','publication'));
+		$pubrows = null;
 		foreach ($params as &$param) {
 			if (strtolower($param->Property == 'publication')) {
+				if( is_null($pubrows)) {
+					require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
+					$pubrows = DBPublication::listPublications( array( 'id', 'publication' ) );
+				}
 				foreach ($pubrows as $pubrow) {
 					if (strtolower($pubrow['publication']) == strtolower($param->Value) && $param->Operation == '=') {
 						$param->Property = 'publicationid';

@@ -251,7 +251,9 @@ class DocBlockReflection implements ReflectionInterface
 
         // create a clean docComment
         $this->cleanDocComment = preg_replace("#[ \t]*(?:/\*\*|\*/|\*)[ ]{0,1}(.*)?#", '$1', $docComment);
-        $this->cleanDocComment = ltrim($this->cleanDocComment, "\r\n"); // @todo should be changed to remove first and last empty line
+
+        // @todo should be changed to remove first and last empty line
+        $this->cleanDocComment = ltrim($this->cleanDocComment, "\r\n");
 
         $scanner                = new DocBlockScanner($docComment);
         $this->shortDescription = ltrim($scanner->getShortDescription());
@@ -269,15 +271,15 @@ class DocBlockReflection implements ReflectionInterface
      */
     public function toString()
     {
-        $str = "DocBlock [ /* DocBlock */ ] {" . PHP_EOL . PHP_EOL;
-        $str .= "  - Tags [" . count($this->tags) . "] {" . PHP_EOL;
+        $str = "DocBlock [ /* DocBlock */ ] {" . "\n" . "\n";
+        $str .= "  - Tags [" . count($this->tags) . "] {" . "\n";
 
         foreach ($this->tags as $tag) {
             $str .= "    " . $tag;
         }
 
-        $str .= "  }" . PHP_EOL;
-        $str .= "}" . PHP_EOL;
+        $str .= "  }" . "\n";
+        $str .= "}" . "\n";
 
         return $str;
     }

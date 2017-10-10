@@ -260,7 +260,7 @@ class BizNamedQuery extends BizQueryBase
 	 * @param string $mode Specifies how the query was initiated (InDesign, Content Station etc).
 	 * @param array $requestedPropertyNames	Complete list of props to return, overrules $requestProps as well as configured fields.
 	 * @param integer $accessRight Access right applicable for the current search.
-	 * @return WflQueryObjectsResponse	Response containing all requested information (rows)
+	 * @return WflNamedQueryResponse	Response containing all requested information (rows)
 	 * @throws BizException
 	 */
 	static private function runPublishManagerQuery( $shortusername, $params, $firstEntry, $maxEntries, $queryOrder,

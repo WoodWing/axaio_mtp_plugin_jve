@@ -3,7 +3,6 @@
 /**
  * @package Enterprise
  * @subpackage Services
- * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  * 
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -42,7 +41,7 @@ class WflPubChannelTypeValidator
 {
 	static public function validate( $validator, $enumVal )
 	{
-		static $enums = array( 'print', 'web', 'sms', 'dps', 'dps2', 'other' );
+		static $enums = array( 'print', 'web', 'sms', 'dps2', 'other' );
 		$validator->checkEnum( $enums, $enumVal );
 	}
 }
@@ -1377,6 +1376,13 @@ class WflUserValidator
 			$validator->checkNull( $datObj->TrackChangesColor );
 			if( !is_null( $datObj->TrackChangesColor ) ) {
 				$validator->checkType( $datObj->TrackChangesColor, 'Color' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'EmailAddress' ) ) {
+			$validator->enterPath( 'EmailAddress' );
+			if( !is_null( $datObj->EmailAddress ) ) {
+				$validator->checkType( $datObj->EmailAddress, 'string' );
 			}
 			$validator->leavePath();
 		}

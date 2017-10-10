@@ -85,7 +85,7 @@ class GCalDataSource_DataSource extends DataSource_EnterpriseConnector
 		$service = Zend_Gdata_Calendar::AUTH_SERVICE_NAME;
 		$client = Zend_Gdata_ClientLogin::getHttpClient($user, $pass, $service);
   
-	   // $gdataCalÊ=ÊnewÊZend_Gdata_Calendar();
+	   // $gdataCalï¿½=ï¿½newï¿½Zend_Gdata_Calendar();
   
 		$gdataCal = new Zend_Gdata_Calendar($client);
 		$gquery = $gdataCal->newEventQuery();
@@ -211,7 +211,6 @@ class GCalDataSource_DataSource extends DataSource_EnterpriseConnector
 	 */
 	final public function getUpdates( $familyvalue )
 	{
-		$familyvalue = $familyvalue; // made code analyzer happy
 	}
 	
 	/**

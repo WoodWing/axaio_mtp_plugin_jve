@@ -67,9 +67,9 @@ class WW_JSON_Services
 	 * - Removes elements which are not reflected in the class signature.
 	 * - Adds round trip information.
 	 *
-	 * @param array|object $arrayObject
+	 * @param array|mixed $arrayObject
 	 * @throws BizException If the passed parameter is of the wrong type, it's an invalid operation
-	 * @return array|object $arrayObject
+	 * @return array|mixed $arrayObject
 	 */
 	public static function restructureObjects($arrayObject) {
 
@@ -92,6 +92,7 @@ class WW_JSON_Services
 		elseif (is_array($arrayObject)) {
 
 			// Default: it's an array, so copy 'object' in both and move on
+			$parameterClass = null;
 			$tmpObject = $arrayObject;
 			$checkProperties = $arrayObject;
 		}

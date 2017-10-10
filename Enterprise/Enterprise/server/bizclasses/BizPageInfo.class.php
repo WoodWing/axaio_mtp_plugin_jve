@@ -316,8 +316,11 @@ function cmp( $a, $b )
 	$aModified = $a->Modified;
 	$bModified = $b->Modified;
 	
-	if ($aModified == $bModified){ 
-		return 0;
+	if ($aModified == $bModified){
+		// Invoke object ids to avoid random layout object order (e.g. after refresh of the Publication Overview)
+		// when two layouts happen to have the exact same Modified value. This check is added for the BuildTest running
+		// on fast machines which could have two layouts saved within the same second.
+		return $a->Id == $b->Id ? 0 : ($a->Id > $b->Id ? -1 : 1);
 	}
 	return ($aModified > $bModified) ? -1 : 1; 
 }

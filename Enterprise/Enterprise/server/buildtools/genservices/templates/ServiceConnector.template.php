@@ -40,6 +40,5 @@ abstract class /*INTFSHORT*//*SERVICE*/_EnterpriseConnector extends ServiceConne
 	 */
 	public function onError( /*INTFSHORT*//*SERVICE*/Request $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

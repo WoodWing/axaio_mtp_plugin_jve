@@ -99,7 +99,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetObjects_TestCase exte
 	 * not full Object tree should be returned. This function ensure that the minimum properties are returned
 	 * in the MetaData->BasicMetaData, and the rest should all be null.
 	 *
-	 * @param GetObjectsResponse $response
+	 * @param WflGetObjectsResponse $response
 	 * @return bool Whether the response was returned correctly; False otherwise.
 	 */
 	private function validateGetObjectsResponse( $response )
@@ -192,7 +192,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetObjects_TestCase exte
 	public function createArticle( $stepInfo, $articleName=null )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizObjectComposer.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = $this->user;
 
 		// The WSDL expects a Publication object, a PublicationInfo object is given, so transform
@@ -342,7 +341,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetObjects_TestCase exte
 	 * @param null|array $requestInfo List of other info such as MetaData, Relations and etc.
 	 * @param null|array $haveVersions List of object's version.
 	 * @param null|array $areas Area where the object resides in. 'Workflow' or 'Trash'
-	 * @return null|GetObjectResponse
+	 * @return null|WflGetObjectsResponse
 	 */
 	private function getObjects( $stepInfo, $ids, $lock, $rendition, $requestInfo, $haveVersions=null, $areas=null  )
 	{
@@ -370,6 +369,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetObjects_TestCase exte
 	 * @param string &$errorReport To fill in the error message if there's any during the delete operation.
 	 * @param bool $permanent Whether or not to delete the object permanently.
 	 * @param array $areas The areas to test against.
+	 * @return bool
 	 */
 	private function deleteObject( $objId, $stepInfo, &$errorReport, $permanent=true, $areas=array('Workflow'))
 	{
@@ -398,6 +398,4 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetObjects_TestCase exte
 		}
 		return $deleteSuccessful;
 	}
-
-
 }

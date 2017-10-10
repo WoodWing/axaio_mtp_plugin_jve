@@ -57,11 +57,11 @@ if( isset($_REQUEST['delete']) ) { // delete mode
 				$prefix = ($issueId > 0) ? '['.$issueId.'] ' : '';
 
 				// build new status object in memory
-				$statusObj = newStatusObj( $pubId, $issueId, $objType, $prefix.$statusName.' ('.$postfix.')', $color, $nextId, $order );
+				$statusObj = newStatusObj( $objType, $prefix.$statusName.' ('.$postfix.')', $color, $nextId, $order );
 
 				// create the status object at DB
 				print 'Creating status "'.$statusObj->Name.'" ... ';
-				$statusObj = BizAdmStatus::createStatus( $statusObj );
+				$statusObj = BizAdmStatus::createStatuses( $pubId, $issueId, array($statusObj) );
 				print '<font color="green">OK!</font><br/>';
 
 				// prepare for next status object
@@ -75,24 +75,33 @@ if( isset($_REQUEST['delete']) ) { // delete mode
 }
 print '<br/><br/>Done!<br/>';
 
-// helper function that builds one status object in memory
-function newStatusObj( $pubId, $issueId, $objType, $statusName, $color, $nextId, $order )
+/**
+ * Helper function that composes a status object in memory.
+ *
+ * @param string $objType
+ * @param string $statusName
+ * @param string $color
+ * @param integer $nextId
+ * @param integer $order
+ * @return AdmStatus
+ */
+function newStatusObj( $objType, $statusName, $color, $nextId, $order )
 {
-	$obj = new stdClass();
-	$obj->Id				= 0;
-	$obj->PublicationId		= $pubId;
-	$obj->Type				= $objType;
-	$obj->Name				= $statusName;
-	$obj->Produce			= false;
-	$obj->Color				= $color;
-	$obj->NextStatusId		= $nextId;
-	$obj->SortOrder			= $order;
-	$obj->IssueId			= $issueId;
-	$obj->SectionId			= 0; // not supported
-	$obj->DeadlineStatusId	= 0;
-	$obj->DeadlineRelative	= '';
-	$obj->CreatePermanentVersion	 = false;
-	$obj->RemoveIntermediateVersions = false;
-	$obj->AutomaticallySendToNext	 = false;
-	return $obj;
+	require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php'; // AdmStatus, AdmIdName
+	$status = new AdmStatus();
+	$status->Id               = 0;
+	$status->Name             = $statusName;
+	$status->SortOrder        = $order;
+	$status->Type             = $objType;
+	$status->Produce          = false;
+	$status->Color            = $color;
+	$status->DeadlineRelative = '';
+	$status->NextStatus       = new AdmIdName( $nextId );
+	$status->CreatePermanentVersion     = false;
+	$status->RemoveIntermediateVersions = false;
+	$status->AutomaticallySendToNext    = false;
+	$status->ReadyForPublishing         = false;
+	$status->SkipIdsa                   = false;
+	$status->Phase            = 'Production';
+	return $status;
 }

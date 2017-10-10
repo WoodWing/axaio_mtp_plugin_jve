@@ -27,7 +27,12 @@ class WflMultiSetObjectPropertiesService extends EnterpriseService
 			true   	// use transactions
 			);
 	}
-	
+
+	/**
+	 * @inheritdoc
+	 * @param WflMultiSetObjectPropertiesRequest $req
+	 * @throws BizException
+	 */
 	protected function restructureRequest( &$req )
 	{
 		// Validate that the IDs parameter is passed and contains identifiers.
@@ -43,6 +48,7 @@ class WflMultiSetObjectPropertiesService extends EnterpriseService
 		// over again.
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 		$req->InvokedObjects = BizObject::resolveInvokedObjectsForMultiSetProps( $req->IDs );
+		$invokedObjectIds = array_keys( $req->InvokedObjects ); // excludes alien ids
 
 		$firstObjectMetadata = reset( $req->InvokedObjects );
 		if ( $firstObjectMetadata ) {
@@ -58,16 +64,16 @@ class WflMultiSetObjectPropertiesService extends EnterpriseService
 		}
 
 		// Validate that the requested objects all belong to the same Publication and have the same ObjectType.
-		if( !BizObject::isSameObjectTypeAndPublication( $req->IDs )) {
+		if( !BizObject::isSameObjectTypeAndPublication( $invokedObjectIds )) {
 			throw new BizException( 'ERR_INVALID_OPERATION', 'Client',
-				'Object IDs ('.implode(',', $req->IDs ).') provided must be of the same object '.
+				'Object IDs ('.implode(',', $invokedObjectIds ).') provided must be of the same object '.
 					'type and from the same publication.');
 		}
 
 		// Collect information on the overrule issues for the Objects.
 		require_once BASEDIR .'/server/dbclasses/DBIssue.class.php';
 		$req->SendToNext = false;
-		$sameOverruleIssue = DBIssue::isSameOverruleIssue( $req->IDs );
+		$sameOverruleIssue = DBIssue::isSameOverruleIssue( $invokedObjectIds );
 		$req->OverruleIssueId = 0;
 
 		if ( !is_null( $sameOverruleIssue ) ) {
@@ -75,7 +81,7 @@ class WflMultiSetObjectPropertiesService extends EnterpriseService
 			// an exception should be thrown.
 			if ( $sameOverruleIssue === false ) {
 				throw new BizException( 'ERR_INVALID_OPERATION', 'Client',
-					'Object IDs ('.implode(',', $req->IDs ).') provided must be of the same overrule issue.' );
+					'Object IDs ('.implode(',', $invokedObjectIds ).') provided must be of the same overrule issue.' );
 			}
 
 			// Pass the overrule Issue Id to be used when updating the Objects.

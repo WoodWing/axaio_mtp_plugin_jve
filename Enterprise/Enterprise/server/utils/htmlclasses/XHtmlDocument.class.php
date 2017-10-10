@@ -462,7 +462,7 @@ class Utils_XHtmlFieldFactory
 	 * @param string $propType Determines what class is created. See WSDL
 	 * @param string $id The id attribute of the input field
 	 * @param string $name The name attribute of the input field
-	 * @return XHhtmlField flavors
+	 * @return Utils_XHtmlField flavors
 	 */
 	static public function create( Utils_XHtmlDocument $doc, $propType, $id, $name )
 	{

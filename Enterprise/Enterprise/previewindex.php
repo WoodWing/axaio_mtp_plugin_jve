@@ -18,7 +18,6 @@
  */
 	
 require_once dirname(__FILE__).'/config/config.php';
-require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 require_once BASEDIR . '/server/bizclasses/BizWebEditWorkspace.class.php';
 
 // Take incoming HTTP request params

@@ -40,6 +40,5 @@ abstract class WflGetDialog2_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflGetDialog2Request $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

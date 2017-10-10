@@ -27,7 +27,6 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_UtfBomDetection_TestCase extends Test
     
 	/**
 	 * Performs the test as written in module header.
-	 * @return boolean  Wether or not all PHP files are correct.
 	 */
 	final public function runTest()
 	{
@@ -51,8 +50,6 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_UtfBomDetection_TestCase extends Test
 	 */
 	public function iterFile( $filePath, $level )
 	{
-		$level = $level; // heep analyzer happy
-
 		// read first 8 bytes...
 		$firstBytes = file_get_contents( $filePath, false, null, -1, 8 );
 		
@@ -71,17 +68,14 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_UtfBomDetection_TestCase extends Test
 	// These three functions are called by parent class, but have no meaning here.
 	public function skipFile( $filePath, $level )
 	{
-		$filePath = $filePath; $level = $level; // heep analyzer happy
 	}
 
 	public function iterFolder( $folderPath, $level )
 	{
-		$folderPath = $folderPath; $level = $level; // heep analyzer happy
 	}
 
 	public function skipFolder( $folderPath, $level )
 	{
-		$folderPath = $folderPath; $level = $level; // heep analyzer happy
 	}
 
 	/**

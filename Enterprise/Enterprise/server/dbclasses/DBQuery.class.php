@@ -11,7 +11,7 @@ class DBQuery extends DBBase
 	private static $RegViews;
 
 	/**
-         * After the views have been used they must be dropped...
+	 * After the views have been used they must be dropped...
 	 */
 	static public function dropRegisteredViews()
 	{
@@ -820,9 +820,9 @@ class DBQuery extends DBBase
 	}
 
 	/**
-         * Gets the named query named $queryname from the database.
-         * @param string $queryname
-         * @return row containing the namedquery with $queryname
+	 * Gets the named query named $queryname from the database.
+	 * @param string $queryname
+	 * @return array row containing the namedquery with $queryname
 	 */
 	static public function getNamedQueryByName($queryname)
 	{

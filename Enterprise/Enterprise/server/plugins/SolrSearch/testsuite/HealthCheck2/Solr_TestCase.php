@@ -350,7 +350,7 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 		if ($fieldName != 'WoodWing') {
 			$this->setResult( 'WARN', 'The used Solr '.$solrSchemaName.' file is not the "WoodWing" schema. ' .
 				'This typically happens when you did not copy the file shipped with Enterprise Server to the Solr/conf folder. '.
-				'Please check the &lt;schema name="WoodWing" version="1.5"&gt; entry in the schema.xml file. ' .
+				'Please check the &lt;schema name="WoodWing" version="1.6"&gt; entry in the schema.xml file. ' .
 				'Renaming the schema is harmless but not using the delivered schema can cause a lot of errors/warnings '.
 				'This can be fixed by copying the Enterprise file to the Solr/conf folder. '.
 				'Obviously, your customizations made to the file will then be lost.');
@@ -370,9 +370,6 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 
 		$xmlUniqueKey = $xmlDoc->getElementsByTagName('uniqueKey');
 		$schemaInfo['uniqueKey'] = $xmlUniqueKey->item(0)->nodeValue;
-
-		$xmldefaultSearchField = $xmlDoc->getElementsByTagName('defaultSearchField');
-		$schemaInfo['defaultSearchField'] = $xmldefaultSearchField->item(0)->nodeValue;
 
 		$xmlFieldTypes = $xmlDoc->getElementsByTagName('filter');
 		for( $index = 0; $index < $xmlFieldTypes->length; $index++ ) {
@@ -427,10 +424,10 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 			return false;
 		}
 
-		// Check the Lucene version, should match 4.5.
+		// Check the Lucene version, should match 6.2.1.
 		$luceneVersion = (string)$xmlDoc->getElementsByTagName('luceneMatchVersion')->item(0)->nodeValue;
 
-		if( version_compare($luceneVersion, '4.5', '<') ) {
+		if( version_compare($luceneVersion, '6.2.1', '<') ) {
 			$this->setResult( 'ERROR', $solrConfigName . ' version is incorrect.',
 				'This typically happens when you have manually edited the file and accidentally made a typo. '.
 				'Check if the "luceneMatchVersion" is well formed by opening it in a Web browser (or in an XML editor). '.
@@ -586,20 +583,12 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	 */
 	private function checkCatchAllField($schemaInfo)
 	{
-		if (!array_key_exists('defaultSearchField', $schemaInfo) || $schemaInfo['defaultSearchField'] == null ) {
-				$this->setResult( 'ERROR', 'No Catch All field set in schema.xml.' , 'Add &lt;defaultSearchField&gt;WW_CATCHALL&lt;/defaultSearchField&gt; to schema.xml.');
-		}
-
 		$catchAllField = null;
 		if (defined('SOLR_CATCHALL_FIELD')) {
 			$catchAllField = SOLR_CATCHALL_FIELD;
 		}
 		else {
 			$this->setResult( 'ERROR', 'No Catch All field set in config_solr.php.' , "Add 'define ('SOLR_CATCHALL_FIELD', 'WW_CATCHALL')' to config_solr.php.");
-		}
-
-		if ($schemaInfo['defaultSearchField'] !== $catchAllField) {
-				$this->setResult( 'ERROR', $catchAllField .  'is not set as defaultSearchField in schema.xml.' , 'Change setting to &lt;defaultSearchField&gt;'.$catchAllField.'&lt;/defaultSearchField&gt; in schema.xml.');
 		}
 	}
 
@@ -696,7 +685,7 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	/**
 	 * Checks the version of the currently used Solr instance.
 	 *
-	 * Solr versions prior to version 4.5.0 are not supported, and thus if one of those versions is detected
+	 * Solr versions prior to version 6.2.1 are not supported, and thus if one of those versions is detected
 	 * then an error message should be displayed accordingly.
 	 *
 	 * @param bool $ignoreFailRetrieve Does not set an error message if it failed to retrieve the version
@@ -711,14 +700,14 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 				return true;
 			}
 			$this->setResult( 'ERROR', 'Could not retrieve Solr version number',
-				"Verify your Solr connection and verify Solr is at least version 4.5.0.");
+				"Verify your Solr connection and verify Solr is at least version 6.2.1.");
 			return false;
 		}
 		else {
-			// Solr versions pre 4.5 are not supported.
-			if (version_compare($versionNumber, '4.5.0', '<')){
-				$this->setResult( 'ERROR', 'The currently configured Solr version ( ' . $versionNumber . ' ) is not supported, version 4.5.0 or higher is required.',
-					"Upgrade Solr to at least version 4.5.0.");
+			// Solr versions pre 6.2.1 are not supported.
+			if (version_compare($versionNumber, '6.2.1', '<')){
+				$this->setResult( 'ERROR', 'The currently configured Solr version ( ' . $versionNumber . ' ) is not supported, version 6.2.1 or higher is required.',
+					"Upgrade Solr to at least version 6.2.1.");
 				return false;
 			}
 		}
@@ -737,7 +726,7 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	 */
 	private function getVersion($extended = false)
 	{
-		// Get Solr 4 system info. This url is only valid for Solr 4.
+		// Get Solr 6 system info.
 		$url = SOLR_SERVER_URL .'/admin/info/system';
 		$config = file_get_contents($url);
 
@@ -794,7 +783,7 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	/**
 	 * Check the version of the schema.xml file.
 	 *
-	 * The schema should adhere to the Solr 4.5 version.
+	 * The schema should adhere to the Solr 6.2.1 version.
 	 *
 	 * @param array $schemaInfo
 	 * @return bool Whether or not the test was passed.
@@ -802,10 +791,10 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 	private function checkSchemaVersion($schemaInfo)
 	{
 		$fieldName = $schemaInfo['version'];
-		if ($fieldName != '1.5') {
+		if ($fieldName != '1.6') {
 			$this->setResult( 'ERROR', 'The used Solr schema.xml file has an incorrect version. ' .
 				'This typically happens when you did not copy the file shipped with Enterprise Server to the Solr/conf folder. '.
-				'Please check the &lt;schema name="WoodWing" version="1.5"&gt; entry in the schema.xml file. ' .
+				'Please check the &lt;schema name="WoodWing" version="1.6"&gt; entry in the schema.xml file. ' .
 				'This can be fixed by copying the Enterprise file to the Solr/conf folder. '.
 				'Obviously, your customizations made to the file will then be lost.');
 			return false;

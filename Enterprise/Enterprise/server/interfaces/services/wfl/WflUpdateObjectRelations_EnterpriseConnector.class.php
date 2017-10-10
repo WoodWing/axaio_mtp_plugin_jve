@@ -40,6 +40,5 @@ abstract class WflUpdateObjectRelations_EnterpriseConnector extends ServiceConne
 	 */
 	public function onError( WflUpdateObjectRelationsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

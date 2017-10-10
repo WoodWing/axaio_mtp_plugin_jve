@@ -40,6 +40,5 @@ abstract class AdmDeletePubChannels_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdmDeletePubChannelsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

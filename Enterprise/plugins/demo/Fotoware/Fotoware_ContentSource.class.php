@@ -107,9 +107,6 @@ class Fotoware_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	final public function doNamedQuery( $query, $params, $firstEntry, $maxEntries, $order )
 	{
-		// keep code analyzer happy for unused params:
-		$query=$query; $firstEntry=$firstEntry; $maxEntries=$maxEntries; $order=$order;
-		
 		// Create array with column definitions and run query
 		$cols = Fotoware::getQueryColumns();
 		$rows = Fotoware::runQuery ( $params[0]->Value, $params[1]->Value );
@@ -124,7 +121,6 @@ class Fotoware_ContentSource extends ContentSource_EnterpriseConnector
 	// -------------------------
 	final public function getAlienObject( $alienID, $rendition, $lock )
 	{
-		$lock=$lock ; // we don't use this argument, keep analyzer happy
 		LogHandler::Log('Fotoware', 'DEBUG', "Fotoware::getAlienObject called for $alienID - $rendition" );
 		
 		$fwID = substr( $alienID, strlen(FOTOWARE_CONTENTSOURCEPREFIX) );
@@ -171,7 +167,6 @@ class Fotoware_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		LogHandler::Log('SimpleFileSystem', 'DEBUG', "Fotoware::createShadowObject called for $alienID" );
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/utils/ImageUtils.class.php'; // ResizeJPEG
 		
 		$fwID = substr( $alienID, strlen(FOTOWARE_CONTENTSOURCEPREFIX) );
@@ -224,7 +219,6 @@ class Fotoware_ContentSource extends ContentSource_EnterpriseConnector
 	private function getEnterpriseContext( &$publication, &$category, &$status )
 	{
 		// Get list of publications from Enterpise. If available we use WW News
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
 		
 		$username = BizSession::getShortUserName();

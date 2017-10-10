@@ -40,6 +40,5 @@ abstract class AdsSaveQueryField_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdsSaveQueryFieldRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

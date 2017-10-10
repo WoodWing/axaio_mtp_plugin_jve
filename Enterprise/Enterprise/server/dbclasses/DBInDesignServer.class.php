@@ -472,9 +472,9 @@ class DBInDesignServer extends DBBase
 				'WHERE s.`locktoken` != ? '.
 				'AND NOT EXISTS ('.
 					'SELECT 1 FROM '.$idsJobsTable.' j '.
-					'WHERE (s.`locktoken` = j.`locktoken`) '.
+					"WHERE (s.`locktoken` = j.`locktoken`) AND  j.`locktoken` != ? ".
 				') ';
-		$params = array( '' );
+		$params = array( '', '' );
 		$sth = $dbDriver->query( $sql, $params );
 
 		if( self::hasError() || !$sth ) {

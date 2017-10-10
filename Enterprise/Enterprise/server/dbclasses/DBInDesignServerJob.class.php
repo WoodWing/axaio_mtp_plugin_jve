@@ -525,7 +525,7 @@ class DBInDesignServerJob extends DBBase
 	 *
 	 * @since 9.7.0
 	 * @param boolean $foreground TRUE for FG jobs, FALSE for BG jobs.
-	 * @return array|null Job id, or NULL when not found.
+	 * @return string|null Job id, or NULL when not found.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
 	public static function getHighestFcfsJobId( $foreground )
@@ -1423,10 +1423,6 @@ class DBInDesignServerJob extends DBBase
 
 		switch( strtolower(DBTYPE) )
 		{
-			case 'oracle':
-				$sql = "SELECT DISTINCT TO_CHAR( TO_DATE( `queuetime`, 'YYYY-MM-DD\"T\"HH24:MI:SS' ), 'YYYY-MM-DD' ) as `queuedate` FROM $indserverjobs ORDER BY `queuedate` DESC";
-				break;
-
 			case 'mssql':
 				$sql = "SELECT DISTINCT CONVERT(varchar(10), `queuetime`, 110) as `queuedate` FROM $indserverjobs ORDER BY `queuedate` DESC";
 				break;

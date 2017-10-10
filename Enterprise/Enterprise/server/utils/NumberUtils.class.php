@@ -348,4 +348,19 @@ class NumberUtils
 		// No matching anything above, so not supported.
 		return false;
 	}
+
+	/**
+	 * Returns the bit size of the architecture PHP is compiled for.
+	 *
+	 * Can be used e.g. to check if PHP is compiled for a 32-bit or 64-bit architecture.
+	 * Note that this does NOT imply the architecture of underlying OS where PHP is currently running on;
+	 * For example for Windows using WOW the PHP application pool could be 32 bit, while the OS could be 64 bit.
+	 *
+	 * @since 10.2.0
+	 * @return int Returns 32 for 32-bit PHP or 64 for 64-bit PHP, etc
+	 */
+	public static function getPhpArchitectureBitSize()
+	{
+		return PHP_INT_SIZE * 8; // PHP_INT_SIZE is 4 for 32 bit, 8 for 64 bit, etc
+	}
 }

@@ -77,7 +77,6 @@ class BizContentSource
 		} else {
 			LogHandler::Log('bizcontentsource','DEBUG','No shadow found for alien object '.$id);
 
-			require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 			require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 			$shadowObject = BizContentSource::createShadowObject( $id, $destObject );
 
@@ -449,15 +448,15 @@ class BizContentSource
 	 * See ContentSource_EnterpriseConnector for comments
 	 * This is a facade hiding the details of calling the method from the right plug-in
 	 *
-	 * @param string	$contentSource
-	 * @param string	$documentId
-	 * @param object 	$object
-	 * @param array 	$objProps
-	 * @param boolean 	$lock
+	 * @param string  $contentSource
+	 * @param string  $documentId
+	 * @param Object  $object
+	 * @param array   $objProps
+	 * @param boolean $lock
 	 * @param string 	$rendition
-     * @param array     $requestInfo
-     * @param array     $supportedContentSources
-	 * @param string	$haveVersion
+	 * @param array   $requestInfo
+	 * @param array   $supportedContentSources
+	 * @param string  $haveVersion
 	 */
 	public static function getShadowObject( $contentSource, $documentId, &$object, $objProps, 
 		$lock, $rendition, $requestInfo = null, $supportedContentSources = null, $haveVersion = null )
@@ -469,7 +468,7 @@ class BizContentSource
 		$connector = self::getContentSourceForAlienObject( $alienId );
 
         // When ContentSourceFileLinks are requested, they need to be enabled for the Content Source plugin.
-        if( in_array( 'ContentSourceFileLinks', $requestInfo ) 
+        if( is_array( $requestInfo ) && in_array( 'ContentSourceFileLinks', $requestInfo )
 			&& is_array( $supportedContentSources ) && in_array( $contentSource, $supportedContentSources ) ) {
             require_once BASEDIR . '/server/bizclasses/BizServerPlugin.class.php';
             BizServerPlugin::runConnector( $connector, 'requestedContentSourceFileLinks', array() );
@@ -727,7 +726,7 @@ class BizContentSource
 	 *
 	 * @param string $contentSource Content Source name.
 	 * @throws BizException Throws error when no connector found for the Content Source requested.
-	 * @return EnterpriseConnector
+	 * @return ContentSource_EnterpriseConnector
 	 */
 	private static function getContentSourceConnectorForContentSource( $contentSource )
 	{

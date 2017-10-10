@@ -6,8 +6,6 @@
  * @copyright 	WoodWing Software bv. All Rights Reserved.
 **/
 
-require_once BASEDIR . '/server/interfaces/services/BizException.class.php';
-
 class BizPublication
 {
 	/**
@@ -101,7 +99,7 @@ class BizPublication
 	 * @param array $pubRow
 	 * @param string $mode
 	 * @param array $extraIssueIds
-	 * @return PublicationInfo[]|Publication[] When $mode is 'flat' Publication is returned, else PublicationInfo
+	 * @return PublicationInfo|Publication When $mode is 'flat' Publication is returned, else PublicationInfo
 	 */
 	public static function getPublicationInfo( $userRights, $userName, $pubRow, $mode='full', $extraIssueIds = array() )
 	{
@@ -131,31 +129,17 @@ class BizPublication
 				require_once BASEDIR.'/server/dbclasses/DBFeature.class.php';
 				require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
 				require_once BASEDIR.'/server/bizclasses/BizSpelling.class.php';
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';				
-				
-				$ticket = BizSession::getTicket();
-				$clientMajorVersion = null;
-				if( $ticket ) {
-					$clientMajorVersion = intval( BizSession::getClientVersion( null, null, 1 ) );
-				}	
-				if( ( $clientMajorVersion && $clientMajorVersion <= 7 ) || // 7.x (or older) => still using the obsoleted retPub->Issues and ->Editions
-						!$ticket ) { // cannot determine the client version, better be safe, so fill in obsoleted issues and editions.
-					$issues = self::getPublIssueInfos( $userRights, $pubRow );
-					$editions = self::getPublEditionInfos( $userRights, $pubRow );
-				} else { // using client 8 and above, so respect the latest WSDL
-					$issues = null;
-					$editions = null;
-				}
+
 				$defaultChanRow = DBChannel::getChannel( $pubRow['defaultchannelid'] );
 				
 				$retPub = new PublicationInfo();
 				$retPub->Id           = $pubRow['id'];
 				$retPub->Name         = $pubRow['publication'];
-				$retPub->Issues       = $issues; // obsoleted; use ChannelInfo instead
+				$retPub->Issues       = null; // obsoleted; use ChannelInfo instead
 				$retPub->States       = self::getStateInfos( $userRights, $pubRow );
 				$retPub->ObjectTypeProperties = DBMetaData::getObjectProperties( $pubRow['id'] );
 				$retPub->ActionProperties     = DBMetaData::getActionProperties( $pubRow['id'] );
-				$retPub->Editions             = $editions; // obsoleted; use ChannelInfo instead
+				$retPub->Editions             = null; // obsoleted; use ChannelInfo instead
 				$retPub->FeatureAccessList    = DBFeature::getFeatureAccess( $userName, $pubRow['id'] );
 				$retPub->CurrentIssue = !empty($defaultChanRow['currentissueid']) ? $defaultChanRow['currentissueid'] : null; // obsoleted; use ChannelInfo instead
 				$retPub->PubChannels  = self::getChannelInfos( $userRights, $pubRow, $mode, $extraIssueIds );
@@ -546,28 +530,15 @@ class BizPublication
 												$publication )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
-		$result = array();
-		
-		$editions = DBEdition::listChannelEditions( $publication['defaultchannelid'] );
-		foreach ($editions as $editionid => $edition) {
-			$result[] = new Edition($editionid, $edition['name']);
-		}
-		
-		return $result;
-	}	
+		return DBEdition::listChannelEditionsObj( $publication['defaultchannelid'] );
+	}
 	
 	public static function getChannelEditionInfos( /** @noinspection PhpUnusedParameterInspection */ $userRights,
 													$channel )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
-		$result = array();
-		
-		$editions = DBEdition::listChannelEditions( $channel['id'] );
-		foreach ($editions as $editionid => $edition) {
-			$result[] = new Edition($editionid, $edition['name']);
-		}
-		return $result;
-	}	
+		return DBEdition::listChannelEditionsObj( $channel['id'] );
+	}
 
 	public static function getIssueEditionInfos( $userRights, $overrulingIssue )
 	{
@@ -679,7 +650,6 @@ class BizPublication
 	 * @param boolean $overruleIssOnly Set to True when only overrule issue is needed; false(default) when ALL issues needed.
 	 * @return mixed              Array of IssueInfo or array of Issue - throws BizException on failure
 	 */
-
 	public static function getIssues( $user, $publication, $mode='flat', $objType=null, $overruleIssOnly=false )
 	{		
 		require_once BASEDIR.'/server/bizclasses/BizAccess.class.php';
@@ -736,23 +706,23 @@ class BizPublication
 		return $ret;
 	}
 
-	/*
+	/**
 	 * Retrieves a list of sections objects from the database for the given publication/issue.
-     *
-     * Returns sections for the specified publication/issue. The caller does not have to worry about overrule
-     * issues, you'll get whatever is valid for the specified pub/issue
-     *
+	 *
+	 * Returns sections for the specified publication/issue. The caller does not have to worry about overrule
+	 * issues, you'll get whatever is valid for the specified pub/issue
+	 *
 	 * @param string  $user         User Id. Used to determine access rights.
 	 * @param int  $publication  Publication id. May not be null.
-     * @param int  $issue 		Issue id. Null means for all issues.
+	 * @param int  $issue 		Issue id. Null means for all issues.
 	 * @param string  $mode         Kind of information wanted:
 	 *   - 'flat'   gives Section objects providing names and ids. (Default)
 	 *   - 'browse' gives Section objects providing names and ids.
 	 *   - 'full'   gives SectionInfo objects providing full details.
-     * @param boolean $checkForOverruleIssue if you know that the issue you pass in is overrule, pass in false to save a DB call.
-	 * @throws BizException Throws BizException on failure
-     * @return Category[]|CategoryInfo[] List of Section or SectionInfo
-     */
+	 * @param boolean $checkForOverruleIssue if you know that the issue you pass in is overrule, pass in false to save a DB call.
+	 * @throws BizException on failure
+	 * @return Category[]|CategoryInfo[] List of Section or SectionInfo
+	 */
 	public static function getSections( $user, $publication, $issue = null, $mode='flat', $checkForOverruleIssue=true )
 	{
 		// If issue is specified we need to see if this is an overrule issue
@@ -821,7 +791,8 @@ class BizPublication
      *
      * @param integer $pubId	publication id
      * @param integer $issueId 	issue id
-     * @return array of Edition - throws BizException on failure
+     * @return Edition[]
+	  * @throws BizException on failure
      */
 	public static function getEditions( $pubId, $issueId = null )
 	{

@@ -40,6 +40,5 @@ abstract class AdmDeleteEditions_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdmDeleteEditionsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

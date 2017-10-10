@@ -36,10 +36,6 @@ class SMS_PubPublishing extends PubPublishing_EnterpriseConnector
 	**/	
 	final public function publishDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		// Make code analyzer happy
-		$dossier = $dossier;
-		$publishTarget = $publishTarget;
-
 		// Publish dossier
 		$text = $this->getTextToSend( $objectsInDossier );
 		$smsResult = $this->sendSMS( $text, $publishTarget ); 
@@ -77,11 +73,6 @@ class SMS_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	final public function unpublishDossier( $dossier, $objectsInDossier, $publishTarget )
 	{
-		// Make code analyzer happy
-		$dossier = $dossier; 
-		$objectsInDossier = $objectsInDossier; 
-		$publishTarget = $publishTarget;
-		
 		// Once SMS is sent out, there is no way to remove it
 		$msg = 'SMS cannot be unpublished, sorry...';
 		throw new BizException( null, 'Client', null, $msg );
@@ -99,10 +90,6 @@ class SMS_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	final public function previewDossier( &$dossier, &$objectsInDossier, $publishTarget )
 	{
-		// Make code analyzer happy
-		$dossier = $dossier;
-		$publishTarget = $publishTarget;
-		
 		// Build URL to our preview application
 		$lastslash	= strrpos( SERVERURL_SCRIPT, '/' );
 		$url 		= substr( SERVERURL_SCRIPT, 0, $lastslash ) . '/config/plugins/SMS/Preview/PreviewSMS.php';
@@ -130,11 +117,6 @@ class SMS_PubPublishing extends PubPublishing_EnterpriseConnector
 	**/	
 	final public function requestPublishFields( $dossier, $objectsInDossier, $publishTarget )
 	{
-		// Make code analyzer happy
-		$dossier = $dossier; 
-		$objectsInDossier = $objectsInDossier;
-		$publishTarget = $publishTarget;
-		
 		// Nothing to say
 		return array();
 	}
@@ -152,11 +134,6 @@ class SMS_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */	
 	final public function getDossierURL( $dossier, $objectsInDossier, $publishTarget )
 	{
-		// Make code analyzer happy
-		$dossier = $dossier; 
-		$objectsInDossier = $objectsInDossier; 
-		$publishTarget = $publishTarget;
-		
 		// There is no URL
 		return '';
 	}

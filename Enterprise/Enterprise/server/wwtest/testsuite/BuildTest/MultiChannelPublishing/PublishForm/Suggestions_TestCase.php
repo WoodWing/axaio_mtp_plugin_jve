@@ -158,6 +158,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Suggestions_Test
 
 			// Determine column indexes to work with
 			$colNames = array( 'ID', 'Name' );
+			$indexes = array();
 			foreach( $colNames as $colName ) {
 				foreach( $response->Columns as $index => $column ) {
 					if( $column->Name == $colName ) {
@@ -289,6 +290,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Suggestions_Test
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmActionProperty.class.php';
 		$retVal = true;
+		$templateName = null;
 
 		foreach( $this->templates as $templateName => $templates ) {
 			foreach( $templates as $pubChannelId => $template ) {
@@ -422,6 +424,10 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Suggestions_Test
 	private function validateGetDialog2Resp( $response )
 	{
 		$retVal = true;
+		$citySuggestionProvider = false;
+		$countrySuggestionProvider = false;
+		$foundRefreshSuggestionButton = false;
+
 		do {
 			if( !isset( $response->Dialog->Tabs )) {
 				$this->setResult( 'ERROR', 'GetDialog2->Dialog->Tabs is empty in getDialog2 response , which is not '.
@@ -430,8 +436,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Suggestions_Test
 				break;
 			}
 
-			$citySuggestionProvider = false;
-			$countrySuggestionProvider = false;
 			// These widgets should have TermEntity set.
 			// <Widget property name> => <TermEntity>
 			$widgetsWithTermEntitySet = array( 'C_MCPSAMPLE_TOURISMCITIES' => 'City',
@@ -473,7 +477,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Suggestions_Test
 				}
 			}
 
-			$foundRefreshSuggestionButton = false;
 			foreach( $response->Dialog->ButtonBar as $buttonBar ) {
 				if( $buttonBar->PropertyInfo->Name == 'RefreshSuggestions' ) {
 					$foundRefreshSuggestionButton = true;
@@ -654,9 +657,9 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Suggestions_Test
 	 */
 	private function composeReqMetaData( $serviceName )
 	{
+		$metaDataValues = array();
 		switch( $serviceName ) {
 			case 'GetDialog2':
-				$metaDataValues = array();
 				// ID
 				$mdValue= new MetaDataValue();
 				$mdValue->Property = 'ID';
@@ -686,7 +689,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Suggestions_Test
 
 				break;
 			case 'Suggestions':
-				$metaDataValues = array();
 				$mdValue= new MetaDataValue();
 				$mdValue->Property = 'C_MCPSAMPLE_STRING';
 				$mdValue->Values = array( 'Facts about Amsterdam' );

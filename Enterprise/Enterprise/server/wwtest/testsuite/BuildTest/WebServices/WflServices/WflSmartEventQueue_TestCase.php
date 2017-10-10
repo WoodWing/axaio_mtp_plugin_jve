@@ -19,7 +19,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflSmartEventQueue_TestCase
 	// Session related stuff
 	/** @var string $ticket  */
 	private $ticket = null;
-	/** @var string[] $vars  */
+	/** @var string[][] $vars  */
 	private $vars = null;
 	/** @var WW_Utils_TestSuite $util */
 	private $util = null;

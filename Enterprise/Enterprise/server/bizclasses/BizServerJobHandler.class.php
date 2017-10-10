@@ -121,8 +121,6 @@ abstract class BizServerJobHandler
 	 */
 	public function estimatedLifeTime( ServerJob $job )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$job = $job; // keep code analyzer happy.
 		return 3600;
 	}
 }

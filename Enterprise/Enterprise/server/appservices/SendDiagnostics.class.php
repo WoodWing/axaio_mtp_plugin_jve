@@ -23,8 +23,6 @@ class SendDiagnostics
 	 */
 	public static function execute( $ticket, $category, $synopsis, $description, $attachment )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-		
 		// Start business session, create DB instance etc.
 		BizSession::startSession( $ticket );
 		BizSession::startTransaction();

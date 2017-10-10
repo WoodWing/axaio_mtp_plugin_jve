@@ -26,17 +26,23 @@ class WW_SOAP_AdmServer extends WW_SOAP_Server
 		}
 		
 		// add our classmaps
+		$options['classmap']['AccessProfile'] = 'AdmAccessProfile';
 		$options['classmap']['Edition'] = 'AdmEdition';
 		$options['classmap']['ExtraMetaData'] = 'AdmExtraMetaData';
 		$options['classmap']['IdName'] = 'AdmIdName';
 		$options['classmap']['Issue'] = 'AdmIssue';
+		$options['classmap']['ObjectInfo'] = 'AdmObjectInfo';
+		$options['classmap']['ProfileFeature'] = 'AdmProfileFeature';
 		$options['classmap']['PubChannel'] = 'AdmPubChannel';
 		$options['classmap']['Publication'] = 'AdmPublication';
+		$options['classmap']['Routing'] = 'AdmRouting';
 		$options['classmap']['Section'] = 'AdmSection';
 		$options['classmap']['Status'] = 'AdmStatus';
+		$options['classmap']['TemplateObjectAccess'] = 'AdmTemplateObjectAccess';
 		$options['classmap']['TermEntity'] = 'AdmTermEntity';
 		$options['classmap']['User'] = 'AdmUser';
 		$options['classmap']['UserGroup'] = 'AdmUserGroup';
+		$options['classmap']['WorkflowUserGroupAuthorization'] = 'AdmWorkflowUserGroupAuthorization';
 		
 
 		// soap handler class

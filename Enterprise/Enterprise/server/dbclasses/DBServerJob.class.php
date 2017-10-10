@@ -76,7 +76,7 @@ class DBServerJob extends DBBase
 	 * Retrieves a Server Job at the job queue (from DB).
 	 *
 	 * @param string $jobId Unique identifier (GUID) of the server job.
- 	 * @return ServerJob
+ 	 * @return ServerJob|null
  	 */
 	public function getJob( $jobId )
 	{
@@ -324,7 +324,7 @@ class DBServerJob extends DBBase
  	 */
 	public function unlockJob( $jobId )
 	{
-		self::updateRow( self::TABLENAME, array('locktoken' => ''), ' `jobid` = ? ', array( $jobId ));
+		return self::updateRow( self::TABLENAME, array('locktoken' => ''), ' `jobid` = ? ', array( $jobId ));
 	}
 
 	/**
@@ -464,7 +464,7 @@ class DBServerJob extends DBBase
 	 *  Converts a DB row to a ServerJob object.
 	 * 
 	 *  @param array $row row contains key values
-	 *  @return object of issue
+	 *  @return ServerJob
 	 */
 	static public function rowToObj( $row )
 	{

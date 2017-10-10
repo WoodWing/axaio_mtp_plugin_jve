@@ -15,8 +15,6 @@ class IdsAutomation_WflUnlockObjects extends WflUnlockObjects_EnterpriseConnecto
 
 	final public function runAfter( WflUnlockObjectsRequest $req, WflUnlockObjectsResponse &$resp)
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$resp = $resp;
 		require_once dirname(__FILE__).'/IdsAutomationUtils.class.php';
 		if ( $req->IDs ) foreach ( $req->IDs as $objectId ) {
 			IdsAutomationUtils::replanLockedJobs( $objectId );
@@ -25,14 +23,10 @@ class IdsAutomation_WflUnlockObjects extends WflUnlockObjects_EnterpriseConnecto
 
 	final public function runOverruled( WflUnlockObjectsRequest $req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req;
 	}
 
 	final public function runBefore( WflUnlockObjectsRequest &$req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req;
 	}
 }
 

@@ -796,7 +796,7 @@ class InCopyTextImport implements TextImport
 	 * @param DOMNode     $icElem       InCopy paragraph-, character- or color style element.
 	 * @param string      $icAttr       InCopy attribute name.
 	 * @param string      $icStyleType  'para', 'char' or 'colr'.
-	 * @return value of the attribute. Empty when not found.
+	 * @return string value of the attribute. Empty when not found.
 	 */
 	private function getInheritedAttribute( $icElem, $icAttr, $icStyleType )
 	{
@@ -979,6 +979,7 @@ class InCopyTextImport implements TextImport
 				break;
 		}
 		switch( $icNode->nodeName ) {
+			/** @noinspection PhpMissingBreakStatementInspection */
 			case 'Note': // inline note
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case 'FNcl': // footnote

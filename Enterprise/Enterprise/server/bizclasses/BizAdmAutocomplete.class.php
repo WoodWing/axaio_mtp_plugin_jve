@@ -178,6 +178,7 @@ class BizAdmAutocomplete extends BizAutocompleteBase
 	                                             $firstEntry = null, $maxEntries = null )
 	{
 		if( $termEntity->Id ) {
+			require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTermEntity.class.php';
 			$termEntity = DBAdmAutocompleteTermEntity::getTermEntityById( $termEntity->Id );
 		}
 		$foundTermTags = self::searchAutocompleteTerms(

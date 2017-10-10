@@ -16,9 +16,7 @@ class MemoryTracker
 	 * Logs current memory usage and peak to debug log
 	 *
 	 * @param string	$location 	Code location of caller to be included in log-file
-	 * 
-	 * @return no return
-	 */	
+	 */
 	public static function log( $location )
 	{
 		// If logging turned off bail out to execute as least code as possible

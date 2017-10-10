@@ -14,31 +14,34 @@ class DBSection extends DBBase
 {
 	const TABLENAME = 'publsections';
 
+	/**
+	 * Resolve a section name by id.
+	 *
+	 * @param integer $id Section id.
+	 * @return string The section name. Empty when not found.
+	 */
 	static public function getSectionName( $id )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$dbo  = $dbDriver->tablename('publsections');
-		$sql = 'SELECT `id`, `section` FROM '.$dbo.' WHERE `id` = ? ';
-		$sth = $dbDriver->query($sql, array( intval( $id ) ));
-		$row = $dbDriver->fetch($sth);
-		if( empty($row) === false ) {
-			return $row['section'];
-		} else {
-			return '';
-		}
+		$fieldNames = array( 'id', 'section' );
+		$where = '`id` = ?';
+		$params = array( intval( $id ) );
+		$row = self::getRow( self::TABLENAME, $where, $fieldNames, $params );
+		return $row ? $row['section'] : '';
 	}
 
 	/**
-     *  updates an Sectiondefinition (record in the publsections-table) with the values supplied in $values
-     *  @param $sectiondefid Id of the Section-definition to update
-     *  @param $values array of values to update, indexed by fieldname. $values['issue'] = issue1, etc...
-     *         The array does NOT need to contain all values, only values that are to be updated.
-     *  @return true if succeeded, false if an error occured.
-    **/
-
-    public static function updateSectionDef($sectiondefid, $values)
+	 * Update an Section definition (record in the publsections-table) with the values supplied in $values
+	 *
+	 * @param $sectionDefId Id of the Section-definition to update
+	 * @param $values array of values to update, indexed by fieldname. $values['issue'] = issue1, etc...
+	 *        The array does NOT need to contain all values, only values that are to be updated.
+	 * @return true if succeeded, false if an error occured.
+	 */
+    public static function updateSectionDef( $sectionDefId, $values )
     {
-        return self::updateRow(self::TABLENAME, $values, "`id` = ? ", array( intval( $sectiondefid ) ));
+	    $where = '`id` = ?';
+	    $params = array( intval( $sectionDefId ) );
+	    return self::updateRow( self::TABLENAME, $values, $where, $params );
     }
 
     /**
@@ -48,18 +51,19 @@ class DBSection extends DBBase
      *  - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with all values.
      *  - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with the values in $fieldnames.
      *
-     * @param integer $publid Id of the publication, if $publid = 0 null is returned;
-     * @param string|string[] $fieldnames see function description
+     * @param integer $pubId Id of the publication, if $publid = 0 null is returned;
+     * @param string|string[] $fieldNames see function description
      * @return array|null NULL in case of error, otherwise see function description
      */
-    public static function listPublSectionDefs($publid, $fieldnames = '*')
+    public static function listPublSectionDefs( $pubId, $fieldNames = '*' )
     {
-        if (empty($publid))
-        {
-            return null;   
-        }
-        return self::listRows(self::TABLENAME, 'id', 'section', "`publication` = ? AND `issue` = '0' ORDER BY `code` ASC ",
-	                           $fieldnames, array( intval( $publid) ));
+	    if( empty( $pubId ) ) {
+		    return null;
+	    }
+	    $where = '`publication` = ?';
+	    $params = array( intval( $pubId ) );
+	    $orderBy = array( 'code' => true );
+	    return self::listRows( self::TABLENAME, 'id', 'section', $where, $fieldNames, $params, $orderBy );
     }
     
     /**
@@ -75,17 +79,17 @@ class DBSection extends DBBase
 	 * @return array|null
 	 */
 	public static function listIssueSectionDefs( $issueId, $fieldnames = '*', $nopubldefs = false)
-    {
-        $issue = DBIssue::getIssue( $issueId );
-        if ($issue['overrulepub'] === true) {
-            $sectiondefs = self::listRows(self::TABLENAME, 'id', 'section', "`issue` = ? ORDER BY `code` ASC ",
-	                                       $fieldnames, array( intval( $issueId ) ));
-            return $sectiondefs;                   
-        }
-        else {
-            return $nopubldefs ? null : self::listPublSectionDefs($issue['publication']);   
-        }
-    }
+	{
+		$issue = DBIssue::getIssue( $issueId );
+		if( $issue['overrulepub'] === true ) {
+			$where = '`issue` = ?';
+			$params = array( intval( $issueId ) );
+			$orderBy = array( 'code' => true );
+			return self::listRows( self::TABLENAME, 'id', 'section', $where, $fieldnames, $params, $orderBy );
+		} else {
+			return $nopubldefs ? null : self::listPublSectionDefs( $issue['publication'] );
+		}
+	}
 
 	/**
 	 *  Lists all sections for the issue
@@ -94,14 +98,16 @@ class DBSection extends DBBase
 	 *  - Either '*' or true -> returns an array of rows indexed by the value in $keycol, each containing an array with all values.
 	 *  - An array with fieldnames -> returns an array of rows indexed by the value in $keycol, each containing an array with the values in $fieldnames.
 	 *
-	 * @param  int $issueid Id of the issue, if $issueid = 0 null is returned;
-	 * @param  mixed $fieldnames see function description
-	 * @return  null in case of error, otherwise see functiondescription
+	 * @param  int $issueId Id of the issue, if $issueid = 0 null is returned;
+	 * @param  mixed $fieldNames see function description
+	 * @return  null in case of error, otherwise see function description
 	 */
-    public static function listIssueSections($issueid, $fieldnames = '*')
-    {
-        return self::listRows('issuesection','id','section',"`issue` = ? ", $fieldnames, array( intval( $issueid ) ));
-    }
+	public static function listIssueSections( $issueId, $fieldNames = '*' )
+	{
+		$where = '`issue` = ?';
+		$params = array( intval( $issueId ) );
+		return self::listRows( 'issuesection', 'id', 'section', $where, $fieldNames, $params );
+	}
 
 	/**
 	 *  Gets exactly one section from issue $issueid, defined by $sectiondefid
@@ -110,56 +116,60 @@ class DBSection extends DBBase
 	 *  - Either '*' or true -> returns an array with all fieldname-value-pairs of the issue.
 	 *  - An array with fieldnames -> returns an array with the fieldname-value-pairs in $fieldnames.
 	 *
-	 * @param  int $issueid Id of the issue
-	 * @param  int $sectiondefid Id of the sectiondefinition by which section is defined.
-	 * @param  mixed $fieldnames see function description.
+	 * @param  int $issueId Id of the issue
+	 * @param  int $sectionDefId Id of the section definition by which section is defined.
+	 * @param  mixed $fieldNames see function description.
 	 * @return  null in case of error, else see function description
 	 */
-	public static function getIssueSection( $issueid, $sectiondefid, $fieldnames = '*' )
+	public static function getIssueSection( $issueId, $sectionDefId, $fieldNames = '*' )
 	{
-		return self::getRow('issuesection'," ( `issue` = ? AND `section` = ? ) ", $fieldnames,
-			array( intval( $issueid ), intval( $sectiondefid ) ) );
+		$where = '`issue` = ? AND `section` = ? ';
+		$params = array( intval( $issueId ), intval( $sectionDefId ) );
+		return self::getRow( 'issuesection', $where, $fieldNames, $params );
 	}
 
     /**
      *  updates a Section (record in the issuesections-table) with the values supplied in $values
-     *  @param $issuesectionid Id of the section to update
+     *  @param $issueSectionId Id of the section to update
      *  @param $values array of values to update, indexed by fieldname. $values['issue'] = issue1, etc...
      *         The array does NOT need to contain all values, only values that are to be updated.
-     *  @return true if succeeded, false if an error occured.
-     **/
-    public static function updateIssueSection($issuesectionid, $values)
-    {
-        return self::updateRow('issuesection', $values, "`id` = ? ", array( intval( $issuesectionid ) ) );
-    }
+     *  @return true if succeeded, false if an error occurred.
+     */
+	public static function updateIssueSection( $issueSectionId, $values )
+	{
+		$where = '`id` = ?';
+		$params = array( intval( $issueSectionId ) );
+		return self::updateRow( 'issuesection', $values, $where, $params );
+	}
 
-    /**
-     * Inserts a Section for issue $issueId, defined by $sectionDefId
-     *
-     * @param int $issueId Id of the issue to create the section for
-     * @param int $sectionDefId Id of the sectiondefinition to use
-     * @param array $values List of values to be updated, indexed by fieldname.
-     *         The array does NOT need to contain all values, only values that are to be updated.
+	/**
+	 * Inserts a Section for issue $issueId, defined by $sectionDefId
+	 *
+	 * @param int $issueId Id of the issue to create the section for
+	 * @param int $sectionDefId Id of the sectiondefinition to use
+	 * @param array $values List of values to be updated, indexed by fieldname.
+	 *         The array does NOT need to contain all values, only values that are to be updated.
 	 * @param bool $updateIfExists
 	 */
-	public static function insertIssueSection($issueId, $sectionDefId, $values, $updateIfExists = false)
-    {
-	    $issueId = intval( $issueId );
-        $sectionexists = self::getRow('issuesection', " `issue` = ? AND `section` = ? ", '*',
-	                                    array( intval( $issueId ), intval( $sectionDefId ) ) );
-        if ($sectionexists) {
-            if ($updateIfExists) {
-                self::updateIssueSection($sectionexists['id'], $values);
-            }
-            else {
-                self::setError("ERR_RECORDEXISTS");
-            }
-        } else {
-            $values['issue'] = $issueId;
-            $values['section'] = $sectionDefId;
-            self::insertRow('issuesection', $values);
-        }
-    }
+	public static function insertIssueSection( $issueId, $sectionDefId, $values, $updateIfExists = false )
+	{
+		$issueId = intval( $issueId );
+		$sectionDefId = intval( $sectionDefId );
+		$where = '`issue` = ? AND `section` = ? ';
+		$params = array( $issueId, $sectionDefId );
+		$sectionExists = self::getRow( 'issuesection', $where, array('id'), $params );
+		if( $sectionExists ) {
+			if( $updateIfExists ) {
+				self::updateIssueSection( $sectionExists['id'], $values );
+			} else {
+				self::setError( "ERR_RECORDEXISTS" );
+			}
+		} else {
+			$values['issue'] = $issueId;
+			$values['section'] = $sectionDefId;
+			self::insertRow( 'issuesection', $values );
+		}
+	}
 
 	/**
 	 * Retrieves sections from smart_publsections table that are owned by given publication or issue.
@@ -181,24 +191,25 @@ class DBSection extends DBBase
 		$where = "`publication` = ? ";
 		$params = array( intval( $pubId ) );
 		if( ((string)($issueId) === (string)(int)($issueId)) && $issueId > 0 ) { // natural and positive
-			$where .= "AND (`issue` = ? OR `issue` = 0) ";
+			$where .= "AND (`issue` = ? OR `issue` = ?) ";
 			$params[] = intval( $issueId );
+			$params[] = 0;
 		} else {
-			$where .= "AND `issue` = 0 ";
+			$where .= "AND `issue` = ? ";
+			$params[] = 0;
 		}
 		if( ((string)($sectionId) === (string)(int)($sectionId)) && $sectionId > 0 ) { // natural and positive
 			$where .= "AND `id` = ? ";
 			$params[] = intval( $sectionId );
 		}
 		if( $sectionName ) { 
-			$sectionName = trim($sectionName);
 			$where .= "AND `section` = ? ";
-			$params[] = strval( $sectionName );
+			$params[] = trim( strval( $sectionName ) );
 		}
 		// run DB query
 		$db = $dbDriver->tablename( self::TABLENAME );
-		$sql = "SELECT `id`, `issue`, `section` FROM $db WHERE $where ORDER BY `code`, `id` ";
-		$sth = $dbDriver->query($sql, $params );
+		$sql = "SELECT `id`, `issue`, `section` from $db WHERE $where ORDER BY `code`, `id` ";
+		$sth = $dbDriver->query( $sql, $params );
 		return $sth;
 	}
 
@@ -207,35 +218,69 @@ class DBSection extends DBBase
 	 *
 	 * @param int $pubId Id of the publication that sections belongs to
 	 * @param int $issueId Id of the issue that sections belongs to
-	 * @return AdmSection[] List of sections if succeeded.
+	 * @return AdmSection[] List of sections found. Empty when none found.
+	 * @throws BizException on SQL error
 	 */
 	static public function listSectionsObj( $pubId, $issueId )
 	{
-		$where = "`publication` = ? AND `issue` = ? ";
-		$params = array( intval( $pubId), intval( $issueId ) );
-		$orderby = " ORDER BY `code` ASC ";
+		$where = "`publication` = ? and `issue` = ? ";
+		$params = array( intval($pubId), intval($issueId) );
+		$orderBy = array( 'code' => true );
+		$rows = self::listRows( self::TABLENAME, 'id', 'section', $where, '*', $params, $orderBy );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
 		$sections = array();
-		$rows = self::listRows( self::TABLENAME, 'id', 'section', $where.$orderby, '*', $params );
-		if( !$rows ) return null;
+		if( $rows ) {
+			foreach( $rows as $row ) {
+				$sections[] = self::rowToObj( $row );
+			}
+		}
+		return $sections;
+	}
 
+	/**
+	 * Get one section by id from DB.
+	 * 
+    * @param int $sectionId Id of the section to get the values from
+    * @return AdmSection|null Section if succeeded, or null if the section was not found.
+	 * @throws BizException on SQL error
+	 */
+	static public function getSectionObj( $sectionId )
+	{
+		$where = '`id` = ?';
+		$params = array( intval($sectionId) );
+		$row = self::getRow(self::TABLENAME, $where, '*', $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+		return $row ? self::rowToObj($row) : null;
+	}
+
+	/**
+	 * Gets section objects based on a list of section ids from DB
+	 *
+	 * @since 10.2.0
+	 * @param integer[] $sectionIds List of section ids.
+	 * @return AdmSection[] The list of section objects if succeeded.
+	 * @throws BizException on SQL error
+	 */
+	static public function getSectionObjs( array $sectionIds )
+	{
+		$where = self::addIntArrayToWhereClause( 'id', $sectionIds );
+		if( !$where ) {
+			throw new BizException('ERR_ARGUMENT', 'Client', 'No section ids provided.' );
+		}
+		$rows = self::listRows( self::TABLENAME, null, null, $where );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
+		$sections = array();
 		foreach( $rows as $row ) {
 			$sections[] = self::rowToObj( $row );
 		}
 		return $sections;
 	}
-	
-	/**
-	 * Gets exactly one section object with id $sectionId from DB
-	 * 
-    * @param int $sectionId Id of the section to get the values from
-    * @return AdmSection|null Object of section if succeeded, null if no record returned
-	 */
-	static public function getSectionObj( $sectionId )
-    {
-    	$row   = self::getRow(self::TABLENAME, "`id` = ? ", '*', array( intval( $sectionId ) ));
-        if (!$row) return null;
-        return self::rowToObj($row);
-    }
 
 	/**
 	 *  Create new section object
@@ -243,8 +288,8 @@ class DBSection extends DBBase
 	 * @param int $pubId publication that new section belongs to
 	 * @param int $issueId Issue that new section belongs to
 	 * @param array $sections array of new sections that will created
-	 * @return array of new created section objects - throws BizException on failure
-	 * @throws BizException
+	 * @return AdmSection[] new created section objects
+	 * @throws BizException on SQL error or when section already exists
 	 */
 	public static function createSectionsObj( $pubId, $issueId, $sections )
 	{
@@ -255,13 +300,20 @@ class DBSection extends DBBase
 			$values = self::objToRow( $pubId, $issueId, $section );
 
 			// check duplicates
-			$params = array( strval( $values['section'] ), intval( $values['publication'] ), intval( $values['issue'] ) );
-			$row = self::getRow( self::TABLENAME, "`section` = ? AND `publication` = ? AND `issue` = ? ", '*', $params );
+			$where = "`section` = ? and `publication` = ? and `issue` = ? ";
+			$params = array( strval($values['section']), intval($values['publication']), intval($values['issue']) );
+			$row = self::getRow( self::TABLENAME, $where, array('id'), $params );
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
 			if( $row ) {
-				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null );
+				throw new BizException( 'ERR_DUPLICATE_NAME', 'Client', $row['id'] );
 			}
 
 			self::insertRow( self::TABLENAME, $values );
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
 			$newid = $dbdriver->newid( self::TABLENAME, true );
 			if( !is_null( $newid ) ) {
 				$newsection = DBSection::getSectionObj( $newid );
@@ -277,8 +329,8 @@ class DBSection extends DBBase
 	 * @param int $pubId Publication that Section belongs to
 	 * @param int $issueId Issue that Section belongs to
 	 * @param array $sections array of sections that need to be modified
-	 * @return array of modified Section objects - throws BizException on failure
-	 * @throws BizException
+	 * @return array of modified Section objects
+	 * @throws BizException on SQL error or when section already exists
 	 */
 	public static function modifySectionsObj( $pubId, $issueId, $sections )
 	{
@@ -289,13 +341,22 @@ class DBSection extends DBBase
 			$values = self::objToRow( $pubId, $issueId, $section );
 
 			// check duplicates
-			$params = array( strval( $section->Name ), intval( $values['issue'] ), intval( $values['publication'] ), intval( $section->Id ) );
-			$row = self::getRow( self::TABLENAME, "`section` = ? AND `issue` = ? AND `publication` = ? AND `id` != ?", '*', $params );
+			$where = '`section` = ? AND `publication` = ? AND `issue` = ? AND `id` != ?';
+			$params = array( strval($section->Name), intval($values['publication']), intval($values['issue']), intval($section->Id) );
+			$row = self::getRow( self::TABLENAME, $where, array('id'), $params );
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
 			if( $row ) {
-				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null );
+				throw new BizException( 'ERR_DUPLICATE_NAME', 'Client', $row['id'] );
 			}
 
-			$result = self::updateRow( self::TABLENAME, $values, "`id` = ?", array( intval( $section->Id ) ) );
+			$where = '`id` = ?';
+			$params = array( intval($section->Id) );
+			$result = self::updateRow( self::TABLENAME, $values, $where, $params );
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
 
 			if( $result === true ) {
 				$modifysection = self::getSectionObj( $section->Id );
@@ -313,33 +374,33 @@ class DBSection extends DBBase
      * @param AdmSection $obj The AdmSection data object.
      * @return array The smart_sections DB row.
      */
-	static public function objToRow ( $pubId, $issueId, $obj )
+	static public function objToRow( $pubId, $issueId, $obj )
 	{
-		$fields = array();
-		
-		if(!is_null($obj->Name)){
-			$fields['section']		= $obj->Name;
+		$row = array();
+
+		if( !is_null( $obj->Name ) ) {
+			$row['section'] = strval( $obj->Name );
 		}
-		if(!is_null($issueId)){
-			$fields['issue']		= $issueId;
+		if( !is_null( $issueId ) ) {
+			$row['issue'] = intval( $issueId );
 		}
-		if(!is_null($pubId)){
-			$fields['publication']	= $pubId;
+		if( !is_null( $pubId ) ) {
+			$row['publication'] = intval( $pubId );
 		}
-		if(!is_null($obj->Deadline)){
-			$fields['deadline']		= $obj->Deadline ? $obj->Deadline : '';
+		if( !is_null( $obj->Deadline ) ) {
+			$row['deadline'] = $obj->Deadline ? strval( $obj->Deadline ) : '';
 		}
-		if(!is_null($obj->ExpectedPages)){
-			$fields['pages']		= (is_int($obj->ExpectedPages) ? $obj->ExpectedPages : 0);
+		if( !is_null( $obj->ExpectedPages ) ) {
+			$row['pages'] = intval( $obj->ExpectedPages );
 		}
-		if(!is_null($obj->Description)){
-			$fields['description']	= $obj->Description;
+		if( !is_null( $obj->Description ) ) {
+			$row['description'] = strval( $obj->Description );
 		}
-		if(!is_null($obj->SortOrder)){
-			$fields['code']			= (is_int($obj->SortOrder )? $obj->SortOrder : 0);
+		if( !is_null( $obj->SortOrder ) ) {
+			$row['code'] = intval( $obj->SortOrder );
 		}
-		
-		return $fields;
+
+		return $row;
 	}
 	
 	/**
@@ -348,17 +409,17 @@ class DBSection extends DBBase
     * @param array $row The smart_sections DB row.
     * @return AdmSection The AdmSection data object.
     */
-	static public function rowToObj ( $row )
+	static public function rowToObj( $row )
 	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		$section = new AdmSection();
-		$section->Id 			= $row['id'];
-		$section->Name			= $row['section'];
-    	$section->Description	= $row['description'];
-    	$section->Deadline		= $row['deadline'];
-    	$section->ExpectedPages	= $row['pages'];
-    	$section->SortOrder		= $row['code'];
-    	$section->IssueId		= $row['issue'];
+		$section->Id            = intval($row['id']);
+		$section->Name          = strval($row['section']);
+    	$section->Description   = strval($row['description']);
+    	$section->Deadline      = strval($row['deadline']);
+    	$section->ExpectedPages = intval($row['pages']);
+    	$section->SortOrder     = intval($row['code']);
+    	$section->IssueId       = intval($row['issue']); // hack! (used by removesection.php)
 		return $section;
 	}
 }

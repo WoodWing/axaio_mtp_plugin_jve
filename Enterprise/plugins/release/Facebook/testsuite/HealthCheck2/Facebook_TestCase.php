@@ -132,7 +132,6 @@ class WW_TestSuite_HealthCheck2_Facebook_TestCase extends TestCase
 		require_once BASEDIR.'/server/bizclasses/BizAdmProperty.class.php';
 		require_once BASEDIR.'/server/utils/PublishingUtils.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizAdmPublication.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once dirname( __FILE__ ).'/../../FacebookPublisher.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
 

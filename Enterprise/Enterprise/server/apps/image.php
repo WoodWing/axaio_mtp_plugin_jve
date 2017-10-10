@@ -107,7 +107,6 @@ elseif( !empty($version) ) //requested version
 elseif( $page ) // page of layout
 {
 	require_once BASEDIR."/server/bizclasses/BizPage.class.php";
-	require_once BASEDIR."/server/bizclasses/BizSession.class.php";
 	try {
 		BizSession::startSession( $ticket );
 		$objPages = BizPage::GetPages($ticket, $globUser, null, $IDs, array($page), false, $edition , array( $rendition ), null, array($pagesequence) );
@@ -134,7 +133,6 @@ elseif( $rendition == 'eMagThumb' || $rendition == 'eMagPreview')
 	$tempRendition = 'preview';
 	
 	require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
-	require_once BASEDIR."/server/bizclasses/BizSession.class.php";
 	try {
 		BizSession::startSession( $ticket );
 		$getObjReq = new WflGetObjectsRequest( $ticket, $IDs, $lockObject, $tempRendition, null, null, $areas);
@@ -199,7 +197,6 @@ elseif( $rendition == 'eMagTextThumb'|| $rendition == 'eMagTextFull' || $renditi
 {	
 	// use preview rendition (jpg) and scale that
 	require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
-	require_once BASEDIR."/server/bizclasses/BizSession.class.php";
 	$Files="";
 	$Pages="";
 	$objectType="";
@@ -272,7 +269,6 @@ elseif( $rendition == 'eMagInPageSlide')
 	// two ways. If png use native rendition and scale to correct size
 	// if other, use preview rendition (jpg) and scale that
 	require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
-	require_once BASEDIR."/server/bizclasses/BizSession.class.php";
 	$Files="";
 	$Pages="";
 	$objectType="";
@@ -333,7 +329,6 @@ elseif( $rendition == 'eMagInPageSlide')
 else
 {	
 	require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
-	require_once BASEDIR."/server/bizclasses/BizSession.class.php";
 	$Files="";
 	$Pages="";
 	$objectType="";

@@ -40,6 +40,5 @@ abstract class PlnLogOn_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( PlnLogOnRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

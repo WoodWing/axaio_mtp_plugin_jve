@@ -40,6 +40,5 @@ abstract class WflCopyObject_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( WflCopyObjectRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

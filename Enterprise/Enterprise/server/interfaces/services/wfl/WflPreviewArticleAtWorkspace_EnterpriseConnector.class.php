@@ -40,6 +40,5 @@ abstract class WflPreviewArticleAtWorkspace_EnterpriseConnector extends ServiceC
 	 */
 	public function onError( WflPreviewArticleAtWorkspaceRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

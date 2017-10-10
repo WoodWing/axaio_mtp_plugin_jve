@@ -40,6 +40,5 @@ abstract class PubUnPublishDossiers_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( PubUnPublishDossiersRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

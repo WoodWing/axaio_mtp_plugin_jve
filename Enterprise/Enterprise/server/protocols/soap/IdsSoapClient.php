@@ -18,7 +18,8 @@ class WW_SOAP_IdsSoapClient extends SoapClient
 {
 	/**
 	 * Overload SoapClient constructor to set IDS SOAP options and to pass patched WSDL.
-	 * For parameters, see SoapClient at PHP manual
+	 *
+	 * @inheritdoc For parameters, see SoapClient at PHP manual
 	 */
 	public function __construct( $wsdl, $options = array() )
 	{
@@ -38,7 +39,8 @@ class WW_SOAP_IdsSoapClient extends SoapClient
 
 	/**
 	 * Overload requests to log all SOAP requests and responses in the Enterprise log folder.
-	 * For parameters, see SoapClient at PHP manual
+	 *
+	 * @inheritdoc For parameters, see SoapClient at PHP manual
 	 */
 	function __doRequest( $request, $location, $action, $version, $one_way = 0 ) 
 	{

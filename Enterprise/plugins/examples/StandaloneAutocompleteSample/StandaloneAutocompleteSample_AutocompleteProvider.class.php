@@ -63,12 +63,7 @@ class StandaloneAutocompleteSample_AutocompleteProvider extends AutocompleteProv
 	 */
 	public function autocomplete( $provider, $objectId, $propertyName, $termEntityName, $publishSystemId, $ignoreValues, $typedValue )
 	{
-		$objectId = $objectId; // keep analyzer happy
-		$propertyName = $propertyName; // keep analyzer happy
-		$provider = $provider; // Keep analyzer happy.
-		$publishSystemId = $publishSystemId; // Keep analyzer happy.
 		$tags = array();
-
 		$entities = $this->getSupportedEntities();
 		if( in_array( $termEntityName, $entities ) ) {
 			require_once BASEDIR . '/server/interfaces/services/wfl/DataClasses.php';

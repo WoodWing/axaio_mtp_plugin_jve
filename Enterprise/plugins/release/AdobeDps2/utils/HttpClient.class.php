@@ -86,8 +86,6 @@ class AdobeDps2_Utils_HttpClient
 				if( $contentParts ) foreach( $contentParts as $contentPart ) {
 					if( strpos( $contentPart, 'contentVersion=' ) === 0 ) {
 						list( $label, $contentVersion ) = explode( '=', $contentPart, 2 );
-						/** @noinspection PhpSillyAssignmentInspection */
-						$label = $label; // keep analyser happy
 						break 2;
 					}
 				}
@@ -830,8 +828,6 @@ class AdobeDps2_Utils_HttpClient
 			//   entity, it could happen that it was created one split second ago. Therefore
 			//   we still do a getEntityMetadata() and handle the HTTP 404 error as expected.
 			$map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO' )); // see catch below
-			/** @noinspection PhpSillyAssignmentInspection */
-			$map = $map; // keep analyzer happy
 			$exists = false;
 			try {
 				$metadata->version = null; // Make sure to always get the head version.
@@ -858,8 +854,6 @@ class AdobeDps2_Utils_HttpClient
 			if( $createOrUpdate ) {
 				$done = false; // something more to do, so not done yet
 				$map = new BizExceptionSeverityMap( array( 'version conflict' => 'INFO' )); // see catch below
-				/** @noinspection PhpSillyAssignmentInspection */
-				$map = $map; // keep analyzer happy
 				try {
 					$this->createOrUpdateEntity( $dpsPublicationId, $metadata ); // $metadata gets updated on success
 					$done = true;
@@ -884,8 +878,6 @@ class AdobeDps2_Utils_HttpClient
 			if( $done && $callbackForContentElements ) {
 				$done = false; // something more to do, so not done yet
 				$map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO' )); // see catch below
-				/** @noinspection PhpSillyAssignmentInspection */
-				$map = $map; // keep analyzer happy
 				try {
 					if( isset($metadata->_links->contentElements->href) ) {
 						$elements = $this->getEntityContentElements( $metadata->_links->contentElements->href );
@@ -910,8 +902,6 @@ class AdobeDps2_Utils_HttpClient
 			if( $done && !is_null($elements) ) {
 				$done = false; // something more to do, so not done yet
 				$map = new BizExceptionSeverityMap( array( 'version conflict' => 'INFO' )); // see catch below
-				/** @noinspection PhpSillyAssignmentInspection */
-				$map = $map; // keep analyzer happy
 				try {
 					if( isset($metadata->_links->contentElements->href) ) {
 						$this->updateEntityContentElements( $metadata->_links->contentElements->href, $elements );
@@ -1107,8 +1097,6 @@ class AdobeDps2_Utils_HttpClient
 // 	public function safeGetEntityMetadata( $dpsPublicationId, $entity )
 // 	{
 // 		$map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO' ) ); // see catch below
-// 		/** @noinspection PhpSillyAssignmentInspection */
-// 		$map = $map; // keep analyzer happy
 // 		$exists = false;
 // 		try {
 // 			$this->getEntityMetadata( $dpsPublicationId, $entity ); // $dpsArticle gets updated on success
@@ -1594,8 +1582,6 @@ class AdobeDps2_Utils_HttpClient
 		try {
 			$httpClient->request();
 		} catch ( Exception $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // To make analyzer happy.
 			$adapter = $httpClient->getAdapter();
 			if ( $adapter instanceof Zend_Http_Client_Adapter_Curl ) {
 				$curl = $adapter->getHandle();
@@ -2052,9 +2038,6 @@ class AdobeDps2_Utils_HttpClient
 	 */
 	protected function callService( Zend_Http_Client $httpClient, $serviceName, array $request )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$request = $request;
-
 		// Call the remote Adobe DPS service and monitor profiling
 		PerformanceProfiler::startProfile( 'Calling Adobe DPS', 1 );
 		$e = null;

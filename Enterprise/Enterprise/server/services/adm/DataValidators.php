@@ -3,7 +3,6 @@
 /**
  * @package Enterprise
  * @subpackage Services
- * @since v8.0
  * @copyright WoodWing Software bv. All Rights Reserved.
  * 
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -24,7 +23,7 @@ class AdmPubChannelTypeValidator
 {
 	static public function validate( $validator, $enumVal )
 	{
-		static $enums = array( 'print', 'web', 'sms', 'dps', 'dps2', 'other' );
+		static $enums = array( 'print', 'web', 'sms', 'dps2', 'other' );
 		$validator->checkEnum( $enums, $enumVal );
 	}
 }
@@ -33,7 +32,7 @@ class AdmModeValidator
 {
 	static public function validate( $validator, $enumVal )
 	{
-		static $enums = array( 'GetPublications', 'GetPubChannels', 'GetIssues', 'GetEditions', 'GetSections', 'GetStatuses', 'GetUsers', 'GetUserGroups' );
+		static $enums = array( 'GetPublications', 'GetPubChannels', 'GetIssues', 'GetEditions', 'GetSections', 'GetStatuses', 'GetUsers', 'GetUserGroups', 'GetProfileFeatures', 'GetObjectInfos' );
 		$validator->checkEnum( $enums, $enumVal );
 	}
 }
@@ -43,6 +42,15 @@ class AdmStatusPhaseValidator
 	static public function validate( $validator, $enumVal )
 	{
 		static $enums = array( 'Selection', 'Production', 'Completed', 'Archived' );
+		$validator->checkEnum( $enums, $enumVal );
+	}
+}
+
+class AdmProfileFeatureValueValidator
+{
+	static public function validate( $validator, $enumVal )
+	{
+		static $enums = array( 'Yes', 'No' );
 		$validator->checkEnum( $enums, $enumVal );
 	}
 }
@@ -61,9 +69,47 @@ class AdmIdNameValidator
 		}
 		if( $validator->checkExist( $datObj, 'Name' ) ) {
 			$validator->enterPath( 'Name' );
+			if( !is_null( $datObj->Name ) ) {
+				$validator->checkType( $datObj->Name, 'string' );
+			}
+			$validator->leavePath();
+		}
+	}
+}
+
+class AdmObjectInfoValidator
+{
+	static public function validate( $validator, $datObj )
+	{
+		if( $validator->checkExist( $datObj, 'ID' ) ) {
+			$validator->enterPath( 'ID' );
+			$validator->checkNull( $datObj->ID );
+			if( !is_null( $datObj->ID ) ) {
+				$validator->checkType( $datObj->ID, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Name' ) ) {
+			$validator->enterPath( 'Name' );
 			$validator->checkNull( $datObj->Name );
 			if( !is_null( $datObj->Name ) ) {
 				$validator->checkType( $datObj->Name, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Type' ) ) {
+			$validator->enterPath( 'Type' );
+			$validator->checkNull( $datObj->Type );
+			if( !is_null( $datObj->Type ) ) {
+				$validator->checkType( $datObj->Type, 'string' );
+				AdmObjectTypeValidator::validate( $validator, $datObj->Type );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Format' ) ) {
+			$validator->enterPath( 'Format' );
+			if( !is_null( $datObj->Format ) ) {
+				$validator->checkType( $datObj->Format, 'string' );
 			}
 			$validator->leavePath();
 		}
@@ -508,6 +554,13 @@ class AdmPubChannelValidator
 			$validator->enterPath( 'Description' );
 			if( !is_null( $datObj->Description ) ) {
 				$validator->checkType( $datObj->Description, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'SortOrder' ) ) {
+			$validator->enterPath( 'SortOrder' );
+			if( !is_null( $datObj->SortOrder ) ) {
+				$validator->checkType( $datObj->SortOrder, 'unsignedInt' );
 			}
 			$validator->leavePath();
 		}
@@ -970,11 +1023,18 @@ class AdmStatusValidator
 			}
 			$validator->leavePath();
 		}
-		if( $validator->checkExist( $datObj, 'DefaultRouteTo' ) ) {
-			$validator->enterPath( 'DefaultRouteTo' );
-			if( !is_null( $datObj->DefaultRouteTo ) ) {
-				$validator->checkType( $datObj->DefaultRouteTo, 'AdmIdName' );
-				AdmIdNameValidator::validate( $validator, $datObj->DefaultRouteTo );
+		if( $validator->checkExist( $datObj, 'DeadlineRelative' ) ) {
+			$validator->enterPath( 'DeadlineRelative' );
+			if( !is_null( $datObj->DeadlineRelative ) ) {
+				$validator->checkType( $datObj->DeadlineRelative, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'NextStatus' ) ) {
+			$validator->enterPath( 'NextStatus' );
+			if( !is_null( $datObj->NextStatus ) ) {
+				$validator->checkType( $datObj->NextStatus, 'AdmIdName' );
+				AdmIdNameValidator::validate( $validator, $datObj->NextStatus );
 			}
 			$validator->leavePath();
 		}
@@ -1018,6 +1078,188 @@ class AdmStatusValidator
 			$validator->enterPath( 'SkipIdsa' );
 			if( !is_null( $datObj->SkipIdsa ) ) {
 				$validator->checkType( $datObj->SkipIdsa, 'boolean' );
+			}
+			$validator->leavePath();
+		}
+	}
+}
+
+class AdmAccessProfileValidator
+{
+	static public function validate( $validator, $datObj )
+	{
+		if( $validator->checkExist( $datObj, 'Id' ) ) {
+			$validator->enterPath( 'Id' );
+			if( !is_null( $datObj->Id ) ) {
+				$validator->checkType( $datObj->Id, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Name' ) ) {
+			$validator->enterPath( 'Name' );
+			if( !is_null( $datObj->Name ) ) {
+				$validator->checkType( $datObj->Name, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'SortOrder' ) ) {
+			$validator->enterPath( 'SortOrder' );
+			if( !is_null( $datObj->SortOrder ) ) {
+				$validator->checkType( $datObj->SortOrder, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Description' ) ) {
+			$validator->enterPath( 'Description' );
+			if( !is_null( $datObj->Description ) ) {
+				$validator->checkType( $datObj->Description, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'ProfileFeatures' ) ) {
+			$validator->enterPath( 'ProfileFeatures' );
+			if( !is_null( $datObj->ProfileFeatures ) ) {
+				$validator->checkType( $datObj->ProfileFeatures, 'array' );
+				if( !empty($datObj->ProfileFeatures) ) foreach( $datObj->ProfileFeatures as $listItem ) {
+					$validator->enterPath( 'ProfileFeature' );
+					$validator->checkType( $listItem, 'AdmProfileFeature' );
+					AdmProfileFeatureValidator::validate( $validator, $listItem );
+					$validator->leavePath();
+				}
+			}
+			$validator->leavePath();
+		}
+	}
+}
+
+class AdmProfileFeatureValidator
+{
+	static public function validate( $validator, $datObj )
+	{
+		if( $validator->checkExist( $datObj, 'Name' ) ) {
+			$validator->enterPath( 'Name' );
+			$validator->checkNull( $datObj->Name );
+			if( !is_null( $datObj->Name ) ) {
+				$validator->checkType( $datObj->Name, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'DisplayName' ) ) {
+			$validator->enterPath( 'DisplayName' );
+			if( !is_null( $datObj->DisplayName ) ) {
+				$validator->checkType( $datObj->DisplayName, 'string' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'Value' ) ) {
+			$validator->enterPath( 'Value' );
+			$validator->checkNull( $datObj->Value );
+			if( !is_null( $datObj->Value ) ) {
+				$validator->checkType( $datObj->Value, 'string' );
+				AdmProfileFeatureValueValidator::validate( $validator, $datObj->Value );
+			}
+			$validator->leavePath();
+		}
+	}
+}
+
+class AdmWorkflowUserGroupAuthorizationValidator
+{
+	static public function validate( $validator, $datObj )
+	{
+		if( $validator->checkExist( $datObj, 'Id' ) ) {
+			$validator->enterPath( 'Id' );
+			if( !is_null( $datObj->Id ) ) {
+				$validator->checkType( $datObj->Id, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'UserGroupId' ) ) {
+			$validator->enterPath( 'UserGroupId' );
+			$validator->checkNull( $datObj->UserGroupId );
+			if( !is_null( $datObj->UserGroupId ) ) {
+				$validator->checkType( $datObj->UserGroupId, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'SectionId' ) ) {
+			$validator->enterPath( 'SectionId' );
+			if( !is_null( $datObj->SectionId ) ) {
+				$validator->checkType( $datObj->SectionId, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'StatusId' ) ) {
+			$validator->enterPath( 'StatusId' );
+			if( !is_null( $datObj->StatusId ) ) {
+				$validator->checkType( $datObj->StatusId, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'AccessProfileId' ) ) {
+			$validator->enterPath( 'AccessProfileId' );
+			$validator->checkNull( $datObj->AccessProfileId );
+			if( !is_null( $datObj->AccessProfileId ) ) {
+				$validator->checkType( $datObj->AccessProfileId, 'integer' );
+			}
+			$validator->leavePath();
+		}
+	}
+}
+
+class AdmRoutingValidator
+{
+	static public function validate( $validator, $datObj )
+	{
+		if( $validator->checkExist( $datObj, 'Id' ) ) {
+			$validator->enterPath( 'Id' );
+			if( !is_null( $datObj->Id ) ) {
+				$validator->checkType( $datObj->Id, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'SectionId' ) ) {
+			$validator->enterPath( 'SectionId' );
+			if( !is_null( $datObj->SectionId ) ) {
+				$validator->checkType( $datObj->SectionId, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'StatusId' ) ) {
+			$validator->enterPath( 'StatusId' );
+			if( !is_null( $datObj->StatusId ) ) {
+				$validator->checkType( $datObj->StatusId, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'RouteTo' ) ) {
+			$validator->enterPath( 'RouteTo' );
+			$validator->checkNull( $datObj->RouteTo );
+			if( !is_null( $datObj->RouteTo ) ) {
+				$validator->checkType( $datObj->RouteTo, 'string' );
+			}
+			$validator->leavePath();
+		}
+	}
+}
+
+class AdmTemplateObjectAccessValidator
+{
+	static public function validate( $validator, $datObj )
+	{
+		if( $validator->checkExist( $datObj, 'TemplateObjectId' ) ) {
+			$validator->enterPath( 'TemplateObjectId' );
+			$validator->checkNull( $datObj->TemplateObjectId );
+			if( !is_null( $datObj->TemplateObjectId ) ) {
+				$validator->checkType( $datObj->TemplateObjectId, 'integer' );
+			}
+			$validator->leavePath();
+		}
+		if( $validator->checkExist( $datObj, 'UserGroupId' ) ) {
+			$validator->enterPath( 'UserGroupId' );
+			$validator->checkNull( $datObj->UserGroupId );
+			if( !is_null( $datObj->UserGroupId ) ) {
+				$validator->checkType( $datObj->UserGroupId, 'integer' );
 			}
 			$validator->leavePath();
 		}

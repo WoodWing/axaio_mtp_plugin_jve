@@ -120,9 +120,10 @@ class WW_Utils_ShellTransferClient extends WW_Utils_TransferClient
 	 * @param Attachment $attachment
 	 * @param bool $cleanup Whether or not to remove the file from Transfer Folder after download.
 	 * @param string $compression This compression feature is not supported by this subclass.
+	 * @param string $stripWcml Pass 'styles' to strip duplicate definitions from WCML articles before download. Empty when none.
 	 * @return bool Tells if download was successful. If true, the $attachment->Content is set.
 	 */	
-	public function downloadFile( Attachment $attachment, $cleanup = true, $compression = '' )
+	public function downloadFile( Attachment $attachment, $cleanup = true, $compression = '', $stripWcml = '' )
 	{
 		// Read template command file (custom config)
 		$fileExt = OS == 'WIN' ? '.bat' : '.sh';
@@ -156,6 +157,6 @@ class WW_Utils_ShellTransferClient extends WW_Utils_TransferClient
 	 */	
 	public function cleanupFile( Attachment $attachment )
 	{
-		$this->cleanupFile( $attachment ); // oursourced to parental class
+		return $this->cleanupFile( $attachment ); // oursourced to parental class
 	}
 }

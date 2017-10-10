@@ -19,7 +19,6 @@ class AdobeDps2_BizClasses_Email
 	{
 		if( self::isEmailEnabled() ) {
 			require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
-			require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 			$object = BizObject::getObject( $layoutId, BizSession::getShortUserName(), false, 'preview', null, null, true );
 			$props = self::convertMetaToArray( $object );
 

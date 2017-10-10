@@ -40,6 +40,5 @@ abstract class AdmLogOff_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdmLogOffRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

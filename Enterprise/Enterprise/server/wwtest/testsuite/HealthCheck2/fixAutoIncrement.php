@@ -23,24 +23,6 @@ if ( $deletedId > 0 ) {
 		$sql = "DBCC CHECKIDENT ($objectsTable, RESEED, $deletedId)";
 		$sth = $dbdriver->query($sql);
 	}
-	// For oracle it is not needed to adjust the 'auto_increment'. It is kept in the sequence and
-	// the sequence 
-	/* 
-	elseif (DBTYPE == 'oracle') {
-		// Oracle has no 1 statement to set the "auto increment". For now we have found that 
-		// increasing the increment to that it will be set to the correct value and then calling 
-		// nextId() to set correct ID works. After that set the increment back to 1.
-		// Discussion with JVE is needed to finalise the solution 
-		
-		$increment = $deletedId - $objectId;
-		$objectsTableSeq = $objectsTable."_seq";
-		$sql = "alter sequence $objectsTableSeq increment by $increment";
-		$sth = $dbdriver->query($sql);
-		$oldID = $dbdriver->nextId($objectsTable);
-		$sql = "alter sequence $objectsTableSeq increment by 1";
-		$sth = $dbdriver->query($sql);
-	}*/
-
 	print "Auto_increment is restored to id: $deletedId";
 }
 else {

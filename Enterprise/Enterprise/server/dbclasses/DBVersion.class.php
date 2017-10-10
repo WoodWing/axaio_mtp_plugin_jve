@@ -216,9 +216,12 @@ class DBVersion extends DBBase
 	 */
 	static public function getCurrentVersionNrFromId( $objId )
 	{
-		$row = self::getRow( 'objects', "`id`= ?", '`id`, `type`, `majorversion`, `minorversion`', array( intval( $objId ) ) );
+		$where = '`id` = ?';
+		$params = array( intval($objId) );
+		$fieldNames = array( 'id', 'majorversion', 'minorversion' );
+		$row = self::getRow( 'objects', $where, $fieldNames, $params );
 		if( !$row ) { // try deleted objects...
-			$row = self::getRow( 'deletedobjects', "`id`=$objId", '`id`, `type`, `majorversion`, `minorversion`' );
+			$row = self::getRow( 'deletedobjects', $where, $fieldNames, $params );
 		}
 		if( $row ) {
 			return self::joinMajorMinorVersion( $row );

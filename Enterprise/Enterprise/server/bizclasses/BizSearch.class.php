@@ -36,7 +36,6 @@ class BizSearch
 			// scripts that query objects -directly- after saving to check if all saved data 
 			// is reflected.
 			if( is_null($directCommit) ) {
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				$directCommit = BizSession::getDirectCommit();
 			}
 			
@@ -91,7 +90,6 @@ class BizSearch
 		}
 
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$objects = array();
 		$user = BizSession::getShortUserName();
 		foreach( $objectIds as $objectId ) {
@@ -150,7 +148,6 @@ class BizSearch
 			// scripts that query objects -directly- after saving to check if all saved data
 			// is reflected.
 			if( is_null($directCommit) ) {
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				$directCommit = BizSession::getDirectCommit();
 			}
 
@@ -190,7 +187,6 @@ class BizSearch
 		}
 
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$objects = array();
 		$user = BizSession::getShortUserName();
 		foreach( $objectIds as $objectId ) {

@@ -19,6 +19,7 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	protected $customCSS = null;
 	
 	// InCopy input
+	protected $wcmlVersion = null;
 	protected $docDomVersion = null;
 	protected $icDoc = null;
 	protected $icXPath = null;
@@ -208,6 +209,12 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 		}
 		$this->icXPath = new DOMXPath( $this->icDoc );
 		$this->icXPath->registerNamespace('ea', 'urn:SmartConnection_v3');
+
+		// Retrieve the wcml version value from the ea:WWVersion attribute
+		$wcmlVersionNodes = $this->icXPath->query("/ea:Stories/@ea:WWVersion");
+		if( $wcmlVersionNodes->length > 0 ) {
+			$this->wcmlVersion = $wcmlVersionNodes->item(0)->nodeValue;
+		}
 
 		// Create XHTML document
 		$this->xDoc = new DOMDocument('1.0','UTF-8');
@@ -1146,25 +1153,25 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	{
 		$info = array();
 
-		$left = $attr['Left'];
-		$right = $attr['Right'];
-		$top = $attr['Top'];
-		$bottom = $attr['Bottom'];
+		$left = floatval($attr['Left']);
+		$right = floatval($attr['Right']);
+		$top = floatval($attr['Top']);
+		$bottom = floatval($attr['Bottom']);
 
-		$info['Width'] = $right - $left - $attr['CropRight'] - $attr['CropLeft'];
-		$info['Width'] *= $attr['ScaleX'];
+		$info['Width'] = $right - $left - floatval($attr['CropRight']) - floatval($attr['CropLeft']);
+		$info['Width'] *= floatval($attr['ScaleX']);
 
-		$info['Height'] = $bottom - $top - $attr['CropBottom'] - $attr['CropTop'];
-		$info['Height'] *= $attr['ScaleY'];
+		$info['Height'] = $bottom - $top - floatval($attr['CropBottom']) - floatval($attr['CropTop']);
+		$info['Height'] *= floatval($attr['ScaleY']);
 
-		$info['ContentDx'] = $left - $attr['CropLeft'];
-		$info['ContentDx'] *= $attr['ScaleX'];
+		$info['ContentDx'] = $left - floatval($attr['CropLeft']);
+		$info['ContentDx'] *= floatval($attr['ScaleX']);
 
-		$info['ContentDy'] = $top - $attr['CropTop'];
-		$info['ContentDy'] *= $attr['ScaleY'];
+		$info['ContentDy'] = $top - floatval($attr['CropTop']);
+		$info['ContentDy'] *= floatval($attr['ScaleY']);
 
-		$info['ScaleX'] = $attr['ScaleX'];
-		$info['ScaleY'] = $attr['ScaleY'];
+		$info['ScaleX'] = floatval($attr['ScaleX']);
+		$info['ScaleY'] = floatval($attr['ScaleY']);
 
 		if( LogHandler::debugMode() ) { // avoid expensive print_r() in production
 			LogHandler::Log( 'textconverter', 'DEBUG', 'Inline image placement info: '.print_r( $info, true ) );
@@ -1523,7 +1530,14 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	{
 		// Iterate through the color defintions at WCML and transform colors to RGB.
 		// All found colors are collected at $this->xColors.
-		$icColors = $this->icXPath->query( '/ea:Stories/ea:Story/Document/Color' );
+
+		// wcml v3 has styles and design metadata stored in wwsd_styles. Fall back to version 2.0 behaviour
+		// when wcmlVersion is not set.
+		$baseQueryExpression = '/ea:Stories/ea:Story';
+		if( isset($this->wcmlVersion) && version_compare($this->wcmlVersion, '3.0', '>=') ) {
+			$baseQueryExpression = '/ea:Stories/ea:wwsd_document/ea:wwsd_styles';
+		}
+		$icColors = $this->icXPath->query( $baseQueryExpression.'/Document/Color' );
 		foreach( $icColors as $icColor ) {
 			$self = $icColor->getAttribute('Self');
 			$space = $icColor->getAttribute('Space');
@@ -1551,13 +1565,20 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 		if( !isset($this->xColors['Color/Black']) ) {
 			$this->xColors['Color/Black'] = '#000000';
 		}
-		
+
+		// wcml v3 has styles and design metadata stored in wwsd_styles. Fall back to version 2.0 behaviour
+		// when wcmlVersion is not set.
+		$baseQueryExpression = '/ea:Stories/ea:Story';
+		if( isset($this->wcmlVersion) && version_compare($this->wcmlVersion, '3.0', '>=') ) {
+			$baseQueryExpression = '/ea:Stories/ea:wwsd_document/ea:wwsd_styles';
+		}
+
 		// Iterate through all swatches and copy colors from definitions found above.
 		// For each copy, the swatch id is used so that swatch color lookups will work.
-		$icSwatches = $this->icXPath->query( '/ea:Stories/ea:Story/Document/Swatch' );
+		$icSwatches = $this->icXPath->query( $baseQueryExpression.'/Document/Swatch' );
 		foreach( $icSwatches as $icSwatch ) {
 			$icCreatorId = $icSwatch->getAttribute('SwatchCreatorID');
-			$icColors = $this->icXPath->query( '/ea:Stories/ea:Story/Document/Color[@SwatchCreatorID="'.$icCreatorId.'"]' );
+			$icColors = $this->icXPath->query( $baseQueryExpression.'/Document/Color[@SwatchCreatorID="'.$icCreatorId.'"]' );
 			if( $icColors->length > 0 ) {
 				$icColor = $icColors->item(0);
 				$icColorId = $icColor->getAttribute('Self');
@@ -1575,7 +1596,7 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 	 * @param bool $isOverride TRUE for override style (becomes 'style' attribute) or FALSE for para/char style definition (referred through 'class' attribute).
 	 * @param bool $isPara TRUE for para style or FALSE for char style.
 	 * @param array $css Style map for internal use.
-	 * @return string CSS definition
+	 * @return array CSS definition
 	 */
 	protected function parseStyles( DOMNode $icStyle, $isOverride, $isPara, $css = array() )
 	{
@@ -1799,8 +1820,6 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 
 	/**
 	 * Parses WCML para/char style definitions and builds $this->xStyles (for XHTML).
-	 *
-	 * @return string
 	 */
 	private function buildStyles()
 	{
@@ -1815,16 +1834,19 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 			$xStyleMap = $this->parseStyles( $icParaStyle, false, true ); // style def, para
 			$this->xStyles[$self] = $this->postProcessStyles( $xStyleMap, $icParaStyle, null, false, true, $self );
 		}
-		
-		
-		$icParaStyles = $this->icXPath->query( '/ea:Stories/ea:Story/Document/RootParagraphStyleGroup/ParagraphStyle' );
-		foreach( $icParaStyles as $icParaStyle ) {
-			$self = $icParaStyle->getAttribute('Self');
-			$self = str_replace( 'ParagraphStyle/', 'para_', $self );
-			$xStyleMap = $this->parseStyles( $icParaStyle, false, true ); // style def, para
-			$this->xStyles[$self] = $this->postProcessStyles( $xStyleMap, $icParaStyle, null, false, true, $self );
+
+		// wcml v3 has styles and design metadata only stored in wwsd_styles. Fall back to version 2.0 behaviour
+		// when wcmlVersion is not set.
+		if( !isset($this->wcmlVersion) || version_compare($this->wcmlVersion, '3.0', '<') ) {
+			$icParaStyles = $this->icXPath->query( '/ea:Stories/ea:Story/Document/RootParagraphStyleGroup/ParagraphStyle' );
+			foreach( $icParaStyles as $icParaStyle ) {
+				$self = $icParaStyle->getAttribute( 'Self' );
+				$self = str_replace( 'ParagraphStyle/', 'para_', $self );
+				$xStyleMap = $this->parseStyles( $icParaStyle, false, true ); // style def, para
+				$this->xStyles[ $self ] = $this->postProcessStyles( $xStyleMap, $icParaStyle, null, false, true, $self );
+			}
 		}
-				
+
 		// Character style
 		// BZ#27109: Need to retrieve styles from "ea:wwsd_document/ea:wwsd_styles/Document/RootPara..." and "ea:Story/Document/RootPara..."
 		$icCharStyles = $this->icXPath->query( '/ea:Stories/ea:wwsd_document/ea:wwsd_styles/Document/RootCharacterStyleGroup/CharacterStyle' );
@@ -1834,13 +1856,17 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 			$xStyleMap = $this->parseStyles( $icCharStyle, false, false ); // style def, char
 			$this->xStyles[$self] = $this->postProcessStyles( $xStyleMap, $icCharStyle, null, false, false, $self );
 		}
-		
-		$icCharStyles = $this->icXPath->query( '/ea:Stories/ea:Story/Document/RootCharacterStyleGroup/CharacterStyle' );
-		foreach( $icCharStyles as $icCharStyle ) {
-			$self = $icCharStyle->getAttribute('Self');
-			$self = str_replace( 'CharacterStyle/', 'char_', $self );
-			$xStyleMap = $this->parseStyles( $icCharStyle, false, false ); // style def, char
-			$this->xStyles[$self] = $this->postProcessStyles( $xStyleMap, $icCharStyle, null, false, false, $self );
+
+		// wcml v3 has styles and design metadata only stored in wwsd_styles. Fall back to version 2.0 behaviour
+		// when wcmlVersion is not set.
+		if( !isset($this->wcmlVersion) || version_compare($this->wcmlVersion, '3.0', '<') ) {
+			$icCharStyles = $this->icXPath->query( '/ea:Stories/ea:Story/Document/RootCharacterStyleGroup/CharacterStyle' );
+			foreach( $icCharStyles as $icCharStyle ) {
+				$self = $icCharStyle->getAttribute( 'Self' );
+				$self = str_replace( 'CharacterStyle/', 'char_', $self );
+				$xStyleMap = $this->parseStyles( $icCharStyle, false, false ); // style def, char
+				$this->xStyles[ $self ] = $this->postProcessStyles( $xStyleMap, $icCharStyle, null, false, false, $self );
+			}
 		}
 	}
 

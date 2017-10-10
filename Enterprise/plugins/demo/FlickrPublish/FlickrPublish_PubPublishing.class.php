@@ -148,10 +148,6 @@ class FlickrPublish_PubPublishing extends PubPublishing_EnterpriseConnector
 	 **/
 	public function previewDossier (&$dossier, &$objectsindossier, $publishtarget)
 	{
-		// keep analyzer happy
-		$dossier = $dossier;
-		$objectsindossier = $objectsindossier;
-		$publishtarget = $publishtarget;
 		$msg = 'Cannot preview Flickr photo';
 		throw new BizException( 'ERR_ERROR', 'Server', $msg, $msg );
 	}
@@ -168,11 +164,7 @@ class FlickrPublish_PubPublishing extends PubPublishing_EnterpriseConnector
 	 **/
 	public function requestPublishFields ($dossier, $objectsindossier, $publishtarget)
 	{
-		// keep analyzer happy
-		$objectsindossier = $objectsindossier;
-		
 		$result = array();
-
 		$imageIds = array();
 		foreach ($objectsindossier as $object){
 			switch ($object->MetaData->BasicMetaData->Type ){
@@ -200,10 +192,6 @@ class FlickrPublish_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getDossierURL ($dossier, $objectsindossier, $publishtarget)
 	{
-		// keep analyzer happy
-		$objectsindossier = $objectsindossier;
-		$publishtarget = $publishtarget;
-
 		// We can publish multiple images, so we just show the account page
 		return self::getFlickrAccountURL();
 	}

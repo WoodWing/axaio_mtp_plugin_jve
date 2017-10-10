@@ -31,8 +31,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_CustomProperties
 
 	/**
 	 * Runs the testcases for this TestSuite.
-	 *
-	 * @return bool
 	 */
 	final public function runTest()
 	{
@@ -227,7 +225,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_CustomProperties
 			BizCustomField::insertFieldAtModel( $table, self::CUSTPROP_TINYTEXT, 'string' );
 			$this->didAdjustTable = true;
 		} catch ( BizException $e ) {
-			$e = $e; // Keep analyzer happy.
 			$this->setResult( 'ERROR',  'Adding field to ' . $table . ' table error for type: ' . $this->type );
 			return false;
 		}
@@ -263,9 +260,8 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_CustomProperties
 		if( $this->didAdjustTable ) {
 			$this->didAdjustTable = false;
 			try {
-				BizCustomField::deleteFieldAtModel( $table, self::CUSTPROP_TINYTEXT, 'string' );
+				BizCustomField::deleteFieldAtModel( $table, self::CUSTPROP_TINYTEXT );
 			} catch( BizException $e ) {
-				$e = $e; // Keep analyzer happy.
 				LogHandler::Log( 'CustPropTest', 'ERROR', 'Deleting field from "'.$table.'" '.
 								'table error, while testing for type: '.$this->type );
 				return false;
