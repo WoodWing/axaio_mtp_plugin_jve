@@ -1566,13 +1566,6 @@ class WW_TextConverters_Wcml2Xhtml extends HtmlTextImport
 			$this->xColors['Color/Black'] = '#000000';
 		}
 
-		// wcml v3 has styles and design metadata stored in wwsd_styles. Fall back to version 2.0 behaviour
-		// when wcmlVersion is not set.
-		$baseQueryExpression = '/ea:Stories/ea:Story';
-		if( isset($this->wcmlVersion) && version_compare($this->wcmlVersion, '3.0', '>=') ) {
-			$baseQueryExpression = '/ea:Stories/ea:wwsd_document/ea:wwsd_styles';
-		}
-
 		// Iterate through all swatches and copy colors from definitions found above.
 		// For each copy, the swatch id is used so that swatch color lookups will work.
 		$icSwatches = $this->icXPath->query( $baseQueryExpression.'/Document/Swatch' );
