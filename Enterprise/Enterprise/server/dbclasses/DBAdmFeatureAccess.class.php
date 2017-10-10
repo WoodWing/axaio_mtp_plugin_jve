@@ -145,7 +145,7 @@ class DBAdmFeatureAccess extends DBBase
 		$dbTable = $dbDriver->tablename( self::TABLENAME );
 		$where = "`featureid` >= ? AND `featureid` <= ? ";
 		$params =  array( intval( $this->accessFeatureMin ), intval( $this->accessFeatureMax ));
-		$sql = "SELECT MAX(`featureid`) as `maxid` FROM $dbTable WHERE $where";
+		$sql = "SELECT MAX(`featureid`) AS `maxid` FROM $dbTable WHERE $where";
 		$sth = self::query( $sql, $params );
 		$row = self::fetch( $sth );
 		return isset( $row['maxid'] ) ? $row['maxid'] : null;
@@ -187,7 +187,7 @@ class DBAdmFeatureAccess extends DBBase
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$dbTable = $dbDriver->tablename( self::TABLENAME );
-		$sql = "SELECT MAX(`accessflag`) as `maxflag` FROM $dbTable ";
+		$sql = "SELECT MAX(`accessflag`) AS `maxflag` FROM $dbTable ";
 		$sth = self::query( $sql );
 		$row = self::fetch( $sth );
 		return isset( $row['maxflag'] ) ? $row['maxflag'] : null;
