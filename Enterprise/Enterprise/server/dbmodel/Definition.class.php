@@ -1679,7 +1679,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 				array ('v' =>'4.1', 'name' => 'smart_objectflags',
 					'comment' => 'Contains volatile object flags, eg. set by planning system when layout is modified.',
 					'fields' => array(
-						array('v' => '10.2', 'name' => 'objid',			'type' => 'bigint(11)',		'default' => "",
+						array('v' => '10.2', 'name' => 'objid',			'type' => 'bigint(11)',		'default' => "'0'",
 							'alters' => array('v' => '6.1', 'name' => 'objid',			'type' => 'int(11)',		'default' => "",
 								'alters' => array('v' => '4.1', 'name' => 'objid',			'type' => 'mediumint(9)',		'default' => "")) ),
 						array('v' => '4.1', 'name' => 'flagorigin',		'type' => 'varchar(255)',		'default' => ""),
