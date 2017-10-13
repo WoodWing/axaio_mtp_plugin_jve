@@ -8,3 +8,4 @@ dependencies:
   - image
   - taxonomy
   - xmlrpc
+  - auto_login_url
