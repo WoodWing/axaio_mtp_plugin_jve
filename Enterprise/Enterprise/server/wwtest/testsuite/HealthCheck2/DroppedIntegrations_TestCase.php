@@ -114,7 +114,8 @@ class WW_TestSuite_HealthCheck2_DroppedIntegrations_TestCase extends TestCase
 		require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
 		$channelInfos = DBChannel::getChannelsByType( 'dps' );
 		if( $channelInfos ) {
-			$help = 'Publication Channels of the type \'dps\' were found. Please update the channel(s) and set the \'Publish System\' to \'Unknown\' or remove these channels.';
+			$message = 'Publication Channels of the type \'dps\' were found.';
+			$help = 'Please update the channel(s) and set the \'Publish System\' to \'Unknown\' or remove these channels.';
 			$help .= '<br/>';
 			$help .= 'The following channels were found:';
 			$help .= '<br/>';
