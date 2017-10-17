@@ -52,8 +52,7 @@ class DBObjectRelation extends DBBase
     	$dbDriver = DBDriverFactory::gen();
 		require_once BASEDIR.'/server/utils/UtfString.class.php';
 		$pageRange = UtfString::truncateMultiByteValue( $pageRange, 50 );
-		$pageRange = $dbDriver->toDBString( $pageRange );
-		
+
 		// Zerofy rating when no or bad value is given.
 		if( !is_numeric($rating) ) {
 			$rating = 0;
@@ -65,7 +64,7 @@ class DBObjectRelation extends DBBase
 				'child'     => $child,
 				'type'      => $relType,
 				'subid'     => $childType,
-				'pagerange' => $pageRange,
+				'pagerange' => strval( $pageRange ),
 				'rating'    => $rating,
 				'parenttype' => $parentType);
 		$result = self::insert( $newValues, true );

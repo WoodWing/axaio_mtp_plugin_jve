@@ -59,8 +59,6 @@ class DBPublication extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename(self::TABLENAME);
 
-		$name = $dbDriver->toDBString($name);
-
 		$sql = "SELECT * FROM $db WHERE 1=1";
 		$params = array();
 		if ($name) {
