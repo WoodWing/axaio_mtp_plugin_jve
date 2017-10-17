@@ -268,9 +268,8 @@ class DBPage extends DBBase
 		$params[] = intval($issueid);
 	
 		if (!empty($instance)) {
-			$instance = $dbDriver->toDBString( $instance );
 			$sql .= ' AND p.`instance` = ? ';
-			$params[] = $instance;
+			$params[] = strval( $instance );
 		}
 	
 		if (!empty($editionid)) {

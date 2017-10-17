@@ -86,7 +86,6 @@ class DBUser extends DBBase
 		// save password
 		$pass = ww_crypt($pass, null, true ); // BZ#20845 - Always store the password with new SHA-512 hash type
 		if( !self::setPassword( $user, $pass, $expiredays ) ) {
-			self::setError( $dbdriver->error() );
 			return null;
 		}
 		return $newid;
@@ -117,9 +116,7 @@ class DBUser extends DBBase
 		// save password
 		if( $pass ) {
 			$pass = ww_crypt($pass, null, true ); // BZ#20845 - Always store the password with new SHA-512 hash type
-			if( !self::setPassword( $user, $pass, $expiredays ) ){
-				self::setError( $dbdriver->error() );
-			}
+			self::setPassword( $user, $pass, $expiredays );
 		}
 	}
 
@@ -722,7 +719,6 @@ class DBUser extends DBBase
 			$user->Password = $user->EncryptedPassword; // Set the password as encrypted password
 		}
 		if( !self::setPassword( $user->Name, $user->Password, $user->PasswordExpired ) ) {
-			self::setError( $dbDriver->error() );
 			return null;
 		}
 
@@ -778,7 +774,6 @@ class DBUser extends DBBase
 					// Save password, EN-20845 - Always store the password with SHA-512 hash type.
 					$user->Password = ww_crypt( $user->Password, null, true );
 					if( !self::setPassword( $user->Name, $user->Password ) ) {
-						self::setError( $dbDriver->error() );
 						return null;
 					}
 				}
@@ -1152,21 +1147,18 @@ class DBUser extends DBBase
 
 	static public function setPassword( $user, $pass, $expiredays=null )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$db = $dbDriver->tablename('users');
-
-		$user = $dbDriver->toDBString($user);
-		$pass = $dbDriver->toDBString($pass);
-
-		if(!empty($expiredays))
-			$expire = date('Y-m-d\TH:i:s', time()+$expiredays*3600*24 );
-		else
+		if( !empty( $expiredays ) ) {
+			$expire = date( 'Y-m-d\TH:i:s', time() + $expiredays * 3600 * 24 );
+		} else {
 			$expire = '';
-
-		$sql = "UPDATE $db SET `pass`='$pass', `expirepassdate` = '$expire' WHERE `user` = ? ";
-		$sth = $dbDriver->query($sql, array( strval( $user ) ));
-
-		return $sth;
+		}
+		$values = array(
+			'pass' => strval( $pass ),
+			'expirepassdate' => strval( $expire )
+		);
+		$where = '`user` = ?';
+		$params = array( strval( $user ) );
+		return self::updateRow( self::TABLENAME, $values, $where, $params );
 	}
 
 	static public function setUserLanguage( $user, $lang )
@@ -1188,16 +1180,9 @@ class DBUser extends DBBase
 	 */
 	static public function getUser( $user )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$db = $dbDriver->tablename( 'users' );
-
-		$user = $dbDriver->toDBString( $user );
-
-		$sql = "SELECT * FROM $db WHERE `user`= ? OR `fullname`= ? ";
-		$sth = $dbDriver->query( $sql, array( strval( $user), strval( $user ) ) );
-		if ( !$sth )
-			return null;
-		$row = $dbDriver->fetch( $sth );
+		$where = "`user`= ? OR `fullname`= ?";
+		$params = array( strval( $user), strval( $user ) );
+		$row = self::getRow( self::TABLENAME, $where, '*', $params );
 
 		// Fix for trackchangecolor, put a default one when there's no data
 		if ( $row ) { //User info found.
@@ -1233,8 +1218,6 @@ class DBUser extends DBBase
 		$db1 = $dbDriver->tablename('users');
 		$db2 = $dbDriver->tablename("usrgrp");
 		$db3 = $dbDriver->tablename("groups");
-
-		$user = $dbDriver->toDBString($user);
 
 		$sql = "SELECT COUNT(*) as `c` FROM $db1 u, $db2 x, $db3 g WHERE u.`user` = ? AND u.`id` = x.`usrid` AND g.`id` = x.`grpid` AND g.`admin` != '' ";
 
@@ -1278,8 +1261,6 @@ class DBUser extends DBBase
 		$db3 = $dbDriver->tablename('authorizations');
 		$db4 = $dbDriver->tablename('states');
 		$db5 = $dbDriver->tablename('profiles');
-
-		$user = $dbDriver->toDBString($user);
 
 		$sql =  "SELECT DISTINCT a.*, s.`type`, p.`profile` as `profilename` ".
 			"FROM $db1 u, $db2 x, $db3 a ".
@@ -1436,7 +1417,6 @@ class DBUser extends DBBase
 	static public function getListBrandsByPubAdmin($user)
 	{
 		$dbDriver = DBDriverFactory::gen();
-		$user = $dbDriver->toDBString($user);
 		$usertable = $dbDriver->tablename('users');
 		$grouptable = $dbDriver->tablename('usrgrp');
 		$publadmintable = $dbDriver->tablename('publadmin');
@@ -1446,7 +1426,7 @@ class DBUser extends DBBase
 		$sql .= "INNER JOIN $grouptable usrgrp ON (usr.`id` = usrgrp.`usrid`) ";
 		$sql .= "INNER JOIN $publadmintable pad ON (usrgrp.`grpid` = pad.`grpid`) ";
 		$sql .= "WHERE usr.`user` = ?";
-		$params = array($user);
+		$params = array( strval( $user ) );
 
 		$sth = $dbDriver->query($sql, $params);
 		$rows = self::fetchResults($sth);

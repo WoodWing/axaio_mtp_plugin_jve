@@ -794,8 +794,6 @@ class DBObject extends DBBase
 		$verFld = $dbDriver->concatFields( array( 'o.`majorversion`', "'.'", 'o.`minorversion`' )).' as "version"';
 
 		$dbo = $dbDriver->tablename(self::TABLENAME);
-		$publ = $dbDriver->toDBString($publ);
-		$name = $dbDriver->toDBString($name);
 
 		$sql = "SELECT o.*, $verFld FROM $dbo o WHERE o.`publication` = ? AND o.`name` =  ? ";
 		$params = array( intval( $publ ), strval( $name ) );
