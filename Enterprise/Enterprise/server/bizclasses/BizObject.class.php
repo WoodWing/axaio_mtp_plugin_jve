@@ -621,40 +621,40 @@ class BizObject
 		$dbDriver = DBDriverFactory::gen();
 
 		// Next, check if we have an alien object (from content source, not in our database)
-		require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
+		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 		if( BizContentSource::isAlienObject( $id ) ) {
 			// Check if all users in the metadata are known within the system. If not, create them and import remaining
 			// information when such a user logs in through LDAP when enabled.
-			self::getOrCreateResolvedUsers($id, $object->MetaData);
+			self::getOrCreateResolvedUsers( $id, $object->MetaData );
 			// Check if we already have a shadow object for this alien. If so, change the id
 			// to the shadow id
-			$shadowID = BizContentSource::getShadowObjectID($id);
+			$shadowID = BizContentSource::getShadowObjectID( $id );
 			if( $shadowID ) {
 				$id = $shadowID;
 			} else {
-				LogHandler::Log('bizobject','DEBUG','No shadow found for alien object '.$id);
+				LogHandler::Log( 'bizobject', 'DEBUG', 'No shadow found for alien object '.$id );
 				throw new BizException( 'ERR_NOTFOUND', 'Client', $id );
 			}
 		}
 
 		// get current record in db
 		$sth = DBObject::getObject( $id );
-		if (!$sth) {
+		if( !$sth ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
 		}
-		$currRow = $dbDriver->fetch($sth);
-		if (!$currRow) {
+		$currRow = $dbDriver->fetch( $sth );
+		if( !$currRow ) {
 			throw new BizException( 'ERR_NOTFOUND', 'Client', $id );
 		}
 
 		// BZ#8475: Oracle specific fix - on Oracle ID as well as id is set...
 		// this leads further code to believe it is a list of properties, not a databaserow...
-		if (isset($currRow['id']) && isset($currRow['ID'])) {
-			unset($currRow['ID']);
+		if( isset( $currRow['id'] ) && isset( $currRow['ID'] ) ) {
+			unset( $currRow['ID'] );
 		}
 
-		$curPub   = $currRow['publication'];
-		$curSect  = $currRow['section'];
+		$curPub = $currRow['publication'];
+		$curSect = $currRow['section'];
 		$curState = $currRow['state'];
 
 		// Publication, Category, Content Source are crucial to have, but can be empty on save when they are not changed, so fill them in with current values:
@@ -664,16 +664,16 @@ class BizObject
 		if( !$object->MetaData->BasicMetaData->Category || !$object->MetaData->BasicMetaData->Category->Id ) {
 			$object->MetaData->BasicMetaData->Category = new Category( $curSect );
 		}
-		if ( !empty( $currRow['contentsource'] && empty( $object->MetaData->BasicMetaData->ContentSource ) ) ) {
+		if( !empty( $currRow['contentsource'] && empty( $object->MetaData->BasicMetaData->ContentSource ) ) ) {
 			$object->MetaData->BasicMetaData->ContentSource = $currRow['contentsource'];
 		}
 
 		// Determine the current- and new targets and issue.
 		require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
 		$curTargets = DBTarget::getTargetsByObjectId( $id );
-		$newTargets = is_null($object->Targets) ? $curTargets : $object->Targets;
-		$curIssueId = $curTargets && count($curTargets) ? $curTargets[0]->Issue->Id : 0;
-		$newIssueId = $newTargets && count($newTargets) ? $newTargets[0]->Issue->Id : 0;
+		$newTargets = is_null( $object->Targets ) ? $curTargets : $object->Targets;
+		$curIssueId = $curTargets && count( $curTargets ) ? $curTargets[0]->Issue->Id : 0;
+		$newIssueId = $newTargets && count( $newTargets ) ? $newTargets[0]->Issue->Id : 0;
 
 		// Validate targets count, layouts can be assigned to one issue only
 		BizWorkflow::validateMultipleTargets( $object->MetaData, $object->Targets );
@@ -688,11 +688,11 @@ class BizObject
 
 		// Does the user has a lock for this file?
 		$lockedby = DBObjectLock::checkLock( $id );
-		if( !$lockedby ){
+		if( !$lockedby ) {
 			// object not locked at all:
-			$sErrorMessage = BizResources::localize("ERR_NOTLOCKED").' '.BizResources::localize("SAVE_LOCAL");
+			$sErrorMessage = BizResources::localize( "ERR_NOTLOCKED" ).' '.BizResources::localize( "SAVE_LOCAL" );
 			throw new BizException( null, 'Client', $id, $sErrorMessage );
-		} else if( strtolower($lockedby) != strtolower($user) ) {
+		} else if( strtolower( $lockedby ) != strtolower( $user ) ) {
 			//locked by someone else
 			throw new BizException( 'ERR_NOTLOCKED', 'Client', $id );
 		}
@@ -725,7 +725,7 @@ class BizObject
 		require_once BASEDIR.'/server/bizclasses/BizPublishForm.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 
-		if ( BizPublishForm::isPublishForm( $object )) {
+		if( BizPublishForm::isPublishForm( $object ) ) {
 			BizRelation::validateFormContainedByDossier( $object->MetaData->BasicMetaData->ID, $object->Targets, $object->Relations );
 		}
 		if( $object->MetaData->BasicMetaData->Type == 'Dossier' ) {
@@ -738,7 +738,20 @@ class BizObject
 		// Create version if needed, even if $createVersion is false a version might be generated
 		BizVersion::createVersionIfNeeded( $id, $currRow, $newRow, $object->MetaData->WorkflowMetaData, $createVersion );
 
-		$now = date('Y-m-d\TH:i:s');
+		// Delete object's 'link' files (htm) in <FileStore>/_BRANDS_ folder
+		$oldtargets = BizTarget::getTargets( $user, $id );
+		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
+		$pubName = DBPublication::getPublicationName( $curPub );
+		if( defined( 'HTMLLINKFILES' ) && HTMLLINKFILES == true ) {
+			require_once BASEDIR.'/server/bizclasses/BizLinkFiles.class.php';
+			BizLinkFiles::deleteLinkFiles( $curPub, $pubName, $id, $currRow['name'], $oldtargets );
+		}
+
+		$now = date( 'Y-m-d\TH:i:s' );
+		$userfull = BizUser::resolveFullUserName( $user );
+		// Set Modifier for return
+		$object->MetaData->WorkflowMetaData->Modified = $now;
+		$object->MetaData->WorkflowMetaData->Modifier = $userfull;
 
 		// Clear indexed flag, so object will be re-indexed when search engine used:
 		// At Create it's initialized empty, SetProps does not modify this to prevent overkill
@@ -746,99 +759,35 @@ class BizObject
 		// change after creation.
 		$newRow['indexed'] = '';
 
-		// Save to DB:
-		$sth = DBObject::updateObject($id, $user, $newRow, $now);
-		if (!$sth)	{
+		// Save to the database:
+		$sth = DBObject::updateObject( $id, $user, $newRow, $now );
+		if( !$sth ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
 		}
-		// v4.2.4 patch for #5700, Save current time be able to send this later as modified time
-		$now = date('Y-m-d\TH:i:s');
 
-		$userfull = BizUser::resolveFullUserName($user);
-
-		// Set Modifier for return
-		$object->MetaData->WorkflowMetaData->Modified = $now;
-		$object->MetaData->WorkflowMetaData->Modifier = $userfull;
-
-		// Delete object's 'link' files (htm) in <FileStore>/_BRANDS_ folder
-		$oldtargets = BizTarget::getTargets($user, $id);
-		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
-		$pubName = DBPublication::getPublicationName($curPub);
-		if( defined( 'HTMLLINKFILES' ) && HTMLLINKFILES == true ) {
-			require_once BASEDIR . '/server/bizclasses/BizLinkFiles.class.php';
-			BizLinkFiles::deleteLinkFiles( $curPub, $pubName, $id, $currRow['name'], $oldtargets );
-		}
-
-		// Validate targets and store them at DB for this object
-		// BZ#9827 Only save targets if not null
-		if ($object->Targets !== null) {
-			BizTarget::saveTargets( $user, $id, $object->Targets, $object->MetaData );
-
-			// Validate meta data and targets (including validation done by Server Plug-ins)
-			self::validateMetaDataAndTargets( $user, $object->MetaData, $object->Targets, null, FALSE );
-		}
-
-		// Object record is now changed, now save other stuff elements, relations, messages, etc.
-		self::saveExtended( $id, $object, $user, false );
-
-		// ===== Handle deadline.
-		// Collect object-/relational-target issues from object
-		$issueIdsDL = self::getTargetIssuesForDeadline( $object );
-		// If deadline is set and object has issues check if the set deadline is not beyond earliest possible deadline
-		if( $issueIdsDL && isset($newRow['deadline']) && $newRow['deadline'] ) {
-			BizDeadlines::checkDeadline($issueIdsDL, $newRow['section'], $newRow['deadline']);
-		}
-		// If no deadline set, calculate deadline, else just store the deadline
-		$deadlinehard = '';
-		$oldDeadline = DBObject::getObjectDeadline( $id );
-		if( isset($newRow['deadline']) && $newRow['deadline'] ) {
-			$deadlinehard = $newRow['deadline'];
-			if ( $oldDeadline !== $deadlinehard ) {
-				DBObject::setObjectDeadline( $id, $deadlinehard );
-				if ( BizDeadlines::canPassDeadlineToChild( $newRow['type'] ) ) {
-					// Set the deadlines of children without own object-target issue.
-					BizDeadlines::setDeadlinesIssuelessChilds( $id, $deadlinehard );
-				}
+		$exception = null;
+		try {
+			// Validate targets and store them at DB for this object. BZ#9827 Only save targets if not null
+			if( $object->Targets !== null ) {
+				BizTarget::saveTargets( $user, $id, $object->Targets, $object->MetaData );
+				// Validate meta data and targets (including validation done by Server Plug-ins)
+				self::validateMetaDataAndTargets( $user, $object->MetaData, $object->Targets, null, false );
 			}
-		} else { // No deadline set, calculate (when "Activate Relative Deadlines" is enabled in brand admin page.).
-			// Determine if it is normal brand or overruleIssue.
-			$overruleIssueId = 0;
-			if( count( $issueIdsDL ) == 1 ) { // When there are more than 1 issue targeted to an Object, it's definitely not an overruleIssue, so don't need to check.
-				require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-				$overruleIssueId = DBIssue::isOverruleIssue( $issueIdsDL[0] ) ? $issueIdsDL[0] : 0;
-			}
-
-			require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-			if( BizPublication::isCalculateDeadlinesEnabled( $newRow['publication'], $overruleIssueId ) ) {
-				$deadlines = DBObject::objectSetDeadline( $id, $issueIdsDL, $newRow['section'], $newRow['state'] );
-                $deadlinehard = $deadlines['Deadline'];
-				if ( $oldDeadline !== $deadlinehard ) {
-					if ( BizDeadlines::canPassDeadlineToChild( $newRow['type'] ) ) {
-						// Recalculate the deadlines of children without own object-target issue.
-						// This recalculation is limited to an issue change of the parent.
-						// New issue of the parent results in new relational-target issue and so
-						// a new deadline. If the category of the parent changes this has no effect
-						// as the children do not inherit this change.
-						BizDeadlines::recalcDeadlinesIssuelessChilds( $id );
-					}
-				}
-			}
+			// Object record is now changed, now save other stuff elements, relations, messages, etc.
+			self::saveExtended( $id, $object, $user, false );
+			$newRow = self::handleDeadlinesOfSavedObject( $object, $newRow );
+		} catch( BizException $e ) {
+			// If an exception is thrown between the database update of the object and the moment the files are stored
+			// we cannot just break out. The files have to be stored to make sure that the database and the Filsestore keep
+			// in sync. Error is thrown after the Filestore is updated.
+			$exception = $e;
 		}
-
-		// Broadcast (soft) deadline (Broadcast only when deadlinehard is given by user or re-calculated.
-		if ( $oldDeadline !== $deadlinehard ) {
-			require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
-			$deadlinesoft = DateTimeFunctions::calcTime( $deadlinehard, -DEADLINE_WARNTIME );
-			require_once BASEDIR . '/server/smartevent.php';
-			new smartevent_deadlinechanged( null, $id, $deadlinehard, $deadlinesoft );
-		}
-		// ==== So far it was DB only, now involve files:
 
 		// For shadow objects we now pass control to Content Source which may influence what to do with file storing
 		// as it can modify $object
-		if( trim($currRow['contentsource']) ) {
-			require_once BASEDIR . '/server/bizclasses/BizContentSource.class.php';
-			BizContentSource::saveShadowObject( trim($currRow['contentsource']), trim($currRow['documentid']), $object );
+		if( trim( $currRow['contentsource'] ) ) {
+			require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
+			BizContentSource::saveShadowObject( trim( $currRow['contentsource'] ), trim( $currRow['documentid'] ), $object );
 		}
 
 		// Save object's files:
@@ -848,7 +797,12 @@ class BizObject
 		$object->Files = array();
 
 		// Save pages (both files and DB records)
-		BizPage::savePages( $currRow['storename'], $id, 'Production', $object->Pages, TRUE, $currRow['version'], $object->MetaData->WorkflowMetaData->Version );
+		BizPage::savePages( $currRow['storename'], $id, 'Production', $object->Pages, true, $currRow['version'], $object->MetaData->WorkflowMetaData->Version );
+
+		// As now the Filestore is updated the exception can be thrown.
+		if( $exception ) {
+			throw $exception;
+		}
 
 		// Create server job to generate preview/thumb async
 		//require_once BASEDIR.'/server/bizclasses/BizMetaDataPreview.class.php';
@@ -6258,5 +6212,68 @@ class BizObject
 		} while ( $nameFound && $iterations < $maxSuffix );
 
 		return $proposedName;
+	}
+
+	/**
+	 * Calculates the deadline and if needed  also updates deadlines of child objects.
+	 *
+	 * @param Object $object Object as retrieved from the save request.
+	 * @param array $newRow The database record to store the properties of the updated object.
+	 * @return mixed
+	 */
+	private static function handleDeadlinesOfSavedObject( Object $object, $newRow )
+	{
+		$id = $object->MetaData->BasicMetaData->ID;
+		// Collect object-/relational-target issues from object
+		$issueIdsDL = self::getTargetIssuesForDeadline( $object );
+		// If deadline is set and object has issues check if the set deadline is not beyond earliest possible deadline
+		if( $issueIdsDL && isset( $newRow['deadline'] ) && $newRow['deadline'] ) {
+			BizDeadlines::checkDeadline( $issueIdsDL, $newRow['section'], $newRow['deadline'] );
+		}
+		// If no deadline set, calculate deadline, else just store the deadline
+		$deadlinehard = '';
+		$oldDeadline = DBObject::getObjectDeadline( $id );
+		if( isset( $newRow['deadline'] ) && $newRow['deadline'] ) {
+			$deadlinehard = $newRow['deadline'];
+			if( $oldDeadline !== $deadlinehard ) {
+				DBObject::setObjectDeadline( $id, $deadlinehard );
+				if( BizDeadlines::canPassDeadlineToChild( $newRow['type'] ) ) {
+					// Set the deadlines of children without own object-target issue.
+					BizDeadlines::setDeadlinesIssuelessChilds( $id, $deadlinehard );
+				}
+			}
+		} else { // No deadline set, calculate (when "Activate Relative Deadlines" is enabled in brand admin page.).
+			// Determine if it is normal brand or overruleIssue.
+			$overruleIssueId = 0;
+			if( count( $issueIdsDL ) == 1 ) { // When there are more than 1 issue targeted to an Object, it's definitely not an overruleIssue, so don't need to check.
+				require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+				$overruleIssueId = DBIssue::isOverruleIssue( $issueIdsDL[0] ) ? $issueIdsDL[0] : 0;
+			}
+
+			require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
+			if( BizPublication::isCalculateDeadlinesEnabled( $newRow['publication'], $overruleIssueId ) ) {
+				$deadlines = DBObject::objectSetDeadline( $id, $issueIdsDL, $newRow['section'], $newRow['state'] );
+				$deadlinehard = $deadlines['Deadline'];
+				if( $oldDeadline !== $deadlinehard ) {
+					if( BizDeadlines::canPassDeadlineToChild( $newRow['type'] ) ) {
+						// Recalculate the deadlines of children without own object-target issue.
+						// This recalculation is limited to an issue change of the parent.
+						// New issue of the parent results in new relational-target issue and so
+						// a new deadline. If the category of the parent changes this has no effect
+						// as the children do not inherit this change.
+						BizDeadlines::recalcDeadlinesIssuelessChilds( $id );
+					}
+				}
+			}
+		}
+
+		// Broadcast (soft) deadline (Broadcast only when deadlinehard is given by user or re-calculated.
+		if( $oldDeadline !== $deadlinehard ) {
+			require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
+			$deadlinesoft = DateTimeFunctions::calcTime( $deadlinehard, -DEADLINE_WARNTIME );
+			require_once BASEDIR.'/server/smartevent.php';
+			new smartevent_deadlinechanged( null, $id, $deadlinehard, $deadlinesoft );
+		}
+		return $newRow;
 	}
 }
