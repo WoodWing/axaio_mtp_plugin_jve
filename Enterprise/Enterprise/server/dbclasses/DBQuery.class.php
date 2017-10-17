@@ -868,7 +868,6 @@ class DBQuery extends DBBase
 			$skipPublications = implode(',', $handled);
 		}
 		
-		$shortusername = $dbdriver->toDBString($shortusername);
 		$userstable = $dbdriver->tablename('users');
 		$usergrouptable = $dbdriver->tablename('usrgrp');
 		$profilefeaturestable = $dbdriver->tablename('profilefeatures');
@@ -1197,12 +1196,6 @@ class DBQuery extends DBBase
 			. ( $isadmin ? " OR o.`state` = -1 " : "" )
 			. ") AND (" . $whereRequired .")";
 		return $sql;
-	}
-	
-	public static function escape4sql($instring)
-	{
-		$dbdriver = DBDriverFactory::gen();
-		return $dbdriver->toDBString($instring);
 	}
 	
 	/**

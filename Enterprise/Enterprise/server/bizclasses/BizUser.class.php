@@ -383,8 +383,7 @@ class BizUser
 		self::validatePassword( $new );
 		
 		$pass = ww_crypt( $new, null, true ); // BZ#20845 - Always store the password with new SHA-512 hash type
-		$sth = DBUser::setPassword( $user, $pass, trim($row["expiredays"]) );
-		if (!$sth) {
+		if( !DBUser::setPassword( $user, $pass, trim($row["expiredays"]) ) ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', DBUser::getError() );
 		}
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
