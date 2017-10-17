@@ -156,10 +156,6 @@ class YouTubePublish_PubPublishing extends PubPublishing_EnterpriseConnector
 	 **/
 	public function previewDossier (&$dossier, &$objectsindossier, $publishtarget)
 	{
-		// keep analyzer happy
-		$dossier = $dossier;
-		$objectsindossier = $objectsindossier;
-		$publishtarget = $publishtarget;
 		$msg = 'Cannot preview YouTube Video';
 		throw new BizException( 'ERR_ERROR', 'Server', $msg, $msg );
 	}
@@ -189,10 +185,6 @@ class YouTubePublish_PubPublishing extends PubPublishing_EnterpriseConnector
 	 **/
 	public function requestPublishFields ($dossier, $objectsindossier, $publishtarget)
 	{
-		// keep analyzer happy
-		$objectsindossier = $objectsindossier;
-		$publishtarget = $publishtarget;
-		
 		return array();
 	}
 	
@@ -207,10 +199,6 @@ class YouTubePublish_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getDossierURL ($dossier, $objectsindossier, $publishtarget)
 	{
-		// keep analyzer happy
-		$objectsindossier = $objectsindossier;
-		$publishtarget = $publishtarget;
-
 		return '';
 	}
 	

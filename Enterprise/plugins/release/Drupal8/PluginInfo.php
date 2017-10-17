@@ -44,14 +44,6 @@ class Drupal8_EnterprisePlugin extends EnterprisePlugin
 	/**
 	 * @inheritdoc
 	 */
-	public function isActivatedByDefault()
-	{
-		return false;
-	}
-
-	/**
-	 * @inheritdoc
-	 */
 	public function requiredServerVersion()
 	{
 		return '10.1.1 Build 0'; // because of ConfigFiles_EnterpriseConnector

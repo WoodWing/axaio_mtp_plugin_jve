@@ -113,7 +113,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase e
 		$error = true; // Assume unexpected behavior
 		if( $expectedErrorCode ) { // when object is checked out
 			$map = new BizExceptionSeverityMap( array( $expectedErrorCode => 'INFO' ) );
-			$map = $map; // keep analyzer happy
 		}
 		try {
 			$action = $permanent ? 'purge' : 'delete';
@@ -179,12 +178,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase e
 			$service = new WflRestoreObjectsService();
 			$request = new WflRestoreObjectsRequest( $this->ticket, array( $objId) );
 			$response = $service->execute($request);
-			if( !$response->Reports ) { // Introduced in v8.0
-				$title = __FUNCTION__.': Expected result.';
-				$message = 'ObjectID ' . $objId . ' is restored from trashCan to workflow area.';
-			}
 			if( $response->Reports ) { // Introduced in v8.0
 				$errMsg = '';
+				$title = '';
+				$message = '';
 				foreach( $response->Reports as $report ){
 					$objId = $report->BelongsTo->ID;
 					foreach( $report->Entries as $reportEntry ) {
@@ -195,6 +192,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase e
 						$errMsg;
 					$error = true; // Error occured, which is not expected so flag it and raise error				
 				}
+			} else {
+				$title = __FUNCTION__.': Expected result.';
+				$message = 'ObjectID ' . $objId . ' is restored from trashCan to workflow area.';
 			}
 		} catch ( BizException $e ){
 			$sCode = $e->getErrorCode();
@@ -203,7 +203,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase e
 				$sCode . ':' . $e->getDetail();
 			$error = true; // Error occured, which is not expected so flag it and raise error
 		}
-		
 		$this->logServiceResp( $title, $message, $error );
 	}
 	
@@ -273,9 +272,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflDeleteObjects_TestCase e
 	{
 		if( $expectedErrorCode ) {
 			$map = new BizExceptionSeverityMap( array( $expectedErrorCode => 'INFO' ) );
-			$map = $map; // keep analyzer happy
 		}
 		$error = false; // we don't want any unexpected behavior to occur.
+		$title = '';
+		$message = '';
 		try {
 			$lockMsg = $lock ? ' and lock ' : ' ';
 			$goal = __FUNCTION__.': Trying to get' . $lockMsg . 'object ' . $objID .' from '  . $areas['0'] . ' area.';

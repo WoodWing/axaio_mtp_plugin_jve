@@ -185,7 +185,6 @@ class BizWebEditWorkspace
 	 */
 	public function listArticleWorkspaces()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		$userId = BizSession::getShortUserName();
 		$appName = DBTicket::DBappticket( BizSession::getTicket() );
@@ -296,8 +295,8 @@ class BizWebEditWorkspace
 	 * @return array 'Elements', 'Placements' and 'Pages'
 	 */
 	public function doPreviewArticlesAtWorkspace( $workspaceId, array $articles,
-	                                            $action, $layoutId, $editionId, $previewType,
-	                                            array $requestInfo = array() )
+												$action, $layoutId, $editionId, $previewType,
+												array $requestInfo = array() )
 	{
 		require_once BASEDIR.'/server/utils/UtfString.class.php';
 
@@ -610,46 +609,12 @@ class BizWebEditWorkspace
 			}
 		}
 
-		// Prefer Web Editor ticket. Fall back at Web Apps ticket.
-		$prodVer = PRODUCTMAJORVERSION.PRODUCTMINORVERSION.'0'; // taken from serverinfo.php
-		$ticketCookies = array(
-			'webedit_ticket_ContentStationPro'.$prodVer, // cookie name for Web Editor ticket (CS login)
-			'webapp_ticket_ContentStationPro'.$prodVer, // cookie name for web apps ticket (CS login)
-			'ticket' // cookie name for web apps ticket (browser login)
-		);
-
-		// Get the name of the Web Editor user by running through cookie information.
-		// Cookie info is set when the Web Editor gets lauched. For the CS editor this is
-		// not the case. See next step below for more info.
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-		$weTicket = '';
-		$weUserId = '';
-		foreach( $ticketCookies as $ticketCookie ) {
-			if( isset($_REQUEST[$ticketCookie]) ) {
-				$weTicket = $_REQUEST[$ticketCookie];
-				$weUserId = DBTicket::DBuserticket( $weTicket );
-				if( $weUserId === false ) {
-					// Clear to avoid passing bad tickets! (BZ#11375)
-					$weTicket = '';
-					$weUserId = '';
-				} else {
-					break; // found user!
-				}
-			}
-		}
-
-		// When failed reading CS ticket or Web Editor ticket from cookies (above), try the ticket
-		// passed in by caller. This fallback is especially needed for the CS editor that is talking
-		// through web services. In this case typically no cookies are updated (as used above).
-		// (Same happens happens for the Build Test when not logging out from web apps and hitting
-		// the Test button the next morning, in which case all tickets at cookies are expired).
-		if( !$weTicket && !$weUserId ) {
-			$weTicket = $ticket;
-			$weUserId = DBTicket::DBuserticket( $weTicket );
-			if( $weUserId === false ) { // Clear to avoid passing bad tickets!
-				$weTicket = '';
-				$weUserId = '';
-			}
+		$weTicket = $ticket;
+		$weUserId = DBTicket::DBuserticket( $ticket );
+		if( $weUserId === false ) { // Clear to avoid passing bad tickets!
+			$weUserId = '';
+			$weTicket = '';
 		}
 
 		// Get the specified edition
@@ -1684,13 +1649,14 @@ class BizWebEditWorkspace
 			$article->Name = null;
 			$article->Format = null;
 			$article->Version = null;
+			$article->WcmlVersion = null; // set in storeArticleAtFileSystem
+			$article->SharedContent = null; // only used with version 3.0; set in storeArticleAtFileSystem
 			$this->workspace->Articles[] = $article;
 		}
 
 		if( is_null($id) ) { // new article?
 			$article->Name = 'article';
 		} else { // existing article?
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 			require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
 			$request = new WflGetObjectsRequest( BizSession::getTicket() );
@@ -1740,7 +1706,6 @@ class BizWebEditWorkspace
 	 */
 	private function enrichWorkspace()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 
 		if( !isset($this->workspace->ID) || !$this->workspace->ID ) {
@@ -2052,7 +2017,6 @@ class BizWebEditWorkspace
 		}
 		return $docDomVersion;
 	}
-
 	/**
 	 * Create or Save article content. Updates $this->workspace->DOMVersion.
 	 *
@@ -2136,6 +2100,20 @@ class BizWebEditWorkspace
 		LogHandler::Log( 'BizWebEditWorkspace', 'INFO', 'Found DOMVersion "'.$this->workspace->DOMVersion.'"'.
 						' for workspace ID "'.$this->workspace->ID.'".' );
 
+		if( !isset($article->WcmlVersion)) {
+			$article->WcmlVersion = $icDoc->documentElement->getAttribute( 'ea:WWVersion' );
+			if( $article->WcmlVersion == '3.0' ) {
+				// Collect the wwsd_document from the article for later insertion
+				$icXPath = new DOMXPath( $icDoc );
+				$icXPath->registerNamespace( 'ea', 'urn:SmartConnection_v3' );
+				$icSharedContent = $icXPath->query( '/ea:Stories/ea:wwsd_document' );
+
+				if( $icSharedContent->length > 0 ) {
+					$article->SharedContent = $icDoc->saveXML( $icSharedContent->item( 0 ) );
+				}
+			}
+		}
+
 		// Save the changed content into article file
 		file_put_contents( $artPath, $icDoc->saveXML() ); // BZ#24337/BZ#24387 $icDoc->save() does an implicit URL decode!
 		$oldUmask = umask(0); // Needed for mkdir, see http://www.php.net/umask
@@ -2157,7 +2135,8 @@ class BizWebEditWorkspace
 	{
 		// Compose a delta story, which contains the changed stories since last preview operation.
 		$deltaContent = '<?xml version="1.0"?>'."\r\n";
-		$deltaContent .= '<ea:Stories xmlns:aic="http://ns.adobe.com/AdobeInCopy/2.0" xmlns:ea="urn:SmartConnection_v3" ea:WWVersion="2.0">'."\r\n";
+		$wcmlVersion = isset($article->WcmlVersion) ? $article->WcmlVersion : '2.0';
+		$deltaContent .= '<ea:Stories xmlns:aic="http://ns.adobe.com/AdobeInCopy/2.0" xmlns:ea="urn:SmartConnection_v3" ea:WWVersion="'.$wcmlVersion.'">'."\r\n";
 		if( $elements ) foreach( $elements as $element ) {
 			$content = $element->Content;
 			// Skip intermediate xml headers since the xml file already has one
@@ -2168,6 +2147,9 @@ class BizWebEditWorkspace
 				}
 			}
 			$deltaContent .= $content."\r\n";
+		}
+		if( isset($article->SharedContent) ) {
+			$deltaContent .= $article->SharedContent."\r\n";
 		}
 		$deltaContent .= '</ea:Stories>'."\r\n";
 
@@ -2384,6 +2366,7 @@ class BizWebEditWorkspace
 		if( $storedRelations ) foreach( $storedRelations as $storedRelation ) {
 			if( $storedRelation->Placements ) foreach( $storedRelation->Placements as $key => $placement ) {
 				if( $inDesignArticlePlacements ) foreach( $inDesignArticlePlacements as $inDesignArticlePlacement ) {
+					require_once BASEDIR.'/server/bizclasses/BizWebEditWorkspace/ComparePlacements.class.php';
 					$comparePlacements = new BizWebEditWorkspace_ComparePlacements();
 					if( $comparePlacements->sameStrings( $inDesignArticlePlacement->FrameID, $placement->FrameID) &&
 						 $comparePlacements->sameEdition( $inDesignArticlePlacement->Edition, $placement->Edition ) ) {
@@ -2446,8 +2429,8 @@ class BizWebEditWorkspace
 		if( !$this->sameEmptiness( $lhsPlacementsByKey, $rhsPlacementsByKey ) ) {
 			$numberDiffers = true;
 		} elseif( is_array( $lhsPlacementsByKey ) && is_array( $rhsPlacementsByKey ) ) {
-			if( !empty( array_diff_key( $lhsPlacementsByKey, $rhsPlacementsByKey ) ) ||
-				!empty( array_diff_key( $rhsPlacementsByKey, $lhsPlacementsByKey ) ) ) {
+			if( array_diff_key( $lhsPlacementsByKey, $rhsPlacementsByKey ) ||
+				array_diff_key( $rhsPlacementsByKey, $lhsPlacementsByKey ) ) {
 				$numberDiffers = true;
 			}
 		}

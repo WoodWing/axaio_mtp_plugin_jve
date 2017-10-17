@@ -22,17 +22,23 @@ class WW_SOAP_AdmClient extends WW_SOAP_Client
 		}
 		
 		// add our classmaps
+		$options['classmap']['AccessProfile'] = 'AdmAccessProfile';
 		$options['classmap']['Edition'] = 'AdmEdition';
 		$options['classmap']['ExtraMetaData'] = 'AdmExtraMetaData';
 		$options['classmap']['IdName'] = 'AdmIdName';
 		$options['classmap']['Issue'] = 'AdmIssue';
+		$options['classmap']['ObjectInfo'] = 'AdmObjectInfo';
+		$options['classmap']['ProfileFeature'] = 'AdmProfileFeature';
 		$options['classmap']['PubChannel'] = 'AdmPubChannel';
 		$options['classmap']['Publication'] = 'AdmPublication';
+		$options['classmap']['Routing'] = 'AdmRouting';
 		$options['classmap']['Section'] = 'AdmSection';
 		$options['classmap']['Status'] = 'AdmStatus';
+		$options['classmap']['TemplateObjectAccess'] = 'AdmTemplateObjectAccess';
 		$options['classmap']['TermEntity'] = 'AdmTermEntity';
 		$options['classmap']['User'] = 'AdmUser';
 		$options['classmap']['UserGroup'] = 'AdmUserGroup';
+		$options['classmap']['WorkflowUserGroupAuthorization'] = 'AdmWorkflowUserGroupAuthorization';
 		$options['classmap']['LogOnResponse'] = 'AdmLogOnResponse';
 		$options['classmap']['LogOffResponse'] = 'AdmLogOffResponse';
 		$options['classmap']['CreateUsersResponse'] = 'AdmCreateUsersResponse';
@@ -68,6 +74,28 @@ class WW_SOAP_AdmClient extends WW_SOAP_Client
 		$options['classmap']['GetSectionsResponse'] = 'AdmGetSectionsResponse';
 		$options['classmap']['ModifySectionsResponse'] = 'AdmModifySectionsResponse';
 		$options['classmap']['DeleteSectionsResponse'] = 'AdmDeleteSectionsResponse';
+		$options['classmap']['CreateStatusesResponse'] = 'AdmCreateStatusesResponse';
+		$options['classmap']['GetStatusesResponse'] = 'AdmGetStatusesResponse';
+		$options['classmap']['ModifyStatusesResponse'] = 'AdmModifyStatusesResponse';
+		$options['classmap']['DeleteStatusesResponse'] = 'AdmDeleteStatusesResponse';
+		$options['classmap']['CreateAccessProfilesResponse'] = 'AdmCreateAccessProfilesResponse';
+		$options['classmap']['GetAccessProfilesResponse'] = 'AdmGetAccessProfilesResponse';
+		$options['classmap']['ModifyAccessProfilesResponse'] = 'AdmModifyAccessProfilesResponse';
+		$options['classmap']['DeleteAccessProfilesResponse'] = 'AdmDeleteAccessProfilesResponse';
+		$options['classmap']['CreateWorkflowUserGroupAuthorizationsResponse'] = 'AdmCreateWorkflowUserGroupAuthorizationsResponse';
+		$options['classmap']['GetWorkflowUserGroupAuthorizationsResponse'] = 'AdmGetWorkflowUserGroupAuthorizationsResponse';
+		$options['classmap']['ModifyWorkflowUserGroupAuthorizationsResponse'] = 'AdmModifyWorkflowUserGroupAuthorizationsResponse';
+		$options['classmap']['DeleteWorkflowUserGroupAuthorizationsResponse'] = 'AdmDeleteWorkflowUserGroupAuthorizationsResponse';
+		$options['classmap']['CreatePublicationAdminAuthorizationsResponse'] = 'AdmCreatePublicationAdminAuthorizationsResponse';
+		$options['classmap']['GetPublicationAdminAuthorizationsResponse'] = 'AdmGetPublicationAdminAuthorizationsResponse';
+		$options['classmap']['DeletePublicationAdminAuthorizationsResponse'] = 'AdmDeletePublicationAdminAuthorizationsResponse';
+		$options['classmap']['CreateRoutingsResponse'] = 'AdmCreateRoutingsResponse';
+		$options['classmap']['GetRoutingsResponse'] = 'AdmGetRoutingsResponse';
+		$options['classmap']['ModifyRoutingsResponse'] = 'AdmModifyRoutingsResponse';
+		$options['classmap']['DeleteRoutingsResponse'] = 'AdmDeleteRoutingsResponse';
+		$options['classmap']['AddTemplateObjectsResponse'] = 'AdmAddTemplateObjectsResponse';
+		$options['classmap']['GetTemplateObjectsResponse'] = 'AdmGetTemplateObjectsResponse';
+		$options['classmap']['RemoveTemplateObjectsResponse'] = 'AdmRemoveTemplateObjectsResponse';
 		$options['classmap']['CreateAutocompleteTermEntitiesResponse'] = 'AdmCreateAutocompleteTermEntitiesResponse';
 		$options['classmap']['GetAutocompleteTermEntitiesResponse'] = 'AdmGetAutocompleteTermEntitiesResponse';
 		$options['classmap']['ModifyAutocompleteTermEntitiesResponse'] = 'AdmModifyAutocompleteTermEntitiesResponse';

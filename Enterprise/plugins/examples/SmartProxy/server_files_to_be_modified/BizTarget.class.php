@@ -13,7 +13,6 @@ class BizTarget
 {
     public static function createTargets( $user, $objectId, $targets )
     {
-    	$user = $user; // make code analyzer happy
     	self::fixPearSoapTargets( $targets ); // PEAR SOAP collection fixes
 
     	self::checkForOverruleIssues($targets);
@@ -40,7 +39,6 @@ class BizTarget
     
    public static function createObjectrelationTargets( $user, $objectrelationId, $targets )
     {
-    	$user = $user; // make code analyzer happy
     	self::fixPearSoapTargets( $targets ); // PEAR SOAP collection fixes
 
     	self::checkForOverruleIssues($targets);
@@ -87,7 +85,6 @@ class BizTarget
     
     public static function deleteTargets( $user, $objectId, $targets )
     {
-    	$user = $user; // make code analyzer happy
     	self::fixPearSoapTargets( $targets ); // PEAR SOAP collection fixes
 		// params validation
         if( !$objectId || trim($objectId) == '' ) {
@@ -165,7 +162,6 @@ class BizTarget
 
     public static function getTargets( $user, $objectId )
     {
-    	$user = $user; // make code analyzer happy
         if( !$objectId || trim($objectId) == '' ) {
 			throw new BizException( 'ERR_NO_SUBJECTS_FOUND', 'Client', null, null, array( '{OBJECT}' ) );
 		}

@@ -40,6 +40,5 @@ abstract class WflGetArticleFromWorkspace_EnterpriseConnector extends ServiceCon
 	 */
 	public function onError( WflGetArticleFromWorkspaceRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

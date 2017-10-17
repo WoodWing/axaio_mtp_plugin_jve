@@ -582,8 +582,6 @@ class LogHandler
 	 */
 	public static function phpErrorHandler( $errno, $errmsg, $file, $line, $debug )
 	{
-		$debug = $debug; // keep analyzer happy
-
 		// When the error handler catches the error, the @ puts silently error_reporting level to 0,
 		// so you can detect errors comming from 'arobased' instructions.
 		if( error_reporting() == 0 ) {

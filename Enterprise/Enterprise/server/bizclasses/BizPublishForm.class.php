@@ -27,7 +27,6 @@ class BizPublishForm
 	 */
 	static public function getFormFields( $publishForm, $pattern = null )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 
 		$fieldProperties = array();
@@ -157,7 +156,6 @@ class BizPublishForm
 		}
 
 		// If not found in the ExtraMetaData, find it in the placed relations.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 
 		if (is_array($publishForm->Relations)) foreach ($publishForm->Relations as $relation ) {
@@ -309,7 +307,6 @@ class BizPublishForm
 	 */
 	static public function extractLayoutObjectAttachments( $layoutObject, $rendition='native' )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizTransferServer.class.php';
 		require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
@@ -607,7 +604,6 @@ class BizPublishForm
 		$attachments = array();
 		if (!isset($object->Files) || !is_array($object->Files) || count($object->Files) == 0) {
 			// Retrieve the object with files to ensure we have the attachments.
-			require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 			require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 			$rendition = 'native';
 			$requestInfo = array('Pages', 'Targets', 'Relations', 'Elements');
@@ -690,7 +686,6 @@ class BizPublishForm
 
 	static public function getDocumentId( $publishForm )
 	{
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
 
 		// Attempt to determine the InstanceOf relational Parent.

@@ -50,7 +50,7 @@ class WW_TestSuite_BuildTest_Search_UpdateDateField_TestCase extends WW_TestSuit
 	 *
 	 * @param Object[] $objects Objects properties to update. On success, they get updated with latest info from DB.
 	 * @param string $stepInfo Extra logging info.
-	 * @param string|null $expectedError S-code when error expected. NULL when no error expected.
+	 * @param array|null $expectedErrors S-codes when error expected. NULL when no error expected.
 	 * @param MetaDataValue[] $updateProps List of metadata properties to update.
 	 * @param string[] $changedPropPaths List of changed metadata properties, expected to be different.
 	 * @return bool success or failure depending on response
@@ -75,7 +75,6 @@ class WW_TestSuite_BuildTest_Search_UpdateDateField_TestCase extends WW_TestSuit
 			}
 		}
 		$severityMapHandle = new BizExceptionSeverityMap( $serverityMap );
-		$severityMapHandle = $severityMapHandle; // keep code analyzer happy
 
 		// Call the SetObjectProperties service.
 		require_once BASEDIR . '/server/services/wfl/WflMultiSetObjectPropertiesService.class.php';
@@ -140,6 +139,7 @@ class WW_TestSuite_BuildTest_Search_UpdateDateField_TestCase extends WW_TestSuit
 		foreach( $response->Objects as $respObject ) {
 
 			// Lookup the original/cached object for the object returned through web service response.
+			$orgObject = null;
 			foreach( $objects as $orgObject ) {
 				if( $orgObject->MetaData->BasicMetaData->ID == $respObject->MetaData->BasicMetaData->ID ) {
 					break; // found

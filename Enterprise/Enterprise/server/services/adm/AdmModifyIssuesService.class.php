@@ -29,7 +29,8 @@ class AdmModifyIssuesService extends EnterpriseService
 	public function runCallback( AdmModifyIssuesRequest $req )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmPublication.class.php';
-		$modifyissues = BizAdmPublication::modifyIssuesObj( $this->User, $req->RequestModes, $req->PublicationId, $req->PubChannelId, $req->Issues );
-		return new AdmModifyIssuesResponse( $req->PublicationId, $req->PubChannelId, $modifyissues );
+		$modifiedIssues = BizAdmPublication::modifyIssuesObj( $this->User, $req->RequestModes,
+			$req->PublicationId, $req->PubChannelId, $req->Issues );
+		return new AdmModifyIssuesResponse( $req->PublicationId, $req->PubChannelId, $modifiedIssues );
 	}
 }

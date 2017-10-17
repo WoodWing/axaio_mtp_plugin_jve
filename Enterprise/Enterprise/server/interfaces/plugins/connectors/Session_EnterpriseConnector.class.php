@@ -49,7 +49,6 @@ abstract class Session_EnterpriseConnector extends DefaultConnector
 	 */
 	public function ticketExpirationReset( $ticket, $userShort )
 	{
-		$ticket = $ticket; $userShort = $userShort; // keep analyzer happy
 		return true;
 	}
 

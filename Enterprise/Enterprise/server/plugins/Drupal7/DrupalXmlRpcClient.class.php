@@ -244,8 +244,6 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 			throw new BizException(null, 'Server', null, 'This Dossier has not been published yet and therefore cannot be updated.');
 		}
 
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
-
 		$valueArray = $this->callRpcService( 'enterprise.saveNode'
 			, array(
 			       array(
@@ -381,7 +379,7 @@ class DrupalXmlRpcClient extends WW_Utils_XmlRpcClient
 	 * @param string $key
 	 * @param string $type
 	 * @param mixed $value
-	 * @return Field or null if $value couldn't be converted
+	 * @return PubField or null if $value couldn't be converted
 	 */
 	public static function getField( $key, $type, $value )
 	{

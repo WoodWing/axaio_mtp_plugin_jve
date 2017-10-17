@@ -56,8 +56,6 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 			$this->testByWebServiceClient();
 			$this->testByMoverClient();
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
 		}
 		$this->tearDownTestData();
 	}
@@ -253,6 +251,7 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 	 *
 	 * @param integer $dossierId Dossier object Id
 	 * @param string $stepInfo Test step description
+	 * @return WflRestoreObjectsResponse
 	 */
 	private function restoreObject( $dossierId, $stepInfo )
 	{
@@ -393,8 +392,6 @@ class WW_TestSuite_BuildTest_NameValidation_AutoNamingRule_TestCase extends Test
 				}
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 

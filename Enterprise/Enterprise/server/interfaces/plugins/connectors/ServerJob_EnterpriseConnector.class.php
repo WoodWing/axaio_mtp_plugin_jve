@@ -79,8 +79,6 @@ abstract class ServerJob_EnterpriseConnector extends DefaultConnector
 	 */
 	public function beforeRunJob( ServerJob $job )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$job = $job; // keep code analyzer happy.
 	}
 
 	/**
@@ -92,8 +90,6 @@ abstract class ServerJob_EnterpriseConnector extends DefaultConnector
 	 */
 	public function createJob( $pushIntoQueue )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$pushIntoQueue = $pushIntoQueue; // To make analyzer happy.
 		return null;
 	}
 
@@ -115,8 +111,6 @@ abstract class ServerJob_EnterpriseConnector extends DefaultConnector
 	 */
 	public function replanJobType( ServerJob $job )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$job = $job; // keep code analyzer happy.
 		return 60;
 	}
 	
@@ -181,8 +175,6 @@ abstract class ServerJob_EnterpriseConnector extends DefaultConnector
 	 */
 	public function estimatedLifeTime( ServerJob $job )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$job = $job; // keep code analyzer happy.
 		return 3600;
 	}
 

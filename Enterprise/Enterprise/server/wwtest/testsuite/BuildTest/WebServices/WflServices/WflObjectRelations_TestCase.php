@@ -253,7 +253,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectRelations_TestCase
 			$this->setResult( 'ERROR', 'Error occurred in CreateObjects service call.',
 				'In the CreateObjects request, Image was sent without Relational Targets, ' .
 				'Server should auto assign a Target but wrong Target has been assign to the Image.' . PHP_EOL .
-				$phpCompare->getErrors() );
+				implode( PHP_EOL, $phpCompare->getErrors()) );
 			return false;
 		}
 
@@ -501,7 +501,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectRelations_TestCase
 	/**
 	 * Update object relations by calling UpdateObjectRelations workflow web service.
 	 * 
-	 * @return UpdateObjectRelationsResponse
+	 * @return WflUpdateObjectRelationsResponse
 	 */
 	private function updateObjectRelations()
 	{	
@@ -621,7 +621,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflObjectRelations_TestCase
 	 */
 	private function addDossierObjectTarget()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 		$this->newPrintTarget = $this->composeNewTarget();
 

@@ -17,7 +17,7 @@ class AdmDeleteIssuesRequest
 	/**
 	 * @param string               $Ticket                    
 	 * @param integer              $PublicationId             
-	 * @param Id[]                 $IssueIds                  
+	 * @param integer[]            $IssueIds                  
 	 */
 	public function __construct( $Ticket=null, $PublicationId=null, $IssueIds=null )
 	{
@@ -56,8 +56,8 @@ class AdmDeleteIssuesRequest
 			if( !is_null( $datObj->IssueIds ) ) {
 				$validator->checkType( $datObj->IssueIds, 'array' );
 				if( !empty($datObj->IssueIds) ) foreach( $datObj->IssueIds as $listItem ) {
-					$validator->enterPath( 'integer' );
-					$validator->checkType( $listItem, 'integer' );
+					$validator->enterPath( 'Id' );
+					$validator->checkType( $listItem, 'Id' );
 					$validator->leavePath();
 				}
 			}

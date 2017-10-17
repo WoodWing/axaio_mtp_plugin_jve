@@ -24,6 +24,7 @@ class TestSuiteFactory
 	  *
 	  * @param string $testFile The PHP file to include
 	  * @return TestCase|TestSuite.
+	  * @throws Exception
 	  */
 	static private function createTestModule( $testFile )
 	{
@@ -113,10 +114,13 @@ class TestSuiteFactory
 	}
 
 	/**
-	  * Scans the given folder for subfolder that contains test module php files.
-	  *
-	  * @return array of full paths of found test module php files.
-	  */
+	 * Scans the given folder for subfolder that contains test module php files.
+	 *
+	 * @param DOMDocument $xmlDoc
+	 * @param DOMNode $xmlTests
+	 * @param string $dirName
+	 * @throws Exception
+	 */
 	static private function readTestObjectsFromFolders( $xmlDoc, $xmlTests, $dirName )
 	{
 		$testObjs = array();
@@ -129,9 +133,9 @@ class TestSuiteFactory
 			if( $itemName == '.' || $itemName == '..' || $itemName == '.DS_Store' ) {
 				// cur dir / parent dir
 			} else if( is_file( $dirName.'/'.$itemName ) && strstr( $itemName, '_TestCase.php' ) !== false ) {
-				$testObj = self::createTestModule( $dirName.'/'.$itemName, null );
+				$testObj = self::createTestModule( $dirName.'/'.$itemName );
 			} else if( is_file( $dirName.'/'.$itemName.'/TestSuite.php' ) ) {
-				$testObj = self::createTestModule( $dirName.'/'.$itemName.'/TestSuite.php', null );
+				$testObj = self::createTestModule( $dirName.'/'.$itemName.'/TestSuite.php' );
 			}
 			if( $testObj ) {
 				$testFile = substr( $dirName.'/'.$itemName, strlen(BASEDIR) );
@@ -157,19 +161,13 @@ class TestSuiteFactory
 			$xmlTests = $xmlDoc->createElement( 'Root' );
 			$xmlDoc->appendChild( $xmlTests );
 
-			// Read TestCase class file from disk and create instance
+			// Collect core server testsuite folder if $testSuite exists. (Note that $testSuite could be a relative path.
+			// This path may not exist, in case the testsuite is provided by one of the server plugins.)
 			$suiteDirs = array();
 			$dirName = BASEDIR.'/server/wwtest/testsuite/'.$testSuite;
 			if( is_file( $dirName.'/TestSuite.php' ) ) {
-				$testObj = self::createTestModule( $dirName.'/TestSuite.php', null );
-				if( $testObj ) {
-					$testFile = substr( $dirName.'/TestSuite.php', strlen(BASEDIR) );
-					$testObjs[$testFile] = $testObj;
-					self::addTestObjectsToXmlTree( $xmlDoc, $xmlTests, $testObjs );
-					$xmlTests = self::$CurrentTestsNode; // Set by addTestObjectsToXmlTree()
-				}
+				$suiteDirs[] = $dirName;
 			}
-			$suiteDirs[] = $dirName;
 
 			// Collect server plugin testsuite folders
 			$pluginDirs = array( BASEDIR.'/server/plugins/', BASEDIR.'/config/plugins/' );
@@ -182,6 +180,21 @@ class TestSuiteFactory
 					}
 				}
 			}
+
+			// Read TestCase class file from disk and create instance
+			if( $suiteDirs ) {
+				$dirName = reset($suiteDirs);
+				if( is_file( $dirName.'/TestSuite.php' ) ) {
+					$testObj = self::createTestModule( $dirName.'/TestSuite.php' );
+					if( $testObj ) {
+						$testFile = substr( $dirName.'/TestSuite.php', strlen(BASEDIR) );
+						$testObjs[$testFile] = $testObj;
+						self::addTestObjectsToXmlTree( $xmlDoc, $xmlTests, $testObjs );
+						$xmlTests = self::$CurrentTestsNode; // Set by addTestObjectsToXmlTree()
+					}
+				}
+			}
+
 			foreach( $suiteDirs as $suiteDir ) {
 				self::readTestObjectsFromFolders( $xmlDoc, $xmlTests, $suiteDir );
 			}
@@ -208,12 +221,13 @@ class TestSuiteFactory
 	{
 		// Read TestCase class file from disk, create instance and run its test method
 		$testResults = array();
+		$snapBefore = null;
 		try {
 			// Start test session.
 			ob_start(); // Capture std output. See ob_get_contents() below for details.
 			self::$testStartTime = date('Y-m-d\TH:i:s');
 			/** @var TestCase $testObj */
-			$testObj = self::createTestModule( BASEDIR.$classPath, 'TestCase' );
+			$testObj = self::createTestModule( BASEDIR.$classPath );
 			$testObj->setSessionId( $sessionId );
 			$autoCleanIdsJobs = ( $ancestorTestSuite != 'HealthCheck2' && // By default, only auto clean for BuildTest
 											$ancestorTestSuite != 'PhpCodingTest' ); // No DB connection yet during this test execution, so exclude.
@@ -339,6 +353,8 @@ class TestSuiteFactory
 	 * If it's a plugin, it checks if it is installed and enabled. If not, it flags
 	 * the test with "Not Installed" and returns TRUE (else FALSE).
 	 *
+	 * @param string $classPath
+	 * @param TestCase $testObj
 	 * @return boolean Whether or test belongs to plugin that is not installed.
 	 */
 	static private function skipWhenNotInstalledPlugin( $classPath, $testObj )
@@ -386,15 +402,22 @@ class TestSuiteFactory
 	 * @return array $map Key-Value array where Key is the *Tablename and Value is the maxId or the total record.
 	 */
 	static private function getSnapShotOfDbTables()
-	{	
-		$map = array();
+	{
+		require_once BASEDIR.'/server/dbmodel/Reader.class.php';
+		require_once BASEDIR.'/server/dbmodel/Factory.class.php';
+
+		$dbTables = array();
+		$dbTablesWithoutAutoIncrement = array();
+		foreach( WW_DbModel_Factory::createModels() as $definition ) {
+			$reader = new WW_DbModel_Reader( $definition );
+			$dbTablesWithoutAutoIncrement = array_merge( $dbTablesWithoutAutoIncrement, $definition->getTablesWithoutAutoIncrement() );
+			$dbTables = array_merge( $dbTables, $reader->listTables() );
+		}
+
 		$dbdriver = DBDriverFactory::gen();
-		require_once BASEDIR.'/server/dbscripts/dbmodel.php';
-		$dbStruct = new DBStruct();
-		$tablesWithoutAutoIncrement = $dbStruct->getTablesWithoutAutoIncrement();
-		$dbTables = $dbStruct->listTables();
+		$map = array();
 		foreach( $dbTables as $dbTable ) {
-			$dbFieldId = in_array( $dbTable['name'], $tablesWithoutAutoIncrement ) ? null : 'id';
+			$dbFieldId = in_array( $dbTable['name'], $dbTablesWithoutAutoIncrement ) ? null : 'id';
 			if( $dbFieldId == 'id' ) {
 				$sql = 'SELECT max(`'.$dbFieldId.'`) as `maxid` FROM '. $dbTable['name'] ;
 			} else{
@@ -404,7 +427,6 @@ class TestSuiteFactory
 			$row = $dbdriver->fetch($sth);
 			$map[$dbTable['name']] = isset( $row['maxid'] ) ? $row['maxid'] : 0;
 		}
-		
 		return $map;
 	}
 	
@@ -428,17 +450,21 @@ class TestSuiteFactory
 	 * @return array $testResults An array of TestResult object consists of 'Status', 'Message' and 'ConfigTip'.
 	 */
 	static private function validateSnapShots( $snapBefore, $snapAfter, $nonCleaningTables )
-	{		
-		require_once BASEDIR.'/server/dbscripts/dbmodel.php';
-		$dbStruct = new DBStruct();
-		$tablesWithoutAutoIncrement = $dbStruct->getTablesWithoutAutoIncrement();
+	{
+		require_once BASEDIR.'/server/dbmodel/Factory.class.php';
+
+		$dbTablesWithoutAutoIncrement = array();
+		foreach( WW_DbModel_Factory::createModels() as $definition ) {
+			$dbTablesWithoutAutoIncrement = array_merge( $dbTablesWithoutAutoIncrement, $definition->getTablesWithoutAutoIncrement() );
+		}
+
 		$testResults = array();
 		foreach( $snapBefore as $tableName => $maxIdBefore ) {
 			if( !in_array( $tableName, $nonCleaningTables ) ) { // skip if table is excluded
 				$maxIdAfter = $snapAfter[$tableName];
 				if( $maxIdBefore != $maxIdAfter ) {
-					$dbTable = str_replace( 'smart_', '', $tableName );
-					$dbFieldId = in_array( $tableName, $tablesWithoutAutoIncrement ) ? null : 'id';
+					$dbTable = str_replace( DBPREFIX, '', $tableName );
+					$dbFieldId = in_array( $tableName, $dbTablesWithoutAutoIncrement ) ? null : 'id';
 					if( $dbFieldId == 'id' ) { // DB table with primary key
 						$where = '`id` > ? AND `id` <= ?';
 						$fieldNames = '*';

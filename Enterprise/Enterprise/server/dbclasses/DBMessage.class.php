@@ -252,15 +252,15 @@ class DBMessage extends DBBase
 	 * Returns messages sent to a given user.
 	 * Messages are sorted in human reading order. See module header for details.
 	 *
-	 * @param string $userId Short user name.
+	 * @param string $userShortName Short user name.
 	 * @return array of Message
 	 */
-	static public function getMessagesForUser( $userId )
+	static public function getMessagesForUser( $userShortName )
 	{
 		$idxMessages = array();
 		$tables = array( 'm' => self::TABLENAME, 'u' => 'users' );
 		$where = 'u.`user` = ? AND ( m.`userid` = u.`id` ) ';
-		$params = array( $userId );
+		$params = array( $userShortName );
 		$fieldNames = array( 'm' => array( '*' ) );
 		$orderBy = array( 'm.`id`' => true );
 		$rows = self::listRows( $tables, null, null, $where, $fieldNames, $params, $orderBy );
@@ -667,7 +667,7 @@ class DBMessage extends DBBase
 	 * Converts a message DB record into a Message object.
 	 * 
 	 * @param array $row   Database record with key-values.
-	 * @return object Message
+	 * @return Message
 	 */
 	static public function rowToObj( $row )
 	{

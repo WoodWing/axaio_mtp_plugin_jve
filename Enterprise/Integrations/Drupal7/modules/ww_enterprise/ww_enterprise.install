@@ -16,7 +16,6 @@ include_once(drupal_get_path('module', 'ww_enterprise').'/ww_enterprise_utils.in
  */
 function ww_enterprise_update_7000( &$sandbox )
 {
-	$sandbox = $sandbox; // keep code analyzer happy
 	ww_enterprise_install();
 }
 
@@ -89,7 +88,6 @@ function ww_enterprise_schema()
  */
 function ww_enterprise_requirements( $phase )
 {
-	$phase = $phase; // keep code analyzer happy
 	return array();
 }
 

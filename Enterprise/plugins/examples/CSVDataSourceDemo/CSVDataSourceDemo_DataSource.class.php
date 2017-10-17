@@ -80,10 +80,6 @@ class CSVDataSourceDemo_DataSource extends DataSource_EnterpriseConnector
 
 	final public function getRecords( $query, $recordid, $queryparameters )
 	{
-		$recordid = $recordid; // make code analyzer happy
-		$queryparameters = $queryparameters;
-		$query = $query; // made code analyzer happy
-		
 		if( !$this->Settings["file"] )
 		{
 			throw new BizException( 'ERR_DATABASE', 'Server', 'file setting not set. check your data source settings.' );
@@ -164,9 +160,6 @@ class CSVDataSourceDemo_DataSource extends DataSource_EnterpriseConnector
 	 */
 	final public function setRecords( $records, $recordid, $queryparameters )
 	{
-		$records = $records; // made code analyzer happy
-		$recordid = $recordid; // make code analyzer happy
-		$queryparameters = $queryparameters;
 		// not implemented in a standard CSV datasource
 	}
 	
@@ -184,7 +177,6 @@ class CSVDataSourceDemo_DataSource extends DataSource_EnterpriseConnector
 	 */
 	final public function getUpdates( $familyvalue )
 	{
-		$familyvalue = $familyvalue; // made code analyzer happy
 		// not implemented in a standard CSV datasource
 	}
 	

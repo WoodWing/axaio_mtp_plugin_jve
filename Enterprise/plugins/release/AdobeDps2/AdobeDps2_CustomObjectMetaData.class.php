@@ -15,9 +15,6 @@ class AdobeDps2_CustomObjectMetaData extends CustomObjectMetaData_EnterpriseConn
 {
 	final public function collectCustomProperties( $coreInstallation )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$coreInstallation = $coreInstallation; // keep analyser happy
-		
 		$props = array();
 		$props[0]['Layout'] = array(
 			new PropertyInfo( 'C_DPS2_UPLOADSTATUS', 

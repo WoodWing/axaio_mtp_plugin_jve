@@ -19,7 +19,7 @@ class AdmGetPubChannelsRequest
 	 * @param string               $Ticket                    
 	 * @param string[]             $RequestModes              
 	 * @param integer              $PublicationId             
-	 * @param Id[]                 $PubChannelIds             Nullable.
+	 * @param integer[]            $PubChannelIds             Nullable.
 	 */
 	public function __construct( $Ticket=null, $RequestModes=null, $PublicationId=null, $PubChannelIds=null )
 	{
@@ -72,8 +72,8 @@ class AdmGetPubChannelsRequest
 			if( !is_null( $datObj->PubChannelIds ) ) {
 				$validator->checkType( $datObj->PubChannelIds, 'array' );
 				if( !empty($datObj->PubChannelIds) ) foreach( $datObj->PubChannelIds as $listItem ) {
-					$validator->enterPath( 'integer' );
-					$validator->checkType( $listItem, 'integer' );
+					$validator->enterPath( 'Id' );
+					$validator->checkType( $listItem, 'Id' );
 					$validator->leavePath();
 				}
 			}

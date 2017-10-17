@@ -22,7 +22,6 @@ $rendition = $_GET['rendition'];
 $id = intval($_GET['id']);
 
 require_once BASEDIR.'/server/services/wfl/WflGetObjectsService.class.php';
-require_once BASEDIR."/server/bizclasses/BizSession.class.php";
 
 try {
 	BizSession::startSession( $ticket );

@@ -234,7 +234,6 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		LogHandler::Log ( 'ELVIS', 'DEBUG', 'ContentSource::getShadowObject2 called for alienId:' . $alienId . '; lock:' . $lock . '; rendition:' . $rendition );
 
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$this->checkUserEditRight( $lock, $rendition );
 
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
@@ -309,7 +308,6 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	{
 		LogHandler::Log( 'ELVIS', 'DEBUG', 'ContentSource::createShadowObject called for alienId:' . $alienId );
 
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once __DIR__ . '/util/ElvisUtils.class.php';
 		$elvisId = ElvisUtils::getElvisId( $alienId );
 
@@ -590,13 +588,11 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 			return;
 		}
 		
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
 		// Only remove the system id in Elvis when the asset is completely removed in Enterprise (removed from the trash)
 		$elvisId = ElvisUtils::getElvisId( $alienId );
 
 		require_once dirname(__FILE__).'/logic/ElvisObjectManager.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$systemId = BizSession::getEnterpriseSystemId();
 		if( !$restore ) {
 			try {
@@ -953,7 +949,6 @@ class Elvis_ContentSource extends ContentSource_EnterpriseConnector
 	 */
 	private function triggeredBySyncJob() 
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		return (BizSession::getServiceName() == 'ElvisSync');
 	}
 

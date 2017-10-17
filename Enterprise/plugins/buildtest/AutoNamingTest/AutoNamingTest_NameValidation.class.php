@@ -5,17 +5,14 @@ class AutoNamingTest_NameValidation extends NameValidation_EnterpriseConnector
 {
 	public function validatePassword( $password )
 	{
-		$password = $password; // keep code analyzer happy
 	}
 
 	public function validateMetaDataAndTargets( $user, MetaData &$meta, &$targets )
 	{
-		$user = $user; $meta = $meta; $targets = $targets; // keep code analyzer happy
 	}
 	
 	public function validateMetaDataInMultiMode( $user, MetaData $invokedMetaData, array &$changedMetaDataValues )
 	{
-		$user = $user; $invokedMetaData = $invokedMetaData; $changedMetaDataValues = $changedMetaDataValues; // keep code analyzer happy
 	}
 
 	/**
@@ -29,11 +26,6 @@ class AutoNamingTest_NameValidation extends NameValidation_EnterpriseConnector
 	 */
 	public function applyAutoNamingRule( $user, $metaData, $targets, $relations )
 	{
-		// Make analyzer happy
-		$user = $user;
-		$targets = $targets;
-		$relations = $relations;
-
 		$autoNaming = null;
 		switch( $metaData->BasicMetaData->Name ) {
 			case 'dossier_web_123':
@@ -50,7 +42,6 @@ class AutoNamingTest_NameValidation extends NameValidation_EnterpriseConnector
 
 	public function applyAutoTargetingRule( $user, Relation $relation, $parentType, $childType, &$extraTargets )
 	{
-		$user = $user; $parentType = $parentType; $childType = $childType; // make code analyser happy
 	}
 
 	public function getPrio() { return self::PRIO_DEFAULT; }

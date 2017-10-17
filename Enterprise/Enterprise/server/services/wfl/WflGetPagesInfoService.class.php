@@ -34,15 +34,15 @@ class WflGetPagesInfoService extends EnterpriseService
 		// But note that IDs can be set to null when an Issue is passed in.
 		$ids = $req->IDs ? array_map('intval', $req->IDs ) : null;
 
-		$retobj = BizPageInfo::getPages( 
+		$retobj = BizPageInfo::getPages(
 			$req->Ticket,
 			$this->User,
 			$req->Issue,
 			$ids,
 			$req->Edition,
 			$req->Category,
-			$req->State);
-			
+			$req->State );
+
 		return $retobj;
 	}
 }

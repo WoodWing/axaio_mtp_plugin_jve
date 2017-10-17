@@ -820,7 +820,7 @@ class DrupalField {
 	 *
 	 * @static
 	 * @param DrupalField $drupalField The DrupalField object being analyzed.
-	 * @return string A string of values, or null if not found / determined.
+	 * @return array|null list of values, or null if not found / determined.
 	 */
 	private static function determineValues( DrupalField $drupalField )
 	{
@@ -1924,7 +1924,7 @@ class DrupalField {
 	 * the determineDefaultValues() function for more details.
 	 *
 	 * @see determineDefaultValues();
-	 * @param string[]|null|string $defaultValues The default values.
+	 * @param string[][]|null|string $defaultValues The default values.
 	 * @return void.
 	 */
 	public function setDefaultValues($defaultValues)
@@ -1937,7 +1937,7 @@ class DrupalField {
 	 *
 	 * Returns the default values for this DrupalField.
 	 *
-	 * @return null|string|string[] The Default values.
+	 * @return null|string|string[][] The Default values.
 	 */
 	public function getDefaultValues()
 	{

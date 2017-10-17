@@ -104,8 +104,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 			$this->placeDossierOnLayout();
 
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
 		}
 
 		$this->tearDownTestData();
@@ -149,8 +147,8 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 		
 		$this->editionObjs = @$vars['BuildTest_AutomatedPrintWorkflow']['editions'];
 		$this->assertCount( 2, $this->editionObjs );
-		$this->assertInstanceOf( 'stdClass', $this->editionObjs[0] ); // TODO: should be AdmEdition
-		$this->assertInstanceOf( 'stdClass', $this->editionObjs[1] ); // TODO: should be AdmEdition
+		$this->assertInstanceOf( 'AdmEdition', $this->editionObjs[0] );
+		$this->assertInstanceOf( 'AdmEdition', $this->editionObjs[1] );
 		$this->editionObjs = array( $this->editionObjs[0] ); // for now just one edition is good enough
 
 		$this->layoutStatus = @$vars['BuildTest_AutomatedPrintWorkflow']['layoutStatus'];
@@ -218,8 +216,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 			$request->IDs    = $objectIds;
 			$service->execute( $request );
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 
@@ -252,8 +248,6 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 				}
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 	
@@ -511,7 +505,7 @@ class WW_TestSuite_BuildTest_InDesignServerAutomation_AutomatedPrintWorkflow_Bas
 		
 		// Validate the response and grab the dossier object.
 		$this->assertInstanceOf( 'Relation', $response->Relations[0] );
-		$this->assertNotEquals( 'Contained', $response->Relations[0]->Type );
+		$this->assertEquals( 'Contained', $response->Relations[0]->Type );
 
 		// Server does not guarantee order object relations, so we sort here.
 		$this->globalUtils->sortObjectRelationsForCompare( $response->Relations );

@@ -17,7 +17,7 @@
 		td.fcc {} /* foot-comment-column */
 	</style>
 </head>
-<body><table><tr><td><img title="" src="woodwing95.gif"/></td><td class="caption"><h1>Workflow interface - Enterprise v10.1</h1></td></table>
+<body><table><tr><td><img title="" src="woodwing95.gif"/></td><td class="caption"><h1>Workflow interface - Enterprise v10.2</h1></td></table>
 <br/><h2>Web Services</h2>
 <div class="section"><h3>AddObjectLabels</h3><p> 
 				Assigns an existing dossier label to one or more objects it contains.
@@ -551,7 +551,7 @@
 <tr><td class="bpc">Params</td><td class="btc">array of <a href="#QueryParam">QueryParam</a></td><td class="bcc"></td></tr>
 <tr><td class="bpc">FirstEntry</td><td class="btc">unsigned integer*</td><td class="bcc"> v4.2: Index of first requested object of total count (TotalEntries) </td></tr>
 <tr><td class="bpc">MaxEntries</td><td class="btc">unsigned integer*</td><td class="bcc"> v4.2: Max count of requested objects (zero for all, nil for DBMAXQUERY) </td></tr>
-<tr><td class="bpc">Hierarchical</td><td class="btc">boolean*</td><td class="bcc"> v4.2: Requests to include ChildRows (placements/components) - Default false! </td></tr>
+<tr><td class="bpc">Hierarchical</td><td class="btc">boolean*</td><td class="bcc"> v4.2: Requests to include ChildRows/ChildColumns (placements) and ComponentRows/ComponentColumns (text components) - Default false! </td></tr>
 <tr><td class="bpc">Order</td><td class="btc">array of <a href="#QueryOrder">QueryOrder</a>*</td><td class="bcc"> v4.2 </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>NamedQueryResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
@@ -616,7 +616,7 @@
 <tr><td class="bpc">Params</td><td class="btc">array of <a href="#QueryParam">QueryParam</a></td><td class="bcc"></td></tr>
 <tr><td class="bpc">FirstEntry</td><td class="btc">unsigned integer*</td><td class="bcc"> v4.2: Index of first requested object of total count (TotalEntries) </td></tr>
 <tr><td class="bpc">MaxEntries</td><td class="btc">unsigned integer*</td><td class="bcc"> v4.2: Max count of requested objects (zero for all, nil for server defined default) </td></tr>
-<tr><td class="bpc">Hierarchical</td><td class="btc">boolean*</td><td class="bcc"> v4.2: Requests to include ChildRows (placements/components) - Default false! </td></tr>
+<tr><td class="bpc">Hierarchical</td><td class="btc">boolean*</td><td class="bcc"> v4.2: Requests to include ChildRows/ChildColumns (placements) and ComponentRows/ComponentColumns (text components) - Default false! </td></tr>
 <tr><td class="bpc">Order</td><td class="btc">array of <a href="#QueryOrder">QueryOrder</a>*</td><td class="bcc"> v4.2 </td></tr>
 <tr><td class="bpc">MinimalProps</td><td class="btc">array of string*</td><td class="bcc"> v6.0: Minimal properties that should be returned even if these are not configured </td></tr>
 <tr><td class="bpc">RequestProps</td><td class="btc">array of string*</td><td class="bcc"> v6.0: Which properties to return, be cautious, this overrules server configuration and overrules MinimalProps </td></tr>
@@ -1443,6 +1443,8 @@
 <tr><td class="bpc">UserID</td><td class="btc">string</td><td class="bcc"></td></tr>
 <tr><td class="bpc">FullName</td><td class="btc">string</td><td class="bcc"></td></tr>
 <tr><td class="bpc">TrackChangesColor</td><td class="btc">color (3-byte, hexadecimal)</td><td class="bcc"> v8.0: User's track changes color in RGB format (without # prefix) </td></tr>
+<tr><td class="bpc">EmailAddress</td><td class="btc">string*</td><td class="bcc"> v10.2: Only populated for LogOnResponse->CurrentUser for CSDE publish to email. </td></tr>
+<tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section" id="UserGroup"><h3>UserGroup</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Name</td><td class="btc">string</td><td class="bcc"></td></tr>
 </table></div><div class="section" id="VersionInfo"><h3>VersionInfo</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
@@ -1588,7 +1590,6 @@
 <tr><td class="btc">"print"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"web"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"sms"</td><td class="bcc"></td></tr>
-<tr><td class="btc">"dps"</td><td class="bcc"> v7.5 Digital Publishing System </td></tr>
 <tr><td class="btc">"dps2"</td><td class="bcc"> v9.6 Adobe DPS (2015) integration </td></tr>
 <tr><td class="btc">"other"</td><td class="bcc"></td></tr>
 </table></div><div class="section" id="RelationType"><h3>RelationType</h3><p></p><table class="section"><tr><td class="htc">choice of</td><td class="hcc">comment</td></tr>
@@ -1606,6 +1607,6 @@
 <tr><td class="btc">"native"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"output"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"trailer"</td><td class="bcc"></td></tr>
-</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SCEnterprise.wsdl" file at 30 May 2017</p>
-<p style="font-size: 9pt;" align="right">Confidential, (c) 1998 WoodWing Software bv. All rights reserved.</p></div>
+</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SCEnterprise.wsdl" file at 15 Sep 2017</p>
+<p style="font-size: 9pt;" align="right">Confidential, (c) 1998-2017 WoodWing Software bv. All rights reserved.</p></div>
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></body></html>

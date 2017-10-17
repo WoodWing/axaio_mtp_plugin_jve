@@ -22,7 +22,7 @@ class DBTarget extends DBBase
 	 *
 	 * @param array $newValues column/value pairs of the columns to be inserted.
 	 * @param boolean $autoIncrement
-	 * @return new id or else false.
+	 * @return int|bool id or else false
 	 */
 	public static function insert( array $newValues, $autoIncrement )
 	{
@@ -224,7 +224,7 @@ class DBTarget extends DBBase
      * @param string $publisheddate date at which object must get/is published
      * @param string $version date at which object must get/is published
      * @param string $user short name of 'publisher'
-     * @return the id of the added entry in the publishhistory table
+     * @return int|bool the id of the added entry in the publishhistory table, or false on error
 	  */
     static public function updatePublishInfoDossier($objectid, $channelid, $issueid, $externalid, $action, $publisheddate, $version, $user )
 	{
@@ -427,7 +427,7 @@ class DBTarget extends DBBase
 	/**
 	 * Deletes records .....  
 	 * @param array $whereParams column/array of value pairs for where clause
-	 * @return number of records updated or null in case of error.
+	 * @return integer number of records updated or null in case of error.
 	 */	
 	public static function delete($whereParams)
     {
@@ -512,7 +512,7 @@ class DBTarget extends DBBase
 	 *
 	 * @param integer $parent objectid of parent
 	 * @param integer $child objectid of child
-	 * @return true if no errors else null
+	 * @return integer|true if no errors else null
 	 */
 	public static function removeTargetObjectRelation( $parent, $child )
 	{
@@ -1110,13 +1110,8 @@ class DBTarget extends DBBase
         $targetsTable = $dbDriver->tablename(self::TABLENAME);
         $targetEditionsTable = $dbDriver->tablename('targeteditions');
 
-        if (DBTYPE == 'oracle') {
-            $sql  = "DELETE FROM (SELECT * FROM SMART_TARGETEDITIONS ted LEFT JOIN SMART_TARGETS tar ON (ted.`targetid` = tar.`id`) WHERE tar.`channelid` = $channelId)";
-        }
-        else {
-            $sql  = "DELETE ted.* FROM $targetEditionsTable ted, $targetsTable tar ";
-            $sql .= "WHERE ted.`targetid` = tar.`id` AND tar.`channelid` = $channelId ";
-        }
+        $sql  = "DELETE ted.* FROM $targetEditionsTable ted, $targetsTable tar ";
+        $sql .= "WHERE ted.`targetid` = tar.`id` AND tar.`channelid` = $channelId ";
         $sth = $dbDriver->query($sql);
 
 		if( is_null($sth) ) {
@@ -1179,14 +1174,9 @@ class DBTarget extends DBBase
         $targetsTable = $dbDriver->tablename(self::TABLENAME);
         $targetEditionsTable = $dbDriver->tablename('targeteditions');
 
-        if (DBTYPE == 'oracle') {
-            $sql  = "DELETE FROM (SELECT * FROM SMART_TARGETEDITIONS ted LEFT JOIN SMART_TARGETS tar ON (ted.`targetid` = tar.`id`) WHERE tar.`issueid` = $issueId)";
-        }
-        else {        
-            $sql  = "DELETE ted.* ";
-            $sql .= "FROM $targetEditionsTable ted, $targetsTable tar ";
-            $sql .= "WHERE tar.`issueid` = $issueId AND ted.`targetid` = tar.`id`";
-        }
+        $sql  = "DELETE ted.* ";
+        $sql .= "FROM $targetEditionsTable ted, $targetsTable tar ";
+        $sql .= "WHERE tar.`issueid` = $issueId AND ted.`targetid` = tar.`id`";
         $sth = $dbDriver->query($sql);
 
 		if( is_null($sth) ) {
@@ -1461,13 +1451,9 @@ class DBTarget extends DBBase
 	public static function getObjectTargetIssueID( $objectId )
 	{
 		$where = '`objectid` = ? ';
-		$params = array( $objectId );
-		$result = self::getRow(self::TABLENAME, $where, 'issueid', $params);
-
-		if (isset($result['issueid'])) {
-			return $result['issueid'];
-		}
-		return false;
+		$params = array( intval( $objectId ) );
+		$row = self::getRow( self::TABLENAME, $where, array( 'issueid' ), $params );
+		return $row ? $row['issueid'] : false;
 	}
 
 	/**

@@ -29,7 +29,8 @@ class AdmGetPubChannelsService extends EnterpriseService
 	public function runCallback( AdmGetPubChannelsRequest $req )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmPublication.class.php';
-		$pubchannels = BizAdmPublication::listPubChannelsObj( $this->User, $req->RequestModes, $req->PublicationId, $req->PubChannelIds );
+		$pubchannels = BizAdmPublication::listPubChannelsObj( $this->User, $req->RequestModes,
+			$req->PublicationId, $req->PubChannelIds );
 		return new AdmGetPubChannelsResponse( $req->PublicationId, $pubchannels );
 	}
 }

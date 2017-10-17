@@ -8,7 +8,6 @@ require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 
 // Start the session to save the ticket in BizSession
 $ticket = checkSecure('admin'); // system admin
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 BizSession::startSession( $ticket );
 
 $bizDevice = new BizAdmOutputDevice();

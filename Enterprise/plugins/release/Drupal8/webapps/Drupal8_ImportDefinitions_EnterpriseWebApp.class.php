@@ -319,7 +319,6 @@ class Drupal8_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 	{
 		require_once dirname(__FILE__).'/../Utils.class.php';
 		require_once dirname(__FILE__).'/../XmlRpcClient.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizAdmPublication.class.php';
 		require_once BASEDIR.'/server/interfaces/services/pub/DataClasses.php';
 		require_once BASEDIR.'/server/services/adm/AdmCreateAutocompleteTermEntitiesService.class.php';
@@ -373,7 +372,6 @@ class Drupal8_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 	 */
 	private function clearTermEntitiesAndTerms( $publishSystemId )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTermEntity.class.php';
 		require_once BASEDIR.'/server/services/adm/AdmDeleteAutocompleteTermEntitiesService.class.php';
 		require_once dirname(__FILE__).'/../Utils.class.php'; // WW_Plugins_Drupal8_Utils.
@@ -430,7 +428,6 @@ class Drupal8_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 			$contentTypes = $drupalXmlRpcClient->getContentTypes();
 
 			require_once BASEDIR . '/server/bizclasses/BizObject.class.php';
-			require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 			require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
 			require_once BASEDIR . '/server/bizclasses/BizAdmActionProperty.class.php';
 			$userName = BizSession::getShortUserName();

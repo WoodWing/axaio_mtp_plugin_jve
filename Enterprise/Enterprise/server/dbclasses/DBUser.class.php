@@ -475,32 +475,27 @@ class DBUser extends DBBase
 	}
 
 	/*
-	 * Remove the given user group from the database. <br>
+	 * Remove a given user group from the database.
 	 *
-	 * @param string $id
+	 * @param integer $id
 	 */
 	public static function deleteUserGroup( $id )
 	{
-		if( !$id ) {
-			self::setError( BizResources::localize( 'ERR_ARGUMENT' ) );
-		} else {
-			// first get user group name (needed later)
-			$where = '`id` = ?';
-			$params = array( $id );
-			$row = self::getRow( 'groups', $where, array( 'name' ), $params );
+		// first get user group name (needed later)
+		$where = '`id` = ?';
+		$params = array( intval( $id ) );
+		$row = self::getRow( 'groups', $where, array( 'name' ), $params );
 
-			if( $row ) {
-				$userGroupName = $row['name'];
+		if( $row ) {
+			$userGroupName = $row['name'];
 
-				self::deleteRows( 'groups', '`id` = ?', $params );						// Delete groups
-				self::deleteRows( 'usrgrp', '`grpid` = ?', $params ); 					// cascading delete usrgrp
-				self::deleteRows( 'authorizations', '`grpid` = ?', $params ); 			// cascading delete authorizations
-				self::deleteRows( 'publadmin', '`grpid` = ?', $params ); 				// cascading delete publadmin
-				self::deleteRows( 'publobjects', '`grpid` = ?', $params );				// cascading delete publobjets
-				self::deleteRows( 'routing', '`routeto` = ?', array( $userGroupName) ); // cascading delete routing
-			}
+			self::deleteRows( 'groups', '`id` = ?', $params );						// Delete groups
+			self::deleteRows( 'usrgrp', '`grpid` = ?', $params ); 					// cascading delete usrgrp
+			self::deleteRows( 'authorizations', '`grpid` = ?', $params ); 			// cascading delete authorizations
+			self::deleteRows( 'publadmin', '`grpid` = ?', $params ); 				// cascading delete publadmin
+			self::deleteRows( 'publobjects', '`grpid` = ?', $params );				// cascading delete publobjets
+			self::deleteRows( 'routing', '`routeto` = ?', array( $userGroupName) ); // cascading delete routing
 		}
-
 	}
 
 	public static function listPublAuthorizations($publid, $fieldnames = '*')
@@ -580,11 +575,28 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 * Gets exactly one user object with specific user id $usrId.
+	 * Returns the count of users who are member of a given user group.
 	 *
-	 * @param string $usrId Id of the user
-	 * @param bool $isAdmin To determine if the user is a System admin
-	 * @return AdmUser|null User object or null when not found.
+	 * @since 10.2.0
+	 * @param integer $groupId
+	 * @return integer User count.
+	 */
+	public static function countUsersInGroup( $groupId )
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$dbu = $dbDriver->tablename('usrgrp');
+		$sql =  "SELECT COUNT(*) AS `c` FROM {$dbu} WHERE `grpid` = ? ";
+		$params = array( intval( $groupId ) );
+		$sth = self::query( $sql, $params );
+		$row = self::fetch( $sth );
+		return $row['c'];
+	}
+
+	/**
+	 *  Gets exactly one user object with specific user id $usrId
+	 *  @param string $usrId Id of the user
+	 *  @param bool $isAdmin To determine if the user is a System admin
+	 *  @return AdmUser|null User object or null when not found.
 	 */
 	public static function getUserObj( $usrId, $isAdmin = null )
 	{
@@ -656,7 +668,7 @@ class DBUser extends DBBase
 	 * Gets exactly one user group object with specific user group id $grpId.
 	 *
 	 * @param int $grpId Id of the user group.
-	 * @return AdmUserGroup, null if no record is found.
+	 * @return AdmUserGroup|null user group if succeeded, null if user not found (or on SQL error)
 	 */
 	public static function getUserGroupObj( $grpId )
 	{
@@ -1117,7 +1129,6 @@ class DBUser extends DBBase
 	 */
 	static public function checkUser( &$userName )
 	{
-		require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename( self::TABLENAME );
 
@@ -1163,11 +1174,9 @@ class DBUser extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename('users');
 
-		$user = $dbDriver->toDBString($user);
-		$lang = $dbDriver->toDBString($lang);
-
-		$sql = "UPDATE $db SET `language`='$lang' WHERE `user` = ? ";
-		$sth = $dbDriver->query($sql, array( strval( $user ) ));
+		$sql = "UPDATE $db SET `language`= ? WHERE `user` = ? ";
+		$params = array( strval( $lang ), strval( $user ) );
+		$sth = $dbDriver->query($sql, $params );
 
 		return $sth;
 	}
@@ -1659,7 +1668,8 @@ class DBUser extends DBBase
 			$features =
 				BizAccessFeatureProfiles::getFileAccessProfiles() +
 				BizAccessFeatureProfiles::getAnnotationsAccessProfiles() +
-				BizAccessFeatureProfiles::getWorkflowAccessProfiles();
+				BizAccessFeatureProfiles::getWorkflowAccessProfiles() +
+				BizAccessFeatureProfiles::getServerPluginFeatureAccessLists();
 			$dbDriver = DBDriverFactory::gen();
 			$authorizations = $dbDriver->tablename("authorizations");
 			$profilefeatures = $dbDriver->tablename("profilefeatures");

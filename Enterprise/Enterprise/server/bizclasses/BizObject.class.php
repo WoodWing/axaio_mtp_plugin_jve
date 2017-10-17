@@ -904,11 +904,12 @@ class BizObject
 
 
 		// Do notifications
+		$latestRouteTo = isset( $newRow['routeto'] ) ? $newRow['routeto'] : $currRow['routeto']; // when not provided by caller, take original value
 		$issueIds = $issueNames = $editionIds = $editionNames = '';
 		self::listIssuesEditions( $object->Targets, $issueIds, $issueNames, $editionIds, $editionNames );
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
 		DBlog::logService( $user, 'SaveObjects', $id, $newRow['publication'], null, $newRow['section'], $newRow['state'],
-			'', '', '', $newRow['type'], $newRow['routeto'], $editionNames, $newRow['version'] );
+			'', '', '', $newRow['type'], $latestRouteTo, $editionNames, $newRow['version'] );
 		if( MTP_SERVER_DEF_ID != '' ) {
 			require_once BASEDIR.'/server/MadeToPrintDispatcher.class.php';
 			MadeToPrintDispatcher::doPrint( $id, BizSession::getTicket() );
@@ -921,7 +922,7 @@ class BizObject
 		require_once BASEDIR.'/server/bizclasses/BizEnterpriseEvent.class.php';
 		BizEnterpriseEvent::createObjectEvent( $object->MetaData->BasicMetaData->ID, 'update' );
 
-		BizEmail::sendNotification( 'save object' , $object, $newRow['types'], $currRow['routeto']);
+		BizEmail::sendNotification( 'save object', $object, $newRow['types'], $currRow['routeto'] );
 
 		// Optionally send geo update for placed articles of a saved layout, but only if we are not using XMLGeo
 		// XMLGeo would require a geo update file per article which we don't have
@@ -1260,7 +1261,7 @@ class BizObject
 				// BZ#13297 don't get files for native and placement renditions when haveversion is same as object version
 				if ($rendition && $rendition != 'none'
 					&& ! ( ($rendition == 'native' || $rendition == 'placement')
-						&& $haveVersion === $object->MetaData->WorkflowMetaData->Version ) ) {
+						&& $haveVersion === $objectProps['Version'] ) ) {
 					require_once BASEDIR.'/server/bizclasses/BizStorage.php';
 					if( $editionId ) { // edition/device specific rendition
 						require_once BASEDIR.'/server/dbclasses/DBObjectRenditions.class.php';
@@ -1876,7 +1877,7 @@ class BizObject
 	 * Checks if all the Objects have the same publication id and type.
 	 *
 	 * @since 9.2.0
-	 * @param array $objectIds An array of object ids.
+	 * @param integer[] $objectIds An array of object ids.
 	 * @return bool Whether or not all objects have the same publication id and type.
 	 */
 	public static function isSameObjectTypeAndPublication( $objectIds )
@@ -1908,7 +1909,6 @@ class BizObject
 	{
 		require_once BASEDIR.'/server/bizclasses/BizEmail.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
 
@@ -2013,7 +2013,12 @@ class BizObject
 
 			// Retrieve the statuses that are defined for this publication / overrule issue.
 			require_once BASEDIR.'/server/bizclasses/BizAdmStatus.class.php';
-			$statuses = BizAdmStatus::getStatuses( $publicationId, $issueId, $objectType );
+			$statuses = array();
+			$gotStatuses = BizAdmStatus::getStatuses( $publicationId, $issueId, $objectType );
+			// $gotStatuses has index [0...N-1] but we need $statuses with status ids as index.
+			if( $gotStatuses ) foreach( $gotStatuses as $status ) {
+				$statuses[$status->Id] = $status;
+			}
 
 			// Initialize variables to hold the allowed Statuses and Categories for MultiSetObjectProperties.
 			$categories = array();
@@ -2099,7 +2104,7 @@ class BizObject
 					if ( $sendToNext ) {
 						// First determine the new State for the Object, if next, determine next.
 						$state = $statuses[$invokedObject->WorkflowMetaData->State->Id];
-						$newStateId = ( $state->NextStatusId ) ? $state->NextStatusId : null;
+						$newStateId = isset( $state->NextStatus->Id ) ? $state->NextStatus->Id : null;
 
 						if ( is_null( $newStateId ) ) {
 							// If there is no state change, then we do not need to include this Object in the set properties so
@@ -2484,7 +2489,8 @@ class BizObject
 					// the next status. This can be skipped if Personal state is involved.
 					if ( $newStateId != -1 && $currentState != -1  ) {
 						$currentStateObject = $statuses[$currentState];
-						if (  $newStateId == $currentStateObject->NextStatusId) {
+						if ( isset($currentStateObject->NextStatus->Id)
+							&& $newStateId == $currentStateObject->NextStatus->Id ) {
 							if ( !$changeStatusForward && !$changeStatus ) {
 								try {
 									throw new BizException( 'ERR_UNABLE_SETPROPERTIES', 'Client',
@@ -2623,7 +2629,6 @@ class BizObject
 	public static function getMultipleObjectsPropertiesByObjectIds( $user, $objIds, $requestProps )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizQuery.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 		// Treat special cases; When prop is configured, we actually want the id instead.
 		// ID,PublicationId,IssueId,SectionId,PubChannelIds,EditionIds are not applicable for multi-set properties.
@@ -3318,6 +3323,7 @@ class BizObject
 		require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
 
 		$id = $meta->BasicMetaData->ID;
+		$name = $meta->BasicMetaData->Name;
 
 		if ( $id && is_null($targets) ) {
 			// Get the targets when they aren't available (see BZ#35774)
@@ -3378,14 +3384,15 @@ class BizObject
 			}
 		}
 		if( !$foundState ) {
-			$errMsg = 'Found an invalid State ' . $meta->WorkflowMetaData->State->Name . ' for ';
+			$errMsg = "Found an invalid Status (id={$stateId}) for ";
 			if( $numOverruleIssues == 1 ) {
-				$errMsg .= 'Overrule Issue ' . $targets[0]->Issue->Name;
+				$errMsg .= "Overrule Issue (id=" . $targets[0]->Issue->Id.") ";
 			} else {
-				$errMsg .= 'Brand ' . $meta->BasicMetaData->Publication->Name;
+				$errMsg .= "Brand (id={$pubId}) ";
 			}
+			$errMsg .= "when validating Object (id={$id}, name={$name})";
 			throw new BizException( 'ERR_INVALIDSTATE', 'Client',
-				$errMsg . PHP_EOL . 'id=' . $id, null, array( $meta->WorkflowMetaData->State->Name ) );
+				$errMsg, null, array( $meta->WorkflowMetaData->State->Name ) );
 		}
 
 		foreach( $categories as $section ) {
@@ -3395,14 +3402,15 @@ class BizObject
 			}
 		}
 		if( !$foundCategory ) {
-			$errMsg = 'Found an invalid Category ' . $meta->BasicMetaData->Category->Name . ' for ';
+			$errMsg = "Found an invalid Category (id={$catId}) for ";
 			if( $numOverruleIssues == 1 ) {
-				$errMsg .= 'Overrule Issue ' . $targets[0]->Issue->Name;
+				$errMsg .= "Overrule Issue (id={$targets[0]->Issue->Id}) ";
 			} else {
-				$errMsg .= 'Brand ' . $meta->BasicMetaData->Publication->Name;
+				$errMsg .= "Brand (id={$pubId}) ";
 			}
+			$errMsg .= "when validating Object (id={$id}, name={$name})";
 			throw new BizException( 'ERR_INVALIDCATEGORY', 'Client',
-				$errMsg . PHP_EOL . 'id=' . $id, null, array( $meta->BasicMetaData->Category->Name ) );
+				$errMsg, null, array( $meta->BasicMetaData->Category->Name ) );
 		}
 	}
 
@@ -3821,6 +3829,15 @@ class BizObject
 			}
 		}
 
+		// When client provides PlainContent without Slugline, derive the Slugline from the PlainContent.
+		// This happens for the Digital Editor (CSDE). [EN-88921]
+		if( !isset($object->MetaData->ContentMetaData->Slugline) &&
+			isset($object->MetaData->ContentMetaData->PlainContent)) {
+			require_once BASEDIR.'/server/utils/UtfString.class.php';
+			$object->MetaData->ContentMetaData->Slugline = UtfString::truncateMultiByteValue(
+				$object->MetaData->ContentMetaData->PlainContent, 250 );
+		}
+
 		// Validate meta data and targets
 		self::validateMetaDataAndTargets( $user, $object->MetaData, $object->Targets, $object->Relations, false );
 
@@ -3883,7 +3900,6 @@ class BizObject
 	 *
 	 * @param Object $object
 	 * @throws BizException in case of error
-	 * @return null
 	 */
 	private static function validateFiles( /** @noinspection PhpLanguageLevelInspection */
 		Object $object )
@@ -4432,7 +4448,6 @@ class BizObject
 	 * @param string $user short user name
 	 * @param string $objId Unique object ID
 	 * @param bool $checkAccess check user access right
-	 * @return bool User has lock.
 	 * @throws BizException when locked by someone else or lock fails
 	 */
 	public static function restoreLock( $user, $objId, $checkAccess = true)
@@ -4799,12 +4814,11 @@ class BizObject
 	 * 	3) Do a broadcast after the above updates.
 	 *
 	 * @param ServerJob $job
-	 * @return ServerJobStatus  $jobStatusId
+	 * @return integer job status id
 	 */
 	public static function updateParentObject( $job )
 	{
 		require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBDeletedObject.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBBase.class.php';
@@ -4957,7 +4971,6 @@ class BizObject
 	private static function updateParentModifierAndModified( $parentId=null, $childId=null, $relation=null, $modifier, $modified )
 	{
 		require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 
 		$isChildRel = isset($relation) && ($relation->Type == 'Contained' || $relation->Type == 'DeletedContained')  && $childId == $relation->Child;
 		if( $parentId || $isChildRel ) {
@@ -5546,7 +5559,6 @@ class BizObject
 
 					// Update the search index, and surpress errors if any.
 					require_once BASEDIR . '/server/bizclasses/BizSearch.class.php';
-					require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 					try {
 						$objectsToIndex = array();
 						$user = BizSession::getShortUserName();
@@ -5751,7 +5763,6 @@ class BizObject
 		if ( !is_null( $object ) && $object->MetaData->BasicMetaData->Type == 'Dossier' ) {
 			require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 			require_once BASEDIR.'/server/bizclasses/BizSemaphore.class.php';
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 			// Update contained PublishForms.
 			$objectsToIndex = array();
@@ -5974,9 +5985,8 @@ class BizObject
 	 * @param integer[] $objectIds
 	 * @param string[] $areas Either 'Workflow' or 'Trash'
 	 * @param string[] $propertiesToIndex Properties returned by the search engine(s) needed to build the index.
-	 * @param array $metaDatas
-	 * @param array $targets
-	 * @return MetaData[] List of MetaData, with object ids as keys plus a list of Targets, with object ids as key.
+	 * @param MetaData[] $metaDatas List of MetaData, with object ids
+	 * @param Target[] $targets list of Targets, with object ids as key
 	 */
 	private static function getMetaDatasAndTargetsToIndexForObjectIds(
 		array $objectIds, array $areas, array $propertiesToIndex, array &$metaDatas, array &$targets )

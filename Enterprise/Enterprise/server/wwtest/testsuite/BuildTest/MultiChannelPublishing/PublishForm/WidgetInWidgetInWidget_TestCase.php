@@ -166,6 +166,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_WidgetInWidgetIn
 
 			// Determine column indexes to work with
 			$colNames = array( 'ID', 'Name' );
+			$indexes = array();
 			foreach( $colNames as $colName ) {
 				foreach( $response->Columns as $index => $column ) {
 					if( $column->Name == $colName ) {
@@ -296,6 +297,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_WidgetInWidgetIn
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmActionProperty.class.php';
 		$retVal = true;
+		$templateName = null;
 
 		foreach( $this->templates as $templateName => $templates ) {
 			foreach( $templates as $pubChannelId => $template ) {
@@ -548,7 +550,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_WidgetInWidgetIn
 	 *
 	 * @param string $action To be set on the GetDialog2 request.
 	 * @param string $objType For error message when there's an error.
-	 * @return GetDialog2Response|null
+	 * @return WflGetDialog2Response|null
 	 */
 	private function callGetDialog2( $action, $objType )
 	{
@@ -573,7 +575,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_WidgetInWidgetIn
 	 *
 	 * @param string $action The action type for the getDialog2 service: 'SetPublishProperties'(built-in).
 	 * @param string $objType
-	 * @return WflGetDialog2Request|null The valid respionse. NULL on error or when not valid.
+	 * @return WflGetDialog2Response|null The valid respionse. NULL on error or when not valid.
 	 */
 	private function getDialog2Test( $action, $objType )
 	{

@@ -1,73 +1,87 @@
 <?php
+/**
+ * @package     Enterprise
+ * @subpackage  BuildTools
+ * @since       10.2.0
+ * @copyright   WoodWing Software bv. All Rights Reserved.
+ *
+ * CLI script that generates PHP classes from WSDLs.
+ *
+ * Those classes implement the web services for the core Enterprise Server (=provider).
+ * Can also be used to generate the classes for a specific server plugin (=provider) instead.
+ * For either of the two providers, it generates classes for all interfaces defined by the provider.
+ */
 require_once dirname(__FILE__).'/../../../config/config.php';
-require_once BASEDIR.'/server/buildtools/genservices/ServicesClassGenerator.php';
+require_once BASEDIR.'/server/buildtools/genservices/WebServiceClassesGeneratorFactory.class.php';
 
-global $argv;
-$selInterface = @$argv[1];
+$plugin = parseCliArguments();
+$provider = $plugin ? $plugin : 'Enterprise Server';
+$factory = new WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory( $plugin );
+if( !$factory->validate() ) {
+	$errorMsg = $factory->getErrorMessage();
+	echo $errorMsg.PHP_EOL;
+	exit( 1 );
+}
 
-// Determine generator
-switch( $selInterface )
+$webInterfaces = $factory->getWebInterfaces();
+if( $webInterfaces ) foreach( $webInterfaces as $webInterface ) {
+	$generator = $factory->createGeneratorForInterface( $webInterface );
+	if( $generator ) {
+		echo "Created a class generator for the $webInterface interface of $provider...".PHP_EOL;
+		$exitStatus = 0;
+		$steps = $generator->getProcessingSteps();
+		if( $steps ) foreach( $steps as $stepInfo => $functionName ) {
+			echo "\tGenerating $stepInfo...".PHP_EOL;
+			$generator->$functionName();
+			// Show results
+			if( count( $generator->FatalErrors ) > 0 ) {
+				echo 'FATAL ERRORS:'.PHP_EOL;
+				foreach( $generator->FatalErrors as $errors ) {
+					echo '-'.$errors.PHP_EOL;
+					$exitStatus = 1;
+				}
+			}
+			if( count( $generator->ErrorFiles ) > 0 ) {
+				foreach( $generator->ErrorFiles as $fileName ) {
+					echo "ERROR: No write access to file: $fileName".PHP_EOL;
+					$exitStatus = 1;
+				}
+			}
+			if( $exitStatus ) {
+				echo '=> Process aborted!'.PHP_EOL;
+				exit( $exitStatus );
+			}
+		}
+		echo "\tGenerator run finished.".PHP_EOL;
+	}
+}
+
+echo "Successfully generated web service files.".PHP_EOL;
+exit( 0 );
+
+/**
+ * Reads the command line arguments.
+ *
+ * @return string Name of the server plugin to generate web service classes for.
+ *    Empty when web service classes for the core Enterprise Server should be generated instead.
+ */
+function parseCliArguments()
 {
-	case 'wfl':
-		$gen = new WorkflowServicesClassGenerator();
-		break;
-	case 'adm':
-		$gen = new AdminServicesClassGenerator();
-		break;
-	case 'sys':
-		$gen = new SysAdminServicesClassGenerator();
-		break;
-	case 'pln':
-		$gen = new PlanningServicesClassGenerator();
-		break;
-	case 'dat':
-		$gen = new DataSourceServicesClassGenerator();
-		break;
-	case 'ads':
-		$gen = new AdmDatSrcServicesClassGenerator();
-		break;
-	case 'pub':
-		$gen = new PublishingServicesClassGenerator();
-		break;
-	default:
-		echo 'Usage: php wsdl2phpcli.php <interface>'.PHP_EOL;
-		echo 'Supported interfaces: adm, ads, dat, pln, pub, wfl'.PHP_EOL;
-		exit(1);
-}
-
-// Collect required generator functions
-$funcs = array();
-$funcs['Services class'] = 'generateServicesClasses';
-$funcs['Service classes'] = 'generateServiceClasses';
-$funcs['SOAP server+client classes'] = 'generateSoapServerClientClasses';
-$funcs['JSON client classes'] = 'generateJsonClientClasses';
-$funcs['Request and response classes for PHP'] = 'generateRequestResponseClasses4Php';
-$funcs['Request and response classes for Flex'] = 'generateRequestResponseClasses4Flex';
-$funcs['Interfaces classes'] = 'generateServiceInterfaces';
-$funcs['Data classes for PHP'] = 'generateDataClasses4Php';
-$funcs['Data classes for Flex'] = 'generateDataClasses4Flex';
-$funcs['Data validation classes'] = 'generateDataValidationClasses';
-$funcs['Readable document'] = 'generateReadableDocument';
-
-// Run generator functions
-$exitStatus = 0;
-foreach( $funcs as $funcTitle => $func ) {
-	echo 'Generating '.$funcTitle.'...'.PHP_EOL;
-	$gen->$func();
-	// Show results
-	if( count($gen->FatalErrors) > 0 ) {
-		echo 'FATAL ERRORS:'.PHP_EOL;
-		foreach( $gen->FatalErrors as $errors ) {
-			echo '-'.$errors.PHP_EOL;
-			$exitStatus = 1;
-		}
+	$opts = new Zend\Console\Getopt( array(
+		'plugin|p=s' => 'Optional. Name of the server plugin to generate the service classes for. '.
+			'When not provided, the web service classes for the core Enterprise Server are generated.',
+		'help|h' => 'Show this information.'
+	) );
+	try {
+		$arguments = $opts->getArguments();
+	} catch( Exception $e ) {
+		echo $opts->getUsageMessage();
+		exit( 0 );
 	}
-	if( count($gen->ErrorFiles) > 0 ) {
-		foreach( $gen->ErrorFiles as $fileName ) {
-			echo 'ERROR: No write access to file: '.$fileName.PHP_EOL;
-			$exitStatus = 1;
-		}
+	$plugin = isset( $arguments['plugin'] ) ? strval( $arguments['plugin'] ) : ''; // optional
+	if( isset( $arguments['help'] ) ) {
+		echo $opts->getUsageMessage();
+		exit( 0 );
 	}
+	return $plugin;
 }
-echo 'Generator run finished.'.PHP_EOL;
-exit( $exitStatus );

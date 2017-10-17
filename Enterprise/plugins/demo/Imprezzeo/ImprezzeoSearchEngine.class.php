@@ -25,7 +25,6 @@
 
 require_once BASEDIR.'/server/ZendFramework/library/Zend/Http/Client.php'; 
 require_once BASEDIR .'/server/bizclasses/BizQuery.class.php';
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 require_once dirname(__FILE__) . '/config.php';
 
 
@@ -446,7 +445,6 @@ class ImprezzeoSearchEngine extends BizQuery
 		$this->mode = $mode;
 		$this->minimalProps = $minimalProps;
 		$this->requestProps = $requestProps;
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		$this->shortUserName = BizSession::getShortUserName();
 		$this->ticket = BizSession::getTicket();			
 	}	

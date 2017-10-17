@@ -219,7 +219,6 @@ class BizDeletedObject
 	{
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBDeletedObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 
 		//for v7 Client compatibility: For v7 client, it doesn't understand $areas.
 		if( count($areas) == 0){
@@ -294,15 +293,13 @@ class BizDeletedObject
 				if( in_array('Workflow',$areas)){
 					// When it is a DossierTemplate type object, check whether configuration exist, if yes, then throw exception
 					if( $rc['type'] == 'DossierTemplate' ) {
-						require_once BASEDIR.'/server/bizclasses/BizAdmPubObject.class.php';
-						$pubObject = BizAdmPubObject::listPubObjects( $rc['publication'], $rc['issue'], $id );
-						if( count($pubObject) > 0 ) {
+						require_once BASEDIR.'/server/bizclasses/BizAdmTemplateObject.class.php';
+						if( BizAdmTemplateObject::isTemplateObjectConfigured( $id ) ) {
 							throw new BizException( 'ERR_IN_CONFIG_DOSSIER_TEMPLATE', 'client', null, null, array($rc['name']) );
 						}
 					} else if( $rc['type'] == 'Dossier' ) {
 						if( $context != 'Issue' ) {
 							require_once BASEDIR . '/server/bizclasses/BizTarget.class.php';
-							require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 							require_once BASEDIR . '/server/bizclasses/BizPublishing.class.php';
 
 							$targets = BizTarget::getTargets(BizSession::getShortUserName(), $rc['id']);
@@ -657,7 +654,6 @@ class BizDeletedObject
 	{
 		require_once BASEDIR.'/server/dbclasses/DBDeletedObject.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 //		require_once BASEDIR.'/server/bizclasses/BizObjectJob.class.php'; // v8.0: Uncomment when serverJob 'UpdateParentModifierAndModified' is supported again.
 		require_once BASEDIR.'/server/bizclasses/BizSearch.class.php';
@@ -1038,7 +1034,6 @@ class BizDeletedObject
 					// parent/child objects have been changed.
 					self::createEnterpriseEventsForRelatedObjects( $id );
 
-					require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 					require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
 					require_once BASEDIR.'/server/smartevent.php';
 

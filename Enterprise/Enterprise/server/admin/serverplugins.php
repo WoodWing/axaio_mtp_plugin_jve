@@ -7,13 +7,11 @@ require_once dirname(__FILE__).'/../../config/config.php';
 require_once BASEDIR.'/server/admin/global_inc.php'; // inputvar() , formvar()
 require_once BASEDIR.'/server/secure.php';
 require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
-require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 
 $ticket = checkSecure('admin');
 $tpl = HtmlDocument::loadTemplate( 'serverplugins.htm' );
 
-require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 BizSession::startSession($ticket);
 
 // handle user request to enabling/disabling a certain plugin

@@ -21,7 +21,7 @@ class AdmGetSectionsRequest
 	 * @param string[]             $RequestModes              
 	 * @param integer              $PublicationId             
 	 * @param integer              $IssueId                   
-	 * @param Id[]                 $SectionIds                Nullable.
+	 * @param integer[]            $SectionIds                Nullable.
 	 */
 	public function __construct( $Ticket=null, $RequestModes=null, $PublicationId=null, $IssueId=null, $SectionIds=null )
 	{
@@ -83,8 +83,8 @@ class AdmGetSectionsRequest
 			if( !is_null( $datObj->SectionIds ) ) {
 				$validator->checkType( $datObj->SectionIds, 'array' );
 				if( !empty($datObj->SectionIds) ) foreach( $datObj->SectionIds as $listItem ) {
-					$validator->enterPath( 'integer' );
-					$validator->checkType( $listItem, 'integer' );
+					$validator->enterPath( 'Id' );
+					$validator->checkType( $listItem, 'Id' );
 					$validator->leavePath();
 				}
 			}

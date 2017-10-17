@@ -519,8 +519,6 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 		try {
 			$httpClient->send();
 		} catch ( Exception $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // To make analyzer happy.
 			$adapter = $httpClient->getAdapter();
 			if ( $adapter instanceof Zend\Http\Client\Adapter\Curl ) {
 				$curl = $adapter->getHandle();
@@ -752,7 +750,7 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	/**
 	 * Constructs a HTTP client class in memory.
 	 *
-	 * @param string[] $request List of request params.
+	 * @param array $request List of request params.
 	 * @return Zend\Http\Client|null Client, or NULL when mocked.
 	 */
 	protected function composeClient( $request )
@@ -872,7 +870,8 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 
 			//EN-87488 RabbitMQ on CentOS sends responses with Content-Encoding set, but an empty body.
 			//Zend\Http\Response does not check for empty bodies, and just tries to decode it which goes wrong.
-			if( !empty( (string) $response->getContent() ) ) {
+			$content = (string) $response->getContent();
+			if( !empty( $content ) ) {
 				$responseBody = $response->getBody();
 			}
 		}
@@ -893,9 +892,6 @@ class WW_Utils_RabbitMQ_RestAPI_Client
 	 */
 	protected function callService( Zend\Http\Client $httpClient, $serviceName, array $request )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$request = $request;
-
 		// Call the remote RabbitMQ service and monitor profiling
 		PerformanceProfiler::startProfile( 'Calling RabbitMQ', 1 );
 		$e = null;

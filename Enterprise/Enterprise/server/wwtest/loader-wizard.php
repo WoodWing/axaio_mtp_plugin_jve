@@ -5,7 +5,7 @@
  *
  * ionCube is a registered trademark of ionCube Ltd. 
  *
- * Copyright (c) ionCube Ltd. 2002-2015
+ * Copyright (c) ionCube Ltd. 2002-2017
  */
 
 
@@ -133,7 +133,7 @@ function php4_http_build_query($formdata, $numeric_prefix = null, $key = null ) 
 
 function script_version()
 {
-    return "2.51";
+    return "2.54";
 }
 
 function retrieve_latest_wizard_version()
@@ -258,7 +258,8 @@ function is_supported_php_version()
     $v = php_version(); 
 
     return ((($v['major'] == 4) && ($v['minor'] >= 1)) ||
-      (($v['major'] == 5) && (($v['minor'] >= 1) || ($v['release'] >= 3))));
+      (($v['major'] == 5) && (($v['minor'] >= 1) || ($v['release'] >= 3))) ||
+	  $v['major'] == 7);
 }
 
 function is_php_version_or_greater($major,$minor,$release = 0)
@@ -320,6 +321,12 @@ function default_platform_list()
 	
 	$platforms[] = array('os'=>'win', 'os_human'=>'Windows VC11',        'os_mod' => '_vc11',     'arch'=>'x86-64',  'dirname'=>'win64_vc11', 'us1-dir'=>'windows_vc11/amd64' );
     $platforms[] = array('os'=>'win', 'os_human'=>'Windows VC11 (Non-TS)',   'os_mod' => '_nonts_vc11',   'arch'=>'x86-64',  'dirname'=>'win64-nonts_vc11', 'us1-dir'=>'windows_vc11/amd64-nonts' );
+	
+	 $platforms[] = array('os'=>'win', 'os_human'=>'Windows VC14',        'os_mod' => '_vc14',     'arch'=>'x86',  'dirname'=>'win32_vc14', 'us1-dir'=>'windows_vc14/x86' );
+    $platforms[] = array('os'=>'win', 'os_human'=>'Windows VC14 (Non-TS)',   'os_mod' => '_nonts_vc14',   'arch'=>'x86',  'dirname'=>'win32-nonts_vc14', 'us1-dir'=>'windows_vc14/x86-nonts' );
+	
+		$platforms[] = array('os'=>'win', 'os_human'=>'Windows VC14',        'os_mod' => '_vc14',     'arch'=>'x86-64',  'dirname'=>'win64_vc14', 'us1-dir'=>'windows_vc14/amd64' );
+    $platforms[] = array('os'=>'win', 'os_human'=>'Windows VC14 (Non-TS)',   'os_mod' => '_nonts_vc14',   'arch'=>'x86-64',  'dirname'=>'win64-nonts_vc14', 'us1-dir'=>'windows_vc14/amd64-nonts' );
 
     $platforms[] = array('os'=>'lin', 'os_human'=>'Linux',              'arch'=>'x86',      'dirname'=>'linux_i686-glibc2.3.4', 'us1-dir'=>'linux/x86');
     $platforms[] = array('os'=>'lin', 'os_human'=>'Linux',              'arch'=>'x86-64',   'dirname'=>'linux_x86_64-glibc2.3.4', 'us1-dir'=>'linux/x86_64');
@@ -469,7 +476,7 @@ function supported_os_variants($os_code,$arch_code)
 
 function default_win_compilers()
 {
-    return array('VC6','VC9','VC11');
+    return array('VC6','VC9','VC11','VC14');
 }
 
 function supported_win_compilers()
@@ -605,7 +612,7 @@ function calc_word_size($os_code)
         } else {
             $compiler = 'VC6';
         }
-        if ($compiler === 'VC9' || $compiler === 'VC11') {
+        if ($compiler === 'VC9' || $compiler === 'VC11' || $compiler === 'VC14') {
 			if (preg_match('~Architecture.*?(</B></td><TD ALIGN="left">| => |v">)([^<]*)~i',$pinfo,$archmatch)) {
 				if (preg_match("/x64/i",$archmatch[2])) {
 					$wordsize = 64;
@@ -801,7 +808,7 @@ function is_possibly_dedicated_or_local()
 function is_local()
 {
     $ret = false;
-    if ($_SERVER["SERVER_NAME"] == 'localhost' || $_SERVER["SERVER_NAME"] == '127.0.0.1') { // WoodWing
+    if ($_SERVER["SERVER_NAME"] == 'localhost') {
         $ret = true;
     } else {
         $ip_address = strtolower($_SERVER["REMOTE_ADDR"]);
@@ -2456,7 +2463,10 @@ function loader_compatibility_test($loader_location)
                 $server_php =  $phpv['major'] . "." .  $phpv['minor'];
                 $errors[ERROR_LOADER_WIN_PHP_MISMATCH] = "The installed loader is for PHP $loader_php but your server is running PHP $server_php.";
             }
-			if ($version_matches[1]== 5 && $version_matches[2] >= 5) {
+			
+			if ($version_matches[1]== 7) {
+				$loader_compiler = 'VC14'; 
+			} elseif ($version_matches[1]== 5 && $version_matches[2] >= 5) {
 				$loader_compiler = 'VC11'; 
             } elseif (preg_match("/assemblyIdentity.*version=\"([^.]+)\./",$loader_strs,$compiler_matches)) {
                 $loader_compiler = "VC" . strtoupper($compiler_matches[1]);

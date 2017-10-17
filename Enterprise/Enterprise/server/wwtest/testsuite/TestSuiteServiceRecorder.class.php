@@ -35,6 +35,7 @@ class TestSuiteServiceRecorder
 	 * @param string $serviceName
 	 * @param string $recordModule
 	 * @param string $recordFolder
+	 * @throws BizException
 	 */
 	public function __construct( $serviceName, $recordModule, $recordFolder )
 	{
@@ -146,7 +147,8 @@ class TestSuiteServiceRecorder
 	 * When the test module runs, this function is called, and re-constructs the request and
 	 * response. Then it compares the recorded response with the original response.
 	 *
-	 * @param stdClass $req Server request object.
+	 * @param object $req Server request object.
+	 * @throws BizException
 	 */
 	public function recordRequest( $req )
 	{
@@ -249,7 +251,7 @@ class TestSuiteServiceRecorder
 	 * Records a service response object. It adds a function to the test module that reconstructs
 	 * the recorded response. See recordRequest() function for more info.
 	 *
-	 * @param stdClass $resp The service response object.
+	 * @param object $resp The service response object.
 	 */
 	public function recordResponse( $resp )
 	{
@@ -404,7 +406,7 @@ class TestSuiteServiceRecorder
 	 *
 	 * @param string $fileData File contents of the test module.
 	 * @param string $funcBody Function body to add.
-	 * @return Test module update with the function body.
+	 * @return string Test module update with the function body.
 	 */
 	private function appendFunction( $fileData, $funcBody )
 	{
@@ -424,7 +426,7 @@ class TestSuiteServiceRecorder
 	 * data tree inside. For example: $request->WflGetObjects->Objects[0]->MetaData->BasicMetaData->ID
 	 *
 	 * @param string $path Variable name that represents the PHP object.
-	 * @param stdClass $obj The PHP object to build function body for.
+	 * @param mixed $obj The PHP object to build function body for.
 	 * @return string Generated PHP code (function body).
 	 */
 	private function buildDataObject( $path, $obj )

@@ -80,10 +80,6 @@ class PreviewMetaPHP_Preview extends Preview_EnterpriseConnector
 	 */
 	public function generatePreview( Attachment $attachment, $max, &$previewFormat, &$meta, $bizMetaDataPreview )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$meta = $meta;
-		/** @noinspection PhpSillyAssignmentInspection */
-		$bizMetaDataPreview = $bizMetaDataPreview; // keep analyzer happy
 		$format = $attachment->Type;
 		LogHandler::Log('PreviewMetaPHP', 'DEBUG', 'Creating preview for '.$format );
 		require_once BASEDIR.'/server/utils/ImageUtils.class.php';

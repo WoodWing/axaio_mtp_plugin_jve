@@ -25,16 +25,13 @@ class QueryFilter_WflLogOn extends WflLogOn_EnterpriseConnector
 	// Not called.
 	final public function runBefore( WflLogOnRequest &$req )
 	{
-		$req = $req; // keep code analyzer happy
-	} 
+	}
 
 	final public function runAfter( WflLogOnRequest $req, WflLogOnResponse &$resp )
 	{
 		LogHandler::Log( 'QueryFilter', 'DEBUG', 'Called: QueryFilter_WflLogOn->runAfter()' );
-		$req = $req; // keep code analyzer happy
-		
+
 		// Determine if current user has admin rights.
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		$isAdmin = DBUser::isAdminUser( BizSession::getShortUserName() );
 		
@@ -61,6 +58,5 @@ class QueryFilter_WflLogOn extends WflLogOn_EnterpriseConnector
 	// Not called.
 	final public function runOverruled( WflLogOnRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
-	} 
+	}
 }

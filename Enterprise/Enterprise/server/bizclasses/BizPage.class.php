@@ -509,9 +509,9 @@ class BizPage
 		$sortedPagesBySortedEditions = array();
 		if( count( $editionIds ) > 1 ) {
 			require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
-			$sortedDBEditionRows = DBEdition::sortEditionIdsByCode( $editionIds );
-			if( $sortedDBEditionRows ) foreach( $sortedDBEditionRows as $sortedDBEditionRow ) {
-				$sortedPagesBySortedEditions[ intval( $sortedDBEditionRow['id'] ) ] = array();
+			$sortedEditionIds = array_keys( DBEdition::sortEditionIdsByCode( $editionIds ) );
+			if( $sortedEditionIds ) foreach( $sortedEditionIds as $sortedEditionId ) {
+				$sortedPagesBySortedEditions[ $sortedEditionId ] = array();
 			}
 		} else {
 			$sortedPagesBySortedEditions[reset( $editionIds )] = array();
@@ -652,7 +652,7 @@ class BizPage
 	 *	@param $pageordered boolean: if false, the pages are just ordered by layout. If true, pages will be ordered by pageorder.
 	 *	@param $instance, either empty, production or ???planning???
 	 *
-	 *	@return associative array of pagerows, the keys being the pageindex where we would expect to show the individual pages.
+	 *	@return array associative array of pagerows, the keys being the pageindex where we would expect to show the individual pages.
 	 *			For each pagerow some information is returned: layoutid, pagesequence, pageorder, pagenumber, sectionid, editionid, visible
 	 *			The visible-flag can only be set to false if either a sectionid or a layoutid was given, only pages in that section or layout are visible then.
 	 *			When $pageordered = true it gets a bit more complicated, it may be that some pages have the same pageindex (pageorder):

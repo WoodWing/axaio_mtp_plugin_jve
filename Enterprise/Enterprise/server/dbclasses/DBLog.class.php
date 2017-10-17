@@ -52,7 +52,6 @@ class DBLog extends DBBase
 		if ($loglevel <= LOGLEVEL) {
 
 			if( is_null( $user ) ) {
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				$user = BizSession::getUserInfo('user');
 			}
 
@@ -163,7 +162,6 @@ class DBLog extends DBBase
 
 		if( $loglevel <= LOGLEVEL ) {
 			if( is_null( $user ) ) {
-				require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 				$user = BizSession::getUserInfo('user');
 			}
 

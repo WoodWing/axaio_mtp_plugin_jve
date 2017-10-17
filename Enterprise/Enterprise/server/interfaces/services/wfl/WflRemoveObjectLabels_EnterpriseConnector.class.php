@@ -40,6 +40,5 @@ abstract class WflRemoveObjectLabels_EnterpriseConnector extends ServiceConnecto
 	 */
 	public function onError( WflRemoveObjectLabelsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

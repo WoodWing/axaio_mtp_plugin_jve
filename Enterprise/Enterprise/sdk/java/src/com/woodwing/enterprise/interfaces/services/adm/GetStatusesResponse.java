@@ -8,86 +8,14 @@
 package com.woodwing.enterprise.interfaces.services.adm;
 
 public class GetStatusesResponse  implements java.io.Serializable {
-    private java.math.BigInteger publicationId;
-
-    private java.math.BigInteger issueId;
-
-    private java.math.BigInteger sectionId;
-
     private com.woodwing.enterprise.interfaces.services.adm.Status[] statuses;
 
     public GetStatusesResponse() {
     }
 
     public GetStatusesResponse(
-           java.math.BigInteger publicationId,
-           java.math.BigInteger issueId,
-           java.math.BigInteger sectionId,
            com.woodwing.enterprise.interfaces.services.adm.Status[] statuses) {
-           this.publicationId = publicationId;
-           this.issueId = issueId;
-           this.sectionId = sectionId;
            this.statuses = statuses;
-    }
-
-
-    /**
-     * Gets the publicationId value for this GetStatusesResponse.
-     * 
-     * @return publicationId
-     */
-    public java.math.BigInteger getPublicationId() {
-        return publicationId;
-    }
-
-
-    /**
-     * Sets the publicationId value for this GetStatusesResponse.
-     * 
-     * @param publicationId
-     */
-    public void setPublicationId(java.math.BigInteger publicationId) {
-        this.publicationId = publicationId;
-    }
-
-
-    /**
-     * Gets the issueId value for this GetStatusesResponse.
-     * 
-     * @return issueId
-     */
-    public java.math.BigInteger getIssueId() {
-        return issueId;
-    }
-
-
-    /**
-     * Sets the issueId value for this GetStatusesResponse.
-     * 
-     * @param issueId
-     */
-    public void setIssueId(java.math.BigInteger issueId) {
-        this.issueId = issueId;
-    }
-
-
-    /**
-     * Gets the sectionId value for this GetStatusesResponse.
-     * 
-     * @return sectionId
-     */
-    public java.math.BigInteger getSectionId() {
-        return sectionId;
-    }
-
-
-    /**
-     * Sets the sectionId value for this GetStatusesResponse.
-     * 
-     * @param sectionId
-     */
-    public void setSectionId(java.math.BigInteger sectionId) {
-        this.sectionId = sectionId;
     }
 
 
@@ -122,15 +50,6 @@ public class GetStatusesResponse  implements java.io.Serializable {
         __equalsCalc = obj;
         boolean _equals;
         _equals = true && 
-            ((this.publicationId==null && other.getPublicationId()==null) || 
-             (this.publicationId!=null &&
-              this.publicationId.equals(other.getPublicationId()))) &&
-            ((this.issueId==null && other.getIssueId()==null) || 
-             (this.issueId!=null &&
-              this.issueId.equals(other.getIssueId()))) &&
-            ((this.sectionId==null && other.getSectionId()==null) || 
-             (this.sectionId!=null &&
-              this.sectionId.equals(other.getSectionId()))) &&
             ((this.statuses==null && other.getStatuses()==null) || 
              (this.statuses!=null &&
               java.util.Arrays.equals(this.statuses, other.getStatuses())));
@@ -145,15 +64,6 @@ public class GetStatusesResponse  implements java.io.Serializable {
         }
         __hashCodeCalc = true;
         int _hashCode = 1;
-        if (getPublicationId() != null) {
-            _hashCode += getPublicationId().hashCode();
-        }
-        if (getIssueId() != null) {
-            _hashCode += getIssueId().hashCode();
-        }
-        if (getSectionId() != null) {
-            _hashCode += getSectionId().hashCode();
-        }
         if (getStatuses() != null) {
             for (int i=0;
                  i<java.lang.reflect.Array.getLength(getStatuses());
@@ -176,24 +86,6 @@ public class GetStatusesResponse  implements java.io.Serializable {
     static {
         typeDesc.setXmlType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", ">GetStatusesResponse"));
         org.apache.axis.description.ElementDesc elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("publicationId");
-        elemField.setXmlName(new javax.xml.namespace.QName("", "PublicationId"));
-        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "integer"));
-        elemField.setNillable(false);
-        typeDesc.addFieldDesc(elemField);
-        elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("issueId");
-        elemField.setXmlName(new javax.xml.namespace.QName("", "IssueId"));
-        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "integer"));
-        elemField.setNillable(false);
-        typeDesc.addFieldDesc(elemField);
-        elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("sectionId");
-        elemField.setXmlName(new javax.xml.namespace.QName("", "SectionId"));
-        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "integer"));
-        elemField.setNillable(false);
-        typeDesc.addFieldDesc(elemField);
-        elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("statuses");
         elemField.setXmlName(new javax.xml.namespace.QName("", "Statuses"));
         elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnectionAdmin", "Status"));

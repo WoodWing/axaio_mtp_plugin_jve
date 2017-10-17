@@ -40,6 +40,5 @@ abstract class WflCreateObjectLabels_EnterpriseConnector extends ServiceConnecto
 	 */
 	public function onError( WflCreateObjectLabelsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

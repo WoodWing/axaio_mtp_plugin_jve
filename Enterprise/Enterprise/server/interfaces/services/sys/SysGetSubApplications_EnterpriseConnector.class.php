@@ -40,6 +40,5 @@ abstract class SysGetSubApplications_EnterpriseConnector extends ServiceConnecto
 	 */
 	public function onError( SysGetSubApplicationsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

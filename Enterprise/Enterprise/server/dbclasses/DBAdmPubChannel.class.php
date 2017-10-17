@@ -32,11 +32,16 @@ class DBAdmPubChannel extends DBBase
 		foreach( $pubChannels as $pubChannel ) {
 			
 			// Error on duplicates
-			$params = array( $pubChannel->Name, $pubId );
-			if( self::getRow( self::TABLENAME, '`name` = ? AND `publicationid` = ?', array('id'), $params ) ) {
-				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null);
+			$where = '`name` = ? AND `publicationid` = ?';
+			$params = array( strval($pubChannel->Name), intval($pubId) );
+			$row = self::getRow( self::TABLENAME, $where, array('id'), $params );
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 			}
-			
+			if( $row ) {
+				throw new BizException( 'ERR_DUPLICATE_NAME', 'Client', $row['id'] );
+			}
+
 			// Auto set the Description when not provided.
 			if( is_null( $pubChannel->Description ) ) {
 				$pubChannel->Description = '';
@@ -44,9 +49,12 @@ class DBAdmPubChannel extends DBBase
 			
 			// Store standard pub channel properties in DB.
 			$pubChannelRow = self::objToRow( $pubChannel );
-			$pubChannelRow['publicationid'] = $pubId;
+			$pubChannelRow['publicationid'] = intval($pubId);
 			$pubChannelId = self::insertRow( self::TABLENAME, $pubChannelRow );
-			
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
+
 			if( $pubChannelId ) {
 				// Store custom publication properties in DB.
 				DBChanneldata::saveCustomProperties( 'PubChannel', $pubChannelId, $pubChannel->ExtraMetaData, $typeMap );
@@ -68,7 +76,8 @@ class DBAdmPubChannel extends DBBase
 	 * @since 9.0: Added $pubId and $typeMap parameters.
 	 * @param integer $pubId Brand ID. NULL to get all channels (system wide)
 	 * @param array|null $typeMap Lookup table with custom property names as keys and types as values. Pass NULL to skip resolving props (which leaves ExtraMetaData set to null).
-	 * @return AdmPubChannel[]|null PubChannel data objects. NULL if no record returned.
+	 * @return AdmPubChannel[]
+	 * @throws BizException on SQL error.
 	 */
 	public static function listPubChannelsObj( $pubId = null, $typeMap = null )
 	{
@@ -76,21 +85,21 @@ class DBAdmPubChannel extends DBBase
 		$where = '';
 		if( !is_null( $pubId ) ) {
 			$where .= '`publicationid` = ? ';
-			$params[] = $pubId;
+			$params[] = intval($pubId);
 		}
 		$orderBy = array( 'code' => true ); // ORDER BY `code` ASC
-		$rows = self::listRows( self::TABLENAME, 'id', 'name', $where, '*', $params, $orderBy );
-		if( !$rows ) {
-			return null;
+		$rows = self::listRows( self::TABLENAME, 'id', null, $where, '*', $params, $orderBy );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 		}
-		
-		require_once BASEDIR.'/server/dbclasses/DBChanneldata.class.php';
+
 		$pubChannels = array();
-		foreach( $rows as $row ) {
+		if( $rows ) foreach( $rows as $row ) {
 			$pubChannel = self::rowToObj( $row );
 			if( is_null( $typeMap ) ) {
 				$pubChannel->ExtraMetaData = null;
 			} else {
+				require_once BASEDIR.'/server/dbclasses/DBChanneldata.class.php';
 				$pubChannel->ExtraMetaData = DBChanneldata::getCustomProperties( 'PubChannel', $row['id'], $typeMap );
 			}
 			$pubChannels[] = $pubChannel;
@@ -109,12 +118,14 @@ class DBAdmPubChannel extends DBBase
 	 */
 	public static function getPubChannelObj( $pubChannelId, $typeMap = null )
 	{
-		$row = self::getRow( self::TABLENAME, '`id` = ?', '*', array( $pubChannelId )  );
+		$where = '`id` = ?';
+		$params = array( intval( $pubChannelId ) );
+		$row = self::getRow( self::TABLENAME, $where, '*', $params );
 		if( !$row ) {
 			return null;
 		}
 		$pubChannel = self::rowToObj( $row );
-	
+
 		if( is_null( $typeMap ) ) {
 			$pubChannel->ExtraMetaData = null;
 		} else {
@@ -139,27 +150,35 @@ class DBAdmPubChannel extends DBBase
 	{
 		require_once BASEDIR.'/server/dbclasses/DBChanneldata.class.php';
 		$modifiedPubChannels = array();
-		
+
 		foreach( $pubChannels as $pubChannel ) {
-			
+
 			// Error on duplicates.
-			$params = array( $pubChannel->Name, $pubId, $pubChannel->Id );
-			if( self::getRow( self::TABLENAME, '`name` = ? AND `publicationid` = ? AND `id` != ?', array('id'), $params ) ) {
-				throw new BizException( 'ERR_DUPLICATE_NAME', 'client', null, null );
+			$where = '`name` = ? AND `publicationid` = ? AND `id` != ?';
+			$params = array( $pubChannel->Name, intval( $pubId ), intval( $pubChannel->Id ) );
+			$row = self::getRow( self::TABLENAME, $where, array( 'id' ), $params );
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 			}
-	
-			// Store custompub channel properties in DB.
+			if( $row ) {
+				throw new BizException( 'ERR_DUPLICATE_NAME', 'Client', $row['id'] );
+			}
+
+			// Store custom pub channel properties in DB.
 			DBChanneldata::saveCustomProperties( 'PubChannel', $pubChannel->Id, $pubChannel->ExtraMetaData, $typeMap );
-	
+
 			// Store standard pub channel properties in DB.
 			$row = self::objToRow( $pubChannel );
-			$result = self::updateRow( self::TABLENAME, $row, '`id` = ?', array( $pubChannel->Id ) );
-			
+			$result = self::updateRow( self::TABLENAME, $row, '`id` = ?', array( intval( $pubChannel->Id ) ) );
+			if( self::hasError() ) {
+				throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+			}
+
 			// Retrieve whole publication from DB. This is to make sure that the caller
 			// gets exactly the same data after a 'save' as after a 'get' operation.
 			if( $result === true ) {
 				$modifiedPubChannels[] = self::getPubChannelObj( $pubChannel->Id, $typeMap );
-			}	
+			}
 		}
 		return $modifiedPubChannels;
 	}
@@ -169,15 +188,19 @@ class DBAdmPubChannel extends DBBase
 	 *
 	 * This is typically called when the server plugin is un-registered (plugin being removed from the plugin folder).
 	 *
-	 * @param string $suggestionProvider The 'suggestionprovider' that has this value will be replced.
+	 * @param string $suggestionProvider The 'suggestionprovider' that has this value will be replaced.
 	 * @param string $newSuggestionProvider The new value to be inserted in 'suggestionprovider' field.
+	 * @throws BizException on SQL error.
 	 */
 	public static function modifyPubChannelsSuggestionProvider( $suggestionProvider, $newSuggestionProvider='' )
 	{
 		$row = array( 'suggestionprovider' => strval( $newSuggestionProvider ) );
 		$where = '`suggestionprovider` = ? ';
-		$params = array( $suggestionProvider );
+		$params = array( strval($suggestionProvider) );
 		self::updateRow( self::TABLENAME, $row, $where, $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
 	}
 
 	/**
@@ -185,12 +208,16 @@ class DBAdmPubChannel extends DBBase
 	 *
 	 * @param int $channelId The publication channel id of which its publishsystemid will be retrieved.
 	 * @return null|string The publish system id of the requested channel, null when no record of the requested channel is found.
+	 * @throws BizException on SQL error.
 	 */
 	public static function getPublishSystemIdForChannel( $channelId )
 	{
 		$where = '`id` = ? ';
-		$params = array( $channelId );
+		$params = array( intval( $channelId ) );
 		$row = self::getRow( self::TABLENAME, $where, array( 'publishsystemid' ), $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
 		return isset( $row['publishsystemid'] ) ? $row['publishsystemid'] : null;
 	}
 
@@ -199,15 +226,18 @@ class DBAdmPubChannel extends DBBase
 	 *
 	 * @param int $pubChannelId The publication channel id of which its publishsystemid will be updated.
 	 * @param string $publishSystemId The publishsystemid value to be saved.
+	 * @throws BizException on SQL error.
 	 */
 	public static function savePublishSystemIdForChannel( $pubChannelId, $publishSystemId )
 	{
 		$row = array( 'publishsystemid' => strval( $publishSystemId ) );
 		$where = '`id` = ? ';
-		$params = array( $pubChannelId );
+		$params = array( intval( $pubChannelId ) );
 		self::updateRow( self::TABLENAME, $row, $where, $params );
+		if( self::hasError() ) {
+			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
+		}
 	}
-
 
 	/**
 	 *  Converts a pubchannel DB row into object.
@@ -218,15 +248,16 @@ class DBAdmPubChannel extends DBBase
 	static private function rowToObj ( $row )
 	{
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
-		$pubChannel 				= new AdmPubChannel();
-		$pubChannel->Id 			= $row['id'];
-		$pubChannel->Name			= $row['name'];
-		$pubChannel->Type           = $row['type'];
-		$pubChannel->Description	= $row['description'];
-		$pubChannel->PublishSystem	= $row['publishsystem'];
-		$pubChannel->PublishSystemId	= $row['publishsystemid'];
-		$pubChannel->SuggestionProvider	= $row['suggestionprovider'];
-		$pubChannel->CurrentIssueId	    = $row['currentissueid'];
+		$pubChannel = new AdmPubChannel();
+		$pubChannel->Id = intval( $row['id'] );
+		$pubChannel->Name = $row['name'];
+		$pubChannel->Type = $row['type'];
+		$pubChannel->Description = $row['description'];
+		$pubChannel->SortOrder = intval( $row['code'] );
+		$pubChannel->PublishSystem = $row['publishsystem'];
+		$pubChannel->PublishSystemId = $row['publishsystemid'];
+		$pubChannel->SuggestionProvider = $row['suggestionprovider'];
+		$pubChannel->CurrentIssueId = intval( $row['currentissueid'] );
 
 		return $pubChannel;
 	}
@@ -239,33 +270,34 @@ class DBAdmPubChannel extends DBBase
 	 */
 	static private function objToRow ( $obj )
 	{
-		$fields = array();
+		$row = array();
 
-		if(!is_null($obj->Id)){
-			$fields['id']			= $obj->Id;
+		if( !is_null( $obj->Id ) ) {
+			$row['id'] = intval( $obj->Id );
 		}
-		if(!is_null($obj->Name)){
-			$fields['name']			= $obj->Name;
+		if( !is_null( $obj->Name ) ) {
+			$row['name'] = strval( $obj->Name );
 		}
-		$fields['type']				= (!empty($obj->Type)) ? $obj->Type : 'print';	
-		$fields['description']		= (!empty($obj->Description)) ? $obj->Description : '';	
+		$row['type'] = ( !empty( $obj->Type ) ) ? strval( $obj->Type ) : 'print';
+		$row['description'] = ( !empty( $obj->Description ) ) ? strval( $obj->Description ) : '';
+		$row['code'] = ( !empty( $obj->SortOrder ) ) ? intval( $obj->SortOrder ) : 0;
 
-		if( !is_null($obj->PublishSystem) ){
-			$fields['publishsystem'] = $obj->PublishSystem;
+		if( !is_null( $obj->PublishSystem ) ) {
+			$row['publishsystem'] = strval( $obj->PublishSystem );
 		}
 
-		if( !is_null( $obj->PublishSystemId )) {
-			$fields['publishsystemid'] = $obj->PublishSystemId;
+		if( !is_null( $obj->PublishSystemId ) ) {
+			$row['publishsystemid'] = intval( $obj->PublishSystemId );
 		}
 
 		if( !is_null( $obj->SuggestionProvider ) ) {
-			$fields['suggestionprovider'] = $obj->SuggestionProvider;
+			$row['suggestionprovider'] = strval( $obj->SuggestionProvider );
 		}
 
-		if( !is_null($obj->CurrentIssueId) ) {
-			$fields['currentissueid'] = $obj->CurrentIssueId;
+		if( !is_null( $obj->CurrentIssueId ) ) {
+			$row['currentissueid'] = intval( $obj->CurrentIssueId );
 		}
 
-		return $fields;
+		return $row;
 	}
 }

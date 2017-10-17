@@ -96,6 +96,7 @@ class WW_TestSuite_HealthCheck2_WsdlCache_TestCase extends TestCase
 		}
 		// Get the latest modified wsdl file in interfaces folder
 		$lastModWsdl = null;
+		$wsdl = null;
 		foreach( glob( BASEDIR.'/server/interfaces/*.wsdl') as $wsdl ) {
 			$latestTime = 0;
 			if( filectime($wsdl) < filemtime($wsdl) ) {

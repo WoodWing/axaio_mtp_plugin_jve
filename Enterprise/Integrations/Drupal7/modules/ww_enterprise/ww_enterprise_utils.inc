@@ -92,10 +92,6 @@ function ww_enterprise_utils_fileDirectoryPath()
  */
 function ww_enterprise_utils_importVideo( $node, $content, $fileName, $ratio, $tempDir, $drupalDir )
 {
-	// keep analyzer happy
-	$node = $node;
-	$content = $content;
-
 	$return = 0;
 	switch ($ratio) {
 		case '3_4':
@@ -126,10 +122,6 @@ function ww_enterprise_utils_importVideo( $node, $content, $fileName, $ratio, $t
  */
 function ww_enterprise_utils_importAudio( $node, $content, $fileName, $tempDir, $drupalDir )
 {
-	// keep analyzer happy
-	$node = $node;
-	$content = $content;
-
 	$return = 0;
 	system( "/usr/bin/lame --mp3input -b 96 /var/www/".$tempDir."/".$fileName." /var/www/".$drupalDir.$fileName.".mp3", $return );
 	if( $return || !file_exists( $drupalDir.$fileName.".mp3" ) ) {

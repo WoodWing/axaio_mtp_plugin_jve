@@ -23,7 +23,6 @@ class Elvis_WflCreateObjectRelations extends WflCreateObjectRelations_Enterprise
 			require_once dirname(__FILE__).'/util/ElvisUtils.class.php';
 			require_once dirname(__FILE__).'/Elvis_ContentSource.class.php';
 			require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-			require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 			$user = BizSession::getShortUserName();
 			$ticket = BizSession::getTicket();
 

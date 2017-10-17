@@ -110,7 +110,6 @@ class BizInDesignServerJobs
 			}
 		}
 
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		if( BizSession::isStarted() ) { // in context of web services
 			$job->ServiceName = BizSession::getServiceName();
 			$job->Initiator = BizSession::getShortUserName();
@@ -386,17 +385,6 @@ class BizInDesignServerJobs
 	{
 		require_once BASEDIR.'/server/dbclasses/DBInDesignServerJob.class.php';
 		return DBInDesignServerJob::getHighestFcfsJobId( $foreground );
-	}
-
-	/**
-	 * Returns the highest prio background job from the queue in FCFS order.
-	 *
-	 * @since 9.7.0
-	 * @return string|null Job id, or NULL when not found.
-	 * @throws BizException When invalid params given or fatal SQL error occurs.
-	 */
-	private static function hasPendingForegroundJobs()
-	{
 	}
 
 	/**

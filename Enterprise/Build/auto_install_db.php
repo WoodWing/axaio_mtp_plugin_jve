@@ -12,7 +12,6 @@
  */
 
 require_once dirname(__FILE__).'/../Enterprise/config/config.php';
-require_once BASEDIR.'/server/interfaces/services/BizException.class.php';
 
 $installer = new Enterprse_AutoInstallDb();
 $mode = isset($argv[1]) ? $argv[1] : '';
@@ -41,7 +40,7 @@ class Enterprse_AutoInstallDb
 		}
 		
 		// Validate the given mode.
-		if( !in_array( $mode, array( '', 'database', 'license', 'plugins', 'jobs' ) ) ) {
+		if( !in_array( $mode, array( '', 'database', 'license', 'plugins', 'plugin-dbs' ) ) ) {
 			$this->scriptOk = false;
 			$this->logMessage( 'ERROR: Unknown mode: '.$mode );
 		}
@@ -55,17 +54,19 @@ class Enterprse_AutoInstallDb
 		if( $this->scriptOk && ($mode=='' || $mode=='license') ) {
 			$this->activateLicenses();
 		}
-		
+
 		// Register server plug-ins at DB.
 		if( $this->scriptOk && ($mode=='' || $mode=='plugins') ) {
 			$this->registerServerPlugins();
 		}
-		
+
+		// Install a database for each server plug-in that provides its own DB model.
+		if( $this->scriptOk && ($mode=='' || $mode=='plugin-dbs') ) {
+			$this->installDbsForServerPlugins();
+		}
+
 		// TODO: Register server jobs at DB.
-		//if( $this->scriptOk && ($mode=='' || $mode=='jobs') ) {
-		//	$this->registerServerJobs();
-		//}
-		
+
 		return $this->scriptOk;
 	}
 	
@@ -76,9 +77,8 @@ class Enterprse_AutoInstallDb
 	 */
 	private function installDb()
 	{
-		require_once BASEDIR.'/server/dbscripts/DbInstaller.class.php';
-		$checkSystemAdmin = array( $this, 'checkSystemAdmin' ); // callback function
-		$installer = new WW_DbScripts_DbInstaller( $checkSystemAdmin );
+		require_once BASEDIR.'/server/dbscripts/dbinstaller/CoreServer.class.php';
+		$installer = new WW_DbScripts_DbInstaller_CoreServer( null );
 		
 		$nextPhase = null;
 		do {
@@ -154,6 +154,55 @@ class Enterprse_AutoInstallDb
 			$this->logMessage( 'ERROR: '.$e->getMessage().PHP_EOL.$e->getDetail() );
 		}
 	}
+
+	/**
+	 * Runs a DB installer for each server plugins that provides its own DB model.
+	 */
+	private function installDbsForServerPlugins()
+	{
+		require_once BASEDIR.'/server/dbscripts/dbinstaller/ServerPlugin.class.php';
+		$pluginNames = WW_DbScripts_DbInstaller_ServerPlugin::getPluginsWhichProvideTheirOwnDbModel();
+		foreach( $pluginNames as $pluginName ) {
+			$this->installDbsForServerPlugin( $pluginName );
+		}
+	}
+
+	/**
+	 * Runs a DB installer a given server plugin that provides its own DB model.
+	 */
+	private function installDbsForServerPlugin( $pluginName )
+	{
+		require_once BASEDIR.'/server/dbscripts/dbinstaller/ServerPlugin.class.php';
+		$installer = new WW_DbScripts_DbInstaller_ServerPlugin( null, $pluginName );
+
+		$nextPhase = null;
+		do {
+			$installer->run( $nextPhase );
+
+			$reportItems = $installer->getReport()->get();
+			if( $reportItems ) foreach( $reportItems as $reportItem ) {
+				switch( $reportItem->severity ) {
+					case 'FATAL':
+						$this->scriptOk = false;
+						$this->logReportItem( $reportItem );
+						break 2; // fatal means that we can not continue, so we quit entirely
+						break;
+					case 'ERROR':
+						$this->scriptOk = false;
+						$this->logReportItem( $reportItem );
+						break;
+					case 'WARN':
+					case 'INFO':
+					default:
+						$this->logReportItem( $reportItem );
+						break;
+				}
+			}
+
+			$nextPhases = array_keys( $installer->getNextPhases() );
+			$nextPhase = count($nextPhases) > 0 ? $nextPhases[0] : null;
+		} while( $nextPhase );
+	}
 	
 	/**
 	 * Adds a given report item to the self::AUTO_INSTALL_DB_LOG file.
@@ -184,15 +233,5 @@ class Enterprse_AutoInstallDb
 			fwrite( $fp, $message . PHP_EOL );
 			fclose( $fp );
 		}
-	}
-	
-	/**
-	 * Called when the is no DB installation, nor a DB upgrade to be done.
-	 * Then the installer will end with the message that the DB is already up-to-date.
-	 * In that case there is nothing to do and we do not continue, so there no reason to authorize.
-	 */
-	public function checkSystemAdmin()
-	{
-		// Nothing to do. See function header.
 	}
 }

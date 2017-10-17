@@ -26,7 +26,7 @@ class SipsUtils
 	 * @param int			$size			Maximum width/height for the resulting image
 	 * @param MetaData		$meta			Meta data of the image object
 	 * @param boolean		$filePathUsage 	The given file is assumed to be a file path (else it is passed in memory)
-	 * @return imagedata	Returns JPG image of requested size.
+	 * @return string	Returns JPG image of requested size.
 	*/
 	public static function convertData( $data, $size, MetaData $meta, $filePathUsage )
 	{
@@ -110,7 +110,6 @@ class SipsUtils
 	 * @param string 	$outputfilename	Full path of destination image
 	 * @param int 		$size			Maximum width/height for the resulting image
 	 * @param int     $orientation EXIF orientation flag
-	 * @return int		0 on success, error code on failure
 	*/
 	private static function convertFile( $inputfilename, $outputfilename, $size, $orientation )
 	{

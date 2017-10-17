@@ -16,7 +16,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
     public function getPrio()        { return 140; }
 
 	private $ticket = null; // string, session ticket for admin user
-	private $utils = null; // WW_Utils_TestSuite
+	/** @var WW_Utils_TestSuite $utils */
+	private $utils = null;
 
 	private $termEntities = null;
 	private $terms = null;
@@ -29,7 +30,9 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 		// Init utils.
 		require_once BASEDIR.'/server/interfaces/services/adm/DataClasses.php';
 		require_once BASEDIR.'/server/utils/TestSuite.php';
+
 		$this->utils = new WW_Utils_TestSuite();
+		$this->utils->initTest( 'JSON' );
 
 		// Retrieve the Ticket that has been determined by AdmInitData TestCase.
    		$vars = $this->getSessionVariables();
@@ -126,11 +129,13 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 			$termEntity = new AdmTermEntity();
 			$termEntity->Name = 'Citi';
 			$termEntity->AutocompleteProvider = self::AUTOCOMPLETE_PROVIDER;
+			$termEntity->PublishSystemId = '';
 			$termEntities[] = $termEntity;
 
 			$termEntity = new AdmTermEntity();
 			$termEntity->Name = 'Countries';
 			$termEntity->AutocompleteProvider = self::AUTOCOMPLETE_PROVIDER . '2';
+			$termEntity->PublishSystemId = '';
 			$termEntities[] = $termEntity;
 
 			$request->TermEntities = $termEntities;
@@ -148,11 +153,13 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 			$termEntity = new AdmTermEntity();
 			$termEntity->Name = 'Citi';
 			$termEntity->AutocompleteProvider = self::AUTOCOMPLETE_PROVIDER;
+			$termEntity->PublishSystemId = '';
 			$this->termEntities[] = $termEntity;
 
 			$termEntity = new AdmTermEntity();
 			$termEntity->Name = 'Countries';
 			$termEntity->AutocompleteProvider = self::AUTOCOMPLETE_PROVIDER;
+			$termEntity->PublishSystemId = '';
 			$this->termEntities[] = $termEntity;
 
 			$request->TermEntities = $this->termEntities;
@@ -327,7 +334,7 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 	/**
 	 * To validate AdmGetAutocompleteTermEntities response.
 	 *
-	 * @param AdmGetAutocompleteTermEntities $response
+	 * @param AdmGetAutocompleteTermEntitiesResponse $response
 	 * @return bool
 	 */
 	private function verifyGetTermEntitiesResp( $response )
@@ -415,8 +422,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 	 */
 	private function verifyDeleteTermEntitiesResp( $response )
 	{
-		$response = $response; // To make analyzer happy.
-
 		// Since there's nothing returned in the response, we query for the TermEntities
 		// to verify if the TermEntities have really been deleted.
 		$result = true;
@@ -540,8 +545,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 	 */
 	private function verifyTermsResp( $response, $action )
 	{
-		$response = $response; // To make analyzer happy.
-
 		$result = true;
 		require_once BASEDIR .'/server/dbclasses/DBAdmAutocompleteTerm.class.php';
 		foreach( $this->terms as $term ) {
@@ -551,6 +554,8 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 			$admTerm->NormalizedName = null;
 			$termInDB = DBAdmAutocompleteTerm::getTerm( $admTerm );
 			if( is_null( $termInDB )) { // Not found in the database, error here.
+				$message = '';
+				$serviceName = '';
 				if( $action == 'create' ) {
 					$message = 'created';
 					$serviceName = 'AdmCreateAutocompleteTerms';
@@ -686,8 +691,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 	 */
 	private function verifyDeleteTermsResp( $response )
 	{
-		$response = $response;
-
 		// Since there's nothing returned in the response, we query for the Terms
 		// to verify if the Terms have really been deleted.
 		$result = true;
@@ -710,10 +713,11 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 
 	/**
 	 * Retrieve the City TermEntity from a list of TermEntities($this->termEntities)
-	 * @return AdmTermEntity Car TermEntity.
+	 * @return AdmTermEntity|null Car TermEntity or null when not found
 	 */
 	private function getCityTermEntity()
 	{
+		$cityTermEntity = null;
 		$termEntities = unserialize( serialize( $this->termEntities ));
 		if( $termEntities ) foreach( $termEntities as $termEntity ) {
 			if( $termEntity->Name == 'City' ) {
@@ -733,7 +737,6 @@ class WW_TestSuite_BuildTest_WebServices_AdmServices_AdmTermEntitiesAndTerms_Tes
 	 */
 	private function clearTermEntitiesAndTerms()
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTermEntity.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBAdmAutocompleteTerm.class.php';
 		require_once BASEDIR.'/server/services/adm/AdmDeleteAutocompleteTermEntitiesService.class.php';

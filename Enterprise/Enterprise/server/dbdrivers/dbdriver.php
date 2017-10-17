@@ -42,11 +42,12 @@ abstract class WW_DbDrivers_DriverBase
 	 * @param integer|null $rowCnt Number of rows (on select) or number of affected rows (on update, delete, etc). NULL to skip log.
 	 * @param string $class The calling class name. Should be __CLASS__
 	 * @param string $function The calling function name. Should be __FUNCTION__
+	 * @param float $execDuration Since 10.2. Time it took to execute the SQL in microseconds.
 	 */
-	protected function logSql( $area, $sql, $rowCnt, $class, $function )
+	protected function logSql( $area, $sql, $rowCnt, $class, $function, $execDuration )
 	{
 		PerformanceProfiler::startProfile( 'query logging', 5 );
-		
+
 		// Add SQL to log.
 		$log = "SQL: {$sql}\r\n";
 		
@@ -54,8 +55,7 @@ abstract class WW_DbDrivers_DriverBase
 		require_once BASEDIR.'/server/utils/PHPClass.class.php';
 		$plies = defined('LOGSQL_CALLERS') ? LOGSQL_CALLERS : 1;
 		if( $plies ) {
-			$skipClasses = array( 'DBBase', 'WW_DbDrivers_DriverBase', 
-				'mysqlidriver', 'mssqldriver', 'oracledriver' );
+			$skipClasses = array( 'DBBase', 'WW_DbDrivers_DriverBase', 'mysqlidriver', 'mssqldriver' );
 			$stackEntries = WW_Utils_PHPClass::getCallers( $class, $function, 
 							$skipClasses, $plies );
 			if( $stackEntries ) foreach( $stackEntries as $stackEntry ) {
@@ -77,7 +77,8 @@ abstract class WW_DbDrivers_DriverBase
 		if( !is_null($rowCnt) ) {
 			$log .= "=> Number of selected/affected rows: {$rowCnt}\r\n";
 		}
-		
+		$log .= '=> Execution time: '.sprintf( '%.3f', $execDuration * 1000 ).'ms'."\r\n";
+
 		// Log SQL, caller and row count at once.
 		LogHandler::Log( $area, 'INFO', $log );
 
@@ -398,7 +399,7 @@ class DBDriverFactory
 	 * Creates one of the following database driver objects: mysqldriver, mssqldriver or oracledriver.
 	 * Always use this factory to access a database; Never create a specific driver yourself.
 	 *
-	 * @param $dbType   string  Database type. 'mysql', 'mssql' or 'oracle'. Default value: DBTYPE config option.
+	 * @param $dbType   string  Database type. 'mysql' or 'mssql'. Default value: DBTYPE config option.
 	 * @param $dbServer string  Server machine name that run the database. Default value: DBSERVER config option.
 	 * @param $dbUser   string  Database user name used for for DB connection. Default value: DBUSER config option.
 	 * @param $dbPass   string  Database user password used for for DB connection. Default value: DBPASS config option.
@@ -427,10 +428,6 @@ class DBDriverFactory
 				require_once BASEDIR.'/server/dbdrivers/mssqldriver.php';
 				$dbDriver = new mssqldriver( $dbServer, $dbUser, $dbPass, $dbSelect );
 				break;
-			case 'oracle':
-				require_once BASEDIR.'/server/dbdrivers/oracledriver.php';
-				$dbDriver = new oracledriver( $dbServer, $dbUser, $dbPass, $dbSelect );
-				break;
 			default:
 				throw new BizException( 'ERR_DATABASE', 'Server', 'Invalid database type: "'.$dbType.'".' );
 				break;
@@ -451,5 +448,18 @@ class DBDriverFactory
 			throw new BizException( 'ERR_COULD_NOT_CONNECT_TO_DATEBASE', 'Server', $detail );
 		}
 		return $dbDriver;
+	}
+
+	/**
+	 * Compose a list of internal names of DB drivers supported by Enterprise Server.
+	 *
+	 * Note that since 10.2.0 Oracle support has dropped.
+	 *
+	 * @since 10.2.0
+	 * @return string[]
+	 */
+	static public function getSupportedDrivers()
+	{
+		return array( 'mysql', 'mssql' );
 	}
 }

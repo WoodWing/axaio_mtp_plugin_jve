@@ -40,7 +40,7 @@ class EnterpriseTwitterConnector
 	public function getTwitter($issueId)
 	{
 		$this->extendZendWithMissingModules();
-		require_once 'WoodWing/Service/Twitter.php';
+		require_once dirname(__FILE__).'/WoodWing/Service/Twitter.php';
 
 		try {
 			$client = $this->getHttpClient($issueId);

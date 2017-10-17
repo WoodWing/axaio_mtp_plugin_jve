@@ -40,6 +40,5 @@ abstract class AdmModifyPublications_EnterpriseConnector extends ServiceConnecto
 	 */
 	public function onError( AdmModifyPublicationsRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

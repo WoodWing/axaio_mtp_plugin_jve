@@ -224,7 +224,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflCreateObject_TestCase ex
 		$category = new Category( $this->categoryInfo->Id, $this->categoryInfo->Name );
 
 		// retrieve user (shortname) of the logOn test user.
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$user = BizSession::checkTicket( $this->ticket );
 		
 		// build metadata

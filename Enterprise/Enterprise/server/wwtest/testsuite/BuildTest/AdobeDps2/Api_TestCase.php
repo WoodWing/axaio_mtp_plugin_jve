@@ -83,8 +83,6 @@ class WW_TestSuite_BuildTest_AdobeDps2_Api_TestCase extends TestCase
 //			// Scenario ?: Test the API: publishEntities call.
 //			$this->testPublishEntities();
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
 		}
 
 		$this->tearDownTestData();

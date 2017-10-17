@@ -126,7 +126,6 @@ class WW_TestSuite_BuildTest_ContentSource_MultiSetObjectProperties_TestCase ext
 	 * Removes dossiers created at {@link: setupTestData()}.
 	 *
 	 * @param string $tipMsg To be used in the error message if there's any error.
-	 * @return bool Whether or not the deletions were successful.
 	 */
 	private function tearDownTestData( $tipMsg )
 	{
@@ -325,10 +324,11 @@ class WW_TestSuite_BuildTest_ContentSource_MultiSetObjectProperties_TestCase ext
 	 *
 	 * @param Object[] $objects Objects properties to update. On success, they get updated with latest info from DB.
 	 * @param string $stepInfo Extra logging info.
-	 * @param string|null $expectedError S-code when error expected. NULL when no error expected.
+	 * @param array $expectedErrors S-codes when error expected. NULL when no error expected.
 	 * @param MetaDataValue[] $updateProps List of metadata properties to update.
 	 * @param string[] $changedPropPaths List of changed metadata properties, expected to be different.
 	 * @param string $expectedCustomPropVal The expected custom property value.
+	 * @return bool|null
 	 */
 	private function multiSetObjectProperties( 
 		$objects, $stepInfo, array $expectedErrors, 
@@ -351,7 +351,6 @@ class WW_TestSuite_BuildTest_ContentSource_MultiSetObjectProperties_TestCase ext
 			}
 		}
 		$severityMapHandle = new BizExceptionSeverityMap( $serverityMap );
-		$severityMapHandle = $severityMapHandle; // keep code analyzer happy
 
 		// Call the SetObjectProperties service.
 		require_once BASEDIR . '/server/services/wfl/WflMultiSetObjectPropertiesService.class.php';
@@ -416,6 +415,7 @@ class WW_TestSuite_BuildTest_ContentSource_MultiSetObjectProperties_TestCase ext
 		foreach( $response->Objects as $respObject ) {
 			
 			// Lookup the original/cached object for the object returned through web service response.
+			$orgObject = null;
 			foreach( $objects as $orgObject ) {
 				if( $orgObject->MetaData->BasicMetaData->ID == $respObject->MetaData->BasicMetaData->ID ) {
 					break; // found
@@ -551,7 +551,6 @@ class WW_TestSuite_BuildTest_ContentSource_MultiSetObjectProperties_TestCase ext
 				return false;
 			}
 		} catch ( BizException $e ) {
-			$e = $e; // Keep analyzer happy.
 			$this->setResult( 'ERROR',  'Adding field to ' . $table . ' table error for type: ' . $this->type );
 			return false;
 		}
@@ -581,9 +580,8 @@ class WW_TestSuite_BuildTest_ContentSource_MultiSetObjectProperties_TestCase ext
 
 		// Delete the custom field from the Objects table.
 		try {
-			BizCustomField::deleteFieldAtModel( $table, self::CUSTOM_PROPERTY, 'string' );
+			BizCustomField::deleteFieldAtModel( $table, self::CUSTOM_PROPERTY );
 		} catch( BizException $e ) {
-			$e = $e; // Keep analyzer happy.
 			LogHandler::Log( 'CustPropTest', 'ERROR', 'Deleting field from "'.$table.'" '.
 				'table error, while testing for type: '.$this->type );
 			$retVal = false;

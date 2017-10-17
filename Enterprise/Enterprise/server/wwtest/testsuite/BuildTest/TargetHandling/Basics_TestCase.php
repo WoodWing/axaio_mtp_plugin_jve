@@ -87,8 +87,6 @@ class WW_TestSuite_BuildTest_TargetHandling_Basics_TestCase extends TestCase
 			$this->addLayoutToDossier();
 			$this->changeIssueOfDossier();
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e;
 		}
 
 		$this->tearDownTestData();
@@ -124,8 +122,8 @@ class WW_TestSuite_BuildTest_TargetHandling_Basics_TestCase extends TestCase
 		}
 		$this->editionObjs = @$vars['TargetHandling']['editions'];
 		$this->assertCount( 2, $this->editionObjs );
-		$this->assertInstanceOf( 'stdClass', $this->editionObjs[0] ); // TODO: should be AdmEdition
-		$this->assertInstanceOf( 'stdClass', $this->editionObjs[1] ); // TODO: should be AdmEdition
+		$this->assertInstanceOf( 'AdmEdition', $this->editionObjs[0] );
+		$this->assertInstanceOf( 'AdmEdition', $this->editionObjs[1] );
 		$this->editionObjs = array( $this->editionObjs[0] ); // for now just one edition is good enough
 		$this->layoutStatus = @$vars['TargetHandling']['layoutStatus'];
 		$this->assertInstanceOf( 'State', $this->layoutStatus );
@@ -177,8 +175,6 @@ class WW_TestSuite_BuildTest_TargetHandling_Basics_TestCase extends TestCase
 			$request->IDs    = $objectIds;
 			$service->execute( $request );
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 
@@ -211,8 +207,6 @@ class WW_TestSuite_BuildTest_TargetHandling_Basics_TestCase extends TestCase
 				}
 			}
 		} catch( BizException $e ) {
-			/** @noinspection PhpSillyAssignmentInspection */
-			$e = $e; // keep analyzer happy
 		}
 	}
 

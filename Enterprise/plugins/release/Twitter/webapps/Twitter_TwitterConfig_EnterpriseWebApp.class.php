@@ -35,7 +35,6 @@ class Twitter_TwitterConfig_EnterpriseWebApp extends EnterpriseWebApp
 	public function getHtmlBody() 
 	{
 		require_once BASEDIR . '/server/bizclasses/BizAdmPublication.class.php';
-		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		require_once dirname(__FILE__) . '/../EnterpriseTwitterConnector.class.php';
 		require_once BASEDIR . '/server/utils/htmlclasses/HtmlDocument.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBPublication.class.php';

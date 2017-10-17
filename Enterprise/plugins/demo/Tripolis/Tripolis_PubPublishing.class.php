@@ -122,10 +122,6 @@ class Tripolis_PubPublishing extends PubPublishing_EnterpriseConnector
 	 **/
 	public function updateDossier (&$dossier, &$objectsindossier, $publishtarget)
 	{
-		// keep analyzer happy
-		$dossier = $dossier;
-		$objectsindossier = $objectsindossier;
-		$publishtarget = $publishtarget;
 		throw new BizException( 'ERR_PUBLISH', 'Server', '', null, array('Tripolis' , 'Cannot update to Tripolis Dialogue') );
 	}
 
@@ -141,10 +137,6 @@ class Tripolis_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function unpublishDossier ($dossier, $objectsindossier, $publishtarget)
 	{
-		// keep analyzer happy
-		$dossier = $dossier;
-		$objectsindossier = $objectsindossier;
-		$publishtarget = $publishtarget;
 		throw new BizException( 'ERR_PUBLISH', 'Server', '', null, array('Tripolis' , 'Cannot unpublish to Tripolis Dialogue') );
 	}
 
@@ -160,11 +152,7 @@ class Tripolis_PubPublishing extends PubPublishing_EnterpriseConnector
 	 **/
 	public function requestPublishFields ($dossier, $objectsindossier, $publishtarget)
 	{
-		// keep analyzer happy
-		$objectsindossier = $objectsindossier;
-		$publishtarget = $publishtarget;
 		$this->init();
-		
 		$result = array();
 		
 		$getSummaryReport = new getSummaryReport( );
@@ -195,13 +183,7 @@ class Tripolis_PubPublishing extends PubPublishing_EnterpriseConnector
 	 */
 	public function getDossierURL ($dossier, $objectsindossier, $publishtarget)
 	{
-		// keep analyzer happy
-		$objectsindossier = $objectsindossier;
-		$publishtarget = $publishtarget;
-		
 		//TODO?
-		
-
 		return $dossier->ExternalId;
 	}
 
@@ -787,7 +769,7 @@ class Tripolis_PubPublishing extends PubPublishing_EnterpriseConnector
 	 * @param Object $dossier
 	 * @return ImageInfo
 	 */
-	private function upsertImage (Object $object, $publishtarget, Object $dossier, $externalId)
+	private function upsertImage (/** @noinspection PhpLanguageLevelInspection */Object $object, $publishtarget, Object $dossier, $externalId)
 	{
 		$format = $object->MetaData->ContentMetaData->Format;
 		$extension = MimeTypeHandler::mimeType2FileExt( $format );

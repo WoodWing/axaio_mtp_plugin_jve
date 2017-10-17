@@ -21,7 +21,7 @@ class AdmGetIssuesRequest
 	 * @param string[]             $RequestModes              
 	 * @param integer              $PublicationId             
 	 * @param integer              $PubChannelId              Nullable.
-	 * @param Id[]                 $IssueIds                  Nullable.
+	 * @param integer[]            $IssueIds                  Nullable.
 	 */
 	public function __construct( $Ticket=null, $RequestModes=null, $PublicationId=null, $PubChannelId=null, $IssueIds=null )
 	{
@@ -82,8 +82,8 @@ class AdmGetIssuesRequest
 			if( !is_null( $datObj->IssueIds ) ) {
 				$validator->checkType( $datObj->IssueIds, 'array' );
 				if( !empty($datObj->IssueIds) ) foreach( $datObj->IssueIds as $listItem ) {
-					$validator->enterPath( 'integer' );
-					$validator->checkType( $listItem, 'integer' );
+					$validator->enterPath( 'Id' );
+					$validator->checkType( $listItem, 'Id' );
 					$validator->leavePath();
 				}
 			}

@@ -1,17 +1,17 @@
 <?php
-
 /**
  * @package Enterprise
  * @subpackage Services
  * @since v5.0
  * @copyright WoodWing Software bv. All Rights Reserved.
- * 
- * Dispatches incomming SOAP requests to Administration Services.<br>
- * It unpacks/packs the SOAP operations while doing so.
+ *
+ * Unwraps incoming SOAP requests and dispatches them to Workflow Administration Services.
+ * Wraps returned service results into outgoing SOAP responses. Also handles exceptions.
+ * This way the SOAP message protocol is entirely hidden from the core Enterprise Server.
  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
- * Use the AdminServices.template.php file instead.
+ * Use the server/buildtools/genservices/interfaces/adm/SoapServices.template.php file instead.
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  */
 
@@ -478,6 +478,292 @@ class WW_SOAP_AdmServices extends WW_SOAP_Service
 
 		try {
 			$service = new AdmDeleteSectionsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function CreateStatuses( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateStatusesService.class.php';
+
+		try {
+			$service = new AdmCreateStatusesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function GetStatuses( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetStatusesService.class.php';
+
+		try {
+			$service = new AdmGetStatusesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function ModifyStatuses( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmModifyStatusesService.class.php';
+
+		try {
+			$service = new AdmModifyStatusesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function DeleteStatuses( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteStatusesService.class.php';
+
+		try {
+			$service = new AdmDeleteStatusesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function CreateAccessProfiles( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateAccessProfilesService.class.php';
+
+		try {
+			$service = new AdmCreateAccessProfilesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function GetAccessProfiles( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetAccessProfilesService.class.php';
+
+		try {
+			$service = new AdmGetAccessProfilesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function ModifyAccessProfiles( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmModifyAccessProfilesService.class.php';
+
+		try {
+			$service = new AdmModifyAccessProfilesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function DeleteAccessProfiles( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteAccessProfilesService.class.php';
+
+		try {
+			$service = new AdmDeleteAccessProfilesService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function CreateWorkflowUserGroupAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateWorkflowUserGroupAuthorizationsService.class.php';
+
+		try {
+			$service = new AdmCreateWorkflowUserGroupAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function GetWorkflowUserGroupAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetWorkflowUserGroupAuthorizationsService.class.php';
+
+		try {
+			$service = new AdmGetWorkflowUserGroupAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function ModifyWorkflowUserGroupAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmModifyWorkflowUserGroupAuthorizationsService.class.php';
+
+		try {
+			$service = new AdmModifyWorkflowUserGroupAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function DeleteWorkflowUserGroupAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteWorkflowUserGroupAuthorizationsService.class.php';
+
+		try {
+			$service = new AdmDeleteWorkflowUserGroupAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function CreatePublicationAdminAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreatePublicationAdminAuthorizationsService.class.php';
+
+		try {
+			$service = new AdmCreatePublicationAdminAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function GetPublicationAdminAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetPublicationAdminAuthorizationsService.class.php';
+
+		try {
+			$service = new AdmGetPublicationAdminAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function DeletePublicationAdminAuthorizations( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeletePublicationAdminAuthorizationsService.class.php';
+
+		try {
+			$service = new AdmDeletePublicationAdminAuthorizationsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function CreateRoutings( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmCreateRoutingsService.class.php';
+
+		try {
+			$service = new AdmCreateRoutingsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function GetRoutings( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetRoutingsService.class.php';
+
+		try {
+			$service = new AdmGetRoutingsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function ModifyRoutings( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmModifyRoutingsService.class.php';
+
+		try {
+			$service = new AdmModifyRoutingsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function DeleteRoutings( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmDeleteRoutingsService.class.php';
+
+		try {
+			$service = new AdmDeleteRoutingsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function AddTemplateObjects( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmAddTemplateObjectsService.class.php';
+
+		try {
+			$service = new AdmAddTemplateObjectsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function GetTemplateObjects( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmGetTemplateObjectsService.class.php';
+
+		try {
+			$service = new AdmGetTemplateObjectsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
+	public function RemoveTemplateObjects( $req )
+	{
+		require_once BASEDIR.'/server/services/adm/AdmRemoveTemplateObjectsService.class.php';
+
+		try {
+			$service = new AdmRemoveTemplateObjectsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
 			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );

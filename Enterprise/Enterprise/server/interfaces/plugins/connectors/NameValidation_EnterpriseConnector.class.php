@@ -58,10 +58,6 @@ abstract class NameValidation_EnterpriseConnector extends DefaultConnector
 	 */
 	public function validateMetaDataInMultiMode( $user, MetaData $invokedMetaData, array &$changedMetaDataValues )
 	{
-		// Keep analyzer happy:
-		$user = $user;
-		$invokedMetaData = $invokedMetaData;
-		$changedMetaDataValues = $changedMetaDataValues;
 	}
 	
 	/**
@@ -75,12 +71,6 @@ abstract class NameValidation_EnterpriseConnector extends DefaultConnector
 	 */
 	public function applyAutoNamingRule( $user, $metaData, $targets, $relations )
 	{
-		// Make analyzer happy
-		$user = $user;
-		$metaData = $metaData;
-		$targets = $targets;
-		$relations = $relations;
-		
 		return null;
 	}
 
@@ -97,8 +87,6 @@ abstract class NameValidation_EnterpriseConnector extends DefaultConnector
 	 */
 	public function applyAutoTargetingRule( $user, Relation $relation, $parentType, $childType, &$extraTargets )
 	{
-		$user = $user; $relation = $relation; $parentType = $parentType; $childType = $childType;
-		$extraTargets = $extraTargets;// make code analyser happy
 		return true;
 	}
 

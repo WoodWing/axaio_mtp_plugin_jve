@@ -185,7 +185,6 @@ class ChannelForm extends HtmlAnyForm
 	 */
 	private function fillCombos( $action, $widget )
 	{
-		$action = $action; // keep code analyzer happy
 		switch( $widget->PropertyInfo->Name ) {
 			case 'CurrentIssueId':
 				$widget->PropertyInfo->PropertyValues = array();
@@ -301,7 +300,6 @@ class ChannelForm extends HtmlAnyForm
 	 */
 	private function drawHtmlField( AdmPubChannel $channelObj, DialogWidget $widget, Utils_XHtmlField $htmlPropObj, $validateError, $width = 200 )
 	{
-		$channelObj = $channelObj; // keep code analyzer happy
 		$displayName = $widget->PropertyInfo->DisplayName;
 		if( $widget->PropertyInfo->Type == 'separator' ) {
 			$htmlWidget = '<tr><td colspan="2">&nbsp;</td></tr>'."\r\n";
@@ -585,12 +583,29 @@ class ChannelForm extends HtmlAnyForm
 		require_once BASEDIR . '/server/dbclasses/DBEdition.class.php';
 		if( $this->pubChannelObj->Id > 0 ) {
 			$issues = DBIssue::listChannelIssues( $this->pubChannelObj->Id );
+			// Sort the issues by code, then by name in natural order.
+			if( $issues ) {
+				uasort( $issues, function( array $issueA, array $issueB ) {
+					if( $issueA['code'] == $issueB['code'] ) {
+						return strnatcmp( $issueA['name'], $issueB['name'] );
+					}
+					return $issueA['code'] < $issueB['code'] ? -1 : 1;
+				} );
+			}
 			$this->fetchIssuesTree( $issues );
 
 			if( $this->pubChannelObj->Type == 'print' ||
-				$this->pubChannelObj->Type == 'dps' ||
 				$this->pubChannelObj->Type == 'dps2' ) {
 				$editions = DBEdition::listChannelEditions( $this->pubChannelObj->Id );
+				// Sort the editions by code, then by name in natural order.
+				if( $editions ) {
+					uasort( $editions, function( array $editionA, array $editionB ) {
+						if( $editionA['code'] == $editionB['code'] ) {
+							return strnatcmp( $editionA['name'], $editionB['name'] );
+						}
+						return $editionA['code'] < $editionB['code'] ? -1 : 1;
+					} );
+				}
 				$this->fetchEditionsTree( $editions );
 			}
 		}
@@ -657,7 +672,6 @@ class ChannelForm extends HtmlAnyForm
 
 		if (!empty($this->pubChannelId) && 
 				($this->pubChannelObj->Type == 'print' ||
-				$this->pubChannelObj->Type == 'dps' || 
 				$this->pubChannelObj->Type == 'dps2' )) {
 			$result .= '
 				<table class="subtitlebar">

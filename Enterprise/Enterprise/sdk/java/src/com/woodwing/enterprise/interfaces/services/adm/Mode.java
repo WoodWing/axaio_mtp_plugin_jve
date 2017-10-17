@@ -25,6 +25,8 @@ public class Mode implements java.io.Serializable {
     public static final java.lang.String _GetStatuses = "GetStatuses";
     public static final java.lang.String _GetUsers = "GetUsers";
     public static final java.lang.String _GetUserGroups = "GetUserGroups";
+    public static final java.lang.String _GetProfileFeatures = "GetProfileFeatures";
+    public static final java.lang.String _GetObjectInfos = "GetObjectInfos";
     public static final Mode GetPublications = new Mode(_GetPublications);
     public static final Mode GetPubChannels = new Mode(_GetPubChannels);
     public static final Mode GetIssues = new Mode(_GetIssues);
@@ -33,6 +35,8 @@ public class Mode implements java.io.Serializable {
     public static final Mode GetStatuses = new Mode(_GetStatuses);
     public static final Mode GetUsers = new Mode(_GetUsers);
     public static final Mode GetUserGroups = new Mode(_GetUserGroups);
+    public static final Mode GetProfileFeatures = new Mode(_GetProfileFeatures);
+    public static final Mode GetObjectInfos = new Mode(_GetObjectInfos);
     public java.lang.String getValue() { return _value_;}
     public static Mode fromValue(java.lang.String value)
           throws java.lang.IllegalArgumentException {

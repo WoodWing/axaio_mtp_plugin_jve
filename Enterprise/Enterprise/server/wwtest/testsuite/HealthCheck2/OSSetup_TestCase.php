@@ -173,19 +173,20 @@ class WW_TestSuite_HealthCheck2_OSSetup_TestCase extends TestCase
 	private function writeToTemporaryFileExternal()
 	{
 		$help = '';
+		$command = null;
 
 		switch ( OS) {
 			case 'WIN':
-				$command = "ver > " .  escapeshellarg($this->tmpFile);
+				$command = "ver > ".escapeshellarg( $this->tmpFile );
 				$help = "Check if user SERVICE or Everyone has write permission on system temp folder ($this->tmpDir).";
 				break;
 			case 'UNIX':
-				$command = "uname -a > " . escapeshellarg($this->tmpFile);
+				$command = "uname -a > ".escapeshellarg( $this->tmpFile );
 				break;
 			case 'LINUX':
-				$command = "uname -a > " . escapeshellarg($this->tmpFile);
+				$command = "uname -a > ".escapeshellarg( $this->tmpFile );
 				break;
-		}		
+		}
 
 
 		/*$output = */shell_exec($command);
@@ -206,19 +207,20 @@ class WW_TestSuite_HealthCheck2_OSSetup_TestCase extends TestCase
 	private function deleteTempFileExternal()
 	{
 		$help = '';
+		$command = null;
 
-			switch ( OS) {
+		switch ( OS ) {
 			case 'WIN':
-				$command = "del " .  escapeshellarg($this->tmpFile);
+				$command = "del ".escapeshellarg( $this->tmpFile );
 				$help = "Check if user SERVICE or Everyone has delete permission on system temp folder ($this->tmpDir).";
 				break;
 			case 'UNIX':
-				$command = "rm " . escapeshellarg($this->tmpFile);
+				$command = "rm ".escapeshellarg( $this->tmpFile );
 				break;
 			case 'LINUX':
-				$command = "rm " . escapeshellarg($this->tmpFile);
+				$command = "rm ".escapeshellarg( $this->tmpFile );
 				break;
-		}		
+		}
 
 
 		/*$output = */shell_exec($command);

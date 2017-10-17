@@ -131,7 +131,6 @@ class WW_TestSuite_HealthCheck2_FileStore_TestCase extends TestCase
 	 * Checks if the parent directory of passed directory is writable. 
 	 * @param string $directory Path of the directory.
 	 * @param string $define Name of the define
-	 * @return bool True if parent is valid, else false.
 	 */
 	private function validateParentDirectory( $directory, $define )
 	{
@@ -151,5 +150,4 @@ class WW_TestSuite_HealthCheck2_FileStore_TestCase extends TestCase
 			return;
 		}
 	}	
-
 }

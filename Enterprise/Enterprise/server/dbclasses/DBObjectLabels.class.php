@@ -216,7 +216,7 @@ class DBObjectLabels extends DBBase
 	 *
 	 * @param integer $objectId Id of dossier for which the labels are configured.
 	 * @param string $labelName
-	 * @return integer The resolved label id.
+	 * @return ObjectLabel
 	 */
 	public static function getLabelByName( $objectId, $labelName )
 	{

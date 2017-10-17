@@ -28,7 +28,6 @@ class DBElement extends DBBase
 	 * @param integer $objectId
 	 * @param Element[] $elements
 	 * @throws BizException On bad given params or fatal SQL errors.
-	 * @return boolean TRUE on success, FALSE on failure
 	 */
 	static public function saveElements( $objectId, $elements )
 	{

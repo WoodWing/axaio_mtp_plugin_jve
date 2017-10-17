@@ -39,7 +39,7 @@ class EnterpriseService
 	 * structure needs to be recorded, and not the new (transformed) one. Or else, the restructuring 
 	 * would get applied again while playing recorded services, which could go wrong.
 	 *
-	 * @param stdClass $request Request object to transform (after arrival from client, before execution).
+	 * @param object $request Request object to transform (after arrival from client, before execution).
 	 */
 	protected function restructureRequest( &$request )
 	{
@@ -48,8 +48,8 @@ class EnterpriseService
 	/**
 	 * See restructureRequest().
 	 *
-	 * @param stdClass $request Request object.
-	 * @param stdClass $response Response object to transform (after executing, before returning to client).
+	 * @param object $request Request object.
+	 * @param object $response Response object to transform (after executing, before returning to client).
 	 */
 	protected function restructureResponse( $request, &$response )
 	{
@@ -88,12 +88,13 @@ class EnterpriseService
 	  * @param string 		$interface		The service interface; the class name of the service
 	  * @param boolean 		$checkTicket	whether ticket should be checked
 	  * @param boolean 		$useTransaction	whether service should be executed within db transaction
-	  * @return object Response object
-	  * @throws BizException when executing the service results in an error.
+	  * @return mixed Response object
+	  * @throws Throwable when executing the service results in an error.
 	  */
 	protected function executeService( $req, $ticket, $type, $interface, $checkTicket, $useTransaction )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
+		require_once BASEDIR.'/server/secure.php';
+
 		$debugMode = LogHandler::debugMode();
 		$logService = LogHandler::debugMode() && defined('LOG_INTERNAL_SERVICES') && LOG_INTERNAL_SERVICES === true;
 		$serviceName = str_replace( 'Request', '', get_class($req) );
@@ -110,6 +111,23 @@ class EnterpriseService
 		}
 
 		try {
+			// Support cookie enabled sessions. When the client has no ticket provided in the request body, try to grab the ticket
+			// from the HTTP cookies. This is to support JSON clients that run multiple web applications which need to share the
+			// same ticket. Client side this can be implemented by simply letting the web browser round-trip cookies. [EN-88910]
+			if( $ticket ) {
+				BizSession::setTicketCookieForClientIdentifier($ticket);
+			} else {
+				if( !in_array( $interface, array( 'WflLogOn', 'AdmLogOn', 'PlnLogOn' ) ) ) {
+					$ticket = BizSession::getTicketForClientIdentifier();
+					if( $ticket ) {
+						BizSession::setTicketCookieForClientIdentifier($ticket);
+						if( $interface != 'WflChangePassword' && property_exists( $req, 'Ticket' ) ) {
+							$req->Ticket = $ticket; // repair for connectors being called in restructureRequest/restructureResponse
+						}
+					}
+				}
+			}
+
 			// Start business session (and DB transaction)
 			BizSession::startSession( $ticket );
 			if( $useTransaction ) {
@@ -123,7 +141,7 @@ class EnterpriseService
 			BizSession::setServiceName( $serviceName );
 			if( $logService ) {
 				LogHandler::Log( __CLASS__, 'DEBUG', 'Procesing service request: '.$serviceName );
-				LogHandler::logService( $serviceName, print_r($req,true), true, 'Service' );
+				LogHandler::logService( $serviceName, LogHandler::prettyPrint( $req ), true, 'Service' );
 			}
 
 			// Validate request
@@ -181,7 +199,7 @@ class EnterpriseService
 			// Log response
 			if( $logService ) {
 				$serviceName = str_replace( 'Response', '', get_class($resp) );
-				LogHandler::logService( $serviceName, print_r($resp,true), false, 'Service' );
+				LogHandler::logService( $serviceName, LogHandler::prettyPrint( $resp ), false, 'Service' );
 			}
 
 			// Stop capturing errors (BizException) into reports.
@@ -194,22 +212,31 @@ class EnterpriseService
 				BizSession::endTransaction();
 			}
 			BizSession::endSession();
-
-		} catch ( BizException $e ) {
-			// Log error
-			if( $debugMode ) {
+		} catch( Throwable $e ) {
+			// For all errors (Error, Exception, BizException) write the error file when enabled
+			if( $logService ) {
 				$error = new stdClass();
-				$error->Type = $e->getType();
 				$error->Message = $e->getMessage();
-				$error->Detail = $e->getDetail();
-				$error->ErrorCode = $e->getErrorCode();
-				LogHandler::logService( $serviceName, print_r($error,true), null, 'Service' );
+				if( $e instanceof BizException ) { // Only add the 'BizException' information when available
+					$error->Type = $e->getType();
+					$error->Detail = $e->getDetail();
+					$error->ErrorCode = $e->getErrorCode();
+				}
+				LogHandler::logService( $serviceName, LogHandler::prettyPrint( $error ), null, 'Service' );
 			}
-			
+
+			if( !$e instanceof BizException ) {
+				// Error and Exception throwables are handled by the interface (e.g. SOAP) and do not end up in the logs by default
+				// as they don't trigger the exception handler. Log the information (including a stacktrace) right here.
+				$error = 'Uncaught throwable "'.get_class( $e ).'".';
+				LogHandler::Log( 'EnterpriseService', 'ERROR', $error, $e );
+				$e = new BizException( null, 'Server', '', $error ); // Let the core throw an exception in this case to the client.
+			}
+
 			// The errors raised by ES are not always thrown up by SC to our IDS script.
 			// This is a limitation of SC (tested with 10.0.3) but we don't want to lose error
 			// info since that is used by ES to decide whether to retry to give up the job.
-			// Instead of waiting for the job to complete (for which we'd risk losing useful 
+			// Instead of waiting for the job to complete (for which we'd risk losing useful
 			// error info) we already save the error raised by ourself or by the core server.
 			if( $ticket ) { // not set e.g. on LogOn with invallid password
 				require_once BASEDIR.'/server/bizclasses/BizInDesignServerJob.class.php';
@@ -220,7 +247,7 @@ class EnterpriseService
 			}
 
 			// Record exception
-			if( isset($recorder) && $createdRecorder ) {
+			if( isset( $recorder ) && $createdRecorder ) {
 				$recorder->recordBizException( $e );
 				$recorder = null; // Reset global recorder. Service call by the real client will end here.
 			}

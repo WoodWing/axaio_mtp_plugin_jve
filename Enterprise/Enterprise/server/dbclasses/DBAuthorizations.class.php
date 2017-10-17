@@ -1,10 +1,10 @@
 <?php
 /**
- * @package     SCEnterprise
+ * @package     Enterprise
  * @subpackage  DBClasses
  * @since       v7.6
  * @copyright   WoodWing Software bv. All Rights Reserved.
- **/
+ */
 
 require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 
@@ -13,28 +13,66 @@ class DBAuthorizations extends DBBase
 	const TABLENAME = 'authorizations';
 
 	/**
-	 * Gets the count for Authorizations by State ID.
+	 * Gets the count for Authorizations by Status ID.
 	 *
 	 * Queries the Authorizations table and returns the count for the number of found records that
-	 * match the State Id.
-	 * @param int $stateId The ID of the State to count the records for.
+	 * match the Status Id.
+	 *
+	 * @param int $statusId The ID of the State to count the records for.
 	 * @return null|int $count The number of found records or null if something went wrong.
 	 */
-	public static function getCountByStateId( $stateId )
+	public static function getCountByStateId( $statusId )
 	{
-		$count = null;
-		$params = array($stateId);
 		$where = '`state` = ?';
-		$row = self::getRow( self::TABLENAME, $where, array('count(`state`) as `cnt`'), $params);
+		$params = array( intval( $statusId ) );
+		$row = self::getRow( self::TABLENAME, $where, array('count(`state`) as `cnt`'), $params );
+		return $row ? intval($row['cnt']) : null;
+	}
+	
+	/**
+	 * Adds authorization for a group.
+	 *
+	 * @since 10.2.0
+	 * @param integer $publId
+	 * @param integer $issueId
+	 * @param integer $groupId
+	 * @param integer $sectionId
+	 * @param integer $stateId
+	 * @param integer $profileId
+	 * @param string $rights
+	 * @return integer Authorization record id.
+	 */
+	public static function addAuthorization( $publId, $issueId, $groupId, $sectionId, $stateId, $profileId, $rights )
+	{
+		$row = array(
+			'publication' => intval( $publId ),
+			'issue'       => intval( $issueId ),
+			'grpid'       => intval( $groupId ),
+			'section'     => intval( $sectionId ),
+			'state'       => intval( $stateId ),
+			'profile'     => intval( $profileId ),
+			'rights'      => strval( $rights )
+		);
+		return self::insertRow( self::TABLENAME, $row );
+	}
 
-		// If there is an error return null.
-		if (self::hasError()){
-			return $count;
+	/**
+	 * Copies all authorizations made for a user group to another user group.
+	 * 
+	 * @since 10.2.0
+	 * @param integer $sourceGroupId User group id to copy from
+	 * @param integer $destGroupId User group id to copy to
+	 */
+	public static function copyUserGroupAuthorizations( $sourceGroupId, $destGroupId )
+	{
+		$where = '`grpid` = ?';
+		$params = array( intval( $sourceGroupId ) );
+		$rows = DBBase::listRows( self::TABLENAME, null, null, $where, '*', $params );
+
+		$overruleFields = array( 'grpid' => intval( $destGroupId ) );
+		if( $rows ) foreach( $rows as $sourceRow ) {
+			self::copyRow( self::TABLENAME, $sourceRow, $overruleFields );
 		}
-
-		// Return the count.
-		$count = intval($row['cnt']);
-		return $count;
 	}
 
 	/**
@@ -49,7 +87,7 @@ class DBAuthorizations extends DBBase
 	 * @param null|int $sectionId Category Id
 	 * @param null|int $stateId State Id
 	 * @param null|int $grpId Group Id
-	 * @return null|bool Null in case of error else true 
+	 * @return bool True when the deletion was successful, False otherwise.
 	 * @throws BizException
 	 */
 	public static function deleteAuthorization( $pubId, $issueId, $sectionId, $stateId, $grpId )
@@ -61,23 +99,23 @@ class DBAuthorizations extends DBBase
 		$params = array();
 		
 		$where = '`publication` = ? ';
-		$params[] = $pubId;
+		$params[] = intval($pubId);
 		
 		if ( !is_null( $issueId )) {
 			$where .= 'AND `issue` = ? ';
-			$params[] = $issueId;
+			$params[] = intval($issueId);
 		}
 		if ( !is_null( $sectionId )) {
 			$where .= 'AND `section` = ? ';
-			$params[] = $sectionId;
+			$params[] = intval($sectionId);
 		}
 		if ( !is_null( $stateId )) {
 			$where .= 'AND `state` = ? ';
-			$params[] = $stateId;
+			$params[] = intval($stateId);
 		}
 		if ( !is_null( $grpId )) {
 			$where .= 'AND `grpid` = ? ';
-			$params[] = $grpId;
+			$params[] = intval($grpId);
 		}
 		
 		return self::deleteRows(self::TABLENAME, $where, $params);
@@ -205,7 +243,7 @@ class DBAuthorizations extends DBBase
 			'AND (`state` = ? OR `state` = ?) '.     // match with param or with ALL (0)
 			'AND `profile` = ? AND `bundle` = ? ';
 		$params = array( $brandId, $issueId, $userGroupId, $categoryId, 0, $statusId, 0, $profileId, $bundleId );
-		$row = DBBase::getRow( 'authorizations', $where, 'id', $params );
+		$row = DBBase::getRow( 'authorizations', $where, array('id'), $params );
 		return isset($row['id']) && $row['id'];
 	}
 

@@ -34,7 +34,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_RemoveChannel_Te
 	public function getTestMethods()
 	{
 		return
-			'Test with objects assigned to a web channel: <ul>';
+			'Test with objects assigned to a web channel: <ul>'.
 				'<li>01 Create a PublishFormTemplate, Dossier and, PublishForm object (CreateObjects).</li>'.
 				'<li>02 Checks removing the Target(s) of a Dossier (DeleteObjectTargets).</li>'.
 				'<li>03 Checks if the Dossier has empty Targets and Relations (DeleteObjectTargets).</li>'.

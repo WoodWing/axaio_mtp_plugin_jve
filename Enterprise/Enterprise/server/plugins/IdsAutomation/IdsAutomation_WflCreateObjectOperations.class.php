@@ -84,17 +84,10 @@ class IdsAutomation_WflCreateObjectOperations extends WflCreateObjectOperations_
 	// No called.
 	final public function runOverruled( WflCreateObjectOperationsRequest $req )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
 	}
 
 	final public function onError( WflCreateObjectOperationsRequest $req, BizException $e )
 	{
-		/** @noinspection PhpSillyAssignmentInspection */
-		$req = $req; // keep analyzer happy
-		/** @noinspection PhpSillyAssignmentInspection */
-		$e = $e; // keep analyzer happy
-		
 		// Clear service context data.
 		$this->cleanupResources();
 	} 

@@ -291,6 +291,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Workflow_TestCas
 	 * Tears down the objects created in the {@link: setupWorkflowTest()} function.
 	 *
 	 * @return bool
+	 * @throws BizException
 	 */
 	private function tearDownWorkflowTest( )
 	{
@@ -505,6 +506,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Workflow_TestCas
 
 			// Determine column indexes to work with
 			$colNames = array( 'ID', 'Name' );
+			$indexes = array();
 			foreach( $colNames as $colName ) {
 				foreach( $response->Columns as $index => $column ) {
 					if( $column->Name == $colName ) {
@@ -596,6 +598,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Workflow_TestCas
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmActionProperty.class.php';
 		$retVal = true;
+		$templateName = null;
 
 		foreach( $this->templates as $templateName => $templates ) {
 			foreach( $templates as $pubChannelId => $template ) {
@@ -724,7 +727,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Workflow_TestCas
 	 * @param string $templateName
 	 * @param PubChannelInfo $pubChannelObj
 	 * @param string $tipMsg To be used in the error message if there's any error.
-	 * @param Object|null &$template Returns the Publish Form Template.
 	 * @return bool Whether or not the setup was successful.
 	 */
 	private function setupRelationTest( $templateName, $pubChannelObj, $tipMsg )
@@ -855,6 +857,9 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Workflow_TestCas
 
 	/**
 	 * To test several scenarios on PublishForm - Dossier relations.
+	 *
+	 * @param string $templateName
+	 * @param PubChannelInfo $pubChannelObj
 	 */
 	private function testPublishFormRelations( $templateName, $pubChannelObj )
 	{
@@ -968,10 +973,10 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Workflow_TestCas
 	 * Calls the getDialog2 service with the specific action and validates the response.
 	 *
 	 * @param Object $template Publish Form Template
-	 * @param $action The action type for the getDialog2 service, e.g 'SetPublishProperties'(built-in),'SetProperties'.
+	 * @param string $action The action type for the getDialog2 service, e.g 'SetPublishProperties'(built-in),'SetProperties'.
 	 * @param string $objType
 	 * @param PubChannelInfo|null $pubChannelObj
-	 * @return WflGetDialog2Request|null The valid respionse. NULL on error or when not valid.
+	 * @return WflGetDialog2Response|null The valid respionse. NULL on error or when not valid.
 	 */
 	private function callGetDialog2Service( $template, $action, $objType, $pubChannelObj=null )
 	{
@@ -1087,6 +1092,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Workflow_TestCas
 	 *
 	 * @param MetaData $metaData
 	 * @param Relation[] $relations
+	 * @return bool
 	 */
 	private function callSaveObjectsService( $metaData, $relations )
 	{
@@ -1874,10 +1880,10 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Workflow_TestCas
 		foreach( get_object_vars( $adjustProps ) as $adjustPropName => $adjustPropValues ) {
 			if( is_array( $adjustPropValues ) && count( $adjustPropValues ) > 0) {
 				$index = 0;
-				foreach( $adjustPropValues as $adjustPropValues ) {
-					if( $adjustPropValues ) {
+				foreach( $adjustPropValues as $adjustPropValue ) {
+					if( $adjustPropValue ) {
 						if( $adjustPropName == 'Widgets') {
-							$adjustProps->Widgets[$index]->PropertyInfo = $this->adjustPropInfo( $origProps->Widgets[$index]->PropertyInfo, $adjustPropValues->PropertyInfo );
+							$adjustProps->Widgets[$index]->PropertyInfo = $this->adjustPropInfo( $origProps->Widgets[$index]->PropertyInfo, $adjustPropValue->PropertyInfo );
 							// @TODO: Use variables instead of putting the fix name like 'Widgets' as used above.
 							//$adjustProps->$adjustPropName[$index]->PropertyInfo =
 							//		$this->adjustPropInfo( $origProps->Widgets[$index]->PropertyInfo, $adjustPropValues->PropertyInfo );
@@ -1901,7 +1907,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_Workflow_TestCas
 	 * Checks if the Form's Relations are returned correctly.
 	 * Checks if the Form has Target (it should not have)
 	 * 
-	 * @param array $relations Response from $service to be validated.
+	 * @param array $respRelations Response from $service to be validated.
 	 * @param string $service The service name of the response where the Relation is retrieved from.
 	 * @return bool True when the relations are valid; False when errors found.
 	 */

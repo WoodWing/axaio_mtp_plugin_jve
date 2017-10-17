@@ -92,34 +92,46 @@ function step0_validateEnvironment {
 
 #
 # Determines the HTTP post and PHP version to use for testing. After calling, HTTP_PORT and PHP_BIN are set.
-# When SERVER_VERSION >= 9.7.0 it uses PHP 5.6, when >= 9.5.0 then PHP 5.5, when >= 9.0.0 then PHP 5.4 else 5.3.
+#
+# When SERVER_VERSION >= 10.2.0 it uses PHP 7.0
+# When SERVER_VERSION >=  9.7.0 it uses PHP 5.6
+# When SERVER_VERSION >=  9.5.0 it uses PHP 5.5
+# When SERVER_VERSION >=  9.0.0 it uses PHP 5.4 else 5.3
 #
 function step1_determineHttpPortAndPhpVersion {
 	echo "step1a: Determining the PHP_BIN (binary path) and HTTP_PORT..."
-	vercomp "${SERVER_VERSION}" "9.7.0"
-    compareWith97=$? # catch result of vercomp
-	if (( ${compareWith97} >= 1 )) # >= 9.7.0 ?
+	vercomp "${SERVER_VERSION}" "10.2.0"
+    compareWith102=$? # catch result of vercomp
+	if (( ${compareWith102} >= 1 )) # >= 10.2.0 ?
     then
-    	HTTP_PORT=8056
-    	PHP_BIN=/opt/local/bin/php56
+    	HTTP_PORT=8071
+    	PHP_BIN=/opt/local/bin/php71
     else
-    	vercomp "${SERVER_VERSION}" "9.5.0"
-	    compareWith95=$? # catch result of vercomp
-	    if (( ${compareWith95} >= 1 )) # >= 9.5.0 ?
-	    then
-		    HTTP_PORT=8055
-    		PHP_BIN=/opt/local/bin/php55
-	    else
-		    vercomp "${SERVER_VERSION}" "9.0.0"
-    		compareWith90=$? # catch result of vercomp
-	    	if (( ${compareWith90} >= 1 )) # >= 9.0.0 ?
-		    then
-			    HTTP_PORT=8054
-    			PHP_BIN=/opt/local/bin/php54
-	    	else
-		    	HTTP_PORT=8053
-			    PHP_BIN=/opt/local/bin/php53
-		    fi
+		vercomp "${SERVER_VERSION}" "9.7.0"
+		compareWith97=$? # catch result of vercomp
+		if (( ${compareWith97} >= 1 )) # >= 9.7.0 ?
+		then
+			HTTP_PORT=8056
+			PHP_BIN=/opt/local/bin/php56
+		else
+			vercomp "${SERVER_VERSION}" "9.5.0"
+			compareWith95=$? # catch result of vercomp
+			if (( ${compareWith95} >= 1 )) # >= 9.5.0 ?
+			then
+				HTTP_PORT=8055
+				PHP_BIN=/opt/local/bin/php55
+			else
+				vercomp "${SERVER_VERSION}" "9.0.0"
+				compareWith90=$? # catch result of vercomp
+				if (( ${compareWith90} >= 1 )) # >= 9.0.0 ?
+				then
+					HTTP_PORT=8054
+					PHP_BIN=/opt/local/bin/php54
+				else
+					HTTP_PORT=8053
+					PHP_BIN=/opt/local/bin/php53
+				fi
+			fi
 		fi
 	fi
 	echo "HTTP_PORT: [${HTTP_PORT}]"
@@ -224,9 +236,9 @@ function step6_testEnterpriseServer {
 	
 	cd "${DOCROOT}/${ENT_DIR}/"
 	echo "step6b: Running the Health Check..."
-	${PHP_BIN} server/wwtest/testcli.php HealthCheck2 "${WORKSPACE}/reports"
+	${PHP_BIN} server/wwtest/testsuite/junitcliclient.php HealthCheck2 "${WORKSPACE}/reports"
 	echo "step6c: Running the Build Test..."
-	${PHP_BIN} server/wwtest/testcli.php BuildTest "${WORKSPACE}/reports"
+	${PHP_BIN} server/wwtest/testsuite/junitcliclient.php BuildTest "${WORKSPACE}/reports"
 	cd -
 }
 

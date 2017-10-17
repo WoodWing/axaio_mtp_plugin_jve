@@ -25,8 +25,7 @@ class AddSubApplication_SysGetSubApplications extends SysGetSubApplications_Ente
 	// Not called.
 	final public function runBefore( SysGetSubApplicationsRequest &$req )
 	{
-		$req = $req; // keep code analyzer happy
-	} 
+	}
 
 	final public function runAfter( SysGetSubApplicationsRequest $req, SysGetSubApplicationsResponse &$resp )
 	{
@@ -47,6 +46,5 @@ class AddSubApplication_SysGetSubApplications extends SysGetSubApplications_Ente
 	// Not called.
 	final public function runOverruled( SysGetSubApplicationsRequest $req )
 	{
-		$req = $req; // keep code analyzer happy
-	} 
+	}
 }

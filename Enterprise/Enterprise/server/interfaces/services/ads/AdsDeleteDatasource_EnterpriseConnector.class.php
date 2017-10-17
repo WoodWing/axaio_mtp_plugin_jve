@@ -40,6 +40,5 @@ abstract class AdsDeleteDatasource_EnterpriseConnector extends ServiceConnector
 	 */
 	public function onError( AdsDeleteDatasourceRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }

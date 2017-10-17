@@ -17,7 +17,6 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_ResourceStrings_TestCase extends Test
     
 	/**
 	 * Performs the test as written in module header.
-	 * @return boolean  Wether or not all PHP files are correct.
 	 */
 	final public function runTest()
 	{
@@ -57,7 +56,6 @@ class WW_TestSuite_PhpCodingTest_PhpCoding_ResourceStrings_TestCase extends Test
 		);
 		
 		// Determine supported languages
-		require_once BASEDIR.'/server/bizclasses/BizResources.class.php';
 		$langCodes = BizResources::getLanguageCodes();
 		
 		// Read all resource tables (all languages)

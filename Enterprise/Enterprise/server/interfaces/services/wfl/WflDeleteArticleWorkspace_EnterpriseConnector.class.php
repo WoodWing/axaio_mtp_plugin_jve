@@ -40,6 +40,5 @@ abstract class WflDeleteArticleWorkspace_EnterpriseConnector extends ServiceConn
 	 */
 	public function onError( WflDeleteArticleWorkspaceRequest $req, BizException $e )
 	{
-		$req = $req; $e = $e; // keep analyzer happy
 	}
 }
