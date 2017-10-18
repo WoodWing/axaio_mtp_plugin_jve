@@ -697,7 +697,7 @@ CREATE  INDEX `mi_messagelog` ON `smart_messagelog`(`msgid`) ;
 CREATE  INDEX `uid_messagelog` ON `smart_messagelog`(`userid`) ;
 
 CREATE TABLE `smart_objectflags` (
-  `objid` bigint(11) NOT NULL ,
+  `objid` bigint(11) NOT NULL  default '0',
   `flagorigin` varchar(255) NOT NULL ,
   `flag` mediumint(9) NOT NULL ,
   `severity` mediumint(9) NOT NULL ,
