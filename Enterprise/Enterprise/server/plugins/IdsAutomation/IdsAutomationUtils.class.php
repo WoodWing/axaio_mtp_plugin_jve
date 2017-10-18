@@ -244,10 +244,10 @@ class IdsAutomationUtils
 			
 			require_once BASEDIR.'/server/bizclasses/BizPage.class.php';
 			if( $newStatus->Produce ) { // Produce/Output status
-				if( self::isIdsClientFeatureValue( 'CreatePagePDFOnProduce' ) &&
-					!BizPage::hasOutputRenditionPDF( $objId ) ) {
-					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePagePDFOnProduce is configured for IDS, '.
-										'but layout has no PDFs. Action needed.' );
+				if( self::isIdsClientFeatureValue( 'CreatePagePDFOnProduce' )
+					// && !BizPage::hasOutputRenditionPDF( $objId ) EN-89302 Will always create (new) PDF regardless if PDF already exists or not.
+				) {
+					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePagePDFOnProduce is configured for IDS. Action needed.' );
 					$isTrigger = true;
 				} elseif( self::isIdsClientFeatureValue( 'CreatePageEPSOnProduce' ) &&
 					!BizPage::hasOutputRenditionEPS( $objId ) ) {
