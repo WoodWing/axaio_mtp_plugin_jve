@@ -1093,7 +1093,6 @@ class DBUser extends DBBase
 	static public function getLanguage($username)
 	{
 		$dbdriver = DBDriverFactory::gen();
-		$username = $dbdriver->toDBString($username);
 		$db = $dbdriver->tablename('users');
 
 		$sql = "SELECT `language` FROM $db WHERE `user` = ? ";
@@ -1379,17 +1378,16 @@ class DBUser extends DBBase
 	static public function isPubAdmin($user, $pubid)
 	{
 		$dbDriver = DBDriverFactory::gen();
-		$user = $dbDriver->toDBString($user);
 		$usertable = $dbDriver->tablename('users');
 		$grouptable = $dbDriver->tablename('usrgrp');
 		$publadmintable = $dbDriver->tablename('publadmin');
-		$params = array($user, $pubid);
 
 		$sql  = "SELECT usr.`id` ";
 		$sql .= "FROM $usertable usr ";
 		$sql .= "INNER JOIN $grouptable usrgrp ON (usr.`id` = usrgrp.`usrid`) ";
 		$sql .= "INNER JOIN $publadmintable pad ON (usrgrp.`grpid` = pad.`grpid`) ";
 		$sql .= "WHERE usr.`user` = ? AND pad.`publication` = ? ";
+		$params = array( strval( $user ), intval( $pubid ));
 
 		$sth = $dbDriver->query($sql, $params);
 		$row = $dbDriver->fetch($sth);
