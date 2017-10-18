@@ -19,6 +19,7 @@ use Drupal\Core\Database\Database;
 function ww_enterprise_install() {
   $dbConnection = Database::getConnection();
   if ($dbConnection->schema()->tableExists('ww_enterprise_preview')) {
+    deleteOldPreviewNodes();
     $dbConnection->schema()->dropTable('ww_enterprise_preview');
     drupal_set_message('Module `ww_enterprise`:  Removed deprecated`ww_enterprise_preview` table.');
   }
@@ -98,5 +99,30 @@ function ww_enterprise_uninstall() {
   }
   else {
     drupal_set_message('Module `ww_enterprise`: Successfully removed the `ww_enterprise_vocabulary_map` table.');
+  }
+}
+
+/**
+ * Deletes old preview nodes. Previews were previously stored as nodes.
+ *
+ */
+function deleteOldPreviewNodes()
+{
+  $dbConnection = Database::getConnection();
+  $result = $dbConnection->select( 'ww_enterprise_preview', 'p' )
+    ->fields( 'p', array('vid', 'nid', 'hash' ) )
+    ->execute();
+  $resultSet = $result->fetchAssoc(); // Need to use fetchAssoc because we are not sure if the record actually exists.
+  $nodeIds = array();
+  while ( $resultSet ) {
+    $nodeIds[] = $resultSet['nid'];
+    $resultSet = $result->fetchAssoc();
+  }
+
+  if ( $nodeIds ) {
+    $nodes = Drupal\node\Entity\Node::loadMultiple($nodeIds);
+    if ($nodes) {
+      \Drupal::entityManager()->getStorage('node')->delete($nodes);
+    }
   }
 }

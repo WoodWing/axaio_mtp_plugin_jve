@@ -1492,9 +1492,8 @@ function mapNodeValues(NodeInterface $node, $formValues, $previewMode) {
  * @return string URL of the publish node. When no node id given, the Drupal site URL is returned.
  */
 function getNodeUrl($nid) {
-  // Remove :80 from base url, xmlrpc client on Enterprise side adds this to SERVER_HOST :(
   global $base_url;
-  $url = preg_replace('|^http://([^/]*):80/|', 'http://$1/', $base_url, 1); // Todo Is this something we have to for the preview URL?
+  $url = $base_url;
 
   if ($nid == NULL) {
     return $url;

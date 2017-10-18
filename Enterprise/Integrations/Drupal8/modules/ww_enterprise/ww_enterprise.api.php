@@ -25,6 +25,5 @@
  *   - Preview: TRUE if a preview is being generated, FALSE otherwise.
  */
 function hook_ww_enterprise_node_map_alter(\Drupal\node\NodeInterface $node, $form_values, $options) {
-//  $node->title->value = 'Overriden title';
   $node->setTitle('Overridden title');
 }
