@@ -345,35 +345,34 @@ function ww_enterprise_xmlrpc_saveNode($dossierProps, $formValues, $attachments,
     throw new \Exception('Could not authenticate the user.');
   }
 
-  if (!in_array($dossierProps['Action'], array(
-    'Publish',
-    'Preview',
-    'Update'
-  ))) {
-    throw new \Exception('Unknown Action: ' . $dossierProps['Action']);
-  }
-
   $result = array();
   try {
+    if (!in_array($dossierProps['Action'], array(
+      'Publish',
+      'Preview',
+      'Update'
+    ))) {
+      throw new \Exception('Unknown Action: ' . $dossierProps['Action']);
+    }
     checkFilters();
 
     // Find the node type based on the UUID provided from Enterprise. (We cannot rely on the original id as this
     // can be changed by the user.
     $originalNodeUuid = $formValues['DRUPAL8_CONTENT_TYPE'][0];
-    $originalType = NULL;
+    $originalNodeType = NULL;
     $nodeTypeId = NULL;
     $nodeTypeLabel = NULL;
     $nodeTypes = \Drupal\node\Entity\NodeType::loadMultiple();
     /** @var \Drupal\node\Entity\NodeType $nodeType */
     foreach ($nodeTypes as $nodeType) {
       if ($nodeType->uuid() == $originalNodeUuid) {
-        $originalType = $nodeType->id();
+        $originalNodeType = $nodeType->id();
         $nodeTypeId = $nodeType->id();
         $nodeTypeLabel = $nodeType->label();
         break; // Found.
       }
     }
-    if (is_null($originalType)) {
+    if (is_null($originalNodeType)) {
       throw new \Exception ('Attempting to save a node with an unknown Node Type UUID: ' . $originalNodeUuid);
     }
 
@@ -399,7 +398,7 @@ function ww_enterprise_xmlrpc_saveNode($dossierProps, $formValues, $attachments,
         $uid = $publishUser->id();
       }
 
-      $node = Drupal\node\Entity\Node::create(array('type' => $originalType));
+      $node = Drupal\node\Entity\Node::create(array('type' => $originalNodeType));
     }
     else { // Update
       // Verify that we have a Node ID for the node to be updated.
@@ -431,14 +430,14 @@ function ww_enterprise_xmlrpc_saveNode($dossierProps, $formValues, $attachments,
 
     $url = NULL;
     $nodeId = NULL;
-    if ($dossierProps['Action'] == 'Publish') {
+    if ($dossierProps['Action'] == 'Publish' || $dossierProps['Action'] == 'Update') {
       $node->save();
       $nodeId = $node->id();
       $url = getNodeUrl($nodeId);
     }
     elseif ($dossierProps['Action'] == 'Preview') {
       $key = storeNodeForPreview($node);
-      $url = createAutoLogOnUrlForPreview( $key );
+      $url = createAutoLogOnUrlForPreview($key);
     }
 
     $result = array('nid' => $nodeId, 'url' => $url);
