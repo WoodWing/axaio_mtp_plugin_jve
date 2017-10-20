@@ -244,22 +244,23 @@ class IdsAutomationUtils
 			
 			require_once BASEDIR.'/server/bizclasses/BizPage.class.php';
 			if( $newStatus->Produce ) { // Produce/Output status
+				$isStatusChanged = $prevStatusId != $newStatusId;
 				if( self::isIdsClientFeatureValue( 'CreatePagePDFOnProduce' ) &&
-					!BizPage::hasOutputRenditionPDF( $objId ) &&
-					( $prevStatusId != $newStatusId ) // EN-89302
+					( !BizPage::hasOutputRenditionPDF( $objId ) ||
+					( $isStatusChanged )) // EN-89302
 				) {
 					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePagePDFOnProduce is configured for IDS. Action needed.' );
 					$isTrigger = true;
 				} elseif( self::isIdsClientFeatureValue( 'CreatePageEPSOnProduce' ) &&
-					!BizPage::hasOutputRenditionEPS( $objId ) &&
-					( $prevStatusId != $newStatusId ) // EN-89302
+					( !BizPage::hasOutputRenditionEPS( $objId ) ||
+					( $isStatusChanged )) // EN-89302
 				) {
 					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePageEPSOnProduce is configured for IDS, '.
 										'but layout has no EPSs. Action needed.' );
 					$isTrigger = true;
 				} elseif( self::isIdsClientFeatureValue( 'CreatePagePreviewOnProduce' ) &&
-					!BizPage::hasPreviewRendition( $objId ) &&
-					( $prevStatusId != $newStatusId ) // EN-89302
+					( !BizPage::hasPreviewRendition( $objId ) ||
+					( $isStatusChanged )) // EN-89302
 				) {
 					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePagePreviewOnProduce is configured for IDS, '.
 										'but layout has no previews. Action needed.' );
