@@ -127,7 +127,7 @@ class DBObjectLock extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename(self::TABLENAME);
 		$sql = "DELETE FROM $db WHERE `object` = ?";
-		$params = array($object);
+		$params = array( intval( $object ));
 		if ($usr) {
 			$sql .= " AND `usr`= ?";
 			$params[] = strval( $usr );
