@@ -145,8 +145,7 @@ function ww_enterprise_xmlrpc_getContentTypes($enableTestMode = FALSE) {
           $contentTypeInformation[$type->getOriginalId()] = array(
             'type' => $type->id(),
             'name' => $type->label(),
-            'description' => strip_tags($type->getDescription()),
-            // Strip out h tags.
+            'description' => strip_tags($type->getDescription()), // Strip out h tags.
             'original' => $type->uuid()
           );
         }
