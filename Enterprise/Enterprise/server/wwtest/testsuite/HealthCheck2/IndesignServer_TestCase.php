@@ -89,9 +89,11 @@ class WW_TestSuite_HealthCheck2_InDesignServer_TestCase extends TestCase
 		$help .= 'Make sure it has write access to this folder.<br/>';
 		if( empty($errmsg) && (!defined('WEBEDITDIRIDSERV') || WEBEDITDIRIDSERV == '') ) {
 	    	$errmsg = 'InDesign Server workspace (WEBEDITDIRIDSERV) is not defined or not filled in.';
+	    	$this->setResult( 'ERROR', $errmsg, $help );
 		}
 		if( empty($errmsg) && strrpos(WEBEDITDIRIDSERV,'/') != (strlen(WEBEDITDIRIDSERV)-1) ) {
 	    	$errmsg = 'Configured InDesign Server workspace (WEBEDITDIRIDSERV) has no slash (/) as last character.';
+	    	$this->setResult( 'ERROR', $errmsg, $help );
 		}
 
 		// - - - - - - - - - - - - - - - InDesign Servers - - - - - - - - - - - - - - - - - - - - 
