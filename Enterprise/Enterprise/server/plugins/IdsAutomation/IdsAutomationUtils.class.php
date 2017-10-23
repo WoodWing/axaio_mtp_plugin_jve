@@ -205,10 +205,10 @@ class IdsAutomationUtils
 	 * - the given object is a Layout or Layout Module
 	 * - the $newStatusId is not the Personal status
  	 * - the $newStatusId has phase Production
- 	 * - Ouput renditions should be generated, so ONE of the following criterea are met:
+ 	 * - Output renditions should be generated, so the following criteria are met:
   	 *    - the $newStatusId refers to Output status and CLIENTFEATURES for IDS_AUTOMATION has the CreatePagePDFOnProduce
 	 *    or CreatePageEPSOnProduce option
-	 *    - CLIENTFEATURES for IDS_AUTOMATION has the CreatePagePDF or CreatePageEPS option
+	 *    - provided the $newStatusId is not the same as the $prevStatusId: EN-89302.
 	 * If the above criteria are not met it is checked if a job is needed to create a folio for Adobe Dps.
 	 *
 	 * @param integer $objId The id of object to be checked.
@@ -246,28 +246,26 @@ class IdsAutomationUtils
 			if( $newStatus->Produce ) { // Produce/Output status
 				$isStatusChanged = $prevStatusId != $newStatusId;
 				if( self::isIdsClientFeatureValue( 'CreatePagePDFOnProduce' ) &&
-					( !BizPage::hasOutputRenditionPDF( $objId ) ||
-					( $isStatusChanged )) // EN-89302
-				) {
-					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePagePDFOnProduce is configured for IDS. Action needed.' );
+					 $isStatusChanged ) // EN-89302
+				{
+					LogHandler::Log( 'IdsAutomation', 'INFO', 'Status has changed and ' .
+										'CreatePagePDFOnProduce is configured for IDS. Action needed.' );
 					$isTrigger = true;
 				} elseif( self::isIdsClientFeatureValue( 'CreatePageEPSOnProduce' ) &&
-					( !BizPage::hasOutputRenditionEPS( $objId ) ||
-					( $isStatusChanged )) // EN-89302
-				) {
-					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePageEPSOnProduce is configured for IDS, '.
-										'but layout has no EPSs. Action needed.' );
+					$isStatusChanged ) // EN-89302
+				{
+					LogHandler::Log( 'IdsAutomation', 'INFO', 'Status has changed and '.
+										'CreatePageEPSOnProduce is configured for IDS. Action needed.' );
 					$isTrigger = true;
 				} elseif( self::isIdsClientFeatureValue( 'CreatePagePreviewOnProduce' ) &&
-					( !BizPage::hasPreviewRendition( $objId ) ||
-					( $isStatusChanged )) // EN-89302
-				) {
-					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePagePreviewOnProduce is configured for IDS, '.
-										'but layout has no previews. Action needed.' );
+					$isStatusChanged ) // EN-89302
+				{
+					LogHandler::Log( 'IdsAutomation', 'INFO', 'Status has changed and '.
+										'CreatePagePreviewOnProduce is configured for IDS. Action needed.' );
 					$isTrigger = true;
 				} else {
 					LogHandler::Log( 'IdsAutomation', 'INFO', 'Moving layout into a Produce status, '.
-						'but no action for IDS configured or layout has Output renditions already. No action needed.' );
+						'but no action for IDS configured or Status remains the same. No action needed.' );
 				}
 			} else {
 				LogHandler::Log( 'IdsAutomation', 'INFO', 'Not moving layout into a Produce status. No action needed.' );
