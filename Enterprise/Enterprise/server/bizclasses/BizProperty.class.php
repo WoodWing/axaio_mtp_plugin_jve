@@ -2283,6 +2283,7 @@ class BizProperty
 		}
 		if ( $doPlacedOn || $doPlacedOnPage ) {
 			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
+			require_once BASEDIR.'/server/bizclasses/BizPage.class.php';
 			$rowsAll = DBObject::getPlacedOnRowsByObjIds( $objIds );
 			if ( $objIds ) foreach ( $objIds as $objId ) {
 				if ( array_key_exists( $objId, $rowsAll ) ) {
@@ -2291,24 +2292,20 @@ class BizProperty
 					$rows = $rowsAll[$objId];
 					if ( $rows ) foreach ( $rows as $row ) {
 						$placedOn[] = $row['name'];
-						// BZ#31032: Pagerange 1 => 001; Pagerange 2-5 => 002-005; 4,45-46,48 => 004,045-046,048
-						$placedOnPageStr = '';
-						$placedOnPageRanges = preg_split( '/([,-])/', $row['pagerange'], -1, PREG_SPLIT_DELIM_CAPTURE );
-						if ($placedOnPageRanges ) foreach ( $placedOnPageRanges as $pageElem ) {
-							if ( is_numeric( $pageElem ) ) {
-								$paddedPageElem = str_pad( $pageElem, 3, "0", STR_PAD_LEFT );
-								$placedOnPageStr .= $paddedPageElem;
-							} else {
-								$placedOnPageStr .= $pageElem; // add ',' or '-'
-							}
-						}
-						$placedOnPage[] = $placedOnPageStr;
+						$placedOnPage[] = BizPage::addZeroPaddingToPageNumberRange( $row['pagerange'] ); // BZ#31032
 					}
 					if ( $doPlacedOn ) {
 						$specialData[$objId]['PlacedOn'] = implode( ', ', $placedOn );
 					}
 					if ( $doPlacedOnPage ) {
 						$specialData[$objId]['PlacedOnPage'] = implode( ', ', $placedOnPage );
+					}
+				} else { // Object is not placed.
+					if ( $doPlacedOn ) {
+						$specialData[$objId]['PlacedOn'] = '';
+					}
+					if ( $doPlacedOnPage ) {
+						$specialData[$objId]['PlacedOnPage'] = '';
 					}
 				}
 			}

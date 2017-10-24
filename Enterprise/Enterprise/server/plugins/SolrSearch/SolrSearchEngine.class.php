@@ -1480,7 +1480,11 @@ class SolrSearchEngine extends BizQuery
 			if( !in_array('Trash', $areas) && BizProperty::isCustomPropertyName( $fieldToIndex ) ) { // Index custom properties
 				// The rows from the database won't contain custom properties when in the Trash.
 				$customData = $this->findMetaDataByField( $fieldToIndex, $object->MetaData->ExtraMetaData);
-				$fieldDefinition[$fieldToIndex] = $this->createCustomValue( $customData );
+				// The $customData can be null if the custom property is defined for a specific brand and the current object
+				// resides in a different brand.
+				if ( !is_null( $customData ) ) {
+					$fieldDefinition[ $fieldToIndex ] = $this->createCustomValue( $customData );
+				}
 			}
 			else // Standard properties
 			{
@@ -1979,7 +1983,7 @@ class SolrSearchEngine extends BizQuery
 	 */
 	private function getFirstMetaDataValue($metaDataValue)
 	{
-		if( !is_null($metaDataValue->Values) ) {
+		if( isset($metaDataValue->Values) ) {
 			return $metaDataValue->Values[0];
 		} else {
 			return $metaDataValue->PropertyValues[0]->Value;

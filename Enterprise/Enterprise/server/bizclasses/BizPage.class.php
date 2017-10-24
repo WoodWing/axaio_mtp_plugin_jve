@@ -422,6 +422,31 @@ class BizPage
 	}
 
 	/**
+	 * Converts a page range to a page range padded with zeros on the left.
+	 *
+	 * Padding is done up to three digits.
+	 * Pagerange 1 => 001; Pagerange 2-5 => 002-005; 4,45-46,48 => 004,045-046,048.
+	 *
+	 * @param string $pageRange
+	 * @return string Page range padded with zeros.
+	 */
+	static public function addZeroPaddingToPageNumberRange( $pageRange )
+	{
+		$placedOnPageRangePadded = '';
+		$placedOnPageRanges = preg_split( '/([,-])/', $pageRange, -1, PREG_SPLIT_DELIM_CAPTURE );
+		if( $placedOnPageRanges ) foreach( $placedOnPageRanges as $pageElem ) {
+			if( is_numeric( $pageElem ) ) {
+				$paddedPageElem = str_pad( $pageElem, 3, "0", STR_PAD_LEFT );
+				$placedOnPageRangePadded .= $paddedPageElem;
+			} else {
+				$placedOnPageRangePadded .= $pageElem; // add ',' or '-'
+			}
+		}
+
+		return $placedOnPageRangePadded;
+	}
+
+	/**
 	 * Returns the page range of a layout based on the page ranges by edition.
 	 *
 	 * Page ranges of editions are concatenated using ';' as a separator. If two page ranges of adjacent editions are the
