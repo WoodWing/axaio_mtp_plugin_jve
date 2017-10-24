@@ -93,7 +93,7 @@ class DBAdmFeatureAccess extends DBBase
 			$fields = array( 'featurename', 'accessflag' );
 			$rows = self::listRows( self::TABLENAME, null, null, $where, $fields, $params );
 			if( $rows ) foreach( $rows as $row ) {
-				$flags[ $row['featurename'] ] = self::intToChar( $row['accessflag'] );
+				$flags[ $row['featurename'] ] = self::convertAccessFlagIntToChar( $row['accessflag'] );
 			}
 		}
 		return $flags;
@@ -109,7 +109,7 @@ class DBAdmFeatureAccess extends DBBase
 	{
 		$fields = array( 'featurename' );
 		$where = '`accessflag` = ?';
-		$params = array( self::charToInt( $flag ) );
+		$params = array( self::convertAccessFlagCharToInt( $flag ) );
 		$row = self::getRow( self::TABLENAME, $where, $fields, $params );
 		return isset( $row['featurename'] ) ? $row['featurename'] : null;
 	}
@@ -175,7 +175,7 @@ class DBAdmFeatureAccess extends DBBase
 		} else {
 			$newFlag = $maxFlag + 1;
 		}
-		return self::intToChar( $newFlag );
+		return self::convertAccessFlagIntToChar( $newFlag );
 	}
 
 	/**
@@ -211,7 +211,7 @@ class DBAdmFeatureAccess extends DBBase
 		$row['featurename'] = strval( $obj->Name );
 
 		if( !is_null( $obj->Id ) ) $row['featureid'] = intval( $obj->Id );
-		if( !is_null( $obj->Flag ) ) $row['accessflag'] = self::charToInt( $obj->Flag );
+		if( !is_null( $obj->Flag ) ) $row['accessflag'] = self::convertAccessFlagCharToInt( $obj->Flag );
 
 		return $row;
 	}
@@ -234,31 +234,43 @@ class DBAdmFeatureAccess extends DBBase
 		$obj->Name = strval($row['featurename']);
 
 		$obj->Id = isset($row['featureid']) ? intval($row['featureid']) : null;
-		$obj->Flag = isset($row['accessflag']) && intval($row['accessflag']) !== 0 ? self::intToChar(intval($row['accessflag'])) : null;
+		$obj->Flag = isset($row['accessflag']) ? self::convertAccessFlagIntToChar(intval($row['accessflag'])) : null;
 
 		return $obj;
 	}
 
 	/**
-	 * Converts an integer into a UTF-8 character. Supported are 1-4 byte UTF-8 characters.
+	 * Converts an integer to a UTF-8 character. Supported are 1-4 byte UTF-8 characters.
+	 * Integer zeroes (0) will be converted to an empty string.
 	 *
 	 * @param int $int
 	 * @return string
 	 */
-	static private function intToChar( $int )
+	static private function convertAccessFlagIntToChar( $int )
 	{
-		return mb_convert_encoding( '&#'.intval($int).';', 'UTF-8', 'HTML-ENTITIES' );
+		if( $int === 0 ) {
+			$result = '';
+		} else {
+			$result = mb_convert_encoding( '&#'.intval($int).';', 'UTF-8', 'HTML-ENTITIES' );
+		}
+		return $result;
 	}
 
 	/**
 	 * Converts a UTF-8 character into an integer. Supported are 1-4 byte UTF-8 characters.
+	 * Empty strings will be converted to integer zeroes (0).
 	 *
 	 * @param string $char
 	 * @return int
 	 */
-	static private function charToInt( $char )
+	static private function convertAccessFlagCharToInt( $char )
 	{
-		$result = unpack('N', mb_convert_encoding( $char, 'UCS-4BE', 'UTF-8' ) );
-		return intval( $result[1] );
+		if( $char === '' ) {
+			$result = 0;
+		} else {
+			$unpack = unpack('N', mb_convert_encoding( $char, 'UCS-4BE', 'UTF-8' ) );
+			$result = intval( $unpack[1] );
+		}
+		return $result;
 	}
 }
