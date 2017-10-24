@@ -234,7 +234,7 @@ class DBAdmFeatureAccess extends DBBase
 		$obj->Name = strval($row['featurename']);
 
 		$obj->Id = isset($row['featureid']) ? intval($row['featureid']) : null;
-		$obj->Flag = isset($row['accessflag']) ? self::intToChar($row['accessflag']) : null;
+		$obj->Flag = isset($row['accessflag']) && intval($row['accessflag']) !== 0 ? self::intToChar(intval($row['accessflag'])) : null;
 
 		return $obj;
 	}
