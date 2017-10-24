@@ -241,26 +241,33 @@ class IdsAutomationUtils
 				LogHandler::Log( 'IdsAutomation', 'INFO', "The new status has the skip InDesign Server Automation property set. No action needed." );
 				break;
 			}
-			
+
 			require_once BASEDIR.'/server/bizclasses/BizPage.class.php';
 			if( $newStatus->Produce ) { // Produce/Output status
+				// **The-Check-Order-Note.
+				// Whether to trigger IDS job should be determined by if the status has been changed or not.
+				// However, in the case if the status has not been changed, the status is in the Produce/Output status and
+				// for some reason, there's no output ( should not happen ), let's trigger the IDS job to create the output.
 				$isStatusChanged = $prevStatusId != $newStatusId;
 				if( self::isIdsClientFeatureValue( 'CreatePagePDFOnProduce' ) &&
-					 $isStatusChanged ) // EN-89302
+					( $isStatusChanged || // EN-89302 // NOTE!! Make sure if status-has-changed is checked first
+						!BizPage::hasOutputRenditionPDF( $objId ))) // only followed by if there's any PDF. See **The-Check-Order-Note.
 				{
-					LogHandler::Log( 'IdsAutomation', 'INFO', 'Status has changed and ' .
+					LogHandler::Log( 'IdsAutomation', 'INFO', 'Status has changed or layout has no PDFs and ' .
 										'CreatePagePDFOnProduce is configured for IDS. Action needed.' );
 					$isTrigger = true;
 				} elseif( self::isIdsClientFeatureValue( 'CreatePageEPSOnProduce' ) &&
-					$isStatusChanged ) // EN-89302
+					( $isStatusChanged ||  // EN-89302 // NOTE!! Make sure if status-has-changed is checked first
+						!BizPage::hasOutputRenditionEPS( $objId ))) // only followed by if there's any EPS. See **The-Check-Order-Note.
 				{
-					LogHandler::Log( 'IdsAutomation', 'INFO', 'Status has changed and '.
+					LogHandler::Log( 'IdsAutomation', 'INFO', 'Status has changed or layout has no EPSs and '.
 										'CreatePageEPSOnProduce is configured for IDS. Action needed.' );
 					$isTrigger = true;
 				} elseif( self::isIdsClientFeatureValue( 'CreatePagePreviewOnProduce' ) &&
-					$isStatusChanged ) // EN-89302
+					( $isStatusChanged || // EN-89302 // NOTE!! Make sure if status-has-changed is checked first
+						!BizPage::hasPreviewRendition( $objId ))) // only followed by if there's any Preview. See **The-Check-Order-Note.
 				{
-					LogHandler::Log( 'IdsAutomation', 'INFO', 'Status has changed and '.
+					LogHandler::Log( 'IdsAutomation', 'INFO', 'Status has changed or layout has no previews and '.
 										'CreatePagePreviewOnProduce is configured for IDS. Action needed.' );
 					$isTrigger = true;
 				} else {
