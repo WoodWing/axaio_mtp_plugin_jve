@@ -851,7 +851,7 @@ class BizWebEditWorkspace
 					$baseStories = $baseStoriesList->length > 0 ? $baseStoriesList->item(0) : null;
 					if( $baseStories ) {
 						$baseStories->appendChild( $newBaseStory );
-						LogHandler::Log( 'WebEditWorkspace', 'ERROR', 'Added story ['.$storyGuid.'] to compose_base.xml.' );
+						LogHandler::Log( 'WebEditWorkspace', 'DEBUG', 'Added story ['.$storyGuid.'] to compose_base.xml.' );
 					} else {
 						LogHandler::Log( 'WebEditWorkspace', 'ERROR', 'Could not find/update "stories" element in compose_base.xml.' );
 					}
