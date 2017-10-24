@@ -60,8 +60,8 @@ class DBSection extends DBBase
 	    if( empty( $pubId ) ) {
 		    return null;
 	    }
-	    $where = '`publication` = ?';
-	    $params = array( intval( $pubId ) );
+	    $where = '`publication` = ? AND `issue` = ? ';
+	    $params = array( intval( $pubId ), 0 );
 	    $orderBy = array( 'code' => true );
 	    return self::listRows( self::TABLENAME, 'id', 'section', $where, $fieldNames, $params, $orderBy );
     }
