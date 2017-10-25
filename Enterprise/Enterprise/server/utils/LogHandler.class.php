@@ -41,7 +41,7 @@ Improvements since v8.0 with changed behavior:
   So, there is no longer a need to call getDebugBackTrace() or debug_backtrace() and pass it to LogHandler::Log().
 - For raised exceptions (BizException) an ERROR or WARN is always logged. (Before, it was done in DEBUG mode only.)
   Do not call LogHandler::Log() just before raising a BizException, or after catching it, or else you'll have two logs.
-- The debug loglevel can now be configured per client (IP). Therefor, DEBUGLEVEL option is replaced by DEBUGLEVELS (prural).
+- The debug loglevel can now be configured per client (IP). Therefor, DEBUGLEVEL option is replaced by DEBUGLEVELS (plural).
   Making a code fragment debug-only must be done with LogHandler::debugMode() which checks the configured debug
   level for the client (IP) doing the request. The function also checks OUTPUTDIRECTORY option to be configured.
 - Defines/settings made at configserver.php for log configuration became mandatory and are checked at wwtest.
@@ -100,13 +100,14 @@ Improvements since 10.1.4:
 class LogHandler
 {
 	private static $logLevels = array(
-		'NONE' 	=> 0,         // Suppress all logging.
-		'CONTEXT' => 1,       // Indicates the calling context. NOT directly logged; Logged on first best 'normal' log.
-		'ERROR' => 2,         // Exceptional error. Stops execution in most cases.
-		'WARN' 	=> 3,         // Warning. Should NOT happen. Recommened option for production.
-		'INFO' 	=> 4,         // Bus stop. Operation succesfull or found/determined details.
-		'DEBUG' => 5,         // For debugging purposes only. Should not be used in production.
-		'NOTINSTALLED' => 6,	// feature is not installed, used in WWTest
+		'NONE'         => 0, // Suppress all logging.
+		'CONTEXT'      => 1, // Indicates the calling context. NOT directly logged; Logged on first best 'normal' log.
+		'ERROR'        => 2, // Exceptional error. Stops execution in most cases.
+		'WARN'         => 3, // Warning. Should NOT happen. Recommended option for production.
+		'INFO'         => 4, // Bus stop. Operation successful or found/determined details.
+		'DEPRECATED'   => 5, // To inform that the code / function  is deprecated.
+		'DEBUG'        => 6, // For debugging purposes only. Should not be used in production.
+		'NOTINSTALLED' => 7, // feature is not installed, used in WWTest
 	);
 	private static $logged = false;
 	private static $context = '';
@@ -142,7 +143,7 @@ class LogHandler
 		} else {
 			$reference = '';
 		}
-		$levColor = ( $level == 'ERROR' ) ? '#ff0000' : ( ( $level == 'WARN' ) ? '#ffaa00' : '#00cc00' ); // red,orange,green
+		$levColor = ( $level == 'ERROR' ) ? '#ff0000' : ( ( $level == 'WARN' || $level == 'DEPRECATED' ) ? '#ffaa00' : '#00cc00' ); // red,orange,green
 		$line =
 			'<tr class="d" id="'.$time.'">'.
 			'<td><nobr>'.$time.'</nobr>'.$reference.'</td>'.
@@ -1054,7 +1055,7 @@ class LogHandler
 			return;
 		}
 		// Suppress logging for frequently polling services (except when there are errors or warnings).
-		if( $level != 'ERROR' && $level != 'WARN' && self::suppressLoggingForService() ) {
+		if( $level != 'ERROR' && $level != 'WARN' && $level != 'DEPRECATED' && self::suppressLoggingForService() ) {
 			return;
 		}
 
@@ -1068,7 +1069,7 @@ class LogHandler
 		$msg = $header;
 
 		// Add calling stack information in debug mode for errors and warnings.
-		$isDebugWarnError = ( self::$debugLevel == 'DEBUG' && ( $level == 'ERROR' || $level == 'WARN' ) );
+		$isDebugWarnError = ( self::$debugLevel == 'DEBUG' && ( $level == 'ERROR' || $level == 'WARN' || $level == 'DEPRECATED' ));
 		if( $isDebugWarnError ) {
 			$message .= self::composeStack( $exception );
 		}
@@ -1262,7 +1263,7 @@ class LogHandler
 			self::Log('errorhandler', 'ERROR', 'User Error: '.$file.' '.$line.' '.$errmsg);
 			// fatal user error has been set explicitly, so we continue to return SOAP fault
 		} else {
-			// Let's be robust here on the newbees (we are in error mode, so let's try to get most out of it)
+			// Let's be robust here on the newbies (we are in error mode, so let's try to get most out of it)
 			if( !defined('E_RECOVERABLE_ERROR') ) define('E_RECOVERABLE_ERROR', 4096 ); // PHP v5.2
 			if( !defined('E_DEPRECATED') )        define('E_DEPRECATED',        8192 ); // PHP v5.3
 			if( !defined('E_USER_DEPRECATED') )   define('E_USER_DEPRECATED',  16384 ); // PHP v5.3
@@ -1273,10 +1274,10 @@ class LogHandler
 				// but did not leave the Engine in an unstable state. So we quit here to continue production.
 				return;
 			} else if( $errno == E_DEPRECATED ) {
-				self::Log('errorhandler', 'WARN', 'Deprecated: '.$file.' '.$line.' '.$errmsg);
+				self::Log('errorhandler', 'DEPRECATED', 'Deprecated: '.$file.' '.$line.' '.$errmsg);
 				return;
 			} else if( $errno == E_USER_DEPRECATED ) {
-				self::Log('errorhandler', 'WARN', 'User Deprecated: '.$file.' '.$line.' '.$errmsg);
+				self::Log('errorhandler', 'DEPRECATED', 'User Deprecated: '.$file.' '.$line.' '.$errmsg);
 				return;
 			} else { // should not happen...
 				self::Log('errorhandler', 'ERROR', 'Unknown Error: '.$file.' '.$line.' '.$errmsg);
