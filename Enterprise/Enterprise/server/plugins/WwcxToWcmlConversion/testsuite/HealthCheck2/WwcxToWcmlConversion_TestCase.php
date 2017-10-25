@@ -37,8 +37,29 @@ class WW_TestSuite_HealthCheck2_WwcxToWcmlConversion_TestCase extends TestCase
 			return;
 		}
 
+		require_once BASEDIR.'/server/plugins/WwcxToWcmlConversion/WwcxToWcmlUtils.class.php';
+		// This plug-in can only function properly when there is an InDesign Server instance available.
+		if( !WwcxToWcmlUtils::hasActiveInDesignServerForWcmlConversion() ) {
+			require_once BASEDIR.'/server/bizclasses/BizInDesignServer.class.php';
+			$idsObjs = BizInDesignServer::listInDesignServers();
+
+			$configTip = 'Please configure an InDesign Server CC 2014 or CC2015 instance or alternatively disable this plug-in.';
+
+			foreach( $idsObjs as $idsObj ) {
+				if( $idsObj->Active && (int)$idsObj->ServerVersion >= 12 ) { // 12 = CC 2017
+					$this->setResult('ERROR',
+						'The configured InDesign Server versions are all too new for this plug-in to function.',
+						$configTip );
+					return;
+				}
+			}
+			$this->setResult('ERROR',
+				'This server plug-in needs an InDesign Server instance (CC 2014 or 2015) to convert articles.',
+				$configTip );
+			return;
+		}
+
 		// Note that the WEBEDITDIR and WEBEDITDIRIDSERV are required for this server plug-in, 
 		// but those are already checked at WW_TestSuite_HealthCheck2_InDesignServer_TestCase.
-		// Same for an active IDS CS5 (or later) installation. So we do NOT check that here again.
 	}
 }
