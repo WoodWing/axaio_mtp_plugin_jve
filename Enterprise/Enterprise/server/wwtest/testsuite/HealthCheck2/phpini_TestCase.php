@@ -135,6 +135,14 @@ class WW_TestSuite_HealthCheck2_PhpIni_TestCase extends TestCase
 			'xsl' => 'This will break HTML5 exports from ContentStation'
 		);
 
+		// Note that since Enterprise 10.0 RabbitMQ AMQP requires the bcmatch library.
+		// For example used in: php-amqplib/PhpAmqpLib/Wire/AMQPWriter.php.
+		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
+		if( BizMessageQueue::isInstalled()) {
+			LogHandler::Log('wwtest', 'INFO', 'Using RabbitMQ which requires PHP "bcmath" library.');
+			$exts['bcmath'] = 'https://redirect.woodwing.com/v1/?path=enterprise-server/php-manual/bcmath-installation';
+		}
+
 		foreach( $exts as $ext => $phpManual ) {
 			if( !extension_loaded($ext) ) {
 				$passed = false;
