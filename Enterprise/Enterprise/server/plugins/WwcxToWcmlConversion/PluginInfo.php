@@ -18,7 +18,7 @@ class WwcxToWcmlConversion_EnterprisePlugin extends EnterprisePlugin
 		$info->Version     = getProductVersion(__DIR__);
 		$info->Description = 'Converts CS4 (WWCX) articles to CS5 (WCML) format with the '.
 			'help of InDesign Server CS5 or higher (up till CC 2015). This happens on-the-fly '.
-			'when an CS4 article gets opened for editing using the Content Station editor.';
+			'when a CS4 article gets opened for editing using the Content Station editor.';
 		$info->Copyright   = COPYRIGHT_WOODWING;
 		return $info;
 	}

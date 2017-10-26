@@ -147,7 +147,7 @@ class WwcxToWcmlUtils
 		$idsObjs = BizInDesignServer::listInDesignServers();
 		foreach( $idsObjs as $idsObj ) {
     		if( $idsObj->Active && (int)$idsObj->ServerVersion >= 7 && (int)$idsObj->ServerVersion <= 11 ) { // 7 = CS5, 11 = CC 2015
-    			return true; // Active CS5 or higher InDesign Server found
+    			return true; // Active InDesign Server found in the correct version range
 			}
 		}
 		return false;
