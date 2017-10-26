@@ -767,7 +767,7 @@ class BizObject
 		}
 		// Save other stuff elements, relations, messages, etc.
 		self::saveExtended( $id, $object, $user, false );
-		self::handleDeadlineForSaveObject( $object, $newRow, $currRow['deadline'] );
+		BizDeadlines::handleDeadlineForSaveObject( $object, $newRow, $currRow['deadline'] );
 
 		// Update object, both in the database as the Filestore.
 		$object = self::updateDatabaseAndFilestore( $object, $user, $newRow, $now, $currRow );
@@ -1623,7 +1623,7 @@ class BizObject
 		// ==== Handle deadline
 		$newDeadline = isset( $newRow['deadline'] ) ? $newRow['deadline'] : null;
 		$pubId = $newRow['publication'];
-		self::handleDeadlineForSetProperties( $id, $pubId, $targets, $curType, $curState, $curSection, $state, $categoryId, $newDeadline );
+		BizDeadlines::handleDeadlineForSetProperties( $id, $pubId, $targets, $curType, $curState, $curSection, $state, $categoryId, $newDeadline );
 
 		//self::saveMetaDataExtended( $id, $newRow, ($curState != $state || $curSection != $meta->BasicMetaData->Category->Id ), $issueIdsDL );
 
@@ -1690,93 +1690,6 @@ class BizObject
 		// return info
 		require_once BASEDIR.'/server/interfaces/services/wfl/WflSetObjectPropertiesResponse.class.php';
 		return new WflSetObjectPropertiesResponse( $modifiedobj->MetaData, $modifiedobj->Targets );
-	}
-
-	/**
-	 * Handles the deadline of an object. The context of the method is setObjectProperties().
-	 *
-	 * Function either takes the deadline entered by the user or
-	 * recalculate the deadline (relative deadline) when user changes the category or status.
-	 *
-	 * When user changes the category / status, and at the same time also entered a deadline in the dialog,
-	 * the function will recalculate the deadline (relative deadline) and ignores the deadline entered by the
-	 * user.
-	 *
-	 * When user only entered the deadline, function checks if the deadline entered is later than the one set
-	 * at the Issue level, function throws error when the the date set is later than the one set in Issue level.
-	 *
-	 * This method is closely related to handleDeadlineForSaveObject().
-	 *
-	 * @param int $id Id of the object where the deadline will be calculated and handled.
-	 * @param int $pubId Publication id.
-	 * @param array $targets The targets of the object of which the issue will be retrieved to get its deadline setting.
-	 * @param string $objectType Object's type.
-	 * @param string $oriState Original object's status.  This is to check if the user has changed the status.
-	 * @param string $oriSection Original category. This is to check if the user has changed the category.
-	 * @param string $state The current status of the object.
-	 * @param int $categoryId The current category of the object.
-	 * @param null|string $newDeadline User typed deadline taken from workflow dialog. Null when deadline not shown at dialog.
-	 */
-	public static function handleDeadlineForSetProperties( $id, $pubId, $targets, $objectType, $oriState, $oriSection, $state, $categoryId, $newDeadline )
-	{
-		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizDeadlines.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-
-		// First look for object-target issues
-		$issueIdsDL = BizTarget::getIssueIds( $targets ); // Object-target issues
-		// Image/Article without object-target issue can inherit issues from relational-targets. BZ#21218
-		if (!$issueIdsDL && BizDeadlines::canInheritParentDeadline( $objectType ) ) {
-			$issueIdsDL = BizTarget::getRelationalTargetIssuesForChildObject( $id );
-		}
-
-		// If state or category are changed the deadline is recalculated.
-		$reCalcDeadline = ( $oriState != $state || $oriSection != $categoryId );
-		$deadlineHard = '';
-
-		// A deadline for an object that is not assigned to any issue has no meaning, so we ignore.
-		// If deadline is set and object has issues, check if the set deadline is not beyond earliest possible deadline.
-		if( !$reCalcDeadline && $issueIdsDL && $newDeadline ) {
-			$deadlineHard = $newDeadline;
-			BizDeadlines::checkDeadline( $issueIdsDL, $categoryId, $newDeadline );
-		}
-
-		// In case state/category are changed a deadline set by hand is ignored (always recalculate).
-		// This behavior is different from the saveObject() where a deadline set by hand always has primacy on
-		// status/category changes.
-		if ( $reCalcDeadline || empty( $deadlineHard ) ) {
-			// Determine if it is normal brand or overruleIssue.
-			$overruleIssueId = 0;
-			if( count( $issueIdsDL ) == 1 ) { // When there are more than 1 issue targeted to an Object, it's definitely not an overruleIssue, so don't need to check.
-				require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-				$overruleIssueId = DBIssue::isOverruleIssue( $issueIdsDL[0] ) ? $issueIdsDL[0] : 0;
-			}
-
-			$deadlines = null;
-			if( BizPublication::isCalculateDeadlinesEnabled( $pubId, $overruleIssueId ) ) {
-				$deadlines = DBObject::objectSetDeadline( $id, $issueIdsDL, $categoryId, $state );
-				if ( BizDeadlines::canPassDeadlineToChild( $objectType ) ) {
-					// Recalculate the deadlines of children without own object-target issue.
-					// This recalculation is limited to an issue change of the parent.
-					// New issue of the parent results in new relational-target issue and so
-					// a new deadline. If the category of the parent changes this has no effect
-					// as the children do not inherit this change.
-					BizDeadlines::recalcDeadlinesIssuelessChilds($id);
-				}
-			}
-		} else {
-			$deadlines = DBObject::setObjectDeadline( $id, $deadlineHard );
-			if ( BizDeadlines::canPassDeadlineToChild( $objectType ) ) {
-				// Set the deadlines of children without own object-target issue.
-				BizDeadlines::setDeadlinesIssuelessChilds( $id, $deadlineHard );
-			}
-		}
-
-		if( $deadlines ) {
-			require_once BASEDIR.'/server/smartevent.php';
-			new smartevent_deadlinechanged( null, $id, $deadlines['Deadline'], $deadlines['DeadlineSoft'] );
-		}
 	}
 
 	/**
@@ -2245,8 +2158,9 @@ class BizObject
 					$latestStateIdForDeadline = $newStateId ? $newStateId : $originalStateId;
 					$latestCatIdForDeadline = $newCategoryId ? $newCategoryId : $originalCategoryId;
 					$deadline = ( isset( $objectProperties['standard']['Deadline'] ) ) ?
-						$objectProperties['standard']['Deadline'] : null;
-					self::handleDeadlineForSetProperties( $id, $publicationId, $targets[$id], $objectType, $originalStateId,
+					$objectProperties['standard']['Deadline'] : null;
+					require_once BASEDIR.'/server/bizclasses/BizDeadlines.class.php';
+					BizDeadlines::handleDeadlineForSetProperties( $id, $publicationId, $targets[ $id ], $objectType, $originalStateId,
 						$originalCategoryId, $latestStateIdForDeadline, $latestCatIdForDeadline, $deadline );
 
 					// Copy task objects to dossier ( For more info, refer to BZ#10308 ).
@@ -4711,7 +4625,7 @@ class BizObject
 	 * @param Object $object
 	 * @return array with the unique issues of the object to calculate the deadline.
 	 */
-	static private function getTargetIssuesForDeadline(/** @noinspection PhpLanguageLevelInspection */
+	static public function getTargetIssuesForDeadline(/** @noinspection PhpLanguageLevelInspection */
 		Object $object )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
@@ -6220,69 +6134,6 @@ class BizObject
 		return $proposedName;
 	}
 
-	/**
-	 * Calculates the deadline and if needed  also updates deadlines of child objects. The context of this method is
-	 * saveObject().
-	 *
-	 * This method is closely related to handleDeadlineForSetProperties().
-	 *
-	 * @param Object $object Object as retrieved from the save request.
-	 * @param array $newFlattenedMetaData The new metadata as it will be used to store the properties of the object.
-	 * @param string $currentDeadLine Currently stored deadline.
-	 */
-	private static function handleDeadlineForSaveObject( $object, $newFlattenedMetaData, $currentDeadLine )
-	{
-		$id = $object->MetaData->BasicMetaData->ID;
-		// Collect object-/relational-target issues from object
-		$issueIdsDL = self::getTargetIssuesForDeadline( $object );
-		// If deadline is set and object has issues check if the set deadline is not beyond earliest possible deadline
-		if( $issueIdsDL && isset( $newFlattenedMetaData['deadline'] ) && $newFlattenedMetaData['deadline'] ) {
-			BizDeadlines::checkDeadline( $issueIdsDL, $newFlattenedMetaData['section'], $newFlattenedMetaData['deadline'] );
-		}
-		// If no deadline set, calculate deadline, else just store the deadline
-		$deadlinehard = '';
-		if( isset( $newFlattenedMetaData['deadline'] ) && $newFlattenedMetaData['deadline'] ) {
-			$deadlinehard = $newFlattenedMetaData['deadline'];
-			if( $currentDeadLine !== $deadlinehard ) {
-				DBObject::setObjectDeadline( $id, $deadlinehard );
-				if( BizDeadlines::canPassDeadlineToChild( $newFlattenedMetaData['type'] ) ) {
-					// Set the deadlines of children without own object-target issue.
-					BizDeadlines::setDeadlinesIssuelessChilds( $id, $deadlinehard );
-				}
-			}
-		} else { // No deadline set, calculate (when "Activate Relative Deadlines" is enabled in brand admin page.).
-			// Determine if it is normal brand or overruleIssue.
-			$overruleIssueId = 0;
-			if( count( $issueIdsDL ) == 1 ) { // When there are more than 1 issue targeted to an Object, it's definitely not an overruleIssue, so don't need to check.
-				require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-				$overruleIssueId = DBIssue::isOverruleIssue( $issueIdsDL[0] ) ? $issueIdsDL[0] : 0;
-			}
-
-			require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-			if( BizPublication::isCalculateDeadlinesEnabled( $newFlattenedMetaData['publication'], $overruleIssueId ) ) {
-				$deadlines = DBObject::objectSetDeadline( $id, $issueIdsDL, $newFlattenedMetaData['section'], $newFlattenedMetaData['state'] );
-				$deadlinehard = $deadlines['Deadline'];
-				if( $currentDeadLine !== $deadlinehard ) {
-					if( BizDeadlines::canPassDeadlineToChild( $newFlattenedMetaData['type'] ) ) {
-						// Recalculate the deadlines of children without own object-target issue.
-						// This recalculation is limited to an issue change of the parent.
-						// New issue of the parent results in new relational-target issue and so
-						// a new deadline. If the category of the parent changes this has no effect
-						// as the children do not inherit this change.
-						BizDeadlines::recalcDeadlinesIssuelessChilds( $id );
-					}
-				}
-			}
-		}
-
-		// Broadcast (soft) deadline (Broadcast only when the hard deadline is given by the user or re-calculated).
-		if( $currentDeadLine !== $deadlinehard ) {
-			require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
-			$deadlinesoft = DateTimeFunctions::calcTime( $deadlinehard, -DEADLINE_WARNTIME );
-			require_once BASEDIR.'/server/smartevent.php';
-			new smartevent_deadlinechanged( null, $id, $deadlinehard, $deadlinesoft );
-		}
-	}
 
 	/**
 	 * Updates the object in the database and next the files in the Filestore.
@@ -6320,7 +6171,7 @@ class BizObject
 			$object->Files,
 			$object->MetaData->WorkflowMetaData->Version );
 
-		$object->Files = array();
+		$object->Files = array(); // The files are moved to the Filestore so they aren't needed anymore.
 
 		return $object;
 	}
