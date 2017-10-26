@@ -39,7 +39,8 @@ class WW_TestSuite_HealthCheck2_WwcxToWcmlConversion_TestCase extends TestCase
 
 		require_once BASEDIR.'/server/plugins/WwcxToWcmlConversion/WwcxToWcmlUtils.class.php';
 		// This plug-in can only function properly when there is an InDesign Server instance available.
-		if( !WwcxToWcmlUtils::hasActiveInDesignServerForWcmlConversion() ) {
+		$wwcxToWcmlUtils = new WwcxToWcmlUtils();
+		if( !$wwcxToWcmlUtils->hasActiveInDesignServerForWcmlConversion() ) {
 			require_once BASEDIR.'/server/bizclasses/BizInDesignServer.class.php';
 			$idsObjs = BizInDesignServer::listInDesignServers();
 
