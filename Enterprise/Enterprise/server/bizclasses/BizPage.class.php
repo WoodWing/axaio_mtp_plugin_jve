@@ -399,6 +399,7 @@ class BizPage
 		if( $pages ) {
 			$editionIds = self::getEditionsFromPages( $pages );
 			$pagesByEditionsSorted = self::assignPagesByEditionsSorted( $pages, $editionIds );
+			require_once BASEDIR.'/server/utils/NumberUtils.class.php';
 			if( $pagesByEditionsSorted ) foreach( $pagesByEditionsSorted as $pagesByEdition ) {
 				$prevPageOrder = reset( $pagesByEdition );
 				$pagesPerRange = array();
