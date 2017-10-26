@@ -6,12 +6,12 @@ class WW_TestSuite_BuildTest_Search_CreateObject_Database_TestCase extends WW_Te
 {
 	public function getDisplayName()
 	{
-		return 'Create Object Database Only';
+		return 'Create Object for Database only.';
 	}
 
 	public function getTestGoals()
 	{
-		return 'Creates an object and validates the object not indexed (no search connectors)';
+		return 'Creates an object and validates the object not indexed (no search connectors).';
 	}
 
 	public function getTestMethods()
