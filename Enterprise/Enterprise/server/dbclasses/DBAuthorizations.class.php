@@ -151,7 +151,7 @@ class DBAuthorizations extends DBBase
 	 *
 	 * @since 10.1.0
 	 * @param integer $brandId
-	 * @param integer$issueId
+	 * @param integer $issueId
 	 * @param integer $userGroupId
 	 * @return array Authorization records sorted by Category, Object Type and Status (code) and indexed by record id.
 	 * @throws BizException
@@ -176,6 +176,36 @@ class DBAuthorizations extends DBBase
 		while( ( $row = $dbh->fetch( $sth ) ) ) {
 			$rows[ $row['id'] ] = $row;
 		}
+		return $rows;
+	}
+
+	/**
+	 * Returns the authorizations as set up by brand (or overrule Brand Issue).
+	 *
+	 * @param int $publ Brand Id
+	 * @param int $issue Issue Id
+	 * @return array db rows
+	 * @since 10.1.5
+	 */
+	public static function getAuthorizationsByBrandIssue( $publ, $issue )
+	{
+		$dbh = DBDriverFactory::gen();
+		$dbg = $dbh->tablename( 'groups' );
+		$dbs = $dbh->tablename( 'publsections' );
+		$dbst = $dbh->tablename( 'states' );
+		$dba = $dbh->tablename( self::TABLENAME );
+
+		$sql = "SELECT g.`name` as `grp`, s.`section` as `section`, a.`state` as `state`, st.`type` as `type`, ".
+			"st.`state` as `statename`, a.`profile` as `profile` ".
+			"FROM {$dbg} g, {$dba} a ".
+			"LEFT JOIN {$dbs} s ON (a.`section` = s.`id`) ".
+			"LEFT JOIN {$dbst} st ON (a.`state` = st.`id`) ".
+			"WHERE a.`grpid` = g.`id` AND a.`publication` = ? AND a.`issue` = ? ".
+			"ORDER BY g.`name`, s.`section`, st.`type`, st.`code`";
+		$params = array( intval( $publ ), intval( $issue ) );
+		$sth = $dbh->query( $sql, $params );
+		$rows = self::fetchResults( $sth );
+
 		return $rows;
 	}
 

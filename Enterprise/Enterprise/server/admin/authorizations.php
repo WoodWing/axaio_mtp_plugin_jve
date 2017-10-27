@@ -895,13 +895,6 @@ class Ww_Admin_Authorizations_App
 	{
 		$profiles = getProfiles();
 
-		$dbh = DBDriverFactory::gen();
-		$dbp = $dbh->tablename( 'publications' );
-		$dbi = $dbh->tablename( 'issues' );
-		$dbg = $dbh->tablename( 'groups' );
-		$dbs = $dbh->tablename( 'publsections' );
-		$dbst = $dbh->tablename( 'states' );
-		$dba = $dbh->tablename( 'authorizations' );
 
 		$txt = '<html><head><title>WoodWing InDesign and InCopy Solutions</title>';
 		$txt .= '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
@@ -912,33 +905,26 @@ class Ww_Admin_Authorizations_App
 		$txt .= '<body style="background-color: #FFFFFF">';
 
 		// header
-		$sql = "select * from $dbp where `id` = $publ";
-		$sth = $dbh->query( $sql );
-		$row = $dbh->fetch( $sth );
+		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
+		$row = DBPublication::listPublications( '*', array( intval( $publ ) ) );
 		$tmp = formvar( $row['publication'] );
 
 		if( $issue > 0 ) {
-			$sql = "select * from $dbi where `id` = $issue";
-			$sth = $dbh->query( $sql );
-			$rowi = $dbh->fetch( $sth );
+			require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+			$rowi = DBIssue::getIssue( array( intval( $issue ) ) );
 			$tmp .= ' / '.formvar( $rowi['name'] );
 		}
+
 		$txt .= '<h1><img src="../../config/images/woodwing95.gif"/> <img src="../../config/images/lock.gif"/> '
 			.BizResources::localize( 'OBJ_AUTHORIZATIONS_FOR' ).' '.$tmp.'</h1>';
 		$txt .= '<table class="text" width="700">';
 
-		$sql = "SELECT g.`name` as `grp`, s.`section` as `section`, a.`state` as `state`, st.`type` as `type`, ".
-			"st.`state` as `statename`, a.`profile` as `profile` ".
-			"FROM $dbg g, $dba a ".
-			"LEFT JOIN $dbs s on (a.`section` = s.`id`) ".
-			"LEFT JOIN $dbst st on (a.`state` = st.`id`) ".
-			"WHERE a.`grpid` = g.`id` and a.`publication` = $publ and a.`issue` = $issue ".
-			"ORDER BY g.`name`, s.`section`, st.`type`, st.`state`";
-		$sth = $dbh->query( $sql );
+		require_once BASEDIR.'/server/dbclasses/DBAuthorizations.class.php';
+		$rows = DBAuthorizations::getAuthorizationsByBrandIssue( $publ, $issue );
 		$color = array( " bgcolor='#eeeeee'", '' );
 		$flip = 0;
 		$grpName = '';
-		while( ( $row = $dbh->fetch( $sth ) ) ) {
+		if( $rows) foreach( $rows  as $row ) {
 			// break group
 			if( $row['grp'] != $grpName ) {
 				$grpName = $row['grp'];
