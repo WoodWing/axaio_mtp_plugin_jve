@@ -65,10 +65,11 @@ class WW_TestSuite_BuildTest_Search_Search_TestCase extends WW_TestSuite_BuildTe
 
 		// Test searching on name and placed on in Solr.
 		$queryParam = array( new QueryParam( 'PlacedOn', '=', '' ) );
-		if( !$this->testSearch( $articleID, $articleName, 'Searching for article', true, $queryParam ) ) {
+		if( !$this->testSearch( $articleID, $articleName, 'Searching for article, not placed.', true, $queryParam ) ) {
 			return false;
 		}
 
+		return true;
 	}
 
 }
