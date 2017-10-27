@@ -157,8 +157,8 @@ class BizFileStoreXmpFileInfo
 					'DEBUG',
 					LogHandler::encodeLogMessage( "XML error in XMP block: {$e->getMessage()}\r\nSkipping this XMP block:\r\n" ).
 					LogHandler::composeCodeBlock( $xmpBlockAsString ) );
-				$xmlBlock = null;
 			}
+			$xmlBlock = null;
 		}
 		return $xmlBlock;
 	}
