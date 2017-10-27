@@ -906,13 +906,15 @@ class Ww_Admin_Authorizations_App
 
 		// header
 		require_once BASEDIR.'/server/dbclasses/DBPublication.class.php';
-		$row = DBPublication::listPublications( '*', array( intval( $publ ) ) );
-		$tmp = formvar( $row['publication'] );
+		$rows = DBPublication::listPublications( '*', array( intval( $publ ) ) );
+		$publicationRow = array_shift( $rows );
+		$tmp = formvar(  $publicationRow['publication'] );
 
 		if( $issue > 0 ) {
 			require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-			$rowi = DBIssue::getIssue( array( intval( $issue ) ) );
-			$tmp .= ' / '.formvar( $rowi['name'] );
+			$rows = DBIssue::getIssue( array( intval( $issue ) ) );
+			$issueRow = array_shift( $rows );
+			$tmp .= ' / '.formvar( $issueRow['name'] );
 		}
 
 		$txt .= '<h1><img src="../../config/images/woodwing95.gif"/> <img src="../../config/images/lock.gif"/> '
