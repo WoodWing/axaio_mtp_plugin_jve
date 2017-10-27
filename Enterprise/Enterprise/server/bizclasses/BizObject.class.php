@@ -2149,6 +2149,7 @@ class BizObject
 				DBlog::logMultiService( $user, 'MultiSetObjectProperties', $objectIds, $objectType, $publicationId, $sections, $states, $versions, $routeTos );
 
 				require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
+				require_once BASEDIR.'/server/bizclasses/BizDeadlines.class.php';
 				foreach ( $objectIds as $id ) {
 					$originalStateId = $invokedObjects[$id]->WorkflowMetaData->State->Id;
 					$originalCategoryId = $invokedObjects[$id]->BasicMetaData->Category->Id;
@@ -2159,7 +2160,6 @@ class BizObject
 					$latestCatIdForDeadline = $newCategoryId ? $newCategoryId : $originalCategoryId;
 					$deadline = ( isset( $objectProperties['standard']['Deadline'] ) ) ?
 					$objectProperties['standard']['Deadline'] : null;
-					require_once BASEDIR.'/server/bizclasses/BizDeadlines.class.php';
 					BizDeadlines::handleDeadlineForSetProperties( $id, $publicationId, $targets[ $id ], $objectType, $originalStateId,
 						$originalCategoryId, $latestStateIdForDeadline, $latestCatIdForDeadline, $deadline );
 
