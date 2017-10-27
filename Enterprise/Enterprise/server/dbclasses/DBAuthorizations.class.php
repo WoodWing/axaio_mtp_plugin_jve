@@ -195,8 +195,8 @@ class DBAuthorizations extends DBBase
 		$dbst = $dbh->tablename( 'states' );
 		$dba = $dbh->tablename( self::TABLENAME );
 
-		$sql = "SELECT g.`name` as `grp`, s.`section` as `section`, a.`state` as `state`, st.`type` as `type`, ".
-			"st.`state` as `statename`, a.`profile` as `profile` ".
+		$sql = "SELECT g.`name` AS `grp`, s.`section` AS `section`, a.`state` AS `state`, st.`type` AS `type`, ".
+			"st.`state` AS `statename`, a.`profile` AS `profile` ".
 			"FROM {$dbg} g, {$dba} a ".
 			"LEFT JOIN {$dbs} s ON (a.`section` = s.`id`) ".
 			"LEFT JOIN {$dbst} st ON (a.`state` = st.`id`) ".
