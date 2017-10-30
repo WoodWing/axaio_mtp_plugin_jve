@@ -525,7 +525,7 @@ class DBIssue extends DBBase
 					$sql .= "AND issues.`active` = ? ";
 					$params[] = 'on';
 				}
-				"ORDER BY issues.`id` ASC ";
+		$sql .= "ORDER BY issues.`id` ASC ";
 		$sth = $dbDriver->query( $sql, $params );
 
 		$result = array();
