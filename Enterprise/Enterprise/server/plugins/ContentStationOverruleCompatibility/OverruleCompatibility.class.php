@@ -235,7 +235,7 @@ class OverruleCompatibility
 			// Get all overrule issues:
 			require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
 			require_once BASEDIR . '/server/dbclasses/DBPublication.class.php';
-			$overruleIssues = DBIssue::listAllOverruleIssuesWithPub();
+			$overruleIssues = DBIssue::listAllOverruleIssuesWithPub( true );
 			if( !empty($overruleIssues) ) {
 				// Walk thru overrule issue array to convert publication ids to our fake overrule pubs
 				$newOverruleIssues = array();

@@ -503,22 +503,29 @@ class DBIssue extends DBBase
 	}
 	
 	/**
-	 *  Lists ALL issues that overrule their publication in a array
-	 *  @return array (key-value), key being the issueId and value the publication id of that overrule issue
+	 * Lists ALL issues that overrule their publication in a array
+	 *
+	 * @param bool $onlyActive Return only active overrule brand issues. Default is false.
+	 * @return array (key-value), key being the issueId and value the publication id of that overrule issue
 	 */
-	static public function listAllOverruleIssuesWithPub()
+	static public function listAllOverruleIssuesWithPub( $onlyActive = false )
 	{
 		//BZ#7258
 		$dbDriver = DBDriverFactory::gen();
 		$issuesTable = $dbDriver->tablename( self::TABLENAME );
 		$channelsTable = $dbDriver->tablename( 'channels' );
+		$params = array();
 
 		$sql = "SELECT issues.`id`, channels.`publicationid` ".
 				"FROM {$issuesTable} issues ".
 				"INNER JOIN {$channelsTable} channels ON (channels.`id` = issues.`channelid`) ".
-				"WHERE issues.`overrulepub` = ? AND issues.`active` = ? ".
+				"WHERE issues.`overrulepub` = ? ";
+				$params[] = 'on';
+				if( $onlyActive ) {
+					$sql .= "AND issues.`active` = ? ";
+					$params[] = 'on';
+				}
 				"ORDER BY issues.`id` ASC ";
-		$params = array( 'on', 'on' );
 		$sth = $dbDriver->query( $sql, $params );
 
 		$result = array();
