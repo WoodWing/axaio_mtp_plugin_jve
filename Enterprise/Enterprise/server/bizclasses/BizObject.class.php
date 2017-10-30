@@ -6141,7 +6141,9 @@ class BizObject
 	 * The update of the object in the database and the update of the files in the Filestore is seen as one action.
 	 * The version information must in line for both the object as the files. If there is a difference (version in the
 	 * database doesn't match the version of the files) the object cannot be opened anymore without content loss.
-	 * Clears the files array, the files are moved to the Filestore so they aren't needed anymore.
+	 *
+	 * $object->Files in the to-be-returned Object will be reset ( setting it to an empty array() ) by this function. This is
+	 * to indicate that the files have been handled and moved to the Filestore and so no further action is needed.
 	 *
 	 * @param Object $object
 	 * @param string $user
