@@ -78,7 +78,29 @@ class UtfString
 		// BZ#12513 remove illegal XML characters (all before 0x1F except for tab, newline, carriage return)
 		$inString = preg_replace('/[\x00-\x08\x0B-\x0C\x0E-\x1F]/', '', $inString );
 
+		$inString = self::filterOutNonUtf8Characters( $inString);
+
 		return $inString;
+	}
+
+	/**
+	 * Filters out non-UTF8 characters.
+	 *
+	 * Non-UTF-8 characters are just removed from the input string.
+	 *
+	 * @since 10.1.5
+	 * @param string $inString
+	 * @return string
+	 */
+	private static function filterOutNonUtf8Characters( $inString )
+	{
+		$oldSubstitutionChar = ini_set('mbstring.substitute_character', "none");
+		$utf8String = mb_convert_encoding( $inString, 'UTF-8');
+		if( $oldSubstitutionChar !== false ) {
+			ini_set( 'mbstring.substitute_character', $oldSubstitutionChar );
+		}
+
+		return $utf8String;
 	}
 	
 	/**

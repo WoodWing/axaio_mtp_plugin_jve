@@ -225,7 +225,9 @@ class ReadWriteFieldHandler
 			case 'multistring':
 			case 'multiline':
 			case 'string':
-				return (string)$elvisValue;
+				$stringValue = strval( $elvisValue );
+				require_once BASEDIR.'/server/utils/UtfString.class.php';
+				return UtfString::removeIllegalUnicodeCharacters( $stringValue );
 			case 'bool':
 			case 'boolean':
 				return $this->toBoolean( $elvisValue );
