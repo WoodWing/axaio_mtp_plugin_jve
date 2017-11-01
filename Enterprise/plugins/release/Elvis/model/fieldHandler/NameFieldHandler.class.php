@@ -56,10 +56,11 @@ class NameFieldHandler extends ReadWriteFieldHandler
 			LogHandler::Log( 'ContentSource', 'WARN', 'NameFieldHandler::getFilename; filename has no extension: '.$fileName );
 			return $fileName;
 		}
-		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 		$fileName = mb_substr( $fileName, 0, $endIdx, 'UTF8' );
+		require_once BASEDIR.'/server/utils/UtfString.class.php';
+		$fileNameUtf8 = UtfString::removeIllegalUnicodeCharacters( $fileName );
 
-		return $fileName;
+		return $fileNameUtf8;
 	}
 
 	/**
