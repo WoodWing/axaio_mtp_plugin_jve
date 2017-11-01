@@ -182,10 +182,10 @@ class DBAuthorizations extends DBBase
 	/**
 	 * Returns the authorizations as set up by brand (or overrule Brand Issue).
 	 *
+	 * @since 10.1.5
 	 * @param int $publ Brand Id
 	 * @param int $issue Issue Id
 	 * @return array db rows
-	 * @since 10.1.5
 	 */
 	public static function getAuthorizationsByBrandIssue( $publ, $issue )
 	{
