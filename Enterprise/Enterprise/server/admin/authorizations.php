@@ -912,7 +912,7 @@ class Ww_Admin_Authorizations_App
 
 		if( $issue > 0 ) {
 			require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-			$rows = DBIssue::getIssue( array( intval( $issue ) ) );
+			$rows = DBIssue::getIssue( $issue );
 			$issueRow = array_shift( $rows );
 			$tmp .= ' / '.formvar( $issueRow['name'] );
 		}
