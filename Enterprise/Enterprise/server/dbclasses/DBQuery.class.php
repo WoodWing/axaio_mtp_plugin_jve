@@ -849,24 +849,28 @@ class DBQuery extends DBBase
  		$dbdriver = DBDriverFactory::gen();
 		$tempav = self::getTempIds('av');
 		$authorizationstable = $dbdriver->tablename('authorizations');
-		
+
 		// Publication admin rights
 		$authPublAdmin = DBUser::getListBrandsByPubAdmin($shortusername);
-		$handled = array();	// contains brands user has full authorization	
+		$fullAuthBrandIds = array();	// Contains brand Ids the user has full authorization for.
 		foreach ($authPublAdmin as $authPublAdminRow) {
-			$brandAdmin = true;
-			$publication = intval($authPublAdminRow['publication']);
-			$sql =  "INSERT INTO $tempav ";
-			$sql .= "SELECT DISTINCT a.`publication`, a.`issue`, 0, 0 ";//BZ#35240 Brand admin user is also entitled to
-			$sql .= "FROM $authorizationstable a ";						//'overrule brand' issues.
-			$sql .= "WHERE a.`publication` = ? ";
-			$dbdriver->query($sql, array( intval( $publication ) ) );
-			$handled[$publication] = $publication;
+			$brandId = intval($authPublAdminRow['publication']);
+			$fullAuthBrandIds[$brandId] = $brandId;
 		}
-		
+
+		if( $fullAuthBrandIds ) {
+			$where = self::addIntArrayToWhereClause('a.publication', $fullAuthBrandIds, false );
+			$brandAdmin = true;
+			$sql  = "INSERT INTO $tempav ";
+			$sql .= "SELECT DISTINCT a.`publication`, a.`issue`, 0, 0 ";//BZ#35240 Brand admin user is also entitled to
+			$sql .= "FROM {$authorizationstable} a ";                  //'overrule brand' issues.
+			$sql .= "WHERE {$where} ";
+			$dbdriver->query($sql);
+		}
+
 		$skipPublications = '';
-		if (!empty($handled)) {
-			$skipPublications = implode(',', $handled);
+		if (!empty($fullAuthBrandIds)) {
+			$skipPublications = implode(',', $fullAuthBrandIds);
 		}
 		
 		$userstable = $dbdriver->tablename('users');
@@ -877,8 +881,8 @@ class DBQuery extends DBBase
 		$params = array();
 		$sql  = "INSERT INTO $tempav ";
 		$sql .= "SELECT DISTINCT `publication`, `issue`, `section`, `state` ";
-		$sql .= "FROM $userstable u, $usergrouptable ug, $authorizationstable a ";
-		$sql .= "LEFT JOIN $profilefeaturestable pf on pf.`profile` = a.`profile` ";
+		$sql .= "FROM {$userstable} u, {$usergrouptable} ug, {$authorizationstable} a ";
+		$sql .= "LEFT JOIN {$profilefeaturestable} pf on pf.`profile` = a.`profile` ";
 		$sql .= "WHERE u.`user` = ? ";
 		$params[] = strval( $shortusername );
 		if( $accessRight > 0 ) {
@@ -888,7 +892,7 @@ class DBQuery extends DBBase
 
 		$sql .= "AND u.`id` = ug.`usrid` AND ug.`grpid` = a.`grpid` ";
 		if (!empty($skipPublications)) {
-			$sql .= "AND a.`publication` NOT IN ($skipPublications) ";
+			$sql .= "AND a.`publication` NOT IN ({$skipPublications}) ";
 		}
 		
 		$dbdriver->query( $sql, $params );
