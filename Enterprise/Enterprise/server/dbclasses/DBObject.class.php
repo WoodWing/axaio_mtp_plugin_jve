@@ -1374,24 +1374,15 @@ class DBObject extends DBBase
 		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 
 		$value = is_string( $value ) ? UtfString::removeIllegalUnicodeCharacters( $value ) : $value;
-		if( !BizProperty::isCustomPropertyName( $propertyName ) ) { // Only format DB value for non custom props
-			$formattedDbValue = self::formatDbValue( $propertyName, $value );
-		} else {
-			$formattedDbValue = $value;
-		}
+		$isCustomProp = BizProperty::isCustomPropertyName( $propertyName );
+		$formattedDbValue = self::formatDbValue( $propertyName, $value, $isCustomProp );
+
 		$descript = '';
 		if ( self::isBlob( $propertyName ) ) {
 			$blobs[] = $formattedDbValue;
 			$descript = '#BLOB#';
 		} else {
-			require_once BASEDIR . '/server/bizclasses/BizProperty.class.php';
-			$customProp = BizProperty::isCustomPropertyName( $propertyName );
-			$propType = self::getPropertyType( $propertyName, $customProp );
-
-			// Fix for BZ#31337. A custom property of the type string can only save up to 200 characters/bytes.
-			if ( $customProp && ($propType == 'string' || $propType == 'list') ) {
-				$formattedDbValue = self::truncateCustomPropertyValue( $propertyName, $formattedDbValue );
-			}
+			$propType = self::getPropertyType( $propertyName, $isCustomProp );
 
 			$quotingDbValueNeeded = self::isQuoteDBValueNeeded( $propType );
 			if ( $quotingDbValueNeeded ) {
@@ -1399,7 +1390,7 @@ class DBObject extends DBBase
 			} elseif( !$value ) {
 				// When there's no value and no quote needed, it needs to be transformed into appropriate 'value' before it is inserted into DB.
 				if( $propType == 'bool' ) {
-					$descript = $customProp ? '0' : "''"; // read isQuoteDBValueNeeded() header.				
+					$descript = $isCustomProp ? '0' : "''"; // read isQuoteDBValueNeeded() header.
 				} elseif ( $propType == 'int' || $propType == 'double' ) {
 					$descript = '0';
 				}
@@ -1484,9 +1475,10 @@ class DBObject extends DBBase
 	 * 
 	 * @param string $propName
 	 * @param mixed $value Value of the Property $propName
+	 * @param bool $isCustomProp True to indicate the $propName is a custom property, false otherwise.
 	 * @return string Formatted/adjusted value
 	 */
-	static protected function formatDbValue( $propName, $value )
+	static protected function formatDbValue( $propName, $value, $isCustomProp=false )
 	{
 		$formattedValue = null;
 		switch ($propName) {
@@ -1517,14 +1509,52 @@ class DBObject extends DBBase
 				$formattedValue = addslashes( $value );
 				break;
 			case 'Name':
-				require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
-				$formattedValue = mb_substr( $value, 0, BizProperty::getStandardPropertyMaxLength( 'Name' ), 'UTF8' );
+				$formattedValue = self::trucateNamePropertyValue( $value );
 				break;
 			default:
-				$formattedValue = self::truncatePropertyValue( $propName, $value );
+				if( $isCustomProp ) {
+					$propType = self::getPropertyType( $propName, $isCustomProp );
+					// Fix for BZ#31337. A custom property of the type string can only save up to 200 characters/bytes.
+					if ( $propType == 'string' || $propType == 'list' ) {
+						$formattedValue = self::truncateCustomPropertyValue( $propName, $value );
+					}
+				} else {
+					$formattedValue = self::truncatePropertyValue( $propName, $value );
+				}
 				break;
 		}
 		return $formattedValue;
+	}
+
+	/**
+	 * Truncate the Name property to have 63 characters.
+	 *
+	 * This function should only be seen as a temporary solution, and should be only used for a very good reason.
+	 *
+	 * In current situation of Enterprise with MSSQL setup, MSSQL is not multi-byte aware, resulting in the DB not
+	 * able to handle multi-byte characters. In order to avoid data corruption, Enterprise will check the field's length
+	 * before the data is inserted or saved into DB. This is done in DBObject::formatDbValue().
+	 *
+	 * However, sometimes there's situation where the field is retrieved from 3rd party source such as ContentSource
+	 * and it is not intended to be saved into DB, but only to be shown in the Client. In such cases, the field
+	 * needs to be handled the same way as how it would end-up in the DB ( so that the data is in-sync between the DB
+	 * and the one shown in the client ).
+	 *
+	 * And obviously, this should be done for all the relevant fields, but since it requires a lot of code changes which
+	 * is not even the correct solution ( the proper solution should be making MSSQL to be multi-byte aware ), currently,
+	 * only the 'Name' field is handled since it is heavily used and also the most obvious / common field in general.
+	 * Also see BZ#23267, BZ#23962, BZ#31337 ( often, it is the Name field that is being reported )
+	 *
+	 * @since 10.1.5
+	 * @param string $nameValue Name to be validated and truncated to length of 63 when it is more than 63 characters.
+	 * @return bool|string
+	 */
+	public static function trucateNamePropertyValue( $nameValue )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
+		$truncatedNameValue = mb_substr( $nameValue, 0, BizProperty::getStandardPropertyMaxLength( 'Name' ), 'UTF8' );
+
+		return $truncatedNameValue;
 	}
 	
 	/**

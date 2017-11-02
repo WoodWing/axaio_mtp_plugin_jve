@@ -1163,6 +1163,9 @@ class BizObject
 					BizContentSource::getShadowObject( trim($objectProps['ContentSource']),
 						trim($objectProps['DocumentID']), $object, $objectProps, $lock,
 						$rendition, $requestInfo, $supportedContentSources, $haveVersion );
+
+					// Ugly hack!! A temporary hack until we have a proper solution. See DBObject::trucateNamePropertyValue().
+					$object->MetaData->BasicMetaData->Name = DBObject::trucateNamePropertyValue( $object->MetaData->BasicMetaData->Name );
 				} catch( BizException $e ) {
 					// Let's be robust here; When the Content Source connector has been unplugged, an exception is thrown.
 					// Nevertheless, when not asked for a rendition, we already have the metadata, so there is no reason

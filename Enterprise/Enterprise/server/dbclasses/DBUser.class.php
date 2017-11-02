@@ -261,64 +261,168 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 * Returns users assigned to given publication and/or issue. <br>
+	 * Returns users authorized for a given publication or overrule brand issue.
 	 *
-	 * Note that null must be given when 'overrulepub' is disabled for that issue!
+	 * If $issueId is set this issue has to be an overrule brand issue.
 	 *
-	 * @param string $publ  publication id (null implies all users for all publications)
-	 * @param string $issue issue id (null* implies all users for given publication)
+	 * @param int $publicationId  publication id (null implies all users for all publications)
+	 * @param int $issueId issueId id (null implies all users for given publication)
 	 * @param string $sortBy sorting column either by 'user' or 'fullname', default sort by 'fullname' column
 	 * @param boolean $activeOnly Only return active users (true) or all users (activated and deactivated)
 	 * @return array of smart_user db rows.
+	 * @throws BizException
 	 */
-	public static function getUsers( $publ = null, $issue = null, $sortBy = 'fullname', $activeOnly = false )
+	public static function getUsers( $publicationId = null, $issueId = null, $sortBy = 'fullname', $activeOnly = false )
 	{
 		self::clearError();
 		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename('users');
 		$params = array();
 
-		if ($publ)
-		{
-			$dbx = $dbdriver->tablename('usrgrp');
-			$dba = $dbdriver->tablename('authorizations');
-			if( !$issue ) { $issue = 0; }
+		if ($publicationId) {
+			if( !$issueId ) { $issueId = 0; }
 			// beware: admin rights do NOT count
-
-			$sql = 	"SELECT DISTINCT u.* FROM $db u, $dbx x "
-				. 	"WHERE u.`id` = x.`usrid` AND x.`grpid` IN ( "
-				. 		"SELECT a.`grpid` FROM $dba a WHERE a.`publication` = ? AND a.`issue` = ? "
-				. 	") ";
-			$params[] = $publ;
-			$params[] = $issue;
+			$where = "a.`publication` = ? AND a.`issue` = ?";
+			$sql = self::makeSelectStatementForAuthorizedUsers( $where );
+			$params[] = intval( $publicationId );
+			$params[] = intval( $issueId );
 			$keyword = 'AND';
 		} else {
-			$sql = "SELECT * FROM $db u ";
+			$db = $dbdriver->tablename('users');
+			$sql = "SELECT * ".
+					 "FROM {$db} u ";
 			$keyword = 'WHERE';
 		}
 		if ( $activeOnly ) {
-			$sql .= "$keyword ( u.`disable` != ? OR u.`disable` IS NULL ) "; // Oracle empty string is equal to NULL
+			$sql .= "{$keyword} ( u.`disable` != ? OR u.`disable` IS NULL ) "; // Oracle empty string is equal to NULL
 			$params[] = 'on';
 		}
-		$sql .= "ORDER BY " . self::toColname( 'u.'. $sortBy );
-
+		$sql .= "ORDER BY ".self::toColname( 'u.'.$sortBy );
 
 		$sth = $dbdriver->query( $sql, $params );
 		if (!$sth) {
 			self::setError( $dbdriver->error() );
 			return null;
 		}
-
-		// fetch into array
+		$rows = self::fetchResults( $sth );
 		$ret = array();
-		while( ($row = $dbdriver->fetch($sth)) ) {
-			// Fix for trackchangecolor, put a default one when there's no data
-			if( !$row['trackchangescolor'] ) {
-				$row['trackchangescolor'] = DEFAULT_USER_COLOR; // set to the default color.
-			}
-			$ret[] = $row;
+		if( $rows ) foreach( $rows as $row ) {
+			$ret[] = self::repairTrackChangesColor( $row );
 		}
 		return $ret;
+	}
+
+	/**
+	 * Returns users that are authorized for one of the passed in brands.
+	 *
+	 * @since 10.1.5
+	 * @param int[] $brandIds
+	 * @return array db user rows
+	 * @throws BizException
+	 */
+	static public function getAuthorizedUsersForBrands( array $brandIds )
+	{
+		$authorizedUserRows = array();
+		if( $brandIds ) {
+			$where = self::addIntArrayToWhereClause( 'a.publication', $brandIds, false );
+			$where .= 'AND a.`issue` = 0 '; // All non-overrule brand issues.
+			$authorizedUserRows = self::getAuthorizedUsers( $where );
+		}
+
+		return $authorizedUserRows;
+	}
+
+	/**
+	 * Returns users that are authorized for one of the passed in overrule brand issues.
+	 *
+	 * @since 10.1.5
+	 * @param int[] $overruleBrandIssueIds
+	 * @return array db user rows
+	 * @throws BizException
+	 */
+	static public function getAuthorizedUsersForOverruleBrandIssues( array $overruleBrandIssueIds )
+	{
+		$authorizedUserRows = array();
+		if( $overruleBrandIssueIds ) {
+			$where = self::addIntArrayToWhereClause( 'a.issue', $overruleBrandIssueIds, false );
+			$authorizedUserRows = self::getAuthorizedUsers( $where );
+		}
+
+		return $authorizedUserRows;
+	}
+
+	/**
+	 * Returns authorized users based on a selection filter.
+	 *
+	 * If the user has no 'trackchangescolor' set, the default user color is set.
+	 *
+	 * @since 10.1.5
+	 * @param string $where Filter on the authorization table.
+	 * @return array of db user rows.
+	 * @throws BizException
+	 */
+	static private function getAuthorizedUsers( $where )
+	{
+		self::clearError();
+		$dbdriver = DBDriverFactory::gen();
+		$params = array();
+
+		$sql = self::makeSelectStatementForAuthorizedUsers( $where );
+		$sql .= "ORDER BY u.`fullname`";
+
+		$sth = $dbdriver->query( $sql, $params );
+		if( !$sth ) {
+			self::setError( $dbdriver->error() );
+			return null;
+		}
+
+		$rows = self::fetchResults( $sth );
+		$ret = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$ret[] = self::repairTrackChangesColor( $row );
+		}
+
+		return $ret;
+	}
+
+	/**
+	 * Composes a select statement to query authorized users based on the passed in filter.
+	 *
+	 * @since 10.1.5
+	 * @param string $where Filter
+	 * @return string SQL statement
+	 * @throws BizException
+	 */
+	static private function makeSelectStatementForAuthorizedUsers( $where )
+	{
+		$dbdriver = DBDriverFactory::gen();
+		$db = $dbdriver->tablename('users');
+		$dbx = $dbdriver->tablename('usrgrp');
+		$dba = $dbdriver->tablename('authorizations');
+
+		$sql = "SELECT DISTINCT u.* ".
+				 "FROM {$db} u, {$dbx} x ".
+				 "WHERE u.`id` = x.`usrid` AND x.`grpid` IN ".
+						"( SELECT a.`grpid` ".
+						"FROM {$dba} a ".
+						"WHERE {$where} ) ";
+
+		return $sql;
+	}
+
+	/**
+	 * Sets the 'trackchangescolor' to the default user color if no 'trackchangescolor' is set.
+	 *
+	 * @since 10.1.5
+	 * @param array $dbUserRow db user row
+	 * @return array db user row.
+	 */
+	static private function repairTrackChangesColor( array $dbUserRow )
+	{
+		if( !$dbUserRow['trackchangescolor'] ) {
+			$dbUserRow['trackchangescolor'] = DEFAULT_USER_COLOR;
+		}
+
+		return $dbUserRow;
 	}
 
 	/**
@@ -326,6 +430,7 @@ class DBUser extends DBBase
 	 *
 	 * @param int $userId
 	 * @return array Brands, overrule brand issues for which the user is authorized.
+	 * @throws BizException
 	 */
 	public static function getBrandIssueAuthorizationForUser( $userId )
 	{
@@ -605,11 +710,7 @@ class DBUser extends DBBase
 		$params[] = $usrId;
 		$row = self::getRow( self::TABLENAME, $where, '*', $params );
 		if( $row ) {
-			// Fix for trackchangecolor, put a default one when there's no data
-			if( !$row['trackchangescolor'] ) {
-				$row['trackchangescolor'] = DEFAULT_USER_COLOR; // set to the default color.
-			}
-
+			$row = self::repairTrackChangesColor( $row );
 			$user = self::rowToUserObj( $row, $isAdmin );
 		}
 		return $user;
@@ -1183,11 +1284,8 @@ class DBUser extends DBBase
 		$params = array( strval( $user), strval( $user ) );
 		$row = self::getRow( self::TABLENAME, $where, '*', $params );
 
-		// Fix for trackchangecolor, put a default one when there's no data
 		if ( $row ) { //User info found.
-			if ( !$row['trackchangescolor'] ) {
-				$row['trackchangescolor'] = DEFAULT_USER_COLOR; // set to the default color.
-			}
+			$row = self::repairTrackChangesColor( $row );
 		}
 		return $row;
 	}
