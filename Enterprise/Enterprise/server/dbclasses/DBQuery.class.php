@@ -851,6 +851,7 @@ class DBQuery extends DBBase
 		$authorizationstable = $dbdriver->tablename('authorizations');
 
 		// Publication admin rights
+		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		$authPublAdmin = DBUser::getListBrandsByPubAdmin($shortusername);
 		$fullAuthBrandIds = array();	// Contains brand Ids the user has full authorization for.
 		foreach ($authPublAdmin as $authPublAdminRow) {
