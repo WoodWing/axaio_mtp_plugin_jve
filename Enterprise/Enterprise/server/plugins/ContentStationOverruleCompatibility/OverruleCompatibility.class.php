@@ -94,8 +94,8 @@ class OverruleCompatibility
 	/**
 	 * Creates array of PropertyValue out of array of an object[with Id, Name field]
 	 *
-	 * @param array of object $objects 
-	 * @returns array of PropertyValue
+	 * @param Object[] $objects
+	 * @returns PropertyValue[]
 	 */
 	public static function createPropertyValues( $objects )
 	{
@@ -114,9 +114,9 @@ class OverruleCompatibility
 	 * Note: the caller does not have to worry if client app is Content Station
 	 * The param $overruleIssues is filled and needs to be passed to the convertObjectAfter
 	 *
-	 * @param string	$ticket
-	 * @param string	$object			in/out object to be manipulated, see comment above
-	 * @param array		$overruleIssues in/out array to keep track of overruleIssues (key) and the associated pub (val)
+	 * @param string $ticket
+	 * @param Object $object in/out object to be manipulated, see comment above
+	 * @param array $overruleIssues in/out array to keep track of overruleIssues (key) and the associated pub (val)
 	 */
 	static public function convertObjectBefore( $ticket, &$object, &$overruleIssues )
 	{
@@ -158,15 +158,15 @@ class OverruleCompatibility
 	 * The array returned = needs to be passed to the convertObjectsAfter
 	 * Note: the caller does not have to worry if client app is Content Station
 	 *
-	 * @param string	$ticket
-	 * @param array of Object	$objects			in/out object to be manipulated, see comment above
+	 * @param string $ticket
+	 * @param Object[] $objects in/out objects to be manipulated, see comment above
 	 * @returns array $overruleIssues in/out array to keep track of overruleIssues (key) and the associated pub (val)
 	 */
 	static public function convertObjectsBefore( $ticket, &$objects )
 	{
 		$overruleIssues = null;
 		if( self::isContentStation( $ticket ) ) {
-			$overruleIssues = Array();
+			$overruleIssues = array();
 			foreach( $objects as $object ) {
 				self::convertObjectBefore( $ticket, $object, $overruleIssues );
 			}
@@ -182,9 +182,9 @@ class OverruleCompatibility
 	 * Note: the caller does not have to worry if client app is Content Station
 	 * The param $overruleIssues is the one filled in by convertObjectBefore
 	 *
-	 * @param string	$ticket
-	 * @param string	$object			in/out object to be manipulated, see comment above
-	 * @param array		$overruleIssues as filled in by convertObjectBefore
+	 * @param string $ticket
+	 * @param Object $object in/out object to be manipulated, see comment above
+	 * @param array $overruleIssues as filled in by convertObjectBefore
 	 */
 	static public function convertObjectAfter( $ticket, &$object, $overruleIssues )
 	{
@@ -205,9 +205,9 @@ class OverruleCompatibility
 	 * The param $overruleIssues is the one returned by convertObjectBefore
 	 * Note: the caller does not have to worry if client app is Content Station
 	 *
-	 * @param string	   $ticket
-	 * @param Object[]	$objects		in/out objects to be manipulated, see comment above
-	 * @param array		$overruleIssues as filled in by convertObjectBefore
+	 * @param string $ticket
+	 * @param Object[] $objects in/out objects to be manipulated, see comment above
+	 * @param array $overruleIssues as filled in by convertObjectBefore
 	 */
 	static public function convertObjectsAfter( $ticket, &$objects, $overruleIssues )
 	{
@@ -225,8 +225,8 @@ class OverruleCompatibility
 	 * In order for this to work we need to have issueId per row. If this is not there while we do have overrule issues
 	 * we throw an exception. This way it's very clear that something needs to get fixed instead of vague silent errors.
 	 *
-	 * @param string	$ticket
-	 * @param string	$resp		in/out response to be manipulated, see comment above
+	 * @param string $ticket
+	 * @param WflQueryObjectsResponse $resp in/out response to be manipulated, see comment above
 	 * @throws BizException when a configuration error is encountered
  	*/
 	static public function convertQueryResults( $ticket, &$resp )
@@ -235,7 +235,7 @@ class OverruleCompatibility
 			// Get all overrule issues:
 			require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
 			require_once BASEDIR . '/server/dbclasses/DBPublication.class.php';
-			$overruleIssues = DBIssue::listAllOverruleIssuesWithPub( true );
+			$overruleIssues = DBIssue::listAllOverruleIssuesWithPub();
 			if( !empty($overruleIssues) ) {
 				// Walk thru overrule issue array to convert publication ids to our fake overrule pubs
 				$newOverruleIssues = array();
@@ -263,18 +263,20 @@ class OverruleCompatibility
 					}
 				}
 
-				// If query returns PubId, but no IssueId we cannot convert PubId, so raise error
-				// that query is incompatible with Content Station
+				// If the query returns a PubId, but no IssueId we cannot convert PubId, so raise an error
+				// that the query is incompatible with Content Station
 				if( $pubIdCol != -1 && $issueIdCol == -1 ) {
 					$msg = 'Contact your System Administrator. Query definition invalid (missing IssueId) for Content Station in combination with overrule publications.';
 					throw new BizException( 'Config Error', 'Server', $msg, $msg );
-				}
-				$nRows = count( $resp->Rows ) ;
-				for( $i=0; $i < $nRows; $i++ ) {
-					$issueId = $resp->Rows[$i][$issueIdCol];
-					if( array_key_exists( $issueId, $newOverruleIssues ) ) {
-						$resp->Rows[$i][$pubIdCol] = $newOverruleIssues[$issueId]['pubId'];
-						$resp->Rows[$i][$pubNameCol] = $newOverruleIssues[$issueId]['pubName'];
+				} elseif( $pubIdCol != -1 && $issueIdCol != -1 ) {
+					// We only need to convert PubId if the PubId AND IssueId are part of the columns.
+					$nRows = count( $resp->Rows ) ;
+					for( $i = 0; $i < $nRows; $i++ ) {
+						$issueId = $resp->Rows[$i][$issueIdCol];
+						if( array_key_exists( $issueId, $newOverruleIssues ) ) {
+							$resp->Rows[$i][$pubIdCol] = $newOverruleIssues[$issueId]['pubId'];
+							$resp->Rows[$i][$pubNameCol] = $newOverruleIssues[$issueId]['pubName'];
+						}
 					}
 				}
 
@@ -286,11 +288,11 @@ class OverruleCompatibility
 				if( $nChildCols == 0 || $nChildRows == 0 ) {
 					return;
 				}
-				
-				$pubIdChildCol 	= -1;
+
+				$pubIdChildCol = -1;
 				$pubNameChildCol = -1;
-				$issueIdChildCol	= -1;
-				for( $i=0; $i < $nChildCols; $i++ ) { // Trying to find columns for publication and issue
+				$issueIdChildCol = -1;
+				for( $i = 0; $i < $nChildCols; $i++ ) { // Trying to find columns for publication and issue
 					if( $resp->ChildColumns[$i]->Name == 'PublicationId' ) {
 						$pubIdChildCol = $i;
 					} else if( $resp->ChildColumns[$i]->Name == 'Publication' ) {
@@ -305,12 +307,14 @@ class OverruleCompatibility
 				if( $pubIdChildCol != -1 && $issueIdChildCol == -1 ) {
 					$msg = 'Contact your System Administrator. Query definition invalid (missing child IssueId) for Content Station in combination with overrule publications.';
 					throw new BizException( 'Config Error', 'Server', $msg, $msg );
-				}
-				for( $i=0; $i < $nChildRows; $i++ ) {
-					$issueId = isset($resp->ChildRows[$i], $resp->ChildRows[$i]->Row[$issueIdChildCol]) ? $resp->ChildRows[$i]->Row[$issueIdChildCol] : null;
-					if( !is_null($issueId) && array_key_exists( $issueId, $newOverruleIssues ) ) {
-						$resp->ChildRows[$i]->Row[$pubIdChildCol] = $newOverruleIssues[$issueId]['pubId'];
-						$resp->ChildRows[$i]->Row[$pubNameChildCol] = $newOverruleIssues[$issueId]['pubName'];
+				} elseif( $pubIdChildCol != -1 && $issueIdChildCol != -1 ) {
+					// We only need to convert PubId if the PubId AND IssueId are part of the columns.
+					for( $i=0; $i < $nChildRows; $i++ ) {
+						$issueId = isset($resp->ChildRows[$i], $resp->ChildRows[$i]->Row[$issueIdChildCol]) ? $resp->ChildRows[$i]->Row[$issueIdChildCol] : null;
+						if( !is_null($issueId) && array_key_exists( $issueId, $newOverruleIssues ) ) {
+							$resp->ChildRows[$i]->Row[$pubIdChildCol] = $newOverruleIssues[$issueId]['pubId'];
+							$resp->ChildRows[$i]->Row[$pubNameChildCol] = $newOverruleIssues[$issueId]['pubName'];
+						}
 					}
 				}
 			}
