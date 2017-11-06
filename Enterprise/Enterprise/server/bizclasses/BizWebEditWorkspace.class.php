@@ -1132,7 +1132,7 @@ class BizWebEditWorkspace
 			if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
 				if( $placement->ElementID == $elementId ) {
 					$edition = $placement->Edition;
-					break; // Found the corresponding text element's edition.
+					break 2; // Found the corresponding text element's edition, so quit all the way.
 				}
 			}
 		}
