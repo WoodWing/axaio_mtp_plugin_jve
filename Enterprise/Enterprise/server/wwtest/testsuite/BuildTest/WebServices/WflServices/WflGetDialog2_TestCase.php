@@ -644,7 +644,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflGetDialog2_TestCase exte
 
 		// Add created users into admin gorup.
 		$stepInfo = 'Requesting user group for user:' . $this->user;
-		$groupIds = $this->wflServicesUtils->getUserGroups( $stepInfo, BizSession::getUserInfo( 'id' ) );
+		$groupIds = $this->wflServicesUtils->getUserGroupsIds( $stepInfo, BizSession::getUserInfo( 'id' ) );
 
 		$stepInfo = 'Adding user "'.$this->testUser1->Name.'" into group';
 		$this->wflServicesUtils->addUserGroupToUser( $stepInfo, $this->testUser1->Id, $groupIds );
