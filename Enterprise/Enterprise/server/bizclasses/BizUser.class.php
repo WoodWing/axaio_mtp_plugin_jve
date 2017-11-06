@@ -248,6 +248,7 @@ class BizUser
 
 		$userRowsBrands = array();
 		$userRowsOverruleBrandIssues = array();
+		$uniqueUserRows = array();
 		if ($brandIds || $overruleBrandIssueIds) {
 			if ($brandIds) {
 				$userRowsBrands = DBUser::getAuthorizedUsersForBrands($brandIds );
