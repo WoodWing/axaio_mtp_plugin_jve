@@ -856,7 +856,7 @@ class DBQuery extends DBBase
 		$fullAuthBrandIds = array();	// Contains brand Ids the user has full authorization for.
 		foreach ($authPublAdmin as $authPublAdminRow) {
 			$brandId = intval($authPublAdminRow['publication']);
-			$fullAuthBrandIds[$brandId] = $brandId;
+			$fullAuthBrandIds[$brandId] = $brandId; // Overwrite, to prevent duplicates.
 		}
 
 		if( $fullAuthBrandIds ) {
