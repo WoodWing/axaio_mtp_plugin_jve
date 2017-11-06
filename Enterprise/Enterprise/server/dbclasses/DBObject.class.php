@@ -486,6 +486,11 @@ class DBObject extends DBBase
 			} else {
 				$md->WorkflowMetaData->State->Color = substr( $row['sttcolor'], 1 ); // remove # prefix
 			}
+			if (!empty( $row['RouteToUser'] )) {
+				$row['routeto'] = $row['RouteToUser'];
+			} elseif ( !empty( $row['RouteToGroup'] ) ) {
+				$row['routeto'] = $row['RouteToGroup'];
+			}
 			$md->WorkflowMetaData->RouteTo = $row['routeto'];
 			$md->WorkflowMetaData->LockedBy = $row['lockedby'];
 			$md->WorkflowMetaData->Version = $row['version'];
@@ -516,12 +521,15 @@ class DBObject extends DBBase
 		$sql = 'SELECT o.`id`, o.`documentid`, o.`name`, o.`type`, o.`contentsource`, o.`storename`, '.
 			'o.`publication`, o.`section`, o.`state`, o.`format`, o.`modified`, o.`modifier`, o.`comment`, '.
 			'pub.`publication` as "pubname", sec.`section` as "secname", stt.`state` as "sttname", '.
-			'stt.`type` as "stttype", stt.`color` as "sttcolor", o.`routeto`, lck.`usr` as "lockedby", '.$verFld.' '.
+			'stt.`type` as "stttype", stt.`color` as "sttcolor", o.`routeto`, lck.`usr` as "lockedby", ' .
+			'rtu.`fullname` as "RouteToUser", rtg.`name` as "RouteToGroup", ' . $verFld.' '.
 			"FROM $objTbl o ".
 			"INNER JOIN $pubTbl pub ON (o.`publication` = pub.`id` ) ".
 			"LEFT JOIN $secTbl sec ON (o.`section` = sec.`id` ) ".
 			"LEFT JOIN $sttTbl stt ON (o.`state` = stt.`id` ) ". // LEFT JOIN because of Personal status = -1
 			"LEFT JOIN $lckTbl lck ON (o.`id` = lck.`object` ) ".
+			"LEFT JOIN smart_users rtu ON (o.`routeto` = rtu.`user` ) ".
+			"LEFT JOIN smart_groups rtg ON (o.`routeto` = rtg.`name` ) ".
 			'WHERE o.`id` IN ( '.implode( ',', $objectIds ).' ) ';
 		$params = array();
 		$sth = $dbDriver->query( $sql, $params );
