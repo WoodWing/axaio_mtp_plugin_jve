@@ -1488,7 +1488,7 @@ class DBObject extends DBBase
 	 */
 	static protected function formatDbValue( $propName, $value, $isCustomProp=false )
 	{
-		$formattedValue = null;
+		$formattedValue = $value;
 		switch ($propName) {
 			case 'Description':
 			case 'PlainContent':
@@ -1496,8 +1496,6 @@ class DBObject extends DBBase
 					require_once BASEDIR.'/server/utils/UtfString.class.php';
 					$formattedValue = UtfString::truncateMultiByteValue( $value, 64000, false );
 					// @TODO If applicable for all mysql blobs this can be moved to the dbdriver.
-				} else {
-					$formattedValue = $value;
 				}
 				break;
 			case 'CopyrightMarked':
