@@ -1449,6 +1449,7 @@
   <Term key="MNU_REPORTING">Rapportage</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Opdracht configuraties</Term>
   <Term key="MNU_SERVER_JOBS">Opdracht wachtrij</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Uploaden</Term>
   <Term key="MNU_USER">Gebruikers</Term>
   <Term key="MNU_USER_QUERY">Gebruikerszoekopdrachten</Term>
