@@ -1449,6 +1449,7 @@
   <Term key="MNU_REPORTING">Rapport</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Configurations des travaux</Term>
   <Term key="MNU_SERVER_JOBS">File d’attente des travaux</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Télécharger</Term>
   <Term key="MNU_USER">Utilisateurs</Term>
   <Term key="MNU_USER_QUERY">Requêtes de l'utilisateur</Term>

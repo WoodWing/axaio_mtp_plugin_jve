@@ -1450,6 +1450,7 @@ After changing the setting(s), don't forget to restart the Web service and/or da
   <Term key="MNU_REPORTING">Reporting</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Job Configurations</Term>
   <Term key="MNU_SERVER_JOBS">Job Queue</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Upload</Term>
   <Term key="MNU_USER">Users</Term>
   <Term key="MNU_USER_QUERY">User Queries</Term>

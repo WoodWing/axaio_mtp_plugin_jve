@@ -1450,6 +1450,7 @@ Dopo avere apportato le modifiche necessarie, riavviare il servizio Web e/o quel
   <Term key="MNU_REPORTING">Creazione rapporti</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Configurazioni processi</Term>
   <Term key="MNU_SERVER_JOBS">Coda processi</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Carica</Term>
   <Term key="MNU_USER">Utenti</Term>
   <Term key="MNU_USER_QUERY">Query utente</Term>
