@@ -26,18 +26,21 @@ class ContentStationOverruleCompatibility_WflGetObjects extends WflGetObjects_En
 	 */
 	final public function runAfter (WflGetObjectsRequest $req, WflGetObjectsResponse &$resp)
 	{
-		require_once dirname(__FILE__) . '/OverruleCompatibility.class.php';
-		if( isset($resp->Objects) && count($resp->Objects) > 0 && 
-			OverruleCompatibility::isContentStation($req->Ticket) ) {  // Only fo this for Content Station
+		require_once __DIR__ . '/OverruleCompatibility.class.php';
+		if( isset( $resp->Objects ) && count( $resp->Objects ) > 0 &&
+			OverruleCompatibility::isContentStation($req->Ticket) ) {  // Only for this for Content Station
+			require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
+			require_once BASEDIR . '/server/dbclasses/DBTarget.class.php';
 			foreach ($resp->Objects as $object) {
-				require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
-				// Find issue ID and issue name for correct MetaData information
-				$issueId = DBTarget::getObjectTargetIssueID($object->MetaData->BasicMetaData->ID);
-				if ($issueId !== false) {
-					$issueName = DBIssue::getIssueName($issueId);
-					if( $issueName != '' && DBIssue::isOverruleIssue( $issueId ) ) {
-						$object->MetaData->BasicMetaData->Publication->Id	= OverruleCompatibility::createPubId( $object->MetaData->BasicMetaData->Publication->Id, $issueId );
-						$object->MetaData->BasicMetaData->Publication->Name = OverruleCompatibility::createPubName( $object->MetaData->BasicMetaData->Publication->Name, $issueName );
+				if( isset( $object->MetaData->BasicMetaData->Publication ) ) {
+					// Find issue ID and issue name for correct MetaData information
+					$issueId = DBTarget::getObjectTargetIssueID( $object->MetaData->BasicMetaData->ID );
+					if( $issueId !== false ) {
+						$issueName = DBIssue::getIssueName( $issueId );
+						if( $issueName != '' && DBIssue::isOverruleIssue( $issueId ) ) {
+							$object->MetaData->BasicMetaData->Publication->Id = OverruleCompatibility::createPubId( $object->MetaData->BasicMetaData->Publication->Id, $issueId );
+							$object->MetaData->BasicMetaData->Publication->Name = OverruleCompatibility::createPubName( $object->MetaData->BasicMetaData->Publication->Name, $issueName );
+						}
 					}
 				}
 			}

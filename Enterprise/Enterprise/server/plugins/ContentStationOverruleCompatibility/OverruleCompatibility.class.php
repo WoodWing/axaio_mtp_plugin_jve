@@ -7,9 +7,9 @@
  * @copyright	WoodWing Software bv. All Rights Reserved.
  *
  * Content Station is not aware of overrule issues. This feature will be replaced in the future, therefore
- * this server plug-in implements a compatibility layer that creates a fake publication out of each 
- * overrule issues. This way for Content Station it's all as expected.
- * The fake publications have id's in this format ':<pubid>:<issueid>' We start with : to make detection as
+ * this server plug-in implements a compatibility layer that creates a fake publication out of each
+ * overrule issue. This way for Content Station its all as expected.
+ * The fake publications have ids in this format ':<pubid>:<issueid>' We start with : to make detection as
  * easy as detecting the first character. NOTE: Content Station also checks for this starting : in handling
  * of GetDialog (since v6.1 build 94) so this cannot be changed.
  */
@@ -26,7 +26,7 @@ class OverruleCompatibility
 	 * @returns boolean
 	 */
 	static public function isContentStation( $ticket )
-	{	
+	{
 		require_once BASEDIR . '/server/dbclasses/DBTicket.class.php';
 		$app = DBTicket::DBappticket($ticket);
 		return (bool)stristr($app, 'content station'); // Can be something like 'Content Station v7.0'
@@ -54,7 +54,7 @@ class OverruleCompatibility
 		$fragments = explode( ':', $pubId );
 		return $fragments[1];
 	}
-	
+
 	/**
 	 * Returns Enterprise (overrule) issue out of fake overrule publication id
 	 *
@@ -66,19 +66,19 @@ class OverruleCompatibility
 		$fragments = explode( ':', $pubId );
 		return $fragments[2];
 	}
-	
+
 	/**
 	 * Creates fake publication id out of Publication Id and (overrule) issue id
 	 *
-	 * @param string $pubId		
+	 * @param string $pubId
 	 * @param string $issueId
 	 * @returns string
 	 */
 	static public function createPubId( $pubId, $issueId )
 	{
-		return ":$pubId:$issueId"; 
+		return ":$pubId:$issueId";
 	}
-	
+
 	/**
 	 * Creates fake publication name out of Publication name and (overrule) issue name
 	 *
@@ -94,12 +94,12 @@ class OverruleCompatibility
 	/**
 	 * Creates array of PropertyValue out of array of an object[with Id, Name field]
 	 *
-	 * @param Object[] $objects
+	 * @param array[] $objects
 	 * @returns PropertyValue[]
 	 */
 	public static function createPropertyValues( $objects )
 	{
-		$propertyValues = Array();
+		$propertyValues = array();
 		foreach( $objects as $object ) {
 			$propertyValues[] = new PropertyValue( $object->Id, $object->Name );
 		}
@@ -109,13 +109,13 @@ class OverruleCompatibility
 	/**
 	 * Converts object before it's send to the server to replace fake pubids with real pub ids etc.
 	 *
-	 * Note: instead of Object you can also pass in CopyObjectRequest or SetPropertyRequest, all 
+	 * Note: instead of Object you can also pass in CopyObjectRequest or SetPropertyRequest, all
 	 * they need to have in common is MetaData and Targets underneath
 	 * Note: the caller does not have to worry if client app is Content Station
 	 * The param $overruleIssues is filled and needs to be passed to the convertObjectAfter
 	 *
 	 * @param string $ticket
-	 * @param Object $object in/out object to be manipulated, see comment above
+	 * @param Object|WflCopyObjectRequest|WflSetObjectPropertiesRequest $object in/out object to be manipulated, see comment above
 	 * @param array $overruleIssues in/out array to keep track of overruleIssues (key) and the associated pub (val)
 	 */
 	static public function convertObjectBefore( $ticket, &$object, &$overruleIssues )
@@ -173,17 +173,17 @@ class OverruleCompatibility
 		}
 		return $overruleIssues;
 	}
-	
+
 	/**
 	 * Converts object after it's received from server to replace real pub ids with fake pubids for overrule issues.
 	 *
-	 * Note: instead of Object you can also pass in CopyObjectResponse or SetPropertyResponse, all 
+	 * Note: instead of Object you can also pass in CopyObjectResponse or SetPropertyResponse, all
 	 * they need to have in common is MetaData and Targets underneath
 	 * Note: the caller does not have to worry if client app is Content Station
 	 * The param $overruleIssues is the one filled in by convertObjectBefore
 	 *
 	 * @param string $ticket
-	 * @param Object $object in/out object to be manipulated, see comment above
+	 * @param Object|WflCopyObjectResponse|WflSetObjectPropertiesResponse $object in/out object to be manipulated, see comment above
 	 * @param array $overruleIssues as filled in by convertObjectBefore
 	 */
 	static public function convertObjectAfter( $ticket, &$object, $overruleIssues )
@@ -192,8 +192,8 @@ class OverruleCompatibility
 			if( !empty( $object->Targets ) ) {
 				if( isset( $object->Targets[0]->Issue->Id ) && array_key_exists( $object->Targets[0]->Issue->Id, $overruleIssues ) ) {
 					LogHandler::Log('ContentStationOverruleCompatibility','DEBUG','Intercepting overrule pub - after');
-					$object->MetaData->BasicMetaData->Publication->Id	= OverruleCompatibility::createPubId( $object->MetaData->BasicMetaData->Publication->Id, $object->Targets[0]->Issue->Id );
-					$object->MetaData->BasicMetaData->Publication->Name = OverruleCompatibility::createPubName( $object->MetaData->BasicMetaData->Publication->Name, $object->Targets[0]->Issue->Name );
+					$object->MetaData->BasicMetaData->Publication->Id	= self::createPubId( $object->MetaData->BasicMetaData->Publication->Id, $object->Targets[0]->Issue->Id );
+					$object->MetaData->BasicMetaData->Publication->Name = self::createPubName( $object->MetaData->BasicMetaData->Publication->Name, $object->Targets[0]->Issue->Name );
 				}
 			}
 		}
@@ -217,7 +217,7 @@ class OverruleCompatibility
 			}
 		}
 	}
-	
+
 	/**
 	 * Converts query results to change pub id for overrule issues to fake pub ids.
 	 *
@@ -226,94 +226,110 @@ class OverruleCompatibility
 	 * we throw an exception. This way it's very clear that something needs to get fixed instead of vague silent errors.
 	 *
 	 * @param string $ticket
-	 * @param WflQueryObjectsResponse $resp in/out response to be manipulated, see comment above
+	 * @param WflQueryObjectsResponse|WflNamedQueryResponse $resp in/out response to be manipulated, see comment above
 	 * @throws BizException when a configuration error is encountered
- 	*/
+	 */
 	static public function convertQueryResults( $ticket, &$resp )
 	{
 		if( self::isContentStation( $ticket ) ) {
-			// Get all overrule issues:
-			require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
-			require_once BASEDIR . '/server/dbclasses/DBPublication.class.php';
-			$overruleIssues = DBIssue::listAllOverruleIssuesWithPub();
-			if( !empty($overruleIssues) ) {
-				// Walk thru overrule issue array to convert publication ids to our fake overrule pubs
-				$newOverruleIssues = array();
-				foreach( $overruleIssues as $issueId => $pubId ) {
+			/** @var bool $handleColumns Tracks whether there are any relevant columns that need to be converted. */
+			$handleColumns = true;
+			/** @var bool $handleChildColumns Tracks whether there are any relevant columns that need to be converted. */
+			$handleChildColumns = true;
+			/** @var array $objectIds Collection of object ids to be used for querying the overrule issues */
+			$objectIds = array();
 
-					$newOverruleIssues[$issueId]['pubId'] = OverruleCompatibility::createPubId( $pubId, $issueId );
+			// See if there are any columns in the response that will have to be converted.
+			$pubIdCol 	= -1;
+			$pubNameCol = -1;
+			$objectIdCol = -1; // Note that the object ID will always be supplied, even if not requested.
 
-					$pubName = DBPublication::getPublicationName( $pubId );
-					$issueName = DBIssue::getIssueName( $issueId );
-					$newOverruleIssues[$issueId]['pubName'] = OverruleCompatibility::createPubName( $pubName, $issueName );
+			foreach( $resp->Columns as $i => $column ) { // Trying to find columns for publication and issue
+				if( $column->Name == 'PublicationId' ) {
+					$pubIdCol = $i;
+				} elseif( $column->Name == 'Publication' ) {
+					$pubNameCol = $i;
+				} elseif( $column->Name == 'ID' ) {
+					$objectIdCol = $i;
 				}
+			}
 
-				$pubIdCol 	= -1;
-				$pubNameCol = -1;
-				$issueIdCol	= -1;
+			// If there is no publication id or name column, there is nothing to replace so we will not have to do anything
+			if( $pubIdCol != -1 || $pubNameCol != -1 ) {
+				foreach( $resp->Rows as $i => $row ) {
+					$objectIds[] = $row[$objectIdCol];
+				}
+			} else {
+				$handleColumns = false;
+			}
 
-				$nCols = count( $resp->Columns );
-				for( $i=0; $i < $nCols; $i++ ) { // Trying to find columns for publication and issue
-					if( $resp->Columns[$i]->Name == 'PublicationId' ) {
-						$pubIdCol = $i;
-					} else if( $resp->Columns[$i]->Name == 'Publication' ) {
-						$pubNameCol = $i;
-					} else if( $resp->Columns[$i]->Name == 'IssueId' ) {
-						$issueIdCol = $i;
+			// And look at the children columns for hierarchical queries:
+			$pubIdChildCol = -1;
+			$pubNameChildCol = -1;
+			$objectIdChildCol = -1; // Note that the object ID will always be supplied, even if not requested.
+
+			// We can stop in case we don't have child columns/rows
+			if( !empty( $resp->ChildColumns && !empty( $resp->ChildRows ) ) ) {
+				foreach( $resp->ChildColumns as $i => $childColumn ) { // Trying to find columns for publication and issue
+					if( $childColumn->Name == 'PublicationId' ) {
+						$pubIdChildCol = $i;
+					} else if( $childColumn->Name == 'Publication' ) {
+						$pubNameChildCol = $i;
+					} elseif( $childColumn->Name == 'ID' ) {
+						$objectIdChildCol = $i;
 					}
 				}
+				// If there is no publication id or name column, there is nothing to replace so we will not have to do anything.
+				if( $pubIdChildCol != -1 || $pubNameCol != -1 ) {
+					foreach( $resp->Rows as $i => $row ) {
+						$objectIds[] = $row[$objectIdCol];
+					}
+				} else {
+					$handleChildColumns = false;
+				}
 
-				// If the query returns a PubId, but no IssueId we cannot convert PubId, so raise an error
-				// that the query is incompatible with Content Station
-				if( $pubIdCol != -1 && $issueIdCol == -1 ) {
-					$msg = 'Contact your System Administrator. Query definition invalid (missing IssueId) for Content Station in combination with overrule publications.';
-					throw new BizException( 'Config Error', 'Server', $msg, $msg );
-				} elseif( $pubIdCol != -1 && $issueIdCol != -1 ) {
-					// We only need to convert PubId if the PubId AND IssueId are part of the columns.
-					$nRows = count( $resp->Rows ) ;
-					for( $i = 0; $i < $nRows; $i++ ) {
-						$issueId = $resp->Rows[$i][$issueIdCol];
-						if( array_key_exists( $issueId, $newOverruleIssues ) ) {
-							$resp->Rows[$i][$pubIdCol] = $newOverruleIssues[$issueId]['pubId'];
-							$resp->Rows[$i][$pubNameCol] = $newOverruleIssues[$issueId]['pubName'];
+			} else {
+				$handleChildColumns = false;
+			}
+
+			if( !empty( $objectIds ) && ($handleColumns || $handleChildColumns) ) {
+				$objectIds = array_unique( $objectIds ); // There might have been double values since we combined the regular and child columns.
+
+				require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
+				$overrulePubInfosByObjectId = DBIssue::getOverrulePublicationsByObjectIds( $objectIds );
+
+				if( $overrulePubInfosByObjectId ) {
+					$newOverruleIssues = array();
+					foreach( $overrulePubInfosByObjectId as $objId => $entry ) {
+						$newOverruleIssues[$objId]['pubId'] = self::createPubId( $entry['pubid'], $entry['issueid'] );
+						$newOverruleIssues[$objId]['pubName'] = self::createPubName( $entry['pubname'], $entry['issuename'] );
+					}
+					if( $handleColumns ) {
+						foreach( $resp->Rows as $i => $row ) {
+							$objectId = $row[$objectIdCol];
+							if( array_key_exists( $objectId, $newOverruleIssues ) ) {
+								if( $pubIdCol != -1 ) {
+									$resp->Rows[$i][$pubIdCol] = $newOverruleIssues[$objectId]['pubId'];
+								}
+								if( $pubNameCol != -1 ) {
+									$resp->Rows[$i][$pubNameCol] = $newOverruleIssues[$objectId]['pubName'];
+								}
+							}
 						}
 					}
-				}
 
-				// And handle children for hierarchical queries:
-				$nChildCols = count( $resp->ChildColumns );
-				$nChildRows = count( $resp->ChildRows ) ;
-				
-				// We can stop in case we don't have child columns/rows
-				if( $nChildCols == 0 || $nChildRows == 0 ) {
-					return;
-				}
-
-				$pubIdChildCol = -1;
-				$pubNameChildCol = -1;
-				$issueIdChildCol = -1;
-				for( $i = 0; $i < $nChildCols; $i++ ) { // Trying to find columns for publication and issue
-					if( $resp->ChildColumns[$i]->Name == 'PublicationId' ) {
-						$pubIdChildCol = $i;
-					} else if( $resp->ChildColumns[$i]->Name == 'Publication' ) {
-						$pubNameChildCol = $i;
-					} else if( $resp->ChildColumns[$i]->Name == 'IssueId' ) {
-						$issueIdChildCol = $i;
-					}
-				}
-
-				// If child query returns PubId, but no IssueId we cannot convert PubId, so raise error
-				// that query is incompatible with Content Station
-				if( $pubIdChildCol != -1 && $issueIdChildCol == -1 ) {
-					$msg = 'Contact your System Administrator. Query definition invalid (missing child IssueId) for Content Station in combination with overrule publications.';
-					throw new BizException( 'Config Error', 'Server', $msg, $msg );
-				} elseif( $pubIdChildCol != -1 && $issueIdChildCol != -1 ) {
-					// We only need to convert PubId if the PubId AND IssueId are part of the columns.
-					for( $i=0; $i < $nChildRows; $i++ ) {
-						$issueId = isset($resp->ChildRows[$i], $resp->ChildRows[$i]->Row[$issueIdChildCol]) ? $resp->ChildRows[$i]->Row[$issueIdChildCol] : null;
-						if( !is_null($issueId) && array_key_exists( $issueId, $newOverruleIssues ) ) {
-							$resp->ChildRows[$i]->Row[$pubIdChildCol] = $newOverruleIssues[$issueId]['pubId'];
-							$resp->ChildRows[$i]->Row[$pubNameChildCol] = $newOverruleIssues[$issueId]['pubName'];
+					if( $handleChildColumns ) {
+						// We only need to convert PubId if the PubId AND IssueId are part of the columns.
+						foreach( $resp->ChildRows as $i => $childRow ) {
+							$objectId = $childRow[$objectIdChildCol];
+							if( array_key_exists( $objectId, $newOverruleIssues ) ) {
+								if( $pubIdChildCol != -1 ) {
+									$resp->ChildRows[$i][$pubIdChildCol] = $newOverruleIssues[$objectId]['pubId'];
+								}
+								if( $pubNameChildCol != -1 ) {
+									$resp->ChildRows[$i][$pubNameChildCol] = $newOverruleIssues[$objectId]['pubid'];
+								}
+							}
 						}
 					}
 				}

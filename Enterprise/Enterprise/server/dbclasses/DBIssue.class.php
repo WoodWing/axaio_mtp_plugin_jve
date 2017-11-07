@@ -680,4 +680,43 @@ class DBIssue extends DBBase
 		$result = self::getRow( 'issues', $where, array( 'id' ), $params );
 		return $result ? true : false;
 	}
+
+	/**
+	 * Get overrule publication info fields by their object ids.
+	 *
+	 * This function returns an array in the following format:
+	 * $row[objectId][pubid]
+	 *               [pubname]
+	 *               [issueid]
+	 *               [issuename]
+	 *
+	 * @since 10.2.0
+	 * @param array $objectIds
+	 * @return array
+	 */
+	public static function getOverrulePublicationsByObjectIds( array $objectIds )
+	{
+		$result = array();
+		$dbDriver = DBDriverFactory::gen();
+		$objects = $dbDriver->tablename( 'objects' );
+		$targets = $dbDriver->tablename( 'targets' );
+		$issues = $dbDriver->tablename( 'issues' );
+
+		$params = array( 'on' );
+		$sql = 'SELECT o.`id`, o.`publication` AS pubid, p.`publication` AS pubname, t.`issueid` AS issueid, i.`name` AS issuename '.
+			'FROM `smart_objects` o '.
+			'LEFT JOIN `smart_targets` t ON o.`id` = t.`objectid` '.
+			'LEFT JOIN `smart_issues` i ON t.`issueid` = i.`id` '.
+			'LEFT JOIN `smart_publications` p ON p.`id` = o.`publication` '.
+			'WHERE i.`overrulepub` = ? '.
+			'AND ' . self::addIntArrayToWhereClause( 'o.id', $objectIds );
+
+		$sth = $dbDriver->query( $sql, $params );
+		if( $sth ) {
+			while( $row = $dbDriver->fetch( $sth ) ) {
+				$result[$row['id']] = $row;
+			}
+		}
+		return $result;
+	}
 }
