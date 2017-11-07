@@ -94,7 +94,7 @@ class OverruleCompatibility
 	/**
 	 * Creates array of PropertyValue out of array of an object[with Id, Name field]
 	 *
-	 * @param array[] $objects
+	 * @param array $objects
 	 * @returns PropertyValue[]
 	 */
 	public static function createPropertyValues( $objects )
