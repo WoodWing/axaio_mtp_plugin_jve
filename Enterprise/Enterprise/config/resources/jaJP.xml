@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--Last edit date in TMS: 07-11-2017 13:24:18 GMT-->
 <LocalizationMap language="jaJP">
   <Term key="ISSUE">号</Term>
   <Term key="ISSUES">号</Term>
@@ -1114,7 +1115,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">ジョブ %1に有効な設定がありません。優先度が %3のInDesignサーバ %2を設定してください。 (S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">InDesign Serverからの応答がありません (S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">以下の優先度が登録されているジョブは処理されません： %1</Term>
-  <Term key="IDS_PICKUP_FROM">Pickup Time</Term>
+  <Term key="IDS_PICKUP_FROM">ピックアップタイム</Term>
   <Term key="IDS_PORTNUMBER">ポート番号:</Term>
   <Term key="IDS_PRIO">ジョブの優先度</Term>
   <Term key="IDS_PRIO_1">高い</Term>
@@ -1449,6 +1450,7 @@
   <Term key="MNU_REPORTING">レポート</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">ジョブコンフィグレーション</Term>
   <Term key="MNU_SERVER_JOBS">ジョブクエリ</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">アップロード</Term>
   <Term key="MNU_USER">ユーザ</Term>
   <Term key="MNU_USER_QUERY">ユーザクエリ</Term>

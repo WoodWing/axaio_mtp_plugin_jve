@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--Last edit date in TMS: 07-11-2017 13:24:18 GMT-->
 <LocalizationMap language="csCZ">
   <Term key="ISSUE">Vydání</Term>
   <Term key="ISSUES">Vydání</Term>
@@ -1449,6 +1450,7 @@
   <Term key="MNU_REPORTING">Vytváření zpráv</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Konfigurace úloh</Term>
   <Term key="MNU_SERVER_JOBS">Fronta úloh</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Odeslat</Term>
   <Term key="MNU_USER">Uživatelé</Term>
   <Term key="MNU_USER_QUERY">Dotazy uživatele</Term>

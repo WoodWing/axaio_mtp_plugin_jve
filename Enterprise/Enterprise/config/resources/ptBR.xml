@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--Last edit date in TMS: 07-11-2017 13:24:18 GMT-->
 <LocalizationMap language="ptBR">
   <Term key="ISSUE">Edição</Term>
   <Term key="ISSUES">Edições</Term>
@@ -1114,7 +1115,7 @@
   <Term key="IDS_NOT_CONFIGURED_FOR_JOB">Nenhuma configuração ativa do InDesign Server encontrada para o trabalho %1. Configurar um InDesign Server %2 que serve prioridade %3. (S1139)</Term>
   <Term key="IDS_NOT_RESPONDING">O servidor InDesign não responde. (S1134)</Term>
   <Term key="IDS_NO_MATCHING_PRIO">Tarefas com as seguintes prioridades não serão executadas: %1</Term>
-  <Term key="IDS_PICKUP_FROM">Pickup Time</Term>
+  <Term key="IDS_PICKUP_FROM">Hora de coleta</Term>
   <Term key="IDS_PORTNUMBER">Número da Porta:</Term>
   <Term key="IDS_PRIO">Prioridades de Tarefa</Term>
   <Term key="IDS_PRIO_1">Muito alto</Term>
@@ -1450,6 +1451,7 @@ Após alterar as configurações, não se esqueça de reiniciar o serviço da We
   <Term key="MNU_REPORTING">Relatório</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Configurações de Serviçøs</Term>
   <Term key="MNU_SERVER_JOBS">Fila de Serviços</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Fazer upload</Term>
   <Term key="MNU_USER">Usuários</Term>
   <Term key="MNU_USER_QUERY">Consultas do Usuário</Term>

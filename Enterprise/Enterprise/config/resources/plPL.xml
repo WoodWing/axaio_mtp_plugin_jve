@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--Last edit date in TMS: 07-11-2017 13:24:18 GMT-->
 <LocalizationMap language="plPL">
   <Term key="ISSUE">Wydanie</Term>
   <Term key="ISSUES">Wydania</Term>
@@ -1450,6 +1451,7 @@ Po zmianie ustawień należy pamiętać o ponownym uruchomieniu usługi WWW i/lu
   <Term key="MNU_REPORTING">Raport</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Konfiguracja prac</Term>
   <Term key="MNU_SERVER_JOBS">Kolejka prac</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Wyślij</Term>
   <Term key="MNU_USER">Użytkownik</Term>
   <Term key="MNU_USER_QUERY">Kwerendy użytkownika</Term>

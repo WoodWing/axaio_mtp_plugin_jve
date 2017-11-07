@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--Last edit date in TMS: 07-11-2017 13:24:18 GMT-->
 <LocalizationMap language="ruRU">
   <Term key="ISSUE">Выпуск</Term>
   <Term key="ISSUES">Выпуски</Term>
@@ -1450,6 +1451,7 @@
   <Term key="MNU_REPORTING">Отчет</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Конфигурации работы</Term>
   <Term key="MNU_SERVER_JOBS">Очередь работы</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Загрузить</Term>
   <Term key="MNU_USER">Пользователи</Term>
   <Term key="MNU_USER_QUERY">Запросы Пользователя</Term>
