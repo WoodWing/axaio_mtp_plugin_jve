@@ -704,10 +704,10 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 			return false;
 		}
 		else {
-			// Solr versions pre 6.2.1 are not supported.
-			if (version_compare($versionNumber, '6.2.1', '<')){
-				$this->setResult( 'ERROR', 'The currently configured Solr version ( ' . $versionNumber . ' ) is not supported, version 6.2.1 or higher is required.',
-					"Upgrade Solr to at least version 6.2.1.");
+			// Solr versions other than 6.2.1 are not supported.
+			if ( !version_compare($versionNumber, '6.2.1', '=' ) ){
+				$this->setResult( 'ERROR', 'The currently configured Solr version ( ' . $versionNumber . ' ) is not supported, version 6.2.1 is required.',
+					"Upgrade Solr to version 6.2.1." );
 				return false;
 			}
 		}
