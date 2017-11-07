@@ -334,6 +334,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	/**
 	 * Gets a list of group id(s) for which user $userId belongs to.
 	 *
+	 * @since 10.1.5 Function name has been adjusted from getUserGroups to getUserGroupsIds.
 	 * @param string $stepInfo Extra logging info.
 	 * @param int $userId User id where the user's group to be retrieved.
 	 * @return array List of group ids where the $userId belongs to, when success expected. Null when error is expected.
@@ -341,17 +342,15 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	 */
 	public function getUserGroupsIds( $stepInfo, $userId )
 	{
-		$groupIds = array();
 		$userGrps = $this->getUserGroups( $stepInfo, $userId );
-		if( $userGrps ) foreach( $userGrps as $userGrp ) {
-			$groupIds[] = $userGrp->Id;
-		}
+		$groupIds = array_map( function( $userGrp ) { return $userGrp->Id; }, $userGrps );
 		return $groupIds;
 	}
 
 	/**
 	 * Gets a list of Group(s) for which user $userId belongs to.
 	 *
+	 * @since 10.1.5 getUserGroups returns list of AdmUserGroup object instead of list of group ids.
 	 * @param string $stepInfo Extra logging info.
 	 * @param int $userId User id where the user's group to be retrieved.
 	 * @return AdmUserGroup[]|null Null is returned when user belongs to no group.
