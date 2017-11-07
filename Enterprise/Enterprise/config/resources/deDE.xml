@@ -1450,6 +1450,7 @@ Nach dem Ändern der Einstellungen müssen Sie den Webdienst bzw. Datenbankdiens
   <Term key="MNU_REPORTING">Report</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Job-Konfigurationen</Term>
   <Term key="MNU_SERVER_JOBS">Job-Warteschlange</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Hochladen</Term>
   <Term key="MNU_USER">Benutzer</Term>
   <Term key="MNU_USER_QUERY">Benutzerabfragen</Term>
