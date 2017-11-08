@@ -157,8 +157,9 @@ class WW_Admin_ShowLog
 			$page .= '<tr><td><a href="'.$indexUrl.'">php.log</a></td></tr>';
 			$page .= '</tbody></table>';
 		}
-		$page .= '<table><tbody>';
+
 		$page .= '<h3>Daily log folders</h3>';
+		$page .= '<table><tbody>';
 		$dailyFolders = LogHandler::listDailySubFolders();
 		if( $dailyFolders ) foreach( $dailyFolders as $dailyFolder ) {
 			$indexUrl = 'showlog.php?act=dailyfolderindex&dailyfolder='.urlencode( $dailyFolder );
