@@ -237,7 +237,7 @@ class BizUser
 		$brandsOrOverruleBrandIssues = DBUser::getBrandIssueAuthorizationForUser( $userId );
 		$brandIds = array();
 		$overruleBrandIssueIds = array();
-		foreach ($brandsOrOverruleBrandIssues as $brandOrOverruleBrandIssue) {
+		if( $brandsOrOverruleBrandIssues ) foreach ($brandsOrOverruleBrandIssues as $brandOrOverruleBrandIssue) {
 			if ($brandOrOverruleBrandIssue['publication'] && !$brandOrOverruleBrandIssue['issue'] ) {
 				$brandIds[] = intval($brandOrOverruleBrandIssue['publication']);
 			}
@@ -249,17 +249,15 @@ class BizUser
 		$userRowsBrands = array();
 		$userRowsOverruleBrandIssues = array();
 		$uniqueUserRows = array();
-		if ($brandIds || $overruleBrandIssueIds) {
-			if ($brandIds) {
-				$userRowsBrands = DBUser::getAuthorizedUsersForBrands($brandIds );
-			}
-			if ($overruleBrandIssueIds) {
-				$userRowsOverruleBrandIssues = DBUser::getAuthorizedUsersForOverruleBrandIssues( $overruleBrandIssueIds );
-			}
-			$userRows = array_merge($userRowsBrands, $userRowsOverruleBrandIssues);
-			foreach ($userRows as $userRow) {
-				$uniqueUserRows[$userRow['id']] = $userRow;
-			}
+		if ($brandIds) {
+			$userRowsBrands = DBUser::getAuthorizedUsersForBrands($brandIds );
+		}
+		if ($overruleBrandIssueIds) {
+			$userRowsOverruleBrandIssues = DBUser::getAuthorizedUsersForOverruleBrandIssues( $overruleBrandIssueIds );
+		}
+		$userRows = array_merge($userRowsBrands, $userRowsOverruleBrandIssues);
+		if( $userRows )foreach ($userRows as $userRow) {
+			$uniqueUserRows[$userRow['id']] = $userRow;
 		}
 
 		$users = array();

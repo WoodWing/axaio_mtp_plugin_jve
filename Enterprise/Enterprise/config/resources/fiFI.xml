@@ -1449,6 +1449,7 @@
   <Term key="MNU_REPORTING">Raportointi</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Työkokoonpanot</Term>
   <Term key="MNU_SERVER_JOBS">Työjono</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Lataa</Term>
   <Term key="MNU_USER">Käyttäjät</Term>
   <Term key="MNU_USER_QUERY">Käyttäjäkyselyt</Term>
