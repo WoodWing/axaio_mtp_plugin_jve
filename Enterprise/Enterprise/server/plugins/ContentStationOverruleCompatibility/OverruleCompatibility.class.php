@@ -74,7 +74,7 @@ class OverruleCompatibility
 	 * @param string $issueId
 	 * @returns string
 	 */
-	static public function createPubId( $pubId, $issueId )
+	static public function composePubId( $pubId, $issueId )
 	{
 		return ":$pubId:$issueId";
 	}
@@ -86,7 +86,7 @@ class OverruleCompatibility
 	 * @param string $issueName
 	 * @returns string
 	 */
-	static public function createPubName( $pubName, $issueName )
+	static public function composePubName( $pubName, $issueName )
 	{
 		return "$pubName $issueName";
 	}
@@ -97,7 +97,7 @@ class OverruleCompatibility
 	 * @param array $objects
 	 * @returns PropertyValue[]
 	 */
-	public static function createPropertyValues( $objects )
+	public static function composePropertyValues( $objects )
 	{
 		$propertyValues = array();
 		foreach( $objects as $object ) {
@@ -192,8 +192,8 @@ class OverruleCompatibility
 			if( !empty( $object->Targets ) ) {
 				if( isset( $object->Targets[0]->Issue->Id ) && array_key_exists( $object->Targets[0]->Issue->Id, $overruleIssues ) ) {
 					LogHandler::Log('ContentStationOverruleCompatibility','DEBUG','Intercepting overrule pub - after');
-					$object->MetaData->BasicMetaData->Publication->Id	= self::createPubId( $object->MetaData->BasicMetaData->Publication->Id, $object->Targets[0]->Issue->Id );
-					$object->MetaData->BasicMetaData->Publication->Name = self::createPubName( $object->MetaData->BasicMetaData->Publication->Name, $object->Targets[0]->Issue->Name );
+					$object->MetaData->BasicMetaData->Publication->Id	= self::composePubId( $object->MetaData->BasicMetaData->Publication->Id, $object->Targets[0]->Issue->Id );
+					$object->MetaData->BasicMetaData->Publication->Name = self::composePubName( $object->MetaData->BasicMetaData->Publication->Name, $object->Targets[0]->Issue->Name );
 				}
 			}
 		}
@@ -254,10 +254,13 @@ class OverruleCompatibility
 				}
 			}
 
+			require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 			// If there is no publication id or name column, there is nothing to replace so we will not have to do anything
 			if( $pubIdCol != -1 || $pubNameCol != -1 ) {
-				foreach( $resp->Rows as $i => $row ) {
-					$objectIds[] = $row[$objectIdCol];
+				foreach( $resp->Rows as $row ) {
+					if( !BizContentSource::isAlienObject( $row[$objectIdCol] ) ){
+						$objectIds[] = $row[$objectIdCol];
+					}
 				}
 			} else {
 				$handleColumns = false;
@@ -280,9 +283,11 @@ class OverruleCompatibility
 					}
 				}
 				// If there is no publication id or name column, there is nothing to replace so we will not have to do anything.
-				if( $pubIdChildCol != -1 || $pubNameCol != -1 ) {
-					foreach( $resp->Rows as $i => $row ) {
-						$objectIds[] = $row[$objectIdCol];
+				if( $pubIdChildCol != -1 || $pubNameChildCol != -1 ) {
+					foreach( $resp->ChildRows as $row ) {
+						if( !BizContentSource::isAlienObject( $row[$objectIdChildCol] ) ) {
+							$objectIds[] = $row[$objectIdChildCol];
+						}
 					}
 				} else {
 					$handleChildColumns = false;
@@ -292,7 +297,7 @@ class OverruleCompatibility
 				$handleChildColumns = false;
 			}
 
-			if( !empty( $objectIds ) && ($handleColumns || $handleChildColumns) ) {
+			if( !empty( $objectIds ) ) {
 				$objectIds = array_unique( $objectIds ); // There might have been double values since we combined the regular and child columns.
 
 				require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
@@ -301,8 +306,8 @@ class OverruleCompatibility
 				if( $overrulePubInfosByObjectId ) {
 					$newOverruleIssues = array();
 					foreach( $overrulePubInfosByObjectId as $objId => $entry ) {
-						$newOverruleIssues[$objId]['pubId'] = self::createPubId( $entry['pubid'], $entry['issueid'] );
-						$newOverruleIssues[$objId]['pubName'] = self::createPubName( $entry['pubname'], $entry['issuename'] );
+						$newOverruleIssues[$objId]['pubId'] = self::composePubId( $entry['pubid'], $entry['issueid'] );
+						$newOverruleIssues[$objId]['pubName'] = self::composePubName( $entry['pubname'], $entry['issuename'] );
 					}
 					if( $handleColumns ) {
 						foreach( $resp->Rows as $i => $row ) {
@@ -327,7 +332,7 @@ class OverruleCompatibility
 									$resp->ChildRows[$i][$pubIdChildCol] = $newOverruleIssues[$objectId]['pubId'];
 								}
 								if( $pubNameChildCol != -1 ) {
-									$resp->ChildRows[$i][$pubNameChildCol] = $newOverruleIssues[$objectId]['pubid'];
+									$resp->ChildRows[$i][$pubNameChildCol] = $newOverruleIssues[$objectId]['pubName'];
 								}
 							}
 						}
