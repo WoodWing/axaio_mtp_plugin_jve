@@ -269,32 +269,44 @@ class DBUser extends DBBase
 	 * @param int $issueId issueId id (null implies all users for given publication)
 	 * @param string $sortBy sorting column either by 'user' or 'fullname', default sort by 'fullname' column
 	 * @param boolean $activeOnly Only return active users (true) or all users (activated and deactivated)
-	 * @return array of smart_user db rows.
+	 * @return array|null db user rows or null in case of a database error
 	 * @throws BizException
 	 */
 	public static function getUsers( $publicationId = null, $issueId = null, $sortBy = 'fullname', $activeOnly = false )
 	{
 		self::clearError();
 		$dbdriver = DBDriverFactory::gen();
+		$db = $dbdriver->tablename('users');
 		$params = array();
+		if( $activeOnly ) {
+			$activeOnlyWhere = '( u.`disable` != ? OR u.`disable` IS NULL )';
+		}
 
 		if ($publicationId) {
 			if( !$issueId ) { $issueId = 0; }
 			// beware: admin rights do NOT count
-			$where = "a.`publication` = ? AND a.`issue` = ?";
-			$sql = self::makeSelectStatementForAuthorizedUsers( $where );
+			$dbx = $dbdriver->tablename('usrgrp');
+			$dba = $dbdriver->tablename('authorizations');
+			$sql = "SELECT DISTINCT u.* ".
+					 "FROM {$db} u, {$dbx} x ".
+					 "WHERE u.`id` = x.`usrid` AND x.`grpid` IN ".
+							"( SELECT a.`grpid` ".
+							"FROM {$dba} a ".
+							"WHERE a.`publication` = ? AND a.`issue` = ? ) ";
 			$params[] = intval( $publicationId );
 			$params[] = intval( $issueId );
-			$keyword = 'AND';
+			if( $activeOnly ) {
+				$sql .= "AND {$activeOnlyWhere} ";
+				$params[] = 'on';
+			}
 		} else {
 			$db = $dbdriver->tablename('users');
 			$sql = "SELECT * ".
 					 "FROM {$db} u ";
-			$keyword = 'WHERE';
-		}
-		if ( $activeOnly ) {
-			$sql .= "{$keyword} ( u.`disable` != ? OR u.`disable` IS NULL ) "; // Oracle empty string is equal to NULL
-			$params[] = 'on';
+			if( $activeOnly ) {
+				$sql .= "WHERE {$activeOnlyWhere} ";
+				$params[] = 'on';
+			}
 		}
 		$sql .= "ORDER BY ".self::toColname( 'u.'.$sortBy );
 
@@ -316,19 +328,42 @@ class DBUser extends DBBase
 	 *
 	 * @since 10.1.5
 	 * @param int[] $brandIds
-	 * @return array db user rows
+	 * @return array|null db user rows or null in case of a database error
 	 * @throws BizException
 	 */
 	static public function getAuthorizedUsersForBrands( array $brandIds )
 	{
-		$authorizedUserRows = array();
+		$result = array();
 		if( $brandIds ) {
+			self::clearError();
+			$dbdriver = DBDriverFactory::gen();
+			$db = $dbdriver->tablename( 'users' );
+			$dbx = $dbdriver->tablename( 'usrgrp' );
+			$dba = $dbdriver->tablename( 'authorizations' );
 			$where = self::addIntArrayToWhereClause( 'a.publication', $brandIds, false );
-			$where .= 'AND a.`issue` = 0 '; // All non-overrule brand issues.
-			$authorizedUserRows = self::getAuthorizedUsers( $where );
+			$where .= 'AND a.`issue` = 0 ';
+
+			$sql = "SELECT DISTINCT u.* ".
+					 "FROM {$db} u, {$dbx} x ".
+					 "WHERE u.`id` = x.`usrid` AND x.`grpid` IN ".
+						"( SELECT a.`grpid` ".
+						"FROM {$dba} a ".
+						"WHERE {$where} ) ".
+					 "ORDER BY u.`fullname`";
+
+			$sth = $dbdriver->query( $sql );
+			if( !$sth ) {
+				self::setError( $dbdriver->error() );
+				return null;
+			}
+
+			$rows = self::fetchResults( $sth );
+			if( $rows ) foreach( $rows as $row ) {
+				$result[] = self::repairTrackChangesColor( $row );
+			}
 		}
 
-		return $authorizedUserRows;
+		return $result;
 	}
 
 	/**
@@ -336,77 +371,41 @@ class DBUser extends DBBase
 	 *
 	 * @since 10.1.5
 	 * @param int[] $overruleBrandIssueIds
-	 * @return array db user rows
+	 * @return array|null db user rows or null in case of a database error
 	 * @throws BizException
 	 */
 	static public function getAuthorizedUsersForOverruleBrandIssues( array $overruleBrandIssueIds )
 	{
-		$authorizedUserRows = array();
+		$result = array();
 		if( $overruleBrandIssueIds ) {
+			self::clearError();
+			$dbdriver = DBDriverFactory::gen();
+			$db = $dbdriver->tablename( 'users' );
+			$dbx = $dbdriver->tablename( 'usrgrp' );
+			$dba = $dbdriver->tablename( 'authorizations' );
 			$where = self::addIntArrayToWhereClause( 'a.issue', $overruleBrandIssueIds, false );
-			$authorizedUserRows = self::getAuthorizedUsers( $where );
-		}
 
-		return $authorizedUserRows;
-	}
-
-	/**
-	 * Returns authorized users based on a selection filter.
-	 *
-	 * If the user has no 'trackchangescolor' set, the default user color is set.
-	 *
-	 * @since 10.1.5
-	 * @param string $where Filter on the authorization table.
-	 * @return array of db user rows.
-	 * @throws BizException
-	 */
-	static private function getAuthorizedUsers( $where )
-	{
-		self::clearError();
-		$dbdriver = DBDriverFactory::gen();
-		$params = array();
-
-		$sql = self::makeSelectStatementForAuthorizedUsers( $where );
-		$sql .= "ORDER BY u.`fullname`";
-
-		$sth = $dbdriver->query( $sql, $params );
-		if( !$sth ) {
-			self::setError( $dbdriver->error() );
-			return null;
-		}
-
-		$rows = self::fetchResults( $sth );
-		$ret = array();
-		if( $rows ) foreach( $rows as $row ) {
-			$ret[] = self::repairTrackChangesColor( $row );
-		}
-
-		return $ret;
-	}
-
-	/**
-	 * Composes a select statement to query authorized users based on the passed in filter.
-	 *
-	 * @since 10.1.5
-	 * @param string $where Filter
-	 * @return string SQL statement
-	 * @throws BizException
-	 */
-	static private function makeSelectStatementForAuthorizedUsers( $where )
-	{
-		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename('users');
-		$dbx = $dbdriver->tablename('usrgrp');
-		$dba = $dbdriver->tablename('authorizations');
-
-		$sql = "SELECT DISTINCT u.* ".
-				 "FROM {$db} u, {$dbx} x ".
-				 "WHERE u.`id` = x.`usrid` AND x.`grpid` IN ".
+			$sql = "SELECT DISTINCT u.* ".
+					 "FROM {$db} u, {$dbx} x ".
+					 "WHERE u.`id` = x.`usrid` AND x.`grpid` IN ".
 						"( SELECT a.`grpid` ".
 						"FROM {$dba} a ".
-						"WHERE {$where} ) ";
+						"WHERE {$where} ) ".
+					 "ORDER BY u.`fullname`";
 
-		return $sql;
+			$sth = $dbdriver->query( $sql );
+			if( !$sth ) {
+				self::setError( $dbdriver->error() );
+				return null;
+			}
+
+			$rows = self::fetchResults( $sth );
+			if( $rows ) foreach( $rows as $row ) {
+				$result[] = self::repairTrackChangesColor( $row );
+			}
+		}
+
+		return $result;
 	}
 
 	/**
