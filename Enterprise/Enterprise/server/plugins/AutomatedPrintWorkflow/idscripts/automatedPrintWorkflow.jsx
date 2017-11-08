@@ -47,7 +47,7 @@ var SCRIPT_ARG_KEYS = [ "documentId",	// The object id of the layout to perform 
 			function firstLetterToLower( sKey ) {
 			    return (sKey[0].toLowerCase() + sKey.slice(1));
 			}
-			for each( var argKey in SCRIPT_ARG_KEYS ) {
+			for( var argKey in SCRIPT_ARG_KEYS ) {
 				if( scriptArgObj.isDefined(argKey) ) {
 					opsInstructions[firstLetterToLower(argKey)] = scriptArgObj.get(argKey);
 				}
@@ -198,9 +198,26 @@ function placeImage( docObject, operationObj ) {
 		docObject.viewPreferences.horizontalMeasurementUnits = MeasurementUnits.POINTS;
 		docObject.viewPreferences.verticalMeasurementUnits = MeasurementUnits.POINTS;
 
+		// Determine rotation of the image. Later on this will be used to adapt scaling and translation.
+        	var image = curFrame.images.firstItem();
+        	var imageRotationAngle = image.rotationAngle;
+        	var rotM = (imageRotationAngle / 90 + 8) % 4;
+        	var rotCW = ( rotM === 1);
+        	var rotCCW = (rotM === 3);
+        	var rot180 = (rotM === 2);
+       
 		// ********************
 		// Scaling.
 		// ********************
+
+		// swap scaleX/scaleY in case of 90 or 270 rotation (EN-88412)
+		// Reason: with 90/270 rotation, the Y-axis and X-axis of the graphic are swapped by InDesign
+        	if ( rotCW || rotCCW )
+        	{
+            		var tempScaleX = operationObj.scaleX;
+            		operationObj.scaleX = operationObj.scaleY;
+            		operationObj.scaleY = tempScaleX;
+        	}
 
 		// When scaling and translation are set to '0', we will fit the content
 		// to the frame if the dimensions did no change.
@@ -223,6 +240,7 @@ function placeImage( docObject, operationObj ) {
 					// Check if the horizontal and vertical scaling are already set as wanted.
 					// If not, we will set them correctly.
 					if( (curScaleX !== parseFloat(operationObj.scaleX)) || (curScaleY !== parseFloat(operationObj.scaleY)) ) {
+						app.wwlog( "script", parseInt(LogLevelOptions.INFO), "  <PlaceImage info=[Scaling needed]>" );
 
 						// Scale the image.
 						curFrame.allGraphics[0].horizontalScale = (operationObj.scaleX * 100);
@@ -240,21 +258,58 @@ function placeImage( docObject, operationObj ) {
 
 			// Only check and translate when the values are defined.
 			if( operationObj.contentDx !== undefined && operationObj.contentDy !== undefined ) {
+                    		// Check if the translation has already been done.
+                    		var frameBounds = curFrame.geometricBounds;
+                    		var graphicBounds = curFrame.allGraphics[0].geometricBounds;
+                    		/*
+					app.wwlog( "script", parseInt(LogLevelOptions.INFO), "  <PlaceImage graphicBounds[0]=["+graphicBounds[0]+"]>" );
+                            		app.wwlog( "script", parseInt(LogLevelOptions.INFO), "  <PlaceImage graphicBounds[1]=["+graphicBounds[1]+"]>" );
+                            		app.wwlog( "script", parseInt(LogLevelOptions.INFO), "  <PlaceImage frameBounds[0]=["+frameBounds[0]+"]>" );
+                            		app.wwlog( "script", parseInt(LogLevelOptions.INFO), "  <PlaceImage frameBounds[1]=["+frameBounds[1]+"]>" );
+                            	*/
+                 
+                    		// Check if there is a difference in offset.
+                    		var curOffsetY = (graphicBounds[0] - frameBounds[0]);
+                    		var curOffsetX = (graphicBounds[1] - frameBounds[1]);
+				
+                    		// Check if the horizontal and vertical offset are already set as wanted.
+                    		// If not, we will set them correctly.
+                    		if( (parseFloat(curOffsetX) !== parseFloat(operationObj.contentDx)) || (parseFloat(curOffsetY) !== parseFloat(operationObj.contentDy)) ) {
+              
+                        		app.wwlog( "script", parseInt(LogLevelOptions.INFO), "  <PlaceImage: going to move>" );
 
-				// Check if the translation has already been done.
-				var frameBounds = curFrame.geometricBounds;
-				var graphicBounds = curFrame.allGraphics[0].geometricBounds;
-
-				// Check if there is a difference in offset.
-				var curOffsetY = (graphicBounds[0] - frameBounds[0]);
-				var curOffsetX = (graphicBounds[1] - frameBounds[1]);
-			
-				// Check if the horizontal and vertical offset are already set as wanted.
-				// If not, we will set them correctly.
-				if( (parseFloat(curOffsetX) !== parseFloat(operationObj.contentDx)) || (parseFloat(curOffsetY) !== parseFloat(operationObj.contentDy)) ) {
-
-					// Align the image after placing top-left of the parent page item.
-					curFrame.allGraphics[0].move([frameBounds[1],frameBounds[0]]);
+                        		// Align the image after placing top-left of the parent page item.
+                        		// In case of rotated image we have to take care (EN-88412):
+                        		//  - when rotated 90 degrees Clock Wise, the reference point is the bottom-left.
+                        		//  - when rotated 90 degrees Counter Clock Wise, the reference point is the top-right
+                        		// - when rotated 180 degrees, the reference point is the bottom-right
+                        		// We move the reference point of the image such that after moving, the top left corner of the image aligns with the top left corner of the frame.
+                        
+                        		var graphicWidth = graphicBounds[3] - graphicBounds[1];
+                        		var graphicHeight = graphicBounds[2] - graphicBounds[0];
+                        		var xNew = 0;
+                        		var yNew = 0;
+                        
+                        		if ( rotCW ) {
+                            			app.wwlog( "script", parseInt(LogLevelOptions.INFO), "  <PlaceImage: move: 90 CW rotation>" );
+                            			yNew = frameBounds[0] + graphicHeight;
+                            			xNew = frameBounds[1];
+                        		}
+                        		else if ( rotCCW ) {
+                            				app.wwlog( "script", parseInt(LogLevelOptions.INFO), "  <PlaceImage: move: 90 CCW rotation>" );
+                            				yNew = frameBounds[0] ;
+                            				xNew = frameBounds[1] + graphicWidth;
+                        		}
+                        		else if ( rot180 ) {
+                            				app.wwlog( "script", parseInt(LogLevelOptions.INFO), "  <PlaceImage: move: 180 rotation>" );
+                            				yNew = frameBounds[0] + graphicHeight;
+                            				xNew = frameBounds[1] + graphicWidth;
+                        		}
+                        		else {
+                            				yNew = frameBounds[0] ;
+                            				xNew = frameBounds[1];
+                       			}
+                       			curFrame.allGraphics[0].move([xNew, yNew ]);
 
 					// Create a transformation matrix for the image.
 					var translationMatrix = app.transformationMatrices.add({horizontalTranslation:parseFloat(operationObj.contentDx), verticalTranslation:parseFloat(operationObj.contentDy)});
@@ -267,13 +322,11 @@ function placeImage( docObject, operationObj ) {
 		}
 
 		// ********************
-
 		// Restore the horizontal and vertical measurements unit setting.
 		docObject.viewPreferences.horizontalMeasurementUnits = storedHorMes;
 		docObject.viewPreferences.verticalMeasurementUnits = storedVertMes;
 	}
 	while( false );
-
 	app.wwlog( "script", parseInt(LogLevelOptions.INFO), "</AutomatedPrintWorkflow::PlaceImage>" );
 }
 
