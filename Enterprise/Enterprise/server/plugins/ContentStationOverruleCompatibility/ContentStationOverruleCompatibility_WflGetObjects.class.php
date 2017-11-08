@@ -38,8 +38,8 @@ class ContentStationOverruleCompatibility_WflGetObjects extends WflGetObjects_En
 					if( $issueId !== false ) {
 						$issueName = DBIssue::getIssueName( $issueId );
 						if( $issueName != '' && DBIssue::isOverruleIssue( $issueId ) ) {
-							$object->MetaData->BasicMetaData->Publication->Id = OverruleCompatibility::createPubId( $object->MetaData->BasicMetaData->Publication->Id, $issueId );
-							$object->MetaData->BasicMetaData->Publication->Name = OverruleCompatibility::createPubName( $object->MetaData->BasicMetaData->Publication->Name, $issueName );
+							$object->MetaData->BasicMetaData->Publication->Id = OverruleCompatibility::composePubId( $object->MetaData->BasicMetaData->Publication->Id, $issueId );
+							$object->MetaData->BasicMetaData->Publication->Name = OverruleCompatibility::composePubName( $object->MetaData->BasicMetaData->Publication->Name, $issueName );
 						}
 					}
 				}
