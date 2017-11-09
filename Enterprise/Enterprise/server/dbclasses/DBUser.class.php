@@ -278,9 +278,7 @@ class DBUser extends DBBase
 		$dbdriver = DBDriverFactory::gen();
 		$db = $dbdriver->tablename('users');
 		$params = array();
-		if( $activeOnly ) {
-			$activeOnlyWhere = '( u.`disable` != ? OR u.`disable` IS NULL )';
-		}
+		$activeOnlyWhere = $activeOnly ? '( u.`disable` != ? OR u.`disable` IS NULL )' : '';
 
 		if ($publicationId) {
 			if( !$issueId ) { $issueId = 0; }
