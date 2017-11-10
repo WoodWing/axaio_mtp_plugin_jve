@@ -530,21 +530,31 @@ class InDesignArticle
 {
 	public $Id;
 	public $Name;
+	public $SplineIDs;
 
 	/**
 	 * @param string               $Id                   
 	 * @param string               $Name                 Nullable.
+	 * @param string[]             $SplineIDs            Nullable.
 	 */
-	public function __construct( $Id=null, $Name=null)
+	public function __construct( $Id=null, $Name=null, $SplineIDs=null)
 	{
 		$this->Id                   = $Id;
 		$this->Name                 = $Name;
+		$this->SplineIDs            = $SplineIDs;
 	}
 
 	public function getASClassName() { return AS_CLASSNAME_PREFIX.'.wfl.dataclasses.WflInDesignArticle'; } // AMF object type mapping
 
 	public function sanitizeProperties4Php()
 	{
+		if (0 < count($this->SplineIDs)){
+			if (is_object($this->SplineIDs[0])){
+				foreach ($this->SplineIDs as $complexField){
+					$complexField->sanitizeProperties4Php();
+				}
+			}
+		}
 	}
 }
 class Relation

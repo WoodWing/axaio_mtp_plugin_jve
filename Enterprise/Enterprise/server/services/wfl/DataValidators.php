@@ -948,6 +948,18 @@ class WflInDesignArticleValidator
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'SplineIDs' ) ) {
+			$validator->enterPath( 'SplineIDs' );
+			if( !is_null( $datObj->SplineIDs ) ) {
+				$validator->checkType( $datObj->SplineIDs, 'array' );
+				if( !empty($datObj->SplineIDs) ) foreach( $datObj->SplineIDs as $listItem ) {
+					$validator->enterPath( 'string' );
+					$validator->checkType( $listItem, 'string' );
+					$validator->leavePath();
+				}
+			}
+			$validator->leavePath();
+		}
 	}
 }
 

@@ -14,6 +14,7 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 	{
 		private var _Id:String;
 		private var _Name:String;
+		private var _SplineIDs:Array;
 
 		public function WflInDesignArticle() {
 		}
@@ -30,6 +31,13 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		}
 		public function set Name(Name:String):void {
 			this._Name = Name;
+		}
+
+		public function get SplineIDs():Array {
+			return this._SplineIDs;
+		}
+		public function set SplineIDs(SplineIDs:Array):void {
+			this._SplineIDs = SplineIDs;
 		}
 
 	}
