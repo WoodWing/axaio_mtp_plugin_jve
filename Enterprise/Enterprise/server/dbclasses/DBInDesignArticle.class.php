@@ -58,10 +58,11 @@ class DBInDesignArticle extends DBBase
 	 *
 	 * @since 9.7.0
 	 * @param integer $layoutId
+	 * @param boolean $resolveSortedSplineIds
 	 * @return InDesignArticle[] The InDesign Articles. Empty when none found.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
- 	public static function getInDesignArticles( $layoutId )
+ 	public static function getInDesignArticles( $layoutId, $resolveSortedSplineIds = false )
  	{
 		// Bail out when invalid parameters provided. (Paranoid check.)
 		$layoutId = intval( $layoutId );
@@ -78,10 +79,23 @@ class DBInDesignArticle extends DBBase
 		}
 		
 		// Convert rows to data objects.
+	   /** @var InDesignArticle[] $articles */
 		$articles = array();
 		if( $rows ) foreach( $rows as $row ) {
 			$articles[] = self::rowToObj( $row );
 		}
+
+		// Enrich the InDesign Articles with the sorted spline ids.
+		if( $resolveSortedSplineIds && $articles ) {
+			require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
+			$sortedSplineIds = DBInDesignArticlePlacement::getSortedSplineIdsForInDesignArticlesOnLayout( $layoutId );
+			foreach( $articles as $article ) {
+				if( array_key_exists( $article->Id, $sortedSplineIds ) && count( $sortedSplineIds[ $article->Id ] ) > 0 ) {
+					$article->SplineIDs = $sortedSplineIds[ $article->Id ];
+				}
+			}
+		}
+
 		return $articles;
 
  	}

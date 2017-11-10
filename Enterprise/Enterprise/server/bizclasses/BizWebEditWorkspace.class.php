@@ -1013,7 +1013,7 @@ class BizWebEditWorkspace
 				// but only do that when client has explicitly requested for that (for performance reasons).
 				if( in_array( 'InDesignArticles', $requestInfo ) ) {
 					require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-					$ret['InDesignArticles'] = DBInDesignArticle::getInDesignArticles( $layoutId );
+					$ret['InDesignArticles'] = DBInDesignArticle::getInDesignArticles( $layoutId, true );
 					$iaPlacements = $this->composeInDesignArticlesPlacements( $xpath );
 					if ( $iaPlacements ) {
 						$ret['Placements'] = array_merge( $ret['Placements'], array_values( $iaPlacements ) );
@@ -1066,7 +1066,14 @@ class BizWebEditWorkspace
 
 							// Save the InDesign Article Placements for the layout object (v9.7).
 							if( !is_null( $iaPlacements ) ) {
+								require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 								DBPlacements::insertInDesignArticlePlacementsFromScratch( $layoutId, $iaPlacements );
+							}
+
+							// Sort the placements per InDesign Article as shown in the Articles palette for the layout (v10.2).
+							if( !is_null( $ret['InDesignArticles'] ) ) {
+								require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
+								DBInDesignArticlePlacement::sortInDesignArticlePlacements( $layoutId, $ret['InDesignArticles'] );
 							}
 						}
 

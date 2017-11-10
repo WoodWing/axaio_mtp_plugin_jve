@@ -1194,7 +1194,7 @@ class BizObject
 			// v9.7 Return InDesign Articles
 			if( in_array('InDesignArticles', $requestInfo) ) {
 				require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-				$indesignArticles = DBInDesignArticle::getInDesignArticles( $id );
+				$indesignArticles = DBInDesignArticle::getInDesignArticles( $id, false );
 			} else {
 				$indesignArticles = null;
 			}
@@ -3232,14 +3232,18 @@ class BizObject
 
 		// Copy the InDesign Articles (and their placements) set for layout objects.
 		require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-		$idArticles = DBInDesignArticle::getInDesignArticles( $srcid );
+		$idArticles = DBInDesignArticle::getInDesignArticles( $srcid, true );
 		if( $idArticles ) {
 			DBInDesignArticle::createInDesignArticles( $id, $idArticles );
 		}
 		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 		$placements = DBPlacements::getPlacements( $srcid, 0, 'Placed' );
-		foreach( $placements as $placement ) {
-			DBPlacements::insertPlacement( $id, 0, 'Placed', $placement );
+		if( $placements ) {
+			DBPlacements::insertInDesignArticlePlacementsFromScratch( $id, $placements );
+		}
+		if( $idArticles ) {
+			require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
+			DBInDesignArticlePlacement::sortInDesignArticlePlacements( $id, $idArticles );
 		}
 
 		// Delete the Object Operations set for layout objects.
@@ -4042,9 +4046,14 @@ class BizObject
 
 		// Save the Indesign Article Placements for the layout object (v9.7).
 		if( !is_null($object->Placements) ) {
-			foreach( $object->Placements as $placement ) {
-				DBPlacements::insertPlacement( $id, 0, 'Placed', $placement );
-			}
+			require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+			DBPlacements::insertInDesignArticlePlacementsFromScratch( $id, $object->Placements );
+		}
+
+		// Sort the placements per InDesign Article as shown in the Articles palette for the layout (v10.2).
+		if( !is_null($object->InDesignArticles) ) {
+			require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
+			DBInDesignArticlePlacement::sortInDesignArticlePlacements( $id, $object->InDesignArticles );
 		}
 
 		// Save the Object Operations for the layout object (9.7).
