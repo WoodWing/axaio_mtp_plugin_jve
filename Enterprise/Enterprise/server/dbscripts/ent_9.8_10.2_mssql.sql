@@ -201,6 +201,8 @@ EXEC (@SQL1);
 ALTER TABLE smart_indesignarticles ALTER COLUMN   [objid] bigint NOT NULL ;
 ALTER TABLE [smart_indesignarticles] ADD PRIMARY KEY ([objid], [artuid]);
 ALTER TABLE [smart_indesignarticles] ADD DEFAULT (0) FOR [objid];
+ALTER TABLE [smart_idarticlesplacements] ADD 
+  [code] int NOT NULL  default '0';
 DECLARE @return_value int, @constraintName sysname, @sql nvarchar(1024)
 EXEC @return_value = [dbo].[SCE_GetConstraintName] @tablename = 'smart_idarticlesplacements', @columnName = 'objid', @constraintName = @constraintName OUTPUT
 SET @sql = 'ALTER TABLE smart_idarticlesplacements DROP CONSTRAINT ' + @constraintName

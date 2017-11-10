@@ -32,6 +32,8 @@ ALTER TABLE `smart_placements` CHANGE `child`   `child` bigint(11) NOT NULL  def
 ALTER TABLE `smart_elements` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_elements` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_indesignarticles` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
+ALTER TABLE `smart_idarticlesplacements`
+ADD   `code` int(11) NOT NULL  default '0';
 ALTER TABLE `smart_idarticlesplacements` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_idarticlesplacements` CHANGE `plcid`   `plcid` bigint(11) NOT NULL  default 0;
 CREATE  INDEX `plcid_idarticlesplacements` ON `smart_idarticlesplacements`(`plcid`) ;

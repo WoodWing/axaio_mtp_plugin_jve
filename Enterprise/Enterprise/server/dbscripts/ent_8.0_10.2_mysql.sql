@@ -56,6 +56,7 @@ CREATE TABLE `smart_idarticlesplacements` (
   `objid` bigint(11) NOT NULL  default 0,
   `artuid` varchar(40) NOT NULL  default '',
   `plcid` bigint(11) NOT NULL  default 0,
+  `code` int(11) NOT NULL  default '0',
   PRIMARY KEY (`objid`, `artuid`, `plcid`)
 ) DEFAULT CHARSET=utf8;
 CREATE  INDEX `plcid_idarticlesplacements` ON `smart_idarticlesplacements`(`plcid`) ;

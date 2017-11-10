@@ -221,6 +221,7 @@ CREATE TABLE [smart_idarticlesplacements] (
   [objid] bigint NOT NULL  default 0,
   [artuid] varchar(40) NOT NULL  default '',
   [plcid] bigint NOT NULL  default 0,
+  [code] int NOT NULL  default '0',
   PRIMARY KEY ([objid], [artuid], [plcid])
 );
 CREATE  INDEX [plcid_idarticlesplacements] ON [smart_idarticlesplacements]([plcid]) ;

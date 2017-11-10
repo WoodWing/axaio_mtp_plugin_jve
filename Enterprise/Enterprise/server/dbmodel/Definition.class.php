@@ -826,7 +826,6 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 						array('v' => '3.1', 'field' => 'elementid', 'reftable' => 'smart_elements', 'reffield' => 'guid'),
 						array('v' => '4.2', 'field' => 'edition', 'reftable' => 'smart_editions', 'reffield' => 'id'),
 						array('v' => '5.0', 'field' => 'pagesequence', 'reftable' => 'smart_pages', 'reffield' => 'pagesequence'),
-						array('v' => '9.7', 'field' => 'indesignarticleid', 'reftable' => 'smart_indesignarticles', 'reffield' => 'artuid'),
 					),
 				),
 				array ('v' =>'4.2', 'name' => 'smart_elements',
@@ -895,6 +894,8 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 							'comment' => 'Foreign key to smart_placements id.',
 							'alters' => array('v' => '9.7', 'name' => 'plcid',		'type' => 'int(11)',		'default' => 0, 'nullable' => false,
 								'comment' => 'Foreign key to smart_placements id.' )),
+						array('v' => '10.2', 'name' => 'code',			'type' => 'int(11)',		'default' => "'0'",
+							'comment' => 'Represents the sequence of the frames as organized in the InDesign Article palette.' ),
 					),
 					'indexes' => array(
 						array('v' => '9.7', 'name' => 'primary', 	'fields' => 'objid, artuid, plcid', 'primary' => true),
