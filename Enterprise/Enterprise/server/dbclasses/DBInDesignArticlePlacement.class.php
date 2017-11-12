@@ -131,16 +131,17 @@ class DBInDesignArticlePlacement extends DBBase
 		$placementsTable = $dbDriver->tablename( 'placements' );
 		$sql =  'SELECT `plcid` FROM '.$inarticlesTable.' iap '.
 				'INNER JOIN '.$placementsTable.' plc ON ( plc.`id` = iap.`plcid` ) '.
-				'WHERE iap.`objid` = ? AND iap.`artuid` = ? AND plc.`type` = ? '.
-				'ORDER BY iap.`code` ASC ';
-		$params = array( $layoutId, $indesignArticleId, 'Placed' );
+				'WHERE iap.`objid` = ? AND iap.`artuid` = ? AND plc.`type` = ? ';
+		$params = array( intval( $layoutId ), $indesignArticleId, 'Placed' );
 
 		if( $editionId ) {
 			// If the edition id is given search for that specific id or 0 (which means all editions)
 			$sql .= ' AND (plc.`edition` = ? OR plc.`edition` = ?) ';
-			$params[] = $editionId;
+			$params[] = intval( $editionId );
 			$params[] = 0;
 		}
+
+		$sql .= 'ORDER BY iap.`code` ASC ';
 		
 		$sth = $dbDriver->query( $sql, $params );
 		if( is_null($sth) ) {
