@@ -3243,7 +3243,7 @@ class BizObject
 		}
 		if( $idArticles ) {
 			require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
-			DBInDesignArticlePlacement::sortInDesignArticlePlacements( $id, $idArticles );
+			DBInDesignArticlePlacement::saveSortingForInDesignArticlePlacements( $id, $idArticles );
 		}
 
 		// Delete the Object Operations set for layout objects.
@@ -4053,7 +4053,7 @@ class BizObject
 		// Sort the placements per InDesign Article as shown in the Articles palette for the layout (v10.2).
 		if( !is_null($object->InDesignArticles) ) {
 			require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
-			DBInDesignArticlePlacement::sortInDesignArticlePlacements( $id, $object->InDesignArticles );
+			DBInDesignArticlePlacement::saveSortingForInDesignArticlePlacements( $id, $object->InDesignArticles );
 		}
 
 		// Save the Object Operations for the layout object (9.7).

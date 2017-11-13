@@ -1073,7 +1073,7 @@ class BizWebEditWorkspace
 							// Sort the placements per InDesign Article as shown in the Articles palette for the layout (v10.2).
 							if( !is_null( $ret['InDesignArticles'] ) ) {
 								require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
-								DBInDesignArticlePlacement::sortInDesignArticlePlacements( $layoutId, $ret['InDesignArticles'] );
+								DBInDesignArticlePlacement::saveSortingForInDesignArticlePlacements( $layoutId, $ret['InDesignArticles'] );
 							}
 						}
 

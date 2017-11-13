@@ -379,7 +379,7 @@ class DBInDesignArticlePlacement extends DBBase
 	 * @param integer $layoutId
 	 * @param InDesignArticle[] $inDesignArticles
 	 */
-	public static function sortInDesignArticlePlacements( $layoutId, $inDesignArticles )
+	public static function saveSortingForInDesignArticlePlacements( $layoutId, $inDesignArticles )
 	{
 		// Older versions of SC do NOT provide the SplineIDs since that is introduced with ES 10.2.0.
 		// When there are no spline ids we can not sort the placements and so we bail out.
@@ -397,7 +397,6 @@ class DBInDesignArticlePlacement extends DBBase
 		$selects = array();
 		$params = array();
 		foreach( $inDesignArticles as $inDesignArticle ) {
-			$artUID = $inDesignArticle->Id;
 			$sortCode = 1;
 			if( $inDesignArticle->SplineIDs ) foreach( $inDesignArticle->SplineIDs as $splineID ) {
 				if( $selects ) {
@@ -405,7 +404,7 @@ class DBInDesignArticlePlacement extends DBBase
 				} else { // for the first entry only we provide field names for our inline table
 					$selects[] = 'SELECT ? AS `splineid`, ? AS `artuid`, ? AS `objid`, ? AS `code`';
 				}
-				$params = array_merge( $params, array( intval( $splineID ), strval( $artUID ), intval( $layoutId ), $sortCode ) );
+				$params = array_merge( $params, array( intval( $splineID ), strval( $inDesignArticle->Id ), intval( $layoutId ), $sortCode ) );
 				$sortCode += 1;
 			}
 		}
