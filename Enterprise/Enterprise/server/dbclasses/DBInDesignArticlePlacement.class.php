@@ -229,11 +229,16 @@ class DBInDesignArticlePlacement extends DBBase
 		}
 		$rows = array();
 		while( ($row = $dbDriver->fetch($sth)) ) {
-			if( $row['code'] == 0 ) { // older version of SC saved the layout
-				unset( $rows[ $row['artuid'] ] ); // skip this entire InDesign Article
-				continue;
+			// When an older version of SC saved the layout the 'code' field remains zero (0).
+			// Due to the GROUP BY and ORDER BY the resultset will be flattened to 1 row only.
+			// Because for that situation we want to preserve the creation order of the records
+			// (which is the best guess) we do not want to return the splines that may have
+			// a different sorting due to the ORDER BY statement. So in that case we don't return
+			// any spline ids. When a newer version of SC saved the layout the 'code' fields are
+			// set in a range of [1...n] and so zero (0) does not exist.
+			if( $row['code'] != 0 ) { // Newer version of SC saved the layout?
+				$rows[ $row['artuid'] ][] = $row['splineid'];
 			}
-			$rows[ $row['artuid'] ][] = $row['splineid'];
 		}
 		return $rows;
 	}
