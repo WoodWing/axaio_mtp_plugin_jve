@@ -167,6 +167,7 @@ class DBUser extends DBBase
 	 *
 	 * @param string $userId
 	 * @return array|boolean Array of UserGroups or false on error.
+	 * @throws BizException
 	 */
 	public static function getMemberships( $userId )
 	{
@@ -212,6 +213,7 @@ class DBUser extends DBBase
 	 * @param int $userId
 	 * @param array $groupsToDelete
 	 * @param array $groupsToAdd
+	 * @throws BizException
 	 */
 	public static function resetMemberships( $userId, $groupsToDelete, $groupsToAdd )
 	{
@@ -464,6 +466,7 @@ class DBUser extends DBBase
 	 * @param string  $issue issue id, set to null returns groups assigned to given publication (null MUST be given if overrule option is NOT set !)
 	 * @param boolean $onlyrouting only include groups you can send to, else include all (default)
 	 * @return array of smart_group db rows
+	 * @throws BizException
 	 */
 	public static function getUserGroups( $publ = null, $issue = null, $onlyrouting = false )
 	{
@@ -638,6 +641,7 @@ class DBUser extends DBBase
 	 * @param boolean $adminOnly Pass TRUE for admin users, or FALSE for non-admin users, or NULL for all users.
 	 * @param bool $isAdmin To determine if the user is a System admin.
 	 * @return array of AdmUser objects. Returns empty array when none found, or NULL on SQL error.
+	 * @throws BizException
 	 */
 	public static function listUsersObj( $grpId, $adminOnly = null, $isAdmin = null )
 	{
@@ -713,6 +717,7 @@ class DBUser extends DBBase
 	 * @param string $usrId Id of the user used to filter groups this user is member of. When NULL, all groups are returned.
 	 * @param boolean $adminOnly Pass TRUE for admin groups, or FALSE for non-admin groups, or NULL for all groups.
 	 * @return array of AdmUserGroup objects. Returns empty array when none found or NULL on SQL error.
+	 * @throws BizException
 	 */
 	public static function listUserGroupsObj( $usrId, $adminOnly = null )
 	{
@@ -758,6 +763,7 @@ class DBUser extends DBBase
 	 *
 	 * @param int $grpId Id of the user group.
 	 * @return AdmUserGroup, null if no record is found.
+	 * @throws BizException
 	 */
 	public static function getUserGroupObj( $grpId )
 	{
@@ -789,6 +795,7 @@ class DBUser extends DBBase
 	 * @param AdmUser $user new user.
 	 * @param bool $isAdmin System admin indicator.
 	 * @return AdmUser|null Created user, or null when user is not created.
+	 * @throws BizException
 	 */
 	public static function createUserObj( $user, $isAdmin = null )
 	{
@@ -822,6 +829,7 @@ class DBUser extends DBBase
 	 *
 	 * @param AdmUserGroup $userGroup new user group.
 	 * @return AdmUserGroup|null Created group or null when group is not created.
+	 * @throws BizException
 	 */
 	public static function createUserGroupObj( $userGroup )
 	{
@@ -846,10 +854,10 @@ class DBUser extends DBBase
 	 *
 	 * @param AdmUser[] $users Users objects to be modified.
 	 * @return AdmUser[] Modified user objects.
+	 * @throws BizException
 	 */
 	public static function modifyUsersObj( $users )
 	{
-		$dbDriver = DBDriverFactory::gen();
 		$modifyUsers = array();
 
 		foreach( $users as $user ) {
@@ -885,10 +893,11 @@ class DBUser extends DBBase
 	}
 
 	/**
-	 *  Modify usergroup object
+	 * Modify usergroup object
 	 *
-	 *  @param $groups array of values to modify existing user groups
-	 *  @return array of modified UserGroup objects - throws BizException on failure
+	 * @param $groups array of values to modify existing user groups
+	 * @return array of modified UserGroup objects - throws BizException on failure
+	 * @throws BizException
 	 */
 	public static function modifyUserGroupsObj( $groups )
 	{
@@ -1069,6 +1078,7 @@ class DBUser extends DBBase
 	 *
 	 * @param integer $usrId User DB id.
 	 * @return array of AdmUserGroup objects.
+	 * @throws BizException
 	 */
 	static public function getNonMemberGroupsObj( $usrId )
 	{
@@ -1095,6 +1105,7 @@ class DBUser extends DBBase
 	 *
 	 * @param integer $grpId User group DB id.
 	 * @return array of AdmUser objects.
+	 * @throws BizException
 	 */
 	static public function getNonMemberUsersObj( $grpId )
 	{
@@ -1341,6 +1352,7 @@ class DBUser extends DBBase
 	 * @param integer|string $type Optional: Object type
 	 * @param integer $state Optional: Status id
 	 * @return array Authorization records of the user.
+	 * @throws BizException
 	 */
 	static public function getRights( $user, $pubIds, $issue = 0, $sect = 0, $type = 0, $state = 0 )
 	{
@@ -1396,10 +1408,10 @@ class DBUser extends DBBase
 	 *
 	 * @param String $usershortname
 	 * @return String Full name of the user
+	 * @throws BizException
 	 */
 	static public function getFullName($usershortname)
 	{
-		$dbDriver = DBDriverFactory::gen();
 		self::clearError();
 		$dbdriver = DBDriverFactory::gen();
 		$dbu = $dbdriver->tablename('users');
@@ -1426,6 +1438,7 @@ class DBUser extends DBBase
 	 *
 	 * @param string $shortName The short name of the user.
 	 * @return string The full name of the user
+	 * @throws BizException
 	 */
 	static public function getCachedUserFullName( $shortName )
 	{
@@ -1475,6 +1488,7 @@ class DBUser extends DBBase
 	 * @param $user
 	 * @param $pubid
 	 * @return boolean true if brand admin else false
+	 * @throws BizException
 	 */
 	static public function isPubAdmin($user, $pubid)
 	{
@@ -1501,6 +1515,7 @@ class DBUser extends DBBase
 	 * rights.
 	 * @param string $user
 	 * @return array
+	 * @throws BizException
 	 */
 	static public function getListBrandsByPubAdmin($user)
 	{
@@ -1600,6 +1615,7 @@ class DBUser extends DBBase
 	 * So the short name is stored into the database and the full name is indexed.
 	 *
 	 * @param string $userName
+	 * @throws BizException
 	 */
 	protected static function updateUserNameLinksObjectsIndex( $userName )
 	{
@@ -1623,6 +1639,7 @@ class DBUser extends DBBase
 	 *
 	 * @param string $oldName
 	 * @param string $newName
+	 * @throws BizException
 	 */
 	protected static function updateUsergroupNameLinks( $oldName, $newName )
 	{
@@ -1657,6 +1674,7 @@ class DBUser extends DBBase
 	 * @param integer $listRight checked profile feature (right), Listed in Search Results = 1,
 	 * Listed in Publication Overview = 11.
 	 * @return array with Brand/Category/State combinations
+	 * @throws BizException
 	 */
 	public static function getListReadAccessBrandLevel($user, $listRight)
 	{
@@ -1694,6 +1712,7 @@ class DBUser extends DBBase
 	 * @param integer $listRight checked profile feature (right), Listed in Search Results = 1,
 	 * Listed in Publication Overview = 11.
 	 * @return array with Issue/Category/State combinations
+	 * @throws BizException
 	 */
 	public static function getListReadAccessIssueLevel($user, $listRight)
 	{
@@ -1726,6 +1745,7 @@ class DBUser extends DBBase
 	 *
 	 * @param array $userGroupIds
 	 * @return array Authorization records of the user group.
+	 * @throws BizException
 	 */
 	public static function getRightsByUserGroups(array $userGroupIds)
 	{
