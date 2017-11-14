@@ -276,23 +276,13 @@ class DBUser extends DBBase
 	{
 		self::clearError();
 		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename('users');
 		$params = array();
 		$activeOnlyWhere = $activeOnly ? '( u.`disable` != ? OR u.`disable` IS NULL )' : '';
 
 		if ($publicationId) {
 			if( !$issueId ) { $issueId = 0; }
 			// beware: admin rights do NOT count
-			$dbx = $dbdriver->tablename('usrgrp');
-			$dba = $dbdriver->tablename('authorizations');
-			$sql = "SELECT DISTINCT u.* ".
-					 "FROM {$db} u, {$dbx} x ".
-					 "WHERE u.`id` = x.`usrid` AND x.`grpid` IN ".
-							"( SELECT a.`grpid` ".
-							"FROM {$dba} a ".
-							"WHERE a.`publication` = ? AND a.`issue` = ? ) ";
-			$params[] = intval( $publicationId );
-			$params[] = intval( $issueId );
+			$sql = self::makeSelectStatementForAuthorizedUsers( array( $publicationId ), array( $issueId ));
 			if( $activeOnly ) {
 				$sql .= "AND {$activeOnlyWhere} ";
 				$params[] = 'on';
@@ -308,17 +298,7 @@ class DBUser extends DBBase
 		}
 		$sql .= "ORDER BY ".self::toColname( 'u.'.$sortBy );
 
-		$sth = $dbdriver->query( $sql, $params );
-		if (!$sth) {
-			self::setError( $dbdriver->error() );
-			return null;
-		}
-		$rows = self::fetchResults( $sth );
-		$ret = array();
-		if( $rows ) foreach( $rows as $row ) {
-			$ret[] = self::repairTrackChangesColor( $row );
-		}
-		return $ret;
+		return self::queryUsersAndRepairTrackChangesColor( $sql, $params );
 	}
 
 	/**
@@ -333,32 +313,8 @@ class DBUser extends DBBase
 	{
 		$result = array();
 		if( $brandIds ) {
-			self::clearError();
-			$dbdriver = DBDriverFactory::gen();
-			$db = $dbdriver->tablename( 'users' );
-			$dbx = $dbdriver->tablename( 'usrgrp' );
-			$dba = $dbdriver->tablename( 'authorizations' );
-			$where = self::addIntArrayToWhereClause( 'a.publication', $brandIds, false );
-			$where .= 'AND a.`issue` = 0 ';
-
-			$sql = "SELECT DISTINCT u.* ".
-					 "FROM {$db} u, {$dbx} x ".
-					 "WHERE u.`id` = x.`usrid` AND x.`grpid` IN ".
-						"( SELECT a.`grpid` ".
-						"FROM {$dba} a ".
-						"WHERE {$where} ) ".
-					 "ORDER BY u.`fullname`";
-
-			$sth = $dbdriver->query( $sql );
-			if( !$sth ) {
-				self::setError( $dbdriver->error() );
-				return null;
-			}
-
-			$rows = self::fetchResults( $sth );
-			if( $rows ) foreach( $rows as $row ) {
-				$result[] = self::repairTrackChangesColor( $row );
-			}
+			$sql = self::makeSelectStatementForAuthorizedUsers( $brandIds, array( 0 ) );
+			$result = self::queryUsersAndRepairTrackChangesColor( $sql );
 		}
 
 		return $result;
@@ -376,34 +332,84 @@ class DBUser extends DBBase
 	{
 		$result = array();
 		if( $overruleBrandIssueIds ) {
-			self::clearError();
-			$dbdriver = DBDriverFactory::gen();
-			$db = $dbdriver->tablename( 'users' );
-			$dbx = $dbdriver->tablename( 'usrgrp' );
-			$dba = $dbdriver->tablename( 'authorizations' );
-			$where = self::addIntArrayToWhereClause( 'a.issue', $overruleBrandIssueIds, false );
-
-			$sql = "SELECT DISTINCT u.* ".
-					 "FROM {$db} u, {$dbx} x ".
-					 "WHERE u.`id` = x.`usrid` AND x.`grpid` IN ".
-						"( SELECT a.`grpid` ".
-						"FROM {$dba} a ".
-						"WHERE {$where} ) ".
-					 "ORDER BY u.`fullname`";
-
-			$sth = $dbdriver->query( $sql );
-			if( !$sth ) {
-				self::setError( $dbdriver->error() );
-				return null;
-			}
-
-			$rows = self::fetchResults( $sth );
-			if( $rows ) foreach( $rows as $row ) {
-				$result[] = self::repairTrackChangesColor( $row );
-			}
+			$sql = self::makeSelectStatementForAuthorizedUsers( array(), $overruleBrandIssueIds );
+			$result = self::queryUsersAndRepairTrackChangesColor( $sql );
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Returns users rows based on the provided sql. If the 'trackchangescolor' is not set the default is added.
+	 *
+	 * No checking on the sql is done. The $sql is executed as is.
+	 *
+	 * @param string $sql
+	 * @param array $params Optional parameters that will be substituted in the sql.
+	 * @return array|null DB user rows or null in case of error.
+	 * @throws BizException
+	 */
+	static private function queryUsersAndRepairTrackChangesColor( $sql, $params = array() )
+	{
+		$result = array();
+		self::clearError();
+		$dbdriver = DBDriverFactory::gen();
+
+		$sth = $dbdriver->query( $sql, $params );
+		if( !$sth ) {
+			self::setError( $dbdriver->error() );
+			return null;
+		}
+
+		$rows = self::fetchResults( $sth );
+		if( $rows ) foreach( $rows as $row ) {
+			$result[] = self::repairTrackChangesColor( $row );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Composes a sql-statement to query users that are authorised for certain brands or overrule brand issues.
+	 *
+	 * To query for brands pass in the brand Ids and pass one issue Id that is set to zero ( $iissueIds = array( 0 ) ).
+	 * The reason is that the issue Id for authorizations on brand level is always zero ( 0 ).
+	 * To query for overrule brand issues pass in the issue ids and leave brand ids empty ( $pubIds = array()).
+	 * Alternatively you can pass in one brand Id and one issue Id to get the authorization of the overrule brand issue
+	 * that resides in the specified brand. E.g. $pubIds = array( 1 ) and $issueIds = array( 5 ) gives the authorizations
+	 * for issue 5 in brand 1. If issue 5 doesn't belong to brand 1 an empty result set will be returned if the sql is
+	 * executed.
+	 *
+	 * @param int[] $pubIds
+	 * @param int[] $issueIds
+	 * @return string SQL-statement
+	 * @throws BizException
+	 */
+	static private function makeSelectStatementForAuthorizedUsers( array $pubIds, array $issueIds )
+	{
+		$wheres = array();
+		if( $pubIds ) {
+			$wheres[] = self::addIntArrayToWhereClause( 'a.publication', $pubIds, false );
+		}
+		if( $issueIds ) {
+			$wheres[] = self::addIntArrayToWhereClause( 'a.issue', $issueIds, false );
+		}
+
+		$where = $wheres ? "WHERE " . implode( "AND ", $wheres ) : "";
+
+		$dbdriver = DBDriverFactory::gen();
+		$db = $dbdriver->tablename('users');
+		$dbx = $dbdriver->tablename('usrgrp');
+		$dba = $dbdriver->tablename('authorizations');
+
+		$sql = "SELECT DISTINCT u.* ".
+			"FROM {$db} u, {$dbx} x ".
+			"WHERE u.`id` = x.`usrid` AND x.`grpid` IN ".
+			"( SELECT a.`grpid` ".
+			"FROM {$dba} a ".
+			"{$where} ) ";
+
+		return $sql;
 	}
 
 	/**
