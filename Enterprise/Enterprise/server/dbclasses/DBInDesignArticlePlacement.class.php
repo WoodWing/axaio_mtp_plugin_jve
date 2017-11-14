@@ -204,20 +204,30 @@ class DBInDesignArticlePlacement extends DBBase
 	 * The spline ids are sorted the way they are shown in the InDesign Article palette.
 	 * When an older SC has saved the layout there is no sorting provided. In that case this function returns no spline ids.
 	 *
-	 * @since 10.2.0
+	 * @since 10.2.0 [EN-89954]
 	 * @param integer $layoutId
 	 * @return array two-dimensional array with sorted spline ids: array[ InDesign Article id ] [ 0...n-1 ] => spline id
 	 * @throws BizException When fatal SQL error occurs.
 	 */
 	public static function getSortedSplineIdsForInDesignArticlesOnLayout( $layoutId )
 	{
+		// When an OLDER version of SC saved the layout the 'code' field remains zero (0). In that particular situation
+		// we want to preserve the creation order of the records (which is the best guess) and so we do not return the
+		// spline ids at all, since those may have a different sorting due to the ORDER BY statement.
+
+		// When a NEWER version of SC saved the layout the 'code' fields are set in a range of [1...n] and so zero (0)
+		// does not exist. In that case the ORDER BY statement does the job and we simply return all spline ids.
+		// With NEWER version of SC we refer to:
+		// - SC v10.3.1 DAILY build 1402 (Adobe CC 2014)
+		// - SC v11.2.1 DAILY build 668 (Adobe CC 2015)
+		// - SC v12.1.0 DAILY build 105 (Adobe CC 2017)
+
 		$dbDriver = DBDriverFactory::gen();
 		$iapTable = $dbDriver->tablename( self::TABLENAME );
 		$plcTable = $dbDriver->tablename( 'placements' );
 		$sql = 'SELECT plc.`splineid`, iap.`artuid`, iap.`code` FROM '.$iapTable.' iap '.
 			'INNER JOIN '.$plcTable.' plc ON ( plc.`id` = iap.`plcid` ) '.
-			'WHERE iap.`objid` = ? AND plc.`type` = ? '.
-			'GROUP BY iap.`artuid`, iap.`code` '.
+			'WHERE iap.`objid` = ? AND plc.`type` = ? AND iap.`code` > 0 '.
 			'ORDER BY iap.`artuid`, iap.`code` ';
 		$params = array( intval( $layoutId ), 'Placed' );
 
@@ -229,16 +239,7 @@ class DBInDesignArticlePlacement extends DBBase
 		}
 		$rows = array();
 		while( ($row = $dbDriver->fetch($sth)) ) {
-			// When an older version of SC saved the layout the 'code' field remains zero (0).
-			// Due to the GROUP BY and ORDER BY the resultset will be flattened to 1 row only.
-			// Because for that situation we want to preserve the creation order of the records
-			// (which is the best guess) we do not want to return the splines that may have
-			// a different sorting due to the ORDER BY statement. So in that case we don't return
-			// any spline ids. When a newer version of SC saved the layout the 'code' fields are
-			// set in a range of [1...n] and so zero (0) does not exist.
-			if( $row['code'] != 0 ) { // Newer version of SC saved the layout?
-				$rows[ $row['artuid'] ][] = $row['splineid'];
-			}
+			$rows[ $row['artuid'] ][] = $row['splineid'];
 		}
 		return $rows;
 	}
