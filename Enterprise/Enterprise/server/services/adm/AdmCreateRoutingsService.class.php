@@ -72,7 +72,7 @@ class AdmCreateRoutingsService extends EnterpriseService
 	{
 		require_once BASEDIR.'/server/bizclasses/BizAdmRouting.class.php';
 		$newRoutingIds = BizAdmRouting::createRoutings( $req->Routings );
-		$newRoutings = BizAdmRouting::getRoutings( null, null, null, $newRoutingIds );
+		$newRoutings = BizAdmRouting::getRoutings( $req->PublicationId, null, null, $newRoutingIds );
 		$response = new AdmCreateRoutingsResponse();
 		$response->Routings = $newRoutings;
 		return $response;

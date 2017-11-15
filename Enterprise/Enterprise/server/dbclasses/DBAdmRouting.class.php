@@ -87,7 +87,7 @@ class DBAdmRouting extends DBBase
 	/**
 	 * Requests routing rules from the database.
 	 *
-	 * @param integer|null $publicationId The publication id, null if routing ids are used.
+	 * @param integer|null $publicationId The publication id, can be set to null if routing ids are used.
 	 * @param integer|null $issueId The issue id, null if routing ids are used.
 	 * @param integer|null $sectionId The section id, null if routing ids are used.
 	 * @param array|null $routingIds List of routing ids, null if filter ids are used.
