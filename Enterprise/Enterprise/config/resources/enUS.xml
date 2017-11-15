@@ -882,7 +882,7 @@
   <Term key="ERR_IN_USE_BY_DELETEDOBJECTS">%1 cannot be deleted since it is currently in use by deleted objects. Use Trash Can to delete those objects permanently and try again. (S1058)</Term>
   <Term key="ERR_IN_USE_BY_OBJECTS">%1 cannot be deleted since it is currently in use by objects. Please locate those objects, break the link with %1 and try again. (S1057)</Term>
   <Term key="ERR_ITEMS_RENAMED">The following restored items had to be renamed because the original name was occupied again:</Term>
-  <Term key="ERR_LAY_NOT_SAVED">The layout preview could not be generated because the layout was not saved or the article is placed on the paste board.</Term>
+  <Term key="ERR_LAY_NOT_SAVED">The layout preview could not be generated because the layout was not saved or the article is placed on the pasteboard.</Term>
   <Term key="ERR_LICENSE">A license error has occurred.</Term>
   <Term key="ERR_LOCKED">Unable to perform this action; the file has been checked-out. (S1021)</Term>
   <Term key="ERR_LOCKED_PARENTS">Unable to perform this action; the file is linked to another file which is checked-out. (S1065)</Term>
