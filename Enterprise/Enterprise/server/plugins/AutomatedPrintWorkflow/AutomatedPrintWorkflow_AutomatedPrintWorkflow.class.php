@@ -529,11 +529,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	private static function determinePlacementsToClear( $layoutId, $editionId, $articleElements, $iaPlacements )
 	{
 		$elementObjIds = array_unique( array_map( function( $articleElement ) { return $articleElement->ObjectId; }, $articleElements ) );
-
-		$iaSplineIds = array();
-		foreach( $iaPlacements as $iaId => $placement ) {
-			$iaSplineIds[] = $placement->SplineID;
-		}
+		$iaSplineIds = array_map( function( $placement ) { return $placement->SplineID; } , $iaPlacements );
 
 		$placementsToClear = array();
 
@@ -542,7 +538,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			$placementsForObj = DBPlacements::getPlacements($layoutId, $elementObjId, 'Placed');
 
 			if( $placementsForObj ) foreach ( $placementsForObj as $placement ) {
-				// Explicitly exlude spline ids of placements that match with the spline ids of the
+				// Explicitly exclude spline ids of placements that match with the spline ids of the
 				// InDesign Article that the elements are placed on. In case that elements are re-
 				// placed on the same InDesign Article, you do not want to clear the frames.
 				if( !in_array( $placement->SplineID, $iaSplineIds ) ) {
