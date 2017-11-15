@@ -412,11 +412,22 @@ class DBInDesignArticlePlacement extends DBBase
 
 		if( $selects && $params ) { // should be always true
 			$innerSql = implode( ' UNION ALL ', $selects );
-			$sql =
-				'UPDATE `smart_idarticlesplacements` iap '.
-				'INNER JOIN `smart_placements` plc ON ( plc.`id` = iap.`plcid` ) '.
-				'JOIN ( '.$innerSql.' ) tmp ON plc.`splineid` = tmp.`splineid` AND iap.`artuid` = tmp.`artuid` AND iap.`objid` = tmp.`objid` '.
-				'SET iap.`code` = tmp.`code`';
+			if( DBTYPE == 'mysql' ) {
+				$sql =
+					'UPDATE `smart_idarticlesplacements` iap '.
+					'INNER JOIN `smart_placements` plc ON ( plc.`id` = iap.`plcid` ) '.
+					'JOIN ( '.$innerSql.' ) tmp ON plc.`splineid` = tmp.`splineid` AND iap.`artuid` = tmp.`artuid` AND iap.`objid` = tmp.`objid` '.
+					'SET iap.`code` = tmp.`code`';
+			} elseif( DBTYPE == 'mssql' ) {
+				$sql =
+					'UPDATE iap '.
+					'SET iap.`code` = tmp.`code` '.
+					'FROM `smart_idarticlesplacements` iap '.
+					'INNER JOIN `smart_placements` plc ON ( plc.`id` = iap.`plcid` ) '.
+					'JOIN ( '.$innerSql.' ) tmp ON plc.`splineid` = tmp.`splineid` AND iap.`artuid` = tmp.`artuid` AND iap.`objid` = tmp.`objid` ';
+			} else {
+				$sql = ''; // should never get here
+			}
 			self::query( $sql, $params );
 		}
 	}
