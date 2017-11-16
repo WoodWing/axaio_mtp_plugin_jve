@@ -59,7 +59,7 @@ class DBInDesignArticle extends DBBase
 	 * @since 9.7.0
 	 * @param integer $layoutId
 	 * @param boolean $resolveSortedSplineIds
-	 * @return InDesignArticle[] The InDesign Articles. Empty when none found.
+	 * @return InDesignArticle[] The InDesign Articles. Empty when none found. Added since 10.2.0.
 	 * @throws BizException When invalid params given or fatal SQL error occurs.
 	 */
  	public static function getInDesignArticles( $layoutId, $resolveSortedSplineIds = false )
