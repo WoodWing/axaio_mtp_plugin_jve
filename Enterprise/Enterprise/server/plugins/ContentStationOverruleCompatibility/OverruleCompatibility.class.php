@@ -284,9 +284,9 @@ class OverruleCompatibility
 				}
 				// If there is no publication id or name column, there is nothing to replace so we will not have to do anything.
 				if( $pubIdChildCol != -1 || $pubNameChildCol != -1 ) {
-					foreach( $resp->ChildRows as $i => $childRow ) {
-						if( !BizContentSource::isAlienObject( $childRow[$i]->Row[$objectIdChildCol] ) ) {
-							$objectIds[] = $childRow[$i]->Row[$objectIdChildCol];
+					foreach( $resp->ChildRows as $childRow ) {
+						if( !BizContentSource::isAlienObject( $childRow->Row[$objectIdChildCol] ) ) {
+							$objectIds[] = $childRow->Row[$objectIdChildCol];
 						}
 					}
 				} else {
@@ -326,7 +326,7 @@ class OverruleCompatibility
 					if( $handleChildColumns ) {
 						// We only need to convert PubId if the PubId AND IssueId are part of the columns.
 						foreach( $resp->ChildRows as $i => $childRow ) {
-							$objectId = $childRow[$i]->Row[$objectIdChildCol];
+							$objectId = $childRow->Row[$objectIdChildCol];
 							if( array_key_exists( $objectId, $newOverruleIssues ) ) {
 								if( $pubIdChildCol != -1 ) {
 									$resp->ChildRows[$i]->Row[$pubIdChildCol] = $newOverruleIssues[$objectId]['pubId'];
