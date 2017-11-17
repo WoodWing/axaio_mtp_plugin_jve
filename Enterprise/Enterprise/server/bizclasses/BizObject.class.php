@@ -1194,7 +1194,7 @@ class BizObject
 			// v9.7 Return InDesign Articles
 			if( in_array('InDesignArticles', $requestInfo) ) {
 				require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-				$indesignArticles = DBInDesignArticle::getInDesignArticles( $id, false );
+				$indesignArticles = DBInDesignArticle::getInDesignArticles( $id, true );
 			} else {
 				$indesignArticles = null;
 			}
