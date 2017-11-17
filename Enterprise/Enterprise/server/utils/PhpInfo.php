@@ -172,8 +172,13 @@ class WW_Utils_PhpInfo
 
 				$show = empty($defValues[$i][1]) ? '<i>'.$defValues[$i][2].'</i>' : $defValues[$i][1];
 
-				// Check if TESTSUITE replace the password with ***
+				// Check if TESTSUITE and replace the password with ***
 				if( $defValue[0] == 'TESTSUITE' ) {
+					$show = preg_replace('/Password => ([^)|^\ ]*)/', 'Password => ***', $show);
+				}
+
+				// Check if MESSAGE_QUEUE_CONNECTIONS and replace the password with ***
+				if( $defValue[0] == 'MESSAGE_QUEUE_CONNECTIONS' ) {
 					$show = preg_replace('/Password => ([^)|^\ ]*)/', 'Password => ***', $show);
 				}
 
