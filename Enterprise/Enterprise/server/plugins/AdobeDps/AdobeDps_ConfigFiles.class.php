@@ -27,7 +27,7 @@ class AdobeDps_ConfigFiles extends ConfigFiles_EnterpriseConnector
 	public function displayOptionValue( $configFile, $optionName, $value )
 	{
 		if( $optionName == 'ADOBEDPS_ACCOUNTS' ) {
-			$value = preg_replace( '/\[password\] => ([^)|^\ ]*)/', '[password] => ***', $value );
+			$value = preg_replace( '/\[password\] => [^\n]*/', '[password] => ***', $value );
 		}
 		return $value;
 	}

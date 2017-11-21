@@ -99,7 +99,7 @@ class WW_Utils_PhpInfo
 		$dbDriver = self::connectToDb( $info );
 		if( $dbDriver ) {
 			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
-			$connectors = BizServerPlugin::searchConnectors( 'ConfigFiles', null );
+			$connectors = BizServerPlugin::searchConnectors( 'ConfigFiles', null, false );
 		} else {
 			$connectors = array();
 		}
@@ -156,7 +156,7 @@ class WW_Utils_PhpInfo
 
 			// Hide the password value, replace with asterisks
 			if ( $defValue[0] === 'DBPASS' || $defValue[0] === 'EMAIL_SMTP_PASS' || $defValue[0] === 'MTP_PASSWORD' ) {
-				$defValShow = preg_replace('/.*/i', '***', $defValShow, 1);
+				$defValShow = '***';
 			}
 			
 			// Allow plugins to hide their passwords.
@@ -174,12 +174,12 @@ class WW_Utils_PhpInfo
 
 				// Check if TESTSUITE and replace the password with ***
 				if( $defValue[0] == 'TESTSUITE' ) {
-					$show = preg_replace('/Password => ([^)|^\ ]*)/', 'Password => ***', $show);
+					$show = self::replacePasswordInPasswordKeyValueString( $show );
 				}
 
 				// Check if MESSAGE_QUEUE_CONNECTIONS and replace the password with ***
 				if( $defValue[0] == 'MESSAGE_QUEUE_CONNECTIONS' ) {
-					$show = preg_replace('/Password => ([^)|^\ ]*)/', 'Password => ***', $show);
+					$show = self::replacePasswordInPasswordKeyValueString( $show );
 				}
 
 				// Allow plugins to hide their passwords.
@@ -194,6 +194,12 @@ class WW_Utils_PhpInfo
 		$info .= self::getSectionFooter();
 		return $info;
 	}
+
+	private function replacePasswordInPasswordKeyValueString( $keyValueString )
+	{
+		return preg_replace('/Password => .*$/', 'Password => ***', $keyValueString);
+	}
+
 	
 	/**
 	 * Returns database client-, server- and connection information.
