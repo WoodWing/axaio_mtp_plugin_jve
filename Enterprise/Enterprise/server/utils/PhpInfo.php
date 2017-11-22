@@ -174,12 +174,12 @@ class WW_Utils_PhpInfo
 
 				// Check if TESTSUITE and replace the password with ***
 				if( $defValue[0] == 'TESTSUITE' ) {
-					$show = self::replacePasswordInPasswordKeyValueString( $show );
+					$show = self::obfuscatePasswordInPasswordKeyValueString( $show );
 				}
 
 				// Check if MESSAGE_QUEUE_CONNECTIONS and replace the password with ***
 				if( $defValue[0] == 'MESSAGE_QUEUE_CONNECTIONS' ) {
-					$show = self::replacePasswordInPasswordKeyValueString( $show );
+					$show = self::obfuscatePasswordInPasswordKeyValueString( $show );
 				}
 
 				// Allow plugins to hide their passwords.
@@ -195,7 +195,13 @@ class WW_Utils_PhpInfo
 		return $info;
 	}
 
-	private function replacePasswordInPasswordKeyValueString( $keyValueString )
+	/**
+	 * Obfuscates the password in string of format 'Password => <the password>'.
+	 *
+	 * @param string $keyValueString
+	 * @return mixed New string with obfuscated password or false in case of error.
+	 */
+	static private function obfuscatePasswordInPasswordKeyValueString( $keyValueString )
 	{
 		return preg_replace('/Password => .*$/', 'Password => ***', $keyValueString);
 	}
