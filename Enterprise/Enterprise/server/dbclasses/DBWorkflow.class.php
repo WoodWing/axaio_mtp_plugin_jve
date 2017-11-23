@@ -99,7 +99,7 @@ class DBWorkflow extends DBBase
 			$params[] = intval( $sectiondefid );
 		}
 
-		return self::listRows( 'issuesectionstate', 'id', 'state', $where, $fieldnames );
+		return self::listRows( 'issuesectionstate', 'id', 'state', $where, $fieldnames, $params );
 	}
 
 	public static function updateIssueSectionState( $issuesectionstateid, $values )
