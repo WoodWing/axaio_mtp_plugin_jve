@@ -920,7 +920,7 @@ class LogHandler
 				$transData = preg_replace('/\[Password\] => (.*)\n(.*)/i', "[Password] => ***\n$2", $transData, 1 );
 			} elseif( $protocol == 'JSON' ) {
 				// e.g. "Password":"xxx" => "Password":"***"
-				$transData = preg_replace('/\"Password\":\"(.*)\"/i', "\"Password\":\"***\"", $transData, 1 );
+				$transData = preg_replace('/\"Password\":\s*\"(.*)\"/i', "\"Password\":\"***\"", $transData, 1 );
 			}
 		}
 		if( $methodName == 'RabbitMQ_createOrUpdateUser' && $protocol == 'REST' ) {
