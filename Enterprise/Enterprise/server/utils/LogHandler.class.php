@@ -1158,6 +1158,7 @@ class LogHandler
 		$result = $codeBlock;
 		if( LOGFILE_FORMAT == 'html' ) {
 			$result = self::encodeLogMessage( $codeBlock );
+			$result = str_replace( '    ', '&nbsp;&nbsp;&nbsp;&nbsp;', $result ); // show print_r() indents in HTML
 			$result = "<code>$result</code>";
 		}
 
