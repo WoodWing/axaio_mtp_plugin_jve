@@ -6,7 +6,7 @@ class WW_TestSuite_BuildTest_Search_UpdateObject_Database_TestCase extends WW_Te
 {
 	public function getDisplayName()
 	{
-		return 'Update Object Database only';
+		return 'Update Object for Database only';
 	}
 
 	public function getTestGoals()
@@ -17,7 +17,7 @@ class WW_TestSuite_BuildTest_Search_UpdateObject_Database_TestCase extends WW_Te
 	public function getTestMethods()
 	{
 		return 'Updates the properties of the object using SetObjectProperties and searches on the updated values ' .
-		'using QueryObjects. Name and content properties are changed and being searched on.';
+		'using QueryObjects. "Name" and "Content" properties are changed and being searched on.';
 	}
 
 	public function getPrio()

@@ -72,7 +72,7 @@ class BizPageInfo
 		$relations = BizRelation::getPlacementsByRelationalParentIds( $layoutIdsAuth );
 
 		// Get layouts' flag and its message (all at once).
-		$layoutsFlagAndMessage = DBObject::getMultipleObjectsFlags( $layoutIds );
+		$layoutsFlagAndMessage = ( $layoutIds ) ? DBObject::getMultipleObjectsFlags( $layoutIds ) : array();
 
 		// Get essential metadata of all placed objects (all at once).
 		$childIds = array();

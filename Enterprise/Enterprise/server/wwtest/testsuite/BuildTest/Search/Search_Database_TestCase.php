@@ -6,19 +6,20 @@ class WW_TestSuite_BuildTest_Search_Search_Database_TestCase extends WW_TestSuit
 {
 	public function getDisplayName()
 	{
-		return 'Search in Database';
+		return 'Search by doing a query on the Database.';
 	}
 
 	public function getTestGoals()
 	{
-		return 'Checks if able to find objects in Database';
+		return 'Checks if object(s) can be found by doing a query on the Database.';
 	}
 
 	public function getTestMethods() { return
 		'Call QueryObjectsService and validate responses.
 		<ol>
-			<li>Search on Object name (QueryObjects)</li>
-			<li>Search on Object content (QueryObjects)</li>
+			<li>Search Object on "Name" property (QueryObjects)</li>
+			<li>Search Object on "Content" property (QueryObjects)</li>
+			<li>Search Object on "Placed on" property. (QueryObjects)</li>
 		 </ol>';
 	}
 

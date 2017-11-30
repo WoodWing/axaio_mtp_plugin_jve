@@ -224,19 +224,40 @@ class BizUser
 	 * Returns the users which have an authorization profile for the same brands or overrule brand issues as the
 	 * specified user.
 	 *
+	 * Authorizations on brand level apply to all non-overrule brand issues in the brand. The issue Id is in that case 0.
+	 * If authorizations are defined on overrule brand issue level the issue is set to the issue Id. The brand Id can
+	 * then be ignored as the issue Id is unique within the system.
+	 *
 	 * @param int $userId
 	 * @return array of User objects.
+	 * @throws BizException
 	 */
 	public static function getUsersWithCommonAuthorization( $userId )
 	{
 		$brandsOrOverruleBrandIssues = DBUser::getBrandIssueAuthorizationForUser( $userId );
-
-		$uniqueUserRows = array();
-		if ( $brandsOrOverruleBrandIssues ) foreach ( $brandsOrOverruleBrandIssues as $brandOrOverruleBrandIssue ) {
-			$userRows = DBUser::getUsers( $brandOrOverruleBrandIssue['publication'], $brandOrOverruleBrandIssue['issue'] );
-			foreach ( $userRows as $userRow ) {
-				$uniqueUserRows[$userRow['id']] = $userRow;
+		$brandIds = array();
+		$overruleBrandIssueIds = array();
+		if( $brandsOrOverruleBrandIssues ) foreach ($brandsOrOverruleBrandIssues as $brandOrOverruleBrandIssue) {
+			if ($brandOrOverruleBrandIssue['publication'] && !$brandOrOverruleBrandIssue['issue'] ) {
+				$brandIds[] = intval($brandOrOverruleBrandIssue['publication']);
 			}
+			if ($brandOrOverruleBrandIssue['issue']) {
+				$overruleBrandIssueIds[] = intval($brandOrOverruleBrandIssue['issue']);
+			}
+		}
+
+		$userRowsBrands = array();
+		$userRowsOverruleBrandIssues = array();
+		$uniqueUserRows = array();
+		if ($brandIds) {
+			$userRowsBrands = DBUser::getAuthorizedUsersForBrands($brandIds );
+		}
+		if ($overruleBrandIssueIds) {
+			$userRowsOverruleBrandIssues = DBUser::getAuthorizedUsersForOverruleBrandIssues( $overruleBrandIssueIds );
+		}
+		$userRows = array_merge($userRowsBrands, $userRowsOverruleBrandIssues);
+		if( $userRows )foreach ($userRows as $userRow) {
+			$uniqueUserRows[$userRow['id']] = $userRow;
 		}
 
 		$users = array();

@@ -937,6 +937,7 @@ class BizWebEditWorkspace
 
 		$articlePageIds = array();
 		$composeStories = $xpath->query('/textcompose/stories/story');
+		$objectRelations = $this->composeObjectRelations( $xpath );
 		foreach( $composeStories as $composeStory ) {
 			$element = new Element();
 			$element->ID = $composeStory->getAttribute('guid');
@@ -965,6 +966,7 @@ class BizWebEditWorkspace
 					$placement->Width  = $composeFrame->getAttribute('width');
 					$placement->Height = $composeFrame->getAttribute('height');
 					$placement->Layer  = UtfString::unescape( $composeFrame->getAttribute('layer') ); // unescape(): BZ#27285/BZ#26670
+					$placement->Edition = self::resolveEditionFromRelationPlacements( $placement->ElementID, $objectRelations ); // EN-89842
 					$idArticleIds = $composeFrame->getAttribute('idarticleids');
 					$placement->InDesignArticleIds = $idArticleIds ? explode( ',', $idArticleIds ) : array();
 					$placement->FrameType = $composeFrame->getAttribute('frametype');
@@ -1023,7 +1025,7 @@ class BizWebEditWorkspace
 				// Since 9.7, resolve the layout's placed relations so that caller (CS preview)
 				// can draw boxes for the sibling frames on the page and allow image/text (re)placements.
 				if( in_array( 'Relations', $requestInfo ) ) {
-					$ret['Relations'] = $this->composeObjectRelations( $xpath );
+					$ret['Relations'] = $objectRelations;
 					if ( $ret['Relations'] ) {
 						$rebuildNeeded = $this->isRebuildStoredRelationsPlacementsNeeded( $layoutId, $ret['Relations'] );
 						if( $rebuildNeeded ) {
@@ -1086,6 +1088,27 @@ class BizWebEditWorkspace
 			}
 		}
 		return $ret;
+	}
+
+	/**
+	 * Retrieves the Edition for the text element from Relation's Placement.
+	 *
+	 * @param string $elementId The text element GUID, to get its corresponding Edition from Relation.
+	 * @param Relation[] $relations
+	 * @return null|Edition Returns null for all Edition, else Edition when it is a specific one Edition.
+	 */
+	private static function resolveEditionFromRelationPlacements( $elementId, $relations )
+	{
+		$edition = null;
+		if( $relations ) foreach ( $relations as $relation ) {
+			if( $relation->Placements ) foreach( $relation->Placements as $placement ) {
+				if( $placement->ElementID == $elementId ) {
+					$edition = $placement->Edition;
+					break 2; // Found the corresponding text element's edition, so quit all the way.
+				}
+			}
+		}
+		return $edition;
 	}
 
 	/**
@@ -1308,7 +1331,13 @@ class BizWebEditWorkspace
 		if( ($xmlEdition = $this->getElement( $xpath, 'Edition', $xmlPlacement )) ) {
 			$placement->Edition = new Edition();
 			$placement->Edition->Id = $this->getTextValue( $xpath, 'Id', $xmlEdition );
-			$placement->Edition->Name = $this->getTextValue( $xpath, 'Name', $xmlEdition );
+			$editionName = $this->getTextValue( $xpath, 'Name', $xmlEdition );
+			if( empty( $editionName )) {
+				require_once BASEDIR.'/server/dbclasses/DBEdition.class.php';
+				$edition = DBEdition::getEdition( $placement->Edition->Id );
+				$editionName = !is_null( $edition ) && isset( $edition->Name ) ? $edition->Name : '';
+			}
+			$placement->Edition->Name = $editionName;
 		}
 		$placement->ContentDx = $this->getTextValue( $xpath, 'ContentDx', $xmlPlacement );
 		$placement->ContentDy = $this->getTextValue( $xpath, 'ContentDy', $xmlPlacement );

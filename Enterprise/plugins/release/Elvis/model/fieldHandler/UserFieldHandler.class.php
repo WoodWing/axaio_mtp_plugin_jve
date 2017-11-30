@@ -18,7 +18,7 @@ class UserFieldHandler extends ReadOnlyFieldHandler
 		require_once __DIR__.'/../../config.php'; // ELVIS_INTERNAL_USER_POSTFIX
 
 		$propertyName = $this->property->Name;
-		$username = $this->getEnterpriseValue( $propertyName, $elvisMetadata );
+		$username = $this->getEnterpriseValue( $elvisMetadata );
 		$fullName = $username;
 
 		if( !empty( $username ) && !strpos( $username, ELVIS_INTERNAL_USER_POSTFIX ) ) {

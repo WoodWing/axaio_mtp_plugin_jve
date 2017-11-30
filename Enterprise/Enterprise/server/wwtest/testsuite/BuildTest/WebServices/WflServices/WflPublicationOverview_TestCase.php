@@ -10,6 +10,7 @@ require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteInterfaces.php';
 
 class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_TestCase extends TestCase
 {
+	private $wflServicesUtils = null;
 	private $ticket = null; // Session ticket
 	private $transferServer = null; // BizTransferServer
 	private $suiteOpts = null; //  TestSuite value
@@ -23,7 +24,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 	private $objectNames = null; // array( 'Layouts' => LayoutNames )
 	private $flaggedObjects = null; // Objects that are flagged with its flag and message
 	private $testService017_saveResp = null;  // testService017 saveObject response
-	
+	private $routeTo1 = null;
+	private $routeToGroup1 = null;
+
 	// Step#01: Fill in the TestGoals, TestMethods and Prio...
 	public function getDisplayName() { return 'Publication Overview'; }
 	public function getTestGoals()   { return 'Checks if the Publication Overview service works correctly.'; }
@@ -653,7 +656,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Objects[0]->MetaData->WorkflowMetaData->State->Produce = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->State->Color = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->State->DefaultRouteTo = null;
-		$request->Objects[0]->MetaData->WorkflowMetaData->RouteTo = '';
+		$request->Objects[0]->MetaData->WorkflowMetaData->RouteTo = $this->routeTo1;
 		$request->Objects[0]->MetaData->WorkflowMetaData->LockedBy = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Version = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->DeadlineSoft = null;
@@ -1516,7 +1519,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Objects[0]->MetaData->WorkflowMetaData->State->Produce = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->State->Color = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->State->DefaultRouteTo = null;
-		$request->Objects[0]->MetaData->WorkflowMetaData->RouteTo = '';
+		$request->Objects[0]->MetaData->WorkflowMetaData->RouteTo = $this->routeToGroup1;
 		$request->Objects[0]->MetaData->WorkflowMetaData->LockedBy = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->Version = null;
 		$request->Objects[0]->MetaData->WorkflowMetaData->DeadlineSoft = null;
@@ -2786,7 +2789,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->Produce = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->Color = $this->statuses['Layout']->Color;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->DefaultRouteTo = null;
-		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->RouteTo = '';
+		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->RouteTo = $this->routeTo1;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->LockedBy = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Version = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->DeadlineSoft = null;
@@ -2877,7 +2880,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->Produce = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->Color = $this->statuses['Layout']->Color;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->DefaultRouteTo = null;
-		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->RouteTo = '';
+		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->RouteTo = $this->routeToGroup1;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->LockedBy = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Version = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->DeadlineSoft = null;
@@ -3334,7 +3337,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->Produce = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->Color = $this->statuses['Layout']->Color;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->State->DefaultRouteTo = null;
-		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->RouteTo = '';
+		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->RouteTo = $this->routeTo1;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->LockedBy = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->Version = null;
 		$response->ObjectPageInfos[0]->MetaData->WorkflowMetaData->DeadlineSoft = null;
@@ -3425,7 +3428,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->Produce = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->Color = $this->statuses['Layout']->Color;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->State->DefaultRouteTo = null;
-		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->RouteTo = '';
+		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->RouteTo = $this->routeToGroup1;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->LockedBy = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->Version = null;
 		$response->ObjectPageInfos[1]->MetaData->WorkflowMetaData->DeadlineSoft = null;
@@ -3657,6 +3660,17 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$stepInfo = 'Creating issue "'.$issueName.'" under the print channel of the TESTSUITE brand.';
 		$this->issueObj = $this->wflServicesUtils->createIssue( $stepInfo, 
 									$this->pubObj->Id, $this->pubChannelObj->Id, $issueName );
+
+		// EN-89563
+		// Getting RouteTo user.
+		require_once BASEDIR .'/server/bizclasses/BizSession.class.php';
+		$this->routeTo1 = Bizsession::getUserInfo( 'fullname' );
+
+		// Getting RouteTo group.
+		$stepInfo = "Retrieving user groups to be assigned to Layout's routeTo.";
+		$userGroups = $this->wflServicesUtils->getUserGroups( $stepInfo, Bizsession::getUserInfo( 'id' ) );
+		$this->routeToGroup1 = !empty( $userGroups ) ? $userGroups[0]->Name : '';
+
 		return true;
 	}
 
