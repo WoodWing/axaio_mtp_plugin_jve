@@ -1455,7 +1455,6 @@ class LogHandler
 				$replacement = "[Password] => ***\n$2";
 			} elseif( $protocol == 'JSON' ) {
 				// e.g. "Password":"xxx" => "Password":"***"
-				$transData = preg_replace('/\"Password\":\s*\"(.*)\"/i', "\"Password\": \"***\"", $transData, 1 );
 				$expression = '/\"Password\":\s*\"(.*)\"/i';
 				$replacement = "\"Password\": \"***\"";
 			}
