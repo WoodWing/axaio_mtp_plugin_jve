@@ -647,13 +647,6 @@ class PublicationMaintenanceApp
 				$response = $service->execute( $request );
 				$statuses = $response->Statuses;
 
-				// Sort statuses by name, in natural order.
-				if( $statuses ) {
-					usort( $statuses, function( AdmStatus $statusA, AdmStatus $statusB ) {
-						return strcmp( $statusA->Type, $statusB->Type );
-					} );
-				}
-
 				$arr = array();
 				if( $statuses ) foreach( $statuses as $status ) {
 					if( !isset( $arr[$status->Type] ) ) {

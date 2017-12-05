@@ -185,17 +185,18 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 				break;
 			}
 
-			// Determine the placements to clear. If an element was already placed on the layout those
-			// frames are cleared (also the ones that aren't placed with the Automated Print Workflow).
+			// Determine the placements to clear. If an element was already placed on the layout in a
+			// different InDesign Article, those frames are cleared (also the ones that aren't placed
+			// with the Automated Print Workflow).
 			// For an end user this is seen as a move of the placements.
-			$elementsToClear = self::determinePlacementsToClear( $layoutId, $editionId, $articleElements );
+			$placementsToClear = self::determinePlacementsToClear( $layoutId, $editionId, $articleElements, $iaPlacements );
 
 			// Match the element labels with the IdArt frame labels (Placement->Element).
 			// For EACH frame of the selected InDesignArticle, we have to tell the ID script
 			// what to do; either place an element, or remove the existing one.
 			// When child is an Image, only make match when IdArt has one graphic frame 
 			// and exactly one image was found in dossier.
-			$resolvedOperations = self::composeOperations( $iaPlacements, $elementsToClear, $articleElements, $imageId, $editionId );
+			$resolvedOperations = self::composeOperations( $iaPlacements, $placementsToClear, $articleElements, $imageId, $editionId );
 
 		} while( false ); // do once only
 
@@ -522,11 +523,13 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 	 * @param integer $layoutId
 	 * @param integer $editionId
 	 * @param Element[] $articleElements
+	 * @param Placement[] $iaPlacements InDesign article placements on the layout (layout's id is the same as $layoutId)
 	 * @return Placement[]
 	 */
-	private static function determinePlacementsToClear( $layoutId, $editionId, $articleElements )
+	private static function determinePlacementsToClear( $layoutId, $editionId, $articleElements, $iaPlacements )
 	{
 		$elementObjIds = array_unique( array_map( function( $articleElement ) { return $articleElement->ObjectId; }, $articleElements ) );
+		$iaSplineIds = array_map( function( $placement ) { return $placement->SplineID; } , $iaPlacements );
 
 		$placementsToClear = array();
 
@@ -535,10 +538,15 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 			$placementsForObj = DBPlacements::getPlacements($layoutId, $elementObjId, 'Placed');
 
 			if( $placementsForObj ) foreach ( $placementsForObj as $placement ) {
-				foreach ( $articleElements as $articleElement ) {
-					if( $articleElement->ID == $placement->ElementID ) {
-						if( is_null($placement->Edition) || $placement->Edition->Id == $editionId) {
-							$placementsToClear[] = $placement;
+				// Explicitly exclude spline ids of placements that match with the spline ids of the
+				// InDesign Article that the elements are placed on. In case that elements are re-
+				// placed on the same InDesign Article, you do not want to clear the frames.
+				if( !in_array( $placement->SplineID, $iaSplineIds ) ) {
+					foreach( $articleElements as $articleElement ) {
+						if( $articleElement->ID == $placement->ElementID ) {
+							if( is_null( $placement->Edition ) || $placement->Edition->Id == $editionId ) {
+								$placementsToClear[] = $placement;
+							}
 						}
 					}
 				}
@@ -738,6 +746,7 @@ class AutomatedPrintWorkflow_AutomatedPrintWorkflow extends AutomatedPrintWorkfl
 
 		// Also add all the placements that need to be cleared. (Move action).
 		if( $placementsToClear ) foreach( $placementsToClear as $placement) {
+
 			$operations[] = self::composeClearFrameContentOperation($editionId, $placement);
 		}
 

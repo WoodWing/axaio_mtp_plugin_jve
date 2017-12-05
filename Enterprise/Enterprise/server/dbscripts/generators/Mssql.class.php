@@ -214,15 +214,14 @@ class WW_DbScripts_Generators_Mssql extends WW_DbScripts_Generators_Base
 			if( !$this->isNullableEqual( $oldfld, $newfld ) ) {
 				$this->txt .= "UPDATE $tablename SET $oldfldname = '' WHERE $oldfldname is null;";
 				$this->txt .= "\r\n";
-
-				// check if the field is an index field
-				$reAddIndexes = array();
-				if( isset($table['indexes']) ){
-					foreach( $table['indexes'] as $index ){
-						if ( $this->fieldUsedInCurrentIndex( $index, $newfld)) {
-							$reAddIndexes[] = $index; // keep track which index we drop now,we need to add it back later
-							$this->dropIndex( $index, $table);
-						}
+			}
+			// check if the field is an index field
+			$reAddIndexes = array();
+			if( isset($table['indexes']) ){
+				foreach( $table['indexes'] as $index ){
+					if ( $this->fieldUsedInCurrentIndex( $index, $newfld)) {
+						$reAddIndexes[] = $index; // keep track which index we drop now,we need to add it back later
+						$this->dropIndex( $index, $table);
 					}
 				}
 			}
@@ -235,7 +234,11 @@ class WW_DbScripts_Generators_Mssql extends WW_DbScripts_Generators_Base
 
 			if( isset($reAddIndexes) ) foreach( $reAddIndexes as $reAddIndex ){
 				// re-adding back the index after setting field from NULL to Not NULL
-				$this->index( $reAddIndex, $table );
+				if ( isset($reAddIndex['primary']) && $reAddIndex['primary'] == true ) {
+					$this->index( $reAddIndex, $table, true );
+				} else {
+					$this->index( $reAddIndex, $table );
+				}
 			}
 		}
 
@@ -336,10 +339,7 @@ class WW_DbScripts_Generators_Mssql extends WW_DbScripts_Generators_Base
 	}
 
 	/**
-	 * Function to change an existing index definition. In mssql the primary key
-	 * cannot be dropped without knowing the exact name of the primary key constraint.
-	 * For this reason the alter index of a primary key is not supported for mssql.
-	 * Syntax depends on the fact if an index is unique or not.
+	 * Function to change an existing index definition.
 	 *
 	 * @param array $table table info
 	 * @param array $oldIndex index info as in the old/source database
@@ -347,7 +347,6 @@ class WW_DbScripts_Generators_Mssql extends WW_DbScripts_Generators_Base
 	 */
 	public function alterIndex($table, $oldIndex, $newIndex)
 	{
-
 		if ( (array_key_exists('primary', $oldIndex) && $oldIndex['primary'] == true) &&
 			(array_key_exists('primary', $newIndex) && $newIndex['primary'] == true)) {
 			$this->storeProcedure_ChangePrimaryIndex( $table['name'] );
@@ -370,12 +369,9 @@ class WW_DbScripts_Generators_Mssql extends WW_DbScripts_Generators_Base
 	 */
 	public function dropIndex($index, $table)
 	{
-
 		if (array_key_exists('primary', $index) && $index['primary'] == true) {
-			$this->txt .= 'ALTER TABLE ' . $this->quotefields($table['name']) .
-				' DROP CONSTRAINT ' . $this->quotefields($index['name']) . ' ';
-		}
-		elseif (array_key_exists('unique', $index) && $index['unique'] == true) {
+			$this->storeProcedure_ChangePrimaryIndex( $table['name'] );
+		} elseif (array_key_exists('unique', $index) && $index['unique'] == true) {
 			$indexname = $index['name'];
 			$this->txt .= "IF  EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'" . $this->quotefields($table['name']) .
 				"') AND is_unique_constraint = 1 AND name = N" . "'$indexname'" . ' ) ' .
@@ -384,12 +380,12 @@ class WW_DbScripts_Generators_Mssql extends WW_DbScripts_Generators_Base
 			$this->txt .= "IF  EXISTS (SELECT * FROM sys.indexes WHERE object_id = OBJECT_ID(N'" . $this->quotefields($table['name']) . "')
 										AND is_unique_constraint = 0 AND name = N" . "'$indexname'" . ' ) ' .
 				'DROP INDEX ' . $this->quotefields($table['name']) . '.' . $this->quotefields($index['name']) . ' ';
-		}
-		else { //Non-unique
+			$this->txt .= $this->closeline(). "\r\n";
+		} else { //Non-unique
 			$this->txt .= 'DROP INDEX ' . $this->quotefields($table['name']) .
 				'.' . $this->quotefields($index['name']) . ' ';
+			$this->txt .= $this->closeline(). "\r\n";
 		}
-		$this->txt .= $this->closeline(). "\r\n";
 	}
 
 	/**
@@ -576,6 +572,10 @@ class WW_DbScripts_Generators_Mssql extends WW_DbScripts_Generators_Base
 	/**
 	 * Creates a procedure to change the primary index of a table.
 	 *
+	 * In MSSQL the primary index can only be dropped by knowing its constraint name. EN-84882
+	 * This function takes care of the above.
+	 *
+	 * @since 9.4.9
 	 * @param string $tableName The name of the table (including prefix).
 	 */
 	private function storeProcedure_ChangePrimaryIndex( $tableName )

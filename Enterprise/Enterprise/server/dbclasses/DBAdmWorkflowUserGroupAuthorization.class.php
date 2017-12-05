@@ -240,7 +240,7 @@ class DBAdmWorkflowUserGroupAuthorization extends DBBase
 		if(!is_null($obj->AccessProfileId)) $row['profile']     = intval( $obj->AccessProfileId );
 		if(!is_null($obj->SectionId))       $row['section']     = isset( $obj->SectionId ) ? intval( $obj->SectionId ) : 0;
 		if(!is_null($obj->StatusId))        $row['state']       = isset( $obj->StatusId ) ? intval( $obj->StatusId ) : 0;
-		if(!is_null($obj->Rights))          $row['rights']      = isset( $obj->Rights ) ? strval( $obj->Rights ) : 0;
+		if(!is_null($obj->Rights))          $row['rights']      = isset( $obj->Rights ) ? strval( $obj->Rights ) : '';
 		return $row;
 	}
 

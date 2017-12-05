@@ -773,7 +773,7 @@ class DBPlacements extends DBBase
 	 *
 	 * @param integer[] $placementIds
 	 * @param boolean $onlyFirstFrame Return placements with frameorder set to 0.
-	 * @return Placement[] Retrieved placements (values) and placement ids (keys).
+	 * @return Placement[] Retrieved placements (values) and placement ids (keys). Since 10.2.0 the sequence of $placementIds is respected.
 	 * @throws BizException On bad given params or fatal SQL errors.
 	 */
 	static public function getPlacementBasicsByIds( array $placementIds, $onlyFirstFrame = false )
@@ -800,7 +800,15 @@ class DBPlacements extends DBBase
 			$placements[ $row['id'] ] = self::rowToObj( $row );
 			$placements[ $row['id'] ]->ChildId = $row['child']; // hack
 		}
-		return $placements;
+
+		// Respect the sequence of the given $placementIds parameter.
+		$sortedPlacements = array();
+		foreach( $placementIds as $placementId ) {
+			if( array_key_exists( $placementId, $placements ) ) {
+				$sortedPlacements[ $placementId ] = $placements[ $placementId ];
+			}
+		}
+		return $sortedPlacements;
 	}
 	
 	/**

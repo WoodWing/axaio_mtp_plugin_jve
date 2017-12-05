@@ -508,7 +508,7 @@ class WW_TestSuite_HealthCheck2_Elvis_TestCase  extends TestCase
 		}
 		if( $result && !ElvisSync::isRunning( 5 ) ) { // wait max 5 seconds for new cron to startup
 			$help = 'Please make sure a Crontab/Scheduler is setup to periodically run this module and has full time coverage.';
-			$this->setResult( 'ERROR', 'The sync.php module does not seems to be running.', $help );
+			$this->setResult( 'ERROR', 'The sync.php module does not seem to be running.', $help );
 			$result = false;
 		}
 		return $result;

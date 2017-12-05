@@ -137,7 +137,7 @@ class WwcxToWcmlUtils
 	}
 
 	/**
-	 * Checks if there is an InDesign Server CS5 (or later) configured and set active.
+	 * Checks if there is an InDesign Server CS5 (or later, up till CC 2015) configured and set active.
 	 *
 	 * @return boolean True when found, else false
 	 */
@@ -146,8 +146,8 @@ class WwcxToWcmlUtils
 		require_once BASEDIR.'/server/bizclasses/BizInDesignServer.class.php';
 		$idsObjs = BizInDesignServer::listInDesignServers();
 		foreach( $idsObjs as $idsObj ) {
-    		if( $idsObj->Active && (int)$idsObj->ServerVersion >= 7 ) { // 7 = CS5
-    			return true; // Active CS5 InDesign Server found
+    		if( $idsObj->Active && (int)$idsObj->ServerVersion >= 7 && (int)$idsObj->ServerVersion <= 11 ) { // 7 = CS5, 11 = CC 2015
+    			return true; // Active InDesign Server found in the correct version range
 			}
 		}
 		return false;

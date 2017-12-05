@@ -442,6 +442,7 @@
 				<all>
 					<element name="Id"		  	type="xsd:string"/>	<!-- Unique id within the layout (UID) -->
 					<element name="Name"		type="xsd:string" nillable="true"/>	<!-- Unique name within the layout. (User can change.) -->
+					<element name="SplineIDs"	type="tns:ArrayOfString" nillable="true" minOccurs="0" maxOccurs="1"/> <!-- v10.2: Refers to Placement->SplineID and tells the sequence of the frames as organized in the InDesign Article palette. -->
 				</all>
 			</complexType>
 			<complexType name="ArrayOfInDesignArticle">

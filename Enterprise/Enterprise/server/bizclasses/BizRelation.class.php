@@ -564,7 +564,7 @@ class BizRelation
 	 * @param bool $getFromWorkflowAndTrash By default False; True to retrieve normal and deleted relation.
 	 * @param bool $objectLabels By default False; True to retrieve the objectlabels
 	 * @param string $type Filter on te type of the relation e.g. Placed, InstanceOf. Null in case of all types.
-	 * @return array An array of object relations.
+	 * @return Relation[].
 	 * @throws BizException
 	 */
 	public static function getObjectRelations(

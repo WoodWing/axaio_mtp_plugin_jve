@@ -160,7 +160,7 @@
         <field name="Columns" 				type="tint" 	indexed="true" 	stored="true"/>
         <field name="Width"				    type="tdouble"  indexed="true" 	stored="true"/>
         <field name="Height" 				type="tdouble"  indexed="true" 	stored="true"/>
-        <field name="Dpi" 				    type="tint" 	indexed="true" 	stored="true"/>
+        <field name="Dpi" 				    type="tdouble" 	indexed="true" 	stored="true"/>
         <field name="LengthWords" 			type="tint" 	indexed="true" 	stored="true"/>
         <field name="LengthChars" 			type="tint" 	indexed="true" 	stored="true"/>
         <field name="LengthParas" 			type="tint" 	indexed="true" 	stored="true"/>

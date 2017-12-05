@@ -50,6 +50,7 @@ CREATE TABLE `smart_idarticlesplacements` (
   `objid` bigint(11) NOT NULL  default 0,
   `artuid` varchar(40) NOT NULL  default '',
   `plcid` bigint(11) NOT NULL  default 0,
+  `code` int(11) NOT NULL  default '0',
   PRIMARY KEY (`objid`, `artuid`, `plcid`)
 ) DEFAULT CHARSET=utf8;
 CREATE  INDEX `plcid_idarticlesplacements` ON `smart_idarticlesplacements`(`plcid`) ;
@@ -83,7 +84,7 @@ ALTER TABLE `smart_users`
 ADD   `importonlogon` char(2) NOT NULL  default '';
 ALTER TABLE `smart_mtpsentobjects` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_messagelog` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
-ALTER TABLE `smart_objectflags` CHANGE `objid`   `objid` bigint(11) NOT NULL ;
+ALTER TABLE `smart_objectflags` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
 
 CREATE TABLE `smart_featureaccess` (
   `featurename` varchar(255) NOT NULL  default '',

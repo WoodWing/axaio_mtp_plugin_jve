@@ -243,7 +243,8 @@ class DBAdmStatus extends DBBase
 			}
 		}
 
-		$orderBy = array( 'code' => true, 'id' => true );
+      // Sort order has to be applied per type (Article/Layout/etc)
+		$orderBy = array( 'type' => true, 'code' => true, 'id' => true );
 		$rows = self::listRows( self::TABLENAME, null, null, $where, '*', $params, $orderBy );
 		if( self::hasError() ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );

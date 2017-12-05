@@ -302,7 +302,10 @@ class BizInDesignServerDispatcher
 				}
 				if ( $server ) {
 					// Start the job processor in background (async cURL).
-					$url = SERVERURL_ROOT . INETROOT . '/idsjobindex.php?command=rundispatchedjob' .
+					// LOCALURL_ROOT: Use LOCALURL_ROOT instead of SERVERURL_ROOT since Enterprise server is calling itself.
+					// This can be an issue ( if using SERVERURL_ROOT ) when Enterprise is sitting behind AWS LB, Enterprise
+					// having https for the outside world but http internally. Also see EN-86509
+					$url = LOCALURL_ROOT . INETROOT . '/idsjobindex.php?command=rundispatchedjob' .
 						'&jobid=' . $jobId . '&serverid=' . $server->Id . '&locktoken=' . $lockToken;
 					$curl = self::getCurlPath();
 					LogHandler::Log( 'idserver', 'INFO', "START background job with CURL [$curl], URL [$url]." );

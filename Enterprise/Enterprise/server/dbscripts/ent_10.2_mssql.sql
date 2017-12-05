@@ -413,6 +413,7 @@ CREATE TABLE [smart_idarticlesplacements] (
   [objid] bigint NOT NULL  default 0,
   [artuid] varchar(40) NOT NULL  default '',
   [plcid] bigint NOT NULL  default 0,
+  [code] int NOT NULL  default '0',
   PRIMARY KEY ([objid], [artuid], [plcid])
 );
 CREATE  INDEX [plcid_idarticlesplacements] ON [smart_idarticlesplacements]([plcid]) ;
@@ -741,7 +742,7 @@ CREATE  INDEX [mi_messagelog] ON [smart_messagelog]([msgid]) ;
 CREATE  INDEX [uid_messagelog] ON [smart_messagelog]([userid]) ;
 
 CREATE TABLE [smart_objectflags] (
-  [objid] bigint NOT NULL ,
+  [objid] bigint NOT NULL  default '0',
   [flagorigin] varchar(255) NOT NULL ,
   [flag] int NOT NULL ,
   [severity] int NOT NULL ,
