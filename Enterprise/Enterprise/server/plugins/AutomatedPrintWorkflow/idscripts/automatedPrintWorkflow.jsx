@@ -45,9 +45,10 @@ var SCRIPT_ARG_KEYS = [ "documentId",	// The object id of the layout to perform 
 			var opsInstructions = {};
 			var scriptArgObj = app.scriptArgs;
 			function firstLetterToLower( sKey ) {
-			    return (sKey[0].toLowerCase() + sKey.slice(1));
-			}
-			for each( var argKey in SCRIPT_ARG_KEYS ) {
+                return (sKey[0].toLowerCase() + sKey.slice(1));
+            }
+            for( var i = 0; i < SCRIPT_ARG_KEYS.length; i++ ) {
+                var argKey = SCRIPT_ARG_KEYS[i];
 				if( scriptArgObj.isDefined(argKey) ) {
 					opsInstructions[firstLetterToLower(argKey)] = scriptArgObj.get(argKey);
 				}
