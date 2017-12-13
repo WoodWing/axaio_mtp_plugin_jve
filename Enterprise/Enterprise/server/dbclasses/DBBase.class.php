@@ -450,6 +450,7 @@ class DBBase
 	 * @param array|null $groupBy List of fields on which the result set is grouped.
 	 * @param string|null $having Indicates the condition or conditions that the grouped by rows must satisfy to be selected.
 	 * @return array of rows (see function description) or null on failure (use getError() for details)
+	 * @throws BizException In case of database connection error.
 	 */
 	static public function listRows(
 		$tableNames, $keycol, $namecol, $where, $fieldnames = '*', $params = array(), $orderBy = null, $limit = null, $groupBy = null, $having = null )
@@ -591,6 +592,7 @@ class DBBase
 	 *         of the where clause.
 	 * @param bool $logSQL Whether or not the resulting SQL must be logged.
 	 * @return boolean|null NULL in case of error, TRUE in case of success
+	 * @throws BizException In case of database connection error.
 	 */
 	static public function deleteRows( $tablename, $where, $params = array(), $logSQL = true )
 	{

@@ -391,6 +391,14 @@ class BizSession
 		$sLanguage_code = BizUser::getLanguage($shortUser);
 		BizResources::getResourceTable(true);
 
+		try {
+			require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
+			$ticketHandler = new BizTicket();
+			$ticketHandler->deleteExpiredTickets();
+		} catch ( BizException $e ) {
+			LogHandler::Log( __CLASS__, 'ERROR', $e->getMessage() );
+		}
+
 		// Make up new ticket		
 		$errorMessage = '';
 		$userLimit = false;
@@ -398,14 +406,6 @@ class BizSession
 			$appversion, $appserial, $appproductcode, $userLimit,
 			$errorMessage, $masterTicket );
 
-		// Purge the session workspaces for the purged tickets
-		$purgedTickets = DBTicket::getPurgedTickets();
-		self::purgeSessionWorkspaces( $purgedTickets );
-
-		// Remove orphan queues in RabbitMQ.
-		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
-		BizMessageQueue::removeOrphanQueuesByTickets( $purgedTickets );
-		
 		if ( !$ticketid )  {
 			throw new BizException( $userLimit ? 'WARN_USER_LIMIT' : 'ERR_LICENSE', 'Client', $errorMessage );
 		}
@@ -622,22 +622,17 @@ class BizSession
 		//get the appname before deleting the ticket...
 		$appname = DBTicket::DBappticket($ticket);
 
-		// delete ticket
-		$dbDriver = DBDriverFactory::gen();
-		$sth = DBTicket::DBendticket( $ticket );
-		if( !$sth ) {
-			throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
+		try {
+			require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
+			$ticketHandler = new BizTicket();
+			$ticketHandler->deleteTicket( $ticket );
+		} catch( BizException $e ) {
+			LogHandler::Log( __CLASS__, 'ERROR', $e->getMessage() );
 		}
-
-		// Purge the session workspace
-		self::purgeSessionWorkspaces( array( $ticket ) );
-
-		// Remove the ticket based queue in RabbitMQ.
-		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
-		BizMessageQueue::removeOrphanQueuesByTickets( array( $ticket ) );
 
 		// settings
 		if( $savesettings ) {
+			$dbDriver = DBDriverFactory::gen();
 			require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
 			$sth = DBUserSetting::purgeSettings( $shortUserName , $appname );
 			if( !$sth ) {
@@ -727,8 +722,14 @@ class BizSession
 			// That forces clients to (re)login and obtain a seat for both Enterprise and
 			// the remote system again.
 			if( !$connectorTicketsValid ) {
-				DBTicket::DBendticket( $ticket );
-				throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
+				try {
+					require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
+					$ticketHandler = new BizTicket();
+					$ticketHandler->deleteTicket( $ticket );
+				} catch( BizException $e ) {
+					LogHandler::Log( __CLASS__, 'ERROR', $e->getMessage() );
+				}
+				throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket' );
 			}
 		}
 
