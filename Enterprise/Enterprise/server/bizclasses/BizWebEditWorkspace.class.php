@@ -1313,7 +1313,7 @@ class BizWebEditWorkspace
 	private function composePlacement( $xpath, $xmlPlacement )
 	{
 		$placement = new Placement();
-		$placement->Page = $this->getTextValue( $xpath, 'Page', $xmlPlacement );
+		$placement->Page = intval( $this->getTextValue( $xpath, 'Page', $xmlPlacement ) );
 		$placement->Element = $this->getTextValue( $xpath, 'Element', $xmlPlacement );
 		$placement->ElementID = $this->getTextValue( $xpath, 'ElementID', $xmlPlacement );
 		$placement->FrameOrder = $this->getTextValue( $xpath, 'FrameOrder', $xmlPlacement );
