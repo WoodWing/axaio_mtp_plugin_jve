@@ -634,7 +634,7 @@ function step7_zipExternalModules {
 	done
 
 	echo "step7c: Zipping demo plug-ins ..."
-	plugins="Celum Claro EZPublish FlickrPublish FlickrSearch Fotoware Guardian Imprezzeo NYTimes QRCode SMS Tripolis YouTubePublish AspellShellSpelling GoogleWebSpelling Tika"
+	plugins="Celum Claro EZPublish FlickrPublish FlickrSearch Fotoware Guardian NYTimes QRCode SMS Tripolis YouTubePublish AspellShellSpelling GoogleWebSpelling Tika"
 	for plugin in ${plugins}; do
 		zipFolder "${WORKSPACE}/Enterprise_release/plugins/demo" "${plugin}" "${WORKSPACE}/artifacts" "${plugin}_${SERVER_VERSION_ZIP}"
 	done
