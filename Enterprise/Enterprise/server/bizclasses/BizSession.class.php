@@ -393,10 +393,10 @@ class BizSession
 
 		try {
 			require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
-			$ticketHandler = new BizTicket();
-			$ticketHandler->deleteExpiredTickets();
+			$bizTicket = new BizTicket();
+			$bizTicket->deleteExpiredTickets();
 		} catch ( BizException $e ) {
-			LogHandler::Log( __CLASS__, 'ERROR', $e->getMessage() );
+			// Do nothing, error is already added to the log, no need to stop the log on.
 		}
 
 		// Make up new ticket		
@@ -624,10 +624,10 @@ class BizSession
 
 		try {
 			require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
-			$ticketHandler = new BizTicket();
-			$ticketHandler->deleteTicket( $ticket );
+			$bizTicket = new BizTicket();
+			$bizTicket->deleteTicket( $ticket );
 		} catch( BizException $e ) {
-			LogHandler::Log( __CLASS__, 'ERROR', $e->getMessage() );
+			// Do nothing, error is already added to the log, no need to stop the log off.
 		}
 
 		// settings
@@ -724,10 +724,10 @@ class BizSession
 			if( !$connectorTicketsValid ) {
 				try {
 					require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
-					$ticketHandler = new BizTicket();
-					$ticketHandler->deleteTicket( $ticket );
+					$bizTicket = new BizTicket();
+					$bizTicket->deleteTicket( $ticket );
 				} catch( BizException $e ) {
-					LogHandler::Log( __CLASS__, 'ERROR', $e->getMessage() );
+					// Do nothing, error is already added to the log, no need to stop.
 				}
 				throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket' );
 			}

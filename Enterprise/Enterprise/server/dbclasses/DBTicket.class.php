@@ -433,8 +433,8 @@ class DBTicket extends DBBase
 	public static function DBpurgetickets()
 	{
 		require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
-		$ticketHandler = new BizTicket();
-		$ticketHandler->deleteExpiredTickets();
+		$bizTicket = new BizTicket();
+		$bizTicket->deleteExpiredTickets();
 	}
 
 	/**
@@ -443,7 +443,7 @@ class DBTicket extends DBBase
 	 * @return array Array of db rows indexed by the tickets.`id` value.
 	 * @throws  BizException In case of database connection error.
 	 */
-	static public function getExpiredTicketsById(): array
+	static public function getExpiredTicketsIndexedById(): array
 	{
 		$expire = date('Y-m-d\TH:i:s');
 		include_once( BASEDIR . '/server/utils/license/license.class.php' );
@@ -459,17 +459,19 @@ class DBTicket extends DBBase
 	/**
 	 * Removes all ticket records with the specified 'id'.
 	 *
-	 * @param array $ticketsById
+	 * @param array $ticketsIndexedById
 	 * @throws BizException In case of database connection error.
 	 */
-	static public function deleteTicketsById( array $ticketsById ): void
+	static public function deleteTicketsById( array $ticketsIndexedById ): void
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$tickets = $dbDriver->tablename(self::TABLENAME);
-		if( $ticketsById ) {
-			$purgeRowIds = implode(',', array_keys( $ticketsById ));
-			$sql = "DELETE FROM {$tickets} WHERE `id` IN ( {$purgeRowIds} )";
-			$sth = $dbDriver->query($sql, array(), null, false); //Don't write in log
+		if( $ticketsIndexedById ) {
+			$dbDriver = DBDriverFactory::gen();
+			$tickets = $dbDriver->tablename(self::TABLENAME);
+			$purgeRowIds = array_keys( $ticketsIndexedById );
+			$where = self::addIntArrayToWhereClause( 'id', $purgeRowIds );
+			if ( $where ) {
+				/* $success = */self::deleteRows( self::TABLENAME, $where );
+			}
 		}
 	}
 	
