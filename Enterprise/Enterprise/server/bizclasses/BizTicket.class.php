@@ -19,7 +19,7 @@ class BizTicket
 	public function deleteExpiredTickets(): void
 	{
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-		$expiredTicketsById = DBTicket::getExpiredTicketsById();
+		$expiredTicketsById = DBTicket::getExpiredTicketsIndexedById();
 		if( $expiredTicketsById ) {
 			$expiredTickets = array_map( function( $expiredTicketById ) { return $expiredTicketById['ticketid']; },
 												$expiredTicketsById);
@@ -37,7 +37,6 @@ class BizTicket
 	 */
 	private function cleanUpTicketBasedStructures( array $tickets ): void
 	{
-		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		BizSession::purgeSessionWorkspaces( $tickets );
 		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
 		BizMessageQueue::removeOrphanQueuesByTickets( $tickets );
@@ -59,7 +58,7 @@ class BizTicket
 	/**
 	 * Deletes all tickets and related structures linked to a user.
 	 *
-	 * @param string $user
+	 * @param string $user Short user name.
 	 * @throws BizException In case of database connection error.
 	 */
 	public function deleteTicketsByUser( string $user ): void

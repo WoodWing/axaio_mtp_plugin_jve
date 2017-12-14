@@ -141,8 +141,8 @@ class DBUser extends DBBase
 				DBObjectLock::deleteLocksByUser( $user );
 
 				require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
-				$ticketHandler = new BizTicket();
-				$ticketHandler->deleteTicketsByUser( $user );
+				$bizTicket = new BizTicket();
+				$bizTicket->deleteTicketsByUser( $user );
 
 				// cascading delete settings (on name, not id!)
 				require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';

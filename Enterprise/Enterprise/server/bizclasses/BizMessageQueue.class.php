@@ -66,19 +66,18 @@ class BizMessageQueue
 
 	/**
 	 * Composes a regular expression that defines user permissions to the RabbitMQ client queue.
-	 * User gets permission on all queues created by the user. These queues start with 'user.<userId>'.
+	 * User gets permission on all queues created by the user. These queues start with 'user.<userId>.ticket...'.
+	 * The system id is not needed for setting up the permissions. The reason is that a queue is created for a specific
+	 * virtual host and so is the user. The user has only rights on that virtual host and never on other hosts.
 	 *
 	 * See also https://www.rabbitmq.com/access-control.html
 	 *
-	 * @param string $ticket
+	 * @param int $userId
 	 * @return string Permission in regular expression format.
-	 * @throws BizException In case of database connection error.
 	 */
-	public static function composePermissionRegExpression( string $ticket ): string
+	public static function composePermissionRegExpression( $userId ): string
 	{
-		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-		$userId = DBTicket::getUserIdByTicket( $ticket );
-		return '^'.'user.'.$userId.'.*$';
+		return '^'.'user.'.$userId.'\..*$';
 	}
 
 	/**
@@ -124,20 +123,18 @@ class BizMessageQueue
 	 * Returns the name of the RabbitMQ message queue to be used by the client for Enterprise messaging.
 	 * Format 'user.<userId>.ticket.<ticket>. The user Id is needed to grant permissions per user.
 	 *
+	 * @param int $userId
 	 * @param string $ticket
 	 * @return string Exchange name
-	 * @throws BizException In case of database connection error.
 	 */
-	public static function composeMessageQueueName( string $ticket ): string
+	public static function composeMessageQueueName( $userId, string $ticket ): string
 	{
-		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-		$userId = DBTicket::getUserIdByTicket( $ticket );
-
 		return 'user.'.$userId.'.'.'ticket.'.$ticket;
 	}
 
 	/**
 	 * Returns the ticket that was used to compose a given queue name.
+	 * Format of the queue is 'user.<userId>.ticket.<ticket>.
 	 *
 	 * @param string $queueName
 	 * @return string|null Ticket
@@ -145,9 +142,11 @@ class BizMessageQueue
 	public static function deriveTicketFromMessageQueueName($queueName )
 	{
 		$ticket = null;
-		$prefix = 'ticket.';
-		if( substr( $queueName, 0, strlen($prefix ) ) == $prefix ) {
-			$ticket = substr( $queueName, strlen($prefix ) );
+		$prefix = 'ticket\.';
+		$matches = array();
+		$found = preg_match( "/{$prefix}(.*)/", $queueName, $matches );
+		if( $found ) {
+			$ticket = $matches[1]; // Take the subpattern.
 		}
 		return $ticket;
 	}
@@ -319,7 +318,7 @@ class BizMessageQueue
 				}
 
 				// Create queue dedicated for the client for which the messages arrive.
-				$response->MessageQueue = self::composeMessageQueueName( $response->Ticket );
+				$response->MessageQueue = self::composeMessageQueueName( $userId, $response->Ticket );
 				$restClient->createQueue( $response->MessageQueue );
 
 				// Create exchange for system events.
@@ -377,7 +376,7 @@ class BizMessageQueue
 				$restClient->createOrUpdateUser( $restUser );
 
 				// Give user read access to the brand- and overrule issue exchanges in RabbitMQ.
-				$userRights = self::composePermissionRegExpression( $response->Ticket );
+				$userRights = self::composePermissionRegExpression( $userId );
 				$restPerms = new WW_Utils_RabbitMQ_RestAPI_Permissions();
 				$restPerms->Read = $userRights;
 				//$restPerms->Write = $userRights; // queues are used for reading only
@@ -462,7 +461,9 @@ class BizMessageQueue
         $map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO', 'S1144' => 'INFO' ) );
 			// L> Not all clients support RabbitMQ so HTTP 404 / "Record not (S1029)" found may happen.
 		foreach( $expiredTickets as $ticket ) {
-			$queueName = self::composeMessageQueueName( $ticket );
+			require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+			$userId = DBTicket::getUserIdByTicket( $ticket );
+			$queueName = self::composeMessageQueueName( $userId, $ticket );
 			try {
 				$restClient->deleteQueue( $queueName );
 			} catch( BizException $e ) {} // silently continue
