@@ -78,21 +78,27 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 		}
 
 		if( $channelId ) {
-			if( $register ) {
-				$faceConn = new FacebookPublisher( $channelId );
+			if( $register ) { // Register button pressed.
 				try {
+					$faceConn = new FacebookPublisher( $channelId );
 					// Get Facebook access token
 					if( !$faceConn->getAccessToken( $channelId ) ) {
 						// Go to the login page of Facebook to log in and get an access-code
 						$faceConn->loginToFacebook( $channelId );
 					}
 				} catch( Exception $e ) {
-					LogHandler::Log('Facebook','ERROR', ':Error retrieving access token:'. $e->getMessage() );
+					if( $faceConn ) {
+						$faceConn->releaseAccessToken( $channelId );
+					}
+					LogHandler::Log( 'Facebook', 'ERROR', ':Error retrieving access token:'.$e->getMessage() );
 				}
-			} else {
-				$faceConn = new FacebookPublisher();
-				// Unregister, by releasing the access token.
-				$faceConn->releaseAccessToken( $channelId );
+			} else { // Un-register button pressed.
+				try {
+					$faceConn = new FacebookPublisher();
+					$faceConn->releaseAccessToken( $channelId ); // Un-register, by releasing the access token.
+				} catch( Exception $e ) {
+					// Unlikely to happen, but when happens, just be silent here ( since no extra action needed by the user ).
+				}
 			}
 		}
 
@@ -118,10 +124,15 @@ class Facebook_ImportDefinitions_EnterpriseWebApp extends EnterpriseWebApp
 			$channelTxt = str_replace( '<!--PAR:PUBCHANNELURL-->', $channelUrl, $channelTxt );
 
 			$registered = null;
+			$faceConn = null;
 			try{
 				$faceConn = new FacebookPublisher( $channelInfo->Id );
 				$registered = $faceConn->getAccessToken( $channelInfo->Id ) ? true : false;
 			} catch( Exception $e ) {
+				if( !$faceConn ) {
+					$faceConn = new FacebookPublisher(); // No param to avoid Exception, just to release the access token.
+				}
+				$faceConn->releaseAccessToken( $channelInfo->Id );
 				$channelTxt = str_replace ( '<!--PAR:ERROR_MESSAGE-->', $e->getMessage(), $channelTxt );
 			}
 

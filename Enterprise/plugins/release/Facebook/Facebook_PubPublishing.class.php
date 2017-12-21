@@ -378,7 +378,6 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 	private function uploadImageToAlbum( $publishForm, $dossier, $publishTarget, $imageObject, $imagePath, $pageId )
 	{
 		$pubChannelId = $publishTarget->PubChannelID;
-		$facebookPublisher = new FacebookPublisher( $pubChannelId );
 		$albumNameField = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_ALBUM_NAME', false, $pubChannelId );
 		$albumDescriptionField = BizPublishForm::extractFormFieldDataByName( $publishForm, 'C_FACEBOOK_ALBUM', false, $pubChannelId );
 		$albumName = $albumNameField['C_FACEBOOK_ALBUM_NAME'][0];
@@ -389,6 +388,7 @@ class Facebook_PubPublishing extends PubPublishing_EnterpriseConnector
 		// Post the album.
 		$externalId = null;
 		try {
+			$facebookPublisher = new FacebookPublisher( $pubChannelId );
 			$externalId = $facebookPublisher->uploadPictureToPage( $pageId, $imagePath, $imageDescription,
 				$albumName, $albumDescription, $albumId );
 			if( $albumId ) {
