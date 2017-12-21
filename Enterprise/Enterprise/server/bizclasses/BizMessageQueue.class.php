@@ -77,7 +77,7 @@ class BizMessageQueue
 	 */
 	public static function composePermissionRegExpression( $userId ): string
 	{
-		return '^'.'user.'.$userId.'\..*$';
+		return '^'.'user\.'.$userId.'\..*$';
 	}
 
 	/**
@@ -447,6 +447,7 @@ class BizMessageQueue
 	 * For a given list of expired tickets, it removes corresponding queues from RabbitMQ (since they became orphan).
 	 *
 	 * @param string[] $expiredTickets
+	 * @throws  BizException In case of database connection error.
 	 */
 	public static function removeOrphanQueuesByTickets( $expiredTickets )
 	{
@@ -457,16 +458,17 @@ class BizMessageQueue
 		if( !$restClient ) {
 			return;
 		}
-        /** @noinspection PhpUnusedLocalVariableInspection */
-        $map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO', 'S1144' => 'INFO' ) );
-			// L> Not all clients support RabbitMQ so HTTP 404 / "Record not (S1029)" found may happen.
+		/** @noinspection PhpUnusedLocalVariableInspection */
+		$map = new BizExceptionSeverityMap( array( 'S1029' => 'INFO', 'S1144' => 'INFO' ) );
+		// L> Not all clients support RabbitMQ so HTTP 404 / "Record not (S1029)" found may happen.
 		foreach( $expiredTickets as $ticket ) {
 			require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 			$userId = DBTicket::getUserIdByTicket( $ticket );
 			$queueName = self::composeMessageQueueName( $userId, $ticket );
 			try {
 				$restClient->deleteQueue( $queueName );
-			} catch( BizException $e ) {} // silently continue
+			} catch( BizException $e ) {
+			} // silently continue
 		}
 	}
 

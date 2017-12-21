@@ -394,7 +394,7 @@ class BizSession
 		try {
 			require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
 			$bizTicket = new BizTicket();
-			$bizTicket->deleteExpiredTickets();
+			$bizTicket->deleteExpiredTicketsAndAffiliatedStructures();
 		} catch ( BizException $e ) {
 			// Do nothing, error is already added to the log, no need to stop the log on.
 		}
@@ -625,7 +625,7 @@ class BizSession
 		try {
 			require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
 			$bizTicket = new BizTicket();
-			$bizTicket->deleteTicket( $ticket );
+			$bizTicket->deleteTicketAndAffiliatedStructures( $ticket );
 		} catch( BizException $e ) {
 			// Do nothing, error is already added to the log, no need to stop the log off.
 		}
@@ -725,7 +725,7 @@ class BizSession
 				try {
 					require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
 					$bizTicket = new BizTicket();
-					$bizTicket->deleteTicket( $ticket );
+					$bizTicket->deleteTicketAndAffiliatedStructures( $ticket );
 				} catch( BizException $e ) {
 					// Do nothing, error is already added to the log, no need to stop.
 				}

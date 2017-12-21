@@ -142,7 +142,7 @@ class DBUser extends DBBase
 
 				require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
 				$bizTicket = new BizTicket();
-				$bizTicket->deleteTicketsByUser( $user );
+				$bizTicket->deleteTicketsAndAffiliatedStructuresByUser( $user );
 
 				// cascading delete settings (on name, not id!)
 				require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';

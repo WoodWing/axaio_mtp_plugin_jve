@@ -434,24 +434,30 @@ class DBTicket extends DBBase
 	{
 		require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
 		$bizTicket = new BizTicket();
-		$bizTicket->deleteExpiredTickets();
+		$bizTicket->deleteExpiredTicketsAndAffiliatedStructures();
 	}
 
 	/**
 	 * Returns the tickets that are expired.
 	 *
-	 * @return array Array of db rows indexed by the tickets.`id` value.
+	 * @return array Array with 'id' as key and 'ticketid' as value.
 	 * @throws  BizException In case of database connection error.
 	 */
 	static public function getExpiredTicketsIndexedById(): array
 	{
-		$expire = date('Y-m-d\TH:i:s');
-		include_once( BASEDIR . '/server/utils/license/license.class.php' );
+		$dbDriver = DBDriverFactory::gen();
+		$dbTickets = $dbDriver->tablename( self::TABLENAME );
+		$expire = date( 'Y-m-d\TH:i:s' );
+		include_once( BASEDIR.'/server/utils/license/license.class.php' );
 		$lic = new License();
 		$installTicketID = $lic->getInstallTicketID();
-		$where = '`expire` < ? OR `appname`= ? ';
-		$params = array( strval( $expire), strval( $installTicketID ) );
-		$rows = self::listRows( self::TABLENAME, 'id', '', $where, array( 'id', 'ticketid'), $params );
+		$sql = "SELECT `id`, `ticketid` FROM {$dbTickets} WHERE `expire` < ? OR `appname`= ? ";
+		$params = array( strval( $expire ), strval( $installTicketID ) );
+		$sth = $dbDriver->query( $sql, $params, null, false ); //Don't write in log
+		$rows = array();
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+			$rows[ $row['id'] ] = $row['ticketid'];
+		}
 
 		return $rows;
 	}
@@ -459,18 +465,18 @@ class DBTicket extends DBBase
 	/**
 	 * Removes all ticket records with the specified 'id'.
 	 *
-	 * @param array $ticketsIndexedById
+	 * @param array $ticketRowIds
 	 * @throws BizException In case of database connection error.
 	 */
-	static public function deleteTicketsById( array $ticketsIndexedById ): void
+	static public function deleteTicketsById( array $ticketRowIds ): void
 	{
-		if( $ticketsIndexedById ) {
+		if( $ticketRowIds ) {
 			$dbDriver = DBDriverFactory::gen();
-			$tickets = $dbDriver->tablename(self::TABLENAME);
-			$purgeRowIds = array_keys( $ticketsIndexedById );
-			$where = self::addIntArrayToWhereClause( 'id', $purgeRowIds );
-			if ( $where ) {
-				/* $success = */self::deleteRows( self::TABLENAME, $where );
+			$tickets = $dbDriver->tablename( self::TABLENAME );
+			$where = self::addIntArrayToWhereClause( 'id', $ticketRowIds );
+			if( $where ) {
+				/* $success = */
+				self::deleteRows( self::TABLENAME, $where, array(), false );
 			}
 		}
 	}
@@ -478,6 +484,7 @@ class DBTicket extends DBBase
 	/**
 	 * Returns the tickets that are purged
 	 *
+	 * @deprecated Since 10.2.1. Use \BizTicket::deleteExpiredTickets instead.
 	 * @return array
 	 */
 	public static function getPurgedTickets()
