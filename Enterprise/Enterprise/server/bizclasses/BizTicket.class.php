@@ -16,15 +16,13 @@ class BizTicket
 	 *
 	 * @throws  BizException In case of database connection error.
 	 */
-	public function deleteExpiredTickets(): void
+	public function deleteExpiredTicketsAndAffiliatedStructures(): void
 	{
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		$expiredTicketsById = DBTicket::getExpiredTicketsIndexedById();
 		if( $expiredTicketsById ) {
-			$expiredTickets = array_map( function( $expiredTicketById ) { return $expiredTicketById['ticketid']; },
-												$expiredTicketsById);
-			$this->cleanUpTicketBasedStructures( $expiredTickets );
-			DBTicket::deleteTicketsById( $expiredTicketsById );
+			$this->cleanUpTicketBasedStructures( $expiredTicketsById );
+			DBTicket::deleteTicketsById( array_keys( $expiredTicketsById ) );
 		}
 	}
 
@@ -48,7 +46,7 @@ class BizTicket
 	 * @param string $ticket
 	 * @throws BizException In case of database connection error.
 	 */
-	public function deleteTicket( string $ticket ): void
+	public function deleteTicketAndAffiliatedStructures( string $ticket ): void
 	{
 		$this->cleanUpTicketBasedStructures( array( $ticket ) );
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
@@ -61,7 +59,7 @@ class BizTicket
 	 * @param string $user Short user name.
 	 * @throws BizException In case of database connection error.
 	 */
-	public function deleteTicketsByUser( string $user ): void
+	public function deleteTicketsAndAffiliatedStructuresByUser( string $user ): void
 	{
 		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
 		$tickets = DBTicket::getTicketsByUser( $user );
