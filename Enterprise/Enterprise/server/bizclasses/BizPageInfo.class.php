@@ -309,8 +309,23 @@ class BizPageInfo
 	 * Two Prefixes, 'A' and 'B', 6 pages:
 	 * A1, B2, A3, B4, A5, B6 => not adjacent.
 	 *
-	 * @param array $pageOrderSectionPrefixByNumberingSystems
-	 * @return bool
+	 * $pageOrderSectionPrefixByNumberingSystems
+	 * List of Page order with its prefix grouped by Sort Order: [SortOrder][Page Order][Section Prefix]
+	 * E.g:
+	 *    [3000000] => Array(
+	 *                   1 => A
+	 *                   2 => A
+	 *                   3 => ""
+	 *                   5 => ""
+	 *                   6 => B
+	 *                )
+	 *    [4000000] => Array(
+	 *                   7 => C
+	 *                   8 => C
+	 *                )
+	 *
+	 * @param array $pageOrderSectionPrefixByNumberingSystems See function header for its structure.
+	 * @return bool Returns true when the pages are adjacent, false otherwise.
 	 */
 	static private function adjacentSections( $pageOrderSectionPrefixByNumberingSystems )
 	{
@@ -320,7 +335,7 @@ class BizPageInfo
 			ksort( $sortedPageOrderByNumberingSystem); // Pages sorted by Page Order (aka real page number).
 			$previousPrefix = array_shift( $sortedPageOrderByNumberingSystem );
 			$foundPrefixes = array( $previousPrefix );
-			foreach( $sortedPageOrderByNumberingSystem as $pageOrder => $sectionPrefix ) {
+			foreach( $sortedPageOrderByNumberingSystem as /* $pageOrder => */ $sectionPrefix ) {
 				if( $sectionPrefix != $previousPrefix && array_search( $sectionPrefix, $foundPrefixes) !== false ) {
 					$adjacent = false;
 					break 2;
