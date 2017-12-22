@@ -26,9 +26,6 @@ class DBTicket extends DBBase
 	
 	const TABLENAME = 'tickets';
 	
-	/** @var array List of purged tickets (ticket ids). */
-	private static $purgedTickets = array();
-
 	/**
 	 * @var array $ticketCache Cache session data (per ticket) that is frequently asked.
 	 * @since 10.2.0
@@ -427,7 +424,7 @@ class DBTicket extends DBBase
 	/**
 	 * Delete all expired tickets from the database. <br>
 	 * Works indepently of current user or client application. <br>
-	 * @deprecated Since 10.2.1. Use \BizTicket::cleanUpExpiredTickets instead.
+	 * @deprecated Since 10.2.1. Use \BizTicket::deleteExpiredTicketsAndAffiliatedStructures instead.
 	 * @throws BizException In case of database connection error.
 	 */
 	public static function DBpurgetickets()
@@ -440,7 +437,7 @@ class DBTicket extends DBBase
 	/**
 	 * Returns the tickets that are expired.
 	 *
-	 * @return array Array with 'id' as key and 'ticketid' as value.
+	 * @return array Array with tickets.'id' as key and tickets.'ticketid' as value.
 	 * @throws  BizException In case of database connection error.
 	 */
 	static public function getExpiredTicketsIndexedById(): array
@@ -475,23 +472,11 @@ class DBTicket extends DBBase
 			$tickets = $dbDriver->tablename( self::TABLENAME );
 			$where = self::addIntArrayToWhereClause( 'id', $ticketRowIds );
 			if( $where ) {
-				/* $success = */
-				self::deleteRows( self::TABLENAME, $where, array(), false );
+				/* $success = */ self::deleteRows( self::TABLENAME, $where, array(), false );
 			}
 		}
 	}
 	
-	/**
-	 * Returns the tickets that are purged
-	 *
-	 * @deprecated Since 10.2.1. Use \BizTicket::deleteExpiredTickets instead.
-	 * @return array
-	 */
-	public static function getPurgedTickets()
-	{
-		return self::$purgedTickets;
-	}
-
 	/**
 	 * Retrieves the whole ticket DB record (row) for a given ticket.
 	 * Ticket is not validated.
