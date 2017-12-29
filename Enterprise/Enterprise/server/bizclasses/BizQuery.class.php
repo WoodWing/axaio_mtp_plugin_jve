@@ -140,10 +140,6 @@ class BizQuery extends BizQueryBase
 				$accessRight,
 				$request->Hierarchical );
 		}
-		if( self::resolveFacetsForDossier( $request ) && $queryResult->Rows ) {
-			$request->Params = self::getParametersForDossierItemsFacets( $queryResult );
-			/*$success =*/ self::executeSearchEngineQuery( '_FacetsOnly_', $request, $mode, $queryResult->Facets );
-		}
 
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
 		DBlog::logService( $user, 'QueryObjects' );
@@ -291,31 +287,6 @@ class BizQuery extends BizQueryBase
 		if( empty( $request->MaxEntries ) ) {
 			$request->MaxEntries = 0;
 		}
-	}
-
-	/**
-	 * Must facets be resolved for the items in a dossier.
-	 *
-	 * If an dossier is opened and the query is about getting all the items in dossier, facets can be returned to reflect
-	 * the items stored in that dossier. This can be turned on by a server feature.
-	 *
-	 * @param WflQueryObjectsRequest $request
-	 * @return bool True, show the facets for the items in a dossier, else False.
-	 */
-	static private function resolveFacetsForDossier( $request )
-	{
-		$dossierFacets = false;
-		if( $request->Params ) {
-			require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-			foreach( $request->Params as $paramKey => $param ) {
-				if( BizSettings::isFeatureEnabled( 'FacetsInDossier' ) && ( $param->Property == 'ParentId' ) &&
-					( DBObject::getObjectType( $param->Value ) == 'Dossier' ) ) {
-					$dossierFacets = true;
-				}
-			}
-		}
-
-		return $dossierFacets;
 	}
 
 	/**
@@ -1859,33 +1830,6 @@ class BizQuery extends BizQueryBase
 		return $objectIds;
 	}
 
-	/**
-	 * Based on the response, containing all items within a dossier, the parameters
-	 * for a Solr search are composed. The query will be on all IDs of the objects
-	 * within a dossier. Next to these parameters a 'Type' parameter is added to trigger
-	 * the proper facet define from config_solr.
-	 * @param WflQueryObjectsResponse $response
-	 * @return QueryParam[] Array with query parameters.
-	 */
-	static public function getParametersForDossierItemsFacets(WflQueryObjectsResponse $response )
-	{
-		$index  = 0; // Index of the array element containing the object ids.
-		foreach ($response->Columns as $property) {
-			if ( $property->Name == 'ID' ) {
-				break;
-			}
-			++$index;
-		}
-		$params = array();
-		foreach ( $response->Rows as $row ) {
-			$params[] = new QueryParam( 'ID', '=', $row[$index], false);
-		}
-		// 'Fake' type to get the proper facets from the define in config_solr.php
-		$params[] = new QueryParam('Type', '=', 'DossierItems', false);
-
-		return $params;
-	}
-	
 	/**
 	 * Allow the IssueClauses to be cleared.
 	 *

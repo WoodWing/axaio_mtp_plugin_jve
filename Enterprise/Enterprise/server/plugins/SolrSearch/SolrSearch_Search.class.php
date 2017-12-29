@@ -115,9 +115,6 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 				// We can do Inbox 
 				$retVal += 6;  // Good and fast
 				break;
-			case '_FacetsOnly_':
-				$retVal += 6;  // Good and fast
-				break;
 			default:
 				break;
 		}
@@ -153,18 +150,12 @@ class SolrSearch_Search extends Search_EnterpriseConnector
 			case $inbox:
 				$searchEngine->inboxSearch();
 				break;
-			case '_FacetsOnly_':
-				$searchEngine->facetOnlySearch();
-				break;
 		}
 
 		$response = null;
 		if( $query == $inbox || $query == 'Inbox' ) {
 			require_once BASEDIR.'/server/interfaces/services/wfl/WflNamedQueryResponse.class.php';
 			$response = new WflNamedQueryResponse();
-		}  elseif ( $query == '_FacetsOnly_' ) {
-			// Used to return the facets of the items within a dossier.
-			return $searchEngine->getFacets();
 		} else if( $query == 'PublishFormTemplates' ) {
 			require_once BASEDIR.'/server/interfaces/services/wfl/WflNamedQueryResponse.class.php';
 			$response = new WflNamedQueryResponse();			
