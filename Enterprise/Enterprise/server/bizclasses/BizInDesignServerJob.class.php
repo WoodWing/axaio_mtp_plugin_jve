@@ -297,12 +297,10 @@ class BizInDesignServerJobs
 						LogHandler::Log( 'idserver', 'DEBUG', 'Unassigning IDS job '.$jobId );
 						DBInDesignServerJob::unassignServerFromJob( $jobId, $idleServerId, $lockToken );
 					}
-					$noMoreSuitableServers = $numberOfIdleServers === count( $serversToBeExcluded ); // EN-89094
-					if( $noMoreSuitableServers ) {
+					if( $numberOfIdleServers === count( $serversToBeExcluded ) ) { // No more suitable IDS available: EN-89094
 						require_once BASEDIR.'/server/dataclasses/InDesignServerJobStatus.class.php';
-						$status = InDesignServerJobStatus::UNAVAILABLE;
 						$jobStatus = new InDesignServerJobStatus();
-						$jobStatus->setStatus( $status );
+						$jobStatus->setStatus( InDesignServerJobStatus::UNAVAILABLE );
 						DBInDesignServerJob::updateJobStatus( array( $jobId ), $jobStatus, true );
 					}
 				}
