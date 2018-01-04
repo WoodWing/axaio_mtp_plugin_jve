@@ -24,7 +24,7 @@ class ElvisObjectUtils
 
 		$elvisShadowObjectIds = array();
 
-		if( !is_null( $objectIds ) ) {
+		if( $objectIds ) {
 			$dbDriver = DBDriverFactory::gen();
 			$dbo = $dbDriver->tablename( 'objects' );
 			$sql = 'SELECT `id`, `documentid` FROM ' . $dbo . ' ';
