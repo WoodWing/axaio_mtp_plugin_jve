@@ -1880,7 +1880,7 @@ class DBObject extends DBBase
 	{
 		$tableName = ($area == 'Workflow') ? self::TABLENAME : 'deletedobjects';
 		$where = ' `id` = ?';
-		$params = array( $id );
+		$params = array( intval($id) );
 		return self::updateRow($tableName, $values, $where, $params);
 	}
 
