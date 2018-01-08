@@ -246,6 +246,11 @@ class DBIssue extends DBBase
 	 */
 	static public function isOverruleIssue( $issueId )
 	{
+		static $overrulePublications = array();
+		if( isset( $overrulePublications[ $issueId ] )) {
+			$row = $overrulePublications[ $issueId ];
+			return $row ? $row['overrulepub'] == 'on' : false;
+		}
 		$fieldNames = array( 'overrulepub' );
 		$where = '`id` = ?';
 		$params = array( intval( $issueId ) );
@@ -253,6 +258,7 @@ class DBIssue extends DBBase
 		if( self::hasError() ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 		}
+		$overrulePublications[ $issueId ] = $row;
 		return $row ? $row['overrulepub'] == 'on' : false;
 	}
 
@@ -544,6 +550,11 @@ class DBIssue extends DBBase
 	 */
 	static public function getChannelId( $issueId )
 	{
+		static $channelIds = array();
+		if( isset( $channelIds[ $issueId ] )) {
+			$row = $channelIds[ $issueId ];
+			return $row ? intval( $row['channelid'] ) : null;
+		}
 		$fieldNames = array( 'channelid' );
 		$where = '`id` = ?';
 		$params = array( intval( $issueId ) );
@@ -551,6 +562,7 @@ class DBIssue extends DBBase
 		if( self::hasError() ) {
 			throw new BizException( 'ERR_DATABASE', 'Server', self::getError() );
 		}
+		$channelIds[ $issueId ] = $row;
 		return $row ? intval( $row['channelid'] ) : null;
 	}
 

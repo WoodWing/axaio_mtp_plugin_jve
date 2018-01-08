@@ -45,8 +45,12 @@ class DBChannel extends DBBase
      */
 	public static function getChannel( $channelId )
 	{
-		$row = self::getRow( self::TABLENAME, "`id` = ?", '*', array( intval( $channelId ) ));
-		return $row;
+		static $channels = array();
+		if( isset( $channels[ $channelId ] )) {
+			return $channels[ $channelId ];
+		}
+		$channels[ $channelId ] = self::getRow( self::TABLENAME, "`id` = ?", '*', array( intval( $channelId ) ));
+		return $channels[ $channelId ];
 	}
 
 	/**

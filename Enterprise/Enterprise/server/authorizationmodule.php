@@ -134,7 +134,9 @@ class authorizationmodule
 
 		foreach( $featuresByProfiles as $featuresByProfileRow ){
 			$featureId = $featuresByProfileRow['feature'];
-			$rightsByProfiles[$featuresByProfileRow['profile']] .= $features[$featureId]->Flag;
+			if( isset( $features[$featureId] ) ) { // may not be set e.g. when server plug-in (that provides rights) is currently disabled
+				$rightsByProfiles[ $featuresByProfileRow['profile'] ] .= $features[ $featureId ]->Flag;
+			}
 		}
 
 		return $rightsByProfiles;
