@@ -29,7 +29,7 @@ class ContentStationOverruleCompatibility_WflQueryObjects extends WflQueryObject
 			// First check if we do have any overrule issues in the system. If not we don't
 			// have to require IssueId as extra minimal prop (which makes query more complicated/slower)
 			require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
-			$overruleIssues = DBIssue::listAllOverruleIssuesWithPub();
+			$overruleIssues = DBIssue::listAllOverruleIssuesWithPub( true );
 			if( !empty($overruleIssues) ) {
 				// if query contains a overrule publication, fix it:
 				if (isset($req->Params)) {

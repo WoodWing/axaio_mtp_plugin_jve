@@ -6,18 +6,18 @@ class WW_TestSuite_BuildTest_Search_DeleteObject_TestCase extends WW_TestSuite_B
 {
 	public function getDisplayName()
 	{
-		return 'Delete Object Solr';
+		return 'Delete Object for Solr Search.';
 	}
 
 	public function getTestGoals()
 	{
-		return 'Delete Object and test if object is no longer indexed and searchable in Solr';
+		return 'Delete Object and test if object is no longer indexed and searchable by Solr Search.';
 	}
 
 	public function getTestMethods()
 	{
 		return 'Delete Object using DeleteObjects, check if the index flag is no longer set ' .
-			   'and check if the object is no longer searchable';
+			   'and check if the object is no longer searchable.';
 	}
 
 	public function getPrio()
@@ -54,7 +54,7 @@ class WW_TestSuite_BuildTest_Search_DeleteObject_TestCase extends WW_TestSuite_B
 
 		// Delete Object from Enterprise
 		$errorReport = null;
-		if( !$this->utils->deleteObject( $this, $ticket, $articleID, 'Delete article object from Database and Solr', $errorReport ) ) {
+		if( !$this->utils->deleteObject( $this, $ticket, $articleID, 'Delete article object from Database and Solr.', $errorReport ) ) {
 			return false;
 		}
 
@@ -66,7 +66,7 @@ class WW_TestSuite_BuildTest_Search_DeleteObject_TestCase extends WW_TestSuite_B
 		$objects = DBObject::getIndexedObjects( $prevObjectID, 1);
 		if( !empty($objects) && $objects[0] == $articleID ) {
 			$this->setResult( 'ERROR', 'Created object is still indexed',
-				'Check the Object in Solr/database' );
+				'Check the Object in Solr/Database' );
 			return false;
 		}
 

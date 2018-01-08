@@ -44,21 +44,20 @@ class NameFieldHandler extends ReadWriteFieldHandler
 	 * Extracts the file name from the meta data returned by Elvis.
 	 *
 	 * Returned file name is the original file name without the extension.
+	 * Illegal characters found in the file name will be removed.
 	 *
-	 * @param BasicMap $elvisMetadata Elvis metadata.
+	 * @param array $elvisMetadata Elvis metadata.
 	 * @return string Filename (without extension).
 	 */
 	private function getFilename( $elvisMetadata )
 	{
-		$fileName = $elvisMetadata['filename'];
+		$fileName = $this->getEnterpriseValue( $elvisMetadata ); // Value of Elvis MetaData 'filename' will be used.
 		$endIdx = mb_strrpos( $fileName, '.', 'UTF8' );
 		if( !$endIdx ) {
 			LogHandler::Log( 'ContentSource', 'WARN', 'NameFieldHandler::getFilename; filename has no extension: '.$fileName );
 			return $fileName;
 		}
-		require_once BASEDIR.'/server/bizclasses/BizProperty.class.php';
 		$fileName = mb_substr( $fileName, 0, $endIdx, 'UTF8' );
-
 		return $fileName;
 	}
 

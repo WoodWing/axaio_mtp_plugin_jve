@@ -6,12 +6,12 @@ class WW_TestSuite_BuildTest_Search_DeleteObject_Database_TestCase extends WW_Te
 {
 	public function getDisplayName()
 	{
-		return 'Delete Object Database Only';
+		return 'Delete Object for Database only.';
 	}
 
 	public function getTestGoals()
 	{
-		return 'Delete Object and test if object is no longer indexed and searchable in Database';
+		return 'Delete Object and test if object is no longer indexed and searchable by using the Database.';
 	}
 
 	public function getTestMethods()

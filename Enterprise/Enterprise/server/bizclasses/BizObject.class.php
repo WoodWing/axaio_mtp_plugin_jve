@@ -759,50 +759,20 @@ class BizObject
 		// change after creation.
 		$newRow['indexed'] = '';
 
-		// Save to the database:
-		$sth = DBObject::updateObject( $id, $user, $newRow, $now );
-		if( !$sth ) {
-			throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
+		// Validate targets and store them at DB for this object. BZ#9827 Only save targets if not null
+		if( $object->Targets !== null ) {
+			BizTarget::saveTargets( $user, $id, $object->Targets, $object->MetaData );
+			// Validate meta data and targets (including validation done by Server Plug-ins)
+			self::validateMetaDataAndTargets( $user, $object->MetaData, $object->Targets, null, false );
 		}
+		// Save other stuff elements, relations, messages, etc.
+		self::saveExtended( $id, $object, $user, false );
+		BizDeadlines::handleDeadlineForSaveObject( $object, $newRow, $currRow['deadline'] );
 
-		$exception = null;
-		try {
-			// Validate targets and store them at DB for this object. BZ#9827 Only save targets if not null
-			if( $object->Targets !== null ) {
-				BizTarget::saveTargets( $user, $id, $object->Targets, $object->MetaData );
-				// Validate meta data and targets (including validation done by Server Plug-ins)
-				self::validateMetaDataAndTargets( $user, $object->MetaData, $object->Targets, null, false );
-			}
-			// Object record is now changed, now save other stuff elements, relations, messages, etc.
-			self::saveExtended( $id, $object, $user, false );
-			$newRow = self::handleDeadlinesOfSavedObject( $object, $newRow );
-		} catch( BizException $e ) {
-			// If an exception is thrown between the database update of the object and the moment the files are stored
-			// we cannot just break out. The files have to be stored to make sure that the database and the Filsestore keep
-			// in sync. Error is thrown after the Filestore is updated.
-			$exception = $e;
-		}
-
-		// For shadow objects we now pass control to Content Source which may influence what to do with file storing
-		// as it can modify $object
-		if( trim( $currRow['contentsource'] ) ) {
-			require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
-			BizContentSource::saveShadowObject( trim( $currRow['contentsource'] ), trim( $currRow['documentid'] ), $object );
-		}
-
-		// Save object's files:
-		self::saveFiles( $currRow['storename'], $id, $object->Files, $object->MetaData->WorkflowMetaData->Version );
-
-		// Clear the files array, the files are moved to the files store so they aren't available anymore
-		$object->Files = array();
-
-		// Save pages (both files and DB records)
+		// Update object, both in the database as the Filestore.
+		$object = self::updateDatabaseAndFilestore( $object, $user, $newRow, $now, $currRow );
+		// Save pages, both in the database as the Filestore.
 		BizPage::savePages( $currRow['storename'], $id, 'Production', $object->Pages, true, $currRow['version'], $object->MetaData->WorkflowMetaData->Version );
-
-		// As now the Filestore is updated the exception can be thrown.
-		if( $exception ) {
-			throw $exception;
-		}
 
 		// Create server job to generate preview/thumb async
 		//require_once BASEDIR.'/server/bizclasses/BizMetaDataPreview.class.php';
@@ -1148,7 +1118,7 @@ class BizObject
 			// v9.7 Return InDesign Articles
 			if( in_array('InDesignArticles', $requestInfo) ) {
 				require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-				$indesignArticles = DBInDesignArticle::getInDesignArticles( $id );
+				$indesignArticles = DBInDesignArticle::getInDesignArticles( $id, true );
 			} else {
 				$indesignArticles = null;
 			}
@@ -1193,6 +1163,9 @@ class BizObject
 					BizContentSource::getShadowObject( trim($objectProps['ContentSource']),
 						trim($objectProps['DocumentID']), $object, $objectProps, $lock,
 						$rendition, $requestInfo, $supportedContentSources, $haveVersion );
+
+					// Ugly hack!! A temporary hack until we have a proper solution. See DBObject::trucateNamePropertyValue().
+					$object->MetaData->BasicMetaData->Name = DBObject::trucateNamePropertyValue( $object->MetaData->BasicMetaData->Name );
 				} catch( BizException $e ) {
 					// Let's be robust here; When the Content Source connector has been unplugged, an exception is thrown.
 					// Nevertheless, when not asked for a rendition, we already have the metadata, so there is no reason
@@ -1653,7 +1626,7 @@ class BizObject
 		// ==== Handle deadline
 		$newDeadline = isset( $newRow['deadline'] ) ? $newRow['deadline'] : null;
 		$pubId = $newRow['publication'];
-		self::handleDeadline( $id, $pubId, $targets, $curType, $curState, $curSection, $state, $categoryId, $newDeadline );
+		BizDeadlines::handleDeadlineForSetProperties( $id, $pubId, $targets, $curType, $curState, $curSection, $state, $categoryId, $newDeadline );
 
 		//self::saveMetaDataExtended( $id, $newRow, ($curState != $state || $curSection != $meta->BasicMetaData->Category->Id ), $issueIdsDL );
 
@@ -1720,92 +1693,6 @@ class BizObject
 		// return info
 		require_once BASEDIR.'/server/interfaces/services/wfl/WflSetObjectPropertiesResponse.class.php';
 		return new WflSetObjectPropertiesResponse( $modifiedobj->MetaData, $modifiedobj->Targets );
-	}
-
-	/**
-	 * Handles the deadline of an object.
-	 *
-	 * Function either takes the deadline entered by the user or
-	 * recalculate the deadline (relative deadline) when user changes the category or status.
-	 *
-	 * When user changes the category / status, and at the same time also entered a deadline in the dialog,
-	 * the function will recalculate the deadline (relative deadline) and ignores the deadline entered by the
-	 * user.
-	 *
-	 * When user only entered the deadline, function checks if the deadline entered is later than the one set
-	 * at the Issue level, function throws error when the the date set is later than the one set in Issue level.
-	 *
-	 * @param int $id Id of the object where the deadline will be calculated and handled.
-	 * @param int $pubId Publication id.
-	 * @param array $targets The targets of the object of which the issue will be retrieved to get its deadline setting.
-	 * @param string $objectType Object's type.
-	 * @param string $oriState Original object's status.  This is to check if the user has changed the status.
-	 * @param string $oriSection Original category. This is to check if the user has changed the category.
-	 * @param string $state The current status of the object.
-	 * @param int $categoryId The current category of the object.
-	 * @param null|string $newDeadline User typed deadline taken from workflow dialog. Null when deadline not shown at dialog.
-	 */
-	public static function handleDeadline( $id, $pubId, $targets, $objectType, $oriState, $oriSection, $state, $categoryId, $newDeadline )
-	{
-		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizDeadlines.class.php';
-		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-		require_once BASEDIR.'/server/dbclasses/DBObject.class.php';
-
-		// First look for object-target issues
-		$issueIdsDL = BizTarget::getIssueIds( $targets ); // Object-target issues
-		// Image/Article without object-target issue can inherit issues from relational-targets. BZ#21218
-		if (!$issueIdsDL && ( $objectType == 'Article' || $objectType == 'Image' || $objectType == 'Spreadsheet' )) {
-			$issueIdsDL = BizTarget::getRelationalTargetIssuesForChildObject( $id );
-		}
-
-		// If state or category are changed the deadline is recalculated.
-		$reCalcDeadline = ( $oriState != $state || $oriSection != $categoryId );
-		$deadlineHard = '';
-
-		// A deadline for an object that is not assigned to any issue has no meaning, so we ignore.
-		// If deadline is set and object has issues, check if the set deadline is not beyond earliest possible deadline.
-		if( !$reCalcDeadline && $issueIdsDL && $newDeadline ) {
-			$deadlineHard = $newDeadline;
-			BizDeadlines::checkDeadline( $issueIdsDL, $categoryId, $newDeadline );
-		}
-
-		// In case state/category are changed a deadline set by hand is ignored
-		// (always recalculate).
-		// This behavior is different from the saveObject() where a deadline set
-		// by hand always has primacy on status/category changes.
-		if ( $reCalcDeadline || empty( $deadlineHard ) ) {
-			// Determine if it is normal brand or overruleIssue.
-			$overruleIssueId = 0;
-			if( count( $issueIdsDL ) == 1 ) { // When there are more than 1 issue targeted to an Object, it's definitely not an overruleIssue, so don't need to check.
-				require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-				$overruleIssueId = DBIssue::isOverruleIssue( $issueIdsDL[0] ) ? $issueIdsDL[0] : 0;
-			}
-
-			$deadlines = null;
-			if( BizPublication::isCalculateDeadlinesEnabled( $pubId, $overruleIssueId ) ) {
-				$deadlines = DBObject::objectSetDeadline( $id, $issueIdsDL, $categoryId, $state );
-				if ( BizDeadlines::canPassDeadlineToChild( $objectType ) ) {
-					// Recalculate the deadlines of children without own object-target issue.
-					// This recalculation is limited to an issue change of the parent.
-					// New issue of the parent results in new relational-target issue and so
-					// a new deadline. If the category of the parent changes this has no effect
-					// as the children do not inherit this change.
-					BizDeadlines::recalcDeadlinesIssuelessChilds($id);
-				}
-			}
-		} else {
-			$deadlines = DBObject::setObjectDeadline( $id, $deadlineHard );
-			if ( BizDeadlines::canPassDeadlineToChild( $objectType ) ) {
-				// Set the deadlines of children without own object-target issue.
-				BizDeadlines::setDeadlinesIssuelessChilds( $id, $deadlineHard );
-			}
-		}
-
-		if( $deadlines ) {
-			require_once BASEDIR.'/server/smartevent.php';
-			new smartevent_deadlinechanged( null, $id, $deadlines['Deadline'], $deadlines['DeadlineSoft'] );
-		}
 	}
 
 	/**
@@ -2265,6 +2152,7 @@ class BizObject
 				DBlog::logMultiService( $user, 'MultiSetObjectProperties', $objectIds, $objectType, $publicationId, $sections, $states, $versions, $routeTos );
 
 				require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
+				require_once BASEDIR.'/server/bizclasses/BizDeadlines.class.php';
 				foreach ( $objectIds as $id ) {
 					$originalStateId = $invokedObjects[$id]->WorkflowMetaData->State->Id;
 					$originalCategoryId = $invokedObjects[$id]->BasicMetaData->Category->Id;
@@ -2274,8 +2162,8 @@ class BizObject
 					$latestStateIdForDeadline = $newStateId ? $newStateId : $originalStateId;
 					$latestCatIdForDeadline = $newCategoryId ? $newCategoryId : $originalCategoryId;
 					$deadline = ( isset( $objectProperties['standard']['Deadline'] ) ) ?
-						$objectProperties['standard']['Deadline'] : null;
-					self::handleDeadline( $id, $publicationId, $targets[$id], $objectType, $originalStateId,
+					$objectProperties['standard']['Deadline'] : null;
+					BizDeadlines::handleDeadlineForSetProperties( $id, $publicationId, $targets[ $id ], $objectType, $originalStateId,
 						$originalCategoryId, $latestStateIdForDeadline, $latestCatIdForDeadline, $deadline );
 
 					// Copy task objects to dossier ( For more info, refer to BZ#10308 ).
@@ -3186,14 +3074,18 @@ class BizObject
 
 		// Copy the InDesign Articles (and their placements) set for layout objects.
 		require_once BASEDIR.'/server/dbclasses/DBInDesignArticle.class.php';
-		$idArticles = DBInDesignArticle::getInDesignArticles( $srcid );
+		$idArticles = DBInDesignArticle::getInDesignArticles( $srcid, true );
 		if( $idArticles ) {
 			DBInDesignArticle::createInDesignArticles( $id, $idArticles );
 		}
 		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 		$placements = DBPlacements::getPlacements( $srcid, 0, 'Placed' );
-		foreach( $placements as $placement ) {
-			DBPlacements::insertPlacement( $id, 0, 'Placed', $placement );
+		if( $placements ) {
+			DBPlacements::insertInDesignArticlePlacementsFromScratch( $id, $placements );
+		}
+		if( $idArticles ) {
+			require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
+			DBInDesignArticlePlacement::saveSortingForInDesignArticlePlacements( $id, $idArticles );
 		}
 
 		// Delete the Object Operations set for layout objects.
@@ -3996,9 +3888,14 @@ class BizObject
 
 		// Save the Indesign Article Placements for the layout object (v9.7).
 		if( !is_null($object->Placements) ) {
-			foreach( $object->Placements as $placement ) {
-				DBPlacements::insertPlacement( $id, 0, 'Placed', $placement );
-			}
+			require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
+			DBPlacements::insertInDesignArticlePlacementsFromScratch( $id, $object->Placements );
+		}
+
+		// Sort the placements per InDesign Article as shown in the Articles palette for the layout (v10.2).
+		if( !is_null($object->InDesignArticles) ) {
+			require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
+			DBInDesignArticlePlacement::saveSortingForInDesignArticlePlacements( $id, $object->InDesignArticles );
 		}
 
 		// Save the Object Operations for the layout object (9.7).
@@ -4740,7 +4637,7 @@ class BizObject
 	 * @param Object $object
 	 * @return array with the unique issues of the object to calculate the deadline.
 	 */
-	static private function getTargetIssuesForDeadline(/** @noinspection PhpLanguageLevelInspection */
+	static public function getTargetIssuesForDeadline(/** @noinspection PhpLanguageLevelInspection */
 		Object $object )
 	{
 		require_once BASEDIR.'/server/bizclasses/BizTarget.class.php';
@@ -6249,66 +6146,47 @@ class BizObject
 		return $proposedName;
 	}
 
+
 	/**
-	 * Calculates the deadline and if needed  also updates deadlines of child objects.
+	 * Updates the object in the database and next the files in the Filestore.
 	 *
-	 * @param Object $object Object as retrieved from the save request.
-	 * @param array $newRow The database record to store the properties of the updated object.
-	 * @return mixed
+	 * The update of the object in the database and the update of the files in the Filestore is seen as one action.
+	 * The version information must in line for both the object as the files. If there is a difference (version in the
+	 * database doesn't match the version of the files) the object cannot be opened anymore without content loss.
+	 *
+	 * $object->Files in the to-be-returned Object will be reset ( setting it to an empty array() ) by this function. This is
+	 * to indicate that the files have been handled and moved to the Filestore and so no further action is needed.
+	 *
+	 * @param Object $object
+	 * @param string $user
+	 * @param array $newFlattenedMetadata
+	 * @param string $now
+	 * @param array $currentFlattenedMetaData
+	 * @return Object
+	 * @throws BizException
 	 */
-	private static function handleDeadlinesOfSavedObject( Object $object, $newRow )
+	private static function updateDatabaseAndFilestore( $object, $user, $newFlattenedMetadata, $now, $currentFlattenedMetaData )
 	{
-		$id = $object->MetaData->BasicMetaData->ID;
-		// Collect object-/relational-target issues from object
-		$issueIdsDL = self::getTargetIssuesForDeadline( $object );
-		// If deadline is set and object has issues check if the set deadline is not beyond earliest possible deadline
-		if( $issueIdsDL && isset( $newRow['deadline'] ) && $newRow['deadline'] ) {
-			BizDeadlines::checkDeadline( $issueIdsDL, $newRow['section'], $newRow['deadline'] );
-		}
-		// If no deadline set, calculate deadline, else just store the deadline
-		$deadlinehard = '';
-		$oldDeadline = DBObject::getObjectDeadline( $id );
-		if( isset( $newRow['deadline'] ) && $newRow['deadline'] ) {
-			$deadlinehard = $newRow['deadline'];
-			if( $oldDeadline !== $deadlinehard ) {
-				DBObject::setObjectDeadline( $id, $deadlinehard );
-				if( BizDeadlines::canPassDeadlineToChild( $newRow['type'] ) ) {
-					// Set the deadlines of children without own object-target issue.
-					BizDeadlines::setDeadlinesIssuelessChilds( $id, $deadlinehard );
-				}
-			}
-		} else { // No deadline set, calculate (when "Activate Relative Deadlines" is enabled in brand admin page.).
-			// Determine if it is normal brand or overruleIssue.
-			$overruleIssueId = 0;
-			if( count( $issueIdsDL ) == 1 ) { // When there are more than 1 issue targeted to an Object, it's definitely not an overruleIssue, so don't need to check.
-				require_once BASEDIR.'/server/dbclasses/DBIssue.class.php';
-				$overruleIssueId = DBIssue::isOverruleIssue( $issueIdsDL[0] ) ? $issueIdsDL[0] : 0;
-			}
+		/* $sth  = */ DBObject::updateObject( $object->MetaData->BasicMetaData->ID, $user, $newFlattenedMetadata, $now );
 
-			require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
-			if( BizPublication::isCalculateDeadlinesEnabled( $newRow['publication'], $overruleIssueId ) ) {
-				$deadlines = DBObject::objectSetDeadline( $id, $issueIdsDL, $newRow['section'], $newRow['state'] );
-				$deadlinehard = $deadlines['Deadline'];
-				if( $oldDeadline !== $deadlinehard ) {
-					if( BizDeadlines::canPassDeadlineToChild( $newRow['type'] ) ) {
-						// Recalculate the deadlines of children without own object-target issue.
-						// This recalculation is limited to an issue change of the parent.
-						// New issue of the parent results in new relational-target issue and so
-						// a new deadline. If the category of the parent changes this has no effect
-						// as the children do not inherit this change.
-						BizDeadlines::recalcDeadlinesIssuelessChilds( $id );
-					}
-				}
-			}
+		// For shadow objects we now pass control to Content Source which may influence what to do with file storing
+		// as it can modify $object
+		if( trim( $currentFlattenedMetaData['contentsource'] ) ) {
+			require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
+			BizContentSource::saveShadowObject(
+				trim( $currentFlattenedMetaData['contentsource'] ),
+				trim( $currentFlattenedMetaData['documentid'] ),
+				$object );
 		}
 
-		// Broadcast (soft) deadline (Broadcast only when deadlinehard is given by user or re-calculated.
-		if( $oldDeadline !== $deadlinehard ) {
-			require_once BASEDIR.'/server/utils/DateTimeFunctions.class.php';
-			$deadlinesoft = DateTimeFunctions::calcTime( $deadlinehard, -DEADLINE_WARNTIME );
-			require_once BASEDIR.'/server/smartevent.php';
-			new smartevent_deadlinechanged( null, $id, $deadlinehard, $deadlinesoft );
-		}
-		return $newRow;
+		self::saveFiles(
+			$currentFlattenedMetaData['storename'],
+			$object->MetaData->BasicMetaData->ID,
+			$object->Files,
+			$object->MetaData->WorkflowMetaData->Version );
+
+		$object->Files = array(); // The files are moved to the Filestore so they aren't needed anymore.
+
+		return $object;
 	}
 }

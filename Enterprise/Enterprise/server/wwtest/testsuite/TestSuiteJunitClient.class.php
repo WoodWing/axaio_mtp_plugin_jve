@@ -184,7 +184,8 @@ class WW_TestSuite_JunitClient
 			require_once BASEDIR.'/server/wwtest/testsuite/TestSuiteFactory.class.php';
 			$contents = TestSuiteFactory::runTest( $this->sessionId, $test->ClassPath, $this->testSuite );
 		} else {
-			$client = new Zend\Http\Client( $this->testUri.'?command=PollTest&classPath='.$test->ClassPath.'&sessionId='.$test->SessionId, $options );
+			$client = new Zend\Http\Client( $this->testUri.'?command=PollTest&testSuite='.$this->testSuite.
+				'&classPath='.$test->ClassPath.'&sessionId='.$test->SessionId, $options );
 			$response = $client->send();
 			$contents = $response->getBody();
 		}

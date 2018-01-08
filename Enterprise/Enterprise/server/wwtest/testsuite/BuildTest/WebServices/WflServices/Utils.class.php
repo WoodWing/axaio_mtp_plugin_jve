@@ -336,11 +336,28 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 	}
 
 	/**
-	 * Gets a list of group id for user $userId.
+	 * Gets a list of group id(s) for which user $userId belongs to.
 	 *
+	 * @since 10.1.5 Function name has been adjusted from getUserGroups to getUserGroupsIds.
 	 * @param string $stepInfo Extra logging info.
 	 * @param int $userId User id where the user's group to be retrieved.
 	 * @return array List of group ids where the $userId belongs to, when success expected. Null when error is expected.
+	 * @throws BizException on unexpected system response
+	 */
+	public function getUserGroupsIds( $stepInfo, $userId )
+	{
+		$userGrps = $this->getUserGroups( $stepInfo, $userId );
+		$groupIds = array_map( function( $userGrp ) { return $userGrp->Id; }, $userGrps );
+		return $groupIds;
+	}
+
+	/**
+	 * Gets a list of Group(s) for which user $userId belongs to.
+	 *
+	 * @since 10.1.5 getUserGroups returns list of AdmUserGroup object instead of list of group ids.
+	 * @param string $stepInfo Extra logging info.
+	 * @param int $userId User id where the user's group to be retrieved.
+	 * @return AdmUserGroup[]|null Null is returned when user belongs to no group.
 	 * @throws BizException on unexpected system response
 	 */
 	public function getUserGroups( $stepInfo, $userId )
@@ -356,14 +373,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_Utils
 
 		$groupIds = null;
 		if( !$expectedError ) {
-			$groupIds = array();
 			$this->testCase->assertAttributeInternalType( 'array', 'UserGroups', $response );
-			$userGrps = $response->UserGroups;
-			foreach( $userGrps as $userGrp ) {
-				$groupIds[] = $userGrp->Id;
-			}
 		}
-		return $groupIds;
+		return $response->UserGroups;
 	}
 
 	/**

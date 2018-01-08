@@ -78,8 +78,8 @@ class ContentStationOverruleCompatibility_WflLogOn extends WflLogOn_EnterpriseCo
 		
 		// Create new dummy publication to replace overrule issue
 		$newPub = clone $resp->Publications[$p];
-		$newPub->Id 			= OverruleCompatibility::createPubId($newPub->Id, $overruleIssue->Id);
-		$newPub->Name 			= OverruleCompatibility::createPubName( $newPub->Name, $overruleIssue->Name);		
+		$newPub->Id 			= OverruleCompatibility::composePubId($newPub->Id, $overruleIssue->Id);
+		$newPub->Name 			= OverruleCompatibility::composePubName( $newPub->Name, $overruleIssue->Name);
 		$newPub->Sections 		= $overruleIssue->Sections;
 		$newPub->States 		= $overruleIssue->States;
 		

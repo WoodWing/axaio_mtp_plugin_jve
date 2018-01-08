@@ -1450,6 +1450,7 @@
   <Term key="MNU_REPORTING">Отчет</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Конфигурации работы</Term>
   <Term key="MNU_SERVER_JOBS">Очередь работы</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Загрузить</Term>
   <Term key="MNU_USER">Пользователи</Term>
   <Term key="MNU_USER_QUERY">Запросы Пользователя</Term>

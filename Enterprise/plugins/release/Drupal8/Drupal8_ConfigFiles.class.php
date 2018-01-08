@@ -27,7 +27,7 @@ class Drupal8_ConfigFiles extends ConfigFiles_EnterpriseConnector
 	public function displayOptionValue( $configFile, $optionName, $value )
 	{
 		if( $optionName == 'DRUPAL8_SITES' ) {
-			$value = preg_replace( '/\[password\] => ([^)|^\ ]*)/', '[password] => ***', $value );
+			$value = preg_replace( '/\[password\] => [^\n]*/', '[password] => ***', $value );
 		}
 		return $value;
 	}

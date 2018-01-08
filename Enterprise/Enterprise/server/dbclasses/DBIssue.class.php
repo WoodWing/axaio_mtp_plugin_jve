@@ -503,22 +503,29 @@ class DBIssue extends DBBase
 	}
 	
 	/**
-	 *  Lists ALL issues that overrule their publication in a array
-	 *  @return array (key-value), key being the issueId and value the publication id of that overrule issue
+	 * Lists ALL issues that overrule their publication in a array
+	 *
+	 * @param bool $onlyActive Return only active overrule brand issues. Default is false.
+	 * @return array (key-value), key being the issueId and value the publication id of that overrule issue
 	 */
-	static public function listAllOverruleIssuesWithPub()
+	static public function listAllOverruleIssuesWithPub( $onlyActive = false )
 	{
 		//BZ#7258
 		$dbDriver = DBDriverFactory::gen();
 		$issuesTable = $dbDriver->tablename( self::TABLENAME );
 		$channelsTable = $dbDriver->tablename( 'channels' );
+		$params = array();
 
 		$sql = "SELECT issues.`id`, channels.`publicationid` ".
 				"FROM {$issuesTable} issues ".
 				"INNER JOIN {$channelsTable} channels ON (channels.`id` = issues.`channelid`) ".
-				"WHERE issues.`overrulepub` = ? AND issues.`active` = ? ".
-				"ORDER BY issues.`id` ASC ";
-		$params = array( 'on', 'on' );
+				"WHERE issues.`overrulepub` = ? ";
+				$params[] = 'on';
+				if( $onlyActive ) {
+					$sql .= "AND issues.`active` = ? ";
+					$params[] = 'on';
+				}
+		$sql .= "ORDER BY issues.`id` ASC ";
 		$sth = $dbDriver->query( $sql, $params );
 
 		$result = array();
@@ -672,5 +679,44 @@ class DBIssue extends DBBase
 		$params = array( intval( $issuedId ), 'on' );
 		$result = self::getRow( 'issues', $where, array( 'id' ), $params );
 		return $result ? true : false;
+	}
+
+	/**
+	 * Get overrule publication info fields by their object ids.
+	 *
+	 * This function returns an array in the following format:
+	 * $row[objectId][pubid]
+	 *               [pubname]
+	 *               [issueid]
+	 *               [issuename]
+	 *
+	 * @since 10.2.0
+	 * @param array $objectIds
+	 * @return array
+	 */
+	public static function getOverrulePublicationsByObjectIds( array $objectIds )
+	{
+		$result = array();
+		$dbDriver = DBDriverFactory::gen();
+		$objects = $dbDriver->tablename( 'objects' );
+		$targets = $dbDriver->tablename( 'targets' );
+		$issues = $dbDriver->tablename( 'issues' );
+
+		$params = array( 'on' );
+		$sql = 'SELECT o.`id`, o.`publication` AS pubid, p.`publication` AS pubname, t.`issueid` AS issueid, i.`name` AS issuename '.
+			'FROM `smart_objects` o '.
+			'LEFT JOIN `smart_targets` t ON o.`id` = t.`objectid` '.
+			'LEFT JOIN `smart_issues` i ON t.`issueid` = i.`id` '.
+			'LEFT JOIN `smart_publications` p ON p.`id` = o.`publication` '.
+			'WHERE i.`overrulepub` = ? '.
+			'AND ' . self::addIntArrayToWhereClause( 'o.id', $objectIds );
+
+		$sth = $dbDriver->query( $sql, $params );
+		if( $sth ) {
+			while( $row = $dbDriver->fetch( $sth ) ) {
+				$result[$row['id']] = $row;
+			}
+		}
+		return $result;
 	}
 }

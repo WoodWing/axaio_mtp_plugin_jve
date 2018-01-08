@@ -6,18 +6,18 @@ class WW_TestSuite_BuildTest_Search_UpdateObject_TestCase extends WW_TestSuite_B
 {
 	public function getDisplayName()
 	{
-		return 'Update Object Solr';
+		return 'Update Object for Solr Search.';
 	}
 
 	public function getTestGoals()
 	{
-		return 'Update Object properties and verify the updated values are searchable in Solr. ';
+		return 'Update Object properties and verify the updated values are searchable by Solr Search. ';
 	}
 
 	public function getTestMethods()
 	{
 		return 'Updates the properties of the object using SetObjectProperties and searches on the updated values ' .
-			   'using QueryObjects. Name and content properties are changed and being searched on.';
+			   'using QueryObjects. "Name" and "Content" properties are changed and being searched on.';
 	}
 
 	public function getPrio()

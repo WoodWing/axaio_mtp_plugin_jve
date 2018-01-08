@@ -63,7 +63,7 @@ class ReadWriteFieldHandler
 	public function read( $entMetadata, $elvisMetadata )
 	{
 		$propertyName = $this->property->Name;
-		$enterpriseValue = $this->getEnterpriseValue( $propertyName, $elvisMetadata );
+		$enterpriseValue = $this->getEnterpriseValue( $elvisMetadata );
 		if( $this->customProperty ) {
 			// Jay, we've got a custom property, let's do some complex stuff
 			if( is_null( $enterpriseValue ) ) {
@@ -165,11 +165,12 @@ class ReadWriteFieldHandler
 	}
 
 	/**
-	 * @param string $enterpriseFieldName
-	 * @param mixed[] $elvisMetadata
+	 * Retrieve the desired value from Elvis to be populated at Enterprise side.
+	 *
+	 * @param array $elvisMetadata MetaData value retrieved from Elvis.
 	 * @return mixed
 	 */
-	protected function getEnterpriseValue( $enterpriseFieldName, $elvisMetadata )
+	protected function getEnterpriseValue( $elvisMetadata )
 	{
 		if( is_null( $this->lvsFieldName ) || !isset( $elvisMetadata[ $this->lvsFieldName ] ) ) {
 			$elvisValue = null;
@@ -200,7 +201,12 @@ class ReadWriteFieldHandler
 	}
 
 	/**
-	 * Converts the Elvis value to Enterprise value
+	 * Converts the Elvis value to Enterprise value.
+	 *
+	 * In case when the Enterprise property is of type
+	 * 'list', 'multilist', 'multistring', 'multiline' or 'string',
+	 * extra checks are done on the value and illegals characters ( if found ) will be removed.
+	 * See UtfString::removeIllegalUnicodeCharacters().
 	 *
 	 * @param mixed $elvisValue
 	 * @return mixed Datatype requested by Enterprise
@@ -225,7 +231,8 @@ class ReadWriteFieldHandler
 			case 'multistring':
 			case 'multiline':
 			case 'string':
-				return (string)$elvisValue;
+				require_once BASEDIR.'/server/utils/UtfString.class.php';
+				return UtfString::removeIllegalUnicodeCharacters( strval( $elvisValue ) );
 			case 'bool':
 			case 'boolean':
 				return $this->toBoolean( $elvisValue );

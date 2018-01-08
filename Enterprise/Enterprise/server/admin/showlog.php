@@ -10,6 +10,11 @@ require_once BASEDIR.'/server/secure.php';
 // In the exceptional case that the logon itself maybe erratic, the logging could be manually taken from disk.
 checkSecure('admin');
 
+// The default action is 'rootfolderindex'.
+if( !isset($_REQUEST['act']) || empty($_REQUEST['act']) ) {
+	$_REQUEST['act'] = 'rootfolderindex';
+}
+
 switch( $_REQUEST['act'] ) {
 
 	case 'errorsonly': // show special debug log file with errors only
@@ -144,7 +149,16 @@ class WW_Admin_ShowLog
 	{
 		require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
 		$page = '<h2>Server Logging</h2>';
-		$page .= self::composeBreadcrumb().'<h3>Daily log folders</h3>';
+		$page .= self::composeBreadcrumb();
+		if( LogHandler::getPhpLogFile() ) {
+			$page .= '<h3>PHP Log</h3>';
+			$page .= '<table><tbody>';
+			$indexUrl = 'showlog.php?act=phplog';
+			$page .= '<tr><td><a href="'.$indexUrl.'">php.log</a></td></tr>';
+			$page .= '</tbody></table>';
+		}
+
+		$page .= '<h3>Daily log folders</h3>';
 		$page .= '<table><tbody>';
 		$dailyFolders = LogHandler::listDailySubFolders();
 		if( $dailyFolders ) foreach( $dailyFolders as $dailyFolder ) {

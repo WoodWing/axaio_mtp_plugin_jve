@@ -1450,6 +1450,7 @@ Po zmianie ustawień należy pamiętać o ponownym uruchomieniu usługi WWW i/lu
   <Term key="MNU_REPORTING">Raport</Term>
   <Term key="MNU_SERVERJOB_CONFIGS">Konfiguracja prac</Term>
   <Term key="MNU_SERVER_JOBS">Kolejka prac</Term>
+  <Term key="MNU_SERVER_LOGS">Server Logs</Term>
   <Term key="MNU_UPLOAD">Wyślij</Term>
   <Term key="MNU_USER">Użytkownik</Term>
   <Term key="MNU_USER_QUERY">Kwerendy użytkownika</Term>

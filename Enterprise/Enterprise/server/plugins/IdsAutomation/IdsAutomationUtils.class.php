@@ -205,10 +205,10 @@ class IdsAutomationUtils
 	 * - the given object is a Layout or Layout Module
 	 * - the $newStatusId is not the Personal status
  	 * - the $newStatusId has phase Production
- 	 * - Ouput renditions should be generated, so ONE of the following criterea are met:
+ 	 * - Output renditions should be generated, so the following criteria are met:
   	 *    - the $newStatusId refers to Output status and CLIENTFEATURES for IDS_AUTOMATION has the CreatePagePDFOnProduce
 	 *    or CreatePageEPSOnProduce option
-	 *    - CLIENTFEATURES for IDS_AUTOMATION has the CreatePagePDF or CreatePageEPS option
+	 *    - provided the $newStatusId is not the same as the $prevStatusId: EN-89302.
 	 * If the above criteria are not met it is checked if a job is needed to create a folio for Adobe Dps.
 	 *
 	 * @param integer $objId The id of object to be checked.
@@ -241,27 +241,38 @@ class IdsAutomationUtils
 				LogHandler::Log( 'IdsAutomation', 'INFO', "The new status has the skip InDesign Server Automation property set. No action needed." );
 				break;
 			}
-			
+
 			require_once BASEDIR.'/server/bizclasses/BizPage.class.php';
 			if( $newStatus->Produce ) { // Produce/Output status
+				// **The-Check-Order-Note.
+				// Whether to trigger IDS job should be determined by if the status has been changed or not.
+				// However, in the case if the status has not been changed, the status is in the Produce/Output status and
+				// for some reason, there's no output ( should not happen ), let's trigger the IDS job to create the output.
+				$isStatusChanged = $prevStatusId != $newStatusId;
 				if( self::isIdsClientFeatureValue( 'CreatePagePDFOnProduce' ) &&
-					!BizPage::hasOutputRenditionPDF( $objId ) ) {
-					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePagePDFOnProduce is configured for IDS, '.
-										'but layout has no PDFs. Action needed.' );
+					( $isStatusChanged || // EN-89302 // NOTE!! Make sure if status-has-changed is checked first
+						!BizPage::hasOutputRenditionPDF( $objId ))) // only followed by if there's any PDF. See **The-Check-Order-Note.
+				{
+					LogHandler::Log( 'IdsAutomation', 'INFO', 'Status has changed or layout has no PDFs and ' .
+										'CreatePagePDFOnProduce is configured for IDS. Action needed.' );
 					$isTrigger = true;
 				} elseif( self::isIdsClientFeatureValue( 'CreatePageEPSOnProduce' ) &&
-					!BizPage::hasOutputRenditionEPS( $objId ) ) {
-					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePageEPSOnProduce is configured for IDS, '.
-										'but layout has no EPSs. Action needed.' );
+					( $isStatusChanged ||  // EN-89302 // NOTE!! Make sure if status-has-changed is checked first
+						!BizPage::hasOutputRenditionEPS( $objId ))) // only followed by if there's any EPS. See **The-Check-Order-Note.
+				{
+					LogHandler::Log( 'IdsAutomation', 'INFO', 'Status has changed or layout has no EPSs and '.
+										'CreatePageEPSOnProduce is configured for IDS. Action needed.' );
 					$isTrigger = true;
 				} elseif( self::isIdsClientFeatureValue( 'CreatePagePreviewOnProduce' ) &&
-					!BizPage::hasPreviewRendition( $objId ) ) {
-					LogHandler::Log( 'IdsAutomation', 'INFO', 'CreatePagePreviewOnProduce is configured for IDS, '.
-										'but layout has no previews. Action needed.' );
+					( $isStatusChanged || // EN-89302 // NOTE!! Make sure if status-has-changed is checked first
+						!BizPage::hasPreviewRendition( $objId ))) // only followed by if there's any Preview. See **The-Check-Order-Note.
+				{
+					LogHandler::Log( 'IdsAutomation', 'INFO', 'Status has changed or layout has no previews and '.
+										'CreatePagePreviewOnProduce is configured for IDS. Action needed.' );
 					$isTrigger = true;
 				} else {
 					LogHandler::Log( 'IdsAutomation', 'INFO', 'Moving layout into a Produce status, '.
-						'but no action for IDS configured or layout has Output renditions already. No action needed.' );
+						'but no action for IDS configured or Status remains the same. No action needed.' );
 				}
 			} else {
 				LogHandler::Log( 'IdsAutomation', 'INFO', 'Not moving layout into a Produce status. No action needed.' );

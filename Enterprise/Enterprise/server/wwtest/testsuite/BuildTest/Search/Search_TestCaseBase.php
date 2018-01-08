@@ -26,6 +26,7 @@ abstract class WW_TestSuite_BuildTest_Search_Base extends TestCase
 		// Make sure the save operations are directly reflected at Solr indexes,
 		// or else we risk race-conditions, whereby saved data is not queryable the next
 		// split second, and so tests would fail randomly.
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		BizSession::setDirectCommit( true );
 
 		return;
@@ -42,8 +43,8 @@ abstract class WW_TestSuite_BuildTest_Search_Base extends TestCase
 	 * @param string $query Query term on which is being searched
 	 * @param string $stepInfo Info added to any error
 	 * @param bool $expected Whether or not it is expected to find the tested Object
-	 * @param QueryParam[] $queryParams
-	 * @param array $areas
+	 * @param QueryParam[] Extra query parameters to filter.
+	 * @param string[] $areas Either Workflow or Trash
 	 * @return bool True on success.
 	 */
 	public function testSearch( $objectID, $query, $stepInfo, $expected = true, $queryParams = null, $areas = array("Workflow") )

@@ -29,7 +29,7 @@ class WW_TestSuite_HealthCheck2_ContentStationOverruleCompatibility_TestCase ext
 
 		// Check if there are overrule issues.
 		require_once BASEDIR . '/server/dbclasses/DBIssue.class.php';
-		$overruleIssues = DBIssue::listAllOverruleIssuesWithPub();
+		$overruleIssues = DBIssue::listAllOverruleIssuesWithPub( true );
 		
 		// Validate both findings against each other.
 		$plugin = '"Content Station Overrule Compatibility"';

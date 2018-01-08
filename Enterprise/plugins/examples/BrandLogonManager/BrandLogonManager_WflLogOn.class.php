@@ -31,8 +31,7 @@ class BrandLogonManager_WflLogOn extends WflLogOn_EnterpriseConnector
 		// Get Organization of the user:
 		require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 		$dbdriver = DBDriverFactory::gen();
-		$user = $dbdriver->toDBString($req->User);  // secure against SQL injection
-		$userRow = DBUser::findUser( null, $user, $user );
+		$userRow = DBUser::findUser( null, $req->User, $req->User );
 		if( empty($userRow) ) return; // Invalid user, let's normal logon handle this case.
 
 		$userOrg = trim($userRow['organization']);
