@@ -65,6 +65,18 @@ class DBServerConnector extends DBBase
 	  */
 	static public function getConnectors( $interface, $type, $activeOnly = true, $installedOnly = true )
 	{
+		if( $activeOnly && $installedOnly ) { // EN-89026: Performance optimization
+			$allInstalledAndActiveConnectors = self::getAllInstalledAndActiveConnectors();
+			$objs = array();
+			if( $allInstalledAndActiveConnectors ) foreach ( $allInstalledAndActiveConnectors as $connector ) {
+				if ( ( is_null ( $interface ) || $interface == $connector['interface'] ) &&
+					( is_null ( $type ) || $type == $connector['type'] ) ) {
+					$objs[$connector['classname']] = self::rowToObj( $connector );
+				}
+			}
+			return $objs;
+		}
+
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
 		$conTable = $dbDriver->tablename( self::TABLENAME );
@@ -107,6 +119,38 @@ class DBServerConnector extends DBBase
 			$objs[$row['classname']] = self::rowToObj( $row );
 		}
 		return $objs;
+	}
+
+	/**
+	 * Returns all the active and installed connectors.
+	 *
+	 * @since 10.2.1
+	 * @return array|null List of active and installed connectors.
+	 */
+	private static function getAllInstalledAndActiveConnectors()
+	{
+		static $allInstalledAndActiveConnectors = array();
+		if( $allInstalledAndActiveConnectors ) {
+			return $allInstalledAndActiveConnectors;
+		}
+
+		self::clearError();
+		$dbDriver = DBDriverFactory::gen();
+		$conTable = $dbDriver->tablename( self::TABLENAME );
+		$plnTable = $dbDriver->tablename( 'serverplugins' );
+		$sql = "SELECT c.* FROM $conTable c LEFT JOIN $plnTable p ON (p.`id` = c.`pluginid`) ";
+		$sql .= "WHERE p.`active` = ? AND p.`installed` = ? ";
+		$params = array( 'on', 'on' );
+		$sth = $dbDriver->query( $sql, $params );
+		if( is_null( $sth ) ) {
+			$err = trim($dbDriver->error());
+			self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
+			$allInstalledAndActiveConnectors = null;
+		} else {
+			$allInstalledAndActiveConnectors = self::fetchResults( $sth, 'id' );
+		}
+
+		return $allInstalledAndActiveConnectors;
 	}
 
 	/**
