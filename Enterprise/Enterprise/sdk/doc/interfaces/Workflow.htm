@@ -428,6 +428,13 @@
 <tr><td class="bpc">WordsToCheck</td><td class="btc">array of string</td><td class="bcc"></td></tr>
 </table></div><div class="section"><h3>GetSuggestionsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Suggestions</td><td class="btc">array of <a href="#Suggestion">Suggestion</a></td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>GetUserSettings</h3><p>
+				v10.3: Retrieve the cached user settings stored in DB for the current client appplication.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+</table></div><div class="section"><h3>GetUserSettingsResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Settings</td><td class="btc">array of <a href="#Setting">Setting</a></td><td class="bcc"></td></tr>
 </table></div><div class="section"><h3>GetVersion</h3><p> Retrieves information of a specified version of a object. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
 <tr><td class="bpc">ID</td><td class="btc">string</td><td class="bcc"></td></tr>
@@ -679,6 +686,11 @@
 <tr><td class="bpc">Objects</td><td class="btc">array of <a href="#Object">Object</a></td><td class="bcc"></td></tr>
 <tr><td class="bpc">Reports</td><td class="btc">array of <a href="#ErrorReport">ErrorReport</a>*</td><td class="bcc"> v8.0: Errors and warnings of saving the Messages. </td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
+</table></div><div class="section"><h3>SaveUserSettings</h3><p>
+				v10.3: Store user settings in DB for the current client appplication.
+			</p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
+<tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
+<tr><td class="bpc">Settings</td><td class="btc">array of <a href="#Setting">Setting</a></td><td class="bcc"></td></tr>
 </table></div><div class="section"><h3>SendMessages</h3><p> Sends messages to objects or users. </p><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
 <tr><td class="bpc">Ticket</td><td class="btc">string</td><td class="bcc"></td></tr>
 <tr><td class="bpc">Messages</td><td class="btc">array of <a href="#Message">Message</a>*</td><td class="bcc"> DEPRECATED since v8.0. Use Objects->Object->MessageList->Messages instead. </td></tr>
@@ -1608,6 +1620,6 @@
 <tr><td class="btc">"native"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"output"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"trailer"</td><td class="bcc"></td></tr>
-</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SCEnterprise.wsdl" file at 8 Nov 2017</p>
-<p style="font-size: 9pt;" align="right">Confidential, (c) 1998-2017 WoodWing Software bv. All rights reserved.</p></div>
+</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SCEnterprise.wsdl" file at 8 Jan 2018</p>
+<p style="font-size: 9pt;" align="right">Confidential, (c) 1998-2018 WoodWing Software bv. All rights reserved.</p></div>
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></body></html>

@@ -1909,6 +1909,38 @@
 				</sequence>
 			  </complexType>
 			</element>
+
+			<!--
+				v10.3: Retrieve the cached user settings stored in DB for the current client appplication.
+			-->
+			<element name="GetUserSettings">
+				<complexType>
+					<sequence>
+						<element name="Ticket" 			type="xsd:string"/>
+					</sequence>
+				</complexType>
+			</element>
+			<element name="GetUserSettingsResponse">
+				<complexType>
+					<sequence>
+						<element name="Ticket" 			type="xsd:string"/>
+						<element name="Settings"		type="tns:ArrayOfSetting"/>
+					</sequence>
+				</complexType>
+			</element>
+
+			<!--
+				v10.3: Store user settings in DB for the current client appplication.
+			-->
+			<element name="SaveUserSettings">
+				<complexType>
+					<sequence>
+						<element name="Ticket" 			type="xsd:string"/>
+						<element name="Settings"		type="tns:ArrayOfSetting"/>
+					</sequence>
+				</complexType>
+			</element>
+
 			<!--
 				Return the next possible workflow statusses for a given object. On client side, this is 
 				just a list, but at server side it can be given a special meaning. The meaning can even 
@@ -3262,6 +3294,16 @@
 		<part name="parameters" element="tns:LogOff"/>
 	</message>
 	<message name="LogOffResponse"/>
+	<message name="GetUserSettings">
+		<part name="parameters" element="tns:GetUserSettings"/>
+	</message>
+	<message name="GetUserSettingsResponse">
+		<part name="parameters" element="tns:GetUserSettingsResponse"/>
+	</message>
+	<message name="SaveUserSettings">
+		<part name="parameters" element="tns:SaveUserSettings"/>
+	</message>
+	<message name="SaveUserSettingsResponse"/>
 	<message name="ChangePassword">
 		<part name="parameters" element="tns:ChangePassword"/>
 	</message>
@@ -3596,6 +3638,14 @@
 			<input message="tns:LogOff"/>
 			<output message="tns:LogOffResponse"/>
 		</operation>
+		<operation name="GetUserSettings">
+			<input message="tns:GetUserSettings"/>
+			<output message="tns:GetUserSettingsResponse"/>
+		</operation>
+		<operation name="SaveUserSettings">
+			<input message="tns:SaveUserSettings"/>
+			<output message="tns:SaveUserSettingsResponse"/>
+		</operation>
 		<operation name="GetStates">
 			<input message="tns:GetStates"/>
 			<output message="tns:GetStatesResponse"/>
@@ -3824,6 +3874,24 @@
 		</operation>
 		<operation name="LogOff">
 			<soap:operation soapAction="urn:SmartConnection#LogOff"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="GetUserSettings">
+			<soap:operation soapAction="urn:SmartConnection#GetUserSettings"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="SaveUserSettings">
+			<soap:operation soapAction="urn:SmartConnection#SaveUserSettings"/>
 			<input>
 				<soap:body use="literal"/>
 			</input>

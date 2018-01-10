@@ -11,6 +11,8 @@
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflGetServersRequest', 'WflGetServersRequest' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflLogOnRequest', 'WflLogOnRequest' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflLogOffRequest', 'WflLogOffRequest' );
+	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflGetUserSettingsRequest', 'WflGetUserSettingsRequest' );
+	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflSaveUserSettingsRequest', 'WflSaveUserSettingsRequest' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflChangePasswordRequest', 'WflChangePasswordRequest' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflChangeOnlineStatusRequest', 'WflChangeOnlineStatusRequest' );
 	$server->setClassMap( 'com.woodwing.enterprise.interfaces.services.wfl.WflGetStatesRequest', 'WflGetStatesRequest' );
