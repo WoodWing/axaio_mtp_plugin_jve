@@ -8,38 +8,14 @@
 package com.woodwing.enterprise.interfaces.services.wfl;
 
 public class GetUserSettingsResponse  implements java.io.Serializable {
-    private java.lang.String ticket;
-
     private com.woodwing.enterprise.interfaces.services.wfl.Setting[] settings;
 
     public GetUserSettingsResponse() {
     }
 
     public GetUserSettingsResponse(
-           java.lang.String ticket,
            com.woodwing.enterprise.interfaces.services.wfl.Setting[] settings) {
-           this.ticket = ticket;
            this.settings = settings;
-    }
-
-
-    /**
-     * Gets the ticket value for this GetUserSettingsResponse.
-     * 
-     * @return ticket
-     */
-    public java.lang.String getTicket() {
-        return ticket;
-    }
-
-
-    /**
-     * Sets the ticket value for this GetUserSettingsResponse.
-     * 
-     * @param ticket
-     */
-    public void setTicket(java.lang.String ticket) {
-        this.ticket = ticket;
     }
 
 
@@ -74,9 +50,6 @@ public class GetUserSettingsResponse  implements java.io.Serializable {
         __equalsCalc = obj;
         boolean _equals;
         _equals = true && 
-            ((this.ticket==null && other.getTicket()==null) || 
-             (this.ticket!=null &&
-              this.ticket.equals(other.getTicket()))) &&
             ((this.settings==null && other.getSettings()==null) || 
              (this.settings!=null &&
               java.util.Arrays.equals(this.settings, other.getSettings())));
@@ -91,9 +64,6 @@ public class GetUserSettingsResponse  implements java.io.Serializable {
         }
         __hashCodeCalc = true;
         int _hashCode = 1;
-        if (getTicket() != null) {
-            _hashCode += getTicket().hashCode();
-        }
         if (getSettings() != null) {
             for (int i=0;
                  i<java.lang.reflect.Array.getLength(getSettings());
@@ -116,12 +86,6 @@ public class GetUserSettingsResponse  implements java.io.Serializable {
     static {
         typeDesc.setXmlType(new javax.xml.namespace.QName("urn:SmartConnection", ">GetUserSettingsResponse"));
         org.apache.axis.description.ElementDesc elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("ticket");
-        elemField.setXmlName(new javax.xml.namespace.QName("", "Ticket"));
-        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
-        elemField.setNillable(false);
-        typeDesc.addFieldDesc(elemField);
-        elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("settings");
         elemField.setXmlName(new javax.xml.namespace.QName("", "Settings"));
         elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnection", "Setting"));

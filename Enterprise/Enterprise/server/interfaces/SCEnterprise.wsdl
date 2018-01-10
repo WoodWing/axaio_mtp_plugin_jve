@@ -1923,7 +1923,6 @@
 			<element name="GetUserSettingsResponse">
 				<complexType>
 					<sequence>
-						<element name="Ticket" 			type="xsd:string"/>
 						<element name="Settings"		type="tns:ArrayOfSetting"/>
 					</sequence>
 				</complexType>

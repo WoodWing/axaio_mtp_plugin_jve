@@ -10,16 +10,13 @@
 
 class WflGetUserSettingsResponse
 {
-	public $Ticket;
 	public $Settings;
 
 	/**
-	 * @param string               $Ticket                    
 	 * @param Setting[]            $Settings                  
 	 */
-	public function __construct( $Ticket=null, $Settings=null )
+	public function __construct( $Settings=null )
 	{
-		$this->Ticket               = $Ticket;
 		$this->Settings             = $Settings;
 	}
 
@@ -31,14 +28,6 @@ class WflGetUserSettingsResponse
 		$datObj = $this;
 
 		$validator->enterPath( 'GetUserSettingsResponse' );
-		if( $validator->checkExist( $datObj, 'Ticket' ) ) {
-			$validator->enterPath( 'Ticket' );
-			$validator->checkNull( $datObj->Ticket );
-			if( !is_null( $datObj->Ticket ) ) {
-				$validator->checkType( $datObj->Ticket, 'string' );
-			}
-			$validator->leavePath();
-		}
 		if( $validator->checkExist( $datObj, 'Settings' ) ) {
 			$validator->enterPath( 'Settings' );
 			$validator->checkNull( $datObj->Settings );

@@ -12,17 +12,9 @@ package com.woodwing.enterprise.interfaces.services.wfl
 
 	public class WflGetUserSettingsResponse
 	{
-		private var _Ticket:String;
 		private var _Settings:Array;
 
 		public function WflGetUserSettingsResponse() {
-		}
-
-		public function get Ticket():String {
-			return this._Ticket;
-		}
-		public function set Ticket(Ticket:String):void {
-			this._Ticket = Ticket;
 		}
 
 		public function get Settings():Array {
