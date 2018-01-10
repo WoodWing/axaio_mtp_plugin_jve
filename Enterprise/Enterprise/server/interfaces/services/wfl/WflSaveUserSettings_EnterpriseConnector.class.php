@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @package 	Enterprise
- * @subpackage 	ServerPlugins
- * @since 		v10.2
- * @copyright	WoodWing Software bv. All Rights Reserved.
+ * @package    Enterprise
+ * @subpackage ServerPlugins
+ * @since      10.3.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
  
 require_once BASEDIR.'/server/interfaces/plugins/ServiceConnector.class.php';
@@ -34,7 +34,6 @@ abstract class WflSaveUserSettings_EnterpriseConnector extends ServiceConnector
 	 * Or, this function may be called even after the runAfter() action is executed.
 	 * This happens when other service connectors are called which only then throw a BizException.
 	 *
-	 * @since 9.7.0
 	 * @param WflSaveUserSettingsRequest $req The web service request.
 	 * @param BizException $e The error thrown.
 	 */
