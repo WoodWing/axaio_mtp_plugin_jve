@@ -22,6 +22,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	/** @var WW_Utils_TestSuite $utils */
 	private $utils;
 
+	/** @var Setting[] $settings*/
+	private $settings;
+
 	/**
 	 * @inheritdoc
 	 */
@@ -31,11 +34,11 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 			$this->setUpTestData();
 
 			$this->testRoundtripSettingsOverLogOnLogOff();
-			$this->cleanSettingsInDatabase();
+			$this->testCleanSettingsInDatabaseOverLogOnLogOff();
 
 			$this->testRoundtripSettingsOverSaveAndGet();
-			$this->cleanSettingsInDatabase();
-			
+			$this->testCleanSettingsOverSaveAndGet();
+
 		} catch( BizException $e ) {}
 		$this->tearDownTestData();
 	}
@@ -70,13 +73,30 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		$this->assertCount( 0, $this->settings );
 
 		$this->settings = array();
-		$this->settings[] = new Setting( 'Aap', 'abc' );
-		$this->settings[] = new Setting( 'Noot', '123' );
-		$this->settings[] = new Setting( 'Mies', '' );
+		$this->settings[] = new Setting( 'Aap1', 'abc' );
+		$this->settings[] = new Setting( 'Noot1', '123' );
+		$this->settings[] = new Setting( 'Mies1', '' );
 		$this->logOff();
 
 		$this->logOn();
-		$this->assertCount( 3, $this->settings );
+		$expected = array(
+			new Setting( 'Aap1', 'abc' ),
+			new Setting( 'Noot1', '123' ),
+			new Setting( 'Mies1', '' )
+		);
+		$this->assertSettingsEquals( $expected, $this->settings );
+	}
+
+	/**
+	 * Remove the user settings for the current client application.
+	 */
+	private function testCleanSettingsInDatabaseOverLogOnLogOff()
+	{
+		$this->settings = array();
+		$this->logOff();
+		$this->logOn();
+		$this->assertCount( 0, $this->settings );
+		$this->logOff();
 	}
 
 	/**
@@ -115,18 +135,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	}
 
 	/**
-	 * Remove the user settings for the current client application.
-	 */
-	private function cleanSettingsInDatabase()
-	{
-		$this->settings = array();
-		$this->logOff();
-		$this->logOn();
-		$this->assertCount( 0, $this->settings );
-		$this->logOff();
-	}
-
-	/**
 	 * Call GetUserSettings and SaveUserSettings and validate the user settings round-tripped through these web services.
 	 */
 	private function testRoundtripSettingsOverSaveAndGet()
@@ -139,13 +147,36 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		$this->assertCount( 0, $this->settings );
 
 		$this->settings = array();
-		$this->settings[] = new Setting( 'Aap', 'abc' );
-		$this->settings[] = new Setting( 'Noot', '123' );
-		$this->settings[] = new Setting( 'Mies', '' );
+		$this->settings[] = new Setting( 'Aap2', 'def' );
+		$this->settings[] = new Setting( 'Noot2', '456' );
+		$this->settings[] = new Setting( 'Mies2', '' );
 		$this->saveSettings();
 
 		$this->getSettings();
-		$this->assertCount( 3, $this->settings );
+		$expected = array(
+			new Setting( 'Aap2', 'def' ),
+			new Setting( 'Noot2', '456' ),
+			new Setting( 'Mies2', '' )
+		);
+		$this->assertSettingsEquals( $expected, $this->settings );
+	}
+
+	/**
+	 * Call DeleteUserSettings and GetUserSettings and validate the user settings round-tripped through these web services.
+	 */
+	private function testCleanSettingsOverSaveAndGet()
+	{
+		$this->deleteSettings( array( 'Aap2' ) );
+		$this->getSettings();
+		$expected = array(
+			new Setting( 'Noot2', '456' ),
+			new Setting( 'Mies2', '' )
+		);
+		$this->assertSettingsEquals( $expected, $this->settings );
+
+		$this->deleteSettings( array( 'Noot2', 'Mies2' ) );
+		$this->getSettings();
+		$this->assertCount( 0, $this->settings );
 	}
 
 	/**
@@ -177,6 +208,22 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	}
 
 	/**
+	 * Call the DeleteUserSettings service to remove the user settings.
+	 *
+	 * @param string[] $settingNames
+	 */
+	private function deleteSettings( $settingNames )
+	{
+		require_once BASEDIR . '/server/services/wfl/WflDeleteUserSettingsService.class.php';
+		$request = new WflDeleteUserSettingsRequest();
+		$request->Ticket = $this->ticket;
+		$request->Settings = $settingNames;
+		/** @var WflSaveUserSettingsResponse $response */
+		$response = $this->utils->callService( $this, $request, 'Delete user settings' );
+		$this->assertInstanceOf( 'WflDeleteUserSettingsResponse', $response );
+	}
+
+	/**
 	 * Composes a formatted timestamp with milliseconds.
 	 *
 	 * @return string Formatted timestamp
@@ -186,5 +233,30 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		$microTime = explode( ' ', microtime() );
 		$miliSec = sprintf( '%03d', round($microTime[0]*1000) );
 		return date( 'Y m d H i s', $microTime[1] ).' '.$miliSec;
+	}
+
+	/**
+	 * Asserts that two collections of settings are equal.
+	 *
+	 * @param Setting[] $expected
+	 * @param Setting[] $actual
+	 */
+	private function assertSettingsEquals( $expected, $actual )
+	{
+		$matches = 0;
+		$this->assertInternalType( 'array', $expected );
+		$this->assertInternalType( 'array', $actual );
+		$this->assertEquals( count( $expected ), count( $actual ) );
+		foreach( $expected as $settingA ) {
+			foreach( $actual as $settingB ) {
+				if( $settingA->Setting === $settingB->Setting ) {
+					if( $settingA->Value === $settingB->Value ) {
+						$matches += 1;
+					}
+					break;
+				}
+			}
+		}
+		$this->assertEquals( count( $expected ), $matches, 'The two collections of Settings are not equal.' );
 	}
 }

@@ -98,7 +98,7 @@ class WW_BizClasses_UserSetting
 	 */
 	public function replaceSettings( $userShortName, $clientAppName, array $settings )
 	{
-		$this->deleteSettings( $userShortName, $clientAppName );
+		$this->purgeSettings( $userShortName, $clientAppName );
 		$this->saveSettings( $userShortName, $clientAppName, $settings );
 	}
 
@@ -108,12 +108,31 @@ class WW_BizClasses_UserSetting
 	 * @param string $userShortName
 	 * @param string $clientAppName
 	 */
-	private function deleteSettings( $userShortName, $clientAppName )
+	private function purgeSettings( $userShortName, $clientAppName )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
 
 		$this->validateAndRepairContextParams( $userShortName, $clientAppName );
 		DBUserSetting::purgeSettings( $userShortName, $clientAppName );
+	}
+
+	/**
+	 * Remove some user settings for a client application.
+	 *
+	 * @param string $userShortName
+	 * @param string $clientAppName
+	 * @param string[] $settingNames
+	 */
+	public function deleteSettingsByName( $userShortName, $clientAppName, $settingNames )
+	{
+		$this->validateAndRepairContextParams( $userShortName, $clientAppName );
+		if( $settingNames ) {
+			foreach( $settingNames as &$settingName ) {
+				$this->validateAndRepairSettingName( $settingName );
+			}
+			require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
+			DBUserSetting::deleteSettingsByName( $userShortName, $clientAppName, $settingNames );
+		}
 	}
 
 	/**
@@ -138,7 +157,7 @@ class WW_BizClasses_UserSetting
 	}
 
 	/**
-	 * Validate settings that are used to create, update or delete user settings.
+	 * Validate a setting (before it is used to create, update or delete operation).
 	 *
 	 * @param Setting $setting
 	 * @throws BizException when the type or value of the setting name or value is not correct.
@@ -154,6 +173,21 @@ class WW_BizClasses_UserSetting
 		if( !is_string( $setting->Value ) ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Client',
 				'Please provide valid string for the Setting->Value param.' );
+		}
+	}
+
+	/**
+	 * Validate setting (before it is used to create, update or delete operation).
+	 *
+	 * @param string $settingName
+	 * @throws BizException when the type or value of the setting name or value is not correct.
+	 */
+	private function validateAndRepairSettingName( &$settingName )
+	{
+		$settingName = trim( $settingName );
+		if( !$settingName || !is_string( $settingName ) ) {
+			throw new BizException( 'ERR_ARGUMENT', 'Client',
+				'Please provide valid string for the setting name.' );
 		}
 	}
 }

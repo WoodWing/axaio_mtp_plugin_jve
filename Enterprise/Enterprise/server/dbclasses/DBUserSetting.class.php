@@ -71,7 +71,6 @@ class DBUserSetting extends DBBase
 	 * @since 10.3.0 no longer returning the DB resource handle
 	 * @param string $userShortName
 	 * @param string|null $clientAppName Name to remove settings for a client application, or NULL to remove all settings for the user.
-	 * @throws BizException on fatal SQL/DB error.
 	 */
 	static public function purgeSettings( $userShortName, $clientAppName = null )
 	{
@@ -82,6 +81,25 @@ class DBUserSetting extends DBBase
 			$params[] = strval( $clientAppName );
 		}
 		self::deleteRows( self::TABLENAME, $where, $params );
+	}
+
+	/**
+	 * Remove some user settings or all settings for a client application.
+	 *
+	 * @param string $userShortName
+	 * @param string $clientAppName
+	 * @param string[] $settingNames
+	 */
+	static public function deleteSettingsByName( $userShortName, $clientAppName, $settingNames )
+	{
+		if( $settingNames ) {
+			$questionMarks = array_fill( 0, count( $settingNames ), '?' );
+			$questionMarksCsv = implode( ', ', $questionMarks );
+			$where = '`user` = ? AND `appname` = ? AND `setting` IN ( '.$questionMarksCsv.' )';
+			$params = array( strval( $userShortName ), strval( $clientAppName ) );
+			$params = array_merge( $params, array_map( 'strval', $settingNames ) );
+			self::deleteRows( self::TABLENAME, $where, $params );
+		}
 	}
 
 	/**
