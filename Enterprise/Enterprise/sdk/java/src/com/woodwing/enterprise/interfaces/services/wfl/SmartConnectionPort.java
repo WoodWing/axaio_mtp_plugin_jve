@@ -13,6 +13,7 @@ public interface SmartConnectionPort extends java.rmi.Remote {
     public void logOff(com.woodwing.enterprise.interfaces.services.wfl.LogOff parameters) throws java.rmi.RemoteException;
     public com.woodwing.enterprise.interfaces.services.wfl.GetUserSettingsResponse getUserSettings(com.woodwing.enterprise.interfaces.services.wfl.GetUserSettings parameters) throws java.rmi.RemoteException;
     public void saveUserSettings(com.woodwing.enterprise.interfaces.services.wfl.SaveUserSettings parameters) throws java.rmi.RemoteException;
+    public void deleteUserSettings(com.woodwing.enterprise.interfaces.services.wfl.DeleteUserSettings parameters) throws java.rmi.RemoteException;
     public com.woodwing.enterprise.interfaces.services.wfl.GetStatesResponse getStates(com.woodwing.enterprise.interfaces.services.wfl.GetStates parameters) throws java.rmi.RemoteException;
     public com.woodwing.enterprise.interfaces.services.wfl.CreateObjectsResponse createObjects(com.woodwing.enterprise.interfaces.services.wfl.CreateObjects parameters) throws java.rmi.RemoteException;
     public com.woodwing.enterprise.interfaces.services.wfl.InstantiateTemplateResponse instantiateTemplate(com.woodwing.enterprise.interfaces.services.wfl.InstantiateTemplate parameters) throws java.rmi.RemoteException;

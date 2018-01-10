@@ -16,7 +16,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
     static org.apache.axis.description.OperationDesc [] _operations;
 
     static {
-        _operations = new org.apache.axis.description.OperationDesc[56];
+        _operations = new org.apache.axis.description.OperationDesc[57];
         _initOperationDesc1();
         _initOperationDesc2();
         _initOperationDesc3();
@@ -80,6 +80,15 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         _operations[4] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("DeleteUserSettings");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "DeleteUserSettings"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">DeleteUserSettings"), com.woodwing.enterprise.interfaces.services.wfl.DeleteUserSettings.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[5] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
         oper.setName("GetStates");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "GetStates"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">GetStates"), com.woodwing.enterprise.interfaces.services.wfl.GetStates.class, false, false);
         oper.addParameter(param);
@@ -88,7 +97,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetStatesResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[5] = oper;
+        _operations[6] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("CreateObjects");
@@ -99,7 +108,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "CreateObjectsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[6] = oper;
+        _operations[7] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("InstantiateTemplate");
@@ -110,7 +119,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "InstantiateTemplateResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[7] = oper;
+        _operations[8] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("GetObjects");
@@ -121,8 +130,13 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetObjectsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[8] = oper;
+        _operations[9] = oper;
 
+    }
+
+    private static void _initOperationDesc2(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("QueryObjects");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "QueryObjects"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">QueryObjects"), com.woodwing.enterprise.interfaces.services.wfl.QueryObjects.class, false, false);
@@ -132,13 +146,8 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "QueryObjectsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[9] = oper;
+        _operations[10] = oper;
 
-    }
-
-    private static void _initOperationDesc2(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("SaveObjects");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "SaveObjects"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">SaveObjects"), com.woodwing.enterprise.interfaces.services.wfl.SaveObjects.class, false, false);
@@ -148,7 +157,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "SaveObjectsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[10] = oper;
+        _operations[11] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("LockObjects");
@@ -159,7 +168,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "LockObjectsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[11] = oper;
+        _operations[12] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("UnlockObjects");
@@ -170,7 +179,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "UnlockObjectsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[12] = oper;
+        _operations[13] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("DeleteObjects");
@@ -181,7 +190,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "DeleteObjectsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[13] = oper;
+        _operations[14] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("RestoreObjects");
@@ -192,7 +201,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "RestoreObjectsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[14] = oper;
+        _operations[15] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("CreateObjectRelations");
@@ -203,7 +212,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "CreateObjectRelationsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[15] = oper;
+        _operations[16] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("UpdateObjectRelations");
@@ -214,7 +223,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "UpdateObjectRelationsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[16] = oper;
+        _operations[17] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("DeleteObjectRelations");
@@ -223,7 +232,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[17] = oper;
+        _operations[18] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("GetObjectRelations");
@@ -234,8 +243,13 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetObjectRelationsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[18] = oper;
+        _operations[19] = oper;
 
+    }
+
+    private static void _initOperationDesc3(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("CreateObjectTargets");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "CreateObjectTargets"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">CreateObjectTargets"), com.woodwing.enterprise.interfaces.services.wfl.CreateObjectTargets.class, false, false);
@@ -245,13 +259,8 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "CreateObjectTargetsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[19] = oper;
+        _operations[20] = oper;
 
-    }
-
-    private static void _initOperationDesc3(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("UpdateObjectTargets");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "UpdateObjectTargets"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">UpdateObjectTargets"), com.woodwing.enterprise.interfaces.services.wfl.UpdateObjectTargets.class, false, false);
@@ -261,7 +270,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "UpdateObjectTargetsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[20] = oper;
+        _operations[21] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("DeleteObjectTargets");
@@ -270,7 +279,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[21] = oper;
+        _operations[22] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("GetVersion");
@@ -281,7 +290,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetVersionResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[22] = oper;
+        _operations[23] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("ListVersions");
@@ -292,7 +301,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "ListVersionsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[23] = oper;
+        _operations[24] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("RestoreVersion");
@@ -301,7 +310,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[24] = oper;
+        _operations[25] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("CreateArticleWorkspace");
@@ -312,7 +321,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "CreateArticleWorkspaceResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[25] = oper;
+        _operations[26] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("ListArticleWorkspaces");
@@ -323,7 +332,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "ListArticleWorkspacesResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[26] = oper;
+        _operations[27] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("GetArticleFromWorkspace");
@@ -334,24 +343,13 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetArticleFromWorkspaceResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[27] = oper;
+        _operations[28] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("SaveArticleInWorkspace");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "SaveArticleInWorkspace"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">SaveArticleInWorkspace"), com.woodwing.enterprise.interfaces.services.wfl.SaveArticleInWorkspace.class, false, false);
         oper.addParameter(param);
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
-        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
-        oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[28] = oper;
-
-        oper = new org.apache.axis.description.OperationDesc();
-        oper.setName("PreviewArticleAtWorkspace");
-        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "PreviewArticleAtWorkspace"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">PreviewArticleAtWorkspace"), com.woodwing.enterprise.interfaces.services.wfl.PreviewArticleAtWorkspace.class, false, false);
-        oper.addParameter(param);
-        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnection", ">PreviewArticleAtWorkspaceResponse"));
-        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.wfl.PreviewArticleAtWorkspaceResponse.class);
-        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "PreviewArticleAtWorkspaceResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
         _operations[29] = oper;
@@ -362,6 +360,17 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         org.apache.axis.description.OperationDesc oper;
         org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
+        oper.setName("PreviewArticleAtWorkspace");
+        param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "PreviewArticleAtWorkspace"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">PreviewArticleAtWorkspace"), com.woodwing.enterprise.interfaces.services.wfl.PreviewArticleAtWorkspace.class, false, false);
+        oper.addParameter(param);
+        oper.setReturnType(new javax.xml.namespace.QName("urn:SmartConnection", ">PreviewArticleAtWorkspaceResponse"));
+        oper.setReturnClass(com.woodwing.enterprise.interfaces.services.wfl.PreviewArticleAtWorkspaceResponse.class);
+        oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "PreviewArticleAtWorkspaceResponse"));
+        oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
+        oper.setUse(org.apache.axis.constants.Use.LITERAL);
+        _operations[30] = oper;
+
+        oper = new org.apache.axis.description.OperationDesc();
         oper.setName("PreviewArticlesAtWorkspace");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "PreviewArticlesAtWorkspace"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">PreviewArticlesAtWorkspace"), com.woodwing.enterprise.interfaces.services.wfl.PreviewArticlesAtWorkspace.class, false, false);
         oper.addParameter(param);
@@ -370,7 +379,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "PreviewArticlesAtWorkspaceResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[30] = oper;
+        _operations[31] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("DeleteArticleWorkspace");
@@ -379,7 +388,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[31] = oper;
+        _operations[32] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("CheckSpelling");
@@ -390,7 +399,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "CheckSpellingResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[32] = oper;
+        _operations[33] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("GetSuggestions");
@@ -401,7 +410,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetSuggestionsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[33] = oper;
+        _operations[34] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("CheckSpellingAndSuggest");
@@ -412,7 +421,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "CheckSpellingAndSuggestResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[34] = oper;
+        _operations[35] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("NamedQuery");
@@ -423,7 +432,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "NamedQueryResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[35] = oper;
+        _operations[36] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("ChangePassword");
@@ -432,7 +441,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[36] = oper;
+        _operations[37] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("SendMessages");
@@ -443,7 +452,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "SendMessagesResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[37] = oper;
+        _operations[38] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("CreateObjectOperations");
@@ -454,8 +463,13 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "CreateObjectOperationsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[38] = oper;
+        _operations[39] = oper;
 
+    }
+
+    private static void _initOperationDesc5(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("CopyObject");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "CopyObject"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">CopyObject"), com.woodwing.enterprise.interfaces.services.wfl.CopyObject.class, false, false);
@@ -465,13 +479,8 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "CopyObjectResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[39] = oper;
+        _operations[40] = oper;
 
-    }
-
-    private static void _initOperationDesc5(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("SetObjectProperties");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "SetObjectProperties"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">SetObjectProperties"), com.woodwing.enterprise.interfaces.services.wfl.SetObjectProperties.class, false, false);
@@ -481,7 +490,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "SetObjectPropertiesResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[40] = oper;
+        _operations[41] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("MultiSetObjectProperties");
@@ -492,7 +501,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "MultiSetObjectPropertiesResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[41] = oper;
+        _operations[42] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("SendTo");
@@ -503,7 +512,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "SendToResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[42] = oper;
+        _operations[43] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("SendToNext");
@@ -514,7 +523,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "SendToNextResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[43] = oper;
+        _operations[44] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("ChangeOnlineStatus");
@@ -523,7 +532,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[44] = oper;
+        _operations[45] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("GetDialog");
@@ -534,7 +543,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetDialogResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[45] = oper;
+        _operations[46] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("GetDialog2");
@@ -545,7 +554,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetDialog2Response"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[46] = oper;
+        _operations[47] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("GetPages");
@@ -556,7 +565,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetPagesResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[47] = oper;
+        _operations[48] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("GetPagesInfo");
@@ -567,8 +576,13 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "GetPagesInfoResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[48] = oper;
+        _operations[49] = oper;
 
+    }
+
+    private static void _initOperationDesc6(){
+        org.apache.axis.description.OperationDesc oper;
+        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("Autocomplete");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "Autocomplete"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">Autocomplete"), com.woodwing.enterprise.interfaces.services.wfl.Autocomplete.class, false, false);
@@ -578,13 +592,8 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "AutocompleteResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[49] = oper;
+        _operations[50] = oper;
 
-    }
-
-    private static void _initOperationDesc6(){
-        org.apache.axis.description.OperationDesc oper;
-        org.apache.axis.description.ParameterDesc param;
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("Suggestions");
         param = new org.apache.axis.description.ParameterDesc(new javax.xml.namespace.QName("urn:SmartConnection", "Suggestions"), org.apache.axis.description.ParameterDesc.IN, new javax.xml.namespace.QName("urn:SmartConnection", ">Suggestions"), com.woodwing.enterprise.interfaces.services.wfl.Suggestions.class, false, false);
@@ -594,7 +603,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "SuggestionsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[50] = oper;
+        _operations[51] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("CreateObjectLabels");
@@ -605,7 +614,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "CreateObjectLabelsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[51] = oper;
+        _operations[52] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("UpdateObjectLabels");
@@ -616,7 +625,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnQName(new javax.xml.namespace.QName("urn:SmartConnection", "UpdateObjectLabelsResponse"));
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[52] = oper;
+        _operations[53] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("DeleteObjectLabels");
@@ -625,7 +634,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[53] = oper;
+        _operations[54] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("AddObjectLabels");
@@ -634,7 +643,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[54] = oper;
+        _operations[55] = oper;
 
         oper = new org.apache.axis.description.OperationDesc();
         oper.setName("RemoveObjectLabels");
@@ -643,7 +652,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
         oper.setReturnType(org.apache.axis.encoding.XMLType.AXIS_VOID);
         oper.setStyle(org.apache.axis.constants.Style.DOCUMENT);
         oper.setUse(org.apache.axis.constants.Use.LITERAL);
-        _operations[55] = oper;
+        _operations[56] = oper;
 
     }
 
@@ -894,6 +903,13 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             qName = new javax.xml.namespace.QName("urn:SmartConnection", ">DeleteObjectTargets");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.wfl.DeleteObjectTargets.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", ">DeleteUserSettings");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.wfl.DeleteUserSettings.class;
             cachedSerClasses.add(cls);
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
@@ -1388,13 +1404,6 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             cachedSerFactories.add(enumsf);
             cachedDeserFactories.add(enumdf);
 
-            qName = new javax.xml.namespace.QName("urn:SmartConnection", "ActionProperty");
-            cachedSerQNames.add(qName);
-            cls = com.woodwing.enterprise.interfaces.services.wfl.ActionProperty.class;
-            cachedSerClasses.add(cls);
-            cachedSerFactories.add(beansf);
-            cachedDeserFactories.add(beandf);
-
     }
     private void addBindings1() {
             java.lang.Class cls;
@@ -1410,6 +1419,13 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             java.lang.Class simpledf = org.apache.axis.encoding.ser.SimpleDeserializerFactory.class;
             java.lang.Class simplelistsf = org.apache.axis.encoding.ser.SimpleListSerializerFactory.class;
             java.lang.Class simplelistdf = org.apache.axis.encoding.ser.SimpleListDeserializerFactory.class;
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", "ActionProperty");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.wfl.ActionProperty.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnection", "AppFeature");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.wfl.AppFeature.class;
@@ -2251,13 +2267,6 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             cachedSerFactories.add(beansf);
             cachedDeserFactories.add(beandf);
 
-            qName = new javax.xml.namespace.QName("urn:SmartConnection", "ErrorReport");
-            cachedSerQNames.add(qName);
-            cls = com.woodwing.enterprise.interfaces.services.wfl.ErrorReport.class;
-            cachedSerClasses.add(cls);
-            cachedSerFactories.add(beansf);
-            cachedDeserFactories.add(beandf);
-
     }
     private void addBindings2() {
             java.lang.Class cls;
@@ -2273,6 +2282,13 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             java.lang.Class simpledf = org.apache.axis.encoding.ser.SimpleDeserializerFactory.class;
             java.lang.Class simplelistsf = org.apache.axis.encoding.ser.SimpleListSerializerFactory.class;
             java.lang.Class simplelistdf = org.apache.axis.encoding.ser.SimpleListDeserializerFactory.class;
+            qName = new javax.xml.namespace.QName("urn:SmartConnection", "ErrorReport");
+            cachedSerQNames.add(qName);
+            cls = com.woodwing.enterprise.interfaces.services.wfl.ErrorReport.class;
+            cachedSerClasses.add(cls);
+            cachedSerFactories.add(beansf);
+            cachedDeserFactories.add(beandf);
+
             qName = new javax.xml.namespace.QName("urn:SmartConnection", "ErrorReportEntity");
             cachedSerQNames.add(qName);
             cls = com.woodwing.enterprise.interfaces.services.wfl.ErrorReportEntity.class;
@@ -3029,12 +3045,39 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
 }
     }
 
-    public com.woodwing.enterprise.interfaces.services.wfl.GetStatesResponse getStates(com.woodwing.enterprise.interfaces.services.wfl.GetStates parameters) throws java.rmi.RemoteException {
+    public void deleteUserSettings(com.woodwing.enterprise.interfaces.services.wfl.DeleteUserSettings parameters) throws java.rmi.RemoteException {
         if (super.cachedEndpoint == null) {
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
         _call.setOperation(_operations[5]);
+        _call.setUseSOAPAction(true);
+        _call.setSOAPActionURI("urn:SmartConnection#DeleteUserSettings");
+        _call.setEncodingStyle(null);
+        _call.setProperty(org.apache.axis.client.Call.SEND_TYPE_ATTR, Boolean.FALSE);
+        _call.setProperty(org.apache.axis.AxisEngine.PROP_DOMULTIREFS, Boolean.FALSE);
+        _call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
+        _call.setOperationName(new javax.xml.namespace.QName("", "DeleteUserSettings"));
+
+        setRequestHeaders(_call);
+        setAttachments(_call);
+ try {        java.lang.Object _resp = _call.invoke(new java.lang.Object[] {parameters});
+
+        if (_resp instanceof java.rmi.RemoteException) {
+            throw (java.rmi.RemoteException)_resp;
+        }
+        extractAttachments(_call);
+  } catch (org.apache.axis.AxisFault axisFaultException) {
+  throw axisFaultException;
+}
+    }
+
+    public com.woodwing.enterprise.interfaces.services.wfl.GetStatesResponse getStates(com.woodwing.enterprise.interfaces.services.wfl.GetStates parameters) throws java.rmi.RemoteException {
+        if (super.cachedEndpoint == null) {
+            throw new org.apache.axis.NoEndPointException();
+        }
+        org.apache.axis.client.Call _call = createCall();
+        _call.setOperation(_operations[6]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#GetStates");
         _call.setEncodingStyle(null);
@@ -3068,7 +3111,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[6]);
+        _call.setOperation(_operations[7]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#CreateObjects");
         _call.setEncodingStyle(null);
@@ -3102,7 +3145,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[7]);
+        _call.setOperation(_operations[8]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#InstantiateTemplate");
         _call.setEncodingStyle(null);
@@ -3136,7 +3179,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[8]);
+        _call.setOperation(_operations[9]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#GetObjects");
         _call.setEncodingStyle(null);
@@ -3170,7 +3213,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[9]);
+        _call.setOperation(_operations[10]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#QueryObjects");
         _call.setEncodingStyle(null);
@@ -3204,7 +3247,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[10]);
+        _call.setOperation(_operations[11]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#SaveObjects");
         _call.setEncodingStyle(null);
@@ -3238,7 +3281,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[11]);
+        _call.setOperation(_operations[12]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#LockObjects");
         _call.setEncodingStyle(null);
@@ -3272,7 +3315,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[12]);
+        _call.setOperation(_operations[13]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#UnlockObjects");
         _call.setEncodingStyle(null);
@@ -3306,7 +3349,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[13]);
+        _call.setOperation(_operations[14]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#DeleteObjects");
         _call.setEncodingStyle(null);
@@ -3340,7 +3383,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[14]);
+        _call.setOperation(_operations[15]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#RestoreObjects");
         _call.setEncodingStyle(null);
@@ -3374,7 +3417,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[15]);
+        _call.setOperation(_operations[16]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#CreateObjectRelations");
         _call.setEncodingStyle(null);
@@ -3408,7 +3451,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[16]);
+        _call.setOperation(_operations[17]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#UpdateObjectRelations");
         _call.setEncodingStyle(null);
@@ -3442,7 +3485,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[17]);
+        _call.setOperation(_operations[18]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#DeleteObjectRelations");
         _call.setEncodingStyle(null);
@@ -3469,7 +3512,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[18]);
+        _call.setOperation(_operations[19]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#GetObjectRelations");
         _call.setEncodingStyle(null);
@@ -3503,7 +3546,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[19]);
+        _call.setOperation(_operations[20]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#CreateObjectTargets");
         _call.setEncodingStyle(null);
@@ -3537,7 +3580,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[20]);
+        _call.setOperation(_operations[21]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#UpdateObjectTargets");
         _call.setEncodingStyle(null);
@@ -3571,7 +3614,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[21]);
+        _call.setOperation(_operations[22]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#DeleteObjectTargets");
         _call.setEncodingStyle(null);
@@ -3598,7 +3641,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[22]);
+        _call.setOperation(_operations[23]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#GetVersion");
         _call.setEncodingStyle(null);
@@ -3632,7 +3675,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[23]);
+        _call.setOperation(_operations[24]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#ListVersions");
         _call.setEncodingStyle(null);
@@ -3666,7 +3709,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[24]);
+        _call.setOperation(_operations[25]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#RestoreVersion");
         _call.setEncodingStyle(null);
@@ -3693,7 +3736,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[25]);
+        _call.setOperation(_operations[26]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#CreateArticleWorkspace");
         _call.setEncodingStyle(null);
@@ -3727,7 +3770,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[26]);
+        _call.setOperation(_operations[27]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#ListArticleWorkspaces");
         _call.setEncodingStyle(null);
@@ -3761,7 +3804,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[27]);
+        _call.setOperation(_operations[28]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#GetArticleFromWorkspace");
         _call.setEncodingStyle(null);
@@ -3795,7 +3838,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[28]);
+        _call.setOperation(_operations[29]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#SaveArticleInWorkspace");
         _call.setEncodingStyle(null);
@@ -3822,7 +3865,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[29]);
+        _call.setOperation(_operations[30]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#PreviewArticleAtWorkspace");
         _call.setEncodingStyle(null);
@@ -3856,7 +3899,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[30]);
+        _call.setOperation(_operations[31]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#PreviewArticlesAtWorkspace");
         _call.setEncodingStyle(null);
@@ -3890,7 +3933,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[31]);
+        _call.setOperation(_operations[32]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#DeleteArticleWorkspace");
         _call.setEncodingStyle(null);
@@ -3917,7 +3960,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[32]);
+        _call.setOperation(_operations[33]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#CheckSpelling");
         _call.setEncodingStyle(null);
@@ -3951,7 +3994,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[33]);
+        _call.setOperation(_operations[34]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#GetSuggestions");
         _call.setEncodingStyle(null);
@@ -3985,7 +4028,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[34]);
+        _call.setOperation(_operations[35]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#CheckSpellingAndSuggest");
         _call.setEncodingStyle(null);
@@ -4019,7 +4062,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[35]);
+        _call.setOperation(_operations[36]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#NamedQuery");
         _call.setEncodingStyle(null);
@@ -4053,7 +4096,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[36]);
+        _call.setOperation(_operations[37]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#ChangePassword");
         _call.setEncodingStyle(null);
@@ -4080,7 +4123,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[37]);
+        _call.setOperation(_operations[38]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#SendMessages");
         _call.setEncodingStyle(null);
@@ -4114,7 +4157,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[38]);
+        _call.setOperation(_operations[39]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#CreateObjectOperations");
         _call.setEncodingStyle(null);
@@ -4148,7 +4191,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[39]);
+        _call.setOperation(_operations[40]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#CopyObject");
         _call.setEncodingStyle(null);
@@ -4182,7 +4225,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[40]);
+        _call.setOperation(_operations[41]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#SetObjectProperties");
         _call.setEncodingStyle(null);
@@ -4216,7 +4259,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[41]);
+        _call.setOperation(_operations[42]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#MultiSetObjectProperties");
         _call.setEncodingStyle(null);
@@ -4250,7 +4293,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[42]);
+        _call.setOperation(_operations[43]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#SendTo");
         _call.setEncodingStyle(null);
@@ -4284,7 +4327,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[43]);
+        _call.setOperation(_operations[44]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#SendToNext");
         _call.setEncodingStyle(null);
@@ -4318,7 +4361,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[44]);
+        _call.setOperation(_operations[45]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#ChangeOnlineStatus");
         _call.setEncodingStyle(null);
@@ -4345,7 +4388,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[45]);
+        _call.setOperation(_operations[46]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#GetDialog");
         _call.setEncodingStyle(null);
@@ -4379,7 +4422,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[46]);
+        _call.setOperation(_operations[47]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#GetDialog2");
         _call.setEncodingStyle(null);
@@ -4413,7 +4456,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[47]);
+        _call.setOperation(_operations[48]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#GetPages");
         _call.setEncodingStyle(null);
@@ -4447,7 +4490,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[48]);
+        _call.setOperation(_operations[49]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#GetPagesInfo");
         _call.setEncodingStyle(null);
@@ -4481,7 +4524,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[49]);
+        _call.setOperation(_operations[50]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#Autocomplete");
         _call.setEncodingStyle(null);
@@ -4515,7 +4558,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[50]);
+        _call.setOperation(_operations[51]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#Suggestions");
         _call.setEncodingStyle(null);
@@ -4549,7 +4592,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[51]);
+        _call.setOperation(_operations[52]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#CreateObjectLabels");
         _call.setEncodingStyle(null);
@@ -4583,7 +4626,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[52]);
+        _call.setOperation(_operations[53]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#UpdateObjectLabels");
         _call.setEncodingStyle(null);
@@ -4617,7 +4660,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[53]);
+        _call.setOperation(_operations[54]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#DeleteObjectLabels");
         _call.setEncodingStyle(null);
@@ -4644,7 +4687,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[54]);
+        _call.setOperation(_operations[55]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#AddObjectLabels");
         _call.setEncodingStyle(null);
@@ -4671,7 +4714,7 @@ public class SmartConnectionBindingStub extends org.apache.axis.client.Stub impl
             throw new org.apache.axis.NoEndPointException();
         }
         org.apache.axis.client.Call _call = createCall();
-        _call.setOperation(_operations[55]);
+        _call.setOperation(_operations[56]);
         _call.setUseSOAPAction(true);
         _call.setSOAPActionURI("urn:SmartConnection#RemoveObjectLabels");
         _call.setEncodingStyle(null);

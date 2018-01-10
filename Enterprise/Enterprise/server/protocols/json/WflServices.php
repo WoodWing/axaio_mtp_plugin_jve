@@ -77,6 +77,18 @@ class WW_JSON_WflServices extends WW_JSON_Services
 		return $resp;
 	}
 
+	public function DeleteUserSettings( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflDeleteUserSettingsService.class.php';
+		$req['__classname__'] = 'WflDeleteUserSettingsRequest';
+		$req = $this->arraysToObjects( $req );
+		$req = $this->restructureObjects( $req );
+		$service = new WflDeleteUserSettingsService();
+		$resp = $service->execute( $req );
+		$resp = $this->restructureObjects( $resp );
+		return $resp;
+	}
+
 	public function ChangePassword( $req )
 	{
 		require_once BASEDIR.'/server/services/wfl/WflChangePasswordService.class.php';

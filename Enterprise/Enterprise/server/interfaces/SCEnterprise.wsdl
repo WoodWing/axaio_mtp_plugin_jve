@@ -1941,6 +1941,18 @@
 			</element>
 
 			<!--
+				v10.3: Remove user settings in DB for the current client appplication.
+			-->
+			<element name="DeleteUserSettings">
+				<complexType>
+					<sequence>
+						<element name="Ticket" 			type="xsd:string"/>
+						<element name="Settings"		type="tns:ArrayOfString"/>
+					</sequence>
+				</complexType>
+			</element>
+
+			<!--
 				Return the next possible workflow statusses for a given object. On client side, this is 
 				just a list, but at server side it can be given a special meaning. The meaning can even 
 				can change from time to time, for example from workflow steps to approve/disapprove.
@@ -3303,6 +3315,10 @@
 		<part name="parameters" element="tns:SaveUserSettings"/>
 	</message>
 	<message name="SaveUserSettingsResponse"/>
+	<message name="DeleteUserSettings">
+		<part name="parameters" element="tns:DeleteUserSettings"/>
+	</message>
+	<message name="DeleteUserSettingsResponse"/>
 	<message name="ChangePassword">
 		<part name="parameters" element="tns:ChangePassword"/>
 	</message>
@@ -3645,6 +3661,10 @@
 			<input message="tns:SaveUserSettings"/>
 			<output message="tns:SaveUserSettingsResponse"/>
 		</operation>
+		<operation name="DeleteUserSettings">
+			<input message="tns:DeleteUserSettings"/>
+			<output message="tns:DeleteUserSettingsResponse"/>
+		</operation>
 		<operation name="GetStates">
 			<input message="tns:GetStates"/>
 			<output message="tns:GetStatesResponse"/>
@@ -3891,6 +3911,15 @@
 		</operation>
 		<operation name="SaveUserSettings">
 			<soap:operation soapAction="urn:SmartConnection#SaveUserSettings"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+		</operation>
+		<operation name="DeleteUserSettings">
+			<soap:operation soapAction="urn:SmartConnection#DeleteUserSettings"/>
 			<input>
 				<soap:body use="literal"/>
 			</input>

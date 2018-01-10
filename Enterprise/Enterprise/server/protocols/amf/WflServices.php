@@ -19,6 +19,7 @@ require_once(BASEDIR.'/server/interfaces/services/wfl/WflLogOnRequest.class.php'
 require_once(BASEDIR.'/server/interfaces/services/wfl/WflLogOffRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/wfl/WflGetUserSettingsRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/wfl/WflSaveUserSettingsRequest.class.php');
+require_once(BASEDIR.'/server/interfaces/services/wfl/WflDeleteUserSettingsRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/wfl/WflChangePasswordRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/wfl/WflChangeOnlineStatusRequest.class.php');
 require_once(BASEDIR.'/server/interfaces/services/wfl/WflGetStatesRequest.class.php');
@@ -142,6 +143,21 @@ class WW_AMF_WflServices extends WW_AMF_Services
 		try {
 			$req = $this->objectToRequest( $req, 'WflSaveUserSettingsRequest' );
 			$service = new WflSaveUserSettingsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			require_once 'Zend/Amf/Server/Exception.php';
+			throw new Zend_Amf_Server_Exception( $e->getMessage() );
+		}
+		return $resp;
+	}
+
+	public function DeleteUserSettings( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflDeleteUserSettingsService.class.php';
+
+		try {
+			$req = $this->objectToRequest( $req, 'WflDeleteUserSettingsRequest' );
+			$service = new WflDeleteUserSettingsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
 			require_once 'Zend/Amf/Server/Exception.php';

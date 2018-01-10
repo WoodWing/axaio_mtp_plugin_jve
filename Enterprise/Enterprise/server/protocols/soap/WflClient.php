@@ -109,6 +109,7 @@ class WW_SOAP_WflClient extends WW_SOAP_Client
 		$options['classmap']['LogOffResponse'] = 'WflLogOffResponse';
 		$options['classmap']['GetUserSettingsResponse'] = 'WflGetUserSettingsResponse';
 		$options['classmap']['SaveUserSettingsResponse'] = 'WflSaveUserSettingsResponse';
+		$options['classmap']['DeleteUserSettingsResponse'] = 'WflDeleteUserSettingsResponse';
 		$options['classmap']['ChangePasswordResponse'] = 'WflChangePasswordResponse';
 		$options['classmap']['ChangeOnlineStatusResponse'] = 'WflChangeOnlineStatusResponse';
 		$options['classmap']['GetStatesResponse'] = 'WflGetStatesResponse';

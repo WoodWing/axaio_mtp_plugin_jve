@@ -99,6 +99,19 @@ class WW_SOAP_WflServices extends WW_SOAP_Service
 		return self::returnResponse($resp);
 	}
 
+	public function DeleteUserSettings( $req )
+	{
+		require_once BASEDIR.'/server/services/wfl/WflDeleteUserSettingsService.class.php';
+
+		try {
+			$service = new WflDeleteUserSettingsService();
+			$resp = $service->execute( $req );
+		} catch( BizException $e ) {
+			throw new SoapFault( $e->getType(), $e->getMessage(), '', $e->getDetail() );
+		}
+		return self::returnResponse($resp);
+	}
+
 	public function ChangePassword( $req )
 	{
 		require_once BASEDIR.'/server/services/wfl/WflChangePasswordService.class.php';
