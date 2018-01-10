@@ -18,8 +18,10 @@ class ElvisSessionUtil
 	 */
 	private static function getUserSetting( $userShort, $name )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-		$settings = BizUser::getSettings( $userShort, 'ElvisContentSource' );
+		require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+		$bizUserSettings = new WW_BizClasses_UserSetting();
+		$settings = $bizUserSettings->getSettings( $userShort, 'ElvisContentSource' );
+
 		$value = null;
 		if( $settings ) foreach( $settings as $setting ) {
 			if( $setting->Setting == $name ) {
@@ -40,9 +42,9 @@ class ElvisSessionUtil
 	 */
 	private static function setUserSetting( $userShort, $name, $value )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-		$settings = array( new Setting( $name, $value ) );
-		BizUser::updateSettings( $userShort, $settings, 'ElvisContentSource' );
+		require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+		$bizUserSettings = new WW_BizClasses_UserSetting();
+		$bizUserSettings->saveSetting( $userShort, 'ElvisContentSource', new Setting( $name, $value ) );
 	}
 
 	/**
@@ -58,7 +60,7 @@ class ElvisSessionUtil
 	{
 		$userShort = BizSession::getShortUserName();
 		$restricted = self::getUserSetting( $userShort, 'Restricted' );
-		return is_null($restricted) ? true : (bool)$restricted;
+		return is_null($restricted) ? true : boolval( intval( $restricted ) ); // convert '0' to FALSE or '1' to TRUE
 	}
 
 	/**
@@ -73,7 +75,7 @@ class ElvisSessionUtil
 	public static function setRestricted( $restricted )
 	{
 		$userShort = BizSession::getShortUserName();
-		self::setUserSetting( $userShort, 'Restricted', intval($restricted) );
+		self::setUserSetting( $userShort, 'Restricted', strval( intval( $restricted ) ) ); // store FALSE as '0' or TRUE as '1'
 	}
 
 	/**

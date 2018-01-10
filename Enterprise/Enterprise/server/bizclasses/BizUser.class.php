@@ -420,58 +420,40 @@ class BizUser
 	}
 
 	/**
-	 * Get user settings for an application.
+	 * Get user settings for a client application.
 	 *
-	 * @param string $shortUser User id (short name). Mandatory!
-	 * @param string $appName   Name of (current) application. Mandatory!
+	 * @deprecated since 10.3.0 Please use WW_BizClasses_UserSetting->getSettings() instead.
+	 * @param string $userShortName
+	 * @param string $clientAppName
 	 * @return Setting[]
 	 * @since v6.0 [BZ#8744]
 	 */
-	public static function getSettings( $shortUser, $appName )
+	public static function getSettings( $userShortName, $clientAppName )
 	{
-		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
+		LogHandler::log( __METHOD__, 'DEPRECATED',
+			'Please use WW_BizClasses_UserSetting->getSettings() instead.' );
 
-		// Smart Mover has no GUI to define User Queries. However, it wants to access them,
-		// no matter if created by any other application. So here we return the user settings
-		// for all applications. Note that Smart Mover operates under "Mover" name followed by
-		// some process id. So here we check if the application name *start* with "Mover".
-		// Note: Since Mover never *saves* settings, we can safely do this without the risk returning 
-		//       same settings twice, which could happen after logon+logoff+logon.
-		if( stripos( $appName, 'mover' ) === 0 ) { // Smart Mover client?
-			$userSettings = DBUserSetting::getSettings( $shortUser, null ); // null = ALL user settings, except migrated settings
-		} else {
-			$userSettings = DBUserSetting::getSettings( $shortUser, $appName ); // Filled = APPLICATION user settings
-		}
-		// When customers are migrated from old SCE version to v6 (or higher), the appname column
-		// will be empty for migrated user settings! To get out these old user settings,
-		// we check if there are *no* settings for the current application, in which case we 
-		// ask for all user settings that have *no* appname set (= the old migrated settings).
-		// This typically happens, when user does logon with ID/IC for the first time after migration.
-		// The next time, the settings are saved with InDesign or InCopy appname (which then are duplicated).
-		if( count($userSettings) == 0 ) {
-			$userSettings = DBUserSetting::getSettings( $shortUser, '' ); // '' = MIGRATED user settings
-		}
-		return $userSettings;
+		require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+		$bizUserSettings = new WW_BizClasses_UserSetting();
+		return $bizUserSettings->getSettings( $userShortName, $clientAppName );
 	}
 
-	/*
-	 * Add/Update user setting
+	/**
+	 * Update user settings for a client application.
 	 *
-	 * @param string $user
+	 * @deprecated since 10.3.0 Please use WW_BizClasses_UserSetting->saveSettings() instead.
+	 * @param string $userShortName
 	 * @param Setting[] $settings
-	 * @param string $appname
+	 * @param string $clientAppName
 	 */
-	public static function updateSettings( $user, $settings, $appname )
+	public static function updateSettings( $userShortName, $settings, $clientAppName )
 	{
-		require_once BASEDIR."/server/dbclasses/DBUserSetting.class.php";
-		if( $settings ) foreach( $settings as $setting ) {
-			if(DBUserSetting::hasSetting( $user, $setting->Setting, $appname )) {
-				DBUserSetting::updateSetting( $user, $setting->Setting, $setting->Value, $appname);
-			} 
-			else {
-				DBUserSetting::addSetting( $user, $setting->Setting, $setting->Value, $appname );	
-			}
-		}
+		LogHandler::log( __METHOD__, 'DEPRECATED',
+			'Please use WW_BizClasses_UserSetting->getSettings() instead.' );
+
+		require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+		$bizUserSettings = new WW_BizClasses_UserSetting();
+		$bizUserSettings->saveSettings( $userShortName, $clientAppName, $settings );
 	}
 	
 	/**

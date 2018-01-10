@@ -452,8 +452,9 @@ class BizSession
 			$ret->ServerInfo    = self::getServerInfo( $ticket );
 		}
 		if( in_array( 'Settings', $requestInfo ) ) {
-			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-			$ret->Settings      = BizUser::getSettings( $shortUser, $appname );
+			require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+			$bizUserSettings = new WW_BizClasses_UserSetting();
+			$ret->Settings = $bizUserSettings->getSettings( $shortUser, $appname );
 		}
 		if( in_array( 'Users', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
@@ -620,7 +621,7 @@ class BizSession
 		DBlog::logService( $shortUserName, 'LogOff' );
 
 		//get the appname before deleting the ticket...
-		$appname = DBTicket::DBappticket($ticket);
+		$clientAppName = DBTicket::DBappticket($ticket);
 
 		// delete ticket
 		$dbDriver = DBDriverFactory::gen();
@@ -638,18 +639,9 @@ class BizSession
 
 		// settings
 		if( $savesettings ) {
-			require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
-			$sth = DBUserSetting::purgeSettings( $shortUserName , $appname );
-			if( !$sth ) {
-				throw new BizException( 'ERR_DATABASE', 'Server',  $dbDriver->error() );
-			}
-
-			if( $settings ) foreach( $settings as $setting ) {
-				$sth = DBUserSetting::addSetting( $shortUserName, $setting->Setting, $setting->Value, $appname );
-				if( !$sth ) {
-					throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
-				}
-			}
+			require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+			$bizUserSettings = new WW_BizClasses_UserSetting();
+			$bizUserSettings->replaceSettings( $shortUserName , $clientAppName, $settings );
 		}
 	}
 
