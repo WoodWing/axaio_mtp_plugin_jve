@@ -68,21 +68,28 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	 */
 	private function testRoundtripSettingsOverLogOnLogOff()
 	{
+		// Start with new client application have no settings.
 		$this->clientAppName = 'WflUserSettings_App1_'.self::composeTimestampWithMs();
 		$this->logOn();
 		$this->assertCount( 0, $this->settings );
 
+		// Insert some settings for the current user who is now working with the client application.
 		$this->settings = array();
 		$this->settings[] = new Setting( 'Aap1', 'abc' );
 		$this->settings[] = new Setting( 'Noot1', '123' );
 		$this->settings[] = new Setting( 'Mies1', '' );
+		// Simulate SC having duplicate settings (such as 'QueryPanels'):
+		$this->settings[] = new Setting( 'Vuur1', 'foo' );
+		$this->settings[] = new Setting( 'Vuur1', 'bar' );
 		$this->logOff();
 
 		$this->logOn();
 		$expected = array(
 			new Setting( 'Aap1', 'abc' ),
 			new Setting( 'Noot1', '123' ),
-			new Setting( 'Mies1', '' )
+			new Setting( 'Mies1', '' ),
+			new Setting( 'Vuur1', 'foo' ),
+			new Setting( 'Vuur1', 'bar' )
 		);
 		$this->assertSettingsEquals( $expected, $this->settings );
 	}
@@ -139,6 +146,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	 */
 	private function testRoundtripSettingsOverSaveAndGet()
 	{
+		// Start with new client application have no settings.
 		$this->clientAppName = 'WflUserSettings_App2_'.self::composeTimestampWithMs();
 		$this->logOn();
 		$this->assertCount( 0, $this->settings );
@@ -146,6 +154,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		$this->getSettings();
 		$this->assertCount( 0, $this->settings );
 
+		// Insert 3 settings for the current user who is now working with the client application.
 		$this->settings = array();
 		$this->settings[] = new Setting( 'Aap2', 'def' );
 		$this->settings[] = new Setting( 'Noot2', '456' );
@@ -159,6 +168,19 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 			new Setting( 'Mies2', '' )
 		);
 		$this->assertSettingsEquals( $expected, $this->settings );
+
+		// Update only one of the settings that is changed by the current user.
+		$this->settings = array();
+		$this->settings[] = new Setting( 'Noot2', '789' );
+		$this->saveSettings();
+
+		$this->getSettings();
+		$expected = array(
+			new Setting( 'Aap2', 'def' ),
+			new Setting( 'Noot2', '789' ),
+			new Setting( 'Mies2', '' )
+		);
+		$this->assertSettingsEquals( $expected, $this->settings );
 	}
 
 	/**
@@ -169,7 +191,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		$this->deleteSettings( array( 'Aap2' ) );
 		$this->getSettings();
 		$expected = array(
-			new Setting( 'Noot2', '456' ),
+			new Setting( 'Noot2', '789' ),
 			new Setting( 'Mies2', '' )
 		);
 		$this->assertSettingsEquals( $expected, $this->settings );
@@ -253,7 +275,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 					if( $settingA->Value === $settingB->Value ) {
 						$matches += 1;
 					}
-					break;
 				}
 			}
 		}

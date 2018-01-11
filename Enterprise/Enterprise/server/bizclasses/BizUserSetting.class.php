@@ -14,23 +14,15 @@ class WW_BizClasses_UserSetting
 	/**
 	 * Get user settings for a client application.
 	 *
-	 * [BZ#8744] There are three different sets of settings you can query:
-	 * - APPLICATION user settings. Only those user settings that are stored by the given application.
-	 *   This is for normal usage. Pass a filled $clientAppName to retrieve those from DB.
-	 * - ALL user settings. All user settings saved by all applications (excluding migrated settings!).
-	 *   This is typically used by Smart Mover. Pass null for $clientAppName to retrieve those from DB.
-	 *   In case of Mover we add the application name to the setting name to avoid duplicate names.
-	 * - MIGRATED user settings. Old user settings saved by applications before SCE v6. (Those ones
-	 *   have empty 'appname' field). Typically used when no settings were found for given application.
-	 *   Pass an empty ('') string for $clientAppName  to retrieve those from DB.
-	 *
 	 * @param string $userShortName
-	 * @param string|null $clientAppName Filled = app settings. Null = all settings. Empty = migrated settings.
+	 * @param string $clientAppName
 	 * @return Setting[]
 	 */
 	public function getSettings( $userShortName, $clientAppName )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
+
+		$this->validateAndRepairContextParams( $userShortName, $clientAppName );
 
 		// Smart Mover has no GUI to define User Queries. However, it wants to access them,
 		// no matter if created by any other application. So here we return the user settings
@@ -42,15 +34,6 @@ class WW_BizClasses_UserSetting
 			$settings = DBUserSetting::getSettings( $userShortName, null ); // null = ALL user settings, except migrated settings
 		} else {
 			$settings = DBUserSetting::getSettings( $userShortName, $clientAppName ); // Filled = APPLICATION user settings
-		}
-		// When customers are migrated from old SCE version to v6 (or higher), the appname column
-		// will be empty for migrated user settings! To get out these old user settings,
-		// we check if there are *no* settings for the current application, in which case we
-		// ask for all user settings that have *no* appname set (= the old migrated settings).
-		// This typically happens, when user does logon with ID/IC for the first time after migration.
-		// The next time, the settings are saved with InDesign or InCopy appname (which then are duplicated).
-		if( count( $settings ) == 0 ) {
-			$settings = DBUserSetting::getSettings( $userShortName, '' ); // '' = MIGRATED user settings
 		}
 		return $settings;
 	}
@@ -98,22 +81,15 @@ class WW_BizClasses_UserSetting
 	 */
 	public function replaceSettings( $userShortName, $clientAppName, array $settings )
 	{
-		$this->purgeSettings( $userShortName, $clientAppName );
-		$this->saveSettings( $userShortName, $clientAppName, $settings );
-	}
-
-	/**
-	 * Remove all user settings for a client application.
-	 *
-	 * @param string $userShortName
-	 * @param string $clientAppName
-	 */
-	private function purgeSettings( $userShortName, $clientAppName )
-	{
 		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
 
 		$this->validateAndRepairContextParams( $userShortName, $clientAppName );
 		DBUserSetting::purgeSettings( $userShortName, $clientAppName );
+
+		if( $settings ) foreach( $settings as $setting ) {
+			$this->validateAndRepairSetting( $setting );
+			DBUserSetting::addSetting( $userShortName, $setting->Setting, $setting->Value, $clientAppName );
+		}
 	}
 
 	/**

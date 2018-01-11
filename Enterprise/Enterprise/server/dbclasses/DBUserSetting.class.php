@@ -6,6 +6,11 @@
  * @subpackage DBClasses
  * @since      v4.2
  * @copyright  WoodWing Software bv. All Rights Reserved.
+ *
+ * Note that since 10.3.0 the 'user', 'clientapp', and 'setting' fields should always be filled.
+ * A migration script is added Enterprise/server/dbscripts/dbupgrades/RemoveBadUserSettings.class.php
+ * to make sure existing/old records with empty fields are removed and biz logic is added to the BizUserSetting
+ * class that no longer allows empty values.
  */
 
 class DBUserSetting extends DBBase
@@ -15,18 +20,15 @@ class DBUserSetting extends DBBase
 	/**
 	 * Get user settings for a client application.
 	 *
-	 * [BZ#8744] There are three different sets of settings you can query:
+	 * [BZ#8744] There are two different sets of settings you can query:
 	 * - APPLICATION user settings. Only those user settings that are stored by the given application.
 	 *   This is for normal usage. Pass a filled $clientAppName to retrieve those from DB.
-	 * - ALL user settings. All user settings saved by all applications (excluding migrated settings!).
+	 * - ALL user settings. All user settings saved by all applications.
 	 *   This is typically used by Smart Mover. Pass null for $clientAppName to retrieve those from DB.
 	 *   In case of Mover we add the application name to the setting name to avoid duplicate names.
-	 * - MIGRATED user settings. Old user settings saved by applications before SCE v6. (Those ones
-	 *   have empty 'appname' field). Typically used when no settings were found for given application.
-	 *   Pass an empty ('') string for $clientAppName  to retrieve those from DB.
 	 *
 	 * @param string $userShortName
-	 * @param string|null $clientAppName Filled = app settings. Null = all settings. Empty = migrated settings.
+	 * @param string|null $clientAppName Filled = app settings. Null = all settings.
 	 * @return Setting[]
 	 */
 	static public function getSettings( $userShortName, $clientAppName = null )
@@ -113,9 +115,9 @@ class DBUserSetting extends DBBase
 	 */
 	static public function saveSetting( $userShortName, $clientAppName, $settingName, $settingValue )
 	{
-		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
-		if( self::hasSetting( $userShortName, $settingName, $clientAppName ) ) {
-			self::updateSetting( $userShortName, $settingName, $settingValue, $clientAppName );
+		$settingId = self::getSettingId( $userShortName, $clientAppName, $settingName );
+		if( $settingId ) {
+			self::updateSettingById( $settingId, $settingValue );
 		} else {
 			self::addSetting( $userShortName, $settingName, $settingValue, $clientAppName );
 		}
@@ -124,13 +126,13 @@ class DBUserSetting extends DBBase
 	/**
 	 * Add a new user setting for a client application.
 	 *
-	 * @since 10.3.0 no longer returning the DB resource handle
+	 * @since 10.3.0 no longer returning the DB resource handle and no longer accepting null for $clientAppName
 	 * @param string $userShortName
 	 * @param string $settingName
 	 * @param string $settingValue
-	 * @param string|null $clientAppName Name of the client application.
+	 * @param string $clientAppName Name of the client application.
 	 */
-	static public function addSetting( $userShortName, $settingName, $settingValue, $clientAppName = null )
+	static public function addSetting( $userShortName, $settingName, $settingValue, $clientAppName )
 	{
 		$values = array(
 			'user' => strval( $userShortName ),
@@ -144,37 +146,68 @@ class DBUserSetting extends DBBase
 	/**
 	 * Check whether a user setting for a client application exists.
 	 *
+	 * @deprecated since 10.3.0; Please use DBUserSetting::getSettingId() instead.
+	 * @since 10.3.0 no longer accepting null for $clientAppName
+	 *
 	 * @param string $userShortName
 	 * @param string $settingName
-	 * @param string|null $clientAppName
+	 * @param string $clientAppName
 	 * @return bool TRUE when user setting exists, or FALSE otherwise.
 	 */
-	static public function hasSetting( $userShortName, $settingName, $clientAppName = null )
+	static public function hasSetting( $userShortName, $settingName, $clientAppName )
 	{
-		$where = '`user` = ? AND `setting` = ? ';
-		$params = array( strval( $userShortName ), strval( $settingName ) );
-		if( $clientAppName ) {
-			$where .= 'AND `appname` = ? ';
-			$params[] = strval( $clientAppName );
-		}
+		LogHandler::log( __METHOD__, 'DEPRECATED',
+			'Please use DBUserSetting::getSettingId() instead.' );
+		return (bool)self::getSettingId( $userShortName, $settingName, $clientAppName );
+	}
+
+	/**
+	 * Resolve the record id of a user setting for a client application.
+	 *
+	 * @param string $userShortName
+	 * @param string $clientAppName
+	 * @param string $settingName
+	 * @return int|null Id value when found, NULL otherwise.
+	 */
+	static public function getSettingId( $userShortName, $clientAppName, $settingName )
+	{
+		$where = '`user` = ? AND `setting` = ? AND `appname` = ?';
+		$params = array( strval( $userShortName ), strval( $settingName ), strval( $clientAppName ) );
 		$row = self::getRow( self::TABLENAME, $where, array('id'), $params );
-		return isset( $row['id'] );
+		return isset( $row['id'] ) ? intval( $row['id'] ) : null;
 	}
 
 	/**
 	 * Update a value of an existing user setting for a client application.
 	 *
-	 * @since 10.3.0 no longer returning the DB resource handle
+	 * @deprecated since 10.3.0; Please use DBUserSetting::updateSettingById() instead.
+	 * @since 10.3.0 no longer returning the DB resource handle and no longer accepting null for $clientAppName
+	 *
 	 * @param string $userShortName
 	 * @param string $settingName
 	 * @param string $settingValue
-	 * @param string|null $clientAppName
+	 * @param string $clientAppName
 	 */
-	static public function updateSetting( $userShortName, $settingName, $settingValue, $clientAppName = null )
+	static public function updateSetting( $userShortName, $settingName, $settingValue, $clientAppName )
 	{
 		$values = array( 'value' => '#BLOB#' );
 		$where = '`user` = ? AND `setting` = ? AND `appname` = ?';
 		$params = array( strval( $userShortName ), strval( $settingName ), strval( $clientAppName ) );
+		self::updateRow( self::TABLENAME, $values, $where, $params, strval( $settingValue ) );
+	}
+
+	/**
+	 * Update a value of an existing user setting for a client application.
+	 *
+	 * @since 10.3.0
+	 * @param integer $settingId
+	 * @param string $settingValue
+	 */
+	static public function updateSettingById( $settingId, $settingValue )
+	{
+		$values = array( 'value' => '#BLOB#' );
+		$where = '`id` = ?';
+		$params = array( intval( $settingId ) );
 		self::updateRow( self::TABLENAME, $values, $where, $params, strval( $settingValue ) );
 	}
 }
