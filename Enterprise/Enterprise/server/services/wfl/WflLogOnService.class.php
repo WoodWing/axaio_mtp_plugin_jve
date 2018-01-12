@@ -119,12 +119,12 @@ class WflLogOnService extends EnterpriseService
 			if( !empty($req->Ticket) && empty($req->Password) ) {
 				$otherUser = DBTicket::checkTicket( $req->Ticket ); // still valid ticket? (not expired)
 				if( $otherUser === false ) { // same user?
-					throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket' );
+					throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
 				}
 				// We only allow interchanging tickets between DIFFERENT apps
 				$ticketRow = DBTicket::getTicket( $req->Ticket );
 				if( $ticketRow === false || $ticketRow['appname'] == $req->ClientAppName ) { // diff app?
-					throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket' );
+					throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
 				}
 				// Third parties should not fool us...
 				/* // This check always fails since we don't know the serial nor prodcode for the 'other' app...
@@ -135,7 +135,7 @@ class WflLogOnService extends EnterpriseService
 				require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
 				$usrRow = DBUser::findUser( null, $otherUser, null );
 				if( !$usrRow ) {
-					throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket' );
+					throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO' );
 				}
 				// Fill-in user name (derived from valid ticket) and see if we can login
 				$req->User = $otherUser;
