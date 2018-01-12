@@ -20,49 +20,49 @@ class DBUserSetting extends DBBase
 	/**
 	 * Get user settings for a client application.
 	 *
-	 * [BZ#8744] There are two different sets of settings you can query:
-	 * - APPLICATION user settings. Only those user settings that are stored by the given application.
-	 *   This is for normal usage. Pass a filled $clientAppName to retrieve those from DB.
-	 * - ALL user settings. All user settings saved by all applications.
-	 *   This is typically used by Smart Mover. Pass null for $clientAppName to retrieve those from DB.
-	 *   In case of Mover we add the application name to the setting name to avoid duplicate names.
-	 *
+	 * @since 10.3.0 no longer accepting null for $clientAppName
 	 * @param string $userShortName
-	 * @param string|null $clientAppName Filled = app settings. Null = all settings.
+	 * @param string $clientAppName
 	 * @return Setting[]
 	 */
-	static public function getSettings( $userShortName, $clientAppName = null )
+	static public function getSettings( $userShortName, $clientAppName )
 	{
 		// Fetch user settings from DB.
-		$where = '`user` = ? ';
-		$params = array( strval( $userShortName ) );
-		if( is_null( $clientAppName ) ) { // all settings?
-			$where .= "AND NOT (`appname` = '' OR `appname` is null) "; // exclude migrated settings! -> or else you'll get duplicates!
-		} else {
-			if( $clientAppName ) {
-				$where .= "AND `appname` = ? ";
-				$params[] = strval( $clientAppName );
-			} else {
-				$where .= "AND (`appname` = ? OR `appname` is null) ";
-				$params[] = strval( $clientAppName );
-			}
-		}
-		$rows = self::listRows( self::TABLENAME, '', '', $where, '*', $params );
+		$select = array( 'setting', 'value' );
+		$where = '`user` = ? AND `appname` = ?';
+		$params = array( strval( $userShortName ), strval( $clientAppName ) );
+		$rows = self::listRows( self::TABLENAME, '', '', $where, $select, $params );
 
 		// Convert DB rows into Setting data objects.
 		$settings = array();
 		if( $rows ) foreach( $rows as $row ) {
-			if( is_null( $clientAppName ) ) { // all settings for e.g. Mover
-				if( empty( $row['appname'] ) ) {
-					$settingName = $row['setting'];
-				} else {
-					$settingName = $row['setting'].'-'.$row['appname'];
-					// User queries in InCopy and InDesign can have the same name so we add the application.
-				}
-				$settings[] = new Setting( $settingName, $row['value'] );
-			} else {
-				$settings[] = new Setting( $row['setting'], $row['value'] );
-			}
+			$settings[] = new Setting( $row['setting'], $row['value'] );
+		}
+		return $settings;
+	}
+
+	/**
+	 * Get the 'UserQuery' user settings for all client applications.
+	 *
+	 * These settings are named 'UserQuery_', 'UserQuery2_', 'UserQuery3_', etc
+	 *
+	 * @since 10.3.0
+	 * @param string $userShortName
+	 * @return Setting[] The setting names are postfixed with the client application name (separated by a dash).
+	 */
+	static public function getUserQuerySettings( $userShortName )
+	{
+		// Fetch user settings from DB.
+		$select = array( 'appname', 'setting', 'value' );
+		$where = '`user` = ? AND `setting` LIKE ?';
+		$params = array( strval( $userShortName ), 'UserQuery%' );
+		$rows = self::listRows( self::TABLENAME, '', '', $where, $select, $params );
+
+		// Convert DB rows into Setting data objects.
+		$settings = array();
+		if( $rows ) foreach( $rows as $row ) {
+			$settingName = $row['setting'].'-'.$row['appname'];
+			$settings[] = new Setting( $settingName, $row['value'] );
 		}
 		return $settings;
 	}

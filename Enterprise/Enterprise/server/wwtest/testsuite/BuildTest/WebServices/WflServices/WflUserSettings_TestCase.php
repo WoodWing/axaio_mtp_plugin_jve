@@ -16,14 +16,17 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	public function getPrio()        { return 200; }
 	public function isSelfCleaning() { return true; }
 
-	/** @var string $ticket */
-	private $ticket;
+	/** @var string[] $tickets Ticket per client app. */
+	private $tickets = array();
 
 	/** @var WW_Utils_TestSuite $utils */
 	private $utils;
 
-	/** @var Setting[] $settings*/
-	private $settings;
+	/** @var Setting[][] $settings Collection of settings per client app. */
+	private $settings = array();
+
+	/** @var string $clientAppName Currently acting client app. */
+	private $clientAppName;
 
 	/**
 	 * @inheritdoc
@@ -34,6 +37,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 			$this->setUpTestData();
 
 			$this->testRoundtripSettingsOverLogOnLogOff();
+			$this->testUserQueriesForMoverOverLogOnLogOff();
 			$this->testCleanSettingsInDatabaseOverLogOnLogOff();
 
 			$this->testRoundtripSettingsOverSaveAndGet();
@@ -58,8 +62,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	 */
 	private function tearDownTestData()
 	{
-		if( $this->ticket ) {
-			$this->utils->wflLogOff( $this, $this->ticket );
+		if( $this->tickets ) foreach( $this->tickets as $clientAppName => $ticket ) {
+			$this->utils->wflLogOff( $this, $ticket );
+			unset( $this->tickets[$clientAppName] );
 		}
 	}
 
@@ -71,16 +76,20 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		// Start with new client application have no settings.
 		$this->clientAppName = 'WflUserSettings_App1_'.self::composeTimestampWithMs();
 		$this->logOn();
-		$this->assertCount( 0, $this->settings );
+		$this->assertCount( 0, $this->settings[$this->clientAppName] );
 
 		// Insert some settings for the current user who is now working with the client application.
-		$this->settings = array();
-		$this->settings[] = new Setting( 'Aap1', 'abc' );
-		$this->settings[] = new Setting( 'Noot1', '123' );
-		$this->settings[] = new Setting( 'Mies1', '' );
+		$settings = array();
+		$settings[] = new Setting( 'Aap1', 'abc' );
+		$settings[] = new Setting( 'Noot1', '123' );
+		$settings[] = new Setting( 'Mies1', '' );
 		// Simulate SC having duplicate settings (such as 'QueryPanels'):
-		$this->settings[] = new Setting( 'Vuur1', 'foo' );
-		$this->settings[] = new Setting( 'Vuur1', 'bar' );
+		$settings[] = new Setting( 'Vuur1', 'foo' );
+		$settings[] = new Setting( 'Vuur1', 'bar' );
+		// Simulate SC saving user queries, as preparation to the succeeding Smart Mover test:
+		$settings[] = new Setting( 'UserQuery_foo', 'foo' ); // must have UserQuery prefix
+		$settings[] = new Setting( 'UserQuery2_bar', 'bar' );
+		$this->settings[$this->clientAppName] = $settings;
 		$this->logOff();
 
 		$this->logOn();
@@ -89,9 +98,33 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 			new Setting( 'Noot1', '123' ),
 			new Setting( 'Mies1', '' ),
 			new Setting( 'Vuur1', 'foo' ),
-			new Setting( 'Vuur1', 'bar' )
+			new Setting( 'Vuur1', 'bar' ),
+			new Setting( 'UserQuery_foo', 'foo' ),
+			new Setting( 'UserQuery2_bar', 'bar' )
 		);
-		$this->assertSettingsEquals( $expected, $this->settings );
+		$this->assertSettingsEquals( $expected, $this->settings[$this->clientAppName] );
+	}
+
+	/**
+	 * Call LogOn and LogOff for Smart Mover and validate if the UserQuery user settings are taken from other clients.
+	 */
+	private function testUserQueriesForMoverOverLogOnLogOff()
+	{
+		$otherClientAppName = $this->clientAppName; // temporary switch to Mover
+		$this->clientAppName = 'Mover_WflUserSettings_'.self::composeTimestampWithMs(); // must have Mover prefix
+		$this->logOn();
+		// Don't assertCount() here because the TESTSUITE user could be a real user having UserQuery settings for InDesign/InCopy.
+
+		// The core postfixes the settings with the client application name.
+		$expected = array(
+			new Setting( "UserQuery_foo-{$otherClientAppName}", 'foo' ),
+			new Setting( "UserQuery2_bar-{$otherClientAppName}", 'bar' )
+		);
+		$matches = $this->countEqualSettings( $expected, $this->settings[$this->clientAppName] );
+		$this->assertEquals( 2, $matches );
+
+		$this->logOff( false ); // Smart Mover does not save user settings.
+		$this->clientAppName = $otherClientAppName; // restore temporary switch
 	}
 
 	/**
@@ -99,10 +132,10 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	 */
 	private function testCleanSettingsInDatabaseOverLogOnLogOff()
 	{
-		$this->settings = array();
+		$this->settings[$this->clientAppName] = array();
 		$this->logOff();
 		$this->logOn();
-		$this->assertCount( 0, $this->settings );
+		$this->assertCount( 0, $this->settings[$this->clientAppName] );
 		$this->logOff();
 	}
 
@@ -121,24 +154,28 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		$this->assertInstanceOf( 'WflLogOnResponse', $response );
 
 		$this->assertFalse( empty( $response->Ticket ) );
-		$this->ticket = $response->Ticket;
+		$this->tickets[$this->clientAppName] = $response->Ticket;
 
-		$this->settings = $response->Settings;
+		$this->settings[$this->clientAppName] = $response->Settings;
 	}
 
 	/**
 	 * Call the LogOff service and save the user settings.
+	 *
+	 * @param bool $saveSettings
 	 */
-	private function logOff()
+	private function logOff( $saveSettings = true )
 	{
-		$this->utils->setRequestComposer(
-			function( WflLogOffRequest $req ) {
-				$req->SaveSettings = true;
-				$req->Settings = $this->settings;
-			}
-		);
-		$this->utils->wflLogOff( $this, $this->ticket );
-		$this->ticket = null;
+		if( $saveSettings ) {
+			$this->utils->setRequestComposer(
+				function( WflLogOffRequest $req ) {
+					$req->SaveSettings = true;
+					$req->Settings = $this->settings[ $this->clientAppName ];
+				}
+			);
+		}
+		$this->utils->wflLogOff( $this, $this->tickets[$this->clientAppName] );
+		unset( $this->tickets[$this->clientAppName] );
 	}
 
 	/**
@@ -149,16 +186,17 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		// Start with new client application have no settings.
 		$this->clientAppName = 'WflUserSettings_App2_'.self::composeTimestampWithMs();
 		$this->logOn();
-		$this->assertCount( 0, $this->settings );
+		$this->assertCount( 0, $this->settings[$this->clientAppName] );
 
 		$this->getSettings();
-		$this->assertCount( 0, $this->settings );
+		$this->assertCount( 0, $this->settings[$this->clientAppName] );
 
 		// Insert 3 settings for the current user who is now working with the client application.
-		$this->settings = array();
-		$this->settings[] = new Setting( 'Aap2', 'def' );
-		$this->settings[] = new Setting( 'Noot2', '456' );
-		$this->settings[] = new Setting( 'Mies2', '' );
+		$settings = array();
+		$settings[] = new Setting( 'Aap2', 'def' );
+		$settings[] = new Setting( 'Noot2', '456' );
+		$settings[] = new Setting( 'Mies2', '' );
+		$this->settings[$this->clientAppName] = $settings;
 		$this->saveSettings();
 
 		$this->getSettings();
@@ -167,11 +205,12 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 			new Setting( 'Noot2', '456' ),
 			new Setting( 'Mies2', '' )
 		);
-		$this->assertSettingsEquals( $expected, $this->settings );
+		$this->assertSettingsEquals( $expected, $this->settings[$this->clientAppName] );
 
 		// Update only one of the settings that is changed by the current user.
-		$this->settings = array();
-		$this->settings[] = new Setting( 'Noot2', '789' );
+		$settings = array();
+		$settings[] = new Setting( 'Noot2', '789' );
+		$this->settings[$this->clientAppName] = $settings;
 		$this->saveSettings();
 
 		$this->getSettings();
@@ -180,7 +219,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 			new Setting( 'Noot2', '789' ),
 			new Setting( 'Mies2', '' )
 		);
-		$this->assertSettingsEquals( $expected, $this->settings );
+		$this->assertSettingsEquals( $expected, $this->settings[$this->clientAppName] );
 	}
 
 	/**
@@ -194,11 +233,11 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 			new Setting( 'Noot2', '789' ),
 			new Setting( 'Mies2', '' )
 		);
-		$this->assertSettingsEquals( $expected, $this->settings );
+		$this->assertSettingsEquals( $expected, $this->settings[$this->clientAppName] );
 
 		$this->deleteSettings( array( 'Noot2', 'Mies2' ) );
 		$this->getSettings();
-		$this->assertCount( 0, $this->settings );
+		$this->assertCount( 0, $this->settings[$this->clientAppName] );
 	}
 
 	/**
@@ -208,11 +247,11 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	{
 		require_once BASEDIR . '/server/services/wfl/WflGetUserSettingsService.class.php';
 		$request = new WflGetUserSettingsRequest();
-		$request->Ticket = $this->ticket;
+		$request->Ticket = $this->tickets[$this->clientAppName];
 		/** @var WflGetUserSettingsResponse $response */
 		$response = $this->utils->callService( $this, $request, 'Get user settings' );
 		$this->assertInstanceOf( 'WflGetUserSettingsResponse', $response );
-		$this->settings = $response->Settings;
+		$this->settings[$this->clientAppName] = $response->Settings;
 	}
 
 	/**
@@ -222,8 +261,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	{
 		require_once BASEDIR . '/server/services/wfl/WflSaveUserSettingsService.class.php';
 		$request = new WflSaveUserSettingsRequest();
-		$request->Ticket = $this->ticket;
-		$request->Settings = $this->settings;
+		$request->Ticket = $this->tickets[$this->clientAppName];
+		$request->Settings = $this->settings[$this->clientAppName];
 		/** @var WflSaveUserSettingsResponse $response */
 		$response = $this->utils->callService( $this, $request, 'Save user settings' );
 		$this->assertInstanceOf( 'WflSaveUserSettingsResponse', $response );
@@ -238,7 +277,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	{
 		require_once BASEDIR . '/server/services/wfl/WflDeleteUserSettingsService.class.php';
 		$request = new WflDeleteUserSettingsRequest();
-		$request->Ticket = $this->ticket;
+		$request->Ticket = $this->tickets[$this->clientAppName];
 		$request->Settings = $settingNames;
 		/** @var WflSaveUserSettingsResponse $response */
 		$response = $this->utils->callService( $this, $request, 'Delete user settings' );
@@ -265,12 +304,25 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	 */
 	private function assertSettingsEquals( $expected, $actual )
 	{
-		$matches = 0;
 		$this->assertInternalType( 'array', $expected );
 		$this->assertInternalType( 'array', $actual );
 		$this->assertEquals( count( $expected ), count( $actual ) );
-		foreach( $expected as $settingA ) {
-			foreach( $actual as $settingB ) {
+		$matches = $this->countEqualSettings( $expected, $actual );
+		$this->assertEquals( count( $expected ), $matches, 'The two collections of Settings are not equal.' );
+	}
+
+	/**
+	 * Tells for two collections of user settings how many are equal (having the same name and value).
+	 *
+	 * @param Setting[] $settingsA
+	 * @param Setting[] $settingsB
+	 * @return int Number of equal settings.
+	 */
+	private function countEqualSettings( $settingsA, $settingsB )
+	{
+		$matches = 0;
+		foreach( $settingsA as $settingA ) {
+			foreach( $settingsB as $settingB ) {
 				if( $settingA->Setting === $settingB->Setting ) {
 					if( $settingA->Value === $settingB->Value ) {
 						$matches += 1;
@@ -278,6 +330,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 				}
 			}
 		}
-		$this->assertEquals( count( $expected ), $matches, 'The two collections of Settings are not equal.' );
+		return $matches;
 	}
 }

@@ -31,9 +31,9 @@ class WW_BizClasses_UserSetting
 		// Note: Since Mover never *saves* settings, we can safely do this without the risk returning
 		//       same settings twice, which could happen after logon+logoff+logon.
 		if( stripos( $clientAppName, 'mover' ) === 0 ) { // Smart Mover client?
-			$settings = DBUserSetting::getSettings( $userShortName, null ); // null = ALL user settings, except migrated settings
+			$settings = DBUserSetting::getUserQuerySettings( $userShortName );
 		} else {
-			$settings = DBUserSetting::getSettings( $userShortName, $clientAppName ); // Filled = APPLICATION user settings
+			$settings = DBUserSetting::getSettings( $userShortName, $clientAppName );
 		}
 		return $settings;
 	}
