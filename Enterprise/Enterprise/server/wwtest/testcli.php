@@ -25,7 +25,7 @@ class WW_Test
 	public $testSuite = '';
 }
 
-function getTestsFromXML(&$tests, $xmlTests, $sessionId = null, $testSuite )
+function getTestsFromXML(&$tests, $xmlTests, $sessionId, $testSuite )
 {
 	if ( !$sessionId ) {
 		// Per test suite a different session id. (only on the first level (this is also done in the javascript implementation)
