@@ -22,9 +22,10 @@ class WW_Test
 	public $Message = '';
 	public $ExtendedMessage = '';
 	public $SessionId = '';
+	public $testSuite = '';
 }
 
-function getTestsFromXML(&$tests, $xmlTests, $sessionId = null )
+function getTestsFromXML(&$tests, $xmlTests, $sessionId = null, $testSuite )
 {
 	if ( !$sessionId ) {
 		// Per test suite a different session id. (only on the first level (this is also done in the javascript implementation)
@@ -33,12 +34,13 @@ function getTestsFromXML(&$tests, $xmlTests, $sessionId = null )
 	foreach ($xmlTests as $xmlTest){
 		// a test can contain sub tests
 		if ($xmlTest->Type == 'TestSuite'){
-			getTestsFromXML($tests, $xmlTest->Tests[0]->Test, $sessionId);
+			getTestsFromXML($tests, $xmlTest->Tests[0]->Test, $sessionId, $testSuite);
 		} else {
 			$test = new WW_Test();
 			$test->ClassPath = strval($xmlTest->ClassPath);
 			$test->DisplayName = strval($xmlTest->DisplayName);
 			$test->SessionId = strval($sessionId);
+			$test->testSuite = $testSuite;
 			$tests[] = $test;
 		}
 	}
@@ -53,7 +55,7 @@ function getTests($testSuite)
 
 	$tests = array();
 	if (isset($xml->Test[0]->Tests[0]->Test)){
-		getTestsFromXML($tests, $xml->Test[0]->Tests[0]->Test);
+		getTestsFromXML($tests, $xml->Test[0]->Tests[0]->Test, null, $testSuite );
 	} else {
 		// testsuite doesn't contain tests
 		// maybe it contains an error
@@ -73,7 +75,7 @@ function pollTest(WW_Test $test)
 {
 	$startTime = microtime(true);
 	$options = array( 'timeout' => 3600 ); // Max 1 hour
-	$client = new Zend\Http\Client( TESTSUITE_URI . '?command=PollTest&classPath=' . $test->ClassPath .'&sessionId=' . $test->SessionId, $options );
+	$client = new Zend\Http\Client( TESTSUITE_URI.'?command=PollTest&classPath='.$test->ClassPath.'&sessionId='.$test->SessionId.'&testSuite='.$test->testSuite, $options );
 	$response = $client->send();
 	$contents = $response->getBody();
 	$test->Time = microtime(true) - $startTime;
