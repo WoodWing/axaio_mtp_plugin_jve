@@ -334,10 +334,10 @@ class ElvisUtils {
 	 * connect to Elvis.
 	 * 2. When Elvis receives the request, it uses this very same url to compose the
 	 * download URL for the Elvis object.
-	 * 3. Download URL is returned to Enterprise.
-	 * 4. Enterprise returns this download URL to the clients, but not all clients can
+	 * 3. Download URL is returned to Enterprise Server.
+	 * 4. Enterprise Server returns this download URL to the clients, but not all clients can
 	 * access Elvis using this download URL. This is because ELVIS_URL that is used is
-	 * meant for communication between Enterprise and Elvis ( which are often located
+	 * meant for communication between Enterprise Server and Elvis ( which are often located
 	 * in the same local network ).
 	 *
 	 * Therefore, the download URL ( $url ) needs to be replaced with ELVIS_CLIENT_URL
