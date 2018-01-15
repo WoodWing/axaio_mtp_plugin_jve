@@ -284,7 +284,7 @@ class ElvisAMFClient extends ElvisClient
 			// the next day. Then the stored credentials will no longer be valid (since the day number is part of the key).
 			// In that case we bail out and let the user logon again so we can store the credentials again, this time
 			// encrypted with the current day number.
-			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket');
+			throw new BizException( 'ERR_TICKET', 'Client', 'SCEntError_InvalidTicket', null, null, 'INFO');
 		}
 		self::loginUserOrSuperuser( $credentials );
 
