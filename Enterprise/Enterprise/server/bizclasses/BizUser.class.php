@@ -435,7 +435,7 @@ class BizUser
 
 		require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
 		$bizUserSettings = new WW_BizClasses_UserSetting();
-		return $bizUserSettings->getSettings( $userShortName, $clientAppName );
+		return $bizUserSettings->getSettings( $userShortName, $clientAppName, null );
 	}
 
 	/**

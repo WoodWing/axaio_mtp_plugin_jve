@@ -20,14 +20,12 @@ class ElvisSessionUtil
 	{
 		require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
 		$bizUserSettings = new WW_BizClasses_UserSetting();
-		$settings = $bizUserSettings->getSettings( $userShort, 'ElvisContentSource' );
+		$settings = $bizUserSettings->getSettings( $userShort, 'ElvisContentSource', array( $name ) );
 
 		$value = null;
-		if( $settings ) foreach( $settings as $setting ) {
-			if( $setting->Setting == $name ) {
-				$value = $setting->Value;
-				break;
-			}
+		if( $settings ) {
+			$setting = reset( $settings );
+			$value = $setting->Value;
 		}
 		return $value;
 	}

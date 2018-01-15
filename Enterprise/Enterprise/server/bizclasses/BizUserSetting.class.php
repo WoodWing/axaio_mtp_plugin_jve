@@ -16,9 +16,10 @@ class WW_BizClasses_UserSetting
 	 *
 	 * @param string $userShortName
 	 * @param string $clientAppName
+	 * @param string[]|null $settingNames
 	 * @return Setting[]
 	 */
-	public function getSettings( $userShortName, $clientAppName )
+	public function getSettings( $userShortName, $clientAppName, $settingNames )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
 
@@ -33,7 +34,7 @@ class WW_BizClasses_UserSetting
 		if( stripos( $clientAppName, 'mover' ) === 0 ) { // Smart Mover client?
 			$settings = DBUserSetting::getUserQuerySettings( $userShortName );
 		} else {
-			$settings = DBUserSetting::getSettings( $userShortName, $clientAppName );
+			$settings = DBUserSetting::getSettings( $userShortName, $clientAppName, $settingNames );
 		}
 		return $settings;
 	}

@@ -10,12 +10,16 @@ package com.woodwing.enterprise.interfaces.services.wfl;
 public class GetUserSettings  implements java.io.Serializable {
     private java.lang.String ticket;
 
+    private java.lang.String[] settings;
+
     public GetUserSettings() {
     }
 
     public GetUserSettings(
-           java.lang.String ticket) {
+           java.lang.String ticket,
+           java.lang.String[] settings) {
            this.ticket = ticket;
+           this.settings = settings;
     }
 
 
@@ -38,6 +42,26 @@ public class GetUserSettings  implements java.io.Serializable {
         this.ticket = ticket;
     }
 
+
+    /**
+     * Gets the settings value for this GetUserSettings.
+     * 
+     * @return settings
+     */
+    public java.lang.String[] getSettings() {
+        return settings;
+    }
+
+
+    /**
+     * Sets the settings value for this GetUserSettings.
+     * 
+     * @param settings
+     */
+    public void setSettings(java.lang.String[] settings) {
+        this.settings = settings;
+    }
+
     private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof GetUserSettings)) return false;
@@ -52,7 +76,10 @@ public class GetUserSettings  implements java.io.Serializable {
         _equals = true && 
             ((this.ticket==null && other.getTicket()==null) || 
              (this.ticket!=null &&
-              this.ticket.equals(other.getTicket())));
+              this.ticket.equals(other.getTicket()))) &&
+            ((this.settings==null && other.getSettings()==null) || 
+             (this.settings!=null &&
+              java.util.Arrays.equals(this.settings, other.getSettings())));
         __equalsCalc = null;
         return _equals;
     }
@@ -66,6 +93,17 @@ public class GetUserSettings  implements java.io.Serializable {
         int _hashCode = 1;
         if (getTicket() != null) {
             _hashCode += getTicket().hashCode();
+        }
+        if (getSettings() != null) {
+            for (int i=0;
+                 i<java.lang.reflect.Array.getLength(getSettings());
+                 i++) {
+                java.lang.Object obj = java.lang.reflect.Array.get(getSettings(), i);
+                if (obj != null &&
+                    !obj.getClass().isArray()) {
+                    _hashCode += obj.hashCode();
+                }
+            }
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -82,6 +120,13 @@ public class GetUserSettings  implements java.io.Serializable {
         elemField.setXmlName(new javax.xml.namespace.QName("", "Ticket"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setNillable(false);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("settings");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "Settings"));
+        elemField.setXmlType(new javax.xml.namespace.QName("urn:SmartConnection", "String"));
+        elemField.setNillable(true);
+        elemField.setItemQName(new javax.xml.namespace.QName("", "String"));
         typeDesc.addFieldDesc(elemField);
     }
 

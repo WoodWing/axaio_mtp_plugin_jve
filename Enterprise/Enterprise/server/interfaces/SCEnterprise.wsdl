@@ -1917,6 +1917,7 @@
 				<complexType>
 					<sequence>
 						<element name="Ticket" 			type="xsd:string"/>
+						<element name="Settings"		type="tns:ArrayOfString" nillable="true"/> <!-- nil mean all settings -->
 					</sequence>
 				</complexType>
 			</element>

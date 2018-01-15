@@ -31,7 +31,8 @@ class WflGetUserSettingsService extends EnterpriseService
 		require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
 		$bizUserSettings = new WW_BizClasses_UserSetting();
 		$response = new WflGetUserSettingsResponse();
-		$response->Settings = $bizUserSettings->getSettings( BizSession::getShortUserName(), BizSession::getClientName() );
+		$response->Settings = $bizUserSettings->getSettings( BizSession::getShortUserName(), BizSession::getClientName(),
+			$req->Settings );
 		return $response;
 	}
 }

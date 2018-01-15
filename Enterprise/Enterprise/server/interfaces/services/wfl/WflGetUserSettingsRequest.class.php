@@ -11,13 +11,16 @@
 class WflGetUserSettingsRequest
 {
 	public $Ticket;
+	public $Settings;
 
 	/**
 	 * @param string               $Ticket                    
+	 * @param string[]             $Settings                  Nullable.
 	 */
-	public function __construct( $Ticket=null )
+	public function __construct( $Ticket=null, $Settings=null )
 	{
 		$this->Ticket               = $Ticket;
+		$this->Settings             = $Settings;
 	}
 
 	public function validate()
@@ -36,6 +39,18 @@ class WflGetUserSettingsRequest
 			}
 			$validator->leavePath();
 		}
+		if( $validator->checkExist( $datObj, 'Settings' ) ) {
+			$validator->enterPath( 'Settings' );
+			if( !is_null( $datObj->Settings ) ) {
+				$validator->checkType( $datObj->Settings, 'array' );
+				if( !empty($datObj->Settings) ) foreach( $datObj->Settings as $listItem ) {
+					$validator->enterPath( 'string' );
+					$validator->checkType( $listItem, 'string' );
+					$validator->leavePath();
+				}
+			}
+			$validator->leavePath();
+		}
 		$validator->leavePath();
 	}
 
@@ -43,6 +58,13 @@ class WflGetUserSettingsRequest
 
 	public function sanitizeProperties4Php()
 	{
+		if (0 < count($this->Settings)){
+			if (is_object($this->Settings[0])){
+				foreach ($this->Settings as $complexField){
+					$complexField->sanitizeProperties4Php();
+				}
+			}
+		}
 	}
 
 	public function mightHaveContent() { return false; }

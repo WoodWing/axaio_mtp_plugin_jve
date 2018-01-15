@@ -454,7 +454,7 @@ class BizSession
 		if( in_array( 'Settings', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
 			$bizUserSettings = new WW_BizClasses_UserSetting();
-			$ret->Settings = $bizUserSettings->getSettings( $shortUser, $appname );
+			$ret->Settings = $bizUserSettings->getSettings( $shortUser, $appname, null );
 		}
 		if( in_array( 'Users', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';

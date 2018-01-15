@@ -20,17 +20,52 @@ class DBUserSetting extends DBBase
 	/**
 	 * Get user settings for a client application.
 	 *
+	 * The $settingNames parameter is optional. When omitted, all settings for the user/client are returned.
+	 * Alternatively, a list of setting names (strings) can be provided to search only for those settings.
+	 * A setting name can be a matching name (for example 'foo') but can also contain a percentage character (%)
+	 * to request for a wildcard search (for example 'bar%' which returns all settings for which the name
+	 * starts with 'bar' such as 'bar123').
+	 *
 	 * @since 10.3.0 no longer accepting null for $clientAppName
 	 * @param string $userShortName
 	 * @param string $clientAppName
+	 * @param string[]|null $settingNames
 	 * @return Setting[]
 	 */
-	static public function getSettings( $userShortName, $clientAppName )
+	static public function getSettings( $userShortName, $clientAppName, $settingNames )
 	{
 		// Fetch user settings from DB.
 		$select = array( 'setting', 'value' );
-		$where = '`user` = ? AND `appname` = ?';
+		$where = '`user` = ? AND `appname` = ? ';
 		$params = array( strval( $userShortName ), strval( $clientAppName ) );
+
+		// From the $settingNames param, compose a WHERE clause fragment such as:
+		//    "AND ( `setting` IN ( 'foo', 'bar' ) OR `setting` LIKE 'UserQuery%' )"
+		$settingsNamesEquals = array();
+		$settingsNamesLike = array();
+		if( $settingNames ) foreach( $settingNames as $settingName ) {
+			if( strpos( $settingName, '%' ) ) {
+				$settingsNamesLike[] = $settingName;
+			} else {
+				$settingsNamesEquals[] = $settingName;
+			}
+		}
+		$whereORs = array();
+		if( $settingsNamesEquals ) {
+			$questionMarks = array_fill( 0, count( $settingsNamesEquals ), '?' );
+			$questionMarksCsv = implode( ', ', $questionMarks );
+			$whereORs[] = '`setting` IN ( '.$questionMarksCsv.' ) ';
+			$params = array_merge( $params, array_map( 'strval', $settingsNamesEquals ) );
+		}
+		if( $settingsNamesLike ) {
+			$likes = array_map( function( $settingsName ) { return '`setting` LIKE ?'; }, $settingsNamesLike );
+			$whereORs = array_merge( $whereORs, $likes );
+			$params = array_merge( $params, array_map( 'strval', $settingsNamesLike ) );
+		}
+		if( $whereORs ) {
+			$where .= 'AND ( '.implode( ' OR ', $whereORs ).' ) ';
+		}
+
 		$rows = self::listRows( self::TABLENAME, '', '', $where, $select, $params );
 
 		// Convert DB rows into Setting data objects.
@@ -44,7 +79,7 @@ class DBUserSetting extends DBBase
 	/**
 	 * Get the 'UserQuery' user settings for all client applications.
 	 *
-	 * These settings are named 'UserQuery_', 'UserQuery2_', 'UserQuery3_', etc
+	 * These settings are prefixed as follows: 'UserQuery_...', 'UserQuery2_...', 'UserQuery3_...', etc
 	 *
 	 * @since 10.3.0
 	 * @param string $userShortName
@@ -68,7 +103,7 @@ class DBUserSetting extends DBBase
 	}
 
 	/**
-	 * Remove all user settings or all settings for a client application.
+	 * Remove all user settings or all user settings for a specific client application.
 	 *
 	 * @since 10.3.0 no longer returning the DB resource handle
 	 * @param string $userShortName

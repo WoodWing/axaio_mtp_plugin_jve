@@ -13,6 +13,7 @@ package com.woodwing.enterprise.interfaces.services.wfl
 	public class WflGetUserSettingsRequest
 	{
 		private var _Ticket:String;
+		private var _Settings:Array;
 
 		public function WflGetUserSettingsRequest() {
 		}
@@ -22,6 +23,13 @@ package com.woodwing.enterprise.interfaces.services.wfl
 		}
 		public function set Ticket(Ticket:String):void {
 			this._Ticket = Ticket;
+		}
+
+		public function get Settings():Array {
+			return this._Settings;
+		}
+		public function set Settings(Settings:Array):void {
+			this._Settings = Settings;
 		}
 
 	}

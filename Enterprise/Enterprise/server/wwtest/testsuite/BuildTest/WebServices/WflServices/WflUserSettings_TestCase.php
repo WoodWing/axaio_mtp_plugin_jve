@@ -41,6 +41,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 			$this->testCleanSettingsInDatabaseOverLogOnLogOff();
 
 			$this->testRoundtripSettingsOverSaveAndGet();
+			$this->testQuerySettingsOverSaveAndGet();
 			$this->testCleanSettingsOverSaveAndGet();
 
 		} catch( BizException $e ) {}
@@ -196,6 +197,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		$settings[] = new Setting( 'Aap2', 'def' );
 		$settings[] = new Setting( 'Noot2', '456' );
 		$settings[] = new Setting( 'Mies2', '' );
+		$settings[] = new Setting( 'UserQuery_bar', 'bar' ); // must have UserQuery prefix
+		$settings[] = new Setting( 'UserQuery3_foo', 'foo' );
 		$this->settings[$this->clientAppName] = $settings;
 		$this->saveSettings();
 
@@ -203,7 +206,9 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		$expected = array(
 			new Setting( 'Aap2', 'def' ),
 			new Setting( 'Noot2', '456' ),
-			new Setting( 'Mies2', '' )
+			new Setting( 'Mies2', '' ),
+			new Setting( 'UserQuery_bar', 'bar' ),
+			new Setting( 'UserQuery3_foo', 'foo' )
 		);
 		$this->assertSettingsEquals( $expected, $this->settings[$this->clientAppName] );
 
@@ -217,7 +222,49 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		$expected = array(
 			new Setting( 'Aap2', 'def' ),
 			new Setting( 'Noot2', '789' ),
+			new Setting( 'Mies2', '' ),
+			new Setting( 'UserQuery_bar', 'bar' ),
+			new Setting( 'UserQuery3_foo', 'foo' )
+		);
+		$this->assertSettingsEquals( $expected, $this->settings[$this->clientAppName] );
+	}
+
+	/**
+	 * Call GetUserSettings with all kind of search parameters and validate the results.
+	 */
+	private function testQuerySettingsOverSaveAndGet()
+	{
+		// One setting.
+		$this->getSettings( array( 'Noot2' ) );
+		$expected = array(
+			new Setting( 'Noot2', '789' )
+		);
+		$this->assertSettingsEquals( $expected, $this->settings[$this->clientAppName] );
+
+		// Multiple settings.
+		$this->getSettings( array( 'Aap2', 'Mies2' ) );
+		$expected = array(
+			new Setting( 'Aap2', 'def' ),
 			new Setting( 'Mies2', '' )
+		);
+		$this->assertSettingsEquals( $expected, $this->settings[$this->clientAppName] );
+
+		// Wildcard search (LIKE).
+		$this->getSettings( array( 'UserQuery%' ) );
+		$expected = array(
+			new Setting( 'UserQuery_bar', 'bar' ),
+			new Setting( 'UserQuery3_foo', 'foo' )
+		);
+		$this->assertSettingsEquals( $expected, $this->settings[$this->clientAppName] );
+
+		// Mix of exact matches and wildcard.
+		$this->getSettings( array( 'UserQuery%', 'Aap2', 'Noot2', 'Mies2' ) );
+		$expected = array(
+			new Setting( 'Aap2', 'def' ),
+			new Setting( 'Noot2', '789' ),
+			new Setting( 'Mies2', '' ),
+			new Setting( 'UserQuery_bar', 'bar' ),
+			new Setting( 'UserQuery3_foo', 'foo' )
 		);
 		$this->assertSettingsEquals( $expected, $this->settings[$this->clientAppName] );
 	}
@@ -231,23 +278,28 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		$this->getSettings();
 		$expected = array(
 			new Setting( 'Noot2', '789' ),
-			new Setting( 'Mies2', '' )
+			new Setting( 'Mies2', '' ),
+			new Setting( 'UserQuery_bar', 'bar' ),
+			new Setting( 'UserQuery3_foo', 'foo' )
 		);
 		$this->assertSettingsEquals( $expected, $this->settings[$this->clientAppName] );
 
-		$this->deleteSettings( array( 'Noot2', 'Mies2' ) );
+		$this->deleteSettings( array( 'Noot2', 'Mies2', 'UserQuery_bar', 'UserQuery3_foo' ) );
 		$this->getSettings();
 		$this->assertCount( 0, $this->settings[$this->clientAppName] );
 	}
 
 	/**
 	 * Call the GetUserSettings service and retrieve the user settings.
+	 *
+	 * @param string[]|null
 	 */
-	private function getSettings()
+	private function getSettings( $settingNames = null )
 	{
 		require_once BASEDIR . '/server/services/wfl/WflGetUserSettingsService.class.php';
 		$request = new WflGetUserSettingsRequest();
 		$request->Ticket = $this->tickets[$this->clientAppName];
+		$request->Settings = $settingNames;
 		/** @var WflGetUserSettingsResponse $response */
 		$response = $this->utils->callService( $this, $request, 'Get user settings' );
 		$this->assertInstanceOf( 'WflGetUserSettingsResponse', $response );
