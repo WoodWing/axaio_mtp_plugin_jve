@@ -1353,11 +1353,20 @@ function main()
                 var myDocPagesLen = myDocPages.length;
                 var myDocPrefPageWidth = myDoc.documentPreferences.pageWidth;
                 var myDocPrefPageHeight = myDoc.documentPreferences.pageHeight;
-                for( var pgIdx = 0; pgIdx < myDocPagesLen; pgIdx++ )
+                var currentSectionIdx = 0;
+                var pgSecIdx = 0;
+                for( var pgIdx = 0; pgIdx < myDocPagesLen; pgIdx++, pgSecIdx++ )
                 {
                     var oPage = myDocPages[pgIdx];
                     if ( lookupPages[oPage.id] == 1 ) {
                         var section = oPage.appliedSection;
+                        
+                        // if a new section is started, then reinitialize the section page counter. 
+                        if ( oPage.appliedSection.index != currentSectionIdx ) {
+                            currentSectionIdx = oPage.appliedSection.index;
+                            pgSecIdx = 0;
+                        }
+
                         var pageSectionName = section ? section.name : '';
                         if ( oPage.name.substr(0,pageSectionName.length) == pageSectionName ) {
                             // section name is allready in pagename ( sections/numbering -> tickbox 'Include prefix when numbering pages' )
@@ -1368,7 +1377,8 @@ function main()
                         }
                         arrSortPageObjects.push( { key:pgIdx, value:oPage } );
                         var finalPageName = oPage.name;
-                        var pageOrder = section.pageNumberStart + pgIdx;
+                        // page order = start of section + page index within the section.
+                        var pageOrder = section.pageNumberStart + pgSecIdx;
 
                         composeData.push( '\t\t<page side="' + pageSide2Text(oPage.side) +
                             '" name="' + escape(finalPageName) + '" sequence="' + (pgIdx+1) +
