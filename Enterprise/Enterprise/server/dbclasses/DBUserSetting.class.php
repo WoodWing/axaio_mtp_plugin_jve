@@ -83,9 +83,10 @@ class DBUserSetting extends DBBase
 	 *
 	 * @since 10.3.0
 	 * @param string $userShortName
-	 * @return Setting[] The setting names are postfixed with the client application name (separated by a dash).
+	 * @param callable $postfixSettingNameWithClientAppName
+	 * @return Setting[] The setting names are postfixed with the client application name.
 	 */
-	static public function getUserQuerySettings( $userShortName )
+	static public function getUserQuerySettings( $userShortName, callable $postfixSettingNameWithClientAppName )
 	{
 		// Fetch user settings from DB.
 		$select = array( 'appname', 'setting', 'value' );
@@ -96,7 +97,7 @@ class DBUserSetting extends DBBase
 		// Convert DB rows into Setting data objects.
 		$settings = array();
 		if( $rows ) foreach( $rows as $row ) {
-			$settingName = $row['setting'].'-'.$row['appname'];
+			$settingName = call_user_func( $postfixSettingNameWithClientAppName, $row['setting'], $row['appname'] );
 			$settings[] = new Setting( $settingName, $row['value'] );
 		}
 		return $settings;

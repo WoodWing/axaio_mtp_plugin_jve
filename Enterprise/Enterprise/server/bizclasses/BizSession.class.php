@@ -454,7 +454,7 @@ class BizSession
 		if( in_array( 'Settings', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
 			$bizUserSettings = new WW_BizClasses_UserSetting();
-			$ret->Settings = $bizUserSettings->getSettings( $shortUser, $appname, null );
+			$ret->Settings = $bizUserSettings->getSettings( BizSession::getShortUserName(), BizSession::getClientName(), null );
 		}
 		if( in_array( 'Users', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
@@ -620,8 +620,12 @@ class BizSession
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
 		DBlog::logService( $shortUserName, 'LogOff' );
 
-		//get the appname before deleting the ticket...
-		$clientAppName = DBTicket::DBappticket($ticket);
+		// store user settings (before deleting the ticket)
+		if( $savesettings ) {
+			require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+			$bizUserSettings = new WW_BizClasses_UserSetting();
+			$bizUserSettings->replaceSettings( $shortUserName , DBTicket::DBappticket($ticket), $settings );
+		}
 
 		// delete ticket
 		$dbDriver = DBDriverFactory::gen();
@@ -636,13 +640,6 @@ class BizSession
 		// Remove the ticket based queue in RabbitMQ.
 		require_once BASEDIR.'/server/bizclasses/BizMessageQueue.class.php';
 		BizMessageQueue::removeOrphanQueuesByTickets( array( $ticket ) );
-
-		// settings
-		if( $savesettings ) {
-			require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
-			$bizUserSettings = new WW_BizClasses_UserSetting();
-			$bizUserSettings->replaceSettings( $shortUserName , $clientAppName, $settings );
-		}
 	}
 
 	/**
