@@ -56,16 +56,31 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	/** @var string[] $protocols */
 	private $protocols;
 
+	/** @var string $packageName */
+	private $packageName;
+
 	/**
 	 * Constructor.
 	 *
 	 * @param WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface $interfaceDescriptor
 	 * @param string[] $protocols List of protocols required by the web service provider.
+	 * @param string $packageName (optional) Package name of the web service provider.
+	 * @param string $packageVersion (optional) Package version of the web service provider.
 	 */
-	public function __construct( WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface $interfaceDescriptor, $protocols )
+	public function __construct( WW_BuildTools_GenServices_Interfaces_WebServiceDescriptorInterface $interfaceDescriptor, $protocols, $packageName = null, $packageVersion = null )
 	{
 		$this->intfDescriptor = $interfaceDescriptor;
 		$this->protocols = $protocols;
+		$this->packageName = $packageName;
+		if( !$packageName ) {
+			$this->packageName = 'Enterprise';
+		}
+		$this->packageVersion = $packageVersion;
+		if( !$packageVersion ) {
+			require_once BASEDIR.'/server/serverinfo.php'; // SERVERVERSION
+			$version = explode( '.', SERVERVERSION );
+			$this->packageVersion = $version[0] .'.'. $version[1];
+		}
 
 		// parse wsdl
 		$wsdlFile = $this->intfDescriptor->getWsdlFilePath();
@@ -493,12 +508,16 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	public function generateTypeMap4AMF(array $map, $identifier)
 	{
 		$outTxt = "<?php\n\n/**\n"
-			." * @package Enterprise\n"
+			." * @package ".$this->packageName."\n"
 			." * @subpackage Services\n"
 			." * @copyright WoodWing Software bv. All Rights Reserved.\n"
-			." * \n"
-			." * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!\n"
-			." *".'/'."\n\n";
+			." *".'/'."\n"
+			."\n"
+			."// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+			."// * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!\n"
+			."// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+			."\n";
+
 
 		$fileOut = BASEDIR.'/server/protocols/amf/' . $this->intfDescriptor->getServiceNameShort() . $identifier . "TypeMap.php";
 
@@ -539,14 +558,15 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		);
 
 		$outTxt = "<?php\n\n/**\n"
-				." * @package Enterprise\n"
+				." * @package ".$this->packageName."\n"
 				." * @subpackage $intfFull Services\n"
 				." * @copyright WoodWing Software bv. All Rights Reserved.\n"
-				." * \n"
-				." * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n"
-				." * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!\n"
-				." * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n"
-				." *".'/'."\n\n"
+				." *".'/'."\n"
+				."\n"
+				."// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+				."// * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!\n"
+				."// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+				."\n"
 				."require_once BASEDIR.'/server/protocols/soap/SOAP_Attachment.class.php';"."\n\n";
 		foreach( $dataClasses as $dataName => $dataStruct ) {
 			$numberFields = array();
@@ -708,7 +728,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			$datPackage = $this->composeWebServicesUri().".{$intfShortLow}.dataclasses";
 			$dataClassName = $this->intfDescriptor->getServiceNameShort().$dataName; // See Note#001
 			$outTxt = "/*\n"
-					."\tEnterprise $intfFull Services\n"
+					."\t".$this->packageName." $intfFull Services\n"
 					."\tCopyright (c) WoodWing Software bv. All Rights Reserved.\n\n"
 					."\tIMPORTANT: DO NOT EDIT! THIS PACKAGE IS GENERATED FROM WSDL!\n"
 					.'*/'."\n\n";
@@ -746,7 +766,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		}
 
 		$outTxt = "/*\n"
-			."\tEnterprise Services Utils\n"
+			."\t".$this->packageName." Services Utils\n"
 			."\tCopyright (c) WoodWing Software bv. All Rights Reserved.\n\n"
 			."\tIMPORTANT: DO NOT EDIT! THIS PACKAGE IS GENERATED FROM WSDL!\n"
 			.'*/'."\n\n";
@@ -757,10 +777,10 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 			."\t{\n\n"
 			."\t\t/*\n"
 			."\t\t* Returns a date string formatted as yyyy-mm-ddThh:mm:ss\n"
-	 		."\t\t* @param d Date\n"
+			."\t\t* @param d Date\n"
 			."\t\t*\n"
-	 		."\t\t* @return String a yyyy-mm-ddThh:mm:ss formated date.\n"
-	 		."\t\t*/\n"
+			."\t\t* @return String a yyyy-mm-ddThh:mm:ss formated date.\n"
+			."\t\t*/\n"
 			."\t\tpublic static function dateToString (d:Date):String {\n\n"
 			."\t\t\tif (d != null) {\n"
 			."\t\t\t\tvar day:Number = d.date;\n"
@@ -1131,6 +1151,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		// replace /*BODY*/ marker with list of service functions (class body)
 		$providerDir = $pluginFull ? "__DIR__.'/../../.." : "BASEDIR.'/server";
 		$outTxt = str_replace( '/*BODY*/', $outTxt, $template );
+		$outTxt = str_replace( '/*PACKAGENAME*/', $this->packageName, $outTxt );
 		$outTxt = str_replace( '/*CLASSNAME*/', $className, $outTxt );
 		$outTxt = str_replace( '/*INTFSHORT*/', $intfShort, $outTxt );
 		$outTxt = str_replace( '/*INTFSHORTLOW*/', $intfShortLow, $outTxt );
@@ -1191,12 +1212,15 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 
 			// File header
 			$outTxt = "<?php\n\n/**\n"
-					." * @package Enterprise\n"
+					." * @package ".$this->packageName."\n"
 					." * @subpackage Services\n"
 					." * @copyright WoodWing Software bv. All Rights Reserved.\n"
-					." * \n"
-					." * IMPORTANT: DO NOT EDIT! THIS CLASS IS GENERATED FROM WSDL!\n"
-					." *".'/'."\n\n";
+					." *".'/'."\n"
+					."\n"
+					."// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+					."// * IMPORTANT: DO NOT EDIT! THIS CLASS IS GENERATED FROM WSDL!\n"
+					."// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+					."\n";
 			// Request/Reponse class
 			$outTxt .= "class {$pluginShort}{$intfShort}{$serviceName}\n{\n";
 
@@ -1375,7 +1399,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 
 			// File header
 			$outTxt = "/*\n"
-					."\tEnterprise $intfFull Services\n"
+					."\t".$this->packageName." $intfFull Services\n"
 					."\tCopyright (c) WoodWing Software bv. All Rights Reserved.\n\n"
 					."\tIMPORTANT: DO NOT EDIT! THIS PACKAGE IS GENERATED FROM WSDL!\n"
 					.'*/'."\n\n";
@@ -1453,10 +1477,6 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		$pluginFull = $this->intfDescriptor->getPluginNameFull();
 		$pluginShort = $this->intfDescriptor->getPluginNameShort();
 
-		require_once BASEDIR.'/server/serverinfo.php'; // SERVERVERSION
-		$serverVer = explode( '.', SERVERVERSION );
-   		$serverVersion = $serverVer[0] .'.'. $serverVer[1];
-
 		// TODO: Use getServiceMessages() instead of code fragment below
 		$msgEntries = $xpath->query( '/wsdl:definitions/wsdl:message' );
 		foreach( $msgEntries as $msgEntry ) {
@@ -1476,11 +1496,12 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 					}
 					$providerDir = $pluginFull ? "__DIR__.'/../.." : "BASEDIR.'/server";
 					// fill in template params
+					$outTxt = str_replace( '/*PACKAGENAME*/', $this->packageName, $outTxt );
 					$outTxt = str_replace( '/*SERVICE*/', $serviceName, $outTxt );
 					$outTxt = str_replace( '/*INTFFULL*/', $intfFull, $outTxt );
 					$outTxt = str_replace( '/*INTFSHORT*/', $intfShort, $outTxt );
 					$outTxt = str_replace( '/*INTFSHORTLOW*/', $intfShortLow, $outTxt );
-					$outTxt = str_replace( '/*SERVERVERSION*/', $serverVersion, $outTxt );
+					$outTxt = str_replace( '/*SERVERVERSION*/', $this->packageVersion, $outTxt );
 					$outTxt = str_replace( '/*PLUGINFULL*/', $pluginFull, $outTxt );
 					$outTxt = str_replace( '/*PLUGINSHORT*/', $pluginShort, $outTxt );
 					$outTxt = str_replace( '/*PROVIDERDIR*/', $providerDir, $outTxt );
@@ -1507,10 +1528,6 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		$intfShort = $this->intfDescriptor->getServiceNameShort();
 		$intfShortLow = strtolower($intfShort);
 
-		require_once BASEDIR.'/server/serverinfo.php'; // SERVERVERSION
-		$serverVer = explode( '.', SERVERVERSION );
-   		$serverVersion = $serverVer[0] .'.'. $serverVer[1];
-
 		// TODO: Use getServiceMessages() instead of code fragment below
 		$msgEntries = $xpath->query( '/wsdl:definitions/wsdl:message' );
 		foreach( $msgEntries as $msgEntry ) {
@@ -1525,11 +1542,12 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 					return;
 				}
 				// fill in template params
+				$outTxt = str_replace( '/*PACKAGENAME*/', $this->packageName, $outTxt );
 				$outTxt = str_replace( '/*SERVICE*/', $serviceName, $outTxt );
 				$outTxt = str_replace( '/*INTFFULL*/', $intfFull, $outTxt );
 				$outTxt = str_replace( '/*INTFSHORT*/', $intfShort, $outTxt );
 				$outTxt = str_replace( '/*INTFSHORTLOW*/', $intfShortLow, $outTxt );
-				$outTxt = str_replace( '/*SERVERVERSION*/', $serverVersion, $outTxt );
+				$outTxt = str_replace( '/*SERVERVERSION*/', $this->packageVersion, $outTxt );
 				// write template instance into new php class file
 				$obsoletedServiceInterfaces = array('WflGetDialog');
 				if( !in_array( $intfShort.$serviceName, $obsoletedServiceInterfaces ) ) {
@@ -1608,6 +1626,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		$location = $address->getAttribute('location');
 		
 		// replace /*...*/ markers for server
+		$srvrOutTxt = str_replace( '/*PACKAGENAME*/', $this->packageName, $srvrOutTxt );
 		$srvrOutTxt = str_replace( '/*INTFFULL*/', $intfFull, $srvrOutTxt );
 		$srvrOutTxt = str_replace( '/*INTFSHORT*/', $intfShort, $srvrOutTxt );
 		//$srvrOutTxt = str_replace( '/*TYPEMAPS*/', $typeMaps, $srvrOutTxt );
@@ -1616,6 +1635,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		$srvrOutTxt = str_replace( '/*ENTRYPOINT*/', $location, $srvrOutTxt );
 
 		// replace /*...*/ markers for client
+		$clntOutTxt = str_replace( '/*PACKAGENAME*/', $this->packageName, $clntOutTxt );
 		$clntOutTxt = str_replace( '/*INTFFULL*/', $intfFull, $clntOutTxt );
 		$clntOutTxt = str_replace( '/*INTFSHORT*/', $intfShort, $clntOutTxt );
 		//$clntOutTxt = str_replace( '/*TYPEMAPS*/', $typeMaps, $clntOutTxt );
@@ -1651,6 +1671,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 		}
 
 		// replace /*...*/ markers for client
+		$outTxt = str_replace( '/*PACKAGENAME*/', $this->packageName, $outTxt );
 		$outTxt = str_replace( '/*INTFFULL*/', $intfFull, $outTxt );
 		$outTxt = str_replace( '/*CLASSNAME*/', $jsonClassName, $outTxt );
 		$outTxt = str_replace( '/*ENTRYPOINT*/', $this->intfDescriptor->getSoapEntryPoint(), $outTxt );
@@ -1701,9 +1722,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	{
 		// Init
 		$this->clearErrors();
-		require_once BASEDIR.'/server/serverinfo.php';
-		$version = explode( '.', SERVERVERSION );
-		$version = 'v'.$version[0].'.'.$version[1];
+		$version = 'v'.$this->packageVersion;
 		$wsdlFile = basename( $this->intfDescriptor->getWsdlFilePath() );
 		$intfFull = $this->intfDescriptor->getServiceNameFull();
 
@@ -1749,7 +1768,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 	</style>
 </head>
 <body><table><tr><td><img title="" src="woodwing95.gif"/></td>';
-		$docOutTxt .= '<td class="caption"><h1>'.$intfFull.' interface - Enterprise '.$version.'</h1></td></table>'.PHP_EOL;
+		$docOutTxt .= '<td class="caption"><h1>'.$intfFull.' interface - '.$this->packageName.' '.$version.'</h1></td></table>'.PHP_EOL;
 
 		// Build "Web Services" section in HTML
 		$docOutTxt .= '<br/><h2>Web Services</h2>'.PHP_EOL;
@@ -1953,14 +1972,15 @@ class WW_BuildTools_GenServices_WebServiceClassesGenerator
 
 		// Build the PHP class file header		
 		$outTxt = "<?php\n\n/**\n"
-				." * @package Enterprise\n"
+				." * @package ".$this->packageName."\n"
 				." * @subpackage Services\n"
 				." * @copyright WoodWing Software bv. All Rights Reserved.\n"
-				." * \n"
-				." * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n"
-				." * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!\n"
-				." * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n"
-				." *".'/'."\n\n";
+				." *".'/'."\n"
+				."\n"
+				."// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+				."// * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!\n"
+				."// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n"
+				."\n";
 
 		// Build PHP validation class for enumerations
 		foreach( $simpleTypeEnums as $enumName => $enumStructs ) {
