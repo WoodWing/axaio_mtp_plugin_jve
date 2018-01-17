@@ -621,7 +621,7 @@ class BizSession
 		DBlog::logService( $shortUserName, 'LogOff' );
 
 		// store user settings (before deleting the ticket)
-		if( $savesettings ) {
+		if( $savesettings && is_array( $settings ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
 			$bizUserSettings = new WW_BizClasses_UserSetting();
 			$bizUserSettings->replaceSettings( $shortUserName , DBTicket::DBappticket($ticket), $settings );
