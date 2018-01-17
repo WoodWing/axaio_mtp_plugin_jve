@@ -76,7 +76,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	{
 		// Start with new client application have no settings.
 		$this->clientAppName = 'WflUserSettings_App1_'.self::composeTimestampWithMs();
-		$this->logOn();
+		$this->logOn( array( 'Settings' ) );
 		$this->assertCount( 0, $this->settings[$this->clientAppName] );
 
 		// Insert some settings for the current user who is now working with the client application.
@@ -93,7 +93,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 		$this->settings[$this->clientAppName] = $settings;
 		$this->logOff();
 
-		$this->logOn();
+		$this->logOn( array( 'Settings' ) );
 		$expected = array(
 			new Setting( 'Aap1', 'abc' ),
 			new Setting( 'Noot1', '123' ),
@@ -113,7 +113,7 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	{
 		$otherClientAppName = $this->clientAppName; // temporary switch to Mover
 		$this->clientAppName = 'Mover_WflUserSettings_'.self::composeTimestampWithMs(); // must have Mover prefix
-		$this->logOn();
+		$this->logOn( array( 'Settings' ) );
 		// Don't assertCount() here because the TESTSUITE user could be a real user having UserQuery settings for InDesign/InCopy.
 
 		// The core postfixes the settings with the client application name.
@@ -135,20 +135,22 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	{
 		$this->settings[$this->clientAppName] = array();
 		$this->logOff();
-		$this->logOn();
+		$this->logOn( array( 'Settings' ) );
 		$this->assertCount( 0, $this->settings[$this->clientAppName] );
 		$this->logOff();
 	}
 
 	/**
 	 * Call the LogOn service and retrieve the user settings.
+	 *
+	 * @param string[] $requestInfo
 	 */
-	private function logOn()
+	private function logOn( $requestInfo )
 	{
 		$this->utils->setRequestComposer(
-			function( WflLogOnRequest $req ) {
+			function( WflLogOnRequest $req ) use ( $requestInfo ) {
 				$req->ClientAppName = $this->clientAppName;
-				$req->RequestInfo = array( 'Settings' );
+				$req->RequestInfo = $requestInfo;
 			}
 		);
 		$response = $this->utils->wflLogOn( $this );
@@ -186,8 +188,8 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflUserSettings_TestCase ex
 	{
 		// Start with new client application have no settings.
 		$this->clientAppName = 'WflUserSettings_App2_'.self::composeTimestampWithMs();
-		$this->logOn();
-		$this->assertCount( 0, $this->settings[$this->clientAppName] );
+		$this->logOn( array( 'Settings', 'PreferNoSettings' ) );
+		$this->assertNull( $this->settings[$this->clientAppName] );
 
 		$this->getSettings();
 		$this->assertCount( 0, $this->settings[$this->clientAppName] );

@@ -451,7 +451,7 @@ class BizSession
 		if( in_array( 'ServerInfo', $requestInfo ) ) {
 			$ret->ServerInfo    = self::getServerInfo( $ticket );
 		}
-		if( in_array( 'Settings', $requestInfo ) ) {
+		if( in_array( 'Settings', $requestInfo ) && !in_array( 'PreferNoSettings', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
 			$bizUserSettings = new WW_BizClasses_UserSetting();
 			$ret->Settings = $bizUserSettings->getSettings( BizSession::getShortUserName(), BizSession::getClientName(), null );

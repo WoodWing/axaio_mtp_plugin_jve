@@ -1851,13 +1851,19 @@
 					<element name="RequestInfo"			type="tns:ArrayOfString" nillable="true" minOccurs="0" maxOccurs="1"/>
 					<!-- v9.7: Which kind of information to resolve for the LogOnResponse.
 						Supported values: 
-							Publications, NamedQueries, ServerInfo, Settings, 
+							Publications, NamedQueries, ServerInfo, Settings, PreferNoSettings,
 							Users, UserGroups, Membership, ObjectTypeProperties, ActionProperties, 
 							Terms, FeatureProfiles, Dictionaries, MessageList, CurrentUser, MessageQueueConnections (v10.0)
 						And, when 'Publications' is NOT specified:
 							Publications->ObjectTypeProperties, Publications->ActionProperties, 
 							Publications->FeatureAccessList, Publications->CurrentIssue,
 							Publications->PubChannels, Publications->Categories, Publications->Dictionaries
+						Since 10.3 the PreferNoSettings option is added which enables client applications handling user
+						settings through the LogOn/LogOff services to migrate to the Get/SaveUserSettings services that
+						are introduced with ES 10.3 and meanwhile support both 10.2 and 10.3. By passing both Settings
+						and PreferNoSettings, ES 10.2 returns the settings through the LogOnResponse->Settings while
+						ES 10.3 does not. The client can check if LogOnResponse->ServerInfo->Version >= 10.3 and call
+						the new GetUserSettings services instead.
 					-->
 				</sequence>
 			  </complexType>

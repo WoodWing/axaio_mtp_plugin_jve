@@ -517,13 +517,19 @@
 <tr><td class="bpc">RequestTicket</td><td class="btc">boolean*</td><td class="bcc"> Obsoleted. Pass nil for TicketOnly and pass empty array for RequestInfo to obtain a ticket only. </td></tr>
 <tr><td class="bpc">RequestInfo</td><td class="btc">array of string*</td><td class="bcc"> v9.7: Which kind of information to resolve for the LogOnResponse.
 						Supported values: 
-							Publications, NamedQueries, ServerInfo, Settings, 
+							Publications, NamedQueries, ServerInfo, Settings, PreferNoSettings,
 							Users, UserGroups, Membership, ObjectTypeProperties, ActionProperties, 
 							Terms, FeatureProfiles, Dictionaries, MessageList, CurrentUser, MessageQueueConnections (v10.0)
 						And, when 'Publications' is NOT specified:
 							Publications->ObjectTypeProperties, Publications->ActionProperties, 
 							Publications->FeatureAccessList, Publications->CurrentIssue,
 							Publications->PubChannels, Publications->Categories, Publications->Dictionaries
+						Since 10.3 the PreferNoSettings option is added which enables client applications handling user
+						settings through the LogOn/LogOff services to migrate to the Get/SaveUserSettings services that
+						are introduced with ES 10.3 and meanwhile support both 10.2 and 10.3. By passing both Settings
+						and PreferNoSettings, ES 10.2 returns the settings through the LogOnResponse->Settings while
+						ES 10.3 does not. The client can check if LogOnResponse->ServerInfo->Version >= 10.3 and call
+						the new GetUserSettings services instead.
 					</td></tr>
 <tr><td class="fpc"></td><td class="ftc">* = null value allowed</td><td class="fcc"></td></tr>
 </table></div><div class="section"><h3>LogOnResponse</h3><table class="section"><tr><td class="hpc">property</td><td class="htc">type</td><td class="hcc">comment</td></tr>
@@ -1626,6 +1632,6 @@
 <tr><td class="btc">"native"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"output"</td><td class="bcc"></td></tr>
 <tr><td class="btc">"trailer"</td><td class="bcc"></td></tr>
-</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SCEnterprise.wsdl" file at 15 Jan 2018</p>
+</table></div><div class="section"><p style="font-size: 9pt;" align="right">Generated from the "SCEnterprise.wsdl" file at 17 Jan 2018</p>
 <p style="font-size: 9pt;" align="right">Confidential, (c) 1998-2018 WoodWing Software bv. All rights reserved.</p></div>
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/></body></html>

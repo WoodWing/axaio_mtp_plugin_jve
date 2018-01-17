@@ -122,7 +122,7 @@ class DBUserSetting extends DBBase
 	}
 
 	/**
-	 * Remove some user settings or all settings for a client application.
+	 * Remove the specified user settings or all settings for a client application.
 	 *
 	 * @param string $userShortName
 	 * @param string $clientAppName
