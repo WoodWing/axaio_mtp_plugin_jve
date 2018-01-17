@@ -590,11 +590,7 @@ class WW_DbScripts_DbInstaller
 		if( $upgrades ) {
 			return $upgrades;
 		}
-		$upgrades = array( 
-			'800' => array(),
-			'900' => array(),
-		);
-
+		$upgrades = array();
 		$dbUpgradeFiles = $this->getDBUpgradeFiles();
 
 		if ( $dbUpgradeFiles ) foreach ( $dbUpgradeFiles as $dbUpgradeFile ) {
@@ -646,9 +642,9 @@ class WW_DbScripts_DbInstaller
 		$retVal = false;
 			// Check if any of the post upgrade scripts wants to be executed.
 		$upgrades = $this->determineDbDataUpgrades();
-		if( $upgrades ) foreach( $upgrades as $version ) {
-			foreach( $version as $upgrade ) {
-				if( $upgrade['upgrade'] === true ) {
+		if( $upgrades ) foreach( $upgrades as /* $introducedVersion => */ $upgradeListsInfo ) {
+			if( $upgradeListsInfo ) foreach( $upgradeListsInfo as $upgradeInfo ) {
+				if( $upgradeInfo['upgrade'] === true ) {
 					$retVal = true;
 					break 2;
 				}
@@ -666,10 +662,10 @@ class WW_DbScripts_DbInstaller
 	{
 		$scripts = array();
 		$upgrades = $this->determineDbDataUpgrades();
-		if( $upgrades ) foreach( $upgrades as $version ) {
-			foreach( $version as $upgrade ) {
-				if( $upgrade['upgrade'] === true ) {
-					$scripts[] = get_class($upgrade['object']).'.class.php';
+		if( $upgrades ) foreach( $upgrades as /* $introducedVersion => */ $upgradeListsInfo ) {
+			if( $upgradeListsInfo ) foreach( $upgradeListsInfo as $upgradeInfo ) {
+				if( $upgradeInfo['upgrade'] === true ) {
+					$scripts[] = get_class( $upgradeInfo['object']).'.class.php';
 				}
 			}
 		}
@@ -682,39 +678,39 @@ class WW_DbScripts_DbInstaller
 	private function runDbDataUpgrades()
 	{
 		$upgrades = $this->determineDbDataUpgrades();
-		if( $upgrades ) foreach( $upgrades as $version ) {
-			foreach( $version as $upgrade ) {
+		if( $upgrades ) foreach( $upgrades as /* $introducedVersion => */ $upgradeListsInfo ) {
+			if( $upgradeListsInfo ) foreach( $upgradeListsInfo as $upgradeInfo ) {
 				if( $this->dbDataUpgrade ) {
 					// If there is a need to update the DB, run the update script.
 					// In case of an error, update the report to inform admin user.
-					$script = get_class($upgrade['object']).'.class.php';
-					if( $upgrade['upgrade'] === true ) {
+					$script = get_class( $upgradeInfo['object'] ).'.class.php';
+					if( $upgradeInfo['upgrade'] === true ) {
 						if ( !$this->newInstallation ) {
-							$result = $upgrade['object']->run();
-						}
-						if( $result ) {
-							LogHandler::Log( 'DbInstaller', 'INFO', 
-								'Successfully run DB migration script '.$script );
-						} else {
-							$this->report->add( 'DbInstaller', 'FATAL', 'ERROR', 
-								BizResources::localize('DBINSTALLER_DBUPGRADE_FAILED'), 
-								BizResources::localize('SEELOGFILES'),
-								'', array( 'phase' => $this->phase ) );
+							$result = $upgradeInfo['object']->run();
+							if( $result ) {
+								LogHandler::Log( 'DbInstaller', 'INFO',
+									'Successfully run DB migration script '.$script );
+							} else {
+								$this->report->add( 'DbInstaller', 'FATAL', 'ERROR',
+									BizResources::localize('DBINSTALLER_DBUPGRADE_FAILED'),
+									BizResources::localize('SEELOGFILES'),
+									'', array( 'phase' => $this->phase ) );
+							}
 						}
 					} else {
 						LogHandler::Log( 'DbInstaller', 'INFO', 
-							'The DB migration script '.$script. 'was '.
+							'The DB migration script '.$script. ' was '.
 							'skipped since it was already run before.' );
 					}
 				}
 				// No matter if the above did run the update script, there is a need
 				// to flag it, to make sure we don't suggest to run over and over again.
 				// This also implies that for clean installations all upgrade scripts will get flagged.
-				$upgrade['object']->setUpdated();
+				$upgradeInfo['object']->setUpdated();
 			}
 		}
 	}
-	
+
 	/**
 	 * Converts a version string in '<major>.<minor>[.<patch>]' format into a single version number.
 	 * For example, '8.0' or  '8.0.0' gets converted into 800.
@@ -914,17 +910,6 @@ class WW_DbScripts_DbInstaller
 
 		usort( $selectfiles, array($this, 'sortFiles') );
 		return $selectfiles;
-	}
-
-	/**
-	 * Checks if the index 'issueid_targets' on the smart_targets table exists.
-	 * @param type $dbdriver Connection to the database.
-	 * @return boolean Index exists.
-	 */
-	private function indexOnIssueOnTargetsExists( $dbdriver )
-	{
-		$indexes = $dbdriver->listIndexOnTable( $dbdriver->tablename( 'targets' ) );
-		return in_array( 'issueid_targets', $indexes );
 	}
 
 	/**

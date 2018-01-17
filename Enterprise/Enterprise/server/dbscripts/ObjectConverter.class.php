@@ -52,9 +52,9 @@ abstract class ObjectConverter extends DbUpgradeModule
 		$needsToUpdateDeletedObjects = self::getByTypes( array($objectTypeFrom), false ); // trash area
 		$needsToUpdateObjects = self::getByTypes( array($objectTypeFrom), true ); // workflow area
 
-		// If there are no objects of type 'Other' there is no need to convert.
+		// If there are no objects of type $objectTypeFrom there is no need to convert.
 		if ( !$needsToUpdateDeletedObjects && !$needsToUpdateObjects ) {
-			LogHandler::Log( self::NAME, 'INFO', 
+			LogHandler::Log( self::NAME, 'INFO',
 				'No objects of type: \'' . $objectTypeFrom . '\' to be converted to ' .
 				'\'' . $objectTypeTo . '\'.');
 			return true;
@@ -477,12 +477,11 @@ abstract class ObjectConverter extends DbUpgradeModule
 	/**
 	 * Preps an array of values for use as string delimited values.
 	 * Delimits values by ',' and adds quotes.
-	 * @static
 	 *
 	 * @param array $arr The array of values to be transform into a string delimited by comma.
 	 * @return string
 	 */
-	static private function arrayToSQLString( $arr )
+	static public function arrayToSQLString( $arr )
 	{
 		return (count( $arr > 1 ))
 			? $arr = '\'' . implode( '\',\'', $arr ) . '\''
@@ -541,7 +540,7 @@ abstract class ObjectConverter extends DbUpgradeModule
 	 *
 	 * @static
 	 * @param string[] $objectTypes.
-     * @param $workflow Workflow or Trash
+	 * @param $workflow Workflow or Trash
 	 * @return true if found else false.
 	 */
 	static public function getByTypes($objectTypes, $workflow)
@@ -565,5 +564,5 @@ abstract class ObjectConverter extends DbUpgradeModule
 		}
 
 		return false;
-	}	
+	}
 }
