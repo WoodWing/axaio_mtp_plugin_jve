@@ -588,9 +588,9 @@ abstract class WW_DbScripts_DbInstaller_Base
 	{
 		$retVal = false;
 		$upgrades = $this->determineDataUpgrades();
-		if( $upgrades ) foreach( $upgrades as $version ) {
-			foreach( $version as $upgrade ) {
-				if( $upgrade['upgrade'] === true ) {
+		if ( $upgrades ) foreach( $upgrades as /* $introducedVersion => */ $upgradeListsInfo ) {
+			if ( $upgradeListsInfo ) foreach( $upgradeListsInfo as $upgradeInfo ) {
+				if( $upgradeInfo['upgrade'] === true ) {
 					$retVal = true;
 					break 2;
 				}
@@ -608,10 +608,10 @@ abstract class WW_DbScripts_DbInstaller_Base
 	{
 		$scripts = array();
 		$upgrades = $this->determineDataUpgrades();
-		if( $upgrades ) foreach( $upgrades as $version ) {
-			foreach( $version as $upgrade ) {
-				if( $upgrade['upgrade'] === true ) {
-					$filePath = $upgrade['script'];
+		if( $upgrades ) foreach( $upgrades as /* $introducedVersion => */ $upgradeListsInfo ) {
+			if( $upgradeListsInfo ) foreach( $upgradeListsInfo as $upgradeInfo ) {
+				if( $upgradeInfo['upgrade'] === true ) {
+					$filePath = $upgradeInfo['script'];
 					$scripts[] = substr( $filePath, strlen( dirname( $filePath, 4 ) ) + 1 );
 				}
 			}
@@ -625,15 +625,15 @@ abstract class WW_DbScripts_DbInstaller_Base
 	private function runDataUpgrades()
 	{
 		$upgrades = $this->determineDataUpgrades();
-		if( $upgrades ) foreach( $upgrades as $version ) {
-			foreach( $version as $upgrade ) {
+		if ( $upgrades ) foreach( $upgrades as /* $introducedVersion => */ $upgradeListsInfo ) {
+			if ( $upgradeListsInfo ) foreach( $upgradeListsInfo as $upgradeInfo ) {
 				if( $this->dbDataUpgrade ) {
 					// If there is a need to update the DB, run the update script.
 					// In case of an error, update the report to inform admin user.
-					$script = basename( $upgrade['script'] );
-					if( $upgrade['upgrade'] === true ) {
+					$script = basename( $upgradeInfo['script'] );
+					if( $upgradeInfo['upgrade'] === true ) {
 						if ( !$this->newInstallation ) {
-							$result = $upgrade['object']->run();
+							$result = $upgradeInfo['object']->run();
 							if( $result ) {
 								LogHandler::Log( 'DbInstaller', 'INFO',
 									'Successfully run DB migration script '.$script );
@@ -646,14 +646,14 @@ abstract class WW_DbScripts_DbInstaller_Base
 						}
 					} else {
 						LogHandler::Log( 'DbInstaller', 'INFO',
-							'The DB migration script '.$script. 'was '.
+							'The DB migration script '.$script. ' was '.
 							'skipped since it was already run before.' );
 					}
 				}
 				// No matter if the above did run the update script, there is a need
 				// to flag it, to make sure we don't suggest to run over and over again.
 				// This also implies that for clean installations all upgrade scripts will get flagged.
-				$upgrade['object']->setUpdated();
+				$upgradeInfo['object']->setUpdated();
 			}
 		}
 	}

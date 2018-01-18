@@ -14,6 +14,8 @@ require_once BASEDIR.'/server/dbscripts/dbupgrades/ObjectConverter.class.php';
 
 class WW_DbScripts_DbUpgrades_Spreadsheets extends WW_DbScripts_DbUpgrades_ObjectConverter
 {
+	const NAME = 'DBUpgradeSpreadsheets';
+
  	/**
 	 * See {@link DbUpgradeModule} class.
 	 *
@@ -40,7 +42,7 @@ class WW_DbScripts_DbUpgrades_Spreadsheets extends WW_DbScripts_DbUpgrades_Objec
 	 * - application/x-apple-numbers
 	 *
 	 * @since 8.2.0
-	 * @return bool Whether or not the updates were successful.
+	 * @return bool Whether or not the updates were successful. ﻿When no update is needed, true is returned.
 	 */
 	public function run()
 	{
@@ -55,11 +57,65 @@ class WW_DbScripts_DbUpgrades_Spreadsheets extends WW_DbScripts_DbUpgrades_Objec
 			'application/vnd.oasis.opendocument.spreadsheet-template',
 			'application/x-apple-numbers' );
 		
-		return $this->convertObjectType( $spreadSheetFileFormats, 'Article', 'Spreadsheet' );
+		$result = true;
+		if ( self::isConversionNeeded( $spreadSheetFileFormats ) ) {
+			$result = $this->convertObjectType( $spreadSheetFileFormats, 'Article', 'Spreadsheet' );
+		}
+		return $result;
 	}
 
 	public function introduced()
 	{
 		return '8.0';
+	}
+
+	/**
+	 * Checks if there's any conversion from object type Article to Spreadsheet is needed.
+	 *
+	 * Function returns True when any of the Objects ( workflow or deleted )
+	 * that has spreadsheet mime types ( file format ) but still having the object type 'Article'.
+	 * Otherwise, function returns False, which means no conversion needed.
+	 *
+	 * @since 10.1.6
+	 * @param string[] $spreadSheetFileFormats
+	 * @return bool
+	 */
+	private static function isConversionNeeded( $spreadSheetFileFormats )
+	{
+		require_once BASEDIR . '/server/dbclasses/DBObject.class.php';
+		$dbh = DBDriverFactory::gen();
+		$spreadSheetFileFormatsInString = self::arrayToSQLString( $spreadSheetFileFormats );
+
+		// Workflow objects.
+		$tableName = $dbh->tablename( 'objects' );
+		$sql = "SELECT `id` FROM $tableName WHERE `type` = ? AND `format` IN ( $spreadSheetFileFormatsInString )";
+		$params = array( 'Article' );
+		$sth = $dbh->query( $sql, $params );
+
+		if ( $sth ) {
+			if ( $dbh->fetch( $sth )) {
+				LogHandler::Log( self::NAME, 'INFO',
+					'The conversion from object type "Article" to "Spreadsheet" is needed.' );
+				return true;
+			}
+		}
+
+		// Deleted objects.
+		$tableName = $dbh->tablename( 'deletedobjects' );
+		$sql = "SELECT `id` FROM $tableName WHERE `type` = ? AND `format` IN ( $spreadSheetFileFormatsInString )";
+		$params = array( 'Article' );
+		$sth = $dbh->query( $sql, $params );
+
+		if ( $sth ) {
+			if ( $dbh->fetch( $sth )) {
+				LogHandler::Log( self::NAME, 'INFO',
+					'The conversion from object type "Article" to "Spreadsheet" is needed.' );
+				return true;
+			}
+		}
+
+		LogHandler::Log( self::NAME, 'INFO',
+			'No objects with mime type of spreadsheet found with objec type = "Article". No conversion is needed.' );
+		return false;
 	}
 }
