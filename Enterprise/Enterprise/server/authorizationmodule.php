@@ -274,7 +274,9 @@ class authorizationmodule
 	 */
 	private function coreCheckRight( $accessRight, $publ, $overruleIssueId, $categoryId, $type, $stateId, $routeToUser )
 	{
-		$hasAccess = $this->ownsPersonalState( $stateId, $routeToUser ) ;
+		require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
+		$hasAccess = $this->ownsPersonalState( $stateId, $routeToUser ) ||
+			( DBTicket::getOriginatingApplicationName( BizSession::getTicket() ) == 'InDesign Server' );
 
 		// loop each authorization-record
 		if( !$hasAccess ) {
