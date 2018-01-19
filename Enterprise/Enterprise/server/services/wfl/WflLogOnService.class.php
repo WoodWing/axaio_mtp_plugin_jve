@@ -183,11 +183,7 @@ class WflLogOnService extends EnterpriseService
 		if( $checkLicenceStatus ) { // Original ticket has been checked.
 			$licenseStatus1 = $lic->getLicenseStatus( $req->ClientAppProductKey, $req->ClientAppSerial, $info, $errorMessage1 );
 			if( $licenseStatus1 > WW_LICENSE_OK_MAX ) {
-				if( $req->ClientAppName == 'WebEditor' ) { // Make message more readable (BZ#6600)
-					throw new BizException( 'LIC_NO_WEBEDITOR_LICENSE_INSTALLED', 'Server', $errorMessage1 );
-				} else {
-					throw new BizException( 'ERR_LICENSE', 'Server', $errorMessage1 );
-				}
+				throw new BizException( 'ERR_LICENSE', 'Server', $errorMessage1 );
 			}
 		}
 

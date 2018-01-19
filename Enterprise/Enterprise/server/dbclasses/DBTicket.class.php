@@ -174,13 +174,12 @@ class DBTicket extends DBBase
      */
     public static function getExpireTime( $app )
     {
-        if( $app == 'Web' || $app == 'WebEditor' ) {
-            $time = EXPIREWEB;
-        } else {
-            $time = EXPIREDEFAULT;
-        }
-
-        return $time;
+	    if( $app == 'Web' ) {
+		    $time = EXPIREWEB;
+	    } else {
+		    $time = EXPIREDEFAULT;
+	    }
+	    return $time;
     }
 
 	/**
@@ -605,13 +604,6 @@ class DBTicket extends DBBase
 			$sql = "UPDATE $db SET `expire` = ? WHERE `ticketid` = ?";
 			$sth = $dbdriver->query( $sql, $params );
 
-			// Auto-postpone WebEditor ticket when Web(App) goes along, or vice versa(!).
-			// This is to avoid any logon dialogs while user works a while at one of them and then starts using the other one again.
-			if( ( $otherTicket = self::getOtherTicket( $row['appname'], $user ) ) ) {
-				$params = array( $expire, strval($otherTicket) );
-				$sql = "UPDATE $db SET `expire` = ? WHERE `ticketid` = ?";
-				$sth = $dbdriver->query( $sql, $params );
-			}
 		}
 
 		// do some automatic logging
@@ -632,54 +624,10 @@ class DBTicket extends DBBase
 		$dbdriver = DBDriverFactory::gen();
 		$db = $dbdriver->tablename(self::TABLENAME);
 
-		// Auto-remove WebEditor ticket on Web(App) logoff (but NOT* vice versa!)
-		// This is to avoid any pending web tickets when user explicitly logs off.
-		// * Note that WebEditor supports silent logon based on Web(App) ticket and they logoff on any doc close.
-		if( ($appname = self::DBappticket( $ticket )) && $appname == 'Web' ) {
-			if( ($user = self::DBuserticket( $ticket )) ) {
-				if( ($otherTicket = self::getOtherTicket($appname,$user)) ) {
-					$params = array( strval($otherTicket) );
-					$sql = "DELETE FROM {$db} WHERE `ticketid` = ?";
-					$dbdriver->query( $sql, $params );
-				}
-			}
-		}
 		// remove the given ticket
 		$params = array( strval($ticket) );
 		$sql = "DELETE FROM {$db} WHERE `ticketid` = ?";
 		$sth = $dbdriver->query( $sql, $params );
-	}
-
-	/**
-	 * Returns WebEditor ticket when Web(App) is passed or vice versa.
-	 *
-	 * @param string $appname
-	 * @param string $user
-	 * @return string The other ticket.
-	 * @throws BizException In case of database connection error.
-	 */
-	private static function getOtherTicket( $appname, $user )
-	{
-		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename(self::TABLENAME);
-		
-		if( $appname == 'Web' ) {
-			$otherApp = 'WebEditor';
-		} else if( $appname == 'WebEditor' ) {
-			$otherApp = 'Web';
-		} else {
-			$otherApp = null;
-		}
-		if( $otherApp ) {
-			$sql = "SELECT `ticketid` FROM $db WHERE `usr`= ? AND `appname`= ? ";
-			$params = array( strval( $user ), strval( $otherApp ) );
-			$sth = $dbdriver->query($sql, $params );
-			$row = $sth ? $dbdriver->fetch($sth) : null;
-			$otherTicket = $row ? $row['ticketid'] : null;
-		} else {
-			$otherTicket = null;
-		}
-		return $otherTicket;
 	}
 
 	/**
