@@ -520,9 +520,10 @@ class DBTicket extends DBBase
 	 * The first time login is for "InDesign Server" while the second time is for "Digital Publishing Tools InDesign Server".
 	 * From then on, SC will use the first ticket and second ticket one by one to make sure both tickets won't expire and
 	 * the DPS seat can not be taken away by another user. But for both tickets the originating application is "InDesign Server".
-	 * The tickets are linked together by the
+	 * The tickets are linked together by the `masterticketid`.
 	 * Ticket is not validated.
 	 *
+	 * @since 10.1.6
 	 * @param string $ticket  Unique ticket; gives user access to the system with given client application
 	 * @return string  Client application name, for example: Web, InDesign, InCopy, PhotoShop, Illustrator.
 	 *                 Returns empty string when (ticket) not found.
@@ -543,7 +544,7 @@ class DBTicket extends DBBase
 			"FROM {$ticketsTable} tickets1 ".
 			"LEFT JOIN {$ticketsTable} tickets2 ON (tickets2.`ticketid` = tickets1.`masterticketid` ) ".
 			'WHERE tickets1.`ticketid` = ?';
-		$params = array( $ticket );
+		$params = array( strval( $ticket ) );
 		$sth = $dbDriver->query( $sql, $params );
 		$row = $dbDriver->fetch( $sth );
 
