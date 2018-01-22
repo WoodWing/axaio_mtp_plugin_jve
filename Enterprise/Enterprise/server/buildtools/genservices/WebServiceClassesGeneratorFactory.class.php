@@ -43,6 +43,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory
 	 *
 	 * @param string $plugin Name of the server plugin to generate web service classes for.
 	 *    Empty when web service classes for the core Enterprise Server should be generated instead.
+	 * @param string $version Version of the server plug-in to use as value for variables in templates
 	 * @param string $dir Location of the plugin directory that the plugin resides in.
 	 */
 	public function __construct( $plugin, $version, $dir )
@@ -137,7 +138,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory
 		if( $this->plugin ) {
 			$baseDirs = array( BASEDIR.'/config/plugins', BASEDIR.'/server/plugins' );
 			if( $this->dir ) {
-				$baseDirs = array( $this->dir );
+				array_unshift($baseDirs, $this->dir);
 			}
 			foreach( $baseDirs as $baseDir ) {
 				$pluginDir = $baseDir.'/'.$this->plugin;
