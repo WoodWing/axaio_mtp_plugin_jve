@@ -1406,124 +1406,147 @@ class License
 	}
 
 	/**
-	 *	Return the number of concurrent users for the given productcode
-	 *	If the productcode is empty, return the number of connections (all applications).
-	 *	Note that if a user is logged on twice to the same application, the oldest ticket will be deleted.
-	 *  Exception example:
+	 *	Return the number of concurrent users for the given productcode. If the productcode is empty, return the number
+	 * of connections (all applications).
+	 *
+	 *	If a user is logged on twice to the same application, the oldest ticket will be deleted.
+	 *
+	 * Exception example:
 	 *    ID/IC have the same appproductcode, however, the appname will be different.
 	 *    A user that is logged on to both applications is counted as 1, without one of the tickets being deleted.
-	 *	If a user is about to log on to certain application, 
-	 *	and an old ticket for that user and application is still present in the tickets table,
-	 *  that ticket will be deleted, and thus doesn't count.
 	 *
-	 * @param string $appproductcode
+	 *	If a user is about to log on to certain application and an old ticket for that user and application is still
+	 * present in the tickets table, that ticket will be deleted, and thus doesn't count.
+	 *
+	 * @param string $appProductCode
 	 * @param string $logonUser
-	 * @param string $logonApp
+	 * @param string $logonAppName
+	 * @param string $logonAppVersion [Since 10.2.2]
 	 * @return int number of users/connections
 	 */
-	private function getNumConnections( $appproductcode='', $logonUser='', $logonApp='' )
+	private function getNumConnections( $appProductCode='', $logonUser='', $logonAppName='', $logonAppVersion='' )
 	{
-//		$this->mDBDriver->DBpurgetickets();
+		require_once BASEDIR.'/server/dbclasses/DBBase.class.php';
 
-		$db = $this->mDBDriver->tablename("tickets");
-		$sql = "SELECT `usr`, `appname`, `expire`, `id`, `appserial`, `appproductcode`  from $db";
-
-		//Ignore the footprint of the installation. Will be removed as soon as 'purgeTickets' is called.
-		$installkey = $this->mInstallTicketID;
-		$sql .= " WHERE `usr` <> '$installkey' AND `usr` NOT LIKE '%_system_%' AND `appname` <> '$installkey'";
-
-		if ( $appproductcode )
-		{
-			$sql .= " AND `appproductcode`='$appproductcode'";
-			$orderfield = 'appproductcode';
+		// Ignore the footprint of the installation. Will be removed as soon as 'purgeTickets' is called.
+		$where = "`usr` <> ? AND `appname` <> ? ";
+		$params = array( strval( $this->mInstallTicketID ), strval( $this->mInstallTicketID ) );
+		if( $appProductCode ) {
+			$where .= "AND `appproductcode` = ? ";
+			$params[] = strval( $appProductCode );
 		}
-		else 
-		{
-			$orderfield = 'appname';
-		}
-		
-		//Multiple connections of 1 user count as 1 as long as the application name/productcode differs
-		$sql .= " ORDER BY `usr`, `$orderfield`, `expire` DESC";
-		
-		$sth = $this->mDBDriver->query($sql, array(), null, $this->mLicLog ); //false: do not write in the log file
-		if (!$sth) 
-			return false;
-		$n = 0;
-		$prevUsr = '';
-		$prevAppname = '';
-		while(($row = $this->mDBDriver->fetch($sth))) {
-			$usr = $row[ 'usr' ];
-			$appname = $row[ 'appname' ];
-//			print "<br>Testing user $usr ($productcode; $appname)...";
 
-			$bDeleteTicket = false;
-			$sDeleteReason = '';
-			if ( $logonUser && ($logonUser == $usr) &&
-				 $logonApp && ($logonApp == $appname) )
-			{
-				//In case the user wants to logon for a certain application (except IDS), 
-				//and an old ticket is still present for that user and application,
-				//remove that old ticket. This way it doesn't count.
-				$bDeleteTicket = true;
-				$sDeleteReason = "Deleting old ticket for the user + application that logs on now.";
+		// Compose SQL fragment such as: "ORDER BY `usr`, `appname`, `expire` DESC"
+		$orderBy = array( 'usr' => false );
+		if( $appProductCode ) {
+			$orderBy['appproductcode'] = false;
+		} else {
+			$orderBy['appname'] = false;
+		}
+		$orderBy['expire'] = false;
+
+		$fields = array( 'usr', 'appname', 'appversion', 'expire', 'id', 'appserial', 'appproductcode' );
+		$rows = DBBase::listRows( 'tickets', '', '', $where, $fields, $params, $orderBy,
+			null, null, null, $this->mLicLog );
+
+		// Multiple connections of 1 user count as 1 as long as the application name/productcode differs
+		$count = 0;
+		$prevUser = '';
+		$prevAppName = '';
+		$prevAppVersion = '';
+		if( $rows ) foreach( $rows as $row ) {
+			$iterUser = $row[ 'usr' ];
+			$iterAppName = $row[ 'appname' ];
+			$iterAppVersion = $row[ 'appversion' ];
+
+			$deleteTicket = false;
+			$deleteReason = '';
+			if ( $logonUser && ($logonUser == $iterUser) &&
+				$logonAppName && $this->isSameApplication( $logonAppName, $logonAppVersion, $iterAppName, $iterAppVersion ) ) {
+				// In case the user wants to logon for a certain application (except IDS), and an old ticket is still
+				// present for that user and application, remove that old ticket. This way it doesn't count.
+				$deleteTicket = true;
+				$deleteReason = "Deleting old ticket for the user + application that logs on now.";
 			}
 
-			if ( !$bDeleteTicket )
-			{
-				//Only update the counter (n) in case the user differs from the previous user
-				if ( $usr != $prevUsr )
-				{
-					$n++;
-					$prevUsr = $usr;
-					$prevAppname = '';
+			if( !$deleteTicket ) {
+				// Only update the counter (n) in case the user differs from the previous user
+				if( $iterUser != $prevUser ) {
+					$count++;
+					$prevUser = $iterUser;
+					$prevAppName = '';
+					$prevAppVersion = '';
 				}
 	
 				if( $this->mLicLog ) {
-					$productcode = $row[ 'appproductcode' ];
-					LogHandler::Log('license', 'DEBUG', "Testing user $n, $usr, appname $appname (code $productcode)..." );
+					$productCode = $row[ 'appproductcode' ];
+					LogHandler::Log('license', 'DEBUG',  "Testing user {$iterUser} ({$count}), ".
+						"app name {$iterAppName}, app version {$iterAppVersion} (code $productCode)..." );
 				}
 	
-				if ( $appname != $prevAppname )
-				{
-					if( $this->mLicLog ) {
-						LogHandler::Log('license', 'DEBUG', "$appname != $prevAppname" );
-					}
-					$prevAppname = $appname;
-				}
-				else
-				{
-					//In case the user is logged on twice (or more) for the same application, 
-					//remove tickets and remain only the first (for this application)
-					//Because the row are ordered by `expire` DESC, the first one is the most recent one, 
-					//and the older ones can be removed...
-					$bDeleteTicket = true;
-					$sDeleteReason = "Deleting old ticket for the same application (logged on twice or more to the same application).";
+				if( !$this->isSameApplication( $prevAppName, $prevAppVersion, $iterAppName, $iterAppVersion ) ) {
+					$prevAppName = $iterAppName;
+					$prevAppVersion = $iterAppVersion;
+				} else {
+					// In case the user is logged on twice (or more) for the same application, remove tickets and remain only
+					// the first (for this application). Because the row are ordered by `expire` DESC, the first one is the
+					// most recent one, and the older ones can be removed.
+					$deleteTicket = true;
+					$deleteReason = "Deleting old ticket for the same application (logged on twice or more to the same application).";
 				}
 			}
 			
-			if ( $bDeleteTicket )
-			{
+			if( $deleteTicket ) {
 				// We allow InDesign Server to logon as many times as needed.
 				// Example: when user stores layout, it could trigger background IDS jobs to generate PDFs.
 				// There could be many jobs running at the same time for that single user. Those jobs
 				// can run at the same IDS machine, or even dispatched over different machines.
 				// We do not want to clear those ticket or else one job could break other running job half way!
-				if( stripos( $appname, 'indesign server' ) === false && // no IDS?
-					stripos( $appname, 'mover' ) !== 0 ) { // no Smart Mover? (It operates under "Mover" name followed by some process id.)
-					$id = $row[ 'id' ];
-					$sql = "DELETE FROM $db WHERE `id`=$id";
+				if( stripos( $iterAppName, 'indesign server' ) === false && // no IDS?
+					stripos( $iterAppName, 'mover' ) !== 0 ) { // no Smart Mover? (It operates under "Mover" name followed by some process id.)
 					if( $this->mLicLog ) {
-						LogHandler::Log('license', 'INFO', $sDeleteReason );
+						LogHandler::Log('license', 'INFO', $deleteReason );
 					}
-					$sth2 = $this->mDBDriver->query($sql, array(), null, $this->mLicLog);
-					if ( !$sth2 )
+					$where = '`id` = ?';
+					$params = array( intval( $row[ 'id' ] ) );
+					if( !DBBase::deleteRows( 'tickets', $where, $params, $this->mLicLog ) ) {
 						return false;
+					}
 				}
 			}
 		}
-		return $n;
+		return $count;
 	}
 
+	/**
+	 * Tells whether two client applications are equal.
+	 *
+	 * CS9 is technically a totally different production than CS10. Even the license of CS9 differs from CS10.
+	 * CS10 is not yet a full replacement of CS9 and so they may be used side by side during transition phases.
+	 * All this makes that a CS9 seat should NOT be cleared automatically when that user takes a CS10 seat.
+	 * In other words a CS9 (or before) client must be seen as a different than a CS10 (or later) client.
+	 *
+	 * @since 10.2.2
+	 * @param string $appNameA
+	 * @param string $appVersionA The client application version of $appNameA.
+	 * @param string $appNameB
+	 * @param string $appVersionB The client application version of $appNameB.
+	 * @return bool
+	 */
+	private function isSameApplication( $appNameA, $appVersionA, $appNameB, $appVersionB )
+	{
+		$same = false;
+		if( $appNameA == $appNameB ) {
+			if( $appNameA == 'Content Station' ) {
+				$csMajorVersionA = intval( BizSession::formatClientVersion( $appVersionA, 1 ) );
+				$csMajorVersionB = intval( BizSession::formatClientVersion( $appVersionB, 1 ) );
+				$same = ($csMajorVersionA <= 9) === ($csMajorVersionB <= 9);
+			} else {
+				$same = true;
+			}
+		}
+		return $same;
+	}
 
 	/**
 	 *	Delete old tickets one by one, that are older than "mKeepAliveMinutes" minutes.
@@ -1829,22 +1852,25 @@ class License
 	 * In case InDesign Server is the client application the license status is checked randomly. To know when a check is
 	 * done a log statement is added. This registers the time needed to do the check.
 	 * 
-	 * @param string productcode
-	 * @param string appserial
-	 * @param array info
-	 * @param string errorMessage
-	 * @param string logonTime Optional.
-	 * @param string logonUser Optional.
-	 * @param string logonApp  Optional.
+	 * @param string $productcode
+	 * @param string $appserial
+	 * @param array $info
+	 * @param string $errorMessage
+	 * @param string $logonTime Optional.
+	 * @param string $logonUser Optional.
+	 * @param string $logonApp  Optional.
+	 * @param string $logonAppVersion Optional. [Since 10.2.2]
 	 * @return string license status, see codes at the start of this module
 	 */
-	public function getLicenseStatus( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '', $logonUser='', $logonApp='' )
+	public function getLicenseStatus( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '',
+	                                  $logonUser='', $logonApp='', $logonAppVersion='' )
 	{
 		$semaId = $this->lo_getSema();
 		$status = false;
 		if( $semaId ){
 			$startTime = microtime( true );
-			$status = $this->getLicenseStatusNoTiming( $productcode, $appserial, $info, $errorMessage, $logonTime,  $logonUser, $logonApp );
+			$status = $this->getLicenseStatusNoTiming( $productcode, $appserial, $info, $errorMessage, $logonTime,
+				$logonUser, $logonApp, $logonAppVersion );
 			$this->lo_releaseSema( $semaId ); // Note that the default semaphore can already be released by a call to lo_releaseSema() in between.
 			$endTime = microtime( true );
 			LogHandler::Log('license', 'DEBUG', sprintf( 'Execution time for detecting the license status: %.4f seconds.', $endTime - $startTime ) );
@@ -1864,9 +1890,11 @@ class License
 	 * @param string $logonTime
 	 * @param string $logonUser
 	 * @param string $logonApp
+	 * @param string $logonAppVersion [Since 10.2.2]
 	 * @return string
 	 */
-	private function getLicenseStatusNoTiming( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '', $logonUser='', $logonApp='' )
+	private function getLicenseStatusNoTiming( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '',
+	                                           $logonUser='', $logonApp='', $logonAppVersion='' )
 	{
 		$info = Array( 'curusage' => -1, 
 						'maxusage' => -1,
@@ -2232,7 +2260,8 @@ class License
 					{
 						LogHandler::Log('license', 'DEBUG', "Autorenew: returning new status (recursively)." );
 						//In case a forced auto renew would be necessary again (which is not normal), the recursion proctection will avoid a loop.
-						$newLicenseStatus = $this->getLicenseStatus( $productcode, $appserial, $info, $errorMessage, $logonTime, $logonUser, $logonApp );
+						$newLicenseStatus = $this->getLicenseStatus( $productcode, $appserial, $info, $errorMessage, $logonTime,
+							$logonUser, $logonApp, $logonAppVersion );
 						$this->mInAutoRenew = false;
 						return $newLicenseStatus;
 					}
@@ -2425,7 +2454,7 @@ class License
 			//Check only connections for this appproductcode
 			$checkProductcode = $productcode;
 		}
-		$curusage = $this->getNumConnections( $checkProductcode, $logonUser, $logonApp );
+		$curusage = $this->getNumConnections( $checkProductcode, $logonUser, $logonApp, $logonAppVersion );
 		$info[ 'curusage' ] = $curusage;
 		$tooManyUsers = $curusage >= $maxusage;
 		if ( $tooManyUsers )

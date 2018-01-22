@@ -250,7 +250,8 @@ class DBTicket extends DBBase
 			//Check the license and number of concurrent users for this application
 			//On success, use '$now' as last valid logon time
 			//Be sure to use this $now also to insert a ticket in the database below!
-			$licenseStatus = $lic->getLicenseStatus( $appproductcode, $appserial, $info, $errorMessage, $now, $usr, $appname );
+			$licenseStatus = $lic->getLicenseStatus( $appproductcode, $appserial, $info, $errorMessage, $now,
+				$usr, $appname, $appversion );
 			if ( !$lic->canLogonStatus( $licenseStatus ) )
 			{
 				$usageLimitReached = 
@@ -264,7 +265,8 @@ class DBTicket extends DBBase
 			$tmpErrorMessage = $errorMessage;
 			//On success, use '$now' as last valid logon time
 			//Be sure to use this $now also to insert a ticket in the database below!
-			$licenseStatus = $lic->getLicenseStatus( PRODUCTKEY, $appserialSCE, $info, $errorMessage, $now, $usr, $appname );
+			$licenseStatus = $lic->getLicenseStatus( PRODUCTKEY, $appserialSCE, $info, $errorMessage, $now,
+				$usr, $appname, $appversion );
 			if ( !$lic->canLogonStatus( $licenseStatus ) )
 			{
 				$usageLimitReached = 
@@ -292,6 +294,14 @@ class DBTicket extends DBBase
 		if( self::insertRow( self::TABLENAME, $values ) === false ) {
 			return false;
 		}
+
+		// cache ticket data
+		self::$ticketCache[ strval( $ticketid ) ] = array(
+			'usr' => strval( $usr ),
+			'appname' => strval( $appname ),
+			'appversion' => strval( $appversion ),
+			'masterticketid' => strval( $masterTicket )
+		);
 
 		$values = array( 'lastlogondate' => strval( $now ) );
 		$where = '`user`= ?';
@@ -541,6 +551,11 @@ class DBTicket extends DBBase
 			return self::$ServerJob->ActingUser;
 		}
 
+		// when cached, assume ticket is still valid and does not need to extend
+		if( array_key_exists( $ticket, self::$ticketCache ) ) {
+			return self::$ticketCache[ $ticket ][ 'usr' ];
+		}
+
 		// check ticket existence
 		$fields = array( 'usr', 'appname', 'appversion', 'expire', 'masterticketid' );
 		$where = '`ticketid` = ?';
@@ -550,19 +565,20 @@ class DBTicket extends DBBase
 			return false;
 		}
 
-		self::$ticketCache[ $ticket ] = array(
-			'usr' => $row['usr'],
-			'appname' => $row['appname'],
-			'appversion' => $row['appversion'],
-			'masterticketid' => $row['masterticketid']
-		);
-
 		// check expiration
 		$now = date( 'Y-m-d\TH:i:s' );
 		$expire = trim( $row['expire'] );
 		if( !empty( $expire ) && strncmp( $expire, $now, 19 ) < 0 ) {
 			return false; // ticket expired
 		}
+
+		// cache ticket data
+		self::$ticketCache[ $ticket ] = array(
+			'usr' => $row['usr'],
+			'appname' => $row['appname'],
+			'appversion' => $row['appversion'],
+			'masterticketid' => $row['masterticketid']
+		);
 
 		// user touched server, so postpone expiration
 		if( $extend ) {
