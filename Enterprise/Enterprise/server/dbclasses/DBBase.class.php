@@ -449,10 +449,12 @@ class DBBase
 	 * 		  retrieve rows 6-15. The offset of the initial row is 0 (not 1).
 	 * @param array|null $groupBy List of fields on which the result set is grouped.
 	 * @param string|null $having Indicates the condition or conditions that the grouped by rows must satisfy to be selected.
+	 * @param bool $logSQL [Since 10.2.2] Whether or not the resulting SQL must be logged.
 	 * @return array of rows (see function description) or null on failure (use getError() for details)
 	 */
 	static public function listRows(
-		$tableNames, $keycol, $namecol, $where, $fieldnames = '*', $params = array(), $orderBy = null, $limit = null, $groupBy = null, $having = null )
+		$tableNames, $keycol, $namecol, $where, $fieldnames = '*', $params = array(), $orderBy = null, $limit = null,
+		$groupBy = null, $having = null, $logSQL = true )
 	{
 		self::clearError();
 		$dbDriver = DBDriverFactory::gen();
@@ -529,7 +531,7 @@ class DBBase
 			$sql = self::addLimitByClause( $dbDriver, $sql, $limit );
 		}
 
-		$sth = $dbDriver->query( $sql, $params );
+		$sth = $dbDriver->query( $sql, $params, null, $logSQL );
 		if( is_null( $sth ) ) {
 			$err = trim( $dbDriver->error() );
 			self::setError( empty($err) ? BizResources::localize('ERR_DATABASE') : $err );
