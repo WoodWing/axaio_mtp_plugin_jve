@@ -1421,7 +1421,7 @@ class License
 	 * @param string $appProductCode
 	 * @param string $logonUser
 	 * @param string $logonAppName
-	 * @param string $logonAppVersion [Since 10.2.2]
+	 * @param string $logonAppVersion [Since 10.1.6/10.3.0]
 	 * @return int number of users/connections
 	 */
 	private function getNumConnections( $appProductCode='', $logonUser='', $logonAppName='', $logonAppVersion='' )
@@ -1526,7 +1526,7 @@ class License
 	 * All this makes that a CS9 seat should NOT be cleared automatically when that user takes a CS10 seat.
 	 * In other words a CS9 (or before) client must be seen as a different than a CS10 (or later) client.
 	 *
-	 * @since 10.2.2
+	 * @since 10.1.6/10.3.0
 	 * @param string $appNameA
 	 * @param string $appVersionA The client application version of $appNameA.
 	 * @param string $appNameB
@@ -1859,7 +1859,7 @@ class License
 	 * @param string $logonTime Optional.
 	 * @param string $logonUser Optional.
 	 * @param string $logonApp  Optional.
-	 * @param string $logonAppVersion Optional. [Since 10.2.2]
+	 * @param string $logonAppVersion Optional. [Since 10.1.6/10.3.0]
 	 * @return string license status, see codes at the start of this module
 	 */
 	public function getLicenseStatus( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '',
@@ -1890,7 +1890,7 @@ class License
 	 * @param string $logonTime
 	 * @param string $logonUser
 	 * @param string $logonApp
-	 * @param string $logonAppVersion [Since 10.2.2]
+	 * @param string $logonAppVersion [Since 10.1.6/10.3.0]
 	 * @return string
 	 */
 	private function getLicenseStatusNoTiming( $productcode, $appserial, &$info, &$errorMessage, $logonTime = '',
