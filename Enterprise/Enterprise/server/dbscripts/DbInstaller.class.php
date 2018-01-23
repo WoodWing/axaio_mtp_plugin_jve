@@ -580,7 +580,7 @@ class WW_DbScripts_DbInstaller
 
 	/**
 	 * Determines what data modifications needs to be ran. If the model needs to be updated these scripts are ran after
-	 * the database moel has been changed. If the model is already up to date these scripts can just be executed.
+	 * the database model has been changed. If the model is already up to date these scripts can just be executed.
 	 *
 	 * @return array Array containing the available updates and their installation states.
 	 */
