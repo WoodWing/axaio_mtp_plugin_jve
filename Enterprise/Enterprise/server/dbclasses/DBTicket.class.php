@@ -26,9 +26,6 @@ class DBTicket extends DBBase
 	
 	const TABLENAME = 'tickets';
 	
-	/** @var array List of purged tickets (ticket ids). */
-	private static $purgedTickets = array();
-
 	/**
 	 * @var array $ticketCache Cache session data (per ticket) that is frequently asked.
 	 * @since 10.2.0
@@ -126,6 +123,7 @@ class DBTicket extends DBBase
 	 * @param string $errorMessage: in case false is returned, the errorMessage is set.
 	 * @param string $masterTicket [9.7] In case the same application does logon twice (e.g. IDS for DPS) this refers to the ticket of the first logon.
 	 * @return string ticketid or false
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function genTicket( $orguser, $shortuser, $server, $clientname, 
 		$appname, $appversion, $appserial, $appproductcode, &$usageLimitReached, 
@@ -134,9 +132,6 @@ class DBTicket extends DBBase
 		require_once BASEDIR.'/server/utils/UrlUtils.php';
 		$clientip = WW_Utils_UrlUtils::getClientIP();
 		$ticketid = '';
-
-		// purge old tickets
-		self::DBpurgetickets();
 
 		// create new ticket
 		while( true ) {
@@ -193,6 +188,7 @@ class DBTicket extends DBBase
 	 *
 	 * @param string $ticket 
 	 * @return boolean unique (true=not found)
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function checkUniqueTicket($ticket)
 	{
@@ -227,6 +223,7 @@ class DBTicket extends DBBase
 	 * @return boolean True on success else false.
 	 * 	- userLimit: in case false is returned, 'userLimit' is true in case the max number of concurrent users has been reached.
 	 *  - errorMessage: in case false is returned, the errorMessage is set.
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function DBnewticket( $ticketid, $usr, $database, $clientname, $clientip, 
 		$appname, $appversion, $appserial, $appproductcode, &$usageLimitReached, 
@@ -367,6 +364,7 @@ class DBTicket extends DBBase
 	 * @param string $appversion Client application version number
 	 * @param string $appserial  Client application serial number
 	 * @return string            ticket; gives user access to the system with given client application
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function DBfindticket( $usr, $database, $clientname, $clientip, $appname, $appversion, $appserial )
 	{
@@ -426,52 +424,59 @@ class DBTicket extends DBBase
 	/**
 	 * Delete all expired tickets from the database. <br>
 	 * Works indepently of current user or client application. <br>
-	 *
-	 * @return resource       Database connection or FALSE on error
+	 * @deprecated Since 10.2.1. Use \BizTicket::deleteExpiredTicketsAndAffiliatedStructures instead.
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function DBpurgetickets()
 	{
-		$dbdriver = DBDriverFactory::gen();
-		$db = $dbdriver->tablename(self::TABLENAME);
-		$expire = date('Y-m-d\TH:i:s');
+		require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
+		$bizTicket = new BizTicket();
+		$bizTicket->deleteExpiredTicketsAndAffiliatedStructures();
+	}
 
-		include_once( BASEDIR . '/server/utils/license/license.class.php' );
+	/**
+	 * Returns the tickets that are expired.
+	 *
+	 * @return array Array with tickets.'id' as key and tickets.'ticketid' as value.
+	 * @throws  BizException In case of database connection error.
+	 */
+	static public function getExpiredTicketsIndexedById(): array
+	{
+		$dbDriver = DBDriverFactory::gen();
+		$dbTickets = $dbDriver->tablename( self::TABLENAME );
+		$expire = date( 'Y-m-d\TH:i:s' );
+		include_once( BASEDIR.'/server/utils/license/license.class.php' );
 		$lic = new License();
-		$installTicketID = $lic->getInstallTicketID(); 
-
-		// Get all the tickets that need to be purged
-		$sql = "SELECT `id`, `ticketid` FROM $db WHERE `expire` < ? OR `appname`= ? ";
-		$params = array( strval( $expire), strval( $installTicketID ) );
-		$sth = $dbdriver->query($sql, $params, null, false); //Don't write in log
-		
-		$tickets = array();
-		while( ( $row = $dbdriver->fetch( $sth ) ) ) {
-			$tickets[$row['id']] = $row['ticketid'];
-		}
-		
-		// Remember the tickets for later reference in this session
-		self::$purgedTickets = array_values($tickets);
-		
-		// Delete the expired tickets from the database
-		if( $tickets ) {
-			$purgeRowIds = implode(',', array_keys($tickets));
-			$sql = "DELETE FROM $db WHERE `id` IN ($purgeRowIds)";
-			$sth = $dbdriver->query($sql, array(), null, false); //Don't write in log
+		$installTicketID = $lic->getInstallTicketID();
+		$sql = "SELECT `id`, `ticketid` FROM {$dbTickets} WHERE `expire` < ? OR `appname`= ? ";
+		$params = array( strval( $expire ), strval( $installTicketID ) );
+		$sth = $dbDriver->query( $sql, $params, null, false ); //Don't write in log
+		$rows = array();
+		while( ( $row = $dbDriver->fetch( $sth ) ) ) {
+			$rows[ $row['id'] ] = $row['ticketid'];
 		}
 
-		return $sth;
+		return $rows;
+	}
+
+	/**
+	 * Removes all ticket records with the specified 'id'.
+	 *
+	 * @param array $ticketRowIds
+	 * @throws BizException In case of database connection error.
+	 */
+	static public function deleteTicketsById( array $ticketRowIds ): void
+	{
+		if( $ticketRowIds ) {
+			$dbDriver = DBDriverFactory::gen();
+			$tickets = $dbDriver->tablename( self::TABLENAME );
+			$where = self::addIntArrayToWhereClause( 'id', $ticketRowIds );
+			if( $where ) {
+				/* $success = */ self::deleteRows( self::TABLENAME, $where, array(), false );
+			}
+		}
 	}
 	
-	/**
-	 * Returns the tickets that are purged
-	 *
-	 * @return array
-	 */
-	public static function getPurgedTickets()
-	{
-		return self::$purgedTickets;
-	}
-
 	/**
 	 * Retrieves the whole ticket DB record (row) for a given ticket.
 	 * Ticket is not validated.
@@ -555,6 +560,7 @@ class DBTicket extends DBBase
 	 * @param bool $extend     Since 10.2. Whether or not the ticket lifetime should be implicitly extended (when valid).
 	 *                         Pass FALSE when e.g. frequently called and so the expensive DB update could be skipped.
 	 * @return string|bool     Short user name or FALSE when ticket not exists or expired.
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function checkTicket( $ticket, $service = '', $extend = true )
 	{
@@ -617,8 +623,8 @@ class DBTicket extends DBBase
 	/**
 	 * Remove ticket from database.
 	 *
-	 * @param string $ticket   Unique ticket; gives user access to the system with given client application
-	 * @return resource        Database connection or FALSE on error
+	 * @param string $ticket Unique ticket; gives user access to the system with given client application
+	 * @throws  BizException In case of database connection error.
 	 */
 	public static function DBendticket( $ticket )
 	{
@@ -633,16 +639,15 @@ class DBTicket extends DBBase
 			if( ($user = self::DBuserticket( $ticket )) ) {
 				if( ($otherTicket = self::getOtherTicket($appname,$user)) ) {
 					$params = array( strval($otherTicket) );
-					$sql = "DELETE FROM $db WHERE `ticketid` = ?";
+					$sql = "DELETE FROM {$db} WHERE `ticketid` = ?";
 					$dbdriver->query( $sql, $params );
 				}
 			}
 		}
 		// remove the given ticket
 		$params = array( strval($ticket) );
-		$sql = "DELETE FROM $db WHERE `ticketid` = ?";
+		$sql = "DELETE FROM {$db} WHERE `ticketid` = ?";
 		$sth = $dbdriver->query( $sql, $params );
-		return $sth;
 	}
 
 	/**
@@ -651,6 +656,7 @@ class DBTicket extends DBBase
 	 * @param string $appname
 	 * @param string $user
 	 * @return string The other ticket.
+	 * @throws BizException In case of database connection error.
 	 */
 	private static function getOtherTicket( $appname, $user )
 	{
@@ -680,6 +686,7 @@ class DBTicket extends DBBase
 	 * Remove tickets by user
 	 * 
 	 * @param string $user
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function DbPurgeTicketsByUser( $user = null )
 	{
@@ -696,6 +703,7 @@ class DBTicket extends DBBase
 	 * @since 10.1.4
 	 * @param string[] $clientIps
 	 * @return array
+	 * @throws BizException In case of database connection error.
 	 */
 	public static function resolveOnlineUsersFromClientIps( $clientIps )
 	{
@@ -744,5 +752,55 @@ class DBTicket extends DBBase
 		$private = crypt( $input, $salt );
 		$public = substr( $private, strlen($salt) ); // remove salt (at prefix)
 		return $public;
+	}
+
+	/**
+	 * Returns the Id of the user linked to the ticket.
+	 *
+	 * @param string $ticket
+	 * @return int
+	 * @throws BizException In case of database connection error.
+	 */
+	static public function getUserIdByTicket( string $ticket ): int
+	{
+		$dbdriver = DBDriverFactory::gen();
+		$dbTickets = $dbdriver->tablename(self::TABLENAME);
+		$dbUsers = $dbdriver->tablename('users');
+		$userId = 0;
+
+		$sql =   'SELECT users.`id` '.
+					"FROM {$dbTickets} tickets ".
+					"INNER JOIN {$dbUsers} users ON ( tickets.`usr` = users.`user` ) ".
+					'WHERE tickets.`ticketid` = ?';
+		$params = array( strval( $ticket ) );
+		$sth = $dbdriver->query( $sql, $params );
+		$row = $dbdriver->fetch( $sth );
+
+		if ( $row ) {
+			$userId = intval( $row['id'] );
+		}
+
+		return $userId;
+	}
+
+	/**
+	 * Returns all tickets of the specified user.
+	 *
+	 * @param string $user Short user name.
+	 * @return string[]
+	 * @throws BizException In case of database connection error.
+	 */
+	static public function getTicketsByUser( string $user ): array
+	{
+		$tickets = array();
+		if( $user ) {
+			$where = '`usr` = ? ';
+			$params = array( strval( $user ) );
+			$rows = self::listRows( self::TABLENAME, '', '', $where, array( 'ticketid' ), $params );
+			if( $rows ) {
+				$tickets = array_map( function( $ticket ) { return $ticket['ticketid']; }, $rows);
+			}
+		}
+		return $tickets;
 	}
 }

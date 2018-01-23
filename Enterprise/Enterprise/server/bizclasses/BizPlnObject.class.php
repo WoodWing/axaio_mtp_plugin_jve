@@ -663,12 +663,6 @@ class BizPlnObject
 
 	static private function createLayoutFromTemplate( $type, $name, &$arr, $user )
 	{
-		self::convertPublishNamesIntoIds( $arr, $user );
-
-		$err = self::resolveEditions( $arr['editions'], $arr['publication'], $arr['issue'] );
-		if( !empty( $err ) ) {
-			throw new BizException( 'ERR_NOTFOUND', 'Client', "Edition:$err" );
-		}
 		$dbDriver = DBDriverFactory::gen();
 
 		// find template with given name
@@ -1266,7 +1260,7 @@ class BizPlnObject
 	 */
 	private static function resolveChannelProperties( &$arr )
 	{
-		if( $arr['publication'] ) {
+		if( isset( $arr['publication'] ) ) {
 			require_once BASEDIR.'/server/dbclasses/DBChannel.class.php';
 			if( $arr['pubChannelName'] ) {
 				$channelObject = DBChannel::getPubChannelObjByBrandAndName( $arr['publication'], $arr['pubChannelName'] );

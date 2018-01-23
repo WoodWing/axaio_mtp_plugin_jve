@@ -499,9 +499,12 @@ class DBPlacements extends DBBase
 		$dbDriver = DBDriverFactory::gen();
 		$db = $dbDriver->tablename(self::TABLENAME);
 		$editionstable = $dbDriver->tablename("editions");
-		
-		$sql = "SELECT pla.*, edi.`name` FROM $db pla ";
+		$tilestable = $dbDriver->tablename('placementtiles');
+
+		$sql = 'SELECT pla.*, edi.`name`, tiles.`id` as "hastiles" ';
+		$sql .= "FROM $db pla ";
 		$sql .= "LEFT JOIN $editionstable edi ON (pla.`edition` = edi.`id`) ";
+		$sql .= "LEFT JOIN $tilestable tiles ON (pla.`id` = tiles.`placementid` ) ";
 		$sql .= "WHERE `child`= ? AND `parent`= ? ";
 		$params = array( intval( $child ), intval( $parent ) );
 
@@ -530,7 +533,7 @@ class DBPlacements extends DBBase
 			$placement->InDesignArticleIds = array();
 			$placements[$row['id']] = $placement;
 		}
-		
+
 		if( $placements ) {
 			require_once BASEDIR.'/server/dbclasses/DBInDesignArticlePlacement.class.php';
 			$articleIds = DBInDesignArticlePlacement::getInDesignArticleIds( $parent, array_keys( $placements ) );

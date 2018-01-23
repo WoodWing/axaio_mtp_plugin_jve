@@ -118,9 +118,6 @@ class SolrSearchEngine extends BizQuery
 		$this->searchParams = $searchParams;
 		if( $searchOneType ) {
 			switch( $objectType ) {
-				case 'Dossier':
-					$this->facetFields = unserialize(SOLR_DOSSIER_FACETS);
-					break;
 				case 'Image':
 					$this->facetFields = unserialize(SOLR_IMAGE_FACETS);
 					break;
@@ -241,49 +238,6 @@ class SolrSearchEngine extends BizQuery
 		}
 
 		PerformanceProfiler::stopProfile( 'Solr inbox search', 3 );
-	}
-
-	/**
-	 * Searches for facets only.
-	 *
-	 * After the query is executed by Solr only the Facets are retrieved from the
-	 * Solr response. No rows are build and returned.
-	 * Because no rows are returned the area (Workflow/Trash) does not matter.
-	 *
-	 * This search is used for the feature "FacetsInDossier".
-	 */
-	public function facetOnlySearch()
-	{
-		if( is_null($this->index) ) {
-			return; // quit when bad config / no access / Solr server down
-		}
-
-		PerformanceProfiler::startProfile( 'Solr facet only search', 3 );
-
-		// Create a new Query object
-		$query = $this->index->createSelect( array(
-			'start'         => 0,
-			'rows'          => 0, // Facets only, don't care about documents search result
-			'fields'        => array('ID'),  // Fields returned by Solr.
-		));
-		if( !is_null($query) ) {
-			// Add facet fields/queries to query object
-			$this->addFacetsFieldsSearchParams( $query );
-
-			// Add query parameters (search query term & filter queries)
-			$this->addQueryParamsToQuery( $query );
-
-			// Add authorizations of user as a filter query
-			$this->addAuthorizationToQuery( $query );
-
-			// Execute query and parse the results
-			$resultSet = $this->index->executeSelect( $query );
-			if( !is_null($resultSet) ) {
-				$this->parseQueryResult( $resultSet, array('Workflow'), true /* facetsOnly */ );
-			}
-		}
-
-		PerformanceProfiler::stopProfile( 'Solr facet only search', 3 );
 	}
 
 	/**

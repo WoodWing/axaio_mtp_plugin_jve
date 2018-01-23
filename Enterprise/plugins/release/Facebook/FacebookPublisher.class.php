@@ -22,6 +22,7 @@ class FacebookPublisher
 	private $appSecret = null;
 	public $appId = null;
 	public $pageId = null;
+	const LOG_IDENTIFIER = 'FacebookPublisher';
 
 	/**
 	 * The construct function of Facebook publisher
@@ -145,7 +146,7 @@ class FacebookPublisher
 		$this->saveAccessToken( $accessToken, $channelId );
 
 		if( !$accessToken ) {
-			LogHandler::Log( 'Facebook', 'ERROR', 'Failed retrieving access token.' . PHP_EOL .
+			LogHandler::Log( self::LOG_IDENTIFIER, 'ERROR', 'Failed retrieving access token.' . PHP_EOL .
 				'Code:' . $code . PHP_EOL .
 				'ChannelId:' . $channelId );
 		}
@@ -291,19 +292,59 @@ class FacebookPublisher
 		}
 
 		$connectString = 'https://graph.facebook.com/me/accounts?access_token='.$userAccessToken;
-		$accounts = json_decode( file_get_contents( $connectString ) );
+		$response = file_get_contents( $connectString );
 
-		if( empty( $accounts ) ) {
-			throw new Exception( 'Could not retrieve the account information.' );
+		$httpStatusCode = 0;
+		$errorMessage = 'Failed retrieving access token for Facebook page.';
+		if( isset($http_response_header ) &&
+			preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#i", $http_response_header[0], $httpStatus ) > 0 ) {
+			$httpStatusCode = intval( $httpStatus[1] );
+		} else {
+			LogHandler::Log( self::LOG_IDENTIFIER, 'ERROR',
+				$errorMessage . PHP_EOL . ": No response returned from Facebook: {$connectString}." );
+			throw new Exception( $errorMessage ); //
 		}
 
-		foreach( $accounts->data as $account ) {
+		$accounts = $this->validateAndRetrieveAccountsFromResponse( $httpStatusCode, $response, $errorMessage );
+		if( $accounts ) foreach( $accounts->data as $account ) {
 			if( $account->id == $pageId ) {
 				$this->pageAccessToken = $account->access_token;
 			}
 		}
 
 		return $this->pageAccessToken;
+	}
+
+	/**
+	 * Validates the response from the page-access-token request and retrieves the accounts.
+	 *
+	 * @param int $httpStatusCode The HTTP status code returned from calling the retrieval of page-access-token.
+	 * @param string $response Response returned from calling the retrieval of page-access-token.
+	 * @param string $errorMessage Error message to be shown to the end-user.
+	 * @throws Exception Throws Exception when validation of the response fails or accounts cannot be retrieved.
+	 * @return string[]|null List of accounts or Null when no accounts found.
+	 */
+	private function validateAndRetrieveAccountsFromResponse( $httpStatusCode, $response, $errorMessage )
+	{
+		$accounts = null;
+		if( $httpStatusCode == 200 ) {
+			$accounts = json_decode( $response );
+			if( $accounts === null ) {
+				LogHandler::Log( self::LOG_IDENTIFIER, 'ERROR',
+					$errorMessage . PHP_EOL . ": Could not parse the response returned from Facebook {$response}." );
+				throw new Exception( $errorMessage );
+			}
+		} else {
+			LogHandler::Log( self::LOG_IDENTIFIER, 'ERROR',
+				$errorMessage . PHP_EOL . ": Communication error with Facebook (HTTP code: $httpStatusCode)." );
+			throw new Exception( $errorMessage );
+		}
+		if( empty( $accounts ) ) {
+			LogHandler::Log( self::LOG_IDENTIFIER, 'ERROR',
+				$errorMessage . PHP_EOL . ": Could not retrieve the account information." );
+			throw new Exception( $errorMessage );
+		}
+		return $accounts;
 	}
 
 	/**

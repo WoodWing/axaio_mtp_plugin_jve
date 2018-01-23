@@ -143,7 +143,7 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 		$defines = array( 'SOLR_INSTALLED', // now checking server plug-in instead
 			'SOLR_SERVER', 'SOLR_PORT', 'SOLR_PATH',  // use SOLR_SERVER_URL instead
 			'SOLR_SYNCHRONOUS_INDEX', 'SOLR_USER', 'SOLR_PASSWORD', 'SOLR_INDEX_MAXDOCS', // synchron only!
-			'SOLR_MLT_GENERAL_FIELDS', 'SOLR_HL_GENERAL_FIELDS' ); // No longer supported
+			'SOLR_MLT_GENERAL_FIELDS', 'SOLR_HL_GENERAL_FIELDS', 'SOLR_DOSSIER_FACETS' ); // No longer supported
 		foreach( $defines as $define ) {
 			if( defined($define) ) {
 				$this->setResult( 'WARN', 'The '.$define.' option is no longer supported.',
@@ -153,10 +153,13 @@ class WW_TestSuite_HealthCheck2_Solr_TestCase extends TestCase
 		}
 
 		// Check obsolete options at SERVERFEATURES
-		if( BizSettings::isFeatureEnabled( 'HotInbox' ) ) {
-			$this->setResult( 'WARN', 'The "HotInbox" option at SERVERFEATURES setting is no longer supported.',
-				'Remove the option from your configserver.php file.' );
+		$obsoletedServerFeatures = array( 'HotInbox', 'FacetsInDossier' );
+		if( $obsoletedServerFeatures ) foreach( $obsoletedServerFeatures as $obsoletedServerFeature ) {
+			if( BizSettings::isFeatureEnabled( $obsoletedServerFeature ) ) {
+				$this->setResult( 'WARN', 'The "'. $obsoletedServerFeature.'" option at SERVERFEATURES setting is no longer supported.',
+					'Remove the option from your configserver.php or config_overrule.php file.' );
 				// continue
+			}
 		}
 
 		// Check if the obsoleted Inbox or Name Search queries are still in DB

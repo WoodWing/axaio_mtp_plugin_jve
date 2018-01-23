@@ -136,20 +136,13 @@ class DBUser extends DBBase
 				require_once BASEDIR.'/server/bizclasses/BizMessage.class.php';
 				BizMessage::deleteMessagesForUser( $id );
 
-				$where = '`id` = ?';
-				$params = array( $id );
-				self::deleteRows( self::TABLENAME, $where, $params );
-
-				// Cascading delete on users by user groups.
-				self::deleteUsrgrpByUserId( $id );
-
 				// cascading delete locks (on name, not id!)
 				require_once BASEDIR.'/server/dbclasses/DBObjectLock.class.php';
 				DBObjectLock::deleteLocksByUser( $user );
 
-				// cascading delete tickets (on name, not id!)
-				require_once BASEDIR.'/server/dbclasses/DBTicket.class.php';
-				DBTicket::DbPurgeTicketsByUser( $user );
+				require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
+				$bizTicket = new BizTicket();
+				$bizTicket->deleteTicketsAndAffiliatedStructuresByUser( $user );
 
 				// cascading delete settings (on name, not id!)
 				require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
@@ -157,6 +150,14 @@ class DBUser extends DBBase
 
 				// cascading delete routing(on name)
 				self::deleteRows( 'routing', '`routeto` = ?', array( $user ) );
+
+				// Cascading delete on users by user groups.
+				self::deleteUsrgrpByUserId( $id );
+
+				// Lastly delete the user from the users table.
+				$where = '`id` = ?';
+				$params = array( $id );
+				self::deleteRows( self::TABLENAME, $where, $params );
 			}
 		}
 	}

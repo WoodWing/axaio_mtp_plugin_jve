@@ -110,6 +110,7 @@ class BizInDesignServerJobs
 			}
 		}
 
+		require_once BASEDIR.'/server/bizclasses/BizSession.class.php';
 		if( BizSession::isStarted() ) { // in context of web services
 			$job->ServiceName = BizSession::getServiceName();
 			$job->Initiator = BizSession::getShortUserName();
@@ -219,7 +220,7 @@ class BizInDesignServerJobs
 		$tries = 0;
 		$maxtries = $foreground ? 60 : 1; // BZ#21109
 		$assignedServer = null;
-		$busyServers = array();
+		$serversToBeExcluded = array();
 
 		// Get available InDesign Server instances (that have currently no job assigned).
 		while ( !$assignedServer && $tries < $maxtries ) {
@@ -241,14 +242,14 @@ class BizInDesignServerJobs
 					}
 				}
 				// Get all version matching servers that are active.
-				$idleServerIds = BizInDesignServer::getAvailableServerIdsForJob( $jobId, $busyServers, $excludePrios, false );
+				$idleServerIds = BizInDesignServer::getAvailableServerIdsForJob( $jobId, $serversToBeExcluded, $excludePrios, false );
 				if ( $idleServerIds ) {
 					LogHandler::Log( 'idserver', 'DEBUG', 'Found available IDS instances: ['.implode(',',$idleServerIds).']' );
 				} else {
 					LogHandler::Log( 'idserver', 'DEBUG', 'No IDS instances available for job: ' . $jobId . ' ' );
 					if ( !$foreground ) {
 						//Check again to see if any InDesign Servers exist that can process this job, busy or not.
-						$serverIds = BizInDesignServer::getAvailableServerIdsForJob( $jobId, $busyServers, $excludePrios, true );
+						$serverIds = BizInDesignServer::getAvailableServerIdsForJob( $jobId, $serversToBeExcluded, $excludePrios, true );
 
 						require_once BASEDIR . '/server/dataclasses/InDesignServerJobStatus.class.php';
 						$jobStatus = new InDesignServerJobStatus();
@@ -267,6 +268,7 @@ class BizInDesignServerJobs
 			if( $idleServerIds ) {
 				shuffle( $idleServerIds ); // Randomly sort the servers
 			}
+			$numberOfIdleServers = count( $idleServerIds );
 			while( $idleServerIds && !$assignedServer ) {
 				$idleServerId = array_pop( $idleServerIds );
 				LogHandler::Log( 'idserver', 'DEBUG', 'Trying to assign IDS instance '.$idleServerId );
@@ -286,7 +288,7 @@ class BizInDesignServerJobs
 					LogHandler::Log( 'idserver', 'DEBUG', 'Could not assign IDS instance '.$idleServerId );
 				}
 				if( !$assignedServer ) {
-					$busyServers[] = $idleServerId;
+					$serversToBeExcluded[] = $idleServerId;
 					if( $didLock ) {
 						LogHandler::Log( 'idserver', 'DEBUG', 'Unlocking IDS instance '.$idleServerId );
 						DBInDesignServer::unlockServer( $idleServerId, $lockToken );
@@ -294,6 +296,12 @@ class BizInDesignServerJobs
 					if( $didAssign ) {
 						LogHandler::Log( 'idserver', 'DEBUG', 'Unassigning IDS job '.$jobId );
 						DBInDesignServerJob::unassignServerFromJob( $jobId, $idleServerId, $lockToken );
+					}
+					if( $numberOfIdleServers === count( $serversToBeExcluded ) ) { // No more suitable IDS available: EN-89094
+						require_once BASEDIR.'/server/dataclasses/InDesignServerJobStatus.class.php';
+						$jobStatus = new InDesignServerJobStatus();
+						$jobStatus->setStatus( InDesignServerJobStatus::UNAVAILABLE );
+						DBInDesignServerJob::updateJobStatus( array( $jobId ), $jobStatus, true );
 					}
 				}
 			}
