@@ -90,6 +90,7 @@ class WW_DbScripts_DbUpgrades_Spreadsheets extends WW_DbScripts_DbUpgrades_Objec
 		$tableName = $dbh->tablename( 'objects' );
 		$sql = "SELECT `id` FROM $tableName WHERE `type` = ? AND `format` IN ( $spreadSheetFileFormatsInString )";
 		$params = array( 'Article' );
+		$sql = $dbh->limitquery( $sql, 0, 1 );
 		$sth = $dbh->query( $sql, $params );
 
 		if ( $sth ) {
@@ -104,6 +105,7 @@ class WW_DbScripts_DbUpgrades_Spreadsheets extends WW_DbScripts_DbUpgrades_Objec
 		$tableName = $dbh->tablename( 'deletedobjects' );
 		$sql = "SELECT `id` FROM $tableName WHERE `type` = ? AND `format` IN ( $spreadSheetFileFormatsInString )";
 		$params = array( 'Article' );
+		$sql = $dbh->limitquery( $sql, 0, 1 );
 		$sth = $dbh->query( $sql, $params );
 
 		if ( $sth ) {
