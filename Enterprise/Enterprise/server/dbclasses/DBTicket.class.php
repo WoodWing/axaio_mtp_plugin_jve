@@ -259,7 +259,8 @@ class DBTicket extends DBBase
 			//Check the license and number of concurrent users for this application
 			//On success, use '$now' as last valid logon time
 			//Be sure to use this $now also to insert a ticket in the database below!
-			$licenseStatus = $lic->getLicenseStatus( $appproductcode, $appserial, $info, $errorMessage, $now, $usr, $appname );
+			$licenseStatus = $lic->getLicenseStatus( $appproductcode, $appserial, $info, $errorMessage, $now,
+				$usr, $appname, $appversion );
 			if ( !$lic->canLogonStatus( $licenseStatus ) )
 			{
 				$usageLimitReached = 
@@ -273,7 +274,8 @@ class DBTicket extends DBBase
 			$tmpErrorMessage = $errorMessage;
 			//On success, use '$now' as last valid logon time
 			//Be sure to use this $now also to insert a ticket in the database below!
-			$licenseStatus = $lic->getLicenseStatus( PRODUCTKEY, $appserialSCE, $info, $errorMessage, $now, $usr, $appname );
+			$licenseStatus = $lic->getLicenseStatus( PRODUCTKEY, $appserialSCE, $info, $errorMessage, $now,
+				$usr, $appname, $appversion );
 			if ( !$lic->canLogonStatus( $licenseStatus ) )
 			{
 				$usageLimitReached = 

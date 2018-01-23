@@ -210,7 +210,8 @@ class WflLogOnService extends EnterpriseService
 		$errorMessage2 = '';
 		if( $checkLicenceStatus ) { // Original ticket has been checked.
 			$SCEAppserial = $lic->getSerial( PRODUCTKEY );
-			$licenseStatus2 = $lic->getLicenseStatus( PRODUCTKEY, $SCEAppserial, $info, $errorMessage2, '', $shortuser, $req->ClientAppName );
+			$licenseStatus2 = $lic->getLicenseStatus( PRODUCTKEY, $SCEAppserial, $info, $errorMessage2, '',
+				$shortuser, $req->ClientAppName, $req->ClientAppVersion );
 			if( $licenseStatus2 > WW_LICENSE_OK_MAX ) {
 				throw new BizException( 'ERR_LICENSE', 'Server', $errorMessage2 );
 			}
