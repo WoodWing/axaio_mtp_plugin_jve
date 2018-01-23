@@ -152,6 +152,10 @@ class WW_TestSuite_HealthCheck2_InDesignServer_TestCase extends TestCase
 			// This is done to check if ID Server (JS) has write access. 
 			// Note that ID Server is a different process than PHP and might act for different users and so have different access profile!
 			clearstatcache( true, $prodInfoPath );
+
+			// EN-90166: For cifs-systems opening and closing a file updates the cache.
+			@fclose( fopen ( $prodInfoPath, 'r' )); // Not interested if there's any error, suppress it with @. Do 'r' mode as no new file should be created.
+
 			if( file_exists($prodInfoPath) ) {
 				if( !unlink( $prodInfoPath ) ) { // clear previous runs
 			    	$errmsg = 'Could not remove test file of previous runs:<pre>&nbsp;&nbsp;&nbsp;'.$prodInfoPath.'</pre>';
@@ -192,6 +196,9 @@ class WW_TestSuite_HealthCheck2_InDesignServer_TestCase extends TestCase
     		$this->setResult( 'ERROR', $msgPrefix.$errmsg, $help );
     		return;
 		}
+
+		// EN-90166: For cifs-systems opening and closing a file updates the cache.
+		@fclose( fopen ( $prodInfoPath, 'r' )); // Not interested if there's any error, suppress it with @. Do 'r' mode as no new file should be created.
 
 		// Check InDesign Server write access in CS Editor workspace
 		if( !file_exists($prodInfoPath) ) {
