@@ -105,6 +105,7 @@ class DBUpgradeSpreadsheets extends ObjectConverter
 		$tableName = $dbh->tablename( 'deletedobjects' );
 		$sql = "SELECT `id` FROM $tableName WHERE `type` = ? AND `format` IN ( $spreadSheetFileFormatsInString )";
 		$params = array( 'Article' );
+		$sql = $dbh->limitquery( $sql, 0, 1 );
 		$sth = $dbh->query( $sql, $params );
 
 		if ( $sth ) {
