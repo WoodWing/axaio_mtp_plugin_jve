@@ -14,8 +14,8 @@
 SOURCE_BASE="./Enterprise/"
 TARGET_BASE="./Enterprise_release/"
 iONCUBE_ENCODER="/usr/local/ioncube/10.0/ioncube_encoder71_10.0_64"
-PHPSTORM_INSPECTOR="/opt/phpstorm2017.1.4/bin/inspect.sh"
-PHPSTORM_LOGFILE=~/.PhpStorm2017.1/system/log/idea.log
+PHPSTORM_INSPECTOR="/opt/phpstorm2017.3.3/bin/inspect.sh"
+PHPSTORM_LOGFILE=~/.PhpStorm2017.3/system/log/idea.log
 : ${PHP_EXE:=php} #Set default value to base php executable.
 
 # To maintain the es_php_encoder.php and php_define.php tools that are installed on Zetes, please use the Git repository
