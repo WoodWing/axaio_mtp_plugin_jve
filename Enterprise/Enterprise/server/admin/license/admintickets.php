@@ -1,11 +1,9 @@
 <?php
 require_once dirname(__FILE__).'/../../../config/config.php';
-
 include_once( BASEDIR . "/server/utils/license/license.class.php" );
 require_once BASEDIR . '/server/secure.php';
 
 ob_start();
-
 $lic = new License();
 
 //If no license installed yet: everyone may install the first license (the SCE Server license)
@@ -19,16 +17,17 @@ if ( !$hasLicense )
 }
 
 $ok = false;
-$user = @$_GET[ 'adminUser' ];
-if ( !$user )
-	$user = @$_POST[ 'adminUser' ];
+require_once BASEDIR.'/server/utils/HttpRequest.class.php';
+$requestParams = WW_Utils_HttpRequest::getHttpParams( 'GP' );
+$user = isset($requestParams['adminUser'] ) ? $requestParams['adminUser'] : '';
+
 //Admin user should always logon AFTER the max usage limit has been reached.
 //If necessary he should first logoff.
 //By logging on, the _install_ user will be removed from the tickets table, and his lastlogon timestamp will be set!
 if ( $user )
 {
-	$sessionname = 'ww_userlimit_admin_session';
-	session_name( $sessionname );
+	$sessionId = isset($requestParams['sessionId'] ) ? $requestParams['sessionId'] : '';
+	session_id( $sessionId );
 	session_start();
 	$adminUser = $_SESSION[ 'adminUser' ];
 
@@ -270,5 +269,3 @@ function admintickets_buildDoc()
 	$txt = HtmlDocument::buildDocument($txt, true, null, false, true);
 	print $txt;
 }
-
-?>

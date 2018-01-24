@@ -116,8 +116,7 @@ if (!$loginsucceed) {
 		//In case of error, there is no 'secure' admin session (the user can't logon!)
 		//But these admin pages should be able to be fetched, 
 		//and need to verify that only admin users are requesting them
-		$sessionname = 'ww_userlimit_admin_session';
-		session_name( $sessionname );
+		session_id( 'ww-userlimit-admin-session-id' );
 		session_start();
 		$_SESSION[ 'adminUser' ] = $user;
 		$_SESSION[ 'hash' ] = md5( $user . "bla" );
@@ -125,12 +124,12 @@ if (!$loginsucceed) {
 	}
 	if( $userLimitAdmin ) 
 	{
-		header('Location: '.SERVERURL_ROOT.INETROOT.'/server/admin/license/admintickets.php?adminUser='.urlencode($user).'&' . $sessionname . '=' . session_id() );
+		header('Location: '.SERVERURL_ROOT.INETROOT.'/server/admin/license/admintickets.php?adminUser='.urlencode($user).'&'.'sessionId'.'='.session_id() );
 		exit(); //After setting the header, always quit: don't send extra data to the browser
 	}
 	if ( $licenseAdmin )
 	{
-		header('Location: '.SERVERURL_ROOT.INETROOT.'/server/admin/license/index.php?adminUser='.urlencode($user).'&' . $sessionname . '=' . session_id() );
+		header('Location: '.SERVERURL_ROOT.INETROOT.'/server/admin/license/index.php?adminUser='.urlencode($user).'&'.'sessionId'.'='.session_id() );
 		exit(); //After setting the header, always quit: don't send extra data to the browser
 	}
 	$tpl = HtmlDocument::loadTemplate( 'login.htm' );
@@ -208,4 +207,4 @@ else	// is succedeed
 	}
 	print $errNoJavascript;
 	print '</body></html>';
-}	
+}
