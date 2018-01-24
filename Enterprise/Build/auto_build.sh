@@ -512,7 +512,7 @@ function step4_validatePhpCode {
 		# The process could fail e.g. due to license expiration, so dump the log to see what is causing the failure.
 		echo "phpStorm code inspection has failed. Now dumping the phpStorm system log file..."
 		echo "----------------------8<----------------------8<----------------------"
-		cat PHPSTORM_LOGFILE
+		cat "${PHPSTORM_LOGFILE}"
 		echo "----------------------8<----------------------8<----------------------"
 		exit 1
 	fi
