@@ -15,6 +15,7 @@ SOURCE_BASE="./Enterprise/"
 TARGET_BASE="./Enterprise_release/"
 iONCUBE_ENCODER="/usr/local/ioncube/10.0/ioncube_encoder71_10.0_64"
 PHPSTORM_INSPECTOR="/opt/phpstorm2017.1.4/bin/inspect.sh"
+PHPSTORM_LOGFILE=~/.PhpStorm2017.1/system/log/idea.log
 : ${PHP_EXE:=php} #Set default value to base php executable.
 
 # To maintain the es_php_encoder.php and php_define.php tools that are installed on Zetes, please use the Git repository
@@ -180,8 +181,7 @@ function zipFolder {
 function determineZipPostfix {
 	# Start with the server version, but remove the patch digit for daily master builds.
 	SERVER_VERSION_ZIP="${SERVER_VERSION}"
-	if [[ "${SERVER_RELEASE_TYPE}" == "Daily" &&
-		( "${GIT_BRANCH}" == "master" || "${GIT_BRANCH}" == work* ) ]]; then
+	if [[ "${SERVER_RELEASE_TYPE}" == "Daily" && ( "${GIT_BRANCH}" == "master" || "${GIT_BRANCH}" == work* ) ]]; then
 		SERVER_VERSION_ZIP=`echo "${SERVER_VERSION_ZIP}" | sed -r "s/([0-9]+\.[0-9]+)\.[0-9]+/\1/g"`
 	fi
 
@@ -505,7 +505,18 @@ function step4_validatePhpCode {
 	# mkdir ./reports/phpstorm_strict
 	# inspect.sh params: <project file path> <inspection profile path> <output path> -d <directory to be inspected>
 	# see more info: http://www.jetbrains.com/phpstorm/webhelp/running-inspections-offline.html
+	# Use "set +e" and "set -e" to temporary suppress exiting the script in case the code inspector exits.
+	set +e
 	sh ${PHPSTORM_INSPECTOR} "${WORKSPACE}/Enterprise" "${WORKSPACE}/Enterprise/.idea/inspectionProfiles/EnterpriseCodeInspection.xml" "${WORKSPACE}/reports/phpstorm_strict" -d "${WORKSPACE}/Enterprise/Enterprise"
+	if [ $? -ne 0 ]; then
+		# The process could fail e.g. due to license expiration, so dump the log to see what is causing the failure.
+		echo "phpStorm code inspection has failed. Now dumping the phpStorm system log file..."
+		echo "----------------------8<----------------------8<----------------------"
+		cat PHPSTORM_LOGFILE
+		echo "----------------------8<----------------------8<----------------------"
+		exit 1
+	fi
+	set -e
 
 	echo "step4d: Move back the 3rd party libraries (that were temporary moved aside) to their original location."
 	mv "${WORKSPACE}/code_analyser/dgrid" "${WORKSPACE}/Enterprise/Enterprise/server"
