@@ -432,7 +432,8 @@ class DBTicket extends DBBase
 		$fields = array( 'id', 'ticketid' );
 		$where = '`expire` < ? OR `appname`= ?';
 		$params = array( strval( date( 'Y-m-d\TH:i:s' ) ), strval( $lic->getInstallTicketID() ) );
-		$rows = self::listRows( self::TABLENAME, '', '', $where, $fields, $params );
+		$rows = self::listRows( self::TABLENAME, '', '', $where, $fields, $params,
+			null, null, null, null, false );
 
 		$map = array();
 		if( $rows ) foreach( $rows as $row ) {
