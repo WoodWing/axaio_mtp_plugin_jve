@@ -22,13 +22,12 @@ $user = isset( $requestParams['adminUser'] ) ? $requestParams['adminUser'] : '';
 
 //Admin user should always logon AFTER the max usage limit has been reached.
 //If necessary he should first logoff.
-//By logging on, the _install_ user will be removed from the tickets table, and his lastlogon timestamp will be set!
+//By logging on, the _install_ user will be removed from the tickets table, and his lastlogon timestamp will be set.
 if( $user ) {
-	$sessionId = isset( $requestParams['sessionId'] ) ? $requestParams['sessionId'] : '';
-	session_id( $sessionId );
+	$sessionName = isset( $requestParams['sessionName'] ) ? $requestParams['sessionName'] : '';
+	session_name( $sessionName );
 	session_start();
 	$adminUser = $_SESSION['adminUser'];
-
 	$hash = $_SESSION['hash'];
 	$myhash = md5( $user."bla" );
 	if( ( $user == $adminUser ) &&
@@ -43,51 +42,46 @@ if( !$ok ) {
 	exit;
 }
 
-$dbdriver = DBDriverFactory::gen();        // Note: $_SESSION[ 'dbdriver' ] not set when no more application licenses left
-$users = array();
-$db = $dbdriver->tablename( "users" );
-$sql = "SELECT `fullname`, `user` from $db";
-$sth = $dbdriver->query( $sql );
-if( !$sth ) {
+require_once BASEDIR.'/server/dbclasses/DBUser.class.php';
+$rows = DBBase::listRows( 'users', '', null, '', array( 'fullname', 'user' ) );
+if( is_null( $rows ) ) { // Error occurred
 	admintickets_buildDoc();
 	exit;
 }
-
-while( ( $row = $dbdriver->fetch( $sth ) ) ) {
+$users = array();
+if( $rows ) foreach( $rows as $row ) {
 	$users[ $row['user'] ] = $row['fullname'];
 }
 
-$db = $dbdriver->tablename( "tickets" );
-
 //Delete by usr
-$usr = @$_POST['usr'];
+$usr = isset( $requestParams['usr'] ) ? $requestParams['usr'] : '';
 if( $usr ) {
-	$sql = "DELETE FROM $db WHERE `usr`='$usr'";
-//	print $sql;
-	$sth = $dbdriver->query( $sql );
-	if( !$sth ) {
+    $where = '`usr`= ?';
+    $params = array( strval( $usr ));
+    $result = DBBase::deleteRows( 'tickets', $where, $params  );
+	if( is_null( $result ) ) {
 		admintickets_buildDoc();
 		exit;
 	}
 }
 //Delete by id
-$id = @$_POST['id'];
+$id = isset( $requestParams['id'] ) ? $requestParams['id'] : '';
 if( $id ) {
-	$sql = "DELETE FROM $db WHERE `id`='$id'";
-//	print $sql;
-	$sth = $dbdriver->query( $sql );
-	if( !$sth ) {
+    $where = '`id`= ?';
+    $params = array( intval( $id ));
+    $result = DBBase::deleteRows( 'tickets', $where, $params  );
+	if( is_null( $result ) ) { // Error occurred
 		admintickets_buildDoc();
 		exit;
 	}
 }
 //Delete by time
-$time = @$_POST['time'];
+$time = isset( $requestParams['time'] ) ? $requestParams['time'] : '';
 if( $time ) {
-	$sql = "DELETE FROM $db WHERE `logon`<='$time'";
-//	print $sql;
-	$sth = $dbdriver->query( $sql );
-	if( !$sth ) {
+	$where = '`logon` <= ?';
+	$params = array( strval( $time ));
+	$result = DBBase::deleteRows( 'tickets', $where, $params  );
+	if( is_null( $result ) ) { // Error occurred
 		admintickets_buildDoc();
 		exit;
 	}
@@ -101,21 +95,22 @@ function timeConverter( $val )
 	return $date_formated." ".$val_array['1'];
 }
 
-//1 DELETE BASED ON USR
-$sql = "SELECT `usr`, `clientname`, `clientip`, `appname`, `appversion`, `expire`, `logon` from $db order by `usr` ASC";
-$sth = $dbdriver->query( $sql );
-if( !$sth ) {
+//1 delete based on usr
+$fields = array('usr', 'clientname', 'clientip', 'appname', 'appversion', 'expire', 'logon');
+$orderBy = array( 'usr' => true );
+$rows = DBBase::listRows( 'tickets', '', null, '', $fields, array(), $orderBy );
+if( is_null( $rows ) ) {
 	admintickets_buildDoc();
 	exit;
 }
-
-$user2NumTickets = Array();
-while( ( $row = $dbdriver->fetch( $sth ) ) ) {
+$user2NumTickets = array();
+if( $rows ) foreach( $rows as $row ) {
 	$usr = $row['usr'];
-	if( !isset( $user2NumTickets[ $usr ] ) )
+	if( !isset( $user2NumTickets[ $usr ] ) ) {
 		$user2NumTickets[ $usr ] = 1;
-	else
+	} else {
 		$user2NumTickets[ $usr ]++;
+	}
 }
 
 print "<h2>".BizResources::localize( "LIC_USAGE_LIMIT_REACHED" )."</h2>";
@@ -161,10 +156,10 @@ print "</form>";
 <?php
 
 $numToShow = 20;
-
-$sql = "SELECT `id`, `usr`, `clientname`, `clientip`, `appname`, `appproductcode`, `appversion`, `expire`, `logon` from $db order by `logon` ASC";
-$sth = $dbdriver->query( $sql );
-if( !$sth ) {
+$fields = array('id', 'usr', 'clientname', 'clientip', 'appname', 'appproductcode', 'appversion', 'expire', 'logon');
+$orderBy = array( 'logon' => true );
+$rows = DBBase::listRows( 'tickets', '', null, '', $fields, array(), $orderBy );
+if( is_null( $rows ) ) {
 	admintickets_buildDoc();
 	exit;
 }
@@ -183,9 +178,9 @@ $txt .= "<th class='text'>&nbsp;</td>";
 $txt .= "<th class='text'>&nbsp;</td>";
 $txt .= "</tr>";
 
-// build tablerows with the results
+// Build table rows with the results.
 $n = 0;
-while( ( $row = $dbdriver->fetch( $sth ) ) ) {
+if( $rows ) foreach( $rows as $row ) {
 	$n++;
 	$txt .= "<tr bgcolor='#DDDDDD'>";
 	$txt .= "<td class='text'>$n.</td>";
@@ -201,12 +196,6 @@ while( ( $row = $dbdriver->fetch( $sth ) ) ) {
 		$txt .= "&nbsp;";
 	}
 	$txt .= "</td>";
-
-	// Client name not used, so don't show:
-//		$txt .= "<td class='text'>";
-//			$txt .= $row['clientname'];
-//		$txt .= "</td>";
-
 	$txt .= "<td class='text'>";
 	$txt .= $row['clientip'];
 	$txt .= "</td>";
@@ -216,11 +205,6 @@ while( ( $row = $dbdriver->fetch( $sth ) ) ) {
 	$txt .= "<td class='text'>";
 	$txt .= $row['appproductcode'];
 	$txt .= "</td>";
-	/*
-			 $txt .= "<td class='text'>";
-				 $txt .= $row['appversion'];
-			 $txt .= "</td>";
-	 */
 	$logontime = timeConverter( $row['logon'] );
 	$txt .= "<td class='text'>";
 	$txt .= $logontime;
@@ -254,12 +238,9 @@ print "<a href='../../apps/login.php?logout=true'>".BizResources::localize( "LIC
 admintickets_buildDoc();
 function admintickets_buildDoc()
 {
-
 	$txt = ob_get_contents();
 	ob_end_clean();
-
 	require_once BASEDIR.'/server/utils/htmlclasses/HtmlDocument.class.php';
-
 	$txt = HtmlDocument::buildDocument( $txt, true, null, false, true );
 	print $txt;
 }

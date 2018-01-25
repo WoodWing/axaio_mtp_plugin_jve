@@ -42,7 +42,7 @@ if( $logout ) {
 	}
 }
 
-// LOGON
+// Log On
 $loginsucceed = false;
 $passExpired = false;
 $userLimitAdmin = false;
@@ -110,18 +110,19 @@ if( !$loginsucceed ) {
 		//In case of error, there is no 'secure' admin session (the user can't logon!)
 		//But these admin pages should be able to be fetched, 
 		//and need to verify that only admin users are requesting them
-		session_id( 'ww-userlimit-admin-session-id' );
+		$sessionName = 'ww_userlimit_admin_session';
+		session_name( $sessionName );
 		session_start();
 		$_SESSION['adminUser'] = $user;
 		$_SESSION['hash'] = md5( $user."bla" );
 		$_SESSION['start'] = time();
 	}
 	if( $userLimitAdmin ) {
-		header( 'Location: '.SERVERURL_ROOT.INETROOT.'/server/admin/license/admintickets.php?adminUser='.urlencode( $user ).'&'.'sessionId'.'='.session_id() );
+		header( 'Location: '.SERVERURL_ROOT.INETROOT.'/server/admin/license/admintickets.php?adminUser='.urlencode( $user ).'&'.'sessionName'.'='.$sessionName );
 		exit(); //After setting the header, always quit: don't send extra data to the browser
 	}
 	if( $licenseAdmin ) {
-		header( 'Location: '.SERVERURL_ROOT.INETROOT.'/server/admin/license/index.php?adminUser='.urlencode( $user ).'&'.'sessionId'.'='.session_id() );
+		header( 'Location: '.SERVERURL_ROOT.INETROOT.'/server/admin/license/index.php?adminUser='.urlencode( $user ).'&'.'sessionName'.'='.$sessionName );
 		exit(); //After setting the header, always quit: don't send extra data to the browser
 	}
 	$tpl = HtmlDocument::loadTemplate( 'login.htm' );
@@ -143,10 +144,8 @@ if( !$loginsucceed ) {
 	}
 
 	$tpl = str_replace( "<!--USERNAME-->", formvar( $user ), $tpl );
-
 	$versionInfo = trim( SERVERVERSION.' '.SERVERVERSION_EXTRAINFO );
 	$tpl = str_replace( "<!--VERSIONINFO-->", $versionInfo, $tpl );
-
 	$messageList = '';
 	// Running in debug mode?
 	if( LogHandler::debugMode() ) {
@@ -163,11 +162,8 @@ if( !$loginsucceed ) {
 	$tpl .= $showDialogs;
 	$tpl .= "\n".$errNoJavascript;
 	print HtmlDocument::buildDocument( $tpl, false );
-}
-else	// is succeeded
-{
+} else {  // Is succeed.
 	$shortusername = BizSession::getShortUserName();
-	// homepage for successful logon
 	$isadmin = hasRights( DBDriverFactory::gen(), $shortusername, 'Web' );
 	$ispubladmin = publRights( DBDriverFactory::gen(), $shortusername );
 	if( $isadmin || $ispubladmin ) { // admin user
@@ -191,8 +187,6 @@ else	// is succeeded
 	}
 	if( $redir != 'false' ) { // Logon originated from other page? Let's go back then...
 		print '<script language="javascript">top.location.replace("'.STARTHTM.'");</script>';
-		// Rolled back since I can not get this bullet-proof: logoff, start new tab, goto Google, then to browse page, logon (redir) -> goes back to Google instead of browse page
-		//print '<script language="javascript">if( window.history.length > 2 ) { history.go('.$redir.'); } else { top.location.replace("'.STARTHTM.'"); }</script>';
 	} else { // Initial logon? Let's start at the index page...
 		print '<script language="javascript">top.location.replace("'.STARTHTM.'");</script>';
 	}
