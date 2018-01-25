@@ -248,6 +248,3 @@ function unregister_buildDoc()
 	$txt = HtmlDocument::buildDocument($txt, true, null, false, true);
 	print $txt;
 }
-	
-	
-?>
