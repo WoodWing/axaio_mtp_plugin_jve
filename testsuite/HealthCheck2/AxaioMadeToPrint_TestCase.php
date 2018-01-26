@@ -100,7 +100,7 @@ class WW_TestSuite_HealthCheck2_AxaioMadeToPrint_TestCase extends TestCase
 		$not_found_tables =array();
         foreach ($check_tables as $value) {
             if (!$dbDriver->tableExists($value)) {
-                $not_found_tables[] = DBPREFIX.$value;
+                $not_found_tables[] = $dbDriver->tablename($value);
             }
         }
 		if(!empty($not_found_tables))

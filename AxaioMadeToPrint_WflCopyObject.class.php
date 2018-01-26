@@ -20,33 +20,29 @@ require_once BASEDIR . '/server/interfaces/services/wfl/WflCopyObject_Enterprise
 class AxaioMadeToPrint_WflCopyObject extends WflCopyObject_EnterpriseConnector
 {
 	final public function getPrio()     { return self::PRIO_DEFAULT; }
-	final public function getRunMode()  { return self::RUNMODE_AFTER; }
+	final public function getRunMode()  { return self::RUNMODE_BEFOREAFTER; }
 
 	final public function runBefore( WflCopyObjectRequest &$req )
 	{
-		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Called: AxaioMadeToPrint_WflCopyObject->runBefore()' );
-		require_once dirname(__FILE__) . '/config.php';
 		$req = $req; // keep code analyzer happy
 		
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_AFTER with RUNMODE_AFTER when this hook is not needed.
 
-		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Returns: AxaioMadeToPrint_WflCopyObject->runBefore()' );
 	} 
 
 	final public function runAfter( WflCopyObjectRequest $req, WflCopyObjectResponse &$resp )
 	{
-		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Called: AxaioMadeToPrint_WflCopyObject->runAfter()' );
-		require_once dirname(__FILE__) . '/config.php';
+		$req = $req; $resp = $resp; // keep code analyzer happy
+
+        require_once dirname(__FILE__) . '/config.php';
 		require_once dirname(__FILE__) . '/AxaioMadeToPrintDispatcher.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
-		$req = $req; $resp = $resp; // keep code analyzer happy
 
 		$ticket = BizSession::getTicket();
 		
 		AxaioMadeToPrintDispatcher::doPrint( $resp->MetaData->BasicMetaData->ID, $ticket );
 
-		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Returns: AxaioMadeToPrint_WflCopyObject->runAfter()' );
 	} 
 	
 	// Not called.

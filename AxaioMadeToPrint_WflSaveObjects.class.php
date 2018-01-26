@@ -20,40 +20,52 @@ require_once BASEDIR . '/server/interfaces/services/wfl/WflSaveObjects_Enterpris
 class AxaioMadeToPrint_WflSaveObjects extends WflSaveObjects_EnterpriseConnector
 {
 	final public function getPrio()     { return self::PRIO_DEFAULT; }
-	final public function getRunMode()  { return self::RUNMODE_AFTER; }
+	final public function getRunMode()  { return self::RUNMODE_BEFOREAFTER; }
 
+    /** @var integer $prevStatusId The object status id before the service was executed. */
+	private $prevStatusId;
+	
 	final public function runBefore( WflSaveObjectsRequest &$req )
 	{
-		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Called: AxaioMadeToPrint_WflSaveObjects->runBefore()' );
-		require_once dirname(__FILE__) . '/config.php';
 		$req = $req; // keep code analyzer happy
-		
+
+        require_once dirname(__FILE__) . '/config.php';
+        require_once dirname(__FILE__) . '/AxaioMadeToPrintDispatcher.class.php';
+        $this->prevStatusId = AxaioMadeToPrintDispatcher::getObjectStatus( $req->ID );
+
 		// TODO: Add your code that hooks into the service request.
 		// NOTE: Replace RUNMODE_AFTER with RUNMODE_AFTER when this hook is not needed.
-
-		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Returns: AxaioMadeToPrint_WflSaveObjects->runBefore()' );
 	} 
 
 	final public function runAfter( WflSaveObjectsRequest $req, WflSaveObjectsResponse &$resp )
 	{
-		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Called: AxaioMadeToPrint_WflSaveObjects->runAfter()' );
 		require_once dirname(__FILE__) . '/config.php';
 		require_once dirname(__FILE__) . '/AxaioMadeToPrintDispatcher.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizSession.class.php';
 		$req = $req; $resp = $resp; // keep code analyzer happy
 
 		$ticket = BizSession::getTicket();
-		foreach($resp->Objects as $respArrKey => $respArrValue)
-		{
-			if (LogHandler::debugMode())
-			{
-				LogHandler::Log( 'AxaioMadeToPrint_WflSaveObjects.class.php', 'DEBUG', print_r('$respArrValue', true) );
-				LogHandler::Log( 'AxaioMadeToPrint_WflSaveObjects.class.php', 'DEBUG', print_r($respArrValue, true) );
-			}
-			AxaioMadeToPrintDispatcher::doPrint( $respArrValue->MetaData->BasicMetaData->ID, $ticket );
-		}
+		if( defined( "AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY") && AXAIO_MTP_TRIGGER_ON_CHANGE_ONLY == true) {
+            if( $this->prevStatusId && (substr($req->Objects[0]->MetaData->BasicMetaData->Type, 0, 6) == 'Layout') ) { //set and other than 0 and is layout
+                $currentStatusId = (isset( $req->Objects[0]->MetaData->WorkflowMetaData->State->Id))
+                                         ? $req->Objects[0]->MetaData->WorkflowMetaData->State->Id
+                                         : 0;
 
-		LogHandler::Log( 'AxaioMadeToPrint', 'DEBUG', 'Returns: AxaioMadeToPrint_WflSaveObjects->runAfter()' );
+                if($currentStatusId != $this->prevStatusId) {
+                    LogHandler::Log('AxaioMadeToPrint', 'DEBUG', 'Layout status was changed from ' . $this->prevStatusId . ' to ' . $currentStatusId);
+                    AxaioMadeToPrintDispatcher::doPrint( $resp->Objects[0]->MetaData->BasicMetaData->ID, $ticket );            
+                } else {
+                    LogHandler::Log('AxaioMadeToPrint', 'DEBUG', 'Skipping layout '.$resp->Objects[0]->MetaData->BasicMetaData->ID.' because the status was not changed' );
+                }
+            }
+        } else {
+            if((BizSession::getShortUserName() == AXAIO_MTP_USER) && ($req->Objects[0]->MetaData->WorkflowMetaData->State->Id == $resp->Objects[0]->MetaData->WorkflowMetaData->State->Id) ){
+            }else{
+                AxaioMadeToPrintDispatcher::doPrint(  $resp->Objects[0]->MetaData->BasicMetaData->ID, $ticket );
+            }
+        }
+
+
 	} 
 	
 	// Not called.

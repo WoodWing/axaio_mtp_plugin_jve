@@ -26,7 +26,7 @@ $user = $globUser;
 $tpl = file_get_contents(dirname(__FILE__).'/mtpsetup.htm' );
 
 $dbDriver = DBDriverFactory::gen();
-$mtptab = DBPREFIX."axaio_mtp_trigger";
+$mtptab = $dbDriver->tablename("axaio_mtp_trigger");
 $statustab = $dbDriver->tablename('states');
 
 $PublicationID  = isset($_REQUEST['Publication']) ? intval($_REQUEST['Publication'])  : 0;
