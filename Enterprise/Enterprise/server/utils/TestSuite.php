@@ -580,6 +580,54 @@ class WW_Utils_TestSuite
 		$stepInfo = 'LogOff TESTSUITE user.';
 		/*$response =*/ $this->callService( $testCase, $request, $stepInfo );		
 	}
+
+	/**
+	 * Copies a given publication/brand ($sourcePubId) and returns this newly copied publication/brand.
+	 *
+	 * @since 10.1.6
+	 * @param int $sourcePubId The original publication id to be copied to a new one.
+	 * @param string $newPubName The New name for the newly copied publication.
+	 * @param bool $copyIssues True to copy over the issues from the original publication, false otherwise.
+	 * @param string $prefixName For debugging purposes, name prefix to apply to all copied items inside publication for ease recognizion.
+	 *                           Leave this empty when no prefix is needed.
+	 * @throws BizException
+	 * @return int The newly copied publication id.
+	 */
+	public function copyPublication( $sourcePubId, $newPubName, $copyIssues, $prefixName )
+	{
+		require_once BASEDIR.'/server/bizclasses/BizCascadePub.class.php';
+		return BizCascadePub::copyPublication( $sourcePubId, $newPubName, $copyIssues, $prefixName );
+	}
+
+	/**
+	 * Deletes a publication and all its corresponding settings.
+	 *
+	 * @since 10.1.6
+	 * @param TestCase $testCase The test module calling this function.
+	 * @param string $ticket A valid test session ticket.
+	 * @param int $pubId Publication id of the publication to be deleted.
+	 * @throws BizException
+	 */
+	public function deletePublication( TestCase $testCase, $ticket, $pubId )
+	{
+		try {
+			require_once BASEDIR.'/server/services/adm/AdmDeletePublicationsService.class.php';
+			$request = new AdmDeletePublicationsRequest();
+			$request->Ticket = $ticket;
+			$request->PublicationIds = array( $pubId );
+
+			$stepInfo = 'Delete Brand ( id = ' . $pubId . ' ).';
+			$response = $this->callService( $testCase, $request, $stepInfo );
+
+			if ( !$response instanceof AdmDeletePublicationsResponse ) {
+				throw new BizException( 'ERR_ERROR', 'Server', __FUNCTION__.'()',
+					'Could not delete Brand ( id = ' . $pubId . ' ).' );
+			}
+		} catch( BizException $e ) {
+			LogHandler::Log( 'Services', 'ERROR', __CLASS__.'::'.__FUNCTION__.'(): '.$e->__toString() );
+			throw ($e);
+		}
+	}
 	
 	/**
 	 * Creates a new Publication Channel
@@ -958,7 +1006,7 @@ class WW_Utils_TestSuite
 	 * Create object via CreateObjects service call.
 	 *
 	 * @param TestCase $testCase
-	 * @param string $ticket Ticket retrieved on logon
+	 * @param string $ticket A valid test session ticket.
 	 * @param array $objects List of objects to be created via CreateObjects service call.
 	 * @param bool $lock Whether or not to lock the object
 	 * @param string|null $stepInfo Optional step info in case an error occurs
@@ -986,7 +1034,7 @@ class WW_Utils_TestSuite
 	 * Deletes a given object from the database by calling the DeleteObjects service.
 	 *
 	 * @param TestCase $testCase Test case being executed
-	 * @param string $ticket Server ticket
+	 * @param string $ticket A valid test session ticket.
 	 * @param int $objId The id of the object to be removed.
 	 * @param string $stepInfo Extra logging info.
 	 * @param string &$errorReport To fill in the error message if there's any during the delete operation.
@@ -1028,7 +1076,7 @@ class WW_Utils_TestSuite
 	 * Updates an object with given metadata by calling the SetObjectProperties service.
 	 *
 	 * @param $TestCase
-	 * @param string $ticket server ticket
+	 * @param string $ticket A valid test session ticket.
 	 * @param Object $object Object properties an targets to update. On success, it gets updated with latest info from DB.
 	 * @param string $stepInfo Extra logging info.
 	 * @param string|null $expectedError S-code when error expected. NULL when no error expected.
@@ -1089,7 +1137,7 @@ class WW_Utils_TestSuite
 	 * Updates an object with given metadata by calling the MultiSetObjectProperties service.
 	 *
 	 * @param TestCase $testCase The test case executing the service. Errors are set on the test case object.
-	 * @param string $ticket A valid ticket for the test session.
+	 * @param string $ticket A valid test session ticket.
 	 * @param Object[] $objects Objects properties to update. On success, they are updated with latest info from the DB.
 	 * @param string $stepInfo Extra logging info.
 	 * @param array $expectedReports Array of expected ErrorReport(s).
