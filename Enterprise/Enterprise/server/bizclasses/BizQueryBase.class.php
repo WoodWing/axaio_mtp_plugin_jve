@@ -1058,7 +1058,7 @@ class BizQueryBase
 	 * @param string $limitPlacedView identifier for subselect on temporary table with limited placed objects.
 	 * @param string $allView identifier of the temporary table containing all object ids.
 	 * @param array $componentrows element information
-	 * @param bool $returnComponentRows true if function should return $componentrows else false (BZ#17057)
+	 * @param bool $returnComponentRows true if function should return component rows else false (BZ#17057)
 	 * @param array $areas 'Workflow' or 'Trash'
 	 * @param string $orientation
 	 * @return array processed object rows
@@ -1077,9 +1077,9 @@ class BizQueryBase
 
 		self::resolveRouteTo($resultRows);
 
-		$elementNameRequested = in_array('ElementName', $requestedpropnames); // bool
+		$elementNameRequested = in_array('ElementName', $requestedpropnames);
 		if ($elementNameRequested || $returnComponentRows){
-			$componentrows = DBQuery::getElementsByView($limitPlacedView);
+			$componentrows = DBQuery::getElementsByView( $allView );
 		}
 		if ($elementNameRequested) {
 			self::resolveElementName($resultRows, $componentrows);
