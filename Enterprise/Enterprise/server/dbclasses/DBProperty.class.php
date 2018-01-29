@@ -886,4 +886,39 @@ class DBProperty extends DBBase
 
 		return $rows;
 	}
+
+	/**
+	 * Returns a list of publication ids where the requested property ($propName) belongs to
+	 * ﻿but it should not belong to publication ids listed in $pubIdsToBeExcluded.
+	 *
+	 * @since 10.1.6 Introduced since the fix for EN-84515.
+	 * @param string $propName Name of the property to retrieve. In case of custom props, it starts with C_.
+	 * @param int[] $pubIdsToBeExcluded See function header.
+	 * @return int[]|null List of publication ids or an empty array when none is found. Null is returned
+	 *                    when passed in $pubIdsToBeExcluded is empty.
+	 */
+	public static function getPropertyPubIdsExistsInOtherPublications( $propName, $pubIdsToBeExcluded )
+	{
+		$propertyInOtherPublications = null;
+		if( $pubIdsToBeExcluded ) {
+			$dbDriver = DBDriverFactory::gen();
+			$properties = $dbDriver->tablename( self::TABLENAME );
+
+			$params = array();
+			$sql = "SELECT `publication` FROM {$properties} "
+				."WHERE `publication` NOT IN ( ". implode( ",", $pubIdsToBeExcluded )." ) "
+				."AND `name` = ? ";
+			$params[] = strval( $propName );
+			$sth = $dbDriver->query( $sql, $params );
+
+			$propertyInOtherPublications = array();
+			if ( $sth ) {
+				while( $row = $dbDriver->fetch( $sth )) {
+					$propertyInOtherPublications[] = $row['publication'];
+				}
+			}
+		}
+
+		return $propertyInOtherPublications;
+	}
 }
