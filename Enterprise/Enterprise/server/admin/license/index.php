@@ -59,7 +59,7 @@ if( $hasLicense ) { // One or more licenses installed?
 				// By logging on, the _install_ user will be removed from the tickets table, 
 				// and his lastlogon timestamp will be set!
 				if( $user ) {
-					$sessionName = isset( $requestParams['sessionName'] ) ? $requestParams['sessionName'] : '';
+					$sessionName = 'ww_userlimit_admin_session';
 					session_name( $sessionName );
 					session_start();
 					$adminUser = $_SESSION['adminUser'];
