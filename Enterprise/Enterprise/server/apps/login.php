@@ -127,11 +127,11 @@ if( !$loginsucceed ) {
 		$_SESSION['start'] = time();
 	}
 	if( $userLimitAdmin ) {
-		header( 'Location: '.SERVERURL_ROOT.INETROOT.'/server/admin/license/admintickets.php?adminUser='.urlencode( $user ).'&'.'sessionName'.'='.$sessionName );
+		header( 'Location: '.SERVERURL_ROOT.INETROOT.'/server/admin/license/admintickets.php?adminUser='.urlencode( $user ) );
 		exit(); //After setting the header, always quit: don't send extra data to the browser
 	}
 	if( $licenseAdmin ) {
-		header( 'Location: '.SERVERURL_ROOT.INETROOT.'/server/admin/license/index.php?adminUser='.urlencode( $user ).'&'.'sessionName'.'='.$sessionName );
+		header( 'Location: '.SERVERURL_ROOT.INETROOT.'/server/admin/license/index.php?adminUser='.urlencode( $user ) );
 		exit(); //After setting the header, always quit: don't send extra data to the browser
 	}
 	$tpl = HtmlDocument::loadTemplate( 'login.htm' );
