@@ -34,6 +34,9 @@ class WW_TestSuite_BuildTest_Admin_MetaDataHandling_TestCase extends TestCase
 	/** @var array $metadata1 */
 	private $metadata1 = array();
 
+	/** @var array $metadata3 */
+	private $metadata3 = array();
+
 	/** @var array $metadata2 */
 	private $metadata2 = array();
 
@@ -68,6 +71,11 @@ class WW_TestSuite_BuildTest_Admin_MetaDataHandling_TestCase extends TestCase
 				break;
 			}
 
+			$this->composeMetadata3();
+			if( !$this->createMetaData( $this->metadata3 )) {
+				break;
+			}
+
 			$this->composeMetadata2();
 			if( !$this->createMetaData( $this->metadata2 )) {
 				break;
@@ -87,6 +95,10 @@ class WW_TestSuite_BuildTest_Admin_MetaDataHandling_TestCase extends TestCase
 				break;
 			}
 
+			if( !$this->setupDialog( $this->metadata3['pubId'], $this->metadata3['name'] )) { // MD3 For Publication B
+				break;
+			}
+
 			// MetaData deletion
 			if( $this->deletePropertyAssignedToAllPublication()) {
 				$this->metadata0 = array();
@@ -96,7 +108,7 @@ class WW_TestSuite_BuildTest_Admin_MetaDataHandling_TestCase extends TestCase
 			}
 
 			if( $this->deletePropertyAssignedToOnePublication()) {
-				$this->metadata2 = array();
+				$this->metadata3 = array();
 			} else {
 				break;
 			}
@@ -160,10 +172,18 @@ class WW_TestSuite_BuildTest_Admin_MetaDataHandling_TestCase extends TestCase
 
 	private function composeMetadata2()
 	{
-		$this->metadata2['name'] = 'C_MD2'. $this->dateTime;
-		$this->metadata2['displayName'] = 'MD2'. $this->dateTime;
+		$this->metadata2['name'] = $this->metadata0['name']; // same name as MD0
+		$this->metadata2['displayName'] = $this->metadata0['displayName']; // same display name as MD0
 		$this->metadata2['type'] = 'string';
 		$this->metadata2['pubId'] = $this->brandId2;  // Specific Publication
+	}
+
+	private function composeMetadata3()
+	{
+		$this->metadata3['name'] = 'C_MD3'. $this->dateTime;
+		$this->metadata3['displayName'] = 'MD3'. $this->dateTime;
+		$this->metadata3['type'] = 'string';
+		$this->metadata3['pubId'] = $this->brandId2;  // Specific Publication
 	}
 
 	private function createMetaData( &$metadataInfo )
@@ -190,7 +210,10 @@ class WW_TestSuite_BuildTest_Admin_MetaDataHandling_TestCase extends TestCase
 			);
 			$metadataInfo['id'] = BizProperty::addProperty( $values );
 
-			BizCustomField::insertFieldAtModel( 'objects', $metadataInfo['name'], $metadataInfo['type'] );
+			$foundDbType = BizProperty::getCustomPropType( $metadataInfo['id'], $metadataInfo['type'], $metadataInfo['name'] );
+			if( !$foundDbType ) {
+				BizCustomField::insertFieldAtModel( 'objects', $metadataInfo['name'], $metadataInfo['type'] );
+			}
 			DBProperty::updateRow( 'properties', array('dbupdated' => 1), '`id` = ?', array( $metadataInfo['id'] ));
 
 		} catch ( BizException $e ) {
@@ -231,31 +254,50 @@ class WW_TestSuite_BuildTest_Admin_MetaDataHandling_TestCase extends TestCase
 		require_once BASEDIR . '/server/bizclasses/BizProperty.class.php';
 		BizProperty::checkAndRemoveRelatedDataBeforeDeleteProperty( $this->metadata0['id'], $this->metadata0['type'], $this->metadata0['name'], $this->metadata0['pubId'] );
 
-		if( !self::validateDoesPropertyExistAfterDeletion( $this->metadata0['id'], $this->metadata0['name'], $this->metadata0['pubId'] )) { // All Pub
+		// metadata0
+		if( !self::validateDoesActionPropertyExistsAfterDeletion( $this->metadata0['id'], $this->metadata0['name'], $this->metadata0['pubId'], false )) { // All Pub
+			return false;
+		}
+		if( !self::validateDoesPropertyExistAfterDeletion( $this->metadata0['id'], $this->metadata0['name'], $this->metadata0['pubId'], false )) { // All Pub
 			return false;
 		}
 
-		if( !self::validateDoesPropertyExistAfterDeletion( $this->metadata1['id'], $this->metadata1['name'], $this->metadata1['pubId'] )) { // Specific Pub
+		//metadata1
+		if( !self::validateDoesActionPropertyExistsAfterDeletion( $this->metadata1['id'], $this->metadata1['name'], $this->metadata1['pubId'], false )) { // Specific Pub
+			return false;
+		}
+		if( !self::validateDoesPropertyExistAfterDeletion( $this->metadata1['id'], $this->metadata1['name'], $this->metadata1['pubId'], false )) { // Specific Pub
+			return false;
+		}
+
+		// metadata2
+		if( !self::validateDoesActionPropertyExistsAfterDeletion( $this->metadata2['id'], $this->metadata2['name'], $this->metadata2['pubId'], true )) { // Specific Pub
+			return false;
+		}
+		if( !self::validateDoesPropertyExistAfterDeletion( $this->metadata2['id'], $this->metadata2['name'], $this->metadata2['pubId'], true )) { // Specific Pub
 			return false;
 		}
 
 		return true;
-
 	}
 
 	private function deletePropertyAssignedToOnePublication()
 	{
 		require_once BASEDIR . '/server/bizclasses/BizProperty.class.php';
-		BizProperty::checkAndRemoveRelatedDataBeforeDeleteProperty( $this->metadata2['id'], $this->metadata2['type'], $this->metadata2['name'], $this->metadata2['pubId'] );
+		BizProperty::checkAndRemoveRelatedDataBeforeDeleteProperty( $this->metadata3['id'], $this->metadata3['type'], $this->metadata3['name'], $this->metadata3['pubId'] );
 
-		if( !self::validateDoesPropertyExistAfterDeletion( $this->metadata2['id'], $this->metadata2['name'], $this->metadata2['pubId'] )) { // Specific Pub.
+		// metadata3
+		if( !self::validateDoesActionPropertyExistsAfterDeletion( $this->metadata3['id'], $this->metadata3['name'], $this->metadata3['pubId'], false )) { // Specific Pub.
+			return false;
+		}
+		if( !self::validateDoesPropertyExistAfterDeletion( $this->metadata3['id'], $this->metadata3['name'], $this->metadata3['pubId'], false )) { // Specific Pub.
 			return false;
 		}
 
 		return true;
 	}
 
-	private function validateDoesPropertyExistAfterDeletion( $id, $name, $publ )
+	private function validateDoesActionPropertyExistsAfterDeletion( $id, $name, $publ, $shouldExists )
 	{
 		$dbh = DBDriverFactory::gen();
 		$tableName = $dbh->tablename( 'actionproperties' );
@@ -264,12 +306,25 @@ class WW_TestSuite_BuildTest_Admin_MetaDataHandling_TestCase extends TestCase
 		$sth = $dbh->query( $sql, $params );
 		if( $sth ) {
 			if( $dbh->fetch( $sth ) ) {
-				$this->setResult( 'ERROR',  "Property '{$name}' (id='{$id}') should be deleted and should '.
-								'not exist in smart_actionproperties table.'." );
-				return false;
+				if( !$shouldExists ) {
+					$this->setResult( 'ERROR',  "Property '{$name}' (id='{$id}') should be deleted and should ".
+						"not exist in smart_actionproperties table." );
+					return false; // record found while it shouldn't.
+				}
+			} else {
+				if( $shouldExists ) {
+					$this->setResult( 'ERROR',  "Property '{$name}' (id='{$id}') should not be deleted and should ".
+						"exist in smart_actionproperties table." );
+					return false; // record not found while it should.
+				}
 			}
 		}
+		return true;
+	}
 
+	private function validateDoesPropertyExistAfterDeletion( $id, $name, $publ, $shouldExists )
+	{
+		$dbh = DBDriverFactory::gen();
 		$tableName = $dbh->tablename( 'properties' );
 		$sql = "SELECT `name` FROM $tableName WHERE `id` = ? ";
 		$params = array( $id );
@@ -277,9 +332,17 @@ class WW_TestSuite_BuildTest_Admin_MetaDataHandling_TestCase extends TestCase
 
 		if( $sth ) {
 			if( $dbh->fetch( $sth ) ) {
-				$this->setResult( 'ERROR',  "Property '{$name}' (id='{$id}') should be deleted and should '.
-								'not exist in smart_properties table.'." );
-				return false;
+				if( !$shouldExists ) {
+					$this->setResult( 'ERROR',  "Property '{$name}' (id='{$id}') should be deleted and should ".
+						"not exist in smart_properties table." );
+					return false; // record found while it shouldn't.
+				}
+			} else {
+				if( $shouldExists ) {
+					$this->setResult( 'ERROR',  "Property '{$name}' (id='{$id}') should not be deleted and should ".
+						"exist in smart_properties table." );
+					return false; // record not found while it should.
+				}
 			}
 		}
 		return true;
@@ -293,7 +356,10 @@ class WW_TestSuite_BuildTest_Admin_MetaDataHandling_TestCase extends TestCase
 
 		if( $this->metadata0 ) {
 			DBActionproperty::deletePropFromActionProperties( $this->metadata0['name'], null );
-			BizCustomField::deleteFieldAtModel( 'objects', $this->metadata0['name'] );
+			$foundDbType = BizProperty::getCustomPropType( $this->metadata0['id'], $this->metadata0['type'], $this->metadata0['name'] );
+			if( !$foundDbType ) {
+				BizCustomField::deleteFieldAtModel( 'objects', $this->metadata0['name'] );
+			}
 			BizProperty::deleteProperty( $this->metadata0['id'] );
 			$this->metadata0 = array();
 		}
@@ -305,9 +371,22 @@ class WW_TestSuite_BuildTest_Admin_MetaDataHandling_TestCase extends TestCase
 
 		if( $this->metadata2 ) {
 			DBActionproperty::deletePropFromActionProperties( $this->metadata2['name'], null );
-			BizCustomField::deleteFieldAtModel( 'objects', $this->metadata2['name'] );
+			$foundDbType = BizProperty::getCustomPropType( $this->metadata2['id'], $this->metadata2['type'], $this->metadata2['name'] );
+			if( !$foundDbType ) {
+				BizCustomField::deleteFieldAtModel( 'objects', $this->metadata2['name'] );
+			}
 			BizProperty::deleteProperty( $this->metadata2['id'] );
 			$this->metadata2 = array();
+		}
+
+		if( $this->metadata3 ) {
+			DBActionproperty::deletePropFromActionProperties( $this->metadata3['name'], null );
+			$foundDbType = BizProperty::getCustomPropType( $this->metadata3['id'], $this->metadata3['type'], $this->metadata3['name'] );
+			if( !$foundDbType ) {
+				BizCustomField::deleteFieldAtModel( 'objects', $this->metadata3['name'] );
+			}
+			BizProperty::deleteProperty( $this->metadata3['id'] );
+			$this->metadata3 = array();
 		}
 
 		if( $this->brandId2 ) {

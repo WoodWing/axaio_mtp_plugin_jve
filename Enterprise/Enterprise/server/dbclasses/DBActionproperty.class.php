@@ -66,7 +66,7 @@ class DBActionproperty extends DBBase
 	 * @param array $ids Array of action property Ids
 	 * @return bool True when execution fine | False when error occur
 	 */
-	public static function deleteActionProperties( $ids )
+	public static function deleteActionProperties( array $ids )
 	{
 		$ids = implode( ',', $ids );
 		$where = "`id` IN ( $ids )";
@@ -302,7 +302,7 @@ class DBActionproperty extends DBBase
 	/**
 	 * Deletes all action properties with name = $propname from the actionproperties table
 	 *
-	 * @param string $propname name of the prop to delete, in case of custom props: starting with C_ (!)
+	 * @param string $propname name of the property to delete, in case of custom props: starting with C_ (!)
 	 * @param int|null $pubId Publication Id of the property or null when deletion should be done for the
 	 *                        requested property regardless of the Publication.
 	 */
@@ -326,20 +326,30 @@ class DBActionproperty extends DBBase
 	}
 
 	/**
-	 * Delete (action)property(s) that do not belong to the given publications ($pubIdsToBeExcluded).
+	 * Delete (action)property(s) given the property name.
+	 *
+	 * The property will not be deleted if it belongs to any of the publication listed in $pubIdsToBeExcluded.
 	 *
 	 * @since 10.1.6 Introduced since the fix for EN-84515.
 	 * @param string $propName Name of the property to be deleted. In case of custom props, it starts with C_.
 	 * @param int[] $pubIdsToBeExcluded Property will be excluded from deletion if it belongs to any of these publications.
 	 */
-	public static function deletePropThatNotBelongToGivenPublications( $propName, $pubIdsToBeExcluded )
+	public static function deleteActionPropertiesGivenPropName( $propName, array $pubIdsToBeExcluded=array() )
 	{
 		$dbDriver = DBDriverFactory::gen();
 		$actionpropstable = $dbDriver->tablename( self::TABLENAME );
 		$params = array();
-		$sql  = "DELETE FROM $actionpropstable ";
-		$sql .= "WHERE `property` = ? AND `publication` NOT IN ( ". implode( ",", $pubIdsToBeExcluded )." ) ";
+		$whereConditions = array();
+
+		$whereConditions[] = "`property` = ? ";
 		$params[] = strval( $propName );
+
+		if( $pubIdsToBeExcluded ) {
+			$whereConditions[] = "`publication` NOT IN ( ". implode( ",", $pubIdsToBeExcluded )." ) ";
+		}
+
+		$sql  = "DELETE FROM $actionpropstable ";
+		$sql .= "WHERE " . implode( " AND ", $whereConditions );
 		$dbDriver->query( $sql, $params );
 	}
 

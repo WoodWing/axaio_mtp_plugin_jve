@@ -888,37 +888,39 @@ class DBProperty extends DBBase
 	}
 
 	/**
-	 * Returns a list of publication ids where the requested property ($propName) belongs to
-	 * ﻿but it should not belong to publication ids listed in $pubIdsToBeExcluded.
+	 * Returns a list of publication ids of the requested property ($propName).
+	 *
+	 * ﻿The publication ids listed in $pubIdsToBeExcluded will be excluded from being returned.
 	 *
 	 * @since 10.1.6 Introduced since the fix for EN-84515.
 	 * @param string $propName Name of the property to retrieve. In case of custom props, it starts with C_.
 	 * @param int[] $pubIdsToBeExcluded See function header.
-	 * @return int[]|null List of publication ids or an empty array when none is found. Null is returned
-	 *                    when passed in $pubIdsToBeExcluded is empty.
+	 * @return int[] List of publication ids where the property belongs to.
 	 */
-	public static function getPropertyPubIdsExistsInOtherPublications( $propName, $pubIdsToBeExcluded )
+	public static function getPropertyPubIds( $propName, $pubIdsToBeExcluded = array() )
 	{
-		$propertyInOtherPublications = null;
+		$dbDriver = DBDriverFactory::gen();
+		$properties = $dbDriver->tablename( self::TABLENAME );
+		$params = array();
+		$whereConditions = array();
+
+		$whereConditions[] = " `name` = ? ";
+		$params[] = strval( $propName );
+
 		if( $pubIdsToBeExcluded ) {
-			$dbDriver = DBDriverFactory::gen();
-			$properties = $dbDriver->tablename( self::TABLENAME );
-
-			$params = array();
-			$sql = "SELECT `publication` FROM {$properties} "
-				."WHERE `publication` NOT IN ( ". implode( ",", $pubIdsToBeExcluded )." ) "
-				."AND `name` = ? ";
-			$params[] = strval( $propName );
-			$sth = $dbDriver->query( $sql, $params );
-
-			$propertyInOtherPublications = array();
-			if ( $sth ) {
-				while( $row = $dbDriver->fetch( $sth )) {
-					$propertyInOtherPublications[] = $row['publication'];
-				}
-			}
+			$whereConditions[] = "`publication` NOT IN ( ". implode( ",", $pubIdsToBeExcluded )." ) ";
 		}
 
-		return $propertyInOtherPublications;
+		$sql = "SELECT `publication` FROM {$properties} ";
+		$sql .= "WHERE " . implode( " AND ", $whereConditions );
+		$sth = $dbDriver->query( $sql, $params );
+
+		$publications = array();
+		if ( $sth ) {
+			while( $row = $dbDriver->fetch( $sth )) {
+				$publications[] = $row['publication'];
+			}
+		}
+		return $publications;
 	}
 }
