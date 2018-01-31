@@ -2773,28 +2773,27 @@ class BizProperty
 	}
 
 	/**
-	 * Returns a list of publication ids where the requested property ($propName) belongs to
-	 * but it should not belong to publication ids listed in $pubIdsToBeExcluded.
+	 * Returns a list of publication ids of the requested property ($propName).
+	 *
+	 * ﻿The publication ids listed in $pubIdsToBeExcluded will be excluded from being returned.
 	 *
 	 * @since 10.1.6 Introduced since the fix for EN-84515.
 	 * @param string $propName Name of the property to retrieve. In case of custom props, it starts with C_.
 	 * @param int[] $pubIdsToBeExcluded See function header.
-	 * @return int[] List of publication ids or an empty array when none is found. Null is returned
-	 *               when passed in $pubIdsToBeExcluded is empty.
+	 * @return int[] List of publication ids where the property belongs to.
 	 */
-	private static function getPropertyPubIdsExistsInOtherPublications( $propName, $pubIdsToBeExcluded )
+	private static function getPropertyPubIds( $propName, array $pubIdsToBeExcluded )
 	{
 		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
-		return DBProperty::getPropertyPubIdsExistsInOtherPublications( $propName, $pubIdsToBeExcluded );
+		return DBProperty::getPropertyPubIds( $propName, $pubIdsToBeExcluded );
 	}
 
 	/**
 	 * Checks and deletes the property($propertyName) defined in dialog setup(smart_actionproperties)
-	 * if there is any before it is removed from the MetaData setup(smart_properties).
+	 * before the property is removed from the MetaData setup(smart_properties).
 	 *
 	 * This function does not remove the property($propertyName) from MetaData setup, but only remove
 	 * from the dialog setup.
-	 *
 	 * This function is typically called just right before the property is going to be removed from
 	 * the MetaData setup.
 	 *
@@ -2806,9 +2805,9 @@ class BizProperty
 	{
 		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
 		if( $pubId == 0 ) {
-			$pubIdsToBeExcludedFromPropDeletion = self::getPropertyPubIdsExistsInOtherPublications( $propertyName, array( $pubId ) );
+			$pubIdsToBeExcludedFromPropDeletion = self::getPropertyPubIds( $propertyName, array( $pubId ));
 			if( $pubIdsToBeExcludedFromPropDeletion ) {
-				DBActionproperty::deletePropThatNotBelongToGivenPublications( $propertyName, $pubIdsToBeExcludedFromPropDeletion );
+				DBActionproperty::deleteActionPropertiesGivenPropName( $propertyName, $pubIdsToBeExcludedFromPropDeletion );
 			} else {
 				DBActionproperty::deletePropFromActionProperties( $propertyName, null );
 			}
@@ -2823,7 +2822,6 @@ class BizProperty
 	 * When a property is introduced, the property will be added as a database field in
 	 * smart_objects and smart_deletedobjects table.
 	 * Optionally, the property can also be added in the Dialog Setup.
-	 *
 	 * Therefore the above mentioned data needs to be first removed before the property is deleted.
 	 *
 	 * @since 10.1.6
