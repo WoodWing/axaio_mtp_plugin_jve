@@ -38,7 +38,7 @@ class CopyWithPlacements_WflCopyObject extends WflCopyObject_EnterpriseConnector
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 
-		$dbdriver = DBDriverFactory::gen();
+		$dbDriver = DBDriverFactory::gen();
 
 		$originalId = $req->SourceID;
 		$originalLayout = BizObject::getObject( $originalId, null, false, 'none' );
@@ -48,15 +48,15 @@ class CopyWithPlacements_WflCopyObject extends WflCopyObject_EnterpriseConnector
 			return;
 		}
 
-		$deepcopy = null;
-		foreach( $req->MetaData->ExtraMetaData as $extradata ) {
-			if( $extradata->Property == 'C_CWP_DEEPCOPY' ) {
-				$deepcopy = ( $extradata->Values[0] == '1' );
+		$deepCopy = null;
+		foreach( $req->MetaData->ExtraMetaData as $extraMetaData ) {
+			if( $extraMetaData->Property == 'C_CWP_DEEPCOPY' ) {
+				$deepCopy = ( $extraMetaData->Values[0] == '1' );
 				break;
 			}
 		}
 
-		if( !$deepcopy ) {
+		if( !$deepCopy ) {
 			return;
 		}
 
@@ -67,11 +67,11 @@ class CopyWithPlacements_WflCopyObject extends WflCopyObject_EnterpriseConnector
 		require_once BASEDIR.'/server/bizclasses/BizPublication.class.php';
 		$user = BizSession::getShortUserName();
 		$pubs = BizPublication::getPublications( $user, 'full', $req->MetaData->BasicMetaData->Publication->Id );
-		$article2status = Array();
+		$articleToStatus = Array();
 		if( $pubs ) foreach( $pubs as $pub ) {
 			if( $pub->States ) foreach( $pub->States as $state ) {
 				if( $state->Type == 'Article' ) {
-					$article2status[ $state->Name ] = $state;
+					$articleToStatus[ $state->Name ] = $state;
 				}
 			}
 		}
@@ -82,8 +82,8 @@ class CopyWithPlacements_WflCopyObject extends WflCopyObject_EnterpriseConnector
 		}
 
 		$relations = BizRelation::getObjectRelations( $originalId );
-		$newobjrelation = array();
-		$oldobjrelation = array();
+		$newObjRelation = array();
+		$oldObjRelation = array();
 
 		if( LogHandler::debugMode() ) {
 			LogHandler::Log( 'CopyWithPlacements', 'DEBUG', "Original relations: ".print_r( $relations, true ) );
@@ -91,107 +91,104 @@ class CopyWithPlacements_WflCopyObject extends WflCopyObject_EnterpriseConnector
 
 		// now process all existing relations in the source layout
 		if( $relations ) foreach( $relations as $relation ) {
-			$childid = $relation->Child;
-			$obj = BizObject::getObject( $childid, null, false, 'none' );
+			$childId = $relation->Child;
+			$obj = BizObject::getObject( $childId, null, false, 'none' );
 
 			// only copy Article objects, leave other objects by default
 			if( $obj->MetaData->BasicMetaData->Type == 'Article' ) {
 				LogHandler::Log( 'CopyWithPlacements', 'INFO', "Copy article ".$obj->MetaData->BasicMetaData->Name );
 
-				// put article relation in the $oldobjrelation set (to be reset)
-				$parentid = $relation->Parent;
-				$childtype = $relation->Type;
-				$childplacements = $relation->Placements;
-				$childparenetversion = $relation->ParentVersion;
-				$childversion = $relation->ChildVersion;
-				$childgeometry = $relation->Geometry;
-				$oldobjrelation[] = new Relation( $resp->MetaData->BasicMetaData->ID, $childid, $childtype, $childplacements, $childparenetversion, $childversion, $childgeometry );
+				// put article relation in the $oldObjRelation set (to be reset)
+				$parentId = $relation->Parent;
+				$childType = $relation->Type;
+				$childPlacements = $relation->Placements;
+				$childParentVersion = $relation->ParentVersion;
+				$childVersion = $relation->ChildVersion;
+				$childGeometry = $relation->Geometry;
+				$oldObjRelation[] = new Relation( $resp->MetaData->BasicMetaData->ID, $childId, $childType, $childPlacements, $childParentVersion, $childVersion, $childGeometry );
 
 				// now create a copy of the article
 				// id of object to be copied
-				$objid = $obj->MetaData->BasicMetaData->ID;
+				$objId = $obj->MetaData->BasicMetaData->ID;
 
 				//prepare meta data for article copy
-				$childmeta = $obj->MetaData;
+				$childMeta = $obj->MetaData;
 
-				$childmeta->WorkflowMetaData->State = $article2status[ $childmeta->WorkflowMetaData->State->Name ];
+				$childMeta->WorkflowMetaData->State = $articleToStatus[ $childMeta->WorkflowMetaData->State->Name ];
 
 				// set Brand and Category of article to the target of the layout
-				$childmeta->BasicMetaData->Publication = $newMetaData->BasicMetaData->Publication;
-				$childmeta->BasicMetaData->Category = $newMetaData->BasicMetaData->Category;
+				$childMeta->BasicMetaData->Publication = $newMetaData->BasicMetaData->Publication;
+				$childMeta->BasicMetaData->Category = $newMetaData->BasicMetaData->Category;
 
 				//change child name
-				$newname = $obj->MetaData->BasicMetaData->Name;
-				$childmeta->BasicMetaData->Name = BizResources::localize( 'ACT_COPY_OF' ).' '.$newname;
+				$newName = $obj->MetaData->BasicMetaData->Name;
+				$childMeta->BasicMetaData->Name = BizResources::localize( 'ACT_COPY_OF' ).' '.$newName;
 
 				// Do not copy target meta data, this will make it possible
 				// to copy layout + articles to a different brand
-
-				//	$childmeta->TargetMetaData = $newMetaData->TargetMetaData;
 
 				// clear deadline
 				$obj->MetaData->WorkflowMetaData->Deadline = "";
 
 				// clear target ID
-				unset( $childmeta->BasicMetaData->ID );
+				unset( $childMeta->BasicMetaData->ID );
 
 				// Copy article into new article
 				require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
-				$copychild = BizObject::copyObject( $objid, $childmeta, $user, null, null );
+				$copyChild = BizObject::copyObject( $objId, $childMeta, $user, null, null );
 
-				$newchildid = $copychild->MetaData->BasicMetaData->ID;
+				$newChildId = $copyChild->MetaData->BasicMetaData->ID;
 
 				// if the copy succeeded, add it as a new relation to the layout
-				if( $newchildid ) {
+				if( $newChildId ) {
 					foreach( $relations as $childRelation ) {
-						$childid = $childRelation->Child;
-						if( $childid == $objid ) { // Only copy the current child relation !!!
-							$guidmapping = array();
+						$childId = $childRelation->Child;
+						if( $childId == $objId ) { // Only copy the current child relation !!!
+							$guidMapping = array();
 
 							// unfortunately we need a bit of sql here, to set the guids right
 							// we have to map from original guid to new guid
 							// have to do this because order of components is not guaranteed by copyto service
 							// (this should be improved in 8.2, but nevertheless...
 
-							$sql1 = "select `guid` from `smart_elements` where `objid`=".$newchildid.' order by `version` asc';
-							$sth1 = $dbdriver->query( $sql1 );
+							$sql1 = "select `guid` from `smart_elements` where `objid`=".$newChildId.' order by `version` asc';
+							$sth1 = $dbDriver->query( $sql1 );
 
-							$sql2 = "select `guid` from `smart_elements` where `objid`=".$objid.' order by `version` asc';
-							$sth2 = $dbdriver->query( $sql2 );
+							$sql2 = "select `guid` from `smart_elements` where `objid`=".$objId.' order by `version` asc';
+							$sth2 = $dbDriver->query( $sql2 );
 
-							while( $row1 = $dbdriver->fetch( $sth1 ) ) {
-								$row2 = $dbdriver->fetch( $sth2 );
-								$guidmapping[ $row2['guid'] ] = $row1['guid'];
+							while( $row1 = $dbDriver->fetch( $sth1 ) ) {
+								$row2 = $dbDriver->fetch( $sth2 );
+								$guidMapping[ $row2['guid'] ] = $row1['guid'];
 							}
 
 							if( LogHandler::debugMode() ) {
-								LogHandler::Log( 'CopyWithPlacements', 'DEBUG', "GUID mapping (old->new): ".print_r( $guidmapping, true ) );
+								LogHandler::Log( 'CopyWithPlacements', 'DEBUG', "GUID mapping (old->new): ".print_r( $guidMapping, true ) );
 							}
 
-							$parentid = $childRelation->Parent;
-							$childtype = $childRelation->Type;
+							$parentId = $childRelation->Parent;
+							$childType = $childRelation->Type;
 
 							if( LogHandler::debugMode() ) {
-								LogHandler::Log( 'CopyWithPlacements', 'DEBUG', "Placements before reordering: ".print_r( $childplacements, true ) );
+								LogHandler::Log( 'CopyWithPlacements', 'DEBUG', "Placements before reordering: ".print_r( $childPlacements, true ) );
 							}
 
 							// now copy guids from smart_elements table (created by the artice CopyObjects) into the
 							// smart_placements table (initialized by this customization)
-							$childplacements = $childRelation->Placements;
-							for( $x = 0; $x < count( $childplacements ); $x++ ) {
-								$childplacements[ $x ]->ElementID = $guidmapping[ $childplacements[ $x ]->ElementID ];
+							$childPlacements = $childRelation->Placements;
+							for( $x = 0; $x < count( $childPlacements ); $x++ ) {
+								$childPlacements[ $x ]->ElementID = $guidMapping[ $childPlacements[ $x ]->ElementID ];
 							}
 
 							if( LogHandler::debugMode() ) {
-								LogHandler::Log( 'CopyWithPlacements', 'DEBUG', "Placements after reordering: ".print_r( $childplacements, true ) );
+								LogHandler::Log( 'CopyWithPlacements', 'DEBUG', "Placements after reordering: ".print_r( $childPlacements, true ) );
 							}
 
-							// $childparenetversion=$childRelation->ParentVersion;
-							$childparenetversion = 1;
-							$childversion = $childRelation->ChildVersion;
-							$childgeometry = $childRelation->Geometry;
+							$childParentVersion = 1;
+							$childVersion = $childRelation->ChildVersion;
+							$childGeometry = $childRelation->Geometry;
 
-							$newobjrelation[] = new Relation( $resp->MetaData->BasicMetaData->ID, $newchildid, $childtype, $childplacements, $childparenetversion, $childversion, $childgeometry );
+							$newObjRelation[] = new Relation( $resp->MetaData->BasicMetaData->ID, $newChildId, $childType, $childPlacements, $childParentVersion, $childVersion, $childGeometry );
 						}
 					}
 				}
@@ -199,9 +196,9 @@ class CopyWithPlacements_WflCopyObject extends WflCopyObject_EnterpriseConnector
 		}
 
 		// now confirm the new relations
-		$newrelation = BizRelation::createObjectRelations( $newobjrelation, $user, null, false, false );
+		$newRelation = BizRelation::createObjectRelations( $newObjRelation, $user, null, false, false );
 		// and reset the old relations
-		BizRelation::deleteObjectRelations( $user, $oldobjrelation );
+		BizRelation::deleteObjectRelations( $user, $oldObjRelation );
 
 		// finished
 		if( LogHandler::debugMode() ) {
