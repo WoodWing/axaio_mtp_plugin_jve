@@ -899,8 +899,6 @@ class DBProperty extends DBBase
 	 */
 	public static function getPropertyPubIds( $propName, $pubIdsToBeExcluded = array() )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$properties = $dbDriver->tablename( self::TABLENAME );
 		$params = array();
 		$whereConditions = array();
 
@@ -911,15 +909,13 @@ class DBProperty extends DBBase
 			$whereConditions[] = "`publication` NOT IN ( ". implode( ",", $pubIdsToBeExcluded )." ) ";
 		}
 
-		$sql = "SELECT `publication` FROM {$properties} ";
-		$sql .= "WHERE " . implode( " AND ", $whereConditions );
-		$sth = $dbDriver->query( $sql, $params );
+		$where = implode( " AND ", $whereConditions );
+		$fieldNames = array( 'publication' );
+		$rows = DBBase::listRows( self::TABLENAME, '', '', $where, $fieldNames, $params );
 
 		$publications = array();
-		if ( $sth ) {
-			while( $row = $dbDriver->fetch( $sth )) {
-				$publications[] = $row['publication'];
-			}
+		if( $rows ) foreach( $rows as $row ) {
+			$publications[] = $row['publication'];
 		}
 		return $publications;
 	}

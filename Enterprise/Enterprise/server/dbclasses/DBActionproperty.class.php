@@ -309,20 +309,18 @@ class DBActionproperty extends DBBase
 	static public function deletePropFromActionProperties( $propname, $pubId=null )
 	{
 		$params = array();
+		$whereConditions = array();
 
-		$dbDriver = DBDriverFactory::gen();
-		$actionpropstable = $dbDriver->tablename(self::TABLENAME);
-
-		$sql  = "DELETE FROM $actionpropstable ";
-		$sql .= "WHERE `property` = ? ";
+		$whereConditions[] = "`property` = ? ";
 		$params[] = strval( $propname );
 
 		if( !is_null( $pubId )) {
-			$sql .= "AND `publication` = ? ";
+			$whereConditions[] = "`publication` = ? ";
 			$params[] = intval( $pubId );
 		}
 
-		$dbDriver->query($sql, $params);
+		$where = implode( " AND ", $whereConditions );
+		DBBase::deleteRows( self::TABLENAME, $where, $params );
 	}
 
 	/**
@@ -336,8 +334,6 @@ class DBActionproperty extends DBBase
 	 */
 	public static function deleteActionPropertiesGivenPropName( $propName, array $pubIdsToBeExcluded=array() )
 	{
-		$dbDriver = DBDriverFactory::gen();
-		$actionpropstable = $dbDriver->tablename( self::TABLENAME );
 		$params = array();
 		$whereConditions = array();
 
@@ -348,9 +344,8 @@ class DBActionproperty extends DBBase
 			$whereConditions[] = "`publication` NOT IN ( ". implode( ",", $pubIdsToBeExcluded )." ) ";
 		}
 
-		$sql  = "DELETE FROM $actionpropstable ";
-		$sql .= "WHERE " . implode( " AND ", $whereConditions );
-		$dbDriver->query( $sql, $params );
+		$where = implode( " AND ", $whereConditions );
+		DBBase::deleteRows( self::TABLENAME, $where, $params );
 	}
 
 	/**
