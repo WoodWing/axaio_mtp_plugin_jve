@@ -132,6 +132,9 @@ $txt .= '</select>';
 $tpl = str_replace ("<!--USERCOMBO-->", $txt, $tpl);
 
 if ($inUser) {
+	require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+	$bizUserSettings = new WW_BizClasses_UserSetting();
+
 	// Fill user userqueries
 	$db = $dbDriver->tablename('settings');
 	$sql = "SELECT * FROM $db WHERE `user` = '" . $dbDriver->toDBString($inUser) . "' ORDER BY `setting`, `appname`";
@@ -146,9 +149,10 @@ if ($inUser) {
 			$underscore = strpos( $row['setting'], '_' ); // position of underscore in UserQuery[<ver>]_<name>
 			if( $underscore !== FALSE && substr( $row['setting'], 0, strlen('UserQuery') ) == 'UserQuery' ) {
 				$userQuery = substr( $row['setting'],$underscore+1 ); // get name of user query
-				$appName = (trim($row['appname']) == '') ? '' : '&nbsp;('.formvar($row['appname']).')';
-				$txt .= '<input type="checkbox" name="queryCheck'.$queryCount.'"/>&nbsp;'.formvar($userQuery).$appName;
-				$txt .= '<input type="hidden" name="queryID'.$queryCount.'" value="'.$row['id'].'"/><br/>';
+				$clientAppName = $bizUserSettings->enrichClientAppNameForDisplay( $row['appname'] );
+				$txt .= '<div style="white-space: nowrap;"><input type="checkbox" name="queryCheck'.$queryCount.'"/>'.
+					'&nbsp;'.formvar($userQuery).'&nbsp;('.formvar($clientAppName).')';
+				$txt .= '<input type="hidden" name="queryID'.$queryCount.'" value="'.$row['id'].'"/></div>';
 				$queryCount++;
 			}
 		}

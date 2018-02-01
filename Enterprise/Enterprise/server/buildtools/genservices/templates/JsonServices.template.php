@@ -1,15 +1,15 @@
 <?php
 
 /**
- * @package Enterprise
+ * @package /*PACKAGENAME*/
  * @subpackage Services
  * @copyright WoodWing Software bv. All Rights Reserved.
- * 
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
- * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
- * Use the JsonServices.template.php file instead.
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  */
+
+// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
+// * Use the JsonServices.template.php file instead.
+// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 require_once BASEDIR.'/server/protocols/json/Services.php';
 require_once /*PROVIDERDIR*//interfaces/services//*INTFSHORTLOW*//DataClasses.php';

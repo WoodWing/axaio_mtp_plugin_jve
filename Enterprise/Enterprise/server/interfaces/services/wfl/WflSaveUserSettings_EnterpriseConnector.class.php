@@ -1,22 +1,22 @@
 <?php
 
 /**
- * @package 	/*PACKAGENAME*/
- * @subpackage 	ServerPlugins
- * @since 		v/*SERVERVERSION*/
- * @copyright	WoodWing Software bv. All Rights Reserved.
+ * @package    Enterprise
+ * @subpackage ServerPlugins
+ * @since      10.3.0
+ * @copyright  WoodWing Software bv. All Rights Reserved.
  */
  
 require_once BASEDIR.'/server/interfaces/plugins/ServiceConnector.class.php';
 
-abstract class /*INTFSHORT*//*SERVICE*/_EnterpriseConnector extends ServiceConnector 
+abstract class WflSaveUserSettings_EnterpriseConnector extends ServiceConnector 
 {
-	final public function getConnectorType()    { return '/*INTFFULL*/Service'; }
+	final public function getConnectorType()    { return 'WorkflowService'; }
 	final public function getInterfaceVersion() { return 1; }
 
-	abstract public function runBefore( /*INTFSHORT*//*SERVICE*/Request &$req );
-	abstract public function runAfter( /*INTFSHORT*//*SERVICE*/Request $req, /*INTFSHORT*//*SERVICE*/Response &$resp );
-	abstract public function runOverruled( /*INTFSHORT*//*SERVICE*/Request $req );
+	abstract public function runBefore( WflSaveUserSettingsRequest &$req );
+	abstract public function runAfter( WflSaveUserSettingsRequest $req, WflSaveUserSettingsResponse &$resp );
+	abstract public function runOverruled( WflSaveUserSettingsRequest $req );
 
 
 	/**
@@ -34,11 +34,10 @@ abstract class /*INTFSHORT*//*SERVICE*/_EnterpriseConnector extends ServiceConne
 	 * Or, this function may be called even after the runAfter() action is executed.
 	 * This happens when other service connectors are called which only then throw a BizException.
 	 *
-	 * @since 9.7.0
-	 * @param /*INTFSHORT*//*SERVICE*/Request $req The web service request.
+	 * @param WflSaveUserSettingsRequest $req The web service request.
 	 * @param BizException $e The error thrown.
 	 */
-	public function onError( /*INTFSHORT*//*SERVICE*/Request $req, BizException $e )
+	public function onError( WflSaveUserSettingsRequest $req, BizException $e )
 	{
 	}
 }

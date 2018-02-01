@@ -393,12 +393,8 @@ class BizSearch
 	 */
 	static public function setLastOptimized( $value )
 	{
-		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
-		if( DBUserSetting::hasSetting( '', 'LastOptimized', 'BizSearch' ) ) {
-			DBUserSetting::updateSetting( '', 'LastOptimized', $value, 'BizSearch' );
-		} else {
-			DBUserSetting::addSetting( '', 'LastOptimized', $value, 'BizSearch' );
-		}
+		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
+		DBConfig::storeValue( 'BizSearch_LastOptimized', $value );
 		return $value;
 	}
 
@@ -409,14 +405,9 @@ class BizSearch
 	 */
 	static public function getLastOptimized()
 	{
-		require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
-		$settings = DBUserSetting::getSettings( '', 'BizSearch' );
-		foreach( $settings as $setting ) {
-			if( $setting->Setting == 'LastOptimized' ) {
-				return $setting->Value;
-			}
-		}
-		return '';
+		require_once BASEDIR.'/server/dbclasses/DBConfig.class.php';
+		$value = DBConfig::getValue( 'BizSearch_LastOptimized' );
+		return is_null( $value ) ? '' : $value;
 	}
 
 	// - - - - - - - - - - - - - - - - - - - - SEARCHING - - - - - - - - - - - - - - - - - - - - 

@@ -2,7 +2,7 @@
 /**
  * /*SERVICE*/ /*INTFFULL*/ service.
  *
- * @package Enterprise
+ * @package /*PACKAGENAME*/
  * @subpackage Services
  * @since v/*SERVERVERSION*/
  * @copyright WoodWing Software bv. All Rights Reserved.
