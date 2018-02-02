@@ -72,8 +72,22 @@ class WW_TestSuite_BuildTest_TransferServer_TransferServer_TestCase extends Test
 	private function logOn()
 	{
 		require_once BASEDIR . '/server/services/wfl/WflLogOnService.class.php';
+
+		$req = new WflLogOnRequest();
+		$req->User = $this->suiteOpts['User'];
+		$req->Password = $this->suiteOpts['Password'];
+		$req->Ticket = '';
+		$req->Server = '';
+		$req->ClientName = '';
+		$req->Domain = '';
+		$req->ClientAppName = 'Transfer Server';
+		$req->ClientAppVersion = 'v'.SERVERVERSION;
+		$req->ClientAppSerial = '';
+		$req->ClientAppProductKey = '';
+		$req->RequestTicket = null; // obsoleted
+		$req->RequestInfo = array(); // ticket only
+
 		$service = new WflLogOnService();
-		$req = new WflLogOnRequest( $this->suiteOpts['User'], $this->suiteOpts['Password'], '', '', '', '', 'Transfer Server', SERVERVERSION, '', '', false );
 		$resp = $service->execute( $req );
 		$this->ticket = $resp->Ticket;
 	}
@@ -84,9 +98,13 @@ class WW_TestSuite_BuildTest_TransferServer_TransferServer_TestCase extends Test
 	private function logOff()
 	{
 		require_once BASEDIR . '/server/services/wfl/WflLogOffService.class.php';
+
+		$req = new WflLogOffRequest();
+		$req->Ticket = $this->ticket;
+		$req->SaveSettings = false;
+
 		$service = new WflLogOffService();
-		$req = new WflLogOffRequest( $this->ticket, true );
-		/* $resp = */ $service->execute( $req );
+		$service->execute( $req );
 	}
 
 	/**

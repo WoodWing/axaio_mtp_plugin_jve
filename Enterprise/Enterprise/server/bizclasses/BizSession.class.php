@@ -451,9 +451,10 @@ class BizSession
 		if( in_array( 'ServerInfo', $requestInfo ) ) {
 			$ret->ServerInfo    = self::getServerInfo( $ticket );
 		}
-		if( in_array( 'Settings', $requestInfo ) ) {
-			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-			$ret->Settings      = BizUser::getSettings( $shortUser, $appname );
+		if( in_array( 'Settings', $requestInfo ) && !in_array( 'PreferNoSettings', $requestInfo ) ) {
+			require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+			$bizUserSettings = new WW_BizClasses_UserSetting();
+			$ret->Settings = $bizUserSettings->getSettings( BizSession::getShortUserName(), BizSession::getClientName(), null );
 		}
 		if( in_array( 'Users', $requestInfo ) ) {
 			require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
@@ -619,8 +620,12 @@ class BizSession
 		require_once BASEDIR.'/server/dbclasses/DBLog.class.php';
 		DBlog::logService( $shortUserName, 'LogOff' );
 
-		//get the appname before deleting the ticket...
-		$appname = DBTicket::DBappticket($ticket);
+		// store user settings (before deleting the ticket)
+		if( $savesettings && is_array( $settings ) ) {
+			require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+			$bizUserSettings = new WW_BizClasses_UserSetting();
+			$bizUserSettings->replaceSettings( $shortUserName , DBTicket::DBappticket($ticket), $settings );
+		}
 
 		try {
 			require_once BASEDIR.'/server/bizclasses/BizTicket.class.php';
@@ -630,22 +635,6 @@ class BizSession
 			// Do nothing, error is already added to the log, no need to stop the log off.
 		}
 
-		// settings
-		if( $savesettings ) {
-			$dbDriver = DBDriverFactory::gen();
-			require_once BASEDIR.'/server/dbclasses/DBUserSetting.class.php';
-			$sth = DBUserSetting::purgeSettings( $shortUserName , $appname );
-			if( !$sth ) {
-				throw new BizException( 'ERR_DATABASE', 'Server',  $dbDriver->error() );
-			}
-
-			if( $settings ) foreach( $settings as $setting ) {
-				$sth = DBUserSetting::addSetting( $shortUserName, $setting->Setting, $setting->Value, $appname );
-				if( !$sth ) {
-					throw new BizException( 'ERR_DATABASE', 'Server', $dbDriver->error() );
-				}
-			}
-		}
 	}
 
 	/**

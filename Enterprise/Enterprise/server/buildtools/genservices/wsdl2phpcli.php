@@ -14,9 +14,9 @@
 require_once dirname(__FILE__).'/../../../config/config.php';
 require_once BASEDIR.'/server/buildtools/genservices/WebServiceClassesGeneratorFactory.class.php';
 
-$plugin = parseCliArguments();
-$provider = $plugin ? $plugin : 'Enterprise Server';
-$factory = new WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory( $plugin );
+$args = parseCliArguments();
+$provider = $args["plugin"] ? $args["plugin"] : 'Enterprise Server';
+$factory = new WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory( $args["plugin"], $args["version"], $args["dir"] );
 if( !$factory->validate() ) {
 	$errorMsg = $factory->getErrorMessage();
 	echo $errorMsg.PHP_EOL;
@@ -70,6 +70,9 @@ function parseCliArguments()
 	$opts = new Zend\Console\Getopt( array(
 		'plugin|p=s' => 'Optional. Name of the server plugin to generate the service classes for. '.
 			'When not provided, the web service classes for the core Enterprise Server are generated.',
+		'version|v=s' => 'Optional. Plugin version to use for the server plugin to generate the service classes for.'.
+			'When not provided, the Enterprise Server version is used.',
+		'dir|d=s' => 'Optional. Location of the plugin directory that the plugin resides in.',
 		'help|h' => 'Show this information.'
 	) );
 	try {
@@ -79,9 +82,15 @@ function parseCliArguments()
 		exit( 0 );
 	}
 	$plugin = isset( $arguments['plugin'] ) ? strval( $arguments['plugin'] ) : ''; // optional
+	$version = isset( $arguments['plugin'] ) && isset( $arguments['version'] ) ? strval( $arguments['version'] ) : ''; // optional and depending on 'plugin'
+	$dir = isset( $arguments['plugin'] ) && isset( $arguments['dir'] ) ? strval( $arguments['dir'] ) : ''; // optional and depending on 'plugin'
 	if( isset( $arguments['help'] ) ) {
 		echo $opts->getUsageMessage();
 		exit( 0 );
 	}
-	return $plugin;
+	return array(
+		'plugin' => $plugin,
+		'version' => $version,
+		'dir' => $dir,
+	);
 }

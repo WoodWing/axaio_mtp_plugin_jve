@@ -12,20 +12,20 @@ class ElvisSessionUtil
 	 * Read a Elvis ContentSource session setting from DB that were saved for the given session user.
 	 *
 	 * @since 10.1.4
-	 * @param string $userShort Short name of the session user.
 	 * @param string $name Name of the setting.
 	 * @return null|string Value of the setting. NULL when setting was never saved before.
 	 */
-	private static function getUserSetting( $userShort, $name )
+	private static function getUserSetting( $name )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-		$settings = BizUser::getSettings( $userShort, 'ElvisContentSource' );
+		require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+		$bizUserSettings = new WW_BizClasses_UserSetting();
+		$settings = $bizUserSettings->getSettings( BizSession::getShortUserName(), 'ElvisContentSource',
+			array( $name ) );
+
 		$value = null;
-		if( $settings ) foreach( $settings as $setting ) {
-			if( $setting->Setting == $name ) {
-				$value = $setting->Value;
-				break;
-			}
+		if( $settings ) {
+			$setting = reset( $settings );
+			$value = $setting->Value;
 		}
 		return $value;
 	}
@@ -34,15 +34,15 @@ class ElvisSessionUtil
 	 * Save a Elvis ContentSource session setting into DB for the given session user.
 	 *
 	 * @since 10.1.4
-	 * @param string $userShort Short name of the session user.
 	 * @param string $name Name of the setting.
 	 * @param string $value Value of the setting.
 	 */
-	private static function setUserSetting( $userShort, $name, $value )
+	private static function setUserSetting( $name, $value )
 	{
-		require_once BASEDIR.'/server/bizclasses/BizUser.class.php';
-		$settings = array( new Setting( $name, $value ) );
-		BizUser::updateSettings( $userShort, $settings, 'ElvisContentSource' );
+		require_once BASEDIR.'/server/bizclasses/BizUserSetting.class.php';
+		$bizUserSettings = new WW_BizClasses_UserSetting();
+		$bizUserSettings->saveSettings( BizSession::getShortUserName(), 'ElvisContentSource',
+			array( new Setting( $name, $value ) ) );
 	}
 
 	/**
@@ -56,9 +56,8 @@ class ElvisSessionUtil
 	 */
 	public static function getRestricted()
 	{
-		$userShort = BizSession::getShortUserName();
-		$restricted = self::getUserSetting( $userShort, 'Restricted' );
-		return is_null($restricted) ? true : (bool)$restricted;
+		$restricted = self::getUserSetting( 'Restricted' );
+		return is_null($restricted) ? true : boolval( intval( $restricted ) ); // convert '0' to FALSE or '1' to TRUE
 	}
 
 	/**
@@ -72,8 +71,7 @@ class ElvisSessionUtil
 	 */
 	public static function setRestricted( $restricted )
 	{
-		$userShort = BizSession::getShortUserName();
-		self::setUserSetting( $userShort, 'Restricted', intval($restricted) );
+		self::setUserSetting( 'Restricted', strval( intval( $restricted ) ) ); // store FALSE as '0' or TRUE as '1'
 	}
 
 	/**
@@ -83,14 +81,14 @@ class ElvisSessionUtil
 	 */
 	public static function getCredentials()
 	{
-		$userShort = BizSession::getShortUserName();
-		$storage = self::getUserSetting( $userShort, 'Temp' );
+		$storage = self::getUserSetting( 'Temp' );
 		$credentials = null;
 		if( $storage ) {
 			list( $encrypted, $initVector, $date ) = explode( '::', $storage, 3 );
 			$encrypted = base64_decode( $encrypted );
 			$initVector = base64_decode( $initVector );
 			$date = base64_decode( $date );
+			$userShort = BizSession::getShortUserName();
 			$encryptionKey = '!Tj0nG3'.$userShort.strval( date( 'z', intval( $date )) ); // hardcoded key + user name + day of the year
 			$credentials = openssl_decrypt( $encrypted, 'aes-256-cbc', $encryptionKey,
 				OPENSSL_RAW_DATA, $initVector );
@@ -122,7 +120,7 @@ class ElvisSessionUtil
 			OPENSSL_RAW_DATA, $initVector );
 		if( $encrypted ) {
 			$storage = base64_encode( $encrypted ).'::'.base64_encode( $initVector ).'::'.base64_encode( strval( $date ));
-			self::setUserSetting( $userShort, 'Temp', $storage ); // use vague name to obfuscate
+			self::setUserSetting( 'Temp', $storage ); // use vague name to obfuscate
 		} else {
 			LogHandler::Log( 'ELVIS', 'ERROR', 'Encryption procedure failed. Please run the Health Check.' );
 		}
@@ -293,8 +291,7 @@ class ElvisSessionUtil
 	 */
 	public static function getEditableFields()
 	{
-		$userShort = BizSession::getShortUserName();
-		$fields = self::getUserSetting( $userShort, 'EditableFields' );
+		$fields = self::getUserSetting( 'EditableFields' );
 		return $fields ? unserialize( $fields ) : null;
 	}
 
@@ -306,11 +303,10 @@ class ElvisSessionUtil
 	 */
 	public static function setEditableFields( $editableFields )
 	{
-		$userShort = BizSession::getShortUserName();
 		if( !$editableFields ) {
 			$editableFields = array();
 		}
-		self::setUserSetting( $userShort, 'EditableFields', serialize( $editableFields ) );
+		self::setUserSetting( 'EditableFields', serialize( $editableFields ) );
 	}
 
 	/**
@@ -321,8 +317,7 @@ class ElvisSessionUtil
 	 */
 	public static function getElvisServerVersion()
 	{
-		$userShort = BizSession::getShortUserName();
-		return self::getUserSetting( $userShort, 'ElvisServerVersion' );
+		return self::getUserSetting( 'ElvisServerVersion' );
 	}
 
 	/**
@@ -333,8 +328,7 @@ class ElvisSessionUtil
 	 */
 	public static function setElvisServerVersion( $version )
 	{
-		$userShort = BizSession::getShortUserName();
-		self::setUserSetting( $userShort, 'ElvisServerVersion', $version );
+		self::setUserSetting( 'ElvisServerVersion', $version );
 	}
 
 	/**

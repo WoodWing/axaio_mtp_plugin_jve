@@ -20,6 +20,12 @@ class WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory
 	/** @var string $plugin Optionally the internal name of a server plugin to generate classes for. */
 	private $plugin;
 
+	/** @var string $version Optionally the version of a server plugin to generate classes for. */
+	private $version;
+
+	/** @var string $plugin Optionally the location that the plugin resides in. */
+	private $dir;
+
 	/** @var WW_BuildTools_GenServices_WebServiceProviderInterface $provider Tells which interfaces to generate classes for. */
 	private $provider;
 
@@ -37,10 +43,14 @@ class WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory
 	 *
 	 * @param string $plugin Name of the server plugin to generate web service classes for.
 	 *    Empty when web service classes for the core Enterprise Server should be generated instead.
+	 * @param string $version Version of the server plug-in to use as value for variables in templates
+	 * @param string $dir Location of the plugin directory that the plugin resides in.
 	 */
-	public function __construct( $plugin )
+	public function __construct( $plugin, $version, $dir )
 	{
 		$this->plugin = $plugin;
+		$this->version = $version;
+		$this->dir = $dir;
 		$this->errorMsg = '';
 	}
 
@@ -94,7 +104,7 @@ class WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory
 		$generator = null;
 		if( isset($this->interfaceDefs[$webInterface] ) ) {
 			$interfaceDef = $this->interfaceDefs[ $webInterface ];
-			$generator = new WW_BuildTools_GenServices_WebServiceClassesGenerator( $interfaceDef, $this->provider->getProtocols() );
+			$generator = new WW_BuildTools_GenServices_WebServiceClassesGenerator( $interfaceDef, $this->provider->getProtocols(), $this->plugin, $this->version );
 		}
 		return $generator;
 	}
@@ -127,6 +137,9 @@ class WW_BuildTools_GenServices_WebServiceClassesGeneratorFactory
 		$workDir = null;
 		if( $this->plugin ) {
 			$baseDirs = array( BASEDIR.'/config/plugins', BASEDIR.'/server/plugins' );
+			if( $this->dir ) {
+				array_unshift($baseDirs, $this->dir);
+			}
 			foreach( $baseDirs as $baseDir ) {
 				$pluginDir = $baseDir.'/'.$this->plugin;
 				if( file_exists( $pluginDir ) ) {
