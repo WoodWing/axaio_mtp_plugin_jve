@@ -891,19 +891,9 @@ class BizWorkflow
 				empty($obj->Targets) ? array() : $obj->Targets, $objType ); // Targets are typically NOT set for 'Query' action (BZ#16988)
 		}
 
-		// Add Dossier property list to dialog and fill it with dossiers (to let user pick one).
-		// But, disable Dossier property for non-Create dialogs, even when client does support it.
-		// The reason is that only the CreateObject service does support implicit Dossier creation !
-        // Only for Create dialogs we want the Dossier property (BZ#10526)
-        // Besides 'Create', 'CopyTo' needs Dossier property as well. (BZ #18311)
-		if( !self::objectIsCreated( $action ) ||
-            $objType == 'Dossier' || $objType == 'DossierTemplate'  ) { // Dossier in Dossier not supported! (BZ#16909)
-			unset($usages['Dossier']);
-		}
-		if( !is_null($defaultDossier) && isset($usages['Dossier']) ) {
-			$retVal['Dossiers'] = self::getDossiersForDialog( $pub, $iss, $catId, $rights, $defaultDossier, $user );
-		}
-		self::fixDossierPropertyUsage( $retVal['Dossiers'], $defaultDossier, $props, $usages );
+		self::fixDossierPropertyUsage( $action, $objType, $defaultDossier, $usages );
+
+		self::handleDossiersForDialog( $pub, $iss, $catId, $rights, $defaultDossier, $user, $usages, $retVal, $props );
 
 		if( $multipleObjects ) {
 			// Eliminate all the unwanted properties for multi-set properties.
@@ -2388,26 +2378,61 @@ class BizWorkflow
 	}
 
 	/**
-	 * Adds/removes the given PropertyInfo and PropertyUsage objects with 'Dossier' property details.
-	 * This depends if supported by client, which is indicated by the $defaultDossier param.
+	 * Removes the unwanted PropertyUsage objects for property Dossier.
 	 *
-	 * @param array $dossiers List of dossiers that are about to get listed at workflow dialog.
-	 * @param int $defaultDossier Dossier ID. When given, 'Dossier' prop details are added (else removed).
-	 * @param array $props List of PropertyInfo objects
-	 * @param array $usages List of PropertyUsage objects
+	 * @since 10.3.x
+	 * @param string $action
+	 * @param string $objType
+	 * @param string $defaultDossier
+	 * @param string[] $usages [IN/OUT]
 	 */
-	protected static function fixDossierPropertyUsage( $dossiers, $defaultDossier, array &$props, array &$usages )
+	protected static function fixDossierPropertyUsage( $action, $objType, $defaultDossier, &$usages )
 	{
+		// Add Dossier property list to dialog and fill it with dossiers (to let user pick one).
+		// But, disable Dossier property for non-Create dialogs, even when client does support it.
+		// The reason is that only the CreateObject service does support implicit Dossier creation !
+		// Only for Create dialogs we want the Dossier property (BZ#10526)
+		// Besides 'Create', 'CopyTo' needs Dossier property as well. (BZ #18311)
+		if( !self::objectIsCreated( $action ) ||
+			$objType == 'Dossier' || $objType == 'DossierTemplate'  ) { // Dossier in Dossier not supported! (BZ#16909)
+			unset($usages['Dossier']);
+		}
+
 		if ( is_null($defaultDossier) ) {
 			// remove Dossier from usages, it's not supported by the client
 			if (isset($usages['Dossier'])){
 				unset($usages['Dossier']);
 				LogHandler::Log( 'GetDialog', 'INFO', 'Hiding Dossier property because it is not supported by client.' );
 			}
-		} else {
+		}
+	}
+
+	/**
+	 * Adds/removes the given PropertyInfo and PropertyUsage objects with 'Dossier' property details.
+	 * This depends if supported by client, which is indicated by the $defaultDossier param.
+	 *
+	 * @since 10.3.x Renamed the function from fixDossierPropertyUsage to handleDossiersForDialog.
+	 * @param int $pub Publication Id.
+	 * @param int $iss Issue Id.
+	 * @param int $catId Category Id.
+	 * @param string[] $rights User access rights (key=right, value=boolean)
+	 * @param int $defaultDossier Dossier ID. When given, 'Dossier' prop details are added.
+	 * @param string $user Acting user.
+	 * @param string[] $usages List of PropertyUsage objects.
+	 * @param string[] $retVal List of Dialog properties.
+	 * @param string[] $props List of properties.
+	 */
+	protected static function handleDossiersForDialog( $pub, $iss, $catId, $rights, $defaultDossier, $user, $usages, array &$retVal, array &$props )
+	{
+		if( !is_null($defaultDossier) && isset($usages['Dossier']) ) {
+			$retVal['Dossiers'] = self::getDossiersForDialog( $pub, $iss, $catId, $rights, $defaultDossier, $user );
+		}
+
+		if ( !is_null($defaultDossier) ) {
 			// set default dossier
 			if( isset($props['Dossier']) ) {
 				$props['Dossier']->PropertyValues = array();
+				$dossiers = $retVal['Dossiers'];
 				if( $dossiers ) foreach( $dossiers as $dossier ) {
 					$props['Dossier']->PropertyValues[] = new PropertyValue( $dossier->ID, $dossier->Name );
 					// Check whether default dossier exists and set default value
