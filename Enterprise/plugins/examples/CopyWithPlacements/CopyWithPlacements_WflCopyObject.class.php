@@ -38,8 +38,6 @@ class CopyWithPlacements_WflCopyObject extends WflCopyObject_EnterpriseConnector
 		require_once BASEDIR.'/server/bizclasses/BizObject.class.php';
 		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
 
-		$dbDriver = DBDriverFactory::gen();
-
 		$originalId = $req->SourceID;
 		$originalObjectType = BizObject::getObjectType( $originalId, "Workflow" );
 		if( $originalObjectType != 'Layout' ) {
