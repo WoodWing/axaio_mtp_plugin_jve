@@ -34,7 +34,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 			'3.1', '3.2', '3.3', '3.4', '4.0', '4.1', '4.2',
 			'5.0', '6.0', '6.1', '7.0', '7.5', '7.6', '8.0',
 			'9.0', '9.1', '9.2', '9.4', '9.5', '9.6', '9.7', '9.8',
-			'10.0', '10.1', '10.2'
+			'10.0', '10.1', '10.2', '10.3'
 		);
 	}
 
@@ -409,6 +409,7 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 							'alters' => array('v' => '4.1', 'name' => 'ip', 			'type' => 'varchar(30)',		'default' => "''", 'nullable' => true)),
 						array('v' => '8.0', 'name' => 'lockoffline', 	'type' => 'varchar(2)',			'default' => "''", 'nullable' => false,
 							'alters' => array('v' => '4.1', 'name' => 'lockoffline', 	'type' => 'varchar(2)',			'default' => "''", 'nullable' => true)),
+						array('v' => '10.3', 'name' => 'ticketid', 'type' => 'varchar(40)', 'default' => "''"),
 					),
 					'indexes' => array(
 						array('v' => '3.1', 'name' => 'ob_objectlocks', 'fields' => 'object', 'unique' => true),

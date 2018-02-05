@@ -164,6 +164,7 @@ CREATE TABLE `smart_objectlocks` (
   `timestamp` timestamp NOT NULL ,
   `ip` varchar(30) NOT NULL  default '',
   `lockoffline` varchar(2) NOT NULL  default '',
+  `ticketid` varchar(40) NOT NULL  default '',
   PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8;
 CREATE UNIQUE INDEX `ob_objectlocks` ON `smart_objectlocks`(`object`) ;
@@ -1325,4 +1326,4 @@ CREATE TABLE `smart_channeldata` (
   `value` blob NOT NULL  default '',
   PRIMARY KEY (`publication`, `pubchannel`, `issue`, `section`, `name`)
 ) DEFAULT CHARSET=utf8;
-UPDATE `smart_config` set `value` = '10.2' where `name` = 'version';
+UPDATE `smart_config` set `value` = '10.3' where `name` = 'version';
