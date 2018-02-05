@@ -409,7 +409,8 @@ class WW_DbModel_Definition extends WW_DbModel_Provider
 							'alters' => array('v' => '4.1', 'name' => 'ip', 			'type' => 'varchar(30)',		'default' => "''", 'nullable' => true)),
 						array('v' => '8.0', 'name' => 'lockoffline', 	'type' => 'varchar(2)',			'default' => "''", 'nullable' => false,
 							'alters' => array('v' => '4.1', 'name' => 'lockoffline', 	'type' => 'varchar(2)',			'default' => "''", 'nullable' => true)),
-						array('v' => '10.3', 'name' => 'ticketid', 'type' => 'varchar(40)', 'default' => "''"),
+						array('v' => '10.3', 'name' => 'appname',			'type' => 'varchar(200)',		'default' => "''"),
+						array('v' => '10.3', 'name' => 'appversion',		'type' => 'varchar(200)',		'default' => "''"),
 					),
 					'indexes' => array(
 						array('v' => '3.1', 'name' => 'ob_objectlocks', 'fields' => 'object', 'unique' => true),
