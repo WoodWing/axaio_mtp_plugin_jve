@@ -52,6 +52,9 @@
 	$lic->getLicenseStatusInfo( $licenseStatus, $color, $status, $flags );
 	
 	$renew = $info[ 'renew' ];
+	// NFR subscription may have an expire but no renew
+	if(!$renew && $info[ 'expires' ] )
+	    $renew = $info[ 'expires' ];
 
 	$bRenewStatus = ( $licenseStatus == WW_LICENSE_ERR_RENEWTIME ) ||  //Has to be renewed now
 					( ( $licenseStatus <= WW_LICENSE_OK_MAX ) && ( $renew && $renew != -1 )); //Renew license
