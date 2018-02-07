@@ -198,6 +198,8 @@ CREATE TABLE [smart_objectlocks] (
   [timestamp] timestamp NOT NULL ,
   [ip] varchar(30) NOT NULL  default '',
   [lockoffline] varchar(2) NOT NULL  default '',
+  [appname] varchar(200) NOT NULL  default '',
+  [appversion] varchar(200) NOT NULL  default '',
   PRIMARY KEY ([id])
 );
 CREATE UNIQUE INDEX [ob_objectlocks] ON [smart_objectlocks]([object]) ;
@@ -1385,4 +1387,4 @@ CREATE TABLE [smart_channeldata] (
   [value] text NOT NULL  default '',
   PRIMARY KEY ([publication], [pubchannel], [issue], [section], [name])
 );
-UPDATE [smart_config] set [value] = '10.2' where [name] = 'version';
+UPDATE [smart_config] set [value] = '10.3' where [name] = 'version';

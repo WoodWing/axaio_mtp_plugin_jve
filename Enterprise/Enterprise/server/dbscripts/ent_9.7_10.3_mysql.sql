@@ -8,6 +8,9 @@ ALTER TABLE `smart_deletedobjects` CHANGE `dpi`   `dpi` double NOT NULL  default
 ALTER TABLE `smart_log` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_log` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_log` CHANGE `parent`   `parent` bigint(11) NOT NULL  default '0';
+ALTER TABLE `smart_objectlocks`
+ADD   `appname` varchar(200) NOT NULL  default '',
+ADD   `appversion` varchar(200) NOT NULL  default '';
 ALTER TABLE `smart_objectlocks` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectlocks` CHANGE `object`   `object` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelations` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
@@ -42,6 +45,8 @@ ALTER TABLE `smart_objectoperations` CHANGE `objid`   `objid` bigint(11) NOT NUL
 ALTER TABLE `smart_properties` CHANGE `templateid`   `templateid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_publobjects` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_settings` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
+ALTER TABLE `smart_states`
+ADD   `skipidsa` char(2) NOT NULL  default '';
 CREATE  INDEX `cost_states` ON `smart_states`(`code`, `state`) ;
 ALTER TABLE `smart_tickets` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_terms` CHANGE `entityid`   `entityid` bigint(11) NOT NULL  default '0';
@@ -90,6 +95,7 @@ ALTER TABLE `smart_targeteditions` CHANGE `targetid`   `targetid` bigint(11) NOT
 ALTER TABLE `smart_indesignserverjobs`
 ADD   `pickuptime` varchar(30) NOT NULL  default '';
 ALTER TABLE `smart_indesignserverjobs` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
+CREATE  INDEX `lt_indesignserverjobs` ON `smart_indesignserverjobs`(`locktoken`) ;
 ALTER TABLE `smart_serverplugins`
 ADD   `dbprefix` varchar(10) NOT NULL  default '',
 ADD   `dbversion` varchar(10) NOT NULL  default '';
@@ -100,4 +106,4 @@ ALTER TABLE `smart_objectlabels` CHANGE `id`   `id` bigint(11) NOT NULL  auto_in
 ALTER TABLE `smart_objectlabels` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelationlabels` CHANGE `labelid`   `labelid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelationlabels` CHANGE `childobjid`   `childobjid` bigint(11) NOT NULL  default '0';
-UPDATE `smart_config` set `value` = '10.2' where `name` = 'version';
+UPDATE `smart_config` set `value` = '10.3' where `name` = 'version';

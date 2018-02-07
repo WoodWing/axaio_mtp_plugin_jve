@@ -9,6 +9,9 @@ ALTER TABLE `smart_deletedobjects` CHANGE `dpi`   `dpi` double NOT NULL  default
 ALTER TABLE `smart_log` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_log` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_log` CHANGE `parent`   `parent` bigint(11) NOT NULL  default '0';
+ALTER TABLE `smart_objectlocks`
+ADD   `appname` varchar(200) NOT NULL  default '',
+ADD   `appversion` varchar(200) NOT NULL  default '';
 ALTER TABLE `smart_objectlocks` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectlocks` CHANGE `object`   `object` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelations` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
@@ -166,4 +169,4 @@ ALTER TABLE `smart_objectlabels` CHANGE `objid`   `objid` bigint(11) NOT NULL  d
 ALTER TABLE `smart_objectlabels` CHANGE `name`   `name` varchar(250) NOT NULL  default '';
 ALTER TABLE `smart_objectrelationlabels` CHANGE `labelid`   `labelid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelationlabels` CHANGE `childobjid`   `childobjid` bigint(11) NOT NULL  default '0';
-UPDATE `smart_config` set `value` = '10.2' where `name` = 'version';
+UPDATE `smart_config` set `value` = '10.3' where `name` = 'version';
