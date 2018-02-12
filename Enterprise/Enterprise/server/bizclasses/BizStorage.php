@@ -285,7 +285,7 @@ class FileStorage
 		$this->clearError(); // init $this->errMsg
 		$this->filename = $this->fileMap( $storename, $id, $rendition, $format, $version, $page, $edition, $write );
 
-		// Since ES 6.0 a version must be provided for all renditions except 'page' and 'geo-' files.
+		// Since ES 6.0 a version must be provided for all renditions except 'page' files.
 		// Since ES 10.2 the version is made mandatory for native files only to allow custom renditions.
 		if( !$version && $rendition == 'rendition' ) {
 			throw new BizException( 'ERR_ARGUMENT', 'Server',
@@ -660,58 +660,58 @@ class FileStorage
 	/**
 	 * Determines the full path (including file name) of the object file that resides at file store.
 	 *
-	 * @param string $storename    Object store name (original name)
-	 * @param string $id           Object id
-	 * @param string $rendition    Rendition (native, preview, thumb, etc)
-	 * @param string $format       File format (mime type)
+	 * @param string $storename Object store name (original name)
+	 * @param string $id Object id
+	 * @param string $rendition Rendition (native, preview, thumb, etc)
+	 * @param string $format File format (mime type)
 	 * @param string|null $version Object version (used in name to keep versions separated).
-	 * @param string|null $page    The layout page number. Typically used for thumb/preview/pdf per page.
+	 * @param string|null $page The layout page number. Typically used for thumb/preview/pdf per page.
 	 * @param string|null $edition The object edition.
-	 * @param boolean $write       Indicates if caller is creating/updating new version.
+	 * @param boolean $write Indicates if caller is creating/updating new version.
 	 * @return string The file path.
 	 */
-	protected function fileMap( $storename, $id, $rendition, $format, $version=null, $page=null, $edition=null, $write=false )
+	protected function fileMap( $storename, $id, $rendition, $format, $version = null, $page = null, $edition = null, $write = false )
 	{
 		// normally storename is filled
 		$objname = empty( $storename ) ? self::objMap( $id ) : $storename;
 		$objname = ltrim( $objname, '/' ); // remove leading slash that could come from $storename
 		$fileNoVer = ATTACHMENTDIRECTORY.'/'.$objname."-$rendition";
-		
+
 		if( $page ) {
 			$fileNoVer .= $page;
 		}
 		if( $edition ) {
 			$fileNoVer .= "-$edition";
 		}
-		
+
 		// Ask the FileStore server plug-in connectors to resolve the file format (in case unknown).
-		require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
+		require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
 		if( !MimeTypeHandler::mimeType2FileExt( $format ) ) { // unknown?
 			require_once BASEDIR.'/server/bizclasses/BizServerPlugin.class.php';
 			$connectors = BizServerPlugin::searchConnectors( 'FileStore', null );
 			if( $connectors ) foreach( $connectors as $connector ) {
-				$postfix = BizServerPlugin::runConnector( $connector, 'mapFormatToPostfix', 
+				$postfix = BizServerPlugin::runConnector( $connector, 'mapFormatToPostfix',
 					array( $id, $rendition, $format, $version, $page, $edition ) );
 				if( $postfix ) {
 					$fileNoVer .= '-'.$postfix;
-					LogHandler::Log('filestore', 'DEBUG', 'Connector has provided a file postfix: '.$postfix );
+					LogHandler::Log( 'filestore', 'DEBUG', 'Connector has provided a file postfix: '.$postfix );
 					break; // respect the first best found
 				}
 			}
 		}
-		
+
 		$fileWithVer = $version ? $fileNoVer.'.v'.$version : $fileNoVer;
 		$ret = null;
-		
-		// Since Enterprise v6.0, version numbers are used in file names in major.minor notation.
+
+		// Version numbers are used in file names in major.minor notation.
 		// This is applied for both versioned files as well as 'current' files.
 		// Only for reading files (not writing!), we try the old notation, which is
 		// a single version number for versioned files and no number for 'current' files.
 		if( $write === false && $version ) { // read (no create)
-			// Since Enterprise v6.0, versioned files and current files are in "<name>.vX.Y" notation.
+			// Versioned files and current files are in "<name>.vX.Y" notation.
 			// Here we try "<name>.vX.Y" when asked for X.Y.
 			if( file_exists( $fileWithVer ) === true ) {
-				$ret = $fileWithVer; // found!
+				$ret = $fileWithVer;
 			} else {
 				// Versioned files stored before v6.0 are in "<name>.vX" notation.
 				// Here we try "<name>.vY" when asked for "X.Y".
@@ -719,53 +719,35 @@ class FileStorage
 				$verArr = array();
 				DBVersion::splitMajorMinorVersion( $version, $verArr );
 				$fileMinor = $fileNoVer.'.v'.$verArr['minorversion'];
-				require_once BASEDIR . '/server/utils/MimeTypeHandler.class.php';
-				$extension = MimeTypeHandler::mimeType2FileExt($this->format);
+				require_once BASEDIR.'/server/utils/MimeTypeHandler.class.php';
+				$extension = MimeTypeHandler::mimeType2FileExt( $this->format );
 				if( file_exists( $fileMinor ) === true ) {
 					$ret = $fileMinor; // found!
-				}
-				elseif (file_exists($fileNoVer) === true) {
+				} elseif( file_exists( $fileNoVer ) === true ) {
 					// 'Current' files that are stored before v6.0 have NO version in the name.
 					// Here we try "<name>" when asked for "X.Y".
-						$ret = $fileNoVer; // found!
-					}
-				//Try it with extension (REALFILE before v6.0)
-				elseif (!empty($extension) && file_exists($fileMinor.$extension) === true) {
+					$ret = $fileNoVer; // found!
+				} //Try it with extension (REALFILE before v6.0)
+				elseif( !empty( $extension ) && file_exists( $fileMinor.$extension ) === true ) {
 					$ret = $fileMinor.$extension;
-				}
-				elseif(!empty($extension) && file_exists( $fileNoVer.$extension) === true ) {
+				} elseif( !empty( $extension ) && file_exists( $fileNoVer.$extension ) === true ) {
 					$ret = $fileNoVer.$extension; // found!
 				}
 			}
 		}
-		if( is_null($ret) ) {
+		if( is_null( $ret ) ) {
 			$ret = $fileWithVer; // fall back at default
 			if( $write === false ) { // read (no create)
 				if( $version || // already checked above, so simply warn that file does not exist
-					!file_exists($ret) ) { // no version asked (e.g. geo file), so not check above yet, so first check before warn
-					
-					// Normally files in the filestore are referrenced from the database through
-					// the 'types' field, such as in smart_objects and smart_objectversions tables.
-					// Whenever a file is stored in the filestore, the 'types' field gets updated.
-					// Whenever a file is read from filestore, the 'types' field is used to address
-					// the file path. And so, the file should always exist and therefore we WARN
-					// in case the file is not present. However, we suppress that for geometric files.
-					// Those files are stored for object relations, but the smart_objectrelations table
-					// has NO 'types' field. As a result, the caller has no idea whether or not there
-					// is a geo file and so simply composes the file path through a StorageFactory::gen() 
-					// call. That hits this fileMap() function, so too early to WARN (BZ#31836).
-					
-					$isGeometryFile = strpos( $rendition, 'geo-' ) === 0 && $format == XMLTYPE;
-					if( !$isGeometryFile ) { // suppress warnings for geo files
-						LogHandler::Log('filestore', 'WARN', 'FileStorage::fileMap(): '.
-										'File does not exist for id=['.$id.'], version=['.$version.'], rendition=['.$rendition.'] ' .
-										'and edition=['.$edition.'].');
-					}
+					!file_exists( $ret ) ) { // No version asked, so not check above yet, so first check before warn.
+					LogHandler::Log( 'filestore', 'WARN', 'FileStorage::fileMap(): '.
+						'File does not exist for id=['.$id.'], version=['.$version.'], rendition=['.$rendition.'] '.
+						'and edition=['.$edition.'].' );
 				}
 			}
 		}
-		LogHandler::Log('filestore', 'DEBUG', 'FileStorage::fileMap(): Filename=['.$ret.']. '.
-			'Syntax: objectid[-rendition[-edition][-postfix]|-"page"pagenr-renditionid[-edition]][."v"version]');
+		LogHandler::Log( 'filestore', 'DEBUG', 'FileStorage::fileMap(): Filename=['.$ret.']. '.
+			'Syntax: objectid[-rendition[-edition][-postfix]|-"page"pagenr-renditionid[-edition]][."v"version]' );
 		return $ret;
 	}
 

@@ -668,12 +668,6 @@ if( !defined('MTP_POSTPROCESS_LOC') ) {
 //       SuppressGeometryPreview
 //          (Server feature.) Suppresses the layout preview information that is carried by geometry files.
 //          This improves performance but prevents InCopy users from viewing the opened article in the layout.
-//       UseXMLGeometry
-//          (Server feature.) Lets InDesign save a tiny geometry file and geometry preview file so 
-//          that no large layout file needs to be loaded when the article is opened in InCopy. 
-//          Note 1: Currently the XML Geometry Update feature is not working with Editions and 
-//                  not fully working with Sticky Notes.
-//          Note 2: When UseXMLGeometry is enabled, UPDATE_GEOM_SAVE must be disabled and vice versa.
 // 		DateFormat
 //			Formatter used by ContentStation to format dates, for example DD/MM/YYYY or MM-DD-YYYY
 //			This format is also used for the date input components. The width of these components is fixed to 
@@ -1008,9 +1002,6 @@ if( !defined('LANGPATTIMEDIFF') ) {
 // UPDATE_GEOM_SAVE:
 //    Notifies an InDesign/InCopy user when a geometry update is available by displaying a dialog box.
 //    Possible options are ON/OFF. Default value: 'OFF'.
-//    Note: The UseXMLGeometry option of SERVERFEATURES setting is not compatible with the 
-//          UPDATE_GEOM_SAVE setting. (When UseXMLGeometry is enabled, UPDATE_GEOM_SAVE needs to be
-//          disabled and vice versa.) The Update will not be sent if UseXMLGeometry is enabled.
 //
 if( !defined('UPDATE_GEOM_SAVE') ) {
 	define( 'UPDATE_GEOM_SAVE', 'OFF' );

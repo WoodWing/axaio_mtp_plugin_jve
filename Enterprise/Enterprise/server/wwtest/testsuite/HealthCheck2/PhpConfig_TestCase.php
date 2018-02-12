@@ -232,6 +232,7 @@ class WW_TestSuite_HealthCheck2_PhpConfig_TestCase extends TestCase
 		$help = 'Check your configserver.php file for the SERVERFEATURES setting and remove the obsoleted option from that list.';
 		$deprecatedFeatures = array( 
 			array( 'name' => 'ServerCreateImagePreview', 'help' => 'This option is no longer used. Please enable/disable the preview Server Plug-ins instead.' ),
+			array( 'name' => 'UseXMLGeometry', 'help' => 'This option is no longer used. Please remove this setting from config_overrule.php and configserver.php.' ),
 		);
 		foreach( $deprecatedFeatures as $opt ) {
 			if( BizSettings::isFeatureEnabled( $opt['name'] ) ) {

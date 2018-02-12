@@ -204,7 +204,7 @@ class WormGraphvizObjectProgressReport extends WormGraphvizComposer
 		require_once BASEDIR .'/server/bizclasses/BizRelation.class.php';
 		$relations = array();
 		if( !is_null( $relationType )) {
-			$relations = BizRelation::getObjectRelations( $objId, true, false, 'childs', false, false, $relationType );
+			$relations = BizRelation::getObjectRelations( $objId, null, false, 'childs', false, false, $relationType );
 			if( $relations ) foreach( $relations as $relation ) {
 				$relation->ChildRelations = $this->getObjectRelations( $relation->Child, $relation->ChildInfo->Type );
 			}

@@ -338,7 +338,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_CopyDossierWithF
 	{
 		// The updated Target after 'publishing' the Form. The Target is updated with PublishedVersion and Date.
 		$target = $this->template->Targets[0];
-		$formRelations = BizRelation::getObjectRelations( $this->form->MetaData->BasicMetaData->ID, false, true, 'both' );
+		$formRelations = BizRelation::getObjectRelations( $this->form->MetaData->BasicMetaData->ID, null, true, 'both' );
 
 		if( $formRelations ) {
 			foreach( $formRelations as &$relation ) {
@@ -576,7 +576,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_CopyDossierWithF
 	{
 		// The updated Target after 'un-publishing' the Form. The Target is updated with PublishedVersion and Date (both cleared).
 		$target = $this->template->Targets[0];
-		$formRelations = BizRelation::getObjectRelations( $formToUnPublish->MetaData->BasicMetaData->ID, false, true, 'both' );
+		$formRelations = BizRelation::getObjectRelations( $formToUnPublish->MetaData->BasicMetaData->ID, null, true, 'both' );
 
 		if( $formRelations ) {
 			foreach( $formRelations as &$relation ) {
