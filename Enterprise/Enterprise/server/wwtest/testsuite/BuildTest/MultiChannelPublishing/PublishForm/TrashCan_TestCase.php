@@ -935,7 +935,7 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_TrashCan_TestCas
 		require_once BASEDIR.'/server/interfaces/services/wfl/DataClasses.php';
 
 		$updated = null;
-		$relations = BizRelation::getObjectRelations( $publishFormId, true, true, null);
+		$relations = BizRelation::getObjectRelations( $publishFormId, null, true, null);
 
 		if( $relations ) foreach( $relations as $relation ) {
 			$parentInfo = $relation->ParentInfo; // ObjectInfo

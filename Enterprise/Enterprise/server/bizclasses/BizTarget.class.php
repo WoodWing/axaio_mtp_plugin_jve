@@ -1274,7 +1274,7 @@ class BizTarget
 
 		$objType = DBObject::getObjectType( $objId );
 		if( $objType == 'Dossier' ) {
-			$dossierRelations = BizRelation::getObjectRelations( $objId, false, true, 'childs' );
+			$dossierRelations = BizRelation::getObjectRelations( $objId, null, true, 'childs' );
 			if( $dossierRelations ) foreach( $dossierRelations as $dossierRelation ) {
 				if( $dossierRelation->ChildInfo->Type == 'PublishForm' ) {
 					if( $dossierRelation->Targets ) foreach( $dossierRelation->Targets as $dossierRelationTarget ) {

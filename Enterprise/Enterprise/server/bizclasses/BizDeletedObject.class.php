@@ -103,7 +103,7 @@ class BizDeletedObject
 		require_once BASEDIR.'/server/bizclasses/BizContentSource.class.php';
 
 		if( !BizContentSource::isAlienObject( $id ) ) { // Continue to get object relations if it is not alien object
-			$relations = BizRelation::getObjectRelations($id, true, true, null);
+			$relations = BizRelation::getObjectRelations($id, null, true, null);
 		}
 		if ($relations) foreach ($relations as $relation) {
 			$parentInfo = $relation->ParentInfo; // ObjectInfo
@@ -549,7 +549,8 @@ class BizDeletedObject
 
 		// If $childRow is false then the child object is not found (either in the Workflow or the Trash can).
 		if ( $childRow ) {
-			// Delete geometry file (if exists) from filestore
+			// Delete geometry file (if exists) from the FileStore. Althought "UseXMLGeometry" is no longer supported old
+			// geometry files will still be deleted from the FileStore.
 			$attachobj = StorageFactory::gen( $childRow['storename'], $childId, "geo-$parentId", XMLTYPE,
 											null, null, null, true ); // version, page, edition, write
 											// L> pass "true" for $write param sinc we do delete operation (avoids warning in log)
@@ -942,7 +943,7 @@ class BizDeletedObject
 			try {
 				$report->Type = 'Object';
 				$report->ID = $id;
-				$relations = BizRelation::getObjectRelations( $id, true, true, null);
+				$relations = BizRelation::getObjectRelations( $id, null, true, null);
 				/** @var Relation $relation */
 				$newObjectRelations = null;
 				if ($relations) foreach ($relations as $relation) {
@@ -1160,7 +1161,7 @@ class BizDeletedObject
 		require_once BASEDIR . '/server/bizclasses/BizRelation.class.php';
 		require_once BASEDIR . '/server/bizclasses/BizProperty.class.php';
 		require_once BASEDIR . '/server/dbclasses/DBPlacements.class.php';
-		$objectRelations = BizRelation::getObjectRelations( $id, true, false, null, true );
+		$objectRelations = BizRelation::getObjectRelations( $id, null, false, null, true );
 		if( $objectRelations ) foreach( $objectRelations as &$objectRelation ) {
 			$parentInfo = $objectRelation->ParentInfo;
 			$childInfo = $objectRelation->ChildInfo;
@@ -1219,7 +1220,7 @@ class BizDeletedObject
 		$isPlacementRemoved = false;
 		$publishFormId = $articleRelation->ParentInfo->ID;
 		$articleId = $articleRelation->ChildInfo->ID;
-		$formRelations = BizRelation::getObjectRelations( $publishFormId, true, false, null, true );
+		$formRelations = BizRelation::getObjectRelations( $publishFormId, null, false, null, true );
 		if( $formRelations ) foreach( $formRelations as $formRelation ) {
 			if( $formRelation->Type == 'Placed' &&
 				$formRelation->ParentInfo->ID == $publishFormId &&
@@ -1258,7 +1259,7 @@ class BizDeletedObject
 		$isPlacementRemoved = false;
 		$publishFormId = $objectRelation->ParentInfo->ID;
 		$objId = $objectRelation->ChildInfo->ID;
-		$formRelations = BizRelation::getObjectRelations( $publishFormId, true, false, null, true );
+		$formRelations = BizRelation::getObjectRelations( $publishFormId, null, false, null, true );
 		if( $formRelations ) foreach( $formRelations as $formRelation ) {
 			if( $formRelation->Type == 'Placed' &&
 				$formRelation->ParentInfo->Type == 'PublishForm' ) {
@@ -1319,7 +1320,7 @@ class BizDeletedObject
 			// Now when the Form is about to be restored, the relational target needs to be set back but it can be only
 			// done now (after restoring the Form), otherwise we will encounter deleted-xxx relation like deletedContained
 			// which is unwanted as the system doesn't deal with updating a deleted-xxx relation.
-			$updatedObjRelations = BizRelation::getObjectRelations( $id, true, true, null);
+			$updatedObjRelations = BizRelation::getObjectRelations( $id, null, true, null);
 			if( $updatedObjRelations ) foreach( $updatedObjRelations as &$updatedObjRelation ) {
 				if( $updatedObjRelation->Type == 'Contained' && $updatedObjRelation->ParentInfo->Type == 'Dossier' &&
 					$updatedObjRelation->ChildInfo->Type == 'PublishForm' ) { // Need to repair Dossier-Form Contained relation's Target.
@@ -1353,7 +1354,7 @@ class BizDeletedObject
 		require_once BASEDIR.'/server/dbclasses/DBTarget.class.php';
 		$targets = DBTarget::getTargetsByObjectId( $new_id );
 		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
-		$relations = BizRelation::getObjectRelations($new_id, false, false, 'parents', false, false, 'Contained' );
+		$relations = BizRelation::getObjectRelations($new_id, null, false, 'parents', false, false, 'Contained' );
 		$currentName = $object->MetaData->BasicMetaData->Name;
 		// Call NameValidation connectors. If the name is changed it must be updated in the database. 
 		BizObject::validateMetaDataAndTargets( $user, $object->MetaData, $targets, $relations, true );
@@ -1423,7 +1424,7 @@ class BizDeletedObject
 
 		$newPublishFormRelations = null;
 		// If the Dossier is active, check that we do not have other PublishForms on the Dossier.
-		$dossierRelations = BizRelation::getObjectRelations( $publishFormRelation->Parent, true, true, null);
+		$dossierRelations = BizRelation::getObjectRelations( $publishFormRelation->Parent, null, true, null);
 
 		// Refer to BZ#33120 for full scenarios.
 		$allPublishFormsChannel = array();

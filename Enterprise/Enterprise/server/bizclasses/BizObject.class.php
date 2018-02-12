@@ -852,12 +852,10 @@ class BizObject
 		// XMLGeo would require a geo update file per article which we don't have
 		if( isset($object->Relations) && ( $newRow['type'] == 'Layout' || $newRow['type'] == 'PublishForm' )
 			&& strtolower(UPDATE_GEOM_SAVE) == strtolower('ON') ) {
-			if (! BizSettings::isFeatureEnabled('UseXMLGeometry') ) {
-				foreach ($object->Relations as $relation) {
-					// If someone else has object lock, send notification
-					if( strtolower(DBObjectLock::checkLock( $relation->Child )) !=  strtolower($user) ) {
-						new smartevent_updateobjectrelation(BizSession::getTicket(), $relation->Child, $relation->Type, $id, $newRow['name']);
-					}
+			foreach ($object->Relations as $relation) {
+				// If someone else has object lock, send notification
+				if( strtolower(DBObjectLock::checkLock( $relation->Child )) !=  strtolower($user) ) {
+					new smartevent_updateobjectrelation(BizSession::getTicket(), $relation->Child, $relation->Type, $id, $newRow['name']);
 				}
 			}
 		}
@@ -1061,14 +1059,9 @@ class BizObject
 
 			if( in_array('Relations', $requestInfo) ) {
 				require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
-				// BZ#14481 only attach geo info when server feature "UseXMLGeometry" is on, object type is Article and rendition != none (BZ#8657)
-				$attachGeo =
-					$objectProps['Type'] == 'Article' &&
-					BizSettings::isFeatureEnabled('UseXMLGeometry') &&
-					$rendition != 'none';
 				$relations = BizRelation::getObjectRelations(
 					$id,
-					$attachGeo,
+					null,
 					in_array( 'Targets', $requestInfo ),
 					null, // use $id in both ways to resolve relations (as parent and child)
 					false, // get from workflow and trashcan
@@ -1264,7 +1257,7 @@ class BizObject
 			if ( !$objectId ) {
 				throw new BizException( 'ERR_NOTFOUND', 'Client', 'Object ID should be set for ' . __METHOD__ . ' when relations is null.' );
 			}
-			$relations = BizRelation::getObjectRelations( $objectId, false, false, null, false, false, 'InstanceOf' );
+			$relations = BizRelation::getObjectRelations( $objectId, null, false, null, false, false, 'InstanceOf' );
 		}
 
 		if ( $relations ) foreach ( $relations as $relation ) {
@@ -3985,7 +3978,7 @@ class BizObject
 	static private function handleObjectRelations( $id, &$newRelations, &$relationsToBeUpdated )
 	{
 		// These 'new' relations are either to be inserted or updated. (Deletion is handled above)
-		$existingRelations = BizRelation::getObjectRelations( $id, false, false, 'childs' );
+		$existingRelations = BizRelation::getObjectRelations( $id, null, false, 'childs' );
 		$relationIndex = 0;
 		if( $newRelations ) foreach( $newRelations as $newRelation ) {
 			$currRelationFoundInDb = false; // Assume the relation is a new one ( not yet stored in DB before)
@@ -5474,7 +5467,7 @@ class BizObject
 		$slugline = '';
 		if ( $publishFormId ) {
 			$publishFormRow = DBObject::getObjectRows( $publishFormId, array('Workflow') );
-			$relations = BizRelation::getObjectRelations( $publishFormId, false, false);
+			$relations = BizRelation::getObjectRelations( $publishFormId, null, false);
 			$slugline = self::getPublishFormSlugLine( $publishFormId, $publishFormRow, $relations );
 		}
 		return $slugline;
@@ -5620,7 +5613,7 @@ class BizObject
 			$objectsInTrashToIndex = array();
 			$semaphoreId = null;
 			$user = BizSession::getShortUserName();
-			$dossierRelations = BizRelation::getObjectRelations( $object->MetaData->BasicMetaData->ID, false, false, null, true );
+			$dossierRelations = BizRelation::getObjectRelations( $object->MetaData->BasicMetaData->ID, null, false, null, true );
 			if( $dossierRelations ) foreach( $dossierRelations as $dossierRelation ) {
 				if ( ( $dossierRelation->Type == 'Contained' || $dossierRelation->Type == 'DeletedContained' ) &&
 					$dossierRelation->ParentInfo->Name != $dossierRelation->ChildInfo->Name // The Form name and the Dossier name is still not the same
@@ -5757,7 +5750,7 @@ class BizObject
 	{
 		$restoreSuccess = true;
 		try {
-			$publishFormRelations = BizRelation::getObjectRelations( $id, false, false, null, false );
+			$publishFormRelations = BizRelation::getObjectRelations( $id, null, false, null, false );
 			if( $publishFormRelations ) foreach( $publishFormRelations as $publishFormRelation ) {
 				if( $publishFormRelation->Type == 'Contained' &&
 					$publishFormRelation->Child == $id &&

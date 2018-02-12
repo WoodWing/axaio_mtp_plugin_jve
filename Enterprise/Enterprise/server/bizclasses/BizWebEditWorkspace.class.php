@@ -2370,7 +2370,7 @@ class BizWebEditWorkspace
 		PerformanceProfiler::startProfile( 'Preview_Check_On_Placements', 5 );
 		$rebuildNeeded = false;
 		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
-		$storedRelations = BizRelation::getObjectRelations( $layoutId, true, false, null, false, false, 'Placed' );
+		$storedRelations = BizRelation::getObjectRelations( $layoutId, null, false, null, false, false, 'Placed' );
 		require_once BASEDIR.'/server/dbclasses/DBPlacements.class.php';
 		$storedInDesignArticlePlacements = DBPlacements::getPlacements( $layoutId, 0, 'Placed');
 		$storedRelationsWithIDSArticles = $this->addInDesignArticleToRelations( $storedRelations, $storedInDesignArticlePlacements );

@@ -284,15 +284,6 @@ class BizRelation
 				}
 				*/
 
-				// register geometry
-				if ( isset($relation->Geometry) ) { // BZ#8657
-					$attachobj = StorageFactory::gen( $childRow['storename'], $childId, "geo-$parentId", XMLTYPE, null, null, null, true );
-
-					if( !$attachobj->saveFile( $relation->Geometry->FilePath ) ) {
-						throw new BizException( 'ERR_ATTACHMENT', 'Server', $attachobj->getError() );
-					}
-				}
-
 				self::addParentChildVersionToRelation( $relationCreated );
 				if ( isset( $objRelationTargets ) ) {
 					$relationCreated->Targets = $objRelationTargets;
@@ -558,7 +549,7 @@ class BizRelation
 	 *      L> Object properties are all retrieved from smart_objects and smart_deletedobjects table.
 	 *
 	 * @param integer $id The Object Id for which to retrieve the relations.
-	 * @param bool $attachGeo Whether or not to get the geo rendition.
+	 * @param bool $attachGeo Whether or not to get the geo rendition. Deprecated since 10.3.1.
 	 * @param bool $allTargets Whether or not to return relations for the children.
 	 * @param null|string $related The relational type which implies how the $id is used; 'parents', 'childs' or 'both'. NULL means 'both'.
 	 * @param bool $getFromWorkflowAndTrash By default False; True to retrieve normal and deleted relation.
@@ -568,9 +559,13 @@ class BizRelation
 	 * @throws BizException
 	 */
 	public static function getObjectRelations(
-		$id, $attachGeo = true, $allTargets = false, $related = null, $getFromWorkflowAndTrash = false,
+		$id, $attachGeo = null, $allTargets = false, $related = null, $getFromWorkflowAndTrash = false,
 		$objectLabels = false, $type = null )
 	{
+		if( is_bool( $attachGeo ) ) {
+			LogHandler::Log( __CLASS__, 'DEPRECATED', 'XML Geometry is no longer supported.' );
+		}
+
 		require_once BASEDIR.'/server/bizclasses/BizStorage.php';
 		require_once BASEDIR.'/server/bizclasses/BizVersion.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBObjectRelation.class.php';
@@ -691,18 +686,6 @@ class BizRelation
 			}
 
 			if( $id == $row['child'] ) { // we are child.
-				// get geometry (only when we are child).
-				if( $attachGeo && isset($childProps['StoreName'])) { // when not asked for any renditions, we avoid geo attachments BZ#8657.
-					$attachobj = StorageFactory::gen( $childProps['StoreName'], $id, "geo-".$row['parent'], XMLTYPE, null );
-					// TO DO for v5, get rid of SOAP dependency here
-					if ($attachobj->doesFileExist() && $attachobj->getSize() > 0) { // getSize: do not return empty geo files BZ#8657.
-						$attachment = new Attachment();
-						$attachment->Rendition = 'native';
-						$attachment->Type = XMLTYPE;
-						$attachobj->copyToFileTransferServer($attachment);
-						$rel->Geometry = $attachment;
-					}
-				}
 				if( $allTargets ) { //If explicitly is asked for targets return also targets of the child.
 					$objectRelationId = intval( $row['id'] );
 					if ( isset($targetEditionRows[ $objectRelationId ])) {
@@ -1142,22 +1125,6 @@ class BizRelation
 					self::addRelationalTargetsForPlacements( $user, $relation, $parentRow['type'], $childRow['type'] );
 					if ( $relation->Targets ) {
 						BizTarget::updateObjectRelationTargets( $user, $relationInfo->Id, $relation->Targets );
-					}
-				}
-
-				// update geometry
-				if ( isset($relation->Geometry) ) {
-					$attachObject = StorageFactory::gen(
-						$childRow['storename'],
-						$relation->Child,
-						"geo-$relation->Parent",
-						XMLTYPE,
-						null,
-						null,
-						null,
-						true);
-					if( !$attachObject->saveFile( $relation->Geometry->FilePath ) ) {
-						throw new BizException( 'ERR_ATTACHMENT', 'Server', $attachObject->getError() );
 					}
 				}
 
@@ -1877,7 +1844,7 @@ class BizRelation
 	 */
 	public static function getDeletedPlacedRelations($parent, $newRelations, $related=null )
 	{
-		$oldRelations = self::getObjectRelations($parent, false, false, $related);
+		$oldRelations = self::getObjectRelations($parent, null, false, $related);
 		$placedOldDeletedRelations = array();
 
 		$newchilds = array();
@@ -1987,7 +1954,7 @@ class BizRelation
 					$parentType = DBObject::getObjectType( $dossierRelation->Parent );
 				}
 				if( $parentType == 'Dossier' && $childType == 'PublishForm' ) {
-					$formRelations = self::getObjectRelations( $dossierRelation->Child, false, true, null );
+					$formRelations = self::getObjectRelations( $dossierRelation->Child, null, true, null );
 					if( $formRelations ) foreach( $formRelations as $formRelation ) {
 						if( $formRelation->Type == 'Contained' ) {
 							$formRelationalTargets = self::collectRelationTargetIssue( $formRelation );
@@ -2080,7 +2047,7 @@ class BizRelation
 
 					// Retrieve children(Form) relational target issue ids that -already contained- in the Dossier.
 					// 1. First, retrieve all the data from DB.
-					$dossierRelations = self::getObjectRelations( $formRelationToBeSaved->Parent, false, false, 'childs' );
+					$dossierRelations = self::getObjectRelations( $formRelationToBeSaved->Parent, null, false, 'childs' );
 					if( $dossierRelations ) foreach( $dossierRelations as $dossierRelation ) {
 						if( $dossierRelation->Type == 'Contained' ) {
 							$parentType = DBObject::getObjectType( $dossierRelation->Parent );
@@ -2216,7 +2183,7 @@ class BizRelation
 	 */
 	private static function validatePublishFormContainedRelations( $formId, $formRelationsToBeSaved, &$existingDossier, &$newDossier )
 	{
-		$formRelations = BizRelation::getObjectRelations( $formId, false, true, 'both' );
+		$formRelations = BizRelation::getObjectRelations( $formId, null, true, 'both' );
 		$formFoundInOtherDossier = false;
 		$dossier = array();
 		if( $formRelations ) foreach( $formRelations as $formRelation ) {
@@ -2362,6 +2329,6 @@ class BizRelation
 	 */
 	public static function hasRelationOfType( $id, $type, $related )
 	{
-		return count(self::getObjectRelations( $id, false, false, $related, false, false, $type )) > 0;
+		return count(self::getObjectRelations( $id, null, false, $related, false, false, $type )) > 0;
 	}
 }

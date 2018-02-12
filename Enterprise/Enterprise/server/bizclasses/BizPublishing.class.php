@@ -1051,7 +1051,7 @@ class BizPublishing
 		}
 
 		require_once BASEDIR.'/server/bizclasses/BizRelation.class.php';
-		$relations = BizRelation::getObjectRelations( $parent, false, true, 'childs', true, false );
+		$relations = BizRelation::getObjectRelations( $parent, null, true, 'childs', true, false );
 		if ($relations ) foreach ( $relations as $relation ) {
 			if ( substr($relation->Type, 0, 7 ) == 'Deleted' ) {
 				if ( $relation->Targets ) foreach ( $relation->Targets as $target ) {
