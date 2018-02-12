@@ -2229,15 +2229,15 @@ class License
 		}
 
 		// NFR subscription may have an expire but no renew
-		$realRenewTime = $renewtime;
-		if ( !$realRenewTime && $expiretime ) {
-			$realRenewTime = $expiretime;
+		$renewOrExpireTime = $renewtime;
+		if ( !$renewOrExpireTime && $expiretime ) {
+			$renewOrExpireTime = $expiretime;
 		}
 
 		//Subscription?
-		if ( $realRenewTime )
+		if ( $renewOrExpireTime )
 		{
-			$togoSeconds = $realRenewTime - $thistime;
+			$togoSeconds = $renewOrExpireTime - $thistime;
 			$days = intval( $togoSeconds / (60 * 60 * 24) );
 			//Try to renew a few weeks before expiration
 			if ( $days < TRYRENEW_DAYSBEFOREEXPIRATION ) 
@@ -3383,7 +3383,7 @@ class License
 
 			print "<tr bgcolor='#cccccc'>";
 			print "<th class='text'>" . BizResources::localize('LIC_APPLICATION') . "</th>";
-			print "<th class='text'>" . "Serial" . "</th>";
+			print "<th class='text'>" . BizResources::localize('LIC_THE_SERIAL') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_STATUS') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_MESSAGE') . "</th>";
 			print "<th class='text'>" . BizResources::localize('LIC_RENEW') . "</th>";
