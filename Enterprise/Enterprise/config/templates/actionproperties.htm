@@ -5,9 +5,75 @@ function myconfirm(code)
 		case 'delaction':
 			txt = "<!--RES:ACT_SURE_DELETE_ACTION_PROPERTY_QMK-->";
 			break;
+		case 'deleteAllSelected':
+		    if( isThereAnyCheckboxesChecked() ) {
+				txt = "Are you sure you want to delete the selected properties?"; // TODO : must check if list is empty or not.
+			} else {
+                return alert( "There is no checkbox selected." );
+			}
+		    break;
 	}
 	return confirm(txt);
 }
+
+function isThereAnyCheckboxesChecked()
+{
+    var countCheckBoxes = document.forms['propfilter'].recs.value;
+    for(var i = 0; i < countCheckBoxes; i++) {
+        var objCheckBox = document.forms['propfilter'].elements['multiDelete'+i];
+        if( objCheckBox.checked ) {
+            return true;
+		}
+    }
+    return false;
+}
+
+function checkDeleteCheckboxes()
+{
+    var countCheckBoxes = document.forms['propfilter'].recs.value;
+    for(var i = 0; i < countCheckBoxes; i++) {
+        var objCheckBox = document.forms['propfilter'].elements['multiDelete'+i];
+		objCheckBox.checked = !(objCheckBox.checked)
+	}
+    return false;
+}
+
+$(document).ready(function() {
+    $(function dialogBox() {
+        $("#dialog_confirm").dialog({
+            autoOpen: false,
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            zIndex: 1000,
+            buttons: {
+                "Yes": function( ) {
+                    $("#add").val( "add" );
+                    $("#addDefaultDynamic").val( "true" );
+                    $( this ).dialog( "close" );
+                    $("form[name=propfilter]").submit(); // document.forms.propfilter.submit();
+                },
+                "No": function() {
+                    $("#add").val( "add" );
+                    $("#addDefaultDynamic").val( "false" );
+                    $( this ).dialog( "close" );
+                    $("form[name=propfilter]").submit(); // document.forms.propfilter.submit();
+                }
+            },
+        }).parent().appendTo($("#propfilter"));
+    });
+
+    $("#dialog_button").click( function( event ){
+        event.preventDefault();
+        if( $("input[name=recs]").val() == 0 ){
+            $("#dialog_confirm").dialog( "open" );
+        }else{
+            $("#add").val( "add" );
+            document.forms.propfilter.submit();
+        }
+    });
+});
 
 function SetCombos(sPubl, sObjType, sAction)
 {
@@ -72,6 +138,9 @@ function SetCombos(sPubl, sObjType, sAction)
 		<br/>
 		<table class="listpane">
 			<tr>
+				<td style="<!--LAST_COLUMN-->">
+					<input type="checkbox" title="Multi Delete Toggle" name="multiDeleteToggle" onClick="javascript:checkDeleteCheckboxes(); " />
+				</td>
 				<th><!--RES:OBJ_CATEGORY--></th>
 				<th><!--RES:LIS_ORDER--></th>
 				<th><!--RES:OBJ_PROPERTY--></th>
@@ -80,7 +149,6 @@ function SetCombos(sPubl, sObjType, sAction)
 				<th><!--RES:OBJ_RESTRICTED--></th>
 				<!-- <th><!--RES:OBJ_REFRESH--><!-- </th> -->
 				<th style="<!--MULTIPLE_OBJECTS_CELL-->"><!--RES:OBJ_MULTIPLE_OBJECTS--></th>
-				<th style="<!--LAST_COLUMN-->"></th>
 			</tr>
 		<!--ROWS-->
 		</table>
@@ -88,8 +156,20 @@ function SetCombos(sPubl, sObjType, sAction)
 		<table class="listbtnbar">
 			<tr>
 				<td>
-					<input type="submit" name="update" value="<!--RES:BUT_UPDATE-->"/>
-					<input type="submit" name="add" value="<!--RES:BUT_ADD_ACTION_PROPERTY-->"/>
+					<input style="<!--EDIT_BUTTON-->" type="submit" id="dialog_button" name="edit" value="<!--RES:DS_DATASOURCE_EDIT-->" />
+					<input style="<!--EDIT_BUTTON-->" type="hidden" id="add" name="add" value="">
+					<input style="<!--EDIT_BUTTON-->" type="hidden" id="addDefaultDynamic" name="addDefaultDynamic" value="false">
+					<!--<div   style="&lt;!&ndash;EDIT_BUTTON&ndash;&gt;" id="dialog_confirm" title="Add Default fields?">-->
+					<div   style="display:none" id="dialog_confirm" title="Add Default fields?">
+						<p>
+							<span style="float: left; margin: 0 0px 0px 0;"></span>
+							Some ompulsory fields will be added.
+							However, there are also some regular used fields, do you want to add them?
+							(You will still be able to remove these regular used fields later.)
+						</p>
+					</div>
+					<input style="<!--UPDATE_BUTTON-->" type="submit" name="update" value="<!--RES:BUT_UPDATE-->"/>
+					<input style="<!--DELETE_BUTTON-->" type="submit" name="delete" value="<!--RES:ACT_DELETE_SELECTED-->" onClick='return myconfirm( "deleteAllSelected" )'/>
 				</td>
 			</tr>
 		</table>

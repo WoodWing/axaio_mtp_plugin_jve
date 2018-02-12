@@ -2386,7 +2386,7 @@ class BizWorkflow
 	 * @param string $defaultDossier
 	 * @param string[] $usages [IN/OUT]
 	 */
-	protected static function fixDossierPropertyUsage( $action, $objType, $defaultDossier, &$usages )
+	public static function fixDossierPropertyUsage( $action, $objType, $defaultDossier, &$usages )
 	{
 		// Add Dossier property list to dialog and fill it with dossiers (to let user pick one).
 		// But, disable Dossier property for non-Create dialogs, even when client does support it.

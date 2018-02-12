@@ -157,11 +157,24 @@ class BizProperty
 	/**
 	 * List of properties that are used in workflow dialogs when no customizations are done.
 	 *
-	 * @return array of string  Internal property names (ids) as used in workflow WSDL.
+	 * @param bool $onlyStatic True to return only default static fields, False for default static and dynamic fields.
+	 * @return string[] Internal property names (ids) as used in workflow WSDL.
 	 */
-	public static function getDefaultDialogPropIds()
+	public static function getDefaultDialogPropIds( $onlyStatic )
 	{
-		return array_merge( self::getStaticPropIds(), array('Dossier', 'RouteTo','Comment') );
+		return $onlyStatic ? self::getStaticPropIds() :
+					array_merge( self::getStaticPropIds(), self::getDefaultDialogDynamicPropIds() );
+	}
+
+	/**
+	 * Returns list of properties that can be partially customized (renamed only) that are used in workflow dialogs
+	 * when no customizations are done.
+	 *
+	 * @return string[]
+	 */
+	public static function getDefaultDialogDynamicPropIds()
+	{
+		return array( 'Dossier', 'RouteTo','Comment' );
 	}
 
 	/**
@@ -223,8 +236,6 @@ class BizProperty
 		require_once BASEDIR.'/server/dbclasses/DBProperty.class.php';
 		require_once BASEDIR.'/server/dbclasses/DBActionproperty.class.php';
 		$usages = DBActionproperty::getPropertyUsages( $publ, $objType, $action, $explicit, $documentId, $wiwiwUsages );
-		$targetProps = array_flip( self::getTargetRelatedPropIds() );
-		$refreshProps = array_flip( self::getDefaultRefreshPropIds() );
 		if( $onlyMultiSetProperties ) {
 			// Filter out all the properties that don't support multi-set.
 			if( $usages ) foreach( $usages as $usageName => $usage ) {
@@ -236,84 +247,135 @@ class BizProperty
 		if( empty( $usages ) ) {
 			// No customization found, return defaults
 			if ( $withStaticProps ) {
-				$props = self::getDefaultDialogPropIds();
-				foreach( $props as $prop ) {
-					$propUsage = new PropertyUsage();
-					$propUsage->Name = $prop;
-					$propUsage->Editable = true;
-					$propUsage->Mandatory = false;
-					$propUsage->Restricted = false;
-					$propUsage->RefreshOnChange = isset($refreshProps[$prop]);
-					// ** For static property, it should never be added to multi-set properties dialog (Hence set to false).
-					// However, there's an exception, 'State' and 'Category' are allowed to be edited, including for
-					// multi-set-properties. (Hence set to true).
-					// For other non-static default dialog props, it is safe to put false here since
-					// the admin did not configure them to have MultipleObjects set to be True in the Dialog Setup.
-					$propUsage->MultipleObjects = ( $prop == 'State' || $prop == 'Category' ) ? true : false; // Refer to ** above.
-
-					if (($prop == 'RouteTo') || ($prop == 'Comment') || //'Route to' and 'Comment'are not mandatory
-						($prop == 'Issue') || isset($targetProps[$prop]) || // BZ#16792
-						($prop == 'Dossier') ) { // BZ#17831
-						// nothing to do; use default
-					} elseif( $action == 'SendTo' ) { //BZ#8836 Static props except for State are not editable when $action is SendTo
-						if( $prop != 'State' ) {
-							$propUsage->Editable = false;
-						}
-					} else {
-						$propUsage->Mandatory = true;
-					}
-					$usages[$prop] = $propUsage;
-				}
+				$usages = self::defaultPropertyUsageWhenNoUsagesAvailable( $action, false );
 			}
 		} else {
 			if ( $withStaticProps ) {
-				// Pre-insert static props (when missing) in the right order.
-				// Trick to insert key-value pairs on top: reverse the order, add them at end and reverse them again.
-				$staticProps = self::getStaticPropIds();
-
-				$staticProps = array_reverse( $staticProps, true );
-				if( $action == 'SendTo' ) { // BZ#20061 - Filter out those non Workflow properties, when action is SendTo
-					$wflProps = self::getWorkflowPropIds();
-					$tempUsages = array();
-					foreach( $usages as $usage ) {
-						if( in_array($usage->Name, $wflProps) ) {
-							$tempUsages[$usage->Name] = $usage;
-						}
-					}
-					$usages = $tempUsages;
-				}
-				$usages = array_reverse( $usages, true );
-				foreach( $staticProps as $staticProp ) {
-					$propUsage = new PropertyUsage();
-					$propUsage->Name = $staticProp;
-					$propUsage->Editable = true;
-					$propUsage->Mandatory = false;
-					$propUsage->Restricted = false;
-					$propUsage->RefreshOnChange = isset($refreshProps[$staticProp]);
-					// For static property, it should never be added to multi-set properties dialog.
-					// However, there's an exception, 'State' and 'Category' are allowed to be edited (even for multi-set-properties)
-					$propUsage->MultipleObjects = ( $staticProp == 'State' || $staticProp == 'Category' ) ? true : false;
-
-					if( !array_key_exists( $staticProp, $usages ) ) {
-						if ($action == 'SendTo') {
-							if ($staticProp == 'State') {
-								$propUsage->Mandatory = true;
-							} else {
-								$propUsage->Editable = false;
-							}
-						} else if( ($staticProp == 'Issue') || isset( $targetProps[$staticProp] ) ) { // BZ#16792
-							// nothing to do; use default
-						} else {
-							$propUsage->Mandatory = true;
-						}
-					}
-					$usages[$staticProp] = $propUsage;
-				}
-				$usages = array_reverse( $usages, true );
+				$usages = self::defaultPropertyUsageWhenUsagesAvailable( $usages, $action );
 			}
 		}
 		return $usages;
 	}
+
+	/**
+	 * Compose PropertyUsage object.
+	 *
+	 * @param string $property
+	 * @param string[] $refreshProps
+	 * @return PropertyUsage
+	 */
+	private static function composePropUsage( $property, $refreshProps )
+	{
+		$propUsage = new PropertyUsage();
+		$propUsage->Name = $property;
+		$propUsage->Editable = true;
+		$propUsage->Mandatory = false;
+		$propUsage->Restricted = false;
+		$propUsage->RefreshOnChange = isset( $refreshProps[$property] );
+		$propUsage->MultipleObjects = self::isMultipleObjectsSupportedPropUsage( $property );
+		return $propUsage;
+	}
+
+	/**
+	 * Returns usages list with default property(ies) on an empty usages ( no setup in DialogSetup page yet).
+	 *
+	 * @param string $action
+	 * @param bool $onlyStatic
+	 * @return mixed
+	 */
+	public static function defaultPropertyUsageWhenNoUsagesAvailable( $action, $onlyStatic )
+	{
+		$usages = array();
+		$refreshProps = array_flip( self::getDefaultRefreshPropIds() );
+		$targetProps = array_flip( self::getTargetRelatedPropIds() );
+		$props = self::getDefaultDialogPropIds( $onlyStatic );
+		if( $props ) foreach( $props as $prop ) {
+			// TODO: Re-visit this part when DialogSetup improvements is implemented for Multiset properties.
+			// For other non-static default dialog props, it is safe to put false here since
+			// the admin did not configure them to have MultipleObjects set to be True in the Dialog Setup.		
+			$propUsage = self::composePropUsage( $prop, $refreshProps );
+
+			if (($prop == 'RouteTo') || ($prop == 'Comment') || //'Route to' and 'Comment'are not mandatory
+				($prop == 'Issue') || isset($targetProps[$prop]) || // BZ#16792
+				($prop == 'Dossier') ) { // BZ#17831
+				// nothing to do; use default
+			} elseif( $action == 'SendTo' ) { //BZ#8836 Static props except for State are not editable when $action is SendTo
+				if( $prop != 'State' ) {
+					$propUsage->Editable = false;
+				}
+			} else {
+				$propUsage->Mandatory = true;
+			}
+			$usages[$prop] = $propUsage;
+		}
+		return $usages;
+	}
+
+	/**
+	 * Enrich usages list with default property(ies) on top of the already defined usages from DialogSetup page.
+	 *
+	 * @param array $usages
+	 * @param string $action
+	 * @return string[] array
+	 */
+	private static function defaultPropertyUsageWhenUsagesAvailable( $usages, $action )
+	{
+		$refreshProps = array_flip( self::getDefaultRefreshPropIds() );
+		$targetProps = array_flip( self::getTargetRelatedPropIds() );
+		// Pre-insert static props (when missing) in the right order.
+		// Trick to insert key-value pairs on top: reverse the order, add them at end and reverse them again.
+		$staticProps = self::getStaticPropIds();
+
+		$staticProps = array_reverse( $staticProps, true );
+		if( $action == 'SendTo' ) { // BZ#20061 - Filter out those non Workflow properties, when action is SendTo
+			$wflProps = self::getWorkflowPropIds();
+			$tempUsages = array();
+			if( $usages ) foreach( $usages as $usage ) {
+				if( in_array($usage->Name, $wflProps) ) {
+					$tempUsages[$usage->Name] = $usage;
+				}
+			}
+			$usages = $tempUsages;
+		}
+		$usages = array_reverse( $usages, true );
+		foreach( $staticProps as $staticProp ) {
+			$propUsage = self::composePropUsage( $staticProp, $refreshProps );
+
+			if( !array_key_exists( $staticProp, $usages ) ) {
+				if ($action == 'SendTo') {
+					if ($staticProp == 'State') {
+						$propUsage->Mandatory = true;
+					} else {
+						$propUsage->Editable = false;
+					}
+				} else if( ($staticProp == 'Issue') || isset( $targetProps[$staticProp] ) ) { // BZ#16792
+					// nothing to do; use default
+				} else {
+					$propUsage->Mandatory = true;
+				}
+			}
+			$usages[$staticProp] = $propUsage;
+		}
+		$usages = array_reverse( $usages, true );
+		return $usages;
+	}
+
+
+	/**
+	 * Determines if the property can be used for multi-set properties dialog.
+	 *
+	 * For static property, it should never be added to multi-set properties dialog.
+	 * However, there's an exception, 'State' and 'Category' are allowed to be edited, including for
+	 * multi-set-properties.
+	 *
+	 * @param string $property
+	 * @return bool
+	 */
+	private static function isMultipleObjectsSupportedPropUsage( $property )
+	{
+		return ( $property == 'State' || $property == 'Category' ) ? true : false;
+	}
+
 
 	/**
 	 * The complete list of PropertyInfo, typically used in GetDialog and QueryObjects services

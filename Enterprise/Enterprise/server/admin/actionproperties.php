@@ -151,10 +151,9 @@ class ActionPropertiesAdminApp
 	}
 
 	/**
-	 * Insert new action property, based on the form value
-	 *
+	 * Insert new action property retrieved from the Form value.
 	 */
-	public function insertActionProperty()
+	public function insertActionPropertyFromTheForm()
 	{
 		$order = isset($_REQUEST['order']) ? intval($_REQUEST['order']) : 0; // Sorting order field. Zero when not filled.
 		$prop = isset($_REQUEST['prop']) ? $_REQUEST['prop'] : '';           // Name of action property. Always set.
@@ -178,8 +177,19 @@ class ActionPropertiesAdminApp
 				'edit' => $edit, 'mandatory' => $mandatory, 'restricted' => $restricted,
 				// 'refreshonchange' => $refreshonchange, // EN-2164, Marked for future use
 				'multipleobjects' => $multipleObjects );
-			DBActionproperty::insertActionproperty( $values );
+			$this->insertActionProperty( $values );
 		}
+	}
+
+	/**
+	 * Insert new action property into database.
+	 *
+	 * @param string[] $values
+	 */
+	public function insertActionProperty( $values )
+	{
+		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
+		DBActionproperty::insertActionproperty( $values );
 	}
 
 	/**
@@ -217,13 +227,29 @@ class ActionPropertiesAdminApp
 	}
 
 	/**
-	 * Delete action property, based on the form id value
+	 * Delete action propert(ies) selected on the Form.
+	 *
+	 * @param int $numberOfRecords
 	 */
-	public function deleteActionProperty()
+	public function deleteActionProperty( $numberOfRecords )
 	{
-		$id = intval($_REQUEST['id']); // Record id. Used in POST and GET requests.
+		// >>> START TODO: To be removed when Query Setup page is separated from Dialog Setup page.
+		$id = isset( $_REQUEST['id'] ) ? intval($_REQUEST['id']) : 0 ; // Record id. Used in POST and GET requests.
 		if( $id > 0 ) {
 			DBActionproperty::deleteActionproperty( $id );
+		}
+		// END <<<
+
+		require_once BASEDIR . '/server/dbclasses/DBActionproperty.class.php';
+		$propIdsToBeDeleted = array();
+		for( $i=0; $i < $numberOfRecords; $i++ ) {
+			$deleteCheckboxChecked = isset( $_REQUEST["multiDelete$i"] ) ? $_REQUEST["multiDelete$i"] : '';
+			if( $deleteCheckboxChecked ) {
+				$propIdsToBeDeleted[] = intval($_REQUEST["id$i"]);
+			}
+		}
+		if( $propIdsToBeDeleted ) {
+			DBActionproperty::deleteActionProperties( $propIdsToBeDeleted );
 		}
 	}
 
@@ -276,9 +302,10 @@ class ActionPropertiesAdminApp
 	 * @param array $locals Array of property infos
 	 * @param array $rows Array of action properties database records
 	 * @param string $detailTxt HTML strings
+	 * @param int $numberOfRecords [In/Out] Total number of action properties listed.
 	 * @return string $detailTxt HTML strings of the table list
 	 */
-	private function listCurrentActionProperties( $showMultiObj, $locals, $rows, $detailTxt )
+	private function listCurrentActionProperties( $showMultiObj, $locals, $rows, $detailTxt, &$numberOfRecords )
 	{
 		$i = 0;
 		$color = array (" bgcolor='#eeeeee'", '');
@@ -313,13 +340,18 @@ class ActionPropertiesAdminApp
 			}
 			$clr = $color[$flip];
 			$flip = 1- $flip;
-			$deltxt = "<a href='actionproperties.php?delete=1&id=".$row["id"]."' onClick='return myconfirm(\"delaction\")'>" . BizResources::localize("ACT_DEL") . "</a>";
+			$deltxt = inputvar("multiDelete$i", '', 'checkbox', null, true, BizResources::localize("ACT_DELETE_PERMANENT_SELECTED_ROWS"));
 			if( $this->onlyQuery ) {
-				$detailTxt .= "<tr$clr><td>".inputvar("order$i", $row['orderid'], 'small').'</td>';
+				$deltxt = "<a href='actionproperties.php?delete=1&id=".$row["id"]."' onClick='return myconfirm(\"delaction\")'>" . BizResources::localize("ACT_DEL") . "</a>";
+				$detailTxt .= "<tr$clr>";
+				$detailTxt .= "<td>".inputvar("order$i", $row['orderid'], 'small').'</td>';
 				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
-				$detailTxt .= "<td>$deltxt</td></tr>";
+				$detailTxt .= "<td>$deltxt</td>";
+				$detailTxt .= '</tr>';
 			} else {
-				$detailTxt .= "<tr$clr><td>".$row['category'].'</td>';
+				$detailTxt .= "<tr$clr>";
+				$detailTxt .= "<td>$deltxt</td>";
+				$detailTxt .= "<td>".$row['category'].'</td>';
 				$detailTxt .= '<td>'.inputvar("order$i", $row['orderid'], 'small').'</td>';
 				$detailTxt .= '<td>'.formvar($prop).inputvar("prop$i",$row['property'],'hidden').'</td>';
 				if( in_array($row['property'], $this->sysProps) ) {
@@ -335,12 +367,13 @@ class ActionPropertiesAdminApp
 				} else { // Don't fill in the multiple objects column.
 					$detailTxt .= '<td style="display:none"></td>'; // No checkbox.
 				}
-				$detailTxt .= "<td>$deltxt</td></tr>";
+				$detailTxt .= "</tr>";
 			}
 			$detailTxt .= inputvar( "id$i", $row['id'], 'hidden' );
 			$i++;
 		}
 		$detailTxt .= inputvar( 'recs', $i, 'hidden' );
+		$numberOfRecords = $i;
 		return $detailTxt;
 	}
 
@@ -436,6 +469,36 @@ class ActionPropertiesAdminApp
 	}
 
 	/**
+	 * Draw the Form to either show or hide Edit, Update and Delete buttons depending on the action ( $this->mode ).
+	 *
+	 * @param string $txt
+	 * @param int $numberOfRecords
+	 * @return string
+	 */
+	private function showOrHideButtons( $txt, $numberOfRecords )
+	{
+		switch( $this->mode ) {
+			case "view":
+			case "delete":
+				$txt = str_replace("<!--EDIT_BUTTON-->",  '', $txt );
+				$txt = str_replace("<!--UPDATE_BUTTON-->",'display:none', $txt );
+				$txt = str_replace("<!--DELETE_BUTTON-->",( $numberOfRecords == 0 ) ? 'display:none' : '', $txt );
+				break;
+			case "add":
+				$txt = str_replace("<!--EDIT_BUTTON-->",  'display:none', $txt );
+				$txt = str_replace("<!--UPDATE_BUTTON-->",'', $txt );
+				$txt = str_replace("<!--DELETE_BUTTON-->",'display:none', $txt );
+				break;
+			case "update";
+				$txt = str_replace("<!--EDIT_BUTTON-->",  '', $txt );
+				$txt = str_replace("<!--UPDATE_BUTTON-->",'display:none', $txt );
+				$txt = str_replace("<!--DELETE_BUTTON-->",'', $txt );
+				break;
+		}
+		return $txt;
+	}
+
+	/**
 	 * Load different Html Template, based on onlyQuery value.
 	 *
 	 * @return string $txt HTML strings
@@ -473,7 +536,7 @@ class ActionPropertiesAdminApp
 			null,
 			$wiwiwUsages, // $wiwiwUsages = null when it is not for Template and PublishForm.
 			false ); //
-		foreach( $usages as $usage ) { // $onlyMultiSetProperties = false: Returns all properties regardless of single/multi-set properties support.
+		if( $usages ) foreach( $usages as $usage ) { // $onlyMultiSetProperties = false: Returns all properties regardless of single/multi-set properties support.
 			$already[] = $usage->Name;
 		}
 
@@ -584,19 +647,55 @@ class ActionPropertiesAdminApp
 		$detailTxt = '';
 		$multiObjAllowedActions = array( '', 'SetProperties', 'SendTo' ); // Action that supports multiple-objects
 		$showMultiObj = in_array( $this->action, $multiObjAllowedActions );
-		$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->onlyAllObjectType );
+
+ 		if( $usages ) {
+ 			$rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->onlyAllObjectType );
+ 		} else {
+		   $addDefaultDynamicFields = isset( $_REQUEST['addDefaultDynamic'] ) ? strval( $_REQUEST['addDefaultDynamic'] ) : "false"; // Whether the default fields should be added.
+		   if( $this->mode == 'add' ) {
+			   if( $addDefaultDynamicFields == 'true' ) {
+				   $usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, false );
+			   } else {
+				   $usages = BizProperty::defaultPropertyUsageWhenNoUsagesAvailable( $this->action, true );
+			   }
+
+			   require_once BASEDIR.'/server/bizclasses/BizWorkflow.class.php';
+			   BizWorkflow::fixDossierPropertyUsage( $this->mode, $this->objType, '', $usages );
+			   // TODO: Mark asterisk on the fields that might be removed when Client doesn't support the field(s).
+
+			   $order = 0;
+			   if( $usages ) foreach( $usages as $usage ) {
+				   $values = array();
+				   $values['publication'] = $this->publ;
+				   $values['action'] = $this->action;
+				   $values['type'] = $this->objType;
+				   $values['orderid'] = $order;
+				   $values['property'] = $usage->Name;
+				   $values['edit'] = $usage->Editable ? 'on' : '';
+				   $values['mandatory'] = $usage->Mandatory ? 'on' : '';
+				   $values['restricted'] = $usage->Restricted ? 'on' : '';
+				   $values['multipleobjects'] = $usage->MultipleObjects ? 'on' : '';
+					$this->insertActionProperty( $values );
+				   $order += 5;
+			   }
+		   }
+		   $rows = DBActionproperty::listActionPropertyWithNames( $this->publ, $this->objType, $this->action, $this->onlyAllObjectType );
+	   }
 
 		switch( $this->mode ) {
 			case 'view':
 			case 'update':
 			case 'delete':
-				$detailTxt = $this->listCurrentActionProperties( $showMultiObj, $locals, $rows, $detailTxt );
+				$numberOfRecords = 0;
+				$detailTxt = $this->listCurrentActionProperties( $showMultiObj, $locals, $rows, $detailTxt, $numberOfRecords );
 				break;
 			case 'add':
+				$numberOfRecords = count( $rows );
 				$detailTxt = $this->listNewAndCurrentActionProperties( $showMultiObj, $props, $rows, $detailTxt );
 				break;
 		}
 
+		$txt = $this->showOrHideButtons( $txt, $numberOfRecords );
 		$txt = str_replace("<!--LAST_COLUMN-->", ($this->mode == 'add') ? 'display:none' : '', $txt );
 		$txt = str_replace("<!--MULTIPLE_OBJECTS_CELL-->", $showMultiObj ? '' : 'display:none', $txt );
 		$txt = str_replace("<!--ROWS-->", $detailTxt, $txt);
@@ -640,7 +739,7 @@ class ActionPropertiesAdminApp
 			$insert = isset($_REQUEST['insert']) ? (bool)$_REQUEST['insert'] : false;
 		} else if (isset($_REQUEST['delete']) && $_REQUEST['delete']) {
 			$this->mode = 'delete';
-			$numberOfRecords = 0;
+			$numberOfRecords = isset($_REQUEST['recs']) ? intval($_REQUEST['recs']) : 0;
 			$insert = false;
 		} else if (isset($_REQUEST['add']) && $_REQUEST['add']) {
 			$this->mode = 'add';
@@ -657,10 +756,10 @@ class ActionPropertiesAdminApp
 			$this->updateActionProperties( $numberOfRecords );
 		}
 		if( $insert === true ) {
-			$this->insertActionProperty();
+			$this->insertActionPropertyFromTheForm();
 		}
 		if( $this->mode == 'delete' ) {
-			$this->deleteActionProperty();
+			$this->deleteActionProperty( $numberOfRecords );
 		}
 	}
 
