@@ -19,8 +19,8 @@ class IdsAutomation_WflRestoreVersion extends WflRestoreVersion_EnterpriseConnec
 	final public function getPrio()     { return self::PRIO_DEFAULT; }
 	final public function getRunMode()  { return self::RUNMODE_BEFOREAFTER; }
 
-	/** @var array $hookedLayouts */
-	private $hookedLayouts;
+	/** @var array $hookedObject */
+	private $hookedObject;
 	
 	final public function runBefore( WflRestoreVersionRequest &$req )
 	{
@@ -52,28 +52,42 @@ class IdsAutomation_WflRestoreVersion extends WflRestoreVersion_EnterpriseConnec
 		// Bail out when not restoring layouts.
 		require_once dirname(__FILE__).'/IdsAutomationUtils.class.php';
 		$objType = IdsAutomationUtils::getObjectType( $objId );
-		if( !IdsAutomationUtils::isLayoutObjectType( $objType ) ) {
-			LogHandler::Log( 'IdsAutomation', 'INFO', "Object type [$objType] is not a supported layout. No action needed." );
+		$isLayout = IdsAutomationUtils::isLayoutObjectType( $objType );
+		$isPlaced = IdsAutomationUtils::isPlaceableObjectType( $objType );
+		if( !$isLayout && !$isPlaced ) {
+			LogHandler::Log( 'IdsAutomation', 'INFO', "Object type [$objType] is not a supported object type. No action needed." );
 			return;
 		}
 
 		// Hook into this layout to continue in runAfter().
-		$this->hookedLayouts[] = array( 'ID' => $objId, 'Type' => $objType );
+		$this->hookedObject = array(
+			'id' => $objId,
+			'type' => $objType,
+			'isLayout' => $isLayout,
+			'isPlaced' => $isPlaced
+		);
 	} 
 
 	final public function runAfter( WflRestoreVersionRequest $req, WflRestoreVersionResponse &$resp )
 	{
-		foreach( $this->hookedLayouts as $hookedLayout ) {
-			// After restore operation, the pages are removed from DB and the page renditions
-			// are removed from the filestore. Therefore here is it time to create an IDS job, 
-			// regardsless of the current layout status.
-			$objId = $hookedLayout['ID'];
-			$objType = $hookedLayout['Type'];
-			LogHandler::Log( 'IdsAutomation', 'INFO', 
-				"Object (id=$objId) is a layout for which an IDS job will be created." );
-			IdsAutomationUtils::createIDSJob( $objId, $objId, $objType );
+		if( $this->hookedObject ) {
+			$objId = $this->hookedObject['id'];
+			$objType = $this->hookedObject['type'];
+			if( $this->hookedObject['isLayout'] ) {
+				// After restore operation, the pages are removed from DB and the page renditions
+				// are removed from the filestore. Therefore here is it time to create an IDS job,
+				// regardsless of the current layout status.
+				LogHandler::Log( 'IdsAutomation', 'INFO',
+					"Object (id=$objId) is a layout for which an IDS job will be created." );
+				IdsAutomationUtils::createIDSJob( $objId, $objId, $objType );
+			} else {
+				LogHandler::Log( 'IdsAutomation', 'INFO',
+					"Object (id=$objId) is a supported placed object for which an IDS job will be created." );
+				$statusId = IdsAutomationUtils::getStatusId( $objId );
+				IdsAutomationUtils::createIdsAutomationJobsForPlacedObject( $objId, $statusId, $objType );
+			}
 		}
-			
+
 		// Clear service context data.
 		$this->cleanupResources();
 	} 
