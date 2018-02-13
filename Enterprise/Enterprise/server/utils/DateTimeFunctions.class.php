@@ -183,24 +183,12 @@ class DateTimeFunctions
 			}
 		}
 		
-		$timeAdded = false;
-		if ($r[6] != "00" || isset($r[7])) {
-			$ret .= " $r[4]:$r[5]:$r[6]";
-			$timeAdded = true;
-		} else if ($r[4] != "00" || $r[5] != "00") {
-			$ret .= " $r[4]:$r[5]";
-			$timeAdded = true;
+		$ret .= ' ' . self::addzeros( $r[4] ) . ':' . self::addzeros( $r[5] ) . ':' . self::addzeros( $r[6] );
+		if( isset($r[7]) ) { // Optionally, add miliseconds.
+			$ret .= $r[7].str_repeat( '0', 4 - strlen( $r[7] ) );
 		}
-		
-		if( $timeAdded ) {
-			// Optionally, add miliseconds.
-			if( isset($r[7]) ) {
-				$ret .= $r[7].str_repeat( '0', 4 - strlen( $r[7] ) );
-			}
-			// Add am/pm notation.		
-			$ret .= $ampm;
-		}
-			
+		$ret .= $ampm; // Add am/pm notation.
+
 		return $ret;
 	}
 
