@@ -199,7 +199,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflWcml2Xhtml_TestCase exte
 		$relations[0]->Placements = array();
 		$relations[0]->ParentVersion = null;
 		$relations[0]->ChildVersion = null;
-		$relations[0]->Geometry = null;
 		$relations[0]->Rating = null;
 		$relations[0]->Targets = array();
 		$relations[0]->ParentInfo = null;
@@ -402,7 +401,6 @@ An inline image';
 		$article->Relations[0]->Placements = null;
 		$article->Relations[0]->ParentVersion = null;
 		$article->Relations[0]->ChildVersion = null;
-		$article->Relations[0]->Geometry = null;
 		$article->Relations[0]->Rating = null;
 		$article->Relations[0]->Targets = null;
 		$article->Relations[0]->ParentInfo = null;

@@ -241,7 +241,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ObjectTargets_Te
 		$relation->Placements = array( $placement );
 		$relation->ParentVersion = null;
 		$relation->ChildVersion = null;
-		$relation->Geometry = null;
 		$relation->Rating = null;
 		$relation->Targets = null;
 		$relation->ParentInfo = null;
@@ -309,7 +308,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ObjectTargets_Te
 
 		$relation->ParentVersion = null;
 		$relation->ChildVersion = null;
-		$relation->Geometry = null;
 		$relation->Rating = null;
 		$relation->Targets = null;
 		$relation->ParentInfo = null;
@@ -433,7 +431,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ObjectTargets_Te
 		$request->Relations[0]->Placements = null;
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;
@@ -462,7 +459,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ObjectTargets_Te
 		$request->Relations[0]->Placements = null;
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;

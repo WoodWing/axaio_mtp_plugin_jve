@@ -620,7 +620,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ArticlePlacement
 		$request->Objects[0]->Relations[0]->Placements = array();
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = array();
 		$request->Objects[0]->Relations[0]->ParentInfo = null;
@@ -633,7 +632,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ArticlePlacement
 		$request->Objects[0]->Relations[1]->Placements = array();
 		$request->Objects[0]->Relations[1]->ParentVersion = null;
 		$request->Objects[0]->Relations[1]->ChildVersion = null;
-		$request->Objects[0]->Relations[1]->Geometry = null;
 		$request->Objects[0]->Relations[1]->Rating = null;
 		$request->Objects[0]->Relations[1]->Targets = array( $target );
 		$request->Objects[0]->Relations[1]->ParentInfo = null;
@@ -670,7 +668,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ArticlePlacement
 		$request->Objects[0]->Relations[2]->Placements[0]->FormWidgetId = 'C_MCPSAMPLE_BODYTEXT';
 		$request->Objects[0]->Relations[2]->ParentVersion = null;
 		$request->Objects[0]->Relations[2]->ChildVersion = null;
-		$request->Objects[0]->Relations[2]->Geometry = null;
 		$request->Objects[0]->Relations[2]->Rating = null;
 		$request->Objects[0]->Relations[2]->Targets = array( $target );
 		$request->Objects[0]->Relations[2]->ParentInfo = null;
@@ -778,7 +775,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ArticlePlacement
 		$request->Relations[0]->Placements[0]->FormWidgetId = null;
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;
@@ -893,7 +889,6 @@ class WW_TestSuite_BuildTest_MultiChannelPublishing_PublishForm_ArticlePlacement
 		$request->Objects[0]->Relations[0]->Placements[0]->FormWidgetId = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 		$request->Objects[0]->Relations[0]->ParentInfo = null;

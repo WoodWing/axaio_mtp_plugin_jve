@@ -180,7 +180,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 		$request->Objects[0]->Relations[0]->Placements = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = array();
 		$request->Objects[0]->Relations[0]->Targets[0] = new Target();
@@ -383,7 +382,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 		$request->Objects[0]->Relations[0]->Placements = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 
@@ -776,7 +774,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 		$request->Relations[0]->Placements[0]->Tiles = array();
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 
@@ -945,7 +942,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 		$request->Objects[0]->Relations[0]->Placements[1]->Tiles = array();
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 		$request->Objects[0]->Pages = array();
@@ -1260,7 +1256,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflArticlePlacements_TestCa
 
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 		$request->Objects[0]->Pages = array();

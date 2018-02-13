@@ -1192,7 +1192,6 @@ class BizWebEditWorkspace
 				}
 				$relation->ParentVersion = $this->getTextValue( $xpath, 'ParentVersion', $xmlRelation );
 				$relation->ChildVersion = $this->getTextValue( $xpath, 'ChildVersion', $xmlRelation );
-				$relation->Geometry = null;
 				$relation->Rating = $this->getTextValue( $xpath, 'Rating', $xmlRelation );
 				$relation->Targets = null;
 				// >>> Commented out since CS does not need relational targets in this context.

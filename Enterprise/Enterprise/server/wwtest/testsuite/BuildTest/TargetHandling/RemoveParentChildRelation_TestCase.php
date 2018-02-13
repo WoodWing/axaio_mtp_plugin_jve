@@ -970,7 +970,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 		$request->Objects[0]->Relations[0]->Placements[0]->FormWidgetId = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = array();
 		$request->Objects[0]->Relations[0]->Targets[0] = $this->composeTarget( 0 );
@@ -1117,7 +1116,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 		$response->Objects[0]->Relations[0]->Placements[0]->SplineID = '';
 		$response->Objects[0]->Relations[0]->ParentVersion = '0.1';
 		$response->Objects[0]->Relations[0]->ChildVersion = '0.1';
-		$response->Objects[0]->Relations[0]->Geometry = null;
 		$response->Objects[0]->Relations[0]->Rating = '0';
 		$response->Objects[0]->Relations[0]->Targets = array();
 		$response->Objects[0]->Relations[0]->Targets[0] = $this->composeTarget( 0 );
@@ -1200,7 +1198,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 		$request->Relations[0]->Placements[0]->FormWidgetId = null;
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;
@@ -1283,7 +1280,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 		$response->Relations[0]->Placements[1]->Tiles = array();
 		$response->Relations[0]->ParentVersion = '0.1';
 		$response->Relations[0]->ChildVersion = '0.1';
-		$response->Relations[0]->Geometry = null;
 		$response->Relations[0]->Rating = '0';
 		$response->Relations[0]->Targets = array();
 		$response->Relations[0]->Targets[0] = $this->composeTarget( 0 );
@@ -1406,7 +1402,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 		$request->Objects[0]->Relations[0]->Placements[0]->FormWidgetId = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 		$request->Objects[0]->Relations[0]->ParentInfo = null;
@@ -1590,7 +1585,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 		$response->Objects[0]->Relations[0]->Placements[0]->SplineID = '';
 		$response->Objects[0]->Relations[0]->ParentVersion = '0.2';
 		$response->Objects[0]->Relations[0]->ChildVersion = '0.1';
-		$response->Objects[0]->Relations[0]->Geometry = null;
 		$response->Objects[0]->Relations[0]->Rating = '0';
 		$response->Objects[0]->Relations[0]->Targets = array();
 		$response->Objects[0]->Relations[0]->Targets[0] = $this->composeTarget( 0 );
@@ -1832,7 +1826,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 		$request->Relations[0]->Placements = null;
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = array();
 		$request->Relations[0]->ParentInfo = null;
@@ -1859,7 +1852,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 		$response->Relations[0]->Placements = array();
 		$response->Relations[0]->ParentVersion = '0.1';
 		$response->Relations[0]->ChildVersion = '0.1';
-		$response->Relations[0]->Geometry = null;
 		$response->Relations[0]->Rating = '0';
 		$response->Relations[0]->Targets = array();
 		$response->Relations[0]->Targets[0] = new Target();
@@ -1897,7 +1889,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 		$request->Relations[0]->Placements = null;
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;
@@ -1936,7 +1927,6 @@ class WW_TestSuite_BuildTest_TargetHandling_RemoveParentChildRelation_TestCase e
 		$request->Relations[0]->Placements = null;
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;

@@ -569,7 +569,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Relations[0]->Placements[2]->Tiles = array();
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;
@@ -741,7 +740,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Objects[0]->Relations[0]->Placements[2]->Tiles = array();
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 		$request->Objects[0]->Relations[0]->ParentInfo = null;
@@ -1263,7 +1261,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Relations[0]->Placements[0]->Tiles = array();
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;
@@ -1434,7 +1431,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Relations[0]->Placements[0]->Tiles = array();
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;
@@ -1558,7 +1554,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Objects[0]->Relations[0]->Placements[0]->Tiles = array();
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 		$request->Objects[0]->Relations[0]->ParentInfo = null;
@@ -1593,7 +1588,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Objects[0]->Relations[1]->Placements[0]->Tiles = array();
 		$request->Objects[0]->Relations[1]->ParentVersion = null;
 		$request->Objects[0]->Relations[1]->ChildVersion = null;
-		$request->Objects[0]->Relations[1]->Geometry = null;
 		$request->Objects[0]->Relations[1]->Rating = null;
 		$request->Objects[0]->Relations[1]->Targets = null;
 		$request->Objects[0]->Relations[1]->ParentInfo = null;
@@ -2100,7 +2094,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Relations[0]->Placements[0]->Tiles = array();
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;
@@ -2175,7 +2168,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Relations[0]->Placements[1]->Tiles = array();
 		$request->Relations[0]->ParentVersion = null;
 		$request->Relations[0]->ChildVersion = null;
-		$request->Relations[0]->Geometry = null;
 		$request->Relations[0]->Rating = null;
 		$request->Relations[0]->Targets = null;
 		$request->Relations[0]->ParentInfo = null;
@@ -2324,7 +2316,6 @@ class WW_TestSuite_BuildTest_WebServices_WflServices_WflPublicationOverview_Test
 		$request->Objects[0]->Relations[0]->Placements[1]->Tiles = array();
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = null;
 		$request->Objects[0]->Relations[0]->ParentInfo = null;
