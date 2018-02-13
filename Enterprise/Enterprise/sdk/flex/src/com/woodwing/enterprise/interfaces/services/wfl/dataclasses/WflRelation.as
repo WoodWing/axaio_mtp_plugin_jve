@@ -7,7 +7,6 @@
 
 package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 {
-	import com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflAttachment;
 	import com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflObjectInfo;
 
 	[Bindable]
@@ -21,7 +20,6 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		private var _Placements:Array;
 		private var _ParentVersion:String;
 		private var _ChildVersion:String;
-		private var _Geometry:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflAttachment;
 		private var _Rating:Number;
 		private var _Targets:Array;
 		private var _ParentInfo:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflObjectInfo;
@@ -71,13 +69,6 @@ package com.woodwing.enterprise.interfaces.services.wfl.dataclasses
 		}
 		public function set ChildVersion(ChildVersion:String):void {
 			this._ChildVersion = ChildVersion;
-		}
-
-		public function get Geometry():com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflAttachment {
-			return this._Geometry;
-		}
-		public function set Geometry(Geometry:com.woodwing.enterprise.interfaces.services.wfl.dataclasses.WflAttachment):void {
-			this._Geometry = Geometry;
 		}
 
 		public function get Rating():Number {

@@ -461,7 +461,6 @@
 					<element name="Placements"      type="tns:ArrayOfPlacement" nillable="true"/>
 					<element name="ParentVersion"   type="xsd:string"           nillable="true"/>   <!-- The current version of the parent, nil when passed to server -->
 					<element name="ChildVersion"    type="xsd:string"           nillable="true"/>   <!-- The current version of the child, nil when passed to server -->
-					<element name="Geometry"        type="tns:Attachment"       nillable="true"/>
 					<element name="Rating"          type="xsd:unsignedInt"      nillable="true"/>   <!-- v6.0: Rating of the child object in relation to the parent context -->
 					<element name="Targets"         type="tns:ArrayOfTarget"    nillable="true"/>   <!-- v6.0: object targets within the parent context -->
 					<element name="ParentInfo"      type="tns:ObjectInfo"       nillable="true"/>   <!-- v8.2: Read-only info of parent to enable to user identify the object. Returned in GetObjects response. -->
