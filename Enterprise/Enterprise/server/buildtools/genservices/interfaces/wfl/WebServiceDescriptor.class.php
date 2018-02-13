@@ -26,44 +26,19 @@ class WW_BuildTools_GenServices_Interfaces_Wfl_WebServiceDescriptor implements W
 
 	final public function getUrlToFilePath($serviceName)
 	{
-		switch ($serviceName) {
-			case 'CreateObjectRelations':
-			case 'UpdateObjectRelations':
-				$result =
-					"\t\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
-					"\t\t\t\$transferServer = new BizTransferServer();\n" .
-					"\t\t\tif( \$req->Relations ) foreach( \$req->Relations as \$relation ) {\n" .
-					"\t\t\t\tif ( \$relation->Geometry ) {\n".
-					"\t\t\t\t\t\$transferServer->urlToFilePath( \$relation->Geometry );\n" .
-					"\t\t\t\t}\n" .
-					"\t\t\t}\n";
-				break;
-			default:
-				$result =
-					"\t\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
-					"\t\t\t\$transferServer = new BizTransferServer();\n" .
-					"\t\t\tif( \$req->Objects ) foreach( \$req->Objects as \$object ) {\n" .
-					"\t\t\t\t\$transferServer->switchURLToFilePath( \$object );\n" .
-					"\t\t\t}\n";
-				break;
-		}
+		$result =
+			"\t\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
+			"\t\t\t\$transferServer = new BizTransferServer();\n" .
+			"\t\t\tif( \$req->Objects ) foreach( \$req->Objects as \$object ) {\n" .
+			"\t\t\t\t\$transferServer->switchURLToFilePath( \$object );\n" .
+			"\t\t\t}\n";
+
 		return $result;
 	}
 
 	final public function getFilePathToUrl($serviceName)
 	{
 		switch ($serviceName) {
-			case 'GetObjectRelations':
-				$result =
-					"\n" .
-					"\t\trequire_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';\n" .
-					"\t\t\$transferServer = new BizTransferServer();\n" .
-					"\t\tif( \$resp->Relations ) foreach( \$resp->Relations as \$relation ) {\n" .
-					"\t\t\tif ( \$relation->Geometry ) {\n".
-					"\t\t\t\t\$transferServer->filePathToURL( \$relation->Geometry );\n" .
-					"\t\t\t}\n" .
-					"\t\t}\n\n";
-				break;
 			case 'GetVersion':
 				$result =
 					"\n" .

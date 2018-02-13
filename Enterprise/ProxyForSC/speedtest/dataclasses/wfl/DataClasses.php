@@ -528,7 +528,6 @@ class Relation
 		$this->Placements           = $Placements;
 		$this->ParentVersion        = $ParentVersion;
 		$this->ChildVersion         = $ChildVersion;
-		$this->Geometry             = $Geometry;
 		$this->Rating               = $Rating;
 		$this->Targets              = $Targets;
 		$this->ParentInfo           = $ParentInfo;

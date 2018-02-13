@@ -818,7 +818,6 @@ class WW_TestSuite_BuildTest_NameValidation_AutoTargetingRule_TestCase extends T
 		$request->Objects[0]->Relations[0]->Placements = null;
 		$request->Objects[0]->Relations[0]->ParentVersion = null;
 		$request->Objects[0]->Relations[0]->ChildVersion = null;
-		$request->Objects[0]->Relations[0]->Geometry = null;
 		$request->Objects[0]->Relations[0]->Rating = null;
 		$request->Objects[0]->Relations[0]->Targets = array();
 		$request->Objects[0]->Relations[0]->ParentInfo = null;

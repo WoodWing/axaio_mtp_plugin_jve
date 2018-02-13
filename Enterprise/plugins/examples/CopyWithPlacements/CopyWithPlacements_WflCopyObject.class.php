@@ -98,7 +98,6 @@ class CopyWithPlacements_WflCopyObject extends WflCopyObject_EnterpriseConnector
 				$childPlacements = $relation->Placements;
 				$childParentVersion = $relation->ParentVersion;
 				$childVersion = $relation->ChildVersion;
-				$childGeometry = $relation->Geometry;
 				$oldObjRelation[] = new Relation( $resp->MetaData->BasicMetaData->ID, $childId, $childType, $childPlacements, $childParentVersion, $childVersion, $childGeometry );
 
 				// now create a copy of the article
@@ -179,7 +178,6 @@ class CopyWithPlacements_WflCopyObject extends WflCopyObject_EnterpriseConnector
 
 							$childParentVersion = 1;
 							$childVersion = $childRelation->ChildVersion;
-							$childGeometry = $childRelation->Geometry;
 
 							$newObjRelation[] = new Relation( $resp->MetaData->BasicMetaData->ID, $newChildId, $childType, $childPlacements, $childParentVersion, $childVersion, $childGeometry );
 						}

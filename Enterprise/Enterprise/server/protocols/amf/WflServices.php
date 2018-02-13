@@ -543,13 +543,6 @@ class WW_AMF_WflServices extends WW_AMF_Services
 
 		try {
 			$req = $this->objectToRequest( $req, 'WflCreateObjectRelationsRequest' );
-			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-			$transferServer = new BizTransferServer();
-			if( $req->Relations ) foreach( $req->Relations as $relation ) {
-				if ( $relation->Geometry ) {
-					$transferServer->urlToFilePath( $relation->Geometry );
-				}
-			}
 			$service = new WflCreateObjectRelationsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
@@ -565,13 +558,6 @@ class WW_AMF_WflServices extends WW_AMF_Services
 
 		try {
 			$req = $this->objectToRequest( $req, 'WflUpdateObjectRelationsRequest' );
-			require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-			$transferServer = new BizTransferServer();
-			if( $req->Relations ) foreach( $req->Relations as $relation ) {
-				if ( $relation->Geometry ) {
-					$transferServer->urlToFilePath( $relation->Geometry );
-				}
-			}
 			$service = new WflUpdateObjectRelationsService();
 			$resp = $service->execute( $req );
 		} catch( BizException $e ) {
@@ -607,14 +593,6 @@ class WW_AMF_WflServices extends WW_AMF_Services
 		} catch( BizException $e ) {
 			require_once 'Zend/Amf/Server/Exception.php';
 			throw new Zend_Amf_Server_Exception( $e->getMessage() );
-		}
-
-		require_once BASEDIR.'/server/bizclasses/BizTransferServer.class.php';
-		$transferServer = new BizTransferServer();
-		if( $resp->Relations ) foreach( $resp->Relations as $relation ) {
-			if ( $relation->Geometry ) {
-				$transferServer->filePathToURL( $relation->Geometry );
-			}
 		}
 
 		return $resp;
