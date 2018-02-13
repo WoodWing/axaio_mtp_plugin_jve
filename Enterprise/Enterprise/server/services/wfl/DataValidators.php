@@ -4,11 +4,11 @@
  * @package Enterprise
  * @subpackage Services
  * @copyright WoodWing Software bv. All Rights Reserved.
- * 
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
- * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  */
+
+// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
+// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 class WflObjectTypeValidator
 {
@@ -1015,14 +1015,6 @@ class WflRelationValidator
 			$validator->enterPath( 'ChildVersion' );
 			if( !is_null( $datObj->ChildVersion ) ) {
 				$validator->checkType( $datObj->ChildVersion, 'string' );
-			}
-			$validator->leavePath();
-		}
-		if( $validator->checkExist( $datObj, 'Geometry' ) ) {
-			$validator->enterPath( 'Geometry' );
-			if( !is_null( $datObj->Geometry ) ) {
-				$validator->checkType( $datObj->Geometry, 'Attachment' );
-				WflAttachmentValidator::validate( $validator, $datObj->Geometry );
 			}
 			$validator->leavePath();
 		}

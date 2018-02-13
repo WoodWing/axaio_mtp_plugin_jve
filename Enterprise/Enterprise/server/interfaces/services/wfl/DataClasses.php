@@ -4,11 +4,11 @@
  * @package Enterprise
  * @subpackage Workflow Services
  * @copyright WoodWing Software bv. All Rights Reserved.
- * 
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
- * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
  */
+
+// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// * IMPORTANT: DO NOT EDIT! THIS FILE IS GENERATED FROM WSDL!
+// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 require_once BASEDIR.'/server/protocols/soap/SOAP_Attachment.class.php';
 
@@ -565,7 +565,6 @@ class Relation
 	public $Placements;
 	public $ParentVersion;
 	public $ChildVersion;
-	public $Geometry;
 	public $Rating;
 	public $Targets;
 	public $ParentInfo;
@@ -579,14 +578,13 @@ class Relation
 	 * @param Placement[]          $Placements           Nullable.
 	 * @param string               $ParentVersion        Nullable.
 	 * @param string               $ChildVersion         Nullable.
-	 * @param Attachment           $Geometry             Nullable.
 	 * @param integer              $Rating               Nullable.
 	 * @param Target[]             $Targets              Nullable.
 	 * @param ObjectInfo           $ParentInfo           Nullable.
 	 * @param ObjectInfo           $ChildInfo            Nullable.
 	 * @param ObjectLabel[]        $ObjectLabels         Nullable.
 	 */
-	public function __construct( $Parent=null, $Child=null, $Type=null, $Placements=null, $ParentVersion=null, $ChildVersion=null, $Geometry=null, $Rating=null, $Targets=null, $ParentInfo=null, $ChildInfo=null, $ObjectLabels=null)
+	public function __construct( $Parent=null, $Child=null, $Type=null, $Placements=null, $ParentVersion=null, $ChildVersion=null, $Rating=null, $Targets=null, $ParentInfo=null, $ChildInfo=null, $ObjectLabels=null)
 	{
 		$this->Parent               = $Parent;
 		$this->Child                = $Child;
@@ -594,7 +592,6 @@ class Relation
 		$this->Placements           = $Placements;
 		$this->ParentVersion        = $ParentVersion;
 		$this->ChildVersion         = $ChildVersion;
-		$this->Geometry             = $Geometry;
 		$this->Rating               = $Rating;
 		$this->Targets              = $Targets;
 		$this->ParentInfo           = $ParentInfo;
@@ -627,9 +624,6 @@ class Relation
 					$complexField->sanitizeProperties4Php();
 				}
 			}
-		}
-		if( is_object( $this->Geometry ) ) {
-			$this->Geometry->sanitizeProperties4Php();
 		}
 		if( is_object( $this->ParentInfo ) ) {
 			$this->ParentInfo->sanitizeProperties4Php();
