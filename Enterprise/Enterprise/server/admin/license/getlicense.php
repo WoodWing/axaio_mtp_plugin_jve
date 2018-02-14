@@ -1450,11 +1450,7 @@
 			//We can however, check whether an admin user is already logged on...
 			if ( $hasLicense )
 			{
-				//Very first time
-				if ( !$ticket )
-					print "<br><a href='../../apps/index.php'>" . BizResources::localize("LIC_LOGON_AS_ADMIN_TO_ADD_CONCURRENT") . "</a>";
-				else //Already an admin
-					print "<br><a href='index.php'>" . BizResources::localize("LIC_LICENSE_STATUS") . "</a>";
+				print "<br><a href='index.php'>" . BizResources::localize("LIC_LICENSE_STATUS") . "</a>";
 			}
 			else //Some error occured during the first install (no license yet)...
 				print "<br><a href='index.php'>" . BizResources::localize("LIC_LICENSE_STATUS") . "</a>";
