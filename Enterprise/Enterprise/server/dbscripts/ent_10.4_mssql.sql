@@ -1385,4 +1385,4 @@ CREATE TABLE [smart_channeldata] (
   [value] text NOT NULL  default '',
   PRIMARY KEY ([publication], [pubchannel], [issue], [section], [name])
 );
-UPDATE [smart_config] set [value] = '10.2' where [name] = 'version';
+UPDATE [smart_config] set [value] = '10.4' where [name] = 'version';

@@ -103,4 +103,4 @@ ALTER TABLE `smart_objectlabels` CHANGE `id`   `id` bigint(11) NOT NULL  auto_in
 ALTER TABLE `smart_objectlabels` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelationlabels` CHANGE `labelid`   `labelid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelationlabels` CHANGE `childobjid`   `childobjid` bigint(11) NOT NULL  default '0';
-UPDATE `smart_config` set `value` = '10.2' where `name` = 'version';
+UPDATE `smart_config` set `value` = '10.4' where `name` = 'version';

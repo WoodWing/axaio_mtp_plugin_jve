@@ -1325,4 +1325,4 @@ CREATE TABLE `smart_channeldata` (
   `value` blob NOT NULL  default '',
   PRIMARY KEY (`publication`, `pubchannel`, `issue`, `section`, `name`)
 ) DEFAULT CHARSET=utf8;
-UPDATE `smart_config` set `value` = '10.2' where `name` = 'version';
+UPDATE `smart_config` set `value` = '10.4' where `name` = 'version';

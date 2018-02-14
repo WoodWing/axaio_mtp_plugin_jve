@@ -679,4 +679,4 @@ SET @SQL1 = REPLACE(@SQL1, '|ConstraintName|', ( SELECT name FROM sysobjects WHE
 EXEC (@SQL1);
 ALTER TABLE [smart_channeldata] ADD PRIMARY KEY ([publication], [pubchannel], [issue], [section], [name]);
 DROP PROCEDURE [dbo].[SCE_GetConstraintName];
-UPDATE [smart_config] set [value] = '10.2' where [name] = 'version';
+UPDATE [smart_config] set [value] = '10.4' where [name] = 'version';

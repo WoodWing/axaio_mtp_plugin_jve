@@ -1,10 +1,5 @@
-ALTER TABLE `smart_authorizations`
-ADD   `bundle` int(11) NOT NULL  default '0';
 ALTER TABLE `smart_authorizations` CHANGE `rights`   `rights` varchar(1024) NOT NULL  default '';
-ALTER TABLE `smart_deletedobjects`
-ADD   `orientation` tinyint(4) NOT NULL  default '0';
 ALTER TABLE `smart_deletedobjects` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
-ALTER TABLE `smart_deletedobjects` CHANGE `dpi`   `dpi` double NOT NULL  default '0';
 ALTER TABLE `smart_log` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_log` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_log` CHANGE `parent`   `parent` bigint(11) NOT NULL  default '0';
@@ -13,15 +8,9 @@ ALTER TABLE `smart_objectlocks` CHANGE `object`   `object` bigint(11) NOT NULL  
 ALTER TABLE `smart_objectrelations` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectrelations` CHANGE `parent`   `parent` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelations` CHANGE `child`   `child` bigint(11) NOT NULL  default '0';
-ALTER TABLE `smart_objects`
-ADD   `orientation` tinyint(4) NOT NULL  default '0';
 ALTER TABLE `smart_objects` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
-ALTER TABLE `smart_objects` CHANGE `dpi`   `dpi` double NOT NULL  default '0';
-ALTER TABLE `smart_objectversions`
-ADD   `orientation` tinyint(4) NOT NULL  default '0';
 ALTER TABLE `smart_objectversions` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectversions` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
-ALTER TABLE `smart_objectversions` CHANGE `dpi`   `dpi` double NOT NULL  default '0';
 ALTER TABLE `smart_objectrenditions` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_objectrenditions` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_pages` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
@@ -72,23 +61,11 @@ ALTER TABLE `smart_pubpublishedissues` CHANGE `id`   `id` bigint(11) NOT NULL  a
 ALTER TABLE `smart_publishedobjectshist` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_publishedobjectshist` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_publishedobjectshist` CHANGE `publishid`   `publishid` bigint(11) NOT NULL  default '0';
-
-CREATE TABLE `smart_publishedplcmtshist` (
-  `id` bigint(11) NOT NULL  auto_increment,
-  `objectid` bigint(11) NOT NULL  default '0',
-  `publishid` bigint(11) NOT NULL  default '0',
-  `majorversion` mediumint(9) NOT NULL  default '0',
-  `minorversion` mediumint(9) NOT NULL  default '0',
-  `externalid` varchar(200) NOT NULL  default '',
-  `placementhash` varchar(64) NOT NULL ,
-  PRIMARY KEY (`id`)
-) DEFAULT CHARSET=utf8;
-CREATE  INDEX `obpu_publplchist` ON `smart_publishedplcmtshist`(`objectid`, `publishid`) ;
-CREATE  INDEX `puob_publplchist` ON `smart_publishedplcmtshist`(`publishid`, `objectid`) ;
+ALTER TABLE `smart_publishedplcmtshist` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
+ALTER TABLE `smart_publishedplcmtshist` CHANGE `objectid`   `objectid` bigint(11) NOT NULL  default '0';
+ALTER TABLE `smart_publishedplcmtshist` CHANGE `publishid`   `publishid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_targeteditions` CHANGE `id`   `id` bigint(11) NOT NULL  auto_increment;
 ALTER TABLE `smart_targeteditions` CHANGE `targetid`   `targetid` bigint(11) NOT NULL  default '0';
-ALTER TABLE `smart_indesignserverjobs`
-ADD   `pickuptime` varchar(30) NOT NULL  default '';
 ALTER TABLE `smart_indesignserverjobs` CHANGE `objid`   `objid` bigint(11) NOT NULL  default 0;
 ALTER TABLE `smart_serverplugins`
 ADD   `dbprefix` varchar(10) NOT NULL  default '',
@@ -100,4 +77,4 @@ ALTER TABLE `smart_objectlabels` CHANGE `id`   `id` bigint(11) NOT NULL  auto_in
 ALTER TABLE `smart_objectlabels` CHANGE `objid`   `objid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelationlabels` CHANGE `labelid`   `labelid` bigint(11) NOT NULL  default '0';
 ALTER TABLE `smart_objectrelationlabels` CHANGE `childobjid`   `childobjid` bigint(11) NOT NULL  default '0';
-UPDATE `smart_config` set `value` = '10.2' where `name` = 'version';
+UPDATE `smart_config` set `value` = '10.4' where `name` = 'version';
