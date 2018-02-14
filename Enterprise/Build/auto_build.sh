@@ -496,7 +496,6 @@ function step4_validatePhpCode {
 
 	echo "step4b: Temporary move 3rd party libraries aside (to exclude them from phpStorm's code inspection)."
 	mv "${WORKSPACE}/Enterprise/Enterprise/server/dgrid" "${WORKSPACE}/code_analyser"
-	mv "${WORKSPACE}/Enterprise/Enterprise/server/javachart" "${WORKSPACE}/code_analyser"
 	mv "${WORKSPACE}/Enterprise/Enterprise/server/jquery" "${WORKSPACE}/code_analyser"
 	mv "${WORKSPACE}/Enterprise/Enterprise/server/vendor" "${WORKSPACE}/code_analyser"
 	mv "${WORKSPACE}/Enterprise/Enterprise/server/ZendFramework" "${WORKSPACE}/code_analyser"
@@ -520,7 +519,6 @@ function step4_validatePhpCode {
 
 	echo "step4d: Move back the 3rd party libraries (that were temporary moved aside) to their original location."
 	mv "${WORKSPACE}/code_analyser/dgrid" "${WORKSPACE}/Enterprise/Enterprise/server"
-	mv "${WORKSPACE}/code_analyser/javachart" "${WORKSPACE}/Enterprise/Enterprise/server"
 	mv "${WORKSPACE}/code_analyser/jquery" "${WORKSPACE}/Enterprise/Enterprise/server"
 	mv "${WORKSPACE}/code_analyser/vendor" "${WORKSPACE}/Enterprise/Enterprise/server"
 	mv "${WORKSPACE}/code_analyser/ZendFramework" "${WORKSPACE}/Enterprise/Enterprise/server"
