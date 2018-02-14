@@ -4,9 +4,11 @@
  * @package Enterprise
  * @subpackage Services
  * @copyright WoodWing Software bv. All Rights Reserved.
- * 
- * IMPORTANT: DO NOT EDIT! THIS CLASS IS GENERATED FROM WSDL!
  */
+
+// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// * IMPORTANT: DO NOT EDIT! THIS CLASS IS GENERATED FROM WSDL!
+// * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 class AdmModifyUserGroupsResponse
 {
