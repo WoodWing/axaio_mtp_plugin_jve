@@ -108,7 +108,6 @@ class HtmlDocument
 			}
 			$txt = str_replace("<!--WEBAPP_SCRIPTS-->", $webappScripts, $txt );
 
-
 			$imagedir = '../../config/images/';
 			$appsdir = '../../server/apps/';
 			$admindir = '../../server/admin/';
@@ -119,30 +118,7 @@ class HtmlDocument
 				$admindir = '../' . $admindir;
 			}
 	
-			// build Applications menu
 			$menu = '';
-			$appIcons = array();
-			if( count($wr) > 0 && defined('SHOW_DEPRECATED_WEBAPPS') && SHOW_DEPRECATED_WEBAPPS == 'ON' ) {
-				$menu .= '<p><a class="menutitle" href="'.$appsdir.'index.php">'.BizResources::localize('MNU_APPLICATIONS').'</a></p>';
-				$menu .= '<p>';
-				if ($wr[BizAccessFeatureProfiles::ACCESS_QUERY_BROWSE]) {
-					$menu .= '<a id="bullet" class="menu" href="'.$appsdir.'browse.php"><img src="'.$imagedir.'transparent.gif"/>'.BizResources::localize('MNU_QUERY_BROWSE').'</a><br/>';
-					$appIcons[] = '<a href="'.$appsdir.'browse.php"><img src="'.$imagedir.'web_32.gif" border="0" width="32" height="32"><br/>'.BizResources::localize('MNU_QUERY_BROWSE').'</a>';
-				}
-				if ($wr[BizAccessFeatureProfiles::ACCESS_REPORTING]) {
-					$menu .= '<a id="bullet" class="menu" href="'.$appsdir.'report.php"><img src="'.$imagedir.'transparent.gif"/>'.BizResources::localize('MNU_REPORTING').'</a><br/>';
-					$appIcons[] = '<a href="'.$appsdir.'report.php"><img src="'.$imagedir.'stats_32.gif" border="0" width="32" height="32"><br/>'.BizResources::localize('MNU_REPORTING').'</a>';
-				}
-				//if ($wr[BizAccessFeatureProfiles::ACCESS_EXPORT]) {
-					$menu .= '<a id="bullet" class="menu" href="'.$appsdir.'export.php"><img src="'.$imagedir.'transparent.gif"/>'.BizResources::localize('MNU_EXPORT').'</a><br/>';
-					$appIcons[] = '<a href="'.$appsdir.'export.php"><img src="'.$imagedir.'exp_32.gif" border="0" width="32" height="32"><br/>'.BizResources::localize('MNU_EXPORT').'</a>';
-				//}
-				if ($wr[BizAccessFeatureProfiles::ACCESS_MYPROFILE]) {
-					$menu .= '<a id="bullet" class="menu" href="'.$appsdir.'password.php"><img src="'.$imagedir.'transparent.gif"/>'.BizResources::localize('MY_PROFILE').'</a><br/>';
-					$appIcons[] = '<a href="'.$appsdir.'password.php"><img src="'.$imagedir.'users.gif" border="0" width="32" height="32"><br/>'.BizResources::localize('MY_PROFILE').'</a>';
-				}
-				$menu .= '</p>';
-			}			
 
 			// build Maintenance menu
 			$adminIcons = array();
@@ -249,11 +225,8 @@ class HtmlDocument
 			}
 			$txt = str_replace("<!--MENU-->", $menu, $txt);
 
-			// build icon index page (Applications or Maintenance)
-			if( strpos( $txt, '<!--WEBAPP_ICONS-->' ) !== false ) {
-				$icons = $appIcons;
-				$iconAnchor = '<!--WEBAPP_ICONS-->';
-			} else if( strpos( $txt, '<!--ADMIN_ICONS-->' ) !== false ) {
+			// build icon index page (Maintenance)
+			if( strpos( $txt, '<!--ADMIN_ICONS-->' ) !== false ) {
 				$icons = $adminIcons;
 				$iconAnchor = '<!--ADMIN_ICONS-->';
 			} else { // not the icon index page
