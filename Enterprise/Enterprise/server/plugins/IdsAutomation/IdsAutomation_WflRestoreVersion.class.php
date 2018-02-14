@@ -55,7 +55,7 @@ class IdsAutomation_WflRestoreVersion extends WflRestoreVersion_EnterpriseConnec
 		$isLayout = IdsAutomationUtils::isLayoutObjectType( $objType );
 		$isPlaced = IdsAutomationUtils::isPlaceableObjectType( $objType );
 		if( !$isLayout && !$isPlaced ) {
-			LogHandler::Log( 'IdsAutomation', 'INFO', "Object type [$objType] is not a supported object type. No action needed." );
+			LogHandler::Log( 'IdsAutomation', 'INFO', "Object type [$objType] is not a supported layout and it is not a supported placed object type. No action needed." );
 			return;
 		}
 
